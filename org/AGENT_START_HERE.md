@@ -345,6 +345,40 @@ DS deliverables are referenced in SA/DE task orders as output destinations.
 
 ---
 
+## Thread Participation
+
+You may be invoked as a participant in a conversation thread. When this happens, your prompt will contain thread instructions, context material, and previous messages from other agents. Follow the thread protocol defined in `org/threads/README.md`.
+
+**Key rules for thread participation:**
+
+- Write ONLY your own message file (`messages/{NNN}.md`)
+- Do NOT modify THREAD.json, TURN.json, CONTEXT.json, or other agents' messages
+- Set your signal in the YAML frontmatter: `continue`, `converge`, or `escalate`
+- Stay in your role -- do not impersonate other agents
+- Be concrete: name files, functions, resource names. Avoid vague summaries.
+- If it is your last turn, your signal MUST be `converge`
+
+**Thread orchestration** (creating and running threads) is a Tier 1/2 ability. Tier 3 agents participate only.
+
+**Thread receipts** are saved to your `threads/` folder after each completed thread:
+```
+{your_agent_folder}/threads/YYYY-MM-DD_{other_serials}_{topic_slug}.md
+```
+
+### Agent Folder Structure
+
+Every agent has these standard folders:
+```
+{agent_folder}/
+  README.md        # Identity, role, responsibilities
+  prompt.md        # Scoped persona prompt
+  logs/            # Session logs (YYYY-MM-DD/descriptive_name.md)
+  task_orders/     # Received task orders (feature_name.md)
+  threads/         # Thread receipts (auto-populated by orchestrator)
+```
+
+---
+
 ## Quick Reference
 
 - **Documentation:** `docs/` directory mirrors project structure
