@@ -162,6 +162,39 @@ explicitly so the agent finds them in 1-2 reads rather than hunting.
 
 ---
 
+### M11 — Agents must self-unblock using tools before the final turn
+
+**Rule:** An agent may not surface an unresolved caveat in the final turn (signal:
+converge) if the caveat is answerable by reading a file. If DS is uncertain about
+a data field, parquet date range, script behavior, or output shape — they must
+READ the relevant file during the thread and resolve the question before writing
+the final contract block. A hedged receipt is a failed receipt.
+
+**Why:** ADVI-005 (2026-03-03) closed with "we are not guaranteeing 3Y/Max visual
+completeness for rolling_1y until DS inspects actual parquet min/max dates."
+Script 10 is a local file. The date range was readable in the thread. DS had tools
+enabled. The hedge was unnecessary — the question was answerable in 1 tool call.
+
+**Add to every DS/AE bespoke opening message:**
+```
+If you are uncertain about a data field, date range, output shape, or script
+behavior: read the relevant file during this thread and resolve the question
+before your final turn. Do not close the thread with a caveat that file
+inspection would answer. You have tool access — use it.
+```
+
+**What counts as an acceptable blocker (not a tool-resolvable caveat):**
+- Missing infrastructure that does not exist yet (e.g., gold layer lacks a join key)
+- S3 data content that requires a live query (not readable from scripts alone)
+- A design decision that requires Andrew's business input
+
+**What is NOT acceptable as a receipt caveat:**
+- "We need to check the date range" — read the script and check it now
+- "We need to verify the field name" — read the Lambda and confirm it now
+- "DS should investigate X before implementation" — DS is in the thread, investigate now
+
+---
+
 ## OBSERVATIONS (patterns to be aware of)
 
 ### O1 — Agents strip code fences from frontmatter in GPT-4o-mini responses

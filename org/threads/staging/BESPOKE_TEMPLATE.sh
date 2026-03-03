@@ -78,6 +78,15 @@ EventBridge schedule, known issues. Do not ask vague questions.}
 
 If any answer references a resource name without citing a specific file or config,
 ask for the exact location before accepting it as ground truth.
+
+## Self-unblock requirement (applies to all participants)
+
+If you are uncertain about a data field, date range, output shape, or script
+behavior: use your tool access to read the relevant file and resolve the question
+before your final turn. Do not close the thread with a caveat that file inspection
+would answer. Acceptable blockers are things that do not exist yet or require a
+live data query outside the repo. An unresolved question about a file in this repo
+is not an acceptable receipt caveat.
 OPENING_EOF
 
 # ---------------------------------------------------------------------------
