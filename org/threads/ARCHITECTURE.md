@@ -57,7 +57,7 @@ DS / DE / RD / DT implement against the agreed contracts
 org/
   projects/
     REGISTRY.md                   Human-readable project index
-    {CODE}.json                   One file per project (e.g., AI.json, MO.json)
+    {CODE}.json                   One file per project (e.g., ADVI.json, MKOV.json)
 
   threads/
     README.md                     Quick start and pattern reference
@@ -105,8 +105,8 @@ org/
 {agent_folder}/
   threads/
     {thread_id}_{other_serials}.md   Receipt deposited on thread completion
-    AI-001-*.md                      Project AI threads (filterable by code prefix)
-    MO-003-*.md                      Project MO threads
+    ADVI-001-*.md                    Project ADVI threads (filterable by code prefix)
+    MKOV-003-*.md                    Project MKOV threads
 ```
 
 ---
@@ -115,7 +115,7 @@ org/
 
 ```json
 {
-  "code": "AI",
+  "code": "ADVI",
   "name": "AdvisorIntelligence",
   "description": "Complete the AdvisorIntelligence UI page",
   "prd": "docs/architecture/ADVISOR_INTELLIGENCE_COMPLETION.md",
@@ -126,7 +126,7 @@ org/
   "thread_counter": 3,
   "threads": [
     {
-      "serial": "AI-001",
+      "serial": "ADVI-001",
       "thread_id": "2026-03-03-continuous-nna-cla-alignment",
       "topic": "Pattern 0 alignment: adv_drill + cla_timeseries",
       "participants": ["0.4.0_DS_ClientPlatform", "0.4.0_DE_ClientPlatform", "0.4.2_RD_AdvisorIntelligence"],
@@ -147,9 +147,9 @@ org/
 
 ```json
 {
-  "id": "AI-004-books-publisher-gap",
-  "project": "AI",
-  "serial": "AI-004",
+  "id": "ADVI-004-books-publisher-gap",
+  "project": "ADVI",
+  "serial": "ADVI-004",
   "created_by": "2.0.0_SA_COO",
   "created_at": "2026-03-03T20:00:00Z",
   "topic": "Books tab publisher data gap investigation",
@@ -320,14 +320,14 @@ For each participant in thread.participants:
 
 **Naming convention:**
 ```
-AI-004-books-publisher-gap_0.4.0_DT_ClientPlatform.md
+ADVI-004-books-publisher-gap_0.4.0_DT_ClientPlatform.md
   ^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^^^^^^^
   thread_id                 other participants joined with +
 ```
 
 **Where to find receipts:**
 - Any agent: `ls {agent_folder}/threads/`
-- Filter by project: `ls {agent_folder}/threads/AI-*.md`
+- Filter by project: `ls {agent_folder}/threads/ADVI-*.md`
 - All receipts for a project: search across all agent threads/ folders
 
 Receipts are NOT generated for threads that end as `needs_human`.
@@ -372,7 +372,7 @@ Staging scripts live in `org/threads/staging/` and are self-contained:
 - SA/DE agents run these directly via Bash tool -- no Andrew handoff required
 
 **Naming:**
-- Project thread: `run-{CODE}-{NNN}-{slug}.sh` (e.g., `run-AI-004-books-publisher-gap.sh`)
+- Project thread: `run-{CODE}-{NNN}-{slug}.sh` (e.g., `run-ADVI-004-books-publisher-gap.sh`)
 - Non-project: `run-YYYY-MM-DD-{slug}.sh`
 
 **Generation:**

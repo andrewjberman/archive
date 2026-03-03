@@ -259,15 +259,15 @@ the task order filename is prefixed with that thread's serial:
 {agent_folder}/task_orders/{CODE}-{NNN}-{feature_slug}.md
 ```
 
-Example: thread `AI-004` produces task orders:
-- `0.4.0_DS_ClientPlatform/task_orders/AI-004-adv_drill.md`
-- `0.4.0_DE_ClientPlatform/task_orders/AI-004-continuous_nna_rendering.md`
-- `0.4.2_RD_AdvisorIntelligence/task_orders/AI-004-continuous_nna_rendering.md`
+Example: thread `ADVI-004` produces task orders:
+- `0.4.0_DS_ClientPlatform/task_orders/ADVI-004-adv_drill.md`
+- `0.4.0_DE_ClientPlatform/task_orders/ADVI-004-continuous_nna_rendering.md`
+- `0.4.2_RD_AdvisorIntelligence/task_orders/ADVI-004-continuous_nna_rendering.md`
 
 The task order XML `<metadata>` also includes:
 ```xml
-<thread_serial>AI-004</thread_serial>
-<thread_ref>org/threads/AI-004-{slug}/</thread_ref>
+<thread_serial>ADVI-004</thread_serial>
+<thread_ref>org/threads/ADVI-004-{slug}/</thread_ref>
 ```
 
 **Why:** The thread serial is the only join key needed. It links the task order back
@@ -317,16 +317,16 @@ PRDs, and agent receipts.
 Each project has a JSON file at `org/projects/{CODE}.json` containing the PRD path,
 pod scope, and a log of all threads run under it.
 
-**Serial format:** `{CODE}-{NNN}` (e.g., `AI-004`). Auto-assigned by `create-thread.sh`
-when `--project` is passed. Thread folder: `org/threads/AI-004-{slug}/`.
-Receipt in agent folder: `AI-004-{slug}_{other_serials}.md`.
+**Serial format:** `{CODE}-{NNN}` (e.g., `ADVI-004`). Auto-assigned by `create-thread.sh`
+when `--project` is passed. Thread folder: `org/threads/ADVI-004-{slug}/`.
+Receipt in agent folder: `ADVI-004-{slug}_{other_serials}.md`.
 
 **Why:** Without project linkage, thread receipts accumulate in agent folders with no
 searchable structure. With project codes, any agent can filter their `threads/` folder
-by code (`ls threads/AI-*.md`) to find all threads related to a specific feature.
+by code (`ls threads/ADVI-*.md`) to find all threads related to a specific feature.
 The project JSON file gives the COO a single-file audit of every thread run for a project.
 
-**To create a new project:** Add `{CODE}.json` to `org/projects/` (copy AI.json as template)
+**To create a new project:** Add `{CODE}.json` to `org/projects/` (copy ADVI.json as template)
 and add a row to `org/projects/REGISTRY.md`. Then pass `--project {CODE}` to any
 `create-thread.sh` call and it auto-assigns the serial and updates the project file.
 

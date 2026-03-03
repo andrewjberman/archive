@@ -399,7 +399,7 @@ All task orders use this XML structure. Wrap the XML in a markdown file.
     <date>{YYYY-MM-DD}</date>
     <status>pending | complete</status>
     <!-- If this task order was produced from a project thread, include: -->
-    <thread_serial>{CODE}-{NNN}</thread_serial>  <!-- e.g., AI-004 -->
+    <thread_serial>{CODE}-{NNN}</thread_serial>  <!-- e.g., ADVI-004 -->
     <thread_ref>org/threads/{thread_id}/</thread_ref>
   </metadata>
 
@@ -463,8 +463,8 @@ This links the task order back to the thread receipt and the project file.
 
 Examples:
 ```
-org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/AI-004-adv_drill.md
-org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/AI-004-continuous_nna_rendering.md
+org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI-004-adv_drill.md
+org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI-004-continuous_nna_rendering.md
 ```
 
 **Ad-hoc** (no project / lateral between agents):
@@ -479,8 +479,8 @@ org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/rolling_flows_chart_re
 
 Filtering task orders by project in any agent folder:
 ```bash
-ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/AI-*.md   # all AI project work
-ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/AI-004-*.md  # from thread AI-004
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI-*.md      # all ADVI project work
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI-004-*.md  # from thread ADVI-004
 ```
 
 ---

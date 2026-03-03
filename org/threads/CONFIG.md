@@ -64,7 +64,7 @@ Custom secret: `python org/threads/orchestrator.py --thread <id> --secret my-sec
 
 | Context | Format | Example |
 |---------|--------|---------|
-| Project thread | `{CODE}-{NNN}-{slug}` | `AI-004-books-publisher-gap` |
+| Project thread | `{CODE}-{NNN}-{slug}` | `ADVI-004-books-publisher-gap` |
 | Non-project (legacy) | `YYYY-MM-DD-{slug}` | `2026-03-02-etl-migration-review` |
 | Exploratory (auto) | `YYYY-MM-DD-{a1slug}+{a2slug}-sync` | `2026-03-03-ds-clientplatform+de-clientplatform-sync` |
 
@@ -77,7 +77,7 @@ Custom secret: `python org/threads/orchestrator.py --thread <id> --secret my-sec
 ```
 
 Examples:
-- `org/tier2_senior/0.4.0_DS_ClientPlatform/threads/AI-004-books-publisher-gap_0.4.0_DE_ClientPlatform+0.4.2_RD_AdvisorIntelligence.md`
+- `org/tier2_senior/0.4.0_DS_ClientPlatform/threads/ADVI-004-books-publisher-gap_0.4.0_DE_ClientPlatform+0.4.2_RD_AdvisorIntelligence.md`
 - `org/tier1_exec/1.0.0_SA_CTO/threads/2026-03-02-etl-migration-review_0.5.0_AE_OpalETL.md`
 
 ---
