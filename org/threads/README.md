@@ -1,384 +1,179 @@
-# Agent Thread System -- Round-Robin Conversation Protocol
+# Thread System — Quick Reference
 
-## BEFORE YOU CREATE A THREAD
+Multi-turn structured conversations between agents, driven by the OpenAI API.
+Threads are project-linked, filesystem-backed, and fully automated.
 
-**Read `org/threads/THREAD_KNOWLEDGE.md` first.**
-
-It contains mandatory rules (M1-M5) that govern context injection, model
-selection, turn limits, and agent behavior. Skipping it produces threads
-where agents fabricate answers or fail to ground their responses in real code.
-
----
-
-## Overview
-
-The thread system enables structured, multi-turn conversations between agents without requiring Andrew to manually relay messages. A **thread** is a filesystem-backed conversation folder where agents take turns writing messages. The Python orchestrator (`orchestrator.py`) drives the conversation loop via the OpenAI API and can be run from within a Claude Code session.
-
-**Who can create/run threads:** Tier 1 (SA) and Tier 2 (DE, DT, DS, AE) agents.
-**Who can participate:** Any agent (including Tier 3 RD agents).
+**Before creating any thread:** read `THREAD_KNOWLEDGE.md` (mandates M1-M9).
+**For full technical detail:** see `ARCHITECTURE.md`.
+**For configuration and paths:** see `CONFIG.md`.
 
 ---
 
 ## Quick Start
 
-### Create a thread
+### 1. Check the project registry
 
 ```bash
-./org/threads/create-thread.sh \
-  --id "2026-03-02-etl-migration-review" \
-  --topic "Review seeking-alpha ETL migration approach" \
-  --created-by "1.0.0_SA_CTO" \
-  --participants "1.0.0_SA_CTO,0.5.0_AE_OpalETL" \
-  --context-file path/to/CONTEXT.json \
-  --opening-message path/to/opening.md
+cat org/projects/REGISTRY.md
 ```
 
-### Run the orchestrator
+Every thread must belong to a project. If your project doesn't exist yet, create
+`org/projects/{CODE}.json` (copy `AI.json` as a template) and add a row to REGISTRY.md.
+
+### 2. Write a staging script
+
+Copy `staging/BESPOKE_TEMPLATE.sh`. Set `PROJECT`, `TOPIC`, `PARTICIPANTS`, `CONTEXT`,
+and the opening message. Save as `staging/run-{CODE}-{NNN}-{slug}.sh`.
+The `{CODE}-{NNN}` serial is auto-assigned when you run it -- name the file with the
+next expected serial for clarity, but the script will confirm the actual assignment.
+
+### 3. Run it (Bash tool -- no Andrew handoff)
 
 ```bash
-# Bespoke thread (use gpt-4o for grounded technical conversations)
-python org/threads/orchestrator.py --thread 2026-03-02-etl-migration-review --model gpt-4o --verbose
-
-# Exploratory sync (use the convenience wrapper -- gpt-4o-mini, no config needed)
-./org/threads/run-exploratory.sh 0.1.0_DS_MarketIntelligence 0.5.0_AE_OpalETL
+bash org/threads/staging/run-AI-004-books-publisher-gap.sh
 ```
 
-### Check results
+This scaffolds the thread folder AND runs the orchestrator in one shot.
 
-Thread messages are in `org/threads/{thread_id}/messages/`.
-After completion, each participant gets a receipt in their `threads/` folder.
+### 4. Check results
+
+```bash
+# Thread messages
+ls org/threads/AI-004-books-publisher-gap/messages/
+
+# Receipts in agent folders (one per participant)
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/threads/AI-004-*.md
+
+# Updated project file
+cat org/projects/AI.json
+```
 
 ---
 
-## Thread Folder Structure
+## Exploratory Sync (2-party, no config needed)
 
-Each thread is a self-contained folder:
-
-```
-org/threads/{thread_id}/
-  THREAD.json              # Immutable metadata (set at creation)
-  CONTEXT.json             # Context injection manifest (set at creation)
-  TURN.json                # Mutable turn state (updated each turn by orchestrator)
-  CONTEXT_COMPILED.md      # Generated briefing document (all context merged)
-  context/                 # Materialized context files
-    agents/                #   Per-participant identity, logs, task orders
-    refs/                  #   Documents and code from CONTEXT.json
-    commits/               #   Git log/diff output for commit ranges
-    inline_notes.md        #   Free-form notes from CONTEXT.json inline field
-  messages/
-    000.md                 # Opening message (written by thread creator)
-    001.md                 # First response
-    002.md                 # ...
+```bash
+./org/threads/run-exploratory.sh 0.4.0_DE_ClientPlatform 0.4.0_DT_ClientPlatform --project AI
 ```
 
-**Thread ID format:** `YYYY-MM-DD-{short-slug}` (e.g., `2026-03-02-etl-migration-review`)
+Auto-assigns next serial under the AI project. Uses `gpt-5.2`, `--no-tools`, 2 max turns.
+Both agents must have recent session logs or the thread will be low-signal (O3 rule).
 
 ---
 
-## THREAD.json -- Thread Metadata
+## Thread Patterns
 
-```json
-{
-  "id": "2026-03-02-etl-migration-review",
-  "created_by": "1.0.0_SA_CTO",
-  "created_at": "2026-03-02T10:00:00Z",
-  "topic": "Review seeking-alpha ETL migration approach",
-  "participants": ["1.0.0_SA_CTO", "0.5.0_AE_OpalETL"],
-  "turn_order": "alternating",
-  "max_turns_per_agent": 3,
-  "status": "active"
-}
+| Pattern | When | Participants | Model | Turns | Tools |
+|---------|------|-------------|-------|-------|-------|
+| **0** Pre-implementation alignment | Before writing any code for a DS→DE→RD interface | DS + DE + RD (round-robin) | gpt-5.2 | 3 | ON |
+| **1** Pod delivery audit | Status check before planning | DE + DT | gpt-5.2 | 2 | OFF |
+| **2** Technical gap investigation | Unknown before CTO can write PRD | DS + AE or DT | gpt-5.2 | 3 | ON |
+| **3** Cross-pod coordination | Feature touching 2+ pods | Both pod DEs | gpt-5.2 | 3 | ON |
+
+Pattern 0 runs BEFORE task orders are written. The thread receipt IS the data contract.
+
+---
+
+## Project Serial System
+
 ```
+org/projects/AI.json        Project registry for AdvisorIntelligence
+    thread_counter: 3       Next serial will be AI-004
+
+Thread folder:  org/threads/AI-004-{slug}/
+Receipt format: {agent_folder}/threads/AI-004-{slug}_{other_serials}.md
+
+Filter any agent's threads by project:
+    ls org/tier2_senior/0.4.0_DS_ClientPlatform/threads/AI-*.md
+```
+
+Passing `--project AI` to `create-thread.sh` or `run-exploratory.sh`:
+- Auto-assigns `AI-004` as the serial
+- Patches `project` and `serial` into `THREAD.json`
+- Updates `AI.json`: increments `thread_counter`, appends thread entry
+
+---
+
+## Thread ID Formats
+
+| Context | Format | Example |
+|---------|--------|---------|
+| Project thread | `{CODE}-{NNN}-{slug}` | `AI-004-books-publisher-gap` |
+| Legacy / non-project | `YYYY-MM-DD-{slug}` | `2026-03-02-etl-migration-review` |
+
+---
+
+## THREAD.json Fields
 
 | Field | Description |
 |-------|-------------|
-| `id` | Thread ID matching the folder name |
-| `created_by` | Agent serial who created the thread |
-| `created_at` | ISO 8601 timestamp |
-| `topic` | Human-readable topic description |
-| `participants` | Array of agent serial numbers (the only agents that can participate) |
-| `turn_order` | `alternating` (A-B-A-B), `round_robin` (A-B-C-A-B-C), or `directed` (current agent picks next) |
-| `max_turns_per_agent` | Max turns per agent (default 3). Total thread cap = N x num_participants |
-| `status` | `active`, `complete`, `blocked`, `needs_human` |
-
-### Serial Number Resolution
-
-Everything is derived from the serial number. No redundant paths in THREAD.json.
-
-- `1.0.0_SA_CTO` -> `org/tier1_exec/1.0.0_SA_CTO/`
-- `0.5.0_AE_OpalETL` -> `org/tier2_senior/0.5.0_AE_OpalETL/`
-- `0.1.2_RD_CausalityEngine` -> `org/tier3_junior/0.1.2_RD_CausalityEngine/`
-
-The tier is determined by which position holds the number:
-- `X.0.0` where X > 0 = `tier1_exec`
-- `0.Y.0` where Y > 0 = `tier2_senior`
-- `0.Y.Z` where Z > 0 = `tier3_junior`
-
-Role code is extracted from position 2 of the serial (e.g., `SA`, `AE`, `RD`), mapped to base prompts:
-- SA -> `org/ref/prompts/systems_architect.md`
-- DE -> `org/ref/prompts/dashboard_engineer.md`
-- DT -> `org/ref/prompts/devops_technician.md`
-- DS -> `org/ref/prompts/data_scientist.md`
-- AE -> `org/ref/prompts/aws_engineer.md`
-- RD -> `org/ref/prompts/react_designer.md`
-
----
-
-## CONTEXT.json -- Context Injection Manifest
-
-This is how you inject shared context into the thread. All participants see the same compiled context.
-
-```json
-{
-  "documents": [
-    {
-      "label": "Architecture Spec",
-      "path": "docs/architecture/PORTFOLIO_EXPORT_TRADE_SUBMISSION_BRIDGE.md"
-    }
-  ],
-  "code": [
-    {
-      "label": "Trade Submission API",
-      "path": "portal/src/api/endpoints/trade-submission.ts"
-    },
-    {
-      "label": "Portfolio Types",
-      "path": "portal/src/types/portfolio-optimization.ts",
-      "lines": "1-50"
-    }
-  ],
-  "commits": [
-    {
-      "label": "Recent BD pipeline changes",
-      "range": "bd-v2.13.0..HEAD",
-      "paths": ["data/black_diamond/"]
-    }
-  ],
-  "logs": [
-    {
-      "label": "AE session log",
-      "agent": "0.5.0_AE_OpalETL",
-      "date": "2026-03-01"
-    },
-    {
-      "label": "DS investigation",
-      "path": "org/tier2_senior/0.1.0_DS_MarketIntelligence/deliverables/correlation_analysis.md"
-    }
-  ],
-  "inline": "Additional briefing notes written by the thread creator. Free-form markdown."
-}
-```
-
-### Auto-Injected Context (No Manual Specification Needed)
-
-For every participant listed in THREAD.json, the system automatically injects:
-
-1. **Identity:** `{agent_folder}/README.md` -> `context/agents/{serial}_README.md`
-2. **Recent logs:** Most recent session logs -> `context/agents/{serial}_logs/`
-3. **Task orders:** Pending task orders -> `context/agents/{serial}_task_orders/`
-
-### Explicit Context Resolution
-
-| Type | How It Gets Materialized |
-|------|--------------------------|
-| `documents` | File copied to `context/refs/{label_slug}.md` |
-| `code` | File copied to `context/refs/{label_slug}` (with optional line range extraction) |
-| `commits` | `git log --oneline` + `git diff --stat` written to `context/commits/{label_slug}.txt` |
-| `logs` (by agent+date) | Log files copied to `context/refs/` |
-| `logs` (by path) | File copied to `context/refs/` |
-| `inline` | Written to `context/inline_notes.md` |
-
-### Why Copy Instead of Live Paths?
-
-- Thread becomes a self-contained, auditable artifact
-- Source files may change between turns -- the thread should reference the state at creation time
-- Agents can be scoped to only read the thread folder
-
----
-
-## TURN.json -- Turn State
-
-```json
-{
-  "turn_number": 2,
-  "next_agent": "1.0.0_SA_CTO",
-  "turns_taken": {
-    "1.0.0_SA_CTO": 1,
-    "0.5.0_AE_OpalETL": 1
-  },
-  "status": "active",
-  "last_updated": "2026-03-02T10:05:00Z"
-}
-```
-
-Updated by the orchestrator after each agent completes its turn. Agents never modify this file.
+| `id` | Thread folder name |
+| `project` | Project code (e.g., `AI`) -- only if `--project` was passed |
+| `serial` | Project serial (e.g., `AI-004`) -- only if `--project` was passed |
+| `created_by` | Agent serial who wrote `messages/000.md` |
+| `participants` | Agents who take turns (not necessarily includes creator) |
+| `turn_order` | `alternating` (A-B) or `round_robin` (A-B-C) |
+| `max_turns_per_agent` | Per-agent cap. Total = cap × num_participants |
+| `status` | `active` / `complete` / `blocked` / `needs_human` |
 
 ---
 
 ## Message Format
 
-Each message is `messages/{NNN}.md` (zero-padded 3 digits):
+Every message file (`messages/{NNN}.md`) must start with:
 
-```markdown
+```
 ---
-agent: 0.5.0_AE_OpalETL
+agent: 0.4.0_DS_ClientPlatform
 turn: 1
-timestamp: 2026-03-02T10:05:00Z
+timestamp: 2026-03-03T20:05:00Z
 signal: continue
 ---
 
-## Response
-
-[Agent's actual content -- analysis, questions, proposals, decisions]
-
-## Open Questions
-
-- Question 1 for the other participant
-- Question 2
-
-## Signal
-
-- **continue** -- I have questions / more to discuss
-  (or **converge** -- I believe we have reached agreement)
-  (or **escalate** -- This needs human input, reason: ...)
+[Message body]
 ```
 
-### Signal Values
-
-| Signal | Meaning | Orchestrator Action |
-|--------|---------|---------------------|
-| `continue` | More to discuss, questions remain | Advance to next agent's turn |
-| `converge` | Conversation has reached resolution | If both agents signal converge consecutively, thread completes |
-| `escalate` | Needs human input | Set thread status to `needs_human`, halt |
-
-### Forced Convergence
-
-On an agent's **last turn** (turns_taken == max_turns_per_agent), the signal MUST be `converge`. The turn instructions template enforces this.
+Signal values: `continue` (more to discuss) | `converge` (done) | `escalate` (needs human).
+Last turn signal MUST be `converge` (enforced by orchestrator turn instructions).
 
 ---
 
-## Orchestrator Usage
+## Termination Conditions
 
-```
-Usage: ./org/threads/orchestrator.sh [options]
-
-Options:
-  --thread <id>       Run a specific thread (default: run all active threads)
-  --concurrency <n>   Max threads to run in parallel (default: 1)
-  --dry-run           Show what would be invoked without running
-  --verbose           Print agent prompts and responses to stdout
-```
-
-### Core Loop (Per Thread)
-
-1. Read THREAD.json and TURN.json
-2. Check termination conditions
-3. Determine next agent from TURN.json
-4. Resolve agent serial -> folder paths
-5. Build system prompt (base persona + scoped prompt)
-6. Build user prompt (CONTEXT_COMPILED.md + all messages + turn instructions)
-7. Invoke `claude -p` with the constructed prompts
-8. Validate agent wrote the expected message file
-9. Parse signal from the message frontmatter
-10. Update TURN.json (increment turn, set next agent)
-11. Check termination again
-12. If complete: write thread receipts to each participant's `threads/` folder
-
-### Termination Conditions
-
-- All agents have exhausted their max turns
-- Last two consecutive messages both signal `converge`
-- Any message signals `escalate` (thread halts as `needs_human`)
-
-### Thread Receipts
-
-When a thread completes, a compiled markdown receipt is saved to each participant's `threads/` folder:
-
-```
-{agent_folder}/threads/YYYY-MM-DD_{other_serials}_{topic_slug}.md
-```
-
-For a 2-party thread between CTO and OpalETL:
-- `org/tier1_exec/1.0.0_SA_CTO/threads/2026-03-02_0.5.0_AE_OpalETL_etl-migration-review.md`
-- `org/tier2_senior/0.5.0_AE_OpalETL/threads/2026-03-02_1.0.0_SA_CTO_etl-migration-review.md`
-
-For multi-party threads (3+ participants), other serials are joined with `+`:
-- `2026-03-02_0.5.0_AE_OpalETL+0.3.0_DE_TradingOps_pipeline-review.md`
+1. All agents exhausted `max_turns_per_agent` -- thread completes, receipts written
+2. Two consecutive `converge` signals -- thread completes, receipts written
+3. Any `escalate` signal -- thread halts as `needs_human`, NO receipts written
 
 ---
 
-## create-thread.sh Usage
+## orchestrator.py CLI
 
 ```
-Usage: ./org/threads/create-thread.sh \
-  --id <thread-id> \
-  --topic <topic-string> \
-  --created-by <agent-serial> \
-  --participants <comma-separated-serials> \
-  --context-file <path-to-CONTEXT.json> \
-  --opening-message <path-to-opening.md> \
-  [--max-turns <n>]           # default: 3
-  [--turn-order <type>]       # default: alternating
-```
-
-### What It Does
-
-1. Creates `org/threads/{id}/` with subdirectories
-2. Writes THREAD.json from arguments
-3. Auto-injects participant context (README, logs, task orders) via serial resolution
-4. Resolves explicit CONTEXT.json entries (copies docs, runs git log, etc.)
-5. Generates CONTEXT_COMPILED.md
-6. Copies opening message as `messages/000.md`
-7. Writes initial TURN.json pointing to the second participant
-
----
-
-## Agent Turn Instructions
-
-When an agent is invoked by the orchestrator, it receives turn instructions appended to its prompt:
-
-```
-## YOUR TURN -- Thread Protocol
-
-You are participating in a structured conversation thread.
-
-**Your identity:** {agent_serial} ({role})
-**Thread topic:** {topic}
-**Turn:** {turn_number} of max {max_total_turns}
-**Your turns remaining:** {remaining}
-
-### Instructions
-
-1. Read the CONTEXT section below -- this is your shared briefing material.
-2. Read all previous messages in order.
-3. Write your response to: org/threads/{thread_id}/messages/{NNN}.md
-4. Use the message template (YAML frontmatter with agent, turn, timestamp, signal).
-5. Set your signal:
-   - continue -- you have more to discuss or questions remain
-   - converge -- you believe the conversation has reached resolution
-   - escalate -- you need human input (explain why in your message)
-
-### Constraints
-- Stay in your role. Do not impersonate other agents.
-- Do not modify THREAD.json, TURN.json, CONTEXT.json, or other agents' messages.
-- Only write your own message file.
-- Reference context documents by their label (e.g., "per the Architecture Spec...").
-- Be concrete. Name files, functions, resource names. Avoid vague summaries.
-- If this is your last turn, your signal MUST be converge (forced convergence).
+python org/threads/orchestrator.py \
+  --thread  AI-004-books-publisher-gap \
+  --model   gpt-5.2 \
+  --verbose \
+  [--dry-run]   \   # show prompts without calling API
+  [--no-tools]  \   # disable read_file/glob/grep (exploratory threads)
+  [--secret openai-api-key]   # AWS Secrets Manager secret name
 ```
 
 ---
 
 ## Troubleshooting
 
-### Thread stuck on "active" but no agent is responding
-Check TURN.json -- the `next_agent` serial may not resolve to a valid folder. Verify the agent folder exists under `org/{tier}/`.
+| Problem | Fix |
+|---------|-----|
+| Thread not found | Check `org/threads/{thread_id}/THREAD.json` exists |
+| Agent folder not found | Serial tier resolution: `0.Y.Z` Z>0 = tier3_junior, `0.Y.0` Y>0 = tier2_senior |
+| Signal not parsed | Message must start with raw `---` YAML frontmatter, not a code block |
+| Receipts missing | Only written on `complete`. `needs_human` threads skip receipts. |
+| Model error | Run `python org/threads/test-model.py --model <name>` to verify |
+| Project file not updated | JQ must be at `.tools/jq.exe`. Check create-thread.sh stderr. |
 
-### Agent wrote message but signal not parsed
-The orchestrator reads the YAML frontmatter `signal:` field. Ensure the message starts with `---` and has a valid signal value.
+---
 
-### Context materialization failed
-Check that all paths in CONTEXT.json exist relative to the repo root. The `commits` range must be valid git refs.
-
-### Thread receipts not generated
-Receipts are only generated when the thread reaches `complete` status (convergence or max turns). Threads that end as `needs_human` do not auto-generate receipts.
+**See also:**
+- `ARCHITECTURE.md` -- full technical end-to-end (prompt construction, context pipeline, ops)
+- `CONFIG.md` -- all paths, models, secrets, defaults
+- `THREAD_KNOWLEDGE.md` -- mandatory rules (M1-M9) and failure patterns
