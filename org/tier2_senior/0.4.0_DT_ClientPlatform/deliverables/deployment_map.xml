@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  deployment_map.xml
+  Agent:    0.4.0_DT_ClientPlatform
+  Pod:      ClientPlatform
+  Date:     2026-03-02
+  Purpose:  Tracks deployment state of all Terraform modules, Lambda functions,
+            and EC2 services that this DT deploys or coordinates on.
+-->
+
+<deployment_map>
+
+  <metadata>
+    <agent>0.4.0_DT_ClientPlatform</agent>
+    <pod>ClientPlatform</pod>
+    <date>2026-03-02</date>
+    <pages_served>ModelPortfolios, AdvisorIntelligence</pages_served>
+  </metadata>
+
+  <!-- =========================================================== -->
+  <!-- TERRAFORM MODULES                                            -->
+  <!-- =========================================================== -->
+
+  <terraform_modules>
+
+    <module name="yang-pipeline" authority="full">
+      <path>infra/aws/terraform/yang-pipeline/</path>
+      <current_tag>yang-v2.1.4</current_tag>
+      <state_key>yang-pipeline/tfstate</state_key>
+      <note>ModelPortfolios side — AUM metrics, benchmarks, peer performance Lambdas. Shared with Pod 2 (also full authority) and Pod 3 (upload side).</note>
+    </module>
+
+    <module name="bd-pipeline" authority="partial">
+      <path>infra/aws/terraform/bd-pipeline/</path>
+      <current_tag>bd-v2.14.0</current_tag>
+      <state_key>bd-pipeline/tfstate</state_key>
+      <note>DT owns portal-facing Lambdas only. Gold layer, EC2 runners, EventBridge rules: coordinate with 0.6.0_AE_PartnerETL.</note>
+    </module>
+
+  </terraform_modules>
+
+  <!-- =========================================================== -->
+  <!-- LAMBDA FUNCTIONS                                             -->
+  <!-- =========================================================== -->
+
+  <lambdas>
+
+    <!-- bd-pipeline: portal-facing (DT authority) -->
+    <lambda pipeline="bd-pipeline" authority="full">
+      <name>bd-portal-publisher</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <note>Publishes partner analytics to portal S3. DT deploys.</note>
+    </lambda>
+    <lambda pipeline="bd-pipeline" authority="full">
+      <name>bd-portal-advisor-publisher</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <note>Publishes advisor-level data to portal S3. DT deploys.</note>
+    </lambda>
+    <lambda pipeline="bd-pipeline" authority="full">
+      <name>bd-client-detail</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <note>Client detail API. DT deploys.</note>
+    </lambda>
+
+    <!-- bd-pipeline: infrastructure (coordinate with AE) -->
+    <lambda pipeline="bd-pipeline" authority="coordinate">
+      <name>bd-gold-trigger</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+    </lambda>
+    <lambda pipeline="bd-pipeline" authority="coordinate">
+      <name>bd-allocation-trigger</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+    </lambda>
+    <lambda pipeline="bd-pipeline" authority="coordinate">
+      <name>bd-transactions-trigger</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+    </lambda>
+    <lambda pipeline="bd-pipeline" authority="coordinate">
+      <name>bd-allocation-processor</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+    </lambda>
+    <lambda pipeline="bd-pipeline" authority="coordinate">
+      <name>bd-gold-layer</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+    </lambda>
+    <lambda pipeline="bd-pipeline" authority="coordinate">
+      <name>bd-allocation-file-checker</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+    </lambda>
+    <lambda pipeline="bd-pipeline" authority="coordinate">
+      <name>bd-price-update</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+    </lambda>
+    <lambda pipeline="bd-pipeline" authority="coordinate">
+      <name>bd-gold-foundation</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+    </lambda>
+    <lambda pipeline="bd-pipeline" authority="coordinate">
+      <name>bd-gold-detail-checker</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+    </lambda>
+    <lambda pipeline="bd-pipeline" authority="coordinate">
+      <name>historical-prices-scheduler</name>
+      <deployed_tag>bd-v2.14.0</deployed_tag>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+    </lambda>
+
+  </lambdas>
+
+  <!-- =========================================================== -->
+  <!-- EC2 SERVICES (all coordinate with AE PartnerETL)             -->
+  <!-- =========================================================== -->
+
+  <ec2_services>
+
+    <service name="bd-gold-layer-runner" authority="coordinate">
+      <source_path>data/black_diamond/scripts</source_path>
+      <instance_id>i-01003b035d2988dfb</instance_id>
+      <instance_type>persistent</instance_type>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      <note>S3-pull model. Runs gold layer scripts. Do not deploy directly.</note>
+    </service>
+
+    <service name="bd-allocations" authority="coordinate">
+      <source_path>infra/aws/ec2/bd-exporter</source_path>
+      <instance_id>i-0800437d1dbb0b5cc</instance_id>
+      <instance_type>persistent</instance_type>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      <note>Code deployed via SSM document opal-bd-allocation-download. Triggered by bd-allocation-trigger Lambda.</note>
+    </service>
+
+    <service name="bd-transactions" authority="coordinate">
+      <source_path>infra/aws/ec2/bd-exporter</source_path>
+      <instance_id>i-00c7568bc510f7423</instance_id>
+      <instance_type>persistent</instance_type>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      <note>Code deployed via SSM document opal-bd-transaction-download. Triggered by bd-transactions-trigger Lambda.</note>
+    </service>
+
+    <service name="bd-gold-detail-generator" authority="coordinate">
+      <source_path>infra/aws/ec2/bd-gold-detail-generator</source_path>
+      <instance_type>ephemeral</instance_type>
+      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      <note>Ephemeral — code baked into user-data.sh at launch. No persistent deploy.</note>
+    </service>
+
+  </ec2_services>
+
+</deployment_map>

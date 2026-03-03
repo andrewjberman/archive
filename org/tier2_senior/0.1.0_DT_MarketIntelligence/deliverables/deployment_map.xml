@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  deployment_map.xml
+  Agent:    0.1.0_DT_MarketIntelligence
+  Pod:      MarketIntelligence
+  Date:     2026-03-02
+  Purpose:  Tracks deployment state of all Terraform modules, Lambda functions,
+            and EC2 services that this DT deploys or coordinates on.
+-->
+
+<deployment_map>
+
+  <metadata>
+    <agent>0.1.0_DT_MarketIntelligence</agent>
+    <pod>MarketIntelligence</pod>
+    <date>2026-03-02</date>
+    <pages_served>MarketPerformance, CausalityEngine, MarketUpdate, CapitalMarketAssumptions</pages_served>
+  </metadata>
+
+  <!-- =========================================================== -->
+  <!-- TERRAFORM MODULES                                            -->
+  <!-- =========================================================== -->
+
+  <terraform_modules>
+
+    <module name="news-pipeline" authority="full">
+      <path>infra/aws/terraform/news-pipeline/</path>
+      <current_tag>news-v2.3.0</current_tag>
+      <state_key>news-pipeline/tfstate</state_key>
+    </module>
+
+    <module name="market-overview" authority="full">
+      <path>infra/aws/terraform/market-overview/</path>
+      <current_tag>market-overview-v1.4.1</current_tag>
+      <state_key>market-overview/tfstate</state_key>
+    </module>
+
+    <module name="causality" authority="coordinate">
+      <path>infra/aws/terraform/causality/</path>
+      <current_tag>none</current_tag>
+      <state_key>none</state_key>
+      <coordinate_with>0.5.0_AE_OpalETL</coordinate_with>
+      <note>Not yet Terraformed with S3 backend</note>
+    </module>
+
+    <module name="seeking-alpha" authority="coordinate">
+      <path>infra/aws/terraform/seeking-alpha/</path>
+      <current_tag>none</current_tag>
+      <state_key>none</state_key>
+      <coordinate_with>0.5.0_AE_OpalETL</coordinate_with>
+      <note>Not yet Terraformed with S3 backend</note>
+    </module>
+
+  </terraform_modules>
+
+  <!-- =========================================================== -->
+  <!-- LAMBDA FUNCTIONS                                             -->
+  <!-- =========================================================== -->
+
+  <lambdas>
+
+    <!-- news-pipeline -->
+    <lambda pipeline="news-pipeline">
+      <name>news-ingestion-scheduler</name>
+      <deployed_tag>news-v2.3.0</deployed_tag>
+    </lambda>
+    <lambda pipeline="news-pipeline">
+      <name>news-trending-analysis</name>
+      <deployed_tag>news-v2.3.0</deployed_tag>
+    </lambda>
+    <lambda pipeline="news-pipeline">
+      <name>opal-news-layer3-curation</name>
+      <deployed_tag>news-v2.3.0</deployed_tag>
+    </lambda>
+    <lambda pipeline="news-pipeline">
+      <name>news-semantic-clustering</name>
+      <deployed_tag>news-v2.3.0</deployed_tag>
+    </lambda>
+    <lambda pipeline="news-pipeline">
+      <name>semantic-news-layer3-curation</name>
+      <deployed_tag>news-v2.3.0</deployed_tag>
+    </lambda>
+    <lambda pipeline="news-pipeline">
+      <name>semantic-trending-topics-portal-publisher</name>
+      <deployed_tag>news-v2.3.0</deployed_tag>
+    </lambda>
+    <lambda pipeline="news-pipeline">
+      <name>opal-news-ai-sentiment</name>
+      <deployed_tag>news-v2.3.0</deployed_tag>
+    </lambda>
+    <lambda pipeline="news-pipeline">
+      <name>keyword-intelligence-generator</name>
+      <deployed_tag>news-v2.3.0</deployed_tag>
+    </lambda>
+    <lambda pipeline="news-pipeline">
+      <name>opal-keyword-drilldown-generator</name>
+      <deployed_tag>news-v2.3.0</deployed_tag>
+    </lambda>
+
+    <!-- market-overview -->
+    <lambda pipeline="market-overview">
+      <name>opal-market-regime-classifier</name>
+      <deployed_tag>market-overview-v1.4.1</deployed_tag>
+    </lambda>
+    <lambda pipeline="market-overview">
+      <name>opal-portal-fear-greed-fetcher</name>
+      <deployed_tag>market-overview-v1.4.1</deployed_tag>
+    </lambda>
+    <lambda pipeline="market-overview">
+      <name>opal-trending-topics-portal-publisher</name>
+      <deployed_tag>market-overview-v1.4.1</deployed_tag>
+    </lambda>
+    <lambda pipeline="market-overview">
+      <name>opal-market-overview-tiered-generator</name>
+      <deployed_tag>market-overview-v1.4.1</deployed_tag>
+    </lambda>
+    <lambda pipeline="market-overview">
+      <name>opal-market-rsi-tiered-generator</name>
+      <deployed_tag>market-overview-v1.4.1</deployed_tag>
+    </lambda>
+    <lambda pipeline="market-overview">
+      <name>opal-precompute-market-metrics</name>
+      <deployed_tag>market-overview-v1.4.1</deployed_tag>
+    </lambda>
+    <lambda pipeline="market-overview">
+      <name>opal-cloudfront-market-generator</name>
+      <deployed_tag>market-overview-v1.4.1</deployed_tag>
+    </lambda>
+    <lambda pipeline="market-overview">
+      <name>opal-portal-data-proxy</name>
+      <deployed_tag>market-overview-v1.4.1</deployed_tag>
+      <note>Shared Lambda — also serves ModelPortfolios and other pages. Terraform ownership is market-overview.</note>
+    </lambda>
+    <lambda pipeline="market-overview">
+      <name>opal-portal-volatility-fetcher</name>
+      <deployed_tag>market-overview-v1.4.1</deployed_tag>
+    </lambda>
+
+  </lambdas>
+
+  <!-- =========================================================== -->
+  <!-- EC2 SERVICES                                                 -->
+  <!-- =========================================================== -->
+
+  <ec2_services>
+
+    <service name="seeking-alpha-scraper" authority="coordinate">
+      <source_path>infra/aws/ec2/seeking_alpha_scraper</source_path>
+      <coordinate_with>0.5.0_AE_OpalETL</coordinate_with>
+      <note>Persistent. Scrapes Seeking Alpha. Coordinate with AE for deploys.</note>
+    </service>
+
+  </ec2_services>
+
+</deployment_map>

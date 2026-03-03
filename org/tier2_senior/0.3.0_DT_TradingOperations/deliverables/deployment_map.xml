@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  deployment_map.xml
+  Agent:    0.3.0_DT_TradingOperations
+  Pod:      TradingOperations
+  Date:     2026-03-02
+  Purpose:  Tracks deployment state of all Terraform modules, Lambda functions,
+            and EC2 services that this DT deploys or coordinates on.
+-->
+
+<deployment_map>
+
+  <metadata>
+    <agent>0.3.0_DT_TradingOperations</agent>
+    <pod>TradingOperations</pod>
+    <date>2026-03-02</date>
+    <pages_served>PortfolioManagement, TradeSubmission, DataRefresh</pages_served>
+  </metadata>
+
+  <!-- =========================================================== -->
+  <!-- TERRAFORM MODULES                                            -->
+  <!-- =========================================================== -->
+
+  <terraform_modules>
+
+    <module name="smartx-pipeline" authority="full">
+      <path>infra/aws/terraform/smartx-pipeline/</path>
+      <current_tag>smartx-v2.0.0</current_tag>
+      <state_key>smartx-pipeline/tfstate</state_key>
+    </module>
+
+    <module name="yang-pipeline" authority="shared">
+      <path>infra/aws/terraform/yang-pipeline/</path>
+      <current_tag>yang-v2.1.4</current_tag>
+      <state_key>yang-pipeline/tfstate</state_key>
+      <note>Upload-side Lambdas for SmartX data ingestion. Shared with Pod 2 (primary owner) and Pod 4.</note>
+    </module>
+
+    <module name="portfolio-management" authority="full">
+      <path>infra/aws/terraform/portfolio-management/</path>
+      <current_tag>none</current_tag>
+      <state_key>none</state_key>
+      <note>Not yet tagged. Portfolio management Terraform module.</note>
+    </module>
+
+  </terraform_modules>
+
+  <!-- =========================================================== -->
+  <!-- LAMBDA FUNCTIONS                                             -->
+  <!-- =========================================================== -->
+
+  <lambdas>
+
+    <!-- smartx-pipeline -->
+    <lambda pipeline="smartx-pipeline">
+      <name>smartx-ec2-autostart</name>
+      <deployed_tag>smartx-v2.0.0</deployed_tag>
+      <note>Starts the smartx-exporter EC2 instance on schedule</note>
+    </lambda>
+    <lambda pipeline="smartx-pipeline">
+      <name>opal-smartx-ingestion-pipeline</name>
+      <deployed_tag>smartx-v2.0.0</deployed_tag>
+    </lambda>
+
+  </lambdas>
+
+  <!-- =========================================================== -->
+  <!-- EC2 SERVICES                                                 -->
+  <!-- =========================================================== -->
+
+  <ec2_services>
+
+    <service name="smartx-exporter" authority="full">
+      <source_path>infra/aws/ec2/smartx-exporter</source_path>
+      <instance_id>i-06ebcb27395eb3f49</instance_id>
+      <instance_type>persistent</instance_type>
+      <deploy_script>infra/aws/ec2/smartx-exporter/deploy-to-ec2.sh</deploy_script>
+      <note>Always use safe-ec2-deploy.sh wrapper. No Elastic IP — host changes on start.</note>
+    </service>
+
+  </ec2_services>
+
+</deployment_map>
