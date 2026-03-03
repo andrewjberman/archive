@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page_inventory>
+  <metadata>
+    <agent>0.3.3_RD_DataRefresh</agent>
+    <page>DataRefresh</page>
+    <directory>portal/src/pages/DataRefresh/</directory>
+    <date>2026-03-02</date>
+  </metadata>
+
+  <files>
+    <file path="portal/src/pages/DataRefresh/DataRefresh.tsx" type="component">
+      Main page component with tab navigation between Upload and History tabs
+    </file>
+    <file path="portal/src/pages/DataRefresh/types.ts" type="types">
+      TypeScript interfaces and types for pipeline execution, file uploads, manifest, and page state
+    </file>
+    <file path="portal/src/pages/DataRefresh/constants.ts" type="constants">
+      Pipeline step definitions, accepted file types, status colors, and file type labels
+    </file>
+    <file path="portal/src/pages/DataRefresh/index.ts" type="export">
+      Module export for DataRefresh component
+    </file>
+    <file path="portal/src/pages/DataRefresh/hooks/useDataRefreshState.ts" type="hook">
+      Custom React hook managing upload state, file progress, pipeline status polling, and history
+    </file>
+    <file path="portal/src/pages/DataRefresh/tabs/UploadTab.tsx" type="component">
+      Tab showing file drop zone, manifest preview, pipeline progress, and file type reference
+    </file>
+    <file path="portal/src/pages/DataRefresh/tabs/HistoryTab.tsx" type="component">
+      Tab displaying execution history table with rollback functionality
+    </file>
+    <file path="portal/src/pages/DataRefresh/components/FileDropZone.tsx" type="component">
+      Drag-and-drop file input component with manifest file detection and validation
+    </file>
+    <file path="portal/src/pages/DataRefresh/components/ManifestPreview.tsx" type="component">
+      Displays manifest configuration, file presence checks, missing file warnings, and generators to run
+    </file>
+    <file path="portal/src/pages/DataRefresh/components/PipelineProgress.tsx" type="component">
+      Pipeline execution progress display with grouped steps, status tracking, and error/success messages
+    </file>
+    <file path="portal/src/pages/DataRefresh/components/UploadProgress.tsx" type="component">
+      Per-file upload progress visualization with overall progress bar
+    </file>
+    <file path="portal/src/pages/DataRefresh/components/CurrentStatePanel.tsx" type="component">
+      Displays current portal data state, data freshness, and source information from manifest.json
+    </file>
+  </files>
+
+  <api_calls>
+    <api_call>
+      <hook>getDataRefreshUploadUrls</hook>
+      <endpoint>/api/scoped/data-refresh/upload-urls</endpoint>
+      <method>POST</method>
+      <request_shape>{ fileInfo: Array[{ name: string, size: number }] }</request_shape>
+      <response_shape>{ uploadId: string, urls: Record[string, string] }</response_shape>
+      <file>portal/src/pages/DataRefresh/hooks/useDataRefreshState.ts:250</file>
+    </api_call>
+    <api_call>
+      <hook>triggerDataRefresh</hook>
+      <endpoint>/api/scoped/data-refresh/trigger</endpoint>
+      <method>POST</method>
+      <request_shape>{ uploadId: string }</request_shape>
+      <response_shape>{ executionId: string }</response_shape>
+      <file>portal/src/pages/DataRefresh/hooks/useDataRefreshState.ts:311</file>
+    </api_call>
+    <api_call>
+      <hook>getDataRefreshStatus</hook>
+      <endpoint>/api/scoped/data-refresh/status/{executionId}</endpoint>
+      <method>GET</method>
+      <request_shape>{ executionId: string }</request_shape>
+      <response_shape>DataRefreshStatusResponse (status, steps[], currentStep, executionArn, error)</response_shape>
+      <file>portal/src/pages/DataRefresh/hooks/useDataRefreshState.ts:159</file>
+    </api_call>
+    <api_call>
+      <hook>getDataRefreshHistory</hook>
+      <endpoint>/api/scoped/data-refresh/history</endpoint>
+      <method>GET</method>
+      <request_shape>{ limit: number (default 20) }</request_shape>
+      <response_shape>{ executions: Array[DataRefreshHistoryEntry] }</response_shape>
+      <file>portal/src/pages/DataRefresh/hooks/useDataRefreshState.ts:418</file>
+    </api_call>
+    <api_call>
+      <hook>rollbackDataRefresh</hook>
+      <endpoint>/api/scoped/data-refresh/rollback</endpoint>
+      <method>POST</method>
+      <request_shape>{ executionId: string }</request_shape>
+      <response_shape>{ newExecutionId: string }</response_shape>
+      <file>portal/src/pages/DataRefresh/hooks/useDataRefreshState.ts:444</file>
+    </api_call>
+    <api_call>
+      <hook>fetch + useQuery</hook>
+      <endpoint>/api/general/json/latest/manifest.json</endpoint>
+      <method>GET</method>
+      <request_shape>{ Authorization: Bearer {accessToken} } (from localStorage)</request_shape>
+      <response_shape>PortalManifest (generated_at, pipeline_execution_id, sources{})</response_shape>
+      <file>portal/src/pages/DataRefresh/components/CurrentStatePanel.tsx:18</file>
+    </api_call>
+    <api_call>
+      <hook>XMLHttpRequest (direct)</hook>
+      <endpoint>S3 presigned URL</endpoint>
+      <method>PUT</method>
+      <request_shape>Binary file content (application/octet-stream)</request_shape>
+      <response_shape>HTTP 200-299 on success</response_shape>
+      <file>portal/src/pages/DataRefresh/hooks/useDataRefreshState.ts:36</file>
+    </api_call>
+  </api_calls>
+
+  <shared_imports>
+    <import>
+      <from>@/contexts/PageThemeContext</from>
+      <provides>PageThemeProvider</provides>
+      <used_in>portal/src/pages/DataRefresh/DataRefresh.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/PageHeaderVariants</from>
+      <provides>PageHeaderCleanBadge</provides>
+      <used_in>portal/src/pages/DataRefresh/DataRefresh.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/TabNavigation</from>
+      <provides>TabNavigation, Tab</provides>
+      <used_in>portal/src/pages/DataRefresh/DataRefresh.tsx</used_in>
+    </import>
+    <import>
+      <from>@/api/portal-proxy</from>
+      <provides>getDataRefreshUploadUrls, triggerDataRefresh, getDataRefreshStatus, getDataRefreshHistory, rollbackDataRefresh, DataRefreshStatusResponse, DataRefreshHistoryEntry</provides>
+      <used_in>portal/src/pages/DataRefresh/hooks/useDataRefreshState.ts</used_in>
+    </import>
+    <import>
+      <from>@/ui/components/panels</from>
+      <provides>Panel, PanelHeader, PanelContent</provides>
+      <used_in>portal/src/pages/DataRefresh/tabs/UploadTab.tsx, portal/src/pages/DataRefresh/tabs/HistoryTab.tsx, portal/src/pages/DataRefresh/components/CurrentStatePanel.tsx</used_in>
+    </import>
+    <import>
+      <from>@/ui/components/CategoryTag</from>
+      <provides>CategoryTag</provides>
+      <used_in>portal/src/pages/DataRefresh/components/FileDropZone.tsx</used_in>
+    </import>
+    <import>
+      <from>@/ui/components/StatusBadge</from>
+      <provides>StatusBadge</provides>
+      <used_in>portal/src/pages/DataRefresh/tabs/HistoryTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/ui/components/EmptyState</from>
+      <provides>EmptyState</provides>
+      <used_in>portal/src/pages/DataRefresh/tabs/HistoryTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/ui/components/CategoryTag</from>
+      <provides>TagList</provides>
+      <used_in>portal/src/pages/DataRefresh/tabs/HistoryTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/ui/components/statusColors</from>
+      <provides>STATUS_COLORS</provides>
+      <used_in>portal/src/pages/DataRefresh/components/PipelineProgress.tsx</used_in>
+    </import>
+    <import>
+      <from>@tanstack/react-query</from>
+      <provides>useQuery</provides>
+      <used_in>portal/src/pages/DataRefresh/components/CurrentStatePanel.tsx</used_in>
+    </import>
+    <import>
+      <from>lucide-react</from>
+      <provides>RefreshCw, Upload, History, Check, Loader2, AlertCircle, Circle, SkipForward, Clock, ChevronDown, ChevronRight, ExternalLink, RotateCcw, File, FileSpreadsheet, Database, FileText, Calendar, Cpu, X, VisuallyHidden</provides>
+      <used_in>All components</used_in>
+    </import>
+    <import>
+      <from>sonner</from>
+      <provides>toast</provides>
+      <used_in>portal/src/pages/DataRefresh/hooks/useDataRefreshState.ts</used_in>
+    </import>
+    <import>
+      <from>react-router</from>
+      <provides>Link</provides>
+      <used_in>portal/src/pages/DataRefresh/components/PipelineProgress.tsx</used_in>
+    </import>
+  </shared_imports>
+
+  <types>
+    <type name="PipelineStatus" defined_in="portal/src/pages/DataRefresh/types.ts">
+      Union type: 'idle' | 'uploading' | 'processing' | 'completed' | 'failed'
+    </type>
+    <type name="PipelineStep" defined_in="portal/src/pages/DataRefresh/types.ts">
+      Key fields: id: string, name: string, description: string, status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped', startedAt?: string, completedAt?: string, error?: string
+    </type>
+    <type name="PipelineExecution" defined_in="portal/src/pages/DataRefresh/types.ts">
+      Key fields: executionId: string, status: PipelineStatus, startedAt: string, completedAt?: string, steps: PipelineStep[], manifest?: ManifestFile, error?: string, currentStep?: string, executionArn?: string
+    </type>
+    <type name="ManifestFileEntry" defined_in="portal/src/pages/DataRefresh/types.ts">
+      Key fields: type: 'data_pkl' | 'model_pkl' | 'cma_excel' | 'peer_excel' | 'attribution_excel' | 'regression_csv', filename: string, size?: number, status: 'pending' | 'uploading' | 'uploaded' | 'failed'
+    </type>
+    <type name="ManifestFile" defined_in="portal/src/pages/DataRefresh/types.ts">
+      Key fields: files: ManifestFileEntry[], strategy?: string, asOfDate?: string
+    </type>
+    <type name="FileUploadProgress" defined_in="portal/src/pages/DataRefresh/types.ts">
+      Key fields: filename: string, loaded: number, total: number, percent: number, status: 'pending' | 'uploading' | 'uploaded' | 'failed'
+    </type>
+    <type name="UploadState" defined_in="portal/src/pages/DataRefresh/types.ts">
+      Key fields: files: File[], manifest: ManifestFile | null, status: PipelineStatus, progress: number, currentExecution: PipelineExecution | null, fileProgress: FileUploadProgress[]
+    </type>
+    <type name="HistoryEntry" defined_in="portal/src/pages/DataRefresh/types.ts">
+      Key fields: executionId: string, startedAt: string, completedAt?: string, status: 'completed' | 'failed', filesProcessed: string[], dataAsOfDate?: string, duration?: number, triggeredBy?: string
+    </type>
+    <type name="DataRefreshState" defined_in="portal/src/pages/DataRefresh/types.ts">
+      Key fields: uploadState: UploadState, history: HistoryEntry[], isLoadingHistory: boolean
+    </type>
+    <type name="DataRefreshActions" defined_in="portal/src/pages/DataRefresh/types.ts">
+      Key fields: uploadFiles: (files: File[]) => Promise&lt;void&gt;, cancelUpload: () => void, refreshHistory: () => Promise&lt;void&gt;, rollbackToExecution: (executionId: string) => Promise&lt;void&gt;
+    </type>
+    <type name="PortalManifest" defined_in="portal/src/pages/DataRefresh/components/CurrentStatePanel.tsx">
+      Key fields: generated_at: string, pipeline_execution_id?: string, sources?: Record&lt;string, { data_as_of?: string, updated_at?: string, timestamp?: string, frequency?: string }&gt;
+    </type>
+  </types>
+
+  <page_structure>
+    <tab name="Upload" status="functional">
+      Allows users to upload PKL files and optionally a manifest.json configuration. Shows file drop zone, manifest preview, and pipeline progress tracking. Displays current portal state before upload begins. Supports file-by-file progress and overall pipeline progress monitoring.
+    </tab>
+    <tab name="History" status="functional">
+      Displays table of past executions with status (completed/failed), data as of date, files processed, duration, and triggered by info. Supports rollback to previous execution state. Shows informational panel about rollback mechanics.
+    </tab>
+  </page_structure>
+
+  <issues>
+    <issue file="portal/src/pages/DataRefresh/components/PipelineProgress.tsx:5" type="import">
+      Uses STATUS_COLORS from @/ui/components/statusColors but import path shows @/ui/components/statusColors — verify this path exists in shared UI
+    </issue>
+  </issues>
+
+  <architecture_notes>
+    <note type="state_management">
+      State is managed by useDataRefreshState hook which handles file uploads, manifest parsing, S3 presigned URL coordination, pipeline triggering, status polling, and history fetching. Uses XMLHttpRequest for direct S3 uploads with progress tracking.
+    </note>
+    <note type="polling">
+      Pipeline status is polled every 3 seconds until a terminal state is reached (SUCCEEDED, FAILED, TIMED_OUT, ABORTED). Polling is cleaned up on unmount. Frontend handles 409 Conflict errors (pipeline already running) with retry scheduling.
+    </note>
+    <note type="manifest_parsing">
+      manifest.json is parsed synchronously in FileDropZone and again during upload. Manifest contains file type mappings (data_pkl, model_pkl, etc) that determine which generators will run. Missing file detection provides UX warnings.
+    </note>
+    <note type="step_grouping">
+      PipelineProgress groups individual Step Functions steps by phase (Setup & Validation, Data Ingestion, Generate JSON, Update Portal, Finalize) for cleaner UI. Groups are collapsible with auto-expand on active step.
+    </note>
+    <note type="error_handling">
+      409 Conflict errors trigger special handling with user-friendly toast suggesting retry after timeout. Other errors show generic failure message. Failed pipeline states show AWS Step Functions console link.
+    </note>
+    <note type="data_freshness">
+      CurrentStatePanel reads /api/general/json/latest/manifest.json to display current portal state, data as of dates for each source, and staleness indicators (Fresh/Aging/Stale based on age).
+    </note>
+  </architecture_notes>
+
+  <dependencies>
+    <dependency name="@tanstack/react-query">
+      Used for fetching portal manifest with caching and stale time management
+    </dependency>
+    <dependency name="sonner">
+      Toast notifications for error, warning, and info messages during upload process
+    </dependency>
+    <dependency name="lucide-react">
+      Icon library for UI components (uploads, progress, status, rollback, etc)
+    </dependency>
+    <dependency name="react-router">
+      Link component for navigation to related pages (Valuation, Market Overview, Model Portfolios)
+    </dependency>
+  </dependencies>
+
+</page_inventory>

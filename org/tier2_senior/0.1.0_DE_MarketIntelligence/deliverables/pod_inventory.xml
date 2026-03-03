@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pod_inventory>
+
+  <metadata>
+    <agent>0.1.0_DE_MarketIntelligence</agent>
+    <pod>MarketIntelligence</pod>
+    <pages_owned>
+      <page>MarketPerformance</page>
+      <page>CausalityEngine</page>
+      <page>MarketUpdate</page>
+      <page>CapitalMarketAssumptions</page>
+    </pages_owned>
+    <date>2026-03-02</date>
+    <source_inventories>
+      <source>org/tier3_junior/0.1.1_RD_MarketPerformance/deliverables/page_inventory.xml</source>
+      <source>org/tier3_junior/0.1.2_RD_CausalityEngine/deliverables/page_inventory.xml</source>
+      <source>org/tier3_junior/0.1.3_RD_CapitalMarketAssumptions/deliverables/page_inventory.xml</source>
+    </source_inventories>
+  </metadata>
+
+  <!-- ============================================================
+       PAGES
+       ============================================================ -->
+  <pages>
+
+    <page>
+      <name>MarketPerformance</name>
+      <rd_agent>0.1.1_RD_MarketPerformance</rd_agent>
+      <directory>portal/src/pages/MarketPerformance/</directory>
+      <summary>
+        Displays broad multi-asset market performance data across equities, fixed income, and commodities using
+        PerformanceHeatMap visualizations. The page loads all returns via useMarketData (React Query wrapping
+        loadMarketData from @/lib/dataLoader) and distributes data to tab and panel components via props.
+        Supports an index drilldown mode and an IndexPerformanceModal for detailed per-index history.
+      </summary>
+      <tabs>
+        <tab name="multi-asset" status="functional"/>
+        <tab name="equities" status="functional"/>
+        <tab name="fixed-income" status="functional"/>
+        <tab name="commodities" status="functional"/>
+      </tabs>
+      <primary_data_hook>
+        <hook>useMarketData</hook>
+        <file>portal/src/pages/MarketPerformance/hooks.ts:24</file>
+        <endpoint>loadMarketData (from @/lib/dataLoader) — tiered CloudFront endpoints enabled 2026-01-05</endpoint>
+        <stale_time>5 minutes</stale_time>
+        <refetch>window focus, network reconnect</refetch>
+      </primary_data_hook>
+      <known_issues>
+        <issue file="portal/src/pages/MarketPerformance/MarketPerformance.tsx:107" type="TODO">
+          Load sector data for selected index — drilldown feature currently placeholder only
+        </issue>
+        <issue file="portal/src/pages/MarketPerformance/hooks.ts:33-38" type="DEBUG_CODE">
+          Console warning in DEV mode if marketData loads without dataAsOf field
+        </issue>
+      </known_issues>
+    </page>
+
+    <page>
+      <name>CausalityEngine</name>
+      <rd_agent>0.1.2_RD_CausalityEngine</rd_agent>
+      <directory>portal/src/pages/CausalityEngine/</directory>
+      <summary>
+        AI-powered thematic analysis tool. The Discovery tab renders an interactive ThemeBubbleGalaxy that
+        fetches trending themes from /causality/themes via useFilteredThemes; users select 2-3 themes to
+        generate structured analysis. History and Generate tabs are stubbed pending backend DynamoDB and AI
+        integration. All API calls route through causality-endpoints.ts with base URL from VITE_CAUSALITY_API_URL
+        or the default /causality path. State managed via Zustand (causality-store-v2 in localStorage).
+      </summary>
+      <tabs>
+        <tab name="Discovery" status="functional"/>
+        <tab name="History" status="stubbed"/>
+      </tabs>
+      <primary_data_hook>
+        <hook>useFilteredThemes (via useThemes)</hook>
+        <file>portal/src/pages/CausalityEngine/hooks/useCausalityApi.ts:58</file>
+        <endpoint>/causality/themes</endpoint>
+        <cache>5 minutes</cache>
+      </primary_data_hook>
+      <known_issues>
+        <issue file="portal/src/pages/CausalityEngine/components/MarketOverview.tsx:6" type="COMMENT">
+          Mock data — Dashboard Engineer will wire to real API for SPY, QQQ, VIX prices
+        </issue>
+        <issue file="portal/src/pages/CausalityEngine/tabs/Tab1_Discovery.tsx:33" type="COMMENT">
+          API returns 'movements' field for now; treating as themes (legacy compatibility)
+        </issue>
+        <issue file="portal/src/pages/CausalityEngine/tabs/Tab2_Generate.tsx" type="STUBBED">
+          Trade Ideas and Market Update generation both stubbed — awaits backend AI integration
+        </issue>
+        <issue file="portal/src/pages/CausalityEngine/tabs/Tab2_History.tsx" type="STUBBED">
+          History tab stubbed — awaits DynamoDB query and UI implementation for saved analyses
+        </issue>
+      </known_issues>
+    </page>
+
+    <page>
+      <name>MarketUpdate</name>
+      <rd_agent>0.1.2_RD_CausalityEngine</rd_agent>
+      <directory>portal/src/pages/MarketUpdate/</directory>
+      <summary>
+        Three-step workflow tool (Select Topics / Generate and Edit / Export and Save) for producing a weekly
+        market update bulletin. Tab 1 fetches bullish/bearish topics, upcoming earnings, and macro events;
+        Tab 2 auto-generates three content sections via GPT-4 (POST /api/general/market-update/generate);
+        Tab 3 saves a draft to DynamoDB and exports a PowerPoint via S3 presigned URL. Global state managed
+        via MarketUpdateContext. All API calls route through market-update.ts (marketUpdateApi object).
+      </summary>
+      <tabs>
+        <tab name="Select Topics" status="functional"/>
+        <tab name="Generate and Edit" status="functional"/>
+        <tab name="Export and Save" status="functional"/>
+      </tabs>
+      <primary_data_hook>
+        <hook>useTopics</hook>
+        <file>portal/src/pages/MarketUpdate/hooks/useMarketUpdateData.ts:13</file>
+        <endpoint>/api/general/market-update/topics?days=14</endpoint>
+        <cache>10 minutes</cache>
+      </primary_data_hook>
+      <known_issues>
+        <issue file="portal/src/pages/MarketUpdate/tabs/Tab3_ExportSave.tsx:51" type="TODO">
+          Replace hardcoded 'user@opalcapital.com' with actual authenticated user from auth context
+        </issue>
+      </known_issues>
+    </page>
+
+    <page>
+      <name>CapitalMarketAssumptions</name>
+      <rd_agent>0.1.3_RD_CapitalMarketAssumptions</rd_agent>
+      <directory>portal/src/pages/CapitalMarketAssumptions/</directory>
+      <summary>
+        Displays 10-year capital market forecasts and Opal's strategic/tactical allocation views.
+        The 10-Year Assumptions header panel renders a collapsible table across five asset class categories.
+        The Expectations tab renders a Recharts ComposedChart with colored bars (expected returns) and
+        black diamond markers (volatility). The Views tab displays GradientSlider and ConvergingSlider
+        components with split/combined display toggle across Overall, Equity, and Fixed Income views.
+        Data fetched in parallel via React Query from two CloudFront-backed static JSON endpoints.
+      </summary>
+      <tabs>
+        <tab name="Expectations" status="functional"/>
+        <tab name="Views" status="functional"/>
+      </tabs>
+      <primary_data_hook>
+        <hook>useQuery (getCMAAssumptions)</hook>
+        <file>portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx:32-35</file>
+        <endpoint>/api/general/capital-markets/assumptions.json</endpoint>
+        <cache>60 minutes (CloudFront edge)</cache>
+      </primary_data_hook>
+      <known_issues>
+        <issue file="portal/src/api/portal-proxy.ts:1168" type="TODO">
+          Demo mode: using public endpoint (no auth). TODO: Revert to shared endpoint with JWT Bearer token for production.
+        </issue>
+        <issue file="portal/src/api/portal-proxy.ts:1210" type="TODO">
+          Demo mode: using public endpoint (no auth). TODO: Revert to shared endpoint with JWT Bearer token for production.
+        </issue>
+      </known_issues>
+    </page>
+
+  </pages>
+
+  <!-- ============================================================
+       API ENDPOINTS
+       ============================================================ -->
+  <api_endpoints>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/market.ts</file>
+      <transport>CloudFront (tiered static JSON) with Lambda proxy fallback</transport>
+      <functions>
+        <function name="getAllReturns">
+          Path: /api/general/json-tiered/market-overview/summary/all-returns.json (primary);
+          /api/general/market/market-metrics.json (secondary via getMetricsFromEdge);
+          portalProxy.getAllMarketData() (tertiary).
+          Returns AllReturnsResponse with tickers keyed by name.
+        </function>
+        <function name="getTickerReturns">
+          Path: portalProxy.getMarketDataForTicker(ticker) then ${METRICS_BASE_URL}/returns/{ticker}.json fallback.
+          Returns TickerReturns for a single ticker.
+        </function>
+        <function name="getBestWorst">
+          Path: ${METRICS_BASE_URL}/best_worst/{period}.json (CloudFront direct).
+          Returns BestWorstResponse keyed by asset class.
+        </function>
+        <function name="getNormalizedPrices">
+          Path: ${METRICS_BASE_URL}/normalized/{ticker}.json.
+          Returns NormalizedResponse with base-100 price series.
+        </function>
+        <function name="getNormalizedPricesMultiple">Calls getNormalizedPrices in parallel for multiple tickers.</function>
+        <function name="getRSISummaryTiered">
+          Path: /api/general/json-tiered/market-overview/rsi-summary.json.
+          Returns RSISummaryTier1 with equities/fixedIncome/commodities RSI and change data.
+        </function>
+        <function name="getRSIDetailsTiered">
+          Path: /api/general/json-tiered/market-overview/rsi-details-{assetClass}.json.
+          Returns RSIDetailsTier2 with full historical RSI for modal drilldown.
+        </function>
+        <function name="getTickerTimeSeries">
+          Path: /api/general/json-tiered/market-overview/timeseries/{tickerSafe}.json.
+          Returns TickerTimeSeries with 3 years of daily prices.
+        </function>
+        <function name="getTrendingTopicsStatic">
+          Path: /api/general/trending/latest.json.
+          Returns TrendingTopicsStatic with bullish/bearish topic arrays (~42 KB).
+          Alias: getTrendingTopicsTiered (deprecated name).
+        </function>
+        <function name="getMarketRegime">
+          Path: /api/general/json/market/market-regime.json.
+          Returns MarketRegimeData with current regime, signals, history, periodStats.
+        </function>
+        <function name="getMarketRegimeHistory">
+          Path: /api/general/json/market/market-regime-history.json (~480 KB).
+          Returns MarketRegimeHistory with time series for 4 signals.
+        </function>
+      </functions>
+      <pages_using>MarketPerformance (via @/lib/dataLoader which calls getAllReturns)</pages_using>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/market-precomputed.ts</file>
+      <transport>CloudFront static JSON via authenticated apiRequest (secondary/legacy)</transport>
+      <functions>
+        <function name="getMetricsFromEdge">
+          Path: /api/general/market/market-metrics.json.
+          Returns AllReturnsResponse. Used as SECONDARY fallback in market.ts getAllReturns.
+          DEPRECATED RSI functions (getRSISummary, getRSISummaryWithDetails, getMarketMetrics) kept for
+          backwards compatibility; S3 files deleted 2026-01-13 — use tiered endpoints from market.ts instead.
+        </function>
+      </functions>
+      <pages_using>Not called directly by any page; used as fallback by market.ts getAllReturns</pages_using>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/causality-endpoints.ts</file>
+      <transport>API Gateway via authenticated apiRequest; base URL from VITE_CAUSALITY_API_URL or /causality</transport>
+      <functions>
+        <function name="causalityApi.getThematicSignals">GET /causality/thematic-signals — top 3 daily signals with theme and price impact</function>
+        <function name="causalityApi.getThemes">GET /causality/themes — all themes with optional filter params (days, sentiment, sector, limit)</function>
+        <function name="causalityApi.generateAnalysis">POST /causality/generate-analysis — GPT-4 analysis for 1-3 theme IDs</function>
+        <function name="causalityApi.saveAnalysis">POST /causality/save-analysis — persist analysis to DynamoDB</function>
+        <function name="causalityApi.getHistory">GET /causality/history — paginated saved analyses with optional filters</function>
+        <function name="causalityApi.deleteAnalysis">DELETE /causality/analysis/{saved_analysis_id}</function>
+        <function name="causalityApi.updateNotes">PATCH /causality/analysis/{saved_analysis_id}/notes</function>
+        <function name="causalityApi.generateMarketUpdate">POST /causality/market-update — PowerPoint/PDF generation from exactly 3 theme IDs; returns S3 presigned URL</function>
+        <function name="causalityApi.healthCheck">GET /causality/health</function>
+      </functions>
+      <pages_using>CausalityEngine (via useCausalityApi.ts hooks)</pages_using>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/market-update.ts</file>
+      <transport>CloudFront via publicApiRequest (unauthenticated for GET; POST methods also use publicApiRequest)</transport>
+      <functions>
+        <function name="marketUpdateApi.getTopics">GET /api/general/market-update/topics?days=14 — bullish/bearish Topic arrays</function>
+        <function name="marketUpdateApi.getEarnings">GET /api/general/market-update/earnings — Earning[] for next 7 days</function>
+        <function name="marketUpdateApi.getMacroEvents">GET /api/general/market-update/macro-events — MacroEvent[] for next 7 days</function>
+        <function name="marketUpdateApi.getMetrics">GET /api/general/market-update/metrics — current MarketMetric[] (S&amp;P 500, Nasdaq, VIX, 10Y Yield)</function>
+        <function name="marketUpdateApi.generateContent">POST /api/general/market-update/generate — GPT-4 generates section1[], section2[], section3[]</function>
+        <function name="marketUpdateApi.regenerateSection">POST /api/general/market-update/regenerate — re-generates a single section's bullets</function>
+        <function name="marketUpdateApi.saveDraft">POST /api/general/market-update/save — saves draft to DynamoDB; returns draftId</function>
+        <function name="marketUpdateApi.exportToPowerPoint">POST /api/general/market-update/export — generates PowerPoint; returns S3 presigned downloadUrl</function>
+      </functions>
+      <pages_using>MarketUpdate (via useMarketUpdateData.ts hooks)</pages_using>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/yield-curve.ts</file>
+      <transport>CloudFront via authenticated apiRequest</transport>
+      <functions>
+        <function name="getYieldCurveData">GET /api/general/macro/yield_curve_fred.json — full YieldCurveResponse with tenors 1M through 30Y</function>
+        <function name="getLatestYields">Pure utility: extracts latest value per maturity from YieldCurveResponse</function>
+        <function name="getYieldCurveForDate">Pure utility: returns yield snapshot for a specific date</function>
+        <function name="calculateYieldCurveSlope">Pure utility: computes 10Y-2Y spread</function>
+        <function name="getTimeSeriesForMaturity">Pure utility: extracts YieldCurveDataPoint[] for a single maturity</function>
+      </functions>
+      <pages_using>
+        Available to MarketPerformance SentimentPanel (yield curve metric displayed); exact call site not
+        confirmed in RD page_inventory.xml — SentimentPanel component may call directly or receive via
+        parent-loaded marketData. Requires DE read of SentimentPanel.tsx to confirm wiring.
+      </pages_using>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/sentiment.ts</file>
+      <transport>CloudFront via authenticated apiRequest (S3-backed static JSON); /v1/sentiment/keyword-intelligence uses apiRequest (authenticated POST)</transport>
+      <functions>
+        <function name="getFearGreedIndex">GET /api/general/sentiment/fear-greed-index.json — FearGreedIndex with current value, description, historical, and 7 component breakdowns</function>
+        <function name="getFearGreedIndexWithDetails">Alias for getFearGreedIndex (same file, same response)</function>
+        <function name="getMarketSentimentHistorical">GET /api/general/sentiment/articles.json — SentimentHistorical with bullish/bearish/neutral counts; uses localStorage for prior-day comparison</function>
+        <function name="getAAIISentiment">GET /api/general/sentiment/aaii-history.json — 35+ years of AAII survey data</function>
+        <function name="getAAIILatest">GET /api/general/sentiment/aaii-latest.json — latest AAII sentiment and allocation readings</function>
+        <function name="getKeywordFinBERTSentimentsWithTimestamp">GET /api/general/sentiment/keyword-sentiments.json — per-keyword FinBERT scores with optional GPT audit evidence</function>
+        <function name="getKeywordFinBERTSentiments">Wrapper for getKeywordFinBERTSentimentsWithTimestamp; returns keywords array only</function>
+        <function name="getKeywordSentimentHistorySummary">GET /api/general/sentiment/keyword-history-summary/{keyword}.json — Tier 1 lightweight 14-day chart (~1 KB)</function>
+        <function name="getKeywordSentimentHistoryArticles">GET /api/general/sentiment/keyword-history-articles/{keyword}.json — Tier 2 article list (~5-10 KB, max 50 articles)</function>
+        <function name="getKeywordIntelligence">POST /v1/sentiment/keyword-intelligence — authenticated GPT analysis for a keyword with drivers, confidence, conflict detection (45s timeout)</function>
+        <function name="getKeywordSentimentHistory">DEPRECATED: combined Tier 1+2 fetch; use tiered functions instead</function>
+      </functions>
+      <pages_using>
+        Available to MarketPerformance SentimentPanel (news sentiment, fear and greed displayed); exact call
+        site not confirmed in RD page_inventory.xml — requires DE read of SentimentPanel.tsx to confirm wiring.
+        getFearGreedIndex and getMarketSentimentHistorical are the primary candidates.
+      </pages_using>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/trending.ts</file>
+      <transport>Delegates to portal-proxy.ts (getTrendingTopics, getLatestTrendingTopics)</transport>
+      <functions>
+        <function name="getTrendingTopics">Wraps proxyGetTrendingTopics(date) — GET /v1/trending/topics/{date}; returns bullish/bearish NewsTrend arrays</function>
+        <function name="getLatestTrendingTopics">Wraps proxyGetLatestTrendingTopics() — GET /v1/trending/latest; tries today then falls back to yesterday etc.</function>
+        <function name="getLayer3KeywordSentiments">Loops N days calling proxyGetTrendingTopics; extracts keyword-level sentiment from GPT-curated topics</function>
+      </functions>
+      <pages_using>
+        Not directly imported by any pod page per RD inventories. MarketPerformance's ExecutiveSummary panel
+        uses trending data which is also available via getTrendingTopicsStatic in market.ts
+        (/api/general/trending/latest.json). Trending.ts wraps the portal-proxy path for pages outside
+        this pod. DE should verify if ExecutiveSummaryPanel uses market.ts or trending.ts for topic data.
+      </pages_using>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/portal-proxy.ts</file>
+      <transport>CloudFront/API Gateway; authenticated via Bearer token from localStorage; public routes via publicApiRequest</transport>
+      <functions>
+        <function name="clearCache">No-op — CloudFront handles caching at edge</function>
+        <function name="getAllMarketData">GET /v1/market/all — all market data with calculated returns (used as tertiary fallback by market.ts getAllReturns)</function>
+        <function name="getMarketDataForTicker">GET /v1/market/ticker/{ticker} — single ticker data (used as primary by market.ts getTickerReturns)</function>
+        <function name="getTrendingTopics">GET /v1/trending/topics/{date} — wrapped by trending.ts</function>
+        <function name="getLatestTrendingTopics">GET /v1/trending/latest — wrapped by trending.ts</function>
+        <function name="getCMAAssumptions">GET /api/general/capital-markets/assumptions.json (demo mode, public; TODO: revert to authenticated shared endpoint) — line 1168</function>
+        <function name="getOpalViews">GET /api/general/capital-markets/views.json (demo mode, public; TODO: revert to authenticated shared endpoint) — line 1210</function>
+      </functions>
+      <pages_using>
+        CapitalMarketAssumptions (getCMAAssumptions, getOpalViews — imported directly at CapitalMarketAssumptions.tsx:17);
+        market.ts fallback path (getAllMarketData, getMarketDataForTicker);
+        trending.ts (getTrendingTopics, getLatestTrendingTopics)
+      </pages_using>
+    </endpoint>
+
+  </api_endpoints>
+
+  <!-- ============================================================
+       SHARED COMPONENTS (used by 2+ pages in this pod)
+       ============================================================ -->
+  <shared_components>
+
+    <component name="TabNavigation" path="@/components/TabNavigation">
+      Used by: MarketPerformance (MarketPerformance.tsx), CausalityEngine (CausalityEngine.tsx),
+      MarketUpdate (MarketUpdate.tsx), CapitalMarketAssumptions (CapitalMarketAssumptions.tsx:13)
+    </component>
+
+    <component name="useTabNavigation" path="@/hooks/useTabNavigation">
+      Used by: MarketPerformance (MarketPerformance.tsx), CausalityEngine (CausalityEngine.tsx,
+      Tab1_Discovery.tsx), MarketUpdate (MarketUpdate.tsx, Tab1_SelectTopics.tsx, Tab2_GenerateEdit.tsx,
+      Tab3_ExportSave.tsx), CapitalMarketAssumptions (CapitalMarketAssumptions.tsx:14)
+    </component>
+
+    <component name="PageHeaderCleanBadge" path="@/components/PageHeaderVariants">
+      Used by: MarketPerformance (MarketPerformance.tsx — CURRENTLY ACTIVE),
+      CausalityEngine (CausalityEngine.tsx), MarketUpdate (MarketUpdate.tsx),
+      CapitalMarketAssumptions (CapitalMarketAssumptions.tsx:11)
+      Note: MarketPerformance has commented-out imports for other variants
+      (PageHeaderHeroBanner, PageHeaderPremiumCard, PageHeaderMinimalExpanded, PageHeaderSplitDesign)
+    </component>
+
+    <component name="PageThemeProvider" path="@/contexts/PageThemeContext">
+      Used by: MarketPerformance (MarketPerformance.tsx), MarketUpdate (MarketUpdate.tsx),
+      CapitalMarketAssumptions (CapitalMarketAssumptions.tsx:10)
+    </component>
+
+    <component name="Panel, PanelHeader, PanelContent, SmartPanelFooter" path="@/ui/components/panels">
+      Used by: MarketPerformance (tabs/*, panels/*), CapitalMarketAssumptions
+      (CapitalMarketAssumptions.tsx:12, tabs/ExpectationsTab.tsx:11, tabs/OpalViewsTab.tsx:11)
+    </component>
+
+    <component name="LoadingContainer / LoadingSpinner" path="@/components/LoadingSpinner">
+      Used by: MarketPerformance (MarketPerformance.tsx), MarketUpdate (SectionEditor.tsx),
+      CapitalMarketAssumptions (CapitalMarketAssumptions.tsx:15)
+    </component>
+
+    <component name="Card, CardHeader, CardContent" path="portal/src/components/Card">
+      Used by: CausalityEngine (MarketOverview.tsx, SystemDescription.tsx, SelectedThemesPanel.tsx,
+      ThemeBubbleGalaxy.tsx, Tab2_Generate.tsx, Tab2_History.tsx)
+      Note: Only used within the CausalityEngine page — not a multi-page shared component within this pod,
+      but listed for completeness as a shared component library entry.
+    </component>
+
+    <component name="PerformanceHeatMap" path="@/components/PerformanceHeatMap">
+      Used by: MarketPerformance (tabs/MultiAssetTab/MultiAssetTab.tsx, EquitiesTab.tsx,
+      FixedIncomeTab.tsx, CommoditiesTab.tsx)
+      Note: Only within MarketPerformance but used across 4 tab components.
+    </component>
+
+  </shared_components>
+
+  <!-- ============================================================
+       CROSS-POD DEPENDENCIES
+       ============================================================ -->
+  <cross_pod_dependencies>
+
+    <dependency path="@/lib/dataLoader" provides="loadMarketData, FIXED_INCOME_GROUPS, COMMODITY_GROUPS, US_EQUITY_GROUPS, INTERNATIONAL_EQUITY_GROUPS, IndexData, MarketData">
+      Consumed by: MarketPerformance (hooks.ts, tabs/*, panels/*)
+      This library abstracts the tiered CloudFront endpoint strategy (market.ts getAllReturns) from the page.
+      Owner: not within this pod's page directories — shared infra/library concern.
+    </dependency>
+
+    <dependency path="@/hooks/useDataSource" provides="useYangDataAsOf">
+      Consumed by: CapitalMarketAssumptions (CapitalMarketAssumptions.tsx:16)
+      Used twice: useYangDataAsOf('cma', cmaData?.asOfDate) and useYangDataAsOf('views', viewsData?.asOfDate)
+      Registers data as-of dates in central Yang data source registry.
+    </dependency>
+
+    <dependency path="@/hooks/useFilterTracking" provides="useSelectTracking">
+      Consumed by: CapitalMarketAssumptions (tabs/OpalViewsTab.tsx:10)
+      Tracks selectedView ('overall', 'equity', 'fixed-income') and displayMode ('split', 'combined').
+    </dependency>
+
+    <dependency path="@/components/market-performance" provides="ExecutiveSummary, SentimentGauge, EquitiesPerformancePanel">
+      Consumed by: MarketPerformance (panels/ExecutiveSummaryPanel.tsx, panels/SentimentPanel.tsx,
+      tabs/EquitiesTab/components/EquitiesPerformance.tsx)
+    </dependency>
+
+    <dependency path="@/components/market-performance/IndexPerformanceModal" provides="IndexPerformanceModal">
+      Consumed by: MarketPerformance (MarketPerformance.tsx)
+    </dependency>
+
+    <dependency path="@/components/ErrorMessage" provides="ErrorMessage">
+      Consumed by: MarketPerformance (MarketPerformance.tsx)
+    </dependency>
+
+    <dependency path="@/components/Button" provides="Button">
+      Consumed by: MarketPerformance (MarketPerformance.tsx)
+    </dependency>
+
+    <dependency path="recharts" provides="Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Scatter, ComposedChart">
+      Consumed by: CapitalMarketAssumptions (tabs/ExpectationsTab.tsx:10)
+    </dependency>
+
+    <dependency path="zustand" provides="create, devtools, persist">
+      Consumed by: CausalityEngine (hooks/useCausalityStore.ts — localStorage key: causality-store-v2)
+    </dependency>
+
+    <dependency path="framer-motion" provides="motion components">
+      Consumed by: CausalityEngine (ThemeBubble.tsx), MarketUpdate (BubbleGalaxy/Bubble.tsx)
+    </dependency>
+
+    <dependency path="sonner" provides="toast">
+      Consumed by: CausalityEngine (useCausalityApi.ts), MarketUpdate (useMarketUpdateData.ts)
+    </dependency>
+
+  </cross_pod_dependencies>
+
+  <!-- ============================================================
+       POD HEALTH
+       ============================================================ -->
+  <pod_health>
+    <open_issues_count>7</open_issues_count>
+    <stubbed_features_count>3</stubbed_features_count>
+    <todo_count>4</todo_count>
+    <missing_contracts>
+      None — all 7 listed endpoint files exist and are readable.
+    </missing_contracts>
+    <wiring_gaps>
+      <gap>
+        SentimentPanel (MarketPerformance) displays news sentiment, RSI, yield curve, and fear/greed metrics
+        but hooks.ts documents only one API call (loadMarketData). The exact source of sentiment and
+        yield-curve data within SentimentPanel is not confirmed by the RD inventory. DE should read
+        portal/src/pages/MarketPerformance/panels/SentimentPanel/SentimentPanel.tsx to confirm whether
+        it calls sentiment.ts/yield-curve.ts directly or receives data through MarketData prop.
+      </gap>
+      <gap>
+        MarketPerformance ExecutiveSummaryPanel shows "bullish/bearish market drivers and top/bottom
+        performing indices." The trending topics feature (getTrendingTopicsStatic in market.ts vs
+        trending.ts via portal-proxy) is not explicitly documented in the RD inventory for this panel.
+        DE should confirm data source for trending topics in ExecutiveSummary.
+      </gap>
+      <gap>
+        CausalityEngine MarketOverview.tsx uses mock data for SPY, QQQ, VIX. Wire to real API is a
+        pending DE task (noted at MarketOverview.tsx:6).
+      </gap>
+      <gap>
+        CausalityEngine History tab and Generate tab are fully stubbed. Blocked on backend AI integration
+        (Tab2_Generate.tsx) and DynamoDB history queries (Tab2_History.tsx).
+      </gap>
+    </wiring_gaps>
+    <summary>
+      Pod has 4 pages across 3 RD agents. MarketUpdate is PRODUCTION_READY. CapitalMarketAssumptions
+      is PRODUCTION_READY with two demo-mode auth TODOs. MarketPerformance is functional but has
+      an unimplemented sector drilldown and two unconfirmed API wiring paths in SentimentPanel.
+      CausalityEngine Discovery tab is functional; History and Generate tabs are stubbed and blocked
+      on backend work. No missing contract files. First DE priority is confirming SentimentPanel wiring
+      and wiring MarketOverview mock data to real API.
+    </summary>
+  </pod_health>
+
+</pod_inventory>

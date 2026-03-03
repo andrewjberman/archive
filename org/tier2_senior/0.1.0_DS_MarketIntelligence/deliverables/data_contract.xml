@@ -1,0 +1,880 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data_contract>
+
+  <metadata>
+    <agent>0.1.0_DS_MarketIntelligence</agent>
+    <pod>MarketIntelligence</pod>
+    <date>2026-03-02</date>
+    <source>Lambda source code, portal endpoint TypeScript types, pod_inventory.xml</source>
+    <status>complete</status>
+  </metadata>
+
+  <!-- ====================================================================
+       PAGE CONTRACTS
+       ==================================================================== -->
+  <page_contracts>
+
+    <!-- ----------------------------------------------------------------
+         MarketPerformance
+         ---------------------------------------------------------------- -->
+    <page>
+      <name>MarketPerformance</name>
+      <rd_agent>0.1.1_RD_MarketPerformance</rd_agent>
+      <directory>portal/src/pages/MarketPerformance/</directory>
+
+      <data_sources>
+
+        <!-- Source 1: Market Overview Tiered Summary (primary heatmap data) -->
+        <source id="MP-1">
+          <name>market-overview-tiered-generator (Tier 1 Summary)</name>
+          <lambda_function>market-overview-tiered-generator</lambda_function>
+          <actual_source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/market-overview-tiered-generator/lambda_function.py</actual_source_path>
+          <trigger>Yang pipeline (after yang-ingest-dynamodb Lambda) OR EventBridge schedule</trigger>
+          <dynamodb_input>opal-portal-market-data (PK: ticker_id, SK: LATEST / DAILY#date — scans LATEST for metadata, queries DAILY# for time series)</dynamodb_input>
+          <s3_output_key_pattern>json-tiered/market-overview/summary/all-returns.json</s3_output_key_pattern>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <cloudfront_invalidation_paths>/api/public/json-tiered/market-overview/summary/*, /json-tiered/market-overview/*</cloudfront_invalidation_paths>
+          <response_shape>
+            <!-- From generate_all_data() summary dict in lambda_function.py:498 -->
+            <field name="generated_at" type="string (ISO 8601)"/>
+            <field name="data_as_of" type="string (YYYY-MM-DD) — latest date across all tickers"/>
+            <field name="as_of_date" type="string (YYYY-MM-DD) — alias for data_as_of, portal uses this field"/>
+            <field name="tier" type="number — value: 1"/>
+            <field name="page" type="string — value: 'market-overview'"/>
+            <field name="count" type="number — total entity count"/>
+            <field name="data_source" type="string — value: 'DynamoDB:opal-portal-market-data'"/>
+            <field name="indices" type="array of entity objects">
+              <subfield name="ticker" type="string"/>
+              <subfield name="ticker_id" type="string — format: ENTITY_TYPE#ticker_name (e.g. INDEX#S&amp;P 500)"/>
+              <subfield name="name" type="string — same as ticker"/>
+              <subfield name="entity_type" type="string — one of: INDEX, ETF, BOND_INDEX, CREDIT, YIELD, COMMODITY, VOLATILITY"/>
+              <subfield name="asset_class" type="string — one of: equities, fixed_income, commodities, other"/>
+              <subfield name="latest_price" type="number (float)"/>
+              <subfield name="latest_date" type="string (YYYY-MM-DD)"/>
+              <subfield name="period_returns" type="object — keys: 1D, WTD, MTD, 1M, QTD, 1Q, YTD, 1Y, 3Y, 5Y; values: number (decimal, e.g. 0.05 = 5%) or null"/>
+            </field>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/market.ts</file>
+            <function>getAllReturns (primary path) — fetches /api/general/json-tiered/market-overview/summary/all-returns.json via publicApiRequest; transforms indices array to tickers Record keyed by name</function>
+            <fallback_1>getMetricsFromEdge (market-precomputed.ts) — /api/general/market/market-metrics.json (legacy S3 file)</fallback_1>
+            <fallback_2>portalProxy.getAllMarketData — GET /v1/market/all via portal_data_proxy Lambda</fallback_2>
+            <consumed_by>loadMarketData in @/lib/dataLoader, used by useMarketData hook in hooks.ts:24</consumed_by>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 2: Market Overview Details (per-ticker Tier 2, used by IndexPerformanceModal) -->
+        <source id="MP-2">
+          <name>market-overview-tiered-generator (Tier 2 Details)</name>
+          <lambda_function>market-overview-tiered-generator</lambda_function>
+          <actual_source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/market-overview-tiered-generator/lambda_function.py</actual_source_path>
+          <trigger>Same run as MP-1 (same Lambda invocation)</trigger>
+          <dynamodb_input>opal-portal-market-data (DAILY# entries, up to 2000 days per ticker)</dynamodb_input>
+          <s3_output_key_pattern>json-tiered/market-overview/details/{ticker_safe}.json (ticker_safe: spaces→_, /→_, &amp;→AND)</s3_output_key_pattern>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <!-- From detail_entry dict in lambda_function.py:420-440 -->
+            <field name="ticker" type="string"/>
+            <field name="ticker_id" type="string"/>
+            <field name="name" type="string"/>
+            <field name="entity_type" type="string"/>
+            <field name="asset_class" type="string"/>
+            <field name="latest_price" type="number (float)"/>
+            <field name="latest_date" type="string (YYYY-MM-DD)"/>
+            <field name="period_returns" type="object — same structure as MP-1 period_returns"/>
+            <field name="time_series" type="array of {date: string, price: number, return: number (total return %)}"/>
+            <field name="metadata" type="object — {time_series_days: number, data_source: string, generated_at: string}"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/market.ts</file>
+            <function>getMarketOverviewDetails — fetches /api/general/json-tiered/market-overview/details/{encodedTicker}.json</function>
+            <consumed_by>IndexPerformanceModal component (MarketPerformance.tsx)</consumed_by>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 3: RSI Summary Tier 1 (RSI panel page load) -->
+        <source id="MP-3">
+          <name>market-rsi-tiered-generator (RSI Tier 1 Summary)</name>
+          <lambda_function>market-rsi-tiered-generator</lambda_function>
+          <actual_source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/market-rsi-tiered-generator/lambda_function.py</actual_source_path>
+          <trigger>EventBridge schedule — 2x daily: 9:30 AM ET, 4:00 PM ET</trigger>
+          <dynamodb_input>opal-portal-market-data (DAILY# entries only, last 1900 days; excludes LATEST to avoid duplicate dates)</dynamodb_input>
+          <s3_output_key_pattern>json-tiered/market-overview/rsi-summary.json</s3_output_key_pattern>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <!-- From tier1_summary dict in generate_rsi_tiering(), lambda_function.py:621-633 -->
+            <field name="generated_at" type="string (ISO 8601 with Z suffix)"/>
+            <field name="data_as_of" type="string (YYYY-MM-DD)"/>
+            <field name="tier" type="number — value: 1"/>
+            <field name="page" type="string — value: 'market-overview'"/>
+            <field name="last_updated" type="string (YYYY-MM-DD)"/>
+            <field name="rsi_summary" type="object">
+              <subfield name="equities" type="object — {value: number (Wilder RSI 14-day equal-weighted avg), status: oversold|neutral|overbought, change_7d, change_14d, change_30d, change_90d, change_1y, change_3y: number|null}"/>
+              <subfield name="fixedIncome" type="object — same shape as equities"/>
+              <subfield name="commodities" type="object — same shape as equities"/>
+            </field>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/market.ts</file>
+            <function>getRSISummaryTiered — fetches /api/general/json-tiered/market-overview/rsi-summary.json (0.44 KB)</function>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 4: RSI Details Tier 2 (per-asset-class modal drilldown) -->
+        <source id="MP-4">
+          <name>market-rsi-tiered-generator (RSI Tier 2 Details)</name>
+          <lambda_function>market-rsi-tiered-generator</lambda_function>
+          <actual_source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/market-rsi-tiered-generator/lambda_function.py</actual_source_path>
+          <trigger>Same run as MP-3</trigger>
+          <dynamodb_input>opal-portal-market-data (same scan as MP-3)</dynamodb_input>
+          <s3_output_key_pattern>json-tiered/market-overview/rsi-details-{equities|fixedIncome|commodities}.json</s3_output_key_pattern>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <!-- From build_tier2_structure() in lambda_function.py:539-554 -->
+            <field name="generated_at" type="string"/>
+            <field name="data_as_of" type="string (YYYY-MM-DD)"/>
+            <field name="tier" type="number — value: 2"/>
+            <field name="asset_class" type="string — equities|fixedIncome|commodities"/>
+            <field name="indices" type="object keyed by index name — value: {current: number|null, change_14d: number|null, historical: [{date: string, value: number}]}"/>
+            <field name="sectors" type="object keyed by GICS sector name — equities only; same value shape as indices"/>
+            <field name="aggregate" type="object — {value: number, status: string, historical: [{date, value}], history: {change_7d, change_14d, change_30d, change_90d, change_1y, change_3y}}"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/market.ts</file>
+            <function>getRSIDetailsTiered(assetClass) — fetches /api/general/json-tiered/market-overview/rsi-details-{assetClass}.json (equities 160 KB, fixedIncome 38 KB, commodities 33 KB)</function>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 5: Per-Ticker Time Series (IndexPerformanceModal charts) -->
+        <source id="MP-5">
+          <name>market-rsi-tiered-generator (Time Series)</name>
+          <lambda_function>market-rsi-tiered-generator</lambda_function>
+          <actual_source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/market-rsi-tiered-generator/lambda_function.py</actual_source_path>
+          <trigger>Same run as MP-3</trigger>
+          <dynamodb_input>opal-portal-market-data (DAILY# entries, last 1095 days per ticker)</dynamodb_input>
+          <s3_output_key_pattern>json-tiered/market-overview/timeseries/{tickerSafe}.json (spaces removed, &amp;→AND)</s3_output_key_pattern>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <!-- From generate_time_series() output dict in lambda_function.py:695-705 -->
+            <field name="generated_at" type="string"/>
+            <field name="data_as_of" type="string (YYYY-MM-DD) — newest date in series"/>
+            <field name="ticker" type="string"/>
+            <field name="ticker_id" type="string"/>
+            <field name="entity_type" type="string"/>
+            <field name="data_points" type="number"/>
+            <field name="start_date" type="string (YYYY-MM-DD)"/>
+            <field name="end_date" type="string (YYYY-MM-DD)"/>
+            <field name="historical_prices" type="array of {date: string, price: number, volume: number, return: number|null (price return %, null if no prior day)} — descending order (newest first)"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/market.ts</file>
+            <function>getTickerTimeSeries(ticker) — fetches /api/general/json-tiered/market-overview/timeseries/{tickerSafe}.json (~44 KB avg)</function>
+            <note>market-regime-classifier also reads these files as input (SANDP500, BloombergAggregate, SANDPGSCI); ticker safe name strips all spaces, replaces &amp; with AND</note>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 6: Market Regime Classification -->
+        <source id="MP-6">
+          <name>market-regime-classifier</name>
+          <lambda_function>market-regime-classifier</lambda_function>
+          <actual_source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/market-regime-classifier/lambda_function.py</actual_source_path>
+          <trigger>EventBridge schedule — 6:30 AM and 2:30 PM UTC daily</trigger>
+          <s3_input>
+            json-tiered/market-overview/timeseries/SANDP500.json,
+            json-tiered/market-overview/timeseries/BloombergAggregate.json,
+            json-tiered/market-overview/timeseries/SANDPGSCI.json,
+            json/macro/timeseries/2y.json (GZIP or plain JSON, 35 years FRED monthly data),
+            json/macro/timeseries/10y.json (same structure)
+          </s3_input>
+          <s3_output_key_pattern>json/market/market-regime.json</s3_output_key_pattern>
+          <s3_output_key_pattern_secondary>json/market/market-regime-history.json</s3_output_key_pattern_secondary>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <!-- From output dict in lambda_handler(), lambda_function.py:191-227 -->
+            <field name="regime" type="string — one of: risk-on, risk-off, volatile, rotation, neutral"/>
+            <field name="description" type="string"/>
+            <field name="triggeredBy" type="string — quantitative threshold expression that matched"/>
+            <field name="lastUpdated" type="string (ISO 8601)"/>
+            <field name="generated_at" type="string (ISO 8601)"/>
+            <field name="data_as_of" type="string (YYYY-MM-DD)"/>
+            <field name="signals" type="object">
+              <subfield name="momentum" type="{value: number (0-100, avg RSI across equities/bonds/commodities), label: string, change: number, breakdown: {equities, bonds, commodities: number}}"/>
+              <subfield name="volatility" type="{value: number (0-100 inverted vol score), label: string, change: number, raw: {annualized_pct: number, score: number}}"/>
+              <subfield name="correlation" type="{value: number (0-100 inverted equity-bond correlation), label: string, change: number, raw: number (raw correlation -1 to +1)}"/>
+              <subfield name="rateRegime" type="{value: number (0-100 yield curve score), label: string, change: number, raw: {spread_pct: number, spread_change_pct: number}}"/>
+            </field>
+            <field name="history" type="array of {date: string, regime: string, signals: {momentum, volatility, correlation, rateRegime: number}} — rolling 252 entries (1 year)"/>
+            <field name="periodStats" type="object keyed by 90D, 1Y, 3Y, 5Y — each value: {momentum, volatility, correlation, rateRegime: {value, percentile, previous_percentile, change, breakdown/raw_vol/raw_corr/spread: varies}}"/>
+            <field name="regimeThresholds" type="object keyed by regime name — quantitative threshold definitions"/>
+          </response_shape>
+          <response_shape_history_file>
+            <!-- From generate_historical_time_series() return dict, lambda_function.py:1031-1041 -->
+            <field name="generated_at" type="string (ISO 8601)"/>
+            <field name="data_as_of" type="string (YYYY-MM-DD)"/>
+            <field name="timeSeries" type="object — {momentum: [{date, value, raw: {equities, bonds, commodities: number}}], volatility: [{date, value, raw: {realized_vol: number}}], correlation: [{date, value, raw: {correlation: number}}], rateRegime: [{date, value, raw: {spread_bps, yield_2y, yield_10y: number}}]} — all arrays descending (newest first)"/>
+            <field name="regimeHistory" type="array of {date: string, regime: string} — descending"/>
+          </response_shape_history_file>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/market.ts</file>
+            <function>getMarketRegime — fetches /api/general/json/market/market-regime.json (~1 KB)</function>
+            <function>getMarketRegimeHistory — fetches /api/general/json/market/market-regime-history.json (~480 KB)</function>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 7: CNN Fear and Greed Index -->
+        <source id="MP-7">
+          <name>fear-greed-fetcher</name>
+          <lambda_function>fear-greed-fetcher</lambda_function>
+          <actual_source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/fear-greed-fetcher/lambda_function.py</actual_source_path>
+          <trigger>EventBridge schedule (exact cron not in source; portal comments state "updated hourly")</trigger>
+          <upstream_api>CNN Fear and Greed Index direct API: https://production.dataviz.cnn.io/index/fearandgreed/graphdata</upstream_api>
+          <s3_output_key_pattern>json/sentiment/fear-greed-index.json</s3_output_key_pattern>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <!-- From output_data dict in lambda_handler(), lambda_function.py:255-274 -->
+            <field name="current" type="object — {value: number (0-100), description: string (rating), last_update: string (ISO 8601), previous_close: number, previous_1_week: number, previous_1_month: number, previous_1_year: number, components: {7 keys, each: {score: number, rating: string, name: string, description: string, historical: [{date: string, value: number, rating: string}] (90-day max)}}}"/>
+            <field name="historical" type="array of {date: string, value: number (0-100), description: string} — 90-day rolling max, descending"/>
+            <field name="generated_at" type="string (ISO 8601)"/>
+            <field name="source" type="string — value: 'CNN Fear &amp; Greed Index (direct API)'"/>
+            <field name="scale" type="object — {extreme_fear: '0-24', fear: '25-44', neutral: '45-55', greed: '56-75', extreme_greed: '76-100'}"/>
+            <field name="components_info" type="object — 7 keys mapping component id to {name, description}"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/sentiment.ts</file>
+            <function>getFearGreedIndex and getFearGreedIndexWithDetails — both fetch /api/general/sentiment/fear-greed-index.json (same file, components data included)</function>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 8: VIX and MOVE Volatility Indices -->
+        <source id="MP-8">
+          <name>opal-portal-volatility-fetcher</name>
+          <lambda_function>opal-portal-volatility-fetcher</lambda_function>
+          <actual_source_path>infra/aws/lambda/v2_portal/07_macroeconomics/lambdas/opal-portal-volatility-fetcher/lambda_function.py</actual_source_path>
+          <trigger>EventBridge schedule — cron(30 12 ? * MON-FRI *), 7:30 AM ET weekdays only</trigger>
+          <upstream_api>FRED API (VIXCLS series, 35 years), Yahoo Finance (^MOVE ticker, 35 years)</upstream_api>
+          <s3_output_key_pattern>json/macro/volatility_data.json</s3_output_key_pattern>
+          <s3_output_key_pattern_legacy>json/macro/vix_data.json</s3_output_key_pattern_legacy>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <!-- From result dict in lambda_handler(), lambda_function.py:450-480 -->
+            <field name="generated_at" type="string (ISO 8601 with Z suffix)"/>
+            <field name="data_as_of" type="string (YYYY-MM-DD)"/>
+            <field name="data_sources" type="object — {vix: 'FRED VIXCLS', move: 'Yahoo Finance ^MOVE'}"/>
+            <field name="vix" type="object — {current: {current: number, regime: string (Low|Below Normal|Normal|Elevated|Extreme), percentile: number (1-99), change1D: number, change1W: number, change1M: number}, percentiles: {p10, p25, p50, p75, p90: number}, historical: [{date: string, value: number, regime: string}] (35 years), ai_summary: string (markdown text)}"/>
+            <field name="move" type="object — same shape as vix"/>
+            <field name="regime_colors" type="object — {Low: string, Below Normal: string, Normal: string, Elevated: string, Extreme: string} (hex colors)"/>
+            <field name="regimes" type="object — legacy VIX and MOVE absolute-threshold regime definitions"/>
+          </response_shape>
+          <portal_endpoint>
+            <note>No direct function found in the portal endpoint files read (sentiment.ts, market.ts). Wiring to portal page not confirmed from source code. Endpoint is available at /api/general/json/macro/volatility_data.json via CloudFront.</note>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 9: News Article Sentiment Aggregation -->
+        <source id="MP-9">
+          <name>news-trending-analysis (EC2 pipeline stage)</name>
+          <lambda_function>N/A — EC2-based pipeline (news_trending_analysis Lambda orchestrates; actual aggregation in EC2)</lambda_function>
+          <actual_source_path>infra/aws/lambda/news_trending_analysis/lambda_function.py (Lambda orchestrator; full file is 71 KB, truncated)</actual_source_path>
+          <trigger>EventBridge — daily at ~5:00 PM ET (after final ingestion at 4:45 PM)</trigger>
+          <dynamodb_input>opal-news-articles (PK: article_date, SK: url_hash — last 7 days)</dynamodb_input>
+          <s3_output_key_pattern>json/sentiment/articles.json</s3_output_key_pattern>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <!-- Inferred from getMarketSentimentHistorical() in sentiment.ts:272-277 -->
+            <field name="sentiment_breakdown" type="object — {Bullish: number, Bearish: number, Neutral: number} (article counts)"/>
+            <field name="total_articles" type="number"/>
+            <field name="generated_at" type="string (ISO 8601)"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/sentiment.ts</file>
+            <function>getMarketSentimentHistorical — fetches /api/general/sentiment/articles.json; portal uses localStorage to cache prior-day data for day-over-day comparison</function>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 10: Keyword FinBERT Sentiments (TopicCloud, SentimentPanel) -->
+        <source id="MP-10">
+          <name>news_trending_analysis + finbert_batch_processor (keyword-sentiments.json)</name>
+          <lambda_function>finbert_batch_processor (orchestrator) + opal-news-ai-sentiment (scorer)</lambda_function>
+          <actual_source_path_orchestrator>infra/aws/lambda/finbert_batch_processor/lambda_function.py</actual_source_path_orchestrator>
+          <actual_source_path_scorer>Not found in local repo — opal-news-ai-sentiment Lambda has no source directory under infra/aws/lambda/</actual_source_path_scorer>
+          <trigger>EventBridge after news ingestion completes</trigger>
+          <dynamodb_input>opal-news-articles (articles missing sentiment_finbert, last 7 days)</dynamodb_input>
+          <s3_output_key_pattern>json/sentiment/keyword-sentiments.json</s3_output_key_pattern>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <!-- From getKeywordFinBERTSentimentsWithTimestamp() type in sentiment.ts:497-500, and KeywordFinBERTSentiment interface -->
+            <field name="keywords" type="array of {keyword: string, sentiment: number (-1 to +1 avg FinBERT), count: number, bullish?: number, bearish?: number, neutral?: number, reasoning?: string, bullish_evidence?: string[], bearish_evidence?: string[]}"/>
+            <field name="generated_at" type="string (ISO 8601)"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/sentiment.ts</file>
+            <function>getKeywordFinBERTSentimentsWithTimestamp / getKeywordFinBERTSentiments — fetches /api/general/sentiment/keyword-sentiments.json</function>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 11: Keyword Intelligence (GPT-powered per-keyword analysis) -->
+        <source id="MP-11">
+          <name>keyword-intelligence-generator</name>
+          <lambda_function>keyword-intelligence-generator</lambda_function>
+          <actual_source_path>infra/aws/lambda/keyword_intelligence_generator/lambda_function.py</actual_source_path>
+          <trigger>EventBridge — cron(50 14,21 * * ? *), 9:50 AM and 4:50 PM ET daily; runs 20 min after news-trending-analysis writes keyword-sentiments.json</trigger>
+          <s3_input>opal-data-portal-v2/json/sentiment/keyword-sentiments.json (top 20 keywords)</s3_input>
+          <dynamodb_input>opal-news-articles (legacy path: regex scan by keyword, 7-day window) OR pre-fetched articles embedded in keyword-sentiments.json (cluster/fast path)</dynamodb_input>
+          <dynamodb_output>opal-keyword-intelligence (PK: keyword string, SK: generated_date YYYY-MM-DD — full GPT intelligence response)</dynamodb_output>
+          <response_shape>
+            <!-- From result dict in compute_keyword_intelligence(), lambda_function.py:599-622 -->
+            <field name="keyword" type="string"/>
+            <field name="sentiment_score" type="number (avg FinBERT -1 to +1)"/>
+            <field name="sentiment_label" type="string — Bullish|Slightly Bullish|Neutral|Slightly Bearish|Bearish"/>
+            <field name="sentiment_pattern" type="string — breakout_driven|high_frequency_moderate|contrarian|low_confidence"/>
+            <field name="pattern_explanation" type="string (1-2 sentences)"/>
+            <field name="headline_summary" type="string (2-3 sentences WHY this sentiment)"/>
+            <field name="key_drivers" type="array of {type: BREAKOUT|TRENDING|HEADWIND, title: string, description: string, article_count: number, avg_sentiment_estimate: number, recency_label: string}"/>
+            <field name="counterarguments" type="string"/>
+            <field name="confidence" type="string — high|medium|low"/>
+            <field name="confidence_reason" type="string"/>
+            <field name="signal_conflict" type="object|absent — {detected: bool, bull_case, bear_case, resolution: string} — only present when bullish/bearish conflict detected"/>
+            <field name="web_enriched" type="boolean"/>
+            <field name="web_context_note" type="string"/>
+            <field name="web_queries" type="array of string"/>
+            <field name="article_count" type="number"/>
+            <field name="articles" type="array of {title, source, url, published, sentiment_finbert: number} — up to 50"/>
+            <field name="generated_at" type="string (ISO 8601 with Z)"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/sentiment.ts</file>
+            <function>getKeywordIntelligence(keyword) — POST /v1/sentiment/keyword-intelligence {keyword}; authenticated; 45s timeout; served live from portal_data_proxy Lambda reading opal-keyword-intelligence DynamoDB table</function>
+            <note>getKeywordSentimentHistorySummary and getKeywordSentimentHistoryArticles fetch tiered static JSON from S3: keyword-history-summary/{keyword}.json and keyword-history-articles/{keyword}.json; these are produced by keyword-drilldown-generator Lambda (not in task order scope)</note>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 12: Trending Topics Static JSON (ExecutiveSummaryPanel) -->
+        <source id="MP-12">
+          <name>trending-topics-portal-publisher</name>
+          <lambda_function>trending-topics-portal-publisher</lambda_function>
+          <actual_source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/trending-topics-portal-publisher/lambda_function.py</actual_source_path>
+          <trigger>EventBridge — 2:40 PM ET daily (after Layer 3 GPT curation completes)</trigger>
+          <dynamodb_input>opal-news-trending-daily (PK: date, SK: topic_rank — finds latest date with data, up to 7 days back)</dynamodb_input>
+          <s3_output_key_pattern>json/trending/latest.json</s3_output_key_pattern>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <!-- From output dict in lambda_handler(), lambda_function.py:228-234; topic shape from transform_to_frontend_format() -->
+            <field name="generated_at" type="string (ISO 8601)"/>
+            <field name="data_as_of" type="string (YYYY-MM-DD)"/>
+            <field name="date" type="string (YYYY-MM-DD) — backward compat alias"/>
+            <field name="bullish" type="array of TrendingTopic objects — sorted by trending_rank asc"/>
+            <field name="bearish" type="array of TrendingTopic objects — sorted by trending_rank asc"/>
+            <subtype name="TrendingTopic">
+              <subfield name="topic" type="string (GPT headline)"/>
+              <subfield name="subtext" type="string (brief tagline)"/>
+              <subfield name="context" type="string (GPT analysis/initial_analysis)"/>
+              <subfield name="article_count" type="number"/>
+              <subfield name="sentiment_bull_bear" type="number — +0.6 for bullish topics, -0.6 for bearish (categorical)"/>
+              <subfield name="sentiment_confidence_fear" type="number (from DynamoDB sentiment.confidence_fear)"/>
+              <subfield name="sentiment_risk_appetite" type="number"/>
+              <subfield name="sentiment_positive_negative" type="number"/>
+              <subfield name="sentiment_emotional_intensity" type="number"/>
+              <subfield name="top_sources" type="array of string"/>
+              <subfield name="trending_rank" type="number — numeric rank within bullish or bearish list"/>
+              <subfield name="top_articles" type="array of {title, source, published, url, sentiment_finbert, opal_score, escalation_score}"/>
+            </subtype>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/market.ts</file>
+            <function>getTrendingTopicsStatic — fetches /api/general/trending/latest.json (~42 KB); alias getTrendingTopicsTiered is deprecated name</function>
+          </portal_endpoint>
+        </source>
+
+      </data_sources>
+
+      <data_freshness>
+        <item>Market overview returns (all-returns.json): updated by Yang pipeline trigger (daily after market close) or EventBridge fallback</item>
+        <item>RSI summary and time series: 2x daily (9:30 AM ET, 4:00 PM ET) via market-rsi-tiered-generator</item>
+        <item>Market regime: 2x daily (6:30 AM, 2:30 PM UTC) via market-regime-classifier</item>
+        <item>Fear and Greed: hourly via fear-greed-fetcher</item>
+        <item>Volatility (VIX/MOVE): weekdays at 7:30 AM ET via opal-portal-volatility-fetcher</item>
+        <item>News sentiment (articles.json): daily at ~5:00 PM ET</item>
+        <item>Keyword sentiments (keyword-sentiments.json): daily at ~5:15 PM ET</item>
+        <item>Keyword intelligence (DynamoDB): 2x daily at 9:50 AM and 4:50 PM ET</item>
+        <item>Trending topics (latest.json): daily at ~2:40 PM ET after Layer 3 GPT curation</item>
+        <item>Portal stale_time: 5 minutes (useMarketData hook)</item>
+      </data_freshness>
+    </page>
+
+    <!-- ----------------------------------------------------------------
+         CausalityEngine
+         ---------------------------------------------------------------- -->
+    <page>
+      <name>CausalityEngine</name>
+      <rd_agent>0.1.2_RD_CausalityEngine</rd_agent>
+      <directory>portal/src/pages/CausalityEngine/</directory>
+
+      <data_sources>
+
+        <!-- Source 1: Themes (Discovery Tab bubble data) -->
+        <source id="CE-1">
+          <name>causality-themes-fetcher</name>
+          <lambda_function>causality-themes-fetcher</lambda_function>
+          <actual_source_path>infra/aws/lambda/causality_themes_fetcher/lambda_function.py</actual_source_path>
+          <trigger>API Gateway (on-demand GET request from Discovery tab)</trigger>
+          <s3_input>opal-data-news-av bucket — daily_summaries/{year}/{month}/{date}_summary.json OR daily_summaries/{date}_summary.json OR summaries/{date}.json (tries all patterns, up to N days back)</s3_input>
+          <upstream_api>Alpha Vantage API — GLOBAL_QUOTE (current price/volume) and TIME_SERIES_INTRADAY (15-min bars, 5 days) per ticker; key from Secrets Manager opal/external-apis</upstream_api>
+          <s3_output_key_pattern>None — response is returned directly via API Gateway (no S3 persistence)</s3_output_key_pattern>
+          <response_shape>
+            <!-- From success_response() return in lambda_handler(), lambda_function.py:91-99 -->
+            <field name="themes" type="array of Theme objects"/>
+            <field name="total_count" type="number"/>
+            <field name="filters" type="object — {days: number, sector: string, sentiment: string}"/>
+            <subtype name="Theme">
+              <subfield name="theme_id" type="string — format: THEME-{YYYYMMDD}-{TICKER}-{KEYWORD_UPPER}"/>
+              <subfield name="topic" type="object — {headline, raw_keyword, article_count, sentiment: number (-1 to +1), sentiment_label, top_tickers: string[], sources: string[], top_articles: [{title, source, published, url}], date: string}"/>
+              <subfield name="tickers" type="array (up to 3) of {ticker, company_name, current_price, price_change_pct, price_change_dollars, volume, volume_vs_avg, rsi: number, sma_20, sma_50, price_history: [{timestamp, price, volume}] (last 100 points)}"/>
+              <subfield name="sector" type="string — hardcoded map from ticker to sector (Technology, Finance, Index, Fixed Income, Consumer Cyclical, Communication Services)"/>
+              <subfield name="detected_at" type="string (ISO 8601)"/>
+              <subfield name="date_range" type="object — {start: string, end: string (YYYY-MM-DD)}"/>
+              <subfield name="relevance_score" type="number — (article_count * 0.4) + (|price_change_pct| * 20 * 0.4) + (|sentiment| * 100 * 0.2)"/>
+            </subtype>
+            <note>Portal Discovery tab uses 'movements' field name for backward compatibility per Tab1_Discovery.tsx:33 comment; themes is the current field name</note>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/causality-endpoints.ts</file>
+            <function>causalityApi.getThemes — GET /causality/themes?days=7&amp;sector=all&amp;sentiment=all&amp;limit=20; base URL from VITE_CAUSALITY_API_URL or /causality</function>
+            <consumed_by>useFilteredThemes via useThemes hook in useCausalityApi.ts:58; renders ThemeBubbleGalaxy</consumed_by>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 2: Thematic Signals (top 3 daily signals) -->
+        <source id="CE-2">
+          <name>causality-thematic-signals-generator</name>
+          <lambda_function>causality-thematic-signals-generator</lambda_function>
+          <actual_source_path>infra/aws/lambda/causality_thematic_signals_generator/lambda_function.py</actual_source_path>
+          <trigger>EventBridge — daily at 6:00 AM ET (per causality-endpoints.ts:44 comment)</trigger>
+          <s3_output_key_pattern>unknown — not in task order Lambda list; source path found in glob but not read</s3_output_key_pattern>
+          <response_shape>
+            <note>Shape not confirmed — source file causality_thematic_signals_generator/lambda_function.py was not in the task order reading list and was not read. Shape can be inferred from GetThematicSignalsResponse portal type but that type file was not read.</note>
+            <field name="signals" type="array (top 3) of daily thematic signals with theme and price impact — exact schema unknown"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/causality-endpoints.ts</file>
+            <function>causalityApi.getThematicSignals — GET /causality/thematic-signals?date={date}</function>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 3: AI Analysis Generation -->
+        <source id="CE-3">
+          <name>causality-analysis-generator</name>
+          <lambda_function>causality-analysis-generator</lambda_function>
+          <actual_source_path>infra/aws/lambda/causality_analysis_generator/lambda_function.py</actual_source_path>
+          <trigger>API Gateway (on-demand POST from Generate tab — currently stubbed in portal)</trigger>
+          <upstream_api>OpenAI GPT-4-turbo-preview — generates structured JSON analysis from theme context; key from Secrets Manager opal/external-apis</upstream_api>
+          <dynamodb_output>causality-generations (PK: generation_id format ANALYSIS-{YYYYMMDD-HHMMSS}; audit trail with 365-day TTL)</dynamodb_output>
+          <response_shape>
+            <!-- From generate_analysis() return dict, lambda_function.py:152-157 and GPT prompt schema -->
+            <field name="analysis_id" type="string (UUID)"/>
+            <field name="title" type="string"/>
+            <field name="summary" type="string (300-400 words, 2-3 paragraphs)"/>
+            <field name="catalysts" type="array of string"/>
+            <field name="price_impact" type="object — {summary: string, volume_analysis: string, technical_assessment: string}"/>
+            <field name="technical_summary" type="object — {rsi: number, sma_20_assessment: string, pattern: string}"/>
+            <field name="created_at" type="string (ISO 8601)"/>
+            <field name="themes_analyzed" type="number"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/causality-endpoints.ts</file>
+            <function>causalityApi.generateAnalysis — POST /causality/generate-analysis {theme_ids: string[], themes: object[]}</function>
+            <note>Tab2_Generate.tsx is currently STUBBED — this endpoint is not yet called from the portal</note>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 4: AI Query Handler (correlation questions) -->
+        <source id="CE-4">
+          <name>causality-ai-query-handler</name>
+          <lambda_function>causality-ai-query-handler</lambda_function>
+          <actual_source_path>infra/aws/lambda/causality_ai_query_handler/lambda_function.py</actual_source_path>
+          <trigger>API Gateway (on-demand POST)</trigger>
+          <upstream_api>OpenAI GPT-4-turbo-preview — answers correlation/causality questions given movements context; key from Secrets Manager opal/external-apis</upstream_api>
+          <s3_output_key_pattern>None — response returned directly via API Gateway</s3_output_key_pattern>
+          <response_shape>
+            <!-- From success_response() in lambda_function.py:122, based on GPT prompt JSON schema -->
+            <field name="answer" type="string"/>
+            <field name="confidence" type="number (0-100)"/>
+            <field name="sources" type="array of string"/>
+            <field name="explanation" type="string"/>
+          </response_shape>
+          <portal_endpoint>
+            <note>No direct endpoint function in causality-endpoints.ts matches /query path; this Lambda is likely invoked via an unlisted route. Not confirmed as active in portal.</note>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 5: Market Update Bullet Generator -->
+        <source id="CE-5">
+          <name>causality-market-update-generator</name>
+          <lambda_function>causality-market-update-generator</lambda_function>
+          <actual_source_path>infra/aws/lambda/causality_market_update_generator/lambda_function.py</actual_source_path>
+          <trigger>API Gateway (on-demand POST from MarketUpdate page via /causality/market-update)</trigger>
+          <upstream_api>OpenAI GPT-4-turbo-preview — generates market update bullet text per movement</upstream_api>
+          <dynamodb_output>causality-generations (PK: generation_id format GEN-{YYYYMMDD-HHMMSS}; 365-day TTL)</dynamodb_output>
+          <response_shape>
+            <!-- From success_response() in lambda_function.py:150 -->
+            <field name="market_updates" type="array of {ticker: string, movement_id: string, bullet: string (2-3 sentence professional text), sentiment: string, article_count: number, price_change_pct: number, generated_at: string}"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/causality-endpoints.ts</file>
+            <function>causalityApi.generateMarketUpdate — POST /causality/market-update {movements: array, exactly 3 theme IDs}; returns S3 presigned download URL for PowerPoint/PDF</function>
+            <note>The Lambda source generates bullet text but the endpoint comment says it returns a presigned URL — there may be a mismatch or a wrapper Lambda that handles PowerPoint generation. Tab2_History.tsx and Tab2_Generate.tsx are STUBBED.</note>
+          </portal_endpoint>
+        </source>
+
+        <!-- Source 6: History Manager -->
+        <source id="CE-6">
+          <name>causality-history-manager</name>
+          <lambda_function>causality-history-manager</lambda_function>
+          <actual_source_path>infra/aws/lambda/causality_history_manager/lambda_function.py</actual_source_path>
+          <trigger>API Gateway (on-demand GET/POST/DELETE/PATCH for History tab)</trigger>
+          <dynamodb_output>Unknown table name — source file not read (was not in task order reading list)</dynamodb_output>
+          <response_shape>
+            <note>Source file causality_history_manager/lambda_function.py was found in glob but not in task order reading list and was not read. Shape unknown beyond what portal types imply.</note>
+            <field name="saved_analyses" type="array (on GET /history) — pagination with optional filters date_from, date_to, search, limit, offset"/>
+            <field name="saved_analysis_id" type="string (on POST /save-analysis) — returned as confirmation"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/causality-endpoints.ts</file>
+            <function>causalityApi.saveAnalysis — POST /causality/save-analysis</function>
+            <function>causalityApi.getHistory — GET /causality/history</function>
+            <function>causalityApi.deleteAnalysis — DELETE /causality/analysis/{id}</function>
+            <function>causalityApi.updateNotes — PATCH /causality/analysis/{id}/notes</function>
+            <note>Tab2_History.tsx is STUBBED — these endpoints are not yet called from the portal</note>
+          </portal_endpoint>
+        </source>
+
+      </data_sources>
+
+      <data_freshness>
+        <item>Themes: on-demand per user request (API Gateway); looks back N days (default 7) in opal-data-news-av S3</item>
+        <item>Thematic signals: pre-computed daily at 6:00 AM ET</item>
+        <item>Analysis generation: on-demand via GPT-4 (~2-5s latency)</item>
+        <item>History: on-demand DynamoDB read</item>
+        <item>Portal cache: 5 minutes (useThemes hook)</item>
+      </data_freshness>
+    </page>
+
+    <!-- ----------------------------------------------------------------
+         MarketUpdate
+         ---------------------------------------------------------------- -->
+    <page>
+      <name>MarketUpdate</name>
+      <rd_agent>0.1.2_RD_CausalityEngine</rd_agent>
+      <directory>portal/src/pages/MarketUpdate/</directory>
+
+      <data_sources>
+
+        <source id="MU-1">
+          <name>market-update-data-aggregator (topics, earnings, macro events)</name>
+          <lambda_function>market-update-data-aggregator</lambda_function>
+          <actual_source_path>infra/aws/lambda/market_update_data_aggregator/lambda_function.py</actual_source_path>
+          <trigger>API Gateway (on-demand GET requests from Tab 1)</trigger>
+          <s3_output_key_pattern>unknown — source file found in glob but not read; assumed in-memory API Gateway response</s3_output_key_pattern>
+          <response_shape>
+            <note>Source file was found in glob (market_update_data_aggregator/lambda_function.py) but was not in the task order reading list. Shapes inferred from portal endpoint types in pod_inventory.xml only.</note>
+            <field name="topics" type="from /api/general/market-update/topics?days=14 — bullish/bearish Topic arrays"/>
+            <field name="earnings" type="from /api/general/market-update/earnings — Earning[] for next 7 days"/>
+            <field name="macro_events" type="from /api/general/market-update/macro-events — MacroEvent[] for next 7 days"/>
+            <field name="metrics" type="from /api/general/market-update/metrics — MarketMetric[] (S&amp;P 500, Nasdaq, VIX, 10Y Yield)"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/market-update.ts</file>
+            <function>marketUpdateApi.getTopics, getEarnings, getMacroEvents, getMetrics</function>
+            <consumed_by>useTopics hook (useMarketUpdateData.ts:13), Tab1_SelectTopics</consumed_by>
+          </portal_endpoint>
+        </source>
+
+        <source id="MU-2">
+          <name>market-update-generator (GPT-4 content generation)</name>
+          <lambda_function>market-update-generator</lambda_function>
+          <actual_source_path>infra/aws/lambda/market_update_generator/lambda_function.py</actual_source_path>
+          <trigger>API Gateway (on-demand POST from Tab 2 Generate button)</trigger>
+          <upstream_api>OpenAI GPT-4 — generates section1[], section2[], section3[]</upstream_api>
+          <response_shape>
+            <note>Source file found in glob but not read. Shape inferred from portal endpoint comment only.</note>
+            <field name="section1" type="array of string (bullet points)"/>
+            <field name="section2" type="array of string"/>
+            <field name="section3" type="array of string"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/market-update.ts</file>
+            <function>marketUpdateApi.generateContent — POST /api/general/market-update/generate</function>
+            <function>marketUpdateApi.regenerateSection — POST /api/general/market-update/regenerate</function>
+          </portal_endpoint>
+        </source>
+
+        <source id="MU-3">
+          <name>market-update-exporter (save + PowerPoint export)</name>
+          <lambda_function>market-update-exporter</lambda_function>
+          <actual_source_path>infra/aws/lambda/market_update_exporter/lambda_function.py</actual_source_path>
+          <trigger>API Gateway (on-demand POST from Tab 3)</trigger>
+          <dynamodb_output>DynamoDB (draft storage; returns draftId)</dynamodb_output>
+          <s3_output_key_pattern>Unknown — generates PowerPoint and returns presigned S3 download URL</s3_output_key_pattern>
+          <response_shape>
+            <note>Source file found in glob but not read. Shape inferred from portal endpoint comments only.</note>
+            <field name="draftId" type="string (from /save endpoint)"/>
+            <field name="downloadUrl" type="string (S3 presigned URL from /export endpoint)"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/endpoints/market-update.ts</file>
+            <function>marketUpdateApi.saveDraft — POST /api/general/market-update/save</function>
+            <function>marketUpdateApi.exportToPowerPoint — POST /api/general/market-update/export</function>
+          </portal_endpoint>
+        </source>
+
+      </data_sources>
+
+      <data_freshness>
+        <item>Topics: on-demand, 14-day lookback; 10-minute cache</item>
+        <item>Content generation: on-demand via GPT-4 (~5-15s)</item>
+        <item>Export: on-demand</item>
+      </data_freshness>
+    </page>
+
+    <!-- ----------------------------------------------------------------
+         CapitalMarketAssumptions
+         ---------------------------------------------------------------- -->
+    <page>
+      <name>CapitalMarketAssumptions</name>
+      <rd_agent>0.1.3_RD_CapitalMarketAssumptions</rd_agent>
+      <directory>portal/src/pages/CapitalMarketAssumptions/</directory>
+
+      <data_sources>
+
+        <source id="CMA-1">
+          <name>yang-generate-cma (CMA assumptions)</name>
+          <lambda_function>yang-generate-cma</lambda_function>
+          <actual_source_path>infra/aws/lambda/v2_portal/yang_pipeline/cma/yang-generate-cma/lambda_function.py</actual_source_path>
+          <trigger>Yang pipeline (EventBridge or S3-triggered step in yang orchestration)</trigger>
+          <s3_output_key_pattern>Exact key unknown — served at /api/general/capital-markets/assumptions.json via CloudFront</s3_output_key_pattern>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <note>Source file was found but not read (not in task order scope). Shape unknown. Portal fetches raw JSON and passes to CMA components (collapsible table for 5 asset class categories, bar chart for expected returns, volatility diamonds).</note>
+            <field name="assumptions" type="unknown — 5 asset class categories with 10-year expected return and volatility data; exact schema requires reading yang-generate-cma lambda_function.py"/>
+            <field name="asOfDate" type="string — used by useYangDataAsOf hook for data registration"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/portal-proxy.ts</file>
+            <function>getCMAAssumptions — GET /api/general/capital-markets/assumptions.json (demo mode: public endpoint, no auth; TODO: revert to authenticated shared endpoint)</function>
+            <consumed_by>CapitalMarketAssumptions.tsx:32-35 via useQuery(getCMAAssumptions)</consumed_by>
+          </portal_endpoint>
+        </source>
+
+        <source id="CMA-2">
+          <name>yang-generate-cma (Opal Views)</name>
+          <lambda_function>yang-generate-cma (likely same Lambda, separate output key)</lambda_function>
+          <actual_source_path>infra/aws/lambda/v2_portal/yang_pipeline/cma/yang-generate-cma/lambda_function.py</actual_source_path>
+          <trigger>Yang pipeline (same run as CMA-1)</trigger>
+          <s3_output_key_pattern>Exact key unknown — served at /api/general/capital-markets/views.json via CloudFront</s3_output_key_pattern>
+          <s3_bucket>opal-data-portal-v2</s3_bucket>
+          <response_shape>
+            <note>Source file not read. Shape unknown. Portal renders GradientSlider and ConvergingSlider components for Overall, Equity, Fixed Income views; split/combined display toggle.</note>
+            <field name="views" type="unknown — strategic/tactical allocation views across asset classes; exact schema requires reading yang-generate-cma lambda_function.py"/>
+            <field name="asOfDate" type="string — used by useYangDataAsOf hook"/>
+          </response_shape>
+          <portal_endpoint>
+            <file>portal/src/api/portal-proxy.ts</file>
+            <function>getOpalViews — GET /api/general/capital-markets/views.json (demo mode: public endpoint, no auth; TODO: revert to authenticated shared endpoint)</function>
+            <consumed_by>CapitalMarketAssumptions.tsx via parallel useQuery(getOpalViews)</consumed_by>
+          </portal_endpoint>
+        </source>
+
+      </data_sources>
+
+      <data_freshness>
+        <item>CMA and Views: updated by Yang pipeline after new PKL data ingest (weekly cadence typical)</item>
+        <item>CloudFront edge cache: 60 minutes (pod_inventory.xml)</item>
+      </data_freshness>
+    </page>
+
+  </page_contracts>
+
+  <!-- ====================================================================
+       SHARED DATA SOURCES
+       ==================================================================== -->
+  <shared_data_sources>
+
+    <shared_source name="DynamoDB opal-portal-market-data">
+      <consumed_by>MP-1 (market-overview-tiered-generator Tier 1), MP-2 (Tier 2), MP-3 (market-rsi-tiered-generator RSI), MP-4 (RSI Tier 2), MP-5 (time series)</consumed_by>
+      <description>Primary market data store. PK: ticker_id (format ENTITY_TYPE#name), SK: LATEST or DAILY#YYYY-MM-DD. Contains daily_return field (total return with dividends) and price field. Entity types: INDEX, ETF, BOND_INDEX, CREDIT, YIELD, COMMODITY, VOLATILITY.</description>
+    </shared_source>
+
+    <shared_source name="DynamoDB opal-news-articles">
+      <consumed_by>MP-9 (news sentiment articles.json), MP-10 (finbert_batch_processor), MP-11 (keyword-intelligence-generator legacy path)</consumed_by>
+      <description>News article store. PK: article_date (YYYY-MM-DD), SK: url_hash. Key fields: title, summary, source, url, published, sentiment_finbert (float -1 to +1), sentiment_finbert_label, sentiment_finbert_confidence.</description>
+    </shared_source>
+
+    <shared_source name="DynamoDB opal-news-trending-daily">
+      <consumed_by>MP-12 (trending-topics-portal-publisher)</consumed_by>
+      <description>Layer 3 GPT-curated trending topics. PK: date (YYYY-MM-DD), SK: topic_rank (format bullish-1, bearish-1, etc.). Contains headline, subtext, analysis, article_count, sources, top_articles, sentiment object.</description>
+    </shared_source>
+
+    <shared_source name="S3 opal-data-portal-v2">
+      <consumed_by>All Lambda outputs above; market-regime-classifier reads timeseries files from this bucket as input</consumed_by>
+      <description>Primary portal data bucket. CloudFront distribution ID: EVTSA9VEHNZVH. Key namespaces: json-tiered/market-overview/, json/market/, json/sentiment/, json/macro/, json/trending/.</description>
+    </shared_source>
+
+    <shared_source name="S3 opal-data-portal-v2 json/sentiment/keyword-sentiments.json">
+      <consumed_by>MP-10 (keyword sentiment display), MP-11 (keyword-intelligence-generator reads this as input)</consumed_by>
+      <description>Pre-computed keyword FinBERT sentiment aggregates. Written by news_trending_analysis pipeline. Read by keyword-intelligence-generator as the keyword list to process.</description>
+    </shared_source>
+
+    <shared_source name="Secrets Manager opal/external-apis">
+      <consumed_by>CE-1 (Alpha Vantage key), CE-3/CE-4/CE-5 (OpenAI key), MP-8 (FRED API key)</consumed_by>
+      <description>Centralized external API key store. Keys: alpha_vantage_api_key, openai_api_key, FRED_API_KEY.</description>
+    </shared_source>
+
+    <shared_source name="Secrets Manager opal/openai/news-trending">
+      <consumed_by>MP-11 (keyword-intelligence-generator uses separate OpenAI secret)</consumed_by>
+      <description>OpenAI key for news pipeline GPT calls. Separate from opal/external-apis OpenAI key used by Causality Engine.</description>
+    </shared_source>
+
+    <shared_source name="DynamoDB causality-generations">
+      <consumed_by>CE-3 (causality-analysis-generator writes audit trail), CE-5 (causality-market-update-generator writes audit trail)</consumed_by>
+      <description>Audit trail for GPT-generated content. PK: generation_id (format ANALYSIS-YYYYMMDD-HHMMSS or GEN-YYYYMMDD-HHMMSS). TTL: 365 days.</description>
+    </shared_source>
+
+  </shared_data_sources>
+
+  <!-- ====================================================================
+       UPSTREAM DEPENDENCIES
+       ==================================================================== -->
+  <upstream_dependencies>
+
+    <dependency name="Yang Pipeline (PKL data)">
+      <used_by>MarketPerformance (all-returns.json trigger), CapitalMarketAssumptions (CMA and Views)</used_by>
+      <description>Weekly PKL file ingest from Opal Capital internal systems. Yang pipeline processes PKL → DynamoDB opal-portal-market-data. Triggers market-overview-tiered-generator after yang-ingest-dynamodb step. Also produces CMA and Views JSON via yang-generate-cma.</description>
+    </dependency>
+
+    <dependency name="CNN Fear and Greed Index API">
+      <used_by>MP-7 (fear-greed-fetcher)</used_by>
+      <endpoint>https://production.dataviz.cnn.io/index/fearandgreed/graphdata</endpoint>
+      <description>Direct CNN API. No API key required. Returns composite F&amp;G score plus 7 component indicators with historical time series. Bot detection mitigated with browser-like headers.</description>
+    </dependency>
+
+    <dependency name="FRED API (Federal Reserve Economic Data)">
+      <used_by>MP-8 (opal-portal-volatility-fetcher — VIX via VIXCLS series), MP-6 (market-regime-classifier reads macro timeseries produced by yang-generate-macro-timeseries)</used_by>
+      <description>FRED REST API. API key from Secrets Manager. VIX (VIXCLS): 35 years daily. Yield curve data (2Y, 10Y) is produced by yang-generate-macro-timeseries into S3 json/macro/timeseries/.</description>
+    </dependency>
+
+    <dependency name="Yahoo Finance (yfinance)">
+      <used_by>MP-8 (opal-portal-volatility-fetcher — MOVE index via ^MOVE ticker)</used_by>
+      <description>yfinance Python library. No API key required. MOVE (^MOVE): 35 years daily ICE BofA MOVE Index data.</description>
+    </dependency>
+
+    <dependency name="Alpha Vantage API">
+      <used_by>CE-1 (causality-themes-fetcher — per-ticker quotes and intraday bars)</used_by>
+      <description>REST API. Key from Secrets Manager opal/external-apis. Provides GLOBAL_QUOTE (current price) and TIME_SERIES_INTRADAY (15-min bars). Rate limits constrain to top 3 tickers per theme.</description>
+    </dependency>
+
+    <dependency name="OpenAI API (GPT-4-turbo-preview and GPT-4o-mini)">
+      <used_by>CE-3 (causality-analysis-generator), CE-4 (causality-ai-query-handler), CE-5 (causality-market-update-generator), MP-11 (keyword-intelligence-generator), MU-2 (market-update-generator)</used_by>
+      <description>OpenAI chat completions API. GPT-4-turbo-preview for Causality Engine analysis/bullets/queries. GPT-4o-mini for keyword intelligence (lower cost, batch-friendly). Web search preview tool used in keyword intelligence for today-focused enrichment.</description>
+    </dependency>
+
+    <dependency name="S3 opal-data-news-av">
+      <used_by>CE-1 (causality-themes-fetcher reads daily_summaries)</used_by>
+      <description>News aggregation bucket. Contains daily_summaries/{year}/{month}/{date}_summary.json with top_topics array (topic, article_count, avg_sentiment, top_tickers, sources, articles).</description>
+    </dependency>
+
+    <dependency name="DynamoDB opal-keyword-intelligence">
+      <used_by>MP-11 (keyword-intelligence-generator writes here; portal_data_proxy reads for GET /v1/sentiment/keyword-intelligence)</used_by>
+      <description>Pre-computed GPT intelligence per keyword. PK: keyword (lowercase), SK: generated_date (YYYY-MM-DD). Enables instant modal loads instead of ~45s live GPT calls.</description>
+    </dependency>
+
+  </upstream_dependencies>
+
+  <!-- ====================================================================
+       DATA QUALITY NOTES
+       ==================================================================== -->
+  <data_quality_notes>
+
+    <note id="DQ-1" affects="MP-1 MP-2 MP-3 MP-4 MP-5">
+      <description>market-overview-tiered-generator uses total returns (daily_return field from DynamoDB) including dividends/distributions. Calendar date arithmetic (not trading days) for period calculations. Consistent with Yang pipeline benchmark returns. DAILY# entries exclude LATEST to prevent duplicate dates (fix applied 2026-01-13).</description>
+    </note>
+
+    <note id="DQ-2" affects="MP-6">
+      <description>market-regime-classifier reads timeseries files from S3 (written by market-rsi-tiered-generator). If timeseries files are stale, regime calculations use outdated return data. Yield curve uses monthly FRED data (433 points from 1990); linear interpolation fills gaps for daily regime history. As of 2026-02-26, a bug was fixed where the rolling percentile window was always empty (range(period, min(period,N)) = always empty).</description>
+    </note>
+
+    <note id="DQ-3" affects="MP-7">
+      <description>Fear and Greed component historical data uses raw underlying metrics (e.g., S&amp;P 500 price level for market_momentum, not a normalized 0-100 score). Deduplication by date applied 2026-02-17 to prevent duplicate entries when Lambda runs multiple times per day.</description>
+    </note>
+
+    <note id="DQ-4" affects="MP-8">
+      <description>Volatility fetcher runs weekdays only. Weekend VIX/MOVE values are not collected. Regime classification is percentile-based (35-year history) rather than absolute thresholds. Legacy absolute-threshold regimes (VIX_REGIMES, MOVE_REGIMES) kept in response for backward compatibility but percentile-based regime is canonical.</description>
+    </note>
+
+    <note id="DQ-5" affects="MP-9 MP-10">
+      <description>News sentiment (articles.json) uses a 7-day rolling window from opal-news-articles. Previous-day comparison in SentimentHistorical is client-side via localStorage (not server-computed); shows flat change on first load or when localStorage is unavailable.</description>
+    </note>
+
+    <note id="DQ-6" affects="MP-11">
+      <description>keyword-intelligence-generator is idempotent — skips keywords already written for today. Continues on per-keyword errors (one failure never aborts the batch). opal-news-ai-sentiment Lambda (FinBERT scorer) source not found in local repo under infra/aws/lambda/; likely managed separately or deployed without a local source directory.</description>
+    </note>
+
+    <note id="DQ-7" affects="CE-1">
+      <description>causality-themes-fetcher requires Alpha Vantage API key. If key is unavailable, all ticker enrichment returns None and themes with no ticker data are excluded entirely. Effectively filters out themes with no associated equities. Sector mapping is a hardcoded dict of ~13 tickers — any ticker outside that map returns 'Unknown' sector.</description>
+    </note>
+
+    <note id="DQ-8" affects="CMA-1 CMA-2">
+      <description>CapitalMarketAssumptions uses demo-mode public endpoints (no auth) per portal-proxy.ts:1168 and :1210. TODOs exist to revert to authenticated shared endpoints for production. CMA data freshness depends on Yang pipeline cadence (typically weekly with new PKL uploads).</description>
+    </note>
+
+    <note id="DQ-9" affects="MarketPerformance">
+      <description>SentimentPanel wiring gap: pod_inventory.xml notes SentimentPanel may call sentiment.ts/yield-curve.ts directly or receive data through MarketData prop. Exact wiring not confirmed from source code; DE investigation of SentimentPanel.tsx is a first-priority open item. This data contract cannot fully specify SentimentPanel data sources without that read.</description>
+    </note>
+
+    <note id="DQ-10" affects="CausalityEngine">
+      <description>CausalityEngine MarketOverview.tsx:6 uses mock data for SPY, QQQ, VIX prices. Real API wiring is a pending DE task. Tab2_Generate.tsx and Tab2_History.tsx are fully STUBBED — causality-analysis-generator and causality-history-manager endpoints are not active in portal.</description>
+    </note>
+
+  </data_quality_notes>
+
+  <!-- ====================================================================
+       GAPS
+       ==================================================================== -->
+  <gaps>
+
+    <gap id="GAP-1">
+      <page>MarketPerformance</page>
+      <description>SentimentPanel exact data wiring unknown. Pod inventory flags it as unconfirmed whether SentimentPanel fetches from sentiment.ts (getFearGreedIndex, getMarketSentimentHistorical) and yield-curve.ts directly, or receives all data as a prop through MarketData. This data contract documents MP-7, MP-9, MP-10 as candidate sources, but the actual call sites in SentimentPanel.tsx were not read.</description>
+    </gap>
+
+    <gap id="GAP-2">
+      <page>MarketPerformance</page>
+      <description>opal-portal-volatility-fetcher output (json/macro/volatility_data.json) is not confirmed as consumed by any portal endpoint function in sentiment.ts or market.ts. The Lambda exists and produces data but the portal wiring for VIX/MOVE display on MarketPerformance is unknown.</description>
+    </gap>
+
+    <gap id="GAP-3">
+      <page>MarketPerformance ExecutiveSummaryPanel</page>
+      <description>Trending topics source ambiguity. ExecutiveSummaryPanel may use getTrendingTopicsStatic from market.ts or the portal-proxy path via trending.ts. Pod inventory notes this as unconfirmed. This contract documents MP-12 (getTrendingTopicsStatic) as the most likely source based on pod_inventory.xml description of static CloudFront path.</description>
+    </gap>
+
+    <gap id="GAP-4">
+      <page>CapitalMarketAssumptions</page>
+      <description>yang-generate-cma output schema unknown. Source file infra/aws/lambda/v2_portal/yang_pipeline/cma/yang-generate-cma/lambda_function.py was found in glob but not read (outside task order reading list). CMA and Views response shapes documented as unknown pending DE read of this file.</description>
+    </gap>
+
+    <gap id="GAP-5">
+      <page>CausalityEngine</page>
+      <description>causality-thematic-signals-generator and causality-history-manager response shapes unknown. Source files exist in infra/aws/lambda/ but were not in the task order reading list. GetThematicSignalsResponse and GetHistoryResponse TypeScript types were not read (causality-api-types.ts not in scope).</description>
+    </gap>
+
+    <gap id="GAP-6">
+      <page>MarketUpdate</page>
+      <description>market-update-data-aggregator, market-update-generator, market-update-exporter response shapes are inferred from portal endpoint comments only — source files were found in glob but not in task order reading list. Exact DynamoDB table names for draft storage are unknown.</description>
+    </gap>
+
+    <gap id="GAP-7">
+      <page>All pages</page>
+      <description>opal-news-ai-sentiment Lambda (FinBERT scorer, invoked by finbert_batch_processor) has no source directory under infra/aws/lambda/. Glob search returned no match. This Lambda's runtime, trigger configuration, and internal response schema are undocumented in this contract.</description>
+    </gap>
+
+  </gaps>
+
+</data_contract>

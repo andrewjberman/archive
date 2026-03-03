@@ -6,7 +6,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.3.0_DT_TradingOperations</issued_to>
     <date>2026-03-02</date>
-    <status>pending</status>
+    <status>superseded</status>
   </metadata>
 
   <objective>
@@ -24,9 +24,9 @@
       <page>DataRefresh</page>
     </pages>
     <rd_agents>
-      <agent>0.0.10_RD_PortfolioManagement</agent>
-      <agent>0.0.11_RD_TradeSubmission</agent>
-      <agent>0.0.12_RD_DataRefresh</agent>
+      <agent>0.3.1_RD_PortfolioManagement</agent>
+      <agent>0.3.2_RD_TradeSubmission</agent>
+      <agent>0.3.3_RD_DataRefresh</agent>
     </rd_agents>
   </scope>
 
@@ -80,7 +80,7 @@ Write your audit using this structure:
   </metadata>
 
   <pages_served>
-    <page name="PortfolioManagement" rd_agent="0.0.10_RD_PortfolioManagement">
+    <page name="PortfolioManagement" rd_agent="0.3.1_RD_PortfolioManagement">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
@@ -88,7 +88,7 @@ Write your audit using this structure:
         Pipeline name, relevant scripts, S3 output paths
       </data_pipeline>
     </page>
-    <page name="TradeSubmission" rd_agent="0.0.11_RD_TradeSubmission">
+    <page name="TradeSubmission" rd_agent="0.3.2_RD_TradeSubmission">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
@@ -96,7 +96,7 @@ Write your audit using this structure:
         Pipeline name, relevant scripts, S3 output paths
       </data_pipeline>
     </page>
-    <page name="DataRefresh" rd_agent="0.0.12_RD_DataRefresh">
+    <page name="DataRefresh" rd_agent="0.3.3_RD_DataRefresh">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>

@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page_inventory>
+  <metadata>
+    <agent>0.1.2_RD_CausalityEngine</agent>
+    <pages>CausalityEngine, MarketUpdate</pages>
+    <directories>portal/src/pages/CausalityEngine/, portal/src/pages/MarketUpdate/</directories>
+    <audit_date>2026-03-02</audit_date>
+    <total_files>34</total_files>
+  </metadata>
+
+  <!-- ============================================================================
+       CAUSALITY ENGINE PAGE
+       ============================================================================ -->
+  <section name="CausalityEngine">
+    <files>
+      <file path="portal/src/pages/CausalityEngine/CausalityEngine.tsx" type="component">
+        Main page component with tab navigation (Discovery/History) and state management
+      </file>
+      <file path="portal/src/pages/CausalityEngine/types.ts" type="types">
+        TypeScript interfaces: Theme, ThematicSignal, Analysis, SavedAnalysis, Article, SeekingAlphaArticle, PricePoint, TickerPerformance, PriceImpact, TechnicalSummary
+      </file>
+      <file path="portal/src/pages/CausalityEngine/index.ts" type="export">
+        Barrel export for CausalityEngine component
+      </file>
+      <file path="portal/src/pages/CausalityEngine/mockData.ts" type="data">
+        Mock themes and analyses for development/testing
+      </file>
+      <file path="portal/src/pages/CausalityEngine/hooks/useCausalityApi.ts" type="hook">
+        React Query hooks: useThematicSignals, useThemes, useHistory, useAPIHealth, useGenerateAnalysis, useSaveAnalysis, useDeleteAnalysis, useUpdateNotes, useGenerateMarketUpdate, useFilteredThemes
+      </file>
+      <file path="portal/src/pages/CausalityEngine/hooks/useCausalityStore.ts" type="hook">
+        Zustand store for UI state: selected themes, filters, generation state, tab navigation, modal states
+      </file>
+      <file path="portal/src/pages/CausalityEngine/components/CausalityEngineHeader.tsx" type="component">
+        Container for MarketOverview and SystemDescription panels
+      </file>
+      <file path="portal/src/pages/CausalityEngine/components/FilterControls.tsx" type="component">
+        UI controls for time range, sentiment, and sector filtering with callback handlers
+      </file>
+      <file path="portal/src/pages/CausalityEngine/components/MarketOverview.tsx" type="component">
+        Displays mock market metrics (SPY, QQQ, VIX) with price and percent change
+      </file>
+      <file path="portal/src/pages/CausalityEngine/components/SystemDescription.tsx" type="component">
+        System description card explaining Causality Engine workflow
+      </file>
+      <file path="portal/src/pages/CausalityEngine/components/SelectedThemesPanel.tsx" type="component">
+        Displays 0-3 selected themes with sentiment badges, article counts, relevance scores
+      </file>
+      <file path="portal/src/pages/CausalityEngine/components/ThemeBubbleGalaxy/index.ts" type="export">
+        Barrel export for ThemeBubbleGalaxy and ThemeBubble components
+      </file>
+      <file path="portal/src/pages/CausalityEngine/components/ThemeBubbleGalaxy/ThemeBubbleGalaxy.tsx" type="component">
+        Interactive bubble galaxy visualization with position calculation, statistics, and legend
+      </file>
+      <file path="portal/src/pages/CausalityEngine/components/ThemeBubbleGalaxy/ThemeBubble.tsx" type="component">
+        Individual bubble component with sentiment colors, sizing by relevance, tooltip on hover
+      </file>
+      <file path="portal/src/pages/CausalityEngine/tabs/Tab1_Discovery.tsx" type="component">
+        Discovery tab with filters, bubble galaxy, and selected themes panel; fetches themes from API
+      </file>
+      <file path="portal/src/pages/CausalityEngine/tabs/Tab2_Generate.tsx" type="component">
+        Generate tab with mode selector (Trade Ideas/Market Update) - both currently stubbed
+      </file>
+      <file path="portal/src/pages/CausalityEngine/tabs/Tab2_History.tsx" type="component">
+        History tab stub - placeholder for saved analyses feature
+      </file>
+    </files>
+
+    <api_calls>
+      <api_call>
+        <hook>useThematicSignals</hook>
+        <endpoint>/causality/thematic-signals</endpoint>
+        <method>GET</method>
+        <request_shape>{ date?: string (YYYY-MM-DD) }</request_shape>
+        <response_shape>{ date: string, signals: ThematicSignal[], generated_at: string }</response_shape>
+        <file>portal/src/pages/CausalityEngine/hooks/useCausalityApi.ts:39</file>
+        <cache>1 hour</cache>
+      </api_call>
+      <api_call>
+        <hook>useThemes</hook>
+        <endpoint>/causality/themes</endpoint>
+        <method>GET</method>
+        <request_shape>{ days?: number, sentiment?: 'all'|'bullish'|'bearish', sector?: string, limit?: number }</request_shape>
+        <response_shape>{ themes: Theme[], total_count: number, filters_applied: object }</response_shape>
+        <file>portal/src/pages/CausalityEngine/hooks/useCausalityApi.ts:58</file>
+        <cache>5 minutes</cache>
+      </api_call>
+      <api_call>
+        <hook>useHistory</hook>
+        <endpoint>/causality/history</endpoint>
+        <method>GET</method>
+        <request_shape>{ user_id?: string, date_from?: string, date_to?: string, search?: string, limit?: number, offset?: number }</request_shape>
+        <response_shape>{ saved_analyses: SavedAnalysis[], total_count: number, page_size: number, offset: number }</response_shape>
+        <file>portal/src/pages/CausalityEngine/hooks/useCausalityApi.ts:77</file>
+        <cache>10 minutes</cache>
+      </api_call>
+      <api_call>
+        <hook>useAPIHealth</hook>
+        <endpoint>/causality/health</endpoint>
+        <method>GET</method>
+        <request_shape>{}</request_shape>
+        <response_shape>{ status: string, timestamp: string }</response_shape>
+        <file>portal/src/pages/CausalityEngine/hooks/useCausalityApi.ts:92</file>
+        <cache>30 seconds</cache>
+      </api_call>
+      <api_call>
+        <hook>useGenerateAnalysis (mutation)</hook>
+        <endpoint>/causality/generate-analysis</endpoint>
+        <method>POST</method>
+        <request_shape>{ theme_ids: string[], user_id?: string }</request_shape>
+        <response_shape>{ analysis: Analysis, generated_at: string, model: string, token_usage?: object }</response_shape>
+        <file>portal/src/pages/CausalityEngine/hooks/useCausalityApi.ts:114</file>
+      </api_call>
+      <api_call>
+        <hook>useSaveAnalysis (mutation)</hook>
+        <endpoint>/causality/save-analysis</endpoint>
+        <method>POST</method>
+        <request_shape>{ analysis: Analysis, notes?: string, tags?: string[], user_id?: string }</request_shape>
+        <response_shape>{ saved_analysis_id: string, saved_at: string, user_id: string }</response_shape>
+        <file>portal/src/pages/CausalityEngine/hooks/useCausalityApi.ts:141</file>
+      </api_call>
+      <api_call>
+        <hook>useDeleteAnalysis (mutation)</hook>
+        <endpoint>/causality/analysis/{saved_analysis_id}</endpoint>
+        <method>DELETE</method>
+        <request_shape>saved_analysis_id: string</request_shape>
+        <response_shape>{ success: boolean, deleted_id: string, deleted_at: string }</response_shape>
+        <file>portal/src/pages/CausalityEngine/hooks/useCausalityApi.ts:167</file>
+      </api_call>
+      <api_call>
+        <hook>useUpdateNotes (mutation)</hook>
+        <endpoint>/causality/analysis/{saved_analysis_id}/notes</endpoint>
+        <method>PATCH</method>
+        <request_shape>{ saved_analysis_id: string, request: { notes: string, tags?: string[] } }</request_shape>
+        <response_shape>{ success: boolean, saved_analysis_id: string, updated_at: string }</response_shape>
+        <file>portal/src/pages/CausalityEngine/hooks/useCausalityApi.ts:193</file>
+      </api_call>
+      <api_call>
+        <hook>useGenerateMarketUpdate (mutation)</hook>
+        <endpoint>/causality/market-update</endpoint>
+        <method>POST</method>
+        <request_shape>{ theme_ids: string[] (exactly 3), format: 'powerpoint'|'pdf', style: 'professional'|'detailed', user_id?: string }</request_shape>
+        <response_shape>{ market_update: object, export_url: string (S3 presigned), filename: string, generated_at: string, expires_at: string }</response_shape>
+        <file>portal/src/pages/CausalityEngine/hooks/useCausalityApi.ts:222</file>
+      </api_call>
+    </api_calls>
+
+    <shared_imports>
+      <import>
+        <from>portal/src/hooks/useTabNavigation</from>
+        <provides>useTabNavigation hook for tab state and callbacks</provides>
+        <used_in>CausalityEngine.tsx, Tab1_Discovery.tsx</used_in>
+      </import>
+      <import>
+        <from>portal/src/components/PageHeaderVariants</from>
+        <provides>PageHeaderCleanBadge component with icon, title, description</provides>
+        <used_in>CausalityEngine.tsx</used_in>
+      </import>
+      <import>
+        <from>portal/src/components/TabNavigation</from>
+        <provides>TabNavigation component for tab UI</provides>
+        <used_in>CausalityEngine.tsx</used_in>
+      </import>
+      <import>
+        <from>portal/src/components/Card</from>
+        <provides>Card, CardHeader, CardContent components</provides>
+        <used_in>MarketOverview.tsx, SystemDescription.tsx, SelectedThemesPanel.tsx, ThemeBubbleGalaxy.tsx, Tab2_Generate.tsx, Tab2_History.tsx</used_in>
+      </import>
+      <import>
+        <from>portal/src/api/endpoints/causality-endpoints</from>
+        <provides>causalityApi object with all endpoint methods</provides>
+        <used_in>useCausalityApi.ts</used_in>
+      </import>
+      <import>
+        <from>@tanstack/react-query</from>
+        <provides>useQuery, useMutation, useQueryClient hooks</provides>
+        <used_in>useCausalityApi.ts</used_in>
+      </import>
+      <import>
+        <from>zustand</from>
+        <provides>create function for store, devtools and persist middleware</provides>
+        <used_in>useCausalityStore.ts</used_in>
+      </import>
+      <import>
+        <from>framer-motion</from>
+        <provides>motion components for animations</provides>
+        <used_in>ThemeBubble.tsx</used_in>
+      </import>
+      <import>
+        <from>lucide-react</from>
+        <provides>Icon components (Compass, Zap, History, Calendar, TrendingUp, Building2, Activity, Sparkles, X, etc.)</provides>
+        <used_in>CausalityEngine.tsx, FilterControls.tsx, MarketOverview.tsx, SelectedThemesPanel.tsx, Tab1_Discovery.tsx</used_in>
+      </import>
+      <import>
+        <from>sonner</from>
+        <provides>toast notifications (loading, success, error)</provides>
+        <used_in>useCausalityApi.ts</used_in>
+      </import>
+    </shared_imports>
+
+    <types>
+      <type name="Theme" defined_in="portal/src/pages/CausalityEngine/types.ts:6">
+        Main data object for trending topics. Key fields: theme_id, headline, description, article_count, sentiment (-1 to 1), sector, tickers[], relevance_score (0-100), first_seen, last_updated, top_articles[], seeking_alpha_analysis[]
+      </type>
+      <type name="ThematicSignal" defined_in="portal/src/pages/CausalityEngine/types.ts:23">
+        Daily auto-generated top market signals. Key fields: signal_id, rank (1-3), theme, price_summary, avg_price_change, volume_ratio, generated_at, confidence (0-100)
+      </type>
+      <type name="Analysis" defined_in="portal/src/pages/CausalityEngine/types.ts:35">
+        User-generated analysis on a theme. Key fields: analysis_id, theme_id, user_id, title, summary, catalysts[], price_impact, technical_summary, ticker_performance[], created_at, saved, tags[]
+      </type>
+      <type name="SavedAnalysis" defined_in="portal/src/pages/CausalityEngine/types.ts:51">
+        Persisted analysis in History tab. Key fields: saved_analysis_id, user_id, analysis, notes, saved_at, last_viewed, tags[]
+      </type>
+      <type name="Article" defined_in="portal/src/pages/CausalityEngine/types.ts:83">
+        News article metadata. Key fields: article_id, title, source, published_at, sentiment, url, summary
+      </type>
+      <type name="PriceImpact" defined_in="portal/src/pages/CausalityEngine/types.ts:62">
+        Price movement analysis. Key fields: summary, chart_data[], volume_analysis
+      </type>
+      <type name="TechnicalSummary" defined_in="portal/src/pages/CausalityEngine/types.ts:68">
+        Technical indicators. Key fields: rsi, sma_20, sma_50, pattern
+      </type>
+      <type name="TickerPerformance" defined_in="portal/src/pages/CausalityEngine/types.ts:75">
+        Individual stock performance. Key fields: ticker, price_change_pct, volume_ratio, current_price
+      </type>
+      <type name="FilterState" defined_in="portal/src/pages/CausalityEngine/hooks/useCausalityStore.ts:24">
+        Filter UI state. Key fields: timeRange (days), sentiment ('all'|'bullish'|'bearish'), sector (string)
+      </type>
+      <type name="GenerationState" defined_in="portal/src/pages/CausalityEngine/hooks/useCausalityStore.ts:30">
+        Analysis generation state. Key fields: currentAnalysis, isGenerating, error
+      </type>
+      <type name="MarketUpdateModalState" defined_in="portal/src/pages/CausalityEngine/hooks/useCausalityStore.ts:36">
+        Market update modal state. Key fields: isOpen, selectedThemeIds[]
+      </type>
+      <type name="CausalityStoreState" defined_in="portal/src/pages/CausalityEngine/hooks/useCausalityStore.ts:41">
+        Full Zustand store shape with all state and action methods
+      </type>
+      <type name="TabType" defined_in="portal/src/pages/CausalityEngine/CausalityEngine.tsx:10">
+        Union type for tab IDs: 'discovery' | 'history'
+      </type>
+    </types>
+
+    <page_structure>
+      <tab name="Discovery" status="functional">
+        Browse trending themes (bubble galaxy), apply filters by time range/sentiment/sector, select 2-3 themes for analysis
+      </tab>
+      <tab name="History" status="stubbed">
+        Placeholder tab for viewing/managing saved analyses - backend integration pending
+      </tab>
+      <panel name="Header Panels" status="functional">
+        Market Overview (SPY/QQQ/VIX with mock data), System Description (workflow explanation)
+      </panel>
+      <component name="ThemeBubbleGalaxy" status="functional">
+        Interactive bubble visualization with responsive sizing based on relevance score, color by sentiment, tooltip on hover
+      </component>
+      <component name="SelectedThemesPanel" status="functional">
+        Shows 0-3 selected themes with aggregated stats (total articles, avg sentiment, avg relevance)
+      </component>
+    </page_structure>
+
+    <integration_notes>
+      - CausalityEngine.tsx manages tab state via useTabNavigation and local component state for selected themes
+      - Tab1_Discovery fetches themes via useFilteredThemes(timeRange, sentiment, sector) with caching
+      - All API calls routed through causality-endpoints.ts with configurable base URL (VITE_CAUSALITY_API_URL env var)
+      - Zustand store provides persistent state for filters and selections (localStorage key: 'causality-store-v2')
+      - React Query handles caching and background refetching with error/loading states
+      - MarketOverview uses mock data (requires DE to wire to real API)
+      - Tab2_Generate currently stubbed - awaits backend AI integration
+      - Tab2_History currently stubbed - awaits DynamoDB query implementation
+    </integration_notes>
+  </section>
+
+  <!-- ============================================================================
+       MARKET UPDATE PAGE
+       ============================================================================ -->
+  <section name="MarketUpdate">
+    <files>
+      <file path="portal/src/pages/MarketUpdate/MarketUpdate.tsx" type="component">
+        Main page component with 3-tab workflow (Select Topics/Generate &amp; Edit/Export &amp; Save)
+      </file>
+      <file path="portal/src/pages/MarketUpdate/index.ts" type="export">
+        Barrel export for MarketUpdate component
+      </file>
+      <file path="portal/src/pages/MarketUpdate/hooks/useMarketUpdateData.ts" type="hook">
+        React Query hooks: useTopics, useEarnings, useMacroEvents, useMarketMetrics, useGenerateContent, useRegenerateSection, useSaveDraft, useExportToPowerPoint
+      </file>
+      <file path="portal/src/pages/MarketUpdate/contexts/MarketUpdateContext.tsx" type="context">
+        React Context for global state: selected items, fetched data, generated content, draft/export status
+      </file>
+      <file path="portal/src/pages/MarketUpdate/components/MarketUpdateHeader.tsx" type="component">
+        Container for InstructionsPanel
+      </file>
+      <file path="portal/src/pages/MarketUpdate/components/InstructionsPanel.tsx" type="component">
+        Instructions panel explaining 3-step workflow with tips
+      </file>
+      <file path="portal/src/pages/MarketUpdate/components/BubbleGalaxy/BubbleGalaxy.tsx" type="component">
+        Bubble galaxy with left side (bearish, red) and right side (bullish, green) topic visualization
+      </file>
+      <file path="portal/src/pages/MarketUpdate/components/BubbleGalaxy/Bubble.tsx" type="component">
+        Individual bubble with animated float effect, sizing by article count, tooltip on hover
+      </file>
+      <file path="portal/src/pages/MarketUpdate/components/EarningsSection.tsx" type="component">
+        List of upcoming earnings (ticker, company, date, time, est. EPS) with checkbox selection
+      </file>
+      <file path="portal/src/pages/MarketUpdate/components/MacroEventsSection.tsx" type="component">
+        List of macro economic events (event name, date/time, impact badge) with checkbox selection
+      </file>
+      <file path="portal/src/pages/MarketUpdate/components/SelectedItemsPanel.tsx" type="component">
+        Displays selected topics, earnings, and macro events with remove buttons
+      </file>
+      <file path="portal/src/pages/MarketUpdate/components/SectionEditor.tsx" type="component">
+        Container for editing 3 content sections with regenerate button and loading state
+      </file>
+      <file path="portal/src/pages/MarketUpdate/components/BulletEditor.tsx" type="component">
+        Single bullet text editor with edit/save functionality
+      </file>
+      <file path="portal/src/pages/MarketUpdate/components/PowerPointPreview.tsx" type="component">
+        Preview of PowerPoint content (3 sections with bullets and date)
+      </file>
+      <file path="portal/src/pages/MarketUpdate/components/MarketMetricsDisplay.tsx" type="component">
+        Display current market metrics (S&amp;P 500, Nasdaq, VIX, 10Y Yield)
+      </file>
+      <file path="portal/src/pages/MarketUpdate/tabs/Tab1_SelectTopics.tsx" type="component">
+        Selection tab: bubble galaxy + earnings + macro events + selected items panel + navigation
+      </file>
+      <file path="portal/src/pages/MarketUpdate/tabs/Tab2_GenerateEdit.tsx" type="component">
+        Generation tab: auto-generates 3 sections, allows editing and regenerating individual sections
+      </file>
+      <file path="portal/src/pages/MarketUpdate/tabs/Tab3_ExportSave.tsx" type="component">
+        Export tab: preview, save draft to DynamoDB, export to PowerPoint with download
+      </file>
+    </files>
+
+    <api_calls>
+      <api_call>
+        <hook>useTopics</hook>
+        <endpoint>/api/general/market-update/topics?days=14</endpoint>
+        <method>GET</method>
+        <request_shape>{}</request_shape>
+        <response_shape>{ bullish: Topic[], bearish: Topic[] }</response_shape>
+        <file>portal/src/pages/MarketUpdate/hooks/useMarketUpdateData.ts:13</file>
+        <cache>10 minutes</cache>
+      </api_call>
+      <api_call>
+        <hook>useEarnings</hook>
+        <endpoint>/api/general/market-update/earnings</endpoint>
+        <method>GET</method>
+        <request_shape>{}</request_shape>
+        <response_shape>{ earnings: Earning[] }</response_shape>
+        <file>portal/src/pages/MarketUpdate/hooks/useMarketUpdateData.ts:26</file>
+        <cache>1 hour</cache>
+      </api_call>
+      <api_call>
+        <hook>useMacroEvents</hook>
+        <endpoint>/api/general/market-update/macro-events</endpoint>
+        <method>GET</method>
+        <request_shape>{}</request_shape>
+        <response_shape>{ events: MacroEvent[] }</response_shape>
+        <file>portal/src/pages/MarketUpdate/hooks/useMarketUpdateData.ts:39</file>
+        <cache>1 hour</cache>
+      </api_call>
+      <api_call>
+        <hook>useMarketMetrics</hook>
+        <endpoint>/api/general/market-update/metrics</endpoint>
+        <method>GET</method>
+        <request_shape>{}</request_shape>
+        <response_shape>{ metrics: MarketMetric[] }</response_shape>
+        <file>portal/src/pages/MarketUpdate/hooks/useMarketUpdateData.ts:52</file>
+        <cache>5 minutes</cache>
+      </api_call>
+      <api_call>
+        <hook>useGenerateContent (mutation)</hook>
+        <endpoint>/api/general/market-update/generate</endpoint>
+        <method>POST</method>
+        <request_shape>{ selectedTopicIds: string[], selectedEarningIds: string[], selectedEventIds: string[], topics: Topic[], earnings: Earning[], events: MacroEvent[] }</request_shape>
+        <response_shape>{ date: string, section1: string[], section2: string[], section3: string[] }</response_shape>
+        <file>portal/src/pages/MarketUpdate/hooks/useMarketUpdateData.ts:69</file>
+      </api_call>
+      <api_call>
+        <hook>useRegenerateSection (mutation)</hook>
+        <endpoint>/api/general/market-update/regenerate</endpoint>
+        <method>POST</method>
+        <request_shape>{ section: 'section1'|'section2'|'section3', selectedTopicIds: string[], selectedEarningIds: string[], selectedEventIds: string[], topics: Topic[], earnings: Earning[], events: MacroEvent[] }</request_shape>
+        <response_shape>{ bullets: string[] }</response_shape>
+        <file>portal/src/pages/MarketUpdate/hooks/useMarketUpdateData.ts:88</file>
+      </api_call>
+      <api_call>
+        <hook>useSaveDraft (mutation)</hook>
+        <endpoint>/api/general/market-update/save</endpoint>
+        <method>POST</method>
+        <request_shape>{ selectedTopicIds: string[], selectedEarningIds: string[], selectedEventIds: string[], section1Bullets: string[], section2Bullets: string[], section3Bullets: string[], date: string, createdBy: string }</request_shape>
+        <response_shape>{ draftId: string, savedAt: string }</response_shape>
+        <file>portal/src/pages/MarketUpdate/hooks/useMarketUpdateData.ts:112</file>
+      </api_call>
+      <api_call>
+        <hook>useExportToPowerPoint (mutation)</hook>
+        <endpoint>/api/general/market-update/export</endpoint>
+        <method>POST</method>
+        <request_shape>{ draftId?: string, date: string, section1Bullets: string[], section2Bullets: string[], section3Bullets: string[] }</request_shape>
+        <response_shape>{ downloadUrl: string (S3 presigned), filename: string, expiresAt: string }</response_shape>
+        <file>portal/src/pages/MarketUpdate/hooks/useMarketUpdateData.ts:135</file>
+      </api_call>
+    </api_calls>
+
+    <shared_imports>
+      <import>
+        <from>portal/src/hooks/useTabNavigation</from>
+        <provides>useTabNavigation hook for tab state and callbacks</provides>
+        <used_in>MarketUpdate.tsx, Tab1_SelectTopics.tsx, Tab2_GenerateEdit.tsx, Tab3_ExportSave.tsx</used_in>
+      </import>
+      <import>
+        <from>portal/src/contexts/PageThemeContext</from>
+        <provides>PageThemeProvider component for accent color theming</provides>
+        <used_in>MarketUpdate.tsx</used_in>
+      </import>
+      <import>
+        <from>portal/src/components/PageHeaderVariants</from>
+        <provides>PageHeaderCleanBadge component</provides>
+        <used_in>MarketUpdate.tsx</used_in>
+      </import>
+      <import>
+        <from>portal/src/components/TabNavigation</from>
+        <provides>TabNavigation component for tab UI</provides>
+        <used_in>MarketUpdate.tsx</used_in>
+      </import>
+      <import>
+        <from>portal/src/components/LoadingSpinner</from>
+        <provides>LoadingSpinner component</provides>
+        <used_in>SectionEditor.tsx</used_in>
+      </import>
+      <import>
+        <from>portal/src/api/endpoints/market-update</from>
+        <provides>marketUpdateApi object with all endpoint methods, type definitions (Topic, Earning, MacroEvent, etc.)</provides>
+        <used_in>useMarketUpdateData.ts</used_in>
+      </import>
+      <import>
+        <from>@tanstack/react-query</from>
+        <provides>useQuery, useMutation, useQueryClient hooks</provides>
+        <used_in>useMarketUpdateData.ts</used_in>
+      </import>
+      <import>
+        <from>framer-motion</from>
+        <provides>motion components for animations</provides>
+        <used_in>BubbleGalaxy/Bubble.tsx</used_in>
+      </import>
+      <import>
+        <from>lucide-react</from>
+        <provides>Icon components (FileText, Target, Edit, Download, Building, Calendar, TrendingUp, Clock, Info, ArrowLeft, ArrowRight, RefreshCw, Save)</provides>
+        <used_in>MarketUpdate.tsx, InstructionsPanel.tsx, EarningsSection.tsx, MacroEventsSection.tsx, SectionEditor.tsx, Tab3_ExportSave.tsx</used_in>
+      </import>
+      <import>
+        <from>sonner</from>
+        <provides>toast notifications (loading, success, error)</provides>
+        <used_in>useMarketUpdateData.ts</used_in>
+      </import>
+    </shared_imports>
+
+    <types>
+      <type name="Topic" defined_in="portal/src/api/endpoints/market-update.ts:7">
+        Trending topic for bulletin. Key fields: id, headline, article_count, sentiment ('bullish'|'bearish'), date, raw_keyword, sources[]
+      </type>
+      <type name="Earning" defined_in="portal/src/api/endpoints/market-update.ts:17">
+        Upcoming company earnings. Key fields: ticker, company, date, time, est_eps, market_cap_b, sector
+      </type>
+      <type name="MacroEvent" defined_in="portal/src/api/endpoints/market-update.ts:27">
+        Macro economic event. Key fields: event, date, time, impact ('high'|'medium'|'low'), expected, previous, unit
+      </type>
+      <type name="MarketMetric" defined_in="portal/src/api/endpoints/market-update.ts:37">
+        Current market metric. Key fields: label, value, change_pct, sublabel
+      </type>
+      <type name="GenerateContentRequest" defined_in="portal/src/api/endpoints/market-update.ts:44">
+        Request payload for content generation. Key fields: selectedTopicIds[], selectedEarningIds[], selectedEventIds[], topics[], earnings[], events[]
+      </type>
+      <type name="GenerateContentResponse" defined_in="portal/src/api/endpoints/market-update.ts:53">
+        Generated content response. Key fields: date, section1[], section2[], section3[]
+      </type>
+      <type name="SaveDraftRequest" defined_in="portal/src/api/endpoints/market-update.ts:70">
+        Draft save payload. Key fields: selectedTopicIds[], selectedEarningIds[], selectedEventIds[], section1Bullets[], section2Bullets[], section3Bullets[], date, createdBy
+      </type>
+      <type name="SaveDraftResponse" defined_in="portal/src/api/endpoints/market-update.ts:81">
+        Draft save response. Key fields: draftId, savedAt
+      </type>
+      <type name="ExportRequest" defined_in="portal/src/api/endpoints/market-update.ts:86">
+        PowerPoint export request. Key fields: draftId?, date, section1Bullets[], section2Bullets[], section3Bullets[]
+      </type>
+      <type name="ExportResponse" defined_in="portal/src/api/endpoints/market-update.ts:94">
+        PowerPoint export response. Key fields: downloadUrl (S3 presigned), filename, expiresAt
+      </type>
+      <type name="MarketUpdateState" defined_in="portal/src/pages/MarketUpdate/contexts/MarketUpdateContext.tsx:8">
+        Full Context state shape with all selected IDs, fetched data arrays, generated content, draft/export status, computed properties, and action methods
+      </type>
+      <type name="TabType" defined_in="portal/src/pages/MarketUpdate/MarketUpdate.tsx:14">
+        Union type for tab IDs: 'select' | 'edit' | 'export'
+      </type>
+    </types>
+
+    <page_structure>
+      <tab name="Select Topics (Tab 1)" status="functional">
+        Select bullish/bearish topics (bubble galaxy), upcoming earnings (next 7 days), macro economic events (next 7 days); shows selected items panel
+      </tab>
+      <tab name="Generate &amp; Edit (Tab 2)" status="functional">
+        Auto-generates 3 sections (What Happened Last Week / Key Events This Week / Impact on Client Portfolios); allows editing individual bullets and regenerating sections
+      </tab>
+      <tab name="Export &amp; Save (Tab 3)" status="functional">
+        Preview generated content, save draft to DynamoDB, export to PowerPoint with browser download
+      </tab>
+      <component name="BubbleGalaxy" status="functional">
+        Left side shows bearish topics (red bubbles), right side shows bullish topics (green bubbles); bubble size represents article count
+      </component>
+      <component name="EarningsSection" status="functional">
+        Selectable list of upcoming company earnings with ticker, company name, date/time, and estimated EPS
+      </component>
+      <component name="MacroEventsSection" status="functional">
+        Selectable list of macro events with event name, date/time, impact badge (high/medium/low), expected/previous values
+      </component>
+      <component name="SelectedItemsPanel" status="functional">
+        Shows all selected topics, earnings, and macro events with remove buttons
+      </component>
+    </page_structure>
+
+    <integration_notes>
+      - MarketUpdate.tsx wraps content in PageThemeProvider and MarketUpdateProvider for global state
+      - Tab1_SelectTopics fetches topics (last 14 days), earnings (next 7 days), and macro events; stores selections in context
+      - Tab2_GenerateEdit uses useEffect to auto-trigger content generation on mount; provides section editor UI
+      - Tab3_ExportSave handles draft save (to DynamoDB) and PowerPoint export (S3 presigned URL with browser download)
+      - All API calls routed through market-update.ts endpoint definitions
+      - React Query handles caching and error/loading states for data fetch operations
+      - Context provides computed properties for selectedTopics/selectedEarnings/selectedEvents by filtering fetched data
+      - InstructionsPanel explains 3-step workflow: Select → Generate &amp; Edit → Export
+      - Sections are: 1. "What Happened Last Week?" 2. "Key Events This Week" 3. "Impact on Client Portfolios"
+    </integration_notes>
+  </section>
+
+  <!-- ============================================================================
+       SHARED COMPONENTS &amp; PATTERNS
+       ============================================================================ -->
+  <shared_patterns>
+    <pattern name="Tab Navigation">
+      Both pages use useTabNavigation hook with TabNavigation UI component for tab-based workflows
+    </pattern>
+    <pattern name="Bubble Galaxy Visualization">
+      CausalityEngine and MarketUpdate both feature interactive bubble visualizations (different implementations)
+      - CausalityEngine: Single container, grid-based positioning with jitter, sentiment colors, relevance sizing
+      - MarketUpdate: Dual-side (bearish left/bullish right), random positioning with overlap detection, article count sizing
+    </pattern>
+    <pattern name="React Query + React Context">
+      CausalityEngine uses Zustand for local state, MarketUpdate uses React Context for global state
+      Both use React Query v5 for data fetching with caching and background refetching
+    </pattern>
+    <pattern name="API Client Abstraction">
+      All API calls abstracted in endpoint files (causality-endpoints.ts, market-update.ts)
+      Allows environment-specific URL configuration (VITE_CAUSALITY_API_URL env var)
+    </pattern>
+    <pattern name="Toast Notifications">
+      Both pages use sonner library for loading/success/error toasts during mutations
+    </pattern>
+    <pattern name="Filter/Selection State">
+      CausalityEngine: Stores filters (timeRange, sentiment, sector) + selected theme IDs in Zustand
+      MarketUpdate: Stores selected item IDs (topics, earnings, events) in React Context
+    </pattern>
+    <pattern name="Modal/Panel UI">
+      CausalityEngine SelectedThemesPanel shows selected themes with aggregate stats
+      MarketUpdate SelectedItemsPanel shows selected items from all three data sources
+    </pattern>
+  </shared_patterns>
+
+  <!-- ============================================================================
+       ISSUES &amp; TODOs
+       ============================================================================ -->
+  <issues>
+    <issue file="portal/src/pages/MarketUpdate/tabs/Tab3_ExportSave.tsx:51" type="TODO">
+      Get from auth context - replace hardcoded 'user@opalcapital.com' with actual authenticated user email
+    </issue>
+    <issue file="portal/src/pages/CausalityEngine/components/MarketOverview.tsx:6" type="COMMENT">
+      Mock data - Dashboard Engineer will wire to real API for SPY, QQQ, VIX prices
+    </issue>
+    <issue file="portal/src/pages/CausalityEngine/tabs/Tab1_Discovery.tsx:33" type="COMMENT">
+      Note: API returns 'movements' field for now, treating as themes (legacy compatibility)
+    </issue>
+    <issue file="portal/src/pages/CausalityEngine/tabs/Tab2_Generate.tsx" type="STUBBED">
+      Trade Ideas and Market Update generation both stubbed - awaits backend AI integration
+    </issue>
+    <issue file="portal/src/pages/CausalityEngine/tabs/Tab2_History.tsx" type="STUBBED">
+      History tab stubbed - awaits DynamoDB query and UI implementation for saved analyses
+    </issue>
+  </issues>
+
+  <!-- ============================================================================
+       DEPENDENCIES &amp; EXTERNAL LIBRARIES
+       ============================================================================ -->
+  <dependencies>
+    <group name="State Management">
+      <dep name="zustand" usage="CausalityEngine local state (filters, selections)"/>
+      <dep name="react" context="Context API usage="MarketUpdate global state"/>
+    </group>
+    <group name="Data Fetching">
+      <dep name="@tanstack/react-query" version="v5" usage="useQuery, useMutation for all API calls"/>
+    </group>
+    <group name="UI Components">
+      <dep name="framer-motion" usage="Animations in ThemeBubble (spring), BubbleGalaxy/Bubble (float)"/>
+      <dep name="lucide-react" usage="Icons throughout (Compass, Zap, Calendar, TrendingUp, etc.)"/>
+      <dep name="sonner" usage="Toast notifications for mutations"/>
+    </group>
+    <group name="Custom UI">
+      <dep name="portal/src/components" usage="Card, TabNavigation, PageHeaderVariants, LoadingSpinner"/>
+      <dep name="portal/src/hooks" usage="useTabNavigation for both pages"/>
+      <dep name="portal/src/contexts" usage="PageThemeContext for MarketUpdate theming"/>
+    </group>
+  </dependencies>
+
+  <!-- ============================================================================
+       DELIVERABLE SUMMARY
+       ============================================================================ -->
+  <summary>
+    <total_files_audited>34</total_files_audited>
+    <causality_engine_files>17</causality_engine_files>
+    <market_update_files>17</market_update_files>
+    <api_endpoints_total>16</api_endpoints_total>
+    <causality_endpoints>9</causality_endpoints>
+    <market_update_endpoints>7</market_update_endpoints>
+    <typescript_types_total>23</typescript_types_total>
+    <shared_component_imports>10</shared_component_imports>
+    <critical_todos>1</critical_todos>
+    <stubbed_features>3</stubbed_features>
+
+    <page_status>
+      <causality_engine status="PRODUCTION_READY_PARTIAL">
+        Discovery tab fully functional with API integration, History/Generate tabs stubbed, mock data in MarketOverview
+      </causality_engine>
+      <market_update status="PRODUCTION_READY">
+        All three tabs fully functional, 3-step workflow complete, API integration tested, draft save and PowerPoint export ready
+      </market_update>
+    </page_status>
+  </summary>
+</page_inventory>

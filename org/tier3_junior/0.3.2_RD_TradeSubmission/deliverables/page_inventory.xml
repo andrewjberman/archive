@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page_inventory>
+  <metadata>
+    <agent>0.3.2_RD_TradeSubmission</agent>
+    <page>TradeSubmission</page>
+    <directory>portal/src/pages/TradeSubmission/</directory>
+    <date>2026-03-02</date>
+  </metadata>
+
+  <files>
+    <file path="portal/src/pages/TradeSubmission/TradeSubmission.tsx" type="component">
+      Main page component with 4-tab navigation (Submit, Approvals, Execution, History); renders based on auth state
+    </file>
+    <file path="portal/src/pages/TradeSubmission/types.ts" type="types">
+      Re-exports TradeSubmission type from API, defines UserRole union type (initiator|approver|executor|admin)
+    </file>
+    <file path="portal/src/pages/TradeSubmission/index.ts" type="export">
+      Public export of TradeSubmission component
+    </file>
+    <file path="portal/src/pages/TradeSubmission/tabs/SubmitTab.tsx" type="tab">
+      Form to submit new trade with file upload, securities table, and pre-trade attestations
+    </file>
+    <file path="portal/src/pages/TradeSubmission/tabs/ApprovalsTab.tsx" type="tab">
+      Lists pending trades requiring approval; shows approve/reject modals
+    </file>
+    <file path="portal/src/pages/TradeSubmission/tabs/ExecutionTab.tsx" type="tab">
+      Lists approved trades ready to execute; shows execution confirmation modal
+    </file>
+    <file path="portal/src/pages/TradeSubmission/tabs/HistoryTab.tsx" type="tab">
+      Lists completed and rejected trades with view mode toggle (My Submissions vs All Trades) and pagination
+    </file>
+    <file path="portal/src/pages/TradeSubmission/components/TradeCard.tsx" type="component">
+      Card component displaying trade summary (fund, submission ID, status, dates, counts, action buttons)
+    </file>
+    <file path="portal/src/pages/TradeSubmission/components/SecuritiesTable.tsx" type="component">
+      Editable table for securities with ticker autocomplete, identifier fields, weights, trade instructions
+    </file>
+    <file path="portal/src/pages/TradeSubmission/components/FileUploadZone.tsx" type="component">
+      Drag-drop file upload zone for Excel/CSV files; handles parse status feedback
+    </file>
+    <file path="portal/src/pages/TradeSubmission/components/TickerAutocompleteInput.tsx" type="component">
+      Text input with inline ticker suggestions from cache; accepts suggestion via Tab or Right Arrow
+    </file>
+    <file path="portal/src/pages/TradeSubmission/components/ApproveModal.tsx" type="component">
+      Confirmation modal for approving a trade submission with fund and securities count
+    </file>
+    <file path="portal/src/pages/TradeSubmission/components/ExecuteModal.tsx" type="component">
+      Confirmation modal for executing a trade; shows brokerage destination and securities count
+    </file>
+    <file path="portal/src/pages/TradeSubmission/components/RejectModal.tsx" type="component">
+      Modal with textarea for entering rejection reason; confirms before submitting
+    </file>
+    <file path="portal/src/pages/TradeSubmission/components/TradeDetailsModal.tsx" type="component">
+      Full trade details modal showing metadata, timeline, securities table, and attestations
+    </file>
+    <file path="portal/src/pages/TradeSubmission/hooks/useTradeSubmissionState.ts" type="hook">
+      React Query hooks for fetching submissions: getAllSubmissions, getPendingApprovals, getMySubmissions, getSubmissionsByStatus (15s-60s refetch)
+    </file>
+    <file path="portal/src/pages/TradeSubmission/hooks/useTradeSubmissionActions.ts" type="hook">
+      State and action handlers for approve, reject, execute, and download; manages modals and loading state
+    </file>
+    <file path="portal/src/pages/TradeSubmission/services/fileParser.ts" type="service">
+      Parses Excel (.xlsx) and CSV files; extracts fund, dates, comments, and securities data
+    </file>
+  </files>
+
+  <api_calls>
+    <api_call>
+      <hook>useQuery (usePendingApprovals)</hook>
+      <endpoint>/api/scoped/trade-submissions/pending</endpoint>
+      <method>GET</method>
+      <request_shape>none</request_shape>
+      <response_shape>{ count: number, submissions: TradeSubmission[] }</response_shape>
+      <file>hooks/useTradeSubmissionState.ts:45</file>
+      <refetch_interval>15000ms</refetch_interval>
+    </api_call>
+    <api_call>
+      <hook>useQuery (useAllSubmissions)</hook>
+      <endpoint>/api/scoped/trade-submissions/all</endpoint>
+      <method>GET</method>
+      <request_shape>none</request_shape>
+      <response_shape>{ submissions: TradeSubmission[] }</response_shape>
+      <file>hooks/useTradeSubmissionState.ts:32</file>
+      <refetch_interval>30000ms</refetch_interval>
+    </api_call>
+    <api_call>
+      <hook>useQuery (useMySubmissions)</hook>
+      <endpoint>/api/scoped/trade-submissions/my-submissions/{userEmail}</endpoint>
+      <method>GET</method>
+      <request_shape>{ email: string }</request_shape>
+      <response_shape>{ submissions: TradeSubmission[] }</response_shape>
+      <file>hooks/useTradeSubmissionState.ts:58</file>
+      <refetch_interval>30000ms</refetch_interval>
+    </api_call>
+    <api_call>
+      <hook>useQuery (useApprovedSubmissions)</hook>
+      <endpoint>/api/scoped/trade-submissions/by-status/APPROVED</endpoint>
+      <method>GET</method>
+      <request_shape>{ status: 'APPROVED' }</request_shape>
+      <response_shape>{ submissions: TradeSubmission[] }</response_shape>
+      <file>hooks/useTradeSubmissionState.ts:71</file>
+      <refetch_interval>20000ms</refetch_interval>
+    </api_call>
+    <api_call>
+      <hook>useQuery (useExecutedSubmissions)</hook>
+      <endpoint>/api/scoped/trade-submissions/by-status/EXECUTED</endpoint>
+      <method>GET</method>
+      <request_shape>{ status: 'EXECUTED' }</request_shape>
+      <response_shape>{ submissions: TradeSubmission[] }</response_shape>
+      <file>hooks/useTradeSubmissionState.ts:84</file>
+      <refetch_interval>30000ms</refetch_interval>
+    </api_call>
+    <api_call>
+      <hook>useQuery (useCompletedSubmissions)</hook>
+      <endpoint>/api/scoped/trade-submissions/by-status/COMPLETE</endpoint>
+      <method>GET</method>
+      <request_shape>{ status: 'COMPLETE' }</request_shape>
+      <response_shape>{ submissions: TradeSubmission[] }</response_shape>
+      <file>hooks/useTradeSubmissionState.ts:96</file>
+      <refetch_interval>60000ms</refetch_interval>
+    </api_call>
+    <api_call>
+      <hook>useQuery (useRejectedSubmissions)</hook>
+      <endpoint>/api/scoped/trade-submissions/by-status/REJECTED</endpoint>
+      <method>GET</method>
+      <request_shape>{ status: 'REJECTED' }</request_shape>
+      <response_shape>{ submissions: TradeSubmission[] }</response_shape>
+      <file>hooks/useTradeSubmissionState.ts:108</file>
+      <refetch_interval>60000ms</refetch_interval>
+    </api_call>
+    <api_call>
+      <hook>useMutation (submitTrade)</hook>
+      <endpoint>/api/scoped/trade-submissions/submit</endpoint>
+      <method>POST</method>
+      <request_shape>{ fund: Fund, brokerage: Brokerage, weights_as_of: string, proposed_trades_as_of: string, trade_comments: string, attestations: object, securities: array, initiator_email: string, initiator_name: string }</request_shape>
+      <response_shape>{ submission_id: string, status: string }</response_shape>
+      <file>tabs/SubmitTab.tsx:179</file>
+    </api_call>
+    <api_call>
+      <hook>useMutation (approveSubmission)</hook>
+      <endpoint>/api/scoped/trade-submissions/{submissionId}/approve</endpoint>
+      <method>POST</method>
+      <request_shape>{ submissionId: string, userEmail: string, userName: string }</request_shape>
+      <response_shape>{ message: string, submission_id: string }</response_shape>
+      <file>hooks/useTradeSubmissionActions.ts:53</file>
+    </api_call>
+    <api_call>
+      <hook>useMutation (rejectSubmission)</hook>
+      <endpoint>/api/scoped/trade-submissions/{submissionId}/reject</endpoint>
+      <method>POST</method>
+      <request_shape>{ submissionId: string, userEmail: string, userName: string, reason: string }</request_shape>
+      <response_shape>{ message: string, submission_id: string }</response_shape>
+      <file>hooks/useTradeSubmissionActions.ts:104</file>
+    </api_call>
+    <api_call>
+      <hook>useMutation (executeSubmission)</hook>
+      <endpoint>/api/scoped/trade-submissions/{submissionId}/execute</endpoint>
+      <method>POST</method>
+      <request_shape>{ submissionId: string, userEmail: string, userName: string }</request_shape>
+      <response_shape>{ message: string, submission_id: string }</response_shape>
+      <file>hooks/useTradeSubmissionActions.ts:149</file>
+    </api_call>
+    <api_call>
+      <hook>useMutation (downloadExcelFile)</hook>
+      <endpoint>/api/scoped/trade-submissions/{submissionId}/download-excel</endpoint>
+      <method>GET</method>
+      <request_shape>{ submissionId: string }</request_shape>
+      <response_shape>{ filename: string, url: string }</response_shape>
+      <file>hooks/useTradeSubmissionActions.ts:182</file>
+    </api_call>
+    <api_call>
+      <hook>searchIdentifierCache</hook>
+      <endpoint>/api/scoped/trade-submissions/identifier-cache/search</endpoint>
+      <method>POST</method>
+      <request_shape>{ query: string }</request_shape>
+      <response_shape>{ results: SecurityIdentifiers[] }</response_shape>
+      <file>tabs/SubmitTab.tsx:98</file>
+    </api_call>
+    <api_call>
+      <hook>batchSaveIdentifiers</hook>
+      <endpoint>/api/scoped/trade-submissions/identifier-cache/batch-save</endpoint>
+      <method>POST</method>
+      <request_shape>{ identifiers: { ticker: string, sedol: string, isin: string, figi: string }[] }</request_shape>
+      <response_shape>{ saved: number, errors?: string[] }</response_shape>
+      <file>tabs/SubmitTab.tsx:83</file>
+    </api_call>
+  </api_calls>
+
+  <shared_imports>
+    <import>
+      <from>portal/src/ui/components/panels</from>
+      <provides>Panel, PanelHeader, PanelContent</provides>
+      <used_in>SubmitTab, ApprovalsTab, ExecutionTab, HistoryTab, FileUploadZone</used_in>
+    </import>
+    <import>
+      <from>portal/src/components/Button</from>
+      <provides>Button</provides>
+      <used_in>All tabs and modals</used_in>
+    </import>
+    <import>
+      <from>portal/src/ui/components/StatusBadge</from>
+      <provides>StatusBadge</provides>
+      <used_in>TradeCard, TradeDetailsModal</used_in>
+    </import>
+    <import>
+      <from>portal/src/components/LoadingSpinner</from>
+      <provides>LoadingContainer</provides>
+      <used_in>ApprovalsTab, ExecutionTab, HistoryTab</used_in>
+    </import>
+    <import>
+      <from>portal/src/contexts/PageThemeContext</from>
+      <provides>PageThemeProvider</provides>
+      <used_in>TradeSubmission</used_in>
+    </import>
+    <import>
+      <from>portal/src/components/PageHeaderVariants</from>
+      <provides>PageHeaderCleanBadge</provides>
+      <used_in>TradeSubmission</used_in>
+    </import>
+    <import>
+      <from>portal/src/hooks/useTabNavigation</from>
+      <provides>useTabNavigation</provides>
+      <used_in>TradeSubmission</used_in>
+    </import>
+    <import>
+      <from>portal/src/components/TabNavigation</from>
+      <provides>TabNavigation</provides>
+      <used_in>TradeSubmission</used_in>
+    </import>
+    <import>
+      <from>portal/src/hooks/useAuth</from>
+      <provides>useAuth</provides>
+      <used_in>TradeSubmission</used_in>
+    </import>
+    <import>
+      <from>portal/src/api/endpoints/trade-submission</from>
+      <provides>TradeSubmission type, getAllSubmissions, getPendingApprovals, getMySubmissions, getSubmissionsByStatus, submitTrade, approveSubmission, rejectSubmission, executeSubmission, downloadExcelFile, searchIdentifierCache, batchSaveIdentifiers, Fund, Brokerage</provides>
+      <used_in>All hooks and tabs</used_in>
+    </import>
+    <import>
+      <from>portal/src/lib/designTokens</from>
+      <provides>Z_INDEX</provides>
+      <used_in>All modal components</used_in>
+    </import>
+    <import>
+      <from>lucide-react</from>
+      <provides>Upload, FileText, CheckCircle, PlayCircle, History, Plus, Trash2, RotateCcw, X, AlertCircle, AlertTriangle, Download, User, Building2, ChevronLeft, ChevronRight, PlayCircle, Loader2</provides>
+      <used_in>All components and tabs</used_in>
+    </import>
+    <import>
+      <from>@tanstack/react-query</from>
+      <provides>useQuery, useQueryClient, useMutation</provides>
+      <used_in>useTradeSubmissionState, useTradeSubmissionActions, all tabs</used_in>
+    </import>
+  </shared_imports>
+
+  <types>
+    <type name="TradeSubmission" defined_in="@/api/endpoints/trade-submission (re-exported in types.ts)">
+      Key fields: submission_id: string, fund: string, brokerage: string, status: 'PENDING_APPROVAL'|'APPROVED'|'REJECTED'|'EXECUTED'|'COMPLETE', securities: SecurityDetail[], submitted_at: ISO string, approved_at?: ISO string, approver_name?: string, initiator_email: string, initiator_name: string, weights_as_of: string, proposed_trades_as_of: string, trade_comments: string, attestations?: object, rejection_reason?: string, executor_name?: string, executed_at?: ISO string
+    </type>
+    <type name="UserRole" defined_in="portal/src/pages/TradeSubmission/types.ts">
+      'initiator' | 'approver' | 'executor' | 'admin'
+    </type>
+    <type name="Security" defined_in="portal/src/pages/TradeSubmission/components/SecuritiesTable.tsx">
+      Key fields: id: number, ticker: string, sedol: string, isin: string, figi: string, current_weight: number, proposed_weight: number, delta_weight: number, trade_instructions: 'BUY'|'SELL'|'HOLD', comments: string
+    </type>
+    <type name="ParsedTradeData" defined_in="portal/src/pages/TradeSubmission/components/FileUploadZone.tsx">
+      Key fields: fund: string, weightsAsOf: string, tradesAsOf: string, tradeComments: string, otherComments?: string, securities: array of {ticker, sedol, isin, figi, current_weight, proposed_weight, delta_weight, trade_instructions, comments}
+    </type>
+    <type name="SecurityIdentifiers" defined_in="portal/src/pages/TradeSubmission/components/TickerAutocompleteInput.tsx">
+      Key fields: ticker: string, sedol?: string, isin?: string, figi?: string
+    </type>
+    <type name="Fund" defined_in="@/api/endpoints/trade-submission">
+      Union of valid fund identifiers (PFDE|PFOE|DIVZ|IDVZ|UST|ST|INT|LTC|LTA)
+    </type>
+    <type name="Brokerage" defined_in="@/api/endpoints/trade-submission">
+      Union of valid brokerages (vident|trueshares|internal)
+    </type>
+  </types>
+
+  <page_structure>
+    <tab name="Submit" status="functional">
+      Allow users to submit new trade orders via form or file upload. Components: FileUploadZone, ConsolidatedTradePanel (fund/dates/destination/securities), AttestationsCard, SubmitButtonRow. Integrates with submitTrade, searchIdentifierCache, batchSaveIdentifiers APIs.
+    </tab>
+    <tab name="Approvals" status="functional">
+      Display pending trades requiring approval. Shows alert banner when trades present. Render TradeCards with approve/reject/view/download actions. Modals: ApproveModal, RejectModal, TradeDetailsModal. Uses usePendingApprovals hook with 15s refetch.
+    </tab>
+    <tab name="Execution" status="functional">
+      Display approved trades ready to execute. Shows success banner when trades present. Render TradeCards with execute/view/download actions. Modals: ExecuteModal, TradeDetailsModal. Uses useApprovedSubmissions hook with 20s refetch.
+    </tab>
+    <tab name="History" status="functional">
+      Display completed and rejected trades. Features view mode toggle (My Submissions vs All Trades), status filter (Complete/Rejected), and pagination (20 items per page). Shows TradeCards with view/download actions. Uses useMySubmissions, useCompletedSubmissions, useRejectedSubmissions hooks.
+    </tab>
+  </page_structure>
+
+  <issues>
+    <issue file="portal/src/pages/TradeSubmission/components/README_FILEUPLOAD.md:55" type="TODO">
+      Call API (referenced in documentation but implemented - backend call in SubmitTab.tsx:83)
+    </issue>
+  </issues>
+
+  <state_management>
+    <tool>React Query (@tanstack/react-query)</tool>
+    <description>All data fetching and caching handled by React Query with automatic refetch intervals. Query keys defined in tradeSubmissionKeys object. Cache invalidated on mutation success via queryClient.invalidateQueries().</description>
+    <query_keys>
+      - trade-submissions:all
+      - trade-submissions:all:all
+      - trade-submissions:pending
+      - trade-submissions:my:{email}
+      - trade-submissions:status:{status}
+    </query_keys>
+  </state_management>
+
+  <form_validation>
+    <location>SubmitTab.tsx:142-161</location>
+    <rules>
+      - Fund, weightsAsOf, tradesAsOf, destination required
+      - At least one security with ticker required
+      - All four attestations must be checked
+    </rules>
+    <error_display>Inline error message in red banner</error_display>
+  </form_validation>
+
+  <modal_system>
+    <modal name="ApproveModal" file="components/ApproveModal.tsx">
+      Confirmation before approving trade. Shows fund and securities count. Calls approveSubmission() and invalidates cache on success.
+    </modal>
+    <modal name="RejectModal" file="components/RejectModal.tsx">
+      Requires rejection reason textarea (required field). Calls rejectSubmission(reason) and invalidates cache on success.
+    </modal>
+    <modal name="ExecuteModal" file="components/ExecuteModal.tsx">
+      Confirmation before executing trade. Shows brokerage destination. Calls executeSubmission() and invalidates cache on success.
+    </modal>
+    <modal name="TradeDetailsModal" file="components/TradeDetailsModal.tsx">
+      Full read-only trade details: metadata, timeline (submitted/approved/executed), securities table, attestations. Supports download Excel action.
+    </modal>
+  </modal_system>
+
+  <file_parsing>
+    <location>services/fileParser.ts</location>
+    <formats_supported>Excel (.xlsx), CSV</formats_supported>
+    <structure>
+      Row 0: [_, fund]
+      Row 1: [_, weightsAsOf]
+      Row 2: [_, tradesAsOf]
+      Row 3: [_, tradeComments]
+      Row 4: [_, otherComments]
+      Row 6: Headers
+      Row 7+: Securities [ticker, sedol, isin, figi, currentWeight, proposedWeight, deltaWeight, tradeInstruction, comments]
+    </structure>
+    <special_handling>Skips cash/CURNCY rows. Handles Excel serial dates and percentage/decimal weight formats.</special_handling>
+  </file_parsing>
+
+  <authentication>
+    <mechanism>useAuth hook from @/hooks/useAuth</mechanism>
+    <user_fields>email, name</user_fields>
+    <required_for>All trade operations - submitter email/name, approver email/name, executor email/name</required_for>
+    <auth_check>TradeSubmission.tsx shows login message if not authenticated</auth_check>
+  </authentication>
+
+  <styling>
+    <system>Tailwind CSS with HSL design tokens</system>
+    <colors>
+      - Primary accent: hsl(var(--primary))
+      - Warning: hsl(var(--warning))
+      - Danger: hsl(var(--danger))
+      - Success: hsl(var(--success))
+      - Headers: hsl(var(--bg-header))
+      - Page: hsl(var(--bg-page))
+      - Cards: hsl(var(--bg-card))
+    </colors>
+    <responsive>Mobile-first with sm:/lg: breakpoints for grid layouts</responsive>
+  </styling>
+
+  <pagination>
+    <location>HistoryTab.tsx:54-79</location>
+    <items_per_page>20</items_per_page>
+    <controls>Previous/Next buttons with page indicator</controls>
+    <reset>Pagination resets to page 1 when view mode or status filter changes</reset>
+  </pagination>
+
+  <notes>
+    - All timestamps formatted in Eastern Time (ET)
+    - Trade statuses: PENDING_APPROVAL -> APPROVED -> EXECUTED -> COMPLETE (or REJECTED at any stage)
+    - TradeCard component uses conditional rendering for action buttons based on status
+    - FileUploadZone shows parse status feedback with success/error indicators
+    - TickerAutocompleteInput supports Tab/RightArrow keyboard shortcuts to accept suggestions
+    - All modals use Z_INDEX.modal for proper layering
+    - File operations (download Excel) handled through downloadExcelFile API
+    - Securities table has auto-calculate delta weight (proposed - current)
+  </notes>
+
+</page_inventory>

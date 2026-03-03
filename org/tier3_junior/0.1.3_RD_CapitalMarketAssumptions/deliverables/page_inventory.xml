@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page_inventory>
+  <metadata>
+    <agent>0.1.3_RD_CapitalMarketAssumptions</agent>
+    <page>CapitalMarketAssumptions</page>
+    <directory>portal/src/pages/CapitalMarketAssumptions/</directory>
+    <date>2026-03-02</date>
+    <audit_status>complete</audit_status>
+  </metadata>
+
+  <files>
+    <file path="portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx" type="component">
+      Main page component: displays 10-year capital market assumptions table, expectations chart, and opal views with strategic/tactical sliders
+    </file>
+    <file path="portal/src/pages/CapitalMarketAssumptions/types.ts" type="types">
+      TypeScript interfaces for CMA assumptions, Opal views, allocation views, and peer performance data
+    </file>
+    <file path="portal/src/pages/CapitalMarketAssumptions/index.ts" type="export">
+      Module exports for CapitalMarketAssumptions component and all types
+    </file>
+    <file path="portal/src/pages/CapitalMarketAssumptions/README.md" type="documentation">
+      Complete documentation of page structure, data flow, components, and troubleshooting guide
+    </file>
+    <file path="portal/src/pages/CapitalMarketAssumptions/components/AssumptionsTable.tsx" type="component">
+      Renders collapsible category headers and asset class rows with expected return and volatility percentages
+    </file>
+    <file path="portal/src/pages/CapitalMarketAssumptions/components/GradientSlider.tsx" type="component">
+      Gradient slider showing position indicator (-2 to +2) with green/yellow/red gradient and custom scale labels
+    </file>
+    <file path="portal/src/pages/CapitalMarketAssumptions/components/ConvergingSlider.tsx" type="component">
+      Animated slider with split/combined mode: Strategic and Tactical bars with converge animation to center with Combined diamond indicator
+    </file>
+    <file path="portal/src/pages/CapitalMarketAssumptions/tabs/ExpectationsTab.tsx" type="component">
+      Composed chart displaying 10-year expected returns as colored bars by asset class and volatility as black diamond markers
+    </file>
+    <file path="portal/src/pages/CapitalMarketAssumptions/tabs/OpalViewsTab.tsx" type="component">
+      Displays strategic/tactical asset allocation views using GradientSlider and ConvergingSlider with view selector (Overall/Equity/Fixed Income) and split/combined toggle
+    </file>
+  </files>
+
+  <api_calls>
+    <api_call>
+      <hook>useQuery</hook>
+      <endpoint>/api/general/capital-markets/assumptions.json</endpoint>
+      <method>GET</method>
+      <request_shape>none</request_shape>
+      <response_shape>{ generated_at: string, data_as_of: string, assumptions: Array&lt;{ assetClass: string, expectedReturn: number | null, expectedVolatility: number | null, category?: string }&gt; }</response_shape>
+      <file>portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx:32-35</file>
+      <auth>Demo mode: no auth required. Production: JWT Bearer token required</auth>
+      <cache>CloudFront edge cache (60 minutes via React Query)</cache>
+    </api_call>
+    <api_call>
+      <hook>useQuery</hook>
+      <endpoint>/api/general/capital-markets/views.json</endpoint>
+      <method>GET</method>
+      <request_shape>none</request_shape>
+      <response_shape>{ generated_at: string, data_as_of: string, overall_views: { strategic: Array&lt;{ pair: string, position: number }&gt;, tactical: Array&lt;{ pair: string, position: number }&gt; }, fixed_income_views: { strategic: Array&lt;{ assetClass: string, position: number }&gt;, tactical: Array&lt;{ assetClass: string, position: number }&gt; }, equity_views: { strategic: Array&lt;{ assetClass: string, position: number }&gt;, tactical: Array&lt;{ assetClass: string, position: number }&gt; } }</response_shape>
+      <file>portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx:42-45</file>
+      <auth>Demo mode: no auth required. Production: JWT Bearer token required</auth>
+      <cache>CloudFront edge cache (60 minutes via React Query)</cache>
+    </api_call>
+  </api_calls>
+
+  <shared_imports>
+    <import>
+      <from>@/contexts/PageThemeContext</from>
+      <provides>PageThemeProvider</provides>
+      <used_in>portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx:10</used_in>
+    </import>
+    <import>
+      <from>@/components/PageHeaderVariants</from>
+      <provides>PageHeaderCleanBadge</provides>
+      <used_in>portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx:11</used_in>
+    </import>
+    <import>
+      <from>@/ui/components/panels</from>
+      <provides>Panel, PanelHeader, PanelContent, SmartPanelFooter</provides>
+      <used_in>portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx:12, tabs/ExpectationsTab.tsx:11, tabs/OpalViewsTab.tsx:11</used_in>
+    </import>
+    <import>
+      <from>@/components/TabNavigation</from>
+      <provides>TabNavigation</provides>
+      <used_in>portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx:13</used_in>
+    </import>
+    <import>
+      <from>@/hooks/useTabNavigation</from>
+      <provides>useTabNavigation</provides>
+      <used_in>portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx:14</used_in>
+    </import>
+    <import>
+      <from>@/components/LoadingSpinner</from>
+      <provides>LoadingContainer</provides>
+      <used_in>portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx:15</used_in>
+    </import>
+    <import>
+      <from>@/hooks/useDataSource</from>
+      <provides>useYangDataAsOf</provides>
+      <used_in>portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx:16</used_in>
+    </import>
+    <import>
+      <from>@/api/portal-proxy</from>
+      <provides>getCMAAssumptions, getOpalViews</provides>
+      <used_in>portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx:17</used_in>
+    </import>
+    <import>
+      <from>lucide-react</from>
+      <provides>TrendingUp, BarChart3, Target, ChevronDown, ChevronRight</provides>
+      <used_in>CapitalMarketAssumptions.tsx:9, AssumptionsTable.tsx:11, ExpectationsTab.tsx (implicit)</used_in>
+    </import>
+    <import>
+      <from>recharts</from>
+      <provides>Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Scatter, ComposedChart</provides>
+      <used_in>portal/src/pages/CapitalMarketAssumptions/tabs/ExpectationsTab.tsx:10</used_in>
+    </import>
+    <import>
+      <from>@/hooks/useFilterTracking</from>
+      <provides>useSelectTracking</provides>
+      <used_in>portal/src/pages/CapitalMarketAssumptions/tabs/OpalViewsTab.tsx:10</used_in>
+    </import>
+  </shared_imports>
+
+  <types>
+    <type name="AssetClassAssumption" defined_in="portal/src/pages/CapitalMarketAssumptions/types.ts:6-11">
+      Key fields: assetClass (string), expectedReturn (number | null, 10-year %), expectedVolatility (number | null, 10-year %), category (Cash | Fixed Income | Equities | Alternatives | Commodities)
+    </type>
+    <type name="CMADataset" defined_in="portal/src/pages/CapitalMarketAssumptions/types.ts:14-17">
+      Key fields: assumptions (AssetClassAssumption[]), asOfDate (string)
+    </type>
+    <type name="AllocationView" defined_in="portal/src/pages/CapitalMarketAssumptions/types.ts:20-23">
+      Key fields: assetClass (string), position (number, -2 to +2 scale where -2=Strong Underweight, 0=Neutral, +2=Strong Overweight)
+    </type>
+    <type name="OpalViewsDataset" defined_in="portal/src/pages/CapitalMarketAssumptions/types.ts:26-43">
+      Key fields: overall_views (strategic/tactical pairs), fixed_income_views (strategic/tactical allocations), equity_views (strategic/tactical allocations), asOfDate (string)
+    </type>
+    <type name="PeerPerformancePoint" defined_in="portal/src/pages/CapitalMarketAssumptions/types.ts:46-55">
+      Key fields: period (string), percentile5, percentile25, percentile50 (median), percentile75, percentile95 (all numbers), modelValue (number), benchmarkValue (number)
+    </type>
+    <type name="PeerPerformanceDataset" defined_in="portal/src/pages/CapitalMarketAssumptions/types.ts:58-62">
+      Key fields: modelName (string), data (PeerPerformancePoint[]), asOfDate (string)
+    </type>
+    <type name="CMATabType" defined_in="portal/src/pages/CapitalMarketAssumptions/types.ts:65">
+      Union type: 'expectations' | 'views'
+    </type>
+    <type name="AssumptionsTableProps" defined_in="portal/src/pages/CapitalMarketAssumptions/components/AssumptionsTable.tsx:14-16">
+      Key fields: assumptions (AssetClassAssumption[])
+    </type>
+    <type name="GradientSliderProps" defined_in="portal/src/pages/CapitalMarketAssumptions/components/GradientSlider.tsx:10-15">
+      Key fields: label (string), position (number, -2 to +2), type ('strategic' | 'tactical', default 'strategic'), useCustomLabels (boolean, optional)
+    </type>
+    <type name="ConvergingSliderProps" defined_in="portal/src/pages/CapitalMarketAssumptions/components/ConvergingSlider.tsx:9-16">
+      Key fields: label (string), strategicPosition (number), tacticalPosition (number), combinedPosition (number), mode ('split' | 'combined'), useCustomLabels (boolean, optional)
+    </type>
+    <type name="ExpectationsTabProps" defined_in="portal/src/pages/CapitalMarketAssumptions/tabs/ExpectationsTab.tsx:14-16">
+      Key fields: assumptions (AssetClassAssumption[])
+    </type>
+    <type name="OpalViewsTabProps" defined_in="portal/src/pages/CapitalMarketAssumptions/tabs/OpalViewsTab.tsx:16-18">
+      Key fields: viewsData (OpalViewsDataset)
+    </type>
+  </types>
+
+  <page_structure>
+    <tab name="Expectations" status="functional">
+      Displays 10-year capital market expectations as a composed chart with colored bars for expected returns (green=Fixed Income, blue=Equity, orange=Alternatives) and black diamond markers for volatility. Includes legend and interactive tooltips. Uses Recharts for visualization.
+    </tab>
+    <tab name="Views" status="functional">
+      Displays Opal's strategic and tactical asset allocation views using gradient sliders. Includes view selector dropdown (Overall/Equity/Fixed Income) and split/combined display toggle. Split mode shows strategic and tactical side by side. Combined mode shows animated convergence with combined position indicator diamond. Supports custom scale labels parsed from asset class pair labels.
+    </tab>
+    <section name="10-Year Assumptions (Header Panel)" status="functional">
+      Main panel displaying collapsible category headers (Cash, Fixed Income, Equities, Alternatives, Commodities) with expandable asset class rows showing expected return and volatility percentages. Uses custom collapsible table component with indented rows under category headers.
+    </section>
+  </page_structure>
+
+  <state_management>
+    <state_hook name="useTabNavigation">
+      Manages active tab state. Parameters: initial tab ('expectations'), analytics group ('capital-market-assumptions'). Provides: activeTab, handleTabChange, tabContentRef.
+    </state_hook>
+    <state_hook name="useSelectTracking">
+      Used in OpalViewsTab to track: selectedView ('overall', 'equity', 'fixed-income'), displayMode ('split', 'combined'). Provides state setter functions for both.
+    </state_hook>
+    <state_hook name="useState">
+      Used in AssumptionsTable to track collapsed categories as a Set&lt;string&gt;. Provides toggle functionality for category collapse/expand.
+    </state_hook>
+    <state_hook name="useQuery">
+      React Query hooks for data fetching: getCMAAssumptions (queryKey: 'cma-assumptions'), getOpalViews (queryKey: 'opal-views'). Returns: data, isLoading, error.
+    </state_hook>
+    <state_hook name="useYangDataAsOf">
+      Central data source registry. Called twice: useYangDataAsOf('cma', cmaData?.asOfDate), useYangDataAsOf('views', viewsData?.asOfDate).
+    </state_hook>
+  </state_management>
+
+  <color_scheme>
+    <palette>
+      Primary accent: hsl(var(--primary-purple))
+    </palette>
+    <asset_class_colors_expectations_tab>
+      Fixed Income: #10b981 (green)
+      Equity: #3b82f6 (blue)
+      Alternatives &amp; Commodities: #f97316 (orange)
+    </asset_class_colors_expectations_tab>
+    <allocation_view_colors_sliders>
+      Gradient background: Green (#22c55e) left → Yellow (#eab308) center → Red (#ef4444) right
+      Strategic indicator: Blue (#3b82f6)
+      Tactical indicator: Purple (#a855f7)
+      Combined indicator: Amber (#fbbf24)
+    </allocation_view_colors_sliders>
+  </color_scheme>
+
+  <data_flow>
+    <on_page_load>
+      1. useQuery fetches getCMAAssumptions() and getOpalViews() in parallel
+      2. Responses transformed into CMADataset and OpalViewsDataset
+      3. useYangDataAsOf called twice to register data_as_of values in central registry
+      4. Page renders with loading spinner until both requests complete
+      5. Tab navigation renders: Expectations (default) and Views tabs
+    </on_page_load>
+    <error_handling>
+      Views error stored but only displayed in 10-Year Assumptions panel if viewsError exists
+      AssumptionsLoading or viewsLoading prevents tab content render with LoadingContainer
+    </error_handling>
+    <data_caching>
+      React Query cache: 5 minutes default (can be configured)
+      CloudFront edge cache: 60 minutes (per documentation)
+      Static files: public/data/cma_assumptions.json, public/data/opal_views.json
+    </data_caching>
+  </data_flow>
+
+  <responsive_design>
+    <mobile>
+      AssumptionsTable: Horizontal scroll on overflow (scrollbar-none class)
+      GradientSlider: Single column, inline labels
+      ConvergingSlider: Single column, margin-top adjustments for split/combined modes
+      ExpectationsTab: Chart responsive height (650px), rotated X-axis labels (-45 degrees)
+      OpalViewsTab: Grid switches to md:grid-cols-2 (Strategic/Tactical columns)
+    </mobile>
+    <breakpoints>
+      md: grid-cols-2 (768px+) for OpalViewsTab Strategic/Tactical two-column layout
+    </breakpoints>
+  </responsive_design>
+
+  <phase_markers>
+    <requirement id="PHASE1_CM_REQ_001" status="complete">
+      CMA Assumptions data loading enabled (line 26, CapitalMarketAssumptions.tsx)
+    </requirement>
+    <requirement id="PHASE1_CM_REQ_002" status="complete">
+      Opal Views data loading enabled (line 27, CapitalMarketAssumptions.tsx)
+    </requirement>
+  </phase_markers>
+
+  <issues>
+    <issue file="portal/src/api/portal-proxy.ts:1168" type="TODO">
+      Demo mode: Using public endpoint (no auth) for demo purposes. TODO: Revert to shared endpoint for production with JWT Bearer token authentication.
+    </issue>
+    <issue file="portal/src/api/portal-proxy.ts:1210" type="TODO">
+      Demo mode: Using public endpoint (no auth) for demo purposes. TODO: Revert to shared endpoint for production with JWT Bearer token authentication.
+    </issue>
+  </issues>
+
+  <design_system>
+    <theme>Purple accent (hsl(var(--primary-purple)))</theme>
+    <components_used>
+      Panel, PanelHeader, PanelContent, SmartPanelFooter (from @/ui/components/panels)
+      TabNavigation (from @/components/TabNavigation)
+      PageHeaderCleanBadge (from @/components/PageHeaderVariants)
+      LoadingContainer (from @/components/LoadingSpinner)
+      PageThemeProvider (from @/contexts/PageThemeContext)
+    </components_used>
+    <icons>
+      TrendingUp (page header)
+      BarChart3 (Expectations tab)
+      Target (Views tab)
+      ChevronDown, ChevronRight (category collapse toggles)
+    </icons>
+  </design_system>
+
+  <configuration>
+    <tab_default>expectations</tab_default>
+    <analytics_group>capital-market-assumptions</analytics_group>
+    <data_source_static_files>
+      /public/data/cma_assumptions.json (approximately 4KB)
+      /public/data/opal_views.json (approximately 4KB)
+    </data_source_static_files>
+    <chart_dimensions>
+      ExpectationsTab: height={650px}, margin={{ top: 40, right: 30, left: 60, bottom: 100 }}
+      GradientSlider: h-8 (height: 32px)
+      ConvergingSlider: minHeight={100px}
+    </chart_dimensions>
+    <animation_durations>
+      ConvergingSlider mode transitions: duration-500 ease-out
+      GradientSlider position indicator: duration-300
+    </animation_durations>
+    <table_structure>
+      AssumptionsTable: w-full overflow-x-auto (horizontal scroll on mobile)
+      Default collapsed: all categories expanded (new Set())
+      Categories: Cash, Fixed Income, Equities, Alternatives, Commodities
+    </table_structure>
+  </configuration>
+
+  <summary>
+    The CapitalMarketAssumptions page is a complete, functional React component displaying 10-year capital market forecasts and Opal's strategic/tactical allocation views. It consists of 9 source files: 1 main component, 3 sub-components (AssumptionsTable, GradientSlider, ConvergingSlider), 2 tab components (ExpectationsTab, OpalViewsTab), 1 types file, 1 export file, and 1 documentation file. The page uses two API endpoints (/api/general/capital-markets/assumptions.json and /api/general/capital-markets/views.json) to fetch data. All functionality is operational: the Expectations tab renders a Recharts composed chart with colored bars and volatility diamond markers, the Views tab displays gradient sliders with strategic/tactical comparison and split/combined display modes. Data is fetched in parallel using React Query with CloudFront caching. The page registers data as-of dates with a central Yang data source registry. No blocking issues exist; both TODO items relate to transitioning from demo mode (public endpoints) to production mode (authenticated shared endpoints).
+  </summary>
+
+</page_inventory>

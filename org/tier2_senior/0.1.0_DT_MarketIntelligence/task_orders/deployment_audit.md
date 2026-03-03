@@ -6,7 +6,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.1.0_DT_MarketIntelligence</issued_to>
     <date>2026-03-02</date>
-    <status>pending</status>
+    <status>superseded</status>
   </metadata>
 
   <objective>
@@ -25,9 +25,9 @@
       <page>CapitalMarketAssumptions</page>
     </pages>
     <rd_agents>
-      <agent>0.0.1_RD_MarketPerformance</agent>
-      <agent>0.0.2_RD_CausalityEngine</agent>
-      <agent>0.0.3_RD_CapitalMarketAssumptions</agent>
+      <agent>0.1.1_RD_MarketPerformance</agent>
+      <agent>0.1.2_RD_CausalityEngine</agent>
+      <agent>0.1.3_RD_CapitalMarketAssumptions</agent>
     </rd_agents>
   </scope>
 
@@ -83,7 +83,7 @@ Write your audit using this structure:
   </metadata>
 
   <pages_served>
-    <page name="MarketPerformance" rd_agent="0.0.1_RD_MarketPerformance">
+    <page name="MarketPerformance" rd_agent="0.1.1_RD_MarketPerformance">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
@@ -91,7 +91,7 @@ Write your audit using this structure:
         Pipeline name, relevant scripts, S3 output paths
       </data_pipeline>
     </page>
-    <page name="CausalityEngine" rd_agent="0.0.2_RD_CausalityEngine">
+    <page name="CausalityEngine" rd_agent="0.1.2_RD_CausalityEngine">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
@@ -99,7 +99,7 @@ Write your audit using this structure:
         Pipeline name, relevant scripts, S3 output paths
       </data_pipeline>
     </page>
-    <page name="MarketUpdate" rd_agent="0.0.2_RD_CausalityEngine">
+    <page name="MarketUpdate" rd_agent="0.1.2_RD_CausalityEngine">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
@@ -107,7 +107,7 @@ Write your audit using this structure:
         Pipeline name, relevant scripts, S3 output paths
       </data_pipeline>
     </page>
-    <page name="CapitalMarketAssumptions" rd_agent="0.0.3_RD_CapitalMarketAssumptions">
+    <page name="CapitalMarketAssumptions" rd_agent="0.1.3_RD_CapitalMarketAssumptions">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>

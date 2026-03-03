@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pod_inventory>
+  <metadata>
+    <agent>0.3.0_DE_TradingOperations</agent>
+    <pod>TradingOperations</pod>
+    <pages_owned>
+      <page>PortfolioManagement</page>
+      <page>TradeSubmission</page>
+      <page>DataRefresh</page>
+      <page>auth</page>
+    </pages_owned>
+    <rd_agents>
+      <rd_agent page="PortfolioManagement">0.3.1_RD_PortfolioManagement</rd_agent>
+      <rd_agent page="TradeSubmission">0.3.2_RD_TradeSubmission</rd_agent>
+      <rd_agent page="DataRefresh">0.3.3_RD_DataRefresh</rd_agent>
+    </rd_agents>
+    <date>2026-03-02</date>
+    <wave>2 (DE pod_inventory.xml)</wave>
+    <source_documents>
+      <source>org/tier3_junior/0.3.1_RD_PortfolioManagement/deliverables/page_inventory.xml</source>
+      <source>org/tier3_junior/0.3.2_RD_TradeSubmission/deliverables/page_inventory.xml</source>
+      <source>org/tier3_junior/0.3.3_RD_DataRefresh/deliverables/page_inventory.xml</source>
+      <source>portal/src/api/endpoints/portfolio-optimization.ts</source>
+      <source>portal/src/api/endpoints/trade-submission.ts</source>
+      <source>portal/src/api/endpoints/portfolio.ts</source>
+      <source>portal/src/api/portal-proxy.ts (lines 1838-1975)</source>
+      <source>portal/src/hooks/useYangData.ts</source>
+    </source_documents>
+  </metadata>
+
+  <!-- ============================================================ -->
+  <!-- PAGES                                                         -->
+  <!-- ============================================================ -->
+
+  <pages>
+
+    <page>
+      <name>PortfolioManagement</name>
+      <rd_agent>0.3.1_RD_PortfolioManagement</rd_agent>
+      <directory>portal/src/pages/PortfolioManagement/</directory>
+      <total_files>55</total_files>
+
+      <summary>
+        The most complex page in the portal. A full portfolio optimization workbench with 5 tabs (Alpha,
+        Sector, Model, Trade, History). Receives pre-calculated optimization data from the
+        opal-pm-optimization-loader Lambda (503 securities x 33 factors), supports inline weight editing
+        via an AG Grid (33 columns), dual 60-second auto-save (legacy trade-based and new optimization-state),
+        file uploads via presigned S3 URLs, version/export history, and an Export-and-Submit flow that
+        creates a PENDING_APPROVAL record in TradeSubmission.
+      </summary>
+
+      <tabs>
+        <tab name="Alpha" status="functional">
+          Factor attribution table (alpha factors). Group filtering, search, 3-state sort (canonical/asc/desc).
+          Separate "Total Alpha" row. Read-only display.
+        </tab>
+        <tab name="Sector" status="functional">
+          Sector allocation table with constraint violations (min/max bounds highlighted red). Computes
+          final/optimized weights bottom-up from security data. 3-state sortable. Constraint validation
+          via useConstraintValidation hook.
+        </tab>
+        <tab name="Model" status="functional">
+          Model coefficients table with toggle between By Factor (34 factors) and By Group (15 groups)
+          views. Read-only, 3-state sortable.
+        </tab>
+        <tab name="Trade" status="functional">
+          Main portfolio grid (PortfolioGrid.tsx). 33 columns with frozen left pane (ticker/name/economy)
+          and scrollable pane (weights/factors/risk/trade). Inline editing: optimizedWeight and finalTrade.
+          Multi-select for bulk operations, fullscreen toggle, security lookup, version history modal,
+          export modal.
+        </tab>
+        <tab name="History" status="functional">
+          Version history. Shows export metadata (exported_at, uploaded_by, trades_count, overrides_count),
+          download buttons for Trade CSV, and submission tracking links per version.
+        </tab>
+      </tabs>
+
+      <primary_data_hook>
+        <hook>usePortfolioData (React Query) in usePortfolioOptimizationApi.ts</hook>
+        <endpoint>GET /api/private/portfolio-management/load?fund={fund}&amp;date={date}</endpoint>
+        <backend_lambda>opal-pm-optimization-loader</backend_lambda>
+        <returns>503 securities with 33 factors each, alphaFactors, sectorAllocations, modelCoefficients, modelGroups, riskFactors, factorCovariance (12x12 matrix), summary (PortfolioSummary), optimizationDate, modelDate</returns>
+      </primary_data_hook>
+
+      <secondary_data_hooks>
+        <hook name="useFunds">portal/src/pages/PortfolioManagement/hooks/usePortfolioApi.ts:110 — GET /api/private/portfolio/funds — backend: listFunds Lambda — returns Fund[] with sub-accounts</hook>
+        <hook name="useAutoSaveQuery">portal/src/pages/PortfolioManagement/hooks/usePortfolioApi.ts:125 — GET /api/private/portfolio/autosave/{fund}/{account} — returns AutoSaveResponse (exists, AutoSaveData)</hook>
+        <hook name="useOptimizationAutoSave">portal/src/pages/PortfolioManagement/hooks/useOptimizationAutoSave.ts:94 — PUT /api/private/portfolio/optimization-autosave/{fund}/{account} — 60s interval, saves full optimization state</hook>
+        <hook name="useAutoSave (legacy)">portal/src/pages/PortfolioManagement/hooks/useAutoSave.ts — PUT /api/private/portfolio/autosave/{fund}/{account} — 60s interval, delta-only (changed trades)</hook>
+        <hook name="useUploadPortfolioFiles">portal/src/pages/PortfolioManagement/hooks/usePortfolioOptimizationApi.ts:232 — GET /api/private/portfolio-management/upload-urls?fund={fund}&amp;date={date} — backend: opal-pm-upload-urls Lambda — returns presigned S3 URLs (alphaPklUrl, optimizationXlsxUrl, 15-min expiry)</hook>
+        <hook name="useSavePortfolio">portal/src/pages/PortfolioManagement/hooks/usePortfolioOptimizationApi.ts:128 — POST /api/private/portfolio-management/snapshot — saves named snapshot</hook>
+        <hook name="useSnapshots">portal/src/pages/PortfolioManagement/hooks/usePortfolioOptimizationApi.ts:152 — GET /api/private/portfolio-management/snapshots/{fund}</hook>
+        <hook name="useSnapshot">portal/src/pages/PortfolioManagement/hooks/usePortfolioOptimizationApi.ts:176 — GET /api/private/portfolio-management/snapshot/{id}</hook>
+        <hook name="useDeleteSnapshot">portal/src/pages/PortfolioManagement/hooks/usePortfolioOptimizationApi.ts:191 — DELETE /api/private/portfolio-management/snapshot/{id}</hook>
+        <hook name="useVersions">portal/src/pages/PortfolioManagement/hooks/usePortfolioApi.ts:233 — GET /api/private/portfolio/versions/{fund}/{account}?limit=20</hook>
+        <hook name="useExportAndSubmit">portal/src/pages/PortfolioManagement/hooks/usePortfolioApi.ts:211 — POST /api/private/portfolio/export-and-submit — THE PM-to-TradeSubmission bridge (see cross_pod_dependencies)</hook>
+        <hook name="useSecurityDetails">portal/src/pages/PortfolioManagement/hooks/usePortfolioOptimizationApi.ts:109 — GET /api/private/portfolio-management/security/{ticker} — BACKEND PENDING (console.warn logged)</hook>
+      </secondary_data_hooks>
+
+      <state_architecture>
+        <store name="useOptimizationState">Central state hook. Manages securities[], alphaFactors[], sectorAllocations[], modelCoefficients[], riskFactors[], summary, weight overrides, and finalTrade edits. Each tab receives sliced data and passes back update callbacks.</store>
+        <store name="usePortfolioStore">Zustand store. Fund/account selection, sessionId, versions[], currentVersionId, autoSave metadata (lastSaved, isSaving). Legacy trades array (being superseded by useOptimizationState).</store>
+        <store name="usePortfolioEditStore">Zustand store (legacy). Trade edits. May be superseded by useOptimizationState.</store>
+      </state_architecture>
+
+      <known_issues>
+        <issue file="portal/src/pages/PortfolioManagement/PortfolioManagement.tsx:124" type="TODO">modelDate uses optimizationDate as fallback — real modelDate not yet wired from API response</issue>
+        <issue file="portal/src/pages/PortfolioManagement/tabs/TradeTab.tsx:171" type="TODO">Bulk edit selection from AG Grid not implemented — grid multi-select not yet wired to BulkEditModal</issue>
+        <issue file="portal/src/pages/PortfolioManagement/hooks/usePortfolioEditStore.ts:143" type="TODO">AUM hardcoded at $100M default — should come from main store</issue>
+        <issue file="portal/src/pages/PortfolioManagement/hooks/useOptimizationState.ts:257" type="TODO">New security added via lookup creates placeholder — backend security detail fetch not called</issue>
+        <issue file="portal/src/pages/PortfolioManagement/hooks/useOptimizationCalculations.ts:61" type="TODO">predictedBeta not calculated — stubbed</issue>
+        <issue file="portal/src/pages/PortfolioManagement/hooks/useOptimizationCalculations.ts:62" type="TODO">totalRisk not calculated from covariance matrix — stubbed</issue>
+        <issue file="portal/src/pages/PortfolioManagement/hooks/useOptimizationCalculations.ts:63" type="TODO">assetSelection not calculated from decomposition — stubbed</issue>
+        <issue file="portal/src/pages/PortfolioManagement/hooks/useOptimizationCalculations.ts:64" type="TODO">commonFactor not calculated from decomposition — stubbed</issue>
+        <issue file="portal/src/pages/PortfolioManagement/hooks/useOptimizationCalculations.ts:72" type="TODO">AUM not pulled from portfolio metadata</issue>
+        <issue type="MISSING_FEATURE">Portfolio locking/approval workflow not implemented — no lock state, no approval gate before Export-and-Submit</issue>
+        <issue type="MISSING_FEATURE">getSecurityDetails backend endpoint not yet deployed — console.warn logged in portfolio-optimization.ts:201</issue>
+      </known_issues>
+    </page>
+
+    <!-- ============================================================ -->
+
+    <page>
+      <name>TradeSubmission</name>
+      <rd_agent>0.3.2_RD_TradeSubmission</rd_agent>
+      <directory>portal/src/pages/TradeSubmission/</directory>
+      <total_files>16</total_files>
+
+      <summary>
+        The downstream approval and execution portal for trade orders. Receives submissions created
+        either manually (via SubmitTab form or Excel/CSV file upload) or automatically from
+        PortfolioManagement's Export-and-Submit flow. Four tabs model the full trade lifecycle:
+        Submit (initiate), Approvals (PENDING_APPROVAL queue, 15s refetch), Execution (APPROVED queue,
+        20s refetch), History (COMPLETE/REJECTED, paginated 20/page). All workflow actions (approve,
+        reject, execute) flow through a single /api/general/trades/workflow endpoint. Three
+        backend Lambdas: trade-submission-handler, trade-workflow-handler, trade-dashboard-api.
+      </summary>
+
+      <tabs>
+        <tab name="Submit" status="functional">
+          New trade submission form. FileUploadZone (Excel/CSV parse via services/fileParser.ts),
+          ConsolidatedTradePanel (fund, dates, brokerage destination, SecuritiesTable), AttestationsCard
+          (4 required checkboxes), SubmitButtonRow. Ticker autocomplete via searchIdentifierCache
+          (2-char minimum), identifier batch-save after successful submission.
+        </tab>
+        <tab name="Approvals" status="functional">
+          Pending trades (PENDING_APPROVAL status). Alert banner when items present. TradeCard grid
+          with approve/reject/view/download actions. Modals: ApproveModal, RejectModal, TradeDetailsModal.
+          useApprovals hook refetches every 15s.
+        </tab>
+        <tab name="Execution" status="functional">
+          Approved trades (APPROVED status). Success banner when items present. TradeCards with
+          execute/view/download actions. ExecuteModal shows brokerage destination. Refetches every 20s.
+        </tab>
+        <tab name="History" status="functional">
+          Completed and rejected trades. View mode toggle (My Submissions vs All Trades). Status filter
+          (Complete/Rejected). Pagination: 20 items/page, resets to page 1 on filter/mode change.
+          TradeCards with view/download actions.
+        </tab>
+      </tabs>
+
+      <primary_data_hook>
+        <hook>usePendingApprovals (React Query) in hooks/useTradeSubmissionState.ts:45</hook>
+        <endpoint>GET /api/general/trades/submissions/pending</endpoint>
+        <backend_lambda>trade-dashboard-api</backend_lambda>
+        <returns>{ count: number, submissions: TradeSubmission[] }</returns>
+        <refetch_interval>15000ms</refetch_interval>
+      </primary_data_hook>
+
+      <secondary_data_hooks>
+        <hook name="useAllSubmissions">hooks/useTradeSubmissionState.ts:32 — GET /api/general/trades/submissions — refetch 30s</hook>
+        <hook name="useMySubmissions">hooks/useTradeSubmissionState.ts:58 — GET /api/general/trades/submissions/by-initiator?email={email} — refetch 30s</hook>
+        <hook name="useApprovedSubmissions">hooks/useTradeSubmissionState.ts:71 — GET /api/general/trades/submissions/by-status?status=APPROVED — refetch 20s</hook>
+        <hook name="useExecutedSubmissions">hooks/useTradeSubmissionState.ts:84 — GET /api/general/trades/submissions/by-status?status=EXECUTED — refetch 30s</hook>
+        <hook name="useCompletedSubmissions">hooks/useTradeSubmissionState.ts:96 — GET /api/general/trades/submissions/by-status?status=COMPLETE — refetch 60s</hook>
+        <hook name="useRejectedSubmissions">hooks/useTradeSubmissionState.ts:108 — GET /api/general/trades/submissions/by-status?status=REJECTED — refetch 60s</hook>
+      </secondary_data_hooks>
+
+      <trade_lifecycle>
+        PENDING_APPROVAL → (approveSubmission) → APPROVED → (executeSubmission) → EXECUTED → COMPLETE
+        PENDING_APPROVAL → (rejectSubmission) → REJECTED
+        APPROVED → (rejectSubmission) → REJECTED
+        All state transitions: POST /api/general/trades/workflow with action: approve|reject|execute|complete
+      </trade_lifecycle>
+
+      <file_parsing>
+        <service>portal/src/pages/TradeSubmission/services/fileParser.ts</service>
+        <formats>Excel (.xlsx), CSV</formats>
+        <row_layout>Row 0: fund | Row 1: weightsAsOf | Row 2: tradesAsOf | Row 3: tradeComments | Row 4: otherComments | Row 6: headers | Row 7+: securities</row_layout>
+        <special>Skips cash/CURNCY rows. Handles Excel serial dates and percentage/decimal weight formats.</special>
+      </file_parsing>
+
+      <auth_requirement>useAuth hook required for all operations — email and name needed for initiator/approver/executor fields. Unauthenticated users see login message.</auth_requirement>
+
+      <known_issues>
+        <issue file="portal/src/pages/TradeSubmission/components/README_FILEUPLOAD.md:55" type="TODO">Documentation references an API call that is implemented in SubmitTab.tsx:83 — minor doc/code alignment issue</issue>
+      </known_issues>
+    </page>
+
+    <!-- ============================================================ -->
+
+    <page>
+      <name>DataRefresh</name>
+      <rd_agent>0.3.3_RD_DataRefresh</rd_agent>
+      <directory>portal/src/pages/DataRefresh/</directory>
+      <total_files>12</total_files>
+
+      <summary>
+        Admin/ops-only page (requires Dev userType) for triggering full portal data refreshes.
+        Users upload PKL files (alpha.pkl, model.pkl) and optionally a manifest.json, then trigger
+        the Yang pipeline via AWS Step Functions. Pipeline status is polled every 3 seconds until
+        a terminal state. History tab shows past executions with rollback capability. CurrentStatePanel
+        reads the live manifest.json to show data freshness (Fresh/Aging/Stale). All backend calls
+        go through portal-proxy.ts using apiRequest (scoped/dev-gated routes).
+      </summary>
+
+      <tabs>
+        <tab name="Upload" status="functional">
+          FileDropZone (drag-and-drop, manifest.json auto-detection), ManifestPreview (file presence
+          checks, missing file warnings, generators-to-run list), UploadProgress (per-file XHR progress),
+          PipelineProgress (grouped Step Functions steps with auto-expand on active step), CurrentStatePanel
+          (live manifest.json showing data_as_of per source).
+        </tab>
+        <tab name="History" status="functional">
+          Execution history table (status, data_as_of, files_processed, duration, triggered_by).
+          Rollback button per row triggers rollbackDataRefresh. Informational panel explains rollback
+          mechanics.
+        </tab>
+      </tabs>
+
+      <primary_data_hook>
+        <hook>triggerDataRefresh + getDataRefreshStatus polling in hooks/useDataRefreshState.ts</hook>
+        <endpoint>POST /api/scoped/data-refresh/trigger → returns { executionId }; then GET /api/scoped/data-refresh/status/{executionId} polled every 3s</endpoint>
+        <backend>portal-proxy.ts apiRequest (scoped, dev-userType required); ultimately invokes Yang pipeline via Step Functions</backend>
+      </primary_data_hook>
+
+      <upload_flow>
+        1. getDataRefreshUploadUrls (POST /api/scoped/data-refresh/upload-urls) — returns { uploadId, urls: Record[filename, presignedUrl] }
+        2. XMLHttpRequest PUT to each presigned S3 URL with progress tracking
+        3. triggerDataRefresh (POST /api/scoped/data-refresh/trigger, body: { uploadId }) — starts Step Functions execution, returns { executionId }
+        4. Poll getDataRefreshStatus every 3s until SUCCEEDED|FAILED|TIMED_OUT|ABORTED
+        5. 409 Conflict = pipeline already running — user-friendly toast with retry suggestion
+      </upload_flow>
+
+      <manifest_format>
+        manifest.json parsed in FileDropZone. Fields: files[] with type (data_pkl|model_pkl|cma_excel|peer_excel|attribution_excel|regression_csv), filename, size, status. Optional: strategy, asOfDate. Missing file detection shows UX warnings.
+      </manifest_format>
+
+      <data_freshness>
+        CurrentStatePanel fetches /api/general/json/latest/manifest.json using Bearer token from localStorage (useQuery with caching). Displays generated_at, pipeline_execution_id, per-source data_as_of/updated_at. Staleness categories: Fresh / Aging / Stale based on age.
+      </data_freshness>
+
+      <known_issues>
+        <issue file="portal/src/pages/DataRefresh/components/PipelineProgress.tsx:5" type="import">STATUS_COLORS imported from @/ui/components/statusColors — verify this path exists in shared UI components</issue>
+      </known_issues>
+    </page>
+
+  </pages>
+
+  <!-- ============================================================ -->
+  <!-- API ENDPOINTS                                                  -->
+  <!-- ============================================================ -->
+
+  <api_endpoints>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/portfolio-optimization.ts</file>
+      <base_path>/api/private/portfolio-management</base_path>
+      <auth>apiRequest (JWT, tier === 'internal' required)</auth>
+      <functions>
+        <function name="loadOptimizationData" method="GET" path="/api/private/portfolio-management/load?fund={fund}&amp;date={date}">
+          Load full optimization snapshot from backend. Backend: opal-pm-optimization-loader Lambda. Returns
+          503 securities with 33 factors, alphaFactors, sectorAllocations, modelCoefficients, modelGroups,
+          riskFactors, factorCovariance (12x12), summary (PortfolioSummary), optimizationDate, modelDate.
+          Called by: usePortfolioData hook in usePortfolioOptimizationApi.ts:84.
+        </function>
+        <function name="saveOptimizationSnapshot" method="POST" path="/api/private/portfolio-management/snapshot">
+          Save current optimization state as named snapshot. Called by: useSavePortfolio in usePortfolioOptimizationApi.ts:128.
+        </function>
+        <function name="listOptimizationSnapshots" method="GET" path="/api/private/portfolio-management/snapshots/{fund}">
+          List all snapshots for a fund. Called by: useSnapshots in usePortfolioOptimizationApi.ts:152.
+        </function>
+        <function name="getOptimizationSnapshot" method="GET" path="/api/private/portfolio-management/snapshot/{snapshotId}">
+          Get specific snapshot. Called by: useSnapshot in usePortfolioOptimizationApi.ts:176.
+        </function>
+        <function name="deleteOptimizationSnapshot" method="DELETE" path="/api/private/portfolio-management/snapshot/{snapshotId}">
+          Delete draft snapshot. Called by: useDeleteSnapshot in usePortfolioOptimizationApi.ts:191.
+        </function>
+        <function name="getUploadUrls" method="GET" path="/api/private/portfolio-management/upload-urls?fund={fund}&amp;date={date}">
+          Get presigned S3 URLs for alpha.pkl and optimization.xlsx uploads (15-min expiry). Backend:
+          opal-pm-upload-urls Lambda. Called by: useUploadPortfolioFiles in usePortfolioOptimizationApi.ts:232.
+        </function>
+        <function name="uploadToS3" method="PUT" path="presigned S3 URL">
+          Direct S3 upload via XMLHttpRequest with progress callback. Called by: UploadPortfolioModal.tsx.
+        </function>
+        <function name="searchSecurities" method="GET" path="/api/trades/identifiers/search?q={query}">
+          Security ticker lookup. Reuses TradeSubmission identifier search endpoint. Called by: SecurityLookupModal.
+        </function>
+        <function name="getSecurityDetails" method="GET" path="/api/private/portfolio-management/security/{ticker}">
+          Full security details with factor breakdown. BACKEND PENDING — console.warn logged. Called by:
+          usePortfolioOptimizationApi.ts (stub).
+        </function>
+        <function name="extractDateFromFilename" type="utility">
+          Extracts YYYYMMDD pattern from filename string. Not an API call. Used in: UploadPortfolioModal.
+        </function>
+        <function name="getMockOptimizationData" type="dev-only">
+          Returns mock OptimizationSnapshot for development. Not used in production paths.
+        </function>
+      </functions>
+      <pages_using>PortfolioManagement (TradeTab, UploadPortfolioModal, useOptimizationState, usePortfolioOptimizationApi)</pages_using>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/trade-submission.ts</file>
+      <base_path>/api/general/trades</base_path>
+      <auth>publicApiRequest (no JWT scope — trades use their own auth model via user email)</auth>
+      <backend_lambdas>trade-submission-handler, trade-workflow-handler, trade-dashboard-api</backend_lambdas>
+      <functions>
+        <function name="submitTrade" method="POST" path="/api/general/trades/submit">
+          Submit new trade. Request: SubmitTradeRequest (fund, brokerage, weights_as_of, proposed_trades_as_of, attestations, securities[], initiator_email, initiator_name). Returns TradeSubmission. Called by: SubmitTab.tsx:179.
+        </function>
+        <function name="approveSubmission" method="POST" path="/api/general/trades/workflow">
+          Approve trade (action: 'approve'). Called by: useTradeSubmissionActions.ts:53.
+        </function>
+        <function name="rejectSubmission" method="POST" path="/api/general/trades/workflow">
+          Reject trade with required reason (action: 'reject'). Called by: useTradeSubmissionActions.ts:104.
+        </function>
+        <function name="executeSubmission" method="POST" path="/api/general/trades/workflow">
+          Execute approved trade (action: 'execute'). Called by: useTradeSubmissionActions.ts:149.
+        </function>
+        <function name="completeSubmission" method="POST" path="/api/general/trades/workflow">
+          Mark trade complete (action: 'complete'). Not directly surfaced in current UI — may be auto-triggered.
+        </function>
+        <function name="getAllSubmissions" method="GET" path="/api/general/trades/submissions">
+          All submissions most-recent-first. Called by: useAllSubmissions hook.
+        </function>
+        <function name="getPendingApprovals" method="GET" path="/api/general/trades/submissions/pending">
+          PENDING_APPROVAL queue. Called by: usePendingApprovals hook (15s refetch).
+        </function>
+        <function name="getMySubmissions" method="GET" path="/api/general/trades/submissions/by-initiator?email={email}">
+          Submissions by initiator email. Called by: useMySubmissions hook.
+        </function>
+        <function name="getSubmissionsApprovedBy" method="GET" path="/api/general/trades/submissions/by-approver?email={email}">
+          Submissions approved by email. Not currently used in active tab hooks — available for future.
+        </function>
+        <function name="getSubmissionsByStatus" method="GET" path="/api/general/trades/submissions/by-status?status={status}">
+          Filter by status. Called by: useApprovedSubmissions, useExecutedSubmissions, useCompletedSubmissions, useRejectedSubmissions hooks.
+        </function>
+        <function name="getSubmission" method="GET" path="/api/general/trades/submissions/{submissionId}">
+          Single submission detail. Available for detail views.
+        </function>
+        <function name="downloadExcelFile" method="GET" path="/api/general/trades/submissions/{submissionId}/excel">
+          Get presigned S3 URL for Vident Excel template and auto-open in new tab. Called by: useTradeSubmissionActions.ts:182.
+        </function>
+        <function name="getTradeUsers" method="GET" path="/api/general/trades/users">
+          All trade users (for dropdowns/filters). Available, not currently used in active hooks.
+        </function>
+        <function name="searchIdentifierCache" method="GET" path="/api/general/trades/identifiers/search?q={query}">
+          Ticker autocomplete — returns up to 10 SecurityIdentifier results sorted by occurrence frequency.
+          Minimum 2-char query enforced client-side. Called by: TickerAutocompleteInput.tsx.
+        </function>
+        <function name="batchSaveIdentifiers" method="POST" path="/api/general/trades/identifiers/batch">
+          Save/increment occurrence counts for security identifiers after submission. Called by: SubmitTab.tsx:83.
+        </function>
+      </functions>
+      <pages_using>TradeSubmission (all hooks and tabs); portfolio-optimization.ts reuses /api/trades/identifiers/search for SecurityLookupModal in PortfolioManagement</pages_using>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/portfolio.ts</file>
+      <base_path>/api/private/portfolio (apiRequest, JWT) and /api/portfolio (publicApiRequest, legacy)</base_path>
+      <auth>Dual: apiRequest (JWT, /api/private/portfolio/*) for persistence functions; publicApiRequest (legacy export functions)</auth>
+      <backend_lambdas>portfolio_pickle_parser (parse-pickle), opal-pm-autosave-handler (autosave), opal-portfolio-version-manager (versions), opal-portfolio-export-submit (export-and-submit), opal-portfolio-funds (funds)</backend_lambdas>
+      <functions>
+        <function name="uploadPickleFile" method="POST" path="/api/private/portfolio/parse-pickle">
+          Upload PKL as base64 — legacy, no fund/account. Returns ImportData.
+        </function>
+        <function name="uploadPickleFileWithFund" method="POST" path="/api/private/portfolio/parse-pickle">
+          Upload PKL with fund/account/strategy context. Backend saves to S3 and creates initial auto-save. Returns UploadResponse (sessionId, fund, account, data: {strategy, trades, metrics}). Called by: usePortfolioUploadWithFund hook.
+        </function>
+        <function name="getAutoSave" method="GET" path="/api/private/portfolio/autosave/{fund}/{account}">
+          Fetch current auto-save (account='_' if null). Returns AutoSaveResponse {exists, autosave: AutoSaveData}. AutoSaveData can contain both legacy (trades[]) and new-format (securities[], alphaFactors[], etc.) fields. Called by: useAutoSaveQuery hook.
+        </function>
+        <function name="updateAutoSave" method="PUT" path="/api/private/portfolio/autosave/{fund}/{account}">
+          Delta auto-save (legacy path) — sends only changedTrades. Backend merges with existing 505 trades. Called by: useAutoSave legacy hook.
+        </function>
+        <function name="saveOptimizationAutoSave" method="PUT" path="/api/private/portfolio/optimization-autosave/{fund}/{account}">
+          Full-state auto-save for optimization workflow — sends complete securities[], alphaFactors[], sectorAllocations[], modelCoefficients[], modelGroups[], riskFactors[], summary. Called by: useOptimizationAutoSave.ts:94.
+        </function>
+        <function name="exportAndSubmit" method="POST" path="/api/private/portfolio/export-and-submit">
+          THE PM-TO-TRADESUBMISSION BRIDGE. Generates Vident Trade CSV, uploads to S3, creates a
+          PENDING_APPROVAL TradeSubmission record. Returns ExportAndSubmitResponse (versionId, submissionId,
+          tradeCsvUrl, tradeCsvKey, exportedAt, totalSecurities, tradeCount). Called by: useExportAndSubmit
+          hook. Resulting submissionId appears in TradeSubmission Approvals tab.
+        </function>
+        <function name="getExportDownloadUrl" method="GET" path="/api/private/portfolio/exports/{fund}/{account}/{versionId}/download">
+          Presigned download URL for previously exported Trade CSV. Called by: HistoryTab.tsx:8 (getExportDownloadUrl direct).
+        </function>
+        <function name="listVersions" method="GET" path="/api/private/portfolio/versions/{fund}/{account}?limit=20">
+          Export version history. Returns VersionsListResponse (versions: VersionMetadata[]). VersionMetadata includes optional submissionId linking to TradeSubmission. Called by: useVersions hook.
+        </function>
+        <function name="loadVersion" method="GET" path="/api/private/portfolio/versions/{fund}/{account}/{versionId}">
+          Load specific export version as VersionData (trades, metrics, exportedAt). Called by: useLoadVersion hook.
+        </function>
+        <function name="listFunds" method="GET" path="/api/private/portfolio/funds">
+          Available funds with sub-accounts. Returns Fund[] with FundCode (PFOE|PFDE|TAX), name, hasSubAccounts, accounts[]. Called by: useFunds hook.
+        </function>
+        <function name="exportToVidentTemplate" method="POST" path="/api/portfolio/export">
+          Legacy export to Vident template Excel (publicApiRequest). Pre-dates exportAndSubmit bridge.
+        </function>
+        <function name="getExportHistory" method="GET" path="/api/portfolio/exports?strategy={strategy}&amp;limit={limit}">
+          Legacy export history (publicApiRequest). Pre-dates versioning system.
+        </function>
+        <function name="transformToEditableTrade" type="utility">
+          Converts TradeRecord (API format) to EditableTrade (UI format). Calculates tradeWeight and derives BUY/SELL/HOLD action.
+        </function>
+        <function name="transformToExportTrade" type="utility">
+          Converts EditableTrade to ExportTrade for submission. SEDOL/ISIN/FIGI lookup not yet implemented (TODO in function body).
+        </function>
+      </functions>
+      <pages_using>PortfolioManagement (all hooks: usePortfolioApi.ts, useOptimizationAutoSave.ts, usePortfolioOptimizationApi.ts, HistoryTab.tsx)</pages_using>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/portal-proxy.ts (lines 1838-1975)</file>
+      <base_path>/api/scoped/data-refresh</base_path>
+      <auth>apiRequest (scoped, requires Dev userType)</auth>
+      <backend>Yang pipeline via Step Functions (invoked through scoped API gateway route)</backend>
+      <functions>
+        <function name="getDataRefreshUploadUrls" method="POST" path="/api/scoped/data-refresh/upload-urls">
+          Get presigned S3 PUT URLs for file uploads. Request: { fileInfo: Array[{name, size}] }. Returns { uploadId, urls: Record[filename, presignedUrl] }. Called by: useDataRefreshState.ts:250.
+        </function>
+        <function name="triggerDataRefresh" method="POST" path="/api/scoped/data-refresh/trigger">
+          Trigger Step Functions execution after file upload. Request: { uploadId }. Returns { executionId }. Called by: useDataRefreshState.ts:311.
+        </function>
+        <function name="getDataRefreshStatus" method="GET" path="/api/scoped/data-refresh/status/{executionId}">
+          Poll Step Functions execution status. Returns DataRefreshStatusResponse (status, steps[], currentStep, executionArn, error). Polled every 3s until terminal state. Called by: useDataRefreshState.ts:159.
+        </function>
+        <function name="getDataRefreshHistory" method="GET" path="/api/scoped/data-refresh/history?limit={limit}">
+          Past execution history (default limit 20). Returns DataRefreshHistoryResponse. Called by: useDataRefreshState.ts:418.
+        </function>
+        <function name="rollbackDataRefresh" method="POST" path="/api/scoped/data-refresh/rollback">
+          Rollback to previous execution state. Request: { executionId }. Returns { newExecutionId }. Called by: useDataRefreshState.ts:444.
+        </function>
+      </functions>
+      <pages_using>DataRefresh (hooks/useDataRefreshState.ts exclusively)</pages_using>
+    </endpoint>
+
+  </api_endpoints>
+
+  <!-- ============================================================ -->
+  <!-- SHARED COMPONENTS                                             -->
+  <!-- ============================================================ -->
+
+  <shared_components>
+    <component path="@/components/PageHeaderVariants" export="PageHeaderCleanBadge">
+      Page header with icon and description. Used by: PortfolioManagement.tsx, TradeSubmission.tsx, DataRefresh.tsx (all 3 pages).
+    </component>
+    <component path="@/contexts/PageThemeContext" export="PageThemeProvider">
+      Theme provider for page accent colors. Used by: PortfolioManagement.tsx, TradeSubmission.tsx, DataRefresh.tsx (all 3 pages).
+    </component>
+    <component path="@/components/TabNavigation" export="TabNavigation">
+      Tab navigation with icons. Used by: PortfolioManagement.tsx, TradeSubmission.tsx, DataRefresh.tsx (all 3 pages).
+    </component>
+    <component path="@/hooks/useTabNavigation" export="useTabNavigation">
+      Tab state and scroll management hook. Used by: PortfolioManagement.tsx, TradeSubmission.tsx, DataRefresh.tsx (all 3 pages).
+    </component>
+    <component path="@/ui/components/panels" export="Panel, PanelHeader, PanelContent">
+      Panel layout primitives. Used by: PortfolioManagement (all tabs and modals), TradeSubmission (all tabs and FileUploadZone), DataRefresh (UploadTab, HistoryTab, CurrentStatePanel) — all 3 pages.
+    </component>
+    <component path="@/hooks/useAuth" export="useAuth">
+      Auth context hook (user email, name). Used by: PortfolioManagement/tabs/TradeTab.tsx (export authorization) and TradeSubmission.tsx (all workflow operations require user identity).
+    </component>
+    <component path="@/components/LoadingSpinner" export="LoadingContainer">
+      Loading spinner. Used by: PortfolioManagement/tabs/HistoryTab.tsx, TradeSubmission/tabs/ApprovalsTab.tsx, ExecutionTab.tsx, HistoryTab.tsx.
+    </component>
+    <component path="lucide-react" export="icons">
+      Icon library. Used by all pages and all components across the pod.
+    </component>
+    <component path="sonner" export="toast">
+      Toast notification library. Used by: PortfolioManagement (upload, save, delete actions), DataRefresh (upload/pipeline errors).
+    </component>
+    <component path="@tanstack/react-query" export="useQuery, useMutation, useQueryClient">
+      React Query. Used by all data-fetching hooks across PortfolioManagement and TradeSubmission. DataRefresh (CurrentStatePanel manifest fetch).
+    </component>
+  </shared_components>
+
+  <!-- ============================================================ -->
+  <!-- CROSS-POD DEPENDENCIES                                        -->
+  <!-- ============================================================ -->
+
+  <cross_pod_dependencies>
+
+    <intra_pod_workflow name="PM-to-TradeSubmission Export Bridge" criticality="HIGH">
+      <description>
+        The primary operational workflow of this pod. PM user completes optimization, reviews the Trade
+        tab, then triggers Export-and-Submit from ExportModal (TradeTab). This calls exportAndSubmit()
+        in portfolio.ts (POST /api/private/portfolio/export-and-submit), which generates the Vident Trade
+        CSV, uploads it to S3, and writes a PENDING_APPROVAL TradeSubmission record to DynamoDB.
+        The resulting submissionId is stored in VersionMetadata.submissionId (listVersions response)
+        and appears in TradeSubmission's Approvals tab via getPendingApprovals() (15s refetch).
+        History tab in PM shows each version's submissionId as a navigation link to TradeSubmission.
+      </description>
+      <from_page>PortfolioManagement</from_page>
+      <from_function>exportAndSubmit (portfolio.ts)</from_function>
+      <from_endpoint>POST /api/private/portfolio/export-and-submit</from_endpoint>
+      <to_page>TradeSubmission</to_page>
+      <to_function>getPendingApprovals (trade-submission.ts)</to_function>
+      <to_endpoint>GET /api/general/trades/submissions/pending</to_endpoint>
+      <link_field>submissionId in ExportAndSubmitResponse / VersionMetadata.submissionId</link_field>
+    </intra_pod_workflow>
+
+    <external_dependency name="SecurityLookupModal uses TradeSubmission identifier cache">
+      <description>
+        portfolio-optimization.ts searchSecurities() reuses /api/trades/identifiers/search endpoint
+        (also used by TradeSubmission's TickerAutocompleteInput). Cross-page within pod — same identifier
+        cache backing both pages.
+      </description>
+      <from_page>PortfolioManagement (SecurityLookupModal)</from_page>
+      <from_function>searchSecurities in portfolio-optimization.ts</from_function>
+      <to_page>TradeSubmission identifier cache</to_page>
+      <to_endpoint>GET /api/trades/identifiers/search</to_endpoint>
+    </external_dependency>
+
+    <external_dependency name="YangDataContext (not actively used in this pod)" criticality="LOW">
+      <description>
+        portal/src/hooks/useYangData.ts exposes useYangTimestamp() — a thin wrapper around YangDataContext.
+        This context provides Yang's data timestamp (likely from yang pipeline output) and is used by
+        other pods (MarketIntelligence, PortfolioAnalytics) for data freshness display. The TradingOperations
+        pod does not currently consume useYangTimestamp — DataRefresh directly reads manifest.json for
+        freshness data.
+      </description>
+    </external_dependency>
+
+    <external_dependency name="DataRefresh invokes Yang Pipeline" criticality="HIGH">
+      <description>
+        DataRefresh triggers the yang pipeline (Step Functions) via /api/scoped/data-refresh routes.
+        This pipeline regenerates the JSON data consumed by PortfolioAnalytics pod pages (Positioning,
+        Attribution, FactorTilts, Valuation, Macroeconomics, Correlation). Cross-pod operational dependency:
+        DataRefresh is the admin trigger for data that feeds the entire PortfolioAnalytics pod.
+      </description>
+      <from_page>DataRefresh</from_page>
+      <to_pod>PortfolioAnalytics (0.2.0_DE)</to_pod>
+      <to_pipelines>yang-pipeline (Step Functions)</to_pipelines>
+    </external_dependency>
+
+    <external_dependency name="react-router-dom navigation from DataRefresh">
+      <description>
+        DataRefresh/components/PipelineProgress.tsx uses Link from react-router to navigate to related
+        pages (Valuation, Market Overview, Model Portfolios) — cross-pod navigation links shown after
+        pipeline completion.
+      </description>
+    </external_dependency>
+
+  </cross_pod_dependencies>
+
+  <!-- ============================================================ -->
+  <!-- POD HEALTH                                                    -->
+  <!-- ============================================================ -->
+
+  <pod_health>
+    <open_issues_count>12</open_issues_count>
+    <todo_count>9</todo_count>
+    <missing_backends_count>1</missing_backends_count>
+    <missing_contracts_count>0</missing_contracts_count>
+
+    <summary>
+      Pod is functionally operational across all three pages. The PM-to-TradeSubmission export bridge
+      is implemented end-to-end. The highest risk area is PortfolioManagement: 9 TODO stubs in
+      calculation hooks (predictedBeta, totalRisk, assetSelection, commonFactor, AUM sourcing) leave
+      summary stats partially incomplete. The getSecurityDetails backend endpoint is not yet deployed
+      (console.warn logged). Bulk edit selection from AG Grid is stubbed. DataRefresh and TradeSubmission
+      are clean with only minor documentation alignment issues.
+    </summary>
+
+    <highest_risk>
+      PortfolioManagement — dual auto-save paths (legacy + optimization) with Zustand + React Query
+      state split across usePortfolioStore, usePortfolioEditStore, and useOptimizationState creates
+      complexity risk. Risk calculation stubs (predictedBeta, totalRisk) mean the summary panel
+      does not show accurate live metrics.
+    </highest_risk>
+
+    <operational_note>
+      DataRefresh is Dev-userType gated (scoped API). Regular portal users cannot trigger it.
+      TradeSubmission uses publicApiRequest — no JWT scope — trades rely on email-based identity
+      (no RBAC enforcement at the API level beyond Lambda business logic).
+    </operational_note>
+  </pod_health>
+
+</pod_inventory>
