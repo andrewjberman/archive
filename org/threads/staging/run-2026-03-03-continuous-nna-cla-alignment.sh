@@ -22,7 +22,7 @@ TOPIC="Pattern 0 alignment: adv_drill (Continuous NNA ADV) + cla_timeseries (Con
 CREATED_BY="2.0.0_SA_COO"
 PARTICIPANTS="0.4.0_DS_ClientPlatform,0.4.0_DE_ClientPlatform,0.4.2_RD_AdvisorIntelligence"
 MAX_TURNS=3
-MODEL="gpt-5.3-codex"
+MODEL="gpt-4o"
 
 # ---------------------------------------------------------------------------
 # Context (M1 compliance: DS knowledge source files + portal consumer files)

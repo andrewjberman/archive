@@ -22,7 +22,7 @@ TOPIC="Pattern 0 alignment: Books tab L2/L3/L4 design brief"
 CREATED_BY="2.0.0_SA_COO"
 PARTICIPANTS="0.4.0_DS_ClientPlatform,0.4.2_RD_AdvisorIntelligence,0.4.0_DE_ClientPlatform"
 MAX_TURNS=3
-MODEL="gpt-5.3-codex"
+MODEL="gpt-4o"
 
 # ---------------------------------------------------------------------------
 # Context (M1: advisor publisher + gold scripts + current portal consumer files)

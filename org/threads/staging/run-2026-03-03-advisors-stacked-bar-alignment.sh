@@ -22,7 +22,7 @@ TOPIC="Pattern 0 alignment: Advisors tab stacked bar (Stream A3)"
 CREATED_BY="2.0.0_SA_COO"
 PARTICIPANTS="0.4.0_DS_ClientPlatform,0.4.0_DE_ClientPlatform,0.4.2_RD_AdvisorIntelligence"
 MAX_TURNS=3
-MODEL="gpt-5.3-codex"
+MODEL="gpt-4o"
 
 # ---------------------------------------------------------------------------
 # Context (M1: current script 10 + portal consumer + types)

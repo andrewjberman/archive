@@ -68,6 +68,8 @@ resolve_agent() {
 
   if [ "$x" != "0" ]; then
     TIER_FOLDER="tier1_exec"
+  elif [ "$z" != "0" ]; then
+    TIER_FOLDER="tier3_junior"
   elif [ "$y" != "0" ]; then
     TIER_FOLDER="tier2_senior"
   else
@@ -468,10 +470,25 @@ elif [ -n "$OPENING_MESSAGE" ]; then
 fi
 
 # --- Write initial TURN.json ---
-# Creator wrote message 000, so next agent is the second participant
-SECOND_AGENT="${PARTICIPANTS[1]}"
+# If creator is a participant, they wrote message 000 (their first turn),
+# so the next agent is PARTICIPANTS[1]. If creator is NOT a participant
+# (e.g., COO opens a thread they don't participate in), PARTICIPANTS[0]
+# goes first -- the opening message is not a participant turn.
+CREATOR_IS_PARTICIPANT=false
+for serial in "${PARTICIPANTS[@]}"; do
+  if [ "$serial" = "$CREATED_BY" ]; then
+    CREATOR_IS_PARTICIPANT=true
+    break
+  fi
+done
 
-# Build turns_taken: creator has 1 turn, everyone else has 0
+if [ "$CREATOR_IS_PARTICIPANT" = "true" ]; then
+  FIRST_TURN_AGENT="${PARTICIPANTS[1]}"
+else
+  FIRST_TURN_AGENT="${PARTICIPANTS[0]}"
+fi
+
+# Build turns_taken: creator (if participant) has 1 turn, everyone else has 0
 TURNS_TAKEN=$("$JQ" -n '{}')
 for serial in "${PARTICIPANTS[@]}"; do
   if [ "$serial" = "$CREATED_BY" ]; then
@@ -483,7 +500,7 @@ done
 
 "$JQ" -n \
   --argjson turn_number 1 \
-  --arg next_agent "$SECOND_AGENT" \
+  --arg next_agent "$FIRST_TURN_AGENT" \
   --argjson turns_taken "$TURNS_TAKEN" \
   --arg last_updated "$CREATED_AT" \
   '{
@@ -494,7 +511,7 @@ done
     last_updated: $last_updated
   }' > "$THREAD_DIR/TURN.json"
 
-echo "OK: Wrote TURN.json (next agent: $SECOND_AGENT)"
+echo "OK: Wrote TURN.json (next agent: $FIRST_TURN_AGENT)"
 echo ""
 echo "Thread '$THREAD_ID' is ready."
 echo "  Directory: $THREAD_DIR"

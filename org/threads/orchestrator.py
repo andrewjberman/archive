@@ -70,8 +70,11 @@ def resolve_agent(serial: str) -> dict:
     y = parts[1]
     role_code = parts[2].split("_")[1] if "_" in parts[2] else parts[2]
 
+    z = parts[2].split("_")[0]  # numeric z component before role suffix
     if x != "0":
         tier_folder = "tier1_exec"
+    elif z != "0":
+        tier_folder = "tier3_junior"
     elif y != "0":
         tier_folder = "tier2_senior"
     else:
@@ -653,7 +656,7 @@ def run_thread(thread_dir: Path, client: OpenAI | None, model: str, dry_run: boo
 def main():
     parser = argparse.ArgumentParser(description="Run an agent thread via OpenAI API")
     parser.add_argument("--thread",   required=True,          help="Thread ID to run")
-    parser.add_argument("--model",    default="gpt-5.3-codex",  help="OpenAI model (default: gpt-5.3-codex)")
+    parser.add_argument("--model",    default="gpt-4o",          help="OpenAI model (default: gpt-4o)")
     parser.add_argument("--dry-run",   action="store_true",    help="Show invocation without calling API")
     parser.add_argument("--verbose",   action="store_true",    help="Print agent responses and tool calls to stdout")
     parser.add_argument("--no-tools",  action="store_true",    help="Disable tool use (faster/cheaper; agents cannot read files)")
