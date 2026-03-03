@@ -1,0 +1,1167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  pipeline_inventory.xml
+  Agent:    0.5.0_AE_OpalETL
+  Date:     2026-03-02
+  Purpose:  Permanent activation document — complete map of all Lambda functions,
+            EC2 services, EventBridge rules, S3 artifact paths, IAM roles, and
+            Terraform modules owned by AE OpalETL.
+  Source:   All values read verbatim from Terraform .tf files, CHANGELOG.json,
+            lambda-source-map.json, and EC2_MANIFEST.json. No inference.
+-->
+
+<pipeline_inventory>
+
+  <metadata>
+    <agent>0.5.0_AE_OpalETL</agent>
+    <date>2026-03-02</date>
+    <pipelines_owned>
+      <pipeline>yang-pipeline</pipeline>
+      <pipeline>news-pipeline</pipeline>
+      <pipeline>market-overview</pipeline>
+      <pipeline>smartx-pipeline</pipeline>
+      <pipeline>causality</pipeline>
+      <pipeline>seeking-alpha</pipeline>
+    </pipelines_owned>
+    <artifact_bucket>opal-313476888478-lambda-artifacts</artifact_bucket>
+    <layer_bucket>opal-313476888478-lambda-layers</layer_bucket>
+    <state_bucket>opal-313476888478-terraform-state</state_bucket>
+  </metadata>
+
+  <!-- =========================================================== -->
+  <!-- PIPELINE: yang-pipeline                                      -->
+  <!-- =========================================================== -->
+  <pipeline name="yang-pipeline"
+            terraform_module="infra/aws/terraform/yang-pipeline/"
+            current_tag="yang-v2.1.4"
+            s3_backend_key="yang-pipeline/tfstate"
+            trigger_model="S3 upload to opal-data-portal-v2/uploads/ → yang-pipeline-trigger Lambda → YangDataPipeline Step Functions">
+
+    <lambdas>
+      <!-- ORCHESTRATION -->
+      <lambda>
+        <name>yang-pipeline-trigger</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/orchestration/yang-pipeline-trigger</source_path>
+        <artifact_s3_key>yang-pipeline/yang-pipeline-trigger.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>30</timeout_s>
+        <runtime>module-default (not specified in lambdas.tf)</runtime>
+        <layers/>
+        <trigger>S3 (opal-data-portal-v2/uploads/)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-validate-files</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/orchestration/validate-files</source_path>
+        <artifact_s3_key>yang-pipeline/yang-validate-files.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>module-default</runtime>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-get-prior-metadata</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/orchestration/get-prior-metadata</source_path>
+        <artifact_s3_key>yang-pipeline/yang-get-prior-metadata.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>module-default</runtime>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-generate-manifest</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/orchestration/generate-manifest</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-manifest.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>module-default</runtime>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-move-to-processed</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/orchestration/move-to-processed</source_path>
+        <artifact_s3_key>yang-pipeline/yang-move-to-processed.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>240</timeout_s>
+        <runtime>module-default</runtime>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-cleanup-uploads</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/orchestration/cleanup-uploads</source_path>
+        <artifact_s3_key>yang-pipeline/yang-cleanup-uploads.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>120</timeout_s>
+        <runtime>module-default</runtime>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+
+      <!-- OUTPUTS -->
+      <lambda>
+        <name>yang-generate-latest</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/outputs/generate-latest</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-latest.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>module-default</runtime>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-ingest-dynamodb</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/outputs/ingest-dynamodb</source_path>
+        <artifact_s3_key>yang-pipeline/yang-ingest-dynamodb.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-generate-volatility</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/outputs/generate-volatility</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-volatility.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>120</timeout_s>
+        <runtime>module-default</runtime>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-refresh-fred-cache</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/outputs/refresh-fred-cache</source_path>
+        <artifact_s3_key>yang-pipeline/yang-refresh-fred-cache.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>120</timeout_s>
+        <runtime>module-default</runtime>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-capture-output-versions</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/outputs/capture-output-versions</source_path>
+        <artifact_s3_key>yang-pipeline/yang-capture-output-versions.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>module-default</runtime>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-invalidate-cloudfront</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/outputs/invalidate-cloudfront</source_path>
+        <artifact_s3_key>yang-pipeline/yang-invalidate-cloudfront.zip</artifact_s3_key>
+        <memory_mb>128</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>module-default</runtime>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+
+      <!-- POSITIONING -->
+      <lambda>
+        <name>yang-generate-positioning</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-positioning.zip</artifact_s3_key>
+        <memory_mb>1024</memory_mb>
+        <timeout_s>360</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-generate-allocation-summary</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-allocation-summary</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-allocation-summary.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>240</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-generate-holdings-attribution</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-holdings-attribution</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-holdings-attribution.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>120</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+          <layer>openpyxl-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:openpyxl-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+
+      <!-- PORTFOLIOS -->
+      <lambda>
+        <name>yang-generate-benchmark-returns</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-generate-benchmark-returns</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-benchmark-returns.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>240</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-generate-etf-returns</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-generate-etf-returns</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-etf-returns.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>120</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-generate-peer-performance</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-generate-peer-performance</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-peer-performance.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>240</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+          <layer>openpyxl-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:openpyxl-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-model-portfolio-benchmarks</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-model-portfolio-benchmarks</source_path>
+        <artifact_s3_key>yang-pipeline/yang-model-portfolio-benchmarks.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>240</timeout_s>
+        <runtime>module-default</runtime>
+        <layers>
+          <layer>AWSSDKPandas-Python312:16 (arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python312:16)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+
+      <!-- VALUATION -->
+      <lambda>
+        <name>yang-generate-valuation</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/valuation/yang-generate-valuation</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-valuation.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>240</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-generate-risk-premium</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/valuation/yang-generate-risk-premium</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-risk-premium.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>240</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+
+      <!-- FACTOR TILTS -->
+      <lambda>
+        <name>yang-generate-factor-tilts</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/factor_tilts/yang-generate-factor-tilts</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-factor-tilts.zip</artifact_s3_key>
+        <memory_mb>1024</memory_mb>
+        <timeout_s>600</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+
+      <!-- MACROECONOMICS -->
+      <lambda>
+        <name>yang-generate-macro</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/macro/yang-generate-macro</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-macro.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>240</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-generate-macro-timeseries</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/macro/yang-generate-macro-timeseries</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-macro-timeseries.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>360</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+
+      <!-- CORRELATION -->
+      <lambda>
+        <name>yang-generate-correlation</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/correlation/yang-generate-correlation</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-correlation.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>360</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+
+      <!-- CAPITAL MARKET ASSUMPTIONS -->
+      <lambda>
+        <name>yang-generate-cma</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/cma/yang-generate-cma</source_path>
+        <artifact_s3_key>yang-pipeline/yang-generate-cma.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>240</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline)</trigger>
+        <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+    </lambdas>
+
+    <step_functions>
+      <state_machine>
+        <name>YangDataPipeline</name>
+        <role>yang-pipeline-sfn-role</role>
+        <definition_file>infra/aws/terraform/yang-pipeline/yang-pipeline-definition.json</definition_file>
+        <summary>Orchestrates full yang data processing: validate → get-prior-metadata → generate-manifest → parallel branch (positioning, portfolios, valuation, factor-tilts, macro, correlation, cma, outputs) → move-to-processed → cleanup-uploads → capture-output-versions → invalidate-cloudfront</summary>
+        <also_invokes>opal-precompute-market-metrics, opal-market-overview-tiered-generator, opal-market-rsi-tiered-generator, opal-market-regime-classifier</also_invokes>
+      </state_machine>
+    </step_functions>
+
+    <eventbridge_rules>
+      <!-- None — yang-pipeline is triggered by S3 upload, not EventBridge.
+           The S3 notification that invokes yang-pipeline-trigger is managed
+           by the portal-notifications Terraform module, not this module. -->
+    </eventbridge_rules>
+
+    <s3_artifacts>
+      <input_bucket>opal-data-portal-v2</input_bucket>
+      <input_prefix>uploads/</input_prefix>
+      <output_bucket>opal-data-portal-v2</output_bucket>
+      <processed_prefix>processed/</processed_prefix>
+      <artifact_pattern>s3://opal-313476888478-lambda-artifacts/yang-pipeline/{function-name}.zip</artifact_pattern>
+      <dynamodb_tables>
+        <table>opal-portal-market-data</table>
+        <table>etf-classifications</table>
+      </dynamodb_tables>
+    </s3_artifacts>
+
+    <iam_roles>
+      <role>yang-pipeline-lambda-role</role>
+      <role>yang-pipeline-sfn-role</role>
+    </iam_roles>
+
+    <other_resources>
+      <resource type="dynamodb_table">etf-classifications (managed in yang-pipeline etf-classifications.tf, PAY_PER_REQUEST, GSIs: asset-class-index, sub-asset-class-index)</resource>
+    </other_resources>
+  </pipeline>
+
+  <!-- =========================================================== -->
+  <!-- PIPELINE: news-pipeline                                      -->
+  <!-- =========================================================== -->
+  <pipeline name="news-pipeline"
+            terraform_module="infra/aws/terraform/news-pipeline/"
+            current_tag="news-v2.3.0"
+            s3_backend_key="news-pipeline/tfstate">
+
+    <lambdas>
+      <lambda>
+        <name>news-ingestion-scheduler</name>
+        <source_path>infra/aws/lambda/news_ingestion_scheduler</source_path>
+        <artifact_s3_key>news-pipeline/news-ingestion-scheduler.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>900</timeout_s>
+        <runtime>python3.12</runtime>
+        <package_type>Zip</package_type>
+        <layers>
+          <layer>news-trending-deps (aws_lambda_layer_version.news_trending_deps)</layer>
+        </layers>
+        <trigger>EventBridge (16 rules: news-api-700am through news-api-1100pm + 5 news-rss-* rules)</trigger>
+        <last_deployed_commit>0279e499b451320199477329281efc2a787f9309</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>news-trending-analysis</name>
+        <source_path>infra/aws/lambda/news_trending_analysis</source_path>
+        <artifact_s3_key>news-pipeline/news-trending-analysis.zip</artifact_s3_key>
+        <memory_mb>10240</memory_mb>
+        <timeout_s>900</timeout_s>
+        <runtime>python3.12</runtime>
+        <package_type>Zip</package_type>
+        <layers>
+          <layer>news-trending-deps (aws_lambda_layer_version.news_trending_deps)</layer>
+        </layers>
+        <trigger>EventBridge (news-trending-analysis-daily: cron(30 13,21 * * ? *), ENABLED)</trigger>
+        <last_deployed_commit>0279e499b451320199477329281efc2a787f9309</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>opal-news-layer3-curation</name>
+        <source_path>infra/aws/lambda/news_layer3_curation</source_path>
+        <artifact_s3_key>news-pipeline/opal-news-layer3-curation.zip</artifact_s3_key>
+        <memory_mb>10240</memory_mb>
+        <timeout_s>900</timeout_s>
+        <runtime>python3.12</runtime>
+        <package_type>Zip</package_type>
+        <layers>
+          <layer>news-trending-deps (aws_lambda_layer_version.news_trending_deps)</layer>
+        </layers>
+        <trigger>Chain-invoked by news-trending-analysis; EventBridge fallback (layer3-gpt-curation-daily: cron(55 21 * * ? *), DISABLED)</trigger>
+        <last_deployed_commit>0279e499b451320199477329281efc2a787f9309</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>news-semantic-clustering</name>
+        <source_path>infra/aws/lambda/news_semantic_clustering</source_path>
+        <artifact_s3_key>N/A (Container Image)</artifact_s3_key>
+        <image_uri>313476888478.dkr.ecr.us-east-1.amazonaws.com/news-semantic-clustering:latest</image_uri>
+        <memory_mb>3008</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>Container Image</runtime>
+        <package_type>Image</package_type>
+        <layers/>
+        <trigger>No active EventBridge trigger (removed 2026-02-24); invoked by news-trending-analysis chain</trigger>
+        <last_deployed_commit>0279e499b451320199477329281efc2a787f9309</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>semantic-news-layer3-curation</name>
+        <source_path>infra/aws/lambda/semantic-news-layer3-curation</source_path>
+        <artifact_s3_key>news-pipeline/semantic-news-layer3-curation.zip</artifact_s3_key>
+        <memory_mb>1024</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>python3.12</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>No active EventBridge trigger (removed 2026-02-24)</trigger>
+        <last_deployed_commit>0279e499b451320199477329281efc2a787f9309</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>semantic-trending-topics-portal-publisher</name>
+        <source_path>infra/aws/lambda/semantic-trending-topics-portal-publisher</source_path>
+        <artifact_s3_key>news-pipeline/semantic-trending-topics-portal-publisher.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>python3.12</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>No active EventBridge trigger (removed 2026-02-24)</trigger>
+        <last_deployed_commit>0279e499b451320199477329281efc2a787f9309</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>opal-news-ai-sentiment</name>
+        <source_path>tools/news_scanner/lambda/layer2_finbert_scoring</source_path>
+        <artifact_s3_key>N/A (Container Image — FinBERT)</artifact_s3_key>
+        <image_uri>313476888478.dkr.ecr.us-east-1.amazonaws.com/finbert-lambda:latest</image_uri>
+        <memory_mb>3008</memory_mb>
+        <timeout_s>900</timeout_s>
+        <runtime>Container Image</runtime>
+        <package_type>Image</package_type>
+        <layers/>
+        <trigger>manual / invoked by other Lambdas (no EventBridge)</trigger>
+        <last_deployed_commit>0279e499b451320199477329281efc2a787f9309</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>keyword-intelligence-generator</name>
+        <source_path>infra/aws/lambda/keyword_intelligence_generator</source_path>
+        <artifact_s3_key>news-pipeline/keyword-intelligence-generator.zip</artifact_s3_key>
+        <memory_mb>2048</memory_mb>
+        <timeout_s>780</timeout_s>
+        <runtime>python3.12</runtime>
+        <package_type>Zip</package_type>
+        <layers>
+          <layer>news-trending-deps (aws_lambda_layer_version.news_trending_deps)</layer>
+        </layers>
+        <trigger>Chain-invoked by news-trending-analysis; EventBridge fallback (keyword-intelligence-generator-daily: cron(50 14,21 * * ? *), DISABLED)</trigger>
+        <last_deployed_commit>0279e499b451320199477329281efc2a787f9309</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>opal-keyword-drilldown-generator</name>
+        <source_path>infra/aws/lambda/keyword_drilldown_generator</source_path>
+        <artifact_s3_key>news-pipeline/opal-keyword-drilldown-generator.zip</artifact_s3_key>
+        <memory_mb>1024</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>python3.12</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>EventBridge (keyword-intelligence-generator-daily, DISABLED)</trigger>
+        <last_deployed_commit>0279e499b451320199477329281efc2a787f9309</last_deployed_commit>
+      </lambda>
+    </lambdas>
+
+    <step_functions>
+      <!-- None — news-pipeline uses EventBridge-to-Lambda direct invocation with chain-invocation between functions -->
+    </step_functions>
+
+    <eventbridge_rules>
+      <!-- NEWS API RULES (11) — all target news-ingestion-scheduler -->
+      <rule><name>news-api-700am</name><schedule>cron(0 12 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-api-845am</name><schedule>cron(45 13 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-api-1100am</name><schedule>cron(0 16 * * ? *)</schedule><state>DISABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-api-100pm</name><schedule>cron(0 18 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-api-345pm</name><schedule>cron(45 20 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-api-400pm</name><schedule>cron(0 21 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-api-500pm</name><schedule>cron(0 22 * * ? *)</schedule><state>DISABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-api-600pm</name><schedule>cron(0 23 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-api-745pm</name><schedule>cron(45 0 * * ? *)</schedule><state>DISABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-api-900pm</name><schedule>cron(0 2 * * ? *)</schedule><state>DISABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-api-1100pm</name><schedule>cron(0 4 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <!-- NEWS RSS RULES (5) -->
+      <rule><name>news-rss-9am</name><schedule>cron(0 14 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-rss-12pm</name><schedule>cron(0 17 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-rss-3pm</name><schedule>cron(0 20 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-rss-6pm</name><schedule>cron(0 23 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <rule><name>news-rss-9pm</name><schedule>cron(0 2 * * ? *)</schedule><state>ENABLED</state><target>news-ingestion-scheduler</target></rule>
+      <!-- ANALYTICS RULES -->
+      <rule><name>news-trending-analysis-daily</name><schedule>cron(30 13,21 * * ? *)</schedule><state>ENABLED</state><target>news-trending-analysis</target></rule>
+      <rule><name>layer3-gpt-curation-daily</name><schedule>cron(55 21 * * ? *)</schedule><state>DISABLED</state><target>opal-news-layer3-curation (fallback)</target></rule>
+      <rule><name>keyword-intelligence-generator-daily</name><schedule>cron(50 14,21 * * ? *)</schedule><state>DISABLED</state><target>keyword-intelligence-generator (fallback)</target></rule>
+    </eventbridge_rules>
+
+    <s3_artifacts>
+      <news_data_bucket>opal-data-news-v2</news_data_bucket>
+      <legacy_news_bucket>opal-data-news-av</legacy_news_bucket>
+      <portal_output_bucket>opal-data-portal-v2</portal_output_bucket>
+      <portal_output_prefixes>
+        <prefix>sentiment/keyword-sentiments.json</prefix>
+        <prefix>json/trending/</prefix>
+        <prefix>json/semantic-trending/</prefix>
+      </portal_output_prefixes>
+      <artifact_pattern>s3://opal-313476888478-lambda-artifacts/news-pipeline/{function-name}.zip</artifact_pattern>
+      <dynamodb_tables>
+        <table>opal-news-articles</table>
+        <table>opal-news-trending-daily</table>
+        <table>opal-keyword-intelligence</table>
+      </dynamodb_tables>
+    </s3_artifacts>
+
+    <iam_roles>
+      <role active="true">news-ingestion-lambda-role (used by: news-ingestion-scheduler, news-trending-analysis, keyword-intelligence-generator, opal-keyword-drilldown-generator)</role>
+      <role active="true">opal-news-lambda-role (used by: opal-news-layer3-curation)</role>
+      <role active="false" note="orphaned — no Lambda currently uses this">news-dashboard-processor-role</role>
+      <role active="false" note="orphaned — no Lambda currently uses this">news-sentiment-lambda-role</role>
+      <role active="false" note="orphaned — no Lambda currently uses this">semantic-news-lambda-role</role>
+    </iam_roles>
+
+    <other_resources>
+      <resource type="ecr_repository">news-semantic-clustering (ECR, managed in news-pipeline lambdas.tf)</resource>
+      <resource type="dynamodb_table">opal-keyword-intelligence (managed in news-pipeline main.tf, PAY_PER_REQUEST, GSI: date-index)</resource>
+    </other_resources>
+  </pipeline>
+
+  <!-- =========================================================== -->
+  <!-- PIPELINE: market-overview                                    -->
+  <!-- =========================================================== -->
+  <pipeline name="market-overview"
+            terraform_module="infra/aws/terraform/market-overview/"
+            current_tag="market-overview-v1.4.1"
+            s3_backend_key="market-overview/tfstate">
+
+    <lambdas>
+      <lambda>
+        <name>opal-market-regime-classifier</name>
+        <source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/market-regime-classifier</source_path>
+        <artifact_s3_key>market-overview/opal-market-regime-classifier.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>120</timeout_s>
+        <runtime>module-default</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline — invoked via SFN role)</trigger>
+        <last_deployed_commit>1a5cfd2c5e3048d344a3614e541bdfb377b26040</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>opal-portal-fear-greed-fetcher</name>
+        <source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/fear-greed-fetcher</source_path>
+        <artifact_s3_key>market-overview/opal-portal-fear-greed-fetcher.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>900</timeout_s>
+        <runtime>python3.11</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>EventBridge (fear-greed-daily-update: cron(30 14,21 * * ? *), ENABLED)</trigger>
+        <last_deployed_commit>1a5cfd2c5e3048d344a3614e541bdfb377b26040</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>opal-trending-topics-portal-publisher</name>
+        <source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/trending-topics-portal-publisher</source_path>
+        <artifact_s3_key>market-overview/opal-trending-topics-portal-publisher.zip</artifact_s3_key>
+        <memory_mb>10240</memory_mb>
+        <timeout_s>900</timeout_s>
+        <runtime>python3.11</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>Chain-invoked by opal-news-layer3-curation; EventBridge fallback rules all DISABLED</trigger>
+        <last_deployed_commit>1a5cfd2c5e3048d344a3614e541bdfb377b26040</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>opal-market-overview-tiered-generator</name>
+        <source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/market-overview-tiered-generator</source_path>
+        <artifact_s3_key>market-overview/opal-market-overview-tiered-generator.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>python3.11</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>StepFunctions (YangDataPipeline — invoked via SFN role)</trigger>
+        <last_deployed_commit>1a5cfd2c5e3048d344a3614e541bdfb377b26040</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>opal-market-rsi-tiered-generator</name>
+        <source_path>infra/aws/lambda/v2_portal/01_market_overview/lambdas/market-rsi-tiered-generator</source_path>
+        <artifact_s3_key>market-overview/opal-market-rsi-tiered-generator.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>180</timeout_s>
+        <runtime>module-default</runtime>
+        <package_type>Zip</package_type>
+        <layers>
+          <layer>AWSSDKPandas-Python312:16 (arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python312:16)</layer>
+        </layers>
+        <trigger>EventBridge (market-rsi-tiered-daily: cron(30 21 * * ? *), ENABLED)</trigger>
+        <last_deployed_commit>1a5cfd2c5e3048d344a3614e541bdfb377b26040</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>opal-precompute-market-metrics</name>
+        <source_path>infra/aws/lambda/precompute_market_metrics</source_path>
+        <artifact_s3_key>N/A (lifecycle ignore_changes — Node.js, deployed externally)</artifact_s3_key>
+        <memory_mb>1024</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>nodejs20.x</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>manual / invoked by other processes (no EventBridge)</trigger>
+        <last_deployed_commit>not tracked (lifecycle ignore_changes)</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>opal-cloudfront-market-generator</name>
+        <source_path>N/A (Node.js — no local source managed in repo)</source_path>
+        <artifact_s3_key>N/A (lifecycle ignore_changes — Node.js, deployed externally)</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>nodejs20.x</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>manual (no EventBridge)</trigger>
+        <last_deployed_commit>not tracked (lifecycle ignore_changes)</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>opal-portal-data-proxy</name>
+        <source_path>infra/aws/lambda/portal_data_proxy</source_path>
+        <artifact_s3_key>market-overview/opal-portal-data-proxy.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>90</timeout_s>
+        <runtime>python3.11</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>API Gateway (portal data proxy — no EventBridge)</trigger>
+        <last_deployed_commit>1a5cfd2c5e3048d344a3614e541bdfb377b26040</last_deployed_commit>
+        <note>lifecycle ignore_changes on filename/source_code_hash — deployed with bundled Linux openai/pydantic_core wheels</note>
+      </lambda>
+      <lambda>
+        <name>opal-portal-volatility-fetcher</name>
+        <source_path>infra/aws/lambda/v2_portal/07_macroeconomics/lambdas/opal-portal-volatility-fetcher</source_path>
+        <artifact_s3_key>market-overview/opal-portal-volatility-fetcher.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>120</timeout_s>
+        <runtime>python3.11</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>EventBridge (volatility-daily-update: cron(30 12 ? * MON-FRI *), ENABLED)</trigger>
+        <last_deployed_commit>1a5cfd2c5e3048d344a3614e541bdfb377b26040</last_deployed_commit>
+        <note>lifecycle ignore_changes — large package with Linux-compiled scipy/numpy wheels</note>
+      </lambda>
+    </lambdas>
+
+    <step_functions>
+      <!-- None — market-overview does not own any Step Functions state machines -->
+    </step_functions>
+
+    <eventbridge_rules>
+      <rule><name>fear-greed-daily-update</name><schedule>cron(30 14,21 * * ? *)</schedule><state>ENABLED</state><target>opal-portal-fear-greed-fetcher</target></rule>
+      <rule><name>market-rsi-tiered-daily</name><schedule>cron(30 21 * * ? *)</schedule><state>ENABLED</state><target>opal-market-rsi-tiered-generator</target></rule>
+      <rule><name>trending-topics-portal-publisher-morning</name><schedule>cron(10 14 * * ? *)</schedule><state>DISABLED</state><target>opal-trending-topics-portal-publisher (safety-net fallback)</target></rule>
+      <rule><name>trending-topics-portal-publisher-afternoon</name><schedule>cron(0 23 * * ? *)</schedule><state>DISABLED</state><target>opal-trending-topics-portal-publisher (safety-net fallback)</target></rule>
+      <rule><name>trending-topics-portal-publisher-daily</name><schedule>cron(10 14,21 * * ? *)</schedule><state>DISABLED</state><target>opal-trending-topics-portal-publisher (kept to prevent console re-creation)</target></rule>
+      <rule><name>volatility-daily-update</name><schedule>cron(30 12 ? * MON-FRI *)</schedule><state>ENABLED</state><target>opal-portal-volatility-fetcher</target></rule>
+    </eventbridge_rules>
+
+    <s3_artifacts>
+      <portal_bucket>opal-data-portal-v2</portal_bucket>
+      <output_patterns>
+        <pattern>market-metrics.json / market-metrics.json.gz</pattern>
+        <pattern>json/sentiment/fear-greed-index.json</pattern>
+        <pattern>json/macro/*</pattern>
+        <pattern>json-tiered/market-overview/*</pattern>
+        <pattern>json/sentiment/fear-greed-index.json</pattern>
+      </output_patterns>
+      <artifact_pattern>s3://opal-313476888478-lambda-artifacts/market-overview/{function-name}.zip</artifact_pattern>
+    </s3_artifacts>
+
+    <iam_roles>
+      <role>opal-lambda-market-metrics-role (dedicated, opal-precompute-market-metrics)</role>
+      <role>opal-lambda-market-rsi-role (dedicated, opal-market-rsi-tiered-generator)</role>
+      <role note="shared portal role — NOT managed in this module, referenced by ARN only">opal-portal-lambda-role</role>
+    </iam_roles>
+  </pipeline>
+
+  <!-- =========================================================== -->
+  <!-- PIPELINE: smartx-pipeline                                    -->
+  <!-- =========================================================== -->
+  <pipeline name="smartx-pipeline"
+            terraform_module="infra/aws/terraform/smartx-pipeline/"
+            current_tag="smartx-v2.0.0"
+            s3_backend_key="smartx-pipeline/tfstate">
+
+    <lambdas>
+      <lambda>
+        <name>smartx-ec2-autostart</name>
+        <source_path>infra/aws/lambda/smartx-ec2-autostart</source_path>
+        <artifact_s3_key>smartx-pipeline/smartx-ec2-autostart.zip</artifact_s3_key>
+        <memory_mb>128</memory_mb>
+        <timeout_s>900</timeout_s>
+        <runtime>python3.11</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>EventBridge (smartx-daily-export-trigger: cron(0 14 ? * MON-FRI *), ENABLED)</trigger>
+        <last_deployed_commit>81ba66ea7f3644e36cca8b7abafcbd5e392f2787</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>opal-smartx-ingestion-pipeline</name>
+        <source_path>infra/aws/lambda/smartx_ingestion_pipeline</source_path>
+        <artifact_s3_key>smartx-pipeline/opal-smartx-ingestion-pipeline.zip</artifact_s3_key>
+        <memory_mb>2048</memory_mb>
+        <timeout_s>600</timeout_s>
+        <runtime>python3.11</runtime>
+        <package_type>Zip</package_type>
+        <layers>
+          <layer>var.pandas_layer_arn (injected via Terraform variable)</layer>
+        </layers>
+        <trigger>Invoked by smartx-exporter EC2 after export completes</trigger>
+        <last_deployed_commit>81ba66ea7f3644e36cca8b7abafcbd5e392f2787</last_deployed_commit>
+      </lambda>
+    </lambdas>
+
+    <step_functions>
+      <!-- None -->
+    </step_functions>
+
+    <eventbridge_rules>
+      <rule><name>smartx-daily-export-trigger</name><schedule>cron(0 14 ? * MON-FRI *)</schedule><state>ENABLED</state><target>smartx-ec2-autostart</target></rule>
+    </eventbridge_rules>
+
+    <ec2_resources>
+      <instance>
+        <name>smartx-exporter</name>
+        <resource_name>aws_instance.smartx_exporter</resource_name>
+        <instance_id>i-06ebcb27395eb3f49</instance_id>
+        <instance_type>t3.small</instance_type>
+        <instance_type_persistent>true</instance_type_persistent>
+        <iam_role>var.ec2_role_name (smartx-exporter-role)</iam_role>
+        <ecr_repository>313476888478.dkr.ecr.us-east-1.amazonaws.com/smartx-exporter</ecr_repository>
+        <note>No Elastic IP — host changes on each start. Run sync-ec2-manifest.sh after starting.</note>
+      </instance>
+    </ec2_resources>
+
+    <s3_artifacts>
+      <smartx_data_bucket>opal-data-smartx-v2</smartx_data_bucket>
+      <smartx_legacy_bucket>opal-data-smartx (read-only)</smartx_legacy_bucket>
+      <portal_bucket>opal-data-portal-v2</portal_bucket>
+      <dynamodb_tables>
+        <table>opal-data-smartx</table>
+      </dynamodb_tables>
+      <artifact_pattern>s3://opal-313476888478-lambda-artifacts/smartx-pipeline/{function-name}.zip</artifact_pattern>
+    </s3_artifacts>
+
+    <iam_roles>
+      <role>var.autostart_role_name (smartx-ec2-autostart Lambda role)</role>
+      <role>smartx-ingestion-lambda-role (opal-smartx-ingestion-pipeline)</role>
+      <role>var.ec2_role_name (smartx-exporter EC2 instance role)</role>
+    </iam_roles>
+  </pipeline>
+
+  <!-- =========================================================== -->
+  <!-- PIPELINE: causality                                          -->
+  <!-- =========================================================== -->
+  <pipeline name="causality"
+            terraform_module="infra/aws/terraform/causality/"
+            current_tag="NONE — no CHANGELOG.json, no git tag"
+            s3_backend="NO S3 BACKEND — no backend block in main.tf (local state only)">
+
+    <lambdas>
+      <lambda>
+        <name>causality-ai-query-handler</name>
+        <source_path>infra/aws/lambda/causality_ai_query_handler</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>arn:aws:iam::313476888478:role/lambda-causality-ai-query-handler-role</iam_role>
+        <trigger>manual / API invocation (no EventBridge in module)</trigger>
+        <last_deployed_commit>not tracked in lambda-source-map.json</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>causality-analysis-generator</name>
+        <source_path>infra/aws/lambda/causality_analysis_generator</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>arn:aws:iam::313476888478:role/lambda-causality-analysis-generator-role</iam_role>
+        <trigger>manual / API invocation</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>causality-data-enrichment</name>
+        <source_path>infra/aws/lambda/causality_data_enrichment</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>arn:aws:iam::313476888478:role/lambda-causality-data-enrichment-role</iam_role>
+        <trigger>manual / API invocation</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+        <env_vars>NEWS_SCANNER_BUCKET=opal-data-news-av</env_vars>
+      </lambda>
+      <lambda>
+        <name>causality-history-manager</name>
+        <source_path>infra/aws/lambda/causality_history_manager</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>arn:aws:iam::313476888478:role/lambda-causality-history-manager-role</iam_role>
+        <trigger>manual / API invocation</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>causality-market-update-generator</name>
+        <source_path>infra/aws/lambda/causality_market_update_generator</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>arn:aws:iam::313476888478:role/lambda-causality-market-update-generator-role</iam_role>
+        <trigger>manual / API invocation</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>causality-thematic-signals-generator</name>
+        <source_path>infra/aws/lambda/causality_thematic_signals_generator</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>arn:aws:iam::313476888478:role/lambda-causality-thematic-signals-generator-role</iam_role>
+        <trigger>manual / API invocation</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>causality-themes-fetcher</name>
+        <source_path>infra/aws/lambda/causality_themes_fetcher</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>arn:aws:iam::313476888478:role/lambda-causality-themes-fetcher-role</iam_role>
+        <trigger>manual / API invocation</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>causality-trade-idea-generator</name>
+        <source_path>infra/aws/lambda/causality_trade_idea_generator</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>60</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>arn:aws:iam::313476888478:role/lambda-causality-trade-idea-generator-role</iam_role>
+        <trigger>manual / API invocation</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+    </lambdas>
+
+    <step_functions><!-- None --></step_functions>
+    <eventbridge_rules><!-- None defined in causality/main.tf --></eventbridge_rules>
+
+    <s3_artifacts>
+      <!-- No S3 artifact bucket pattern defined — causality uses inline source_dir (old yang-lambda pattern), not S3-backed deployment -->
+    </s3_artifacts>
+
+    <iam_roles>
+      <!-- Per-function dedicated roles, not managed inside causality/main.tf — referenced by ARN only -->
+      <role>lambda-causality-ai-query-handler-role</role>
+      <role>lambda-causality-analysis-generator-role</role>
+      <role>lambda-causality-data-enrichment-role</role>
+      <role>lambda-causality-history-manager-role</role>
+      <role>lambda-causality-market-update-generator-role</role>
+      <role>lambda-causality-thematic-signals-generator-role</role>
+      <role>lambda-causality-themes-fetcher-role</role>
+      <role>lambda-causality-trade-idea-generator-role</role>
+    </iam_roles>
+  </pipeline>
+
+  <!-- =========================================================== -->
+  <!-- PIPELINE: seeking-alpha                                      -->
+  <!-- =========================================================== -->
+  <pipeline name="seeking-alpha"
+            terraform_module="infra/aws/terraform/seeking-alpha/"
+            current_tag="NONE — no CHANGELOG.json, no git tag"
+            s3_backend="NO S3 BACKEND — no backend block in main.tf (local state only)">
+
+    <lambdas>
+      <!-- ANALYSIS PIPELINE: coordinator → listing-parser → dedup → scraper -->
+      <lambda>
+        <name>seeking-alpha-analysis-coordinator</name>
+        <source_path>infra/aws/lambda/seeking-alpha-url-coordinator</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>seeking-alpha-scraper-role</iam_role>
+        <trigger>EventBridge (seeking-alpha-analysis-daily: cron(0 21 * * ? *), ENABLED)</trigger>
+        <last_deployed_commit>not tracked in lambda-source-map.json</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>seeking-alpha-analysis-listing-parser</name>
+        <source_path>infra/aws/lambda/seeking-alpha-analysis-listing-parser</source_path>
+        <memory_mb>1024</memory_mb>
+        <timeout_s>900</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>seeking-alpha-scraper-role</iam_role>
+        <trigger>Chain-invoked by seeking-alpha-analysis-coordinator</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>seeking-alpha-analysis-dedup</name>
+        <source_path>infra/aws/lambda/seeking-alpha-dedup-coordinator</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>seeking-alpha-scraper-role</iam_role>
+        <trigger>Chain-invoked by seeking-alpha-analysis-listing-parser</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>seeking-alpha-analysis-scraper</name>
+        <source_path>infra/aws/lambda/seeking-alpha-article-scraper</source_path>
+        <memory_mb>1024</memory_mb>
+        <timeout_s>900</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>seeking-alpha-scraper-role</iam_role>
+        <trigger>Chain-invoked by seeking-alpha-analysis-dedup (fan-out)</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+      <!-- NEWS PIPELINE: coordinator → dedup → scraper -->
+      <lambda>
+        <name>seeking-alpha-news-coordinator</name>
+        <source_path>infra/aws/lambda/seeking-alpha-news-coordinator</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>seeking-alpha-scraper-role</iam_role>
+        <trigger>EventBridge (seeking-alpha-news-daily: cron(0 14 * * ? *), ENABLED)</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>seeking-alpha-news-dedup</name>
+        <source_path>infra/aws/lambda/seeking-alpha-news-dedup</source_path>
+        <memory_mb>512</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>seeking-alpha-scraper-role</iam_role>
+        <trigger>Chain-invoked by seeking-alpha-news-coordinator</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>seeking-alpha-news-scraper</name>
+        <source_path>infra/aws/lambda/seeking-alpha-news-scraper</source_path>
+        <memory_mb>1024</memory_mb>
+        <timeout_s>600</timeout_s>
+        <runtime>python3.12</runtime>
+        <iam_role>seeking-alpha-scraper-role</iam_role>
+        <trigger>Chain-invoked by seeking-alpha-news-dedup (fan-out)</trigger>
+        <last_deployed_commit>not tracked</last_deployed_commit>
+      </lambda>
+    </lambdas>
+
+    <step_functions><!-- None --></step_functions>
+
+    <eventbridge_rules>
+      <rule><name>seeking-alpha-analysis-daily</name><schedule>cron(0 21 * * ? *)</schedule><state>ENABLED</state><target>seeking-alpha-analysis-coordinator</target></rule>
+      <rule><name>seeking-alpha-news-daily</name><schedule>cron(0 14 * * ? *)</schedule><state>ENABLED</state><target>seeking-alpha-news-coordinator</target></rule>
+    </eventbridge_rules>
+
+    <s3_artifacts>
+      <news_av_bucket>opal-data-news-av</news_av_bucket>
+      <analysis_prefix>seeking-alpha/analysis/</analysis_prefix>
+      <news_prefix>seeking-alpha/news/</news_prefix>
+      <dynamodb_tables>
+        <table>opal-news-articles</table>
+        <table>seeking-alpha-article-urls (dedup registry)</table>
+      </dynamodb_tables>
+    </s3_artifacts>
+
+    <iam_roles>
+      <role>seeking-alpha-scraper-role (shared across all 7 functions, managed in seeking-alpha/main.tf)</role>
+    </iam_roles>
+  </pipeline>
+
+  <!-- =========================================================== -->
+  <!-- EC2 SERVICES                                                 -->
+  <!-- =========================================================== -->
+  <ec2_services>
+    <service>
+      <name>smartx-exporter</name>
+      <instance_id>i-06ebcb27395eb3f49</instance_id>
+      <instance_type>t3.small</instance_type>
+      <instance_type_persistent>true</instance_type_persistent>
+      <source_path>infra/aws/ec2/smartx-exporter</source_path>
+      <remote_path>/home/ubuntu/smartx-exporter</remote_path>
+      <deploy_script>infra/aws/ec2/smartx-exporter/deploy-to-ec2.sh</deploy_script>
+      <last_deployed_commit>null (not tracked in EC2_MANIFEST.json)</last_deployed_commit>
+      <last_deployed_at>null</last_deployed_at>
+      <trigger>Started by smartx-ec2-autostart Lambda via EC2 StartInstances API; self-shuts down after export</trigger>
+      <pipeline>smartx-pipeline</pipeline>
+      <note>No Elastic IP — host changes on each start. Run sync-ec2-manifest.sh to refresh. Post-deploy must copy run-all-portfolios.sh to /home/ubuntu/smartx-exporter/ AND /home/ubuntu/run-all-portfolios.sh (autostart Lambda expects the latter path).</note>
+    </service>
+    <service>
+      <name>seeking-alpha-scraper</name>
+      <instance_id>null (not populated in EC2_MANIFEST.json — needs sync-ec2-manifest.sh)</instance_id>
+      <ec2_host>44.201.69.3</ec2_host>
+      <instance_type_persistent>true</instance_type_persistent>
+      <source_path>infra/aws/ec2/seeking_alpha_scraper</source_path>
+      <remote_path>/home/ubuntu/seeking-alpha-scraper</remote_path>
+      <deploy_script>infra/aws/ec2/seeking_alpha_scraper/deploy_hybrid.sh</deploy_script>
+      <last_deployed_commit>null (not tracked in EC2_MANIFEST.json)</last_deployed_commit>
+      <last_deployed_at>null</last_deployed_at>
+      <trigger>unknown (not documented in EC2_MANIFEST.json)</trigger>
+      <pipeline>seeking-alpha</pipeline>
+      <note>instance_id is null — needs sync-ec2-manifest.sh to populate. Terraform coverage unknown — not referenced in seeking-alpha/main.tf.</note>
+    </service>
+  </ec2_services>
+
+  <!-- =========================================================== -->
+  <!-- LAMBDA LAYERS                                                -->
+  <!-- =========================================================== -->
+  <layers>
+    <layer>
+      <name>news-trending-deps</name>
+      <version>managed as aws_lambda_layer_version in news-pipeline/lambdas.tf</version>
+      <s3_bucket>opal-313476888478-lambda-layers</s3_bucket>
+      <s3_key>news-trending-deps.zip</s3_key>
+      <source_manifest>infra/aws/lambda/layers/news-trending-deps/requirements.txt</source_manifest>
+      <python_version>python3.12</python_version>
+      <contents>numpy, hdbscan, scipy, scikit-learn, joblib, openai, beautifulsoup4 (manylinux wheels)</contents>
+      <used_by>news-ingestion-scheduler, news-trending-analysis, opal-news-layer3-curation, keyword-intelligence-generator</used_by>
+    </layer>
+    <layer>
+      <name>pandas-pyarrow-layer</name>
+      <arn>arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1</arn>
+      <s3_bucket>opal-313476888478-lambda-layers</s3_bucket>
+      <s3_key>pandas-pyarrow-layer.zip (presumed)</s3_key>
+      <python_version>python3.11</python_version>
+      <used_by>yang-ingest-dynamodb, yang-generate-positioning, yang-generate-allocation-summary, yang-generate-holdings-attribution, yang-generate-benchmark-returns, yang-generate-etf-returns, yang-generate-peer-performance, yang-generate-valuation, yang-generate-risk-premium, yang-generate-factor-tilts, yang-generate-macro, yang-generate-macro-timeseries, yang-generate-correlation, yang-generate-cma</used_by>
+    </layer>
+    <layer>
+      <name>openpyxl-layer</name>
+      <arn>arn:aws:lambda:us-east-1:313476888478:layer:openpyxl-layer:1</arn>
+      <s3_bucket>opal-313476888478-lambda-layers</s3_bucket>
+      <s3_key>openpyxl-layer.zip (presumed)</s3_key>
+      <python_version>python3.11</python_version>
+      <used_by>yang-generate-holdings-attribution, yang-generate-peer-performance</used_by>
+    </layer>
+    <layer>
+      <name>AWSSDKPandas-Python312</name>
+      <arn>arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python312:16</arn>
+      <owner>AWS-managed (account 336392948345)</owner>
+      <python_version>python3.12</python_version>
+      <used_by>yang-model-portfolio-benchmarks, opal-market-rsi-tiered-generator</used_by>
+    </layer>
+  </layers>
+
+  <!-- =========================================================== -->
+  <!-- KNOWN ISSUES / GAPS                                          -->
+  <!-- =========================================================== -->
+  <known_issues>
+    <issue id="1" severity="HIGH" pipeline="causality">
+      No S3 backend configured in causality/main.tf. Terraform state is local only. Pipeline cannot be safely managed across machines or agents. Needs S3 backend migration and CHANGELOG.json initialization before any further Terraform work.
+    </issue>
+    <issue id="2" severity="HIGH" pipeline="seeking-alpha">
+      No S3 backend configured in seeking-alpha/main.tf. Terraform state is local only. Same risk as causality. Also no CHANGELOG.json and no git version tag. Needs S3 backend migration.
+    </issue>
+    <issue id="3" severity="HIGH" pipeline="causality">
+      All 8 causality Lambdas use inline source_dir= (old yang-lambda pattern from before the S3-backed artifact model). They are NOT S3-backed. This means build-and-upload.sh does not apply. Deployment mechanism is undefined/non-standard. Needs migration to S3-backed artifact pattern (Phases 1-4 canonical pattern).
+    </issue>
+    <issue id="4" severity="HIGH" pipeline="seeking-alpha">
+      All 7 seeking-alpha Lambdas use inline source_dir= (same old pattern as causality). NOT S3-backed. lambda-source-map.json entries have no artifact_s3_key, no last_deployed_commit, no last_deployed_at. Deployment traceability is zero.
+    </issue>
+    <issue id="5" severity="MEDIUM" pipeline="seeking-alpha">
+      seeking-alpha-scraper EC2 service: instance_id is null in EC2_MANIFEST.json. Run sync-ec2-manifest.sh to populate. No Terraform module covers this EC2 instance — it has no entry in any .tf file reviewed. Infrastructure-as-code gap.
+    </issue>
+    <issue id="6" severity="MEDIUM" pipeline="news-pipeline">
+      3 orphaned IAM roles in news-pipeline/iam.tf with no Lambda attached: news-dashboard-processor-role, news-sentiment-lambda-role, semantic-news-lambda-role. Kept under management to prevent drift, but should be evaluated for deletion.
+    </issue>
+    <issue id="7" severity="MEDIUM" pipeline="news-pipeline">
+      keyword-intelligence-generator has vendored openai in _build_tmp/ directory (tech debt noted in lambdas.tf comment). Should attach news-trending-deps layer and remove _build_tmp, then migrate to build-and-upload.sh standard pattern.
+    </issue>
+    <issue id="8" severity="MEDIUM" pipeline="market-overview">
+      opal-precompute-market-metrics and opal-cloudfront-market-generator are Node.js Lambdas with lifecycle ignore_changes on filename/source_code_hash. No local source in repo. Terraform cannot manage their code. No parity checking is possible.
+    </issue>
+    <issue id="9" severity="MEDIUM" pipeline="market-overview">
+      opal-portal-data-proxy and opal-portal-volatility-fetcher also use lifecycle ignore_changes — deployed via aws lambda update-function-code directly (Linux wheels). This bypasses the Terraform-only deployment rule (CLAUDE.md rule 1). Should be migrated to S3-backed + Terraform-controlled deployment.
+    </issue>
+    <issue id="10" severity="LOW" pipeline="yang-pipeline">
+      yang-pipeline has no EventBridge rules. The S3 notification that invokes yang-pipeline-trigger is managed by infra/aws/terraform/portal-notifications/ (separate module). That module must remain consistent with the yang-pipeline trigger Lambda ARN.
+    </issue>
+    <issue id="11" severity="LOW" pipeline="news-pipeline">
+      3 EventBridge rules are DISABLED fallbacks (layer3-gpt-curation-daily, keyword-intelligence-generator-daily) and news-api-* rules (1100am, 500pm, 745pm, 900pm). These are intentional safety nets. Do not delete — re-enable if chain invocation fails.
+    </issue>
+    <issue id="12" severity="INFO" pipeline="smartx-pipeline">
+      smartx-pipeline CHANGELOG.json records current_tag as smartx-v2.0.0, but the workspace MEMORY.md table recorded smartx-v1.0.0. CHANGELOG.json is the authoritative source — smartx-v2.0.0 is correct.
+    </issue>
+  </known_issues>
+
+</pipeline_inventory>
