@@ -6,7 +6,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-03-02</date>
-    <status>pending</status>
+    <status>superseded</status>
   </metadata>
 
   <objective>
@@ -23,8 +23,8 @@
       <page>AdvisorIntelligence</page>
     </pages>
     <rd_agents>
-      <agent>0.0.13_RD_ModelPortfolios</agent>
-      <agent>0.0.14_RD_AdvisorIntelligence</agent>
+      <agent>0.4.1_RD_ModelPortfolios</agent>
+      <agent>0.4.2_RD_AdvisorIntelligence</agent>
     </rd_agents>
   </scope>
 
@@ -78,7 +78,7 @@ Write your audit using this structure:
   </metadata>
 
   <pages_served>
-    <page name="ModelPortfolios" rd_agent="0.0.13_RD_ModelPortfolios">
+    <page name="ModelPortfolios" rd_agent="0.4.1_RD_ModelPortfolios">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
@@ -86,7 +86,7 @@ Write your audit using this structure:
         Pipeline name, relevant scripts, S3 output paths
       </data_pipeline>
     </page>
-    <page name="AdvisorIntelligence" rd_agent="0.0.14_RD_AdvisorIntelligence">
+    <page name="AdvisorIntelligence" rd_agent="0.4.2_RD_AdvisorIntelligence">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
