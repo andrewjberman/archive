@@ -241,5 +241,33 @@ or example if applicable. Date-stamp entries if helpful for traceability.
 
 ---
 
-*Last updated: 2026-03-02*
-*Updated by: v2 multi-agent workflow (Andrew + Claude)*
+---
+
+### M8 -- Pre-implementation alignment threads run BEFORE task orders, not after
+
+**Rule:** For any work stream where DS output feeds DE wiring feeds RD layout,
+the COO must run a 3-party alignment thread (Pattern 0) BEFORE writing the
+task orders for that stream. The thread receipt is the data contract. Task orders
+reference the receipt as the binding interface specification.
+
+**Why:** Without the alignment thread, DS produces a reasonable shape, DE types
+against it, RD builds layout around the types, and they discover the mismatch
+in code review. The Pattern 0 thread forces the DS/DE/RD contract conversation
+to happen BEFORE anyone writes code. This eliminates the most common rework cycle.
+
+**What the thread produces:**
+- DS commitment: "I will produce {exact JSON shape} at {S3 key} on {schedule}"
+- DE commitment: "I will type against {TypeScript interface} via {query key} at {endpoint}"
+- RD commitment: "My component expects {field names} in {format} for {chart/layout}"
+
+**Thread configuration for Pattern 0:**
+- Participants: DS + DE + RD (3-party)
+- turn_order: round_robin
+- Model: gpt-4o (bespoke, tools enabled)
+- Max turns: 3
+- CONTEXT.json: PRD section, types.ts, current tab component, current Lambda/script
+- Opening message structure: DS goes first describing available data -> DE responds
+  with interface need -> RD responds with layout constraints -> converge on contract
+
+*Last updated: 2026-03-03*
+*Updated by: 1.0.0_SA_CTO + Andrew (CEO) -- CEO-CTO workflow design session*
