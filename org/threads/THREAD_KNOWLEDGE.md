@@ -59,9 +59,9 @@ anchored to a real file path or AWS resource name.
 
 ---
 
-### M3 — Model selection: use gpt-4o until chat-compatible variants confirmed
+### M3 — Model selection: use gpt-5.2 until chat-compatible variants confirmed
 
-**Current safe default:** `--model gpt-4o` for ALL thread types.
+**Current safe default:** `--model gpt-5.2` for ALL thread types.
 
 **Intended split (pending confirmation of chat-compatible model IDs):**
 - Code-grounded threads (Pattern 0, Pattern 2): codex-class model
@@ -70,7 +70,7 @@ anchored to a real file path or AWS resource name.
 **WARN — gpt-5.3-codex and gpt-5.2-pro are NOT usable until verified:**
 The orchestrator calls `client.chat.completions.create()`. gpt-5.3-codex is a
 completions-only model, incompatible with this endpoint. First live run (2026-03-03)
-confirmed the failure and reverted to gpt-4o. Do not configure these model strings
+confirmed the failure and reverted to gpt-5.2. Do not configure these model strings
 again until a chat-endpoint-compatible ID is confirmed by Andrew.
 
 **Why the split matters:** Code-grounded threads read Lambda source, TypeScript,
@@ -235,7 +235,7 @@ See `org/threads/staging/BESPOKE_TEMPLATE.sh` for the expected format.
 ```
 
 Verify both agents have recent session logs before running. Use default
-`gpt-4o-mini` model.
+`gpt-5.2` model.
 
 ### Adding a new knowledge item
 
@@ -270,7 +270,7 @@ to happen BEFORE anyone writes code. This eliminates the most common rework cycl
 **Thread configuration for Pattern 0:**
 - Participants: DS + DE + RD (3-party)
 - turn_order: round_robin
-- Model: gpt-4o (bespoke, tools enabled)
+- Model: gpt-5.2 (bespoke, tools enabled)
 - Max turns: 3
 - CONTEXT.json: PRD section, types.ts, current tab component, current Lambda/script
 - Opening message structure: DS goes first describing available data -> DE responds

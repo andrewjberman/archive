@@ -656,7 +656,7 @@ def run_thread(thread_dir: Path, client: OpenAI | None, model: str, dry_run: boo
 def main():
     parser = argparse.ArgumentParser(description="Run an agent thread via OpenAI API")
     parser.add_argument("--thread",   required=True,          help="Thread ID to run")
-    parser.add_argument("--model",    default="gpt-4o",          help="OpenAI model (default: gpt-4o)")
+    parser.add_argument("--model",    default="gpt-5.2",          help="OpenAI model (default: gpt-5.2)")
     parser.add_argument("--dry-run",   action="store_true",    help="Show invocation without calling API")
     parser.add_argument("--verbose",   action="store_true",    help="Print agent responses and tool calls to stdout")
     parser.add_argument("--no-tools",  action="store_true",    help="Disable tool use (faster/cheaper; agents cannot read files)")
