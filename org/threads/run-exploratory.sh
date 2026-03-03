@@ -18,7 +18,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 JQ="${REPO_ROOT}/.tools/jq.exe"
 
 # --- Defaults ---
-MODEL="gpt-5.2-pro"
+MODEL="gpt-4o"
 MAX_TURNS=2
 DRY_RUN=false
 

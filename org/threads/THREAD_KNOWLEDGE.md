@@ -59,18 +59,23 @@ anchored to a real file path or AWS resource name.
 
 ---
 
-### M3 — Use gpt-5.3-codex for code-grounded threads, gpt-5.2-pro for planning threads
+### M3 — Model selection: use gpt-4o until chat-compatible variants confirmed
 
-**Rule:**
-- Code-grounded threads (Pattern 0 pre-implementation alignment, Pattern 2 technical investigation): `--model gpt-5.3-codex`
-  These threads read Lambda source, TypeScript types, gold scripts, and Terraform. The codex model handles code reasoning significantly better.
-- Planning/coordination threads (Pattern 1 delivery audit, Pattern 3 cross-pod coordination): `--model gpt-5.2-pro`
-  These threads reason over session logs, task orders, and deliverable state. No deep code reading required.
+**Current safe default:** `--model gpt-4o` for ALL thread types.
 
-**Why:** gpt-5.3-codex excels at interpreting and reasoning over source code, making it
-the right choice whenever agents are grounding their answers in actual implementation files.
-gpt-5.2-pro is the right choice for strategic planning and cross-agent coordination where
-the primary context is prose logs and specs rather than code.
+**Intended split (pending confirmation of chat-compatible model IDs):**
+- Code-grounded threads (Pattern 0, Pattern 2): codex-class model
+- Planning/coordination threads (Pattern 1, Pattern 3): pro-class model
+
+**WARN — gpt-5.3-codex and gpt-5.2-pro are NOT usable until verified:**
+The orchestrator calls `client.chat.completions.create()`. gpt-5.3-codex is a
+completions-only model, incompatible with this endpoint. First live run (2026-03-03)
+confirmed the failure and reverted to gpt-4o. Do not configure these model strings
+again until a chat-endpoint-compatible ID is confirmed by Andrew.
+
+**Why the split matters:** Code-grounded threads read Lambda source, TypeScript,
+and gold scripts where codex-class reasoning is significantly better. Planning
+threads reason over prose logs and specs where pro-class is sufficient.
 
 ---
 
