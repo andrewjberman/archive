@@ -11,32 +11,27 @@
   </metadata>
 
   <objective>
-    Implement all data-layer additions required to complete AdvisorIntelligence to v1.0
-    shippable state. Covers five parallel data streams (A1-A5) and one blocked stream (E).
-    DS work is the critical path — nothing in the DE/RD portal layer can proceed on
-    ADV continuous, CLA continuous, or Advisors stacked bar until DS commits and
-    updates data_contract.xml.
+    Implement all data-layer additions for AdvisorIntelligence completion. Streams A1, A2,
+    and A3 require Pattern 0 alignment threads to run FIRST — the thread receipts define
+    the exact JSON shapes and TypeScript interfaces DS must implement. Do NOT implement
+    A1/A2/A3 based on this task order's descriptions alone; the thread receipt is the
+    binding specification. Streams A4 and A5 have no interface dependency and start
+    immediately. Stream E is blocked by the Books tab design thread (Stream D).
   </objective>
 
   <references>
-    <ref>docs/architecture/ADVISOR_INTELLIGENCE_COMPLETION.md</ref>
-    <ref>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/data_contract.xml</ref>
-    <ref>infra/aws/lambda/bd-pipeline/bd-portal-publisher/lambda_function.py</ref>
-    <ref>data/black_diamond/scripts/gold/</ref>
+    <ref type="prd">docs/architecture/ADVISOR_INTELLIGENCE_COMPLETION.md</ref>
+    <ref type="thread-staging">org/threads/staging/run-2026-03-03-continuous-nna-cla-alignment.sh</ref>
+    <ref type="thread-staging">org/threads/staging/run-2026-03-03-advisors-stacked-bar-alignment.sh</ref>
+    <ref type="thread-staging">org/threads/staging/run-2026-03-03-books-tab-design.sh</ref>
+    <ref type="data-contract">org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/data_contract.xml</ref>
   </references>
 
   <scope>
     <files>
-      <!-- Stream A1 -->
       <file action="modify">infra/aws/lambda/bd-pipeline/bd-portal-publisher/lambda_function.py</file>
-      <!-- Stream A2 -->
-      <!-- (same publisher file, separate section) -->
-      <!-- Stream A3 -->
-      <file action="modify">data/black_diamond/scripts/gold/10_build_advisor_rolling_flows.py</file>
-      <!-- Stream A4 -->
+      <file action="modify">data/black_diamond/scripts/gold/10_generate_advisor_rolling_flows.py</file>
       <file action="verify">data/black_diamond/scripts/gold/09_build_distribution_stats.py</file>
-      <!-- Stream A5 (investigation only, no code change expected unless mapping absent) -->
-      <!-- Stream E (audit only until thread completes) -->
       <file action="modify">org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/data_contract.xml</file>
     </files>
   </scope>
@@ -44,191 +39,169 @@
   <requirements>
 
     <!-- ================================================================ -->
-    <!-- STREAM A1 — adv_drill in timeseries_chart.json                   -->
-    <!-- ================================================================ -->
-    <requirement id="A1.1">
-      Add adv_drill to bd-portal-publisher lambda_function.py output.
-      Structure mirrors geo_drill exactly:
-        adv_drill: Record&lt;architect_key, CumulativeChartView&gt;
-      where CumulativeChartView.categories = the architect's top clients (relationships),
-      and CumulativeChartView.data = cumulative NNA time series per client.
-      Use the same date range and data density as geo_drill.
-    </requirement>
-    <requirement id="A1.2">
-      Limit to the top clients per architect by AUA (same cardinality cap as geo_drill's
-      city cap — up to 10 clients per architect). If an architect has fewer than 2 clients,
-      omit from adv_drill (not meaningful for a chart series).
-    </requirement>
-    <requirement id="A1.3">
-      Update data_contract.xml to document adv_drill: output shape, S3 key, how architect
-      keys map to rel_architect_lookup, and client grain definition.
-      Mark data_contract.xml update as complete BEFORE handing to DT for deploy.
-    </requirement>
-
-    <!-- ================================================================ -->
-    <!-- STREAM A2 — cla_timeseries in timeseries_chart.json              -->
-    <!-- ================================================================ -->
-    <requirement id="A2.1">
-      Design and implement cla_timeseries output. This is the highest DS effort item.
-      Output structure to add to timeseries_chart.json:
-        cla: {
-          total: CumulativeChartView          // categories: ['nmnc', 'nmec']
-          geo: CumulativeChartView            // categories: top states
-          adv: CumulativeChartView            // categories: top architects
-          geo_drill: Record&lt;state, CumulativeChartView&gt;  // per-city breakdown
-          // no adv_drill for CLA — architect is terminal grain
-        }
-      CumulativeChartView.data values = NMNC AUM and NMEC AUM (absolute dollars) per date.
-    </requirement>
-    <requirement id="A2.2">
-      Classify each relationship as NMNC (new client, green) or NMEC (existing client, blue)
-      using accounts_dimension_latest and/or account open dates + advisor assignment history.
-      Confirm classification logic with DE before committing — send DE a quick written
-      confirmation of the NMNC/NMEC classification logic and get acknowledgment.
-    </requirement>
-    <requirement id="A2.3">
-      Determine whether cla_timeseries lives in script 09 (EC2 gold layer) or in the
-      publisher Lambda. Document the decision in data_contract.xml with rationale.
-      Either location is acceptable; the criterion is: does the data require per-row
-      gold table access (script 09) or can it be assembled from existing publisher inputs?
-    </requirement>
-    <requirement id="A2.4">
-      Update data_contract.xml with cla_timeseries output shape, S3 key, grain definitions,
-      and NMNC/NMEC classification logic.
-      Mark update complete BEFORE handing to DT.
-    </requirement>
-
-    <!-- ================================================================ -->
-    <!-- STREAM A3 — Stacked bar + 1Y rolling data for Advisors tab       -->
-    <!-- ================================================================ -->
-    <requirement id="A3.1">
-      Update script 10 (10_build_advisor_rolling_flows.py) to produce period-anchored
-      aggregated inflows/outflows/nna_net per advisor for the stacked bar chart:
-        stacked_bar: {
-          architects: { qtd: AdvisorBarEntry[], ytd: AdvisorBarEntry[], '1y': AdvisorBarEntry[], '3y': AdvisorBarEntry[], max: AdvisorBarEntry[] }
-          implementors: { qtd: AdvisorBarEntry[], ytd: AdvisorBarEntry[], '1y': AdvisorBarEntry[], '3y': AdvisorBarEntry[], max: AdvisorBarEntry[] }
-        }
-      AdvisorBarEntry = { name: str, inflows: float, outflows: float, nna_net: float }
-      Period definitions:
-        qtd = sum from start of current calendar quarter to today
-        ytd = sum from Jan 1 of current year to today
-        1y  = sum from exactly 1 year ago to today
-        3y  = sum from exactly 3 years ago to today
-        max = inception to today
-    </requirement>
-    <requirement id="A3.2">
-      Produce rolling_1y output: 1-year trailing NNA per advisor as daily time series,
-      extended to cover the full 3Y and Max x-axis windows for the secondary line chart:
-        rolling_1y: {
-          architects: AdvisorRollingSeries[]   // each: { name, data: [{date, value}...] }
-          implementors: AdvisorRollingSeries[]
-        }
-      Rolling window is FIXED at 1 year (each date point = trailing 365 days from that date).
-      Date range must cover at least 3 years of history for 3Y view.
-    </requirement>
-    <requirement id="A3.3">
-      Update data_contract.xml with new advisor_rolling_flows.json shape, replacing or
-      addending the current contract entry for script 10 output.
-      Mark update complete BEFORE handing to DT.
-    </requirement>
-
-    <!-- ================================================================ -->
-    <!-- STREAM A4 — Bell curve math verification                          -->
+    <!-- STREAM A4 — Snapshot NNA bell curve math verification            -->
+    <!-- UNBLOCKED — start immediately, no interface dependency           -->
     <!-- ================================================================ -->
     <requirement id="A4.1">
       Verify that commit 8247c6d0 correctly implemented |abs| for negative NNA accounts
       in script 09's bell curve percentile threshold calculation.
-      Check: open partner_analytics/header_metrics.json from S3 and inspect the
-      distribution field for the NNA view's negative (outflow) segment.
-      Confirm P10/P25/Median/P75/P90 thresholds are non-degenerate (not all zero,
-      not symmetric mirrors of the positive side).
+      Open partner_analytics/header_metrics.json from S3 and inspect the distribution
+      field for the NNA view's outflow segment.
+      Confirm P10/P25/Median/P75/P90 thresholds are non-degenerate: not all zero,
+      not symmetric mirrors of the positive side.
     </requirement>
     <requirement id="A4.2">
-      If the fix did NOT land correctly: write a targeted patch to script 09 and
-      coordinate with 0.4.0_DT to deploy the EC2 script update.
-      If the fix DID land: document the verification result in your session log
-      with the specific values observed in header_metrics.json.
+      If the fix did NOT land: write a targeted patch to script 09 and coordinate with
+      0.4.0_DT to deploy the EC2 script update.
+      If the fix DID land: document the verification result in your session log with
+      the specific threshold values observed in header_metrics.json.
     </requirement>
 
     <!-- ================================================================ -->
-    <!-- STREAM A5 — opal-users-v2 advisor identity mapping               -->
+    <!-- STREAM A5 — opal-users-v2 advisor identity investigation         -->
+    <!-- UNBLOCKED — start immediately, no interface dependency           -->
     <!-- ================================================================ -->
     <requirement id="A5.1">
-      Investigate the schema of the opal-users-v2 DynamoDB table:
-        - What fields identify an advisor (e.g., userId, email, advisorId, firmId)?
+      Investigate the schema of the opal-users-v2 DynamoDB table (read-only):
+        - What fields identify an advisor (userId, email, advisorId, firmId)?
         - What is the partition key / sort key structure?
-      Do NOT modify the table. Read-only investigation.
     </requirement>
     <requirement id="A5.2">
       Determine whether a mapping from opal-users-v2 identity fields to
-      accounts_dimension_latest.architect or rel_architect_lookup.parquet already exists.
-      Options:
-        (a) Direct field match (userId == some gold layer key)
-        (b) Email-based lookup (email matches advisor record in gold layer)
+      accounts_dimension_latest.architect or rel_architect_lookup.parquet already exists:
+        (a) Direct field match
+        (b) Email-based lookup
         (c) No existing mapping — new data registration step required
       Document findings in your session log. This is the linchpin for Books tab auth gating.
-    </requirement>
-    <requirement id="A5.3">
-      Surface findings to COO and CTO in your session log. If option (c) — flag as
-      a blocker for Stream J (firmId auth refactor) and Books tab gating.
-      No code change required from this investigation alone.
+      If option (c): flag as a blocker and surface to COO and CTO before any auth work proceeds.
     </requirement>
 
     <!-- ================================================================ -->
-    <!-- STREAM E — Books data contract audit (BLOCKED by Stream D)        -->
+    <!-- STREAM A1 — adv_drill in timeseries_chart.json                   -->
+    <!-- BLOCKED: run Pattern 0 thread first                              -->
+    <!-- Thread: org/threads/staging/run-2026-03-03-continuous-nna-cla-alignment.sh -->
+    <!-- ================================================================ -->
+    <requirement id="A1.1">
+      GATE: Do not implement adv_drill until the Pattern 0 alignment thread
+      (2026-03-03-continuous-nna-cla-alignment) has completed and you have a receipt at:
+        org/tier2_senior/0.4.0_DS_ClientPlatform/threads/
+      The thread receipt is the binding specification for the adv_drill JSON shape,
+      S3 key pattern, cardinality constraints, and date range. Implement exactly what
+      was agreed in the thread — not what is described in the PRD or this task order.
+    </requirement>
+    <requirement id="A1.2">
+      In the thread, you are the knowledge source. Describe what per-architect and
+      per-client NNA data currently exists in the gold layer. Name specific parquet
+      files, column names, and cardinality. Let DE specify the TypeScript interface
+      and RD specify the chart constraint — then converge on the exact shape.
+    </requirement>
+    <requirement id="A1.3">
+      After thread completes: implement adv_drill in bd-portal-publisher/lambda_function.py
+      per the agreed contract. Update data_contract.xml with the agreed shape, S3 key,
+      and grain definitions BEFORE signaling DT to deploy.
+    </requirement>
+
+    <!-- ================================================================ -->
+    <!-- STREAM A2 — cla_timeseries in timeseries_chart.json              -->
+    <!-- BLOCKED: run Pattern 0 thread first (same thread as A1)          -->
+    <!-- Thread: org/threads/staging/run-2026-03-03-continuous-nna-cla-alignment.sh -->
+    <!-- ================================================================ -->
+    <requirement id="A2.1">
+      GATE: Same as A1 — do not implement cla_timeseries until the thread receipt from
+      2026-03-03-continuous-nna-cla-alignment is in your threads/ folder.
+      The thread defines: NMNC/NMEC classification logic (agreed with DE and RD),
+      the exact JSON structure, grain definitions (total/geo/adv/geo_drill),
+      and whether implementation lives in script 09 (EC2) or the publisher Lambda.
+    </requirement>
+    <requirement id="A2.2">
+      In the thread, surface what NMNC/NMEC classification data currently exists in
+      the gold layer. Do NOT assume the classification. Name the specific field or
+      derivation logic and let all three agents agree on the definition in the thread.
+      Do not commit any classification logic until DE has confirmed it matches how
+      CLA is currently defined in header_metrics.json.
+    </requirement>
+    <requirement id="A2.3">
+      After thread completes: implement cla_timeseries per the agreed contract.
+      Update data_contract.xml BEFORE signaling DT to deploy.
+      Note: adv_drill and cla_timeseries should deploy together in one publisher update
+      (Stream B1) to minimize deploy events.
+    </requirement>
+
+    <!-- ================================================================ -->
+    <!-- STREAM A3 — Stacked bar + 1Y rolling for Advisors tab            -->
+    <!-- BLOCKED: run Pattern 0 thread first                              -->
+    <!-- Thread: org/threads/staging/run-2026-03-03-advisors-stacked-bar-alignment.sh -->
+    <!-- ================================================================ -->
+    <requirement id="A3.1">
+      GATE: Do not modify script 10 until the Pattern 0 alignment thread
+      (2026-03-03-advisors-stacked-bar-alignment) has completed and you have a receipt at:
+        org/tier2_senior/0.4.0_DS_ClientPlatform/threads/
+      The thread receipt defines: the exact output schema for advisor_rolling_flows.json,
+      how outflows are encoded (sign convention vs separate field), what period-anchored
+      aggregation is feasible given available history, and the TypeScript interface
+      DE and RD agreed on.
+    </requirement>
+    <requirement id="A3.2">
+      In the thread, describe what script 10 currently computes, what parquet columns
+      carry inflows vs outflows vs net NNA, and what date history is available.
+      Be specific about whether inflows and outflows are tracked separately in the
+      source data or only as net NNA. Let DE and RD shape the output contract from
+      what you describe as feasible.
+    </requirement>
+    <requirement id="A3.3">
+      After thread completes: implement the agreed stacked_bar and rolling_1y output
+      in script 10. Update data_contract.xml BEFORE signaling DT for Stream B2 deploy.
+    </requirement>
+
+    <!-- ================================================================ -->
+    <!-- STREAM E — Books data contract audit (BLOCKED by Stream D)       -->
     <!-- ================================================================ -->
     <requirement id="E.1">
-      BLOCKED: Do not begin Stream E until the Books tab design thread (Stream D)
-      has completed and you have a thread receipt at:
-        org/tier2_senior/0.4.0_DS_ClientPlatform/threads/
-      Stream D thread will establish which L2/L3/L4 fields are needed for the Books tab.
+      BLOCKED: Do not begin Stream E until the Books design thread
+      (2026-03-03-books-tab-design) completes and you have a receipt in your threads/ folder.
+      In that thread, you are the knowledge source. Read the advisor-publisher Lambda and
+      scripts 03, 05b, and 06 carefully. Describe precisely what each script produces
+      and which of those outputs currently flow into the publisher vs remain gold-layer only.
     </requirement>
     <requirement id="E.2">
-      After Stream D thread completes: audit bd-portal-advisor-publisher/lambda_function.py
-      to determine which L4 fields (holdings lots, cost basis, tax liability) are already
-      published vs. absent from clients/{clientKey}.json S3 output.
-      Reference scripts: 03_build_holdings_lots.py, 05b_build_account_performance.py,
-      06_build_client_tax_liability.py — confirm their outputs flow into the publisher.
-    </requirement>
-    <requirement id="E.3">
-      Produce a written gap list: which L4 fields exist in the gold layer but are not
-      currently in the publisher output. Include this in your session log and in
-      data_contract.xml as a pending section.
-      Update data_contract.xml with the L4 Books contract BEFORE handing to DT for Stream F deploy.
+      After thread: produce a gap list (what L4 fields exist in gold but are absent from
+      the publisher output). Add to data_contract.xml as a pending Books L4 section.
+      Implement the publisher additions. Update data_contract.xml to complete status
+      BEFORE signaling DT for Stream F deploy.
     </requirement>
 
   </requirements>
 
   <acceptance_criteria>
-    <criterion id="1">adv_drill is present in timeseries_chart.json S3 output with correct structure (verified by DT deploy + spot-check).</criterion>
-    <criterion id="2">cla_timeseries is present in timeseries_chart.json with nmnc and nmec AUM series at total/geo/adv/geo_drill grains.</criterion>
-    <criterion id="3">advisor_rolling_flows.json has stacked_bar (5 periods x 2 role types) and rolling_1y (daily, 3Y+ history).</criterion>
-    <criterion id="4">Bell curve verification documented in session log; patch applied and deployed if fix was absent.</criterion>
-    <criterion id="5">opal-users-v2 mapping investigation findings documented in session log before Books thread runs.</criterion>
-    <criterion id="6">data_contract.xml updated for A1, A2, A3 before each respective DT deploy.</criterion>
-    <criterion id="7">Stream E complete: L4 gap list in session log + data_contract.xml updated with Books L4 contract (post-thread).</criterion>
+    <criterion id="1">A4: Bell curve verification result in session log with actual threshold values; patch applied if needed.</criterion>
+    <criterion id="2">A5: opal-users-v2 mapping findings documented in session log; option (c) flagged to COO if no mapping exists.</criterion>
+    <criterion id="3">A1: adv_drill implemented per thread receipt; data_contract.xml updated; DT deploy confirmed.</criterion>
+    <criterion id="4">A2: cla_timeseries implemented per thread receipt; classification logic agreed in thread; data_contract.xml updated.</criterion>
+    <criterion id="5">A3: advisor_rolling_flows.json updated per thread receipt; data_contract.xml updated; DT deploy confirmed.</criterion>
+    <criterion id="6">E: L4 publisher gap list produced and closed; data_contract.xml updated (post-thread).</criterion>
   </acceptance_criteria>
 
   <constraints>
-    <constraint>Do NOT begin Stream E until Stream D thread receipt is in your threads/ folder.</constraint>
-    <constraint>data_contract.xml must be updated and committed BEFORE signaling DT to deploy any Lambda change. This is a quality gate.</constraint>
-    <constraint>Confirm NMNC/NMEC classification logic with DE in writing before committing cla_timeseries implementation.</constraint>
+    <constraint>A1, A2, A3 are BLOCKED until Pattern 0 thread receipts are in your threads/ folder. Do not implement from PRD descriptions alone — the thread contract supersedes the PRD's suggested shapes.</constraint>
+    <constraint>data_contract.xml must be updated and committed BEFORE signaling DT to deploy any Lambda change. This is a non-negotiable quality gate.</constraint>
+    <constraint>Do NOT deploy directly. Hand off to 0.4.0_DT via your session log next steps with the commit hash of your code change.</constraint>
     <constraint>Do NOT use emojis in any script, Lambda, or log output. Plain ASCII only.</constraint>
-    <constraint>Do NOT deploy directly. All EC2 and Lambda deploys go through 0.4.0_DT. Hand off via your session log next steps.</constraint>
     <constraint>Commit with: git commit --author="0.4.0_DS_ClientPlatform &lt;0.4.0_DS_ClientPlatform@opal.agent&gt;" -m "..."</constraint>
-    <constraint>NOTE: You have no prior session logs. The Books thread (Stream D) cannot run until you have produced at least one session log from your activation. Complete Streams A1-A5 first, write your session log, then the COO will schedule Stream D.</constraint>
+    <constraint>Start A4 and A5 in your first session. These have no thread dependency.</constraint>
   </constraints>
 
   <dependencies>
-    <dependency agent="2.0.0_SA_COO" task="Stream-D-thread" status="pending" note="Stream E blocked until D completes"/>
-    <dependency agent="0.4.0_DE_ClientPlatform" task="advisor_intelligence_completion" status="pending" note="A2 NMNC/NMEC logic requires DE written acknowledgment before commit"/>
+    <dependency agent="2.0.0_SA_COO" task="2026-03-03-continuous-nna-cla-alignment" status="pending" note="A1 and A2 blocked until thread receipt"/>
+    <dependency agent="2.0.0_SA_COO" task="2026-03-03-advisors-stacked-bar-alignment" status="pending" note="A3 blocked until thread receipt"/>
+    <dependency agent="2.0.0_SA_COO" task="2026-03-03-books-tab-design" status="pending" note="E blocked until thread receipt"/>
   </dependencies>
 
   <deliverables>
-    <deliverable type="commit">bd-portal-publisher/lambda_function.py updated with adv_drill + cla_timeseries</deliverable>
-    <deliverable type="commit">10_build_advisor_rolling_flows.py updated with stacked_bar + rolling_1y output</deliverable>
-    <deliverable type="document">data_contract.xml updated with A1, A2, A3 shapes before each DT deploy</deliverable>
-    <deliverable type="document">Session log with A4 bell curve verification result + A5 opal-users-v2 mapping findings</deliverable>
+    <deliverable type="commit">Script 09 verification result (and patch if needed)</deliverable>
+    <deliverable type="document">Session log with A5 opal-users-v2 findings</deliverable>
+    <deliverable type="commit">bd-portal-publisher/lambda_function.py: adv_drill + cla_timeseries per thread receipt (A1+A2)</deliverable>
+    <deliverable type="commit">10_generate_advisor_rolling_flows.py: stacked_bar + rolling_1y per thread receipt (A3)</deliverable>
+    <deliverable type="document">data_contract.xml updated for A1, A2, A3 (before each DT deploy)</deliverable>
     <deliverable type="document">data_contract.xml updated with Books L4 contract (post-thread, Stream E)</deliverable>
   </deliverables>
 </task_order>

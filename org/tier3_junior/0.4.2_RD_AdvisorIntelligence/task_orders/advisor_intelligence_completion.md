@@ -19,7 +19,10 @@
   </objective>
 
   <references>
-    <ref>docs/architecture/ADVISOR_INTELLIGENCE_COMPLETION.md</ref>
+    <ref type="prd">docs/architecture/ADVISOR_INTELLIGENCE_COMPLETION.md</ref>
+    <ref type="thread-staging">org/threads/staging/run-2026-03-03-continuous-nna-cla-alignment.sh</ref>
+    <ref type="thread-staging">org/threads/staging/run-2026-03-03-advisors-stacked-bar-alignment.sh</ref>
+    <ref type="thread-staging">org/threads/staging/run-2026-03-03-books-tab-design.sh</ref>
     <ref>portal/src/pages/AdvisorIntelligence/</ref>
     <ref>portal/src/api/endpoints/advisor-intelligence.ts</ref>
     <ref>portal/src/pages/AdvisorIntelligence/types.ts</ref>
@@ -82,13 +85,17 @@
       timeseries_chart.json S3 output.
     </requirement>
     <requirement id="C2.2">
-      Implement ADV continuous NNA view identically to GEO (C1), but for architects:
-        - Top architects as separate series
+      Implement ADV continuous NNA view using the adv_drill shape agreed in the
+      Pattern 0 thread (2026-03-03-continuous-nna-cla-alignment). The thread receipt
+      defines: adv_drill JSON structure, architect key format, client series format,
+      and the TypeScript interface name DE typed against. Do not infer the shape from
+      the PRD alone — use the receipt as the binding spec.
+      Behavior:
+        - Top architects as separate series, same chart format as GEO view
         - Search input for architects not in top list
-        - Click architect → drill to client/relationship level
-          (sourced from adv_drill[architectKey] in timeseries_chart.json)
+        - Click architect -> drill to client/relationship level (adv_drill[architectKey])
         - Breadcrumb returns to architect-level view
-        - No drill-down past relationship level (client is terminal grain for ADV)
+        - No drill-down past relationship level
     </requirement>
     <requirement id="C2.3">
       The ADV drill interaction uses the same component and pattern as GEO drill (C1).
@@ -130,13 +137,16 @@
       timeseries_chart.json S3 output (cla.total field).
     </requirement>
     <requirement id="C4.2">
-      Implement the continuous CLA view as a stacked area chart:
-        - Y-axis = dollar AUM (absolute, not percentage)
-        - Two stacked areas: NMNC AUM (green, bottom) and NMEC AUM (blue, top)
+      Implement the continuous CLA view using the cla_timeseries shape agreed in the
+      Pattern 0 thread (2026-03-03-continuous-nna-cla-alignment). The thread receipt
+      defines: exact JSON structure (field names for NMNC and NMEC series, grain keys),
+      S3 key, and the TypeScript interface name DE typed against.
+      Chart behavior:
+        - Y-axis = dollar AUM (absolute), two stacked areas: NMNC (green) and NMEC (blue)
         - Total height at each date = total firm AUM
-        - Date range = same as other continuous views (window toggle applies)
-      Data source: timeseries_chart.json cla.total (firm-wide),
-        cla.geo / cla.geo_drill (GEO grain), cla.adv (ADV grain — architect is terminal).
+        - Date range = same window toggle as other continuous views
+        - Grains: total (firm-wide), geo/geo_drill, adv (architect terminal — no client drill)
+      Use the agreed field names from the thread receipt, not the PRD's suggested naming.
     </requirement>
     <requirement id="C4.3">
       Add search input and drill-down behavior consistent with C1/C2:
@@ -191,23 +201,28 @@
       advisor_rolling_flows.json S3 output (from script 10 Stream B2 deploy).
     </requirement>
     <requirement id="4C.2">
-      Implement PRIMARY VIEW — Stacked Bar Chart (default view):
-        - X-axis: one bar per architect (or implementor, per toggle)
-        - Bars: Inflows (positive, teal or similar), Outflows (inverted downward or negative segment), NNA net (implied)
-        - Sorted lowest to highest by NNA (highest performers visually rightmost)
-        - Period toggle: QTD / YTD / 1Y / 3Y / Max
-        - Architects / Implementors toggle at top (controls both primary and secondary views)
-      Data source: advisor_rolling_flows.json stacked_bar.architects / stacked_bar.implementors
+      Implement PRIMARY VIEW — Stacked Bar Chart — using the shape agreed in the
+      Pattern 0 thread (2026-03-03-advisors-stacked-bar-alignment). The thread receipt
+      defines: exact top-level key names in advisor_rolling_flows.json, how outflows
+      are encoded (negative number? separate field? sign flag?), period key names,
+      and the TypeScript interface name.
+      Chart behavior:
+        - X-axis: one bar per architect or implementor (per toggle)
+        - Bars show inflows, outflows, NNA net per the agreed encoding
+        - Sorted lowest to highest by NNA (highest performers rightmost)
+        - Period toggle: per agreed period keys in thread receipt
+        - Architects / Implementors toggle controls both views
+      Use the agreed field names from the thread receipt, not the PRD's suggested naming.
     </requirement>
     <requirement id="4C.3">
-      Implement SECONDARY VIEW — 1-Year Rolling Line Chart:
-        - X-axis: dates over the selected period window
-        - Y-axis: 1-year rolling NNA value per advisor
-        - One line per advisor (top performers by default, all accessible via search/toggle)
-        - Period toggle controls X-AXIS WINDOW (how far back dates go), NOT the rolling window
-        - Rolling window is FIXED at 1 year (full year trailing from each date point)
+      Implement SECONDARY VIEW — 1-Year Rolling Line Chart — using the rolling_1y shape
+      agreed in the same thread receipt (2026-03-03-advisors-stacked-bar-alignment).
+      The thread defines: per-advisor series structure, date+value format, and
+      what date range DS committed to providing.
+      Chart behavior:
+        - X-axis: dates over the selected period window (period toggle = x-axis window)
+        - Y-axis: 1-year rolling NNA per advisor (fixed 1Y rolling window per date point)
         - Same Architects/Implementors toggle as primary view
-      Data source: advisor_rolling_flows.json rolling_1y.architects / rolling_1y.implementors
     </requirement>
     <requirement id="4C.4">
       View toggle (Primary / Secondary) must be clear and accessible.

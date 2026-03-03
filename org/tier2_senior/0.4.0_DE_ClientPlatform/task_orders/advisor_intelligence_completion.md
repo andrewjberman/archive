@@ -19,7 +19,10 @@
   </objective>
 
   <references>
-    <ref>docs/architecture/ADVISOR_INTELLIGENCE_COMPLETION.md</ref>
+    <ref type="prd">docs/architecture/ADVISOR_INTELLIGENCE_COMPLETION.md</ref>
+    <ref type="thread-staging">org/threads/staging/run-2026-03-03-continuous-nna-cla-alignment.sh</ref>
+    <ref type="thread-staging">org/threads/staging/run-2026-03-03-advisors-stacked-bar-alignment.sh</ref>
+    <ref type="thread-staging">org/threads/staging/run-2026-03-03-books-tab-design.sh</ref>
     <ref>org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/pod_inventory.xml</ref>
     <ref>portal/src/pages/AdvisorIntelligence/</ref>
     <ref>portal/src/api/endpoints/advisor-intelligence.ts</ref>
@@ -68,18 +71,30 @@
     </requirement>
 
     <!-- ================================================================ -->
-    <!-- DS A2 GATE — NMNC/NMEC classification acknowledgment             -->
+    <!-- PATTERN 0 THREAD PARTICIPATION — A1+A2 and A3                   -->
     <!-- ================================================================ -->
-    <requirement id="A2-gate.1">
-      DS (0.4.0_DS_ClientPlatform) must confirm in writing the NMNC/NMEC classification
-      logic for cla_timeseries before committing that implementation.
-      When DS sends you the classification logic (via session log or direct communication),
-      review it and provide written acknowledgment:
-        - Confirm that the classification aligns with how CLA is currently defined in
-          header_metrics.json (NMNC = new client AUA, NMEC = existing client AUA)
-        - Confirm which gold table fields / account open date logic DS is using
-        - If the classification is incorrect or ambiguous, send DS a correction
-      Document your acknowledgment in your session log.
+    <requirement id="thread.1">
+      You are a participant in two Pattern 0 alignment threads. These threads run
+      BEFORE DS writes any code for A1, A2, and A3. Your role in each:
+
+      Thread 1 (2026-03-03-continuous-nna-cla-alignment):
+        After DS describes available gold layer data, specify:
+        - The TypeScript interface name(s) and shape the portal will use for adv_drill
+        - The TypeScript interface name(s) and shape for cla_timeseries
+        - The NMNC/NMEC definition your portal types currently expect
+          (check header_metrics.json CLA structure vs what DS proposes)
+        - Any query key or endpoint path change needed in advisor-intelligence.ts
+
+      Thread 2 (2026-03-03-advisors-stacked-bar-alignment):
+        After DS describes what script 10 can produce, specify:
+        - The TypeScript interface for the stacked bar data per period
+        - The TypeScript interface for the rolling 1Y series
+        - How the period toggle maps to data keys
+        - Outflow encoding requirement from a portal typing perspective
+
+      The thread receipts are the binding interface specs. Your task orders for
+      C2, C4, and 4C (issued to RD) reference these receipts. Do NOT finalize
+      those stream requirements before the receipts are available.
     </requirement>
 
     <!-- ================================================================ -->
