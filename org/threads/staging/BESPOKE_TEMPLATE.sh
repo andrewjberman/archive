@@ -5,8 +5,9 @@
 # Everything is self-contained: CONTEXT.json and opening message are embedded as
 # heredocs. Run it once from the repo root and the thread scaffolds and executes.
 #
-# Generated scripts are named: staging/run-YYYY-MM-DD-{slug}.sh
-# Run from repo root: bash org/threads/staging/run-YYYY-MM-DD-{slug}.sh
+# Generated scripts are named: staging/run-{PROJECT_CODE}-{NNN}-{slug}.sh  (project threads)
+#                          or: staging/run-YYYY-MM-DD-{slug}.sh             (non-project threads)
+# Run from repo root: bash org/threads/staging/run-{name}.sh
 
 set -euo pipefail
 
@@ -18,12 +19,14 @@ THREADS_DIR="$REPO_ROOT/org/threads"
 # Configuration -- edit these when generating a new script
 # ---------------------------------------------------------------------------
 
-THREAD_ID="YYYY-MM-DD-{slug}"
+PROJECT="{CODE}"          # project code from org/projects/REGISTRY.md (e.g. AI, PEB)
+                          # leave blank and set THREAD_ID manually for non-project threads
+THREAD_ID=""              # auto-assigned from project serial if PROJECT is set
 TOPIC="{Human-readable topic}"
 CREATED_BY="{opening-agent-serial}"
 PARTICIPANTS="{agent1-serial},{agent2-serial}"
 MAX_TURNS=3               # bespoke default; use 2 for shorter exchanges
-MODEL="gpt-4o"            # bespoke default; gpt-4o-mini for lighter threads
+MODEL="gpt-5.2"           # current standard model
 
 # ---------------------------------------------------------------------------
 # Context -- files and briefing injected into CONTEXT_COMPILED.md
@@ -81,21 +84,35 @@ OPENING_EOF
 # Scaffold and run
 # ---------------------------------------------------------------------------
 
-echo "Scaffolding thread: ${THREAD_ID}"
-"${THREADS_DIR}/create-thread.sh" \
-  --id              "$THREAD_ID" \
-  --topic           "$TOPIC" \
-  --created-by      "$CREATED_BY" \
-  --participants    "$PARTICIPANTS" \
-  --context-file    "$CONTEXT_FILE" \
-  --opening-message "$OPENING_FILE" \
-  --max-turns       "$MAX_TURNS" \
-  --turn-order      alternating
+CREATE_ARGS=(
+  --topic           "$TOPIC"
+  --created-by      "$CREATED_BY"
+  --participants    "$PARTICIPANTS"
+  --context-file    "$CONTEXT_FILE"
+  --opening-message "$OPENING_FILE"
+  --max-turns       "$MAX_TURNS"
+  --turn-order      round_robin
+)
+[ -n "$PROJECT" ]   && CREATE_ARGS+=(--project "$PROJECT")
+[ -n "$THREAD_ID" ] && CREATE_ARGS+=(--id "$THREAD_ID")
+
+echo "Scaffolding thread..."
+"${THREADS_DIR}/create-thread.sh" "${CREATE_ARGS[@]}"
 
 rm -f "$CONTEXT_FILE" "$OPENING_FILE"
 
+# Resolve the actual thread ID (auto-assigned if project was set)
+if [ -z "$THREAD_ID" ] && [ -n "$PROJECT" ]; then
+  JQ="${REPO_ROOT}/.tools/jq.exe"
+  PROJECT_FILE="${REPO_ROOT}/org/projects/${PROJECT}.json"
+  COUNTER=$("$JQ" -r '.thread_counter' "$PROJECT_FILE")
+  SERIAL="${PROJECT}-$(printf '%03d' $COUNTER)"
+  TOPIC_SLUG=$(echo "$TOPIC" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-' | cut -c1-40 | sed 's/-$//')
+  THREAD_ID="${SERIAL}-${TOPIC_SLUG}"
+fi
+
 echo ""
-echo "Running orchestrator..."
+echo "Running orchestrator on: ${THREAD_ID}"
 /c/Users/AndrewBerman/AppData/Local/Programs/Python/Python312/python.exe \
   "${THREADS_DIR}/orchestrator.py" \
   --thread  "$THREAD_ID" \

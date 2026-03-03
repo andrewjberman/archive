@@ -254,17 +254,21 @@ def set_status(thread_dir: Path, status: str):
 
 def write_receipts(thread_dir: Path):
     thread_json = json.loads((thread_dir / "THREAD.json").read_text())
-    thread_id   = thread_json["id"]
-    topic       = thread_json["topic"]
+    thread_id    = thread_json["id"]
+    topic        = thread_json["topic"]
     participants = thread_json["participants"]
-    date_prefix = thread_id[:10]
-    slug        = thread_id[11:]
+    project      = thread_json.get("project", "")
+    serial_no    = thread_json.get("serial", "")
 
     msg_files = sorted((thread_dir / "messages").glob("*.md"))
-    header = "\n".join([
+    header_lines = [
         f"# Thread Receipt: {topic}",
         "",
         f"**Thread ID:** {thread_id}",
+    ]
+    if serial_no:
+        header_lines.append(f"**Project Serial:** {serial_no}")
+    header_lines += [
         f"**Created by:** {thread_json['created_by']}",
         f"**Created at:** {thread_json['created_at']}",
         f"**Status:** {thread_json['status']}",
@@ -272,7 +276,8 @@ def write_receipts(thread_dir: Path):
         "",
         "---",
         "",
-    ])
+    ]
+    header = "\n".join(header_lines)
     body_parts = []
     for mf in msg_files:
         body_parts.append(f"## {mf.name}\n\n{mf.read_text(encoding='utf-8')}\n\n---\n")
@@ -281,7 +286,8 @@ def write_receipts(thread_dir: Path):
     for serial in participants:
         agent  = resolve_agent(serial)
         others = "+".join(s for s in participants if s != serial)
-        dest   = agent["agent_dir"] / "threads" / f"{date_prefix}_{others}_{slug}.md"
+        # Receipt filename uses full thread_id so project threads sort by code+serial
+        dest   = agent["agent_dir"] / "threads" / f"{thread_id}_{others}.md"
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(receipt, encoding="utf-8")
         print(f"OK: Receipt -> {dest}")

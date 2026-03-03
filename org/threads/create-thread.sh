@@ -24,6 +24,8 @@ MAX_TURNS=3
 TURN_ORDER="alternating"
 CONTEXT_FILE=""
 OPENING_MESSAGE=""
+THREAD_ID=""
+PROJECT_CODE=""
 
 # --- Parse arguments ---
 while [[ $# -gt 0 ]]; do
@@ -36,17 +38,42 @@ while [[ $# -gt 0 ]]; do
     --opening-message) OPENING_MESSAGE="$2"; shift 2 ;;
     --max-turns) MAX_TURNS="$2"; shift 2 ;;
     --turn-order) TURN_ORDER="$2"; shift 2 ;;
+    --project) PROJECT_CODE="$2"; shift 2 ;;
     *) echo "ERROR: Unknown argument: $1"; exit 1 ;;
   esac
 done
 
 # --- Validate required args ---
-for var in THREAD_ID TOPIC CREATED_BY PARTICIPANTS_RAW; do
+for var in TOPIC CREATED_BY PARTICIPANTS_RAW; do
   if [ -z "${!var:-}" ]; then
     echo "ERROR: --$(echo $var | tr '[:upper:]' '[:lower:]' | tr '_' '-') is required"
     exit 1
   fi
 done
+
+# --- Project serial assignment ---
+PROJECT_SERIAL=""
+if [ -n "$PROJECT_CODE" ]; then
+  PROJECT_FILE="$REPO_ROOT/org/projects/${PROJECT_CODE}.json"
+  if [ ! -f "$PROJECT_FILE" ]; then
+    echo "ERROR: Project file not found: $PROJECT_FILE"
+    echo "       Create org/projects/${PROJECT_CODE}.json first."
+    exit 1
+  fi
+  CURRENT_COUNTER=$("$JQ" -r '.thread_counter' "$PROJECT_FILE")
+  NEXT_COUNTER=$((CURRENT_COUNTER + 1))
+  PROJECT_SERIAL="${PROJECT_CODE}-$(printf '%03d' $NEXT_COUNTER)"
+
+  # Auto-build thread ID from serial + topic slug if not explicitly provided
+  if [ -z "$THREAD_ID" ]; then
+    TOPIC_SLUG=$(echo "$TOPIC" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-' | cut -c1-40 | sed 's/-$//')
+    THREAD_ID="${PROJECT_SERIAL}-${TOPIC_SLUG}"
+  fi
+  echo "OK: Project ${PROJECT_CODE} -- assigning serial ${PROJECT_SERIAL} -> thread ${THREAD_ID}"
+elif [ -z "$THREAD_ID" ]; then
+  echo "ERROR: --id is required when --project is not specified"
+  exit 1
+fi
 
 # --- Parse participants into array ---
 IFS=',' read -ra PARTICIPANTS <<< "$PARTICIPANTS_RAW"
@@ -129,6 +156,8 @@ PARTICIPANTS_JSON=$(printf '%s\n' "${PARTICIPANTS[@]}" | "$JQ" -R . | "$JQ" -s .
   --argjson participants "$PARTICIPANTS_JSON" \
   --arg turn_order "$TURN_ORDER" \
   --argjson max_turns "$MAX_TURNS" \
+  --arg project "${PROJECT_CODE:-}" \
+  --arg serial "${PROJECT_SERIAL:-}" \
   '{
     id: $id,
     created_by: $created_by,
@@ -138,7 +167,9 @@ PARTICIPANTS_JSON=$(printf '%s\n' "${PARTICIPANTS[@]}" | "$JQ" -R . | "$JQ" -s .
     turn_order: $turn_order,
     max_turns_per_agent: $max_turns,
     status: "active"
-  }' > "$THREAD_DIR/THREAD.json"
+  }
+  | if $project != "" then . + {project: $project, serial: $serial} else . end
+  ' > "$THREAD_DIR/THREAD.json"
 
 echo "OK: Wrote THREAD.json"
 
@@ -512,7 +543,31 @@ done
   }' > "$THREAD_DIR/TURN.json"
 
 echo "OK: Wrote TURN.json (next agent: $FIRST_TURN_AGENT)"
+
+# --- Update project file if --project was specified ---
+if [ -n "$PROJECT_CODE" ]; then
+  PARTICIPANTS_FOR_PROJECT=$(printf '%s\n' "${PARTICIPANTS[@]}" | "$JQ" -R . | "$JQ" -s .)
+  THREAD_ENTRY=$("$JQ" -n \
+    --arg serial "$PROJECT_SERIAL" \
+    --arg thread_id "$THREAD_ID" \
+    --arg topic "$TOPIC" \
+    --argjson participants "$PARTICIPANTS_FOR_PROJECT" \
+    --arg date "$(date +%Y-%m-%d)" \
+    '{serial: $serial, thread_id: $thread_id, topic: $topic, participants: $participants, pattern: "unset", status: "active", date: $date}')
+
+  "$JQ" \
+    --argjson entry "$THREAD_ENTRY" \
+    --argjson counter "$NEXT_COUNTER" \
+    '.thread_counter = $counter | .threads += [$entry]' \
+    "$PROJECT_FILE" > "${PROJECT_FILE}.tmp" && mv "${PROJECT_FILE}.tmp" "$PROJECT_FILE"
+
+  echo "OK: Updated $PROJECT_FILE -- serial $PROJECT_SERIAL, counter $NEXT_COUNTER"
+fi
+
 echo ""
 echo "Thread '$THREAD_ID' is ready."
 echo "  Directory: $THREAD_DIR"
-echo "  Run: ./org/threads/orchestrator.sh --thread $THREAD_ID"
+if [ -n "$PROJECT_SERIAL" ]; then
+  echo "  Project:   $PROJECT_CODE  Serial: $PROJECT_SERIAL"
+fi
+echo "  Run: python org/threads/orchestrator.py --thread $THREAD_ID"

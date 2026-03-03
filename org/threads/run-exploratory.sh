@@ -21,6 +21,7 @@ JQ="${REPO_ROOT}/.tools/jq.exe"
 MODEL="gpt-5.2"
 MAX_TURNS=2
 DRY_RUN=false
+PROJECT_CODE=""
 
 # --- Parse args ---
 AGENT1="${1:-}"
@@ -28,25 +29,29 @@ AGENT2="${2:-}"
 shift 2 2>/dev/null || true
 
 if [ -z "$AGENT1" ] || [ -z "$AGENT2" ]; then
-  echo "Usage: $0 <agent1-serial> <agent2-serial> [--model <m>] [--max-turns <n>] [--dry-run]"
+  echo "Usage: $0 <agent1-serial> <agent2-serial> [--project <code>] [--model <m>] [--max-turns <n>] [--dry-run]"
   exit 1
 fi
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --model)     MODEL="$2";     shift 2 ;;
-    --max-turns) MAX_TURNS="$2"; shift 2 ;;
-    --dry-run)   DRY_RUN=true;   shift ;;
+    --model)     MODEL="$2";        shift 2 ;;
+    --max-turns) MAX_TURNS="$2";    shift 2 ;;
+    --project)   PROJECT_CODE="$2"; shift 2 ;;
+    --dry-run)   DRY_RUN=true;      shift ;;
     *) echo "ERROR: Unknown argument: $1"; exit 1 ;;
   esac
 done
 
-# --- Thread ID ---
+# --- Thread ID (project-serial if --project given, else date-based) ---
 DATE=$(date +"%Y-%m-%d")
-# Shorten serials for slug: take the role+name part (e.g. DS_ClientPlatform)
 A1_SLUG=$(echo "$AGENT1" | cut -d'.' -f3 | tr '[:upper:]' '[:lower:]' | tr '_' '-')
 A2_SLUG=$(echo "$AGENT2" | cut -d'.' -f3 | tr '[:upper:]' '[:lower:]' | tr '_' '-')
-THREAD_ID="${DATE}-${A1_SLUG}+${A2_SLUG}-sync"
+if [ -n "$PROJECT_CODE" ]; then
+  THREAD_ID=""  # create-thread.sh will auto-assign from project serial
+else
+  THREAD_ID="${DATE}-${A1_SLUG}+${A2_SLUG}-sync"
+fi
 
 # --- Resolve agent role names for the opening message ---
 get_role_name() {
@@ -105,16 +110,32 @@ cat > "$CONTEXT_FILE" << EOF
 EOF
 
 # --- Scaffold thread ---
-echo "Scaffolding thread: ${THREAD_ID}"
-"${SCRIPT_DIR}/create-thread.sh" \
-  --id          "$THREAD_ID" \
-  --topic       "Context sync: ${AGENT1} + ${AGENT2}" \
-  --created-by  "$AGENT1" \
-  --participants "${AGENT1},${AGENT2}" \
-  --context-file "$CONTEXT_FILE" \
-  --opening-message "$OPENING_FILE" \
-  --max-turns   "$MAX_TURNS" \
-  --turn-order  alternating
+TOPIC="Context sync: ${AGENT1} + ${AGENT2}"
+echo "Scaffolding thread: ${THREAD_ID:-auto}"
+
+CREATE_ARGS=(
+  --topic           "$TOPIC"
+  --created-by      "$AGENT1"
+  --participants    "${AGENT1},${AGENT2}"
+  --context-file    "$CONTEXT_FILE"
+  --opening-message "$OPENING_FILE"
+  --max-turns       "$MAX_TURNS"
+  --turn-order      alternating
+)
+[ -n "$THREAD_ID" ]    && CREATE_ARGS+=(--id "$THREAD_ID")
+[ -n "$PROJECT_CODE" ] && CREATE_ARGS+=(--project "$PROJECT_CODE")
+
+"${SCRIPT_DIR}/create-thread.sh" "${CREATE_ARGS[@]}"
+
+# Capture thread ID if auto-assigned by project
+if [ -z "$THREAD_ID" ] && [ -n "$PROJECT_CODE" ]; then
+  JQ="${REPO_ROOT}/.tools/jq.exe"
+  PROJECT_FILE="${REPO_ROOT}/org/projects/${PROJECT_CODE}.json"
+  COUNTER=$("$JQ" -r '.thread_counter' "$PROJECT_FILE")
+  SERIAL="${PROJECT_CODE}-$(printf '%03d' $COUNTER)"
+  TOPIC_SLUG=$(echo "$TOPIC" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-' | cut -c1-40 | sed 's/-$//')
+  THREAD_ID="${SERIAL}-${TOPIC_SLUG}"
+fi
 
 rm -f "$OPENING_FILE" "$CONTEXT_FILE"
 

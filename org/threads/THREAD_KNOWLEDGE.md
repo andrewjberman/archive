@@ -276,5 +276,30 @@ to happen BEFORE anyone writes code. This eliminates the most common rework cycl
 - Opening message structure: DS goes first describing available data -> DE responds
   with interface need -> RD responds with layout constraints -> converge on contract
 
+---
+
+### M9 — All threads belong to a project. Use --project when creating threads.
+
+**Rule:** Every thread created for a feature or initiative must reference a project
+via `--project {CODE}`. The project code is the join key between threads, task orders,
+PRDs, and agent receipts.
+
+**Project registry:** `org/projects/REGISTRY.md` lists all active projects.
+Each project has a JSON file at `org/projects/{CODE}.json` containing the PRD path,
+pod scope, and a log of all threads run under it.
+
+**Serial format:** `{CODE}-{NNN}` (e.g., `AI-004`). Auto-assigned by `create-thread.sh`
+when `--project` is passed. Thread folder: `org/threads/AI-004-{slug}/`.
+Receipt in agent folder: `AI-004-{slug}_{other_serials}.md`.
+
+**Why:** Without project linkage, thread receipts accumulate in agent folders with no
+searchable structure. With project codes, any agent can filter their `threads/` folder
+by code (`ls threads/AI-*.md`) to find all threads related to a specific feature.
+The project JSON file gives the COO a single-file audit of every thread run for a project.
+
+**To create a new project:** Add `{CODE}.json` to `org/projects/` (copy AI.json as template)
+and add a row to `org/projects/REGISTRY.md`. Then pass `--project {CODE}` to any
+`create-thread.sh` call and it auto-assigns the serial and updates the project file.
+
 *Last updated: 2026-03-03*
-*Updated by: 1.0.0_SA_CTO + Andrew (CEO) -- CEO-CTO workflow design session*
+*Updated by: 1.0.0_SA_CTO + Andrew (CEO) -- project serial system added*
