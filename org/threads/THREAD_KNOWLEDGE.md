@@ -203,6 +203,16 @@ will be vacuous.
 they have at least one session log. If not, run a bespoke orientation thread
 first to seed their knowledge, THEN run exploratory syncs.
 
+**IMPORTANT — O3 applies to EXPLORATORY threads only, not BESPOKE threads:**
+Bespoke threads (orchestrator.py with TOOLS_ENABLED=true and M1 context injection)
+do NOT require session logs to produce quality output. The agents have:
+  (1) Their enriched prompt.md as system context
+  (2) M1 file injection — source code injected directly into the thread context
+  (3) Tools access — agents can read any file during the thread run
+  (4) v1 session logs accessible via logs/sessions/ fallback (84 logs, 2025-11-18)
+O3 is therefore already satisfied for any agent with an enriched prompt.
+Do NOT block a bespoke thread because an agent lacks recent new-system session logs.
+
 ---
 
 ## WORKFLOW REFERENCE

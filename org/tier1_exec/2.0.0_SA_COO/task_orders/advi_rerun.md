@@ -32,14 +32,12 @@
     <!-- PHASE 0 — Prerequisites before running any thread               -->
     <!-- ================================================================ -->
     <requirement id="P.1">
-      O3 compliance: DS, DE, and RD must each have at least one session log before
-      any ADVI thread runs. Confirm by checking:
-        org/tier2_senior/0.4.0_DS_ClientPlatform/logs/
-        org/tier2_senior/0.4.0_DE_ClientPlatform/logs/
-        org/tier3_junior/0.4.2_RD_AdvisorIntelligence/logs/
-      Immediate task orders (A4, A5, C1, C3, H, I, I2) have been issued to these agents.
-      Their first activation sessions writing those logs is the O3 trigger.
-      Do NOT run ADVI-004, 005, or 006 until logs exist for all three agents.
+      O3 is SATISFIED. Agents have enriched prompts, tools-enabled threads (direct file
+      read during run), and 84 v1 session logs accessible via logs/sessions/ fallback.
+      Do NOT wait for new session logs before running ADVI-004 and ADVI-005.
+      Run them now. ADVI-006 (Books) may wait until DS/DE/RD have multiple current
+      session logs — it is the most complex thread and benefits from richer context,
+      but 004/005 should execute immediately.
     </requirement>
     <requirement id="P.2">
       Before creating any staging script, verify the BESPOKE_TEMPLATE.sh exists:
@@ -197,15 +195,16 @@
     </requirement>
 
     <!-- ================================================================ -->
-    <!-- ADVI-004 and ADVI-005 can run in parallel.                       -->
-    <!-- ADVI-006 runs after further session logs accumulate (O3).        -->
+    <!-- ADVI-004 and ADVI-005 run immediately in parallel.              -->
+    <!-- ADVI-006 runs after DS/DE/RD accumulate multiple session logs.  -->
     <!-- ================================================================ -->
     <requirement id="SEQ.1">
       Run order:
-        1. Confirm O3 (all three agents have session logs) — then run ADVI-004 and ADVI-005
-           in parallel (they cover independent work streams, no data dependency between them).
-        2. After ADVI-004 and ADVI-005 receipts land and DS/DE/RD have multiple session logs:
-           run ADVI-006 (Books — requires richer context, more session log signal for O3).
+        1. Run ADVI-004 and ADVI-005 immediately in parallel — O3 is satisfied by enriched
+           prompts and tools access. No waiting for new session logs.
+        2. After ADVI-004 and ADVI-005 receipts land and DS/DE/RD have multiple current
+           session logs: run ADVI-006 (Books — the most complex thread, benefits from richer
+           accumulated context before running).
     </requirement>
 
     <!-- ================================================================ -->
@@ -271,7 +270,7 @@
   </requirements>
 
   <acceptance_criteria>
-    <criterion id="1">O3 confirmed for all three agents before any thread runs.</criterion>
+    <criterion id="1">ADVI-004 and ADVI-005 staging scripts created and executed immediately — no O3 wait required.</criterion>
     <criterion id="2">ADVI-004 and ADVI-005 staging scripts created and run; receipts in all participant threads/ folders.</criterion>
     <criterion id="3">ADVI-006 staging script created and run; docs/architecture/advisor_intelligence/books_tab_design_brief.md exists after thread completes.</criterion>
     <criterion id="4">Per-thread task orders issued for each post-receipt stream with thread_serial and thread_ref in XML metadata.</criterion>
@@ -282,7 +281,7 @@
   <constraints>
     <constraint>ADVI-001/002/003 are superseded. Do not reference their receipts as binding contracts. Old staging scripts are deleted.</constraint>
     <constraint>All staging scripts use PROJECT="ADVI", MODEL="gpt-5.2", THREAD_ID="" (auto-assigned). Never hardcode thread IDs for project threads.</constraint>
-    <constraint>ADVI-004 and ADVI-005 can run in parallel. ADVI-006 runs only after DS, DE, and RD have multiple session logs (deeper O3 signal for the most complex thread).</constraint>
+    <constraint>ADVI-004 and ADVI-005 run immediately in parallel — O3 is already satisfied. ADVI-006 runs only after DS, DE, and RD have multiple current session logs (the most complex thread; richer context improves output quality).</constraint>
     <constraint>The books_tab_design_brief.md is a required thread deliverable, not optional. If the thread completes without DE writing it, the thread has failed and must be re-run.</constraint>
     <constraint>Do not issue Stream G (Books implementation) task orders until the design brief file exists at docs/architecture/advisor_intelligence/books_tab_design_brief.md.</constraint>
     <constraint>Commit all task orders and ADVI.json updates using:
@@ -290,9 +289,9 @@
   </constraints>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform" task="advi_a4_bell_curve_verify + advi_a5_users_v2_mapping" status="pending" note="First session log required for O3 before threading"/>
-    <dependency agent="0.4.0_DE_ClientPlatform" task="advi_i2_leaderboard_sort" status="pending" note="First session log required for O3"/>
-    <dependency agent="0.4.2_RD_AdvisorIntelligence" task="advi_c1/c3/h/i" status="pending" note="First session log required for O3"/>
+    <dependency agent="0.4.0_DS_ClientPlatform" task="advi_a4_bell_curve_verify + advi_a5_users_v2_mapping" status="pending" note="Immediate task orders active — no O3 gate on ADVI-004/005"/>
+    <dependency agent="0.4.0_DE_ClientPlatform" task="advi_i2_leaderboard_sort" status="pending" note="Immediate task order active — no O3 gate on ADVI-004/005"/>
+    <dependency agent="0.4.2_RD_AdvisorIntelligence" task="advi_c1/c3/h/i" status="pending" note="Immediate task orders active — no O3 gate on ADVI-004/005"/>
   </dependencies>
 
   <deliverables>
