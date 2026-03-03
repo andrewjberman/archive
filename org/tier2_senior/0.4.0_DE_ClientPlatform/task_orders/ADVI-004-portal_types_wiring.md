@@ -13,9 +13,9 @@
   </metadata>
 
   <objective>
-    Define TypeScript interfaces and wire API endpoints for adv_drill and cla_timeseries
-    per the binding contract in the ADVI-004 receipt. The receipt specifies exact interface
-    names and shapes agreed with DS and RD — implement those, not your own interpretation.
+    Define TypeScript interfaces for adv_drill and cla per the ADVI-004 receipt,
+    with CTO scope correction: cla includes geo_city_drill (not blocked). No new
+    endpoint or query key needed — existing getCumulativeChart() covers this.
   </objective>
 
   <references>
@@ -26,25 +26,33 @@
   <requirements>
 
     <requirement id="TY.1">
-      Add the following TypeScript interfaces to portal/src/pages/AdvisorIntelligence/types.ts
-      per the ADVI-004 receipt (exact names and field types from the thread convergence):
-        - AdvDrillResponse (or the name agreed in receipt)
-        - ClaTimeseriesResponse (or the name agreed in receipt)
-        - Any supporting types (CumulativeChartView extensions, colorMap type)
-      Read the receipt for the exact interface shapes. Do not add fields not in the receipt.
+      Add the following to portal/src/pages/AdvisorIntelligence/types.ts as an
+      extension on CumulativeChartResponse (non-breaking, optional key):
+        cla?: {
+          total: CumulativeChartView
+          geo_drill: Record&lt;string, CumulativeChartView&gt;
+          adv_drill: Record&lt;string, CumulativeChartView&gt;
+          geo_city_drill?: Record&lt;string, Record&lt;string, CumulativeChartView&gt;&gt;
+        }
+      geo_city_drill is optional (?) at the type level since it may not be present
+      in older cached responses during rollout.
     </requirement>
     <requirement id="TY.2">
-      Wire the new data into the existing query/fetch pattern in
-      portal/src/api/endpoints/advisor-intelligence.ts. Add query keys and endpoint
-      paths per the receipt contract. The data arrives as new fields in
-      timeseries_chart.json — no new API endpoint needed, just type the response correctly.
+      No new endpoint needed. No new React Query key needed. Existing
+      getCumulativeChart() -> GET /api/scoped/advisor-intelligence/timeseries_chart.json
+      already covers these new fields. Just type the response correctly.
     </requirement>
     <requirement id="TY.3">
-      Note: cla.geo_city_drill is BLOCKED (gold layer limitation). Do NOT add a type
-      for city-level CLA drill-down. The interface should type cla.total, cla.geo,
-      and cla.adv only.
+      No backend colorMap field in the contract. RD uses existing frontend hex
+      palettes (CATEGORY_COLORS, GEO_COLORS in DistributionTab.tsx). Do NOT add
+      a colorMap type.
     </requirement>
     <requirement id="TY.4">
+      Blocked by DS delivering A1/A2 — DS updates data_contract.xml first, then
+      DE types after to ensure alignment. Read DS's updated data_contract.xml
+      before finalizing your types.
+    </requirement>
+    <requirement id="TY.5">
       Review RD implementation (C2 + C4) when those streams are ready. Signal DT
       to push to DEV only after review. Document review in your session log.
     </requirement>
@@ -52,22 +60,21 @@
   </requirements>
 
   <acceptance_criteria>
-    <criterion id="1">TypeScript interfaces match ADVI-004 receipt field names and types exactly.</criterion>
-    <criterion id="2">API endpoint wiring updated to include new response fields.</criterion>
-    <criterion id="3">No type for cla.geo_city_drill (blocked).</criterion>
+    <criterion id="1">cla type on CumulativeChartResponse includes total, geo_drill, adv_drill, and optional geo_city_drill.</criterion>
+    <criterion id="2">No new endpoint, no new query key added.</criterion>
+    <criterion id="3">No colorMap type defined (frontend-only colors).</criterion>
     <criterion id="4">bunx tsc -b passes after changes.</criterion>
   </acceptance_criteria>
 
   <constraints>
-    <constraint>Types must match the ADVI-004 receipt. Do not add speculative fields.</constraint>
+    <constraint>Types must match DS's data_contract.xml. Read it before finalizing.</constraint>
     <constraint>Do not push. DT pushes after DE review of RD work.</constraint>
     <constraint>No emojis in code.</constraint>
     <constraint>Commit with: git commit --author="0.4.0_DE_ClientPlatform &lt;0.4.0_DE_ClientPlatform@opal.agent&gt;" -m "..."</constraint>
   </constraints>
 
   <deliverables>
-    <deliverable type="commit">types.ts: AdvDrillResponse + ClaTimeseriesResponse interfaces</deliverable>
-    <deliverable type="commit">advisor-intelligence.ts: endpoint wiring updates</deliverable>
+    <deliverable type="commit">types.ts: cla type extension on CumulativeChartResponse</deliverable>
   </deliverables>
 </task_order>
 ```

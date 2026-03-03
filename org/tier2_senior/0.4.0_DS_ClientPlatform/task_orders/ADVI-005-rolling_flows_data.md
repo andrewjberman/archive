@@ -26,12 +26,26 @@
   <requirements>
 
     <!-- ================================================================ -->
+    <!-- PRE-CHECK — resolve receipt caveat before implementation         -->
+    <!-- ================================================================ -->
+    <requirement id="A3.0">
+      FIRST ACTION before any implementation: Read data/black_diamond/scripts/gold/
+      10_generate_advisor_rolling_flows.py and confirm the actual min date of the
+      cumulative parquet data (nna_aua_by_advisor.parquet). Determine whether 3Y and
+      Max periods will have complete history. Document the actual available lookback
+      in data_contract.xml under the rolling_1y contract block. If history is shorter
+      than 3Y, record the actual available min date — do not leave it as an open question.
+      This resolves the ADVI-005 receipt caveat before implementation begins.
+    </requirement>
+
+    <!-- ================================================================ -->
     <!-- STREAM A3 — stacked_bar + rolling_1y                             -->
     <!-- ================================================================ -->
     <requirement id="A3.1">
-      Add stacked_bar to advisor_rolling_flows.json output per ADVI-005 receipt:
-        - stacked_bar.architects.{qtd|ytd|1y|3y|max}: AdvisorBarEntry[]
-        - stacked_bar.implementors.{qtd|ytd|1y|3y|max}: AdvisorBarEntry[]
+      Add stacked_bar to advisor_rolling_flows.json output per ADVI-005 receipt.
+      Nesting structure per CTO correction:
+        stacked_bar: { "qtd"|"ytd"|"1y"|"3y"|"max": { "architects": AdvisorBarEntry[], "implementors": AdvisorBarEntry[] } }
+      Period is the outer key, role type is the inner key.
         - AdvisorBarEntry = { advisor_name, advisor_id, inflows, outflows, nna_net }
         - Outflows: positive magnitude (>= 0) — frontend negates for chart rendering
         - nna_net: signed (can be negative)
