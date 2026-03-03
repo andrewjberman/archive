@@ -1,8 +1,18 @@
 # Agent Thread System -- Round-Robin Conversation Protocol
 
+## BEFORE YOU CREATE A THREAD
+
+**Read `org/threads/THREAD_KNOWLEDGE.md` first.**
+
+It contains mandatory rules (M1-M5) that govern context injection, model
+selection, turn limits, and agent behavior. Skipping it produces threads
+where agents fabricate answers or fail to ground their responses in real code.
+
+---
+
 ## Overview
 
-The thread system enables structured, multi-turn conversations between agents without requiring Andrew to manually relay messages. A **thread** is a filesystem-backed conversation folder where agents take turns writing messages. A **shell orchestrator** automates the round-robin invocation.
+The thread system enables structured, multi-turn conversations between agents without requiring Andrew to manually relay messages. A **thread** is a filesystem-backed conversation folder where agents take turns writing messages. The Python orchestrator (`orchestrator.py`) drives the conversation loop via the OpenAI API and can be run from within a Claude Code session.
 
 **Who can create/run threads:** Tier 1 (SA) and Tier 2 (DE, DT, DS, AE) agents.
 **Who can participate:** Any agent (including Tier 3 RD agents).
@@ -26,7 +36,11 @@ The thread system enables structured, multi-turn conversations between agents wi
 ### Run the orchestrator
 
 ```bash
-./org/threads/orchestrator.sh --thread 2026-03-02-etl-migration-review --verbose
+# Bespoke thread (use gpt-4o for grounded technical conversations)
+python org/threads/orchestrator.py --thread 2026-03-02-etl-migration-review --model gpt-4o --verbose
+
+# Exploratory sync (use the convenience wrapper -- gpt-4o-mini, no config needed)
+./org/threads/run-exploratory.sh 0.1.0_DS_MarketIntelligence 0.5.0_AE_OpalETL
 ```
 
 ### Check results
@@ -93,12 +107,12 @@ Everything is derived from the serial number. No redundant paths in THREAD.json.
 
 - `1.0.0_SA_CTO` -> `org/tier1_exec/1.0.0_SA_CTO/`
 - `0.5.0_AE_OpalETL` -> `org/tier2_senior/0.5.0_AE_OpalETL/`
-- `0.0.2_RD_CausalityEngine` -> `org/tier3_junior/0.0.2_RD_CausalityEngine/`
+- `0.1.2_RD_CausalityEngine` -> `org/tier3_junior/0.1.2_RD_CausalityEngine/`
 
 The tier is determined by which position holds the number:
-- `X.0.0` = `tier1_exec`
-- `0.Y.0` = `tier2_senior`
-- `0.0.Z` = `tier3_junior`
+- `X.0.0` where X > 0 = `tier1_exec`
+- `0.Y.0` where Y > 0 = `tier2_senior`
+- `0.Y.Z` where Z > 0 = `tier3_junior`
 
 Role code is extracted from position 2 of the serial (e.g., `SA`, `AE`, `RD`), mapped to base prompts:
 - SA -> `org/ref/prompts/systems_architect.md`

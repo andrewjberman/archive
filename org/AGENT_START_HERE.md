@@ -169,64 +169,151 @@ Logs go in YOUR agent folder:
 {your_agent_folder}/logs/YYYY-MM-DD/descriptive_thesis_of_work.md
 ```
 
-**Example:** `org/tier3_junior/0.0.1_RD_MarketPerformance/logs/2026-03-02/chart_component_refactor.md`
+**Example:** `org/tier3_junior/0.1.1_RD_MarketPerformance/logs/2026-03-02/chart_component_refactor.md`
 
-### Log Template
+### Base Log Template
 
 ```markdown
-# [Thesis Title] - [Agent ID]
+# [Thesis Title] — [Agent ID]
 
 **Date:** YYYY-MM-DD
 **Start Time:** HH:MM
 **End Time:** HH:MM
 
 ## Objective
-[What we set out to accomplish]
+
+[1-3 sentences: what was set out to accomplish and why. Name the feature, bug, or investigation.]
+
+---
 
 ## Work Completed
-- Task 1 (done)
-- Task 2 (in progress)
-- Task 3 (blocked - reason)
+
+[Organize into numbered sections for distinct pieces of work. Use tables where data is structured.]
+
+### 1. [First work unit]
+
+[Narrative + table or code block as appropriate. Be specific: function names, S3 paths, commit hashes, actual output.]
+
+### 2. [Second work unit]
+
+...
+
+---
 
 ## Decisions Made
-- **Decision:** Rationale
+
+| Decision | Rationale |
+|----------|-----------|
+| [What was decided] | [Why — include alternatives considered if significant] |
+
+---
 
 ## Files Modified
-- `path/to/file.py` - What changed
+
+| File | Change | Committed |
+|------|--------|-----------|
+| `path/to/file.py` | What changed | Yes — `abc1234` / No — local only |
+
+---
 
 ## Blockers
-- Blocker description and impact
+
+- [Blocker description, impact, and who can unblock it]
 
 ---
 
 ## Current State
-> **This section is the primary handoff point.**
-> Write it as if briefing someone picking up mid-task with no other context.
 
-**Status:** [IN PROGRESS | COMPLETE | BLOCKED]
+> **Primary handoff point. Write as if briefing someone with zero prior context.**
+
+**Status:** IN PROGRESS | COMPLETE | BLOCKED
 **Active branch:** `CLOUD`
 
-[2-4 sentences describing exactly where work stands. File names, function names, AWS resource names.]
+[2-4 dense sentences. Name specific files, functions, AWS resource names, commit hashes, S3 paths. Avoid vague summaries.]
+
+---
 
 ## Next Steps
-> **Ordered list. Execute top-to-bottom when picking up this work.**
 
-1. **[Action verb] [specific thing]** - [why / what done-looks-like]
-2. **[Action verb] [specific thing]** - [why / what done-looks-like]
+> Ordered list. Top-to-bottom execution order. Tag with [Agent] when handing off to another agent.
+
+1. **[Action verb] [specific thing]** — [why / what done looks like]
+2. **[Dashboard Engineer] [specific action]** — [cross-agent handoff]
+3. **[DevOps] [specific action]** — [cross-agent handoff]
 
 **Files to touch next:**
-- `path/to/file.py` - [what change is needed]
+- `path/to/file.py` — [what change is needed]
 
 **Do NOT:**
-- [any specific gotcha or action to avoid]
+- [Specific anti-pattern to avoid — name the wrong command, wrong path, wrong approach]
+- [Another gotcha]
 ```
+
+---
+
+### Role-Specific Log Additions
+
+Each role extends the base template with additional sections suited to their work.
+
+**DE (Dashboard Engineer) — add to header and Files Modified:**
+```markdown
+**Portal DEV commits:** `abc1234` → `def5678` → `ghi9012`
+**Workspace CLOUD commit:** `jkl3456`
+```
+Files Modified table must include the commit hash in the Committed column. When work breaks something, embed a `## Postmortem` section between Work Completed and Decisions Made with: Root Cause, a table of shape/contract mismatches, and Resolution tracking.
+
+**DS (Data Scientist) — add Briefs Written section before Current State:**
+```markdown
+## Briefs Written
+
+| Brief | Path | Audience |
+|-------|------|----------|
+| DevOps deploy instructions | `docs/briefs/devops-brief-{feature}.md` | DevOps |
+| Data contract for DE | `docs/briefs/dashboard-engineer-{feature}-data-contract.md` | Dashboard Engineer |
+| Investigation reference | `docs/briefs/data-scientist-{topic}-investigation.md` | Reference |
+```
+DS briefs are the formal cross-agent handoff artifact. Write them first; list them here. Next Steps must name the receiving agent in brackets: `[DevOps] Upload scripts to S3`.
+
+**DT/AE (DevOps/AWS Engineer) — replace Work Completed with Deployment Sequence table, add Deployment Tags:**
+```markdown
+## Deployment Sequence
+
+| Step | Action | Result |
+|------|--------|--------|
+| 1 | Commit source | `abc1234` feat(pipeline): description |
+| 2 | build-and-upload.sh | SHA256: `AbCdEf...=` |
+| 3 | Commit source map | `def5678` ci: upload artifacts [skip ci] |
+| 4 | terraform plan | N changed (description) |
+| 5 | terraform apply | N added, N changed, N destroyed |
+| 6 | 0-diff plan | No changes. Infrastructure is up-to-date. |
+| 7 | Update core doc | deployment_map.xml / pipeline_inventory.xml |
+| 8 | record-deploy + tag + push | `ghi9012` ci: record deploy [skip ci], tag `pipeline-vX.Y.Z` |
+| 9 | CloudFront invalidation | `INVALIDATION_ID` on `/api/path/*` |
+
+## Verification
+
+[Paste actual output confirming the deploy worked — S3 object sizes, data checksums, API response snippet, or CLI output.]
+
+## Deployment Tags
+
+| Pipeline | Tag | Commit |
+|----------|-----|--------|
+| {pipeline} | `{pipeline}-vX.Y.Z` | `abc1234` |
+```
+
+**RD (React Designer) — add commit reference to header:**
+```markdown
+**Portal DEV commit:** `abc1234`
+```
+
+---
 
 ### Before Writing the Log
 
-**Always ask the user for clarification on:**
-1. **Blockers** - What's blocking progress?
-2. **Next steps** - What's the logical next task?
-3. **Completion status** - Are we done or is this a checkpoint?
+**Always confirm:**
+1. **Status** — COMPLETE, IN PROGRESS, or BLOCKED (one word, no hedging)
+2. **Blockers** — what is blocking, who can unblock
+3. **Next steps** — ordered, self-contained, cross-agent attributed where needed
 
 ---
 
@@ -247,6 +334,42 @@ Logs go in YOUR agent folder:
 - DEs commit athletically across any portal path but never push
 - DS logic always goes cloud-side via DT/AE — never in frontend
 - DE session logs are mandatory; all other roles encouraged
+
+### Agent Commit Identity (Non-Negotiable)
+
+Every agent commit MUST use the `--author` flag to attribute the commit to the agent, not to the machine user. Git has separate Author and Committer fields — the committer stays as Andrew (repo owner), the author is the agent.
+
+**Format:**
+```bash
+git commit --author="{agent_serial} <{agent_serial}@opal.agent>" -m "message"
+```
+
+**Examples:**
+```bash
+# RD agent committing page work
+git commit --author="0.4.2_RD_AdvisorIntelligence <0.4.2_RD_AdvisorIntelligence@opal.agent>" \
+  -m "0.4.2_RD_AdvisorIntelligence: AdvisorIntelligence/DistributionTab -- fix nomenclature"
+
+# DT agent committing infra work
+git commit --author="0.1.0_DT_MarketIntelligence <0.1.0_DT_MarketIntelligence@opal.agent>" \
+  -m "feat(news-pipeline): update trending scanner timeout"
+
+# DE agent committing portal work
+git commit --author="0.4.0_DE_ClientPlatform <0.4.0_DE_ClientPlatform@opal.agent>" \
+  -m "0.4.0_DE_ClientPlatform: fix advisor intelligence API endpoint wiring"
+
+# SA agent committing docs/org work
+git commit --author="1.0.0_SA_CTO <1.0.0_SA_CTO@opal.agent>" \
+  -m "org(1.0.0_SA_CTO): cross-pod API contract spec"
+```
+
+**Why this matters:**
+- `git log --format='%an'` shows which agent authored each commit
+- `git log --author="0.4.0"` filters to a specific agent's work
+- GitHub displays the author distinctly from the committer
+- DE launch protocol (`git log --grep`) and thread commit injection both depend on agent attribution
+
+**Never** commit without `--author`. If you see a commit attributed to the machine user, it was made outside the agent system.
 
 ---
 
@@ -329,7 +452,7 @@ All task orders use this XML structure. Wrap the XML in a markdown file.
 ### Example Task Order Filename
 
 ```
-org/tier3_junior/0.0.14_RD_AdvisorIntelligence/task_orders/rolling_flows_chart_redesign.md
+org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/rolling_flows_chart_redesign.md
 ```
 
 ---
@@ -342,6 +465,62 @@ Data Scientists produce technical documents, investigation reports, and specs. T
 ```
 
 DS deliverables are referenced in SA/DE task orders as output destinations.
+
+---
+
+## Core Document Maintenance Protocol
+
+Every agent above Tier 3 has a **core document** — a living XML deliverable that represents the current ground truth of their domain. These documents are not written once at activation and forgotten. They must be kept current as work progresses.
+
+### Core Documents by Role
+
+| Role | Core Document | Location |
+|------|--------------|----------|
+| RD | `page_inventory.xml` | `{agent_folder}/deliverables/` |
+| DE | `pod_inventory.xml` | `{agent_folder}/deliverables/` |
+| DS | `data_contract.xml` | `{agent_folder}/deliverables/` |
+| DT | `deployment_map.xml` | `{agent_folder}/deliverables/` |
+| AE | `pipeline_inventory.xml` | `{agent_folder}/deliverables/` |
+| SA | `architecture_brief.xml` | `{agent_folder}/deliverables/` |
+
+### Update Trigger (all roles)
+
+Update your core document when you make a **structural change** to your domain:
+- New resource, endpoint, file, or data source added
+- Existing resource removed or renamed
+- Shape or contract of an interface changes
+- Configuration change with operational impact (memory, timeout, S3 key)
+
+Do **not** update for cosmetic changes, patch deployments with no contract change, or internal refactors with no external interface change.
+
+### Role-Specific Timing
+
+**RD:** Update `page_inventory.xml` in the same commit as the page code change.
+
+**DE:** Update `pod_inventory.xml` in the same commit as the portal code change that affects the pod's API endpoints, shared components, or page structure.
+
+**DS:** Update `data_contract.xml` at handoff — in the same commit as the Lambda code change, before handing off to DT/AE for deployment. Verify your update against `infra/aws/lambda/ci/lambda-source-map.json` to confirm the deployed version aligns with what you documented. This update is a **gate**: DT should not deploy a Lambda whose output shape changed without a corresponding data_contract.xml update.
+
+**DT:** Update `deployment_map.xml` after `terraform apply` reaches 0-diff, before `git tag`. The update is committed as part of the post-deploy commit sequence:
+```
+apply → 0-diff → update deployment_map.xml → commit → tag → push --follow-tags
+```
+Verification: the 0-diff Terraform plan is the proof that state matches your document.
+
+**AE:** Update `pipeline_inventory.xml` after `terraform apply` reaches 0-diff, before `record-terraform-deploy.sh`. Part of the standard deploy sequence:
+```
+apply → 0-diff → update pipeline_inventory.xml → record-terraform-deploy.sh → commit → tag → push --follow-tags
+```
+The `current_tag` in `pipeline_inventory.xml` must always match the tag in `CHANGELOG.json`.
+
+### Cross-Agent Consistency
+
+When your change implies another agent's core document is now stale:
+- Note it in your session log under "Files Modified"
+- Issue a task order to the affected agent if the staleness is significant
+- Do **not** edit another agent's core document yourself
+
+Example: DS changes a Lambda output shape → DS updates `data_contract.xml` → DT deploys → DT updates `deployment_map.xml`. Each agent updates their own document; no agent crosses into another's deliverable.
 
 ---
 
@@ -375,7 +554,10 @@ Every agent has these standard folders:
   logs/            # Session logs (YYYY-MM-DD/descriptive_name.md)
   task_orders/     # Received task orders (feature_name.md)
   threads/         # Thread receipts (auto-populated by orchestrator)
+  deliverables/    # Core document and other deliverables (Tier 2+ agents)
 ```
+
+The `deliverables/` folder holds the agent's **core document** (see Core Document Maintenance Protocol below) and any other structured output artifacts.
 
 ---
 
