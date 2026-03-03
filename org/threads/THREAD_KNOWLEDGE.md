@@ -59,16 +59,18 @@ anchored to a real file path or AWS resource name.
 
 ---
 
-### M3 — Use gpt-4o for bespoke threads, gpt-4o-mini for exploratory
+### M3 — Use gpt-5.3-codex for code-grounded threads, gpt-5.2-pro for planning threads
 
 **Rule:**
-- Bespoke threads (targeted knowledge transfer, producing deliverables): `--model gpt-4o`
-- Exploratory/sync threads (recent work summaries, cross-dependency awareness): `--model gpt-4o-mini`
+- Code-grounded threads (Pattern 0 pre-implementation alignment, Pattern 2 technical investigation): `--model gpt-5.3-codex`
+  These threads read Lambda source, TypeScript types, gold scripts, and Terraform. The codex model handles code reasoning significantly better.
+- Planning/coordination threads (Pattern 1 delivery audit, Pattern 3 cross-pod coordination): `--model gpt-5.2-pro`
+  These threads reason over session logs, task orders, and deliverable state. No deep code reading required.
 
-**Why:** gpt-4o-mini is cheaper and sufficient for open-ended sync
-conversations where no specific technical facts need to be verified. Bespoke
-threads require more careful reasoning when interpreting source code and
-producing structured output.
+**Why:** gpt-5.3-codex excels at interpreting and reasoning over source code, making it
+the right choice whenever agents are grounding their answers in actual implementation files.
+gpt-5.2-pro is the right choice for strategic planning and cross-agent coordination where
+the primary context is prose logs and specs rather than code.
 
 ---
 
