@@ -248,44 +248,6 @@ Do NOT block a bespoke thread because an agent lacks recent new-system session l
 
 ---
 
-## PATTERN R — CTO Task Order Review
-
-**When:** After COO writes post-receipt task orders (draft status), before committing.
-Run one Pattern R thread per batch of task orders from the same thread receipt.
-
-**Purpose:** CTO reads draft task orders + receipts + source files with full tool
-access. Verifies: (1) blocked items are real blockers (not false positives from agents
-not reading files), (2) data source references match the receipt, (3) JSON shapes
-are consistent with the PRD, (4) no invented file names or field names. Outputs a
-corrections list or "APPROVED". Record is saved in thread for visibility.
-
-**Participant:** `1.0.0_SA_CTO` (single agent)
-**Script:** `org/threads/staging/REVIEW_TEMPLATE.sh`
-**Model:** gpt-5.2 | **Max turns:** 2 | **Tools:** ENABLED (full repo access)
-**Not a project thread** — name as `run-YYYY-MM-DD-{CODE}-{NNN}-review.sh`.
-No `--project` flag. Thread folder saved as permanent review record.
-
-**CONTEXT.json MUST include:**
-- All draft task order files (the files just written by COO)
-- The thread receipt(s) they were derived from (binding contracts)
-- PRD section for the streams being reviewed
-- Any source files cited in the task orders as data sources
-
-**COO workflow with Pattern R:**
-1. Write draft task orders to final paths with `<status>draft</status>` in XML
-2. Generate a Pattern R staging script injecting drafts + receipts + source files
-3. Run the script — CTO reviews, outputs corrections or APPROVED in thread record
-4. Apply corrections to task order files, update `<status>` to `pending`, commit
-
-**CTO review checklist (baked into REVIEW_TEMPLATE.sh opening message):**
-- [ ] For every "BLOCKED" item: read the cited source file and verify the block is real
-- [ ] For every data source reference (parquet, Lambda, script): confirm it matches the receipt
-- [ ] For every new JSON shape: verify structure is consistent with the PRD
-- [ ] For every TypeScript interface name: confirm it matches what DE agreed in the receipt
-- [ ] Flag any field name that does not appear in the cited file
-
----
-
 ## WORKFLOW REFERENCE
 
 ### Creating a bespoke thread
