@@ -539,6 +539,14 @@ You may be invoked as a participant in a conversation thread. When this happens,
 
 **Thread orchestration** (creating and running threads) is a Tier 1/2 ability. Tier 3 agents participate only.
 
+**SA and DE agents run thread scripts themselves via the Bash tool. Do NOT ask Andrew to run them.**
+When a staging script exists, invoke it directly:
+```bash
+bash org/threads/staging/run-YYYY-MM-DD-{slug}.sh
+```
+The orchestrator is fully automated -- it writes messages, advances turns, and deposits
+receipts without any human intervention. Andrew is never in the execution loop.
+
 **Thread receipts** are saved to your `threads/` folder after each completed thread:
 ```
 {your_agent_folder}/threads/YYYY-MM-DD_{other_serials}_{topic_slug}.md
