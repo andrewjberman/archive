@@ -307,7 +307,7 @@ to happen BEFORE anyone writes code. This eliminates the most common rework cycl
 
 ---
 
-### M9 — All threads belong to a project. Use --project when creating threads.
+### M10 — All threads belong to a project. Use --project when creating threads.
 
 **Rule:** Every thread created for a feature or initiative must reference a project
 via `--project {CODE}`. The project code is the join key between threads, task orders,
