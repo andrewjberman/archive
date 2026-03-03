@@ -250,7 +250,36 @@ or example if applicable. Date-stamp entries if helpful for traceability.
 
 ---
 
-### M8 -- Pre-implementation alignment threads run BEFORE task orders, not after
+### M8 -- Task orders from project threads inherit the thread serial as filename prefix
+
+**Rule:** When the COO writes task orders as a direct result of a project thread,
+the task order filename is prefixed with that thread's serial:
+
+```
+{agent_folder}/task_orders/{CODE}-{NNN}-{feature_slug}.md
+```
+
+Example: thread `AI-004` produces task orders:
+- `0.4.0_DS_ClientPlatform/task_orders/AI-004-adv_drill.md`
+- `0.4.0_DE_ClientPlatform/task_orders/AI-004-continuous_nna_rendering.md`
+- `0.4.2_RD_AdvisorIntelligence/task_orders/AI-004-continuous_nna_rendering.md`
+
+The task order XML `<metadata>` also includes:
+```xml
+<thread_serial>AI-004</thread_serial>
+<thread_ref>org/threads/AI-004-{slug}/</thread_ref>
+```
+
+**Why:** The thread serial is the only join key needed. It links the task order back
+to the thread receipt (which contains the agreed data contract) and to the project file
+(which tracks all threads). No separate task order numbering system needed.
+
+**When NOT to prefix:** Ad-hoc task orders from DE to RD, or any task order not
+directly spawned from a formal project thread, keep the plain feature slug filename.
+
+---
+
+### M9 -- Pre-implementation alignment threads run BEFORE task orders, not after
 
 **Rule:** For any work stream where DS output feeds DE wiring feeds RD layout,
 the COO must run a 3-party alignment thread (Pattern 0) BEFORE writing the

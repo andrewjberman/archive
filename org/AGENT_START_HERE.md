@@ -398,6 +398,9 @@ All task orders use this XML structure. Wrap the XML in a markdown file.
     <issued_to>{receiving_agent_id}</issued_to>
     <date>{YYYY-MM-DD}</date>
     <status>pending | complete</status>
+    <!-- If this task order was produced from a project thread, include: -->
+    <thread_serial>{CODE}-{NNN}</thread_serial>  <!-- e.g., AI-004 -->
+    <thread_ref>org/threads/{thread_id}/</thread_ref>
   </metadata>
 
   <objective>
@@ -449,10 +452,35 @@ All task orders use this XML structure. Wrap the XML in a markdown file.
 - Tier 1/2 agents review completion status of task orders they issued as part of their startup protocol
 - This is the "done signal" — no separate notification needed
 
-### Example Task Order Filename
+### Task Order Filename Convention
+
+**From a project thread** (top-down, Tier 1/2 initiated):
+```
+{agent_folder}/task_orders/{CODE}-{NNN}-{feature_slug}.md
+```
+The `{CODE}-{NNN}` prefix is the thread serial that produced this task order.
+This links the task order back to the thread receipt and the project file.
+
+Examples:
+```
+org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/AI-004-adv_drill.md
+org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/AI-004-continuous_nna_rendering.md
+```
+
+**Ad-hoc** (no project / lateral between agents):
+```
+{agent_folder}/task_orders/{feature_slug}.md
+```
+No prefix. Used for work that doesn't trace to a formal project thread.
 
 ```
 org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/rolling_flows_chart_redesign.md
+```
+
+Filtering task orders by project in any agent folder:
+```bash
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/AI-*.md   # all AI project work
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/AI-004-*.md  # from thread AI-004
 ```
 
 ---
