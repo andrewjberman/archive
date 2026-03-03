@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pod_inventory>
+
+  <metadata>
+    <agent>0.2.0_DE_PortfolioAnalytics</agent>
+    <pod>PortfolioAnalytics</pod>
+    <pages_owned>
+      <page>Positioning</page>
+      <page>Attribution</page>
+      <page>FactorTilts</page>
+      <page>Valuation</page>
+      <page>Macroeconomics</page>
+      <page>Correlation</page>
+    </pages_owned>
+    <date>2026-03-02</date>
+    <rd_agents>
+      <rd_agent page="Positioning">0.0.4_RD_Positioning</rd_agent>
+      <rd_agent page="Attribution">0.0.5_RD_Attribution</rd_agent>
+      <rd_agent page="FactorTilts">0.0.6_RD_FactorTilts</rd_agent>
+      <rd_agent page="Valuation">0.0.7_RD_Valuation</rd_agent>
+      <rd_agent page="Macroeconomics">0.0.8_RD_Macroeconomics</rd_agent>
+      <rd_agent page="Correlation">0.0.9_RD_Correlation</rd_agent>
+    </rd_agents>
+    <upstream_pipeline>yang-pipeline</upstream_pipeline>
+  </metadata>
+
+  <!-- ================================================================ -->
+  <!-- PAGES                                                            -->
+  <!-- ================================================================ -->
+
+  <pages>
+
+    <page name="Positioning" rd_agent="0.0.4_RD_Positioning" directory="portal/src/pages/Positioning/">
+      <summary>
+        The Positioning page displays asset allocation analysis for 5 model portfolios (UST, ST, INT, LTC, LTA)
+        plus an AGG aggregate. It provides three complementary views — Portfolio (actual allocations),
+        Benchmark (policy allocations), and Relative (active tilts) — via a consolidated PositioningSummary
+        panel backed by stacked bars and an allocation matrix. Additional views include a HoldingsTab (treemap
+        + attribution table), an AttributionTab (style-vs-benchmark diverging bars), and a SelectionTab
+        (ETF selection analysis across QTD/YTD/1Y/SI periods).
+      </summary>
+      <tabs>
+        <tab name="PositioningSummary Panel" type="panel" status="functional">Consolidated panel: allocation bars + matrix; 3 view modes (Portfolio/Benchmark/Relative)</tab>
+        <tab name="HoldingsTab" type="tab" status="functional">Treemap (size=weight, color=performance) + dense attribution table</tab>
+        <tab name="AttributionTab" type="tab" status="functional">StylePolicyComparison diverging bars + asset allocation attribution table</tab>
+        <tab name="SelectionTab" type="tab" status="functional">ETF selection treemap + attribution across QTD/YTD/1Y/SI periods</tab>
+      </tabs>
+      <primary_data_hook>
+        <hook>useQuery (Positioning.tsx:31)</hook>
+        <endpoint>getPositioningData() via @/api/portal-proxy → /api/general/positioning/positioning_data.json</endpoint>
+        <additional_hooks>
+          <hook>getAllocationSummary() → /api/general/positioning/allocation-summary.json (AssetAllocationSummary, StylePolicyComparison)</hook>
+          <hook>getHoldingsAttribution() → /api/general/positioning/holdings_attribution_data.json (PositioningSummary, HoldingsTab, SelectionTab)</hook>
+          <hook>getETFPeriodReturns() → /returns/etf-periods (SelectionTab)</hook>
+          <hook>getAUMSummary() → /api/general/portfolios/aum-metrics.json (HoldingsTab, SelectionTab)</hook>
+          <hook>useYangDataAsOf('positioning', dataAsOf) — central Yang data registry</hook>
+        </additional_hooks>
+      </primary_data_hook>
+      <known_issues>
+        <issue file="portal/src/pages/Positioning/utils/buildAttributionData.ts:17" type="TODO">Policy weight source undefined — policyWeight hardcoded null</issue>
+        <issue file="portal/src/pages/Positioning/utils/buildAttributionData.ts:21" type="TODO">Benchmark return mapping undefined — benchmarkReturn hardcoded null</issue>
+        <issue file="portal/src/pages/Positioning/utils/buildAttributionData.ts:121-124" type="TODO">Attribution calculations use null placeholders; no policy portfolio or benchmark return integration yet</issue>
+      </known_issues>
+    </page>
+
+    <page name="Attribution" rd_agent="0.0.5_RD_Attribution" directory="portal/src/pages/Attribution/">
+      <summary>
+        The Attribution page provides portfolio attribution analysis for a user-selected model portfolio
+        and time period (QTD/YTD/1Y/SI). Its header shows the StylePolicyComparison component (diverging
+        bar chart + allocation table), and its main body is the SelectionTab (fund selection and style
+        allocation effects). Supporting views include HoldingsTab (treemap + heatmap), AllocationHeatmap
+        panel, and PortfolioRadialCharts panel. The page shares data contracts and component patterns
+        heavily with Positioning — both consume getPositioningData, getAllocationSummary, getHoldingsAttribution,
+        and getAUMSummary.
+      </summary>
+      <tabs>
+        <tab name="StylePolicyComparison" type="panel" status="functional">Diverging bars per asset class (Fixed Income/Equity) + AssetAllocationSummary child table</tab>
+        <tab name="SelectionTab" type="tab" status="functional">Fund selection and style allocation attribution; QTD/YTD/1Y/SI — NOTE: backend generates QTD and YTD only; 1Y/SI require Lambda update</tab>
+        <tab name="HoldingsTab" type="tab" status="functional">Treemap (size=weight, color=performance) + heatmap table</tab>
+        <tab name="AllocationHeatmap" type="panel" status="functional">Attribution breakdown by asset class/segment, color-coded heatmap</tab>
+        <tab name="PortfolioRadialCharts" type="panel" status="functional">Radial/circular chart of portfolio composition by asset class</tab>
+      </tabs>
+      <primary_data_hook>
+        <hook>useQuery (Attribution.tsx:31-37)</hook>
+        <endpoint>getPositioningData() via @/api/portal-proxy → positioning_data.json</endpoint>
+        <additional_hooks>
+          <hook>getAllocationSummary() — StylePolicyComparison, AssetAllocationSummary (useQuery)</hook>
+          <hook>getHoldingsAttribution() — AssetAllocationSummary, HoldingsTab, SelectionTab, AllocationHeatmap (useQuery + useEffect)</hook>
+          <hook>getETFPeriodReturns() — SelectionTab (useEffect)</hook>
+          <hook>getAUMSummary() — HoldingsTab, SelectionTab (useEffect)</hook>
+          <hook>useYangDataAsOf('positioning', ...) and useYangDataAsOf('allocation_summary', ...) — central Yang registry</hook>
+        </additional_hooks>
+      </primary_data_hook>
+      <known_issues>
+        <issue file="portal/src/pages/Attribution/utils/buildAttributionData.ts:17" type="TODO">Policy weight undefined — hardcoded null</issue>
+        <issue file="portal/src/pages/Attribution/utils/buildAttributionData.ts:21" type="TODO">Benchmark returns undefined — hardcoded null</issue>
+        <issue file="portal/src/pages/Attribution/components/StylePolicyComparison.tsx:160" type="NOTE">Backend generates QTD and YTD only; 1Y/SI periods require a yang-generate-holdings-attribution Lambda update</issue>
+        <issue file="portal/src/pages/Attribution/tabs/SelectionTab.tsx:7" type="ESLINT-DISABLE">no-constant-binary-expression and no-constant-condition disabled for dead code blocks reserved for future use</issue>
+        <issue file="portal/src/pages/Attribution/components/HoldingsTable.tsx:221" type="NOTE">Equity duration uses proxy value of 20.0 years</issue>
+      </known_issues>
+    </page>
+
+    <page name="FactorTilts" rd_agent="0.0.6_RD_FactorTilts" directory="portal/src/pages/FactorTilts/">
+      <summary>
+        The FactorTilts page performs regression-based factor exposure analysis for 5 model portfolios plus
+        an AUM-weighted AGG aggregate across 6 lookback windows (1M/2M/3M/6M/1Y/2Y). It uses a tiered
+        loading architecture: Tier 1 (46 KB snapshot) loads on mount and powers the Overview panel and
+        Portfolio Factors tab; Tier 2 (196 KB factor spreads) loads lazily on Factor Spreads tab click;
+        Tier 3 (2.1 MB historical time series) loads on Time Series view toggle. The 6 factors are:
+        Equity vs FI, Growth vs Value, US vs Foreign, Large vs Small, Agg vs Short, HY vs Agg.
+      </summary>
+      <tabs>
+        <tab name="Portfolio Factors" id="bars" type="tab" status="functional">Clustered bar chart (snapshot) or ModelTiltTimeSeriesView (time series) — Tier 3 triggers on time series toggle</tab>
+        <tab name="Factor Spreads" id="timeseries" type="tab" status="functional">Rolling cumulative factor spread line chart — Tier 2 triggers on tab click</tab>
+        <tab name="Factor Exposure Profile" type="overview_panel" status="functional">Nivo radar chart + SummaryMetricsTable (R2, alpha, conviction, consensus) — always visible, Tier 1 data</tab>
+      </tabs>
+      <primary_data_hook>
+        <hook>Direct imperative fetch in FactorTilts.tsx (no separate hook file)</hook>
+        <endpoint>getFactorTiltsSnapshot() via @/api/portal-proxy (Tier 1, ~46 KB)</endpoint>
+        <additional_hooks>
+          <hook>getFactorTiltsSpreads() — Tier 2, ~196 KB, lazy on Factor Spreads tab click</hook>
+          <hook>getFactorTiltsTimeSeries() — Tier 3, ~2.1 MB, lazy on Time Series view toggle</hook>
+          <hook>getAUMMetrics() from @/api/endpoints/aum — AUM weights for AGG portfolio computeAggregateMetrics()</hook>
+          <hook>useYangDataAsOf('factor_tilts', dataAsOf) — central Yang registry</hook>
+        </additional_hooks>
+      </primary_data_hook>
+      <known_issues>
+        <issue file="portal/src/pages/FactorTilts/constants.ts:16-17,52-53" type="MIGRATION_NOTE">Factor keys migrated from 'Short vs Agg' to 'Agg vs Short' and 'HY vs IG' to 'HY vs Agg' to match Yang PKL exactly</issue>
+      </known_issues>
+    </page>
+
+    <page name="Valuation" rd_agent="0.0.7_RD_Valuation" directory="portal/src/pages/Valuation/">
+      <summary>
+        The Valuation page displays equity market valuation metrics (fwd_pe, trailing_pe, p_fcf, ev_sales,
+        p_b, p_sales, div_yield) across 40+ equity indices. Two full-width panels are always visible:
+        ValuationSummaryPanel (heatmap of latest percentiles, expandable, 5 rows default) and ValuationRangePanel
+        (drilldown for a user-selected index showing p10-p90 ranges — only 8 of 40+ indices have range data).
+        Two tabs provide historical views: ValuationTimeSeriesTab (ComposedChart with percentile bands, dual-index
+        ratio mode) and RiskPremiumTab (ERP and Credit spreads with FRED data, percentile bands).
+      </summary>
+      <tabs>
+        <tab name="ValuationSummaryPanel" type="panel_always_visible" status="functional">Heatmap of 7 metrics across 40+ indices; color-coded percentiles; div_yield color inverted</tab>
+        <tab name="ValuationRangePanel" type="panel_always_visible" status="functional">Drilldown for selected index — p10-p90 ranges; "pending" for indices without backend data (only 8/40+ complete)</tab>
+        <tab name="Valuation Time Series" id="time-series" type="tab" status="functional">ComposedChart with percentile bands; dual-index ratio mode; 4 controls (Index1, Index2, Metric, Period)</tab>
+        <tab name="Risk Premium" id="risk-premium" type="tab" status="functional">ERP (earnings yield - 10Y Treasury) and Credit (IG/HY spreads from FRED); time window selector (5Y/10Y/20Y/Max)</tab>
+      </tabs>
+      <primary_data_hook>
+        <hook>useValuationData() — dedicated hook at portal/src/pages/Valuation/hooks/useValuationData.ts</hook>
+        <endpoint>getValuationData() via portal/src/api/endpoints/valuation.ts → portalProxy.getValuationData() → /v1/valuation/data</endpoint>
+        <additional_hooks>
+          <hook>getRiskPremiumData() — RiskPremiumTab, via portal-proxy → /v1/risk-premium/data</hook>
+          <hook>useYangDataAsOf('valuation', data?.data_as_of) and useYangDataAsOf('risk_premium', ...) — central registry</hook>
+        </additional_hooks>
+      </primary_data_hook>
+      <known_issues>
+        <issue file="portal/src/pages/Valuation/panels/ValuationRangePanel.tsx:108" type="BACKEND_GAP">Only 8 of 40+ equity indices have range drilldown data; remaining show "pending" placeholder</issue>
+        <issue file="portal/src/pages/Valuation/constants.ts:25" type="BACKEND_BUG">Backend PKL typo: "Kindom" should be "Kingdom" for MSCI Kingdom entry</issue>
+        <issue file="portal/src/pages/Valuation/tabs/ValuationTimeSeriesTab.tsx:277" type="NOTE">Hardcoded metrics list ("Trailing P/E, Fwd P/E, P/B") does not match all available metrics; should be dynamic</issue>
+        <issue file="portal/src/pages/Valuation/tabs/RiskPremiumTab.tsx:226" type="NOTE">Time period '1y' present in code but not selectable in UI; dead code path in formatXAxisDate</issue>
+      </known_issues>
+    </page>
+
+    <page name="Macroeconomics" rd_agent="0.0.8_RD_Macroeconomics" directory="portal/src/pages/Macroeconomics/">
+      <summary>
+        The Macroeconomics page displays an Economic Data Performance Tracker heatmap of 73+ macroeconomic
+        indicators in 10 expandable groups with two display modes (Value: trailing 12-month cells; Position:
+        latest percentile + p10-p90 thresholds). Clicking any indicator opens a MacroTimeSeriesModal for
+        individual time series drill-down. Two tabs provide additional views: YieldCurveTab (USD Treasury
+        1M-30Y multi-snapshot chart: current/1M-ago/1Y-ago) and VolatilityTab (VIX and MOVE toggle with
+        AI summary, speedometer gauge, historical time series with percentile bands).
+      </summary>
+      <tabs>
+        <tab name="Economic Data Performance Tracker" type="panel_always_visible" status="functional">73+ indicators across 10 categories; Value and Position display modes; drill-down modal on click</tab>
+        <tab name="Yield Curve" id="yield-curve" type="tab" status="functional">USD Treasury 1M-30Y multi-snapshot; 1Y-ago snapshot optional (requires FRED ingest)</tab>
+        <tab name="Volatility" id="vix" type="tab" status="functional">VIX/MOVE toggle; AI summary; speedometer gauge; historical chart with percentile bands; 1Y/3Y/5Y/10Y/Max window</tab>
+      </tabs>
+      <primary_data_hook>
+        <hook>useQuery (Macroeconomics.tsx:31) — getVolatilityData()</hook>
+        <endpoint>getVolatilityData() via @/api/portal-proxy → volatility JSON</endpoint>
+        <additional_hooks>
+          <hook>getMacroData() — MacroHeatmap.tsx:74 (Promise.all) → macro JSON with 73+ indicators</hook>
+          <hook>getYieldCurveData() from @/api/endpoints/yield-curve — YieldCurveTab.tsx:220 (Promise.all)</hook>
+          <hook>getMacroTimeSeries(slug) from @/api/endpoints/macro — MacroTimeSeriesModal on demand</hook>
+          <hook>useYangDataAsOf — registered in both MacroHeatmap and main Macroeconomics component</hook>
+        </additional_hooks>
+      </primary_data_hook>
+      <known_issues>
+        <issue file="portal/src/pages/Macroeconomics/tabs/YieldCurveTab.tsx:240" type="WARNING">FRED historical data optional; 1Y-ago curve requires running ingest_yield_curve_fred.py separately</issue>
+        <issue file="portal/src/pages/Macroeconomics/tabs/VolatilityTab.tsx:412,495" type="NOTE">Unused _config variables reserved for future enhancement</issue>
+        <issue file="portal/src/pages/Macroeconomics/tabs/YieldCurveTab.tsx:318" type="NOTE">30Y/10Y spread calculated but not displayed</issue>
+      </known_issues>
+    </page>
+
+    <page name="Correlation" rd_agent="0.0.9_RD_Correlation" directory="portal/src/pages/Correlation/">
+      <summary>
+        The Correlation page displays an interactive triangular heatmap of correlation values between
+        user-selected financial assets. It supports 8 preset groupings (Cross-Asset default, US Large Cap,
+        US Style Factors, US Size, US Sectors, International, Fixed Income, Commodities), multi-select
+        with search, and 5 lookback periods (1M/3M/6M/1Y/2Y). Data is a pre-computed lower-triangular
+        matrix from S3 via the yang-generate-correlation Lambda; filtering and period selection happen
+        client-side. Color scheme: pink gradient (positive) to green gradient (negative). This is the
+        simplest page in the pod — no tabs, single panel.
+      </summary>
+      <tabs>
+        <tab name="Correlation Matrix" type="single_panel" status="functional">Triangular heatmap; TickerSelector; lookback period selector (3M default)</tab>
+      </tabs>
+      <primary_data_hook>
+        <hook>useCorrelationData() — dedicated hook at portal/src/pages/Correlation/hooks/useCorrelationData.ts</hook>
+        <endpoint>getCorrelationData() via @/api/portal-proxy → /api/general/correlations/correlation_data.json (staleTime: 30 min, gcTime: 60 min)</endpoint>
+        <additional_hooks>
+          <hook>useSelectTracking (lookback period persistence across sessions)</hook>
+        </additional_hooks>
+      </primary_data_hook>
+      <known_issues>
+        <issue file="portal/src/pages/Correlation/hooks/useCorrelationData.ts:42" type="MARKER">PHASE1_CR_REQ_001 marker confirms correlation data loading is enabled</issue>
+        <issue file="portal/src/pages/Correlation/constants.ts:40-63" type="PLANNED">EQUITY_SECTORS and REGIONS arrays defined but Equity Sector Correlations and Geographic Correlations panels not yet built</issue>
+      </known_issues>
+    </page>
+
+  </pages>
+
+  <!-- ================================================================ -->
+  <!-- API ENDPOINTS                                                    -->
+  <!-- ================================================================ -->
+
+  <api_endpoints>
+
+    <endpoint file="portal/src/api/portal-proxy.ts" role="primary_data_hub">
+      <functions>
+        <function>getPositioningData() — lines 914+ — serves Positioning, Attribution</function>
+        <function>getAllocationSummary() — lines 1391+ — serves Positioning, Attribution</function>
+        <function>getHoldingsAttribution() — lines 1498+ — serves Positioning, Attribution</function>
+        <function>getETFPeriodReturns() — lines 790+ — serves Positioning (SelectionTab), Attribution (SelectionTab)</function>
+        <function>getAUMSummary() — lines 257+ — serves Positioning, Attribution (AGG weighting)</function>
+        <function>getFactorTiltsSnapshot() — lines 1103+ — serves FactorTilts (Tier 1)</function>
+        <function>getFactorTiltsSpreads() — lines 1116+ — serves FactorTilts (Tier 2)</function>
+        <function>getFactorTiltsTimeSeries() — lines 1129+ — serves FactorTilts (Tier 3)</function>
+        <function>getValuationData() — lines 1284+ — serves Valuation (summary, ranges, time_series)</function>
+        <function>getRiskPremiumData() — lines 1337+ — serves Valuation (RiskPremiumTab)</function>
+        <function>getMacroData() — lines 1551+ — serves Macroeconomics (MacroHeatmap)</function>
+        <function>getVolatilityData() — lines 1637+ — serves Macroeconomics (VolatilityTab)</function>
+        <function>getCorrelationData() — lines 1437+ — serves Correlation</function>
+        <function>getBenchmarkReturns() — lines 624+ — NOT used by this pod's 6 pages; serves other pods</function>
+      </functions>
+      <pages_using>Positioning, Attribution, FactorTilts, Valuation, Macroeconomics, Correlation</pages_using>
+    </endpoint>
+
+    <endpoint file="portal/src/api/endpoints/valuation.ts">
+      <functions>
+        <function>getValuationData() — thin wrapper over portalProxy.getValuationData(); exports ValuationDataResponse, ValuationTimeSeriesMetric types</function>
+      </functions>
+      <pages_using>Valuation (via useValuationData hook)</pages_using>
+    </endpoint>
+
+    <endpoint file="portal/src/api/endpoints/macro.ts">
+      <functions>
+        <function>getMacroTimeSeries(slug: string) — fetches /api/general/macro/timeseries/{slug}.json for modal drill-down</function>
+      </functions>
+      <pages_using>Macroeconomics (MacroTimeSeriesModal on-demand)</pages_using>
+    </endpoint>
+
+    <endpoint file="portal/src/api/endpoints/benchmarks.ts">
+      <functions>
+        <function>getModelBenchmarkReturns() — wraps getBenchmarkReturns() from portal-proxy; returns UST/ST/INT/LTC/LTA model vs benchmark returns for 1D/WTD/MTD/1M/QTD/1Q/YTD/1Y periods</function>
+        <function>formatBenchmarkReturn(value) — formats return as percentage string</function>
+        <function>getBenchmarkReturnColorClass(value) — returns emerald/red/white CSS class</function>
+        <function>getSpreadColorClass(value) — returns emerald/red/yellow CSS class based on 0.1% threshold</function>
+      </functions>
+      <pages_using>NOT directly used by this pod's 6 analytics pages — listed as pod-adjacent endpoint for benchmark context; consumed by other pods (e.g., MarketPerformance)</pages_using>
+    </endpoint>
+
+    <endpoint file="portal/src/api/endpoints/portfolio.ts">
+      <functions>
+        <function>uploadPickleFileWithFund(request) — POST /api/private/portfolio/parse-pickle</function>
+        <function>getAutoSave(fund, account) — GET /api/private/portfolio/autosave/{fund}/{account}</function>
+        <function>updateAutoSave(fund, account, data) — PUT /api/private/portfolio/autosave/{fund}/{account}</function>
+        <function>saveOptimizationAutoSave(fund, account, data) — PUT /api/private/portfolio/optimization-autosave/{fund}/{account}</function>
+        <function>exportAndSubmit(request) — POST /api/private/portfolio/export-and-submit</function>
+        <function>listVersions(fund, account) — GET /api/private/portfolio/versions/{fund}/{account}</function>
+        <function>loadVersion(fund, account, versionId) — GET /api/private/portfolio/versions/{fund}/{account}/{versionId}</function>
+        <function>listFunds() — GET /api/private/portfolio/funds</function>
+      </functions>
+      <pages_using>NOT used by this pod's 6 analytics pages — this file serves the TradingOperations pod (PortfolioManagement PKL upload, autosave, versioning, export-and-submit workflow)</pages_using>
+    </endpoint>
+
+  </api_endpoints>
+
+  <!-- ================================================================ -->
+  <!-- SHARED COMPONENTS                                                -->
+  <!-- ================================================================ -->
+
+  <shared_components>
+
+    <component name="Panel, PanelHeader, PanelContent, SmartPanelFooter" source="@/ui/components/panels">
+      <used_by>Positioning, Attribution, FactorTilts, Valuation, Macroeconomics, Correlation (ALL 6 pages)</used_by>
+      <purpose>Core card/panel layout: header with title/help/actions, content area, smart footer with data timestamps</purpose>
+    </component>
+
+    <component name="PageHeaderCleanBadge" source="@/components/PageHeaderVariants">
+      <used_by>Positioning, Attribution, FactorTilts, Valuation, Macroeconomics, Correlation (ALL 6 pages)</used_by>
+      <purpose>Standardized page header with icon, title, and description badge</purpose>
+    </component>
+
+    <component name="PageThemeProvider" source="@/contexts/PageThemeContext">
+      <used_by>Positioning, FactorTilts, Valuation, Macroeconomics, Correlation (5 of 6 pages)</used_by>
+      <purpose>Applies per-page accent color theming via CSS variable</purpose>
+      <accent_colors>
+        <page name="Positioning">hsl(var(--model-default))</page>
+        <page name="FactorTilts">hsl(var(--model-default))</page>
+        <page name="Valuation">#f59e0b (amber)</page>
+        <page name="Macroeconomics">--primary CSS variable</page>
+        <page name="Correlation">hsl(var(--info)) (cyan)</page>
+      </accent_colors>
+    </component>
+
+    <component name="useYangDataAsOf" source="@/hooks/useDataSource">
+      <used_by>Positioning, Attribution, FactorTilts, Valuation, Macroeconomics (5 pages)</used_by>
+      <purpose>Registers data_as_of timestamps with central Yang data registry for synchronized freshness display</purpose>
+      <note>Correlation page does not use this hook; uses formatYangDate from @/lib/dateUtils instead</note>
+    </component>
+
+    <component name="Tooltip" source="@/components/Tooltip">
+      <used_by>Positioning, Attribution, FactorTilts, Valuation, Macroeconomics, Correlation (all 6 pages)</used_by>
+      <purpose>Hover tooltips for cell values, column headers, and help text throughout the pod</purpose>
+    </component>
+
+    <component name="LoadingSpinner (LoadingContainer, LoadingInline, LoadingContent)" source="@/components/LoadingSpinner">
+      <used_by>Positioning, Attribution, FactorTilts, Valuation, Macroeconomics, Correlation (all 6 pages)</used_by>
+      <purpose>Loading state placeholders during data fetches</purpose>
+    </component>
+
+    <component name="TabNavigation" source="@/components/TabNavigation">
+      <used_by>FactorTilts, Valuation, Macroeconomics (3 pages)</used_by>
+      <purpose>Tab bar component for switching between views</purpose>
+    </component>
+
+    <component name="useTabNavigation" source="@/hooks/useTabNavigation">
+      <used_by>FactorTilts, Valuation, Macroeconomics (3 pages)</used_by>
+      <purpose>Hook managing active tab state with analytics tracking</purpose>
+    </component>
+
+    <component name="useSelectTracking" source="@/hooks/useFilterTracking">
+      <used_by>FactorTilts (portfolio scope + window), Valuation (selected index), Correlation (lookback period)</used_by>
+      <purpose>Persists user filter selections (portfolio, period, index) across sessions with analytics events</purpose>
+    </component>
+
+    <component name="recharts (Treemap, ResponsiveContainer, BarChart, LineChart, ComposedChart, ...)" source="recharts">
+      <used_by>Positioning, Attribution, FactorTilts, Valuation, Macroeconomics (5 pages)</used_by>
+      <purpose>All chart rendering — treemaps, bar charts, line charts, composed charts with percentile bands</purpose>
+    </component>
+
+    <component name="useQuery" source="@tanstack/react-query">
+      <used_by>Positioning, Attribution, FactorTilts, Valuation, Macroeconomics, Correlation (all 6 pages)</used_by>
+      <purpose>Data caching with staleTime (5-30 min) and gcTime (30-60 min); automatic retry and refetch on focus</purpose>
+    </component>
+
+    <component name="buildAttributionData" source="page-local utility (Positioning and Attribution each have their own copy)">
+      <used_by>Positioning (utils/buildAttributionData.ts), Attribution (utils/buildAttributionData.ts)</used_by>
+      <purpose>Transforms portfolio holdings and return data into hierarchical Asset Class > Segment > ETF structure for attribution tables and treemaps</purpose>
+      <note>Both pages maintain separate copies of this utility with identical TODOs for policy weights and benchmark returns</note>
+    </component>
+
+    <component name="ETF_CATEGORIZATION (etf-categories.ts)" source="page-local constants">
+      <used_by>Positioning (constants/etf-categories.ts), Attribution (constants/etf-categories.ts)</used_by>
+      <purpose>Maps 30+ tickers to asset classes (Fixed Income/Equity/Cash/Hedge) and sub-segments for attribution grouping</purpose>
+      <note>Each page maintains its own copy — potential candidate for shared lib extraction</note>
+    </component>
+
+  </shared_components>
+
+  <!-- ================================================================ -->
+  <!-- CROSS-POD DEPENDENCIES                                          -->
+  <!-- ================================================================ -->
+
+  <cross_pod_dependencies>
+
+    <dependency type="upstream_infrastructure" name="yang-pipeline">
+      <description>
+        All 6 pages in this pod derive their analytical data from the yang-pipeline. The following
+        Lambda functions are the upstream data producers for each page's S3 JSON artifacts:
+      </description>
+      <lambdas>
+        <lambda function="yang-generate-positioning" serves="Positioning, Attribution (positioning_data.json)"/>
+        <lambda function="yang-generate-holdings-attribution" serves="Positioning, Attribution (holdings_attribution_data.json, allocation_summary.json)"/>
+        <lambda function="yang-generate-factor-tilts" serves="FactorTilts (snapshot, spreads, timeseries JSONs)"/>
+        <lambda function="yang-generate-valuation" serves="Valuation (valuation_data.json, risk_premium_data.json)"/>
+        <lambda function="yang-generate-macro" serves="Macroeconomics (macro JSON groups, volatility data, macro timeseries slugs)"/>
+        <lambda function="yang-generate-correlation" serves="Correlation (correlation_data.json)"/>
+      </lambdas>
+      <note>All data flows: yang-pipeline Lambda → S3 (opal-data-portal-v2) → opal-portal-data-proxy Lambda → CloudFront → portal client</note>
+    </dependency>
+
+    <dependency type="shared_library" name="@/lib/tickerRegistry">
+      <description>getTickerMetadata() — enriches holdings with sector/industry metadata</description>
+      <used_by>Positioning (HoldingsTab, SelectionTab), Attribution (HoldingsTab, SelectionTab)</used_by>
+    </dependency>
+
+    <dependency type="shared_library" name="@/lib/performanceUtils">
+      <description>formatPercentageReturn / formatReturn, getReturnColorClass — performance formatting</description>
+      <used_by>Positioning (HoldingsTab), Attribution (HoldingsTab)</used_by>
+    </dependency>
+
+    <dependency type="shared_library" name="@/lib/designTokens">
+      <description>Z_INDEX constants for dropdown and overlay z-index layering</description>
+      <used_by>Correlation (TickerSelector)</used_by>
+    </dependency>
+
+    <dependency type="shared_library" name="@/lib/dateUtils">
+      <description>formatYangDate (Correlation), formatPanelTimestamp (Macroeconomics modal)</description>
+      <used_by>Correlation, Macroeconomics</used_by>
+    </dependency>
+
+    <dependency type="external_endpoint" name="@/api/endpoints/yield-curve">
+      <description>getYieldCurveData() — FRED Treasury yield curve data (1M-30Y tenors, historical snapshots)</description>
+      <used_by>Macroeconomics (YieldCurveTab)</used_by>
+    </dependency>
+
+    <dependency type="external_data_source" name="FRED API (Federal Reserve Economic Data)">
+      <description>Indirect dependency via yang-generate-macro Lambda: powers macro indicator timeseries and yield curve 1Y-ago snapshot</description>
+      <used_by>Macroeconomics (MacroHeatmap data source, YieldCurveTab 1Y-ago optional curve)</used_by>
+    </dependency>
+
+    <dependency type="shared_library" name="@nivo/radar">
+      <description>ResponsiveRadar — Nivo radar chart for factor exposure visualization</description>
+      <used_by>FactorTilts (FactorTiltOverviewPanel only) — unique to this page; no other pod page uses Nivo</used_by>
+    </dependency>
+
+  </cross_pod_dependencies>
+
+  <!-- ================================================================ -->
+  <!-- POD HEALTH                                                       -->
+  <!-- ================================================================ -->
+
+  <pod_health>
+    <open_issues_count>14</open_issues_count>
+    <todo_count>6</todo_count>
+    <backend_gaps_count>3</backend_gaps_count>
+    <planned_features_count>2</planned_features_count>
+    <migration_notes_count>1</migration_notes_count>
+    <warning_count>1</warning_count>
+
+    <summary>
+      The PortfolioAnalytics pod (6 pages) is functionally operational. All pages load data and render
+      their primary views. The most significant open issue is shared across Positioning and Attribution:
+      the buildAttributionData.ts utility in both pages has unresolved TODOs for policy weights and
+      benchmark return mapping (currently null placeholders), which means attribution effect columns
+      (allocationEffect, selectionEffect, interactionEffect) compute as null. Valuation has a backend
+      gap (only 8 of 40+ indices have range drilldown data) and a PKL typo ("Kindom"). Macroeconomics
+      has an optional FRED dependency for the 1Y-ago yield curve snapshot. Correlation has two planned
+      but unimplemented panels (Equity Sectors, Geographic). FactorTilts is the cleanest page with
+      only a migration note (factor key naming change already applied). No page is blocked from serving
+      its primary function.
+    </summary>
+
+    <critical_shared_gap>
+      Positioning and Attribution share an identical unresolved dependency: both pages' buildAttributionData.ts
+      utilities hard-code policyWeight and benchmarkReturn as null. This gap blocks true attribution
+      analysis (allocation effect, selection effect, interaction effect are all null). Resolution requires
+      a data contract definition for the policy portfolio data source and a benchmark return mapping
+      — this is a DS-level data contract issue, not a frontend bug.
+    </critical_shared_gap>
+
+    <data_freshness_pattern>
+      All 6 pages register data_as_of timestamps via useYangDataAsOf() (except Correlation which formats
+      directly). The yang-pipeline Lambda runs produce the S3 artifacts; the portal-proxy Lambda serves
+      them. Cache times range from 5 minutes (macro data) to 60 minutes (valuation data). Factor tilts
+      uses direct imperative fetching with in-memory caching via tier flags.
+    </data_freshness_pattern>
+  </pod_health>
+
+</pod_inventory>
