@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page_inventory>
+  <metadata>
+    <agent>0.2.1_RD_Positioning</agent>
+    <page>Positioning</page>
+    <directory>portal/src/pages/Positioning/</directory>
+    <date>2026-03-02</date>
+    <audit_completed>2026-03-02</audit_completed>
+  </metadata>
+
+  <files>
+    <file path="portal/src/pages/Positioning/Positioning.tsx" type="component">
+      Main page component that orchestrates positioning page layout with header, positioning summary panel, and holdings tab
+    </file>
+    <file path="portal/src/pages/Positioning/index.ts" type="export">
+      Barrel export exposing Positioning component and type definitions
+    </file>
+    <file path="portal/src/pages/Positioning/types.ts" type="types">
+      TypeScript type definitions for positioning domain (AssetClass, Portfolio, PortfolioHolding, PositioningData, etc.)
+    </file>
+    <file path="portal/src/pages/Positioning/constants/etf-categories.ts" type="constants">
+      ETF categorization system mapping tickers to asset class/segment with helper functions for lookup
+    </file>
+    <file path="portal/src/pages/Positioning/components/AssetAllocationSummary.tsx" type="component">
+      Reusable attribution table showing style weight, policy weight, tilt, and attribution metrics across asset classes
+    </file>
+    <file path="portal/src/pages/Positioning/components/HoldingsTable.tsx" type="component">
+      Interactive sortable/filterable table of portfolio holdings with CSV export capability
+    </file>
+    <file path="portal/src/pages/Positioning/components/StylePolicyComparison.tsx" type="component">
+      Diverging bar chart and attribution table comparing style positioning vs benchmark with allocation analysis
+    </file>
+    <file path="portal/src/pages/Positioning/tabs/HoldingsTab.tsx" type="component">
+      Holdings view with treemap visualization (size=weight, color=performance) and dense attribution table
+    </file>
+    <file path="portal/src/pages/Positioning/tabs/AttributionTab.tsx" type="component">
+      Asset allocation attribution analysis tab showing style vs benchmark positioning comparison
+    </file>
+    <file path="portal/src/pages/Positioning/tabs/SelectionTab.tsx" type="component">
+      ETF selection analysis tab with treemap and attribution across time periods (QTD/YTD/1Y/SI)
+    </file>
+    <file path="portal/src/pages/Positioning/panels/PositioningSummary.tsx" type="component">
+      Consolidated panel combining allocation bars with allocation matrix table, supports 3 view modes (Portfolio/Benchmark/Relative)
+    </file>
+    <file path="portal/src/pages/Positioning/panels/PortfolioRadialCharts.tsx" type="component">
+      Portfolio allocation bars panel showing stacked vertical bars for 5 model portfolios with Fixed Income/Equity mix
+    </file>
+    <file path="portal/src/pages/Positioning/shared/gridConfig.ts" type="config">
+      Shared grid template constants ensuring vertical alignment between allocation bars and matrix table
+    </file>
+    <file path="portal/src/pages/Positioning/utils/buildAttributionData.ts" type="utility">
+      Attribution data builder that transforms portfolio holdings and returns into hierarchical asset class/segment/ETF structure
+    </file>
+  </files>
+
+  <api_calls>
+    <api_call>
+      <hook>useQuery (Positioning.tsx:31)</hook>
+      <endpoint>/api/general/positioning/positioning_data.json</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters required</request_shape>
+      <response_shape>PositioningDataResponse: { portfolios: Record&lt;string, PositioningPortfolio&gt;, data_as_of: string }</response_shape>
+      <file>portal/src/pages/Positioning/Positioning.tsx:33</file>
+    </api_call>
+    <api_call>
+      <hook>useQuery (AssetAllocationSummary.tsx:59)</hook>
+      <endpoint>/api/general/positioning/allocation-summary.json</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters required</request_shape>
+      <response_shape>AllocationSummaryResponse: { portfolios: Record&lt;string, { qtd: PortfolioData, ytd: PortfolioData }&gt;, data_as_of: string }</response_shape>
+      <file>portal/src/pages/Positioning/components/AssetAllocationSummary.tsx:61</file>
+    </api_call>
+    <api_call>
+      <hook>useEffect (StylePolicyComparison.tsx:50)</hook>
+      <endpoint>/api/general/positioning/allocation-summary.json</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters required</request_shape>
+      <response_shape>AllocationSummaryResponse</response_shape>
+      <file>portal/src/pages/Positioning/components/StylePolicyComparison.tsx:51</file>
+    </api_call>
+    <api_call>
+      <hook>useEffect (PositioningSummary.tsx:454)</hook>
+      <endpoint>/api/general/positioning/holdings_attribution_data.json</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters required</request_shape>
+      <response_shape>HoldingsAttributionResponse: { portfolios: Record&lt;string, AttributionPortfolio&gt;, data_as_of: string }</response_shape>
+      <file>portal/src/pages/Positioning/panels/PositioningSummary.tsx:454</file>
+    </api_call>
+    <api_call>
+      <hook>useEffect (HoldingsTab.tsx:639)</hook>
+      <endpoint>/api/general/positioning/positioning_data.json</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters required</request_shape>
+      <response_shape>PositioningDataResponse</response_shape>
+      <file>portal/src/pages/Positioning/tabs/HoldingsTab.tsx:639</file>
+    </api_call>
+    <api_call>
+      <hook>useEffect (HoldingsTab.tsx:654)</hook>
+      <endpoint>/api/general/positioning/holdings_attribution_data.json</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters required</request_shape>
+      <response_shape>HoldingsAttributionResponse</response_shape>
+      <file>portal/src/pages/Positioning/tabs/HoldingsTab.tsx:654</file>
+    </api_call>
+    <api_call>
+      <hook>useEffect (HoldingsTab.tsx:673)</hook>
+      <endpoint>/api/general/portfolios/aum-metrics.json</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters required</request_shape>
+      <response_shape>AUMSummary: { total: number, by_portfolio: Record&lt;string, number&gt; }</response_shape>
+      <file>portal/src/pages/Positioning/tabs/HoldingsTab.tsx:673</file>
+    </api_call>
+    <api_call>
+      <hook>useEffect (SelectionTab.tsx:645)</hook>
+      <endpoint>/api/general/positioning/positioning_data.json</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters required</request_shape>
+      <response_shape>PositioningDataResponse</response_shape>
+      <file>portal/src/pages/Positioning/tabs/SelectionTab.tsx:645</file>
+    </api_call>
+    <api_call>
+      <hook>useEffect (SelectionTab.tsx:657)</hook>
+      <endpoint>/returns/etf-periods</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters required</request_shape>
+      <response_shape>ETFPeriodReturnsResponse: { [ticker: string]: { [period: string]: number | null } }</response_shape>
+      <file>portal/src/pages/Positioning/tabs/SelectionTab.tsx:657</file>
+    </api_call>
+    <api_call>
+      <hook>useEffect (SelectionTab.tsx:670)</hook>
+      <endpoint>/api/general/positioning/holdings_attribution_data.json</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters required</request_shape>
+      <response_shape>HoldingsAttributionResponse</response_shape>
+      <file>portal/src/pages/Positioning/tabs/SelectionTab.tsx:670</file>
+    </api_call>
+    <api_call>
+      <hook>useEffect (SelectionTab.tsx:689)</hook>
+      <endpoint>/api/general/portfolios/aum-metrics.json</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters required</request_shape>
+      <response_shape>AUMSummary</response_shape>
+      <file>portal/src/pages/Positioning/tabs/SelectionTab.tsx:689</file>
+    </api_call>
+  </api_calls>
+
+  <shared_imports>
+    <import>
+      <from>@tanstack/react-query</from>
+      <provides>useQuery</provides>
+      <used_in>Positioning.tsx, AssetAllocationSummary.tsx</used_in>
+    </import>
+    <import>
+      <from>lucide-react</from>
+      <provides>Target, HelpCircle, ChevronDown, ChevronRight</provides>
+      <used_in>Positioning.tsx, AssetAllocationSummary.tsx, StylePolicyComparison.tsx, PositioningSummary.tsx</used_in>
+    </import>
+    <import>
+      <from>@/contexts/PageThemeContext</from>
+      <provides>PageThemeProvider</provides>
+      <used_in>Positioning.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/PageHeaderVariants</from>
+      <provides>PageHeaderCleanBadge</provides>
+      <used_in>Positioning.tsx</used_in>
+    </import>
+    <import>
+      <from>@/hooks/useDataSource</from>
+      <provides>useYangDataAsOf, useDataSourceTimestamp</provides>
+      <used_in>Positioning.tsx, AssetAllocationSummary.tsx, StylePolicyComparison.tsx, HoldingsTab.tsx, SelectionTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/Tooltip</from>
+      <provides>Tooltip</provides>
+      <used_in>AssetAllocationSummary.tsx, StylePolicyComparison.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/LoadingSpinner</from>
+      <provides>LoadingInline</provides>
+      <used_in>AssetAllocationSummary.tsx, HoldingsTab.tsx, SelectionTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/DataAsOf</from>
+      <provides>DataAsOfCompact</provides>
+      <used_in>AssetAllocationSummary.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/Card</from>
+      <provides>Card, CardContent</provides>
+      <used_in>HoldingsTable.tsx</used_in>
+    </import>
+    <import>
+      <from>@/ui/components/panels</from>
+      <provides>Panel, PanelHeader, PanelContent, SmartPanelFooter</provides>
+      <used_in>StylePolicyComparison.tsx, PositioningSummary.tsx, PortfolioRadialCharts.tsx, HoldingsTab.tsx, SelectionTab.tsx</used_in>
+    </import>
+    <import>
+      <from>recharts</from>
+      <provides>Treemap, ResponsiveContainer, Tooltip</provides>
+      <used_in>HoldingsTab.tsx, SelectionTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/lib/tickerRegistry</from>
+      <provides>getTickerMetadata</provides>
+      <used_in>HoldingsTab.tsx, SelectionTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/lib/performanceUtils</from>
+      <provides>formatPercentageReturn, getReturnColorClass</provides>
+      <used_in>HoldingsTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/api/portal-proxy</from>
+      <provides>getPositioningData, getAllocationSummary, getHoldingsAttribution, getETFPeriodReturns, getAUMSummary, type definitions</provides>
+      <used_in>Positioning.tsx, AssetAllocationSummary.tsx, StylePolicyComparison.tsx, PositioningSummary.tsx, HoldingsTab.tsx, SelectionTab.tsx</used_in>
+    </import>
+  </shared_imports>
+
+  <types>
+    <type name="AssetClass" defined_in="portal/src/pages/Positioning/types.ts">
+      Union type: 'Equity' | 'Cash' | 'Government' | 'Investment Grade Credit' | 'High Yield' | 'Municipals' | 'Structured' | 'Emerging Markets Debt' | 'Other'
+    </type>
+    <type name="DurationBucket" defined_in="portal/src/pages/Positioning/types.ts">
+      Union type for duration brackets: '0' | '0-3' | '3-5' | '5-7' | '7-10' | '10+'
+    </type>
+    <type name="InstrumentType" defined_in="portal/src/pages/Positioning/types.ts">
+      Union type: 'ETF' | 'Stock' | 'Bond' | 'MutualFund' | 'Cash'
+    </type>
+    <type name="Instrument" defined_in="portal/src/pages/Positioning/types.ts">
+      Key fields: instrumentId, ticker, name, instrumentType, assetClass, subAssetClass, currency
+    </type>
+    <type name="InstrumentAnalytics" defined_in="portal/src/pages/Positioning/types.ts">
+      Key fields: instrumentId, asOfDate, modifiedDuration, yield, spread, creditRating
+    </type>
+    <type name="PortfolioHolding" defined_in="portal/src/pages/Positioning/types.ts">
+      Key fields: portfolioId, asOfDate, instrumentId, weight (%), ticker, name, assetClass, modifiedDuration, durationContribution
+    </type>
+    <type name="Portfolio" defined_in="portal/src/pages/Positioning/types.ts">
+      Key fields: portfolioId, name, type ('Model' | 'Benchmark'), asOfDate
+    </type>
+    <type name="DurationByAssetClass" defined_in="portal/src/pages/Positioning/types.ts">
+      Key fields: assetClass, weight, avgDuration, durationContribution
+    </type>
+    <type name="DurationByBucket" defined_in="portal/src/pages/Positioning/types.ts">
+      Key fields: bucket (DurationBucket), weight, durationContribution
+    </type>
+    <type name="PortfolioSummary" defined_in="portal/src/pages/Positioning/types.ts">
+      Key fields: totalModifiedDuration, cashPercent, fixedIncomePercent, equityPercent, otherPercent
+    </type>
+    <type name="PositioningData" defined_in="portal/src/pages/Positioning/types.ts">
+      Key fields: portfolio (Portfolio), summary (PortfolioSummary), holdings (PortfolioHolding[]), durationByAssetClass, durationByBucket
+    </type>
+    <type name="ETFCategory" defined_in="portal/src/pages/Positioning/constants/etf-categories.ts">
+      Key fields: assetClass ('Fixed Income' | 'Equity' | 'Cash' | 'Hedge'), segment (string), name (string)
+    </type>
+    <type name="ETFHolding" defined_in="portal/src/pages/Positioning/utils/buildAttributionData.ts">
+      Key fields: ticker, name, actualWeight, policyWeight, activeWeight, fundReturn, benchmarkReturn, activeReturn, contribution, allocationEffect, selectionEffect, interactionEffect
+    </type>
+    <type name="SubAssetClass" defined_in="portal/src/pages/Positioning/utils/buildAttributionData.ts">
+      Key fields: name, color, holdings (ETFHolding[]), and aggregated totals for weight, return, and attribution metrics
+    </type>
+    <type name="AssetClass (attribution)" defined_in="portal/src/pages/Positioning/utils/buildAttributionData.ts">
+      Key fields: name, color, subAssetClasses (SubAssetClass[]), and aggregated totals
+    </type>
+  </types>
+
+  <page_structure>
+    <section name="Main Layout">
+      <component>PageThemeProvider with accent color hsl(var(--model-default))</component>
+      <component>PageHeaderCleanBadge with Target icon, title "Positioning", description about asset allocation and holdings</component>
+    </section>
+    <section name="PositioningSummary Panel">
+      <description>Consolidated view combining allocation bars and allocation matrix table</description>
+      <status>functional</status>
+      <view name="Portfolio (Model)" status="functional">Shows actual model portfolio allocations in stacked bars and matrix cells</view>
+      <view name="Benchmark (ETF)" status="functional">Shows benchmark/policy allocations for comparison</view>
+      <view name="Relative (Delta/Tilt)" status="functional">Shows tilts (active weights) relative to benchmark with color coding (green overweight, red underweight)</view>
+      <subsection name="Allocation Bars">Shows 5 stacked vertical bars for UST, ST, INT, LTC, LTA portfolios with Fixed Income (green) and Equity (blue) mix</subsection>
+      <subsection name="Allocation Matrix">Grid table with portfolios as columns, asset classes/segments as rows, with style weight, policy weight, and tilt metrics</subsection>
+    </section>
+    <section name="HoldingsTab">
+      <description>Holdings view with treemap visualization and dense attribution table</description>
+      <status>functional</status>
+      <subsection name="Treemap">Interactive treemap showing holdings where size=weight, color=performance (red/green for negative/positive)</subsection>
+      <subsection name="Attribution Table">Dense table with columns for each holding showing actual weight, policy weight, fund return, style return, excess return, and various attribution effects</subsection>
+    </section>
+    <section name="AttributionTab">
+      <description>Asset allocation attribution analysis comparing style positioning vs benchmark</description>
+      <status>functional</status>
+      <subsection name="StylePolicyComparison">Diverging bar chart showing allocation tilts vs benchmark (center line at parity, red left for underweight, green right for overweight)</subsection>
+      <subsection name="Attribution Table">Asset allocation attribution with style weight, benchmark weight, tilt, asset allocation attribution, and total attribution</subsection>
+    </section>
+    <section name="SelectionTab">
+      <description>ETF selection analysis across time periods with treemap and attribution</description>
+      <status>functional</status>
+      <subsection name="Period Selector">Allows selection between QTD, YTD, 1Y, SI periods</subsection>
+      <subsection name="Treemap">ETF holdings visualization with performance coloring across selected period</subsection>
+      <subsection name="Attribution Table">Detailed attribution showing fund selection effect, style allocation effect, and asset allocation attribution</subsection>
+    </section>
+  </page_structure>
+
+  <issues>
+    <issue file="portal/src/pages/Positioning/utils/buildAttributionData.ts:17" type="TODO">
+      Where does policy weight come from? - Need to define policy portfolio data source
+    </issue>
+    <issue file="portal/src/pages/Positioning/utils/buildAttributionData.ts:21" type="TODO">
+      Define benchmarks - Need to establish benchmark return mapping for each ticker/asset class
+    </issue>
+    <issue file="portal/src/pages/Positioning/utils/buildAttributionData.ts:121" type="TODO">
+      Define policy weights and benchmarks - Currently using placeholder null values for attribution calculations
+    </issue>
+    <issue file="portal/src/pages/Positioning/utils/buildAttributionData.ts:123" type="TODO">
+      Get policy weights from policy portfolio - Need integration with policy portfolio data source
+    </issue>
+    <issue file="portal/src/pages/Positioning/utils/buildAttributionData.ts:124" type="TODO">
+      Get benchmark returns from benchmark mapping - Need to map tickers to benchmark returns
+    </issue>
+  </issues>
+
+  <implementation_notes>
+    <note>
+      **Page Layout:** Simplified structure - no tab navigation. Main components are PositioningSummary (consolidated panel) and HoldingsTab (holdings view).
+    </note>
+    <note>
+      **Data Fetching:** Uses React Query for caching with 5-10 minute stale times and 10-30 minute garbage collection. Automatic retry and refetch on window focus.
+    </note>
+    <note>
+      **Portfolio Configuration:** 5 model portfolios (UST, ST, INT, LTC, LTA) plus AGG aggregate, each with canonical hex colors defined in multiple files.
+    </note>
+    <note>
+      **Data Sources:** All data comes from S3-backed JSON files served through API Gateway CloudFront cache. DEMO mode uses public endpoints; production mode requires JWT Bearer token auth.
+    </note>
+    <note>
+      **Attribution Analysis:** Supports hierarchical breakdown: Asset Class &gt; Segment &gt; ETF Holding with metrics for weights, returns, and attribution effects.
+    </note>
+    <note>
+      **Grid Alignment:** PORTFOLIO_GRID_TEMPLATE ensures perfect vertical alignment between allocation bars and matrix table using shared config.
+    </note>
+    <note>
+      **Color System:** Fixed Income = #10b981 (green-500), Equity = #3b82f6 (blue-500), Hedge = #a855f7 (purple), with segment-specific shades for hierarchy visualization.
+    </note>
+    <note>
+      **Duration Proxy:** Equity holdings use 20-year modified duration proxy for unified duration measurement across asset classes.
+    </note>
+  </implementation_notes>
+
+  <dependencies>
+    <dependency type="external_component">
+      <name>PageThemeProvider, PageHeaderVariants</name>
+      <source>@/contexts, @/components</source>
+      <purpose>Page styling and header presentation</purpose>
+    </dependency>
+    <dependency type="external_component">
+      <name>Panel, PanelHeader, PanelContent, SmartPanelFooter</name>
+      <source>@/ui/components/panels</source>
+      <purpose>Consistent panel wrapper and footer formatting</purpose>
+    </dependency>
+    <dependency type="external_hook">
+      <name>useYangDataAsOf, useDataSourceTimestamp</name>
+      <source>@/hooks/useDataSource</source>
+      <purpose>Register data timestamps with central Yang registry for synchronization</purpose>
+    </dependency>
+    <dependency type="external_api">
+      <name>portal-proxy API functions</name>
+      <source>@/api/portal-proxy</source>
+      <purpose>Provides all API calls to S3-backed positioning, allocation, and attribution endpoints</purpose>
+    </dependency>
+    <dependency type="external_library">
+      <name>Recharts (Treemap, ResponsiveContainer)</name>
+      <source>recharts</source>
+      <purpose>Treemap visualization in HoldingsTab and SelectionTab</purpose>
+    </dependency>
+    <dependency type="external_library">
+      <name>React Query (useQuery)</name>
+      <source>@tanstack/react-query</source>
+      <purpose>Data caching, refetch on focus, automatic retry</purpose>
+    </dependency>
+  </dependencies>
+
+  <build_and_deploy_info>
+    <note>
+      **Commit restrictions:** Agent 0.2.1_RD_Positioning can commit ONLY files under portal/src/pages/Positioning/
+    </note>
+    <note>
+      **Commit tagging:** Every commit must be tagged: `0.2.1_RD_Positioning: Positioning — &lt;description&gt;`
+    </note>
+    <note>
+      **Push restrictions:** Agent cannot push to remote - DT handles all pushes
+    </note>
+    <note>
+      **No AWS deployment:** This is portal frontend only - no Lambda or infrastructure changes
+    </note>
+  </build_and_deploy_info>
+
+</page_inventory>

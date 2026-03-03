@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page_inventory>
+  <metadata>
+    <agent>0.2.6_RD_Correlation</agent>
+    <page>Correlation</page>
+    <directory>portal/src/pages/Correlation/</directory>
+    <date>2026-03-02</date>
+    <scan_depth>Complete</scan_depth>
+    <files_found>9</files_found>
+  </metadata>
+
+  <files>
+    <file path="portal/src/pages/Correlation/Correlation.tsx" type="component">
+      Main page component - displays correlation matrix with ticker selection, lookback period selector, and dynamic data loading from API
+    </file>
+    <file path="portal/src/pages/Correlation/types.ts" type="types">
+      TypeScript interfaces: CorrelationMatrixData, CorrelationPanelProps, CorrelationCellProps, LookbackPeriod, TickerPreset
+    </file>
+    <file path="portal/src/pages/Correlation/constants.ts" type="constants">
+      Asset class names, short labels, color schemes, lookback periods, ticker presets, and color utility functions
+    </file>
+    <file path="portal/src/pages/Correlation/hooks/useCorrelationData.ts" type="hook">
+      React Query hook for fetching correlation data; exports utility functions for matrix filtering and correlation value lookup
+    </file>
+    <file path="portal/src/pages/Correlation/components/CorrelationMatrix.tsx" type="component">
+      Triangular heatmap matrix component with color-coded cells, axis labels, tooltips, and legend display
+    </file>
+    <file path="portal/src/pages/Correlation/components/TickerSelector.tsx" type="component">
+      Multi-select dropdown with preset buttons, search filter, Select All/Clear, and visual checkbox indicators
+    </file>
+    <file path="portal/src/pages/Correlation/components/index.ts" type="barrel_export">
+      Barrel export: CorrelationMatrix, TickerSelector
+    </file>
+    <file path="portal/src/pages/Correlation/index.ts" type="barrel_export">
+      Page barrel export: Correlation component
+    </file>
+    <file path="portal/src/pages/Correlation/CORRELATION_PAGE_SPEC.md" type="documentation">
+      Implementation specification and design reference documentation
+    </file>
+  </files>
+
+  <api_calls>
+    <api_call>
+      <hook>useQuery (via useCorrelationData)</hook>
+      <endpoint>/api/general/correlations/correlation_data.json</endpoint>
+      <method>GET</method>
+      <request_shape>No request payload - GET with query key 'correlation-data'</request_shape>
+      <response_shape>
+        {
+          metadata: {
+            generated_at: string,
+            as_of_date?: string,
+            data_as_of?: string (YYYY-MM-DD),
+            ticker_count: number,
+            periods_available: ['1M', '3M', '6M', '1Y', '2Y']
+          },
+          tickers: string[],
+          correlations: {
+            '1M': { matrix: (number | null)[][], data_points: number },
+            '3M': { matrix: (number | null)[][], data_points: number },
+            '6M': { matrix: (number | null)[][], data_points: number },
+            '1Y': { matrix: (number | null)[][], data_points: number },
+            '2Y': { matrix: (number | null)[][], data_points: number }
+          }
+        }
+      </response_shape>
+      <cache_strategy>staleTime: 30 minutes, gcTime: 60 minutes</cache_strategy>
+      <file>portal/src/pages/Correlation/hooks/useCorrelationData.ts:41-56</file>
+      <source>portal/src/api/portal-proxy.ts:1437-1439</source>
+    </api_call>
+  </api_calls>
+
+  <shared_imports>
+    <import>
+      <from>portal/src/contexts/PageThemeContext</from>
+      <provides>PageThemeProvider</provides>
+      <used_in>portal/src/pages/Correlation/Correlation.tsx</used_in>
+      <usage>Wraps page with accent color (cyan/info)</usage>
+    </import>
+    <import>
+      <from>portal/src/components/PageHeaderVariants</from>
+      <provides>PageHeaderCleanBadge</provides>
+      <used_in>portal/src/pages/Correlation/Correlation.tsx</used_in>
+      <usage>Renders page header with icon, title, and description</usage>
+    </import>
+    <import>
+      <from>portal/src/hooks/useFilterTracking</from>
+      <provides>useSelectTracking</provides>
+      <used_in>portal/src/pages/Correlation/Correlation.tsx:33</used_in>
+      <usage>Tracks lookback period selection across sessions</usage>
+    </import>
+    <import>
+      <from>portal/src/components/LoadingSpinner</from>
+      <provides>LoadingSpinner</provides>
+      <used_in>portal/src/pages/Correlation/Correlation.tsx</used_in>
+      <usage>Shows loading state while data fetches</usage>
+    </import>
+    <import>
+      <from>portal/src/components/Tooltip</from>
+      <provides>Tooltip</provides>
+      <used_in>portal/src/pages/Correlation/components/CorrelationMatrix.tsx</used_in>
+      <usage>Displays correlation value and asset names on cell hover</usage>
+    </import>
+    <import>
+      <from>portal/src/ui/components/panels</from>
+      <provides>Panel, PanelHeader, PanelContent, SmartPanelFooter</provides>
+      <used_in>portal/src/pages/Correlation/components/CorrelationMatrix.tsx</used_in>
+      <usage>Panel wrapper, header with title/helpText/actions, content container, footer with source attribution</usage>
+    </import>
+    <import>
+      <from>portal/src/components/DataAsOf</from>
+      <provides>DataAsOfCompact</provides>
+      <used_in>portal/src/pages/Correlation/components/CorrelationMatrix.tsx:55</used_in>
+      <usage>Displays data timestamp in compact format</usage>
+    </import>
+    <import>
+      <from>portal/src/lib/utils</from>
+      <provides>cn</provides>
+      <used_in>portal/src/pages/Correlation/components/CorrelationMatrix.tsx, TickerSelector.tsx</used_in>
+      <usage>Utility function for conditional class name composition</usage>
+    </import>
+    <import>
+      <from>portal/src/lib/dateUtils</from>
+      <provides>formatYangDate</provides>
+      <used_in>portal/src/pages/Correlation/Correlation.tsx:56</used_in>
+      <usage>Formats as_of_date metadata for display</usage>
+    </import>
+    <import>
+      <from>portal/src/lib/designTokens</from>
+      <provides>Z_INDEX</provides>
+      <used_in>portal/src/pages/Correlation/components/TickerSelector.tsx:15, 96, 220</used_in>
+      <usage>Z-index constants for dropdown and overlay layering</usage>
+    </import>
+    <import>
+      <from>lucide-react</from>
+      <provides>GitCompare, AlertCircle, ChevronDown, Search, X, Check</provides>
+      <used_in>Multiple files</used_in>
+      <usage>Icons for page header, error states, dropdown control, search, and checkbox indicators</usage>
+    </import>
+    <import>
+      <from>@tanstack/react-query</from>
+      <provides>useQuery</provides>
+      <used_in>portal/src/pages/Correlation/hooks/useCorrelationData.ts:11</used_in>
+      <usage>React Query hook for async data fetching and caching</usage>
+    </import>
+  </shared_imports>
+
+  <types>
+    <type name="CorrelationMatrixData" defined_in="portal/src/pages/Correlation/types.ts:5-10">
+      Key fields: assets (string[]), matrix (2D array of numbers/nulls in lower-triangular format), asOfDate (string), lookbackPeriod (string)
+    </type>
+    <type name="CorrelationPanelProps" defined_in="portal/src/pages/Correlation/types.ts:12-17">
+      Key fields: title (string), subtitle (optional string), data (CorrelationMatrixData), colorScheme (optional: 'pink'|'cyan'|'green')
+    </type>
+    <type name="CorrelationCellProps" defined_in="portal/src/pages/Correlation/types.ts:19-23">
+      Key fields: value (number), rowAsset (string), colAsset (string)
+    </type>
+    <type name="LookbackPeriod" defined_in="portal/src/pages/Correlation/types.ts:26">
+      Type alias: '1M' | '3M' | '6M' | '1Y' | '2Y'
+    </type>
+    <type name="TickerPreset" defined_in="portal/src/pages/Correlation/types.ts:29-33">
+      Key fields: id (string), name (string), tickers (string[])
+    </type>
+    <type name="CorrelationPeriod" defined_in="portal/src/api/portal-proxy.ts:1406">
+      Type alias: '1M' | '3M' | '6M' | '1Y' | '2Y' (imported from portal-proxy)
+    </type>
+    <type name="CorrelationPeriodData" defined_in="portal/src/api/portal-proxy.ts:1408-1411">
+      Key fields: matrix (lower-triangular number array), data_points (number) (imported from portal-proxy)
+    </type>
+    <type name="CorrelationDataResponse" defined_in="portal/src/api/portal-proxy.ts:1413-1423">
+      Key fields: metadata (with generated_at, as_of_date, data_as_of, ticker_count, periods_available), tickers (string[]), correlations (Record of period to CorrelationPeriodData) (imported from portal-proxy)
+    </type>
+    <type name="UseCorrelationDataReturn" defined_in="portal/src/pages/Correlation/hooks/useCorrelationData.ts:18-23">
+      Key fields: data (CorrelationDataResponse | undefined), isLoading (boolean), error (Error | null), refetch (function)
+    </type>
+  </types>
+
+  <page_structure>
+    <layout type="single_panel">Single full-width panel with correlation matrix (no tabs)</layout>
+    <main_component name="Correlation Matrix">
+      Displays triangular heatmap of correlation values between selected tickers
+      - Functional: Renders matrix, filters by period and tickers
+      - Features: Color-coded cells (pink=positive, green=negative), tooltips, legend
+    </main_component>
+    <control_component name="Ticker Selector">
+      Multi-select dropdown for choosing which tickers to display
+      - Status: Functional
+      - Features: Preset buttons, search filter, Select All/Clear, count display
+      - Default: Cross-Asset preset on page load
+    </control_component>
+    <control_component name="Lookback Period Selector">
+      Dropdown to choose time period for correlations
+      - Status: Functional
+      - Options: 1M, 3M (default), 6M, 1Y, 2Y
+      - Controlled by useSelectTracking hook
+    </control_component>
+    <state_component name="Loading State">
+      Displays spinner while data fetches
+      - Status: Functional
+      - Triggered when useCorrelationData returns isLoading=true
+    </state_component>
+    <state_component name="Error State">
+      Displays error message with alert icon
+      - Status: Functional
+      - Triggered when useCorrelationData returns error
+    </state_component>
+    <state_component name="Empty/Insufficient Selection Warning">
+      Yellow warning banner shown when fewer than 2 tickers selected
+      - Status: Functional
+      - Message: "Select at least 2 tickers to view correlation matrix"
+    </state_component>
+  </page_structure>
+
+  <component_props>
+    <component name="Correlation">
+      <prop name="None">Top-level page component, no props</prop>
+    </component>
+    <component name="CorrelationMatrix">
+      <prop name="title" type="string" required="true">Panel title</prop>
+      <prop name="data" type="CorrelationMatrixData" required="true">Matrix data and metadata</prop>
+      <prop name="showLegend" type="boolean" required="false" default="true">Show/hide color scale legend</prop>
+      <prop name="actions" type="ReactNode" required="false">React node for right-side actions (ticker+period selectors)</prop>
+      <prop name="dataAsOf" type="string|null" required="false">Data timestamp for display</prop>
+    </component>
+    <component name="TickerSelector">
+      <prop name="availableTickers" type="string[]" required="true">Array of all available ticker names</prop>
+      <prop name="selectedTickers" type="string[]" required="true">Currently selected tickers</prop>
+      <prop name="onSelectionChange" type="(tickers: string[]) => void" required="true">Callback when selection changes</prop>
+    </component>
+  </component_props>
+
+  <state_management>
+    <state name="selectedTickers" location="Correlation.tsx:42">
+      Type: string[], managed with useState
+      Updated by: TickerSelector onSelectionChange callback
+      Used for: Filtering correlation matrix display
+    </state>
+    <state name="lookbackPeriod" location="Correlation.tsx:33">
+      Type: LookbackPeriod ('1M'|'3M'|'6M'|'1Y'|'2Y'), managed with useSelectTracking hook
+      Updated by: Period dropdown onChange
+      Used for: Selecting which correlation period data to display
+      Persistence: Stored in filter tracking system across sessions
+    </state>
+    <state name="isOpen" location="TickerSelector.tsx:28">
+      Type: boolean, managed with useState
+      Used for: Toggling dropdown visibility
+    </state>
+    <state name="searchQuery" location="TickerSelector.tsx:29">
+      Type: string, managed with useState
+      Used for: Filtering ticker list in dropdown
+    </state>
+    <async_state name="correlation data" location="useCorrelationData">
+      Source: useQuery with React Query
+      Cache: 30 minutes staleTime, 60 minutes gcTime
+      Provides: data, isLoading, error, refetch
+    </async_state>
+  </state_management>
+
+  <data_flow>
+    <step order="1">User loads Correlation page</step>
+    <step order="2">useCorrelationData hook fires, fetches /api/general/correlations/correlation_data.json via React Query</step>
+    <step order="3">Initial tickers loaded from DEFAULT_PRESET_ID ('cross-asset') filtered to available data</step>
+    <step order="4">User interacts: changes ticker selection or lookback period</step>
+    <step order="5">filterCorrelationMatrix() builds lower-triangular matrix for selected tickers and period</step>
+    <step order="6">CorrelationMatrix re-renders with filtered data, color scheme applied per correlation value</step>
+  </data_flow>
+
+  <constants>
+    <constant name="ASSET_CLASS_NAMES" location="constants.ts:6-20">
+      Array of 13 asset class names: Cash, Gov/Credit, Aggregate, Treasury 20+, etc.
+    </constant>
+    <constant name="ASSET_CLASS_SHORT_LABELS" location="constants.ts:23-37">
+      Record mapping full names to abbreviated display labels (e.g., 'Government/Credit 1-3 Year' → 'Gov/Credit 1-3Y')
+    </constant>
+    <constant name="EQUITY_SECTORS" location="constants.ts:40-52">
+      Array of 11 equity sector names (defined but not currently used in active components)
+    </constant>
+    <constant name="REGIONS" location="constants.ts:55-63">
+      Array of 7 geographic regions (defined but not currently used in active components)
+    </constant>
+    <constant name="CORRELATION_COLORS" location="constants.ts:67-75">
+      Record of 7 color definitions: strongPositive, moderatePositive, weakPositive, veryWeakPositive, neutral, weakNegative, strongNegative
+    </constant>
+    <constant name="LOOKBACK_PERIODS" location="constants.ts:109-115">
+      Array of 5 period objects with value ('1M'|'3M'|etc) and display label
+    </constant>
+    <constant name="TICKER_PRESETS" location="constants.ts:118-175">
+      Array of 8 preset groups: US Large Cap, US Style Factors, US Size, US Sectors, International, Fixed Income, Commodities, Cross-Asset (default)
+    </constant>
+    <constant name="DEFAULT_PRESET_ID" location="constants.ts:178">
+      Value: 'cross-asset' - loaded on page init if no prior selection
+    </constant>
+  </constants>
+
+  <utility_functions>
+    <function name="getCorrelationColor" defined_in="constants.ts:81-89">
+      Returns rgba color string based on correlation value (-1.0 to 1.0), used for cell background
+    </function>
+    <function name="getCorrelationTextColor" defined_in="constants.ts:94-99">
+      Returns text color class string (white/white-90/white-80/emerald-200) for readability based on value
+    </function>
+    <function name="formatCorrelation" defined_in="constants.ts:104-106">
+      Formats correlation number to 2 decimal places (e.g., 0.83)
+    </function>
+    <function name="getDefaultTickers" defined_in="Correlation.tsx:25-29">
+      Filters default preset tickers to only those available in API response
+    </function>
+    <function name="getCorrelationValue" defined_in="hooks/useCorrelationData.ts:70-87">
+      Looks up correlation between two tickers in lower-triangular matrix
+    </function>
+    <function name="filterCorrelationMatrix" defined_in="hooks/useCorrelationData.ts:97-129">
+      Builds filtered lower-triangular matrix for selected ticker subset and period
+    </function>
+    <function name="getShortLabel" defined_in="components/CorrelationMatrix.tsx:32-34">
+      Returns short display label for asset from ASSET_CLASS_SHORT_LABELS
+    </function>
+  </utility_functions>
+
+  <style_and_theming>
+    <theme name="PageThemeProvider">
+      Accent color: 'hsl(var(--info))' (cyan)
+      Context: Wraps entire page
+    </theme>
+    <color_scheme name="Correlation Heatmap">
+      Strong Positive (0.8-1.0): rgba(236, 72, 153, 0.7) - pink
+      Moderate Positive (0.6-0.8): rgba(236, 72, 153, 0.5) - pink lighter
+      Weak Positive (0.4-0.6): rgba(236, 72, 153, 0.35) - pink lightest
+      Very Weak Positive (0.2-0.4): rgba(236, 72, 153, 0.2) - pink very light
+      Neutral (0.0-0.2): rgba(236, 72, 153, 0.08) - almost white
+      Weak Negative (-0.3-0.0): rgba(34, 197, 94, 0.25) - green
+      Strong Negative (&lt;-0.3): rgba(34, 197, 94, 0.45) - green darker
+    </color_scheme>
+    <responsive_behavior>
+      Cell size: 64px for &lt;=10 assets, 56px for &gt;10 assets
+      Font size: 12px for &lt;=10 assets, 11px for &gt;10 assets
+      Dropdown width: Fixed 320px
+    </responsive_behavior>
+  </style_and_theming>
+
+  <issues>
+    <issue file="portal/src/pages/Correlation/hooks/useCorrelationData.ts:42" type="MARKER">
+      Comment: "✅ PHASE1_CR_REQ_001: CORRELATION DATA LOADING ENABLED" - marks API loading phase milestone
+    </issue>
+  </issues>
+
+  <edge_cases_and_behavior>
+    <edge_case name="No data available">
+      Returns null during loading before API responds
+    </edge_case>
+    <edge_case name="API error">
+      Shows error message with AlertCircle icon, prevents matrix render
+    </edge_case>
+    <edge_case name="Fewer than 2 tickers selected">
+      Shows yellow warning banner, does not render matrix even if data available
+    </edge_case>
+    <edge_case name="Selected ticker not in available data">
+      filterCorrelationMatrix filters it out silently
+    </edge_case>
+    <edge_case name="Preset includes tickers not in available data">
+      TickerSelector filters preset to only available tickers on apply
+    </edge_case>
+    <edge_case name="Matrix cell value is null">
+      Displays '-' in cell with gray background and tooltip 'Insufficient data'
+    </edge_case>
+    <edge_case name="Cell hover">
+      Scales up 105%, border becomes more visible, shows tooltip with asset names and correlation value
+    </edge_case>
+  </edge_cases_and_behavior>
+
+  <async_operations>
+    <operation name="Initial data fetch">
+      Hook: useQuery from useCorrelationData
+      Trigger: Page mount
+      Endpoint: /api/general/correlations/correlation_data.json
+      Status indicators: isLoading (shows spinner), error (shows error UI), success (renders matrix)
+    </operation>
+    <operation name="Manual refetch">
+      Hook: useCorrelationData returns refetch function
+      Currently: Not exposed in UI (available for future use)
+    </operation>
+  </async_operations>
+
+  <dependencies>
+    <external_lib name="@tanstack/react-query">
+      Used by: useCorrelationData hook for async data management
+    </external_lib>
+    <external_lib name="lucide-react">
+      Used by: Icons throughout (GitCompare, AlertCircle, ChevronDown, Search, X, Check)
+    </external_lib>
+    <internal_hook name="useSelectTracking">
+      Used by: Correlation.tsx for lookback period persistence
+      Location: @/hooks/useFilterTracking
+    </internal_hook>
+    <internal_context name="PageThemeContext">
+      Used by: PageThemeProvider for page accent color
+      Location: @/contexts/PageThemeContext
+    </internal_context>
+  </dependencies>
+
+  <performance_notes>
+    <note>React Query cacheTime set to 1 hour - data refetches if not accessed for 30 minutes</note>
+    <note>useMemo used for: initialTickers, matrixData, currentPresetName in TickerSelector - prevents unnecessary recalculations</note>
+    <note>Matrix filter operation O(n^2) but typically small datasets (&lt;100 tickers)</note>
+    <note>Dropdown uses max-height with overflow-y-auto for scrollable ticker list</note>
+  </performance_notes>
+
+  <accessibility_notes>
+    <note>Lookback period select has aria-label for screen readers</note>
+    <note>CorrelationMatrix cells use Tooltip for hover content (accessible to keyboard and mouse)</note>
+    <note>Buttons and interactive elements properly labeled and styled for focus states</note>
+  </accessibility_notes>
+
+  <future_enhancement_candidates>
+    <enhancement>Equity Sector Correlations panel (constants defined but component not built)</enhancement>
+    <enhancement>Geographic Correlations panel (constants defined but component not built)</enhancement>
+    <enhancement>Rolling correlation chart over time</enhancement>
+    <enhancement>Click to highlight row/column feature on matrix cells</enhancement>
+    <enhancement>Correlation export to CSV</enhancement>
+    <enhancement>Cluster analysis to group correlated assets</enhancement>
+  </future_enhancement_candidates>
+
+  <summary>
+    The Correlation page displays a dynamic, interactive triangular heatmap of correlation values between selected financial assets. It supports preset ticker grouping, multi-select with search, and period selection across 5 lookback windows. Data is fetched from S3 via Lambda proxy API with 30-minute React Query caching. The page is fully functional with proper error handling, loading states, and responsive layout. No major blockers or TODOs found in the code.
+  </summary>
+
+</page_inventory>

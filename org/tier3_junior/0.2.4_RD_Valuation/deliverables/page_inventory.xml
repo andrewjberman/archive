@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page_inventory>
+  <metadata>
+    <agent>0.2.4_RD_Valuation</agent>
+    <page>Valuation</page>
+    <directory>portal/src/pages/Valuation/</directory>
+    <date>2026-03-02</date>
+  </metadata>
+
+  <files>
+    <file path="portal/src/pages/Valuation/Valuation.tsx" type="component">
+      Main page component: Displays valuation metrics via two full-width panels (Summary and Range) and two tabs (Time Series and Risk Premium) with PageThemeProvider (accent: #f59e0b) and tab navigation
+    </file>
+    <file path="portal/src/pages/Valuation/index.ts" type="export">
+      Barrel export: Exports main Valuation component, all types from types.ts, and all constants from constants.ts
+    </file>
+    <file path="portal/src/pages/Valuation/types.ts" type="types">
+      Type definitions: ValuationMetric, ValuationIndex, TimePeriod, ValuationSummaryRow, ValuationRangeRow, ValuationTimeSeriesPoint, ValuationTimeSeries
+    </file>
+    <file path="portal/src/pages/Valuation/constants.ts" type="constants">
+      Configuration: METRIC_LABELS, INDEX_GROUPS (8 groups), AVAILABLE_INDICES, AVAILABLE_METRICS, TIME_PERIODS, DEFAULT_INDEX/METRIC/TIME_PERIOD, PERCENTILE_COLORS, PERCENTILE_LABELS
+    </file>
+    <file path="portal/src/pages/Valuation/hooks/useValuationData.ts" type="hook">
+      React Query hook: Fetches valuation data via useQuery with queryKey 'valuation-data', returns data/isLoading/error/refetch with 5-minute stale time
+    </file>
+    <file path="portal/src/pages/Valuation/panels/ValuationSummaryPanel.tsx" type="component">
+      Heatmap component: Displays latest percentile for 7 metrics across all indices; expandable (5 rows default); sticky headers; color-coded percentiles (red=90th, orange=75th, gray=50th, green=25th, emerald=10th); div_yield inverted
+    </file>
+    <file path="portal/src/pages/Valuation/panels/ValuationRangePanel.tsx" type="component">
+      Drilldown component: Shows current valuation vs historical percentile ranges for selected index; grouped dropdown by INDEX_GROUPS; displays latest %-ile, latest value, p10-p90 columns; shows "pending" for indices without data
+    </file>
+    <file path="portal/src/pages/Valuation/tabs/ValuationTimeSeriesTab.tsx" type="component">
+      Chart component: Historical valuation metric as time series with ±1σ to ±2σ bands (p10-p90); dual-index comparison mode (ratio calculation); 4 dropdowns (Index1, Index2, Metric, Period); Recharts ComposedChart; dynamic x-axis tick interval
+    </file>
+    <file path="portal/src/pages/Valuation/tabs/RiskPremiumTab.tsx" type="component">
+      Chart component: Two charts (Equity Risk Premium and Credit Risk Premium); ERP = S&P 500 earnings yield - 10Y Treasury; Credit = IG and HY spreads from FRED; percentile bands (p10-p90); time window selector (5Y/10Y/20Y/Max); custom tooltips with percentile ranks
+    </file>
+  </files>
+
+  <api_calls>
+    <api_call>
+      <hook>useValuationData (React Query)</hook>
+      <endpoint>/v1/valuation/data</endpoint>
+      <method>GET</method>
+      <request_shape>No request body (queryKey: 'valuation-data')</request_shape>
+      <response_shape>{
+        data_as_of: string (YYYY-MM-DD),
+        summary: ValuationSummaryRow[],
+        ranges: Record&lt;index_name, ValuationRangeMetric[]&gt;,
+        time_series: Record&lt;index_name, Record&lt;metric, ValuationTimeSeriesMetric&gt;&gt;
+      }</response_shape>
+      <file>portal/src/pages/Valuation/hooks/useValuationData.ts:46</file>
+      <data_source>s3://opal-data-portal-v2/json/valuation/valuation_data.json (via Yang Lambda proxy)</data_source>
+    </api_call>
+    <api_call>
+      <hook>getRiskPremiumData (React Query)</hook>
+      <endpoint>/v1/risk-premium/data</endpoint>
+      <method>GET</method>
+      <request_shape>No request body (queryKey: 'risk-premium-data')</request_shape>
+      <response_shape>{
+        data_as_of: string (YYYY-MM-DD),
+        erp: { data: {date, value, earnings_yield, treasury_rate}[], thresholds: {p10-p90} },
+        credit: { ig: {data: {date, ig_spread, hy_spread}[], thresholds: {p10-p90}}, hy: {thresholds: {p10-p90}} }
+      }</response_shape>
+      <file>portal/src/pages/Valuation/tabs/RiskPremiumTab.tsx:159</file>
+      <data_source>s3://opal-data-portal-v2/json/valuation/risk_premium_data.json (via portal-proxy Lambda)</data_source>
+    </api_call>
+    <api_call>
+      <hook>useYangDataAsOf</hook>
+      <endpoint>N/A (internal registry hook)</endpoint>
+      <method>N/A</method>
+      <request_shape>N/A - Registers data_as_of timestamp with central registry</request_shape>
+      <response_shape>N/A - Void function</response_shape>
+      <file>portal/src/pages/Valuation/Valuation.tsx:34 and RiskPremiumTab.tsx:163</file>
+      <notes>Called twice: useYangDataAsOf('valuation', data?.data_as_of) and useYangDataAsOf('risk_premium', riskPremiumData?.data_as_of)</notes>
+    </api_call>
+  </api_calls>
+
+  <shared_imports>
+    <import>
+      <from>portal/src/contexts/PageThemeContext</from>
+      <provides>PageThemeProvider</provides>
+      <used_in>Valuation.tsx (wrapper component with accentColor #f59e0b)</used_in>
+    </import>
+    <import>
+      <from>portal/src/components/PageHeaderVariants</from>
+      <provides>PageHeaderCleanBadge</provides>
+      <used_in>Valuation.tsx (page title/description header with TrendingUp icon)</used_in>
+    </import>
+    <import>
+      <from>portal/src/hooks/useTabNavigation</from>
+      <provides>useTabNavigation</provides>
+      <used_in>Valuation.tsx (tab state management with analyticsGroup 'valuations')</used_in>
+    </import>
+    <import>
+      <from>portal/src/hooks/useFilterTracking</from>
+      <provides>useSelectTracking</provides>
+      <used_in>Valuation.tsx (tracks selected index selection with key 'selected-index', default 'S&P 500')</used_in>
+    </import>
+    <import>
+      <from>portal/src/hooks/useDataSource</from>
+      <provides>useYangDataAsOf</provides>
+      <used_in>Valuation.tsx and RiskPremiumTab.tsx (registers data_as_of timestamp in central registry)</used_in>
+    </import>
+    <import>
+      <from>portal/src/components/TabNavigation</from>
+      <provides>TabNavigation</provides>
+      <used_in>Valuation.tsx (renders two tabs: 'time-series' and 'risk-premium')</used_in>
+    </import>
+    <import>
+      <from>portal/src/components/LoadingSpinner</from>
+      <provides>LoadingSpinner, LoadingContainer</provides>
+      <used_in>Valuation.tsx (loading state) and RiskPremiumTab.tsx (loading state)</used_in>
+    </import>
+    <import>
+      <from>portal/src/components/ErrorMessage</from>
+      <provides>ErrorMessage</provides>
+      <used_in>Valuation.tsx (error and no-data states)</used_in>
+    </import>
+    <import>
+      <from>portal/src/components/Tooltip</from>
+      <provides>Tooltip</provides>
+      <used_in>ValuationSummaryPanel.tsx and ValuationRangePanel.tsx (cell hover tooltips)</used_in>
+    </import>
+    <import>
+      <from>portal/src/ui/components/panels</from>
+      <provides>Panel, PanelHeader, PanelContent, SmartPanelFooter, PanelFooter</provides>
+      <used_in>ValuationSummaryPanel.tsx, ValuationRangePanel.tsx, ValuationTimeSeriesTab.tsx, RiskPremiumTab.tsx (panel containers with headers/footers)</used_in>
+    </import>
+    <import>
+      <from>portal/src/ui/components/Select</from>
+      <provides>Select</provides>
+      <used_in>ValuationTimeSeriesTab.tsx (4 dropdown controls for Index1, Index2, Metric, Period)</used_in>
+    </import>
+    <import>
+      <from>portal/src/lib/utils</from>
+      <provides>cn (classname utility)</provides>
+      <used_in>ValuationSummaryPanel.tsx, ValuationRangePanel.tsx, ValuationTimeSeriesTab.tsx (conditional className merging)</used_in>
+    </import>
+    <import>
+      <from>recharts</from>
+      <provides>ComposedChart, LineChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine</provides>
+      <used_in>ValuationTimeSeriesTab.tsx and RiskPremiumTab.tsx (Recharts charting components)</used_in>
+    </import>
+    <import>
+      <from>lucide-react</from>
+      <provides>TrendingUp, Clock, TriangleAlert</provides>
+      <used_in>Valuation.tsx (page header and tab icons)</used_in>
+    </import>
+    <import>
+      <from>@tanstack/react-query</from>
+      <provides>useQuery</provides>
+      <used_in>useValuationData.ts and RiskPremiumTab.tsx (data fetching with caching/refetch)</used_in>
+    </import>
+    <import>
+      <from>portal/src/api/endpoints/valuation</from>
+      <provides>getValuationData, ValuationDataResponse, ValuationTimeSeriesMetric</provides>
+      <used_in>useValuationData.ts (fetch function) and ValuationTimeSeriesTab.tsx (type for time series data)</used_in>
+    </import>
+    <import>
+      <from>portal/src/api/portal-proxy</from>
+      <provides>getRiskPremiumData</provides>
+      <used_in>RiskPremiumTab.tsx:159 (fetches risk premium data with React Query)</used_in>
+    </import>
+  </shared_imports>
+
+  <types>
+    <type name="ValuationMetric" defined_in="portal/src/pages/Valuation/types.ts">
+      Union of 7 valuation metric keys: 'fwd_pe', 'trailing_pe', 'p_fcf', 'ev_sales', 'p_b', 'p_sales', 'div_yield'
+    </type>
+    <type name="ValuationIndex" defined_in="portal/src/pages/Valuation/types.ts">
+      Alias for string to allow all equity indices (S&P 500, Russell, MSCI, etc.)
+    </type>
+    <type name="TimePeriod" defined_in="portal/src/pages/Valuation/types.ts">
+      Union: '1Y' | '5Y' | '10Y' | '20Y' | 'Max' (1Y kept for backend compatibility)
+    </type>
+    <type name="ValuationSummaryRow" defined_in="portal/src/pages/Valuation/types.ts">
+      Key fields: index: ValuationIndex, fwd_pe: number|null, trailing_pe: number|null, p_fcf: number|null, ev_sales: number|null, p_b: number|null, p_sales: number|null, div_yield: number|null
+    </type>
+    <type name="ValuationRangeRow" defined_in="portal/src/pages/Valuation/types.ts">
+      Key fields: metric: ValuationMetric, label: string, percentile: number|null, current: number|null, p10: number|null, p25: number|null, p50: number|null, p75: number|null, p90: number|null
+    </type>
+    <type name="ValuationTimeSeriesPoint" defined_in="portal/src/pages/Valuation/types.ts">
+      Key fields: date: string, value: number, stdDevsFromAvg: number
+    </type>
+    <type name="ValuationTimeSeries" defined_in="portal/src/pages/Valuation/types.ts">
+      Key fields: index: ValuationIndex, metric: ValuationMetric, metricLabel: string, data: ValuationTimeSeriesPoint[], historicAvg: number, stdDev: number
+    </type>
+    <type name="TabType" defined_in="portal/src/pages/Valuation/Valuation.tsx:26">
+      Union: 'time-series' | 'risk-premium'
+    </type>
+    <type name="ValuationSummaryPanelProps" defined_in="portal/src/pages/Valuation/panels/ValuationSummaryPanel.tsx:15">
+      Key fields: data: ValuationSummaryRow[], defaultRowCount?: number (default 5)
+    </type>
+    <type name="ValuationRangePanelProps" defined_in="portal/src/pages/Valuation/panels/ValuationRangePanel.tsx:13">
+      Key fields: data: ValuationRangeRow[], selectedIndex: string, onIndexChange: (index: string) => void, availableIndices: string[]
+    </type>
+    <type name="ValuationTimeSeriesTabProps" defined_in="portal/src/pages/Valuation/tabs/ValuationTimeSeriesTab.tsx:31">
+      Key fields: timeSeriesData: Record&lt;string, Record&lt;string, ValuationTimeSeriesMetric&gt;&gt;
+    </type>
+    <type name="ValuationTimeSeriesMetric" defined_in="portal/src/api/endpoints/valuation.ts:82">
+      Key fields: thresholds: ValuationThresholds, data: ValuationTimeSeriesPoint[] — imported from API endpoints
+    </type>
+    <type name="TimeWindow" defined_in="portal/src/pages/Valuation/tabs/RiskPremiumTab.tsx:131">
+      Union: 'max' | '20y' | '10y' | '5y' | '1y' (canonical: 5Y, 10Y, 20Y, Max)
+    </type>
+  </types>
+
+  <page_structure>
+    <header status="functional">
+      PageHeaderCleanBadge with TrendingUp icon, title "Valuation", description about "Market valuation metrics and relative value analysis"
+    </header>
+    <tab name="Summary Panel (Full Width)" status="functional">
+      ValuationSummaryPanel: Heatmap of 7 metrics across 40+ indices, expandable (5 default), color-coded percentiles, inverted colors for div_yield
+    </tab>
+    <tab name="Range Panel (Full Width)" status="functional">
+      ValuationRangePanel: Current valuation drilldown for selected index (via grouped dropdown), shows p10-p90 ranges, "pending" message for unavailable indices, 8 major indices have full data
+    </tab>
+    <tab name="Valuation Time Series Tab" status="functional">
+      Historical metric chart with percentile bands, dual-index comparison mode, 4 controls (Index1, Index2, Metric, Period), Recharts ComposedChart with p10-p90 reference lines, custom tooltip with percentile ranges
+    </tab>
+    <tab name="Risk Premium Tab" status="functional">
+      Two charts: Equity Risk Premium (ERP = S&P 500 earnings yield - 10Y Treasury) and Credit Risk Premium (IG and HY spreads from FRED), time window selector (5Y/10Y/20Y/Max), custom tooltips with percentile ranks calculated per time window
+    </tab>
+  </page_structure>
+
+  <state_management>
+    <state name="activeTab" component="Valuation.tsx">
+      Managed by useTabNavigation hook, default 'time-series', analyticsGroup 'valuations', controls which tab content renders
+    </state>
+    <state name="selectedIndex" component="Valuation.tsx">
+      Managed by useSelectTracking hook, key 'selected-index', default 'S&P 500', passed to ValuationRangePanel and filters data
+    </state>
+    <state name="isExpanded" component="ValuationSummaryPanel.tsx">
+      useState toggle, controls row expansion (5 default to all rows)
+    </state>
+    <state name="selectedIndex" component="ValuationTimeSeriesTab.tsx">
+      useState, default first available index, controls primary chart data
+    </state>
+    <state name="selectedIndex2" component="ValuationTimeSeriesTab.tsx">
+      useState, default 'None', enables ratio mode when not 'None'
+    </state>
+    <state name="selectedMetric" component="ValuationTimeSeriesTab.tsx">
+      useState, default 'trailing_pe', controls which metric is charted
+    </state>
+    <state name="selectedPeriod" component="ValuationTimeSeriesTab.tsx">
+      useState, default '10Y', filters data by time window (1Y/5Y/10Y/20Y/Max)
+    </state>
+    <state name="timeWindow" component="RiskPremiumTab.tsx">
+      useState, default 'max', filters both ERP and Credit data by days (null for max)
+    </state>
+  </state_management>
+
+  <data_flow>
+    <flow name="Main Page Load">
+      1. Valuation.tsx calls useValuationData() → fetches /v1/valuation/data
+      2. Data includes summary (40+ indices), ranges (8 indices), time_series (3 indices × 3 metrics)
+      3. data_as_of registered via useYangDataAsOf('valuation', data?.data_as_of)
+      4. ValuationSummaryPanel receives data.summary
+      5. ValuationRangePanel receives data.ranges[selectedIndex] and availableIndices
+      6. ValuationTimeSeriesTab receives data.time_series
+    </flow>
+    <flow name="Risk Premium Tab Load">
+      1. RiskPremiumTab calls useQuery with queryFn getRiskPremiumData
+      2. Fetches /v1/risk-premium/data from portal-proxy
+      3. Data includes ERP data and Credit (IG/HY) spreads
+      4. data_as_of registered via useYangDataAsOf('risk_premium', riskPremiumData?.data_as_of)
+      5. Two charts render with percentile bands calculated from thresholds
+    </flow>
+    <flow name="Index Selection">
+      1. User selects index from grouped dropdown in ValuationRangePanel
+      2. onIndexChange calls setSelectedIndex (useSelectTracking)
+      3. ValuationRangePanel receives new data.ranges[selectedIndex]
+      4. Panel updates to show ranges for new index
+    </flow>
+    <flow name="Time Series Filtering">
+      1. User changes Period dropdown in ValuationTimeSeriesTab
+      2. getFilteredData() calculates startDate based on selectedPeriod
+      3. Chart re-renders with filtered data points
+      4. Percentiles recalculated dynamically from visible data
+      5. X-axis tick interval adjusted based on data point count
+    </flow>
+    <flow name="Ratio Mode">
+      1. User selects Index2 != 'None' in ValuationTimeSeriesTab
+      2. isRatioMode = true
+      3. getFilteredData() calculates ratio for each date: data1.value / data2.value
+      4. Chart title changes to "Index1 / Index2 - Metric Ratio"
+      5. Panel help text explains higher ratio = Index1 more expensive
+    </flow>
+  </data_flow>
+
+  <error_states>
+    <error component="Valuation.tsx">
+      isLoading: Shows LoadingSpinner centered with page header
+    </error>
+    <error component="Valuation.tsx">
+      error || !data: Shows ErrorMessage with specific message (or "No valuation data available")
+    </error>
+    <error component="ValuationRangePanel.tsx">
+      !hasData: Shows message "Drilldown data not yet available for {selectedIndex}" with available indices list and hint about backend
+    </error>
+    <error component="ValuationTimeSeriesTab.tsx">
+      !hasData: Shows message about missing time series data, lists available indices and metrics, hints for ratio mode
+    </error>
+    <error component="RiskPremiumTab.tsx">
+      isLoading: Shows LoadingContainer
+    </error>
+    <error component="RiskPremiumTab.tsx">
+      error || !riskPremiumData: Shows error message with data source path and error details
+    </error>
+  </error_states>
+
+  <issues>
+    <issue file="ValuationRangePanel.tsx:108" type="INLINE_HINT">
+      Emoji present (💡) with comment about backend needing to generate ranges data for all indices. No FIXME but indicates incomplete backend state.
+    </issue>
+    <issue file="ValuationTimeSeriesTab.tsx:281" type="INLINE_HINT">
+      Emoji present (💡) with comment about both indices needing data for ratio calculation. Informational message, not a bug.
+    </issue>
+    <issue file="constants.ts:25" type="COMMENT">
+      Note: Backend PKL has typo "Kindom" (should be "Kingdom" for MSCI Kingdom entry). Backend data mapping issue, not frontend code issue.
+    </issue>
+    <issue file="ValuationTimeSeriesTab.tsx:277" type="COMMENT">
+      Text: "Metrics: Trailing P/E, Fwd P/E, P/B" — hard-coded list doesn't match all available metrics (missing p_fcf, ev_sales, p_b, p_sales, div_yield). Should be dynamic or updated.
+    </issue>
+    <issue file="RiskPremiumTab.tsx:226" type="COMMENT">
+      Time period '1y' shown in UI but hidden from selectable options (commented out). Kept for backend compatibility but creates dead code path in formatXAxisDate.
+    </issue>
+  </issues>
+
+  <component_hierarchy>
+    <component name="Valuation" level="1">
+      Root page component, handles data fetching, tab state, index selection
+      <child name="PageThemeProvider" role="wrapper" />
+      <child name="PageHeaderCleanBadge" role="header" />
+      <child name="ValuationSummaryPanel" role="panel" />
+      <child name="ValuationRangePanel" role="panel" />
+      <child name="TabNavigation" role="navigation" />
+      <child name="ValuationTimeSeriesTab" role="tab_content" />
+      <child name="RiskPremiumTab" role="tab_content" />
+      <child name="LoadingSpinner" role="state" />
+      <child name="ErrorMessage" role="state" />
+    </component>
+    <component name="ValuationSummaryPanel" level="2">
+      Heatmap panel, internally manages expansion state
+      <child name="Panel" role="container" />
+      <child name="PanelHeader" role="header" />
+      <child name="table" role="content" />
+      <child name="Tooltip" role="interaction" multiplicity="multiple" />
+      <child name="SmartPanelFooter" role="footer" />
+    </component>
+    <component name="ValuationRangePanel" level="2">
+      Drilldown panel, controls index selection via dropdown
+      <child name="Panel" role="container" />
+      <child name="PanelHeader" role="header" />
+      <child name="select (grouped)" role="control" />
+      <child name="table" role="content" />
+      <child name="Tooltip" role="interaction" multiplicity="multiple" />
+      <child name="SmartPanelFooter" role="footer" />
+    </component>
+    <component name="ValuationTimeSeriesTab" level="2">
+      Chart tab, controls metric/period selection via dropdowns
+      <child name="Panel" role="container" />
+      <child name="PanelHeader" role="header" />
+      <child name="Select" role="control" multiplicity="4" />
+      <child name="ComposedChart (recharts)" role="content" />
+      <child name="CustomTooltip" role="interaction" />
+      <child name="SmartPanelFooter" role="footer" />
+    </component>
+    <component name="RiskPremiumTab" level="2">
+      Risk premium charts, controls time window selection
+      <child name="Panel" role="container" multiplicity="2" />
+      <child name="PanelHeader" role="header" multiplicity="2" />
+      <child name="select (time window)" role="control" multiplicity="2" />
+      <child name="ComposedChart / LineChart (recharts)" role="content" multiplicity="2" />
+      <child name="ERPTooltip / CreditTooltip" role="interaction" />
+      <child name="SmartPanelFooter / PanelFooter" role="footer" multiplicity="2" />
+      <child name="LoadingContainer" role="state" />
+    </component>
+  </component_hierarchy>
+
+  <performance_notes>
+    <note>
+      Data fetching: useValuationData uses React Query with 5-minute stale time (global config), automatic retry, refetch on focus/reconnect. No explicit cache duration override in hook.
+    </note>
+    <note>
+      Time series filtering: getFilteredData() in ValuationTimeSeriesTab recalculates on every render when period changes. Percentile calculation is O(n log n) due to sort, acceptable for &lt;5000 data points.
+    </note>
+    <note>
+      Ratio mode: Ratio calculation uses Map lookup for O(1) date matching. Filters to only valid dates with both values present.
+    </note>
+    <note>
+      Panel expansion: ValuationSummaryPanel only renders visible rows (max 5 or all when expanded), reducing DOM size. Sticky headers use z-index layering for scroll performance.
+    </note>
+    <note>
+      Risk Premium tooltips: Percentile rank calculated on every tooltip via calculatePercentileRank() helper. Overhead acceptable for ~500 data points, but could be memoized if rendering performance becomes issue.
+    </note>
+    <note>
+      Charts: Recharts ResponsiveContainer handles resize. X-axis tick interval dynamically adjusted (shows 1 per year for 20Y+, every tick for 1Y) to avoid crowding.
+    </note>
+  </performance_notes>
+
+  <styling_notes>
+    <note>
+      Theme: PageThemeProvider applies accentColor #f59e0b (amber). Standard Tailwind dark theme with white/opacity variants.
+    </note>
+    <note>
+      Percentile colors: Consistent across all components (red=90th, orange=75th, gray=50th, green=25th, emerald=10th). Colors support both text and background with opacity.
+    </note>
+    <note>
+      Tables: Fixed layout, sticky headers, hover effects on rows. Metric names sticky left on horizontal scroll (ValuationSummaryPanel, ValuationRangePanel).
+    </note>
+    <note>
+      Charts: Max heights defined (300px ERP/Credit, 400px Time Series), scrollbar hidden on tables, ResponsiveContainer handles remaining space.
+    </note>
+    <note>
+      Utilities: Uses cn() from @/lib/utils for conditional class merging (from clsx/classnames pattern).
+    </note>
+  </styling_notes>
+
+  <dependencies_external>
+    <dependency name="@tanstack/react-query" version="unknown" role="data-fetching">
+      useQuery for getValuationData and getRiskPremiumData, with global stale time 5 minutes
+    </dependency>
+    <dependency name="recharts" version="unknown" role="charting">
+      ComposedChart, LineChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine for all chart rendering
+    </dependency>
+    <dependency name="lucide-react" version="unknown" role="icons">
+      TrendingUp, Clock, TriangleAlert for page header and tab icons
+    </dependency>
+  </dependencies_external>
+
+  <backend_integration>
+    <service name="Yang Lambda / Portal Proxy">
+      Endpoint: GET /v1/valuation/data
+      Response: ValuationDataResponse with summary (40+ indices), ranges (8 indices), time_series (3 indices × 3 metrics)
+      Data source: s3://opal-data-portal-v2/json/valuation/valuation_data.json
+      Update frequency: Infrequent, 60-minute cache recommended
+    </service>
+    <service name="Portal Proxy / FRED">
+      Endpoint: GET /v1/risk-premium/data
+      Response: Risk premium data with ERP (S&P 500 earnings yield - 10Y Treasury) and Credit spreads (IG/HY from FRED)
+      Data source: s3://opal-data-portal-v2/json/valuation/risk_premium_data.json
+      Update frequency: Daily or as FRED updates
+    </service>
+  </backend_integration>
+
+  <future_work>
+    <item priority="medium">
+      Complete drilldown data for all indices: Currently only 8 major indices have ranges data. Backend needs to generate ValuationRangeMetric[] for all ~40 indices in summary.
+    </item>
+    <item priority="medium">
+      Expand time series data coverage: Currently only 3 indices × 3 metrics. Consider adding all 7 metrics for more indices.
+    </item>
+    <item priority="low">
+      Fix backend PKL typo: "Kindom" should be "Kingdom" in MSCI Kingdom index entry (if that's intentional, document it).
+    </item>
+    <item priority="low">
+      Update hardcoded metrics list in ValuationTimeSeriesTab.tsx:277: Should reflect actual available metrics dynamically or be removed.
+    </item>
+    <item priority="low">
+      Memoize percentile calculations: If risk premium tab shows rendering lag with large datasets, consider memoizing calculatePercentileRank().
+    </item>
+  </future_work>
+
+  <test_coverage_notes>
+    <note>
+      Panels: ValuationSummaryPanel, ValuationRangePanel, ValuationTimeSeriesTab, RiskPremiumTab should have tests for:
+      - Data rendering (rows, cells, headers)
+      - Expansion/collapse toggle
+      - Dropdown selection and data updates
+      - Chart rendering with correct data
+      - Empty/error states
+    </note>
+    <note>
+      Hooks: useValuationData should test query success/error/loading states and refetch behavior.
+    </note>
+    <note>
+      Utilities: Time filtering (getFilteredData), percentile calculation (calculatePercentiles, calculatePercentileRank), color mapping functions should have unit tests.
+    </note>
+    <note>
+      Integration: Tab switching, index selection across panels, time window changes should have integration tests.
+    </note>
+  </test_coverage_notes>
+
+</page_inventory>

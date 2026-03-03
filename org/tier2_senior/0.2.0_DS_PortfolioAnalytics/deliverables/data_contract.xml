@@ -1,0 +1,1167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data_contract>
+
+  <metadata>
+    <agent>0.2.0_DS_PortfolioAnalytics</agent>
+    <pod>PortfolioAnalytics</pod>
+    <date>2026-03-02</date>
+    <task_order_id>1.0.0_SA_CTO-2026-03-02-data-contract-portfolio-analytics</task_order_id>
+    <status>complete</status>
+    <pages_covered>Positioning, Attribution, FactorTilts, Valuation, Macroeconomics, Correlation</pages_covered>
+  </metadata>
+
+  <!-- ================================================================ -->
+  <!-- YANG PIPELINE OVERVIEW                                           -->
+  <!-- ================================================================ -->
+
+  <yang_pipeline_overview>
+
+    <trigger_mechanism>
+      The yang pipeline is triggered by an S3 event on the opal-data-portal-v2 bucket.
+      The PM team uploads a manifest.json to the uploads/ prefix, which invokes the
+      yang-pipeline-trigger Lambda. The manifest lists which file types are present in
+      this run (data_pkl, model_pkl, attribution_excel, peer_excel, cma_excel, saa_excel).
+      Only the generator Lambdas for present file types are executed.
+    </trigger_mechanism>
+
+    <step_functions_execution_order>
+      <!--
+        Source: infra/aws/terraform/yang-pipeline/stepfunctions/yang-pipeline-definition.json
+        The pipeline is selective: each branch executes only if the corresponding file type
+        was present in the uploaded manifest.
+      -->
+      <step order="1" state="ReadManifest">Reads manifest.json from uploads/ to determine which file types are present.</step>
+      <step order="2" state="MoveToProcessed">Moves uploaded files to processed/{execution_id}/ prefix.</step>
+      <step order="3" state="GetPriorMetadata">Retrieves metadata from previous pipeline run for diff/change detection.</step>
+      <step order="4" state="GenerateLatest">
+        Writes json/latest/{file_type}.json pointer files (one per file type present).
+        Each pointer contains: file_type, pattern, frequency, latest_version, data_as_of,
+        s3_key, original_filename, uploaded_at, pipeline_execution_id.
+      </step>
+      <step order="5" state="CheckNeedsDynamoDBFirst">
+        If data_pkl is present: runs yang-ingest-dynamodb FIRST (before all generator Lambdas).
+        This populates the opal-portal-market-data DynamoDB table before any downstream consumers read it.
+      </step>
+      <step order="6" state="ProcessFileTypes" type="PARALLEL — up to 5 concurrent branches">
+        <branch name="data_pkl branch" condition="data_pkl present" type="PARALLEL within branch">
+          <lambda>yang-generate-valuation</lambda>
+          <lambda>yang-generate-risk-premium</lambda>
+          <lambda>yang-generate-correlation</lambda>
+          <lambda>yang-generate-macro</lambda>
+          <lambda>yang-generate-macro-timeseries</lambda>
+        </branch>
+        <branch name="model_pkl branch" condition="model_pkl present" type="PARALLEL within branch">
+          <lambda>yang-generate-factor-tilts</lambda>
+          <lambda>yang-generate-etf-returns</lambda>
+          <lambda>yang-generate-allocation-summary</lambda>
+        </branch>
+        <branch name="both_pkl branch" condition="data_pkl AND model_pkl present" type="PARALLEL within branch">
+          <lambda>yang-generate-benchmark-returns</lambda>
+          <lambda>yang-model-portfolio-benchmarks</lambda>
+          <lambda>yang-generate-positioning</lambda>
+        </branch>
+        <branch name="cma_excel branch" condition="cma_excel present">
+          <lambda>yang-generate-cma (OUT OF SCOPE — owned by DS_MarketIntelligence)</lambda>
+        </branch>
+        <branch name="attribution_excel branch" condition="attribution_excel present">
+          <lambda>yang-generate-holdings-attribution</lambda>
+        </branch>
+        <branch name="peer_excel branch" condition="peer_excel present">
+          <lambda>yang-generate-peer-performance</lambda>
+        </branch>
+      </step>
+      <step order="7" state="CheckNeedsPortalData" condition="data_pkl present" type="PARALLEL">
+        <lambda>opal-market-overview-tiered-generator (out of scope — MarketIntelligence pod)</lambda>
+        <lambda>opal-market-rsi-tiered-generator (out of scope — MarketIntelligence pod)</lambda>
+        <lambda>opal-market-regime-classifier (out of scope — MarketIntelligence pod)</lambda>
+      </step>
+      <step order="8" state="GenerateManifest">
+        Reads all json/latest/{file_type}.json files and aggregates them into a single
+        json/latest/manifest.json. This is the unified version pointer the portal reads
+        to know which data is current. Final step before cleanup.
+      </step>
+      <step order="9" state="CaptureOutputVersions">
+        Scans json/ prefix for files modified in last 10 minutes. Captures S3 version IDs
+        for rollback. Writes to data-refresh/archive/{execution_id}/outputs-manifest.json.
+      </step>
+      <step order="10" state="InvalidateCloudFront">Invalidates CloudFront distribution cache after manifest generation.</step>
+      <step order="11" state="CleanupUploads">Removes files from uploads/ prefix.</step>
+      <step order="12" state="PipelineSuccess">Terminal success state.</step>
+    </step_functions_execution_order>
+
+    <versioning_model>
+      <!--
+        Critical context for any DS investigating Yang output correctness.
+        S3 keys are FLAT — there is no version number embedded in the output JSON key path.
+        The key always resolves to the same path (e.g., json/valuation/valuation_data.json).
+        Version tracking is handled through:
+
+        1. S3 object versioning (bucket has versioning enabled)
+           - S3 VersionId captured after every write via CaptureOutputVersions Lambda
+           - Enables rollback to any prior object version
+
+        2. json/latest/{file_type}.json pointers
+           - One file per input file type (data_pkl, model_pkl, attribution_excel, etc.)
+           - Contains: latest_version, data_as_of, s3_key of the source PKL/Excel, uploaded_at
+           - These are what the portal reads to know the data_as_of date for display
+
+        3. json/latest/manifest.json (unified manifest)
+           - Aggregated in step 8 (GenerateManifest)
+           - Single source of truth for all current data versions in one document
+
+        4. Portal fetch path
+           - Portal client calls portal-proxy Lambda endpoint (e.g., /api/general/valuation/valuation_data.json)
+           - Portal-proxy Lambda fetches from S3 and serves the response
+           - CloudFront caches the response (TTL varies by data type: 5-60 min)
+           - After pipeline completes, CloudFront is invalidated (step 10)
+
+        Data as-of timestamp display convention:
+           - YYYYMMDD version → displayed as that date + 5:00 PM ET
+           - YYYYMM version → displayed as last day of month + 5:00 PM ET
+           - YYYY version → displayed as Dec 31 of year + 5:00 PM ET
+      -->
+      <run_frequency>
+        <file_type name="data_pkl">Weekly</file_type>
+        <file_type name="model_pkl">Weekly</file_type>
+        <file_type name="attribution_excel">Monthly</file_type>
+        <file_type name="peer_excel">Monthly</file_type>
+        <file_type name="cma_excel">Annually (out of scope)</file_type>
+        <file_type name="saa_excel">Monthly</file_type>
+      </run_frequency>
+    </versioning_model>
+
+    <s3_bucket>opal-data-portal-v2</s3_bucket>
+    <data_flow>
+      yang-pipeline Lambda → writes JSON to s3://opal-data-portal-v2/json/{category}/ →
+      opal-portal-data-proxy Lambda fetches and serves via portal-proxy API →
+      CloudFront CDN → portal client (React)
+    </data_flow>
+
+  </yang_pipeline_overview>
+
+  <!-- ================================================================ -->
+  <!-- PAGE CONTRACTS                                                   -->
+  <!-- ================================================================ -->
+
+  <page_contracts>
+
+    <!-- ============================================================== -->
+    <!-- PAGE: Positioning                                              -->
+    <!-- ============================================================== -->
+    <page name="Positioning" rd_agent="0.2.1_RD_Positioning" directory="portal/src/pages/Positioning/">
+
+      <data_sources>
+
+        <source id="positioning-1">
+          <lambda_function>yang-generate-positioning</lambda_function>
+          <s3_output_key_pattern>json/positioning/positioning_data.json</s3_output_key_pattern>
+          <encoding>gzip compressed</encoding>
+          <input_data>
+            model_pkl: benchmarks/model_{YYYYMMDD}_{version}.pkl
+              - Holdings per model portfolio (UST, ST, INT, LTC, LTA)
+              - etf_characteristics: ETF-level weight, return, and characteristic data
+              - benchmark_holdings: policy benchmark holdings
+            data_pkl: benchmarks/data_{YYYYMMDD}_{version}.pkl
+              - INDEX characteristics (MXWD, LBUSTRUU, and similar cross-asset indices)
+          </input_data>
+          <response_shape>
+            {
+              "data_as_of": "YYYY-MM-DD",
+              "portfolios": {
+                "UST|ST|INT|LTC|LTA": {
+                  "code": "string",
+                  "name": "string",
+                  "characteristics": { /* ETF-level metrics */ },
+                  "holdings": [ /* per-holding weight/return data */ ],
+                  "allocation": { /* asset class breakdown */ }
+                }
+              }
+            }
+          </response_shape>
+          <portal_endpoint>
+            getPositioningData() — portal/src/api/portal-proxy.ts line 914+
+            URL: /api/general/positioning/positioning_data.json
+            Used by: PositioningSummary panel, HoldingsTab, AttributionTab
+          </portal_endpoint>
+        </source>
+
+        <source id="positioning-2">
+          <lambda_function>yang-generate-holdings-attribution</lambda_function>
+          <s3_output_key_pattern>json/positioning/holdings_attribution_data.json</s3_output_key_pattern>
+          <encoding>uncompressed JSON</encoding>
+          <input_data>
+            attribution_excel: uploads/{attribution_excel} ("Model Portfolio Attribution YYYYMMDD.xlsx")
+              - Excel file uploaded monthly by PM team
+              - Contains per-holding attribution data with periods (QTD, YTD)
+            DynamoDB table: etf-classifications
+              - Partition key: ticker (ETF symbol)
+              - Provides: asset_class, sub_asset_class for canonical ETF classification
+              - Used to join Excel attribution rows to their hierarchical category
+          </input_data>
+          <response_shape>
+            {
+              "generated_at": "ISO-8601 timestamp",
+              "as_of_date": "YYYY-MM-DD",
+              "data_as_of": "YYYY-MM-DD",  /* backward-compat alias */
+              "note": "string",
+              "portfolios": {
+                "UST|ST|INT|LTC|LTA": {
+                  /* hierarchical: asset_class > sub_asset_class > ETF ticker */
+                  /* per-holding: weight, return, allocation_effect, selection_effect */
+                  /* periods: QTD, YTD (1Y and SI not yet generated — see data_quality_notes) */
+                }
+              }
+            }
+          </response_shape>
+          <portal_endpoint>
+            getHoldingsAttribution() — portal/src/api/portal-proxy.ts line 1498+
+            URL: /api/general/positioning/holdings_attribution_data.json
+            Used by: PositioningSummary panel, HoldingsTab, SelectionTab
+          </portal_endpoint>
+        </source>
+
+        <source id="positioning-3">
+          <lambda_function>yang-generate-allocation-summary</lambda_function>
+          <s3_output_key_pattern>json/positioning/allocation_summary.json</s3_output_key_pattern>
+          <encoding>gzip compressed</encoding>
+          <input_data>
+            model_pkl: benchmarks/model_{YYYYMMDD}_{version}.pkl (same as positioning-1)
+            Reads holdings_attribution_data.json from S3 (depends on yang-generate-holdings-attribution output)
+            DynamoDB table: etf-classifications (same as positioning-2)
+          </input_data>
+          <response_shape>
+            {
+              "generated_at": "ISO-8601 timestamp",
+              "data_as_of": "YYYY-MM-DD",
+              "portfolios": {
+                "UST|ST|INT|LTC|LTA": {
+                  /* hierarchical allocation: asset_class > sub_asset_class */
+                  /* per-node: actual_weight, benchmark_weight, active_weight */
+                }
+              }
+            }
+          </response_shape>
+          <portal_endpoint>
+            getAllocationSummary() — portal/src/api/portal-proxy.ts line 1391+
+            URL: /api/general/positioning/allocation-summary.json
+            Used by: AssetAllocationSummary panel, StylePolicyComparison component
+          </portal_endpoint>
+        </source>
+
+        <source id="positioning-4">
+          <lambda_function>yang-generate-etf-returns</lambda_function>
+          <s3_output_key_pattern>json/benchmarks/etf_returns.json</s3_output_key_pattern>
+          <encoding>uncompressed JSON</encoding>
+          <input_data>
+            model_pkl: benchmarks/model_{YYYYMMDD}_{version}.pkl
+              - etf_returns DataFrame (indexed by ETF ticker)
+              - 5 benchmark ETFs: BIL (Cash), VGSH (Short-Term Treasury), AGG (Aggregate Bond),
+                IVV (S&P 500), ACWI (All-Country World)
+              - Inception date reference: 2024-04-30
+          </input_data>
+          <response_shape>
+            {
+              "generated_at": "ISO-8601 timestamp",
+              "data_as_of": "YYYY-MM-DD",
+              "etfs": {
+                "BIL|VGSH|AGG|IVV|ACWI": {
+                  "name": "string",
+                  "asset_class": "string",
+                  "1D": float, "WTD": float, "MTD": float, "1M": float,
+                  "QTD": float, "1Q": float, "YTD": float, "1Y": float,
+                  "since_inception": float
+                }
+              }
+            }
+          </response_shape>
+          <portal_endpoint>
+            getETFPeriodReturns() — portal/src/api/portal-proxy.ts line 790+
+            URL: /returns/etf-periods
+            Used by: SelectionTab (ETF selection analysis across QTD/YTD/1Y/SI periods)
+          </portal_endpoint>
+        </source>
+
+      </data_sources>
+
+      <data_freshness>
+        positioning_data.json and allocation_summary.json: refreshed on every yang run that includes model_pkl (weekly).
+        holdings_attribution_data.json: refreshed on every yang run that includes attribution_excel (monthly).
+        etf_returns.json: refreshed on every yang run that includes model_pkl (weekly).
+        Portal cache: 5-30 min staleTime via React Query; CloudFront TTL invalidated after each pipeline run.
+      </data_freshness>
+
+    </page>
+
+    <!-- ============================================================== -->
+    <!-- PAGE: Attribution                                              -->
+    <!-- ============================================================== -->
+    <page name="Attribution" rd_agent="0.2.2_RD_Attribution" directory="portal/src/pages/Attribution/">
+
+      <note>
+        Attribution shares all data sources with Positioning. The same four Yang output files
+        drive both pages. The distinction is in how the portal layers present the data:
+        Positioning emphasizes allocation views; Attribution emphasizes selection and attribution effects.
+      </note>
+
+      <data_sources>
+
+        <source id="attribution-1" shared_with="Positioning">
+          <lambda_function>yang-generate-positioning</lambda_function>
+          <s3_output_key_pattern>json/positioning/positioning_data.json</s3_output_key_pattern>
+          <input_data>See Positioning source positioning-1 — identical contract.</input_data>
+          <response_shape>See Positioning source positioning-1 — identical shape.</response_shape>
+          <portal_endpoint>
+            getPositioningData() — portal/src/api/portal-proxy.ts line 914+
+            URL: /api/general/positioning/positioning_data.json
+            Used by: Attribution.tsx main query (line 31-37)
+          </portal_endpoint>
+        </source>
+
+        <source id="attribution-2" shared_with="Positioning">
+          <lambda_function>yang-generate-holdings-attribution</lambda_function>
+          <s3_output_key_pattern>json/positioning/holdings_attribution_data.json</s3_output_key_pattern>
+          <input_data>See Positioning source positioning-2 — identical contract.</input_data>
+          <response_shape>See Positioning source positioning-2 — identical shape.</response_shape>
+          <portal_endpoint>
+            getHoldingsAttribution() — portal/src/api/portal-proxy.ts line 1498+
+            URL: /api/general/positioning/holdings_attribution_data.json
+            Used by: AssetAllocationSummary, HoldingsTab, SelectionTab, AllocationHeatmap
+          </portal_endpoint>
+        </source>
+
+        <source id="attribution-3" shared_with="Positioning">
+          <lambda_function>yang-generate-allocation-summary</lambda_function>
+          <s3_output_key_pattern>json/positioning/allocation_summary.json</s3_output_key_pattern>
+          <input_data>See Positioning source positioning-3 — identical contract.</input_data>
+          <response_shape>See Positioning source positioning-3 — identical shape.</response_shape>
+          <portal_endpoint>
+            getAllocationSummary() — portal/src/api/portal-proxy.ts line 1391+
+            URL: /api/general/positioning/allocation-summary.json
+            Used by: StylePolicyComparison panel, AssetAllocationSummary child table
+          </portal_endpoint>
+        </source>
+
+        <source id="attribution-4" shared_with="Positioning">
+          <lambda_function>yang-generate-etf-returns</lambda_function>
+          <s3_output_key_pattern>json/benchmarks/etf_returns.json</s3_output_key_pattern>
+          <input_data>See Positioning source positioning-4 — identical contract.</input_data>
+          <response_shape>See Positioning source positioning-4 — identical shape.</response_shape>
+          <portal_endpoint>
+            getETFPeriodReturns() — portal/src/api/portal-proxy.ts line 790+
+            URL: /returns/etf-periods
+            Used by: SelectionTab (fund selection and style allocation effects)
+          </portal_endpoint>
+        </source>
+
+      </data_sources>
+
+      <data_freshness>
+        Identical freshness profile to Positioning. All sources refresh at the same cadence.
+        SelectionTab note: backend currently generates QTD and YTD attribution periods only.
+        1Y and Since Inception periods require a yang-generate-holdings-attribution Lambda update
+        (see Attribution/components/StylePolicyComparison.tsx:160).
+      </data_freshness>
+
+    </page>
+
+    <!-- ============================================================== -->
+    <!-- PAGE: FactorTilts                                              -->
+    <!-- ============================================================== -->
+    <page name="FactorTilts" rd_agent="0.2.3_RD_FactorTilts" directory="portal/src/pages/FactorTilts/">
+
+      <note>
+        FactorTilts uses a tiered loading architecture. All three tiers are produced by the
+        same single Lambda (yang-generate-factor-tilts) in one execution, written to three
+        separate S3 keys. The portal fetches them lazily on demand to control payload size.
+      </note>
+
+      <data_sources>
+
+        <source id="factor-tilts-tier1">
+          <lambda_function>yang-generate-factor-tilts</lambda_function>
+          <s3_output_key_pattern>json/factor-tilts/tier1-snapshot.json</s3_output_key_pattern>
+          <tier>Tier 1 — loaded on page mount (~46 KB)</tier>
+          <input_data>
+            model_pkl: benchmarks/model_{YYYYMMDD}_{version}.pkl
+              - summary: model-level factor tilt summaries (R2, alpha, conviction, consensus)
+              - factor tilts by window: 1M, 2M, 3M, 6M, 1Y
+              - 5 model portfolios: UST, ST, INT, LTC, LTA + AUM-weighted AGG aggregate
+              - 6 factors: Equity vs FI, Growth vs Value, US vs Foreign, Large vs Small,
+                Agg vs Short, HY vs Agg
+          </input_data>
+          <response_shape>
+            {
+              "generated_at": "ISO-8601 timestamp",
+              "data_as_of": "YYYY-MM-DD",
+              "summary": { /* per-model: R2, alpha, conviction, consensus */ },
+              "factorTiltsByWindow": {
+                "1M|2M|3M|6M|1Y": {
+                  /* per-model, per-factor: tilt magnitude and direction */
+                }
+              },
+              "aggregateTilts": { /* AUM-weighted AGG across all models */ },
+              "models": ["UST", "ST", "INT", "LTC", "LTA", "AGG"],
+              "windows": ["1M", "2M", "3M", "6M", "1Y"],
+              "factors": ["Equity vs FI", "Growth vs Value", "US vs Foreign",
+                          "Large vs Small", "Agg vs Short", "HY vs Agg"]
+            }
+          </response_shape>
+          <portal_endpoint>
+            getFactorTiltsSnapshot() — portal/src/api/portal-proxy.ts line 1103+
+            Used by: FactorTiltOverviewPanel (radar chart + SummaryMetricsTable), Portfolio Factors tab (bar chart)
+          </portal_endpoint>
+        </source>
+
+        <source id="factor-tilts-tier2">
+          <lambda_function>yang-generate-factor-tilts</lambda_function>
+          <s3_output_key_pattern>json/factor-tilts/tier2-spreads.json</s3_output_key_pattern>
+          <tier>Tier 2 — lazy loaded on Factor Spreads tab click (~196 KB)</tier>
+          <input_data>
+            model_pkl: benchmarks/model_{YYYYMMDD}_{version}.pkl
+              - factor spreads: rolling cumulative factor spread time series (market-level, not per-model)
+          </input_data>
+          <response_shape>
+            {
+              "generated_at": "ISO-8601 timestamp",
+              "data_as_of": "YYYY-MM-DD",
+              "factorSpreads": {
+                /* per-factor: array of {date, value} rolling cumulative spread */
+              },
+              "factors": ["Equity vs FI", "Growth vs Value", "US vs Foreign",
+                          "Large vs Small", "Agg vs Short", "HY vs Agg"]
+            }
+          </response_shape>
+          <portal_endpoint>
+            getFactorTiltsSpreads() — portal/src/api/portal-proxy.ts line 1116+
+            Used by: Factor Spreads tab (rolling cumulative line chart)
+          </portal_endpoint>
+        </source>
+
+        <source id="factor-tilts-tier3">
+          <lambda_function>yang-generate-factor-tilts</lambda_function>
+          <s3_output_key_pattern>json/factor-tilts/tier3-timeseries.json</s3_output_key_pattern>
+          <tier>Tier 3 — lazy loaded on Time Series view toggle (~2.1 MB)</tier>
+          <input_data>
+            model_pkl: benchmarks/model_{YYYYMMDD}_{version}.pkl
+              - rolling regression history: per-model, per-window historical factor exposure regressions
+          </input_data>
+          <response_shape>
+            {
+              "generated_at": "ISO-8601 timestamp",
+              "data_as_of": "YYYY-MM-DD",
+              "timeSeries": {
+                /* market factor spreads: per-factor historical time series */
+              },
+              "modelTiltTimeSeries": {
+                /* per-model, per-window rolling regression history */
+              },
+              "factors": [ /* same 6 factors */ ],
+              "models": [ /* UST, ST, INT, LTC, LTA, AGG */ ],
+              "windows": ["1M", "2M", "3M", "6M", "1Y", "2Y"]
+            }
+          </response_shape>
+          <portal_endpoint>
+            getFactorTiltsTimeSeries() — portal/src/api/portal-proxy.ts line 1129+
+            Used by: Portfolio Factors tab in Time Series mode (ModelTiltTimeSeriesView)
+          </portal_endpoint>
+        </source>
+
+      </data_sources>
+
+      <data_freshness>
+        All three tiers refreshed together on every yang run including model_pkl (weekly).
+        Portal caches tier data in memory via tier-flag architecture (no React Query for tier 2/3).
+        Tier 1 loaded on mount; Tier 2 loaded once on first Factor Spreads tab click; Tier 3 loaded once on first Time Series toggle.
+      </data_freshness>
+
+    </page>
+
+    <!-- ============================================================== -->
+    <!-- PAGE: Valuation                                                -->
+    <!-- ============================================================== -->
+    <page name="Valuation" rd_agent="0.2.4_RD_Valuation" directory="portal/src/pages/Valuation/">
+
+      <data_sources>
+
+        <source id="valuation-1">
+          <lambda_function>yang-generate-valuation</lambda_function>
+          <s3_output_key_pattern>json/valuation/valuation_data.json</s3_output_key_pattern>
+          <encoding>uncompressed JSON</encoding>
+          <input_data>
+            data_pkl: benchmarks/data_{YYYYMMDD}_{version}.pkl
+              - return_monthly DataFrame: monthly valuation metrics for 40+ equity indices
+              - Metrics: pe_ntm (Forward P/E), pe_ltm (Trailing P/E), pfcf (P/FCF),
+                ev_sales (EV/Sales), pb (P/B), ps (P/Sales), dy (Dividend Yield)
+              - Index coverage: US (S&P 500, Dow Jones, Nasdaq, Russell 2000 + tiers),
+                Style factors (Growth/Value), Developed Markets, Emerging Markets
+          </input_data>
+          <response_shape>
+            {
+              "data_as_of": "YYYY-MM-DD",
+              "summary": [
+                {
+                  "index": "string",
+                  "fwd_pe": float, "trailing_pe": float, "p_fcf": float,
+                  "ev_sales": float, "p_b": float, "p_sales": float, "div_yield": float,
+                  /* percentile rank (0-100) for each metric vs full history */
+                  "fwd_pe_pct": float, "trailing_pe_pct": float, /* etc. */
+                }
+                /* one row per equity index (~40+ entries) */
+              ],
+              "ranges": {
+                "S&P 500|...": {
+                  /* p10, p25, p50, p75, p90 thresholds per metric */
+                  /* only 8 of 40+ indices have range data — see data_quality_notes */
+                }
+              },
+              "time_series": {
+                "S&P 500|...": {
+                  "fwd_pe|trailing_pe|...": {
+                    "values": [{"date": "YYYY-MM-DD", "value": float}],
+                    "percentile_bands": {"p10": float, "p25": float, "p50": float, "p75": float, "p90": float}
+                  }
+                }
+              }
+            }
+          </response_shape>
+          <portal_endpoint>
+            getValuationData() — portal/src/api/endpoints/valuation.ts (thin wrapper)
+              → portalProxy.getValuationData() → portal/src/api/portal-proxy.ts line 1284+
+            URL: /v1/valuation/data
+            Used by: ValuationSummaryPanel (heatmap), ValuationRangePanel (drilldown),
+                     ValuationTimeSeriesTab (historical chart)
+          </portal_endpoint>
+        </source>
+
+        <source id="valuation-2">
+          <lambda_function>yang-generate-risk-premium</lambda_function>
+          <s3_output_key_pattern>json/valuation/risk_premium_data.json</s3_output_key_pattern>
+          <encoding>uncompressed JSON</encoding>
+          <input_data>
+            data_pkl: benchmarks/data_{YYYYMMDD}_{version}.pkl
+              - return_monthly: S&P 500 pe_ntm (for ERP = earnings yield - 10Y Treasury yield)
+              - price_monthly: 10Y Treasury yield time series
+            FRED cache (fallback if live FRED unavailable):
+              - s3://opal-data-portal-v2/cache/fred/BAMLC0A0CM.csv (IG credit spreads)
+              - s3://opal-data-portal-v2/cache/fred/BAMLH0A0HYM2.csv (HY credit spreads)
+          </input_data>
+          <response_shape>
+            {
+              "generated_at": "ISO-8601 timestamp",
+              "data_as_of": "YYYY-MM-DD",
+              "data_source": {
+                "erp": "string (source description)",
+                "credit_spreads": "string (FRED series IDs)"
+              },
+              "note": "string (sampling methodology: monthly ERP, NO 6-month sampling; daily credit spreads)",
+              "erp": {
+                "data": [{"date": "YYYY-MM-DD", "value": float}],
+                "thresholds": {"p10": float, "p25": float, "p50": float, "p75": float, "p90": float}
+              },
+              "credit": {
+                "ig": {
+                  "data": [{"date": "YYYY-MM-DD", "value": float}],
+                  "thresholds": { /* percentile bands */ }
+                },
+                "hy": {
+                  "data": [{"date": "YYYY-MM-DD", "value": float}],
+                  "thresholds": { /* percentile bands */ }
+                }
+              }
+            }
+          </response_shape>
+          <portal_endpoint>
+            getRiskPremiumData() — portal/src/api/portal-proxy.ts line 1337+
+            URL: /v1/risk-premium/data
+            Used by: RiskPremiumTab (ERP + IG/HY spreads chart; 5Y/10Y/20Y/Max window selector)
+          </portal_endpoint>
+        </source>
+
+      </data_sources>
+
+      <data_freshness>
+        Both sources refreshed on every yang run including data_pkl (weekly).
+        Portal cache: useQuery with gcTime 60 min (valuation data is the longest-cached in the pod).
+        CloudFront TTL invalidated after each pipeline run.
+      </data_freshness>
+
+    </page>
+
+    <!-- ============================================================== -->
+    <!-- PAGE: Macroeconomics                                           -->
+    <!-- ============================================================== -->
+    <page name="Macroeconomics" rd_agent="0.2.5_RD_Macroeconomics" directory="portal/src/pages/Macroeconomics/">
+
+      <note>
+        Macroeconomics is served by TWO separate Yang Lambdas: yang-generate-macro (main heatmap + VIX file)
+        and yang-generate-macro-timeseries (per-indicator drill-down files, fetched on demand).
+        A third Lambda (yang-generate-volatility) is a separate, independent component that produces the
+        VolatilityTab data with FRED API (not the data_pkl). The YieldCurveTab data comes from a separate
+        yield-curve endpoint and is outside the Yang pipeline.
+      </note>
+
+      <data_sources>
+
+        <source id="macro-1">
+          <lambda_function>yang-generate-macro</lambda_function>
+          <s3_output_key_pattern>json/macro/macro_data.json</s3_output_key_pattern>
+          <encoding>uncompressed JSON</encoding>
+          <input_data>
+            data_pkl: benchmarks/data_{YYYYMMDD}_{version}.pkl
+              - 73+ macroeconomic indicator time series indexed by Bloomberg ticker
+              - Grouped into 10 categories: Leading, Lagging, Financial Condition, Inflation,
+                Labor Market, Consumer, Housing, Investor Sentiment, Treasury Yields,
+                Credit Spread, Market Indicator, Currency
+          </input_data>
+          <response_shape>
+            {
+              "generated_at": "ISO-8601 timestamp",
+              "data_as_of": "YYYY-MM-DD",
+              "groups": [
+                {
+                  "name": "string (group category)",
+                  "indicators": [
+                    {
+                      "name": "string",
+                      "bloomberg_ticker": "string",
+                      "latest_value": float,
+                      "percentile": float,    /* 0-100 percentile vs history */
+                      "values": [             /* trailing 12 months for Value mode */
+                        {"date": "YYYY-MM-DD", "value": float}
+                      ],
+                      "thresholds": {"p10": float, "p90": float}  /* for Position mode */
+                    }
+                  ]
+                }
+              ]
+            }
+          </response_shape>
+          <portal_endpoint>
+            getMacroData() — portal/src/api/portal-proxy.ts line 1551+
+            URL: /api/general/macro/macro_data.json
+            Used by: MacroHeatmap.tsx (73+ indicators, 2 display modes: Value and Position)
+          </portal_endpoint>
+        </source>
+
+        <source id="macro-2">
+          <lambda_function>yang-generate-macro</lambda_function>
+          <s3_output_key_pattern>json/macro/vix_data.json</s3_output_key_pattern>
+          <encoding>uncompressed JSON</encoding>
+          <input_data>
+            data_pkl: benchmarks/data_{YYYYMMDD}_{version}.pkl
+              - VIX time series data (derived from macro indicator subset in PKL)
+            NOTE: This is distinct from yang-generate-volatility. The yang-generate-macro
+            Lambda writes a separate VIX-specific JSON as a convenience output alongside macro_data.json.
+          </input_data>
+          <response_shape>
+            {
+              /* subset of macro_data.json — VIX indicator extracted for portal convenience */
+              "data_as_of": "YYYY-MM-DD",
+              "vix": {
+                "latest": float,
+                "percentile": float,
+                "values": [{"date": "YYYY-MM-DD", "value": float}]
+              }
+            }
+          </response_shape>
+          <portal_endpoint>
+            getVolatilityData() — portal/src/api/portal-proxy.ts line 1637+
+            URL: /api/general (volatility endpoint — exact path confirmed via portal-proxy)
+            Used by: Macroeconomics.tsx primary query (line 31); VolatilityTab as backing data
+          </portal_endpoint>
+        </source>
+
+        <source id="macro-3">
+          <lambda_function>yang-generate-macro-timeseries</lambda_function>
+          <s3_output_key_pattern>json/macro/timeseries/{slugified_indicator_name}.json</s3_output_key_pattern>
+          <encoding>gzip compressed (per-file)</encoding>
+          <note>
+            This Lambda produces one JSON file per macroeconomic indicator (44+ files per run),
+            written to individual S3 keys. Files are fetched on-demand when the user clicks an
+            indicator in the MacroHeatmap to open the MacroTimeSeriesModal. They are NOT fetched
+            at page load.
+          </note>
+          <input_data>
+            data_pkl: benchmarks/data_{YYYYMMDD}_{version}.pkl
+              - price_monthly DataFrame: full historical monthly time series for each indicator
+              - Covers: Leading indicators (PMI, ISM), Financial conditions, Labor market,
+                Consumer, Housing, Treasury yields, Credit spreads, VIX, currencies, and more
+          </input_data>
+          <response_shape>
+            {
+              "indicator": "string (display name)",
+              "as_of": "YYYY-MM-DD",
+              "data": [{"date": "YYYY-MM-DD", "value": float}],
+              "stats": {
+                "min": float, "max": float, "mean": float,
+                "latest": float, "count": int
+              }
+            }
+          </response_shape>
+          <portal_endpoint>
+            getMacroTimeSeries(slug: string) — portal/src/api/endpoints/macro.ts
+            URL: /api/general/macro/timeseries/{slug}.json
+            Used by: MacroTimeSeriesModal (opened on indicator click in MacroHeatmap)
+          </portal_endpoint>
+        </source>
+
+        <source id="macro-4">
+          <lambda_function>yang-generate-volatility</lambda_function>
+          <s3_output_key_pattern>json/yang/volatility_data.json</s3_output_key_pattern>
+          <encoding>uncompressed JSON</encoding>
+          <input_data>
+            FRED API: VIX time series fetched live via FRED API
+              - API key stored in AWS Secrets Manager at path: opal/external-apis
+            NOTE: Does NOT read the data_pkl. This Lambda is driven by the FRED API directly.
+            NOTE: MOVE (Merrill Lynch Option Volatility Estimate) data is currently incomplete
+            (null values) — see data_quality_notes.
+          </input_data>
+          <response_shape>
+            {
+              "as_of": "YYYY-MM-DD",
+              "vix": {
+                "current": float,
+                "percentile": float,       /* vs last 252 trading days */
+                "status": "string",        /* e.g., "elevated", "normal", "low" */
+                "history": [{"date": "YYYY-MM-DD", "value": float}]  /* last 252 days */
+              },
+              "move": {
+                "current": null,           /* CURRENTLY NULL — data source incomplete */
+                "percentile": null,
+                "status": null,
+                "history": []
+              }
+            }
+          </response_shape>
+          <portal_endpoint>
+            Consumed via Macroeconomics VolatilityTab — VIX/MOVE toggle with speedometer gauge,
+            AI summary, and historical chart with percentile bands (1Y/3Y/5Y/10Y/Max window).
+            NOTE: MOVE toggle is non-functional until yang-generate-volatility MOVE data is resolved.
+          </portal_endpoint>
+        </source>
+
+      </data_sources>
+
+      <data_freshness>
+        macro_data.json and vix_data.json: refreshed on every yang run with data_pkl (weekly).
+        macro timeseries files: refreshed on every yang run with data_pkl (weekly, 44+ files written).
+        volatility_data.json: refreshed by yang-generate-volatility independently via FRED API fetch (weekly with yang run).
+        Portal cache: getMacroData uses staleTime 5 min (shortest in the pod — macro data treated as most time-sensitive).
+        YieldCurveTab data (getYieldCurveData) comes from an independent FRED-backed endpoint outside the Yang pipeline.
+      </data_freshness>
+
+    </page>
+
+    <!-- ============================================================== -->
+    <!-- PAGE: Correlation                                              -->
+    <!-- ============================================================== -->
+    <page name="Correlation" rd_agent="0.2.6_RD_Correlation" directory="portal/src/pages/Correlation/">
+
+      <data_sources>
+
+        <source id="correlation-1">
+          <lambda_function>yang-generate-correlation</lambda_function>
+          <s3_output_key_pattern>json/correlations/correlation_data.json</s3_output_key_pattern>
+          <encoding>uncompressed JSON</encoding>
+          <input_data>
+            data_pkl: benchmarks/data_{YYYYMMDD}_{version}.pkl
+              - return_monthly DataFrame: monthly return series for 55 market indices
+              - Coverage: US Large/Mid/Small Cap, Style Factors (Growth/Value), Developed Markets,
+                Emerging Markets, Fixed Income (Agg, IG, HY, Treasuries), Commodities (Gold, Oil)
+              - Pre-computes lower-triangular correlation matrices for all 5 lookback windows
+                at Lambda execution time; portal does not recompute
+          </input_data>
+          <response_shape>
+            {
+              "data_as_of": "YYYY-MM-DD",
+              "metadata": {
+                "generated_at": "ISO-8601 timestamp",
+                "ticker_count": int,       /* ~55 */
+                "periods_available": ["1M", "3M", "6M", "1Y", "2Y"]
+              },
+              "tickers": ["string", ...],  /* ordered list of index names */
+              "correlations": {
+                "1M|3M|6M|1Y|2Y": {
+                  "matrix": [[float, ...]],  /* lower-triangular NxN matrix; null above diagonal */
+                  "data_points": int         /* number of monthly observations used */
+                }
+              }
+            }
+          </response_shape>
+          <portal_endpoint>
+            getCorrelationData() — portal/src/api/portal-proxy.ts line 1437+
+            URL: /api/general/correlations/correlation_data.json
+            staleTime: 30 min, gcTime: 60 min (longest React Query cache in the pod)
+            Used by: useCorrelationData hook → Correlation page triangular heatmap
+            NOTE: Filtering by preset group and period selection happen client-side;
+                  the full 55-ticker matrix for all 5 periods is always fetched in one request.
+          </portal_endpoint>
+        </source>
+
+      </data_sources>
+
+      <data_freshness>
+        Refreshed on every yang run with data_pkl (weekly).
+        Portal cache: staleTime 30 min / gcTime 60 min — correlation data is treated as stable
+        within a session. CloudFront TTL invalidated after each pipeline run.
+        Note: Correlation page does not use useYangDataAsOf hook; instead formats data_as_of
+        directly via formatYangDate from @/lib/dateUtils.
+      </data_freshness>
+
+    </page>
+
+  </page_contracts>
+
+  <!-- ================================================================ -->
+  <!-- SHARED DATA SOURCES                                              -->
+  <!-- ================================================================ -->
+
+  <shared_data_sources>
+
+    <shared_source name="positioning_data.json">
+      <lambda_function>yang-generate-positioning</lambda_function>
+      <s3_key>json/positioning/positioning_data.json</s3_key>
+      <consumed_by>Positioning (PositioningSummary, HoldingsTab, AttributionTab), Attribution (main query)</consumed_by>
+    </shared_source>
+
+    <shared_source name="holdings_attribution_data.json">
+      <lambda_function>yang-generate-holdings-attribution</lambda_function>
+      <s3_key>json/positioning/holdings_attribution_data.json</s3_key>
+      <consumed_by>Positioning (PositioningSummary, HoldingsTab, SelectionTab), Attribution (AssetAllocationSummary, HoldingsTab, SelectionTab, AllocationHeatmap)</consumed_by>
+    </shared_source>
+
+    <shared_source name="allocation_summary.json">
+      <lambda_function>yang-generate-allocation-summary</lambda_function>
+      <s3_key>json/positioning/allocation_summary.json</s3_key>
+      <consumed_by>Positioning (AssetAllocationSummary, StylePolicyComparison), Attribution (StylePolicyComparison)</consumed_by>
+    </shared_source>
+
+    <shared_source name="etf_returns.json">
+      <lambda_function>yang-generate-etf-returns</lambda_function>
+      <s3_key>json/benchmarks/etf_returns.json</s3_key>
+      <consumed_by>Positioning (SelectionTab ETF analysis), Attribution (SelectionTab ETF analysis)</consumed_by>
+    </shared_source>
+
+    <shared_source name="peer_performance.json" portal_consumer="unconfirmed">
+      <lambda_function>yang-generate-peer-performance</lambda_function>
+      <s3_key>json/peers/peer_performance.json</s3_key>
+      <consumed_by>
+        Direct portal consumer for this pod's 6 pages could not be confirmed from pod_inventory.xml.
+        This Lambda is listed in the task order scope and exists in the yang pipeline.
+        Output contains: generated_at, data_as_of (YYYYMM from filename), periods (1M/QTD/1Q/YTD/1Y/SI),
+        and per-model percentile data (p5, p25, p50, p75, p95) vs peer universe.
+        Input: "Models Performance vs Peers YYYYMM.xlsx" (monthly Excel upload).
+        See gaps section.
+      </consumed_by>
+    </shared_source>
+
+    <shared_source name="benchmark_returns.json" scope="out_of_pod">
+      <lambda_function>yang-generate-benchmark-returns</lambda_function>
+      <s3_key>json/benchmarks/benchmark_returns.json</s3_key>
+      <consumed_by>
+        NOT consumed by this pod's 6 analytics pages per pod_inventory.xml.
+        Serves other pods (e.g., MarketPerformance via getBenchmarkReturns() portal-proxy line 624+).
+        Documented here for completeness as it runs in the same yang pipeline parallel batch.
+      </consumed_by>
+    </shared_source>
+
+    <shared_source name="useYangDataAsOf hook">
+      <source>portal/src/hooks/useDataSource.ts</source>
+      <consumed_by>Positioning, Attribution, FactorTilts, Valuation, Macroeconomics (5 of 6 pages)</consumed_by>
+      <purpose>
+        Registers data_as_of timestamps with the central Yang data registry.
+        Powers synchronized freshness display (SmartPanelFooter data timestamps).
+        Correlation does NOT use this hook — it formats data_as_of directly via formatYangDate.
+      </purpose>
+    </shared_source>
+
+  </shared_data_sources>
+
+  <!-- ================================================================ -->
+  <!-- UPSTREAM DEPENDENCIES                                            -->
+  <!-- ================================================================ -->
+
+  <upstream_dependencies>
+
+    <dependency name="data_pkl (market data workspace)">
+      <source>S3 uploads/ prefix — PM team uploads weekly</source>
+      <s3_key_pattern>benchmarks/data_{YYYYMMDD}_{version}.pkl (e.g., data_20260109_v1.pkl)</s3_key_pattern>
+      <frequency>Weekly</frequency>
+      <contents>
+        Monthly return series for 40+ equity indices (valuation metrics: pe_ntm, pe_ltm, pfcf, ev_sales, pb, ps, dy),
+        price_monthly (10Y Treasury yield, FX rates, macro indicator values),
+        economic indicator time series (73+ indicators across 10 groups),
+        daily return series for benchmark indices and credit spreads,
+        market data for correlation matrix computation (55 indices)
+      </contents>
+      <downstream_lambdas>
+        yang-generate-valuation, yang-generate-risk-premium, yang-generate-correlation,
+        yang-generate-macro, yang-generate-macro-timeseries,
+        yang-generate-benchmark-returns (with model_pkl), yang-generate-positioning (with model_pkl)
+      </downstream_lambdas>
+    </dependency>
+
+    <dependency name="model_pkl (portfolio holdings workspace)">
+      <source>S3 uploads/ prefix — PM team uploads weekly</source>
+      <s3_key_pattern>benchmarks/model_{YYYYMMDD}_{version}.pkl (e.g., model_20260109_v1.pkl)</s3_key_pattern>
+      <frequency>Weekly</frequency>
+      <contents>
+        Holdings per model portfolio (UST, ST, INT, LTC, LTA),
+        etf_characteristics (ETF-level weights, returns, attributes),
+        benchmark_holdings (policy portfolio holdings),
+        factor tilt summary + factor spreads time series,
+        rolling regression history (per-model, per-window factor exposures),
+        etf_returns DataFrame (5 benchmark ETFs: BIL, VGSH, AGG, IVV, ACWI)
+      </contents>
+      <downstream_lambdas>
+        yang-generate-positioning, yang-generate-factor-tilts,
+        yang-generate-etf-returns, yang-generate-allocation-summary,
+        yang-generate-benchmark-returns (with data_pkl)
+      </downstream_lambdas>
+    </dependency>
+
+    <dependency name="attribution_excel (holdings attribution Excel)">
+      <source>S3 uploads/ prefix — PM team uploads monthly</source>
+      <s3_key_pattern>uploads/{attribution_excel} ("Model Portfolio Attribution YYYYMMDD.xlsx")</s3_key_pattern>
+      <frequency>Monthly</frequency>
+      <contents>
+        Per-holding attribution data for 5 model portfolios.
+        Columns include: ticker, holding name, weight, attribution effects (QTD, YTD).
+        Note: 1Y and Since Inception periods not yet generated by this Lambda.
+      </contents>
+      <downstream_lambdas>yang-generate-holdings-attribution</downstream_lambdas>
+    </dependency>
+
+    <dependency name="peer_excel (peer performance Excel)">
+      <source>S3 uploads/ prefix — PM team uploads monthly</source>
+      <s3_key_pattern>uploads/{peer_excel} ("Models Performance vs Peers YYYYMM.xlsx")</s3_key_pattern>
+      <frequency>Monthly</frequency>
+      <contents>
+        "Peer Table" sheet with model returns and peer universe percentile benchmarks (p5, p25, p50, p75, p95)
+        across periods: 1M, QTD, 1Q, YTD, 1Y, Since Inception
+      </contents>
+      <downstream_lambdas>yang-generate-peer-performance</downstream_lambdas>
+    </dependency>
+
+    <dependency name="DynamoDB etf-classifications table">
+      <source>AWS DynamoDB — managed independently of Yang pipeline runs</source>
+      <table>etf-classifications</table>
+      <key_schema>Partition key: ticker (ETF symbol string)</key_schema>
+      <contents>Canonical ETF classification data: asset_class, sub_asset_class per ticker</contents>
+      <downstream_lambdas>yang-generate-holdings-attribution, yang-generate-allocation-summary</downstream_lambdas>
+      <note>
+        This table provides the authoritative ETF classification used to join attribution Excel data
+        to hierarchical asset class groupings. If a ticker is missing from this table, it cannot
+        be properly classified in the attribution output.
+      </note>
+    </dependency>
+
+    <dependency name="FRED API (Federal Reserve Economic Data)">
+      <source>External API — api.stlouisfed.org</source>
+      <api_key_location>AWS Secrets Manager: opal/external-apis</api_key_location>
+      <contents>
+        Credit spreads:
+          - BAMLC0A0CM: ICE BofA US Corporate Index (IG spreads) — cached at cache/fred/BAMLC0A0CM.csv
+          - BAMLH0A0HYM2: ICE BofA US High Yield Index (HY spreads) — cached at cache/fred/BAMLH0A0HYM2.csv
+        VIX data (for yang-generate-volatility)
+      </contents>
+      <downstream_lambdas>yang-generate-risk-premium (via S3 cache), yang-generate-volatility (live fetch)</downstream_lambdas>
+      <note>
+        yang-generate-risk-premium uses FRED cache from S3 as fallback if live FRED is unavailable.
+        FRED cache is refreshed by the yang-refresh-fred-cache Lambda (outputs/ directory).
+        The YieldCurveTab 1Y-ago curve requires a separate ingest_yield_curve_fred.py script to run
+        (not part of the main yang pipeline execution).
+      </note>
+    </dependency>
+
+    <dependency name="DynamoDB opal-portal-market-data table">
+      <source>AWS DynamoDB — written by yang-ingest-dynamodb during pipeline run</source>
+      <table>opal-portal-market-data</table>
+      <key_schema>
+        Partition key: ticker_id (e.g., "INDEX#S&amp;P 500", "ETF#IWM")
+        Sort key: data_key (e.g., "DAILY#2026-01-16", "LATEST")
+      </key_schema>
+      <contents>Market time series data at daily granularity for portal components</contents>
+      <note>
+        Written BEFORE all generator Lambdas (DynamoDB-first pattern in step 5).
+        Not directly consumed by any of the 6 PortfolioAnalytics pages — consumed by
+        MarketIntelligence pod components and the market-overview tiered generator.
+      </note>
+    </dependency>
+
+  </upstream_dependencies>
+
+  <!-- ================================================================ -->
+  <!-- DATA QUALITY NOTES                                               -->
+  <!-- ================================================================ -->
+
+  <data_quality_notes>
+
+    <note id="DQ-001" severity="high" page="Attribution, Positioning">
+      <title>Alpha factor attribution join: permid vs company_name</title>
+      <description>
+        The yang-generate-holdings-attribution Lambda joins attribution Excel data to holdings
+        using DynamoDB etf-classifications (keyed by ticker). Historical root cause: an earlier
+        version of this Lambda attempted to join attribution rows by company_name (display string),
+        which produced silent mismatches when name spellings differed between the Excel source
+        and the portfolio holdings data (e.g., whitespace, abbreviation, casing differences).
+        The fix was to use ticker as the canonical join key, backed by the etf-classifications
+        DynamoDB table.
+
+        Current risk: if the attribution Excel contains tickers not present in DynamoDB
+        etf-classifications, those rows will fail to classify and be dropped from the output.
+        The etf-classifications table must be kept current with any new ETF positions added
+        to the model portfolios.
+      </description>
+      <affected_output>json/positioning/holdings_attribution_data.json</affected_output>
+    </note>
+
+    <note id="DQ-002" severity="high" page="Attribution, Positioning">
+      <title>Attribution effects are null: policyWeight and benchmarkReturn not populated</title>
+      <description>
+        Both Positioning/utils/buildAttributionData.ts and Attribution/utils/buildAttributionData.ts
+        (separate copies with identical logic) hard-code policyWeight as null and benchmarkReturn
+        as null. As a result, allocationEffect, selectionEffect, and interactionEffect all compute
+        as null throughout the attribution display.
+
+        This is a data contract gap, not a frontend bug. Resolution requires:
+        1. Defining the policy portfolio data source (likely benchmark_holdings from model_pkl or
+           a dedicated policy portfolio file)
+        2. Defining the benchmark return mapping (likely from yang-generate-benchmark-returns output)
+        3. Updating buildAttributionData.ts in both pages to read these sources
+
+        This is the single most impactful open data gap in the PortfolioAnalytics pod.
+      </description>
+      <affected_pages>Positioning/utils/buildAttributionData.ts:17,21,121-124, Attribution/utils/buildAttributionData.ts:17,21</affected_pages>
+    </note>
+
+    <note id="DQ-003" severity="medium" page="Attribution">
+      <title>Holdings attribution periods: QTD and YTD only</title>
+      <description>
+        yang-generate-holdings-attribution currently generates attribution data for QTD and YTD
+        periods only. The SelectionTab in Attribution renders UI controls for 1Y and SI (Since
+        Inception), but the backend does not provide data for these periods. The Lambda must be
+        updated to compute 1Y and SI attribution windows before these UI controls will function.
+      </description>
+      <affected_output>json/positioning/holdings_attribution_data.json</affected_output>
+      <reference>portal/src/pages/Attribution/components/StylePolicyComparison.tsx:160</reference>
+    </note>
+
+    <note id="DQ-004" severity="medium" page="Valuation">
+      <title>Valuation range drilldown: only 8 of 40+ indices have complete range data</title>
+      <description>
+        The ValuationRangePanel (always visible, drilldown for a user-selected index) shows p10-p90
+        percentile range data. The yang-generate-valuation Lambda only produces ranges for 8 of the
+        40+ equity indices covered in the summary table. Indices without range data render a
+        "pending" placeholder in the portal. Completing range coverage requires updating the Lambda
+        to compute percentile thresholds for all indices.
+      </description>
+      <affected_output>json/valuation/valuation_data.json — "ranges" key</affected_output>
+      <reference>portal/src/pages/Valuation/panels/ValuationRangePanel.tsx:108</reference>
+    </note>
+
+    <note id="DQ-005" severity="low" page="Valuation">
+      <title>PKL typo: "Kindom" should be "Kingdom" for MSCI entry</title>
+      <description>
+        The data_pkl contains a spelling error in the MSCI Kingdom index name: stored as
+        "Kindom" instead of "Kingdom". The portal works around this with a hardcoded constant
+        mapping, but the underlying PKL source should be corrected to prevent future confusion
+        and to avoid silent mismatches if the workaround is removed.
+      </description>
+      <affected_output>json/valuation/valuation_data.json</affected_output>
+      <reference>portal/src/pages/Valuation/constants.ts:25</reference>
+    </note>
+
+    <note id="DQ-006" severity="medium" page="Macroeconomics">
+      <title>MOVE index data is null in yang-generate-volatility</title>
+      <description>
+        The yang-generate-volatility Lambda fetches VIX data from FRED successfully, but
+        MOVE (Merrill Lynch Option Volatility Estimate — bond market equivalent of VIX) data
+        is currently null/empty. The Lambda structure supports MOVE but the data source is
+        incomplete. The VolatilityTab's MOVE toggle will render with null/empty data until
+        the MOVE data source in yang-generate-volatility is resolved.
+      </description>
+      <affected_output>json/yang/volatility_data.json — "move" key</affected_output>
+    </note>
+
+    <note id="DQ-007" severity="low" page="Attribution">
+      <title>Equity duration uses proxy value</title>
+      <description>
+        portal/src/pages/Attribution/components/HoldingsTable.tsx hard-codes equity duration
+        as a proxy value of 20.0 years. This is a display approximation, not derived from the
+        yang pipeline output. Any accurate duration calculation would require Yang to include
+        duration in the positioning_data.json or holdings_attribution_data.json response shape.
+      </description>
+      <reference>portal/src/pages/Attribution/components/HoldingsTable.tsx:221</reference>
+    </note>
+
+    <note id="DQ-008" severity="low" page="FactorTilts">
+      <title>Factor key naming migration applied in portal constants</title>
+      <description>
+        Factor key names were migrated in the portal to match the Yang PKL exactly:
+          - 'Short vs Agg' renamed to 'Agg vs Short'
+          - 'HY vs IG' renamed to 'HY vs Agg'
+        The migration has been applied in portal/src/pages/FactorTilts/constants.ts (lines 16-17, 52-53).
+        Any future changes to factor naming in the PKL must be synchronized with this constants file.
+      </description>
+    </note>
+
+    <note id="DQ-009" severity="low" page="Macroeconomics">
+      <title>YieldCurveTab 1Y-ago curve requires separate FRED ingest</title>
+      <description>
+        The YieldCurveTab displays a multi-snapshot USD Treasury yield curve (current, 1M-ago, 1Y-ago).
+        The 1Y-ago snapshot requires running ingest_yield_curve_fred.py separately from the main
+        yang pipeline. If this script has not been run, the 1Y-ago curve line will be absent or stale.
+        This is an optional data enrichment, not a blocking dependency.
+      </description>
+      <reference>portal/src/pages/Macroeconomics/tabs/YieldCurveTab.tsx:240</reference>
+    </note>
+
+  </data_quality_notes>
+
+  <!-- ================================================================ -->
+  <!-- GAPS                                                             -->
+  <!-- ================================================================ -->
+
+  <gaps>
+
+    <gap id="GAP-001">
+      <lambda_function>yang-generate-peer-performance</lambda_function>
+      <description>
+        This Lambda is included in the task order scope and is confirmed to exist at
+        infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-generate-peer-performance/.
+        It produces json/peers/peer_performance.json containing peer universe percentile
+        benchmarks for the 5 model portfolios across standard periods.
+        However, the pod_inventory.xml for PortfolioAnalytics does not list a direct
+        portal endpoint consuming peer_performance.json for any of the 6 pages in this pod.
+        The peer performance data may be consumed by a different pod or by a future
+        enhancement to the Attribution SelectionTab. Portal consumer mapping is unconfirmed.
+      </description>
+    </gap>
+
+    <gap id="GAP-002">
+      <lambda_function>yang-generate-macro-timeseries</lambda_function>
+      <description>
+        The exact set of indicator slug names (used as S3 key suffixes in json/macro/timeseries/{slug}.json)
+        could not be fully enumerated from static code analysis. The slugs are derived by
+        slugifying the indicator display names from the data_pkl. The count is 44+ indicators.
+        A complete slug list would require either running the Lambda or inspecting the PKL's
+        macro indicator index. This gap means a DS cannot enumerate all available timeseries
+        files without an execution-time reference.
+      </description>
+    </gap>
+
+    <gap id="GAP-003">
+      <description>
+        The exact portal-proxy URL for yang-generate-volatility output (json/yang/volatility_data.json)
+        could not be confirmed from static analysis of portal/src/api/portal-proxy.ts.
+        The getVolatilityData() function exists (line 1637+) and is used by Macroeconomics.tsx,
+        but whether it fetches from json/yang/volatility_data.json or json/macro/vix_data.json
+        requires reading the full portal-proxy function body. Both files exist; the active path
+        should be confirmed by reading portal-proxy.ts around line 1637.
+      </description>
+    </gap>
+
+  </gaps>
+
+</data_contract>

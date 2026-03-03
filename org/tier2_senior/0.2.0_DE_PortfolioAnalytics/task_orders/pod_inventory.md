@@ -29,12 +29,12 @@
     </pages>
     <files>
       <!-- Source documents (read, do not modify) -->
-      <file action="read">org/tier3_junior/0.0.4_RD_Positioning/deliverables/page_inventory.xml</file>
-      <file action="read">org/tier3_junior/0.0.5_RD_Attribution/deliverables/page_inventory.xml</file>
-      <file action="read">org/tier3_junior/0.0.6_RD_FactorTilts/deliverables/page_inventory.xml</file>
-      <file action="read">org/tier3_junior/0.0.7_RD_Valuation/deliverables/page_inventory.xml</file>
-      <file action="read">org/tier3_junior/0.0.8_RD_Macroeconomics/deliverables/page_inventory.xml</file>
-      <file action="read">org/tier3_junior/0.0.9_RD_Correlation/deliverables/page_inventory.xml</file>
+      <file action="read">org/tier3_junior/0.2.1_RD_Positioning/deliverables/page_inventory.xml</file>
+      <file action="read">org/tier3_junior/0.2.2_RD_Attribution/deliverables/page_inventory.xml</file>
+      <file action="read">org/tier3_junior/0.2.3_RD_FactorTilts/deliverables/page_inventory.xml</file>
+      <file action="read">org/tier3_junior/0.2.4_RD_Valuation/deliverables/page_inventory.xml</file>
+      <file action="read">org/tier3_junior/0.2.5_RD_Macroeconomics/deliverables/page_inventory.xml</file>
+      <file action="read">org/tier3_junior/0.2.6_RD_Correlation/deliverables/page_inventory.xml</file>
       <!-- Portal API endpoint files for this pod -->
       <file action="read">portal/src/api/endpoints/portfolio.ts</file>
       <file action="read">portal/src/api/endpoints/benchmarks.ts</file>
@@ -125,12 +125,12 @@
   </constraints>
 
   <dependencies>
-    <dependency agent="0.0.4_RD_Positioning" task="page_inventory" status="complete"/>
-    <dependency agent="0.0.5_RD_Attribution" task="page_inventory" status="complete"/>
-    <dependency agent="0.0.6_RD_FactorTilts" task="page_inventory" status="complete"/>
-    <dependency agent="0.0.7_RD_Valuation" task="page_inventory" status="complete"/>
-    <dependency agent="0.0.8_RD_Macroeconomics" task="page_inventory" status="complete"/>
-    <dependency agent="0.0.9_RD_Correlation" task="page_inventory" status="complete"/>
+    <dependency agent="0.2.1_RD_Positioning" task="page_inventory" status="complete"/>
+    <dependency agent="0.2.2_RD_Attribution" task="page_inventory" status="complete"/>
+    <dependency agent="0.2.3_RD_FactorTilts" task="page_inventory" status="complete"/>
+    <dependency agent="0.2.4_RD_Valuation" task="page_inventory" status="complete"/>
+    <dependency agent="0.2.5_RD_Macroeconomics" task="page_inventory" status="complete"/>
+    <dependency agent="0.2.6_RD_Correlation" task="page_inventory" status="complete"/>
   </dependencies>
 
   <deliverables>

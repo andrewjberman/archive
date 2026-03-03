@@ -6,7 +6,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DT_PortfolioAnalytics</issued_to>
     <date>2026-03-02</date>
-    <status>pending</status>
+    <status>superseded</status>
   </metadata>
 
   <objective>
@@ -27,12 +27,12 @@
       <page>Correlation</page>
     </pages>
     <rd_agents>
-      <agent>0.0.4_RD_Positioning</agent>
-      <agent>0.0.5_RD_Attribution</agent>
-      <agent>0.0.6_RD_FactorTilts</agent>
-      <agent>0.0.7_RD_Valuation</agent>
-      <agent>0.0.8_RD_Macroeconomics</agent>
-      <agent>0.0.9_RD_Correlation</agent>
+      <agent>0.2.1_RD_Positioning</agent>
+      <agent>0.2.2_RD_Attribution</agent>
+      <agent>0.2.3_RD_FactorTilts</agent>
+      <agent>0.2.4_RD_Valuation</agent>
+      <agent>0.2.5_RD_Macroeconomics</agent>
+      <agent>0.2.6_RD_Correlation</agent>
     </rd_agents>
   </scope>
 
@@ -86,7 +86,7 @@ Write your audit using this structure:
   </metadata>
 
   <pages_served>
-    <page name="Positioning" rd_agent="0.0.4_RD_Positioning">
+    <page name="Positioning" rd_agent="0.2.1_RD_Positioning">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
@@ -94,7 +94,7 @@ Write your audit using this structure:
         Pipeline name, relevant scripts, S3 output paths
       </data_pipeline>
     </page>
-    <page name="Attribution" rd_agent="0.0.5_RD_Attribution">
+    <page name="Attribution" rd_agent="0.2.2_RD_Attribution">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
@@ -102,7 +102,7 @@ Write your audit using this structure:
         Pipeline name, relevant scripts, S3 output paths
       </data_pipeline>
     </page>
-    <page name="FactorTilts" rd_agent="0.0.6_RD_FactorTilts">
+    <page name="FactorTilts" rd_agent="0.2.3_RD_FactorTilts">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
@@ -110,7 +110,7 @@ Write your audit using this structure:
         Pipeline name, relevant scripts, S3 output paths
       </data_pipeline>
     </page>
-    <page name="Valuation" rd_agent="0.0.7_RD_Valuation">
+    <page name="Valuation" rd_agent="0.2.4_RD_Valuation">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
@@ -118,7 +118,7 @@ Write your audit using this structure:
         Pipeline name, relevant scripts, S3 output paths
       </data_pipeline>
     </page>
-    <page name="Macroeconomics" rd_agent="0.0.8_RD_Macroeconomics">
+    <page name="Macroeconomics" rd_agent="0.2.5_RD_Macroeconomics">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>
@@ -126,7 +126,7 @@ Write your audit using this structure:
         Pipeline name, relevant scripts, S3 output paths
       </data_pipeline>
     </page>
-    <page name="Correlation" rd_agent="0.0.9_RD_Correlation">
+    <page name="Correlation" rd_agent="0.2.6_RD_Correlation">
       <api_endpoints>
         <endpoint url="/api/..." lambda="{function_name}" pipeline="{pipeline}" />
       </api_endpoints>

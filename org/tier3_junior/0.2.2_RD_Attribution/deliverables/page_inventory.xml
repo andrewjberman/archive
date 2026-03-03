@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page_inventory>
+  <metadata>
+    <agent>0.2.2_RD_Attribution</agent>
+    <page>Attribution</page>
+    <directory>portal/src/pages/Attribution/</directory>
+    <date>2026-03-02</date>
+  </metadata>
+
+  <files>
+    <file path="portal/src/pages/Attribution/Attribution.tsx" type="component">
+      Main page component: Portfolio attribution analysis with portfolio/period selectors, positioning data fetch, and tab navigation
+    </file>
+    <file path="portal/src/pages/Attribution/index.ts" type="barrel-export">
+      Barrel export: exports Attribution component and all types
+    </file>
+    <file path="portal/src/pages/Attribution/types.ts" type="types">
+      Type definitions: AssetClass, Instrument, InstrumentAnalytics, PortfolioHolding, Portfolio, DurationByAssetClass, DurationByBucket, PortfolioSummary, PositioningData
+    </file>
+    <file path="portal/src/pages/Attribution/constants/etf-categories.ts" type="constants">
+      ETF categorization: Maps tickers to asset classes and segments (Fixed Income, Equity, Cash, Hedge); includes helper functions and segment ordering
+    </file>
+    <file path="portal/src/pages/Attribution/components/StylePolicyComparison.tsx" type="component">
+      Visual comparison of actual style positioning vs benchmark with diverging bar charts and attribution table
+    </file>
+    <file path="portal/src/pages/Attribution/components/AssetAllocationSummary.tsx" type="component">
+      Asset allocation attribution table showing style weight, policy weight, tilt, allocation effect, fund selection, and total attribution
+    </file>
+    <file path="portal/src/pages/Attribution/components/HoldingsTable.tsx" type="component">
+      Interactive holdings table with sorting, filtering by asset class, and CSV export capability
+    </file>
+    <file path="portal/src/pages/Attribution/tabs/AttributionTab.tsx" type="component">
+      Attribution tab wrapper: renders StylePolicyComparison with portfolio and period selectors
+    </file>
+    <file path="portal/src/pages/Attribution/tabs/SelectionTab.tsx" type="component">
+      Selection tab: Attribution analysis with QTD/YTD/1Y/SI periods showing fund selection and style allocation effects (large file, 84.7KB)
+    </file>
+    <file path="portal/src/pages/Attribution/tabs/HoldingsTab.tsx" type="component">
+      Holdings tab: Treemap visualization and heatmap table of portfolio holdings with performance coloring (26.8KB, uses useEffect)
+    </file>
+    <file path="portal/src/pages/Attribution/panels/AllocationHeatmap.tsx" type="component">
+      Allocation heatmap panel: Shows attribution breakdown by asset class and segment using color-coded heatmap
+    </file>
+    <file path="portal/src/pages/Attribution/panels/PortfolioRadialCharts.tsx" type="component">
+      Portfolio radial charts panel: Visual representation of portfolio composition using radial/circular charts
+    </file>
+    <file path="portal/src/pages/Attribution/utils/buildAttributionData.ts" type="utility">
+      Attribution data builder: Constructs hierarchical attribution structure from holdings and returns data (Asset Class > Segment > ETF)
+    </file>
+  </files>
+
+  <api_calls>
+    <api_call>
+      <hook>useQuery</hook>
+      <endpoint>/api/portal-proxy (getPositioningData)</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters</request_shape>
+      <response_shape>PositioningDataResponse with portfolio, summary (duration/allocation), holdings, durationByAssetClass, durationByBucket</response_shape>
+      <file>portal/src/pages/Attribution/Attribution.tsx:31-37</file>
+      <description>Fetches positioning data for selected portfolio including holdings and duration analytics</description>
+    </api_call>
+    <api_call>
+      <hook>useQuery</hook>
+      <endpoint>/api/portal-proxy (getAllocationSummary)</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters</request_shape>
+      <response_shape>{ portfolios: Record&lt;string, Record&lt;'qtd'|'ytd'|'1y'|'si', { asset_classes: Array&lt;{ name, style_weight, policy_weight, bet, asset_allocation, total }&gt;, total: {...} }&gt;, data_as_of: string }</response_shape>
+      <file>portal/src/pages/Attribution/components/StylePolicyComparison.tsx:43-48</file>
+      <description>Fetches allocation summary data with style vs benchmark weights across periods. Source: s3://opal-data-portal-v2/json/positioning/allocation_summary.json</description>
+    </api_call>
+    <api_call>
+      <hook>useQuery</hook>
+      <endpoint>/api/portal-proxy (getHoldingsAttribution)</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters</request_shape>
+      <response_shape>HoldingsAttributionResponse with portfolios containing holdings array with fund_selection and style_allocation attribution metrics</response_shape>
+      <file>portal/src/pages/Attribution/components/AssetAllocationSummary.tsx:67-72</file>
+      <description>Fetches holdings-level attribution data for equity/fixed income breakdowns showing fund selection and style allocation effects</description>
+    </api_call>
+    <api_call>
+      <hook>useEffect + Promise</hook>
+      <endpoint>/api/portal-proxy (getPositioningData)</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters</request_shape>
+      <response_shape>PositioningDataResponse</response_shape>
+      <file>portal/src/pages/Attribution/tabs/HoldingsTab.tsx:637-641</file>
+      <description>Fetches positioning data in HoldingsTab useEffect hook</description>
+    </api_call>
+    <api_call>
+      <hook>useEffect + Promise</hook>
+      <endpoint>/api/portal-proxy (getHoldingsAttribution)</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters</request_shape>
+      <response_shape>HoldingsAttributionResponse</response_shape>
+      <file>portal/src/pages/Attribution/tabs/HoldingsTab.tsx:653-656</file>
+      <description>Fetches attribution data in HoldingsTab useEffect hook</description>
+    </api_call>
+    <api_call>
+      <hook>useEffect + Promise</hook>
+      <endpoint>/api/portal-proxy (getAUMSummary)</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters</request_shape>
+      <response_shape>AUMSummaryResponse with portfolio AUM values for weighting aggregations</response_shape>
+      <file>portal/src/pages/Attribution/tabs/HoldingsTab.tsx:672-675</file>
+      <description>Fetches AUM data for weighting AGG (Aggregate) aggregation across individual portfolios</description>
+    </api_call>
+    <api_call>
+      <hook>useEffect + Promise</hook>
+      <endpoint>/api/portal-proxy (getPositioningData)</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters</request_shape>
+      <response_shape>PositioningDataResponse</response_shape>
+      <file>portal/src/pages/Attribution/tabs/SelectionTab.tsx:660-664</file>
+      <description>Fetches positioning data in SelectionTab useEffect hook</description>
+    </api_call>
+    <api_call>
+      <hook>useEffect + Promise</hook>
+      <endpoint>/api/portal-proxy (getETFPeriodReturns)</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters</request_shape>
+      <response_shape>ETFPeriodReturnsResponse with returns data by ticker and period</response_shape>
+      <file>portal/src/pages/Attribution/tabs/SelectionTab.tsx:673-676</file>
+      <description>Fetches ETF period returns for treemap performance coloring (optional)</description>
+    </api_call>
+    <api_call>
+      <hook>useEffect + Promise</hook>
+      <endpoint>/api/portal-proxy (getHoldingsAttribution)</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters</request_shape>
+      <response_shape>HoldingsAttributionResponse</response_shape>
+      <file>portal/src/pages/Attribution/tabs/SelectionTab.tsx:686-689</file>
+      <description>Fetches attribution data in SelectionTab useEffect hook</description>
+    </api_call>
+    <api_call>
+      <hook>useEffect + Promise</hook>
+      <endpoint>/api/portal-proxy (getAUMSummary)</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters</request_shape>
+      <response_shape>AUMSummaryResponse</response_shape>
+      <file>portal/src/pages/Attribution/tabs/SelectionTab.tsx:705-708</file>
+      <description>Fetches AUM data in SelectionTab useEffect hook for AGG weighting</description>
+    </api_call>
+    <api_call>
+      <hook>useEffect + Promise</hook>
+      <endpoint>/api/portal-proxy (getHoldingsAttribution)</endpoint>
+      <method>GET</method>
+      <request_shape>No parameters</request_shape>
+      <response_shape>HoldingsAttributionResponse</response_shape>
+      <file>portal/src/pages/Attribution/panels/AllocationHeatmap.tsx:109-112</file>
+      <description>Fetches attribution data in AllocationHeatmap useEffect hook for heatmap visualization</description>
+    </api_call>
+  </api_calls>
+
+  <shared_imports>
+    <import>
+      <from>@/components/PageHeaderVariants</from>
+      <provides>PageHeaderCleanBadge</provides>
+      <used_in>portal/src/pages/Attribution/Attribution.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/Tooltip</from>
+      <provides>Tooltip</provides>
+      <used_in>portal/src/pages/Attribution/components/StylePolicyComparison.tsx, AssetAllocationSummary.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/Card</from>
+      <provides>Card, CardContent</provides>
+      <used_in>portal/src/pages/Attribution/components/HoldingsTable.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/LoadingSpinner</from>
+      <provides>LoadingInline</provides>
+      <used_in>portal/src/pages/Attribution/components/AssetAllocationSummary.tsx, tabs/HoldingsTab.tsx, tabs/SelectionTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/DataAsOf</from>
+      <provides>DataAsOfCompact</provides>
+      <used_in>portal/src/pages/Attribution/components/AssetAllocationSummary.tsx</used_in>
+    </import>
+    <import>
+      <from>@/ui/components/panels</from>
+      <provides>Panel, PanelHeader, PanelContent, SmartPanelFooter</provides>
+      <used_in>portal/src/pages/Attribution/components/StylePolicyComparison.tsx, tabs/AttributionTab.tsx, tabs/HoldingsTab.tsx, tabs/SelectionTab.tsx, panels/AllocationHeatmap.tsx</used_in>
+    </import>
+    <import>
+      <from>@/hooks/useDataSource</from>
+      <provides>useYangDataAsOf, useDataSourceTimestamp</provides>
+      <used_in>portal/src/pages/Attribution/Attribution.tsx, components/StylePolicyComparison.tsx, components/AssetAllocationSummary.tsx, tabs/HoldingsTab.tsx, tabs/SelectionTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/api/portal-proxy</from>
+      <provides>getPositioningData, getAllocationSummary, getHoldingsAttribution, getETFPeriodReturns, getAUMSummary, PositioningDataResponse, ETFPeriodReturnsResponse, HoldingsAttributionResponse, AttributionPortfolio</provides>
+      <used_in>portal/src/pages/Attribution/Attribution.tsx, components/StylePolicyComparison.tsx, components/AssetAllocationSummary.tsx, tabs/HoldingsTab.tsx, tabs/SelectionTab.tsx, panels/AllocationHeatmap.tsx, utils/buildAttributionData.ts</used_in>
+    </import>
+    <import>
+      <from>@/lib/tickerRegistry</from>
+      <provides>getTickerMetadata</provides>
+      <used_in>portal/src/pages/Attribution/tabs/HoldingsTab.tsx, tabs/SelectionTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/lib/performanceUtils</from>
+      <provides>formatReturn, getReturnColorClass</provides>
+      <used_in>portal/src/pages/Attribution/tabs/HoldingsTab.tsx</used_in>
+    </import>
+    <import>
+      <from>lucide-react</from>
+      <provides>PieChart, Target, ChevronDown, ChevronRight, HelpCircle</provides>
+      <used_in>portal/src/pages/Attribution/Attribution.tsx, components/StylePolicyComparison.tsx, components/AssetAllocationSummary.tsx, panels/AllocationHeatmap.tsx</used_in>
+    </import>
+    <import>
+      <from>recharts</from>
+      <provides>Treemap, ResponsiveContainer, Tooltip (as RechartsTooltip)</provides>
+      <used_in>portal/src/pages/Attribution/tabs/HoldingsTab.tsx, tabs/SelectionTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@tanstack/react-query</from>
+      <provides>useQuery</provides>
+      <used_in>portal/src/pages/Attribution/Attribution.tsx, components/StylePolicyComparison.tsx, components/AssetAllocationSummary.tsx</used_in>
+    </import>
+  </shared_imports>
+
+  <types>
+    <type name="AssetClass" defined_in="portal/src/pages/Attribution/types.ts">
+      Union type: 'Equity' | 'Cash' | 'Government' | 'Investment Grade Credit' | 'High Yield' | 'Municipals' | 'Structured' | 'Emerging Markets Debt' | 'Other'
+    </type>
+    <type name="DurationBucket" defined_in="portal/src/pages/Attribution/types.ts">
+      Union type: '0' | '0-3' | '3-5' | '5-7' | '7-10' | '10+'
+    </type>
+    <type name="InstrumentType" defined_in="portal/src/pages/Attribution/types.ts">
+      Union type: 'ETF' | 'Stock' | 'Bond' | 'MutualFund' | 'Cash'
+    </type>
+    <type name="Instrument" defined_in="portal/src/pages/Attribution/types.ts">
+      Key fields: instrumentId, ticker, name, instrumentType, assetClass, subAssetClass?, currency?
+    </type>
+    <type name="InstrumentAnalytics" defined_in="portal/src/pages/Attribution/types.ts">
+      Key fields: instrumentId, asOfDate, modifiedDuration, yield?, spread?, creditRating?
+    </type>
+    <type name="PortfolioHolding" defined_in="portal/src/pages/Attribution/types.ts">
+      Key fields: portfolioId, asOfDate, instrumentId, weight (0-100%), ticker, name, assetClass, modifiedDuration, durationContribution
+    </type>
+    <type name="Portfolio" defined_in="portal/src/pages/Attribution/types.ts">
+      Key fields: portfolioId, name, type ('Model' | 'Benchmark'), asOfDate
+    </type>
+    <type name="DurationByAssetClass" defined_in="portal/src/pages/Attribution/types.ts">
+      Key fields: assetClass, weight, avgDuration, durationContribution
+    </type>
+    <type name="DurationByBucket" defined_in="portal/src/pages/Attribution/types.ts">
+      Key fields: bucket (DurationBucket), weight, durationContribution
+    </type>
+    <type name="PortfolioSummary" defined_in="portal/src/pages/Attribution/types.ts">
+      Key fields: totalModifiedDuration, cashPercent, fixedIncomePercent, equityPercent, otherPercent
+    </type>
+    <type name="PositioningData" defined_in="portal/src/pages/Attribution/types.ts">
+      Key fields: portfolio (Portfolio), summary (PortfolioSummary), holdings (PortfolioHolding[]), durationByAssetClass, durationByBucket
+    </type>
+    <type name="ETFCategory" defined_in="portal/src/pages/Attribution/constants/etf-categories.ts">
+      Key fields: assetClass ('Fixed Income' | 'Equity' | 'Cash' | 'Hedge'), segment (string), name (string)
+    </type>
+    <type name="StylePolicyComparisonProps" defined_in="portal/src/pages/Attribution/components/StylePolicyComparison.tsx">
+      Key fields: portfolio (string), period ('QTD' | 'YTD' | '1Y' | 'SI'), onPortfolioChange?, onPeriodChange?
+    </type>
+    <type name="AssetAllocationSummaryProps" defined_in="portal/src/pages/Attribution/components/AssetAllocationSummary.tsx">
+      Key fields: portfolio, period, inline?, onPortfolioChange?, onPeriodChange?, dataAsOf?
+    </type>
+    <type name="HoldingsTableProps" defined_in="portal/src/pages/Attribution/components/HoldingsTable.tsx">
+      Key fields: data (PositioningData)
+    </type>
+    <type name="ETFHolding" defined_in="portal/src/pages/Attribution/utils/buildAttributionData.ts">
+      Key fields: ticker, name, actualWeight, policyWeight, activeWeight, fundReturn, benchmarkReturn, activeReturn, contribution, allocationEffect, selectionEffect, interactionEffect
+    </type>
+    <type name="SubAssetClass" defined_in="portal/src/pages/Attribution/utils/buildAttributionData.ts">
+      Key fields: name, color, holdings (ETFHolding[]), totalActualWeight, totalPolicyWeight, totalActiveWeight, totalFundReturn, totalBenchmarkReturn, totalActiveReturn, totalContribution, totalAllocationEffect, totalSelectionEffect, totalInteractionEffect
+    </type>
+    <type name="AssetClass" defined_in="portal/src/pages/Attribution/utils/buildAttributionData.ts">
+      Key fields: name (ETFCategory['assetClass']), color, subAssetClasses (SubAssetClass[]), and aggregate totals (totalActualWeight, totalPolicyWeight, etc.)
+    </type>
+  </types>
+
+  <page_structure>
+    <component name="Attribution" status="functional">
+      Main page component with portfolio selector (UST, ST, INT, LTC, LTA), period selector (QTD, YTD, 1Y, SI), and two main sections: StylePolicyComparison (header) and SelectionTab (body)
+    </component>
+    <section name="StylePolicyComparison" status="functional">
+      Displays style vs benchmark positioning with diverging bar charts per asset class (Fixed Income, Equity) and detailed attribution table
+    </section>
+    <section name="SelectionTab" status="functional">
+      Attribution analysis showing fund selection and style allocation effects with QTD/YTD/1Y/SI period support (large component with extensive logic)
+    </section>
+    <section name="HoldingsTab" status="functional">
+      Treemap visualization of portfolio holdings (size = weight, color = performance) with supporting heatmap table
+    </section>
+    <panel name="AllocationHeatmap" status="functional">
+      Heatmap visualization of attribution breakdown by asset class and segment (collapsed/expandable tree structure)
+    </panel>
+    <panel name="PortfolioRadialCharts" status="functional">
+      Radial/circular chart visualization of portfolio composition by asset class
+    </panel>
+  </page_structure>
+
+  <issues>
+    <issue file="portal/src/pages/Attribution/utils/buildAttributionData.ts:17" type="TODO">
+      Where does policy weight come from? Currently using placeholder null values
+    </issue>
+    <issue file="portal/src/pages/Attribution/utils/buildAttributionData.ts:21" type="TODO">
+      Define benchmarks - currently using placeholder null values for benchmark returns
+    </issue>
+    <issue file="portal/src/pages/Attribution/utils/buildAttributionData.ts:123" type="TODO">
+      Get policy weights from policy portfolio - currently hardcoded null
+    </issue>
+    <issue file="portal/src/pages/Attribution/utils/buildAttributionData.ts:124" type="TODO">
+      Get benchmark returns from benchmark mapping - currently hardcoded null
+    </issue>
+    <issue file="portal/src/pages/Attribution/tabs/SelectionTab.tsx:7" type="ESLINT-DISABLE">
+      Disabled rules: no-constant-binary-expression, no-constant-condition (dead code blocks using constant false for potential future use)
+    </issue>
+    <issue file="portal/src/pages/Attribution/components/StylePolicyComparison.tsx:160" type="NOTE">
+      Backend currently generates QTD and YTD only. 1Y/SI periods require a Lambda update.
+    </issue>
+    <issue file="portal/src/pages/Attribution/components/HoldingsTable.tsx:221" type="NOTE">
+      Equity duration is proxy value of 20.0 years for unified duration measurement across asset classes
+    </issue>
+  </issues>
+
+  <data_flow>
+    <flow description="Main data fetch pipeline">
+      1. Attribution.tsx fetches getPositioningData() via useQuery (positioning-data key)
+      2. data_as_of registered with useYangDataAsOf('positioning', dataAsOf)
+      3. Portfolio and period state passed to StylePolicyComparison and SelectionTab
+    </flow>
+    <flow description="StylePolicyComparison pipeline">
+      1. Fetches getAllocationSummary() via useQuery (allocation-summary key)
+      2. Registers data_as_of with useYangDataAsOf('allocation_summary', ...)
+      3. Renders diverging bars per asset class and AssetAllocationSummary child component
+    </flow>
+    <flow description="AssetAllocationSummary pipeline">
+      1. Fetches getAllocationSummary() and getHoldingsAttribution() via parallel useQuery calls
+      2. Merges data: allocation weights from first, equity/fixed income breakdowns from second
+      3. Renders attribution table with color-coded cells
+    </flow>
+    <flow description="SelectionTab pipeline">
+      1. Multiple useEffect hooks fetch: getPositioningData(), getETFPeriodReturns(), getHoldingsAttribution(), getAUMSummary()
+      2. buildAttributionData() structures holdings into Asset Class > Segment > ETF hierarchy
+      3. Renders treemap and table with period-specific attribution metrics
+    </flow>
+    <flow description="HoldingsTab pipeline">
+      1. useEffect hooks fetch: getPositioningData(), getHoldingsAttribution(), getAUMSummary()
+      2. Treemap sized by weight, colored by return
+      3. Heatmap table shows performance across periods
+    </flow>
+  </data_flow>
+
+  <dependencies>
+    <dependency type="api">
+      Portal proxy endpoints (in @/api/portal-proxy): getPositioningData, getAllocationSummary, getHoldingsAttribution, getETFPeriodReturns, getAUMSummary
+    </dependency>
+    <dependency type="hook">
+      useYangDataAsOf from @/hooks/useDataSource - central data timestamp registry
+    </dependency>
+    <dependency type="hook">
+      useQuery from @tanstack/react-query - data caching with 5min staleTime and 30min gcTime
+    </dependency>
+    <dependency type="utility">
+      buildAttributionData - constructs hierarchical attribution structure from holdings + returns
+    </dependency>
+    <dependency type="constants">
+      ETF_CATEGORIZATION from constants/etf-categories - maps 30+ tickers to categories and segments
+    </dependency>
+    <dependency type="external">
+      recharts - Treemap, ResponsiveContainer for visualizations
+    </dependency>
+  </dependencies>
+
+  <component_relationships>
+    <relationship from="Attribution" to="StylePolicyComparison" type="parent-child">
+      Passes portfolio, period, and change handlers. StylePolicyComparison is header section.
+    </relationship>
+    <relationship from="Attribution" to="SelectionTab" type="parent-child">
+      Passes portfolio, period, and change handlers. SelectionTab is main body section.
+    </relationship>
+    <relationship from="StylePolicyComparison" to="AssetAllocationSummary" type="parent-child">
+      Embeds attribution table inline. AssetAllocationSummary fetches its own data.
+    </relationship>
+    <relationship from="SelectionTab" to="buildAttributionData" type="utility-consumer">
+      Calls buildAttributionData(portfolio, returnsData, period) to construct tree structure
+    </relationship>
+    <relationship from="HoldingsTab" to="getTickerMetadata" type="utility-consumer">
+      Enriches holdings with ticker metadata (sector, industry, etc.)
+    </relationship>
+  </component_relationships>
+
+  <cache_strategy>
+    <cache key="positioning-data" staleTime="not-specified" gcTime="default">
+      Main positioning data - appears in Attribution.tsx useQuery
+    </cache>
+    <cache key="allocation-summary" staleTime="5 minutes" gcTime="30 minutes">
+      Allocation summary data - used in StylePolicyComparison and AssetAllocationSummary
+    </cache>
+    <cache key="holdings-attribution" staleTime="5 minutes" gcTime="30 minutes">
+      Holdings attribution data - used in AssetAllocationSummary and panel/HoldingsTab
+    </cache>
+    <note>
+      Note: HoldingsTab and SelectionTab use useEffect + Promise for data fetching instead of useQuery, bypassing React Query caching
+    </note>
+  </cache_strategy>
+
+</page_inventory>

@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page_inventory>
+  <metadata>
+    <agent>0.2.3_RD_FactorTilts</agent>
+    <page>FactorTilts</page>
+    <directory>portal/src/pages/FactorTilts/</directory>
+    <date>2026-03-02</date>
+    <audit_status>complete</audit_status>
+  </metadata>
+
+  <files>
+    <file path="portal/src/pages/FactorTilts/FactorTilts.tsx" type="component">
+      Main page component with tiered data loading (Tier 1/2/3), tab navigation, and state management for portfolio/window selection
+    </file>
+    <file path="portal/src/pages/FactorTilts/index.ts" type="export">
+      Barrel export exposing FactorTilts component, types, constants, and utilities
+    </file>
+    <file path="portal/src/pages/FactorTilts/types.ts" type="types">
+      TypeScript type definitions: PortfolioId, WindowId, FactorKey, RegressionSummaryRow, FactorTiltsDataset, RadarDataPoint, etc.
+    </file>
+    <file path="portal/src/pages/FactorTilts/constants.ts" type="utilities">
+      Portfolio/window/factor constants, formatting utilities (formatFactorValue, formatR2, formatAlpha), data transformation functions (transformSnapshotToDataset, mergeSpreadsIntoDataset, mergeTimeSeriesIntoDataset, computeAggregateMetrics)
+    </file>
+    <file path="portal/src/pages/FactorTilts/components/ModelTiltTimeSeriesView.tsx" type="component">
+      Line chart visualization of historical model factor tilts over time with model/factor selection controls and display period filters
+    </file>
+    <file path="portal/src/pages/FactorTilts/panels/FactorTiltOverviewPanel.tsx" type="component">
+      Overview panel with Nivo radar chart showing factor exposure profile, expanded summary table, and conviction/consensus indicators
+    </file>
+    <file path="portal/src/pages/FactorTilts/panels/SummaryMetricsTable.tsx" type="component">
+      Regression summary table displaying R², alpha, conviction, and consensus factors with model toggle and window filtering
+    </file>
+    <file path="portal/src/pages/FactorTilts/tabs/FactorTiltBarsTab.tsx" type="component">
+      Tab component with bar chart showing factor tilts across portfolios (snapshot mode) and embedded ModelTiltTimeSeriesView (time series mode)
+    </file>
+    <file path="portal/src/pages/FactorTilts/tabs/FactorTiltTimeSeriesTab.tsx" type="component">
+      Tab component showing rolling cumulative returns of market factor spreads with factor selection and time window controls
+    </file>
+  </files>
+
+  <api_calls>
+    <api_call>
+      <name>getFactorTiltsSnapshot</name>
+      <import_from>@/api/portal-proxy</import_from>
+      <endpoint>/api/portal-proxy/factor-tilts-snapshot (or similar)</endpoint>
+      <method>GET</method>
+      <tier>1 (on page mount)</tier>
+      <size_approx>46 KB</size_approx>
+      <request_shape>No parameters</request_shape>
+      <response_shape>{ data_as_of: string | null, as_of: string | null, summary: RegressionSummaryRow[], factorTiltsByWindow: Record&lt;WindowId, Record&lt;ModelPortfolioId, Record&lt;FactorKey, number | null&gt;&gt;&gt;, aggregateTilts: Record&lt;WindowId, Record&lt;FactorKey, number | null&gt;&gt; }</response_shape>
+      <file>portal/src/pages/FactorTilts/FactorTilts.tsx:41, 80</file>
+      <purpose>Loads regression summary and factor tilts for Overview panel and bar chart; triggers immediately on mount</purpose>
+    </api_call>
+    <api_call>
+      <name>getFactorTiltsSpreads</name>
+      <import_from>@/api/portal-proxy</import_from>
+      <endpoint>/api/portal-proxy/factor-tilts-spreads (or similar)</endpoint>
+      <method>GET</method>
+      <tier>2 (lazy load on "Factor Spreads" tab click)</tier>
+      <size_approx>196 KB</size_approx>
+      <request_shape>No parameters</request_shape>
+      <response_shape>{ factorSpreads: Record&lt;FactorKey, { current: number, recent: Array&lt;{ date: string, value: number }&gt; }&gt; }</response_shape>
+      <file>portal/src/pages/FactorTilts/FactorTilts.tsx:42, 138</file>
+      <purpose>Loads market factor spread time series for Factor Spreads tab visualization</purpose>
+    </api_call>
+    <api_call>
+      <name>getFactorTiltsTimeSeries</name>
+      <import_from>@/api/portal-proxy</import_from>
+      <endpoint>/api/portal-proxy/factor-tilts-timeseries (or similar)</endpoint>
+      <method>GET</method>
+      <tier>3 (lazy load on Time Series view toggle)</tier>
+      <size_approx>2.1 MB</size_approx>
+      <request_shape>No parameters</request_shape>
+      <response_shape>{ timeSeries: Record&lt;FactorKey, Array&lt;{ date: string, value: number }&gt;&gt;, modelTiltTimeSeries: Array&lt;{ date: string, model: PortfolioId, window: WindowId, r2: number | null, alpha: number | null, factors: Record&lt;FactorKey, number | null&gt; }&gt; }</response_shape>
+      <file>portal/src/pages/FactorTilts/FactorTilts.tsx:43, 164</file>
+      <purpose>Loads historical model tilts and factor spreads for ModelTiltTimeSeriesView component in FactorTiltBarsTab</purpose>
+    </api_call>
+    <api_call>
+      <name>getAUMMetrics</name>
+      <import_from>@/api/endpoints/aum</import_from>
+      <endpoint>/api/aum-metrics (or similar)</endpoint>
+      <method>GET</method>
+      <tier>1 (on page mount)</tier>
+      <request_shape>No parameters</request_shape>
+      <response_shape>{ total: { aum: number }, by_model: Array&lt;{ model_name: string, aum: number }&gt; }</response_shape>
+      <file>portal/src/pages/FactorTilts/FactorTilts.tsx:45, 81</file>
+      <purpose>Loads AUM data for computing price-weighted aggregate metrics (AGG portfolio consensus/conviction)</purpose>
+    </api_call>
+    <api_call>
+      <name>useYangDataAsOf</name>
+      <import_from>@/hooks/useDataSource</import_from>
+      <type>hook</type>
+      <request_shape>useYangDataAsOf('factor_tilts', dataAsOf: string | null)</request_shape>
+      <file>portal/src/pages/FactorTilts/FactorTilts.tsx:46, 67</file>
+      <purpose>Registers the data_as_of timestamp with central Yang data registry for display synchronization</purpose>
+    </api_call>
+  </api_calls>
+
+  <shared_imports>
+    <import>
+      <from>@/contexts/PageThemeContext</from>
+      <provides>PageThemeProvider</provides>
+      <used_in>portal/src/pages/FactorTilts/FactorTilts.tsx</used_in>
+      <purpose>Provides accent color theming (hsl(var(--model-default)))</purpose>
+    </import>
+    <import>
+      <from>@/components/PageHeaderVariants</from>
+      <provides>PageHeaderCleanBadge</provides>
+      <used_in>portal/src/pages/FactorTilts/FactorTilts.tsx</used_in>
+      <purpose>Page header with icon, title, and description</purpose>
+    </import>
+    <import>
+      <from>@/components/TabNavigation</from>
+      <provides>TabNavigation</provides>
+      <used_in>portal/src/pages/FactorTilts/FactorTilts.tsx</used_in>
+      <purpose>Tab bar for switching between Portfolio Factors and Factor Spreads views</purpose>
+    </import>
+    <import>
+      <from>@/hooks/useTabNavigation</from>
+      <provides>useTabNavigation</provides>
+      <used_in>portal/src/pages/FactorTilts/FactorTilts.tsx</used_in>
+      <purpose>Hook managing active tab state and analytics tracking</purpose>
+    </import>
+    <import>
+      <from>@/hooks/useFilterTracking</from>
+      <provides>useSelectTracking</provides>
+      <used_in>portal/src/pages/FactorTilts/FactorTilts.tsx</used_in>
+      <purpose>Hook for portfolio scope and time window selection with analytics</purpose>
+    </import>
+    <import>
+      <from>@/components/LoadingSpinner</from>
+      <provides>LoadingContainer, LoadingContent</provides>
+      <used_in>portal/src/pages/FactorTilts/FactorTilts.tsx, FactorTiltBarsTab.tsx, FactorTiltTimeSeriesTab.tsx</used_in>
+      <purpose>Loading spinners and content placeholders</purpose>
+    </import>
+    <import>
+      <from>@/ui/components/panels</from>
+      <provides>Panel, PanelHeader, PanelContent, SmartPanelFooter</provides>
+      <used_in>FactorTiltOverviewPanel.tsx, FactorTiltBarsTab.tsx, FactorTiltTimeSeriesTab.tsx</used_in>
+      <purpose>Card/panel layout components with header, content, and footer</purpose>
+    </import>
+    <import>
+      <from>@/components/Tooltip</from>
+      <provides>Tooltip</provides>
+      <used_in>ModelTiltTimeSeriesView.tsx, SummaryMetricsTable.tsx</used_in>
+      <purpose>Hover tooltips for help text and column descriptions</purpose>
+    </import>
+    <import>
+      <from>@/components/ErrorMessage</from>
+      <provides>ErrorMessage</provides>
+      <used_in>FactorTiltOverviewPanel.tsx, SummaryMetricsTable.tsx</used_in>
+      <purpose>Error state display</purpose>
+    </import>
+    <import>
+      <from>@nivo/radar</from>
+      <provides>ResponsiveRadar</provides>
+      <used_in>portal/src/pages/FactorTilts/panels/FactorTiltOverviewPanel.tsx</used_in>
+      <purpose>Nivo radar chart for factor exposure visualization</purpose>
+    </import>
+    <import>
+      <from>recharts</from>
+      <provides>BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, Cell</provides>
+      <used_in>FactorTiltBarsTab.tsx, ModelTiltTimeSeriesView.tsx, FactorTiltTimeSeriesTab.tsx</used_in>
+      <purpose>Chart components for bar and line visualizations</purpose>
+    </import>
+    <import>
+      <from>lucide-react</from>
+      <provides>Scale, SlidersHorizontal, Split, HelpCircle, BarChart3, TrendingUp</provides>
+      <used_in>FactorTilts.tsx, ModelTiltTimeSeriesView.tsx, FactorTiltOverviewPanel.tsx, SummaryMetricsTable.tsx, FactorTiltBarsTab.tsx</used_in>
+      <purpose>Icon components for UI elements</purpose>
+    </import>
+    <import>
+      <from>@/lib/utils</from>
+      <provides>cn</provides>
+      <used_in>All components</used_in>
+      <purpose>Utility function for class name merging (tailwind conditional classes)</purpose>
+    </import>
+  </shared_imports>
+
+  <types>
+    <type name="PortfolioId" defined_in="portal/src/pages/FactorTilts/types.ts:5">
+      Union type: 'UST' | 'ST' | 'INT' | 'LTC' | 'LTA' | 'AGG' - identifies portfolios (5 model portfolios + aggregate)
+    </type>
+    <type name="ModelPortfolioId" defined_in="portal/src/pages/FactorTilts/types.ts:7">
+      Union type: Exclude&lt;PortfolioId, 'AGG'&gt; - the 5 non-aggregate model portfolios
+    </type>
+    <type name="WindowId" defined_in="portal/src/pages/FactorTilts/types.ts:9">
+      Union type: '1M' | '2M' | '3M' | '6M' | '1Y' | '2Y' - regression lookback periods
+    </type>
+    <type name="FactorKey" defined_in="portal/src/pages/FactorTilts/types.ts:11">
+      Union type: 'Equity vs FI' | 'Growth vs Value' | 'US vs Foreign' | 'Large vs Small' | 'Agg vs Short' | 'HY vs Agg' - factor tilt identifiers
+    </type>
+    <type name="CompareMode" defined_in="portal/src/pages/FactorTilts/types.ts:19">
+      Union type: 'aggregate' | 'overlay' | 'smallMultiples' - comparison visualization modes (currently hardcoded to 'aggregate')
+    </type>
+    <type name="TabType" defined_in="portal/src/pages/FactorTilts/types.ts:21">
+      Union type: 'bars' | 'timeseries' - active tab identifier
+    </type>
+    <type name="OverviewViewMode" defined_in="portal/src/pages/FactorTilts/types.ts:23">
+      Union type: 'snapshot' | 'timeseries' - sub-view mode in FactorTiltBarsTab
+    </type>
+    <type name="RegressionSummaryRow" defined_in="portal/src/pages/FactorTilts/types.ts:25">
+      Fields: model (PortfolioId), window (WindowId), r2 (number | null), alpha (number | null), factors (Record&lt;FactorKey, number | null&gt;), priceWeightedConsensus (FactorKey | null), priceWeightedConviction (FactorKey | null) - regression results for one model/window combination
+    </type>
+    <type name="FactorTimeSeriesPoint" defined_in="portal/src/pages/FactorTilts/types.ts:36">
+      Fields: date (ISO string), factors (Record&lt;FactorKey, number | null&gt;) - market factor spread data at a point in time
+    </type>
+    <type name="ModelTiltTimeSeriesPoint" defined_in="portal/src/pages/FactorTilts/types.ts:41">
+      Fields: date (ISO string), model (PortfolioId), window (WindowId), r2 (number | null), alpha (number | null), factors (Record&lt;FactorKey, number | null&gt;) - rolling regression tilts for a model at a point in time
+    </type>
+    <type name="FactorTiltsDataset" defined_in="portal/src/pages/FactorTilts/types.ts:50">
+      Fields: summary (RegressionSummaryRow[]), timeSeriesByModel (Record&lt;ModelPortfolioId, Record&lt;WindowId, FactorTimeSeriesPoint[]&gt;&gt;), factorTiltsByWindow (Record&lt;WindowId, Record&lt;ModelPortfolioId, Record&lt;FactorKey, number | null&gt;&gt;&gt;), aggregateTiltsByWindow (Record&lt;WindowId, Record&lt;FactorKey, number | null&gt;&gt;), factorTimeSeries (FactorTimeSeriesPoint[] | undefined), modelTiltTimeSeries (ModelTiltTimeSeriesPoint[] | undefined) - complete dataset for all visualizations
+    </type>
+    <type name="RadarDataPoint" defined_in="portal/src/pages/FactorTilts/types.ts:62">
+      Fields: factor (FactorKey), [key: string]: string | number | null - Nivo radar chart data format with model values keyed by PortfolioId
+    </type>
+    <type name="NivoRadarDataPoint" defined_in="portal/src/pages/FactorTilts/types.ts:68">
+      Fields: factor (string), [key: string]: string | number | null | undefined - transformed Nivo radar data with adjusted values for visualization
+    </type>
+    <type name="PortfolioInfo" defined_in="portal/src/pages/FactorTilts/types.ts:74">
+      Fields: id (PortfolioId), name (string), color (string) - metadata for portfolio display
+    </type>
+    <type name="FactorInfo" defined_in="portal/src/pages/FactorTilts/types.ts:81">
+      Fields: key (FactorKey), shortName (string), description (string), longSide (string), shortSide (string) - metadata for factor display and interpretation
+    </type>
+  </types>
+
+  <page_structure>
+    <tab name="Portfolio Factors" id="bars" status="functional">
+      Bar chart showing factor tilts across all model portfolios with snapshot mode (clustered bar chart) and time series mode (embedded ModelTiltTimeSeriesView). Includes lookback window selector in snapshot mode. Tier 3 loading triggered when switching to time series view.
+    </tab>
+    <tab name="Factor Spreads" id="timeseries" status="functional">
+      Line chart showing rolling cumulative returns of market factor spreads with factor selection checkboxes, rolling window selector (1M/3M/6M/1Y), and display window selector (1M/3M/6M/1Y/2Y). Tier 2 data loading triggered when tab is clicked.
+    </tab>
+    <overview_panel name="Factor Exposure Profile" status="functional">
+      Nivo radar chart visualization of factor tilts with portfolio and lookback dropdowns. Right panel shows expanded summary: regression table (R², alpha, conviction, consensus) and factor exposures grid with gradient bars. Portfolio/lookback selectors in header. Methodology note for AGG portfolio AUM-weighted calculations.
+    </overview_panel>
+  </page_structure>
+
+  <state_management>
+    <state_variable name="selectedScope" type="PortfolioId" initial_value="AGG">
+      Active portfolio selection tracked by useSelectTracking hook with analytics
+    </state_variable>
+    <state_variable name="selectedWindow" type="WindowId" initial_value="3M">
+      Active lookback window tracked by useSelectTracking hook with analytics
+    </state_variable>
+    <state_variable name="activeTab" type="TabType" initial_value="bars">
+      Active tab managed by useTabNavigation hook with analytics
+    </state_variable>
+    <state_variable name="data" type="FactorTiltsDataset | null" initial_value="null">
+      Merged dataset from Tiers 1/2/3 lazy loading
+    </state_variable>
+    <state_variable name="dataAsOf" type="string | null" initial_value="null">
+      Timestamp of snapshot data registered with Yang data registry via useYangDataAsOf
+    </state_variable>
+    <state_variable name="tier2Loaded" type="boolean" initial_value="false">
+      Flag indicating Tier 2 spreads data has been loaded
+    </state_variable>
+    <state_variable name="tier3Loaded" type="boolean" initial_value="false">
+      Flag indicating Tier 3 time series data has been loaded
+    </state_variable>
+  </state_management>
+
+  <data_flow>
+    <flow name="Tier 1 Loading (Page Mount)">
+      Page mount triggers Promise.all([getFactorTiltsSnapshot(), getAUMMetrics()]) → data transformed via transformSnapshotToDataset() → AUM weights used to compute AGG metrics via computeAggregateMetrics() → merged back into dataset → setData() → Overview panel and bars chart rendered
+    </flow>
+    <flow name="Tier 2 Loading (Factor Spreads Tab)">
+      User clicks Factor Spreads tab → handleTabChangeWithLazyLoad('timeseries') → loadTier2() triggered → getFactorTiltsSpreads() fetched → mergeSpreadsIntoDataset() transforms to factorTimeSeries → setTier2Loaded(true) → FactorTiltTimeSeriesTab renders with data
+    </flow>
+    <flow name="Tier 3 Loading (Time Series Toggle)">
+      User clicks "Time Series" button in Bars tab → handleViewModeChange('timeseries') → onLoadTier3() called → getFactorTiltsTimeSeries() fetched → mergeTimeSeriesIntoDataset() loads modelTiltTimeSeries → setTier3Loaded(true) → ModelTiltTimeSeriesView renders with data
+    </flow>
+  </data_flow>
+
+  <constants>
+    <constant name="AVAILABLE_PORTFOLIOS" type="PortfolioInfo[]" defined_in="constants.ts:25">
+      Array of 6 portfolios: AGG (purple), UST (orange), ST (amber), INT (green), LTC (blue), LTA (red) with canonical colors from modelPortfolioColors.ts
+    </constant>
+    <constant name="MODEL_PORTFOLIOS" type="PortfolioInfo[]" defined_in="constants.ts:34">
+      Filtered AVAILABLE_PORTFOLIOS excluding AGG
+    </constant>
+    <constant name="WINDOWS" type="Array&lt;{ id: WindowId; label: string }&gt;" defined_in="constants.ts:38">
+      Array of regression lookback periods: 1M, 2M, 3M, 6M, 1Y (2Y hidden from UI but backend logic remains)
+    </constant>
+    <constant name="FACTOR_KEYS" type="FactorKey[]" defined_in="constants.ts:47">
+      Array of 6 factors in canonical order: Equity vs FI, Growth vs Value, US vs Foreign, Large vs Small, Agg vs Short, HY vs Agg (matched to Yang's PKL exactly)
+    </constant>
+    <constant name="FACTOR_INFO" type="FactorInfo[]" defined_in="constants.ts:56">
+      Detailed metadata for each factor with descriptions and long/short sides
+    </constant>
+    <constant name="FACTOR_COLORS" type="Record&lt;FactorKey, string&gt;" defined_in="FactorTiltTimeSeriesTab.tsx:35">
+      High-contrast colors for factor lines in spreads chart: red, purple, blue, yellow, orange, green
+    </constant>
+  </constants>
+
+  <key_functions>
+    <function name="getRadarData" file="constants.ts:275" signature="(dataset: FactorTiltsDataset, window: WindowId, models: PortfolioId[]): NivoRadarDataPoint[]">
+      Transforms dataset to Nivo radar format using full factor descriptions as labels
+    </function>
+    <function name="getExtremeTilts" file="constants.ts:303" signature="(factors: Record&lt;FactorKey, number | null&gt;): { largest: ... | null; smallest: ... | null }">
+      Finds largest and smallest tilts in a factor record
+    </function>
+    <function name="formatFactorValue" file="constants.ts:327" signature="(value: number | null, decimals?: number): string">
+      Formats factor tilt as percentage with sign (e.g., "+15.3%")
+    </function>
+    <function name="formatR2" file="constants.ts:337" signature="(value: number | null): string">
+      Formats R² as 3-decimal string
+    </function>
+    <function name="formatAlpha" file="constants.ts:345" signature="(value: number | null): string">
+      Formats alpha in basis points with sign (e.g., "+123.4 bps")
+    </function>
+    <function name="computeAggregateMetrics" file="constants.ts:126" signature="(summaryRows: RegressionSummaryRow[], aumWeights: Record&lt;string, number&gt;, window: WindowId): RegressionSummaryRow">
+      Computes AUM-weighted aggregate metrics for AGG portfolio including price-weighted consensus/conviction
+    </function>
+    <function name="transformSnapshotToDataset" file="constants.ts:366" signature="(snapshot: FactorTiltsSnapshotResponse): FactorTiltsDataset">
+      Tier 1: Transforms API snapshot response to FactorTiltsDataset format with empty time series placeholders
+    </function>
+    <function name="mergeSpreadsIntoDataset" file="constants.ts:433" signature="(dataset: FactorTiltsDataset, spreads: FactorTiltsSpreadsResponse): FactorTiltsDataset">
+      Tier 2: Merges factor spread data into dataset as factorTimeSeries, respects window-specific day counts
+    </function>
+    <function name="mergeTimeSeriesIntoDataset" file="constants.ts:500" signature="(dataset: FactorTiltsDataset, timeseries: FactorTiltsTimeSeriesResponse): FactorTiltsDataset">
+      Tier 3: Merges time series data into dataset as factorTimeSeries and modelTiltTimeSeries
+    </function>
+  </key_functions>
+
+  <component_props>
+    <component name="FactorTilts">
+      Receives no props. Uses internal state and hooks. Returns PageThemeProvider-wrapped page with header, overview panel, tabs, and tab content.
+    </component>
+    <component name="FactorTiltOverviewPanel">
+      Props: data (FactorTiltsDataset), selectedScope (PortfolioId), setSelectedScope, selectedWindow (WindowId), setSelectedWindow, dataAsOf (string | null, optional)
+    </component>
+    <component name="SummaryMetricsTable">
+      Props: data (RegressionSummaryRow[]), selectedWindow (WindowId | null), selectedScope (PortfolioId)
+    </component>
+    <component name="FactorTiltBarsTab">
+      Props: data (FactorTiltsDataset), dataAsOf (string | null, optional), onLoadTier3 (function, optional), tier3Loading (boolean), tier3Loaded (boolean)
+    </component>
+    <component name="FactorTiltTimeSeriesTab">
+      Props: data (FactorTiltsDataset), dataAsOf (string | null, optional), tier2Loading (boolean), tier2Loaded (boolean)
+    </component>
+    <component name="ModelTiltTimeSeriesView">
+      Props: data (FactorTiltsDataset)
+    </component>
+  </component_props>
+
+  <performance_notes>
+    <note name="Tiered Loading Architecture">
+      Tier 1 (~46 KB) loads on mount and powers Overview + Bars views. Tier 2 (~196 KB) loads lazily on Factor Spreads tab click. Tier 3 (~2.1 MB) loads on Time Series toggle. Default page load reduced from 2.3 MB to 46 KB (99% reduction).
+    </note>
+    <note name="Data Caching">
+      Tier 2 and Tier 3 data cached in state after first load (tier2Loaded, tier3Loaded flags prevent re-fetching)
+    </note>
+    <note name="Responsive Radar Margins">
+      FactorTiltOverviewPanel adjusts radar chart margins, label offsets, and font size based on viewport width for Surface Laptop (~1280px), Medium screens (~1536px), Large screens (~1920px), and Very Large screens (1920+px)
+    </note>
+    <note name="useMemo Optimization">
+      Chart data, Y-axis domain, and legend/line configurations memoized to prevent unnecessary re-renders during tab switches and selection changes
+    </note>
+  </performance_notes>
+
+  <issues>
+    <issue file="constants.ts:16, 17, 52, 53, 86, 93" type="MIGRATION_NOTE">
+      Factor keys changed from 'Short vs Agg' to 'Agg vs Short' and from 'HY vs IG' to 'HY vs Agg' to match Yang's PKL exactly. Comments note this change was made.
+    </issue>
+  </issues>
+
+  <data_sources>
+    <source name="Yang Pipeline (yang-pipeline)">
+      Provides getFactorTiltsSnapshot(), getFactorTiltsSpreads(), getFactorTiltsTimeSeries() via portal-proxy. Data represents regression-based factor analysis for 5 model portfolios + aggregate with multiple lookback windows.
+    </source>
+    <source name="AUM Endpoint">
+      Provides getAUMMetrics() returning total and per-model AUM for weighting AGG portfolio metrics
+    </source>
+    <source name="Data Registry">
+      useYangDataAsOf('factor_tilts', dataAsOf) registers snapshot timestamp with central Yang data source registry
+    </source>
+  </data_sources>
+
+  <dependencies>
+    <dependency type="component" name="Portal UI Library">
+      @/ui/components/panels (Panel, PanelHeader, PanelContent, SmartPanelFooter) - core card/panel layout components
+    </dependency>
+    <dependency type="library" name="Nivo Charts">
+      @nivo/radar - radar chart visualization for factor profiles
+    </dependency>
+    <dependency type="library" name="Recharts">
+      recharts - bar and line charts for tilts and spreads visualization
+    </dependency>
+    <dependency type="hook" name="Page Theme">
+      @/contexts/PageThemeContext (PageThemeProvider) - accent color theming (hsl(var(--model-default)))
+    </dependency>
+    <dependency type="hook" name="Analytics">
+      @/hooks/useSelectTracking (useSelectTracking), @/hooks/useTabNavigation (useTabNavigation) - analytics event tracking for user interactions
+    </dependency>
+  </dependencies>
+
+  <api_response_types>
+    <type name="FactorTiltsSnapshotResponse">
+      Fields: data_as_of (string | null), as_of (string | null), summary (Array of { model, window, r2, alpha, factors: Record&lt;FactorKey, number | null&gt; }), factorTiltsByWindow (Record&lt;WindowId, Record&lt;ModelPortfolioId, Record&lt;FactorKey, number | null&gt;&gt;&gt;), aggregateTilts (Record&lt;WindowId, Record&lt;FactorKey, number | null&gt;&gt;)
+    </type>
+    <type name="FactorTiltsSpreadsResponse">
+      Fields: factorSpreads (Record&lt;FactorKey, { current: number, recent: Array&lt;{ date: string, value: number }&gt; }&gt;)
+    </type>
+    <type name="FactorTiltsTimeSeriesResponse">
+      Fields: timeSeries (Record&lt;FactorKey, Array&lt;{ date: string, value: number }&gt;&gt;), modelTiltTimeSeries (Array&lt;{ date, model, window, r2, alpha, factors: Record&lt;FactorKey, number | null&gt; }&gt;)
+    </type>
+    <type name="AUMMetricsResponse">
+      Fields: total ({ aum: number }), by_model (Array&lt;{ model_name: string, aum: number }&gt;)
+    </type>
+  </api_response_types>
+
+  <visual_design>
+    <color_scheme>
+      AGG: #5e72e4 (purple/indigo)
+      UST: #f97316 (orange)
+      ST: #f59e0b (amber/yellow)
+      INT: #10b981 (green)
+      LTC: #3b82f6 (blue)
+      LTA: #ef4444 (red)
+      Primary accent: hsl(var(--primary-sky)) = sky-400 (Opal marker color)
+      Success: emerald-400 (positive tilts/values)
+      Danger: red-400 (negative tilts/values)
+    </color_scheme>
+    <layout_patterns>
+      Overview Panel: 2-column grid (1 col on mobile) with radar chart (left) and expanded summary (right)
+      Radar Chart: Factor labels positioned outside with responsive offsets based on viewport
+      Factor Exposures Table: Dual-column grid with fixed width factor names/abbreviations/values on left, gradient bars on right
+      Tab Content: Full-width responsive containers with h-[400px] or h-[350px] charts
+      Controls: Compact dropdowns and button groups in panel headers with flex layout
+    </layout_patterns>
+  </visual_design>
+
+</page_inventory>

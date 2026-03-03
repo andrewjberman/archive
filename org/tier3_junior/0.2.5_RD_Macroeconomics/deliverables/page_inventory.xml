@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page_inventory>
+  <metadata>
+    <agent>0.2.5_RD_Macroeconomics</agent>
+    <page>Macroeconomics</page>
+    <directory>portal/src/pages/Macroeconomics/</directory>
+    <date>2026-03-02</date>
+    <audit_timestamp>2026-03-02T00:00:00Z</audit_timestamp>
+  </metadata>
+
+  <files>
+    <file path="portal/src/pages/Macroeconomics/Macroeconomics.tsx" type="component">
+      Main page component: displays Economic Data Performance Tracker heatmap + tab navigation for Yield Curve and Volatility tabs
+    </file>
+    <file path="portal/src/pages/Macroeconomics/index.ts" type="barrel_export">
+      Barrel export for Macroeconomics page component
+    </file>
+    <file path="portal/src/pages/Macroeconomics/types.ts" type="types">
+      Core type definitions for page (MacroTabType, IndicatorStatus, YieldCurvePoint, VIXData, MacroDataResponse, etc.)
+    </file>
+    <file path="portal/src/pages/Macroeconomics/constants.ts" type="constants">
+      Configuration constants: MONTHS, QUARTERS, MONTHLY_INDICATORS, STATUS_COLORS, VIX_REGIMES, MOVE_REGIMES, YIELD_CURVE_TENORS
+    </file>
+    <file path="portal/src/pages/Macroeconomics/panels/MacroHeatmap.tsx" type="component">
+      Heatmap panel displaying 73 macroeconomic indicators in 10 expandable groups with percentile-based color gradients (Value/Position modes)
+    </file>
+    <file path="portal/src/pages/Macroeconomics/tabs/YieldCurveTab.tsx" type="component">
+      Yield Curve tab: multi-snapshot chart (current, 1M ago, 1Y ago) with stat cards, spread analysis, and curve shape indicator
+    </file>
+    <file path="portal/src/pages/Macroeconomics/tabs/VolatilityTab.tsx" type="component">
+      Volatility tab: VIX/MOVE index toggle with AI summary, speedometer gauge, historical chart with percentile bands, time window selector
+    </file>
+    <file path="portal/src/pages/Macroeconomics/components/MacroTimeSeriesModal.tsx" type="component">
+      Modal component for drilling into individual macro indicator time series with percentile bands, value/percentile display modes
+    </file>
+    <file path="portal/src/pages/Macroeconomics/utils/percentileColor.ts" type="utility">
+      Percentile color utilities: getPercentileColor(), getPercentileTextClass(), getPercentileRange(), formatValueWithUnit()
+    </file>
+    <file path="portal/src/pages/Macroeconomics/constants/indicators.ts" type="constants">
+      Indicator metadata: INDICATOR_SIGNS (+ for higher=better, − for higher=worse) and INDICATOR_DESCRIPTIONS for all ~45 tracked indicators
+    </file>
+  </files>
+
+  <api_calls>
+    <api_call>
+      <hook>useQuery</hook>
+      <endpoint>/api/portal-proxy (getVolatilityData)</endpoint>
+      <method>GET</method>
+      <request_shape>None (no parameters)</request_shape>
+      <response_shape>{ data_as_of: string, vix: { current: VolatilityCurrentData, historical: VolatilityHistoricalPoint[], percentiles: VolatilityPercentiles }, move: { ... }, regime_colors: VolatilityRegimeColors }</response_shape>
+      <file>portal/src/pages/Macroeconomics/Macroeconomics.tsx:31</file>
+    </api_call>
+    <api_call>
+      <hook>Promise.all (getMacroData)</hook>
+      <endpoint>/api/portal-proxy (getMacroData)</endpoint>
+      <method>GET</method>
+      <request_shape>None (no parameters)</request_shape>
+      <response_shape>{ data_as_of: string, year: number, groups: MacroGroup[] } where MacroGroup = { category: string, count: number, indicators: MacroIndicator[] }</response_shape>
+      <file>portal/src/pages/Macroeconomics/panels/MacroHeatmap.tsx:74</file>
+    </api_call>
+    <api_call>
+      <hook>Promise.all (getYieldCurveData)</hook>
+      <endpoint>/api/endpoints/yield-curve</endpoint>
+      <method>GET</method>
+      <request_shape>None (no parameters)</request_shape>
+      <response_shape>YieldCurveResponse with keys like 'US Treasury 1M', 'US Treasury 3M', ..., 'US Treasury 30Y', each containing array of { date: string, value: number }</response_shape>
+      <file>portal/src/pages/Macroeconomics/tabs/YieldCurveTab.tsx:220</file>
+    </api_call>
+    <api_call>
+      <hook>fetch (getMacroTimeSeries)</hook>
+      <endpoint>/api/endpoints/macro</endpoint>
+      <method>GET</method>
+      <request_shape>slug: string (slugified indicator name)</request_shape>
+      <response_shape>MacroTimeSeriesData or simple format { indicator: string, as_of: string, data: [{ date: string, value: number }, ...] }</response_shape>
+      <file>portal/src/pages/Macroeconomics/components/MacroTimeSeriesModal.tsx:297</file>
+    </api_call>
+  </api_calls>
+
+  <shared_imports>
+    <import>
+      <from>@/contexts/PageThemeContext</from>
+      <provides>PageThemeProvider</provides>
+      <used_in>portal/src/pages/Macroeconomics/Macroeconomics.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/PageHeaderVariants</from>
+      <provides>PageHeaderCleanBadge</provides>
+      <used_in>portal/src/pages/Macroeconomics/Macroeconomics.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/TabNavigation</from>
+      <provides>TabNavigation</provides>
+      <used_in>portal/src/pages/Macroeconomics/Macroeconomics.tsx</used_in>
+    </import>
+    <import>
+      <from>@/hooks/useTabNavigation</from>
+      <provides>useTabNavigation</provides>
+      <used_in>portal/src/pages/Macroeconomics/Macroeconomics.tsx</used_in>
+    </import>
+    <import>
+      <from>@/hooks/useDataSource</from>
+      <provides>useYangDataAsOf</provides>
+      <used_in>portal/src/pages/Macroeconomics/Macroeconomics.tsx, MacroHeatmap.tsx</used_in>
+    </import>
+    <import>
+      <from>@/api/portal-proxy</from>
+      <provides>getVolatilityData, getMacroData</provides>
+      <used_in>portal/src/pages/Macroeconomics/Macroeconomics.tsx, MacroHeatmap.tsx, YieldCurveTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/Tooltip</from>
+      <provides>Tooltip</provides>
+      <used_in>portal/src/pages/Macroeconomics/panels/MacroHeatmap.tsx</used_in>
+    </import>
+    <import>
+      <from>@/ui/components/panels</from>
+      <provides>SmartPanelFooter, Panel, PanelHeader, PanelContent, PanelFooter</provides>
+      <used_in>portal/src/pages/Macroeconomics/panels/MacroHeatmap.tsx, tabs/YieldCurveTab.tsx, tabs/VolatilityTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/components/LoadingSpinner</from>
+      <provides>LoadingContainer, LoadingInline</provides>
+      <used_in>portal/src/pages/Macroeconomics/panels/MacroHeatmap.tsx, tabs/YieldCurveTab.tsx, components/MacroTimeSeriesModal.tsx</used_in>
+    </import>
+    <import>
+      <from>@/lib/utils</from>
+      <provides>cn</provides>
+      <used_in>portal/src/pages/Macroeconomics/panels/MacroHeatmap.tsx</used_in>
+    </import>
+    <import>
+      <from>recharts</from>
+      <provides>Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceArea, ComposedChart</provides>
+      <used_in>portal/src/pages/Macroeconomics/tabs/YieldCurveTab.tsx, tabs/VolatilityTab.tsx, components/MacroTimeSeriesModal.tsx</used_in>
+    </import>
+    <import>
+      <from>lucide-react</from>
+      <provides>ChevronDown, ChevronRight, HelpCircle, Globe, Percent, Activity, X</provides>
+      <used_in>portal/src/pages/Macroeconomics/Macroeconomics.tsx, panels/MacroHeatmap.tsx, components/MacroTimeSeriesModal.tsx</used_in>
+    </import>
+    <import>
+      <from>@tanstack/react-query</from>
+      <provides>useQuery</provides>
+      <used_in>portal/src/pages/Macroeconomics/Macroeconomics.tsx</used_in>
+    </import>
+    <import>
+      <from>@/api/endpoints/yield-curve</from>
+      <provides>getYieldCurveData, YieldCurveResponse type</provides>
+      <used_in>portal/src/pages/Macroeconomics/tabs/YieldCurveTab.tsx</used_in>
+    </import>
+    <import>
+      <from>@/api/endpoints/macro</from>
+      <provides>getMacroTimeSeries</provides>
+      <used_in>portal/src/pages/Macroeconomics/components/MacroTimeSeriesModal.tsx</used_in>
+    </import>
+    <import>
+      <from>@/hooks/useDataFreshness</from>
+      <provides>useDataFreshness</provides>
+      <used_in>portal/src/pages/Macroeconomics/components/MacroTimeSeriesModal.tsx</used_in>
+    </import>
+    <import>
+      <from>@/lib/dateUtils</from>
+      <provides>formatPanelTimestamp</provides>
+      <used_in>portal/src/pages/Macroeconomics/components/MacroTimeSeriesModal.tsx</used_in>
+    </import>
+  </shared_imports>
+
+  <types>
+    <type name="MacroTabType" defined_in="portal/src/pages/Macroeconomics/types.ts">
+      Union type: 'yield-curve' | 'vix'. Defines available page tabs.
+    </type>
+    <type name="IndicatorStatus" defined_in="portal/src/pages/Macroeconomics/types.ts">
+      Union type: 'Tame' | 'Hot' | 'Mixed' | 'Dovish' | 'Hawkish' | null. Qualitative assessment of indicator readings.
+    </type>
+    <type name="EconomicIndicatorCell" defined_in="portal/src/pages/Macroeconomics/types.ts">
+      Key fields: status (IndicatorStatus), value (number | null), unit (string). Single cell in heatmap grid.
+    </type>
+    <type name="MacroMonthlyValue" defined_in="portal/src/pages/Macroeconomics/types.ts">
+      Key fields: value (number | null), percentile (number | null, 1-100). Monthly value with percentile rank from Yang PKL data.
+    </type>
+    <type name="MacroPercentileThresholds" defined_in="portal/src/pages/Macroeconomics/types.ts">
+      Key fields: p10, p25, p50, p75, p90 (all number | null). Historical percentile thresholds for an indicator.
+    </type>
+    <type name="MacroIndicator" defined_in="portal/src/pages/Macroeconomics/types.ts">
+      Key fields: name (string), bbg_ticker (string), unit (string), values (Record&lt;month, MacroMonthlyValue&gt;), thresholds (MacroPercentileThresholds). Single macro indicator.
+    </type>
+    <type name="MacroGroup" defined_in="portal/src/pages/Macroeconomics/types.ts">
+      Key fields: category (string), count (number), indicators (MacroIndicator[]). Grouped indicators by category.
+    </type>
+    <type name="MacroDataResponse" defined_in="portal/src/pages/Macroeconomics/types.ts">
+      Key fields: data_as_of (string, YYYY-MM-DD), year (number), groups (MacroGroup[]). Complete macro data response from Yang Lambda.
+    </type>
+    <type name="YieldCurvePoint" defined_in="portal/src/pages/Macroeconomics/types.ts">
+      Key fields: tenor (string), tenorYears (number), current (number), oneMonthAgo (number), oneYearAgo (number | null). Single point on yield curve.
+    </type>
+    <type name="VIXData" defined_in="portal/src/pages/Macroeconomics/types.ts">
+      Key fields: current (number), regime ('Low' | 'Normal' | 'Elevated' | 'High' | 'Extreme'), percentile (number), change1D (number), change1W (number), change1M (number). Current VIX reading.
+    </type>
+    <type name="VolatilityIndex" defined_in="portal/src/pages/Macroeconomics/constants.ts">
+      Union type: 'vix' | 'move'. Selects between equity and bond volatility indices.
+    </type>
+    <type name="VolatilityDataResponse" defined_in="@/api/portal-proxy">
+      Key fields: data_as_of (string), vix ({ current, historical, percentiles }), move ({ current, historical, percentiles }), regime_colors. Complete volatility data from API.
+    </type>
+  </types>
+
+  <page_structure>
+    <panel name="Economic Data Performance Tracker" status="functional">
+      MacroHeatmap panel displaying all 73+ macroeconomic indicators in 10 expandable categories with two display modes:
+      - Value Mode: Trailing 12-month view with percentile-colored cells
+      - Position Mode: Latest percentile + historical thresholds (p10, p25, p50, p75, p90)
+      Features: Collapsible groups, drill-down modal on indicator click, legend with percentile scale
+    </panel>
+    <tab name="Yield Curve" status="functional">
+      YieldCurveTab displays USD Treasury yield curve from 1M to 30Y maturity with three snapshots:
+      - Current (green, solid line)
+      - 1 Month Ago (amber, dashed line)
+      - 1 Year Ago (red, dashed line) — optional, depends on FRED data availability
+      Features: Curve shape (Inverted/Flat/Normal), 2s10s spread, 30Y yield, toggleable curves, stat cards, yield change mini bars
+    </tab>
+    <tab name="Volatility" status="functional">
+      VolatilityTab shows VIX and MOVE volatility indices with toggle between them:
+      - Left panel: AI-generated summary of volatility regime and implications
+      - Right panel: Speedometer gauge with current value, regime, percentile bar, 1D/1W/1M changes
+      - Bottom panel: Historical time series with percentile-based regime bands (10th/25th/50th/75th/90th), time window selector (1Y/3Y/5Y/10Y/Max)
+      Features: Regime color coding, asymmetric y-axis compression for VIX spikes, regime band labels
+    </tab>
+  </page_structure>
+
+  <issues>
+    <issue file="portal/src/pages/Macroeconomics/Macroeconomics.tsx:26" type="MARKER">
+      ✅ PHASE1_MC_REQ_002: VOLATILITY DATA LOADING ENABLED — comment marking feature flag for volatility data ingestion
+    </issue>
+    <issue file="portal/src/pages/Macroeconomics/panels/MacroHeatmap.tsx:71" type="MARKER">
+      ✅ PHASE1_MC_REQ_001: MACRO DATA LOADING ENABLED — comment marking feature flag for macro data ingestion
+    </issue>
+    <issue file="portal/src/pages/Macroeconomics/tabs/YieldCurveTab.tsx:216" type="MARKER">
+      ✅ PHASE1_MC_REQ_001: MACRO DATA LOADING ENABLED — comment marking feature flag for treasury yields from macro data
+    </issue>
+    <issue file="portal/src/pages/Macroeconomics/tabs/YieldCurveTab.tsx:240" type="WARNING">
+      Log output: '⚠️ FRED data not available - run ingest_yield_curve_fred.py' indicates optional FRED historical data ingestion requirement
+    </issue>
+    <issue file="portal/src/pages/Macroeconomics/tabs/VolatilityTab.tsx:412" type="COMMENT">
+      Config available for future use if needed — unused _config variable suggests reserved for future enhancements
+    </issue>
+    <issue file="portal/src/pages/Macroeconomics/tabs/VolatilityTab.tsx:495" type="COMMENT">
+      Config available for future use if needed — unused _config variable in HistoricalChart
+    </issue>
+    <issue file="portal/src/pages/Macroeconomics/tabs/YieldCurveTab.tsx:318" type="COMMENT">
+      Spread calculation available for future use — 30Y/10Y spread calculated but not displayed
+    </issue>
+  </issues>
+
+  <data_dependencies>
+    <source name="Yang PKL Macro Data">
+      Provides: MacroIndicator monthly values, percentiles, and thresholds for 73+ indicators across 10 categories (Leading Indicators, Treasury Yields, etc.)
+      Updated: Daily (via PHASE1_MC_REQ_001)
+      API: getMacroData() from @/api/portal-proxy
+      Consumed by: MacroHeatmap, YieldCurveTab (Treasury Yields group)
+    </source>
+    <source name="FRED Yield Curve Historical">
+      Provides: 1-year-ago yield curve snapshot for historical comparison (10 tenors: 1M to 30Y)
+      Updated: Optional/Manual (requires ingest_yield_curve_fred.py)
+      API: getYieldCurveData() from @/api/endpoints/yield-curve
+      Consumed by: YieldCurveTab (enables 1Y Ago curve toggle)
+    </source>
+    <source name="Volatility Index Data">
+      Provides: VIX and MOVE current readings, historical time series, percentiles, AI summaries, regime colors
+      Updated: Intraday (via PHASE1_MC_REQ_002)
+      API: getVolatilityData() from @/api/portal-proxy
+      Consumed by: VolatilityTab
+    </source>
+    <source name="Macro Time Series">
+      Provides: Individual indicator historical time series for drill-down modal (both simple and full formats supported)
+      Updated: On-demand when modal opens
+      API: getMacroTimeSeries(slug) from @/api/endpoints/macro
+      Consumed by: MacroTimeSeriesModal
+    </source>
+  </data_dependencies>
+
+  <component_hierarchy>
+    <root name="Macroeconomics">
+      Main page component orchestrating layout and tab navigation
+      <child name="PageHeaderCleanBadge">
+        Page title and description
+      </child>
+      <child name="MacroHeatmap">
+        Economic Data Performance Tracker panel with data loading
+        <grandchild name="GroupSectionValue / GroupSectionPosition">
+          Collapsible group headers with indicator counts
+        </grandchild>
+        <grandchild name="IndicatorRowValue / IndicatorRowPosition">
+          Individual indicator rows with value/percentile cells
+        </grandchild>
+        <grandchild name="MonthCellValue">
+          Month cell with percentile coloring and tooltip
+        </grandchild>
+        <grandchild name="MacroTimeSeriesModal">
+          Drill-down modal for full historical time series visualization
+          <element name="ChartTooltip">Custom tooltip for chart hover</element>
+          <element name="HistoricalChart">Percentile band visualization</element>
+        </grandchild>
+      </child>
+      <child name="TabNavigation">
+        Tab selector between Yield Curve and Volatility
+      </child>
+      <child name="YieldCurveTab">
+        Yield curve visualization with multi-snapshot comparison
+        <grandchild name="CustomTooltip">
+          Interactive tooltip showing all three curves and spreads
+        </grandchild>
+        <grandchild name="StatCard">
+          Key metric cards (2Y/10Y/30Y yields, spreads, curve shape)
+        </grandchild>
+      </child>
+      <child name="VolatilityTab">
+        VIX/MOVE volatility index display with toggle
+        <grandchild name="IndexToggle">
+          VIX/MOVE selector toggle
+        </grandchild>
+        <grandchild name="VolatilitySpeedometer">
+          Gauge visualization with percentile-based regime bands
+        </grandchild>
+        <grandchild name="AISummaryContent">
+          Parsed AI summary with section headers and bullets
+        </grandchild>
+        <grandchild name="HistoricalChart">
+          Time series with percentile reference lines and regime bands
+        </grandchild>
+        <grandchild name="HistoricalChartTooltip">
+          Tooltip with percentile calculation and regime inference
+        </grandchild>
+        <grandchild name="LoadingSkeleton">
+          Shimmer loading state
+        </grandchild>
+      </child>
+    </root>
+  </component_hierarchy>
+
+  <styling_notes>
+    <color_scheme name="Percentile-based Gradient">
+      1-20%: Green (rgba(34, 197, 94, ...)) — Low/good for negative indicators
+      21-40%: Lime (rgba(132, 204, 22, ...)) — Below Average
+      41-60%: Yellow (rgba(234, 179, 8, ...)) — Normal/Median
+      61-80%: Orange (rgba(249, 115, 22, ...)) — Above Average
+      81-100%: Red (rgba(239, 68, 68, ...)) — High/bad for negative indicators
+    </color_scheme>
+    <theme_variables>
+      Uses HSL CSS variables: --primary, --bg-header, --semantic-background-default, --semantic-background-contentPanel, --semantic-border-default
+    </theme_variables>
+    <accessibility>
+      Tooltips with help icons for all major components
+      Color-blind friendly via text labels + percentile numbers
+      Keyboard accessible dropdowns and toggles
+    </accessibility>
+  </styling_notes>
+
+  <performance_notes>
+    <optimization name="Data Sampling">
+      VolatilityTab: Filters historical data by time window, then samples every 3rd point (or last point) for rendering
+      YieldCurveTab: Uses recharts ResponsiveContainer for responsive sizing
+    </optimization>
+    <optimization name="Memoization">
+      MacroTimeSeriesModal: useMemo for filteredData, filteredThresholds, currentPercentile, yDomain to prevent unnecessary recalculations
+      VolatilityTab: useMemo for filteredData in HistoricalChart
+    </optimization>
+    <asymmetric_compression name="VIX Scale">
+      VolatilityTab VIX chart uses asymmetric y-axis transform (linear below 25, compressed above) to keep typical volatility range readable while compressing extreme spikes
+    </asymmetric_compression>
+  </performance_notes>
+
+  <integration_notes>
+    <data_as_of_registry>
+      Both MacroHeatmap and main Macroeconomics component register their data_as_of timestamps via useYangDataAsOf() hook for central freshness tracking
+    </data_as_of_registry>
+    <manifest_integration>
+      MacroTimeSeriesModal fetches manifest timestamp via useDataFreshness() for footer attribution
+      Panels use SmartPanelFooter with sourceKey="data_pkl" for consistent timestamp display
+    </manifest_integration>
+    <theme_context>
+      Main page wraps content in PageThemeProvider with accentColor tied to --primary CSS variable
+    </theme_context>
+  </integration_notes>
+
+</page_inventory>
