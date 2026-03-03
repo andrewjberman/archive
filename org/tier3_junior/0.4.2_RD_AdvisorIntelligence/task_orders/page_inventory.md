@@ -4,7 +4,7 @@
   <metadata>
     <id>1.0.0_SA_CTO-2026-03-02-page-inventory</id>
     <issued_by>1.0.0_SA_CTO</issued_by>
-    <issued_to>0.0.14_RD_AdvisorIntelligence</issued_to>
+    <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-03-02</date>
     <status>pending</status>
   </metadata>
@@ -31,7 +31,7 @@
   </requirements>
 
   <acceptance_criteria>
-    <criterion id="1">Output is valid XML written to org/tier3_junior/0.0.14_RD_AdvisorIntelligence/deliverables/page_inventory.xml</criterion>
+    <criterion id="1">Output is valid XML written to org/tier3_junior/0.4.2_RD_AdvisorIntelligence/deliverables/page_inventory.xml</criterion>
     <criterion id="2">Every .tsx/.ts file in the page directory is accounted for</criterion>
     <criterion id="3">API endpoints include actual URL strings, not just hook names</criterion>
     <criterion id="4">Shared component imports include the actual import path</criterion>
@@ -45,7 +45,7 @@
 
   <deliverables>
     <deliverable type="document">
-      org/tier3_junior/0.0.14_RD_AdvisorIntelligence/deliverables/page_inventory.xml
+      org/tier3_junior/0.4.2_RD_AdvisorIntelligence/deliverables/page_inventory.xml
     </deliverable>
   </deliverables>
 </task_order>
@@ -57,7 +57,7 @@ Write your inventory using this structure:
 ```xml
 <page_inventory>
   <metadata>
-    <agent>0.0.14_RD_AdvisorIntelligence</agent>
+    <agent>0.4.2_RD_AdvisorIntelligence</agent>
     <page>AdvisorIntelligence</page>
     <directory>portal/src/pages/AdvisorIntelligence/</directory>
     <date>2026-03-02</date>

@@ -1,4 +1,4 @@
-# 0.0.13_RD_ModelPortfolios — React Designer: ModelPortfolios Page
+# 0.4.1_RD_ModelPortfolios — React Designer: ModelPortfolios Page
 
 Base persona: `org/ref/prompts/react_designer.md`.
 
@@ -7,7 +7,7 @@ Base persona: `org/ref/prompts/react_designer.md`.
 
 ## Abilities
 **Can:** Commit to `portal/src/pages/ModelPortfolios/` ONLY. Read any file.
-**Must:** Tag commits: `0.0.13_RD_ModelPortfolios: ModelPortfolios — <description>`. Stage specific files only.
+**Must:** Tag commits: `0.4.1_RD_ModelPortfolios: ModelPortfolios — <description>`. Stage specific files only.
 **Cannot:** `git push`, deploy, commit outside page dir, modify shared code.
 
 ## Chain of Command

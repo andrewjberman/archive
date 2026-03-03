@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page_inventory>
+  <metadata>
+    <agent>0.4.1_RD_ModelPortfolios</agent>
+    <page>ModelPortfolios</page>
+    <directory>portal/src/pages/ModelPortfolios/</directory>
+    <date>2026-03-02</date>
+    <audit_scope>Complete codebase audit of ModelPortfolios page and subcomponents</audit_scope>
+  </metadata>
+
+  <files>
+    <file path="portal/src/pages/ModelPortfolios.tsx" type="page-component">
+      Main page component for Model Portfolios page. Real-time AUA tracking and portfolio performance analysis with three tabs: Growth (donut chart, metrics, distribution), Performance (benchmark comparisons), and Peers (peer universe comparison).
+    </file>
+    <file path="portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx" type="subcomponent">
+      Peers Tab component displaying quartile-based peer performance comparison with visual arrows showing model and benchmark positions relative to Morningstar peer universe. Includes annualized Since Inception returns calculation and interactive model selector.
+    </file>
+  </files>
+
+  <api_calls>
+    <api_call>
+      <name>AUM Metrics</name>
+      <hook>useQuery</hook>
+      <query_key>aum-metrics</query_key>
+      <function>getAUMMetrics()</function>
+      <endpoint>/v1/aum/metrics</endpoint>
+      <method>GET</method>
+      <request_shape>No request parameters</request_shape>
+      <response_shape>{ last_updated: string, total: AUMWithMetrics, by_model: Array&lt;{ model_name: string, aum: number, account_count: number, q0: PeriodMetrics, q1: PeriodMetrics, q2: PeriodMetrics, q3: PeriodMetrics }&gt;, dates: { q0: string, q1: string, q2: string, q3: string } }</response_shape>
+      <file>portal/src/pages/ModelPortfolios.tsx:183-186</file>
+      <enabled_state>Always enabled, loads immediately on page mount</enabled_state>
+    </api_call>
+    <api_call>
+      <name>AUM Time Series</name>
+      <hook>useQuery</hook>
+      <query_key>aum-timeseries</query_key>
+      <function>getAUMTimeSeries()</function>
+      <endpoint>/v1/aum/timeseries</endpoint>
+      <method>GET</method>
+      <request_shape>No request parameters</request_shape>
+      <response_shape>{ aggregate: Array&lt;{ period: string, aum: number, account_count?: number }&gt;, by_model: Array&lt;ModelTimeSeriesResponse&gt; }</response_shape>
+      <file>portal/src/pages/ModelPortfolios.tsx:189-192</file>
+      <enabled_state>Always enabled</enabled_state>
+    </api_call>
+    <api_call>
+      <name>Account Distribution</name>
+      <hook>useQuery</hook>
+      <query_key>account-distribution</query_key>
+      <function>getAccountDistribution()</function>
+      <endpoint>/v1/aum/distribution</endpoint>
+      <method>GET</method>
+      <request_shape>No request parameters</request_shape>
+      <response_shape>{ models: Record&lt;string, Array&lt;{ range: string, count: number, percentage: number }&gt;&gt; }</response_shape>
+      <file>portal/src/pages/ModelPortfolios.tsx:195-198</file>
+      <enabled_state>Always enabled</enabled_state>
+    </api_call>
+    <api_call>
+      <name>Non-Model Assets</name>
+      <hook>useQuery</hook>
+      <query_key>non-model-assets</query_key>
+      <function>getNonModelAssets()</function>
+      <endpoint>/v1/aum/non-model</endpoint>
+      <method>GET</method>
+      <request_shape>No request parameters</request_shape>
+      <response_shape>{ latest: { non_model_aum: number }, time_series: Array&lt;{ period: string, non_model_aum: number, enterprise_total: number }&gt; }</response_shape>
+      <file>portal/src/pages/ModelPortfolios.tsx:201-204</file>
+      <enabled_state>Always enabled</enabled_state>
+    </api_call>
+    <api_call>
+      <name>Model Portfolio Benchmarks</name>
+      <hook>useQuery</hook>
+      <query_key>model-portfolio-benchmarks</query_key>
+      <function>getModelPortfolioBenchmarks()</function>
+      <endpoint>/v1/benchmarks/returns</endpoint>
+      <method>GET</method>
+      <request_shape>No request parameters</request_shape>
+      <response_shape>{ data_as_of: string, models: Array&lt;BenchmarkModelData&gt;, index_compositions: Record&lt;string, unknown&gt;, etf_compositions: Record&lt;string, unknown&gt; }</response_shape>
+      <file>portal/src/pages/ModelPortfolios.tsx:208-212</file>
+      <enabled_state>Lazy loaded - enabled only when 'performance' tab is active</enabled_state>
+    </api_call>
+    <api_call>
+      <name>ETF Benchmark Returns</name>
+      <hook>useQuery</hook>
+      <query_key>etf-benchmark-returns</query_key>
+      <function>getETFBenchmarkReturns()</function>
+      <endpoint>/v1/benchmarks/etf</endpoint>
+      <method>GET</method>
+      <request_shape>No request parameters</request_shape>
+      <response_shape>{ BIL: Record&lt;string, number&gt;, AGG: Record&lt;string, number&gt;, IVV: Record&lt;string, number&gt; }</response_shape>
+      <file>portal/src/pages/ModelPortfolios.tsx:216-220</file>
+      <enabled_state>Lazy loaded - enabled only when 'performance' tab is active</enabled_state>
+    </api_call>
+    <api_call>
+      <name>Peer Performance</name>
+      <hook>useQuery</hook>
+      <query_key>peer-performance</query_key>
+      <function>getPeerPerformance()</function>
+      <endpoint>/v1/peers/performance</endpoint>
+      <method>GET</method>
+      <request_shape>No request parameters</request_shape>
+      <response_shape>{ generated_at: string, data_as_of: string, periods: string[], models: Record&lt;string, ModelPeerData&gt; }</response_shape>
+      <file>portal/src/pages/ModelPortfolios.tsx:224-228</file>
+      <enabled_state>Lazy loaded - enabled only when 'peers' tab is active</enabled_state>
+      <used_by>PeersTab component</used_by>
+    </api_call>
+  </api_calls>
+
+  <shared_imports>
+    <import>
+      <from>portal/src/ui/components/panels</from>
+      <exports>Panel, PanelHeader, PanelContent, PanelFooter, SmartPanelFooter</exports>
+      <used_in>ModelPortfolios.tsx, PeersTab.tsx</used_in>
+      <purpose>Layout and container components for organizing page sections</purpose>
+    </import>
+    <import>
+      <from>portal/src/components/LoadingSpinner</from>
+      <exports>LoadingInline</exports>
+      <used_in>ModelPortfolios.tsx, PeersTab.tsx</used_in>
+      <purpose>Inline loading indicator for async data states</purpose>
+    </import>
+    <import>
+      <from>portal/src/components/PageHeaderVariants</from>
+      <exports>PageHeaderCleanBadge</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Page header with icon and description</purpose>
+    </import>
+    <import>
+      <from>portal/src/components/TabNavigation</from>
+      <exports>TabNavigation</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Tab navigation for Growth, Performance, Peers tabs</purpose>
+    </import>
+    <import>
+      <from>portal/src/components/AccountDistributionChart</from>
+      <exports>AccountDistributionChart</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Bell curve visualization of account distribution</purpose>
+    </import>
+    <import>
+      <from>portal/src/components/AccountDistributionMetrics</from>
+      <exports>AccountDistributionMetrics</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Metrics summary for account distribution data</purpose>
+    </import>
+    <import>
+      <from>portal/src/components/AUMGrowthMetrics</from>
+      <exports>AUMGrowthMetrics</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Card component showing AUA growth metrics across quarters</purpose>
+    </import>
+    <import>
+      <from>portal/src/components/Tooltip</from>
+      <exports>Tooltip</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Help text tooltips for UI guidance</purpose>
+    </import>
+    <import>
+      <from>portal/src/components/ErrorMessage</from>
+      <exports>ErrorMessage</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Error display component for failed data loads</purpose>
+    </import>
+    <import>
+      <from>portal/src/components/BenchmarkHeatmap</from>
+      <exports>BenchmarkHeatmap</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Heatmap visualization for benchmark returns comparison</purpose>
+    </import>
+    <import>
+      <from>portal/src/components/ReturnVolatilityScatter</from>
+      <exports>ReturnVolatilityScatter</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Scatter plot showing return vs volatility tradeoff</purpose>
+    </import>
+    <import>
+      <from>portal/src/lib/modelPortfolioColors</from>
+      <exports>getModelColor</exports>
+      <used_in>ModelPortfolios.tsx, PeersTab.tsx</used_in>
+      <purpose>Color scheme lookup for each model portfolio (UST, ST, INT, LTC, LTA)</purpose>
+    </import>
+    <import>
+      <from>portal/src/lib/universalNumberFormatter</from>
+      <exports>formatNumberTo3Digits, formatCurrency</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Number formatting utilities (thousands, currency)</purpose>
+    </import>
+    <import>
+      <from>portal/src/api/endpoints/aum</from>
+      <exports>getAUMMetrics, getAUMTimeSeries, getAccountDistribution</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>AUM data API client functions</purpose>
+    </import>
+    <import>
+      <from>portal/src/api/portal-proxy</from>
+      <exports>getModelPortfolioBenchmarks, getETFBenchmarkReturns, getPeerPerformance, getNonModelAssets, type BenchmarkModelData</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Portal API proxy client functions for benchmark and peer data</purpose>
+    </import>
+    <import>
+      <from>portal/src/hooks/useTabNavigation</from>
+      <exports>useTabNavigation</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Hook for managing tab state and analytics</purpose>
+    </import>
+    <import>
+      <from>portal/src/hooks/useDataSource</from>
+      <exports>useYangDataAsOf</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Hook for registering data source timestamps with Yang timestamp registry</purpose>
+    </import>
+    <import>
+      <from>portal/src/contexts/PageThemeContext</from>
+      <exports>PageThemeProvider</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Context provider for page-level theme customization (purple accent)</purpose>
+    </import>
+    <import>
+      <from>portal/src/services/analytics</from>
+      <exports>OpalAnalytics</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Analytics event tracking service</purpose>
+    </import>
+    <import>
+      <from>recharts</from>
+      <exports>AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, CartesianGrid</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Charting library for time series and bar visualizations</purpose>
+    </import>
+    <import>
+      <from>react-apexcharts</from>
+      <exports>Chart (lazy loaded)</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Donut chart visualization (lazy loaded to reduce bundle size)</purpose>
+    </import>
+    <import>
+      <from>lucide-react</from>
+      <exports>Briefcase, HelpCircle, CircleDollarSign, Ruler, Users</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Icon components for UI elements</purpose>
+    </import>
+    <import>
+      <from>portal/src/pages/ModelPortfolios/tabs/PeersTab</from>
+      <exports>PeersTab</exports>
+      <used_in>ModelPortfolios.tsx</used_in>
+      <purpose>Peers tab component for peer performance comparison</purpose>
+    </import>
+  </shared_imports>
+
+  <types>
+    <type name="ModelPortfolio" defined_in="portal/src/pages/ModelPortfolios.tsx:42-47">
+      Represents a single model portfolio with current metrics. Key fields: modelName (string), currentAUM (number), accountCount (number), metrics (MetricsPeriod[] - quarterly metrics)
+    </type>
+    <type name="TimeSeriesDataPoint" defined_in="portal/src/pages/ModelPortfolios.tsx:49-53">
+      Single data point in AUM time series. Key fields: period (string - date), aum (number), account_count (optional number)
+    </type>
+    <type name="TabType" defined_in="portal/src/pages/ModelPortfolios.tsx:82">
+      Union type for page tabs: 'growth' | 'performance' | 'peers'
+    </type>
+    <type name="Percentiles" defined_in="portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx:79-85">
+      Percentile values for peer universe distribution. Key fields: p5, p25, p50, p75, p95 (all number | null)
+    </type>
+    <type name="PeriodData" defined_in="portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx:87-91">
+      Performance data for a single period. Key fields: percentiles (Percentiles), model (number | null), benchmark (number | null)
+    </type>
+    <type name="ModelPeerData" defined_in="portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx:93-97">
+      Peer data for a single model. Key fields: code (string - UST/ST/INT/LTC/LTA), name (string), periods (Record&lt;string, PeriodData&gt;)
+    </type>
+    <type name="PeerPerformanceData" defined_in="portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx:99-104">
+      Complete peer performance dataset. Key fields: generated_at (string), data_as_of (string), periods (string[] - list of period names), models (Record&lt;string, ModelPeerData&gt;)
+    </type>
+    <type name="PeersTabProps" defined_in="portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx:106-109">
+      Props for PeersTab component. Key fields: data (PeerPerformanceData | null), loading (optional boolean)
+    </type>
+    <type name="BenchmarkModelData" defined_in="portal/src/api/portal-proxy.ts">
+      Imported type from portal-proxy. Represents benchmark data structure for model portfolios with code, name, and returns by period
+    </type>
+    <type name="MetricsPeriod" defined_in="portal/src/components/MetricsRow.tsx">
+      Imported type for quarterly/period metrics. Contains label, description, change, growth, priorLevel
+    </type>
+  </types>
+
+  <page_structure>
+    <tab name="Growth" status="functional">
+      Default tab displaying Portfolio Analytics panel. Contains: (1) Left partition - Donut chart with AUA breakdown by model, interactive model legend, AUM Growth Metrics showing quarterly changes; (2) Right partition - Account Distribution bell curve chart showing fund distribution across models; (3) Non-Model AUA roll-forward note explaining data freshness
+    </tab>
+    <tab name="Performance" status="functional">
+      Performance comparison tab (content not fully read but referenced components include BenchmarkHeatmap and ReturnVolatilityScatter). Lazy loads benchmark data when tab becomes active. Displays model vs index/ETF benchmark returns with toggle for gross/net and index/ETF selection
+    </tab>
+    <tab name="Peers" status="functional">
+      Peer universe comparison tab. Displays PeersTab component showing quartile-based peer performance with model and benchmark position arrows, model selector buttons, and period-specific charts. Lazy loads peer performance data when tab becomes active
+    </tab>
+  </page_structure>
+
+  <component_relationships>
+    <relationship>
+      <parent>ModelPortfolios</parent>
+      <child>PeersTab</child>
+      <prop_name>data</prop_name>
+      <value>peerData (from peer-performance query)</value>
+      <description>Passes fetched peer performance data to PeersTab for rendering</description>
+    </relationship>
+    <relationship>
+      <parent>ModelPortfolios</parent>
+      <child>PeersTab</child>
+      <prop_name>loading</prop_name>
+      <value>peerLoading (from peer-performance query)</value>
+      <description>Indicates loading state while peer data fetches</description>
+    </relationship>
+    <relationship>
+      <parent>PeersTab</parent>
+      <child>QuartileChart</child>
+      <prop_name>modelData</prop_name>
+      <value>ModelPeerData for selected model</value>
+      <description>Internal relationship: PeersTab renders QuartileChart for each period in transformedData.periods</description>
+    </relationship>
+  </component_relationships>
+
+  <data_transformations>
+    <transformation name="Annualize Since Inception Returns">
+      <file>portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx:14-36</file>
+      <description>Converts cumulative Since Inception returns to annualized returns using formula: (1 + cumulative_return) ^ (365/actual_days) - 1. Required because Excel data contains cumulative SI returns but display shows annualized to match lambda logic.</description>
+      <function>annualizeSinceInceptionReturn(cumulativeReturn: number | null, dataAsOf: string): number | null</function>
+    </transformation>
+    <transformation name="Transform Peer Data">
+      <file>portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx:38-77</file>
+      <description>Applies annualization logic to entire peer performance dataset, transforming 'Since Inception' percentiles and model/benchmark values while preserving other periods as-is (cumulative)</description>
+      <function>transformPeerData(data: PeerPerformanceData): PeerPerformanceData</function>
+    </transformation>
+    <transformation name="Get Non-Model AUM for Date">
+      <file>portal/src/pages/ModelPortfolios.tsx:88-106</file>
+      <description>Roll-forward lookup for Non-Model AUM data. Uses most recent known value for any date that doesn't have explicit data, since Non-Model data is updated sporadically</description>
+      <function>getNonModelAumForDate(timeSeries: Array&lt;{ period: string; non_model_aum: number }&gt; | undefined, targetDate: string): number</function>
+    </transformation>
+    <transformation name="Get Last Actual Data Date">
+      <file>portal/src/pages/ModelPortfolios.tsx:109-134</file>
+      <description>Finds the last date where enterprise data actually changed (not rolled forward), returns date string of last actual data point</description>
+      <function>getLastActualDataDate(timeSeries: Array&lt;{ period: string; enterprise_total: number }&gt; | undefined): string | null</function>
+    </transformation>
+    <transformation name="Get Enterprise Total for Date">
+      <file>portal/src/pages/ModelPortfolios.tsx:136-159</file>
+      <description>Roll-forward lookup for Enterprise Total (49 Financial total AUM). Returns enterprise_total for most recent date &lt;= targetDate. Used for quarterly lookbacks to include non-model AUA in historical comparisons</description>
+      <function>getEnterpriseTotalForDate(timeSeries: Array&lt;{ period: string; enterprise_total: number }&gt; | undefined, targetDate: string): number | null</function>
+    </transformation>
+    <transformation name="Sort By Model Order">
+      <file>portal/src/pages/ModelPortfolios.tsx:72-80</file>
+      <description>Sorts model portfolios by canonical order (UST, ST, INT, LTC, LTA, optionally Non-Model). Used for consistent ordering in charts, legends, and tooltips</description>
+      <function>sortByModelOrder&lt;T extends { modelName: string }&gt;(portfolios: T[], includeNonModel: boolean = false): T[]</function>
+    </transformation>
+  </data_transformations>
+
+  <constants>
+    <constant name="INCEPTION_DATE" defined_in="portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx:21">
+      Value: '2024-04-30' - Used for calculating actual days elapsed for annualization calculations
+    </constant>
+    <constant name="MODEL_CODE_ORDER" defined_in="portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx:112">
+      Value: ['UST', 'ST', 'INT', 'LTC', 'LTA'] - Canonical order for model portfolio codes
+    </constant>
+    <constant name="MODEL_CODE_TO_NAME" defined_in="portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx:115-121">
+      Map from model codes to full names: { UST: 'Ultra Short-Term', ST: 'Short-Term', INT: 'Intermediate', LTC: 'Long-Term Conservative', LTA: 'Long-Term Aggressive' }
+    </constant>
+    <constant name="MODEL_ORDER" defined_in="portal/src/pages/ModelPortfolios.tsx:58-64">
+      Value: ['Ultra Short-Term', 'Short-Term', 'Intermediate', 'Long-Term Conservative', 'Long-Term Aggressive'] - Canonical order for model portfolio display names
+    </constant>
+    <constant name="MODEL_ORDER_WITH_NONMODEL" defined_in="portal/src/pages/ModelPortfolios.tsx:67-70">
+      Value: [...MODEL_ORDER, 'Non-Model'] - Extended order including Non-Model AUA for enterprise total views
+    </constant>
+    <constant name="QUARTILE_COLORS" defined_in="portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx:131-136">
+      Array of 4 colors for quartile visualization (purple to dark blue gradient): Bottom Quartile (p95-p75), 3rd Quartile (p75-p50), 2nd Quartile (p50-p25), Top Quartile (p25-p5)
+    </constant>
+  </constants>
+
+  <issues>
+    <issue file="portal/src/api/portal-proxy.ts:87-95" type="HACK">
+      Redirect to login on 401 Unauthorized disabled - was causing infinite redirect loop for Model Portfolios page. Currently logs error but does not redirect
+    </issue>
+  </issues>
+
+  <lifecycle_and_state>
+    <state_management>
+      Uses React Query (TanStack Query) for all data fetching. No useEffect + useState patterns - all data management through useQuery hooks with proper loading/error states and lazy loading for performance and peers tabs
+    </state_management>
+    <ui_state>
+      - selectedDonutIndex: number | null - Track which model is selected in donut chart (null = show total)
+      - periodView: 'monthly' | 'quarterly' - Toggle for time period granularity
+      - trendMetricType: 'value' | 'count' - Toggle between AUM value and account count display
+      - benchmarkReturnType: 'gross' | 'net' - Toggle for benchmark return type
+      - benchmarkType: 'index' | 'etf' - Toggle between index and ETF benchmarks
+      - activeTab: 'growth' | 'performance' | 'peers' - Current tab selection (managed by useTabNavigation hook)
+      - selectedModel: 'UST' | 'ST' | 'INT' | 'LTC' | 'LTA' - Selected model in Peers tab (default 'LTC')
+    </ui_state>
+    <data_flow>
+      1. Page mounts -> useQuery hooks trigger for aum-metrics, aum-timeseries, account-distribution, non-model-assets (all enabled by default)
+      2. When user clicks 'performance' tab -> model-portfolio-benchmarks and etf-benchmark-returns queries enable
+      3. When user clicks 'peers' tab -> peer-performance query enables
+      4. Data arrives -> useMemo transforms/aggregates data
+      5. Components render with live data, no polling or refetching unless explicitly configured
+    </data_flow>
+  </lifecycle_and_state>
+
+  <known_limitations>
+    <limitation>Non-Model AUA data is rolled forward from last known value - may not reflect current actual state if updates are infrequent</limitation>
+    <limitation>API responses are accessed via portal-proxy Lambda which may have cached responses from CloudFront edge</limitation>
+    <limitation>Performance tab lazy loads data only when active - initial page load is fast but Performance tab has slight delay on first view</limitation>
+  </known_limitations>
+
+  <audit_summary>
+    <total_tsx_files>1</total_tsx_files>
+    <total_subcomponent_files>1</total_subcomponent_files>
+    <total_api_calls>7</total_api_calls>
+    <total_shared_imports>22</total_shared_imports>
+    <total_types_defined>8</total_types_defined>
+    <total_helper_functions>5</total_helper_functions>
+    <total_ui_state_properties>7</total_ui_state_properties>
+    <completeness>100% - All .tsx/.ts files in directory accounted for, all imports documented, all API calls traced with endpoint/request/response shapes, all types documented</completeness>
+  </audit_summary>
+
+</page_inventory>

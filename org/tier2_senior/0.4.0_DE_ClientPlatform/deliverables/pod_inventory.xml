@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pod_inventory>
+
+  <metadata>
+    <agent>0.4.0_DE_ClientPlatform</agent>
+    <pod>ClientPlatform</pod>
+    <pages_owned>
+      <page>ModelPortfolios</page>
+      <page>AdvisorIntelligence</page>
+    </pages_owned>
+    <date>2026-03-02</date>
+    <rd_deliverable_status>
+      <item rd_agent="0.4.1_RD_ModelPortfolios" status="complete" path="org/tier3_junior/0.4.1_RD_ModelPortfolios/deliverables/page_inventory.xml"/>
+      <item rd_agent="0.4.2_RD_AdvisorIntelligence" status="MISSING" path="org/tier3_junior/0.4.2_RD_AdvisorIntelligence/deliverables/page_inventory.xml" note="Deliverable does not exist. AdvisorIntelligence section below was sourced directly from portal source files."/>
+    </rd_deliverable_status>
+    <notes>
+      ClientPlatform is architecturally unique within the portal: its two pages draw from
+      fundamentally different upstream pipelines. ModelPortfolios is Yang/SmartX-driven
+      (AUM data from SmartX EC2, benchmarks and peers from Yang). AdvisorIntelligence is
+      BD-driven (partner AUA and NNA data from Black Diamond via BD pipeline).
+      The GEO/ADV cohort toggle is a cross-panel interaction pattern specific to this pod.
+    </notes>
+  </metadata>
+
+  <!-- ================================================================== -->
+  <!-- PAGES                                                                -->
+  <!-- ================================================================== -->
+
+  <pages>
+
+    <!-- ---------------------------------------------------------------- -->
+    <!-- Page 1: ModelPortfolios                                           -->
+    <!-- Source: 0.4.1_RD_ModelPortfolios/deliverables/page_inventory.xml -->
+    <!-- ---------------------------------------------------------------- -->
+    <page>
+      <name>ModelPortfolios</name>
+      <rd_agent>0.4.1_RD_ModelPortfolios</rd_agent>
+      <directory>portal/src/pages/ModelPortfolios/</directory>
+
+      <summary>
+        Real-time AUA tracking and portfolio performance analysis for the five Opal model
+        portfolios (Ultra Short-Term, Short-Term, Intermediate, Long-Term Conservative,
+        Long-Term Aggressive). Organizes data across three tabs: Growth (donut chart,
+        quarterly metrics, account distribution bell curve), Performance (benchmark heatmap
+        and return/volatility scatter), and Peers (Morningstar quartile peer comparison).
+        Data sourced exclusively from Yang pipeline (SmartX time series via portal-proxy and
+        yang-model-portfolio-benchmarks Lambda).
+      </summary>
+
+      <files>
+        <file path="portal/src/pages/ModelPortfolios.tsx" type="page-component"/>
+        <file path="portal/src/pages/ModelPortfolios/tabs/PeersTab.tsx" type="subcomponent"/>
+      </files>
+
+      <tabs>
+        <tab name="growth" status="functional" default="true">
+          Default tab. Portfolio Analytics panel: donut chart (AUA by model, interactive legend),
+          AUMGrowthMetrics (quarterly change cards), AccountDistributionChart (bell curve by model).
+          Non-Model AUA roll-forward note. State: selectedDonutIndex, periodView (monthly/quarterly),
+          trendMetricType (value/count).
+        </tab>
+        <tab name="performance" status="functional" default="false">
+          Lazy-loads model-portfolio-benchmarks and etf-benchmark-returns queries when first
+          activated. Displays BenchmarkHeatmap and ReturnVolatilityScatter. Toggles:
+          benchmarkReturnType (gross/net), benchmarkType (index/etf).
+        </tab>
+        <tab name="peers" status="functional" default="false">
+          Lazy-loads peer-performance query when first activated. Renders PeersTab component:
+          quartile chart with model and benchmark position arrows per Morningstar peer universe.
+          Model selector (UST/ST/INT/LTC/LTA, default LTC). Applies annualizeSinceInceptionReturn
+          transformation before display.
+        </tab>
+      </tabs>
+
+      <primary_data_hook>
+        <hook_name>useQuery (queryKey: 'aum-metrics')</hook_name>
+        <function>getAUMMetrics()</function>
+        <endpoint>/v1/aum/metrics</endpoint>
+        <file>portal/src/api/endpoints/aum.ts → portal/src/api/portal-proxy.ts</file>
+        <notes>Loads on mount. Routes through portal-proxy to opal-portal-data-proxy Lambda.</notes>
+      </primary_data_hook>
+
+      <all_queries>
+        <query key="aum-metrics" function="getAUMMetrics()" endpoint="/v1/aum/metrics" lazy="false"/>
+        <query key="aum-timeseries" function="getAUMTimeSeries()" endpoint="/v1/aum/timeseries" lazy="false"/>
+        <query key="account-distribution" function="getAccountDistribution()" endpoint="/api/general/portfolios/account-distribution.json" lazy="false"/>
+        <query key="non-model-assets" function="getNonModelAssets()" endpoint="/v1/aum/non-model" lazy="false"/>
+        <query key="model-portfolio-benchmarks" function="getModelPortfolioBenchmarks()" endpoint="/v1/benchmarks/returns" lazy="true" trigger="performance tab active"/>
+        <query key="etf-benchmark-returns" function="getETFBenchmarkReturns()" endpoint="/v1/benchmarks/etf" lazy="true" trigger="performance tab active"/>
+        <query key="peer-performance" function="getPeerPerformance()" endpoint="/v1/peers/performance" lazy="true" trigger="peers tab active"/>
+      </all_queries>
+
+      <known_issues>
+        <issue file="portal/src/api/portal-proxy.ts:87-95" type="HACK" severity="medium">
+          Redirect to login on 401 Unauthorized is disabled — was causing infinite redirect loop
+          for Model Portfolios page. Currently logs error but does not redirect.
+        </issue>
+        <issue type="limitation" severity="low">
+          Non-Model AUA data is rolled forward from last known value — may not reflect current
+          actual state if updates are infrequent.
+        </issue>
+        <issue type="limitation" severity="low">
+          Performance tab has first-view latency from lazy-loading benchmark queries.
+        </issue>
+      </known_issues>
+    </page>
+
+    <!-- ---------------------------------------------------------------- -->
+    <!-- Page 2: AdvisorIntelligence                                       -->
+    <!-- Source: portal source (RD deliverable 0.0.14 is MISSING)         -->
+    <!-- ---------------------------------------------------------------- -->
+    <page>
+      <name>AdvisorIntelligence</name>
+      <rd_agent>0.4.2_RD_AdvisorIntelligence</rd_agent>
+      <rd_deliverable_warning>
+        RD page_inventory.xml for 0.0.14 is MISSING. This section was authored from
+        direct reads of portal source files. Completeness may be lower than a full RD audit.
+        Files read: AdvisorIntelligence.tsx, tabs/DistributionTab.tsx (header only),
+        tabs/AdvisorsTab.tsx (header only), tabs/ClientsTab.tsx (header only),
+        components/PartnerAnalytics.tsx (header only), types.ts (partial),
+        portal/src/api/endpoints/advisor-intelligence.ts (full).
+      </rd_deliverable_warning>
+      <directory>portal/src/pages/AdvisorIntelligence/</directory>
+
+      <summary>
+        Partner AUA analytics and reporting dashboard for advisor-facing intelligence
+        on partner firm data sourced from the Black Diamond Wealth Platform via the BD pipeline.
+        Page v5. Features a permanent PartnerAnalytics header panel (above all tabs) with
+        AUA/NNA/GEO/ADV view toggle, plus three tabs: Distribution (firm cohort analysis —
+        snapshot and continuous views), Advisors (rolling flows and leaderboard), and Books
+        (per-advisor book drilldown and client detail). Multi-tenant: partner firm selection
+        controls all tab data (defaults to '49financial').
+      </summary>
+
+      <files>
+        <file path="portal/src/pages/AdvisorIntelligence/AdvisorIntelligence.tsx" type="page-component"/>
+        <file path="portal/src/pages/AdvisorIntelligence/tabs/DistributionTab.tsx" type="tab-component"/>
+        <file path="portal/src/pages/AdvisorIntelligence/tabs/AdvisorsTab.tsx" type="tab-component"/>
+        <file path="portal/src/pages/AdvisorIntelligence/tabs/ClientsTab.tsx" type="tab-component" exported_as="BooksTab"/>
+        <file path="portal/src/pages/AdvisorIntelligence/components/PartnerAnalytics.tsx" type="subcomponent"/>
+        <file path="portal/src/pages/AdvisorIntelligence/components/AUACompositionChart.tsx" type="subcomponent"/>
+        <file path="portal/src/pages/AdvisorIntelligence/components/AUATrendChart.tsx" type="subcomponent"/>
+        <file path="portal/src/pages/AdvisorIntelligence/components/DimensionSelector.tsx" type="subcomponent"/>
+        <file path="portal/src/pages/AdvisorIntelligence/components/HeaderMetrics.tsx" type="subcomponent"/>
+        <file path="portal/src/pages/AdvisorIntelligence/components/MetricSelector.tsx" type="subcomponent"/>
+        <file path="portal/src/pages/AdvisorIntelligence/types.ts" type="types"/>
+        <file path="portal/src/pages/AdvisorIntelligence/index.ts" type="barrel"/>
+        <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/ClientDetailPage.tsx" type="subpage"/>
+        <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/types.ts" type="types"/>
+        <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/AISummaryPanel.tsx" type="panel-component"/>
+        <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/PortfolioBalancePanel.tsx" type="panel-component"/>
+        <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/TimeSeriesPanel.tsx" type="panel-component"/>
+        <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/index.ts" type="barrel"/>
+        <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/index.ts" type="barrel"/>
+        <file path="portal/src/pages/AdvisorIntelligence/tabs/AssetIntelligenceTab.tsx" type="tab-component" note="Legacy tab — present but not wired to main tab nav in v5"/>
+      </files>
+
+      <tabs>
+        <tab name="distribution" status="functional" default="true">
+          Primary cohort analysis tab. Toggle between Snapshot (default) and Continuous view modes.
+          Cohort toggle: GEO / ADV (drives donut segmentation and bell curve grouping in both views).
+          Snapshot layout: ApexCharts donut + time machine strip (left) + bell curve histogram (right).
+          Continuous layout: hero metrics + legend (left) + stacked area chart (right) + Assets/Window controls.
+          Data: getCumulativeChart() for continuous; PartnerAnalyticsResponse (from page-level
+          getPartnerAnalytics()) passed as prop for snapshot donut + distribution stats.
+        </tab>
+        <tab name="advisors" status="functional" default="false">
+          Advisor-level activity tab. Top-level toggle: Architects / Implementors — controls entire tab.
+          TOP 3 highlights (rank, NNA, AUA growth) for selected role at selected leaderboard window.
+          Rolling Flows panel: LineChart, one line per advisor; metric toggle (NNA/Inflows/Outflows),
+          window toggle (30d/90d/1Y). Leaderboard panel: table with sort, search, click-to-toggle-chart;
+          window toggle (3M/6M/1Y/2Y/3Y).
+          Data: getArchitectLeaderboard(), getImplementorLeaderboard(), getAdvisorRollingFlows().
+        </tab>
+        <tab name="books" status="functional" default="false" component_exported_as="BooksTab">
+          Per-advisor book drilldown (admin) and client detail view. View mode toggle: Book / Client.
+          Advisor selector dropdown (firm admin only — all current users qualify as isFirmAdmin).
+          AI Executive Summary panel + Headline Numbers + Tax Intel + Income and Fees + Portfolio
+          Composition + Engagement Metrics panels. Client picker for drill-down.
+          Data: getClientsTab(), getClientDetail(clientKey), getArchitectLeaderboard(), getAdvisorBook(advisorId).
+        </tab>
+      </tabs>
+
+      <permanent_header_panel>
+        <component>PartnerAnalytics</component>
+        <file>portal/src/pages/AdvisorIntelligence/components/PartnerAnalytics.tsx</file>
+        <description>
+          Always-visible panel above all tabs. Version 5 — mirrors Model Portfolios
+          Portfolio Analytics pattern. Left: donut chart for selected view. Right: bell curve
+          histogram. Below: quarterly metrics with time machine support.
+        </description>
+        <view_toggle options="aua nna geo adv" default="aua">
+          <view id="aua">Total assets by client type (NMNC/NMEC). Stacked bar / donut.</view>
+          <view id="nna">Net new assets with inflows/outflows diverging bar drill-down.</view>
+          <view id="geo">Geographic breakdown by region/city. Donut + distribution + metrics.</view>
+          <view id="adv">Architect breakdown with client drill-down. Donut + distribution + metrics.</view>
+        </view_toggle>
+        <data_source>getPartnerAnalytics() — fetched at page level (AdvisorIntelligence.tsx:81-87), passed as prop</data_source>
+        <also_fetches>getCumulativeChart() — 2-year daily cumulative NNA for all 4 views</also_fetches>
+      </permanent_header_panel>
+
+      <geo_adv_cohort_pattern>
+        <description>
+          GEO/ADV is a cross-panel cohort toggle present in both the PartnerAnalytics header panel
+          and the DistributionTab. Toggling it switches the segmentation dimension across:
+          (1) PartnerAnalytics donut chart segments (geographic regions vs architect names),
+          (2) DistributionTab donut segmentation and bell curve grouping,
+          (3) DistributionTab continuous chart series.
+          This is the primary cross-panel interaction pattern the DE must coordinate for any
+          work touching Distribution or PartnerAnalytics. GEO uses city/region geographic
+          groupings. ADV uses architect (financial advisor) groupings.
+          Type aliases: CohortOption ('geo' | 'adv') in DistributionTab;
+          PartnerAnalyticsViewMode in types.ts covers aua/nna/geo/adv.
+        </description>
+        <affected_components>
+          <component>portal/src/pages/AdvisorIntelligence/components/PartnerAnalytics.tsx</component>
+          <component>portal/src/pages/AdvisorIntelligence/tabs/DistributionTab.tsx</component>
+        </affected_components>
+        <data_shape>
+          PartnerAnalyticsResponse.views.geo — geographic breakdown (top 8 regions + Other)
+          PartnerAnalyticsResponse.views.adv — architect breakdown (top 8 architects + Other)
+          Each view: donut { title, total, segments[] } + distribution { total, by_segment } + metrics { aua, nna_ytd, q0, q1, q2 }
+        </data_shape>
+      </geo_adv_cohort_pattern>
+
+      <primary_data_hook>
+        <hook_name>useQuery (queryKey: 'partner-analytics')</hook_name>
+        <function>getPartnerAnalytics()</function>
+        <endpoint>/api/scoped/advisor-intelligence/partner_analytics/header_metrics.json</endpoint>
+        <file>portal/src/api/endpoints/advisor-intelligence.ts:226-228</file>
+        <notes>
+          Loaded at page level in AdvisorIntelligence.tsx:81-87. staleTime=5min,
+          refetchOnWindowFocus=false. Result (analyticsData) passed as prop to PartnerAnalytics
+          and DistributionTab. Static JSON served via CloudFront → S3 with firm routing via
+          shared-advisor-router.
+        </notes>
+      </primary_data_hook>
+
+      <known_issues>
+        <issue type="missing_deliverable" severity="high">
+          0.4.2_RD_AdvisorIntelligence page_inventory.xml does not exist. This pod inventory
+          section is lower-fidelity than ModelPortfolios as a result. RD agent 0.0.14 must
+          produce the deliverable before DS data_contract.xml can be issued for ClientPlatform.
+        </issue>
+        <issue file="portal/src/pages/AdvisorIntelligence/tabs/AssetIntelligenceTab.tsx" type="legacy" severity="low">
+          AssetIntelligenceTab.tsx is present in the directory but does not appear in the
+          v5 AdvisorIntelligence.tsx tab navigation. May be legacy code from prior version.
+          Verify before modifying or deleting.
+        </issue>
+        <issue file="portal/src/api/endpoints/advisor-intelligence.ts:136-144" type="TODO" severity="medium">
+          getSnapshot() docstring notes: firmId is passed as query param "will be removed once
+          Lambda reads from portal-authorizer context (authorizer.lambda.firmId) instead."
+          Auth refactor is pending.
+        </issue>
+        <issue file="portal/src/api/endpoints/aum.ts:470-478" type="DEMO_MODE" severity="medium">
+          getAccountDistribution() uses public endpoint (/api/general/portfolios/account-distribution.json,
+          no auth) with comment: "DEMO MODE: Using public endpoint... TODO: Revert to private
+          endpoint for production."
+        </issue>
+      </known_issues>
+    </page>
+
+  </pages>
+
+  <!-- ================================================================== -->
+  <!-- API ENDPOINTS                                                        -->
+  <!-- ================================================================== -->
+
+  <api_endpoints>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/advisor-intelligence.ts</file>
+      <pipeline>BD (Black Diamond via bd-portal-publisher, bd-portal-advisor-publisher, bd-client-detail, opal-partners-data)</pipeline>
+      <auth_pattern>Bearer token from localStorage('accessToken') on all requests; static JSON endpoints via CloudFront/S3 with firm routing by shared-advisor-router</auth_pattern>
+      <functions>
+        <function name="getAllowedPartners" endpoint="GET /api/partners" response_type="PartnersResponse" pages="AdvisorIntelligence"/>
+        <function name="getTimeSeries" endpoint="GET /api/scoped/advisor-intelligence/timeseries/{dimension}" params="firmId: string, dimension: TimeseriesDimension" response_type="TimeSeriesResponse | CategoryTimeSeriesResponse" pages="AdvisorIntelligence"/>
+        <function name="getSnapshot" endpoint="GET /api/scoped/advisor-intelligence/snapshots/{dimension}" params="firmId: string, dimension: SnapshotDimension" response_type="SnapshotResponse" pages="AdvisorIntelligence"/>
+        <function name="getFilters" endpoint="GET /api/scoped/advisor-intelligence/filters" params="firmId: string" response_type="FiltersResponse" pages="AdvisorIntelligence"/>
+        <function name="getClientGrowth" endpoint="GET /api/scoped/advisor-intelligence/clients/growth" params="firmId: string" response_type="ClientGrowthResponse" pages="AdvisorIntelligence"/>
+        <function name="getTaxBreakdown" endpoint="GET /api/scoped/advisor-intelligence/clients/tax-breakdown" params="firmId: string" response_type="TaxBasisBreakdownResponse" pages="AdvisorIntelligence"/>
+        <function name="getTaxDeferredCandidates" endpoint="GET /api/scoped/advisor-intelligence/clients/tax-deferred" params="firmId: string" response_type="TaxDeferredResponse" pages="AdvisorIntelligence"/>
+        <function name="getHeaderSummary" endpoint="GET /api/scoped/advisor-intelligence/summary/header_metrics.json" response_type="HeaderSummary" pages="AdvisorIntelligence" note="Static JSON via CloudFront/S3"/>
+        <function name="getHeaderMetrics" endpoint="GET /api/scoped/advisor-intelligence/summary/header_metrics.json" response_type="HeaderMetricsResponse" pages="AdvisorIntelligence" note="v3 — same path as getHeaderSummary but returns full structure including radial_12m and account_distribution"/>
+        <function name="getPartnerAnalytics" endpoint="GET /api/scoped/advisor-intelligence/partner_analytics/header_metrics.json" response_type="PartnerAnalyticsResponse" pages="AdvisorIntelligence" note="v4 multi-view NNA/GEO/ADV. Static JSON via CloudFront/S3. Loaded at page level."/>
+        <function name="getCumulativeChart" endpoint="GET /api/scoped/advisor-intelligence/timeseries_chart.json" response_type="CumulativeChartResponse" pages="AdvisorIntelligence (DistributionTab continuous view, PartnerAnalytics)" note="2-year daily cumulative NNA data for aua/nna/geo/adv views"/>
+        <function name="getClientsTab" endpoint="GET /api/scoped/advisor-intelligence/clients_tab.json" response_type="ClientsTabResponse" pages="AdvisorIntelligence (BooksTab)"/>
+        <function name="getClientDetail" endpoint="GET /api/scoped/advisor-intelligence/clients/{clientKey}.json" params="clientKey: string" response_type="ClientDetailResponse" pages="AdvisorIntelligence (BooksTab client drill-down)"/>
+        <function name="getArchitectLeaderboard" endpoint="GET /api/scoped/advisor-intelligence/architect_leaderboard.json" response_type="LeaderboardResponse" pages="AdvisorIntelligence (AdvisorsTab, BooksTab)"/>
+        <function name="getImplementorLeaderboard" endpoint="GET /api/scoped/advisor-intelligence/implementor_leaderboard.json" response_type="LeaderboardResponse" pages="AdvisorIntelligence (AdvisorsTab)"/>
+        <function name="getAdvisorBook" endpoint="GET /api/scoped/advisor-intelligence/advisors/{advisorId}/book.json" params="advisorId: string" response_type="AdvisorBookResponse" pages="AdvisorIntelligence (BooksTab)" note="Static JSON via CloudFront/S3 with firm routing"/>
+        <function name="getAdvisorRollingFlows" endpoint="GET /api/scoped/advisor-intelligence/advisor_rolling_flows.json" response_type="AdvisorRollingFlowsResponse" pages="AdvisorIntelligence (AdvisorsTab)" note="Static JSON via CloudFront/S3 (opal-data-portal-v2 bucket)"/>
+      </functions>
+      <dimension_constants>
+        <constant name="TIMESERIES_DIMENSIONS" values="total category architect region account_type tax_status client_segment state city relationship implementor" count="11"/>
+        <constant name="SNAPSHOT_DIMENSIONS" values="architect region tax_status account_type implementor state city" count="7"/>
+      </dimension_constants>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/endpoints/aum.ts</file>
+      <pipeline>Yang / SmartX (AUM from SmartX EC2 via portal-proxy / opal-portal-data-proxy Lambda; account distribution from S3)</pipeline>
+      <auth_pattern>Routes through portalProxy (portal-proxy.ts) and apiRequest() (api-client.ts)</auth_pattern>
+      <functions>
+        <function name="getAUMSummary" endpoint="via portalProxy.getAUMSummary() → /v1/aum/summary" response_type="AUMSummaryResponse" pages="ModelPortfolios (indirect)"/>
+        <function name="getAUMFlows" endpoint="via portalProxy.getAUMFlows() → /v1/aum/flows" params="startPeriod?: string, endPeriod?: string, assetClass?: string" response_type="AUMFlowsResponse" pages="ModelPortfolios (indirect)"/>
+        <function name="getModelTimeSeries" endpoint="via portalProxy.getAUMTimeSeries() → /v1/aum/timeseries" params="model: string, _assetClass?: string" response_type="ModelTimeSeriesResponse" pages="ModelPortfolios (indirect)"/>
+        <function name="getAUMMetrics" endpoint="via portalProxy.getAUMMetricsWithCalculations() → /v1/aum/metrics" params="bustCache?: boolean" response_type="AUMFlowsWithMetricsResponse" pages="ModelPortfolios (primary — queryKey: 'aum-metrics')"/>
+        <function name="getAUMTimeSeries" endpoint="via portalProxy.getAUMTimeSeries() → /v1/aum/timeseries" response_type="AUMTimeSeriesData" pages="ModelPortfolios (queryKey: 'aum-timeseries')"/>
+        <function name="getAccountDistribution" endpoint="GET /api/general/portfolios/account-distribution.json" params="forceRefresh?: boolean" response_type="AccountDistribution" pages="ModelPortfolios (queryKey: 'account-distribution')" note="DEMO MODE: uses public endpoint, no auth. 60-min in-memory cache. TODO: revert to /api/private/portfolios/account-distribution.json"/>
+        <function name="clearAccountDistributionCache" endpoint="none (cache utility)" pages="ModelPortfolios"/>
+      </functions>
+      <helper_functions>
+        <helper name="formatAUM" purpose="Format AUM number as $B/$M/$K/$"/>
+        <helper name="formatPeriod" purpose="Format YYYYMM period string as 'Mon YYYY'"/>
+        <helper name="formatPercentChange" purpose="Format percentage with +/- sign"/>
+        <helper name="getChangeColor" purpose="Tailwind color class for positive/negative change"/>
+        <helper name="getLatestMoMChange" purpose="Extract latest month-over-month change from time series"/>
+        <helper name="getTimeSeriesStats" purpose="Aggregate stats (total growth, avg monthly change, peak)"/>
+        <helper name="sortModelsByAUM" purpose="Sort AUMByModel array descending"/>
+        <helper name="getModelColor" purpose="Color lookup for model name (Aggressive/Conservative/Intermediate/Short-Term/Ultra Short-Term)"/>
+      </helper_functions>
+    </endpoint>
+
+    <endpoint>
+      <file>portal/src/api/portal-proxy.ts</file>
+      <pipeline>Shared proxy — serves multiple pods including ClientPlatform</pipeline>
+      <auth_pattern>Centralized apiRequest() with Bearer token from localStorage</auth_pattern>
+      <functions_used_by_client_platform>
+        <function name="getAUMMetricsWithCalculations" endpoint="/v1/aum/metrics" pages="ModelPortfolios (via aum.ts getAUMMetrics)"/>
+        <function name="getAUMTimeSeries" endpoint="/v1/aum/timeseries" pages="ModelPortfolios (via aum.ts getAUMTimeSeries, getModelTimeSeries)"/>
+        <function name="getAUMSummary" endpoint="/v1/aum/summary" pages="ModelPortfolios (via aum.ts getAUMSummary)"/>
+        <function name="getAUMFlows" endpoint="/v1/aum/flows" pages="ModelPortfolios (via aum.ts getAUMFlows)"/>
+        <function name="getModelPortfolioBenchmarks" endpoint="/v1/benchmarks/returns" pages="ModelPortfolios (queryKey: 'model-portfolio-benchmarks')"/>
+        <function name="getETFBenchmarkReturns" endpoint="/v1/benchmarks/etf" pages="ModelPortfolios (queryKey: 'etf-benchmark-returns')"/>
+        <function name="getPeerPerformance" endpoint="/v1/peers/performance" pages="ModelPortfolios (queryKey: 'peer-performance')"/>
+        <function name="getNonModelAssets" endpoint="/v1/aum/non-model" pages="ModelPortfolios (queryKey: 'non-model-assets')"/>
+      </functions_used_by_client_platform>
+      <known_issue file="portal/src/api/portal-proxy.ts:87-95">
+        401 redirect to login is disabled — was causing infinite redirect loop for ModelPortfolios.
+        Currently logs error, does not redirect.
+      </known_issue>
+    </endpoint>
+
+  </api_endpoints>
+
+  <!-- ================================================================== -->
+  <!-- SHARED COMPONENTS (used by 2+ pages in this pod)                    -->
+  <!-- ================================================================== -->
+
+  <shared_components>
+    <component from="portal/src/ui/components/panels" exports="Panel, PanelHeader, PanelContent, PanelFooter, SmartPanelFooter" used_by="ModelPortfolios, AdvisorIntelligence"/>
+    <component from="portal/src/components/LoadingSpinner" exports="LoadingInline" used_by="ModelPortfolios, AdvisorIntelligence"/>
+    <component from="portal/src/components/PageHeaderVariants" exports="PageHeaderCleanBadge" used_by="ModelPortfolios, AdvisorIntelligence"/>
+    <component from="portal/src/components/TabNavigation" exports="TabNavigation" used_by="ModelPortfolios, AdvisorIntelligence"/>
+    <component from="portal/src/components/ErrorBoundary" exports="ErrorBoundary" used_by="AdvisorIntelligence (tab-level error boundaries); ModelPortfolios implicit"/>
+    <component from="portal/src/contexts/PageThemeContext" exports="PageThemeProvider" used_by="ModelPortfolios (purple accent), AdvisorIntelligence (primary accent)"/>
+    <component from="portal/src/hooks/useTabNavigation" exports="useTabNavigation" used_by="ModelPortfolios, AdvisorIntelligence"/>
+    <component from="portal/src/lib/universalNumberFormatter" exports="formatNumberTo3Digits, formatCurrency" used_by="ModelPortfolios, AdvisorIntelligence"/>
+    <component from="portal/src/components/Tooltip" exports="Tooltip" used_by="ModelPortfolios, AdvisorIntelligence (DistributionTab)"/>
+    <component from="recharts" exports="AreaChart Area BarChart Bar XAxis YAxis Tooltip ResponsiveContainer CartesianGrid" used_by="ModelPortfolios, AdvisorIntelligence"/>
+    <component from="react-apexcharts" exports="Chart (lazy loaded)" used_by="ModelPortfolios (donut), AdvisorIntelligence (DistributionTab donut)"/>
+    <component from="lucide-react" exports="various icons" used_by="ModelPortfolios, AdvisorIntelligence"/>
+  </shared_components>
+
+  <!-- ================================================================== -->
+  <!-- CROSS-POD DEPENDENCIES                                               -->
+  <!-- ================================================================== -->
+
+  <cross_pod_dependencies>
+
+    <upstream_infrastructure id="yang-pipeline" consumed_by_page="ModelPortfolios">
+      <description>
+        ModelPortfolios draws its benchmark and peer data from the Yang pipeline via
+        opal-portal-data-proxy Lambda (portal-proxy). AUM time series data originates
+        from SmartX EC2 (persistent instance) and is stored in DynamoDB, then served
+        through portal-proxy. Model portfolio benchmark returns and ETF comparisons are
+        generated by yang-model-portfolio-benchmarks Lambda and served through
+        portal-proxy /v1/benchmarks/returns and /v1/benchmarks/etf. Peer performance
+        data (/v1/peers/performance) is generated by yang-generate-peer-performance Lambda.
+        This dependency means ModelPortfolios data freshness is gated on Yang pipeline runs.
+      </description>
+      <lambdas>
+        <lambda>opal-portal-data-proxy (API proxy for all portal-proxy.ts calls)</lambda>
+        <lambda>yang-model-portfolio-benchmarks (benchmark returns)</lambda>
+        <lambda>yang-generate-peer-performance (peer universe comparison)</lambda>
+      </lambdas>
+      <ec2_services>
+        <service>smartx-exporter (AUM time series source — persistent EC2)</service>
+      </ec2_services>
+      <storage>
+        <item>DynamoDB (AUM time series, model data)</item>
+        <item>S3 opal-data-portal-v2 (static JSON artifacts)</item>
+      </storage>
+    </upstream_infrastructure>
+
+    <upstream_infrastructure id="bd-pipeline" consumed_by_page="AdvisorIntelligence">
+      <description>
+        AdvisorIntelligence draws all partner AUA/NNA data from the BD (Black Diamond)
+        pipeline. bd-portal-publisher generates aggregate partner analytics
+        (partner_analytics/header_metrics.json, timeseries_chart.json, advisor_rolling_flows.json).
+        bd-portal-advisor-publisher generates per-advisor book files
+        (advisors/{advisorId}/book.json). bd-client-detail generates per-client detail
+        files (clients/{clientKey}.json). opal-partners-data Lambda handles real-time
+        scoped API requests (timeseries/{dimension}, snapshots/{dimension}, filters).
+        All static JSON artifacts are served via CloudFront → S3 (opal-data-portal-v2 bucket)
+        with firm-level routing handled by shared-advisor-router.
+        Data freshness is gated on daily BD pipeline runs.
+      </description>
+      <lambdas>
+        <lambda>opal-partners-data (scoped API: timeseries, snapshots, filters)</lambda>
+        <lambda>bd-portal-publisher (aggregate analytics generation)</lambda>
+        <lambda>bd-portal-advisor-publisher (per-advisor book generation)</lambda>
+        <lambda>bd-client-detail (per-client detail generation)</lambda>
+      </lambdas>
+      <ec2_services>
+        <service>bd-gold-layer-runner (BD pipeline gold layer — persistent EC2)</service>
+      </ec2_services>
+      <storage>
+        <item>S3 opal-data-portal-v2 (all static JSON artifacts)</item>
+        <item>CloudFront (CDN edge caching for static JSON)</item>
+      </storage>
+      <routing>
+        <item>shared-advisor-router Lambda (firm-scoped routing for static JSON requests)</item>
+        <item>portal-authorizer Lambda (JWT validation + allowedFirmIds injection)</item>
+      </routing>
+    </upstream_infrastructure>
+
+  </cross_pod_dependencies>
+
+  <!-- ================================================================== -->
+  <!-- POD HEALTH                                                           -->
+  <!-- ================================================================== -->
+
+  <pod_health>
+    <open_issues_count>5</open_issues_count>
+    <todo_count>2</todo_count>
+    <missing_deliverables_count>1</missing_deliverables_count>
+    <summary>
+      ModelPortfolios is stable and complete (100% RD audit coverage). Its main outstanding
+      item is the disabled 401 redirect in portal-proxy and a demo-mode endpoint for account
+      distribution. AdvisorIntelligence is active development territory (Distribution, Advisors,
+      Books tabs all recently built in Feb 23-27 sprint) and carries a blocker: the 0.0.14 RD
+      page_inventory.xml deliverable is missing, which will gate Wave 3 DS data_contract.xml
+      issuance. The auth refactor (remove firmId query param from scoped endpoints) and
+      account-distribution private endpoint migration are pending TODOs.
+    </summary>
+    <blockers>
+      <blocker id="1" severity="high">
+        0.4.2_RD_AdvisorIntelligence page_inventory.xml is missing. Must be produced before
+        DS data_contract.xml can be issued for ClientPlatform pod. DE should issue task order
+        to 0.0.14 RD agent to produce the deliverable.
+      </blocker>
+    </blockers>
+  </pod_health>
+
+</pod_inventory>
