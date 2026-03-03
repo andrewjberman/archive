@@ -40,10 +40,11 @@
       No backend colorMap field — RD uses frontend hex palettes.
     </requirement>
     <requirement id="A1.2">
-      Source data: nna_aua_by_advisor.parquet (architect grain) joined with
-      client_performance.parquet (relationship grain) and rel_architect_lookup.parquet
-      for architect-to-client mapping. These were confirmed in the ADVI-004 thread
-      as the grounding data sources.
+      Source data (already loaded in load_all()):
+        - gold/client_performance.parquet (perf): date, relationship_id, total_aua, nna (cumulative)
+        - gold/client_dimension.parquet (cdim): relationship_id, relationship_name, primary_architect
+      No additional parquet files needed for adv_drill. These were confirmed in the
+      ADVI-004 receipt (turn 7) as the grounding data sources.
     </requirement>
 
     <!-- ================================================================ -->
