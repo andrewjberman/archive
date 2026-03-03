@@ -151,17 +151,16 @@ for serial in "${PARTICIPANTS[@]}"; do
     cp "$AGENT_README" "$THREAD_DIR/context/agents/${serial}_README.md"
   fi
 
-  # Copy most recent logs (today first, then most recent date)
+  # Copy logs from the 3 most recent date folders (more context, same cost)
   if [ -d "$AGENT_LOGS" ]; then
-    if [ -d "$AGENT_LOGS/$TODAY" ]; then
-      LOG_DATE="$TODAY"
-    else
-      LOG_DATE=$(ls -1 "$AGENT_LOGS" 2>/dev/null | sort -r | head -1)
-    fi
-
-    if [ -n "${LOG_DATE:-}" ] && [ -d "$AGENT_LOGS/$LOG_DATE" ]; then
+    LOG_DATES=$(ls -1 "$AGENT_LOGS" 2>/dev/null | sort -r | head -3)
+    if [ -n "${LOG_DATES}" ]; then
       mkdir -p "$THREAD_DIR/context/agents/${serial}_logs"
-      cp "$AGENT_LOGS/$LOG_DATE"/*.md "$THREAD_DIR/context/agents/${serial}_logs/" 2>/dev/null || true
+      while IFS= read -r log_date; do
+        if [ -d "$AGENT_LOGS/$log_date" ]; then
+          cp "$AGENT_LOGS/$log_date"/*.md "$THREAD_DIR/context/agents/${serial}_logs/" 2>/dev/null || true
+        fi
+      done <<< "$LOG_DATES"
     fi
   fi
 
@@ -176,6 +175,30 @@ for serial in "${PARTICIPANTS[@]}"; do
           cp "$tf" "$THREAD_DIR/context/agents/${serial}_task_orders/"
         fi
       done
+    fi
+  fi
+
+  # Inject recent commits authored by this agent (matched by serial in commit message)
+  AGENT_COMMITS=$(git -C "$REPO_ROOT" log --oneline --grep="$serial" -20 2>/dev/null)
+  if [ -n "$AGENT_COMMITS" ]; then
+    {
+      echo "# Recent commits by $serial"
+      echo ""
+      echo "$AGENT_COMMITS"
+    } > "$THREAD_DIR/context/agents/${serial}_commits.txt"
+    echo "OK: Injected commit history for $serial"
+  fi
+
+  # For AE and DT agents: inject recent deployment tags as deployment history
+  if [ "$ROLE_CODE" = "AE" ] || [ "$ROLE_CODE" = "DT" ]; then
+    RECENT_TAGS=$(git -C "$REPO_ROOT" tag --sort=-creatordate | grep -E "^[a-z].*-v[0-9]" 2>/dev/null | head -20)
+    if [ -n "$RECENT_TAGS" ]; then
+      {
+        echo "# Recent deployment tags (all pipelines, newest first)"
+        echo ""
+        echo "$RECENT_TAGS"
+      } > "$THREAD_DIR/context/agents/${serial}_deployment_tags.txt"
+      echo "OK: Injected deployment tags for $serial"
     fi
   fi
 done
@@ -412,6 +435,22 @@ fi
         done
         echo ""
       fi
+    fi
+
+    # Recent commits by this agent
+    if [ -f "$THREAD_DIR/context/agents/${serial}_commits.txt" ]; then
+      echo "### ${serial} -- Recent Commits"
+      echo ""
+      cat "$THREAD_DIR/context/agents/${serial}_commits.txt"
+      echo ""
+    fi
+
+    # Deployment tags (AE/DT only)
+    if [ -f "$THREAD_DIR/context/agents/${serial}_deployment_tags.txt" ]; then
+      echo "### ${serial} -- Recent Deployments"
+      echo ""
+      cat "$THREAD_DIR/context/agents/${serial}_deployment_tags.txt"
+      echo ""
     fi
   done
 

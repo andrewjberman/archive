@@ -453,11 +453,13 @@ run_thread() {
     fi
 
     # Invoke claude
-    claude -p "$(cat "$usr_tmp")" \
+    # Unset CLAUDECODE to allow nested invocation from within a Claude Code session
+    # Remove redundant --print flag (already enabled by -p)
+    CLAUDECODE="" claude -p "$(cat "$usr_tmp")" \
       --system-prompt "$(cat "$sys_tmp")" \
       --allowedTools "Read,Write,Edit,Glob,Grep" \
       --output-format text \
-      --print 2>/dev/null || true
+      2>/dev/null || true
 
     rm -f "$sys_tmp" "$usr_tmp"
 
