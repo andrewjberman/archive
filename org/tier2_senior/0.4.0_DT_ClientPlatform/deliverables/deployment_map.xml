@@ -37,6 +37,13 @@
       <note>DT owns portal-facing Lambdas only. Gold layer, EC2 runners, EventBridge rules: coordinate with 0.6.0_AE_PartnerETL.</note>
     </module>
 
+    <module name="portal-auth" authority="full">
+      <path>infra/aws/terraform/portal-auth/</path>
+      <current_tag>portal-auth-v1.2.0</current_tag>
+      <state_key>portal-auth/tfstate</state_key>
+      <note>Auth-handler + portal-authorizer Lambdas. DT owns. J2/J3 added advisor identity passthrough (ADVI-J2/J3).</note>
+    </module>
+
   </terraform_modules>
 
   <!-- =========================================================== -->
@@ -44,6 +51,18 @@
   <!-- =========================================================== -->
 
   <lambdas>
+
+    <!-- portal-auth: auth-handler + portal-authorizer (DT full authority) -->
+    <lambda pipeline="portal-auth" authority="full">
+      <name>opalinvest-auth-handler</name>
+      <deployed_tag>portal-auth-v1.1.0</deployed_tag>
+      <note>Login/refresh auth. Reads opal-partner-49financial, injects advisorKey/advisorName/advisorRole into JWT for advisor-intelligence users (ADVI-J2).</note>
+    </lambda>
+    <lambda pipeline="portal-auth" authority="full">
+      <name>opal-portal-authorizer</name>
+      <deployed_tag>portal-auth-v1.2.0</deployed_tag>
+      <note>API GW Lambda authorizer. Passes advisorKey/advisorName/advisorRole to Lambda context (ADVI-J3).</note>
+    </lambda>
 
     <!-- bd-pipeline: portal-facing (DT authority) -->
     <lambda pipeline="bd-pipeline" authority="full">
