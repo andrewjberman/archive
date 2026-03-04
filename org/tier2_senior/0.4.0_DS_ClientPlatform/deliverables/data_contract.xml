@@ -4,7 +4,7 @@
   <metadata>
     <agent>0.4.0_DS_ClientPlatform</agent>
     <pod>ClientPlatform</pod>
-    <date>2026-03-02</date>
+    <date>2026-03-04</date>
     <task_order_id>1.0.0_SA_CTO-2026-03-02-data-contract-client-platform</task_order_id>
     <status>complete</status>
     <source_note>
@@ -12,6 +12,8 @@
       AdvisorIntelligence section sourced from 0.4.0_DE_ClientPlatform pod_inventory + direct
       Lambda code reads. 0.4.2_RD_AdvisorIntelligence deliverable is MISSING; this contract
       carries lower fidelity on AdvisorIntelligence page-level component detail.
+      2026-03-04: timeseries_chart.json extended with adv_drill (ADVI-004 A1) and cla
+      (ADVI-004 A2) per ADVI-004 Pattern 0 thread receipt.
     </source_note>
   </metadata>
 
@@ -234,12 +236,67 @@
               Optional. { [state]: { categories: [top 9 cities + "Other"], data: [{ date, [city]: aua }] } }
               Present only when nna_aua_by_geography_city.parquet is available.
             </key>
+
+            <!-- ADVI-004 A1: adv_drill -- added 2026-03-04 -->
+            <key name="adv_drill" type="object">
+              Optional. Per-architect per-client AUA timeseries drill-down.
+              Structure: { [architect_display_name]: CumulativeChartView }
+              Record keys MUST match timeseries_chart.json.adv.categories strings exactly
+              (architect display names as produced by nna_aua_by_advisor.parquet).
+              CumulativeChartView:
+                { description: string,
+                  categories: string[],   -- top 8 clients by latest-day AUA in format
+                                             "{relationship_name} ({relationship_id})"
+                                             (fallback to relationship_id if name absent)
+                                             plus "Other" if remainder > 0
+                  data: [{ date: YYYY-MM-DD, [client_key]: aua_dollars, ... }] }
+              Source: gold/client_performance.parquet (total_aua) joined with
+                      gold/client_dimension.parquet (relationship_name, primary_architect).
+              TOP_N_CLIENTS_PER_ARCH = 8 (constant in lambda_function.py).
+              Note: primary_architect from cdim is current-snapshot assignment, not
+              historical. Minor differences vs nna_aua_by_advisor.parquet (which uses
+              rel_architect_lookup.parquet for historical assignments) are expected.
+            </key>
+
+            <!-- ADVI-004 A2: cla -- added 2026-03-04 -->
+            <key name="cla" type="object">
+              Client Lifecycle Analysis: NMNC/NMEC AUM over time at multiple grains.
+              NMNC/NMEC classification: trailing-12-month vintage rule.
+                months_since_first = (row_date - cdim.first_seen_date).days / 30.44
+                NMNC if months_since_first &lt;= 12, else NMEC.
+              Same rule as timeseries_chart.json.aua view (verified in build_timeseries_chart()).
+
+              Sub-keys:
+                total: CumulativeChartView -- firm-wide NMNC/NMEC AUM dollars over time
+                  { description, categories: ["NMNC","NMEC"], data: [{date, NMNC, NMEC}] }
+
+                geo_drill: Record&lt;state, CumulativeChartView&gt;
+                  Keys are state abbreviations (e.g. "TX", "CA") and MUST match
+                  timeseries_chart.json.geo.categories strings exactly.
+                  Each view: 2-series NMNC/NMEC AUM for that state's clients
+                  (filtered by cdim.primary_state -- current snapshot).
+
+                adv_drill: Record&lt;architect_display_name, CumulativeChartView&gt;
+                  Keys MUST match timeseries_chart.json.adv.categories strings exactly
+                  (architect display names, excluding "Other").
+                  Each view: 2-series NMNC/NMEC AUM for that architect's clients
+                  (filtered by cdim.primary_architect -- current snapshot).
+
+                geo_city_drill: Record&lt;state, Record&lt;city, CumulativeChartView&gt;&gt;
+                  Optional. Present when cdim.primary_city is populated.
+                  State keys match geo.categories. City keys are city display names
+                  (top MAX_CLA_CITIES=9 by latest-day AUA per state).
+                  Each view: 2-series NMNC/NMEC AUM for that city's clients.
+                  Source: cdim.primary_city (CTO scope correction, ADVI-004 task order A2.0).
+                  Confirmed available in gold/client_dimension.parquet lines 267-268 of
+                  04_build_client_dimension.py.
+            </key>
           </response_shape>
           <portal_endpoint>
             <function>getCumulativeChart()</function>
             <path>portal/src/api/endpoints/advisor-intelligence.ts</path>
             <http>GET /api/scoped/advisor-intelligence/timeseries_chart.json</http>
-            <note>Used by DistributionTab (continuous view) and PartnerAnalytics. 2-year daily data for aua/nna/geo/adv views.</note>
+            <note>Used by DistributionTab (continuous view) and PartnerAnalytics. adv_drill and cla are additive optional keys added in ADVI-004.</note>
           </portal_endpoint>
         </source>
 
