@@ -7,7 +7,7 @@
     <issued_by>0.4.0_DE_ClientPlatform</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-03-02</date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>high</priority>
     <type>nomenclature-fix</type>
   </metadata>
