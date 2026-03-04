@@ -345,20 +345,78 @@
         </source>
 
         <!-- Source 5: Advisor Rolling Flows (AdvisorsTab) -->
+        <!-- Updated 2026-03-04: ADVI-005 A3 adds stacked_bar + rolling_1y keys -->
         <source>
-          <lambda_function>bd-portal-publisher (writes file)</lambda_function>
-          <source_path>infra/aws/lambda/bd-pipeline/bd-portal-publisher/lambda_function.py</source_path>
-          <trigger>Static JSON via CloudFront / S3</trigger>
-          <s3_output_key_pattern>opal-data-bd/gold/advisor_rolling_flows.json (inferred from portal endpoint)</s3_output_key_pattern>
+          <script>data/black_diamond/scripts/gold/10_generate_advisor_rolling_flows.py (EC2 gold script)</script>
+          <trigger>EC2 gold pipeline run; script uploads to S3 via --upload flag</trigger>
+          <s3_output_key_pattern>opal-data-bd/gold/advisor_rolling_flows.json</s3_output_key_pattern>
+          <data_history>
+            Daily data from 2020-06-30 to present (~5.5 years).
+            Source parquets: nna_aua_by_advisor.parquet (architects), client_performance.parquet (implementors).
+            First valid 1Y rolling point: ~2021-07-01 (after 1Y warmup).
+            3Y and Max stacked_bar coverage: complete (data exceeds 4Y required lookback).
+          </data_history>
           <response_shape>
-            <key name="advisors" type="array">Per-advisor rolling NNA/inflows/outflows timeseries</key>
-            <note>Exact shape not confirmed from code — inferred from portal endpoint definition in pod_inventory.</note>
+
+            <!-- LEGACY KEYS (unchanged) -->
+            <key name="generated_at" type="string">ISO8601 UTC</key>
+            <key name="data_as_of" type="string">YYYY-MM-DD</key>
+            <key name="firm_id" type="string"/>
+            <key name="summary" type="object">
+              { architects: { mtd, qtd, ytd }, implementors: { mtd, qtd, ytd } }
+              Each period: { period_start, period_end, display, total_nna, total_inflows, total_outflows,
+                             prior: {...}, growth_pct, segments: [AdvisorSegment] }
+              AdvisorSegment: { advisor_name, advisor_id, nna, nna_pct, inflows, outflows, total_aua,
+                                client_count, new_clients, prior_nna, nna_growth_pct, rank,
+                                prior_rank, rank_change, color }
+            </key>
+            <key name="architects" type="array">
+              Legacy rolling series. Each: { advisor_name, advisor_id,
+              series: { "30d": [Rolling1YDataPoint], "90d": [...], "1Y": [...] } }
+              Rolling1YDataPoint: { date, nna, inflows, outflows }
+            </key>
+            <key name="implementors" type="array">Same shape as architects.</key>
+
+            <!-- ADVI-005 A3.1: stacked_bar -- added 2026-03-04 -->
+            <key name="stacked_bar" type="object">
+              Period-aggregated inflows/outflows/nna_net per advisor.
+              Nesting: period-outer / role-inner (CTO correction from thread receipt).
+              Structure:
+                { "qtd": { "architects": [AdvisorBarEntry], "implementors": [AdvisorBarEntry] },
+                  "ytd": { ... }, "1y": { ... }, "3y": { ... }, "max": { ... } }
+              AdvisorBarEntry: { advisor_name, advisor_id, inflows, outflows, nna_net }
+                - outflows: positive magnitude (&gt;= 0); frontend negates for stacked bar chart.
+                - nna_net: signed (can be negative).
+              Period boundaries:
+                - qtd, ytd: calendar-anchored via _get_period_boundaries().
+                - 1y, 3y: trailing 365/1095 days from latest_date.
+                - max: inception-to-date (earliest date in parquet = 2020-06-30).
+              Source: nna_aua_by_advisor.parquet (architects);
+                      client_performance.parquet + accounts_dimension_latest.parquet (implementors).
+              Computed by: compute_stacked_bar() in 10_generate_advisor_rolling_flows.py.
+            </key>
+
+            <!-- ADVI-005 A3.2: rolling_1y -- added 2026-03-04 -->
+            <key name="rolling_1y" type="object">
+              Fixed 1Y rolling window timeseries per advisor; full history emitted.
+              Frontend slices x-axis by period toggle (qtd/ytd/1y/3y/max).
+              Structure:
+                { "architects": [AdvisorRolling1YSeries], "implementors": [AdvisorRolling1YSeries] }
+              AdvisorRolling1YSeries: { advisor_name, advisor_id,
+                series: [{ date: YYYY-MM-DD, nna: number, inflows: number, outflows: number }] }
+                - Daily cadence. All 3 fields present per point.
+                - outflows: positive magnitude (consistent with legacy series convention).
+                - nna: signed.
+              Rolling method: roll_val[D] = cum_val[D] - cum_val[D - 365d].
+              First valid data point: ~2021-07-01 (requires 365d warmup).
+              Source: reuses existing 1Y window from compute_rolling_series() in script 10.
+            </key>
+
           </response_shape>
           <portal_endpoint>
             <function>getAdvisorRollingFlows()</function>
             <path>portal/src/api/endpoints/advisor-intelligence.ts</path>
             <http>GET /api/scoped/advisor-intelligence/advisor_rolling_flows.json</http>
-            <note>Static JSON via CloudFront/S3 (opal-data-portal-v2 bucket per pod_inventory).</note>
           </portal_endpoint>
         </source>
 

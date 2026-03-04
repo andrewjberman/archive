@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-03-03</date>
-    <status>pending</status>
+    <status>complete</status>
     <thread_serial>ADVI-005</thread_serial>
     <thread_ref>org/threads/ADVI-005-pattern-0-stacked-bar--rolling-flows-dat/</thread_ref>
   </metadata>
