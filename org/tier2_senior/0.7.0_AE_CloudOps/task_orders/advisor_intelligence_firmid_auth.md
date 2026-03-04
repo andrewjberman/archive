@@ -7,15 +7,23 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-03-03</date>
-    <status>pending</status>
+    <status>superseded</status>
+    <superseded_by>ADVI-J1-partner-identity-dynamo.md</superseded_by>
+    <superseded_date>2026-03-04</superseded_date>
+    <superseded_note>
+      The Cognito custom:firmId approach is dead. DS A5 investigation confirmed that
+      financial architects have no portal accounts at all — there is nothing to attach
+      a firmId claim to. The new approach is a per-partner DynamoDB identity table
+      (opal-partner-49financial) joined to opal-users-v2 by email. The auth-handler
+      reads the partner table at login and injects advisorKey/advisorRole/firmId into
+      the JWT. See docs/architecture/PARTNER_IDENTITY_TABLE.md for the full PRD.
+    </superseded_note>
   </metadata>
 
   <objective>
-    Configure the Cognito custom:firmId claim so that API Gateway injects firmId into
-    the Lambda authorizer context, eliminating the current client-supplied query string
-    firmId parameter. This is Stream J of the AdvisorIntelligence completion PRD.
-    This stream is NOT blocking completion — schedule after B1, B2, F are deployed.
-    However, it MUST be complete before external advisor access goes live.
+    SUPERSEDED — see ADVI-J1-partner-identity-dynamo.md and
+    docs/architecture/PARTNER_IDENTITY_TABLE.md.
+    Original objective (Cognito firmId claim) is no longer valid.
   </objective>
 
   <references>

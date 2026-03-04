@@ -45,26 +45,73 @@
     <!-- STREAM J2 — auth-handler Lambda                                  -->
     <!-- ================================================================ -->
     <requirement id="J2.1">
-      File: infra/aws/opalinvest_dev/lambda/auth-handler/
+      Files to modify (all TypeScript — auth-handler is Node.js/TS, not Python):
+        - infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts
+        - infra/aws/opalinvest_dev/lambda/auth-handler/src/types.ts
+        - infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts
+        - infra/aws/opalinvest_dev/lambda/auth-handler/src/auth.ts
 
-      After the existing opal-users-v2 lookup succeeds, add a conditional second DynamoDB
-      read from opal-partner-49financial:
+      Read all four files in full before making any changes.
 
-        CONDITION: user's allowedPages list includes "advisor-intelligence"
-          (this is how auth-handler knows the user is a 49 Financial user)
+      db.ts — add a new function using the existing docClient (DynamoDBDocumentClient):
 
-        IF condition met:
-          dynamodb.get_item(
-            TableName="opal-partner-49financial",
-            Key={"email": {"S": user_email}}
+        const PARTNER_TABLE_49FIN = 'opal-partner-49financial'
+
+        export async function getPartnerIdentity(email: string): Promise&lt;{
+          advisorKey: string
+          advisorName: string
+          advisorRole: string
+        } | null&gt; {
+          const response = await docClient.send(
+            new GetCommand({
+              TableName: PARTNER_TABLE_49FIN,
+              Key: { email },
+            })
           )
-          If record found: extract advisorKey, advisorRole
-          If no record: omit those claims (graceful degradation — user still logs in)
+          if (!response.Item) return null
+          return {
+            advisorKey:  response.Item.advisorKey  as string,
+            advisorName: response.Item.advisorName as string,
+            advisorRole: response.Item.advisorRole as string,
+          }
+        }
 
-        JWT claims to add when record found:
-          firmId     = "49financial"
-          advisorKey = record["advisorKey"]["S"]
-          advisorRole= record["advisorRole"]["S"]
+      types.ts — add three optional fields to AccessTokenPayload:
+        advisorKey?:  string   // BD gold layer advisor slug (e.g., "arch_jane_smith")
+        advisorName?: string   // Display name (e.g., "Jane Smith")
+        advisorRole?: string   // "architect" | "implementor" | "admin" | "viewer"
+
+      jwt.ts — update generateAccessToken signature to accept optional partner identity:
+        export async function generateAccessToken(
+          user: User,
+          partnerIdentity?: { advisorKey: string; advisorName: string; advisorRole: string } | null
+        ): Promise&lt;string&gt;
+
+        Add to payload spread (after allowedTabs):
+          ...(partnerIdentity &amp;&amp; {
+            advisorKey:  partnerIdentity.advisorKey,
+            advisorName: partnerIdentity.advisorName,
+            advisorRole: partnerIdentity.advisorRole,
+          }),
+
+      auth.ts — update login() and refresh() to call getPartnerIdentity when needed:
+
+        TRIGGER: user.allowedPages?.includes('advisor-intelligence')
+          (this is how auth-handler knows the user is a 49 Financial advisor)
+
+        In login() after getUser() succeeds:
+          let partnerIdentity = null
+          if (user.allowedPages?.includes('advisor-intelligence')) {
+            try {
+              partnerIdentity = await getPartnerIdentity(user.email)
+            } catch (err) {
+              console.error('WARN: partner identity lookup failed, continuing without:', err)
+              // Do not fail the login on partner table error
+            }
+          }
+          const accessToken = await generateAccessToken(user, partnerIdentity)
+
+        Apply the same pattern to refresh() — getPartnerIdentity after getUser().
 
       Reference the auth flow diagram in PRD Section 3 (New Flow) for the exact sequence.
     </requirement>
@@ -79,11 +126,13 @@
     </requirement>
 
     <requirement id="J2.3">
-      IAM: the auth-handler Lambda role needs GetItem and Query on opal-partner-49financial.
-      AE (J1) will either attach this policy or document the attachment point.
-      If AE left the IAM attachment for DT (within your portal-auth Terraform module):
-        add the policy statement to the auth-handler role in your module.
-      Confirm with AE's J1 session log for the exact IAM status before deploying.
+      IAM: AE (J1) attaches the PartnerIdentityReadPermissions policy to role
+      opalinvest-auth-lambda-role directly from shared-infra/main.tf. DT does NOT
+      need to add any IAM. Verify this is in place by checking AE's J1 session log
+      confirms "PartnerIdentityReadPermissions" policy is live on the role before
+      you run terraform plan for portal-auth. If AE's log does not confirm this,
+      the plan will succeed but the Lambda will get AccessDenied at runtime — stop
+      and wait for AE J1 to fully complete first.
     </requirement>
 
     <!-- ================================================================ -->
@@ -103,43 +152,85 @@
       pass them through IF present, and omit them IF absent. Do not error when they are
       absent — most users will not have them.
 
+      Specific change in index.mjs: in the context object (currently lines 194-206),
+      add three new fields using the same null-coalescing pattern as existing fields:
+
+        advisorKey:  decoded.advisorKey  || 'null',
+        advisorName: decoded.advisorName || 'null',
+        advisorRole: decoded.advisorRole || 'null',
+
       After J3, scoped Lambdas read advisor identity from:
-        event["requestContext"]["authorizer"]["advisorKey"]
-        event["requestContext"]["authorizer"]["advisorRole"]
-        event["requestContext"]["authorizer"]["firmId"]
+        event.requestContext.authorizer.advisorKey
+        event.requestContext.authorizer.advisorRole
+        event.requestContext.authorizer.firmId    (already present in context)
     </requirement>
 
     <!-- ================================================================ -->
     <!-- DEPLOY — Both Lambdas via portal-auth Terraform module           -->
     <!-- ================================================================ -->
     <requirement id="J2J3.deploy">
-      Deploy both Lambdas via the portal-auth Terraform module (your module, commit 1660ed82).
-      Follow the standard sequence:
-        1. Write code changes (auth-handler + portal-authorizer)
-        2. git commit (--author="0.4.0_DT_ClientPlatform &lt;0.4.0_DT_ClientPlatform@opal.agent&gt;")
-        3. terraform plan (portal-auth module)
-        4. terraform apply
-        5. Confirm 0-diff on second apply
-        6. git tag -a portal-auth-v{X.Y.Z} -m "feat(portal-auth): partner identity JWT claims J2/J3 (ADVI)"
-        7. git push --follow-tags
+      Deploy both Lambdas via the portal-auth Terraform module. Deploy J2 and J3 as
+      separate apply cycles (J2 first, verify, then J3) to match the dependency order.
 
-      Update lambda-source-map.json if either Lambda's source path changed.
+      Current portal-auth tag: portal-auth-v1.0.0 (commit 1660ed82, deployed 2026-03-03).
+      Next tags: portal-auth-v1.1.0 for J2, portal-auth-v1.2.0 for J3.
+
+      J2 deploy sequence (auth-handler):
+        1. Commit auth-handler source changes (db.ts, types.ts, jwt.ts, auth.ts)
+           git commit --author="0.4.0_DT_ClientPlatform ..."
+        2. Compile TypeScript (REQUIRED before build-and-upload.sh):
+           cd infra/aws/opalinvest_dev/lambda/auth-handler
+           npm run build
+           (produces dist/*.js from src/*.ts — source map lists dist/ files)
+        3. Build + upload artifact:
+           bash infra/aws/lambda/ci/build-and-upload.sh portal-auth opalinvest-auth-handler
+        4. Commit updated source map:
+           git add infra/aws/lambda/ci/lambda-source-map.json
+           git commit --author="0.4.0_DT_ClientPlatform ..." -m "ci: upload artifacts [skip ci]"
+        5. terraform plan + apply (infra/aws/terraform/portal-auth)
+        6. 0-diff verify
+        7. Update deployment_map.xml, record-terraform-deploy.sh, tag portal-auth-v1.1.0, push
+
+      J3 deploy sequence (portal-authorizer) — after J2 verified:
+        1. Commit portal-authorizer source change (index.mjs)
+        2. Build + upload artifact (index.mjs needs no compilation):
+           bash infra/aws/lambda/ci/build-and-upload.sh portal-auth opal-portal-authorizer
+        3. Commit updated source map
+        4. terraform plan + apply + 0-diff
+        5. Update deployment_map.xml, record-terraform-deploy.sh, tag portal-auth-v1.2.0, push
+
+      Export before any Terraform or AWS CLI:
+        export MSYS_NO_PATHCONV=1
+        export AWS_EC2_METADATA_DISABLED=true
     </requirement>
 
     <!-- ================================================================ -->
     <!-- VERIFICATION                                                      -->
     <!-- ================================================================ -->
     <requirement id="J2J3.verify">
-      After deploy:
-        1. Trigger a login for a test user whose email IS in opal-partner-49financial.
-           Verify JWT contains firmId, advisorKey, advisorRole.
-        2. Trigger a login for a test user whose email is NOT in opal-partner-49financial.
-           Verify login succeeds and JWT does NOT contain those claims (graceful degradation).
-        3. Confirm portal-authorizer passes claims to Lambda context:
+      After J2 deploy:
+        1. Insert one test record into opal-partner-49financial to enable testing:
+             aws dynamodb put-item --table-name opal-partner-49financial \
+               --item '{"email":{"S":"test-advisor@49financial.com"},
+                        "advisorKey":{"S":"arch_test"},
+                        "advisorName":{"S":"Test Advisor"},
+                        "advisorRole":{"S":"architect"},
+                        "createdAt":{"S":"2026-03-04T00:00:00Z"},
+                        "createdBy":{"S":"DT-J2-test"}}'
+           (This is a temp test record — not a real advisor. Remove after verification.)
+        2. Trigger a login as a user whose email IS in opal-partner-49financial AND
+           has "advisor-intelligence" in allowedPages. Decode the JWT (jwt.io or aws logs)
+           and verify: firmId="49financial", advisorKey="arch_test", advisorRole="architect".
+        3. Trigger a login for a user whose email is NOT in opal-partner-49financial.
+           Verify login succeeds and JWT does NOT contain advisorKey/advisorRole.
+        4. After J3 deploy: confirm portal-authorizer passes the claims to Lambda context.
            Read a scoped Lambda's CloudWatch logs and confirm advisorKey appears in
-           requestContext.authorizer for an authenticated advisor user.
+           event.requestContext.authorizer for the test advisor user.
 
-      Document verification results in session log.
+      Note: table starts EMPTY after J1. You must insert the test record above before
+      any JWT-level verification is possible.
+
+      Document verification results in session log. Remove the test record after testing.
     </requirement>
 
   </requirements>

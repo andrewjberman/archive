@@ -68,17 +68,33 @@
     <!-- PART 2 — IAM Policy for auth-handler Lambda                      -->
     <!-- ================================================================ -->
     <requirement id="J1.3">
-      Add an IAM policy (or policy statement) granting the auth-handler Lambda role
-      read access to opal-partner-49financial. Required DynamoDB actions:
-        - dynamodb:GetItem     (read by email PK — the primary use case)
-        - dynamodb:Query       (for GSI ByAdvisorRole — admin enumeration use case)
+      Add an aws_iam_role_policy resource to infra/aws/terraform/shared-infra/main.tf
+      granting the auth-handler Lambda role read access to opal-partner-49financial.
 
-      The auth-handler Lambda role is managed by the portal-auth Terraform module
-      (deployed at commit 1660ed82). Coordinate with DT if the IAM attachment point
-      is in their module vs shared-infra. If in DT's portal-auth module, document the
-      required policy ARN/statement so DT can attach it in J2.
+      Placement: shared-infra/main.tf — same file as the table. Same Terraform apply.
+      Do NOT touch infra/aws/terraform/portal-auth/iam.tf. That file manages the base
+      opalinvest-auth-permissions policy. Adding a second inline policy from shared-infra
+      is valid AWS (a role can have multiple inline policies with different names).
 
-      Do NOT hardcode ARNs — use aws_dynamodb_table.opal_partner_49financial.arn reference.
+      Pattern to follow: the existing portal_lambda_ec2_snapshot resource in main.tf
+      attaches to "opal-portal-lambda-role" by name string. Use the identical pattern:
+
+        resource "aws_iam_role_policy" "partner_identity_read" {
+          name = "PartnerIdentityReadPermissions"
+          role = "opalinvest-auth-lambda-role"
+          policy = jsonencode({ ... })
+        }
+
+      Required DynamoDB actions:
+        - dynamodb:GetItem   (read by email PK — primary auth lookup)
+        - dynamodb:Query     (GSI ByAdvisorRole — admin enumeration use case)
+
+      Resources: use Terraform references, not hardcoded ARNs:
+        - aws_dynamodb_table.opal_partner_49financial.arn
+        - "${aws_dynamodb_table.opal_partner_49financial.arn}/index/*"
+
+      The auth-handler role name "opalinvest-auth-lambda-role" is confirmed in:
+        infra/aws/terraform/portal-auth/iam.tf line 16 (resource "aws_iam_role" "auth_handler")
     </requirement>
 
     <!-- ================================================================ -->
