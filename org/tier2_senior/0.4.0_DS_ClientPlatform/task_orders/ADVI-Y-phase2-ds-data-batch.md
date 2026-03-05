@@ -7,7 +7,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-03-04</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-03-05 — deployed bd-v2.16.2 (Lambda) + bd-v2.16.3 (EC2)</completed>
     <priority>HIGH — run parallel with RD Phase 1</priority>
     <streams>Y2, Y3, Y5, Y6b, Y6c, Y6d, Y7, Y9, Y10, Y11, Y13</streams>
   </metadata>
