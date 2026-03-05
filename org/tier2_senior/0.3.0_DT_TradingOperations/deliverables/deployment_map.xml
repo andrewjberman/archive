@@ -13,8 +13,8 @@
   <metadata>
     <agent>0.3.0_DT_TradingOperations</agent>
     <pod>TradingOperations</pod>
-    <date>2026-03-02</date>
-    <pages_served>PortfolioManagement, TradeSubmission, DataRefresh</pages_served>
+    <date>2026-03-05</date>
+    <pages_served>PortfolioManagement, TradeSubmission, DataRefresh, SecurityScanner</pages_served>
   </metadata>
 
   <!-- =========================================================== -->
@@ -46,7 +46,41 @@
   </terraform_modules>
 
   <!-- =========================================================== -->
-  <!-- LAMBDA FUNCTIONS                                             -->
+  <!-- PORTAL PAGES                                                 -->
+  <!-- =========================================================== -->
+
+  <pages_served>
+
+    <page name="SecurityScanner" rd_agent="0.3.4_RD_SecurityScanner" status="live">
+      <portal_path>portal/src/pages/SecurityScanner/</portal_path>
+      <route>/security-scanner</route>
+      <access>requiresDev: true (ProtectedRoute requireDev)</access>
+      <dev_commit_range>d473304..c44d5b2</dev_commit_range>
+      <shared_utils>
+        <util>portal/src/utils/colorUtils.ts</util>
+        <util>portal/src/utils/factorOrder.ts</util>
+      </shared_utils>
+      <api_endpoints>
+        <endpoint url="/api/scoped/security-scanner/factors" method="GET"
+                  lambda="opal-data-refresh-api" pipeline="other"
+                  note="Factor definitions (metadata registry)" />
+        <endpoint url="/api/scoped/security-scanner/universe/{id}" method="GET"
+                  lambda="opal-data-refresh-api" pipeline="other"
+                  note="Universe row data from S3 JSON" />
+        <endpoint url="/api/scoped/security-scanner/scanner/{id}" method="GET"
+                  lambda="opal-data-refresh-api" pipeline="other"
+                  note="Scanner rows for composite scoring" />
+        <endpoint url="/api/scoped/security-scanner/upload-url" method="POST"
+                  lambda="opal-data-refresh-api" pipeline="other"
+                  note="Presign PUT URL for FactSet Excel upload (asOf param)" />
+      </api_endpoints>
+      <backend_lambda>opal-security-scanner-processor (owned by 0.5.0_AE_OpalETL)</backend_lambda>
+    </page>
+
+  </pages_served>
+
+  <!-- =========================================================== -->
+  <!-- TERRAFORM MODULES                                            -->
   <!-- =========================================================== -->
 
   <lambdas>
@@ -60,6 +94,17 @@
     <lambda pipeline="smartx-pipeline">
       <name>opal-smartx-ingestion-pipeline</name>
       <deployed_tag>smartx-v2.0.0</deployed_tag>
+    </lambda>
+
+    <!-- security-scanner-pipeline (owned by 0.5.0_AE_OpalETL — DT coordinates portal push only) -->
+    <lambda pipeline="security-scanner-pipeline">
+      <name>opal-security-scanner-processor</name>
+      <deployed_tag>security-scanner-v1.0.0</deployed_tag>
+      <source_commit>82463f79</source_commit>
+      <artifact_sha256>agsyJidYodZo6fXFQPFE2XFCJd60jjDeMUDxevkU3nc=</artifact_sha256>
+      <trigger>S3 ObjectCreated — opal-data-portal-v2/security_scanner/uploads/*.xlsx</trigger>
+      <note>S3 trigger registered in portal-notifications, not security-scanner-pipeline.
+            factor_metadata_registry.json bundled in zip alongside lambda_function.py.</note>
     </lambda>
 
   </lambdas>
