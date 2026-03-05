@@ -65,6 +65,9 @@
           or 'PortfolioManagement/utils/factorOrder' anywhere in the portal source.
         - Run bunx tsc -b from portal/ — must pass.
         - Spot-check ModelTab.tsx and PortfolioGrid.tsx to confirm gradient imports resolve.
+        - CRITICAL: verify App.tsx contains SecurityScanner registration (lazy import,
+          NAV_SECTIONS sidebar entry with ScanLine icon + requiresDev: true, Route with
+          ProtectedRoute requireDev). Without this, the page is unreachable.
 
       Push: git push on portal submodule DEV branch.
       DT is responsible for this push; DE cannot push (AGENT_START_HERE.md abilities table).

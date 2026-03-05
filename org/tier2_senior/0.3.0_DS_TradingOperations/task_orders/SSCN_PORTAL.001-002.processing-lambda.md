@@ -113,6 +113,11 @@
     </requirement>
     <requirement id="5">
       NULL SEMANTICS (per SSCN_DATA_CONTRACT.md Section 7):
+      - FACTSET SENTINEL: FactSet uses 42 as the N/A value across ALL numeric columns (scoring factors
+        AND universe weight columns). Replace 42 -> NaN with df.replace(42, float('nan')) BEFORE
+        the universe membership filter (df[universe_col] > 0). If not done, rows with wt_{etf}=42
+        satisfy > 0 and are incorrectly included as universe members; factor values of 42 are emitted
+        as 42.0 instead of null. Source: DS file analysis of actual upload 2026-03-05.
       - Missing raw value: emit null in values[code] (not 0, not omit)
       - Missing percentile: emit null in pctls[code]
       - Python NaN must be serialized as JSON null (use default=lambda x: None if isinstance(x, float) and math.isnan(x) in json.dumps, or use pandas .where(pd.notna(x), None) before building the dict)
@@ -180,5 +185,18 @@
     <deliverable type="commit">infra/aws/lambda/opal_security_scanner_processor/requirements.txt committed to CLOUD branch</deliverable>
     <deliverable type="log">Session log at org/tier2_senior/0.3.0_DS_TradingOperations/logs/2026-03-05/ (or next session date)</deliverable>
   </deliverables>
+
+  <!-- POST-COMPLETE ADDENDUM (2026-03-05): DS analysis of actual upload file confirmed:
+    1. Sentinel 42 = FactSet N/A sentinel across ALL numeric columns (scoring + universe weight).
+       Lambda updated with df.replace(42, float('nan')) before universe membership filter.
+       This was not in the original requirements; it was found after initial implementation.
+       lambda_function.py has been patched (still local, not yet committed).
+    2. 284 factor columns confirmed -- matches contract exactly.
+    3. Header row index 4 confirmed -- already correctly implemented.
+    4. International tickers (ACWX/EAFE/EAFEV) are FactSet entity IDs, not exchange tickers.
+       Documented in SSCN_DATA_CONTRACT.md Section 10.5 as informational.
+    5. country_name is UPPERCASE -- decision pending (see SSCN_DATA_CONTRACT.md Section 10.6).
+    SSCN_DATA_CONTRACT.md Sections 7, 8, and 10 updated to reflect all findings.
+  -->
 </task_order>
 ```
