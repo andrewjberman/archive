@@ -454,37 +454,42 @@ All task orders use this XML structure. Wrap the XML in a markdown file.
 
 ### Task Order Filename Convention
 
-**From a project thread** (top-down, Tier 1/2 initiated):
+**Format (rigid — no exceptions for project work):**
 ```
-{agent_folder}/task_orders/{PROJECT_CODE}-{NNN}-{feature_slug}.md
-```
-The `{PROJECT_CODE}-{NNN}` prefix is the thread serial that produced this task order.
-This links the task order back to the thread receipt and the project file.
-
-Project code format: `{MACRO}_{6CHAR}` (e.g., `ADVI_V1VERS`, `ADVI_YANGV2`).
-Macro codes are in `org/projects/MACRO_CODES.md`. Project codes are registered in `org/projects/REGISTRY.md`.
-
-Examples:
-```
-org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_V1VERS-004-adv_drill.md
-org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI_V1VERS-004-continuous_nna_rendering.md
+{agent_folder}/task_orders/{MACRO}_{6CHAR}.{task-code-and-description}.md
 ```
 
-**Ad-hoc** (no project / lateral between agents):
+- Project code (`{MACRO}_{6CHAR}`) and task description are separated by a `.`
+- Everything after the `.` uses dashes only — no underscores anywhere in the filename
+- Task code comes first after the dot (e.g., `004`, `Y1-Y4-Y6-Y12`, `J2-J3`), followed by a dash and a human-readable description
+- When sourced from a thread, the numeric task code matches the thread serial number (`004` = thread `ADVI_V1VERS-004`)
+
+Project codes are in `org/projects/REGISTRY.md`. Macro codes are in `org/projects/MACRO_CODES.md`.
+
+**Project task order examples:**
 ```
-{agent_folder}/task_orders/{feature_slug}.md
+org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_V1VERS.004-adv-drill-cla.md
+org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI_V1VERS.004-distribution-continuous.md
+org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI_YANGV2.Y1-Y4-Y6-Y12-phase1-visual.md
+org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ADVI_YANGV2.Y-phase3-de-type-wiring.md
+org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ADVI_V1VERS.J1-partner-identity-dynamo.md
 ```
-No prefix. Used for work that doesn't trace to a formal project thread.
+
+**Ad-hoc** (no registered project / lateral between agents):
+```
+{agent_folder}/task_orders/{description-with-dashes}.md
+```
+No project prefix. Used for work that doesn't trace to a registered project.
 
 ```
-org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/rolling_flows_chart_redesign.md
+org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/rolling-flows-chart-redesign.md
 ```
 
 Filtering task orders by project in any agent folder:
 ```bash
-ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_V1VERS-*.md   # all V1VERS project work
-ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_YANGV2-*.md   # all YANGV2 project work
-ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_*.md          # all ADVI macro work
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_V1VERS.*   # all V1VERS work
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_YANGV2.*   # all YANGV2 work
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_*          # all ADVI macro work
 ```
 
 ---
