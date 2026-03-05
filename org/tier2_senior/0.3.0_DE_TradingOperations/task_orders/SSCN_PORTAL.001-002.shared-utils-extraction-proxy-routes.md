@@ -133,6 +133,28 @@
       Commit message:
         0.3.0_DE_TradingOperations: add SSCN API endpoint functions (SSCN_PORTAL-001)
     </requirement>
+    <requirement id="7">
+      APP.TSX PAGE REGISTRATION (MISSED IN ORIGINAL TASK ORDER -- ADDED POST-REVIEW):
+      Register SecurityScanner in portal/src/App.tsx. This is DE's responsibility because
+      App.tsx is outside RD's page-scoped commit scope. Three changes required:
+
+      1. LAZY IMPORT (after TradeSubmission import):
+         const SecurityScanner = lazy(() => import('./pages/SecurityScanner/index').then(m => ({ default: m.SecurityScanner })))
+
+      2. SIDEBAR ENTRY in NAV_SECTIONS tools section, FIRST item (above Portfolio Management):
+         { path: '/security-scanner', label: 'Security Scanner', icon: ScanLine, requiresDev: true }
+         Also add ScanLine to the lucide-react import block.
+
+      3. ROUTE (before portfolio-management route):
+         &lt;Route path="/security-scanner" element={&lt;ProtectedRoute requireDev&gt;&lt;SecurityScanner /&gt;&lt;/ProtectedRoute&gt;} /&gt;
+
+      Without this, the page components exist but are unreachable -- no sidebar link, no route.
+      This was specified in the PRD (route: /security-scanner, sidebar: Tools above PM,
+      icon: ScanLine, requiresDev: true) but was not captured in any task order.
+
+      NOTE: This was caught during CTO review and fixed directly. If this task order was
+      already marked complete before this addendum, DE should verify the fix is committed.
+    </requirement>
   </requirements>
 
   <acceptance_criteria>
@@ -143,6 +165,7 @@
     <criterion id="5">bunx tsc -b passes after extraction commit and after proxy routes commit.</criterion>
     <criterion id="6">portal/src/api/endpoints/security-scanner.ts exists with 3 exported functions + UNIVERSE_IDS constant.</criterion>
     <criterion id="7">Two commits produced: one for extraction, one for the endpoint file.</criterion>
+    <criterion id="8">SecurityScanner appears in App.tsx: lazy import, NAV_SECTIONS sidebar entry (Tools, above PM, ScanLine icon, requiresDev), and Route with ProtectedRoute requireDev.</criterion>
   </acceptance_criteria>
 
   <constraints>
