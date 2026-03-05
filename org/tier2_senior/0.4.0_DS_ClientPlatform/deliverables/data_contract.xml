@@ -14,6 +14,11 @@
       carries lower fidelity on AdvisorIntelligence page-level component detail.
       2026-03-04: timeseries_chart.json extended with adv_drill (ADVI-004 A1) and cla
       (ADVI-004 A2) per ADVI-004 Pattern 0 thread receipt.
+      2026-03-04: Yang V2 Phase 2 DS batch (ADVI-Y). 11 streams: Y7,Y10,Y6c (bug fixes),
+      Y2,Y11 (investigations), Y3,Y5,Y6b,Y6d,Y9,Y13 (data extensions). All complete.
+      timeseries_chart.json: +growth_decomposition, +nna_geo, +nna_adv, +nna_geo_drill, +aua_mix.
+      header_metrics.json: Y6c quartile fix, Y7 binning fix, Y6b city drill, Y6d relationship drill.
+      advisor_rolling_flows.json: Y13 monthly stacked_bar.
     </source_note>
   </metadata>
 
@@ -290,6 +295,41 @@
                   Source: cdim.primary_city (CTO scope correction, ADVI-004 task order A2.0).
                   Confirmed available in gold/client_dimension.parquet lines 267-268 of
                   04_build_client_dimension.py.
+            </key>
+
+            <!-- Y5: growth_decomposition -- added 2026-03-04 -->
+            <key name="growth_decomposition" type="object">
+              Monthly AUA change decomposed into market appreciation and NNA.
+              Accounting identity: market = aua_end - aua_start - nna; total = market + nna.
+              { description: string, data: [{ period: "YYYY-MM", market: float, nna: float, total: float }] }
+              Source: gold/client_performance.parquet (total_aua, nna) grouped by year_month.
+            </key>
+
+            <!-- Y9: nna_geo / nna_adv / nna_geo_drill -- added 2026-03-04 -->
+            <key name="nna_geo" type="object">
+              Cumulative NNA, inflows, outflows by US state. Flat key format.
+              { description, categories: [states], data: [{ date, [state], [state]_inflow, [state]_outflow }] }
+            </key>
+            <key name="nna_adv" type="object">
+              Cumulative NNA, inflows, outflows by architect. Flat key format.
+              { description, categories: [architects], data: [{ date, [arch], [arch]_inflow, [arch]_outflow }] }
+            </key>
+            <key name="nna_geo_drill" type="object">
+              Optional. Per-city NNA within top states.
+              { [state]: { categories: [cities], data: [{ date, [city], [city]_inflow, [city]_outflow }] } }
+            </key>
+
+            <!-- Y3: aua_mix -- added 2026-03-04 -->
+            <key name="aua_mix" type="object">
+              Optional. Asset class AUA breakdown from holdings_lots snapshots (monthly).
+              { description: string,
+                categories: ["Equities","Fixed Income","Real Estate","Alternatives","Cash","Other"],
+                data: [{ period: "YYYY-MM", segments: [{ label: string, value: float }] }] }
+              Source: gold/holdings_lots/YYYY-MM-DD.parquet (one per month-end).
+              Classification: name-pattern heuristic on asset_name (inline in publisher Lambda).
+              6 categories: Equities (US+Intl), Fixed Income, Real Estate (split from Alternatives),
+              Alternatives, Cash, Other.
+              Present only when holdings_lots snapshots exist in S3.
             </key>
           </response_shape>
           <portal_endpoint>
@@ -921,5 +961,75 @@
     </gap>
 
   </gaps>
+
+  <!-- ======================================================================== -->
+  <!-- YANG V2 STREAM FINDINGS (ADVI-Y phase 2, 2026-03-04)                     -->
+  <!-- ======================================================================== -->
+  <yang_v2_stream_findings date="2026-03-04" task_order="ADVI-Y-phase2-ds-data-batch">
+
+    <finding id="Y7" type="bug_fix" file="09_generate_partner_analytics.py">
+      Root cause: calculate_distribution_stats() produces degenerate bins when min_val == max_val
+      (single-account relationship). np.logspace(log10(X), log10(X), N) collapses all bin edges.
+      Fix: guard added -- if max_val &lt;= min_val: max_val = min_val * 2.
+    </finding>
+
+    <finding id="Y10" type="investigation" file="10_generate_advisor_rolling_flows.py + lambda_function.py">
+      No code change. All three QTD/YTD computation paths produce identical results for Q1 2026
+      (both start Jan 1). Discrepancy is stale deployed data or frontend display issue.
+    </finding>
+
+    <finding id="Y6c" type="bug_fix" file="09_generate_partner_analytics.py">
+      Root cause: signed NNA percentiles placed largest outflows at P10 (most negative).
+      Fix: added inflow_percentiles (positive NNA ranked normally) and outflow_percentiles
+      (absolute magnitude of negative NNA, so P90+ = largest outflow). Applied at all grain levels
+      via calculate_nna_distribution_stats(). Added inflow_count, outflow_count keys.
+    </finding>
+
+    <finding id="Y2" type="investigation" file="09_generate_partner_analytics.py + lambda_function.py">
+      No code change. Two NMNC/NMEC implementations found:
+      - Script 09 CLA view: period-bookended (correct per Yang PRD).
+      - Publisher Lambda aua view: trailing-12-month (appropriate for daily time series).
+      Both are fit for purpose. No patch needed.
+    </finding>
+
+    <finding id="Y11" type="investigation" file="00-04 gold scripts">
+      No code change. Exhaustive search of gold layer sources:
+      ADVISOR_FIELDS = ['architect', 'implementor', 'local_ops'] (01_build_advisor_assignments_history.py).
+      No distinct "Advisor" identity field exists in BD data. Y13 proceeds with architects/implementors only.
+    </finding>
+
+    <finding id="Y6b" type="data_extension" file="09_generate_partner_analytics.py">
+      Added city-level NNA distribution drill-down to build_nna_geo_view().
+      New function: _build_rel_city_lookup() maps relationship -> modal city.
+      Output: views.nna.[period].geo.drill.{state}.by_city.{city} = NNA distribution.
+    </finding>
+
+    <finding id="Y6d" type="data_extension" file="09_generate_partner_analytics.py">
+      Added relationship-level NNA distribution drill-down to build_nna_adv_view().
+      Output: views.nna.[period].adv.drill.{architect}.distribution = NNA distribution per relationship.
+    </finding>
+
+    <finding id="Y5" type="data_extension" file="lambda_function.py">
+      Added growth_decomposition to timeseries_chart.json. Monthly granularity.
+      market = aua_end - aua_start - nna; total = market + nna.
+    </finding>
+
+    <finding id="Y9" type="data_extension" file="lambda_function.py">
+      Added nna_geo, nna_adv, nna_geo_drill views to timeseries_chart.json.
+      Per-state and per-architect cumulative NNA with inflow/outflow suffixes.
+    </finding>
+
+    <finding id="Y3" type="data_extension" file="lambda_function.py">
+      Added aua_mix view to timeseries_chart.json. Monthly snapshots from holdings_lots.
+      6 asset classes: Equities, Fixed Income, Real Estate, Alternatives, Cash, Other.
+      Classification: inline name-pattern heuristic on asset_name.
+    </finding>
+
+    <finding id="Y13" type="data_extension" file="10_generate_advisor_rolling_flows.py">
+      Added monthly granularity to stacked_bar: result['monthly'] = { "YYYY-MM": [AdvisorBarEntry] }.
+      No 'advisors' key added (Y11 confirmed no distinct Advisor field -- architects/implementors only).
+    </finding>
+
+  </yang_v2_stream_findings>
 
 </data_contract>
