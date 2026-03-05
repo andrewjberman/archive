@@ -20,6 +20,7 @@
       <pipeline>news-pipeline</pipeline>
       <pipeline>market-overview</pipeline>
       <pipeline>smartx-pipeline</pipeline>
+      <pipeline>security-scanner-pipeline</pipeline>
       <pipeline>causality</pipeline>
       <pipeline>seeking-alpha</pipeline>
     </pipelines_owned>
@@ -1163,5 +1164,84 @@
       smartx-pipeline CHANGELOG.json records current_tag as smartx-v2.0.0, but the workspace MEMORY.md table recorded smartx-v1.0.0. CHANGELOG.json is the authoritative source — smartx-v2.0.0 is correct.
     </issue>
   </known_issues>
+
+  <!-- ======================================================================
+       SECURITY SCANNER PIPELINE  (added 2026-03-05)
+       Terraform:   infra/aws/terraform/security-scanner-pipeline/
+       State:       opal-313476888478-terraform-state/security-scanner/tfstate
+       Current tag: security-scanner-v1.0.0
+       ====================================================================== -->
+  <pipeline name="security-scanner-pipeline"
+            terraform_module="infra/aws/terraform/security-scanner-pipeline/"
+            current_tag="security-scanner-v1.0.0">
+
+    <lambdas>
+      <lambda name="opal-security-scanner-processor"
+              source_path="infra/aws/lambda/opal_security_scanner_processor/"
+              memory_mb="2048"
+              timeout_s="300"
+              runtime="python3.12"
+              layers="security-scanner-deps:1"
+              trigger="S3 ObjectCreated — opal-data-portal-v2/security_scanner/uploads/*.xlsx (via portal-notifications)"
+              artifact="s3://opal-313476888478-lambda-artifacts/security-scanner-pipeline/opal-security-scanner-processor.zip"
+              arn="arn:aws:lambda:us-east-1:313476888478:function:opal-security-scanner-processor">
+        Reads monthly FactSet Excel from S3, computes per-factor percentiles (V0 canonical logic),
+        writes JSON artifacts (factor_metadata, universe_data, scanner_data) to
+        opal-data-portal-v2/json/security_scanner/{asOf}/ and latest/.
+        Bundled files: lambda_function.py, factor_metadata_registry.json.
+      </lambda>
+    </lambdas>
+
+    <layers>
+      <layer name="security-scanner-deps"
+             s3_key="s3://opal-313476888478-lambda-layers/security-scanner-deps.zip"
+             version="1"
+             arn="arn:aws:lambda:us-east-1:313476888478:layer:security-scanner-deps:1"
+             python="3.12"
+             requirements="infra/aws/lambda/layers/security-scanner-deps/requirements.txt">
+        pandas 2.3.2 + openpyxl 3.1.5 + transitive deps (numpy 2.2.6, python-dateutil, pytz, tzdata, et-xmlfile, six).
+        manylinux2014_x86_64 wheels. 43.1 MB zipped.
+      </layer>
+    </layers>
+
+    <iam_roles>
+      <role name="opal-security-scanner-processor-role"
+            arn="arn:aws:iam::313476888478:role/opal-security-scanner-processor-role">
+        AssumeRole: lambda.amazonaws.com.
+        s3:GetObject on opal-data-portal-v2/security_scanner/uploads/*.
+        s3:PutObject on opal-data-portal-v2/json/security_scanner/*.
+        logs:CreateLogGroup/CreateLogStream/PutLogEvents on *.
+      </role>
+    </iam_roles>
+
+    <triggers>
+      <trigger type="S3" resource="opal-data-portal-v2" registered_in="infra/aws/terraform/portal-notifications/">
+        s3:ObjectCreated:* on prefix=security_scanner/uploads/ suffix=.xlsx.
+        aws_lambda_permission AllowS3InvokeSSCNProcessor registered in portal-notifications module.
+      </trigger>
+    </triggers>
+
+    <s3_artifacts>
+      <path bucket="opal-data-portal-v2" prefix="security_scanner/uploads/" direction="read">
+        Monthly FactSet Excel uploaded by DevOps via presigned PUT URL from opal-data-refresh-api.
+      </path>
+      <path bucket="opal-data-portal-v2" prefix="json/security_scanner/" direction="write">
+        Processed JSON: factor_metadata.json, universes/{uId}/universe_data.json, universes/{uId}/scanner_data.json.
+        Written for both {asOf}/ and latest/ paths.
+      </path>
+      <path bucket="opal-313476888478-lambda-artifacts" prefix="security-scanner-pipeline/" direction="read">
+        Lambda function zip artifact.
+      </path>
+      <path bucket="opal-313476888478-lambda-layers" prefix="security-scanner-deps.zip" direction="read">
+        Lambda layer zip (pandas + openpyxl stack).
+      </path>
+    </s3_artifacts>
+
+    <related_changes>
+      <change pipeline="portal-notifications" description="Added aws_lambda_permission.sscn_processor + lambda_function block in aws_s3_bucket_notification.portal_triggers"/>
+      <change pipeline="other" description="Extended opal-data-refresh-api with POST /security-scanner/upload-url presign route (15min TTL)"/>
+    </related_changes>
+
+  </pipeline>
 
 </pipeline_inventory>
