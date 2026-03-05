@@ -108,6 +108,49 @@ Tier folders:
 
 ---
 
+## Step 2b: Proactive Downstream Check
+
+After reading your own logs, close the loop on every active handoff. An agent that only reads
+their own context will miss what happened after they handed work off — this step eliminates that blind spot.
+
+### Two directions to check
+
+**1. Downstream — agents you handed work to**
+
+Scan your most recent log's `## Next Steps` for `[agent_serial]` tags. Each tagged agent is a
+first-order contact. For each one:
+
+```
+{agent_folder}/logs/{latest-date}/    <- read ALL files in their latest date folder
+```
+
+Look for: did they receive and act on the handoff? What is their current state? Any new blockers?
+
+**2. Upstream — agents who issued work to you**
+
+Check the `<issued_by>` field in each PENDING task order in your `task_orders/` folder.
+For each issuing agent, read their latest log folder.
+
+Look for: did scope change? Did they issue new dependencies? Are they aware of your current blockers?
+
+### Rules
+
+- **One hop only.** Read first-order contacts' latest logs. Do NOT recurse into their contacts.
+- **Latest date folder only.** Do not read their full log history — only the most recent date folder.
+- **Skip gracefully.** If all your task orders are complete, no pending handoffs exist, and your
+  last log has no `[agent_serial]` Next Steps tags, skip this step.
+- **Note gaps.** If a first-order agent has no `logs/` folder or no recent entries, flag it as
+  AMBIGUOUS in your Step 5 orientation summary — do not assume they are idle.
+
+### What this catches
+
+This step is the mechanism for surfacing gaps like: task order marked complete but downstream
+agent never acted on it; handoff commit pushed but receiving agent has a blocker you don't know
+about; issuing agent changed scope but you haven't seen the update. Without this check, these
+gaps are invisible until a human runs an explicit audit.
+
+---
+
 ## Step 3: Read Your Prompt
 
 Read `{your_agent_folder}/prompt.md` and adopt that role. You should now:
@@ -154,6 +197,7 @@ Pod: [pod name, if applicable]
 Reports to: [manager agent ID]
 Current priority: [from logs if any]
 Key context: [from recent logs]
+Downstream check: [what first-order agents did after your last handoff — or "no pending handoffs"]
 
 Ready to work. What would you like me to focus on?
 ```
@@ -238,11 +282,13 @@ See **Blocker Verification Protocol** below.
 
 ## Next Steps
 
-> Ordered list. Top-to-bottom execution order. Tag with [Agent] when handing off to another agent.
+> Ordered list. Top-to-bottom execution order. Use the full agent serial in brackets for every
+> cross-agent handoff. The serial format is what Step 2b uses to resolve the agent's log folder.
+> Use `[role name]` only for Andrew or external actors with no agent folder.
 
 1. **[Action verb] [specific thing]** — [why / what done looks like]
-2. **[Dashboard Engineer] [specific action]** — [cross-agent handoff]
-3. **[DevOps] [specific action]** — [cross-agent handoff]
+2. **[0.4.0_DE_ClientPlatform] [specific action]** — [cross-agent handoff]
+3. **[0.4.0_DT_ClientPlatform] [specific action]** — [cross-agent handoff]
 
 **Files to touch next:**
 - `path/to/file.py` — [what change is needed]
