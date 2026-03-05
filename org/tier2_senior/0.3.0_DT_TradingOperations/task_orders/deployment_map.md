@@ -7,7 +7,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.3.0_DT_TradingOperations</issued_to>
     <date>2026-03-02</date>
-    <status>pending</status>
+    <status>complete</status>
   </metadata>
 
   <objective>
