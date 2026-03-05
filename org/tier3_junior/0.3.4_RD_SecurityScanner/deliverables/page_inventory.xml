@@ -6,7 +6,7 @@
     <directory>portal/src/pages/SecurityScanner/</directory>
     <date>2026-03-05</date>
     <audit_timestamp>2026-03-05T00:00:00Z</audit_timestamp>
-    <status>implementation complete -- tsc gate pending DE extraction</status>
+    <status>implementation complete -- tsc passes -- awaiting DT push (bb3759b)</status>
     <total_files>14</total_files>
   </metadata>
 
@@ -15,16 +15,16 @@
     <file path="portal/src/pages/SecurityScanner/index.ts"             type="entry"    status="shipped cf16ff4" />
     <file path="portal/src/pages/SecurityScanner/types.ts"             type="types"    status="shipped d473304" />
     <file path="portal/src/pages/SecurityScanner/SecurityScanner.tsx"  type="page"     status="shipped cf16ff4" />
-    <file path="portal/src/pages/SecurityScanner/utils/categoryOrder.ts"       type="util"      status="shipped cf16ff4" />
-    <file path="portal/src/pages/SecurityScanner/utils/quintileUtils.ts"       type="util"      status="shipped cf16ff4 -- awaits @/utils/colorUtils extraction" />
+    <file path="portal/src/pages/SecurityScanner/utils/categoryOrder.ts"       type="util"      status="corrected bb3759b -- initial cf16ff4 had 11 wrong categories (V0 reference); DE rewrote to 18 XLSM ground-truth categories" />
+    <file path="portal/src/pages/SecurityScanner/utils/quintileUtils.ts"       type="util"      status="shipped cf16ff4 -- DE resolved @/utils/colorUtils extraction (4b5aac8)" />
     <file path="portal/src/pages/SecurityScanner/components/FactorChip.tsx"    type="component" status="shipped cf16ff4" />
-    <file path="portal/src/pages/SecurityScanner/components/ScannerHeaderPanel.tsx" type="component" status="shipped cf16ff4 -- awaits @/api/endpoints/security-scanner" />
+    <file path="portal/src/pages/SecurityScanner/components/ScannerHeaderPanel.tsx" type="component" status="shipped cf16ff4 -- DE resolved @/api/endpoints/security-scanner (a796555)" />
     <file path="portal/src/pages/SecurityScanner/hooks/useScannerState.ts"    type="hook"      status="shipped cf16ff4" />
-    <file path="portal/src/pages/SecurityScanner/hooks/useScannerApi.ts"      type="hook"      status="shipped cf16ff4 -- awaits @/api/endpoints/security-scanner" />
+    <file path="portal/src/pages/SecurityScanner/hooks/useScannerApi.ts"      type="hook"      status="shipped cf16ff4 -- DE resolved @/api/endpoints/security-scanner (a796555)" />
     <file path="portal/src/pages/SecurityScanner/tabs/FactorBankTab.tsx"      type="tab"       status="shipped cf16ff4" />
     <file path="portal/src/pages/SecurityScanner/tabs/UniverseDataTab.tsx"    type="tab"       status="shipped cf16ff4" />
     <file path="portal/src/pages/SecurityScanner/tabs/FactorDataTab.tsx"      type="tab"       status="shipped cf16ff4" />
-    <file path="portal/src/pages/SecurityScanner/tabs/UniverseScannerTab.tsx" type="tab"       status="shipped cf16ff4 -- awaits @/utils/colorUtils extraction" />
+    <file path="portal/src/pages/SecurityScanner/tabs/UniverseScannerTab.tsx" type="tab"       status="shipped cf16ff4 -- DE resolved @/utils/colorUtils extraction (4b5aac8)" />
   </files>
 
   <api_calls>
@@ -36,13 +36,21 @@
   </api_calls>
 
   <tabs>
-    <tab id="factor-bank" status="not-started">Factor Bank -- factor selection with IC metadata, add/remove toggle, search/filter, category grouping</tab>
-    <tab id="universe-data" status="not-started">Universe Data -- full security table for selected universe, sortable columns, raw factor values</tab>
-    <tab id="factor-data" status="not-started">Factor Data -- static reference table of all factors with metadata (independent of header selections)</tab>
-    <tab id="universe-scanner" status="not-started">Universe Scanner -- primary interactive tab, weight input, composite scoring, auto-sort by rank, quintile coloring</tab>
+    <tab id="factor-bank" status="shipped">Factor Bank -- factor selection with IC metadata, add/remove toggle, search/filter, category grouping</tab>
+    <tab id="universe-data" status="shipped">Universe Data -- full security table for selected universe, sortable columns, raw factor values</tab>
+    <tab id="factor-data" status="shipped">Factor Data -- static reference table of all factors with metadata (independent of header selections)</tab>
+    <tab id="universe-scanner" status="shipped">Universe Scanner -- primary interactive tab, weight input, composite scoring, auto-sort by rank, quintile coloring</tab>
   </tabs>
 
   <issues>
-    <!-- No issues yet; page not started -->
+    <issue id="1" severity="corrected" commit="bb3759b">
+      categoryOrder.ts shipped cf16ff4 with 11 wrong categories sourced from V0_SYSTEM_REFERENCE.md
+      and the compact XLSM audit (20/287 factors). Ground truth is XLSM Tab 3 direct: 18 categories,
+      287 factors. DE rewrote the file at bb3759b with all 18 real categories:
+      solvency, value, crowding, growth, efficiency, technical, profitability, momentum, quality,
+      analyst, volatility, size, management, governance, short, insider, liquidity, beta.
+      TSC passes after fix. Root cause: RD used insufficient reference docs; ground truth must
+      come from XLSM Tab 3 direct, not V0 aggregations or small audit samples.
+    </issue>
   </issues>
 </page_inventory>
