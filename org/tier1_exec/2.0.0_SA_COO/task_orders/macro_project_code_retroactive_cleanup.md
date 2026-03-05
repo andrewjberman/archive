@@ -30,13 +30,13 @@
       <file action="modify">org/threads/ADVI-005-pattern-0-stacked-bar--rolling-flows-dat/THREAD.json</file>
       <file action="modify">org/threads/ADVI-006-pattern-0-books-tab-design-brief-l2-l3-l/THREAD.json</file>
 
-      <!-- AE task order: rename to dot format + content update -->
+      <!-- AE task order: rename to dot-segment format + content update -->
       <file action="rename+modify">org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ADVI-J1-partner-identity-dynamo.md
-          -> ADVI_V1VERS.J1-partner-identity-dynamo.md</file>
+          -> ADVI_V1VERS.J1.partner-identity-dynamo.md</file>
 
-      <!-- DT task order: rename to dot format + content update -->
+      <!-- DT task order: rename to dot-segment format + content update -->
       <file action="rename+modify">org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/ADVI-J2-J3-auth-handler-authorizer.md
-          -> ADVI_V1VERS.J2-J3-auth-handler-authorizer.md</file>
+          -> ADVI_V1VERS.J2-J3.auth-handler-authorizer.md</file>
     </files>
   </scope>
 
@@ -51,12 +51,12 @@
     <requirement id="2">
       Use git mv to rename the AE task order. J1 is V1VERS scope (partner identity
       DynamoDB was a scoped auth requirement from V1 completion PRD). Target filename:
-      ADVI_V1VERS.J1-partner-identity-dynamo.md (dot separator, dashes only after dot).
+      ADVI_V1VERS.J1.partner-identity-dynamo.md (dots between segments, dashes within segments).
     </requirement>
     <requirement id="3">
       Use git mv to rename the DT task order. J2/J3 are V1VERS scope (portal auth
       handler and authorizer were V1 completion requirements). Target filename:
-      ADVI_V1VERS.J2-J3-auth-handler-authorizer.md (dot separator, dashes only after dot).
+      ADVI_V1VERS.J2-J3.auth-handler-authorizer.md (J2-J3 is one task code segment, auth-handler-authorizer is the description segment).
     </requirement>
     <requirement id="4">
       Inside the renamed AE and DT task order files, update the XML &lt;metadata&gt;&lt;id&gt;
@@ -77,8 +77,8 @@
       serials. Verify: grep -r '"project"' org/threads/ADVI-*/THREAD.json
     </criterion>
     <criterion id="2">
-      AE task order exists at org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ADVI_V1VERS.J1-partner-identity-dynamo.md
-      DT task order exists at org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/ADVI_V1VERS.J2-J3-auth-handler-authorizer.md
+      AE task order exists at org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ADVI_V1VERS.J1.partner-identity-dynamo.md
+      DT task order exists at org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/ADVI_V1VERS.J2-J3.auth-handler-authorizer.md
       Old ADVI-J* paths no longer exist.
     </criterion>
     <criterion id="3">

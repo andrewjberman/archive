@@ -456,23 +456,30 @@ All task orders use this XML structure. Wrap the XML in a markdown file.
 
 **Format (rigid — no exceptions for project work):**
 ```
-{agent_folder}/task_orders/{MACRO}_{6CHAR}.{task-code-and-description}.md
+{agent_folder}/task_orders/{MACRO}_{6CHAR}.{task-code}.{description-words}.md
 ```
 
-- Project code (`{MACRO}_{6CHAR}`) and task description are separated by a `.`
-- Everything after the `.` uses dashes only — no underscores anywhere in the filename
-- Task code comes first after the dot (e.g., `004`, `Y1-Y4-Y6-Y12`, `J2-J3`), followed by a dash and a human-readable description
-- When sourced from a thread, the numeric task code matches the thread serial number (`004` = thread `ADVI_V1VERS-004`)
+**Segment rules:**
+- **Dots** separate distinct segments of the identifier hierarchy
+- **Dashes** separate words within a single segment
+- **No underscores** after the `{MACRO}_{6CHAR}` project code
+- Segments: `{MACRO}_{6CHAR}` → task code → description (→ further sub-segments if needed)
+
+| Segment | Examples | Notes |
+|---------|----------|-------|
+| Project code | `ADVI_V1VERS`, `ADVI_YANGV2` | Underscore between macro and project suffix only |
+| Task code | `004`, `Y-phase3`, `J1`, `Y1-Y4-Y6-Y12` | Matches thread serial number when thread-sourced |
+| Description | `adv-drill-cla`, `de-type-wiring` | Dashes between words |
 
 Project codes are in `org/projects/REGISTRY.md`. Macro codes are in `org/projects/MACRO_CODES.md`.
 
 **Project task order examples:**
 ```
-org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_V1VERS.004-adv-drill-cla.md
-org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI_V1VERS.004-distribution-continuous.md
-org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI_YANGV2.Y1-Y4-Y6-Y12-phase1-visual.md
-org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ADVI_YANGV2.Y-phase3-de-type-wiring.md
-org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ADVI_V1VERS.J1-partner-identity-dynamo.md
+org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_V1VERS.004.adv-drill-cla.md
+org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI_V1VERS.004.distribution-continuous.md
+org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI_YANGV2.Y1-Y4-Y6-Y12.phase1-visual.md
+org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ADVI_YANGV2.Y-phase3.de-type-wiring.md
+org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ADVI_V1VERS.J1.partner-identity-dynamo.md
 ```
 
 **Ad-hoc** (no registered project / lateral between agents):

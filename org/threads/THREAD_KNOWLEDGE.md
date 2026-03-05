@@ -299,16 +299,17 @@ or example if applicable. Date-stamp entries if helpful for traceability.
 the task order filename follows the rigid project task order format:
 
 ```
-{agent_folder}/task_orders/{MACRO}_{6CHAR}.{task-code-and-description}.md
+{agent_folder}/task_orders/{MACRO}_{6CHAR}.{task-code}.{description}.md
 ```
 
-Dot separates project code from task. Everything after the dot uses dashes only.
+Dots separate segments. Dashes separate words within a segment.
+Segments: project code → task code → description. No underscores after the project code.
 The numeric task code matches the thread serial number when thread-sourced.
 
 Example: thread `ADVI_V1VERS-004` produces task orders:
-- `0.4.0_DS_ClientPlatform/task_orders/ADVI_V1VERS.004-adv-drill-cla.md`
-- `0.4.0_DE_ClientPlatform/task_orders/ADVI_V1VERS.004-portal-types-wiring.md`
-- `0.4.2_RD_AdvisorIntelligence/task_orders/ADVI_V1VERS.004-distribution-continuous.md`
+- `0.4.0_DS_ClientPlatform/task_orders/ADVI_V1VERS.004.adv-drill-cla.md`
+- `0.4.0_DE_ClientPlatform/task_orders/ADVI_V1VERS.004.portal-types-wiring.md`
+- `0.4.2_RD_AdvisorIntelligence/task_orders/ADVI_V1VERS.004.distribution-continuous.md`
 
 The task order XML `<metadata>` also includes:
 ```xml

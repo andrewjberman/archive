@@ -25,17 +25,18 @@
     <files>
       <!-- FILENAME FORMAT REFERENCE:
            Old: ADVI-NNN-slug_with_underscores.md
-           New: ADVI_V1VERS.NNN-slug-with-dashes.md   (V1 completion work)
-                ADVI_YANGV2.Y-slug-with-dashes.md      (Yang V2 work)
-           Dot separates project code from task. Dashes only after the dot. No underscores. -->
+           New: ADVI_V1VERS.NNN.description-words.md   (V1 completion work)
+                ADVI_YANGV2.Y-task-code.description.md  (Yang V2 work)
+           Dots between segments. Dashes between words within a segment. No underscores after project code.
+           Segments: {PROJECT_CODE} . {task-code} . {description} -->
 
       <!-- === DE OWN TASK ORDERS (git mv + content update) === -->
       <file action="rename+modify">org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ADVI-004-portal_types_wiring.md
-          -> ADVI_V1VERS.004-portal-types-wiring.md</file>
+          -> ADVI_V1VERS.004.portal-types-wiring.md</file>
       <file action="rename+modify">org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ADVI-006-books_design_brief.md
-          -> ADVI_V1VERS.006-books-design-brief.md</file>
+          -> ADVI_V1VERS.006.books-design-brief.md</file>
       <file action="rename+modify">org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ADVI-Y-phase3-de-type-wiring.md
-          -> ADVI_YANGV2.Y-phase3-de-type-wiring.md</file>
+          -> ADVI_YANGV2.Y-phase3.de-type-wiring.md</file>
 
       <!-- === DE OWN THREAD RECEIPTS (git mv only -- do not modify content) === -->
       <file action="rename">org/tier2_senior/0.4.0_DE_ClientPlatform/threads/ADVI-004-pattern-0-advdrill--clatimeseries-data-c_0.4.0_DS_ClientPlatform+0.4.2_RD_AdvisorIntelligence.md
@@ -47,11 +48,11 @@
 
       <!-- === DS TASK ORDERS (git mv + content update) === -->
       <file action="rename+modify">org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI-004-adv_drill_cla.md
-          -> ADVI_V1VERS.004-adv-drill-cla.md</file>
+          -> ADVI_V1VERS.004.adv-drill-cla.md</file>
       <file action="rename+modify">org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI-005-rolling_flows_data.md
-          -> ADVI_V1VERS.005-rolling-flows-data.md</file>
+          -> ADVI_V1VERS.005.rolling-flows-data.md</file>
       <file action="rename+modify">org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI-Y-phase2-ds-data-batch.md
-          -> ADVI_YANGV2.Y-phase2-ds-data-batch.md</file>
+          -> ADVI_YANGV2.Y-phase2.ds-data-batch.md</file>
 
       <!-- === DS THREAD RECEIPTS (git mv only -- do not modify content) === -->
       <file action="rename">org/tier2_senior/0.4.0_DS_ClientPlatform/threads/ADVI-004-pattern-0-advdrill--clatimeseries-data-c_0.4.0_DE_ClientPlatform+0.4.2_RD_AdvisorIntelligence.md
@@ -63,21 +64,21 @@
 
       <!-- === RD TASK ORDERS (git mv + content update) === -->
       <file action="rename+modify">org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI-004-distribution_continuous.md
-          -> ADVI_V1VERS.004-distribution-continuous.md</file>
+          -> ADVI_V1VERS.004.distribution-continuous.md</file>
       <file action="rename+modify">org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI-005-advisors_tab.md
-          -> ADVI_V1VERS.005-advisors-tab.md</file>
+          -> ADVI_V1VERS.005.advisors-tab.md</file>
       <file action="rename+modify">org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI-Y1-Y4-Y6-Y12-phase1-visual.md
-          -> ADVI_YANGV2.Y1-Y4-Y6-Y12-phase1-visual.md</file>
+          -> ADVI_YANGV2.Y1-Y4-Y6-Y12.phase1-visual.md</file>
       <file action="rename+modify">org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI-Y8-continuous-aua-stacked-bar.md
-          -> ADVI_YANGV2.Y8-continuous-aua-stacked-bar.md</file>
+          -> ADVI_YANGV2.Y8.continuous-aua-stacked-bar.md</file>
       <file action="rename+modify">org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI-Y3-Y5-FE-header-panel.md
-          -> ADVI_YANGV2.Y3-Y5-FE-header-panel.md</file>
+          -> ADVI_YANGV2.Y3-Y5.fe-header-panel.md</file>
       <file action="rename+modify">org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI-Y6b-Y6d-Y9-FE-drill-and-continuous-nna.md
-          -> ADVI_YANGV2.Y6b-Y6d-Y9-FE-drill-and-continuous-nna.md</file>
+          -> ADVI_YANGV2.Y6b-Y6d-Y9.fe-drill-and-continuous-nna.md</file>
       <file action="rename+modify">org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI-Y13-FE-rolling-flows-nna-bar.md
-          -> ADVI_YANGV2.Y13-FE-rolling-flows-nna-bar.md</file>
+          -> ADVI_YANGV2.Y13.fe-rolling-flows-nna-bar.md</file>
       <file action="rename+modify">org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI-Y15-books-tab-l2-l3-l4.md
-          -> ADVI_YANGV2.Y15-books-tab-l2-l3-l4.md</file>
+          -> ADVI_YANGV2.Y15.books-tab-l2-l3-l4.md</file>
 
       <!-- === RD THREAD RECEIPTS (git mv only -- do not modify content) === -->
       <file action="rename">org/tier3_junior/0.4.2_RD_AdvisorIntelligence/threads/ADVI-004-pattern-0-advdrill--clatimeseries-data-c_0.4.0_DS_ClientPlatform+0.4.0_DE_ClientPlatform.md
@@ -94,9 +95,9 @@
       Use git mv for all renames. Do not delete and recreate.
     </requirement>
     <requirement id="2">
-      Task order filename format (rigid): MACRO_6CHAR.task-code-and-description.md
-      Dot separates project code from task. Dashes only after the dot. No underscores.
-      V1VERS for threads 004/005/006 (V1 completion). YANGV2 for Y-series (Yang V2 feedback).
+      Task order filename format (rigid): MACRO_6CHAR.task-code.description.md
+      Dots separate segments. Dashes separate words within a segment. No underscores after the project code.
+      Segments: project code -> task code -> description. V1VERS for threads 004/005/006. YANGV2 for Y-series.
     </requirement>
     <requirement id="3">
       Thread receipt filenames use hyphen format (ADVI_V1VERS-NNN-...), NOT dot format.
