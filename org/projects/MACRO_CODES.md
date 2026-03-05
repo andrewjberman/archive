@@ -1,10 +1,24 @@
-# Portal Page Project Codes
+# Macro Codes
 
-Canonical 4-character codes for every portal page and pipeline context.
-Use these as the `{CODE}` when registering projects in `org/projects/`.
+Canonical 4-character codes for every surface area in the Opal Capital system.
+A surface area can be a portal page, a pipeline, a cloud process, or a research topic.
+These are NOT project codes. One macro can have many projects over its lifetime.
 
 All codes are exactly 4 characters. No 1-3 char codes are issued to prevent
 ambiguity as the project list grows.
+
+---
+
+## Macro Code vs Project Code
+
+| Concept | Format | Example | Lives In |
+|---------|--------|---------|----------|
+| **Macro code** | 4 chars | `ADVI` | This file |
+| **Project code** | `{MACRO}_{6CHAR}` | `ADVI_V1VERS` | `org/projects/{PROJECT_CODE}.json` |
+
+The macro code identifies the surface area permanently.
+The project code identifies a specific initiative on that surface area.
+Thread serials, task order filenames, commits, and logs all reference the **project code**.
 
 ---
 
@@ -12,8 +26,8 @@ ambiguity as the project list grows.
 
 Responsible pod: `0.1.0_DE` / `0.1.0_DS` / `0.1.0_DT`
 
-| Code | Page / Context | Portal Directory | RD Agent | Pipeline |
-|------|---------------|-----------------|----------|----------|
+| Code | Surface Area | Portal Directory | RD Agent | Pipeline |
+|------|-------------|-----------------|----------|----------|
 | `MKPF` | MarketPerformance | `portal/src/pages/MarketPerformance/` | `0.1.1_RD_MarketPerformance` | yang-pipeline, market-overview |
 | `CENG` | CausalityEngine (+ MarketUpdate) | `portal/src/pages/CausalityEngine/` | `0.1.2_RD_CausalityEngine` | causality, news-pipeline |
 | `CMAS` | CapitalMarketAssumptions | `portal/src/pages/CapitalMarketAssumptions/` | `0.1.3_RD_CapitalMarketAssumptions` | yang-pipeline |
@@ -25,8 +39,8 @@ Responsible pod: `0.1.0_DE` / `0.1.0_DS` / `0.1.0_DT`
 
 Responsible pod: `0.2.0_DE` / `0.2.0_DS` / `0.2.0_DT`
 
-| Code | Page | Portal Directory | RD Agent | Pipeline |
-|------|------|-----------------|----------|----------|
+| Code | Surface Area | Portal Directory | RD Agent | Pipeline |
+|------|-------------|-----------------|----------|----------|
 | `POSN` | Positioning | `portal/src/pages/Positioning/` | `0.2.1_RD_Positioning` | yang-pipeline |
 | `ATTR` | Attribution | `portal/src/pages/Attribution/` | `0.2.2_RD_Attribution` | yang-pipeline |
 | `FCTL` | FactorTilts | `portal/src/pages/FactorTilts/` | `0.2.3_RD_FactorTilts` | yang-pipeline |
@@ -40,8 +54,8 @@ Responsible pod: `0.2.0_DE` / `0.2.0_DS` / `0.2.0_DT`
 
 Responsible pod: `0.3.0_DE` / `0.3.0_DS` / `0.3.0_DT`
 
-| Code | Page | Portal Directory | RD Agent | Pipeline |
-|------|------|-----------------|----------|----------|
+| Code | Surface Area | Portal Directory | RD Agent | Pipeline |
+|------|-------------|-----------------|----------|----------|
 | `PFMG` | PortfolioManagement | `portal/src/pages/PortfolioManagement/` | `0.3.1_RD_PortfolioManagement` | portfolio-management |
 | `TRSB` | TradeSubmission | `portal/src/pages/TradeSubmission/` | `0.3.2_RD_TradeSubmission` | smartx-pipeline |
 | `DRFR` | DataRefresh | `portal/src/pages/DataRefresh/` | `0.3.3_RD_DataRefresh` | (cross-pipeline) |
@@ -52,8 +66,8 @@ Responsible pod: `0.3.0_DE` / `0.3.0_DS` / `0.3.0_DT`
 
 Responsible pod: `0.4.0_DE` / `0.4.0_DS` / `0.4.0_DT`
 
-| Code | Page | Portal Directory | RD Agent | Pipeline |
-|------|------|-----------------|----------|----------|
+| Code | Surface Area | Portal Directory | RD Agent | Pipeline |
+|------|-------------|-----------------|----------|----------|
 | `MDLP` | ModelPortfolios | `portal/src/pages/ModelPortfolios.tsx` | `0.4.1_RD_ModelPortfolios` | yang-pipeline |
 | `ADVI` | AdvisorIntelligence | `portal/src/pages/AdvisorIntelligence/` | `0.4.2_RD_AdvisorIntelligence` | bd-pipeline |
 
@@ -64,8 +78,8 @@ Responsible pod: `0.4.0_DE` / `0.4.0_DS` / `0.4.0_DT`
 For projects that span pods or live purely in infrastructure with no single page owner.
 Assign the DE/DS/DT of the primary pod, or the AE for pipeline-only projects.
 
-| Code | Context | Primary Owner |
-|------|---------|---------------|
+| Code | Surface Area | Primary Owner |
+|------|-------------|---------------|
 | `YALP` | Yang pipeline (cross-pod) | `0.5.0_AE_OpalETL` |
 | `BDPL` | BD pipeline | `0.6.0_AE_PartnerETL` |
 | `NPPL` | News pipeline | `0.5.0_AE_OpalETL` |
@@ -76,11 +90,15 @@ Assign the DE/DS/DT of the primary pod, or the AE for pipeline-only projects.
 
 ## Rules
 
-1. All codes are exactly 4 characters — no exceptions.
-2. Codes map 1:1 to a page or pipeline context. No code covers multiple pages
-   unless those pages share one RD agent and one pod (e.g., CENG covers
-   CausalityEngine + MarketUpdate because both are owned by 0.1.2_RD).
-3. When a project spans multiple pages, pick the primary page's code OR use a
-   cross-pod code and list all affected pages in the project JSON file.
-4. New codes must be added here before use. Check this file before assigning
-   a new project code.
+1. All macro codes are exactly 4 characters — no exceptions.
+2. Macro codes identify a surface area permanently. They are NOT project codes and
+   must not be used as the `{CODE}` in project filenames or thread serials.
+3. Project codes are `{MACRO}_{6CHAR}` — e.g., `ADVI_V1VERS`, `ADVI_YANGV2`.
+   Each project has its own JSON file: `org/projects/{PROJECT_CODE}.json`.
+4. Codes map 1:1 to a surface area. No code covers multiple areas unless those
+   areas share one RD agent and one pod (e.g., CENG covers CausalityEngine +
+   MarketUpdate because both are owned by 0.1.2_RD).
+5. When a project spans multiple surface areas, pick the primary macro code OR
+   use a cross-pod code and list all affected areas in the project JSON.
+6. New macro codes must be added here before use. Check this file before
+   assigning a new project code.

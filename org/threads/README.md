@@ -17,20 +17,23 @@ Threads are project-linked, filesystem-backed, and fully automated.
 cat org/projects/REGISTRY.md
 ```
 
-Every thread must belong to a project. If your project doesn't exist yet, create
-`org/projects/{CODE}.json` (copy `ADVI.json` as a template) and add a row to REGISTRY.md.
+Every thread must belong to a project. Project code format: `{MACRO}_{6CHAR}` (e.g., `ADVI_V1VERS`).
+If your project doesn't exist yet, pick a macro from `org/projects/MACRO_CODES.md`, choose a
+6-char suffix, create `org/projects/{PROJECT_CODE}.json` (copy any existing project JSON as a
+template), and add a row to REGISTRY.md.
 
 ### 2. Write a staging script
 
 Copy `staging/BESPOKE_TEMPLATE.sh`. Set `PROJECT`, `TOPIC`, `PARTICIPANTS`, `CONTEXT`,
-and the opening message. Save as `staging/run-{CODE}-{NNN}-{slug}.sh`.
-The `{CODE}-{NNN}` serial is auto-assigned when you run it -- name the file with the
+and the opening message. Save as `staging/run-{PROJECT_CODE}-{NNN}-{slug}.sh`
+(e.g., `staging/run-ADVI_V1VERS-007-books-design.sh`).
+The `{PROJECT_CODE}-{NNN}` serial is auto-assigned when you run it -- name the file with the
 next expected serial for clarity, but the script will confirm the actual assignment.
 
 ### 3. Run it (Bash tool -- no Andrew handoff)
 
 ```bash
-bash org/threads/staging/run-ADVI-004-books-publisher-gap.sh
+bash org/threads/staging/run-ADVI_V1VERS-007-books-publisher-gap.sh
 ```
 
 This scaffolds the thread folder AND runs the orchestrator in one shot.
@@ -39,13 +42,13 @@ This scaffolds the thread folder AND runs the orchestrator in one shot.
 
 ```bash
 # Thread messages
-ls org/threads/ADVI-004-books-publisher-gap/messages/
+ls org/threads/ADVI_V1VERS-007-books-publisher-gap/messages/
 
 # Receipts in agent folders (one per participant)
-ls org/tier2_senior/0.4.0_DS_ClientPlatform/threads/ADVI-004-*.md
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/threads/ADVI_V1VERS-007-*.md
 
 # Updated project file
-cat org/projects/ADVI.json
+cat org/projects/ADVI_V1VERS.json
 ```
 
 ---
@@ -53,10 +56,11 @@ cat org/projects/ADVI.json
 ## Exploratory Sync (2-party, no config needed)
 
 ```bash
-./org/threads/run-exploratory.sh 0.4.0_DE_ClientPlatform 0.4.0_DT_ClientPlatform --project ADVI
+./org/threads/run-exploratory.sh 0.4.0_DE_ClientPlatform 0.4.0_DT_ClientPlatform --project ADVI_V1VERS
 ```
 
-Auto-assigns next serial under the ADVI project. Uses `gpt-5.2`, `--no-tools`, 2 max turns.
+Auto-assigns next serial under the project. Uses `gpt-5.2`, `--no-tools`, 2 max turns.
+Pass the full project code (e.g., `ADVI_V1VERS`), not the macro code (`ADVI`).
 Both agents must have recent session logs or the thread will be low-signal (O3 rule).
 
 ---
@@ -77,20 +81,23 @@ Pattern 0 runs BEFORE task orders are written. The thread receipt IS the data co
 ## Project Serial System
 
 ```
-org/projects/ADVI.json      Project registry for AdvisorIntelligence
-    thread_counter: 3       Next serial will be ADVI-004
+org/projects/ADVI_V1VERS.json    Project registry for AdvisorIntelligence V1 Completion
+    thread_counter: 6            Next serial will be ADVI_V1VERS-007
 
-Thread folder:  org/threads/ADVI-004-{slug}/
-Receipt format: {agent_folder}/threads/ADVI-004-{slug}_{other_serials}.md
+Thread folder:  org/threads/ADVI_V1VERS-007-{slug}/
+Receipt format: {agent_folder}/threads/ADVI_V1VERS-007-{slug}_{other_serials}.md
 
 Filter any agent's threads by project:
-    ls org/tier2_senior/0.4.0_DS_ClientPlatform/threads/ADVI-*.md
+    ls org/tier2_senior/0.4.0_DS_ClientPlatform/threads/ADVI_V1VERS-*.md
+
+Filter by macro (all ADVI projects):
+    ls org/tier2_senior/0.4.0_DS_ClientPlatform/threads/ADVI_*.md
 ```
 
-Passing `--project ADVI` to `create-thread.sh` or `run-exploratory.sh`:
-- Auto-assigns `ADVI-004` as the serial
+Passing `--project ADVI_V1VERS` to `create-thread.sh` or `run-exploratory.sh`:
+- Auto-assigns `ADVI_V1VERS-007` as the serial
 - Patches `project` and `serial` into `THREAD.json`
-- Updates `ADVI.json`: increments `thread_counter`, appends thread entry
+- Updates `ADVI_V1VERS.json`: increments `thread_counter`, appends thread entry
 
 ---
 
@@ -98,7 +105,7 @@ Passing `--project ADVI` to `create-thread.sh` or `run-exploratory.sh`:
 
 | Context | Format | Example |
 |---------|--------|---------|
-| Project thread | `{CODE}-{NNN}-{slug}` | `ADVI-004-books-publisher-gap` |
+| Project thread | `{PROJECT_CODE}-{NNN}-{slug}` | `ADVI_V1VERS-007-books-publisher-gap` |
 | Legacy / non-project | `YYYY-MM-DD-{slug}` | `2026-03-02-etl-migration-review` |
 
 ---
@@ -108,8 +115,8 @@ Passing `--project ADVI` to `create-thread.sh` or `run-exploratory.sh`:
 | Field | Description |
 |-------|-------------|
 | `id` | Thread folder name |
-| `project` | Project code (e.g., `ADVI`) -- only if `--project` was passed |
-| `serial` | Project serial (e.g., `ADVI-004`) -- only if `--project` was passed |
+| `project` | Project code (e.g., `ADVI_V1VERS`) -- only if `--project` was passed |
+| `serial` | Project serial (e.g., `ADVI_V1VERS-007`) -- only if `--project` was passed |
 | `created_by` | Agent serial who wrote `messages/000.md` |
 | `participants` | Agents who take turns (not necessarily includes creator) |
 | `turn_order` | `alternating` (A-B) or `round_robin` (A-B-C) |

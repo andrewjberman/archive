@@ -57,7 +57,8 @@ DS / DE / RD / DT implement against the agreed contracts
 org/
   projects/
     REGISTRY.md                   Human-readable project index
-    {CODE}.json                   One file per project (e.g., ADVI.json, MKOV.json)
+    MACRO_CODES.md                4-char surface area codes (pages, pipelines, cloud, research)
+    {PROJECT_CODE}.json           One file per project (e.g., ADVI_V1VERS.json, ADVI_YANGV2.json)
 
   threads/
     README.md                     Quick start and pattern reference
@@ -105,29 +106,34 @@ org/
 {agent_folder}/
   threads/
     {thread_id}_{other_serials}.md   Receipt deposited on thread completion
-    ADVI-001-*.md                    Project ADVI threads (filterable by code prefix)
-    MKOV-003-*.md                    Project MKOV threads
+    ADVI_V1VERS-001-*.md             Project ADVI_V1VERS threads (filterable by project code)
+    ADVI_YANGV2-001-*.md             Project ADVI_YANGV2 threads
+    ADVI_*.md                        All ADVI macro threads (cross-project filter)
 ```
 
 ---
 
-## 3. Project File Schema (org/projects/{CODE}.json)
+## 3. Project File Schema (org/projects/{PROJECT_CODE}.json)
+
+Project code format: `{MACRO}_{6CHAR}` (e.g., `ADVI_V1VERS`). Macro codes are in
+`org/projects/MACRO_CODES.md`. Multiple projects can share the same macro.
 
 ```json
 {
-  "code": "ADVI",
-  "name": "AdvisorIntelligence",
+  "project_code": "ADVI_V1VERS",
+  "macro_code": "ADVI",
+  "name": "AdvisorIntelligence V1 Completion",
   "description": "Complete the AdvisorIntelligence UI page",
-  "prd": "docs/architecture/ADVISOR_INTELLIGENCE_COMPLETION.md",
+  "prds": [{"path": "docs/architecture/ADVISOR_INTELLIGENCE_COMPLETION.md", "label": "V1 spec", "date": "2026-03-02"}],
   "status": "active",
   "created": "2026-03-03",
   "pods": ["0.4"],
   "pipeline": "bd-pipeline",
-  "thread_counter": 3,
+  "thread_counter": 6,
   "threads": [
     {
-      "serial": "ADVI-001",
-      "thread_id": "2026-03-03-continuous-nna-cla-alignment",
+      "serial": "ADVI_V1VERS-004",
+      "thread_id": "ADVI_V1VERS-004-pattern-0-advdrill-clatimeseries",
       "topic": "Pattern 0 alignment: adv_drill + cla_timeseries",
       "participants": ["0.4.0_DS_ClientPlatform", "0.4.0_DE_ClientPlatform", "0.4.2_RD_AdvisorIntelligence"],
       "pattern": "Pattern 0",
@@ -147,9 +153,9 @@ org/
 
 ```json
 {
-  "id": "ADVI-004-books-publisher-gap",
-  "project": "ADVI",
-  "serial": "ADVI-004",
+  "id": "ADVI_V1VERS-007-books-publisher-gap",
+  "project": "ADVI_V1VERS",
+  "serial": "ADVI_V1VERS-007",
   "created_by": "2.0.0_SA_COO",
   "created_at": "2026-03-03T20:00:00Z",
   "topic": "Books tab publisher data gap investigation",
@@ -320,14 +326,15 @@ For each participant in thread.participants:
 
 **Naming convention:**
 ```
-ADVI-004-books-publisher-gap_0.4.0_DT_ClientPlatform.md
-  ^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^^^^^^^
-  thread_id                 other participants joined with +
+ADVI_V1VERS-007-books-publisher-gap_0.4.0_DT_ClientPlatform.md
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  thread_id                           other participants joined with +
 ```
 
 **Where to find receipts:**
 - Any agent: `ls {agent_folder}/threads/`
-- Filter by project: `ls {agent_folder}/threads/ADVI-*.md`
+- Filter by project: `ls {agent_folder}/threads/ADVI_V1VERS-*.md`
+- Filter by macro (all ADVI projects): `ls {agent_folder}/threads/ADVI_*.md`
 - All receipts for a project: search across all agent threads/ folders
 
 Receipts are NOT generated for threads that end as `needs_human`.
@@ -345,8 +352,8 @@ Receipts are NOT generated for threads that end as `needs_human`.
    create-thread.sh:
      - reads thread_counter (e.g., 3)
      - increments to 4
-     - assigns serial = "{CODE}-004"
-     - builds thread_id = "{CODE}-004-{topic_slug}"
+     - assigns serial = "{PROJECT_CODE}-007"
+     - builds thread_id = "{PROJECT_CODE}-007-{topic_slug}"
      - creates thread folder
      - AFTER thread folder created successfully:
          writes project_file.thread_counter = 4
@@ -372,7 +379,7 @@ Staging scripts live in `org/threads/staging/` and are self-contained:
 - SA/DE agents run these directly via Bash tool -- no Andrew handoff required
 
 **Naming:**
-- Project thread: `run-{CODE}-{NNN}-{slug}.sh` (e.g., `run-ADVI-004-books-publisher-gap.sh`)
+- Project thread: `run-{PROJECT_CODE}-{NNN}-{slug}.sh` (e.g., `run-ADVI_V1VERS-007-books-publisher-gap.sh`)
 - Non-project: `run-YYYY-MM-DD-{slug}.sh`
 
 **Generation:**

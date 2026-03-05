@@ -399,7 +399,7 @@ All task orders use this XML structure. Wrap the XML in a markdown file.
     <date>{YYYY-MM-DD}</date>
     <status>pending | complete</status>
     <!-- If this task order was produced from a project thread, include: -->
-    <thread_serial>{CODE}-{NNN}</thread_serial>  <!-- e.g., ADVI-004 -->
+    <thread_serial>{PROJECT_CODE}-{NNN}</thread_serial>  <!-- e.g., ADVI_V1VERS-004 -->
     <thread_ref>org/threads/{thread_id}/</thread_ref>
   </metadata>
 
@@ -456,15 +456,18 @@ All task orders use this XML structure. Wrap the XML in a markdown file.
 
 **From a project thread** (top-down, Tier 1/2 initiated):
 ```
-{agent_folder}/task_orders/{CODE}-{NNN}-{feature_slug}.md
+{agent_folder}/task_orders/{PROJECT_CODE}-{NNN}-{feature_slug}.md
 ```
-The `{CODE}-{NNN}` prefix is the thread serial that produced this task order.
+The `{PROJECT_CODE}-{NNN}` prefix is the thread serial that produced this task order.
 This links the task order back to the thread receipt and the project file.
+
+Project code format: `{MACRO}_{6CHAR}` (e.g., `ADVI_V1VERS`, `ADVI_YANGV2`).
+Macro codes are in `org/projects/MACRO_CODES.md`. Project codes are registered in `org/projects/REGISTRY.md`.
 
 Examples:
 ```
-org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI-004-adv_drill.md
-org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI-004-continuous_nna_rendering.md
+org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_V1VERS-004-adv_drill.md
+org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/ADVI_V1VERS-004-continuous_nna_rendering.md
 ```
 
 **Ad-hoc** (no project / lateral between agents):
@@ -479,8 +482,9 @@ org/tier3_junior/0.4.2_RD_AdvisorIntelligence/task_orders/rolling_flows_chart_re
 
 Filtering task orders by project in any agent folder:
 ```bash
-ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI-*.md      # all ADVI project work
-ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI-004-*.md  # from thread ADVI-004
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_V1VERS-*.md   # all V1VERS project work
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_YANGV2-*.md   # all YANGV2 project work
+ls org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_*.md          # all ADVI macro work
 ```
 
 ---
