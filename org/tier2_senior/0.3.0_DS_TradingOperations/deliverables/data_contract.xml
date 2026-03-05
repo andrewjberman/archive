@@ -840,4 +840,48 @@
 
   </gaps>
 
+  <!-- ================================================================== -->
+  <!-- SECURITY SCANNER CONTRACT REFERENCE                                 -->
+  <!-- ================================================================== -->
+
+  <security_scanner_contract>
+    <source>SSCN_PORTAL-001 thread</source>
+    <thread_receipt>org/tier2_senior/0.3.0_DE_TradingOperations/threads/SSCN_PORTAL-001-pattern-0-security-scanner-data-architec_0.3.0_DS_TradingOperations+0.5.0_AE_OpalETL.md</thread_receipt>
+    <contract_path>docs/architecture/SSCN_DATA_CONTRACT.md</contract_path>
+    <status>contracted</status>
+    <date>2026-03-05</date>
+    <participants>
+      <participant role="DS">0.3.0_DS_TradingOperations</participant>
+      <participant role="AE">0.5.0_AE_OpalETL</participant>
+      <participant role="DE">0.3.0_DE_TradingOperations</participant>
+    </participants>
+    <summary>
+      Monthly processing Lambda reads FactSet Excel, computes per-factor percentiles server-side
+      using V0 canonical logic (calculate_percentiles_with_sign), writes static JSON to
+      opal-data-portal-v2/json/security_scanner/{asOf|latest}/. Portal reads via portal-proxy
+      scoped routes (/api/scoped/security-scanner/...). Client computes composite score and rank
+      from pre-computed percentiles + user weights. All 284 scoring factor columns included in
+      monthly artifacts. Phase 0: no gzip, no CloudFront invalidation.
+    </summary>
+    <endpoints>
+      <endpoint method="GET" path="/api/scoped/security-scanner/factors" s3_key="json/security_scanner/latest/factor_metadata.json"/>
+      <endpoint method="GET" path="/api/scoped/security-scanner/universe/{universeId}/data" s3_key="json/security_scanner/latest/universes/{universeId}/universe_data.json"/>
+      <endpoint method="GET" path="/api/scoped/security-scanner/universe/{universeId}/scanner" s3_key="json/security_scanner/latest/universes/{universeId}/scanner_data.json"/>
+    </endpoints>
+    <typescript_interfaces>
+      <interface>FactorDefinition</interface>
+      <interface>UniverseDataRow</interface>
+      <interface>ScannerRow</interface>
+      <interface>FactorMetadataResponse</interface>
+      <interface>UniverseDataResponse</interface>
+      <interface>ScannerDataResponse</interface>
+    </typescript_interfaces>
+    <notes>
+      See full contract at docs/architecture/SSCN_DATA_CONTRACT.md for all field-level
+      definitions, null semantics, universe ID mapping, compute split, and open items.
+      Header snapshot (284 factor columns confirmed) at:
+      docs/architecture/security-scanner-source/source_headers_20251028.json
+    </notes>
+  </security_scanner_contract>
+
 </data_contract>
