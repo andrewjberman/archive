@@ -220,6 +220,9 @@ Logs go in YOUR agent folder:
 
 - [Blocker description, impact, and who can unblock it]
 
+**Before writing any blocker:** check the blocking agent's directory first.
+See **Blocker Verification Protocol** below.
+
 ---
 
 ## Current State
@@ -311,9 +314,61 @@ DS briefs are the formal cross-agent handoff artifact. Write them first; list th
 ### Before Writing the Log
 
 **Always confirm:**
-1. **Status** — COMPLETE, IN PROGRESS, or BLOCKED (one word, no hedging)
-2. **Blockers** — what is blocking, who can unblock
+1. **Status** — COMPLETE, IN PROGRESS, or BLOCKED, or AMBIGUOUS (one word, no hedging)
+2. **Blockers** — what is blocking, who can unblock. Must follow Blocker Verification Protocol before writing BLOCKED.
 3. **Next steps** — ordered, self-contained, cross-agent attributed where needed
+
+---
+
+## Blocker Verification Protocol
+
+**Never declare yourself BLOCKED based on assumption alone.** Before writing a blocker
+in your session log or task order status, you must do the following:
+
+### Step 1 — Check the blocking agent's directory
+
+Read the most recent logs and pending task orders of the agent you believe is blocking you:
+
+```
+{blocking_agent_folder}/logs/{most_recent_date}/    <- what they worked on last
+{blocking_agent_folder}/task_orders/                <- what they have been asked to do
+```
+
+Look for: evidence that their work is complete, in progress, or not yet started.
+
+### Step 2 — Determine status
+
+| What you find | How to classify |
+|---|---|
+| Log or task order confirms the dependency is delivered | **Not blocked.** Use the output and proceed. |
+| Log or task order confirms it is in progress or pending | **BLOCKED** — name the specific agent, task order, and what you are waiting for. |
+| Nothing in their directory corroborates either state | **AMBIGUOUS** — dependency chain status unknown. |
+
+### Step 3 — Write the appropriate status
+
+**If BLOCKED:**
+```
+## Blockers
+- BLOCKED on [agent serial]: [task order path] — waiting for [specific deliverable].
+  Evidence: [log or task order path that confirms it is in flight].
+```
+
+**If AMBIGUOUS:**
+```
+## Blockers
+- AMBIGUOUS dependency: [agent serial] has no log or task order corroborating
+  status of [deliverable]. Cannot confirm blocked or unblocked.
+  Escalate to DE/COO to resolve dependency chain visibility.
+```
+
+**If resolved by checking:**
+Do not write a blocker at all. Proceed using the delivered output and note where you found it.
+
+### Why this matters
+
+A BLOCKED status halts work and triggers escalation. An incorrect BLOCKED status
+wastes cycles. AMBIGUOUS is the honest state when evidence is absent — it routes
+to COO/DE for resolution rather than stalling the entire agent.
 
 ---
 
