@@ -1,9 +1,9 @@
-# Task Order: ADVI-J1 — opal-partner-49financial DynamoDB Table — 0.7.0_AE_CloudOps
+# Task Order: ADVI_V1VERS-J1 — opal-partner-49financial DynamoDB Table — 0.7.0_AE_CloudOps
 
 ```xml
 <task_order>
   <metadata>
-    <id>2.0.0_SA_COO-2026-03-04-ADVI-J1-partner-identity-dynamo</id>
+    <id>2.0.0_SA_COO-2026-03-04-ADVI_V1VERS-J1-partner-identity-dynamo</id>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-03-04</date>

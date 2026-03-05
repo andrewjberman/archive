@@ -3,12 +3,12 @@
 ```xml
 <task_order>
   <metadata>
-    <id>2.0.0_SA_COO-ADVI-005-rd-advisors_tab</id>
+    <id>2.0.0_SA_COO-ADVI_V1VERS.005.rd-advisors-tab</id>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-03-03</date>
     <status>complete</status>
-    <thread_serial>ADVI-005</thread_serial>
+    <thread_serial>ADVI_V1VERS-005</thread_serial>
     <thread_ref>org/threads/ADVI-005-pattern-0-stacked-bar--rolling-flows-dat/</thread_ref>
     <gate_status>CLEARED — DT Stream B2 deployed bd-v2.15.1. stacked_bar + rolling_1y are LIVE
       in advisor_rolling_flows.json. DE typed AdvisorRollingFlowsResponseV2 in portal DEV 5125eb9.

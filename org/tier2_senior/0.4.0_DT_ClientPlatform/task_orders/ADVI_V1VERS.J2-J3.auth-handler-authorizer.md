@@ -1,9 +1,9 @@
-# Task Order: ADVI-J2/J3 — Auth-Handler + Portal-Authorizer Partner Identity — 0.4.0_DT_ClientPlatform
+# Task Order: ADVI_V1VERS-J2/J3 — Auth-Handler + Portal-Authorizer Partner Identity — 0.4.0_DT_ClientPlatform
 
 ```xml
 <task_order>
   <metadata>
-    <id>2.0.0_SA_COO-2026-03-04-ADVI-J2-J3-auth-handler-authorizer</id>
+    <id>2.0.0_SA_COO-2026-03-04-ADVI_V1VERS-J2-J3-auth-handler-authorizer</id>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-03-04</date>

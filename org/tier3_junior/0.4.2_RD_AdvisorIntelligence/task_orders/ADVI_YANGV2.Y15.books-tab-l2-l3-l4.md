@@ -3,14 +3,14 @@
 ```xml
 <task_order>
   <metadata>
-    <id>2.0.0_SA_COO-2026-03-05-ADVI-Y15-books-tab-l2-l3-l4</id>
+    <id>2.0.0_SA_COO-2026-03-05-ADVI_YANGV2.Y15.books-tab-l2-l3-l4</id>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-03-05</date>
     <status>complete</status>
     <priority>HIGH</priority>
     <stream>Y15</stream>
-    <thread_serial>ADVI-006</thread_serial>
+    <thread_serial>ADVI_V1VERS-006</thread_serial>
   </metadata>
 
   <objective>

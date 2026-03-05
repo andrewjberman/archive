@@ -3,12 +3,12 @@
 ```xml
 <task_order>
   <metadata>
-    <id>2.0.0_SA_COO-ADVI-004-de-portal_types_wiring</id>
+    <id>2.0.0_SA_COO-ADVI_V1VERS.004.de-portal-types-wiring</id>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-03-03</date>
     <status>complete</status>
-    <thread_serial>ADVI-004</thread_serial>
+    <thread_serial>ADVI_V1VERS-004</thread_serial>
     <thread_ref>org/threads/ADVI-004-pattern-0-advdrill--clatimeseries-data-c/</thread_ref>
   </metadata>
 

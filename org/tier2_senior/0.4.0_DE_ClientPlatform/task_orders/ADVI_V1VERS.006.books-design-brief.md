@@ -3,12 +3,12 @@
 ```xml
 <task_order>
   <metadata>
-    <id>2.0.0_SA_COO-2026-03-04-advi006-books-brief</id>
+    <id>2.0.0_SA_COO-2026-03-04-ADVI_V1VERS.006.books-design-brief</id>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-03-04</date>
     <status>complete</status>
-    <thread_serial>ADVI-006</thread_serial>
+    <thread_serial>ADVI_V1VERS-006</thread_serial>
     <thread_ref>org/threads/ADVI-006-pattern-0-books-tab-design-brief-l2-l3-l/messages/</thread_ref>
   </metadata>
 
