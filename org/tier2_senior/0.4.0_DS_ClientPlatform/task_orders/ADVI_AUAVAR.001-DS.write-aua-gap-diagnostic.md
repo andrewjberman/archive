@@ -21,21 +21,19 @@
 
     Problem: BD reports ~$1.605B non-cash AUA (2026-03-03 snapshot).
     Our gold layer reports ~$1.545B. The ~$55M gap (3.4%) needs to be attributed
-    to named segments. Before segment decomposition can be meaningful, we must
-    resolve an internal discrepancy: Phase 1 DS investigation showed our model
-    at $1.236B while the script 09 deploy log shows $1.552B — both are gold-derived
-    but from different build states.
+    to named segments.
 
-    Thread receipt conclusion:
-      - $1.236B = household AUA from client_performance.parquet on 2026-03-02,
-        from an older/incomplete gold build (fewer positions_cube partitions at run time).
-      - $1.552B = gold AUA from a newer build (script 09 dry-run, more complete coverage).
-      - The discrepancy is gold-vs-gold, not BD-vs-gold.
+    CORRECTION (2026-03-06, 1.0.0_SA_CTO): The $1.236B figure from the Phase 1
+    DS investigation was erroneous — the prior agent conflated NNA and AUA metrics.
+    Our actual non-cash AUA is ~$1.545B. There is NO gold-vs-gold discrepancy to
+    resolve. The real gap is simply BD (~$1.60B) vs our model (~$1.545B) = ~$55M.
+    All references to $1.236B in prior logs and thread messages should be disregarded.
 
     The diagnostic script will:
-      1) Reconcile gold-vs-gold for the same as-of date (D = 2026-03-02)
-      2) Decompose BD-vs-gold gap into coverage + household integrity + residual segments
-      3) Emit a stable JSON waterfall artifact for COO/memo use
+      1) Establish gold baseline for D=2026-03-02 (expected: ~$1.545B)
+      2) Run household aggregation check (positions_cube x prices vs client_performance — should be ~0)
+      3) Decompose BD-vs-gold gap into coverage + residual segments
+      4) Emit a stable JSON waterfall artifact for COO/memo use
 
     COO DECISION GATE:
       Cash treatment (Segment 3) is diagnostics-only for now. Do NOT net cash from
@@ -79,15 +77,13 @@
         3. If as_of_date absent: report both alignments (filename date == D and filename date == D-1)
            in the JSON under diagnostics.alloc_date_convention_note.
 
-      STEP 1 — GOLD-VS-GOLD RECONCILIATION:
+      STEP 1 — GOLD BASELINE (per 2026-03-06 correction; no unexpected discrepancy expected):
         A. gold_cp_total = sum(total_aua) from client_performance where date == D
-                           (relationship grain)
-        B. gold_cube_total = sum(units * price) from positions_cube/D join canonical_prices for D
-                             (account grain, no relationship mapping)
-        C. Report gold_cp_total, gold_cube_total, and delta (A - B).
-           If abs(A - B) / A > 0.01 (>1% discrepancy), flag as WARN: possible relationship
-           mapping drop or dimension join issue.
-           If abs(A - B) / A <= 0.01, flag as OK: gold internally consistent.
+                           (relationship grain). Expected: ~$1.545B.
+        B. gold_cube_total = sum(units * price) from positions_cube/D x canonical_prices for D
+                             (account grain). Needed for Segment 2 check and Segment 4 residual.
+        C. Report both totals. If abs(A - B) / A > 0.01 (>1%), flag as WARN. No large discrepancy
+           is expected (the $1.236B figure in prior logs was a prior agent error; ignore it).
 
       STEP 2 — SEGMENT DECOMPOSITION (BD-vs-gold):
 
@@ -209,8 +205,9 @@
 
   <acceptance_criteria>
     <criterion id="1">
-      diag_aua_gap_decomposition.py committed. Computes gold-vs-gold reconciliation and
-      BD-vs-gold segment decomposition for D=2026-03-02. Emits JSON with locked schema.
+      diag_aua_gap_decomposition.py committed. Establishes gold baseline (~$1.545B expected),
+      runs household aggregation check, and decomposes BD-vs-gold gap for D=2026-03-02.
+      Emits JSON with locked schema.
     </criterion>
     <criterion id="2">
       Script handles missing positions_cube gracefully (flag, do not error).

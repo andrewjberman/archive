@@ -23,11 +23,13 @@
 
     Anchor date: D = 2026-03-02.
 
-    The diagnostic resolves two things in one run:
-      1) Gold-vs-gold reconciliation: client_performance total vs positions_cube x prices total
-         (explains the $1.236B vs $1.552B discrepancy from Phase 1 investigation)
-      2) BD-vs-gold segment decomposition: account coverage, household integrity, residual
-         (the ~$55M gap waterfall)
+    CORRECTION (2026-03-06, 1.0.0_SA_CTO): The $1.236B figure from the Phase 1
+    DS investigation was erroneous — the prior agent conflated NNA and AUA metrics.
+    Our actual non-cash AUA is ~$1.545B. There is no gold-vs-gold discrepancy.
+
+    The diagnostic decomposes the BD-vs-gold gap:
+      - BD (~$1.60B) vs our gold layer (~$1.545B) = ~$55M gap
+      - Segments: account coverage, household integrity, residual
 
     Output is a JSON artifact that DS interprets and COO converts into the AUAVAR memo.
   </background>
