@@ -55,14 +55,14 @@
   </acceptance_criteria>
 
   <constraints>
-    <constraint>BLOCKED until DE completes ADVI_49FNV3.N1-N2-DE task order (types + wiring).</constraint>
+    <constraint>DE wiring complete (ADVI_49FNV3.N1-N2-DE marked complete 2026-03-06). Dependency resolved. DT pre-implemented functional panels in commit 1dc96b5 (DEV) -- RD reviews visual quality and polishes as needed.</constraint>
     <constraint>Do not implement L3/L4 visual panels -- Phase 2a only.</constraint>
     <constraint>Do not render any field that DE has not confirmed is in the published JSON.
       Design brief Section 5 lists gaps -- those panels stay hidden.</constraint>
   </constraints>
 
   <dependencies>
-    <dependency agent="0.4.0_DE_ClientPlatform" task="ADVI_49FNV3.N1-N2-DE.firm-dashboard-and-advisor-book-wiring" status="pending"/>
+    <dependency agent="0.4.0_DE_ClientPlatform" task="ADVI_49FNV3.N1-N2-DE.firm-dashboard-and-advisor-book-wiring" status="complete"/>
   </dependencies>
 
   <deliverables>
