@@ -37,9 +37,14 @@
 
 **Branch Definitions:**
 - **`CLOUD`** (parent repo) = The one working branch for all infrastructure, Lambda, data, and docs work
-- **`DEV`** (portal submodule only) = Portal development branch
-- **`PROD`** (portal submodule only) = Portal production branch
+- **`DEV`** (portal submodule only) = Portal development branch — all agent commits go here
+- **`PROD`** (portal submodule only) = Portal production branch — **AGENTS NEVER COMMIT HERE**
 - **`main`** = NOT USED anywhere. Ignore completely.
+
+**PROD IS STRICTLY MERGE-ONLY:**
+`PROD` only ever receives merge-forwards from `DEV`, issued explicitly by a DevOps team member (DT agent or Andrew). Agents never commit directly to `PROD`, never cherry-pick to `PROD`, and never push directly to `PROD` for any reason, including hotfixes. All work — including urgent bug fixes — goes to `DEV` first. A DT agent or Andrew merges to `PROD` when authorized.
+
+Violating this rule corrupts the DEV→PROD audit trail and makes deployment history unreliable.
 
 **No Pull Requests:** This is a single-developer workflow. Use direct push.
 
