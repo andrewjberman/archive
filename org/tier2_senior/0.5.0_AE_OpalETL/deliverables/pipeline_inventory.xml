@@ -14,13 +14,14 @@
 
   <metadata>
     <agent>0.5.0_AE_OpalETL</agent>
-    <date>2026-03-02</date>
+    <date>2026-03-06</date>
     <pipelines_owned>
       <pipeline>yang-pipeline</pipeline>
       <pipeline>news-pipeline</pipeline>
       <pipeline>market-overview</pipeline>
       <pipeline>smartx-pipeline</pipeline>
       <pipeline>security-scanner-pipeline</pipeline>
+      <pipeline>other</pipeline>
       <pipeline>causality</pipeline>
       <pipeline>seeking-alpha</pipeline>
     </pipelines_owned>
@@ -1241,6 +1242,96 @@
       <change pipeline="portal-notifications" description="Added aws_lambda_permission.sscn_processor + lambda_function block in aws_s3_bucket_notification.portal_triggers"/>
       <change pipeline="other" description="Extended opal-data-refresh-api with POST /security-scanner/upload-url presign route (15min TTL)"/>
     </related_changes>
+
+  </pipeline>
+
+  <!-- ======================================================================
+       OTHER PIPELINE — opal-data-refresh-api  (added 2026-03-06)
+       Terraform:   infra/aws/terraform/other/
+       State:       opal-313476888478-terraform-state/other/tfstate
+       Current tag: other-v1.1.0
+       Owner:       0.5.0_AE_OpalETL
+       ====================================================================== -->
+  <pipeline name="other"
+            terraform_module="infra/aws/terraform/other/"
+            current_tag="other-v1.1.0"
+            s3_backend_key="other/tfstate"
+            trigger_model="API Gateway HTTP API (CloudFront-fronted) → opal-data-refresh-api Lambda">
+
+    <lambdas>
+      <lambda name="opal-data-refresh-api"
+              source_path="infra/aws/lambda/data_refresh/lambda_function.py"
+              memory_mb="256"
+              timeout_s="60"
+              runtime="python3.11"
+              layers="none"
+              trigger="CloudFront-fronted API Gateway HTTP API (authenticated via validate_user_type)"
+              artifact="s3://opal-313476888478-lambda-artifacts/other/opal-data-refresh-api.zip"
+              iam_role="opal-data-refresh-lambda-role"
+              iam_role_arn="arn:aws:iam::313476888478:role/opal-data-refresh-lambda-role">
+
+        <!-- DataRefresh route family (5 routes) -->
+        <routes family="DataRefresh" prefix="/data-refresh/">
+          <route method="POST" path="/data-refresh/trigger" description="Trigger YangDataPipeline Step Functions execution"/>
+          <route method="GET"  path="/data-refresh/status" description="Get latest execution status from DynamoDB"/>
+          <route method="GET"  path="/data-refresh/status/executions" description="Get execution history list"/>
+          <route method="GET"  path="/data-refresh/available-years" description="List available years from S3"/>
+          <route method="GET"  path="/data-refresh/available-factors" description="List available factor files from S3"/>
+        </routes>
+
+        <!-- Security Scanner route family (4 routes) -->
+        <routes family="SecurityScanner" prefix="/security-scanner/">
+          <route method="POST" path="/security-scanner/upload-url" description="Generate presigned S3 PUT URL for FactSet Excel upload (15-min TTL)"/>
+          <route method="GET"  path="/security-scanner/factors" description="Proxy s3://opal-data-portal-v2/json/security_scanner/latest/factor_metadata.json"/>
+          <route method="GET"  path="/security-scanner/universe/{universeId}/data" description="Proxy universe_data.json for given universe"/>
+          <route method="GET"  path="/security-scanner/universe/{universeId}/scanner" description="Proxy scanner_data.json for given universe"/>
+        </routes>
+
+        <environment>
+          <var name="BUCKET">opal-data-portal-v2</var>
+          <var name="PRESIGN_EXPIRY">3600</var>
+          <var name="STATE_MACHINE_ARN">arn:aws:states:us-east-1:313476888478:stateMachine:YangDataPipeline</var>
+          <var name="TABLE_NAME">opal-data-refresh-executions</var>
+        </environment>
+
+        opal-data-refresh-api is the unified backend for two portal features: DataRefresh
+        (Yang pipeline orchestration) and Security Scanner (SSCN FactSet upload + GET proxy).
+        AE owns all routes, IAM, Terraform, and runtime. Portal pages are DE/RD scope.
+        Presign route uses SSCN_PRESIGN_EXPIRY = 900 (15 min); overrides PRESIGN_EXPIRY env var.
+      </lambda>
+    </lambdas>
+
+    <iam_roles>
+      <role name="opal-data-refresh-lambda-role"
+            arn="arn:aws:iam::313476888478:role/opal-data-refresh-lambda-role"
+            managed_by="Pre-existing role referenced by ARN in other/main.tf — not created by this module">
+        Required permissions:
+        s3:PutObject on opal-data-portal-v2/security_scanner/* (presign route).
+        s3:GetObject on opal-data-portal-v2/json/security_scanner/* (GET proxy routes).
+        states:StartExecution on YangDataPipeline (DataRefresh trigger).
+        dynamodb:PutItem/GetItem/Query on opal-data-refresh-executions.
+        logs:CreateLogGroup/CreateLogStream/PutLogEvents.
+      </role>
+    </iam_roles>
+
+    <related_resources>
+      <resource type="DynamoDB" name="opal-data-refresh-executions" description="Stores DataRefresh pipeline execution state"/>
+      <resource type="StepFunctions" name="YangDataPipeline" description="State machine triggered by DataRefresh /trigger route"/>
+      <resource type="CloudFront" name="opal-data-portal-v2 distribution" description="Fronts the API; DataRefresh routes trigger CloudFront invalidation on completion"/>
+      <resource type="S3" name="opal-data-portal-v2" description="Source bucket for SSCN uploads; destination for JSON artifacts read by GET routes"/>
+    </related_resources>
+
+    <s3_artifacts>
+      <path bucket="opal-313476888478-lambda-artifacts" prefix="other/opal-data-refresh-api.zip" direction="read">
+        Lambda function zip artifact, built by build-and-upload.sh.
+      </path>
+      <path bucket="opal-data-portal-v2" prefix="security_scanner/uploads/" direction="write (presign)">
+        SSCN FactSet Excel uploaded by portal user via presigned PUT URL.
+      </path>
+      <path bucket="opal-data-portal-v2" prefix="json/security_scanner/latest/" direction="read (proxy)">
+        Processed SSCN JSON artifacts proxied to portal client.
+      </path>
+    </s3_artifacts>
 
   </pipeline>
 
