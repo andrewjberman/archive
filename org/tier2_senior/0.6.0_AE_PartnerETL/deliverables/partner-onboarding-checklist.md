@@ -64,7 +64,7 @@ Acceptance criteria:
 
 ---
 
-## Step 2: Attach CloudFront Bucket Policy
+## Step 2: Attach CloudFront Bucket Policy (OAI)
 
 **Who:** 0.7.0_AE_CloudOps (owns CloudFront + IAM)
 **REQUIRED:** Without this step, CloudFront cannot serve data from the new bucket.
@@ -72,39 +72,50 @@ Acceptance criteria:
 S3 access is per-bucket — there is NO wildcard origin access policy covering all
 `opal-data-*` buckets. Each new bucket requires its own explicit CloudFront access policy.
 
-**Thread ADVI_APISCP-001 finding:** The exact principal format (OAC vs OAI) and the
-canonical policy template must be confirmed by DT during preflight discovery. The DT will
-document the policy template in their preflight thread before this step is executed.
+**Architecture decision ADVI_APISCP v5 (2026-03-10):** The `/api/scoped/advisor-intelligence/*`
+behavior uses OAI (`opal-scoped-advisor-oai`, ID: `E139998VWH0PD`) — NOT OAC. OAC is
+architecturally incompatible with Lambda@Edge dynamic origin mutation. Each new partner bucket
+must grant `s3:GetObject` to the OAI canonical user. No CloudFront distribution changes are
+needed per partner onboarding.
 
-**Expected form (placeholder — use DT-verified template):**
+Apply the following bucket policy statement to `opal-data-{firmId}`:
 
-```json
-{
+```bash
+# Step 1: Read existing bucket policy
+aws s3api get-bucket-policy --bucket opal-data-{firmId}
+
+# Step 2: Add AllowScopedAdvisorOAI statement to the existing policy and apply
+aws s3api put-bucket-policy --bucket opal-data-{firmId} --policy '{
   "Version": "2012-10-17",
   "Statement": [
+    ... (existing statements preserved) ...,
     {
-      "Sid": "AllowCloudFrontRead",
+      "Sid": "AllowScopedAdvisorOAI",
       "Effect": "Allow",
       "Principal": {
-        "Service": "cloudfront.amazonaws.com"
+        "CanonicalUser": "d4ad9d8c8d632c03dc0495c78f1d102f1de6a06056577e25de649eaa90d66c9e35c047cce9afa4e82f74dbadc058c161"
       },
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::opal-data-{firmId}/*",
-      "Condition": {
-        "StringEquals": {
-          "AWS:SourceArn": "arn:aws:cloudfront::{accountId}:distribution/{distributionId}"
-        }
-      }
+      "Resource": "arn:aws:s3:::opal-data-{firmId}/*"
     }
   ]
-}
+}'
+
+# Step 3: Verify
+aws s3api get-bucket-policy --bucket opal-data-{firmId}
 ```
+
+**OAI reference:**
+- OAI name: `opal-scoped-advisor-oai`
+- OAI ID: `E139998VWH0PD`
+- S3CanonicalUserId: `d4ad9d8c8d632c03dc0495c78f1d102f1de6a06056577e25de649eaa90d66c9e35c047cce9afa4e82f74dbadc058c161`
 
 Acceptance criteria:
 - [ ] CloudFront can perform `s3:GetObject` on `opal-data-{firmId}/*`
-- [ ] Policy uses the DT-confirmed principal (OAC or OAI)
+- [ ] Policy statement `AllowScopedAdvisorOAI` present with the OAI canonical user above
+- [ ] Existing bucket policy statements preserved (APPEND only — do NOT replace)
 - [ ] No public read access granted
-- [ ] 0-diff terraform plan confirmed after apply
+- [ ] Verified with `get-bucket-policy` post-apply
 
 ---
 
@@ -231,7 +242,6 @@ After first gold pipeline run for the new partner:
 
 ## IAM Note
 
-The bd-pipeline Lambda role currently holds a stale `s3:PutObject` permission on
-`opal-data-portal-v2/*` (known issue #10 in pipeline_inventory.xml). This permission
-should be removed before onboarding the second partner to maintain least-privilege hygiene.
-Coordinate with 0.7.0_AE_CloudOps for the IAM cleanup.
+The stale `s3:PutObject` permission on `opal-data-portal-v2/*` in the bd-pipeline Lambda
+role was removed on 2026-03-10 (ADVI_APISCP.002, commit `ab731673`, tag `bd-v2.17.3`).
+Bucket separation is now enforced at the IAM level. No further action needed.
