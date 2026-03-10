@@ -1,0 +1,59 @@
+{
+  "code": [
+    {
+      "label": "yang-capture-output-versions Lambda -- scans json/ prefix, captures S3 VersionIds after pipeline success, writes outputs-manifest.json",
+      "path": "infra/aws/lambda/v2_portal/yang_pipeline/outputs/capture-output-versions/lambda_function.py"
+    },
+    {
+      "label": "yang-ingest-dynamodb Lambda -- writes pipeline results to DynamoDB (table name, PK/SK unknown -- must be determined)",
+      "path": "infra/aws/lambda/v2_portal/yang_pipeline/outputs/ingest-dynamodb/lambda_function.py"
+    },
+    {
+      "label": "yang-refresh-fred-cache Lambda -- refreshes FRED macro data (output S3 path must be identified)",
+      "path": "infra/aws/lambda/v2_portal/yang_pipeline/outputs/refresh-fred-cache/lambda_function.py"
+    },
+    {
+      "label": "opal-data-refresh-api Lambda -- contains handle_rollback (copy_object with CopySourceVersionId), IAM role determines S3 permissions",
+      "path": "infra/aws/lambda/data_refresh/lambda_function.py"
+    },
+    {
+      "label": "bd-portal-publisher Lambda -- triggered by pipeline-complete.json S3 event, writes all gold/ JSON outputs",
+      "path": "infra/aws/lambda/bd-pipeline/bd-portal-publisher/lambda_function.py"
+    },
+    {
+      "label": "bd-portal-advisor-publisher Lambda -- writes per-advisor client files to gold/",
+      "path": "infra/aws/lambda/bd-pipeline/bd-portal-advisor-publisher/lambda_function.py"
+    },
+    {
+      "label": "yang-pipeline Step Functions definition -- confirms whether capture-output-versions is a step and when it runs relative to generate-manifest",
+      "path": "infra/aws/terraform/yang-pipeline/stepfunctions.tf"
+    },
+    {
+      "label": "yang-pipeline IAM -- execution role policies for data-refresh-api and yang pipeline Lambdas",
+      "path": "infra/aws/terraform/yang-pipeline/iam.tf"
+    },
+    {
+      "label": "Lambda source map -- all deployed Lambdas and their S3 artifact paths (Lambda@Edge and unmanaged Lambdas NOT listed)",
+      "path": "infra/aws/lambda/ci/lambda-source-map.json"
+    }
+  ],
+  "documents": [
+    {
+      "label": "DRFR_PTMCH PRD -- Portal Time Machine architecture, open questions per AE (Section 4), implementation phases (Section 5)",
+      "path": "docs/architecture/DRFR_PTMCH_PRD.md"
+    },
+    {
+      "label": "CloudOps task order -- full question list for 0.7.0_AE_CloudOps",
+      "path": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/DRFR_PTMCH.001.cloudops-versioning-iam-audit.md"
+    },
+    {
+      "label": "OpalETL task order -- full question list for 0.5.0_AE_OpalETL",
+      "path": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/DRFR_PTMCH.001.opal-pipeline-archive-audit.md"
+    },
+    {
+      "label": "PartnerETL task order -- full question list for 0.6.0_AE_PartnerETL",
+      "path": "org/tier2_senior/0.6.0_AE_PartnerETL/task_orders/DRFR_PTMCH.001.bd-pipeline-snapshot-audit.md"
+    }
+  ],
+  "inline": "Goal: Three AEs perform their infrastructure discovery audits for the Portal Time Machine project (DRFR_PTMCH) in a shared thread so cross-dependencies are resolved in real time. The most critical single fact is whether S3 versioning is enabled on opal-data-portal-v2 -- if it is NOT enabled, the entire Layer 1 restore mechanism is broken and must be redesigned before any implementation begins. CloudOps (0.7.0) holds this verdict and goes first. OpalETL (0.5.0) goes second -- they can absorb the versioning verdict and adjust their archive health findings accordingly. PartnerETL (0.6.0) goes third -- their snapshot-vs-versioning cost analysis for opal-data-bd depends on CloudOps findings. Each AE produces a structured findings document in their own deliverables/ folder. The thread receipt and each agent's findings document together constitute the Phase 0 discovery package that unblocks Phase 1 implementation task orders."
+}
