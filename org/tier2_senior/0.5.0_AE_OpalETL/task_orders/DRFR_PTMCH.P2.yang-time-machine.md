@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-03-10</date>
-    <status>pending</status>
+    <status>in_progress</status>
+    <status_note>Req 5 DEPLOYED news-v2.7.0. Reqs 2/3/6/7 code complete, committed 5ce67698. Hold deploy until CloudOps P1 delivers IAM + CF paths.</status_note>
     <thread_serial>DRFR_PTMCH-001</thread_serial>
     <thread_ref>org/threads/DRFR_PTMCH-001-portal-time-machine-ae-infrastructure-di/</thread_ref>
     <revised>2026-03-10 -- REVISED post agent review. Corrections: news publisher path fixed;
