@@ -6,7 +6,12 @@
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-03-10</date>
     <status>in_progress</status>
-    <status_note>Req 5 DEPLOYED news-v2.7.0. Reqs 2/3/6/7 code complete, committed 5ce67698. Hold deploy until CloudOps P1 delivers IAM + CF paths.</status_note>
+    <status_note>Req 5 DEPLOYED news-v2.7.0. Reqs 2/3/6/7 code complete, committed 5ce67698.
+    COO added Req 8 (DynamoDB Market Overview restore) -- scope expanded to true full rollback.
+    Lambda patched (restore_market_data_dynamo added), MARKET_DATA_TABLE env var added to TF.
+    No new IAM needed (dynamodb:Scan + dynamodb:PutItem already on yang-pipeline-lambda-role).
+    CF paths confirmed by CloudOps P1: yang=/api/general/*, BD=/api/scoped/advisor-intelligence/*.
+    Phase B unblocked. Proceed with build + deploy.</status_note>
     <thread_serial>DRFR_PTMCH-001</thread_serial>
     <thread_ref>org/threads/DRFR_PTMCH-001-portal-time-machine-ae-infrastructure-di/</thread_ref>
     <revised>2026-03-10 -- REVISED post agent review. Corrections: news publisher path fixed;
@@ -161,6 +166,30 @@
         GATED ON CloudOps P1 findings doc (CF paths):
           2. yang-pipeline apply (yang-time-machine Lambda + IAM) → yang-v2.2.0
           3. data-refresh apply (new endpoints + invoke permission) → data-refresh-v2.1.0
+    </requirement>
+
+    <requirement id="8">
+      MARKET OVERVIEW DYNAMODB RESTORE -- added by COO 2026-03-10 (full rollback scope):
+      Yang-time-machine Lambda already patched by COO with restore_market_data_dynamo().
+      The function scans opal-portal-market-data for DAILY#target_date items (the historical
+      per-date rows yang-ingest-dynamodb writes on every pipeline run) and writes each back
+      as the corresponding LATEST item (the fast-load row the portal reads at request time).
+      This gives Market Overview true time travel without PITR restore.
+
+      No IAM change needed -- yang-pipeline-lambda-role already has dynamodb:Scan,
+      dynamodb:PutItem, dynamodb:Query on opal-portal-market-data (confirmed from iam.tf).
+
+      MARKET_DATA_TABLE env var already added to module "time_machine" in lambdas.tf by COO.
+
+      Your action for Phase B: build and deploy yang-time-machine as normal. The DynamoDB
+      step is already in the Lambda code at commit (COO-authored). Verify in acceptance
+      testing: invoke time machine with a historical date, confirm opal-portal-market-data
+      LATEST items update to reflect that date's data.
+
+      Coverage limitation: DAILY#target_date items exist only as far back as the yang pipeline
+      has been running and writing DAILY items. For dates with no DAILY# row (pre-pipeline or
+      gaps), the function logs a warning and skips DynamoDB restore (S3 files still restored).
+      Document the earliest restorable Market Overview date in the findings doc.
     </requirement>
 
     <requirement id="7">
