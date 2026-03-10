@@ -53,7 +53,7 @@
   <!-- =========================================================== -->
   <pipeline name="yang-pipeline"
             terraform_module="infra/aws/terraform/yang-pipeline/"
-            current_tag="yang-v2.1.4"
+            current_tag="yang-v2.2.0"
             s3_backend_key="yang-pipeline/tfstate"
             trigger_model="S3 upload to opal-data-portal-v2/uploads/ → yang-pipeline-trigger Lambda → YangDataPipeline Step Functions">
 
@@ -194,6 +194,18 @@
         <layers/>
         <trigger>StepFunctions (YangDataPipeline)</trigger>
         <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>yang-time-machine</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/outputs/yang-time-machine</source_path>
+        <artifact_s3_key>yang-pipeline/yang-time-machine.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>python3.12</runtime>
+        <layers/>
+        <trigger>Invoked asynchronously by opal-data-refresh-api POST /data-refresh/time-machine</trigger>
+        <last_deployed_commit>71ef5481</last_deployed_commit>
+        <notes>DRFR_PTMCH.P2: S3 versioned restore + DynamoDB Market Overview restore + CF invalidation. Deployed yang-v2.2.0.</notes>
       </lambda>
 
       <!-- POSITIONING -->
