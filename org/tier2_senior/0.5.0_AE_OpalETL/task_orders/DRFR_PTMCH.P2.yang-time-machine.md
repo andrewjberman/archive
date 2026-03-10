@@ -8,17 +8,22 @@
     <status>pending</status>
     <thread_serial>DRFR_PTMCH-001</thread_serial>
     <thread_ref>org/threads/DRFR_PTMCH-001-portal-time-machine-ae-infrastructure-di/</thread_ref>
+    <revised>2026-03-10 -- REVISED post agent review. Corrections: news publisher path fixed;
+    LATEST.json rebuild reads manifest.json not metadata.json; yang-pipeline-lambda-role confirmed
+    as IAM target (OpalETL owns this in yang-pipeline/iam.tf, not CloudOps); API Gateway requires
+    no TF changes (catch-all proxy already routes all /data-refresh/*). Go-ahead: start now.
+    News publisher (req 5) is fully unblocked. Yang-time-machine code (req 2) can be written now
+    and deployed after CloudFront paths confirmed by CloudOps P1.</revised>
   </metadata>
 
   <objective>
-    Build the yang-time-machine Lambda and supporting DataRefresh API endpoint (Layer 1 of
-    the Portal Time Machine). S3 versioning is confirmed enabled on opal-data-portal-v2 and
-    archive manifests are confirmed healthy (83 files, non-null versionIds, exec 7a407b33
-    from 2026-03-08). The mechanism: given a target_date, scan outputs-manifest.json files
-    across executions, select the latest execution whose data_as_of_date <= target_date,
-    restore all captured JSON files to their version at that execution via CopyObject with
-    CopySourceVersionId, update benchmarks/LATEST.json, and invalidate CloudFront.
-    Also parameterize semantic-trending-topics-portal-publisher for Layer 3 (news re-publish).
+    Build the yang-time-machine Lambda and DataRefresh API endpoints (Layer 1 of Portal Time
+    Machine). Also parameterize the news trending publisher for Layer 3. Archive manifests are
+    confirmed healthy (83 files, non-null versionIds). Step Functions placement confirmed:
+    CaptureOutputVersions runs on every execution after GenerateManifest. Outputs-manifest schema
+    confirmed: { executionId, dataAsOfDate, pipelineStartedAt, outputCount, outputs: { key: {
+    versionId, size, etag, lastModified } } }. OpalETL also owns yang-pipeline IAM additions
+    for yang-pipeline-lambda-role (version S3 permissions).
   </objective>
 
   <scope>
@@ -26,153 +31,209 @@
       <file action="create">infra/aws/lambda/v2_portal/yang_pipeline/outputs/yang-time-machine/lambda_function.py</file>
       <file action="modify">infra/aws/lambda/data_refresh/lambda_function.py</file>
       <file action="modify">infra/aws/terraform/yang-pipeline/main.tf</file>
+      <file action="modify">infra/aws/terraform/yang-pipeline/iam.tf</file>
+      <file action="modify">infra/aws/terraform/data-refresh/main.tf</file>
       <file action="modify">infra/aws/lambda/ci/lambda-source-map.json</file>
-      <file action="modify">infra/aws/lambda/news-pipeline/semantic-trending-topics-portal-publisher/lambda_function.py</file>
+      <file action="modify">infra/aws/lambda/semantic-trending-topics-portal-publisher/lambda_function.py</file>
       <file action="create">org/tier2_senior/0.5.0_AE_OpalETL/deliverables/DRFR_PTMCH.001.opal-pipeline-findings.md</file>
     </files>
   </scope>
 
   <requirements>
     <requirement id="1">
-      PREREQUISITE -- read yang-pipeline-definition.json to confirm Step Functions placement:
-      File: infra/aws/terraform/yang-pipeline/yang-pipeline-definition.json (or the path
-      that stepfunctions.tf references via file()). Confirm:
-        - Is yang-capture-output-versions a step in the state machine?
-        - Does it run on every execution (not just full runs)?
-        - Does it run AFTER all generator lambdas and AFTER yang-generate-manifest?
-      If it is NOT on every run: flag to COO immediately before building the time machine.
-      The time machine is only reliable if every execution has an outputs-manifest.json.
+      CONFIRMED -- Step Functions placement verified by you before this task order arrived.
+      CaptureOutputVersions runs on every execution (unconditional), positioned after GenerateManifest
+      and before InvalidateCloudFront. Has a Catch block that routes to InvalidateCloudFront on
+      error (pipeline does not fail if capture fails). 10-minute window is a known limitation --
+      document in findings doc (req 7) but do not change the window in this phase.
+      Outputs-manifest schema is confirmed as noted in revision header.
     </requirement>
 
     <requirement id="2">
-      yang-time-machine Lambda -- core restore logic:
-      New Lambda at infra/aws/lambda/v2_portal/yang_pipeline/outputs/yang-time-machine/lambda_function.py.
-      Handler: restore_to_date(event, context).
-      Input event: { "target_date": "YYYY-MM-DD" }
+      yang-time-machine Lambda:
+      Path: infra/aws/lambda/v2_portal/yang_pipeline/outputs/yang-time-machine/lambda_function.py
+      Handler: restore_to_date(event, context)
+      Input: { "target_date": "YYYY-MM-DD" }
       Logic:
-        1. List all objects under data-refresh/archive/ matching */outputs-manifest.json.
-        2. For each manifest, read the associated metadata.json (same execution prefix)
-           to get data_as_of_date and pipeline_completed_at timestamp.
-        3. Select the latest execution where data_as_of_date <= target_date AND
-           pipeline_completed_at is at or before 17:00 ET on target_date.
-           If no such execution exists: return 404 with earliest_available_date.
-        4. For each key/versionId pair in the selected manifest's outputs:
-           call s3.copy_object(CopySource={Bucket, Key, VersionId=versionId},
-           Bucket=BUCKET, Key=key) to restore that exact version.
-        5. Update benchmarks/LATEST.json to point to the PKL version from that execution
-           (get execution metadata for the pkl_version field).
-        6. Invalidate CloudFront for /api/public/* AND /api/scoped/* (use invalidation
-           paths confirmed by CloudOps req 4 -- coordinate before hardcoding).
-        7. Return { "restored_execution": execId, "data_as_of": date, "files_restored": N }.
-      Error handling: if any copy_object fails, log the key and continue (partial restore
-      is better than no restore; the caller can retry). Return a summary of failed keys.
+        1. List all objects matching data-refresh/archive/*/outputs-manifest.json (paginated).
+           NOTE: execution IDs use two formats -- UUID (e.g. 7a407b33-...) and exec- prefix
+           (e.g. exec-30147e4870cf). Both are valid; filter to keys ending in outputs-manifest.json.
+        2. For each manifest, read dataAsOfDate and pipelineStartedAt directly from the manifest
+           JSON (confirmed schema fields). Do NOT read metadata.json for these fields.
+        3. Select latest execution where dataAsOfDate <= target_date AND pipelineStartedAt <=
+           17:00 ET on target_date. If none found: return 404 with
+           { "error": "no_restore_point", "earliest_available": <oldest dataAsOfDate found> }.
+        4. For each key/versionId pair in outputs: call
+           s3.copy_object(CopySource={Bucket, Key, VersionId=versionId}, Bucket=BUCKET, Key=key).
+           Collect failures. Log each. Continue on failure (partial restore is better than abort).
+        5. Rebuild benchmarks/LATEST.json: read
+           data-refresh/archive/{executionId}/manifest.json (the original uploaded manifest,
+           NOT metadata.json -- this is where PKL file paths and version strings live).
+           Reconstruct LATEST.json consistent with how yang-generate-latest builds it.
+        6. CloudFront invalidation: use paths confirmed by CloudOps P1 findings doc
+           (deliverables/DRFR_PTMCH.001.cloudops-findings.md). Hardcode the confirmed paths.
+           Do NOT deploy yang-time-machine until CloudOps P1 findings doc is available.
+           Code can be written with a placeholder comment: # CF_PATHS: see CloudOps P1 findings.
+        7. Return { "restored_execution": execId, "data_as_of": date,
+           "files_restored": N, "files_failed": [key, ...] }.
+      Env vars: BUCKET (opal-data-portal-v2), ARCHIVE_PREFIX (data-refresh/archive).
     </requirement>
 
     <requirement id="3">
-      DataRefresh API -- new endpoint GET /data-refresh/archive:
-      Add to infra/aws/lambda/data_refresh/lambda_function.py.
-      Returns a list of available restore points (one per unique data_as_of_date):
-        [ { "data_as_of": "YYYY-MM-DD", "execution_id": "...", "pipeline_completed_at": "...",
-            "files_captured": N } ]
-      Ordered newest-first. This feeds the frontend date picker showing which dates
-      are available for Time Machine travel.
-      Also add POST /data-refresh/time-machine endpoint that invokes yang-time-machine Lambda
-      asynchronously and returns { "status": "initiated", "target_date": date }.
+      DataRefresh API new endpoints in infra/aws/lambda/data_refresh/lambda_function.py:
+
+      GET /data-refresh/archive -- handle_archive_list(event):
+        List data-refresh/archive/*/outputs-manifest.json, read dataAsOfDate + outputCount
+        from each manifest. Return sorted newest-first:
+        [{ "data_as_of": "YYYY-MM-DD", "execution_id": "...",
+           "pipeline_completed_at": "...", "files_captured": N }]
+
+      POST /data-refresh/time-machine -- handle_time_machine(event):
+        Parse target_date from request body. Validate YYYY-MM-DD format.
+        Invoke yang-time-machine async:
+          lambda_client.invoke(FunctionName=TIME_MACHINE_FUNCTION_NAME,
+                               InvocationType='Event',
+                               Payload=json.dumps({"target_date": target_date}))
+        Return { "status": "initiated", "target_date": target_date }.
+
+      API Gateway note (confirmed by you): no Terraform changes needed. The /data-refresh/*
+      catch-all proxy already routes to the data-refresh Lambda. New routes work via Lambda
+      path inspection only.
+
+      Add to data-refresh/main.tf: TIME_MACHINE_FUNCTION_NAME env var pointing to the
+      yang-time-machine Lambda name. Also add lambda:InvokeFunction permission on
+      yang-time-machine ARN to opal-data-refresh-lambda-role in data-refresh/main.tf
+      (this is the only IAM change in data-refresh -- invoke permission only, not S3).
     </requirement>
 
     <requirement id="4">
-      FRED cache -- document as explicit exception:
-      yang-refresh-fred-cache writes to cache/fred/ which is NOT under json/ and NOT
-      captured by yang-capture-output-versions. Document this gap in the findings doc as:
-      "FRED cache (cache/fred/BAMLC0A0CM.csv, BAMLH0A0HYM2.csv) is NOT restored by
-      Time Machine. FRED data updates weekly and represents macro market conditions.
-      Accepted exception: FRED cache always reflects current data during time-travel."
-      Do NOT extend yang-capture-output-versions to capture cache/ in this phase.
+      FRED cache -- document as explicit accepted exception in findings doc:
+      "FRED cache (cache/fred/BAMLC0A0CM.csv, cache/fred/BAMLH0A0HYM2.csv) is NOT captured
+      by yang-capture-output-versions (scans json/ only). FRED updates weekly. Accepted
+      exception for Time Machine Phase 1: FRED cache always reflects current data during
+      time-travel. Extending capture scope to cache/ is deferred to a future phase."
+      No code change.
     </requirement>
 
     <requirement id="5">
-      NEWS re-publish parameterization (Layer 3):
-      Modify infra/aws/lambda/news-pipeline/semantic-trending-topics-portal-publisher/lambda_function.py.
-      Current behavior: queries DynamoDB semantic-news-trending-daily for the latest date.
-      Required: accept optional event field { "target_date": "YYYY-MM-DD" }.
-      If target_date present: query DynamoDB for date = target_date instead of get_latest_trending_date().
-      If target_date absent: existing behavior unchanged (backward compatible).
-      The portal-time-machine orchestrator (Phase 5) will invoke this Lambda with target_date
-      as part of the full time-travel sequence.
+      NEWS publisher parameterization -- Layer 3:
+      CORRECT PATH: infra/aws/lambda/semantic-trending-topics-portal-publisher/lambda_function.py
+      (NOT news-pipeline/ subdirectory -- confirmed by you as the correct path).
+      Change: in lambda_handler, replace get_latest_trending_date() with:
+        target_date = event.get('target_date') if isinstance(event, dict) else None
+        if target_date:
+            latest_date = target_date
+        else:
+            latest_date = get_latest_trending_date()
+      Backward compatible. Existing callers (EventBridge schedule, S3 trigger) pass no event
+      or a non-dict event -- existing behavior unchanged.
+      THIS REQ IS FULLY UNBLOCKED. Deploy immediately as news-v2.7.0. No IAM dependency.
+      Follow standard news-pipeline deploy sequence.
     </requirement>
 
     <requirement id="6">
-      Terraform + source map:
-      - Add yang-time-machine Lambda to infra/aws/terraform/yang-pipeline/main.tf
-        (use the standard yang-lambda module, memory 512MB, timeout 300s -- restore is I/O heavy).
-      - Update infra/aws/lambda/ci/lambda-source-map.json with the new Lambda.
-      - Update news-pipeline source map entry if semantic-trending-topics-portal-publisher
-        changed is in a different pipeline's Terraform.
-      Deploy via standard protocol: build-and-upload.sh -> commit -> plan -> apply -> 0-diff -> tag.
+      Terraform + IAM + source map:
+
+      yang-pipeline/main.tf: add yang-time-machine Lambda using yang-lambda module.
+        memory_size = 512, timeout = 300 (restore is S3 I/O heavy).
+        role = yang-pipeline-lambda-role (existing pipeline role -- confirmed by you as FLAG 4 resolution).
+
+      yang-pipeline/iam.tf: add inline policy TimeMachineRestorePermissions to
+      yang-pipeline-lambda-role. Permissions required:
+        - s3:GetObjectVersion on arn:aws:s3:::opal-data-portal-v2/*
+        - s3:CopyObject on arn:aws:s3:::opal-data-portal-v2/*
+        - s3:PutObject on arn:aws:s3:::opal-data-portal-v2/json/*
+        - s3:ListBucket on arn:aws:s3:::opal-data-portal-v2 (for manifest listing)
+        - cloudfront:CreateInvalidation on the portal CloudFront distribution ARN
+          (arn:aws:cloudfront::313476888478:distribution/EVTSA9VEHNZVH)
+      OpalETL owns yang-pipeline/iam.tf -- add this directly. No CloudOps involvement needed.
+
+      data-refresh/main.tf: add TIME_MACHINE_FUNCTION_NAME env var to data-refresh Lambda.
+      Add lambda:InvokeFunction permission on yang-time-machine to opal-data-refresh-lambda-role.
+      This is the only change to data-refresh IAM.
+
+      lambda-source-map.json: add yang-time-machine entry.
+
+      Deploy sequence (two applies, one gate):
+        UNBLOCKED NOW:
+          1. news-pipeline apply (req 5) → news-v2.7.0
+        GATED ON CloudOps P1 findings doc (CF paths):
+          2. yang-pipeline apply (yang-time-machine Lambda + IAM) → yang-v2.2.0
+          3. data-refresh apply (new endpoints + invoke permission) → data-refresh-v2.1.0
     </requirement>
 
     <requirement id="7">
       FINDINGS DOCUMENT:
       Write org/tier2_senior/0.5.0_AE_OpalETL/deliverables/DRFR_PTMCH.001.opal-pipeline-findings.md
       covering:
-        - Step Functions placement verdict (req 1)
-        - Archive health: confirmed 83-file manifests with non-null versionIds
-        - DynamoDB: opal-portal-market-data confirmed, portal reads at runtime (Market Overview)
-        - FRED cache: documented as explicit exception
-        - Market-overview Lambda output prefixes (from source map + Lambda source)
-        - yang-time-machine implementation notes and deployment tag
+        - Step Functions placement: CONFIRMED, every run, after GenerateManifest
+        - Outputs-manifest schema (as confirmed by you)
+        - Archive health: 83-file manifests, non-null versionIds, healthy
+        - 10-minute capture window: known limitation, documented, not a blocker
+        - DynamoDB opal-portal-market-data: portal reads at runtime (Market Overview), PITR enabled
+        - FRED cache: explicit accepted exception (cache/fred/ out of scope)
+        - Market-overview Lambda output prefixes (enumerate from lambda-source-map.json source reads)
+        - FLAG 3 resolution: pkl_version comes from manifest.json not metadata.json
+        - FLAG 6: no API Gateway TF changes needed
+        - Deployment tags after apply
     </requirement>
   </requirements>
 
   <acceptance_criteria>
     <criterion id="1">
-      yang-time-machine Lambda deployed. Invoke with a real historical target_date from
-      the archive list (e.g., 2026-03-04) and confirm files are restored without errors.
-      Check one restored file in S3 matches the expected execution's output.
+      news-v2.7.0 deployed. semantic-trending-topics-portal-publisher invoked with
+      { "target_date": "2026-03-05" } returns news data for that date. Without target_date:
+      existing behavior unchanged.
     </criterion>
     <criterion id="2">
-      GET /data-refresh/archive returns a non-empty list of available restore points
-      with correct data_as_of dates and file counts.
+      yang-time-machine + data-refresh API deployed (after CloudOps P1 CF paths confirmed).
+      GET /data-refresh/archive returns non-empty list of restore points.
+      POST /data-refresh/time-machine with valid target_date returns { "status": "initiated" }.
+      Invoking yang-time-machine directly with a historical date restores json/ files and
+      invalidates CloudFront.
     </criterion>
     <criterion id="3">
-      POST /data-refresh/time-machine with a valid target_date returns { "status": "initiated" }.
-      CloudFront invalidation fires. Portal json/ files update to the historical version.
+      Terraform 0-diff on both yang-pipeline and data-refresh after apply.
+      Tags pushed: yang-v2.2.0, data-refresh-v2.1.0.
     </criterion>
-    <criterion id="4">
-      semantic-trending-topics-portal-publisher with { "target_date": "2026-03-05" } returns
-      news data for that date. Without target_date: existing behavior unchanged.
-    </criterion>
-    <criterion id="5">
-      Terraform 0-diff after apply. Source map updated. Git tag pushed.
-    </criterion>
+    <criterion id="4">Findings doc complete.</criterion>
   </acceptance_criteria>
 
   <constraints>
-    <constraint>Do NOT modify the existing handle_rollback function behavior -- yang-time-machine
-    is a NEW code path, not a replacement for rollback.</constraint>
-    <constraint>FRED cache (cache/fred/) is explicitly out of scope. Do not extend capture
-    or restore to that prefix.</constraint>
-    <constraint>yang-time-machine must be idempotent: calling it twice with the same
-    target_date produces the same result without errors.</constraint>
-    <constraint>Coordinate with CloudOps on CloudFront invalidation paths (req 6) before
-    hardcoding /api/public/* -- BD data may require /api/scoped/*.</constraint>
-    <constraint>Standard deployment protocol: never use aws lambda update-function-code directly.
-    All deploys via terraform apply.</constraint>
+    <constraint>yang-time-machine is a NEW Lambda -- do NOT modify handle_rollback in
+    data_refresh/lambda_function.py. Two separate code paths.</constraint>
+    <constraint>FRED cache (cache/fred/) is explicitly out of scope. No changes to
+    yang-capture-output-versions in this phase.</constraint>
+    <constraint>Do NOT deploy yang-pipeline or data-refresh Terraform until CloudOps P1
+    findings doc is available (need confirmed CF invalidation paths for yang-time-machine).</constraint>
+    <constraint>News publisher change is backward compatible -- existing invocation patterns
+    must continue to work unchanged.</constraint>
+    <constraint>Standard deployment protocol throughout. No aws lambda update-function-code.</constraint>
   </constraints>
+
+  <go_ahead>
+    PROCEED IMMEDIATELY on:
+      - Req 5 (news publisher) -- fully unblocked, deploy now as news-v2.7.0
+      - Req 2 (yang-time-machine code) -- write now, use CF_PATHS placeholder
+      - Req 3 (DataRefresh API code) -- write now
+      - Req 6 IAM additions (yang-pipeline/iam.tf, data-refresh/main.tf TF blocks) -- write now
+      - Req 7 (findings doc) -- write now (partial; add CF paths section when CloudOps P1 lands)
+    HOLD deploy of yang-pipeline + data-refresh until CloudOps P1 findings doc delivers CF paths.
+  </go_ahead>
 
   <dependencies>
     <dependency agent="0.7.0_AE_CloudOps" task="DRFR_PTMCH.P1.lifecycle-iam-cloudfront.md"
-      status="pending"
-      note="IAM permissions (req 3 of CloudOps task order) must be in place before
-      yang-time-machine Lambda can copy objects across version IDs. CloudFront invalidation
-      paths (req 4 of CloudOps) must be known before req 6 of this task order.
-      CloudOps P1 is on the critical path."/>
+      status="pending" scope="CloudFront invalidation paths only"
+      note="OpalETL needs the CF path table from CloudOps P1 req 3 to finalize
+      yang-time-machine CloudFront invalidation call. IAM is NOT a dependency --
+      OpalETL adds their own IAM to yang-pipeline/iam.tf independently."/>
   </dependencies>
 
   <deliverables>
-    <deliverable type="commit">yang-time-machine Lambda source + Terraform + source map update</deliverable>
-    <deliverable type="commit">DataRefresh API new endpoints (GET /data-refresh/archive, POST /data-refresh/time-machine)</deliverable>
-    <deliverable type="commit">semantic-trending-topics-portal-publisher target_date parameterization</deliverable>
+    <deliverable type="commit">news-v2.7.0: semantic-trending-topics-portal-publisher target_date parameterization</deliverable>
+    <deliverable type="commit">yang-time-machine Lambda source + yang-pipeline Terraform + yang-pipeline IAM additions</deliverable>
+    <deliverable type="commit">DataRefresh API new endpoints + data-refresh/main.tf env var + invoke permission</deliverable>
+    <deliverable type="commit">lambda-source-map.json updated</deliverable>
     <deliverable type="document">org/tier2_senior/0.5.0_AE_OpalETL/deliverables/DRFR_PTMCH.001.opal-pipeline-findings.md</deliverable>
   </deliverables>
 </task_order>
