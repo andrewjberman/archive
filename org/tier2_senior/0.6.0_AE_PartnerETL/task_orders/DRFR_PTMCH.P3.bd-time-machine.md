@@ -5,12 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-03-10</date>
-    <status>in_progress</status>
-    <status_note>PATCH REQUIRED before testing. COO audit (2026-03-10) found two bugs in bd-time-machine:
-    (1) _restore_from_manifest had no error handling -- single CopyObject failure aborted entire restore.
-    (2) MetadataDirective='REPLACE' stripped ContentType from all restored files.
-    Both fixed at commit 233da228. Redeploy as bd-v2.18.1 required before acceptance testing.
-    bd-v2.18.0 is deployed but contains these bugs and should not be tested against until patched.</status_note>
+    <status>complete</status>
+    <status_note>Deployed bd-v2.18.1 (2026-03-10). Patch commits: 233da228 (bug fixes), dbff0093 (source map), 8c794947 (record-deploy). Both bugs resolved: try/except in restore paths, MetadataDirective=COPY (default). Acceptance testing per docs/testing/DRFR_PTMCH_acceptance_test_plan.md can proceed.</status_note>
     <thread_serial>DRFR_PTMCH-001</thread_serial>
     <thread_ref>org/threads/DRFR_PTMCH-001-portal-time-machine-ae-infrastructure-di/</thread_ref>
     <revised>2026-03-10 -- REVISED post agent review. Critical correction: bd-capture-output-versions
