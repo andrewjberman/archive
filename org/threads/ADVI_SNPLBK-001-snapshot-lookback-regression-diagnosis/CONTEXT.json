@@ -1,0 +1,37 @@
+{
+  "code": [
+    {
+      "label": "Script 09: partner analytics generator (produces quarterly lookback data)",
+      "path": "data/black_diamond/scripts/gold/09_generate_partner_analytics.py"
+    },
+    {
+      "label": "DistributionTab: snapshot view (consumes lookback data)",
+      "path": "portal/src/pages/AdvisorIntelligence/tabs/DistributionTab.tsx"
+    },
+    {
+      "label": "AdvisorIntelligence types (PeriodSnapshot, PartnerAnalyticsViewWithPeriods, hasTimeMachine)",
+      "path": "portal/src/pages/AdvisorIntelligence/types.ts"
+    },
+    {
+      "label": "API endpoint (fetches partner_analytics/header_metrics_{suffix}.json)",
+      "path": "portal/src/api/endpoints/advisor-intelligence.ts"
+    },
+    {
+      "label": "bd-portal-publisher Lambda (partner_analytics DISABLED -- EC2 script 09 owns output)",
+      "path": "infra/aws/lambda/bd-pipeline/bd-portal-publisher/lambda_function.py"
+    },
+    {
+      "label": "bd-portal-advisor-publisher Lambda (advisor-level publisher)",
+      "path": "infra/aws/lambda/bd-pipeline/bd-portal-advisor-publisher/lambda_function.py"
+    },
+    {
+      "label": "EC2 user-data.sh (runs scripts 07, 09, 10, 11 on EC2)",
+      "path": "infra/aws/ec2/bd-gold-detail-generator/user-data.sh"
+    },
+    {
+      "label": "bd-gold-layer Lambda (Step 3: generate_snapshots -- different from script 09)",
+      "path": "infra/aws/lambda/bd-pipeline/bd-gold-layer/lambda_function.py"
+    }
+  ],
+  "inline": "DIAGNOSTIC THREAD: The Segment Analytics panel (Distribution tab, Snapshot view) previously displayed data from the current quarter plus 3 prior quarters via a 'time machine' strip. This lookback is no longer rendering. The regression could be: (A) backend -- script 09_generate_partner_analytics.py stopped producing q1/q2/q3 period data in its output JSON, (B) frontend -- DistributionTab.tsx or types.ts changed how it reads period data during 49FNV3 work, or (C) publisher -- the bd-portal-publisher Lambda is overwriting the EC2 output (unlikely since partner_analytics is DISABLED in the publisher). DS is the knowledge source for the backend data pipeline and gold scripts. DE is the knowledge source for API wiring and TypeScript interfaces. RD is the knowledge source for how the DistributionTab renders the time machine. Each agent must inspect their layer and report whether the data contract is intact at their boundary. The deliverable is a definitive root-cause diagnosis: which layer broke, which file, and what the fix is."
+}
