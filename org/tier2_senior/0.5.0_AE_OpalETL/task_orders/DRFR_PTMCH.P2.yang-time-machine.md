@@ -5,13 +5,13 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-03-10</date>
-    <status>in_progress</status>
-    <status_note>Req 5 DEPLOYED news-v2.7.0. Reqs 2/3/6/7 code complete, committed 5ce67698.
-    COO added Req 8 (DynamoDB Market Overview restore) -- scope expanded to true full rollback.
-    Lambda patched (restore_market_data_dynamo added), MARKET_DATA_TABLE env var added to TF.
-    No new IAM needed (dynamodb:Scan + dynamodb:PutItem already on yang-pipeline-lambda-role).
-    CF paths confirmed by CloudOps P1: yang=/api/general/*, BD=/api/scoped/advisor-intelligence/*.
-    Phase B unblocked. Proceed with build + deploy.</status_note>
+    <status>complete</status>
+    <status_note>ALL REQUIREMENTS DEPLOYED. Req 5: news-v2.7.0 (2026-03-10). Req 2/3/6 + Req 8 (DynamoDB):
+    yang-time-machine Lambda deployed at yang-v2.2.0 (2026-03-10, commit 71ef5481).
+    DataRefresh endpoints (archive list + time-machine invoke) deployed at data-refresh-v2.1.0 (2026-03-10).
+    IAM: S3VersionedRestore on yang-pipeline-lambda-role; InvokeTimeMachine on opal-data-refresh-lambda-role.
+    CF paths: /api/general/* + /api/general/json-tiered/* per CloudOps P1 findings.
+    Req 4 (FRED cache exception): documented in findings doc. Req 7: findings doc complete.</status_note>
     <thread_serial>DRFR_PTMCH-001</thread_serial>
     <thread_ref>org/threads/DRFR_PTMCH-001-portal-time-machine-ae-infrastructure-di/</thread_ref>
     <revised>2026-03-10 -- REVISED post agent review. Corrections: news publisher path fixed;
