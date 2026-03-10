@@ -14,7 +14,7 @@
 
   <metadata>
     <agent>0.5.0_AE_OpalETL</agent>
-    <date>2026-03-06</date>
+    <date>2026-03-10</date>
     <pipelines_owned>
       <pipeline>yang-pipeline</pipeline>
       <pipeline>news-pipeline</pipeline>
@@ -28,6 +28,24 @@
     <artifact_bucket>opal-313476888478-lambda-artifacts</artifact_bucket>
     <layer_bucket>opal-313476888478-lambda-layers</layer_bucket>
     <state_bucket>opal-313476888478-terraform-state</state_bucket>
+
+    <!-- ============================================================ -->
+    <!-- BUCKET SEPARATION INVARIANT (audited 2026-03-10 ADVI_APISCP) -->
+    <!-- ============================================================ -->
+    <bucket_separation_invariant audited="2026-03-10" task_order="ADVI_APISCP.001">
+      <rule id="1">Yang, News, and MarketOverview pipelines write ONLY to opal-data-portal-v2.
+        No Opal-owned pipeline writes to any opal-data-{firmId} bucket.
+        This invariant was verified by source code audit of all publisher Lambdas.</rule>
+      <rule id="2">Partner pipelines (BD, PartnerETL) write ONLY to opal-data-{firmId} buckets
+        (e.g., opal-data-bd, opal-data-49financial). These are strictly separate from Opal data.</rule>
+      <rule id="3">Internal pipeline staging buckets (opal-data-news-v2, opal-data-news-av) are
+        read/intermediate only — never exposed to portal consumers or partner paths.</rule>
+      <opal_pipeline_writes>
+        <pipeline name="yang-pipeline">opal-data-portal-v2 (json/, json-tiered/, cache/)</pipeline>
+        <pipeline name="news-pipeline">opal-data-portal-v2 (json/sentiment/, json/trending/) + opal-data-news-v2 / opal-data-news-av (internal intermediate reads only)</pipeline>
+        <pipeline name="market-overview">opal-data-portal-v2 (json/, json-tiered/)</pipeline>
+      </opal_pipeline_writes>
+    </bucket_separation_invariant>
   </metadata>
 
   <!-- =========================================================== -->
