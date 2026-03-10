@@ -1,0 +1,35 @@
+{
+  "code": [
+    {
+      "label": "shared-advisor-router Lambda@Edge v3 (current — URI rewrite only, no origin mutation)",
+      "path": "infra/aws/lambda-edge/shared-advisor-router/index.mjs"
+    },
+    {
+      "label": "auth-validator-edge Lambda@Edge v7 (JWT validation, injects X-Firm-Id header)",
+      "path": "infra/aws/lambda-edge/auth-validator-edge/index.mjs"
+    },
+    {
+      "label": "shared-infra Terraform (S3 artifact buckets, DynamoDB, IAM — NO CloudFront resources)",
+      "path": "infra/aws/terraform/shared-infra/main.tf"
+    },
+    {
+      "label": "S3 module with OAI policy (per-bucket grants, lines 131-159)",
+      "path": "infra/aws/multi-account/terraform/modules/s3/main.tf"
+    },
+    {
+      "label": "Lambda source map (Lambda@Edge functions are NOT listed here)",
+      "path": "infra/aws/lambda/ci/lambda-source-map.json"
+    }
+  ],
+  "documents": [
+    {
+      "label": "ADVI_APISCP PRD — Scoped API Multi-Partner Routing Architecture",
+      "path": "docs/architecture/ADVI_APISCP_PRD.md"
+    },
+    {
+      "label": "ADVI_APISCP project definition",
+      "path": "org/projects/ADVI_APISCP.json"
+    }
+  ],
+  "inline": "Goal: Verify the three critical technical assumptions in the CTO's ADVI_APISCP PRD BEFORE agents implement. The PRD proposes upgrading shared-advisor-router from v3 (URI rewrite only) to v4 (dynamic S3 origin mutation based on X-Firm-Id). The PRD includes pseudocode but three things are unverified: (1) How Lambda@Edge functions are deployed — they are NOT in Terraform or lambda-source-map.json, so the deployment mechanism is unknown; (2) Whether the CloudFront origin-request event shape supports dynamic origin mutation via request.origin.s3 — the PRD's pseudocode assumes this works but it has never been done in this codebase; (3) Whether the OAI (Origin Access Identity) policy grants access to ALL opal-data-* buckets or only the currently-configured origin bucket (opal-data-bd) — the S3 module shows per-bucket grants, which would mean each new partner bucket needs an explicit OAI policy update. 0.7.0_AE_CloudOps is the knowledge SOURCE (owns CloudFront, IAM, OAI, shared-infra). 0.4.0_DT_ClientPlatform is the knowledge RECEIVER (will implement v4 based on verified facts from this thread). The thread receipt becomes the ground truth for the DT task order revision."
+}

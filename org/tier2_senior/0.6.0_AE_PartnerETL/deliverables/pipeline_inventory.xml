@@ -942,6 +942,108 @@
       <description>Advisor carry-forward logic and NNA/CLA segment views were added to the gold layer on 2026-03-02 (commit 8247c6d0), included in bd-v2.14.0 deploy. These features affect scripts 08 and the advisor publisher output structure.</description>
     </issue>
 
+    <issue id="10" severity="security" status="active">
+      <title>Stale IAM s3:PutObject permission on opal-data-portal-v2</title>
+      <description>infra/aws/terraform/bd-pipeline/iam.tf line 375 grants s3:PutObject on
+        arn:aws:s3:::opal-data-portal-v2/* to the bd-pipeline Lambda role. The active pipeline
+        code (bd-portal-publisher, bd-portal-advisor-publisher) writes ZERO objects to
+        opal-data-portal-v2 — all output is opal-data-bd/gold/. This permission is a stale
+        artifact from a prior architecture. It violates least-privilege and should be removed.
+        Removal requires: edit iam.tf to delete the opal-data-portal-v2 statement, terraform
+        apply, 0-diff verify, tag bd-v{next}.</description>
+      <operational_note>Do NOT use this permission. Any Lambda that writes to
+        opal-data-portal-v2/json/advisor-intelligence/ would violate the bucket separation
+        invariant (see data_contracts section). The path was deleted 2026-03-10 and must never
+        be recreated by any partner pipeline.</operational_note>
+    </issue>
+
+    <issue id="11" severity="informational" status="active">
+      <title>Archive scripts contain opal-data-portal-v2 references</title>
+      <description>Scripts in data/black_diamond/scripts/gold/archive/ were the pre-separation
+        architecture. Several contain OUTPUT_BUCKET = 'opal-data-portal-v2': archive/08, 11
+        (leaderboards), 12, 13, allocations/generate_aua_chart.py, transactions/generate_flows_chart.py,
+        hybrid/generate_leaderboards.py. archive/11_generate_clients_tab.py is notable: it has
+        DUAL buckets (S3_BUCKET_BD=opal-data-bd AND S3_BUCKET_PORTAL=opal-data-portal-v2).
+        None of these scripts are in the active pipeline. The bd-gold-detail-generator
+        (user-data.sh) downloads from s3://opal-data-bd/scripts/gold_layer/ which may contain
+        older versions. The version at that S3 path should be verified in the AWS console to
+        confirm it does not contain portal-v2 writes.</description>
+    </issue>
+
   </known_issues>
+
+  <!-- =========================================================
+       DATA CONTRACTS — BUCKET SEPARATION INVARIANT
+       Source of truth for all partner pipeline output routing.
+       Audit date: 2026-03-10 | Auditor: 0.6.0_AE_PartnerETL
+       ========================================================= -->
+  <data_contracts>
+
+    <contract id="gold-output-invariant" status="verified" audit_date="2026-03-10">
+      <title>Gold Output Bucket Separation</title>
+      <invariant>All bd-pipeline gold output writes to s3://opal-data-bd/gold/ exclusively.
+        ZERO writes to opal-data-portal-v2 are permitted from any active pipeline component.
+        Portal data delivery is achieved by Lambda@Edge routing to opal-data-bd — not by
+        writing to opal-data-portal-v2.</invariant>
+
+      <output_pattern>
+        <rule>OUTPUT_BUCKET = 'opal-data-{firmId}' for all partner pipelines</rule>
+        <rule>All portal-consumed JSON files go under the gold/ prefix</rule>
+        <rule>Never write to opal-data-portal-v2/ for any partner data path</rule>
+        <rule>CloudFront/Lambda@Edge constructs the source bucket from firmId at request time</rule>
+      </output_pattern>
+
+      <verified_components>
+        <component name="bd-portal-publisher" bucket="opal-data-bd" prefix="gold/" status="CLEAN">
+          <outputs>
+            <output>gold/timeseries_chart.json</output>
+            <output>gold/architect_leaderboard.json</output>
+            <output>gold/clients_tab.json</output>
+            <output>gold/summary/header_metrics.json</output>
+            <output>gold/partner_analytics/header_metrics.json</output>
+            <output>gold/filters/dimensions.json</output>
+            <output>gold/snapshots/aua_by_architect.json</output>
+            <output>gold/snapshots/aua_by_state.json</output>
+            <output>gold/snapshots/aua_by_tax_status.json</output>
+            <output>gold/snapshots/aua_by_region.json</output>
+          </outputs>
+          <verified_by>grep audit 2026-03-10 -- zero opal-data-portal-v2 refs in source</verified_by>
+          <source_map_commit>b9c483aa 2026-03-10</source_map_commit>
+        </component>
+        <component name="bd-portal-advisor-publisher" bucket="opal-data-bd" prefix="gold/" status="CLEAN">
+          <outputs>
+            <output>gold/implementor_leaderboard.json</output>
+            <output>gold/advisors/{adv_id}/book.json (per-advisor)</output>
+            <output>gold/clients/{rel_id}.json (per-client)</output>
+          </outputs>
+          <verified_by>grep audit 2026-03-10 -- zero opal-data-portal-v2 refs in source</verified_by>
+          <source_map_commit>b9c483aa 2026-03-10</source_map_commit>
+        </component>
+        <component name="EC2 gold scripts 00-10 (bd-gold-layer-runner)" bucket="opal-data-bd" prefix="gold/" status="CLEAN">
+          <note>All active scripts hardcode S3_BUCKET = 'opal-data-bd'. Verified via grep on
+            data/black_diamond/scripts/gold/*.py. opal-data-portal-v2 not found in any active script.</note>
+          <verified_by>grep audit 2026-03-10</verified_by>
+        </component>
+      </verified_components>
+
+      <partner_scaling_model>
+        <description>When onboarding a new partner (e.g., acme-advisors), create
+          s3://opal-data-{firmId}/. Lambda@Edge router reads firmId from request context and
+          constructs the origin bucket name. No code changes to publisher Lambdas or gold scripts
+          are required — only the new bucket + CloudFront bucket policy + DynamoDB FIRM# record.
+          See deliverables/partner-onboarding-checklist.md for the complete runbook.</description>
+        <example_firm>49financial -> s3://opal-data-bd/gold/</example_firm>
+        <next_firm_pattern>acme-advisors -> s3://opal-data-acme-advisors/gold/</next_firm_pattern>
+      </partner_scaling_model>
+
+      <deleted_path status="DELETED" deleted_at="2026-03-10">
+        <path>opal-data-portal-v2/json/advisor-intelligence/</path>
+        <note>This path was used in a prior architecture where bd-pipeline wrote directly to the
+          portal bucket. It was deleted 2026-03-10. It must NEVER be recreated by any pipeline.
+          Any write to this path would violate the bucket separation model and break CloudFront routing.</note>
+      </deleted_path>
+    </contract>
+
+  </data_contracts>
 
 </pipeline_inventory>
