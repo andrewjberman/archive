@@ -15,14 +15,14 @@
   <metadata>
     <agent>0.6.0_AE_PartnerETL</agent>
     <pipeline>bd-pipeline</pipeline>
-    <current_tag>bd-v2.17.2</current_tag>
+    <current_tag>bd-v2.18.0</current_tag>
     <date>2026-03-10</date>
     <terraform_state>s3://opal-313476888478-terraform-state/bd-pipeline/tfstate</terraform_state>
-    <last_deployed_commit>b9c483aa</last_deployed_commit>
-    <last_deployed_at>2026-03-10T16:30:00Z</last_deployed_at>
+    <last_deployed_commit>9fcb0216</last_deployed_commit>
+    <last_deployed_at>2026-03-10T21:26:00Z</last_deployed_at>
   </metadata>
 
-  <pipeline name="bd-pipeline" terraform_module="infra/aws/terraform/bd-pipeline/" current_tag="bd-v2.17.2">
+  <pipeline name="bd-pipeline" terraform_module="infra/aws/terraform/bd-pipeline/" current_tag="bd-v2.18.0">
 
     <!-- =========================================================
          TRIGGER CHAIN
@@ -413,9 +413,10 @@
           OUTPUT_BUCKET=opal-data-bd;
           FIRM_ID=49financial;
           FIRM_NAME=49 Financial;
-          ADVISOR_PUBLISHER_FUNCTION=bd-portal-advisor-publisher
+          ADVISOR_PUBLISHER_FUNCTION=bd-portal-advisor-publisher;
+          CAPTURE_VERSIONS_FUNCTION=bd-capture-output-versions
         </env_vars>
-        <role_in_pipeline>Reads gold parquets from opal-data-bd, builds portal JSON output files (segment analytics, distribution panels, summary metrics, etc.), writes to opal-data-bd portal paths. At startup, async-invokes bd-portal-advisor-publisher (Lambda-to-Lambda fan-out to work around S3 single-rule limit on identical prefix+suffix filters).</role_in_pipeline>
+        <role_in_pipeline>Reads gold parquets from opal-data-bd, builds portal JSON output files. Three-way fan-out: (1) at handler START invokes bd-portal-advisor-publisher async, (2) after all writes complete invokes bd-capture-output-versions async. Lambda-to-Lambda fan-out required for both — S3 does not allow two notification rules with identical prefix+suffix filters.</role_in_pipeline>
         <last_deployed_commit>fc862626c568dccbb86b2a8e1cce2ab1ddf73c2e</last_deployed_commit>
         <last_deployed_at>2026-03-02T20:34:09Z</last_deployed_at>
       </lambda>
@@ -487,6 +488,38 @@
         <role_in_pipeline>Spawns ephemeral EC2 (t3.xlarge, AMI ami-0c1fe732b5494dc14) with bd-exporter-ec2-role. Ephemeral instance fetches historical prices via yfinance and writes silver/historical_prices.parquet (T2 price source for gold layer). BD pipeline asset despite non-bd- prefix. Imported from manual creation 2026-02-13.</role_in_pipeline>
         <last_deployed_commit>fc862626c568dccbb86b2a8e1cce2ab1ddf73c2e</last_deployed_commit>
         <last_deployed_at>2026-03-02T20:34:09Z</last_deployed_at>
+      </lambda>
+
+      <lambda>
+        <name>bd-capture-output-versions</name>
+        <source_path>infra/aws/lambda/bd-pipeline/bd-capture-output-versions</source_path>
+        <artifact_s3_key>bd-pipeline/bd-capture-output-versions.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>120</timeout_s>
+        <runtime>python3.12</runtime>
+        <layers/>
+        <trigger>Lambda-to-Lambda async from bd-portal-publisher (at handler END, after all gold/ writes)</trigger>
+        <role>bd-capture-versions-lambda-role</role>
+        <env_vars>S3_BUCKET=opal-data-bd</env_vars>
+        <role_in_pipeline>Time Machine Layer 2 (DRFR_PTMCH.P3). Lists all gold/ objects, records current VersionId of each via head_object, writes timestamped manifest to snapshots/manifests/{YYYYMMDD-HHMMSS}.json. Provides fast O(1) version lookup for bd-time-machine without scanning full version history per-key. One manifest per rebuild, permanent audit log.</role_in_pipeline>
+        <last_deployed_commit>9fcb0216</last_deployed_commit>
+        <last_deployed_at>2026-03-10T21:26:00Z</last_deployed_at>
+      </lambda>
+
+      <lambda>
+        <name>bd-time-machine</name>
+        <source_path>infra/aws/lambda/bd-pipeline/bd-time-machine</source_path>
+        <artifact_s3_key>bd-pipeline/bd-time-machine.zip</artifact_s3_key>
+        <memory_mb>256</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>python3.12</runtime>
+        <layers/>
+        <trigger>On-demand direct invocation (event: {"target_date": "YYYY-MM-DD"})</trigger>
+        <role>bd-time-machine-lambda-role</role>
+        <env_vars>S3_BUCKET=opal-data-bd; DISTRIBUTION_ID=EVTSA9VEHNZVH</env_vars>
+        <role_in_pipeline>Time Machine Layer 2 restore (DRFR_PTMCH.P3). Finds latest manifest at or before 17:00 ET on target_date, CopyObjects each gold/ key to recorded VersionId, writes pipeline-complete.json sentinel to trigger bd-portal-publisher re-publish, invalidates CloudFront /api/scoped/advisor-intelligence/*. Fallback: list_object_versions per key for pre-manifest history (earliest: 2026-02-25).</role_in_pipeline>
+        <last_deployed_commit>9fcb0216</last_deployed_commit>
+        <last_deployed_at>2026-03-10T21:26:00Z</last_deployed_at>
       </lambda>
 
     </lambdas>
