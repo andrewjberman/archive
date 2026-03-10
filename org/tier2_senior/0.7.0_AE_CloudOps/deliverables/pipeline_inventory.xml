@@ -16,7 +16,7 @@
   <metadata>
     <agent>0.7.0_AE_CloudOps</agent>
     <scope>shared-infrastructure</scope>
-    <date>2026-03-04</date>
+    <date>2026-03-10</date>
     <account_id>313476888478</account_id>
     <region>us-east-1</region>
   </metadata>
@@ -110,8 +110,29 @@
         <consumer>opal-cloudfront-market-generator (triggered by market-metrics.json)</consumer>
         <consumer>CloudFront origin (serves data to portal frontend)</consumer>
       </consumers>
-      <note>This bucket is NOT created by shared-infra Terraform. All S3 notification bindings are owned by portal-notifications module. Individual pipelines own their write IAM permissions.</note>
-      <terraform_resource>portal-notifications module owns aws_s3_bucket_notification.portal_triggers</terraform_resource>
+      <lifecycle_config>aws_s3_bucket_lifecycle_configuration.portal_v2_versions (shared-infra/main.tf) — 90-day noncurrent version expiry + 7-day MPU abort. Deployed 2026-03-10 (shared-infra-v1.4.0, DRFR_PTMCH Phase 1).</lifecycle_config>
+      <note>This bucket is NOT created by shared-infra Terraform. All S3 notification bindings are owned by portal-notifications module. Individual pipelines own their write IAM permissions. Lifecycle config added in shared-infra-v1.4.0.</note>
+      <terraform_resource>portal-notifications module owns aws_s3_bucket_notification.portal_triggers; shared-infra owns lifecycle config</terraform_resource>
+    </bucket>
+
+    <bucket>
+      <name>opal-data-bd</name>
+      <purpose>BD pipeline gold layer output store. BD gold scripts and bd-portal-publisher write processed advisor intelligence data here. CloudFront serves content via S3-opal-data-bd origin on /api/scoped/advisor-intelligence/*.json path.</purpose>
+      <key_patterns>
+        <pattern>gold/{filename}.json (BD portal publisher outputs)</pattern>
+        <pattern>gold/clients/{z_id}.json (advisor-level detail)</pattern>
+        <pattern>gold/client_detail/* (client detail files)</pattern>
+        <pattern>gold/partner_analytics/*.json (EC2 gold script outputs)</pattern>
+      </key_patterns>
+      <consumers>
+        <consumer>bd-portal-publisher Lambda (writes gold/)</consumer>
+        <consumer>bd-portal-advisor-publisher Lambda (writes gold/clients/)</consumer>
+        <consumer>bd-gold-layer-runner EC2 (writes gold/ via S3 sync)</consumer>
+        <consumer>CloudFront (S3-opal-data-bd origin — serves /api/scoped/advisor-intelligence/*.json)</consumer>
+      </consumers>
+      <lifecycle_config>aws_s3_bucket_lifecycle_configuration.bd_versions (shared-infra/main.tf) — 90-day noncurrent version expiry + 7-day MPU abort. Deployed 2026-03-10 (shared-infra-v1.4.0, DRFR_PTMCH Phase 1).</lifecycle_config>
+      <note>This bucket is NOT created by shared-infra Terraform. Versioning was pre-enabled (confirmed 2026-03-10 CLI). Lifecycle config added in shared-infra-v1.4.0.</note>
+      <terraform_resource>shared-infra owns lifecycle config only</terraform_resource>
     </bucket>
 
   </s3_buckets>
@@ -227,29 +248,90 @@
        ========================================================= -->
   <cloudfront>
     <distribution>
-      <id>NOT DISCOVERABLE — not in Terraform source (console-managed historically)</id>
-      <description>Serves the Opal Portal: static React SPA from S3 and API routes proxied to API Gateway (opal-portal-data-proxy Lambda). Handles both same-origin routing in production and dev proxy via Vite.</description>
+      <id>EVTSA9VEHNZVH</id>
+      <description>Serves the Opal Portal: static React SPA (default behavior) and API/data routes via S3 origins and API Gateway. Full behavior list audited via CLI 2026-03-10.</description>
     </distribution>
 
     <behaviors>
+      <!-- Audited via: aws cloudfront get-distribution-config --id EVTSA9VEHNZVH 2026-03-10 -->
       <behavior>
         <path_pattern>Default (*)</path_pattern>
-        <origin>S3 static site hosting (portal React SPA)</origin>
-        <viewer_request_fn>opal-portal-authorizer (inferred — auth gate Lambda)</viewer_request_fn>
-        <origin_request_fn>unknown — not in TF source</origin_request_fn>
-        <notes>Static assets served from S3. CloudFront caches at edge. Portal clears no local cache — CloudFront handles it (confirmed in portal-proxy.ts clearCache comment).</notes>
+        <origin>S3 static site (React SPA)</origin>
+        <viewer_request_fn>auth-validator-edge:7</viewer_request_fn>
+        <notes>Static portal assets. Not directly relevant to Time Machine.</notes>
       </behavior>
       <behavior>
-        <path_pattern>/v1/* (API routes)</path_pattern>
-        <origin>API Gateway → opal-portal-data-proxy Lambda (execute-api.us-east-1.amazonaws.com)</origin>
-        <viewer_request_fn>opal-portal-authorizer (inferred — verifies Bearer JWT)</viewer_request_fn>
-        <origin_request_fn>unknown — not in TF source</origin_request_fn>
-        <notes>
-          Endpoints proxied: /v1/market/*, /v1/aum/*, /v1/benchmarks/*, /v1/news/*,
-          /v1/trending/*, /v1/positioning/*, /v1/valuation/*, /v1/macro/*, /v1/sentiment/*
-          Auth header: Authorization: Bearer {accessToken} (Cognito JWT from localStorage)
-          Optional API key: X-Api-Key header (VITE_PORTAL_API_KEY env var)
-        </notes>
+        <path_pattern>/api/general/json-tiered/*</path_pattern>
+        <origin>S3-opal-data-portal-v2-json</origin>
+        <viewer_request_fn>auth-validator-edge:7</viewer_request_fn>
+        <origin_request_fn>public-data-router:4</origin_request_fn>
+        <origin_response_fn>cache-control-injector:1</origin_response_fn>
+        <notes>YANG DATA PATH. Yang pipeline JSON outputs served here. Time Machine yang restore requires invalidation on this path.</notes>
+      </behavior>
+      <behavior>
+        <path_pattern>/api/general/*</path_pattern>
+        <origin>S3-opal-data-portal-v2-json</origin>
+        <viewer_request_fn>auth-validator-edge:7</viewer_request_fn>
+        <origin_request_fn>public-data-router:4</origin_request_fn>
+        <origin_response_fn>cache-control-injector:1</origin_response_fn>
+        <notes>YANG DATA PATH (catch-all). Broader catch-all for general yang data. Invalidation needed alongside /api/general/json-tiered/*.</notes>
+      </behavior>
+      <behavior>
+        <path_pattern>/json-tiered/*</path_pattern>
+        <origin>S3-opal-data-portal-v2-json</origin>
+        <notes>Legacy direct path — no Lambda@Edge. Likely internal/legacy use.</notes>
+      </behavior>
+      <behavior>
+        <path_pattern>/api/scoped/advisor-intelligence/*.json</path_pattern>
+        <origin>S3-opal-data-bd</origin>
+        <viewer_request_fn>auth-validator-edge:7</viewer_request_fn>
+        <origin_request_fn>shared-advisor-router:3</origin_request_fn>
+        <notes>BD DATA PATH. BD gold JSON files served directly from opal-data-bd. Time Machine BD restore requires invalidation on this path. SEPARATE from yang invalidation.</notes>
+      </behavior>
+      <behavior>
+        <path_pattern>/api/scoped/advisor-intelligence/clients/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <notes>BD client detail via API Gateway (not S3 direct). Invalidation for this path clears API Gateway cache, not S3 object cache.</notes>
+      </behavior>
+      <behavior>
+        <path_pattern>/api/scoped/data-refresh/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <viewer_request_fn>auth-validator-edge:7</viewer_request_fn>
+        <notes>DataRefresh API endpoint. Not a data-serving path — no Time Machine invalidation needed.</notes>
+      </behavior>
+      <behavior>
+        <path_pattern>/api/scoped/security-scanner/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <notes>Security Scanner API. No Time Machine invalidation needed.</notes>
+      </behavior>
+      <behavior>
+        <path_pattern>/api/general/trades/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <viewer_request_fn>auth-validator-edge:7</viewer_request_fn>
+        <notes>Trades API. No Time Machine invalidation needed.</notes>
+      </behavior>
+      <behavior>
+        <path_pattern>/api/private/portfolio*</path_pattern>
+        <origin>APIGateway-portfolio</origin>
+        <viewer_request_fn>auth-validator-edge:7</viewer_request_fn>
+        <notes>Portfolio API. No Time Machine invalidation needed.</notes>
+      </behavior>
+      <behavior>
+        <path_pattern>/api/private/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <viewer_request_fn>auth-validator-edge:7</viewer_request_fn>
+        <notes>Private API catch-all. No Time Machine invalidation needed.</notes>
+      </behavior>
+      <behavior>
+        <path_pattern>/v1/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <viewer_request_fn>auth-validator-edge:7</viewer_request_fn>
+        <notes>Legacy /v1 API path. No Time Machine invalidation needed.</notes>
+      </behavior>
+      <behavior>
+        <path_pattern>/auth/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <notes>Auth endpoints. No Time Machine invalidation needed.</notes>
       </behavior>
     </behaviors>
 
@@ -441,7 +523,7 @@
       <path>infra/aws/terraform/shared-infra/</path>
       <state_key>shared-infra/tfstate</state_key>
       <state_bucket>opal-313476888478-terraform-state</state_bucket>
-      <current_tag>shared-infra-v1.3.0</current_tag>
+      <current_tag>shared-infra-v1.4.0</current_tag>
       <changelog>MISSING — CHANGELOG.json does not exist in this module directory</changelog>
       <owns>
         <resource>aws_s3_bucket.lambda_layers (opal-313476888478-lambda-layers)</resource>
@@ -449,6 +531,8 @@
         <resource>aws_iam_role_policy.portal_lambda_ec2_snapshot (EC2SnapshotPermissions)</resource>
         <resource>aws_dynamodb_table.opal_partner_49financial (opal-partner-49financial)</resource>
         <resource>aws_iam_role_policy.partner_identity_read (PartnerIdentityReadPermissions)</resource>
+        <resource>aws_s3_bucket_lifecycle_configuration.portal_v2_versions (opal-data-portal-v2 — 90d noncurrent expiry)</resource>
+        <resource>aws_s3_bucket_lifecycle_configuration.bd_versions (opal-data-bd — 90d noncurrent expiry)</resource>
       </owns>
       <does_not_own>
         Terraform state bucket itself (bootstrapped outside TF), Lambda layer version resources (owned per-pipeline),
