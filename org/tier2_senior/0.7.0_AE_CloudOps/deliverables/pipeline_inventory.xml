@@ -16,7 +16,7 @@
   <metadata>
     <agent>0.7.0_AE_CloudOps</agent>
     <scope>shared-infrastructure</scope>
-    <date>2026-03-10</date>
+    <date>2026-03-11</date>
     <account_id>313476888478</account_id>
     <region>us-east-1</region>
   </metadata>
@@ -283,10 +283,13 @@
       </behavior>
       <behavior>
         <path_pattern>/api/scoped/advisor-intelligence/*.json</path_pattern>
-        <origin>S3-opal-data-bd</origin>
+        <origin>S3-opal-data-bd (OAI E139998VWH0PD)</origin>
         <viewer_request_fn>auth-validator-edge:7</viewer_request_fn>
-        <origin_request_fn>shared-advisor-router:3</origin_request_fn>
-        <notes>BD DATA PATH. BD gold JSON files served directly from opal-data-bd. Time Machine BD restore requires invalidation on this path. SEPARATE from yang invalidation.</notes>
+        <origin_request_fn>shared-advisor-router:5</origin_request_fn>
+        <origin_request_policy>b689b0a8-53d0-40ab-baf2-68738e2966ac (CORS-S3Origin)</origin_request_policy>
+        <response_headers_policy>3570c5b4-e62c-49c1-91dd-ff0319a3a227 (opal-scoped-advisor-cors)</response_headers_policy>
+        <cache_policy>45eb7514-712c-42c5-9fd6-40909b9f0347 (opal-scoped-advisor-by-firm) — X-Firm-Id header + firm query string in cache key. TF-managed: portal-auth/cloudfront.tf (portal-auth-v1.3.1)</cache_policy>
+        <notes>BD DATA PATH. BD gold JSON files served directly from opal-data-bd. Time Machine BD restore requires invalidation on this path. SEPARATE from yang invalidation. OAI migrated from OAC on 2026-03-10 (ADVI_APISCP.003). CORS added 2026-03-10 (ADVI_APISCP.004/005). firm query string added to cache key 2026-03-10/11 (ADVI_APISCP.007).</notes>
       </behavior>
       <behavior>
         <path_pattern>/api/scoped/advisor-intelligence/clients/*</path_pattern>
@@ -538,6 +541,23 @@
         Terraform state bucket itself (bootstrapped outside TF), Lambda layer version resources (owned per-pipeline),
         opal-data-portal-v2 bucket (no TF source found)
       </does_not_own>
+    </module>
+
+    <module>
+      <path>infra/aws/terraform/portal-auth/</path>
+      <state_key>portal-auth/tfstate</state_key>
+      <state_bucket>opal-313476888478-terraform-state</state_bucket>
+      <current_tag>portal-auth-v1.3.1</current_tag>
+      <changelog>infra/aws/terraform/portal-auth/CHANGELOG.json</changelog>
+      <owns>
+        <resource>aws_lambda_function.portal_authorizer (opal-portal-authorizer)</resource>
+        <resource>aws_lambda_function.auth_handler (opalinvest-auth-handler)</resource>
+        <resource>aws_iam_role.auth_handler (opalinvest-auth-lambda-role)</resource>
+        <resource>aws_iam_role_policy.auth_permissions</resource>
+        <resource>aws_iam_role_policy.auth_ses</resource>
+        <resource>aws_cloudfront_cache_policy.opal_scoped_advisor_by_firm (45eb7514-712c-42c5-9fd6-40909b9f0347) — X-Firm-Id header + firm query string cache key</resource>
+      </owns>
+      <note>Cache policy imported 2026-03-11 (ADVI_APISCP.007). firm query string was already present (added by DT in v6 deploy). Import brings it under TF state for change management going forward.</note>
     </module>
 
     <module>
