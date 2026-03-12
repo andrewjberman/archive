@@ -4,7 +4,7 @@
     <issued_by>0.4.0_DE_ClientPlatform</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-03-11</date>
-    <status>pending</status>
+    <status>complete -- 05c deployed, 33-date backfill written to gold/validation/, root cause documented. Missing accounts = stale accounts_dimension (monthly full-run only). Price divergence = canonical market-close vs BD settlement prices. Closed 2026-03-12.</status>
     <project>ADVI_49FNV3</project>
   </metadata>
 
