@@ -53,7 +53,7 @@
   <!-- =========================================================== -->
   <pipeline name="yang-pipeline"
             terraform_module="infra/aws/terraform/yang-pipeline/"
-            current_tag="yang-v2.2.0"
+            current_tag="yang-v2.3.0"
             s3_backend_key="yang-pipeline/tfstate"
             trigger_model="S3 upload to opal-data-portal-v2/uploads/ → yang-pipeline-trigger Lambda → YangDataPipeline Step Functions">
 
@@ -404,6 +404,21 @@
         </layers>
         <trigger>StepFunctions (YangDataPipeline)</trigger>
         <last_deployed_commit>672c7bc28721ab3414c563959216068c86b43f25</last_deployed_commit>
+      </lambda>
+
+      <!-- CANON INTERLOCK -->
+      <lambda>
+        <name>yang-canon-interlock</name>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/canon/yang-canon-interlock</source_path>
+        <artifact_s3_key>yang-pipeline/yang-canon-interlock.zip</artifact_s3_key>
+        <memory_mb>1024</memory_mb>
+        <timeout_s>120</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers>
+          <layer>pandas-pyarrow-layer:1 (arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1)</layer>
+        </layers>
+        <trigger>StepFunctions (YangDataPipeline — Branch E, parallel observer)</trigger>
+        <last_deployed_commit></last_deployed_commit>
       </lambda>
     </lambdas>
 
@@ -1135,7 +1150,7 @@
       <s3_bucket>opal-313476888478-lambda-layers</s3_bucket>
       <s3_key>pandas-pyarrow-layer.zip (presumed)</s3_key>
       <python_version>python3.11</python_version>
-      <used_by>yang-ingest-dynamodb, yang-generate-positioning, yang-generate-allocation-summary, yang-generate-holdings-attribution, yang-generate-benchmark-returns, yang-generate-etf-returns, yang-generate-peer-performance, yang-generate-valuation, yang-generate-risk-premium, yang-generate-factor-tilts, yang-generate-macro, yang-generate-macro-timeseries, yang-generate-correlation, yang-generate-cma</used_by>
+      <used_by>yang-ingest-dynamodb, yang-generate-positioning, yang-generate-allocation-summary, yang-generate-holdings-attribution, yang-generate-benchmark-returns, yang-generate-etf-returns, yang-generate-peer-performance, yang-generate-valuation, yang-generate-risk-premium, yang-generate-factor-tilts, yang-generate-macro, yang-generate-macro-timeseries, yang-generate-correlation, yang-generate-cma, yang-canon-interlock</used_by>
     </layer>
     <layer>
       <name>openpyxl-layer</name>
