@@ -4,7 +4,7 @@
     <issued_by>0.4.0_DE_ClientPlatform</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-03-11</date>
-    <status>pending</status>
+    <status>complete -- resolved by ADVI_PSCFIX A2+A3 (bd-v2.18.3). All portal AUA displays now use certified_aua from silver allocations via 05d. timeseries_chart.json and header_metrics both converge on same total. Closed 2026-03-12.</status>
     <project>ADVI_49FNV3</project>
   </metadata>
 
