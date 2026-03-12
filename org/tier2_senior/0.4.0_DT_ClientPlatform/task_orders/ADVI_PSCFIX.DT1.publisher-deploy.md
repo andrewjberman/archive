@@ -7,10 +7,13 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-03-11</date>
-    <status>pending</status>
+    <status>complete</status>
     <!-- UPDATED 2026-03-11 by 0.4.0_DS_ClientPlatform: added commit c3c8d072
          (GRO nna_start fix) and portal DEV commit 67090a4 (GRO aggregation fix).
          Both must go out with ea832f51. Deadline: 4PM DT. -->
+    <!-- CLOSED 2026-03-12 by 2.0.0_SA_COO: deploy confirmed. bd-v2.18.3 (initial),
+         bd-v2.18.4 (GRO nna fix rebuild). Portal submodule updated to 67090a4 (abd5fcc4).
+         DE integration validation passed (b5750c11). -->
   </metadata>
 
   <objective>
@@ -131,7 +134,7 @@
                 note="DS commits ea832f51 + c3c8d072 on CLOUD HEAD. Ready to build and deploy."/>
     <dependency agent="0.4.0_DE_ClientPlatform"
                 task="ADVI_PSCFIX.B1.portal-schema-update.md"
-                status="pending -- check DE logs"
+                status="complete"
                 note="DE portal DEV commit 67090a4 also needs to go to PROD with this deploy."/>
   </dependencies>
 
