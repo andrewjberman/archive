@@ -5,7 +5,7 @@
     <issued_by>0.3.0_DE_TradingOperations</issued_by>
     <issued_to>0.3.3_RD_DataRefresh</issued_to>
     <date>2026-03-12</date>
-    <status>pending</status>
+    <status>complete</status>
     <thread_serial>DRFR_PTMCH-001</thread_serial>
     <parent_task>DRFR_PTMCH.P5.time-machine-portal-integration</parent_task>
   </metadata>
