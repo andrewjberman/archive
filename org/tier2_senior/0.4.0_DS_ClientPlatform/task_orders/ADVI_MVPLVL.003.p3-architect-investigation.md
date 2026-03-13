@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-03-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <thread_serial>ADVI_MVPLVL-003</thread_serial>
     <thread_ref>org/threads/ADVI_MVPLVL-003-p3-advisors-tab-alignment/</thread_ref>
   </metadata>
