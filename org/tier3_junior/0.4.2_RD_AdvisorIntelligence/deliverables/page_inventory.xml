@@ -4,7 +4,7 @@
     <agent>0.4.2_RD_AdvisorIntelligence</agent>
     <page>AdvisorIntelligence</page>
     <directory>portal/src/pages/AdvisorIntelligence/</directory>
-    <date>2026-03-02</date>
+    <date>2026-03-16</date>
     <audit_scope>Complete codebase audit of AdvisorIntelligence page and subcomponents</audit_scope>
   </metadata>
 
@@ -16,7 +16,7 @@
       Barrel export for AdvisorIntelligence component.
     </file>
     <file path="portal/src/pages/AdvisorIntelligence/types.ts" type="types">
-      Comprehensive type definitions (v2). Partner/Firm types, NNA metrics, time series, snapshot, filters, client growth, tax breakdown, header metrics, partner analytics with nested drill-down and time machine, cumulative charts, leaderboard, advisor book, rolling flows. Includes type guards (hasTimeMachine, hasCities, hasClients, hasFlows) and helper functions.
+      Comprehensive type definitions (v3). Partner/Firm types, NNA metrics, time series, snapshot, filters, client growth, tax breakdown, header metrics, partner analytics with nested drill-down and time machine, cumulative charts, leaderboard, advisor book, rolling flows. Books types: BooksClientDetailResponse, BooksTimeseriesResponse, BooksCompositionResponse, MixItem, ConcentrationItem. Addendum A types: MixAssetClass, MixTimeseriesPoint, ConcentrationPoint, ConcentrationResponse, MixWindow. Includes type guards and helper functions.
     </file>
 
     <!-- Tabs -->
@@ -27,7 +27,7 @@
       Advisors tab. Architects/Implementors toggle controls entire tab. Rolling Flows line chart (NNA/Inflows/Outflows x 30d/90d/1Y windows) + Leaderboard table (3M/6M/1Y/2Y/3Y trailing windows). Top 3 highlights panel. Click leaderboard row to toggle chart line.
     </file>
     <file path="portal/src/pages/AdvisorIntelligence/tabs/ClientsTab.tsx" type="tab-component">
-      Books tab (exported as BooksTab). Individual advisor book drilldown. Firm admin sees advisor selector, summary table, AI executive summary, headline numbers, tax intelligence, income/fees, portfolio composition, engagement metrics. Client detail sub-view. Uses useAuth for role-based display.
+      Books tab (exported as BooksTab). L2/L3/L4 drill hierarchy. L3 (relationship): Client Summary, Accounts Table, Mix+Concentration snapshot pie charts (linked selection), Mix Timeseries area chart, Concentration Timeseries area chart, compact AUA/NNA composed chart, Tax Intelligence, Open Lots, Engagement. L4 (account): inline drill with metrics, account-scoped composition pies, compact timeseries, open lots. N1: AdvisorSummaryTable with 3d leaderboard-style card rows (rank badges, gradient growth pills, NNA green/red). Uses useAuth for role-based display.
     </file>
     <file path="portal/src/pages/AdvisorIntelligence/tabs/AssetIntelligenceTab.tsx" type="tab-component">
       Asset Intelligence tab. Cumulative NNA trend chart (4 view modes: AUA/NNA/GEO/ADV) + snapshot table with AUA breakdown by dimension. Dimension selector (Advisors, Geographic, Account Attributes groups). Not currently wired into main page tabs.
@@ -72,8 +72,14 @@
     <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/TimeSeriesPanel.tsx" type="subcomponent">
       Time series chart panel for client AUA/NNA history.
     </file>
+    <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/MixTimeseriesPanel.tsx" type="subcomponent">
+      100% stacked area chart (Recharts) showing asset class allocation over time. 5 series: equity, fixed_income, structured_notes, cash, other. Independent 1Y/3Y/Max window toggle. Click area to toggle selectedAssetClass filter. Fetches from getMixTimeseries(); renders mock data as skeleton until Lambda deployed.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/ConcentrationPanel.tsx" type="subcomponent">
+      Top-N holdings stacked area chart over time. Filtered by selectedAssetClass when set. Displays asset_name with ticker in parentheses (null-safe). Header shows "Top {top_n} Holdings" from response. Fetches from getConcentrationTimeseries(); renders mock data as skeleton.
+    </file>
     <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/index.ts" type="barrel">
-      Barrel export for client detail panels.
+      Barrel export for client detail panels (AISummaryPanel, PortfolioBalancePanel, TimeSeriesPanel, MixTimeseriesPanel, ConcentrationPanel).
     </file>
   </files>
 
@@ -161,6 +167,66 @@
       <enabled_state>Loaded when an advisor is selected in Books tab</enabled_state>
     </api_call>
     <api_call>
+      <name>Books Relationship Composition</name>
+      <function>getBooksRelationshipComposition(relationshipId)</function>
+      <endpoint>/api/scoped/partners/books/relationship/{relationshipId}/composition</endpoint>
+      <method>GET</method>
+      <request_shape>relationshipId: string</request_shape>
+      <response_shape>BooksCompositionResponse { generated_at, data_as_of, scope, mix: MixItem[], concentration: { top_n, items: ConcentrationItem[], other }, unclassified }</response_shape>
+      <file>ClientsTab.tsx (L3ClientDetail)</file>
+      <enabled_state>Loaded when a client is selected in Books tab L3 view</enabled_state>
+    </api_call>
+    <api_call>
+      <name>Books Account Composition</name>
+      <function>getBooksAccountComposition(accountId)</function>
+      <endpoint>/api/scoped/partners/books/account/{accountId}/composition</endpoint>
+      <method>GET</method>
+      <request_shape>accountId: string</request_shape>
+      <response_shape>BooksCompositionResponse (same shape as relationship)</response_shape>
+      <file>ClientsTab.tsx (L4 account drill)</file>
+      <enabled_state>Loaded when an account is selected in Books tab L4 view</enabled_state>
+    </api_call>
+    <api_call>
+      <name>Books Relationship Timeseries</name>
+      <function>getBooksRelationshipTimeseries(relationshipId)</function>
+      <endpoint>/api/scoped/partners/books/relationship/{relationshipId}/timeseries</endpoint>
+      <method>GET</method>
+      <request_shape>relationshipId: string</request_shape>
+      <response_shape>BooksTimeseriesResponse { generated_at, data_as_of, relationship_id?, data: BooksTimeseriesPoint[] }</response_shape>
+      <file>ClientsTab.tsx (L3ClientDetail)</file>
+      <enabled_state>Loaded when a client is selected in Books tab L3 view</enabled_state>
+    </api_call>
+    <api_call>
+      <name>Books Account Timeseries</name>
+      <function>getBooksAccountTimeseries(accountId)</function>
+      <endpoint>/api/scoped/partners/books/account/{accountId}/timeseries</endpoint>
+      <method>GET</method>
+      <request_shape>accountId: string</request_shape>
+      <response_shape>BooksTimeseriesResponse (same shape as relationship)</response_shape>
+      <file>ClientsTab.tsx (L4 account drill)</file>
+      <enabled_state>Loaded when an account is selected in Books tab L4 view</enabled_state>
+    </api_call>
+    <api_call>
+      <name>Mix Timeseries</name>
+      <function>getMixTimeseries(relationshipId, firmId, window?)</function>
+      <endpoint>/api/scoped/partners/books/relationship/{relationshipId}/mix-timeseries?firmId=X&amp;window=1Y</endpoint>
+      <method>GET</method>
+      <request_shape>relationshipId: string, firmId: string, window?: '1Y'|'3Y'|'Max'</request_shape>
+      <response_shape>MixTimeseriesPoint[] — array of { date, equity, fixed_income, structured_notes, cash, other } (0-1 pcts)</response_shape>
+      <file>ClientDetail/panels/MixTimeseriesPanel.tsx</file>
+      <enabled_state>Loaded when MixTimeseriesPanel mounts (L3 view). Re-fetches on window change.</enabled_state>
+    </api_call>
+    <api_call>
+      <name>Concentration Timeseries</name>
+      <function>getConcentrationTimeseries(relationshipId, firmId, window?)</function>
+      <endpoint>/api/scoped/partners/books/relationship/{relationshipId}/concentration-timeseries?firmId=X&amp;window=1Y</endpoint>
+      <method>GET</method>
+      <request_shape>relationshipId: string, firmId: string, window?: '1Y'|'3Y'|'Max'</request_shape>
+      <response_shape>ConcentrationResponse { relationship_id, top_n, data: ConcentrationPoint[] }</response_shape>
+      <file>ClientDetail/panels/ConcentrationPanel.tsx</file>
+      <enabled_state>Loaded when ConcentrationPanel mounts (L3 view). Re-fetches on window change.</enabled_state>
+    </api_call>
+    <api_call>
       <name>Header Metrics</name>
       <function>getHeaderMetrics()</function>
       <endpoint>S3 static file via portal-proxy</endpoint>
@@ -245,7 +311,7 @@
     </import>
     <import>
       <from>@/api/endpoints/advisor-intelligence</from>
-      <exports>getPartnerAnalytics, getCumulativeChart, getArchitectLeaderboard, getImplementorLeaderboard, getAdvisorRollingFlows, getClientsTab, getClientDetail, getAdvisorBook, getSnapshot, getHeaderMetrics</exports>
+      <exports>getPartnerAnalytics, getCumulativeChart, getArchitectLeaderboard, getImplementorLeaderboard, getAdvisorRollingFlows, getClientsTab, getClientDetail, getAdvisorBook, getSnapshot, getHeaderMetrics, getBooksRelationshipComposition, getBooksAccountComposition, getBooksRelationshipTimeseries, getBooksAccountTimeseries, getMixTimeseries, getConcentrationTimeseries</exports>
       <used_in>All tabs and components</used_in>
     </import>
     <import>
@@ -273,7 +339,7 @@
       Architects/Implementors toggle controls entire tab. Top 3 highlights panel. Rolling Flows line chart (metric: NNA/Inflows/Outflows, window: 30d/90d/1Y) with per-advisor lines. Leaderboard table (3M/6M/1Y/2Y/3Y trailing windows) with search, sortable columns (name, AUA, NNA, growth%, new clients), click-to-toggle chart lines.
     </tab>
     <tab name="Books" status="functional">
-      Individual advisor book drilldown. Book/Client view toggle. Advisor selector dropdown (from leaderboard data). AI Executive Summary panel (Sparkles icon). Headline numbers (AUA, accounts, clients, fee rate, income yield). Tax Intelligence panel (taxable/deferred/free breakdown with pie chart). Income and Fees panel. Portfolio Composition panel (allocation pie chart, expense ratio, holdings concentration). Engagement Metrics panel (flows, trading activity, tenure). Client list with search and click-to-detail. Uses useAuth for role-based UI.
+      L2/L3/L4 drill hierarchy (firm admin gated). N1: AdvisorSummaryTable with 3d leaderboard-style card rows, rank badges, gradient growth pills. L2: Advisor Book Summary, Tax Exposure, Engagement, Clients table. L3: Client Summary, Accounts Table, Mix+Concentration snapshot pies (linked click filtering), Mix Timeseries (100% stacked area), Concentration Timeseries (top-N holdings), compact AUA/NNA composed chart, Tax Intelligence, Taxable Open Lots, Engagement. L4: Inline account drill with metrics, account-scoped composition pies, compact timeseries, account-scoped open lots.
     </tab>
   </page_structure>
 
@@ -304,9 +370,9 @@
   </known_limitations>
 
   <audit_summary>
-    <total_tsx_files>16</total_tsx_files>
+    <total_tsx_files>18</total_tsx_files>
     <total_ts_files>3</total_ts_files>
-    <total_api_calls>10</total_api_calls>
+    <total_api_calls>16</total_api_calls>
     <total_shared_imports>17</total_shared_imports>
     <total_tabs>3 (Distribution, Advisors, Books) + 1 unused (AssetIntelligence)</total_tabs>
     <completeness>100% — all files in directory accounted for, all API calls traced, all tabs documented</completeness>

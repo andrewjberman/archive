@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-03-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <thread_serial>ADVI_MVPLVL-004</thread_serial>
     <thread_ref>org/threads/ADVI_MVPLVL-004-p4-books-tab-alignment/</thread_ref>
   </metadata>
@@ -101,11 +101,11 @@
   </constraints>
 
   <dependencies>
-    <dependency agent="0.4.0_DE_ClientPlatform" task="ADVI_MVPLVL.004.p4-books-proxy-wiring" status="pending">
-      RD needs proxy routes and types before wiring data fetches
+    <dependency agent="0.4.0_DE_ClientPlatform" task="ADVI_MVPLVL.004.p4-books-proxy-wiring" status="complete">
+      Proxy routes and types committed to portal DEV
     </dependency>
-    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_MVPLVL.004.p4-books-backend-endpoints" status="pending">
-      Endpoints must be deployed before live data flows
+    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_MVPLVL.004.p4-books-backend-endpoints" status="complete">
+      All 4 endpoints committed (522ffad8). Lambda deploy pending (partners-api-v1.1.0).
     </dependency>
   </dependencies>
 
