@@ -15,17 +15,15 @@ Cross-validation of gold AUA (positions_cube x canonical_prices) against silver 
 
 ### 1. New file: `data/black_diamond/scripts/gold/aua_overrides.json`
 
-Configuration file with two sections:
+Configuration file (v2.0.0) with two sections:
 
-- **`price_overrides`** (RC1/RC2): 5 asset names whose canonical price resolves to the wrong instrument. Action: force price to $0. Combined impact: **-$43.9M phantom overvaluation removed**.
+- **`silver_tape_accounts`** (RC1/RC2): 3 account IDs with severely mispriced assets. Instead of zeroing, the script tapes these accounts to silver's daily `account_market_value` across the full time series. This preserves continuity -- no cliff, no fake market crash in GRO. The position-level MV is scaled pro-rata so the account total matches silver, preserving tax_status breakdown proportions.
 
-  | Asset Name | Wrong Price | Reason | Impact |
-  |---|---|---|---|
-  | BNP PARIBAS SA | $97 (BNPQF equity) | Structured deposit, face-value units | -$20.9M |
-  | DESTINATIONS LARGE CAP EQUITY I | $546 (wrong NAV) | Brinker Capital model sleeve | -$14.7M |
-  | DESTINATIONS INTERNATIONAL EQUITY I | $384 (wrong NAV) | Brinker Capital model sleeve | -$6.2M |
-  | NATIONAL BANK OF CANADA | $138 (NTIOF equity) | Structured note, face-value units | -$1.9M |
-  | BBVA GLOBAL SECS B V 0% 09/16/2030 | $0.94 (issuer equity) | Structured note | -$0.2M |
+  | Account | Mispriced Asset | Wrong Price | Silver MV | Gold MV |
+  |---|---|---|---|---|
+  | z0819189891 | BNP PARIBAS SA | $97 (BNPQF equity) | $1.9M | $22.6M |
+  | z0821490351 | DESTINATIONS LARGE/INTL CAP | $546/$384 (wrong NAV) | $1.7M | $22.0M |
+  | z0821890141 | NATIONAL BANK OF CANADA | $138 (NTIOF equity) | $884K | $2.9M |
 
 - **`ghost_accounts`** (RC6): 4 account IDs where silver reports $0 but gold has a full stale portfolio. Action: exclude from gold AUA. Combined impact: **-$7.4M phantom AUA removed**.
 
@@ -39,12 +37,14 @@ Configuration file with two sections:
 ### 2. Modified file: `data/black_diamond/scripts/gold/05_build_client_performance.py`
 
 - Added `import json` and `AUA_OVERRIDES_PATH` constant
-- Added `load_aua_overrides()` function: reads `aua_overrides.json`, returns price override actions and ghost account set
-- Modified `process_date_partition()`: accepts `price_override_actions` and `ghost_accounts` params
+- Added `load_aua_overrides()`: reads `aua_overrides.json`, returns silver tape account set + ghost account set
+- Added `load_silver_tape_index(tape_accounts)`: pre-loads all `silver/allocations/*.parquet` files, extracts MV for taped accounts, builds `{date_str: {account_id: silver_mv}}` lookup
+- Added `get_silver_tape_mv(index, date, account)`: looks up silver MV with forward-fill for weekends/holidays
+- Modified `process_date_partition()`:
   - Ghost accounts: positions filtered out before pricing (RC6)
-  - Price overrides: matched assets get `price=0.0, source='override_zero'` before market_value calculation (RC1/RC2)
+  - Silver tape: after computing gold MV, scales all positions in taped accounts pro-rata so account total matches silver MV (RC1/RC2)
 - Modified `build_client_performance()`: passes overrides through to partition processor
-- Modified `main()`: loads overrides in new Step 1b, passes to build function
+- Modified `main()`: loads overrides + silver tape index in new Step 1b
 
 ### 3. NOT changed (Phase 2 -- RC8)
 
@@ -55,7 +55,7 @@ Systematic ETF pricing gap (~$6.7M net undervaluation across 11 accounts) is **n
 | Metric | Before | After |
 |---|---|---|
 | Gold-vs-Silver gap (top 35) | +$37.5M | ~-$13.2M |
-| RC1/RC2 overvaluation | +$43.9M | $0 (zeroed) |
+| RC1/RC2 overvaluation | +$43.9M | Taped to silver (continuous) |
 | RC6 ghost AUA | +$7.4M | $0 (excluded) |
 | RC8 ETF pricing gap | -$6.7M | -$6.7M (unchanged, Phase 2) |
 | Net remaining gap | -- | Dominated by RC8 + RC3/RC7 |
@@ -80,6 +80,7 @@ The `.tmp_gro_validation.py` script (in workspace root, not deployed) can also b
 
 ## Risk
 
-- **Low risk**: Price overrides zero out 5 specific asset names. If any of these asset names are used by other accounts with legitimate holdings, those positions will also be zeroed. Mitigation: the asset names are highly specific (e.g., "BNP PARIBAS SA" is only held by one account as a structured deposit; genuine BNP equity is not held anywhere in the book).
+- **Low risk**: Silver tape scales 3 specific account_ids to silver's daily MV. If silver's MV is also wrong for these accounts, the error propagates. Mitigation: silver is BD's own reported value -- it is the authoritative source for client-facing reporting.
+- **Performance**: Step 1b pre-loads all silver allocation files to build the tape index. This adds ~60-90s to startup (one-time read of ~1500 parquet files, extracting only 3 account rows per file). No impact on per-date processing speed.
 - **Low risk**: Ghost account exclusion removes 4 specific account_ids. If these accounts are re-opened with new positions, they will need to be removed from the exclusion list.
 - **No NNA impact**: Overrides only affect AUA pricing. NNA flows (cum_inflows, cum_outflows) are computed from transactions, not positions x prices, so NNA is unaffected.
