@@ -717,11 +717,32 @@
       <consumed_by>bd-portal-publisher</consumed_by>
     </gold_script>
 
+    <gold_script name="(produces) gold/views/architect_attribution.parquet">
+      <description>
+        Per-funded-account architect attribution via T0-T16 deterministic decision tree.
+        Columns: account_id, relationship_id, resolved_architect, tier, original_architect, original_implementor.
+        19 true architects computed dynamically (AUA >= $5M, rels >= 5, active 12M, not 49F/Unassigned).
+        Produced by 08b_build_architect_attribution.py. ~98.3% AUA resolved, ~1.7% Unresolved residual.
+      </description>
+      <consumed_by>08_build_nna_aua_by_advisor.py (via rel_architect_lookup.parquet)</consumed_by>
+    </gold_script>
+
+    <gold_script name="(produces) gold/views/rel_architect_lookup.parquet">
+      <description>
+        Per-relationship attributed architect assignment: relationship_id, architect.
+        Modal resolved_architect per relationship from architect_attribution.parquet.
+        Contains exactly 19 true architect names + "Unresolved". No 49F House, no Unassigned.
+        Produced by 08b (replaced former production by 08). Consumed by 08, 09, 10.
+      </description>
+      <consumed_by>08_build_nna_aua_by_advisor.py, 09_generate_partner_analytics.py, 10_generate_advisor_rolling_flows.py</consumed_by>
+    </gold_script>
+
     <gold_script name="(produces) gold/views/nna_aua_by_advisor.parquet">
       <description>
         Per-architect daily AUA/flows aggregation: date, architect, total_aua, aua_taxable,
         aua_tax_deferred, aua_tax_exempt, cum_inflows, cum_outflows, nna, num_relationships, num_accounts.
         Drives ADV view in timeseries_chart.json, architect_leaderboard.json, and PartnerAnalyticsResponse.views.adv.
+        Architect assignment sourced from rel_architect_lookup.parquet (written by 08b).
       </description>
       <consumed_by>bd-portal-publisher</consumed_by>
     </gold_script>
@@ -760,10 +781,12 @@
       <description>
         Per-account latest metadata: account_id, relationship_id, account_name, architect, implementor,
         local_relationship, tax_status, qualified_flag, client_state, client_country, account_type,
-        account_is_open.
+        account_is_open, consultant, additional_advisor.
+        Architect field normalized: "Olivia Shin" -> "Liv Shin".
+        consultant and additional_advisor carried from silver transactions (used by 08b T11-T15).
         Used for filters/dimensions.json and snapshot snapshots (region, account_type).
       </description>
-      <consumed_by>bd-portal-publisher</consumed_by>
+      <consumed_by>bd-portal-publisher, 08b_build_architect_attribution.py</consumed_by>
     </gold_script>
 
     <gold_script name="(produces) gold/views/client_tax_liability.parquet">
