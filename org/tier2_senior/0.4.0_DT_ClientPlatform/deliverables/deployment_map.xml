@@ -13,7 +13,7 @@
   <metadata>
     <agent>0.4.0_DT_ClientPlatform</agent>
     <pod>ClientPlatform</pod>
-    <date>2026-03-02</date>
+    <date>2026-03-16</date>
     <pages_served>ModelPortfolios, AdvisorIntelligence</pages_served>
   </metadata>
 
@@ -32,9 +32,16 @@
 
     <module name="bd-pipeline" authority="partial">
       <path>infra/aws/terraform/bd-pipeline/</path>
-      <current_tag>bd-v2.16.2</current_tag>
+      <current_tag>bd-v2.18.4</current_tag>
       <state_key>bd-pipeline/tfstate</state_key>
       <note>DT owns portal-facing Lambdas only. Gold layer, EC2 runners, EventBridge rules: coordinate with 0.6.0_AE_PartnerETL.</note>
+    </module>
+
+    <module name="partners-api" authority="full">
+      <path>infra/aws/terraform/partners-api/</path>
+      <current_tag>partners-api-v1.1.0</current_tag>
+      <state_key>partners-api/tfstate</state_key>
+      <note>Multi-tenant opal-partners-data Lambda. Separated from bd-pipeline (v1.0.0). S3-backed artifact. 1024MB/120s. AWSSDKPandas-Python312:16 layer.</note>
     </module>
 
     <module name="portal-auth" authority="full">
@@ -62,6 +69,13 @@
       <name>opal-portal-authorizer</name>
       <deployed_tag>portal-auth-v1.3.0</deployed_tag>
       <note>API GW Lambda authorizer. Passes advisorKey/advisorName/advisorRole to Lambda context (ADVI-J3). v1.3.0: ESM bundle index.mjs via build-nodejs-lambda.sh.</note>
+    </lambda>
+
+    <!-- partners-api: multi-tenant (DT full authority) -->
+    <lambda pipeline="partners-api" authority="full">
+      <name>opal-partners-data</name>
+      <deployed_tag>partners-api-v1.1.0</deployed_tag>
+      <note>Multi-tenant partner data API. Books Tab L3/L4 (timeseries, composition), Addendum A (mix-timeseries, concentration-timeseries), plus all v2 advisor intelligence endpoints. 1024MB/120s. AWSSDKPandas-Python312:16 layer. API Gateway routes on opal-portal-data-proxy-api with portal-jwt-authorizer.</note>
     </lambda>
 
     <!-- bd-pipeline: portal-facing (DT authority) -->
