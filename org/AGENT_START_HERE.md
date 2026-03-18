@@ -72,10 +72,11 @@ All deployment reference docs are included in this org structure at `org/ref/`:
 2. **Commit before apply.** Write code -> Terraform -> update source map -> git commit -> plan -> apply -> verify 0-diff -> tag -> push.
 3. **Dependencies go in Lambda Layers.** No `pip install -t .` into Lambda source dirs.
 4. **Update the source map.** Every Lambda must have an entry in `infra/aws/lambda/ci/lambda-source-map.json`.
-5. **Tag after deploy.** After 0-diff: `git tag -a {pipeline}-v{X.Y.Z} -m "description"` and `git push --follow-tags`.
-6. **Always use `safe-ec2-deploy.sh`.** Never run service-specific deploy scripts directly.
-7. **EC2_MANIFEST.json is the source of truth.** Every EC2 service must be registered.
-8. **No emojis in code.** Never use emoji characters in production code, debug logs, or any code that runs on AWS.
+5. **Run `record-terraform-deploy.sh` after 0-diff.** `bash infra/aws/lambda/ci/record-terraform-deploy.sh {pipeline} {pipeline}-v{X.Y.Z}` — updates `CHANGELOG.json`. Commit the result before tagging. Skipping this breaks COO audit visibility.
+6. **Tag after deploy.** After 0-diff and `record-terraform-deploy.sh`: `git tag -a {pipeline}-v{X.Y.Z} -m "description"` and `git push --follow-tags`.
+7. **Always use `safe-ec2-deploy.sh`.** Never run service-specific deploy scripts directly.
+8. **EC2_MANIFEST.json is the source of truth.** Every EC2 service must be registered.
+9. **No emojis in code.** Never use emoji characters in production code, debug logs, or any code that runs on AWS.
 
 ---
 

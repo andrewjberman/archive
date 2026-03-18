@@ -390,12 +390,20 @@ Before calling layer work "done":
 1. Write source code     → infra/aws/lambda/{function-name}/
 2. Write Terraform       → infra/aws/terraform/{pipeline}/lambdas.tf, iam.tf, etc.
 3. Update source map     → infra/aws/lambda/ci/lambda-source-map.json
-4. Commit to DEV         → git add specific files && git commit
+4. Commit to CLOUD       → git add specific files && git commit
 5. terraform plan        → verify changes are expected
 6. terraform apply       → deploy to AWS
 7. terraform plan        → MUST show "No changes" (verify 0-diff)
-8. Git tag               → git tag -a {pipeline}-v{X.Y.Z} -m "description"
-9. Push                  → git push --follow-tags
+8. record-terraform-deploy.sh → updates CHANGELOG.json (mandatory — COO/CI depend on this)
+9. Git tag               → git tag -a {pipeline}-v{X.Y.Z} -m "description"
+10. Push                 → git push --follow-tags
+```
+
+**Step 8 — how to run:**
+```bash
+bash infra/aws/lambda/ci/record-terraform-deploy.sh {pipeline} {pipeline}-v{X.Y.Z}
+# Appends an entry to infra/aws/terraform/{pipeline}/CHANGELOG.json
+# Commit the updated CHANGELOG.json as part of the tag commit or a separate ci: commit
 ```
 
 ### Why This Order Matters
@@ -413,6 +421,7 @@ Before calling layer work "done":
 | `terraform apply` before `git commit` | Deployed code doesn't match any commit. Tag is meaningless. |
 | Forgetting `terraform plan` after apply | You don't know if state is actually clean. |
 | Skipping the source map update | CI drift detection is blind to your Lambda. |
+| Skipping `record-terraform-deploy.sh` | CHANGELOG.json is not updated. COO audit sees stale deploy state; version history is broken. |
 | Adding `lifecycle { ignore_changes = [filename, source_code_hash] }` | Terraform will never deploy code updates. Only use for container-image Lambdas managed via ECR. |
 | `aws s3 cp` (layer zip) before committing `requirements.txt` | Layer version is published with no source-of-record in git. The immutable layer version cannot be patched — a new version must be published after remediation. See §3.4 Gate. |
 | Storing layer zip in the Terraform state bucket | State bucket is for Terraform state only. Layer zips go in `s3://opal-313476888478-lambda-layers/`. Mixing them causes confusion and breaks the separation of concerns. |
@@ -462,6 +471,7 @@ Before calling any Lambda work "done", verify every item:
 - [ ] All changes are committed to `DEV` before running `terraform apply`
 - [ ] `terraform plan` shows only expected changes before apply
 - [ ] `terraform plan` shows "No changes" after apply
+- [ ] `record-terraform-deploy.sh` run — CHANGELOG.json updated and committed
 - [ ] Git tag created: `{pipeline}-v{X.Y.Z}`
 - [ ] Pushed with `--follow-tags`
 - [ ] No `deploy.sh` was used, no raw AWS CLI deployments
