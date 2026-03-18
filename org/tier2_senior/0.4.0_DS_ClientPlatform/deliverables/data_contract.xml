@@ -1055,4 +1055,67 @@
 
   </yang_v2_stream_findings>
 
+  <!-- ======================================================================== -->
+  <!-- ADVI_MIXV2 Artifacts (added 2026-03-18)                                  -->
+  <!-- ======================================================================== -->
+
+  <advi_mixv2_artifacts>
+
+    <!-- Artifact 1: Firm-level period mix views -->
+    <artifact>
+      <s3_key>gold/firm_mix_views.json</s3_key>
+      <s3_key_raw>gold/firm_mix_views_daily.json</s3_key_raw>
+      <written_by>data/black_diamond/scripts/gold/06b_build_client_mix_timeseries.py</written_by>
+      <served_by>opal-partners-data Lambda -- GET /api/scoped/partners/books/firm/all/mix-views?firmId=xxx</served_by>
+      <schema>
+        <key name="generated_at" type="string">ISO8601 UTC timestamp</key>
+        <key name="data_as_of" type="string">YYYY-MM-DD -- last positions_cube date processed</key>
+        <key name="firm_id" type="string">Firm identifier (e.g. "49financial")</key>
+        <key name="views" type="object">
+          <subkey name="quarterly" type="array">Period entries (end-of-quarter snapshot)</subkey>
+          <subkey name="monthly" type="array">Period entries (end-of-month snapshot)</subkey>
+          <subkey name="annually" type="array">Period entries (end-of-year snapshot)</subkey>
+        </key>
+      </schema>
+      <period_entry_schema>
+        <key name="period" type="string">Period key matching getPeriodInfo() in PartnerAnalytics.tsx: "YYYY-Q#" / "YYYY-MM" / "YYYY"</key>
+        <key name="label" type="string">Display label: "Q4 '24" / "Oct '24" / "2024"</key>
+        <key name="end_date" type="string">YYYY-MM-DD -- last date in period used as snapshot</key>
+        <key name="total_aua" type="float">Total AUA in dollars for this period-end snapshot</key>
+        <key name="equity" type="object">{value: float (dollars), pct: float (0-1)}</key>
+        <key name="fixed_income" type="object">{value: float (dollars), pct: float (0-1)}</key>
+        <key name="structured_notes" type="object">{value: float (dollars), pct: float (0-1)}</key>
+        <key name="cash" type="object">{value: float (dollars), pct: float (0-1)}</key>
+        <key name="other" type="object">{value: float (dollars), pct: float (0-1)}</key>
+      </period_entry_schema>
+      <notes>
+        Dollar amounts derived from: pct (from mix dict) * total_mv (per relationship) summed
+        across all relationships per date. The raw daily accumulator (firm_mix_views_daily.json)
+        enables incremental updates without full rebuild. pct values are 0-1 (multiply by 100 to display).
+      </notes>
+    </artifact>
+
+    <!-- Artifact 2: Per-advisor period mix views -->
+    <artifact>
+      <s3_key>gold/advisors/{advisor_id}/mix.json</s3_key>
+      <s3_key_raw>gold/advisors/{advisor_id}/mix_daily.json</s3_key_raw>
+      <written_by>data/black_diamond/scripts/gold/06b_build_client_mix_timeseries.py</written_by>
+      <served_by>opal-partners-data Lambda -- GET /api/shared/advisor-intelligence/advisors/{id}/mix-views?firmId=xxx</served_by>
+      <schema>
+        <key name="generated_at" type="string">ISO8601 UTC timestamp</key>
+        <key name="data_as_of" type="string">YYYY-MM-DD</key>
+        <key name="advisor_id" type="string">Canonical advisor name (matches rel_architect_lookup.architect)</key>
+        <key name="advisor_name" type="string">Display name (same as advisor_id for now)</key>
+        <key name="views" type="object">Same shape as firm_mix_views.json views -- quarterly, monthly, annually</key>
+      </schema>
+      <notes>
+        advisor_id comes from rel_architect_lookup.parquet (gold/views/rel_architect_lookup.parquet).
+        "Unresolved" accounts are excluded from advisor aggregation.
+        Only advisors with at least one annual period entry get a mix.json written.
+        19 active advisors expected (matches rel_architect_lookup unique architect count).
+      </notes>
+    </artifact>
+
+  </advi_mixv2_artifacts>
+
 </data_contract>
