@@ -78,11 +78,11 @@
   </constraints>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_MIXV2.001" status="pending">
-      DS must commit AP gate fix before AE deploys
+    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_MIXV2.001" status="complete">
+      DS AP gate fix committed (a7617a08). Gate clear.
     </dependency>
-    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_MIXV2.002" status="pending">
-      DS must commit firm/advisor aggregation before AE deploys
+    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_MIXV2.002" status="complete">
+      DS firm/advisor aggregation committed (a885f625, 2384a9f6). Gate clear.
     </dependency>
   </dependencies>
 
