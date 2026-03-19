@@ -24,7 +24,7 @@ TOPIC="Pattern R: CTO task order review -- {CODE}-{NNN} post-receipt"
 CREATED_BY="2.0.0_SA_COO"
 PARTICIPANTS="1.0.0_SA_CTO"
 MAX_TURNS=2
-MODEL="gpt-5.2"
+MODEL="claude-sonnet-4-6"
 
 # ---------------------------------------------------------------------------
 # Context -- inject drafts + receipts + source files

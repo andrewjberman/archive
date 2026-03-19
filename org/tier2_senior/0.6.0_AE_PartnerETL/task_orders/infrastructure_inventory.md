@@ -6,7 +6,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-03-02</date>
-    <status>pending</status>
+    <status>obsolete -- superseded by pipeline_inventory.xml (deliverables/pipeline_inventory.xml). bd-pipeline now at bd-v2.19.2; infrastructure changed substantially since 2026-03-02 issue date. Closed 2026-03-19.</status>
   </metadata>
 
   <objective>

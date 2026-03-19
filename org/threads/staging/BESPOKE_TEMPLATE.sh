@@ -26,7 +26,7 @@ TOPIC="{Human-readable topic}"
 CREATED_BY="{opening-agent-serial}"
 PARTICIPANTS="{agent1-serial},{agent2-serial}"
 MAX_TURNS=3               # bespoke default; use 2 for shorter exchanges
-MODEL="gpt-5.2"           # current standard model
+MODEL="claude-sonnet-4-6"  # current standard model
 
 # ---------------------------------------------------------------------------
 # Context -- files and briefing injected into CONTEXT_COMPILED.md

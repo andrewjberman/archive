@@ -2,7 +2,7 @@
 """
 orchestrator.py -- Round-robin agent conversation driver (API-based)
 
-Replaces orchestrator.sh. Uses OpenAI API directly so it can be invoked
+Replaces orchestrator.sh. Uses Anthropic API directly so it can be invoked
 from within a Claude Code session via the Bash tool -- no nested claude
 CLI processes, no CLAUDECODE env var conflicts.
 
@@ -11,10 +11,10 @@ Usage:
 
 Options:
     --thread <id>       Thread ID to run (required)
-    --model <model>     OpenAI model (default: gpt-4o-mini)
+    --model <model>     Anthropic model (default: claude-sonnet-4-6)
     --dry-run           Show what would be invoked without calling API
     --verbose           Print agent responses to stdout as they arrive
-    --secret <name>     AWS Secrets Manager secret name (default: openai-api-key)
+    --secret <name>     AWS Secrets Manager secret name (default: anthropic-api-key)
 """
 
 import argparse
@@ -31,7 +31,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 import boto3
-from openai import OpenAI
+from anthropic import Anthropic
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -298,75 +298,66 @@ def write_receipts(thread_dir: Path):
 
 TOOLS = [
     {
-        "type": "function",
-        "function": {
-            "name": "read_file",
-            "description": (
-                "Read the full contents of a file. Path must be relative to the "
-                "repository root. Use this to read Lambda source, Terraform files, "
-                "endpoint definitions, or any other file in the codebase."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "File path relative to repo root, e.g. 'infra/aws/terraform/bd-pipeline/eventbridge.tf'",
-                    }
-                },
-                "required": ["path"],
+        "name": "read_file",
+        "description": (
+            "Read the full contents of a file. Path must be relative to the "
+            "repository root. Use this to read Lambda source, Terraform files, "
+            "endpoint definitions, or any other file in the codebase."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "File path relative to repo root, e.g. 'infra/aws/terraform/bd-pipeline/eventbridge.tf'",
+                }
             },
+            "required": ["path"],
         },
     },
     {
-        "type": "function",
-        "function": {
-            "name": "glob_files",
-            "description": (
-                "Find files matching a glob pattern relative to the repository root. "
-                "Use this to discover what files exist in a directory before reading them."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "pattern": {
-                        "type": "string",
-                        "description": "Glob pattern relative to repo root, e.g. 'infra/aws/terraform/bd-pipeline/*.tf'",
-                    }
-                },
-                "required": ["pattern"],
+        "name": "glob_files",
+        "description": (
+            "Find files matching a glob pattern relative to the repository root. "
+            "Use this to discover what files exist in a directory before reading them."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "pattern": {
+                    "type": "string",
+                    "description": "Glob pattern relative to repo root, e.g. 'infra/aws/terraform/bd-pipeline/*.tf'",
+                }
             },
+            "required": ["pattern"],
         },
     },
     {
-        "type": "function",
-        "function": {
-            "name": "grep_content",
-            "description": (
-                "Search for a pattern in a file or directory. Returns matching lines "
-                "with file path and line number. Use this to find a specific resource "
-                "name, function, or variable across a codebase path."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "pattern": {
-                        "type": "string",
-                        "description": "String or regex to search for (case-insensitive)",
-                    },
-                    "path": {
-                        "type": "string",
-                        "description": "File or directory path relative to repo root",
-                    },
+        "name": "grep_content",
+        "description": (
+            "Search for a pattern in a file or directory. Returns matching lines "
+            "with file path and line number. Use this to find a specific resource "
+            "name, function, or variable across a codebase path."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "pattern": {
+                    "type": "string",
+                    "description": "String or regex to search for (case-insensitive)",
                 },
-                "required": ["pattern", "path"],
+                "path": {
+                    "type": "string",
+                    "description": "File or directory path relative to repo root",
+                },
             },
+            "required": ["pattern", "path"],
         },
     },
 ]
 
 MAX_TOOL_CALLS_PER_TURN = 5
-FILE_SIZE_LIMIT = 50_000  # chars; truncate beyond this
+FILE_SIZE_LIMIT = 15_000  # chars; truncate beyond this (keeps tool results small for rate limit)
 
 
 def execute_tool(name: str, args: dict, verbose: bool = False) -> str:
@@ -456,11 +447,11 @@ def execute_tool(name: str, args: dict, verbose: bool = False) -> str:
 
 
 # ---------------------------------------------------------------------------
-# OpenAI client
+# Anthropic client
 # ---------------------------------------------------------------------------
 
-def get_openai_client(secret_name: str) -> OpenAI:
-    api_key = os.environ.get("OPENAI_API_KEY")
+def get_anthropic_client(secret_name: str) -> Anthropic:
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         sm = boto3.client("secretsmanager", region_name="us-east-1")
         raw = sm.get_secret_value(SecretId=secret_name)["SecretString"]
@@ -469,20 +460,20 @@ def get_openai_client(secret_name: str) -> OpenAI:
             parsed = json.loads(raw)
             api_key = (
                 parsed.get("api_key")
-                or parsed.get("OPENAI_API_KEY")
-                or parsed.get("openai_api_key")
+                or parsed.get("ANTHROPIC_API_KEY")
+                or parsed.get("anthropic_api_key")
                 or raw
             )
         except (json.JSONDecodeError, AttributeError):
             api_key = raw
-    return OpenAI(api_key=api_key)
+    return Anthropic(api_key=api_key)
 
 # ---------------------------------------------------------------------------
 # Tool-aware API call
 # ---------------------------------------------------------------------------
 
 def call_with_tools(
-    client: OpenAI,
+    client: Anthropic,
     model: str,
     system_prompt: str,
     user_prompt: str,
@@ -490,7 +481,7 @@ def call_with_tools(
     verbose: bool = False,
 ) -> str:
     """
-    Call the OpenAI API with an optional tool-use loop.
+    Call the Anthropic API with an optional tool-use loop.
 
     If use_tools is True, the model may call read_file / glob_files /
     grep_content to inspect the codebase before producing its final response.
@@ -500,28 +491,67 @@ def call_with_tools(
     Returns the final message content as a string.
     """
     messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user",   "content": user_prompt},
+        {"role": "user", "content": user_prompt},
     ]
     tools_used = 0
 
     while True:
-        kwargs = {"model": model, "messages": messages, "temperature": 0.3}
+        kwargs = {
+            "model": model,
+            "max_tokens": 8192,
+            "system": system_prompt,
+            "messages": messages,
+            "temperature": 0.3,
+        }
         if use_tools:
             kwargs["tools"] = TOOLS
-            kwargs["tool_choice"] = "auto"
+            kwargs["tool_choice"] = {"type": "auto"}
 
-        response = client.chat.completions.create(**kwargs)
-        msg = response.choices[0].message
+        # Retry on rate-limit (429) with exponential backoff
+        import time as _time
+        _backoff = 65
+        for _attempt in range(4):
+            try:
+                response = client.messages.create(**kwargs)
+                break
+            except Exception as _exc:
+                if "429" in str(_exc) and _attempt < 3:
+                    print(f"  WARN: rate limit hit, sleeping {_backoff}s (attempt {_attempt+1}/4)...")
+                    _time.sleep(_backoff)
+                    _backoff = min(_backoff * 2, 240)
+                else:
+                    raise
+
+        # Extract text blocks and tool_use blocks from response
+        text_parts = []
+        tool_calls = []
+        for block in response.content:
+            if block.type == "text":
+                text_parts.append(block.text)
+            elif block.type == "tool_use":
+                tool_calls.append(block)
+
+        text_content = "\n".join(text_parts)
 
         # No tool calls — model is done
-        if not msg.tool_calls:
-            return msg.content or ""
+        if not tool_calls:
+            return text_content
 
         # Safety limit: force a final answer without tools
         if tools_used >= MAX_TOOL_CALLS_PER_TURN:
             print(f"  WARN: tool call limit ({MAX_TOOL_CALLS_PER_TURN}) reached, forcing finish")
-            messages.append({"role": "assistant", "content": msg.content or "", "tool_calls": []})
+            messages.append({"role": "assistant", "content": response.content})
+            # Must satisfy every pending tool_use with a stub tool_result
+            # before sending the "finish now" instruction.
+            stub_results = [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": tc.id,
+                    "content": "Tool call limit reached. Use information already retrieved.",
+                }
+                for tc in tool_calls
+            ]
+            messages.append({"role": "user", "content": stub_results})
             messages.append({
                 "role": "user",
                 "content": (
@@ -529,45 +559,51 @@ def call_with_tools(
                     "Write your final response now using only what you have already read."
                 ),
             })
-            final = client.chat.completions.create(
-                model=model, messages=messages, temperature=0.3
+            import time as _time
+            for _attempt in range(4):
+                try:
+                    final = client.messages.create(
+                        model=model, max_tokens=8192, system=system_prompt,
+                        messages=messages, temperature=0.3,
+                    )
+                    break
+                except Exception as _exc:
+                    if "429" in str(_exc) and _attempt < 3:
+                        _sleep = 65 * (2 ** _attempt)
+                        print(f"  WARN: rate limit on finish call, sleeping {_sleep}s...")
+                        _time.sleep(_sleep)
+                    else:
+                        raise
+            return "\n".join(
+                b.text for b in final.content if b.type == "text"
             )
-            return final.choices[0].message.content or ""
 
-        # Append the assistant message that contains tool calls
-        messages.append({
-            "role": "assistant",
-            "content": msg.content,
-            "tool_calls": [
-                {
-                    "id": tc.id,
-                    "type": "function",
-                    "function": {"name": tc.function.name, "arguments": tc.function.arguments},
-                }
-                for tc in msg.tool_calls
-            ],
-        })
+        # Append the assistant message (contains both text and tool_use blocks)
+        messages.append({"role": "assistant", "content": response.content})
 
-        # Execute each tool call and append results
-        for tc in msg.tool_calls:
-            name = tc.function.name
-            args = json.loads(tc.function.arguments)
+        # Execute each tool call and build tool_result blocks
+        tool_results = []
+        for tc in tool_calls:
+            name = tc.name
+            args = tc.input
             if verbose:
                 print(f"  [tool] {name}({args})")
             result = execute_tool(name, args, verbose=verbose)
             tools_used += 1
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tc.id,
+            tool_results.append({
+                "type": "tool_result",
+                "tool_use_id": tc.id,
                 "content": result,
             })
+
+        messages.append({"role": "user", "content": tool_results})
 
 
 # ---------------------------------------------------------------------------
 # Main run loop
 # ---------------------------------------------------------------------------
 
-def run_thread(thread_dir: Path, client: OpenAI | None, model: str, dry_run: bool, verbose: bool, no_tools: bool = False):
+def run_thread(thread_dir: Path, client: Anthropic | None, model: str, dry_run: bool, verbose: bool, no_tools: bool = False):
     thread_json = json.loads((thread_dir / "THREAD.json").read_text())
     thread_id   = thread_json["id"]
 
@@ -634,7 +670,7 @@ def run_thread(thread_dir: Path, client: OpenAI | None, model: str, dry_run: boo
                 use_tools=(not no_tools), verbose=verbose,
             )
         except Exception as exc:
-            print(f"ERROR: OpenAI API call failed for {current}: {exc}")
+            print(f"ERROR: Anthropic API call failed for {current}: {exc}")
             set_status(thread_dir, "blocked")
             break
 
@@ -655,18 +691,24 @@ def run_thread(thread_dir: Path, client: OpenAI | None, model: str, dry_run: boo
         advance_turn(thread_dir, current, nxt)
         print(f"  Next: {nxt} (turn {turn_num + 1})\n")
 
+        # Rate-limit guard: pause between turns so each call lands in a fresh
+        # 60-second input-token window (org limit: 30K tokens/min).
+        import time as _time
+        print("  Pausing 90s for rate-limit window reset...")
+        _time.sleep(90)
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Run an agent thread via OpenAI API")
+    parser = argparse.ArgumentParser(description="Run an agent thread via Anthropic API")
     parser.add_argument("--thread",   required=True,          help="Thread ID to run")
-    parser.add_argument("--model",    default="gpt-5.2",          help="OpenAI model (default: gpt-5.2)")
+    parser.add_argument("--model",    default="claude-sonnet-4-6",  help="Anthropic model (default: claude-sonnet-4-6)")
     parser.add_argument("--dry-run",   action="store_true",    help="Show invocation without calling API")
     parser.add_argument("--verbose",   action="store_true",    help="Print agent responses and tool calls to stdout")
     parser.add_argument("--no-tools",  action="store_true",    help="Disable tool use (faster/cheaper; agents cannot read files)")
-    parser.add_argument("--secret",    default="openai-api-key", help="AWS Secrets Manager secret name")
+    parser.add_argument("--secret",    default="anthropic-api-key", help="AWS Secrets Manager secret name")
     args = parser.parse_args()
 
     thread_dir = SCRIPT_DIR / args.thread
@@ -677,10 +719,10 @@ def main():
     if args.dry_run:
         client = None
     else:
-        print(f"Fetching OpenAI key ({args.secret})...")
+        print(f"Fetching Anthropic key ({args.secret})...")
         try:
-            client = get_openai_client(args.secret)
-            print("OK: OpenAI client ready\n")
+            client = get_anthropic_client(args.secret)
+            print("OK: Anthropic client ready\n")
         except Exception as exc:
             print(f"ERROR: {exc}")
             sys.exit(1)

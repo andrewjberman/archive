@@ -18,7 +18,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 JQ="${REPO_ROOT}/.tools/jq.exe"
 
 # --- Defaults ---
-MODEL="gpt-5.2"
+MODEL="claude-sonnet-4-6"
 MAX_TURNS=2
 DRY_RUN=false
 PROJECT_CODE=""
