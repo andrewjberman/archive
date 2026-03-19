@@ -738,6 +738,18 @@ def _claims_overlap(claim_text: str, shape_text: str) -> bool:
 # ---------------------------------------------------------------------------
 
 @dataclass
+class PreFlightCheck:
+    """A deterministic precondition that must hold before Worker execution.
+
+    Failure stops THIS Worker (success=False, pre_flight_failures populated)
+    but does NOT halt the pipeline -- other Workers continue.
+    """
+    name: str
+    command: str
+    failure_message: str
+
+
+@dataclass
 class ExecutionResult:
     """Result of a Worker execution against a task order."""
     worker_id: str
@@ -752,6 +764,7 @@ class ExecutionResult:
     iterations: int = 0
     success: bool = True
     error: str = ""
+    pre_flight_failures: list[str] = field(default_factory=list)
 
 
 def invoke_worker_for_execution(
@@ -764,6 +777,7 @@ def invoke_worker_for_execution(
     allowed_paths: list[str] | None = None,
     max_iterations: int = 25,
     branch: str = "",
+    pre_flight_checks: list[PreFlightCheck] | None = None,
 ) -> ExecutionResult:
     """Invoke a Worker with full tool access to execute a task order.
 
@@ -803,18 +817,66 @@ def invoke_worker_for_execution(
         task_order_id=task_order_id,
     )
 
-    # Checkout branch if specified
+    # Checkout branch if specified.
+    # Check current branch first -- skip checkout if already correct.
     if branch:
         try:
-            # Create branch if it doesn't exist
-            _sp.run(
-                ["git", "checkout", "-B", branch],
-                cwd=working_directory, capture_output=True, text=True, timeout=30,
+            current = _sp.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                cwd=working_directory, capture_output=True, text=True, timeout=10,
             )
-            print(f"  [EXEC] Checked out branch: {branch}", file=sys.stderr)
+            current_branch = current.stdout.strip()
+            if current_branch == branch:
+                print(f"  [EXEC] Already on branch: {branch}", file=sys.stderr)
+            else:
+                switch = _sp.run(
+                    ["git", "checkout", branch],
+                    cwd=working_directory, capture_output=True, text=True, timeout=30,
+                )
+                if switch.returncode != 0:
+                    create = _sp.run(
+                        ["git", "checkout", "-b", branch],
+                        cwd=working_directory, capture_output=True, text=True, timeout=30,
+                    )
+                    if create.returncode != 0:
+                        result.success = False
+                        result.error = f"Branch checkout failed: {create.stderr.strip()}"
+                        return result
+                print(f"  [EXEC] Checked out branch: {branch}", file=sys.stderr)
         except Exception as e:
             result.success = False
             result.error = f"Branch checkout failed: {e}"
+            return result
+
+    # Run pre-flight checks (deterministic, before any LLM calls)
+    if pre_flight_checks:
+        import subprocess as _sp_check
+        for check in pre_flight_checks:
+            try:
+                check_result = _sp_check.run(
+                    check.command, shell=True, cwd=working_directory,
+                    capture_output=True, text=True, timeout=60,
+                )
+                if check_result.returncode != 0:
+                    result.success = False
+                    result.pre_flight_failures.append(
+                        f"[{check.name}] {check.failure_message} "
+                        f"(exit code {check_result.returncode}: "
+                        f"{check_result.stderr.strip()[:200]})"
+                    )
+                    print(f"  [PRE-FLIGHT FAIL] {check.name}: {check.failure_message}", file=sys.stderr)
+            except _sp_check.TimeoutExpired:
+                result.success = False
+                result.pre_flight_failures.append(f"[{check.name}] Timed out after 60s")
+            except Exception as e:
+                result.success = False
+                result.pre_flight_failures.append(f"[{check.name}] Check error: {e}")
+
+        if not result.success:
+            result.error = (
+                f"Pre-flight checks failed: {len(result.pre_flight_failures)} failure(s). "
+                f"This Worker is stopped but the pipeline continues."
+            )
             return result
 
     # Get full tool set with scope enforcement
@@ -863,8 +925,14 @@ def invoke_worker_for_execution(
             "transition_msg": (
                 "STAGE TRANSITION: In -> Ac. "
                 "READ TOOLS HAVE BEEN REMOVED. "
-                "Write all deliverables now. Use write_file for new files, "
-                "edit_file or apply_patch for modifications."
+                "Write all deliverables now.\n\n"
+                "CRITICAL TOOL SELECTION:\n"
+                "- NEW files (that do not exist yet): use write_file\n"
+                "- EXISTING files (that already have content): use edit_file "
+                "to replace specific sections, or apply_patch for multi-line "
+                "changes. NEVER use write_file on an existing file -- it will "
+                "destroy the existing content. write_file is BLOCKED on files "
+                "that already exist."
             ),
             "deliverables": allowed_paths or [],
             "working_dir": working_directory,

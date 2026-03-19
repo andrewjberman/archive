@@ -50,7 +50,11 @@ _SAFE_COMMANDS = frozenset({
 _SAFE_GIT_SUBCOMMANDS = frozenset({
     "status", "log", "diff", "show", "blame", "branch", "tag",
     "remote", "config", "describe", "rev-parse", "ls-files",
-    "ls-tree", "cat-file", "shortlog", "stash",
+    "ls-tree", "cat-file", "shortlog",
+    # NOT safe: add, commit, push, reset, checkout, merge, rebase, stash
+    # Workers MUST use git_commit tool for commits (enforces --author,
+    # scopes to allowed_paths). Shell git write commands blocked to
+    # prevent staging the entire working tree.
 })
 
 
@@ -200,11 +204,38 @@ def get_worker_tools(
     # write_file
     # -----------------------------------------------------------------------
     def write_file(file_path: str, content: str) -> str:
-        """Write content to a file. Creates parent directories if needed."""
+        """Write content to a file. Creates parent directories if needed.
+
+        GUARD: If the file already exists and has content, write_file is
+        BLOCKED. Use edit_file or apply_patch to modify existing files.
+        write_file is for creating NEW files only. This prevents Workers
+        from overwriting entire files when they should be making targeted
+        edits. Empirically confirmed: Workers consistently use write_file
+        to replace 500-line handlers with 5-line stubs.
+        """
         p = _validate_path(file_path)
         scope_error = _check_write_scope(file_path, p)
         if scope_error:
             return scope_error
+
+        # Guard: block overwrite of existing files with content
+        if p.exists() and p.stat().st_size > 0:
+            try:
+                existing = p.read_text(encoding="utf-8")
+                existing_lines = len(existing.splitlines())
+            except Exception:
+                existing_lines = 0
+
+            if existing_lines > 5:
+                return (
+                    f"BLOCKED: {file_path} already exists ({existing_lines} lines). "
+                    f"write_file overwrites the entire file. Use edit_file to "
+                    f"replace specific sections, or apply_patch to insert/remove "
+                    f"lines. If you truly need to replace the entire file, read "
+                    f"it first with read_file and include ALL existing content "
+                    f"in your write."
+                )
+
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(content, encoding="utf-8")
         return f"OK: Wrote {len(content)} chars to {file_path}"
@@ -637,16 +668,16 @@ def get_worker_tools(
     def git_commit(message: str, author_serial: str, files: list[str] | None = None) -> str:
         """Commit changes with enforced agent author attribution.
 
-        Stages only the specified files (or files written during this
-        execution if none specified). Commits with --author in the
-        canonical agent format. Captures and returns the commit SHA.
+        Stages ONLY the specified files or the allowed_paths deliverables.
+        NEVER stages the entire working tree (no git add -A). This prevents
+        committing unrelated files (.tmp, response.json, etc.).
 
         Args:
             message: Commit message.
             author_serial: Agent serial (e.g., "DS.CP.1"). Used as
                 both author name and email prefix.
-            files: Specific files to stage. If None, stages all
-                modified/new files in the working directory.
+            files: Specific files to stage. If None, falls back to
+                allowed_paths. If both are None, refuses to commit.
         """
         import sys
 
@@ -654,26 +685,33 @@ def get_worker_tools(
         if not all(c.isalnum() or c in "._ " for c in author_serial):
             return f"ERROR: Invalid author_serial '{author_serial}'. Use alphanumeric + dots only."
 
-        author = f"{author_serial} <{author_serial}@corporeal.agent>"
+        author = f"{author_serial} <{author_serial}@runtime.agent>"
+
+        # Determine files to stage -- NEVER git add -A
+        files_to_stage = files
+        if not files_to_stage and allowed_paths:
+            files_to_stage = allowed_paths
+        if not files_to_stage:
+            return (
+                "ERROR: No files specified and no allowed_paths set. "
+                "You must specify which files to commit. Use: "
+                "git_commit(message=..., author_serial=..., files=[...])"
+            )
 
         try:
-            # Stage files
-            if files:
-                for f in files:
+            # Stage only specified files
+            for f in files_to_stage:
+                try:
                     p = _validate_path(f)
                     rel = str(p.relative_to(base.resolve())).replace("\\", "/")
-                    stage_result = subprocess.run(
-                        ["git", "add", rel], cwd=str(base),
-                        capture_output=True, text=True, timeout=30,
-                    )
-                    if stage_result.returncode != 0:
-                        return f"ERROR: git add failed for {rel}: {stage_result.stderr}"
-            else:
-                # Stage all changes in working directory
-                subprocess.run(
-                    ["git", "add", "-A"], cwd=str(base),
+                except (PermissionError, ValueError):
+                    continue
+                stage_result = subprocess.run(
+                    ["git", "add", rel], cwd=str(base),
                     capture_output=True, text=True, timeout=30,
                 )
+                if stage_result.returncode != 0:
+                    print(f"  [GIT] WARN: git add skipped {rel}: {stage_result.stderr.strip()[:100]}", file=sys.stderr)
 
             # Check if there's anything to commit
             status = subprocess.run(
@@ -772,9 +810,10 @@ def get_worker_tools(
         {
             "name": "write_file",
             "description": (
-                "Write content to a file. Creates directories if needed. "
-                "For modifying existing files, prefer edit_file or apply_patch "
-                "(more token-efficient)."
+                "Create a NEW file. Creates directories if needed. "
+                "BLOCKED on existing files with content -- use edit_file "
+                "or apply_patch to modify existing files. write_file is "
+                "for new files ONLY."
             ),
             "input_schema": {
                 "type": "object",
