@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-03-05</date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>HIGH — CEO-directed. Supersedes parameter grid run 1 which was degenerate.</priority>
     <supersedes>acat-inkind-parameter-optimization.md (grid design) — keep for reference</supersedes>
   </metadata>

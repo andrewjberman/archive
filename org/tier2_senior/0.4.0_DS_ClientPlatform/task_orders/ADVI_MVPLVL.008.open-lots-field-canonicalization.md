@@ -4,6 +4,7 @@
 **From:** `0.4.0_DE_ClientPlatform`
 **Project:** `ADVI_MVPLVL`
 **Date:** 2026-03-18
+**Status:** COMPLETE — `current_units` → `quantity` and `accrued_gain` → `unrealized_gain` rename committed at `14b3be3d`, deployed in bd-pipeline batch `aef01b14`. RD consumed at `a8b1c3e8`. Re-publish run included in that deploy.
 
 ---
 

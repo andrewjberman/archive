@@ -4,6 +4,7 @@
 **From:** `0.4.0_DE_ClientPlatform`
 **Project:** `ADVI_MVPLVL`
 **Date:** 2026-03-18
+**Status:** COMPLETE — delivered under ADVI_MVP318.001 (WS3a + WS3c). Commits: `a3903a03` (gold artifacts), `6234d50c` (Lambda routes). Shape verified by DE 2026-03-19: Lambda returns `data` key, `AdvisorMixTimeseriesResponse` type declares `data`, callsite extracts `d?.data` — consistent end to end. No mismatch.
 
 ---
 

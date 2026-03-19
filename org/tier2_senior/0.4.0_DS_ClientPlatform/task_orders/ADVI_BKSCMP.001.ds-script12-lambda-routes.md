@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-03-19</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>ADVI_BKSCMP</project_code>
   </metadata>
 
@@ -57,7 +57,11 @@
         # Do NOT import from 06b directly (numeric prefix prevents clean imports).
 
       Inline (copy verbatim from 06b): ETF_CLASSIFICATIONS, ASSET_NAME_TO_TICKER,
-      _OPAL_ETF_OVERRIDES, and classify_series(). These are the classification lookup tables.
+      and classify_series(). These are the classification lookup tables.
+      Inline _OPAL_ETF_OVERRIDES from silver/build_canonical_prices_v2.py (line 69) — it does
+      NOT exist in 06b. Confirmed by DT S-Report 2026-03-19. The dict maps Opal/Pathfinder ETF
+      asset name strings to tickers (DIVZ, IDVZ, PFDE, PFOE, PCHI). Without it, these positions
+      are misclassified as 'other' in composition output. Copy the dict verbatim; do not import.
 
       Algorithm (per PRD §WS1):
       1. Discover latest holdings_lots parquet: list s3://opal-data-bd/holdings_lots/*.parquet,
