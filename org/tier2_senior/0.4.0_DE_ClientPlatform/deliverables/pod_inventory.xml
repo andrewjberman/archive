@@ -8,8 +8,8 @@
       <page>ModelPortfolios</page>
       <page>AdvisorIntelligence</page>
     </pages_owned>
-    <date>2026-03-04</date>
-    <last_updated>2026-03-04 — leaderboard sort stability fix (AdvisorsTab.tsx); resolved known_issue logged</last_updated>
+    <date>2026-03-19</date>
+    <last_updated>2026-03-19 — ADVI_MVP318 WS3e types+functions, WS5 chart windows, L2 quarterly bar wiring, BooksTab canonical N1/L2/L3/L4 framework, ADVI_MIXV2 firm mix stacked bar, API Gateway auth fix for 4 partners routes</last_updated>
     <rd_deliverable_status>
       <item rd_agent="0.4.1_RD_ModelPortfolios" status="complete" path="org/tier3_junior/0.4.1_RD_ModelPortfolios/deliverables/page_inventory.xml"/>
       <item rd_agent="0.4.2_RD_AdvisorIntelligence" status="complete" path="org/tier3_junior/0.4.2_RD_AdvisorIntelligence/deliverables/page_inventory.xml" note="Deliverable produced 2026-03-02. Pod inventory upgraded to full-fidelity 2026-03-03."/>
@@ -163,24 +163,23 @@
           timePeriod, drilldown state, window.
         </tab>
         <tab name="advisors" status="functional" default="false">
-          Architects/Implementors toggle controls entire tab. Top 3 highlights panel (rank, NNA, AUA
-          growth for selected role at selected leaderboard window). Rolling Flows line chart: one line
-          per advisor, metric toggle (NNA/Inflows/Outflows), window toggle (30d/90d/1Y). Leaderboard
-          table: search, sortable columns (name, AUA, NNA, growth%, new clients), window toggle
-          (3M/6M/1Y/2Y/3Y), click leaderboard row to toggle chart line.
-          Data: getArchitectLeaderboard(), getImplementorLeaderboard(), getAdvisorRollingFlows().
-          UI state: advisorRole ('architects'|'implementors'), flowsMetric, flowsWindow, leaderboardWindow,
-          selectedAdvisors, sortField, sortDirection, search.
+          Architects-only view. Top 3 highlights panel with period toggle (QTD/YTD — MTD removed,
+          leaderboard JSON uses uppercase keys MTD/QTD/YTD since bd-v2.18.4). Leaderboard with
+          AUA/NNA/Growth metric toggle and diverging horizontal bar chart for NNA mode showing
+          inflows/outflows per advisor. Rolling Flows stacked bar (per-period inflows/outflows/net
+          NNA). NNA colors: inflow #2196F3, outflow #EF4444 — matches PartnerAnalytics NNA_COLORS.
+          Data: getArchitectLeaderboard(), getAdvisorRollingFlows().
+          Window lookup: periodToWindowKey() returns uppercase 'QTD'/'YTD' to match JSON keys.
         </tab>
         <tab name="books" status="functional" default="false" component_exported_as="BooksTab">
-          Per-advisor book drilldown and client detail view. Book/Client view toggle. Advisor selector
-          dropdown (from leaderboard data). Panels: AI Executive Summary (Sparkles icon), Headline
-          Numbers (AUA, accounts, clients, fee rate, income yield), Tax Intelligence (taxable/deferred/free
-          breakdown with pie chart), Income and Fees, Portfolio Composition (allocation pie chart, expense
-          ratio, holdings concentration), Engagement Metrics (flows, trading activity, tenure). Client
-          list with search and click-to-detail. Uses useAuth for role-based UI.
-          Data: getClientsTab(), getClientDetail(clientKey), getArchitectLeaderboard(), getAdvisorBook(advisorId).
-          UI state: viewMode ('book'|'client'), selectedAdvisor, selectedClient, search.
+          Canonical 4-level drill hierarchy: N1 (Firm) -> L2 (Advisor Book) -> L3 (Relationship) -> L4 (Account).
+          Each level renders CanonicalBookView = ConsolidatedOverviewPanel (metric cards + asset mix donut
+          + top holdings + quarterly bar) + TaxCostBasisPanel. Level-specific data:
+          N1: getFirmMixViews (quarterly bar), firm/all/composition (mix donut + holdings), getClientsTab (headline).
+          L2: getAdvisorBook (summary), getAdvisorTimeseries + getAdvisorMixTimeseries (quarterly bar via deriveQuarterlyFromTimeseries), advisor/all/composition (fallback synthesis from asset_allocation).
+          L3: getBooksClientDetail, getBooksRelationshipComposition, getBooksRelationshipTimeseries + getMixTimeseries (quarterly bar).
+          L4: getBooksAccountComposition, account data from clientDetailData.accounts.
+          Uses useAuth for isFirmAdmin gate (N1 only shown to internal/dev users).
         </tab>
       </tabs>
 
@@ -224,12 +223,12 @@
           histogram. Below: quarterly metrics with time machine support.
         </description>
         <view_toggle options="aua nna geo adv" default="aua">
-          <view id="aua">Total assets by client type (NMNC/NMEC). Stacked bar / donut.</view>
-          <view id="nna">Net new assets with inflows/outflows diverging bar drill-down.</view>
+          <view id="aua">AUA sub-mode toggle: Clients (NMNC/NMEC stacked bar) | Mix (asset class absolute dollar stacked bar from getFirmMixViews). Mix uses FirmMixPeriodPoint with FIRM_MIX_COLORS. FirmCompositionSnapshot panel removed (was extra panel below chart).</view>
+          <view id="nna">Net new assets. Gross mode (inflows above zero, outflows below zero, net line) when cum_inflows/cum_outflows present; net-only fallback. Net Flow tooltip has gold dot. Colors: inflow #2196F3, outflow #EF4444.</view>
           <view id="geo">Geographic breakdown by region/city. Donut + distribution + metrics.</view>
           <view id="adv">Architect breakdown with client drill-down. Donut + distribution + metrics.</view>
         </view_toggle>
-        <data_source>getPartnerAnalytics() — fetched at page level (AdvisorIntelligence.tsx:81-87), passed as prop</data_source>
+        <data_source>getPartnerAnalytics() — fetched at page level, passed as prop. getFirmMixViews() — fetched via useQuery when AUA Mix sub-mode active.</data_source>
         <also_fetches>getCumulativeChart() — 2-year daily cumulative NNA for all 4 views</also_fetches>
       </permanent_header_panel>
 
@@ -326,6 +325,18 @@
         <function name="getImplementorLeaderboard" endpoint="GET /api/scoped/advisor-intelligence/implementor_leaderboard.json" response_type="LeaderboardResponse" pages="AdvisorIntelligence (AdvisorsTab)"/>
         <function name="getAdvisorBook" endpoint="GET /api/scoped/advisor-intelligence/advisors/{advisorId}/book.json" params="advisorId: string" response_type="AdvisorBookResponse" pages="AdvisorIntelligence (BooksTab)" note="Static JSON via CloudFront/S3 with firm routing"/>
         <function name="getAdvisorRollingFlows" endpoint="GET /api/scoped/advisor-intelligence/advisor_rolling_flows.json" response_type="AdvisorRollingFlowsResponse" pages="AdvisorIntelligence (AdvisorsTab)" note="Static JSON via CloudFront/S3 (opal-data-portal-v2 bucket)"/>
+        <function name="getBooksClientDetail" endpoint="GET /api/scoped/advisor-intelligence/clients/{clientKey}.json" params="clientKey: string" response_type="BooksClientDetailResponse" pages="AdvisorIntelligence (BooksTab L3)" note="Static JSON via CloudFront/S3"/>
+        <function name="getBooksRelationshipTimeseries" endpoint="GET /api/scoped/partners/books/relationship/{id}/timeseries?firmId=" response_type="BooksTimeseriesResponse" pages="AdvisorIntelligence (BooksTab L3 quarterly bar)" note="Lambda opal-partners-data via API Gateway. LAMBDA_FIRM_ID mapping applied."/>
+        <function name="getBooksAccountTimeseries" endpoint="GET /api/scoped/partners/books/account/{id}/timeseries?firmId=" response_type="BooksTimeseriesResponse" pages="AdvisorIntelligence (BooksTab L4)"/>
+        <function name="getBooksRelationshipComposition" endpoint="GET /api/scoped/partners/books/relationship/{id}/composition?firmId=" response_type="BooksCompositionResponse" pages="AdvisorIntelligence (BooksTab L3 mix donut + holdings)"/>
+        <function name="getBooksAccountComposition" endpoint="GET /api/scoped/partners/books/account/{id}/composition?firmId=" response_type="BooksCompositionResponse" pages="AdvisorIntelligence (BooksTab L4 mix donut + holdings)"/>
+        <function name="getBooksFirmComposition" endpoint="GET /api/scoped/partners/books/firm/all/composition?firmId=" response_type="BooksCompositionResponse" pages="AdvisorIntelligence (BooksTab N1 mix donut + holdings)" note="JWT authorizer fixed 2026-03-19. Falls back to synthesis from portfolio.allocation if Lambda unavailable."/>
+        <function name="getMixTimeseries" endpoint="GET /api/scoped/partners/books/relationship/{id}/mix-timeseries?firmId=" response_type="MixTimeseriesPoint[]" params="relationshipId, firmId, window?: MixWindow" pages="AdvisorIntelligence (BooksTab L3 quarterly bar)" note="Extracts .mix from envelope response"/>
+        <function name="getFirmMixTimeseries" endpoint="GET /api/scoped/partners/books/relationship/0/mix-timeseries?firmId=" response_type="MixTimeseriesPoint[]" pages="AdvisorIntelligence (BooksTab)" note="Firm aggregate using relationship_id=0"/>
+        <function name="getFirmMixViews" endpoint="GET /api/scoped/partners/books/firm/all/mix-views?firmId=" response_type="FirmMixViewsResponse" pages="AdvisorIntelligence (BooksTab N1 quarterly bar, PartnerAnalytics AUA Mix stacked bar)" note="Pre-aggregated quarterly/monthly/annually. JWT authorizer fixed 2026-03-19. Path was bug-fixed from firm/mix-views -> firm/all/mix-views (2026-03-19)."/>
+        <function name="getConcentrationTimeseries" endpoint="GET /api/scoped/partners/books/relationship/{id}/concentration-timeseries?firmId=" response_type="ConcentrationResponse" params="relationshipId, firmId, window?: MixWindow" pages="AdvisorIntelligence (BooksTab L3)"/>
+        <function name="getAdvisorTimeseries" endpoint="GET /api/scoped/partners/books/advisor/{id}/timeseries?firmId=" response_type="AdvisorTimeseriesResponse" params="advisorId, firmId" pages="AdvisorIntelligence (BooksTab L2 quarterly bar)" note="Added WS3e 2026-03-19. JWT authorizer fixed 2026-03-19."/>
+        <function name="getAdvisorMixTimeseries" endpoint="GET /api/scoped/partners/books/advisor/{id}/mix-timeseries?firmId=" response_type="AdvisorMixTimeseriesResponse" params="advisorId, firmId, window?: MixWindow" pages="AdvisorIntelligence (BooksTab L2 quarterly bar)" note="Added WS3e 2026-03-19. JWT authorizer fixed 2026-03-19."/>
       </functions>
       <dimension_constants>
         <constant name="TIMESERIES_DIMENSIONS" values="total category architect region account_type tax_status client_segment state city relationship implementor" count="11"/>
@@ -469,17 +480,18 @@
   <!-- ================================================================== -->
 
   <pod_health>
-    <open_issues_count>5</open_issues_count>
+    <open_issues_count>3</open_issues_count>
     <todo_count>2</todo_count>
     <missing_deliverables_count>0</missing_deliverables_count>
     <summary>
-      Both pages at 100% RD audit coverage as of 2026-03-03. ModelPortfolios is stable; main
-      outstanding items are the disabled 401 redirect in portal-proxy and a demo-mode public
-      endpoint for account distribution. AdvisorIntelligence is fully documented (Distribution,
-      Advisors, Books tabs all functional; AssetIntelligenceTab unused legacy code). Auth refactor
-      (remove firmId query param from scoped endpoints) and account-distribution private endpoint
-      migration are pending TODOs. Wave 3 DS data_contract.xml issuance is now unblocked —
-      both RD page inventories are complete.
+      ADVI_MVP318 WS3e+WS5 complete as of 2026-03-19. BooksTab canonical N1/L2/L3/L4 framework
+      functional. L2 quarterly bar now wired via getAdvisorTimeseries+getAdvisorMixTimeseries.
+      API Gateway auth fixed for firm/all/composition, firm/all/mix-views, advisor timeseries routes.
+      getFirmMixViews path bug fixed (firm/mix-views -> firm/all/mix-views).
+      PartnerAnalytics AUA Mix stacked bar wired but requires gold layer run for data.
+      Outstanding: WS4 pod_inventory gate cleared (RD 62143e7), marked complete.
+      ADVI_MVP318.004 complete. Pending TODOs: auth refactor (firmId param removal),
+      account-distribution private endpoint migration.
     </summary>
     <blockers/>
   </pod_health>
