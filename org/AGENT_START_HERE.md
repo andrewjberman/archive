@@ -210,6 +210,31 @@ Ready to work. What would you like me to focus on?
 
 ---
 
+## Runtime Attribution Rule (MANDATORY)
+
+Any project, task order, or deliverable where code was produced by the
+ka_testing Docker runtime (org/ka_testing) MUST be marked with `[*runtime]`
+in REGISTRY.md, project JSON phase fields, and session log Files Modified tables.
+
+**Format:**
+- REGISTRY.md Phase column: `Phase N: ... [*runtime on WS1, WS3]`
+- Session log Files Modified: `path/to/file.py | Changed | Yes — `sha` [*runtime]`
+- Project JSON `phase` field: append `[*runtime: WS1 DS, WS7 RD]`
+
+**Why this matters:** Runtime agents produce code that is often partially
+correct but may contain structural defects (duplicate bodies, syntax errors,
+stub implementations, file overwrites). The asterisk is not a quality judgment —
+it is an audit trail marker. It means the deliverable was produced autonomously
+and must be verified before treating as human-reviewed production quality.
+
+Performance baseline as of 2026-03-19:
+- CLSUNI test: ~36% of final committed code unedited from runtime
+- CLSPT2 test: ~67% of final committed code unedited from runtime
+
+Runtime config and results live at: `org/ka_testing/`, `.runtime/results/`
+
+---
+
 ## Session Logging Protocol
 
 ### Log Location
