@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-03-05</date>
-    <status>complete</status>
+    <status>pending</status>
     <priority>HIGH — 5 commits of Phase 3 FE work unreachable until pushed</priority>
   </metadata>
 
