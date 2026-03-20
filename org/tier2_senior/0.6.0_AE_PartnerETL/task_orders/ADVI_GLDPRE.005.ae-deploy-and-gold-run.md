@@ -12,8 +12,8 @@
     Deploy all GLDPRE code changes to AWS and run a FULL gold layer rebuild.
     Three deployment targets: (1) Lambda opal-partners-data via Terraform (WS3 mix.json fix),
     (2) EC2 gold scripts via S3 sync (WS1 06b ETFClassifier), (3) full gold rerun to produce
-    4-class firm_mix_views.json with cash-as-residual. After WS2 (script 09 aua_mix) is
-    committed by DS, include that in the S3 upload and gold run as well.
+    4-class firm_mix_views.json with cash-as-residual. WS2 (client_performance total
+    substitution) was committed to 06b at 61f76c8b — all code gates are cleared.
   </objective>
 
   <context>
@@ -38,8 +38,8 @@
       aua_mix section -- will be committed by DS before this task order executes
 
     Pending DS commit (WS2 gate):
-    - Script 09 aua_mix section. CTO confirmed target: script 09, not archived 08.
-      Wait for DS commit before uploading 09 to S3. 06b and Lambda can deploy immediately.
+    WS2 landed in 06b (61f76c8b), not script 09. All code gates cleared.
+      No script 09 changes needed. Proceed with all phases.
   </context>
 
   <scope>
@@ -48,9 +48,11 @@
       <file action="upload-to-s3">data/black_diamond/scripts/gold/06b_build_client_mix_timeseries.py</file>
       <file action="upload-to-s3">data/black_diamond/scripts/gold/lib/etf_classifier.py</file>
       <file action="upload-to-s3">data/black_diamond/scripts/gold/lib/__init__.py</file>
+      <file action="upload-to-s3">data/black_diamond/scripts/gold/12_build_composition_artifacts.py</file>
+      <file action="upload-to-s3">data/black_diamond/scripts/gold/run_gold_layer.sh</file>
       <file action="upload-to-s3">data/black_diamond/scripts/silver/bd_price_update.py</file>
       <file action="upload-to-s3">data/black_diamond/scripts/silver/inject_scoped_overrides.py</file>
-      <file action="upload-to-s3-if-committed">data/black_diamond/scripts/gold/09_generate_partner_analytics.py</file>
+      <!-- script 09 not changed — WS2 went into 06b instead -->
       <file action="run-on-ec2">run_gold_layer.sh --full</file>
     </files>
   </scope>
@@ -135,7 +137,8 @@
     <requirement id="2" priority="phase-2">
       Upload updated gold scripts to S3 per EC2_CODE_DEPLOYMENT_STANDARD.md.
 
-      Upload 06b (changed), lib/etf_classifier.py (dependency), and lib/__init__.py (required for import):
+      Upload 06b (changed), lib/etf_classifier.py (dependency), lib/__init__.py (required for import),
+      script 12 (BKSCMP composition artifacts — new), and run_gold_layer.sh (updated to include 12):
         export AWS_EC2_METADATA_DISABLED=true
         export MSYS_NO_PATHCONV=1
         aws s3 cp data/black_diamond/scripts/gold/06b_build_client_mix_timeseries.py \
@@ -144,10 +147,19 @@
           s3://opal-data-bd/code/gold/lib/etf_classifier.py
         aws s3 cp data/black_diamond/scripts/gold/lib/__init__.py \
           s3://opal-data-bd/code/gold/lib/__init__.py
+        aws s3 cp data/black_diamond/scripts/gold/12_build_composition_artifacts.py \
+          s3://opal-data-bd/code/gold/12_build_composition_artifacts.py
+        aws s3 cp data/black_diamond/scripts/gold/run_gold_layer.sh \
+          s3://opal-data-bd/code/gold/run_gold_layer.sh
 
       CRITICAL: lib/__init__.py must be uploaded or `from lib.etf_classifier import ETFClassifier`
       will fail with ModuleNotFoundError on EC2. If lib/__init__.py does not exist locally, create
       an empty one: `touch data/black_diamond/scripts/gold/lib/__init__.py`
+
+      CRITICAL: script 12 and the updated run_gold_layer.sh MUST be uploaded. Script 12 is
+      wired into run_gold_layer.sh at lines 116 (incremental) and 163 (full). If script 12
+      is missing from S3, run_gold_layer.sh will fail when it tries to execute it.
+      This covers ADVI_BKSCMP.004 (AE EC2 gold run).
 
       Do NOT upload uncommitted files. Do NOT write code directly to EC2.
     </requirement>
@@ -172,18 +184,20 @@
     <!-- ============================================================ -->
 
     <requirement id="4" priority="gate">
-      HARD GATE: Wait for DS to commit WS2 (script 09 aua_mix section) to CLOUD.
-      Check:
-        git log --oneline -- data/black_diamond/scripts/gold/09_generate_partner_analytics.py
-      The commit message should reference GLDPRE WS2 or aua_mix. Do not proceed to
-      Phase 4 until this commit exists on CLOUD.
+      WS2 GATE: CLEARED. DS committed WS2 to 06b (not script 09) at 61f76c8b.
+      WS2 substitutes client_performance total into 06b's compute_period_views.
+      Since 06b is already uploaded in Phase 2 (req 2), no additional S3 upload
+      is needed for WS2. Proceed directly to Phase 4.
 
-      Once committed, upload script 09 to S3:
-        aws s3 cp data/black_diamond/scripts/gold/09_generate_partner_analytics.py \
-          s3://opal-data-bd/code/gold/09_generate_partner_analytics.py
-      Pull to EC2:
-        aws s3 cp s3://opal-data-bd/code/gold/09_generate_partner_analytics.py \
-          ~/bd-gold/data/black_diamond/scripts/gold/09_generate_partner_analytics.py
+      Verify WS2 commit is on CLOUD:
+        git log --oneline -1 61f76c8b
+      Expected: [GLDPRE] WS2: substitute client_performance total into 06b firm_mix_views
+
+      IMPORTANT: The 06b uploaded in Phase 2 must be from HEAD (which includes
+      both WS1 at 3ede9fc4 AND WS2 at 61f76c8b). If you already uploaded 06b
+      before WS2 was committed, re-upload it:
+        aws s3 cp data/black_diamond/scripts/gold/06b_build_client_mix_timeseries.py \
+          s3://opal-data-bd/code/gold/06b_build_client_mix_timeseries.py
     </requirement>
 
     <!-- ============================================================ -->
@@ -239,19 +253,23 @@
         aws s3 ls s3://opal-data-bd/gold/advisors/ --recursive | grep mix.json | head -5
         (Should show mix.json for multiple advisors)
 
-      Check 4: timeseries_chart.json has aua_mix section (requires WS2):
-        aws s3 cp s3://opal-data-bd/gold/timeseries_chart.json /tmp/tc.json
+      Check 4: firm_mix_views.json total_aua matches client_performance (WS2):
         python3 -c "
-        import json
-        d = json.load(open('/tmp/tc.json'))
-        assert 'aua_mix' in d, 'aua_mix section missing'
-        am = d['aua_mix']
-        for gran in ['quarterly','monthly','annually']:
-            if gran in am:
-                cats = am[gran].get('categories', [])
-                print(f'{gran}: {len(am[gran].get(\"data\",[]))} periods, categories={cats}')
-                assert set(cats) == {'Equity','Fixed Income','Alternatives','Cash'}, f'Wrong cats: {cats}'
-        print('PASS: aua_mix present with 4 categories')
+        import json, boto3, pandas as pd
+        from io import BytesIO
+        s3 = boto3.client('s3', region_name='us-east-1')
+        fmv = json.load(open('/tmp/fmv.json'))
+        obj = s3.get_object(Bucket='opal-data-bd', Key='gold/client_performance.parquet')
+        cp = pd.read_parquet(BytesIO(obj['Body'].read()))
+        latest = cp['date'].max()
+        cp_total = cp[cp['date'] == latest]['total_aua'].sum()
+        fmv_total = fmv['views']['quarterly'][-1]['total_aua']
+        diff = abs(fmv_total - cp_total)
+        print(f'client_performance total: {cp_total:,.2f}')
+        print(f'firm_mix_views total:     {fmv_total:,.2f}')
+        print(f'diff: {diff:,.2f}')
+        assert diff < 1.0, f'Total divergence too large: {diff}'
+        print('PASS: firm_mix_views total matches client_performance')
         "
 
       Check 5: No structured_notes, other, or 5-class data in output:
@@ -291,20 +309,23 @@
     <criterion id="1">Lambda opal-partners-data deployed via Terraform; 0-diff plan passes; tag pushed</criterion>
     <criterion id="2">06b + lib/etf_classifier.py uploaded to S3 and pulled to EC2</criterion>
     <criterion id="3">ETFClassifier.instance() resolves on EC2 with >= 116 tickers</criterion>
-    <criterion id="4">Script 09 uploaded to S3 (after DS WS2 commit)</criterion>
+    <criterion id="4">WS2 commit (61f76c8b) included in uploaded 06b — verify by checking HEAD includes both WS1+WS2</criterion>
     <criterion id="5">FULL gold layer completes without errors</criterion>
     <criterion id="6">firm_mix_views.json: exactly 4 classes, sum equals total_aua, cash is residual</criterion>
     <criterion id="7">Advisor mix.json files present for >= 10 advisors</criterion>
-    <criterion id="8">timeseries_chart.json has aua_mix with 4 categories (after WS2)</criterion>
-    <criterion id="9">No structured_notes or other in any output JSON</criterion>
+    <criterion id="8">firm_mix_views.json total_aua matches client_performance total for same date (within $1)</criterion>
+    <criterion id="9">No structured_notes or other in firm_mix_views.json</criterion>
     <criterion id="10">EC2_MANIFEST.json updated with deployment record</criterion>
     <criterion id="11">lambda-source-map.json updated; CHANGELOG.json written; tag pushed</criterion>
+    <criterion id="12">BKSCMP: 12_build_composition_artifacts.py uploaded to S3 and executed in gold run</criterion>
+    <criterion id="13">BKSCMP: firm_composition.json exists in S3 (s3://opal-data-bd/gold/firm_composition.json)</criterion>
+    <criterion id="14">BKSCMP: per-advisor composition.json files exist (s3://opal-data-bd/gold/advisors/*/composition.json — expect >= 10)</criterion>
   </acceptance_criteria>
 
   <constraints>
     <constraint>Follow LAMBDA_DEPLOYMENT_PROTOCOL exactly — Terraform is the only Lambda deploy mechanism</constraint>
     <constraint>Follow EC2_CODE_DEPLOYMENT_STANDARD — repo -> S3 -> EC2 pull, never write code directly to EC2</constraint>
-    <constraint>Do NOT upload uncommitted code to S3 — verify DS WS2 commit before uploading script 09</constraint>
+    <constraint>Do NOT upload uncommitted code to S3 — verify HEAD includes WS2 commit 61f76c8b before uploading 06b</constraint>
     <constraint>Do NOT start gold run until ETFClassifier.instance() resolves on EC2 (req 3 verify)</constraint>
     <constraint>If ETFClassifier scan fails during gold run, STOP and report — do not let it silently fall back</constraint>
     <constraint>FULL mode only — incremental will not reclassify existing positions with new taxonomy</constraint>
@@ -316,20 +337,19 @@
   </constraints>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform" task="GLDPRE WS2" status="pending">
-      Script 09 aua_mix section committed to CLOUD — HARD GATE for Phase 3/4.
-      Phase 1 (Lambda) and Phase 2 (06b S3 upload) can proceed without this.
+    <dependency agent="0.4.0_DS_ClientPlatform" task="GLDPRE WS2" status="complete">
+      DS committed WS2 to 06b at 61f76c8b on CLOUD. Gate cleared.
+      06b now reads client_performance total instead of independent positions_cube sum.
     </dependency>
-    <dependency agent="0.4.0_DT_ClientPlatform" task="ClientsTab.tsx fix" status="pending">
-      CTO fixed structured_notes/other lines in ClientsTab.tsx deriveQuarterlyFromTimeseries.
-      Must be committed to portal DEV before portal merge gate. Not a gate for this task order.
+    <dependency agent="0.4.0_DT_ClientPlatform" task="ClientsTab.tsx fix" status="complete">
+      DT committed a466a7b on portal DEV. Gate cleared.
     </dependency>
   </dependencies>
 
   <deliverables>
     <deliverable type="deploy">Lambda opal-partners-data at partners-api-v{NEXT} (mix.json fix)</deliverable>
     <deliverable type="deploy">06b + lib/etf_classifier.py on EC2 via S3</deliverable>
-    <deliverable type="deploy">Script 09 on EC2 via S3 (after WS2 commit)</deliverable>
+    <!-- Script 09 not changed — WS2 went into 06b -->
     <deliverable type="verify">FULL gold layer run complete; all acceptance criteria verified</deliverable>
     <deliverable type="document">EC2_MANIFEST.json updated</deliverable>
     <deliverable type="document">lambda-source-map.json updated, CHANGELOG.json written</deliverable>
