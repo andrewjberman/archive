@@ -1,0 +1,47 @@
+{
+  "code": [
+    {
+      "label": "Gold script 06b -- builds firm_mix_views.json + per-advisor mix.json + client_mix_timeseries parquet (4-class taxonomy via ETFClassifier)",
+      "path": "data/black_diamond/scripts/gold/06b_build_client_mix_timeseries.py"
+    },
+    {
+      "label": "Gold script 12 -- builds firm_composition.json + per-advisor composition.json (asset mix radial + top holdings per class, ETFClassifier)",
+      "path": "data/black_diamond/scripts/gold/12_build_composition_artifacts.py"
+    },
+    {
+      "label": "Lambda function -- opal-partners-data (partners-api-v1.8.0). Contains ALL routes: mix-views, advisor mix, firm composition, advisor composition, relationship composition",
+      "path": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py"
+    },
+    {
+      "label": "Portal API endpoints -- advisor-intelligence.ts. All fetch functions for AdvisorIntelligence page",
+      "path": "portal/src/api/endpoints/advisor-intelligence.ts"
+    },
+    {
+      "label": "Portal TypeScript types -- types.ts. FirmMixViewsResponse, BooksCompositionResponse, AuaMixView, MixAssetClass, MixItem, etc.",
+      "path": "portal/src/pages/AdvisorIntelligence/types.ts"
+    },
+    {
+      "label": "PartnerAnalytics.tsx -- Assets Overview header panel (AUA / Clients / Mix toggles). The 'Mix' toggle is broken.",
+      "path": "portal/src/pages/AdvisorIntelligence/components/PartnerAnalytics.tsx"
+    },
+    {
+      "label": "ClientsTab.tsx -- Books tab with Overview panels (Asset Mix radial + Top Holdings bars). Both are broken at all drill levels.",
+      "path": "portal/src/pages/AdvisorIntelligence/tabs/ClientsTab.tsx"
+    },
+    {
+      "label": "AUACompositionChart.tsx -- composition chart rendering component",
+      "path": "portal/src/pages/AdvisorIntelligence/components/AUACompositionChart.tsx"
+    },
+    {
+      "label": "MixTimeseriesPanel.tsx -- ClientDetail mix timeseries panel (recently fixed by DT for 4-class taxonomy)",
+      "path": "portal/src/pages/AdvisorIntelligence/ClientDetail/panels/MixTimeseriesPanel.tsx"
+    }
+  ],
+  "documents": [
+    {
+      "label": "ADVI_MVPLVL.009 task order -- full problem statement, data sources, Lambda routes, TypeScript types, acceptance criteria",
+      "path": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ADVI_MVPLVL.009.mix-composition-e2e.md"
+    }
+  ],
+  "inline": "GOAL: Two views in AdvisorIntelligence are completely non-functional despite all upstream projects being marked complete. (1) Assets Overview 'Mix' toggle does not display -- should show asset class stacked bar (equity, fixed income, alternatives, other) in same format as NMEC/NMNC in Clients toggle. (2) Books tab 'Asset Mix' radial + 'Top Holdings' bars do not load at any drill level (firm, advisor, relationship). This thread is a diagnostic -- each agent traces their segment of the chain and identifies exactly where the break is.\n\nROLES:\n- DS (knowledge source): Describes gold layer outputs -- what 06b and 12 produce, JSON shapes, S3 paths, field names\n- AE (knowledge source): Confirms Lambda routes serve the data correctly -- HTTP status, response shape, S3 key mapping\n- DE (knowledge receiver + fixer): Traces API fetch chain through TypeScript types to components, identifies wiring gaps\n- RD (knowledge receiver + fixer): Identifies rendering expectations and what the components need from the data\n\nDELIVERABLE: Thread receipt containing (1) confirmed data path from gold -> Lambda -> portal for each view, (2) exact location of every break in the chain, (3) agreed fix plan per agent.\n\nDEFINITIONS:\n- 'Mix' = breakdown by ASSET CLASS (equity, fixed income, alternatives, other)\n- 'Concentration' = breakdown by SECURITY (individual holdings ranked by market value)\n- 'Other' in Mix context = residual AUA not in equity/fixed_income/alternatives (primarily cash). Do NOT add 'Cash' as a separate label.\n\nCRITICAL CONSTRAINT: Do NOT assume data is missing. The gold rerun completed 2026-03-20 evening. Scripts 06b + 12 ran successfully. Lambda partners-api-v1.8.0 is deployed with all routes. The break is MOST LIKELY in the frontend wiring or a shape mismatch between Lambda response and TypeScript types. Verify before declaring anything missing."
+}
