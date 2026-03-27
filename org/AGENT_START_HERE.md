@@ -1059,6 +1059,18 @@ The `deliverables/` folder holds the agent's **core document** (see Core Documen
 
 ---
 
+## Time Zone Rule
+
+**All times reported to Andrew must be in US Eastern Time (ET).** Never report UTC,
+Zulu, or any other timezone. When reading UTC timestamps from logs, S3, git, or AWS,
+convert to ET before presenting. Eastern is UTC-5 (EST) or UTC-4 (EDT). As of March
+2026 we are in EDT (UTC-4). If you are unsure of the offset, run `TZ=America/New_York date`.
+
+This applies to: session logs, status reports, deployment timestamps, gold run times,
+S3 object timestamps, git commit times, and any other time you report to Andrew.
+
+---
+
 ## Quick Reference
 
 - **Documentation:** `docs/` directory mirrors project structure
