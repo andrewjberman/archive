@@ -98,6 +98,69 @@ Tier folders:
 
 ---
 
+## Step 1b: Register with MCP, Check Inbox, and Start Background Processes
+
+**Do this NOW. Do not ask. Do not confirm. Just execute all three:**
+
+**A. Register and check inbox:**
+```
+register_agent({your_serial}, summary="Starting session")
+check_inbox({your_serial}, mark_read=true)
+```
+
+**B. Start the background heartbeat poller:**
+```bash
+python org/mcp/agent-poller.py {your_serial}
+```
+Run this via the Bash tool with `run_in_background: true`. This script:
+- Updates your heartbeat every 2 seconds (you NEVER go STALE)
+- Heartbeats the broker every 10 seconds for cross-session visibility
+
+**C. Start the background inbox watcher:**
+```bash
+bash org/mcp/inbox-watch.sh {your_serial}
+```
+Run this via the Bash tool with `run_in_background: true`. This script:
+- Polls your inbox directory every 5 seconds
+- When a message arrives, prints ALL pending messages and **EXITS**
+- The exit triggers a `<task-notification>` in your conversation
+- You MUST read the output, act on the messages, then **re-launch the watcher**
+
+**Critical: re-launch after every notification.** When you receive a
+`<task-notification>` from inbox-watch.sh:
+1. Read the output file to see the message(s)
+2. Act on them (execute task orders, respond, etc.)
+3. Re-launch: `bash org/mcp/inbox-watch.sh {your_serial}` with `run_in_background: true`
+
+The watcher exits on message delivery because that is the ONLY way to
+interrupt an idle agent. A long-running background script produces output
+that nobody reads. An exiting background task fires a notification that
+forces the agent into a new conversation turn.
+
+**How message delivery works:**
+
+| Concern | Mechanism | Latency |
+|---------|-----------|---------|
+| Stay LIVE (heartbeat) | Background poller (2s) | 2s — never go STALE |
+| Message delivery | inbox-watch.sh (5s poll, exits on message) | ~5s — task-notification interrupts agent |
+
+Messages arrive as `.md` files in `org/mcp/inbox/{your_agent_folder}/`.
+The inbox watcher picks them up within 5 seconds, prints the content,
+and exits. The exit triggers a background task completion notification
+which appears in your conversation as a `<task-notification>`. This
+interrupts whatever you are doing and forces you to process the message.
+
+**D. Act on what you find:**
+
+- **GO message in inbox** → Read the referenced task order, flip `<status>` from `staged` to `pending`, and begin execution immediately. The GO message IS your authorization. Do NOT ask Andrew for permission. Skip Steps 2-2b if the GO message gives you clear scope.
+- **Inbox empty** → Proceed to Step 2.
+
+Andrew runs agents in parallel across terminal windows. COO sends GO messages to
+activate task orders. If you don't register, poll, and check inbox, you miss
+the activation signal and force Andrew to manually relay the message.
+
+---
+
 ## Step 2: Read Your Recent Logs (HIGHEST PRIORITY)
 
 **THIS IS THE MOST IMPORTANT STEP.**
@@ -114,46 +177,293 @@ Tier folders:
 
 ---
 
-## Step 2b: Proactive Downstream Check
+## Step 2b: Ground Truth Reconciliation (WRITE OPERATION)
 
-After reading your own logs, close the loop on every active handoff. An agent that only reads
-their own context will miss what happened after they handed work off — this step eliminates that blind spot.
+**You are the startup OS process.** Your job is to reconcile declared state (task order
+statuses, project JSON phases, registry rows) against actual state (agent logs, git
+commits, deployed artifacts). Every discrepancy you find MUST be corrected immediately
+using the Edit tool — before you present your oriented summary.
 
-### Two directions to check
+The outputs of this step are:
+1. **All status documents updated to reflect reality** — task orders, project JSONs, registry
+2. **A clear picture of what work is actually pending** — which agents, which task orders, what remains
+3. **Uncommitted changes identified** — what exists locally but hasn't been pushed
 
-**1. Downstream — agents you handed work to**
+### MANDATORY FIRST ACTION: MCP Server Must Be Running
 
-Scan your most recent log's `## Next Steps` for `[agent_serial]` tags. Each tagged agent is a
-first-order contact. For each one:
+The `opal-agent-comms` MCP server is the backbone of inter-agent communication.
+**Before doing ANYTHING else in Step 2b, you must confirm the server is connected
+and start it yourself if it is not.**
+
+**Step A — Check if MCP tools are available:**
+
+Use `ToolSearch` to look for `get_agent_status`. If the tool appears, the server
+is connected — skip to Step B.
+
+**Step B — If MCP tools are NOT available, start the server yourself:**
+
+```bash
+# Test that the server starts without errors (will hang on stdin — that is correct)
+timeout 3 python org/mcp/server.py 2>&1 || true
+```
+
+If the test produces import errors, fix them (likely `pip install mcp`).
+If the test produces no errors (clean exit after timeout), the server binary is healthy
+but Claude Code has not connected to it. Tell Andrew:
+
+> "The `opal-agent-comms` MCP server is healthy but not connected to this session.
+> Run `/mcp` to check its status, or restart Claude Code so it reads `.mcp.json`
+> on startup and prompts you to approve it."
+
+**Do NOT proceed past this point until the MCP tools are available.** No fallback
+to manual file reads. The MCP server exists to prevent agents from missing cross-agent
+state — manual reads are error-prone, miss inbox messages, skip fuzzy serial resolution,
+and produce inconsistent project queries. The correct action is to fix the connection,
+not to work around it.
+
+**Step C — Verify connectivity with a live call:**
+
+Once MCP tools are available, run one test call to confirm end-to-end:
+```
+get_agent_status({your_serial})
+```
+If this returns your status, the server is fully operational. Proceed to Step D.
+
+**Step D — Register as live (MANDATORY for all agents):**
+
+Call `register_agent` with your serial and a brief summary of what you're about to work on.
+This is NOT optional. It does three things:
+
+1. **Makes you visible** to other agents via `get_live_agents` — they can see you're active
+2. **Starts the broker** if it's not running — the broker routes messages between concurrent sessions
+3. **Enables instant message delivery** — messages sent to you while you're live arrive via channel push instead of waiting for you to poll your inbox
 
 ```
-{agent_folder}/logs/{latest-date}/    <- read ALL files in their latest date folder
+register_agent({your_serial}, summary="Starting session: ground truth reconciliation for ADVI_PRICES")
 ```
 
-Look for: did they receive and act on the handoff? What is their current state? Any new blockers?
+Update your summary as your focus changes during the session:
+```
+set_summary({your_serial}, summary="Running gold layer, waiting on COO review")
+```
 
-**2. Upstream — agents who issued work to you**
+Heartbeat and inbox polling are handled by the CronCreate loop you set up in Step 1b.
+You do NOT need to manually call heartbeat — the cron job does it automatically.
 
-Check the `<issued_by>` field in each PENDING task order in your `task_orders/` folder.
-For each issuing agent, read their latest log folder.
+Use these MCP tools for all cross-agent queries — do NOT ask Andrew to relay status questions.
+
+### Protocol
+
+**1. Check your own task orders**
+
+Use `list_task_orders({your_serial})` to see all your pending and complete task orders.
+For each PENDING task order: is the work actually done? If yes, edit the `<status>` field
+from `pending` to `complete` immediately.
+
+**STAGED task orders:** If a task order has `<status>staged</status>`, it is assigned to
+you and scoped, but you MUST NOT begin work on it UNLESS you have a GO message in your
+inbox from COO or CTO authorizing it. `staged` means "COO will send you a go message
+when it is time to start." When you receive a go message (via `check_inbox` or broker
+push), flip the status to `pending` and begin immediately — do NOT ask Andrew for
+confirmation. The GO message IS the authorization.
+
+**2. Audit all agents on active projects**
+
+This is the core of the reconciliation. The purpose is to identify every agent who has
+a pending task order and determine whether the work is actually done, actually pending,
+or ambiguous.
+
+For each active project in REGISTRY.md, run:
+
+```
+query_project({project_code})
+```
+
+This returns every task order across every agent for that project. For each **pending**
+task order, check the assigned agent:
+
+```
+get_agent_status({agent_serial})
+```
+
+Then verify actual completion by examining evidence — not just the `<status>` field:
+- **Their latest logs** — does the log describe the deliverable as done?
+- **Their commits** — `git log --author="{agent_serial}" --oneline -10`
+- **Deployed artifacts** — git tags (`git tag -l "{pipeline}-v*" | sort -V | tail -5`),
+  S3 objects, terraform state
+- **Uncommitted local changes** — `git diff --name-only` for files in their scope
+
+The `<status>` field is a claim, not proof. An agent may have completed the work but
+not marked their task order. Conversely, an agent may have marked `complete` without
+the work actually being deployed or committed.
+
+**For each pending task order, classify it:**
+
+| Evidence | Classification | Action |
+|----------|---------------|--------|
+| Logs + commits confirm work is deployed/delivered | **Done** | Edit `<status>` to `complete`. Update project JSON phase. |
+| Logs show work in progress, partial commits exist | **In flight** | Note in summary. No status change. |
+| No logs, no commits, no evidence of activity | **Not started** | Note in summary as AMBIGUOUS. |
+| Agent marked complete but no supporting evidence | **Unverified** | Flag in summary. Do NOT trust without evidence. |
+| Status is `staged` — assigned but no go received | **Held** | Do NOT begin. Wait for COO go message. |
+
+**3. Check upstream — agents who issued work to you**
+
+For each PENDING task order in your `task_orders/` folder, check the `<issued_by>` agent:
+
+```
+get_agent_status({issuing_agent_serial})
+```
 
 Look for: did scope change? Did they issue new dependencies? Are they aware of your current blockers?
 
+**4. Check dependencies — task orders you're waiting on**
+
+For each `<dependency>` in your pending task orders, check the blocking agent:
+
+```
+list_task_orders({blocking_agent_serial}, project={project_code})
+```
+
+If the dependency task order is now `complete`, update the `<dependency status="">` field
+in YOUR task order from `pending` to `complete`. If the dependency is delivered AND your
+task order status is `pending`, proceed with your work. If your task order is `staged`,
+do NOT begin — wait for a go message from COO even if dependencies are met.
+
+**5. Update all status documents (Tier 1 and Tier 2 only)**
+
+After steps 1-4, you have the actual state of every active project. Now reconcile
+ALL status documents — not just your own, but every document that other agents or
+Andrew will read on their next session.
+
+**Project-level documents:**
+- **Project JSON `phase`** — rewrite to match what you found (which TOs are done, which are pending, what milestone the project is actually at)
+- **Project JSON `blocking`** — update to reflect actual current blockers, not historical ones
+- **Project JSON `status`** — if ALL task orders are complete and deliverables verified, set to `"complete"`
+- **REGISTRY.md** — update the Phase and Blocking columns to match the project JSON
+
+**Exec-level documents (CTO responsibility):**
+- **CTO `prompt.md` dashboard** — update Active Projects, Recently Completed, Pipeline Tags
+- **COO `prompt.md` dashboard** — update the Pod Delivery Dashboard (Active Projects table,
+  Pod status tables, Shared Services table) and Operational Health Checks (pipeline tags).
+  The COO boots from these tables. If they are stale, the COO's first session starts with
+  wrong assumptions about who is doing what. The CTO reconciliation must bring COO documents
+  to parity so the next COO session inherits correct state.
+
 ### Rules
 
-- **One hop only.** Read first-order contacts' latest logs. Do NOT recurse into their contacts.
-- **Latest date folder only.** Do not read their full log history — only the most recent date folder.
-- **Skip gracefully.** If all your task orders are complete, no pending handoffs exist, and your
-  last log has no `[agent_serial]` Next Steps tags, skip this step.
-- **Note gaps.** If a first-order agent has no `logs/` folder or no recent entries, flag it as
+- **Write, don't report.** Every stale document found MUST be corrected before presenting
+  your oriented summary. "Task order still marked pending" in your summary = you failed this step.
+- **Logs and commits are ground truth.** The `<status>` field in a task order is a claim,
+  not proof. Always verify against the agent's logs, git commits, and deployed artifacts
+  before deciding whether work is actually done.
+- **Identify uncommitted work.** Run `git status` and `git diff --name-only` to find
+  changes that exist locally but haven't been committed or pushed. This is critical —
+  unpushed work is invisible to other agents and to production.
+- **Skip gracefully.** If you have no active projects and no pending task orders, skip this step.
+- **Note gaps.** If a project-assigned agent has no logs or no recent entries, flag it as
   AMBIGUOUS in your Step 5 orientation summary — do not assume they are idle.
+
+### MCP Tools Reference
+
+| Tool | When to Use |
+|------|-------------|
+| `register_agent(serial, summary?)` | **MANDATORY on startup.** Registers you as live, starts broker, enables push messaging. |
+| `heartbeat(serial, summary?)` | Handled by CronCreate loop from Step 1b — do not call manually |
+| `set_summary(serial, summary)` | Update your work description visible to all agents |
+| `get_live_agents(pod?)` | See who's currently online. Optional pod filter (e.g., pod="4") |
+| `get_agent_status(serial)` | Quick check on any agent — liveness, summary, latest log, pending TOs, blockers |
+| `read_agent_latest_log(serial)` | Full log content when you need completion evidence |
+| `list_task_orders(serial, status?, project?)` | Check specific task order statuses |
+| `query_project(code)` | See all task orders across all agents for a project |
+| `send_message(from, to, subject, body)` | Send message to another agent — delivered via broker + channel push if they're live |
+| `check_inbox(serial)` | Read messages left for you by other agents |
+| `list_agents(tier?)` | All agents in org with liveness badges |
+| `get_org_summary()` | Org-wide view of live agents, active projects, pending work |
 
 ### What this catches
 
-This step is the mechanism for surfacing gaps like: task order marked complete but downstream
-agent never acted on it; handoff commit pushed but receiving agent has a blocker you don't know
-about; issuing agent changed scope but you haven't seen the update. Without this check, these
-gaps are invisible until a human runs an explicit audit.
+- Task order marked `pending` but the work is actually done (agent forgot to update status)
+- Task order marked `complete` but no commits or deploys support it (false completion)
+- Work completed locally but never committed or pushed (invisible to production and other agents)
+- Project JSON phase/blocking stale relative to actual agent progress
+- Agent assigned to a project with no logs or activity (silent failure)
+- Dependencies resolved but downstream agent hasn't noticed and is still waiting
+
+Without this reconciliation on every startup, these gaps compound across sessions
+until a human runs an explicit audit. The CTO startup IS that audit.
+
+---
+
+## Long-Running Operation Polling Protocol (SSM, gold runs, deploys)
+
+When you dispatch a long-running operation (SSM command, gold layer run, deploy script,
+any async process), you MUST poll for completion. Do not sleep. Do not wait silently.
+Do not ask Andrew to check for you.
+
+### Structure
+
+The polling loop interleaves two operations:
+
+1. **Status check** — poll the async operation (e.g., `aws ssm get-command-invocation`)
+2. **MCP heartbeat + inbox check** — every other iteration to stay LIVE and receive messages
+
+### Cadence
+
+- Poll the operation every tool call cycle (~15-30s natural latency)
+- Heartbeat every 2nd or 3rd poll to stay within the 2-minute LIVE window
+- **No `sleep` commands** — the natural latency of tool calls IS the pacing
+- Update your summary with current status: `set_summary(serial, "Gold run: 45 min elapsed, script 06b running")`
+
+### Exit Conditions (SSM example)
+
+| SSM Status | Action |
+|------------|--------|
+| `InProgress` | Continue polling |
+| `Success` | Proceed to post-run validation |
+| `Failed` | Pull `StandardOutputContent` + `StandardErrorContent`, diagnose |
+| `Cancelled` | Report to COO via `send_message`, do not retry without instruction |
+| `TimedOut` | Check if partial output was written to S3 log path, report |
+
+### Post-Completion
+
+On **Success**: immediately run validation checks (S3 ls for artifacts, download
+spot-check files, cross-validate metrics). Report completion to COO via `send_message`.
+
+On **Failed**: pull the last 500 lines of output:
+```bash
+aws ssm get-command-invocation --command-id "{id}" --instance-id "{id}" \
+  --query '{Status:Status,StandardOutputContent:StandardOutputContent,StandardErrorContent:StandardErrorContent}' \
+  --output json
+```
+SSM truncates output at 24KB. If truncated, pull the full log from the S3 path
+embedded in the SSM command.
+
+### SSM Command Template (gold layer runs)
+
+```bash
+cd /home/ubuntu/gold-layer/scripts \
+  && aws s3 sync s3://opal-data-bd/code/gold/ . \
+  && chmod +x *.sh *.py 2>/dev/null; \
+  ./run_gold_layer.sh full 2>&1 \
+  | tee /var/log/gold-full-run.log \
+  && aws s3 cp /var/log/gold-full-run.log \
+     s3://opal-data-bd/logs/gold-layer/gold_full_{task_slug}_$(date +%Y%m%d_%H%M%S).log
+```
+
+Key design choices:
+- **S3 sync first** — pulls latest code from S3 artifact store (never runs stale code)
+- **tee** — writes to local log AND stdout (SSM captures stdout)
+- **S3 upload at end** — full log persisted even if SSM truncates
+- **`$(date)` in S3 key** — prevents overwriting previous run logs
+- **Timeout 7200s** (2 hours) — generous ceiling for full runs
+
+### Why No Sleep
+
+`sleep` creates dead time where you are unresponsive to inbox messages and invisible
+to the org. The natural round-trip of tool calls (Bash for SSM check, MCP for heartbeat)
+provides ~15-30s spacing automatically. This is sufficient for operations that take
+minutes to hours.
 
 ---
 
@@ -195,7 +505,10 @@ This shows what other agents are working on, pushing, or deploying today. Before
 
 ## Step 5: Provide Oriented Summary
 
-Give the user a brief summary:
+Give the user a brief summary. By this point, all stale documents MUST already be
+corrected (Step 2b). Your summary should say "corrected N documents" — not "N documents
+need correction."
+
 ```
 Agent: [ID and name]
 Role: [role type]
@@ -203,6 +516,7 @@ Pod: [pod name, if applicable]
 Reports to: [manager agent ID]
 Current priority: [from logs if any]
 Key context: [from recent logs]
+Corrections made: [N task orders / project files corrected — or "none needed"]
 Downstream check: [what first-order agents did after your last handoff — or "no pending handoffs"]
 
 Ready to work. What would you like me to focus on?
@@ -753,6 +1067,9 @@ The `deliverables/` folder holds the agent's **core document** (see Core Documen
 - **Files:** Ask before reorganizing or deleting
 - **Dependencies:** Ask before installing packages
 - **Security:** Never expose credentials
+- **MCP server:** `opal-agent-comms` — inter-agent status checks, task order queries, async messaging. Use on every startup (Step 2b). Server source: `org/mcp/server.py`
+- **Broker:** Auto-launched by `register_agent`. Singleton HTTP server on localhost:7800 for cross-session message routing. Source: `org/mcp/broker.py`
+- **Monitor:** `python org/mcp/monitor.py` — live telemetry feed in a separate terminal. Supports `--pod N` and `--project CODE` filters.
 - **Terraform binary:** `.tools/terraform.exe`
 - **Bun:** `/c/Users/AndrewBerman/.bun/bin/bun`
 - **Git Bash PATH note:** `export MSYS_NO_PATHCONV=1` before commands with `/` paths
