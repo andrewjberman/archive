@@ -70,7 +70,7 @@
           ProtectedRoute requireDev). Without this, the page is unreachable.
 
       Push: git push on portal submodule DEV branch.
-      DT is responsible for this push; DE cannot push (AGENT_START_HERE.md abilities table).
+      DT is responsible for this push; DE cannot push (XXX.md abilities table).
     </requirement>
     <requirement id="3">
       PUSH WAVE 2 — RD implementation (after RD signals complete):

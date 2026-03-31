@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-03-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>ADVI_CLSPT2</project_code>
   </metadata>
 

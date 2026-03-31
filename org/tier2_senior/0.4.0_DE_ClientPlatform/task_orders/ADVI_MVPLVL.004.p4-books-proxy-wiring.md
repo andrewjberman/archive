@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-03-13</date>
-    <status>pending</status>
+    <status>complete</status><!-- Books proxy routes delivered under BKSCMP (partners-api-v1.5.0+). Project closed 2026-03-20. -->
     <thread_serial>ADVI_MVPLVL-004</thread_serial>
     <thread_ref>org/threads/ADVI_MVPLVL-004-p4-books-tab-alignment/</thread_ref>
   </metadata>

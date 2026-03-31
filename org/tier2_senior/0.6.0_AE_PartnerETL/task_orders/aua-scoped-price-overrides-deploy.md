@@ -6,7 +6,7 @@
     <issued_by>0.4.0_DS_ClientPlatform</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-03-17</date>
-    <status>pending</status>
+    <status>complete</status><!-- subsumed: scoped overrides deployed under GLDPRE, AUA recon -3.6% structural (by-design), project closed 2026-03-25 -->
   </metadata>
 
   <objective>

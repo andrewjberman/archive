@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-03-23</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>ADVI_PRICES</project_code>
     <thread_serial>ADVI_PRICES-001</thread_serial>
     <thread_ref>org/threads/ADVI_PRICES-001-lot-valuation-reconciliation-investigati/</thread_ref>
@@ -189,4 +189,33 @@
     <deliverable type="commit">WS2: structural_gap_exclusions.py + docs/data/structural_gap_exclusions.md</deliverable>
     <deliverable type="document">Pricing divergence brief in session log with top 10 securities + concentration assessment</deliverable>
   </deliverables>
+
+  <closure>
+    <closed_by>0.4.0_DS_ClientPlatform</closed_by>
+    <closed_date>2026-03-25</closed_date>
+    <summary>
+      Both workstreams delivered. WS1 deep-dive was superseded by PRICES.003
+      (yahoo priority dry-run) which answered the same questions more directly.
+
+      WS1 — Pricing Divergence:
+      - diag_pricing_divergence.py committed (0c62a3a2)
+      - Root cause: ~$41M of -$57.7M gap was transaction-observed (T1) pricing
+        lagging BD end-of-day NAV for 5 core ETFs (IEFA, IDVZ, Pathfinder US/Focused,
+        iShares EM). Not a bug — methodology difference (trade-execution vs close).
+      - PRICES.003 dry-run confirmed: switching 123 assets to yahoo_finance produces
+        +$52.1M MV increase, closing gap from -3.6% to ~-0.4% (90% reduction).
+      - Conclusion: CONCENTRATED, not systemic. Fixable via price source hierarchy
+        change (yahoo_finance priority for tickered assets).
+
+      WS2 — Structural Exclusions:
+      - build_structural_exclusion_list.py committed (4d6a0258)
+      - docs/data/structural_gap_exclusions.md committed (4d6a0258)
+      - Baseline: 394 accounts, ~$15M across EX1-EX6 codes. Accepted as known
+        limitation — these accounts lack transaction feeds by design.
+
+      Pricing recommendations brief in:
+      - org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-03-24/advi_prices_post_fix_verification.md
+      - org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-03-24/advi_prices_003_yahoo_priority_dryrun.md
+    </summary>
+  </closure>
 </task_order>

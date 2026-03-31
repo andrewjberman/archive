@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-03-05</date>
-    <status>pending</status>
+    <status>complete</status><!-- subsumed: portal-v2.1.17 52-commit merge (2026-03-23) included all YANGV2 Phase 3 FE work -->
     <priority>HIGH — 5 commits of Phase 3 FE work unreachable until pushed</priority>
   </metadata>
 

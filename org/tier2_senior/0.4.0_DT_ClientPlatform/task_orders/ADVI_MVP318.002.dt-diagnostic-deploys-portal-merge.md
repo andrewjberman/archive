@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-03-18</date>
-    <status>in_progress</status>
+    <status>complete</status><!-- WS6 subsumed by GLDPRE.006 portal merge (portal-v2.1.16, 2026-03-23). All workstreams delivered. -->
     <!-- WS1-A: DONE. Root cause: BD country='United States' not 'USA' in script 07. geo_us empty -> 0 categories. DS fix: fec1f7e4. AE rebuilt geo parquet: b2119882. -->
     <!-- WS1-deploy: DONE. bd-portal-publisher deployed at fec1f7e4 (bd-v2.19.1). Lambda re-invoked, geo verified: TX=$900,754,857, 9 states. -->
     <!-- WS2+WS3b: DONE. bd-portal-advisor-publisher at a3903a03+14b3be3d (D4+WS3a+open_lots). bd-v2.19.0. -->

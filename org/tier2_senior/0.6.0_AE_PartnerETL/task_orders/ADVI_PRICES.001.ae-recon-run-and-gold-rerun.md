@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-03-23</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>ADVI_PRICES</project_code>
     <thread_serial>ADVI_PRICES-001</thread_serial>
     <thread_ref>org/threads/ADVI_PRICES-001-lot-valuation-reconciliation-investigati/</thread_ref>

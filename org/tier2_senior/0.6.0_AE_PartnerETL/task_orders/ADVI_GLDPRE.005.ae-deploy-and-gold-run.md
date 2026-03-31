@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-03-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>ADVI_GLDPRE</project_code>
   </metadata>
 
