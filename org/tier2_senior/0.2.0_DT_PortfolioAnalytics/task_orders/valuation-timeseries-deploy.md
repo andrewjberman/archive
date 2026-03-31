@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DT_PortfolioAnalytics</issued_to>
     <date>2026-03-31</date>
-    <status>pending</status>
+    <status>complete</status>
   </metadata>
 
   <objective>
@@ -71,7 +71,7 @@
 
   <dependencies>
     <dependency agent="0.2.0_DS_PortfolioAnalytics" task="backend-monthly-data" status="complete">Lambda code change committed to CLOUD — commit 7ee774e0</dependency>
-    <dependency agent="0.2.4_RD_Valuation" task="frontend-monthly-labels" status="pending">Frontend code change committed to portal DEV</dependency>
+    <dependency agent="0.2.4_RD_Valuation" task="frontend-monthly-labels" status="complete">Frontend code change committed to portal DEV -- commits 38527e2, ac35d66</dependency>
   </dependencies>
 
   <deliverables>
