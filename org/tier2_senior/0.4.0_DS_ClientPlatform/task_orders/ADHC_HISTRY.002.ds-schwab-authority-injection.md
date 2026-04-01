@@ -4,29 +4,42 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-01</date>
-    <status>staged</status>
+    <status>pending</status>
     <priority>high</priority>
     <type>feature</type>
     <project>ADHC_HISTRY</project>
   </metadata>
 
   <objective>
-    Implement Schwab-authority injection in scripts 02 and 03. Replace the current
-    residual-based synthetic buy injection with direct Schwab unit targets derived
-    from the 6,510-account mapping breakthrough (P0 investigation).
+    REVISED 2026-04-01 (CTO, per Andrew's direction): Use silver/RPS/ as the Schwab
+    authority instead of silver/TRN/ reconstruction.
 
-    The core insight: BD's transaction feed is missing sell transactions (50,887
-    positions / $513M). The current rotation-capital injection uses residual back-solve
-    to estimate what was missing. Schwab TRN has the exact unit counts. Use them.
+    RPS = Schwab's daily position snapshot file. It reports quantity_settled per
+    (account, security) directly -- no FIFO reconstruction, no sign convention analysis.
+    Schwab tells us exactly what each account holds on each date.
 
-    Formula: injection_units = schwab_net_units - fifo_units (for accounts in the mapping).
-    This eliminates estimation error and makes the injection data-driven.
+    Two deliverables:
+    1. LATEST-DATE MATCHING: For the most recent RPS date, compute
+       injection_units = rps.quantity_settled - fifo_units per (account, asset).
+       This is the core Schwab-authority injection calculation.
+    2. TIME SERIES: Iterate over all available RPS dates. For each date build the
+       same (account, asset, gap) table. This gives a time series of when positions
+       diverge -- identifying exactly when BD's feed fell behind Schwab.
+
+    Focus on the 49Financial account universe (all accounts in the 6,510-account mapping).
+
+    Prerequisite: AE must build silver/RPS/ first (ADHC_HISTRY.003). Wait for AE's
+    MCP message confirming silver/RPS/ is ready before running on EC2.
   </objective>
 
   <references>
     <ref type="investigation_log">org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-03-31/adhc_histry_schwab_crossref_and_rotation_capital.md</ref>
+    <ref type="ae_session_log">org/tier2_senior/0.6.0_AE_PartnerETL/logs/2026-03-31/adhc_histry_schwab_silver_layer.md</ref>
     <ref type="account_mapping">s3://opal-data-bd/gold/dimensions/schwab_bd_account_mapping.parquet</ref>
-    <ref type="schwab_silver">s3://opal-data-schwab/silver/ (2.73M rows, 554 daily files, 2024-01-16 to 2026-03-30)</ref>
+    <ref type="schwab_rps_silver">s3://opal-data-schwab/silver/RPS/ (built by AE.003 -- wait for GO from AE)</ref>
+    <ref type="schwab_trn_silver">s3://opal-data-schwab/silver/TRN/ (337 partitions, fallback reference)</ref>
+    <ref type="rps_converter">data/black_diamond/scripts/bronze/convert_schwab_rps_to_parquet.py (schema reference)</ref>
+    <ref type="prior_injection_scripts">data/black_diamond/scripts/diagnostics/schwab_authority_injection_test.py (prior TRN approach -- superseded)</ref>
     <ref type="script_02">data/black_diamond/scripts/gold/02_build_positions_cube.py</ref>
     <ref type="script_03">data/black_diamond/scripts/gold/03_build_holdings_lots.py</ref>
   </references>
@@ -56,110 +69,110 @@
   <requirements>
 
     <requirement id="1">
-      PHASE 1 (DIAGNOSTIC): Write a diagnostic script at
-      `data/black_diamond/scripts/diagnostics/adhc_histry_005_schwab_authority_calc.py`
-
-      The diagnostic must:
-      a) Load `schwab_bd_account_mapping.parquet` from S3 (6,510 rows with BD and Schwab account IDs)
-      b) Aggregate Schwab TRN silver by (schwab_account_id, cusip) -> net_schwab_units
-         (sum quantity; use signed convention matching BD: buy=+, sell=-)
-         Filter to the 6,510 mapped accounts only.
-      c) Load the current gold cube positions (script 02 output or silver positions) for
-         the same accounts and tickers -> fifo_units per (bd_account_id, cusip)
-      d) Compute: injection_units = schwab_net_units - fifo_units
-         Positive injection_units = BD under-counts (need to inject more units)
-         Negative injection_units = BD over-counts (would remove units -- flag these, do NOT inject)
-      e) Report summary statistics:
-         - Total injection needed (sum of positive injection_units)
-         - Total over-count (sum of abs(negative injection_units)) -- these are suspect
-         - Top 20 accounts by injection gap
-         - DIVZ injection total and account count
-         - Aggregate MV at current prices
-      f) Write results to S3 (diagnostic output path: s3://opal-data-bd/diagnostics/schwab_authority_calc.csv)
-         and print summary to stdout.
-
-      Upload this script to S3 per EC2_CODE_DEPLOYMENT_STANDARD.md before running on EC2.
-      Run via SSM as the diagnostic first. Do NOT modify scripts 02/03 until diagnostic
-      results are reviewed and approved.
+      WAIT for AE's MCP message confirming silver/RPS/ is built (ADHC_HISTRY.003).
+      Do not start EC2 runs until AE confirms the data is there. You can write and
+      stage the scripts locally while AE runs the converter.
     </requirement>
 
     <requirement id="2">
-      PHASE 1 (DIAGNOSTIC): Report the diagnostic results in your session log with:
-      - Total injection gap (units and estimated MV at spot prices)
-      - Number of accounts affected
-      - DIVZ-specific numbers (since DIVZ is the primary target from P0 analysis)
-      - Any accounts with large negative injection_units (BD sees more than Schwab -- these need investigation)
-      - Percentage of the $341M confirmed-open undershoot explained by Schwab injection targets
+      PHASE 1 -- LATEST-DATE MATCHING (diagnostic):
+      Write `data/black_diamond/scripts/diagnostics/adhc_histry_006_rps_matching.py`
 
-      Do NOT proceed to Phase 2 until COO reviews these numbers and sends a GO.
+      The script must:
+      a) Load account mapping: `schwab_bd_account_mapping.parquet` (6,510 rows)
+      b) Load the latest RPS date partition from `silver/RPS/` -- list the keys,
+         take the most recent date=YYYYMMDD partition.
+         Key fields from RPS: `account_id` (Schwab), `cusip`, `ticker`,
+         `quantity_settled`, `market_value`, `closing_price`.
+      c) Map Schwab account_id -> BD account_id via the mapping parquet.
+      d) Load BD FIFO positions (existing logic from schwab_authority_injection_test.py
+         or load directly from gold cube output if available on EC2).
+         Key: compute net open positions per (bd_account_id, asset_name).
+      e) Join on (bd_account_id, cusip or asset_name):
+         - Build a ticker->asset_name bridge from silver/unrealized/ (same as prior scripts).
+         - gap = rps.quantity_settled - fifo_units
+      f) Report:
+         - Total positions compared, matched, unmatched
+         - Positions where gap > 0 (FIFO undercounts): count, total units, total MV
+         - Positions where gap &lt; 0 (FIFO overcounts): count, total units, total MV
+         - Top 20 undercount positions by MV
+         - DIVZ: RPS units vs FIFO units, gap, accounts affected
+         - If FIFO+injection were applied: estimated total gold MV vs silver MV
+      g) Write results to s3://opal-data-bd/diagnostics/rps_matching_latest.json
+
+      Upload script to S3 at s3://opal-data-bd/code/schwab/adhc_histry_006_rps_matching.py
+      and run via SSM on EC2.
     </requirement>
 
     <requirement id="3">
-      PHASE 2 (IMPLEMENTATION -- wait for GO after Phase 1):
-      Modify script 02 (`_load_synthetic_buy_events` or equivalent) to use Schwab unit
-      targets instead of residual back-solve for accounts in the 6,510-account mapping.
+      PHASE 2 -- TIME SERIES MATCHING:
+      Extend the script (or write a separate one) to iterate over ALL available RPS dates.
+      For each date:
+        rps_date_df = silver/RPS/date={date}/data.parquet
+        For each (account, cusip): compute gap vs FIFO-as-of-that-date
 
-      Implementation approach:
-      a) Load schwab_bd_account_mapping.parquet at script startup (or lazily before injection)
-      b) For each (bd_account_id, cusip) in the mapping with positive injection_units:
-         - If bd_account_id has no FIFO history for this ticker: inject a synthetic buy
-           for injection_units at the position's weighted-average Schwab price
-         - If bd_account_id has FIFO history: compare and inject the delta
-      c) Accounts NOT in the 6,510-account mapping fall back to the existing rotation-capital
-         residual approach (do not regress non-mapped accounts)
-      d) Continue to exclude CASH from injection targets
-      e) Continue to apply sell injection (RC1 sell logic) before the buy injection
+      "FIFO as of date" requires loading only transactions up to that date. Use the
+      cumulative daily approach from adhc_histry_schwab_crossref scripts (sort by
+      trade_date, cumsum up to date). This is the time series.
+
+      Output: one row per (date, bd_account_id, asset_name, rps_units, fifo_units, gap)
+      Save as s3://opal-data-bd/diagnostics/rps_timeseries_holdings.parquet
+
+      Key question to answer: on which date did positions first diverge for the top-gap
+      accounts? Does the divergence date match the known onboarding event (~2024-04-30)?
+
+      NOTE: This is computationally heavier. Run Phase 1 first and validate before
+      running Phase 2.
     </requirement>
 
     <requirement id="4">
-      PHASE 2: Also modify script 03 if it contains a separate injection step that
-      would conflict with script 02's changes. Read script 03 completely before touching it.
-      If injection logic is only in script 02, make no change to script 03.
+      Commit scripts with author attribution:
+      ```
+      git commit --author="0.4.0_DS_ClientPlatform &lt;0.4.0_DS_ClientPlatform@opal.agent&gt;" \
+          -m "diag(ADHC_HISTRY P1): RPS-based position matching (latest + timeseries)"
+      ```
+      Do NOT push -- AE deploys to EC2 from S3. Upload to S3 yourself after committing.
     </requirement>
 
     <requirement id="5">
-      Commit diagnostic script with author attribution:
-      ```
-      git commit --author="0.4.0_DS_ClientPlatform <0.4.0_DS_ClientPlatform@opal.agent>" \
-          -m "diag(ADHC_HISTRY P1): schwab-authority injection calculator (Phase 1 diagnostic)"
-      ```
-      Phase 2 implementation commits separately after GO.
-      Do NOT push -- AE deploys to EC2 from S3.
-    </requirement>
+      Report results in session log at:
+      org/tier2_senior/0.4.0_DS_ClientPlatform/logs/YYYY-MM-DD/adhc_histry_p1_rps_matching.md
 
-    <requirement id="6">
-      Write a session log at:
-      org/tier2_senior/0.4.0_DS_ClientPlatform/logs/YYYY-MM-DD/adhc_histry_p1_schwab_injection.md
+      Required sections:
+      - Phase 1: latest-date match summary (total gap MV, DIVZ numbers, under vs over counts)
+      - Phase 2 (if completed): time series summary -- when did divergence begin, pattern
+      - Recommendation: does the RPS data support full injection? Is the DIVZ target hit?
+      - Next step recommendation for Phase 2 (script 02 implementation)
 
-      Include the diagnostic results table and a clear recommendation (proceed with Phase 2 
-      or investigation needed).
+      Send results to CTO (1.0.0_SA_CTO) and COO (2.0.0_SA_COO) via MCP when complete.
     </requirement>
 
   </requirements>
 
   <acceptance_criteria>
-    <criterion id="1">Diagnostic script at data/black_diamond/scripts/diagnostics/adhc_histry_005_schwab_authority_calc.py committed and uploaded to S3.</criterion>
-    <criterion id="2">Diagnostic output at s3://opal-data-bd/diagnostics/schwab_authority_calc.csv produced by EC2 run.</criterion>
-    <criterion id="3">Session log contains injection gap summary with MV estimates and DIVZ-specific numbers.</criterion>
-    <criterion id="4">(Phase 2, after GO) script 02 injection logic uses Schwab unit targets for mapped accounts.</criterion>
-    <criterion id="5">(Phase 2, after GO) Scripts committed and uploaded to S3 for AE deploy.</criterion>
+    <criterion id="1">adhc_histry_006_rps_matching.py committed and uploaded to S3.</criterion>
+    <criterion id="2">Phase 1 diagnostic output at s3://opal-data-bd/diagnostics/rps_matching_latest.json produced by EC2 run.</criterion>
+    <criterion id="3">Phase 2 time series at s3://opal-data-bd/diagnostics/rps_timeseries_holdings.parquet produced.</criterion>
+    <criterion id="4">Session log contains gap summary with MV estimates, DIVZ numbers, and divergence date.</criterion>
+    <criterion id="5">CTO and COO notified via MCP with results summary.</criterion>
   </acceptance_criteria>
 
   <constraints>
+    <constraint>Use silver/RPS/ quantity_settled as the Schwab authority -- do NOT use TRN-reconstructed positions for this task.</constraint>
+    <constraint>Use CUSIP as the primary join key between Schwab RPS and BD asset_name (more reliable than ticker).</constraint>
+    <constraint>Build ticker->asset_name bridge from silver/unrealized/ (same as prior scripts -- it has both ticker and CUSIP).</constraint>
     <constraint>Do NOT deploy RC3/RC4 changes (held per Andrew's direction from 2026-03-31 session).</constraint>
     <constraint>Do NOT remove RC1 (name aliasing). It is correct, deployed, and must stay.</constraint>
-    <constraint>Do NOT run a full gold layer rebuild until Phase 1 diagnostic is reviewed by COO and Andrew.</constraint>
-    <constraint>Do NOT inject negative injection_units (accounts where BD > Schwab). Flag them, investigate separately.</constraint>
-    <constraint>Schwab TRN data may have older ticker symbols (e.g., SPLG not SPYM). Verify ticker matching against the mapping. Use CUSIP as the authoritative join key, not ticker.</constraint>
-    <constraint>Follow EC2_CODE_DEPLOYMENT_STANDARD.md: write locally -> upload to S3 -> EC2 pulls from S3 -> execute. Never run scripts locally against production data.</constraint>
+    <constraint>Do NOT run a full gold layer rebuild until Phase 1 diagnostic is reviewed.</constraint>
+    <constraint>Do NOT inject negative gaps (FIFO > Schwab). Flag them, do not inject.</constraint>
+    <constraint>Follow EC2_CODE_DEPLOYMENT_STANDARD.md: write locally -> upload to S3 -> EC2 pulls and executes.</constraint>
     <constraint>No emojis in code per CLAUDE.md.</constraint>
   </constraints>
 
   <dependencies>
-    <dependency agent="0.6.0_AE_PartnerETL" task="schwab_trn_silver_ready" status="complete">
-      Schwab TRN silver is already in S3 (confirmed by DS 2026-03-31 log: 2.73M rows, 
-      554 daily files through 2026-03-30). AE needs to set up automated daily ingestion
-      separately (this is a future TO, not a blocker for Phase 1 diagnostic).
+    <dependency agent="0.6.0_AE_PartnerETL" task="ADHC_HISTRY.003" status="pending">
+      AE must build silver/RPS/ before Phase 1 can run on EC2. Wait for AE's MCP message.
+      You can write and stage scripts locally while AE is running the converter.
     </dependency>
   </dependencies>
 
