@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-01. Design doc at docs/architecture/ADHC_HISTRY_schwab_bucket_design.md. Key finding: NOT a write deny -- SSE-AES256 header missing from callers. No IAM/policy changes needed. -->
     <priority>high</priority>
     <type>investigation</type>
     <project>ADHC_HISTRY</project>
