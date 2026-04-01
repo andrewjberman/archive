@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status>
     <!-- Updated 2026-04-01: scope expanded to full tier removal (not just internal rename). Andrew confirmed tier column not needed. DT .011 also removed regionId/officeId from JWT. -->
     <priority>high</priority>
     <type>feature</type>
