@@ -4,7 +4,8 @@
     <issued_by>0.4.0_DS_ClientPlatform</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-01. Commit ec9ff6e2. portal-auth-v1.5.0. partner lookup gate changed to firmId, status check wired, 5 deprecated fields removed from types/db/jwt. NOTE: login broken 18:29-18:34 due to handler path mismatch (dist/index.handler vs index.mjs at zip root). COO hotfix applied handler=index.handler. Req 6 data migration deferred to AE. -->
     <priority>high</priority>
     <type>refactor</type>
     <project>ADVI_ANONYM</project>
