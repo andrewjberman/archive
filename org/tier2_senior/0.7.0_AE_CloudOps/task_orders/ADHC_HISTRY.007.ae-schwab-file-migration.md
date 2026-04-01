@@ -4,8 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-01</date>
-    <status>staged</status>
-    <!-- STAGED: activate after DS commits ADHC_HISTRY.006 (converter script fix) -->
+    <status>pending</status>
     <priority>medium</priority>
     <type>infrastructure</type>
     <project>ADHC_HISTRY</project>
