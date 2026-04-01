@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-01. Track B: auth-validator-edge:8 on CF behaviors 13+14. Track A: partners-api-v1.11.0 (commit 4485ec1c). Track C: auth-validator-edge v9, P0 gate removed (commit 92ae074c). All 10 CF behaviors updated. E2E verified. -->
     <priority>high</priority>
     <type>deploy</type>
     <project>ADVI_ANONYM</project>
