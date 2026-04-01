@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status><!-- gold rebuild done, .007/.008/.009 diagnostics run, positions_cube cleanup 43,464 partitions deleted -->
     <priority>high</priority>
     <type>data-build</type>
     <project>ADHC_HISTRY</project>

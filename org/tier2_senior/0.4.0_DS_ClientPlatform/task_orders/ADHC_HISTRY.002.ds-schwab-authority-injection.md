@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status><!-- committed 2666dc1f, rotation scripts deployed, AUA $1,582M (0.3% from silver) -->
     <priority>high</priority>
     <type>feature</type>
     <project>ADHC_HISTRY</project>
