@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-01</date>
-    <status>staged</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-01. Track A: partners-api-v1.12.0 + portal-auth-v1.4.0 (commit 59b7eef2). Track B: portal-v2.1.22 (submodule 5038f0bd). DE 1390fa1 + DS schema doc + Andrew treemap fix included. All CI green. -->
     <!-- STAGED: activate after DS .007 commits for Lambda deploy.
                   Portal deploy activates after DE .010 commits. -->
     <priority>high</priority>
