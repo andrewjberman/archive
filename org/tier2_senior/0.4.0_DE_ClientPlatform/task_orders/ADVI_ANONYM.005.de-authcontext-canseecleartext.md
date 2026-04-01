@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-01. Portal DEV commit 11ee364. canSeeCleartext() in AuthContext.context.ts + AuthContext.tsx. TSC clean. -->
     <priority>high</priority>
     <type>feature</type>
     <project>ADVI_ANONYM</project>

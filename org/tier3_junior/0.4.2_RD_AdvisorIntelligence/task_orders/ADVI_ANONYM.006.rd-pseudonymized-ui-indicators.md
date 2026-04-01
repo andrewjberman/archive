@@ -5,6 +5,7 @@
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-01</date>
     <status>pending</status>
+    <!-- DE .005 committed 2026-04-01 (portal DEV 11ee364). canSeeCleartext() available via useAuthContext(). RD can begin. -->
     <priority>high</priority>
     <type>feature</type>
     <project>ADVI_ANONYM</project>
