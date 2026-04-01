@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-01. 22 March RPS files migrated to bronze/rps/ with SSE. Converter verified 556 silver/RPS/ partitions. Staging deleted. 01_raw/ archive background job CommandId 2015d13b. -->
     <priority>medium</priority>
     <type>infrastructure</type>
     <project>ADHC_HISTRY</project>
