@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-01. 13 opal-capital users migrated (tier internal->advisor). FIRM#mockadv created. 3 test accounts verified. Chase advisorId="Chase Bertrand" confirmed vs S3 gold folder. -->
     <priority>high</priority>
     <type>infrastructure</type>
     <project>ADVI_ANONYM</project>
