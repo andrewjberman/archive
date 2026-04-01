@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-01. 534 RPS partitions built. DS diagnostic ran successfully against silver/RPS/. -->
     <priority>urgent</priority>
     <type>data-build</type>
     <project>ADHC_HISTRY</project>
