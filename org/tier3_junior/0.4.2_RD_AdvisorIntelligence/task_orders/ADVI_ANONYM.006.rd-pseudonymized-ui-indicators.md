@@ -4,8 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
-    <!-- DE .005 committed 2026-04-01 (portal DEV 11ee364). canSeeCleartext() available via useAuthContext(). RD can begin. -->
+    <status>complete</status>
+    <!-- Completed 2026-04-01. Portal DEV commit 2ebf55b. 4 surfaces: DistributionTab drill header, ClientsTab L2+L4 column headers, ClientDetailPage header. TSC clean. Export disable N/A (button doesn't exist yet). -->
     <priority>high</priority>
     <type>feature</type>
     <project>ADVI_ANONYM</project>
