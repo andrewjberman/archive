@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-01. Commit 3fdb9a51. pseudonymizer.py created, lambda wired at 9 PII call sites. IAM blocker documented for DT. handle_adv_drill handler not yet implemented -- wire when added. -->
     <priority>high</priority>
     <type>feature</type>
     <project>ADVI_ANONYM</project>

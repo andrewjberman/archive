@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-01</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-01. Commit 2c8a4470. SRC_PREFIXES updated, staging script deleted. -->
     <priority>medium</priority>
     <type>cleanup</type>
     <project>ADHC_HISTRY</project>

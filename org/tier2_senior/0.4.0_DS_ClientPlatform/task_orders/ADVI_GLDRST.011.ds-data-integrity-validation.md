@@ -7,7 +7,8 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-03-26</date>
-    <status>staged</status>
+    <status>superseded</status>
+    <!-- Superseded 2026-04-02. Validation covered piecemeal by ADHC_HISTRY diagnostics, RPS reconciliation, ADVI_PRICES runs, phantom exclusion fix. AE confirmed 04-02. -->
     <project_code>ADVI_GLDRST</project_code>
   </metadata>
 
