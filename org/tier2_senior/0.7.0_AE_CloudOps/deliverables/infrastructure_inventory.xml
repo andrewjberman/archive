@@ -1,0 +1,372 @@
+<infrastructure_inventory>
+  <metadata>
+    <agent>0.7.0_AE_CloudOps</agent>
+    <scope>Shared Infrastructure, CloudFront, Lambda@Edge, Portal Notifications, Portal Auth, Partners API, IAM, Security, EC2</scope>
+    <date>2026-04-06</date>
+    <updated>2026-04-06</updated>
+    <notes>Post DEBT_1STRUN.002-.004 — source map 100%, trade pipeline Terraformed, 7 S3 buckets imported</notes>
+  </metadata>
+
+  <!-- ================================================================== -->
+  <!-- PIPELINE: shared-infra                                              -->
+  <!-- ================================================================== -->
+  <pipelines>
+    <pipeline name="shared-infra" terraform_dir="infra/aws/terraform/shared-infra/" tag="shared-infra-v1.6.0">
+
+      <tf_files>
+        <tf_file name="main.tf">Provider/backend (S3: shared-infra/tfstate), S3 buckets (lambda-layers, lambda-artifacts), DynamoDB tables (opal-partner-49financial, bd-securities), IAM policies (PartnerIdentityReadPermissions, EC2SnapshotPermissions, bd-securities-access), S3 lifecycle rules</tf_file>
+        <tf_file name="s3.tf">Platform S3 buckets: opalinvest-portal, opal-cloudfront-logs, opal-cloudtrail-logs, opal-analytics-dashboard, opal-ci-staging</tf_file>
+      </tf_files>
+
+      <lambda_functions>
+        <!-- No Lambda functions directly in shared-infra; ec2-runtime-monitor is EXTERNAL -->
+      </lambda_functions>
+
+      <layers>
+        <layer name="deck-generation-deps" s3_key="deck-generation-deps.zip" version="1">
+          python-pptx, PyYAML, lxml, Pillow — PowerPoint deck generation
+        </layer>
+        <layer name="news-trending-deps" s3_key="news-trending-deps.zip" version="2">
+          hdbscan, numpy, scipy, scikit-learn, openai, beautifulsoup4, feedparser, requests, pydantic — news clustering and AI sentiment
+        </layer>
+        <layer name="openpyxl-layer" s3_key="openpyxl-layer.zip" version="1">
+          openpyxl — Excel file reading for yang/bd pipelines
+        </layer>
+        <layer name="security-scanner-deps" s3_key="security-scanner-deps.zip" version="1">
+          pandas, openpyxl — security scanner data processing
+        </layer>
+      </layers>
+
+      <iam_roles>
+        <!-- shared-infra manages cross-cutting IAM policies, not standalone roles -->
+      </iam_roles>
+
+      <s3_paths>
+        <path bucket="opal-313476888478-lambda-layers" prefix="*.zip" direction="write">Lambda layer zip artifacts</path>
+        <path bucket="opal-313476888478-lambda-artifacts" prefix="{pipeline}/*.zip" direction="write">Lambda function zip artifacts</path>
+        <path bucket="opal-313476888478-terraform-state" prefix="{pipeline}/tfstate" direction="read/write">Terraform state files</path>
+        <path bucket="opalinvest-portal" prefix="/" direction="write">SPA static assets (default CloudFront origin)</path>
+        <path bucket="opal-cloudfront-logs-313476888478" prefix="/" direction="write">CloudFront access logs</path>
+        <path bucket="opal-cloudtrail-logs-313476888478" prefix="/" direction="write">CloudTrail audit logs</path>
+        <path bucket="opal-analytics-dashboard" prefix="/" direction="write">Analytics dashboard static site</path>
+        <path bucket="opal-ci-staging" prefix="/" direction="write">CI/CD staging artifacts</path>
+      </s3_paths>
+
+    </pipeline>
+
+    <!-- ================================================================== -->
+    <!-- PIPELINE: portal-auth                                              -->
+    <!-- ================================================================== -->
+    <pipeline name="portal-auth" terraform_dir="infra/aws/terraform/portal-auth/" tag="portal-auth-v1.11.0">
+
+      <tf_files>
+        <tf_file name="main.tf">Provider/backend (S3: portal-auth/tfstate), variable enable_lambda_edge</tf_file>
+        <tf_file name="iam.tf">IAM roles: opalinvest-auth-lambda-role (DynamoDB, SecretsManager, SES), lambda-edge-execution-role (SecretsManager, CloudWatch). Data source for opal-portal-lambda-role.</tf_file>
+        <tf_file name="lambdas.tf">Lambda functions: opalinvest-auth-handler, opal-portal-authorizer</tf_file>
+        <tf_file name="lambda-edge.tf">5 Lambda@Edge functions: auth-validator-edge, tier-router-edge, cache-control-injector, public-data-router, shared-advisor-router</tf_file>
+        <tf_file name="dynamodb.tf">6 DynamoDB tables: opal-firms, opal-sessions, user-permissions, opal-offices, opal-users, opal-users-v2</tf_file>
+        <tf_file name="ses.tf">SES domain identity: opalinvest.dev</tf_file>
+        <tf_file name="secrets.tf">Secrets Manager: opal/auth/jwt-private-key, opal/auth/jwt-public-key</tf_file>
+        <tf_file name="cloudfront.tf">CloudFront cache policy: opal-scoped-advisor-by-firm (cache by X-Firm-Id, firm param, 24h TTL)</tf_file>
+        <tf_file name="cloudfront-distribution.tf">CloudFront distribution EVTSA9VEHNZVH (opalinvest.dev). 5 origins, 13 ordered cache behaviors, edge function associations, ACM cert, SPA error responses.</tf_file>
+      </tf_files>
+
+      <lambda_functions>
+        <lambda name="opalinvest-auth-handler"
+                source_dir="infra/aws/lambda/portal_authorizer/"
+                tf_resource="aws_lambda_function.auth_handler"
+                runtime="nodejs20.x"
+                memory_mb="256"
+                timeout_s="30"
+                trigger="API Gateway (/auth/*)"
+                last_deployed="5c8ac135 @ 2026-04-06">
+          Portal auth handler — login, signup, token refresh, password reset via Cognito + DynamoDB + SES
+        </lambda>
+        <lambda name="opal-portal-authorizer"
+                source_dir="infra/aws/lambda/portal_authorizer/"
+                tf_resource="aws_lambda_function.portal_authorizer"
+                runtime="nodejs20.x"
+                memory_mb="256"
+                timeout_s="10"
+                trigger="API Gateway (authorizer)"
+                last_deployed="5c8ac135 @ 2026-04-06">
+          API Gateway Lambda authorizer — JWT validation for /api/scoped/* and /api/private/* routes
+        </lambda>
+        <lambda name="auth-validator-edge"
+                source_dir="infra/aws/lambda-edge/"
+                tf_resource="aws_lambda_function.auth_validator_edge[0]"
+                runtime="nodejs20.x"
+                memory_mb="128"
+                timeout_s="5"
+                trigger="CloudFront Lambda@Edge (viewer-request)"
+                last_deployed="5c8ac135 @ 2026-04-06">
+          Lambda@Edge: JWT validation on viewer-request for auth-gated CloudFront behaviors. Version 9 pinned.
+        </lambda>
+        <lambda name="tier-router-edge"
+                source_dir="infra/aws/lambda-edge/tier-router-edge/"
+                tf_resource="aws_lambda_function.tier_router_edge[0]"
+                runtime="nodejs20.x"
+                memory_mb="128"
+                timeout_s="5"
+                trigger="CloudFront Lambda@Edge (origin-request)"
+                last_deployed="5c8ac135 @ 2026-04-06">
+          Lambda@Edge: tier-based routing for origin requests
+        </lambda>
+        <lambda name="cache-control-injector"
+                source_dir="infra/aws/lambda-edge/"
+                tf_resource="aws_lambda_function.cache_control_injector[0]"
+                runtime="nodejs20.x"
+                memory_mb="128"
+                timeout_s="3"
+                trigger="CloudFront Lambda@Edge (origin-response)"
+                last_deployed="5c8ac135 @ 2026-04-06">
+          Lambda@Edge: injects Cache-Control headers on origin responses
+        </lambda>
+        <lambda name="public-data-router"
+                source_dir="infra/aws/lambda/public-data-router/"
+                tf_resource="aws_lambda_function.public_data_router[0]"
+                runtime="nodejs20.x"
+                memory_mb="128"
+                timeout_s="3"
+                trigger="CloudFront Lambda@Edge (viewer-request)"
+                last_deployed="5c8ac135 @ 2026-04-06">
+          Lambda@Edge: rewrites public data paths (/api/general/*) to S3 origins
+        </lambda>
+        <lambda name="shared-advisor-router"
+                source_dir="infra/aws/lambda/shared-advisor-router/"
+                tf_resource="aws_lambda_function.shared_advisor_router[0]"
+                runtime="nodejs20.x"
+                memory_mb="128"
+                timeout_s="5"
+                trigger="CloudFront Lambda@Edge (origin-request)"
+                last_deployed="5c8ac135 @ 2026-04-06">
+          Lambda@Edge: rewrites /api/scoped/advisor-intelligence/*.json to S3-opal-data-bd paths by firmId
+        </lambda>
+      </lambda_functions>
+
+      <iam_roles>
+        <role name="opalinvest-auth-lambda-role" tf_resource="aws_iam_role.auth_handler">
+          DynamoDB: opal-users, opal-users-v2, opal-sessions, opal-firms, opal-offices, user-permissions.
+          SecretsManager: opalinvest/*, opal/*.
+          SES: SendEmail/SendRawEmail on opalinvest.dev.
+        </role>
+        <role name="lambda-edge-execution-role" tf_resource="aws_iam_role.lambda_edge">
+          SecretsManager: opal/auth/*.
+          CloudWatch: logs in us-east-1.
+          Basic Lambda execution.
+        </role>
+      </iam_roles>
+
+      <triggers>
+        <trigger type="CloudFront" resource="EVTSA9VEHNZVH">
+          auth-validator-edge:9 on viewer-request for /api/general/trades/*, /api/scoped/data-refresh/*, /api/scoped/advisor-intelligence/*.json, /api/general/json-tiered/*, /api/general/*, /api/private/*, /v1/*, /api/scoped/partners/*, /api/partners.
+          shared-advisor-router:8 on origin-request for /api/scoped/advisor-intelligence/*.json.
+          public-data-router:4 on viewer-request for /api/general/json-tiered/*, /api/general/*.
+          cache-control-injector:1 on origin-response for /api/general/json-tiered/*, /api/general/*.
+        </trigger>
+      </triggers>
+
+      <dynamodb_tables>
+        <table name="opal-firms" pk="PK" sk="SK" billing="PROVISIONED" rcu="5" wcu="5"/>
+        <table name="opal-sessions" pk="PK" sk="SK" billing="PAY_PER_REQUEST" items="3.2M" gsi="GSI1"/>
+        <table name="user-permissions" pk="email" sk="permission" billing="PAY_PER_REQUEST" gsi="by-permission"/>
+        <table name="opal-offices" pk="PK" sk="SK" billing="PROVISIONED" rcu="5" wcu="5"/>
+        <table name="opal-users" pk="email" billing="PAY_PER_REQUEST" notes="legacy — replaced by opal-users-v2"/>
+        <table name="opal-users-v2" pk="PK" sk="SK" billing="PAY_PER_REQUEST" gsi="firmId-index,email-index"/>
+      </dynamodb_tables>
+
+    </pipeline>
+
+    <!-- ================================================================== -->
+    <!-- PIPELINE: partners-api                                             -->
+    <!-- ================================================================== -->
+    <pipeline name="partners-api" terraform_dir="infra/aws/terraform/partners-api/" tag="partners-api-v1.15.0">
+
+      <tf_files>
+        <tf_file name="main.tf">Provider/backend (S3: partners-api/tfstate), locals for role ARN and AWSSDKPandas layer</tf_file>
+        <tf_file name="lambdas.tf">Lambda: opal-partners-data (python3.12, 2048MB, 120s)</tf_file>
+        <tf_file name="iam.tf">IAM role: partners-lambda-role (S3, DynamoDB, CloudWatch, SecretsManager)</tf_file>
+        <tf_file name="api-gateway.tf">10 API GW routes for /api/scoped/advisor-intelligence/* on 7k3ed8px20</tf_file>
+      </tf_files>
+
+      <lambda_functions>
+        <lambda name="opal-partners-data"
+                source_dir="infra/aws/lambda/v2_portal/partners/"
+                tf_resource="module.opal_partners_data.aws_lambda_function.this"
+                runtime="python3.12"
+                memory_mb="2048"
+                timeout_s="120"
+                trigger="API Gateway (/api/scoped/advisor-intelligence/*, /api/scoped/partners/*, /api/partners)"
+                last_deployed="f5510e0d @ 2026-04-06">
+          Multi-tenant advisor intelligence API — serves gold layer data for any firm via firmId + DynamoDB lookup.
+          Layer: AWSSDKPandas-Python312:16
+        </lambda>
+      </lambda_functions>
+
+      <iam_roles>
+        <role name="partners-lambda-role" tf_resource="aws_iam_role.partners_lambda">
+          S3: read opal-data-*.
+          DynamoDB: read opal-users-v2.
+          SecretsManager: opal/pseudonym/*.
+          CloudWatch: logs.
+          Policy attachment: bd-securities-access, AWSLambdaBasicExecutionRole.
+        </role>
+      </iam_roles>
+
+      <api_gateway_routes count="10" api_id="7k3ed8px20" integration="y95f56f" authorizer="naqxlm">
+        <route>GET /api/scoped/advisor-intelligence/timeseries/{dimension}</route>
+        <route>GET /api/scoped/advisor-intelligence/snapshots/{dimension}</route>
+        <route>GET /api/scoped/advisor-intelligence/filters</route>
+        <route>GET /api/scoped/advisor-intelligence/summary</route>
+        <route>GET /api/scoped/advisor-intelligence/partner-analytics</route>
+        <route>GET /api/scoped/advisor-intelligence/clients-tab</route>
+        <route>GET /api/scoped/advisor-intelligence/advisors/{advisorId}/book</route>
+        <route>GET /api/scoped/advisor-intelligence/clients/growth</route>
+        <route>GET /api/scoped/advisor-intelligence/clients/tax-breakdown</route>
+        <route>GET /api/scoped/advisor-intelligence/clients/tax-deferred</route>
+      </api_gateway_routes>
+
+    </pipeline>
+
+    <!-- ================================================================== -->
+    <!-- PIPELINE: portal-notifications                                     -->
+    <!-- ================================================================== -->
+    <pipeline name="portal-notifications" terraform_dir="infra/aws/terraform/portal-notifications/" tag="portal-notifications (no tag)">
+
+      <tf_files>
+        <tf_file name="main.tf">S3 notification on opal-data-portal-v2 with 3 Lambda triggers + permissions</tf_file>
+        <tf_file name="outputs.tf">Outputs: bucket name, notification resource ID</tf_file>
+      </tf_files>
+
+      <triggers>
+        <trigger type="S3" resource="opal-data-portal-v2">
+          uploads/manifest.json -> yang-pipeline-trigger (yang pipeline ingestion)
+        </trigger>
+        <trigger type="S3" resource="opal-data-portal-v2">
+          market-metrics.json -> opal-cloudfront-market-generator (market overview)
+        </trigger>
+        <trigger type="S3" resource="opal-data-portal-v2">
+          security_scanner/uploads/*.xlsx -> opal-security-scanner-processor (security scanner)
+        </trigger>
+      </triggers>
+
+    </pipeline>
+
+  </pipelines>
+
+  <!-- ================================================================== -->
+  <!-- NON-TF LAMBDA FUNCTIONS IN SCOPE (no Terraform, local source only) -->
+  <!-- ================================================================== -->
+  <unmanaged_lambdas>
+    <lambda name="access-anomaly-scanner"
+            source_dir="infra/aws/lambda/access-anomaly-scanner/"
+            runtime="python3.11"
+            memory_mb="256"
+            trigger="manual"
+            tf_managed="false">
+      Security audit — scans IAM access patterns for anomalies. Has legacy deploy.sh (should not be used).
+    </lambda>
+    <lambda name="cost-anomaly-scanner"
+            source_dir="infra/aws/lambda/cost-anomaly-scanner/"
+            runtime="python3.11"
+            memory_mb="256"
+            trigger="manual"
+            tf_managed="false">
+      Cost monitoring — flags unusual AWS spend patterns. Has legacy deploy.sh.
+    </lambda>
+    <lambda name="ec2-auto-shutdown-enforcer"
+            source_dir="infra/aws/lambda/ec2-auto-shutdown-enforcer/"
+            runtime="python3.11"
+            memory_mb="128"
+            trigger="EventBridge (scheduled)"
+            tf_managed="local-state-only">
+      EC2 auto-shutdown — enforces scheduled shutdowns. Has own main.tf with LOCAL state (not S3 backend). Needs migration to S3 backend.
+    </lambda>
+    <lambda name="opal-infrastructure-monitor"
+            source_dir="infra/aws/lambda/infrastructure_monitor/"
+            runtime="python3.11"
+            trigger="manual"
+            tf_managed="false">
+      Infrastructure monitoring. WARNING: has vendored openai/pydantic packages inline (violates layer rule).
+    </lambda>
+    <lambda name="infrastructure-daily-snapshot"
+            source_dir="infra/aws/lambda/infrastructure-daily-snapshot/"
+            runtime="python3.11"
+            trigger="EventBridge (daily)"
+            tf_managed="false">
+      Daily infrastructure snapshot — captures AWS resource state to S3.
+    </lambda>
+  </unmanaged_lambdas>
+
+  <!-- ================================================================== -->
+  <!-- EC2 SERVICES                                                        -->
+  <!-- ================================================================== -->
+  <ec2_services>
+    <service name="moltbot" instance_id="i-0b784d4908e320fc4" type="persistent" manifest="true">
+      AI agent host (Claude Code). GitHub PAT for repo access.
+    </service>
+    <service name="smartx-exporter" instance_id="i-06ebcb27395eb3f49" type="persistent" manifest="true">
+      SmartX data exporter. No Elastic IP — host changes on restart.
+    </service>
+    <service name="seeking-alpha-scraper" instance_id="null" type="persistent" manifest="true" ip="44.201.69.3">
+      Seeking Alpha scraping service.
+    </service>
+    <service name="bd-gold-layer-runner" instance_id="i-01003b035d2988dfb" type="persistent" manifest="true" instance_type="c6i.16xlarge">
+      BD gold layer computation. Deployed commit 8d0546634d (2026-03-18).
+    </service>
+    <service name="bd-exporter" instance_id="null" type="persistent" manifest="true">
+      BD daily incremental export (merge-daily-incremental.py).
+    </service>
+    <service name="bd-allocations" instance_id="i-0800437d1dbb0b5cc" type="persistent" manifest="true">
+      BD allocation downloads via SSM (opal-bd-allocation-download).
+    </service>
+    <service name="bd-transactions" instance_id="i-00c7568bc510f7423" type="persistent" manifest="true">
+      BD transaction downloads via SSM (opal-bd-transaction-download).
+    </service>
+    <service name="bd-price-runner" instance_id="i-0800437d1dbb0b5cc" type="persistent" manifest="true">
+      BD price fetching — shares instance with bd-allocations, S3-pull model.
+    </service>
+    <service name="bd-gold-detail-generator" instance_id="null" type="ephemeral" manifest="true">
+      BD gold detail generation — code baked into user-data.sh.
+    </service>
+    <service name="historical-prices-fetcher" instance_id="i-05ad83c1c075de14b" type="ephemeral" manifest="true">
+      Historical price fetching — managed by Lambda scheduler, auto-shutdown enforced.
+    </service>
+  </ec2_services>
+
+  <!-- ================================================================== -->
+  <!-- COVERAGE SUMMARY (post DEBT_1STRUN.002-.004)                       -->
+  <!-- ================================================================== -->
+  <coverage_summary>
+    <resource type="Lambda Functions" total="134" mapped="134" coverage="100%" notes="Source map at 100% after DEBT_1STRUN.002 (was 77%). 18 EXTERNAL (no repo source). 30 have no TF resource."/>
+    <resource type="EC2 Instances" total="10" in_manifest="10" coverage="100%" notes="3 have null instance_id (seeking-alpha-scraper, bd-exporter, bd-gold-detail-generator)"/>
+    <resource type="S3 Buckets" total="33" in_terraform="17" coverage="52%" notes="Up from 30% after DEBT_1STRUN.004 imported 7. 2 deferred (us-east-2). 5 deletion candidates."/>
+    <resource type="DynamoDB Tables" total="30" in_terraform="21" coverage="70%" notes="Up from 60%. 3 trade tables imported in DEBT_1STRUN.003."/>
+    <resource type="IAM Roles (opal)" total="43" in_terraform="30" coverage="70%" notes="Up from 65%. 2 trade roles imported in DEBT_1STRUN.003."/>
+    <resource type="TF Pipelines" total="17" with_s3_state="16" coverage="94%" notes="trade-pipeline added in DEBT_1STRUN.003. ec2-auto-shutdown-enforcer still on local state."/>
+  </coverage_summary>
+
+  <!-- ================================================================== -->
+  <!-- DEPLOYMENT TAGS (current as of 2026-04-06)                         -->
+  <!-- ================================================================== -->
+  <deployment_tags>
+    <tag pipeline="bd" version="bd-v2.21.4"/>
+    <tag pipeline="yang" version="yang-v2.3.6"/>
+    <tag pipeline="news" version="news-v2.7.3"/>
+    <tag pipeline="market-overview" version="market-overview-v1.6.9"/>
+    <tag pipeline="partners-api" version="partners-api-v1.15.0"/>
+    <tag pipeline="portal-auth" version="portal-auth-v1.11.0"/>
+    <tag pipeline="portfolio-management" version="portfolio-management-v2.1.0"/>
+    <tag pipeline="shared-infra" version="shared-infra-v1.6.0"/>
+    <tag pipeline="smartx" version="smartx-v2.0.0"/>
+    <tag pipeline="data-refresh" version="data-refresh-v2.2.0"/>
+    <tag pipeline="trade-pipeline" version="trade-pipeline-v1.0.0"/>
+    <tag pipeline="security-scanner" version="security-scanner-v1.0.0"/>
+    <tag pipeline="deck-generation" version="deck-generation-v1.0.0"/>
+    <tag pipeline="portal-notifications" version="none"/>
+    <tag pipeline="seeking-alpha" version="none"/>
+    <tag pipeline="portfolio" version="none"/>
+    <tag pipeline="causality" version="none"/>
+  </deployment_tags>
+
+</infrastructure_inventory>
