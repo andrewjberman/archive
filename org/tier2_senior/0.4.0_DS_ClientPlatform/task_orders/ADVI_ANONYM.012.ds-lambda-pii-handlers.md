@@ -4,7 +4,7 @@
   <issuer>2.0.0_SA_COO</issuer>
   <issued>2026-04-02</issued>
   <agent>0.4.0_DS_ClientPlatform</agent>
-  <status>staged</status>
+  <status>complete</status>
   <priority>high</priority>
   <project>ADVI_ANONYM</project>
 </task_order>
