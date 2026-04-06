@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-03-26</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_GLDRST</project_code>
     <revised_by>1.0.0_SA_CTO</revised_by>
     <revised_date>2026-03-26</revised_date>
@@ -184,4 +184,17 @@
     <deliverable type="deploy">Lambda@Edge version publish + CloudFront behavior association update</deliverable>
     <deliverable type="document">CloudFront console change log for Terraform import</deliverable>
   </deliverables>
+  <tooling>
+    <tool module="interpret.ast_extractor" when="before_coding">
+      Parse shared-advisor-router index.mjs (Lambda@Edge). Extract the URL rewrite
+      rules and path mappings. Document every route pattern before modification so
+      the v7->v8 diff is auditable.
+    </tool>
+
+    <tool module="adapt.differential_regression" when="after_coding">
+      Diff the router v8 against v7 baseline. Verify: every old route still resolves
+      (through rewrite to new path), no route deleted without replacement, new
+      categorized paths (gold/artifacts/, gold/entities/) are covered.
+    </tool>
+  </tooling>
 </task_order>

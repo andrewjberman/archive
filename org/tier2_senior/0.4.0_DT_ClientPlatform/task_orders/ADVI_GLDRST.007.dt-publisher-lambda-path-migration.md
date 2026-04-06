@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-03-26</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_GLDRST</project_code>
     <revised_by>1.0.0_SA_CTO</revised_by>
     <revised_date>2026-03-26</revised_date>
@@ -175,4 +175,24 @@
     <deliverable type="deploy">bd-pipeline Terraform deploy (publisher + advisor-publisher)</deliverable>
     <deliverable type="deploy">partners-api Terraform deploy (opal-partners-data)</deliverable>
   </deliverables>
+  <tooling>
+    <tool module="interpret.crossref_graph" when="before_coding">
+      Run against infra/aws/lambda/ to map references between the 3 Lambda handlers
+      and gold script outputs. Identify every S3 path literal in the Lambda source.
+      The graph shows which Lambda reads which gold output — every path must be
+      updated to the new layout.
+    </tool>
+
+    <tool module="interpret.ast_extractor" when="before_coding">
+      Parse all 3 Lambda handlers (opal-partners-data, bd-portal-publisher,
+      bd-portal-advisor-publisher). Extract function signatures, S3 client calls,
+      and key construction patterns. This is the migration surface for Lambda paths.
+    </tool>
+
+    <tool module="adapt.coverage_auditor" when="after_coding">
+      Compare: S3 path literals found in pre-analysis vs paths now routed through
+      the new layout. Any old-format path literal remaining in Lambda source is a
+      migration gap that will break after .010 (old key cleanup).
+    </tool>
+  </tooling>
 </task_order>
