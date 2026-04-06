@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-02</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_GLDRST</project_code>
   </metadata>
 
@@ -93,4 +93,18 @@
     <ref type="prd">docs/architecture/GLDRST_P3_OPERATIONAL_READINESS.md</ref>
     <ref type="depends-on">org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_GLDRST.017.ds-nna-market-growth-rearchitecture.md</ref>
   </references>
+  <tooling>
+    <tool module="interpret.ast_extractor" when="before_coding">
+      Extract the current TypeScript interfaces for client_performance data in types.ts.
+      Identify which components already reference AUA, NNA, or growth fields. Map
+      the existing data flow so new fields (market_growth, synthetic_correction) wire
+      into the correct interfaces without colliding with existing props.
+    </tool>
+
+    <tool module="interpret.crossref_graph" when="before_coding">
+      Build citation graph for portal/src/. Identify which components consume the
+      advisor performance data and would need to be updated to display the new
+      AUA decomposition columns.
+    </tool>
+  </tooling>
 </task_order>

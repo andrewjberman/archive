@@ -164,5 +164,24 @@
     - Do not modify any S3 keys, Lambda code, or Terraform state.
     - Use the gldrst/ verification scripts where applicable.
   </constraints>
+  <tooling>
+    <tool module="adapt.structural_validator" when="during_validation">
+      Run structural validation against the post-migration gold pipeline: verify
+      all script paths exist, S3 layout registry is consistent, manifest format
+      is compliant.
+    </tool>
+
+    <tool module="adapt.coverage_auditor" when="during_validation">
+      Full coverage audit: gold script outputs vs manifest entries vs S3 actual
+      keys vs Lambda consumer expectations. Every link in the chain must be covered.
+      This is the final completeness gate before declaring migration done.
+    </tool>
+
+    <tool module="adapt.differential_regression" when="during_soak">
+      During soak period: diff each daily gold run output against the first
+      post-migration run. Flag any new regressions (keys disappearing, size
+      changes, missing manifest entries) that emerge under real daily operation.
+    </tool>
+  </tooling>
 </task_order>
 ```

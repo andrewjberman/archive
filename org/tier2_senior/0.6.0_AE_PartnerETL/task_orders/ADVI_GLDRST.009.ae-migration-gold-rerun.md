@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-03-26</date>
-    <status>staged</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-06. Run 5 (incremental) finished 16:29 UTC. 2,319 keys in new gold/timeseries/ layout (target 2,284+). Pipeline manifest confirmed. All 13 scripts succeeded. -->
     <project_code>ADVI_GLDRST</project_code>
   </metadata>
 
@@ -51,4 +52,17 @@
     <deliverable type="artifact">New-layout S3 keys populated</deliverable>
     <deliverable type="document">Validation report: old vs new key comparison</deliverable>
   </deliverables>
+  <tooling>
+    <tool module="adapt.differential_regression" when="after_rerun">
+      After gold rerun completes: diff new-layout S3 keys against old-layout keys.
+      Every old key must have a corresponding new key with matching file size.
+      Additions (new keys) expected. Removals (missing old keys) are regressions.
+    </tool>
+
+    <tool module="adapt.coverage_auditor" when="after_rerun">
+      Compare: expected new-layout key set (from s3_layout.py registry) vs actual
+      S3 keys produced by the rerun. Any expected key missing is a gap. Any
+      unexpected key is an artifact of incomplete migration.
+    </tool>
+  </tooling>
 </task_order>

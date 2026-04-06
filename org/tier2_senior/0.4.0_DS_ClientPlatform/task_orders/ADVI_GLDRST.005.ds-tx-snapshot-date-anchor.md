@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-03-26</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_GLDRST</project_code>
   </metadata>
 
@@ -85,4 +85,18 @@
     <deliverable type="document">Publisher date anchor fix specification for DT</deliverable>
     <deliverable type="commit">run_gold_layer.sh --run-date flag + script plumbing</deliverable>
   </deliverables>
+  <tooling>
+    <tool module="interpret.ast_extractor" when="before_coding">
+      Parse run_gold_layer.sh and all 13 gold scripts to extract every date variable,
+      datetime.now() call, and date parameter. Map the flow of date values from the
+      runner into each script. This is the date anchor surface — every script that
+      derives its own date instead of reading --run-date is a mismatch risk.
+    </tool>
+
+    <tool module="interpret.crossref_graph" when="before_coding">
+      Build the reference graph between gold scripts and the publisher Lambda.
+      Identify which scripts produce date-stamped outputs that the publisher consumes.
+      The publisher date anchor fix must align with every upstream script's date format.
+    </tool>
+  </tooling>
 </task_order>

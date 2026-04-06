@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-03-26</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_GLDRST</project_code>
   </metadata>
 
@@ -160,4 +160,34 @@
     <deliverable type="commit">Phase B: all scripts read from new paths (separate commit)</deliverable>
     <deliverable type="document">Session log with complete key migration map</deliverable>
   </deliverables>
+  <tooling>
+    <!-- Compiler modules at org/modules/ — run these BEFORE and AFTER code changes -->
+
+    <!-- PRE-WORK: Map every S3 path reference across all 13 gold scripts + 3 Lambdas -->
+    <tool module="interpret.crossref_graph" when="before_coding">
+      Run against data/black_diamond/scripts/gold/ and infra/aws/lambda/v2_portal/.
+      The citation graph shows which scripts reference which other scripts and which
+      S3 path literals are shared. Use the authority ranking to identify the highest-impact
+      files (most referenced = break these and everything downstream breaks).
+    </tool>
+
+    <tool module="interpret.ast_extractor" when="before_coding">
+      Extract function signatures and imports from all 13 gold scripts. Identify every
+      function that constructs S3 keys (grep for s3://, opal-data-bd, gold/, silver/).
+      This is the migration surface — every path literal found here must move to lib/s3_layout.py.
+    </tool>
+
+    <!-- POST-WORK: Verify migration completeness -->
+    <tool module="adapt.coverage_auditor" when="after_coding">
+      Compare: set of S3 path literals found by ast_extractor (pre) vs set of paths
+      now routed through lib/s3_layout.py (post). Any path literal that still exists
+      outside the centralized registry is a migration gap.
+    </tool>
+
+    <tool module="adapt.differential_regression" when="after_phase_a">
+      After Phase A (dual-write) commit: diff gold script outputs against baseline.
+      New keys must appear at new paths. Old keys must still exist (dual-write).
+      Any key that disappears is a regression.
+    </tool>
+  </tooling>
 </task_order>

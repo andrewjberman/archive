@@ -7,7 +7,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-03-26</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_GLDRST</project_code>
   </metadata>
 
@@ -139,5 +139,17 @@
     - Run the portal locally (bun run dev --port 5175) pointed at production APIs.
     - Use browser developer tools for API inspection, not direct curl.
   </constraints>
+  <tooling>
+    <tool module="interpret.crossref_graph" when="during_validation">
+      Run against portal/src/ to verify no orphaned imports or broken references
+      after the S3 key migration. The graph should show zero new orphans compared
+      to the pre-migration baseline.
+    </tool>
+
+    <tool module="adapt.coverage_auditor" when="during_validation">
+      Compare: set of S3 API endpoints the portal calls vs set of S3 keys that
+      exist at the new paths. Any endpoint returning 404 is a coverage gap.
+    </tool>
+  </tooling>
 </task_order>
 ```

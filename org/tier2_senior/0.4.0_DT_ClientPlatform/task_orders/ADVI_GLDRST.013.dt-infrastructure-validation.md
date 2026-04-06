@@ -142,5 +142,22 @@
     - Do not modify CloudFront behaviors.
     - Use MSYS_NO_PATHCONV=1 for all Terraform commands on Windows.
   </constraints>
+  <tooling>
+    <tool module="adapt.structural_validator" when="during_validation">
+      Run 8-point structural validation against all modified Lambda source files
+      and Terraform configurations. Verify: paths exist, codes valid, format
+      compliant. Catches drift between source and deployed state.
+    </tool>
+
+    <tool module="adapt.coverage_auditor" when="during_validation">
+      Compare: Lambda source map entries vs actually deployed functions. Compare:
+      Terraform resource definitions vs AWS state. Any mismatch is a drift finding.
+    </tool>
+
+    <tool module="adapt.differential_regression" when="during_validation">
+      Diff current Terraform plan output against the expected 0-diff baseline.
+      Any unexpected change is a regression that must be explained before CLEAR.
+    </tool>
+  </tooling>
 </task_order>
 ```

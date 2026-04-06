@@ -4,7 +4,8 @@
   <issuer>2.0.0_SA_COO</issuer>
   <issued>2026-04-02</issued>
   <agent>0.4.0_DE_ClientPlatform</agent>
-  <status>staged</status>
+  <status>complete</status>
+  <!-- COO 2026-04-06: DE re-executed with crossref validation. Portal DEV d552234. Awaiting DT push + PROD merge. -->
   <priority>high</priority>
   <project>ADVI_ANONYM</project>
 </task_order>

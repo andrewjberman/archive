@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-03-26</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_GLDRST</project_code>
   </metadata>
 
@@ -144,4 +144,24 @@
     <deliverable type="commit">Portal: deriveQuarterlyFromTimeseries removed</deliverable>
     <deliverable type="document">Session log</deliverable>
   </deliverables>
+  <tooling>
+    <tool module="interpret.crossref_graph" when="before_coding">
+      Run against portal/src/ to map which components import from which modules.
+      Identify every file that calls deriveQuarterlyFromTimeseries() — these are the
+      removal targets. The graph shows blast radius: removing the function breaks
+      every component that imports it.
+    </tool>
+
+    <tool module="interpret.ast_extractor" when="before_coding">
+      Extract TypeScript interface definitions and function signatures from types.ts
+      and the tab components. Map the data flow: which interfaces define the quarterly
+      view shape, which components consume it, which API calls fetch it.
+    </tool>
+
+    <tool module="adapt.differential_regression" when="after_coding">
+      Diff the portal types.ts and component files against baseline. Verify: no
+      interface fields removed that other components still reference, no orphaned
+      imports after deriveQuarterlyFromTimeseries removal.
+    </tool>
+  </tooling>
 </task_order>

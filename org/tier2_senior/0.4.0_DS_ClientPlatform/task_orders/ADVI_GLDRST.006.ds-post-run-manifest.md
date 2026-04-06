@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-03-26</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_GLDRST</project_code>
   </metadata>
 
@@ -80,4 +80,12 @@
     <deliverable type="commit">run_gold_layer.sh manifest collection + write</deliverable>
     <deliverable type="commit">Per-script MANIFEST: stdout lines</deliverable>
   </deliverables>
+  <tooling>
+    <tool module="adapt.coverage_auditor" when="after_coding">
+      After implementing MANIFEST: stdout lines, run coverage audit: compare set of
+      S3 keys written by each script (from s3_layout.py registry) against set of keys
+      reported in the manifest. Any key written but not manifested is a gap. Any key
+      manifested but not written is a phantom.
+    </tool>
+  </tooling>
 </task_order>

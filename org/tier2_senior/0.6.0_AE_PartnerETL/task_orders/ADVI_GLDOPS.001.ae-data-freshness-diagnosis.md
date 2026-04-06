@@ -6,7 +6,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-03</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- Completed 2026-04-06. AE delivered diagnosis via MCP: EC2 running but idle since 04-02, pending marker exists, 4 days missed (Apr 3-6), silver missing since 04-02. Scripts 05+12 uploaded to S3. -->
     <priority>P0</priority>
     <project_code>ADVI_GLDOPS</project_code>
   </metadata>

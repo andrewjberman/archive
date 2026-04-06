@@ -61,4 +61,18 @@
     <deliverable type="artifact">Old S3 keys removed</deliverable>
     <deliverable type="document">Cleanup log with deleted keys inventory</deliverable>
   </deliverables>
+  <tooling>
+    <tool module="adapt.coverage_auditor" when="before_cleanup">
+      Before deleting any old keys: verify every old key has a confirmed new-layout
+      counterpart (from .009 validation). The set difference (old keys WITHOUT a
+      new counterpart) must be empty before cleanup proceeds. Any gap means a
+      consumer still depends on that old key.
+    </tool>
+
+    <tool module="interpret.crossref_graph" when="before_cleanup">
+      Run against all Lambda source, gold scripts, and portal source. Grep for any
+      remaining references to old S3 key patterns. Any reference found means a
+      consumer has not been migrated and the old key cannot be deleted yet.
+    </tool>
+  </tooling>
 </task_order>
