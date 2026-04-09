@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-04-09</date>
-    <status>in_progress</status>
+    <status>complete</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>6</wave>
     <phase>P3 data correctness</phase>
