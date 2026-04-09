@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-09</date>
-    <status>pending -- BLOCKED on .019 (Terraform deploy)</status>
+    <status>pending -- unblocked (auth confirmed fixed, gold re-run in progress)</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>5</wave>
     <phase>P3+P4</phase>
