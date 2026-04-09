@@ -2,7 +2,7 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-04-08-49push-017-ds</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-08</date>
     <status>pending</status>
     <project_code>ADVI_49PUSH</project_code>
