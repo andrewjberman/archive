@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform~B</issued_to>
     <date>2026-04-09</date>
-    <status>pending -- blocked on DS .027 issues 3a/3b/3c</status>
+    <status>COMPLETE -- ADV-AUA center = firm headline AUA (f2e7eca); relationship_count subtext wired; validation blocked on AE D_01+D_04 re-run</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>7</wave>
     <phase>Distribution P1-3</phase>

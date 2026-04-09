@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform~B</issued_to>
     <date>2026-04-09</date>
-    <status>pending -- blocked on DS .027 (pseudonymized platinum data)</status>
+    <status>PARTIAL -- display_name type + PII comment added to ClientSegment (7e8e83e); DE de-anonymization logic excluded; comp-pii gate pending AE data re-run</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>7</wave>
     <phase>PII compliance</phase>
