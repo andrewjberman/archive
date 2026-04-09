@@ -6,7 +6,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-06</date>
-    <status>staged</status>
+    <status>archived</status>
     <project_code>ADVI_NNAFEE</project_code>
     <priority>medium</priority>
     <phase>1</phase>

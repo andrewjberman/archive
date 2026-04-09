@@ -6,7 +6,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-07</date>
-    <status>staged</status>
+    <status>archived</status>
     <project_code>ADVI_REBORN</project_code>
     <phase>WS1</phase>
   </metadata>
