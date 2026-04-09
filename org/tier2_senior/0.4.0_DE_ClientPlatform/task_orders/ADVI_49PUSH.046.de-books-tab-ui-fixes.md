@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform~D</issued_to>
     <date>2026-04-09</date>
-    <status>partial -- fix_1 DONE (16f0552), fix_2 DONE (16f0552), fix_3 blocked on DS .045</status>
+    <status>complete -- fix_1 DONE (16f0552), fix_2 DONE (16f0552), commission tooltip DONE (20ccb6f), fix_3 DONE (DS .045 Option A confirmed: ratio=commission/NNA, Efficiency label correct, tooltip updated)</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>11</wave>
     <phase>Books tab UI fixes</phase>
