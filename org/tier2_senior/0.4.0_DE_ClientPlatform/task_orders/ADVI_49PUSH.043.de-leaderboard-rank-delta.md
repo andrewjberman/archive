@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform~A</issued_to>
     <date>2026-04-09</date>
-    <status>pending -- blocked on DS .042 (period_start_aua in leaderboard data)</status>
+    <status>complete -- rank delta column implemented (portal DEV 3588971); DS .042 done (10df0f0f); comp-transform PASS; no cache collisions</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>10</wave>
     <phase>Advisors tab rank delta UI</phase>
