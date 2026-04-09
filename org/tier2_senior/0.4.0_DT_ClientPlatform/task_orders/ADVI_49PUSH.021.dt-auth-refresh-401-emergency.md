@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-09</date>
-    <status>URGENT</status>
+    <status>complete</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>HOTFIX</wave>
     <phase>P4</phase>
