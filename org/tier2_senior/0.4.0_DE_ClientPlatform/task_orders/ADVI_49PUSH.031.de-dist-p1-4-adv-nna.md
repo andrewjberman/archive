@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform~B</issued_to>
     <date>2026-04-09</date>
-    <status>partial -- fix_1 (Net NNA rename) DONE across all ADVI components; fix_2 (client NNA drilldown) + fix_3 (count wiring) blocked on AE D_01+D_04 re-run + nna_clients.json availability</status>
+    <status>complete -- fix_1 DONE, fix_2 DONE (NNA client drilldown, DEV 061d0fb), fix_3 DONE. comp-pii PASS.</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>7</wave>
     <phase>Distribution P1-4</phase>

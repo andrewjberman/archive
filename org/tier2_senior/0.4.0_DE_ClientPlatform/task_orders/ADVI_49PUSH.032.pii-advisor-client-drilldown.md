@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform~B</issued_to>
     <date>2026-04-09</date>
-    <status>PARTIAL -- display_name type + PII comment added to ClientSegment (7e8e83e); DE de-anonymization logic excluded; comp-pii gate pending AE data re-run</status>
+    <status>complete -- NnaClientEntry.display_name typed + PII comment at render site (061d0fb); firmOverride wired; comp-pii scan DistributionTab PASS (no cleartext names)</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>7</wave>
     <phase>PII compliance</phase>
