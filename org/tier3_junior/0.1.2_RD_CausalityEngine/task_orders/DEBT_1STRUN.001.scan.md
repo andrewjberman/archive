@@ -4,7 +4,8 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.1.2_RD_CausalityEngine</issued_to>
     <date>2026-03-23</date>
-    <status>pending</status>
+    <status>cancelled</status>
+    <!-- Cancelled 2026-04-07: CausalityEngine page removed from portal during ADHC_DESIGN session 20 (CTO). No codebase to scan. -->
     <project_code>DEBT_1STRUN</project_code>
   </metadata>
 

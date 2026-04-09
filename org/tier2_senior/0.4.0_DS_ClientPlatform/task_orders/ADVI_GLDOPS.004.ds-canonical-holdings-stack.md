@@ -4,7 +4,10 @@
   <issuer>0.4.0_DS_ClientPlatform</issuer>
   <issued>2026-04-06</issued>
   <agent>0.4.0_DS_ClientPlatform</agent>
-  <status>staged</status>
+  <status>complete</status>
+  <!-- Phase 4 COMPLETE: 05 swap live on EC2 (AUA $1.602B, -1.55% vs silver, within 2% tolerance).
+       01b fee rate history complete (10,193 records). Pipeline wired into run_gold_layer.sh.
+       Project ADVI_GLDOPS archived 2026-04-07. Phase 5 (sealed-day watermarks) deferred. -->
   <priority>high</priority>
   <project>ADVI_GLDOPS</project>
   <depends_on>GLDOPS.003 (complete), yahoo backfill (complete)</depends_on>

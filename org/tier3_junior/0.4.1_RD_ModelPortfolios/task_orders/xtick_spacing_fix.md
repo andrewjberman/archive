@@ -7,7 +7,7 @@
     <issued_by>0.4.0_DE_ClientPlatform</issued_by>
     <issued_to>0.4.1_RD_ModelPortfolios</issued_to>
     <date>2026-03-02</date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>high</priority>
     <type>bug-fix</type>
   </metadata>
