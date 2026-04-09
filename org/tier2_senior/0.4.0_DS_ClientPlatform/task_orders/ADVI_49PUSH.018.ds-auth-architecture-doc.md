@@ -2,9 +2,9 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-04-08-49push-018-ds</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-08</date>
-    <status>pending</status>
+    <status>complete -- 0.4.0_DS_ClientPlatform~C, commit 928c4565. Doc at docs/architecture/ADVI_49PUSH_AUTH_ARCHITECTURE.md</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>4</wave>
     <phase>P5</phase>

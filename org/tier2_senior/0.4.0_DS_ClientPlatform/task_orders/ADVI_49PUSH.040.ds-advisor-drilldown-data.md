@@ -2,9 +2,9 @@
   <metadata>
     <id>1.0.0_SA_CTO-2026-04-09-49push-040-ds</id>
     <issued_by>1.0.0_SA_CTO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-09</date>
-    <status>complete</status>
+    <status>complete -- 0.4.0_DS_ClientPlatform~C, commit 10df0f0f</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>10</wave>
     <phase>Advisor drilldown data</phase>

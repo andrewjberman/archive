@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-08</date>
-    <status>pending</status>
+    <status>complete -- 0.4.0_DS_ClientPlatform~C, commit 675d869f. Catalog at docs/briefs/ADVI_49PUSH_P2_platinum_file_catalog.md</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>2</wave>
     <phase>P2</phase>

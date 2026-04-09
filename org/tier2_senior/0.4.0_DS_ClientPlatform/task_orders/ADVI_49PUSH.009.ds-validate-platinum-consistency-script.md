@@ -2,9 +2,9 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-04-08-49push-009-ds</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-08</date>
-    <status>pending</status>
+    <status>complete -- 0.4.0_DS_ClientPlatform~C, commit 999cfa59. Script: data/black_diamond/scripts/gold/validate_platinum_consistency.py</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>2b</wave>
     <phase>P3</phase>
