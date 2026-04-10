@@ -15,14 +15,14 @@
   <metadata>
     <agent>0.6.0_AE_PartnerETL</agent>
     <pipeline>bd-pipeline</pipeline>
-    <current_tag>bd-v2.18.2</current_tag>
+    <current_tag>bd-v2.22.0</current_tag>
     <date>2026-03-10</date>
     <terraform_state>s3://opal-313476888478-terraform-state/bd-pipeline/tfstate</terraform_state>
     <last_deployed_commit>2ab1e436</last_deployed_commit>
     <last_deployed_at>2026-03-10T23:10:00Z</last_deployed_at>
   </metadata>
 
-  <pipeline name="bd-pipeline" terraform_module="infra/aws/terraform/bd-pipeline/" current_tag="bd-v2.18.2">
+  <pipeline name="bd-pipeline" terraform_module="infra/aws/terraform/bd-pipeline/" current_tag="bd-v2.22.0">
 
     <!-- =========================================================
          TRIGGER CHAIN
@@ -750,22 +750,39 @@
 
       <rule>
         <name>bd-gold-layer-monthly-trigger</name>
-        <schedule>cron(0 8 1 * ? *) — 08:00 UTC 1st of month (3:00 AM ET)</schedule>
-        <state>ENABLED</state>
+        <schedule>cron(0 8 1 * ? *) -- 08:00 UTC 1st of month (3:00 AM ET)</schedule>
+        <state>DISABLED</state>
         <target>bd-gold-trigger Lambda</target>
         <input>{"mode": "full"}</input>
       </rule>
 
       <rule>
+        <name>bd-gold-nightly-fallback</name>
+        <schedule>cron(0 23 ? * MON-SAT *) -- 23:00 UTC Mon-Sat (7 PM EDT, 1h after silver)</schedule>
+        <state>ENABLED</state>
+        <target>bd-gold-trigger Lambda</target>
+        <notes>Safety net when the S3 silver/prices trigger or the canonical-prices-daily trigger is silently dropped. Redundant defense with the pending-marker mechanism in bd-gold-trigger Lambda + run-gold-layer.sh race-safety.</notes>
+      </rule>
+
+      <rule>
+        <name>bd-canonical-prices-daily</name>
+        <schedule>cron(0 22 * * ? *) -- 22:00 UTC every day incl. weekends/holidays</schedule>
+        <state>ENABLED</state>
+        <target>bd-gold-trigger Lambda</target>
+        <input>{"mode": "incremental"}</input>
+        <notes>Added bd-v2.22.0 (ADVI_GLDRST.022 Phase 1). Closes weekend/holiday coverage gap for silver/prices/canonical_prices.parquet. Runner's gold_dispatch.sh runs silver-prep (S_00 = build_canonical_prices_v2.py) before the freshness gate; on weekdays the gate passes and full A/B/C/D chain runs; on weekends/holidays the gate trips and the instance shuts down after canonical_prices is refreshed for that date. Overlap with bd-allocation-pipeline-trigger at 22:00 UTC on weekdays is absorbed by the pending-marker mechanism. Ref: docs/briefs/ae-brief-v2-prestep-integration.md</notes>
+      </rule>
+
+      <rule>
         <name>bd-allocation-file-check-daily</name>
-        <schedule>cron(30 22 ? * MON-FRI *) — 22:30 UTC Mon-Fri (5:30 PM ET)</schedule>
+        <schedule>cron(30 22 ? * MON-FRI *) -- 22:30 UTC Mon-Fri (5:30 PM ET)</schedule>
         <state>ENABLED</state>
         <target>bd-allocation-file-checker Lambda</target>
       </rule>
 
       <rule>
         <name>historical-prices-daily</name>
-        <schedule>cron(0 14 * * ? *) — 14:00 UTC daily (9:00 AM ET, all days)</schedule>
+        <schedule>cron(0 14 * * ? *) -- 14:00 UTC daily (9:00 AM ET, all days)</schedule>
         <state>ENABLED</state>
         <target>historical-prices-scheduler Lambda</target>
       </rule>
