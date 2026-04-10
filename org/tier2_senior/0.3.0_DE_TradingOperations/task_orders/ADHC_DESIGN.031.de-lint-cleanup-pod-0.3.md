@@ -5,7 +5,7 @@
 **Project:** `ADHC_DESIGN` (Phase 2 — carryover from DEBT_1STRUN)
 **Depends on:** Nothing
 **Priority:** Medium
-**Status:** PENDING
+**Status:** COMPLETE
 
 ---
 
@@ -72,6 +72,10 @@ Run `bun run lint` from `portal/` and fix all warnings in files under:
 
 ---
 
+## Compiler Tool
+
+Run `comp-tooltip summary` after your lint work to confirm no tooltip drift was introduced. Informational only — pod 0.3 has no tooltip migration scope.
+
 ## Validation
 
 - `bun run lint` shows zero warnings in files under your pod's domain
@@ -80,4 +84,4 @@ Run `bun run lint` from `portal/` and fix all warnings in files under:
 
 Commit message: `chore(portal): pod 0.3 lint cleanup — X warnings resolved (ADHC_DESIGN.031)`
 
-Ping `1.0.0_SA_CTO` when done.
+Ping `2.0.0_SA_COO` when done.
