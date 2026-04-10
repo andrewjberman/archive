@@ -5,7 +5,7 @@
 **Project:** `ADHC_DESIGN`
 **Depends on:** ADHC_DESIGN.025 (DE 0.4.0 ships `<DataTooltip>` + token flip)
 **Priority:** Medium — start once `<DataTooltip>` lands on DEV
-**Status:** PENDING (BLOCKED until .025 complete)
+**Status:** COMPLETE
 
 ---
 
@@ -15,7 +15,9 @@ See full analysis: `org/tier3_junior/0.4.1_RD_ModelPortfolios/deliverables/toolt
 
 Portal-wide tooltip unification. The canonical reference is `AUATrendChart.tsx:230-266`. This TO migrates all pod 0.1 (MarketIntelligence) data tooltips to the shared `<DataTooltip>` component built in TO-025.
 
-**Do not build the component. Do not touch the token. Those are done in TO-025.** Your job is mechanical migration: delete inline div trees, replace with `<DataTooltip>` calls.
+**The canonical tooltip is `portal/src/components/DataTooltip.tsx`. Read it. It uses dark navy bg (`--bg-header`), white text, `border-white/10`. DO NOT use silver bg or indigo border — those are wrong.**
+
+Your job is mechanical migration: delete inline div trees, replace with `<DataTooltip>` calls.
 
 ---
 
@@ -93,16 +95,30 @@ Typical net deletion: ~50-80 LOC per site. Import path: `import { DataTooltip } 
 
 ---
 
+## Compiler Tool — comp-tooltip
+
+A new compiler tool `comp-tooltip` has been built for this migration. Use it:
+
+```bash
+comp-tooltip scan       # full audit — all tooltip sites, classified by variant
+comp-tooltip drift      # only non-conforming sites (your migration targets)
+comp-tooltip summary    # counts by variant + migration progress %
+```
+
+Run `comp-tooltip drift` before starting to see your exact hit list. Run it again after each file to confirm the site disappeared from the drift list.
+
+**Acceptance gate:** `comp-tooltip drift` must show zero hits in any file under `portal/src/components/market-performance/` and `portal/src/pages/CapitalMarketAssumptions/` and `portal/src/pages/CausalityEngine/`.
+
 ## Validation
 
-- Visit each of the 4 market-performance modals and hover every chart inside — silver bg, dark navy text, 2px indigo border
-- Visit CMA Expectations tab — helper tooltips render via `<Tooltip>` component, no inline re-implementation
-- (If migrated) Visit CausalityEngine theme galaxy — bubbles render, tooltip matches canonical
-- Run `bun run build` to confirm no TypeScript errors
+1. Run `comp-tooltip drift` — zero hits in your pod's files
+2. Visit each market-performance modal, hover every chart — silver bg, dark navy text, 2px indigo border
+3. CMA ExpectationsTab — helper tooltip uses `<Tooltip>` component, no inline
+4. `bun run build` passes
 
 Commit message: `feat(portal): pod 0.1 tooltip migration to DataTooltip (ADHC_DESIGN.026)`
 
-Ping `1.0.0_SA_CTO` and `0.4.0_DE_ClientPlatform` when done (0.4.0 coordinates the TO-028 final audit sweep).
+Ping `0.4.0_DE_ClientPlatform` and `2.0.0_SA_COO` when done.
 
 ---
 
