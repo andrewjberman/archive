@@ -15,14 +15,14 @@
   <metadata>
     <agent>0.6.0_AE_PartnerETL</agent>
     <pipeline>bd-pipeline</pipeline>
-    <current_tag>bd-v2.22.0</current_tag>
-    <date>2026-03-10</date>
+    <current_tag>bd-v2.23.0</current_tag>
+    <date>2026-04-10</date>
     <terraform_state>s3://opal-313476888478-terraform-state/bd-pipeline/tfstate</terraform_state>
-    <last_deployed_commit>2ab1e436</last_deployed_commit>
-    <last_deployed_at>2026-03-10T23:10:00Z</last_deployed_at>
+    <last_deployed_commit>pending</last_deployed_commit>
+    <last_deployed_at>2026-04-10T21:11:00Z</last_deployed_at>
   </metadata>
 
-  <pipeline name="bd-pipeline" terraform_module="infra/aws/terraform/bd-pipeline/" current_tag="bd-v2.22.0">
+  <pipeline name="bd-pipeline" terraform_module="infra/aws/terraform/bd-pipeline/" current_tag="bd-v2.23.0">
 
     <!-- =========================================================
          TRIGGER CHAIN
@@ -286,6 +286,22 @@
         <role_in_pipeline>Starts bd-transactions EC2 via SSM; SSM document downloads transaction XLSX from Black Diamond to s3://opal-data-bd/forwardfill_v2/transactions/</role_in_pipeline>
         <last_deployed_commit>fc862626c568dccbb86b2a8e1cce2ab1ddf73c2e</last_deployed_commit>
         <last_deployed_at>2026-03-02T20:34:09Z</last_deployed_at>
+      </lambda>
+
+      <lambda>
+        <name>bd-fees-trigger</name>
+        <source_path>infra/aws/lambda/bd-pipeline/bd-fees-trigger</source_path>
+        <artifact_s3_key>bd-pipeline/bd-fees-trigger.zip</artifact_s3_key>
+        <memory_mb>128</memory_mb>
+        <timeout_s>600</timeout_s>
+        <runtime>python3.11</runtime>
+        <layers/>
+        <trigger>EventBridge bd-fees-pipeline-trigger (cron 22:15 UTC Mon-Fri)</trigger>
+        <role>bd-daily-trigger-lambda-role</role>
+        <env_vars>EC2_INSTANCE_ID=i-0868fc7e7ebec26f2</env_vars>
+        <role_in_pipeline>Starts bd-fees EC2 via SSM document opal-bd-fees-download. SSM doc runs download-daily-fees.ts (Playwright -> BD Data Mining -> Fees_OpalCapital_Daily template) -> uploads to s3://opal-data-bd/bronze/fees/Fees_OpalCapital_Daily_{start}_to_{end}.xlsx -> runs convert_fees_to_silver.py --latest -> writes silver/fees/YYYY-MM-DD.parquet. Fees pipeline is STANDALONE: does NOT invoke bd-price-update or bd-gold-trigger. silver/fees/ is consumed by bd-portal-publisher + bd-portal-advisor-publisher which run AFTER gold completes via the pipeline-complete.json sentinel.</role_in_pipeline>
+        <last_deployed_commit>pending</last_deployed_commit>
+        <last_deployed_at>2026-04-10T21:11:00Z</last_deployed_at>
       </lambda>
 
       <lambda>
@@ -703,6 +719,25 @@
       </service>
 
       <service>
+        <name>bd-fees</name>
+        <type>persistent</type>
+        <instance_id>i-0868fc7e7ebec26f2</instance_id>
+        <instance_type>t3.medium (ami-07ff62358b87c7116, AL2023)</instance_type>
+        <iam_role>bd-exporter-ec2-role (profile: bd-exporter-profile)</iam_role>
+        <source_path>infra/aws/ec2/bd-exporter</source_path>
+        <remote_path>/opt/bd-exporter</remote_path>
+        <deploy_note>Dedicated EC2 for the BD Fees pipeline (standalone from bd-allocations to isolate failure domains). Provisioned 2026-04-10 via uploader_user_data.sh which installs bun + playwright chromium + xvfb + python libs. Code deployed via SSM document opal-bd-fees-download which syncs from s3://opal-data-bd/scripts/src/ on each run. Triggered Mon-Fri 22:15 UTC by bd-fees-trigger Lambda via EventBridge. The SSM doc runs download-daily-fees.ts (Playwright -> BD Data Mining -> Fees_OpalCapital_Daily template) and then convert_fees_to_silver.py --latest. Does NOT invoke bd-price-update or bd-gold-trigger.</deploy_note>
+        <ssm_document>opal-bd-fees-download</ssm_document>
+        <started_by>bd-fees-trigger Lambda</started_by>
+        <ts_source>infra/aws/ec2/bd-exporter/src/stepwise/download-daily-fees.ts</ts_source>
+        <silver_converter>data/black_diamond/scripts/silver/convert_fees_to_silver.py</silver_converter>
+        <bronze_s3>s3://opal-data-bd/bronze/fees/Fees_OpalCapital_Daily_{startDate}_to_{endDate}.xlsx</bronze_s3>
+        <silver_s3>s3://opal-data-bd/silver/fees/{YYYY-MM-DD}.parquet (date-partitioned by Trade Date)</silver_s3>
+        <consumers>bd-portal-publisher, bd-portal-advisor-publisher (read fees after gold completes)</consumers>
+        <last_deployed_commit>pending (bd-v2.23.0)</last_deployed_commit>
+      </service>
+
+      <service>
         <name>bd-gold-detail-generator</name>
         <type>ephemeral</type>
         <instance_id>null (launched fresh per job)</instance_id>
@@ -746,6 +781,14 @@
         <schedule>cron(48 21 ? * MON-FRI *) — 21:48 UTC Mon-Fri (4:48 PM ET)</schedule>
         <state>ENABLED</state>
         <target>bd-allocation-trigger Lambda</target>
+      </rule>
+
+      <rule>
+        <name>bd-fees-pipeline-trigger</name>
+        <schedule>cron(15 22 ? * MON-FRI *) — 22:15 UTC Mon-Fri (6:15 PM ET)</schedule>
+        <state>ENABLED</state>
+        <target>bd-fees-trigger Lambda</target>
+        <notes>Added bd-v2.23.0. Starts dedicated bd-fees EC2 which downloads the Fees_OpalCapital_Daily BD template to s3://opal-data-bd/bronze/fees/ and runs convert_fees_to_silver.py --latest to produce silver/fees/YYYY-MM-DD.parquet partitions. Scheduled 15 min after the allocation wave clears (22:00) and 45 min before the gold nightly fallback (23:00). Fees pipeline is standalone — does NOT feed the price/gold chain. Portal publishers consume silver/fees/ AFTER gold completes via the pipeline-complete.json sentinel.</notes>
       </rule>
 
       <rule>
