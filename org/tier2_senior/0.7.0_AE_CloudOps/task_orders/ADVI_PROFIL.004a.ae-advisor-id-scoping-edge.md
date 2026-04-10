@@ -5,7 +5,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <co_owner>0.4.0_DT_ClientPlatform</co_owner>
     <date>2026-04-10</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>ADVI_PROFIL</project_code>
     <supersedes>ADVI_PROFIL.004.ae-advisor-scoping-enforcement.md (single-TO scoping, replaced after CTO comp-routes audit caught the two-behavior + ownership-map split)</supersedes>
   </metadata>
