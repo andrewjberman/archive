@@ -5,7 +5,7 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <co_owner>0.7.0_AE_CloudOps</co_owner>
     <date>2026-04-10</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_PROFIL</project_code>
   </metadata>
 
