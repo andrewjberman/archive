@@ -5,13 +5,23 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <co_owner>0.4.0_DT_ClientPlatform</co_owner>
     <date>2026-04-10</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>ADVI_PROFIL</project_code>
     <supersedes>ADVI_PROFIL.004.ae-advisor-scoping-enforcement.md (single-TO scoping, replaced after CTO comp-routes audit caught the two-behavior + ownership-map split)</supersedes>
   </metadata>
 
   <objective>
     Enforce non-admin advisor scoping at `shared-advisor-router` Lambda@Edge for the SIMPLE case: endpoints where the URL path parameter is literally `{advisorId}`. Rule: `if !isAdmin(jwt) and path[advisorId] != jwt.advisorId: return 403`. Admin bypass preserved. This is Wave 2a and unblocks the Profile + Timeseries serving path independently of .005. .004b/.004c handle the ownership-mapped account/relationship paths separately.
+
+    **ARCHITECTURAL PRINCIPLE — the profile IS the security boundary** (Andrew 2026-04-10, ~16:45 EDT, relayed by 0.4.0_DT_ClientPlatform):
+
+    > "Chase should be able to drill all the way to the bottom of his book. We actually solve a lot of our security concerns here by simply having better architecture with the profile."
+
+    Implications for .004a:
+    - Your edge scoping IS the authoritative security gate for the entire non-admin drill chain (L2 book -> L3 client -> L4 account). The frontend is NOT capping depth; .005 RD is wiring full drill for non-admins.
+    - You do not need to match frontend "can the user see this UI" logic. You enforce "does this advisorId own this path". That is the entire guarantee.
+    - Depth cap would be defense-in-depth theater. The Lambda@Edge check is the single choke point -- make it correct, not paranoid.
+    - Keep .004a strictly scoped to "does jwt.advisorId match the {advisorId} path segment". Account/client ownership lookups are .004c's job using .004b's ownership map.
   </objective>
 
   <context>
@@ -89,12 +99,47 @@
     11. **Session log:** Includes the prerequisite verification, regex patterns, helper design, integration test matrix, deploy tag, CloudFront invalidation id, and compiler tools log.
   </acceptance_criteria>
 
+  <correction>
+    <date>2026-04-10</date>
+    <author>0.7.0_AE_CloudOps</author>
+    <authorized_by>0.4.0_DT_ClientPlatform (DT coordinator authority, message 20260410T224010Z)</authorized_by>
+    <summary>
+      Choke-point target changed from `shared-advisor-router` to `auth-validator-edge`.
+      Phase 1 comp-routes audit found `shared-advisor-router` is attached only to the
+      `/api/scoped/advisor-intelligence/*.json` CloudFront behavior (origin-request,
+      S3-opal-data-bd origin). It does NOT see `/api/scoped/partners/books/advisor/*`
+      traffic, which goes CloudFront -> API GW behavior -> portal_authorizer. No single
+      modification to `shared-advisor-router` can enforce .004a across both path
+      patterns required by `<requirement id="2">`.
+
+      `auth-validator-edge` runs on viewer-request (universal), already does JWT
+      verification via Secrets Manager, and sees EVERY request before origin
+      selection. It is the true single choke point for both path patterns.
+
+      Code change: extract `payload.advisorId` from verified JWT, inject
+      `X-Advisor-Id` header (parallel to existing X-Firm-Id), add
+      `matchAdvisorScopingPath(uri)` + `getAllowedAdvisorIds(payload)` helpers,
+      enforce the .004a rule after JWT verify and before downstream forwarding.
+
+      Admin semantics (Option 2, Andrew + DT decision): `firmId === 'opal-capital'`
+      bypasses scoping. Partner-firm admins (Travis) are locked to their own
+      `jwt.advisorId` same as non-admins. Users with no `advisorId` claim cannot
+      access advisor-scoped paths. Future .007-Option-3 (same-firm admin bypass)
+      and .004c (ownership-map lookup) extend `getAllowedAdvisorIds` rather than
+      duplicate the pattern-matching logic.
+
+      CTO PRD note: CTO's original PRD likely encodes the same shared-advisor-router
+      choke-point error. DT acknowledged this as a separate follow-up for CTO audit,
+      not a .004a blocker.
+    </summary>
+  </correction>
+
   <scope>
     <files>
-      <file action="modify">infra/aws/lambda/{shared-advisor-router path}/lambda_function.py (or equivalent)</file>
-      <file action="modify">infra/aws/terraform/{owning pipeline}/** (if any Terraform changes needed)</file>
+      <file action="modify">infra/aws/lambda-edge/auth-validator-edge/index.mjs</file>
       <file action="update">infra/aws/lambda/ci/lambda-source-map.json</file>
-      <file action="reference">auth-validator-edge (verify .002 claim is available)</file>
+      <file action="reference">infra/aws/terraform/portal-auth/lambda-edge.tf (S3 version change drives redeploy; no TF source edit needed)</file>
+      <file action="reference">shared-advisor-router (untouched -- the .004a logic does NOT go here)</file>
     </files>
   </scope>
 
@@ -111,7 +156,7 @@
 
   <deliverables>
     <deliverable type="commit">Router Lambda modified with .004a enforcement + reusable helper. Committed with `--author=0.7.0_AE_CloudOps <0.7.0_AE_CloudOps@opal.agent>`.</deliverable>
-    <deliverable type="tag">`shared-infra-v1.6.{next}` (or equivalent) annotated git tag pushed with `--follow-tags`.</deliverable>
+    <deliverable type="tag">`portal-auth-v1.11.8` annotated git tag pushed with `--follow-tags` (auth-validator-edge lives in portal-auth TF module, not shared-infra -- corrected per Phase 1 audit).</deliverable>
     <deliverable type="source_map">`infra/aws/lambda/ci/lambda-source-map.json` entry updated.</deliverable>
     <deliverable type="test">Integration test matrix (7 cases) executed and logged.</deliverable>
     <deliverable type="document">Session log at `org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-04-{NN}/advi_profil_004a_scoping.md` with prerequisite verification, regex patterns, helper design, integration test output, deploy tag, invalidation id, and compiler tools log.</deliverable>
