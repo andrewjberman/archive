@@ -121,12 +121,58 @@
       `matchAdvisorScopingPath(uri)` + `getAllowedAdvisorIds(payload)` helpers,
       enforce the .004a rule after JWT verify and before downstream forwarding.
 
-      Admin semantics (Option 2, Andrew + DT decision): `firmId === 'opal-capital'`
-      bypasses scoping. Partner-firm admins (Travis) are locked to their own
-      `jwt.advisorId` same as non-admins. Users with no `advisorId` claim cannot
-      access advisor-scoped paths. Future .007-Option-3 (same-firm admin bypass)
-      and .004c (ownership-map lookup) extend `getAllowedAdvisorIds` rather than
-      duplicate the pattern-matching logic.
+      Admin semantics (Option 3-simplified, corrected by Andrew 2026-04-10 ~17:35 EDT,
+      relayed by 0.4.0_DT_ClientPlatform via URGENT message 20260410T224501Z):
+      `jwt.role === 'admin'` bypasses the path-advisorId scoping. Both Opal staff
+      (firmId='opal-capital', role='admin') AND partner-firm admins (e.g. Travis
+      at 49financial, role='admin') bypass. Chase (firmId='49financial', role='user')
+      stays strictly scoped to his own `jwt.advisorId`. Users with no `advisorId`
+      claim AND no admin role cannot access advisor-scoped paths.
+
+      **Previous incorrect attribution:** An earlier version of this correction
+      block said "Option 2, Andrew + DT decision". That was wrong -- at the time
+      AE wrote that block, Andrew had not weighed in on admin bypass semantics.
+      DT had leaned Option 2 (firmId=opal-capital only) and AE agreed. Andrew
+      subsequently gave a direct correction with the explicit quote:
+
+      > "No travis should be able to click on any advisor card, or their bar in
+      >  a chart element, or the leaderboard cards, and be taken to that advisors
+      >  profile with full access. He is an Admin of 49. Chase however cannot do
+      >  that."
+
+      That quote authorizes Option 3-simplified: any user with `jwt.role === 'admin'`
+      bypasses the path check, regardless of firmId. Cross-firm containment is
+      handled IMPLICITLY by the existing `X-Firm-Id` injection + S3 path rewriting
+      in `shared-advisor-router` (for S3-direct paths) and by the firm-scoped data
+      fetches in `opal-partners-data` (for API GW paths). Travis hitting
+      `/advisor/chase_bertrand/...` resolves because Chase is in 49financial;
+      Travis hitting `/advisor/rj_advisor/...` returns 404 (not 403) because the
+      rewritten S3 key doesn't exist in 49financial's partition or the partners
+      Lambda's firm-scoped query returns empty.
+
+      **Revised helper shape:**
+      ```js
+      function getAllowedAdvisorIds(jwt) {
+        if (jwt.role === 'admin') return null;           // null = bypass (Opal OR partner-firm admin)
+        if (!jwt.advisorId) return [];                   // [] = deny all
+        return [jwt.advisorId];                          // [self] = non-admin scope
+      }
+      ```
+
+      Single-line change from the Option 2 version: the first conditional is
+      `jwt.role === 'admin'` instead of `jwt.firmId === 'opal-capital'`. Everything
+      else stays identical. `.004c` extends this by concatenating ownership-map
+      results for non-admin users; admins still return `null` (bypass) and cross-firm
+      containment is preserved by the ownership map being firm-partitioned (DT
+      flagged to Andrew that `.004b` DS TO needs to include firm partitioning in
+      the map shape so Travis bypassing `.004c` is still bounded to 49financial's
+      ownership map by the X-Firm-Id rewrite).
+
+      Future `.007`-Option-3 (same-firm admin firm-listing broaden) becomes a
+      no-op at the edge because the backend already serves same-firm data. The
+      `.007` frontend change collapses to a single line (`isFirmAdmin = internal
+      || isAdmin()`) without a two-gate split, because Travis's drill clicks no
+      longer 403 at the edge.
 
       CTO PRD note: CTO's original PRD likely encodes the same shared-advisor-router
       choke-point error. DT acknowledged this as a separate follow-up for CTO audit,
