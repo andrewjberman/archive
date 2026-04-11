@@ -5,12 +5,22 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <co_owner>0.4.0_DT_ClientPlatform</co_owner>
     <date>2026-04-10</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_PROFIL</project_code>
   </metadata>
 
   <objective>
     Extend `shared-advisor-router` Lambda@Edge with account-id and relationship-id scoping, using the ownership map artifact published by .004b. Covers: (a) `/api/scoped/advisor-intelligence/platinum/accounts/{accountId}/summary.json` (S3-direct origin), (b) `/api/scoped/partners/books/relationship/{relationshipId}/platinum-summary` (API GW origin). Rule: look up the ownership map, find `advisors[jwt.advisorId]`, check whether `{accountId}` or `{relationshipId}` is in the matching set. 403 on miss. Admin bypass preserved. This is Wave 2c and ships after .004a (shared helper) AND .004b (ownership map artifact exists) AND .005 (non-admin drill paths are only reachable via Book view).
+
+    **ARCHITECTURAL PRINCIPLE — the profile IS the security boundary** (Andrew 2026-04-10, ~16:45 EDT, relayed by 0.4.0_DT_ClientPlatform):
+
+    > "Chase should be able to drill all the way to the bottom of his book. We actually solve a lot of our security concerns here by simply having better architecture with the profile."
+
+    Implications for .004c:
+    - Non-admin Chase clicks all the way to account-level detail on his own clients. The frontend does NOT cap depth; full L4 drill is intentional per .005.
+    - Your account/client scoping here is the authoritative gate for that L4 path. Check that `{accountId}` and `{relationshipId}` resolve, via the .004b ownership map, to an advisorId that matches `jwt.advisorId`. If yes, pass through. If no, 403.
+    - Do not also enforce "is this path pattern allowed for non-admin" at the account/client layer. That is frontend logic, and .005 RD has resolved it to "yes, full drill". Your job is purely ownership.
+    - The single-choke-point model means this Lambda is load-bearing. Test coverage should exercise the "Chase tries to reach Travis's account" case to prove the 403 fires.
   </objective>
 
   <context>
