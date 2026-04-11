@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-10</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_PROFIL</project_code>
   </metadata>
 
@@ -23,7 +23,9 @@
 
     **Option (c) Split level:** Advisor-level book stays at 5-min stale (matching the rest of the page for analytics continuity). Client-detail (L3 from .005) uses `gcTime: 0`, no persistence across unmounts. Account-detail (L4) same — `gcTime: 0`. This is the "right" answer if PII concern is primarily about client/account-level data rather than advisor roll-ups.
 
-    Andrew decision required before this TO can proceed.
+    **DECISION: Option (c) — split level.** Andrew confirmed via main chat on 2026-04-10, ~16:35 EDT, relayed by 0.4.0_DT_ClientPlatform. Advisor-level book `useQuery` stays at `staleTime: 5 * 60 * 1000` (matches page analytics continuity). Client-detail L3 (`AdvisorBookClientDetail.tsx`) and Account-detail L4 (`AdvisorBookAccountDetail.tsx`) use `gcTime: 0` with default staleTime, no persistence across unmounts. Rationale: treats PII sensitivity as a layered property rather than a blunt toggle; isolates walk-by exposure risk to the client/account layer where real names + account numbers live; scales cleanly for tighter-PII partner firms in the future without touching advisor-level caching.
+
+    RD must also audit whether any other page-level cache key touches client-specific data and should follow the same policy (per the last paragraph of this context).
 
     The actual code change is trivial: per cache key in the AdvisorBookView flow, update `staleTime` and/or `gcTime` props in the `useQuery` call. Each key is one line.
 

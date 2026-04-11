@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-10</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_PROFIL</project_code>
   </metadata>
 
@@ -36,6 +36,16 @@
     Cache policy: default to 5-min stale on the per-id keys (matching existing page policy). If Andrew/COO picks option (b) or (c) in .006, those keys will be updated in a follow-up one-line change per key. Do not wait on .006 — ship with 5-min stale and update after.
 
     Client data fetching: the existing `ClientsTab` L3/L4 fetches use bespoke `useEffect`+`useState` patterns. Convert to `useQuery` with proper error/loading states. If the existing fetch functions live in `portal/src/api/` or similar, reuse them as-is; do not rewrite the API layer.
+
+    **ARCHITECTURAL PRINCIPLE — non-admin drill depth (Andrew 2026-04-10, ~16:45 EDT, relayed by 0.4.0_DT_ClientPlatform):**
+
+    > "Chase should be able to drill all the way to the bottom of his book. We actually solve a lot of our security concerns here by simply having better architecture with the profile."
+
+    The profile IS the security boundary. Non-admin advisors get FULL drill depth (L2 book -> L3 client detail -> L4 account detail) within their own profile scope -- identical rendering to what an admin sees drilling into that same advisor. Do NOT cap non-admin depth. Do NOT build "non-admin-lite" variants of L3/L4. Admin and non-admin paths converge on the same `AdvisorBookClientDetail.tsx` + `AdvisorBookAccountDetail.tsx`.
+
+    Safety model: the Lambda@Edge scoping rules in .004a (advisor-id paths) and .004c (account/client paths via .004b ownership map) enforce at the backend that a non-admin can only fetch data for advisorIds / clientIds / accountIds they own. Frontend depth cap would be defense-in-depth theater -- the authoritative gate is the edge Lambda. Clean architecture beats redundant cosmetic restrictions.
+
+    Criterion 8 ("admin and non-admin both drill") is therefore a hard requirement, not an optional bonus. Non-admin Chase must see exactly what admin sees when drilling into Chase's own advisor book, no less.
   </context>
 
   <compiler_tools_mandate>
