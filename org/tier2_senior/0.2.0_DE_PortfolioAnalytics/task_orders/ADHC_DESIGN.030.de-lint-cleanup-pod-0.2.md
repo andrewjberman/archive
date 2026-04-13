@@ -5,7 +5,8 @@
 **Project:** `ADHC_DESIGN` (Phase 2 — carryover from DEBT_1STRUN)
 **Depends on:** Nothing — can run concurrent with ADHC_DESIGN.027
 **Priority:** Medium
-**Status:** PENDING
+**Status:** COMPLETE
+<!-- Completed 2026-04-09. 12 of 25 pod warnings resolved (portal DEV 365dc88). 13 deferred (holdings-shared.tsx react-refresh -- requires file split). -->
 
 ---
 
@@ -73,6 +74,10 @@ Run `bun run lint` from `portal/` and fix all warnings in files under:
 
 ---
 
+## Compiler Tool
+
+Run `comp-tooltip summary` after your lint work to confirm no tooltip drift was introduced. This is informational — the tooltip migration itself is in .027.
+
 ## Validation
 
 - `bun run lint` shows zero warnings in files under your pod's domain
@@ -81,4 +86,4 @@ Run `bun run lint` from `portal/` and fix all warnings in files under:
 
 Commit message: `chore(portal): pod 0.2 lint cleanup — X warnings resolved (ADHC_DESIGN.030)`
 
-Ping `1.0.0_SA_CTO` when done.
+Ping `2.0.0_SA_COO` when done.

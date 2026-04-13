@@ -4,8 +4,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-10</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_PROFIL</project_code>
+    <!-- Flipped by 1.0.0_SA_CTO 2026-04-13 per Andrew: visual test passed, PROFIL project closed. -->
   </metadata>
 
   <objective>
