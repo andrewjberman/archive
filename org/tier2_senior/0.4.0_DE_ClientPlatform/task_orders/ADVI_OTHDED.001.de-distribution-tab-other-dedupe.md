@@ -5,6 +5,8 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-13</date>
     <status>pending</status>
+    <!-- code landed on portal DEV 801349d 2026-04-13; AC #6 (/frontend-dev visual pass) outstanding pending submodule bump -->
+
     <project_code>ADVI_OTHDED</project_code>
   </metadata>
 
