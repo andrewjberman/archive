@@ -5,6 +5,8 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-13</date>
     <status>pending</status>
+    <!-- code landed on portal DEV 2b5b0ec 2026-04-13; AC #4 numeric contrast recording outstanding pending /frontend-dev run -->
+
     <project_code>ADVI_HDRSPL</project_code>
   </metadata>
 
