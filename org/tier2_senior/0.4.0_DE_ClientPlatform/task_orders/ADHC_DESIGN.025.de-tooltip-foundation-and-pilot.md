@@ -5,7 +5,8 @@
 **Project:** `ADHC_DESIGN`
 **Depends on:** Nothing — TO-026 and TO-027 depend on this
 **Priority:** High (blocks pod 0.1 and 0.2 migrations)
-**Status:** PENDING
+**Status:** COMPLETE
+<!-- 2026-04-13 COO close-out (CTO memo): COMPLETE-IN-FACT. Pilot migrated, DataTooltip canonical, COO confirmed on DEV 2026-04-10. -->
 
 ---
 
@@ -113,10 +114,26 @@ Add `export { DataTooltip } from './DataTooltip'` to wherever `Tooltip` is curre
 
 ---
 
+## Compiler Tool — comp-tooltip
+
+A new compiler tool `comp-tooltip` has been built for this migration. Use it:
+
+```bash
+comp-tooltip scan       # full audit — all tooltip sites, classified by variant
+comp-tooltip drift      # only non-conforming sites (your migration targets)
+comp-tooltip canonical  # only canonical / migrated sites (should grow as you work)
+comp-tooltip summary    # counts by variant + migration progress %
+```
+
+**Acceptance gate:** After your work, `comp-tooltip drift` must show zero hits in ModelPortfolios.tsx, AccountDistributionChart.tsx, and ReturnVolatilityScatter.tsx. `comp-tooltip summary` must show the Variant B and C counts at 0.
+
 ## Validation
 
-Before closing, run `comp-transform trace ModelPortfolios` and confirm all three chart tooltips route through the new `<DataTooltip>` component. Spot-check WCAG contrast with browser devtools — the header text on silver background should report ≥ 4.5:1.
+1. Run `comp-tooltip drift` — your 3 pilot files must not appear
+2. Run `comp-transform trace ModelPortfolios` — all chart tooltips route through `<DataTooltip>`
+3. Spot-check WCAG contrast (header text on silver bg >= 4.5:1)
+4. `bun run build` passes
 
 Commit message: `feat(portal): DataTooltip shared component + ModelPortfolios migration (ADHC_DESIGN.025)`
 
-Ping `1.0.0_SA_CTO` and `0.1.0_DE_MarketIntelligence` + `0.2.0_DE_PortfolioAnalytics` when the shared component lands so they can start TO-026 and TO-027.
+**Immediately after committing:** send MCP messages to `0.1.0_DE_MarketIntelligence`, `0.2.0_DE_PortfolioAnalytics`, and `2.0.0_SA_COO` confirming `<DataTooltip>` is on DEV so .026/.027 can start.

@@ -6,7 +6,8 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-08</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- 2026-04-13 COO close-out (CTO memo, Andrew-directed cross-org reconciliation): DEPRECATED (provisional; RD 0.4.2 not LIVE at reconciliation time). Advisors tab rewritten to PROD by ADVI_PROFIL (d2e78631 / portal-v2.1.39); 'no data' symptom resolved by W5-005 COMPLETE-IN-FACT flip. Re-open if RD disagrees on next session. -->
     <project_code>ADVI_REBORN</project_code>
   </metadata>
 
