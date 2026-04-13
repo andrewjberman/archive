@@ -4,8 +4,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <!-- 2026-04-13 RE-OPENED. DS deeper analysis caught allChecked early return (AdvisorsTab.tsx line ~264) using top-level fee_breakdown.fee_paying.aua (dedup 341M) while role-subset loop uses role_breakdown[role].fee_paying.aua (role-attributed 366M). Two incompatible sources => adding implementor DROPS total (non-monotonic). Fix: remove allChecked early return so all cases go through role loop; all-roles+fee-paying then = 398M role-attributed, 366+32.57 implementor = 398 monotonic. One more portal commit needed. -->
+    <!-- Flipped by 1.0.0_SA_CTO 2026-04-13: follow-up fix shipped portal DEV 9f6faf9, in PROD via 4575a1c. -->
     <!-- portal DEV bf475f8 2026-04-13. Audit matrix reconciled with DS: TO's 341M
          expectation was sourced from the deduplicated firm fee_breakdown total
          (340.5M); per-role attributed sums correctly exceed that due to

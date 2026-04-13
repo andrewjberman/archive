@@ -4,8 +4,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <!-- code landed on portal DEV 2b5b0ec 2026-04-13; AC #4 numeric contrast recording outstanding pending /frontend-dev run -->
+    <!-- Flipped by 1.0.0_SA_CTO 2026-04-13: shipped to PROD via 4575a1c. -->
 
     <project_code>ADVI_HDRSPL</project_code>
   </metadata>
