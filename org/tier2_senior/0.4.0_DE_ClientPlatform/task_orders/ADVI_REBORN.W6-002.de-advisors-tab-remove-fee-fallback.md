@@ -4,7 +4,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-13</date>
-    <status>staged</status>
+    <status>pending</status>
+    <!-- code landed portal DEV bf475f8 2026-04-13; 3-of-4 audit cells match, the 4th hits 365.55M vs TO's <=341M expectation — flagged for DS revalidation in the session log -->
+
     <project_code>ADVI_REBORN</project_code>
   </metadata>
 
