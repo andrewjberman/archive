@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-04-06</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>DEBT_1STRUN</project_code>
   </metadata>
 
