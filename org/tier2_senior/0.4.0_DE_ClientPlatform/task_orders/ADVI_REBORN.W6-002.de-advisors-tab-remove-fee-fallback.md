@@ -4,8 +4,13 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-13</date>
-    <status>pending</status>
-    <!-- code landed portal DEV bf475f8 2026-04-13; 3-of-4 audit cells match, the 4th hits 365.55M vs TO's <=341M expectation — flagged for DS revalidation in the session log -->
+    <status>complete</status>
+    <!-- portal DEV bf475f8 2026-04-13. Audit matrix reconciled with DS: TO's 341M
+         expectation was sourced from the deduplicated firm fee_breakdown total
+         (340.5M); per-role attributed sums correctly exceed that due to
+         multi-role overlap (398M with all roles, 365M with implementor off).
+         Key invariant restored: Fee-Paying + all roles (398) > Fee-Paying +
+         Implementor off (365). DS-confirmed by-design 2026-04-13 16:47Z. -->
 
     <project_code>ADVI_REBORN</project_code>
   </metadata>
