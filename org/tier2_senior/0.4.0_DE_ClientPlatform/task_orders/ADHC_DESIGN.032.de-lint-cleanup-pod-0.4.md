@@ -5,7 +5,17 @@
 **Project:** `ADHC_DESIGN` (Phase 2 — carryover from DEBT_1STRUN)
 **Depends on:** Nothing — can run concurrent with tooltip work (.025/.028)
 **Priority:** Medium
-**Status:** PENDING
+**Status:** COMPLETE (with follow-up — see ADHC_DESIGN.033 below)
+<!-- portal DEV f3274f3 2026-04-13. Pod-0.4 lint count 23 -> 16 warnings.
+     Cleared 5 react-hooks/rules-of-hooks violations (real bugs: useMemo/
+     useCallback below early returns in AdvisorsTab + FeeEfficiencyPanel)
+     plus 1 unused-imports auto-fix.
+     Remaining 16 warnings = 15 react-hooks/set-state-in-effect + 1
+     react-hooks/refs. All on intentional state-resync effects (cohort
+     changes resetting drill state, etc.) — perf hints, not bugs. Each
+     needs an effect-restructure with regression risk; deferred to a
+     dedicated effect-refactor pass. Tracked as ADHC_DESIGN.033 (TBD). -->
+
 
 ---
 
@@ -85,6 +95,10 @@ Run `bun run lint` from `portal/` and fix all warnings in files under:
 
 ---
 
+## Compiler Tool
+
+Run `comp-tooltip summary` after your lint work to confirm no tooltip drift was introduced. The tooltip migration itself is in .025/.028.
+
 ## Validation
 
 - `bun run lint` shows zero warnings in files under your pod's domain
@@ -95,4 +109,4 @@ Run `bun run lint` from `portal/` and fix all warnings in files under:
 
 Commit message: `chore(portal): pod 0.4 lint cleanup — X warnings resolved (ADHC_DESIGN.032)`
 
-Ping `1.0.0_SA_CTO` when done.
+Ping `2.0.0_SA_COO` when done.

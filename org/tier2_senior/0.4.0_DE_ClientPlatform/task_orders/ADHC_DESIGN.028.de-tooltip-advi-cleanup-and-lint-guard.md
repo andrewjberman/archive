@@ -5,7 +5,9 @@
 **Project:** `ADHC_DESIGN`
 **Depends on:** ADHC_DESIGN.025 (foundation), .026 (pod 0.1), .027 (pod 0.2)
 **Priority:** Low — final cleanup pass after .026 and .027 merge
-**Status:** PENDING (BLOCKED until .026 and .027 complete)
+**Status:** COMPLETE
+<!-- portal DEV 3096108 2026-04-13. 4 inline RechartsTooltip bodies in DistributionTab.tsx migrated to <DataTooltip>; eslint no-restricted-syntax guard added in eslint.config.js scoped to <Tooltip|RechartsTooltip> content arrows that return a top-level <div>. -->
+
 
 ---
 
@@ -51,29 +53,23 @@ These should migrate to `<DataTooltip>` with **zero visual change** (the compone
 
 **Why migrate them if they already look right?** To delete the re-implementations. After this TO, exactly zero files should contain raw `bg-[hsl(var(--semantic-background-chartTooltipBg))] border-2 border-[hsl(var(--primary))]` — the only way to render a canonical data tooltip must be through `<DataTooltip>`.
 
-### 3. Lint guard
+### 3. Lint guard — comp-tooltip
 
-Add an ESLint rule to `portal/.eslintrc.*` (or the equivalent config) that bans the tooltip drift patterns. The rule should flag any of these string literals appearing inside a JSX className:
+The `comp-tooltip` compiler tool replaces the manual grep approach. It already classifies every tooltip site by variant, distinguishes tooltips from non-tooltip UI elements (table headers, dropdowns), and reports migration progress.
 
-**Banned patterns (any match = lint error):**
-- `bg-[hsl(var(--bg-header))]` — Variant A drift
-- `bg-[hsl(var(--bg-tooltip))]` — Variant B/C drift
-- `bg-slate-900` in files under `portal/src/pages/` or `portal/src/components/` — Variant D hardcoded
-- `border-white/10` AND `border-white/20` when they appear alongside `rounded-lg|rounded-md` and `shadow-xl` on the same element (these are the tooltip-shape giveaways)
-
-Error message: `Chart tooltips must use <DataTooltip />. See ADHC_DESIGN.025.`
-
-If ESLint AST rules are too heavy for this (they often are for className pattern matching), fall back to a simple `grep`-based pre-commit hook in `portal/package.json`:
+Add a script entry to `portal/package.json`:
 
 ```json
 {
   "scripts": {
-    "lint:tooltips": "! grep -rE \"(bg-\\[hsl\\(var\\(--bg-(header|tooltip)\\)\\)\\]|bg-slate-900)\" src/pages src/components --include='*.tsx' --exclude='DataTooltip.tsx'"
+    "lint:tooltips": "comp-tooltip drift"
   }
 }
 ```
 
-Wire it into the existing `lint` npm script so `bun run lint` catches it.
+Wire it into the existing `lint` npm script so `bun run lint` catches drift.
+
+The tool lives at `.tools/comp-tooltip` (Python at `org/modules/graph/tooltip_cli.py`). It does NOT need ESLint AST rules — it already handles the classification better than pattern matching can.
 
 ### 4. Update CONTRIBUTING / dev docs
 
@@ -83,27 +79,28 @@ Add a short section to `portal/docs/` (or create `portal/CONTRIBUTING.md` if it 
 
 ### 5. Final inventory check
 
-After merging .025/.026/.027, run this grep from `portal/`:
+After merging .025/.026/.027, run:
 
 ```bash
-grep -rEn "(bg-\[hsl\(var\(--bg-(header|tooltip)\)\)\]|bg-slate-900|border-white/(10|20)).*rounded-lg.*shadow" src/ --include='*.tsx' | grep -v DataTooltip.tsx
+comp-tooltip drift
 ```
 
-Expected output: **zero matches**. Any hits are either a missed migration site (report it to the owning pod) or a false positive (non-tooltip usage — document it as an exemption in CONTRIBUTING).
+Expected output: **zero sites**. `comp-tooltip summary` should show `Migration progress: N/N (100%)`. Any remaining drift is either a missed migration (report to the owning pod) or a false positive (document in CONTRIBUTING).
 
 ---
 
 ## Validation
 
-- DistributionTab.tsx:2629 renders with indigo border (not accent color)
-- All 8 previously-canonical ADVI sites render visually identical to before TO-025
-- `bun run lint:tooltips` passes clean
-- `bun run build` passes
-- `grep` inventory check returns zero tooltip drift patterns
+1. `comp-tooltip drift` — zero sites across entire portal
+2. `comp-tooltip summary` — 100% migration progress
+3. DistributionTab Variant E renders with indigo border (not accent)
+4. All ADVI sites visually identical to before
+5. `bun run lint:tooltips` passes clean
+6. `bun run build` passes
 
 Commit message: `feat(portal): ADVI tooltip cleanup + lint guard (ADHC_DESIGN.028)`
 
-Report back to `1.0.0_SA_CTO` with: total migration LOC deleted, final drift count (should be 0), and any exemptions added to CONTRIBUTING.
+Report back to `2.0.0_SA_COO` with: total migration LOC deleted, final drift count (should be 0), and any exemptions.
 
 ---
 
