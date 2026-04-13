@@ -15,7 +15,15 @@
   </references>
 
   <objective>
-    Produce a single structured audit response covering 7 backend data gaps surfaced from today's advisor-profile/book number-tie audit. For each gap: label (LIVE / MISSING-COLUMN / MISSING-ROLL-UP / MISSING-ARTIFACT / DEPRECATED), canonical-source recommendation, proposed chain insertion point, and follow-up TO hooks. No implementation in this TO — pure audit output. DS then spawns follow-up TOs per confirmed gap under `ADVI_PROFAU.002+`.
+    Produce a single structured audit response covering 7 backend data gaps surfaced from today's advisor-profile/book number-tie audit. **Framing per Andrew (via CTO 2026-04-13T18:13Z): "Ideally we can work with our existing tables and we already have all this information."** First-order question on every gap: does the data already exist in a current Group A-D table? Only if truly absent do we consider a new column / roll-up / artifact.
+
+    Label taxonomy (one per gap, mandatory):
+    - **EXISTS-UPSTREAM** — data already in an existing table; needs roll-up/passthrough in the existing D-script. Name the table + column. Preferred path; expected to be most gaps.
+    - **COLUMN-ADD** — data derivable from existing tables but not yet emitted. Name target D-script + transform.
+    - **NEW-ARTIFACT** — data genuinely absent from Group A-D. Rare; DS must justify with compiler evidence.
+    - **DEPRECATED** — field declared in TS but UI intent has been dropped; recommend removing the type field.
+
+    No implementation in this TO — pure audit output. DS then spawns follow-up TOs per confirmed gap under `ADVI_PROFAU.002+`.
   </objective>
 
   <context>
@@ -49,9 +57,9 @@
   </cross_domain_coordination>
 
   <acceptance_criteria>
-    1. Single response doc at `org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/profaup_gap_audit_response.md` covering all 7 questions (path per CTO scoping — do NOT rename).
-    2. Each gap carries: LIVE / MISSING-COLUMN / MISSING-ROLL-UP / MISSING-ARTIFACT / DEPRECATED label + evidence line (grep or compiler ref).
-    3. Each gap carries: canonical-source recommendation (gold script + field name) when LIVE; proposed chain insertion point (which script, column name or new artifact path) when MISSING.
+    1. Single response doc at `org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/profau_gap_audit_response.md` covering all 7 questions (path per CTO scoping — do NOT rename).
+    2. Each gap carries: EXISTS-UPSTREAM / COLUMN-ADD / NEW-ARTIFACT / DEPRECATED label + evidence line (grep or compiler ref). NEW-ARTIFACT requires explicit compiler-evidence justification per Andrew framing.
+    3. Each gap carries: canonical-source recommendation (gold script + column/field name) when EXISTS-UPSTREAM; proposed chain insertion point (which script, column name) when COLUMN-ADD; new source + justification when NEW-ARTIFACT.
     4. Each gap identifies whether follow-up work is one-liner column-add, multi-script work, or deprecation removal — this drives `.002+` TO granularity.
     5. Q7 explicitly names which field (`fee_earning_aua` or `sum(role_breakdown[role].fee_paying.aua)`) should be canonical at the advisor-profile headline and whether the non-canonical should be deprecated anywhere on the platinum surface.
     6. Compiler Tools section in the response doc logs every Phase 1 + Phase 2 run with pass/fail + output summary.
@@ -60,7 +68,7 @@
 
   <scope>
     <files>
-      <file action="create">org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/profaup_gap_audit_response.md</file>
+      <file action="create">org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/profau_gap_audit_response.md</file>
     </files>
   </scope>
 
