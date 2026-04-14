@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_OFFICE</project_code>
   </metadata>
 
