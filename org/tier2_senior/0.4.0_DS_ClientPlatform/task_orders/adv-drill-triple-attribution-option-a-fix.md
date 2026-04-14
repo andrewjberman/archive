@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- DS shipped 2026-04-14 commit on CLOUD; validation after gold rerun -->
+    <status>staged</status><!-- HELD 2026-04-14T23:20Z — CTO scope revision after initial GO. DS commit on CLOUD reflects prior scope ($391.66M target via rel_architect_lookup); revised target is $390.37M via account-level attribution mirroring D_00c. DS must revise + keep local; NO S3 upload until post-presentation + Andrew GO. -->
     <project_code>ad-hoc</project_code>
     <priority>post-presentation — Andrew GO required</priority>
   </metadata>
@@ -15,41 +15,52 @@
   </references>
 
   <objective>
-    Patch `data/black_diamond/scripts/gold/D_00b.portal_timeseries.py:806-822` to reuse
-    `rel_architect_lookup` as the drill's filter source (not `cdim.primary_architect`).
-    Eliminates the $153.6M L0-vs-L1 mismatch on Segment Analytics Continuous-ADV-AUA drill.
+    **REVISED 2026-04-14T23:18Z per CTO — target is $390.37M canonical (Leaderboard), NOT $391.66M.**
+    The original rel_architect_lookup approach is relationship-level and would leave L0+L1 drill
+    $1.29M off canonical.
 
-    DS's own analysis identified this fix; she owns the scope.
+    In `data/black_diamond/scripts/gold/D_00b.portal_timeseries.py`, rebuild the architect slice
+    of BOTH the L0 aggregate (lines 721-729, currently reads `nna_aua_by_advisor.parquet`) AND
+    the L1 drill (lines 806-822) using ACCOUNT-LEVEL attribution: filter `account_performance`
+    joined to `account_team` where `account_team.architect == arch` — exactly the same rule as
+    `D_00c.portal_leaderboard.py`. Consistency of rule is more important than elegance.
+
+    - Ignore `nna_aua_by_advisor.parquet`'s architect slice for this chart.
+    - Ignore `cdim.primary_architect` as a filtering source.
+    - Keep `cdim.primary_architect` as a dimension display column (no semantics change).
+
+    Effectively scoped-down Option B — account-level inline without upstream parquet rebuild.
+    Full upstream rebuild stays as candidate BDPL_CNPRCS WP-10 (not authored).
   </objective>
 
   <scope>
     <file>data/black_diamond/scripts/gold/D_00b.portal_timeseries.py</file>
     <change>
-      Exact change per DS analysis section 5.A:
+      Two blocks touched in the same file (both architect-slice paths):
 
-      BEFORE (line 809):
-          arch_perf = perf_cohort[perf_cohort['primary_architect'] == arch].copy()
+      1. L0 aggregate (lines 721-729) — currently reads `nna_aua_by_advisor.parquet`.
+         Replace with account-level join: filter account_performance by
+         account_team.architect == arch (same rule D_00c.portal_leaderboard.py uses).
 
-      AFTER:
-          travis_rels = set(rel_arch_lookup.loc[
-              rel_arch_lookup['architect'] == arch, 'relationship_id'])
-          arch_perf = perf_cohort[perf_cohort['relationship_id'].isin(travis_rels)].copy()
+      2. L1 drill (lines 806-822) — currently filters perf_cohort['primary_architect'] == arch.
+         Replace with the same account-level join.
 
-      If `rel_architect_lookup` is not in scope at that function, pass it as an
-      argument from the caller already consuming it for `nna_aua_by_advisor`.
+      DS reads D_00c.portal_leaderboard.py FIRST to mirror its exact filter logic.
+      No new columns, no schema change — only swap the filter source on two blocks.
     </change>
   </scope>
 
   <acceptance_criteria>
-    1. For every architect X emitted in adv_drill: `abs(sum(adv_drill[X].data[-1]) - adv.data[-1][X]) < $1.0`
-    2. Travis Penfield specifically: `adv_drill['Travis Penfield'].data[-1]` sums to $391.66M ± $1 (matching L0)
-    3. Firm-wide disagreement census in session log — run the one-liner from analysis doc section 6 against current snapshot; report per-architect rel count where rel_architect_lookup disagrees with cdim.primary_architect
-    4. Zero change to any other consumer of `perf_cohort['primary_architect']` — geo drill, cla_adv_drill at :844 both untouched. Only the adv_drill block (806-822) is modified
-    5. MCP COMPLETE to COO with commit + firm-wide census snippet + Travis spot-check
+    1. **Internal consistency:** `abs(sum(adv_drill[X].data[-1]) - adv.data[-1][X]) < $1.0` for every architect X
+    2. **Canonical consistency:** `abs(adv.data[-1][X] - Leaderboard.employee_leaderboard.windows[*].entries[i].role_breakdown.architect.aua) < $1.0` for every architect where both surfaces emit X
+    3. **Travis spot-check:** `adv.data[-1]['Travis Penfield']` = $390.37M ± $1 AND `adv_drill['Travis Penfield']` top-9 + Other sums to $390.37M ± $1
+    4. Firm-wide disagreement census in session log (as before — per-architect rel-count diff rel_architect_lookup vs cdim.primary_architect — useful for post-fix diagnostics)
+    5. Zero change to other consumers — geo drill, cla_adv_drill at :844, and any other `primary_architect` consumer untouched. Only the two architect-slice blocks (721-729 + 806-822) are modified
+    6. MCP COMPLETE to COO with commit + firm-wide census + Travis spot-check + Leaderboard tie-out snippet for 3 sample architects (not just Travis)
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io D_00b.portal_timeseries.py` — enumerate all readers/writers; `comp-pipescript consumers cumulative_chart.json` to confirm adv_drill scope.
+    Phase 1: `comp-pipescript io D_00b.portal_timeseries.py`; **`comp-pipescript io D_00c.portal_leaderboard.py`** (read the exact account-level filter rule and mirror it in D_00b — consistency of rule > elegance, per CTO 2026-04-14T23:18Z); `comp-pipescript consumers cumulative_chart.json`.
     Phase 2: `python -m py_compile D_00b.portal_timeseries.py`; `comp-validate D_00b` after gold rerun.
     Phase 3: `comp-transform schema-check DistributionTab --feature advDrill` — confirm no FE side impact.
   </compiler_tools_mandate>
