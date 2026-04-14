@@ -17,6 +17,7 @@
 | D2 | Snapshot-OFC-AUA L1 drill: no time machine lookback | FE + DS | `OfcAdvisorListPanel` (`DistributionTab:3071`) has no per-period strip. `NnaQuarterlyStrip` (`:3165`) is NNA-only. Need DS to expose per-office-per-period AUA; FE wires a time-machine row mirroring L0. |
 | D3 | Snapshot-OFC-NNA: no bell curve (L0 + L1) | FE + DS likely | `nna_ofc` exists on continuous but snapshot bell-curve for OFC-NNA not populating. Verify DS emits nna distribution bins under `views.ofc` (and L1 per-advisor bins); FE to render. |
 | D4 | "No advisor data for Austin" on L1 drill | DS | `officeSegment.advisors[]` empty (`DistributionTab:3086`). Needs DS to populate `advisors[]` on every OFC donut segment. |
+| D5 | Continuous-ADV drill: pseudonymize sub-category labels (added 2026-04-14 per Andrew) | FE trivial | `DistributionTab.tsx` `ContinuousChartView` when `cohort === 'adv' && isDrilled` — `getCategoryDisplayName` falls through to `formatArchitectLabel` which renders real client names / account numbers. Change to `Client N` ordinal labels (Other preserved). Helper `pseudonymizeChildLabel` swapped at `:1295, :1308, :1445, :2022, :2180, :2249`. Forced — independent of `canSeeCleartext()`. |
 
 ### Advisors / AdvisorPublicProfile (public)
 
