@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- GO sent 2026-04-14T19:50Z; RD flips to pending on receipt -->
+    <status>complete</status><!-- portal DEV 5ea017c; /frontend-dev Phase 2 pending external trigger -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
   </metadata>
