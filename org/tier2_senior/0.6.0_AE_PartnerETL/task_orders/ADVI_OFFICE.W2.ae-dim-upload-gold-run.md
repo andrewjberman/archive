@@ -23,9 +23,11 @@
   <objective>
     1. Upload the advisor-office dim file to S3 (one-time; prerequisite for D_01 + D_00b runtime reads).
     2. Trigger D_00b + D_01 + D_04 on bd-gold-qa-runner; verify OFC keys in artifacts.
-    3. Promote: trigger PROD gold run on bd-gold-layer-runner (via EventBridge).
-    4. Verify platinum artifacts and MCP-message DE + COO on completion.
+    3. Verify platinum artifacts and MCP-message DE + COO on completion.
   </objective>
+  <!-- NOTE: No PROD trigger step. QA runner writes directly to production S3 -- artifacts
+       are live the moment the QA run completes. The PROD runner (bd-gold-layer-runner)
+       is nightly EventBridge only and must NOT be manually triggered after QA runs. -->
 
   <context>
     The dim file is already committed in the repo:
