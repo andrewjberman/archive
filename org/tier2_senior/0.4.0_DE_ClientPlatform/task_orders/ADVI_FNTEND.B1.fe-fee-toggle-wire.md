@@ -25,14 +25,14 @@
     1c. When Fees Only is checked, every displayed AUA/NNA/count figure across Summary + RoleDonut + Lifetime Activity reflects the `fee_paying` bucket exclusively. Unchecking expands to the parent (fee_paying + no_fee).
     2. No static values when toggling — every displayed figure is state-driven.
     3. "Fee filter not applied" footnote at `AdvisorBookView:1105` removed.
-    4. `/frontend-dev` closed-loop pass.
+    4. Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) closed-loop pass.
     5. MCP COMPLETE to COO.
   </acceptance_criteria>
 
   <compiler_tools_mandate>
     Phase 1: `comp-transform schema-check --feature feeView` on AdvisorPublicProfile + RoleDonut + LifetimeActivity; **`comp-transform ternary-audit RoleDonut`** (added 2026-04-14 per CTO directive — W6 OFC lesson: every `role ===` / `feeView ===` chain must have both branches covered).
     Phase 2: `comp-transform ternary-audit` on all affected components (feeView routing).
-    Phase 3: `/frontend-dev`.
+    Phase 3: Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`).
   </compiler_tools_mandate>
 
   <dependencies>

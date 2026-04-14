@@ -30,13 +30,13 @@
     2. OFC office-list font-weight matches
     3. OFC office-list color matches
     4. OFC office-list spacing (padding/margin) matches
-    5. `/frontend-dev` pass on DistributionTab OFC + GEO + ADV Continuous views — visual symmetry confirmed
+    5. Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) pass on DistributionTab OFC + GEO + ADV Continuous views — visual symmetry confirmed
     6. MCP COMPLETE to COO with commit hash
   </acceptance_criteria>
 
   <compiler_tools_mandate>
     Phase 1: `comp-transform schema-check DistributionTab` (confirm no className/prop drift on the OFC branch).
-    Phase 2: `/frontend-dev`.
+    Phase 2: Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`).
   </compiler_tools_mandate>
 
   <dependencies>

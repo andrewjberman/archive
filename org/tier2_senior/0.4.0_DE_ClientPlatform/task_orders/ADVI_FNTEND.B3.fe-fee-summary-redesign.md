@@ -24,13 +24,13 @@
     1. Fee Summary panel shows per-advisor rows with fee shares
     2. Profile advisor pinned first
     3. "Wtd Avg Fee" label gone or replaced
-    4. `/frontend-dev` closed-loop pass
+    4. Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) closed-loop pass
     5. MCP COMPLETE to COO
   </acceptance_criteria>
 
   <compiler_tools_mandate>
     Phase 1: `comp-transform schema-check FeeSummaryPanel` + `--feature teamAttribution`.
-    Phase 3: `/frontend-dev`.
+    Phase 3: Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`).
   </compiler_tools_mandate>
 
   <dependencies>

@@ -29,7 +29,7 @@
     2. Unchecking reduces dataset AND updates percentile ranks (visible advisor movement, not row-hide)
     3. Empty selection → empty-state message "Select at least one role"
     4. Role filter persists across Window/Period toggle changes
-    5. `/frontend-dev` closed-loop pass
+    5. Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) closed-loop pass
     6. Sum-reconciliation: with all 5 selected, metrics match production within $0.01
     7. MCP COMPLETE to COO
   </acceptance_criteria>
@@ -37,7 +37,7 @@
   <compiler_tools_mandate>
     Phase 1: `comp-transform schema-check FeeEfficiencyPanel --feature roleFilter`; `comp-transform ternary-audit FeeEfficiencyPanel` (role routing chains); `comp-cache collisions` (auto-rule: new FE state driving React Query — role selection may introduce query-key hash).
     Phase 2: `comp-transform ternary-audit` final pass.
-    Phase 3: `/frontend-dev`.
+    Phase 3: Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`).
   </compiler_tools_mandate>
 
   <dependencies>

@@ -20,13 +20,13 @@
   <acceptance_criteria>
     1. Account L1 drill renders timeseries chart with M/Q/Y toggle
     2. Pattern matches Lifetime Activity (same interval selector, same series)
-    3. `/frontend-dev` closed-loop pass
+    3. Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) closed-loop pass
     4. MCP COMPLETE to COO
   </acceptance_criteria>
 
   <compiler_tools_mandate>
     Phase 1: `comp-transform schema-check AdvisorBookAccountDetail`; `comp-cache collisions` (new account timeseries likely introduces new React Query key).
-    Phase 3: `/frontend-dev` on Account L1 drill.
+    Phase 3: Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) on Account L1 drill.
   </compiler_tools_mandate>
 
   <dependencies>

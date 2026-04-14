@@ -20,13 +20,13 @@
   <acceptance_criteria>
     1. Top Gain Positions renders on advisor L2 with real data (not [])
     2. **Added 2026-04-14 per RD audit:** Top Gain Positions also renders on client L3 drill after AE D_04 PROD re-run (ADVI_PROFAU.006 dependency)
-    3. `/frontend-dev` closed-loop pass on both L2 + L3
+    3. Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) closed-loop pass on both L2 + L3
     4. MCP COMPLETE to COO
   </acceptance_criteria>
 
   <compiler_tools_mandate>
     Phase 1: `comp-transform schema-check AdvisorBookView` + `comp-transform fields AdvisorBookView` (verify top_gain_positions prop actually rendered, not just typed — added 2026-04-14 per CTO audit).
-    Phase 3: `/frontend-dev` on AdvisorBookView.
+    Phase 3: Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) on AdvisorBookView.
   </compiler_tools_mandate>
 
   <dependencies>

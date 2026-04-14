@@ -31,14 +31,14 @@
   <acceptance_criteria>
     1. 10x rapid cohort toggle across all cohorts (geo/adv/ofc/cla × snapshot/continuous) — zero blank-chart states observed
     2. Browser network tab confirms both ApexCharts + Recharts vendor chunks fetched early (on DistributionTab mount, not on first chart render)
-    3. `/frontend-dev` closed-loop pass on DistributionTab
+    3. Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) closed-loop pass on DistributionTab
     4. No regression on non-rapid toggle path
     5. MCP COMPLETE to COO with commit hash + /frontend-dev report path
   </acceptance_criteria>
 
   <compiler_tools_mandate>
     Phase 1: `comp-transform schema-check DistributionTab` — confirm no prop/state drift from added useEffect.
-    Phase 3: `/frontend-dev` rapid-toggle scenario.
+    Phase 3: Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) rapid-toggle scenario.
   </compiler_tools_mandate>
 
   <dependencies>

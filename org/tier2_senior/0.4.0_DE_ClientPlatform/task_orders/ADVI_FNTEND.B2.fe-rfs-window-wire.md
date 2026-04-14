@@ -24,14 +24,14 @@
     1. QTD/YTD/Max toggle visible on Relationship Flows Summary; default QTD
     2. All three panels (RFS, Accounts, Clients) share one window state
     3. NNA column present on Clients table, obeys window toggle
-    4. `/frontend-dev` closed-loop pass
+    4. Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) closed-loop pass
     5. MCP COMPLETE to COO
   </acceptance_criteria>
 
   <compiler_tools_mandate>
     Phase 1: `comp-transform schema-check --feature rfsWindow` on RelationshipFlowsSummary + AccountsTable + ClientsTable; `comp-cache collisions` (new window state may introduce new React Query keys — must not collide with existing client/account keys).
     Phase 2: `comp-transform ternary-audit` on all three (window routing).
-    Phase 3: `/frontend-dev`.
+    Phase 3: Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`).
   </compiler_tools_mandate>
 
   <dependencies>

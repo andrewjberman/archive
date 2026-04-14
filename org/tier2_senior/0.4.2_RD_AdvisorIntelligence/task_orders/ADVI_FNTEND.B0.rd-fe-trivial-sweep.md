@@ -25,17 +25,17 @@
   </objective>
 
   <acceptance_criteria>
-    1. `/frontend-dev` shows No-Fee pill on single line
+    1. Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) shows No-Fee pill on single line
     2. Client/Account L1 drills show non-clickable Asset Mix (readonlyAssetClass propagated)
     3. Top Holdings palette matches Assets Overview (blue/green/orange) on every render site
     4. Continuous-ADV drilled view shows `Client N` labels across legend + search + tooltip + stacked bars + breadcrumb (forced, regardless of canSeeCleartext)
-    5. `/frontend-dev` closed-loop pass
+    5. Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) closed-loop pass
     6. MCP COMPLETE to COO with commit hash
   </acceptance_criteria>
 
   <compiler_tools_mandate>
     Phase 1: `comp-transform schema-check CanonicalBookView` (readonlyAssetClass trace); `comp-transform schema-check ConsolidatedOverviewPanel` (Top Holdings palette); **`comp-transform schema-check DistributionTab`** (D5 touches 6 call sites; without this the pseudonymize swap can miss a site).
-    Phase 2: `/frontend-dev` after commit.
+    Phase 2: Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) after commit.
     Phase 3: Post-PR visual QA.
   </compiler_tools_mandate>
 

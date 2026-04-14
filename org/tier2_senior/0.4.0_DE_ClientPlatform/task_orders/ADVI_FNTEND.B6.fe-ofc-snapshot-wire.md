@@ -23,13 +23,13 @@
     2. NNA bell curve renders on L0 OFC partition
     3. NNA bell curve renders per-office on L1
     4. time-machine strip works on L1 OfcAdvisorListPanel
-    5. `/frontend-dev` closed-loop pass
+    5. Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) closed-loop pass
     6. MCP COMPLETE to COO
   </acceptance_criteria>
 
   <compiler_tools_mandate>
     Phase 1: `comp-transform schema-check DistributionTab --feature ofcSnapshot` + `comp-transform ternary-audit DistributionTab`.
-    Phase 3: `/frontend-dev` on DistributionTab OFC mode.
+    Phase 3: Skill `frontend-dev` (or direct `.tools/frontend-dev.py --constitution portal/.frontend-dev/testing/<name>.json`) on DistributionTab OFC mode.
   </compiler_tools_mandate>
 
   <dependencies>
