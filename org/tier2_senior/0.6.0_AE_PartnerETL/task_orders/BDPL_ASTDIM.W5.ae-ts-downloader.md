@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status>
+    <status>pending</status><!-- GO ack'd 2026-04-14T18:58Z by 0.6.0_AE_PartnerETL -->
     <project_code>BDPL_ASTDIM</project_code>
   </metadata>
 
