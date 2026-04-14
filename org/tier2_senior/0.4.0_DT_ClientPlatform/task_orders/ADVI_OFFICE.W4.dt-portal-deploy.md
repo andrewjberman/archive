@@ -43,15 +43,23 @@
   </context>
 
   <compiler_tools_mandate>
-    Phase 1 (before deploying):
-    - Confirm `bun run build` passes on portal DEV HEAD.
-    - Confirm AE W2 MCP message received (PROD artifact live).
-    - Check `git log --oneline portal DEV -5` — confirm DE W3 commit is HEAD.
+    <phase name="before_deploy">
+      <run>comp-transform schema-check DistributionTab</run>
+      <expect>0 MISSING fields; ofc types present in rendered set; chartData/analyticsData appear as NOTE (expected aliases)</expect>
+      <if_mismatch>DO NOT deploy — W3 is incomplete or types.ts is missing OFC declarations. Flag to COO immediately.</if_mismatch>
 
-    Phase 2 (after deploy):
-    - Smoke-test OFC toggle on PROD (5-step checklist above).
-    - Append to `org/compiler-tools-log.md`.
-    - MCP message to 2.0.0_SA_COO: "ADVI_OFFICE W4 complete — portal PROD deployed. OFC toggle live."
+      <run>comp-blast DistributionTab</run>
+      <expect>8 downstream nodes via opal-partners-data Lambda — unchanged from pre-OFC baseline</expect>
+      <if_mismatch>Node count change means an unexpected dependency was added. Flag to COO before deploying.</if_mismatch>
+
+      Set compiler context before running tools:
+      printf "SERIAL=0.4.0_DT_ClientPlatform\nTO_ID=ADVI_OFFICE.W4" &gt; .comp-graph/.agent_context
+    </phase>
+
+    <phase name="after_deploy">
+      Smoke-test OFC toggle on PROD (5-step checklist in context above).
+      MCP message to 2.0.0_SA_COO: "ADVI_OFFICE W4 complete — portal PROD deployed. OFC toggle live."
+    </phase>
   </compiler_tools_mandate>
 
   <cross_domain_coordination>

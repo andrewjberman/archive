@@ -78,17 +78,37 @@
     3. cost_basis_by_year chart/table renders — iterates list by purchase_year field, not dict key access.
     4. top_gain_positions passed as [] — no crash, no empty-state error if component handles null/empty gracefully.
     5. Null-safe: advisors with no tax_exposure data show nothing (no crash).
-    6. comp-transform schema-check AdvisorBookView: capital_gains_ttm removed from UNUSED list.
-    7. Session log with compiler tools section committed.
-    8. MCP message to 2.0.0_SA_COO: "PROFAU .006 complete."
+    6. comp-transform schema-check AdvisorBookView: capital_gains_ttm NOT in UNUSED list (rendered).
+    7. comp-transform schema-check AdvisorBookView: cost_basis_by_year NOT in UNUSED list (rendered).
+    8. bun run typecheck exits 0.
+    9. Session log with compiler tools section committed.
+    10. MCP message to 2.0.0_SA_COO: "PROFAU .006 complete."
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1 (before writing): comp-transform schema-check AdvisorBookView — confirm
-    capital_gains_ttm is accessible via PlatinumAdvisorSummary.tax_exposure after .004 fix.
-    Phase 2 (before commit): bun run typecheck — 0 new errors.
-    Phase 3 (after commit): comp-transform schema-check AdvisorBookView — confirm
-    capital_gains_ttm no longer UNUSED. Append one line to org/compiler-tools-log.md.
+    Set compiler context first:
+    printf "SERIAL=0.4.0_DE_ClientPlatform\nTO_ID=ADVI_PROFAU.006" &gt; .comp-graph/.agent_context
+
+    <phase name="before_write">
+      <run>comp-transform schema-check AdvisorBookView</run>
+      <expect>capital_gains_ttm and cost_basis_by_year visible in UNUSED list on PlatinumAdvisorSummary (data live in platinum, not yet rendered); 0 MISSING fields (type was fixed in .004)</expect>
+      <if_mismatch>If capital_gains_ttm is NOT in UNUSED, the .004 type fix may not be in your HEAD — pull latest CLOUD. If it shows as MISSING, the type is still undeclared — check .004 commit (0050c05) is present.</if_mismatch>
+
+      <run>comp-blast AdvisorBookView</run>
+      <expect>4 downstream nodes (3 endpoints + opal-partners-data Lambda), isolated to AdvisorBookView</expect>
+      <if_mismatch>Unexpected node count means blast radius changed — flag to COO before writing.</if_mismatch>
+    </phase>
+
+    <phase name="before_commit">
+      <run>comp-transform schema-check AdvisorBookView</run>
+      <expect>capital_gains_ttm and cost_basis_by_year no longer in UNUSED list — now rendered via TaxCostBasisPanel at L2; 0 MISSING fields; bun run typecheck exits 0</expect>
+      <if_mismatch>If fields remain UNUSED, the JSX reference is not bound to the data variable. Check AdvisorBookView L259-266 tax prop build.</if_mismatch>
+    </phase>
+
+    <phase name="after_commit">
+      <run>comp-transform schema-check AdvisorBookView</run>
+      <expect>capital_gains_ttm rendered; cost_basis_by_year rendered; 0 MISSING; UNUSED count reduced vs pre-.006 baseline</expect>
+    </phase>
   </compiler_tools_mandate>
 
   <cross_domain_coordination>
