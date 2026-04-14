@@ -48,4 +48,8 @@
   <cross_domain_coordination>
     Isolated to DistributionTab.tsx — does NOT touch AdvisorBookView.tsx or types.ts. No serialization conflict with Wave C (B1/B3/B4/B5/B8 FE). Safe to run in parallel.
   </cross_domain_coordination>
+
+  <frontend_dev_note>
+    If no constitution exists at `portal/.frontend-dev/testing/` for the target component + scenario, author one first per the schema in that directory's README.md. Do not hand-roll Playwright scripts in repo root — the smoke-test.py/.mjs pattern is deprecated.
+  </frontend_dev_note>
 </task_order>

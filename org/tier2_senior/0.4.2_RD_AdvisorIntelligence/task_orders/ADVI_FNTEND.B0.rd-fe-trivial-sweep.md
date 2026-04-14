@@ -42,4 +42,8 @@
   <dependencies>
     <none/>
   </dependencies>
+
+  <frontend_dev_note>
+    If no constitution exists at `portal/.frontend-dev/testing/` for the target component + scenario, author one first per the schema in that directory's README.md. Do not hand-roll Playwright scripts in repo root — the smoke-test.py/.mjs pattern is deprecated.
+  </frontend_dev_note>
 </task_order>
