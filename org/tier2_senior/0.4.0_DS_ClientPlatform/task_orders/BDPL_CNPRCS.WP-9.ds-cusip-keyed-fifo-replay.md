@@ -50,7 +50,7 @@
   </rollback>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io` on adhc_histry_005 + siblings + diag_phantom_fifo_replay.
+    Phase 1: `comp-pipescript io` on adhc_histry_005 + siblings + diag_phantom_fifo_replay; `comp-blast adhc_histry_005` (deprecation-candidate blast-check — confirm what depends on it before touching).
     Phase 2: `python -m py_compile` on all edited scripts.
     Phase 3: `comp-pipescript deployed`.
   </compiler_tools_mandate>

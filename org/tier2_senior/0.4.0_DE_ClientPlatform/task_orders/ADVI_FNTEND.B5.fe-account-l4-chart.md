@@ -25,7 +25,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-transform schema-check AdvisorBookAccountDetail`.
+    Phase 1: `comp-transform schema-check AdvisorBookAccountDetail`; `comp-cache collisions` (new account timeseries likely introduces new React Query key).
     Phase 3: `/frontend-dev` on Account L1 drill.
   </compiler_tools_mandate>
 

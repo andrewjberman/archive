@@ -30,7 +30,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io D_02` for team_attribution emission path.
+    Phase 1: `comp-pipescript io D_02` for team_attribution emission path; `comp-platinum reverse team_attribution` (confirm only FeeSummaryPanel is a consumer; otherwise cross-domain coordination needed).
     Phase 2: `python -m py_compile`.
     Phase 3: `comp-transform schema-check FeeSummaryPanel --feature teamAttribution`.
   </compiler_tools_mandate>

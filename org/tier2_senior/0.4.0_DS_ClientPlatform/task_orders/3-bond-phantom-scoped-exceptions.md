@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status>
+    <status>staged</status><!-- GO sent 2026-04-14T19:10Z; DS flips to pending on receipt -->
     <project_code>ad-hoc</project_code>
     <priority>URGENT — must land before Yahoo's next run</priority>
   </metadata>
@@ -40,7 +40,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io inject_scoped_overrides.py`.
+    Phase 1: `comp-pipescript io inject_scoped_overrides.py`; `comp-pipescript consumers canonical_prices` (enumerate downstream readers so we know what to validate after the override lands — added 2026-04-14 per CTO audit).
     Phase 2: `python -m py_compile inject_scoped_overrides.py`.
     Phase 3: `comp-pipescript deployed inject_scoped_overrides.py` — MATCH.
   </compiler_tools_mandate>

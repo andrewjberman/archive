@@ -50,7 +50,7 @@
   </rollback>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io B_01b.classify_new_securities.py` + `comp-pipescript consumers` on ledger.
+    Phase 1: `comp-pipescript io B_01b.classify_new_securities.py` + `comp-pipescript consumers` on ledger; `comp-platinum reverse bd_asset_classifications_dryrun` (enumerate dryrun consumers — should be zero pre-cutover); `comp-blast B_01b.classify_new_securities` (confirm dryrun doesn't accidentally touch existing classifier blast).
     Phase 2: `python -m py_compile`.
     Phase 3: `comp-pipescript deployed`.
   </compiler_tools_mandate>

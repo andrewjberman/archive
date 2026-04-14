@@ -26,7 +26,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io B_01.holdings_lots.py` + `comp-pipescript consumers gold/holdings_lots`.
+    Phase 1: `comp-pipescript io B_01.holdings_lots.py` + `comp-pipescript consumers gold/holdings_lots`; `comp-blast B_01.holdings_lots` + `comp-blast B_02.canonical_lots` (new CUSIP column blast-check — who reads these in gold).
     Phase 2: `python -m py_compile`.
     Phase 3: `comp-pipescript deployed`.
   </compiler_tools_mandate>

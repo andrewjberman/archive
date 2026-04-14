@@ -25,7 +25,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io` on account-summary writer.
+    Phase 1: `comp-pipescript io` on account-summary writer; `comp-platinum reverse` on the new PlatinumAccountSummary timeseries field (confirm no other consumer blast).
     Phase 2: `python -m py_compile`.
     Phase 3: `comp-validate`.
   </compiler_tools_mandate>

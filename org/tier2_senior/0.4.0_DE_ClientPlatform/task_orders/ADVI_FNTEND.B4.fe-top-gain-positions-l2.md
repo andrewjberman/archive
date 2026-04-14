@@ -25,6 +25,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
+    Phase 1: `comp-transform schema-check AdvisorBookView` + `comp-transform fields AdvisorBookView` (verify top_gain_positions prop actually rendered, not just typed — added 2026-04-14 per CTO audit).
     Phase 3: `/frontend-dev` on AdvisorBookView.
   </compiler_tools_mandate>
 

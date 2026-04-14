@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status>
+    <status>staged</status><!-- GO sent 2026-04-14T19:50Z; RD flips to pending on receipt -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
   </metadata>
@@ -34,7 +34,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-transform schema-check CanonicalBookView` (readonlyAssetClass trace); `comp-transform schema-check ConsolidatedOverviewPanel` (Top Holdings palette).
+    Phase 1: `comp-transform schema-check CanonicalBookView` (readonlyAssetClass trace); `comp-transform schema-check ConsolidatedOverviewPanel` (Top Holdings palette); **`comp-transform schema-check DistributionTab`** (D5 touches 6 call sites; without this the pseudonymize swap can miss a site).
     Phase 2: `/frontend-dev` after commit.
     Phase 3: Post-PR visual QA.
   </compiler_tools_mandate>

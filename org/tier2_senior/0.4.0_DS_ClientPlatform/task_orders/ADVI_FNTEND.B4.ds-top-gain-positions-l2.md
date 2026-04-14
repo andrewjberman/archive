@@ -26,7 +26,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io` on advisor-summary writer to confirm top_gain_positions plumbed.
+    Phase 1: `comp-pipescript io` on advisor-summary writer to confirm top_gain_positions plumbed; `comp-platinum reverse top_gain_positions` (confirm AdvisorBookView is the sole consumer at L2).
     Phase 2: `python -m py_compile`.
     Phase 3: `comp-validate` after rerun.
   </compiler_tools_mandate>

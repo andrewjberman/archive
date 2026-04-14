@@ -34,7 +34,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io` on both cumulative_chart producer (D_01 area) and partner_analytics producer; diff the as-of-date selection logic.
+    Phase 1: `comp-pipescript io` on both cumulative_chart producer (D_01 area) and partner_analytics producer; diff the as-of-date selection logic. **`comp-pipescript consumers cumulative_chart.json` + `comp-pipescript consumers partner_analytics.json`** to enumerate every downstream affected by any reconciliation fix.
   </compiler_tools_mandate>
 
   <dependencies>

@@ -29,7 +29,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-transform schema-check --feature rfsWindow` on RelationshipFlowsSummary + AccountsTable + ClientsTable.
+    Phase 1: `comp-transform schema-check --feature rfsWindow` on RelationshipFlowsSummary + AccountsTable + ClientsTable; `comp-cache collisions` (new window state may introduce new React Query keys — must not collide with existing client/account keys).
     Phase 2: `comp-transform ternary-audit` on all three (window routing).
     Phase 3: `/frontend-dev`.
   </compiler_tools_mandate>

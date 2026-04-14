@@ -34,7 +34,7 @@
   </rollback>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io merge-daily-incremental.py` — list consumers.
+    Phase 1: `comp-pipescript io merge-daily-incremental.py` — list consumers; `comp-iam service bd-fees-trigger` (analog — confirm new S3 prefix `silver/transactions_v2_dryrun/` has IAM write permission before terraform apply).
     Phase 2: `python -m py_compile`.
     Phase 3: Smoke test each consumer listed by comp-pipescript.
   </compiler_tools_mandate>

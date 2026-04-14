@@ -45,9 +45,9 @@
   </rollback>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io build_canonical_prices_v2.py` before + after.
+    Phase 1: `comp-pipescript io build_canonical_prices_v2.py` before + after; `comp-pipescript overlap build_canonical_prices_v2 build_canonical_prices_v3_dryrun` (shared S3 reads — silver/prices + silver/assets).
     Phase 2: `python -m py_compile`.
-    Phase 3: `comp-pipescript postdeps`; `comp-validate` after full gold run.
+    Phase 3: `comp-pipescript postdeps`; `comp-pipescript deployed build_canonical_prices_v3_dryrun.py`; `comp-validate` after full gold run.
   </compiler_tools_mandate>
 
   <dependencies>

@@ -29,7 +29,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io D_01` + `comp-pipescript io` on OFC segment writer; `comp-platinum reverse views.ofc` to enumerate consumers.
+    Phase 1: `comp-pipescript io D_01` + `comp-pipescript io` on OFC segment writer; `comp-platinum reverse views.ofc` to enumerate consumers; `comp-blast DistributionTab` (confirm OFC changes don't blast outside this component).
     Phase 2: `python -m py_compile`; `comp-validate`.
     Phase 3: `comp-transform schema-check DistributionTab --feature ofcSnapshot`.
   </compiler_tools_mandate>

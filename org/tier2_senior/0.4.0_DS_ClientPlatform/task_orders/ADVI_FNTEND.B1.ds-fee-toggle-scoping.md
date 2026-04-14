@@ -30,7 +30,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-pipescript io D_00.leaderboard.py` + `comp-pipescript consumers leaderboard`.
+    Phase 1: `comp-pipescript io D_00.leaderboard.py` + `comp-pipescript consumers leaderboard`; `comp-blast D_00.leaderboard` (new-field blast); `comp-platinum reverse fee_breakdown` + `comp-platinum reverse role_breakdown` (new-platinum-field consumer enumeration).
     Phase 2: `python -m py_compile`; `comp-validate` after gold rerun.
     Phase 3: `comp-transform schema-check AdvisorPublicProfile` + `AdvisorBookView` — new fields typed + rendered.
   </compiler_tools_mandate>

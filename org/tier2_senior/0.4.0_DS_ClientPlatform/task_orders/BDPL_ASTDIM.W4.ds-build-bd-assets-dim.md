@@ -39,7 +39,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: Read W2 recon doc + ETFClassifier DDB schema (`infra/aws/dynamodb/etf-classifications/`).
+    Phase 1: Read W2 recon doc + ETFClassifier DDB schema (`infra/aws/dynamodb/etf-classifications/`); `comp-pipescript io convert_assets_to_silver.py` (input pattern reference); `comp-platinum reverse silver/bd_assets.parquet` (confirm consumer set — critical because BDPL_CNPRCS WP-4 + WP-5 will consume this; blend rule must match what they expect).
     Phase 2: `python -m py_compile build_bd_assets_dim.py`.
     Phase 3: `comp-pipescript deployed build_bd_assets_dim.py` — MATCH expected.
   </compiler_tools_mandate>

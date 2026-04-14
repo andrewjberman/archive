@@ -29,6 +29,7 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
+    Phase 1: `comp-pipescript deployed D_04` (confirm runner has current code before re-fire — cheap insurance added 2026-04-14 per CTO audit).
     Phase 3: Spot-check platinum output via `aws s3 cp ... summary.json` on 3 advisors — confirm new tax_exposure fields populate.
   </compiler_tools_mandate>
 
