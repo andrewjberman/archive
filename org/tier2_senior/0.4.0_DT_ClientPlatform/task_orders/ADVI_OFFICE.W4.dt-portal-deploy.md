@@ -15,12 +15,12 @@
   <dependencies>
     <dependency agent="0.4.0_DE_ClientPlatform"
                 task="ADVI_OFFICE.W3.de-ofc-frontend"
-                status="pending"
-                description="DE frontend OFC changes complete on portal DEV; TypeScript build clean."/>
+                status="complete"
+                description="DE frontend OFC changes complete on portal DEV (7dd0a7e); TypeScript build clean."/>
     <dependency agent="0.6.0_AE_PartnerETL"
                 task="ADVI_OFFICE.W2.ae-dim-upload-gold-run"
-                status="pending"
-                description="AE QA gold run complete — OFC artifact live in platinum/ (QA runner writes directly to production S3; no separate PROD trigger step)."/>
+                status="complete"
+                description="AE QA gold run complete — OFC artifact live in platinum/ (D_03+D_04 local, 10 offices confirmed)."/>
   </dependencies>
 
   <objective>
