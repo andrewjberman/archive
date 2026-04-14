@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- GO sent 2026-04-14T23:10Z — Andrew lifted pre-presentation hold. DS flips to pending on receipt. -->
+    <status>pending</status><!-- DS shipped 2026-04-14 commit on CLOUD; validation after gold rerun -->
     <project_code>ad-hoc</project_code>
     <priority>post-presentation — Andrew GO required</priority>
   </metadata>
