@@ -14,29 +14,35 @@
   </references>
 
   <objective>
-    Refactor build_canonical_prices_v2.py to CUSIP-primary + BD-SuperClass-aware routing.
-    Never-Yahoo for Fixed Income and To Be Classified. Append-only daily ledger at
-    `gold/canonical_prices/{YYYY-MM-DD}.parquet`. Deterministic + weekend/holiday roll-forward.
-    Add `price_quality` enum column.
+    **DRY-RUN MODE (Andrew guardrail 2026-04-14):** Production `build_canonical_prices_v2.py` UNCHANGED.
+    Write NEW script `build_canonical_prices_v3_dryrun.py` that outputs to
+    `gold/canonical_prices_v3_dryrun/` in parallel. v2 production path untouched.
+    30-day parallel running + diff reports before any cutover (cutover EXPLICITLY out-of-scope).
 
-    Routing rules:
+    v3 logic (CUSIP-primary + BD-SuperClass-aware routing):
       Equities -> Yahoo
       Fixed Income -> BD txn price from silver/assets; fallback accreted_cost
       To Be Classified -> latest BD txn price or carry_forward
       Cash & Cash Equivalents -> $1.00 unless BD says otherwise
       DIVERSIFIER / Unclassified -> carry_forward only
 
-    Dark-launch pattern: write new ledger alongside old output; diff; flip once clean.
-    AE orchestrates backfill after DS logic ships.
+    Append-only daily ledger; `price_quality` enum column; deterministic + weekend/holiday roll-forward.
   </objective>
 
   <acceptance_criteria>
-    1. No asset with BD SuperClass Fixed Income or To Be Classified has price_quality='yahoo_equity'
-    2. WP-7 phantom-scan diagnostic returns 0 hits post-deploy
-    3. Deterministic: same input twice = byte-identical output
-    4. Ledger schema includes price_quality enum
-    5. MCP COMPLETE to COO with commit + dark-launch diff summary + final-flip confirmation
+    1. New `build_canonical_prices_v3_dryrun.py` shipped; v2 production script untouched
+    2. Output at `gold/canonical_prices_v3_dryrun/{YYYY-MM-DD}.parquet` (v2 output at prod path unchanged)
+    3. No asset with BD SuperClass Fixed Income or To Be Classified has `price_quality='yahoo_equity'` in v3 output
+    4. Deterministic: same input twice → byte-identical v3 output
+    5. Ledger schema includes `price_quality` enum
+    6. 30 consecutive calendar days of parallel runs stable (no exceptions, no schema drift)
+    7. Diff report committed at `data/black_diamond/scripts/diagnostics/output/dryrun_diff_wp5_{YYYY-MM-DD}.json` (per-day v2-vs-v3 deltas by super_class + price_quality breakdown)
+    8. MCP COMPLETE to COO with commit + final-day diff + 30-day stability summary
   </acceptance_criteria>
+
+  <rollback>
+    Delete `gold/canonical_prices_v3_dryrun/` prefix + remove `build_canonical_prices_v3_dryrun.py`. No production path modified; v2 continues unchanged. Zero-risk rollback.
+  </rollback>
 
   <compiler_tools_mandate>
     Phase 1: `comp-pipescript io build_canonical_prices_v2.py` before + after.

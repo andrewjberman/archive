@@ -13,31 +13,41 @@
   </references>
 
   <objective>
-    CUSIP-keyed FIFO replay + phantom reclassification.
+    **DRY-RUN MODE (Andrew guardrail 2026-04-14):** Production UNCHANGED. Specifically:
+      - adhc_histry_001/002/003/004/005_*.py UNCHANGED (existing compute_fifo stays live)
+      - NAME_ALIASES dict LEFT IN PLACE
+      - "silver allocations phantom gate" in 02b_build_canonical_holdings.py Step 5 LEFT IN PLACE
+      - diag_phantom_fifo_replay.py UNCHANGED
 
-    1. Rewrite compute_fifo() in adhc_histry_005_phantom_schwab.py AND adhc_histry_001/002/003/004.py
-       AND diag_phantom_fifo_replay.py: key on (account_id, cusip) instead of (account_id, asset_name).
+    Build NEW `diag_phantom_fifo_cusip_dryrun.py` that applies CUSIP-keyed FIFO (account_id, cusip)
+    as a comparison report only. 30-day parallel output + diff vs production phantom-detection
+    before any cutover. Cutover (FIFO rewrite + deprecations) is EXPLICITLY out-of-scope.
+
+    Dry-run report:
+    1. Apply CUSIP-keyed FIFO on silver/transactions (read-only) + silver/bd_assets.
     2. Consume asset_dim Action granularity — distinguish ACAT Out, EF Transfer Out, JNL-SHORT,
-       FTP-DEBIT, plain Transfer Out as reporting enums (not blanket SELL).
-    3. Re-run phantom hunt post-WP-3/4. Categorize the 10,832 flagged phantoms ($177M) into:
-       - rotation_explained — matched to non-cash rotation event in asset_dim. Silent close
-         in FIFO ledger with audit-tag row (resolution='rotation_explained', matched_event, matched_cusip) per Q8.
-       - genuine_data_issue — no matching event. Feed into monthly BD-feed-quality report
-         (docs/data_quality/bd_feed_quality_{YYYY-MM}.md). Material threshold: >$1M or >100 count
-         in a single month triggers out-of-band BD-account-manager escalation.
-    4. Output: data/black_diamond/scripts/diagnostics/output/phantom_resolution_{YYYY-MM-DD}.json
+       FTP-DEBIT, plain Transfer Out as reporting enums.
+    3. Categorize the 10,832 flagged phantoms ($177M) into:
+       - rotation_explained — matched to non-cash rotation event in asset_dim (report only)
+       - genuine_data_issue — no matching event (feed into monthly BD-feed-quality report;
+         >$1M or >100 count in a month triggers BD-account-manager escalation)
+    4. Output: `data/black_diamond/scripts/diagnostics/output/phantom_resolution_dryrun_{YYYY-MM-DD}.json`
        with per-phantom cause tags.
-    5. Deprecate NAME_ALIASES dict in adhc_histry_005 AND the "silver allocations phantom gate"
-       in 02b_build_canonical_holdings.py Step 5 — both were patches for the
-       (account_id, asset_name) fragility that CUSIP resolves structurally.
   </objective>
 
   <acceptance_criteria>
-    1. Residual unexplained phantom MV < $10M (vs current $177M)
-    2. NAME_ALIASES and silver-allocations phantom gate either removed OR session log documents why they stayed
-    3. First monthly bd_feed_quality report published
-    4. MCP COMPLETE to COO with commit + residual MV + rotation/genuine split
+    1. New `diag_phantom_fifo_cusip_dryrun.py` script shipped; no production scripts modified
+    2. Dry-run projects residual unexplained phantom MV < $10M (vs current $177M production)
+    3. NAME_ALIASES + silver-allocations phantom gate + adhc_histry_* all confirmed unchanged post-deploy
+    4. 30 consecutive calendar days of stable dry-run output
+    5. Diff report committed at `data/black_diamond/scripts/diagnostics/output/dryrun_diff_wp9_{YYYY-MM-DD}.json` (production-vs-dryrun rotation/genuine counts + residual MV deltas)
+    6. First monthly bd_feed_quality report published (advisory; does not affect production)
+    7. MCP COMPLETE to COO with commit + dry-run residual MV + rotation/genuine split + 30-day stability summary
   </acceptance_criteria>
+
+  <rollback>
+    Delete `diag_phantom_fifo_cusip_dryrun.py` + associated dryrun outputs. No production scripts, phantom gates, or FIFO logic were modified. Zero-risk rollback.
+  </rollback>
 
   <compiler_tools_mandate>
     Phase 1: `comp-pipescript io` on adhc_histry_005 + siblings + diag_phantom_fifo_replay.

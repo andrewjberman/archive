@@ -13,29 +13,41 @@
   </references>
 
   <objective>
-    BD-primary append-only classification ledger. Demote DDB ETFClassifier to fallback.
-    Migrate ticker_overrides.json into ledger and delete the JSON file.
+    **DRY-RUN MODE (Andrew guardrail 2026-04-14):** Production UNTOUCHED. Specifically:
+      - B_01b.classify_new_securities.py UNCHANGED (keyword heuristics remain live)
+      - ETFClassifier DDB UNCHANGED (NOT demoted)
+      - ticker_overrides.json UNCHANGED (NOT deleted, NOT migrated)
+      - scoped_price_exceptions.json UNCHANGED (stays as durable tactical guard)
+      - lib/mix_views.py MIX_ASSET_CLASSES UNCHANGED
 
-    1. New ledger `silver/bd_asset_classifications/{YYYY-MM-DD}.parquet` (immutable daily).
-    2. Primary classification = BD SuperClass via Q1 mapping:
-         Equities -> equity; Fixed Income -> fixed_income; Cash&CE -> cash;
-         DIVERSIFIER -> alternatives; To Be Classified -> alternatives;
-         Unclassified -> other.
-    3. ETFClassifier (DDB) demoted to fallback for assets not in silver/bd_assets.
-    4. Deprecate B_01b.classify_new_securities.py keyword heuristics for BD-covered universe.
-    5. Migrate ticker_overrides.json entries with source='manual_override'; DELETE the JSON.
-    6. Update lib/mix_views.py MIX_ASSET_CLASSES to read from ledger.
-    7. Also absorb the tactical 3-bond scoped_price_exceptions entries as source='custodial_override'
-       once the ledger is live; retire scoped_price_exceptions.json.
+    Build parallel `silver/bd_asset_classifications_dryrun/{YYYY-MM-DD}.parquet` (immutable daily)
+    implementing the target design for comparison only. 30-day parallel running + diff reports
+    before any cutover. Migrate-and-delete is EXPLICITLY out-of-scope for this project.
+
+    Dry-run ledger content:
+      - Primary classification = BD SuperClass via Q1 mapping:
+          Equities -> equity; Fixed Income -> fixed_income; Cash&CE -> cash;
+          DIVERSIFIER -> alternatives; To Be Classified -> alternatives;
+          Unclassified -> other.
+      - ETFClassifier-fallback rows for assets not in silver/bd_assets (READ only, no DDB changes)
+      - Simulated manual_override rows from ticker_overrides.json (READ only, source JSON unchanged)
+      - Simulated custodial_override rows from scoped_price_exceptions.json (READ only)
   </objective>
 
   <acceptance_criteria>
-    1. ≥98% of 49F holdings classified source='bd'
-    2. Remainder source in {etf_classifier_fallback, manual_override, custodial_override}
-    3. Zero classified via keyword-heuristic
-    4. ticker_overrides.json deleted from repo
-    5. MCP COMPLETE to COO with commit + coverage breakdown + migration audit row counts
+    1. `silver/bd_asset_classifications_dryrun/` ledger materialized daily
+    2. ≥98% of 49F holdings classified source='bd' in the dry-run ledger
+    3. Remainder source in {etf_classifier_fallback, manual_override, custodial_override} in dry-run
+    4. Zero keyword-heuristic classifications in dry-run (production B_01b still runs, this measures what the target design would produce)
+    5. ticker_overrides.json + scoped_price_exceptions.json + ETFClassifier DDB + B_01b.py all confirmed unchanged post-deploy
+    6. 30 consecutive calendar days of parallel runs stable
+    7. Diff report committed at `data/black_diamond/scripts/diagnostics/output/dryrun_diff_wp6_{YYYY-MM-DD}.json` (per-asset classification deltas dryrun-vs-production)
+    8. MCP COMPLETE to COO with commit + coverage breakdown + 30-day stability summary
   </acceptance_criteria>
+
+  <rollback>
+    Delete `silver/bd_asset_classifications_dryrun/` prefix. No production scripts, DDB entries, or JSON files were modified. ticker_overrides.json, scoped_price_exceptions.json, ETFClassifier, B_01b all remain in original state. Zero-risk rollback.
+  </rollback>
 
   <compiler_tools_mandate>
     Phase 1: `comp-pipescript io B_01b.classify_new_securities.py` + `comp-pipescript consumers` on ledger.

@@ -14,16 +14,24 @@
   </references>
 
   <objective>
-    Add `cusip` column to silver/transactions via `merge-daily-incremental.py`.
-    Re-materialize historical partitions with cusip populated. Append-only (new nullable column).
+    **DRY-RUN MODE (Andrew guardrail 2026-04-14):** Production `silver/transactions/` UNTOUCHED.
+    Build parallel `silver/transactions_v2_dryrun/` with cusip column populated. Original
+    merge-daily-incremental.py UNCHANGED. 30-day parallel running + diff reports before any cutover
+    (cutover is EXPLICITLY out-of-scope for this project).
   </objective>
 
   <acceptance_criteria>
-    1. `merge-daily-incremental.py` preserves cusip column
-    2. ≥95% of silver/transactions rows have non-null cusip
-    3. Smoke test every gold script consuming silver/transactions — no breakage
-    4. MCP COMPLETE to COO with commit + backfill row counts
+    1. New dry-run materializer writes to `silver/transactions_v2_dryrun/` (production path untouched)
+    2. ≥95% of `silver/transactions_v2_dryrun/` rows have non-null cusip
+    3. Row-count parity vs production within 0.1% (per date partition)
+    4. Diff report committed at `data/black_diamond/scripts/diagnostics/output/dryrun_diff_wp3_{YYYY-MM-DD}.json` (row counts, cusip-coverage, per-partition deltas)
+    5. Smoke test: every gold script consuming silver/transactions still reads production path cleanly (no breakage)
+    6. MCP COMPLETE to COO with commit + diff report path + parity numbers
   </acceptance_criteria>
+
+  <rollback>
+    Delete `silver/transactions_v2_dryrun/` prefix. No production path was modified; no state to restore. Merge-daily-incremental.py unchanged. Zero-risk rollback.
+  </rollback>
 
   <compiler_tools_mandate>
     Phase 1: `comp-pipescript io merge-daily-incremental.py` — list consumers.
