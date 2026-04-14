@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-10</date>
-    <status>staged</status>
+    <status>complete</status><!-- COO session 28 2026-04-14 sweep: D_00c fix 4f821b99 shipped; TO body itself states "no required frontend code changes for correctness" — optional polish items never picked up -->
     <project_code>ad-hoc</project_code>
     <related_to>Grouped with rd-advi-nna-frontend-migration.md (shared RD ClientPlatform NNA workstream). Wraps the already-shipped D_00c gold script fix in commit 4f821b99.</related_to>
   </metadata>
