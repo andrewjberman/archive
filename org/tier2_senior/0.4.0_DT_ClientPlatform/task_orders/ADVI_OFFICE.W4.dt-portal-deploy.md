@@ -20,7 +20,7 @@
     <dependency agent="0.6.0_AE_PartnerETL"
                 task="ADVI_OFFICE.W2.ae-dim-upload-gold-run"
                 status="pending"
-                description="AE PROD gold run complete — OFC artifact live in platinum/ before DT deploys portal."/>
+                description="AE QA gold run complete — OFC artifact live in platinum/ (QA runner writes directly to production S3; no separate PROD trigger step)."/>
   </dependencies>
 
   <objective>
