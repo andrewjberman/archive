@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- GO sent 2026-04-14T20:15Z; AE flips to pending on receipt -->
+    <status>complete</status><!-- COO session 28 2026-04-14: AE shipped. Commit d7140701, tag bd-v2.24.0 pushed. EC2 bd_assets + Lambda bd-asset-dim-trigger + EventBridge cron(10 22 ? * MON-FRI) + SSM opal-bd-asset-dim-download + source map + CHANGELOG all live. Terraform 0-diff verified. -->
     <project_code>BDPL_ASTDIM</project_code>
   </metadata>
 
