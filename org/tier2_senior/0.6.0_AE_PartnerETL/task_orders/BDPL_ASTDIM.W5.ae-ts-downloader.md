@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- GO ack'd 2026-04-14T18:58Z by 0.6.0_AE_PartnerETL -->
+    <status>complete</status><!-- 2026-04-14: TS shipped, layout migrated to backfill_v2/forwardfill_v2 pattern, full silver history backfilled (1823 partitions, 3.19M txns), W1 absorbed into W5 by AE per Andrew direction -->
     <project_code>BDPL_ASTDIM</project_code>
   </metadata>
 
