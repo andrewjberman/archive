@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status>
+    <status>complete</status><!-- COO session 28 2026-04-14: absorbed by AE — convert_assets_to_silver.py + upload_bd_assets_backfill.py shipped; silver/assets/ 1823 partitions + silver/bd_assets.parquet 3.19M rows compacted. merge-daily-assets-incremental.py subsumed by W6 SSM doc post-download step. -->
     <project_code>BDPL_ASTDIM</project_code>
   </metadata>
 

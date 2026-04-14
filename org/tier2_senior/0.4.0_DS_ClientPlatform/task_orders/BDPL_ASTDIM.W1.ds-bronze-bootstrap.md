@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status>
+    <status>complete</status><!-- COO session 28 2026-04-14: absorbed by AE per CTO directive — AE executed bronze bootstrap (backfill_v2/assets/ 17 xlsx). DS no longer on the hook. -->
     <project_code>BDPL_ASTDIM</project_code>
   </metadata>
 

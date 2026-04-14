@@ -14,10 +14,14 @@
   </references>
 
   <objective>
-    Enumerate BD's distinct `asset_super_class` values across all 16 bronze xlsx files
-    with row counts. Output: `data/black_diamond/recon/bd_asset_super_class_values.md`.
-    This recon is the GATE for W4 blend rule — DS cannot write
-    `build_bd_assets_dim.py` (W4) without it.
+    Enumerate BD's distinct `asset_super_class` values with row counts. Output:
+    `data/black_diamond/recon/bd_asset_super_class_values.md`.
+    This recon is the GATE for W4 blend rule.
+
+    **Scope update 2026-04-14 post-W5 AE absorption:** enumerate from the compacted
+    `silver/bd_assets.parquet` (3.19M rows, already live) rather than the 17 source xlsx —
+    the parquet is the canonical consolidation. Xlsx remains available as ground truth if
+    DS needs to cross-check any edge case.
   </objective>
 
   <acceptance_criteria>

@@ -19,6 +19,14 @@
     point-in-time asset dimension table. Apply the BD→ETFClassifier blend rule
     derived from W2 recon: BD `asset_super_class` wins unless null/empty/coarse,
     in which case ETFClassifier (DDB `etf-classifications`) provides super_class.
+
+    **Scope update 2026-04-14 post-W5 AE absorption:** AE compacted silver/bd_assets.parquet
+    (3.19M rows) from the xlsx set, but CTO flagged unclear whether AE applied the BD-first /
+    ETFClassifier-fallback blend rule (D3). DS's W4 work:
+      (a) inspect the compacted file for blend-rule presence (super_class source provenance column / sampling)
+      (b) if blend already applied — confirm + flip to complete
+      (c) if not applied — rebuild via build_bd_assets_dim.py with the blend rule, atomically replace
+    AE has been flagged to confirm from their side; coordinate before overwriting.
   </objective>
 
   <acceptance_criteria>
