@@ -6,7 +6,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-06</date>
-    <status>staged</status>
+    <status>complete</status><!-- COO session 28 2026-04-14 sweep: ADVI_NNAFEE absorbed into ADVI_REBORN per REGISTRY; superseded by REBORN .005-.008 + .011-.013 -->
     <project_code>ADVI_NNAFEE</project_code>
     <priority>high</priority>
     <phase>2</phase>
