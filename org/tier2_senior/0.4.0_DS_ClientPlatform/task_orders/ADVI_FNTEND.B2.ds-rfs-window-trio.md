@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- DS flipped 2026-04-14 after tactical 3-bond shipped -->
+    <status>pending</status><!-- CODE SHIPPED 2026-04-14: commit 3a2f0998, s3 code/gold/D_02.advisor_client_detail.py (102,483 bytes). py_compile + schema-check clean. Awaiting nightly gold-run artifact for comp-validate reconciliation + formal COMPLETE. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
     <priority>keystone — window vocabulary reused by B3/B4/B5</priority>

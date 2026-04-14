@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- DS flipped 2026-04-14; rides B2 gold rerun -->
+    <status>pending</status><!-- CODE SHIPPED 2026-04-14: commit f17e8366, s3 code/gold/D_04.client_portal_summary.py (101,584 bytes). py_compile clean. Awaiting shared nightly gold-run artifact (rides B2 rerun) for comp-validate + formal COMPLETE. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
   </metadata>
