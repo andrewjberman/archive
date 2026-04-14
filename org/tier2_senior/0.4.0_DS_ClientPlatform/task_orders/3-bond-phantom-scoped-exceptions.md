@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- DS flipped 2026-04-14 on receipt of COO GO -->
+    <status>complete</status><!-- DS shipped 2026-04-14 — per B2 DS status comment "flipped after tactical 3-bond shipped". Awaiting DS COMPLETE message with commit hash + AUA delta for final close. -->
     <project_code>ad-hoc</project_code>
     <priority>URGENT — must land before Yahoo's next run</priority>
   </metadata>

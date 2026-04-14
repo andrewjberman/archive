@@ -19,6 +19,13 @@
     - `team_attribution[] = {advisor_id, display_name, fee_share_bps, fee_share_usd, pct_of_client_fee}`
       with profile advisor pinned first.
 
+    **Fee-share rule (CTO ruling 2026-04-14 — EQUAL-WEIGHT across assigned team):**
+    Mirrors the d51e44ef canonical-NNA equal-split pattern Andrew blessed this morning.
+      fee_share_bps[i] = client_total_fee_bps / team_size
+      fee_share_usd[i] proportional (fee_share_bps[i] * client AUA / 10000)
+      pct_of_client_fee[i] = 1 / team_size
+    Deterministic, consistent org-wide accounting model, non-breaking (emitted-field, not consumed-baseline) so refinement is possible later without schema change.
+
     **DS contract is primary (updated 2026-04-14 per CTO ratification of RD audit):** advisor_id → display_name mapping is DS territory; FE cannot invent. DS emits raw per-account shares per the spec above. FE may compute aggregated rollups (e.g. client-level `total_fee_usd`, `pct_of_client_fee`) from the per-account shares — that's an FE optimization, not a DS scope change. Do NOT narrow DS scope based on FE capability.
   </objective>
 
@@ -26,7 +33,8 @@
     1. Per-account artifact has all listed fields
     2. team_attribution fee_share_usd sums ≈ client_total_fee_usd
     3. Profile advisor always index 0 in team_attribution
-    4. MCP COMPLETE to COO
+    4. **Reconciliation invariant (added 2026-04-14 per CTO ruling):** `sum(team_attribution[].fee_share_bps) == client_total_fee_bps` within $0.01 per client row
+    5. MCP COMPLETE to COO
   </acceptance_criteria>
 
   <compiler_tools_mandate>

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- GO sent 2026-04-14T21:30Z Wave A keystone — prioritize -->
+    <status>pending</status><!-- DS flipped 2026-04-14 after tactical 3-bond shipped -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
     <priority>keystone — window vocabulary reused by B3/B4/B5</priority>
@@ -17,7 +17,7 @@
   <objective>
     Ship window-scoped `{nna, inflows, outflows}_{qtd, ytd, max}` at:
     - client-level (AdvisorClient)
-    - account-level (AccountsTable row)
+    - account-level (AccountsTable row — per DS scoping doc, 5-line passthrough absorbed into B2 scope per CTO ruling 2026-04-14; no separate TO)
     AND full `decomposition_{qtd, ytd, max}` = `{market_growth, synthetic_correction, nna}`.
   </objective>
 

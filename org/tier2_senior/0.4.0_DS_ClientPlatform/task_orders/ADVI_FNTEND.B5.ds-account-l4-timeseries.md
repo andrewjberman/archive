@@ -31,6 +31,6 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <none/>
+    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_FNTEND.B2 DS" status="staged" description="B5 rides B2's gold rerun per CTO ruling 2026-04-14 — separate commit but shares rerun window"/>
   </dependencies>
 </task_order>

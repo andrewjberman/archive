@@ -48,7 +48,7 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <none/>
+    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_FNTEND.B1 DS" status="staged" description="Serial ordering per CTO ruling 2026-04-14 — B8 + B1 both write to D_00 role_breakdown primitive; serial avoids merge-conflict + logic duplication"/>
   </dependencies>
 
   <next>On COMPLETE: COO fires B8 FE TO.</next>
