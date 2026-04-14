@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status>
+    <status>complete</status><!-- COO session 28 2026-04-14: absorbed into W2. DS D_00b fix #3 (commit 5b4439e1) shipped + QA run D_00-D_02 OFC keys confirmed (AE log advi_office_w2_complete_and_enforcer_fixes.md) -->
     <project_code>ADVI_OFFICE</project_code>
   </metadata>
 

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status>
+    <status>complete</status><!-- COO session 28 2026-04-14: AE ran D_03 (13:59 UTC) + D_04 (14:09 UTC) --upload locally; cumulative_chart.json ofc/nna_ofc confirmed in platinum spot-check per W2 session log -->
     <project_code>ADVI_OFFICE</project_code>
   </metadata>
 
