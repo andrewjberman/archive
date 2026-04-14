@@ -19,16 +19,19 @@
   </objective>
 
   <acceptance_criteria>
-    1. Toggling Fees updates Summary counts, RoleDonut segments, and Lifetime Activity chart
-    2. No static values when toggling
-    3. Footnote removed
-    4. `/frontend-dev` closed-loop pass
-    5. MCP COMPLETE to COO
+    **Tightened 2026-04-14 per Andrew + CTO directive — explicit Role Decomposition wiring:**
+    1a. RoleDonut reads `entry.role_breakdown[role].{fee_paying|no_fee}.{aua, nna}` indexed by `feeView` state. Toggling Fees Only (fee_paying) vs. All (fee_paying + no_fee summed or parent) changes each segment's **numeric value, arc size, and tooltip content** — not just a visual re-render.
+    1b. Summary Clients / New Clients / Account counts read the matching `fee_breakdown.{fee_paying|no_fee}.{client_count, new_clients, account_count}` per feeView.
+    1c. When Fees Only is checked, every displayed AUA/NNA/count figure across Summary + RoleDonut + Lifetime Activity reflects the `fee_paying` bucket exclusively. Unchecking expands to the parent (fee_paying + no_fee).
+    2. No static values when toggling — every displayed figure is state-driven.
+    3. "Fee filter not applied" footnote at `AdvisorBookView:1105` removed.
+    4. `/frontend-dev` closed-loop pass.
+    5. MCP COMPLETE to COO.
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    Phase 1: `comp-transform schema-check --feature feeView` on AdvisorPublicProfile + RoleDonut + LifetimeActivity.
-    Phase 2: `comp-transform ternary-audit` on affected components.
+    Phase 1: `comp-transform schema-check --feature feeView` on AdvisorPublicProfile + RoleDonut + LifetimeActivity; **`comp-transform ternary-audit RoleDonut`** (added 2026-04-14 per CTO directive — W6 OFC lesson: every `role ===` / `feeView ===` chain must have both branches covered).
+    Phase 2: `comp-transform ternary-audit` on all affected components (feeView routing).
     Phase 3: `/frontend-dev`.
   </compiler_tools_mandate>
 

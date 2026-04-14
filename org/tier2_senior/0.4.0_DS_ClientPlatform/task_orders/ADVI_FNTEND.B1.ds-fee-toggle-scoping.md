@@ -23,7 +23,7 @@
 
   <acceptance_criteria>
     1. Platinum leaderboard artifact has all listed fields populated
-    2. Role-breakdown subbucket sum reconciles to parent aua/nna/counts
+    2. Role-breakdown subbucket sum reconciles to parent — **within $0.01 for aua/nna, exact for counts** (sharpened 2026-04-14 per CTO — matches reconciliation gate #4)
     3. Lifetime Activity series (option A preferred) OR reconciliation spec shipped
     4. **Reconciliation gate (added 2026-04-14 per RD audit):** at a given Window end, sum of Lifetime period diffs equals Summary.window values for the selected Fees bucket within $0.01 for each of NNA / Inflows / Outflows
     5. MCP COMPLETE to COO with commit + S3 ETag + sample JSON snippet
