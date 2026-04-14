@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-14</date>
-    <status>complete</status><!-- portal DEV 5ea017c; /frontend-dev Phase 2 pending external trigger -->
+    <status>pending</status><!-- CONDITIONALLY COMPLETE — portal DEV 5ea017c diffs validated by CTO; acceptance #5 /frontend-dev closed-loop not yet satisfied (RD-triggered run requested 2026-04-14T21:31Z). Flip to complete when RD confirms clean run. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
   </metadata>
