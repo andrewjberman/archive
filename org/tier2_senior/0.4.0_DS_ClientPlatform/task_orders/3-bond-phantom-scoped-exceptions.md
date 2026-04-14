@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- ON HOLD 2026-04-14T22:15Z per Andrew pre-presentation AUA freeze. DS code shipped but MUST NOT execute in tonight's 22:00 UTC gold run. AE coordinating tactical rollback / cron skip. Flip to complete only after post-presentation thaw + confirmed clean production execution. -->
+    <status>pending</status><!-- ON HOLD 2026-04-14T22:15Z per Andrew pre-presentation AUA freeze (CTO-clarified 22:19Z: narrow hold — ONLY tactical, all other FNTEND work proceeds). DS code shipped; MUST NOT execute in tonight's or subsequent runs until Andrew thaws. AE confirming tactical paths are NOT on PROD runner. Cron stays live for all other pipeline ops. -->
     <project_code>ad-hoc</project_code>
     <priority>URGENT — must land before Yahoo's next run</priority>
   </metadata>
