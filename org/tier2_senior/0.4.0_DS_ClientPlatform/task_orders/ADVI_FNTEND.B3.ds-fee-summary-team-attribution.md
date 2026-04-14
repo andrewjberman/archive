@@ -19,7 +19,7 @@
     - `team_attribution[] = {advisor_id, display_name, fee_share_bps, fee_share_usd, pct_of_client_fee}`
       with profile advisor pinned first.
 
-    **Client-level rollup (added 2026-04-14 per RD audit):** B3 FE confirms during Phase 1 whether Fee Summary panel needs a client-rollup header. If yes, this TO adds client-level `total_fee_usd` + aggregated `team_attribution[]` across all accounts for the client. Default: FE-only rollup from per-account; only fold into DS if Phase 1 surfaces FE infeasibility.
+    **DS contract is primary (updated 2026-04-14 per CTO ratification of RD audit):** advisor_id → display_name mapping is DS territory; FE cannot invent. DS emits raw per-account shares per the spec above. FE may compute aggregated rollups (e.g. client-level `total_fee_usd`, `pct_of_client_fee`) from the per-account shares — that's an FE optimization, not a DS scope change. Do NOT narrow DS scope based on FE capability.
   </objective>
 
   <acceptance_criteria>
