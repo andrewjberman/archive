@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- HELD pre-presentation per Andrew 2026-04-14. Option A moves Travis L1 drill visible value from $238M -> $391.66M; cannot ship before presentation. GO authorized post-presentation only. -->
+    <status>staged</status><!-- GO sent 2026-04-14T23:10Z — Andrew lifted pre-presentation hold. DS flips to pending on receipt. -->
     <project_code>ad-hoc</project_code>
     <priority>post-presentation — Andrew GO required</priority>
   </metadata>
