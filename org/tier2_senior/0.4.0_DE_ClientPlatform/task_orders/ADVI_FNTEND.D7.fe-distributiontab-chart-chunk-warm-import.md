@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- GO sent 2026-04-14T22:08Z (immediate — DE has bandwidth, isolated scope) -->
+    <status>pending</status><!-- GO sent 2026-04-14T22:08Z; DE flipped to pending 2026-04-14T22:10Z -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
     <type>FE regression fix (micro-TO)</type>
