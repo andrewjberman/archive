@@ -17,7 +17,8 @@
     OFC snapshot parity contract:
     (a) Populate `officeSegment.advisors[]` on EVERY OFC donut segment (fixes "No advisor data for Austin" at DistributionTab:3086)
     (b) Emit per-office per-period AUA for time-machine at L1 (OfcAdvisorListPanel)
-    (c) Emit NNA distribution bins under `views.ofc` at L0 AND per-office at L1
+    (c) Emit NNA distribution bins under `views.ofc` at L0 AND per-office at L1.
+        **Clarification added 2026-04-14 per RD audit:** "bins" = per-advisor NNA values within the selected office, suitable for bell-curve histogram rendering (same shape as existing GEO/ADV L1 bins — NOT a single NNA value per office).
   </objective>
 
   <acceptance_criteria>

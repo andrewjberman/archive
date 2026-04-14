@@ -18,6 +18,8 @@
     - `client_total_fee_bps`, `client_total_fee_usd`
     - `team_attribution[] = {advisor_id, display_name, fee_share_bps, fee_share_usd, pct_of_client_fee}`
       with profile advisor pinned first.
+
+    **Client-level rollup (added 2026-04-14 per RD audit):** B3 FE confirms during Phase 1 whether Fee Summary panel needs a client-rollup header. If yes, this TO adds client-level `total_fee_usd` + aggregated `team_attribution[]` across all accounts for the client. Default: FE-only rollup from per-account; only fold into DS if Phase 1 surfaces FE infeasibility.
   </objective>
 
   <acceptance_criteria>

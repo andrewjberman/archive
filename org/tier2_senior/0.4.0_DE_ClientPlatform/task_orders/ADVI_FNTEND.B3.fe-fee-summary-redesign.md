@@ -16,6 +16,8 @@
   <objective>
     Redesign `FeeSummaryPanel` — "Client Fee" headline, per-advisor rows with fee shares,
     rename or remove misleading "Wtd Avg Fee" card.
+
+    **Client rollup (updated 2026-04-14 per CTO ratification):** FE computes client-level `total_fee_usd` + any aggregated `pct_of_client_fee` from DS's per-account `fee_share_usd` / `fee_share_bps`. DS owns the advisor_id → display_name + raw per-account shares; FE owns aggregation. Do not request DS to emit rollups.
   </objective>
 
   <acceptance_criteria>

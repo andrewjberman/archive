@@ -18,14 +18,15 @@
 
     1. Extend `PlatinumLeaderboardEntry.fee_breakdown.{fee_paying, no_fee}` with `client_count`, `new_clients`, `account_count`.
     2. Extend `role_breakdown[role]` with `{fee_paying, no_fee}` sub-buckets of `{aua, nna, client_count, account_count}` (types.ts:1527 already anticipates).
-    3. Reconcile Lifetime Activity timeseries: emit fee-bucketed `*_canonical` series OR publish explicit reconciliation spec for FE to scale chart by Summary's fee bucket.
+    3. Reconcile Lifetime Activity timeseries: **PREFER option A — emit fee-bucketed `*_canonical` series** (option B pushes scaling onto FE and reintroduces drift risk per RD audit 2026-04-14). Option B (explicit reconciliation spec) only allowed if A infeasible.
   </objective>
 
   <acceptance_criteria>
     1. Platinum leaderboard artifact has all listed fields populated
     2. Role-breakdown subbucket sum reconciles to parent aua/nna/counts
-    3. Lifetime Activity series OR reconciliation spec shipped (not both optional)
-    4. MCP COMPLETE to COO with commit + S3 ETag + sample JSON snippet
+    3. Lifetime Activity series (option A preferred) OR reconciliation spec shipped
+    4. **Reconciliation gate (added 2026-04-14 per RD audit):** at a given Window end, sum of Lifetime period diffs equals Summary.window values for the selected Fees bucket within $0.01 for each of NNA / Inflows / Outflows
+    5. MCP COMPLETE to COO with commit + S3 ETag + sample JSON snippet
   </acceptance_criteria>
 
   <compiler_tools_mandate>

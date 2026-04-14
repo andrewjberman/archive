@@ -15,13 +15,14 @@
 
   <objective>
     Populate `top_gain_positions` on advisor-summary (L2).
-    Client-summary (L3) already has the type via `clientDetail.tax.top_gain_positions`.
+    Client-summary (L3) — type exists via `clientDetail.tax.top_gain_positions`, but artifact population NOT verified (flagged by RD audit 2026-04-14). Verify + expand scope if empty.
   </objective>
 
   <acceptance_criteria>
     1. Advisor-summary artifacts have top_gain_positions populated (not [])
-    2. Spot-check 3 advisors shows real data
-    3. MCP COMPLETE to COO
+    2. **Refined 2026-04-14 per RD audit + CTO ratification:** top_gain_positions is non-empty on ≥95% of open advisor-summaries with taxable activity (type-present != data-present)
+    3. Spot-check 3 client-summary artifacts — top_gain_positions non-empty. If empty, expand this TO's scope to cover L3 emission before COMPLETE.
+    4. MCP COMPLETE to COO with L2 + L3 population status + coverage % against taxable-activity denominator
   </acceptance_criteria>
 
   <compiler_tools_mandate>

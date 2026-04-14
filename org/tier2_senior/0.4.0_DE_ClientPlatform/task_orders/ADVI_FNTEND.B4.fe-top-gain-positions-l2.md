@@ -19,8 +19,8 @@
 
   <acceptance_criteria>
     1. Top Gain Positions renders on advisor L2 with real data (not [])
-    2. L3 (client) unchanged — already works
-    3. `/frontend-dev` closed-loop pass
+    2. **Added 2026-04-14 per RD audit:** Top Gain Positions also renders on client L3 drill after AE D_04 PROD re-run (ADVI_PROFAU.006 dependency)
+    3. `/frontend-dev` closed-loop pass on both L2 + L3
     4. MCP COMPLETE to COO
   </acceptance_criteria>
 
