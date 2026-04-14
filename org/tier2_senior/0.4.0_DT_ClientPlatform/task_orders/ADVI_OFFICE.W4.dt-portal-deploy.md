@@ -57,9 +57,15 @@
   <cross_domain_coordination>
     <shared_resource>portal/ submodule (DEV → PROD)</shared_resource>
     <required_action>
-      Check git status of portal DEV before deploying — confirm no in-flight DE commits
-      from ADVI_REBORN.W6-004 or ADHC_DESIGN.028/.032 are staged that should not ship yet.
-      If other DE work is ahead of W3 on DEV, coordinate with DE + COO before pushing PROD.
+      Check git status of portal DEV before deploying — this deploy is intended to ship
+      all of the following DE work together in one push:
+        - ADVI_REBORN.W6-004 (AdvisorsTab role_combination_breakdown)
+        - ADVI_OFFICE.W3 (DistributionTab OFC toggle + types.ts + chartColors.ts)
+        - ADVI_PROFAU.004 (PlatinumAdvisorSummary type fix — types.ts)
+        - ADVI_PROFAU.005 (fee_summary L3 + total_market_value L4 wire)
+      Confirm all four are committed to portal DEV before pushing to PROD.
+      If any are missing, coordinate with DE + COO before pushing PROD.
+      If additional unrelated DE commits are present on DEV, coordinate with COO before including.
     </required_action>
   </cross_domain_coordination>
 
