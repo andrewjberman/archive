@@ -4,7 +4,7 @@
     <issued_by>0.7.0_AE_CloudOps (self-authored from cloud inventory audit; trigger: Andrew direction 2026-04-15)</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>CDRS_TFIMPT</project_code>
     <priority>P1 (sprint) -- adds API Gateway origin pattern</priority>
   </metadata>
@@ -68,6 +68,14 @@
   </compiler_tools_mandate>
 
   <dependencies>Sequence after .002 (same pipeline; avoid concurrent state edits).</dependencies>
+
+  <closeout date="2026-04-15" commit="pending-on-commit">
+    (a) Scope flex: single file `cloudfront-trade-recon.tf`; no separate `s3-trade-recon-ui.tf`.
+    (b) Rationale: `aws_s3_bucket.trade_recon_ui` + versioning/SSE/PAB/website are already managed in `trade-pipeline/s3.tf:46-80`. Adding a duplicate S3 block would collide.
+    (c) Original `<scope>` listed 2 files; substituted 1. Same pattern as .002 (COO ACK'd 18:23Z; no separate flag needed — extension of established pattern).
+    API GW 77005oklok is NOT TF-managed; referenced by domain_name only (no import attempted, matching the TO's contingency plan in deliverable #2).
+    Targeted `terraform plan` 0-diff post-apply (apply was tags_all metadata only, same as .001/.002).
+  </closeout>
 
   <next>On complete: CDRS_TFIMPT.004 (Market Metrics CDN -- 2 S3 origins).</next>
 </task_order>
