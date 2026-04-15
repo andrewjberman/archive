@@ -4,7 +4,7 @@
     <issued_by>0.7.0_AE_CloudOps (self-authored from cloud inventory audit; trigger: Andrew direction 2026-04-15)</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>CDRS_TFIMPT</project_code>
     <priority>P1 (sprint) -- easiest of 5 console-only CloudFront distributions</priority>
   </metadata>
@@ -74,6 +74,14 @@
   </compiler_tools_mandate>
 
   <dependencies>None. Standalone import.</dependencies>
+
+  <closeout date="2026-04-15" commit="pending-on-commit">
+    (a) Scope flex applied: bucket (aws_s3_bucket.analytics_dashboard + versioning/PAB/website/SSE) was EXCLUDED from this module.
+    (b) Rationale: bucket is already TF-managed in shared-infra/s3.tf:89-126. Moving it would require destroy+recreate or a `moved{}` block across modules, expanding blast radius past import-only scope and risking shared-infra state continuity.
+    (c) Original `<expect>` (scope section): 4 files including s3.tf. Substituted: 3 files (main.tf, variables.tf, cloudfront.tf). Acceptance criterion #3 ("aws_s3_bucket.dashboard resource ID = opal-analytics-dashboard in state") replaced in spirit by: bucket continues being managed from shared-infra state (verified live); this module manages aws_s3_bucket_policy.dashboard (OAC grant) + aws_cloudfront_distribution.dashboard + aws_cloudfront_origin_access_control.dashboard.
+    Pre-flagged to COO at 18:09Z; ACK received at 18:12Z (approved substitution). Audit doc section 6b updated with correction note.
+    Final plan: 0-diff post-apply (1 change at apply = default_tags metadata only, no config mutation).
+  </closeout>
 
   <next>On complete: pick CDRS_TFIMPT.002 (Trade Form UI -- next-easiest, same pattern).</next>
 </task_order>
