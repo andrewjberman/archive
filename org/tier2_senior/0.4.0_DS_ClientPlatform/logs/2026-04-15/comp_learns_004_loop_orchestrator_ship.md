@@ -106,3 +106,15 @@ $ comp/bin/comp-learns-run --help
 - Do NOT add `git checkout`, `git switch`, `git reset`, `git restore`, or any other git-mutation command to `run.py` or `branch_guard.py`. P0 branch-race invariant.
 - Do NOT track `.tools/comp-learns-run` directly — `.tools/` is gitignored by policy. Source lives at `comp/bin/comp-learns-run`; local install is a `cp`.
 - Do NOT assume state.json is authoritative. `git log` + `results.tsv` are the source of truth (AUTORESEARCH_WALKTHROUGH.md §F contract). state.json is a cache; safe to delete + rebuild.
+
+## Addendum — Track B worktree migration (per COO 20:08Z)
+
+COO ACK'd completion at 20:08Z and reported:
+
+- **Worktree migration shipped in `23de5edf`** (Track B half of the joint design pass CTO mandated). Dry-run scenario 1 (shared HEAD unchanged across concurrent lane edits) PASS; 4 scenarios queued.
+- **Schema-drift coordination (no action from ~C):** COO's bash driver previously maintained its own tsv-header-init and used legacy-column AWK parsers for plateau/pass-rate reads. COO's next commit strips the driver's tsv-header-init (lets `comp.framework.results_schema.append_row` own it) and defers plateau/pass-rate reads to `state.json` (one source of truth). `run.py` + `branch_guard.py` + shim contract is authoritative; the driver adapts.
+- **Atomic-commit property** preserved via commit-level co-ship pattern: `e657c232` (~C Python entry) and `23de5edf` (COO worktree) are paired even though they landed in separate commits.
+
+This closes the joint design pass. P0 branch-race is resolved at both layers:
+  - Bash driver (Track B, COO-owned) now runs inside `worktrees/comp-learns-<target>/`, shared workspace HEAD never moves.
+  - Python entry (this TO, ~C-owned) is read-only against git regardless of bash driver behavior.
