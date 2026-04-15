@@ -2,9 +2,9 @@
   <metadata>
     <id>0.4.0_DS_ClientPlatform-2026-04-14-advi-fntend-b5-ds</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to><!-- re-dialed 2026-04-15 PM by COO from base lane to ~B for post-rerun validator pass -->
     <date>2026-04-14</date>
-    <status>pending</status><!-- CODE SHIPPED 2026-04-14: commit f17e8366, s3 code/gold/D_04.client_portal_summary.py (101,584 bytes). py_compile clean. Awaiting shared nightly gold-run artifact (rides B2 rerun) for comp-validate + formal COMPLETE. -->
+    <status>complete</status><!-- VALIDATED 2026-04-15 22:11Z by ~B against post-19:35Z artifacts. Acceptance #1+#2 PASS: account summary z0812152081 has timeseries[] length=844, inception 2023-12-22 → 2026-04-13. Fields exact-match TO: {date, aua_canonical, nna_canonical, inflows_canonical, outflows_canonical}. Code shipped 2026-04-14 commit f17e8366. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
   </metadata>

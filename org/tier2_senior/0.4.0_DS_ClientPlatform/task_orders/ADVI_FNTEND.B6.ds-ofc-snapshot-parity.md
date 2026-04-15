@@ -2,9 +2,9 @@
   <metadata>
     <id>0.4.0_DS_ClientPlatform-2026-04-14-advi-fntend-b6-ds</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to><!-- re-dialed 2026-04-15 PM by COO from base lane to ~B for post-rerun validator pass -->
     <date>2026-04-14</date>
-    <status>pending</status><!-- GO sent 2026-04-14T21:30Z Wave A parallel dispatch -->
+    <status>pending</status><!-- VALIDATED 2026-04-15 22:11Z by ~B against post-19:35Z artifacts. (a)+(b) PASS. (c) L0 PASS, L1 GAP. CTO Path C+ APPROVED 2026-04-15 22:13Z: B6 HOLD pending code-fix on (c) L1. Required change in D_01: emit `views.nna.{q}.ofc.distribution.by_segment[office]` as histogram of per-advisor NNA values within that office (count=N_advisors_in_office), per CTO 2026-04-14 RD-audit clarification. Current implementation emits single-value-per-office (count=1) which breaks OfcAdvisorListPanel L1 bell-curve render. COO authoring B6.fix follow-up TO. Original GO note 2026-04-14T21:30Z. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
   </metadata>

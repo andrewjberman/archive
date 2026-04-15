@@ -1118,4 +1118,54 @@
 
   </advi_mixv2_artifacts>
 
+  <!--
+    ADVI_FNTEND.B8 contract notes (CTO-accepted gaps, 2026-04-15 22:13Z, Path C+).
+    Validated against post-19:35Z artifact platinum/firm/fee_efficiency.json.
+  -->
+  <fee_efficiency_contract_notes>
+    <artifact>
+      <s3_key>platinum/firm/fee_efficiency.json</s3_key>
+      <produced_by>data/black_diamond/scripts/gold/D_04.client_portal_summary.py (passthrough from C_08.advisor_fee_efficiency.py)</produced_by>
+      <consumer>FeeEfficiencyAdvisor (types.ts:1458-1476) via FeeEfficiencyPanel</consumer>
+
+      <accepted_gap name="role_breakdown sparse representation">
+        windows[*].advisors[].role_breakdown is SPARSE-BY-DESIGN: roles where the advisor has zero accounts are OMITTED rather than zero-filled. Empirical distribution on post-19:35Z artifact: {1 role: 72, 2: 27, 3: 31, 4: 20, 5: 2} of 152 advisors in QTD window. FE consumers MUST treat missing role keys as implicit zero (`role_breakdown[role] ?? {aua: 0, nna: 0, commission: 0, fee_bps_weighted: 0, accounts_as_primary: 0, accounts_touched: 0}`). Mirrors React Query undefined-handling pattern used elsewhere on AdvisorPublicProfile. CTO Path C+ acceptance 2026-04-15 22:13Z.
+      </accepted_gap>
+
+      <accepted_gap name="window naming drift">
+        windows{} keys emit as {qtd, ytd, max, trailing_1y, trailing_3y}. ADVI_FNTEND.B8 TO referenced {QTD, YTD, 1Y, 3Y, Max}. Label-only difference, structural shape unchanged. FE/types should expect `trailing_1y`/`trailing_3y`. CTO Path C+ acceptance 2026-04-15 22:13Z.
+      </accepted_gap>
+
+      <pending_fix name="account_count basis disambiguation (ADVI_FNTEND.B8b)">
+        Current `role_breakdown.{role}.account_count` uses a NARROW counting basis (e.g. accounts where this advisor is the primary architect for that role) — Grant Boren top-level account_count=268 vs sum(role_breakdown[*].account_count)=5. Required producer change (B8b follow-up TO, owned by ~B once authored by COO):
+        (1) RENAME `role_breakdown.{role}.account_count` -> `accounts_as_primary` (preserves narrow basis semantics).
+        (2) ADD sibling `role_breakdown.{role}.accounts_touched` = broad basis: any account where this advisor is tagged in this role; sums to top-level account_count exactly.
+        Both fields kept so consumers opt into the right basis. DE follow-up TO needed for FeeEfficiencyPanel consumption choice.
+      </pending_fix>
+    </artifact>
+  </fee_efficiency_contract_notes>
+
+  <!--
+    ADVI_FNTEND.B6 contract notes (pending-fix surfacing, 2026-04-15 22:13Z).
+    Validated against post-19:35Z artifact gold/artifacts/partner_analytics/header_metrics_quarterly.json.
+  -->
+  <ofc_views_contract_notes>
+    <artifact>
+      <s3_key>gold/artifacts/partner_analytics/header_metrics_{annual,monthly,quarterly}.json</s3_key>
+      <produced_by>data/black_diamond/scripts/gold/D_01.partner_analytics.py</produced_by>
+
+      <pending_fix name="views.nna.{q}.ofc.distribution.by_segment grain (B6.fix)">
+        Current implementation emits `by_segment[office]` with count=1 per office (single NNA value, single-bin histogram). Per CTO 2026-04-14 RD-audit clarification, L1 should be PER-ADVISOR NNA values within the selected office (count=N_advisors_in_office) so OfcAdvisorListPanel L1 can render a bell-curve histogram. Required producer change (B6.fix follow-up TO, owned by ~B once authored by COO): groupby (office, advisor) over period_nna and pass that pd.Series into `calculate_nna_distribution_stats` for each office's by_segment entry. L0 (`distribution.total`) remains correct as-is (12 offices × 1 value).
+      </pending_fix>
+
+      <accepted name="views.ofc.{q}.donut.segments[].advisors[]">
+        Populated on EVERY OFC segment including Other (rolled-up advisors deduped + re-sorted by AUA). Validated 10/10 segments × 4 quarters non-empty. ADVI_FNTEND.B6 (a) PASS.
+      </accepted>
+
+      <accepted name="views.ofc_per_period[office]">
+        Per-office per-period AUA strip for L1 time-machine on OfcAdvisorListPanel: [{period, date, label, aua, aua_pct, client_count}, ...]. ADVI_FNTEND.B6 (b) PASS.
+      </accepted>
+    </artifact>
+  </ofc_views_contract_notes>
+
 </data_contract>

@@ -2,9 +2,9 @@
   <metadata>
     <id>0.4.0_DS_ClientPlatform-2026-04-14-advi-fntend-b2-ds</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to><!-- re-dialed 2026-04-15 PM by COO from base lane to ~B for post-rerun validator pass -->
     <date>2026-04-14</date>
-    <status>pending</status><!-- CODE SHIPPED 2026-04-14: commit 3a2f0998, s3 code/gold/D_02.advisor_client_detail.py (102,483 bytes). py_compile + schema-check clean. Awaiting nightly gold-run artifact for comp-validate reconciliation + formal COMPLETE. -->
+    <status>complete</status><!-- VALIDATED 2026-04-15 22:11Z by ~B against post-19:35Z artifacts. Acceptance #1 PASS: all 12 keys present at all 3 grains (advisor.book.rfs, client.rfs, account.rfs) — verified on Travis Penfield (advisor), z08103151 (client), z0812152081 (account). Acceptance #2 PASS: decomp.nna == rfs.nna in all windows (qtd/ytd/max); market_growth + synth_corr terms present + non-zero; reconciliation by construction. Code shipped 2026-04-14 commit 3a2f0998. Original CODE SHIPPED note preserved for audit trail. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
     <priority>keystone — window vocabulary reused by B3/B4/B5</priority>
