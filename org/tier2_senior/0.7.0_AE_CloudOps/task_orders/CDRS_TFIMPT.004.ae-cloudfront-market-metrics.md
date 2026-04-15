@@ -4,7 +4,7 @@
     <issued_by>0.7.0_AE_CloudOps (self-authored from cloud inventory audit; trigger: Andrew direction 2026-04-15)</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>CDRS_TFIMPT</project_code>
     <priority>P1 (sprint) -- two S3 origins, market-overview pipeline</priority>
   </metadata>
@@ -73,5 +73,13 @@
 
   <dependencies>None hard. Sequence after .003 to space out CF imports.</dependencies>
 
-  <next>On complete: CDRS_TFIMPT.005 (Public API CDN -- 5 cache behaviors, the most complex).</next>
+  <closeout date="2026-04-15" commit="pending-on-commit">
+    (a) Scope flex (closeout-only per COO 18:44Z "bucket-already-in-pipeline-s3.tf pattern is 2/2 established"): buckets opal-market-data-v2 (market-overview/s3.tf:6) and opal-data-portal-v2 (shared-infra/s3.tf, cross-module) already managed. No S3 changes in this TO.
+    (b) IAM refactor landed: `infra/aws/terraform/market-overview/iam.tf:39` `Resource` changed from hardcoded `"arn:aws:cloudfront::${local.account_id}:distribution/E2LPCXXBLDGWXY"` → `aws_cloudfront_distribution.market_metrics.arn`. Same literal value post-interpolation; plan showed no diff on IAM (benign reference swap).
+    (c) Origin 1 (`opal-data-portal-v2`) is **OAI-backed** (EU39UXW7CMSI5, shared with portal-auth distribution) -- declared inline via `s3_origin_config { origin_access_identity = ... }`. Not OAC. No cross-module export attempted (single-attribute literal is acceptable duplication).
+    (d) Origin 2 (`opal-market-data-v2/metrics`) is OAC-backed via `opal-metrics-oac` (E27K6SGX8Y6CE2). **Observation:** no `aws_s3_bucket_policy` exists live for opal-market-data-v2, so the OAC cannot actually read. Live CDN's second origin would 403 today. Out-of-scope for this import-as-is TO; flagged to COO as separate finding.
+    Full `terraform plan` 0-diff post-apply (apply was tags_all metadata only).
+  </closeout>
+
+  <next>On complete: CDRS_TFIMPT.005 (Public API CDN -- 6 cache behaviors, new top-level module).</next>
 </task_order>
