@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-15</date>
-    <status>pending</status><!-- RA-P1 landed afd553d4 (shadow artifact live 2026-04-13 parquet, validator 6/6 PASS per ~D). CN-P1 landed bf9651b8. COO GO 20:06Z. Rule 7 pre-flag on Option 1 (narrow P2 scope, respect P1 billable-split deferrals) APPROVED by COO 20:12Z + acknowledged by CTO 20:18Z. Coord with ~D on D_02 simultaneous edit locked at 20:08Z. -->
+    <status>complete</status><!-- COMPLETE 2026-04-15 17:50 ET (commit 0c06d423, S3 ship 17:45 ET). Snapshot site L1289 cut over to canonical role_aua. L1632 timeseries DEFERRED to RA-P2b per CTO ACCEPTANCE FLEX 21:39:49Z (single-date shadow artifact 2026-04-13.parquet only). Closeout in logs/2026-04-15/ra-p2_d02_consumer_cutover_l1289.md. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W4</wave>
     <phase_label>RA-P2 (D_02 consumer cutover — first of 4 cutover phases)</phase_label>
