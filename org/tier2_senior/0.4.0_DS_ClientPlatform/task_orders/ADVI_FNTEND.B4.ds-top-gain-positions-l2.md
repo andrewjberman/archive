@@ -2,7 +2,7 @@
   <metadata>
     <id>0.4.0_DS_ClientPlatform-2026-04-14-advi-fntend-b4-ds</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to><!-- re-dialed 2026-04-15 PM by COO from base lane to ~A for post-rerun validator pass; original code-shipper instance unavailable -->
     <date>2026-04-14</date>
     <status>pending</status><!-- GO sent 2026-04-14T21:30Z Wave A parallel dispatch -->
     <project_code>ADVI_FNTEND</project_code>

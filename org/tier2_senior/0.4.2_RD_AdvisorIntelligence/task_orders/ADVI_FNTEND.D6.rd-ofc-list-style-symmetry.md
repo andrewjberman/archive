@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- CONDITIONALLY COMPLETE — fix applied (fallback-branch div → GEO/ADV container metrics); awaiting /frontend-dev closed-loop pass per RAVC (RD-triggered run requested 2026-04-14T21:31Z). Flip to complete when RD confirms clean run. -->
+    <status>complete</status><!-- Code 814ba34. /frontend-dev closed-loop PASS 2026-04-15T21:57Z, constitution portal/.frontend-dev/testing/advi_fntend_b0_d6_pseudonymize.json, evidence .frontend-dev-results/20260415T215732Z/. OFC office-list (Austin/Dallas/LA/Jacksonville) visually symmetric with GEO state-list (Texas/Florida/CA/Georgia): identical font-size, weight, color, spacing, bullet markers. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
     <type>FE-trivial follow-on</type>

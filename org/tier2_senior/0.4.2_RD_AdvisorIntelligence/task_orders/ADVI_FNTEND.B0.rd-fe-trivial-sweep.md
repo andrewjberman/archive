@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- CONDITIONALLY COMPLETE — portal DEV 5ea017c diffs validated by CTO; acceptance #5 /frontend-dev closed-loop not yet satisfied (RD-triggered run requested 2026-04-14T21:31Z). Flip to complete when RD confirms clean run. -->
+    <status>complete</status><!-- Code 5ea017c. /frontend-dev closed-loop PASS 2026-04-15T21:57Z, constitution portal/.frontend-dev/testing/advi_fntend_b0_d6_pseudonymize.json, evidence .frontend-dev-results/20260415T215732Z/ (9 screenshots). D5 drilled view shows "Client 1..4" legend + "(pseudonymized)" hero caption on Travis Penfield. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
   </metadata>
