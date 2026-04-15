@@ -4,7 +4,7 @@
     <issued_by>0.7.0_AE_CloudOps (self-authored from cloud inventory audit; trigger: Andrew direction 2026-04-15)</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>CDRS_TFIMPT</project_code>
     <priority>P1 (sprint) -- most complex of the 5; 5 cache behaviors</priority>
   </metadata>
@@ -74,6 +74,17 @@
   </compiler_tools_mandate>
 
   <dependencies>Sequence last among the 5 -- the 6-behavior config benefits from pattern reps in .001-.004 first.</dependencies>
+
+  <closeout date="2026-04-15" commit="pending-on-commit">
+    (a) **Import landed on first-try 0-diff.** Zero plan/edit cycles needed (TO estimated 2-3). All 6 behaviors use AWS-managed policy IDs (no inline forwarded_values legacy) which is the best-case CF import shape.
+    (b) API GW `7k3ed8px20` is **v2 HTTP API** (not v1 REST). The TO's Phase 1 step 2 `aws apigateway get-rest-api` returned NotFoundException because v2 lives in a different namespace (`aws apigatewayv2 get-api`). **Corpus note for future AE CF imports over API GW origins:** if `get-rest-api` returns NotFoundException, try `apigatewayv2 get-api --api-id <id>` before concluding the API GW is broken.
+    (c) API GW is referenced in `partners-api/api-gateway.tf` + `bd-pipeline/api-gateway.tf` as string literals (not as a resource). Referenced in this module by domain_name only (per TO contingency path for unmanaged API GWs).
+    (d) HttpVersion = `http2and3` (differs from .001-.004 which are http2 only). Noted inline.
+    (e) New top-level module `infra/aws/terraform/public-api-cdn/` — state key `public-api-cdn/tfstate`. Backend initialized; no prior state.
+    Full `terraform plan` 0-diff post-apply (apply was tags_all default_tags metadata only, same pattern as all 4 prior imports).
+  </closeout>
+
+  <next>On complete: CloudFront TF coverage = 100% (6/6). CDRS_TFIMPT sprint closed. Next: JWT drift reconcile (AE-owned post-sprint follow-up) OR DT 0.4 handoff to CDRS_TFIMPT.006/.007 per COO staging.</next>
 
   <next>On complete: CloudFront TF coverage = 100% (6/6). Update README "Known Issues" + cloud inventory report. Optional follow-up: add CI lint flagging any future console-only distribution.</next>
 </task_order>
