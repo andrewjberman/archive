@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- GO sent 2026-04-14T21:30Z Wave A parallel dispatch -->
+    <status>complete</status><!-- INVESTIGATION COMPLETE 2026-04-15 PM (~C). Analysis shipped 7708f0c8 (2026-04-14). Post-rerun measurement appended 2026-04-15 17:55 ET: continuous vs snapshot.aua delta = $0.01 (0.0000%) at Q4 2025 boundary -- no divergence exists. Cause (b) downsample gap did not materialize because _weekly_downsample includes Dec 31 explicitly. Recommend ACCEPT with no FE footnote / no B7b TO. Side finding (geo-donut vs aua-donut $3.73M intra-snapshot gap) flagged for separate ADVI triage. Closeout: docs/data/2026-04-14_q4_aua_continuous_vs_snapshot.md "Measurement results" + "B7 closeout recommendation" sections. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
     <type>investigation-only</type>
