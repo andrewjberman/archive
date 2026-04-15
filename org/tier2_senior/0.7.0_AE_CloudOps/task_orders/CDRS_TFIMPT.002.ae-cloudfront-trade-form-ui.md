@@ -4,7 +4,7 @@
     <issued_by>0.7.0_AE_CloudOps (self-authored from cloud inventory audit; trigger: Andrew direction 2026-04-15)</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>CDRS_TFIMPT</project_code>
     <priority>P1 (sprint) -- 2nd-easiest, same pattern as .001</priority>
   </metadata>
@@ -69,5 +69,14 @@
 
   <dependencies>None functionally; sequence after .001 to reuse the import pattern + any module conventions established.</dependencies>
 
-  <next>On complete: CDRS_TFIMPT.003 (Trade Reconciliation Tool -- adds API Gateway origin to the pattern).</next>
+  <closeout date="2026-04-15" commit="pending-on-commit">
+    (a) Scope flex: dropped `s3-trade-form-ui.tf` from the file list (2 → 1 file, `cloudfront-trade-form-ui.tf` only).
+    (b) Rationale: `aws_s3_bucket.trade_form_ui` + versioning + SSE + PAB + website are already managed in `trade-pipeline/s3.tf:10-46`. Adding a second S3 resource block would collide; moving existing would expand blast radius.
+    (c) Original `<scope>` listed 2 files, substituted 1. Acceptance criteria all still apply (bucket remains state-managed; bucket_policy is the only new S3-adjacent resource, lives in the new cloudfront-trade-form-ui.tf file).
+    Pre-flagged to COO at 18:22Z; ACK received at 18:23Z (approved + forward note: add `grep -rn bucket-name infra/aws/terraform/` to Phase 1 recon for .003-.005).
+    Targeted `terraform plan` 0-diff post-apply (targeted to the 3 new resources to isolate the import from pre-existing trade-pipeline JWT/lambda state drift that is out-of-scope).
+    Pre-existing drift observed: 3 trade-recon Lambda env JWT_SECRET values differ from state; 3 additional benign unchanged blocks. Not introduced by this TO; flagged separately to COO.
+  </closeout>
+
+  <next>On complete: CDRS_TFIMPT.003 (Trade Reconciliation Tool -- adds API Gateway origin to the pattern; serializes after .002 per cross-domain block).</next>
 </task_order>
