@@ -4,8 +4,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_FNTEND</project_code>
+    <evidence>org/tier2_senior/0.6.0_AE_PartnerETL/logs/2026-04-15/full_chain_recovery_b01_namerror_fix.md — full A→D rerun CHAIN-COMPLETE 19:35:06 UTC 2026-04-15; D_04 ran in partial chain; RF01 nna_max + D_04 distribution.total gates PASS; CF EVTSA9VEHNZVH invalidation IEU8CK2CTAR6YLN1J6JI26UB3H.</evidence>
     <type>coordination</type>
   </metadata>
 
