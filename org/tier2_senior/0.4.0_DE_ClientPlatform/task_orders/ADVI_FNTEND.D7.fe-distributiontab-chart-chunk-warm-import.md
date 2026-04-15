@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- GO sent 2026-04-14T22:08Z; DE flipped to pending 2026-04-14T22:10Z -->
+    <status>complete</status><!-- GO 2026-04-14T22:08Z; DE flipped pending 2026-04-14T22:10Z; complete portal commit e200193 (2026-04-14); confirmed post-rerun regression 2026-04-15 distribution_tab_rapid_toggle PASS 10x3+10x2, 0 blanks -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
     <type>FE regression fix (micro-TO)</type>
