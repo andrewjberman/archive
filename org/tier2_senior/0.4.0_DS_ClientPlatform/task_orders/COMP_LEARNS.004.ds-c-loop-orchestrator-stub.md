@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-15</date>
-    <status>pending</status><!-- Gates cleared 2026-04-15 ~19:36Z, CTO ACK (inbox 20260415T193607Z): (1) PRD #1 framework commits 43e3225e + 771aff8d; (2) Track B bash driver comp/bin/comp-learns-run.sh present (COO walkthrough ACK via MCP 18:56Z). Pre-flight plateau+tests landed in 4d17f47d. Proceeding to full scope with P0 branch-race constraint (no git checkout on shared workspace; use git -C or worktree). -->
+    <status>complete</status><!-- Shipped 2026-04-15 19:55Z. Commits: 4d17f47d (pre-flight plateau + 11 tests), 1380d44c (status flip), e657c232 (full scope: run.py rewrite + branch_guard.py + comp/bin/comp-learns-run shim, 22/22 pytest). Acceptance #5 flex ACK'd by CTO 19:52Z (shim source at comp/bin/, local .tools/ install per comp-* convention; .gitignore:170 forbids tracked .tools/ files). P0 branch-race constraint honored: Python side read-only against git. End-to-end httpx iteration deferred to post-PRD#2 ship. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P2 — partially subsumed by Track B engine; stubs-only until engine lands</priority>
   </metadata>
