@@ -809,11 +809,11 @@
 
       <rule>
         <name>bd-canonical-prices-daily</name>
-        <schedule>cron(0 22 * * ? *) -- 22:00 UTC every day incl. weekends/holidays</schedule>
+        <schedule>cron(0 4 * * ? *) -- 04:00 UTC every day (midnight ET EDT / 11 PM ET EST) incl. weekends/holidays</schedule>
         <state>ENABLED</state>
         <target>bd-gold-trigger Lambda</target>
         <input>{"mode": "incremental"}</input>
-        <notes>Added bd-v2.22.0 (ADVI_GLDRST.022 Phase 1). Closes weekend/holiday coverage gap for silver/prices/canonical_prices.parquet. Runner's gold_dispatch.sh runs silver-prep (S_00 = build_canonical_prices_v2.py) before the freshness gate; on weekdays the gate passes and full A/B/C/D chain runs; on weekends/holidays the gate trips and the instance shuts down after canonical_prices is refreshed for that date. Overlap with bd-allocation-pipeline-trigger at 22:00 UTC on weekdays is absorbed by the pending-marker mechanism. Ref: docs/briefs/ae-brief-v2-prestep-integration.md</notes>
+        <notes>Added bd-v2.22.0 (ADVI_GLDRST.022 Phase 1). Moved 22:00 UTC -> 04:00 UTC at bd-v2.24.1 (2026-04-15) -- runs the full daily gold chain overnight after BD upstream waves settle (21:38-22:30 UTC weekdays), before morning portal traffic. Closes weekend/holiday coverage gap for silver/prices/canonical_prices.parquet. Runner's gold_dispatch.sh runs silver-prep (S_00 = build_canonical_prices_v2.py) before the freshness gate; on weekdays the gate passes and full A/B/C/D chain runs; on weekends/holidays the gate trips and the instance shuts down after canonical_prices is refreshed for that date. Ref: docs/briefs/ae-brief-v2-prestep-integration.md</notes>
       </rule>
 
       <rule>
