@@ -5,7 +5,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_at>2026-04-15</issued_at>
-    <status>pending</status>
+    <status>complete</status><!-- 0.4.0_DS_ClientPlatform~C 2026-04-15; patch in platinum_cli.py: empty-vs-broken diagnostic footer + artifact-stem auto-probe + SPECULATIVE MATCH label upgrade. Session log at logs/2026-04-15/adhc_router_t3_comp_platinum_reverse_audit.md. -->
     <authorizing_directive>Andrew 2026-04-15 — corpus-driven compiler regression testing.</authorizing_directive>
   </header>
 
