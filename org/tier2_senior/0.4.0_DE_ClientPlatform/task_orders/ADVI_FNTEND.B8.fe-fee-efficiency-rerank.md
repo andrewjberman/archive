@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- GO sent 2026-04-14T23:30Z by CTO direct dispatch; fires parallel after B2 FE. -->
+    <status>complete</status><!-- Shipped portal DEV 0e94e48 2026-04-15T00:20Z. DS B8 role_breakdown emit pending -- FE projects correctly when artifact refreshes, otherwise falls back to roles[] membership filter. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>C</wave>
   </metadata>

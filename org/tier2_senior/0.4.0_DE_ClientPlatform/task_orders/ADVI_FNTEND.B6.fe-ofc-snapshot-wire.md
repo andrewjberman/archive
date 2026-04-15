@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- GO sent 2026-04-14T23:30Z by CTO direct dispatch; fires parallel after B2 FE (DistributionTab isolated). -->
+    <status>complete</status><!-- Shipped portal DEV 467f4c1 2026-04-15T00:14Z. L0 bell curve + Austin advisor list via D6 (5ea017c/814ba34); L1 bell curve per-office + strip wiring this commit. DS B6 per-office distribution emit pending. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>C</wave>
   </metadata>

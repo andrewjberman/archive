@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- GO sent 2026-04-14T23:30Z by CTO direct dispatch; fires parallel after B2 FE. -->
+    <status>complete</status><!-- Shipped portal DEV c66c24e 2026-04-15T00:29Z. Chart scaffold live; empty-state until DS B5 timeseries endpoint ships, then parent drops data in via new prop. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>C</wave>
   </metadata>

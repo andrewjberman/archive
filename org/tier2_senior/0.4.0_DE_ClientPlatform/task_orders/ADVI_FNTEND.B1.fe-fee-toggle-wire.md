@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- GO sent 2026-04-14T23:30Z by CTO direct dispatch; DE flips on receipt. Fires parallel after B2 FE. -->
+    <status>complete</status><!-- Shipped portal DEV 82c6b73 2026-04-15T00:05Z. /frontend-dev pending DT; DS B1 fee-split canonical stream pending. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>C</wave>
   </metadata>

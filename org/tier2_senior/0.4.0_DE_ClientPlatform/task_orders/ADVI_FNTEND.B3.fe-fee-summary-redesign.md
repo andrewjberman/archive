@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- GO sent 2026-04-14T23:30Z by CTO direct dispatch; fires LAST (dep B2 FE window vocabulary). -->
+    <status>complete</status><!-- Shipped portal DEV 1d7aa76 2026-04-15T00:37Z. Rollup logic + Client Fee rename + profile pin all live; DS B3 team_attribution emit pending (panel falls back gracefully). profileAdvisorId prop is optional parent plumbing deferred. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>C</wave>
   </metadata>

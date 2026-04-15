@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- GO via CTO 2026-04-14T23:38Z; DE flipped pending 2026-04-14T23:39Z. KEYSTONE — first in Wave C. -->
+    <status>complete</status><!-- Shipped portal DEV 3eb7ede 2026-04-14T23:52Z. /frontend-dev visual test pending DT push + Playwright. DS gold artifact refresh pending — UI scaffolded defensively. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>C</wave>
     <priority>keystone — must land before B3/B4/B5 FE</priority>
