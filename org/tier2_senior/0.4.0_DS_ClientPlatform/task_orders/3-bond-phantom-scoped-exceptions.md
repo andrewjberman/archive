@@ -2,9 +2,9 @@
   <metadata>
     <id>0.4.0_DS_ClientPlatform-2026-04-14-3-bond-scoped-exceptions</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-04-14</date>
-    <status>pending</status><!-- ON HOLD 2026-04-14T22:15Z per Andrew pre-presentation AUA freeze (CTO-clarified 22:19Z: narrow hold — ONLY tactical, all other FNTEND work proceeds). DS code shipped; MUST NOT execute in tonight's or subsequent runs until Andrew thaws. AE confirming tactical paths are NOT on PROD runner. Cron stays live for all other pipeline ops. -->
+    <status>complete</status><!-- COMPLETE 2026-04-15 (~D). Superseded by BDPL_CNPRCS.WP-11 per WP-11 acceptance #5. JSON blocklist shipped in commit 2ff87e6b (2026-04-14); WP-11 formalization in 864b6d7a. After morning canonical_prices rebuild wiped overrides (09:29 ET), ran inject_scoped_overrides.py --upload at 15:22 ET to backfill — canonical_prices.parquet now shows BNP/WFC/NEWMONT with source=bd_txn_price at derived NAVs ($1.0188/$0.9804/$0.9037). 49F AUA delta (~$24.3M) verification pending next nightly cohort run. -->
     <project_code>ad-hoc</project_code>
     <priority>URGENT — must land before Yahoo's next run</priority>
   </metadata>
