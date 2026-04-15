@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-15</date>
-    <status>pending</status><!-- flipped 2026-04-15 22:21Z post DH-2 close aaccd4e8 -->
+    <status>complete</status>
+    <evidence>Commit a1a31507 (+31 -9); push `aaccd4e8..a1a31507`; S3 ETag `f91d72c06a6e6a03a0bdb06c413d33ee` @ 22:24:08 UTC. CTO NO-OBJECT 222335Z. Live --bg test PASS: `--single S_00 --bg --dry-run` produced exactly 1 log in /tmp/gold_logs/ (`single_S_00_20260415_182218.log`). bash -n PASS pre+post. Diagnostics line rewritten (grep "run directly" returns no match). 04:00 UTC fire will verify --bg log dedup on PROD.</evidence>
     <project_code>ADVI_ROLLUP</project_code>
     <wave>DH (Dispatcher hygiene — Wave 6)</wave>
     <priority>P2 (logs cleanup, no behavior change)</priority>
