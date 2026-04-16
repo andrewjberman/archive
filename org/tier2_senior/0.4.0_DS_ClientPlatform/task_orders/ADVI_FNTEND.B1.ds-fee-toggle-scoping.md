@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to><!-- re-dialed 2026-04-15 PM by COO from base lane to ~A for post-rerun validator pass; original code-shipper instance unavailable -->
     <date>2026-04-14</date>
-    <status>pending</status><!-- DS flipped 2026-04-14 after B2/B5 uploaded -->
+    <status>complete</status><!-- ~B closed 2026-04-15 22:50Z after B1.fix shipped (see ADVI_FNTEND.B1.fix + same-commit D_00c L528-549 change). Acceptance #2 reconciliation gate $0.01 now holds per-(advisor, role) by construction (nf.aua = parent - scaled_fp). Parent B1 fields already in place pre-fix; this commit closes the correctness gap surfaced by ~A validator sweep 22:27Z. Original DS-flipped-pending note 2026-04-14 preserved for audit. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
   </metadata>
