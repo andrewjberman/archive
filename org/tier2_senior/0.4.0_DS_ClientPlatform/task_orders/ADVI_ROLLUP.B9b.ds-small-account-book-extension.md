@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-16</date>
-    <status>pending</status>
+    <status>complete</status><!-- 0.4.0_DS_ClientPlatform~B 2026-04-16. Commit be14c1f9. D_02 small_account_count: (a) clients[] per client, (b) role_breakdown per role (always numeric int, never null), (c) summary aggregate. SMALL_ACCOUNT_AUA_THRESHOLD_USD=40_000. B9b addendum: relationship_since from cdim.first_seen_date. py_compile EXIT 0. comp-pipescript deployed D_02 MATCH. Spot-check deferred to post-PROD-nightly (platinum artifacts pre-run). -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W3-addendum</wave>
   </metadata>

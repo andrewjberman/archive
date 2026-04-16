@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-16</date>
-    <status>staged</status><!-- Gate: ADVI_ROLLUP.B3b.ds-fee-window-revenue-d02 complete. Dispatch after B3b lands. -->
+    <status>complete</status><!-- 0.4.0_DS_ClientPlatform~B 2026-04-16. Commit 4fbe26dd. D_02 growth.ttm_nna + growth.ttm_pct. ttm_start = latest_date - 365 days; falls back to advisor earliest date for <365d history advisors. py_compile EXIT 0. comp-pipescript deployed D_02 MATCH. Spot-check deferred to post-PROD-nightly. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W3-addendum-B3c</wave>
   </metadata>

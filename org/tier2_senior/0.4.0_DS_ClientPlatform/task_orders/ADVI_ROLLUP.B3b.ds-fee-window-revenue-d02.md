@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-16</date>
-    <status>pending</status>
+    <status>complete</status><!-- 0.4.0_DS_ClientPlatform~B 2026-04-16. Commit 1f91954c. D_02 fee_summary.window_revenue.{qtd/ytd/max}.{firm_revenue_usd, advisor_revenue_usd} + team_attribution[].window_fee_share_usd.{qtd/ytd/max}. annual_implied_revenue preserved. py_compile EXIT 0. comp-pipescript deployed D_02 MATCH. Spot-check deferred to post-PROD-nightly. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W3-addendum-B3b</wave>
   </metadata>
