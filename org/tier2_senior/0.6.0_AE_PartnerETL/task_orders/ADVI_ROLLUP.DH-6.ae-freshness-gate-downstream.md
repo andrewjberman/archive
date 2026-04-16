@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Lower priority follow-up; ship after DH-1..DH-4 -->
+    <status>complete</status><!-- Shipped bd-v2.24.3 2026-04-16 (co-ship with DH-5) -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>DH (Dispatcher hygiene — Wave 6)</wave>
     <priority>P3 (data-correctness gate; logic trap 12 from audit)</priority>
@@ -76,6 +76,6 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency to="ADVI_ROLLUP.DH-1" description="DH-1 chain definitions land first" status="pending"/>
+    <dependency to="ADVI_ROLLUP.DH-1" description="DH-1 chain definitions land first" status="complete" evidence="516e39da"/>
   </dependencies>
 </task_order>

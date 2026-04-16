@@ -16,9 +16,11 @@
   </references>
 
   <objective>
-    Auto-shutdown currently fires only for `MODE=chain`. `--group D` and `--single X` modes never trigger shutdown — leaves the c6i.16xlarge runner warm indefinitely after ad-hoc invocations. Extend auto-shutdown to all invocation modes (default ON; `--no-shutdown` opt-out remains the override).
+    **Item A — Auto-shutdown all modes (logic trap 11 from monolith audit):** Auto-shutdown currently fires only for `MODE=chain`. `--group D` and `--single X` modes never trigger shutdown — leaves the c6i.16xlarge runner warm indefinitely after ad-hoc invocations. Extend auto-shutdown to all invocation modes (default ON; `--no-shutdown` opt-out remains the override).
 
     **Cost framing:** PROD runner is bd-gold-layer-runner (c6i.16xlarge per memory `feedback_ec2_gold_runner_sizing.md`). At ~$2.72/hr on-demand, every forgotten warm hour after an ad-hoc run is real cost. QA runner (bd-gold-qa-runner) is the same instance type.
+
+    **Item B — B_01 `holdings_lots` terminal-output audit (DS~A peer-review flag per AE 0.6 MCP 221649Z):** Compiler shows B_01's `holdings_lots` S3 output as terminal — nothing reads it. Two possibilities: (1) compiler missed a dynamic reader (e.g. B_01b uses dynamic key resolution per DH-3 item 12, may consume holdings_lots; verify after DH-3 lands), OR (2) holdings_lots is a dead artifact and B_01 only feeds downstream via accounts_dimension overwrite + DynamoDB bd-securities to B_01b. Audit decision: either document the dynamic reader OR remove the dead emit from B_01. If item B reveals a dead-emit, ship the removal in same commit.
   </objective>
 
   <scope>
@@ -77,7 +79,7 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency to="ADVI_ROLLUP.DH-1" description="DH-1 chain definitions land first" status="pending"/>
-    <dependency to="ADVI_ROLLUP.DH-2" description="DH-2 arg validation lands first (clean target id parsing)" status="pending"/>
+    <dependency to="ADVI_ROLLUP.DH-1" description="DH-1 chain definitions land first" status="complete" evidence="516e39da"/>
+    <dependency to="ADVI_ROLLUP.DH-2" description="DH-2 arg validation lands first (clean target id parsing)" status="complete" evidence="aaccd4e8"/>
   </dependencies>
 </task_order>
