@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- HARD GATE: ADVI_ROLLUP.RA-P1b validator PASS required -->
+    <status>complete</status><!-- 0.4.0_DS_ClientPlatform~C 2026-04-16. Commit 94600ff6. Added CANONICAL_ROLE_AUA_PREFIX import + _load_role_aua_canonical_all_dates() + replaced role_ts_lookup/fee/nofee builder (L1740-1775) with canonical all-dates load + local-compute fallback. py_compile EXIT 0. comp-blast terminal. comp-pipescript deployed MATCH. S3: opal-data-bd/code/gold/D_02.advisor_client_detail.py. AC#3-5 Travis + 5-date spot-check: deferred to post gold-run (same run as CN-P3 AC#2). -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>4 (Structural convergence)</wave>
     <priority>P1 (closes RA-P2 deferred scope; gates Wave 4 convergence gate)</priority>
@@ -86,7 +86,7 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency to="ADVI_ROLLUP.RA-P1b" description="Historical backfill must complete + validator PASS" status="pending"/>
+    <dependency to="ADVI_ROLLUP.RA-P1b" description="Historical backfill must complete + validator PASS" status="complete" evidence="c962ddb3"/>
   </dependencies>
 
   <next>
