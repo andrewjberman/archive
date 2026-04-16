@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-02</date>
-    <status>staged</status>
+    <status>superseded</status><!-- 2026-04-16: Schwab delivery must remain manual (SI2 Desktop only, no API/SFTP). Automation objective is not achievable. Manual SOP already documented in 0.6.0_AE_PartnerETL/prompt.md "Schwab Ingest" section -- 0.6.0 owns execution. Andrew confirmed 2026-04-16. -->
     <project_code>ADVI_GLDRST</project_code>
   </metadata>
 
