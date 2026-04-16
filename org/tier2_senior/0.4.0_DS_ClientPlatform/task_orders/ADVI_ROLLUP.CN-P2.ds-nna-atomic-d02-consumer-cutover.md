@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-04-15</date>
-    <status>pending</status><!-- FLIPPED 2026-04-15 (~D) per COO 20:06Z GO; CN-P1+RA-P1 closed in 6c0da968 with validators PASS. Pre-flight starting. -->
+    <status>complete</status><!-- Flipped pending→complete 2026-04-16 by 0.4.0_DS_ClientPlatform. Commit ebd737e3 on CLOUD. Import + paginator prefix swapped CANONICAL_NNA_PREFIX→CANONICAL_NNA_ATOMIC_PREFIX in _load_canonical_nna_per_advisor. py_compile exit 0. comp-pipescript deployed D_02 → MATCH. comp-blast D_02 → no downstream surprises (terminal node). comp-validate nna_atomic --artifact /tmp/nna_atomic.parquet → 0 ERROR 0 WARN. Travis NNA three-way validation pending D_02 gold run (source change confirmed; schism closed by construction — all three canonical_lookup/role_canonical_lookup paths now source from 2,294-partition nna_atomic). -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W4</wave>
     <phase_label>CN-P2 (D_02 consumer cutover — first of 4 cutover phases)</phase_label>
@@ -95,8 +95,11 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_ROLLUP.CN-P1" status="staged" description="nna_atomic shadow artifact must be producing before consumer cutover"/>
-    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_ROLLUP.RA-P1" status="staged" description="paired shadow; D_02 reads from both canonical tables now"/>
+    <!-- Re-sequenced 2026-04-16 per CTO Path B (20260416T125816Z): CN-P1b historical backfill blocks D_02 consumer cutover because D_02 NNA paths are period/historical with no snapshot carve-out. -->
+    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_ROLLUP.CN-P0" status="complete" evidence="93b70620" description="canonical schema ratified"/>
+    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_ROLLUP.CN-P1" status="complete" evidence="bf9651b8" description="daily shadow writer live"/>
+    <dependency agent="0.4.0_DS_ClientPlatform" task="ADVI_ROLLUP.RA-P1" status="complete" evidence="afd553d4" description="paired role_aua shadow writer live"/>
+    <dependency agent="0.4.0_DS_ClientPlatform~D" task="ADVI_ROLLUP.CN-P1b" status="complete" description="historical backfill of nna_atomic partitions -- D_02 reads period/historical NNA, would collapse to $0 on ~2293 dates without CN-P1b close. COMPLETE dc4980c3 2026-04-16."/>
   </dependencies>
 
   <next>
