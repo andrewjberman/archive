@@ -4,7 +4,27 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-15</date>
-    <status>pending</status><!-- Flipped pending 2026-04-16 12:47 UTC; DH-1/2/4 already complete. -->
+    <status>complete</status><!-- Shipped 2026-04-16 12:55 UTC in 0fc54608 -->
+    <evidence>
+      Commit `0fc54608` feat(dh-3): collapse dispatcher flag docs to show_help + compiler visibility fixes (5 files).
+      S3 uploads (s3://opal-data-bd/code/gold/):
+        - gold_dispatch.sh ETag f98f58163a13f0c816113a50c0b84f76
+        - B_01.holdings_lots.py ETag a6ee33be1181cc27f1244eddf125fa94
+        - B_01b.classify_new_securities.py ETag a220a612e2db4516d5ad9647e1b08e5d
+        - lib/s3_layout.py ETag 65a58edb0c56454bea6ca24b782cdbc8
+      Acceptance criteria:
+        1. Items 7+8+11+12 in one commit (bundled)
+        2. bash -n gold_dispatch.sh: exit 0
+        3. --help docs --force AND --no-shutdown: confirmed
+        4. Top-of-file FLAGS block removed: grep '^# *FLAGS|^# *Flags:' matches zero
+        5. No second-source flag list: confirmed
+        6. Session log with Compiler Tools: written 2026-04-16 session log
+        7. MCP COMPLETE: see DH-7 combined closeout (same session)
+      Compiler gains:
+        - B_01 WRITES 4 -> 3 (ACCOUNTS_DIMENSION substring-alias false-positive removed via inline)
+        - B_01b "(none detected)" -> READS(2) + WRITES(1) (import from lib.s3_layout)
+      CTO ACK 2026-04-16 12:56 UTC; COO ACK 2026-04-16 12:56 UTC.
+    </evidence>
     <project_code>ADVI_ROLLUP</project_code>
     <wave>DH (Dispatcher hygiene — Wave 6)</wave>
     <priority>P2 (pure docs)</priority>

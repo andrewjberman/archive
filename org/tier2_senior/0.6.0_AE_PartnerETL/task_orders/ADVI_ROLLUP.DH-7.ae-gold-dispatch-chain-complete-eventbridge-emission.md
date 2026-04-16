@@ -4,7 +4,17 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-15</date>
-    <status>pending</status><!-- Flipped pending 2026-04-16 12:56 UTC; DH-3 shipped 0fc54608 -->
+    <status>complete</status><!-- Shipped bd-v2.24.2 2026-04-16 13:11 UTC -->
+    <evidence>
+      Commit `1829007a` feat(bd-pipeline): DH-7 emit + IAM. Record-deploy `3b9fbf83` [skip ci].
+      Tag `bd-v2.24.2` pushed 2026-04-16 13:11 UTC.
+      IAM: aws_iam_role_policy.bd_exporter_events_emit created (events:PutEvents on event-bus/default).
+      terraform apply: 1 added. Plan post-apply: No changes.
+      S3 upload: s3://opal-data-bd/code/gold/gold_dispatch.sh ETag ab7e1127d3f407b956c5059548a9860f VersionId Fi63twJC8vXJatwxYPHsqJo5DFz6.Dzf.
+      Rule 7 pre-flag: CTO cleared 13:10:43Z, COO no-object 13:10:46Z.
+      First natural fire: tonight 2026-04-17 04:00 UTC (DH-1/2/3/4/7 ride together).
+      Bonus stabilization: chain_exit PIPESTATUS[0] + exit propagation (catches tee-branch silent-success; called out to COO/CTO in MCP COMPLETE for catalog).
+    </evidence>
 
     <project_code>ADVI_ROLLUP</project_code>
     <wave>DH (Dispatcher hygiene — Wave 6)</wave>
