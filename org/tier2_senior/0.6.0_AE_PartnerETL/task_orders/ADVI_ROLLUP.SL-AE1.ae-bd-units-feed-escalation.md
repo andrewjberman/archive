@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Independent of in-flight work; Andrew GO when AE has bandwidth post-W7 + DH series -->
+    <status>complete</status><!-- VOID/NA 2026-04-16 by Andrew directive: Schwab sub-custody does not provide bespoke data exports; BD cannot add Units to UNREALIZED_DAILY if Schwab feed doesn't carry it. Escalation path dead. Sleeve falls back entirely to Path 3 cost-basis apportionment (SL-P0). No email to send. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>4 (Structural convergence — sleeve quantity-source primary path)</wave>
     <priority>P2 (Path 1 primary; Path 3 cost-basis apportionment is fallback in flight via SL-P0)</priority>
