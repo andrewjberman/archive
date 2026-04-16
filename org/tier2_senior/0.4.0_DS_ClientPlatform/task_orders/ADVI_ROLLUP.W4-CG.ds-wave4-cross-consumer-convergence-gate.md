@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-15</date>
-    <status>pending</status><!-- auto-dispatch 20260416T172940Z operator.py --dispatch -->
+    <status>complete</status><!-- Flipped pending→complete 2026-04-16 by 0.4.0_DS_ClientPlatform~B. Script: data/black_diamond/scripts/diagnostics/wave4_cross_consumer_convergence.py. Evidence: docs/data/2026-04-16_wave4_convergence_evidence.md. CANONICAL AUA: 26 PASS / 0 FAIL. --fail-on-divergence EXIT=0. NNA flow columns in role_aua = 0.00 flagged to CTO (Rule 7 pre-flag; RA-P1c candidate). Platinum formal close pending PROD nightly run. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>4 (Structural convergence — closeout gate)</wave>
     <priority>P1 (formal Wave 4 closure; without this we ship with consumers silently disagreeing)</priority>
