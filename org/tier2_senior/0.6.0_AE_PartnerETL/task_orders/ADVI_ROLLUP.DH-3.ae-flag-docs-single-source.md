@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Gates on DH-1 close. Can ship parallel with DH-2/4. -->
+    <status>pending</status><!-- Flipped pending 2026-04-16 12:47 UTC; DH-1/2/4 already complete. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>DH (Dispatcher hygiene — Wave 6)</wave>
     <priority>P2 (pure docs)</priority>
@@ -16,11 +16,13 @@
   </references>
 
   <objective>
-    Collapse two-source flag truth into one. Document `--force`. Remove top-of-file FLAGS block.
+    Collapse two-source flag truth into one + audit pipeline-graph hygiene flagged by ~A peer review.
 
-    **Items in scope (2 of the 10 from monolith TO):**
+    **Items in scope (4 — items 7+8 from monolith + 2 audit additions from DS~A peer-review of bd-v2.24.1+DH-1 per AE 0.6 MCP 221649Z):**
     7. **Document --force** — top-of-file FLAGS block (line 47-50) omits `--force` entirely. Freshness-gate override with zero discoverability is a foot-gun.
     8. **Sync --no-shutdown docs** — appears in `--help` but missing from top-of-file FLAGS. Two sources of truth out of sync. Andrew preference: collapse to `show_help` single source; remove the top-of-file FLAGS block.
+    11. **A_00 + B_01 dual-writer audit on `gold/dimensions/accounts_dimension_latest.parquet`** — compiler shows both as writers to the same key. Either B_01 enriches with holdings-sourced columns A_00 can't know about (OK, document the enrichment surface in a comment), OR it's vestigial dead code from prior refactor (remove from B_01). Audit + decide + document or remove.
+    12. **B_01b dynamic-key compiler invisibility** — `comp-pipescript io B_01b` returns "(none detected)" because B_01b uses `f'{PREFIX}/...'` + `s3.list_objects`. Future dependency regressions won't be caught. Add one-line static S3 key constants at top of B_01b so compiler can trace I/O. (Doesn't change runtime behavior; restores graph visibility.)
   </objective>
 
   <scope>
