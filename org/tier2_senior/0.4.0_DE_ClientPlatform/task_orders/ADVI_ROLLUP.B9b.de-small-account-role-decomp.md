@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-16</date>
-    <status>pending</status>
+    <status>complete</status><!-- portal DEV d77465e 2026-04-16. AdvisorBookView: Small Accounts by Role Panel (guarded). role_breakdown.small_account_count? added to PlatinumAdvisorSummary type. bun build exit 0. /frontend-dev role_breakdown_small_accts PASS 1 iter. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W3-addendum</wave>
   </metadata>

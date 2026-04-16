@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-16</date>
-    <status>pending</status>
+    <status>complete</status><!-- portal DEV d77465e 2026-04-16. ClientsTable: Small Accts col (guarded), sortable, red row highlight. AdvisorBookView: headline stat guarded. bun build exit 0. schema-check clean. /frontend-dev clients_panel PASS 1 iter. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W3-addendum</wave>
   </metadata>
