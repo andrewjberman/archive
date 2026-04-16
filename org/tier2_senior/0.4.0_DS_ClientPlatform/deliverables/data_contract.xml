@@ -1136,12 +1136,14 @@
         windows{} keys emit as {qtd, ytd, max, trailing_1y, trailing_3y}. ADVI_FNTEND.B8 TO referenced {QTD, YTD, 1Y, 3Y, Max}. Label-only difference, structural shape unchanged. FE/types should expect `trailing_1y`/`trailing_3y`. CTO Path C+ acceptance 2026-04-15 22:13Z.
       </accepted_gap>
 
-      <pending_fix name="account_count basis disambiguation (ADVI_FNTEND.B8b)">
-        Current `role_breakdown.{role}.account_count` uses a NARROW counting basis (e.g. accounts where this advisor is the primary architect for that role) — Grant Boren top-level account_count=268 vs sum(role_breakdown[*].account_count)=5. Required producer change (B8b follow-up TO, owned by ~B once authored by COO):
-        (1) RENAME `role_breakdown.{role}.account_count` -> `accounts_as_primary` (preserves narrow basis semantics).
-        (2) ADD sibling `role_breakdown.{role}.accounts_touched` = broad basis: any account where this advisor is tagged in this role; sums to top-level account_count exactly.
-        Both fields kept so consumers opt into the right basis. DE follow-up TO needed for FeeEfficiencyPanel consumption choice.
-      </pending_fix>
+      <shipped name="account_count basis disambiguation (ADVI_FNTEND.B8b)">
+        Shipped 2026-04-15 per CTO Path C+ approval + COO GO BLAST 22:23Z. Producer: `C_08.advisor_fee_efficiency.py` L352-393 (groupby (advisor, role) logic).
+        (1) REMOVED `role_breakdown.{role}.account_count` (pre-fix narrow basis with confusing semantics).
+        (2) ADDED `role_breakdown.{role}.accounts_as_primary` — narrow basis: nunique accounts on `latest_day` groupby (advisor, role). Equal to the former `account_count` value.
+        (3) ADDED `role_breakdown.{role}.accounts_touched` — broad basis: nunique(account_id) over `detail_window` groupby (advisor, role). Any account where this advisor held this role anywhere in the window.
+        Reconciliation note: `sum_over_roles(accounts_touched)` approximates top-level `account_count` from above (exact match only when no account has the same advisor in multiple roles; otherwise sum overcounts multi-role accounts). Both fields emitted so consumers choose the right basis. FeeEfficiencyPanel consumer (types.ts:1458-1476) must migrate from `account_count` to `accounts_as_primary` (narrow) or `accounts_touched` (broad) per its display intent. DE pre-flight MCP sent 22:37Z.
+        Note: `employee_leaderboard.json` role_breakdown keeps its own `account_count` field (separate producer D_00c + D_04 `_LEADERBOARD_ROLE_FIELDS` whitelist at D_04:2190). This rename is fee_efficiency-scoped only.
+      </shipped>
     </artifact>
   </fee_efficiency_contract_notes>
 

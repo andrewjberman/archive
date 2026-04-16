@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to><!-- re-dialed 2026-04-15 PM by COO from base lane to ~B for post-rerun validator pass -->
     <date>2026-04-14</date>
-    <status>pending</status><!-- VALIDATED 2026-04-15 22:11Z by ~B against post-19:35Z artifacts. CTO Path C+ APPROVED 2026-04-15 22:13Z. ACCEPTED: #1 sparse role keys (FE-side undefined→0 contract — document in data_contract.xml); #2 window naming drift (trailing_1y/trailing_3y vs TO 1Y/3Y — label only, document). HOLD pending code-fix: #3 account_count rename + add. Required producer change: rename `role_breakdown.{role}.account_count` → `accounts_as_primary` (preserves narrow basis) AND add sibling `accounts_touched` (broad: any account where advisor has this role; sums to top-level account_count). Current Grant Boren top=268 vs sum=5 violates "exact for account_count". COO authoring ADVI_FNTEND.B8b.ds-{slug} follow-up TO. Original GO note 2026-04-14T21:30Z. -->
+    <status>complete</status><!-- ~B closed 2026-04-15 22:40Z after B8b fix shipped (see ADVI_FNTEND.B8b + same-commit C_08 change). All 3 accepted-or-fixed: #1 sparse role keys ACCEPTED (documented in data_contract.xml); #2 window naming drift trailing_1y/trailing_3y ACCEPTED (documented); #3 account_count rename SHIPPED — fee_efficiency role_breakdown now emits accounts_as_primary (narrow) + accounts_touched (broad) per (advisor, role), old account_count removed. Spot-check reconciliation deferred to post-nightly per acceptance #3 (CTO Path C+ trail in B8b commit body). Original GO note 2026-04-14T21:30Z. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
   </metadata>

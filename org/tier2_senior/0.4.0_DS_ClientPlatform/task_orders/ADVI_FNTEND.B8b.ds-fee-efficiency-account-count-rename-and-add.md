@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Follow-up to B8 HOLD per CTO Path C+ approval 22:13Z -->
+    <status>complete</status><!-- ~B shipped 2026-04-15 22:40Z. C_08 _build_window (L322-393): RENAME account_count → accounts_as_primary; ADD accounts_touched via detail_window groupby (advisor, role).nunique(account_id). py_compile PASS. D_04 passthrough needs no change (L404 verbatim emit). DE pre-flight sent 22:37Z; data_contract.xml <shipped> block replaces <pending_fix>. Accuracy note on #3: broad-basis accounts_touched overcounts multi-role advisors' accounts (sum_over_roles ≥ top.account_count); this is structurally inherent to any "broad" interpretation and documented in data_contract.xml. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A (followup)</wave>
     <priority>P2 (closes B8 acceptance gap #3 — account_count semantic violation)</priority>
