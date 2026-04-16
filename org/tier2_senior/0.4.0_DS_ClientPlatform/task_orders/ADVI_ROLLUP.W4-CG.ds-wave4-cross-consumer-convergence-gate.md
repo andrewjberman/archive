@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- HARD GATE: ALL of RA-P2, RA-P2b, RA-P3, CN-P2, CN-P3, RA-P1b, CN-P1b must PASS before this fires -->
+    <status>pending</status><!-- auto-dispatch 20260416T172940Z operator.py --dispatch -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>4 (Structural convergence — closeout gate)</wave>
     <priority>P1 (formal Wave 4 closure; without this we ship with consumers silently disagreeing)</priority>
@@ -100,14 +100,14 @@
 
   <dependencies>
     <dependency to="ADVI_ROLLUP.RA-P2" status="complete"/>
-    <dependency to="ADVI_ROLLUP.RA-P2b" status="pending"/>
-    <dependency to="ADVI_ROLLUP.RA-P3" status="complete"/><!-- shipped 2026-04-15 commit e53f0afa per ~B -->
-    <dependency to="ADVI_ROLLUP.RA-P4" status="staged"/>
-    <dependency to="ADVI_ROLLUP.CN-P2" status="pending"/>
-    <dependency to="ADVI_ROLLUP.CN-P3" status="staged"/>
-    <dependency to="ADVI_ROLLUP.CN-P4" status="staged"/>
-    <dependency to="ADVI_ROLLUP.RA-P1b" status="staged"/>
-    <dependency to="ADVI_ROLLUP.CN-P1b" status="staged"/>
+    <dependency to="ADVI_ROLLUP.RA-P2b" status="complete" evidence="94600ff6"/>
+    <dependency to="ADVI_ROLLUP.RA-P3" status="complete" evidence="e53f0afa"/>
+    <dependency to="ADVI_ROLLUP.RA-P4" status="complete" evidence="4e63038e"/>
+    <dependency to="ADVI_ROLLUP.CN-P2" status="complete" evidence="ebd737e3"/>
+    <dependency to="ADVI_ROLLUP.CN-P3" status="complete" evidence="d96da39d"/>
+    <dependency to="ADVI_ROLLUP.CN-P4" status="complete" evidence="4e63038e"/>
+    <dependency to="ADVI_ROLLUP.RA-P1b" status="complete" evidence="c962ddb3"/>
+    <dependency to="ADVI_ROLLUP.CN-P1b" status="complete" evidence="dc4980c3"/>
   </dependencies>
 
   <next>
