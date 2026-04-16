@@ -2,9 +2,9 @@
   <metadata>
     <id>0.4.0_DS_ClientPlatform-2026-04-14-advi-fntend-b3-ds</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to><!-- re-dialed 2026-04-15 PM by COO from base lane to ~A for post-rerun validator pass; original code-shipper instance unavailable -->
+    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to><!-- re-dialed 2026-04-15 PM by COO from base lane to ~A for post-rerun validator pass; original code-shipper instance unavailable. CLOSED 2026-04-16 by B3.fix 544877cc (~B D_02 loader WARN-LOUD) per ~A RCA f49aa9bd — root cause was D_02 loader missing relationship_id column, not C_07. -->
     <date>2026-04-14</date>
-    <status>pending</status>
+    <status>complete</status><!-- B3.fix 544877cc (~B 2026-04-15): D_02 loader L358 + WARN-LOUD L2272. Root cause: relationship_id missing from _load_account_team column list. Post-nightly re-validation deferred to ~A sweep. D_02 MATCH on S3 (CN-P2 deploy). -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>B</wave>
   </metadata>
