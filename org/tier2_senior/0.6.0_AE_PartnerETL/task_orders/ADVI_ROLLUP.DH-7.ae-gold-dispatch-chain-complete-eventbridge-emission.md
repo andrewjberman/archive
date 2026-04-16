@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Can ship parallel with DH-2/3/4 (different code site within gold_dispatch.sh end-of-chain hook) -->
+    <status>pending</status><!-- Flipped pending 2026-04-16 12:56 UTC; DH-3 shipped 0fc54608 -->
+
     <project_code>ADVI_ROLLUP</project_code>
     <wave>DH (Dispatcher hygiene — Wave 6)</wave>
     <priority>P1 (HARD-BLOCKS ADVI_49EXEC.007 EventBridge wiring)</priority>

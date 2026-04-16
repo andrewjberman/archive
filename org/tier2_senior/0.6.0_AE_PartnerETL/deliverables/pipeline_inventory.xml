@@ -675,7 +675,7 @@
         <name>bd-gold-layer-runner</name>
         <type>persistent</type>
         <instance_id>i-01003b035d2988dfb</instance_id>
-        <instance_type>r6i.xlarge (32 GB RAM)</instance_type>
+        <instance_type>c6i.16xlarge</instance_type>
         <iam_role>bd-exporter-ec2-role (profile: bd-exporter-profile)</iam_role>
         <source_path>data/black_diamond/scripts</source_path>
         <remote_path>/home/ubuntu/gold-layer/scripts</remote_path>
@@ -688,6 +688,16 @@
         <last_deployed_at>2026-02-26T21:51:56Z</last_deployed_at>
         <started_by>bd-gold-trigger Lambda (EC2 start via EC2 API)</started_by>
         <logs>s3://opal-data-bd/logs/gold-layer/ (uploaded after each run)</logs>
+        <eventbridge_emission>
+          After every successful chain close (gold_dispatch.sh MODE=chain,
+          DRY_RUN=0, chain_exit=0), emits a `chain-complete` event to the
+          default EventBridge bus. Source=bd-pipeline.gold-chain,
+          DetailType=chain-complete, Detail={chain_label, completed_at,
+          scripts, mode, exit_code}. IAM: bd-exporter-ec2-role
+          `events-emit` inline policy (bd-v2.24.2, ADVI_ROLLUP.DH-7).
+          First consumer: ADVI_49EXEC.007 exec-summary-generator Lambda.
+          Failed chains emit nothing.
+        </eventbridge_emission>
       </service>
 
       <service>
