@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Follow-up to B6 HOLD per CTO Path C+ approval 22:13Z -->
+    <status>complete</status><!-- ~B shipped 2026-04-15 22:36Z. D_01 build_nna_ofc_view now emits per-advisor NNA histogram per office (groupby (_office, _det_advisor) via OFC_ROLE_PRIORITY), count=N_advisors_in_office. Fallback to legacy single-value preserved when canonical path inactive. py_compile PASS. Caller at L2374 updated to pass account_team. Post-nightly verification deferred to RD visual check on OfcAdvisorListPanel L1 bell-curve. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A (followup)</wave>
     <priority>P2 (FE OfcAdvisorListPanel L1 bell-curve render gated on this fix)</priority>

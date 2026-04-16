@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to><!-- re-dialed 2026-04-15 PM by COO from base lane to ~B for post-rerun validator pass -->
     <date>2026-04-14</date>
-    <status>pending</status><!-- VALIDATED 2026-04-15 22:11Z by ~B against post-19:35Z artifacts. (a)+(b) PASS. (c) L0 PASS, L1 GAP. CTO Path C+ APPROVED 2026-04-15 22:13Z: B6 HOLD pending code-fix on (c) L1. Required change in D_01: emit `views.nna.{q}.ofc.distribution.by_segment[office]` as histogram of per-advisor NNA values within that office (count=N_advisors_in_office), per CTO 2026-04-14 RD-audit clarification. Current implementation emits single-value-per-office (count=1) which breaks OfcAdvisorListPanel L1 bell-curve render. COO authoring B6.fix follow-up TO. Original GO note 2026-04-14T21:30Z. -->
+    <status>complete</status><!-- ~B closed 2026-04-15 22:36Z after B6b fix shipped (see ADVI_FNTEND.B6b.ds-ofc-distribution-by-segment-histogram.md + same-commit D_01 change). All 3 acceptance criteria satisfied: (a) advisors[] populated on EVERY OFC segment (10/10 × 4 quarters) — PASS; (b) per-office per-period AUA via views.ofc_per_period — PASS; (c) NNA bins L0 PASS (office-grain histogram count=12) + L1 PASS post-B6b (per-advisor NNA histogram per office, count=N_advisors_in_office via groupby (_office, _det_advisor) OFC_ROLE_PRIORITY attribution). Original validation against post-19:35Z artifact 22:11Z surfaced the L1 gap; B6b fix landed within the hour. CTO Path C+ approval trail preserved in commit bodies. -->
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
   </metadata>
