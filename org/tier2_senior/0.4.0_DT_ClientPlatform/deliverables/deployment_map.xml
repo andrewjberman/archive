@@ -3,9 +3,21 @@
   deployment_map.xml
   Agent:    0.4.0_DT_ClientPlatform
   Pod:      ClientPlatform
-  Date:     2026-03-02
-  Purpose:  Tracks deployment state of all Terraform modules, Lambda functions,
-            and EC2 services that this DT deploys or coordinates on.
+  Date:     2026-04-16
+  TO:       1.0.0_SA_CTO-2026-03-02-deployment-map-client-platform
+  Purpose:  Permanent operational reference for the ClientPlatform pod's
+            deployment surface. Page-centric view (endpoints per page),
+            Lambda-centric view (deployment state), explicit pipeline_split
+            documenting the DT/AE authority boundary, and infrastructure
+            wiring (S3 triggers + EventBridge schedules).
+
+            Refresh history:
+              2026-03-02  v1 baseline (yang-v2.3.6 / bd-v2.21.2 / partners-api-v1.13.1 / portal-auth-v1.5.0)
+              2026-04-06  v2 incremental (Yang V2 Phase 2)
+              2026-04-16  v3 full schema rewrite per CTO TO -- aligned to current tags,
+                          adds bd-v2.24.x trigger fan-out (fees/asset_dim/realized/unrealized
+                          + Time Machine), portal-auth Lambda@Edge inventory,
+                          BD platinum/ artifact namespace, page->endpoint->Lambda map.
 -->
 
 <deployment_map>
@@ -13,180 +25,998 @@
   <metadata>
     <agent>0.4.0_DT_ClientPlatform</agent>
     <pod>ClientPlatform</pod>
-    <date>2026-04-06</date>
-    <pages_served>ModelPortfolios, AdvisorIntelligence</pages_served>
+    <pages_served>
+      <page>ModelPortfolios</page>
+      <page>AdvisorIntelligence</page>
+    </pages_served>
+    <rd_agents>
+      <agent>0.4.1_RD_ModelPortfolios</agent>
+      <agent>0.4.2_RD_AdvisorIntelligence</agent>
+    </rd_agents>
+    <date>2026-04-16</date>
+    <verified_against>
+      <item>data_contract.xml (DS, 2026-03-04 + addenda 2026-03-18 / 2026-04-15)</item>
+      <item>pod_inventory.xml (DE, 2026-03-19)</item>
+      <item>portal/src/api/endpoints/advisor-intelligence.ts (live read)</item>
+      <item>portal/src/api/endpoints/aum.ts (live read)</item>
+      <item>infra/aws/lambda/ci/lambda-source-map.json (last_deployed_commit values)</item>
+      <item>infra/aws/ec2/EC2_MANIFEST.json (instance IDs)</item>
+      <item>git tag -l (current pipeline tags)</item>
+    </verified_against>
   </metadata>
 
-  <!-- =========================================================== -->
-  <!-- TERRAFORM MODULES                                            -->
-  <!-- =========================================================== -->
+  <!-- ======================================================================== -->
+  <!-- PAGES SERVED                                                              -->
+  <!-- ======================================================================== -->
+
+  <pages_served>
+
+    <!-- ====================================================================== -->
+    <page>
+      <name>ModelPortfolios</name>
+      <rd_agent>0.4.1_RD_ModelPortfolios</rd_agent>
+      <pipeline>yang</pipeline>
+      <directory>portal/src/pages/ModelPortfolios/</directory>
+
+      <api_endpoints>
+        <!-- AUM (SmartX EC2 -> DynamoDB -> opal-portal-data-proxy) -->
+        <endpoint url="/v1/aum/metrics"     lambda="opal-portal-data-proxy"      pipeline="market-overview" via="portalProxy.getAUMMetricsWithCalculations"/>
+        <endpoint url="/v1/aum/timeseries"  lambda="opal-portal-data-proxy"      pipeline="market-overview" via="portalProxy.getAUMTimeSeries"/>
+        <endpoint url="/v1/aum/summary"     lambda="opal-portal-data-proxy"      pipeline="market-overview" via="portalProxy.getAUMSummary"/>
+        <endpoint url="/v1/aum/flows"       lambda="opal-portal-data-proxy"      pipeline="market-overview" via="portalProxy.getAUMFlows"/>
+        <endpoint url="/v1/aum/non-model"   lambda="opal-portal-data-proxy"      pipeline="market-overview" via="portalProxy.getNonModelAssets"/>
+        <!-- Benchmarks + Peers (Yang Lambdas -> S3 JSON -> opal-portal-data-proxy) -->
+        <endpoint url="/v1/benchmarks/returns" lambda="yang-model-portfolio-benchmarks" pipeline="yang"/>
+        <endpoint url="/v1/benchmarks/etf"     lambda="yang-generate-etf-returns"        pipeline="yang"/>
+        <endpoint url="/v1/peers/performance"  lambda="yang-generate-peer-performance"   pipeline="yang"/>
+        <!-- Account distribution (DEMO MODE: public unauth S3) -->
+        <endpoint url="/api/general/portfolios/account-distribution.json" lambda="none (static S3)" pipeline="static" note="DEMO MODE -- no auth. TODO: revert to /api/private/portfolios/account-distribution.json"/>
+      </api_endpoints>
+
+      <data_pipeline>
+        <pipeline>yang + smartx (read-only via opal-portal-data-proxy)</pipeline>
+        <trigger_chain>
+          AUM:        SmartX EC2 (smartx-exporter, daily) -> DynamoDB -> opal-portal-data-proxy Lambda -> portal-proxy.ts (React Query)
+          Benchmarks: Yang PKL upload to s3://opal-data-portal-v2/benchmarks/data_YYYYMMDD_v1.pkl -> Step Functions YangDataPipeline (or direct S3 trigger)
+                      -> yang-model-portfolio-benchmarks -> s3://opal-data-portal-v2/json/benchmarks/model_portfolio_benchmarks.json
+                      -> opal-portal-data-proxy -> portal-proxy.ts (lazy on Performance tab)
+          ETF:        Yang Step Functions -> yang-generate-etf-returns -> s3://opal-data-portal-v2/json/benchmarks/etf_returns.json
+          Peers:      Yang Step Functions -> yang-generate-peer-performance -> s3://opal-data-portal-v2/json/peers/peer_performance.json
+        </trigger_chain>
+        <s3_output_paths>
+          <path>opal-data-portal-v2/json/benchmarks/model_portfolio_benchmarks.json</path>
+          <path>opal-data-portal-v2/json/benchmarks/benchmark_returns.json (legacy)</path>
+          <path>opal-data-portal-v2/json/benchmarks/etf_returns.json</path>
+          <path>opal-data-portal-v2/json/peers/peer_performance.json</path>
+          <path>opal-data-portal-v2/benchmarks/LATEST.json (PKL pointer)</path>
+        </s3_output_paths>
+      </data_pipeline>
+    </page>
+
+    <!-- ====================================================================== -->
+    <page>
+      <name>AdvisorIntelligence</name>
+      <rd_agent>0.4.2_RD_AdvisorIntelligence</rd_agent>
+      <pipeline>bd</pipeline>
+      <directory>portal/src/pages/AdvisorIntelligence/</directory>
+
+      <api_endpoints>
+        <!-- Static-S3 artifacts (CloudFront -> shared-advisor-router Lambda@Edge -> S3 opal-data-bd) -->
+        <endpoint url="/api/scoped/advisor-intelligence/artifacts/summary/header_metrics.json"   lambda="bd-portal-publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/artifacts/timeseries_chart.json"          lambda="bd-portal-publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/artifacts/employee_leaderboard.json"      lambda="bd-portal-publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/architect_leaderboard.json"               lambda="bd-portal-publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/implementor_leaderboard.json"             lambda="bd-portal-advisor-publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/advisor_rolling_flows.json"               lambda="bd gold script 10 (writer; EC2 runner)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/clients_tab.json"                         lambda="bd-portal-publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/partner_analytics/header_metrics.json"    lambda="bd-portal-publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <!-- Platinum tier (ADVI_49PUSH P3 / ADVI_49EXEC) -- pre-sliced static-S3 served via shared-advisor-router -->
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/firm/timeseries_overview.json"   lambda="D_04 publisher (writer; gold runner)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/firm/cumulative_chart.json"      lambda="D_04 publisher (writer; gold runner)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/firm/partner_analytics_{quarterly|monthly|annual}.json" lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/firm/dashboard.json"             lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3" note="split mode: stub triggers leaderboard.json + fee_efficiency.json + clients-tab Lambda fan-out"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/firm/mix_summary.json"           lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/firm/leaderboard.json"           lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/firm/fee_efficiency.json"        lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/advisors/{id}/timeseries.json"   lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/advisors/{id}/nna_clients.json"  lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/advisors/{id}/exec_summary.json" lambda="ADVI_49EXEC.006 nightly LLM batch (writer)" pipeline="bd" route_type="static-s3" note="404 normalized to empty bullets on FE"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/clients/{id}/mix_timeseries.json" lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/clients/{id}/concentration.json" lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/platinum/accounts/{id}/summary.json"      lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/entities/clients/{id}_views.json"         lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/entities/clients/{id}_composition.json"   lambda="D_04 publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/advisors/{advisorId}/book"                lambda="bd-portal-advisor-publisher (writer)" pipeline="bd" route_type="static-s3"/>
+        <endpoint url="/api/scoped/advisor-intelligence/advisors/{advisorId}/mix-views"           lambda="opal-partners-data" pipeline="partners-api" route_type="lambda" note="ADVI_49PUSH .023"/>
+        <!-- Lambda-served API (CloudFront -> API Gateway -> opal-partners-data) -->
+        <endpoint url="/api/scoped/advisor-intelligence/timeseries/{dimension}"                   lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda" note="LEGACY (pre-platinum)"/>
+        <endpoint url="/api/scoped/advisor-intelligence/snapshots/{dimension}"                    lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda" note="LEGACY (pre-platinum); firmId param removal pending auth refactor"/>
+        <endpoint url="/api/scoped/advisor-intelligence/filters"                                  lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/advisor-intelligence/clients/growth"                           lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/advisor-intelligence/clients/tax-breakdown"                    lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/advisor-intelligence/clients/tax-deferred"                     lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/advisor-intelligence/clients-tab"                              lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/advisor-intelligence/clients/{clientKey}/detail"               lambda="bd-client-detail"     pipeline="bd"           route_type="lambda" note="admin-only via portal-authorizer"/>
+        <endpoint url="/api/scoped/partners/books/firm/all/composition"                           lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/firm/all/mix-views"                             lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/relationship/{id}/timeseries"                   lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/relationship/{id}/composition"                  lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/relationship/{id}/mix-timeseries"               lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/relationship/{id}/concentration-timeseries"     lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/relationship/{id}/platinum-summary"             lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/account/{id}/timeseries"                        lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/account/{id}/composition"                       lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/advisor/{id}/timeseries"                        lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/advisor/{id}/mix-timeseries"                    lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/advisor/{id}/composition"                       lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/scoped/partners/books/advisor/{id}/platinum-summary"                  lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+        <endpoint url="/api/partners"                                                             lambda="opal-partners-data"   pipeline="partners-api" route_type="lambda"/>
+      </api_endpoints>
+
+      <data_pipeline>
+        <pipeline>bd (Black Diamond, 49 Financial)</pipeline>
+        <trigger_chain>
+          1. EventBridge schedules (UTC, MON-FRI):
+               21:38 bd-unrealized-pipeline-trigger -> bd-unrealized-trigger -> SSM doc on bd-allocations EC2 (snapshot)
+               21:45 bd-realized-pipeline-trigger   -> bd-realized-trigger   -> SSM doc on bd-allocations EC2 (incremental)
+               21:53 bd-transaction-pipeline-trigger -> bd-transactions-trigger -> SSM doc on bd-transactions EC2
+               22:00 bd-allocation-pipeline-trigger  -> bd-allocation-trigger  -> SSM doc on bd-allocations EC2
+               22:10 bd-asset-dim-pipeline-trigger   -> bd-asset-dim-trigger   -> SSM doc on bd-assets EC2 (BDPL_ASTDIM.W6)
+               22:15 bd-fees-pipeline-trigger        -> bd-fees-trigger        -> SSM doc on bd-fees EC2 (silver/fees write)
+               22:30 bd-allocation-file-check-daily  -> bd-allocation-file-checker
+               23:00 bd-gold-nightly-fallback (MON-SAT) -> bd-gold-trigger (safety net)
+          2. Allocation files arrive at s3://opal-data-bd/forwardfill_v2/allocations/*.xlsx
+               -> bd-allocation-processor (S3 trigger; processes silver/, then invokes bd-price-update Lambda async)
+          3. Daily price parquet at s3://opal-data-bd/silver/prices/YYYY-MM-DD.parquet
+               -> bd-gold-trigger (S3 trigger; starts bd-gold-layer-runner EC2)
+          4. Gold runner (bd-gold-layer-runner, c6i.16xlarge, S3-pull from opal-data-bd/code/gold/)
+               -> writes opal-data-bd/gold/* parquets and platinum/* JSON artifacts
+               -> writes opal-data-bd/gold/pipeline-complete.json sentinel
+          5. Sentinel s3://opal-data-bd/gold/pipeline-complete*.json
+               -> bd-portal-publisher (S3 trigger; primary)
+                    -> async invokes bd-portal-advisor-publisher (Lambda-to-Lambda fan-out)
+                    -> async invokes bd-capture-output-versions at end (writes snapshots/manifests/)
+          6. Daily 04:00 UTC bd-canonical-prices-daily -> bd-gold-trigger (mode=incremental)
+                    -> gold_dispatch.sh runs S_00 build_canonical_prices_v2.py before freshness gate
+                    -> on weekdays full A/B/C/D chain runs; on weekends silver-prep only
+          7. Daily 14:00 UTC historical-prices-daily -> historical-prices-scheduler -> spawns
+                    historical-prices-fetcher EC2 (yfinance) -> opal-data-bd/silver/historical_prices.parquet
+        </trigger_chain>
+        <s3_output_paths>
+          <path>opal-data-bd/gold/{client_performance,client_dimension,accounts_dimension_latest,account_performance}.parquet</path>
+          <path>opal-data-bd/gold/views/{nna_aua_by_advisor,nna_aua_by_geography,nna_aua_by_geography_city,architect_attribution,rel_architect_lookup,client_tax_liability}.parquet</path>
+          <path>opal-data-bd/gold/holdings_lots/{YYYY-MM-DD}.parquet</path>
+          <path>opal-data-bd/gold/firm_mix_views.json + opal-data-bd/gold/advisors/{id}/mix.json</path>
+          <path>opal-data-bd/gold/{timeseries_chart,architect_leaderboard,implementor_leaderboard,clients_tab}.json</path>
+          <path>opal-data-bd/gold/summary/header_metrics.json + opal-data-bd/gold/partner_analytics/header_metrics.json</path>
+          <path>opal-data-bd/gold/artifacts/* (header_metrics_{annual,monthly,quarterly}.json, employee_leaderboard.json, summary/header_metrics.json, timeseries_chart.json)</path>
+          <path>opal-data-bd/gold/advisors/{advisor_id}/book.json + opal-data-bd/gold/clients/{relationship_id}.json</path>
+          <path>opal-data-bd/platinum/firm/{timeseries_overview,cumulative_chart,partner_analytics_{quarterly|monthly|annual},dashboard,mix_summary,leaderboard,fee_efficiency}.json</path>
+          <path>opal-data-bd/platinum/advisors/{id}/{timeseries,nna_clients,exec_summary,summary,mix}.json</path>
+          <path>opal-data-bd/platinum/clients/{id}/{mix_timeseries,concentration,views,composition}.json</path>
+          <path>opal-data-bd/platinum/accounts/{id}/summary.json</path>
+          <path>opal-data-bd/snapshots/manifests/{YYYYMMDD-HHMMSS}.json (DRFR_PTMCH Phase 2 Time Machine)</path>
+        </s3_output_paths>
+      </data_pipeline>
+    </page>
+
+  </pages_served>
+
+  <!-- ======================================================================== -->
+  <!-- LAMBDA INVENTORY                                                          -->
+  <!-- ======================================================================== -->
+
+  <lambda_inventory>
+
+    <!-- =========================== YANG ============================== -->
+    <pipeline_group name="yang">
+      <lambda>
+        <name>yang-model-portfolio-benchmarks</name>
+        <terraform_module>infra/aws/terraform/yang-pipeline/lambdas.tf module.model_portfolio_benchmarks</terraform_module>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-model-portfolio-benchmarks/lambda_function.py</source_path>
+        <runtime>python3.12</runtime>
+        <memory_mb>512</memory_mb>
+        <timeout_s>240</timeout_s>
+        <layers><layer>aws-pandas-312 (AWSSDKPandas-Python312)</layer></layers>
+        <trigger>S3 ObjectCreated on opal-data-portal-v2/benchmarks/*.pkl OR Step Functions YangDataPipeline</trigger>
+        <last_deployed_commit>c9b382d5</last_deployed_commit>
+        <last_deployed_at>2026-04-13T18:51:52Z</last_deployed_at>
+        <serves_pages><page>ModelPortfolios</page><section>Performance tab (lazy)</section></serves_pages>
+      </lambda>
+      <lambda>
+        <name>yang-generate-etf-returns</name>
+        <terraform_module>infra/aws/terraform/yang-pipeline/lambdas.tf module.generate_etf_returns</terraform_module>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-generate-etf-returns/lambda_function.py</source_path>
+        <runtime>python3.11</runtime>
+        <memory_mb>256</memory_mb>
+        <timeout_s>120</timeout_s>
+        <layers><layer>pandas-pyarrow-layer:1</layer></layers>
+        <trigger>Step Functions YangDataPipeline</trigger>
+        <last_deployed_commit>c9b382d5</last_deployed_commit>
+        <last_deployed_at>2026-04-13T18:51:52Z</last_deployed_at>
+        <serves_pages><page>ModelPortfolios</page><section>Performance tab ETF view (lazy)</section></serves_pages>
+      </lambda>
+      <lambda>
+        <name>yang-generate-peer-performance</name>
+        <terraform_module>infra/aws/terraform/yang-pipeline/lambdas.tf module.generate_peer_performance</terraform_module>
+        <source_path>infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-generate-peer-performance/lambda_function.py</source_path>
+        <runtime>python3.11</runtime>
+        <memory_mb>512</memory_mb>
+        <timeout_s>240</timeout_s>
+        <layers><layer>pandas-pyarrow-layer:1</layer><layer>openpyxl_layer (yang-managed)</layer></layers>
+        <trigger>Step Functions YangDataPipeline</trigger>
+        <last_deployed_commit>c9b382d5</last_deployed_commit>
+        <last_deployed_at>2026-04-13T18:51:52Z</last_deployed_at>
+        <serves_pages><page>ModelPortfolios</page><section>Peers tab (lazy)</section></serves_pages>
+      </lambda>
+    </pipeline_group>
+
+    <!-- ===================== MARKET-OVERVIEW (consumed) ============== -->
+    <pipeline_group name="market-overview" authority="coordinate">
+      <lambda>
+        <name>opal-portal-data-proxy</name>
+        <terraform_module>infra/aws/terraform/market-overview/lambdas.tf aws_lambda_function.portal_data_proxy</terraform_module>
+        <source_path>infra/aws/lambda/portal_data_proxy/lambda_function.py + session_tracker.py</source_path>
+        <trigger>API Gateway (per request)</trigger>
+        <last_deployed_commit>2f57241c</last_deployed_commit>
+        <last_deployed_at>2026-04-08T17:11:16Z</last_deployed_at>
+        <serves_pages><page>ModelPortfolios</page><section>All AUM endpoints + benchmark/peer proxy</section></serves_pages>
+        <coordinate_with>0.5.0_AE_OpalETL (market-overview module owner)</coordinate_with>
+        <note>Critical AUM data path. ClientPlatform DT does NOT deploy this -- coordinate before any handler change.</note>
+      </lambda>
+    </pipeline_group>
+
+    <!-- =========================== BD ================================ -->
+    <pipeline_group name="bd">
+
+      <!-- DT FULL AUTHORITY: portal-facing publishers + on-demand client API -->
+      <lambda authority="full">
+        <name>bd-portal-publisher</name>
+        <terraform_module>infra/aws/terraform/bd-pipeline/lambdas.tf module.bd_portal_publisher</terraform_module>
+        <source_path>infra/aws/lambda/bd-pipeline/bd-portal-publisher/lambda_function.py</source_path>
+        <runtime>python3.11</runtime>
+        <memory_mb>4096</memory_mb>
+        <timeout_s>900</timeout_s>
+        <layers><layer>pandas-pyarrow-layer:1</layer></layers>
+        <trigger>S3 ObjectCreated on opal-data-bd/gold/pipeline-complete*.json (sentinel)</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <last_deployed_at>2026-04-15T21:52:35Z</last_deployed_at>
+        <serves_pages><page>AdvisorIntelligence</page><section>PartnerAnalytics header, DistributionTab, AdvisorsTab leaderboard, BooksTab N1/N2 static artifacts</section></serves_pages>
+        <fan_out>Async invokes bd-portal-advisor-publisher at handler START. Async invokes bd-capture-output-versions at handler END.</fan_out>
+      </lambda>
+      <lambda authority="full">
+        <name>bd-portal-advisor-publisher</name>
+        <terraform_module>infra/aws/terraform/bd-pipeline/lambdas.tf module.bd_portal_advisor_publisher</terraform_module>
+        <source_path>infra/aws/lambda/bd-pipeline/bd-portal-advisor-publisher/lambda_function.py</source_path>
+        <runtime>python3.11</runtime>
+        <memory_mb>6144</memory_mb>
+        <timeout_s>900</timeout_s>
+        <layers><layer>pandas-pyarrow-layer:1</layer></layers>
+        <trigger>Async invoke from bd-portal-publisher (NOT S3-triggered directly -- S3 disallows duplicate prefix+suffix rules)</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <last_deployed_at>2026-04-15T21:52:35Z</last_deployed_at>
+        <serves_pages><page>AdvisorIntelligence</page><section>BooksTab L2 advisor book, L3 client detail, implementor leaderboard, per-client static</section></serves_pages>
+      </lambda>
+      <lambda authority="full">
+        <name>bd-client-detail</name>
+        <terraform_module>infra/aws/terraform/bd-pipeline/lambdas.tf module.bd_client_detail</terraform_module>
+        <source_path>infra/aws/lambda/bd-pipeline/bd-client-detail/lambda_function.py</source_path>
+        <runtime>python3.11</runtime>
+        <memory_mb>10240</memory_mb>
+        <timeout_s>900</timeout_s>
+        <layers><layer>pandas-pyarrow-layer:1</layer></layers>
+        <trigger>API Gateway (on-demand per request; admin-only via portal-authorizer role gate)</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <last_deployed_at>2026-04-15T21:52:35Z</last_deployed_at>
+        <serves_pages><page>AdvisorIntelligence</page><section>BooksTab client drill (admin)</section></serves_pages>
+      </lambda>
+
+      <!-- TIME MACHINE (DT FULL AUTHORITY -- DRFR_PTMCH Phase 2) -->
+      <lambda authority="full">
+        <name>bd-capture-output-versions</name>
+        <terraform_module>infra/aws/terraform/bd-pipeline/lambdas.tf module.bd_capture_output_versions</terraform_module>
+        <source_path>infra/aws/lambda/bd-pipeline/bd-capture-output-versions/lambda_function.py</source_path>
+        <runtime>python3.12</runtime>
+        <memory_mb>256</memory_mb>
+        <timeout_s>120</timeout_s>
+        <trigger>Async invoke from bd-portal-publisher at handler END</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <last_deployed_at>2026-04-15T21:52:35Z</last_deployed_at>
+        <writes>opal-data-bd/snapshots/manifests/{YYYYMMDD-HHMMSS}.json</writes>
+      </lambda>
+      <lambda authority="full">
+        <name>bd-time-machine</name>
+        <terraform_module>infra/aws/terraform/bd-pipeline/lambdas.tf module.bd_time_machine</terraform_module>
+        <source_path>infra/aws/lambda/bd-pipeline/bd-time-machine/lambda_function.py</source_path>
+        <runtime>python3.12</runtime>
+        <memory_mb>256</memory_mb>
+        <timeout_s>300</timeout_s>
+        <trigger>On-demand invoke. Input: { "target_date": "YYYY-MM-DD" }</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <last_deployed_at>2026-04-15T21:52:35Z</last_deployed_at>
+        <effect>Restores gold/* keys to recorded versions, writes pipeline-complete.json (re-publishes), invalidates CloudFront EVTSA9VEHNZVH.</effect>
+      </lambda>
+
+      <!-- AE COORDINATE: ingestion triggers, gold layer, processors -->
+      <lambda authority="coordinate">
+        <name>bd-gold-trigger</name>
+        <terraform_module>module.gold_trigger</terraform_module>
+        <source_path>infra/aws/lambda/bd-pipeline/bd-gold-trigger/lambda_function.py</source_path>
+        <runtime>python3.11</runtime><memory_mb>128</memory_mb><timeout_s>120</timeout_s>
+        <trigger>S3 silver/prices/20*.parquet | EventBridge bd-canonical-prices-daily 04:00 UTC | bd-gold-nightly-fallback 23:00 UTC | bd-gold-layer-monthly-trigger (DISABLED)</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <last_deployed_at>2026-04-15T21:52:35Z</last_deployed_at>
+        <env>GOLD_INSTANCE_ID=i-01003b035d2988dfb (bd-gold-layer-runner)</env>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-allocation-trigger</name>
+        <runtime>python3.11</runtime><memory_mb>128</memory_mb><timeout_s>600</timeout_s>
+        <trigger>EventBridge bd-allocation-pipeline-trigger 22:00 UTC MON-FRI</trigger>
+        <env>EC2_INSTANCE_ID=i-0800437d1dbb0b5cc (bd-allocations)</env>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <last_deployed_at>2026-04-15T21:52:35Z</last_deployed_at>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-transactions-trigger</name>
+        <runtime>python3.11</runtime><memory_mb>128</memory_mb><timeout_s>600</timeout_s>
+        <trigger>EventBridge bd-transaction-pipeline-trigger 21:53 UTC MON-FRI</trigger>
+        <env>EC2_INSTANCE_ID=i-00c7568bc510f7423 (bd-transactions)</env>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-fees-trigger</name>
+        <runtime>python3.11</runtime><memory_mb>128</memory_mb><timeout_s>600</timeout_s>
+        <trigger>EventBridge bd-fees-pipeline-trigger 22:15 UTC MON-FRI</trigger>
+        <env>EC2_INSTANCE_ID=aws_instance.bd_fees.id (i-0868fc7e7ebec26f2)</env>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-asset-dim-trigger</name>
+        <runtime>python3.11</runtime><memory_mb>128</memory_mb><timeout_s>600</timeout_s>
+        <trigger>EventBridge bd-asset-dim-pipeline-trigger 22:10 UTC MON-FRI (BDPL_ASTDIM.W6)</trigger>
+        <env>EC2_INSTANCE_ID=aws_instance.bd_assets.id (i-0e6f6dc014fdcf1cd)</env>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-realized-trigger</name>
+        <runtime>python3.11</runtime><memory_mb>128</memory_mb><timeout_s>600</timeout_s>
+        <trigger>EventBridge bd-realized-pipeline-trigger 21:45 UTC MON-FRI (incremental)</trigger>
+        <env>EC2_INSTANCE_ID=i-0800437d1dbb0b5cc (reuses bd-allocations)</env>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-unrealized-trigger</name>
+        <runtime>python3.11</runtime><memory_mb>128</memory_mb><timeout_s>600</timeout_s>
+        <trigger>EventBridge bd-unrealized-pipeline-trigger 21:38 UTC MON-FRI (snapshot)</trigger>
+        <env>EC2_INSTANCE_ID=i-0800437d1dbb0b5cc (reuses bd-allocations)</env>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-allocation-processor</name>
+        <runtime>python3.11</runtime><memory_mb>1024</memory_mb><timeout_s>300</timeout_s>
+        <layers><layer>pandas-pyarrow-layer:1</layer><layer>openpyxl_layer</layer></layers>
+        <trigger>S3 ObjectCreated on opal-data-bd/forwardfill_v2/allocations/*.xlsx</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-gold-layer</name>
+        <runtime>python3.11</runtime><memory_mb>10240</memory_mb><timeout_s>900</timeout_s>
+        <layers><layer>pandas-pyarrow-layer:1</layer></layers>
+        <trigger>Manual / on-demand (legacy gold Lambda; modern path runs on bd-gold-layer-runner EC2)</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-gold-foundation</name>
+        <runtime>python3.11</runtime><memory_mb>2048</memory_mb><timeout_s>180</timeout_s>
+        <layers><layer>pandas-pyarrow-layer:1</layer></layers>
+        <trigger>Step Functions BDGoldLayer Stage 1</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-gold-detail-checker</name>
+        <runtime>python3.11</runtime><memory_mb>128</memory_mb><timeout_s>30</timeout_s>
+        <trigger>Step Functions BDGoldLayer Stage 4 (EC2 completion check)</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-allocation-file-checker</name>
+        <runtime>python3.11</runtime><memory_mb>256</memory_mb><timeout_s>60</timeout_s>
+        <trigger>EventBridge bd-allocation-file-check-daily 22:30 UTC MON-FRI</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <ignore_changes>filename, source_code_hash (EXTERNAL source -- no local code)</ignore_changes>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>bd-price-update</name>
+        <runtime>python3.11</runtime><memory_mb>10240</memory_mb><timeout_s>900</timeout_s>
+        <layers><layer>pandas-pyarrow-layer:1</layer></layers>
+        <trigger>Async invoke from bd-allocation-processor (legacy; EC2 migration in progress per EC2_MANIFEST bd-price-runner _replaces note)</trigger>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+      <lambda authority="coordinate">
+        <name>historical-prices-scheduler</name>
+        <runtime>python3.11</runtime><memory_mb>256</memory_mb><timeout_s>60</timeout_s>
+        <trigger>EventBridge historical-prices-daily 14:00 UTC daily</trigger>
+        <effect>Spawns ephemeral historical-prices-fetcher EC2 (yfinance)</effect>
+        <last_deployed_commit>d08d4bb7</last_deployed_commit>
+        <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
+      </lambda>
+
+    </pipeline_group>
+
+    <!-- ======================= PARTNERS-API ========================== -->
+    <pipeline_group name="partners-api">
+      <lambda authority="full">
+        <name>opal-partners-data</name>
+        <terraform_module>infra/aws/terraform/partners-api/lambdas.tf module.opal_partners_data</terraform_module>
+        <source_path>infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/{lambda_function,etf_classification,etf_classifier,pseudonymizer}.py</source_path>
+        <runtime>python3.12</runtime>
+        <memory_mb>2048</memory_mb>
+        <timeout_s>120</timeout_s>
+        <layers><layer>AWSSDKPandas-Python312:16</layer></layers>
+        <trigger>API Gateway (per request) via CloudFront /api/scoped/* and /api/scoped/partners/books/*</trigger>
+        <env>USERS_TABLE=opal-users-v2</env>
+        <last_deployed_commit>d08d4bb7-area (latest partners-api-v1.15.9 cut 2026-04-15)</last_deployed_commit>
+        <serves_pages><page>AdvisorIntelligence</page><section>All Lambda-served Books endpoints (timeseries/composition/mix-views/platinum-summary), DistributionTab dynamic snapshots, ClientsTab</section></serves_pages>
+      </lambda>
+    </pipeline_group>
+
+    <!-- ======================== PORTAL-AUTH =========================== -->
+    <pipeline_group name="portal-auth">
+      <lambda authority="full">
+        <name>opalinvest-auth-handler</name>
+        <terraform_module>aws_lambda_function.auth_handler</terraform_module>
+        <source_path>infra/aws/opalinvest_dev/lambda/auth-handler/dist/index.mjs (TS -&gt; ESM bundle via build-nodejs-lambda.sh)</source_path>
+        <runtime>nodejs20.x</runtime>
+        <memory_mb>256</memory_mb>
+        <timeout_s>30</timeout_s>
+        <trigger>API Gateway (login/refresh)</trigger>
+        <last_deployed_commit>432d995f</last_deployed_commit>
+        <last_deployed_at>2026-04-15T20:14:19Z</last_deployed_at>
+        <note>Reads opal-partner-49financial table; injects advisorKey/advisorName/advisorRole into JWT.</note>
+      </lambda>
+      <lambda authority="full">
+        <name>opal-portal-authorizer</name>
+        <terraform_module>aws_lambda_function.portal_authorizer</terraform_module>
+        <source_path>infra/aws/users/lambda/portal-authorizer/index.mjs (ESM)</source_path>
+        <runtime>nodejs20.x</runtime>
+        <memory_mb>256</memory_mb>
+        <timeout_s>10</timeout_s>
+        <trigger>API Gateway Lambda authorizer (every /api/scoped/* call)</trigger>
+        <last_deployed_commit>432d995f</last_deployed_commit>
+        <last_deployed_at>2026-04-15T20:14:19Z</last_deployed_at>
+        <note>Validates JWT, injects allowedFirmIds + advisorRole into request context.</note>
+      </lambda>
+      <lambda authority="full" type="lambda-edge">
+        <name>auth-validator-edge</name>
+        <terraform_module>aws_lambda_function.auth_validator_edge[0]</terraform_module>
+        <source_path>infra/aws/lambda-edge/auth-validator-edge/index.mjs</source_path>
+        <runtime>nodejs20.x</runtime><memory_mb>128</memory_mb><timeout_s>5</timeout_s>
+        <association>CloudFront EVTSA9VEHNZVH viewer-request</association>
+        <last_deployed_commit>432d995f</last_deployed_commit>
+        <last_deployed_at>2026-04-15T20:14:19Z</last_deployed_at>
+        <note>JWT validation on every portal request. Latest deploy adds firmRole=admin bypass for advisor/resource scoping gates.</note>
+        <ignore_changes>qualified_arn, source_code_hash</ignore_changes>
+      </lambda>
+      <lambda authority="full" type="lambda-edge">
+        <name>tier-router-edge</name>
+        <runtime>nodejs20.x</runtime><memory_mb>128</memory_mb><timeout_s>5</timeout_s>
+        <association>CloudFront EVTSA9VEHNZVH origin-request (tier-based routing: advisor/client/public)</association>
+        <last_deployed_commit>432d995f</last_deployed_commit>
+        <last_deployed_at>2026-04-15T20:14:19Z</last_deployed_at>
+      </lambda>
+      <lambda authority="full" type="lambda-edge">
+        <name>cache-control-injector</name>
+        <runtime>nodejs20.x</runtime><memory_mb>128</memory_mb><timeout_s>3</timeout_s>
+        <association>CloudFront EVTSA9VEHNZVH origin-response (cache-control headers)</association>
+        <last_deployed_commit>432d995f</last_deployed_commit>
+        <last_deployed_at>2026-04-15T20:14:19Z</last_deployed_at>
+      </lambda>
+      <lambda authority="full" type="lambda-edge">
+        <name>public-data-router</name>
+        <runtime>nodejs20.x</runtime><memory_mb>128</memory_mb><timeout_s>3</timeout_s>
+        <association>CloudFront EVTSA9VEHNZVH viewer-request (routes public/unauthenticated paths)</association>
+        <last_deployed_commit>432d995f</last_deployed_commit>
+        <last_deployed_at>2026-04-15T20:14:19Z</last_deployed_at>
+      </lambda>
+      <lambda authority="full" type="lambda-edge">
+        <name>shared-advisor-router</name>
+        <runtime>nodejs20.x</runtime><memory_mb>128</memory_mb><timeout_s>5</timeout_s>
+        <association>CloudFront EVTSA9VEHNZVH viewer-request -- rewrites /api/scoped/advisor-intelligence/* to S3 (firm routing)</association>
+        <last_deployed_commit>432d995f</last_deployed_commit>
+        <last_deployed_at>2026-04-15T20:14:19Z</last_deployed_at>
+        <note>v9 M1: blocks S3-direct on platinum/advisors/{id}/summary.json (PII), forces routing through opal-partners-data Lambda for pseudonymization.</note>
+      </lambda>
+    </pipeline_group>
+
+  </lambda_inventory>
+
+  <!-- ======================================================================== -->
+  <!-- PIPELINE SPLIT (deployment authority boundary)                            -->
+  <!-- ======================================================================== -->
+
+  <pipeline_split>
+
+    <yang_side page="ModelPortfolios">
+      <module>yang-pipeline (state_key yang-pipeline/tfstate, current_tag yang-v2.3.8)</module>
+      <portal_facing_lambdas>
+        <lambda>yang-model-portfolio-benchmarks</lambda>
+        <lambda>yang-generate-etf-returns</lambda>
+        <lambda>yang-generate-peer-performance</lambda>
+      </portal_facing_lambdas>
+      <versioning>
+        Yang PKL convention: opal-data-portal-v2/benchmarks/data_YYYYMMDD_v1.pkl. LATEST.json pointer
+        in same prefix. Output JSONs (model_portfolio_benchmarks.json, etf_returns.json,
+        peer_performance.json) are overwritten in-place; no version pinning at the JSON layer.
+        AUM: SmartX EC2 daily export -> DynamoDB; opal-portal-data-proxy serves /v1/aum/* with
+        in-Lambda caching (no version key).
+      </versioning>
+      <dt_authority>
+        FULL on the three portal-facing Yang Lambdas above. yang-pipeline is shared with Pod 2
+        (PortfolioAnalytics, full authority on its 23 other Lambdas) and Pod 3 (uploads side).
+        Coordinate with 0.2.0_DT_PortfolioAnalytics for any Step Functions / orchestration change.
+        CRITICAL: opal-portal-data-proxy lives in market-overview module owned by 0.5.0_AE_OpalETL.
+        ClientPlatform DT does NOT deploy that Lambda.
+      </dt_authority>
+    </yang_side>
+
+    <bd_side page="AdvisorIntelligence">
+      <module>bd-pipeline (state_key bd-pipeline/tfstate, current_tag bd-v2.24.1)</module>
+      <portal_facing_lambdas authority="DT-full">
+        <lambda>bd-portal-publisher</lambda>
+        <lambda>bd-portal-advisor-publisher</lambda>
+        <lambda>bd-client-detail</lambda>
+        <lambda>bd-capture-output-versions (Time Machine writer)</lambda>
+        <lambda>bd-time-machine (Time Machine restore)</lambda>
+      </portal_facing_lambdas>
+      <upstream_lambdas authority="AE-coordinate">
+        <lambda>bd-gold-trigger</lambda>
+        <lambda>bd-allocation-trigger | bd-transactions-trigger | bd-fees-trigger | bd-asset-dim-trigger | bd-realized-trigger | bd-unrealized-trigger</lambda>
+        <lambda>bd-allocation-processor</lambda>
+        <lambda>bd-allocation-file-checker</lambda>
+        <lambda>bd-gold-layer | bd-gold-foundation | bd-gold-detail-checker</lambda>
+        <lambda>bd-price-update</lambda>
+        <lambda>historical-prices-scheduler</lambda>
+      </upstream_lambdas>
+      <upstream_ec2 authority="AE-coordinate">
+        <ec2>bd-gold-layer-runner (i-01003b035d2988dfb, c6i.16xlarge, EVENTBRIDGE-ONLY)</ec2>
+        <ec2>bd-gold-qa-runner (i-0090b823a4a0997e3, manual QA only -- never PROD)</ec2>
+        <ec2>bd-allocations (i-0800437d1dbb0b5cc) | bd-transactions (i-00c7568bc510f7423)</ec2>
+        <ec2>bd-fees (i-0868fc7e7ebec26f2) | bd-assets (i-0e6f6dc014fdcf1cd)</ec2>
+        <ec2>bd-gold-detail-generator (ephemeral) | historical-prices-fetcher (ephemeral, lambda-managed)</ec2>
+      </upstream_ec2>
+      <s3_trigger_chain>
+        gold/pipeline-complete*.json sentinel (written by bd-gold-layer-runner) -> bd-portal-publisher (S3)
+          -> bd-portal-advisor-publisher (Lambda-to-Lambda async fan-out at handler START)
+          -> bd-capture-output-versions (Lambda-to-Lambda async at handler END; writes snapshots/manifests/)
+        S3 disallows two notification rules with identical prefix+suffix on the same bucket+event
+        type, so all sentinel fan-out happens via async invoke inside bd-portal-publisher.
+      </s3_trigger_chain>
+      <dt_authority>
+        FULL on portal-facing publishers + Time Machine. ALL ingestion triggers, gold layer, EC2
+        runners, EventBridge schedules, S3 notification config (s3-notifications.tf),
+        ec2.tf, eventbridge.tf -- coordinate with 0.6.0_AE_PartnerETL before changing.
+        Production gold runs are dispatched to bd-gold-layer-runner ONLY by EventBridge
+        (never by agent or human). Manual QA goes to bd-gold-qa-runner.
+      </dt_authority>
+    </bd_side>
+
+  </pipeline_split>
+
+  <!-- ======================================================================== -->
+  <!-- TERRAFORM MODULES                                                         -->
+  <!-- ======================================================================== -->
 
   <terraform_modules>
 
-    <module name="yang-pipeline" authority="full">
+    <module name="yang-pipeline" authority="full-on-3-of-26-lambdas">
       <path>infra/aws/terraform/yang-pipeline/</path>
-      <current_tag>yang-v2.3.6</current_tag>
+      <current_tag>yang-v2.3.8</current_tag>
       <state_key>yang-pipeline/tfstate</state_key>
-      <note>ModelPortfolios side — AUM metrics, benchmarks, peer performance Lambdas. Shared with Pod 2 (also full authority) and Pod 3 (upload side).</note>
+      <resources>
+        <resource type="aws_lambda_function (via yang-lambda module)" count="26"/>
+        <resource type="aws_iam_role">yang execution roles</resource>
+        <resource type="aws_lambda_layer_version">openpyxl_layer</resource>
+        <resource type="aws_sfn_state_machine">YangDataPipeline (Step Functions)</resource>
+      </resources>
+      <note>26-Lambda module shared across pods 1/2/4. ClientPlatform owns deploy authority on 3.</note>
     </module>
 
     <module name="bd-pipeline" authority="partial">
       <path>infra/aws/terraform/bd-pipeline/</path>
-      <current_tag>bd-v2.21.2</current_tag>
+      <current_tag>bd-v2.24.1</current_tag>
       <state_key>bd-pipeline/tfstate</state_key>
-      <note>DT owns portal-facing Lambdas only. Gold layer, EC2 runners, EventBridge rules: coordinate with 0.6.0_AE_PartnerETL.</note>
+      <resources>
+        <resource type="aws_lambda_function" count="19" note="includes 6 trigger fns + Time Machine pair (capture + restore)"/>
+        <resource type="aws_instance">bd_allocations | bd_transactions | bd_fees | bd_assets | bd_gold_detail_generator</resource>
+        <resource type="aws_cloudwatch_event_rule" count="9" note="6 daily MON-FRI ingestion triggers + nightly fallback + canonical_prices_daily + monthly (DISABLED) + historical_prices_daily"/>
+        <resource type="aws_s3_bucket_notification">opal-data-bd (3 rules: allocations xlsx, silver/prices parquet, gold/pipeline-complete json)</resource>
+        <resource type="aws_iam_role">bd_daily_trigger | bd_gold_layer | bd_processor | bd_allocation_processor | bd_allocation_checker | bd_capture_versions | bd_time_machine | historical_prices | bd_exporter | bd_gold_detail</resource>
+      </resources>
     </module>
 
     <module name="partners-api" authority="full">
       <path>infra/aws/terraform/partners-api/</path>
-      <current_tag>partners-api-v1.13.1</current_tag>
+      <current_tag>partners-api-v1.15.9</current_tag>
       <state_key>partners-api/tfstate</state_key>
-      <note>Multi-tenant opal-partners-data Lambda. v1.5.0: firm+advisor composition S3-proxy routes (ADVI_BKSCMP WS2). cors_response_nocache + serve_s3_json_nocache helpers added. 2048MB/120s. AWSSDKPandas-Python312:16 layer.</note>
+      <resources>
+        <resource type="aws_lambda_function">opal-partners-data (single fn)</resource>
+        <resource type="aws_iam_role">partners_api role</resource>
+        <resource type="aws_apigatewayv2 integrations">routes for /api/scoped/partners/* and /api/scoped/advisor-intelligence/*</resource>
+      </resources>
     </module>
 
     <module name="portal-auth" authority="full">
       <path>infra/aws/terraform/portal-auth/</path>
-      <current_tag>portal-auth-v1.5.0</current_tag>
+      <current_tag>portal-auth-v1.12.3</current_tag>
       <state_key>portal-auth/tfstate</state_key>
-      <note>Auth-handler + portal-authorizer Lambdas. DT owns. v1.3.0: canonical ESM bundle deployment via build-nodejs-lambda.sh (bun build --format=esm). Both functions now single-file .mjs bundles, @aws-sdk external, jsonwebtoken/bcryptjs inlined.</note>
+      <resources>
+        <resource type="aws_lambda_function">opalinvest-auth-handler | opal-portal-authorizer</resource>
+        <resource type="aws_lambda_function (Lambda@Edge, var.enable_lambda_edge=true)">auth-validator-edge | tier-router-edge | cache-control-injector | public-data-router | shared-advisor-router</resource>
+        <resource type="aws_cloudfront_distribution">EVTSA9VEHNZVH (opalinvest.dev portal)</resource>
+        <resource type="aws_dynamodb_table">user/session tables</resource>
+        <resource type="aws_iam_role">auth_handler | lambda_edge</resource>
+        <resource type="aws_secretsmanager_secret">JWT signing keys</resource>
+      </resources>
+    </module>
+
+    <module name="portal-notifications" authority="awareness-only">
+      <path>infra/aws/terraform/portal-notifications/</path>
+      <state_key>portal-notifications/tfstate</state_key>
+      <note>Owns ALL S3 event triggers on opal-data-portal-v2 (shared event bus). ClientPlatform DT
+        does NOT own this module but must add a binding here for any new yang-pipeline Lambda
+        consuming opal-data-portal-v2 events. Current consumers: yang-pipeline-trigger
+        (uploads/manifest.json), opal-cloudfront-market-generator (market-metrics.json),
+        opal-security-scanner-processor (security_scanner/uploads/*.xlsx).</note>
     </module>
 
   </terraform_modules>
 
-  <!-- =========================================================== -->
-  <!-- LAMBDA FUNCTIONS                                             -->
-  <!-- =========================================================== -->
+  <!-- ======================================================================== -->
+  <!-- UPSTREAM EC2 DEPENDENCIES (AE-owned, diagnostic starting point)           -->
+  <!-- ======================================================================== -->
 
-  <lambdas>
+  <upstream_ec2_dependencies>
 
-    <!-- portal-auth: auth-handler + portal-authorizer (DT full authority) -->
-    <lambda pipeline="portal-auth" authority="full">
-      <name>opalinvest-auth-handler</name>
-      <deployed_tag>portal-auth-v1.3.0</deployed_tag>
-      <note>Login/refresh auth. Reads opal-partner-49financial, injects advisorKey/advisorName/advisorRole into JWT (ADVI-J2). v1.3.0: ESM bundle dist/index.mjs via build-nodejs-lambda.sh.</note>
-    </lambda>
-    <lambda pipeline="portal-auth" authority="full">
-      <name>opal-portal-authorizer</name>
-      <deployed_tag>portal-auth-v1.3.0</deployed_tag>
-      <note>API GW Lambda authorizer. Passes advisorKey/advisorName/advisorRole to Lambda context (ADVI-J3). v1.3.0: ESM bundle index.mjs via build-nodejs-lambda.sh.</note>
-    </lambda>
+    <ec2>
+      <name>smartx-exporter</name>
+      <instance_id>i-06ebcb27395eb3f49</instance_id>
+      <instance_type>persistent</instance_type>
+      <feeds>opal-portal-data-proxy AUM endpoints (ModelPortfolios primary data hook)</feeds>
+      <owned_by>0.7.0_AE_CloudOps (smartx-exporter source) / 0.5.0_AE_OpalETL (proxy Lambda)</owned_by>
+      <_note>No Elastic IP -- host changes on each start. Run sync-ec2-manifest.sh after restart.</_note>
+    </ec2>
 
-    <!-- partners-api: multi-tenant (DT full authority) -->
-    <lambda pipeline="partners-api" authority="full">
-      <name>opal-partners-data</name>
-      <deployed_tag>partners-api-v1.5.0</deployed_tag>
-      <note>Multi-tenant partner data API. v1.5.0 (ADVI_BKSCMP WS2): firm+advisor composition S3-proxy routes. GET /api/scoped/partners/books/firm/all/composition and GET /api/scoped/partners/books/advisor/{id}/composition. cors_response_nocache + serve_s3_json_nocache helpers. 2048MB/120s. AWSSDKPandas-Python312:16 layer.</note>
-    </lambda>
-
-    <!-- bd-pipeline: portal-facing (DT authority) -->
-    <lambda pipeline="bd-pipeline" authority="full">
-      <name>bd-portal-publisher</name>
-      <deployed_tag>bd-v2.16.2</deployed_tag>
-      <note>Publishes partner analytics to portal S3. DT deploys. Yang V2 Phase 2: Y3 aua_mix, Y5 growth_decomposition, Y9 nna_geo/nna_adv/nna_geo_drill. Prior: adv_drill + cla (ADVI-004), NNA canonicalization fix.</note>
-    </lambda>
-    <lambda pipeline="bd-pipeline" authority="full">
-      <name>bd-portal-advisor-publisher</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <note>Publishes advisor-level data to portal S3. DT deploys.</note>
-    </lambda>
-    <lambda pipeline="bd-pipeline" authority="full">
-      <name>bd-client-detail</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <note>Client detail API. DT deploys.</note>
-    </lambda>
-
-    <!-- bd-pipeline: infrastructure (coordinate with AE) -->
-    <lambda pipeline="bd-pipeline" authority="coordinate">
-      <name>bd-gold-trigger</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-    </lambda>
-    <lambda pipeline="bd-pipeline" authority="coordinate">
-      <name>bd-allocation-trigger</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-    </lambda>
-    <lambda pipeline="bd-pipeline" authority="coordinate">
-      <name>bd-transactions-trigger</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-    </lambda>
-    <lambda pipeline="bd-pipeline" authority="coordinate">
-      <name>bd-allocation-processor</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-    </lambda>
-    <lambda pipeline="bd-pipeline" authority="coordinate">
-      <name>bd-gold-layer</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-    </lambda>
-    <lambda pipeline="bd-pipeline" authority="coordinate">
-      <name>bd-allocation-file-checker</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-    </lambda>
-    <lambda pipeline="bd-pipeline" authority="coordinate">
-      <name>bd-price-update</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-    </lambda>
-    <lambda pipeline="bd-pipeline" authority="coordinate">
-      <name>bd-gold-foundation</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-    </lambda>
-    <lambda pipeline="bd-pipeline" authority="coordinate">
-      <name>bd-gold-detail-checker</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-    </lambda>
-    <lambda pipeline="bd-pipeline" authority="coordinate">
-      <name>historical-prices-scheduler</name>
-      <deployed_tag>bd-v2.14.0</deployed_tag>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-    </lambda>
-
-  </lambdas>
-
-  <!-- =========================================================== -->
-  <!-- EC2 SERVICES (all coordinate with AE PartnerETL)             -->
-  <!-- =========================================================== -->
-
-  <ec2_services>
-
-    <service name="bd-gold-layer-runner" authority="coordinate">
-      <source_path>data/black_diamond/scripts</source_path>
+    <ec2>
+      <name>bd-gold-layer-runner</name>
       <instance_id>i-01003b035d2988dfb</instance_id>
-      <instance_type>persistent</instance_type>
-      <deployed_tag>bd-v2.16.3</deployed_tag>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-      <note>S3-pull model. Runs gold layer scripts. Yang V2 Phase 2: Y7 binning fix, Y6b/Y6c/Y6d drill distributions (script 09), Y13 monthly stacked_bar (script 10), NNA exclusions (scripts 05/05b). Prior: stacked_bar + rolling_1y, NNA Unknown state fix.</note>
-    </service>
+      <instance_type>persistent (c6i.16xlarge)</instance_type>
+      <feeds>bd-portal-publisher (via opal-data-bd/gold/pipeline-complete sentinel)</feeds>
+      <last_deployed_commit>39bd8440 (2026-04-10T19:18:59Z, recorded by sync-ec2-manifest)</last_deployed_commit>
+      <owned_by>0.6.0_AE_PartnerETL</owned_by>
+      <_access_policy>EVENTBRIDGE ONLY. No agent / human / SSM may start, stop, or run commands. Manual gold runs go to bd-gold-qa-runner.</_access_policy>
+      <_s3_pull_paths>s3://opal-data-bd/code/{bronze,silver,gold}/</_s3_pull_paths>
+    </ec2>
 
-    <service name="bd-allocations" authority="coordinate">
-      <source_path>infra/aws/ec2/bd-exporter</source_path>
+    <ec2>
+      <name>bd-gold-qa-runner</name>
+      <instance_id>i-0090b823a4a0997e3</instance_id>
+      <instance_type>persistent (c6i.16xlarge -- mirrors PROD)</instance_type>
+      <feeds>NONE (manual QA only -- writes to opal-data-bd/code/runner-qa/)</feeds>
+      <last_deployed_commit>c3f901ea (2026-04-08T17:10:00Z by 0.6.0_AE_PartnerETL)</last_deployed_commit>
+      <owned_by>0.6.0_AE_PartnerETL</owned_by>
+      <_access_policy>MANUAL RUNS ONLY. NEVER use bd-gold-layer-runner for manual runs.</_access_policy>
+    </ec2>
+
+    <ec2>
+      <name>bd-allocations</name>
       <instance_id>i-0800437d1dbb0b5cc</instance_id>
-      <instance_type>persistent</instance_type>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-      <note>Code deployed via SSM document opal-bd-allocation-download. Triggered by bd-allocation-trigger Lambda.</note>
-    </service>
+      <instance_type>persistent (t3.medium)</instance_type>
+      <feeds>opal-data-bd/forwardfill_v2/allocations/* (xlsx) + silver/realized + silver/unrealized</feeds>
+      <ssm_doc>opal-bd-allocation-download (also runs realized + unrealized SSM docs daily)</ssm_doc>
+      <owned_by>0.6.0_AE_PartnerETL</owned_by>
+    </ec2>
 
-    <service name="bd-transactions" authority="coordinate">
-      <source_path>infra/aws/ec2/bd-exporter</source_path>
+    <ec2>
+      <name>bd-transactions</name>
       <instance_id>i-00c7568bc510f7423</instance_id>
-      <instance_type>persistent</instance_type>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-      <note>Code deployed via SSM document opal-bd-transaction-download. Triggered by bd-transactions-trigger Lambda.</note>
-    </service>
+      <instance_type>persistent (t3.medium)</instance_type>
+      <feeds>opal-data-bd/forwardfill_v2/transactions/*</feeds>
+      <ssm_doc>opal-bd-transaction-download</ssm_doc>
+      <owned_by>0.6.0_AE_PartnerETL</owned_by>
+    </ec2>
 
-    <service name="bd-gold-detail-generator" authority="coordinate">
-      <source_path>infra/aws/ec2/bd-gold-detail-generator</source_path>
-      <instance_type>ephemeral</instance_type>
-      <coordinate_with>0.6.0_AE_PartnerETL</coordinate_with>
-      <note>Ephemeral — code baked into user-data.sh at launch. No persistent deploy.</note>
-    </service>
+    <ec2>
+      <name>bd-fees</name>
+      <instance_id>i-0868fc7e7ebec26f2</instance_id>
+      <instance_type>persistent (t3.medium)</instance_type>
+      <feeds>opal-data-bd/silver/fees/YYYY-MM-DD.parquet</feeds>
+      <ssm_doc>opal-bd-fees-download (then convert_fees_to_silver.py --latest)</ssm_doc>
+      <owned_by>0.6.0_AE_PartnerETL</owned_by>
+      <_note>Standalone -- does NOT feed gold/price chain.</_note>
+    </ec2>
 
-  </ec2_services>
+    <ec2>
+      <name>bd-assets</name>
+      <instance_id>i-0e6f6dc014fdcf1cd</instance_id>
+      <instance_type>persistent (t3.medium)</instance_type>
+      <feeds>opal-data-bd/silver/assets/* (BDPL_ASTDIM.W6; gold integration deferred to W8)</feeds>
+      <ssm_doc>opal-bd-asset-dim-download</ssm_doc>
+      <owned_by>0.6.0_AE_PartnerETL</owned_by>
+    </ec2>
+
+    <ec2>
+      <name>bd-gold-detail-generator</name>
+      <instance_id>ephemeral (Step Functions launches)</instance_id>
+      <instance_type>r6i.xlarge (auto-stop on completion)</instance_type>
+      <feeds>opal-data-bd/gold/clients/{relationship_id}/* (per-client detail backfill)</feeds>
+      <owned_by>0.6.0_AE_PartnerETL</owned_by>
+      <_note>Code baked into user-data.sh at launch -- no persistent deploy.</_note>
+    </ec2>
+
+    <ec2>
+      <name>historical-prices-fetcher</name>
+      <instance_id>i-00abf626b065373bc</instance_id>
+      <instance_type>ephemeral (started by historical-prices-scheduler Lambda; AutoShutdown=true)</instance_type>
+      <feeds>opal-data-bd/silver/historical_prices.parquet (yfinance)</feeds>
+      <owned_by>0.6.0_AE_PartnerETL</owned_by>
+    </ec2>
+
+  </upstream_ec2_dependencies>
+
+  <!-- ======================================================================== -->
+  <!-- S3 NOTIFICATION TRIGGERS                                                  -->
+  <!-- ======================================================================== -->
+
+  <s3_triggers>
+
+    <!-- opal-data-bd (owned by bd-pipeline/s3-notifications.tf) -->
+    <trigger>
+      <bucket>opal-data-bd</bucket>
+      <prefix>forwardfill_v2/allocations/</prefix>
+      <suffix>.xlsx</suffix>
+      <event_type>s3:ObjectCreated:*</event_type>
+      <target_lambda>bd-allocation-processor</target_lambda>
+      <owner_module>bd-pipeline</owner_module>
+    </trigger>
+    <trigger>
+      <bucket>opal-data-bd</bucket>
+      <prefix>silver/prices/20</prefix>
+      <suffix>.parquet</suffix>
+      <event_type>s3:ObjectCreated:*</event_type>
+      <target_lambda>bd-gold-trigger</target_lambda>
+      <owner_module>bd-pipeline</owner_module>
+      <note>Prefix "silver/prices/20" matches dated files (YYYY-MM-DD) but NOT canonical_prices.parquet.</note>
+    </trigger>
+    <trigger>
+      <bucket>opal-data-bd</bucket>
+      <prefix>gold/pipeline-complete</prefix>
+      <suffix>.json</suffix>
+      <event_type>s3:ObjectCreated:*</event_type>
+      <target_lambda>bd-portal-publisher</target_lambda>
+      <owner_module>bd-pipeline</owner_module>
+      <note>Publisher fans out to bd-portal-advisor-publisher + bd-capture-output-versions via Lambda-to-Lambda async (S3 disallows duplicate prefix+suffix rules).</note>
+    </trigger>
+
+    <!-- opal-data-portal-v2 (owned by portal-notifications module, NOT bd-pipeline) -->
+    <trigger>
+      <bucket>opal-data-portal-v2</bucket>
+      <prefix>uploads/</prefix>
+      <suffix>manifest.json</suffix>
+      <event_type>s3:ObjectCreated:*</event_type>
+      <target_lambda>yang-pipeline-trigger</target_lambda>
+      <owner_module>portal-notifications</owner_module>
+      <note>Yang Step Functions kickoff. ClientPlatform pod consumes Yang outputs but does NOT own this trigger.</note>
+    </trigger>
+    <trigger>
+      <bucket>opal-data-portal-v2</bucket>
+      <prefix>market-metrics.json</prefix>
+      <event_type>s3:ObjectCreated:*</event_type>
+      <target_lambda>opal-cloudfront-market-generator</target_lambda>
+      <owner_module>portal-notifications</owner_module>
+      <note>Not consumed by ClientPlatform pages.</note>
+    </trigger>
+    <trigger>
+      <bucket>opal-data-portal-v2</bucket>
+      <prefix>security_scanner/uploads/</prefix>
+      <suffix>.xlsx</suffix>
+      <event_type>s3:ObjectCreated:*</event_type>
+      <target_lambda>opal-security-scanner-processor</target_lambda>
+      <owner_module>portal-notifications</owner_module>
+      <note>Not consumed by ClientPlatform pages.</note>
+    </trigger>
+
+  </s3_triggers>
+
+  <!-- ======================================================================== -->
+  <!-- EVENTBRIDGE SCHEDULES                                                     -->
+  <!-- ======================================================================== -->
+
+  <eventbridge_schedules>
+    <schedule cron="cron(38 21 ? * MON-FRI *)" target="bd-unrealized-trigger"            enabled="true"  note="bd-unrealized-pipeline-trigger -- daily snapshot, 5:38 PM ET"/>
+    <schedule cron="cron(45 21 ? * MON-FRI *)" target="bd-realized-trigger"              enabled="true"  note="bd-realized-pipeline-trigger -- incremental, 5:45 PM ET"/>
+    <schedule cron="cron(53 21 ? * MON-FRI *)" target="bd-transactions-trigger"          enabled="true"  note="bd-transaction-pipeline-trigger -- 5:53 PM ET"/>
+    <schedule cron="cron(0 22 ? * MON-FRI *)"  target="bd-allocation-trigger"            enabled="true"  note="bd-allocation-pipeline-trigger -- 6:00 PM ET"/>
+    <schedule cron="cron(10 22 ? * MON-FRI *)" target="bd-asset-dim-trigger"             enabled="true"  note="bd-asset-dim-pipeline-trigger -- 6:10 PM ET (BDPL_ASTDIM.W6)"/>
+    <schedule cron="cron(15 22 ? * MON-FRI *)" target="bd-fees-trigger"                  enabled="true"  note="bd-fees-pipeline-trigger -- 6:15 PM ET"/>
+    <schedule cron="cron(30 22 ? * MON-FRI *)" target="bd-allocation-file-checker"       enabled="true"  note="bd-allocation-file-check-daily -- 6:30 PM ET"/>
+    <schedule cron="cron(0 23 ? * MON-SAT *)"  target="bd-gold-trigger"                  enabled="true"  note="bd-gold-nightly-fallback -- safety net 7:00 PM EDT (Mon-Sat)"/>
+    <schedule cron="cron(0 4 * * ? *)"         target="bd-gold-trigger"                  enabled="true"  input='{"mode":"incremental"}' note="bd-canonical-prices-daily -- midnight ET, ALL days incl weekends. Runs S_00 build_canonical_prices_v2 then freshness gate."/>
+    <schedule cron="cron(0 8 1 * ? *)"         target="bd-gold-trigger"                  enabled="false" input='{"mode":"full"}' note="bd-gold-layer-monthly-trigger -- 1st 3 AM ET (DISABLED)"/>
+    <schedule cron="cron(0 14 * * ? *)"        target="historical-prices-scheduler"      enabled="true"  note="historical-prices-daily -- 9:00 AM ET, all days"/>
+  </eventbridge_schedules>
+
+  <!-- ======================================================================== -->
+  <!-- RECENT DEPLOYMENTS (per pipeline)                                         -->
+  <!-- ======================================================================== -->
+
+  <recent_deployments>
+    <deployment pipeline="yang-pipeline" tag="yang-v2.3.6" function="multiple"             commit="95d72468" date="2026-04-06T11:45:33Z"/>
+    <deployment pipeline="yang-pipeline" tag="yang-v2.3.7" function="(see CHANGELOG.json)" commit="-"        date="-"/>
+    <deployment pipeline="yang-pipeline" tag="yang-v2.3.8" function="yang benchmarks SI-restore" commit="c9b382d5" date="2026-04-13T18:51:52Z"/>
+    <deployment pipeline="bd-pipeline"   tag="bd-v2.24.1"  function="(no Lambda code change; Time Machine wave)" commit="d08d4bb7" date="2026-04-15T21:52:35Z"/>
+    <deployment pipeline="bd-pipeline"   tag="bd-v2.24.0"  function="bd-portal-publisher Time Machine fan-out + new triggers" commit="38d3d5b1" date="-"/>
+    <deployment pipeline="bd-pipeline"   tag="bd-v2.23.0"  function="-" commit="-" date="-"/>
+    <deployment pipeline="partners-api"  tag="partners-api-v1.15.9" function="opal-partners-data" commit="-" date="2026-04-15"/>
+    <deployment pipeline="partners-api"  tag="partners-api-v1.15.8" function="opal-partners-data" commit="-" date="2026-04-13"/>
+    <deployment pipeline="partners-api"  tag="partners-api-v1.13.1" function="opal-partners-data (GLDRST.018)" commit="f5510e0d" date="2026-04-06T15:19:47Z"/>
+    <deployment pipeline="portal-auth"   tag="portal-auth-v1.12.3" function="auth-validator-edge (firmRole=admin bypass)" commit="432d995f" date="2026-04-15T20:14:19Z"/>
+    <deployment pipeline="portal-auth"   tag="portal-auth-v1.12.1" function="shared-advisor-router (P0 v2 PII filter + cumulative_chart coverage)" commit="3ed1d7b6" date="2026-04-13T16:54:30Z"/>
+  </recent_deployments>
+
+  <!-- ======================================================================== -->
+  <!-- DEPLOYMENT SEQUENCE                                                       -->
+  <!-- ======================================================================== -->
+
+  <deployment_sequence>
+
+    <yang_side>
+      <step n="1">Confirm DS data_contract.xml updated if any Lambda output shape changed (data_contract.xml in 0.4.0_DS_ClientPlatform/deliverables/)</step>
+      <step n="2">bash infra/aws/lambda/ci/build-and-upload.sh yang-pipeline [{function-name}]</step>
+      <step n="3">git commit infra/aws/lambda/ci/lambda-source-map.json (artifact_sha256 + last_deployed_commit/at)</step>
+      <step n="4">export MSYS_NO_PATHCONV=1 &amp;&amp; .tools/terraform.exe -chdir=infra/aws/terraform/yang-pipeline plan</step>
+      <step n="5">.tools/terraform.exe -chdir=infra/aws/terraform/yang-pipeline apply</step>
+      <step n="6">Re-plan -- MUST show "No changes."</step>
+      <step n="7">Update org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/deployment_map.xml (this file: bump current_tag, update last_deployed_commit on touched Lambdas)</step>
+      <step n="8">bash infra/aws/lambda/ci/record-terraform-deploy.sh yang-pipeline (writes CHANGELOG.json entry)</step>
+      <step n="9">git tag -a yang-v{X.Y.Z} -m "description"  (verify next version with `git tag -l "yang-v*" | sort -V | tail -5`)</step>
+      <step n="10">git push origin CLOUD --follow-tags</step>
+      <step n="11">For Step Functions Lambdas: confirm YangDataPipeline state machine references the new $LATEST.</step>
+    </yang_side>
+
+    <bd_side>
+      <step n="1">Confirm DS data_contract.xml updated for any output JSON schema change (publisher Lambdas).</step>
+      <step n="2">bash infra/aws/lambda/ci/build-and-upload.sh bd-pipeline [{function-name}]</step>
+      <step n="3">git commit infra/aws/lambda/ci/lambda-source-map.json</step>
+      <step n="4">export MSYS_NO_PATHCONV=1 &amp;&amp; .tools/terraform.exe -chdir=infra/aws/terraform/bd-pipeline plan</step>
+      <step n="5">.tools/terraform.exe -chdir=infra/aws/terraform/bd-pipeline apply</step>
+      <step n="6">Re-plan -- MUST show "No changes."</step>
+      <step n="7">Update deployment_map.xml + record-terraform-deploy.sh bd-pipeline + git tag -a bd-v{X.Y.Z} -m "..."</step>
+      <step n="8">git push origin CLOUD --follow-tags</step>
+      <step n="9">CloudFront invalidation if static-S3 artifact path or cache-control header changed (EVTSA9VEHNZVH).</step>
+      <step n="10">For publisher changes: trigger a re-run by writing a fresh gold/pipeline-complete.json sentinel OR wait for next scheduled gold run.</step>
+      <step n="11">FOR EC2 GOLD SCRIPT CHANGES (data/black_diamond/scripts/gold/*): NOT a Terraform deploy. AE runs `safe-ec2-deploy.sh` to push to s3://opal-data-bd/code/gold/, then EC2 syncs on next boot. ClientPlatform DT does NOT touch this path -- coordinate with 0.6.0_AE_PartnerETL.</step>
+    </bd_side>
+
+    <partners_api>
+      <step n="1">bash infra/aws/lambda/ci/build-and-upload.sh partners-api opal-partners-data</step>
+      <step n="2">git commit lambda-source-map.json</step>
+      <step n="3">terraform plan / apply / 0-diff plan in infra/aws/terraform/partners-api/</step>
+      <step n="4">Update deployment_map.xml + record-terraform-deploy.sh + git tag partners-api-v{X.Y.Z}</step>
+    </partners_api>
+
+    <portal_auth>
+      <step n="1">For Node Lambdas (auth-handler / portal-authorizer): bash infra/aws/lambda/ci/build-nodejs-lambda.sh portal-auth {function-name}</step>
+      <step n="2">For Lambda@Edge: same build-nodejs-lambda.sh, then re-publish (publish=true) -- CloudFront association picks up new version on next apply.</step>
+      <step n="3">git commit lambda-source-map.json</step>
+      <step n="4">terraform plan / apply / 0-diff plan in infra/aws/terraform/portal-auth/</step>
+      <step n="5">CloudFront takes ~5-15 min to propagate Lambda@Edge changes globally. Verify against EVTSA9VEHNZVH.</step>
+      <step n="6">Tag portal-auth-v{X.Y.Z} + push --follow-tags.</step>
+    </portal_auth>
+
+  </deployment_sequence>
+
+  <!-- ======================================================================== -->
+  <!-- KNOWN GOTCHAS                                                             -->
+  <!-- ======================================================================== -->
+
+  <known_gotchas>
+
+    <gotcha severity="high">
+      bd-portal-advisor-publisher and bd-capture-output-versions are NOT S3-triggered. They are
+      invoked Lambda-to-Lambda by bd-portal-publisher. Do not add S3 notification rules for
+      either function -- S3 disallows duplicate prefix+suffix rules on the same bucket+event.
+    </gotcha>
+
+    <gotcha severity="high">
+      bd-gold-layer-runner (i-01003b035d2988dfb) is EVENTBRIDGE-ONLY. Never start, stop, or
+      run SSM commands against it manually -- only the bd-gold-trigger Lambda invoked by an
+      EventBridge rule may touch it. Manual / QA gold runs go to bd-gold-qa-runner
+      (i-0090b823a4a0997e3). Source: EC2_MANIFEST.json _access_policy.
+    </gotcha>
+
+    <gotcha severity="high">
+      opal-portal-data-proxy is NOT in any ClientPlatform-owned module. It lives in
+      infra/aws/terraform/market-overview/lambdas.tf and is owned by 0.5.0_AE_OpalETL.
+      ClientPlatform DT must coordinate before any handler change -- this is the primary
+      AUM data path for ModelPortfolios.
+    </gotcha>
+
+    <gotcha severity="high">
+      bd-allocation-file-checker has lifecycle ignore_changes on filename + source_code_hash
+      and `_note: source_dir EXTERNAL` in lambda-source-map.json. There is no local source
+      file. terraform apply will not update its code; do code updates by uploading a new zip
+      to AWS console (rare; coordinate with AE).
+    </gotcha>
+
+    <gotcha severity="medium">
+      Lambda@Edge functions (5 in portal-auth) have `lifecycle.ignore_changes = [qualified_arn,
+      source_code_hash]`. Updates require explicit publish=true and CloudFront association
+      version bump. Plan diffs may look noisy; check actual function $LATEST + version_id.
+    </gotcha>
+
+    <gotcha severity="medium">
+      Yang pipeline tag versioning skips. yang-v2.3.7 was deployed between v2.3.6 and v2.3.8
+      with different functions touched. ALWAYS run `git tag -l "yang-v*" | sort -V | tail -5`
+      before tagging -- do NOT assume "next version is current+1".
+    </gotcha>
+
+    <gotcha severity="medium">
+      bd_allocations EC2 (i-0800437d1dbb0b5cc) is shared across allocation, realized, and
+      unrealized SSM docs. EventBridge fires three triggers in sequence (21:38 / 21:45 / 22:00
+      UTC) and each SSM doc cancels pending shutdowns and schedules its own +2 min. Manual
+      runs that fire while another sequence is mid-shutdown will race -- coordinate with AE.
+    </gotcha>
+
+    <gotcha severity="medium">
+      ModelPortfolios DEMO mode: getAccountDistribution() hits /api/general/portfolios/account-distribution.json
+      (public, unauth). TODO in source to revert to /api/private/portfolios/account-distribution.json.
+      Track via portal/src/api/endpoints/aum.ts:470-478.
+    </gotcha>
+
+    <gotcha severity="medium">
+      ModelPortfolios 401 redirect disabled in portal/src/api/portal-proxy.ts:87-95 (was causing
+      infinite redirect loop). Auth failures log silently. Re-enable only after backend 401s
+      are fixed for the AUM endpoint set.
+    </gotcha>
+
+    <gotcha severity="medium">
+      shared-advisor-router v9 M1 blocks S3-direct fetches of platinum/advisors/{id}/summary.json
+      (PII -- book_name, client_name). Frontend requests for that path MUST go through
+      opal-partners-data Lambda for server-side pseudonymization + book scoping.
+      Reference: portal/src/api/endpoints/advisor-intelligence.ts getPlatinumAdvisorDrilldownSummary.
+    </gotcha>
+
+    <gotcha severity="low">
+      build-and-upload.sh on Windows: when only bun (no node) is in PATH, do NOT export
+      TMPDIR=C:/Windows/Temp -- bun crashes on Windows-style temp paths via MSYS2.
+      Run bare. MSYS_NO_PATHCONV=1 still required separately for terraform.exe.
+      Source: MEMORY.md.
+    </gotcha>
+
+    <gotcha severity="low">
+      partners-api-v1.13.1 entry in deployment_map predecessor (and CHANGELOG) was overtaken
+      by partners-api-v1.15.x cuts on 2026-04-13/15. Always cross-check
+      `git tag -l "partners-api-v*" | sort -V | tail -5` against the value in this file.
+    </gotcha>
+
+    <gotcha severity="low">
+      AssetIntelligenceTab.tsx remains in portal/src/pages/AdvisorIntelligence/tabs/ but is NOT
+      wired into v5 page tab navigation. Legacy. Verify before modifying.
+    </gotcha>
+
+  </known_gotchas>
 
 </deployment_map>
