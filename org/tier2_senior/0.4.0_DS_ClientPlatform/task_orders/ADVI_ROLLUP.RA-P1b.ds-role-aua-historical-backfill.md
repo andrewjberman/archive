@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- HARD GATE: CN-P2 (~D current in-flight) must close first; ~D lane match preserves shadow-writer infra reuse -->
+    <status>complete</status><!-- staged→pending 2026-04-16 by 2.0.0_SA_COO. CN-P1b COMPLETE dc4980c3, CN-P2 COMPLETE ebd737e3 — hard gate cleared. GO dispatched to DS~D 20260416T163557Z. COMPLETE 2026-04-16 by 0.4.0_DS_ClientPlatform~D. Commit c962ddb3 on CLOUD: C_01b.role_aua_backfill.py created; 2,293 new partitions uploaded (2,294 total in S3), 390,974 rows. Parity spot-check 28/30 PASS (2 SKIP early $0-AUA dates), 0 FAIL, diff_pct=0.000% on all non-zero dates. Account_performance source; account_team current-snapshot role assignments retroactively applied. Schema matches _ROLE_AUA_COLS. RA-P2b unblocked. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>4 (Structural convergence)</wave>
     <priority>P1 (gates RA-P2b D_02 timeseries cutover + Wave 4 convergence gate)</priority>
@@ -116,7 +116,7 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency to="ADVI_ROLLUP.CN-P2" description="~D current in-flight TO must close first (single-lane on ~D)" status="pending"/>
+    <dependency to="ADVI_ROLLUP.CN-P1b" description="~D lane sequencing per CTO Path B 2026-04-16 12:58Z: CN-P1b backfill ships FIRST; RA-P1b interleaves/follows on same ~D lane. (Prior dep on CN-P2 was the pre-re-sequence plan.)" status="complete" evidence="dc4980c3"/>
   </dependencies>
 
   <next>
