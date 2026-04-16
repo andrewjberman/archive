@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status>
+    <status>complete</status><!-- Executed by AE 0.6 opportunistically (commit c0a00bcc 2026-04-16) while AE 0.7 was on CDRS_TFIMPT sprint. Layer anthropic-sdk-deps built per pins. Owner reassignment AE 0.7 -> AE 0.6 not re-scoped in filename; evidence commit is authoritative. -->
     <project_code>ADVI_49EXEC</project_code>
     <priority>P1 (gates TO 2 + TO 4 — Lambda layer prerequisite)</priority>
   </metadata>

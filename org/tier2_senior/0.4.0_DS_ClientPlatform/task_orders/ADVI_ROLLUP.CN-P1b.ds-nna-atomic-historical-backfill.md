@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- HARD GATE: CN-P2 must close first AND RA-P1b must close first (single-lane on ~D, sequential) -->
+    <status>complete</status><!-- COMPLETE 2026-04-16 14:29:27Z per DS~D MCP 15:15:38Z. Evidence: commit dc4980c3 (2,294 partitions, 9,245,944 rows, S3 count PASS). AC#7 CTO reinterp authorized MCP 14:36:47Z "legacy nna/ comparison satisfies intent" (activity-only C_03 gains-join diverges structurally; legacy nna/ shares identical nna_flows pipeline). Parity PASS on 4-date sample: 2026-04-13/2023-06-15/2021-12-31/2022-09-01, in_diff 0.00%, out_diff <=0.08%. AC2 90-date INV1/INV2/INV4/INV5 spot-check pending (CTO non-blocking for CN-P2). CN-P2 UNBLOCKED; DS~D proceeding Path B. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>4 (Structural convergence)</wave>
     <priority>P1 (HARD-blocks CN-P3 ~B refire + Wave 4 convergence gate)</priority>
@@ -31,10 +31,11 @@
 
     **CRITICAL — Rule 7 pre-flag MANDATORY before `aws s3 cp` / `--upload`** for bulk historical write. A→D-rerun-sensitive surface (your own memory rule applies).
 
-    **Sequencing on ~D lane:**
-    1. Finish CN-P2 (current in-flight)
-    2. RA-P1b (smaller backfill — likely shorter window per consumer spec)
-    3. CN-P1b (this TO — full ~2294 partition backfill)
+    **Sequencing on ~D lane (RE-SEQUENCED per CTO Path B 2026-04-16 12:58Z):**
+    1. **CN-P1b (this TO) — SHIPS FIRST.** Full ~2294 partition backfill of `gold/canonical/nna_atomic/`. Pre-dependency for every downstream NNA cutover.
+    2. CN-P2 (D_02 consumer cutover) — staged behind CN-P1b, ships single-commit once CN-P1b data validated.
+    3. RA-P1b — independent, can interleave.
+    4. CN-P3/P4/P5 cutover cascade — gated on CN-P1b close (auto-clearable HOLDs).
   </objective>
 
   <scope>
@@ -58,6 +59,7 @@
     4. Rule 7 pre-flag MCP sent to CTO+COO BEFORE bulk S3 upload; 60-sec window observed.
     5. Session log Compiler Tools reproduces every `<run>` + observed + pass/fail vs `<expect>`.
     6. MCP COMPLETE to COO + CTO with: partition count, S3 prefix listing summary, validator summary, parity spot-check table covering all 9 D_00c window sizes.
+    7. **AC ADDENDUM per CTO Path B clearance 2026-04-16 12:58Z:** per-date row-count AND per-date sum(inflows) + sum(outflows) comparison between backfilled `nna_atomic/{date}.parquet` and legacy C_03 cum columns (the pre-atomic source). Anchor: 2026-04-13 EXACT (±$0.00 on inflows+outflows; row count exact). Plus 3 RANDOM historical dates within ±1% on both sums (row count difference documented if non-exact — atomic vs legacy-cum semantic gap). Table emitted to session log + MCP COMPLETE body. This addendum is the gate that lets CN-P2 ship single-commit against validated backfill; missing = REWORK.
   </acceptance_criteria>
 
   <compiler_tools_mandate>
@@ -114,9 +116,14 @@
     </phase>
     <phase id="4" when="after commit">
       <step>
-        <run>for date in {90 sample dates}; do validate_nna_atomic.py --artifact gold/canonical/nna_atomic/${date}.parquet; done | grep -cE 'PASS'</run>
-        <expect>90/90 PASS on INV1/INV2/INV4/INV5.</expect>
-        <if_mismatch>Document failures.</if_mismatch>
+        <run>for date in {90 sample dates}; do comp-validate canonical_nna_atomic --artifact gold/canonical/nna_atomic/${date}.parquet; done | grep -cE 'PASS'</run>
+        <expect>90/90 PASS on INV1/INV2/INV4/INV5. comp-validate wrapper used so runs auto-log to `org/compiler-tools-log.md`.</expect>
+        <if_mismatch>Document failures per date. Fall back to direct validate_nna_atomic.py only if comp-validate has missing schema pass-through.</if_mismatch>
+      </step>
+      <step>
+        <run>For each of (2026-04-13 exact + 3 random historical dates): per-date row-count + sum(inflows) + sum(outflows) comparing nna_atomic/{date}.parquet to legacy C_03 cum_inflows/cum_outflows period-diff for same date.</run>
+        <expect>2026-04-13: row-count exact + inflows/outflows ±$0.00. Random 3 dates: both sums within ±1% (row count documented if non-exact — atomic vs legacy-cum semantic gap). Table in session log. Satisfies AC #7 per CTO Path B clearance 2026-04-16 12:58Z.</expect>
+        <if_mismatch>STOP. Do not MCP COMPLETE. Re-inspect backfill compute vs C_03 period-diff arithmetic. Surface to CTO+COO before retry.</if_mismatch>
       </step>
       <step>
         <run>For each D_00c window (3M/6M/1Y/2Y/3Y/MTD/QTD/YTD/MAX): sum nna_atomic partitions in that window vs sum legacy nna in same window for Travis Penfield. Output table.</run>
@@ -127,8 +134,9 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency to="ADVI_ROLLUP.CN-P2" description="~D current in-flight TO must close first" status="pending"/>
-    <dependency to="ADVI_ROLLUP.RA-P1b" description="Sequential ~D lane: RA-P1b ships before CN-P1b (smaller window first, builds confidence in backfill infra)" status="pending"/>
+    <!-- RE-SEQUENCED 2026-04-16 12:58Z per CTO Path B — CN-P1b is now the FIRST step in the ~D lane, no upstream deps. -->
+    <dependency to="ADVI_ROLLUP.CN-P0" description="Canonical schema ratified (22-column list) — ships before backfill compute" status="complete" evidence="93b70620"/>
+    <dependency to="ADVI_ROLLUP.CN-P1" description="Daily shadow writer exists and validated post-rerun" status="complete" evidence="bf9651b8 + 6c0da968 post-rerun validators PASS"/>
   </dependencies>
 
   <next>
