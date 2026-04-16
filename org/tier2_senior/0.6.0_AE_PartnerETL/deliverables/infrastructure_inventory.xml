@@ -1,0 +1,817 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  BD Pipeline Infrastructure Inventory
+  Agent:    0.6.0_AE_PartnerETL
+  Date:     2026-04-16
+  Tag:      bd-v2.24.3
+  Sources:  infra/aws/terraform/bd-pipeline/*.tf
+            infra/aws/lambda/ci/lambda-source-map.json (bd-* entries)
+            infra/aws/ec2/EC2_MANIFEST.json
+            docs/analysis/2026-04-15_cloud_inventory_audit.md (0.7.0_AE_CloudOps)
+  Note:     Layer bd-gold-common (untracked, python3.11, 2026-02-12) queried to
+            0.7.0_AE_CloudOps — awaiting response. See MCP 20260416T163507Z.
+-->
+<infrastructure_inventory>
+
+  <metadata>
+    <agent>0.6.0_AE_PartnerETL</agent>
+    <scope>BD (Black Diamond / 49 Financial) Pipeline</scope>
+    <date>2026-04-16</date>
+    <tag>bd-v2.24.3</tag>
+    <terraform_state>s3://opal-313476888478-terraform-state / bd-pipeline/tfstate</terraform_state>
+    <account_id>313476888478</account_id>
+    <region>us-east-1</region>
+    <cross_reference>docs/analysis/2026-04-15_cloud_inventory_audit.md (0.7.0_AE_CloudOps account-wide audit)</cross_reference>
+  </metadata>
+
+  <!-- =========================================================== -->
+  <!-- TERRAFORM FILES                                             -->
+  <!-- =========================================================== -->
+
+  <terraform_files dir="infra/aws/terraform/bd-pipeline/">
+    <file name="main.tf">Provider config (aws ~5.0), S3 backend (bd-pipeline/tfstate), locals: account_id=313476888478, region=us-east-1</file>
+    <file name="lambdas.tf">All Lambda function declarations — 16 modules + 1 aws_lambda_function resource (bd-allocation-file-checker); includes S3 resource-based policies (lambda:InvokeFunction permissions)</file>
+    <file name="layers.tf">openpyxl-layer Lambda layer resource (s3://opal-313476888478-lambda-layers/openpyxl-layer.zip)</file>
+    <file name="iam.tf">All IAM roles and inline policies for bd-pipeline — 11 bd-specific roles + 1 shared reference (lambda-execution-role hardcoded ARN)</file>
+    <file name="eventbridge.tf">EventBridge rules, targets, and Lambda invoke permissions — 10 rules total (7 allocation/transaction/fees/assets wave rules, 1 monthly, 1 nightly fallback, 1 canonical-prices-daily)</file>
+    <file name="s3.tf">S3 bucket declarations — currently empty except a comment noting opal-data-schwab import is DEFERRED (bucket in us-east-2, requires aliased provider)</file>
+    <file name="s3-notifications.tf">S3 event notification rules on opal-data-bd — 3 Lambda triggers (allocation-processor, gold-trigger, portal-publisher)</file>
+    <file name="ec2.tf">EC2 instance resources — bd-allocations, bd-transactions, bd-fees, bd-assets (all t3.medium persistent), bd-gold-detail-generator (r6i.xlarge ephemeral)</file>
+    <file name="api-gateway.tf">API Gateway v2 route registrations on opal-portal-data-proxy-api (7k3ed8px20) — 7 GET routes under /api/scoped/partners/books/</file>
+    <file name="outputs.tf">Two outputs: bd_gold_detail_generator_instance_id, price_update_lambda_arn</file>
+  </terraform_files>
+
+  <!-- =========================================================== -->
+  <!-- PIPELINES                                                   -->
+  <!-- =========================================================== -->
+
+  <pipelines>
+    <pipeline name="bd-pipeline" terraform_dir="infra/aws/terraform/bd-pipeline/" tag="bd-v2.24.3">
+
+      <!-- ------------------------------------------------------- -->
+      <!-- LAMBDA FUNCTIONS                                        -->
+      <!-- ------------------------------------------------------- -->
+
+      <lambda_functions>
+
+        <!-- Trigger group — start EC2 instances to run BD export downloads -->
+
+        <lambda name="bd-gold-trigger"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-gold-trigger/"
+                tf_resource="module.gold_trigger"
+                runtime="python3.11"
+                memory_mb="128"
+                timeout_s="120"
+                trigger="EventBridge (bd-canonical-prices-daily 04:00 UTC daily, bd-gold-nightly-fallback 23:00 UTC Mon-Sat, bd-gold-layer-monthly-trigger 08:00 UTC 1st DISABLED) + S3 (silver/prices/20*.parquet)"
+                artifact_s3_key="bd-pipeline/bd-gold-trigger.zip"
+                env_GOLD_INSTANCE_ID="i-01003b035d2988dfb">
+          Starts bd-gold-layer-runner (PROD EC2 i-01003b035d2988dfb) via SSM to execute the nightly gold chain. EventBridge sends mode=incremental (canonical-prices-daily) or mode=full (monthly, disabled). Also fires on silver/prices/ S3 event for event-driven gold runs after price update.
+        </lambda>
+
+        <lambda name="bd-allocation-trigger"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-allocation-trigger/"
+                tf_resource="module.allocation_trigger"
+                runtime="python3.11"
+                memory_mb="128"
+                timeout_s="600"
+                trigger="EventBridge (bd-allocation-pipeline-trigger cron(0 22 ? * MON-FRI *))"
+                artifact_s3_key="bd-pipeline/bd-allocation-trigger.zip"
+                env_EC2_INSTANCE_ID="i-0800437d1dbb0b5cc">
+          Starts bd-allocations EC2 and runs opal-bd-allocation-download SSM document to download allocation files from Black Diamond at 22:00 UTC Mon-Fri.
+        </lambda>
+
+        <lambda name="bd-transactions-trigger"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-transactions-trigger/"
+                tf_resource="module.transactions_trigger"
+                runtime="python3.11"
+                memory_mb="128"
+                timeout_s="600"
+                trigger="EventBridge (bd-transaction-pipeline-trigger cron(53 21 ? * MON-FRI *))"
+                artifact_s3_key="bd-pipeline/bd-transactions-trigger.zip"
+                env_EC2_INSTANCE_ID="i-00c7568bc510f7423">
+          Starts bd-transactions EC2 and runs opal-bd-transaction-download SSM document at 21:53 UTC Mon-Fri.
+        </lambda>
+
+        <lambda name="bd-fees-trigger"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-fees-trigger/"
+                tf_resource="module.fees_trigger"
+                runtime="python3.11"
+                memory_mb="128"
+                timeout_s="600"
+                trigger="EventBridge (bd-fees-pipeline-trigger cron(15 22 ? * MON-FRI *))"
+                artifact_s3_key="bd-pipeline/bd-fees-trigger.zip"
+                env_EC2_INSTANCE_ID="aws_instance.bd_fees.id">
+          Starts bd-fees EC2 and runs opal-bd-fees-download SSM document at 22:15 UTC Mon-Fri. Fees pipeline is standalone — does not feed gold/price chain.
+        </lambda>
+
+        <lambda name="bd-asset-dim-trigger"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-asset-dim-trigger/"
+                tf_resource="module.asset_dim_trigger"
+                runtime="python3.11"
+                memory_mb="128"
+                timeout_s="600"
+                trigger="EventBridge (bd-asset-dim-pipeline-trigger cron(10 22 ? * MON-FRI *))"
+                artifact_s3_key="bd-pipeline/bd-asset-dim-trigger.zip"
+                env_EC2_INSTANCE_ID="aws_instance.bd_assets.id">
+          Starts bd-assets EC2 and runs opal-bd-asset-dim-download SSM document at 22:10 UTC Mon-Fri. Asset dim pipeline is standalone — silver/assets/ has no current gold consumers (BDPL_ASTDIM.W8 gold integration deferred).
+        </lambda>
+
+        <lambda name="bd-realized-trigger"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-realized-trigger/"
+                tf_resource="module.realized_trigger"
+                runtime="python3.11"
+                memory_mb="128"
+                timeout_s="600"
+                trigger="EventBridge (bd-realized-pipeline-trigger cron(45 21 ? * MON-FRI *))"
+                artifact_s3_key="bd-pipeline/bd-realized-trigger.zip"
+                env_EC2_INSTANCE_ID="i-0800437d1dbb0b5cc">
+          Starts bd-allocations EC2 and runs opal-bd-realized-download SSM document at 21:45 UTC Mon-Fri. Incremental — each day appends that day's realized capital gains.
+        </lambda>
+
+        <lambda name="bd-unrealized-trigger"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-unrealized-trigger/"
+                tf_resource="module.unrealized_trigger"
+                runtime="python3.11"
+                memory_mb="128"
+                timeout_s="600"
+                trigger="EventBridge (bd-unrealized-pipeline-trigger cron(38 21 ? * MON-FRI *))"
+                artifact_s3_key="bd-pipeline/bd-unrealized-trigger.zip"
+                env_EC2_INSTANCE_ID="i-0800437d1dbb0b5cc">
+          Starts bd-allocations EC2 and runs opal-bd-unrealized-download SSM document at 21:38 UTC Mon-Fri. Daily snapshot — full replacement each day.
+        </lambda>
+
+        <lambda name="historical-prices-scheduler"
+                source_dir="infra/aws/lambda/bd-pipeline/historical-prices-scheduler/"
+                tf_resource="module.historical_prices_scheduler"
+                runtime="python3.11"
+                memory_mb="256"
+                timeout_s="60"
+                trigger="EventBridge (historical-prices-daily cron(0 14 * * ? *) — all days)"
+                artifact_s3_key="bd-pipeline/historical-prices-scheduler.zip">
+          Spawns ephemeral t3.xlarge EC2 (historical-prices-fetcher) at 14:00 UTC daily (9 AM ET) to run yfinance fetch and write silver/historical_prices.parquet. EC2 auto-terminates on completion (ManagedBy=lambda-scheduler tag).
+        </lambda>
+
+        <!-- Processing group -->
+
+        <lambda name="bd-allocation-processor"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-allocation-processor/"
+                tf_resource="module.allocation_processor"
+                runtime="python3.11"
+                memory_mb="1024"
+                timeout_s="300"
+                trigger="S3 (opal-data-bd / forwardfill_v2/allocations/*.xlsx)"
+                artifact_s3_key="bd-pipeline/bd-allocation-processor.zip"
+                layers="pandas-pyarrow-layer:1, openpyxl-layer">
+          Processes Excel allocation files written by bd-allocations EC2. Converts to silver parquet, then invokes bd-price-update Lambda-to-Lambda to refresh prices.
+        </lambda>
+
+        <lambda name="bd-allocation-file-checker"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-allocation-file-checker/"
+                tf_resource="aws_lambda_function.allocation_file_checker"
+                runtime="python3.11"
+                memory_mb="256"
+                timeout_s="60"
+                trigger="EventBridge (bd-allocation-file-check-daily cron(30 22 ? * MON-FRI *))"
+                artifact_s3_key="bd-pipeline/code/bd-allocation-file-checker.zip (local code/ dir, lifecycle ignore_changes)">
+          Checks opal-data-bd for the expected daily allocation file at 22:30 UTC Mon-Fri. Publishes to SNS topic bd-allocation-file-missing if absent. Imported from manual creation; code changes ignored by Terraform.
+        </lambda>
+
+        <lambda name="bd-gold-layer"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-gold-layer/"
+                tf_resource="module.gold_layer"
+                runtime="python3.11"
+                memory_mb="10240"
+                timeout_s="900"
+                trigger="manual (legacy — gold layer now runs on EC2 runner via SSM)"
+                artifact_s3_key="bd-pipeline/bd-gold-layer.zip"
+                env_S3_BUCKET="opal-data-bd"
+                layers="pandas-pyarrow-layer:1">
+          Legacy gold-layer Lambda (10 GB RAM). Original gold runner before migration to EC2-based gold_dispatch.sh chain. Retained in TF but no longer invoked by EventBridge or S3 triggers; EC2 runner (bd-gold-layer-runner) now executes the gold chain directly.
+        </lambda>
+
+        <lambda name="bd-gold-foundation"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-gold-foundation/"
+                tf_resource="module.gold_foundation"
+                runtime="python3.11"
+                memory_mb="2048"
+                timeout_s="180"
+                trigger="Step Functions (planned migration — bd-gold-step-functions-role pre-created)"
+                artifact_s3_key="bd-pipeline/bd-gold-foundation.zip"
+                env_S3_BUCKET="opal-data-bd"
+                layers="pandas-pyarrow-layer:1">
+          Stage 1 gold foundation Lambda. Role: lambda-execution-role (shared). Currently retained; gold chain runs on EC2. Used by bd-gold-step-functions-role (Step Functions migration pre-created).
+        </lambda>
+
+        <lambda name="bd-gold-detail-checker"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-gold-detail-checker/"
+                tf_resource="module.gold_detail_checker"
+                runtime="python3.11"
+                memory_mb="128"
+                timeout_s="30"
+                trigger="Step Functions (planned — Stage 4 completion check)"
+                artifact_s3_key="bd-pipeline/bd-gold-detail-checker.zip"
+                env_S3_BUCKET="opal-data-bd">
+          Stage 4 EC2 completion checker Lambda. Polls S3 for bd-gold-detail-generator completion sentinel. Role: lambda-execution-role (shared).
+        </lambda>
+
+        <lambda name="bd-price-update"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-price-update/"
+                tf_resource="module.price_update"
+                runtime="python3.11"
+                memory_mb="10240"
+                timeout_s="900"
+                trigger="Lambda-to-Lambda (invoked by bd-allocation-processor; also invoked by bd-price-runner EC2 via allocation SSM sequence)"
+                artifact_s3_key="bd-pipeline/bd-price-update.zip"
+                env_S3_BUCKET="opal-data-bd"
+                env_TZ="America/New_York"
+                layers="pandas-pyarrow-layer:1">
+          Refreshes silver/prices/ using yfinance and historical data. Upon completion triggers bd-gold-trigger to kick off gold chain. Note: bd-price-runner EC2 logical service also runs bd_price_update.py via S3-pull on bd-allocations instance.
+        </lambda>
+
+        <lambda name="bd-portal-publisher"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-portal-publisher/"
+                tf_resource="module.bd_portal_publisher"
+                runtime="python3.11"
+                memory_mb="4096"
+                timeout_s="900"
+                trigger="S3 (opal-data-bd / gold/pipeline-complete.json)"
+                artifact_s3_key="bd-pipeline/bd-portal-publisher.zip"
+                env_INPUT_BUCKET="opal-data-bd"
+                env_OUTPUT_BUCKET="opal-data-bd"
+                env_FIRM_ID="49financial"
+                env_ADVISOR_PUBLISHER_FUNCTION="bd-portal-advisor-publisher"
+                env_CAPTURE_VERSIONS_FUNCTION="bd-capture-output-versions"
+                layers="pandas-pyarrow-layer:1">
+          Main gold-to-portal publisher. Triggered by pipeline-complete.json sentinel. Fans out via Lambda-to-Lambda async: invokes bd-portal-advisor-publisher at start (concurrent) and bd-capture-output-versions at end. Writes portal-facing aggregates to opal-data-bd/gold/.
+        </lambda>
+
+        <lambda name="bd-portal-advisor-publisher"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-portal-advisor-publisher/"
+                tf_resource="module.bd_portal_advisor_publisher"
+                runtime="python3.11"
+                memory_mb="6144"
+                timeout_s="900"
+                trigger="Lambda-to-Lambda (invoked async by bd-portal-publisher at start)"
+                artifact_s3_key="bd-pipeline/bd-portal-advisor-publisher.zip"
+                env_INPUT_BUCKET="opal-data-bd"
+                env_OUTPUT_BUCKET="opal-data-bd"
+                env_FIRM_ID="49financial"
+                layers="pandas-pyarrow-layer:1">
+          Per-advisor portal publisher. Runs concurrently with bd-portal-publisher main flow. Writes advisor-level platinum summaries and detail artifacts to opal-data-bd/gold/.
+        </lambda>
+
+        <lambda name="bd-client-detail"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-client-detail/"
+                tf_resource="module.bd_client_detail"
+                runtime="python3.11"
+                memory_mb="10240"
+                timeout_s="900"
+                trigger="API Gateway (opal-portal-data-proxy-api 7k3ed8px20 — on-demand per-client detail endpoint)"
+                artifact_s3_key="bd-pipeline/bd-client-detail.zip"
+                env_INPUT_BUCKET="opal-data-bd"
+                env_FIRM_ID="49financial"
+                layers="pandas-pyarrow-layer:1">
+          On-demand client detail API Lambda. Invoked by API Gateway for per-client drill-down requests routed through CloudFront distribution EVTSA9VEHNZVH.
+        </lambda>
+
+        <lambda name="bd-capture-output-versions"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-capture-output-versions/"
+                tf_resource="module.bd_capture_output_versions"
+                runtime="python3.12"
+                memory_mb="256"
+                timeout_s="120"
+                trigger="Lambda-to-Lambda (invoked async by bd-portal-publisher at end of gold/ writes)"
+                artifact_s3_key="bd-pipeline/bd-capture-output-versions.zip"
+                env_S3_BUCKET="opal-data-bd">
+          Time Machine Phase 1: records VersionId of every gold/ object into a timestamped snapshot manifest at opal-data-bd/snapshots/manifests/YYYYMMDD-HHMMSS.json. Enables point-in-time restore via bd-time-machine.
+        </lambda>
+
+        <lambda name="bd-time-machine"
+                source_dir="infra/aws/lambda/bd-pipeline/bd-time-machine/"
+                tf_resource="module.bd_time_machine"
+                runtime="python3.12"
+                memory_mb="256"
+                timeout_s="300"
+                trigger="manual (on-demand — input: {target_date: YYYY-MM-DD})"
+                artifact_s3_key="bd-pipeline/bd-time-machine.zip"
+                env_S3_BUCKET="opal-data-bd"
+                env_DISTRIBUTION_ID="EVTSA9VEHNZVH">
+          Time Machine Phase 2: restores gold/ to the latest snapshot at or before 17:00 ET on target_date. Writes pipeline-complete.json sentinel (re-triggers bd-portal-publisher), invalidates CloudFront distribution EVTSA9VEHNZVH.
+        </lambda>
+
+      </lambda_functions>
+
+      <!-- ------------------------------------------------------- -->
+      <!-- LAMBDA LAYERS                                           -->
+      <!-- ------------------------------------------------------- -->
+
+      <layers>
+
+        <layer name="openpyxl-layer"
+               tf_resource="aws_lambda_layer_version.openpyxl_layer"
+               s3_key="opal-313476888478-lambda-layers/openpyxl-layer.zip"
+               compatible_runtimes="python3.11"
+               tracked_in_tf="yes">
+          openpyxl 3.1.5 + et_xmlfile 2.0.0 — Excel file processing. Used by: bd-allocation-processor.
+        </layer>
+
+        <layer name="pandas-pyarrow-layer"
+               tf_resource="locals.pandas_layer (referenced by ARN only — not declared in bd-pipeline TF)"
+               arn="arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1"
+               compatible_runtimes="python3.11"
+               tracked_in_tf="no (untracked per 0.7.0_AE_CloudOps 2026-04-15 audit — python3.11, created 2026-01-15)">
+          pandas + pyarrow — core data processing. Used by: bd-gold-layer, bd-price-update, bd-gold-foundation, bd-portal-publisher, bd-portal-advisor-publisher, bd-client-detail, bd-allocation-processor.
+        </layer>
+
+        <layer name="yfinance-dependencies"
+               tf_resource="locals.yfinance_layer (referenced by ARN only — not declared in bd-pipeline TF)"
+               arn="arn:aws:lambda:us-east-1:313476888478:layer:yfinance-dependencies:1"
+               compatible_runtimes="python3.11"
+               tracked_in_tf="no (untracked per 0.7.0_AE_CloudOps audit — python3.11, created 2026-02-09)">
+          yfinance + dependencies. Referenced in lambdas.tf locals but not attached to any current Lambda function — bd-price-update was originally the consumer; price fetching migrated to EC2 (bd-price-runner via S3-pull). Candidate for cleanup.
+        </layer>
+
+        <layer name="bd-gold-common"
+               tf_resource="(none — entirely untracked)"
+               arn="arn:aws:lambda:us-east-1:313476888478:layer:bd-gold-common:1"
+               compatible_runtimes="python3.11"
+               size_bytes="2712"
+               tracked_in_tf="no (untracked per 0.7.0_AE_CloudOps audit — python3.11, created 2026-02-12)"
+               management_status="unmanaged (no source_dir, no requirements.txt, no aws_lambda_layer_version resource)">
+          Previously used by the 10 old portal publisher stub Lambdas: bd-gold-aua-chart, bd-gold-clients, bd-gold-filters, bd-gold-flows-chart, bd-gold-leaderboards, bd-gold-partner, bd-gold-snapshots, bd-gold-summary, bd-gold-timeseries, bd-gold-timeseries-chart. ALL 10 consumer Lambdas were REMOVED in bd-v2.0.0 (consolidated into bd-portal-publisher + bd-portal-advisor-publisher per BD_PORTAL_PUBLISHER_PLAN.md). Layer is now an ORPHAN — no active consumers remain. Source: 0.7.0_AE_CloudOps response MCP 2026-04-16 (infra/aws/lambda/ci/lambda-layer-map.json). Action: verify consumers are truly gone, then delete the layer OR formally document as decommissioned. No TF coverage needed unless a new consumer is added.
+        </layer>
+
+      </layers>
+
+      <!-- ------------------------------------------------------- -->
+      <!-- IAM ROLES                                               -->
+      <!-- ------------------------------------------------------- -->
+
+      <iam_roles>
+
+        <role name="bd-daily-trigger-lambda-role"
+              tf_resource="aws_iam_role.bd_daily_trigger"
+              used_by="bd-gold-trigger, bd-allocation-trigger, bd-transactions-trigger, bd-fees-trigger, bd-asset-dim-trigger, bd-realized-trigger, bd-unrealized-trigger">
+          ec2:StartInstances + StopInstances + DescribeInstances on scoped BD EC2 ARNs (9 instances including bd-fees + bd-assets dynamic refs); ssm:SendCommand + GetCommandInvocation on those instances and all 6 opal-bd-* SSM documents; iam:PassRole to bd-exporter-ec2-role; s3:List/Get/Put on opal-data-bd; logs:* on /aws/lambda/bd-*
+        </role>
+
+        <role name="bd-allocation-checker-lambda-role"
+              tf_resource="aws_iam_role.bd_allocation_checker"
+              used_by="bd-allocation-file-checker">
+          s3:GetObject + HeadObject + ListBucket on opal-data-bd; sns:Publish on bd-allocation-file-missing SNS topic; AWSLambdaBasicExecutionRole managed policy.
+        </role>
+
+        <role name="bd-processor-lambda-role"
+              tf_resource="aws_iam_role.bd_processor"
+              used_by="bd-price-update">
+          s3:Get/Put/Delete/List on opal-data-bd; lambda:InvokeFunction on bd-gold-trigger; AWSLambdaBasicExecutionRole.
+        </role>
+
+        <role name="bd-gold-layer-lambda-role"
+              tf_resource="aws_iam_role.bd_gold_layer"
+              used_by="bd-gold-layer, bd-portal-publisher, bd-portal-advisor-publisher, bd-client-detail, bd-capture-output-versions">
+          s3:Get/Put/Delete on opal-data-bd/*; s3:ListBucket on opal-data-bd; lambda:InvokeFunction on bd-portal-advisor-publisher + bd-capture-output-versions; AWSLambdaBasicExecutionRole.
+        </role>
+
+        <role name="bd-exporter-ec2-role"
+              tf_resource="aws_iam_role.bd_exporter"
+              used_by="bd-allocations EC2, bd-transactions EC2, bd-fees EC2, bd-assets EC2, bd-gold-layer-runner (PROD), bd-gold-qa-runner (QA)">
+          s3:Put/Get/List/Head/Delete on opal-data-bd; secretsmanager:GetSecretValue (anthropic-api-key, openai-api-key, opal/bd/credentials, price_discovery); ec2:TerminateInstances (condition: ManagedBy=lambda-scheduler only); cloudfront:CreateInvalidation on EVTSA9VEHNZVH; ec2:Start/Describe on bd-gold-layer-runner i-01003b035d2988dfb; lambda:InvokeFunction on bd-price-update; events:PutEvents on default event bus (DH-7, 2026-04-16); AmazonSSMManagedInstanceCore managed policy.
+          NOTE: Pre-existing drift — schwab-bucket-access inline policy attached in AWS but NOT declared in iam.tf. Flagged for future import.
+        </role>
+
+        <role name="bd-gold-detail-generator-role"
+              tf_resource="aws_iam_role.bd_gold_detail"
+              used_by="bd-gold-detail-generator EC2 (ephemeral, Stage 4)">
+          s3:Get/Put/List on opal-data-bd; logs:CreateLogGroup + CreateLogStream + PutLogEvents on *.
+        </role>
+
+        <role name="bd-allocation-processor-role"
+              tf_resource="aws_iam_role.bd_allocation_processor"
+              used_by="bd-allocation-processor">
+          s3:Get/Put/Head/List on opal-data-bd; lambda:InvokeFunction on bd-price-update; AWSLambdaBasicExecutionRole.
+        </role>
+
+        <role name="bd-gold-step-functions-role"
+              tf_resource="aws_iam_role.step_functions_execution"
+              used_by="(planned Step Functions migration — pre-created, not yet invoked)">
+          lambda:InvokeFunction on bd-gold-foundation + bd-gold-detail-checker (+ versioned ARNs); CloudWatch Logs delivery permissions; ec2:Start/Stop/Describe/Status (condition: System=BDGoldLayer).
+        </role>
+
+        <role name="bd-gold-eventbridge-step-functions-role"
+              tf_resource="aws_iam_role.eventbridge_step_functions"
+              used_by="(planned Step Functions migration — EventBridge to SF trigger, pre-created)">
+          states:StartExecution on arn:aws:states:us-east-1:313476888478:stateMachine:bd-gold-pipeline.
+        </role>
+
+        <role name="bd-capture-versions-lambda-role"
+              tf_resource="aws_iam_role.bd_capture_versions"
+              used_by="bd-capture-output-versions">
+          s3:ListBucket on opal-data-bd (condition: prefix=gold/*); s3:GetObject + HeadObject on opal-data-bd/gold/*; s3:PutObject on opal-data-bd/snapshots/manifests/*; AWSLambdaBasicExecutionRole.
+        </role>
+
+        <role name="bd-time-machine-lambda-role"
+              tf_resource="aws_iam_role.bd_time_machine"
+              used_by="bd-time-machine">
+          s3:ListBucket + ListBucketVersions on opal-data-bd; s3:GetObject on snapshots/manifests/*; s3:GetObjectVersion on gold/*; s3:PutObject on gold/*; cloudfront:CreateInvalidation on EVTSA9VEHNZVH; AWSLambdaBasicExecutionRole.
+        </role>
+
+        <role name="historical-prices-lambda-role"
+              tf_resource="aws_iam_role.historical_prices"
+              used_by="historical-prices-scheduler">
+          ec2:RunInstances (condition: InstanceType=t3.xlarge) on instance/* + supporting resources (key-pair, security-group, subnets, NIC, volume, AMI ami-0c1fe732b5494dc14); ec2:CreateTags + DescribeInstances on *; iam:PassRole to bd-exporter-ec2-role; logs:* on /aws/lambda/historical-prices-*; AWSLambdaBasicExecutionRole.
+        </role>
+
+        <role name="lambda-execution-role"
+              tf_resource="(SHARED — hardcoded ARN in lambdas.tf locals, not declared in bd-pipeline TF)"
+              used_by="bd-allocation-processor (fallback), bd-gold-foundation, bd-gold-detail-checker">
+          Cross-pipeline shared execution role. Managed outside bd-pipeline Terraform scope.
+        </role>
+
+      </iam_roles>
+
+      <!-- ------------------------------------------------------- -->
+      <!-- TRIGGERS                                                -->
+      <!-- ------------------------------------------------------- -->
+
+      <triggers>
+
+        <!-- EventBridge rules -->
+
+        <trigger type="EventBridge"
+                 resource="bd-canonical-prices-daily"
+                 tf_resource="aws_cloudwatch_event_rule.bd_canonical_prices_daily"
+                 state="ENABLED"
+                 target="bd-gold-trigger"
+                 input='{"mode":"incremental"}'>
+          cron(0 4 * * ? *) — daily 04:00 UTC (midnight ET EDT, 11 PM ET EST), all days including weekends/holidays. Runs silver-prep (S_00 build_canonical_prices_v2.py) before gold chain freshness gate. Primary production gold trigger since 2026-04-15.
+        </trigger>
+
+        <trigger type="EventBridge"
+                 resource="bd-unrealized-pipeline-trigger"
+                 tf_resource="aws_cloudwatch_event_rule.bd_unrealized_pipeline"
+                 state="ENABLED"
+                 target="bd-unrealized-trigger">
+          cron(38 21 ? * MON-FRI *) — 21:38 UTC Mon-Fri (5:38 PM ET). Daily unrealized gains snapshot download from Black Diamond.
+        </trigger>
+
+        <trigger type="EventBridge"
+                 resource="bd-realized-pipeline-trigger"
+                 tf_resource="aws_cloudwatch_event_rule.bd_realized_pipeline"
+                 state="ENABLED"
+                 target="bd-realized-trigger">
+          cron(45 21 ? * MON-FRI *) — 21:45 UTC Mon-Fri. Incremental realized capital gains download.
+        </trigger>
+
+        <trigger type="EventBridge"
+                 resource="bd-transaction-pipeline-trigger"
+                 tf_resource="aws_cloudwatch_event_rule.bd_transaction_pipeline"
+                 state="ENABLED"
+                 target="bd-transactions-trigger">
+          cron(53 21 ? * MON-FRI *) — 21:53 UTC Mon-Fri. Daily transaction file download.
+        </trigger>
+
+        <trigger type="EventBridge"
+                 resource="bd-allocation-pipeline-trigger"
+                 tf_resource="aws_cloudwatch_event_rule.bd_allocation_pipeline"
+                 state="ENABLED"
+                 target="bd-allocation-trigger">
+          cron(0 22 ? * MON-FRI *) — 22:00 UTC Mon-Fri. Daily allocation file download. Also triggers bd-price-runner (bd_price_update.py) at end of SSM sequence.
+        </trigger>
+
+        <trigger type="EventBridge"
+                 resource="bd-asset-dim-pipeline-trigger"
+                 tf_resource="aws_cloudwatch_event_rule.bd_asset_dim_pipeline"
+                 state="ENABLED"
+                 target="bd-asset-dim-trigger">
+          cron(10 22 ? * MON-FRI *) — 22:10 UTC Mon-Fri. AssetDimTXNs daily download + silver conversion (BDPL_ASTDIM.W6).
+        </trigger>
+
+        <trigger type="EventBridge"
+                 resource="bd-fees-pipeline-trigger"
+                 tf_resource="aws_cloudwatch_event_rule.bd_fees_pipeline"
+                 state="ENABLED"
+                 target="bd-fees-trigger">
+          cron(15 22 ? * MON-FRI *) — 22:15 UTC Mon-Fri. Fees_OpalCapital_Daily download + silver conversion.
+        </trigger>
+
+        <trigger type="EventBridge"
+                 resource="bd-allocation-file-check-daily"
+                 tf_resource="aws_cloudwatch_event_rule.bd_allocation_file_check"
+                 state="ENABLED"
+                 target="bd-allocation-file-checker">
+          cron(30 22 ? * MON-FRI *) — 22:30 UTC Mon-Fri. Checks for missing allocation file; SNS alert if absent.
+        </trigger>
+
+        <trigger type="EventBridge"
+                 resource="bd-gold-nightly-fallback"
+                 tf_resource="aws_cloudwatch_event_rule.bd_gold_nightly_fallback"
+                 state="ENABLED"
+                 target="bd-gold-trigger">
+          cron(0 23 ? * MON-SAT *) — 23:00 UTC Mon-Sat. Safety net in case S3 price trigger was dropped (e.g. EC2 busy with manual run). Pending-marker mechanism handles race with in-progress runs.
+        </trigger>
+
+        <trigger type="EventBridge"
+                 resource="bd-gold-layer-monthly-trigger"
+                 tf_resource="aws_cloudwatch_event_rule.bd_gold_monthly"
+                 state="DISABLED"
+                 target="bd-gold-trigger"
+                 input='{"mode":"full"}'>
+          cron(0 8 1 * ? *) — 08:00 UTC on 1st of each month. Full gold rebuild. DISABLED — monthly full run not currently active.
+        </trigger>
+
+        <trigger type="EventBridge"
+                 resource="historical-prices-daily"
+                 tf_resource="aws_cloudwatch_event_rule.historical_prices_daily"
+                 state="ENABLED"
+                 target="historical-prices-scheduler">
+          cron(0 14 * * ? *) — 14:00 UTC daily (9 AM ET), all days. Spawns ephemeral EC2 for yfinance historical price fetch.
+        </trigger>
+
+        <!-- S3 event notifications on opal-data-bd -->
+
+        <trigger type="S3"
+                 resource="opal-data-bd"
+                 tf_resource="aws_s3_bucket_notification.bd_data_bucket (id: ProcessAllocationFiles)"
+                 filter_prefix="forwardfill_v2/allocations/"
+                 filter_suffix=".xlsx"
+                 target="bd-allocation-processor">
+          Fires on s3:ObjectCreated:* for BD allocation xlsx files written by bd-allocations EC2.
+        </trigger>
+
+        <trigger type="S3"
+                 resource="opal-data-bd"
+                 tf_resource="aws_s3_bucket_notification.bd_data_bucket (id: GoldLayerPricesTrigger)"
+                 filter_prefix="silver/prices/20"
+                 filter_suffix=".parquet"
+                 target="bd-gold-trigger">
+          Fires on s3:ObjectCreated:* for dated silver price parquets (e.g. 2026-04-14.parquet). Does NOT match canonical_prices.parquet (starts with 'c'). Primary event-driven gold chain trigger.
+        </trigger>
+
+        <trigger type="S3"
+                 resource="opal-data-bd"
+                 tf_resource="aws_s3_bucket_notification.bd_data_bucket (id: PortalPublisherTrigger)"
+                 filter_prefix="gold/pipeline-complete"
+                 filter_suffix=".json"
+                 target="bd-portal-publisher">
+          Fires on s3:ObjectCreated:* for pipeline-complete sentinel written by bd-gold-layer-runner EC2 at end of gold chain. Triggers full portal publish fan-out.
+        </trigger>
+
+      </triggers>
+
+      <!-- ------------------------------------------------------- -->
+      <!-- API GATEWAY                                             -->
+      <!-- ------------------------------------------------------- -->
+
+      <api_gateway api_id="7k3ed8px20"
+                   name="opal-portal-data-proxy-api"
+                   integration_id="y95f56f"
+                   integration_target="opal-partners-data Lambda (not in bd-pipeline TF)"
+                   authorizer_id="naqxlm"
+                   authorizer_type="CUSTOM (Cognito-backed)"
+                   tf_file="api-gateway.tf">
+        <route key="GET /api/scoped/partners/books/firm/all/composition">N1 firm-level asset mix and top holdings</route>
+        <route key="GET /api/scoped/partners/books/firm/all/mix-views">N1 firm-level quarterly/monthly/annual mix views</route>
+        <route key="GET /api/scoped/partners/books/advisor/{advisorId}/timeseries">L2 advisor AUA timeseries</route>
+        <route key="GET /api/scoped/partners/books/advisor/{advisorId}/mix-timeseries">L2 advisor mix timeseries</route>
+        <route key="GET /api/scoped/partners/books/advisor/{advisorId}/platinum-summary">L2 advisor platinum summary (PII + pseudonymization via Lambda scoping)</route>
+        <route key="GET /api/scoped/partners/books/relationship/{relationshipId}/platinum-summary">L3 relationship platinum summary</route>
+        <route key="GET /api/scoped/partners/books/advisor/{advisorId}/composition">L2 advisor composition (mix + top-N concentration snapshot)</route>
+        <note>API Gateway itself, integration, and Lambda invoke permission (apigateway-invoke-partners) are manually created and NOT managed by Terraform. Only the 7 routes above are TF-managed. Pre-existing manually-created routes: GET /api/partners, GET /api/scoped/partners/books/relationship/{id}/composition, /timeseries, /mix-timeseries, /concentration-timeseries, account/{id}/composition, account/{id}/timeseries.</note>
+      </api_gateway>
+
+      <!-- ------------------------------------------------------- -->
+      <!-- S3 PATHS                                                -->
+      <!-- ------------------------------------------------------- -->
+
+      <s3_paths bucket="opal-data-bd">
+
+        <!-- Bronze / raw exports from Black Diamond -->
+        <path prefix="forwardfill_v2/allocations/" direction="write">BD allocation xlsx files written by bd-allocations EC2 (opal-bd-allocation-download SSM doc); read by bd-allocation-processor Lambda</path>
+        <path prefix="forwardfill_v2/unrealized/" direction="write">BD unrealized gains xlsx written by bd-allocations EC2 (opal-bd-unrealized-download); read by silver merge scripts</path>
+        <path prefix="forwardfill_v2/realized/" direction="write">BD realized gains xlsx written by bd-allocations EC2 (opal-bd-realized-download); read by silver merge scripts</path>
+        <path prefix="forwardfill_v2/transactions/" direction="write">BD transaction xlsx written by bd-transactions EC2 (opal-bd-transaction-download)</path>
+        <path prefix="forwardfill_v2/assets/" direction="write">BD AssetDimTXNs xlsx written by bd-assets EC2 (opal-bd-asset-dim-download); BDPL_ASTDIM pipeline</path>
+        <path prefix="bronze/fees/" direction="write">Fees_OpalCapital_Daily xlsx written by bd-fees EC2 (opal-bd-fees-download)</path>
+
+        <!-- Silver layer — transformed / normalized parquet -->
+        <path prefix="silver/allocations/" direction="write">Parquet allocation records written by bd-allocation-processor Lambda</path>
+        <path prefix="silver/prices/" direction="write+read">Dated price parquets (20*.parquet) written by bd-price-update Lambda / bd-price-runner EC2 via bd_price_update.py; S3 event on this prefix triggers bd-gold-trigger</path>
+        <path prefix="silver/canonical_prices/" direction="write+read">Canonical price artifacts written by build_canonical_prices_v2.py (S_00 silver-prep on gold runner); read by gold chain A/B/C scripts</path>
+        <path prefix="silver/historical_prices.parquet" direction="write">Written by ephemeral historical-prices-fetcher EC2 (yfinance); T2 price fallback source for gold chain</path>
+        <path prefix="silver/fees/" direction="write">Daily fee parquets written by convert_fees_to_silver.py on bd-fees EC2</path>
+        <path prefix="silver/assets/" direction="write">Daily asset dimension parquets written by convert_assets_to_silver.py on bd-assets EC2; no current gold consumers (BDPL_ASTDIM.W8 deferred)</path>
+        <path prefix="silver/transactions/" direction="write">Transaction parquets written by silver merge scripts on bd-transactions EC2</path>
+        <path prefix="silver/unrealized/" direction="write">Unrealized gains parquets written by merge-daily-incremental.py on bd-allocations EC2; 14-column schema (no Units/quantity — active gap per ADVI_ROLLUP.SL-AE1)</path>
+
+        <!-- Gold layer — aggregated analytics + portal outputs -->
+        <path prefix="gold/" direction="write+read">All gold analytics artifacts (dimensions, timeseries, portal aggregates) written by gold chain scripts (A/B/C/D prefixes) on bd-gold-layer-runner EC2</path>
+        <path prefix="gold/pipeline-complete.json" direction="write">Sentinel written by gold_dispatch.sh at end of chain; S3 event triggers bd-portal-publisher Lambda</path>
+        <path prefix="gold/dimensions/" direction="write">Accounts, advisor, client dimension tables (A_00, A_04)</path>
+        <path prefix="gold/timeseries/" direction="write">Holdings lots, canonical holdings, NNA timeseries (B_00, B_01, C_01)</path>
+        <path prefix="gold/portal/" direction="write">Portal aggregates, advisor analytics, client summaries (D_00-D_04)</path>
+        <path prefix="gold/manifests/" direction="write">Watermark + metadata manifests (B_01b classify_watermark.json)</path>
+
+        <!-- Time Machine snapshots -->
+        <path prefix="snapshots/manifests/" direction="write">Snapshot manifests written by bd-capture-output-versions after each portal publish; used by bd-time-machine for point-in-time restore</path>
+
+        <!-- Code artifacts (EC2 S3-pull model) -->
+        <path prefix="code/gold/" direction="write+read">Gold chain scripts deployed here by build-and-upload.sh; bd-gold-layer-runner + bd-gold-qa-runner sync from this prefix on startup</path>
+        <path prefix="code/silver/" direction="write+read">Silver scripts deployed here; synced by EC2 SSM documents</path>
+        <path prefix="code/bronze/" direction="write+read">Bronze scripts deployed here; synced by EC2 SSM documents</path>
+        <path prefix="scripts/src/" direction="write+read">Bun/TypeScript exporter sources for bd-exporter EC2s; synced by SSM documents opal-bd-*-download</path>
+
+      </s3_paths>
+
+      <!-- ------------------------------------------------------- -->
+      <!-- DATA SCRIPTS                                            -->
+      <!-- ------------------------------------------------------- -->
+
+      <data_scripts>
+
+        <layer name="bronze" path="data/black_diamond/scripts/bronze/" script_count="11">
+          <script name="convert_daily_allocation_to_parquet.py">Converts BD daily allocation xlsx to bronze parquet</script>
+          <script name="convert_daily_transaction_to_parquet.py">Converts BD daily transaction xlsx to bronze parquet</script>
+          <script name="slice_backfill_to_daily.py">Slices backfill allocation files into per-day parquets</script>
+          <script name="convert_schwab_trn_to_parquet.py">Converts Schwab TRN (transaction) CSV to bronze parquet</script>
+          <script name="convert_schwab_rps_to_parquet.py">Converts Schwab RPS (realized positions) CSV to bronze parquet</script>
+          <script name="convert_schwab_acc_to_parquet.py">Converts Schwab ACC (account) CSV to bronze parquet</script>
+          <script name="rps_ingestion.py">Ingests Schwab RPS data into bronze S3 prefix</script>
+          <script name="convert_schwab_rps_to_silver.py">Converts Schwab RPS to silver parquet</script>
+          <script name="convert_schwab_lots_to_silver.py">Converts Schwab lot data to silver parquet</script>
+          <script name="sync_schwab_onedrive_to_s3.py">Syncs Schwab files from OneDrive to S3 bronze prefix</script>
+          <script name="cleanup_positions_cube.py">Maintenance script to clean up orphan positions cube artifacts</script>
+        </layer>
+
+        <layer name="silver" path="data/black_diamond/scripts/silver/" script_count="14">
+          <script name="build_canonical_prices_v2.py">S_00 silver-prep: builds canonical_prices from historical + yfinance sources; runs before gold chain freshness gate each night</script>
+          <script name="inject_scoped_overrides.py">Applies scoped price overrides after build_canonical_prices_v2 (must run second — caught $22M phantom wipe incident)</script>
+          <script name="bd_price_update.py">Price update script run by bd-price-runner on bd-allocations EC2; also deployed as bd-price-update Lambda</script>
+          <script name="merge-daily-incremental.py">Merges daily BD exports incrementally into silver parquet partitions</script>
+          <script name="merge-daily-allocation-incremental.py">Merges daily allocation increments into silver/allocations/</script>
+          <script name="merge-capital-gains.py">Merges realized capital gains into silver</script>
+          <script name="compact-realized.py">Compacts realized gains parquet partitions</script>
+          <script name="convert_fees_to_silver.py">Converts Fees_OpalCapital_Daily xlsx to silver/fees/ parquet; runs on bd-fees EC2</script>
+          <script name="convert_assets_to_silver.py">Converts AssetDimTXNs xlsx to silver/assets/ parquet; runs on bd-assets EC2</script>
+          <script name="build_bd_assets_dim.py">Builds the BD assets dimension table from silver/assets/</script>
+          <script name="upload_bd_assets_backfill.py">One-time backfill script for silver/assets/ historical data</script>
+          <script name="fetch_historical_prices_yfinance.py">Fetches historical prices via yfinance; runs on ephemeral historical-prices-fetcher EC2</script>
+          <script name="build_interpolated_prices.py">Builds interpolated price series for securities with gaps</script>
+          <script name="backfill_yahoo_prices_safe.py">Safe backfill script for Yahoo Finance historical prices</script>
+          <script name="security_ticker_mapping_final.py">Builds security-to-ticker mapping table</script>
+        </layer>
+
+        <layer name="gold" path="data/black_diamond/scripts/gold/" script_count="55" active_chain_scripts="A_00 A_01 A_02 A_03 A_04 B_00 B_01 B_01b B_02 B_03 C_00 C_01 C_02 C_03 C_04 C_05 C_06 C_07 C_08 D_00 D_00b D_00c D_01 D_02 D_03 D_04">
+          <note>Gold chain is orchestrated by gold_dispatch.sh (not a Python script). Scripts are executed sequentially by prefix group. S_00 (build_canonical_prices_v2.py) runs as silver-prep before the freshness gate. E_* scripts (20+) are diagnostic/exploration tools, not part of the main chain.</note>
+          <script_group prefix="S_00" script="build_canonical_prices_v2.py (silver/)">Silver-prep: canonical price rebuild. Runs before freshness gate every night.</script_group>
+          <script_group prefix="A (00-04)">Foundation layer: accounts_dimension (A_00), advisor_assignments (A_01), fee_rate_history (A_02), positions_cube (A_03), client_dimension (A_04)</script_group>
+          <script_group prefix="B (00-03)">Holdings layer: canonical_holdings (B_00), holdings_lots (B_01), classify_new_securities (B_01b), canonical_lots (B_02), account_gains (B_03)</script_group>
+          <script_group prefix="C (00-08)">Analytics layer: canonical_performance (C_00), canonical_nna (C_01), client_performance (C_02), account_performance (C_03), validate_aua (C_04), client_tax_liability (C_05), client_mix_timeseries (C_06), advisor_attribution (C_07), advisor_fee_efficiency (C_08)</script_group>
+          <script_group prefix="D (00-04)">Portal layer: portal_aggregates (D_00), portal_timeseries (D_00b), portal_leaderboard (D_00c), partner_analytics (D_01), advisor_client_detail (D_02), composition_artifacts (D_03), client_portal_summary (D_04). After D_04 completion: gold_dispatch.sh writes gold/pipeline-complete.json sentinel and emits EventBridge chain-complete event (DH-7).</script_group>
+          <script_group prefix="E (00-24)">Diagnostic exploration scripts: decompose_aua_gap, account_quality_tiers, diagnose_positions_cube, trace_account_cube, dedup_audit, gap_by_pricing_source, trace_asset_pricing, account_gap_buckets, tail_asset_drill, unrecognized_exit_types, validate_ffill_cap, unmatched_asset_analysis, dump_all_non_yahoo, tail_decomposition, audit_existing_mappings, validate_yf_overrides, unit_math_audit, check_49f_tickers, detect_new_securities, write_aua_certification, cross_script_validation, generate_reconciliation_reference, diagnose_unassigned_accounts, diagnose_fee_splits, rebuild_fee_scorecard. NOT in main chain.</script_group>
+        </layer>
+
+      </data_scripts>
+
+    </pipeline>
+  </pipelines>
+
+  <!-- =========================================================== -->
+  <!-- EC2 SERVICES                                               -->
+  <!-- =========================================================== -->
+
+  <ec2_services>
+
+    <service name="bd-gold-layer-runner"
+             instance_id="i-01003b035d2988dfb"
+             instance_type="c6i.16xlarge"
+             manifest_entry="true"
+             tf_managed="no (not an aws_instance resource — managed externally; IAM role bd-exporter-ec2-role is TF-managed)"
+             access_policy="EVENTBRIDGE ONLY — no agent, no human, no SSM manual command. Only bd-gold-trigger Lambda may start it.">
+      Persistent PROD gold runner. Runs nightly gold chain (A/B/C/D scripts) via gold_dispatch.sh. S3-pull model: syncs scripts from s3://opal-data-bd/code/gold/ on startup. Emits EventBridge chain-complete event on successful chain completion (DH-7, bd-v2.24.2). Auto-shuts down after chain completes.
+    </service>
+
+    <service name="bd-gold-qa-runner"
+             instance_id="i-0090b823a4a0997e3"
+             instance_type="c6a.16xlarge"
+             manifest_entry="true"
+             tf_managed="no"
+             access_policy="MANUAL RUNS ONLY — for agent and human test gold runs. Never use PROD runner for manual runs.">
+      Persistent QA gold runner. Same script base as PROD (syncs from same S3 code prefix). No systemd auto-start; GOLD_KEEP_ALIVE=1 (no auto-shutdown). Used for manual dispatch of gold chain during development and validation.
+    </service>
+
+    <service name="bd-allocations"
+             instance_id="i-0800437d1dbb0b5cc"
+             instance_type="t3.medium"
+             manifest_entry="true"
+             tf_managed="yes (aws_instance.bd_allocations in ec2.tf)"
+             ami="ami-07ff62358b87c7116"
+             iam_profile="bd-exporter-profile">
+      Persistent EC2 for BD allocation, realized, and unrealized downloads. Runs SSM documents opal-bd-allocation-download, opal-bd-realized-download, opal-bd-unrealized-download. Also runs bd_price_update.py at end of allocation sequence (bd-price-runner logical service). Triggered by bd-allocation-trigger, bd-realized-trigger, bd-unrealized-trigger Lambdas.
+    </service>
+
+    <service name="bd-transactions"
+             instance_id="i-00c7568bc510f7423"
+             instance_type="t3.medium"
+             manifest_entry="true"
+             tf_managed="yes (aws_instance.bd_transactions in ec2.tf)"
+             ami="ami-059ec86c4552abf68"
+             iam_profile="bd-exporter-profile">
+      Persistent EC2 for BD transaction file downloads. Runs SSM document opal-bd-transaction-download. Triggered by bd-transactions-trigger Lambda at 21:53 UTC Mon-Fri.
+    </service>
+
+    <service name="bd-fees"
+             instance_id="i-0868fc7e7ebec26f2"
+             instance_type="t3.medium"
+             manifest_entry="true"
+             tf_managed="yes (aws_instance.bd_fees in ec2.tf)"
+             ami="ami-07ff62358b87c7116"
+             iam_profile="bd-exporter-profile">
+      Persistent EC2 for BD Fees_OpalCapital_Daily downloads. Runs SSM document opal-bd-fees-download; also runs convert_fees_to_silver.py --latest to write silver/fees/ parquet. Triggered by bd-fees-trigger Lambda at 22:15 UTC Mon-Fri. Standalone — does not feed gold/price chain.
+    </service>
+
+    <service name="bd-assets"
+             instance_id="i-0e6f6dc014fdcf1cd"
+             instance_type="t3.medium"
+             manifest_entry="true"
+             tf_managed="yes (aws_instance.bd_assets in ec2.tf)"
+             ami="ami-07ff62358b87c7116"
+             iam_profile="bd-exporter-profile">
+      Persistent EC2 for BD AssetDimTXNs_OpalCapital_Daily downloads (BDPL_ASTDIM.W6). Runs SSM document opal-bd-asset-dim-download; runs convert_assets_to_silver.py to write silver/assets/ parquet. Triggered by bd-asset-dim-trigger Lambda at 22:10 UTC Mon-Fri. Standalone — silver/assets/ has no current gold consumers (W8 deferred).
+    </service>
+
+    <service name="bd-gold-detail-generator"
+             instance_id="i-074bfc40ee049dc62 (persistent but used as ephemeral — started per-job)"
+             instance_type="r6i.xlarge"
+             manifest_entry="true"
+             tf_managed="yes (aws_instance.bd_gold_detail_generator in ec2.tf)"
+             ami="ami-0453ec754f44f9a4a"
+             iam_profile="bd-gold-detail-generator-profile">
+      Ephemeral gold Stage 4: per-client detail generator. Code baked into user-data.sh at launch. instance_initiated_shutdown_behavior=stop. Stopped after completion. Managed by Step Functions (planned) or ad-hoc SSM dispatch.
+    </service>
+
+    <service name="historical-prices-fetcher"
+             instance_id="i-00abf626b065373bc"
+             instance_type="t3.xlarge"
+             manifest_entry="true"
+             tf_managed="yes (ec2 resource referenced in iam.tf RunInstances policy; spawned by historical-prices-scheduler Lambda)"
+             access_policy="Tags: ManagedBy=lambda-scheduler, Purpose=yfinance-daily-prices, AutoShutdown=true. Lambda ec2:TerminateInstances permission scoped to ManagedBy=lambda-scheduler.">
+      Ephemeral daily yfinance price fetcher. Spawned by historical-prices-scheduler Lambda at 14:00 UTC (9 AM ET). Writes silver/historical_prices.parquet. Auto-terminates on completion. Note: duplicate instance i-05ad83c1c075de14b was terminated 2026-04-15 (Andrew-authorized, 0.7.0_AE_CloudOps).
+    </service>
+
+    <service name="bd-exporter"
+             instance_id="null (no AWS instance with this tag)"
+             manifest_entry="true"
+             tf_managed="no">
+      Ghost entry — instance_id=null, no matching AWS EC2 instance. Likely an old entry for bd-transactions or bd-allocations before they were registered with their own names. Safe to remove in a future manifest cleanup.
+    </service>
+
+    <service name="bd-price-runner"
+             instance_id="i-0800437d1dbb0b5cc (shared with bd-allocations)"
+             manifest_entry="true"
+             tf_managed="no (logical service only — runs on bd-allocations instance)">
+      Logical service: bd_price_update.py runs on bd-allocations EC2 at the end of the opal-bd-allocation-download SSM sequence (~21:51 UTC weekdays). Not a separate physical instance. Replaces legacy bd-price-update Lambda invocation path.
+    </service>
+
+  </ec2_services>
+
+  <!-- =========================================================== -->
+  <!-- DEPLOYMENT TAG LINEAGE (bd-pipeline)                       -->
+  <!-- =========================================================== -->
+
+  <deployment_tags>
+    <tag version="bd-v2.24.3" commit="86eb5c94">DH-5 (auto-shutdown all modes) + DH-6 (freshness gate dry-run print). gold_dispatch.sh + B_01.</tag>
+    <tag version="bd-v2.24.2" commit="1829007a">DH-7 — gold chain-complete EventBridge emission + events:PutEvents IAM. iam.tf + gold_dispatch.sh + pipeline_inventory.</tag>
+    <tag version="bd-v2.24.1" commit="0fc54608">DH-3 — dispatcher flag docs collapse + compiler visibility fixes (B_01 alias false-positive + B_01b s3_layout detection).</tag>
+    <note>Full CHANGELOG.json: infra/aws/terraform/bd-pipeline/CHANGELOG.json. README.md tag field is stale (shows bd-v2.14.0 — update in next maintenance commit).</note>
+  </deployment_tags>
+
+  <!-- =========================================================== -->
+  <!-- OPEN GAPS / ACTION ITEMS                                   -->
+  <!-- =========================================================== -->
+
+  <open_gaps>
+    <gap id="1" priority="P2" source="0.7.0_AE_CloudOps audit 2026-04-15">
+      bd-gold-common Lambda Layer (python3.11, created 2026-02-12) is untracked in Terraform. Purpose and consumers unknown. Query sent to 0.7.0_AE_CloudOps (MCP 20260416T163507Z). Action: identify consumers + import into bd-pipeline TF or shared-infra TF.
+    </gap>
+    <gap id="2" priority="P2" source="DH-7 session log 2026-04-16">
+      schwab-bucket-access inline policy is attached to bd-exporter-ec2-role in AWS but NOT declared in iam.tf (TF drift). Not in scope for any current TO. Action: import into iam.tf in a future AE session.
+    </gap>
+    <gap id="3" priority="P2" source="DH-7 session log 2026-04-16">
+      pipeline_inventory.xml bd-gold-qa-runner entry is now documented here (newly added). pipeline_inventory.xml (this file) supersedes the older .gitkeep deliverable.
+    </gap>
+    <gap id="4" priority="P3" source="lambdas.tf review">
+      yfinance-layer (yfinance-dependencies:1) is referenced in lambdas.tf locals but not attached to any current Lambda function. Candidate for removal from locals once confirmed no Lambda uses it.
+    </gap>
+    <gap id="5" priority="P3" source="0.7.0_AE_CloudOps audit 2026-04-15">
+      opal-data-schwab S3 bucket (Schwab data — RPS, ACC, TRN) is in us-east-2. Import into bd-pipeline TF is blocked by region mismatch (requires aliased provider). Documented in s3.tf comment. Future work.
+    </gap>
+    <gap id="6" priority="P3" source="README.md">
+      README.md pipeline_inventory tag field shows bd-v2.14.0 (stale). Should be updated to bd-v2.24.3 in a future maintenance commit.
+    </gap>
+    <gap id="7" priority="P2" source="0.7.0_AE_CloudOps audit 2026-04-15">
+      bd-exporter EC2_MANIFEST entry has null instance_id and no AWS instance with that tag. Likely a legacy entry predating the per-service registration (bd-allocations, bd-transactions, etc.). Safe to remove in a future manifest cleanup; confirm with Andrew first.
+    </gap>
+  </open_gaps>
+
+</infrastructure_inventory>
