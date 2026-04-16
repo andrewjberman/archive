@@ -4,7 +4,14 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to><!-- re-dialed 2026-04-15 PM by COO from base lane to ~A for post-rerun validator pass; original code-shipper instance unavailable -->
     <date>2026-04-14</date>
-    <status>pending</status><!-- GO sent 2026-04-14T21:30Z Wave A parallel dispatch -->
+    <status>complete</status><!-- GO sent 2026-04-14T21:30Z Wave A parallel dispatch; validated 2026-04-16 by ~A, 100% tgp coverage on 145/145 taxable-active advisors -->
+    <validation_result>
+      AC1 PASS: advisor-summary book.json populates tax_exposure.top_gain_positions (sample Travis: 20 entries).
+      AC2 PASS: 145/145 = 100.0% of taxable-active advisors have non-empty top_gain_positions (denominator = tax_exposure.taxable > 0; 163 book.json artifacts out of 183 slug prefixes; 20 slugs have no book.json — empty/orphan folders; 18 of 163 non-taxable — legitimate exclusion).
+      AC3 PASS: L3 client-summary spot-check (z08327149, z0880615, z08296312) all populate client detail.tax.top_gain_positions (len 17, 20, 20).
+      OBSERVATION (non-blocking): L2 emits at `tax_exposure.top_gain_positions`; L3 emits at `tax.top_gain_positions`. FE consumers wired to each layer's path (AdvisorBookView.tsx:386 reads tax_exposure; AdvisorBookClientDetail.tsx:233 reads tax). Internally consistent per layer; no breakage. Standardization deferred — would require FE refactor + producer refactor coordinated, not gated by population.
+      Evidence: C:/Users/ANDREW~1/AppData/Local/Temp/b4_sweep_result.json (per-advisor rows + summary stats).
+    </validation_result>
     <project_code>ADVI_FNTEND</project_code>
     <wave>A</wave>
   </metadata>
