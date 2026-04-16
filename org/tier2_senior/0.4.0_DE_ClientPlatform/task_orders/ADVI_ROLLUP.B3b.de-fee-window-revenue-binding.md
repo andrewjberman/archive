@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-16</date>
-    <status>pending</status>
+    <status>complete</status><!-- portal DEV 3ca28d0 2026-04-16. window_revenue + window_fee_share_usd types added. totalFirmRevenue + advisorRevenue window-bound with annualized fallback. pickAdvisorSplitBps window-aware. bun build exit 0. schema-check clean. /frontend-dev fee_summary_window PASS 1 iter. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W3-addendum-B3b</wave>
   </metadata>
