@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- ~B HELD 2026-04-15 21:50Z per CTO Path 1 APPROVED. Hard blocker: nna_atomic has 1 partition (2026-04-13) vs nna's 2294 partitions back to ~2018. D_00c multi-window aggregations (3M..MAX) would collapse to single-day sums. CTO assigned CN-P1b backfill TO authoring to COO for ~D dispatch. CN-P3 re-fires under same substituted parity (vs canonical SOURCE) once CN-P1b validator PASSES (partition count ≥ legacy nna/ + 90-day spot-check parity). Local D_00c CN-side edit reverted; not committed. -->
+    <status>complete</status><!-- 0.4.0_DS_ClientPlatform~C 2026-04-16. Commit d96da39d — D_00c CANONICAL_NNA_PREFIX -> CANONICAL_NNA_ATOMIC_PREFIX (import L35 + paginator L121). py_compile EXIT 0. comp-blast: terminal node. comp-pipescript deployed: MATCH. S3: opal-data-bd/code/gold/D_00c.portal_leaderboard.py. AC#2 Travis spot-check deferred to post gold-run per COO pre-flag / CTO Rule 7 auth. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W4</wave>
     <phase_label>CN-P3 (D_00c NNA consumer cutover — pairs with RA-P3)</phase_label>
@@ -82,9 +82,9 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform~D" task="ADVI_ROLLUP.CN-P1" status="pending"/>
-    <dependency agent="0.4.0_DS_ClientPlatform~D" task="ADVI_ROLLUP.CN-P2" status="staged" description="D_02 NNA cutover must land first (cross-consumer parity target)"/>
-    <dependency agent="co-phase" task="ADVI_ROLLUP.RA-P3" status="staged" description="paired D_00c role cutover; co-ship recommended"/>
+    <dependency agent="0.4.0_DS_ClientPlatform~D" task="ADVI_ROLLUP.CN-P1" status="complete" evidence="bf9651b8"/>
+    <dependency agent="0.4.0_DS_ClientPlatform~D" task="ADVI_ROLLUP.CN-P2" status="complete" evidence="ebd737e3" description="D_02 NNA cutover must land first (cross-consumer parity target); CN-P2 gated on CN-P1b per CTO Path B. COMPLETE ebd737e3 2026-04-16."/>
+    <dependency agent="co-phase" task="ADVI_ROLLUP.RA-P3" status="complete" evidence="e53f0afa" description="paired D_00c role cutover; co-ship complete"/>
   </dependencies>
 
   <next>
