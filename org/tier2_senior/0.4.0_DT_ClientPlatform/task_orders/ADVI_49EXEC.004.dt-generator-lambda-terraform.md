@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- HARD GATE: TO 2 + TO 3 complete -->
+    <status>pending</status><!-- Andrew GO 2026-04-16; TO 3 complete (AE 0.6 c0a00bcc), TO 2 source pending - will pause before source_map + apply -->
     <project_code>ADVI_49EXEC</project_code>
     <priority>P1 (gates TO 7 deploy)</priority>
   </metadata>
