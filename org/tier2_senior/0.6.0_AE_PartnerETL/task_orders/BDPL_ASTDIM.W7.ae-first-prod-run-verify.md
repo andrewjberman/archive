@@ -4,8 +4,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>BDPL_ASTDIM</project_code>
+    <evidence>First natural fire 2026-04-15 22:10:00 UTC post bd-v2.24.1 re-enable. Lambda (bd-asset-dim-trigger) clean (no ERROR; 47s duration, SSM `df541c5e-355d-4252-b512-ff17c0eb5dee` doc `opal-bd-asset-dim-download`). forwardfill_v2/assets/AssetDimTXNs_OpalCapital_Daily_2026-04-14_to_2026-04-14.xlsx @ 22:11:50 UTC (92342 bytes). silver/assets/2026-04-14.parquet @ 22:11:53 UTC (50919 bytes; Lambda xlsx→parquet turnaround 3s). NOTE: PRD says "three consecutive Mon-Fri runs"; COO verbal criteria at 2026-04-15 was single-fire close. Thu 2026-04-16 + Fri 2026-04-17 fires still ride for PRD-strict acceptance; flagging to COO.</evidence>
   </metadata>
 
   <references>
