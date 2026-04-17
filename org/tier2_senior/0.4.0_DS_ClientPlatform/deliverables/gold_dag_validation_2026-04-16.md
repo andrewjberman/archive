@@ -266,17 +266,42 @@ D_04 reads: clients_tab (D_00/D1), header_metrics (D_00/D1), timeseries_chart (D
 
 A_01, A_02, A_04 write no B-consumed artifacts. Only A_00 and A_03 gate B start.
 
-### B → C (validated against ~B's I/O matrix)
+### A → C (cross-group skip, bypasses B)
+
+| Artifact | A writer | C reader | Safe? |
+|----------|----------|---------|-------|
+| `accounts_dimension_latest.parquet` | A_00 | C_00, C_01, C_02, C_03, C_05, C_06, C_07 | YES — A completes before C (by full-phase gate) |
+| `advisor_assignments_history.parquet` | A_01 | C_08 | YES |
+| `fee_rate_history.parquet` | A_02 | C_08 | YES |
+
+C_04 and C_08-via-A_00 are not A→C direct; C_04 reads only aua_validation (S3-dynamic). A_03 and A_04 write no C-consumed artifacts.
+
+### B → C (validated against ~B's I/O matrix, with C_03 correction)
 
 | Artifact | B writer | C reader | Safe? |
 |----------|----------|---------|-------|
 | `canonical_holdings/{*}.parquet` | B_00 | C_02, C_06 | YES — B completes before C |
-| `canonical_account_gains/{*}.parquet` | B_03 | C_00, C_01, C_02 | YES |
+| `canonical_account_gains/{*}.parquet` | B_03 | C_00, C_01, C_02, **C_03** | YES — C_03 read verified at C_03.account_performance.py L69/L114 (CANONICAL_ACCOUNT_GAINS_PREFIX import + `_list_prefix` call) |
 | `holdings_lots/{*}.parquet` | B_01 | C_05 (HOLDINGS_LOTS_PREFIX) | YES |
 | `canonical_lots_unrealized/{*}.parquet` | B_02 | C_05, B_03 | YES — PHASE_B2 ensures B_02 before B_03/C_05 |
 | `canonical_lots_realized/{*}.parquet` | B_02 | B_03 | YES — PHASE_B2 serial |
 
 C_05 pulled into PHASE_B3 by ~B (correct — C_05 doesn't need B_03, only B_02 + B_01). No race with B_03.
+
+**Correction to ~B's Group B row 40 I/O matrix:** `canonical_account_gains/{*} → C_00, C_01, C_02, C_03` (original row listed only C_00–C_02; C_03 row 49 confirms the read).
+
+### A → D (cross-group skip, bypasses B and C)
+
+| Artifact | A writer | D reader | Safe? |
+|----------|----------|---------|-------|
+| `accounts_dimension_latest.parquet` | A_00 | D_00, D_00b, D_01 (direct imports `ACCOUNTS_DIMENSION`) | YES — full-phase gate |
+| `client_dimension.parquet` | A_04 | **ALL 7 D scripts** (D_00, D_00b, D_00c, D_01, D_02, D_03, D_04 — direct imports `CLIENT_DIMENSION`) | YES |
+| `advisor_assignments_history.parquet` | A_01 | D_00c, D_02 | YES |
+| `fee_rate_history.parquet` | A_02 | D_00c, D_02 | YES |
+
+**Correction to ~B's Group A row 26 I/O matrix:** `accounts_dimension → A_01, A_04, B_00, B_01, B_02, C_00–C_03, C_05–C_07, D_00, D_00b, D_01` (original row missed D_00/D_00b/D_01; verified via direct `ACCOUNTS_DIMENSION` imports in D_00 L49, D_00b L39, D_01 L74).
+
+A_04's client_dimension reaches every D script directly — this was the broadest A→D fan-out and was under-specified in ~B's row 30 ("D scripts only"). Enumerated above.
 
 ### C → D (full boundary matrix)
 
