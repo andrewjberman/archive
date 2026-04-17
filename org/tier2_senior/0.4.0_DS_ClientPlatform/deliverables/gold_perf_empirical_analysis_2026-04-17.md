@@ -7,6 +7,14 @@
 
 **Caveat:** PROD full-chain run at 04:00 UTC is the definitive artifact. This document covers only the QA full-chain run that halted at B_01. C/D-group empirical data is deferred to Section 2 (post-04:00 UTC).
 
+### CORRECTION (post-0e9ece2a, ~D revert)
+
+The STALE-RPS auto-skip shipped in a9f42c3b was REVERTED by ~D at 0e9ece2a. Reason: the spec was semantically wrong. `rps_date` (Schwab T-1 business-day close partition) and `snapshot_date` (UTC wall-clock) are different units; they structurally cannot equal during the normal evening-ET / overnight-UTC operating window. The auto-skip fired on perfectly fresh data, zeroing ~37,414 legitimate sell_corrections and leaving phantom FIFO positions — producing MV=$2.493B vs BD-authoritative $1.695B (overcount ~$800M-$1B).
+
+**Implication for this analysis:** the B_01 "117.2s, 12x improvement" row below is **numerically correct but semantically invalid**. That run was fast because it skipped work that should have executed. Discount the 117.2s data point entirely. The real B_01 wall-time profile is unknown post-fix; will be measured on PROD with 0e9ece2a applied.
+
+**Self-critique:** I implemented CTO's spec faithfully (including a Rule 7 flex on `pd.Timestamp.strptime`). I did NOT question whether "rps_date != snapshot_date" was a reasonable stale test. It is not — `rps_date` is always behind `snapshot_date` by construction on UTC-runner overnight runs. Implementing a spec without sanity-checking its operational semantics against the actual data flow is the exact failure mode my audit exhibited earlier in static code review: trusting the label, not measuring the reality. Noted for future spec reviews.
+
 ---
 
 ## 1. Data Summary Table
@@ -23,7 +31,7 @@ QA full chain run, 2026-04-17 01:00:16Z through 01:23:41Z. Chain halted on B_01 
 | A_04 client_dimension | 32.6 | 6.21 | 2,165 | trivial |
 | B_00 canonical_holdings | 217.9 | 6.93 | 799,801 | |
 | B_01 holdings_lots (pre-fix) | **1408.6** | 1.81 | 530,933 | **halted on RPS safety** |
-| B_01 holdings_lots (post-fix, --single) | 117.2 | 4.86 | 529,215 | **12x improvement after stale-RPS + df.attrs fixes** |
+| B_01 holdings_lots (post-fix, --single) | 117.2 | 4.86 | 529,215 | ~~**12x improvement**~~ **INVALID — auto-skip zeroed $1B of legit sell_corrections; reverted in 0e9ece2a. Real post-fix wall TBD on PROD.** |
 
 \* **Mem peak is untrustworthy** — values exceed 128 GB physical RAM on c6i.16xlarge (e.g. B_00 reports 780 GB, A_03 222 GB, build_canonical_prices 234 GB). Instrumentation is almost certainly summing RSS across subprocess workers or counting virtual memory. Disregard column for absolute sizing; relative ordering may or may not be meaningful. D1 instrumentation is owed a fix here.
 
@@ -82,9 +90,13 @@ Not in either ~B or ~C's original bottleneck audit scope as a priority item. 558
 
 B_00 code has `ProcessPoolExecutor(fork, max_workers=cpu_count-4=60)` at L950. Observed CPU avg: 6.93%. Interpretation: the ProcessPool does work, but the dominant wall time is the pre-pool bulk-load-into-memory phase (L904 ThreadPoolExecutor(256) reading thousands of partitions) and the sorted-Schwab-date forward-fill phase (L974). The compute phase is short relative to I/O. The audit's mental model of "B_00 is CPU-saturated by the ProcessPool" is wrong.
 
-### S3 — B_01 stale-RPS + df.attrs fixes produced a 12x speedup, not a rounding win
+### S3 — RETRACTED — B_01 "12x speedup" was phantom
 
-a9f42c3b (stale-RPS auto-skip) + b320426b (df.attrs wipe) dropped B_01 from 1408.6s to 117.2s. That's a 1291s saving on a single script — larger than the combined theoretical savings across all of my audit's Rank 2-5 items. The real bottleneck was operational (stale Schwab data causing a hung RPS injection path), not compute. No audit of code-level bottlenecks would have surfaced this; only live execution did.
+Original claim (retracted): a9f42c3b dropped B_01 from 1408.6s to 117.2s.
+
+Reality: the auto-skip fired on structurally-fresh RPS data (rps_date and snapshot_date are different units; they can never equal on overnight UTC runs) and zeroed 37,414 legitimate sell_corrections. The 117.2s run produced $800M-$1B of phantom MV. ~D reverted the skip at 0e9ece2a. The only genuinely retained B_01 code change is b320426b (df.attrs wipe before to_parquet) — that's a crash fix, not a perf win. Real post-fix B_01 wall will be measured on PROD.
+
+**Takeaway:** operational-class bugs (stale-data halts, semantic mismatches between data pipelines) are not the same as perf wins. Wall-time drops that come from skipping legitimate work do not count. Empirical measurement correctly reported a lower number; the number was simply not a speedup.
 
 ### S4 — Mem instrumentation is broken
 
@@ -107,6 +119,8 @@ Ranked by **observed wall-time impact** from this single QA chain, not theoretic
 | 3 | Dispatcher phase parallelization (gold_dispatch.sh) | -- | Independent of per-script. Deploys the 10-phase map from 856855f3 DAG validation. A_02 / A_04 trivial; A_03 is the serialization gate. Savings dominated by PHASE_B3 (B_03 \|\| C_05) and PHASE_C5 (C_06 \|\| C_08). | Estimate 20-30% chain wall reduction, but hard to pin without C/D data. |
 | 4 | Restore D1 instrumentation — s3_reads/s3_writes and a sane mem metric | -- | Essential for future audits. Without these, the PRD's H4 cannot be tested and we cannot distinguish I/O-bound from memory-bound scripts. | Prerequisite for further empirical work. |
 | 5 | B_01 price loader TPE (already shipped, 22736cf7) | ~5s saved | Shipped, keep. Cosmetic scale. | Already realized. |
+
+**NOT on this list (retracted):** B_01 stale-RPS auto-skip (a9f42c3b). Reverted at 0e9ece2a. The apparent 1291s saving was phantom — skipped legitimate sell_corrections. No perf credit claimed for this change.
 
 Rank 3 (dispatcher) moves DOWN from my audit's #1 because the empirical data shows a single-script (A_03) dominates far more than inter-script serialization does. Fixing A_03 first has a larger absolute wall-time impact than any dispatcher rework.
 
