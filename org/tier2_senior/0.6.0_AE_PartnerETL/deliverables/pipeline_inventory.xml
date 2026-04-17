@@ -701,6 +701,22 @@
       </service>
 
       <service>
+        <name>bd-gold-qa-runner</name>
+        <type>persistent</type>
+        <instance_id>i-0090b823a4a0997e3</instance_id>
+        <instance_type>c6i.16xlarge</instance_type>
+        <iam_role>bd-exporter-ec2-role (profile: bd-exporter-profile)</iam_role>
+        <source_path>data/black_diamond/scripts</source_path>
+        <remote_path>/home/ubuntu/gold-layer/scripts</remote_path>
+        <deploy_note>QA/test twin of bd-gold-layer-runner. Same instance type (c6i.16xlarge), same S3-pull model, same bd-exporter-ec2-role. No systemd auto-start; GOLD_KEEP_ALIVE=1 so no auto-shutdown after gold_dispatch.sh completes. Manual SSM dispatch only — agents or humans start/stop/SSM this instance for test gold runs. NEVER use for PROD nightlies: bd-gold-layer-runner is EventBridge-only and the sole PROD gold runner.</deploy_note>
+        <s3_code_gold>s3://opal-data-bd/code/gold/</s3_code_gold>
+        <s3_code_runner_qa>s3://opal-data-bd/code/runner-qa/</s3_code_runner_qa>
+        <access_policy>MANUAL RUNS ONLY. Not touched by bd-gold-trigger Lambda or EventBridge. Validate CP-DS1 / CP-AE1 / any chain-edit code path here before landing on PROD runner.</access_policy>
+        <started_by>manual SSM (agent or operator)</started_by>
+        <logs>/tmp/gold-*.log on instance; upload via gold_dispatch.sh upload_log (optional) or manual aws s3 cp</logs>
+      </service>
+
+      <service>
         <name>bd-allocations</name>
         <type>persistent</type>
         <instance_id>i-0800437d1dbb0b5cc</instance_id>
