@@ -23,11 +23,11 @@ dep graph were identified. Revised phase map below is safe.
 
 | Script | Reads | Writes |
 |--------|-------|--------|
-| A_00 | accounts_dimension (external/silver) | accounts_dimension → A_01, A_04, B_00, B_01, B_02, C_00–C_03, C_05–C_07 |
+| A_00 | accounts_dimension (external/silver) | accounts_dimension → A_01, A_04, B_00, B_01, B_02, C_00–C_03, C_05–C_07, D_00, D_00b, D_01 |
 | A_01 | accounts_dimension (A_00) | advisor_assignments_history → C_08, D_00c, D_02 |
 | A_02 | (none) | fee_rate_history → C_08, D_00c, D_02 |
 | A_03 | (none) | positions_cube/{*}.parquet → B_00 (implicit — see below) |
-| A_04 | accounts_dimension (A_00) | client_dimension → D scripts only |
+| A_04 | accounts_dimension (A_00) | client_dimension → D_00, D_00b, D_00c, D_01, D_02, D_03, D_04 |
 
 ### Group B
 
@@ -37,7 +37,7 @@ dep graph were identified. Revised phase map below is safe.
 | B_01 | accounts_dimension (A_00) | holdings_lots/{*}, holdings_lots_shadow/{*}, holdings_lots_backfill/{*} → C_05 (via prefix) |
 | B_01b | holdings_lots/ (B_01), classify_watermark | classify_watermark |
 | B_02 | canonical_holdings/{*} (B_00), schwab ULN/ULT/RLD prefixes, canonical_prices, canonical_lots_realized/{*} (prior), canonical_lots_unrealized/{*} (prior) | **canonical_lots_unrealized/{*} → B_03, C_05; canonical_lots_realized/{*} → B_03** (comp WRITES: none detected — gap, verified L617–624) |
-| B_03 | canonical_holdings/{*} (B_00), canonical_lots_realized/ (B_02), canonical_lots_unrealized/ (B_02) | canonical_account_gains/{*} → C_00, C_01, C_02 |
+| B_03 | canonical_holdings/{*} (B_00), canonical_lots_realized/ (B_02), canonical_lots_unrealized/ (B_02) | canonical_account_gains/{*} → C_00, C_01, C_02, C_03 |
 
 ### Group C
 
