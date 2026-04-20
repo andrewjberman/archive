@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T14:08Z by 2.0.0_SA_COO. CTO approval MCP 20260420T140816Z. REVISED 20260420T14:46Z after ~B Phase 0 reconciliation: original mechanism framing was based on stale T3 leaderboard.json + 9f6faf9 category-error ref. CTO authorized Option A via Andrew at 20260420T144506Z. TO scope/mechanism/references corrected; TO ID + acceptance criteria preserved (enriched per AE INV1 subsidiary finding). ~B patching now. -->
+    <status>complete</status><!-- PATCHED + LOCAL-VALIDATED 20260420T~14:58Z by ~B: D_00c L971-987 RA-P3 guard-clause, gold_validate_config.yaml D_00c regression sentinels added, comp-validate exit 0, 5 target advisors inv1+inv2 PASS, firm-wide inv1 fails dropped 22->18 (16 sub-cent rounding + 2 genuine residuals for follow-up), firm-wide inv2 fails dropped 146->5 (explicitly FIX2 scope). Evidence: STAUDT/FIX1/fix_to_1_evidence.md + lb_local_run_2026-04-20.json. DT owns push per lane protocol. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P0 — user-visible portal defect. Inv2 (`fee_paying.aua + no_fee.aua == tagged_aua`) fails 146/152 advisors at T3 via silent clip at L565. Inv1 fails 22/152 ($0 rounding + 3 outliers). Earlier "152/152 crisis" framing was an artifact of stale pre-FIX3A T3 leaderboard.json; actual production state per ~B Phase 0 dry-run is Inv2-dominant.</priority>
     <lane>~B — FIX-TO 1 then FIX-TO 2 (sequential on D_00c). ~B owns both in order.</lane>
