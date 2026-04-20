@@ -1,16 +1,16 @@
 <task_order>
   <metadata>
-    <id>0.4.0_DS_ClientPlatform~B-2026-04-15-comp-learns-003-compiler-baseline</id>
+    <id>0.2.0_DS_CompLearns-2026-04-15-comp-learns-003-compiler-baseline</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
+    <issued_to>0.2.0_DS_CompLearns</issued_to>
     <date>2026-04-15</date>
-    <status>complete</status><!-- Shipped 2026-04-15 20:30Z. Files: comp/framework/compiler_baseline.py (139 lines), extractor_interface.py, tests/test_compiler_baseline.py (9/9 PASS, 7.05s). Acceptance #3 dispatcher smoke PASS (4/4 SUBCOMMANDS via cc.invoke). Acceptance #4 run_harness honest-zero PASS (queries_run=10, pass_rate=0.0, coverage=0.0, mean_latency_ms>0). Acceptance flex pre-flagged to CTO 20:15Z — baseline CLI matches ~A's shipped compiler_contract (no --repo, no confidence, 4 subcommands incl. rebuild, list-* return arrays) because harness_base IS the interlock consumer. 0.4.0_DS_ClientPlatform~B. -->
+    <status>complete</status><!-- Shipped 2026-04-15 20:30Z. Files: comp/framework/compiler_baseline.py (139 lines), extractor_interface.py, tests/test_compiler_baseline.py (9/9 PASS, 7.05s). Acceptance #3 dispatcher smoke PASS (4/4 SUBCOMMANDS via cc.invoke). Acceptance #4 run_harness honest-zero PASS (queries_run=10, pass_rate=0.0, coverage=0.0, mean_latency_ms>0). Acceptance flex pre-flagged to CTO 20:15Z — baseline CLI matches ~A's shipped compiler_contract (no --repo, no confidence, 4 subcommands incl. rebuild, list-* return arrays) because harness_base IS the interlock consumer. 0.2.0_DS_CompLearns. -->
     <evidence>
       Shipped: commit 7740277d — compiler_baseline + extractor Protocol (PRD #3 of 5).
       Artifacts: comp/framework/compiler_baseline.py (139 lines), comp/framework/extractor_interface.py, comp/framework/tests/test_compiler_baseline.py.
       Validation: pytest comp/framework/tests/test_compiler_baseline.py = 9/9 PASS (7.05s). Acceptance #3 dispatcher smoke = 4/4 SUBCOMMANDS via cc.invoke. Acceptance #4 run_harness honest-zero PASS (queries_run=10, pass_rate=0.0, coverage=0.0, mean_latency_ms>0).
       Acceptance flex: pre-flagged to CTO 2026-04-15 20:15Z — baseline CLI matches ~A's shipped compiler_contract (no --repo, no confidence, 4 subcommands incl. rebuild, list-* return arrays) because harness_base IS the interlock consumer.
-      Session log: org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-04-15/.
+      Session log: org/tier2_senior/0.2.0_DS_CompLearns/logs/2026-04-15/.
     </evidence>
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — prevents agent over/under-engineering first iteration</priority>
@@ -113,7 +113,7 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform~A" task="COMP_LEARNS.001" status="staged" description="framework CLI contract needed for baseline to implement against"/>
+    <dependency agent="0.1.0_DS_CompLearns" task="COMP_LEARNS.001" status="staged" description="framework CLI contract needed for baseline to implement against"/>
   </dependencies>
 
   <next>On commit: PRD #2 HTTPX_TARGET (CTO) copies baseline as its starting `compiler.py` template. Phase 2 iteration can fire once engine is built.</next>

@@ -1,15 +1,15 @@
 <task_order>
   <metadata>
-    <id>0.4.0_DS_ClientPlatform~A-2026-04-15-comp-learns-001-harness-framework</id>
+    <id>0.1.0_DS_CompLearns-2026-04-15-comp-learns-001-harness-framework</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
+    <issued_to>0.1.0_DS_CompLearns</issued_to>
     <date>2026-04-15</date>
     <status>complete</status><!-- COO flip 2026-04-16. ~A shipped comp/framework/ harness skeleton 43e3225e (PRD #1 of 5) + elapsed_ms diagnostic 714d43a9. Framework foundational; unblocks #2/#3/#4/#5. -->
     <evidence>
       Shipped: commits 43e3225e (comp/framework/ harness skeleton — PRD #1 of 5) and 714d43a9 (QueryResult.elapsed_ms diagnostic add per CTO).
       Artifacts: comp/framework/harness_base.py, comp/framework/query_schema.py, comp/framework/compiler_contract.py, comp/framework/results_schema.py, comp/framework/tests/smoke.py, comp/framework/tests/test_harness_base.py, comp/README.md.
       Validation: pytest comp/framework/ passes — 6+ cases (happy path, compiler-crash, subprocess-timeout, malformed-yaml, duplicate-id, missing-answer). Smoke test instantiates all four pieces with a 3-query fake target and reports green.
-      Session log: org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-04-15/.
+      Session log: org/tier2_senior/0.1.0_DS_CompLearns/logs/2026-04-15/.
     </evidence>
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — foundational; unblocks 2 + 4</priority>

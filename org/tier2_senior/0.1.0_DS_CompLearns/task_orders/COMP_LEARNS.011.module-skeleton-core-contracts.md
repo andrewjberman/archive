@@ -1,8 +1,8 @@
 <task_order>
   <metadata>
-    <id>0.4.0_DS_ClientPlatform~A-2026-04-16-comp-learns-011-module-skeleton-core-contracts</id>
-    <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
+    <id>0.1.0_DS_CompLearns-2026-04-16-comp-learns-011-module-skeleton-core-contracts</id>
+    <issued_by>2.0.0_SA_COO~Z</issued_by>
+    <issued_to>0.1.0_DS_CompLearns</issued_to>
     <date>2026-04-16</date>
     <status>staged</status><!-- REVERT 2026-04-20T17:59Z by COO~Z. Prior pending-flip at 17:55Z (commit 2f7d06d7) was out of lane scope — today's ~Z session is scoped to ~Z agents only per Andrew directive; dispatch across to base DS~A lane was incorrect. TO stays staged; dep-graph eyeballed clean by CTO~Z (PRD §3 module layout: zero-in-edge root, no cycles, blast radius matches) and v3 sweep authoring complete, so whenever the base lane picks this up it's dispatch-ready. -->
     <project_code>COMP_LEARNS</project_code>
@@ -166,7 +166,7 @@
     11. **R7 (legacy churn):** `python -c "from comp.framework.extractor_interface import *; print('ok')"` still prints `ok` (alias, not hard break). `comp-blast comp/framework/extractor_interface` shows 0 new breakage vs baseline.
     12. **R13 (wall-clock contamination) mechanical enforcement:** `python -c "import dataclasses; from comp.compiler_subtypes.records import SubtypeRecord; from comp.ir.schema import Node; assert 'extracted_at' not in {f.name for f in dataclasses.fields(SubtypeRecord)}; assert 'last_modified' not in {f.name for f in dataclasses.fields(Node)}; print('no-wallclock-on-records')"` prints `no-wallclock-on-records`.
     13. Session log includes a `## Compiler Tools` section reproducing every `<run>` from `<compiler_tools_mandate>` below with observed output and explicit pass/fail vs. `<expect>`. **Missing rows = REWORK.**
-    14. MCP COMPLETE to 2.0.0_SA_COO~B with commit hash + test output summary + `python -c "...public-API import..."` one-liner output.
+    14. MCP COMPLETE to 2.0.0_SA_COO~Z with commit hash + test output summary + `python -c "...public-API import..."` one-liner output.
   </acceptance_criteria>
 
   <compiler_tools_mandate>
@@ -226,5 +226,5 @@
 
   <cross_domain_coordination><none/></cross_domain_coordination>
 
-  <next>On commit + MCP COMPLETE: COO~B dispatches .012 (~A Python parser) + .020 (CTO selector harness) + .016 (CTO httpx gold) in parallel. .013/.014/.015/.021 unblock as their additional parents land.</next>
+  <next>On commit + MCP COMPLETE: COO~Z dispatches .012 (~A Python parser) + .020 (CTO selector harness) + .016 (CTO httpx gold) in parallel. .013/.014/.015/.021 unblock as their additional parents land.</next>
 </task_order>

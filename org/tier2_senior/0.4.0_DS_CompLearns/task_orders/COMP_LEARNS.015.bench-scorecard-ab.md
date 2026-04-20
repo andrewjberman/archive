@@ -1,8 +1,8 @@
 <task_order>
   <metadata>
-    <id>0.4.0_DS_ClientPlatform~D-2026-04-16-comp-learns-015-bench-scorecard-ab</id>
-    <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
+    <id>0.4.0_DS_CompLearns-2026-04-16-comp-learns-015-bench-scorecard-ab</id>
+    <issued_by>2.0.0_SA_COO~Z</issued_by>
+    <issued_to>0.4.0_DS_CompLearns</issued_to>
     <date>2026-04-16</date>
     <status>staged</status>
     <project_code>COMP_LEARNS</project_code>
@@ -279,7 +279,7 @@
 
     **Capacity flag:** if ~D is saturated on ADVI_ROLLUP (primary COO's lane), reassign to ~B after .013 closes per §16 item 6. COO~Z (owning this project as of 2026-04-20) re-asserts fallback authority — bench is critical path, do not stall.
 
-    **v3 sweep marker (2026-04-20 COO~Z):** this TO was swept from v2→v3 per CTO checklist 2026-04-16 13:59Z, preserved in COO~B handoff log `org/tier1_exec/2.0.0_SA_COO/logs/2026-04-16/COO_B_comp_learns_v3_sweep_handoff.md`. Deltas applied: ratchet_critical/exploratory scorecard split (§6.1, §6.2), cached-answer regime (§6.4.1) with `CacheMissDuringPrimaryMetric` + warm-up phase separation, JudgeBackend temperature-0 enforcement via `ratchet_critical_call` wrapper, ab_answer_key validator rejecting open-ended in ratchet pool (§6.4), full 9-tuple cache key, R14 risk added.
+    **v3 sweep marker (2026-04-20 COO~Z):** this TO was swept from v2→v3 per CTO checklist 2026-04-16 13:59Z, preserved in COO~Z handoff log `org/tier1_exec/2.0.0_SA_COO/logs/2026-04-16/COO_B_comp_learns_v3_sweep_handoff.md`. Deltas applied: ratchet_critical/exploratory scorecard split (§6.1, §6.2), cached-answer regime (§6.4.1) with `CacheMissDuringPrimaryMetric` + warm-up phase separation, JudgeBackend temperature-0 enforcement via `ratchet_critical_call` wrapper, ab_answer_key validator rejecting open-ended in ratchet pool (§6.4), full 9-tuple cache key, R14 risk added.
   </cross_domain_coordination>
 
   <next>On commit + MCP COMPLETE to 2.0.0_SA_COO~Z: .017 (~C ratchet) is closer to unblocking. Still waits on .016 + .020 + .021.</next>

@@ -1,8 +1,8 @@
 <task_order>
   <metadata>
-    <id>0.4.0_DS_ClientPlatform~B-2026-04-15-comp-learns-007-status-cli</id>
+    <id>0.2.0_DS_CompLearns-2026-04-15-comp-learns-007-status-cli</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
+    <issued_to>0.2.0_DS_CompLearns</issued_to>
     <date>2026-04-15</date>
     <status>staged</status><!-- Parallel with #003; flips pending when ~B closes #003. -->
     <project_code>COMP_LEARNS</project_code>
@@ -112,8 +112,8 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform~A" task="COMP_LEARNS.001" status="complete"/>
-    <dependency agent="0.4.0_DS_ClientPlatform~C" task="COMP_LEARNS.004" status="complete" description="state.json + run.py schema authoritative"/>
+    <dependency agent="0.1.0_DS_CompLearns" task="COMP_LEARNS.001" status="complete"/>
+    <dependency agent="0.3.0_DS_CompLearns" task="COMP_LEARNS.004" status="complete" description="state.json + run.py schema authoritative"/>
   </dependencies>
 
   <next>On commit: operator can answer "what is target X doing?" in sub-10s per mandate req #8 — closes the last observability requirement.</next>

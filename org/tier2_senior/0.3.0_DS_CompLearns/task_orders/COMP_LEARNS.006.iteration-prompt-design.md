@@ -1,15 +1,15 @@
 <task_order>
   <metadata>
-    <id>0.4.0_DS_ClientPlatform~C-2026-04-15-comp-learns-006-iter-prompt</id>
+    <id>0.3.0_DS_CompLearns-2026-04-15-comp-learns-006-iter-prompt</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <issued_to>0.3.0_DS_CompLearns</issued_to>
     <date>2026-04-15</date>
     <status>complete</status><!-- commit d8ab1372 2026-04-16 -->
     <evidence>
       Shipped: commit d8ab1372 — comp/prompts/iter.md per-iteration agent prompt.
       Artifacts: comp/prompts/iter.md.
       Validation: comp/bin/comp-learns-run.sh (engine at commit 2cb83eb6) invokes the per-iter agent via python -m comp.framework.run referencing this prompt.
-      Session log: org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-04-16/.
+      Session log: org/tier2_senior/0.3.0_DS_CompLearns/logs/2026-04-16/.
     </evidence>
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — engine runs but agent needs the prompt</priority>
@@ -108,7 +108,7 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform~C" task="COMP_LEARNS.004" status="complete" description="run.py invocation contract locked (e657c232)"/>
+    <dependency agent="0.3.0_DS_CompLearns" task="COMP_LEARNS.004" status="complete" description="run.py invocation contract locked (e657c232)"/>
     <dependency agent="2.0.0_SA_COO" task="Track B engine worktree migration" status="complete" description="worktree-based invocation env (23de5edf + 2cb83eb6)"/>
   </dependencies>
 

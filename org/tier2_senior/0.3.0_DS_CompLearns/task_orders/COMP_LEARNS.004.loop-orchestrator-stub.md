@@ -1,8 +1,8 @@
 <task_order>
   <metadata>
-    <id>0.4.0_DS_ClientPlatform~C-2026-04-15-comp-learns-004-loop-orchestrator</id>
+    <id>0.3.0_DS_CompLearns-2026-04-15-comp-learns-004-loop-orchestrator</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <issued_to>0.3.0_DS_CompLearns</issued_to>
     <date>2026-04-15</date>
     <status>complete</status><!-- Shipped 2026-04-15 19:55Z. Commits: 4d17f47d (pre-flight plateau + 11 tests), 1380d44c (status flip), e657c232 (full scope: run.py rewrite + branch_guard.py + comp/bin/comp-learns-run shim, 22/22 pytest). Acceptance #5 flex ACK'd by CTO 19:52Z (shim source at comp/bin/, local .tools/ install per comp-* convention; .gitignore:170 forbids tracked .tools/ files). P0 branch-race constraint honored: Python side read-only against git. End-to-end httpx iteration deferred to post-PRD#2 ship. -->
     <evidence>
@@ -10,7 +10,7 @@
       Artifacts: comp/loop/run.py, comp/loop/branch_guard.py, comp/loop/plateau.py, comp/loop/tests/ (22 test cases), comp/bin/comp-learns-run.sh.
       Validation: pytest comp/loop/ = 22/22 PASS. Acceptance #5 flex ACK'd by CTO 2026-04-15 19:52Z (shim source at comp/bin/, local .tools/ install per comp-* convention; .gitignore:170 forbids tracked .tools/ files). P0 branch-race constraint honored — Python side read-only against git.
       Deferred: end-to-end httpx iteration deferred to post-PRD#2 ship (now handled by .017 under v3 PRD).
-      Session log: org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-04-15/.
+      Session log: org/tier2_senior/0.3.0_DS_CompLearns/logs/2026-04-15/.
     </evidence>
     <project_code>COMP_LEARNS</project_code>
     <priority>P2 — partially subsumed by Track B engine; stubs-only until engine lands</priority>
@@ -20,7 +20,7 @@
     <ref type="prd">docs/architecture/COMP_LEARNS_LOOP_ORCHESTRATOR.md (PRD #4 of 5)</ref>
     <ref type="mandate">docs/architecture/COMP_LEARNS_OPERATIONAL_MANDATE.md (8 reqs — COO engine owns continuous-execution, state-persistence, crash-recovery, kill-switch, observability)</ref>
     <ref type="walkthrough">comp/AUTORESEARCH_WALKTHROUGH.md (COO's pre-implementation study — describes engine shape + state contract)</ref>
-    <ref type="depends_framework">org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/COMP_LEARNS.001.ds-a-harness-framework.md</ref>
+    <ref type="depends_framework">org/tier2_senior/0.1.0_DS_CompLearns/task_orders/COMP_LEARNS.001.harness-framework.md</ref>
     <ref type="depends_engine">Track B engine ship (COO-owned, bash driver pattern per Andrew 19:01Z: "bash script that the agent can only turn off if it hits its goal")</ref>
   </references>
 
@@ -109,7 +109,7 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform~A" task="COMP_LEARNS.001" status="staged" description="framework signature needed"/>
+    <dependency agent="0.1.0_DS_CompLearns" task="COMP_LEARNS.001" status="staged" description="framework signature needed"/>
     <dependency agent="2.0.0_SA_COO" task="Track B engine bash driver + CTO walkthrough ACK" status="pending" description="bash driver subsumes much of PRD #4 scope; ~C's work is the Python single-iteration half"/>
   </dependencies>
 

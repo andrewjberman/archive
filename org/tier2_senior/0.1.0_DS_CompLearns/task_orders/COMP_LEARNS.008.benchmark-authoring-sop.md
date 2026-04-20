@@ -1,8 +1,8 @@
 <task_order>
   <metadata>
-    <id>0.4.0_DS_ClientPlatform~A-2026-04-15-comp-learns-008-bench-sop</id>
+    <id>0.1.0_DS_CompLearns-2026-04-15-comp-learns-008-bench-sop</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
+    <issued_to>0.1.0_DS_CompLearns</issued_to>
     <date>2026-04-15</date>
     <status>staged</status><!-- Flips pending when ~A closes PRD #1 follow-ups. Transferability lever — 4-6 CTO hours per target → DS-runnable under spot-check. -->
     <project_code>COMP_LEARNS</project_code>
@@ -90,7 +90,7 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform~A" task="COMP_LEARNS.001" status="complete" description="query_schema.py needed for template validation"/>
+    <dependency agent="0.1.0_DS_CompLearns" task="COMP_LEARNS.001" status="complete" description="query_schema.py needed for template validation"/>
     <dependency agent="1.0.0_SA_CTO" task="COMP_LEARNS_QUALITATIVE_FRAMEWORK authoring" status="complete" description="7-step protocol is source material"/>
   </dependencies>
 

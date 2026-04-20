@@ -1,8 +1,8 @@
 <task_order>
   <metadata>
-    <id>0.4.0_DS_ClientPlatform~D-2026-04-15-comp-learns-005-adversarial-queries</id>
+    <id>0.4.0_DS_CompLearns-2026-04-15-comp-learns-005-adversarial-queries</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
+    <issued_to>0.4.0_DS_CompLearns</issued_to>
     <date>2026-04-15</date>
     <status>deferred</status><!-- DEFERRED 2026-04-20 by 2.0.0_SA_COO~Z per CTO~Z directive. Evidence: PRD v3 `docs/architecture/COMP_LEARNS_ARCHITECTURE.md @ 8df31d86` §2 row 6 (loop/propose) re-scopes Phase 4 Goodhart-defense adversarial-query work to v0.3+. Mutation-based adversarial validation (§6.6, new TO .021) supersedes this as the v0 honesty mechanism — mutation invariance replaces adversary-generated query scaffolding for the first ratchet cycle. Re-activate only when mutation stability plateau is hit AND v0 exit criterion (§8) is cleared. Prior GO (2026-04-15 Andrew) was issued under the v1/v2 PRD that placed adversarial-query generation in Phase 4 of the pilot; v3 architectural expansion supersedes. Fork resolution: CTO~Z redline 2026-04-20T17:31Z ACK 20260420T173234Z. -->
     <project_code>COMP_LEARNS</project_code>
@@ -101,7 +101,7 @@
   </compiler_tools_mandate>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform~A" task="COMP_LEARNS.001" status="staged" description="query_schema.py extended"/>
+    <dependency agent="0.1.0_DS_CompLearns" task="COMP_LEARNS.001" status="staged" description="query_schema.py extended"/>
     <dependency agent="1.0.0_SA_CTO" task="COMP_LEARNS.002" status="staged" description="httpx queries.yaml needed for back-compat test"/>
   </dependencies>
 

@@ -1,8 +1,8 @@
 <task_order>
   <metadata>
-    <id>0.4.0_DS_ClientPlatform~C-2026-04-16-comp-learns-017-e2e-v0-ratchet-httpx</id>
-    <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <id>0.3.0_DS_CompLearns-2026-04-16-comp-learns-017-e2e-v0-ratchet-httpx</id>
+    <issued_by>2.0.0_SA_COO~Z</issued_by>
+    <issued_to>0.3.0_DS_CompLearns</issued_to>
     <date>2026-04-16</date>
     <status>staged</status>
     <project_code>COMP_LEARNS</project_code>
@@ -131,12 +131,12 @@
       <step>
         <run>python -c "from comp.ir import Node, Edge; from comp.compiler_subtypes.imports import ImportsSubtype; from comp.graph_builder import GraphBuilder; from comp.bench import Scorecard; from comp.bench.ab import run_ab; from comp.bench.primary import primary_metric; from comp.parsers.python import PythonParser; print('all-deps-ok')"</run>
         <expect>Prints `all-deps-ok`. All seven parent TOs (.011-.016 + .020 + .021) have shipped.</expect>
-        <if_mismatch>STOP. Identify missing parent(s) and ping COO~B. Do NOT proceed to wire the ratchet against stub dependencies — that defeats integration testing.</if_mismatch>
+        <if_mismatch>STOP. Identify missing parent(s) and ping COO~Z. Do NOT proceed to wire the ratchet against stub dependencies — that defeats integration testing.</if_mismatch>
       </step>
       <step>
         <run>ls comp/targets/httpx/gold/imports_gold.jsonl comp/targets/httpx/gold/ab_questions.yaml comp/targets/httpx/gold/ab_answer_key.yaml</run>
         <expect>All three gold artifacts present (landed by .016).</expect>
-        <if_mismatch>STOP. .016 has not shipped. Ping COO~B + CTO.</if_mismatch>
+        <if_mismatch>STOP. .016 has not shipped. Ping COO~Z + CTO.</if_mismatch>
       </step>
       <step>
         <run>python -c "from comp.loop.adversarial import AdversarialGenerator; print('adv-ok')"</run>
