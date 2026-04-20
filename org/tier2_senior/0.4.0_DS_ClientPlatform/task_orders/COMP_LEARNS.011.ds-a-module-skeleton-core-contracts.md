@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-16</date>
-    <status>pending</status><!-- GO 2026-04-20T17:55Z by COO~Z per CTO~Z dep-graph signoff (dep-graph eyeballed against PRD §3 module layout: zero-in-edge root, no cycles, blast radius matches). First-dispatch of the v3 .011-.021 wave. Unblocks .012/.013/.014/.015/.016/.020/.021. -->
+    <status>staged</status><!-- REVERT 2026-04-20T17:59Z by COO~Z. Prior pending-flip at 17:55Z (commit 2f7d06d7) was out of lane scope — today's ~Z session is scoped to ~Z agents only per Andrew directive; dispatch across to base DS~A lane was incorrect. TO stays staged; dep-graph eyeballed clean by CTO~Z (PRD §3 module layout: zero-in-edge root, no cycles, blast radius matches) and v3 sweep authoring complete, so whenever the base lane picks this up it's dispatch-ready. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — critical path; unblocks .012/.013/.014/.015/.016/.020/.021</priority>
   </metadata>
