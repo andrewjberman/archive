@@ -2,13 +2,13 @@
   <metadata>
     <id>ADVI_STAUDT.FIX6</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-04-20</date>
-    <status>draft</status>
+    <status>dispatched</status><!-- DISPATCHED 20260420T14:47Z by 2.0.0_SA_COO. CTO approval MCP 20260420T144745Z "APPROVED as drafted (f1c685aa)... No edits required." Andrew called ~D to spawn (rationale: ~D just mapped platinum NNA consumers in their synthesis → Phase 0 is at-hand context). -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P1 — schedules after FIX1 lands (parallel to FIX2/FIX3A closeout). Addresses Andrew's top-level historical-NNA concern that INV1 confirmed as a real firm-grain universe asymmetry, NOT a per-advisor code bug.</priority>
     <bug_reference>Pre-2023 universe asymmetry between silver/transactions (broader flow-tracked universe) and holdings_lots-derived AUA (narrower tracked universe). INV1 Q1 20260420T143042Z quantified: 4.28x ratio firm NNA/AUA in 2020, converging to 0.91x by 2024. See data/black_diamond/diagnostics/STAUDT/INV1/historical_nna_mechanism.md (when AE publishes).</bug_reference>
-    <lane>Single-TO — no serialization required given Option B long-term direction supersedes this. Proposed spawn: ~A (idle after FIX3A) or ~D (idle after synthesis). COO to coordinate with Andrew on spawn assignment.</lane>
+    <lane>~D — single-TO lane. Andrew-assigned 2026-04-20T14:47Z. Rationale: ~D's synthesis just mapped platinum's NNA consumers + the full B/C/D propagation chain; the Phase 0 comp-pipescript/blast surface-identification is at-hand context. Option B work (post-FIX1) also slated for ~D + AE joint, so continuity is preserved.</lane>
   </metadata>
 
   <references>
