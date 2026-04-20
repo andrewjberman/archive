@@ -26,6 +26,29 @@
   </objective>
 
   <scope>
+    <!-- VERBATIM from ADVI_STAUDT.md §3.0 (Two primary failure classes) per CTO MCP 20260420T~12:14Z. Lead-with framing — do not paraphrase, do not relabel. -->
+
+    ### 3.0 Two primary failure classes (Andrew 2026-04-20 — lead every lane TO scope with this)
+
+    Every lane TO must open its scope with these two classes named explicitly. These are THE primary audit subjects; everything else in §3.2/§3.3 is secondary evidence grounding.
+
+    **Class 1 — NNA definition change** (grain AND path)
+    - **Grain sub-class:** D_02 `_nna_since` flipped per-advisor cumulative → per-(date, advisor, role) daily-grain at CN-P2 (commits `b3f6b1ee` + `ebd737e3` Thu 2026-04-16 12:31–12:35 ET). Previously a single cumulative NNA value per advisor; now a daily-rolled sum decomposed across roles. COO audit bug #1 — currently hidden in the modal via `SHOW_NNA=false` (`AdvisorBookAccountModal.tsx:38`).
+    - **Path sub-class:** Canonical prefix split — `CANONICAL_NNA_PREFIX` (`gold/canonical/nna/`, 14 cols, has `aua_current`/`growth`/`client_state`) vs `CANONICAL_NNA_ATOMIC_PREFIX` (`gold/canonical/nna_atomic/`, 22 cols, missing those). W4 CN-P2..P5 put all D-group consumers on atomic (Thu); session-32 `cd177553` (Fri 16:08 ET) reverted D_04+D_00b+D_01+C_08 to `nna/` but left D_00c+D_02 on `nna_atomic/`. Live schism. §2.3.
+
+    **Class 2 — Group D mapping ambiguity** (tagged_aua source + role-split + fee-split)
+    - **tagged_aua source sub-class:** Where does the canonical `tagged_aua` live? D_00c computes its own via `row.total_aua` fallback (`D_00c:528`) with a `_weighted_aua` split-weighted degradation (`D_00c:881`). D_02 produces `summary.tagged_aua` in `build_advisor_books`. D_04 overrides with its own block (`D_04:2325-2340`, commits `fe999416`/`6391b96c`, 2026-04-09). None of them reads from a shared module — D_00c does not read from D_02 (COO-verified: 9 reads, 0 from D_02). COO audit bugs #2 and #3.
+    - **Role-split attribution sub-class:** How is a multi-role client's AUA distributed across roles? `D_00c._weighted_aua` (L881) applies a split-weight; DE removal of allChecked early return (`9f6faf9`) forced the leaderboard through the split-weighted sum, producing Travis $82M (split) vs $434M (non-split). C_08 role_breakdown canonical override (RA-P5 `d9ab1719`) adds a second role-split site.
+    - **Fee-split attribution sub-class:** Fee-paying vs no-fee bucket boundaries. `D_00c:565` silent clip `no_fee_aua = max(0, tagged_aua - fee_aua)` zeros the no-fee bucket when tagged_aua under-computes (Travis `max(0, 82 - 346) = 0`, drops off leaderboard). B1.fix (`5114984b`) swept `role_breakdown[role].no_fee.aua` but NOT top-level `fee_breakdown.no_fee.aua`. COO audit bug #4.
+
+    **MANDATORY INVARIANT per checkpoint per advisor (must check, every checkpoint, every advisor):**
+    - `sum(role_breakdown[*].aua) == tagged_aua`
+    - `fee_breakdown.fee_paying.aua + fee_breakdown.no_fee.aua == tagged_aua`
+
+    Any checkpoint where these fail is a mapping-ambiguity finding — cite advisor ID + checkpoint + delta magnitude in `group_d_tagged_aua_role_fee_decomposition.md`.
+
+    <!-- End §3.0 lead-in. The §3.3 Group D PRIMARY FOCUS table follows as second-level evidence detail. -->
+
     <!-- VERBATIM from ADVI_STAUDT.md §3.3 (Group D PRIMARY FOCUS) per CTO MCP 20260420T120334Z. The primary-focus language must survive into the TO — no paraphrasing. -->
 
     ### 3.3 GROUP D PRIMARY FOCUS — tagged_aua / role-split / fee-split (PRIMARY SCOPE, non-negotiable)
@@ -206,4 +229,49 @@
     mkdir -p .comp-graph && printf "SERIAL=0.4.0_DS_ClientPlatform~B\nTO_ID=ADVI_STAUDT.B\n" > .comp-graph/.agent_context
     ```
   </agent_context_setup>
+
+  <amendment_2026_04_20_post_authoring>
+    Per CTO MCPs 20260420T~12:14Z (§3.0 lead-with framing — already inserted at top of `<scope>` above) + 20260420T121431Z (§3.4 Group B+C material-change scope). This amendment ADDS scope, deliverable, mandate, and acceptance criteria; nothing above is superseded.
+
+    ### 3.4 Group B + Group C material-change scope (Andrew 2026-04-20) — VERBATIM
+
+    Group D is the most important, but every material Group B and Group C change in the window must be audited because those are the upstream producers whose output D-group reads. An upstream definitional change with a mild direct effect can cascade to a severe D-group effect.
+
+    **Authoritative B/C scripts in scope at T1 `f177240b` (each gets a line in your `group_bc_material_changes.md` inventory — no collapse):**
+
+    **Group B (Block-level: holdings, canonical prices, transactions):**
+    - `B_00.canonical_fills.py` — `22736cf7` (Thu 20:18 perf: parallel forward-fill — IN T1 WINDOW). Audit: parity of parallel vs sequential forward-fill output; any partition drift vs T0.
+    - `B_01.holdings_lots.py` — at T1: post-WAR-ROOM rewrites (`22736cf7` parallel price loader; subset of WAR ROOM iterrows). Pre-Friday cusip-rework, pre-bond-100x, pre-tiered-cap. Audit: any change in lot-merge / RPS-merge / cap-compression behavior between T0 and T1. Document `df.attrs` strip status + DAG behavior + parallel-loader effect.
+    - `B_01b` — search commits T0→T1; if touched, audit.
+    - `B_02 / B_03` — `856855f3` (Thu 19:59 DAG race condition B_02‖B_03 identified + corrected — IN T1 WINDOW). Audit: did the correction land at T1? Was there a window where B_02/B_03 raced producing partition drift?
+
+    **Group C (Canonical layer: performance, NNA, role_aua, fees, views, advisor_fee_efficiency):**
+    - `C_00.canonical_performance.py` — `f177240b` (Thu 20:29 full Polars port — groupby+agg L222 + cumsum L263), `22736cf7` (Thu 20:18 batched cumsum), `4a6173db` (Thu 20:35 runner polars install). **POLARS PARITY PROBE MANDATORY at this lane (already in §4.2 + Phase 1 above).** Diff polars-port output at T1 vs prior pandas baseline at T0 for 2026-04-15 partition. Row-level delta > $0.01 = FINDING for ~D's bug_attribution.md.
+    - `C_01.canonical_nna.py` — `9e47830c` (Thu 09:48 CN-P1b --backfill-nna-atomic-only — IN T1 WINDOW), `dc4980c3` (Thu 10:02 CN-P1b bulk historical emit 2,294 partitions / 9,245,944 rows — IN T1 WINDOW). **NNA Class 1 path sub-class producer.** Audit: schema diff between `nna/` and `nna_atomic/` at T1 (both present); column-set diff (`aua_current`, `growth`, `client_state`, `aua_residual`, `nna_clean` in nna/ but not nna_atomic/); which historical partitions exist as of T1.
+    - `C_01b` — search commits T0→T1; if touched, audit.
+    - `C_02 / C_04 / C_05 / C_06` — quieter scripts; grep T0→T1 commits. If quiet, document "no material change in T0→T1 window" with grep evidence.
+    - `C_03.canonical_performance.py` — at T1: pre-`85bb2daa` phantom outflow pulse fix (lands Friday). Document baseline `cum_inflows`/`cum_outflows` behavior at T1 — should match T0 for this script.
+    - `C_07.advisor_dimensions.py` — at T1: same as T0 (post-`f49aa9bd` RCA, no new commits). Confirm stability; cite hash equality if possible.
+    - `C_08.advisor_fee_efficiency.py` — already PRIMARY in §3.3. §3.4 adds at T1: `3e497ab8` (Thu 18:14 canonical role order), `86e57e36` (Thu 20:15 WAR ROOM iterrows→to_dict), `bb426933` (Thu 18:46 B10 small_account_avg_aua at (advisor,role) + advisor grain), `49eac17d` (Thu 13:23 CN-P5 nna_atomic flip — STILL ACTIVE at T1, reverted later by Friday `cd177553`), `d9ab1719` (Thu 13:28 RA-P5 role_breakdown canonical override). Audit: B10 numeric output + canonical role order correctness + WAR ROOM iterrows parity (covered in §4.2 probe) + CN-P5 atomic-prefix read effect (does C_08 successfully read aua_current/growth from atomic at T1, or does it crash?).
+
+    **WAR-ROOM ITERROWS PARITY PROBE (already in §4.2 + Phase 1 above):** D_02 (`e031d1f5`), D_00b (`a822e34d`), D_00c (`c7a7a5a9`), D_01 (`a7f1ee76`), C_08 (`86e57e36`). For each, diff output JSON against pre-WAR-ROOM tip. Field list MUST include `role_breakdown`, `fee_breakdown`, `tagged_aua`, `aua_growth_pct`. Any row-level delta > $0.01 = FINDING.
+
+    ### Additional compiler mandate per §3.4 (Phase 1 deltas — augments the §3.3 mandate above):
+
+    - `cd /tmp/staudt_T1 && comp-pipescript io B_00 && comp-pipescript io B_01 && comp-pipescript io B_02 && comp-pipescript io B_03 && comp-pipescript io C_00 && comp-pipescript io C_01 && comp-pipescript io C_03 && comp-pipescript io C_07` (skip quiet scripts that have no commits in T0→T1 window; document the skip with grep evidence)
+    - `cd /tmp/staudt_T1 && comp-blast B_01 && comp-blast C_00 && comp-blast C_01 && comp-blast C_03 && comp-blast C_08`
+    - Polars parity probe + WAR ROOM iterrows parity probes already in Phase 1 above per §4.2 — those satisfy the §3.4 Phase 2 mandate for ~B.
+
+    ### Additional deliverable per §3.4:
+
+    `data/black_diamond/diagnostics/STAUDT/T1_thursday/group_bc_material_changes.md` with the four required sections per §3.4: (1) touched-script inventory at T1, (2) per-change delta with formula/logic + commit SHA + file:line, (3) downstream propagation per `comp-blast`, (4) numeric signal at T1 — at least one sampled figure (firm total OR sample advisor OR sample account) for every touched B/C script that changed between T0 and T1. Quiet scripts get an explicit "no material change in T0→T1 window" line with grep evidence.
+
+    ### Additional acceptance criteria per §3.4 + §3.0:
+
+    1. `group_bc_material_changes.md` committed under `STAUDT/T1_thursday/`. Script-line discipline: each touched B/C script gets its own line — no collapse. Quiet scripts (C_02/C_04/C_05/C_06) explicitly noted "no material change in window" with grep evidence; silent omission = REWORK.
+    2. **MANDATORY INVARIANT per §3.0** — for every advisor at T1 (5 top + firm-level), check both invariants:
+       - `sum(role_breakdown[*].aua) == tagged_aua`
+       - `fee_breakdown.fee_paying.aua + fee_breakdown.no_fee.aua == tagged_aua`
+       Violations cited in `group_d_tagged_aua_role_fee_decomposition.md` with advisor ID + T1 + delta magnitude. Missing invariant evidence = REWORK.
+  </amendment_2026_04_20_post_authoring>
 </task_order>

@@ -26,6 +26,29 @@
   </objective>
 
   <scope>
+    <!-- VERBATIM from ADVI_STAUDT.md §3.0 (Two primary failure classes) per CTO MCP 20260420T~12:14Z. Lead-with framing — do not paraphrase, do not relabel. -->
+
+    ### 3.0 Two primary failure classes (Andrew 2026-04-20 — lead every lane TO scope with this)
+
+    Every lane TO must open its scope with these two classes named explicitly. These are THE primary audit subjects; everything else in §3.2/§3.3 is secondary evidence grounding.
+
+    **Class 1 — NNA definition change** (grain AND path)
+    - **Grain sub-class:** D_02 `_nna_since` flipped per-advisor cumulative → per-(date, advisor, role) daily-grain at CN-P2 (commits `b3f6b1ee` + `ebd737e3` Thu 2026-04-16 12:31–12:35 ET). Previously a single cumulative NNA value per advisor; now a daily-rolled sum decomposed across roles. COO audit bug #1 — currently hidden in the modal via `SHOW_NNA=false` (`AdvisorBookAccountModal.tsx:38`).
+    - **Path sub-class:** Canonical prefix split — `CANONICAL_NNA_PREFIX` (`gold/canonical/nna/`, 14 cols, has `aua_current`/`growth`/`client_state`) vs `CANONICAL_NNA_ATOMIC_PREFIX` (`gold/canonical/nna_atomic/`, 22 cols, missing those). W4 CN-P2..P5 put all D-group consumers on atomic (Thu); session-32 `cd177553` (Fri 16:08 ET) reverted D_04+D_00b+D_01+C_08 to `nna/` but left D_00c+D_02 on `nna_atomic/`. Live schism. §2.3.
+
+    **Class 2 — Group D mapping ambiguity** (tagged_aua source + role-split + fee-split)
+    - **tagged_aua source sub-class:** Where does the canonical `tagged_aua` live? D_00c computes its own via `row.total_aua` fallback (`D_00c:528`) with a `_weighted_aua` split-weighted degradation (`D_00c:881`). D_02 produces `summary.tagged_aua` in `build_advisor_books`. D_04 overrides with its own block (`D_04:2325-2340`, commits `fe999416`/`6391b96c`, 2026-04-09). None of them reads from a shared module — D_00c does not read from D_02 (COO-verified: 9 reads, 0 from D_02). COO audit bugs #2 and #3.
+    - **Role-split attribution sub-class:** How is a multi-role client's AUA distributed across roles? `D_00c._weighted_aua` (L881) applies a split-weight; DE removal of allChecked early return (`9f6faf9`) forced the leaderboard through the split-weighted sum, producing Travis $82M (split) vs $434M (non-split). C_08 role_breakdown canonical override (RA-P5 `d9ab1719`) adds a second role-split site.
+    - **Fee-split attribution sub-class:** Fee-paying vs no-fee bucket boundaries. `D_00c:565` silent clip `no_fee_aua = max(0, tagged_aua - fee_aua)` zeros the no-fee bucket when tagged_aua under-computes (Travis `max(0, 82 - 346) = 0`, drops off leaderboard). B1.fix (`5114984b`) swept `role_breakdown[role].no_fee.aua` but NOT top-level `fee_breakdown.no_fee.aua`. COO audit bug #4.
+
+    **MANDATORY INVARIANT per checkpoint per advisor (must check, every checkpoint, every advisor):**
+    - `sum(role_breakdown[*].aua) == tagged_aua`
+    - `fee_breakdown.fee_paying.aua + fee_breakdown.no_fee.aua == tagged_aua`
+
+    Any checkpoint where these fail is a mapping-ambiguity finding — cite advisor ID + checkpoint + delta magnitude in `group_d_tagged_aua_role_fee_decomposition.md`.
+
+    <!-- End §3.0 lead-in. The §3.3 Group D PRIMARY FOCUS table follows as second-level evidence detail. -->
+
     <!-- VERBATIM from ADVI_STAUDT.md §3.3 (Group D PRIMARY FOCUS) per CTO MCP 20260420T120334Z. The primary-focus language must survive into the TO — no paraphrasing. -->
 
     ### 3.3 GROUP D PRIMARY FOCUS — tagged_aua / role-split / fee-split (PRIMARY SCOPE, non-negotiable)
@@ -207,4 +230,53 @@
     mkdir -p .comp-graph && printf "SERIAL=0.4.0_DS_ClientPlatform~C\nTO_ID=ADVI_STAUDT.C\n" > .comp-graph/.agent_context
     ```
   </agent_context_setup>
+
+  <amendment_2026_04_20_post_authoring>
+    Per CTO MCPs 20260420T~12:14Z (§3.0 lead-with framing — already inserted at top of `<scope>` above) + 20260420T121431Z (§3.4 Group B+C material-change scope). This amendment ADDS scope, deliverable, mandate, and acceptance criteria; nothing above is superseded.
+
+    ### 3.4 Group B + Group C material-change scope (Andrew 2026-04-20) — VERBATIM
+
+    Group D is the most important, but every material Group B and Group C change in the window must be audited because those are the upstream producers whose output D-group reads. An upstream definitional change with a mild direct effect can cascade to a severe D-group effect.
+
+    **Authoritative B/C scripts in scope at T2 `ae759bbb` (each gets a line in your `group_bc_material_changes.md` inventory — no collapse):**
+
+    **Group B (Block-level: holdings, canonical prices, transactions):**
+    - `B_00.canonical_fills.py` — at T2: same as T1 (no new commits in T1→T2 window). Confirm stability.
+    - `B_01.holdings_lots.py` — HEAVY in T1→T2 window: `ec2c1efc` (Fri 00:09 GOLD-DATE-FIX), `59340b42`→`4317354a` (Thu 23:14-23:15 snapshot_date option-d + revert), `a9f42c3b`→`0e9ece2a` (Thu 22:38-23:08 stale-RPS auto-skip + removal), `52b78c0d`+`b320426b` (Thu 22:51-22:53 df.attrs strip), `5438de6e`+`cd00ff2c` (Fri 08:33-08:36 silver-authority gate PIVOT 2 + Gate 3 silent-close), `7e57576f`+`c693d5a3`+`d39c4dff` (Fri 09:00-09:49 PIVOT 5/6 synth-inject gate), `1db831aa`+`f5f19e77`+`c4ebde9a`+`ae759bbb` (Fri 06:11-07:40 cusip rework). Audit: snapshot_date derivation path (revert integrity covered in §4.3 probe) · stale-RPS behavior · `df.attrs` serialization path · silver-authority gate cohort size · PIVOT evolution · Gate 3 silent-close cohort size · cusip merge keying ((account_id, cusip) per `1db831aa`).
+    - `B_01b` — search commits T1→T2; if touched, audit.
+    - `B_02 / B_03` — at T2: same as T1 (DAG fix already landed). Confirm stability.
+
+    **Group C (Canonical layer: performance, NNA, role_aua, fees, views, advisor_fee_efficiency):**
+    - `C_00.canonical_performance.py` — at T2: same as T1 (Polars port already landed; no new commits). Confirm stability + cite hash equality if possible.
+    - `C_01.canonical_nna.py` — at T2: same as T1 (CN-P1b backfill already landed; no new commits). Confirm `nna_atomic/` partition presence + schema unchanged.
+    - `C_01b` — search commits T1→T2; if touched, audit.
+    - `C_02 / C_04 / C_05 / C_06` — quieter scripts; grep T1→T2 commits. If quiet, document "no material change in T1→T2 window" with grep evidence.
+    - `C_03.canonical_performance.py` — `85bb2daa` (Fri 09:42 phantom outflow pulse fix — IN T1→T2 WINDOW — recompute cum_inflows/cum_outflows on dense date grid post-merge cumsum). **Load-bearing for NNA.** `ACCOUNT_PERFORMANCE` is read by D_00c, D_02, D_04. Audit: cum_inflows/cum_outflows at T1 (pre-fix) vs T2 (post-fix) for sample advisors · advisor-level and firm-level daily NNA derived from C_03 output · does the phantom outflow pulse exist at T1 but not T2? · any downstream advisor whose NNA flipped sign between T1 and T2.
+    - `C_07.advisor_dimensions.py` — at T2: same as T1 + T0 (no new commits). Confirm stability.
+    - `C_08.advisor_fee_efficiency.py` — already PRIMARY in §3.3. §3.4 adds at T2: same as T1 (no new C_08 commits in T1→T2 window — defensive backfill `9e537f9f` and revert `cd177553` land Friday afternoon, AFTER T2 anchor `ae759bbb` 07:40 ET). Confirm C_08 still reads atomic at T2 (CN-P5 not-yet-reverted).
+
+    **Silver-layer churn in T1→T2 window** (out of B/C strict scope but related):
+    - `c270a9b2` (rolling-key refresh) → `32fbb0d6` (revert of rolling key) → `2a69b97e` (snapshot-date keying)
+    - `80917a1e` cusip column added to silver/transactions (CP-AE1)
+    - `6c80c5ed` Schwab ULN → silver/ULN/ (AE)
+    Audit: revert integrity (covered in §4.3 + Phase 1 above), silver/transactions cusip column presence at T2, silver/ULN/ first-version timestamp.
+
+    ### Additional compiler mandate per §3.4 (Phase 1 deltas — augments the §3.3 mandate above):
+
+    - `cd /tmp/staudt_T2 && comp-pipescript io B_00 && comp-pipescript io B_01 && comp-pipescript io B_02 && comp-pipescript io B_03 && comp-pipescript io C_00 && comp-pipescript io C_01 && comp-pipescript io C_03 && comp-pipescript io C_07` (skip quiet scripts that have no commits in T1→T2 window; document the skip with grep evidence)
+    - `cd /tmp/staudt_T2 && comp-blast B_01 && comp-blast C_00 && comp-blast C_01 && comp-blast C_03 && comp-blast C_08`
+    - Cusip-coverage probe + revert-integrity check already in Phase 1 above per §4.3 — those satisfy the §3.4 Phase 2 mandate for ~C.
+
+    ### Additional deliverable per §3.4:
+
+    `data/black_diamond/diagnostics/STAUDT/T2_friday_earlyam/group_bc_material_changes.md` with the four required sections per §3.4: (1) touched-script inventory at T2, (2) per-change delta with formula/logic + commit SHA + file:line, (3) downstream propagation per `comp-blast`, (4) numeric signal at T2 — at least one sampled figure (firm total OR sample advisor OR sample account) for every touched B/C script that changed between T1 and T2. Quiet scripts get an explicit "no material change in T1→T2 window" line with grep evidence.
+
+    ### Additional acceptance criteria per §3.4 + §3.0:
+
+    1. `group_bc_material_changes.md` committed under `STAUDT/T2_friday_earlyam/`. Script-line discipline: each touched B/C script gets its own line — no collapse. Quiet scripts (C_02/C_04/C_05/C_06) explicitly noted "no material change in T1→T2 window" with grep evidence; silent omission = REWORK.
+    2. **MANDATORY INVARIANT per §3.0** — for every advisor at T2 (5 top + firm-level), check both invariants:
+       - `sum(role_breakdown[*].aua) == tagged_aua`
+       - `fee_breakdown.fee_paying.aua + fee_breakdown.no_fee.aua == tagged_aua`
+       Violations cited in `group_d_tagged_aua_role_fee_decomposition.md` with advisor ID + T2 + delta magnitude. Missing invariant evidence = REWORK.
+  </amendment_2026_04_20_post_authoring>
 </task_order>
