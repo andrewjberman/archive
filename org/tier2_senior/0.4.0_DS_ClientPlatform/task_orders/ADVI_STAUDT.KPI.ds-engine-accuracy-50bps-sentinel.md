@@ -25,15 +25,24 @@
   <scope>
     **Two deliverables:**
 
-    **(1) `gold_validate_config.yaml` sentinel — firm AUA accuracy gate:**
-    Add a new validator entry (severity ERROR) that:
+    **(1) `gold_validate_config.yaml` sentinels — TWO independent accuracy gates:**
+
+    **(1a) BD-anchored sentinel (ERROR severity) — firm AUA vs BD ground truth:**
     - Reads `gold/firm_composition.json` (current canonical firm AUA)
     - Reads `silver/allocations/{latest_date}.parquet` (current BD silver firm MV)
     - Computes `abs(canonical_firm_aua - bd_silver_firm_mv) / bd_silver_firm_mv`
     - Fails if > 50bps (0.005)
     - Optional WARN tier at 25bps for early warning
 
-    Plus auxiliary sentinels:
+    **(1b) IDENTITY sentinel (ERROR severity) — flow-vs-snapshot drift:**
+    Per ~A's briefing 20260420 §"Why this hasn't been caught before" — the engine has been silently dropping snapshot accuracy because `canonical_nna.aua_residual` absorbs daily drift without alarm. The identity check Andrew used to discover this should be codified:
+    - For each date d, assert `abs((aua_current[d-1] + nna_txn[d] + growth[d]) - aua_current[d]) / aua_current[d] < 50bps`
+    - Equivalently (and computationally cheaper): `abs(sum(canonical_nna.aua_residual[d])) / sum(canonical_nna.aua_current[d]) < 50bps` — the residual field IS the drift
+    - Fails if > 50bps. WARN tier at 25bps.
+    - This catches snapshot pipeline drift INDEPENDENT of BD silver availability — works even if BD source is stale or unavailable.
+    - The two sentinels (1a + 1b) are complementary: (1a) catches calibration error vs source-of-truth; (1b) catches internal-consistency drift between flows and snapshots within the engine.
+
+    **Plus auxiliary sentinels:**
     - Schwab-cohort accuracy: `abs(canonical_schwab_mv - bd_silver_schwab_mv) / bd_silver_schwab_mv ≤ 50bps` (ERROR)
     - Non-Schwab-cohort accuracy: same target (ERROR; tighter cohort highlights regressions)
     - Account count parity: `canonical_account_count >= bd_silver_account_count - 5` (WARN; catches account-drop regressions)
@@ -123,7 +132,7 @@
 
   <acceptance_criteria>
     - [ ] engine_accuracy_diagnostic.py reproduces ~A's manual report numbers within 5% for 2026-04-16
-    - [ ] gold_validate_config.yaml sentinels added (firm AUA + cohort + account count)
+    - [ ] gold_validate_config.yaml sentinels added: (1a) firm AUA vs BD silver + (1b) flow-vs-snapshot identity assertion + auxiliary cohort + account count
     - [ ] Sentinels DISABLED initially with clear enablement procedure documented
     - [ ] comp-validate parses config without error
     - [ ] Sentinel-logic dry-run confirms exit 0 / non-zero behavior at 50bps boundary
