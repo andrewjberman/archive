@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T17:25Z by 2.0.0_SA_COO. Andrew approval 2026-04-20 in chat ("Agreed on all counts go ahead") on engine refinement plan (1)+(2). -->
+    <status>pending</status><!-- DISPATCHED 20260420T17:25Z by 2.0.0_SA_COO. Andrew approval 2026-04-20 in chat ("Agreed on all counts go ahead") on engine refinement plan (1)+(2). Extended 20260420T1829Z with identity-assertion sentinel (1b). ACK'd by ~C after fresh-session resume; Phase 0 starting. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P2 — engine quality framework, no time pressure. Codifies the 50bps firm AUA accuracy target as a regression sentinel + makes the loss-decomposition diagnostic re-runnable. Independent of qa-runner watchdog incident; can author + draft now.</priority>
     <lane>~C — idle post-FIX5 close. Independent lane from BFIX1+BFIX2 (~A). KPI work doesn't conflict with B_00 patching (different files).</lane>

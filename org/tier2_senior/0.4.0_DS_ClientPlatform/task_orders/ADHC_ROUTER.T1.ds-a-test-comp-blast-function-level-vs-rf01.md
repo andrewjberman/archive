@@ -5,7 +5,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_at>2026-04-15</issued_at>
-    <status>pending</status>
+    <status>complete</status><!-- COO flip 2026-04-16 per ADHC_ROUTER Phase 1 closeout. ~A shipped compiler patches d1d6920b (comp-blast function-level + dotted reverse-edge regression). Patch landed + REGISTRY reflects Phase 1 COMPLETE. -->
     <authorizing_directive>Andrew 2026-04-15 — route idle DS lanes to compiler regression testing on the 3 shipped compiler features (0324142a). Each lane is critical of the tools against their own recent work and is authorized to ship direct patches.</authorizing_directive>
   </header>
 

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-20</date>
-    <status>pending</status><!-- CTO conditional-approved 20260420T~12:49Z; comp-build rework + minor polish landed; COO dispatched GO to ~A inbox 20260420T~12:55Z. ~A is upstream-most, no upstream gate, may begin immediately on registration. -->
+    <status>complete</status><!-- COMPLETE 20260420T13:12Z by ~A. Commit 0d34f025. All 4 deliverables present (silver_and_group_a_inventory.md + layer_a_findings.md + silver_schema_diff.json + evidence_pack.json). comp-build 1162/940 nodes/edges UNIFORM at all 4 checkpoints (CTO rework honored). 3 material silver changes (A-1 cusip column add at T2 / A-2 ULN ingest at T3 / A-3 rolling-key revert net-zero) — all anticipated by PRD §4.1; A-group scripts CLEAN-BILL T0=T1=T2=T3; Group D upstream dimensions (advisor_assignments/fee_rate/client_dimension) UNCHANGED in window. ~B findings-write gate RELEASED. -->
     <project_code>ADVI_STAUDT</project_code>
     <lane>~A — Layer: SILVER + Group A (upstream-most)</lane>
     <model>LAYER × 4-checkpoint MATRIX. Lane owns one layer; lane walks through all 4 checkpoints to capture evolution. Andrew 2026-04-20 reinforced: "layer scoped AND time scoped — at each of those times, watch how the layer evolved, cross-reference, comprehensive."</model>

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T19:XX Z by 2.0.0_SA_COO. Andrew directive 2026-04-20 in chat. ~C lane (KPI in parallel; both P2/P3, no overlap with ~A engine wave). -->
+    <status>pending</status><!-- DISPATCHED 20260420T19:XX Z by 2.0.0_SA_COO. Andrew directive 2026-04-20 in chat. ~C lane (KPI in parallel; both P2/P3, no overlap with ~A engine wave). GO after 4-edit review incorporation (commit 4a901692 + broken-ref fix). ACK'd by ~C; queued behind KPI Phase 0. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P2 — feature-investigation TO. Output is a scoping/architecture briefing, not code. Independent of FIX wave + engine wave; no qa-runner dependency.</priority>
     <deadline>24-36 hours from dispatch (target 2026-04-21 evening to 2026-04-22 morning ET). Flex on KPI-briefing overlap if Phase 0 of either surfaces shared compiler-tools work that's better batched.</deadline>

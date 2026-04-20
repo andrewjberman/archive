@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-04-15</date>
-    <status>complete</status><!-- Flipped pending→complete 2026-04-16 by 0.4.0_DS_ClientPlatform. Commit ebd737e3 on CLOUD. Import + paginator prefix swapped CANONICAL_NNA_PREFIX→CANONICAL_NNA_ATOMIC_PREFIX in _load_canonical_nna_per_advisor. py_compile exit 0. comp-pipescript deployed D_02 → MATCH. comp-blast D_02 → no downstream surprises (terminal node). comp-validate nna_atomic --artifact /tmp/nna_atomic.parquet → 0 ERROR 0 WARN. Travis NNA three-way validation pending D_02 gold run (source change confirmed; schism closed by construction — all three canonical_lookup/role_canonical_lookup paths now source from 2,294-partition nna_atomic). -->
+    <status>complete</status><!-- Flipped pending→complete 2026-04-16 by 0.4.0_DS_ClientPlatform. Commit ebd737e3 on CLOUD: D_02-2 + D_02-3 prefix flip (CANONICAL_NNA_PREFIX→CANONICAL_NNA_ATOMIC_PREFIX in _load_canonical_nna_per_advisor). Commit b3f6b1ee on CLOUD (DS~D 2026-04-16): D_02-1 canonical NNA for build_advisor_books summary site — canonical_lookup + canonical_adv_dates pre-computed in build_advisor_books, _nna_since now uses canonical period-diff with C_03 fallback. py_compile exit 0. comp-blast D_02 → no downstream. S3 upload complete. Travis NNA three-way validation pending D_02 gold run (schism closed by construction — all three D_02 NNA sites now source from nna_atomic canonical). -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W4</wave>
     <phase_label>CN-P2 (D_02 consumer cutover — first of 4 cutover phases)</phase_label>

@@ -5,7 +5,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_at>2026-04-15</issued_at>
-    <status>pending</status>
+    <status>complete</status><!-- COO flip 2026-04-16 per ADHC_ROUTER Phase 1 closeout. ~D shipped 3c921e08 — ADHC_ROUTER.T4 + comp-validate pass-through dispatch (proposal E partial). -->
     <authorizing_directive>Andrew 2026-04-15 — corpus-driven compiler regression testing.</authorizing_directive>
   </header>
 

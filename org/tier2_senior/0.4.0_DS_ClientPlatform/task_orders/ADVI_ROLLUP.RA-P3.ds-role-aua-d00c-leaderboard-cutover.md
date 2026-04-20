@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-15</date>
-    <status>pending</status><!-- ~B flipped 2026-04-15 21:43Z. CTO Rule 7 substitution APPROVED 21:43Z: parity vs canonical SOURCE (gold/canonical/role_aua/{latest}.parquet) instead of vs in-flight D_02 consumer. RA-P2 narrowed to snapshot L1277 only (RA-P2b deferred); cross-consumer convergence retargeted to Wave 4 closeout gate per CTO. -->
+    <status>complete</status><!-- COO flip 2026-04-16. ~B shipped e53f0afa — ADVI_ROLLUP.RA-P3 D_00c role_aua canonical cutover (latest-date AUA override). CTO Rule 7 substitution APPROVED 21:43Z: parity vs canonical SOURCE (gold/canonical/role_aua/{latest}.parquet). Cross-consumer convergence deferred to Wave 4 closeout gate. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W4</wave>
     <phase_label>RA-P3 (D_00c leaderboard consumer cutover)</phase_label>

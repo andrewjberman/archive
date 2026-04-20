@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- base lane; may bounce to CTO for PRD authoring -->
     <date>2026-04-15</date>
-    <status>pending</status><!-- picked up 2026-04-16; DS base exercised potential-bounce clause (IN-1 memo already noted "CTO claimed"); COO forwarded to CTO as PRD absorb-request 13:48Z; awaiting CTO commit. Will flip to complete with evidence citing CTO PRD commit hash once absorbed. -->
+    <status>complete</status><!-- 2026-04-16: scope-absorbed by CTO per ABSORB CONFIRMED 14:00Z. PRD at docs/architecture/INCREMENTAL_RUNS_DESIGN.md committed 916a3a4f (CTO author). PRD covers all 7 scope items across 13 sections (watermark contract §3, merge strategy §4, parity validator §5, hard gates §6, wave plan §7, cross-domain coordination §8, telemetry/risk §10/11). Closure note: scope-absorbed by CTO, not DS-authored delivery. IN-3+ per-script implementation TOs author against PRD §Acceptance + §Compiler mandates. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>IN (Incremental runs — Wave 7)</wave>
     <priority>P1 (gates IN-3+ implementation)</priority>
