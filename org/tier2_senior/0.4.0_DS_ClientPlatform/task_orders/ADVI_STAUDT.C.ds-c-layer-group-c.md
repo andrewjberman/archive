@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-20</date>
-    <status>staged</status><!-- CTO confirms shape before COO dispatches GO -->
+    <status>pending</status><!-- CTO conditional-approved 20260420T~12:49Z; comp-build rework + minor polish landed; COO dispatched GO to ~C inbox 20260420T~12:55Z. Phase 0 data collection may begin immediately; Phase 1 findings-write gates on ~B findings MCP. -->
     <project_code>ADVI_STAUDT</project_code>
     <lane>~C — Layer: Group C (canonical NNA / role_aua / fee_detail / account_performance / advisor_fee_efficiency)</lane>
     <model>LAYER × 4-checkpoint MATRIX. Lane owns one layer; lane walks through all 4 checkpoints to capture evolution. Andrew 2026-04-20: "layer scoped AND time scoped — at each of those times, watch how the layer evolved, cross-reference, comprehensive."</model>
@@ -84,6 +84,8 @@
     If ~B flagged a B_01 output change, does it propagate through C_03 / C_08 to canonical outputs? If ~A flagged a silver schema change, does C_01 (which reads silver) absorb it?
 
     **Investigative discipline (§4.0):** layer × 4 checkpoints. Walk upstream-first. Andrew clarification: cross-reference layer × time comprehensively.
+
+    **T0 pre-window-state note (CTO MCP 20260420T~12:49Z):** T0 anchor `544877cc` is "imperfect but accepted" per PRD §3.1. It already contains pre-window regressions including the W6-005 split-weighted change (`0804b377` 2026-04-13) and DE allChecked removal (`9f6faf9` 2026-04-13) — these affect downstream Group D but not C-layer scripts directly. Report any such pre-existing C-state as "pre-window state at T0" rather than "introduced at T0."
   </scope>
 
   <compiler_tools_mandate>
@@ -92,6 +94,11 @@
         <run>git worktree add /tmp/staudt_layerC_T0 544877cc &amp;&amp; git worktree add /tmp/staudt_layerC_T1 f177240b &amp;&amp; git worktree add /tmp/staudt_layerC_T2 ae759bbb &amp;&amp; git worktree add /tmp/staudt_layerC_T3 cd177553</run>
         <expect>Four scratch worktrees per PRD §5 #4.</expect>
         <if_mismatch>Force-remove + retry; MCP COO if blocked.</if_mismatch>
+      </step>
+      <step>
+        <run>For each Tx in {T0, T1, T2, T3}: cd /tmp/staudt_layerC_Tx &amp;&amp; comp-build</run>
+        <expect>1,162 ± 50 nodes / 940 ± 50 edges built per checkpoint. Node/edge count variance between checkpoints is itself a finding — document drift in `group_c_inventory.md`.</expect>
+        <if_mismatch>If comp-build fails inside a worktree, investigate before falling back. Do NOT skip — skipping reads wrong-checkpoint state from the repo-root graph (CLOUD tip = T3) and invalidates the entire layer × 4-checkpoint matrix. Per CTO MCP 20260420T~12:49Z (shape-review rework).</if_mismatch>
       </step>
       <step>
         <run>For each Tx in {T0, T1, T2, T3}: cd /tmp/staudt_layerC_Tx &amp;&amp; comp-pipescript io C_00 &amp;&amp; comp-pipescript io C_01 &amp;&amp; comp-pipescript io C_01b (if exists) &amp;&amp; comp-pipescript io C_02 &amp;&amp; comp-pipescript io C_03 &amp;&amp; comp-pipescript io C_04 &amp;&amp; comp-pipescript io C_05 &amp;&amp; comp-pipescript io C_06 &amp;&amp; comp-pipescript io C_07 &amp;&amp; comp-pipescript io C_08</run>
@@ -104,9 +111,9 @@
         <if_mismatch>n/a — orientation only.</if_mismatch>
       </step>
       <step>
-        <run>POLARS PARITY PROBE: cd /tmp/staudt_layerC_T0 &amp;&amp; python data/black_diamond/scripts/gold/C_00.canonical_performance.py --partition 2026-04-15 --out /tmp/staudt_C00_pandas.parquet ; cd /tmp/staudt_layerC_T1 &amp;&amp; python data/black_diamond/scripts/gold/C_00.canonical_performance.py --partition 2026-04-15 --out /tmp/staudt_C00_polars.parquet ; diff outputs at row level on shared keys; flag any delta > $0.01</run>
-        <expect>Empty diff. Polars port `f177240b` should be byte-equivalent at row level. Any row-level delta > $0.01 = FINDING for ~D's bug_attribution.md.</expect>
-        <if_mismatch>Document EVERY row with delta > $0.01: (advisor_id, account_id, snapshot_date, pandas_value, polars_value, delta_dollars).</if_mismatch>
+        <run>POLARS PARITY PROBE: cd /tmp/staudt_layerC_T0 &amp;&amp; python data/black_diamond/scripts/gold/C_00.canonical_performance.py --partition 2026-04-15 --out /tmp/staudt_C00_pandas.parquet ; cd /tmp/staudt_layerC_T1 &amp;&amp; python data/black_diamond/scripts/gold/C_00.canonical_performance.py --partition 2026-04-15 --out /tmp/staudt_C00_polars.parquet ; diff outputs at row level on shared keys; flag any delta > $0.01. **Pin silver-input version (CTO MCP 20260420T~12:49Z):** before each run, resolve the silver partition S3 object version as of the lane's per-checkpoint wall-clock (T0 cutoff = 2026-04-16 00:00 UTC; T1 cutoff = 2026-04-17 00:00 UTC) and download THAT version explicitly. Otherwise the diff is code+data, not just code.</run>
+        <expect>Empty diff. Polars port `f177240b` should be byte-equivalent at row level when run against the SAME silver-partition version. Any row-level delta > $0.01 = FINDING for ~D's bug_attribution.md.</expect>
+        <if_mismatch>Document EVERY row with delta > $0.01: (advisor_id, account_id, snapshot_date, pandas_value, polars_value, delta_dollars). Cite the silver-partition S3 object version used so future runs are reproducible.</if_mismatch>
       </step>
       <step>
         <run>NNA SCHEMA DIFF: For each Tx where both nna/ and nna_atomic/ partitions exist (T1+ probably; T0 may have nna_atomic/ shadow writer code present but backfill ABSENT), pull both 2026-04-15 partitions and diff column-set + dtypes + per-(advisor, date, role) value alignment</run>

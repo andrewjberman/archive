@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-20</date>
-    <status>staged</status><!-- CTO confirms shape before COO dispatches GO -->
+    <status>pending</status><!-- CTO conditional-approved 20260420T~12:49Z; comp-build rework + minor polish landed; COO dispatched GO to ~A inbox 20260420T~12:55Z. ~A is upstream-most, no upstream gate, may begin immediately on registration. -->
     <project_code>ADVI_STAUDT</project_code>
     <lane>~A — Layer: SILVER + Group A (upstream-most)</lane>
     <model>LAYER × 4-checkpoint MATRIX. Lane owns one layer; lane walks through all 4 checkpoints to capture evolution. Andrew 2026-04-20 reinforced: "layer scoped AND time scoped — at each of those times, watch how the layer evolved, cross-reference, comprehensive."</model>
@@ -78,6 +78,11 @@
         <run>git worktree add /tmp/staudt_layerA_T0 544877cc &amp;&amp; git worktree add /tmp/staudt_layerA_T1 f177240b &amp;&amp; git worktree add /tmp/staudt_layerA_T2 ae759bbb &amp;&amp; git worktree add /tmp/staudt_layerA_T3 cd177553</run>
         <expect>Four scratch worktrees. Repo root remains on CLOUD tip. Per PRD §5 #4 + #3: lane writes ONLY under STAUDT/layer_A/.</expect>
         <if_mismatch>Force-remove + retry; if still failing, MCP COO.</if_mismatch>
+      </step>
+      <step>
+        <run>For each Tx in {T0, T1, T2, T3}: cd /tmp/staudt_layerA_Tx &amp;&amp; comp-build</run>
+        <expect>1,162 ± 50 nodes / 940 ± 50 edges built per checkpoint. Node/edge count variance between checkpoints is itself a finding — document drift in `silver_and_group_a_inventory.md`.</expect>
+        <if_mismatch>If comp-build fails inside a worktree, investigate before falling back. Do NOT skip — skipping reads wrong-checkpoint state from the repo-root graph (CLOUD tip = T3) and invalidates the entire layer × 4-checkpoint matrix. Per CTO MCP 20260420T~12:49Z (shape-review rework).</if_mismatch>
       </step>
       <step>
         <run>git log --all --since='2026-04-15' --until='2026-04-20' -- data/black_diamond/scripts/gold/A_*.py data/black_diamond/scripts/silver/*.py code/silver/* > /tmp/staudt_layerA_commits.txt</run>

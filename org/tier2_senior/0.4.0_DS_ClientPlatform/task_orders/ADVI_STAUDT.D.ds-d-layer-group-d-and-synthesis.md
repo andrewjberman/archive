@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-04-20</date>
-    <status>staged</status><!-- CTO confirms shape before COO dispatches GO; ~D blocks on ~A/~B/~C findings MCPs -->
+    <status>pending</status><!-- CTO conditional-approved 20260420T~12:49Z; comp-build rework + minor polish landed; COO dispatched GO to ~D inbox 20260420T~12:55Z. Phase 0 data collection may begin immediately; Phase 1 findings + 5 SYNTHESIS docs gate on ~C findings MCP (which transitively confirms ~A + ~B fired). -->
     <project_code>ADVI_STAUDT</project_code>
     <lane>~D — Layer: Group D audit + cross-layer SYNTHESIS (dual role)</lane>
     <model>LAYER × 4-checkpoint MATRIX. ~D owns Group D layer (D_00..D_04) across all 4 checkpoints AND owns the 5 SYNTHESIS deliverables that cite the upstream lane findings. Andrew 2026-04-20: "layer scoped AND time scoped — at each of those times, watch how the layer evolved, cross-reference, comprehensive."</model>
@@ -95,6 +95,8 @@
     - **Deliverable 2E — COO handoff briefing:** `STAUDT/SYNTHESIS/coo_handoff.md`. Plain English. Restore-to-T0 vs keep-T1/T2/T3 vs hybrid-with-rewrite — one call per field/bug. Per-call rationale citing specific rows of decomposition / propagation / delta tables. Per-call proposed fix-TO sketch (DS lane, scope, acceptance criteria machine-checkable).
 
     **Investigative discipline (§4.0):** layer × 4 checkpoints × cross-layer synthesis. Andrew clarification: cross-reference is the point. Every recommendation in coo_handoff.md cites a specific row of decomposition / propagation / delta tables AND a layer-of-origin (silver/A/B/C/D) per propagation matrix.
+
+    **T0 pre-window-state note (CTO MCP 20260420T~12:49Z):** T0 anchor `544877cc` is "imperfect but accepted" per PRD §3.1 — already contains pre-window Group D regressions including the W6-005 split-weighted change (`0804b377` 2026-04-13) and DE allChecked removal (`9f6faf9` 2026-04-13). These predate the audit window. In `bug_attribution.md`, classify them as "pre-window inherited state at T0" with original commit SHA cited. They are NOT "introduced at T0" — but they ARE in scope for the restore/keep/rewrite decision in `coo_handoff.md` because the W6-005 split-weighted is the source of the Travis $82M-vs-$434M divergence Andrew flagged.
   </scope>
 
   <compiler_tools_mandate>
@@ -103,6 +105,11 @@
         <run>git worktree add /tmp/staudt_layerD_T0 544877cc &amp;&amp; git worktree add /tmp/staudt_layerD_T1 f177240b &amp;&amp; git worktree add /tmp/staudt_layerD_T2 ae759bbb &amp;&amp; git worktree add /tmp/staudt_layerD_T3 cd177553</run>
         <expect>Four scratch worktrees per PRD §5 #4.</expect>
         <if_mismatch>Force-remove + retry; MCP COO if blocked.</if_mismatch>
+      </step>
+      <step>
+        <run>For each Tx in {T0, T1, T2, T3}: cd /tmp/staudt_layerD_Tx &amp;&amp; comp-build</run>
+        <expect>1,162 ± 50 nodes / 940 ± 50 edges built per checkpoint. Node/edge count variance between checkpoints is itself a finding — document drift in `group_d_inventory.md` and roll into `delta_table.md`.</expect>
+        <if_mismatch>If comp-build fails inside a worktree, investigate before falling back. Do NOT skip — skipping reads wrong-checkpoint state from the repo-root graph (CLOUD tip = T3) and invalidates the entire layer × 4-checkpoint matrix. Per CTO MCP 20260420T~12:49Z (shape-review rework).</if_mismatch>
       </step>
       <step>
         <run>For each Tx in {T0, T1, T2, T3}: cd /tmp/staudt_layerD_Tx &amp;&amp; comp-pipescript io D_00 &amp;&amp; comp-pipescript io D_00b &amp;&amp; comp-pipescript io D_00c &amp;&amp; comp-pipescript io D_01 &amp;&amp; comp-pipescript io D_02 &amp;&amp; comp-pipescript io D_03 &amp;&amp; comp-pipescript io D_04</run>

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-20</date>
-    <status>staged</status><!-- CTO confirms shape before COO dispatches GO -->
+    <status>pending</status><!-- CTO conditional-approved 20260420T~12:49Z; comp-build rework + minor polish landed; COO dispatched GO to ~B inbox 20260420T~12:55Z. Phase 0 data collection may begin immediately; Phase 1 findings-write gates on ~A findings MCP. -->
     <project_code>ADVI_STAUDT</project_code>
     <lane>~B — Layer: Group B (holdings / canonical prices / transactions)</lane>
     <model>LAYER × 4-checkpoint MATRIX. Lane owns one layer; lane walks through all 4 checkpoints to capture evolution. Andrew 2026-04-20 reinforced: "layer scoped AND time scoped — at each of those times, watch how the layer evolved, cross-reference, comprehensive."</model>
@@ -82,6 +82,8 @@
     Lane reads `layer_a_findings.md` MCP summary BEFORE concluding. If ~A found silver schema changes affecting B_01 inputs (e.g., silver/transactions.cusip add `80917a1e` at T2), ~B's findings must trace the propagation — does B_01's cusip enrichment behavior change at T2 because of the silver upstream change?
 
     **Investigative discipline (§4.0):** layer-scoped × 4 checkpoints. Andrew: cross-reference layer × time. Walk upstream-first. Clean-bill or N-findings; no claim accepted without evidence.
+
+    **T0 pre-window-state note (CTO MCP 20260420T~12:49Z):** T0 anchor `544877cc` is "imperfect but accepted" per PRD §3.1. It already contains pre-window regressions including the W6-005 split-weighted change (`0804b377` 2026-04-13) and DE allChecked removal (`9f6faf9` 2026-04-13). These PREDATE the audit window. Report any such pre-existing state as "pre-window state at T0" rather than "introduced at T0."
   </scope>
 
   <compiler_tools_mandate>
@@ -90,6 +92,11 @@
         <run>git worktree add /tmp/staudt_layerB_T0 544877cc &amp;&amp; git worktree add /tmp/staudt_layerB_T1 f177240b &amp;&amp; git worktree add /tmp/staudt_layerB_T2 ae759bbb &amp;&amp; git worktree add /tmp/staudt_layerB_T3 cd177553</run>
         <expect>Four scratch worktrees per PRD §5 #4.</expect>
         <if_mismatch>Force-remove + retry; MCP COO if blocked.</if_mismatch>
+      </step>
+      <step>
+        <run>For each Tx in {T0, T1, T2, T3}: cd /tmp/staudt_layerB_Tx &amp;&amp; comp-build</run>
+        <expect>1,162 ± 50 nodes / 940 ± 50 edges built per checkpoint. Node/edge count variance between checkpoints is itself a finding — document drift in `group_b_inventory.md`.</expect>
+        <if_mismatch>If comp-build fails inside a worktree, investigate before falling back. Do NOT skip — skipping reads wrong-checkpoint state from the repo-root graph (CLOUD tip = T3) and invalidates the entire layer × 4-checkpoint matrix. Per CTO MCP 20260420T~12:49Z (shape-review rework).</if_mismatch>
       </step>
       <step>
         <run>For each Tx in {T0, T1, T2, T3}: cd /tmp/staudt_layerB_Tx &amp;&amp; comp-pipescript io B_00 &amp;&amp; comp-pipescript io B_01 &amp;&amp; comp-pipescript io B_01b (if exists) &amp;&amp; comp-pipescript io B_02 &amp;&amp; comp-pipescript io B_03</run>
@@ -149,7 +156,7 @@
     1. **`group_b_inventory.md`** — touched-script list + 4-checkpoint commit diff per script. Each B-script gets its own line — no collapse. Quiet scripts noted "no material change in window" with grep evidence.
     2. **`layer_b_findings.md`** — definitive answer (clean-bill OR N-findings) + evidence per claim + upstream-consistency reference to ~A findings.
     3. **`b01_evolution_trace.md`** — per-checkpoint state of the 8 B_01 sub-behaviors enumerated above. Each sub-behavior × 4 checkpoint matrix populated.
-    4. **`b01_cusip_coverage_probe.md`** — per-checkpoint cusip coverage ratio (per-lot AND per-row if they differ) compared to session-32 98.3% benchmark. Cohort breakdown by account-type if possible.
+    4. **`b01_cusip_coverage_probe.md`** — per-checkpoint cusip coverage ratio (per-lot AND per-row if they differ) compared to session-32 98.3% benchmark. Cohort breakdown by account-type if possible. **Note (CTO MCP 20260420T~12:49Z):** silver/transactions.cusip column doesn't land until `80917a1e` (Fri 05:59 ET, T2); B_01 runtime cusip enrichment via bd_assets_dim (`f5f19e77`) is also T2+. Expected cusip coverage at T0/T1 is legitimately low or N/A — document as expected, not as finding. Probe baselines start meaningfully at T2.
     5. **`evidence_pack.json`** — hashes + row counts + column sets + per-checkpoint sample figures.
     6. **MCP handoff** to CTO + COO + ~C + ~D at findings-file commit.
     7. **Session log** at `org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-04-20/staudt_layer_b_group_b.md` (or appropriate date) with Compiler Tools section reproducing every `<run>` with observed output and explicit pass/fail vs. `<expect>`.
