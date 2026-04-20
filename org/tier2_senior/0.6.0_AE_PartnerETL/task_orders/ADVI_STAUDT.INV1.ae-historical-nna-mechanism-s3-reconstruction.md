@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T14:13Z by 2.0.0_SA_COO. CTO approval MCP 20260420T141219Z "Approved as drafted. Flip to dispatched." Awaiting Andrew's AE spawn. -->
+    <status>complete</status><!-- COMPLETE 20260420T14:45Z. Joint (a)+(b) ruling, (c) ruled out. Mechanism: NNA/AUA universe asymmetry (silver/transactions covers ~447 more accts than holdings_lots in 2020-12-31). Andrew's $100M+ firm NNA vs $27M firm AUA at 2020-12-31 reproduced exactly in T3 production artifacts. FIX-TO 4 role_aua/ refresh is ORTHOGONAL — does NOT close historical-NNA explosion. Decision doc + 3 query JSONs committed. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P1 — unblocks FIX-TO 4 scope decision. Pure diagnostic, no fixes. Target ~2-4 hour turnaround.</priority>
     <kind>INVESTIGATION — S3 reconstruction + integrity check. NO fixes authored under this TO.</kind>
