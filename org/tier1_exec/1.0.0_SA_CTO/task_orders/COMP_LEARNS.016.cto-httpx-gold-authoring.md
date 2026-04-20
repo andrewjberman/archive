@@ -50,12 +50,14 @@
     {"source": "module:httpx._client", "predicate": "imports", "target": "module:httpx._transports", "attributes": {"resolution": "static", "guard": "unconditional", "binding": "resolved"}, "confidence": "certain", "gold_authored_at": "2026-04-16T14:00:00Z"}
     ```
 
-    **Required attribute coverage in gold:** at least 2 records per dimension value must exist somewhere in the gold set. Specifically:
-    - ≥2 records with `resolution=static`, ≥2 records with `resolution=dynamic` (httpx has `importlib` usage in `_transports`).
-    - ≥2 records with `guard=unconditional`, ≥2 records with `guard=conditional` (httpx has `TYPE_CHECKING` guards).
-    - ≥2 records with `binding=resolved`, ≥2 records with `binding=unresolved` (httpx has star imports or relative imports that need resolution context).
+    **Observed attribute coverage in gold (v4.1 per PRD §6.3):** at least 2 records per dimension value **observed in the target** must exist in the gold set. For httpx 0.28.1 (`26d48e0634e6`):
+    - ≥2 records with `resolution=static` — every top-level `import X` and `from .X import Y` (abundant in httpx).
+    - ≥2 records with `guard=unconditional` — standard top-level imports.
+    - ≥2 records with `guard=conditional` — 12 `if typing.TYPE_CHECKING:` blocks enumerated in Phase 1 evidence.
+    - ≥2 records with `binding=resolved` — relative and absolute imports that bind to a specific module/symbol.
+    - ≥2 records with `binding=unresolved` — 16 star imports across `httpx/__init__.py` + `httpx/_transports/__init__.py`.
 
-    If httpx does not naturally contain enough instances of a dimension value, CTO flags it to COO~B — we either pick a different inaugural target or add a synthetic extension to httpx for test coverage.
+    **Target-absent values:** `resolution=dynamic` — 0 `importlib`/`__import__` usage in httpx (grep confirmed). Documented in `GOLD_SURVEY.md` per PRD §6.3 "Dimension Values Not Observed" attestation format.
 
     **ab_questions.yaml format (v3):** each question has `id`, `question`, `pool` (`ratchet_critical` | `exploratory`), `adversarial` (bool).
 
@@ -109,8 +111,8 @@
   <acceptance_criteria>
     1. `imports_gold.jsonl` loads cleanly via `bench.structural.load_gold()` (function shipped by .015).
     2. Record count matches hand-counted tally in GOLD_SURVEY.md.
-    3. **Observed attribute coverage (v4 per PRD §6.3):** every dimension value **observed in the target** has ≥2 gold records. For httpx 0.28.1 (`26d48e0634e6`), observed values are: `resolution=static`, `guard=unconditional`, `guard=conditional`, `binding=resolved` — all four must have ≥2 records in `imports_gold.jsonl`. Verified via `for d in resolution guard binding; do echo "=== $d"; jq -r ".attributes.$d" imports_gold.jsonl | sort | uniq -c; done` — each observed value shows count ≥2.
-    4. **Target-absent dimension values — documented, not fatal (v4 per PRD §6.3):** `resolution=dynamic` and `binding=unresolved` are absent from httpx 0.28.1 (no `importlib`/`__import__`/star-import usage). These MUST be documented in `GOLD_SURVEY.md` under a **"Dimension Values Not Observed"** section with machine-checkable evidence: exact grep command + zero-match output + one-line attestation per absent value. R3 defense for absent values lives in the attribute validator (`.011`) + per-subtype synthetic fixtures (`.013 test_synthetic_3_file`) — not gold. Missing the "Dimension Values Not Observed" section while gold has <6/6 coverage is a ship blocker.
+    3. **Observed attribute coverage (v4.1 per PRD §6.3):** every dimension value **observed in the target** has ≥2 gold records. For httpx 0.28.1 (`26d48e0634e6`), observed values are: `resolution=static`, `guard=unconditional`, `guard=conditional`, `binding=resolved`, **`binding=unresolved`** (16 star imports in `httpx/__init__.py` + `httpx/_transports/__init__.py`) — all five must have ≥2 records in `imports_gold.jsonl`. Verified via `for d in resolution guard binding; do echo "=== $d"; jq -r ".attributes.$d" imports_gold.jsonl | sort | uniq -c; done` — each observed value shows count ≥2.
+    4. **Target-absent dimension values — documented, not fatal (v4.1 per PRD §6.3):** `resolution=dynamic` is absent from httpx 0.28.1 (no `importlib`/`__import__` usage; grep confirmed 0 hits). It MUST be documented in `GOLD_SURVEY.md` under a **"Dimension Values Not Observed"** section with machine-checkable evidence: exact grep command + zero-match output + one-line attestation. R3 defense for the absent value lives in the attribute validator (`.011`) + per-subtype synthetic fixtures (for `imports`, `.013`'s `test_synthetic_3_file`) — not gold. Missing the "Dimension Values Not Observed" section while gold has <6/6 coverage is a ship blocker.
     5. `ab_questions.yaml` contains 15-30 questions; ratchet_critical pool has 12-22 entries (incl. 3-5 adversarial); exploratory pool has 3-8 entries. **Every question has a `pool` field.**
     6. `ab_answer_key.yaml` has an entry for every question ID; every entry has `answer_type`. **Ratchet-pool entries have `answer_type` ∈ `{enumerable, set_membership, numeric}` only.**
     7. **Ratchet-pool validator PASSES (NEW v3):** `python -c "from comp.bench.ab_answer_key_validator import validate; validate('comp/targets/httpx/gold/ab_answer_key.yaml')"` exits 0 with no `RatchetPoolOpenEndedRejected` raise. This is the §6.4 judge-split enforcement — if any ratchet entry is `open_ended`, the validator raises and commit halts.
@@ -147,7 +149,7 @@
       </step>
       <step>
         <run>for d in resolution guard binding; do echo "=== $d"; jq -r ".attributes.$d" comp/targets/httpx/gold/imports_gold.jsonl | sort | uniq -c; done</run>
-        <expect>Per v4 PRD §6.3: every **observed** dimension value has count ≥2. For httpx 0.28.1, expected observed values: resolution=static (≥2), guard=unconditional (≥2), guard=conditional (≥2), binding=resolved (≥2). `resolution=dynamic` and `binding=unresolved` are absent — confirmed via Phase 1 grep evidence and documented in GOLD_SURVEY.md "Dimension Values Not Observed" with the zero-match grep output as attestation.</expect>
+        <expect>Per v4.1 PRD §6.3: every **observed** dimension value has count ≥2. For httpx 0.28.1, expected observed values: resolution=static (≥2), guard=unconditional (≥2), guard=conditional (≥2), binding=resolved (≥2), binding=unresolved (≥2 — 16 star imports in __init__.py files). `resolution=dynamic` is the sole absent value — confirmed via Phase 1 grep evidence and documented in GOLD_SURVEY.md "Dimension Values Not Observed" with the zero-match grep output as attestation.</expect>
         <if_mismatch>If an observed value has count <2: add more gold records covering that value. If GOLD_SURVEY.md is missing the "Dimension Values Not Observed" section while gold has <100% vocabulary coverage: author it per PRD §6.3 example format. This replaces the v3 STOP rule — v4 R1/R3 layer separation (PRD §4.5) permits observed-coverage-only gold with an attestation section.</if_mismatch>
       </step>
       <step>
