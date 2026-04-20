@@ -4,7 +4,13 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Flips pending post COMP_LEARNS.004 ship (~C already done e657c232). -->
+    <status>complete</status><!-- commit d8ab1372 2026-04-16 -->
+    <evidence>
+      Shipped: commit d8ab1372 — comp/prompts/iter.md per-iteration agent prompt.
+      Artifacts: comp/prompts/iter.md.
+      Validation: comp/bin/comp-learns-run.sh (engine at commit 2cb83eb6) invokes the per-iter agent via python -m comp.framework.run referencing this prompt.
+      Session log: org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-04-16/.
+    </evidence>
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — engine runs but agent needs the prompt</priority>
   </metadata>

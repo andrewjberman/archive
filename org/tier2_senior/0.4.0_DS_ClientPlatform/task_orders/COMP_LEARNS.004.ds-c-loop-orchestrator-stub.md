@@ -5,6 +5,13 @@
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-15</date>
     <status>complete</status><!-- Shipped 2026-04-15 19:55Z. Commits: 4d17f47d (pre-flight plateau + 11 tests), 1380d44c (status flip), e657c232 (full scope: run.py rewrite + branch_guard.py + comp/bin/comp-learns-run shim, 22/22 pytest). Acceptance #5 flex ACK'd by CTO 19:52Z (shim source at comp/bin/, local .tools/ install per comp-* convention; .gitignore:170 forbids tracked .tools/ files). P0 branch-race constraint honored: Python side read-only against git. End-to-end httpx iteration deferred to post-PRD#2 ship. -->
+    <evidence>
+      Shipped: commits 4d17f47d (pre-flight plateau detector + 11 test cases), 1380d44c (staged→pending flip on CTO GO), e657c232 (full scope ship — run.py rewrite + branch_guard.py + comp/bin/comp-learns-run shim), 8df2ba97 (session log addendum — Track B worktree migration 23de5edf), 3ae7c3dd (DS~C session log).
+      Artifacts: comp/loop/run.py, comp/loop/branch_guard.py, comp/loop/plateau.py, comp/loop/tests/ (22 test cases), comp/bin/comp-learns-run.sh.
+      Validation: pytest comp/loop/ = 22/22 PASS. Acceptance #5 flex ACK'd by CTO 2026-04-15 19:52Z (shim source at comp/bin/, local .tools/ install per comp-* convention; .gitignore:170 forbids tracked .tools/ files). P0 branch-race constraint honored — Python side read-only against git.
+      Deferred: end-to-end httpx iteration deferred to post-PRD#2 ship (now handled by .017 under v3 PRD).
+      Session log: org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-04-15/.
+    </evidence>
     <project_code>COMP_LEARNS</project_code>
     <priority>P2 — partially subsumed by Track B engine; stubs-only until engine lands</priority>
   </metadata>
