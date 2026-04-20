@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-20</date>
-    <status>pending</status><!-- CTO conditional-approved 20260420T~12:49Z; comp-build rework + minor polish landed; COO dispatched GO to ~B inbox 20260420T~12:55Z. Phase 0 data collection may begin immediately; Phase 1 findings-write gates on ~A findings MCP. -->
+    <status>complete</status><!-- Completed 2026-04-20 ~13:20Z by 0.4.0_DS_ClientPlatform~B. All 5 deliverables shipped under STAUDT/layer_B/: group_b_inventory.md, layer_b_findings.md (7 material findings B-1..B-7), b01_evolution_trace.md (8 sub-behaviors × 4 checkpoints), b01_cusip_coverage_probe.md (98.30% at T3 measured), evidence_pack.json. MCP handoff to CTO+COO+~C+~D on commit. -->
     <project_code>ADVI_STAUDT</project_code>
     <lane>~B — Layer: Group B (holdings / canonical prices / transactions)</lane>
     <model>LAYER × 4-checkpoint MATRIX. Lane owns one layer; lane walks through all 4 checkpoints to capture evolution. Andrew 2026-04-20 reinforced: "layer scoped AND time scoped — at each of those times, watch how the layer evolved, cross-reference, comprehensive."</model>
