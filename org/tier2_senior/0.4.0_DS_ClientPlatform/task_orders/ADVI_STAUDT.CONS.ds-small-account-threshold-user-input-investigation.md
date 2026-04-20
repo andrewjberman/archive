@@ -17,7 +17,8 @@
     <ref type="originating-feature">ADVI_ROLLUP.B9 commit f2ec98d1 — "C_08 small_account_count per advisor (threshold $40k)"</ref>
     <ref type="follow-on-feature">ADVI_ROLLUP.B10 commit bb426933 — "C_08 small_account_avg_aua at (advisor, role) grain + advisor grain"</ref>
     <ref type="portal-context">/Books tab → "Revenue Operations & Analysis" panel → "Consolidation Opportunities" toggle (frontend component name TBD via Phase 0 portal-side audit)</ref>
-    <ref type="parent-project">project_bd_is_ground_truth.md (BD silver/allocations is authoritative for active accounts; threshold computations should respect the BD active-account universe)</ref>
+    <ref type="principle">BD silver/allocations is authoritative for active accounts; threshold computations should respect the BD active-account universe (operating principle, not a tracked doc — full statement lives in COO+CTO auto-memory `project_bd_is_ground_truth.md`).</ref>
+    <ref type="dependency-consult">0.4.0_DE_ClientPlatform — portal-side wiring (React component identification, React Query key, schema-check); especially for Option C/C' client-side filter cost on render path. Consult during Phase 0 steps 4-5 + Phase 1 architecture trade-off scoring.</ref>
   </references>
 
   <objective>
@@ -197,7 +198,7 @@
        - ADVI_ROLLUP.B9 + B10 commit messages (f2ec98d1, bb426933) for original feature intent
        - portal/ source for /Books tab → Revenue Operations & Analysis (find via grep "Consolidation" or "consolidation_opportunities")
        - docs/architecture/ if there's a portal feature index
-       - project_bd_is_ground_truth.md + feedback_no_unverified_theories_as_conclusions.md (apply same rigor as engine wave)
+       - (operating principle: BD is ground-truth for active accounts; theory-as-conclusion discipline — same rigor as engine wave; both principles live in COO+CTO auto-memory)
     3. Heartbeat every 60s during active work
   </agent_context_setup>
 
