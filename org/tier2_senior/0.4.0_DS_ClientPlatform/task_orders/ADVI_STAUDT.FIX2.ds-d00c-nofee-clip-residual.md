@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T14:08Z by 2.0.0_SA_COO. CTO approval MCP 20260420T140816Z. Awaiting Andrew's ~B spawn (same instance as FIX1, sequential). -->
+    <status>complete</status><!-- COMPLETE 20260420T~16:45Z by ~B: silent max(0,...) at L565 replaced with explicit WARN log + 0-clip. 5 genuine fee_aua>tagged residuals (Micah Damrow, Myles Thomas, Lauren Matheu, Grace McCasland, Caleb Kuhn — all <$30M) logged per window. gold_validate_config.yaml inv2 sentinel added at $35M threshold (Justin Lopez $32.1M excluded as legitimate 100% fee-paying). comp-validate exits 0 (3 PASS, 0 ERROR). Commit c25afc6c. DT owns push per lane protocol. Evidence: STAUDT/FIX2/fix_to_2_evidence.md. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P0 (dependent on FIX-TO 1). Expected to self-resolve for most advisors after FIX-TO 1 completes; residual cases need explicit handling.</priority>
     <lane>~B — picks this up AFTER FIX-TO 1 closes. Same lane, same context, same D_00c working tree. Do NOT hand off to a different instance.</lane>
