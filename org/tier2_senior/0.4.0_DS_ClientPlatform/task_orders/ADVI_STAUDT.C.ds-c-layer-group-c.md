@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-20</date>
-    <status>pending</status><!-- CTO conditional-approved 20260420T~12:49Z; comp-build rework + minor polish landed; COO dispatched GO to ~C inbox 20260420T~12:55Z. Phase 0 data collection may begin immediately; Phase 1 findings-write gates on ~B findings MCP. -->
+    <status>complete</status><!-- Phase 0 + Phase 1 complete 2026-04-20. Deliverables: group_c_inventory.md, c01_nna_schema_diff.md, c03_phantom_outflow_probe.md, c00_polars_parity_probe.md, evidence_pack.json, layer_c_findings.md. MCP handoff to CTO+COO+~D fired at commit. -->
     <project_code>ADVI_STAUDT</project_code>
     <lane>~C — Layer: Group C (canonical NNA / role_aua / fee_detail / account_performance / advisor_fee_efficiency)</lane>
     <model>LAYER × 4-checkpoint MATRIX. Lane owns one layer; lane walks through all 4 checkpoints to capture evolution. Andrew 2026-04-20: "layer scoped AND time scoped — at each of those times, watch how the layer evolved, cross-reference, comprehensive."</model>
