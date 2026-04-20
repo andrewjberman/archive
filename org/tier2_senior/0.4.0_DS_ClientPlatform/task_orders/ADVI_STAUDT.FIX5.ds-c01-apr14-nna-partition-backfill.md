@@ -2,11 +2,12 @@
   <metadata>
     <id>ADVI_STAUDT.FIX5</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-20</date>
     <status>draft</status>
     <project_code>ADVI_STAUDT</project_code>
-    <priority>P2 — low impact, quick close. Can run fully parallel to FIX-TO 1 / 2 / 3A (different file, different S3 surface).</priority>
+    <priority>P2 — low impact, quick close. Fully parallel to ~A (FIX3A) and ~B (FIX1/FIX2) — different file (C_01), different S3 surface, no coordination needed.</priority>
+    <lane>~C — FIX5 only. Single-TO lane; idle after close.</lane>
     <bug_reference>Bug 5 per SYNTHESIS/bug_attribution.md — nna_atomic/ missing 2026-04-14 partition. D_00c + D_02 misattribute Apr 14 NNA to prior-day partition.</bug_reference>
   </metadata>
 

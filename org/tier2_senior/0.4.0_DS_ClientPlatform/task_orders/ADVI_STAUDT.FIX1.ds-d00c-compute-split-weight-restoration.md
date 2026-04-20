@@ -2,11 +2,12 @@
   <metadata>
     <id>ADVI_STAUDT.FIX1</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-20</date>
     <status>draft</status>
     <project_code>ADVI_STAUDT</project_code>
     <priority>P0 — firm-wide user-visible crisis. 152/152 advisors fail invariant 1 at T3. Top critical path.</priority>
+    <lane>~B — FIX-TO 1 then FIX-TO 2 (sequential on D_00c). ~B owns both in order.</lane>
     <bug_reference>Bug 1 per SYNTHESIS/bug_attribution.md — role_breakdown sum ~20% of tagged_aua (firm-wide).</bug_reference>
   </metadata>
 
@@ -133,6 +134,7 @@
     - **Agent commit identity:** `git commit --only --author="0.4.0_DS_ClientPlatform &lt;0.4.0_DS_ClientPlatform@opal.agent&gt;" -- &lt;paths&gt;`
     - **Pre-flag A→D-rerun-sensitive writes:** if your fix ends up touching `canonical_prices`, `holdings_lots`, or `canonical_nna` S3 writes, pre-flag to CTO+COO BEFORE `aws s3 cp`. This fix should NOT touch those — but if investigation surfaces a dependency, stop and escalate.
     - **Single-TO focus:** if Phase 0 investigation reveals the bug actually lives in C-layer or D_04, STOP and MCP COO. Do not expand scope.
+    - **Rebase on ~A's FIX3A commit:** ~A ships FIX-TO 3A (D_00c L35 + L121 constant swap) first. Pull latest CLOUD before starting; rebase cleanly on top of ~A's commit. FIX-TO 1 touches L839-L881 (different function) so textual conflict is unlikely, but confirm after rebase. If conflict: it's textual only — ~A's constant swap lines are unrelated to your weight-chain fix.
   </guardrails>
 
   <agent_context_setup>

@@ -2,11 +2,12 @@
   <metadata>
     <id>ADVI_STAUDT.FIX2</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-20</date>
     <status>draft</status>
     <project_code>ADVI_STAUDT</project_code>
     <priority>P0 (dependent on FIX-TO 1). Expected to self-resolve for most advisors after FIX-TO 1 completes; residual cases need explicit handling.</priority>
+    <lane>~B — picks this up AFTER FIX-TO 1 closes. Same lane, same context, same D_00c working tree. Do NOT hand off to a different instance.</lane>
     <bug_reference>Bug 2 per SYNTHESIS/bug_attribution.md — D_00c no_fee_aua silent max(0, ...) clip. ~148/152 advisors no_fee=0 at T3.</bug_reference>
     <depends_on>ADVI_STAUDT.FIX1 — must land + deploy + validate before this TO executes.</depends_on>
   </metadata>

@@ -2,11 +2,12 @@
   <metadata>
     <id>ADVI_STAUDT.FIX3A</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-20</date>
     <status>draft</status>
     <project_code>ADVI_STAUDT</project_code>
-    <priority>P1 — can run parallel to FIX-TO 1 (different code paths in D_00c + D_02).</priority>
+    <priority>P1 — trivial 2-file constant swap, ships first. Lands before FIX-TO 1 on D_00c so ~B rebases on top of ~A's commit (NOT the reverse).</priority>
+    <lane>~A — FIX3A only. Single-TO lane; idle after close.</lane>
     <bug_reference>Bug 3 Option A per SYNTHESIS/bug_attribution.md — NNA live schism. Option A = interim revert to nna/; Option B (nna_atomic/ schema fix) parked as separate follow-up initiative.</bug_reference>
     <decision_authority>Andrew 2026-04-20 authorized Option A interim. Option B scoping is CTO-backlog AFTER this wave. Do NOT bundle Option B work into this TO.</decision_authority>
   </metadata>
@@ -123,7 +124,8 @@
   <guardrails>
     - **Option A scope only:** if investigation reveals Option A is not safe (e.g., aua_current is actually read somewhere), STOP immediately. Do NOT attempt Option B under this TO — Option B is a separate follow-up initiative requiring DE involvement.
     - **No schema changes:** zero C-layer edits, zero ingestion changes, zero re-backfills.
-    - **Parallel to FIX-TO 1:** this TO touches different code paths in D_00c (lines 35 + 121) from FIX-TO 1 (lines 839-881). Coordinate git commits so they don't collide on D_00c.portal_leaderboard.py — commit FIX-TO 1 or FIX-TO 3A first (whichever finishes), then rebase the other.
+    - **Commit ordering vs ~B (FIX-TO 1):** ~A ships FIRST. FIX-TO 3A is the trivial constant swap and lands quickly; ~B's FIX-TO 1 rebases on top of ~A's commit. Do NOT wait for ~B. Do NOT coordinate interactively — push your commit and close out.
+    - **Scope overlap warning:** ~A touches D_00c at L35 + L121 (imports + paginator). ~B touches D_00c at L839-L881 (weight chain). Different functions, different lines — no logical coupling. Pure textual rebase.
     - **No emojis, selective staging, agent commit identity** per standard rules.
   </guardrails>
 
