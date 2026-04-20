@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>1.0.0_SA_CTO</issued_to>
     <date>2026-04-16</date>
-    <status>pending</status><!-- 2026-04-20T18:07Z CTO~Z start under COO~Z ACK (silent-default go); Phase 1 flagged dimension-coverage finding (4/6 natural in httpx); PRD v4 + this AC amendment land in commit sequence preceding gold authoring. -->
+    <status>complete</status><!-- 2026-04-20T18:35Z CTO~Z ship: gold 58a52153. All Phase 2 ACs PASS except #1 (deferred post-.011 per TO cross_domain_coordination). 85 records / 24 questions (19 ratchet incl. 4 adversarial + 5 exploratory) / validator PASS / target_version SHA 909ea79f.... Evidence chain: PRD v4 28999f01 + TO .016 v4 087ac4ba + PRD v4.1 885c8dc3 + TO .016 v4.1 3ba83810 + gold 58a52153. Session log: org/tier1_exec/1.0.0_SA_CTO/logs/2026-04-20/comp_learns_016_gold_authoring_Z.md. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — gates .013 precision/recall + .015 A/B + .017 ratchet</priority>
   </metadata>
