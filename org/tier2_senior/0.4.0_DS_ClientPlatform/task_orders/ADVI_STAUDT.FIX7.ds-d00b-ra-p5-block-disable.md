@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T16:28Z by 2.0.0_SA_COO. CTO directive 20260420T162726Z. Bundle with FIX3B in same ~A wave (same D_00b file). -->
+    <status>complete</status><!-- COMPLETE 2026-04-20 — ~A commit `e0550693` (D_00b RA-P5 guard-clause disable), firm ADV-AUA $1.651B validated on QA SSM b5ad3829. PROD-deployed via bd-gold-trigger SSM 3e06059f 19:49:33Z clean. RAVC4 close 20260420T190342Z. User-visible win: firm NNA chart line $330M→$1.649B. Evidence: DS~A log `staudt_engine_accuracy_bfix12.md`. CTO reconciliation session 35. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P0 — same RA-class bug as FIX1, but on D_00b L788-798 (RA-P5) instead of D_00c L971-987 (RA-P3). Continuous-ADV-AUA = $330M instead of $1.649B (same ~20% role_aua/ shadow ratio). Fix is symmetric to FIX1.</priority>
     <lane>~A — bundled with FIX3B + INV4 in single D-script wave. Same commit as FIX3B (both touch D_00b).</lane>

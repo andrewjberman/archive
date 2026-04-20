@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T14:08Z by 2.0.0_SA_COO. CTO approval MCP 20260420T140816Z "Column-safety audit in Phase 0 is exactly the right gate; Option B out-of-scope fencing is crisp." Awaiting Andrew's ~A spawn. -->
+    <status>complete</status><!-- COMPLETE 2026-04-20 — ~A commit `43c3693a` (D_00c+D_02 nna/ revert), structural PASS on QA SSM b5ad3829, PROD-deployed via bd-gold-trigger SSM 3e06059f 19:23:12Z-19:49:33Z clean. RAVC4 close 20260420T183935Z. Evidence: DS~A log `staudt_engine_accuracy_bfix12.md`. CTO reconciliation session 35. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P1 — trivial 2-file constant swap, ships first. Lands before FIX-TO 1 on D_00c so ~B rebases on top of ~A's commit (NOT the reverse).</priority>
     <lane>~A — FIX3A only. Single-TO lane; idle after close.</lane>

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T14:47Z by 2.0.0_SA_COO. CTO approval MCP 20260420T144745Z "APPROVED as drafted (f1c685aa)... No edits required." Andrew called ~D to spawn (rationale: ~D just mapped platinum NNA consumers in their synthesis → Phase 0 is at-hand context). -->
+    <status>complete</status><!-- COMPLETE 2026-04-20 — ~D Phase 1 `b7a75374` committed + DT uploaded 16:47:13Z. Phase 2 PASS 20260420T182000Z: 1,092 NNA entries oldest 2023-04-21 across all 4 firm series + travis_penfield advisor. RAVC4 close 20260420T184122Z. PROD-deployed via bd-gold-trigger SSM 3e06059f 19:49:33Z clean. Evidence: DS~D log `staudt_fix6_nna_3yr_gate.md`. CTO reconciliation session 35. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P1 — schedules after FIX1 lands (parallel to FIX2/FIX3A closeout). Addresses Andrew's top-level historical-NNA concern that INV1 confirmed as a real firm-grain universe asymmetry, NOT a per-advisor code bug.</priority>
     <bug_reference>Pre-2023 universe asymmetry between silver/transactions (broader flow-tracked universe) and holdings_lots-derived AUA (narrower tracked universe). INV1 Q1 20260420T143042Z quantified: 4.28x ratio firm NNA/AUA in 2020, converging to 0.91x by 2024. See data/black_diamond/diagnostics/STAUDT/INV1/historical_nna_mechanism.md (when AE publishes).</bug_reference>

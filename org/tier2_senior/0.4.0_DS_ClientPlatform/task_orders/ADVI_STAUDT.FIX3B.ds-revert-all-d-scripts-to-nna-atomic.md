@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T16:11Z by 2.0.0_SA_COO. CTO directive 20260420T161035Z root-cause traced AUA/NNA/GRO identity break. Andrew portal-flagged. ~A idle post-FIX3A close, owns the prefix-swap surface. -->
+    <status>complete</status><!-- CANCELLED 2026-04-20 — Phase 0 parquet verification proved `aua_current` IS present in canonical/nna/ (original identity-break hypothesis wrong). FIX3A's D_00c+D_02 nna/ revert held structurally; FIX3B scope is moot. Evidence: DS~A log `staudt_engine_accuracy_bfix12.md`. CTO reconciliation session 35. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P0 — BLOCKS PROD. The FIX3A path-uniformity direction was wrong; canonical/nna/ lacks aua_current → identity broken in Assets Overview portal. Reverse direction immediately, restore Wednesday state (all D-scripts on nna_atomic/), park nna/ migration for Option B.</priority>
     <lane>~A — single-TO lane. Continuation of ~A's FIX3A work; ~A owns the entire D-prefix surface.</lane>

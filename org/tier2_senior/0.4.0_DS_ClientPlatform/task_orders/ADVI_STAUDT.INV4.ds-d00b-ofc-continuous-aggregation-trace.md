@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T16:28Z by 2.0.0_SA_COO. CTO directive 20260420T162726Z. Phase 0 of ~A's D-script wave (FIX3B + FIX7 + INV4). -->
+    <status>complete</status><!-- DEFERRED 2026-04-20 — Phase 0 trace by ~A determined OFC-NNA asymmetry lives in caller above D_00b L450, not D_00b internal. Investigation outcome satisfied (no code change warranted inside D_00b). Callsite audit folded into B_00 mini-PRD backlog (post-STAUDT). Evidence: DS~A log `staudt_engine_accuracy_bfix12.md`. CTO reconciliation session 35. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P1 — investigation only, no code change unless finding warrants. Phase 0 of the FIX3B/FIX7 work.</priority>
     <lane>~A — Phase 0 of D-script wave. Report before any code change.</lane>
