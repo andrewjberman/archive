@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-20</date>
-    <status>draft</status>
+    <status>dispatched</status><!-- DISPATCHED 20260420T14:13Z by 2.0.0_SA_COO. CTO approval MCP 20260420T141219Z "Approved as drafted. Flip to dispatched." Awaiting Andrew's AE spawn. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P1 — unblocks FIX-TO 4 scope decision. Pure diagnostic, no fixes. Target ~2-4 hour turnaround.</priority>
     <kind>INVESTIGATION — S3 reconstruction + integrity check. NO fixes authored under this TO.</kind>
@@ -174,7 +174,7 @@
     - **Pure diagnostic:** zero S3 writes to canonical paths, zero silver/ modifications, zero deployed code. Any hypothesis → document, do NOT patch.
     - **QA runner only:** `feedback_prod_runner_eventbridge_only.md` — bd-gold-layer-runner is EventBridge-only PROD; use bd-gold-qa-runner (i-0090b823a4a0997e3) for all INV1 queries.
     - **Single command discipline:** per `feedback_ec2_single_command.md`, no overlapping SSM commands.
-    - **S3 code deployment standard:** per `feedback_no_direct_ds_messages.md`'s deployment analogs, if you need to run diagnostic scripts on EC2, follow `docs/deployment/EC2_CODE_DEPLOYMENT_STANDARD.md` — write locally → upload to S3 → EC2 pulls → execute. No inlined SSM Python.
+    - **S3 code deployment standard:** if you need to run diagnostic scripts on EC2, follow `docs/deployment/EC2_CODE_DEPLOYMENT_STANDARD.md` — write locally → upload to S3 → EC2 pulls → execute. No inlined SSM Python.
     - **No emojis in code** (CLAUDE.md #13).
     - **No scope creep:** three named queries + synthesis. If a fourth candidate emerges during Query 1 or 2, document and escalate — do not pursue.
     - **Agent commit identity:** `git commit --only --author="0.6.0_AE_PartnerETL &lt;0.6.0_AE_PartnerETL@opal.agent&gt;" -- &lt;paths&gt;`
