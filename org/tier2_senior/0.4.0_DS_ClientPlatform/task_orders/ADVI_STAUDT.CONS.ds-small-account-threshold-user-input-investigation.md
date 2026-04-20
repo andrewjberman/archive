@@ -7,6 +7,7 @@
     <status>dispatched</status><!-- DISPATCHED 20260420T19:XX Z by 2.0.0_SA_COO. Andrew directive 2026-04-20 in chat. ~C lane (KPI in parallel; both P2/P3, no overlap with ~A engine wave). -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P2 — feature-investigation TO. Output is a scoping/architecture briefing, not code. Independent of FIX wave + engine wave; no qa-runner dependency.</priority>
+    <deadline>24-36 hours from dispatch (target 2026-04-21 evening to 2026-04-22 morning ET). Flex on KPI-briefing overlap if Phase 0 of either surfaces shared compiler-tools work that's better batched.</deadline>
     <lane>~C — alongside KPI TO. Both are framework/architecture work, no overlap with ~A engine wave or ~B EOP2025 diagnostic.</lane>
     <bug_reference>Andrew chat 2026-04-20: "explore how we can make the small account threshold a user input in the Consolidation Opportunities toggle in Revenue Operations & Analysis panel in /Books tab in ADVI." Current state: threshold is hard-coded at $40k per ADVI_ROLLUP.B9 (commit f2ec98d1 "C_08 small_account_count per advisor (threshold $40k)"). User wants to drag/slide the threshold from the portal UI and have the count + avg AUA + downstream visualizations update.</bug_reference>
     <decision_authority>Andrew directive 2026-04-20 in chat. Investigation-only authorization; implementation TO follows after briefing review.</decision_authority>
@@ -46,7 +47,8 @@
     **Three architecture options to evaluate:**
 
     **Option A — Server precompute multiple threshold buckets.**
-    - C_08 (or new C-script) computes small_account_count + avg_aua at predefined buckets: $10k / $25k / $40k / $75k / $100k / $250k
+    - C_08 (or new C-script) computes small_account_count + avg_aua at predefined buckets
+    - **Bucket selection is itself a Phase 0 deliverable, not pre-committed in this TO.** Ground bucket choice in the actual account-AUA distribution: run a `comp-platinum reverse` (or direct query against canonical_holdings.market_value across the active-account universe) to identify natural breakpoints (e.g., distribution decile clustering, AUA round-number clusters). Alternatively, MCP Andrew for preferred breakpoints. Document chosen buckets in the briefing with the distribution evidence.
     - Portal toggle/dropdown selects between buckets, no per-request compute
     - **Pros:** instant client UX, no latency added, server cost is a one-time precompute increase, cache-friendly (each bucket has a stable key)
     - **Cons:** discrete bucket choices (no slider), schema changes to gold/artifact for each bucket, potential balloon if buckets multiply
@@ -62,7 +64,7 @@
     - **Cons:** PII exposure (account-level data exposed to portal client — verify PII classification per `comp-pii audit`), payload size scales with account count, still need server-side count for downstream aggregates
     - **Hybrid sub-option C':** client-side slider for visual count, but firm-level/role-level rollup stays server-precomputed at common buckets
 
-    **Trade-off dimensions to evaluate per option:**
+    **Trade-off dimensions to evaluate per option (8 dimensions):**
     - **Latency:** time from slider movement → updated number on screen
     - **Server cost:** compute + S3 storage delta
     - **PII exposure:** does the option expose more raw account data to the portal client than current state?
@@ -70,6 +72,7 @@
     - **UX flexibility:** continuous slider vs discrete buckets
     - **Engineering cost:** TOs needed (C-script change, Lambda, portal frontend, deploy cycle)
     - **Forward extensibility:** can other thresholds (e.g., large-account threshold, fee-tier breakpoints) reuse the same architecture?
+    - **Aggregate blast (what else must recompute):** if threshold becomes dynamic, does the change cascade into role_breakdown / fee_breakdown / consolidation_opportunity_dollars / any other rollup that uses small_account_count or small_account_avg_aua as an input? Or is the threshold's effect contained to the count + avg AUA fields only? This dimension is the cleanest separator of Option A (precompute every dependent rollup per bucket = larger schema) vs Option B (recompute everything per request = larger latency) vs Option C (client only has the slider; server-side rollups stay static = mismatch risk).
 
     **Threshold-state persistence question:**
     Where does the user's chosen threshold live?
@@ -168,8 +171,12 @@
     - [ ] Briefing addresses cache-invalidation implications under Option B explicitly
     - [ ] Briefing recommends a path with cited rationale + phased implementation TO sketch
     - [ ] Briefing addresses threshold-state persistence (URL param vs user pref vs ephemeral) with recommendation
+    - [ ] Briefing addresses aggregate-blast dimension explicitly per option (which downstream rollups recompute under each architecture)
+    - [ ] Option A bucket selection is grounded in account-AUA distribution evidence (or Andrew direction documented)
+    - [ ] DE consulted on portal-side wiring + Option C/C' feasibility (consult evidence cited in briefing)
     - [ ] Executive summary MCP'd to COO before forwarding to Andrew
     - [ ] NO code changes in this TO
+    - [ ] org/compiler-tools-log.md append line filed per TO_COMPILER_GATE.md standard (auto-append fires via .agent_context but acceptance gate makes it explicit)
   </acceptance_criteria>
 
   <guardrails>
