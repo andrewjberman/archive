@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-20</date>
-    <status>draft</status>
+    <status>dispatched</status><!-- DISPATCHED 20260420T14:08Z by 2.0.0_SA_COO. CTO approval MCP 20260420T140816Z "No edits required... Dispatch now per standard protocol." Awaiting Andrew's ~B spawn. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P0 — firm-wide user-visible crisis. 152/152 advisors fail invariant 1 at T3. Top critical path.</priority>
     <lane>~B — FIX-TO 1 then FIX-TO 2 (sequential on D_00c). ~B owns both in order.</lane>

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-20</date>
-    <status>draft</status>
+    <status>dispatched</status><!-- DISPATCHED 20260420T14:08Z by 2.0.0_SA_COO. CTO approval MCP 20260420T140816Z. Awaiting Andrew's ~B spawn (same instance as FIX1, sequential). -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P0 (dependent on FIX-TO 1). Expected to self-resolve for most advisors after FIX-TO 1 completes; residual cases need explicit handling.</priority>
     <lane>~B — picks this up AFTER FIX-TO 1 closes. Same lane, same context, same D_00c working tree. Do NOT hand off to a different instance.</lane>

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-04-20</date>
-    <status>draft</status>
+    <status>dispatched</status><!-- DISPATCHED 20260420T14:08Z by 2.0.0_SA_COO. CTO approval MCP 20260420T140816Z "A→D-rerun-sensitive pre-flag rule cited correctly." Awaiting Andrew's ~C spawn. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P2 — low impact, quick close. Fully parallel to ~A (FIX3A) and ~B (FIX1/FIX2) — different file (C_01), different S3 surface, no coordination needed.</priority>
     <lane>~C — FIX5 only. Single-TO lane; idle after close.</lane>
