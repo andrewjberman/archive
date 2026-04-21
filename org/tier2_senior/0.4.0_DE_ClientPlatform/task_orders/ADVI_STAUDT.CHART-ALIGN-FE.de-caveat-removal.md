@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-21</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_STAUDT</project_code>
     <priority>P2 — UX cleanup. Removes a planned caveat (never shipped, or recently shipped depending on DE lane state) that explained chart↔leaderboard attribution divergence. Divergence is about to be eliminated by DS CHART-ALIGN, so the caveat text is obsolete.</priority>
     <sla>~1h (single-string / single-component removal + /frontend-dev acceptance)</sla>
