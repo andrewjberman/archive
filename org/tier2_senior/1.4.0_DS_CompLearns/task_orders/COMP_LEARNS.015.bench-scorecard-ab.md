@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>1.4.0_DS_CompLearns</issued_to>
     <date>2026-04-16</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — critical path; bench is the product surface. Fallback owner ~B after .013 closes if ~D capacity-blocked on CN-P1b.</priority>
   </metadata>
