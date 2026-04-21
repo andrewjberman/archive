@@ -2,7 +2,7 @@
   <metadata>
     <id>ADVI_STAUDT.D</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- originally ~D sub-lane; base serial post 2026-04-21 sub-lane-cleanup -->
     <date>2026-04-20</date>
     <status>pending</status><!-- CTO conditional-approved 20260420T~12:49Z; comp-build rework + minor polish landed; COO dispatched GO to ~D inbox 20260420T~12:55Z. Phase 0 data collection may begin immediately; Phase 1 findings + 5 SYNTHESIS docs gate on ~C findings MCP (which transitively confirms ~A + ~B fired). -->
     <project_code>ADVI_STAUDT</project_code>

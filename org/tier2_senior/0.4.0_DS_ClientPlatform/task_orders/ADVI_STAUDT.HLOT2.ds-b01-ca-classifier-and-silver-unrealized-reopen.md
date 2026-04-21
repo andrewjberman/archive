@@ -2,7 +2,7 @@
   <id>ADVI_STAUDT.HLOT2</id>
   <title>B_01 holdings_lots dual-patch: CA-Merger classifier (Patch A) + silver/unrealized-authoritative 3-tier re-open (Patch B)</title>
   <issued_by>2.0.0_SA_COO</issued_by>
-  <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
+  <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- originally ~A sub-lane; base serial post 2026-04-21 sub-lane-cleanup -->
   <status>pending</status>
   <priority>P1</priority>
   <sla>3h end-to-end from GO (TO dispatch → ~A commit 30 min → DT S3 upload → AE qa-runner --from B --chain → comparison pack → PROD deploy). Held since 2026-04-20 21:38Z Andrew directive "I want a solution immediately."</sla>

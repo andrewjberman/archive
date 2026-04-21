@@ -2,7 +2,7 @@
   <metadata>
     <id>ADVI_STAUDT.EOP2025</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- originally ~B sub-lane; base serial post 2026-04-21 sub-lane-cleanup -->
     <date>2026-04-20</date>
     <status>pending</status><!-- DISPATCHED 20260420T18:30Z by 2.0.0_SA_COO. CTO directive 20260420T182548Z; Andrew approval 20260420T181200Z on briefing sequencing. Gates on cf5bd5ad chain-full recovery for $32M signal trace. Status normalized 2026-04-21 (dispatched -> pending for operator schema). -->
     <project_code>ADVI_STAUDT</project_code>

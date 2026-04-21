@@ -2,7 +2,7 @@
   <metadata>
     <id>ADVI_STAUDT.CONS</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- originally ~C sub-lane; base serial post 2026-04-21 sub-lane-cleanup -->
     <date>2026-04-20</date>
     <status>pending</status><!-- DISPATCHED 20260420T19:XX Z by 2.0.0_SA_COO. Andrew directive 2026-04-20 in chat. ~C lane (KPI in parallel; both P2/P3, no overlap with ~A engine wave). GO after 4-edit review incorporation (commit 4a901692 + broken-ref fix). ACK'd by ~C; queued behind KPI Phase 0. -->
     <project_code>ADVI_STAUDT</project_code>
