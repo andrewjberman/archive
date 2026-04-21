@@ -6,7 +6,8 @@
     <lane_preference>~D (or whichever DS lane is idle post-chain-full recovery per CTO 2026-04-21T15:50Z ACK)</lane_preference>
     <co_owner>0.4.0_DE_ClientPlatform (portal footnote display, sub-deliverable inline)</co_owner>
     <date>2026-04-21</date>
-    <status>staged</status>
+    <status>in_progress — DS code complete (3cf43c26), S3 upload + qa-runner pending post CHART-ALIGN RAVC4 close</status>
+    <acked>2026-04-21 ~13:02 ET (DS)</acked>
     <project_code>ADVI_STAUDT</project_code>
     <priority>P2 — small transparency surface. Headline summary only. NO gold-runner filter changes. Scoped to Cohort A (599 accts / $44.7M dropped silver→canonical).</priority>
     <sla>Combined ~4h (DS emit ~2-3h + DE footnote display ~1h)</sla>
