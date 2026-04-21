@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>1.2.0_DS_CompLearns</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Parallel with #003; flips pending when ~B closes #003. -->
+    <status>complete</status><!-- Shipped 2026-04-21 by 1.2.0_DS_CompLearns. Commit 2cd6ba10 pushed. 60 framework tests green. sub-10s response (Phase 2: 0.364s). Install shim at comp/bin/comp-learns-status. Status flipped by 2.1.0_SA_COO via RAVC close. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — MANDATE req #8 observability</priority>
   </metadata>
