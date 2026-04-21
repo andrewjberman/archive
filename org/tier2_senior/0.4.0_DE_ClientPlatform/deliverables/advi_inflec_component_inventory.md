@@ -97,3 +97,60 @@
 **firmId prop vs hardcode:** Components that ACCEPT `firmId` as a prop are classified SHARED. Only components that HARDCODE a firm identifier or default to 'bd' are 49F-SPECIFIC.
 
 **comp-transform Phase 3 output:** `comp-transform fields AdvisorIntelligence` reports 3 rendered fields at the page-root level (`analyticsData` root, `.generated_at`, `employeeData` root) — expected, since the page root is an orchestrator that passes firmId/data to child components rather than rendering fields directly.
+
+---
+
+## CTO SIGN-OFF — W5.0.3 Review (2026-04-21)
+
+**Signed off by:** 1.0.0_SA_CTO via MCP 20260421T210739Z
+**Resolutions per 1.0.0_SA_CTO — parameterize, don't fork:**
+
+### Q1/Q4 — Role vocabulary: VERDICT: 49F-specific VALUES, shared SHAPE
+
+- `_shared/types.ts`: add `type AdvisorRoleKey = string` + `interface AdvisorRoleMeta { key: string; label: string; color: string; order: number }`. Remove `AdvisorRole` union; rename `TaxDeferredCandidate.architect` to `primaryAdvisor: string | null`.
+- `_partners/49financial/roles.ts`: `type FortyNineFinancialRole = 'architect' | 'implementor' | 'consultant' | 'local_ops' | 'additional_advisor'` + `FORTY_NINE_FINANCIAL_ROLES: Record<FortyNineFinancialRole, AdvisorRoleMeta>` (current ROLE_LABELS/ORDER/COLORS).
+- `_partners/inflection/roles.ts`: `type InflectionRole = 'individual' | 'firm' | 'routing'` + `INFLECTION_ROLES: Record<InflectionRole, AdvisorRoleMeta>` (`individual` = advisor-name-keyed, `firm` = "Inflection Wealth Management", `routing` = excluded from leaderboard).
+- `AdvisorBookView`, `AdvisorsTab`, `AdvisorPublicProfile` take `roleMeta: Record<string, AdvisorRoleMeta>` prop injected by partner router via `useFirmConfig()`. Drop inline ROLE_ORDER/ROLE_LABELS.
+- `lib/chartColors.ts` `ADVISOR_ROLE_LABELS` — MOVE to `_partners/49financial/roles.ts`. chartColors.ts stays partner-agnostic.
+- `types.ts` L183 `TaxDeferredCandidate.architect: string` — RENAME to `primaryAdvisor: string | null` (role-agnostic).
+
+Reclassification: `AdvisorBookView.tsx`, `AdvisorsTab.tsx`, `AdvisorPublicProfile.tsx`, `types.ts` move from AMBIGUOUS to SHARED (parameterized).
+
+### Q2 — $40k threshold: VERDICT: 49F fee-schedule-specific, component stays SHARED
+
+- `SmallAccountsByRoleModal` takes `threshold: number` + `roleMeta: Record<string, AdvisorRoleMeta>` props.
+- Inflection: partner router does NOT render the Small Accounts surface (soft-hide; `threshold: null` signal).
+- 49F: partner router injects `threshold: 40_000` from `_partners/49financial/constants.ts`.
+
+Reclassification: `SmallAccountsByRoleModal.tsx` moves from AMBIGUOUS to SHARED (parameterized).
+
+### Q3 — Book/Profile access model: VERDICT: 49F pyramid-gated, parameterize via access-policy prop
+
+- `AdvisorPublicProfile` takes `accessPolicy: 'gated-by-role' | 'book-only' | 'profile-only'` prop.
+- 49F: `'gated-by-role'` + current user role passed by partner router.
+- Inflection: `'book-only'` (every Rep sees own book; no pyramid gating).
+
+### Additional — Source attribution strings: parameterize (CTO suggestion accepted)
+
+- `AUATrendChart`, `PartnerAnalytics`, `DistributionTab` take `sourceAttribution: string` prop.
+- 49F constant: `"Source: SS&C Black Diamond Wealth Solutions."`
+- Inflection constant: `"Source: Orion Portfolio Solutions."`
+- `DistributionTab` additionally takes `tooltipAttribution: { stateNna: string; cityAua: string }` prop.
+
+### Remaining true-fork components (after all parameterizations)
+
+- `AdvisorIntelligence.tsx` → `_partners/49financial/index.tsx` (AVAILABLE_FIRMS + 'bd' default + BD layout panel). NOT extractable as props — this IS the partner page assembly.
+- `ClientDetail/ClientDetailPage.tsx` → make `firmId` a REQUIRED prop (no fallback). Partner page-root passes the firmId. Cleaner than prop-injected default.
+
+### NET RESULT after W5.0.3 resolutions
+
+**40 components total: 35 SHARED (parameterized) | 2 49F-SPECIFIC (true forks) | 3 config files | 0 AMBIGUOUS**
+
+(Previously: 30 SHARED / 5 49F-SPECIFIC / 5 AMBIGUOUS — 5 AMBIGUOUS all resolved to SHARED-with-params; 3 of the original 49F-SPECIFIC resolved to SHARED-with-params)
+
+### W5.0.4 Prerequisites (all gates cleared)
+
+- CTO sign-off: GIVEN 2026-04-21
+- W5.0.1 complete: YES (051f7ab3)
+- W5.0.2 complete: YES (f5900e5a)
+- W5.0.4 execution: pending COO GO
