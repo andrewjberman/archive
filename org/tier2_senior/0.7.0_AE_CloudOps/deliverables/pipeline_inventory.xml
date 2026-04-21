@@ -362,7 +362,7 @@
   </cloudfront>
 
   <!-- =========================================================
-       DYNAMODB TABLES — Partner Identity
+       DYNAMODB TABLES
        ========================================================= -->
   <dynamodb_tables>
 
@@ -382,6 +382,42 @@
       <prd>docs/architecture/PARTNER_IDENTITY_TABLE.md</prd>
       <tags>Project=ADVI, ManagedBy=terraform, Partner=49financial</tags>
       <created>2026-03-04 (shared-infra-v1.3.0)</created>
+    </table>
+
+    <table>
+      <name>opal-trade-submissions</name>
+      <arn>arn:aws:dynamodb:us-east-1:313476888478:table/opal-trade-submissions</arn>
+      <billing_mode>PAY_PER_REQUEST</billing_mode>
+      <hash_key>submission_id (String)</hash_key>
+      <sort_key>none</sort_key>
+      <gsi>
+        <name>by-date</name>
+        <hash_key>submission_date (String)</hash_key>
+        <range_key>submitted_at (String)</range_key>
+        <projection>ALL</projection>
+      </gsi>
+      <gsi>
+        <name>by-initiator</name>
+        <hash_key>initiator_email (String)</hash_key>
+        <range_key>submitted_at (String)</range_key>
+        <projection>ALL</projection>
+      </gsi>
+      <gsi>
+        <name>by-approver</name>
+        <hash_key>approver_email (String)</hash_key>
+        <range_key>approved_at (String)</range_key>
+        <projection>ALL</projection>
+      </gsi>
+      <gsi>
+        <name>by-status</name>
+        <hash_key>status (String)</hash_key>
+        <range_key>submitted_at (String)</range_key>
+        <projection>ALL</projection>
+      </gsi>
+      <terraform_resource>aws_dynamodb_table.trade_submissions (trade-pipeline/dynamodb.tf)</terraform_resource>
+      <purpose>Financial transaction record store. Backs the trade-submission-handler Lambda (currently dormant per TRSB_TFIMPT.W1 Phase 1 probe — 30-day invocations=0).</purpose>
+      <tags>Project=OpalPortal, ManagedBy=Terraform, Environment=Production, System=Portfolio</tags>
+      <imported>2026-04-21 via TRSB_TFIMPT.W1 (trade-pipeline-v1.3.0) — table created 2026-02-27, imported into TF state 2026-04-21</imported>
     </table>
 
   </dynamodb_tables>
