@@ -92,3 +92,64 @@ Neither blocks the closure itself; they're downstream bookkeeping in other lanes
 ## Task Order Dispatch
 
 No new TOs authored this session. All closure work was MCP coordination + JSON writes under `2.1.0_SA_COO` author.
+
+---
+
+## Post-Closure Addendum — CTO Hardcore Audit (2026-04-21 evening ET)
+
+Appended after closure declaration. Reviewers tracing v0 history should read this alongside `org/tier1_exec/1.1.0_SA_CTO/logs/2026-04-21/session10_hardcore_audit_r9_wire_validators_dedup.md`.
+
+### Trigger
+
+~13 minutes after I pushed the closure commit (`664b9b7e` @ 18:35Z), GPT's protocol brief (external validator agent) flagged the experiment log showing `best_selector=random` across all 5 `.017` iterations. Andrew directed `1.1.0_SA_CTO`: "let's do a hardcore validation of everything wired so far to make sure there aren't more gaps."
+
+CTO ran a full architectural-guard inventory: every declared PRD v4.2 + TARGET_CLOSEOUT v2.0 invariant traced to its live-path call site. Found 5 gaps (every one "defined + unit-tested but NEVER called in live path") + 1 duplicate class identity + 1 tie-guard semantics correction.
+
+### Audit findings (fixed in commit `04f85f18`)
+
+| Gap | Fix |
+|-----|-----|
+| `check_selector_game` (R9 honesty fork) unwired | Wired into `comp/loop/ratchet.py::iterate` post-`compute_primary_metric` |
+| `SelectorGameDetected` defined with DIFFERENT class identities in `selectors/base.py` + `primary.py` | `primary.py` re-exports from `selectors/base.py`; single class across `comp.bench.*` |
+| `validate_gold_survey_attestation` unwired | Wired as pre-flight in `ratchet._main()` — `GoldSurveyAttestationMissing` exits 2 |
+| `ab_answer_key_validator.validate` unwired | Wired as pre-flight in `ratchet._main()` — `RatchetPoolOpenEndedRejected` / `InvalidAnswerKeyEntry` exit 2 |
+| `Verdict` enum lacked forked state | `Verdict.FORKED` added; champion NOT updated on fork; `fork_reason` logged in `extra` |
+| PRD §6.5 literal check would false-positive on selector ceiling (all three saturate at 1.0, tie-break to random) | Tie-guard added — fork only fires when `random_lift > max(structured_lifts)`. 2 regression tests encode both directions. |
+
+### Verified wired + tested (no gap)
+
+CTO's audit also confirmed 12+ other architectural guards ARE wired + tested: `CacheMissDuringPrimaryMetric`, `SubtypeRecord.__post_init__` flat-string rejection, `compute_primary_metric` ratchet-critical-only invariant, `Scorecard.__eq__` emitted_at exclusion (R13), `Graph.__eq__` determinism, `ConflictingProvenanceError` (R4), R1-R5 conflict resolution, `ratchet_critical_call` temperature=0 enforcement, `selector_hash` in cache key, append-only experiment log, mutation rename/reorder/noise × 3 seeds, node-ID canonicalization.
+
+### Live verification
+
+`comp-learns-run.sh httpx --once` post-fix:
+- Pre-flight validators ran clean
+- `check_selector_game` correctly did NOT fire on tie-at-ceiling (literal check would have false-positive'd)
+- Verdict: TIED at primary_metric=1.2439 iter 6 (determinism holds)
+- 268 tests pass / 0 fail across `comp/bench/ comp/loop/ comp/compiler_subtypes/ comp/graph_builder/ comp/ir/ comp/parsers/`
+
+### Implications for v0 closure claim
+
+**The `.017` four-demo acceptance is still valid** — KEEP/DISCARD/adversarial/determinism all demonstrated real behavior. But the fifth pillar ("R9 fork fires on dishonesty") was claimed-but-unverified in the live path at the moment of my closure declaration. **The audit closes that gap retroactively.**
+
+Net effect: v0 is now *more* honestly done than when I declared closure. Closure state unchanged — still 20 COMPLETE / 1 DEFERRED / 1 STAGED-EXT, `status: complete`. No re-opening needed; no JSON narrative rewrite; no REGISTRY row re-edit.
+
+### Discipline observation (not a process change)
+
+The audit happened because external validator input (GPT protocol brief) flagged an anomaly that my own closure run + validator.py run did not surface. My `validator COMP_LEARNS` output showed 230 UNVALIDATED + 52 INSUFFICIENT_EVIDENCE — which we correctly read as "cosine-similarity semantic-match noise" — but buried inside that noise was a genuine wire-level issue the validator couldn't isolate at requirement granularity.
+
+Takeaway for future closures: **a call-site-trace audit of every PRD invariant should be part of the closure discipline**, not a post-hoc catch. Not authoring as a TO or codifying in prompt.md at this moment (per CTO's own session07 discipline — delay formalization until second recurrence) but flagging here for visibility. If this pattern recurs on a future project closure, then we formalize.
+
+### Remaining open honesty unknowns (empirical, not gaps)
+
+All three are correctly framed by CTO as "let the ratchet surface these, not pre-emptively gate":
+1. **Selector ceiling on httpx** — `per_selector = {1.0, 1.0, 1.0}` saturates. Target-2 (`click`) nested command groups should stress differentiation.
+2. **Compiler ceiling on httpx** — `primary_metric=1.2439` stable across iters; needs a genuine compiler edit to see if ratchet detects meaningful deltas.
+3. **Node-ID aliasing pattern** — one instance caught (`_normalize_node_ids` temp-dir leakage); target-2 different filesystem layout is the involuntary stress test.
+
+### Session chain reference
+
+| Exec | Session | Commit | Summary |
+|------|---------|--------|---------|
+| 1.1.0_SA_CTO | session10_hardcore_audit_r9_wire_validators_dedup.md | `04f85f18` | R9 fork wired + tie-guard + 2 validators wired + class consolidation + `Verdict.FORKED` |
+| 2.1.0_SA_COO | session03_project_closure_v0_done.md (this log + this addendum) | `d446c01f` + addendum commit | Closure execution + post-closure audit coherence |
