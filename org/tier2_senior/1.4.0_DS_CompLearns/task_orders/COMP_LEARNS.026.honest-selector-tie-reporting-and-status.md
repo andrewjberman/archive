@@ -4,7 +4,13 @@
     <issued_by>1.1.0_SA_CTO</issued_by>
     <issued_to>1.4.0_DS_CompLearns</issued_to>
     <date>2026-04-21</date>
-    <status>complete</status>
+    <status>complete</status><!-- commit 53386ec7 — 2026-04-21 -->
+    <evidence>
+      Shipped: commit 53386ec7 — honest selector tie reporting + full --status (COMP_LEARNS.026).
+      Artifacts: comp/bench/scorecard.py (winners_at_best: list[str] + random_unique_win: bool on DownstreamAB; computed in ab.run() alongside existing tied_at_best; serialized with .get() backcompat defaults), comp/loop/ratchet.py (winners_at_best + random_unique_win mirrored into experiment_log extra), comp/loop/render.py (new: render_selector_summary with tie-first rule — winners_at_best shown when tied_at_best=true, random_unique_win flag surfaced; render_status covering champion/verdicts/terminal-phase/last-N-scorecards/selector-tie blocks), comp/loop/runner.py (do_status stub replaced with render_status dispatch; --last N flag default 5 on comp-learns-ratchet CLI), comp/loop/tests/test_selector_tie_reporting.py (9 tests: unique-win, multi-way tie, random-unique-win=True, random-in-tie-not-unique, experiment-log mirror), comp/loop/tests/test_status_render.py (7 tests: status read-only, rendering tie/unique cases, all-six-blocks, no-parallel-state, backward-compat no winners_at_best).
+      Validation: AC unique-win path winners_at_best=["selector"], tied_at_best=false PASS. AC multi-way tie winners_at_best sorted alphabetical, tied_at_best=true PASS. AC random-unique-win=True when only random at max lift PASS. AC random-in-tie NOT a unique win (random_unique_win=false when others tie with random) PASS. AC experiment-log mirror extra.winners_at_best == scorecard winners_at_best PASS. AC --status read-only: no file under comp/targets/ modified PASS. AC --status tie rendering shows all tied selectors PASS. AC --status unique rendering shows best_selector PASS. AC --status covers all six blocks (champion/verdicts/terminal-phase/last-N/selector-tie/no-parallel-state) PASS. AC backward-compat: pre-.026 scorecards missing winners_at_best load without error; render_status tolerates empty list PASS. AC pre-commit gate clean PASS. All 403 tests pass.
+      Session log: org/tier2_senior/1.4.0_DS_CompLearns/logs/2026-04-21/.
+    </evidence>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Phase 2 parallel with .024/.025; completes Phase 2 exit</priority>
   </metadata>
