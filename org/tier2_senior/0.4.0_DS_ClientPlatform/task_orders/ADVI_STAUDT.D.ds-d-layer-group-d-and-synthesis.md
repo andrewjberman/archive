@@ -20,9 +20,9 @@
   </references>
 
   <dependencies>
-    <dependency agent="0.4.0_DS_ClientPlatform~A" task="ADVI_STAUDT.A" status="staged" required="layer_a_findings.md committed + evidence_pack.json"/>
-    <dependency agent="0.4.0_DS_ClientPlatform~B" task="ADVI_STAUDT.B" status="staged" required="layer_b_findings.md + b01_evolution_trace.md + b01_cusip_coverage_probe.md + evidence_pack.json"/>
-    <dependency agent="0.4.0_DS_ClientPlatform~C" task="ADVI_STAUDT.C" status="staged" required="layer_c_findings.md + c00_polars_parity_probe.md + c01_nna_schema_diff.md + c03_phantom_outflow_probe.md + evidence_pack.json + MCP fired"/>
+    <dependency agent="0.4.0_DS_ClientPlatform~A" task="ADVI_STAUDT.A" status="complete" required="layer_a_findings.md committed + evidence_pack.json"/>
+    <dependency agent="0.4.0_DS_ClientPlatform~B" task="ADVI_STAUDT.B" status="complete" required="layer_b_findings.md + b01_evolution_trace.md + b01_cusip_coverage_probe.md + evidence_pack.json"/>
+    <dependency agent="0.4.0_DS_ClientPlatform~C" task="ADVI_STAUDT.C" status="complete" required="layer_c_findings.md + c00_polars_parity_probe.md + c01_nna_schema_diff.md + c03_phantom_outflow_probe.md + evidence_pack.json + MCP fired"/>
   </dependencies>
 
   <objective>

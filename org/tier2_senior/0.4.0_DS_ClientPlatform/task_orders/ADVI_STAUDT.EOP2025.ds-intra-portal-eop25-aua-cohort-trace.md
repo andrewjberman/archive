@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T18:30Z by 2.0.0_SA_COO. CTO directive 20260420T182548Z; Andrew approval 20260420T181200Z on briefing sequencing. -->
+    <status>pending</status><!-- DISPATCHED 20260420T18:30Z by 2.0.0_SA_COO. CTO directive 20260420T182548Z; Andrew approval 20260420T181200Z on briefing sequencing. Gates on cf5bd5ad chain-full recovery for $32M signal trace. Status normalized 2026-04-21 (dispatched -> pending for operator schema). -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P3 — non-blocking side finding. Pure diagnostic; no fix in this TO.</priority>
     <lane>~B — parallel to ~A's BFIX1/2/3 chain. ~B is idle post-FIX2/bug_attribution close and has the recent bug-attribution / synthesis mental context. (~D alternative; ~B preferred for synthesis-doc continuity.)</lane>

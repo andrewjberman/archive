@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-20</date>
-    <status>dispatched</status><!-- DISPATCHED 20260420T17:25Z by 2.0.0_SA_COO. Andrew approval 2026-04-20 in chat ("Agreed on all counts go ahead") on engine refinement plan. -->
+    <status>pending</status><!-- DISPATCHED 20260420T17:25Z by 2.0.0_SA_COO. Andrew approval 2026-04-20 in chat ("Agreed on all counts go ahead") on engine refinement plan. Code shipped 081223b5 + fix-forward 1a54d46a; AE uploaded. Awaiting cf5bd5ad chain-full validation + comparison-pack attribution evidence for RAVC4 close. Status normalized 2026-04-21 (dispatched -> pending for operator schema). -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P1 — engine refinement, NOT P0 (qa-runner watchdog incident in flight, no immediate deploy pressure). Closes 80% of the firm AUA accuracy gap ($38.6M of $48.3M). Bundled with BFIX2 (non-Schwab pass-through) in same ~A wave; same script B_00.canonical_holdings.py.</priority>
     <lane>~A — bundled with BFIX2. ~A authored the engine_accuracy diagnostic and owns the B-layer surface for this wave.</lane>
