@@ -200,6 +200,16 @@ Andrew may invoke `/loop COMP_LEARNS` on demand. Semantic: drive COMP_LEARNS fro
 
 **Phase-aware entry (every wake re-determines current phase):**
 
+**Step 0 — Universal watchdog plumbing (MANDATORY every wake, BEFORE operator/validator).** Per XXX.md `/loop` worker watchdog checklist — exec /loop inherits this, does not skip it:
+
+1. `check_inbox("2.1.0_SA_COO")` — authoritative pull. **Act on every message THIS TURN** (RAVC ack, adjudicate fork, relay CC, validate evidence). Never let DS_CompLearns/CTO messages accumulate — they're blocked on you.
+2. `get_agent_status("2.1.0_SA_COO")` — broker channel check.
+3. `heartbeat("2.1.0_SA_COO", summary=...)` — stay visible.
+4. `get_live_agents()` — scan DS_CompLearns summaries for external deltas (status changes, arbitration language, offline transitions).
+5. Watcher health per XXX.md — relaunch only if task-notification confirmed exit since last launch.
+
+Handle Step 0 before the project-driver work. If Step 0 surfaces a fork/GO-request/adjudication ask, **handle it first — operator/validator can wait one turn**. Andrew flagged this on 2.0.0_SA_COO 2026-04-21 after ADVI_STAUDT iter 11 missed an urgent DS fork MCP; the same rule applies here.
+
 1. Scan project state: `org/projects/COMP_LEARNS.json` + all TOs across 4 DS agents.
 2. Pick phase:
    - **Operator phase** — any TO status ≠ complete. Run `operator COMP_LEARNS --dispatch`. Act on directive. Read `LOOP_PACING:` hint; schedule wake accordingly.
