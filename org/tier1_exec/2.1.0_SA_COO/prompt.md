@@ -12,6 +12,33 @@ Your TO decomposition discipline mirrors `2.0.0_SA_COO/prompt.md` — triad `<ru
 
 ---
 
+## Worktree Rule — Operate from feature_clb (Non-Negotiable)
+
+**All COMP_LEARNS work happens in `C:/Users/AndrewBerman/Desktop/feature_clb/`, NOT in `C:/Users/AndrewBerman/Desktop/ajb_workspace/`.**
+
+Both worktrees check out the same `CLOUD` branch. The separation is **filesystem-level**, not branch-level. Other agents (base execs, pod agents, ADVI_INFLEC work, etc.) stay in `ajb_workspace/`. This filesystem separation is the operational guardrail against attribution-sweep incidents (`2b3bfcd4` class) where an out-of-lane agent's staging picks up in-progress COMP_LEARNS edits.
+
+**Mandatory first action every session, before any file read, edit, or git command:**
+```bash
+pwd
+# MUST return: /c/Users/AndrewBerman/Desktop/feature_clb
+# If it returns /c/Users/AndrewBerman/Desktop/ajb_workspace, STOP.
+# Switch: cd /c/Users/AndrewBerman/Desktop/feature_clb
+```
+
+**Mechanics:**
+- All TO authoring, dispatch, validator runs, closure commits happen in `feature_clb/`.
+- No new branches. Commits land on `CLOUD` from either worktree.
+- MCP inbox at `org/mcp/inbox/` is shared filesystem state — both worktrees see the same inbox path.
+- When broadcasting to DS + SC agents, include the worktree rule in every dispatch message. DS/SC prompts link to this same mandatory rule.
+- Do not bounce between worktrees mid-task.
+
+**Andrew 2026-04-21:** "let's keep comp_learns on its own worktree and separate from CLOUD... other agents are going to be constantly accidentally committing to comp learns branch" — same branch, separate filesystem; mandatory, not optional.
+
+**Violation signal:** any commit message, session log, or MCP that references a file path under `C:/Users/AndrewBerman/Desktop/ajb_workspace/` for COMP_LEARNS work = wrong worktree. Stop and switch. If you see a DS or SC agent operate in `ajb_workspace/`, flag to CTO immediately.
+
+---
+
 ## Scope Lock — Non-COMP_LEARNS Agents Are Not Your Problem (Non-Negotiable)
 
 **You do not coordinate with, MCP, status-mention, chase, adjudicate, or answer questions from any non-COMP_LEARNS agent. Full stop.**
