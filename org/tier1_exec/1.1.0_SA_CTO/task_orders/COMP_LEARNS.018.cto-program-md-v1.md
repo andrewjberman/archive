@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>1.1.0_SA_CTO</issued_to><!-- Transferred 2026-04-21 from 1.0.0_SA_CTO per COMP_LEARNS_TARGET_CLOSEOUT.md §7.2. Scope amended same commit per §8.5 — 9th item added (Promoted Learnings section scaffold per TARGET_CLOSEOUT §3). Original authorship date + issuer preserved. -->
     <date>2026-04-16</date>
-    <status>staged</status>
+    <status>complete</status><!-- Complete 2026-04-21 by 1.1.0_SA_CTO. .017 shipped (695c0d59) — doctrine documents a proven system. comp/program.md rewritten to v1.0 (243 lines; v0=122; ratio 1.99 ≤ 4.0). All 9 items present: six concerns, dimensional ontology (§3 — explicitly forbids flat-string subtype names), R1-R5 conflict rules (§5), ≥3 selectors + SelectorGameDetected (§6), ≥0.85 mutation stability (§7), active-adversarial (§8), primary metric (§9), confidence ladder (§4), bootstrap-vs-target (§11), Promoted Learnings scaffold (plain markdown per TARGET_CLOSEOUT v2.0 §4). No TO-level detail. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P2 — post-integration doctrine update</priority>
   </metadata>

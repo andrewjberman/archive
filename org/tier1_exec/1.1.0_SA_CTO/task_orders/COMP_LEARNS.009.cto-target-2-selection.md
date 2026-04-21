@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>1.1.0_SA_CTO</issued_to><!-- Transferred 2026-04-21 from 1.0.0_SA_CTO per COMP_LEARNS_TARGET_CLOSEOUT.md §7.2. Scope amended same commit per §8.4 — selection criteria now anchored in TARGET_CLOSEOUT §5 (weights-not-filters + hard disqualifiers) + gate tightened per §5 evidence bar. Original authorship date + issuer preserved. -->
     <date>2026-04-15</date>
-    <status>staged</status><!-- Gate: worktree fix landed (done 2cb83eb6) + target 1 Phase 1 passes. -->
+    <status>complete</status><!-- Complete 2026-04-21 by 1.1.0_SA_CTO. Honor gate met at .017 ship (695c0d59): primary_metric=1.2439 ≥ 0.25. Memo at docs/architecture/COMP_LEARNS_TARGET_2_SELECTION.md (134 lines ≤ 150). Chosen: click. 5-bar gate evaluated for pydantic/sqlalchemy/starlette/click/attrs; survivors starlette + click; click wins on subtype leverage + size. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P2 — post target-1 Phase 1 success</priority>
   </metadata>
