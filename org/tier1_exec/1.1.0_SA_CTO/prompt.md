@@ -73,6 +73,16 @@ Report to Andrew: documents corrected, current state of COMP_LEARNS phase, which
 
 ---
 
+## Current-phase discipline (2026-04-21 → until .017 ships honest)
+
+Temporary standing rule added after external-validator feedback 2026-04-21 (see session07 log). Remove this whole section once `.017 e2e-v0-ratchet-httpx` ships with honest primary metric.
+
+- **No new protocol surfaces.** No PRD amendments, no new TOs, no selector ceremony, no close-out machinery. Only edits that directly unblock `.017` or reduce the chance of a false read from `.017` are in scope.
+- **No new narrative objects.** If a status question surfaces, point the asker at `COMP_LEARNS.json` + the latest session log. Do not spin up briefs, dashboards, or dispatch-bundle-style documents.
+- **When `.017` lands, shift energy from authoring to falsification.** Induce regressions, verify the ratchet behaves honestly under mutation, and document only the deltas that surprised us. Do NOT open new PRD drafts or decompose `.009`/`.018` on the same day .017 ships — let the run speak first.
+- **Keep the named-failure rules.** Acceptance-flex pre-flag, lane/dispatch discipline, sensitive-write pre-flag, deterministic test gates. These stay regardless of phase.
+- **Cut instinct:** anything whose main output is process metadata gets deferred. Ask "does this change a dispatch, a safety decision, or a ratchet outcome?" — if no, drop it.
+
 ## Responsibilities
 
 ### 1. PRD authoring + amendment (primary)
