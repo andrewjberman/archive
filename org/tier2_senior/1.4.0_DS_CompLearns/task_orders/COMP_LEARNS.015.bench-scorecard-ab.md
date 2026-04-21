@@ -10,8 +10,10 @@
   </metadata>
 
   <references>
-    <ref type="prd">docs/architecture/COMP_LEARNS_ARCHITECTURE.md @ 8df31d86 (v3 — peer review invariant-breakage fixes)</ref>
-    <ref type="prd_section">§6.1 ratchet-critical vs exploratory split + primary objective function (v3), §6.2 Scorecard schema (v3), §6.3 required benchmark components, §6.4 A/B LLM protocol + JudgeBackend judge-split (enumerable/set_membership/numeric in ratchet-critical; open-ended → exploratory only), §6.4.1 cached-answer regime (ratchet-critical non-negotiable), §6.5 selector consumption, §6.6 mutation axis consumption, §11.1 R13 + R14</ref>
+    <ref type="prd">docs/architecture/COMP_LEARNS_ARCHITECTURE.md @ dc839e77 (v4.2 — R1/R3 layer separation + ship-blocker MUST-halt + enforcement-owner paragraph)</ref>
+    <ref type="prd_section">§6.1 ratchet-critical vs exploratory split + primary objective function (v3), §6.2 Scorecard schema (v3), §6.3 required benchmark components + §6.3 gold ship-blocker + enforcement-owner paragraph (v4.2), §6.4 A/B LLM protocol + JudgeBackend judge-split (enumerable/set_membership/numeric in ratchet-critical; open-ended → exploratory only), §6.4.1 cached-answer regime (ratchet-critical non-negotiable), §6.5 selector consumption, §6.6 mutation axis consumption, §11.1 R13 + R14</ref>
+    <ref type="prd">docs/architecture/COMP_LEARNS_TARGET_CLOSEOUT.md v1.0 (§7.1 .015a decision: inline — no standalone micro-TO; §8.3 AC #7 verbatim text)</ref>
+    <ref type="amendment">2026-04-21 amendment — AC #7 added + Phase 2 compiler mandate step added for `validate_gold_survey_attestation` per TARGET_CLOSEOUT §8.3. Authored by 1.1.0_SA_CTO. Subsequent ACs shifted 7→8, 8→9, ..., 13→14. MCP target updated 2.0.0_SA_COO~Z → 2.1.0_SA_COO per dyad succession.</ref>
   </references>
 
   <objective>
@@ -168,13 +170,19 @@
        b. `bench.primary_metric(scorecard)` with a missing cache entry for any ratchet-critical `(question, compiler_sha, selector)` tuple MUST raise `CacheMissDuringPrimaryMetric` and NOT fall through to a fresh LLM call. Asserted by spying on the MockJudge — call count must be 0 during primary_metric computation.
        c. Warm-up phase (`bench.warm_up_cache(compiler_sha, target, selectors)`) DOES call the judge, writes entries, then `primary_metric` succeeds on the same compiler_sha.
     6. **ab_answer_key validator (test_ab_answer_key_validator.py) — NEW v3:** loading an `ab_answer_key.yaml` where a ratchet-critical entry has answer type `free_text` / `open_ended` MUST raise `RatchetPoolOpenEndedRejected` citing the offending `question_id`. Loading an answer key where all ratchet-critical entries are `enumerable` / `set_membership` / `numeric` MUST load cleanly. Exploratory-pool entries MAY be open-ended.
-    7. **A/B with selectors integration (test_ab_selector_integration.py):** given frozen cached responses from 3 fake selectors (seeded fixtures), `bench.ab.run(scorecard, selectors=[random, keyword, centrality])` populates `ratchet_critical.downstream_ab.per_selector` for all 3 selectors; `best_selector` + `best_lift` computed correctly (argmax).
-    8. **SelectorGameDetected (test_selector_game_detected.py):** fabricated scorecard where `random` wins with `best_lift=0.15` raises `SelectorGameDetected`; fabricated scorecard where `centrality` wins with `best_lift=0.2` does NOT raise.
-    9. **Primary metric (test_primary_metric.py):** primary_metric formula hand-verified against 3 synthetic scorecards with known values; α default = 0.3; reads ONLY from `ratchet_critical`; mutation_stability weight applied; conflict_penalty applied. Identical `(target_version, compiler_sha)` → identical primary_metric value across two bench runs (determinism ratchet).
-    10. **Cache key (test_cache_key.py):** every one of the 9 inputs — `question_text, source_hash, graph_hash, selector_hash, selector_version, model_id, model_version, selected_context_token_count, temperature` — independently changes the cache key when perturbed in isolation. Identical inputs → identical key.
-    11. `pytest comp/bench/ -v` exits 0.
-    12. Session log `## Compiler Tools` reproduces every `<run>` from `<compiler_tools_mandate>` with observed output + pass/fail vs. `<expect>`. Missing rows = REWORK.
-    13. MCP COMPLETE to 2.0.0_SA_COO~Z with commit hash + pytest output + sample Scorecard dict showing `ratchet_critical.downstream_ab.per_selector` populated AND demonstrating `Scorecard.__eq__` on two runs of same `(target_version, compiler_sha)`.
+    7. **Gold survey attestation validator (test_gold_survey_attestation.py) — NEW v4.2 per COMP_LEARNS_TARGET_CLOSEOUT.md §7.1 (inline; `.015a` standalone micro-TO rejected):**
+       a. `validate_gold_survey_attestation(target_root: Path)` exists in `ab_answer_key_validator.py` as a public function.
+       b. On a fixture where `ab_answer_key.yaml` + `imports_gold.jsonl` show <100% vocabulary coverage for any dimension AND `GOLD_SURVEY.md` lacks a "Dimension Values Not Observed" section, MUST raise `GoldSurveyAttestationMissing` citing the absent dimension value.
+       c. On a fixture where `GOLD_SURVEY.md` has the section but lacks a grep command + output for an absent value, MUST raise `GoldSurveyAttestationMissing`.
+       d. On the real httpx fixture (present in repo as of `.016` ship at commit `58a52153`), MUST return cleanly — `resolution=dynamic` is documented with reproducible grep evidence.
+       e. On a fabricated fixture with 100% vocabulary coverage (every dimension value appears ≥2× in gold), MUST return cleanly WITHOUT requiring a "Dimension Values Not Observed" section.
+    8. **A/B with selectors integration (test_ab_selector_integration.py):** given frozen cached responses from 3 fake selectors (seeded fixtures), `bench.ab.run(scorecard, selectors=[random, keyword, centrality])` populates `ratchet_critical.downstream_ab.per_selector` for all 3 selectors; `best_selector` + `best_lift` computed correctly (argmax).
+    9. **SelectorGameDetected (test_selector_game_detected.py):** fabricated scorecard where `random` wins with `best_lift=0.15` raises `SelectorGameDetected`; fabricated scorecard where `centrality` wins with `best_lift=0.2` does NOT raise.
+    10. **Primary metric (test_primary_metric.py):** primary_metric formula hand-verified against 3 synthetic scorecards with known values; α default = 0.3; reads ONLY from `ratchet_critical`; mutation_stability weight applied; conflict_penalty applied. Identical `(target_version, compiler_sha)` → identical primary_metric value across two bench runs (determinism ratchet).
+    11. **Cache key (test_cache_key.py):** every one of the 9 inputs — `question_text, source_hash, graph_hash, selector_hash, selector_version, model_id, model_version, selected_context_token_count, temperature` — independently changes the cache key when perturbed in isolation. Identical inputs → identical key.
+    12. `pytest comp/bench/ -v` exits 0.
+    13. Session log `## Compiler Tools` reproduces every `<run>` from `<compiler_tools_mandate>` with observed output + pass/fail vs. `<expect>`. Missing rows = REWORK.
+    14. MCP COMPLETE to 2.1.0_SA_COO with commit hash + pytest output + sample Scorecard dict showing `ratchet_critical.downstream_ab.per_selector` populated AND demonstrating `Scorecard.__eq__` on two runs of same `(target_version, compiler_sha)` AND a sample `validate_gold_survey_attestation` return on the real httpx fixture.
   </acceptance_criteria>
 
   <compiler_tools_mandate>
@@ -235,6 +243,11 @@
         <run>pytest comp/bench/tests/test_primary_metric.py -v</run>
         <expect>3 synthetic scorecards hand-verified; formula reads ONLY from `ratchet_critical` (test MUST assert `exploratory.behavioral.pass_rate` perturbation does NOT change primary_metric). Determinism ratchet: same `(target_version, compiler_sha)` → identical primary_metric value across two runs. Exits 0.</expect>
         <if_mismatch>Fix the read surface. If exploratory fields leak into primary_metric, R14 is back.</if_mismatch>
+      </step>
+      <step>
+        <run>pytest comp/bench/tests/test_gold_survey_attestation.py -v</run>
+        <expect>All five fixtures from AC #7 (a-e) pass: missing-section raise, missing-grep raise, real-httpx clean, fabricated-100%-coverage clean, incomplete-coverage-but-section-present clean. Exit 0. This is the v4.2 ship-blocker enforcement per COMP_LEARNS_TARGET_CLOSEOUT.md §7.1 — cannot be skipped.</expect>
+        <if_mismatch>Fix the validator until all fixtures pass. If authoring scope here genuinely overflows the TO estimate at 2x, pre-flag per Rule 7 and the dyad (1.1.0_SA_CTO + 2.1.0_SA_COO) will authorize a standalone .015a at that time — do NOT silently defer.</if_mismatch>
       </step>
       <step>
         <run>pytest comp/bench/ -v</run>

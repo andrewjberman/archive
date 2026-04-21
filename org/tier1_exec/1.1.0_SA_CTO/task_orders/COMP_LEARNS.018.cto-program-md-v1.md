@@ -1,8 +1,8 @@
 <task_order>
   <metadata>
-    <id>1.0.0_SA_CTO-2026-04-16-comp-learns-018-program-md-v1</id>
+    <id>1.1.0_SA_CTO-2026-04-16-comp-learns-018-program-md-v1</id>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>1.0.0_SA_CTO</issued_to>
+    <issued_to>1.1.0_SA_CTO</issued_to><!-- Transferred 2026-04-21 from 1.0.0_SA_CTO per COMP_LEARNS_TARGET_CLOSEOUT.md §7.2. Scope amended same commit per §8.5 — 9th item added (Promoted Learnings section scaffold per TARGET_CLOSEOUT §3). Original authorship date + issuer preserved. -->
     <date>2026-04-16</date>
     <status>staged</status>
     <project_code>COMP_LEARNS</project_code>
@@ -10,8 +10,11 @@
   </metadata>
 
   <references>
-    <ref type="prd">docs/architecture/COMP_LEARNS_ARCHITECTURE.md @ c963ced5 (v2)</ref>
-    <ref type="prd_section">§4.5 dimensional ontology, §5.3 conflict resolution, §6.1 primary metric, §6.5 selector discipline, §6.6 mutation invariants, §7.5 active adversarial, §8-§11 v0 target + scorecard, §17 amendment log</ref>
+    <ref type="prd">docs/architecture/COMP_LEARNS_ARCHITECTURE.md @ dc839e77 (v4.2)</ref>
+    <ref type="prd_section">§4.5 dimensional ontology, §5.3 conflict resolution, §6.1 primary metric, §6.5 selector discipline, §6.6 mutation invariants, §7.5 active adversarial, §8-§11 v0 target + scorecard</ref>
+    <ref type="prd">docs/architecture/COMP_LEARNS_TARGET_CLOSEOUT.md v1.0 (§3 promotion rule; §6 closeout module)</ref>
+    <ref type="prd_section">TARGET_CLOSEOUT §3 — Promoted Learnings section format + scaffold + enforcement hook into program_promotion.py</ref>
+    <ref type="module">comp/framework/closeout/program_promotion.py (shipped by .024; consumed by program.md authoring)</ref>
   </references>
 
   <objective>
@@ -28,8 +31,9 @@
     6. **Active adversarial pattern (§7.5)** — failure → targeted variants → re-test inside iteration.
     7. **Primary metric formula (§6.1).**
     8. **Confidence ladder (§5.1).**
+    9. **Promoted Learnings section scaffold (TARGET_CLOSEOUT §3).** Empty `## Promoted Learnings` section with the format comment from TARGET_CLOSEOUT §3 inline. No actual learnings promoted at v1.0 ship — v1.0 is the skeleton the first close-out fills via `comp.framework.closeout.promote()` (shipped by .024). The append-only invariant of this section is enforced in code; v1.0 only needs to scaffold it correctly so `promote()`'s first call has a target.
 
-    Explicitly out of scope: PRD v3 content (future amendments), any re-architecting beyond v2 decisions, TOs .011-.017 implementation details (program.md is doctrine, not reference).
+    Explicitly out of scope: PRD v4.3+ content (future amendments), any re-architecting beyond v4.2 decisions, TOs .011-.017 implementation details (program.md is doctrine, not reference), target-2-specific content (that lands post-close-out).
   </objective>
 
   <scope>
@@ -58,9 +62,9 @@
   </wire_contract>
 
   <acceptance_criteria>
-    1. `comp/program.md` v1.0 incorporates all 8 items from §objective.
+    1. `comp/program.md` v1.0 incorporates all 9 items from §objective (items 1-8 from v4.2 PRD + item 9 Promoted Learnings scaffold per TARGET_CLOSEOUT §3).
     2. `wc -l comp/program.md` ≤ 4× v0 line count (diff-size gate).
-    3. Each of the 8 items has its own named section or subsection — searchable by reader.
+    3. Each of the 9 items has its own named section or subsection — searchable by reader.
     4. **No TO-level detail leaks in.** program.md does not reference `.011`, `.017`, specific test filenames, or commit SHAs. It cites §-numbers in the architecture PRD where needed.
     5. **Dimensional ontology section explicitly forbids flat-string subtype names** — the "imports_dynamic is banned, use attributes" rule is spelled out.
     6. **Conflict policy section lists R1-R5 verbatim** with one-sentence examples.
@@ -91,8 +95,13 @@
       </step>
       <step>
         <run>grep -c "^##\|^###" comp/program.md</run>
-        <expect>≥ 8 section headers (one per required item from §objective, plus header).</expect>
+        <expect>≥ 9 section headers (one per required item from §objective, plus header).</expect>
         <if_mismatch>Add missing sections.</if_mismatch>
+      </step>
+      <step>
+        <run>grep -n "^## Promoted Learnings" comp/program.md</run>
+        <expect>Exactly 1 match — the Promoted Learnings section scaffold per TARGET_CLOSEOUT §3 is present and named exactly.</expect>
+        <if_mismatch>Add or rename the section. The section header must match exactly because `program_promotion.py` parses it by literal string.</if_mismatch>
       </step>
       <step>
         <run>echo "ratio = $(wc -l &lt; comp/program.md) / $V0_LINE_COUNT"; # Compute v1 / v0 ratio</run>
