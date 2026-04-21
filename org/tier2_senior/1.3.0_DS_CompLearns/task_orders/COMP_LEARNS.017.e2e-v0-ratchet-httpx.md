@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>1.3.0_DS_CompLearns</issued_to>
     <date>2026-04-16</date>
-    <status>staged</status>
+    <status>pending</status><!-- GO'd 2026-04-21 by 2.1.0_SA_COO after all parents shipped: .011 257d19df, .012 39d2e05b, .013 dcdfa5a0, .014 69b43374, .015 4cfbe8ab, .016 58a52153, .020 d6e9f1fb, .021 1653760a. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — integration gate; all prior parents must land first</priority>
   </metadata>
