@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>1.1.0_DS_CompLearns</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Flips pending when ~A closes PRD #1 follow-ups. Transferability lever — 4-6 CTO hours per target → DS-runnable under spot-check. -->
+    <status>in_progress</status><!-- 1.1.0_DS_CompLearns 2026-04-21 -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — transferability unlock</priority>
   </metadata>
