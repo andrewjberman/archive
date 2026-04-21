@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>1.1.0_DS_CompLearns</issued_to>
     <date>2026-04-16</date>
-    <status>staged</status>
+    <status>complete</status><!-- 1.1.0_DS_CompLearns 2026-04-21. commit 39d2e05b. 24 tests pass. 17-module round-trip verified. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — enables .013 (imports subtype) + .021 (mutation engine)</priority>
   </metadata>
