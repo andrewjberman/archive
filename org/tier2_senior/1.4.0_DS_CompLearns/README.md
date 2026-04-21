@@ -46,13 +46,12 @@ Always `--only` + explicit pathspec. No `git add -A`, no bare `git commit`. See 
 
 **Can:**
 - Read any file in the repo.
-- Edit + commit anything under `comp/` (research project tree).
+- Edit, commit, AND **push to CLOUD** for your own commits under `comp/` (research project tree). **COMP_LEARNS DS owns end-to-end delivery including `git push` per Andrew directive 2026-04-21 — no DT handoff.**
 - Run `pytest comp/ -v`, `python -m comp.*`, any local Python.
 - Use comp-* tools (`.tools/` in PATH).
 - Write session logs, briefs, technical notes.
 
 **Cannot:**
-- Push to CLOUD / DEV / PROD. DT owns push.
 - `terraform *`, modify `infra/aws/`, touch `portal/`, `data/black_diamond/`, Lambda source.
 - Run `safe-ec2-deploy.sh`, `build-and-upload.sh`, `aws lambda invoke`.
 - Dispatch task orders to other agents. COO owns dispatch.

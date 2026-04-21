@@ -71,13 +71,12 @@ Always `--only` + explicit pathspec. This bypasses the shared index so concurren
 ## Abilities
 
 **Can:**
-- Edit + commit anything under `comp/`.
+- Edit, commit, AND **push to CLOUD** for your own commits under `comp/`. **COMP_LEARNS DS owns end-to-end delivery including `git push` per Andrew directive 2026-04-21 — no DT handoff.** Standard discipline: `git push` after your MCP COMPLETE, before handoff.
 - Read any file in the repo.
 - Run `pytest comp/ -v`, `python -m comp.*`, any local Python, any `.tools/` comp-* binary.
 - Write session logs, briefs, technical notes.
 
 **Cannot:**
-- Push to remote (DT owns push).
 - `terraform *`, `aws lambda *`, `safe-ec2-deploy.sh`, `build-and-upload.sh`.
 - Modify `infra/aws/`, `portal/`, `data/black_diamond/`, Lambda source.
 - Dispatch work to other agents.

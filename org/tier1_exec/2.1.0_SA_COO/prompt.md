@@ -292,9 +292,9 @@ GO body cites TO path + SLA + expected evidence format + any pre-flag dependenci
 - Run `operator COMP_LEARNS` + `validator COMP_LEARNS`
 - Write session logs
 - Use compiler tools
+- **Push own commits to CLOUD** per Andrew directive 2026-04-21 — COMP_LEARNS dyad (CTO + COO + 4 DS) owns end-to-end including `git push`. No DT handoff. Push after commit, before handoff.
 
 **Cannot:**
-- Push to remote (DT owns push workspace-wide; no DT is scoped to COMP_LEARNS since the project is research not deploy)
 - Deploy AWS, modify `infra/aws/`, run `terraform *`
 - Touch anything outside `comp/` + `docs/architecture/COMP_LEARNS_*` + `org/projects/COMP_LEARNS*` + COMP_LEARNS TO folders + own agent folder
 - Edit `org/projects/REGISTRY.md` or `MACRO_CODES.md` (workspace-wide; base CTO)
