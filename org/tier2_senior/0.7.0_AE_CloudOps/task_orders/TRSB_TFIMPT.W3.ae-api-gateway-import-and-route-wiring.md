@@ -92,12 +92,33 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    <phase id="0" when="static evidence before live probe (added 2026-04-21 per CTO 20260421T130116Z post-W1-dormancy-finding)">
+    <phase id="0" when="static evidence before live probe (added 2026-04-21 per CTO 20260421T130116Z post-W1-dormancy-finding; expanded 20260421T130527Z post-module-ownership-finding)">
       <step>
         <run>comp-routes behaviors | grep -i trade (or similar filter) + grep -rn "trades" infra/aws/terraform/public-api-cdn/*.tf + cat comp-graph cache for any trade-related routes</run>
         <expect>**Baseline established 2026-04-21 COO probe:** `/api/general/trades/*` CloudFront behavior exists → `APIGateway-portal` origin [AUTH] (auth-gated). Confirms route is CF-defined + routes to portal API GW. Question: what the portal API GW does with `/trades/*` sub-paths given W1 found trade-submission-handler dormant (0 invocations/30d). Phase 0 documents the CF-level evidence BEFORE Phase 1's live AWS probe.</expect>
         <if_mismatch>If the CF behavior DOESN'T exist in TF or returns static/mock origin (not API GW), re-scope W3 immediately — may not need API GW import at all. Surface to COO + CTO.</if_mismatch>
       </step>
+      <step>
+        <run>**MODULE-OWNERSHIP PROBE (added 2026-04-21 per CTO 20260421T130527Z point 2, COO probed 20260421T~13:06Z):** `grep -rn "aws_api_gateway_rest_api\|aws_apigatewayv2_api" infra/aws/terraform/` + `grep -rn "APIGateway-portal\|7k3ed8px20.execute-api" infra/aws/terraform/`</run>
+        <expect>**COO probe result:** APIGateway-portal domain `7k3ed8px20.execute-api.us-east-1.amazonaws.com` referenced ONLY in `infra/aws/terraform/portal-auth/cloudfront-distribution.tf` (CF origin definition — L119 origin_id "APIGateway-portal"). ZERO `aws_api_gateway_rest_api` or `aws_apigatewayv2_api` resources exist anywhere in the repo. **The portal API GW is SHARED** — it serves both `/api/general/trades/*` AND `/api/scoped/advisor-intelligence/advisors/*/*` (plus likely other routes). It is entirely console-only — NOT TF-managed. **This changes W3's scope materially:** the import target is NOT a trade-specific GW but the entire shared portal API GW that fronts advisor-intelligence + trade + portfolio + others.</expect>
+        <if_mismatch>If the GW IS found TF-managed in some module (e.g. shared-infra or a new module), W3 becomes "add trade routes to existing GW resource" — much cheaper. If the GW is found under portal-auth's TF, scope discussion is about splitting out trade routes into their own module or keeping them in portal-auth. Either way, surface BEFORE any `terraform import` fires.</if_mismatch>
+      </step>
+      <step>
+        <run>**PRE-AUTHORIZING SCOPE DECISION** — surface finding to COO + CTO + DT 0.4 before ANY TF-authoring. Options: (A) Import entire portal API GW into portal-auth/ (DT 0.4's domain); (B) Import into new shared-infra/apigateway-portal subordinate module; (C) Partial import — trade-routes-only into trade-pipeline/ via `aws_api_gateway_resource` + `_method` + `_integration` against external `rest_api_id` data source (awkward but TRSB-scoped).</run>
+        <expect>Decision surfaced via MCP to COO before Phase 1 live probe fires. DT 0.4 CloudFront pre-coordination bar raised significantly — importing the shared portal API GW is cross-project blast. CTO may propose PRD amendment; follow CTO+Andrew decision, don't self-pivot.</expect>
+        <if_mismatch>If scope decision stalls: HOLD Phase 1 live probe until resolved. W3 cannot proceed blind on a shared resource without module-ownership agreed.</if_mismatch>
+      </step>
+      <step>
+        <run>comp-routes trace trade-submission-handler (baseline before W2 reclamation closes graph gap)</run>
+        <expect>"No match for: trade-submission-handler" — W2 gap signal. Expected until W2 closes.</expect>
+        <if_mismatch>If a result returns, W2 shipped earlier than expected; re-confirm W2 status with COO.</if_mismatch>
+      </step>
+      <step>
+        <run>cross-reference dormancy-matrix from W2 Phase 1 against the API GW integrations Phase 1 below will surface — mark which Lambda integrations map to dormant vs live functions</run>
+        <expect>Evidence bundle: CF route evidence + dormancy matrix + module-ownership decision + (soon) API GW integrations. Surfaces whether API GW endpoints point at dormant Lambdas (option-b-exception territory) or live Lambdas (option-a reclamation territory).</expect>
+        <if_mismatch>If the API GW has endpoints mapped to ≥5 dormant Lambdas, surface as PRD-framing question (same 5+/11 threshold as W2 §8 Q2 widening). W3 import may need to stay but reclamation subset shrinks.</if_mismatch>
+      </step>
+    </phase>
       <step>
         <run>comp-routes trace trade-submission-handler (baseline before W2 reclamation closes graph gap)</run>
         <expect>"No match for: trade-submission-handler" — W2 gap signal. Expected until W2 closes.</expect>
