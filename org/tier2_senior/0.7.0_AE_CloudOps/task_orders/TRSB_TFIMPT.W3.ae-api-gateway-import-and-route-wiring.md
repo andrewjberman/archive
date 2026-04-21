@@ -21,9 +21,13 @@
   </references>
 
   <objective>
-    Close G3: import the live API Gateway(s) fronting trade Lambdas into `trade-pipeline/apigateway.tf`, wire the `/api/general/trades/*` path to the imported GW via CloudFront behavior, register the routes in `comp-routes` so `comp-routes trace trade-submission-handler` returns a populated chain. Target tag `trade-pipeline-v1.5.0`.
+    Close G3. **Scope decision CTO-locked 20260421T130918Z: Option B — shared-infra subordinate module** (post-COO/CTO/COO-probe-finding that APIGateway-portal is a SHARED portal API GW serving advisor-intelligence + trade + portfolio, not trade-specific). Andrew pre-flag pending via batch; default stays B unless Andrew overrides.
 
-    Post-W3: the entire trade subsystem becomes compiler-visible end-to-end. CF → [behavior] → API GW → authorizer → Lambda → DDB trace is populated in the graph. This closes ADHC_ROUTER Phase 2 gap for this subsystem and lets future trade PRDs use `comp-routes trace` for change-blast analysis.
+    **W3 two-part scope:**
+    1. **NEW `infra/aws/terraform/shared-infra/apigateway-portal/` subordinate module** (AE 0.7 primary; precedent: `partner-firms` subordinate module CDRS_TFIMPT.007 2026-04-15). Import the entire shared portal API GW (REST API + all portal routes enumerated during import: trade-* + advisor-intelligence-* + portfolio-* + others) + authorizers + stages + deployments. Output REST API ID + root resource ID + stage name via TF `output` blocks. Target tag `shared-infra-v1.8.0` (current tip `shared-infra-v1.7.0` per AUTH_TFIMPT).
+    2. **Trade-pipeline consumes via data source** (AE 0.7 primary). New `infra/aws/terraform/trade-pipeline/apigateway.tf` uses `data.aws_api_gateway_rest_api.portal` + `aws_api_gateway_resource` for trade-only route wiring + `aws_lambda_permission` resources granting the shared GW invoke rights on trade Lambdas. Target tag `trade-pipeline-v1.5.0`.
+
+    Post-W3: the shared portal API GW becomes TF-managed cross-project, unblocking clean data-source-reference pattern for any future portal-pipeline TF import (advisor-intelligence, portfolio). The entire trade subsystem becomes compiler-visible end-to-end via `comp-routes trace`. CF → [behavior] → API GW → authorizer → Lambda → DDB trace populated in the graph. Closes ADHC_ROUTER Phase 2 gap for this subsystem.
   </objective>
 
   <scope>
@@ -104,9 +108,9 @@
         <if_mismatch>If the GW IS found TF-managed in some module (e.g. shared-infra or a new module), W3 becomes "add trade routes to existing GW resource" — much cheaper. If the GW is found under portal-auth's TF, scope discussion is about splitting out trade routes into their own module or keeping them in portal-auth. Either way, surface BEFORE any `terraform import` fires.</if_mismatch>
       </step>
       <step>
-        <run>**PRE-AUTHORIZING SCOPE DECISION** — surface finding to COO + CTO + DT 0.4 before ANY TF-authoring. Options: (A) Import entire portal API GW into portal-auth/ (DT 0.4's domain); (B) Import into new shared-infra/apigateway-portal subordinate module; (C) Partial import — trade-routes-only into trade-pipeline/ via `aws_api_gateway_resource` + `_method` + `_integration` against external `rest_api_id` data source (awkward but TRSB-scoped).</run>
-        <expect>Decision surfaced via MCP to COO before Phase 1 live probe fires. DT 0.4 CloudFront pre-coordination bar raised significantly — importing the shared portal API GW is cross-project blast. CTO may propose PRD amendment; follow CTO+Andrew decision, don't self-pivot.</expect>
-        <if_mismatch>If scope decision stalls: HOLD Phase 1 live probe until resolved. W3 cannot proceed blind on a shared resource without module-ownership agreed.</if_mismatch>
+        <run>**SCOPE DECISION RESOLVED 20260421T130918Z — Option B (shared-infra subordinate module).** CTO architectural call under prompt.md escalation authority (no ambiguity, blast material but not exceeded). Andrew pre-flagged via batch MCP (override-if-disagreement window); default stays B. Precedent: `partner-firms` subordinate CDRS_TFIMPT.007 2026-04-15. PRD amendment CTO will execute; until it lands, this TO is authoritative on the Option-B shape.</run>
+        <expect>No further COO/CTO approval needed to proceed to Phase 1 live probe on the authorized Option-B scope. DT 0.4 bar LOWERED: courtesy heads-up (not prior approval) — CF distribution tf stays referencing APIGateway-portal origin_id unchanged; data-source-derived API GW domain must match `7k3ed8px20.execute-api.us-east-1.amazonaws.com`.</expect>
+        <if_mismatch>If Andrew overrides to (A) portal-auth or (C) partial-trade-routes during the pre-flag window, CTO reverts PRD amendment and this TO needs re-authoring. HOLD Phase 1 live probe only if Andrew surfaces override; otherwise proceed.</if_mismatch>
       </step>
       <step>
         <run>comp-routes trace trade-submission-handler (baseline before W2 reclamation closes graph gap)</run>
@@ -212,11 +216,12 @@
   </compiler_tools_mandate>
 
   <cross_domain_coordination>
-    <item>**DT 0.4 CloudFront MCP gate** (PRD §5): if W3 requires ADD of a `/api/general/trades/*` CF behavior on portal main CF (not already there), 0.4.0_DT_ClientPlatform owns that distribution and must be MCP'd before the TF change lands. COO relays or AE 0.7 MCPs directly per RAVC. If behavior already lives on live + TF just needs to import it, DT 0.4 coordination is courtesy heads-up, not gate.</item>
-    <item>**Portal CF TF path** — confirm whether `public-api-cdn/cloudfront.tf` or `portal-auth/cloudfront.tf` (or similar) is the right home. Follow CDRS_TFIMPT.002-.005 precedent for which file owns which behavior.</item>
-    <item>**Authorizer dependency** — W2 reclaimed trade-authorizer code. W3 imports the API GW authorizer config that points at that Lambda. Both must be in a consistent state; a W3 before W2 (or W2 without W3) leaves the authorizer partially managed. PRD §3 strict ordering is the discipline.</item>
-    <item>Tag series: `trade-pipeline-v1.5.0`. Verify tag base `v1.4.0` (W2) exists before cutting `v1.5.0`.</item>
-    <item>**PROJECT CLOSEOUT** on W3 complete: COO flips project status `active → complete`, moves REGISTRY row Active → Completed. This TO is the terminal wave of TRSB_TFIMPT.</item>
+    <item>**Scope (Option B locked 20260421T130918Z):** dual-module ship. (1) shared-infra/apigateway-portal/ subordinate = AE 0.7 primary, target `shared-infra-v1.8.0`. (2) trade-pipeline/apigateway.tf (consumes via data source + Lambda permissions only) = AE 0.7, target `trade-pipeline-v1.5.0`. Two tags, one TO — coordinate tag ordering: shared-infra first (module must ship before trade-pipeline can `data.aws_api_gateway_rest_api.portal` it).</item>
+    <item>**DT 0.4 CloudFront coordination — LOWER BAR under Option B** (CTO 20260421T130918Z): `portal-auth/cloudfront-distribution.tf` stays unchanged (CF origin_id `APIGateway-portal` reference preserved). AE 0.7 courtesy heads-up to DT 0.4 when shared-infra subordinate lands, confirming data-source-derived domain matches `7k3ed8px20.execute-api.us-east-1.amazonaws.com`. Not a prior-approval gate; just ACK that CF origin resolution still works post-subordinate ship.</item>
+    <item>**Authorizer dependency** — W2 reclaimed trade-authorizer code. W3 imports the API GW authorizer config that points at that Lambda. Both must be in a consistent state; W3 before W2 or W2 without W3 leaves the authorizer partially managed. PRD §3 strict ordering is the discipline.</item>
+    <item>**Tag series under Option B:** `shared-infra-v1.8.0` (subordinate module ship) + `trade-pipeline-v1.5.0` (trade-side consumption). Verify bases: `shared-infra-v1.7.0` + `trade-pipeline-v1.4.0` must exist before cutting v1.8.0 / v1.5.0. Run `git tag -l "shared-infra-v*" | sort -V | tail -5` + `git tag -l "trade-pipeline-v*" | sort -V | tail -5` pre-tag.</item>
+    <item>**Cross-project blast (net-new finding):** once shared-infra/apigateway-portal/ lands, advisor-intelligence routes + portfolio routes become inventoried in the subordinate module too. Future projects importing advisor-intelligence or portfolio TF no longer need to re-import the GW — they use the same data source pattern. Compounding-clarity benefit per CTO reasoning point 3.</item>
+    <item>**PROJECT CLOSEOUT** on W3 complete: COO flips project status `active → complete`, moves REGISTRY row Active → Completed. This TO is the terminal wave of TRSB_TFIMPT. Shared-infra subordinate remains owned by AE 0.7 post-close, available for future project consumption.</item>
   </cross_domain_coordination>
 
   <dependencies>
