@@ -3,7 +3,7 @@
 **Author:** 0.4.0_DS_ClientPlatform  
 **Date:** 2026-04-21  
 **Project:** ADVI_INFLEC (W3.1)  
-**Status:** PROPOSED — awaiting CTO sign-off before W3.2 implementation  
+**Status:** APPROVED — CTO SIGN-OFF 2026-04-21 via MCP. W3.2 implementation authorized.  
 **Source brief:** `docs/briefs/cto-brief-inflection-partner-data-investigation.md`  
 **Local data dir:** `data/inf/` (mirrors `data/black_diamond/` — scripts in `data/inf/scripts/{bronze,silver,gold}/`)  
 **Agent ownership:** DS = script authorship + S3 upload + gold dispatch; AE = `0.6.1_AE_PartnerETL` owns inf-pipeline Terraform, Lambda, EC2 runner, S3 bucket provisioning
@@ -21,6 +21,8 @@ Three silver tables, mirroring the BD silver layout where applicable:
 | Accounts Dim | `silver/accounts_dim/latest.parquet` | one row per account_id | single file (no date partition) |
 
 All parquet files use snappy compression, written with pyarrow engine. No hive partitioning subdirectories — flat key `silver/{table}/{date}.parquet` matches the BD layout.
+
+**Single-source-of-truth note (CTO clarification):** Unlike BD (multi-custodian, requires Schwab TRN_NNA overlay via `source_system` tagging per Phase 6a bea387a9), Inflection is single-source-of-truth Orion. No cross-source overlay is needed at the silver layer. There is no `source_system` column and no custodian-reconciliation pass.
 
 ---
 
@@ -102,6 +104,8 @@ None. All 29 source columns are preserved or renamed to a silver column. No colu
 
 **Total columns: 11**
 
+**Load frequency note (CTO clarification):** The spec supports daily, weekly, or monthly snapshot cadence — each new snapshot appends as a new `{snapshot_date}.parquet` file. Load-frequency decision is deferred pending Andrew §10 Q5/Q6 (historical AUM approach + history start date). Schema does not change regardless of cadence.
+
 ---
 
 ## 4. Silver — Accounts Dimension
@@ -134,6 +138,8 @@ None. All 29 source columns are preserved or renamed to a silver column. No colu
 | `source_file` | (derived) | str | No | `"slickgrid"` for SlickGrid-sourced rows; `"trn"` for TRN-only rows. |
 
 **Total columns: 16**
+
+**Per-day attribution note (CTO clarification):** `accounts_dim` is a current-state lookup table only — it reflects the latest rep assignment per account as of the most recent TRN data. Per-day tagging-gated attribution (D_00c, D_02, D_04) MUST read `rep_id` at transaction grain from `silver/transactions/{date}.parquet`, NOT from `accounts_dim`. Using `accounts_dim` for historical attribution produces CHART-vs-LEADERBOARD methodology drift (same failure mode as the STAUDT incident just closed). `accounts_dim` is valid only for current-state portal headers and account selectors.
 
 ---
 
@@ -279,6 +285,9 @@ This requirement traces directly to the d87377a5 C_01 incident where an outer me
 
 ## 12. CTO Sign-Off
 
-_Reserved for CTO acknowledgment. W3.2 implementation (`convert_orion_to_silver.py`) does not start until this section is populated._
+**CTO SIGN-OFF 2026-04-21 via MCP — 1.0.0_SA_CTO. Three clarifications per MCP body added to sections 1, 3, 4. W3.2 implementation authorized.**
 
-<!-- CTO: please reply via MCP with sign-off or requested changes. -->
+Clarifications incorporated:
+1. §1 — Single-source-of-truth note: Inflection is Orion-only, no cross-source overlay.
+2. §3 — AUM snapshot load-frequency deferred to Andrew §10 Q5/Q6.
+3. §4 — Per-day attribution must read TRN grain, not accounts_dim (CHART-vs-LEADERBOARD guard).
