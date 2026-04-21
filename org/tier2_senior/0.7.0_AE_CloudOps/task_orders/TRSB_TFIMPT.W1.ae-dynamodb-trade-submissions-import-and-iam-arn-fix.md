@@ -4,7 +4,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-21</date>
-    <status>pending</status>
+    <status>complete</status>
+    <closeout date="2026-04-21" commits="d1e27dfb, 62847274" tag="trade-pipeline-v1.3.0" mcp_complete="20260421T131104Z">
+      47 min from GO (12:24:22Z) to COMPLETE (13:11:04Z). All 10 AC PASS. Phase 1 probe surfaced dormancy finding (trade-submission-handler 0 invocations/30d; no shadow-grant) — material for W2/W3 downstream, captured in TO addenda commits 57fb148a + b918fc4d + af0bb7e7 + 6dd9b0c3. AC#8 smoke substituted per COO GO 2026-04-21T13:02Z: IAM simulate-principal-policy on 5 CRUD actions — all allowed on opal-trade-submissions, old ARN implicitDeny (confirms old ARN was dead code). Pre/post DDB count 9=9=9 (metadata-only import). Two commits (feature + bookkeeping) due to CHANGELOG.json SHA self-reference. RAVC4-closed by COO.
+    </closeout>
     <project_code>TRSB_TFIMPT</project_code>
     <priority>P1 (financial-txn DDB integrity; ~2-4h quick-win; clean wave)</priority>
     <sla>4h from GO</sla>
