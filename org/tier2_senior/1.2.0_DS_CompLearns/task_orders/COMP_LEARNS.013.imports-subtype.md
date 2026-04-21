@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>1.2.0_DS_CompLearns</issued_to>
     <date>2026-04-16</date>
-    <status>staged</status>
+    <status>complete</status><!-- Shipped 2026-04-21 by 1.2.0_DS_CompLearns. All 8 acceptance criteria pass. 16 tests green. P=100% R=100% on certain records scoped to gold's intra-httpx coverage. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — inaugural subtype; unblocks .014 (graph builder uses imports records) + .017 (ratchet integration)</priority>
   </metadata>
