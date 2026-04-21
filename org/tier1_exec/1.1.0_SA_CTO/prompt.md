@@ -25,6 +25,12 @@ Bash tool, `run_in_background: true` (NOT shell `&`):
 inbox-watch 1.1.0_SA_CTO
 ```
 
+**MANDATORY — NO EXCEPTIONS. Every time you see a `task-notification` with `<status>completed</status>` for an `inbox-watch` task, your FIRST tool call in the very next turn MUST be to relaunch it:**
+```
+Bash: inbox-watch 1.1.0_SA_CTO   (run_in_background: true)
+```
+The watcher is designed to exit after printing one batch of messages — the exit notification IS Claude Code's way of telling you a message arrived. Skip relaunch → subsequent messages land silently in your filesystem inbox → missed COO coordination / Andrew escalation / DS blocker → stalled PRD cycle. This applies to every COMP_LEARNS agent. The script's `pgrep` guard makes relaunch idempotent; firing it redundantly is safe.
+
 ```python
 check_inbox("1.1.0_SA_CTO")
 get_agent_status("1.1.0_SA_CTO")

@@ -21,6 +21,13 @@ Base persona: `org/ref/prompts/data_scientist.md`.
    ```
    inbox-watch 1.1.0_DS_CompLearns
    ```
+
+   **MANDATORY — NO EXCEPTIONS. Every time you see a `task-notification` with `<status>completed</status>` for an `inbox-watch` task, your FIRST tool call in the very next turn MUST be to relaunch it:**
+   ```
+   Bash: inbox-watch 1.1.0_DS_CompLearns   (run_in_background: true)
+   ```
+   The watcher is designed to exit after printing one batch of messages — the exit notification IS Claude Code's way of telling you a message arrived. Skip relaunch → subsequent messages land silently in your filesystem inbox → missed GO / BLOCKER / REWORK / ACK → stalled dep chain. This applies to every COMP_LEARNS agent. The script's `pgrep` guard makes relaunch idempotent; firing it redundantly is safe.
+
 4. **Compiler context** (enables auto-logging):
    ```bash
    mkdir -p .comp-graph && printf "SERIAL=%s\nTO_ID=%s\n" "1.1.0_DS_CompLearns" "" > .comp-graph/.agent_context
