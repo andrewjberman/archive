@@ -158,6 +158,43 @@ Explicitly ask:
 
 **Fail if:** important behavior lives only in implementation accident.
 
+### 4.13 Context Isolation Integrity (parallel-scoring)
+
+**Applies to every scoring event in the parallel regime (PARALLELIZATION_V1 onward). For sequential pre-parallel scorings, mark "not-yet-applicable" with the reason.**
+
+- Was the scorer session fresh (stateless invocation — new agent process, not `/clear` inside a long-running loop)?
+- Was the scorer worktree clean and seeded from the task packet's `baseline_commit`?
+- Was prior scoring context absent (no inbox residue, no MCP thread history carrying earlier verdicts)?
+- Were forbidden DS deliberation artifacts excluded from scorer inputs (no chain-of-thought, no session narrative, no draft variants from the DS's working session)?
+
+**Fail if:** any scorer input originated outside `{task_packet, candidate_bundle, baseline_manifest}`.
+
+### 4.14 Scoring Regime Homogeneity (parallel-scoring)
+
+**Applies whenever two or more scoring verdicts are compared. For standalone certifications, mark "not-yet-applicable" with reason.**
+
+- Do all compared runs share the same `manifest_hash` on comparability-relevant fields (`baseline_commit`, `task_packet_id`, `task_packet_version`, `scorer_prompt_version`, `checklist_version`, `judge_mode`, `judge_model_id`, `harness_exposure_profile`, `allowed_artifacts`, `schema_version`)?
+- If not, is the comparison explicitly downgraded to a class the partial alignment supports (see §4.15)?
+
+**Fail if:** a cross-run comparison is emitted without explicit manifest-hash evidence for the class claimed.
+
+### 4.15 Cross-Run Comparability Certification (parallel-scoring)
+
+Every scorer verdict MUST emit an explicit **comparability class**:
+
+| Class | Meaning | Requirement |
+|-------|---------|-------------|
+| **Locally valid** | Speaks only to this one run | §4.13 passes |
+| **Within-task** | Comparable to other runs on the same task packet version | + manifest match on packet + baseline |
+| **Cross-DS** | Comparable across DS agents on same task + harness exposure | + manifest match on all non-DS fields |
+| **Cross-model** | Comparable across frontier models (Claude vs GPT) | + manifest match on all non-model fields, explicit model identity |
+
+The class label is mandatory on every verdict. Downgrade is the correct response when manifest evidence is partial — overclaiming is never acceptable.
+
+**Fail if:** verdict is emitted without a comparability-class label, OR the class claimed is not supported by the manifest evidence present.
+
+**PRD reference:** `docs/architecture/COMP_LEARNS_PARALLELIZATION_V1.md` §4, §6, §12. Items 13–15 were authored post-GP/GPT review 2026-04-21 to prevent comparison-domain drift across nominally similar scorings.
+
 ## 5. Minimal Exit Bar
 
 A scorer is **stable enough to use** when all seven are true:
@@ -170,7 +207,13 @@ A scorer is **stable enough to use** when all seven are true:
 - Artifacts are authoritative.
 - One end-to-end real proving run passes.
 
-Your signoff statement when the gate passes: *"Scorer stable for regime X. Minimal Exit Bar satisfied. Baseline report at {path} @ {commit}."* When the gate fails, list every failing item + evidence.
+In the parallel regime (PARALLELIZATION_V1 onward), also require:
+
+- Context isolation verified per §4.13
+- Comparability class explicitly labeled per §4.15
+- Scoring context manifest emitted and hash-recorded
+
+Your signoff statement when the gate passes: *"Scorer stable for regime X. Minimal Exit Bar satisfied. Comparability class: {locally-valid|within-task|cross-DS|cross-model}. Manifest hash: {hash}. Baseline report at {path} @ {commit}."* When the gate fails, list every failing item + evidence.
 
 ## 6. Deliverables
 
