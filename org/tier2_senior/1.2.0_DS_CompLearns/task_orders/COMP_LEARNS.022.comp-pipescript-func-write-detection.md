@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>1.2.0_DS_CompLearns</issued_to>
     <date>2026-04-17</date>
-    <status>pending</status><!-- NORMALIZED 2026-04-21 CTO audit: original value was non-standard `active` (the standard taxonomy is staged/pending/dispatched/complete/deferred/held/superseded). Semantically the TO is issued 2026-04-17 by CTO to 1.2.0_DS_CompLearns, open for execution — so `pending` is the right standard term. Related to ADHC_ROUTER Phase 2 backlog item (i) external-Lambda invisibility — same comp-pipescript io S3-write-detection gap class. Evidence: gold_dag_validation 2026-04-16 found B_02 WRITES reported as "(none detected)" due to helper-function indirection (canonical_lots_unrealized_key, canonical_lots_realized_key). -->
+    <status>complete</status><!-- Shipped 2026-04-21 by 1.2.0_DS_CompLearns. Commit 28ca6bd6. All 6 acceptance criteria pass. 16 new tests + 75 existing tests green. -->
     <project_code>COMP_LEARNS</project_code>
     <wave>022</wave>
   </metadata>
