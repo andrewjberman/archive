@@ -2,9 +2,9 @@
   <metadata>
     <id>any-lane-2026-04-16-comp-learns-019-visualization-cli</id>
     <issued_by>2.0.0_SA_COO~Z</issued_by>
-    <issued_to>any DS lane (first idle ~A / ~B / ~C / ~D after .017)</issued_to>
+    <issued_to>1.1.0_DS_CompLearns</issued_to>
     <date>2026-04-16</date>
-    <status>staged</status>
+    <status>pending</status><!-- GO'd 2026-04-21 by 2.1.0_SA_COO after .017 shipped (695c0d59). Assigned to 1.1.0_DS_CompLearns (requested GO; only idle DS lane with capacity). -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P3 — optional; can slip to next wave without escalation</priority>
   </metadata>
