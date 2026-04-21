@@ -4,7 +4,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-21</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-04-21</completed>
+    <ship_commits>b6e0c154 (tool + tests + log), 7b7381ac (exec-bit fix)</ship_commits>
     <project_code>ADHC_DSFLOW</project_code>
     <priority>P1 (closes same-class 081223b5 + 035352c3 latent-PROD-crash pattern; 2 incidents in 2 days)</priority>
     <sla>2h from GO</sla>
