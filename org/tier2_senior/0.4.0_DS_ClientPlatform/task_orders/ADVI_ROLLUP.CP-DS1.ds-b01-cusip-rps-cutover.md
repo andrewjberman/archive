@@ -4,7 +4,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-17</date>
-    <status>pending</status><!-- ~B active 2026-04-17T~10:03Z. CP-AE1 shipped 80917a1e. Impl in flight. -->
+    <status>complete</status>
+    <closeout date="2026-04-21" resolved_by="joint CTO+COO audit" cto_decision="20260421T141326Z Option A">
+      CANCELLED-AS-PENDING closeout 2026-04-21 — code shipped 2026-04-17 across 8 commits (7e57576f/c693d5a3/d39c4dff/cd00ff2c/c4ebde9a/f5f19e77/1db831aa/ec2c1efc), validated Run 11 $3.587B→$1.758B per CTO session 32. HLOT2 2026-04-21 `5f5d0319` proceeded on same B_01.holdings_lots.py without reverting CP-DS1 gates = de-facto acceptance after 4-day no-objection window. Follow-up items moved to ADVI_ROLLUP blocking as standalone (asset_class join hardening TO; Top Positions 'Opal models only' filter TO; cap-timing-rule disposition if Andrew ever wants explicit). Reconciled by joint CTO+COO audit 2026-04-21.
+    </closeout>
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P0 — permanent fix for chronic B_01 SAFETY HALT</priority>
     <supersedes>BDPL_CNPRCS.WP-4, BDPL_CNPRCS.WP-9 (30-day dry-run replaced by single validation run per Andrew 2026-04-17)</supersedes>
