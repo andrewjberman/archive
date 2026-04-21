@@ -154,9 +154,97 @@ Summary answers:
 
 ---
 
+---
+
+## Option A+ Sequence (CTO ruling: reset champion, re-run)
+
+**Reset commit:** 3fb8b694 — VOID annotations on entries 10-13; champion.json archived as champion_v0_mock.json; live champion.json removed. Tag: `comp-learns-v1-proving-reset`.
+
+### Run A1 — Fresh iter, empty champion
+
+**Timestamp:** 2026-04-21T20:29:XX Z  
+**Command:** `comp-learns-ratchet httpx --judge real --max-iter 1`  
+**Exit code:** 10 (MAX_ITER)
+
+| Field | Value |
+|-------|-------|
+| compiler_sha | 3fb8b69 |
+| verdict | **kept** |
+| primary_metric | 0.06635351328309276 |
+| compare_key | primary_metric |
+| champion_pm_before | null |
+| cache_hits | 114 |
+| cache_misses | 0 |
+| new_cache_entries | 0 |
+| benchmark_honest | true |
+| schema_version | 2 |
+| winners_at_best | ["keyword","random"] |
+
+KEEP ✅. champion.json written (sha=3fb8b69, pm=0.0664). Real-judge baseline established.
+
+Note: warm_up_entries_written=0 because cache was pre-warmed by VOID'd runs (same compiler content). Cache infrastructure functioning correctly.
+
+### Run A2 — Cache-warm re-run
+
+**Timestamp:** 2026-04-21T20:30:XX Z  
+**Note on sha:** CTO pushed org commit 5db71c6e between A1 and A2; compiler.py unchanged; AB cache served 114 hits confirming content-addressed keying.
+
+| Field | Value |
+|-------|-------|
+| compiler_sha | 5db71c6 |
+| verdict | **tied** |
+| primary_metric | 0.06635351328309276 |
+| compare_key | compiler_loc |
+| champion_pm_before | 0.0664 |
+| cache_hits | 114 |
+| cache_misses | 0 |
+| warm_up_entries_written | 0 |
+
+TIED ✅. compare_key=compiler_loc (pm+f1 exact match, loc tiebreaker). AC#3 all pass.
+
+### Run A3 — Induced regression
+
+**Timestamp:** 2026-04-21T20:36:XX Z  
+**Regression commit:** 08fa88b6 (py_files=[], pre-commit gate passed)
+
+| Field | Value |
+|-------|-------|
+| compiler_sha | 08fa88b |
+| verdict | **discarded** |
+| primary_metric | 0.0 |
+| compare_key | primary_metric |
+| champion_pm_before | 0.0664 |
+| cache_hits | 57 |
+| cache_misses | 57 |
+
+DISCARD ✅. candidate_pm=0.0 < champion_pm=0.0664. Champion.json unchanged. AC#4 all pass.
+Revert commit: 92f5e4c8.
+
+### Run A4 — Restored compiler
+
+**Timestamp:** 2026-04-21T20:38:XX Z
+
+| Field | Value |
+|-------|-------|
+| compiler_sha | 92f5e4c |
+| verdict | **tied** |
+| primary_metric | 0.06635351328309276 |
+| compare_key | compiler_loc |
+| champion_pm_before | 0.0664 |
+| cache_hits | 114 |
+| cache_misses | 0 |
+
+TIED ✅. Cache warmth from A1+A2 pool. Champion sha=3fb8b69 unchanged throughout. AC#5 all pass.
+
+### Run A5 — Manual review
+
+See `comp/targets/httpx/PROVING_SEQUENCE_R1_R5.md` for full 4-question analysis.
+
+---
+
 ## Legacy surface check
 
-`comp-learns-run.sh` was NOT invoked during any of the four runs. All invocations were `comp-learns-ratchet` (comp/bin/comp-learns-ratchet). Confirmed: no legacy surface reached.
+`comp-learns-run.sh` was NOT invoked during any run. All invocations were `comp-learns-ratchet` (comp/bin/comp-learns-ratchet). Confirmed: no legacy surface reached.
 
 ---
 
