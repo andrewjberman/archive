@@ -26,7 +26,7 @@ too strong; this session restores it.
 | 3 | CRITICAL | Cache-key `source_hash` computed from `target_root / "compiler.py"` where `target_root = target_dir/_repo/target`. Actual compiler at `target_dir/compiler.py`. `_source_hash()` silently returned `"no-compiler"`. | Added `compiler_py_path: Optional[Path]` kwarg to `iterate()`; `_main` passes `target_dir/compiler.py`. In-memory compiler_fn tests (no path) still use the `"no-compiler"` fallback. | `comp/loop/ratchet.py::iterate` lines 215-220; live run wrote 57 new cache entries — prior entries keyed under `"no-compiler"` are now orphaned, proving the fix takes effect. |
 | 4 | HIGH | Champion compare used only `primary_metric`. `Verdict.TIED` updated `champion.json` anyway. `tiebreak_structural` + `tiebreak_loc_delta` helpers in `primary.py` were unused. | Implemented full three-key compare in `iterate()`: `primary_metric → structural_f1 → -compiler_loc`. TIED no longer updates champion. `_save_champion` now writes `structural_f1` + `compiler_loc`. | `comp/loop/ratchet.py::iterate._compare`; live iter 8 with same compiler as iter 7 correctly returned `verdict=tied`, champion unchanged, `delta=0.0 loc_delta=0`. |
 | 5 | HIGH | `ab.run` used `max(per_selector.items(), key=lift)`. On ties, Python returns first inserted — `random` (default selector order). Scorecards logged misleading `best_selector="random"`. | Replaced with `sorted(items, key=(-lift, name))`. Alphabetical tie-break → `centrality < keyword < random`, so structured selector wins attribution at ceiling. Added `DownstreamAB.tied_at_best: bool` flag for honest readers. | `comp/bench/ab.py::run`; live scorecard shows `best_selector="centrality"` + `tied_at_best=true` (was `"random"` pre-fix). |
-| 6 | MEDIUM | Session10 referenced `protocol_briefing_comp_learns_target_execution.md` as authoritative, but the file was `??` (untracked) — no stable hash for audit. | Committed at `64eee063`. | `git log` shows commit 64eee063. |
+| 6 | MEDIUM | Session10 referenced `protocol_briefing_comp_learns_target_execution.md` as authoritative, but the file was `??` (untracked) — no stable hash for audit. | Closed earlier this session at `64eee063` **before** the code-tightening commit `07777832`. Referenced here for audit continuity, not re-closed. | `git log 64eee063` shows the commit + file body. |
 | 7 | MEDIUM | `ExperimentEntry` schema missing `delta` + `loc_delta` fields (architecture §7.4 line 700). | Added both fields with sensible defaults; `iterate()` writes `delta = cand.pm - champ.pm` and `loc_delta = cand_loc - champ_loc`. | `comp/loop/experiment_log.py`; live iter 8 entry: `"delta": 0.0, "loc_delta": 0`. |
 
 ## Live end-to-end verification
@@ -68,6 +68,16 @@ $ comp/bin/comp-learns-run.sh httpx; echo exit=$?
 ERROR: bare `comp-learns-run.sh <target>` is ambiguous. [...]
 exit=2
 ```
+
+**Scope of "verification."** These iter-7/iter-8 runs use `--judge mock`
+(gold-aware mock). They verify **schema honesty + provenance honesty** — the
+new fields populate correctly, tie-break is deterministic, champion updates
+follow the three-key compare, source_hash is non-empty. They do **not**
+verify **benchmark honesty**: selector lifts of 1.0 across the board are
+an artifact of the mock returning correct answers whenever context is
+non-empty, not evidence that compiler v0 is a good compiler. Benchmark
+honesty is blocked on `--judge real` actually running end-to-end (listed
+in residual gaps).
 
 ## Tests
 
@@ -114,7 +124,9 @@ fallback is explicitly safe for those tests and is not reached by `_main`.
 flipping default to ratchet or quarantining legacy. I chose quarantine because
 the ratchet only has `iterate()` (single iter) — a looping driver with kill
 switch + budget + plateau is a separate PRD. Quarantine closes the "silently
-wrong path" hole without blocking that future PRD.
+wrong path" hole without blocking that future PRD. **But it does not close
+the architectural gap** — the repo still lacks a canonical long-running
+ratchet runner. Logged explicitly in residual gap #2.
 
 **Non-decision: backfill iter 1-6 experiment_log with delta/loc_delta.**
 Those entries are pre-fix, pre-schema. Leaving them at default 0.0/0 is
@@ -125,21 +137,48 @@ use the new schema.
 
 1. **No real-judge iteration has ever run.** `--judge real` is wired but
    untested end-to-end. First real run will surface provider-rate-limit and
-   answer-format gaps that the mock hides.
-2. **Champion F1 + LoC for iter 1-6** weren't recorded; iter 7 won KEEP on
+   answer-format gaps that the mock hides. **Top residual — benchmark
+   honesty depends on this.**
+2. **No canonical multi-iter ratchet driver.** `--once` is a single-iteration
+   interface; `comp.loop.ratchet.iterate()` has no looping harness around it.
+   The quarantine in #1 closes the "silently-wrong path" hole, but it does
+   NOT yet give us a long-running ratchet runner with kill switch + budget +
+   plateau detection. That is a separate PRD (tracked as
+   `.019` or equivalent). Until then, multi-iter runs must be driven
+   externally (shell loop, cron, or human-triggered).
+3. **Pre-fix champion.json entries lack F1/LoC.** Older champion files default
+   missing values to zero when read by `_load_champion` (safe code path,
+   `compare()` correctly handles it). But this means pre-fix → post-fix
+   compares are **asymmetric**: any post-fix candidate wins the F1 tiebreaker
+   against a phantom zero. Transient — self-heals after one KEEP writes real
+   values. Worth naming explicitly for anyone doing historical analytics.
+4. **Pre-fix experiment_log entries (iter 1-6) lack delta/loc_delta.** No
+   backfill — those entries predate the schema. Downstream analytics must
+   be schema-version-aware (check for field presence rather than assume).
+5. **Champion F1 + LoC for iter 1-6** weren't recorded; iter 7 won KEEP on
    the F1 tiebreaker against a phantom `champ_f1=0.0, champ_loc=0` champion.
-   Transient; iter 8 with recorded F1/LoC returned TIED correctly.
-3. **LoC counting is line-count, not non-blank non-comment.** Fine for
-   relative-delta tiebreaker but won't match other LoC tools.
+   Transient; iter 8 with recorded F1/LoC returned TIED correctly. (Subset
+   of #3 — called out separately because the effect is visible in the
+   iter 7 log entry.)
+6. **LoC counting is raw line-count of compiler.py.** Not non-blank, not
+   non-comment, not broader "compiler surface" (imports, helpers, IR use).
+   Fine for relative-delta tiebreaker between compiler revisions of the
+   same shape but won't match other LoC tools and doesn't capture
+   complexity of wide dependency graphs.
 
 ## What the validator should now see
 
-- Every CRITICAL finding closed with code + live-run evidence.
+- Every CRITICAL finding closed with code + live-run evidence. **#2 closed
+  at the schema/provenance level only — benchmark honesty is a residual.**
 - Every HIGH finding closed with behavior change visible in iter-7/iter-8
   diff of scorecard + experiment_log.
-- Both MEDIUM findings closed (commit hash + schema fields).
+- MEDIUM #6 closed earlier this session at `64eee063`, referenced by
+  `07777832` for audit continuity (not re-closed).
+- MEDIUM #7 closed at `07777832` with backward-compat schema.
 - Session10's "verified" claim was overreach. Session11 replaces it with
-  verified-on-7-axes plus an explicit residual-gaps list.
+  verified-on-7-axes (scoped as above) plus an explicit 6-item residual-gaps
+  list that now includes the missing multi-iter ratchet driver, pre/post-fix
+  champion asymmetry, and schema-mixed historical logs.
 
 ## Compiler tools used
 
