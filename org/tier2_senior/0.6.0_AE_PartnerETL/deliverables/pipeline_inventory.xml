@@ -1165,4 +1165,67 @@
 
   </data_contracts>
 
+  <!-- =========================================================
+       SCHWAB TRN / NNA INGESTION (49 Financial master account 0008242234)
+       Added 2026-04-21 by 0.6.0_AE_PartnerETL per
+       docs/briefs/ae-brief-schwab-trn-nna-enrichment.md.
+       Sibling ingestion pipeline to bd-pipeline; output consumed by
+       0.4.0_DS_ClientPlatform C_01.canonical_nna merge (Phase 6 of brief).
+       ========================================================= -->
+  <pipeline name="schwab-ingestion-partner-etl" status="active" current_tag="n/a — bronze/silver only; no Terraform module yet">
+
+    <metadata>
+      <agent>0.6.0_AE_PartnerETL</agent>
+      <source>Local OneDrive delivery (authoritative) + s3://opal-data-schwab/01_raw/ (archive mirror)</source>
+      <onedrive_path>C:\Users\AndrewBerman\OneDrive - Opal Capital\Documents\Schwab Data Delivery\{account}\CRS{YYYYMMDD}.{ext}</onedrive_path>
+      <master_account>0008242234 (49 WEALTH MANAGEMENT LLC)</master_account>
+      <purpose>Authoritative NNA source; fills BD silver's new-account onboarding-lag gap (~$91M undercount Jul-Dec 2024 per reconciliation)</purpose>
+    </metadata>
+
+    <silver_layers>
+      <layer name="03_silver/TRN" prefix="s3://opal-data-schwab/03_silver/TRN/date={YYYYMMDD}/data.parquet">
+        <producer>data/black_diamond/scripts/bronze/convert_schwab_trn_to_parquet.py</producer>
+        <source>Local OneDrive (positional D1 parse, format versions 01.04 + 01.06 verified)</source>
+        <row_grain>one row per TRN D1| line</row_grain>
+        <coverage_as_of_2026_04_21>496 partitions (2024-04-12 -> 2026-04-20)</coverage_as_of_2026_04_21>
+        <schema_contract>docs/data/schwab_trn_nna_contract.md</schema_contract>
+      </layer>
+
+      <layer name="03_silver/TRN_NNA" prefix="s3://opal-data-schwab/03_silver/TRN_NNA/date={YYYYMMDD}/data.parquet">
+        <producer>data/black_diamond/scripts/bronze/convert_schwab_trn_to_nna_silver.py</producer>
+        <source>03_silver/TRN/ (S3 bucket-to-bucket)</source>
+        <row_grain>one row per NNA-eligible event (inflow OR outflow); excluded rows dropped</row_grain>
+        <stable_key>schwab_txn_key = SHA1(acct10|trade_date|tran_code|gross_amount|detail[:64])[:16]</stable_key>
+        <classifier_parity>85-90% vs Schwab Business Review PDF monthly totals Jul-Dec 2024 (PoC baseline)</classifier_parity>
+        <schema_contract>docs/data/schwab_trn_nna_contract.md</schema_contract>
+      </layer>
+
+      <layer name="03_silver/ULN" prefix="s3://opal-data-schwab/silver/ULN/date={YYYYMMDD}/data.parquet" note="predecessor, unchanged">
+        <producer>data/black_diamond/scripts/bronze/convert_schwab_uln_to_silver.py</producer>
+        <added_2026_04_17>349 STANDARD partitions backfilled</added_2026_04_17>
+      </layer>
+    </silver_layers>
+
+    <downstream_consumers>
+      <consumer name="canonical_nna_merge" status="pending_Phase_6_to" owner="0.4.0_DS_ClientPlatform">
+        <gold_script>data/black_diamond/scripts/gold/C_01.canonical_nna.py</gold_script>
+        <contract>BD silver takes precedence on every match; Schwab TRN_NNA imputes only when BD is absent (±180d window).
+          Adds source_system column (bd | bd_lagged | bd_delayed | schwab_imputed | bd_diff_flagged | bd_only).
+          Anti-double-count invariant: schwab_txn_key is deterministic; rerun produces byte-identical output.</contract>
+      </consumer>
+      <consumer name="partner_analytics_imputed_pct" status="planned_Phase_7_to" owner="0.4.0_DE_PortalFrontend">
+        <surface>platinum/firm/partner_analytics_monthly.json imputed_pct per period</surface>
+      </consumer>
+    </downstream_consumers>
+
+    <operations>
+      <nightly_backfill_command>python data/black_diamond/scripts/bronze/convert_schwab_trn_to_parquet.py &amp;&amp; python data/black_diamond/scripts/bronze/convert_schwab_trn_to_nna_silver.py</nightly_backfill_command>
+      <parity_check>python data/schwab/analysis/nna_parity_harness.py --month-range 2024-07 2024-12</parity_check>
+      <idempotency>Both scripts skip partitions already present. --force rewrites. Layer B is deterministic over Layer A; Layer A is positional and order-stable.</idempotency>
+      <bucket_sse_gotcha>opal-data-schwab bucket policy DENIES PutObject without x-amz-server-side-encryption: AES256. Both producers set ServerSideEncryption='AES256' on put_object — do not remove.</bucket_sse_gotcha>
+      <deployment_note>No Terraform module yet — scripts run locally. Schwab SFTP automation (replacing OneDrive manual delivery) is a follow-up TO after DS Phase 6.</deployment_note>
+    </operations>
+
+  </pipeline>
+
 </pipeline_inventory>
