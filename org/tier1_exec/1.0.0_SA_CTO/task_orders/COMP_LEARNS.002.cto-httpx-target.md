@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>1.0.0_SA_CTO</issued_to><!-- CTO-execution TO per CTO direction 18:57Z: query verifiability requires CTO-level judgment; authoring is hands-on 4-6 hrs. First CTO-execution TO in this project. -->
     <date>2026-04-15</date>
-    <status>staged</status><!-- Gate: PRD #1 HARNESS_FRAMEWORK ships first (needed: harness_base.py signature, query_schema.py validator). -->
+    <status>complete</status><!-- SUPERSEDED/ABSORBED 2026-04-20 — Phase 0 of this TO shipped at fd2d0515 (httpx target selection + gold survey foundation). Remaining Steps 2-7 (gold authoring) were absorbed into COMP_LEARNS.016 under the v3 PRD (COMP_LEARNS_ARCHITECTURE.md) which reframed the gold-authoring surface around 6-concern structural inference instead of 5-PRD sequence. .016 shipped 58a52153 (2026-04-20 Z-lane) with httpx imports_gold + A/B pool + target_version + 24 adversarial+ratchet questions + validator PASS + GOLD_SURVEY.md. Original .002 scope no longer standalone executable. Evidence: CTO~Z session close log `org/tier1_exec/1.0.0_SA_CTO/logs/2026-04-20/z_lane_session_close.md` + v3 PRD amendments (28999f01/885c8dc3/dc839e77). Reconciled by CTO session 36 audit 2026-04-21 — TO-file status had been left as `staged` while JSON phase correctly documented absorption; flipping to `complete` with absorption note to match reality. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — proves loop end-to-end; blocks Phase 2 iteration</priority>
   </metadata>
