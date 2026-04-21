@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-21</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 
