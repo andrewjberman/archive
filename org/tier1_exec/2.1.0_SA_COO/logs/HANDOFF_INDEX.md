@@ -11,7 +11,7 @@ load for continuity; originals are retained at the 2.0.0 path.
 |------|------------------|---------------------|------|-------|
 | 2026-04-15 | `2026-04-15/session_29_comp_learns_handoff.md` | `org/tier1_exec/2.0.0_SA_COO/logs/2026-04-15/session_29_comp_learns_handoff.md` | base | Session 29 COMP_LEARNS pickup package — start-of-project handoff |
 | 2026-04-16 | `2026-04-16/COO_B_comp_learns_v3_sweep_handoff.md` | `org/tier1_exec/2.0.0_SA_COO/logs/2026-04-16/COO_B_comp_learns_v3_sweep_handoff.md` | ~B | In-flight v2→v3 delta sweep across 11 staged TOs |
-| 2026-04-20 | `2026-04-20/z_lane_comp_learns_ds_agent_reframe.md` | `org/tier1_exec/2.0.0_SA_COO/logs/2026-04-20/z_lane_comp_learns_ds_agent_reframe.md` | ~Z | DS reframe ABCD → 0.{1..4}.0_DS_CompLearns; 17 TOs migrated (commit `788ef8bb`) |
+| 2026-04-20 | `2026-04-20/z_lane_comp_learns_ds_agent_reframe.md` | `org/tier1_exec/2.0.0_SA_COO/logs/2026-04-20/z_lane_comp_learns_ds_agent_reframe.md` | ~Z | DS reframe ABCD → 1.{1..4}.0_DS_CompLearns; 17 TOs migrated (commit `788ef8bb`) |
 | 2026-04-20 | `2026-04-20/z_lane_comp_learns_v3_sweep.md` | `org/tier1_exec/2.0.0_SA_COO/logs/2026-04-20/z_lane_comp_learns_v3_sweep.md` | ~Z | v3 sweep + v4/v4.1/v4.2 amendment wave (commits `9270837f` / `ecac2684` / `ffa43e25` / `5091974e`) |
 | 2026-04-21 | `2026-04-21/session37_comp_learns_exec_dyad_creation.md` | `org/tier1_exec/2.0.0_SA_COO/logs/2026-04-21/session37_comp_learns_exec_dyad_creation.md` | base | Dyad creation — README/prompt for this agent + `1.1.0_SA_CTO` |
 

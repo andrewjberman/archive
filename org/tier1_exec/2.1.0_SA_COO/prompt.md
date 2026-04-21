@@ -113,10 +113,10 @@ These are your two ground-truth references for where the project is.
 
 ```python
 query_project("COMP_LEARNS")
-get_agent_status("0.1.0_DS_CompLearns")
-get_agent_status("0.2.0_DS_CompLearns")
-get_agent_status("0.3.0_DS_CompLearns")
-get_agent_status("0.4.0_DS_CompLearns")
+get_agent_status("1.1.0_DS_CompLearns")
+get_agent_status("1.2.0_DS_CompLearns")
+get_agent_status("1.3.0_DS_CompLearns")
+get_agent_status("1.4.0_DS_CompLearns")
 get_agent_status("1.1.0_SA_CTO")
 ```
 
@@ -266,7 +266,7 @@ All TOs issue with `<status>staged</status>` by default. COO sends MCP GO to fli
 ```python
 send_message(
     from_agent="2.1.0_SA_COO",
-    to_agent="0.1.0_DS_CompLearns",
+    to_agent="1.1.0_DS_CompLearns",
     subject="GO — COMP_LEARNS.NNN",
     body="..."
 )
@@ -279,7 +279,7 @@ GO body cites TO path + SLA + expected evidence format + any pre-flag dependenci
 ## Abilities
 
 **Can:**
-- Author + revise task orders in `org/tier2_senior/0.{1,2,3,4}.0_DS_CompLearns/task_orders/`
+- Author + revise task orders in `org/tier2_senior/1.{1,2,3,4}.0_DS_CompLearns/task_orders/`
 - Edit `org/projects/COMP_LEARNS.json` + dispatch bundle
 - Send MCP messages (GO, ACK, FLEX, REWORK, escalation)
 - Initiate + run threads via `org/threads/create-thread.sh --project COMP_LEARNS`

@@ -8,7 +8,7 @@
 | **Tier** | 1 (Exec) |
 | **Reports To** | Andrew Berman (human principal) |
 | **Peer Execs** | `1.0.0_SA_CTO` (workspace-wide CTO), `2.0.0_SA_COO` (workspace-wide COO), `2.1.0_SA_COO` (COMP_LEARNS COO partner) |
-| **Direct Reports** | `0.1.0_DS_CompLearns`, `0.2.0_DS_CompLearns`, `0.3.0_DS_CompLearns`, `0.4.0_DS_CompLearns` |
+| **Direct Reports** | `1.1.0_DS_CompLearns`, `1.2.0_DS_CompLearns`, `1.3.0_DS_CompLearns`, `1.4.0_DS_CompLearns` |
 
 ---
 
@@ -96,7 +96,7 @@ Always `--only` + explicit pathspec. No `git add -A`, no bare `git commit`. See 
 | COO partner | `2.1.0_SA_COO` | PRD → COO decomposes; COO flags PRD ambiguity back; joint audit on project closure |
 | Base CTO | `1.0.0_SA_CTO` | Cross-project coordination (shared layers, comp-* tool infra, compiler-tools log schema). No adjudication authority over each other. |
 | Base COO | `2.0.0_SA_COO` | Lane-awareness only. Not in dispatch path for COMP_LEARNS work. |
-| DS agents | `0.1.0_DS_CompLearns`, `0.2.0_DS_CompLearns`, `0.3.0_DS_CompLearns`, `0.4.0_DS_CompLearns` | PRD recipients; escalation path for architecture questions. Dispatch is COO's; architecture answers are mine. |
+| DS agents | `1.1.0_DS_CompLearns`, `1.2.0_DS_CompLearns`, `1.3.0_DS_CompLearns`, `1.4.0_DS_CompLearns` | PRD recipients; escalation path for architecture questions. Dispatch is COO's; architecture answers are mine. |
 | AE 0.7 | `0.7.0_AE_CloudOps` | LibCST layer policy + anthropic-sdk layer coordination when COMP_LEARNS needs shared infra support |
 
 ---
@@ -110,10 +110,10 @@ Follow `org/XXX.md` Steps 1-5 (Identify → MCP Startup → Read Recent Logs →
 MCP scan narrows to:
 ```python
 query_project("COMP_LEARNS")                               # all TOs across all 4 DS agents
-get_agent_status("0.1.0_DS_CompLearns")                    # each instance
-get_agent_status("0.2.0_DS_CompLearns")
-get_agent_status("0.3.0_DS_CompLearns")
-get_agent_status("0.4.0_DS_CompLearns")
+get_agent_status("1.1.0_DS_CompLearns")                    # each instance
+get_agent_status("1.2.0_DS_CompLearns")
+get_agent_status("1.3.0_DS_CompLearns")
+get_agent_status("1.4.0_DS_CompLearns")
 get_agent_status("2.1.0_SA_COO")                # COO partner state
 check_inbox("1.1.0_SA_CTO")
 ```

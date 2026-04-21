@@ -84,7 +84,7 @@ Completed `1.0.0_SA_CTO` TOs (`.002`, `.016`) stay as-is — historical attribut
 
 2. **3 mixed logs stay at source.** `startup_session30/33_reconciliation.md` and `session33_advi_staudt_*.md` contain project-sweep entries that touch COMP_LEARNS only as a cross-reference; pulling them would muddy this agent's timeline. Referenced in HANDOFF_INDEX.
 
-3. **Do not fire `.011` GO this session.** COMP_LEARNS.json blocking line (1) names "base-lane COO to fire GO on .011 → 0.1.0_DS_CompLearns" — now succeeded to me. But DS 0.1.0 is NOT REGISTERED on the broker (Andrew hasn't spawned the terminal yet), so any GO would land in an unread inbox. Holding GO until DS agent comes online; will fire on first heartbeat from 0.1.0.
+3. **Do not fire `.011` GO this session.** COMP_LEARNS.json blocking line (1) names "base-lane COO to fire GO on .011 → 1.1.0_DS_CompLearns" — now succeeded to me. But DS 0.1.0 is NOT REGISTERED on the broker (Andrew hasn't spawned the terminal yet), so any GO would land in an unread inbox. Holding GO until DS agent comes online; will fire on first heartbeat from 0.1.0.
 
 4. **Do not re-attribute staged CTO TOs unilaterally.** `.009` / `.018` / `.020` show `1.0.0_SA_CTO` owner — historical attribution from pre-dyad authoring. MCP to `1.1.0_SA_CTO` when he registers, requesting his call on transfer vs. leave-as-is.
 
@@ -111,7 +111,7 @@ Out of scope (untouched): all non-COMP_LEARNS files in working tree.
 ## Blockers
 
 **External (waiting on Andrew):**
-- DS 0.1.0 / 0.2.0 / 0.3.0 / 0.4.0 `_CompLearns` terminals not yet spawned (NOT REGISTERED on broker). GO on `.011` and any downstream dispatch held until they come online.
+- DS 1.1.0 / 1.2.0 / 1.3.0 / 1.4.0 `_CompLearns` terminals not yet spawned (NOT REGISTERED on broker). GO on `.011` and any downstream dispatch held until they come online.
 - `1.1.0_SA_CTO` terminal not yet spawned (NOT REGISTERED). Cannot ask for TO ownership ruling on `.009`/`.018`/`.020` or raise PRD questions.
 
 **Internal:** none.
@@ -122,16 +122,16 @@ Out of scope (untouched): all non-COMP_LEARNS files in working tree.
 
 - Agent is LIVE on broker, inbox-watch running, `.comp-graph/.agent_context` seeded, folder + logs populated.
 - Ground truth matches project JSON — no write-back corrections needed.
-- Next dispatch candidate locked in: `.011 module-skeleton` → `0.1.0_DS_CompLearns` (zero-in-edge root of new wave per dep graph; CTO~Z signoff in DISPATCH_BUNDLE.md still valid).
+- Next dispatch candidate locked in: `.011 module-skeleton` → `1.1.0_DS_CompLearns` (zero-in-edge root of new wave per dep graph; CTO~Z signoff in DISPATCH_BUNDLE.md still valid).
 - Discipline gate holds: no agent-proposer-loop dispatch until `.017` human-verified honest + primary metric demonstrated.
 
 ---
 
 ## Next Steps
 
-1. **[Andrew]** Spawn DS terminals (`0.{1,2,3,4}.0_DS_CompLearns`) and `1.1.0_SA_CTO`. On their first heartbeat I will:
+1. **[Andrew]** Spawn DS terminals (`1.{1,2,3,4}.0_DS_CompLearns`) and `1.1.0_SA_CTO`. On their first heartbeat I will:
    - MCP `1.1.0_SA_CTO`: ownership ruling on staged CTO TOs `.009` / `.018` / `.020`.
-   - MCP `0.1.0_DS_CompLearns`: GO on `COMP_LEARNS.011.module-skeleton-core-contracts.md`.
+   - MCP `1.1.0_DS_CompLearns`: GO on `COMP_LEARNS.011.module-skeleton-core-contracts.md`.
 2. **[2.1.0_SA_COO next session]** When DS agents online, run `operator COMP_LEARNS --dispatch` to auto-fire GOs on actionable_staged TOs and enter persistent-driver loop.
 3. **[Follow-up]** `.022 comp-pipescript-func-write-detection` (DS 0.2.0, pending since 2026-04-17) — pickup only after `.011` dispatch is ACKed; don't double-task 0.2.0 concurrently.
 4. **[Watching]** `.015a` enforcement-owner micro-TO (if `1.1.0_SA_CTO` wants me to author it per v4.2 PRD) — requires his go/no-go.

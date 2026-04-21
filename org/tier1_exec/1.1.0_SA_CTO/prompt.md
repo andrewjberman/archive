@@ -50,10 +50,10 @@ Your scan is project-local. Skip the workspace-wide `get_org_summary`.
 
 ```python
 query_project("COMP_LEARNS")                        # all TOs across 4 DS agents
-get_agent_status("0.1.0_DS_CompLearns")
-get_agent_status("0.2.0_DS_CompLearns")
-get_agent_status("0.3.0_DS_CompLearns")
-get_agent_status("0.4.0_DS_CompLearns")
+get_agent_status("1.1.0_DS_CompLearns")
+get_agent_status("1.2.0_DS_CompLearns")
+get_agent_status("1.3.0_DS_CompLearns")
+get_agent_status("1.4.0_DS_CompLearns")
 get_agent_status("2.1.0_SA_COO")
 ```
 

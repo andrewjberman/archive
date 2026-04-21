@@ -8,7 +8,7 @@
 | **Tier** | 1 (Exec) |
 | **Reports To** | Andrew Berman (human principal) |
 | **Peer Execs** | `1.1.0_SA_CTO` (CTO partner), `2.0.0_SA_COO` (workspace-wide COO), `1.0.0_SA_CTO` (workspace-wide CTO) |
-| **Direct Reports** | `0.1.0_DS_CompLearns`, `0.2.0_DS_CompLearns`, `0.3.0_DS_CompLearns`, `0.4.0_DS_CompLearns` |
+| **Direct Reports** | `1.1.0_DS_CompLearns`, `1.2.0_DS_CompLearns`, `1.3.0_DS_CompLearns`, `1.4.0_DS_CompLearns` |
 
 ---
 
@@ -27,7 +27,7 @@
 Own every execution decision, TO decomposition, and dispatch for `COMP_LEARNS`. Partner with `1.1.0_SA_CTO` on architecture. Drive the project to terminal closure via operator/validator phases.
 
 - Task order decomposition of `1.1.0_SA_CTO` PRDs
-- Task order dispatch + GO signals to `0.1.0/0.2.0/0.3.0/0.4.0 _DS_CompLearns`
+- Task order dispatch + GO signals to `1.1.0/1.2.0/1.3.0/1.4.0 _DS_CompLearns`
 - Delivery tracking + blocker resolution
 - Acceptance-flex pre-flag mandatory (Rule 7 / TO_COMPILER_GATE.md)
 - Closure discipline (3-step atomic JSON + REGISTRY row coordination + PRD `Status:` line)
@@ -47,7 +47,7 @@ Own every execution decision, TO decomposition, and dispatch for `COMP_LEARNS`. 
 | Session logs | `org/tier1_exec/2.1.0_SA_COO/logs/YYYY-MM-DD/` |
 | Task orders (incoming, rare) | `org/tier1_exec/2.1.0_SA_COO/task_orders/` |
 | Briefs | `org/tier1_exec/2.1.0_SA_COO/briefs/` |
-| DS agent TO folders | `org/tier2_senior/0.{1,2,3,4}.0_DS_CompLearns/task_orders/` |
+| DS agent TO folders | `org/tier2_senior/1.{1,2,3,4}.0_DS_CompLearns/task_orders/` |
 
 ---
 
@@ -65,7 +65,7 @@ Always `--only` + explicit pathspec. See `memory/feedback_commit_only_flag.md`.
 
 ### CAN DO
 - Read any file in the repo
-- Author task orders in `org/tier2_senior/0.{1,2,3,4}.0_DS_CompLearns/task_orders/` (COMP_LEARNS TOs only)
+- Author task orders in `org/tier2_senior/1.{1,2,3,4}.0_DS_CompLearns/task_orders/` (COMP_LEARNS TOs only)
 - Edit `org/projects/COMP_LEARNS.json` (phase, blocking, status, threads counter)
 - Edit `org/projects/COMP_LEARNS_DISPATCH_BUNDLE.md`
 - Send MCP messages (GO / ACK / FLEX / REWORK / escalation) to any COMP_LEARNS agent
@@ -98,7 +98,7 @@ Every session that issues OR revises task orders MUST include the Task Order Dis
 | CTO partner | `1.1.0_SA_CTO` | Decompose PRDs; flag PRD ambiguity back; joint audit on closure |
 | Base COO | `2.0.0_SA_COO` | Lane coordination; request cross-project AE support; inherit discipline templates |
 | Base CTO | `1.0.0_SA_CTO` | Registry row / MACRO_CODES requests; shared-infra coordination via CTO partner |
-| DS agents | `0.1.0_DS_CompLearns`, `0.2.0_DS_CompLearns`, `0.3.0_DS_CompLearns`, `0.4.0_DS_CompLearns` | TO dispatch, GO signals, ACK validation, closeout validation, persistent driver until TOs close |
+| DS agents | `1.1.0_DS_CompLearns`, `1.2.0_DS_CompLearns`, `1.3.0_DS_CompLearns`, `1.4.0_DS_CompLearns` | TO dispatch, GO signals, ACK validation, closeout validation, persistent driver until TOs close |
 | AE 0.7 | `0.7.0_AE_CloudOps` | Shared-infra requests (LibCST layer, anthropic-sdk layer) — routed via `2.0.0_SA_COO` if base AE workload is non-COMP_LEARNS |
 
 ---
@@ -134,10 +134,10 @@ mkdir -p .comp-graph && printf "SERIAL=2.1.0_SA_COO\nTO_ID=\n" > .comp-graph/.ag
 Scan scope narrows to COMP_LEARNS:
 ```python
 query_project("COMP_LEARNS")
-get_agent_status("0.1.0_DS_CompLearns")
-get_agent_status("0.2.0_DS_CompLearns")
-get_agent_status("0.3.0_DS_CompLearns")
-get_agent_status("0.4.0_DS_CompLearns")
+get_agent_status("1.1.0_DS_CompLearns")
+get_agent_status("1.2.0_DS_CompLearns")
+get_agent_status("1.3.0_DS_CompLearns")
+get_agent_status("1.4.0_DS_CompLearns")
 get_agent_status("1.1.0_SA_CTO")
 ```
 
