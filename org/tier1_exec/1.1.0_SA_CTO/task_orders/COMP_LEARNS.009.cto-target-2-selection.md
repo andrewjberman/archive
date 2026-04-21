@@ -14,7 +14,7 @@
     <ref type="precedent">docs/architecture/COMP_LEARNS_HTTPX_TARGET.md (PRD #2 shape — repo pin + ~50 queries + harness + answers)</ref>
     <ref type="doctrine">docs/architecture/COMP_LEARNS_QUALITATIVE_FRAMEWORK.md</ref>
     <ref type="sop">docs/architecture/COMP_LEARNS_BENCHMARK_AUTHORING_SOP.md (shipping via #008; reduces target-2 authoring time)</ref>
-    <ref type="prd_section">docs/architecture/COMP_LEARNS_TARGET_CLOSEOUT.md v1.1 §5 — 2 hard minimums (parser-proven + gold-authorable) + 2 weights (subtype leverage + size ceiling) + 3 disqualifiers; §3.1 uniqueness rule for "≥3 promoted learnings" gate</ref>
+    <ref type="prd_section">docs/architecture/COMP_LEARNS_TARGET_CLOSEOUT.md v2.0 §5 — 2 hard minimums (parser-proven + gold-authorable) + 2 weights (subtype leverage + size ceiling) + 3 disqualifiers. Each maps to a named prior failure mode; content kept despite v2.0 overall trim.</ref>
   </references>
 
   <objective>
@@ -73,7 +73,7 @@
     4. Query budget estimate; defensible against httpx's 24-question precedent.
     5. Repo pin sha identified (or explicit "will pin at TO-authoring time").
     6. Projected timeline with dependencies (needs PRD #2-analog authoring via SOP #008 ideally).
-    7. **Gate evidence cited:** memo opens with a one-sentence citation that target 1 has reached either PLATEAU_WITH_HONOR or PLATEAU_BY_EXHAUSTION-with-≥3-promoted-learnings per TARGET_CLOSEOUT §5 v1.1 (per §3.1, "distinct mechanisms" not "distinct entries"). If neither holds, the TO should not have been picked up.
+    7. **Gate evidence cited:** memo opens with a one-sentence citation that target 1 has reached either (a) primary_metric ≥ 0.25 at some iter (honor) or (b) ≥3 distinct mechanism-level learnings in an exhaustion close-out per TARGET_CLOSEOUT v2.0 §5. "Distinct mechanism" is CTO judgment, not a formal uniqueness rule. If neither condition holds, the TO should not have been picked up — next action is target-1 diagnostic, not target-2 authoring.
     8. Session log — CTO's decision process reproducible; Rule 7 audit.
     9. MCP COMPLETE to 2.1.0_SA_COO with commit hash.
   </acceptance_criteria>

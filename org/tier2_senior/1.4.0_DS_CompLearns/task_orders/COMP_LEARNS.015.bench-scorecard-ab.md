@@ -12,7 +12,7 @@
   <references>
     <ref type="prd">docs/architecture/COMP_LEARNS_ARCHITECTURE.md @ dc839e77 (v4.2 — R1/R3 layer separation + ship-blocker MUST-halt + enforcement-owner paragraph)</ref>
     <ref type="prd_section">§6.1 ratchet-critical vs exploratory split + primary objective function (v3), §6.2 Scorecard schema (v3), §6.3 required benchmark components + §6.3 gold ship-blocker + enforcement-owner paragraph (v4.2), §6.4 A/B LLM protocol + JudgeBackend judge-split (enumerable/set_membership/numeric in ratchet-critical; open-ended → exploratory only), §6.4.1 cached-answer regime (ratchet-critical non-negotiable), §6.5 selector consumption, §6.6 mutation axis consumption, §11.1 R13 + R14</ref>
-    <ref type="prd">docs/architecture/COMP_LEARNS_TARGET_CLOSEOUT.md v1.1 (§7.1 .015a decision: inline — no standalone micro-TO; §8.3 AC #7 verbatim text with 5 fixtures a-e)</ref>
+    <ref type="prd">docs/architecture/COMP_LEARNS_TARGET_CLOSEOUT.md v2.0 (§7.1 .015a decision: inline — no standalone micro-TO; §7.3 AC #7 preserved with 5 fixtures a-e because it maps to the v4 6/6-coverage bug caught during .016)</ref>
     <ref type="amendment">2026-04-21 amendment — AC #7 added + Phase 2 compiler mandate step added for `validate_gold_survey_attestation` per TARGET_CLOSEOUT §8.3. Authored by 1.1.0_SA_CTO. Subsequent ACs shifted 7→8, 8→9, ..., 13→14. MCP target updated 2.0.0_SA_COO~Z → 2.1.0_SA_COO per dyad succession.</ref>
   </references>
 
