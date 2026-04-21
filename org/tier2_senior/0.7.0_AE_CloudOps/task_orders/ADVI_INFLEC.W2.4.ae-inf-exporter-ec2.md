@@ -9,7 +9,7 @@
   </metadata>
 
   <objective>
-    Provision `inf-exporter` EC2 (t3.medium, Amazon Linux 2023) in `inf-pipeline/ec2.tf`. Mirrors `bd-exporter` pattern: bun + playwright + xvfb bootstrap via user_data. IAM role `inf-exporter`: Secrets Manager read (Orion credentials), S3 RW on `opal-data-inf/bronze/orion/` + `opal-data-inf/otp/`, SSM Session Manager, SNS publish on OTP-alert topic (Phase 3). Register in EC2_MANIFEST.json (update W1.9 stub).
+    Provision `inf-exporter` EC2 (t3.medium, Amazon Linux 2023) in `inf-pipeline/ec2.tf`. Mirrors `bd-exporter` pattern: bun + playwright + xvfb bootstrap via user_data. EBS root volume KMS-encrypted with `inf-ebs-key` (same CMK as W2.1 — shared within inf-pipeline only, never with bd). Dedicated security group `inf-exporter-sg` (no overlap with bd-pipeline SGs). IAM role `inf-exporter`: Secrets Manager read (Orion credentials), S3 RW on `opal-data-inf/bronze/orion/` + `opal-data-inf/otp/`, SSM Session Manager, SNS publish on OTP-alert topic (Phase 3). Register in EC2_MANIFEST.json (update W1.9 stub).
   </objective>
 
   <context>
@@ -30,10 +30,12 @@
     1. inf-exporter EC2 provisioned (t3.medium).
     2. user_data installs bun + playwright + xvfb (mirror bd-exporter).
     3. IAM role scoped: Secrets Manager read (Orion creds secret path), S3 RW opal-data-inf/bronze/orion/ + opal-data-inf/otp/, SSM Session Manager.
-    4. comp-iam service inf-exporter: 0 MISSING.
-    5. EC2_MANIFEST.json updated with real instance ID.
-    6. Tag inf-pipeline-v1.3.0.
-    7. Session log.
+    4. EBS root volume encrypted=true, KmsKeyId = inf-ebs-key (same key as W2.1 gold runner). Verify: `aws ec2 describe-volumes ... --query Volumes[*].Encrypted`.
+    5. Security group `inf-exporter-sg` created fresh. No shared membership with bd-pipeline SGs.
+    6. comp-iam service inf-exporter: 0 MISSING.
+    7. EC2_MANIFEST.json updated with real instance ID.
+    8. Tag inf-pipeline-v1.3.0.
+    9. Session log with encrypted-volume and SG verification output.
   </acceptance_criteria>
 
   <scope>
@@ -48,6 +50,8 @@
     <requirement id="1">t3.medium — OTP relay exporter doesn't need heavy compute.</requirement>
     <requirement id="2">Orion credentials go in Secrets Manager — NOT hardcoded in user_data.</requirement>
     <requirement id="3">otp/ S3 prefix: read + write + delete for inf-exporter only.</requirement>
+    <requirement id="4">EBS encryption: use `inf-ebs-key` KMS CMK (created in W2.1). encrypted=true on root volume.</requirement>
+    <requirement id="5">Security group: dedicated `inf-exporter-sg`. No shared rules or group membership with bd-pipeline SGs. INF-to-INF traffic only within inf SGs.</requirement>
   </requirements>
 
   <deliverables>
@@ -59,5 +63,7 @@
   <do_not>
     <rule>Do NOT hardcode Orion credentials anywhere. Secrets Manager only.</rule>
     <rule>Do NOT wait for W0.3 to start this TO — infrastructure and Playwright script are independent.</rule>
+    <rule>Do NOT share security groups with bd-pipeline resources.</rule>
+    <rule>Do NOT reuse bd-pipeline KMS key — use inf-ebs-key created in W2.1.</rule>
   </do_not>
 </task_order>
