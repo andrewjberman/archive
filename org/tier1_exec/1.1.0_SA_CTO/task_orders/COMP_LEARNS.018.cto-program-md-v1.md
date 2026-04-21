@@ -12,8 +12,8 @@
   <references>
     <ref type="prd">docs/architecture/COMP_LEARNS_ARCHITECTURE.md @ dc839e77 (v4.2)</ref>
     <ref type="prd_section">§4.5 dimensional ontology, §5.3 conflict resolution, §6.1 primary metric, §6.5 selector discipline, §6.6 mutation invariants, §7.5 active adversarial, §8-§11 v0 target + scorecard</ref>
-    <ref type="prd">docs/architecture/COMP_LEARNS_TARGET_CLOSEOUT.md v1.0 (§3 promotion rule; §6 closeout module)</ref>
-    <ref type="prd_section">TARGET_CLOSEOUT §3 — Promoted Learnings section format + scaffold + enforcement hook into program_promotion.py</ref>
+    <ref type="prd">docs/architecture/COMP_LEARNS_TARGET_CLOSEOUT.md v1.1 (§3 promotion rule with 3-part Justification block; §3.1 uniqueness rule; §6 closeout module)</ref>
+    <ref type="prd_section">TARGET_CLOSEOUT §3 v1.1 — Promoted Learnings section format with Justification block (Mechanism / Why not target-specific / Predicted transfer surface on target 2) + scaffold + enforcement hook into program_promotion.py</ref>
     <ref type="module">comp/framework/closeout/program_promotion.py (shipped by .024; consumed by program.md authoring)</ref>
   </references>
 
@@ -31,7 +31,7 @@
     6. **Active adversarial pattern (§7.5)** — failure → targeted variants → re-test inside iteration.
     7. **Primary metric formula (§6.1).**
     8. **Confidence ladder (§5.1).**
-    9. **Promoted Learnings section scaffold (TARGET_CLOSEOUT §3).** Empty `## Promoted Learnings` section with the format comment from TARGET_CLOSEOUT §3 inline. No actual learnings promoted at v1.0 ship — v1.0 is the skeleton the first close-out fills via `comp.framework.closeout.promote()` (shipped by .024). The append-only invariant of this section is enforced in code; v1.0 only needs to scaffold it correctly so `promote()`'s first call has a target.
+    9. **Promoted Learnings section scaffold (TARGET_CLOSEOUT §3 v1.1).** Empty `## Promoted Learnings` section with the v1.1 format comment including the 3-part Justification block (Mechanism / Why not target-specific / Predicted transfer surface on target 2) inline. No actual learnings promoted at v1.0 program.md ship — v1.0 is the skeleton the first close-out fills via `comp.framework.closeout.promote()` (shipped by .024). The append-only invariant of this section is enforced in code; v1.0 only needs to scaffold it correctly so `promote()`'s first call has a target. Cite §3.1 uniqueness rule in the format comment so future reviewers know what counts as a distinct learning.
 
     Explicitly out of scope: PRD v4.3+ content (future amendments), any re-architecting beyond v4.2 decisions, TOs .011-.017 implementation details (program.md is doctrine, not reference), target-2-specific content (that lands post-close-out).
   </objective>

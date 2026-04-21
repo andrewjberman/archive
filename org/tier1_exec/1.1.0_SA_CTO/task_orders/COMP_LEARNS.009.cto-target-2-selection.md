@@ -14,19 +14,23 @@
     <ref type="precedent">docs/architecture/COMP_LEARNS_HTTPX_TARGET.md (PRD #2 shape — repo pin + ~50 queries + harness + answers)</ref>
     <ref type="doctrine">docs/architecture/COMP_LEARNS_QUALITATIVE_FRAMEWORK.md</ref>
     <ref type="sop">docs/architecture/COMP_LEARNS_BENCHMARK_AUTHORING_SOP.md (shipping via #008; reduces target-2 authoring time)</ref>
-    <ref type="prd_section">docs/architecture/COMP_LEARNS_TARGET_CLOSEOUT.md §5 — selection criteria (weights-not-filters) + hard disqualifiers + gate evidence bar</ref>
+    <ref type="prd_section">docs/architecture/COMP_LEARNS_TARGET_CLOSEOUT.md v1.1 §5 — 2 hard minimums (parser-proven + gold-authorable) + 2 weights (subtype leverage + size ceiling) + 3 disqualifiers; §3.1 uniqueness rule for "≥3 promoted learnings" gate</ref>
   </references>
 
   <objective>
     Decision memo — not a build TO — selecting target 2 and scoping initial surface count + query budget.
 
-    **Selection criteria (per COMP_LEARNS_TARGET_CLOSEOUT.md §5, weights-not-filters, score each candidate 1-5):**
-    1. Parse cleanness — Python (LibCST, shipped) default; TypeScript / Go acceptable v0.1+ with coverage audit. Lua / Rust / Haskell / anything without a proven extractor is rejected.
-    2. Subtype leverage — v0.1 uses same subtype (`imports`) as target 1 to test cross-target generalization; v0.2+ may introduce a new subtype.
-    3. Size ceiling — ≤ 5000 LOC for v0.1; larger targets deferred to v0.3+ once the loop runs unattended.
-    4. Gold-authorable — plain-English ground-truth within a 2-hour CTO authoring budget per the `.016` precedent.
+    **Selection criteria (per COMP_LEARNS_TARGET_CLOSEOUT.md §5 v1.1 — 2 hard minimums + 2 weights):**
 
-    **Hard disqualifiers (per TARGET_CLOSEOUT §5, any one excludes the candidate):**
+    **Hard minimums (pass/fail; failing any one excludes the candidate):**
+    1. Parse cleanness — candidate's language has a parser ALREADY proven on at least one `comp/` codebase (Python/LibCST after `.012`; TypeScript/tree-sitter requires coverage-audit extension first). "We'll stand up a new parser" does NOT qualify — those candidates are excluded at the gate, not weight-scored.
+    4. Gold-authorable — CTO writes one paragraph in the memo explicitly judging the 2-hour authoring budget feasible per the `.016` httpx precedent. Candidates where that paragraph cannot be written (specialist domain knowledge genuinely required — cryptography, compilers, ML frameworks) are excluded at the gate.
+
+    **Weights (scored 1-5, higher is better; total is tiebreaker between qualifying candidates):**
+    2. Subtype leverage — for v0.1 (same subtype as target 1, `imports`): higher score for candidates whose import patterns genuinely differ from httpx (heavier conditional dispatch, registry-based plugins). For v0.2+ (new subtype): higher for candidates exercising the subtype naturally.
+    3. Size ceiling — smaller within the ≤5000 LOC range = higher score (shorter iter time, cleaner scorecard).
+
+    **Hard disqualifiers (per TARGET_CLOSEOUT §5, any one excludes the candidate — same bar as the two hard minimums above):**
     - Extensive metaprogramming (`exec`, `eval`, import-time codegen, runtime class synthesis).
     - Dependency on an LLM beyond `claude-sonnet-4-6`.
     - Opal-internal code.
@@ -42,9 +46,9 @@
 
     Output: decision memo at `docs/architecture/COMP_LEARNS_TARGET_2_SELECTION.md` with:
     1. Chosen target + rationale.
-    2. Per-candidate scoring table (1-5 on each of the four §5 criteria).
-    3. Explicit disqualifier check per candidate (pass/fail on each of the three hard disqualifiers).
-    4. Estimated surface count (from `comp-pipescript`-equivalent passes if CTO wants).
+    2. Gate evaluation table (per v1.1 §5) — every candidate evaluated against the 5 hard bars (2 hard minimums: parser-proven + gold-authorable; 3 disqualifiers: metaprogramming / non-sonnet LLM / opal-internal). Pass/fail per bar per candidate. Excluded candidates named with one-sentence explanation; NOT scored on weights.
+    3. Weight-scoring table for surviving (passes-all-gates) candidates only — 1-5 on each of the 2 weights (subtype leverage, size ceiling); total weight-score breaks ties.
+    4. Estimated surface count for the chosen target (e.g., "pydantic has ~6 primary surfaces: validators, model config, fields, types, serializers, errors").
     5. Estimated query budget (tighter than httpx's 24 if using SOP to delegate authoring).
     6. Repo pin sha identified.
     7. Projected Phase 1 completion timeline.
@@ -64,15 +68,14 @@
 
   <acceptance_criteria>
     1. Memo at path; ≤150 lines; explicit decision with rationale.
-    2. **Scoring table:** every candidate scored 1-5 on each of the four TARGET_CLOSEOUT §5 criteria; total score per candidate visible.
-    3. **Disqualifier check table:** every candidate evaluated against all three hard disqualifiers; pass/fail per disqualifier; any fail = candidate excluded with one-sentence explanation.
-    4. Surface count estimate for the chosen target (e.g., "pydantic has ~6 primary surfaces: validators, model config, fields, types, serializers, errors").
-    5. Query budget estimate; defensible against httpx's 24-question precedent.
-    6. Repo pin sha identified (or explicit "will pin at TO-authoring time").
-    7. Projected timeline with dependencies (needs PRD #2-analog authoring via SOP #008 ideally).
-    8. **Gate evidence cited:** memo opens with a one-sentence citation that target 1 has reached either PLATEAU_WITH_HONOR or PLATEAU_BY_EXHAUSTION-with-3-promoted-learnings per TARGET_CLOSEOUT §5. If neither holds, the TO should not have been picked up.
-    9. Session log — CTO's decision process reproducible; Rule 7 audit.
-    10. MCP COMPLETE to 2.1.0_SA_COO with commit hash.
+    2. **Gate table (per v1.1 §5):** every candidate evaluated against the five hard bars (2 hard minimums + 3 disqualifiers); pass/fail per bar; any fail = candidate excluded with one-sentence explanation. Then the surviving candidates scored 1-5 on the two weights (subtype leverage, size ceiling); total weight-score per qualifying candidate is the tiebreaker. Memo MUST present the gate evaluation BEFORE the weight scoring — excluded candidates don't get scored at all.
+    3. Surface count estimate for the chosen target (e.g., "pydantic has ~6 primary surfaces: validators, model config, fields, types, serializers, errors").
+    4. Query budget estimate; defensible against httpx's 24-question precedent.
+    5. Repo pin sha identified (or explicit "will pin at TO-authoring time").
+    6. Projected timeline with dependencies (needs PRD #2-analog authoring via SOP #008 ideally).
+    7. **Gate evidence cited:** memo opens with a one-sentence citation that target 1 has reached either PLATEAU_WITH_HONOR or PLATEAU_BY_EXHAUSTION-with-≥3-promoted-learnings per TARGET_CLOSEOUT §5 v1.1 (per §3.1, "distinct mechanisms" not "distinct entries"). If neither holds, the TO should not have been picked up.
+    8. Session log — CTO's decision process reproducible; Rule 7 audit.
+    9. MCP COMPLETE to 2.1.0_SA_COO with commit hash.
   </acceptance_criteria>
 
   <compiler_tools_mandate>

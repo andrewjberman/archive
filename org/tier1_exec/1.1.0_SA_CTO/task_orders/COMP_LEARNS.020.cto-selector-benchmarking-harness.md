@@ -2,7 +2,7 @@
   <metadata>
     <id>1.1.0_SA_CTO-2026-04-16-comp-learns-020-selector-benchmarking-harness</id>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>1.1.0_SA_CTO</issued_to><!-- Transferred 2026-04-21 from 1.0.0_SA_CTO per COMP_LEARNS_TARGET_CLOSEOUT.md §7.2 (dyad ownership split). No scope change — v4.2 PRD §6.5 already fully specifies this TO. -->
+    <issued_to>1.1.0_SA_CTO</issued_to><!-- Transferred 2026-04-21 from 1.0.0_SA_CTO per COMP_LEARNS_TARGET_CLOSEOUT.md v1.1 §7.2 (dyad ownership split). No scope change — v4.2 PRD §6.5 already fully specifies this TO. TARGET_CLOSEOUT v1.1 also does not touch selectors; this TO remains verbatim. -->
     <date>2026-04-16</date>
     <status>staged</status>
     <project_code>COMP_LEARNS</project_code>
