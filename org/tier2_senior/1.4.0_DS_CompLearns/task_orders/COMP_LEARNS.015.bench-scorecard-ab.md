@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>1.4.0_DS_CompLearns</issued_to>
     <date>2026-04-16</date>
-    <status>pending</status>
+    <status>complete</status><!-- Shipped 2026-04-21 by 1.4.0_DS_CompLearns. Commit 4cfbe8ab pushed. 138/138 tests pass. Wire-contract ACK from 1.1.0. Flag 1 (range [0,1.3]) resolved via CTO ACCEPT 20260421T171634Z (doc-only). Flag 2 (KeyError guard) already in code. Status flipped by 2.1.0_SA_COO via RAVC close. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — critical path; bench is the product surface. Fallback owner ~B after .013 closes if ~D capacity-blocked on CN-P1b.</priority>
   </metadata>
