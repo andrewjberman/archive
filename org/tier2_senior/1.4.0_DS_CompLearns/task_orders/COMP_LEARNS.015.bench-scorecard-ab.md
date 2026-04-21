@@ -293,6 +293,16 @@
     **Capacity flag:** if ~D is saturated on ADVI_ROLLUP (primary COO's lane), reassign to ~B after .013 closes per §16 item 6. COO~Z (owning this project as of 2026-04-20) re-asserts fallback authority — bench is critical path, do not stall.
 
     **v3 sweep marker (2026-04-20 COO~Z):** this TO was swept from v2→v3 per CTO checklist 2026-04-16 13:59Z, preserved in COO~Z handoff log `org/tier1_exec/2.0.0_SA_COO/logs/2026-04-16/COO_B_comp_learns_v3_sweep_handoff.md`. Deltas applied: ratchet_critical/exploratory scorecard split (§6.1, §6.2), cached-answer regime (§6.4.1) with `CacheMissDuringPrimaryMetric` + warm-up phase separation, JudgeBackend temperature-0 enforcement via `ratchet_critical_call` wrapper, ab_answer_key validator rejecting open-ended in ratchet pool (§6.4), full 9-tuple cache key, R14 risk added.
+
+    **Cross-lane co-review (added 2026-04-21 by 2.1.0_SA_COO per Andrew directive — mandatory):** `1.1.0_DS_CompLearns` acts as schema-consistency reviewer for this TO. They authored the Scorecard / DownstreamAB / RatchetCritical / MutationStability dataclasses in `.011` (`257d19df`) and the Parser / ParsedFile interfaces in `.012` (`39d2e05b`), so they carry authoritative context on the field-semantics that `ab.py` + `primary.py` must populate. Touchpoints:
+
+    1. **Before write (Phase 1 supplement):** `1.4.0_DS_CompLearns` MCP `1.1.0_DS_CompLearns` with a one-page wire-contract interpretation — specifically: what `ab.py` intends to write into `scorecard.ratchet_critical.downstream_ab` (per-selector structure + best_selector + best_lift) AND what `primary.py` intends to read from `ratchet_critical` (Scorecard field access patterns + null-handling). 1.1.0 acknowledges or flags semantic drift from `.011` intent. Silence for 30 minutes = OK to proceed (Rule 7 default).
+
+    2. **Before commit (Phase 2 supplement):** `1.1.0_DS_CompLearns` reviews the Scorecard-writer patterns across `ab.py` + `primary.py`. Any schema-drift findings: if the drift is `.015`'s to fix, `1.4.0_DS_CompLearns` addresses before commit. If the drift reveals ambiguity in `.011`'s docstrings/types, `1.1.0_DS_CompLearns` ships a small inline follow-up commit to `.011` (v2.0 "small inline by default") — not a new TO.
+
+    3. **Out-of-band retroactive review:** `1.1.0_DS_CompLearns` separately reviews `.021` @ `1653760a` on the `MutationStabilityReport` field contract vs `.011`'s Scorecard `.ratchet_critical.mutation_stability` consumption pattern. Runs as their idle-window task AFTER the TAG_VOCAB inline fix + BEFORE `.015` Phase 1 consult. Any drift flagged to `2.1.0_SA_COO` for follow-up routing.
+
+    Rationale: avoids schema-contract drift at the `.011`↔`.015`↔`.021` seam. Lightweight (MCP consult, not a formal review artifact). Consistent with v2.0 "delay formalization until second recurrence" — this is an in-flight consistency check, not a new review ritual.
   </cross_domain_coordination>
 
   <next>On commit + MCP COMPLETE to 2.0.0_SA_COO~Z: .017 (~C ratchet) is closer to unblocking. Still waits on .016 + .020 + .021.</next>
