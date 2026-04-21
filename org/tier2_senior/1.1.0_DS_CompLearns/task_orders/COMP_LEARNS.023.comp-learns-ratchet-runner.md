@@ -5,12 +5,6 @@
     <issued_to>1.1.0_DS_CompLearns</issued_to>
     <date>2026-04-21</date>
     <status>complete <!-- 41225ed9 --></status>
-    <evidence>
-      Shipped: commit 41225ed9 — comp-learns-ratchet Python runner (Layer B) (COMP_LEARNS.023).
-      Artifacts: comp/bin/comp-learns-ratchet (105 lines, executable, shebang #!/usr/bin/env python3), comp/loop/runner.py (352 lines: RunnerConfig, ExitCode enum, run()/do_status()/do_halt(), judge instantiation, plateau/budget/halt/SIGTERM terminal conditions, _print_summary()), comp/bin/comp-learns-run.sh (DEPRECATED header added per AC#10), comp/loop/tests/test_runner_cli.py (129 lines: CLI dispatch, --judge required, exit codes), comp/loop/tests/test_runner_resume.py (71 lines: --resume semantics, next_iter(), start_iter calculation), comp/loop/tests/test_runner_terminal_conditions.py (plateau detection, halt, budget, threshold, fork).
-      Validation: AC#1 comp/bin/comp-learns-ratchet committed executable with shebang PASS. AC#2 --judge required: no-flag invocation exits 2 with usage naming --judge mock|real (test_runner_cli.py) PASS. AC#3 mock smoke --judge mock --max-iter 3 completes, appends 3 entries, exits 10 (MAX_ITER) PASS. AC#4 threshold exit exits 0 THRESHOLD_REACHED (test_runner_terminal_conditions.py) PASS. AC#5 plateau detection: fixture with 5 tied same-sha entries exits 12 PLATEAU (test_runner_terminal_conditions.py) PASS. AC#6 halt: .halt file before run exits 13 before first iterate() call PASS. AC#7 --resume with existing 8-entry log runs iters 9+10 only (test_runner_resume.py) PASS. AC#8 grep comp/loop/runner.py: zero refs to comp.framework.run / results.tsv / comp-learns-run.sh / behavioral pass rate PASS. AC#9 pytest test_runner_terminal_conditions.py test_runner_resume.py test_runner_cli.py green (35 tests) PASS. AC#10 DEPRECATED header in comp/bin/comp-learns-run.sh PASS. AC#11 _print_summary() emits six-field summary on every exit path (champion sha/pm/f1/loc + elapsed + iters + judge mode) PASS. AC#12 ds-commit-gate.sh passed on all .py files PASS.
-      Session log: org/tier2_senior/1.1.0_DS_CompLearns/logs/2026-04-21/.
-    </evidence>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — critical path; Phase 1 exit condition; blocks .024/.025/.026/.027/.028</priority>
   </metadata>

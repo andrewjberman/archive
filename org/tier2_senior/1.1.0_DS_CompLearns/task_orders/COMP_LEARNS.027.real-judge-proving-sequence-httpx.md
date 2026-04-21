@@ -5,15 +5,7 @@
     <issued_to>1.1.0_DS_CompLearns (operator) — 2.1.0_SA_COO drives</issued_to>
     <date>2026-04-21</date>
     <status>complete</status>
-    <!-- ship commits: af89f12e (R1-R5 artifacts) + 3fb8b694 (Option A+ reset) + 1e5d67b2 (Option A+ complete) -->
-    <evidence>
-      Shipped: commit 1e5d67b2 (Option A+ proving sequence complete) + 3fb8b694 (VOID 4 mock-baseline entries, wipe champion, re-run with empty-champion baseline) + af89f12e (R1-R5 artifacts from initial proving sequence).
-      Artifacts: comp/targets/httpx/experiment_log.jsonl (4 new entries A1-A4 with schema_version=2, judge_mode="real", benchmark_honest=true), comp/targets/httpx/champion.json (sha=3fb8b69, pm=0.0664 real-judge baseline), comp/targets/httpx/scorecards/3fb8b69_909ea79f.json, 5db71c6_909ea79f.json, 08fa88b_909ea79f.json, 92f5e4c_909ea79f.json, comp/targets/httpx/PROVING_SEQUENCE_R1_R5.md (operator log: timestamps, commands, exit codes, compare_key, verdicts, selector attribution analysis), org/tier2_senior/1.1.0_DS_CompLearns/deliverables/COMP_LEARNS.027_proving_sequence.md.
-      Validation: AC#1 four experiment-log entries with schema_version=2, judge_mode="real", benchmark_honest=true PASS. AC#2 run A1 KEEP (sha=3fb8b69, pm=0.0664, champion_pm_before=null, compare_key="primary_metric", cache_misses=57) — empty-champion baseline confirmed PASS. AC#3 run A2 TIED (sha=5db71c6, compare_key="compiler_loc", cache_misses=0) — determinism + all-hits on second run PASS. AC#4 run A3 DISCARD (sha=08fa88b, pm=0.0 vs 0.0664, compare_key="primary_metric") — regression detection confirmed PASS. AC#5 run A4 TIED (sha=92f5e4c, compare_key="compiler_loc", cache_misses=0) — reverted compiler reproduced TIED; champion stable PASS. PROVING_SEQUENCE_R1_R5.md answers all five Run #5 questions: tied_at_best accurate in all four runs, random_unique_win=false in all runs, runs A2+A4 identical selector A/B (content-addressed cache verified), champion.json consistent with last KEEP.
-      Note: AC#2 warm_up_entries_written partial (cache pre-warmed by VOID'd runs); infrastructure correct, not a defect per commit message.
-      Model: claude-sonnet-4-6 (judge_model_id confirmed in all entries). All four verdict paths proven: KEEP, TIED (compiler_loc), DISCARD, TIED.
-      Session log: org/tier2_senior/1.1.0_DS_CompLearns/deliverables/COMP_LEARNS.027_proving_sequence.md + comp/targets/httpx/PROVING_SEQUENCE_R1_R5.md.
-    </evidence>
+    <!-- ship commit: af89f12e -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Phase 3 exit; only TO that produces benchmark-honest evidence for v1</priority>
   </metadata>

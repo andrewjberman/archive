@@ -5,14 +5,6 @@
     <issued_to>1.2.0_DS_CompLearns</issued_to>
     <date>2026-04-21</date>
     <status>complete</status><!-- commit 506a9466 — 2026-04-21 -->
-    <evidence>
-      Shipped: commit 506a9466 — judge truth boundary + schema v2 (COMP_LEARNS.024).
-      Artifacts: comp/bench/scorecard.py (judge_mode + benchmark_honest fields, serialized, excluded from __eq__), comp/loop/experiment_log.py (schema_version/judge_mode/benchmark_honest on ExperimentEntry; load_entries() v1-normalizer; derive_benchmark_honest(); strict-mode check in append()), comp/loop/ratchet.py (judge_mode + benchmark_honest kwargs on iterate(); entry_schema_version logic), comp/bench/judges/anthropic.py (credentials_resolved field set from ANTHROPIC_API_KEY at __post_init__).
-      Tests: comp/bench/tests/test_scorecard_judge_mode.py (9 tests: round-trip mock/real, absent field defaults, __eq__ exclusion, credentials_resolved via monkeypatch), comp/loop/tests/test_experiment_log_schema_v2.py (13 tests: round-trip, v1 normalization, strict-mode failure x2, derive_benchmark_honest x5, mixed v1+v2), comp/bench/tests/test_scorecard_roundtrip.py (3 new assertions: round-trip preserves judge_mode/benchmark_honest, absent fields yield defaults). 30 new tests; 125 total passing.
-      Validation: AC#1 scorecard round-trip PASS. AC#2 experiment-log round-trip schema_version=2 PASS. AC#3 v1 entry tolerance (normalized schema_version=1, judge_mode="", benchmark_honest=False) PASS. AC#4 strict-mode failure raises ValueError mentioning "judge_mode" PASS. AC#5 mock run emits benchmark_honest=false via direct iterate() with judge_mode="mock" PASS. AC#6 real run guard test exists with @pytest.mark.skipif (no credentials in CI — by design). AC#7 credentials_resolved set from env var PASS. AC#8 __eq__ unchanged — scorecards differing only in judge_mode are == PASS. AC#9 only load_entries() branches on schema_version (grep confirmed). AC#10 125/125 existing tests green. AC#11 pre-commit gate clean on all .py edits.
-      Runner plumbing: comp/loop/runner.py .023 call to iterate() updated to pass judge_mode=cfg.judge_mode + benchmark_honest=derive_benchmark_honest(cfg.judge_mode, judge).
-      Session log: org/tier2_senior/1.2.0_DS_CompLearns/logs/2026-04-21/comp_learns_024_judge_truth_boundary_shipped.md.
-    </evidence>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Phase 2 parallel with .025/.026; required for .027</priority>
   </metadata>

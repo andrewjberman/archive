@@ -5,13 +5,6 @@
     <issued_to>1.3.0_DS_CompLearns</issued_to>
     <date>2026-04-21</date>
     <status>complete <!-- e7a12a12 (cache.py/tests/log); core scorecard/ratchet/ab changes co-landed in 53386ec7 by parallel .026 agent --></status>
-    <evidence>
-      Shipped: commit e7a12a12 (primary: cache.py, tests, session log) + co-landed scorecard/ratchet/ab changes in 53386ec7 by 1.4.0_DS parallel agent.
-      Artifacts: comp/bench/scorecard.py (CacheProvenance dataclass with compiler_sha/target_version/judge_model_id/warm_up_entries_written/hits_by_selector/misses_by_selector; scorecard_to_dict/from_dict round-trip; loader tolerates null), comp/bench/cache.py (per-selector hit/miss counters; hits_by_selector + misses_by_selector properties; selector_name threaded through get() + require_hit()), comp/loop/ratchet.py (compare_key_for() module-level fn making every KEEP/DISCARD/TIED/FORKED verdict reconstructable from experiment_log extra alone; _compiler_loc() refined to non-empty non-comment lines only; 9 new extra fields: compare_key, candidate/champion_primary_metric/structural_f1/compiler_loc before/after, cache_hits, cache_misses), comp/bench/__init__.py (exports), plus tests.
-      Tests: 22 new tests; 198 total passing. Test files cover compare_key_for() four cases (primary_metric KEEP, structural_f1 KEEP, compiler_loc KEEP, FORKED), snapshot values, no-champion case, refined LoC (non-empty non-comment lines), cache_provenance round-trip, non-breaking loader for pre-.025 scorecards.
-      Validation: AC compare_key correctness — four cases (primary_metric KEEP, structural_f1 KEEP, compiler_loc KEEP, SelectorGame FORKED) PASS. AC snapshot values match champion.json["primary_metric"] at entry time PASS. AC no-champion case produces all champion_*_before=null PASS. AC refined LoC counts non-empty non-comment lines only PASS. AC loc_delta uses refined count PASS. AC cache_provenance populated after mock run (hits_by_selector + misses_by_selector) PASS. AC cache-hits mirror experiment_log entry extra.cache_hits == sum(cache_provenance.hits_by_selector.values()) PASS. AC primary-metric phase zero misses (cache-hit-only re-run path, misses==0) PASS. AC non-breaking loader: pre-.025 scorecards missing cache_provenance load without error PASS. AC existing tests 198/198 green PASS.
-      Session log: org/tier2_senior/1.3.0_DS_CompLearns/logs/2026-04-21/.
-    </evidence>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Phase 2 parallel with .024/.026; required for .027</priority>
   </metadata>
