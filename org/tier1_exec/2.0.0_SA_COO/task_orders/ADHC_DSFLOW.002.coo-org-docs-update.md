@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>2.0.0_SA_COO</issued_to>
     <date>2026-04-21</date>
-    <status>pending</status>
+    <status>complete</status><!-- COMPLETE 2026-04-21 by 2.0.0_SA_COO. Commit (forthcoming) touches: CLAUDE.md (Rules 13 + 14 added, old Rules 13+14 converted to unnumbered bullets to avoid collision), org/XXX.md (DS Abilities row updated), DS README.md (Must + Cannot + deploy-cycle section + Step 0 gate), DS prompt.md (DS self-edited during session to add gate rule + S3-direct language — no conflict). Memory at `feedback_ds_commits_ae_deploys.md` updated by DS to reflect Andrew 2026-04-21 supersession. §11 Q4 DS IAM probe DEFERRED — DS is actively doing `aws s3 cp` to opal-bd-gold-code/gold/* successfully (per DSFLOW.001 evidence + prior gold-script deploys), so implicit `s3:PutObject` coverage confirmed. Formal probe can fire opportunistically. Folded in Andrew mid-session directives per DS MCP 20260421T155952Z: universal py_compile (Rule 14) + DS-owned S3 upload even when DT online (Rule 13). Old Rule 13 (no emojis) moved to unnumbered bullet under Code Quality; old Rule 14 (agent autonomy) moved to unnumbered bullet under Agent Autonomy — no semantic change, just number freeing. -->
     <project_code>ADHC_DSFLOW</project_code>
     <priority>P1 (surfaces enforcement of §6.2 DS deploy ownership in DS startup protocol — paired with .001 tooling to give enforcement teeth)</priority>
     <sla>1h from .001 commit (ordering: .001 ships first so CLAUDE.md Rule 13 can reference a real tool, then .002 lands docs update)</sla>
