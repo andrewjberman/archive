@@ -126,9 +126,9 @@
         <if_mismatch>If comp-iam returns a real result for any Lambda pre-reclaim, the compiler graph has been updated out-of-band — audit order-of-operations with COO.</if_mismatch>
       </step>
       <step>
-        <run>For recon quartet (trade-recon-api, trade-recon-auth, trade-recon-authorizer, trade-recon-processor): check live usage — `aws logs filter-log-events --log-group-name /aws/lambda/&lt;fn&gt; --start-time $(date -d '7 days ago' +%s)000 --max-items 5`</run>
-        <expect>§8 Q2 answer evidence. If log events exist in the last 7 days, recon is live → option-a reclaim. If zero events, recon is dead → option-b formal exception candidate.</expect>
-        <if_mismatch>Ambiguous (sporadic usage): surface to COO with log frequency + last-invocation timestamp per recon Lambda. Default to option-a on any live-in-last-30-days signal; option-b only on &ge;30 days zero events AND Andrew §8 Q2 confirms dead.</if_mismatch>
+        <run>**DORMANCY MATRIX — all 11 trade Lambdas** (widened per TRSB_TFIMPT.W1 dormancy finding 2026-04-21, CTO concur 20260421T130116Z). Per function: `aws cloudwatch get-metric-statistics --namespace AWS/Lambda --metric-name Invocations --dimensions Name=FunctionName,Value=&lt;fn&gt; --start-time $(date -u -d '90 days ago' +%FT%T) --end-time $(date -u +%FT%T) --period 86400 --statistics Sum` + repeat with 30-day window + `aws logs filter-log-events --log-group-name /aws/lambda/&lt;fn&gt; --start-time $(date -d '30 days ago' +%s)000 --max-items 5` for invocation-content spot-check.</run>
+        <expect>§8 Q2 answer evidence widened from recon quartet to full 11. W1 already established trade-submission-handler has 0 invocations/30d — expect ≥1 more Lambda to show same (reality-matches-priors check). Surface full 11×2-window dormancy matrix: fn + 30d Sum + 90d Sum + last-invocation-ts + option-a-or-b recommendation per Lambda.</expect>
+        <if_mismatch>If 5+/11 are dormant, flag to COO + CTO as PRD-framing question — option-b scaling from 4 to 8+ Lambdas is qualitatively different rollout (candidate for consolidated "TRSB deprecation assessment" TO as PRD amendment per CTO 20260421T130116Z). Do NOT self-amend PRD; surface + wait.</if_mismatch>
       </step>
       <step>
         <run>For test fixture (§8 Q4): `aws ses list-configuration-sets` + `aws ses list-identities` + grep repo for `trades@opalinvest.dev` sender</run>
@@ -203,8 +203,8 @@
   </dependencies>
 
   <open_questions_gating_pending>
-    <q id="§8-Q2">Recon quartet (trade-recon-api, trade-recon-auth, trade-recon-authorizer, trade-recon-processor) — still in use? Phase 1 7-day CloudWatch probe + Andrew confirmation together decide option-a vs option-b per Lambda. If dead, 4 option-b exception rows; if live, 4 option-a reclamations (including security review on trade-recon-authorizer).</q>
-    <q id="§8-Q4">Smoke-test fixture for single synthetic trade — does one exist, or does W2 need to build one first? Blocks §acceptance_criteria L5.</q>
+    <q id="§8-Q2-widened">**Widened 2026-04-21 per TRSB_TFIMPT.W1 dormancy finding (CTO 20260421T130116Z).** Originally scoped to recon quartet only (trade-recon-api/auth/authorizer/processor). W1 Phase 1 probe found trade-submission-handler is ALSO dormant (0 invocations/30d) — widens the question to "which of ALL 11 trade Lambdas have any invocations in 30/90d windows". Evidence-first: Phase 1 CloudWatch probe surfaces full 11×2-window dormancy matrix; Andrew's Q2 answer THEN decides reclamation (option-a) vs formal-exception (option-b) per Lambda. If 5+/11 dormant, PRD-framing revisit (consolidated "TRSB deprecation assessment" candidate).</q>
+    <q id="§8-Q4">Smoke-test fixture for single synthetic trade — does one exist, or does W2 need to build one first? Blocks §acceptance_criteria L5. Note: widened Q2 may make this moot for option-b Lambdas; only option-a reclaim functions need fixture-based smoke.</q>
   </open_questions_gating_pending>
 
   <next>On §8 Q2+Q4 answered AND W1 complete: COO flips this TO staged→pending + dispatches GO MCP. On AE commit + tag + push: MCP COMPLETE to COO with per-Lambda decision table + Phase 1 probes + smoke evidence + authorizer triplet DT 0.3 sign-off. Then W3 unblocked (still gated on DT 0.4 CloudFront MCP).</next>

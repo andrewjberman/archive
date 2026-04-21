@@ -92,6 +92,24 @@
   </acceptance_criteria>
 
   <compiler_tools_mandate>
+    <phase id="0" when="static evidence before live probe (added 2026-04-21 per CTO 20260421T130116Z post-W1-dormancy-finding)">
+      <step>
+        <run>comp-routes behaviors | grep -i trade (or similar filter) + grep -rn "trades" infra/aws/terraform/public-api-cdn/*.tf + cat comp-graph cache for any trade-related routes</run>
+        <expect>**Baseline established 2026-04-21 COO probe:** `/api/general/trades/*` CloudFront behavior exists → `APIGateway-portal` origin [AUTH] (auth-gated). Confirms route is CF-defined + routes to portal API GW. Question: what the portal API GW does with `/trades/*` sub-paths given W1 found trade-submission-handler dormant (0 invocations/30d). Phase 0 documents the CF-level evidence BEFORE Phase 1's live AWS probe.</expect>
+        <if_mismatch>If the CF behavior DOESN'T exist in TF or returns static/mock origin (not API GW), re-scope W3 immediately — may not need API GW import at all. Surface to COO + CTO.</if_mismatch>
+      </step>
+      <step>
+        <run>comp-routes trace trade-submission-handler (baseline before W2 reclamation closes graph gap)</run>
+        <expect>"No match for: trade-submission-handler" — W2 gap signal. Expected until W2 closes.</expect>
+        <if_mismatch>If a result returns, W2 shipped earlier than expected; re-confirm W2 status with COO.</if_mismatch>
+      </step>
+      <step>
+        <run>cross-reference dormancy-matrix from W2 Phase 1 against the API GW integrations Phase 1 below will surface — mark which Lambda integrations map to dormant vs live functions</run>
+        <expect>Evidence bundle: CF route evidence + dormancy matrix + (soon) API GW integrations. Surfaces whether API GW endpoints point at dormant Lambdas (option-b-exception territory) or live Lambdas (option-a reclamation territory).</expect>
+        <if_mismatch>If the API GW has endpoints mapped to ≥5 dormant Lambdas, surface as PRD-framing question (same 5+/11 threshold as W2 §8 Q2 widening). W3 import may need to stay but reclamation subset shrinks.</if_mismatch>
+      </step>
+    </phase>
+
     <phase id="1" when="before write">
       <step>
         <run>aws apigateway get-rest-apis + aws apigatewayv2 get-apis (filtered for trade)</run>
