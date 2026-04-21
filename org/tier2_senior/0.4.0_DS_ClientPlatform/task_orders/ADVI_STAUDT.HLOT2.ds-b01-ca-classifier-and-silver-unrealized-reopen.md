@@ -3,7 +3,7 @@
   <title>B_01 holdings_lots dual-patch: CA-Merger classifier (Patch A) + silver/unrealized-authoritative 3-tier re-open (Patch B)</title>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- originally ~A sub-lane; base serial post 2026-04-21 sub-lane-cleanup -->
-  <status>pending</status>
+  <status>complete</status><!-- CLOSE-PARTIAL 2026-04-21 per CTO decision 20260421T184810Z + Andrew "momentum over completeness". Patch A accepted at 73% recovery (observed $57M / expected $78.6M DIVZ target). Root-cause hypothesis per DS (CTO CC 20260421T184948Z): (A) silver/transactions pair-asymmetry DOMINANT + (C) HLOT1 $78.6M was theoretical ceiling + (B) classifier threshold minor + (D) code bug unlikely. $21M gap → SEPARATE sibling investigation TO (COO authoring, low-priority, non-blocking) — investigation-only, not code-ship. Patch B 100% miss → FIX-FORWARD via ADVI_STAUDT.HLOT2b (authored e3995fc0 by COO). Evidence chain: dfaeddc2 code (parent 5f5d0319) + B_01 holdings_lots 2026-04-17 partition post SSM 51ce2df1 B+C partial run (18:01Z) showing 4,046 paired +MV rows reclassified CA_SELL->CA_BUY for DIVZ recovery. Firm total_aua $1,646.4M invariant. DS MCP trail: Patch A close-partial 20260421T184xxxxZ. CTO ACK: 20260421T184810Z + 184927Z. -->
   <priority>P1</priority>
   <sla>3h end-to-end from GO (TO dispatch → ~A commit 30 min → DT S3 upload → AE qa-runner --from B --chain → comparison pack → PROD deploy). Held since 2026-04-20 21:38Z Andrew directive "I want a solution immediately."</sla>
 

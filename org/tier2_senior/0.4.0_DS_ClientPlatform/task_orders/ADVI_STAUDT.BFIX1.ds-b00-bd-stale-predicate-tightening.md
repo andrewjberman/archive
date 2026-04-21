@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- originally ~A sub-lane; base serial post 2026-04-21 sub-lane-cleanup -->
     <date>2026-04-20</date>
-    <status>pending</status><!-- DISPATCHED 20260420T17:25Z by 2.0.0_SA_COO. Andrew approval 2026-04-20 in chat ("Agreed on all counts go ahead") on engine refinement plan. Code shipped 081223b5 + fix-forward 1a54d46a; AE uploaded. Awaiting cf5bd5ad chain-full validation + comparison-pack attribution evidence for RAVC4 close. Status normalized 2026-04-21 (dispatched -> pending for operator schema). -->
+    <status>complete</status><!-- CLOSE 2026-04-21 per CTO Phase 6a RAVC4 acceptance (20260421T184927Z) + HLOT2 Patch A close-partial decision (20260421T184810Z). Code shipped 081223b5 + fix-forward 1a54d46a (defaultdict import miss fix); AE uploaded; SSM 51ce2df1 B+C partial run validated B_00 runs clean without NameError. BFIX1 attribution evidence (bd_stale overreach cohort ~111 accts) rides the HLOT2 Patch A evidence bundle per CTO prior guidance — account-level attribution disjoint from HLOT2 (acct,cusip)-lot-level. No separate RAVC4 bundle needed. DISPATCHED 20260420T17:25Z. Status normalized 2026-04-21. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P1 — engine refinement, NOT P0 (qa-runner watchdog incident in flight, no immediate deploy pressure). Closes 80% of the firm AUA accuracy gap ($38.6M of $48.3M). Bundled with BFIX2 (non-Schwab pass-through) in same ~A wave; same script B_00.canonical_holdings.py.</priority>
     <lane>~A — bundled with BFIX2. ~A authored the engine_accuracy diagnostic and owns the B-layer surface for this wave.</lane>

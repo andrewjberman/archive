@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- originally ~A sub-lane; base serial post 2026-04-21 sub-lane-cleanup -->
     <date>2026-04-20</date>
-    <status>pending</status><!-- DISPATCHED 20260420T17:25Z by 2.0.0_SA_COO. Andrew approval 2026-04-20 in chat ("Agreed on all counts go ahead") on engine refinement plan. Code shipped 081223b5 + fix-forward 1a54d46a; AE uploaded. Awaiting cf5bd5ad chain-full validation + comparison-pack attribution evidence for RAVC4 close. Status normalized 2026-04-21 (dispatched -> pending for operator schema). -->
+    <status>complete</status><!-- CLOSE 2026-04-21 per CTO Phase 6a RAVC4 acceptance (20260421T184927Z) + HLOT2 Patch A close-partial decision (20260421T184810Z). Code shipped 081223b5; AE uploaded; SSM 51ce2df1 B+C partial run validated B_00 non-Schwab passthrough path. BFIX2 cohort (~54 accts newly-opened) attribution rides HLOT2 Patch A evidence bundle per CTO prior guidance — account-level, disjoint from HLOT2 lot-level. Per CTO prior note "BFIX2 re-inject cohort size probe (expect shrinkage — HLOT2 absorbs some BFIX2 scope)" is observable-in-practice with HLOT2 Patch A at 73%; exact cohort shrinkage deferred to DS's sibling investigation TO ($21M gap analysis). No separate RAVC4 bundle needed. DISPATCHED 20260420T17:25Z. Status normalized 2026-04-21. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P1 — engine refinement, bundled with BFIX1 in same ~A wave (same script B_00.canonical_holdings.py). Closes 38% of the firm AUA accuracy gap ($18.5M of $48.3M).</priority>
     <lane>~A — bundled with BFIX1.</lane>
