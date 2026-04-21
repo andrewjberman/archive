@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>1.1.0_DS_CompLearns</issued_to>
     <date>2026-04-15</date>
-    <status>in_progress</status><!-- 1.1.0_DS_CompLearns 2026-04-21 -->
+    <status>complete</status><!-- 1.1.0_DS_CompLearns 2026-04-21. commit 2d7060b6. 5 tests pass. 4 templates + SOP + validate_queries_file shipped. -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — transferability unlock</priority>
   </metadata>
