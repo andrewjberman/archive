@@ -6,7 +6,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.2.2_RD_Attribution</issued_to>
     <date>2026-04-07</date>
-    <status>staged</status>
+    <status>complete</status><!-- CANCELLED 2026-04-21 — surface not under active investment; see org/tier1_exec/1.0.0_SA_CTO/logs/2026-04-21/session36_five_item_decisions.md §4. ADHC_DESIGN closed at 28/32 effective; Attribution + Valuation sub-pages deferred per Andrew directive (no product driver). 0.2.2_RD_Attribution agent not spawned; no code shipped. -->
     <project>ADHC_DESIGN</project>
   </metadata>
 
