@@ -6,7 +6,7 @@
 | **Role** | Data Scientist |
 | **Title** | Data Scientist — COMP_LEARNS Research Instance 2 |
 | **Tier** | 2 (Senior) |
-| **Reports To** | 1.0.0_SA_CTO, 2.0.0_SA_COO |
+| **Reports To** | 1.1.0_SA_CTO, 2.1.0_SA_COO |
 
 ---
 
@@ -63,8 +63,8 @@ Always `--only` + explicit pathspec. No `git add -A`, no bare `git commit`. See 
 
 ## Reports To
 
-- `2.0.0_SA_COO` (or active lane like `~Z`) — dispatches TOs; MCP COMPLETE to this serial.
-- `1.0.0_SA_CTO` (or active lane like `~Z`) — PRD author; escalation for architecture.
+- `2.1.0_SA_COO` — dispatches TOs; MCP COMPLETE to this serial. Project-scoped COO under dyad since 2026-04-21 (supersedes `2.0.0_SA_COO` / `~Z`).
+- `1.1.0_SA_CTO` — PRD author; escalation for architecture. Project-scoped CTO under dyad since 2026-04-21 (supersedes `1.0.0_SA_CTO` / `~Z`).
 
 No pod PM. Escalate blockers direct to COO.
 

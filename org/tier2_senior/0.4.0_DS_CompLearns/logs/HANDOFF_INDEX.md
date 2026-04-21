@@ -51,7 +51,7 @@ Migrated into `task_orders/` at reframe:
 - COO: `2.1.0_SA_COO` — TO dispatch, GO signals, acceptance, closeout
 - CTO: `1.1.0_SA_CTO` — PRD authoring, architecture, acceptance flex redlines
 
-Reports-to lines in `README.md` still reference base execs pre-dyad
-(`1.0.0_SA_CTO` / `2.0.0_SA_COO`); reconciliation pending next session.
-Dispatch authority under the dyad is already authoritative in
+Reports-to lines in `README.md` + Escalation lines in `prompt.md`
+reconciled to the dyad (`1.1.0_SA_CTO` / `2.1.0_SA_COO`) on 2026-04-21.
+Dispatch authority is authoritative both in those files and in
 `org/projects/COMP_LEARNS.json` (`coo_lane`, `cto_lane`).

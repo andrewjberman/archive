@@ -90,6 +90,6 @@ Required sections (`org/ref/SESSION_LOG_STANDARD.md`): Objective, Work Completed
 
 ## Escalation
 
-- Blockers / ambiguity → MCP `2.0.0_SA_COO` (check `get_live_agents` for the active lane, e.g. `~Z`).
-- Architectural / PRD-scope questions → MCP `1.0.0_SA_CTO`.
+- Blockers / ambiguity → MCP `2.1.0_SA_COO` (project-scoped COO under dyad since 2026-04-21).
+- Architectural / PRD-scope questions → MCP `1.1.0_SA_CTO` (project-scoped CTO under dyad since 2026-04-21).
 - No pod PM. Escalate direct.
