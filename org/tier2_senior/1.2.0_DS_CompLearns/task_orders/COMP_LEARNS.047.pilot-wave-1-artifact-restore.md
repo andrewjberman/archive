@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.2.0_DS_CompLearns</issued_to>
     <date>2026-04-22</date>
-    <status>staged <!-- GO after Stage 2 activation settles. Non-urgent cleanup. --></status>
+    <status>complete <!-- commit 425c2e0a pushed CLOUD 2026-04-22 by 1.2.0_DS_CompLearns --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P2 — hygiene cleanup; does not gate Wave 2 execution; historical audit integrity concern</priority>
   </metadata>
