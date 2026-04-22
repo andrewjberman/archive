@@ -5,7 +5,7 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <co_adjudicator>1.0.0_SA_CTO (Patch A 73% partial threshold — separate adjudication)</co_adjudicator>
     <date>2026-04-21</date>
-    <status>pending</status><!-- DISPATCHED on authoring. DS has fix drafted locally + gate-clean per MCP 20260421T183641Z. No staged→pending flip cycle needed — direct-dispatch fix-forward. -->
+    <status>complete</status><!-- Closed 2026-04-22 by 0.4.0_DS_ClientPlatform~B. Commit 74dbad2b (2026-04-21T14:51Z). S3 MATCH confirmed. Chain 2026-04-22 16:27-17:25Z: HLOT2 AUTHORITATIVE RE-OPEN PASS — 79,704/85,156 rows ticker→cusip enriched; 22,148 synth lots / 3,269 accts / MV=$220,793,554; tier1_unrl=21,426, tier2_canon=722; silent_close=7,631, overlap_topup=14,517. Patch A: 4,046 CA_SELL→CA_BUY reclassifications. SSM 87227091 (2026-04-21 --chain full): Success (exit 0). CTO RAVC3 (20260422T202650Z): Patch A 73% PASS; HLOT2b CLOSED on --from B_01 chain; HLOT2 parent holds for nightly 23:00Z. -->
     <project_code>ADVI_STAUDT</project_code>
     <priority>P1 — fix-forward on HLOT2 Patch B 100% miss. B_01 bails when canonical/holdings lacks `cusip`; per-day reopen (both Tier 1 + Tier 2) skipped. Ticker-keyed `bd_assets_dim` merge closes the gap. Expected Tier 1 recovery: ~$102.7M split silent/overlap across IEFA+SPYM+IDVZ+IEMG+SPHY.</priority>
     <sla>~2h end-to-end: fix commit → S3 upload → qa-runner re-dispatch `--chain full` (with D-cascade this time) → Patch B attribution re-validation</sla>
