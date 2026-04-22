@@ -4,7 +4,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-22</date>
-    <status>active</status>
+    <status>complete</status>
+    <completed>2026-04-22</completed>
+    <commit>bb823bf8</commit>
     <project_code>ADVI_STAUDT</project_code>
     <urgency>URGENT — Andrew watching. Target: root cause in 1-2 hours.</urgency>
     <supersedes>AUAGAP.002 + AUAGAP.003 (hypothesis-driven TOs withdrawn per Andrew/CTO directive)</supersedes>
