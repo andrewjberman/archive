@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL (step 1) + 0.4.0_DS_ClientPlatform (steps 2-5)</issued_to>
     <date>2026-04-22</date>
-    <status>active</status>
+    <status>complete</status><!-- Closed 2026-04-22 — AE re-uploaded 217 partitions / 570 cross-bucket SSE=AES256 OK=570/0 ANON=0 confirmed; DS piecemeal cascade B_00 d2b2a10e + B_03 4376bae2 + C_00 8673816a (AUA 2025-11-11 = $1,389,916,193 restored) + C_02 f559d279 + C_03 96374fa8 all SUCCESS; AE 0.6 dispatched Option A full B→C→D windowed cascade on patched B_00 e9368c67 at 19:38Z. Status drift flip per COO reconciliation. -->
     <project_code>ADVI_STAUDT</project_code>
     <urgency>URGENT — portal chart blocked. Andrew watching. 1.0.0_SA_CTO fix plan accepted (20260422T123619Z).</urgency>
     <cto_directive>1.0.0_SA_CTO reconciliation: DS~D ANON_* root cause + DS base BFIX1 amplifier — both confirmed. TO1 = immediate unblock.</cto_directive>

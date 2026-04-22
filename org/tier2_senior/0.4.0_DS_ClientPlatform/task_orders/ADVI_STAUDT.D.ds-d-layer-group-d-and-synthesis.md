@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- originally ~D sub-lane; base serial post 2026-04-21 sub-lane-cleanup -->
     <date>2026-04-20</date>
-    <status>pending</status><!-- CTO conditional-approved 20260420T~12:49Z; comp-build rework + minor polish landed; COO dispatched GO to ~D inbox 20260420T~12:55Z. Phase 0 data collection may begin immediately; Phase 1 findings + 5 SYNTHESIS docs gate on ~C findings MCP (which transitively confirms ~A + ~B fired). -->
+    <status>cancelled</status><!-- Cancelled 2026-04-22 per Andrew directive. Group D audit + cross-layer SYNTHESIS work was authored pre-AUAGAP. AUAGAP resolution (43c7e5db / bb823bf8 / 214430d8 RCA + DS piecemeal cascade + AE windowed cascade on patched B_00 e9368c67) validated D-chain end-to-end; original audit purpose obsolete. -->
     <project_code>ADVI_STAUDT</project_code>
     <lane>~D — Layer: Group D audit + cross-layer SYNTHESIS (dual role)</lane>
     <model>LAYER × 4-checkpoint MATRIX. ~D owns Group D layer (D_00..D_04) across all 4 checkpoints AND owns the 5 SYNTHESIS deliverables that cite the upstream lane findings. Andrew 2026-04-20: "layer scoped AND time scoped — at each of those times, watch how the layer evolved, cross-reference, comprehensive."</model>

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-22</date>
-    <status>active</status>
+    <status>complete</status><!-- Closed 2026-04-22 — BFIX1 structural fix shipped b3aabe10 (B_00.build_persistent_rps_accts(target_date, window_days=14) date-relative persistent set; date-rel 4,686 vs global 5,435 confirmed at 2025-11-11). Memory-regression follow-up shipped e9368c67 (pre-compute per-date persistent_accts pre-fork + CoW restore; 30/14 mechanical patch, py_compile + AST scan PASS). S3 upload confirmed; tonight 23:00Z nightly + Andrew QA==nightly rule applies. Status drift flip per COO reconciliation. -->
     <project_code>ADVI_STAUDT</project_code>
     <urgency>NON-BLOCKING — prevention fix. Run in parallel with AUAGAP.002 steps 3-5 or immediately after.</urgency>
     <cto_directive>1.0.0_SA_CTO 20260422T123619Z — BFIX1 temporal-scope structural fix, Option A. Latent trap if left unfixed.</cto_directive>

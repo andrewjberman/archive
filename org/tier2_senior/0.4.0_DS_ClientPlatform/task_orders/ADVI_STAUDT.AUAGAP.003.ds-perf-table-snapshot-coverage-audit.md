@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-22</date>
-    <status>active</status>
+    <status>complete</status><!-- Closed 2026-04-22 — subsumed by full RCA finalization (43c7e5db / bb823bf8 / 214430d8). Snapshot coverage finding integrated into the composite root cause document at data/black_diamond/diagnostics/aua25q_rca.md. Status drift flip per COO reconciliation. -->
     <project_code>ADVI_STAUDT</project_code>
     <urgency>URGENT — run in parallel with AUAGAP.001 + .002. Andrew watching.</urgency>
   </metadata>
