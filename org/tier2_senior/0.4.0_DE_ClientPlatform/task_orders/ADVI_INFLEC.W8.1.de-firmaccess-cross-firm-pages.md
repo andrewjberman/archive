@@ -4,8 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-22</date>
-    <status>pending</status>
-    <acked>pending</acked>
+    <status>complete</status>
+    <acked>yes</acked>
     <project_code>ADVI_INFLEC</project_code>
     <priority>P1 — Andrew directive 2026-04-22; ship ASAP on current DE bandwidth</priority>
     <sla>~2h (one-line edit per firm + DEV smoke)</sla>
