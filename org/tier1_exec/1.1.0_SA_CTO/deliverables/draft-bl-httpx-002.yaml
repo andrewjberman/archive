@@ -1,0 +1,46 @@
+# COMP_LEARNS Benchmark Backlog Entry — Case 4 (DRAFT)
+# Schema: docs/architecture/COMP_LEARNS_BACKLOG_V1.md §3
+# Status: DRAFT — authored by 1.1.0_SA_CTO 2026-04-22 as .039 pre-work
+# Action required: verify baseline_commit before committing to comp/backlog/benchmark/
+# Destination: comp/backlog/benchmark/bl-httpx-002.yaml (after .037 creates benchmark/ dir)
+
+case_id: bl-httpx-002
+name: "Multi-value WWW-Authenticate header auth challenge failure"
+lane: benchmark
+target: "encode/httpx"
+language: python
+baseline_commit: "unknown"
+source: oss_historical
+archetype: D
+measurement_axes:
+  - reasoning_quality
+  - harness_usefulness
+  - correctness
+harness_relevance: 4
+aided_unaided_safe: true
+expected_ds_minutes: 30
+ac_type: test_suite
+status: candidate
+notes: >
+  Source: httpx PR #1240 (or nearest equivalent — verify against httpx repo before packet authoring).
+  Bug: when an HTTP server returns multiple WWW-Authenticate headers (one per header line, each
+  specifying a different auth scheme), httpx was only parsing the last one. Root cause is in the
+  header model (Models.py / _models.py): HTTP/1.1 technically allows combining comma-separated
+  header values for non-set-cookie headers, and httpx was collapsing duplicate header names before
+  the auth challenge parser saw them. Symptom surface: authentication fails silently or falls back
+  to wrong scheme. _auth.py (auth challenge dispatch) cannot locate the bug — root cause is in
+  _models.py (header deduplication logic), requiring cross-module navigation.
+  Archetype D rationale: DS agent reading _auth.py sees the auth scheme selection logic but no
+  obvious defect. Tracing the auth chain backwards through the response model is required to find
+  the header collapsing. Compiler graph selector from _auth.py -> _models.py is the key aided-vs-
+  unaided differentiator.
+  Baseline resolution: find the commit immediately before PR #1240 merge; verify that
+  a multi-header WWW-Authenticate test fails at that commit. Set baseline_commit to that SHA.
+  Note: if PR #1240 turns out to be different content than described, substitute the nearest
+  multi-WWW-Authenticate fix in httpx history (search: git log --grep="WWW-Authenticate" in httpx).
+
+issue_url: "https://github.com/encode/httpx/pull/1240"
+harness_gap: >
+  Current comp/targets/httpx/ harness covers _client.py and _auth.py primary paths.
+  _models.py header internals may have partial coverage — verify selector reaches
+  the header storage layer before marking aided_unaided_safe confirmed.

@@ -1,0 +1,52 @@
+# COMP_LEARNS Dev Backlog Entry — dev-4 compiler-win (DRAFT)
+# Schema: docs/architecture/COMP_LEARNS_BACKLOG_V1.md §4
+# Status: DRAFT — authored by 1.1.0_SA_CTO 2026-04-22 as .039 pre-work
+# Destination: comp/backlog/dev/dev-click-001.yaml (after .037 creates dev/ dir)
+
+case_id: dev-click-001
+name: "Compiler-win ratchet: click Group.invoke triple-nested chain"
+lane: dev
+target: "pallets/click"
+language: python
+baseline_commit: ""
+source: oss_historical
+archetype: B
+dev_purpose: >
+  Prove that the compiler self-improvement loop (comp-dev-loop.py) can achieve a
+  real primary_metric KEEP on an Archetype B refactor task. The current compiler
+  provided useful context for the pilot Case 2 (Group.invoke 2-method extraction).
+  This case extends to a triple-nested command group (A -> B -> C dispatch chain)
+  where the current compiler graph provides mediocre context — relevant edges are
+  present but buried in noise. Dev loop goal: mutate the compiler until it surfaces
+  the chain cleanly. Success is a ratchet KEEP on primary_metric, not local pass alone.
+harness_stress_type: none
+harness_relevance: 4
+aided_unaided_safe: false
+status: dev_candidate
+notes: >
+  Compiler-win case — proves the ratchet loop achieves real improvement, not just
+  apparatus configuration churn.
+  Task definition: Click supports chained command groups where a Group can contain
+  other Groups. The `invoke` dispatch logic used in Case 2 handles 2-level nesting
+  (Group -> Command). Extend the refactor to handle 3-level nesting (Group -> Group ->
+  Command) while preserving all 8 structural invariants from Case 2 PLUS the
+  additional invariant: context propagation through intermediate group (Group B must
+  receive the parent Group A's context, not just the root context).
+  Why the current compiler is mediocre here: the pilot Case 2 compiler graph localized
+  dispatch to the Group class but did not surface the context-propagation invariant
+  across multiple Group.invoke calls. A DS agent aided with the current compiler would
+  still need to read the context-passing logic manually. The 3-hop case makes this worse.
+  Dev loop target: compiler mutations that make context-propagation edges explicit in
+  the graph output, reducing the DS agent's need to read click/core.py Group.invoke
+  body line-by-line.
+  Primary metric: DS token cost or wall_clock for the full refactor under aided condition
+  (lower = better). A KEEP event means the mutation reduced the metric. Stop condition:
+  3 consecutive KEEP events OR plateau (5 iterations without KEEP).
+  Baseline: pin to click 8.3.1 (SHA f80cf4b0 — same as Case 2 baseline) before dev_active.
+  This is intentional: same codebase, harder task, lets us compare compiler output
+  quality directly to Case 2 pilot results.
+  aided_unaided_safe: false because dev mode only; do not run unaided baseline without
+  explicit CTO authorization (would consume DS budget on an apparatus-tuning case).
+
+intake_author: "1.1.0_SA_CTO"
+intake_time_min: 15

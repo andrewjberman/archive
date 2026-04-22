@@ -1,0 +1,44 @@
+# COMP_LEARNS Dev Backlog Entry — dev-2 cache_identity (DRAFT)
+# Schema: docs/architecture/COMP_LEARNS_BACKLOG_V1.md §4
+# Status: DRAFT — authored by 1.1.0_SA_CTO 2026-04-22 as .039 pre-work
+# Destination: comp/backlog/dev/dev-httpx-002.yaml (after .037 creates dev/ dir)
+
+case_id: dev-httpx-002
+name: "ABCache near-collision key identity stress"
+lane: dev
+target: "encode/httpx"
+language: python
+baseline_commit: ""
+source: apparatus_stress
+archetype: E
+dev_purpose: >
+  Verify that the ABCache key scheme (compiler_sha, target_version) correctly
+  distinguishes between two distinct target states that share the same version tag
+  but differ in actual content. Exercise the boundary where a cache hit would be
+  incorrect — surface whether the key scheme is sufficient or whether additional
+  identity fields are needed.
+harness_stress_type: cache_identity
+harness_relevance: 1
+aided_unaided_safe: false
+status: dev_candidate
+notes: >
+  Apparatus stress only — validates cache correctness, not DS performance.
+  Near-collision scenario to construct: take httpx at commit A and commit B where
+  both report the same version string (e.g., both are "0.25.0-dev" builds), but
+  the module-level content differs (e.g., a one-line change in _auth.py). Run the
+  compiler against both. Verify the cache returns different entries (correct: miss
+  on second run) or the same entry (incorrect: false hit, cache identity failure).
+  Secondary scenario: same repo, two different files as entry points, same compiler_sha.
+  If the cache key doesn't include the entry-point file path, a query on _client.py
+  and a query on _auth.py with the same compiler_sha could collide.
+  Dev loop goal: if a near-collision is found, mutate the cache key scheme to include
+  additional discriminators (e.g., content hash of entry-point file) until all
+  near-collision scenarios produce distinct cache keys.
+  Success condition: all test near-collision scenarios produce cache misses (distinct
+  lookup results). primary_metric = fraction of near-collision scenarios correctly
+  producing cache misses.
+  Note: baseline_commit for the apparatus itself (compiler.py) is the key anchor,
+  not a target repo commit. Pin to the compiler_sha active at dev_active start.
+
+intake_author: "1.1.0_SA_CTO"
+intake_time_min: 12

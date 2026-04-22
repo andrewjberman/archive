@@ -1,0 +1,47 @@
+# COMP_LEARNS Dev Backlog Entry — dev-3 rapid-intake generalization (DRAFT)
+# Schema: docs/architecture/COMP_LEARNS_BACKLOG_V1.md §4
+# Status: DRAFT — authored by 1.1.0_SA_CTO 2026-04-22 as .039 pre-work
+# Destination: comp/backlog/dev/dev-requests-001.yaml (after .037 creates dev/ dir)
+
+case_id: dev-requests-001
+name: "Rapid harness generalization — requests cross-module auth leak"
+lane: dev
+target: "psf/requests"
+language: python
+baseline_commit: ""
+source: rapid_intake
+archetype: A
+dev_purpose: >
+  Test whether the COMP_LEARNS harness apparatus can be quickly generalized to a
+  new target repo (requests) without full harness build effort. Author a minimal
+  comp/targets/requests/ stub and verify the compiler can provide basic structural
+  context on a known cross-module bug. Exposes coverage gaps in the rapid intake path.
+harness_stress_type: coverage_gap
+harness_relevance: 2
+aided_unaided_safe: false
+status: dev_candidate
+notes: >
+  Rapid intake case — no full harness build required at intake. Coverage gap stress.
+  Bug candidate: requests cross-origin redirect credential leak. When following a
+  redirect from an HTTPS URL to a different origin, requests should strip Authorization
+  headers. A historical version of requests had a bug where the stripping logic in
+  sessions.py incorrectly checked same-origin using only the hostname (not scheme+host),
+  allowing credentials to leak on scheme-downgrade redirects (HTTPS -> HTTP).
+  Cross-module: sessions.py (redirect following) + models.py or utils.py (URL comparison
+  and header manipulation). Root cause not visible from the session-level redirect handler.
+  Harness generalization test:
+  1. Author comp/targets/requests/compiler.py with minimal selector stubs
+  2. Author comp/targets/requests/__init__.py + repo_pin.txt
+  3. Run against the cross-module bug scenario above
+  4. Document: what does the compiler return vs what a full harness would return?
+  5. Coverage gap = the delta between minimal stub output and ideal graph output
+  The dev loop goal is to characterize the gap, not necessarily close it in one pass.
+  Success: compiler stub returns at least one relevant cross-module edge (sessions.py
+  -> models.py or utils.py) under the bug scenario. primary_metric = fraction of
+  relevant edges surfaced vs expected.
+  Note: if requests harness becomes useful, author a proper harness TO for full coverage.
+  This dev case is the validity check before that investment.
+  baseline_commit: pin to requests 2.28.x (pre-CVE-2023-32681 fix) before dev_active.
+
+intake_author: "1.1.0_SA_CTO"
+intake_time_min: 14
