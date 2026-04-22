@@ -4,7 +4,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-21</date>
-    <status>pending</status><!-- GO 2026-04-22 per Andrew directive — assigned to ~A -->
+    <status>complete</status>
+    <completed>2026-04-22</completed>
+    <completed_by>0.4.0_DS_ClientPlatform~A</completed_by>
+    <evidence>data/orion/scripts/gold/I_09.generate_partner_analytics.py — py_compile PASS, ds-commit-gate PASS, MATCH on S3. platinum/firm/partner_analytics.json + monthly/quarterly/annual variants present.</evidence>
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 

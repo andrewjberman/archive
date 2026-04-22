@@ -4,7 +4,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-21</date>
-    <status>pending</status><!-- GO 2026-04-22 per Andrew directive — assigned to ~A -->
+    <status>complete</status>
+    <completed>2026-04-22</completed>
+    <completed_by>0.4.0_DS_ClientPlatform~A</completed_by>
+    <evidence>1,881 silver/transactions/ parquets (2019-09-17..2026-04-20). accounts_dim/latest.parquet. aum_snapshot/2026-04-21.parquet. 0 NaT guard violations (script enforces drop on NaT). Q2 2024 gap documented in gap_manifest.json. v1 gold chain (SSM 4432482d) ran successfully against this silver data.</evidence>
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 

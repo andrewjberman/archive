@@ -4,7 +4,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-21</date>
-    <status>pending</status><!-- GO 2026-04-22 per Andrew directive — assigned to ~A -->
+    <status>complete</status>
+    <completed>2026-04-22</completed>
+    <completed_by>0.4.0_DS_ClientPlatform~A</completed_by>
+    <evidence>data/orion/scripts/gold/I_C01.canonical_nna.py — py_compile PASS, ds-commit-gate PASS, MATCH on S3. 1,617 gold/canonical/canonical_nna_{date}.parquet in S3.</evidence>
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 
