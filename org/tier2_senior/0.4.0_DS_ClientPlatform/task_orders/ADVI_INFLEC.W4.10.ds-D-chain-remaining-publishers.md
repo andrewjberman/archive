@@ -5,8 +5,10 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-21</date>
     <status>complete</status>
-    <completed>2026-04-21</completed>
-    <commit>f88ab74d</commit>
+    <completed>2026-04-22</completed>
+    <completed_by>0.4.0_DS_ClientPlatform~A</completed_by>
+    <commit>f561dd8c</commit>
+    <evidence>I_D00/I_D00b/I_D03 authored from scratch (f88ab74d was a false-positive — commit contained W4.3-W4.5 scripts only). py_compile PASS + ds-commit-gate PASS on all 3. MATCH on S3 (local MD5 == S3 ETag). inf-gold-dispatch.sh catalog fixed: I_C00-&gt;canonical_performance.py, I_C01b-&gt;role_aua_backfill.py.</evidence>
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 
