@@ -5,7 +5,7 @@
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <co_owner>0.7.0_AE_CloudOps</co_owner>
     <date>2026-04-21</date>
-    <status>complete</status>
+    <status>staged</status>
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 
