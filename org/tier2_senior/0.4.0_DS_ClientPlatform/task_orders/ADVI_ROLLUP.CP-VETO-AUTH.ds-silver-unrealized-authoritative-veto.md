@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-17</date>
-    <status>pending</status><!-- Flipped staged -> pending 2026-04-22 per Andrew "push all relevant agents to start" directive. Gate met: CP-DS1 shipped + post-cap residual -2.9% (within band but exceeds 2% on-call trigger). CTO adjudication 20260417T051141Z gate condition satisfied. -->
+    <status>complete</status><!-- Closed 2026-04-22 as SUPERSEDED by CP-DS1 PIVOT 2 (silver/unrealized authority for synth-injection, B_01:1546-1567) + PIVOT 5 (alloc-billable gate) + silver-cap (B_01:2287). DS audit (MCP 20260422T193626Z): 472 cohort = 0 in 2026-04-20 partition; gap -0.004% essentially perfect. Compliance: comp-pipescript deployed B_01/B_01b MATCH; comp-validate B_01 PASS (config SKIP). 20-acct chronic-zero residual ($6M missing, no silver/unrealized data) filed as separate TO ADVI_ROLLUP.CP-RES20 (distinct authority source). -->
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P1 ON-CALL — ship if CP-DS1 first clean run firm AUA diverges >2%; otherwise deferred to hardening phase</priority>
   </metadata>
