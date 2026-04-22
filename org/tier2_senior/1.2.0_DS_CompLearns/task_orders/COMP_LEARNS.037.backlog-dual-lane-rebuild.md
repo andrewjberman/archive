@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.2.0_DS_CompLearns</issued_to>
     <date>2026-04-22</date>
-    <status>pending <!-- GO'd on dispatch — see closeout MCP --></status>
+    <status>complete <!-- commit 9fd69bce pushed CLOUD 2026-04-22 by 1.2.0_DS_CompLearns --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — foundation TO for Wave 2 backlog work; .038/.039/.040/.041 all depend on this schema landing</priority>
   </metadata>
