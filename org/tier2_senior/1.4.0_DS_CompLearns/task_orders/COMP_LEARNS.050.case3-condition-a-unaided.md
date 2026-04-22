@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.4.0_DS_CompLearns</issued_to>
     <date>2026-04-22</date>
-    <status>staged <!-- Gate: .049 (1.3.0_DS condition_b aided) ship — non-contamination per PRD §4. GO from COO after .049 COMPLETE MCP. --></status>
+    <status>pending <!-- GO received 2026-04-22 from 2.1.0_SA_COO after .049 COMPLETE --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Wave 3 Lane B unaided condition; pair with .049 for first formal aided-vs-unaided delta</priority>
   </metadata>
