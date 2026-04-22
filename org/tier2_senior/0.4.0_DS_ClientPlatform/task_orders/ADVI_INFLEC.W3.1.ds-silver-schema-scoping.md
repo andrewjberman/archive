@@ -2,10 +2,10 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-04-21-inflec-w3.1-silver-scoping</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <co_owner>1.0.0_SA_CTO</co_owner>
     <date>2026-04-21</date>
-    <status>staged</status>
+    <status>pending</status><!-- GO 2026-04-22 per Andrew directive — assigned to ~A -->
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 
