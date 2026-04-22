@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-22</date><!-- RESCOPED 2026-04-22 per Andrew directive (see <decision_authority>); original 2026-04-17 cash-aggregator scope superseded -->
-    <status>pending</status>
+    <status>complete</status><!-- RAVC4-closed 2026-04-22 by 2.0.0_SA_COO. Evidence: commit 296b778e (D_04 + lib/s3_layout.py + gold_validate_config.yaml), S3 3 files MATCH via comp-pipescript deployed, comp-validate exit 0 (5 PASS / 0 ERROR / 2 WARN scalar-path type-mismatch benign), firm_cash_aggregate $34,323,539.33 matches silver/allocations headline within $0.33 (AC #2), per_account row count 6,543 = silver row count (AC #3), cash_bearing_account_count 5,922, comp-platinum reverse cash_coverage_summary → 0 consumers (AC #5 Phase 1+3 stable), zero changes to B_01/B_01b/C_02-C_08/D_02 (AC #6 confirmed), 8 emitted fields exceed 4-min (AC #1). AC #7 session log Compiler Tools reproduction pending — DS will ship as end-of-day log (documentation lag, not gate). -->
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P1 — D-tier emit, independent of CP-VETO-AUTH (which closed as superseded)</priority>
     <decision_authority>Andrew 2026-04-22 verbatim: "I don't think we have a reliable way to track excess cash, all we can do for that is get it in summary metrics in aggregate and per account via silver/allocations/ and have D_04 prepare that info in a table output and then we can choose what we do from that downstream in the portal."</decision_authority>
