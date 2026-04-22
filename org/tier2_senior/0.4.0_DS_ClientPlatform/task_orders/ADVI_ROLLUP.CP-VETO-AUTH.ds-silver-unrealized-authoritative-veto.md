@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-17</date>
-    <status>staged</status><!-- ON-CALL: Activate only if first clean CP-DS1 run shows >2% firm divergence vs silver/allocations. CTO adjudication 20260417T051141Z. -->
+    <status>pending</status><!-- Flipped staged -> pending 2026-04-22 per Andrew "push all relevant agents to start" directive. Gate met: CP-DS1 shipped + post-cap residual -2.9% (within band but exceeds 2% on-call trigger). CTO adjudication 20260417T051141Z gate condition satisfied. -->
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P1 ON-CALL — ship if CP-DS1 first clean run firm AUA diverges >2%; otherwise deferred to hardening phase</priority>
   </metadata>

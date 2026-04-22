@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-16</date>
-    <status>staged</status><!-- Authored by 2.0.0_SA_COO per CTO directive 2026-04-16T18:03Z. Non-blocking deferred TO — does not hold Wave 4 close. Gates on tonight CN-P1b PROD nightly confirmation. -->
+    <status>pending</status><!-- Flipped staged -> pending 2026-04-22 per Andrew "push all relevant agents to start" directive. CN-P1b PROD nightly confirmation gate satisfied (long ago; sequence P1/P1b/P2/P2b/P3/P4/P5 all complete). Non-blocking closeout to RA sequence. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W4</wave>
     <phase_label>RA-P1c (role_aua flow column repopulation — nna_txn deferred fix)</phase_label>

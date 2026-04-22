@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-17</date>
-    <status>staged</status><!-- Flip to active after CP-DS1 ships. -->
+    <status>pending</status><!-- Flipped staged -> pending 2026-04-22 per Andrew "push all relevant agents to start" directive. CP-DS1 shipped; gate satisfied. -->
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P0 behind CP-AE1 + CP-DS1 — required for Gate 2 (full firm AUA recon)</priority>
   </metadata>
