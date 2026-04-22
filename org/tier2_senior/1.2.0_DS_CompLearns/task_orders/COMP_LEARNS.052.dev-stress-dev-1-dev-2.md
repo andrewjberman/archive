@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.2.0_DS_CompLearns</issued_to>
     <date>2026-04-22</date>
-    <status>pending <!-- GO'd on dispatch per Wave 3 PRD 30971db1 --></status>
+    <status>complete <!-- commit 43945614 pushed CLOUD 2026-04-22 by 1.2.0_DS_CompLearns; dev-1: ordinary coverage gap | dev-2: ordinary coverage gap --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P2 — Wave 3 background apparatus-stress monitor; NON-BLOCKING to main lanes</priority>
   </metadata>
