@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.1.0_DS_CompLearns</issued_to>
     <date>2026-04-22</date>
-    <status>staged <!-- Gate: .039 CTO authors Case 4 bl-*.yaml (OSS historical cross-module bug). GO fires from COO after that entry lands. --></status>
+    <status>complete <!-- Phase0 commit: 6706f333 (bl-httpx-002 baseline resolved). Packet commit: ecfdbd4e (case-004 authored). Pushed to CLOUD 2026-04-22. --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — Case 4 covers Archetype D (cross-module diagnosis), highest harness leverage for aided-vs-unaided</priority>
   </metadata>
