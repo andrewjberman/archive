@@ -5,8 +5,7 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <lane_preference>~D (D_00c was previously ~D-owned; if ~D is idle, prefer that continuity)</lane_preference>
     <date>2026-04-21</date>
-    <status>complete</status>
-    <acked>2026-04-21 ~13:03 ET (DS)</acked>
+    <status>staged</status>
     <project_code>ADVI_STAUDT</project_code>
     <priority>P1 — corrects leaderboard attribution methodology to match chart methodology. Prevents comp gaming (advisor onboarding mid-quarter claiming pre-tag flows) and fixes the historical-truth semantic on "Lifetime Activity" chart ↔ leaderboard surfaces.</priority>
     <sla>~4h (single-script change in D_00c L764-779 + validator + qa-runner --group D validation)</sla>
@@ -18,7 +17,6 @@
     <ref type="sibling_fe_to">org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ADVI_STAUDT.CHART-ALIGN-FE.de-caveat-removal.md — DE removes chart/leaderboard divergence caveat ONCE DS CHART-ALIGN lands + leaderboard matches chart.</ref>
     <ref type="chart_precedent">D_02 commit `048af6a3` — already implements per-day tagging gate correctly for chart. CHART-ALIGN propagates the same rule to D_00c leaderboard. Chart HOLDS, leaderboard cuts over.</ref>
     <ref type="expected_result">Travis Penfield Q2 leaderboard NNA converges from `-$6.311M` (current pre-cutover, current-snapshot × full-window) → `-$6.845M` (chart value, per-day tagging gate). Exact convergence is the acceptance criterion.</ref>
-    <ref type="cto_resolution">CTO Option A PASS — 2026-04-21. AC2 corrected: Travis architect-role QTD NNA convergence (per-day tagging gate). Original pre-C_01 target of -$6.845M superseded (pre-dates Schwab Phase 6a baseline shift 2026-04-21). Post-C_01 current: D_02 architect = -$6.532M, D_00c architect = -$6.541M, delta $9K = 0.14% — PASS. Methodology correct. DE caveat removal authorized.</ref>
     <ref type="canonical_rule">All FLOW attribution (NNA, leaderboard, chart) is time-windowed per-day tagging-gated: a flow on account `A` on day `D` is attributed to advisor `V` iff `V` was tagged to `A` on day `D`. No backfill attribution for pre-tag flows. AUA (stock) is EXEMPT — stays current-snapshot for `role_breakdown.aua`.</ref>
     <ref type="project_json">org/projects/ADVI_STAUDT.json (phase updated `0a37d545`)</ref>
   </references>
@@ -70,7 +68,7 @@
 
   <acceptance_criteria>
     1. D_00c L764-779 replaced with per-day tagging gate logic matching D_02 048af6a3 pattern.
-    2. AC2 (corrected by CTO 2026-04-21): Travis architect-role QTD NNA convergence — D_00c per-advisor architect-role NNA must match D_02 per-advisor architect-role NNA within 50bps. Original pre-C_01 target of -$6.845M superseded (pre-dates Schwab Phase 6a baseline shift 2026-04-21). Post-C_01 current: D_02 architect = -$6.532M, D_00c architect = -$6.541M, delta $9K = 0.14% — PASS.
+    2. Travis Penfield Q2 leaderboard NNA = `-$6.845M ±$0.05M` (matches chart).
     3. `comp-validate D_00c --artifact /tmp/leaderboard_*.json` exits 0 (validator extension included).
     4. qa-runner `--group D` (or `--from D_00c`) exits clean on the new code.
     5. Chart ↔ leaderboard firm NNA sum within 50bps (or documented gap with residual-untagged bucket evidence).
