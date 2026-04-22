@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.3.0_DS_CompLearns</issued_to>
     <date>2026-04-22</date>
-    <status>staged <!-- Gate: .039 CTO approval of Case 3 candidate. GO fires from COO after CTO approves. --></status>
+    <status>complete <!-- commit fa1d5eb8 pushed CLOUD 2026-04-22 by 1.3.0_DS_CompLearns --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — required for Wave 2 formal scoring on SWE-bench Verified anchor case</priority>
   </metadata>
