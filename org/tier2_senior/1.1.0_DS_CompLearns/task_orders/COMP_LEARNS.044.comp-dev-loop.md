@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.1.0_DS_CompLearns</issued_to>
     <date>2026-04-22</date>
-    <status>staged <!-- Gate: .042 (comp-preflight.py) COMPLETE. GO fires from COO after .042 ships. Ships BEFORE .043 per §13 prioritization rule. --></status>
+    <status>complete <!-- commit: 0d0dec04 (pushed CLOUD 5a44ac87) 2026-04-22. 13 tests GREEN. 84 comp/tests/ passing. dev mode ACTIVE. --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Wave 2 throughput driver; per §13 priority rule, ships BEFORE .043 if resourcing tight</priority>
   </metadata>
