@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>2.1.0_SA_COO + 1.1.0_SA_CTO (joint)</issued_to>
     <date>2026-04-22</date>
-    <status>staged <!-- Gate: .042 + .043 both COMPLETE. COO dry-runs; CTO authorizes. --></status>
+    <status>complete <!-- COO section 1b6380da (stage2-gate/ 4 artifacts + APPROVE memo). CTO section 1773f087 (STAGE2-ACTIVATION TO). Stage 2 eval-mode LIVE 2026-04-22. --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — gates Stage 2 EVAL-MODE activation; dev mode activates independently after .044 (does NOT wait for this)</priority>
   </metadata>
