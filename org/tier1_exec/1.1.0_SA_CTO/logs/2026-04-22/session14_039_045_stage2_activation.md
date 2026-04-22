@@ -114,7 +114,25 @@ COO .045 close confirmed at 20260422T182331Z (commit on CLOUD). Stage 2 eval-mod
 
 ---
 
+## Wave 2 Closure (20260422T183555Z)
+
+.041 shipped at a7921aad (1.1.0_DS). All 10 TOs in Wave 2 TO set COMPLETE. Phase 4 apparatus live.
+
+Final TO scoreboard:
+- .037 1.2.0_DS  9fd69bce + 483ad8be
+- .038 COO       f2060fad
+- .039 CTO       65f37bad + 7a26cc09
+- .040 1.3.0_DS  fa1d5eb8
+- .041 1.1.0_DS  6706f333 + ecfdbd4e + a7921aad
+- .042 1.4.0_DS  f6f29836 + 37d49fe7
+- .043 1.3.0_DS  5a44ac87
+- .044 1.1.0_DS  0d0dec04 + cc18adf0
+- .045 Joint     1b6380da + cb725cae + 1773f087
+- .046 1.2.0_DS  cc13a7a4 + b22ca5dd
+
 ## Next CTO Action
 
-Monitor .040 + .041 ship events. First Wave 2 eval-mode dispatch gates on one packet completing.
+Gate on Andrew trigger:
+- First wave-2 eval-mode event (Case 3 sphinx or Case 4 httpx)
+- First dev-4 ratchet-KEEP run (Archetype B compiler-win; designate DS driver)
 .045 Stage 2 exit criterion: 2+ waves with zero eval-mode preflight false-passes AND zero integrity violations.
