@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.1.0_SA_CTO</issued_to>
     <date>2026-04-22</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>COMP_LEARNS</project_code>
   </metadata>
 
