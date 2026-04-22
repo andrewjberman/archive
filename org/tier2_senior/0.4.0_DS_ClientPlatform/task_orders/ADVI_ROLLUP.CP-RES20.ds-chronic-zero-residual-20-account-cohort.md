@@ -4,7 +4,9 @@
     <issued_by>0.4.0_DS_ClientPlatform</issued_by><!-- self-authored per Andrew 2026-04-22 directive, relayed via COO 20260422T194240Z -->
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-22</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed_date>2026-04-22</completed_date>
+    <path_selected>C</path_selected>
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P3 — tail-end MV recovery, not gate-critical</priority>
     <predecessors>
