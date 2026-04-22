@@ -107,10 +107,11 @@ During this session the following DS TOs also shipped:
 
 - .040 (1.3.0_DS sphinx packet): GO'd; broker summary stale — direct nudge sent by COO.
 - .041 (1.1.0_DS httpx packet): GO'd; broker summary stale — direct nudge sent by COO.
-- .047 (pilot-wave-1 artifact cleanup): COO filing now; route to 1.2.0_DS (git-archaeology to restore bundles + integrity_audit.md from sweep commits bdb7bacf/363a0d98/c610630b).
 - 9 pre-existing test failures in comp/bench/ + comp/graph/: accepted baseline; separate sweep TO recommended.
 
-COO .045 close confirmed at 20260422T182331Z (commit on CLOUD). Stage 2 eval-mode LIVE.
+COO .045 close confirmed at 20260422T182331Z. Stage 2 eval-mode LIVE.
+.047 (pilot-wave-1 restore) COMPLETE: 425c2e0a + 1cef9b51 (1.2.0_DS). 32 files restored —
+integrity_audit.md + 9 verdicts + 8 bundle dirs. All 11 TOs (.037-.047) COMPLETE.
 
 ---
 
