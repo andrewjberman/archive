@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.1.0_DS_CompLearns</issued_to>
     <date>2026-04-22</date>
-    <status>pending <!-- GO'd on dispatch per Wave 3 PRD lock b8f1beb5 --></status>
+    <status>complete <!-- mechanics verified; measurement invalidated — see comp/results/dev-4/integrity_invalidation.md; CTO adjudication 20260422T204400Z Option C; Lane A frozen pending PRD amendment --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Wave 3 Lane A (loop-proving engine case); answers "can the compiler-improvement loop climb against a hard quantitative target?"</priority>
   </metadata>
