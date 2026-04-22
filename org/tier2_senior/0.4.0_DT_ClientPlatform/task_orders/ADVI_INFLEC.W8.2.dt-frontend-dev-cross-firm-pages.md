@@ -4,8 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-22</date>
-    <status>staged</status>
-    <acked>pending</acked>
+    <status>complete</status>
+    <acked>acked</acked>
     <project_code>ADVI_INFLEC</project_code>
     <priority>P1 — Andrew directive 2026-04-22; gated on W8.1 DEV merge</priority>
     <sla>~3h (3 pages × 2 JWTs + constitution authoring if missing)</sla>
