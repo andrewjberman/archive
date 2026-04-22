@@ -103,7 +103,7 @@
         <if_mismatch>Post-apply drift = incomplete import. STOP, capture delta, surface to COO; do NOT tag or mark complete.</if_mismatch>
       </step>
       <step>
-        <run>aws dynamodb get-item --table-name opal-users-v2 --key '{"PK":{"S":"USER#andrew@fideles.capital"}}'</run>
+        <run>aws dynamodb get-item --table-name opal-users-v2 --key '{"PK":{"S":"USER#andrew@opalinvest.com"}}'</run>
         <expect>Andrew's user record returns (spot-check reader access preserved).</expect>
         <if_mismatch>Surface to COO + DT — auth-handler may be broken.</if_mismatch>
       </step>
@@ -116,7 +116,7 @@
     (a) **First-try 0-diff (same as .005 sprint close).** No `terraform apply` needed -- table was already tagged with shared-infra provider defaults + the System="PortalAuth" resource-level override I matched to live. Plan returned `No changes` immediately after import.
     (b) **Phase 1 delta from TO:** TO assumed single GSI (firmId-index per DT memo). Live has TWO: firmId-index + email-index (KEYS_ONLY). Added both — no Rule 7 flex event because TO `<compiler_tools_mandate>` step 1 was "capture schema from live" not "limit to one GSI". Normal recon-drives-implementation flow.
     (c) **SSE:** live uses AWS-managed KMS key (aws/dynamodb). Provider default behavior without an explicit `server_side_encryption{}` block matches; no config needed.
-    (d) Spot-check substituted: TO's GetItem `PK=USER#andrew@fideles.capital` returned ValidationException (composite key requires PK+SK for GetItem, and actual PK format is `USER#usr_<id>`, not `USER#<email>`). Substituted with `scan --select COUNT` = 39 (preserved) + query-by-PK format probe. Same evidence shape; noted for future TO authoring.
+    (d) Spot-check substituted: TO's GetItem `PK=USER#andrew@opalinvest.com` returned ValidationException (composite key requires PK+SK for GetItem, and actual PK format is `USER#usr_<id>`, not `USER#<email>`). Substituted with `scan --select COUNT` = 39 (preserved) + query-by-PK format probe. Same evidence shape; noted for future TO authoring.
     (e) System=PortalAuth tag preserved on resource; shared-infra default_tags would set it to SharedInfra but explicit resource tag overrides. Avoids a tag-mutation apply on a table that was pre-tagged by the hand-create flow.
   </closeout>
 

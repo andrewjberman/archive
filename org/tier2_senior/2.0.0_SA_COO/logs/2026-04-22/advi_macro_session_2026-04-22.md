@@ -89,7 +89,7 @@ GO dispatched to DS. **Blocked on Andrew nudging DS terminal.**
 
 | Gate | Description | Who |
 |------|-------------|-----|
-| JWT browser run | Log in at opal.fideles.capital as Inflection user, verify ≥11 advisors with non-zero AUM | Andrew |
+| JWT browser run | Log in at opal.opalinvest.com as Inflection user, verify ≥11 advisors with non-zero AUM | Andrew |
 | 49F login smoke | CTO mandate before first real Inflection user provisioned | Andrew |
 | Test-regression decommission | Disable test-regression@49financial.com + test-regression-adv@49financial.com in opal-users-v2 | Andrew GO → DT executes |
 | ORNREN.001 execution | Nudge DS terminal | Andrew |
