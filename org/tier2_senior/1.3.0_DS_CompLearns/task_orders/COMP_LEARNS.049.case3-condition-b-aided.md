@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.3.0_DS_CompLearns</issued_to>
     <date>2026-04-22</date>
-    <status>pending <!-- GO'd on dispatch per Wave 3 PRD patched at 30971db1 --></status>
+    <status>complete <!-- commit 6ac6352f, pushed CLOUD 2026-04-22 --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Wave 3 Lane B first formal aided run (condition_b); establishes aided baseline before .050 unaided dispatches (non-contamination rule §4)</priority>
   </metadata>
