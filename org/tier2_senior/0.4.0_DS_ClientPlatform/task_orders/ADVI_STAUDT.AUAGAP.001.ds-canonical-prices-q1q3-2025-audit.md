@@ -1,70 +1,67 @@
 <task_order>
   <metadata>
-    <id>2.0.0_SA_COO-2026-04-22-auagap-001-prices-audit</id>
+    <id>2.0.0_SA_COO-2026-04-22-auagap-001-rca</id>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-22</date>
     <status>active</status>
     <project_code>ADVI_STAUDT</project_code>
-    <urgency>URGENT — Andrew watching. Preliminary findings target: 1-2 hours.</urgency>
+    <urgency>URGENT — Andrew watching. Target: root cause in 1-2 hours.</urgency>
+    <supersedes>AUAGAP.002 + AUAGAP.003 (hypothesis-driven TOs withdrawn per Andrew/CTO directive)</supersedes>
   </metadata>
 
   <objective>
-    Audit canonical_prices per-ticker for Q1-Q3 2025. Flag any ticker whose median price
-    in this window is less than 70% of Q4 2024 OR Q4 2025 median. This tests
-    Hypothesis A: systematic price underestimation causing uniform AUA suppression.
-    Output: data/black_diamond/diagnostics/aua25q_price_coverage.md
+    Open-scoped root-cause investigation: AUA 2025 Q1-Q3 regression on 49F portal
+    quarterly chart. DS chooses investigation path. Output: aua25q_rca.md with root
+    cause confirmed, confidence level, and proposed fix scope (not the fix itself).
   </objective>
 
-  <context>
-    Andrew flagged: 49F portal AUA chart (quarterly view) shows ~70% drop for Q1-Q3 2025
-    (Q4 2024 ~$1.4B normal → Q1 2025 ~$300M → Q3 2025 low → Q4 2025 recovers to ~$1.4B).
-    Both New and Existing client segments affected proportionally = uniform suppression,
-    rules out filter/classification bugs. CTO Hypothesis A: canonical_prices has systematic
-    underestimation for Q1-Q3 2025 (bad yahoo backfill, cents/dollars unit flip,
-    T3/T4 interpolation pulling stale values).
+  <observation>
+    Portal Advisor Intelligence AUA chart (49F, quarterly view) after the latest
+    D-chain refresh shows ~70% drop in total_aua for 2025 Q1-Q3, recovering to ~$1.4B
+    in Q4 2025 and growing normally into 2026. Both New Client and Existing Client
+    cohorts are affected proportionally — uniform per-client AUA suppression, not a
+    classification issue.
 
-    Also audit scoped_overrides — recent commits d45fc0dc + 178d0cce touched canonical_prices.
-    Did inject_scoped_overrides wipe price overrides for this range?
+    Screenshot details:
+    - Q4 2024: ~$1.4B (normal)
+    - Q1 2025: $300M ($274M existing + $25.8M new, -65.7% QoQ / -$574M)
+    - Q2-Q3 2025: similar low range
+    - Q4 2025: ~$1.4B (recovery)
+    - Q1-Q2 2026: $1.66B / $1.7B (normal)
 
-    DO NOT attempt fixes. Diagnostic only. MCP CTO + COO when smoking gun found.
-  </context>
+    Chart source: D_00b.portal_timeseries.py _build_static_aua_periods, quarter-end
+    snapshot of perf table, sum(total_aua).
+  </observation>
 
-  <spec>
-    Source: silver/prices/canonical_prices.parquet (S3: s3://opal-data-bd/silver/prices/)
-    Window: 2025-01-01 through 2025-09-30
-    Baseline: Q4 2024 (2024-10-01 through 2024-12-31) and Q4 2025 (2025-10-01 through 2025-12-31)
+  <scope>
+    OPEN — DS investigates freely. No prescribed hypothesis ordering. Follow the data.
 
-    Analysis:
-    1. Per-ticker per-month: count non-null prices vs expected trading days for Q1-Q3 2025.
-       Flag any ticker with >20% missing days in any month of the window.
-    2. Per-ticker: compute median(price) for Q1-Q3 2025, Q4 2024, Q4 2025.
-       Flag any ticker where Q1-Q3 2025 median is less than 70% of Q4 2024 OR Q4 2025 median.
-    3. Cross-check silver/historical_prices.parquet (yahoo source) for same window —
-       is the underlying data missing there too, or is the T2-merge dropping it?
-    4. Check silver/prices/scoped_overrides.parquet — any rows with dates in Q1-Q3 2025
-       that may have been wiped by a recent inject_scoped_overrides.py run.
-       Reference commits: d45fc0dc + 178d0cce.
+    Tools available: S3 parquet queries, git log/diff/blame, full gold/silver/bronze
+    access, ad-hoc diagnostic scripts per EC2_CODE_DEPLOYMENT_STANDARD.
+    No compiler-mandate gates for diagnostic-only work.
+  </scope>
 
-    Output: data/black_diamond/diagnostics/aua25q_price_coverage.md
-    Content: top-20 worst-covered tickers (ticker, month, pct_covered, median_q1q3,
-    median_q42024, median_q42025, ratio_vs_q42024). Summary line: HYP A CONFIRMED or
-    HYP A NOT ROOT CAUSE with supporting evidence.
-  </spec>
+  <deliverable>
+    File: data/black_diamond/diagnostics/aua25q_rca.md
+    Content:
+    - What DS actually investigated (data paths + code paths examined)
+    - Evidence found (specific values, dates, deltas)
+    - Root cause conclusion (one clear statement)
+    - Confidence level + any residual uncertainty
+    - Proposed fix scope (so COO can size the follow-up TO — not the fix itself)
+  </deliverable>
 
   <acceptance_criteria>
-    1. canonical_prices queried for full Q1-Q3 2025 window.
-    2. Per-ticker price coverage + median price delta computed vs both baseline windows.
-    3. Flag list: tickers with median <70% of Q4 2024 or Q4 2025 baseline.
-    4. Yahoo source cross-check completed.
-    5. Scoped overrides checked for Q1-Q3 2025 range.
-    6. Output file committed: data/black_diamond/diagnostics/aua25q_price_coverage.md.
-    7. MCP CTO + COO with findings. Include HYP A verdict.
+    1. aua25q_rca.md committed.
+    2. Root cause identified with specific evidence (not hypothesis).
+    3. Proposed fix scope described (one-liner minimum).
+    4. MCP CTO + COO with rca.md link + one-paragraph summary.
   </acceptance_criteria>
 
   <do_not>
-    <rule>Do NOT attempt fixes. Diagnostic only.</rule>
-    <rule>Do NOT run pipeline scripts — S3 query only.</rule>
-    <rule>Do NOT wait for AUAGAP.002 or .003 before reporting if you find a clear smoking gun.</rule>
+    <rule>Do NOT implement the fix — root cause first, fix is a separate TO.</rule>
+    <rule>Do NOT run gold pipeline scripts during investigation.</rule>
+    <rule>AUAGAP.002 and AUAGAP.003 are SUPERSEDED — ignore them.</rule>
   </do_not>
 </task_order>
