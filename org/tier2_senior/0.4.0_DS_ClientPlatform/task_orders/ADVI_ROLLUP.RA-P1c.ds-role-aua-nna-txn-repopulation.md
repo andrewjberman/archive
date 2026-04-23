@@ -4,7 +4,11 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-16</date>
-    <status>pending</status><!-- Flipped staged -> pending 2026-04-22 per Andrew "push all relevant agents to start" directive. CN-P1b PROD nightly confirmation gate satisfied (long ago; sequence P1/P1b/P2/P2b/P3/P4/P5 all complete). Non-blocking closeout to RA sequence. -->
+    <status>complete</status>
+    <completed_date>2026-04-22</completed_date>
+    <commits>33e21e8f (C_01c lib-fix), 533d3deb (run_c01c_rap1c.py)</commits>
+    <ssm_command_id>84fb00c0-148a-41d9-872c-967716e5a7f6</ssm_command_id>
+    <!-- Flipped pending -> complete 2026-04-22. C_01c --upload on QA runner (Success, ResponseCode 0). 2,299 partitions updated. Spot-check PASS. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W4</wave>
     <phase_label>RA-P1c (role_aua flow column repopulation — nna_txn deferred fix)</phase_label>
