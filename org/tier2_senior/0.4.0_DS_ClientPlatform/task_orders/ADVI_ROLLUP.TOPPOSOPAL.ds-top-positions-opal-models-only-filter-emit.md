@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-24</date>
-    <status>staged</status><!-- GO gated on 49EXEC TO 1+5+ORPHRELID completion OR explicit COO/Andrew override; DE follow-on TO authored separately -->
+    <status>pending</status><!-- GO fired 2026-04-24 PM; gates met (49EXEC TO 1+5 commit 8cc69bab + ORPHRELID commit a8cf3c83 both today). Dispatched in parallel to SCOPEFIX (different scope: ROLLUP D-tier vs INFLEC silver). -->
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P2 — Top Positions portal widget cost_basis quality gate; not portal-breaking but visibly degraded today</priority>
     <origin>
