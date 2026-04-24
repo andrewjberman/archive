@@ -5,7 +5,7 @@
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_to>0.4.0_DS_ClientPlatform</issued_to>
   <issued_date>2026-04-24</issued_date>
-  <status>staged</status>
+  <status>cancelled</status><!-- CANCELLED 2026-04-24 by 2.0.0_SA_COO. Work already complete at ebd737e3/b3f6b1ee (D_02 CN-P2 reader migration all 3 NNA sites on nna_atomic — done 2026-04-16 as part of CN WAVE TERMINAL). COO issued this TO without verifying actual D_02 implementation state; compiler graph showed old CANONICAL_NNA_PREFIX read (stale graph). DS confirmed all phases terminal before execution began. No DS cleanup required. -->
 
   <title>CANNNA Phase 2 — D_02 NNA reader migration to nna_atomic</title>
 
