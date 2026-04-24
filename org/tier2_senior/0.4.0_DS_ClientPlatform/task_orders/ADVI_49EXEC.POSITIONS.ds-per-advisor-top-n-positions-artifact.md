@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-24</date>
-    <status>staged</status><!-- Rewritten 2026-04-24 post CTO PRD amendment 5059cdf0. Gate met: 49EXEC TO 1+5 complete (8cc69bab) + ORPHRELID complete (a8cf3c83/e28e0f5d/a0a57005). Draft offered to CTO for pre-dispatch review per their MCP 20260424T160xxxZ offer. Pending: CTO OK → flip to pending + GO dispatch. -->
+    <status>pending</status><!-- Rewritten 2026-04-24 post CTO PRD amendment 5059cdf0. Gate met: 49EXEC TO 1+5 complete (8cc69bab) + ORPHRELID complete (a8cf3c83/e28e0f5d/a0a57005). CTO review-pass complete (MCP 20260424T16xxxxZ) with 3 mechanical redlines folded in: (1) field-count typo "14"→"13" at 2 sites, (2) zero-cost-basis null unrealized_gain_pct spec, (3) null acquisition_date null first/last/oldest spec. Dispatch fired to 0.4.0_DS 2026-04-24. -->
     <project_code>ADVI_49EXEC</project_code>
     <priority>P1 — single unblock on TO 2 (LLM prose generator) authoring; downstream-gates TO 4 (DT generator Lambda TF apply + tag) and TO 7 (DT EventBridge wiring)</priority>
     <origin>
@@ -90,6 +90,10 @@
     - `last_acquisition_date` = latest `acquisition_date` across lots.
     - `oldest_lot_holding_days` = `as_of_date` − `first_acquisition_date` in whole days.
 
+    **Zero-cost-basis handling** (per CTO redline 2026-04-24): if `cost_basis == 0` for an aggregated position (e.g., stock grants with $0 basis, fully-reinvested-rounded-to-zero positions), emit `unrealized_gain_pct: null` (JSON null — not NaN, not Infinity). `unrealized_gain` itself remains valid (`market_value − 0`). LLM prompt consumer (TO 2) handles the null branch explicitly. Rationale: float infinity breaks JSON round-trip; null is a first-class not-applicable signal.
+
+    **Null acquisition_date handling** (per CTO redline 2026-04-24): lots with null `acquisition_date` (broker-transferred-in positions often lack this) are EXCLUDED from first/last/oldest aggregation. If ALL lots for a `(advisor_id, ticker)` group have null `acquisition_date`, emit `first_acquisition_date: null`, `last_acquisition_date: null`, `oldest_lot_holding_days: null`. `unrealized_gain` and `market_value` are unaffected by null acquisition dates.
+
     **as_of_date:** matches D_04 run date (same date used by summary/timeseries/mix/nna_clients).
 
     **firm_id:** "49financial" for current BD scope. Pulled from ACCOUNTS_DIMENSION firm mapping.
@@ -104,7 +108,7 @@
       D_04 emits positions.json per active advisor matching §4.5 schema exactly. Uses existing HOLDINGS_LOTS + ACCOUNT_TEAM + ACCOUNTS_DIMENSION reads (no new loads). Emit pattern mirrors existing `items.append((payload, f'platinum/advisors/{aid}/*.json'))` at L717/L724/L728/L2674.
     </deliverable>
     <deliverable id="validator-config-entry">
-      `gold_validate_config.yaml` new `D_04_positions_output` entry: required top-level fields (advisor_id, firm_id, as_of_date, total_aum, positions_count, top_n_limit, positions) + required per-position fields (14 listed in §4.5) + schema-type checks + positions count ≤ top_n_limit + positions count ≥ 1 (emitted advisors have at least one position by construction).
+      `gold_validate_config.yaml` new `D_04_positions_output` entry: required top-level fields (advisor_id, firm_id, as_of_date, total_aum, positions_count, top_n_limit, positions) + required per-position fields (13 listed in §4.5) + schema-type checks + positions count ≤ top_n_limit + positions count ≥ 1 (emitted advisors have at least one position by construction).
     </deliverable>
     <deliverable id="session-log-compiler-section">
       Session log `Compiler Tools` section reproduces every `<run>` from the mandate triad + observed output + pass/fail vs `<expect>`. Append 4+ rows to `org/compiler-tools-log.md` via auto-context.
@@ -162,7 +166,7 @@
     <phase id="2" when="before commit (validator-local)">
       <step>
         <run>python3 -c "# Dry-run D_04 positions emit block locally against a recent gold/timeseries/holdings_lots/ partition + account_team snapshot; write /tmp/positions_sample.json for one advisor (e.g., aj_lenartowicz)"</run>
-        <expect>/tmp/positions_sample.json conforms to §4.5 schema; all 14 per-position fields present; sort order market_value desc; len(positions) ≤ 25; positions_count ≥ len(positions).</expect>
+        <expect>/tmp/positions_sample.json conforms to §4.5 schema; all 13 per-position fields present; sort order market_value desc; len(positions) ≤ 25; positions_count ≥ len(positions).</expect>
         <if_mismatch>STOP. Schema contract violated; iterate emit block until conformant.</if_mismatch>
       </step>
       <step>
