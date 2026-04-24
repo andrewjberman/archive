@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- base lane, post CP-RES20/RA-P1c/SL-P1 close; DS bandwidth freed -->
     <date>2026-04-24</date>
-    <status>pending</status><!-- dispatched 2026-04-24 with GO MCP; DS base has bandwidth post ROLLUP 52/0/3/+1 close -->
+    <status>complete</status><!-- completed 2026-04-22; commit e28e0f5d; root-cause H1+H4; trace doc + validator shipped -->
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P2 — data-quality cleanup + CTO backlog fold-in; not blocking portal</priority>
     <origin>
