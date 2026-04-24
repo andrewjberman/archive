@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>2.1.0_SC_CompLearns</issued_to>
     <date>2026-04-24</date>
-    <status>staged</status>
+    <status>complete <!-- Phase 1 freeze: 14f6b44d; Phase 2 ship: pending --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Wave 3b Lane B, Case 1 formal scoring verdict</priority>
   </metadata>
