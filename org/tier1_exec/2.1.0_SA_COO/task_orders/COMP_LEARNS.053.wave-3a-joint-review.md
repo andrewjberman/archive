@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>2.1.0_SA_COO + 1.1.0_SA_CTO (joint)</issued_to>
     <date>2026-04-22</date>
-    <status>staged <!-- Gate: .048 dev-4 COMPLETE + .051 SC scoring COMPLETE --></status>
+    <status>complete <!-- COO 8bf465d9 + CTO 954f86e6; joint closure commit 2026-04-24; Wave 3a closed; Wave 3b authorized --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — mandatory Wave 3a closure gate (§10 success criterion 3); CTO Wave 3b decision</priority>
   </metadata>
