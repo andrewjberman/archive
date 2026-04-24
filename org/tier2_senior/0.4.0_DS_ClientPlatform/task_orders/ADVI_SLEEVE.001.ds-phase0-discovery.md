@@ -5,7 +5,7 @@
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_to>0.4.0_DS_ClientPlatform</issued_to>
   <issued_date>2026-04-24</issued_date>
-  <status>pending</status>
+  <status>cancelled</status><!-- CANCELLED 2026-04-24 by 2.0.0_SA_COO. Work already complete: SL-P0 decision memo (Path 3 selected — cost-basis apportionment) + SL-P1 shadow emit code at 28818eaf (2026-04-16, DS 0.4.0). ADVI_SLEEVE.json was stale at Phase 0 pending; actual state is Phase 0 COMPLETE / Phase 1 STAGED (blocked on nightly re-enable post-INFLEC W4.13b). COO dispatched this TO without verifying SL-P0 commit history. Same pattern as CANNNA.P2 redundant TO. No DS action required; disregard. -->
 
   <title>ADVI_SLEEVE Phase 0 — Discovery + cohort sizing + quantity source recommendation</title>
 
