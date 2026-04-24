@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.4.0_DS_CompLearns</issued_to>
     <date>2026-04-24</date>
-    <status>staged</status>
+    <status>complete</status><!-- Shipped 2026-04-24 by 1.4.0_DS_CompLearns. Commit d588d43c pushed. AC: ac-1 1262p/73s/1xf / ac-2 32p/1xf / ac-3 1082p/66s / ac-4 37p/1xf / ac-5 74p. comp_calls: 3. Decisive file: src/click/core.py (Group.invoke). -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Wave 3b Lane B, Case 2 aided intervention runner</priority>
   </metadata>
