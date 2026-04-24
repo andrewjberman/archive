@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>2.1.0_SC_CompLearns</issued_to>
     <date>2026-04-22</date>
-    <status>staged <!-- Gate: .049 + .050 both COMPLETE + COO manual inspection (first task family). GO from COO after both bundles ready. --></status>
+    <status>complete <!-- Phase 1 freeze: 4e1ec449 | Phase 2 ship: 767f6c95 | pushed CLOUD 2026-04-24 --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Wave 3 Lane B verdict + efficiency delta; first aided-vs-unaided formal measurement</priority>
   </metadata>
