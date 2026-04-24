@@ -7,7 +7,7 @@
     <reviewer>0.3.0_DT_TradingOperations (authorizer triplet security review on `trade-auth-handler` + `trade-authorizer` + `trade-recon-authorizer` IF Phase 0 classifies any as active)</reviewer>
     <date>2026-04-21</date>
     <rescoped>2026-04-21 (was: single-AE binary Q2/Q4 gate)</rescoped>
-    <status>staged</status>
+    <status>complete</status><!-- 2026-04-24: W2 Phase 0 + Phase 1 BOTH SHIPPED. Joint COO+CTO Option X signoff (CTO 20260424T150159Z + 150240Z; COO 20260424T150221Z + 150436Z + 152740Z RAVC4 ACK). Phase 0 docs: 54efb540 brief + 521b8c26 SES packet. Phase 1 ship: AE 0.7 abfed84d source + 71be8a7e lambdas.tf + e11151d5 smoke/README + 14b3b501 log. SES infra: AE 0.5 15a048e6 (config set + bounce/complaint SNS). Tag trade-pipeline-v1.4.0 pushed. 9 option-(b) exceptions in trade-pipeline/README.md Known Issues. Carry-forward (non-blocking): Andrew SES Console prod-access submission, 9-COLD deprecation assessment standing-backlog (CTO-flagged), EMAIL_FROM source/env mismatch on trade-submission-handler, 4 failed SES identities. Phase 0 Section A "missing layers block" was a false-positive — layers always present at lambdas.tf:136-138; CTO Condition #1 moot, Phase 1 still landed clean. -->
     <project_code>TRSB_TFIMPT</project_code>
     <priority>P1 (Rule 1 violation — 11 Lambdas with `filename=placeholder.zip` + `ignore_changes`; code is un-reproducible from repo) — plus SES sandbox→prod readiness folded in (trade pipeline depends on SES for client notifications; same operational cluster)</priority>
     <sla>2 days — Day 1 Phase 0 joint discovery (both AEs) + SES packet, Day 2 actionable outcome based on Phase 0 findings (reclaim vs formal exception) + authorizer triplet paired with DT 0.3 if any triplet member is live</sla>
