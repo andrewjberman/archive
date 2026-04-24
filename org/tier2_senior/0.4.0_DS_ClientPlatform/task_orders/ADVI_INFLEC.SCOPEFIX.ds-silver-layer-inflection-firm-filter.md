@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to><!-- ~A lane per Andrew 2026-04-22 INFLEC DS reassignment + 2026-04-24 scope-bug halt -->
     <date>2026-04-24</date>
-    <status>complete</status><!-- GO fired 2026-04-24 post CTO contract review (MCP 20260424T14xxZ). COMPLETE 2026-04-24 — commit 2d3de276 by 0.4.0_DS_ClientPlatform~A. S3 MATCH verified MD5 655ce81e7280c49b5b48aecab6b4f185. Phase 0 guards ship (ValueError on col-absent + zero-cohort). Filter applied in build_trn_silver()+build_aum_silver()+build_accounts_dim(). gold_validate_config.yaml created with SCOPEFIX assertions. -->
+    <status>complete</status><!-- GO fired 2026-04-24 post CTO contract review (MCP 20260424T14xxZ). COMPLETE 2026-04-24 — commit 2d3de276 by 0.4.0_DS_ClientPlatform~A. S3 MATCH verified MD5 655ce81e7280c49b5b48aecab6b4f185. Phase 0 guards ship (ValueError on col-absent + zero-cohort). Filter applied in build_trn_silver()+build_aum_silver()+build_accounts_dim(). gold_validate_config.yaml created with SCOPEFIX assertions. COMPAT PATCH 2026-04-24: commit 6c1362de — added from __future__ import annotations for Python 3.9 runner compat (str | None PEP-604 crashed at module load on 3.9; deferred annotation eval fixes). S3 re-upload MD5 bd53c9b862bebafce270e0601df6a39b MATCH. -->
     <project_code>ADVI_INFLEC</project_code>
     <priority>P0 — HIGHEST. Blocks all INF pipeline work (W4.14, Q8/Q9/Q10, W4.13b, W5.1 DE); Andrew directive 2026-04-24 on cross-firm bug halt</priority>
     <origin>
