@@ -76,35 +76,58 @@ if (await page.locator('#passwordError').isVisible()) {
 
 ---
 
-## Stage 3: OTP Challenge (TBD)
+## Stage 3: OTP Challenge — CONFIRMED
 
-**Status:** Selectors not yet captured — requires valid credentials to reach this page.
+**URL:** `https://login.orionadvisor.com/` (same domain, in-place page swap)
+**Heading:** `Check Your Phone` — SMS delivery confirmed (not email, not TOTP)
+**Scan run:** `orion-live3-20260424T204320Z`
 
-**Known from BRONZERUN PRD:**
-- OTP is delivered via email or authenticator (frequency: may be per-session or per-new-IP)
-- OTP relay flow: Playwright detects OTP page → writes `state.json` = WAITING_FOR_OTP
-  → Lambda → Slack → Andrew replies with `/orion-otp 123456`
-  → Lambda writes OTP to `s3://opal-data-inf/otp/current.txt`
-  → Playwright polls S3 every 5s, reads OTP, fills form, submits
+| Element | Selector | Notes |
+|---------|----------|-------|
+| OTP input | `#TwoFactorCode` | `type="text"` `class="oat-input-simple"` |
+| Verify button | `#ContinueLogin` | text="Verify" — **disabled** until input filled (JS enables on keyup) |
+| Error indicator | `#FACodeErrorMessage` | `display:none` normally; shown on invalid code |
+| Remember device | `#rememberMyDevice` | `type="checkbox"` — check to reduce OTP frequency across sessions |
+| Resend link | `#resendCode` | triggers new SMS |
+| Session token | `#LoginSessionId` | hidden — required in form POST |
+| Contact method | `#ContactMethodId` | hidden — required in form POST |
 
-**Likely selectors (to be confirmed on first real login run):**
+**Detection:** Check for `#TwoFactorCode` visible after Log In submit.
+
+**Playwright snippet:**
 ```typescript
-// Detection — check for any of these:
-const OTP_SELECTORS = [
-    'input[type="tel"]',
-    'input[autocomplete="one-time-code"]',
-    '#AuthCode', '#Code', '#otp', '#verificationCode',
-    '[name="code"]', '[name="otp"]', '[name="AuthCode"]',
-    '[placeholder*="code" i]', '[placeholder*="verif" i]',
-];
+const isOtpPage = await page.locator('#TwoFactorCode').isVisible();
+if (isOtpPage) {
+    // Signal S3 relay: set state = WAITING_FOR_OTP
+    await s3.putObject({ Bucket: 'opal-data-inf', Key: 'otp/state.json',
+        Body: JSON.stringify({ state: 'WAITING_FOR_OTP', ts: Date.now() }) });
 
-// Submit button likely:
-// '#btn_mfa', '#submit', 'button:has-text("Verify")', 'button:has-text("Submit")'
+    // Poll S3 for OTP (Lambda writes it after Andrew responds in Slack)
+    const otp = await pollS3ForOtp('opal-data-inf', 'otp/current.txt', 300_000);
+
+    await page.fill('#TwoFactorCode', otp);
+    await page.check('#rememberMyDevice');      // reduce future OTP prompts
+    await page.click('#ContinueLogin');
+    await page.waitForLoadState('networkidle');
+}
 ```
 
-**Action needed:** Populate `orion/credentials` in Secrets Manager and run
-`python .tools/orion-inspector.py` with valid creds. The inspector will capture
-stage-04/05 JSON with OTP page elements. Update this spec with confirmed selectors.
+**OTP polling helper (pseudocode):**
+```typescript
+async function pollS3ForOtp(bucket, key, timeoutMs): Promise<string> {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+        try {
+            const obj = await s3.getObject({ Bucket: bucket, Key: key });
+            const code = (await obj.Body.transformToString()).trim();
+            await s3.deleteObject({ Bucket: bucket, Key: key }); // consume it
+            return code;
+        } catch { /* not yet */ }
+        await new Promise(r => setTimeout(r, 5_000));
+    }
+    throw new Error('OTP relay timeout after 5 minutes');
+}
+```
 
 ---
 
