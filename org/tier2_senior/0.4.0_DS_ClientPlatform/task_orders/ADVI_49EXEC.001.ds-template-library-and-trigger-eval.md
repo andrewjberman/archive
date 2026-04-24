@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- base lane; ~ instances may be re-dialed if base saturated -->
     <date>2026-04-15</date>
-    <status>staged</status>
+    <status>pending</status><!-- dispatched 2026-04-24 by COO per Andrew 'unblock 49EXEC lane' directive; DS base bandwidth freed post ROLLUP 52/0/3/+1. Runs parallel with TO 5; TO 2 remains staged pending TO 1 close. -->
     <project_code>ADVI_49EXEC</project_code>
     <priority>P1 (gates TO 2 LLM generator)</priority>
   </metadata>

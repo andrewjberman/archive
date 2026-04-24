@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Independent of TO 1-4; can ship in parallel -->
+    <status>pending</status><!-- dispatched 2026-04-24 by COO per Andrew 'unblock 49EXEC lane' directive; DS base bandwidth freed post ROLLUP 52/0/3/+1. Independent of TO 1-4; runs in parallel with TO 1. -->
     <project_code>ADVI_49EXEC</project_code>
     <priority>P1 (gates leaderboard_rank_delta + cohort_drift slot triggers in TO 1)</priority>
   </metadata>
