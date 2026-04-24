@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.4.0_DS_CompLearns</issued_to>
     <date>2026-04-24</date>
-    <status>staged</status>
+    <status>complete</status><!-- Shipped 2026-04-24 by 1.4.0_DS_CompLearns. Commit 2cd505eb pushed. AC: ac-1 3 passed / ac-2 1 passed / ac-3 46 passed. Decisive file found: httpx/_utils.py. 0 comp_calls (unaided). -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Wave 3b Lane B, Case 1 unaided baseline</priority>
   </metadata>
