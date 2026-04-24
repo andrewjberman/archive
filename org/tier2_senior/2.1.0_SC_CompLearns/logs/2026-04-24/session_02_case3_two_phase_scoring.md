@@ -1,116 +1,125 @@
-# Session Log -- 2.1.0_SC_CompLearns -- 2026-04-24 -- Case 3 Two-Phase Scoring
+# Case 3 Two-Phase Scoring — 2.1.0_SC_CompLearns
 
-**Session:** 02 (COMP_LEARNS.051 execution)
-**TO:** COMP_LEARNS.051.case3-two-phase-scoring
-**Worktree:** feature_clb (`/c/Users/AndrewBerman/Desktop/feature_clb/`)
-**PRD:** docs/architecture/COMP_LEARNS_WAVE3_V1.md (bd84ef10 rev5)
-
----
-
-## What I Read
-
-| Artifact | Purpose |
-|----------|---------|
-| `org/XXX.md` | Agent startup protocol |
-| `org/tier2_senior/2.1.0_SC_CompLearns/README.md` | Role definition |
-| `org/tier2_senior/2.1.0_SC_CompLearns/prompt.md` | Checklist + scoring scope |
-| `org/tier2_senior/2.1.0_SC_CompLearns/logs/2026-04-21/session_01_baseline_report.md` | Prior session context |
-| `COMP_LEARNS.051.case3-two-phase-scoring.md` | TO specification |
-| `comp/tasks/case-003-sphinx-autodoc-typehints/packet.yaml` | Acceptance criteria authority |
-| `comp/tasks/case-003-sphinx-autodoc-typehints/bundles/ds-1.3.0-condition_b/test_output.txt` | Phase 1 input |
-| `comp/tasks/case-003-sphinx-autodoc-typehints/bundles/ds-1.3.0-condition_b/changes.patch` | Phase 1 input |
-| `comp/tasks/case-003-sphinx-autodoc-typehints/bundles/ds-1.4.0-condition_a/test_output.txt` | Phase 1 input |
-| `comp/tasks/case-003-sphinx-autodoc-typehints/bundles/ds-1.4.0-condition_a/changes.patch` | Phase 1 input |
-| `comp/tasks/case-003-sphinx-autodoc-typehints/bundles/ds-1.3.0-condition_b/nav_log.jsonl` | Phase 2 input |
-| `comp/tasks/case-003-sphinx-autodoc-typehints/bundles/ds-1.4.0-condition_a/nav_log.jsonl` | Phase 2 input |
-
-NOT read: either reasoning.md (mechanically excluded per S4.13).
+**Date:** 2026-04-24
+**Task Order:** COMP_LEARNS.051 (case3-two-phase-scoring)
+**Status:** COMPLETE
 
 ---
 
-## Phase 1 -- Verdict Determination
+## Objective
 
-### AC Assessment
-
-**Both conditions submitted identical patches** (same diff content, same changes):
-- `sphinx/ext/autodoc/typehints.py`: `merge_typehints` now passes `suppress_rtype=True` when `objtype == 'class'`
-- `modify_field_list` gains `suppress_rtype: bool = False` parameter; suppresses rtype emission when `annotation == 'None'` and `suppress_rtype=True`
-- Test expectation updated: removed spurious "Return type: None" assertion from `test_autodoc_typehints_description_with_documented_init`
-
-**ac-1 (FAIL_TO_PASS):** PASS both conditions -- `test_autodoc_typehints_description_with_documented_init` 1 passed, 0 failed
-
-**ac-2 (regression guard):** PASS both conditions -- 2 failures (`test_autodoc_type_aliases`, `test_autodoc_default_options`) confirmed pre-existing at baseline 36367765 (Python 3.12 type alias resolution + __weakref__ docstring compat changes)
-
-**ac-3 (broader regression guard):** PASS both conditions -- 1 failure (`test_enum_class`) confirmed pre-existing at baseline 36367765 (Python 3.12/3.13 Enum signature format change `names=<not given>`)
-
-### Verdicts
-
-| Condition | Agent | Verdict | Phase 1 commit |
-|-----------|-------|---------|----------------|
-| condition_b (aided) | 1.3.0_DS_CompLearns | PASS | `4e1ec449` |
-| condition_a (unaided) | 1.4.0_DS_CompLearns | PASS | `4e1ec449` |
-
-Verdict freeze established at `4e1ec449` before Phase 2 began.
-
----
-
-## Phase 2 -- Metric Audit
-
-### Extracted Metrics
-
-| Metric | condition_b (aided) | condition_a (unaided) | Delta (aided - unaided) |
-|--------|--------------------|-----------------------|------------------------|
-| Wall-clock to first correct (sec) | 195 | 105 | +90 (aided slower) |
-| Tokens to first correct | 15200 | 4400 | +10800 |
-| Files touched before decisive | 4 | 3 | +1 |
-| Irrelevant files touched | 5 | 5 | 0 |
-| comp_calls | 7 | 0 | +7 (expected) |
-| decisive_file_found | true | true | -- |
-
-### Noise Flags
-
-1. **Token ratio 3.45x:** aided 15200 vs unaided 4400 exceeds the >3x threshold. Root cause: aided agent's H1 incorrect hypothesis (ClassDocumenter) generated exploration tokens before compiler graph (comp-build import trace) redirected to typehints.py. Not a validity concern -- both agents reached the same correct hypothesis and produced identical fixes.
-
-2. **Wall-clock direction note:** aided was slower (195s vs 105s, delta +90s). Budget was 3600s; both well within budget. Unaided agent navigated linearly to typehints.py in 5 file opens (4 distinct before decisive); aided took an H1 detour first.
-
-### Confounding
-
-- Unaided online search: NO -- nav_log shows direct file reads only, no web search events
-- Unaided prior sphinx exposure: unknown (cannot rule out from nav_log alone; no explicit evidence)
-- Navigation paths differ: YES -- aided: packet.yaml -> compiler.py -> comp-build -> test_configs -> autodoc/__init__.py -> typehints.py (via compiler graph); unaided: test_configs -> test_configs -> fixture/typehints.py -> autodoc/__init__.py -> typehints.py (via source reading)
-
-### Summary
-
-Both agents solved Case 3 (PASS). The aided agent was slower and used more tokens due to an initial incorrect hypothesis that the compiler graph corrected. The unaided agent navigated directly to the fix in linear fashion. On this cross-module failure diagnosis task, aided discovery was not faster; aided advantage was hypothesis confidence (compiler mechanically confirmed the cross-module connection), not discovery speed.
+Score Case 3 (sphinx-doc__sphinx-10449) under the two-phase model per COMP_LEARNS_WAVE3_V1.md §3.5. Phase 1 produces a frozen verdict from bundle artifacts (reasoning.md excluded). Phase 2 extracts navigation-efficiency metrics from nav_log.jsonl after verdict freeze to produce the first formal aided-vs-unaided delta measurement for this program.
 
 ---
 
 ## Compiler Tools
 
-| Tool / Check | Status | Result |
-|--------------|--------|--------|
-| Phase 1 gate 1: `ls bundles/ds-1.3.0-condition_b/` + `ls bundles/ds-1.4.0-condition_a/` | PASS | Both bundles: changes.patch + test_output.txt + reasoning.md + nav_log.jsonl |
-| Phase 1 gate 2: `mkdir -p comp/results/wave-3a/verdicts comp/results/wave-3a/metric_audit` | PASS | Output dirs created |
-| Phase 2 gate 1: `ls comp/results/wave-3a/verdicts/` | PASS | Both Phase 1 verdict files present and committed |
-| Phase 2 gate 2: aided nav_log comp_call assertion | PASS | 7 comp_call events confirmed |
-| Phase 2 gate 3: unaided nav_log zero comp_call assertion | PASS | 0 comp_call events confirmed |
-| Phase 3 gate: `ls comp/results/wave-3a/` | PASS | verdicts/ + metric_audit/ + integrity_audit.md all present |
+| Tool | Command | Result | Note |
+|------|---------|--------|------|
+| Phase 1 gate 1 | `ls bundles/ds-1.3.0-condition_b/ && ls bundles/ds-1.4.0-condition_a/` | PASS | Both bundles confirmed: changes.patch + test_output.txt + reasoning.md + nav_log.jsonl |
+| Phase 1 gate 2 | `mkdir -p comp/results/wave-3a/verdicts comp/results/wave-3a/metric_audit` | PASS | Output dirs created |
+| Phase 2 gate 1 | `ls comp/results/wave-3a/verdicts/` | PASS | Both Phase 1 verdict files present and committed at 4e1ec449 |
+| Phase 2 gate 2 | `python -c "... assert comp_count > 0 ..."` on aided nav_log | PASS | 7 comp_call events confirmed |
+| Phase 2 gate 3 | `python -c "... assert comp_count == 0 ..."` on unaided nav_log | PASS | 0 comp_call events confirmed |
+| Phase 3 gate | `ls comp/results/wave-3a/` | PASS | verdicts/ + metric_audit/ + integrity_audit.md all present |
+
+**What worked:** The three-phase compiler gate structure (bundle presence, verdict freeze, nav_log hygiene) gave a clean checklist with unambiguous exit conditions. Python inline assertions for comp_call counts caught the unaided contamination check mechanically.
+
+**What failed:** Python scripts initially used `/c/...` MSYS-style paths — failed with FileNotFoundError on Windows Python. Fixed by switching to `C:/...` Windows paths in python -c invocations.
+
+**Gap found:** No comp-* tools are applicable to SC scoring work (no gold scripts, no portal components, no Lambda functions). Compiler tools mandate is satisfied by the PRD-specified phase-gate checks above. Same finding as session_01.
 
 ---
 
-## Deliverables
+## Work Completed
 
-| Artifact | Path | Commit |
-|----------|------|--------|
-| Phase 1 verdict (condition_b) | comp/results/wave-3a/verdicts/case-003-ds-1.3.0-condition_b-run-1.json | 4e1ec449 |
-| Phase 1 verdict (condition_a) | comp/results/wave-3a/verdicts/case-003-ds-1.4.0-condition_a-run-1.json | 4e1ec449 |
-| Phase 2 metric audit | comp/results/wave-3a/metric_audit/case-003-efficiency-delta.json | 767f6c95 |
-| Integrity audit | comp/results/wave-3a/integrity_audit.md | 767f6c95 |
-| TO status flip | COMP_LEARNS.051 status=complete | a106f71d |
-| Push | CLOUD remote | a106f71d |
+### 1. Startup
+
+Registered on MCP broker (PID 14868), launched inbox watcher, checked both inbox paths (filesystem + broker). Inbox empty at startup. Surfaced stale 1.4.0_DS status to COO (reported ".049 missing nav_log.jsonl" — bundle verified present). COO ACK: stale heartbeat only, 1.4.0_DS already executing.
+
+### 2. .051 GO received and acknowledged
+
+COO GO received via inbox watcher (task bis2loqzz exit). Both bundles confirmed PASS by COO inspection. RAVC ACK sent. TO status flipped staged -> pending.
+
+### 3. Phase 1 — Verdict determination
+
+Read packet.yaml (acceptance criteria authority), changes.patch + test_output.txt for both conditions. reasoning.md mechanically excluded.
+
+**Key finding:** Both conditions submitted identical patches. The fix adds `suppress_rtype=True` to `merge_typehints` when `objtype == 'class'`, and suppresses emission of rtype field in `modify_field_list` when `annotation == 'None'`. Test expectation updated to remove spurious "Return type: None" line.
+
+| AC | condition_b (aided) | condition_a (unaided) |
+|----|--------------------|-----------------------|
+| ac-1 (FAIL_TO_PASS) | PASS — 1 passed, 0 failed | PASS — 1 passed, 0 failed |
+| ac-2 (regression guard) | PASS — 2 pre-existing Python 3.12 failures | PASS — same 2 pre-existing failures |
+| ac-3 (regression guard) | PASS — 1 pre-existing Python 3.12 failure | PASS — same 1 pre-existing failure |
+
+Pre-existing failures at baseline 36367765: `test_autodoc_type_aliases` (type alias resolution), `test_autodoc_default_options` (__weakref__ docstring), `test_enum_class` (Enum signature format). All three confirmed pre-existing, not introduced by the fix.
+
+Both conditions verdict: **PASS**. Phase 1 verdicts committed at `4e1ec449` (verdict freeze).
+
+### 4. Phase 2 — Metric extraction
+
+Read both nav_log.jsonl files after verdict freeze. Extracted per-condition metrics per PRD §3.5.
+
+| Metric | condition_b (aided, 1.3.0_DS) | condition_a (unaided, 1.4.0_DS) | Delta (aided - unaided) |
+|--------|------------------------------|---------------------------------|------------------------|
+| Wall-clock to first correct (sec) | 195 | 105 | +90 (aided slower) |
+| Tokens to first correct | 15200 | 4400 | +10800 |
+| Files touched before decisive | 4 distinct | 3 distinct | +1 |
+| Irrelevant files touched | 5 events | 5 events | 0 |
+| comp_calls | 7 | 0 | +7 (expected) |
+| decisive_file_found | true | true | — |
+
+Noise flag raised: token ratio 3.45x (aided/unaided) exceeds the >3x threshold. Root cause traced to aided agent's H1 incorrect hypothesis (ClassDocumenter) before compiler graph redirected to typehints.py. Both agents converged on identical fixes, so this is exploration variance not a validity concern.
+
+Wall-clock direction note: aided was slower by 90s. Unaided navigated linearly (test -> fixture -> __init__ -> typehints.py, correct hypothesis at entry 5). Aided took H1 detour, ran comp-build import trace, was directed to typehints.py via event-hook graph edge (compiler_assisted=true at that open).
+
+Confounding check: unaided prior sphinx exposure unknown but no explicit evidence; flagged as open confound per PRD §3.6. Not invalidating.
+
+### 5. Artifacts written and pushed
+
+Phase 2 metric-audit JSON and integrity_audit.md committed at `767f6c95`. TO status flipped to complete at `a106f71d`. Session log committed at `9346d252` (this session adds `9346d252` -> update pending below). All pushed to CLOUD remote.
 
 ---
 
-## Status
+## Decisions Made
 
-COMP_LEARNS.051: COMPLETE. Pushed to CLOUD at `a106f71d`. MCP COMPLETE sent to 2.1.0_SA_COO.
+| Decision | Rationale |
+|----------|-----------|
+| Both patches identical — score each condition independently on its own test output | Identical patches do not invalidate the measurement; each condition's nav_log and AC run are independent evidence. Convergence on the same fix is a finding, not a scoring conflict. |
+| token_ratio 3.45x flagged as noise but run not invalidated | Flag threshold is for flagging + narrative, not automatic re-run. The driver (H1 detour) is identified and explainable; both agents solved the task correctly. |
+| Unaided prior sphinx exposure listed as open confound, not disqualifying | No evidence of prior exposure in nav_log; 1.4.0_DS's prior TOs (.042 comp-preflight) are not sphinx-specific. PRD §3.6 asks to flag, not automatically invalidate. |
+| Comparability class: cross-DS | All non-DS manifest fields match between conditions. Harness exposure difference is the experimental variable, not a class-downgrade trigger. |
+
+---
+
+## Files Modified
+
+| File | Change | Committed |
+|------|--------|-----------|
+| `comp/results/wave-3a/verdicts/case-003-ds-1.3.0-condition_b-run-1.json` | Phase 1 verdict: PASS, condition_b | Yes — `4e1ec449` |
+| `comp/results/wave-3a/verdicts/case-003-ds-1.4.0-condition_a-run-1.json` | Phase 1 verdict: PASS, condition_a | Yes — `4e1ec449` |
+| `comp/results/wave-3a/metric_audit/case-003-efficiency-delta.json` | Phase 2 metric audit + deltas + noise flags | Yes — `767f6c95` |
+| `comp/results/wave-3a/integrity_audit.md` | Phase 1->2 ordering + reasoning.md exclusion + nav_log hygiene + cross-contamination check | Yes — `767f6c95` |
+| `org/tier2_senior/2.1.0_SC_CompLearns/task_orders/COMP_LEARNS.051.case3-two-phase-scoring.md` | Status: staged -> pending -> complete | Yes — `a106f71d` |
+| `org/tier2_senior/2.1.0_SC_CompLearns/logs/2026-04-24/session_02_case3_two_phase_scoring.md` | This session log | Yes — `9346d252` (initial) + update |
+
+---
+
+## Blockers
+
+None. TO queue exhausted (.029-.032 all complete from prior sessions; .051 now complete). Waiting for COO dispatch of .053 (joint review) or any new SC-scoped TO.
+
+---
+
+## Current State
+
+COMP_LEARNS.051 complete and pushed to CLOUD at `a106f71d`. Wave 3a artifacts are at `comp/results/wave-3a/` in feature_clb: two PASS verdicts, metric-audit JSON showing aided agent was slower (+90s wall-clock, 3.45x more tokens) on this cross-module failure diagnosis task, and integrity_audit confirming clean Phase 1->2 ordering and zero context contamination. MCP COMPLETE delivered to 2.1.0_SA_COO with verdict summary, efficiency delta, and noise flags. All four SC task orders (.029-.032, .051) are now complete. Lane A (.048) remains on CTO REDLINE hold — not SC scope until CTO re-scopes and COO re-dispatches.
+
+---
+
+## Next Steps
+
+1. **[2.1.0_SA_COO] Dispatch .053 joint review GO** — .051 ship is one of the two gates (.048 dev-4 output is the other; currently on REDLINE hold). COO determines whether to proceed with partial evidence or wait for .048 resolution.
+2. **[Self] Execute .053 on GO** — joint review of wave-3a verdict + metric-audit; produce scoring sufficiency assessment per PRD §3.7 directional-evidence claim scope.
+3. **[Self] On any new SC dispatch** — check inbox on watcher exit, RAVC ACK, execute immediately.
