@@ -5,7 +5,7 @@
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_to>0.7.0_AE_CloudOps</issued_to>
   <issued_date>2026-04-24</issued_date>
-  <status>staged</status><!-- STAGED: gates on ADHC_OWNPTH.002 (DS hook script impl) completion -->
+  <status>complete</status><!-- COMPLETE: 2026-04-24T20:XX:XXZ -- commit 74b0f77f -- all 5 scope items delivered -->
 
   <title>ADHC_OWNPTH TO 3 — Git hooks wiring + install bootstrap (AE CloudOps)</title>
 
@@ -119,6 +119,22 @@
   </acceptance_criteria>
 
   <evidence>
-    <!-- To be filled by AE on completion -->
+    <commit>74b0f77f -- infra(cloudops): ADHC_OWNPTH.003 -- git hooks wiring + install bootstrap + audit log</commit>
+    <push>CLOUD @ a45c03b5..74b0f77f</push>
+    <scope_items>
+      1. .git/hooks/pre-commit -- exec wrapper created (symlink not possible on Windows Git Bash without Developer Mode; wrapper always delegates to current .tools/git-hooks/owned-paths-check.sh via rev-parse)
+      2. .tools/git-hooks/install-owned-paths.sh -- idempotent bootstrap created; force-added (path gitignored); idempotency confirmed (exit 0, "already wired" on re-run)
+      3. org/git-author-override-audit.log -- bootstrapped; force-added (*.log gitignored)
+      4. org/XXX.md Step D -- owned-paths install-check added before compiler-tool-context step
+      5. Canary test PASS -- WARN fired (exit 0) for 0.7.0_AE_CloudOps staging comp/bench/scorecard.py (COMP_LEARNS lane)
+    </scope_items>
+    <audit_log_tail>
+      2026-04-24T19:51:28Z BOOTSTRAP  SYSTEM  0_files  (audit log initialized by ADHC_OWNPTH.003 AE wiring)
+      2026-04-24T19:52:25Z WARN  0.7.0_AE_CloudOps  1  (1 violation(s): VIOLATION: comp/bench/scorecard.py -- lane=COMP_LEARNS ...)
+    </audit_log_tail>
+    <known_deviations>
+      - Exec wrapper used instead of symlink (Windows Git Bash limitation; ln -s creates a file COPY without error on non-Developer-Mode Windows). Functionally equivalent: wrapper always execs current version of the script.
+      - org/XXX.md WARN fired on commit (lane=BASE_EXEC; AE not in permitted_agents). Expected and acceptable for this TO -- AE is the authorized deliverer of this infra step. Warn mode, commit proceeded.
+    </known_deviations>
   </evidence>
 </task_order>
