@@ -4,14 +4,32 @@
     <issued_by>0.4.0_DS_ClientPlatform</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-22</date>
+    <scope_expanded>2026-04-24 (COO 2.0.0_SA_COO) — added Cohort B (ORPHRELID 4 structural accounts, ~$670K AUA) per ORPHRELID closure `e28e0f5d` H1-A classification. Same BD data-ops inquiry pattern applies to both cohorts.</scope_expanded>
     <status>staged</status>
     <project_code>ADVI_ROLLUP</project_code>
-    <priority>P4 — informational; no portal gate. $6M residual is within Gate 2 band. Not blocking any active TO.</priority>
+    <priority>P4 — informational; no portal gate. Combined residual ~$6.68M (Cohort A $6.013M + Cohort B $670K) within Gate 2 band. Not blocking any active TO.</priority>
     <predecessors>
       <predecessor id="ADVI_ROLLUP.CP-RES20" status="complete" closeout_date="2026-04-22"
-        note="Path C chosen — silver-invisible cohort documented as feed-boundary residual"/>
+        note="Path C chosen — silver-invisible cohort (20 accts) documented as feed-boundary residual"/>
+      <predecessor id="ADVI_ROLLUP.ORPHRELID" status="complete" closeout_date="2026-04-24"
+        note="Orphan rel_id upstream trace; H1-A classification identified 4 structural accounts absent from accounts_dimension — same feed-gap pattern as CP-RES20 Cohort A; folded into this TO as Cohort B"/>
     </predecessors>
   </metadata>
+
+  <cohort_b_orphrelid>
+    Added 2026-04-24 per ORPHRELID RAVC (commit `e28e0f5d`, trace doc `data/black_diamond/diagnostics/ROLLUP/orphan_rel_id_trace.md`).
+
+    4 accounts structurally absent from BD accounts_dimension since EOP2025:
+      - z0819052671 ($35K)
+      - z0819070781 ($29K)
+      - z0819926011 ($280K)
+      - z0820769131 ($326K)
+      Combined: ~$670K AUA persistent; never linked in BD dimension export.
+
+    Pattern: same class as Cohort A — BD feed gap (accounts_dimension missing entries). Distinct from Cohort A in that (a) these are IN silver/allocations, (b) they're not specifically UGL-absent like Cohort A, (c) they're missing from accounts_dimension itself. But the vendor inquiry pattern is identical: "these accounts appear in some BD feeds but not others — please confirm or correct."
+
+    Consolidation rationale: single BD data-ops inquiry covering both cohorts is more efficient than two separate vendor asks; AE 0.6 handles as one engagement cycle.
+  </cohort_b_orphrelid>
 
   <context>
     During CP-RES20 (2026-04-22), a 20-account cohort was identified as silver-invisible at the
@@ -86,14 +104,19 @@
   </wire_contract>
 
   <acceptance_criteria>
-    1. BD data-ops inquiry initiated: AE sends formal inquiry to BD/Schwab data team
-       citing the 20 account IDs and the silver/unrealized absence.
-    2. Root cause determined (one of a/b/c/d above, or new category).
-    3. If feed expansion feasible: silver ingestion updated + silver/unrealized populated
-       for >= 15 of 20 accounts + DS notified to re-run B_00 → B_01.
-    4. If cash-only confirmed: DS notified with BD confirmation; DS updates
-       gold_validate_config.yaml known-exclusion block.
-    5. MCP DS (0.4.0_DS_ClientPlatform) + COO (2.0.0_SA_COO) with outcome when resolved.
+    1. BD data-ops inquiry initiated: AE sends formal inquiry to BD/Schwab data team citing
+       (a) Cohort A — 20 account IDs + silver/unrealized absence, AND (b) Cohort B — 4
+       account IDs + accounts_dimension absence (z0819052671 / z0819070781 / z0819926011 /
+       z0820769131).
+    2. Root cause determined for EACH cohort (one of a/b/c/d for Cohort A; analogous
+       categories for Cohort B).
+    3. If feed expansion feasible: silver ingestion updated + silver/unrealized or
+       accounts_dimension populated for the respective cohorts + DS notified to re-run
+       B_00 → B_01 or chain cascade as appropriate.
+    4. If cash-only or by-design confirmed for any account: DS notified with BD confirmation;
+       DS updates gold_validate_config.yaml known-exclusion block.
+    5. MCP DS (0.4.0_DS_ClientPlatform) + COO (2.0.0_SA_COO) with outcome when resolved —
+       cohort-separated report (Cohort A outcome + Cohort B outcome).
   </acceptance_criteria>
 
   <dependencies>
