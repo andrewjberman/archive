@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-15</date>
-    <status>pending</status><!-- dispatched 2026-04-24 by COO per Andrew 'unblock 49EXEC lane' directive; DS base bandwidth freed post ROLLUP 52/0/3/+1. Independent of TO 1-4; runs in parallel with TO 1. -->
+    <status>complete</status><!-- RAVC4-closed 2026-04-24 by 2.0.0_SA_COO. Evidence: commit 8cc69bab (CLOUD). RE-BASELINE: TO draft targeted D_00c; actual platinum leaderboard writer is D_04.client_portal_summary.py line ~2398 per comp-pipescript io. Rotation added to D_04 (correct producer): s3.copy_object src=platinum/firm/leaderboard.json dst=platinum/firm/leaderboard.prior_week.json with NoSuchKey/exception handled as WARN (first run safe). py_compile + ds-commit-gate PASS. S3 MATCH ETag b9e5e567e046219deab959b8886e5708. comp-platinum reverse leaderboards.prior_week = empty (case [a] new artifact no prior consumers). Phase 3 post-nightly verification: DS reports aws s3 ls evidence tomorrow AM confirming platinum/firm/leaderboard.prior_week.json emits after tonight's 23:00Z nightly. CTO RAVC accepted MCP 20260424. -->
     <project_code>ADVI_49EXEC</project_code>
     <priority>P1 (gates leaderboard_rank_delta + cohort_drift slot triggers in TO 1)</priority>
   </metadata>
