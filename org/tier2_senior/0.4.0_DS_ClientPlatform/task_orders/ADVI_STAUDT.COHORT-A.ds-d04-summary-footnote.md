@@ -6,7 +6,7 @@
     <lane_preference>~D (or whichever DS lane is idle post-chain-full recovery per CTO 2026-04-21T15:50Z ACK)</lane_preference>
     <co_owner>0.4.0_DE_ClientPlatform (portal footnote display, sub-deliverable inline)</co_owner>
     <date>2026-04-21</date>
-    <status>pending</status><!-- DS code complete at 3cf43c26 (build_cohort_a_summary in D_04.client_portal_summary.py + gold_validate_config.yaml cohort_a_summary block); pre-commit gate EXIT 0; pushed to CLOUD. S3 upload + qa-runner --group D held pending CHART-ALIGN RAVC4 close sequencing. Status normalized 2026-04-21 ~14:33 ET (in_progress -> pending for operator schema — descriptive status text preserved in this comment). -->
+    <status>pending</status><!-- DS COMPLETE 2026-04-24: code 3cf43c26, S3 upload this session (MATCH), qa-runner dispatched (SSM 56a8082e, --group D). Artifact at gold/platinum/firm/cohort_a_summary.json: account_count=352/total_aua=$34.5M/snapshot_date=2026-04-22. comp-validate exits 0 (6P/0E/2W — WARN on account_count 352 < 400 threshold due to silver drift from 599 baseline; non-ERROR). HANDOFF TO DE sent 2026-04-24. DE sub-deliverable (portal footnote) PENDING. TO will be flipped to complete after DE MCPs acceptance. -->
     <acked>2026-04-21 ~13:02 ET (DS)</acked>
     <project_code>ADVI_STAUDT</project_code>
     <priority>P2 — small transparency surface. Headline summary only. NO gold-runner filter changes. Scoped to Cohort A (599 accts / $44.7M dropped silver→canonical).</priority>
