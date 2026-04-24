@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.2.0_DS_CompLearns</issued_to>
     <date>2026-04-24</date>
-    <status>staged</status>
+    <status>complete <!-- commit eaf25d6a pushed CLOUD 2026-04-24 by 1.2.0_DS_CompLearns --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — dev-loop infrastructure fix; should land before .060 Lane A rebuild run</priority>
   </metadata>
