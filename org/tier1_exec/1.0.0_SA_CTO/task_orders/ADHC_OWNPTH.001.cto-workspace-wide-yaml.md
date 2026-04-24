@@ -5,7 +5,7 @@
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_to>1.0.0_SA_CTO</issued_to>
   <issued_date>2026-04-24</issued_date>
-  <status>pending</status>
+  <status>complete <!-- 1.0.0_SA_CTO bbf990dc 2026-04-24: .owned-paths.yaml committed; 15 lanes, 70+ rules, 0 MISSING; YAML parse OK --></status>
 
   <title>ADHC_OWNPTH TO 1 — Workspace-wide .owned-paths.yaml authoring</title>
 
