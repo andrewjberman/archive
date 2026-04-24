@@ -257,6 +257,35 @@ Andrew may invoke `/loop COMP_LEARNS` on demand. Semantic: drive COMP_LEARNS fro
 
 Handle Step 0 before the project-driver work. If Step 0 surfaces a fork/GO-request/adjudication ask, **handle it first — operator/validator can wait one turn**. Andrew flagged this on 2.0.0_SA_COO 2026-04-21 after ADVI_STAUDT iter 11 missed an urgent DS fork MCP; the same rule applies here.
 
+**Step 0.5 — Active-push scans (MANDATORY every wake, BEFORE operator/validator).** Tier 1 loop = active push, not passive watch. Agents idle when ready work exists = COO failure, same class as missing auto-rules. Andrew 2026-04-24: "you are a tier 1 agent, a COO, you cannot just wait while nothing is happening, the purpose of the loop is to be checking and pushing." Two sub-scans scoped to COMP_LEARNS dyad (1.1.0_SA_CTO + 4 DS_CompLearns + 2.1.0_SC_CompLearns + self):
+
+**A. Dead-lane scan** — for each in-scope agent:
+1. Broker summary via `get_live_agents()` — "Working on" stale (>1h pre-session)?
+2. `git log --author={serial} --since="2h ago" --oneline` — recent commit activity?
+3. Any in-flight ka_testing-runtime or long-builder operations?
+
+Classify:
+- **Active:** commits / MCP / runtime-op in last 2h → leave alone.
+- **Idle with ready TO:** broker stale + no commits + pending or staged TO with gates met → **NUDGE** with specific TO ID + unblock path + SLA. For `status=active` TOs with zero commits, make implicit gates explicit (e.g., "gated on CTO PRD amendment; pre-work OK now").
+- **Blocked-on-peer:** trace upstream → nudge the blocker → loop back next wake. Chain-of-idle counts as a single dead-lane.
+
+**B. Staged TO dispatch scan** — for COMP_LEARNS:
+```
+list_task_orders({agent_serial}, status="staged", project="COMP_LEARNS")
+```
+For each staged TO whose gates claim met-or-close: verify the gate empirically (dep TOs complete, upstream ship artifacts on S3 or in comp/ tree, CTO rulings landed as commits). If gates met + lane capacity → flip `staged` → `pending` + fire GO same wake. If gates claim unmet but verification shows landed → flip anyway.
+
+**Runtime-in-flight discipline:** when ka_testing Docker runtime owns the critical path (wave scoring + integrity audit + bundle replay), ALWAYS probe runtime status via `runtime status` / TaskList before nudging the monitoring agent (typically 2.1.0_SC_CompLearns). Don't disturb a healthy in-flight runtime.
+
+**Every wake must produce ≥1 of:**
+1. Push forward on an idle DS or SC lane (nudge, escalation, unblock trace)
+2. Flip + dispatch a gates-met staged TO
+3. Author a queued TO (CTO 1.1.0 direction banked, authoring queue has capacity)
+4. Surface a new blocker to 1.1.0_SA_CTO or Andrew
+5. Legitimately close-the-loop (validator exit 1 OR every lane genuinely heads-down with runtime/commit activity last 2h)
+
+Idle-no-push wake = regression; catch next wake, don't compound. Anti-pattern: passive "scan + schedule + end" without any of the 5 push actions.
+
 1. Scan project state: `org/projects/COMP_LEARNS.json` + all TOs across 4 DS agents.
 2. Pick phase:
    - **Operator phase** — any TO status ≠ complete. Run `operator COMP_LEARNS --dispatch`. Act on directive. Read `LOOP_PACING:` hint; schedule wake accordingly.
