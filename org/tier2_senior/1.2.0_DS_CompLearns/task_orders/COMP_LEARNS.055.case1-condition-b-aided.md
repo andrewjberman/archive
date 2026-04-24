@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.2.0_DS_CompLearns</issued_to>
     <date>2026-04-24</date>
-    <status>staged</status>
+    <status>complete <!-- commit 4346df06 pushed CLOUD 2026-04-24 by 1.2.0_DS_CompLearns --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Wave 3b Lane B, Case 1 aided intervention runner</priority>
   </metadata>
