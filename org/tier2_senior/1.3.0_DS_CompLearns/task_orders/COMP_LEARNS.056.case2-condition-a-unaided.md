@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.3.0_DS_CompLearns</issued_to>
     <date>2026-04-24</date>
-    <status>staged</status>
+    <status>complete <!-- 5efb357f --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Wave 3b Lane B, Case 2 unaided intervention runner</priority>
   </metadata>
