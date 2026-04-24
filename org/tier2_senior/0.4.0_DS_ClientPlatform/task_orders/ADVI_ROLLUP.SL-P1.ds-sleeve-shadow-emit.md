@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-15</date>
-    <status>pending</status><!-- picked up 2026-04-16; SL-P0 hard gate cleared via commit 2db02ebc + decision memo (Path 3 apportion + Path 1 escalation, 598 cohort) -->
+    <status>complete</status><!-- RAVC4-closed 2026-04-24 by 2.0.0_SA_COO. First-fire evidence: gold/timeseries/holdings_lots_shadow/2026-04-21.parquet emitted 2026-04-23 00:26:17Z by bd-gold-nightly-fallback 23:00Z 2026-04-22 run. Firm summary: 1,169 rows / 458 accounts / $15,867,270 MV / 100% MV>0. price_quality correctly split 722 uln_sleeve_apportion + 447 uln_sleeve_cash_par. Jones (z0817905851) lot-level spot-check PASS ($318,247 across 3 ETFs + cash with sleeve apportion). EventBridge bd-gold-nightly-fallback confirmed firing on schedule. SL-P1b/SL-P2/SL-P3 stay STAGED pending additional nightly fire stability observation. Original pick up 2026-04-16; SL-P0 hard gate cleared via commit 2db02ebc. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W4</wave>
     <phase_label>SL-P1 (shadow emit to holdings_lots_shadow/)</phase_label>
