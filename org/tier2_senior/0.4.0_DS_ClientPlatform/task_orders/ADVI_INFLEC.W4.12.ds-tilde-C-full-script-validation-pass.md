@@ -4,7 +4,36 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-21</date>
-    <status>pending</status><!-- GO 2026-04-22 per Andrew directive — reassigned from ~C to ~A -->
+    <status>complete</status><!-- GO 2026-04-22 per Andrew directive — reassigned from ~C to ~A -->
+    <completed>2026-04-22</completed>
+    <completed_by>0.4.0_DS_ClientPlatform~A</completed_by>
+    <cto_auth>no-redline authorized 20260424T212000Z</cto_auth>
+    <commit>08e90b30</commit>
+    <evidence>
+      Full C+D chain dispatched --from I_C00 on inf-gold-layer-runner (i-0ed5afded2ebd4ed4).
+      I_C01b column collision bug discovered and fixed mid-run (commit 08e90b30): load_nna_for_date
+      was returning daily_inflow/outflow causing pandas _x/_y rename that broke advisor .agg().
+      Chain re-dispatched --from I_C01b; completed 2026-04-22T22:16:10Z, all 17 scripts exit 0.
+
+      VALIDATION RESULTS:
+        NaT = 0 across all 6 checked platinum artifacts. PASS.
+        managed_aua = absent from all outputs. PASS.
+        platinum/firm/ = 10 JSON files (requirement: >=3). PASS.
+        clients_tab: firm_id=inflection, client_count=997. PASS.
+        timeseries_chart: windows 3M/6M/1Y/2Y/3Y/MAX all present. PASS.
+        leaderboard: 9 advisors x QTD/YTD/MAX windows, fully populated. PASS.
+
+      THRESHOLD FLAGS (data-reality, not pipeline failures):
+        AUA: $429,371,223 (gate: $550M-$750M). Root cause: Fidelity single-custodian
+        AUA only; INF stated $667M AUM includes other custodians. Pipeline correct.
+        Advisor count: 9 subdirs in platinum/advisors/ (gate: >=11). Actual Fidelity
+        feed headcount. Pipeline correct.
+        firm_composition.json: absent (I_D03 graceful no-op — gold/holdings/ empty,
+        I_B01 B-chain not yet run on INF). Separate B-chain TO required.
+
+      MCP COO delivered 2026-04-22T22:30:36Z with W4.12 PASS + threshold flag detail.
+      W4.13 gate: AE 0.6.1 cleared to proceed on pipeline correctness.
+    </evidence>
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 
