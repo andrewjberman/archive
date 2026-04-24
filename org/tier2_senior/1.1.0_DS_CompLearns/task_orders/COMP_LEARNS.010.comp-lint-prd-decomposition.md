@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>1.1.0_DS_CompLearns</issued_to><!-- Any DS lane; CTO flagged as "any lane" in 19:55Z punchlist. Router picks based on who's free. -->
     <date>2026-04-15</date>
-    <status>staged</status><!-- Flips pending when a DS lane is free AND engineer-provided PRD doc N1 is committed to docs/architecture/. -->
+    <status>deferred</status><!-- DEFERRED 2026-04-24 by 2.1.0_SA_COO per 1.1.0_SA_CTO ruling (MCP 20260424T185001Z). External gate (Andrew PRD doc N1 committed to docs/architecture/) has not materialized across full project lifecycle. TO is parked indefinitely; external gate remains technically open. Re-activate only if Andrew delivers N1. Matches .005 precedent (external/superseded deferred pattern). -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P2 — ships last in compiler-upgrade tranche</priority>
   </metadata>
