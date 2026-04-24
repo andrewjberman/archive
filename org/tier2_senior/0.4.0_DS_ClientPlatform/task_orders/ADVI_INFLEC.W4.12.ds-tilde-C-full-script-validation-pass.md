@@ -4,11 +4,12 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-21</date>
-    <status>complete</status><!-- GO 2026-04-22 per Andrew directive — reassigned from ~C to ~A -->
+    <status>complete</status><!-- GO 2026-04-22 per Andrew directive — reassigned from ~C to ~A. RETROACTIVE NOTE 2026-04-24 per CTO ruling MCP 20260424T13xxZ on cross-firm scope bug: W4.12 validated pipeline mechanics correctly on the silver it was given; the firm-scope filter gap in I_A00/I_A01 is upstream ingestion, not a W4.12 validator miss. W4.13b (scope-corrected first-PROD) is the new PROD close gate, NOT W4.12 reopen. ACCEPTANCE-FLEX TRACE: (a) original expect firm_aua $550M-$750M, (b) 2026-04-24T124110Z CTO NO REDLINE flexed to $400M-$500M on Fidelity-single-custodian rationale, (c) 2026-04-24 scope-bug discovery revised to $180M-$200M "Fidelity-only, Inflection-firm-scoped AUA" per Andrew direct figure ~$193M. Three-step trace preserved; original flex was correct-but-incomplete (missed firm-scope layer). -->
     <completed>2026-04-22</completed>
     <completed_by>0.4.0_DS_ClientPlatform~A</completed_by>
-    <cto_auth>no-redline authorized 20260424T212000Z</cto_auth>
+    <cto_auth>no-redline authorized 20260424T212000Z; acceptance-flex revised 20260424T13xxZ per scope-bug discovery — revised threshold $180M-$200M Fidelity-only Inflection-firm-scoped</cto_auth>
     <commit>08e90b30</commit>
+    <retroactive_scope_note>2026-04-24 — W4.12 PASS validated pipeline mechanics on cross-firm aggregate silver; $429M output is multi-firm Orion book, not Inflection-scoped. I_A00/I_A01 lack firm-filter; `ADVI_INFLEC.SCOPEFIX` TO (pending Andrew filter definition + CTO review) will ship that filter. W4.13b scope-corrected first-PROD = new launch gate. W5.1 DE signal held. platinum/firm/ + platinum/advisors/ + platinum/clients/ artifacts quarantined to `_quarantine_scope_bug_20260424/` prefix (AE 0.6.1 execution in flight).</retroactive_scope_note>
     <evidence>
       Full C+D chain dispatched --from I_C00 on inf-gold-layer-runner (i-0ed5afded2ebd4ed4).
       I_C01b column collision bug discovered and fixed mid-run (commit 08e90b30): load_nna_for_date
