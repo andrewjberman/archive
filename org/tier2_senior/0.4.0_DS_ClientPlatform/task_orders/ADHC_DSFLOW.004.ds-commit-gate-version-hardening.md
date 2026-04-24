@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-24</date>
-    <status>pending</status><!-- Andrew decision 2026-04-24 batch approved; CTO PRD §7 TO 4 scope at d8875b42. Gates met (.001 b6e0c154 + .002 1e9d9dc3 both complete). Direct GO dispatch to DS 0.4.0 — any-lane bandwidth. -->
+    <status>complete</status><!-- Phase 1 (gate tools + CLAUDE.md): commit 6156d428. Phase 2 (backfill sweep): commit a5ac27a2. 62 gold + 15 silver/BD + 14 bronze/BD + 2 orion/silver + 2 lib files — 96 files. All pass ruff check --target-version py39 --extend-select FA. Zero exceptions requiring whitelist. RAVC4 sent 2026-04-24. -->
     <project_code>ADHC_DSFLOW</project_code>
     <priority>P1 — closes same latent-bug class as original .001 motivators (081223b5 defaultdict + 035352c3 KeyError). AE 0.6.1 caught pre-dispatch PEP-604 today (SCOPEFIX INFLEC 2d3de276) — structural gate prevents recurrence.</priority>
     <origin>
