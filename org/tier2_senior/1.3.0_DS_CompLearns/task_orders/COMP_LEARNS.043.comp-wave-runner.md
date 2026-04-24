@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.3.0_DS_CompLearns</issued_to>
     <date>2026-04-22</date>
-    <status>complete <!-- 5a44ac87 — comp-wave-runner.py 1113L + 40 tests + wave-1-replay fixture; 2026-04-22 --></status>
+    <status>staged <!-- Gate: .042 (comp-preflight.py) COMPLETE. GO fires from COO after .042 ships. --></status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — wave orchestrator for Stage 2 eval-mode activation; secondary to .044 per §13 prioritization rule</priority>
   </metadata>
