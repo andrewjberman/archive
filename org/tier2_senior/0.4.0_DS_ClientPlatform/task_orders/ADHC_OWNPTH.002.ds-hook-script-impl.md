@@ -5,7 +5,7 @@
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_to>0.4.0_DS_ClientPlatform</issued_to>
   <issued_date>2026-04-24</issued_date>
-  <status>staged</status><!-- STAGED: gates on ADHC_OWNPTH.001 (CTO .owned-paths.yaml) completion -->
+  <status>complete</status><!-- DS COMPLETE 2026-04-24: commit 9ade031f. py_compile exit 0, bash -n exit 0, ds-commit-gate exit 0, 5/5 tests pass, validate exit 0 (15 lanes, 90 rules). RAVC4 sent 2026-04-24. -->
 
   <title>ADHC_OWNPTH TO 2 — Hook script + validator implementation (DS tooling lane)</title>
 
@@ -132,6 +132,16 @@
   </acceptance_criteria>
 
   <evidence>
-    <!-- To be filled by DS on completion -->
+    commit: 9ade031f
+    pushed: CLOUD branch 2026-04-24
+    gate_py_compile: exit 0
+    gate_bash_n: exit 0
+    gate_ds_commit_gate: exit 0 (py_compile + AST + ruff --target-version py39 FA all pass)
+    tests: 5/5 PASS (test_1_positive_ae_infra, test_2_negative_warn_ae_cto_path,
+           test_3_negative_block_ae_cto_path, test_4_override_escape_hatch,
+           test_5_canary_incident4_50_files)
+    phase3_validate: exit 0 -- 15 lanes, 90 path rules, all lane refs resolve
+    windows_compat_notes: grep -a for non-ASCII lane descriptions (BASE_EXEC em-dash cp1252),
+                          tr -d '\r' on Python stdout, Git Bash detection in _run_hook()
   </evidence>
 </task_order>
