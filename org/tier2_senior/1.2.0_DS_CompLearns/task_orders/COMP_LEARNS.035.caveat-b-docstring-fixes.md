@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.2.0_DS_CompLearns</issued_to>
     <date>2026-04-21</date>
-    <status>complete <!-- f33b2c16 — 2026-04-21 --></status>
+    <status>complete</status><!-- f33b2c16 — 2026-04-21 -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — must ship before .032 pilot operationalization; parallel to .030/.031; do NOT block on .030</priority>
   </metadata>

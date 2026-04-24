@@ -4,7 +4,7 @@
     <issued_by>1.1.0_SA_CTO</issued_by>
     <issued_to>1.3.0_DS_CompLearns</issued_to>
     <date>2026-04-21</date>
-    <status>complete <!-- e7a12a12 (cache.py/tests/log); core scorecard/ratchet/ab changes co-landed in 53386ec7 by parallel .026 agent --></status>
+    <status>complete</status><!-- e7a12a12 (cache.py/tests/log); core scorecard/ratchet/ab changes co-landed in 53386ec7 by parallel .026 agent -->
     <evidence>
       Shipped: commit e7a12a12 (primary: cache.py, tests, session log) + co-landed scorecard/ratchet/ab changes in 53386ec7 by 1.4.0_DS parallel agent.
       Artifacts: comp/bench/scorecard.py (CacheProvenance dataclass with compiler_sha/target_version/judge_model_id/warm_up_entries_written/hits_by_selector/misses_by_selector; scorecard_to_dict/from_dict round-trip; loader tolerates null), comp/bench/cache.py (per-selector hit/miss counters; hits_by_selector + misses_by_selector properties; selector_name threaded through get() + require_hit()), comp/loop/ratchet.py (compare_key_for() module-level fn making every KEEP/DISCARD/TIED/FORKED verdict reconstructable from experiment_log extra alone; _compiler_loc() refined to non-empty non-comment lines only; 9 new extra fields: compare_key, candidate/champion_primary_metric/structural_f1/compiler_loc before/after, cache_hits, cache_misses), comp/bench/__init__.py (exports), plus tests.
