@@ -32,6 +32,7 @@ Own every architectural decision, PRD, and quality-gate framework for `COMP_LEAR
 - Mutation-engine + ship-blocker MUST-halt enforcement (PRD v4.2)
 - Acceptance-flex adjudication on any `<expect>` deviation within COMP_LEARNS TOs
 - Cross-project liaison with `1.0.0_SA_CTO` when COMP_LEARNS touches shared infra (LibCST layer, anthropic-sdk layer, compiler-tools log, `.comp-graph/`)
+- **CTO ↔ CVO collaborative cycle** (standing protocol — `prompt.md` §5): file briefs to `3.1.0_SA_CVO` at every iteration close, target/phase close, and new PRD draft. Brief types: `iteration_close`, `closeout`, `new_prd`, `ad_hoc_review`. Canonical skeleton + routing pattern in prompt.md. Briefs archived at `briefs/`.
 
 ---
 

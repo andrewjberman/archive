@@ -175,7 +175,52 @@ When `2.1.0_SA_COO` or a DS agent flags `ACCEPTANCE FLEX — {TO_ID}` on a COMP_
 
 When `validator COMP_LEARNS` exits 1 (requirements closed), pair with `2.1.0_SA_COO` for the 3-step atomic closure (JSON + REGISTRY row coordination with base-CTO + PRD `Status:` line). See `org/XXX.md` → Closure Discipline.
 
-### 5. Escalation to Andrew (five triggers)
+### 5. CTO ↔ CVO collaborative cycle (standing protocol — non-negotiable)
+
+Per Andrew directive 2026-04-27: at every iteration close, phase close, and new PRD draft, file a brief to `3.1.0_SA_CVO` with analysis + paths/references + questions. CVO responds with rulings; CTO actions the rulings within session. This is the canonical CTO↔CVO loop.
+
+**Codified at iter-6 close (2026-04-27).** Pattern proven across iter-6/iter-7 review (`org/tier1_exec/3.1.0_SA_CVO/responses/20260427T143500Z_*`) and iter-7 reclassification ruling (`org/tier1_exec/3.1.0_SA_CVO/responses/20260427T163500Z_*`).
+
+#### Brief types (file pattern shared, emphasis differs)
+
+| Type | Trigger | Example |
+|------|---------|---------|
+| `iteration_close` | Every scored iteration result + n+1 ruling decisions | `20260427T143000Z_from_1.1.0_SA_CTO_iter6_result_iter7_ruling_brief.md` |
+| `closeout` | Target / phase / wave closes (post-mortem + design lessons) | `20260427T162800Z_from_1.1.0_SA_CTO_iter7_result_reclassification_ruling_brief.md` |
+| `new_prd` | Forward-looking design draft (Stage N, Phase N target selection, harness extension) | `20260427T170000Z_from_1.1.0_SA_CTO_stage3_design_brief.md` |
+| `ad_hoc_review` | Specific question outside the iteration cycle (architecture fork, paradigm shift) | `20260424T202500Z_from_1.1.0_SA_CTO_retrieval_paradigm_design.md` |
+
+#### Brief skeleton (canonical — every brief uses this format)
+
+1. **Header.** `from / to / date / subject / brief_type / predecessor` (link to prior brief or CVO ruling that triggered this one).
+2. **§0 — Convergence reading.** What the artifact set actually shows (not what we hoped). 3-5 numbered findings, ranked by signal strength. Cite file:line for every claim.
+3. **§1-N — Analysis sections.** Domain-specific breakdown. For `iteration_close`: result + diagnosis + n+1 spec. For `closeout`: post-mortem + design lessons. For `new_prd`: design decisions + scope + alternatives.
+4. **§N+1 — Recommendations / proposed direction.** CTO's current position, before CVO input. State explicitly what you would do absent CVO ruling.
+5. **§N+2 — Questions for CVO.** Numbered Q1, Q2, ... Each question states (a) the decision needed, (b) my current lean and why, (c) what evidence would change my mind. Mark questions P0 (blocks next action) / P1 (rules required before next phase) / P0+ (epistemological — if CVO sees a hole, surface it now).
+6. **§N+3 — Feedback ask (priority order).** Group questions by priority. State explicit "must rule before X / can rule alongside Y" gating.
+7. **§N+4 — State for CVO context.** Champion sha, ratchet flags, target/phase status, open standing items. CVO needs this to evaluate the brief without re-reading the entire repo.
+
+#### Routing + commit pattern
+
+- **CTO files brief:** `org/tier1_exec/3.1.0_SA_CVO/inbox/YYYYMMDDTHHMMSSZ_from_1.1.0_SA_CTO_<scope>_<type>_brief.md`. Author: `1.1.0_SA_CTO`. Long-form briefs (`closeout`, `new_prd`) also archived at `org/tier1_exec/1.1.0_SA_CTO/briefs/COMP_LEARNS_<scope>_<type>_brief.md`.
+- **CVO responds:** `org/tier1_exec/3.1.0_SA_CVO/responses/YYYYMMDDTHHMMSSZ_to_1.1.0_SA_CTO_<scope>_<type>_review.md`. Author: `3.1.0_SA_CVO`. Andrew typically commits the CVO files since CVO sessions are short-lived.
+- **CTO actions rulings:** within same session if possible. Rulings are stamped R-CTO-N / R-COO-N / R-SC-N / R-DS-N with P0/P1 priority. P0 = blocks next dispatch. P1 = required before next phase.
+- **Session log captures the loop:** every cycle (file brief → receive ruling → action) gets a section in the session log.
+
+#### Iteration cadence (don't break it)
+
+- Every iteration close → `iteration_close` brief filed within 1 hour of SC verdict
+- Every target/phase close → `closeout` brief filed within 1 day of stop-rule trigger
+- Every new PRD draft → `new_prd` brief filed BEFORE PRD authoring begins (CVO P0 rulings shape the PRD)
+- Standing protocol is the cycle, not a per-event ask. If three iterations close without CVO briefs, that is a regression; surface it.
+
+#### What goes in a brief vs. what goes in a session log
+
+- **Brief:** decisions that need CVO input. Architecture-level questions. Forward-looking design. Per-iteration ruling questions.
+- **Session log:** what I did this session. Compiler tools invoked. Files modified. MCP traffic. Tactical execution.
+- **Both:** session log references the brief (path + commit SHA); brief references the session log if the work it discusses is logged.
+
+### 6. Escalation to Andrew (five triggers)
 
 Per RAVC protocol (`org/ref/RAVC_PROTOCOL.md`):
 1. Ambiguity after one clarify cycle
