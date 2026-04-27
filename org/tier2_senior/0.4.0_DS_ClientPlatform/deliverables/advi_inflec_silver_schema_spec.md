@@ -47,6 +47,7 @@ All parquet files use snappy compression, written with pyarrow engine. No hive p
 | `rep_name` | `RepName` | str | No | Direct. |
 | `advisor_key` | (derived) | str | No | Slug from `rep_name`. See §5 (advisor_key derivation). |
 | `rep_bucket` | (derived) | str | No | Enum. See §6 (rep bucketing). Values: `individual`, `firm`, `routing`. |
+| `advisor_firm` | (derived) | str | No | Partner firm tag derived from `rep_id`. See §6.1 (advisor_firm derivation, INFGRD.002). Values: `inflection_wealth_management`, `other`, `unknown`. Used by `_apply_scopefix` to filter the Inflection-only cohort. |
 | `custodian` | (derived) | str | No | Derived from `AcctCode` prefix. See §7 (custodian derivation). |
 | `activity_category` | `Activity Category` | str | No | Direct. 12 known values (see brief §6.1). |
 | `type_desc` | `TypeDesc` | str | No | Direct. 30+ values. |
@@ -71,7 +72,7 @@ All parquet files use snappy compression, written with pyarrow engine. No hive p
 | `edited_by` | `EditedBy` | str | Yes | Direct. Audit field. |
 | `source_file` | (derived) | str | No | Originating CSV filename (e.g., `TRN.csv`, `TRN (3).csv`). For provenance and dedup audit. |
 
-**Total columns: 31**
+**Total columns: 32** (was 31 pre-INFGRD.002; `advisor_firm` added 2026-04-27)
 
 ### 2.2 Excluded Orion columns
 
@@ -97,12 +98,13 @@ None. All 29 source columns are preserved or renamed to a silver column. No colu
 | `rep_name` | `Rep Name` | str | No | Direct. |
 | `advisor_key` | (derived) | str | No | Same slug derivation as TRN §5. |
 | `rep_bucket` | (derived) | str | No | Same enum as TRN §6. |
+| `advisor_firm` | (derived) | str | No | Same partner firm tag as TRN §6.1 (INFGRD.002). Filters to `inflection_wealth_management` cohort at silver layer. |
 | `managed_value` | `Managed Value` | float64 | No | Direct. Household managed AUM. |
 | `unmanaged_value` | `Unmanaged Value` | float64 | Yes | Direct. May be 0 or null. |
 | `firm_managed_aum` | `Firm Managed AUM` | float64 | No | Direct. Firm-level total; constant within a snapshot (667.1M at 2026-04-21). |
 | `source_file` | (derived) | str | No | Originating CSV filename. |
 
-**Total columns: 11**
+**Total columns: 12** (was 11 pre-INFGRD.002; `advisor_firm` added 2026-04-27)
 
 **Load frequency note (CTO clarification):** The spec supports daily, weekly, or monthly snapshot cadence — each new snapshot appends as a new `{snapshot_date}.parquet` file. Load-frequency decision is deferred pending Andrew §10 Q5/Q6 (historical AUM approach + history start date). Schema does not change regardless of cadence.
 
@@ -131,13 +133,14 @@ None. All 29 source columns are preserved or renamed to a silver column. No colu
 | `rep_name` | TRN | str | No | Latest rep_name seen on TRN. |
 | `advisor_key` | (derived) | str | No | Same slug derivation as TRN §5. |
 | `rep_bucket` | (derived) | str | No | Same enum as TRN §6. |
+| `advisor_firm` | (derived) | str | No | Same partner firm tag as TRN §6.1 (INFGRD.002). Filters to `inflection_wealth_management` cohort at silver layer. |
 | `investment_model` | SlickGrid | str | Yes | Model family (Lighthouse, IWM, etc.). Null for accounts without an assigned model (627 accounts / 42%). |
 | `is_active` | SlickGrid | bool | No | True if account appears in SlickGrid registry (active). False for historical TRN-only accounts. |
 | `first_trade_date` | TRN (derived) | date | No | Earliest `trade_date` seen for this `account_id` across all TRN files. |
 | `last_trade_date` | TRN (derived) | date | No | Latest `trade_date` seen. |
 | `source_file` | (derived) | str | No | `"slickgrid"` for SlickGrid-sourced rows; `"trn"` for TRN-only rows. |
 
-**Total columns: 16**
+**Total columns: 17** (was 16 pre-INFGRD.002; `advisor_firm` added 2026-04-27)
 
 **Per-day attribution note (CTO clarification):** `accounts_dim` is a current-state lookup table only — it reflects the latest rep assignment per account as of the most recent TRN data. Per-day tagging-gated attribution (D_00c, D_02, D_04) MUST read `rep_id` at transaction grain from `silver/transactions/{date}.parquet`, NOT from `accounts_dim`. Using `accounts_dim` for historical attribution produces CHART-vs-LEADERBOARD methodology drift (same failure mode as the STAUDT incident just closed). `accounts_dim` is valid only for current-state portal headers and account selectors.
 
@@ -186,6 +189,67 @@ slug = re.sub(r'_+', '_', slug)            # collapse multiple underscores
 | `routing` | "New Accounts Rep" (51,670 TRN rows, $0.02M AUM) | Exclude from all individual and firm attribution; used only for data completeness / audit |
 
 **Rationale for `firm` vs exclusion:** The 29% / $193.6M of firm-managed AUM is too large to silently discard — it must be included in firm-level AUM totals and NNA. It is excluded only from the per-advisor leaderboard view.
+
+---
+
+## 6.1 advisor_firm Derivation (INFGRD.002, 2026-04-27)
+
+`advisor_firm` is a partner-firm tag derived from `rep_id`, added to silver to enable a single-chokepoint multi-firm scope filter at the silver layer (`_apply_scopefix`). It is independent of `rep_bucket` and addresses a different concern:
+
+- `rep_bucket` answers: is this row firm-aggregate, individual-advisor, or routing?
+- `advisor_firm` answers: which partner firm does this row belong to?
+
+The Inflection Orion export carries multi-firm read access — Inflection's Orion login can see Keil Financial Partners affiliates (Tim DeMuth, Kevin Christensen, Dan Sinnen, John Kurcz, Jeremy Keil, Daria Zalewska) in addition to Inflection's own data. `rep_id` is the only field that reliably distinguishes them.
+
+**Algorithm (mirrors silver script `_advisor_firm()`):**
+```
+PARTNER_FIRM_TAGS = {
+    'inflection': 'inflection_wealth_management',
+    # Future: 'keil': 'keil_financial_partners',
+}
+INFLECTION_ADVISOR_FIRM_TAG = PARTNER_FIRM_TAGS['inflection']
+INFLECTION_REP_IDS = {3, 11, 12}
+
+def advisor_firm(rep_id):
+    rid = int(rep_id)  # raises ValueError on bad input -> caught -> 'unknown'
+    if rid in INFLECTION_REP_IDS:
+        return 'inflection_wealth_management'
+    return 'other'
+```
+
+**rep_id mapping (per ADVI_INFGRD.001 Phase 0 audit):**
+
+| rep_id | rep_name | advisor_firm | Inflection? |
+|---|---|---|---|
+| 3 | Inflection Wealth Management | `inflection_wealth_management` | YES (firm placeholder, 287 HH, $193.6M) |
+| 11 | Patrick Scanlan | `inflection_wealth_management` | YES (2 HH, $594K) |
+| 12 | Peter Lee | `inflection_wealth_management` | YES (6 HH, $5.85M) |
+| 1 | New Accounts Rep | `other` | NO (also `rep_bucket='routing'`, excluded by both predicates) |
+| 4 | Keil Financial Partners | `other` | NO (Keil sub-firm placeholder) |
+| 5 | Jeremy Keil | `other` | NO |
+| 9 | John Kurcz | `other` | NO |
+| 13 | Dan Sinnen | `other` | NO |
+| 14 | Tim DeMuth | `other` | NO |
+| 15 | Kevin Christensen | `other` | NO |
+| 18 | Daria Zalewska | `other` | NO |
+
+**Inflection-only AUA per advisor_firm filter:** $200.0M, 295 HH (vs Andrew expectation $191M, +4.7% within ±5% tolerance).
+
+**SCOPEFIX-2 predicate** (replaces the broadened `firm_mask | indiv_mask` from commit 0233aee1):
+```
+firm_scope_mask = df['advisor_firm'] == INFLECTION_ADVISOR_FIRM_TAG
+```
+
+**Phase 0 guards (CTO contract review 2026-04-24, extended INFGRD.002 2026-04-27):**
+
+- **Guard A:** raise if `rep_id` column missing or all-NaN advisor_firm post-derivation. Detects schema regression.
+- **Guard B:** raise if filtered `managed_value` sum outside $50M-$400M (`GUARD_B_AUA_LOWER` / `GUARD_B_AUA_UPPER`). Defends against silent multi-firm contamination if Orion adds a new affiliate partner-firm to the export. Runs only on AUM build path (where `managed_value` exists).
+- **Guard C:** print structured per-firm rep_id breakdown before filter applies. Provides visibility on what rows are being dropped vs kept.
+
+**Notes:**
+- The Inflection Orion export is the multi-firm contamination vector. The bronze-side fix (BRONZERUN_V2 W3.B) is the proper architectural cut; this silver-layer guard is the safety net + immediate ship vehicle.
+- `New Accounts Rep` (rep_id=1) is `advisor_firm='other'` AND `rep_bucket='routing'` — excluded by both predicates. Either alone would suffice; both ensure defense-in-depth.
+- **Long-term:** when Inflection's Orion config supports per-employee rep_ids for all 4 employees (Peter, Noel, Patrick, Joe — currently 2 of 4 in Orion), the allowlist needs maintenance. Pattern is already extractable to `PARTNER_FIRM_TAGS[partner]` for future Keil-as-partner onboarding.
 
 ---
 
