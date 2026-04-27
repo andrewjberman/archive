@@ -211,5 +211,21 @@ If the corrected q03-only retry still yields PATTERN C, reclassify click as shak
 
 | To | Subject | Dispatched |
 |----|---------|-----------|
-| 2.1.0_SA_COO | ITER-7 SPEC AMENDMENT — q03-only scored, q02/q11 to diagnostic ablation | 20260427T~145000Z |
-| 2.1.0_SC_CompLearns | R-SC-1 + R-SC-2 directive — scoring-regime honesty note required before iter-7 | 20260427T~145000Z |
+| 2.1.0_SA_COO | ITER-7 SPEC AMENDMENT — q03-only scored, q02/q11 to diagnostic ablation | 20260427T144011Z |
+| 2.1.0_SC_CompLearns | R-SC-1 + R-SC-2 directive — scoring-regime honesty note required before iter-7 | 20260427T144025Z |
+
+---
+
+## Hold Resolution — Iter-7 GO Released
+
+**Hold condition (2) cleared:** COO committed .067 q03-only amendment at `75789142` (20260427T144859Z). Verified: single class_hierarchy_correction node, Command-perspective, NOT-exclusions for _MultiCommand and CommandCollection, Phase 0 path-fix mandate, status=staged.
+
+**Hold condition (1) cleared:** SC filed R-SC-1 honesty note at `7bc3c185` (20260427T145654Z).
+- Artifact: `comp/results/dev-click-001/scoring_regime_honesty_note.md`
+- Key finding: q11 H3-v2 full-source response contains "Answer: 1" but verbose wrapper causes float() failure. H3-v2 is understated — minimum 9/11 under format-aware grader. q02 verbose failures conflate semantic error with format failure.
+- iter-7 (q03, set_membership grader) is unaffected by this finding.
+- R-SC-2 (semantic-correct-but-unparseable audit label) queued for iter-8.
+
+**GO dispatched to COO:** 20260427T145826Z. COO to dispatch .067 GO to 1.3.0_DS.
+
+**Current state:** iter-7 in progress. Waiting for 1.3.0_DS to implement class_hierarchy_correction node and deliver compiler mutation.
