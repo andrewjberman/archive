@@ -228,4 +228,14 @@ If the corrected q03-only retry still yields PATTERN C, reclassify click as shak
 
 **GO dispatched to COO:** 20260427T145826Z. COO to dispatch .067 GO to 1.3.0_DS.
 
-**Current state:** iter-7 in progress. Waiting for 1.3.0_DS to implement class_hierarchy_correction node and deliver compiler mutation.
+**Iter-7 compiler delivered:** 1.3.0_DS shipped at 20260427T150546Z.
+- `f5095ac0` — runner.py experiment_log path fix (3-4 LOC, redirects to comp/results/dev-click-001/)
+- `7ee0859c` — compiler v7, class_hierarchy_correction node
+- Node content (verbatim): `Command.direct_subclasses: [_BaseCommand, Group]` + `_MultiCommand.parent_class: Group (NOT a direct Command subclass)` + `_CommandCollection.parent_class: Group (NOT a direct Command subclass)`
+- compiler_content_sha: 923071d5. comp-build: 1198 nodes / 979 edges.
+- All gates passed: ds-commit-gate.sh, pytest 458/0, experiment_log 6 entries intact.
+
+**COO validated** and dispatched .068 scoring TO to 2.1.0_SC_CompLearns (commit 6cd1e4c2).
+**Runner path fix active** — iter-7 experiment_log will auto-append, no manual backfill needed.
+
+**Current state:** iter-7 scoring in progress (SC .068). Waiting for verdict.
