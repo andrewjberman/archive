@@ -318,3 +318,25 @@ Author Stage 3 PRD (`docs/architecture/COMP_LEARNS_STAGE3.md` or amendment to ex
 6. Null-result survivability protocol
 
 **MCPs dispatched:** COO (R-COO-1/2 + ship-blockers binding) | SC (R-SC-1/2) | DS (R-DS-1/2). All workers have rulings in their inbox.
+
+---
+
+## Stage 3 PRD V1 Authored
+
+**PRD:** `docs/architecture/COMP_LEARNS_STAGE3.md` — V1, 2026-04-27, 1.1.0_SA_CTO
+
+**Codifies all CVO Stage 3 rulings:**
+- §2 Triage-not-ceiling pre-screen with R-SC-2 semantic consumption (R-CTO-1 P0, R-SC-1 P0)
+- §2.4 Wrong|Wrong subtype distinction with "full-source overload candidate" label (R-SC-2 P1)
+- §3 Two-lane partition (INCLUDE + SENTINEL) with preregistration discipline (R-COO-1 P0)
+- §4 All 4 conditions mandatory from primary case dispatch + decision tree codified (R-CTO-2 P0)
+- §5 INVESTIGATE pilot machinery with promotion/demotion rules (R-DS-2 P1)
+- §6 Per-question per-condition delivered-context sidecar (NOT scorecard bloat) (R-CTO-3 P0, R-DS-1)
+- §7 Sphinx Path A default + Path B mandatory off-ramp criteria (R-COO-2 P1)
+- §8 Click design lesson promotion → COMP_LEARNS_DESIGN_LESSONS.md (follow-on, not ship-blocker)
+- §9 Null-result survivability — preregistration, decision tree, sidecar, reporting discipline as structural defenses (CVO §4 unknown-unknown)
+- §10 Ship-blocker checklist (9 items joint CTO+COO+SC+DS gate before dispatch)
+
+**COMP_LEARNS.json updated** to register Stage 3 PRD as canonical artifact.
+
+**Next CTO action:** File brief to CVO for Stage 3 PRD V1 review per workflow doctrine (new_prd brief type → CVO ruling → V2 amendment if needed → COO TO decomposition).
