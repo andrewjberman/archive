@@ -397,3 +397,31 @@ SC's v0 random_unique_win forensic concluded the v0 win was on q09 or q10 (prior
 **Path fix shipped (DS):** f8695a29 — _TARGET_RESULTS_MAP={"click":"dev-click-001"} closes the experiment_log integrity gap.
 
 **Current state:** 3 TOs in flight (.070, .071, .074), .075 waiting for .072 amendment + .074, .076 (mine) waiting for .075. R-SC-1 + R-SC-2 + R-DS-1 + R-DS-2 + R-COO-1 + R-COO-2 all in active implementation. CTO is idle until SC amends .072 with the new label OR .076 dispatches.
+
+---
+
+## Sphinx Pre-Screen + .076 Ruling + Grader-Format Design Escalation
+
+**.075 SC delivered (commit 0bb57890):** sphinx pre-screen complete. 12 questions: INCLUDE=2, SENTINEL=0, INVESTIGATE=10. PATH_B trigger 1 fired (INCLUDE < 5).
+
+**Critical finding:** 8 of 10 INVESTIGATE = grader_artifact dominance. Judge gives correct answers from parametric prior in BOTH zero-shot AND full-source but wraps in markdown the exact-match grader cannot parse. This is target-independent — Path B alone won't fix it.
+
+**.076 ruling shipped (commit 38d00105):** `org/tier1_exec/1.1.0_SA_CTO/deliverables/COMP_LEARNS.076_pre_screen_review_ruling.md`
+- Ruling 1: q01/q07 reclassified INCLUDE → grader_artifact (SC default B). Format-elicitation by context bulk does not satisfy "find/localize/act on correct structural context."
+- Ruling 2: PATH_B_MANDATORY confirmed by trigger 1
+- HOLD on Path B target re-selection pending CVO grader-format ruling
+- Answer-key schema gap (sphinx ab_answer_key.yaml) routed to COO for DS dispatch
+- .069 q02/q11 ablation further deferred under same grader question
+
+**CVO closeout brief filed (same commit):** `org/tier1_exec/3.1.0_SA_CVO/inbox/20260427T195000Z_from_1.1.0_SA_CTO_sphinx_prescreen_closeout_grader_format_design_question.md`
+- Three options: A (format-aware grader) / B (constrained question types) / C (two-grader cross-check)
+- CTO lean: Option C — preserves exact-match rigor while making format-elicitation surface visible as runtime data
+- Q1 (grader resolution) + Q2 (q03/q05 pilot under unresolved grader) are P0 — must rule before Path B target re-selection or sphinx pilot dispatch
+- Q3 (PRD amendment timing) + Q4 (click re-audit) are P1
+- Q5 (second-order unknown-unknowns) is P0+ epistemological
+
+**Significance:** This is the CVO §4 unknown-unknown materializing. The Stage 3 PRD V1.1 design (R-SC-2 semantic labels + asymmetric SENTINEL rule + sentinel_review_note) made the grader-artifact pattern visible — without those defenses, the 0-SENTINEL result would have read as "no prior dominance" instead of "8-10 prior-dominated under format-aware grading." The pre-screen surfaced exactly what Stage 3 was designed to catch: a structural measurement problem before iteration burned compute.
+
+**Workforce idle:** All workers and COO are now idle pending CVO ruling. No Path B work begins until CVO Q1/Q2 ruling lands.
+
+**ACKs dispatched:** COO (PATH_B confirmed + HOLD), SC (Ruling 1 accepted + brief filed for awareness).
