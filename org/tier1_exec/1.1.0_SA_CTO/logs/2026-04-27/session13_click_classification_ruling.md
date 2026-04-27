@@ -254,3 +254,107 @@ If the corrected q03-only retry still yields PATTERN C, reclassify click as shak
 - experiment_log path fix: f5095ac0 ineffective for click target — DS fix required
 - R-SC-2 (semantic-correct-but-unparseable label): pre iter-8
 - ADVI_RDVSDS DT RAVC: separate CTO ruling needed (Phase 1 leaderboard gap — outside COMP scope)
+
+---
+
+## CVO Reclassification Ruling + Iter-8 Decisions
+
+**CVO response:** `org/tier1_exec/3.1.0_SA_CVO/responses/20260427T163500Z_to_1.1.0_SA_CTO_iter7_reclassification_review.md`
+
+**R-CTO-1 (P0):** Reclassification confirmed. Click q03 CLOSED as scored lift target. Edge topology was already in the failed evidence base (class_inherits edges in iters 2-5). No unexamined mechanism justifies further scored iterations.
+
+**R-CTO-2 (P1):** Position-based injection is a new presentation-policy mechanism family, not iter-8. If run later, label it separately — do not keep click open for it.
+
+**R-CTO-3 (P1 — design lesson):** Strong parametric priors can dominate correct injected structure even when the graph is already right. CVO §4: "closing click is harvesting the actual systems-program insight the target surfaced."
+
+**Iter-8 ruling issued to COO (20260427T163733Z):**
+- Click q03 scored mutations: CLOSED
+- Allowable: (1) .069 q02/q11 non-ratchet diagnostic ablation — gated on SC implementing R-SC-2 simultaneously; (2) experiment_log path fix (DS); (3) click post-mortem
+- Stage 3 planning begins in parallel
+
+**Current state:** Waiting for COO to author .069 TO and click closeout task. Stage 3 design brief pending.
+
+---
+
+## Stage 3 Design Brief Cycle (codified per workflow doctrine)
+
+**Brief filed:** `org/tier1_exec/3.1.0_SA_CVO/inbox/20260427T170000Z_from_1.1.0_SA_CTO_stage3_design_brief.md` (archived at briefs/COMP_LEARNS_stage3_design_brief.md). Commit `fd0baa13`.
+
+**Workflow doctrine codified at same commit:** prompt.md §5 — CTO↔CVO collaborative cycle, brief types (iteration_close / closeout / new_prd / ad_hoc_review), 7-section skeleton, routing pattern, iteration cadence rules.
+
+**CVO ruling received:** `org/tier1_exec/3.1.0_SA_CVO/responses/20260427T171500Z_to_1.1.0_SA_CTO_stage3_design_review.md` (commit b5ddd614).
+
+### Rulings actioned
+
+| Ruling | Priority | Status | Action |
+|--------|----------|--------|--------|
+| R-CTO-1 | P0 | Accepted | Pre-screen redefined as triage tool, NOT ceiling detector. Wrong\|Wrong → INVESTIGATE for structured-context opportunity, not automatic ceiling. Correct\|Wrong → INVESTIGATE for grader/overload artifact. Will codify in Stage 3 PRD. |
+| R-CTO-2 | P0 | Accepted | All 4 conditions (C1+C2+C3+C4) mandatory from primary case dispatch. No phasing. Will codify in PRD. |
+| R-CTO-3 | P0 | Accepted | Delivered-context audit ship-blocker. Per-question per-condition sidecar referenced by scorecard, not raw text in scorecard JSON. R-DS-1 dispatched to DS. |
+| R-CTO-4 | P1 | Accepted | R-SC-2 status correction — it is COMPLETE per scoring_regime_honesty_note.md:72-93 with artifact at r_sc_2_failure_mode_audit.md. Premise drift in brief acknowledged. |
+| R-COO-1 | P0 | Dispatched to COO | Two-lane partition: INCLUDE pool (primary metric) + SENTINEL pool (excluded but retained in metadata). Both preregistered before iteration. |
+| R-COO-2 | P1 | Dispatched to COO | Path A (sphinx) default with HARD off-ramp to Path B if pre-screen fails sphinx. |
+| R-SC-1 | P0 | Dispatched to SC | Stage 3 dispatch blocked on R-SC-2 SEMANTICS integrated into pre-screen, not just R-SC-2 existence. |
+| R-SC-2 | P1 | Dispatched to SC | Add "full-source overload candidate" label to pre-screen output to distinguish genuine ceilings from compression-recoverable Wrong\|Wrong. |
+| R-DS-1 | P1 (gates dispatch) | Dispatched to DS | Per-question per-condition delivered-context sidecar implementation. |
+| R-DS-2 | P1 | Dispatched to DS | Preserve ability to run pilot on Wrong\|Wrong INVESTIGATE candidates. |
+
+### CVO §4 unknown-unknown (critical)
+
+CVO's epistemological warning: "the Stage 3 pre-screen could optimize too aggressively for compiler success and weaken the program's ability to discover null results honestly." Fix: PRE-REGISTER both INCLUDE pool AND excluded/sentinel pool BEFORE iteration begins. Then a null on the INCLUDE pool is a serious challenge to the proposition; success only on INCLUDE pool is honestly reported as "success under pre-screened measurement-room conditions," not a universal claim. This is a binding design constraint for Stage 3 PRD.
+
+### CVO §5 cross-cutting framing
+
+"The most valuable Stage 3 design move is not sphinx itself. It is the shift from 'find a harder target' to 'define measurement room, attribution clarity, and null-result survivability before the next PRD exists.' That is the right correction after click."
+
+### Next CTO action
+
+Author Stage 3 PRD (`docs/architecture/COMP_LEARNS_STAGE3.md` or amendment to existing PRDs). PRD must codify:
+1. Triage-not-ceiling pre-screen with R-SC-2 semantic integration
+2. Two-lane partition with pre-registration discipline
+3. All 4 conditions mandatory
+4. Delivered-context audit as per-question sidecar
+5. Path A default + Path B off-ramp criteria
+6. Null-result survivability protocol
+
+**MCPs dispatched:** COO (R-COO-1/2 + ship-blockers binding) | SC (R-SC-1/2) | DS (R-DS-1/2). All workers have rulings in their inbox.
+
+---
+
+## Stage 3 PRD V1 Authored
+
+**PRD:** `docs/architecture/COMP_LEARNS_STAGE3.md` — V1, 2026-04-27, 1.1.0_SA_CTO
+
+**Codifies all CVO Stage 3 rulings:**
+- §2 Triage-not-ceiling pre-screen with R-SC-2 semantic consumption (R-CTO-1 P0, R-SC-1 P0)
+- §2.4 Wrong|Wrong subtype distinction with "full-source overload candidate" label (R-SC-2 P1)
+- §3 Two-lane partition (INCLUDE + SENTINEL) with preregistration discipline (R-COO-1 P0)
+- §4 All 4 conditions mandatory from primary case dispatch + decision tree codified (R-CTO-2 P0)
+- §5 INVESTIGATE pilot machinery with promotion/demotion rules (R-DS-2 P1)
+- §6 Per-question per-condition delivered-context sidecar (NOT scorecard bloat) (R-CTO-3 P0, R-DS-1)
+- §7 Sphinx Path A default + Path B mandatory off-ramp criteria (R-COO-2 P1)
+- §8 Click design lesson promotion → COMP_LEARNS_DESIGN_LESSONS.md (follow-on, not ship-blocker)
+- §9 Null-result survivability — preregistration, decision tree, sidecar, reporting discipline as structural defenses (CVO §4 unknown-unknown)
+- §10 Ship-blocker checklist (9 items joint CTO+COO+SC+DS gate before dispatch)
+
+**COMP_LEARNS.json updated** to register Stage 3 PRD as canonical artifact.
+
+**Next CTO action:** File brief to CVO for Stage 3 PRD V1 review per workflow doctrine (new_prd brief type → CVO ruling → V2 amendment if needed → COO TO decomposition).
+
+---
+
+## Stage 3 PRD V1.1 — CVO Review Feedback Applied
+
+CVO PRD review feedback received (informal direct relay from Andrew). Five corrections applied:
+
+| Issue | Section | V1 → V1.1 change |
+|-------|---------|------------------|
+| INVESTIGATE pilot rule too permissive | §5.2 | N raised 3-5 → 8 per condition; paired C4+C1 trials; promotion requires absolute floor (≥5/8) AND positive delta (C4-C1 ≥ 2). Adds prior-dominated demotion rule (C1 ≥ 6/8 + delta ≤ 0). |
+| Either-pool-empty hard fail too rigid | §3.1 | INCLUDE empty still hard-rejects; SENTINEL empty allowed only with explicit `sentinel_review_note` in packet manifest. Asymmetric rule reflects asymmetric risk. |
+| "Compression gain" naming loose | §4.3 | Renamed to "Addressed-delivery gain" with caveat that C3→C4 bundles delivery-shape and addressing, not pure compression. |
+| Status metadata drift | §1 header | "Authoring (V1)" → "V1.1" with CVO review reference. |
+| Sidecar audit integrity gap | §6.3 | Added per-blob SHA-256 hashes in manifest + manifest SHA on scorecard. End-to-end content addressing for audit verifiability. |
+
+**Pilot cost recomputed:** |INVESTIGATE| × 8 trials × 2 conditions = 16 calls per investigated question; <100 calls per target.
+
+**PRD V1.1 committed.** Ready for COO TO decomposition once SC and DS receive R-SC-1/R-SC-2/R-DS-1/R-DS-2 implementation TOs.
