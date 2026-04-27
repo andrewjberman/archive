@@ -5,7 +5,9 @@
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_to>0.7.0_AE_CloudOps</issued_to>
   <issued_date>2026-04-27</issued_date>
-  <status>open</status>
+  <status>complete</status>
+  <completed_date>2026-04-27</completed_date>
+  <completion_evidence>14/14 canary assertions PASS; session log adhc_ownpth_007_safe_commit_wrapper.md</completion_evidence>
 
   <title>ADHC_OWNPTH TO 7 — safe-commit.sh wrapper + index-state pre-commit check (AE CloudOps)</title>
 
