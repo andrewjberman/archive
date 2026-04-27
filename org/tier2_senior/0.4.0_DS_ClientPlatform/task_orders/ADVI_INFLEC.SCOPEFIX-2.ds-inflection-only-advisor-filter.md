@@ -1,5 +1,9 @@
 # Task Order: ADVI_INFLEC SCOPEFIX-2 — Inflection-Only Advisor Filter
 
+> **SUPERSEDED** by ADVI_INFGRD.001 + .002 (committed 18041b7e, 2026-04-27).
+> INFGRD.001 = Phase 0 audit. INFGRD.002 = Phase 1 filter + guards (same implementation, fuller spec).
+> DS: ignore this file — work from ADVI_INFGRD.001 and .002.
+
 ```xml
 <task_order>
   <metadata>
