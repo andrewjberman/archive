@@ -238,4 +238,19 @@ If the corrected q03-only retry still yields PATTERN C, reclassify click as shak
 **COO validated** and dispatched .068 scoring TO to 2.1.0_SC_CompLearns (commit 6cd1e4c2).
 **Runner path fix active** — iter-7 experiment_log will auto-append, no manual backfill needed.
 
-**Current state:** iter-7 scoring in progress (SC .068). Waiting for verdict.
+**Iter-7 verdict:** DISCARD, PATTERN C (commit 4e0ecd69)
+- ab_lift=0.0 across all selectors
+- q03 did NOT flip with Command-perspective + NOT-exclusion framing
+- Two mutation families now exhausted: import/class_inherits (iters 2-5) + class_hierarchy_* (iters 6-7)
+- R-CTO-3 stop-rule TRIGGERED: corrected within-family retry still PATTERN C
+
+**Stop-rule ruling issued:** Click dev-click-001 reclassified from lift-signal to shakedown target for q03 surface.
+
+**CVO brief filed:** `org/tier1_exec/3.1.0_SA_CVO/inbox/20260427T162800Z_from_1.1.0_SA_CTO_iter7_result_reclassification_ruling_brief.md`
+
+**Provisional iter-8 position:** No further scored fact-node mutations on q03. Run q02/q11 non-ratchet diagnostic ablation (.069), then close click dev-loop. Awaiting CVO Q1 ruling before dispatch.
+
+**Open items:**
+- experiment_log path fix: f5095ac0 ineffective for click target — DS fix required
+- R-SC-2 (semantic-correct-but-unparseable label): pre iter-8
+- ADVI_RDVSDS DT RAVC: separate CTO ruling needed (Phase 1 leaderboard gap — outside COMP scope)
