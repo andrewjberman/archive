@@ -1,12 +1,14 @@
 <task_order>
   <metadata>
-    <id>2.1.0_SA_COO-2026-04-27-comp-learns-081-sc-sphinx-q03q05-pilot-execution</id>
+    <id>2.1.0_SA_COO-2026-04-27-comp-learns-082-sc-sphinx-q03q05-pilot-execution</id>
+    <renumbered_from>081</renumbered_from>
+    <renumber_reason>Number collision: 1.1.0_DS_CompLearns authored an independent .081 TO (ds-sphinx-answer-key-schema-fix) which absorbed .080 schema conversion at c5f5c89d. SC pilot renumbered to .082 to avoid ambiguity.</renumber_reason>
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>2.1.0_SC_CompLearns</issued_to>
     <date>2026-04-27</date>
     <status>pending</status>
     <project_code>COMP_LEARNS</project_code>
-    <priority>P1 — V1.2 R-COO-1 narrow pilot authorization (parallel with .077/.078/.079/.080)</priority>
+    <priority>P1 — V1.2 R-COO-1 narrow pilot authorization (parallel with .077/.078/.079)</priority>
   </metadata>
 
   <references>
