@@ -140,3 +140,31 @@ No comp-* tool invocations required (architecture ruling session, no script/port
 Lane A dev-loop (iter-6, .064) continues — research value independent of §7 satisfaction. Stage 3 planning can proceed in parallel; COO to surface if PRD §8+ has a trigger.
 
 Ruling MCP'd to 2.1.0_SA_COO at 20260427T130436Z.
+
+---
+
+## Iter-6 Result + Iter-7 Ruling (additional work this session)
+
+**Iter-6 verdict:** DISCARD, PATTERN C (commit 3fd4a31c, compiler_content_sha ecaf3bc0)
+- ab_lift=0.0 across all selectors, q03 did NOT flip
+- structural_f1=0.655, mutation_stability=0.858 (unchanged from iters 4-5)
+- compiler_loc=166 (+39 vs champion 127)
+
+**SC .065 Option A finding (concurrent):**
+- v0 champion random win: q05 (baseline-correct, format artifact — "Yes" vs "Yes." strict match)
+- v0 provides ZERO signal on q02/q03/q11 — all three equally unaddressed
+
+**Iter-6 failure diagnosis — H3 confirmed:**
+The class_hierarchy_summary node encoded hierarchy from Group's perspective (`Group.direct_subclasses`, `_BaseCommand.direct_subclasses`). The judge already knows Group's children (correctly answers q04). The corrective signal needed was from Command's perspective: explicit `Command.direct_subclasses: [_BaseCommand, Group]` + exclusion notes: `_MultiCommand.parent_class: Group (NOT Command subclass)`.
+
+This is a spec error in my Option D framing, not a summary/fact node family ceiling. One DISCARD is not a ceiling.
+
+**Iter-7 ruling (MCP'd to COO 20260427T142454Z):**
+
+| Node | Targets | Rationale |
+|------|---------|-----------|
+| `class_hierarchy_correction`: Command.direct_subclasses + NOT exclusion | q03 | Command-perspective framing; explicit exclusion of _MultiCommand/CommandCollection |
+| `import_count_fact`: core_py.runtime_import_count: 8 | q02 | Numeric fact parseable by float(); bypasses verbose reasoning path |
+| `import_count_fact`: core_py.type_checking_import_count: 1 | q11 | Same numeric extraction rationale |
+
+Author: 1.3.0_DS (COMP_LEARNS.067, COO to author and dispatch).
