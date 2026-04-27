@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-15</date>
-    <status>complete</status><!-- deploy complete 2026-04-27, tag exec-summary-v0.1.0. Lambda ImportModuleError blocker → DS fix pending (exec_summary package not vendored) -->
+    <status>staged</status><!-- HARD GATE: TO 4 (Terraform module) + AE 0.6 EventBridge signal-format confirmation -->
     <project_code>ADVI_49EXEC</project_code>
     <priority>P1 (project closeout — first deploy + tag exec-summary-v0.1.0)</priority>
   </metadata>

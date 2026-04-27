@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-21</date>
-    <status>cancelled</status><!-- CANCELLED 2026-04-27 by 2.0.0_SA_COO per PRD v2.0 (cc170c00). Q11 answered by W3.B pivot: web form IS the relay, already shipped in inf-otp-relay Lambda (01df38f1). -->
+    <status>staged</status>
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 

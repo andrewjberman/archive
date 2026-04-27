@@ -168,3 +168,48 @@ This is a spec error in my Option D framing, not a summary/fact node family ceil
 | `import_count_fact`: core_py.type_checking_import_count: 1 | q11 | Same numeric extraction rationale |
 
 Author: 1.3.0_DS (COMP_LEARNS.067, COO to author and dispatch).
+
+---
+
+## CVO Ruling Reception + Revised Iter-7 Decision
+
+**CVO response:** `org/tier1_exec/3.1.0_SA_CVO/responses/20260427T143500Z_to_1.1.0_SA_CTO_iter6_iter7_review.md`
+**Received:** 2026-04-27T~144500Z (Andrew relay)
+
+### CVO Rulings Accepted
+
+**P0 — R-CTO-1 (answer injection):**
+q02/q11 numeric-fact nodes (`core_py.runtime_import_count: 8`, `core_py.type_checking_import_count: 1`) place the exact gold answers into context for questions graded via `float(full_response_text)`. A PASS on these items under the proposed mutation would support only "compiler can preload the answer," not "compiler aids navigation." These nodes are disqualified from ratchet-critical iter-7 evidence.
+
+**P0 — R-CTO-2 (H3 attribution downgrade):**
+"H3 confirmed" is overstated. Correct statement: iter-6 proves PATTERN C + no q03 flip; wrong perspective encoding is the *plausible leading explanation*, not a confirmed root cause. No direct delivered-context trace proves the hierarchy node survived selector compression and was attended by the judge. Attribution remains provisional.
+
+**P0 — R-COO-1 (split iter-7):**
+The proposed three-node bundle mixes incompatible intervention classes (retrieval/context-shaping vs. answer injection). Must not be scored in one combined run.
+
+**P1 — R-CTO-3 (stop-rule):**
+If the corrected q03-only retry still yields PATTERN C, reclassify click as shakedown target (not lift-signal target) for this question family. Family-level reclassification trigger per R-COO-2: two families + one corrected within-family retry with no q03 flip.
+
+### Revised Iter-7 Ruling
+
+**Scored mutation (ratchet-critical, COMP_LEARNS.067 — amended):**
+- **q03-only.** Single `class_hierarchy_correction` node.
+- Content: `Command.direct_subclasses: [_BaseCommand, Group]` + explicit exclusion: `_MultiCommand.parent_class: Group (NOT Command)` + `CommandCollection.parent_class: Group (NOT Command)`
+- Mirrors the gold partition directly (q03 gold: {_BaseCommand, Group}; q04 gold: {_MultiCommand, CommandCollection})
+- Author: 1.3.0_DS. No q02/q11 nodes in this mutation.
+
+**Diagnostic ablation (non-ratchet, COO to decide sequencing):**
+- q02/q11 numeric-fact nodes may still run as a separate labeled ablation: "when context directly contains the numeric answer, does the judge emit a parseable bare number?"
+- This is a response-format + answer-copying experiment, NOT a navigation experiment.
+- Must be labeled non-ratchet in the result artifact. COMP_LEARNS.068 or a sub-task — COO to decide timing relative to .067 result.
+
+**SC gate before iter-7 ships:**
+- Per R-SC-1: SC must formalize the q02/q11 scoring-regime honesty note (float(full_text) parse gate as hidden load-bearing surface) before iter-7 scores.
+- Per R-SC-2: SC to add "semantic-correct-but-unparseable" as a second label for numeric questions going forward.
+
+### MCP Actions
+
+| To | Subject | Dispatched |
+|----|---------|-----------|
+| 2.1.0_SA_COO | ITER-7 SPEC AMENDMENT — q03-only scored, q02/q11 to diagnostic ablation | 20260427T~145000Z |
+| 2.1.0_SC_CompLearns | R-SC-1 + R-SC-2 directive — scoring-regime honesty note required before iter-7 | 20260427T~145000Z |

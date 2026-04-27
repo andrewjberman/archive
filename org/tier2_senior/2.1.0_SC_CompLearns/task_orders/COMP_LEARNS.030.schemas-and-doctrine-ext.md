@@ -5,7 +5,6 @@
 **Date:** 2026-04-21  
 **Dispatched by:** 2.0.0_SA_COO  
 **Status:** complete  
-<status>complete</status>
 **Scope:** Schema authoring + doctrine documentation. No code changes. No deployment.
 
 ---

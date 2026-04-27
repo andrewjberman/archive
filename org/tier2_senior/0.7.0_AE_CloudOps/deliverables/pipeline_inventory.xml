@@ -2,127 +2,24 @@
 <!--
   Pipeline Inventory — CloudOps (0.7.0_AE_CloudOps)
   Produced by: 0.7.0_AE_CloudOps
-  Date: 2026-04-24
-  Sources: shared-infra/{main,s3,dynamo,iam_legacy}.tf,
-           portal-auth/{cloudfront-distribution,cloudfront,lambdas,lambda-edge,dynamodb,ses,secrets,iam}.tf,
-           portal-notifications/main.tf, infra/aws/ec2/EC2_MANIFEST.json,
-           lambda-source-map.json, infra/aws/lambda/layers/*/requirements.txt
-  Prior version: 2026-03-11
-  Change summary: CloudFront now TF-managed (portal-auth v1.14.0); 4 new shared-infra DynamoDB tables;
-                  6 new portal-auth DynamoDB tables; 8 new EC2 services in EC2_MANIFEST;
-                  trade-pipeline v1.4.0 added; tag refresh shared-infra v1.7.0 / portal-auth v1.14.0;
-                  opalinvest-portal + CF-logs S3 buckets added to shared-infra s3.tf.
+  Date: 2026-03-02
+  Sources: shared-infra/main.tf, portal-notifications/main.tf,
+           lambda-source-map.json, EC2_MANIFEST.json,
+           infra/aws/lambda/layers/*/requirements.txt,
+           infra/aws/terraform/news-pipeline/lambdas.tf,
+           infra/aws/terraform/bd-pipeline/layers.tf,
+           infra/aws/terraform/yang-pipeline/main.tf,
+           portal/src/api/portal-proxy.ts
 -->
 <pipeline_inventory>
 
   <metadata>
     <agent>0.7.0_AE_CloudOps</agent>
-    <scope>shared-infrastructure, portal-auth, portal-notifications, CloudFront, Lambda@Edge, IAM, Security, EC2 awareness</scope>
-    <date>2026-04-24</date>
+    <scope>shared-infrastructure</scope>
+    <date>2026-03-11</date>
     <account_id>313476888478</account_id>
     <region>us-east-1</region>
   </metadata>
-
-  <!-- =========================================================
-       TERRAFORM MODULES
-       ========================================================= -->
-  <terraform_modules>
-
-    <module>
-      <path>infra/aws/terraform/shared-infra/</path>
-      <state_key>shared-infra/tfstate</state_key>
-      <state_bucket>opal-313476888478-terraform-state</state_bucket>
-      <current_tag>shared-infra-v1.7.0</current_tag>
-      <changelog>MISSING — CHANGELOG.json does not exist; run record-terraform-deploy.sh to initialize</changelog>
-      <files>
-        <file>main.tf — backend config, provider, locals; legacy resources (partner_49financial, bd_securities)</file>
-        <file>s3.tf — opalinvest-portal and opal-cloudfront-logs-313476888478 buckets (added v1.5+)</file>
-        <file>dynamo.tf — causality-generations, causality-saved-analyses, opal-users-v2, opal-pii-lookup (imported 2026-04-13, DEBT_1STRUN.005)</file>
-        <file>iam_legacy.tf — EC2SnapshotPermissions, PartnerIdentityReadPermissions</file>
-      </files>
-      <owns>
-        <resource>aws_s3_bucket.lambda_layers (opal-313476888478-lambda-layers)</resource>
-        <resource>aws_s3_bucket.lambda_artifacts (opal-313476888478-lambda-artifacts)</resource>
-        <resource>aws_s3_bucket.opalinvest_portal (opalinvest-portal — CF origin for SPA)</resource>
-        <resource>aws_s3_bucket.cloudfront_logs (opal-cloudfront-logs-313476888478)</resource>
-        <resource>aws_iam_role_policy.portal_lambda_ec2_snapshot (EC2SnapshotPermissions on opal-portal-lambda-role)</resource>
-        <resource>aws_dynamodb_table.opal_partner_49financial (main.tf)</resource>
-        <resource>aws_iam_role_policy.partner_identity_read (PartnerIdentityReadPermissions on opalinvest-auth-lambda-role)</resource>
-        <resource>aws_s3_bucket_lifecycle_configuration.portal_v2_versions (opal-data-portal-v2 — 90d noncurrent expiry)</resource>
-        <resource>aws_s3_bucket_lifecycle_configuration.bd_versions (opal-data-bd — 90d noncurrent expiry)</resource>
-        <resource>aws_dynamodb_table.causality_generations (dynamo.tf)</resource>
-        <resource>aws_dynamodb_table.causality_saved_analyses (dynamo.tf)</resource>
-        <resource>aws_dynamodb_table.opal_users_v2 (dynamo.tf — NOTE: also declared in portal-auth/dynamodb.tf; verify canonical module ownership)</resource>
-        <resource>aws_dynamodb_table.opal_pii_lookup (dynamo.tf — Schwab anonymizer)</resource>
-      </owns>
-    </module>
-
-    <module>
-      <path>infra/aws/terraform/portal-auth/</path>
-      <state_key>portal-auth/tfstate</state_key>
-      <state_bucket>opal-313476888478-terraform-state</state_bucket>
-      <current_tag>portal-auth-v1.14.0</current_tag>
-      <changelog>infra/aws/terraform/portal-auth/CHANGELOG.json</changelog>
-      <files>
-        <file>cloudfront-distribution.tf — aws_cloudfront_distribution.portal (EVTSA9VEHNZVH) — IMPORTED 2026-04-06 (AUTH_TFIMPT.001)</file>
-        <file>cloudfront.tf — cache policies, response headers policies; aws_cloudfront_cache_policy.opal_scoped_advisor_by_firm</file>
-        <file>lambda-edge.tf — auth-validator-edge, shared-advisor-router, public-data-router, cache-control-injector (Lambda@Edge functions)</file>
-        <file>lambdas.tf — opalinvest-auth-handler (nodejs20.x, S3-backed); opal-portal-authorizer (nodejs20.x, S3-backed)</file>
-        <file>dynamodb.tf — opal-firms, opal-sessions, user-permissions, opal-offices, opal-users (legacy), opal-users-v2</file>
-        <file>ses.tf — SES configuration (if any; added post-v1.3.1)</file>
-        <file>secrets.tf — Secrets Manager resource definitions</file>
-        <file>iam.tf — IAM roles and policies for auth pipeline</file>
-        <file>main.tf — backend, provider, locals</file>
-      </files>
-      <owns>
-        <resource>aws_cloudfront_distribution.portal (EVTSA9VEHNZVH — full distribution with 14 ordered behaviors)</resource>
-        <resource>aws_cloudfront_cache_policy.opal_scoped_advisor_by_firm (45eb7514-712c-42c5-9fd6-40909b9f0347)</resource>
-        <resource>aws_lambda_function.auth_handler (opalinvest-auth-handler, nodejs20.x, S3-backed)</resource>
-        <resource>aws_lambda_function.portal_authorizer (opal-portal-authorizer, nodejs20.x, S3-backed)</resource>
-        <resource>aws_lambda_function.auth_validator_edge (Lambda@Edge, viewer-request gate)</resource>
-        <resource>aws_lambda_function.shared_advisor_router (Lambda@Edge, origin-request BD data routing)</resource>
-        <resource>aws_lambda_function.public_data_router (Lambda@Edge, origin-request yang data routing)</resource>
-        <resource>aws_lambda_function.cache_control_injector (Lambda@Edge, origin-response cache headers)</resource>
-        <resource>aws_dynamodb_table.opal_firms (opal-firms, PROVISIONED 5/5, 2 items)</resource>
-        <resource>aws_dynamodb_table.opal_sessions (opal-sessions, PAY_PER_REQUEST, 3.2M items / 1.8 GB)</resource>
-        <resource>aws_dynamodb_table.user_permissions (user-permissions, PAY_PER_REQUEST, 12 items)</resource>
-        <resource>aws_dynamodb_table.opal_offices (opal-offices, PROVISIONED 5/5, 1 item)</resource>
-        <resource>aws_dynamodb_table.opal_users (opal-users, legacy, 12 items)</resource>
-        <resource>aws_dynamodb_table.opal_users_v2 (opal-users-v2, PAY_PER_REQUEST — NOTE: also in shared-infra/dynamo.tf)</resource>
-      </owns>
-      <note>CloudFront distribution imported 2026-04-06 (AUTH_TFIMPT.001). Lambda@Edge ARNs now use dynamic qualified_arn from publish=true so they auto-bump on every apply — resolves the hardcoded-version issue that caused auth-validator-edge v12 to remain pinned after v13 was published (2026-04-15 incident).</note>
-    </module>
-
-    <module>
-      <path>infra/aws/terraform/portal-notifications/</path>
-      <state_key>portal-notifications/tfstate</state_key>
-      <state_bucket>opal-313476888478-terraform-state</state_bucket>
-      <current_tag>UNTAGGED — no portal-notifications-v* tag exists; run 0-diff plan then tag</current_tag>
-      <changelog>MISSING — CHANGELOG.json does not exist; run record-terraform-deploy.sh to initialize</changelog>
-      <owns>
-        <resource>aws_s3_bucket_notification.portal_triggers (on opal-data-portal-v2)</resource>
-        <resource>aws_lambda_permission.yang_pipeline_trigger</resource>
-        <resource>aws_lambda_permission.cloudfront_market_generator</resource>
-      </owns>
-      <note>Singleton owner of all S3 event bindings on opal-data-portal-v2. No pipeline should add S3 notification config in its own TF module.</note>
-    </module>
-
-    <module>
-      <path>infra/aws/terraform/trade-pipeline/</path>
-      <state_key>trade-pipeline/tfstate</state_key>
-      <state_bucket>opal-313476888478-terraform-state</state_bucket>
-      <current_tag>trade-pipeline-v1.4.0</current_tag>
-      <changelog>infra/aws/terraform/trade-pipeline/CHANGELOG.json</changelog>
-      <owns>
-        <resource>aws_dynamodb_table.trade_submissions (opal-trade-submissions, imported TRSB_TFIMPT.W1, trade-pipeline-v1.3.0)</resource>
-        <resource>aws_lambda_function.trade_parquet_batch_export (trade-parquet-batch-export, S3-backed, reclaimed W2 Phase 1)</resource>
-        <resource>aws_lambda_function.trade_dashboard_api (trade-dashboard-api, S3-backed, reclaimed W2 Phase 1)</resource>
-        <resource>9 additional Lambda functions in EXTERNAL state (see README Known Issues)</resource>
-      </owns>
-      <note>TRSB_TFIMPT.W1 imported DynamoDB. W2 Phase 1 reclaimed 2 of 11 Lambdas from EXTERNAL to S3-backed. 9 Lambdas remain EXTERNAL (documented in README Known Issues table). W3 (TRSB_TFIMPT.W3) will bring shared-infra subordinate changes + trade-pipeline-v1.5.0 — gated on Andrew SES prod-access + shared-infra-v1.8.0.</note>
-    </module>
-
-  </terraform_modules>
 
   <!-- =========================================================
        S3 BUCKETS
@@ -134,80 +31,108 @@
       <purpose>Terraform remote state storage. One tfstate file per pipeline module. Never stores code or data artifacts.</purpose>
       <key_patterns>
         <pattern>{pipeline}/tfstate</pattern>
+        <!-- Examples: shared-infra/tfstate, portal-notifications/tfstate,
+             yang-pipeline/tfstate, news-pipeline/tfstate, bd-pipeline/tfstate,
+             market-overview/tfstate, smartx-pipeline/tfstate -->
       </key_patterns>
+      <consumers>
+        <consumer>shared-infra (backend owner)</consumer>
+        <consumer>portal-notifications</consumer>
+        <consumer>yang-pipeline</consumer>
+        <consumer>news-pipeline</consumer>
+        <consumer>bd-pipeline</consumer>
+        <consumer>market-overview</consumer>
+        <consumer>smartx-pipeline</consumer>
+      </consumers>
       <versioning>enabled</versioning>
       <encryption>AES256</encryption>
       <public_access_block>all blocked</public_access_block>
-      <terraform_resource>aws_s3_bucket.terraform_state (shared-infra main.tf — self-referential backend)</terraform_resource>
+      <terraform_resource>aws_s3_bucket.terraform_state (state bucket — backend is self-referential)</terraform_resource>
+      <note>This bucket is the S3 backend for shared-infra itself. All pipelines use it for state.</note>
     </bucket>
 
     <bucket>
       <name>opal-313476888478-lambda-layers</name>
-      <purpose>Compiled Lambda Layer zips uploaded before terraform apply publishes a new aws_lambda_layer_version.</purpose>
+      <purpose>Compiled Lambda Layer zips uploaded before terraform apply publishes a new aws_lambda_layer_version. One zip per layer name.</purpose>
       <key_patterns>
-        <pattern>{layer-name}.zip (e.g., news-trending-deps.zip, openpyxl-layer.zip)</pattern>
+        <pattern>{layer-name}.zip</pattern>
+        <!-- Examples: news-trending-deps.zip, openpyxl-layer.zip -->
       </key_patterns>
+      <consumers>
+        <consumer>news-pipeline (news-trending-deps layer)</consumer>
+        <consumer>bd-pipeline (openpyxl-layer)</consumer>
+        <consumer>yang-pipeline (openpyxl-layer — hardcoded ARN :1)</consumer>
+      </consumers>
       <versioning>enabled</versioning>
       <encryption>AES256</encryption>
       <public_access_block>all blocked</public_access_block>
-      <terraform_resource>aws_s3_bucket.lambda_layers (shared-infra main.tf)</terraform_resource>
+      <terraform_resource>aws_s3_bucket.lambda_layers (shared-infra/main.tf)</terraform_resource>
     </bucket>
 
     <bucket>
       <name>opal-313476888478-lambda-artifacts</name>
-      <purpose>Compiled Lambda function zips. Uploaded by build-and-upload.sh before terraform apply. S3 versioning provides the deploy signal.</purpose>
+      <purpose>Compiled Lambda function zips. Uploaded by build-and-upload.sh before terraform apply. S3 versioning provides full artifact history.</purpose>
       <key_patterns>
         <pattern>{pipeline}/{function-name}.zip</pattern>
+        <!-- Examples:
+             yang-pipeline/yang-pipeline-trigger.zip
+             news-pipeline/news-ingestion-scheduler.zip
+             bd-pipeline/bd-portal-publisher.zip
+             market-overview/opal-market-overview-tiered-generator.zip
+             portfolio-management/opal-pm-snapshot-handler.zip
+             other/opal-data-refresh-api.zip -->
       </key_patterns>
+      <consumers>
+        <consumer>yang-pipeline</consumer>
+        <consumer>news-pipeline</consumer>
+        <consumer>bd-pipeline</consumer>
+        <consumer>market-overview</consumer>
+        <consumer>portfolio-management</consumer>
+        <consumer>other (misc functions)</consumer>
+      </consumers>
       <versioning>enabled</versioning>
       <encryption>AES256</encryption>
       <public_access_block>all blocked</public_access_block>
-      <terraform_resource>aws_s3_bucket.lambda_artifacts (shared-infra main.tf)</terraform_resource>
-      <note>S3 object version change detected by terraform plan via s3_object_version data source — uploading a new zip is the deploy signal.</note>
-    </bucket>
-
-    <bucket>
-      <name>opalinvest-portal</name>
-      <purpose>React SPA static assets — CloudFront origin for the default (*) behavior (OAI EU39UXW7CMSI5). Portal deploy writes built Vite artifacts here via deploy.yml S3 sync.</purpose>
-      <versioning>not confirmed in source</versioning>
-      <encryption>AES256</encryption>
-      <public_access_block>all blocked</public_access_block>
-      <terraform_resource>aws_s3_bucket.opalinvest_portal (shared-infra s3.tf)</terraform_resource>
-    </bucket>
-
-    <bucket>
-      <name>opal-cloudfront-logs-313476888478</name>
-      <purpose>CloudFront access logs for the portal distribution.</purpose>
-      <encryption>AES256</encryption>
-      <terraform_resource>aws_s3_bucket.cloudfront_logs (shared-infra s3.tf)</terraform_resource>
+      <terraform_resource>aws_s3_bucket.lambda_artifacts (shared-infra/main.tf)</terraform_resource>
+      <note>Each zip upload triggers a version change detected by terraform plan via s3_object_version. Uploading a new zip is the signal to deploy.</note>
     </bucket>
 
     <bucket>
       <name>opal-data-portal-v2</name>
-      <purpose>Shared portal data S3 event bus. Pipeline outputs written here; S3 notifications trigger downstream Lambda consumers. Also serves as general data origin for CloudFront.</purpose>
+      <purpose>Shared portal data S3 event bus. Pipeline outputs are written here; S3 notifications trigger downstream Lambda consumers. Also serves static data for CloudFront distribution.</purpose>
       <key_patterns>
         <pattern>uploads/manifest.json (yang-pipeline trigger)</pattern>
         <pattern>market-metrics.json (cloudfront-market-generator trigger)</pattern>
-        <pattern>json-tiered/* (yang pipeline JSON outputs served via /api/general/json-tiered/*)</pattern>
+        <pattern>Various pipeline-specific prefixes (client data, market data, etc.)</pattern>
       </key_patterns>
-      <lifecycle_config>aws_s3_bucket_lifecycle_configuration.portal_v2_versions (shared-infra) — 90-day noncurrent version expiry + 7-day MPU abort</lifecycle_config>
-      <terraform_resource>portal-notifications owns aws_s3_bucket_notification.portal_triggers; shared-infra owns lifecycle config only; bucket itself NOT in any TF module</terraform_resource>
+      <consumers>
+        <consumer>yang-pipeline (writes to uploads/; trigger reads manifest.json)</consumer>
+        <consumer>opal-cloudfront-market-generator (triggered by market-metrics.json)</consumer>
+        <consumer>CloudFront origin (serves data to portal frontend)</consumer>
+      </consumers>
+      <lifecycle_config>aws_s3_bucket_lifecycle_configuration.portal_v2_versions (shared-infra/main.tf) — 90-day noncurrent version expiry + 7-day MPU abort. Deployed 2026-03-10 (shared-infra-v1.4.0, DRFR_PTMCH Phase 1).</lifecycle_config>
+      <note>This bucket is NOT created by shared-infra Terraform. All S3 notification bindings are owned by portal-notifications module. Individual pipelines own their write IAM permissions. Lifecycle config added in shared-infra-v1.4.0.</note>
+      <terraform_resource>portal-notifications module owns aws_s3_bucket_notification.portal_triggers; shared-infra owns lifecycle config</terraform_resource>
     </bucket>
 
     <bucket>
       <name>opal-data-bd</name>
-      <purpose>BD pipeline gold layer output store. CloudFront serves content via S3-opal-data-bd origin on /api/scoped/advisor-intelligence/* paths (OAI E139998VWH0PD).</purpose>
-      <lifecycle_config>aws_s3_bucket_lifecycle_configuration.bd_versions (shared-infra) — 90-day noncurrent version expiry + 7-day MPU abort</lifecycle_config>
-      <terraform_resource>shared-infra owns lifecycle config only; bucket NOT in TF module</terraform_resource>
-    </bucket>
-
-    <bucket>
-      <name>opal-data-inf</name>
-      <purpose>Inflection pipeline S3 store. Gold scripts and dispatch artifacts for inf-gold-layer-runner. Referenced in EC2_MANIFEST dispatch_script.</purpose>
+      <purpose>BD pipeline gold layer output store. BD gold scripts and bd-portal-publisher write processed advisor intelligence data here. CloudFront serves content via S3-opal-data-bd origin on /api/scoped/advisor-intelligence/*.json path.</purpose>
       <key_patterns>
-        <pattern>code/gold/ (dispatch scripts and gold scripts)</pattern>
+        <pattern>gold/{filename}.json (BD portal publisher outputs)</pattern>
+        <pattern>gold/clients/{z_id}.json (advisor-level detail)</pattern>
+        <pattern>gold/client_detail/* (client detail files)</pattern>
+        <pattern>gold/partner_analytics/*.json (EC2 gold script outputs)</pattern>
       </key_patterns>
-      <terraform_resource>UNKNOWN — not confirmed in any TF module source; likely managed under inf-pipeline workspace</terraform_resource>
+      <consumers>
+        <consumer>bd-portal-publisher Lambda (writes gold/)</consumer>
+        <consumer>bd-portal-advisor-publisher Lambda (writes gold/clients/)</consumer>
+        <consumer>bd-gold-layer-runner EC2 (writes gold/ via S3 sync)</consumer>
+        <consumer>CloudFront (S3-opal-data-bd origin — serves /api/scoped/advisor-intelligence/*.json)</consumer>
+      </consumers>
+      <lifecycle_config>aws_s3_bucket_lifecycle_configuration.bd_versions (shared-infra/main.tf) — 90-day noncurrent version expiry + 7-day MPU abort. Deployed 2026-03-10 (shared-infra-v1.4.0, DRFR_PTMCH Phase 1).</lifecycle_config>
+      <note>This bucket is NOT created by shared-infra Terraform. Versioning was pre-enabled (confirmed 2026-03-10 CLI). Lifecycle config added in shared-infra-v1.4.0.</note>
+      <terraform_resource>shared-infra owns lifecycle config only</terraform_resource>
     </bucket>
 
   </s3_buckets>
@@ -226,8 +151,26 @@
       <requirements_file>infra/aws/lambda/layers/news-trending-deps/requirements.txt</requirements_file>
       <terraform_module>infra/aws/terraform/news-pipeline/ (lambdas.tf)</terraform_module>
       <terraform_resource>aws_lambda_layer_version.news_trending_deps</terraform_resource>
-      <key_packages>hdbscan, numpy, scipy, scikit-learn, openai, beautifulsoup4, feedparser, requests, httpx, pydantic</key_packages>
-      <rebuild_note>Use PowerShell rebuild pattern. Do NOT strip numpy/tests/ — numpy 2.x imports numpy._core.tests during __init__.</rebuild_note>
+      <key_packages>
+        <package>hdbscan==0.8.40</package>
+        <package>numpy==2.2.6</package>
+        <package>scipy==1.16.3</package>
+        <package>scikit-learn==1.7.2</package>
+        <package>openai==2.23.0</package>
+        <package>beautifulsoup4==4.14.3</package>
+        <package>feedparser==6.0.12</package>
+        <package>requests==2.32.5</package>
+        <package>httpx==0.28.1</package>
+        <package>pydantic==2.12.5</package>
+      </key_packages>
+      <used_by_pipelines>
+        <pipeline>news-pipeline: news-ingestion-scheduler</pipeline>
+        <pipeline>news-pipeline: news-trending-analysis</pipeline>
+        <pipeline>news-pipeline: opal-news-layer3-curation</pipeline>
+        <pipeline>news-pipeline: keyword-intelligence-generator</pipeline>
+      </used_by_pipelines>
+      <last_updated>2026-02-26 (feedparser + sgmllib3k + requests added)</last_updated>
+      <rebuild_note>Use PowerShell rebuild pattern (build-layer.ps1) — Git Bash path escaping unreliable on Windows. Do NOT strip numpy tests/ directory (numpy 2.x imports numpy._core.tests during __init__).</rebuild_note>
     </layer>
 
     <layer>
@@ -238,357 +181,336 @@
       <requirements_file>infra/aws/lambda/layers/openpyxl-layer/requirements.txt</requirements_file>
       <terraform_module>infra/aws/terraform/bd-pipeline/ (layers.tf)</terraform_module>
       <terraform_resource>aws_lambda_layer_version.openpyxl_layer</terraform_resource>
-      <key_packages>openpyxl==3.1.5, et_xmlfile</key_packages>
-      <note>Owned by bd-pipeline TF module. Yang-pipeline references via hardcoded ARN :1 — cross-pipeline dependency gap.</note>
+      <key_packages>
+        <package>openpyxl==3.1.5</package>
+        <package>et_xmlfile 2.0.0 (bundled dependency)</package>
+      </key_packages>
+      <used_by_pipelines>
+        <pipeline>bd-pipeline: bd-allocation-processor (via aws_lambda_layer_version.openpyxl_layer ARN)</pipeline>
+        <pipeline>yang-pipeline: multiple functions (via hardcoded ARN arn:aws:lambda:us-east-1:313476888478:layer:openpyxl-layer:1)</pipeline>
+      </used_by_pipelines>
+      <note>IMPORTANT: The aws_lambda_layer_version resource lives in bd-pipeline Terraform module, not shared-infra. Yang-pipeline references a hardcoded version :1 ARN in main.tf rather than reading from bd-pipeline state. This is a cross-pipeline dependency gap — if a new layer version is published from bd-pipeline, yang-pipeline will not automatically pick it up.</note>
     </layer>
 
   </lambda_layers>
 
   <!-- =========================================================
+       PORTAL NOTIFICATIONS
+       All S3 event bindings on opal-data-portal-v2
+       Source of truth: infra/aws/terraform/portal-notifications/main.tf
+       ========================================================= -->
+  <portal_notifications>
+    <module_path>infra/aws/terraform/portal-notifications/</module_path>
+    <state_key>portal-notifications/tfstate</state_key>
+    <state_bucket>opal-313476888478-terraform-state</state_bucket>
+    <terraform_resource>aws_s3_bucket_notification.portal_triggers (bucket = opal-data-portal-v2)</terraform_resource>
+
+    <trigger>
+      <id>yang-pipeline-manifest-trigger</id>
+      <bucket>opal-data-portal-v2</bucket>
+      <filter_prefix>uploads/</filter_prefix>
+      <filter_suffix>manifest.json</filter_suffix>
+      <event_type>s3:ObjectCreated:*</event_type>
+      <target_lambda>yang-pipeline-trigger</target_lambda>
+      <target_lambda_arn>arn:aws:lambda:us-east-1:313476888478:function:yang-pipeline-trigger</target_lambda_arn>
+      <owning_pipeline>yang-pipeline</owning_pipeline>
+      <purpose>An upload of uploads/manifest.json to the portal bucket starts the Yang Step Functions pipeline. This is the primary ETL kickoff trigger.</purpose>
+      <lambda_permission>aws_lambda_permission.yang_pipeline_trigger (statement_id = s3-trigger-permission)</lambda_permission>
+    </trigger>
+
+    <trigger>
+      <id>cloudfront-market-generator-trigger</id>
+      <bucket>opal-data-portal-v2</bucket>
+      <filter_prefix>market-metrics.json</filter_prefix>
+      <filter_suffix>(none — prefix acts as exact key match)</filter_suffix>
+      <event_type>s3:ObjectCreated:*</event_type>
+      <target_lambda>opal-cloudfront-market-generator</target_lambda>
+      <target_lambda_arn>arn:aws:lambda:us-east-1:313476888478:function:opal-cloudfront-market-generator</target_lambda_arn>
+      <owning_pipeline>UNKNOWN — function absent from lambda-source-map.json. See known_issues.</owning_pipeline>
+      <purpose>Triggered when market-metrics.json is written to the portal bucket. Likely regenerates CloudFront-served market data (pre-computed response cache or invalidation).</purpose>
+      <lambda_permission>aws_lambda_permission.cloudfront_market_generator (statement_id = AllowS3InvokeCloudFrontGenerator)</lambda_permission>
+    </trigger>
+
+    <adding_a_new_trigger>
+      Add a lambda_function block to aws_s3_bucket_notification.portal_triggers in portal-notifications/main.tf.
+      Add a corresponding aws_lambda_permission resource in the same file.
+      Give the pipeline Lambda an aws_lambda_permission allowing s3.amazonaws.com.
+      Apply portal-notifications Terraform. Do NOT add S3 notification config in individual pipeline modules — that would conflict with the singleton resource here.
+    </adding_a_new_trigger>
+
+  </portal_notifications>
+
+  <!-- =========================================================
        CLOUDFRONT
-       Now TF-managed in portal-auth/cloudfront-distribution.tf
-       Imported 2026-04-06 (AUTH_TFIMPT.001) at portal-auth-v1.14.0
+       Note: Distribution behaviors were partially console-managed
+       historically. Full behavior config is not in Terraform source.
+       Distribution ID is not discoverable from local source files.
        ========================================================= -->
   <cloudfront>
     <distribution>
       <id>EVTSA9VEHNZVH</id>
-      <aliases>opalinvest.dev, www.opalinvest.dev</aliases>
-      <terraform_resource>aws_cloudfront_distribution.portal (portal-auth/cloudfront-distribution.tf)</terraform_resource>
-      <terraform_module>infra/aws/terraform/portal-auth/</terraform_module>
-      <description>Serves the Opal Portal SPA + all API/data routes. Imported into TF 2026-04-06 (AUTH_TFIMPT.001). Lambda@Edge ARNs now dynamic (auto-bump on publish).</description>
+      <description>Serves the Opal Portal: static React SPA (default behavior) and API/data routes via S3 origins and API Gateway. Full behavior list audited via CLI 2026-03-10.</description>
     </distribution>
 
-    <origins>
-      <origin id="S3-opalinvest-portal" type="S3-OAI" oai="EU39UXW7CMSI5">SPA static assets (opalinvest-portal bucket)</origin>
-      <origin id="S3-opal-data-portal-v2-json" type="S3-OAC" oac="E24L6358YRRKAE">Yang data JSON (opal-data-portal-v2 bucket)</origin>
-      <origin id="S3-opal-data-bd" type="S3-OAI" oai="E139998VWH0PD">BD advisor intelligence gold layer (opal-data-bd bucket)</origin>
-      <origin id="APIGateway-portal" domain="7k3ed8px20.execute-api.us-east-1.amazonaws.com">Portal API Gateway</origin>
-      <origin id="APIGateway-portfolio" domain="f61h681z9g.execute-api.us-east-1.amazonaws.com" path="/prod">Portfolio API Gateway</origin>
-    </origins>
-
     <behaviors>
-      <behavior order="default" path_pattern="*" origin="S3-opalinvest-portal" cache_policy="Managed-CachingOptimized">
-        SPA static assets — no Lambda@Edge
+      <!-- Audited via: aws cloudfront get-distribution-config --id EVTSA9VEHNZVH 2026-03-10 -->
+      <behavior>
+        <path_pattern>Default (*)</path_pattern>
+        <origin>S3 static site (React SPA)</origin>
+        <viewer_request_fn>auth-validator-edge:12</viewer_request_fn>
+        <notes>Static portal assets. Not directly relevant to Time Machine.</notes>
       </behavior>
-      <behavior order="1" path_pattern="/api/general/trades/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        Trades API Gateway (auth-gated)
+      <behavior>
+        <path_pattern>/api/general/json-tiered/*</path_pattern>
+        <origin>S3-opal-data-portal-v2-json</origin>
+        <viewer_request_fn>auth-validator-edge:12</viewer_request_fn>
+        <origin_request_fn>public-data-router:4</origin_request_fn>
+        <origin_response_fn>cache-control-injector:1</origin_response_fn>
+        <notes>YANG DATA PATH. Yang pipeline JSON outputs served here. Time Machine yang restore requires invalidation on this path.</notes>
       </behavior>
-      <behavior order="2a" path_pattern="/api/scoped/advisor-intelligence/artifacts/*/*" origin="S3-opal-data-bd" cache_policy="opal_scoped_advisor_by_firm" auth="auth-validator-edge:viewer-request" routing="shared-advisor-router:origin-request">
-        BD artifacts depth-3 (summary/*, partner_analytics/*)
+      <behavior>
+        <path_pattern>/api/general/*</path_pattern>
+        <origin>S3-opal-data-portal-v2-json</origin>
+        <viewer_request_fn>auth-validator-edge:12</viewer_request_fn>
+        <origin_request_fn>public-data-router:4</origin_request_fn>
+        <origin_response_fn>cache-control-injector:1</origin_response_fn>
+        <notes>YANG DATA PATH (catch-all). Broader catch-all for general yang data. Invalidation needed alongside /api/general/json-tiered/*.</notes>
       </behavior>
-      <behavior order="2b" path_pattern="/api/scoped/advisor-intelligence/artifacts/*" origin="S3-opal-data-bd" cache_policy="opal_scoped_advisor_by_firm" auth="auth-validator-edge:viewer-request" routing="shared-advisor-router:origin-request">
-        BD artifacts depth-2
+      <behavior>
+        <path_pattern>/json-tiered/*</path_pattern>
+        <origin>S3-opal-data-portal-v2-json</origin>
+        <notes>Legacy direct path — no Lambda@Edge. Likely internal/legacy use.</notes>
       </behavior>
-      <behavior order="2c" path_pattern="/api/scoped/advisor-intelligence/entities/*/*" origin="S3-opal-data-bd" cache_policy="opal_scoped_advisor_by_firm" auth="auth-validator-edge:viewer-request" routing="shared-advisor-router:origin-request">
-        BD entities depth-3
+      <behavior>
+        <path_pattern>/api/scoped/advisor-intelligence/*.json</path_pattern>
+        <origin>S3-opal-data-bd (OAI E139998VWH0PD)</origin>
+        <viewer_request_fn>auth-validator-edge:12</viewer_request_fn>
+        <origin_request_fn>shared-advisor-router:5</origin_request_fn>
+        <origin_request_policy>b689b0a8-53d0-40ab-baf2-68738e2966ac (CORS-S3Origin)</origin_request_policy>
+        <response_headers_policy>3570c5b4-e62c-49c1-91dd-ff0319a3a227 (opal-scoped-advisor-cors)</response_headers_policy>
+        <cache_policy>45eb7514-712c-42c5-9fd6-40909b9f0347 (opal-scoped-advisor-by-firm) — X-Firm-Id header + firm query string in cache key. TF-managed: portal-auth/cloudfront.tf (portal-auth-v1.3.1)</cache_policy>
+        <notes>BD DATA PATH. BD gold JSON files served directly from opal-data-bd. Time Machine BD restore requires invalidation on this path. SEPARATE from yang invalidation. OAI migrated from OAC on 2026-03-10 (ADVI_APISCP.003). CORS added 2026-03-10 (ADVI_APISCP.004/005). firm query string added to cache key 2026-03-10/11 (ADVI_APISCP.007).</notes>
       </behavior>
-      <behavior order="2d" path_pattern="/api/scoped/advisor-intelligence/advisors/*/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        BD advisors depth-3 (book, mix-views)
+      <behavior>
+        <path_pattern>/api/scoped/advisor-intelligence/clients/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <notes>BD client detail via API Gateway (not S3 direct). Invalidation for this path clears API Gateway cache, not S3 object cache.</notes>
       </behavior>
-      <behavior order="2e" path_pattern="/api/scoped/advisor-intelligence/clients/*/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        BD clients depth-3 (detail)
+      <behavior>
+        <path_pattern>/api/scoped/data-refresh/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <viewer_request_fn>auth-validator-edge:12</viewer_request_fn>
+        <notes>DataRefresh API endpoint. Not a data-serving path — no Time Machine invalidation needed.</notes>
       </behavior>
-      <behavior order="2f" path_pattern="/api/scoped/advisor-intelligence/clients/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        BD clients depth-2 (growth, tax-breakdown, tax-deferred)
+      <behavior>
+        <path_pattern>/api/scoped/security-scanner/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <notes>Security Scanner API. No Time Machine invalidation needed.</notes>
       </behavior>
-      <behavior order="2g" path_pattern="/api/scoped/advisor-intelligence/timeseries/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        BD timeseries depth-2
+      <behavior>
+        <path_pattern>/api/general/trades/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <viewer_request_fn>auth-validator-edge:12</viewer_request_fn>
+        <notes>Trades API. No Time Machine invalidation needed.</notes>
       </behavior>
-      <behavior order="2h" path_pattern="/api/scoped/advisor-intelligence/snapshots/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        BD snapshots depth-2
+      <behavior>
+        <path_pattern>/api/private/portfolio*</path_pattern>
+        <origin>APIGateway-portfolio</origin>
+        <viewer_request_fn>auth-validator-edge:12</viewer_request_fn>
+        <notes>Portfolio API. No Time Machine invalidation needed.</notes>
       </behavior>
-      <behavior order="3" path_pattern="/api/scoped/security-scanner/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled">
-        Security scanner (no edge Lambda)
+      <behavior>
+        <path_pattern>/api/private/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <viewer_request_fn>auth-validator-edge:12</viewer_request_fn>
+        <notes>Private API catch-all. No Time Machine invalidation needed.</notes>
       </behavior>
-      <behavior order="4" path_pattern="/api/scoped/data-refresh/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        DataRefresh API (auth-gated)
+      <behavior>
+        <path_pattern>/v1/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <viewer_request_fn>auth-validator-edge:12</viewer_request_fn>
+        <notes>Legacy /v1 API path. No Time Machine invalidation needed.</notes>
       </behavior>
-      <behavior order="5" path_pattern="/api/scoped/advisor-intelligence/*.json" origin="S3-opal-data-bd" cache_policy="opal_scoped_advisor_by_firm" auth="auth-validator-edge:viewer-request" routing="shared-advisor-router:origin-request">
-        BD depth-1 JSON (top-level gold files)
-      </behavior>
-      <behavior order="5b" path_pattern="/api/scoped/advisor-intelligence/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        BD catch-all depth-1 (clients-tab, filters, summary, partner-analytics)
-      </behavior>
-      <behavior order="6" path_pattern="/api/general/json-tiered/*" origin="S3-opal-data-portal-v2-json" cache_policy="json-tiered-5min" auth="auth-validator-edge:viewer-request" routing="public-data-router:origin-request" response="cache-control-injector:origin-response">
-        Yang data (json-tiered path)
-      </behavior>
-      <behavior order="7" path_pattern="/json-tiered/*" origin="S3-opal-data-portal-v2-json" cache_policy="json-tiered-5min">
-        Yang data legacy direct path (no Lambda@Edge)
-      </behavior>
-      <behavior order="8" path_pattern="/api/general/*" origin="S3-opal-data-portal-v2-json" cache_policy="Managed-CachingOptimized" auth="auth-validator-edge:viewer-request" routing="public-data-router:origin-request" response="cache-control-injector:origin-response">
-        Yang data general catch-all
-      </behavior>
-      <behavior order="9" path_pattern="/api/private/portfolio*" origin="APIGateway-portfolio" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        Portfolio API (auth-gated)
-      </behavior>
-      <behavior order="10" path_pattern="/api/private/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        Private API catch-all (auth-gated)
-      </behavior>
-      <behavior order="11" path_pattern="/v1/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        Legacy /v1 API (auth-gated)
-      </behavior>
-      <behavior order="12" path_pattern="/auth/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled">
-        Auth endpoints (login/signup/refresh — NO auth Lambda)
-      </behavior>
-      <behavior order="13" path_pattern="/api/scoped/partners/*" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        Partners API (auth-gated)
-      </behavior>
-      <behavior order="14" path_pattern="/api/partners" origin="APIGateway-portal" cache_policy="Managed-CachingDisabled" auth="auth-validator-edge:viewer-request">
-        Partners API exact match (auth-gated)
+      <behavior>
+        <path_pattern>/auth/*</path_pattern>
+        <origin>APIGateway-portal</origin>
+        <notes>Auth endpoints. No Time Machine invalidation needed.</notes>
       </behavior>
     </behaviors>
 
-    <custom_error_responses>
-      <response error_code="403" response_code="200" page="/index.html" ttl="0">SPA routing — 403 returns index.html</response>
-      <response error_code="404" response_code="200" page="/index.html" ttl="0">SPA routing — 404 returns index.html</response>
-    </custom_error_responses>
-
     <lambda_at_edge>
       <function>
-        <name>auth-validator-edge</name>
-        <current_version>v13 (dynamic via aws_lambda_function.auth_validator_edge[0].qualified_arn)</current_version>
-        <source_dir>infra/aws/lambda/auth-validator-edge/</source_dir>
-        <event_type>viewer-request</event_type>
-        <terraform_resource>aws_lambda_function.auth_validator_edge (portal-auth/lambda-edge.tf, publish=true)</terraform_resource>
-        <role>JWT gate at CloudFront viewer layer. Validates Bearer token before CloudFront forwards to origin.</role>
-        <note>Dynamic ARN since portal-auth v1.14.0 — auto-bumps on every apply. Resolves the v12-pin incident (2026-04-15).</note>
+        <name>opal-portal-authorizer</name>
+        <runtime>Python</runtime>
+        <source_dir>infra/aws/lambda/portal_authorizer</source_dir>
+        <files>lambda_function.py</files>
+        <event_type>viewer-request (inferred — auth gate at CloudFront viewer layer)</event_type>
+        <role>Validates incoming requests before CloudFront forwards to origin. Checks JWT Bearer token.</role>
+        <terraform_status>No deploy.sh found. Not confirmed TF-managed. Source registered in lambda-source-map.json only.</terraform_status>
       </function>
       <function>
-        <name>shared-advisor-router</name>
-        <current_version>v13 (dynamic)</current_version>
-        <event_type>origin-request</event_type>
-        <terraform_resource>aws_lambda_function.shared_advisor_router (portal-auth/lambda-edge.tf)</terraform_resource>
-        <role>Routes BD advisor-intelligence origin requests to firm-scoped S3 keys.</role>
-      </function>
-      <function>
-        <name>public-data-router</name>
-        <current_version>v4 (dynamic)</current_version>
-        <event_type>origin-request</event_type>
-        <terraform_resource>aws_lambda_function.public_data_router (portal-auth/lambda-edge.tf)</terraform_resource>
-        <role>Rewrites yang data origin requests to correct S3 key paths.</role>
-      </function>
-      <function>
-        <name>cache-control-injector</name>
-        <current_version>v1 (dynamic)</current_version>
-        <event_type>origin-response</event_type>
-        <terraform_resource>aws_lambda_function.cache_control_injector (portal-auth/lambda-edge.tf)</terraform_resource>
-        <role>Injects cache-control headers on yang data origin responses.</role>
+        <name>opalinvest-auth-handler</name>
+        <runtime>Node.js (dist/index.js)</runtime>
+        <source_dir>infra/aws/opalinvest_dev/lambda/auth-handler</source_dir>
+        <files>dist/index.js</files>
+        <event_type>unknown (viewer-request or origin-request)</event_type>
+        <role>Auth handler — likely JWT verification or Cognito token validation for the opalinvest.com domain.</role>
+        <terraform_status>No TF resource found. Non-standard source path (opalinvest_dev/) suggests legacy or dev-environment function. Active status uncertain.</terraform_status>
       </function>
     </lambda_at_edge>
 
   </cloudfront>
 
   <!-- =========================================================
-       AUTH INFRASTRUCTURE (Lambda — TF-managed since portal-auth v1.x)
-       ========================================================= -->
-  <auth_infrastructure>
-
-    <lambda name="opalinvest-auth-handler">
-      <source_dir>infra/aws/opalinvest_dev/lambda/auth-handler/</source_dir>
-      <runtime>nodejs20.x</runtime>
-      <memory_mb>256</memory_mb>
-      <timeout_s>30</timeout_s>
-      <s3_artifact>portal-auth/opalinvest-auth-handler.zip</s3_artifact>
-      <terraform_resource>aws_lambda_function.auth_handler (portal-auth/lambdas.tf)</terraform_resource>
-      <role>Portal auth handler — JWT verification, Cognito token flow, session management.</role>
-    </lambda>
-
-    <lambda name="opal-portal-authorizer">
-      <source_dir>infra/aws/users/lambda/portal-authorizer/</source_dir>
-      <runtime>nodejs20.x</runtime>
-      <memory_mb>256</memory_mb>
-      <timeout_s>10</timeout_s>
-      <s3_artifact>portal-auth/opal-portal-authorizer.zip</s3_artifact>
-      <terraform_resource>aws_lambda_function.portal_authorizer (portal-auth/lambdas.tf)</terraform_resource>
-      <role>JWT verification authorizer for portal API Gateway — Phase 1 Foundation. Note: NOT a Lambda@Edge function despite the name; auth-validator-edge is the CloudFront gate.</role>
-    </lambda>
-
-    <cognito_pool>
-      <status>NOT DISCOVERABLE from local source files. Pool ID consumed via environment variables or Secrets Manager. Not declared in any Terraform module.</status>
-    </cognito_pool>
-
-    <jwt_flow_summary>
-      Portal frontend stores Cognito access token in localStorage (key: accessToken).
-      All API calls include Authorization: Bearer {accessToken}.
-      Optional X-Api-Key from VITE_PORTAL_API_KEY.
-      auth-validator-edge validates at CloudFront viewer-request before forwarding to origin.
-      Token refresh handled by AuthContext in the portal.
-    </jwt_flow_summary>
-
-  </auth_infrastructure>
-
-  <!-- =========================================================
        DYNAMODB TABLES
        ========================================================= -->
   <dynamodb_tables>
 
-    <table module="shared-infra/main.tf">
+    <table>
       <name>opal-partner-49financial</name>
+      <arn>arn:aws:dynamodb:us-east-1:313476888478:table/opal-partner-49financial</arn>
       <billing_mode>PAY_PER_REQUEST</billing_mode>
       <hash_key>email (String)</hash_key>
-      <gsi>ByAdvisorRole (advisorRole → ALL)</gsi>
-      <purpose>Per-partner identity bridge joining portal users to BD gold layer advisor identity (advisorKey, advisorRole). Auth-handler reads at login to inject advisor claims into JWT.</purpose>
-      <created>2026-03-04 (shared-infra-v1.3.0, ADVI_J1)</created>
+      <sort_key>none</sort_key>
+      <gsi>
+        <name>ByAdvisorRole</name>
+        <hash_key>advisorRole (String)</hash_key>
+        <projection>ALL</projection>
+      </gsi>
+      <terraform_resource>aws_dynamodb_table.opal_partner_49financial (shared-infra/main.tf)</terraform_resource>
+      <purpose>Per-partner identity bridge: joins portal users (opal-users-v2) to BD gold layer advisor identity (advisorKey, advisorRole). Auth-handler reads at login time to inject advisor claims into JWT.</purpose>
+      <prd>docs/architecture/PARTNER_IDENTITY_TABLE.md</prd>
+      <tags>Project=ADVI, ManagedBy=terraform, Partner=49financial</tags>
+      <created>2026-03-04 (shared-infra-v1.3.0)</created>
     </table>
 
-    <table module="shared-infra/dynamo.tf">
-      <name>causality-generations</name>
-      <billing_mode>PAY_PER_REQUEST</billing_mode>
-      <hash_key>generation_id (String)</hash_key>
-      <gsi>CreatedByIndex (created_by → created_at, ALL)</gsi>
-      <purpose>Generation records from causality-market-update-generator. Empty at import.</purpose>
-      <imported>2026-04-13 (DEBT_1STRUN.005)</imported>
-    </table>
-
-    <table module="shared-infra/dynamo.tf">
-      <name>causality-saved-analyses</name>
-      <billing_mode>PAY_PER_REQUEST</billing_mode>
-      <hash_key>saved_analysis_id (String)</hash_key>
-      <range_key>user_id (String)</range_key>
-      <gsi>UserIdIndex (user_id → saved_at, ALL)</gsi>
-      <purpose>User-saved analyses from causality pipeline. Empty at import.</purpose>
-      <imported>2026-04-13 (DEBT_1STRUN.005)</imported>
-    </table>
-
-    <table module="shared-infra/dynamo.tf">
-      <name>opal-pii-lookup</name>
-      <billing_mode>PAY_PER_REQUEST</billing_mode>
-      <hash_key>PK (String)</hash_key>
-      <range_key>SK (String)</range_key>
-      <purpose>Schwab anonymizer PII lookup table. 5,611 items / 757 KB at import. Live traffic.</purpose>
-      <imported>2026-04-13 (DEBT_1STRUN.005)</imported>
-    </table>
-
-    <table module="portal-auth/dynamodb.tf">
-      <name>opal-firms</name>
-      <billing_mode>PROVISIONED (5 R/W)</billing_mode>
-      <hash_key>PK (String)</hash_key>
-      <range_key>SK (String)</range_key>
-      <purpose>Firm configuration (2 items). Auth decisions key off firm membership.</purpose>
-    </table>
-
-    <table module="portal-auth/dynamodb.tf">
-      <name>opal-sessions</name>
-      <billing_mode>PAY_PER_REQUEST</billing_mode>
-      <hash_key>PK (String)</hash_key>
-      <range_key>SK (String)</range_key>
-      <gsi>GSI1 (GSI1PK → GSI1SK, ALL)</gsi>
-      <purpose>Session store. 3.2M items / 1.8 GB. Every portal login writes here.</purpose>
-    </table>
-
-    <table module="portal-auth/dynamodb.tf">
-      <name>user-permissions</name>
-      <billing_mode>PAY_PER_REQUEST</billing_mode>
-      <hash_key>email (String)</hash_key>
-      <range_key>permission (String)</range_key>
-      <gsi>by-permission (permission → email, ALL)</gsi>
-      <purpose>Permission grants (12 items). Controls feature access per user.</purpose>
-    </table>
-
-    <table module="portal-auth/dynamodb.tf">
-      <name>opal-offices</name>
-      <billing_mode>PROVISIONED (5 R/W)</billing_mode>
-      <hash_key>PK (String)</hash_key>
-      <range_key>SK (String)</range_key>
-      <purpose>Office configuration (1 item).</purpose>
-    </table>
-
-    <table module="portal-auth/dynamodb.tf">
-      <name>opal-users</name>
-      <billing_mode>PAY_PER_REQUEST</billing_mode>
-      <hash_key>email (String)</hash_key>
-      <purpose>Legacy user table (12 items). Also exists in us-east-2; only us-east-1 imported.</purpose>
-    </table>
-
-    <table module="portal-auth/dynamodb.tf + shared-infra/dynamo.tf">
-      <name>opal-users-v2</name>
-      <billing_mode>PAY_PER_REQUEST</billing_mode>
-      <hash_key>PK (String)</hash_key>
-      <range_key>SK (String)</range_key>
-      <gsi>firmId-index (firmId → PK, INCLUDE [role,email,name,tier,status])</gsi>
-      <gsi>email-index (email, KEYS_ONLY)</gsi>
-      <purpose>Current user table (37-39 items). Single-table design. PITR enabled (35d).</purpose>
-      <note>DUAL DECLARATION WARNING: declared in both portal-auth/dynamodb.tf and shared-infra/dynamo.tf. Verify which module holds TF state via terraform state list. Only one module can own a resource; the other must use a data source or be removed to avoid drift.</note>
-      <imported>CDRS_TFIMPT.006 (portal-auth, 2026-04-15) + DEBT_1STRUN.005 (shared-infra, 2026-04-13)</imported>
-    </table>
-
-    <table module="trade-pipeline/dynamodb.tf">
+    <table>
       <name>opal-trade-submissions</name>
+      <arn>arn:aws:dynamodb:us-east-1:313476888478:table/opal-trade-submissions</arn>
       <billing_mode>PAY_PER_REQUEST</billing_mode>
       <hash_key>submission_id (String)</hash_key>
-      <gsi>by-date (submission_date → submitted_at)</gsi>
-      <gsi>by-initiator (initiator_email → submitted_at)</gsi>
-      <gsi>by-approver (approver_email → approved_at)</gsi>
-      <gsi>by-status (status → submitted_at)</gsi>
-      <purpose>Financial transaction record store. Backs trade-submission-handler Lambda (dormant — 30-day invocations=0 at W1 import).</purpose>
-      <imported>2026-04-21 via TRSB_TFIMPT.W1 (trade-pipeline-v1.3.0)</imported>
+      <sort_key>none</sort_key>
+      <gsi>
+        <name>by-date</name>
+        <hash_key>submission_date (String)</hash_key>
+        <range_key>submitted_at (String)</range_key>
+        <projection>ALL</projection>
+      </gsi>
+      <gsi>
+        <name>by-initiator</name>
+        <hash_key>initiator_email (String)</hash_key>
+        <range_key>submitted_at (String)</range_key>
+        <projection>ALL</projection>
+      </gsi>
+      <gsi>
+        <name>by-approver</name>
+        <hash_key>approver_email (String)</hash_key>
+        <range_key>approved_at (String)</range_key>
+        <projection>ALL</projection>
+      </gsi>
+      <gsi>
+        <name>by-status</name>
+        <hash_key>status (String)</hash_key>
+        <range_key>submitted_at (String)</range_key>
+        <projection>ALL</projection>
+      </gsi>
+      <terraform_resource>aws_dynamodb_table.trade_submissions (trade-pipeline/dynamodb.tf)</terraform_resource>
+      <purpose>Financial transaction record store. Backs the trade-submission-handler Lambda (currently dormant per TRSB_TFIMPT.W1 Phase 1 probe — 30-day invocations=0).</purpose>
+      <tags>Project=OpalPortal, ManagedBy=Terraform, Environment=Production, System=Portfolio</tags>
+      <imported>2026-04-21 via TRSB_TFIMPT.W1 (trade-pipeline-v1.3.0) — table created 2026-02-27, imported into TF state 2026-04-21</imported>
     </table>
 
   </dynamodb_tables>
 
   <!-- =========================================================
-       PORTAL NOTIFICATIONS
+       AUTH INFRASTRUCTURE
        ========================================================= -->
-  <portal_notifications>
-    <module_path>infra/aws/terraform/portal-notifications/</module_path>
-    <state_key>portal-notifications/tfstate</state_key>
-    <terraform_resource>aws_s3_bucket_notification.portal_triggers (bucket = opal-data-portal-v2)</terraform_resource>
+  <auth_infrastructure>
 
-    <trigger>
-      <id>yang-pipeline-manifest-trigger</id>
-      <filter_prefix>uploads/</filter_prefix>
-      <filter_suffix>manifest.json</filter_suffix>
-      <event_type>s3:ObjectCreated:*</event_type>
-      <target_lambda>yang-pipeline-trigger</target_lambda>
-      <purpose>Upload of uploads/manifest.json starts the Yang Step Functions pipeline.</purpose>
-    </trigger>
+    <lambda name="opal-portal-authorizer">
+      <source_dir>infra/aws/lambda/portal_authorizer</source_dir>
+      <runtime>Python</runtime>
+      <role>CloudFront viewer-request auth gate. Validates JWT access tokens before CloudFront forwards requests to origin.</role>
+      <terraform_status>No deploy.sh and no TF resource confirmed. Registered in lambda-source-map.json but deployment path unknown.</terraform_status>
+    </lambda>
 
-    <trigger>
-      <id>cloudfront-market-generator-trigger</id>
-      <filter_prefix>market-metrics.json</filter_prefix>
-      <event_type>s3:ObjectCreated:*</event_type>
-      <target_lambda>opal-cloudfront-market-generator</target_lambda>
-      <purpose>Triggers market data regeneration when market-metrics.json is written.</purpose>
-      <note>opal-cloudfront-market-generator still not in lambda-source-map.json — HIGH PRIORITY gap (see Known Issues).</note>
-    </trigger>
+    <lambda name="opalinvest-auth-handler">
+      <source_dir>infra/aws/opalinvest_dev/lambda/auth-handler</source_dir>
+      <runtime>Node.js</runtime>
+      <role>Auth handler for opalinvest domain. Likely handles Cognito token flow or JWT verification.</role>
+      <terraform_status>No TF resource found in any pipeline module. Active status uncertain.</terraform_status>
+    </lambda>
 
-  </portal_notifications>
+    <cognito_pool>
+      <status>NOT DISCOVERABLE from local source files. Pool ID and client ID are consumed as environment variables or Secrets Manager entries but not declared in any Terraform module visible in the repo.</status>
+    </cognito_pool>
+
+    <jwt_flow_summary>
+      Portal frontend stores Cognito access token in localStorage (key: accessToken).
+      All API calls include Authorization: Bearer {accessToken} header.
+      Optional API key sent as X-Api-Key header (from VITE_PORTAL_API_KEY env var).
+      CloudFront viewer-request Lambda (opal-portal-authorizer) validates the token before
+      forwarding to API Gateway origin. Token refresh logic is handled by AuthContext in the portal.
+    </jwt_flow_summary>
+
+  </auth_infrastructure>
 
   <!-- =========================================================
        MONITORING LAMBDAS
+       Operational Lambdas not belonging to any product pipeline
        ========================================================= -->
   <monitoring_lambdas>
 
     <function>
       <name>opal-infrastructure-monitor</name>
-      <source_dir>infra/aws/lambda/infrastructure_monitor/</source_dir>
-      <trigger>Unknown — no TF resource found</trigger>
-      <purpose>Infrastructure health monitoring.</purpose>
-      <terraform_status>In lambda-source-map.json. No artifact_s3_key or TF resource — not S3-backed.</terraform_status>
+      <source_dir>infra/aws/lambda/infrastructure_monitor</source_dir>
+      <files>lambda_function.py</files>
+      <trigger>Unknown — no TF resource found, no EventBridge rule discoverable from source</trigger>
+      <purpose>Infrastructure health monitoring. Likely checks AWS resource states and alerts on anomalies.</purpose>
+      <terraform_status>Registered in lambda-source-map.json. No artifact_s3_key or TF resource found — not yet migrated to S3-backed deployment.</terraform_status>
     </function>
 
     <function>
       <name>security-sweep-comprehensive</name>
-      <source_dir>infra/aws/lambda/security-sweep-comprehensive/</source_dir>
+      <source_dir>infra/aws/lambda/security-sweep-comprehensive</source_dir>
+      <files>lambda_function.py</files>
       <trigger>Unknown — no TF resource found</trigger>
-      <purpose>Comprehensive security sweep across AWS resources.</purpose>
-      <terraform_status>In lambda-source-map.json. No TF resource.</terraform_status>
+      <purpose>Comprehensive security sweep across AWS resources. Likely checks IAM policies, open security groups, public buckets, etc.</purpose>
+      <terraform_status>Registered in lambda-source-map.json. No artifact_s3_key or TF resource found.</terraform_status>
     </function>
 
     <function>
       <name>daily-agenda-generator</name>
-      <source_dir>infra/aws/lambda/daily_agenda_generator/</source_dir>
+      <source_dir>infra/aws/lambda/daily_agenda_generator</source_dir>
+      <files>lambda_function.py</files>
       <trigger>Unknown — no TF resource found, no deploy.sh</trigger>
-      <purpose>Generates a daily agenda/summary report.</purpose>
-      <terraform_status>In lambda-source-map.json with _note: "no deploy.sh found".</terraform_status>
+      <purpose>Generates a daily agenda or summary report (likely for Telegram/email delivery).</purpose>
+      <terraform_status>Registered in lambda-source-map.json with _note: "no deploy.sh found". Not TF-managed.</terraform_status>
     </function>
 
     <function>
       <name>opal-cloudfront-market-generator</name>
       <source_dir>UNKNOWN — not in lambda-source-map.json</source_dir>
-      <trigger>S3:ObjectCreated:* on opal-data-portal-v2 (market-metrics.json)</trigger>
-      <purpose>Regenerates CloudFront-served market data when market metrics refresh.</purpose>
-      <terraform_status>Lambda permission in portal-notifications/main.tf. Function NOT in lambda-source-map.json. HIGH PRIORITY GAP.</terraform_status>
+      <trigger>S3:ObjectCreated:* on opal-data-portal-v2 when market-metrics.json is written (registered in portal-notifications/main.tf)</trigger>
+      <purpose>Regenerates CloudFront-served market data or invalidates CloudFront cache when fresh market metrics are available.</purpose>
+      <terraform_status>Lambda permission exists in portal-notifications/main.tf. Function itself NOT in lambda-source-map.json — source directory, TF resource, and deployment status unknown. HIGH PRIORITY GAP.</terraform_status>
+    </function>
+
+    <functions_not_found>
+      The following functions were expected per task order requirements but are NOT present
+      in lambda-source-map.json and have no source directories found:
+      <missing>ec2-auto-shutdown-enforcer</missing>
+      <missing>cost-anomaly-scanner</missing>
+      <missing>access-anomaly-scanner</missing>
+      These may be planned but not yet created, or may exist unregistered in AWS.
+    </functions_not_found>
+
+    <function>
+      <name>infrastructure-daily-snapshot</name>
+      <source_dir>(inferred from shared-infra/main.tf IAM context)</source_dir>
+      <trigger>Unknown — likely EventBridge daily schedule</trigger>
+      <purpose>Creates EC2 AMI snapshots. IAM policy for ec2:CreateImage, ec2:DescribeImages, ec2:CreateTags is explicitly attached to opal-portal-lambda-role via shared-infra/main.tf (aws_iam_role_policy.portal_lambda_ec2_snapshot).</purpose>
+      <terraform_status>IAM policy managed in shared-infra. Lambda function itself not found in lambda-source-map.json.</terraform_status>
     </function>
 
   </monitoring_lambdas>
@@ -597,88 +519,125 @@
        IAM — Shared Cross-Cutting Policies
        ========================================================= -->
   <iam>
-
     <policy>
-      <name>EC2SnapshotPermissions (inline on opal-portal-lambda-role)</name>
-      <terraform_resource>aws_iam_role_policy.portal_lambda_ec2_snapshot (shared-infra/iam_legacy.tf)</terraform_resource>
-      <permissions>ec2:CreateImage, ec2:DescribeImages, ec2:CreateTags on account instances/images/snapshots</permissions>
+      <name>EC2SnapshotPermissions (inline policy on opal-portal-lambda-role)</name>
+      <terraform_resource>aws_iam_role_policy.portal_lambda_ec2_snapshot (shared-infra/main.tf)</terraform_resource>
+      <role>opal-portal-lambda-role</role>
+      <permissions>
+        <action>ec2:CreateImage</action>
+        <action>ec2:DescribeImages</action>
+        <action>ec2:CreateTags</action>
+      </permissions>
+      <resources>
+        arn:aws:ec2:us-east-1:313476888478:instance/*,
+        arn:aws:ec2:us-east-1:313476888478:image/*,
+        arn:aws:ec2:us-east-1::image/*,
+        arn:aws:ec2:us-east-1:313476888478:snapshot/*
+      </resources>
+      <note>opal-portal-lambda-role predates Terraform. Rather than importing the full role, shared-infra attaches a scoped inline policy for EC2 snapshot needs only.</note>
     </policy>
 
     <policy>
-      <name>PartnerIdentityReadPermissions (inline on opalinvest-auth-lambda-role)</name>
-      <terraform_resource>aws_iam_role_policy.partner_identity_read (shared-infra/iam_legacy.tf)</terraform_resource>
-      <permissions>dynamodb:GetItem, dynamodb:Query on opal-partner-49financial and its GSIs</permissions>
+      <name>PartnerIdentityReadPermissions (inline policy on opalinvest-auth-lambda-role)</name>
+      <terraform_resource>aws_iam_role_policy.partner_identity_read (shared-infra/main.tf)</terraform_resource>
+      <role>opalinvest-auth-lambda-role</role>
+      <permissions>
+        <action>dynamodb:GetItem</action>
+        <action>dynamodb:Query</action>
+      </permissions>
+      <resources>
+        arn:aws:dynamodb:us-east-1:313476888478:table/opal-partner-49financial,
+        arn:aws:dynamodb:us-east-1:313476888478:table/opal-partner-49financial/index/*
+      </resources>
+      <note>Grants auth-handler Lambda read access to partner identity table. GetItem for login lookup by email PK; Query for GSI ByAdvisorRole admin enumeration. Added in shared-infra-v1.3.0 (ADVI-J1).</note>
     </policy>
-
   </iam>
 
   <!-- =========================================================
-       EC2 SERVICES
+       TERRAFORM MODULES
+       ========================================================= -->
+  <terraform_modules>
+
+    <module>
+      <path>infra/aws/terraform/shared-infra/</path>
+      <state_key>shared-infra/tfstate</state_key>
+      <state_bucket>opal-313476888478-terraform-state</state_bucket>
+      <current_tag>shared-infra-v1.4.0</current_tag>
+      <changelog>MISSING — CHANGELOG.json does not exist in this module directory</changelog>
+      <owns>
+        <resource>aws_s3_bucket.lambda_layers (opal-313476888478-lambda-layers)</resource>
+        <resource>aws_s3_bucket.lambda_artifacts (opal-313476888478-lambda-artifacts)</resource>
+        <resource>aws_iam_role_policy.portal_lambda_ec2_snapshot (EC2SnapshotPermissions)</resource>
+        <resource>aws_dynamodb_table.opal_partner_49financial (opal-partner-49financial)</resource>
+        <resource>aws_iam_role_policy.partner_identity_read (PartnerIdentityReadPermissions)</resource>
+        <resource>aws_s3_bucket_lifecycle_configuration.portal_v2_versions (opal-data-portal-v2 — 90d noncurrent expiry)</resource>
+        <resource>aws_s3_bucket_lifecycle_configuration.bd_versions (opal-data-bd — 90d noncurrent expiry)</resource>
+      </owns>
+      <does_not_own>
+        Terraform state bucket itself (bootstrapped outside TF), Lambda layer version resources (owned per-pipeline),
+        opal-data-portal-v2 bucket (no TF source found)
+      </does_not_own>
+    </module>
+
+    <module>
+      <path>infra/aws/terraform/portal-auth/</path>
+      <state_key>portal-auth/tfstate</state_key>
+      <state_bucket>opal-313476888478-terraform-state</state_bucket>
+      <current_tag>portal-auth-v1.3.1</current_tag>
+      <changelog>infra/aws/terraform/portal-auth/CHANGELOG.json</changelog>
+      <owns>
+        <resource>aws_lambda_function.portal_authorizer (opal-portal-authorizer)</resource>
+        <resource>aws_lambda_function.auth_handler (opalinvest-auth-handler)</resource>
+        <resource>aws_iam_role.auth_handler (opalinvest-auth-lambda-role)</resource>
+        <resource>aws_iam_role_policy.auth_permissions</resource>
+        <resource>aws_iam_role_policy.auth_ses</resource>
+        <resource>aws_cloudfront_cache_policy.opal_scoped_advisor_by_firm (45eb7514-712c-42c5-9fd6-40909b9f0347) — X-Firm-Id header + firm query string cache key</resource>
+      </owns>
+      <note>Cache policy imported 2026-03-11 (ADVI_APISCP.007). firm query string was already present (added by DT in v6 deploy). Import brings it under TF state for change management going forward.</note>
+    </module>
+
+    <module>
+      <path>infra/aws/terraform/portal-notifications/</path>
+      <state_key>portal-notifications/tfstate</state_key>
+      <state_bucket>opal-313476888478-terraform-state</state_bucket>
+      <current_tag>UNKNOWN — not recorded in MEMORY.md pipeline tag table</current_tag>
+      <changelog>MISSING — CHANGELOG.json does not exist in this module directory</changelog>
+      <owns>
+        <resource>aws_s3_bucket_notification.portal_triggers (on opal-data-portal-v2)</resource>
+        <resource>aws_lambda_permission.yang_pipeline_trigger</resource>
+        <resource>aws_lambda_permission.cloudfront_market_generator</resource>
+      </owns>
+    </module>
+
+  </terraform_modules>
+
+  <!-- =========================================================
+       EC2 SERVICES (CloudOps context — all services registered)
        Source of truth: infra/aws/ec2/EC2_MANIFEST.json
-       Last manifest update: 2026-04-17T17:59:17Z
        ========================================================= -->
   <ec2_services>
-
-    <service name="moltbot" type="persistent" instance_id="i-0b784d4908e320fc4" iam_role="MoltbotEC2Role" ec2_host="100.48.87.51">
-      AI agent (Claude Code). GitHub access via github/moltbot-pat in Secrets Manager.
+    <note>No EC2 instances are directly owned by CloudOps. The following are registered services for infrastructure awareness.</note>
+    <service name="moltbot" type="persistent" instance_id="i-0b784d4908e320fc4" role="MoltbotEC2Role">
+      AI agent (Claude Code). Not part of any product pipeline.
     </service>
-
     <service name="smartx-exporter" type="persistent" instance_id="i-06ebcb27395eb3f49">
-      SmartX portfolio data export. No Elastic IP — host changes on restart.
+      Exports SmartX portfolio data. No Elastic IP — host changes on restart.
     </service>
-
-    <service name="seeking-alpha-scraper" type="persistent" instance_id="i-06376c11d8b3c3443" ec2_host="44.201.69.3">
+    <service name="seeking-alpha-scraper" type="persistent" instance_id="null (not synced)" ec2_host="44.201.69.3">
       Seeking Alpha news scraper.
     </service>
-
     <service name="bd-gold-layer-runner" type="persistent" instance_id="i-01003b035d2988dfb">
-      PROD BD gold scripts. S3-pull model (opal-data-bd/code/{bronze,silver,gold}/). EVENTBRIDGE ONLY — no agent/human/SSM direct access. Last deploy: 2026-04-17.
+      Runs BD gold layer scripts. S3-pull model: s3://opal-data-bd/code/{bronze,silver,gold}/
     </service>
-
-    <service name="bd-gold-qa-runner" type="persistent" instance_id="i-0090b823a4a0997e3">
-      QA BD gold runner. Manual SSM dispatch only. Same instance type as PROD (c6i.16xlarge). GOLD_KEEP_ALIVE=1 (no auto-shutdown).
+    <service name="bd-allocations" type="persistent" instance_id="i-0800437d1dbb0b5cc">
+      BD allocation downloads via SSM document opal-bd-allocation-download. Terraform: bd-pipeline/ec2.tf
     </service>
-
-    <service name="bd-exporter" type="persistent" instance_id="null (not synced)">
-      Runs merge-daily-incremental.py daily after BD export. Source: data/black_diamond/scripts/silver/.
+    <service name="bd-transactions" type="persistent" instance_id="i-00c7568bc510f7423">
+      BD transaction downloads via SSM document opal-bd-transaction-download. Terraform: bd-pipeline/ec2.tf
     </service>
-
-    <service name="bd-allocations" type="persistent" instance_id="i-0800437d1dbb0b5cc" iam_role="bd-exporter-ec2-role">
-      BD allocation downloads via SSM opal-bd-allocation-download. Triggered ~21:48 UTC weekdays.
-    </service>
-
-    <service name="bd-transactions" type="persistent" instance_id="i-00c7568bc510f7423" iam_role="bd-exporter-ec2-role">
-      BD transaction downloads via SSM opal-bd-transaction-download. Triggered ~21:40 UTC weekdays.
-    </service>
-
-    <service name="bd-fees" type="persistent" instance_id="i-0868fc7e7ebec26f2" iam_role="bd-exporter-ec2-role">
-      BD fees downloads via SSM opal-bd-fees-download. Triggered ~22:15 UTC weekdays. bronze/fees/ → silver/fees/ via convert_fees_to_silver.py. TF: bd-pipeline/ec2.tf.
-    </service>
-
-    <service name="bd-assets" type="persistent" instance_id="i-0e6f6dc014fdcf1cd" iam_role="bd-exporter-ec2-role">
-      BD asset dim downloads via SSM opal-bd-asset-dim-download. Triggered by Step Functions (BDPL_ASTDIM.W6). TF: bd-pipeline/ec2.tf.
-    </service>
-
-    <service name="bd-price-runner" type="persistent" instance_id="i-0800437d1dbb0b5cc">
-      Shares instance with bd-allocations. S3-pull: opal-data-bd/code/silver/bd_price_update.py. Invoked at end of opal-bd-allocation-download sequence ~21:51 UTC weekdays.
-    </service>
-
     <service name="bd-gold-detail-generator" type="ephemeral">
       Ephemeral: code baked into user-data.sh at launch. No persistent deploy.
     </service>
-
-    <service name="historical-prices-fetcher" type="ephemeral" instance_id="i-00abf626b065373bc">
-      Managed by historical-prices-scheduler Lambda. Starts on daily schedule, runs yfinance fetch, stops. TF: bd-pipeline/ec2.tf.
-    </service>
-
-    <service name="inf-gold-layer-runner" type="persistent" instance_id="i-0ed5afded2ebd4ed4" instance_type="c6a.2xlarge" iam_role="inf-gold-layer-ec2-role" terraform_workspace="inf-pipeline">
-      Inflection pipeline gold layer generation. ORNREN.002 will update dispatch_script from inf-gold-dispatch.sh to orion-gold-dispatch.sh (gated on ORNREN.001).
-    </service>
-
-    <service name="inf-exporter" type="persistent" instance_id="i-081ae6aafb394fb1a" instance_type="t3.medium" iam_role="inf-exporter-ec2-role" terraform_workspace="inf-pipeline">
-      Orion Playwright exporter. Bun+Playwright+xvfb bootstrap, Orion creds from Secrets Manager. ADVI_INFLEC W2.4.
-    </service>
-
   </ec2_services>
 
   <!-- =========================================================
@@ -688,67 +647,108 @@
 
     <issue id="1" severity="HIGH">
       <title>opal-cloudfront-market-generator — unregistered function</title>
-      <detail>portal-notifications/main.tf registers S3 trigger + Lambda permission, but function NOT in lambda-source-map.json. Source directory, TF module, and deployment state unknown. S3 trigger silently fails if function does not exist in AWS.</detail>
-      <action>Locate or create source. Register in lambda-source-map.json. Add TF resource. Verify in AWS console.</action>
+      <detail>
+        portal-notifications/main.tf registers a Lambda permission and S3 trigger for
+        opal-cloudfront-market-generator, but this function is NOT present in
+        lambda-source-map.json. Source directory, Terraform module, and deployment
+        state are unknown. If this function does not exist in AWS, the S3 trigger
+        will silently fail when market-metrics.json is written.
+      </detail>
+      <action>Locate or create source at infra/aws/lambda/cloudfront-market-generator/. Register in lambda-source-map.json and add TF resource in an appropriate pipeline module. Verify function exists in AWS console.</action>
     </issue>
 
-    <issue id="2" severity="HIGH">
-      <title>opal-users-v2 dual-declared in two TF modules</title>
-      <detail>aws_dynamodb_table.opal_users_v2 appears in both shared-infra/dynamo.tf (DEBT_1STRUN.005, 2026-04-13) and portal-auth/dynamodb.tf (CDRS_TFIMPT.006, 2026-04-15). Only one module can own the TF state resource. The other will conflict on plan/apply.</detail>
-      <action>Run terraform state list in both modules. Whichever owns the state is canonical. Remove the declaration from the other module (or replace with data source). Requires coordinated apply.</action>
+    <issue id="2" severity="MEDIUM">
+      <title>ec2-auto-shutdown-enforcer, cost-anomaly-scanner, access-anomaly-scanner — not found</title>
+      <detail>
+        These three monitoring Lambda functions were expected per CloudOps scope but are
+        absent from lambda-source-map.json. No source directories found in the repo.
+        May be planned but not yet created, or may exist in AWS unregistered.
+      </detail>
+      <action>Verify in AWS Lambda console whether these functions exist. If yes, register in lambda-source-map.json. If no, create or remove from scope documentation.</action>
     </issue>
 
     <issue id="3" severity="MEDIUM">
-      <title>ec2-auto-shutdown-enforcer, cost-anomaly-scanner, access-anomaly-scanner — not found</title>
-      <detail>Expected monitoring Lambda functions absent from lambda-source-map.json. No source directories in repo. May be planned but not yet created.</detail>
-      <action>Verify in AWS Lambda console. Register if they exist or remove from scope documentation.</action>
+      <title>CloudFront distribution not in Terraform</title>
+      <detail>
+        CloudFront distribution ID and full behavior configuration (path patterns, cache policies,
+        origin groups, Lambda@Edge associations) are not in any Terraform source file in the repo.
+        Behaviors were partially console-managed historically. There is no Terraform state for the
+        CloudFront distribution.
+      </detail>
+      <action>Import CloudFront distribution into a new terraform module (e.g., infra/aws/terraform/cloudfront/) to bring it under IaC management.</action>
     </issue>
 
     <issue id="4" severity="MEDIUM">
-      <title>ORNREN.002 — inf-gold-layer-runner dispatch_script references inf-gold-dispatch.sh</title>
-      <detail>EC2_MANIFEST.json dispatch_script for inf-gold-layer-runner is still inf-gold-dispatch.sh. ORNREN.001 (DS) will rename scripts; ORNREN.002 (AE) will update the manifest. Gated on ORNREN.001 MCP signal.</detail>
-      <action>Execute ORNREN.002 on receipt of "ORNREN.001 DS complete — S3 MATCH confirmed" MCP from DS~A. Update dispatch_script to orion-gold-dispatch.sh.</action>
+      <title>opal-portal-authorizer — no deploy.sh, TF coverage unknown</title>
+      <detail>
+        lambda-source-map.json notes "no deploy.sh found" for opal-portal-authorizer. No TF
+        resource was found in any pipeline module. This is a critical auth function — if deployed
+        out-of-band, its source-to-deployment mapping is unknown and cannot be parity-checked.
+      </detail>
+      <action>Locate Terraform resource or create one. Verify deployed code matches infra/aws/lambda/portal_authorizer/lambda_function.py using verify-local.sh --download.</action>
     </issue>
 
     <issue id="5" severity="LOW">
-      <title>portal-notifications has no git tag</title>
-      <detail>Module is deployed (S3 backend, applied state) but no annotated tag certifies Terraform/AWS parity.</detail>
-      <action>After verifying 0-diff terraform plan, create portal-notifications-v{X.Y.Z} and push --follow-tags.</action>
+      <title>opalinvest-auth-handler — non-standard path, TF coverage unknown</title>
+      <detail>
+        Source is at infra/aws/opalinvest_dev/lambda/auth-handler — the opalinvest_dev/ prefix
+        suggests a legacy or separate dev environment. No TF resource found. Active status uncertain.
+      </detail>
+      <action>Determine if this function is actively used by the CloudFront distribution. If yes, migrate source to standard path and add TF management. If no, decommission.</action>
     </issue>
 
     <issue id="6" severity="LOW">
-      <title>CHANGELOG.json missing for shared-infra and portal-notifications modules</title>
-      <detail>Both modules lack CHANGELOG.json populated by record-terraform-deploy.sh.</detail>
-      <action>Run record-terraform-deploy.sh after next apply for both modules.</action>
+      <title>openpyxl-layer owned by bd-pipeline module, not shared-infra</title>
+      <detail>
+        aws_lambda_layer_version.openpyxl_layer is defined in bd-pipeline/layers.tf.
+        Yang-pipeline references it via hardcoded ARN ":1" rather than reading from
+        bd-pipeline TF state. If bd-pipeline publishes a new layer version, yang-pipeline
+        will continue to use version :1 until manually updated.
+      </detail>
+      <action>Move openpyxl-layer aws_lambda_layer_version to shared-infra or create an output from bd-pipeline. Update yang-pipeline to use a data source reference instead of hardcoded ARN.</action>
     </issue>
 
     <issue id="7" severity="LOW">
-      <title>openpyxl-layer owned by bd-pipeline, yang-pipeline uses hardcoded ARN :1</title>
-      <detail>Cross-pipeline dependency gap. If bd-pipeline publishes a new layer version, yang-pipeline stays on version :1.</detail>
-      <action>Move aws_lambda_layer_version to shared-infra or create output/data source reference in yang-pipeline.</action>
+      <title>CHANGELOG.json missing for shared-infra and portal-notifications modules</title>
+      <detail>
+        Both infra/aws/terraform/shared-infra/CHANGELOG.json and
+        infra/aws/terraform/portal-notifications/CHANGELOG.json are absent.
+        Other pipeline modules (yang, bd, news) have CHANGELOG.json populated by
+        record-terraform-deploy.sh. These two modules are not following the same convention.
+      </detail>
+      <action>Run record-terraform-deploy.sh after next terraform apply for both modules to initialize their changelogs.</action>
     </issue>
 
-    <issue id="8" severity="INFO">
-      <title>Cognito user pool not in any Terraform module</title>
-      <detail>Pool ID consumed via env vars or Secrets Manager. Not declared in any visible TF module.</detail>
-      <action>Locate in AWS console. Consider importing into shared-infra or dedicated auth module.</action>
+    <issue id="8" severity="LOW">
+      <title>portal-notifications tag not recorded</title>
+      <detail>
+        The pipeline tag table in MEMORY.md does not include a tag for portal-notifications.
+        The module has an S3 backend and is deployed, but no annotated git tag certifying
+        Terraform/AWS parity has been recorded.
+      </detail>
+      <action>After verifying 0-diff terraform plan, create tag: portal-notifications-v{X.Y.Z} and push --follow-tags.</action>
     </issue>
 
     <issue id="9" severity="INFO">
-      <title>opal-data-portal-v2 bucket not in any Terraform module</title>
-      <detail>Primary portal data bucket has no aws_s3_bucket resource. portal-notifications only owns notifications; shared-infra owns lifecycle config. Bucket itself is unmanaged.</detail>
-      <action>Verify ownership. Consider importing into shared-infra.</action>
+      <title>Cognito user pool configuration not in local source</title>
+      <detail>
+        The Cognito user pool ID and app client configuration consumed by opal-portal-authorizer
+        and the portal frontend are not declared in any Terraform module visible in the repo.
+        Pool likely predates Terraform management or lives in a separate configuration.
+      </detail>
+      <action>Locate Cognito pool (check AWS console). Consider importing into shared-infra or a dedicated auth Terraform module for full IaC coverage.</action>
     </issue>
 
     <issue id="10" severity="INFO">
-      <title>opal-data-inf bucket TF ownership unknown</title>
-      <detail>Referenced in inf-gold-layer-runner EC2_MANIFEST dispatch_script. Likely managed under inf-pipeline terraform workspace. Not confirmed in local source.</detail>
-      <action>Confirm bucket is in inf-pipeline Terraform workspace.</action>
+      <title>opal-data-portal-v2 bucket not in any Terraform module</title>
+      <detail>
+        The primary portal data bucket (opal-data-portal-v2) has no aws_s3_bucket resource
+        in any visible Terraform module. portal-notifications only owns the notification
+        resource, not the bucket itself. The bucket may have been created manually or in a
+        module not present in the repo.
+      </detail>
+      <action>Verify bucket ownership. Consider importing into shared-infra to complete IaC coverage.</action>
     </issue>
-
-    <!-- RESOLVED: CloudFront not in Terraform — RESOLVED portal-auth-v1.14.0 (AUTH_TFIMPT.001, 2026-04-06) -->
-    <!-- RESOLVED: opal-portal-authorizer no TF resource — RESOLVED portal-auth/lambdas.tf (portal-auth-v1.x) -->
-    <!-- RESOLVED: opalinvest-auth-handler non-standard path — PARTIALLY RESOLVED (now S3-backed in lambdas.tf) -->
 
   </known_issues>
 

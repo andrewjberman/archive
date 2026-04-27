@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-15</date>
-    <status>complete</status><!-- Module skeleton e53c4923 (2026-04-16). Source map + lock commit 8ceaf1d4 (2026-04-24). Plan: 10 to add, 0 change, 0 destroy. No apply on this TO per COO GO override -- TO7 does first deploy. Tag exec-summary-v0.0.1 pushed. -->
+    <status>pending</status><!-- Andrew GO 2026-04-16; TO 3 complete (AE 0.6 c0a00bcc), TO 2 source pending - will pause before source_map + apply -->
     <project_code>ADVI_49EXEC</project_code>
     <priority>P1 (gates TO 7 deploy)</priority>
   </metadata>

@@ -5,7 +5,7 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- base lane; ~lane OK if bandwidth -->
     <date>2026-04-24</date>
     <rewritten>2026-04-24 — full rewrite per CTO TO 2 authoring direction MCP 20260424T164858Z (6 scope additions A-F) + 3 ambiguity defaults resolved MCP 20260424T16xxxxZ. Original 2026-04-15 TO preserved only in git history.</rewritten>
-    <status>complete</status><!-- COMPLETE 2026-04-24. Commit a3fdf4bf. 62/62 tests. All Phase 1+2 compiler gates PASS (py_compile + AST + ruff + comp-pii + comp-cache). Mock invoke: 5-bullet exec_summary.json, model=claude-sonnet-4-6, sha256 input_hash, 0 PII, 15 CW metric calls. /claude-api skill invoked. Prompt caching on system + slot templates with betas=['prompt-caching-2024-07-31']. Gates TO 4 (DT Lambda Terraform) + TO 7 (DT EventBridge wiring). -->
+    <status>staged</status><!-- Authored 2026-04-24 iter 4 of /loop ADVI. GATES MET contract-wise: TO 1 COMPLETE (8cc69bab) + TO 3 COMPLETE (c0a00bcc) + TO 5 COMPLETE (8cc69bab) + POSITIONS COMPLETE (13eaca78, contract-locked; 5/10 AC post-nightly verification gated on tonight's 23:00Z). GO DISPATCH HELD until POSITIONS Phase 3 post-nightly validation clears tomorrow AM per CTO flip-back condition discipline. On Phase 3 clean: dispatch GO. On Phase 3 miss: POSITIONS flips back to pending + TO 2 stays staged. -->
     <project_code>ADVI_49EXEC</project_code>
     <priority>P1 — closes 49EXEC Phase 1. Gates TO 4 (DT generator Lambda Terraform apply + tag) + TO 7 (DT EventBridge wiring). Primary visible feature for exec-summary v1.</priority>
     <origin>

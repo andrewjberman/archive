@@ -2,7 +2,7 @@
   <metadata>
     <id>ADVI_INFLEC.Q9</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- rerouted from ~A per Andrew 2026-04-24 directive (~A inactive; work goes to DS Base) -->
+    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to><!-- ~A lane per Andrew 2026-04-22 INFLEC DS reassignment -->
     <date>2026-04-24</date>
     <status>staged</status><!-- GO post-W4.13 AE completion; small scope — can run in parallel with W4.14 -->
     <project_code>ADVI_INFLEC</project_code>

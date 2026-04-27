@@ -4,7 +4,7 @@
     <issued_by>1.1.0_SA_CTO</issued_by>
     <issued_to>1.1.0_DS_CompLearns</issued_to>
     <date>2026-04-21</date>
-    <status>complete</status><!-- 41225ed9 -->
+    <status>complete <!-- 41225ed9 --></status>
     <evidence>
       Shipped: commit 41225ed9 — comp-learns-ratchet Python runner (Layer B) (COMP_LEARNS.023).
       Artifacts: comp/bin/comp-learns-ratchet (105 lines, executable, shebang #!/usr/bin/env python3), comp/loop/runner.py (352 lines: RunnerConfig, ExitCode enum, run()/do_status()/do_halt(), judge instantiation, plateau/budget/halt/SIGTERM terminal conditions, _print_summary()), comp/bin/comp-learns-run.sh (DEPRECATED header added per AC#10), comp/loop/tests/test_runner_cli.py (129 lines: CLI dispatch, --judge required, exit codes), comp/loop/tests/test_runner_resume.py (71 lines: --resume semantics, next_iter(), start_iter calculation), comp/loop/tests/test_runner_terminal_conditions.py (plateau detection, halt, budget, threshold, fork).
