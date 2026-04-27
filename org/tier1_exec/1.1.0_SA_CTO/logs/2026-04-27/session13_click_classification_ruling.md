@@ -121,3 +121,22 @@ No comp-* tool invocations required (architecture ruling session, no script/port
 | org/tier2_senior/2.1.0_SC_CompLearns/logs/2026-04-24/session_02_iter4_iter5_scoring.md | Iter-4/5 per-selector breakdown + Options A-D |
 | org/tier2_senior/2.1.0_SC_CompLearns/logs/2026-04-24/session_03_h3_baseline.md | H3-v2 failure analysis + SC recommendation |
 | org/projects/COMP_LEARNS.json | Project status reconciliation |
+| org/tier1_exec/1.1.0_SA_CTO/logs/2026-04-24/session17_wave3b_decision_authored.md | Stage 2 wave count criteria reference |
+| org/tier1_exec/1.1.0_SA_CTO/task_orders/COMP_LEARNS.WAVE3B-DECISION.md | §4 wave count criteria + §7 exit criterion |
+| org/tier2_senior/2.1.0_SC_CompLearns/logs/2026-04-24/session_04_case2_two_phase_scoring.md | Two-phase protocol verification |
+
+---
+
+## Stage 2 Wave Count Ruling (additional ruling this session)
+
+**Trigger:** COO open item from 49b790c4 — "wave count ruling for Wave 3b Lane B Cases 1+2 (both PASS)."
+
+**Evidence reviewed:**
+- Commit ordering: Case 1 Phase 1 (`14f6b44d`) → Phase 2 (`c3d52426`); Case 2 Phase 1 (`290bd61f`) → Phase 2 (`2d2337fb`) — Phase 1 freeze precedes Phase 2 work in both
+- SC session 04: reasoning.md NOT read in Phase 1; comp_call gate PASS (3 aided); noise checks PASS; integrity audit appended
+
+**Ruling:** Both cases qualify. Stage 2 wave count = 3 (Wave 3a Lane B + Wave 3b Cases 1+2). §7 exit criterion (≥2 clean waves): **SATISFIED.**
+
+Lane A dev-loop (iter-6, .064) continues — research value independent of §7 satisfaction. Stage 3 planning can proceed in parallel; COO to surface if PRD §8+ has a trigger.
+
+Ruling MCP'd to 2.1.0_SA_COO at 20260427T130436Z.
