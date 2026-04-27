@@ -4,7 +4,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-27</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed_date>2026-04-27</completed_date>
+    <completion_evidence>commit e32e1013 -- 8/8 assertions PASS in test_adhc_compil_002_gate.sh; S3 uploaded both bd + orion dispatchers 17:22Z; session log trsb_pathfix_submissions_table_fix_and_adhc_compil_002.md</completion_evidence>
     <project_code>ADHC_COMPIL</project_code>
     <theme>B</theme>
     <prd_ref>docs/architecture/ADHC_COMPIL.md §5 (commit 172470a8)</prd_ref>
