@@ -464,3 +464,27 @@ COO authoring TO. Diagnostic only — uses .071 paired C4+C1 N=8 machinery, scor
 **§12 future preregistration question** flagged per CVO §4 unknown-unknown: is the program testing "knowledge delivery to the judge" or "gradeable answer production by the judge"? Surface for next CVO design cycle when a future target shows chronic unparseable formatting under all conditions.
 
 **Workforce status:** SC + DS have V1.2 governance implementation directives. COO authoring sphinx q03/q05 pilot TO (parallel work) + 3 governance TOs (sequential gate). All four lanes activated.
+
+---
+
+## V1.2 TO Decomposition + GO Dispatch (COO 86ea80c2)
+
+After Andrew flagged that nothing was being authored, COO decomposed V1.2 into 5 TOs + dispatched GOs at commit `86ea80c2`:
+
+| TO | Owner | Scope | Status |
+|----|-------|-------|--------|
+| .077 | 1.3.0_DS | DS dual-output grader emission (R-DS-1 P1): comp/bench/semantic_grader.py + runner.py emit both grader outputs; scorecard graders block + summary disagreement_rate; sidecar manifest blob_grader_results. Exact-match preserved as primary ratchet. | GO DISPATCHED (parallel) |
+| .078 | 2.1.0_SC | R-SC-2 subtype split (R-SC-2 P1): split grader_artifact into format_elicitation_gain + semantic_prior_unparseable; integrate sixth-label amendment (semantic-partial-correct-unparseable + cross-regime rules + multi-trial guard); confirm click q03 as parseable-wrong | GO DISPATCHED (parallel) |
+| .079 | 2.1.0_SC | Pre-screen disagreement labels (R-SC-1 P0): per-question + per-target disagreement emission | GATED on .077 |
+| .080 | 1.1.0_DS | Sphinx ab_answer_key.yaml schema fix (R-DS-2 P2): gold_answer → answer_type/values; orthogonal to grader-governance | GO DISPATCHED (parallel) |
+| .081 | 2.1.0_SC | Sphinx q03/q05 narrow pilot (V1.2 R-COO-1): .071 paired C4+C1 N=8 against q03/q05; diagnostic only; PATH_B_MANDATORY preserved per R-COO-2 P1 scope cap; best-effort SC manual semantic audit | GO DISPATCHED (parallel) |
+
+**Smart consolidation:** COO absorbed the earlier sixth-label amendment ruling (semantic-partial-correct-unparseable from the .072 escalation cycle) into .078 alongside the V1.2 R-SC-2 subtype split. Both are r_sc_2_semantic_labels.md edits — cleaner than two separate TOs.
+
+**Sequencing:** Wave 1 (parallel) = .077/.078/.080/.081. Wave 2 (gated) = .079 when .077 completes. §10 ship-blocker grader-governance row closes when .077 + .078 + .079 jointly land.
+
+**Path B target re-selection sub-PRD** queued for COO authoring post-§11 ship.
+
+**ADHC_OWNPTH.006/.007 structural fix** for the recurring sweep class (3 incidents on 2026-04-27) is in AE lane via safe-commit.sh wrapper. Out of CTO scope; noted.
+
+**Final session state:** Workforce actually working. CTO idle until worker completions arrive. Inbox-watch live (`bfg92myfm`).
