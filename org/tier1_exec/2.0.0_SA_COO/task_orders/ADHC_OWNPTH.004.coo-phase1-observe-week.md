@@ -5,7 +5,7 @@
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_to>2.0.0_SA_COO</issued_to>
   <issued_date>2026-04-24</issued_date>
-  <status>staged</status><!-- STAGED: gates on ADHC_OWNPTH.003 (AE hook wiring + Phase 1 live) completion -->
+  <status>pending</status><!-- Flipped staged→pending 2026-04-27. Gate met: TO3 (AE 0.7 hook wiring) complete 2026-04-24 (74b0f77f+f4a8da98). Phase 1 live since 2026-04-24; first WARNs classified Day 1. Observe window: 2026-04-24 through 2026-05-01 (Day 7). -->
 
   <title>ADHC_OWNPTH TO 4 — COO Phase 1 observation week + go/no-go report</title>
 
