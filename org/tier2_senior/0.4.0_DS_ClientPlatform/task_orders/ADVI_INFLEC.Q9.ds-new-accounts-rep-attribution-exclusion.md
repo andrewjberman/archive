@@ -2,9 +2,9 @@
   <metadata>
     <id>ADVI_INFLEC.Q9</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to><!-- rerouted from ~A per Andrew 2026-04-24 directive (~A inactive; work goes to DS Base) -->
+    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to><!-- ~A lane per Andrew 2026-04-22 INFLEC DS reassignment -->
     <date>2026-04-24</date>
-    <status>complete</status><!-- COMPLETE 2026-04-27. Commit dee3e3bf (0.4.0_DS_ClientPlatform). C_07 exclusion filter: 43 accounts with advisor_key=new_accounts_rep filtered from account_team/relationship_team/rel_architect_lookup. Firm totals unaffected (C_01/C_03 path). gold_validate_config.yaml D_00c Q9 ERROR rule added. S3 PRESENT: opal-data-inf/code/gold/C_07.advisor_attribution.py. Gate PASS. -->
+    <status>staged</status><!-- GO post-W4.13 AE completion; small scope — can run in parallel with W4.14 -->
     <project_code>ADVI_INFLEC</project_code>
     <priority>P2 — advisor-attribution accuracy; affects leaderboard correctness but not platinum LIVE</priority>
     <origin>
