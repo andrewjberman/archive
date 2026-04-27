@@ -6,7 +6,7 @@
     <lane_preference>~D (or whichever DS lane is idle post-chain-full recovery per CTO 2026-04-21T15:50Z ACK)</lane_preference>
     <co_owner>0.4.0_DE_ClientPlatform (portal footnote display, sub-deliverable inline)</co_owner>
     <date>2026-04-21</date>
-    <status>pending</status><!-- DS COMPLETE 2026-04-24: code 3cf43c26, S3 upload this session (MATCH), qa-runner dispatched (SSM 56a8082e, --group D). Artifact at gold/platinum/firm/cohort_a_summary.json: account_count=352/total_aua=$34.5M/snapshot_date=2026-04-22. comp-validate exits 0 (6P/0E/2W — WARN on account_count 352 < 400 threshold due to silver drift from 599 baseline; non-ERROR). HANDOFF TO DE sent 2026-04-24. DE sub-deliverable (portal footnote) PENDING. TO will be flipped to complete after DE MCPs acceptance. -->
+    <status>complete</status><!-- DS COMPLETE 2026-04-24: code 3cf43c26, S3 upload this session (MATCH), qa-runner dispatched (SSM 56a8082e, --group D). Artifact at gold/platinum/firm/cohort_a_summary.json: account_count=352/total_aua=$34.5M/snapshot_date=2026-04-22. comp-validate exits 0 (6P/0E/2W — WARN on account_count 352 < 400 threshold due to silver drift from 599 baseline; non-ERROR). DE COMPLETE 2026-04-24: portal DEV 5a4a4d2 (getCohortASummary() endpoint + 49financial/index.tsx inline footnote + isFirmAdmin PII gate; 0 TS errors + PASS + comp-cache collisions 0). 10/10 ACs done. CTO ground-truth reconciliation flip 2026-04-27. -->
     <acked>2026-04-21 ~13:02 ET (DS)</acked>
     <project_code>ADVI_STAUDT</project_code>
     <priority>P2 — small transparency surface. Headline summary only. NO gold-runner filter changes. Scoped to Cohort A (599 accts / $44.7M dropped silver→canonical).</priority>
