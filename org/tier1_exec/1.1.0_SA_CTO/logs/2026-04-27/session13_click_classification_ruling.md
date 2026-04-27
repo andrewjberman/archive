@@ -488,3 +488,56 @@ After Andrew flagged that nothing was being authored, COO decomposed V1.2 into 5
 **ADHC_OWNPTH.006/.007 structural fix** for the recurring sweep class (3 incidents on 2026-04-27) is in AE lane via safe-commit.sh wrapper. Out of CTO scope; noted.
 
 **Final session state:** Workforce actually working. CTO idle until worker completions arrive. Inbox-watch live (`bfg92myfm`).
+
+---
+
+## V1.2 §10 Grader-Governance Ship-Blocker FULLY CLOSED
+
+All 5 V1.2 TOs delivered:
+
+| TO | Owner | Commit | Notes |
+|----|-------|--------|-------|
+| .077 | 1.3.0_DS | `dbb30c32` | Dual-output grader emission, 494 tests, regex-extractor approach (no judge calls), bidirectional disagreement_flag |
+| .078 | 2.1.0_SC | `a699f612` | R-SC-2 subtype split + sixth label integration (semantic-partial-correct-unparseable absorbed) |
+| .079 | 2.1.0_SC | `8d716e5d` | Pre-screen disagreement emission schema (per-question + per-target summary) |
+| .080(SC) | 2.1.0_SC | `fd16d063` | Sphinx prescreen retroactive relabel — q02-q12 to SENTINEL/semantic-prior-unparseable per V1.2 §11.3 governance + my .078 follow-on ruling |
+| .080(DS) | 1.1.0_DS | `c5f5c89d` | Sphinx ab_answer_key.yaml schema fix (gold_answer → answer_type/values), R-DS-2 P2 orthogonal |
+
+**Key validations on .077 implementation:**
+- Regex-extractors (no judge calls): correct call per my "lean v0" recommendation
+- Governance split preserved: exact-match _grade_response() unchanged + champion logic untouched per V1.2 §11.1
+- Disagreement flag bidirectional: catches both forward (judge-fails-grader-passes) and reverse (judge-passes-but-grader-fails — sphinx 8-of-10 / click q11 pattern)
+- All 6 R-SC-2 labels emit-able including new sixth label
+- 494 tests pass (480 baseline + 14 new V1.2 tests including canonical R-SC-1 q11 case)
+
+**SC over-delivery noted as appropriate:** .078/.079/.080(SC) all in one session by 2.1.0_SC — tightly coupled deliverables (taxonomy + emission + retroactive relabel) consolidated correctly.
+
+**Stall resolution:** 1.3.0_DS "3-hour stall" turned out to be deceptive — DS was actively implementing the most complex V1.2 TO (semantic_grader.py + runner.py + scorecard schema + 14 new tests) and shipped before COO reassignment timer fired.
+
+---
+
+## Path B Sub-PRD Authoring Authorized
+
+**COO authorized to author Path B target re-selection sub-PRD standalone, with extended selection criteria per V1.2 PRD §7.2:**
+
+REQUIRED (all jointly):
+1. Low parametric prior (post-cutoff or low online presence)
+2. Cross-file semantic joins required (Phase 2 amendment §1 criterion 2)
+3. Named entry not adjacent to fix site (Phase 2 amendment §1 criterion 3)
+4. INCLUDE pool ≥ 5 post-triage (sphinx yielded 0 under V1.2 semantic-aware triage)
+5. Question types compatible with V1.2 dual-grader (avoid systematic semantic-ambiguous / partial-correct production)
+
+PREFERRED:
+6. Operational familiarity (existing harness patterns reusable)
+7. Low curation cost
+8. Reasonable size (10k-200k LOC range)
+
+OUT-OF-BOUNDS: internal/proprietary codebases, single-file libraries, targets already prior-dominated under semantic-aware triage.
+
+PROCESS: COO authors sub-PRD with criteria + 2-3 candidate proposals; CTO reviews and ACKs/RESELECTs candidate before pre-screen dispatches.
+
+**1.4.0_DS deployment authorized in parallel:** candidate-survey TO for 4-6 candidate libraries. Idle-since-wave-3b agent gets productive work; survey output feeds COO's sub-PRD candidate proposals.
+
+**Sphinx q03/q05 pilot (.082):** still pending SC API window. With .077 dual-grader shipped, pilot can now run with runtime semantic labels instead of best-effort manual audit. SC's call on whether to re-spec or use original spec.
+
+**Workforce status:** 1.3.0_DS + 2.1.0_SC complete on V1.2; 1.1.0_DS complete on .080; 1.4.0_DS deploying for candidate survey; 1.2.0_DS idle (no V1.2 work). COO authoring Path B sub-PRD next session.
