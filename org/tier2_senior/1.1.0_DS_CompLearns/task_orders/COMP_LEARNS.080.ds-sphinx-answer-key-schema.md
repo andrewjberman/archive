@@ -4,9 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.1.0_DS_CompLearns</issued_to>
     <date>2026-04-27</date>
-    <status>pending</status>
-    <project_code>COMP_LEARNS</project_code>
-    <priority>P2 — orthogonal schema fix (R-DS-2 P2, parallel with .077/.078/.079/.081)</priority>
+    <status>complete</status><!-- covered by .081 -- same deliverable, .081 is authoritative (flat-key schema + provenance file) -->
   </metadata>
 
   <references>
