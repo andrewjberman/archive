@@ -6,7 +6,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>2.1.0_SC_CompLearns</issued_to>
     <date>2026-04-27</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>COMP_LEARNS</project_code>
     <priority>P1 — V1.2 R-COO-1 narrow pilot authorization (parallel with .077/.078/.079)</priority>
   </metadata>
