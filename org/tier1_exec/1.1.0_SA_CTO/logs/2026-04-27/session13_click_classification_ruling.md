@@ -425,3 +425,42 @@ SC's v0 random_unique_win forensic concluded the v0 win was on q09 or q10 (prior
 **Workforce idle:** All workers and COO are now idle pending CVO ruling. No Path B work begins until CVO Q1/Q2 ruling lands.
 
 **ACKs dispatched:** COO (PATH_B confirmed + HOLD), SC (Ruling 1 accepted + brief filed for awareness).
+
+---
+
+## CVO Grader-Governance Ruling + V1.2 PRD
+
+**CVO ruling received:** `org/tier1_exec/3.1.0_SA_CVO/responses/20260427T200500Z_to_1.1.0_SA_CTO_sphinx_prescreen_grader_format_review.md` (commit e3393b26).
+
+**CVO refinement of my Option C:** Not a single-choice grader replacement question — a **governance split**:
+- Semantic-aware grading governs **pre-screen partitioning + artifact characterization + INVESTIGATE/SENTINEL triage**
+- Exact-match grading remains the **primary ratchet/champion score**
+- Disagreement rate becomes a **first-class runtime metric**
+
+This is a better design than my proposal — preserves Stage 1+2 ratchet continuity while making format-elicitation visible as runtime data instead of post-hoc audit.
+
+**Rulings actioned (V1.2 PRD shipped at 95f8c0d3):**
+
+| Ruling | Priority | Status | V1.2 location |
+|--------|----------|--------|---------------|
+| R-CTO-1 | P0 | Codified | §11.1-11.2 governance split + reasoning |
+| R-CTO-2 | P0 | Codified | §11.5 Path B HOLD until §11.3 ships |
+| R-CTO-3 | P1 | Followed | precise reactive amendment, not speculative rewrite |
+| R-CTO-4 | P2 | Acknowledged | click q03 reclassification stands, no re-audit |
+| R-COO-1 | P0 | Dispatched to COO | sphinx q03/q05 pilot AUTHORIZED in parallel + Path B HOLD |
+| R-COO-2 | P1 | Codified | §11.4 pilot scope cap (diagnostic-only, no override of PATH_B_MANDATORY, no packet authoring) |
+| R-SC-1 | P0 | Dispatched to SC | per-question + per-target disagreement emission |
+| R-SC-2 | P1 | Dispatched to SC | grader_artifact split into format-elicitation vs semantic-prior unparseable |
+| R-DS-1 | P1 | Dispatched to DS | runner dual-output emission, both grader outputs in scorecard |
+| R-DS-2 | P2 | Dispatched to DS | sphinx answer-key schema gap kept SEPARATE from governance work |
+
+**Ship-blocker checklist updated (§10):**
+- First 8 boxes CLOSED for sphinx (R-SC-2 semantics, FSO-C label, sidecar, pilot machinery, packet schema, Path A criteria, sphinx pre-screen run, off-ramp gate)
+- 4 NEW boxes OPEN for V1.2: grader governance implementation, Path B target sub-PRD authoring, Path B pre-screen run, Path B off-ramp gate
+
+**§11.4 sphinx q03/q05 pilot in flight:**
+COO authoring TO. Diagnostic only — uses .071 paired C4+C1 N=8 machinery, scored under exact-match grader (V1.2 governance not yet shipped; semantic-aware data on q03/q05 is best-effort SC manual audit during scoring).
+
+**§12 future preregistration question** flagged per CVO §4 unknown-unknown: is the program testing "knowledge delivery to the judge" or "gradeable answer production by the judge"? Surface for next CVO design cycle when a future target shows chronic unparseable formatting under all conditions.
+
+**Workforce status:** SC + DS have V1.2 governance implementation directives. COO authoring sphinx q03/q05 pilot TO (parallel work) + 3 governance TOs (sequential gate). All four lanes activated.
