@@ -143,9 +143,37 @@ CC sent to 1.1.0_SA_CTO with same content.
 
 ---
 
+## COMP_LEARNS.R-SC-1 — Scoring Regime Honesty Note (COMPLETE)
+
+### Directive
+R-SC-1 from 1.1.0_SA_CTO (via 3.1.0_SA_CVO review, 20260427T143500Z). Gate condition on .067 GO.
+
+### Action
+Formal scoring-regime honesty note written and committed before iter-7 scoring begins.
+
+Artifact: `comp/results/dev-click-001/scoring_regime_honesty_note.md`
+Commit: 7bc3c185 (pushed CLOUD)
+
+### Finding
+q02 and q11 ratchet-critical failure status is epistemically ambiguous. The proximate cause is
+response-format variance, not semantic error. `float(full_response_text)` in `comp/bench/ab.py`
+raises ValueError on verbose responses — judge reaches correct answer but grading fails.
+
+- q11: H3-v2 response contains "Answer: 1" verbatim; float() fails on surrounding prose. H3-v2
+  baseline is understated by at least 1 (minimum 9/11 under a format-aware grader).
+- q02: all v0 cache responses verbose; format failure conflated with possible semantic error.
+- iter-7 (q03): not affected — set_membership grader, different failure mode.
+- R-SC-2 (audit label for "semantic-correct-but-unparseable"): deferred per CTO directive, required
+  before iter-8.
+
+MCP sent to 1.1.0_SA_CTO and 2.1.0_SA_COO. Hold cleared on SC side for .067 GO.
+
+---
+
 ## Summary
 
-| TO | Status | Key Finding |
-|----|--------|-------------|
+| TO / Item | Status | Key Finding |
+|-----------|--------|-------------|
 | .065 | COMPLETE | v0 random win was q05 (not q02/q03/q11); all improvable questions WRONG for v0; format artifact (bare "Yes" vs "Yes." grader sensitivity) |
 | .066 | COMPLETE | iter-6 DISCARD, ab_lift=0.0, PATTERN C; class_hierarchy_summary fact node produced no lift; q03 did not flip; commit 3fd4a31c |
+| R-SC-1 | COMPLETE | Scoring-regime honesty note filed; q02/q11 ambiguity documented; commit 7bc3c185; .067 hold cleared |
