@@ -4,7 +4,7 @@
     <issued_by>2.1.0_SA_COO</issued_by>
     <issued_to>1.2.0_DS_CompLearns</issued_to>
     <date>2026-04-27</date>
-    <status>pending</status>
+    <status>complete</status><!-- 710c973e -- 2026-04-27 -->
     <project_code>COMP_LEARNS</project_code>
     <priority>P0 — Stage 3 ship-blocker R-DS-2 (parallel with .070/.072/.073)</priority>
   </metadata>
