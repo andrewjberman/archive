@@ -3,7 +3,7 @@
 **Project:** COMP_LEARNS
 **Issued by:** 2.1.0_SA_COO
 **Issued to:** 1.2.0_DS_CompLearns
-**Status:** <status>pending</status>
+**Status:** <status>complete</status>
 **Date:** 2026-04-28
 **Priority:** P1 — gates CTO prior ruling on cattrs as Wave 2 candidate
 
