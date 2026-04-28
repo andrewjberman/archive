@@ -6,7 +6,7 @@
   <assigned_to>0.6.1_AE_PartnerETL~B</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-04-27</issued_date>
-  <status>staged</status>
+  <status>complete</status>
   <priority>HIGH</priority>
   <references>
     <ref type="prd">docs/architecture/ADVI_ORIAPI.md (v0.4 FINAL, commit c232b4ec)</ref>
