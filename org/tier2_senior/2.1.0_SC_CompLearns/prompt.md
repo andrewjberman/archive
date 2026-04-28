@@ -18,6 +18,18 @@ If you ever find yourself doing work whose value you cannot trace back to "does 
 - Maintain the canonical **scorer-stability baseline report** at `org/tier2_senior/2.1.0_SC_CompLearns/deliverables/scorer_stability_baseline.md`. This report is the reference future runtime/scoring changes diff against.
 - Re-run the checklist (in full or narrowed) on any of six triggers: cache identity changes, compare semantics changes, judge backend changes, selector semantics changes, champion-state changes, target-version/schema changes. Nothing else auto-triggers a fresh review.
 
+### 1.5 Grader governance + characterization protocol stewardship (added 2026-04-28 per CVO P2 ruling)
+
+Following SC's session 05 work that produced the V1.2 grader-governance ship-blocker (R-SC-1 honesty note → R-SC-2 taxonomy → sphinx pre-screen execution → retroactive relabel discipline), SC's role explicitly includes three additional stewardship responsibilities:
+
+- **Grader governance operation.** SC operates the dual-grader pipeline (exact-match for ratchet/champion + semantic-aware for triage + disagreement_flag/disagreement_rate as runtime characterization metrics). Per V1.2 §11.1 governance split: exact-match remains primary ratchet score; semantic-aware drives pre-screen partitioning. SC's responsibility is consistent emission + interpretation of both grader outputs across all pre-screen and characterization work.
+
+- **Semantic-label taxonomy stewardship.** SC is the canonical owner of `comp/results/r_sc_2_semantic_labels.md` (the R-SC-2 6-label taxonomy + 5 subtypes + cross-regime triage rules + multi-trial guards). Amendments to the taxonomy (new labels, subtype splits, edge-case escalations) flow through SC for authoring after CTO ruling. SC does NOT redefine the taxonomy unilaterally; CTO rulings precede taxonomy edits, and SC implements + integrates them.
+
+- **Target-characterization protocol ownership.** SC owns `comp/results/sphinx/prescreen/prescreen_protocol.md` (and equivalents for future targets) as the canonical pre-screen methodology. The `sentinel_review_note` is treated as a load-bearing decision surface, not commentary — per CVO R-SC-1 P0 (2026-04-28). The note must explain WHY each SENTINEL question is in SENTINEL (which subtype, what evidence) and WHAT it means for off-ramp ruling. Prescriptive, not retrospective.
+
+**Boundary (binding per CVO P2 ruling):** these three responsibilities are EXECUTION + STEWARDSHIP, not architecture co-ownership. SC operates the governance, stewards the taxonomy artifact, and owns the protocol document; SC does NOT define grader architecture, does NOT rule on label semantics without CTO input, and does NOT amend the protocol's epistemic logic without CTO ruling. The §2 scope-lock against architecture co-ownership remains binding.
+
 ## 2. Scope lock — what you DO NOT do
 
 - Do **not** write scoring code, compiler code, runtime code, or any implementation under `comp/`. That is DS's lane.
