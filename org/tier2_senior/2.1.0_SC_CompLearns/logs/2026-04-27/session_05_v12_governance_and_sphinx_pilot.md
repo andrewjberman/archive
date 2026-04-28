@@ -1,7 +1,7 @@
 # 2.1.0_SC_CompLearns — Session 05 Log
 # Date: 2026-04-27
 # Project: COMP_LEARNS
-# Session scope: V1.2 grader-governance delivery + sphinx q03/q05 pilot
+# Session scope: V1.2 grader-governance delivery + sphinx q03/q05 pilot + pool closeout
 
 ---
 
@@ -10,7 +10,8 @@
 Session resumed from context-compacted prior session (Session 04). SC was holding up the
 COMP_LEARNS Stage 3 workforce. Executed all pending SC TOs: .078 (R-SC-2 amendments),
 .079 (disagreement emission schema), .080 (sphinx prescreen retroactive relabel), .082
-(sphinx q03/q05 pilot). Also executed CTO ruling for sphinx q02-q12 SENTINEL reclassification.
+(sphinx q03/q05 pilot). Also executed three CTO rulings: q02-q12 SENTINEL reclassification,
+q05 trial label correction (parseable-wrong), q03/q05 triage → SENTINEL/ceiling.
 
 ---
 
@@ -44,17 +45,16 @@ Amended `comp/results/r_sc_2_semantic_labels.md`:
 ### COMP_LEARNS.079 — SC Disagreement Emission Schema
 **Commit:** 8d716e5d
 
-Gate confirmed: `_semantic_grade_response` importable (DS .078 runner dual-output shipped).
+Gate confirmed: `_semantic_grade_response` importable (DS .078 runner dual-output shipped at dbb30c32).
 
 Amended `comp/results/sphinx/prescreen/prescreen_protocol.md`:
 - §2 Step 3: V1.2 source note (semantic_label from runner dual-output); sixth label added;
   Step 6 added (disagreement flag derivation rule)
-- §2 Step 4 triage matrix: scbu+parseable-correct → SENTINEL; scbu+scbu → SENTINEL (updated)
+- §2 Step 4 triage matrix: scbu+parseable-correct → SENTINEL; scbu+scbu → SENTINEL
 - §2 Step 5 subtype table: format-elicitation-gain + semantic-prior-unparseable added
 - §3 per-question YAML schema: disagreement field added to both regimes
-- §4 summary schema: grader_governance block added (disagreement_count, disagreement_rate,
-  grader_artifact_count)
-- §8 added: Disagreement Rate Interpretation (3-tier threshold table, sphinx context note)
+- §4 summary schema: grader_governance block added
+- §8 added: Disagreement Rate Interpretation (3-tier threshold table)
 
 ---
 
@@ -62,67 +62,74 @@ Amended `comp/results/sphinx/prescreen/prescreen_protocol.md`:
 **Commit:** fd16d063
 
 - q01, q07: triage_category INCLUDE→SENTINEL; investigate_subtype→format-elicitation-gain;
-  sentinel_reason added per .076 ruling; include_reason→null; pilot_eligible→false
-- q02, q04, q06, q08, q09, q10, q11, q12: investigate_subtype grader_artifact→semantic-prior-
-  unparseable (triage_category stayed INVESTIGATE at .080 time; upgraded to SENTINEL later
-  per CTO ruling — see below)
-- prescreen_summary.yaml: include_count→0, sentinel_count→2
+  sentinel_reason per .076; pilot_eligible→false
+- q02, q04, q06, q08, q09, q10, q11, q12: investigate_subtype grader_artifact→semantic-prior-unparseable
+- prescreen_summary.yaml: include_count→0, sentinel_count→2 (interim; upgraded later per CTO rulings)
 
 ---
 
 ### COMP_LEARNS.082 — Sphinx q03/q05 Narrow Pilot
-**Commits:** 7f1f4eb7 (pilot artifacts + runner fixes), c046ac8f (prescreen label corrections)
+**Commits:** 7f1f4eb7 (pilot artifacts + runner fixes), c046ac8f (initial prescreen label corrections)
 
 **Pre-flight:** 22 pilot machinery tests pass. q03 + q05 pilot_eligible=true confirmed.
+Compiler sha: 768213db.
 
-**Runner compatibility fixes** (two schema gaps vs click format):
+**Runner compatibility fixes** bundled with pilot commit (`comp/loop/runner.py`):
 - sphinx ab_questions.yaml uses `questions:` top-level key (not flat list like click)
 - sphinx ab_questions.yaml uses `text` field (not `question` like click)
-Both fixes backwards-compatible; ds-commit-gate.sh clean. Filed in `comp/loop/runner.py`.
+Both backwards-compatible; ds-commit-gate.sh clean.
 
-**Pilot results:**
-- q03 (EpubBuilder parent): C4=0/8, C1=0/8, delta=0 → DEMOTE_CEILING
-  Judge consistently gives "Builder" as parent. Gold=StandaloneHTMLBuilder. All 16 trials
-  semantic-wrong-unparseable. Compiler context did not correct the judge's wrong prior.
-  v0 imports-only compiler cannot surface class declaration edges.
+**Pilot results (32 total trials):**
 
-- q05 (ClassDocumenter base classes): C4=0/8, C1=0/8, delta=0 → DEMOTE_CEILING
-  Judge consistently gives "DocstringStripSignatureMixin, ModuleLevelDocumenter".
-  Gold={DocstringSignatureMixin, ModuleLevelDocumenter}. 1/2 correct (ModuleLevelDocumenter);
-  DocstringStripSignatureMixin is wrong name. All 16 trials semantic-partial-correct-unparseable.
-  Compiler context did not correct the wrong mixin name. Ceiling-partial.
+- **q03** (EpubBuilder direct parent, gold=StandaloneHTMLBuilder):
+  C4=0/8, C1=0/8, delta=0 → DEMOTE_CEILING
+  All 16 trials: semantic-wrong-unparseable. Judge gives "Builder" consistently.
+  v0 imports-only compiler cannot surface class declaration inheritance edges.
 
-**Diagnostic conclusion:** v0 sphinx compiler (imports-only) does not aid inheritance-chain
-or class-declaration questions. Both questions are genuine ceilings. Design signal: compiler
-with class declaration nodes + inheritance edges would be required for this question class.
+- **q05** (ClassDocumenter base classes, gold={DocstringSignatureMixin,ModuleLevelDocumenter}):
+  C4=0/8, C1=0/8, delta=0 → DEMOTE_CEILING
+  All 16 trials: judge gives DocstringStripSignatureMixin+ModuleLevelDocumenter.
+  1/2 gold members correct (ModuleLevelDocumenter); DocstringStripSignatureMixin is wrong name.
+  Initial semantic label: semantic-partial-correct-unparseable (revised per CTO ruling below).
 
-**Prescreen updates:** q03/q05 reclassified investigate_subtype: ceiling, pilot_eligible: false.
+**Diagnostic conclusion:** v0 sphinx compiler does not aid inheritance-chain or class-declaration
+questions. Design signal: class declaration nodes + inheritance edges required for this question class.
 
-**PATH_B_MANDATORY:** Unchanged. Pilot is diagnostic only (V1.2 R-COO-2 scope cap).
+PATH_B_MANDATORY unchanged. Pilot diagnostic only (V1.2 R-COO-2 scope cap).
 
 ---
 
-### CTO Ruling Execution — Sphinx q02-q12 SENTINEL Reclassification
+### CTO Ruling 1 — Sphinx q02-q12 SENTINEL Reclassification
 **Commit:** 70e950a9
+**Authority:** CTO ruling 20260427T211800Z
 
-CTO ruling 20260427T211800Z authorized SENTINEL reclassification of q02, q04, q06, q08, q09,
-q10, q11, q12 under V1.2 §11.3 governance.
-
-Each per-question YAML updated with audit trail:
+q02, q04, q06, q08, q09, q10, q11, q12 reclassified INVESTIGATE→SENTINEL with full audit trail:
 - `original_triage_v1.1: INVESTIGATE / grader_artifact`
 - `post_v1.2_triage: SENTINEL / semantic-prior-unparseable`
-- `reclassification_authority: CTO ruling 1.1.0_SA_CTO 20260427T211800Z`
-- `reclassification_reason: V1.2 §11.3 — semantic-aware grading drives partitioning`
-- `triage_category: SENTINEL`
-- `sentinel_reason`: per-question
+- `reclassification_authority` and `reclassification_reason` per CTO spec
+- sentinel_count: 2→10
 
-prescreen_summary.yaml final state:
+---
+
+### CTO Ruling 2 + 3 — q05 Trial Relabel + q03/q05 → SENTINEL/ceiling
+**Commit:** 8c95a5b4
+**Authority:** CTO rulings 20260427T213841Z + 20260427T214600Z
+
+**Ruling 2 (q05 trial relabel):** semantic-partial-correct-unparseable → parseable-wrong for all 16 q05 trials.
+Reasoning: DocstringStripSignatureMixin is asserted-wrong (positive claim), not absent.
+§1.6 requires rest ABSENT (not asserted). Near-miss hallucination = parseable-wrong.
+Audit trail preserved per trial (original_label_v1.2 + label_correction fields).
+
+**Ruling 3 (q03/q05 triage → SENTINEL):** V1.2 §5.2 demotion rule — C4 ≤ 1/8 → SENTINEL.
+- q03: triage_category INVESTIGATE→SENTINEL; sentinel_reason: ceiling-no-knowledge
+- q05: triage_category INVESTIGATE→SENTINEL; sentinel_reason: ceiling-near-miss
+
+**prescreen_summary.yaml FINAL STATE:**
 - include_count: 0
-- sentinel_count: 10 (q01/q07 format-elicitation-gain + q02/q04/q06/q08/q09/q10/q11/q12
-  semantic-prior-unparseable)
-- investigate_count: 2 (q03/q05 ceiling post-.082 pilot)
+- sentinel_count: 12
+- investigate_count: 0
 - pilot_eligible_count: 0
-- PATH_B_MANDATORY unchanged; off-ramp trigger: include_too_small
+- final_pool_after_pilot breakdown: format_elicitation_gain=[q01,q07]; semantic_prior_unparseable=[q02,q04,q06,q08,q09,q10,q11,q12]; ceiling_no_knowledge=[q03]; ceiling_near_miss=[q05]
 
 ---
 
@@ -130,46 +137,62 @@ prescreen_summary.yaml final state:
 
 | SHA | Description |
 |---|---|
-| a699f612 | .078 R-SC-2 amendments (subtype split + sixth label) |
-| fd16d063 | .080 sphinx prescreen retroactive relabel |
-| 8d716e5d | .079 SC disagreement emission schema |
-| 7f1f4eb7 | .082 sphinx pilot (DEMOTE_CEILING x2) + runner fixes |
-| c046ac8f | q03/q05 prescreen ceiling reclassification post-pilot |
-| 70e950a9 | CTO ruling: q02-q12 SENTINEL reclassification with audit trail |
+| `a699f612` | .078 R-SC-2 amendments (subtype split + sixth label) |
+| `fd16d063` | .080 sphinx prescreen retroactive relabel |
+| `8d716e5d` | .079 SC disagreement emission schema |
+| `7f1f4eb7` | .082 sphinx pilot (DEMOTE_CEILING x2) + runner schema fixes |
+| `c046ac8f` | q03/q05 prescreen ceiling reclassification (interim) |
+| `70e950a9` | CTO ruling 1: q02-q12 SENTINEL + audit trail (sentinel=10) |
+| `3a109444` | Session log (interim) |
+| `8c95a5b4` | CTO rulings 2+3: q05 parseable-wrong relabel + q03/q05 SENTINEL/ceiling; sphinx pool FINAL SENTINEL=12 |
 
 ---
 
-## SC V1.2 §10 Ship-Blocker Status (SC contributions)
+## SC V1.2 §10 Ship-Blocker — Contributions
 
-- R-SC-2 P1 (taxonomy): COMPLETE (.078)
-- R-SC-1 P0 (disagreement emission schema): COMPLETE (.079)
-- Retroactive relabeling: COMPLETE (.080 + CTO ruling followon)
-- Sphinx q03/q05 pilot: COMPLETE (.082)
+| Item | Status |
+|---|---|
+| R-SC-2 P1 taxonomy amendment (.078) | COMPLETE |
+| R-SC-1 P0 disagreement emission schema (.079) | COMPLETE |
+| Retroactive relabeling (.080) | COMPLETE |
+| Sphinx q03/q05 pilot (.082) | COMPLETE |
+| CTO ruling followons (pool closeout) | COMPLETE |
 
-DS .077/.078 (runner dual-output + _semantic_grade_response): shipped at dbb30c32 by 1.3.0_DS.
+DS .077/.078 (runner dual-output): shipped at dbb30c32 by 1.3.0_DS.
 
-SC obligation to V1.2 §10 ship-blocker: FULLY DELIVERED.
+SC obligation to V1.2 §10 ship-blocker: **FULLY DELIVERED.**
+
+---
+
+## Sphinx Pool — Final State
+
+Sphinx is closed as a measurement-room target under V1.2 semantic-aware triage.
+INCLUDE=0 / SENTINEL=12 / INVESTIGATE=0. PATH_B_MANDATORY unchanged.
+CVO brief 213900Z supplement reflects this pool state.
 
 ---
 
 ## MCP Log
 
-- .078 + .080 → COO (20260427T211425Z)
-- .078 → CTO CC (20260427T211433Z)
-- .079 → COO (20260427T212014Z)
-- .082 → COO (20260427T213601Z)
-- .082 CC → CTO (20260427T213617Z)
-- CTO ruling executed → CTO (20260427T214242Z)
+| Time | To | Subject |
+|---|---|---|
+| 20260427T211425Z | COO | .078 + .080 COMPLETE |
+| 20260427T211433Z | CTO | .078 CC |
+| 20260427T212014Z | COO | .079 COMPLETE |
+| 20260427T213601Z | COO | .082 COMPLETE |
+| 20260427T213617Z | CTO | .082 CC |
+| 20260427T214242Z | CTO | CTO ruling 1 executed (70e950a9) |
+| 20260427T214813Z | CTO | CTO rulings 2+3 executed (8c95a5b4) |
 
 ---
 
-## Open Items / Follow-ons
+## Open Items
 
-1. q05 sixth-label edge case: CTO asked whether DocstringStripSignatureMixin hallucinates
-   qualify as semantic-partial-correct-unparseable (1-of-2 partial) or parseable-wrong
-   (wrong extracted class). SC labeled partial-correct-unparseable; CTO ruling pending.
-2. q03/q05 pilot ran before CTO ruling arrived; q03/q05 remain INVESTIGATE/ceiling per
-   pilot evidence — CTO's ruling noted them as unresolved but pilot supersedes.
-3. Live summary update: pending (COO flagged twice; update via heartbeat next action).
+1. Path B target re-selection — SC input may be needed on question pool triage for new target.
+   Awaiting Path B sub-PRD from CTO/COO.
+2. sphinx revisit scope: if Path B target proves insufficient, sphinx may serve as shakedown
+   target with improved compiler (class declaration nodes needed per .082 pilot finding).
+3. Session log for .072/.075 work (authored in prior sessions) exists at session_03/session_04;
+   this log covers session 05 only.
 
-_Filed by 2.1.0_SC_CompLearns, 2026-04-27, Session 05._
+_Filed by 2.1.0_SC_CompLearns, 2026-04-27, Session 05. All logs in feature_clb worktree._
