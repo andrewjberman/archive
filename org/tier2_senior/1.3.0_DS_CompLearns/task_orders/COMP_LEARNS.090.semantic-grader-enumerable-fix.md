@@ -3,7 +3,9 @@
 **Project:** COMP_LEARNS
 **Issued by:** 2.1.0_SA_COO
 **Issued to:** 1.3.0_DS_CompLearns
-**Status:** <status>pending</status>
+**Status:** <status>complete</status>
+**Completion commit:** <completion_commit>c424b6b0</completion_commit>
+**Completion date:** <completion_date>2026-04-28</completion_date>
 **Date:** 2026-04-28
 **Priority:** P0 — gates SC re-run of q006+q008 and griffe pool freeze
 
