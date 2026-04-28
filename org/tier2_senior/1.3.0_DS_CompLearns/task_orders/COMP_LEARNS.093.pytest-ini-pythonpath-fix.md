@@ -3,7 +3,9 @@
 **Project:** COMP_LEARNS
 **Issued by:** 2.1.0_SA_COO
 **Issued to:** 1.3.0_DS_CompLearns
-**Status:** <status>pending</status>
+**Status:** <status>complete</status>
+**Completion commit:** <completion_commit>1907bd1e</completion_commit>
+**Completion date:** <completion_date>2026-04-28</completion_date>
 **Date:** 2026-04-28
 **Priority:** P2 — quality-of-life; independent of all active SC work; execute while standby
 
