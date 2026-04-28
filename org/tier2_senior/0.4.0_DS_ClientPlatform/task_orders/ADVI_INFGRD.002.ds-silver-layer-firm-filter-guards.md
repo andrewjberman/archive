@@ -7,7 +7,27 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-27</date>
-    <status>open</status>
+    <status>complete</status>
+    <completed_date>2026-04-27</completed_date>
+    <completed_by>0.4.0_DS_ClientPlatform~A</completed_by>
+    <close_summary>
+      Shipped in commit 7ecc140a (silver/convert_orion_to_silver.py + gold/D_04.client_portal_summary.py):
+      - PARTNER_FIRM_TAGS dict + INFLECTION_ADVISOR_FIRM_TAG constant + INFLECTION_REP_IDS = {3, 11, 12}
+      - _advisor_firm(rep_id) helper + _apply_scopefix() rewritten to allowlist-based filter
+      - Guard A (raise on missing rep_id col / all-NaN advisor_firm post-derive) IMPLEMENTED in _apply_scopefix
+      - Guard B (raise if filtered AUA outside [$50M, $400M] sanity bounds) IMPLEMENTED in _apply_aua_guard,
+        called from build_aum_silver
+      - Guard C (pre-filter structured per-firm diagnostic — advisor_firm tag x rep_id list breakdown)
+        IMPLEMENTED in _apply_scopefix
+      - advisor_firm column added to all 3 silver write paths (TRN normalize_trn, AUM normalize_aum,
+        accounts_dim build_accounts_dim)
+      - D_04 NMEC lifecycle helper (_compute_hh_lifecycle) added — was hardcoded to 0 per RD finding
+        2026-04-27; now properly computed (NMNC/NMEC/Existing 3-segment radial_12m + partner_analytics views.aua)
+      Gate: ds-commit-gate.sh PASS (py_compile + AST + ruff) for both files.
+      INFGRD.003 (AE chain rerun) stays HOLD per Andrew "better solution" direction; superseded by
+      ADVI_INFSHIP feeding silver from ORIAPI per CTO 34d2b757 PRD.
+      Authority: COO ACK 20260428T0344Z (after RAVC2 ownership flag).
+    </close_summary>
     <priority>HIGH — gates .003 (AE chain rerun) and Inflection production sign-off</priority>
   </metadata>
 
