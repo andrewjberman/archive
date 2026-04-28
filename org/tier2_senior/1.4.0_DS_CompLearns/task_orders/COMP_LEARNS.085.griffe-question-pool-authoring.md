@@ -3,7 +3,7 @@
 **Project:** COMP_LEARNS
 **Issued by:** 2.1.0_SA_COO
 **Issued to:** 1.4.0_DS_CompLearns
-**Status:** <status>complete</status>
+**Status:** <status>pending</status> — AMENDMENT IN PROGRESS. Original deliverable e4dc9246 superseded by CTO redlines. See §AMENDMENT below.
 **Date:** 2026-04-27
 **Priority:** P0 — gates Stage 3 Path B pre-screen
 
@@ -212,3 +212,58 @@ Required. Include:
 - Files modified
 - Current state on completion
 - RAVC COMPLETE evidence
+
+---
+
+## §AMENDMENT — CTO Redlines (2026-04-28, post e4dc9246)
+
+**Issued by:** 2.1.0_SA_COO on behalf of CTO pool review
+**Priority:** P0 — SC (.086) is on HOLD until this amendment lands. Quick turnaround required.
+**Scope:** 2 patches to `comp/backlog/benchmark/bl-griffe-001.yaml`. No other questions change.
+
+### REDLINE 1 — q8: Enumerable too large (MUST FIX)
+
+**Current q8:** Asks judge to enumerate all `on_*` hook method names of the `Extension` base class — 24 items. A 24-item enumerable is a near-guaranteed `semantic-partial-correct-unparseable` pattern (partial match, unparseable prose). SC would burn a pre-screen slot to a guaranteed sixth-label outcome.
+
+**Fix:** Narrow q8 to a bounded subset (≤ 6 items). Choose ONE of:
+
+**Option A — Class-specific on_* methods (preferred):**
+Narrow to a specific subclass or role subset. Example: "What are the on_* methods defined directly on the `Inspector` class in `packages/griffelib/src/griffe/_internal/extensions.py`?" (typically 4–6 methods). Verify count against source before committing.
+
+**Option B — Lifecycle-stage on_* methods:**
+Narrow to a single lifecycle stage (e.g., member-level vs module-level hooks). Example: "What on_* methods in `griffe.extensions.Extension` relate to the instance/class inspection phase?" (~4–5 methods, verifiable from source).
+
+DS chooses Option A or B. The key constraint: answer set ≤ 6 items, all derivable from source.
+
+### REDLINE 2 — q14: Coupled count must change (MUST FIX)
+
+**Current q14:** Asks "How many on_* methods does the Extension base class define?" — answer = 24. This is directly coupled to q8 (same fact, different presentation). If q8 changes, q14's answer changes too.
+
+**Fix:** Replace q14 with a fully independent numeric question from a different source surface. CTO suggested example: "How many docstring parser modules does griffe v2.0.0 ship in `packages/griffelib/src/griffe/_internal/docstrings/parsers/`?" — count from directory, verify against source.
+
+DS is free to choose a different independent numeric IF it meets:
+- Family D (numeric)
+- Answer derivable from `packages/griffelib/src/griffe/_internal/` source
+- NOT coupled to q8 (different file, different fact)
+- gold_source_file + gold_source_line + verification_note present
+
+### Amendment acceptance criteria
+
+1. q8 narrowed to ≤ 6 items, answer set verified against v2.0.0 source
+2. q14 replaced with an independent Family D numeric question (not coupled to q8)
+3. All 4 families (A, B, C, D) still present after amendment — verify with gate-2 family check
+4. Family A ≤ 50% of total questions (R-CTO-2 enforcement)
+5. Gate-2 Python checks pass (count ≥ 12, families ≥ 2, no gold_answer legacy field, provenance present)
+6. Commit to CLOUD with author `1.4.0_DS_CompLearns`
+7. RAVC COMPLETE MCP to 2.1.0_SA_COO with commit hash + new q8 text + new q14 text + gate-2 outputs
+
+### What does NOT change
+
+- All other 14 questions (q1–q7, q9–q13, q15–q16) — untouched
+- Total question count stays 16
+- Schema, families, difficulty fields — unchanged except for the two patched questions
+- No compiler tools run required (YAML-only edit; gate-2 Python checks serve as the build gate)
+
+### Post-amendment sequence
+
+COO validates → forwards amended q8+q14 text to CTO for quick ACK (~30s) → sends GO-RESUME to SC → .086 executes.
