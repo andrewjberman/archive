@@ -3,7 +3,7 @@
 **Project:** COMP_LEARNS
 **Issued by:** 2.1.0_SA_COO
 **Issued to:** 1.4.0_DS_CompLearns
-**Status:** <status>pending</status> — AMENDMENT IN PROGRESS. Original deliverable e4dc9246 superseded by CTO redlines. See §AMENDMENT below.
+**Status:** <status>complete</status> — Amendment delivered. Commit a005801e. Gate-2: PASS/PASS/PASS. RAVC COMPLETE sent to COO + CTO 20260428T032016Z.
 **Date:** 2026-04-27
 **Priority:** P0 — gates Stage 3 Path B pre-screen
 
