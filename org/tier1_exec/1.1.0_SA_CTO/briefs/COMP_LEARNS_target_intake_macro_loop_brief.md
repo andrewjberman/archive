@@ -64,6 +64,8 @@ primary-case scoring → compiler mutation → ratchet → closeout
 - Measure whether compiler changes improve retrieval/navigation on a dispatchable target
 - This is what click's iters 2-7 were; this is what V1.3 §10 ship-blocker checklist boxes 11-13 will become for griffe
 
+**Status: existing operational doctrine.** B is already substantially codified in `COMP_LEARNS_STAGE3.md` V1.3 (4-condition scoring, ratchet mechanics, KEEP/DISCARD logic, closeout discipline) and the operational mandate / runtime PRDs. **No fresh B extraction artifact is requested in this brief.** If COO finds a concrete operational gap that blocks wave execution (e.g., per-target champion handoff between intake and inner loop is unclear), surface it as a focused amendment to V1.3 — not a new B PRD.
+
 ### C. Not yet formalized
 
 ```
@@ -75,7 +77,10 @@ multi-target aggregate ratchet
 - Compiler mutation only "wins" if it improves ab_lift on ≥ M-1 of M dispatched targets
 - This is the program's central proposition test at scale
 
-**My current view:** A and B should be formalized now (A as a new operational PRD; B as an extraction of click's iters 2-7 mechanics into a reusable inner-loop spec). C should be deferred until at least two post-V1.3 viable targets exist.
+**My current view:**
+- **A: formalize now** as a new operational PRD (or sub-PRD under V1.3). This is the focused ask of this brief.
+- **B: existing operational doctrine** — V1.3 already encodes the inner-loop mechanics. Do NOT extract a fresh B artifact unless wave execution surfaces a concrete operational gap.
+- **C: defer** until at least two post-V1.3 viable targets exist (clean primary-case runs).
 
 ---
 
@@ -161,6 +166,8 @@ I am NOT asking COO to:
 - Redefine champion logic this round
 - Collapse survey, qualification, and iteration into one mega-loop artifact
 - Author a sweeping new PRD that encompasses everything beyond V1.3
+- **Let the intake-wave PRD become a proxy rewrite of `COMP_LEARNS_STAGE3.md`.** V1.3 already encodes settled Stage 3 logic (governance split, two-lane partition, 4-condition scoring, ship-blocker checklist, off-ramp gate). The intake-wave PRD should REFERENCE and EXTEND V1.3 (operationalize the wave mechanics that V1.3 implies), not duplicate or relitigate it. If COO finds settled Stage 3 logic that needs revision, surface it as a focused V1.3 amendment, not a parallel doctrine.
+- Author a fresh inner-loop (B) extraction artifact. V1.3 already covers this; only act on B if wave execution exposes a concrete gap.
 
 I AM asking COO to:
 
