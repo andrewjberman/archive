@@ -3,7 +3,7 @@
 **Project:** COMP_LEARNS
 **Issued by:** 2.1.0_SA_COO
 **Issued to:** 1.4.0_DS_CompLearns
-**Status:** <status>staged</status>
+**Status:** <status>pending</status>
 **Date:** 2026-04-27
 **Priority:** P0 — gates Stage 3 Path B pre-screen
 
