@@ -110,6 +110,14 @@
     NO Lambda invoke (bronze runner is invoked-by, doesn't invoke). NO
     silver write (B2's silver chain Lambda owns silver writes).
 
+    **B2 trigger via sentinel file (RATIFIED COO 14:05Z post AE 0.6.1~B
+    catch):** orchestrator.py final step writes `_BRONZE_COMPLETE.json`
+    sentinel to `s3://opal-data-inf/bronze/orion-api/{date}/`. B2's silver
+    chain Lambda triggers via S3 EventBridge ObjectCreated rule on the
+    sentinel. Keeps B1 IAM minimal (s3:PutObject suffices); no Lambda
+    invoke permission needed. Supersedes B2's original "RECOMMENDED:
+    Direct invoke" pattern.
+
     **Boot flow (userdata.sh + orchestrator.py):**
     1. `userdata.sh` runs once on instance boot:
        - Pull latest orchestrator.py + pull_*.py from S3 code prefix

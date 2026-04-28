@@ -69,17 +69,17 @@
   <spec_summary>
     ## B2 — inf-silver-chain Lambda
 
-    **Trigger:** S3 EventBridge rule on `s3://opal-data-inf/bronze/orion-api/`
-    ObjectCreated. When the LAST dim of the bronze chain lands (signaled by a
-    sentinel file `_BRONZE_COMPLETE_{date}` written by inf-bronze-runner
-    orchestrator at end of chain), Lambda fires. Single Lambda invocation
-    runs all 9 silver builders sequentially. Alternative trigger: direct
-    invoke from inf-bronze-runner orchestrator at chain end (skip S3
-    EventBridge round-trip, simpler).
+    **Trigger (RATIFIED COO 14:05Z post AE 0.6.1~B catch):** S3 EventBridge
+    rule on `s3://opal-data-inf/bronze/orion-api/{date}/_BRONZE_COMPLETE.json`
+    ObjectCreated. inf-bronze-runner orchestrator writes the sentinel as
+    its final step. Lambda fires once per cron run; reads `{date}` from
+    sentinel content + bucket prefix. Single invocation runs all 9 silver
+    builders sequentially.
 
-    **RECOMMENDED:** Direct invoke from bronze runner. Coordinate with B1
-    AE 0.7.0~B — orchestrator.py adds final step `lambda_client.invoke(
-    'inf-silver-chain', InvocationType='Event', payload={'date': today_iso})`.
+    **Why sentinel pattern over direct invoke:** B1's IAM is scoped to
+    bronze write only (no Lambda invoke). Sentinel pattern preserves B1
+    IAM minimalism while giving B2 unambiguous chain-complete trigger.
+    Per-dim ObjectCreated would fire 9 Lambdas; sentinel fires once.
 
     **Lambda runtime:** Python 3.12 (latest supported), 1024 MB memory,
     900s timeout (15 min). Sufficient for 9 sequential silver builds at
