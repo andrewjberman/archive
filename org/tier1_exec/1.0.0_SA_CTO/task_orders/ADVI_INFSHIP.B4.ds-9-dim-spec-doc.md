@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-28</date>
-    <status>pending</status>
+    <status>complete</status><!-- DS~A 2026-04-28: shipped 8fb09338 (INFLEC_DIMS_AND_TRANSACTIONS.md v0.1, 9-dim operational catalog) + 0629d129 (v0.2 patch per DS~B peer-review); session log 40de48e6. Reconciled 2026-04-29 startup. -->
     <project_code>ADVI_INFSHIP</project_code>
     <to_serial>B4</to_serial>
     <priority>HIGH</priority>

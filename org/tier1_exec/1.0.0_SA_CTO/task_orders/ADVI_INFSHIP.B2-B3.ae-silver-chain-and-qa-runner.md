@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.6.1_AE_PartnerETL~B</issued_to>
     <date>2026-04-28</date>
-    <status>pending</status>
+    <status>complete</status><!-- AE 0.6.1~B 2026-04-28: shipped ab5ccadf (B2 inf-silver-chain Lambda + S3 EventBridge sentinel) + 5028c3ec + ed69c66a (B3 inf-gold-qa-runner EC2 c6a.2xlarge + IAM platinum-DENY, inf-pipeline-v1.6.1) + 48baf414 apply + B3-DEP-1/2 cascade (2e9bf29d + a7431486 + 28018d36 + 50d133c8); session log 5189492f. Reconciled 2026-04-29 startup. -->
     <project_code>ADVI_INFSHIP</project_code>
     <to_serial>B2-B3</to_serial>
     <priority>HIGH</priority>

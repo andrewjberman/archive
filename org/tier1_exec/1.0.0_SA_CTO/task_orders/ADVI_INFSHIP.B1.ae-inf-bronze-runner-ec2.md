@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.7.0_AE_CloudOps~B</issued_to>
     <date>2026-04-28</date>
-    <status>pending</status>
+    <status>complete</status><!-- AE 0.7.0~B 2026-04-28: shipped 2d1154c3 + 3b257557 (inf-pipeline-v1.6.0 EC2 + Lambda + 12:30 UTC cron) + d31809ca (user-data fix) + dcd10448 + cf11f13b (POSIX portability) + 05ae692b (orchestrator --upload-bronze) + 07316898 + ff52cd32 logs. Reconciled 2026-04-29 startup. -->
     <project_code>ADVI_INFSHIP</project_code>
     <to_serial>B1</to_serial>
     <priority>HIGH</priority>

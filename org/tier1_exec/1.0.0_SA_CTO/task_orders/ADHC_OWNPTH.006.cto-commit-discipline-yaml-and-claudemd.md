@@ -5,7 +5,7 @@
   <issued_by>1.0.0_SA_CTO</issued_by>
   <issued_to>1.0.0_SA_CTO</issued_to>
   <issued_date>2026-04-27</issued_date>
-  <status>active</status>
+  <status>complete</status><!-- 1.0.0_SA_CTO 2026-04-27: shipped 15276118 (commit-discipline YAML + CLAUDE.md Rule 14a) + 3a0a9b19 (.owned-paths.yaml self-rule); closure log 6f841b04. Reconciled 2026-04-29 startup. -->
 
   <title>ADHC_OWNPTH TO 6 — CTO commit-discipline YAML rule + CLAUDE.md mandate</title>
 
