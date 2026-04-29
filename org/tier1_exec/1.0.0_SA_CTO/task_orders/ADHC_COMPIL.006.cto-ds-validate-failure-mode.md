@@ -5,7 +5,8 @@
     <issued_to>1.0.0_SA_CTO</issued_to><!-- primary: protocol doc + CLAUDE.md -->
     <co_implementer>0.4.0_DS_ClientPlatform</co_implementer><!-- gold_validate_config.yaml inline docs -->
     <date>2026-04-27</date>
-    <status>staged</status>
+    <status>in_progress</status>
+    <ravc4_cto>2026-04-29 — AC1 (COMP_VALIDATE_PROTOCOL.md) + AC3 (CLAUDE.md) shipped by 1.0.0_SA_CTO. Awaiting AC2 (gold_validate_config.yaml inline header docs) from 0.4.0_DS_ClientPlatform~B per Andrew lane assignment.</ravc4_cto>
     <project_code>ADHC_COMPIL</project_code>
     <theme>E (v2)</theme>
     <prd_ref>docs/architecture/ADHC_COMPIL_V2.md §3 (commit 653b0469)</prd_ref>
