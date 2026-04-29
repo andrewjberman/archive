@@ -5,7 +5,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <coordinator>0.4.0_DT_ClientPlatform (CloudFront behavior add — if new behavior required on portal main CF)</coordinator>
     <date>2026-04-21</date>
-    <status>staged</status>
+    <status>complete</status><!-- 2026-04-29: shipped end-to-end. Tags shared-infra-v1.8.0 + trade-pipeline-v1.7.0. 82/86 imports clean (84 incl. data source); 4 quick-create resources ($default stage, integration s7ntfz4, route khcd4f1) unimportable per AWS provider, documented as console-only with refs to live IDs. Both pipelines 0-diff post-apply. Closes G3 + TRSB_TFIMPT terminal wave. -->
     <project_code>TRSB_TFIMPT</project_code>
     <priority>P1 (closes the routing-is-console-only gap; final wave)</priority>
     <sla>1 day from GO (API GW import + CF wiring + comp-routes registration + smoke test)</sla>
