@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-24</date>
-    <status>pending</status><!-- Andrew decision 2026-04-24 batch approved; CTO PRD §7 TO 4 scope at d8875b42. Gates met (.001 b6e0c154 + .002 1e9d9dc3 both complete). Direct GO dispatch to DS 0.4.0 — any-lane bandwidth. -->
+    <status>complete</status><!-- SHIPPED 2026-04-24: ruff 0.15.11 + FA102 + from __future__ annotations backfill 93 scripts. Commits: 6156d428+a5ac27a2+9bffa7e6. CLAUDE.md Rule 15 + canary gate verified. TO closed 2026-04-29 by ~D per COO status correction (REGISTRY confirmed). -->
     <project_code>ADHC_DSFLOW</project_code>
     <priority>P1 — closes same latent-bug class as original .001 motivators (081223b5 defaultdict + 035352c3 KeyError). AE 0.6.1 caught pre-dispatch PEP-604 today (SCOPEFIX INFLEC 2d3de276) — structural gate prevents recurrence.</priority>
     <origin>

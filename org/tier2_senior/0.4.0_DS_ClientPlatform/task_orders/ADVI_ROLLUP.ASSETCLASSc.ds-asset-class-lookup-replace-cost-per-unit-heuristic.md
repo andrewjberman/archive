@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-24</date>
-    <status>pending</status><!-- GO fired 2026-04-24 PM iter 5. Gates met: 49EXEC TO 1+5 complete (8cc69bab) + ORPHRELID complete (a8cf3c83). DS bandwidth surfaced post-TOPPOSOPAL cancellation (3edd0e62). Cross-lane parallel: POSITIONS Phase 3 passive wait + DSFLOW.004 backfill held for TOPPOSOPAL-then-POSITIONS-then-this; this TO lands cleanly BEFORE backfill sweep per DS sequencing plan. -->
+    <status>complete</status><!-- SHIPPED 2026-04-24 at 090d11f6: bd_assets_dim join replaces cost_per_unit <= 2.0 heuristic in B_01.holdings_lots.py. TO closed 2026-04-29 by ~D per COO status correction (REGISTRY confirmed). -->
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P2 — CP-DS1 follow-up; quality improvement, not portal-blocking</priority>
     <origin>
