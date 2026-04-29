@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-21</date>
-    <status>staged</status>
+    <status>complete</status><!-- Verified 2026-04-29 AE TO sweep: opal-inf-export-schedule cron(0 21 * * ? *) deployed inf-pipeline-v1.7.0 — 5pm EDT daily Orion export trigger. -->
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 

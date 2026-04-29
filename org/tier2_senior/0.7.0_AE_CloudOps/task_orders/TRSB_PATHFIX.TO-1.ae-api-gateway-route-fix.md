@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-27</date>
-    <status>active</status>
+    <status>complete</status><!-- Verified 2026-04-29: all 12 /api/general/trades/* routes present with CUSTOM+naqxlm. Tag trade-pipeline-v1.6.0 already applied. Work executed in prior AE session; TO status was stale. -->
     <project_code>TRSB_PATHFIX</project_code>
     <wave>W1 — USER-FACING UNBLOCK (same-session)</wave>
     <prd_ref>docs/architecture/TRSB_PATHFIX_PRD.md §3 W1 (2026-04-27)</prd_ref>

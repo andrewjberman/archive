@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-21</date>
-    <status>staged</status>
+    <status>complete</status><!-- Verified 2026-04-29 AE TO sweep: lambda-otp-relay.tf deployed; function URL live at swk4gc6kd7k3osowr3464l7u540exjbp.lambda-url.us-east-1.on.aws. -->
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 

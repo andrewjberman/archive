@@ -5,7 +5,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <co_implementer>Andrew (production-access form — account-root action only)</co_implementer>
     <date>2026-04-27</date>
-    <status>staged</status>
+    <status>complete</status><!-- Verified 2026-04-29 AE TO sweep: all 9 spec emails (austin/adam/yang/lauren/menachem/manav/aj/andrew/alyssa @opalinvest.com) returning VerificationStatus=Success in SES. SES still sandbox (ProductionAccessEnabled=false). AE actions complete. Pending non-AE: Andrew submits production-access form via AWS console using packet at infra/aws/ses/trade-pipeline-prod-access-request.md. Sandbox + 9-verified is acceptable interim per PRD §3 W3 (BROKERAGE_EMAILS override routes to andrew@). -->
     <project_code>TRSB_PATHFIX</project_code>
     <wave>W3 — SES unblock (can ship parallel with W2 after W1)</wave>
     <prd_ref>docs/architecture/TRSB_PATHFIX_PRD.md §3 W3 (2026-04-27)</prd_ref>

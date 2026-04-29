@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-21</date>
-    <status>staged</status>
+    <status>complete</status><!-- Verified 2026-04-29: opal-partner-inflection table ACTIVE, PAY_PER_REQUEST, PK=email, GSI=ByAdvisorRole. user@inflection.com first real user added 2026-04-29. -->
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 

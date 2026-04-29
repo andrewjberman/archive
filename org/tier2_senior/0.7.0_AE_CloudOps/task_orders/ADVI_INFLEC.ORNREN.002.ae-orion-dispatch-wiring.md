@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-22</date>
-    <status>active</status>
+    <status>complete</status><!-- Verified 2026-04-29 AE TO sweep: EC2_MANIFEST.json dispatch_script entries already point to s3://opal-data-inf/code/gold/orion-gold-dispatch.sh for both inf-gold-layer-runner + inf-gold-qa-runner. DS ORNREN.001 shipped, AE rewire was completed in earlier session. -->
     <project_code>ADVI_INFLEC</project_code>
     <urgency>HIGH — gates next Orion D-chain dispatch. Blocked on ORNREN.001 DS completing S3 upload.</urgency>
     <andrew_directive>2026-04-22 in-session: Orion scripts must not carry firm-specific I_ prefix. Match BD convention.</andrew_directive>

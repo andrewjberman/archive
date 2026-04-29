@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-21</date>
-    <status>staged</status>
+    <status>complete</status><!-- Verified 2026-04-29 AE TO sweep: OTP selectors confirmed via inspector tool (commit b1e19d51a, 29f52f95c). -->
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 

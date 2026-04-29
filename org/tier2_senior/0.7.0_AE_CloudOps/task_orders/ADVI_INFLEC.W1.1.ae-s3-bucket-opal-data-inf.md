@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-21</date>
-    <status>staged</status>
+    <status>complete</status><!-- Verified 2026-04-29: opal-data-inf bucket exists, fully TF-managed in inf-pipeline/s3.tf, layout mirrors opal-data-bd. Closed during AE TO sweep. -->
     <project_code>ADVI_INFLEC</project_code>
   </metadata>
 
