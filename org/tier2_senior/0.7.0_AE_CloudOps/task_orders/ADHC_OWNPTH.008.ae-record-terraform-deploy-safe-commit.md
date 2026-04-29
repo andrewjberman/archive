@@ -5,7 +5,9 @@
   <issued_by>1.0.0_SA_CTO</issued_by>
   <issued_to>0.7.0_AE_CloudOps</issued_to>
   <issued_date>2026-04-28</issued_date>
-  <status>pending</status>
+  <status>complete</status>
+  <completed_date>2026-04-29</completed_date>
+  <completed_commit>aa004108b</completed_commit>
 
   <title>ADHC_OWNPTH TO 8 — migrate record-terraform-deploy.sh to safe-commit.sh (close the recurring sweep door)</title>
 
