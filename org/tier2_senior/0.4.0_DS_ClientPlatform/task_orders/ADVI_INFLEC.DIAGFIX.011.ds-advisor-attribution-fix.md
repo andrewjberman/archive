@@ -7,9 +7,14 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-29</issued_date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>high</priority>
     <estimated_effort>2-3h</estimated_effort>
+    <closed_date>2026-04-29</closed_date>
+    <closed_by>2.0.0_SA_COO</closed_by>
+    <closure_evidence>All 6 phases shipped 2026-04-29 PM. Two commits: `72628a1df` (Phase 1+2+3 — bronze pull pull_inflection_representatives.py for Reps + per-rep clients [3,6,7,8,10,11,12]; silver dims representatives 18 rows + household_rep_mapping 313 rows; build_accounts_v2 augmented with JOIN populating rep_id + servicing rep_name) and `f21ab4b44` (Phase 5 surgical fix — INF_I_D03 advisor_key override JOIN against accounts_v2 to override baked-in advisor_key from prior INF_B_00 chain run; avoids 30-60min EC2 re-run). Phase 4-6 live re-run executed via SSM EXPORT_MODE=jwt-extract dispatch (CMD `d302baf8...`). Result: 4 advisors live on S3 (was 3) — `joe_brandenburg/composition.json` published with $14.62M holdings (orion_native_v1 classification: equity 56.91 / fixed_income 29.03 / alternatives 7.76 / cash 6.30; top holding VOO $2.46M); `inflection_wealth_management`, `patrick_scanlan`, `peter_lee` refreshed. accounts_v2 attributes 67 accounts / $16.15M to rep_id=6 (Joe Brandenburg) — 100% rep_id population, 4 distinct rep names (Lee 617, Scanlan 152, Brandenburg 67, IWM 13). Total firm AUA $197.69M ≈ Andrew's $198.87M Brandenburg-included UI target. mix_summary.json firm-level unchanged from DIAGFIX.010 (53.93/30.93/8.08/6.53). 7/7 acceptance criteria PASS.</closure_evidence>
+    <closure_note>Holdings sourcing delta (Brandenburg accounts_v2 $16.15M vs composition.json $14.62M) is the same TRN-vs-aum_snapshot delta documented at firm level — out of scope here, routed to AE 0.6.1's new DIAGFIX.009 (holdings pricing strategy, filed `394c34606`). DS pivots to that next.</closure_note>
+    <terraform_followups>JWT trigger pipeline diagnostic exposed two structural infrastructure gaps that need AE 0.7.0 Terraform fixes (MCP'd 2026-04-29 23:09Z): (1) inf-jwt-trigger-lambda-role missing KMS perms — fixed manually via aws iam put-role-policy adding inline `inf-jwt-trigger-kms` with kms:CreateGrant + kms:GrantIsForAWSResource:true condition + key-use actions on alias/inf-ebs-key. Needs Terraform lift. (2) Lambda docstring claims systemd inf-jwt-fetch.service handles jwt-extract on EC2 boot, but unit doesn't exist; SSM document opal-inf-export-run only handles bronze-export (no Mode/EXPORT_MODE param). Recommended Option A: extend SSM doc with Mode param + Lambda _handle_jwt_extract calls _send_export_command with Mode=jwt-extract. Tag inf-pipeline-v1.6.6 or v1.7.0.</terraform_followups>
   </metadata>
 
   <references>
