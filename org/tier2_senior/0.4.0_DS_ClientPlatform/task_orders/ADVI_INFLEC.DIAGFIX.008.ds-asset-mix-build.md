@@ -51,7 +51,25 @@
   </context>
 
   <scope>
-    STEP 0 — Verify ETFClassifier mode:
+    STEP 0 — Orion manual_api classification investigation (DO THIS FIRST):
+    Before building any classifier, check data/orion/manual_api/ for existing scripts or
+    endpoints that return security-level classification data from Orion directly.
+    Specifically:
+    - Does any existing pull script (pull_inflection_positions.py, pull_inflection_securities.py,
+      or equivalent) return asset_class / category / security_type / broad_category alongside
+      ticker + product_name in the API response?
+    - If yes: pull a sample, document field name + distinct values + AUA coverage.
+      RAVC to COO with findings. Use Orion-native classification as PRIMARY source if
+      coverage > 70% AUA. Do NOT proceed to ETFClassifier build until COO ACKs.
+    - If no native classification in Orion API: document "Orion API has no native classification
+      — proceeding with ETFClassifier regex-fallback" in RAVC, then proceed to STEP 1.
+
+    NOTE — Opal securities: Do NOT add special handling for Opal model portfolio securities.
+    Andrew assessment: any Opal securities in Inflection's portfolio are coincidental and
+    negligible AUA. Classify them via the same path as any other ticker. Flag count in RAVC
+    if >5 Opal-branded tickers appear.
+
+    STEP 0a — Verify ETFClassifier mode (only if Step 0 finds no Orion-native data):
     In your DIAGFIX.006 test, check if the classifier used DynamoDB lookups or regex-only.
     Quick test: instantiate with no DDB arg / offline mode and re-run on holdings.
     If coverage is still 100% in regex-only mode: no IAM dependency. Note in RAVC.
