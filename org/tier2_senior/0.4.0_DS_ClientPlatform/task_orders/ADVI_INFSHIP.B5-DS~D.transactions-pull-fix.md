@@ -5,6 +5,7 @@
 **Authored by:** 0.6.1_AE_PartnerETL
 **Date:** 2026-04-29
 **Priority:** HIGH — blocks daily incremental bronze completeness for Inflection pipeline
+**Status:** complete <!-- SHIPPED 79bf2afbc 2026-04-29 by DS~D: pull_inflection_transactions_v2.py (prompts[] fix) + orchestrator wired; backfills 2026-04-28/29 done -->
 
 ---
 
