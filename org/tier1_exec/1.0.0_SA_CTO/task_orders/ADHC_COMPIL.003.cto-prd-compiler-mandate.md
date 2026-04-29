@@ -4,7 +4,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>1.0.0_SA_CTO</issued_to>
     <date>2026-04-27</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-04-29</completed>
+    <closing_commit>dd38a71ad</closing_commit>
+    <closing_note>4 of 5 ACs PASS. AC #4 stretch (.tools/prd-evidence-check.sh) split to ADHC_COMPIL.004 with AE 0.7.0 owner per TO spec recommendation. Deliverables: org/templates/prd_template.md (NEW) + docs/architecture/PRD_AUTHORING_PROTOCOL.md (NEW) + CTO + COO prompt.md one-line additions. Forward-only mandate, WARN-mode enforcement v1.</closing_note>
     <project_code>ADHC_COMPIL</project_code>
     <theme>C</theme>
     <prd_ref>docs/architecture/ADHC_COMPIL.md §6 (commit 172470a8)</prd_ref>
