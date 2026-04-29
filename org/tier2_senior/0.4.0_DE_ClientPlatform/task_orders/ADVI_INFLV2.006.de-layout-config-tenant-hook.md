@@ -7,7 +7,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-27</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed_date>2026-04-27</completed_date>
+    <ship_evidence>portal commit 52d2a6c (ADVI_INFLV2.006); parent CLOUD 9f74fa92</ship_evidence>
     <priority>HIGH — start immediately (no gate). Foundation for .007 + .008.</priority>
   </metadata>
 

@@ -7,7 +7,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-27</date>
-    <status>open</status>
+    <status>complete</status>
+    <completed_date>2026-04-27</completed_date>
+    <ship_evidence>portal commit 12cbc8b (ADVI_INFLV2.008 — AdvisorsTab + AdvisorPublicProfile suppression); pushed to origin/DEV; rolled into INFSHIP Phase 2 wave at 37fc91f5; parent CLOUD pointer covered</ship_evidence>
     <priority>HIGH — gates INFLV2.010 (RD smoke)</priority>
   </metadata>
 

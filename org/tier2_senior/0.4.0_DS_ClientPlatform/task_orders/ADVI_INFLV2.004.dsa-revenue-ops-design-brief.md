@@ -7,7 +7,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-27</date>
-    <status>open</status>
+    <status>cancelled</status>
+    <cancelled_date>2026-04-29</cancelled_date>
+    <cancellation_reason>Andrew picked all 3 candidates (Activity Scan + Cash Drag Monitor + Position Concentration Risk) directly without needing a brief. .005 scope expanded to all 3 artifacts; brief no longer needed. Per COO 20260429T133551Z + 20260429T135300Z. Status edit by 0.4.0_DE_ClientPlatform.</cancellation_reason>
     <priority>HIGH — gates INFLV2.005 (Andrew pick required)</priority>
   </metadata>
 

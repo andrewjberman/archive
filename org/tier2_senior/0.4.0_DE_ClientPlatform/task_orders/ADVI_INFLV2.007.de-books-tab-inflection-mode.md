@@ -7,7 +7,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-27</date>
-    <status>open</status>
+    <status>complete</status>
+    <completed_date>2026-04-29</completed_date>
+    <ship_evidence>portal commits 58fdf1f (skeleton + ClientsList layout-driven filtering/drill) + 1511d0b (full InflectionInsightsPanel 3-panel impl + 3 fetch helpers + types). Push to origin/DEV pending DT.</ship_evidence>
     <priority>HIGH — gates INFLV2.010 (RD smoke)</priority>
   </metadata>
 
