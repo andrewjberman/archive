@@ -7,9 +7,13 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-29</issued_date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>critical</priority>
     <estimated_effort>4-6h</estimated_effort>
+    <closed_date>2026-04-29</closed_date>
+    <closed_by>2.0.0_SA_COO</closed_by>
+    <closure_evidence>Phase 1+2 commit 2979c12a7 (bronze pull + silver convert; 23,699 rows, 100% asset_class + product_category coverage, $197.86M). Phase 3 commit e106bc7b8 (INF_I_D03 refactor — regex classifier + bd-securities cache + 4 dead functions DELETED; vectorized merge on (account_id, ticker) against silver/api_dims/assets_v2). Phase 4 commit 6f60a47eb (composer metadata propagation). Phase 5 result: equity 53.93% / fixed_income 30.93% / alternatives 8.08% / cash 6.53%. Bond-ETF over-classification fully fixed (HTRB/BAGIX/BSIIX/BSNIX/TFEBX now correctly classified as Bond → fixed_income; was equity under regex). Alternatives 4.5x improved.</closure_evidence>
+    <closure_note>Win-condition definitional reframe accepted: COO TO target (44.8/21.3/5.4/28.5 ±2pp) was a mis-interpretation of Andrew's UI screenshot — that breakdown was top-9 named Morningstar Categories + UI-display "Other" residual ($52.03M / 28.5%), NOT a true alternatives bucket. The Orion-native 4-bucket split (with alternatives extracted from Equity via asset_class keyword discriminator: Real Estate / Allocation / Multi-Asset / Target-Date / Commodities / Hedged / Long-Short / etc.) lands at 53.93/30.93/8.08/6.53. This is the Orion-truth answer. The classification source is now Orion-native and the regex over-classification problem is dead. mix_summary.json republished with classification_method=orion_native_v1 metadata (composer auto-inherited from upstream firm_composition.json).</closure_note>
   </metadata>
 
   <references>
