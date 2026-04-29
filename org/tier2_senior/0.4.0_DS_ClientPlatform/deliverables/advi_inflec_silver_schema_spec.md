@@ -192,7 +192,7 @@ slug = re.sub(r'_+', '_', slug)            # collapse multiple underscores
 
 ---
 
-## 6.1 advisor_firm Derivation (INFGRD.002, 2026-04-27)
+## 6.1 advisor_firm Derivation (INFGRD.002 + INFGRD.005)
 
 `advisor_firm` is a partner-firm tag derived from `rep_id`, added to silver to enable a single-chokepoint multi-firm scope filter at the silver layer (`_apply_scopefix`). It is independent of `rep_bucket` and addresses a different concern:
 
@@ -201,19 +201,22 @@ slug = re.sub(r'_+', '_', slug)            # collapse multiple underscores
 
 The Inflection Orion export carries multi-firm read access — Inflection's Orion login can see Keil Financial Partners affiliates (Tim DeMuth, Kevin Christensen, Dan Sinnen, John Kurcz, Jeremy Keil, Daria Zalewska) in addition to Inflection's own data. `rep_id` is the only field that reliably distinguishes them.
 
-**Algorithm (mirrors silver script `_advisor_firm()`):**
+**Algorithm (mirrors silver script `_advisor_firm()`, generalized in ADVI_INFGRD.005):**
 ```
 PARTNER_FIRM_TAGS = {
     'inflection': 'inflection_wealth_management',
-    # Future: 'keil': 'keil_financial_partners',
+    # Future: 'keil': 'keil_financial_partners', etc.
 }
-INFLECTION_ADVISOR_FIRM_TAG = PARTNER_FIRM_TAGS['inflection']
-INFLECTION_REP_IDS = {3, 11, 12}
+PARTNER_REP_IDS = {
+    'inflection': {3, 11, 12},
+    # Future: 'keil': {4, 5, 9, ...}, etc.
+}
 
 def advisor_firm(rep_id):
     rid = int(rep_id)  # raises ValueError on bad input -> caught -> 'unknown'
-    if rid in INFLECTION_REP_IDS:
-        return 'inflection_wealth_management'
+    for partner_key, rep_ids in PARTNER_REP_IDS.items():
+        if rid in rep_ids:
+            return PARTNER_FIRM_TAGS[partner_key]
     return 'other'
 ```
 
@@ -235,21 +238,61 @@ def advisor_firm(rep_id):
 
 **Inflection-only AUA per advisor_firm filter:** $200.0M, 295 HH (vs Andrew expectation $191M, +4.7% within ±5% tolerance).
 
-**SCOPEFIX-2 predicate** (replaces the broadened `firm_mask | indiv_mask` from commit 0233aee1):
+**SCOPEFIX predicate** (parameterized in INFGRD.005; replaces hardcoded `INFLECTION_ADVISOR_FIRM_TAG`):
 ```
-firm_scope_mask = df['advisor_firm'] == INFLECTION_ADVISOR_FIRM_TAG
+firm_tag = PARTNER_FIRM_TAGS[partner]      # resolved from --partner arg
+firm_scope_mask = df['advisor_firm'] == firm_tag
 ```
 
-**Phase 0 guards (CTO contract review 2026-04-24, extended INFGRD.002 2026-04-27):**
+**Phase 0 guards (CTO contract review 2026-04-24, extended INFGRD.002 + INFGRD.005):**
 
-- **Guard A:** raise if `rep_id` column missing or all-NaN advisor_firm post-derivation. Detects schema regression.
-- **Guard B:** raise if filtered `managed_value` sum outside $50M-$400M (`GUARD_B_AUA_LOWER` / `GUARD_B_AUA_UPPER`). Defends against silent multi-firm contamination if Orion adds a new affiliate partner-firm to the export. Runs only on AUM build path (where `managed_value` exists).
+- **Guard A:** raise if unknown `--partner` key, if `rep_id` column missing, or if all advisor_firm values are NaN post-derivation. Detects schema regression or misconfiguration.
+- **Guard B:** raise if filtered `managed_value` sum outside `PARTNER_AUA_BOUNDS[partner]`. Inflection bounds: $50M-$400M. Defends against silent multi-firm contamination. Runs only on AUM build path.
 - **Guard C:** print structured per-firm rep_id breakdown before filter applies. Provides visibility on what rows are being dropped vs kept.
 
 **Notes:**
 - The Inflection Orion export is the multi-firm contamination vector. The bronze-side fix (BRONZERUN_V2 W3.B) is the proper architectural cut; this silver-layer guard is the safety net + immediate ship vehicle.
 - `New Accounts Rep` (rep_id=1) is `advisor_firm='other'` AND `rep_bucket='routing'` — excluded by both predicates. Either alone would suffice; both ensure defense-in-depth.
-- **Long-term:** when Inflection's Orion config supports per-employee rep_ids for all 4 employees (Peter, Noel, Patrick, Joe — currently 2 of 4 in Orion), the allowlist needs maintenance. Pattern is already extractable to `PARTNER_FIRM_TAGS[partner]` for future Keil-as-partner onboarding.
+- When Inflection's Orion config supports per-employee rep_ids for all 4 employees (Peter, Noel, Patrick, Joe — currently 2 of 4 in Orion), the `PARTNER_REP_IDS['inflection']` set needs updating.
+
+---
+
+## 6.2 Partner Onboarding Guide (ADVI_INFGRD.005)
+
+To onboard a new partner firm (e.g., Keil Financial Partners as a standalone client):
+
+**Step 1 — Add to PARTNER_FIRM_TAGS in `convert_orion_to_silver.py`:**
+```python
+PARTNER_FIRM_TAGS = {
+    'inflection': 'inflection_wealth_management',
+    'keil': 'keil_financial_partners',   # add this
+}
+```
+
+**Step 2 — Add their rep_id allowlist to PARTNER_REP_IDS:**
+```python
+PARTNER_REP_IDS = {
+    'inflection': {3, 11, 12},
+    'keil': {4, 5, 9, 13, 14, 15, 18},   # confirm via Phase 0 audit (INFGRD.001 pattern)
+}
+```
+
+**Step 3 — Add Guard B AUA bounds to PARTNER_AUA_BOUNDS:**
+```python
+PARTNER_AUA_BOUNDS = {
+    'inflection': (50_000_000, 400_000_000),
+    'keil': (X, Y),   # set based on known AUM range; err wide for initial run
+}
+```
+
+**Step 4 — Run the silver script for the new partner:**
+```bash
+python convert_orion_to_silver.py --partner keil --upload
+```
+
+**Step 5 — Confirm Guard C diagnostic output shows only expected rep_ids; Guard B passes.**
+
+**Architecture note:** The `--partner` flag sets the scope for a single silver build run. The script can be run once per partner; each partner's silver lands in the same S3 prefix structure under the partner's S3 bucket (or sub-prefix, per AE bucket provisioning). Current Inflection bucket: `s3://opal-data-inf/`. Future partners get their own bucket provisioned via Terraform (AE task).
 
 ---
 
