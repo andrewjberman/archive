@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform + 0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-27</date>
-    <status>open</status>
+    <status>complete</status><!-- cbc4f2713 INF_D_08.nmec_nmnc_nna.py; S3 MATCH; RAVC to COO + DS~B 20260429T152000Z -->
     <priority>HIGH — gates INFLV2.003 + downstream chain rerun</priority>
   </metadata>
 

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to><!-- ~A lane per Andrew 2026-04-22 INFLEC DS reassignment (commit 5f6c0bc3) -->
     <date>2026-04-24</date>
-    <status>staged</status><!-- Gates on AE 0.6.1 W4.13 PROD chain completion (SSM b9d0bff8 running); COO fires GO on W4.13 COMPLETE MCP from AE. -->
+    <status>pending</status><!-- GOed: Path B runner-size bump (c6a.4xlarge, inf-pipeline-v1.6.6, commit 306abea10); B-chain dispatched by AE 0.7 SSM 8dd10c48 20260429T152255Z; awaiting chain completion RAVC from AE 0.7 -->
     <project_code>ADVI_INFLEC</project_code>
     <wave>W4</wave>
     <phase_label>W4.14 (B-chain holdings_lots prerequisite; unblocks firm_composition.json + downstream lot-level portal surfaces)</phase_label>
