@@ -5,8 +5,12 @@
     <issued_to>1.0.0_SA_CTO</issued_to><!-- primary: protocol doc + CLAUDE.md -->
     <co_implementer>0.4.0_DS_ClientPlatform</co_implementer><!-- gold_validate_config.yaml inline docs -->
     <date>2026-04-27</date>
-    <status>in_progress</status>
-    <ravc4_cto>2026-04-29 — AC1 (COMP_VALIDATE_PROTOCOL.md) + AC3 (CLAUDE.md) shipped by 1.0.0_SA_CTO. Awaiting AC2 (gold_validate_config.yaml inline header docs) from 0.4.0_DS_ClientPlatform~B per Andrew lane assignment.</ravc4_cto>
+    <status>complete</status>
+    <closed_date>2026-04-29</closed_date>
+    <closed_by>2.0.0_SA_COO</closed_by>
+    <ravc4_cto>2026-04-29 — AC1 (COMP_VALIDATE_PROTOCOL.md) + AC3 (CLAUDE.md) shipped by 1.0.0_SA_CTO commit 74bd4121e (~280 lines, S1-S7 + 4 worked examples).</ravc4_cto>
+    <ravc4_ds>2026-04-29 — AC2 (gold_validate_config.yaml inline header docs) shipped by 0.4.0_DS_ClientPlatform_B commit 81e2a009f. ~19-line headers in BD + INF gold_validate_config.yaml; pivots all rationale through COMP_VALIDATE_PROTOCOL.md rather than re-explaining; covers run command, protocol pointer, config shape, severity (ERROR/WARN/INFO with sentinel asymmetry note), all 7 check types, filter targeting with worked example, adding-a-rule guidance + DS ownership cross-ref to §6, worked-incident catalogue. Identical content in both files (only pipeline label differs). YAML parse-validated post-edit. +36/-20 across 2 files.</ravc4_ds>
+    <closure_evidence>AC1 + AC2 + AC3 all shipped. ADHC_COMPIL.007 CLI hint (gated on .006 COMPLETE) now unblocked for AE 0.7.0.</closure_evidence>
     <project_code>ADHC_COMPIL</project_code>
     <theme>E (v2)</theme>
     <prd_ref>docs/architecture/ADHC_COMPIL_V2.md §3 (commit 653b0469)</prd_ref>
