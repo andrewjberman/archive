@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-04-30</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>ADHC_CLCOMM</project_code>
     <prd_ref>docs/architecture/ADHC_CLCOMM.md §3 + §4.1-§4.4 + §6 (canonicalized 2026-04-30 from feature_clb commit 5eac1f09f)</prd_ref>
     <effort>0.5-1 day</effort>
@@ -16,6 +16,8 @@
     Build the four new MCP infrastructure files for the isolated `complearns-agent-comms` channel. CLOUD-branch work in `ajb_workspace`. The files mirror the existing `org/mcp/` ecosystem (server.py, broker.py, inbox-watch.sh, check-inbox.sh) with namespace-isolation edits per the canonical PRD §4.1-§4.4. After this TO ships, the new files exist on disk and on the CLOUD branch; the feature_clb worktree gains them via merge or filesystem copy in TO-2.
 
     Includes the §6 hidden-dependency resolution: `agent-poller.py` line 45 hardcodes `OPAL_BROKER_PORT` (default 7800). The CL channel runs on port 7801 — without modification, broker push channel notifications won't reach CL agents. TO-1 owns this decision: either modify the existing poller to support both ports OR ship a parallel `cl-agent-poller.py` variant.
+
+    **NOTE 2026-04-30 (CTO):** An earlier amend proposed a heavier channel-agnostic refactor (channels.json registry + role-based auth) up-front. Reverted in light of AE 0.5's parallel work on prefix-routing-in-poller approach + AE's documented concern about env-var threading reliability on Claude Code hooks. Cross-channel refactor moved to TO-4 (architectural codification) where it benefits from empirical evidence (TO-3 verification PASS) before refactor. Sequencing: ship simple thing → verify → refactor with hindsight.
   </objective>
 
   <compiler_tools_mandate>
@@ -57,6 +59,8 @@
 
     6. `.tools/cl-inbox-watch` and `.tools/cl-check-inbox` PATH aliases per PRD §4.7. Match the install pattern of existing `.tools/inbox-watch` and `.tools/check-inbox` (symlink or copy — match what's already there).
 
+    **Cross-channel architecture observations** — append a section "Cross-channel architecture observations" to the session log capturing any pattern, gotcha, or improvement opportunity surfaced during this work that should generalize to opal-agent-comms or future channels. Mined into TO-4 (architecture doc + cross-channel refactor) authoring per Andrew directive 2026-04-30. Light-touch addition to TO-1 scope; substantive refactor work moved to TO-4 with empirical grounding.
+
     Author: `0.5.0_AE_OpalETL <0.5.0_AE_OpalETL@opal.agent>`. Use `.tools/safe-commit.sh` with explicit pathspec (ADHC_OWNPTH.007 mandate). Single commit OK — all files are a coherent shipped unit.
   </scope>
 
@@ -68,25 +72,30 @@
     5. `org/mcp/agent-poller.py` modified to support both ports (or `cl-agent-poller.py` exists as parallel variant). Channel-routing decision documented in commit message.
     6. `.tools/cl-inbox-watch` and `.tools/cl-check-inbox` callable from PATH (verify with `which`).
     7. Single commit on CLOUD branch with all six file additions/modifications. Author = AE 0.5.0 underscore form. Pushed to origin/CLOUD.
-    8. RAVC4 to 2.0.0_SA_COO + 1.0.0_SA_CTO with: AC1-AC7 evidence + commit hash + the agent-poller channel-routing decision rationale.
+    8. Session log includes a "Cross-channel architecture observations" section (light-touch input to TO-4 architecture doc).
+    9. RAVC4 to 2.0.0_SA_COO + 1.0.0_SA_CTO with: AC1-AC8 evidence + commit hash + channel-routing decision rationale.
   </acceptance_criteria>
 
   <do_not>
     <rule>Do NOT create `cl_inbox/` directory manually — `INBOX_DIR.mkdir(exist_ok=True)` in the new server creates it automatically on first start. Premature creation is harmless but unnecessary.</rule>
-    <rule>Do NOT modify the existing `server.py`, `broker.py`, `inbox-watch.sh`, or `check-inbox.sh` — they continue to serve the org-wide channel. CL is purely additive.</rule>
-    <rule>Do NOT skip the deregister auth widening in `complearns_server.py` — without it, 1.1.0_SA_CTO and 2.1.0_SA_COO cannot deregister agents on the CL channel (their primary control plane).</rule>
+    <rule>Do NOT modify the existing `broker.py`, `inbox-watch.sh`, or `check-inbox.sh` — they continue to serve the org-wide channel. CL is purely additive (server.py + agent-poller.py ARE expected to change per AC2 + AC3 — channel-agnostic refactor).</rule>
+    <rule>Do NOT keep the prefix-list auth pattern (`startswith("1.0.0") or ...`) in either server. Both servers refactor to role-based per AC3 — same labor, future-proof.</rule>
+    <rule>Do NOT keep the `OPAL_BROKER_PORT` hardcode in agent-poller.py default path. Channel lookup via channels.json is the new default; env var is override only.</rule>
     <rule>Do NOT start the new broker or server during this TO — that's verification work in TO-3, after feature_clb wire-up is complete.</rule>
     <rule>Do NOT use bare `git commit` — `.tools/safe-commit.sh` with explicit pathspec only.</rule>
+    <rule>Do NOT add a 3rd channel to `channels.json` in this TO — opal + CL only. 3rd channel is a future-state event with its own scope.</rule>
   </do_not>
 
   <deliverables>
+    <deliverable type="config">org/mcp/channels.json (NEW — channel registry; benefits both channels + future)</deliverable>
+    <deliverable type="code">org/mcp/agent-poller.py (REFACTORED — channels.json-driven)</deliverable>
+    <deliverable type="code">org/mcp/server.py (REFACTORED — role-based auth)</deliverable>
     <deliverable type="code">org/mcp/complearns_server.py (NEW)</deliverable>
     <deliverable type="code">org/mcp/cl_broker.py (NEW)</deliverable>
     <deliverable type="code">org/mcp/cl-inbox-watch.sh (NEW, +x)</deliverable>
     <deliverable type="code">org/mcp/cl-check-inbox.sh (NEW, +x)</deliverable>
-    <deliverable type="code">org/mcp/agent-poller.py (MODIFIED) OR org/mcp/cl-agent-poller.py (NEW)</deliverable>
     <deliverable type="code">.tools/cl-inbox-watch + .tools/cl-check-inbox (NEW PATH aliases)</deliverable>
-    <deliverable type="document">Session log under org/tier2_senior/0.5.0_AE_OpalETL/logs/{date}/ documenting agent-poller channel-routing decision + diffs + smoke results</deliverable>
-    <deliverable type="ravc">RAVC4 to 2.0.0_SA_COO + 1.0.0_SA_CTO with: AC1-AC7 evidence + commit hash</deliverable>
+    <deliverable type="document">Session log with "Cross-channel architecture observations" section (input to TO-4)</deliverable>
+    <deliverable type="ravc">RAVC4 to 2.0.0_SA_COO + 1.0.0_SA_CTO with: AC1-AC11 evidence + channels.json + role-parsing rationale</deliverable>
   </deliverables>
 </task_order>
