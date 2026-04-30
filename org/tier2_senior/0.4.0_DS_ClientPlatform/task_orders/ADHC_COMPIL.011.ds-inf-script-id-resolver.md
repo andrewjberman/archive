@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <lane_rationale>~C lane — resolver/AST/disambiguation work is compiler-internals heavy; matches ~C historical strength on graph-builder + tooling extensions (RA-P0 / ROUTER.T1 / nested-key indexing precedent).</lane_rationale>
-    <coordination>Parallel with ~D lane on .012 (comp-freshness tool + cadence config). Independent file-sets — ~C touches .tools/ resolver layer; ~D touches new .tools/comp-freshness + new yaml configs. No merge conflict expected.</coordination>
+    <coordination>.012 reassigned ~D → ~A 2026-04-30 PM per Andrew direction; .011 already COMPLETE at reassignment time. Historical: ran parallel with ~D's pre-reassignment work on .012; independent file-sets, no merge conflict surfaced.</coordination>
     <date>2026-04-30</date>
     <status>COMPLETE</status>
     <project_code>ADHC_COMPIL</project_code>
