@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-29</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- closure 2026-04-29: investigation verdict shipped via session log; root cause = INF_B_00 nav_price guard (40.2% market_value=$0) + _build_aua_view targeting holdings instead of aum_snapshot; both fixed in DS DIAGFIX.002a (aa030d272) + DIAGFIX.002b (127fe2a17); geo donut downstream fix shipped (e39ebd025); flipped 2026-04-30 by COO ground-truth reconciliation -->
     <priority>critical</priority>
     <estimated_effort>1-2h</estimated_effort>
   </metadata>

@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-29</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- closure: 650332e58 (dashboard split flag + clients_tab headline schema + S3 key path platinum/firm/clients_tab.json); flipped 2026-04-30 by COO ground-truth reconciliation -->
     <priority>critical</priority>
     <estimated_effort>1-2h</estimated_effort>
   </metadata>

@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-29</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- closure: 6e68732d3 (NEW INF_I_D00c.cumulative_chart.py 450 LOC; reads client_performance × accounts_v2 + canonical_nna × accounts_v2; weekly samples 2Y; outputs platinum/firm/cumulative_chart.json matching PlatinumCumulativeChartResponse schema geo/adv/nna_geo/nna_adv); flipped 2026-04-30 by COO ground-truth reconciliation -->
     <priority>high</priority>
     <estimated_effort>2-3h</estimated_effort>
   </metadata>

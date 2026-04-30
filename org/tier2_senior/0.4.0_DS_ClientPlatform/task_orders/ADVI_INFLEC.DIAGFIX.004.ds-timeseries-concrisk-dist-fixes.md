@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-29</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- closure: 650332e58 (INF_D_04 timeseries end_date cap + $10B outlier suppression + AUA percentiles; INF_D_07 accts_dim path fix to silver/accounts_dim/latest.parquet); flipped 2026-04-30 by COO ground-truth reconciliation -->
     <priority>high</priority>
     <estimated_effort>2-3h</estimated_effort>
   </metadata>

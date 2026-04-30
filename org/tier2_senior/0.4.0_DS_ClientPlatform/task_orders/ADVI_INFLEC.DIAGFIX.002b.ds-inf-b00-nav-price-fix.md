@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-29</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- closure: 127fe2a17 (INF_B_00 nav_price last-seen-wins guard + post-loop diagnostic; 40.2% market_value=$0 root cause fixed); flipped 2026-04-30 by COO ground-truth reconciliation -->
     <priority>high</priority>
     <estimated_effort>1-2h</estimated_effort>
   </metadata>
