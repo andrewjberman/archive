@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-30</issued_date>
-    <status>staged</status>
+    <status>complete</status><!-- RAVC4 received 2026-04-30 from 0.4.0_DS_ClientPlatform_B (7a4d66c00). 8 probe scripts + eligibility matrix + rate constants delivered. positions_mv/assets_v2 SUPPORTED; accounts_v2/household_rep_mapping/household CURRENT-ONLY; billing/activity/performance PARTIAL. Scale: ~450K REST calls ~125h. Phase 1 gate: JWTRES.001 soft-prereq. -->
     <priority>high</priority>
     <estimated_effort>1-2d</estimated_effort>
   </metadata>
