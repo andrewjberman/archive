@@ -66,6 +66,8 @@
     Recommended: git merge (or cherry-pick) — keeps history coherent and avoids file-content drift. Document choice in commit message.
 
     Author: `0.5.0_AE_OpalETL <0.5.0_AE_OpalETL@opal.agent>` (or 1.1.0_SA_CTO if Option 1 routing). Use `.tools/safe-commit.sh` with explicit pathspec.
+
+    **Cross-channel architecture observations** — append a section "Cross-channel architecture observations" to the session log capturing any pattern, gotcha, or improvement opportunity surfaced during this work that should generalize to opal-agent-comms or future channels (e.g., feature_clb-side hook matcher tedium, settings.local.json patterns that should be wildcardable, .mcp.json cross-worktree gotchas). Mined into TO-4 (architecture doc) authoring per Andrew directive 2026-04-30.
   </scope>
 
   <acceptance_criteria>

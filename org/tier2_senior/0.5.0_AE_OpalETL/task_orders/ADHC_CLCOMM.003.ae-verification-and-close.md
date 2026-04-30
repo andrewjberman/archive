@@ -54,7 +54,13 @@
 
     **No new code in this TO** — pure verification + closure.
 
+    **Cross-channel architecture observations** — final pass: append a section "Cross-channel architecture observations" to the session log capturing any pattern surfaced during smoke-testing or the verification flow that should generalize. Combined with TO-1 + TO-2 observation sections, this becomes the input corpus for TO-4 (architecture doc) authoring.
+
+    **TO-4 dispatch trigger:** on TO-3 PASS + project close, MCP CTO with: "TO-3 verification PASS + project closed; ready for TO-4 architecture doc authoring." CTO+COO co-author TO-4 from the three session logs.
+
     Author: `0.5.0_AE_OpalETL <0.5.0_AE_OpalETL@opal.agent>` for any commits (e.g., session log). 3-step closure routing per Closure Discipline (CTO PRD Status line; COO JSON+REGISTRY).
+
+    **Note on project closure semantics:** project does NOT fully close on TO-3 PASS — TO-4 (architecture doc) is the final wave. Project closes when TO-4 ships. TO-3 closure is "Phase 1 verification COMPLETE; Phase 2 (architectural codification) in flight."
   </scope>
 
   <acceptance_criteria>
