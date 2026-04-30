@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to><!-- ~A lane per Andrew 2026-04-22 INFLEC DS reassignment (commit 5f6c0bc3) -->
     <date>2026-04-24</date>
-    <status>pending</status><!-- GOed: Path B runner-size bump (c6a.4xlarge, inf-pipeline-v1.6.6, commit 306abea10); B-chain dispatched by AE 0.7 SSM 8dd10c48 20260429T152255Z; awaiting chain completion RAVC from AE 0.7 -->
+    <status>complete</status><!-- GT-recon 2026-04-30 Session 50: CLOSES-AS-SUPERSEDED by DIAGFIX.012 Phase 4. CTO ruling Session 49: AE 0.7 SSM 8dd10c48 dispatch failed at launch (--skip-existing invalid + log-dir precondition); old B-chain artifacts stale; DIAGFIX.012 INF_B_00 refactor (4bc5381b2) supersedes B-chain prerequisite entirely — positions_mv replaces TRN-as-price, W4.14 composition.json gate resolves differently via DIAGFIX.012 Phase 5. -->
     <project_code>ADVI_INFLEC</project_code>
     <wave>W4</wave>
     <phase_label>W4.14 (B-chain holdings_lots prerequisite; unblocks firm_composition.json + downstream lot-level portal surfaces)</phase_label>

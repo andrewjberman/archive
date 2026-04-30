@@ -45,7 +45,7 @@
        - Implements the algorithm in PRD §5.1 (pseudocode authoritative)
        - Class `AdaptiveRateLimiter` with constructor accepting SAFE_FLOOR, STEP_UP, STEP_DOWN, OBSERVED_CEILING (optional), BATCH_SIZE, state_file_path
        - Methods: `observe_batch(batch_results)`, `current_rps()`, `throttle()` (sleeps to enforce current rate), `persist_state()`, `load_state()`
-       - State file: `s3://opal-data-inf/orion/rate_limit_state.json` (production) OR local fallback (dev)
+       - State file: `s3://opal-data-inf/orion/rate_limit_state_{dim_name}.json` (production; **per-dim — CTO amendment 2026-04-30: single shared file causes write contention + cross-dim rate conflation**) OR local fallback (dev)
        - State schema: `{rate_rps, observed_ceiling, batches_at_current_rate, last_failure_rate, last_failure_at, total_observed_batches}`
        - Status code categorization: failure = {401, 429, 503, 504}; success = {200, 206}; ambiguous = {404} (treat as success for rate purposes — endpoint missing != rate issue).
 
@@ -115,7 +115,7 @@
 
     11. **Terraform shipped + 0-diff verified**. Tag inf-pipeline-v1.7.6 (or whatever's next). Record deploy.
 
-    12. **Coordinate with DS on state file path**. AE confirms s3://opal-data-inf/orion/rate_limit_state.json path doesn't conflict with existing keys. Pre-create with empty initial state if needed.
+    12. **Coordinate with DS on per-dim state file paths**. AE confirms `s3://opal-data-inf/orion/rate_limit_state_{dim_name}.json` pattern doesn't conflict with existing keys. Pre-create with empty initial state per dim if needed. (CTO amendment 2026-04-30: single file dropped; per-dim required.)
 
   </scope>
 
@@ -133,6 +133,10 @@
 
     DS side blocks AE side at: rate_limiter.py module shape (AE wires CW around it). AE side blocks DS at: state file path confirmation + CW namespace. DS+AE coordinate via direct MCP; not COO routing.
   </acceptance_criteria>
+
+  <data_reprocess_scope>
+    <no_reprocess_needed>rate_limiter.py is new infrastructure (not a patch to existing scripts); bronze S3 write paths unchanged; telemetry emission adds CW side-channel only; no historical data is semantically altered by this TO's changes; downstream consumers read bronze partitions unchanged</no_reprocess_needed>
+  </data_reprocess_scope>
 
   <compiler_tools_mandate>
     <before_write>
@@ -153,7 +157,7 @@
 
   <cross_domain_coordination>
     <shared_artifacts>
-      <artifact>s3://opal-data-inf/orion/rate_limit_state.json (NEW; DS writes via rate_limiter.py; AE pre-creates path + IAM grants)</artifact>
+      <artifact>s3://opal-data-inf/orion/rate_limit_state_{dim_name}.json (NEW per-dim; DS writes via rate_limiter.py; AE pre-creates paths + IAM grants — CTO amendment 2026-04-30)</artifact>
       <artifact>CloudWatch namespace Inflection/HistBackfill/RateLimiter (NEW; AE wires; DS emits)</artifact>
       <artifact>data/orion/scripts/bronze/rate_limiter.py (NEW DS module; AE references for IAM grant scope)</artifact>
     </shared_artifacts>

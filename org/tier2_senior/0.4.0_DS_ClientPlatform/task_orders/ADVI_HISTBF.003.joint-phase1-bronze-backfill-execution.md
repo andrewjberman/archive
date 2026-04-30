@@ -66,7 +66,13 @@
        - When to pause vs auto-back-off vs escalate to Andrew
        - Per Andrew PRD §5.5: if vendor IP-bans during a run, pause + document + escalate (no Orion support fallback). Hard-stop event, not auto-recovery.
 
-    8. **Persistent state across runs**. State file `s3://opal-data-inf/orion/rate_limit_state.json` survives across multi-day runs. Resume from prior observed-stable rate (not SAFE_FLOOR every restart).
+    8. **Persistent state across runs**. Per-dim state files `s3://opal-data-inf/orion/rate_limit_state_{dim_name}.json` survive across multi-day runs. Resume from prior observed-stable rate (not SAFE_FLOOR every restart). (CTO amendment 2026-04-30: per-dim paths required; single shared file causes write contention + cross-dim rate conflation.)
+
+    8a. **Global-pause on systemic-rate-failure** (CTO amendment 2026-04-30). Orchestration-layer coordinator on top of per-dim rate_limiter.py:
+       - Trigger: >= 3 dims fail within a 2-minute window with 401/429 AND JWTRES.001 reports JWT is fresh
+       - Action: ALL dims pause for a configurable backoff window (recommended: 2x current STEP_DOWN interval)
+       - Rationale: if JWT is confirmed fresh and 401s arrive on multiple dims simultaneously, that is a rate-class event — backing off only one dim doesn't help. Per-dim isolation handles single-dim blips; global-pause handles systemic rate exhaustion.
+       - Implementation: add this coordinator to .003 multi-dim orchestration layer (not to .002 rate_limiter.py which stays per-dim)
 
     9. **Daily progress report**. AE 0.6.1 (or DS) emits daily summary post-EOD:
        - Dims completed today
@@ -118,7 +124,7 @@
     <shared_artifacts>
       <artifact>data/orion/manual_api/pull_inflection_*.py (extended with backfill flags + rate_limiter integration; DS owns)</artifact>
       <artifact>s3://opal-data-inf/bronze/orion-api-v2/* (NEW partitions per dim per date; backfill output)</artifact>
-      <artifact>s3://opal-data-inf/orion/rate_limit_state.json (read+write throughout backfill execution)</artifact>
+      <artifact>s3://opal-data-inf/orion/rate_limit_state_{dim_name}.json (per-dim; read+write throughout backfill execution — CTO amendment 2026-04-30)</artifact>
       <artifact>data/orion/scripts/gold/orion-gold-dispatch.sh (CATALOG entries already present per c2062b709; AE confirms backfill scripts hook in cleanly)</artifact>
     </shared_artifacts>
     <coordination_protocol>

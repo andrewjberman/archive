@@ -115,6 +115,10 @@
     DS side blocks AE side at: JwtFreshnessReport interface (AE wires orchestrator around it). AE side blocks DS at: SM IAM grant verification + CW namespace setup. DS+AE coordinate via direct MCP.
   </acceptance_criteria>
 
+  <data_reprocess_scope>
+    <no_reprocess_needed>jwt_freshness.py is a new startup-validation module; changes to pull scripts affect call gating only (startup check before any API calls); no change to bronze S3 write paths or data content; historical data semantically correct at prior version; no downstream consumer reads the changed code path for pre-patch partitions</no_reprocess_needed>
+  </data_reprocess_scope>
+
   <compiler_tools_mandate>
     <before_write>
       <check>comp-iam service [inf-bronze-runner role] before adding PutMetricData grant</check>
