@@ -78,24 +78,20 @@
 
   <do_not>
     <rule>Do NOT create `cl_inbox/` directory manually — `INBOX_DIR.mkdir(exist_ok=True)` in the new server creates it automatically on first start. Premature creation is harmless but unnecessary.</rule>
-    <rule>Do NOT modify the existing `broker.py`, `inbox-watch.sh`, or `check-inbox.sh` — they continue to serve the org-wide channel. CL is purely additive (server.py + agent-poller.py ARE expected to change per AC2 + AC3 — channel-agnostic refactor).</rule>
-    <rule>Do NOT keep the prefix-list auth pattern (`startswith("1.0.0") or ...`) in either server. Both servers refactor to role-based per AC3 — same labor, future-proof.</rule>
-    <rule>Do NOT keep the `OPAL_BROKER_PORT` hardcode in agent-poller.py default path. Channel lookup via channels.json is the new default; env var is override only.</rule>
+    <rule>Do NOT modify the existing `server.py`, `broker.py`, `inbox-watch.sh`, or `check-inbox.sh` — they continue to serve the org-wide channel. CL is purely additive.</rule>
+    <rule>Do NOT skip the deregister auth widening in `complearns_server.py` — without it, 1.1.0_SA_CTO and 2.1.0_SA_COO cannot deregister agents on the CL channel (their primary control plane).</rule>
     <rule>Do NOT start the new broker or server during this TO — that's verification work in TO-3, after feature_clb wire-up is complete.</rule>
     <rule>Do NOT use bare `git commit` — `.tools/safe-commit.sh` with explicit pathspec only.</rule>
-    <rule>Do NOT add a 3rd channel to `channels.json` in this TO — opal + CL only. 3rd channel is a future-state event with its own scope.</rule>
   </do_not>
 
   <deliverables>
-    <deliverable type="config">org/mcp/channels.json (NEW — channel registry; benefits both channels + future)</deliverable>
-    <deliverable type="code">org/mcp/agent-poller.py (REFACTORED — channels.json-driven)</deliverable>
-    <deliverable type="code">org/mcp/server.py (REFACTORED — role-based auth)</deliverable>
     <deliverable type="code">org/mcp/complearns_server.py (NEW)</deliverable>
     <deliverable type="code">org/mcp/cl_broker.py (NEW)</deliverable>
     <deliverable type="code">org/mcp/cl-inbox-watch.sh (NEW, +x)</deliverable>
     <deliverable type="code">org/mcp/cl-check-inbox.sh (NEW, +x)</deliverable>
+    <deliverable type="code">org/mcp/agent-poller.py (MODIFIED) OR org/mcp/cl-agent-poller.py (NEW) — AE channel-routing decision per scope item 5</deliverable>
     <deliverable type="code">.tools/cl-inbox-watch + .tools/cl-check-inbox (NEW PATH aliases)</deliverable>
-    <deliverable type="document">Session log with "Cross-channel architecture observations" section (input to TO-4)</deliverable>
-    <deliverable type="ravc">RAVC4 to 2.0.0_SA_COO + 1.0.0_SA_CTO with: AC1-AC11 evidence + channels.json + role-parsing rationale</deliverable>
+    <deliverable type="document">Session log with "Cross-channel architecture observations" section (light-touch input to TO-4)</deliverable>
+    <deliverable type="ravc">RAVC4 to 2.0.0_SA_COO + 1.0.0_SA_CTO with: AC1-AC9 evidence + commit hash + channel-routing decision rationale</deliverable>
   </deliverables>
 </task_order>
