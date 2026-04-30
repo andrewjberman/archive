@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform + 0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-30</issued_date>
-    <status>staged</status>
+    <status>pending</status><!-- CTO amendment 2026-04-30: AE 0.6.1 owns EC2 dispatch + run monitoring (not DS BASE); DS writes scripts + uploads to S3; chain reg gate: DS comp-pipescript deployed MATCH on all scripts → AE updates chain reg → AE EC2 dispatch. SSM RunCommand 60-min cap incompatible with 6hr run — must use persistent process on inf-bronze-runner. -->
     <priority>high</priority>
     <estimated_effort>TBD by Phase 0 results (~3-7 days; depends on dim count × calls per dim × observed sustained rate)</estimated_effort>
   </metadata>
@@ -122,13 +122,17 @@
 
   <cross_domain_coordination>
     <shared_artifacts>
-      <artifact>data/orion/manual_api/pull_inflection_*.py (extended with backfill flags + rate_limiter integration; DS owns)</artifact>
+      <artifact>data/orion/manual_api/pull_inflection_*.py (authored by DS; uploaded to S3 by DS; executed by AE)</artifact>
       <artifact>s3://opal-data-inf/bronze/orion-api-v2/* (NEW partitions per dim per date; backfill output)</artifact>
-      <artifact>s3://opal-data-inf/orion/rate_limit_state_{dim_name}.json (per-dim; read+write throughout backfill execution — CTO amendment 2026-04-30)</artifact>
-      <artifact>data/orion/scripts/gold/orion-gold-dispatch.sh (CATALOG entries already present per c2062b709; AE confirms backfill scripts hook in cleanly)</artifact>
+      <artifact>s3://opal-data-inf/orion/rate_limit_state_{dim_name}.json (per-dim; AE pre-created; read+write throughout backfill)</artifact>
+      <artifact>data/orion/scripts/gold/orion-gold-dispatch.sh (AE updates chain reg AFTER DS comp-pipescript deployed MATCH gate)</artifact>
     </shared_artifacts>
     <coordination_protocol>
-      DS owns pull script extensions + execution. AE 0.6.1 owns chain reg + CW dashboard ops monitoring + IAM verification. AE 0.7 standby for IAM/Lambda issues if encountered. Daily MCP between DS + AE 0.6.1 (progress + failure events). COO standby for cross-day blockers.
+      CTO ruling 2026-04-30: AE 0.6.1 owns EC2 dispatch + run monitoring. DS BASE does NOT dispatch EC2.
+      Handoff gate: DS commits all pull scripts + uploads to s3://opal-data-inf/code/bronze/ + confirms comp-pipescript deployed MATCH on all scripts → MCP AE 0.6.1 → AE updates chain reg → AE dispatches inf-bronze-runner persistent process (NOT SSM RunCommand — 60-min cap incompatible with 6hr run).
+      Run order: positions_mv → assets_v2 → transactions → performance (highest-confidence first; positions_mv proven by DIAGFIX.012).
+      DS BASE monitors CW dashboard (Inflection-HistBackfill-RateLimiter) throughout; acts on FailureSpike alerts.
+      Daily MCP between DS + AE 0.6.1 (progress + failure events). COO standby for cross-day blockers.
     </coordination_protocol>
   </cross_domain_coordination>
 </task_order>
