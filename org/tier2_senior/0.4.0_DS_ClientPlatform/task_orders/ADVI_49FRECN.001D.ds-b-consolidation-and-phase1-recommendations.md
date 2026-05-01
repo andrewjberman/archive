@@ -6,7 +6,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-01</issued_date>
-    <status>open</status>
+    <status>complete</status>
     <priority>P1 — gates Phase 1 remediation</priority>
     <estimated_effort>0.25d (consolidation only)</estimated_effort>
     <gates_on>ADVI_49FRECN.001A + .001B + .001C all RAVC4 complete</gates_on>
