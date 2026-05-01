@@ -6,7 +6,7 @@
     <issued_to>1.0.0_SA_CTO + 2.0.0_SA_COO (joint)</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-01</issued_date>
-    <status>open</status>
+    <status>complete</status>
     <priority>P2 — standing work; not blocking any active execution</priority>
     <estimated_effort>0.5d (doc authoring, no code)</estimated_effort>
     <gates_on>ADHC_CLCOMM.TO-3 PASS (COMPLETE 2026-05-01)</gates_on>
