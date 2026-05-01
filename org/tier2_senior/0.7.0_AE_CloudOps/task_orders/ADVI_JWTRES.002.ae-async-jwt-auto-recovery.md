@@ -6,7 +6,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-01</issued_date>
-    <status>open</status>
+    <status>implementation-complete-deploy-staged</status><!-- 0.7.0_AE_CloudOps 2026-05-01: code committed a63d76d51 (recover_or_exit + orchestrator) + e3325b6d4 (IAM tf). terraform plan 1-add 0-change 0-destroy. RAVC4 sent to COO+CTO. Deploy (tf apply + S3 upload) staged pending Wave B RAVC4 + COO Wave C GO. CW namespace: Inflection/JwtResilience (same as Phase 1; COO/CTO confirm if Inflection/HistBackfill/RateLimiter intended). -->
     <priority>P1 — bolsters HISTBF backfill resilience; Wave C dispatch authorization conditional on this shipping</priority>
     <estimated_effort>3-5d (per AE 0.7 estimate in source brief §3)</estimated_effort>
     <gates_on>Andrew GO (given 2026-05-01). Deploy gates on ADVI_HISTBF Wave B RAVC4 (do not modify running Wave B orchestrator mid-run).</gates_on>
