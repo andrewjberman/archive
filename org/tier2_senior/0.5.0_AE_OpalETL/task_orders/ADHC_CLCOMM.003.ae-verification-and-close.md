@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-04-30</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>ADHC_CLCOMM</project_code>
     <prd_ref>docs/architecture/ADHC_CLCOMM.md §6 + §7 verification checklist</prd_ref>
     <effort>~1-2 hours (mostly verification + smoke testing)</effort>
