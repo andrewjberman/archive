@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.3.0_DT_TradingOperations</issued_to>
     <date>2026-04-27</date>
-    <status>pending</status><!-- AMENDED 2026-04-30 by 1.0.0_SA_CTO per Andrew directive: categorical full-send, no dual-write window. Trade ops have not yet officially started so there is no disruption from a clean cutover. -->
+    <status>complete</status><!-- AMENDED 2026-04-30 by 1.0.0_SA_CTO per Andrew directive: categorical full-send, no dual-write window. Trade ops have not yet officially started so there is no disruption from a clean cutover. -->
     <project_code>TRSB_PATHFIX</project_code>
     <wave>W2 — DDB reconciliation (categorical clean cutover; ships after W1 RAVC4)</wave>
     <prd_ref>docs/architecture/TRSB_PATHFIX_PRD.md §3 W2 + §11 appendix (2026-04-27); AMENDED 2026-04-30 per Andrew "full send, no disruption"</prd_ref>
