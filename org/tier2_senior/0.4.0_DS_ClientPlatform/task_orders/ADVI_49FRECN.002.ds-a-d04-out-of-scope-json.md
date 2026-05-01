@@ -6,7 +6,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-01</issued_date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>P0 — closes 530 of 590 missing accounts (88% by count, ~5% by $); structurally clean (no C_03 invariant change)</priority>
     <estimated_effort>1d (D_04 extension + emit JSON + verify)</estimated_effort>
   </metadata>
