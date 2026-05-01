@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-30</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- DS~B 2026-05-01: convert_performance_to_silver.py authored, ds-commit-gate clean, committed 3204797c2, S3 MATCH opal-data-inf/code/silver/convert_performance_to_silver.py MD5=f46821e447f34d26c1a8bfc78e54cb96. Docstring patches by DS~A at f2c75eb98. COO RAVC4 accepted. -->
     <priority>high</priority>
     <estimated_effort>0.5-1d (Wave A local code; no EC2)</estimated_effort>
   </metadata>

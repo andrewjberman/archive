@@ -4,8 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-22</date>
-    <status>staged</status>
-    <acked>pending</acked>
+    <status>complete</status>
+    <acked>2026-05-01 DS~B</acked><!-- Verdict: ITERATE. Apportionment denominator bug confirmed. Jones FAIL 86.7%. Fix B spec in ADVI_SLEEVE_P1B_ANALYSIS.md. Commit: see session log 2026-05-01. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W4</wave>
     <phase_label>SL-P1b (post-shadow validation + analysis)</phase_label>
