@@ -6,7 +6,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-01</issued_date>
-    <status>open</status>
+    <status>complete</status>
     <priority>P0 — gates Track 2 fix design (the 77% AUA lever)</priority>
     <estimated_effort>1d (sub-investigation + design recommendation; no code changes)</estimated_effort>
   </metadata>
