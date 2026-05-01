@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-30</date>
-    <status>open</status>
+    <status>complete</status><!-- 0.7.0_AE_CloudOps 2026-05-01: --skip-existing flag shipped commit 46ee0ca51. S3 marker at gold/artifacts/{SCRIPT_ID}/{RUN_DATE}. bash -n PASS, smoke AC1-AC5 verified. S3 MATCH e50b303ad0f4c0a4e5c2e3f5b187611f. -->
     <project_code>ADHC_ORNDSP</project_code>
     <theme>operational ergonomics</theme>
     <effort>0.5 weeks</effort>
