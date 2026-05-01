@@ -6,7 +6,8 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-01</issued_date>
-    <status>open</status>
+    <status>superseded</status>
+    <superseded_by>ADVI_49FRECN.001A (DS~A) + .001B (DS~B) + .001C (DS~C) + .001D consolidation (DS~B); see those four files. Original monolithic scope split into 3 parallel discovery angles + 1 merge step per Andrew directive 2026-05-01: "parallelized between DS~A and DS~B and maybe even DS~C too depending on how much needs to be done here."</superseded_by>
     <priority>P1 — partner data accuracy regression vs 99.1% baseline (ADVI_AUAVAR closeout 2026-03-09)</priority>
     <estimated_effort>0.5–1d (discovery only — no code fixes)</estimated_effort>
   </metadata>
