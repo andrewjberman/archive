@@ -6,10 +6,13 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-01</issued_date>
-    <status>open</status>
-    <priority>P1 — process gate; blocks Wave C dispatch authorization</priority>
+    <status>staged</status>
+    <priority>P3 — procedural defense-in-depth; runtime issue already resolved by AE 0.6.1 dispatch_histbf_backfill_v2.sh update; this TO codifies the upstream MATCH-gate assertion for future waves</priority>
     <estimated_effort>0.5h (script + checklist update)</estimated_effort>
-    <gates_on>ADVI_HISTBF.003 Wave B RAVC4 (COO will issue Wave C dispatch only after this TO is complete)</gates_on>
+    <gates_on>None — Wave B+C have proceeded operationally without this gate via runtime fix; this TO is forward-looking procedural codification, not a blocker. Pick up when DS bandwidth permits.</gates_on>
+    <amendment_2026_05_04>
+      Status flipped open → staged by COO during /loop ADVI tick 2026-05-04. operator output 2026-05-04 flagged UNKNOWN_STATUS (the value "open" is non-standard; operator recognizes pending/staged/complete/cancelled). Wave B fully ran (3/4 bronze + transactions deferred to stream-fix backlog); Wave C HISTBF.004 silver backfill in flight via DS~D (cumulative-batch verdict from Phase 0 audit means single --force gold run post-backfill, not 2166 per-date). Original "blocks Wave C" framing no longer applies. TO retained for forward-looking defense-in-depth procedural codification.
+    </amendment_2026_05_04>
   </metadata>
 
   <context>
