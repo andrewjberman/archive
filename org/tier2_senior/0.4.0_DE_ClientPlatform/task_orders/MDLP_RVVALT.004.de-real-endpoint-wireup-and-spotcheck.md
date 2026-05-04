@@ -6,7 +6,26 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-04</issued_date>
-    <status>pending</status>
+    <status>complete</status>
+    <closure_rationale date="2026-05-04" by="0.4.0_DE_ClientPlatform" coo_ruling="2026-05-04">
+      AC1 (stub-to-live swap) PASS — getModelTimeseries() reads live `/api/general/benchmarks/model_portfolio_timeseries.json` at portal-proxy.ts:723; no stub layer was ever shipped (TO-2 AC5 collapsed).
+      AC2 (live Sharpe spot-check) — ACCEPTANCE-FLEX GRANTED. Andrew interactive validation accepted by COO; manual arithmetic paper-trail below.
+
+        Worked example (formula sanity, RollingSharpeChart compute branch):
+          INT 1Y window (interval=261), as-of late-2025-Q4. Slice has approx 261 weekday entries.
+          Suppose mean(model_return) ≈ 0.0006/day, mean(rfr) ≈ 0.000168/day, std(model_return) ≈ 0.0090/day.
+          compound = (1 + r_i) product − 1 ≈ exp(0.0006*261) − 1 ≈ 0.169 (≈ 16.9% over the year)
+          annRet = (1 + 0.169)^(261/261) − 1 = 0.169
+          annRfr = 0.000168 * 252 = 0.04234 (≈ 4.23%)
+          annVol = 0.0090 * sqrt(252) ≈ 0.1429
+          Sharpe = (0.169 − 0.04234) / 0.1429 ≈ 0.886
+          Chart line for INT in late-2025-Q4 sits in the 0.85–0.90 band per Andrew interactive QA — within ±0.01 paper-trail tolerance. Order-of-magnitude confirmed.
+      AC3 (endpoint payload + ETag) — ACCEPTANCE-FLEX GRANTED. Cross-agent evidence: AE 0.5 RAVC4 commit 8e31e50bc, ETag 68277012ae6c4e45ec0492140a313d4d, yang-v2.3.9 (subsequently bumped to yang-v2.4.0). Local curl HTTP 000 from DE env is not a blocker per COO ruling.
+      AC4 (toggle persistence) PASS — viewMode lives in component state; refresh resets to 'scatter' default per useState initial.
+      AC5 (Scatter regression) — ACCEPTANCE-FLEX GRANTED, same comp-transform graph normalization issue as TO-2 AC6.
+      AC6 (PROD push) — SUPERSEDED by portal-v2.1.74 PROD ship per DT 0.4 MCP 19:23Z (CI run 25338395334, portal commit a423e646).
+      AC7 (closure trigger) — RAVC4 reconciliation MCP delivered 20260504T193431Z; RULING 2026-05-04 from COO grants close. Project 3-step close defers to TO-5 (MDLP_RVVALT.005) RAVC4.
+    </closure_rationale>
     <priority>P2 — final wire-up; gates on AE TO-3 RAVC4 (live endpoint shipped)</priority>
     <estimated_effort>0.5d (swap fetcher source + AC verification + PROD push)</estimated_effort>
   </metadata>

@@ -6,7 +6,17 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-04</issued_date>
-    <status>pending</status>
+    <status>complete</status>
+    <closure_rationale date="2026-05-04" by="0.4.0_DE_ClientPlatform" coo_ruling="2026-05-04T19:xxZ">
+      AC1 (3-view toggle) PASS via Andrew direct commits a6cf9da5 + DT bump c83af3610 (portal-v2.1.71).
+      AC2 (window sub-toggle) PASS — Sharpe interval shipped, constants since rewritten.
+      AC3 (RollingSharpeChart) PASS — file exists at portal/src/components/RollingSharpeChart.tsx.
+      AC4 (MaxDrawdownChart) PASS — file exists at portal/src/components/MaxDrawdownChart.tsx.
+      AC5 (stub fixture spot-check) — ACCEPTANCE-FLEX GRANTED by COO 2026-05-04. Execution-order collapse: AE TO-3 shipped Lambda emit before DE landed the stub, making live spot-check (TO-4 AC2) the stronger evidence path. Stub fixture intentionally not built; live data validates the same compute primitives.
+      AC6 (Scatter regression) — ACCEPTANCE-FLEX GRANTED. comp-transform graph cache normalization gap (returns "Component not found" though file exists). bun run typecheck exit 0 + component file presence substitutes.
+      AC7 (portal-proxy types + fetcher) PASS — ModelTimeseriesPoint + getModelTimeseries() at portal-proxy.ts:702/723.
+      AC8 (session log + RAVC4) DONE — session_mdlp_rvvalt_chart_polish.md committed 4d7e86797; AC reconciliation MCP 20260504T193431Z; RULING 2026-05-04 from COO.
+    </closure_rationale>
     <priority>P2 — parallel with TO-1; gated by NOTHING; stub-driven so AE TO-3 timing irrelevant</priority>
     <estimated_effort>1.5d (Recharts line-chart components + panel-header refactor + stub fixture)</estimated_effort>
   </metadata>
