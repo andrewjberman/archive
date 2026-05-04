@@ -10,6 +10,21 @@
     <status>pending</status>
     <priority>high</priority>
     <estimated_effort>1-3d (depends on silver builder investigation outcome + date-range scale)</estimated_effort>
+    <amendment_2026_05_04>
+      Status flipped staged → pending 2026-05-04 by COO post-Wave B v5 RAVC.
+
+      Hard gate (HISTBF.003 RAVC4) PARTIALLY SATISFIED:
+      - positions_mv: bronze 25/25 chunks COMPLETE (2166 files, 2020-05-26 → 2026-04-30) — DS~D S3 sweep MATCH (RAVC4 2026-05-04)
+      - assets_v2: bronze 25/25 chunks COMPLETE (2166 files, same range) — DS~D MATCH
+      - performance: 1/1 chunk COMPLETE (single-shot snapshot)
+      - transactions: bronze FAILED (suspected OOM at t3.small parquet assembly); DEFERRED to standalone backlog TO (HISTBF transactions stream-fix). HOWEVER: silver/transactions/ already exists (1502 files 2020-05-26 → 2026-04-28, uploaded 2026-04-29 via prior separate silver-layer pull per DS~D RAVC4 addendum) — silver layer for transactions is INDEPENDENTLY COMPLETE.
+
+      Scope refinement: this TO covers silver positions_mv + assets_v2 only. Silver transactions = NO WORK NEEDED (already done). Silver performance = audit only (1 snapshot; existing daily run pattern likely already handles it).
+
+      Soft gate (DIAGFIX.012 Phase 5) CLEARED earlier this session.
+
+      EC2 i-083ad9ae297f88e9f stopping post-bronze (per RULING 2). Wave C silver convert is Lambda-driven (inf-silver-chain + EventBridge sentinel pattern from INFSHIP B2) — does not need this EC2.
+    </amendment_2026_05_04>
   </metadata>
 
   <references>
