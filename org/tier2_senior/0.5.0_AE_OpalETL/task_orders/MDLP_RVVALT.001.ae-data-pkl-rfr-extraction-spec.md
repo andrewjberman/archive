@@ -6,7 +6,9 @@
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-04</issued_date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- COO closure 2026-05-04: shipped earlier today — AE 0.5 commits `697e29e7e`+`80250df90` MDLP_RVVALT_RFR_SPEC.md; RAVC4 already exchanged. Status flag was stale per AE session log. Project closed end-to-end via 2c6839707 + c39f14a04. -->
+
     <priority>P2 — gates TO-3 (Lambda emit); does NOT gate TO-2 (DE stub-driven parallel)</priority>
     <estimated_effort>0.5d (read existing Lambda + sample data.pkl + spec doc)</estimated_effort>
   </metadata>

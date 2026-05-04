@@ -6,7 +6,9 @@
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-04</issued_date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- COO closure 2026-05-04: shipped earlier today — AE 0.5 Lambda `e2f0a8077` `yang-v2.3.9`; rev `2c18f0c06` `yang-v2.4.0` duration-matched per-model RFR; RAVC4 already exchanged. Status flag was stale per AE session log. Project closed end-to-end via 2c6839707 + c39f14a04. -->
+
     <priority>P2 — gates TO-4 (DE wire-up); GATED by TO-1 (RFR spec) — pre-engagement OK</priority>
     <estimated_effort>1.0d (Lambda extension + LAMBDA_DEPLOYMENT_PROTOCOL ship + tag)</estimated_effort>
   </metadata>
