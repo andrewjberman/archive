@@ -3,12 +3,15 @@
     <id>ADVI_49FRECN.003</id>
     <project>ADVI_49FRECN</project>
     <title>Track 2 Fix — D_04 AQR Filter Removal + c1_recovered_accounts.json Sidecar + B_00/A_03 Ratification + Standing-Backlog</title>
-    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-04</issued_date>
     <status>pending</status>
     <priority>P0 — completes 49FRECN Track 2 fix scope; recovers $60.4M of the $64.8M C1 bucket (93.3%)</priority>
     <estimated_effort>0.5d (most fixes already shipped opportunistically; this TO formalizes acceptance + adds AQR removal + sidecar emit + standing-backlog file)</estimated_effort>
+    <reassignment_2026_05_04>
+      Reassigned from ~B → ~C by COO per Andrew directive 2026-05-04. DS~B engaged in ad-hoc IWM ADVI wiring work with DE 0.4. DS~B shipped 3 commits (`e66898a64` schema revision + `386456223` schema revision + `76a3a9418` scope fix to first-seen-in-gold ≥ fix_date). Track 2 fix code is in S3 + bd-gold-qa-runner chain `--from A_00` (SSM `e199be52`) in flight; expected post-chain sidecar count 58-73 per DS~B's prediction. DS~C inherits close-out: receive AE 0.7 chain QA RAVC → verify sidecar count in band on `s3://opal-data-bd/gold/artifacts/49f/c1_recovered_accounts.json` → ETag capture → standing-backlog doc → RAVC4 to COO.
+    </reassignment_2026_05_04>
   </metadata>
 
   <context>
