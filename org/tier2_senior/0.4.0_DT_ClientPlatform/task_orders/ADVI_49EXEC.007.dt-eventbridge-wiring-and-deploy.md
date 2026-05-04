@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- HARD GATE: TO 4 (Terraform module) + AE 0.6 EventBridge signal-format confirmation -->
+    <status>complete</status><!-- Work shipped ecc9b2a5 + 8e50d35c (DT 0.4 2026-04-27 session log). Project ADVI_49EXEC COMPLETE per REGISTRY 2026-04-28 (CTO stale-flip 2026-04-30). Status corrected by DT 0.4.0 2026-05-04. -->
     <project_code>ADVI_49EXEC</project_code>
     <priority>P1 (project closeout — first deploy + tag exec-summary-v0.1.0)</priority>
   </metadata>
