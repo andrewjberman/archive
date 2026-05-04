@@ -6,7 +6,9 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-04</issued_date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- COO closure 2026-05-04: RAVC4 received 19:40Z (`034b29d9e` portal `d1e66357`); y-axis improvement `5a28f128` post-RAVC4; DT 0.4 portal-v2.1.75 bump `2f4370f89` 19:53Z deploys substantive scope. AC1-4 + AC6 PASS empirical; AC5 EXPECTED PASS (additive edits only, typecheck clean) — Playwright smoke FLEX (CLI-context, no dev server). Constants deviation `[22,65,131,261]` documented in DE RAVC5 (`20260504T195044Z`): on-disk RollingSharpeChart legacy table preserved cross-view consistency vs `[30,63,126,252]` canonical proposal. Substantive deliverable shipped; project moves to 3-step atomic close. -->
+
     <priority>P2 — parallel with TO-2/TO-4 wrap; frontend-only, no backend coord</priority>
     <estimated_effort>0.5d (component clone + ViewMode wiring + spot-check)</estimated_effort>
   </metadata>
