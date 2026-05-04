@@ -6,7 +6,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-04</issued_date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>P1 — coupled to DS~B ADVI_49FRECN.003 in flight; D_04 gold run will fail if not shipped before next BD gold trigger</priority>
     <estimated_effort>~30min (iam.tf edit + plan + apply + tag bump + source map)</estimated_effort>
   </metadata>
