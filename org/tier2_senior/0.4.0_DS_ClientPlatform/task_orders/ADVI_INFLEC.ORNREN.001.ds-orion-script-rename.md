@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-22</date>
-    <status>active</status>
+    <status>complete</status><!-- Hygiene flip 2026-05-04 per COO GO (RAVC ACK 20260504T194603Z). Empirical state confirmed work-complete since ORNREN.003 stage: data/orion/scripts/gold/ has A_*, B_*, C_*, D_00c, D_02, D_04, 09, build_canonical_prices.py under canonical names. 3 holdovers (I_D00, I_D00b, I_D03) explicitly scoped to ORNREN.003 (separate TO). Flag was stale; flipped by 0.4.0_DS_ClientPlatform~A. -->
     <project_code>ADVI_INFLEC</project_code>
     <urgency>HIGH — rename before next Orion D-chain dispatch so runner pulls correct names from S3.</urgency>
     <andrew_directive>2026-04-22 in-session: Orion scripts must not carry firm-specific I_ prefix. data/orion/ is a vendor-level folder shared by future clients. Match BD convention (A_00, B_00, C_00).</andrew_directive>
