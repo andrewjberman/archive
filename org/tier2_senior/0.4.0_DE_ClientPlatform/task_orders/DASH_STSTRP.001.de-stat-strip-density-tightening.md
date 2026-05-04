@@ -6,7 +6,7 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-04</issued_date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>P2 — visual consistency cleanup; not blocking any current pipeline work</priority>
     <estimated_effort>0.5d (3h CSS edit + Surface Laptop validation; CSS-only diff, no logic changes)</estimated_effort>
   </metadata>
