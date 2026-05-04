@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-15</date>
-    <status>pending</status><!-- GO 2026-04-15 to ~B. Independent of WP-3. CODE SHIPPED cff234b5 2026-04-15 (gold<->silver recon harness, 19 domains, drift test PASS). Legitimately still pending — awaits AE wire-up into nightly gold_dispatch post-step + 3 clean consecutive nightly runs before flip to complete. -->
+    <status>complete</status><!-- COMPLETE 2026-05-04 via COO GT-recon. Code shipped cff234b5 2026-04-15 (drift test PASS at ship per DS~B session log + this comment); AE wire-up shipped 5700854e6 2026-04-29; 4 consecutive clean nightly runs verified by DS~C (2026-04-29..05-02): all 19 checks consistent, single persistent WARN on aua_totals (delta_pct=None — known structural gap, NOT a regression). AC#1-6 satisfied. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W2</wave>
   </metadata>
