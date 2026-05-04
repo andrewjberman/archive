@@ -17,6 +17,8 @@ Options:
     --secret <name>     AWS Secrets Manager secret name (default: openai-api-key)
 """
 
+from __future__ import annotations
+
 import argparse
 import io
 import json
@@ -25,6 +27,7 @@ import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import List, Dict, Any, Union
 
 # Force UTF-8 stdout on Windows (persona prompts contain emoji from legacy files)
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
@@ -105,7 +108,27 @@ def build_system_prompt(serial: str) -> str:
     return "\n\n".join(parts)
 
 
-def build_user_prompt(thread_dir: Path, serial: str, turn_number: int) -> str:
+def build_user_prompt(
+    thread_dir: Path,
+    serial: str,
+    turn_number: int,
+    now_utc: Union[datetime, None] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Build the user message as a list of content blocks for prompt-caching.
+
+    Returns a list of two content blocks:
+      [0] STATIC PREFIX -- identity, instructions, CONTEXT_COMPILED.md, PREVIOUS
+          MESSAGES. Marked with cache_control={"type":"ephemeral"} so the
+          Anthropic OpenAI-compatible shim caches the prefix. Stable across
+          calls for the same (thread, serial, message-history) tuple.
+      [1] VARIABLE FOOTER -- turn N / max M / remaining R / timestamp /
+          last-turn flag. No cache_control. Wall-clock + per-call counters
+          live here so they don't break the prefix hash.
+
+    The `now_utc` param is injected (default: real wall-clock) to make the
+    function deterministic in tests.
+    """
     thread_json = json.loads((thread_dir / "THREAD.json").read_text())
     turn_json   = json.loads((thread_dir / "TURN.json").read_text())
 
@@ -116,17 +139,21 @@ def build_user_prompt(thread_dir: Path, serial: str, turn_number: int) -> str:
     taken        = turn_json["turns_taken"].get(serial, 0)
     remaining    = max_per - taken
     role_name    = resolve_agent(serial)["role_name"]
-    ts           = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    ts_dt        = now_utc if now_utc is not None else datetime.now(timezone.utc)
+    ts           = ts_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    lines = [
+    # ---- STATIC PREFIX -------------------------------------------------------
+    # Everything in this block is a deterministic function of (thread_dir,
+    # serial, set-of-message-files-on-disk). NOT a function of turn_number,
+    # remaining count, or wall-clock. The prefix's byte-for-byte stability is
+    # what enables Anthropic prompt caching to hit on subsequent turns.
+    static_lines = [
         "## YOUR TURN -- Thread Protocol",
         "",
         "You are participating in a structured agent conversation thread.",
         "",
         f"**Your identity:** {serial} ({role_name})",
         f"**Thread topic:** {topic}",
-        f"**Turn:** {turn_number} of max {max_total}",
-        f"**Your turns remaining:** {remaining}",
         "",
         "### Instructions",
         "",
@@ -142,13 +169,15 @@ def build_user_prompt(thread_dir: Path, serial: str, turn_number: int) -> str:
         "### Required Response Format",
         "",
         "Your response MUST begin with this exact YAML frontmatter block",
-        "(replace `continue` with your actual signal):",
+        "(replace `continue` with your actual signal, and use the turn number,",
+        "agent serial, and timestamp from the YOUR TURN STATE footer at the end",
+        "of this prompt):",
         "",
         "```",
         "---",
-        f"agent: {serial}",
-        f"turn: {turn_number}",
-        f"timestamp: {ts}",
+        "agent: <your serial from footer>",
+        "turn: <turn number from footer>",
+        "timestamp: <timestamp from footer>",
         "signal: continue",
         "---",
         "```",
@@ -161,8 +190,8 @@ def build_user_prompt(thread_dir: Path, serial: str, turn_number: int) -> str:
         "orders, reference documents) is your primary source of truth. It is factual,",
         "specific, and costs nothing to use. Read it carefully before responding.",
         "",
-        "Use file-reading tools ONLY for specific gaps — an exact value in Terraform,",
-        "a precise S3 key pattern in Lambda source code — that the pre-injected context",
+        "Use file-reading tools ONLY for specific gaps -- an exact value in Terraform,",
+        "a precise S3 key pattern in Lambda source code -- that the pre-injected context",
         "does not contain. Do not call tools to re-read information already in context.",
         "If pre-injected context is sufficient, answer directly without any tool calls.",
         "",
@@ -170,27 +199,58 @@ def build_user_prompt(thread_dir: Path, serial: str, turn_number: int) -> str:
         "- Stay in your role. Do not impersonate other agents.",
         "- Be concrete. Name files, functions, S3 paths, resource names, git tags.",
         "- Do not include anything before the opening `---`.",
+        "- If the YOUR TURN STATE footer indicates this is your last turn, your",
+        "  signal MUST be `converge`.",
     ]
 
-    if remaining <= 1:
-        lines.append("- **THIS IS YOUR LAST TURN. Your signal MUST be `converge`.**")
-
-    lines += ["", "---", "", "## CONTEXT", ""]
+    static_lines += ["", "---", "", "## CONTEXT", ""]
 
     context_file = thread_dir / "CONTEXT_COMPILED.md"
     if context_file.exists():
-        lines.append(context_file.read_text(encoding="utf-8"))
+        static_lines.append(context_file.read_text(encoding="utf-8"))
 
-    lines += ["", "---", "", "## PREVIOUS MESSAGES", ""]
+    static_lines += ["", "---", "", "## PREVIOUS MESSAGES", ""]
 
     msg_files = sorted((thread_dir / "messages").glob("*.md"))
     if not msg_files:
-        lines.append("(No previous messages)")
+        static_lines.append("(No previous messages)")
     else:
         for mf in msg_files:
-            lines += [f"### Message: {mf.name}", "", mf.read_text(encoding="utf-8"), ""]
+            static_lines += [f"### Message: {mf.name}", "", mf.read_text(encoding="utf-8"), ""]
 
-    return "\n".join(lines)
+    static_text = "\n".join(static_lines)
+
+    # ---- VARIABLE FOOTER -----------------------------------------------------
+    # Everything that changes per call goes here. By placing this AFTER the
+    # static prefix (and not marking it with cache_control), the cache lookup
+    # hashes only the prefix -- this footer is appended on top of a cache hit.
+    footer_lines = [
+        "",
+        "---",
+        "",
+        "## YOUR TURN STATE",
+        "",
+        f"- agent: {serial}",
+        f"- turn: {turn_number} of max {max_total}",
+        f"- turns remaining for you: {remaining}",
+        f"- timestamp: {ts}",
+    ]
+    if remaining <= 1:
+        footer_lines.append("- **THIS IS YOUR LAST TURN. Your signal MUST be `converge`.**")
+
+    footer_text = "\n".join(footer_lines)
+
+    return [
+        {
+            "type": "text",
+            "text": static_text,
+            "cache_control": {"type": "ephemeral"},
+        },
+        {
+            "type": "text",
+            "text": footer_text,
+        },
+    ]
 
 # ---------------------------------------------------------------------------
 # Signal parsing
@@ -257,7 +317,6 @@ def write_receipts(thread_dir: Path):
     thread_id    = thread_json["id"]
     topic        = thread_json["topic"]
     participants = thread_json["participants"]
-    project      = thread_json.get("project", "")
     serial_no    = thread_json.get("serial", "")
 
     msg_files = sorted((thread_dir / "messages").glob("*.md"))
@@ -459,8 +518,11 @@ def execute_tool(name: str, args: dict, verbose: bool = False) -> str:
 # OpenAI client
 # ---------------------------------------------------------------------------
 
-def get_openai_client(secret_name: str) -> OpenAI:
-    api_key = os.environ.get("OPENAI_API_KEY")
+def get_openai_client(secret_name: str, model: str = "") -> OpenAI:
+    # Anthropic path: claude-* models use Anthropic's OpenAI-compatible endpoint
+    is_anthropic = model.startswith("claude-")
+    env_key = "ANTHROPIC_API_KEY" if is_anthropic else "OPENAI_API_KEY"
+    api_key = os.environ.get(env_key) or os.environ.get("OPENAI_API_KEY")
     if not api_key:
         sm = boto3.client("secretsmanager", region_name="us-east-1")
         raw = sm.get_secret_value(SecretId=secret_name)["SecretString"]
@@ -469,13 +531,51 @@ def get_openai_client(secret_name: str) -> OpenAI:
             parsed = json.loads(raw)
             api_key = (
                 parsed.get("api_key")
+                or parsed.get("ANTHROPIC_API_KEY")
+                or parsed.get("anthropic_api_key")
                 or parsed.get("OPENAI_API_KEY")
                 or parsed.get("openai_api_key")
                 or raw
             )
         except (json.JSONDecodeError, AttributeError):
             api_key = raw
+    if is_anthropic:
+        return OpenAI(api_key=api_key, base_url="https://api.anthropic.com/v1")
     return OpenAI(api_key=api_key)
+
+# ---------------------------------------------------------------------------
+# Usage telemetry — surfaces prompt-cache hit rate per API call
+# ---------------------------------------------------------------------------
+
+def format_usage(usage) -> str:
+    """One-line usage line for stdout. Handles OpenAI native and Anthropic
+    OpenAI-compat shapes. Anthropic exposes cache READS via
+    prompt_tokens_details.cached_tokens; cache CREATION tokens are not always
+    in the standard usage object — pulled from model_extra when present."""
+    if usage is None:
+        return "  [usage] none"
+    inp = getattr(usage, "prompt_tokens", 0) or 0
+    out = getattr(usage, "completion_tokens", 0) or 0
+    cache_read = 0
+    cache_create = 0
+    details = getattr(usage, "prompt_tokens_details", None)
+    if details is not None:
+        cache_read = getattr(details, "cached_tokens", 0) or 0
+    extra = getattr(usage, "model_extra", None) or {}
+    if not cache_read:
+        cache_read = extra.get("cache_read_input_tokens", 0) or 0
+    cache_create = (
+        getattr(usage, "cache_creation_input_tokens", 0)
+        or extra.get("cache_creation_input_tokens", 0)
+        or 0
+    )
+    total_input = inp + cache_read + cache_create
+    hit_pct = (cache_read / total_input * 100) if total_input else 0.0
+    return (
+        f"  [usage] input={inp:,} (cache_read={cache_read:,} = {hit_pct:.0f}%, "
+        f"cache_create={cache_create:,}) output={out:,}"
+    )
+
 
 # ---------------------------------------------------------------------------
 # Tool-aware API call
@@ -485,7 +585,7 @@ def call_with_tools(
     client: OpenAI,
     model: str,
     system_prompt: str,
-    user_prompt: str,
+    user_prompt: Union[str, List[Dict[str, Any]]],
     use_tools: bool = True,
     verbose: bool = False,
 ) -> str:
@@ -497,11 +597,34 @@ def call_with_tools(
     The loop runs until the model stops issuing tool calls or the per-turn
     safety limit is reached.
 
+    `user_prompt` may be either a plain string (legacy) or a list of content
+    blocks (preferred -- enables Anthropic prompt caching when blocks carry
+    cache_control). The system prompt is wrapped in a single text block with
+    cache_control={"type":"ephemeral"} so the per-agent system prompt is
+    cached across turns. OpenAI ignores cache_control fields harmlessly and
+    applies its own automatic prefix caching server-side.
+
     Returns the final message content as a string.
     """
+    # Wrap system prompt in a content array with a cache breakpoint. Even
+    # though OpenAI doesn't use the cache_control hint, it accepts the array
+    # form, so this keeps the message shape uniform across providers.
+    system_blocks = [
+        {
+            "type": "text",
+            "text": system_prompt,
+            "cache_control": {"type": "ephemeral"},
+        }
+    ]
+    # Accept either a string (back-compat) or a pre-built list of blocks.
+    if isinstance(user_prompt, str):
+        user_content: Union[str, List[Dict[str, Any]]] = user_prompt
+    else:
+        user_content = user_prompt
+
     messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user",   "content": user_prompt},
+        {"role": "system", "content": system_blocks},
+        {"role": "user",   "content": user_content},
     ]
     tools_used = 0
 
@@ -511,7 +634,18 @@ def call_with_tools(
             kwargs["tools"] = TOOLS
             kwargs["tool_choice"] = "auto"
 
-        response = client.chat.completions.create(**kwargs)
+        try:
+            response = client.chat.completions.create(**kwargs)
+        except Exception as e:
+            # Newer models (claude-opus-4-7 deprecated; gpt-5.5 only-supports-default)
+            # reject the temperature parameter. Fall back to no-temperature rather
+            # than fail the thread.
+            if "temperature" in str(e):
+                kwargs.pop("temperature", None)
+                response = client.chat.completions.create(**kwargs)
+            else:
+                raise
+        print(format_usage(getattr(response, "usage", None)))
         msg = response.choices[0].message
 
         # No tool calls — model is done
@@ -529,9 +663,18 @@ def call_with_tools(
                     "Write your final response now using only what you have already read."
                 ),
             })
-            final = client.chat.completions.create(
-                model=model, messages=messages, temperature=0.3
-            )
+            try:
+                final = client.chat.completions.create(
+                    model=model, messages=messages, temperature=0.3
+                )
+            except Exception as e:
+                if "temperature" in str(e):
+                    final = client.chat.completions.create(
+                        model=model, messages=messages
+                    )
+                else:
+                    raise
+            print(format_usage(getattr(final, "usage", None)))
             return final.choices[0].message.content or ""
 
         # Append the assistant message that contains tool calls
@@ -567,7 +710,7 @@ def call_with_tools(
 # Main run loop
 # ---------------------------------------------------------------------------
 
-def run_thread(thread_dir: Path, client: OpenAI | None, model: str, dry_run: bool, verbose: bool, no_tools: bool = False):
+def run_thread(thread_dir: Path, clients: dict, model: str, participant_models: dict, dry_run: bool, verbose: bool, no_tools: bool = False):
     thread_json = json.loads((thread_dir / "THREAD.json").read_text())
     thread_id   = thread_json["id"]
 
@@ -615,26 +758,47 @@ def run_thread(thread_dir: Path, client: OpenAI | None, model: str, dry_run: boo
 
         print(f"TURN {turn_num}: {current}")
 
+        # Resolve per-agent model: participant_models override > thread-level participant_models > default model
+        thread_pm = thread_json.get("participant_models", {})
+        agent_model = participant_models.get(current) or thread_pm.get(current) or model
+        # Route to the right client based on provider
+        if agent_model.startswith("claude-"):
+            agent_client = clients.get("anthropic")
+        else:
+            agent_client = clients.get("openai")
+        if agent_client is None and not dry_run:
+            print(f"ERROR: No API client available for model '{agent_model}' (agent {current})")
+            set_status(thread_dir, "blocked")
+            break
+
         system_prompt = build_system_prompt(current)
-        user_prompt   = build_user_prompt(thread_dir, current, turn_num)
+        user_blocks   = build_user_prompt(thread_dir, current, turn_num)
 
         if dry_run:
-            print(f"  DRY RUN -- model: {model}")
-            print(f"  System prompt: {len(system_prompt):,} chars")
-            print(f"  User prompt:   {len(user_prompt):,} chars")
+            user_total_chars = sum(len(b["text"]) for b in user_blocks)
+            print(f"  DRY RUN -- model: {agent_model} (agent: {current})")
+            print(f"  System prompt: {len(system_prompt):,} chars (1 block, cache_control=ephemeral)")
+            print(f"  User prompt:   {user_total_chars:,} chars across {len(user_blocks)} block(s)")
+            for i, b in enumerate(user_blocks):
+                cc = b.get("cache_control")
+                cc_str = f"cache_control={cc}" if cc else "no cache_control"
+                print(f"    block[{i}]: {len(b['text']):,} chars; {cc_str}")
             print(f"  Output:        {msg_file}")
             if verbose:
                 print(f"\n--- SYSTEM (first 500) ---\n{system_prompt[:500]}")
-                print(f"\n--- USER (first 1000) ---\n{user_prompt[:1000]}")
+                if user_blocks:
+                    print(f"\n--- USER block[0] (first 1000) ---\n{user_blocks[0]['text'][:1000]}")
+                if len(user_blocks) > 1:
+                    print(f"\n--- USER block[{len(user_blocks)-1}] (full footer) ---\n{user_blocks[-1]['text']}")
             break
 
         try:
             content = call_with_tools(
-                client, model, system_prompt, user_prompt,
+                agent_client, agent_model, system_prompt, user_blocks,
                 use_tools=(not no_tools), verbose=verbose,
             )
         except Exception as exc:
-            print(f"ERROR: OpenAI API call failed for {current}: {exc}")
+            print(f"ERROR: API call failed for {current} (model={agent_model}): {exc}")
             set_status(thread_dir, "blocked")
             break
 
@@ -662,11 +826,23 @@ def run_thread(thread_dir: Path, client: OpenAI | None, model: str, dry_run: boo
 def main():
     parser = argparse.ArgumentParser(description="Run an agent thread via OpenAI API")
     parser.add_argument("--thread",   required=True,          help="Thread ID to run")
-    parser.add_argument("--model",    default="gpt-5.2",          help="OpenAI model (default: gpt-5.2)")
+    parser.add_argument("--model",    default="gpt-5.2",       help="Default model for all agents (default: gpt-5.2)")
     parser.add_argument("--dry-run",   action="store_true",    help="Show invocation without calling API")
+    parser.add_argument("--dry-run-build", default="",         help="Build prompts for the named agent serial and emit JSON-serialized block structure to stdout. Bypasses active-status check. For inspecting cache_control placement in any thread state.")
     parser.add_argument("--verbose",   action="store_true",    help="Print agent responses and tool calls to stdout")
     parser.add_argument("--no-tools",  action="store_true",    help="Disable tool use (faster/cheaper; agents cannot read files)")
-    parser.add_argument("--secret",    default="openai-api-key", help="AWS Secrets Manager secret name")
+    parser.add_argument("--secret",    default="openai-api-key", help="AWS Secrets Manager secret name (default/OpenAI)")
+    parser.add_argument("--anthropic-secret", default="anthropic-api-key", help="AWS Secrets Manager secret name for Anthropic API key")
+    parser.add_argument("--openai-secret",    default="openai-api-key",    help="AWS Secrets Manager secret name for OpenAI API key")
+    parser.add_argument(
+        "--participant-models",
+        default="",
+        help=(
+            'JSON map of agent serial to model string, e.g. '
+            '\'{"1.1.0_SA_CTO":"claude-opus-4-7","3.1.0_SA_CVO":"gpt-5.5","2.1.0_SA_COO":"claude-sonnet-4-6"}\'. '
+            'Overrides --model for named agents. Persisted to THREAD.json participant_models.'
+        ),
+    )
     args = parser.parse_args()
 
     thread_dir = SCRIPT_DIR / args.thread
@@ -674,18 +850,104 @@ def main():
         print(f"ERROR: Thread not found: {thread_dir}")
         sys.exit(1)
 
-    if args.dry_run:
-        client = None
-    else:
-        print(f"Fetching OpenAI key ({args.secret})...")
+    # Parse participant-models override
+    participant_models: dict = {}
+    if args.participant_models:
         try:
-            client = get_openai_client(args.secret)
-            print("OK: OpenAI client ready\n")
-        except Exception as exc:
-            print(f"ERROR: {exc}")
+            participant_models = json.loads(args.participant_models)
+        except json.JSONDecodeError as exc:
+            print(f"ERROR: --participant-models is not valid JSON: {exc}")
             sys.exit(1)
 
-    run_thread(thread_dir, client, args.model, args.dry_run, args.verbose, args.no_tools)
+    # Persist participant_models into THREAD.json if provided
+    if participant_models:
+        thread_json = json.loads((thread_dir / "THREAD.json").read_text())
+        thread_json["participant_models"] = participant_models
+        (thread_dir / "THREAD.json").write_text(json.dumps(thread_json, indent=2))
+        print(f"OK: Persisted participant_models to THREAD.json: {participant_models}")
+
+    # --dry-run-build: print prompt block structure for one agent and exit.
+    # Useful for verifying cache_control placement on threads in any status
+    # (including 'complete') without burning tokens or running the loop.
+    if args.dry_run_build:
+        target = args.dry_run_build
+        turn_json = json.loads((thread_dir / "TURN.json").read_text())
+        # Use the recorded turn_number if the thread is mid-flight; otherwise
+        # synthesize a representative turn (the next one this agent would take).
+        turn_number = turn_json.get("turn_number", 1)
+        system_prompt = build_system_prompt(target)
+        # Pin the timestamp to a fixed value so two back-to-back invocations
+        # produce byte-identical static prefixes (the determinism check).
+        fixed_ts = datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+        user_blocks = build_user_prompt(thread_dir, target, turn_number, now_utc=fixed_ts)
+        out = {
+            "thread_id": args.thread,
+            "agent": target,
+            "turn_number": turn_number,
+            "system": [
+                {
+                    "type": "text",
+                    "text_len": len(system_prompt),
+                    "text_head": system_prompt[:200],
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+            "user": [
+                {
+                    "type": b["type"],
+                    "text_len": len(b["text"]),
+                    "text_head": b["text"][:200],
+                    "text_tail": b["text"][-200:],
+                    "cache_control": b.get("cache_control"),
+                }
+                for b in user_blocks
+            ],
+        }
+        print(json.dumps(out, indent=2))
+        # Determinism sanity check: rebuild and compare prefix bytes.
+        user_blocks_2 = build_user_prompt(thread_dir, target, turn_number, now_utc=fixed_ts)
+        prefix_match = user_blocks[0]["text"] == user_blocks_2[0]["text"]
+        print(f"\n# DETERMINISM: static-prefix byte-equal across two builds = {prefix_match}")
+        # Also confirm wall-clock variation does not affect the prefix.
+        later_ts = datetime(2099, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
+        user_blocks_3 = build_user_prompt(thread_dir, target, turn_number, now_utc=later_ts)
+        prefix_independent_of_clock = user_blocks[0]["text"] == user_blocks_3[0]["text"]
+        footer_changed_with_clock   = user_blocks[1]["text"] != user_blocks_3[1]["text"]
+        print(f"# DETERMINISM: static-prefix is wall-clock-independent      = {prefix_independent_of_clock}")
+        print(f"# DETERMINISM: footer DOES vary with wall-clock             = {footer_changed_with_clock}")
+        return
+
+    # Collect all models needed (default + per-agent overrides)
+    all_models = list(participant_models.values()) + [args.model]
+    needs_anthropic = any(m.startswith("claude-") for m in all_models)
+    needs_openai    = any(not m.startswith("claude-") for m in all_models)
+
+    clients: dict = {}
+
+    if args.dry_run:
+        pass  # No clients needed for dry run
+    else:
+        if needs_anthropic:
+            secret = args.anthropic_secret
+            print(f"Fetching Anthropic key ({secret})...")
+            try:
+                clients["anthropic"] = get_openai_client(secret, model="claude-sonnet-4-6")
+                print("OK: Anthropic client ready")
+            except Exception as exc:
+                print(f"ERROR: Anthropic client failed: {exc}")
+                sys.exit(1)
+        if needs_openai:
+            secret = args.openai_secret or args.secret
+            print(f"Fetching OpenAI key ({secret})...")
+            try:
+                clients["openai"] = get_openai_client(secret, model="gpt-4o")
+                print("OK: OpenAI client ready")
+            except Exception as exc:
+                print(f"ERROR: OpenAI client failed: {exc}")
+                sys.exit(1)
+        print()
+
+    run_thread(thread_dir, clients, args.model, participant_models, args.dry_run, args.verbose, args.no_tools)
     print("\nOrchestrator complete.")
 
 
