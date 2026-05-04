@@ -7,9 +7,12 @@
     <issued_to>0.4.0_DS_ClientPlatform + 0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-30</issued_date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>high</priority>
     <estimated_effort>1-3d (depends on silver builder investigation outcome + date-range scale)</estimated_effort>
+    <closure_2026_05_04>
+      COMPLETE 2026-05-04 via DS~D RAVC4. Phase 0 audit clean (NATIVE date support both dims; cumulative-batch gold pattern). Execution: ThreadPoolExecutor(32) parallel via `data/orion/scripts/silver/run_silver_backfill_parallel.py` (`5fef9a910`); 537s actual vs ~2.4h sequential projected (16x speedup). Result: 2166 positions_mv + 2166 assets_v2 silver partitions, 2020-05-26 → 2026-04-30, zero gaps, exit 0. Spot check 3 dates clean (24,148 rows/date, snake_case, snapshot_date + source_system=orion-api). Post-backfill GO dispatched to AE 0.6.1 for gold chain re-run (`--from INF_B_00 --force --bg`). CATALOG fix awaiting AE 0.6.1 in CLOUD_OPS_OR_ETL lane. silver/transactions/ pre-existing per DS~D earlier discovery — no transactions silver work needed. AC#1-#10 all satisfied per RAVC4 evidence chain.
+    </closure_2026_05_04>
     <amendment_2026_05_04>
       Status flipped staged → pending 2026-05-04 by COO post-Wave B v5 RAVC.
 
