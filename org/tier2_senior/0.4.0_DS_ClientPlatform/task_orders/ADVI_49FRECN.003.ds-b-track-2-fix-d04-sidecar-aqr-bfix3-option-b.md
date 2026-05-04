@@ -6,7 +6,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-04</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- DS~C close-out 2026-05-04: Option A detection fix 99664e778 shipped; QA honest-zero confirmed; project closed 814353eee by COO 20260504T173506Z -->
     <priority>P0 — completes 49FRECN Track 2 fix scope; recovers $60.4M of the $64.8M C1 bucket (93.3%)</priority>
     <estimated_effort>0.5d (most fixes already shipped opportunistically; this TO formalizes acceptance + adds AQR removal + sidecar emit + standing-backlog file)</estimated_effort>
     <reassignment_2026_05_04>
