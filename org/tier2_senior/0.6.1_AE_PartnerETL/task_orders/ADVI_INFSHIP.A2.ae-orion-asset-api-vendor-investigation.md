@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.6.1_AE_PartnerETL~B</issued_to>
     <date>2026-04-28</date>
-    <status>pending</status>
+    <status>complete</status><!-- 2026-05-05: verdict — per-client REST GET (pull_inflection_assets_v2.py, HISTBF.003) satisfies AC#1; Envision Asset-grouping OFFICIALLY DECLINED (4 timeouts 300-900s all scopes); Track 1 dead-end (no async pattern in HAR(10)); Track 2 viable (per-account GET 322ms) but not required for v1; catalog updated with new Portfolio/Assets section + production sourcing row; RAVC4 sent to CTO 2026-05-05 -->
     <project_code>ADVI_INFSHIP</project_code>
     <to_serial>A2</to_serial>
     <priority>MEDIUM</priority>
