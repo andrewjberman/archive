@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05; gates on TO-2 RAVC5 (Phase 0 pandas-pyarrow-requests-layer:1 published + REPS Lambda template stable). Flips to pending + dispatch GO once TO-2 ships clean. PRD v0.2 commit 050bd3695 §6.2 TO-3 spec. -->
+    <status>pending</status><!-- Flipped staged→pending 2026-05-05T~21:25Z post TO-2 RAVC5 close (inf-pipeline-v1.7.19 LIVE; layer:1 confirmed working; zip 28.4KB drop-in clean; StatusCode=200 + 4 S3 artifacts confirmed). PRD v0.2 commit 050bd3695 §6.2 TO-3 spec; pure clone+prefix substitute (~30-60min target). -->
     <priority>high</priority>
     <estimated_effort>~30-60min AE post TO-2 ship; pure clone+prefix substitute (no Phase 0; layer already published)</estimated_effort>
   </metadata>
@@ -121,8 +121,8 @@
   </acceptance_criteria>
 
   <go_signal>
-    <issued_at>STAGED — not yet GO</issued_at>
+    <issued_at>2026-05-05T~21:25Z</issued_at>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <message>Status `staged` until TO-2 RAVC5 close. Flips to `pending` + dispatch GO once TO-2 ships clean. Sprint mode AE batch authoring complete this turn; TO-4 follows same pattern.</message>
+    <message>GO. TO-2 SHIPPED 2026-05-05 inf-pipeline-v1.7.19 + shared-infra-v1.9.0 (layer:1 ARN confirmed; StatusCode=200; 4 S3 artifacts; comp-iam gaps clean). Pure clone+prefix substitute from inf-api-reps template. Reference `pandas-pyarrow-requests-layer:1`. EventBridge cron 12:50 UTC. Sprint target ~30-60min. RAVC5 expectation: Lambda live + StatusCode=200 + bronze/orion-api-v2/{date}/positions_daily.json + silver/api_dims/positions_daily/{date}/data.parquet + comp-iam gaps clean + tag bump (next semver patch from inf-pipeline-v1.7.19). TO-4 (PERFORMANCE) flips pending on TO-3 RAVC5.</message>
   </go_signal>
 </task_order>
