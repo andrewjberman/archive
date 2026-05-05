@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~D (primary) + 0.5.0_AE_OpalETL (cross-ref if chain re-run needed)</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- DS~D GOed via MCP 20260505T123524Z; this TO formalizes that GO -->
+    <status>complete</status><!-- COMPLETE 2026-05-05: 4-step pricing fix executed by DS~D. activity_scan/cash_drag/concentration_risk all GREEN. DS~D RAVC5 7c936826a. Root cause: canonical_prices.parquet stale since 2026-04-22; rebuilt through 2026-05-05. -->
     <priority>high</priority>
     <estimated_effort>0.5d diagnosis; 0.5-1d fix if single root cause</estimated_effort>
   </metadata>
