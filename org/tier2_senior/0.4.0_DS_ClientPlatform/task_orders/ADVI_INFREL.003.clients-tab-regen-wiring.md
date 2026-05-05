@@ -4,11 +4,11 @@
     <id>ADVI_INFREL.003</id>
     <project>ADVI_INFREL</project>
     <title>clients_tab.json regen wiring (gates on TO-1 silver-chain fix)</title>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <secondary>0.6.1_AE_PartnerETL</secondary>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05T~21:15Z. Gates on TO-1 silver-chain fix RAVC5 — if silver propagation is fixed, clients_tab.json may regenerate automatically (TO-3 closes without code change). Default receiver: DS lane (gold script authoring); AE 0.6.1 secondary if dispatch issue. -->
+    <status>staged</status><!-- Authored sprint mode 2026-05-05T~21:15Z. Gates on TO-1 silver-chain fix RAVC5 — if silver propagation is fixed, clients_tab.json may regenerate automatically (TO-3 closes without code change). Receiver assignment per Andrew 2026-05-05T~21:25Z: DS~A specifically (authored the pipeline audit that surfaced clients_tab staleness; holds most context). AE 0.6.1 secondary if dispatch issue. -->
     <priority>medium</priority>
     <estimated_effort>~0.25d (small wiring fix OR auto-close if TO-1 fix propagates)</estimated_effort>
   </metadata>
