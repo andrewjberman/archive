@@ -6,7 +6,7 @@
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-01</issued_date>
-    <status>open</status>
+    <status>complete</status>
     <priority>P1 — gates ADVI_INFSHIP Phase 3 closure + V2 Andrew sign-off</priority>
     <estimated_effort>1-2d (4 frontend bugs + Phase 0 diagnostic)</estimated_effort>
     <branch>portal DEV (then PROD via DT push)</branch>

@@ -7,7 +7,7 @@
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Gates: INFLFE.001 AC3 PASS + INFLFE.002 COMPLETE + INFLFE.003 COMPLETE. RD should begin once all three are done. -->
+    <status>complete</status><!-- Deliverables shipped 2026-05-05: matrix v6 Render column updated; constitution doc at portal/.frontend-dev/testing/inflection_advisor_intelligence.md; 5 follow-on TOs identified. Andrew manual sweep + S7 smoke evidence. RAVC5 sent to COO. Commit blocked by Andrew "no more commits this session — COO handles" directive — handed to COO for coordination. -->
     <priority>medium</priority>
     <estimated_effort>1d</estimated_effort>
   </metadata>
