@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Flipped staged→pending 2026-05-05T~21:38Z post TO-3 RAVC5 close (inf-pipeline-v1.7.20 LIVE; positions_mv silver 24,205 rows confirmed; layer drop-in 31.5KB). Note: TO-3 surfaced dim-name convention positions_mv (per convert_orion_api_to_silver.py DIM_BUILDERS) + rate_limiter key suffix _positions_mv (not _positions). For TO-4 PERFORMANCE: verify dim-name in DIM_BUILDERS + rate_limiter key suffix matches actual runtime observation BEFORE TF apply. PRD v0.2 commit 050bd3695 §6.2 TO-4 spec. -->
+    <status>deferred</status><!-- DEFERRED 2026-05-05T~21:43Z per AE 0.6.1 pre-flight RAVC (Option C accepted). 4 architecture gaps surfaced: (1) pull_inflection_performance.py doesn't exist (only _rest.py for inception-to-date TWR, different use case); (2) _rest.py hardcodes local_dir inline (no monkeypatch point; lane violation to modify DS code); (3) silver builder reads CSV bronze from EC2-export path, not REST parquet; (4) bronze key mismatch across TO spec / REST pull / CSV bronze (3 different keys). PERFORMANCE silver stays on inf-silver-chain EC2 path until follow-on TO with proper DS-AE scope split (DS authors REST endpoint design + schema; AE scaffolds Lambda after). Sprint not blocked. Cross-ref: ADVI_INFINGE.005 (TXN rate-empirical) proceeds in parallel. -->
     <priority>high</priority>
     <estimated_effort>~30-60min AE post TO-3 ship; pure clone+prefix substitute (no Phase 0; layer already published)</estimated_effort>
   </metadata>
