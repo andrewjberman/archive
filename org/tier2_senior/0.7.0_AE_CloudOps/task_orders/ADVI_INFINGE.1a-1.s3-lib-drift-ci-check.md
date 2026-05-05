@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Authored 2026-05-05 sprint mode per Andrew override; PRD v0.2 commit 050bd3695 §6 Phase 1a TO 1a-1 spec; addresses Risk Register C: "deployed-script (S3) vs canonical-script (local repo) drift in shared library, undetected by CI" — root cause class for AUDIT-008 + AUDIT-002 + AUDIT-003 + tonight's Scenario X confirmation. -->
+    <status>complete</status><!-- CLOSED 20260505T205000Z by COO RAVC5 accept. CI yaml live (872e6a071 CTO proxy), PARITY.md (3fb5504e1), RUNBOOK (d6ce723d8), session log 7 ops findings (dd6f35628). silver/positions_mv/ 5 flat-path artifacts DELETED. Step 2 failure-mode test deferred to post-sprint dedicated session (COO accept: canonical state GREEN = AC1 logically validated). -->
     <priority>high</priority>
     <estimated_effort>~0.5d AE per CTO PRD v0.2 §6.1; sprint compressed ~2-3h tonight target</estimated_effort>
   </metadata>
