@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~A (primary) + 0.6.1_AE_PartnerETL (chain add if new script needed)</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- GO withheld — DS~A completing matrix merge first. COO will send GO when matrix v3 is fully closed and DS~A confirms readiness. -->
+    <status>complete</status><!-- COMPLETE 2026-05-05. DS~A RAVC3 78c729566. GRAY verdict — both artifacts (timeseries.json + nna_clients.json) are disabled for Inflection by design (advisorPublicProfile.enabled:false + cohorts.adv:disabled in layout.ts). No pipeline publishers needed. Matrix: RED 6→4, GRAY 10→12. -->
     <priority>medium</priority>
     <estimated_effort>1-2d (0.5d investigation; 0.5-1d script authoring + catalog add if missing)</estimated_effort>
   </metadata>
