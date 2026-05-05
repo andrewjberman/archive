@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Gate: INFLFE.001 AC3 DT PASS before DE starts this TO. DO NOT BEGIN until COO sends GO post-DT AC3 confirmation. -->
+    <status>complete</status><!-- 72a6c1f4 portal DEV. AC1-4 PASS. 3 sentinels: ClientsTab warnOnInflectionClientDrift, AdvisorBookView warnOnInflectionAdvisorDrift, InflectionInsightsPanel 3x warnOnInflection*Shape. typecheck exit 0. -->
     <priority>high</priority>
     <estimated_effort>0.5-1d</estimated_effort>
   </metadata>
