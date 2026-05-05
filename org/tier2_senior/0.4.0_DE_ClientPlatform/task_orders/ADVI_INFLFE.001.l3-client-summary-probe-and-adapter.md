@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Phase 0+1 COMPLETE via AUDIT-004 execution (fc88893a). Bug A + Bug B fixed. AC3 awaiting DT Playwright smoke. -->
+    <status>complete</status><!-- COMPLETE 2026-05-05. Evidence: fc88893a (Phase 0+1 + AUDIT-004 absorption: hooks-violation fix + ClientsTab static adapter wiring) + 947b78bf8 + 5799c7f79. AC3 satisfied via DT Playwright smoke (portal bump cffacb3e3 → submodule a0c5d0d6). Status flip by COO 2026-05-05 per CTO division-of-labor coordination msg 20260505T155634Z. -->
     <priority>high</priority>
     <estimated_effort>COMPLETE — Phase 0+1 done in AUDIT-004 context; AC3 DT gate outstanding</estimated_effort>
   </metadata>
