@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05; gates on TO-3 RAVC5 (POSITIONS module template stable). Flips to pending + dispatch GO once TO-3 ships clean. PRD v0.2 commit 050bd3695 §6.2 TO-4 spec. -->
+    <status>pending</status><!-- Flipped staged→pending 2026-05-05T~21:38Z post TO-3 RAVC5 close (inf-pipeline-v1.7.20 LIVE; positions_mv silver 24,205 rows confirmed; layer drop-in 31.5KB). Note: TO-3 surfaced dim-name convention positions_mv (per convert_orion_api_to_silver.py DIM_BUILDERS) + rate_limiter key suffix _positions_mv (not _positions). For TO-4 PERFORMANCE: verify dim-name in DIM_BUILDERS + rate_limiter key suffix matches actual runtime observation BEFORE TF apply. PRD v0.2 commit 050bd3695 §6.2 TO-4 spec. -->
     <priority>high</priority>
     <estimated_effort>~30-60min AE post TO-3 ship; pure clone+prefix substitute (no Phase 0; layer already published)</estimated_effort>
   </metadata>
@@ -121,8 +121,8 @@
   </acceptance_criteria>
 
   <go_signal>
-    <issued_at>STAGED — not yet GO</issued_at>
+    <issued_at>2026-05-05T~21:38Z</issued_at>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <message>Status `staged` until TO-3 RAVC5 close. Flips to `pending` + dispatch GO once TO-3 ships clean. Sprint mode AE batch authoring complete this turn; TO-5a (TXN rate-empirical) follows.</message>
+    <message>GO. TO-3 SHIPPED inf-pipeline-v1.7.20 + commit 6eaea1600 (positions_mv 24,205 rows; rate_limiter key fixed). TO-4 pure clone+prefix substitute from inf-api-positions. Reference `pandas-pyarrow-requests-layer:1`. EventBridge cron 12:55 UTC. **Pre-flight check:** verify performance dim-name in `convert_orion_api_to_silver.py` DIM_BUILDERS (likely `performance`, but confirm — TO-3 surfaced positions_mv vs spec'd positions_daily) + rate_limiter key suffix matches runtime log observation BEFORE TF apply. Sprint target ~30-60min. RAVC5 expectation: Lambda live + StatusCode=200 + bronze/orion-api-v2/{date}/performance.json + silver/api_dims/{actual_dim_name}/{date}/data.parquet + comp-iam gaps clean + tag bump. TO-5a (TXN rate-empirical) flips pending on TO-4 RAVC5.</message>
   </go_signal>
 </task_order>
