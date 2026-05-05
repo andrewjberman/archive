@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- GO withheld — DE not online at time of issue. COO will send GO when DE registers. -->
+    <status>complete</status>
     <priority>high</priority>
     <estimated_effort>0.5d — probe only; ~1d if adapter wiring needed</estimated_effort>
   </metadata>
