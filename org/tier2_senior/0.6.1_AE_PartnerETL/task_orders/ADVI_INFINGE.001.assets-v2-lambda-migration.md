@@ -29,7 +29,12 @@
 
     SILVER_BUILDERS extension on `inf-silver-chain` Lambda — adds `assets_v2` to the silver-conversion list. This Lambda's bronze write (bronze/assets/{date}.parquet) triggers existing `_BRONZE_COMPLETE.json` sentinel on its OWN downstream silver chain via direct convert-call, NOT via inf-silver-chain (since this Lambda does both pull AND convert in single execution per Lambda-native pattern).
 
-    Naming convention locked per PRD v0.2 §6.1: `inf-pull-assets-v2-lambda` (Lambda function); `inf-pull-assets-v2-rule` (EventBridge rule); `inf-pull-assets-v2-role` (IAM execution role).
+    **Naming convention locked per CTO ratify 20260505T~19:55Z (supersedes PRD v0.2 §6.1 draft language):**
+    - Lambda function: `inf-api-assets-v2`
+    - EventBridge rule: `inf-api-assets-v2-rule`
+    - IAM execution role: `inf-api-assets-v2-role`
+
+    Phase 1b family convention: `inf-api-{prefix}` for REST-pull execution Lambdas (assets-v2 / reps / positions / performance / transactions). Distinguishes from `inf-{role}-trigger` (trigger Lambdas like `inf-jwt-trigger`, `inf-bronze-trigger`) and `inf-{role}-chain` (chain orchestrators like `inf-silver-chain`).
 
     Tag bump discovery mandate: `git tag -l "inf-pipeline-v*" | sort -V | tail -5` BEFORE bump per CLAUDE.md MEMORY.md "Pipeline Tag Versioning — Critical Rule".
   </context>
@@ -41,7 +46,7 @@
       <if_mismatch>If tag list shows non-monotonic versions: investigate before bumping; do NOT skip versions arbitrarily per MEMORY.md guidance.</if_mismatch>
     </step>
     <step>
-      <run>comp-iam service inf-pull-assets-v2-lambda (per CLAUDE.md auto-rule 3 — Lambda touches new boto3 calls)</run>
+      <run>comp-iam service inf-api-assets-v2 (per CLAUDE.md auto-rule 3 — Lambda touches new boto3 calls)</run>
       <expect>NOT_INDEXED expected (Lambda doesn't exist yet pre-deploy); empirical IAM scope derived from PRD §6.1 spec: bronze/assets/* PutObject + silver/assets_v2/* PutObject + silver/api_dims/assets/* PutObject (note: last two ALREADY in QA-runner role; Lambda role inherits its own IAM block) + secretsmanager:GetSecretValue on orion/jwt/current* + s3:GetObject on opal-data-inf/orion/jwt/current.json + CW Logs + AWSLambdaBasicExecutionRole</expect>
       <if_mismatch>If `comp-iam service` returns indexed (Lambda was authored prior): cross-check existing IAM scope against PRD §6.1; reconcile.</if_mismatch>
     </step>
@@ -59,12 +64,12 @@
 
   <phase id="2" when="implementation — Lambda code + Terraform module">
     <step>
-      <run>Author Lambda function code at `infra/aws/lambda/inf-pipeline/inf-pull-assets-v2-lambda/lambda_function.py`</run>
+      <run>Author Lambda function code at `infra/aws/lambda/inf-pipeline/inf-api-assets-v2/lambda_function.py`</run>
       <expect>Lambda handler invokes `pull_inflection_assets_v2.py` then `convert_assets_v2_to_silver.py` in sequence within single execution. Bundles `rate_limiter.py` + `jwt_freshness.py` from `data/orion/scripts/bronze/`. Patches `LOCAL_PULLS_DIR = Path("/tmp/pulls")`. JWT read via `assert_fresh_or_exit()` fail-fast (NO `recover_or_exit()` invocation; NO lambda:InvokeFunction for inf-jwt-trigger).</expect>
       <if_mismatch>If pull/convert script signatures don't match Lambda handler invocation pattern: refactor scripts to expose `def main(date: str)` entry point; document rationale in commit message.</if_mismatch>
     </step>
     <step>
-      <run>Author Terraform module at `infra/aws/terraform/inf-pipeline/inf-pull-assets-v2-lambda.tf` (or analogous shared lambdas.tf entry per existing pattern)</run>
+      <run>Author Terraform module at `infra/aws/terraform/inf-pipeline/inf-api-assets-v2.tf` (or analogous shared lambdas.tf entry per existing pattern)</run>
       <expect>aws_lambda_function + aws_cloudwatch_event_rule (cron `0 12 * * ? *` placeholder; per-prefix offset within 12:00-13:00 UTC window; refine per OQ3 default in PRD §7) + aws_cloudwatch_event_target + aws_lambda_permission + aws_iam_role + aws_iam_role_policy (per Phase 1 Step 2 IAM enumeration) + aws_cloudwatch_log_group + aws_cloudwatch_metric_alarm (CW Alarm on 2 consecutive failures)</expect>
       <if_mismatch>If existing `inf-assets-trigger.tf` from C-gold authoring (`04448b49c`) conflicts: delete obsolete C-gold resources (Lambda + EventBridge + IAM role from that commit) in same Terraform plan; or re-target via `terraform state rm` if applied (NOT applied per HALT directive).</if_mismatch>
     </step>
@@ -74,7 +79,7 @@
       <if_mismatch>If silver-chain Lambda timeout headroom &lt;50% post-extension (per PRD §7 OQ4 trigger): consult CTO before proceeding; revisit dedicated S3 ObjectCreated trigger pattern instead of SILVER_BUILDERS extension.</if_mismatch>
     </step>
     <step>
-      <run>Update `infra/aws/lambda/ci/lambda-source-map.json` with inf-pull-assets-v2-lambda entry</run>
+      <run>Update `infra/aws/lambda/ci/lambda-source-map.json` with inf-api-assets-v2 entry</run>
       <expect>New entry per existing pattern (function_name + source_dir + handler + runtime); CI drift detection picks it up</expect>
       <if_mismatch>Per CLAUDE.md rule 4: every Lambda must have entry; if entry missing post-deploy, CI drift will catch.</if_mismatch>
     </step>
@@ -92,7 +97,7 @@
       <if_mismatch>Any gap surfaced: amend iam.tf before apply; do NOT proceed with gap.</if_mismatch>
     </step>
     <step>
-      <run>.tools/safe-commit.sh --author "0.6.1_AE_PartnerETL &lt;0.6.1_AE_PartnerETL@opal.agent&gt;" -m "feat(ADVI_INFINGE.001): inf-pull-assets-v2-lambda + Lambda-native bronze pull migration (Phase 1b TO-1; absorbs AUDIT-008.PERM)" -- infra/aws/lambda/inf-pipeline/inf-pull-assets-v2-lambda/ infra/aws/terraform/inf-pipeline/inf-pull-assets-v2-lambda.tf infra/aws/terraform/inf-pipeline/lambdas.tf infra/aws/lambda/ci/lambda-source-map.json infra/aws/lambda/inf-pipeline/inf-silver-chain/lambda_function.py</run>
+      <run>.tools/safe-commit.sh --author "0.6.1_AE_PartnerETL &lt;0.6.1_AE_PartnerETL@opal.agent&gt;" -m "feat(ADVI_INFINGE.001): inf-api-assets-v2 Lambda-native bronze pull migration (Phase 1b TO-1; absorbs AUDIT-008.PERM)" -- infra/aws/lambda/inf-pipeline/inf-api-assets-v2/ infra/aws/terraform/inf-pipeline/inf-api-assets-v2.tf infra/aws/terraform/inf-pipeline/lambdas.tf infra/aws/lambda/ci/lambda-source-map.json infra/aws/lambda/inf-pipeline/inf-silver-chain/lambda_function.py</run>
       <expect>safe-commit.sh PASS — pathspec scoped + index clean. Owned-paths hook PASS — AE has authority on infra/aws/* + lambdas.tf.</expect>
       <if_mismatch>safe-commit abort: clean staged extras with `git reset HEAD -- &lt;path&gt;`; re-run.</if_mismatch>
     </step>
@@ -123,7 +128,7 @@
 
   <phase id="5" when="empirical functional test (24h smoke)">
     <step>
-      <run>Empirical Lambda invocation: `aws lambda invoke --function-name inf-pull-assets-v2-lambda --payload '{"date": "2026-05-06"}' /tmp/lambda-test-output.json` (or wait for natural cron fire at next 12:00-13:00 UTC window)</run>
+      <run>Empirical Lambda invocation: `aws lambda invoke --function-name inf-api-assets-v2 --payload '{"date": "2026-05-06"}' /tmp/lambda-test-output.json` (or wait for natural cron fire at next 12:00-13:00 UTC window)</run>
       <expect>Lambda invocation returns Statuscode 200; /tmp/lambda-test-output.json shows successful pull + convert; bronze/assets/2026-05-06.parquet + silver/assets_v2/2026-05-06.parquet written within ~150s wall</expect>
       <if_mismatch>Lambda timeout: increase timeout to 900s; if still fails, investigate per-prefix script-level wall time. Lambda OOM: increase memory beyond 512MB; cap at 10GB.</if_mismatch>
     </step>
@@ -162,7 +167,7 @@
         <if_mismatch>Investigate non-monotonic versions</if_mismatch>
       </step>
       <step>
-        <run>comp-iam service inf-pull-assets-v2-lambda</run>
+        <run>comp-iam service inf-api-assets-v2</run>
         <expect>NOT_INDEXED pre-deploy; PRD §6.1 IAM enumeration applies</expect>
         <if_mismatch>Cross-check vs PRD</if_mismatch>
       </step>
@@ -186,7 +191,7 @@
     </phase>
     <phase id="3" when="after deploy">
       <step>
-        <run>comp-iam service inf-pull-assets-v2-lambda + comp-pipescript deployed inf-pull-assets-v2-lambda</run>
+        <run>comp-iam service inf-api-assets-v2 + comp-pipescript deployed inf-api-assets-v2</run>
         <expect>Lambda indexed post-deploy; MATCH</expect>
         <if_mismatch>Investigate</if_mismatch>
       </step>
