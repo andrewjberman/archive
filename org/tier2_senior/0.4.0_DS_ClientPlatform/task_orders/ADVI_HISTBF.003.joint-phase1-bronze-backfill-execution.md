@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform + 0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-04-30</issued_date>
-    <status>pending</status><!-- CTO amendment 2026-04-30: AE 0.6.1 owns EC2 dispatch + run monitoring (not DS BASE); DS writes scripts + uploads to S3; chain reg gate: DS comp-pipescript deployed MATCH on all scripts → AE updates chain reg → AE EC2 dispatch. SSM RunCommand 60-min cap incompatible with 6hr run — must use persistent process on inf-bronze-runner. -->
+    <status>complete</status><!-- Flipped 2026-05-05 by 2.0.0_SA_COO during session 57 GT-recon. Evidence: ADVI_HISTBF.json status=complete (2026-05-04 ship) + Phase 1b BRONZE Wave B v5 + Phase 2 SILVER (DS~D `5fef9a910` ThreadPoolExecutor(32), 537s wall, ok=1618 skip=2714 err=0 zero gaps) + Phase 3 GOLD (AE 0.6.1 cumulative-batch 16min wall) + 3-step close commit `def351cb4`. CTO amendment 2026-04-30: AE 0.6.1 owns EC2 dispatch + run monitoring (not DS BASE); DS writes scripts + uploads to S3; chain reg gate: DS comp-pipescript deployed MATCH on all scripts → AE updates chain reg → AE EC2 dispatch. SSM RunCommand 60-min cap incompatible with 6hr run — must use persistent process on inf-bronze-runner. -->
     <priority>high</priority>
     <estimated_effort>TBD by Phase 0 results (~3-7 days; depends on dim count × calls per dim × observed sustained rate)</estimated_effort>
   </metadata>
