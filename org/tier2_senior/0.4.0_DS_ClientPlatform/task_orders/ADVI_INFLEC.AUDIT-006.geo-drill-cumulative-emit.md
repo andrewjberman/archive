@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~A (primary)</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- GO withheld — DS~A completing matrix merge + AUDIT-005 first. COO will send GO when DS~A confirms readiness. -->
+    <status>complete</status><!-- COMPLETE 2026-05-05. DS~A Phase 0+1: 2dd28fe9f + 927809851. AE 0.6.1 Phase 2: SSM 0bbbd1f8 inf-gold-layer-runner 15:22:41Z. geo_drill present: True, len=1, ETag c3744910317ee02317ef519ecc51d529. AC1-4 PASS. YELLOW->GREEN upgrade confirmed. DS~A to update matrix cell. -->
     <priority>low</priority>
     <estimated_effort>0.5d (single key addition to INF_I_D00c; chain re-run ~15min)</estimated_effort>
   </metadata>
