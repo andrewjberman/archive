@@ -15,9 +15,11 @@
 
   <references>
     <ref type="prd_canonical">docs/architecture/ADVI_INFREL.md v0.1; §4.5 + §6 TO-8</ref>
-    <ref type="incident_evidence">2026-05-05 D3 chain — AE 0.7 monitor `bz7cjbk19` exhibited stale-signal-during-progressing-chain pattern; B-chain completed 20:45Z but C-chain didn't auto-trigger; monitor still WAITING at 20:53:49Z because regex matches FINAL platinum artifact (dashboard.json ETag), not intermediate stage transitions</ref>
+    <ref type="incident_evidence_d3">2026-05-05 D3 chain — AE 0.7 monitor `bz7cjbk19` exhibited stale-signal-during-progressing-chain pattern; B-chain completed 20:45Z but C-chain didn't auto-trigger; monitor still WAITING at 20:53:49Z because regex matches FINAL platinum artifact (dashboard.json ETag), not intermediate stage transitions</ref>
+    <ref type="incident_evidence_d3_sighup">2026-05-05 D3f investigation — runner shut down twice (D2c + D3) despite `--no-shutdown` flag. AE 0.7 root cause: SSM shell exit → bash SIGHUP on process group → heartbeat + guard killed → watchdog fired `sudo shutdown` at 21:25Z. Reconciles D2c (canonical_performance halt at 2023-10-02) + D3 (canonical_performance halt at 2024-08-04) into ONE bug class. D3f structural fix: `nohup` on heartbeat + `nohup` on guard + continuous `shutdown -c` every 20s. Diagnostic gold per CTO 20260505T213135Z.</ref>
     <ref type="cto_diagnostic_pattern">CTO message 20260505T210223Z — disambiguator: "is intermediate output landing?" `aws s3 ls` on intermediate paths (gold/canonical/, gold/holdings/, etc.) is canonical tiebreaker for "monitor stale during long chain — hung vs progressing"</ref>
-    <ref type="related_doc">infra/aws/lambda/ci/INF_GOLD_RUNNER_DEPLOYMENT.md (AE 0.7 7-finding catalog; INFINGE TO 1a-2 deployment doc; TO-8 ships disambiguation procedure addition)</ref>
+    <ref type="ds_c_disambiguator_validation">DS~C 20260505T212426Z escalation — empirical "last canonical_performance write at 21:16Z; ~10min gap" caught D3 stall via intermediate-S3-poll discipline 9min before AE 0.7 watchdog fired auto-shutdown. Validates the disambiguator's value at production cadence (120s polling).</ref>
+    <ref type="related_doc">infra/aws/lambda/ci/INF_GOLD_RUNNER_DEPLOYMENT.md (AE 0.7 7-finding catalog; INFINGE TO 1a-2 deployment doc; TO-8 ships disambiguation procedure addition + 8th finding sub-of-#7 nohup/setsid procedure)</ref>
   </references>
 
   <context>
@@ -90,6 +92,10 @@
     <criterion id="AC1">Monitor logs disambiguate "chain progressing" vs "chain stuck" reliably across D2c/D2d/D3/D4 chain types — empirical test on next chain run.</criterion>
     <criterion id="AC2">Disambiguation procedure documented in `infra/aws/lambda/ci/INF_GOLD_RUNNER_DEPLOYMENT.md`.</criterion>
     <criterion id="AC3">RAVC5 close: commit hash + doc updated + one full chain run with disambiguation working.</criterion>
+    <criterion id="AC4">**Empirical-replay AC (D3 incident 2026-05-05):** Monitor (or paired S3-poll) would have detected B-chain finish 20:45Z → no `from_INF_C_00` chain log start within 5min (by 20:50Z) → fire alarm/notification BEFORE 21:00Z auto-shutdown manifested. Tonight's stall would have surfaced 15-30min earlier than actual SSM ground-truth probe under TO-8 acceptance state.</criterion>
+    <criterion id="AC5">**Empirical-replay AC (D3f canonical_performance halt 2026-05-05):** Monitor (or paired S3-poll) would have detected `gold/canonical/canonical_performance_*` last-write at 21:16Z → no new partition writes within 5min (by 21:21Z) → trigger SSM-side ground-truth check (PID alive? heartbeat alive?) BEFORE 21:25Z watchdog fire. DS~C's manual disambiguation at 21:24Z used exactly this pattern at 120s polling cadence; codify as automated procedure.</criterion>
+    <criterion id="AC6">**Catalog AC — finding #8 sub-of-#7:** `INF_GOLD_RUNNER_DEPLOYMENT.md` 7-finding catalog updates with finding #8: "SSM background processes (heartbeat, guard, watchers) MUST use `nohup` OR `setsid` to detach from process group. bash SIGHUP on SSM shell exit kills backgrounded processes by default → heartbeat death → watchdog cascade → `sudo shutdown -h now` mid-run. Defensive belt-and-suspenders: pair `nohup` with continuous `shutdown -c` loop every 20s." D3f fix is the canonical reference implementation.</criterion>
+    <criterion id="AC7">**Per CTO INFREL PRD v0.2 §6 ratchet:** TO-8 ACs (above) get mirrored into PRD v0.2 §6 cross-reference at TO-1 + TO-2 RCA RAVC absorption time. TO file body remains canonical.</criterion>
   </acceptance_criteria>
 
   <go_signal>
