@@ -7,9 +7,9 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05; gates on TO-1 RAVC5 (Lambda module template established). Flips to pending + dispatch GO once TO-1 ships clean. PRD v0.2 commit 050bd3695 §6.2 TO-2 spec. -->
+    <status>pending</status><!-- Flipped staged→pending 2026-05-05T~21:00Z post TO-1 RAVC5 close (AE 0.6.1 inf-pipeline-v1.7.18 LIVE; StatusCode=200 + S3 empirical confirmed). CTO ratified Phase 0 layer-publish framing per AE 0.6.1 packaging note (pandas-pyarrow-layer:1 lacks requests; TO-1 vendored ad-hoc; publish shared layer once for TO-2..5 inheritance). PRD v0.2 commit 050bd3695 §6.2 TO-2 spec. -->
     <priority>high</priority>
-    <estimated_effort>~0.4d AE per CTO PRD v0.2 §6.2; sprint compressed ~1.5-2h target post TO-1 ship</estimated_effort>
+    <estimated_effort>Phase 0 layer publish ~30min-1h + Phase 1 REPS Lambda ~30-60min; total ~1.5-2h sprint compressed</estimated_effort>
   </metadata>
 
   <references>
@@ -37,7 +37,25 @@
     - IAM execution role: `inf-api-reps-role`
   </context>
 
-  <phase id="1" when="before writing — gates on TO-1 ship">
+  <phase id="0" when="publish shared layer — pandas-pyarrow-requests-layer:1 — RATIFIED by CTO 2026-05-05T~20:55Z">
+    <step>
+      <run>Author `infra/aws/lambda/layers/pandas-pyarrow-requests-layer/requirements.txt` listing pandas + pyarrow + requests + urllib3 + certifi + charset_normalizer + idna at versions matching TO-1 vendor bundle.</run>
+      <expect>requirements.txt mirrors TO-1's vendored set; pure-Python deps; layer build deterministic across TO-2..5.</expect>
+      <if_mismatch>If versions diverge from TO-1 empirically validated set: pin to TO-1 versions; layer must be drop-in compatible with TO-1 Lambda config (3072MB/900s).</if_mismatch>
+    </step>
+    <step>
+      <run>Build + upload layer zip to `opal-313476888478-lambda-layers/pandas-pyarrow-requests-layer.zip` per existing layer build pattern; publish via Terraform under shared-infra (`infra/aws/terraform/shared-infra/`).</run>
+      <expect>Layer ARN published as `pandas-pyarrow-requests-layer:1`; shared-infra tag bumped (next semver patch from current shared-infra-v1.6.0).</expect>
+      <if_mismatch>Per layer publishing protocol; shared-infra owns layer publish per memory.</if_mismatch>
+    </step>
+    <step>
+      <run>Optional: refactor TO-1 (`inf-api-assets-v2`) to consume `pandas-pyarrow-requests-layer:1` and drop ad-hoc vendored requests. NOT REQUIRED for TO-2 ship — TO-1 stays as-is until follow-up cleanup TO. Document refactor candidate in commit message.</run>
+      <expect>TO-1 refactor deferred; TO-2 onward consumes layer cleanly.</expect>
+      <if_mismatch>If you elect to refactor TO-1 inline: ensure StatusCode=200 + S3 artifact byte-count match post-refactor; tag bump.</if_mismatch>
+    </step>
+  </phase>
+
+  <phase id="1" when="before writing — TO-1 SHIPPED 2026-05-05 inf-pipeline-v1.7.18; verify">
     <step>
       <run>Verify TO-1 (ADVI_INFINGE.001) ship complete: `comp-pipescript deployed inf-api-assets-v2` MATCH; `aws lambda list-functions | grep inf-api-assets-v2`</run>
       <expect>TO-1 Lambda live; module template established; TO-2 reuses pattern</expect>
@@ -57,9 +75,9 @@
 
   <phase id="2" when="implementation — clone TO-1 module template + REPS-specific edits">
     <step>
-      <run>Clone `infra/aws/lambda/inf-pipeline/inf-api-assets-v2/` → `infra/aws/lambda/inf-pipeline/inf-api-reps/`. Edit lambda_function.py to invoke pull_inflection_representatives.py + convert_orion_api_to_silver.py (--dim representatives + --dim household_rep_mapping).</run>
-      <expect>Lambda handler invokes REPS pull + 2 silver convert calls in sequence; Lambda packaging gotchas inherited from TO-1 (sys.path co-location for rate_limiter + jwt_freshness; LOCAL_PULLS_DIR /tmp/pulls patch); JWT read fail-fast pattern; NO lambda:InvokeFunction.</expect>
-      <if_mismatch>Pattern divergence from TO-1: document in commit message; CTO consult if material.</if_mismatch>
+      <run>Clone `infra/aws/lambda/inf-pipeline/inf-api-assets-v2/` → `infra/aws/lambda/inf-pipeline/inf-api-reps/`. Edit lambda_function.py to invoke pull_inflection_representatives.py + convert_orion_api_to_silver.py (--dim representatives + --dim household_rep_mapping). DROP ad-hoc requests vendoring — pull from `pandas-pyarrow-requests-layer:1` (Phase 0 published).</run>
+      <expect>Lambda handler invokes REPS pull + 2 silver convert calls in sequence; Lambda packaging gotchas inherited from TO-1 (sys.path co-location for rate_limiter + jwt_freshness; LOCAL_PULLS_DIR /tmp/pulls patch); JWT read fail-fast pattern; NO lambda:InvokeFunction. Zip size should drop from TO-1's 936KB to ~50-100KB (pure handler code).</expect>
+      <if_mismatch>Pattern divergence from TO-1: document in commit message; CTO consult if material. If layer-only deps insufficient: surface to me + CTO before vendoring.</if_mismatch>
     </step>
     <step>
       <run>Clone `infra/aws/terraform/inf-pipeline/inf-api-assets-v2.tf` → `infra/aws/terraform/inf-pipeline/inf-api-reps.tf`. Substitute prefix; update IAM scope (bronze/orion-api-v2/* + silver/api_dims/representatives/* + silver/api_dims/household_rep_mapping/* PutObject); set EventBridge cron `cron(30 12 * * ? *)` (12:30 UTC, 5min before TO-1 cron 12:45 UTC; provides fresh hh_rep_mapping for downstream).</run>
@@ -130,8 +148,8 @@
   </acceptance_criteria>
 
   <go_signal>
-    <issued_at>STAGED — not yet GO</issued_at>
+    <issued_at>2026-05-05T~21:00Z</issued_at>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <message>Status `staged` until TO-1 RAVC5 close. Flips to `pending` + dispatch GO once TO-1 ships clean. Sprint mode AE batch authoring complete this turn; TO-3/TO-4/TO-5a follow same pattern.</message>
+    <message>GO. TO-1 SHIPPED 2026-05-05 inf-pipeline-v1.7.18 (StatusCode=200 + bronze 943,982B + silver 928,737B empirical). Phase 0 layer-publish framing ratified by CTO 2026-05-05T~20:55Z (per AE 0.6.1 packaging note). Execute Phase 0 (publish `pandas-pyarrow-requests-layer:1` via shared-infra) then Phase 1 (REPS Lambda referencing the new layer). EventBridge cron 12:30 UTC for fresh hh_rep_mapping ahead of downstream TO-1 cron 12:45 UTC. RAVC5 expectation: layer ARN published + tag bump + REPS Lambda live + StatusCode=200 + bronze/orion-api-v2/{representatives.json, household_rep_mapping.json} + silver/api_dims/{representatives,household_rep_mapping}/data.parquet + comp-iam gaps clean. TO-3/TO-4/TO-5a inherit same layer; clean template post TO-2.</message>
   </go_signal>
 </task_order>
