@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Flipped staged→pending 2026-05-05T~21:25Z post TO-2 RAVC5 close (inf-pipeline-v1.7.19 LIVE; layer:1 confirmed working; zip 28.4KB drop-in clean; StatusCode=200 + 4 S3 artifacts confirmed). PRD v0.2 commit 050bd3695 §6.2 TO-3 spec; pure clone+prefix substitute (~30-60min target). -->
+    <status>complete</status><!-- Flipped staged→pending 2026-05-05T~21:25Z post TO-2 RAVC5 close. COMPLETE: commits f7b70f844 (inf-api-positions Lambda) + 6eaea1600 (IAM rate_limiter key fix — positions_mv not positions) + b81294f8b (terraform-deploy inf-pipeline-v1.7.20); TO-3 RAVC5 confirmed per AE 0.6.1 sprint closeout (broker: TO-5a RAVC3 sent means TO-1/2/3 all closed). -->
     <priority>high</priority>
     <estimated_effort>~30-60min AE post TO-2 ship; pure clone+prefix substitute (no Phase 0; layer already published)</estimated_effort>
   </metadata>

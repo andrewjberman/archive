@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Authored 2026-05-05 sprint mode per Andrew override "aint no tomorrow my friend, we're doing this all right now"; PRD v0.2 commit 050bd3695 §6 TO-1 spec; TO-1 ASSETS_V2 establishes Phase 1b template that TO-2/3/4/5 reuse. -->
+    <status>complete</status><!-- Authored 2026-05-05 sprint mode per Andrew override "aint no tomorrow my friend, we're doing this all right now"; PRD v0.2 commit 050bd3695 §6 TO-1 spec; TO-1 ASSETS_V2 establishes Phase 1b template that TO-2/3/4/5 reuse. COMPLETE: commits 9e37d0b1c (vendor requests fix) + b81294f8b (terraform-deploy inf-pipeline-v1.7.20); inf-pipeline-v1.7.18 shipped; RAVC5 close confirmed per TO-2 staging note. -->
     <priority>high</priority>
     <estimated_effort>~0.5d AE per CTO PRD v0.2 §6.1; sprint compressed ~3-4h tonight target</estimated_effort>
   </metadata>

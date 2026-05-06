@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~B (rep_id resolution + script fix) + 0.6.1_AE_PartnerETL (catalog add + chain re-run)</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- DS~B GOed via MCP 20260505T123459Z; this TO formalizes that GO -->
+    <status>complete</status><!-- DS~B GOed via MCP 20260505T123459Z. COMPLETE: commits dffb2bf22 (INF_I_D02b naming fix + S3 upload) + e257875ec (INF_D_04 sibling fix); joe_brunswick top_holdings.json QA emitted qa/advisors/joe_brunswick/ 20260505T174425Z; DS~B RAVC5 20260505T173651Z + RAVC6 naming correction 20260505T174441Z. Residual: AE 0.6.1 PROD promotion + silver/api_dims/assets/ rep_id=6 gap (INFINGE Phase 1 scope). -->
     <priority>high</priority>
     <estimated_effort>1d (0.5d DS~B rep_id + script fix; 0.5d AE catalog add + chain)</estimated_effort>
   </metadata>

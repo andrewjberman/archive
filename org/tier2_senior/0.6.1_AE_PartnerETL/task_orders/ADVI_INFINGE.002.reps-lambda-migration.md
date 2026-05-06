@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Flipped staged→pending 2026-05-05T~21:00Z post TO-1 RAVC5 close (AE 0.6.1 inf-pipeline-v1.7.18 LIVE; StatusCode=200 + S3 empirical confirmed). CTO ratified Phase 0 layer-publish framing per AE 0.6.1 packaging note (pandas-pyarrow-layer:1 lacks requests; TO-1 vendored ad-hoc; publish shared layer once for TO-2..5 inheritance). PRD v0.2 commit 050bd3695 §6.2 TO-2 spec. -->
+    <status>complete</status><!-- Flipped staged→pending 2026-05-05T~21:00Z post TO-1 RAVC5 close (AE 0.6.1 inf-pipeline-v1.7.18 LIVE; StatusCode=200 + S3 empirical confirmed). CTO ratified Phase 0 layer-publish framing. COMPLETE: commit 0dd4f6c07 (REPS Lambda + pandas-pyarrow-requests-layer); inf-pipeline-v1.7.19 LIVE per TO-3 staging note RAVC5 confirmed. -->
     <priority>high</priority>
     <estimated_effort>Phase 0 layer publish ~30min-1h + Phase 1 REPS Lambda ~30-60min; total ~1.5-2h sprint compressed</estimated_effort>
   </metadata>
