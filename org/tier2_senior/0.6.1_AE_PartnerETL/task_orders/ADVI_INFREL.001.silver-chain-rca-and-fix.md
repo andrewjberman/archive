@@ -8,7 +8,7 @@
     <secondary>0.7.0_AE_CloudOps</secondary>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship (commit 64ea399a3); flips to pending after AE 0.6.1 acks routing OR Andrew dispatches GO. AE 0.6.1 LEAD per PRD §6 + project JSON lane_note (Inflection-specific surface knowledge); AE 0.7 SECONDARY on EventBridge metrics + S3 ObjectCreated event audit. -->
+    <status>pending</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship (commit 64ea399a3). Flipped staged→pending 2026-05-06 by COO session 59 dispatch. AE 0.6.1 LEAD per PRD §6 + project JSON lane_note (Inflection-specific surface knowledge); AE 0.7 SECONDARY on EventBridge metrics + S3 ObjectCreated event audit. COO GO issued 20260506T~1415Z post AE 0.6.1 RAVC2. -->
     <priority>highest</priority>
     <estimated_effort>~0.25-0.5d investigation + ~0.5-1d fix; depends on root-cause class</estimated_effort>
   </metadata>
