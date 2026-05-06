@@ -11,7 +11,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-27</date>
-    <status>open</status>
+    <status>superseded</status>
+    <closure_note>Superseded by ADVI_INFGRD.001 + ADVI_INFGRD.002 (committed 18041b7e, 2026-04-27). INFGRD.002 implements the advisor-identity filter. Formally closed 2026-05-06 by 2.0.0_SA_COO.</closure_note>
     <priority>CRITICAL — higher than F1-F3 schema work; wrong data outranks wrong shape</priority>
   </metadata>
 
