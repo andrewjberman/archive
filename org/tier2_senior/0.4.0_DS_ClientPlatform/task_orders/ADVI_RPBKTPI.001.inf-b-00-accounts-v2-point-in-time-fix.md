@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Phase 0 RAVC3 from DS~C 20260505T170029Z surfaced single-callsite fix; Phase 1 GO dispatched same turn -->
+    <status>complete</status><!-- Phase 0 RAVC3 from DS~C 20260505T170029Z surfaced single-callsite fix; Phase 1 GO dispatched same turn. COMPLETE: fix 7f584ef7c shipped 20260505T180829Z, S3 ETag 0bc26d0f, comp-pipescript MATCH. COO declared mechanically closed 20260505T202607Z (RPBKTPI.002 GO). AC4 INF_D_00c null scope -> ADVI_LDRBRD.001. DS~C TO flipped complete 20260506. -->
     <priority>high</priority>
     <estimated_effort>~1.5-2h DS~C (1h code + 0.5h gate + 0.25h deploy + 0.25h MATCH/RAVC); AE chain trigger separate</estimated_effort>
   </metadata>
