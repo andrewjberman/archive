@@ -6,7 +6,10 @@
 **Issued to:** 0.4.0_DS_ClientPlatform
 **Date:** 2026-04-29
 **Priority:** HIGH — gates correct daily timeseries AUA in all lookback views
-**Status:** open
+**Status:** complete
+
+**closure_evidence:** INF_B_00 was fully migrated to positions_mv pass-through in DIAGFIX.009-NEW Phase 1 (commit 91da4d6a1) + DIAGFIX.012 Phase 2.5 durability check (2026-04-30). nav_price = current_price from silver/api_dims/positions_mv (sourced from Orion REST /Portfolio/Clients/{cid}/Assets/{date}). No TRN-as-price reconstruction anywhere in current code. Status assessment performed 2026-05-06 by 0.4.0_DS_ClientPlatform~C.
+**closure_note:** Bug described in this TO (last-seen-wins from TRN) is dead code. The bug was resolved through DIAGFIX.012 Phase 1-4 without the A/B/C fallback path being needed — Path A (Orion direct) succeeded with 100% coverage and historical depth.
 
 ---
 
