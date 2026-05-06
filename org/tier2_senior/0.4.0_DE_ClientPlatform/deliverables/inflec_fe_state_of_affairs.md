@@ -155,7 +155,7 @@ STALE_TIME: 5 minutes. `refetchOnWindowFocus: false`. `retry: 1`.
 | Cell | Surface | Root cause | FE vs upstream | Matrix row | Next action |
 |------|---------|-----------|----------------|-----------|-------------|
 | `composition.json` per-advisor — asset mix not visible at L3 client detail | ADV drill / L2 | Surface ambiguity: `composition.json` is an L2 advisor artifact; L3 client detail renders per-client mix (separate artifact `platinum/clients/{id}/detail.json`). FE code for L2 advisor `CanonicalBookView` likely does render composition — Andrew's observation was at L3. Need clarification. | Surface-ambiguity (not a code bug) | § Surface 6 | DE: disambiguate via RD Playwright — click L2 advisor drill, check if asset mix donut renders there; separately check L3 |
-| `top_holdings.json` per-advisor — not visible at L3; 3/4 stale; joe_brunswick MISSING | ADV drill / L2+L3 | Data issue: `top_holdings.json` is L2 advisor artifact (last updated 2026-04-28, 6 days stale). joe_brunswick artifact MISSING entirely (INF_I_D02b catalog gap). L3 client top holdings = separate per-client artifact (missing). | Data gap (DS/AE upstream for freshness + joe_brunswick add) + surface-ambiguity | § Surface 6 | DS/AE: INF_I_D02b catalog add + stale republish; DE: confirm L2 vs L3 render surface |
+| `top_holdings.json` per-advisor — not visible at L3; 3/4 stale; joe_brandenbrug MISSING | ADV drill / L2+L3 | Data issue: `top_holdings.json` is L2 advisor artifact (last updated 2026-04-28, 6 days stale). joe_brandenbrug artifact MISSING entirely (INF_I_D02b catalog gap). L3 client top holdings = separate per-client artifact (missing). | Data gap (DS/AE upstream for freshness + joe_brandenbrug add) + surface-ambiguity | § Surface 6 | DS/AE: INF_I_D02b catalog add + stale republish; DE: confirm L2 vs L3 render surface |
 | L3 client detail — asset mix / time machine snapshot / top holdings absent | BooksTab L3 | Per-client platinum artifact (`platinum/clients/{hhId}/detail.json`) lacks mix, timeseries, and top_holdings sections. Cost basis ✓, tax ✓, fee summary ✓, accounts[] ✓ — but 3 panel sections empty. FE code is wired for these fields (mapping correct per INFLFE.002 sentinel pass); data is not emitted. | Upstream data gap — DS/AE AUDIT-009 scope | § Surface 4 BooksTab L3 | DS/AE: per-client mix + timeseries + holdings publishers (AUDIT-009) |
 
 ### RED — Data missing / wrong (3 cells)
@@ -164,7 +164,7 @@ STALE_TIME: 5 minutes. `refetchOnWindowFocus: false`. `retry: 1`.
 |------|---------|-----------|-------|-----------|-------------|
 | Leaderboard `period_start_aua` null on MAX window → phantom `aua_growth_pct` (+4213% Peter, +7522% Patrick) | BooksTab N1 leaderboard | `INF_B_00.latest_accounts_v2_key()` L162-172 returns `keys[-1]` (latest partition) for every `snap_date_str` — rep_bucket reflects today's advisor attribution, not historical point-in-time. Fix: `accounts_v2_key_for_date(snap_date_str)`. | DS~D (ADVI_RPBKTPI scope) | § Surface 4 | RPBKTPI TO — no FE code change needed; FE correctly renders null as "N/A" |
 | Leaderboard `lifecycle_aua` all zero across 4 advisors (NMNC/NMEC/existing decomposition = $0) | BooksTab N1 leaderboard | Upstream publisher gap — lifecycle_aua per-advisor decomposition not populated at Inflection advisor grain. | DS / AE | § Surface 4 | DS/AE investigation — no FE code change needed |
-| `joe_brunswick/top_holdings.json` MISSING from S3 | ADV drill | joe_brunswick rep_id resolution not in INF_I catalog; catalog add + AE rerun needed. | AE 0.6.1 / AE 0.7 + DS~B (INF_I_D02b) | § Surface 6 | INF_I_D02b catalog add + AE SSM dispatch |
+| `joe_brandenbrug/top_holdings.json` MISSING from S3 | ADV drill | joe_brandenbrug rep_id resolution not in INF_I catalog; catalog add + AE rerun needed. | AE 0.6.1 / AE 0.7 + DS~B (INF_I_D02b) | § Surface 6 | INF_I_D02b catalog add + AE SSM dispatch |
 
 ### RED-(c) / RED-INVESTIGATE — Scope-deferred upstream dims (Surface 7, 4 cells)
 
@@ -292,7 +292,7 @@ The 14 GRAY cells in the matrix include:
 | GREEN | ~32 | Page header (4), PartnerAnalytics (8), DistributionTab (4), BooksTab N1+L2+L4 (13+), ADV drill (5), InflectionInsightsPanel (3) |
 | GREEN-by-design | 1 | PartnerAnalytics `views.geo` flat shape (no q1/q2/q3 nesting) |
 | YELLOW | 3 | L2 composition ambiguity; L2/L3 top_holdings; L3 client detail missing fields |
-| RED | 3 | Leaderboard period_start_aua (RPBKTPI); lifecycle_aua zero; joe_brunswick top_holdings MISSING |
+| RED | 3 | Leaderboard period_start_aua (RPBKTPI); lifecycle_aua zero; joe_brandenbrug top_holdings MISSING |
 | RED-(c/b/investigate) | 5 | Surface 7 upstream dims (scope-deferred) |
 | GRAY | 14 | Out-of-scope per layout.ts + Andrew descope |
 
