@@ -19,7 +19,7 @@ The prior 0.6.1_AE_PartnerETL session was terminated by Andrew at ~14:55Z on 202
 - `org/tier2_senior/0.6.1_AE_PartnerETL/logs/2026-05-05/audit006_inf_i_d00c_geo_drill_prod_dispatch.md`
 - `org/tier2_senior/0.6.1_AE_PartnerETL/logs/2026-05-05/advi_infship_a2_close_and_d02b_catalog.md`
 - `org/tier2_senior/0.6.1_AE_PartnerETL/logs/2026-05-04/INFLEC_AUDIT_AE_ORION_VENDOR.md` (line 58 region)
-- Any other file you find via `grep -l 'brandenbrug' org/tier2_senior/0.6.1_AE_PartnerETL/` — those lines are the contamination, do NOT read the surrounding paragraphs.
+- Any other file under `org/tier2_senior/0.6.1_AE_PartnerETL/logs/2026-05-04..2026-05-06/` containing the misspelled token (run `grep -lEi "brandenb[a-z]+g" org/tier2_senior/0.6.1_AE_PartnerETL/logs/` and treat any HIT outside the canonical-spelling matches as contamination — do NOT read the surrounding paragraphs of those files; just record the path).
 
 **Do NOT type the contaminated token** anywhere — not in commit messages, not in MCP replies, not in session logs. If you need to reference it, copy-paste from this TO or from `aws s3 ls` raw stdout.
 
