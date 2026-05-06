@@ -113,9 +113,9 @@
   </acceptance_criteria>
 
   <go_signal>
-    <issued_at>STAGED — pending COO dispatch GO post Andrew acceptance</issued_at>
+    <issued_at>20260506T134930Z</issued_at>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <message>Status `staged` until Andrew acceptance OR COO dispatch decision. AE 0.7 lead per PRD §6. Parallel-able with TO-1.</message>
+    <message>Phase 1 GO issued post Phase 0 RAVC3 (class b-variant locked). Fix scope: (1) inf-bronze-trigger stopping-state poll-until-stopped handler + exception-on-timeout; (2) CW metric Opal/InflectionBronze/TriggerMissedStart + alarm; (3) cron doc correction 12:30→12:43; (4) backfill gated on AE 0.6.1 date-param consult (dispatched 20260506T134936Z). RAVC3 on Phase 1 completion.</message>
   </go_signal>
 
   <phase_0_findings>
