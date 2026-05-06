@@ -103,4 +103,26 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <message>Status `staged` until Andrew acceptance OR COO dispatch decision. AE 0.7 lead per PRD §6 + INFINGE TO 1a-2 doc author. Absorbs INFINGE TO 1a-3.</message>
   </go_signal>
+
+  <phase_0_findings>
+    <path_chosen>b — paired intermediate S3-poll alongside terminal monitor</path_chosen>
+    <rationale>Terminal ETag monitor (dashboard.json) is correct and should remain unchanged. Intermediate signal check adds a tiebreaker procedure: (1) chain log size delta, (2) per-stage S3 artifact LastModified, (3) SSM ground-truth process check. Path (a) regex broaden would require changing the monitor mechanism and risks false triggers from log path matches. Path (b) is documentable, per-chain-type tunable, and validated by DS~C's 2026-05-05 manual disambiguation at 120s cadence.</rationale>
+    <classified_date>2026-05-06</classified_date>
+    <classified_by>0.7.0_AE_CloudOps</classified_by>
+    <intermediate_signals_table>
+      S3 prefix: gold/logs/from_{label}_{ts}.log — grows each step; size delta = progressing
+      S3 prefix: gold/canonical/canonical_holdings_* — updated by INF_B_00
+      S3 prefix: gold/canonical/canonical_performance_* — updated by INF_C_00 (D3f incident signal)
+      S3 prefix: gold/artifacts/employee_leaderboard.json — updated by INF_D_00c (D-chain start)
+      S3 prefix: gold/artifacts/firm_mix_views.json — updated by INF_I_D03 (D-chain mid)
+      S3 prefix: gold/artifacts/summary/ — updated by INF_D_04 (D-chain mid)
+      S3 prefix: /firm/dashboard.json — updated by INF_D_08 (TERMINAL = CHAIN COMPLETE)
+    </intermediate_signals_table>
+    <doc_created>infra/aws/lambda/ci/INF_GOLD_RUNNER_DEPLOYMENT.md — 7+1 findings catalog + disambiguation table + SOP</doc_created>
+    <finding_8>SSM SIGHUP cascade: background processes without nohup die on SSM shell exit → heartbeat death → watchdog fire → shutdown. Fix: nohup + belt-and-suspenders shutdown -c loop. D3f structural fix is canonical reference implementation. Sub-of-finding-7 (dual shutdown triggers).</finding_8>
+    <phase_1_status>COMPLETE — doc authored, contains disambiguation procedure (AC2) + finding catalog (AC6)</phase_1_status>
+    <phase_2_status>PENDING commit + push; phase_3 empirical validation on next chain run</phase_2_status>
+    <empirical_replay_ac4>D3 incident: B-chain completed 20:45Z; no from_INF_C_00 log start by 20:50Z. Procedure: check gold/logs/ for new chain log OR check gold/canonical/canonical_performance LastModified. Would have surfaced stall by 20:50Z (15 min before 21:05Z SSM ground-truth probe).</empirical_replay_ac4>
+    <empirical_replay_ac5>D3f: gold/canonical/canonical_performance LastModified was 21:16Z. S3-ls check at 21:21Z (5 min stale) → trigger SSM probe → find watchdog-about-to-fire before 21:25Z actual shutdown. DS~C's manual 21:24Z check was 1 min too late; automated 5-min stale threshold would catch it.</empirical_replay_ac5>
+  </phase_0_findings>
 </task_order>

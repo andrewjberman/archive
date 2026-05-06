@@ -117,4 +117,41 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <message>Status `staged` until Andrew acceptance OR COO dispatch decision. AE 0.7 lead per PRD §6. Parallel-able with TO-1.</message>
   </go_signal>
+
+  <phase_0_findings>
+    <root_cause_class>b-variant — instance state race condition (manual stop colliding with automated cron)</root_cause_class>
+    <classification_date>2026-05-06</classification_date>
+    <classified_by>0.7.0_AE_CloudOps</classified_by>
+
+    <finding id="1_cloudtrail">
+      CloudTrail confirms: Andrew_Berman issued StopInstances on i-083ad9ae297f88e9f at 2026-05-04T12:41:14 UTC — exactly 2min 31sec before cron fired at 12:43:45 UTC. Instance was in `stopping` state when Lambda invoked.
+    </finding>
+
+    <finding id="2_lambda_behavior">
+      inf-bronze-trigger Lambda (lambda_function.py line 72-85): stopping-state handler calls start_instances (always fails during stopping — IncorrectInstanceState), swallows exception with "Start failed while stopping (expected)", returns statusCode=200. EventBridge sees successful invocation; no automatic retry triggered. Mode marker was written but SSM was never dispatched.
+    </finding>
+
+    <finding id="3_s3_empty">
+      aws s3 ls s3://opal-data-inf/bronze/orion-api-v2/2026-05-04/ returned empty (exit 1) — zero files written. Rules out "data written but sentinel missing" variant. Runner truly did not execute.
+    </finding>
+
+    <finding id="4_retry_stream">
+      Second Lambda invocation stream (12:47:31Z) shows only INIT_START and no subsequent events — retry either failed at Lambda init or was pre-empted. Did not recover the missed start.
+    </finding>
+
+    <finding id="5_cron_discrepancy">
+      Note: Lambda manifest and docstring say cron(30 12 * * ? *) = 12:30 UTC. Empirical CW data shows consistent 12:43:XX UTC firing across May 1-6. Actual deployed cron rule fires at 12:43 UTC, not 12:30. Low-priority discrepancy; manifest/doc stale — not the cause of May 4 gap but worth correcting.
+    </finding>
+
+    <fix_scope>
+      (1) inf-bronze-trigger Lambda: stopping-state handler must poll until stopped (max 120s, 10s interval) then call start_instances. On timeout, raise exception so EventBridge retries. Return 200 only on confirmed start or already-running.
+      (2) CW metric Opal/InflectionBronze/TriggerMissedStart — emit on stopping-race-condition detect; alarm on any occurrence.
+      (3) Backfill 2026-05-04: manual SSM dispatch if Orion API retains historical data. Need confirmation Orion supports date-parameterized pulls for prior dates.
+      (4) Minor: align cron expression in manifest + Lambda docstring with actual 12:43 UTC deployed rule.
+    </fix_scope>
+
+    <backfill_assessment>
+      Recoverable IF Orion API supports historical date pulls. AE 0.6.1 consult needed on orchestrator.py --date flag existence. If Orion returns current-day-only data, May 4 gap is permanent and requires documentation only.
+    </backfill_assessment>
+  </phase_0_findings>
 </task_order>
