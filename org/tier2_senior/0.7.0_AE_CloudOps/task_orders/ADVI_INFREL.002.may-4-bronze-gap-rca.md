@@ -154,4 +154,32 @@
       Recoverable IF Orion API supports historical date pulls. AE 0.6.1 consult needed on orchestrator.py --date flag existence. If Orion returns current-day-only data, May 4 gap is permanent and requires documentation only.
     </backfill_assessment>
   </phase_0_findings>
+
+  <phase_1_fix4_backfill>
+    <attempted_at>2026-05-06T14:21:00Z</attempted_at>
+    <attempted_by>0.7.0_AE_CloudOps</attempted_by>
+    <method>SSM dispatch to inf-bronze-runner (i-083ad9ae297f88e9f) via run_backfill_orchestrator.sh; python orchestrator.py --mode daily --date 2026-05-04</method>
+    <result>overall=failure ok=3 fail=3 expected_fail=0 skip=1</result>
+    <sentinel>s3://opal-data-inf/bronze/orion-api/2026-05-04/_BRONZE_COMPLETE.json (overall=failure)</sentinel>
+
+    <dim_outcomes>
+      <dim name="transactions" status="fail" exit="1">Orion Custom Report 28198 returns 500 Server Error for historical date. Not recoverable via this endpoint.</dim>
+      <dim name="accounts_v2" status="fail" exit="2">pull_inflection_new_portfolio.py does not accept --upload-bronze flag (unrecognized argument). Script-level gap — not a date limitation but flagged for AE 0.6.1 fix.</dim>
+      <dim name="tax" status="ok" exit="0">Ran OK (261s) but wrote to bronze/orion-api/2026-05-06/ — pull script uses today's date for output path regardless of --date flag.</dim>
+      <dim name="billing" status="ok" exit="0">Ran OK (189s) but wrote to bronze/orion-api/2026-05-06/ — same issue as tax.</dim>
+      <dim name="assets" status="ok" exit="0">Ran OK (334s, expected_fail=true) but wrote to 2026-05-06.</dim>
+      <dim name="unified_account_dim" status="fail" exit="1">First concurrent instance completed OK (105s, 2912 rows); second instance failed due to concurrent orchestrator conflict. Data from first run uncertain.</dim>
+      <dim name="geo" status="skip">Track 2 not authored.</dim>
+    </dim_outcomes>
+
+    <ac4_assessment>N/A — 2026-05-04 partition not recoverable. Orion API does not support historical date pulls for most dims. bronze/orion-api/2026-05-04/ contains only _BRONZE_COMPLETE.json (overall=failure) and _markers/. No actual CSV data files. Gap is permanent.</ac4_assessment>
+
+    <side_effect_positive>inf-bronze-runner boot also triggered today's systemd daily run. bronze/orion-api/2026-05-06/_BRONZE_COMPLETE.json LIVE (overall=ok) with assets.csv (7.28MB), billing.csv (488KB), tax_realized.csv (857KB), tax_unrealized.csv (862KB). AE 0.6.1 silver chain will process.</side_effect_positive>
+
+    <recommendations>
+      (1) Add expected_fail=True for transactions endpoint when --date is historical (prevent overall=failure masking).
+      (2) Fix pull_inflection_new_portfolio.py --upload-bronze gap (accounts_v2).
+      (3) Investigate if Orion REST v2 endpoints support date-parameterized pulls for transactions (vs custom report CSV endpoint).
+    </recommendations>
+  </phase_1_fix4_backfill>
 </task_order>
