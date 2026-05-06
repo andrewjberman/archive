@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-24</date>
-    <status>staged</status><!-- GO gated on 49EXEC TO 1+5+ORPHRELID completion OR explicit COO override; depends on no active writes to D_04 during this work -->
+    <status>pending</status><!-- COO override GO 20260506T~1800Z — all 49EXEC gates cleared. Phase 0 audit complete (DS~C). RAVC2 sent. Awaiting COO Phase 1 GO. -->
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P3 — schema-alignment cleanup; low-impact; prevents future silent-wrongness class bugs</priority>
     <origin>
