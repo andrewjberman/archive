@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05T~21:15Z. Gates on TO-4 (unified_account_dim Lambda template stable) + INFINGE TO-5a (TXN rate-empirical) — if 2+ RPS not sustainable, transactions_v2 stays on orchestrator until rate-empirical resolves; per PRD §6 conditional. -->
+    <status>staged</status><!-- SUPERSEDED BY ADVI_INFINGE.005b 2026-05-06. CTO Q-A/Q-B rulings (session 10) changed path schema (bronze/orion-api/{date}/transactions.csv, silver/api_dims/transactions) and confirmed Custom Reports _v2.py path. INFINGE.005b covers bronze pull Lambda + silver builder. This TO's scope (transactions_v2 Lambda, orion-api-v2 paths, _v2 suffix silver) is stale. DO NOT EXECUTE. -->
     <priority>high</priority>
     <estimated_effort>~0.5d AE post TO-4 ship (pure clone+prefix substitute); CONDITIONAL on rate-empirical</estimated_effort>
   </metadata>

@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-06</issued_date>
-    <status>staged</status><!-- Authored 2026-05-06 post CTO canonical-path ruling (1.0.0_SA_CTO RULING 20260506T~1350Z): TO-5b targets pull_inflection_transactions_v2.py (Custom Reports, date-windowed). TO-5a (ADVI_INFINGE.005) COMPLETE Class A (5.2 RPS, 0 failures, ~223s wall). Gates on Phase 0 Custom Reports rate-empirical AC before cron arms. Flips to pending on COO GO post Phase 0 empirical RAVC. -->
+    <status>pending</status><!-- Flipped to pending 2026-05-06 (COO session 60): DS~A silver builder shipped (commit 33180d972, 20260506T151210Z). TO body updated per CTO Q-A/Q-B/Q-C rulings (paths + silver dim name + decom step). AE 0.6.1 GOed for Phase 0 Custom Reports rate-empirical + parity + orchestrator decom plan. CTO instruction: after all body edits + DS~A ship → GO. -->
     <priority>medium</priority>
     <estimated_effort>~30-60min AE post Phase 0 rate-empirical; pure clone+prefix substitute (no Phase 0 layer — pandas-pyarrow-requests-layer:1 already published); +Phase 0 Custom Reports rate-empirical ~30min</estimated_effort>
   </metadata>
@@ -31,10 +31,10 @@
     - Pattern consistency with TO-1..TO-3 = no structural deviation.
 
     Bronze output paths (verify against actual script output during Phase 0):
-    - `bronze/orion-api-v2/{date}/transactions_v2.json`
+    - `bronze/orion-api/{date}/transactions.csv` (REPLACE pattern per CTO Q-A ruling — same key as orchestrator wrote; CSV per Custom Reports endpoint; orchestrator transactions DimSpec decommissioned at Lambda cutover)
 
     Silver convert outputs:
-    - `silver/api_dims/transactions_v2/{date}/data.parquet`
+    - `silver/api_dims/transactions/{date}/data.parquet` (no _v2 suffix per CTO Q-B ruling)
 
     EventBridge cron: `cron(0 13 * * ? *)` = 13:00 UTC.
     Cron stagger position: REPS@12:30 → ASSETS_V2@12:45 → POSITIONS@12:50 → PERFORMANCE@12:55 → TXN@13:00.
@@ -53,6 +53,19 @@
   </context>
 
   <phase id="0" when="before Phase 1 implementation — Custom Reports rate-empirical (required by CTO ruling)">
+    <step>
+      <run>Verify orchestrator transactions DimSpec decommission plan (REPLACE pattern per CTO Q-A ruling).
+      The REPLACE pattern means: Lambda and orchestrator write the SAME bronze key
+      (bronze/orion-api/{date}/transactions.csv). When Lambda goes live, orchestrator DimSpec
+      for transactions must be decommissioned (disabled/removed) to avoid both writing the same key
+      (last-write-wins race). Document: (a) current orchestrator DimSpec for transactions
+      (pull_inflection_transactions.py or pull_inflection_transactions_v2.py?), (b) proposed cutover
+      sequencing (Lambda armed before DimSpec decom? Or decom first?). Propose to COO in RAVC3.
+      Follow same cutover pattern as TO-1/2/3 (ASSETS_V2, REPS, POSITIONS).
+      </run>
+      <expect>Clear decom plan documented before Lambda is armed. No racing writes to same bronze key.</expect>
+      <if_mismatch>If orchestrator DimSpec unclear: ask AE 0.7 or DS~B for context on current transactions dim behavior in orchestrator.</if_mismatch>
+    </step>
     <step>
       <run>Run pull_inflection_transactions_v2.py locally or on inf-bronze-runner EC2 with single-day window (--start-date YYYY-MM-DD --end-date YYYY-MM-DD; pick a recent date with known transaction activity). Measure: wall time, peak memory, API call count, observed RPS, 429/503 count.</run>
       <expect>Empirical numbers for Custom Reports endpoint. Target: 2+ RPS sustainable, 0 429s/503s. Wall target &lt;600s (within 900s Lambda timeout with headroom for /tmp patch overhead).</expect>
@@ -77,12 +90,12 @@
       <if_mismatch>Per CLAUDE.md tag versioning rule — do NOT assume next version.</if_mismatch>
     </step>
     <step>
-      <run>Clone `infra/aws/lambda/inf-pipeline/inf-api-positions/` → `infra/aws/lambda/inf-pipeline/inf-api-txn/`. Edit lambda_function.py to invoke pull_inflection_transactions_v2.py with daily single-day window args (--start-date {date} --end-date {date} derived from invocation context) + convert_orion_api_to_silver.py (--dim transactions_v2). Apply /tmp patch on LOCAL_PULLS_DIR (_v2.py:78: SCRIPT_DIR / "pulls" → /tmp/pulls). Reference `pandas-pyarrow-requests-layer:1`.</run>
+      <run>Clone `infra/aws/lambda/inf-pipeline/inf-api-positions/` → `infra/aws/lambda/inf-pipeline/inf-api-txn/`. Edit lambda_function.py to invoke pull_inflection_transactions_v2.py with daily single-day window args (--start-date {date} --end-date {date} derived from invocation context) + convert_orion_api_to_silver.py (--dim transactions). Apply /tmp patch on LOCAL_PULLS_DIR (_v2.py:78: SCRIPT_DIR / "pulls" → /tmp/pulls). Reference `pandas-pyarrow-requests-layer:1`.</run>
       <expect>Lambda handler invokes _v2.py with bounded single-day window; /tmp patch applied; sys.path co-location for rate_limiter + jwt_freshness; JWT fail-fast; NO lambda:InvokeFunction. Zip ~50-100KB.</expect>
       <if_mismatch>Pattern divergence from TO-3: document in commit message; CTO consult if material.</if_mismatch>
     </step>
     <step>
-      <run>Clone `infra/aws/terraform/inf-pipeline/inf-api-positions.tf` → `infra/aws/terraform/inf-pipeline/inf-api-txn.tf`. Substitute prefix. IAM scope: bronze/orion-api-v2/* PutObject + silver/api_dims/transactions_v2/* PutObject + secretsmanager + s3:GetObject JWT. EventBridge cron `cron(0 13 * * ? *)` (13:00 UTC). Lambda memory_size 1024 (NOT 3072 default — date-windowed payload bounded). timeout 900.</run>
+      <run>Clone `infra/aws/terraform/inf-pipeline/inf-api-positions.tf` → `infra/aws/terraform/inf-pipeline/inf-api-txn.tf`. Substitute prefix. IAM scope: bronze/orion-api/* PutObject + silver/api_dims/transactions/* PutObject + secretsmanager + s3:GetObject JWT. EventBridge cron `cron(0 13 * * ? *)` (13:00 UTC). Lambda memory_size 1024 (NOT 3072 default — date-windowed payload bounded). timeout 900.</run>
       <expect>9 resources to add; 0 destroys; clean plan. memory_size=1024 explicit in TF resource.</expect>
       <if_mismatch>If TO-3 pattern needs deviation for _v2.py Custom Reports invocation style: surface before terraform apply.</if_mismatch>
     </step>
@@ -92,8 +105,8 @@
       <if_mismatch>Per CLAUDE.md rule 4.</if_mismatch>
     </step>
     <step>
-      <run>SILVER_BUILDERS extension on inf-silver-chain — add `transactions_v2` if absent (verify; may already be present per orchestrator path). Document finding.</run>
-      <expect>If present: no edit, document. If absent: append with crossref comment `# AC6: ADVI_INFINGE.005b TO-5b — transactions_v2 silver-chain extension`.</expect>
+      <run>SILVER_BUILDERS extension on inf-silver-chain — add `transactions` if absent (verify; DS~A authoring build_transactions_dim() in convert_orion_api_to_silver.py per INFINGE.005b-silver TO). Gate Phase 0 empirical on DS~A RAVC3 confirming `transactions` registered. Document finding.</run>
+      <expect>If present after DS~A ships: no edit, document. If absent: flag to DS~A before Phase 0 empirical. Crossref: `# AC6: ADVI_INFINGE.005b TO-5b — transactions silver-chain extension`.</expect>
       <if_mismatch>Per TO-3 Phase 2 pattern.</if_mismatch>
     </step>
   </phase>
@@ -141,8 +154,8 @@
   </acceptance_criteria>
 
   <go_signal>
-    <issued_at>STAGED — pending Phase 0 RAVC3 (Custom Reports rate-empirical + parity) + COO Phase 1 GO</issued_at>
+    <issued_at>20260506T~1515Z</issued_at>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <message>Status staged. Execute Phase 0 first (Custom Reports empirical + parity check). RAVC3 Phase 0 to COO. COO issues Phase 1 GO after Phase 0 confirms Class A + parity. If Phase 0 fails: DO NOT proceed to Phase 1 — COO routes to CTO for fallback path ruling. CTO ruling 20260506T~1350Z is conditional on Phase 0 success. Reference: 1.0.0_SA_CTO RULING 20260506T~1350Z in session log for lineage.</message>
+    <message>GO. DS~A silver builder shipped (33180d972). TO body updated per CTO Q-A/Q-B/Q-C. Execute Phase 0: (1) orchestrator DimSpec decom plan, (2) Custom Reports rate-empirical single-day window, (3) row-set parity check, (4) RAVC3 Phase 0 to COO. If Phase 0 Class A + parity confirmed: COO issues Phase 1 GO. If Phase 0 fails: COO routes to CTO for fallback ruling.</message>
   </go_signal>
 </task_order>
