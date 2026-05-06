@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Authored sprint mode 2026-05-05T~21:43Z post TO-4 deferral (Option C). PRD v0.2 commit 050bd3695 §6.2 TO-5a spec. Independent of TO-4 PERFORMANCE follow-on; can run now. -->
+    <status>complete</status><!-- Authored sprint mode 2026-05-05T~21:43Z post TO-4 deferral (Option C). PRD v0.2 commit 050bd3695 §6.2 TO-5a spec. COMPLETE 2026-05-06: empirical data sourced from HISTBF.003 wave B v5 run (2026-05-04 session log histbf003_waveb_v5_txn_iam_fix_redispatch.md). Rate: 5.2 RPS observed (AdaptiveRateLimiter, 8 batches), 0 429s/503s, ~223s wall estimate — Class A. Blockers for TO-5b: (1) local_dir hardcoded inline in main() — no module-level LOCAL_PULLS_DIR constant (same issue as TO-4); (2) no server-side date filter on REST endpoint — daily Lambda pulls full history → OOM risk at 3072MB (known OOM at 2GB EC2; 4096MB+ recommended). RAVC3b sent to COO 2026-05-06. -->
     <priority>medium</priority>
     <estimated_effort>~30-60min empirical test only; no code/TF changes</estimated_effort>
   </metadata>
