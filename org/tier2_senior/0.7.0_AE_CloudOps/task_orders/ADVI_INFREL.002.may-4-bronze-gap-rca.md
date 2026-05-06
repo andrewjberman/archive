@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship; flips to pending after Andrew acceptance OR COO dispatch decision. Parallel non-blocking — does NOT gate on TO-1; can run concurrent with TO-1 investigation. -->
+    <status>pending</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship; flipped staged→pending 20260506T133122Z by COO session 59 post-D4 dispatch. Parallel non-blocking — does NOT gate on TO-1. AE 0.7 LEAD. -->
     <priority>high</priority>
     <estimated_effort>~0.25d investigation + ~0.25d remediation if root-cause is fixable</estimated_effort>
   </metadata>

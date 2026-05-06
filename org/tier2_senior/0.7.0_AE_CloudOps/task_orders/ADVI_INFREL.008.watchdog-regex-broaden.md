@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship; flips to pending after Andrew acceptance OR COO dispatch decision. Absorbs INFINGE TO 1a-3 per CTO ratify 2026-05-05T~21:00Z (option a — drop INFINGE TO 1a-3, ship as INFREL TO-8). -->
+    <status>pending</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship; flipped staged→pending 20260506T133122Z by COO session 59 post-D4 dispatch. Absorbs INFINGE TO 1a-3 per CTO ratify 2026-05-05T~21:00Z. AE 0.7 LEAD. -->
     <priority>medium</priority>
     <estimated_effort>~0.25d</estimated_effort>
     <absorbs>INFINGE TO 1a-3 (cancelled-as-absorbed; mark in INFINGE TO ledger when next touched)</absorbs>
