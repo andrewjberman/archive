@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship; flipped staged→pending 20260506T133122Z by COO session 59 post-D4 dispatch. Absorbs INFINGE TO 1a-3 per CTO ratify 2026-05-05T~21:00Z. AE 0.7 LEAD. -->
+    <status>complete</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship; flipped staged→pending 20260506T133122Z by COO session 59 post-D4 dispatch. Absorbs INFINGE TO 1a-3 per CTO ratify 2026-05-05T~21:00Z. AE 0.7 LEAD. COMPLETE 20260506T~1349Z: INF_GOLD_RUNNER_DEPLOYMENT.md authored (commit 0dd9d4791); 8-finding ops catalog + disambiguation table (Phase b: paired S3-poll); D4+D5 empirical validate Findings 6+7+8. COO RAVC5 RATIFIED 20260506T~1410Z. -->
     <priority>medium</priority>
     <estimated_effort>~0.25d</estimated_effort>
     <absorbs>INFINGE TO 1a-3 (cancelled-as-absorbed; mark in INFINGE TO ledger when next touched)</absorbs>
