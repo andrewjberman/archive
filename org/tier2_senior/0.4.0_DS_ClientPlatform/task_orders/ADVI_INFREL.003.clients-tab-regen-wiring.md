@@ -8,7 +8,7 @@
     <secondary>0.6.1_AE_PartnerETL</secondary>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05T~21:15Z. Gates on TO-1 silver-chain fix RAVC5 — if silver propagation is fixed, clients_tab.json may regenerate automatically (TO-3 closes without code change). Receiver assignment per Andrew 2026-05-05T~21:25Z: DS~A specifically (authored the pipeline audit that surfaced clients_tab staleness; holds most context). AE 0.6.1 secondary if dispatch issue. -->
+    <status>complete</status><!-- DS~A Phase 0/1 investigation COMPLETE 20260505T~2130Z. Phase 2 fix SHIPPED 20260505T173116Z commit 7a71e68f2. Diagnosis: (1) gold/artifacts/clients_tab.json is DEAD LEGACY artifact — I_D00 (pre-ORNREN) not in dispatch chain, no active consumer. (2) platinum/firm/clients_tab.json is FRESH daily via INF_I_D00. (3) ACTUAL BUG: Lambda /clients-tab endpoint reads platinum/firm/clients-tab-slim.json which DOES NOT EXIST for Inflection — this is the real gap. Scope widened: see phase_0_findings block. RAVC sent to COO 20260505T~2130Z. -->
     <priority>medium</priority>
     <estimated_effort>~0.25d (small wiring fix OR auto-close if TO-1 fix propagates)</estimated_effort>
   </metadata>
@@ -27,6 +27,26 @@
 
     Diagnosis path: post TO-1 silver-chain fix, observe whether clients_tab.json regenerates automatically. If yes → (a); diagnosis self-resolves. If no → identify producer; class (b) or (c); scope fix.
   </context>
+
+  <phase_0_findings timestamp="20260505T~2130Z">
+    <classification>WIDENED — three distinct findings</classification>
+    <finding id="1">
+      <artifact>gold/artifacts/clients_tab.json</artifact>
+      <class>b — dead legacy producer</class>
+      <detail>Written by I_D00.portal_aggregates.py (pre-ORNREN.001 legacy script). I_D00 NOT in orion-gold-dispatch.sh CHAIN_FULL or CHAIN_INCREMENTAL. No active Inflection consumer reads this artifact. Last written 2026-04-29 (day of ORNREN.001 deploy). TO-1 fix will NOT change this — it was abandoned when INF_I_D00 took over. Recommend: leave stale; optional manual s3 rm when convenient.</detail>
+    </finding>
+    <finding id="2">
+      <artifact>platinum/firm/clients_tab.json</artifact>
+      <class>HEALTHY — fresh daily</class>
+      <detail>Written by INF_I_D00.portal_aggregates.py (OUTPUT_PREFIX=platinum/). In CHAIN_FULL. Last modified 2026-05-05T16:17:25Z (55KB, 307 clients). Generates correctly on every chain run. No fix needed.</detail>
+    </finding>
+    <finding id="3">
+      <artifact>platinum/firm/clients-tab-slim.json</artifact>
+      <class>c — ABSENT; Lambda endpoint reads this path</class>
+      <detail>Lambda v2_portal/partners/lambda_function.py:922 handle_clients_tab() reads platinum/firm/clients-tab-slim.json (s3://{firm_bucket}/platinum/firm/clients-tab-slim.json). This file DOES NOT EXIST for Inflection (opal-data-inf). Portal /clients-tab API endpoint would 404/error. Counter-evidence: smoke tests showed Books tab working — either endpoint not yet exercised for Inflection, or portal falls back gracefully. ROOT CAUSE: No INF_* script writes clients-tab-slim.json. The .047 fix comment says D_04 writes it (BD pipeline). INF_D_04 does not write a slim artifact. FIX NEEDED: either (a) INF_I_D00 or INF_D_04 should emit platinum/firm/clients-tab-slim.json, or (b) Lambda routing should serve platinum/firm/clients_tab.json directly for Inflection. Recommend option (a) — add slim write to INF_I_D00 (field subset matching clients-tab-slim schema from BD D_04). This is the actual Phase 1 fix.</detail>
+    </finding>
+    <action>Surface findings 1+3 to COO. Finding 3 is the real fix. Finding 1 is dead artifact — no action required. Finding 2 confirms platinum write is healthy.</action>
+  </phase_0_findings>
 
   <phase id="0" when="Phase 0 — observe post TO-1 ship">
     <step>
