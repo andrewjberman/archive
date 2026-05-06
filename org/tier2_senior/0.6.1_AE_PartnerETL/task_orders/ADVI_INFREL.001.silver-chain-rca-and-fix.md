@@ -8,7 +8,7 @@
     <secondary>0.7.0_AE_CloudOps</secondary>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship (commit 64ea399a3). Flipped staged→pending 2026-05-06 by COO session 59 dispatch. AE 0.6.1 LEAD per PRD §6 + project JSON lane_note (Inflection-specific surface knowledge); AE 0.7 SECONDARY on EventBridge metrics + S3 ObjectCreated event audit. COO GO issued 20260506T~1415Z post AE 0.6.1 RAVC2. -->
+    <status>in_progress</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship (commit 64ea399a3). Flipped staged→pending 2026-05-06 by COO session 59 dispatch. AE 0.6.1 LEAD per PRD §6 + project JSON lane_note (Inflection-specific surface knowledge); AE 0.7 SECONDARY on EventBridge metrics + S3 ObjectCreated event audit. COO GO issued 20260506T~1415Z post AE 0.6.1 RAVC2. Phase 0 RCA COMPLETE 2026-05-06: MULTI-CLASS (a) partial + (c). Phase 1 Fix A (AE 0.7 commit 263cd08ca) + Fix C (commit e38f2707e, inf-pipeline-v1.7.21, applied 20260506T) shipped. Fix D (tax exit=2) DS~B lane. Fix B (performance_dim) 3 active consumers found; INFREL.001b separate TO; pending CTO Option 1 ruling. RAVC5 partial close sent; final close after 24h empirical. -->
     <priority>highest</priority>
     <estimated_effort>~0.25-0.5d investigation + ~0.5-1d fix; depends on root-cause class</estimated_effort>
   </metadata>
@@ -123,6 +123,19 @@
     <criterion id="AC5">RCA classification documented in TO file `<phase_0_findings>` + CTO PRD v0.2 §5 Compiler Evidence absorption package.</criterion>
     <criterion id="AC6">RAVC5 close: commit hash + apply 0-diff + tag bump + 24-48h empirical evidence + comp-iam gaps clean.</criterion>
   </acceptance_criteria>
+
+  <phase_0_findings>
+    <classification>MULTI-CLASS: (a) partial + (c)</classification>
+    <finding id="Gap-A">unified_account_dim DimSpec missing extra_args=("--upload-bronze",) in orchestrator.py — household + activity silver always fail NoSuchKey. Fixed by AE 0.7 commit 263cd08ca (2026-05-05T14:13:48Z).</finding>
+    <finding id="Gap-B">accounts_v2 DimSpec missing extra_args=("--upload-bronze",) — accounts_v2 silver staging fails. Fixed by AE 0.7 commit 263cd08ca.</finding>
+    <finding id="Gap-C">performance_dim has no producing script in orchestrator DIMS — bronze CSV never written. Three active gold consumers found (INF_D_00c, INF_D_02, INF_D_04). Fix B escalated as INFREL.001b (Option 1: author performance pull script).</finding>
+    <finding id="Gap-D">tax dim exits with code 2 (ExcelReports/Verbose POST failed) in orchestrator — bronze CSVs never written; silver builder gets NoSuchKey suppressed silently. DS~B lane (orion_tax_dim.py authored by 0.4.0_DS_ClientPlatform~B).</finding>
+    <finding id="Silent-Suppression">inf-silver-chain Lambda _run_builder() wraps all builders in try/except+continue. Errors suppressed silently — Lambda always returns 200. Fix C adds Opal/InflectionSilver/DimConversionFailure CW metric + alarm.</finding>
+    <s3_evidence>bronze/orion-api/2026-05-05/ listing: only assets.csv + billing.csv present. unified_account_dim.csv, new_portfolio_accounts.json, tax_unrealized.csv, tax_realized.csv absent (Gaps A+B+D). Lambda CW: 11 invocations in 14d, 0 CW errors (EventBridge + invocation working; class b ruled out). AE 0.7 audit: S3 EventBridge delivery enabled, sentinels present 2026-04-28/29/30/05-01/05-05, rule fires 11x in 14d.</s3_evidence>
+    <fix_disposition>Fix A: DONE (AE 0.7 commit 263cd08ca). Fix C: DONE (commit e38f2707e, inf-pipeline-v1.7.21). Fix D: DS~B lane. Fix B: INFREL.001b separate TO.</fix_disposition>
+    <recorded_at>2026-05-06T13:45Z</recorded_at>
+    <recorded_by>0.6.1_AE_PartnerETL</recorded_by>
+  </phase_0_findings>
 
   <go_signal>
     <issued_at>STAGED — pending COO dispatch GO post Andrew acceptance OR auto-flip post v0.2 ratchet planning</issued_at>
