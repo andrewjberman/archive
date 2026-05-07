@@ -8,7 +8,7 @@
     <issued_to_secondary>0.7.0_AE_CloudOps</issued_to_secondary>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-06</issued_date>
-    <status>pending</status><!-- Andrew-directed 2026-05-06 following INFREL.002 backfill attempt (May 4 gap). AE 0.7 surfaced: (1) transactions 500 was likely missing params not fundamental gap; (2) billing/tax likely have date params; (3) accounts_v2 likely snapshot-only; (4) expected_fail=true on assets needs investigation before daily cadence declared clean. Phase 0 (audit) MUST precede Phase 1 (backfill code). AE 0.6.1 LEAD (orchestrator + pull scripts); AE 0.7 SECONDARY (runner infra + S3 write path design). COO GO issued 20260506T~1430Z. -->
+    <status>phase0-complete-phase1-pending-coo-go</status><!-- Phase 0 audit complete 20260507T~18:30Z (AE 0.6.1). RAVC3 sent to COO. Billing Wave C 2020-2024 dates + 83/83 silver CLOSED per COO RAVC7. Phase 0 findings: billing+tax date-range-capable via ORION_PULL_DATE env; performance needs --snapshot-date orchestrator fix; unified_account_dim/accounts_v2/assets snapshot-only (no backfill viable). expected_fail removed from assets (confirmed). Phase 1 GO pending COO + Andrew approval (large-scale S3 writes). -->
     <priority>high</priority>
     <estimated_effort>Phase 0: ~0.5d audit; Phase 1: multi-day runner job (6+ years data; parallelizable by dim); Phase 2: ~0.25d cadence confirm</estimated_effort>
   </metadata>

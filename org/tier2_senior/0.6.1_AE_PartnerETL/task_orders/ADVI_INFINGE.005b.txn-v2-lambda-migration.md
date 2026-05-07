@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-06</issued_date>
-    <status>pending</status><!-- Flipped to pending 2026-05-06 (COO session 60): DS~A silver builder shipped (commit 33180d972, 20260506T151210Z). TO body updated per CTO Q-A/Q-B/Q-C rulings (paths + silver dim name + decom step). AE 0.6.1 GOed for Phase 0 Custom Reports rate-empirical + parity + orchestrator decom plan. CTO instruction: after all body edits + DS~A ship → GO. -->
+    <status>closed</status><!-- CLOSED by COO RAVC7 ACK 20260507T~1530Z. inf-pipeline-v1.7.30 deployed (T-1 default date, fd4105bec + b222fa687). Transactions decommissioned from orchestrator (line 83 comment). First cron fire 2026-05-08T13:00Z; RAVC11 after empirical confirmation. -->
     <priority>medium</priority>
     <estimated_effort>~30-60min AE post Phase 0 rate-empirical; pure clone+prefix substitute (no Phase 0 layer — pandas-pyarrow-requests-layer:1 already published); +Phase 0 Custom Reports rate-empirical ~30min</estimated_effort>
   </metadata>
