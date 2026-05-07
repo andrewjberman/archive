@@ -8,7 +8,7 @@
     <issued_to_secondary>0.7.0_AE_CloudOps</issued_to_secondary>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-06</issued_date>
-    <status>phase0-complete-phase1-pending-coo-go</status><!-- Phase 0 audit complete 20260507T~18:30Z (AE 0.6.1). RAVC3 sent to COO. Billing Wave C 2020-2024 dates + 83/83 silver CLOSED per COO RAVC7. Phase 0 findings: billing+tax date-range-capable via ORION_PULL_DATE env; performance needs --snapshot-date orchestrator fix; unified_account_dim/accounts_v2/assets snapshot-only (no backfill viable). expected_fail removed from assets (confirmed). Phase 1 GO pending COO + Andrew approval (large-scale S3 writes). -->
+    <status>closed-scope-revised</status><!-- Phase 0 audit complete + RAVC3 ACCEPTED 20260507T~18:35Z. Phase 1 SCOPE REVISED by COO per Andrew-direct architecture pivot: orchestrator backfill SHELVED; historical backfill executed locally by COO; per-dim Lambdas are the go-forward path (INFETL solidify series). AE 0.6.1 stands by for LAMBDA-DIMS sub-TOs from AE 0.7 (Lambda code author) + billing silver hot-fix domain. Billing Wave C 83/83 silver CLOSED (RAVC7). -->
     <priority>high</priority>
     <estimated_effort>Phase 0: ~0.5d audit; Phase 1: multi-day runner job (6+ years data; parallelizable by dim); Phase 2: ~0.25d cadence confirm</estimated_effort>
   </metadata>
