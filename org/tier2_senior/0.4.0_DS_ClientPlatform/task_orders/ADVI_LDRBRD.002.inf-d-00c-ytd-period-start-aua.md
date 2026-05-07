@@ -8,7 +8,7 @@
     <issued_to_phase1>0.4.0_DS_ClientPlatform~D</issued_to_phase1><!-- implementation -->
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-06</issued_date>
-    <status>active</status>
+    <status>complete</status>
     <priority>normal</priority>
     <estimated_effort>~0.5h DS~C (semantic ratify + test assertion); ~1h DS~D (implement + gate + run)</estimated_effort>
   </metadata>
