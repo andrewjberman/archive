@@ -174,4 +174,38 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <message>GO. Portal DEV commit 43411a79 is live. DS~A data fix (a9435bc90) is live in platinum/. Execute Phase 1 sweep now.</message>
   </go_signal>
+
+  <final_verification>
+    <date>2026-05-07</date>
+    <portal_commit>52a6d84c (portal-v2.1.81)</portal_commit>
+    <verified_by>0.4.2_RD_AdvisorIntelligence</verified_by>
+    <summary>All checks PASS on PROD 52a6d84c. INFLFE.006 visual verification track closed.</summary>
+
+    <check id="A" label="Stacked bars (nmnc+nmec)">
+      <verdict>PASS</verdict>
+      <evidence>
+        bar_group_count=2; fills=[#2196f3 (blue/nmec), #4caf50 (green/nmnc)].
+        timeseries_chart.json?firm=inf: 200 OK, 25 quarters, categories=['nmnc','nmec'].
+        Q2 '26 raw: nmnc=$18,661,836.44 + nmec=$170,585,869.06 = $189.2M (FE patches last bar to canonical $199.6M).
+        49F isInflectionFirm gate: timeseries_chart.json NOT fetched for 49F (PASS).
+      </evidence>
+    </check>
+
+    <check id="B" label="QoQ growth tiles">
+      <verdict>PASS</verdict>
+      <evidence>
+        NEW CLIENTS: $19.7M, +$4.18M (+27.0%) vs Q1 '26.
+        EXISTING CLIENTS: $179M, +$15.5M (+9.5%) vs Q1 '26.
+        TOTAL AUA: $199M, +$19.7M (+11.0%) vs Q1 '26.
+        as of Apr 28, 2026.
+      </evidence>
+    </check>
+
+    <check id="C" label="Regressions">
+      <verdict>PASS</verdict>
+      <evidence>
+        No error boundaries on Inflection or 49F. Total AUA $199M. 49F bar chart unchanged (3 bar_groups, own fills).
+      </evidence>
+    </check>
+  </final_verification>
 </task_order>
