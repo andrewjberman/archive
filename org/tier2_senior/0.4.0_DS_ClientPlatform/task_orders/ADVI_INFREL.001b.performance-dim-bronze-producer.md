@@ -8,7 +8,7 @@
     <issued_to_secondary>0.6.1_AE_PartnerETL</issued_to_secondary>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-06</issued_date>
-    <status>pending</status><!-- COO-authored per CTO spec 20260506T140423Z. Fix B follow-on from INFREL.001 consumer trace (3 active consumers: INF_D_00c + INF_D_02 + INF_D_04 all read silver/api_dims/performance/). Option 2 (remove from SILVER_BUILDERS) BLOCKED — Option 1: author bronze producer script. DS~B LEAD (bronze script authoring). AE 0.6.1 SECONDARY (DimSpec wiring + validation). Non-blocking on Fix A+C+D. Fix D (tax exit=2) sequential within DS~B lane is fine. -->
+    <status>complete</status><!-- COO-authored per CTO spec 20260506T140423Z. Fix B follow-on from INFREL.001 consumer trace (3 active consumers: INF_D_00c + INF_D_02 + INF_D_04 all read silver/api_dims/performance/). Option 2 (remove from SILVER_BUILDERS) BLOCKED — Option 1: author bronze producer script. DS~B LEAD (bronze script authoring). AE 0.6.1 SECONDARY (DimSpec wiring + validation). Non-blocking on Fix A+C+D. Fix D (tax exit=2) sequential within DS~B lane is fine. -->
     <priority>normal</priority><!-- NOT P0. All 3 consumers have graceful fallback (WARN + null). Performance silver stale since 2026-04-28 with no production breakage. Ship at normal cadence. -->
     <estimated_effort>~0.5d (DS~B script authoring + gate); ~0.25d (AE 0.6.1 DimSpec wiring + validation)</estimated_effort>
   </metadata>
