@@ -7,7 +7,7 @@
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-06</issued_date>
-    <status>active</status>
+    <status>complete</status>
     <priority>high</priority>
     <estimated_effort>~1h RD (targeted sweep, not full matrix)</estimated_effort>
   </metadata>
