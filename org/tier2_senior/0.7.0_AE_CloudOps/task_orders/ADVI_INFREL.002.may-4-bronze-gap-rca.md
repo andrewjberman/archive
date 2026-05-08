@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>pending</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship; flipped staged→pending 20260506T133122Z by COO session 59 post-D4 dispatch. Parallel non-blocking — does NOT gate on TO-1. AE 0.7 LEAD. -->
+    <status>complete</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship; flipped staged→pending 20260506T133122Z by COO session 59 post-D4 dispatch. SHIPPED 2026-05-07 by AE 0.7 commit `5a7c55f51` tag `inf-pipeline-v1.7.22` per ADVI_INFREL registry row + AE 0.7 EOD log: root cause Andrew StopInstances 2m31s before cron; 5-fix stack shipped (stopping-state poll-until-stopped + TriggerMissedStart CW alarm + Lambda timeout 30→180s + cloudwatch:PutMetricData IAM + source-map registration); empirical cron confirm 2026-05-07 12:43Z. Flipped pending→complete by 1.0.0_SA_CTO 2026-05-08 startup ground-truth pass. -->
     <priority>high</priority>
     <estimated_effort>~0.25d investigation + ~0.25d remediation if root-cause is fixable</estimated_effort>
   </metadata>

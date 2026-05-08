@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-17</date>
-    <status>pending</status><!-- Flipped staged -> pending 2026-04-22 per Andrew "push all relevant agents to start" directive. CP-DS1 shipped + Gate 1 confirmed. -->
+    <status>deferred</status><!-- Flipped staged -> pending 2026-04-22 per Andrew "push all relevant agents to start" directive. CP-DS1 shipped + Gate 1 confirmed. DEFERRED per ADVI_ROLLUP registry row (CP-VETO-AUTH bridge already shipped + Gate 2 reached without CP-MAP; long-term mapping-expansion scope still tracked in registry as DEFERRED). Flipped pending→deferred by 1.0.0_SA_CTO 2026-05-08 startup ground-truth pass — registry-row had been authoritative; TO file lagged. -->
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P1 parallel to CP-VETO-AUTH — structurally correct Gate 2 path</priority>
     <collaborators>0.4.0_DS_ClientPlatform (BD-side account identification)</collaborators>
