@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <date>2026-04-27</date>
-    <status>open</status>
+    <status>closed-superseded</status><!-- CLOSED-AS-SUPERSEDED 2026-05-08T~14:20Z per COO triage. Rationale: ADVI_INFLV2 project closed 2026-05-01. INFLV2.009 chain re-run for portal layout v2 publish is fully satisfied by subsequent INFLEC + INFETL + INFNNA cascades (INFNNA.SILVER local backfill firing 2026-05-08; AE 0.7 daily Lambda chain post-aggregator-v1.7.44 deploy). -->
     <priority>HIGH — gates INFLV2.010 (RD smoke + Andrew sign-off)</priority>
   </metadata>
 

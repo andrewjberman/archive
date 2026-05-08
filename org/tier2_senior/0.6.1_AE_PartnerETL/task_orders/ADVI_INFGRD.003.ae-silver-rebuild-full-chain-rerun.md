@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <date>2026-04-27</date>
-    <status>open</status>
+    <status>closed-superseded</status><!-- CLOSED-AS-SUPERSEDED 2026-05-08T~14:20Z per COO triage. Rationale: ADVI_INFGRD project closed 2026-04-30 (REGISTRY.md). DS~A INFNNA.SILVER local backfill in flight 2026-05-08 (smoke 8/8 PASS, full historical run firing) reproduces the equivalent silver state with the post-INFNNA.001 INFLECTION_REP_IDS={3,6,11,12} filter. INFGRD.003 intent (full chain re-run after advisor_firm filter) is satisfied by INFNNA.SILVER + AE 0.7 daily Lambda chain (post-aggregator-v1.7.44 deploy). -->
     <priority>HIGH — final chain run before RD validation + Inflection production sign-off</priority>
   </metadata>
 
