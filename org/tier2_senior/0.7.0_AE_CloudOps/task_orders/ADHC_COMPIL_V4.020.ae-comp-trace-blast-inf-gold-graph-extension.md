@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- Closed 2026-05-08T~PM by AE 0.7.0. Architectural seam identified: extract_s3.py gold-extraction loop was BD-only (data/black_diamond/scripts/gold/) + comp-pipescript inject was a separate step that got wiped on every comp-build rebuild. Fix: (a) duplicated the gold-extraction loop in extract_s3.py for INF gold dir (data/orion/scripts/gold/INF_*.py) — script-level + function-level nodes + CALLS edges + builder/function S3 writes; (b) added _inject_full_pipeline_into_graph() helper in trace_graph.build_graph that calls inject_pipeline_edges for both BD and INF gold DAGs in-process with optional _graph param (avoids cache-write race). Empirical: 1250→1772 nodes (+42%); 1047→1344 edges (+28%); 36 INF gold scripts + 428 INF function nodes registered; 22 s3:platinum/* nodes (BD D_04 platinum writes). All 4 OPS Cat 2 cases flip FAIL→PASS. BD regression-clean (multi-match output unchanged; build_employee_leaderboard blast enriched 7→13 from platinum injection). Tier reclassification: comp-trace + comp-blast moved A in comp-tools-segment-scope.md + comp-tools.yaml. RAVC1 latitude not exercised (additive code, no extractor refactor). -->
     <priority>high</priority>
     <estimated_effort>~1-1.5d (graph-extractor refactor risk; RAVC1 if scope expands)</estimated_effort>
   </metadata>
