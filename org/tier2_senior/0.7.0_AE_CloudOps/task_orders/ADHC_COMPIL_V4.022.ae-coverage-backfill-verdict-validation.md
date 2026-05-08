@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- Closed 2026-05-08T~PM by AE 0.7.0. 4 OPS items closed. Cat 6.1: built .tools/backfill-lambda-iam-mapping.py (parses TF for module->role mapping with locals + var.shared + inline-arn handling); 129 of 151 Lambdas backfilled (was 1); 22 unresolved are decommissioned/legacy/test functions. comp-iam gaps post-backfill surfaces 9 real permission gaps (queued separate remediation per out-of-scope). Cat 6.2: comp-platinum reverse '<key>#field' fallback2 directory-prefix speculatives suppressed when query has #field — was 18 SPECULATIVE; now 0. --strict regression-clean (exits 2 with N suppressed message preserved). Cat 7: loop-quiescence adds NO_PROJECT_FILE verdict separate from QUIESCENT_CLEAN; bare macro prefix returns NO_PROJECT_FILE + hint to use full project code; full project code path unchanged. Out-of-scope: 6.1 BD-Lambda permission-gap remediation (separate TO scope when needed). -->
     <priority>normal</priority>
     <estimated_effort>~1d</estimated_effort>
   </metadata>
