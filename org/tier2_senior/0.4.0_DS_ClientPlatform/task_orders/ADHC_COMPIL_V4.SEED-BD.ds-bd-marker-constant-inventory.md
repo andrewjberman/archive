@@ -7,7 +7,9 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed_date>2026-05-08</completed_date>
+    <evidence>commit 290476bbf — org/modules/graph/comp-constants-seed-bd.yaml — 12 constants, 17 sites, 1 drift (FIRM_ID pattern). COO override-commit (lane=ANY_EXEC). RAVC2 delivered 20260508T143157Z.</evidence>
     <priority>medium</priority>
     <estimated_effort>~30-60 min</estimated_effort>
   </metadata>
