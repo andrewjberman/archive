@@ -7,7 +7,7 @@
     <issued_to>1.0.0_SA_CTO</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status><!-- Self-issued by CTO per PRD v0.3 addendum §13.4 TO-16. CTO direct ship; no AE involvement. -->
+    <status>complete</status><!-- Self-issued by CTO per PRD v0.3 addendum §13.4 TO-16. CTO direct ship; no AE involvement. SHIPPED 2026-05-08 PM same-session as v0.3 PRD addendum. 3 docs updated: compiler-tools-log.md header (synthetic test convention) + comp-tools.yaml top-level compiler_tools_log_conventions section + ADHC_COMPIL_FULL_CORPUS_RETROSPECTIVE.md §1.4 forward-only footnote. AC1-AC5 all PASS. Self-RAVC2 close. -->
     <priority>normal</priority>
     <estimated_effort>~0.25d</estimated_effort>
   </metadata>
