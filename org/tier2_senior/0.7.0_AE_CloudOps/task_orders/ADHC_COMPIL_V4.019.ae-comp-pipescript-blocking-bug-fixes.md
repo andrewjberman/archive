@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- Closed 2026-05-08T~PM by AE 0.7.0. Both bugs fixed in single pipeline_cli.py edit. Bug 1.1: skip_gold init at top of cmd_deployed + inf-gold branch sets to False with filter-check. Bug 1.2: cmd_chain reads args.pipeline + passes to _build_dag(); explicit error if chain not registered (replaces silent BD return). Empirical evidence: pre-fix UnboundLocalError reproduced; post-fix renders INF deployment status cleanly. INF chains DO exist (full/incremental/label/silver_prep) — chain --pipeline inf-gold full returns 47 scripts. BD regression-clean (default chain downstream + deployed D_00c + bd-silver all unchanged). -->
     <priority>high</priority>
     <estimated_effort>~0.5d</estimated_effort>
   </metadata>
