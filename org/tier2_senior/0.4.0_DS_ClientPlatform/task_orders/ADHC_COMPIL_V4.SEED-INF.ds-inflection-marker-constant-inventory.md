@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- shipped 14a5474d5 (COO override-commit, DS~C author preserved); 9 constants, 33 sites, 3 drift flags -->
     <priority>medium</priority>
     <estimated_effort>~30-60 min</estimated_effort>
   </metadata>
