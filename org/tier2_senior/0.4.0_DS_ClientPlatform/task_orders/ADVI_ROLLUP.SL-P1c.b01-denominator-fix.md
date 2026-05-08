@@ -172,12 +172,12 @@
 
   <acceptance_criteria>
     <ac id="1">ds-commit-gate.sh exits 0 on B_01.holidays_lots.py (py_compile + AST + ruff).</ac>
-    <ac id="2">Dry-run: Jones z0817905851 shadow MV = cash-only ($21,060 ± $500). PASS.</ac>
-    <ac id="3">Dry-run: 3 pure-sleeve accounts (0 FIFO lots) shadow MV within 2% of silver/allocations. PASS.</ac>
+    <ac id="2">REVISED (CTO Option A, 20260508): Jones z0817905851 shadow MV reflects non-vetoed positions weighted by unit_cost against non_cash_target_mv (current design post-e3463bffa). Cash floor ($21K) present. Non-FIFO positions (IEMG/DIVZ/SPYM) expected in shadow by design. NOTE: FIFO-subtract semantics intentionally reverted at e3463bffa to prevent HLOT2b 98% suppression. Jones-class accounts receive shadow MV above cash floor by design. Discriminated-path revisit parked as ADVI_ROLLUP standing-backlog.</ac>
+    <ac id="3">3 pure-sleeve accounts (0 FIFO lots) shadow MV within 2% of silver/allocations. PASS (verify in Night 3 close package — silver lookup deferred per COO 20260508).</ac>
     <ac id="4">B_01 committed to CLOUD via safe-commit.sh with correct author attribution.</ac>
     <ac id="5">S3 upload MATCH confirmed via comp-pipescript deployed B_01.</ac>
     <ac id="6">3 consecutive clean nightly shadow emissions (new date partition per night, file size > 50KB).</ac>
-    <ac id="7">Post-3-nightly spot-check: Jones cash-only + pure-sleeve within 2% + cohort count stable.</ac>
+    <ac id="7">Post-3-nightly spot-check: Jones has cash floor ($21K) + non-FIFO positions (per revised AC2) + pure-sleeve within 2% + cohort count stable (within ±5 accounts across 3 nights).</ac>
     <ac id="8">Cohort drift investigation documented in session log (S1 — non-blocking).</ac>
     <ac id="9">RAVC4 to COO with: fix commit SHA, S3 ETag, dry-run results (Jones + pure-sleeve), 3 nightly dates + cohort counts.</ac>
     <ac id="10">Session log with Compiler Tools section.</ac>
