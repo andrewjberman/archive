@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- diagnosis (c) confirmed — upstream bronze pull exclusion; fix e2edbe321; cascade re-run pending fresh JWT -->
     <priority>medium</priority>
     <estimated_effort>~30-45 min</estimated_effort>
   </metadata>
