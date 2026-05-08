@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- Closed 2026-05-08T~PM as SUPERSEDED by V4.OPS triage portfolio per CTO ratification (1.0.0_SA_CTO RAVC2 ACK 20260508T~PM). Original .018 scope ("run all V4 tools against current Inflection state, surface retroactive findings") substantially subsumed by today's same-session ships: .017 OPS test matrix validated all 21 tools across 108 cases; .019 fixed 2 BLOCKING bugs surfaced; .020 fixed cross-layer graph gap (Tier reclassification); .021 fixed 16 doc-drift + UX issues; .022 surfaced 9 BD Lambda permission gaps via IAM backfill. Collectively more thorough than .018's narrower Phase 2 validation. Standing-backlog observations from .020 (INF gold HARDCODED writes) + .022 (22 unresolved Lambdas + 9 perm-gap remediation candidates) tracked separately. -->
     <priority>medium</priority>
     <estimated_effort>~0.5d</estimated_effort>
   </metadata>
