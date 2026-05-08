@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- Closed 2026-05-08T~PM by AE 0.7.0. 16 OPS items addressed via mix of doc-fixes + small CLI implementations. CLI ships: check-lambda-layer-deps --json (Cat 3.3); comp-constants check --lane (Cat 3.4); comp-trace --json multi-match disambiguation (Cat 3.5); comp-validate --list matcher tightened to exact-or-prefix-with-underscore + --lane filter (Cat 5.2); comp-validate --list emits ERROR + first-15 candidates on unknown script_id (Cat 5.3); comp-pipescript dag prints both named + detected-paths counts (Cat 5.4). Doc-fixes in comp-tools.yaml: comp-trace examples updated to canonical/working forms incl. INF gold + s3:platinum (Cat 4.4); comp-iam role example corrected (Cat 4.3); comp-platinum page example with non-existent components flagged (Cat 4.1/4.2); origins count 5→6 (Cat 5.6); inf-silver deployment caveat documented (Cat 5.5); --json/--lane added to relevant entries; getEmployeeLeaderboard→getFirmLeaderboard for working endpoint example (Cat 5.1). Out-of-scope: 5.4 INF named-key wiring (current detected-paths report covers; deeper s3_layout-style INF named keys = follow-on if needed). -->
     <priority>normal</priority>
     <estimated_effort>~1d (mostly doc updates + a few small CLI fixes)</estimated_effort>
   </metadata>
