@@ -7,7 +7,9 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed_date>2026-05-08</completed_date>
+    <evidence>commit 5a2d87027 — INF_D_08 existing_aua switched to accounts_v2 silver; ETag 2cbb4e836558cb23c69ff117dde3c053; all 4 advisors non-zero; RAVC2 delivered 20260508T160848Z.</evidence>
     <priority>medium</priority>
     <estimated_effort>~30-60 min</estimated_effort>
   </metadata>
