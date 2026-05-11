@@ -7,10 +7,14 @@
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>high</priority>
     <estimated_effort>~15 min (~5min per script + cascade re-validate)</estimated_effort>
+    <actual_effort>~15min (edit + gate + standalone re-run both + commit + S3 deploy + SHA verify)</actual_effort>
     <authorized_by>1.0.0_SA_CTO ratified 2026-05-11 — Option B (script-side reduce-parallelism) post-empirical-evidence cascade `b9967954` 2/2 retries exhausted on TLS-layer drops</authorized_by>
+    <closed_date>2026-05-11</closed_date>
+    <closed_by>0.4.0_DS_ClientPlatform~A</closed_by>
+    <closed_via>RAVC2 to COO 2026-05-11 ~17:50Z. Commit `4e82e8c45`. INF_C_02 + INF_C_03 both PASS standalone re-run rc=0; no TLS/Connection errors. S3 deploy MATCH on both (ceff93acc1b58333 + 8ab7c76c9c6b19a2). 32-worker cap + boto3 Config(max_pool_connections=128, retries=adaptive) live in both scripts. INF_C_03 second ThreadPool (line 184, was 64) also capped 32 for uniformity.</closed_via>
   </metadata>
 
   <references>
