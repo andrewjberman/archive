@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status><!-- Authored by CTO direct per Andrew 2026-05-08 PM "full 5-item, run it" post-retrospective. PRD v0.3 addendum §13.4 TO-14. -->
+    <status>complete</status><!-- SHIPPED 2026-05-08 by AE 0.7 commit `af0d8ce7a` (dual-purpose: positional <symbol> mode + existing no-arg diff mode preserved via argparse nargs='?'). 6/6 ACs PASS per AE RAVC2 via 7-cell matrix. ~15min vs 0.75d = 2.5%. 5/5 cluster queries from 2026-04-21 17/25 FAIL cluster return graceful 0-match + hint. Flipped pending→complete by 1.0.0_SA_CTO 2026-05-11 startup ground-truth pass. -->
     <priority>normal</priority>
     <estimated_effort>~0.75d</estimated_effort>
   </metadata>

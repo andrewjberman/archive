@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status><!-- Authored by CTO direct per Andrew 2026-05-08 PM "distribute the Task orders" delegation. PRD v0.2 addendum §12.4 TO-10. Sequencing: independent (no dep on other v0.2 TOs). -->
+    <status>complete</status><!-- SHIPPED 2026-05-08 by AE 0.7 commit `22ac77cb9` (annotated [SPECULATIVE] prefix + --strict flag + hybrid #field resolution). 6/6 ACs PASS per AE RAVC2 via 5-cell matrix. ~25min vs 0.5d = 10%. Follow-on V4.022 Cat 6.2 covers hybrid-merge intersection refinement (NOT retro-reopen — V4.010 shipped against literal AC text). Flipped pending→complete by 1.0.0_SA_CTO 2026-05-11 startup ground-truth pass. -->
     <priority>normal</priority>
     <estimated_effort>~0.5d</estimated_effort>
   </metadata>

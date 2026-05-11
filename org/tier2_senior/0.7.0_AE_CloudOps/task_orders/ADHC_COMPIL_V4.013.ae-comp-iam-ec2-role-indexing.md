@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status><!-- Authored by CTO direct per Andrew 2026-05-08 PM "full 5-item, run it" post-retrospective. PRD v0.3 addendum §13.4 TO-13. -->
+    <status>complete</status><!-- SHIPPED 2026-05-08 by AE 0.7 commit `7e246121e` (iam_cli.py EC2-role fall-through after Lambda lookup; helpful error on miss). 6/6 ACs PASS per AE RAVC2 via 6-case matrix. ~12min vs 0.5d = 3%. Both anchor incidents (2026-04-16 + 2026-05-08 inf-gold-trigger catalog miss) resolved. Flipped pending→complete by 1.0.0_SA_CTO 2026-05-11 startup ground-truth pass. -->
     <priority>normal</priority>
     <estimated_effort>~0.5d</estimated_effort>
   </metadata>

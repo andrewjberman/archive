@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- SHIPPED 2026-05-08 by AE 0.7 commit `0eb2c8950` (comp-constants AST-indexer + drift gate; comp-constants-v1.0). 7/7 ACs PASS per AE RAVC2 20260508T~PM. ~30min wall-clock vs 1d catalog = 5% (1st instance of session under-budget pattern). Flipped pending→complete by 1.0.0_SA_CTO 2026-05-11 startup ground-truth pass. -->
     <priority>medium</priority>
     <estimated_effort>~1d</estimated_effort>
   </metadata>

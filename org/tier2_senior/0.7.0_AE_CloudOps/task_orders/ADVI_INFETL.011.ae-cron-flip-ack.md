@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status><!-- Authored by CTO directly per ADVI_INFETL row Pending column "Cron-flip-ack TO (.011) gates on INFNNA.GOLD RAVC ACK." Trigger reached 2026-05-08 per COO MCP — INFNNA.GOLD cascade COMPLETE ($199.6M / 4 advisors / Joe Brandenburg $16.2M / 21 clients; canonical match). All 4 prereqs met (see <prereq_verification> below). COO dispatch sequencing: at AE 0.7 pace, no urgency; AE 0.7 currently shipping FIRMSEP.09 / LAMBDA-DIMS billing-perf. -->
+    <status>complete</status><!-- SHIPPED 2026-05-08 by AE 0.7 commit `e28e24585` + tag `inf-pipeline-v1.7.45` (single-attr Terraform edit DISABLED→ENABLED on aws_cloudwatch_event_rule.inf_canonical_prices_daily). AC1-AC4 PASS via plan 0/1/0 + apply + describe-rule State=ENABLED + tag pushed. AC5 first-fire empirical NOW SATISFIED 2026-05-11 startup CTO investigation: 3 cron windows fired (2026-05-09, 5-10, 5-11 @ 06:00 UTC); `gold/trigger-mode.json` written today 06:00:42Z confirming Lambda firing daily. NOTE: `gold/meta/pipeline-complete.json` absent — production safety net working as designed, surfacing real gold-chain failure from JOE-TXN-BACKFILL schema drift (account_id dtype, ADVI_INFNNA.ACCOUNT-ID-COERCE TO COO-queued for today's Monday-AM workflow). Flipped pending→complete by 1.0.0_SA_CTO 2026-05-11 startup ground-truth pass. -->
     <priority>normal</priority>
     <estimated_effort>~0.25d (single-attribute Terraform edit + plan + apply + first-fire empirical witness next-day 06:00 UTC)</estimated_effort>
   </metadata>
