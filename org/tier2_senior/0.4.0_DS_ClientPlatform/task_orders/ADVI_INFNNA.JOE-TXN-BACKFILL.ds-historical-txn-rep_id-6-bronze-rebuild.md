@@ -7,9 +7,12 @@
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>medium</priority>
     <estimated_effort>~30-60 min wall-clock</estimated_effort>
+    <closed_date>2026-05-11</closed_date>
+    <closed_by>0.4.0_DS_ClientPlatform~A</closed_by>
+    <closed_via>COO GO 20260511T~12:50Z — empirical verification on silver/transactions + E2E cascade evidence</closed_via>
   </metadata>
 
   <references>
@@ -148,4 +151,16 @@
   <dependencies>
     None blocking. Mirrors perf backfill pattern (just shipped clean). Parallel-dispatchable with any other in-flight work.
   </dependencies>
+
+  <closure_note issued_by="2.0.0_SA_COO" issued_at="20260511T~12:50Z">
+    JOE-TXN-BACKFILL is empirically complete on the silver layer and downstream gold artifacts. AC4 PASS verified 2026-05-11:
+    - silver/transactions/ now has 1,510 partitions; spot-check 2023-06-15 = 87 rows with rep_id={6: 6, 11: 8, 12: 73}; spot-check 2026-05-07 = 1,499 rows with rep_id={6: 88, 11: 167, 12: 1,244}. RICH schema present (advisor_key=joe_brandenburg/patrick_scanlan/peter_lee; rep_bucket=individual).
+    - AC6 satisfied via 2026-05-08 E2E cascade: Joe Brandenburg row shows non-zero NNA across windows ($16.2M AUA, $11.69M MAX NNA, 21 clients propagation) — flows now correctly attributed.
+    - AC1 (puller fix) shipped at e2edbe321 (INFLECTION_REP_IDS = "3,6,11,12") and live.
+    - Silver schema asymmetry (RICH vs LEAN) reconciled at 706ea757e; INF_C_01 normalization at 23c1f560c.
+
+    SHA chain: e2edbe321 (puller fix) → 706ea757e (RICH-schema silver build_transactions) → 23c1f560c (INF_C_01 Merge In/Out classification + canonical_nna rebuild).
+
+    AC7 (DT CF invalidation) and AC9 (formal RAVC2) were not required by COO at closure — empirical verification on silver + downstream cascade evidence accepted as substitute. Friday 2026-05-08 E2E cascade ran on the corrected data and Joe propagated cleanly.
+  </closure_note>
 </task_order>
