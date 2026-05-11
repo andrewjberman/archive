@@ -8,7 +8,7 @@
     <secondary>0.7.0_AE_CloudOps</secondary>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>in_progress</status><!-- Authored sprint mode 2026-05-05T~21:15Z post PRD ADVI_INFREL v0.1 ship (commit 64ea399a3). Flipped staged→pending 2026-05-06 by COO session 59 dispatch. AE 0.6.1 LEAD per PRD §6 + project JSON lane_note (Inflection-specific surface knowledge); AE 0.7 SECONDARY on EventBridge metrics + S3 ObjectCreated event audit. COO GO issued 20260506T~1415Z post AE 0.6.1 RAVC2. Phase 0 RCA COMPLETE 2026-05-06: MULTI-CLASS (a) partial + (c). Phase 1 Fix A (AE 0.7 commit 263cd08ca) + Fix C (commit e38f2707e + 1b47a4e08 + 7806a14a5, inf-pipeline-v1.7.21, terraform 0-diff, comp-iam clean) shipped. Fix D (orion_tax_dim.py exit=2 = ExcelReports/Verbose POST failed) DS~B lane; Fix C alarm will surface. Fix B (performance_dim) 3 active consumers (INF_D_00c + INF_D_02 + INF_D_04); Option 1 ruling CTO 20260506T140423Z; INFREL.001b TO authored. RAVC5 partial close ACCEPTED by COO 20260506T~1410Z; final RAVC6 close after 24h empirical window + Fix B INFREL.001b dispatch. -->
+    <status>complete</status><!-- COO RAVC6 ACK 20260511T190420Z. All fix classes shipped. Lambda resync deployed 2026-05-11 (commit 2cc80d1ea, inf-pipeline-v1.7.46): Guard B retired, accounts_v2 INFNNA filter, SILVER-ID-DTYPE-UNIFY. Performance OK 3 consecutive days. AC1 empirical confirmation 2026-05-12 chain run. -->
     <priority>highest</priority>
     <estimated_effort>~0.25-0.5d investigation + ~0.5-1d fix; depends on root-cause class</estimated_effort>
   </metadata>
