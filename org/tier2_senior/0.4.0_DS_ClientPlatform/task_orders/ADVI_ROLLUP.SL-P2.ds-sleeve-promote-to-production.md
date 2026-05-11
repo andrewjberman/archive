@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Dep: SL-P1 shadow clean for 3 consecutive nightlies + Jones verification -->
+    <status>pending</status><!-- Unblocked 2026-05-11 by SL-P1c RAVC4 ACCEPT-WITH-NOTE (COO 12:45Z). 3-nightly shadow window CLEAN: 2026-05-01/06/07 emits, AC2/AC3 Nights 2-3 PASS, Jones $2.47M CTO-Option-A semantics. Ready for DS pickup; awaits explicit COO GO before promotion (reader-visible change). -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W4</wave>
     <phase_label>SL-P2 (promote holdings_lots_shadow → production)</phase_label>

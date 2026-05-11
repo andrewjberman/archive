@@ -8,11 +8,14 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <routed_by>0.4.0_DS_ClientPlatform~B (self-authored per COO directive 2026-05-01)</routed_by>
     <issued_date>2026-05-01</issued_date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>high</priority>
     <wave>W4</wave>
     <phase_label>SL-P1c (denominator fix + re-emit gate)</phase_label>
     <estimated_effort>0.5d (fix 2h + dry-run 1h + 3-nightly-wait async)</estimated_effort>
+    <closed_date>2026-05-11</closed_date>
+    <closed_by>0.4.0_DS_ClientPlatform~A</closed_by>
+    <closed_via>RAVC4 ACCEPT-WITH-NOTE — 2.0.0_SA_COO 20260511T~12:45Z</closed_via>
   </metadata>
 
   <references>
@@ -210,4 +213,25 @@
     <rule>Do NOT skip the Jones dry-run assertion. The Jones check at 0.00% delta was the original correctness proof; restoring it (to cash-only post-fix) is the gate.</rule>
     <rule>Do NOT skip cohort drift investigation — document even if non-blocking.</rule>
   </do_not>
+
+  <closure_note issued_by="2.0.0_SA_COO" issued_at="20260511T~12:45Z">
+    SL-P1c AC6 satisfied via 3 distinct &gt;50KB nightly emits. Architectural caveat: Night 1 (2026-05-01) emit used pre-revert Fix B aggressive (cash-only target_mv); Nights 2-3 (2026-05-06, 2026-05-07) used CTO Option A revert (e3463bffa) + HLOT2 df.attrs preservation (6424b29ab). AC2/AC3 spot-checks performed against Nights 2-3 only (post-revert canonical). Discriminated-path revisit parked as ADVI_ROLLUP standing-backlog per AC2 revision 2026-05-08.
+  </closure_note>
+
+  <ravc4_summary>
+    <sha_chain>7c9f1b13c (orig Fix B, 2026-05-01 18:11Z) → e3463bffa (CTO Option A revert, 2026-05-05 13:00Z) → 6424b29ab (HLOT2 df.attrs preservation, 2026-05-07 16:10Z)</sha_chain>
+    <emit_table>
+      <emit date="2026-05-01" bytes="62347" etag="f5b670f4fe095fb35876ebb308898602" wrote_at="2026-05-05T04:27:35Z" arch="pre-revert Fix B aggressive"/>
+      <emit date="2026-05-06" bytes="113366" etag="31696cdbef46061d8f1344159c34ae6f" wrote_at="2026-05-08T04:30:31Z" arch="post-revert + HLOT2 attrs fix"/>
+      <emit date="2026-05-07" bytes="111281" etag="b218cd07ff5e87d0cb772b7f961b347a" wrote_at="2026-05-11T04:27:41Z" arch="post-revert + HLOT2 attrs fix"/>
+    </emit_table>
+    <cohort_counts>
+      <date d="2026-05-01" rows="593" accts="449" firm_mv_usd="1089461" jones_mv_usd="21542" jones_lots="1"/>
+      <date d="2026-05-06" rows="1203" accts="458" firm_mv_usd="46340649" jones_mv_usd="2488563" jones_lots="4"/>
+      <date d="2026-05-07" rows="1221" accts="457" firm_mv_usd="49810495" jones_mv_usd="2462707" jones_lots="4"/>
+      <stable_cross_date>448 accounts present on all 3 dates; Nights 2-3 cohort delta -1 (within ±5).</stable_cross_date>
+    </cohort_counts>
+    <jones_spot_check>Nights 2-3 ~$2.47M ± 1% (4 non-vetoed lots: IEMG/DIVZ/SPYM-class + cash floor). Matches AC2 CTO Option A revised semantics.</jones_spot_check>
+    <pure_sleeve_spot_check>4 of top-5 non-Jones accts within 1% night-over-night: z0815250401 (-0.90%), z0820121161 (-0.99%), z0813461901 (-0.78%), z0820335091 (-0.77%). 5th (z0820641271 $11K→$1.14M) is real account state transition, not fix regression.</pure_sleeve_spot_check>
+  </ravc4_summary>
 </task_order>
