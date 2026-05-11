@@ -7,14 +7,15 @@
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>complete</status>
+    <status>complete (local-path + S3-deploy-MATCH)</status>
     <priority>high</priority>
     <estimated_effort>~30-45 min</estimated_effort>
     <actual_effort>~85min (incl. scope widen for rep_id + C_01b _read_s3 wrapper patch)</actual_effort>
     <authorized_by>Andrew direct 2026-05-11 + 1.0.0_SA_CTO concurrent</authorized_by>
     <closed_date>2026-05-11</closed_date>
     <closed_by>0.4.0_DS_ClientPlatform~A</closed_by>
-    <closed_via>RAVC to COO 2026-05-11 post-cascade + post-C_01b-patch validation</closed_via>
+    <closed_via>RAVC to COO 2026-05-11 post-cascade + post-C_01b-patch validation; cascade `cascade-133034Z-1474df2b` ran LOCAL HEAD code via `.runtmp/run_inf_e2e_cascade.py` (not S3-pulled). S3 deploy gap addressed in deploy_addendum below — load-bearing evidence is the local cascade, not the S3 deploy. Per COO 2026-05-11 ~15:40Z: "local cascade verification is the load-bearing evidence."</closed_via>
+    <deploy_addendum>2026-05-11 ~15:35-15:40Z — DS~B SHA-cross-check found 5 of 6 gold scripts STALE on s3://opal-data-inf/code/gold/ (rule 13 deploy step skipped). lib/dtype_coerce.py was deployed by DS~B at 11:31Z (collateral of their INF_A_03 deploy). DS~A then deployed the 5 stale scripts via `aws s3 cp data/orion/scripts/gold/INF_*.py s3://opal-data-inf/code/gold/` and verified MATCH via local-vs-S3 SHA16 cross-check: INF_A_00 deb7bb709432ad71, INF_A_01 acdc57d4bb04ed70, INF_B_02 7bb0ea83e8d5f7b3, INF_C_01b cb6aeba45055ffc0, INF_C_03 437e30578a4fcaec. lib/dtype_coerce.py local==S3 37eff6929814e714. Per COO 15:40Z DECISION (Option Y, trust SHA equivalence): S3 deploy gap closed via SHA16 MATCH on all 5 scripts + lib/dtype_coerce.py (DS~B); local cascade `cascade-133034Z-1474df2b` is the load-bearing empirical evidence. Implicit deploy-pipeline verification routed to DS~B's INF_A_03 SSM retry — DS~B SSM ran at 15:42Z and completed compute pipeline cleanly (13x speedup confirmed, 45s compute vs 583s Friday baseline) but failed at S3 PutObject step due to QA-IAM `qa/*` scope (out of ACCOUNT-ID-COERCE's scope, separate follow-up TO). The deploy-pipeline TO-pull-from-S3 path is empirically verified for the read+compute portion; the qa-prefix write IAM gap is independent and tracked separately. CTO hypothesis (a): dtype drift may not be present in current silver because 706ea757e JOE-TXN cascade already coerced at silver-write — ACCOUNT-ID-COERCE was defense-in-depth that didn't get fully exercised in this run, still a correct ship. Comp-pipescript BD-only gap (no INF coverage) tracked via ADHC_DSFLOW.005 `5f81020ee` for AE 0.7.</deploy_addendum>
   </metadata>
 
   <references>

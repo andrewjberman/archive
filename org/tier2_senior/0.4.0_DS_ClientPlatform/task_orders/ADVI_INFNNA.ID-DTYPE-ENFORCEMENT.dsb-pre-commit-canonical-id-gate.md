@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>staged</status>
+    <status>complete</status><!-- Closed 2026-05-11 by DS~B. Gate committed 7b6c0523d. 3/3 fixtures pass. Corpus miss (convert_performance_to_silver.py) routed to DS~A. CLAUDE.md rule 14 pending CTO ratification (follow-up commit). RAVC2 delivered to COO. AE unblocked on DSFLOW.005. -->
     <priority>medium</priority>
     <estimated_effort>~1-2h</estimated_effort>
     <authorized_by>Andrew direct 2026-05-11 ("we need to be rigid on it moving forward")</authorized_by>
