@@ -97,6 +97,13 @@
     7. **Empirical match within ±5%** of Friday baseline (Joe $16.2M / 21 clients).
     8. **CF invalidation** ID captured.
     9. **RAVC2 delivered** with hypothesis-confirmed metadata.
+    10. **Root-cause class surfaced** (CTO addition 2026-05-11): in RAVC2, explicitly classify the root cause as one of:
+        - `filter` (e.g., snapshot-date or temporal filter dropping Joe)
+        - `allowlist` (rep_id or rep_bucket hardcoded list missing 6/individual)
+        - `publisher` (advisor-publisher Lambda fan-out doesn't reach Joe)
+        - `other` (with brief description)
+
+        Pattern note: this is the 2nd Joe-rep_id=6 attribution bug in 1 week (after INFNNA.001 INFLECTION_REP_IDS expansion). If a 3rd Joe-bug surfaces within 2 weeks, COO will trigger `ADVI_INFJOEAUDIT` repo-wide audit project. Root-cause class enables sweep-detection across other downstream consumers in that class.
   </acceptance_criteria>
 
   <blocking>

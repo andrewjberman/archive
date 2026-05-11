@@ -102,6 +102,9 @@
     6. **Silver-side advisory** documented in RAVC (PASS/FAIL on the &lt;1% / &gt;5% threshold).
     7. **Runner-telemetry tool** lives in `.tools/` (promoted from staging path if still pending).
     8. **RAVC delivered to COO** with SHA chain, ETag set (if any platinum writes downstream were re-emitted), and quarterly-audit-baseline confirmation.
+    9. **Leaderboard.json post-cascade check** (CTO addition 2026-05-11): after cascade rerun completes 37/37 OK, read `s3://opal-data-inf/platinum/firm/leaderboard.json`. Spot-check for Joe Brandenburg entry alongside Patrick/Peter/IWM. Include result in RAVC. This is the conditional gate for LEADERBOARD-JOE-ABSENT TO:
+       - **Joe present** → surface in RAVC "leaderboard.json contains Joe — LEADERBOARD-JOE-ABSENT closes as RESOLVED-BY-CASCADE."
+       - **Joe absent** → surface in RAVC "leaderboard.json missing Joe — LEADERBOARD-JOE-ABSENT executes."
   </acceptance_criteria>
 
   <blocking>
