@@ -7,7 +7,7 @@
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>active</status>
+    <status>complete</status>
     <priority>P1 — parity gap (parties read as 4th advisor)</priority>
     <authorized_by>Andrew GO on ADVI_INFTGT 2026-05-11; COO Q3 default "Unassigned" — Andrew can override post-demo prep</authorized_by>
   </metadata>
