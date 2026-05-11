@@ -13,7 +13,7 @@
     <completed_date>2026-05-11</completed_date>
     <completed_commit>63358ee24 (TF rule) + cloudwatch-alarms.tf CT-enabled comment update (this session)</completed_commit>
     <completed_by>0.7.0_AE_CloudOps</completed_by>
-    <completion_note>EventBridge rule FIRMSEP-s3-direct-access-bypass deployed + ENABLED. CT S3 data events enabled 2026-05-11 per COO GO (ReadOnly selector on opal-data-bd + opal-data-inf). Empirical bypass test (aws s3api get-object from non-CF context): GetObject submitted ~19:39Z; EventBridge fire pending CT propagation (~5min). AC4 PASS pending — rule fired confirmed in RAVC.</completion_note>
+    <completion_note>EventBridge rule FIRMSEP-s3-direct-access-bypass deployed + ENABLED. CT S3 data events enabled 2026-05-11 per COO GO (ReadOnly selector on opal-data-bd + opal-data-inf). Empirical bypass test (aws s3api get-object from non-CF context): GetObject submitted ~19:39Z. AC4 PASS CONFIRMED: TriggeredRules=21, Invocations=21 (0 failed) across 19:40-19:45Z windows. SNS delivery to opal-infrastructure-alerts: 100%. All ACs DONE.</completion_note>
   </metadata>
 
   <references>
