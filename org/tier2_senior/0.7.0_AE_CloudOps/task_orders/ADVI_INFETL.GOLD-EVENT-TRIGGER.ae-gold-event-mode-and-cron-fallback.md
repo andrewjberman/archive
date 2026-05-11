@@ -7,9 +7,13 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-07</issued_date>
-    <status>active</status>
+    <status>complete</status>
     <priority>high</priority>
     <estimated_effort>~0.5d Lambda code + Terraform</estimated_effort>
+    <completed_date>2026-05-11</completed_date>
+    <completed_commit>4c73ad30e (eventbridge cron DISABLED) + 9ddcb5d35 (CHANGELOG)</completed_commit>
+    <completed_by>0.7.0_AE_CloudOps</completed_by>
+    <completion_note>Lambda code already complete (event+cron path, idempotency, mode marker). Terraform: inf-canonical-prices-daily flipped DISABLED (was ENABLED drift). IAM: InvokeGoldTrigger already in aggregator role. Tag: inf-pipeline-v1.7.48. All 3 empirical tests PASS.</completion_note>
   </metadata>
 
   <references>
