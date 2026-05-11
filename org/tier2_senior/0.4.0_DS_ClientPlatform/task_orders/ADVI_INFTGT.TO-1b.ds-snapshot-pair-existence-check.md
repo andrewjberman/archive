@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>active</status>
+    <status>complete</status>
     <priority>P1 — parity gap (not partner-blocking; current TO-1 ship covers demo)</priority>
     <authorized_by>CTO Q4 ruling 2026-05-11 (20260511T191055Z) — ACCEPT P0 ship a1594ae69 + AUTHORIZE P1 follow-up. Andrew GO on ADVI_INFTGT 2026-05-11.</authorized_by>
   </metadata>
