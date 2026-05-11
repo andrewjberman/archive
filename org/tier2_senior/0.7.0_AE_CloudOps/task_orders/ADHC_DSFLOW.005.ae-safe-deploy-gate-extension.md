@@ -7,7 +7,9 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed_date>2026-05-11</completed_date>
+    <completed_commit><!-- pending CLAUDE.md co-sign; commit follows CTO ACK --></completed_commit>
     <priority>high</priority>
     <estimated_effort>~4-6h (design + implementation + INF coverage + tests + memory entry)</estimated_effort>
     <authorized_by>1.0.0_SA_CTO ratified 2026-05-11 (workspace-wide scope; AE 0.7 owner per .tools/ git-hooks precedent — safe-commit.sh OWNPTH.007, git-hooks install OWNPTH.003, ds-commit-gate.sh DSFLOW.001)</authorized_by>
