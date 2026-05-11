@@ -80,14 +80,26 @@
     </step>
 
     <step>
-      **Rebuild affected silver partitions — surgical.** Identify which dims currently have non-Int64 ID columns (per Step 1 matrix). Rebuild those dims only. Use the existing per-date dispatcher pattern (mirror PERFDIM-CREATOR ThreadPoolExecutor 64-worker pattern).
+      **Full silver rebuild — Andrew directive 2026-05-11.** Andrew's read: "the whole Inflection data set isn't even that big, which means that even if we do full rebuilds of all this stuff, it shouldn't really take a meaningful amount of time."
 
-      Likely rebuild candidates (most expensive — defer or split if needed):
-      - `silver/transactions/` (1,510 partitions — Friday's JOE-TXN backfill state, all str)
-      - `silver/api_dims/accounts_v2/` (7 snapshots — small)
-      - Any other dim with str ID columns
+      Rebuild ALL silver dims with the new canonical Int64 enforcement applied uniformly. Use the existing per-date dispatcher pattern (mirror PERFDIM-CREATOR ThreadPoolExecutor 64-worker pattern). Per-dim:
 
-      **DO NOT rebuild dims that already write Int64** (positions_mv, etc.) — saves wall-clock.
+      - `silver/transactions/` — 1,510 partitions
+      - `silver/api_dims/accounts_v2/` — all snapshot dates (currently 7 — backfill to frontier if SILVER-ACCOUNTS-HIST hasn't yet)
+      - `silver/api_dims/positions_mv/` — all snapshot dates
+      - `silver/api_dims/performance/` — all snapshot dates
+      - `silver/api_dims/tax_realized/` — all per-date partitions
+      - `silver/api_dims/billing/` — all
+      - `silver/api_dims/activity/` — all
+      - `silver/api_dims/household/` — all
+      - `silver/api_dims/assets_v2/` — 1 snapshot
+      - Any other dim discovered in Step 1 audit
+
+      Rationale for full rebuild over surgical:
+      - Eliminates any latent inconsistency in dims we haven't audited at column level (other than ID cols, other columns may have undetected drift)
+      - Establishes a single uniform-shape silver corpus
+      - Inflection data volume is small enough that wall-clock is tolerable
+      - Subsequent SILVER-ID-DTYPE-ENFORCEMENT pre-commit gate can be validated against a clean baseline
 
       Document each rebuild's partition count + wall-clock + soft-fail rate.
     </step>
@@ -141,7 +153,7 @@
     3. **Header convention comment** in `convert_orion_api_to_silver.py`.
     4. **All silver builders** call `coerce_silver_ids` before return; conflicting explicit casts (e.g., accounts_v2 astype(str)) removed.
     5. **Pre-commit gate** PASS on every file edit.
-    6. **Affected dims rebuilt** with documented partition counts + soft-fail rates. Unaffected dims left alone (don't waste wall-clock).
+    6. **ALL silver dims rebuilt** with canonical Int64 enforcement (Andrew directive 2026-05-11 — full rebuild over surgical). Documented partition counts + wall-clock + soft-fail rates per dim.
     7. **Validation cascade** 37/37 OK with wall-clock within ±10% of ACCOUNT-ID-COERCE baseline.
     8. **Gold-side coerce_id_columns** disposition documented (recommendation: keep as belt-and-suspenders).
     9. **Memory entry** drafted (canonical Int64 convention + reasoning).
