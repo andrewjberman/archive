@@ -7,11 +7,15 @@
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>pending-conditional</status>
+    <status>complete-resolved-by-cascade</status>
     <priority>high</priority>
     <estimated_effort>~1-2h (if executed)</estimated_effort>
+    <actual_effort>~5min (gate observation; no execution required)</actual_effort>
     <authorized_by>Andrew direct 2026-05-11 (approved COO recommended routing)</authorized_by>
     <execution_gate>OBSERVE after ACCOUNT-ID-COERCE cascade re-run completes. IF Joe present in leaderboard.json post-cascade → close as RESOLVED-BY-CASCADE (no execution). IF Joe absent post-cascade → execute this TO.</execution_gate>
+    <closed_date>2026-05-11</closed_date>
+    <closed_by>0.4.0_DS_ClientPlatform~A</closed_by>
+    <closed_via>RESOLVED-BY-CASCADE per execution-gate (Joe present in leaderboard.json post-ACCOUNT-ID-COERCE cascade)</closed_via>
   </metadata>
 
   <references>
@@ -117,4 +121,12 @@
 
     Visibility: this is a portal-visible correctness bug. Andrew aware. CF invalidation is required-not-optional once fix lands.
   </notes>
+
+  <closure_note>
+    Closed 2026-05-11 as RESOLVED-BY-CASCADE per execution gate. Post-ACCOUNT-ID-COERCE cascade `cascade-133034Z-1474df2b` regenerated `s3://opal-data-inf/platinum/firm/leaderboard.json` (generated_at 2026-05-11T14:45:12Z, INF_D_00c rc=0/45.6s). Joe Brandenburg now present in all 3 windows:
+      QTD: AUA $16,430,886  NNA $206,725   clients=21
+      YTD: AUA $16,430,886  NNA $234,581   clients=21
+      MAX: AUA $16,430,886  NNA $11,685,980  clients=21 (new=21)
+    Entry count is 4 in all windows (Peter Lee, Patrick Scanlan, Joe Brandenburg, Inflection Wealth Management). The D_00c filter logic and rep_bucket mapping appear functionally correct; the root cause of Joe's absence in the prior `decaaf523`-era leaderboard was almost certainly a downstream effect of the gold-cascade dtype-drift failure on INF_C_01b + INF_C_03 which blocked role_aua + account_performance refresh for Joe. With the ACCOUNT-ID-COERCE fix, the full chain regenerates cleanly. No D_00c debug execution required. CF invalidation may still be advisable if any cached leaderboard is served to clients — flag to AE 0.7 if needed (not in this TO's scope to dispatch).
+  </closure_note>
 </task_order>

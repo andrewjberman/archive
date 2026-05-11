@@ -7,10 +7,14 @@
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>pending</status>
+    <status>complete</status>
     <priority>high</priority>
     <estimated_effort>~30-45 min</estimated_effort>
+    <actual_effort>~85min (incl. scope widen for rep_id + C_01b _read_s3 wrapper patch)</actual_effort>
     <authorized_by>Andrew direct 2026-05-11 + 1.0.0_SA_CTO concurrent</authorized_by>
+    <closed_date>2026-05-11</closed_date>
+    <closed_by>0.4.0_DS_ClientPlatform~A</closed_by>
+    <closed_via>RAVC to COO 2026-05-11 post-cascade + post-C_01b-patch validation</closed_via>
   </metadata>
 
   <references>
@@ -120,4 +124,8 @@
 
     CTO's quarterly cascade audit pattern (per Friday EOD) uses this run's outcome as the new regression baseline. Make sure telemetry path follows the daily-folder + version-serial convention (`.runtmp/telemetry/YYYY-MM-DD/{runner}/{script}/v{NNN}-{HHMMSSZ}-{run_id}.jsonl`).
   </notes>
+
+  <closure_note>
+    Closed 2026-05-11. All 6 originally-failing scripts PASS. Scope widened during execution: actual dtype drift is on (account_id, rep_id) not just account_id. INF_C_01b required a second-order fix — coerce inside `_read_s3` wrapper (pre-merge) instead of only pre-write — because it joins gold artifacts whose dtypes can mismatch. Cascade `cascade-133034Z-1474df2b` ran 36/37 OK; C_01b standalone re-run with patched wrapper exit 0 (2,418 partitions written). Effective 37/37. AC9 (LEADERBOARD-JOE-ABSENT) resolved-by-cascade — Joe present in leaderboard.json across QTD/YTD/MAX. Helper `data/orion/scripts/gold/lib/dtype_coerce.py` exports `coerce_account_id` (single-col, back-compat) and `coerce_id_columns(df, cols=DEFAULT_ID_COLS)` (multi-col, canonical). Total wall 79.5min (+12% vs Friday 70.9min baseline); attributed to Int64-vs-object merge WARN overhead that SILVER-ID-DTYPE-UNIFY `81c9212d0` will eliminate. Telemetry: `.runtmp/telemetry/2026-05-11/inf-gold-layer-runner/`. Session log: `org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-05-11/DS_A_session4_account_id_coerce_2026-05-11.md`.
+  </closure_note>
 </task_order>
