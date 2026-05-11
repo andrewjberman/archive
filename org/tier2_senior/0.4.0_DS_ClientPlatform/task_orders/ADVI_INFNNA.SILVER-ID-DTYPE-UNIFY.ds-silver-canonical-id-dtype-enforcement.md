@@ -7,10 +7,14 @@
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>staged</status>
+    <status>complete</status>
     <priority>medium</priority>
     <estimated_effort>~2-4h (audit + helper + builder updates + partial rebuild)</estimated_effort>
+    <actual_effort>~2h (audit + helper + builder updates + in-place migrate via Option A pivot + Step 5 cascade)</actual_effort>
     <authorized_by>Andrew direct 2026-05-11 (follow-up to ACCOUNT-ID-COERCE root-cause analysis)</authorized_by>
+    <closed_date>2026-05-11</closed_date>
+    <closed_by>0.4.0_DS_ClientPlatform~A</closed_by>
+    <closed_via>RAVC4 to COO 17:36Z. Gates 1-10 ✅ per CTO+COO pragmatic close (35/37 OK + 2 documented transient S3 SSL failures on 2019-stale-era keys ratified as Gate 1; INF_C02_C03_TLS_HARDEN authoring as separate follow-up TO). In-place dtype migrate executed (9,296/9,296 ok, 6.8min wall, ~50x faster than full bronze rebuild). Int64 sample-validation 12/12 PASS. Wall +6.9% vs ACCOUNT-ID-COERCE baseline (within ±10% tolerance). Commits f6b7238a9 + 8b4c59861. Memory entry shipped with dtype-only-fix vs transformation-change taxonomy.</closed_via>
   </metadata>
 
   <references>
