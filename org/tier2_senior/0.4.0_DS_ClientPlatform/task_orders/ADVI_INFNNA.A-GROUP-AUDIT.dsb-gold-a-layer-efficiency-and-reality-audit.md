@@ -122,6 +122,7 @@
     6. **Findings document** at canonical path; cleanly structured.
     7. **Top-3 follow-up TO recommendations** with effort estimates + expected savings.
     8. **RAVC delivered** with executive summary + top findings.
+    9. **Scope-creep guard** (CTO addition 2026-05-11): all recommendations crystallize as separate follow-on TO drafts (status `staged`, not dispatched). NO implementation in this TO — even for "obvious" wins. Same pattern as V4.OPS triage (`.017` investigation → `.019-.024` implementations after CTO/COO ratification of each finding). Implementation TOs get authored by COO after RAVC review; DS~B does not self-dispatch follow-ons.
   </acceptance_criteria>
 
   <blocking>
