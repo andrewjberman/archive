@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- Closed 2026-05-11 by DS~B. Pragmatic Option B': INF_A_02 body replaced with no-op + deprecation log (early sys.exit 0). gold_freshness_config.yaml entry annotated as deprecated (cadence=deprecated, warn_age=999999). 2 downstream consumers (INF_C_01b + INF_C_08) already gracefully handle missing/empty fee_rate_history. Existing S3 stub remains in place (no destructive aws s3 rm). Catalog removal in dispatcher = AE follow-up (not blocking). Session log: see TXN-CACHE log (DS_B_inf_a_layer_txn_cache.md) for sequence context. -->
     <priority>low</priority>
     <estimated_effort>~30 min (verify no consumer + pick option + ship)</estimated_effort>
     <authorized_by>Andrew direct 2026-05-11 — "GO on all 4 in your recommended sequence"</authorized_by>
