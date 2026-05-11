@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- Closed 2026-05-11 by DS~B. Commit 4186b88f7. SSM telemetry on inf-gold-qa-runner: A-layer wall 60s (was ~660s Friday) = 11x speedup. Materialize=12s, A_00=2s, A_01=1s, A_03=20s (with ProcessPool from prior TO). Cache hit confirmed via "CACHE HIT: /tmp/inf_silver_txn_cache.parquet". Combined cache-hit reads ~3s vs AC target <15s. Parity max_diff=0.0 on 2026-05-07. SSM CMD 1690b61f-488c-4810-85f8-f698616ed979. Session log: org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-05-11/DS_B_inf_a_layer_txn_cache.md. -->
     <priority>medium</priority>
     <estimated_effort>~2h (architecture + per-script wiring + cascade validation)</estimated_effort>
     <authorized_by>Andrew direct 2026-05-11 — "GO on all 4 in your recommended sequence"</authorized_by>
