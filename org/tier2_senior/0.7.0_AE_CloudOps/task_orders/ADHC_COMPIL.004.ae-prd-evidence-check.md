@@ -4,7 +4,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-04-27</date>
-    <status>staged</status>
+    <status>complete</status>
+    <completed_date>2026-05-11</completed_date>
+    <completed_by>0.7.0_AE_CloudOps</completed_by>
+    <completion_note>prd-evidence-check.sh shipped to .tools/; all 4 ACs pass. Baseline: 38 PASS / 127 WARN / 165 PRDs. Python3 path in --baseline (bash grep spawning prohibitively slow on Windows). Coverage appended to compiler-tools-log.md.</completion_note>
     <project_code>ADHC_COMPIL</project_code>
     <theme>C stretch</theme>
     <prd_ref>docs/architecture/ADHC_COMPIL.md §6.2.4 + §6.3 AC4 (commit 172470a8)</prd_ref>
