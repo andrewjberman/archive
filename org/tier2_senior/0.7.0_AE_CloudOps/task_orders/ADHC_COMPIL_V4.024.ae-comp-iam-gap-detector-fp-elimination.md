@@ -7,7 +7,9 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed_date>2026-05-08</completed_date>
+    <completed_commit>4fd343b45</completed_commit>
     <priority>high</priority>
     <estimated_effort>~1d catalog (likely ~30-45min wall-clock per under-budget pattern)</estimated_effort>
   </metadata>

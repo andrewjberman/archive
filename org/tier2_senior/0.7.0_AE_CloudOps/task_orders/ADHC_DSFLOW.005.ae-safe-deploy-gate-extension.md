@@ -9,7 +9,7 @@
     <issued_date>2026-05-11</issued_date>
     <status>complete</status>
     <completed_date>2026-05-11</completed_date>
-    <completed_commit><!-- pending CLAUDE.md co-sign; commit follows CTO ACK --></completed_commit>
+    <completed_commit>b09bda69d (impl) + 11f521fa8 (hook PATH fix) + 3bc9eb72f (CLAUDE.md ratify)</completed_commit>
     <priority>high</priority>
     <estimated_effort>~4-6h (design + implementation + INF coverage + tests + memory entry)</estimated_effort>
     <authorized_by>1.0.0_SA_CTO ratified 2026-05-11 (workspace-wide scope; AE 0.7 owner per .tools/ git-hooks precedent — safe-commit.sh OWNPTH.007, git-hooks install OWNPTH.003, ds-commit-gate.sh DSFLOW.001)</authorized_by>
