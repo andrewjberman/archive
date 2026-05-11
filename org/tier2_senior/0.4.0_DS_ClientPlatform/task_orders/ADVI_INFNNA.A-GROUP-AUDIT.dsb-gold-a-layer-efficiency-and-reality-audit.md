@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>pending</status>
+    <status>complete</status><!-- Closed 2026-05-11 by DS~B. Findings doc: org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-05-11/DS_B_a_group_audit_findings.md. 3 staged TO drafts in task_orders/ (INF_A_03_PARALLEL-EXPAND, INF_A_LAYER_TXN-CACHE, INF_A_02_RETIRE) per AC9. RAVC4 to COO 20260511T~ZZ. -->
     <priority>medium</priority>
     <estimated_effort>~3-5h (read + audit + document; no script rewrites in this TO)</estimated_effort>
     <authorized_by>Andrew direct 2026-05-11 ("A Group of gold runner scripts may not actually be dialed into the reality of the data... could be failing and taking unnecessary time/compute")</authorized_by>
