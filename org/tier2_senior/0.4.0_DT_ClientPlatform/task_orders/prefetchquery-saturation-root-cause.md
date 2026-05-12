@@ -6,11 +6,14 @@
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-12</issued_date>
-    <status>pending</status>
-    <priority>LOW — not blocking ADVI_SHARED Phase 1; PROD unaffected</priority>
-    <estimated_effort>~0.5-1d investigation; re-ship effort TBD post-RCA</estimated_effort>
-    <dispatch_held>false</dispatch_held>
-    <dispatch_note>Backlog-rot risk per DE 0.4 — formal TO replaces "standing backlog" status. Pick up at convenience after ADVI_SHARED Phase 1 wave settles.</dispatch_note>
+    <status>complete</status>
+    <completed_date>2026-05-13</completed_date>
+    <closure_disposition>SUPERSEDED-BY-SHARED.006</closure_disposition>
+    <closure_note>SUPERSEDED 2026-05-13 ~00:25Z per CTO RAVC4 RATIFY (00:15Z). CTO + DT + RD converged on firmOverride-key-mismatch as the saturation root cause: AuthContext.prefetchQuery resolves firmOverride='bd'/'inf'/null at one moment; component mount resolves it to a different literal; React Query cache keys diverge; dedupe fails; second fetch competes on same HTTP/1.1 connection pool against cold Lambda; saturation. The fix is SHARED.006 firmOverride canonicalization (single L1 literal across all 4 namespace layers), NOT prefetch staggering / Vite proxy / HTTP/2 / staleTime tweaks. Step 6 prefetchQuery upgrade re-introduction gates on SHARED.006 ship + 24h empirical confirmation that saturation pattern doesn't recur. RCA collapses to a one-paragraph confirmation in SHARED.006's RAVC2 evidence ("RQ cache key parity between AuthContext.prefetchAdvisorIntelligence and BooksTab/Distribution useQuery consumers"). Path (a) per CTO 00:15Z framing.</closure_note>
+    <priority>LOW — superseded</priority>
+    <estimated_effort>SUPERSEDED — no separate investigation needed</estimated_effort>
+    <dispatch_held>true</dispatch_held>
+    <dispatch_note>Do not dispatch — SUPERSEDED by SHARED.006 firmOverride canonicalization per coordination path (a). SHARED.006 RAVC2 evidence will include the empirical-cache-key-parity check that this TO would have produced.</dispatch_note>
   </metadata>
 
   <references>
