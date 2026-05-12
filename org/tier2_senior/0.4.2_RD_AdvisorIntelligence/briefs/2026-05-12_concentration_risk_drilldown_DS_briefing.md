@@ -82,7 +82,9 @@ type SecurityType = 'single_stock' | 'etf' | 'mutual_fund' | 'other'
 - `top_holders`: top **10** per security by `hh_concentration_pct` descending. Ties broken by `position_value` descending.
 
 **Filtering at source:**
-- Exclude bonds, cash/money market, options. Equity-class securities only (single stocks, ETFs, MFs).
+- Include `security_type IN ('single_stock', 'etf', 'mutual_fund')` AND `asset_class IN ('equity', 'fixed_income', 'alternatives')`.
+- Exclude cash / money_market — concentration risk doesn't apply to MM funds (Andrew confirmed 2026-05-12 follow-up).
+- **CORRECTION (2026-05-12 19:53Z):** original v1 of this brief said "equity-class only" — that was wrong. Inflection's top 10 holdings have substantial fixed-income exposure (HTRB 7.1%, BAGIX 6.7%, BSIIX 5.4%) which is real concentration. Fixed income funds must be included.
 - `security_type === 'other'` is permitted as a catch-all but should be rare. Flag if >5% of securities land in `other` so we can refine the classifier.
 
 ---
@@ -160,7 +162,8 @@ For each ticker in scope (`security_type` ∈ {single_stock, etf, mutual_fund}):
 - Time series / historical drift of concentrations — separate future ask if ever.
 - Per-advisor top concentrations — exists at `platinum/advisors/{advisor_key}/top_holdings.json` already; not part of this firm-level lens.
 - Mutual fund deep-classification (active vs index, equity vs bond MF, etc.) — single bucket is enough for the toggle.
-- Bond, cash, options inclusion — explicitly out of scope; equity-class only.
+- Single bond instruments (individual corporate/treasury bonds) and options inclusion — explicitly out of scope. Bond *funds* (fixed_income asset class) ARE in scope per the §4 correction.
+- Cash / money market funds inclusion — out of scope.
 
 ---
 
