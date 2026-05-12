@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-24</date>
-    <status>staged</status><!-- COO HOLD 20260506T~1830Z — BDPLNNASCHEMA deprioritized per Andrew directive (Inflection focus). Phase 0 audit doc written at data/black_diamond/diagnostics/ROLLUP/state_schema_audit.md (preserving for when work resumes). Phase 1 implementation NOT started. -->
+    <status>complete</status>
+    <!-- CLOSED 2026-05-12 by 2.0.0_SA_COO per Andrew directive: bulk-close pending/unaddressed pre-May 2026 TOs. Inherits closure from parent project state or supersession. Re-author as new TO if work still required. --><!-- COO HOLD 20260506T~1830Z — BDPLNNASCHEMA deprioritized per Andrew directive (Inflection focus). Phase 0 audit doc written at data/black_diamond/diagnostics/ROLLUP/state_schema_audit.md (preserving for when work resumes). Phase 1 implementation NOT started. -->
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P3 — schema-alignment cleanup; low-impact; prevents future silent-wrongness class bugs</priority>
     <origin>

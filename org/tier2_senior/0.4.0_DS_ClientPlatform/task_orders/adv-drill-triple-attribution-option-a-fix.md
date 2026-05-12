@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-14</date>
-    <status>staged</status><!-- HELD 2026-04-14T23:20Z — CTO scope revision after initial GO. DS commit on CLOUD reflects prior scope ($391.66M target via rel_architect_lookup); revised target is $390.37M via account-level attribution mirroring D_00c. DS must revise + keep local; NO S3 upload until post-presentation + Andrew GO. -->
+    <status>complete</status>
+    <!-- CLOSED 2026-05-12 by 2.0.0_SA_COO per Andrew directive: bulk-close pending/unaddressed pre-May 2026 TOs. Inherits closure from parent project state or supersession. Re-author as new TO if work still required. --><!-- HELD 2026-04-14T23:20Z — CTO scope revision after initial GO. DS commit on CLOUD reflects prior scope ($391.66M target via rel_architect_lookup); revised target is $390.37M via account-level attribution mirroring D_00c. DS must revise + keep local; NO S3 upload until post-presentation + Andrew GO. -->
     <project_code>ad-hoc</project_code>
     <priority>post-presentation — Andrew GO required</priority>
   </metadata>

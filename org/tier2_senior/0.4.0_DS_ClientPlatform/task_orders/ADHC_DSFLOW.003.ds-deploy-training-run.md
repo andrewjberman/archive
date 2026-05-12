@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-21</date>
-    <status>staged</status>
+    <status>complete</status>
+    <!-- CLOSED 2026-05-12 by 2.0.0_SA_COO per Andrew directive: bulk-close pending/unaddressed pre-May 2026 TOs. Inherits closure from parent project state or supersession. Re-author as new TO if work still required. -->
     <project_code>ADHC_DSFLOW</project_code>
     <priority>P2 (passive — fires on next natural gold-script commit by any DS lane post-DSFLOW.001+002 ship)</priority>
     <sla>No fixed SLA — fires when the next gold-script commit occurs; validation completes within normal DS deploy cycle (~1-2h)</sla>

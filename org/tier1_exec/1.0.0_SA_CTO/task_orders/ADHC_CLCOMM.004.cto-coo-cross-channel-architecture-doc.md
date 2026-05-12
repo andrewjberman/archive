@@ -5,7 +5,8 @@
     <issued_to>1.0.0_SA_CTO</issued_to>
     <co_implementer>2.0.0_SA_COO</co_implementer>
     <date>2026-04-30</date>
-    <status>staged</status>
+    <status>complete</status>
+    <!-- CLOSED 2026-05-12 by 2.0.0_SA_COO per Andrew directive: bulk-close pending/unaddressed pre-May 2026 TOs. Inherits closure from parent project state or supersession. Re-author as new TO if work still required. -->
     <project_code>ADHC_CLCOMM</project_code>
     <prd_ref>docs/architecture/ADHC_CLCOMM.md (parent project) — TO-4 added 2026-04-30 per Andrew directive: "lessons learned from this process should also be used to benefit opal-agent-comms channels"</prd_ref>
     <effort>0.5 day (CTO+COO joint authoring)</effort>

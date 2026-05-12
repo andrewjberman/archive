@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- Flip to pending on BDPL_ASTDIM.W7 closure. AE may begin Phase 1 compiler pre-flight while staged. -->
+    <status>complete</status>
+    <!-- CLOSED 2026-05-12 by 2.0.0_SA_COO per Andrew directive: bulk-close pending/unaddressed pre-May 2026 TOs. Inherits closure from parent project state or supersession. Re-author as new TO if work still required. --><!-- Flip to pending on BDPL_ASTDIM.W7 closure. AE may begin Phase 1 compiler pre-flight while staged. -->
     <project_code>ADVI_ROLLUP</project_code>
     <wave>W2</wave>
   </metadata>

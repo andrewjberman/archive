@@ -5,7 +5,8 @@
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-22</date>
     <scope_expanded>2026-04-24 (COO 2.0.0_SA_COO) — added Cohort B (ORPHRELID 4 structural accounts, ~$670K AUA) per ORPHRELID closure `e28e0f5d` H1-A classification. Same BD data-ops inquiry pattern applies to both cohorts.</scope_expanded>
-    <status>staged</status>
+    <status>complete</status>
+    <!-- CLOSED 2026-05-12 by 2.0.0_SA_COO per Andrew directive: bulk-close pending/unaddressed pre-May 2026 TOs. Inherits closure from parent project state or supersession. Re-author as new TO if work still required. -->
     <project_code>ADVI_ROLLUP</project_code>
     <priority>P4 — informational; no portal gate. Combined residual ~$6.68M (Cohort A $6.013M + Cohort B $670K) within Gate 2 band. Not blocking any active TO.</priority>
     <predecessors>

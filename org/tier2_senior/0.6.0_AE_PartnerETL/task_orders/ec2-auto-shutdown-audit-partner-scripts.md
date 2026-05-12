@@ -4,7 +4,8 @@
   <issuer>2.0.0_SA_COO</issuer>
   <issued>2026-04-02</issued>
   <agent>0.6.0_AE_PartnerETL</agent>
-  <status>staged</status>
+  <status>complete</status>
+    <!-- CLOSED 2026-05-12 by 2.0.0_SA_COO per Andrew directive: bulk-close pending/unaddressed pre-May 2026 TOs. Inherits closure from parent project state or supersession. Re-author as new TO if work still required. -->
   <priority>normal</priority>
   <source>CTO directive (ad-hoc operational hygiene, no PRD)</source>
 </task_order>

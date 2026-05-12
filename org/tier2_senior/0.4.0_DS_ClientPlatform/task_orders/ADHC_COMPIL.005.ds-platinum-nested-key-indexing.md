@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-27</date>
-    <status>staged</status>
+    <status>complete</status>
+    <!-- CLOSED 2026-05-12 by 2.0.0_SA_COO per Andrew directive: bulk-close pending/unaddressed pre-May 2026 TOs. Inherits closure from parent project state or supersession. Re-author as new TO if work still required. -->
     <project_code>ADHC_COMPIL</project_code>
     <theme>D (v2)</theme>
     <prd_ref>docs/architecture/ADHC_COMPIL_V2.md §2 (commit 653b0469)</prd_ref>

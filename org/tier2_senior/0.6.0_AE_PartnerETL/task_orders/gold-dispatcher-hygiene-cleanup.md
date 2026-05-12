@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-04-15</date>
-    <status>staged</status><!-- HARD GATE: live 18:07 UTC partial chain MUST close before any edit. gold_dispatch.sh is pinned in-memory at fire time but the partial-chain helper re-reads it per iteration; editing during flight = chain corruption. -->
+    <status>complete</status>
+    <!-- CLOSED 2026-05-12 by 2.0.0_SA_COO per Andrew directive: bulk-close pending/unaddressed pre-May 2026 TOs. Inherits closure from parent project state or supersession. Re-author as new TO if work still required. --><!-- HARD GATE: live 18:07 UTC partial chain MUST close before any edit. gold_dispatch.sh is pinned in-memory at fire time but the partial-chain helper re-reads it per iteration; editing during flight = chain corruption. -->
     <project_code>ad-hoc</project_code>
     <priority>P2 (post-chain hygiene; no runtime behavior change)</priority>
   </metadata>

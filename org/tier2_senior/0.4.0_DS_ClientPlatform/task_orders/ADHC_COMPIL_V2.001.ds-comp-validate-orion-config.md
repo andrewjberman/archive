@@ -7,7 +7,8 @@
     <issued_by>0.4.0_DS_ClientPlatform~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-04-30</date>
-    <status>staged</status><!-- standing-low; no GO yet; authored per COO bundle GO 20260430 -->
+    <status>complete</status>
+    <!-- CLOSED 2026-05-12 by 2.0.0_SA_COO per Andrew directive: bulk-close pending/unaddressed pre-May 2026 TOs. Inherits closure from parent project state or supersession. Re-author as new TO if work still required. --><!-- standing-low; no GO yet; authored per COO bundle GO 20260430 -->
     <priority>LOW — standing backlog under ADHC_COMPIL v2 deferred themes</priority>
   </metadata>
 

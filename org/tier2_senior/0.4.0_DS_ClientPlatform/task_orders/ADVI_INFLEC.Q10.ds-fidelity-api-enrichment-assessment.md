@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to><!-- ~A lane per Andrew 2026-04-22 INFLEC DS reassignment -->
     <date>2026-04-24</date>
-    <status>staged</status><!-- GO post-W4.13 + W4.14 ship; INVESTIGATION-ONLY; lower priority than Q8/Q9 -->
+    <status>complete</status>
+    <!-- CLOSED 2026-05-12 by 2.0.0_SA_COO per Andrew directive: bulk-close pending/unaddressed pre-May 2026 TOs. Inherits closure from parent project state or supersession. Re-author as new TO if work still required. --><!-- GO post-W4.13 + W4.14 ship; INVESTIGATION-ONLY; lower priority than Q8/Q9 -->
     <project_code>ADVI_INFLEC</project_code>
     <priority>P3 — investigation-only; recommends defer; not blocking platinum LIVE</priority>
     <origin>
