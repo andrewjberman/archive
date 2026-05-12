@@ -8,7 +8,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
     <revised>2026-05-11 — scope flipped post-Andrew correction: $189M has always been wrong, not a coverage subset</revised>
-    <status>active</status>
+    <status>complete</status>
     <priority>P1 — parity gap (RD interim drop-subtotal covers demo; this is the architectural fix)</priority>
     <authorized_by>CTO ruling 2026-05-11 (REVISION post-Andrew direct correction); Andrew direct: "no idea why Continuous-GEO-AUA would surface 189m that number is wrong and has always been wrong"</authorized_by>
   </metadata>

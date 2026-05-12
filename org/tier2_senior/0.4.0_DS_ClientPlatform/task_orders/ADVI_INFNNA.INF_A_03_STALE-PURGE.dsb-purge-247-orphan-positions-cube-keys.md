@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>pending</status>
+    <status>deferred</status><!-- DS~A: deferred per COO 2026-05-11 21:25Z. Issued to DS~B (dsb- prefix). Superseded by DATE_CLIP + re-author. Do not execute. -->
     <priority>low</priority>
     <estimated_effort>~10 min (enumerate + confirm + delete + verify)</estimated_effort>
     <authorized_by>Andrew direct 2026-05-11 — "GO on all 4 in your recommended sequence"</authorized_by>
