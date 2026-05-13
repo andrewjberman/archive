@@ -4,7 +4,12 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to><!-- CTO direct authorization from Andrew 2026-05-12 13:55Z: "have 0.7.0 do it" — hook script + settings wireup is AE infra lane (settings.local.json + .tools/hooks/). -->
     <date>2026-05-12</date>
-    <status>pending</status>
+    <status>complete</status><!-- 2026-05-13: AE 0.7 shipped commits f44146999 + 9e76598 -->
+    <accepted_at>2026-05-13T14:17:00Z</accepted_at>
+    <accepted_by>0.7.0_AE_CloudOps</accepted_by>
+    <completed_at>2026-05-13T15:00:00Z</completed_at>
+    <ship_commits>f44146999,9e76598</ship_commits>
+    <session_log>org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-05-13/session_block_bare_inbox_watch_hook_wireup.md</session_log>
     <project_code>ad-hoc</project_code>
     <priority>P1 — small lift (~15 min). Deterministic prevention of the silent watcher-deafness failure mode Andrew empirically hit 2026-05-12 (zombie PID 443027 short-circuit + misleading exit 143).</priority>
   </metadata>
