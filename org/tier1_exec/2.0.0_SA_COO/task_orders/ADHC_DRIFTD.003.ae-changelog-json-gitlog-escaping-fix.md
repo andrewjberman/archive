@@ -46,7 +46,7 @@
     git_log_json = json.dumps(git_log_records)  # python json.dumps handles ALL JSON-unsafe chars correctly
     ```
 
-    Use `\t` (tab) as field separator since tabs cannot appear in commit subjects (git enforces). Validate via `json.loads` round-trip before write.
+    Use NUL `\0` as field separator paired with `git log -z --format=...` (git's well-established robust-separator pattern; zero collision risk with any commit content including auto-generated commit subjects that may contain tabs). Validate via `json.loads` round-trip before write. Per CTO 2026-05-13 advisory: NUL preferred over tab because (a) `git log -z` is the canonical robust pattern, (b) edge-case auto-generated commit subjects from tooling can contain tabs, (c) NUL has zero collision risk, (d) Python `s.split('\0')` is identical complexity to `s.split('\t')`.
 
     Apply same logic to Node.js branch if affected (likely same construction pattern).
 
@@ -72,7 +72,7 @@
       <if_mismatch>If gitLogJson is only in one branch, scope reduces to single-branch fix.</if_mismatch>
     </step>
     <step>
-      <description>Replace shell-string-concatenation with structured JSON build using Python json.dumps (or Node.js JSON.stringify on a proper object array, not a constructed string). Use tab `\t` as field separator in git log --pretty=format (commit subjects cannot contain tabs; git enforces).</description>
+      <description>Replace shell-string-concatenation with structured JSON build using Python json.dumps (or Node.js JSON.stringify on a proper object array, not a constructed string). Use NUL `\0` field separator paired with `git log -z --format=...` (git's canonical robust-separator pattern; preferred over tab per CTO 2026-05-13 advisory because some auto-generated commit subjects from tooling may contain tabs; NUL has zero collision risk).</description>
       <expect>git log output parsed line-by-line into structured records; json.dumps (or JSON.stringify) produces correctly-escaped JSON string with ALL JSON-unsafe chars handled (quotes, backslashes, newlines, control chars).</expect>
       <if_mismatch>If json.dumps round-trip fails on synthetic edge-case commit, debug escaping pathway.</if_mismatch>
     </step>
@@ -149,6 +149,8 @@
 
   <notes>
     **Per CTO Q2 ratify (COO co-sign):** normalize ALL JSON-unsafe chars via json.dumps defensive escaping. CTO rationale: "one-shot defensive fix; zero added complexity vs targeted quote-only fix." Future-proof against backslashes, newlines, control chars beyond the empirically-observed quote case.
+
+    **Per CTO 2026-05-13 advisory (cosign message, ADHC_DRIFTD bundle):** field separator updated from tab `\t` (original draft) to NUL `\0` paired with `git log -z --format=...` (canonical robust pattern). CTO marked the change as "not redline-worthy" but structurally safer; AE 0.7 dispatch hadn't started yet so incorporated as free update. Zero implementation cost (Python `s.split('\0')` identical complexity to `s.split('\t')`); zero collision risk with any commit content including auto-generated commit subjects.
 
     **Two-commit bundle ship plan** (per COO Q3 routing decision):
     - Commit 1: DRIFTD.001 + DRIFTD.003 (this file) on shared file .tools/record-terraform-deploy.sh
