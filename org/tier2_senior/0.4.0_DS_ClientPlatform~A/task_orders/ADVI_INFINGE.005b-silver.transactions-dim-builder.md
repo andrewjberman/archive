@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-06</issued_date>
-    <status>pending</status><!-- Dispatched session 59 via MCP GO. DS~A RAVC2 ACK received 20260506T~1500Z (session 60). Formalized here for scope clarity and acceptance criteria. -->
+    <status>complete</status><!-- Dispatched session 59 via MCP GO. DS~A RAVC2 ACK received 20260506T~1500Z (session 60). Formalized here for scope clarity and acceptance criteria. SHIPPED 2026-05-07: T-1 default-date fix fd4105bec + bronze-S3 read fix 2aaa504d9; closed per AE 0.6.1 log 59edf4bf9 + COO log 54dd08969 + 17c9a301a. Empirical close confirmed in 848f12c28 Phase 2 review 2026-05-08. Lane-copy retroactively flipped 2026-05-13 by 1.0.0_SA_CTO during startup ground-truth reconciliation. -->
     <priority>high</priority>
     <estimated_effort>~1-2h</estimated_effort>
   </metadata>
