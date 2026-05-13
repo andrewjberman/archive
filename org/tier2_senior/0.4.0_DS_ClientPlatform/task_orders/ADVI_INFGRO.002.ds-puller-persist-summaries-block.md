@@ -4,7 +4,7 @@
     <id>ADVI_INFGRO.002</id>
     <project>ADVI_INFGRO</project>
     <title>Amend pull_inflection_performance_rest.py — persist summaries block to bronze</title>
-    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-11</issued_date>
     <status>pending</status>

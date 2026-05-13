@@ -4,7 +4,7 @@
     <id>ADVI_INFGRO.001</id>
     <project>ADVI_INFGRO</project>
     <title>Build INF_C_03.performance_canonical — new silver script from bronze/performance/</title>
-    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-11</issued_date>
     <status>pending</status>

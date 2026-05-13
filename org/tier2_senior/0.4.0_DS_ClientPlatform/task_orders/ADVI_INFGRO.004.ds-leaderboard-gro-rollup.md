@@ -4,7 +4,7 @@
     <id>ADVI_INFGRO.004</id>
     <project>ADVI_INFGRO</project>
     <title>Extend INF_D_00c.portal_leaderboard — emit AUA-weighted GRO rollups per advisor + firm</title>
-    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-11</issued_date>
     <status>pending</status>
