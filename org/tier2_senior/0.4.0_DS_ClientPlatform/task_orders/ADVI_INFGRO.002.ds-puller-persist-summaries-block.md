@@ -7,8 +7,8 @@
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
     <dispatch_note>Receiver routing TBD — COO bench-state check 2026-05-12 morning. DS~A + DS~C killed or STANDDOWN 2026-05-11 ~22:31Z. Do NOT pick up this TO until COO issues GO.</dispatch_note>
     <priority>P0</priority>
     <estimated_effort>1-2 hours</estimated_effort>
