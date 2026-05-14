@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>active</status>
+    <status>complete</status>
     <priority>P1 — Stage 0 foundation; gates Stage 1 + Stage 2 TOs</priority>
     <authorized_by>Andrew global GO on ADVI_INFGRO (TWR semantic) + CTO PRD v0.1 `0f5db3046` §6.TO-000 (v0.2 amendment in flight, no scope change)</authorized_by>
   </metadata>

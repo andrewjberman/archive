@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>active</status>
+    <status>complete</status>
     <priority>P1 — gates Stage 1 .001-.006 dispatch (authoring proceeds in parallel against current bucket state)</priority>
     <authorized_by>CTO 5-item ratification table 2026-05-11 21:37Z + Andrew global GO on TWR semantic + Andrew redirect window OPEN on tax-withheld move</authorized_by>
   </metadata>
