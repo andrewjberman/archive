@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-05-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <priority>P0 — partner-visible regression on previously-working Advisor List panel; trumps .004 P2 in priority sequencing</priority>
     <sla>~30min Phase 1 empirical investigation; +~1-2h Phase 2 fix if data-side cause; fork to RD-A if FE-side cause</sla>

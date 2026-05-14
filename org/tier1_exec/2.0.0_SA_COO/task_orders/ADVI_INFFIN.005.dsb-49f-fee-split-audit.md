@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_INFFIN</project_code>
     <priority>P1 — parallel investigation feeding .003 DS~C INF emit shape normalization (Surfaces #6 + #8); audit deliverable + shape inventory; not blocking .003 first ship but feeds normalization round-trip</priority>

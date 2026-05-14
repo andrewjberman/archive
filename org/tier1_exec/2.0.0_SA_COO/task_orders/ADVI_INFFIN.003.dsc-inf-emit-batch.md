@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_INFFIN</project_code>
     <priority>P0 — bundles 3 surfaces (#2 P1 + #6 P0 + #8 P0) sharing upstream gate (silver/billing/ + per-account is_fee_paying flag); critical-path for Phase 2 RD wiring (.006) + AE chain (.007)</priority>

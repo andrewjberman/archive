@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>true</dispatch_held>
     <dispatch_unblock_condition>DRIFTD.001 + .002 + .003 both commits in two-commit bundle SHIPPED + AC PASS on each (.001 + .003 joint RAVC2; .002 separate RAVC2)</dispatch_unblock_condition>
     <project_code>ADHC_DRIFTD</project_code>

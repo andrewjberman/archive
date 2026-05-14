@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <date>2026-05-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>true</dispatch_held>
     <dispatch_unblock_condition>.003 DS~C INF emit batch RAVC2 PASS (signal that gold scripts ship + S3 SHA-MATCH on origin/CLOUD); contingent silver/billing/ backfill if .003 Phase 1 surfaced gap</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>
