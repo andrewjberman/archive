@@ -1,9 +1,10 @@
 <task_order>
   <metadata>
     <id>ADVI_INFINC.001</id>
-    <slug>dsa-skip-gate-lib</slug>
+    <slug>dsd-skip-gate-lib</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
+    <redirect_history>Originally issued to DS~A 2026-05-14 13:55Z; redirected to DS~D 2026-05-14 14:00Z per Andrew direct ("DS~A midstream on more important priorities, this should be redirected to DS~C and DS~D"). DS~A stood down before code shipped. Phase 1 ownership lock: DS~D. Phase 2-6 split across DS~C + DS~D per Andrew direct.</redirect_history>
     <coordinates_with>0.6.1_AE_PartnerETL (dispatch.sh flag plumbing review + integration)</coordinates_with>
     <date>2026-05-14</date>
     <status>staged</status>
