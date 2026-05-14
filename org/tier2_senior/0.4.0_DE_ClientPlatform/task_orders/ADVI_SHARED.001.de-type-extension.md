@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>pending</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_SHARED</project_code>
     <priority>P0 — critical-path foundation; .002/.003/.006 cannot proceed until type shape lands</priority>
