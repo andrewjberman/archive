@@ -7,7 +7,7 @@
     <redirect_history>Originally issued to DS~A 2026-05-14 13:55Z; redirected to DS~D 2026-05-14 14:00Z per Andrew direct ("DS~A midstream on more important priorities, this should be redirected to DS~C and DS~D"). DS~A stood down before code shipped. Phase 1 ownership lock: DS~D. Phase 2-6 split across DS~C + DS~D per Andrew direct.</redirect_history>
     <coordinates_with>0.6.1_AE_PartnerETL (dispatch.sh flag plumbing review + integration)</coordinates_with>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_INFINC</project_code>
     <priority>P1 — Phase 1 foundation; gates all Phase 2-5 per-script migrations</priority>
@@ -127,7 +127,7 @@
     HARD DEPENDENCIES: none — foundational.
 
     COORD:
-    - AE 0.6.1 owns dispatch.sh flag plumbing per brief §7. DS~A authors flag-receiver lib + AE integrates into dispatch.sh. Joint RAVC.
+    - AE 0.6.1 owns dispatch.sh flag plumbing per brief §7. DS~D authors flag-receiver lib + AE integrates into dispatch.sh. Joint RAVC.
     - CTO routing on Q1 (advisor attribution lag) + Q5 (DIAGFIX banner) + Q6 (validation epsilon budget) — these inform Phase 2+ design, not Phase 1; CTO answers should land during Phase 1 wall-clock (~3d) so Phase 2 dispatch isn't blocked.
     - DS~B routing on Q2 (Orion backdate distribution empirical probe) — informs Phase 5 (PULL_TXN/PULL_PERF). Q2 doesn't block Phase 1.
 
@@ -154,23 +154,23 @@
   </deliverables>
 
   <ravc>
-    DS~A RAVC2 to COO + CC AE 0.6.1 on AC1-10 PASS. COO ratifies + AE 0.6.1 confirms dispatch.sh integration sign-off. Phase 2 (.002 INF_B_00 + sibling Pattern A scripts) dispatch authorized post-RAVC2 + post chain #30 mode=full wrap clean.
+    DS~D RAVC2 to COO + CC AE 0.6.1 on AC1-10 PASS. COO ratifies + AE 0.6.1 confirms dispatch.sh integration sign-off. Phase 2 (.002 INF_B_00 + sibling Pattern A scripts) dispatch authorized post-RAVC2 + post chain #30 mode=full wrap clean.
   </ravc>
 
   <notes>
     **Phase sequencing context:** Phase 2 (~5d DS~B per AE brief §5.2) authoring begins immediately after Phase 1 RAVC2. Phase 2 ships 5 PRs serially (INF_B_00 → INF_B_03 → INF_C_00 → INF_C_01 → INF_A_03). Phase 3+4+5+6 follow per AE brief §5.
 
-    **Q3/Q4 design decisions absorbed:** per AE recommendation. If DS~A surfaces evidence-based deviation rationale, surface to COO BEFORE writing; don't litigate post-hoc.
+    **Q3/Q4 design decisions absorbed:** per AE recommendation. If DS~D surfaces evidence-based deviation rationale, surface to COO BEFORE writing; don't litigate post-hoc.
 
     **Q1/Q5/Q6 routed to CTO** in parallel; CTO answers should land during Phase 1 wall-clock so Phase 2 architectural design isn't blocked. If CTO is delayed >Phase 1 wall-clock, Phase 1 still ships standalone and Phase 2 design absorbs CTO answers when they arrive.
 
     **Q2 routed to DS~B** for empirical Orion backdate distribution probe. Informs Phase 5 (PULL_TXN/PULL_PERF window size); not blocking Phase 1.
 
-    **Author identity:** `--author="0.4.0_DS_ClientPlatform~A <0.4.0_DS_ClientPlatform~A@opal.agent>"` per protocol.
+    **Author identity:** `--author="0.4.0_DS_ClientPlatform~D <0.4.0_DS_ClientPlatform~D@opal.agent>"` per protocol (lane updated post-redirect 2026-05-14 14:00Z).
 
     **Compiler context update:**
     ```
-    SERIAL=0.4.0_DS_ClientPlatform~A
+    SERIAL=0.4.0_DS_ClientPlatform~D
     TO_ID=ADVI_INFINC.001
     ```
   </notes>
