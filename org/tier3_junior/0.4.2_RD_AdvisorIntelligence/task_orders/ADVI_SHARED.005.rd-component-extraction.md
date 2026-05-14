@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_SHARED</project_code>
     <priority>P1 — Category B lint warnings (react-hooks/static-components — inner component declarations); parallel-OK</priority>
