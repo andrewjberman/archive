@@ -6,8 +6,8 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-05-14</date>
     <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>(1) .001 RAVC2 PASS AND (2) Q5 option (c) — ADVI_INFTGT P1/P2 wave 2 close (AdvisorBookView + ClientsTab touch zones). COO unblocks via MCP.</dispatch_unblock_condition>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>UNBLOCKED 2026-05-14 by COO. (1) .001 SHIPPED 755dc104 + CTO RAVC4 ACCEPT; (2) ADVI_INFTGT CLOSED 2026-05-13 (AdvisorBookView + ClientsTab touch zone no longer active). Note: DE may absorb the @deprecated panels.roleComposition.enabled migration during .003 per the .001 BC decision (1-LOC AdvisorPublicProfile rewire flagged in DE session log c835a0e54).</dispatch_unblock_condition>
     <project_code>ADVI_SHARED</project_code>
     <priority>P0 — drives dataSources.staticPaths field validation; sibling to .002</priority>
     <sla>~1d wall post-unblock</sla>

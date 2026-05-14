@@ -6,8 +6,8 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-05-14</date>
     <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>(1) .001 RAVC2 PASS (type shape landed) AND (2) ADVI_INFTGT P1/P2 wave 2 OR concurrent PartnerAnalytics-touching project lands its commits — Q5 option (c) sequencing per PRD §7.5. COO unblocks via MCP after verifying no in-flight merge conflict on PartnerAnalytics.tsx.</dispatch_unblock_condition>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>UNBLOCKED 2026-05-14 by COO. Original conditions met: (1) .001 SHIPPED 755dc104 + 8df348bd0 + CTO RAVC4 ACCEPT; (2) ADVI_INFTGT CLOSED 2026-05-13 (no overlap risk); (3) ADVI_INFGRO.005 Phase 2 portal-local shipped (d4e28cca; DT push pending — merge surface bounded). CTO ratify on parallel dispatch acknowledged. Q5 sequencing call: option (c) gate met via INFTGT closure + INFGRO.005 commit landing; no further hold needed.</dispatch_unblock_condition>
     <project_code>ADVI_SHARED</project_code>
     <priority>P0 — worst-offender file (15 firmId-conditional sites); drives asset-class taxonomy + auaDonut.source + barChart.stacked field validation</priority>
     <sla>~1d wall post-unblock</sla>
