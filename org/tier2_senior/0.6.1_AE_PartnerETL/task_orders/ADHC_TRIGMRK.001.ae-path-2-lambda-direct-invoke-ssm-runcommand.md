@@ -5,8 +5,8 @@
 | **Project** | `ADHC_TRIGMRK` (Trigger-Marker Race-Surface Mitigation) |
 | **Owner** | `0.6.1_AE_PartnerETL` |
 | **Lane** | AE / inf-pipeline / Lambda + EC2 + SSM + Terraform |
-| **Status** | `staged` — dispatch_held=true; gates on COO per-TO dispatch GO |
-| **Dispatch_held** | `true` — pending COO dispatch GO post-TO RAVC1 close |
+| **Status** | `pending` — dispatch_held=false; CTO RAVC1 CLOSED `9b24bead2`; COO dispatch GO 2026-05-14 ~19:25Z |
+| **Dispatch_held** | `false` — UNBLOCKED 2026-05-14 ~19:25Z by COO post CTO RAVC1 close + T6 default-go sanctioned; AE 0.6.1 cleared for Phase 2 implementation per AC1-AC14 |
 | **Effort** | ~4-6h wall (Path 2 Lambda full rewrite + IAM + TF + boot-script + deploy + AC sweep) |
 | **PRD** | `docs/architecture/ADHC_TRIGMRK.md` v0.3 canonical (`f91c79c35` ratified Path 2; T1-T8 folded; AC1-AC14) |
 
