@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>GATES ON Andrew product-strategy ratify per CTO routing: "He directed the investigation; he gets the product-strategy ratify on sequencing." Specific Andrew asks: (1) approve D-min implementation as the headline-fresh path; (2) ratify Cottonwood SOFT-GATE sequencing — Option (a) ship-before-Cottonwood (~2 days wall to land LEDGEH + FECACHE_COHERENCE + BPMVH all 3) OR Option (b) Cottonwood-with-Phase-2a-only + categorical follow-ons during Cottonwood UAT. CTO + COO both lean Option (a). Andrew product-strategy call.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>UNBLOCKED 2026-05-14 ~18:35Z by COO per Andrew direct product-strategy ratify (via DS~C surface): Q1 D-min YES + Q2 Cottonwood Option (a) ship-before-Cottonwood. 3-project ADHC bundle (LEDGEH + FECACHE_COHERENCE + BPMVH) lands before Cottonwood live ship.</dispatch_unblock_condition>
     <project_code>ADHC_BPMVH</project_code>
     <priority>P1 — Andrew direct investigation surface ratified by CTO v0.2 PRD; partner-demo headline-fresh requirement</priority>
     <sla>~1h wall post-dispatch-unblock</sla>
