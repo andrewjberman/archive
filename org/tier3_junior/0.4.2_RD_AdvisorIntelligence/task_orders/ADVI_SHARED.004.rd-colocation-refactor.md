@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_SHARED</project_code>
     <priority>P1 — Category A lint warnings (file-organization react-refresh/only-export-components); parallel-OK with .001/.002/.003 (no type-shape dep)</priority>
