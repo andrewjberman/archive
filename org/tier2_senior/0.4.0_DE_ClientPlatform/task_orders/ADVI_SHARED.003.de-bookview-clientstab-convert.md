@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED 2026-05-14 by COO. (1) .001 SHIPPED 755dc104 + CTO RAVC4 ACCEPT; (2) ADVI_INFTGT CLOSED 2026-05-13 (AdvisorBookView + ClientsTab touch zone no longer active). Note: DE may absorb the @deprecated panels.roleComposition.enabled migration during .003 per the .001 BC decision (1-LOC AdvisorPublicProfile rewire flagged in DE session log c835a0e54).</dispatch_unblock_condition>
     <project_code>ADVI_SHARED</project_code>
