@@ -6,7 +6,7 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <coordinates_with>0.4.0_DT_ClientPlatform (api/endpoints/advisor-intelligence.ts touch zone)</coordinates_with>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED 2026-05-14 by COO. (1) .002 SHIPPED 79e35429 (PartnerAnalytics 15-site convert; semantic-split finding: isInflectionFirm -> 3 distinct layout semantics); (2) .003 SHIPPED 5fb03386 (BookView + ClientsTab 12-site convert + bundled @deprecated panels.roleComposition migration + 5 BC field removals). firmId literal surface now shrunk to dispatcher + L3 partner-constants + L4 api endpoint per audit §G — exactly the staged-rename scope per PRD §3.1. Audit §A.4 single-site AdvisorPublicProfile.tsx:57 firmIdFromOverride helper folds into this .006 canonicalization sweep per DE 0.4 .003 RAVC2 note.</dispatch_unblock_condition>
     <project_code>ADVI_SHARED</project_code>
