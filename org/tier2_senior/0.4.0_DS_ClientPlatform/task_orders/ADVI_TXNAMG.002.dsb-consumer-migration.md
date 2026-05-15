@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_TXNAMG</project_code>
     <priority>P1 — completes the ADVI_DWSPLT TO-3 consumer migration; INF_D_05 is a live 7-day-stale partner-facing surface (InflectionInsightsPanel). Phases A+B run immediately, parallel to TO-1.</priority>
