@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>RD 0.4.2 bench-clear post H3 FE patch close. Wave 2 dispatch parallel with .025 + DS lane.</dispatch_unblock_condition>
+    <status>cascade_ds</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>Phase 1 investigation complete 2026-05-14. Per-account per-window NNA (nna_qtd/ytd/max) not emitted by DS in detail.json — Path B DS cascade confirmed. Window selector IS wired in FeeSummaryPanel (L230 effectiveWindow ternary) but no per-account window NNA data to populate. COO routing DS cascade TO for DS lane to augment detail.json accounts[].nna_qtd/ytd/max emit.</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>
     <priority>P1 — Books tab Account NNA window selector wiring; Andrew direct walkthrough</priority>
     <sla>~1-2h wall actual per Pod 4 velocity</sla>

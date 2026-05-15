@@ -5,8 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>complete</status>
+    <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>RD 0.4.2 bench-clear post H3 FE patch close. Wave 2 dispatch parallel with DS lane.</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>
     <priority>P1 — Books tab fee containers + summary table missing; Andrew direct walkthrough</priority>
