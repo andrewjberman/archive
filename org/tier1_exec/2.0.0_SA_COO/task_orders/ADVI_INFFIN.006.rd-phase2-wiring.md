@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED 2026-05-14 by COO. Original conditions met: .003 DS~C c5d98d41f + .010 5e5f18edd shipped + chain #28 mode=gold-d materialized fields + v1.7.56 Lambda passthrough verified via direct-invoke smoke. **Effective remaining scope = Surface #2 stacked HH render only** (11/12 items already shipped via portal-302992c6 / portal-v2.1.85). Surfaces #6 + #8 split out to .011 + .012. Final dev-smoke for Surface #2 gates on chain #30 mode=full completion (in flight 13:01Z; ETA terminal 14:11-14:21Z) — RD can code against expected schema in parallel.</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>
