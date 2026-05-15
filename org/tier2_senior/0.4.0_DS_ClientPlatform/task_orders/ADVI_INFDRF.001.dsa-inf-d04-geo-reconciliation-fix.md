@@ -28,7 +28,7 @@
   </objective>
 
   <scope>
-    <item>DEFECT A (immediate) -- null-city accounts are dropped from the city breakdown, so the state count (744 WA) != the sum of city counts (515). Fix _build_geo_view so null-city / unmapped-city accounts are retained (an explicit Unknown / Unmapped city bucket, or otherwise carried so state == sum(city)). REAL BUG.</item>
+    <item>DEFECT A (immediate) -- the state count (744 WA) != the sum of its city breakdown (515). MECHANISM (DS~A account-level verification 2026-05-15): NOT null-city -- WA has zero null/blank-city accounts. It is the top-N city cap: INF_D_04 _build_geo_view (~line 2200) emits .head(GEO_TOP_N_CITIES_PER_STATE=10); WA's top-10 cities by AUA = 515 accounts, cities #11-55 (45 cities) = exactly 229 dropped. Also the city field is unnormalized (case/spelling dup variants -- Snohomish/SNOHOMISH, Lynnwood/LYNNWOOD, etc.; ~55 raw strings -> ~44 real cities). FIX: emit a city-grain "Other Cities" REMAINDER bucket capturing cities beyond the top-N (so state == sum(city) including the remainder) + case-normalize city before the groupby. REAL BUG.</item>
     <item>DEFECT B (immediate) -- the histogram 1K floor filters accounts but emits no excluded count, so the plotted total (770) != the firm total (865). Add an explicit excluded-count reconciliation field to _compute_histogram_block output so plotted + excluded == total. Per CLAUDE.md Rule 17 the gold tier is where business-logic filtering belongs -- this is gold; the fix is to make the filter's exclusion COUNTED + emitted, not to remove the filter.</item>
     <item>DEFECT D (immediate) -- radial_12m is a partial decomposition presented unlabeled. Add an explicit label / partial-flag so the FE renders it as a partial decomposition, not a full one.</item>
     <item>DEFECT C (GATED on the CTO ruling) -- client_count has a dual source of truth: 321 (geo view, holdings-merge household nunique) vs 307 (accounts_dim, the dedicated client dimension; radial_12m clients also sum to 307). DS~A's read: 307 is canonical, geo's 321 is a side-effect of the holdings merge. Do NOT rewrite the geo household derivation until the CTO rules which is canonical. Once ruled: converge client_count to the single canonical source across the geo view + radial + header.</item>
@@ -36,7 +36,7 @@
   </scope>
 
   <acceptance_criteria>
-    <ac id="AC1">Defect A fixed -- INF_D_04 geo view: state count == sum of its city counts (null/unmapped-city accounts retained, not dropped).</ac>
+    <ac id="AC1">Defect A fixed -- INF_D_04 geo view: state count == sum of its city counts (an "Other Cities" remainder bucket captures cities beyond the top-N cap; city case-normalized before the groupby).</ac>
     <ac id="AC2">Defect B fixed -- the histogram block emits an explicit excluded-count; plotted + excluded == firm total.</ac>
     <ac id="AC3">Defect D fixed -- radial_12m carries an explicit partial-decomposition label/flag.</ac>
     <ac id="AC4">Defect C -- on the CTO ruling: client_count converged to the single canonical source across geo view + radial + header. If the ruling is still pending at TO-completion, AC4 may RAVC2 as "A/B/D shipped, C held for the CTO ruling" -- a valid partial-complete state.</ac>
