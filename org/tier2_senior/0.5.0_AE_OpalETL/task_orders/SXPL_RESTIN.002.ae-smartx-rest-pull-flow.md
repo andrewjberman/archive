@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>RELEASED + RE-ADDRESSED 2026-05-15. This TO was briefly staged pending Andrew's word on the AE assignment. Andrew directed (2026-05-15, via DS~B): "send this work to the 0.5.0_AE_OpalETL agent ... it makes more sense to do these kind of operations with the Opal agent rather than a partner agent because it's shared resources." TO-2 re-addressed from 0.6.1_AE_PartnerETL to 0.5.0_AE_OpalETL and dispatched GO. NOTE: TO-2's DS-authored data/smartx/ pull-script commits gate on the separate data/smartx/ .owned-paths lane decision (routed to CTO) -- the AE Terraform/IAM/EventBridge work has no such gate; sequence accordingly.</dispatch_unblock_condition>
     <project_code>SXPL_RESTIN</project_code>
