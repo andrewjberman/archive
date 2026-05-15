@@ -5,9 +5,11 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>AE 0.6.1 bench-clear post chain re-fire `4957e056` RAVC2 (~21:00Z+) + AE 0.7 LEDGEH ship close OR next-session reopen on AE 0.6.1 lane per Andrew direct. Phase 1 AE Lambda extension can ship in parallel with Phase 2 DS~A bronze puller (Phase 2 stop-gap uses Andrew JWT direct; Phase 1 Lambda-managed JWT supersedes when shipped).</dispatch_unblock_condition>
+    <status>complete</status>
+    <dispatch_held>false</dispatch_held>
+    <completed_at>2026-05-15T02:55Z</completed_at>
+    <deploy_commit>8ff9ee1ff</deploy_commit>
+    <deploy_tag>inf-pipeline-v1.7.60</deploy_tag>
     <project_code>ADVI_ECLDAT</project_code>
     <priority>P1 — Andrew dashboard tomorrow gate; Eclipse JWT capture + dual-track freshness validation</priority>
     <sla>~2-3h wall actual per Pod 4 velocity</sla>
