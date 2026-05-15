@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~? (route at conditional dispatch)</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>not-applicable</status>
     <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>CONDITIONAL cascade unblock post ADVI_INFFIN.025 Phase 1 investigation if rate-emit-gap CONFIRMED (Path B). DOES NOT FIRE if .025 Phase 1 finds rate already present on emit (Path A).</dispatch_unblock_condition>
+    <dispatch_unblock_condition>PATH A CONFIRMED (INFFIN.025 RAVC2 4187ebec): detail.json accounts[].fee fields already present on S3. No DS emit augment needed for fee rates. This TO will never fire. §3.6a also already working (zero FE changes). CLOSED without execution.</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>
     <priority>P1 conditional — Fee Summary table rate-emit augment if gold script gap</priority>
     <sla>~1-2h wall actual (if dispatched)</sla>
