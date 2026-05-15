@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-05-15</date>
-    <status>active</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>RE-SCOPED 2026-05-15 — DS~D Phase 0 STOP upheld by CTO. Original date-windowing mechanism (brief §2.5) empirically invalidated by documented DS~B Orion probe (20260430T174809Z) transcribed into both target script docstrings. Re-scoped from implementation TO to capability-probe (investigation) TO. Supersedes the date-windowing version committed at 635f0bec7.</dispatch_unblock_condition>
     <project_code>ADVI_INFINC</project_code>
