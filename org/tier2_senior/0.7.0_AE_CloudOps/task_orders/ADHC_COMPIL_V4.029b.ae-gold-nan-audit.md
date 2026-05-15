@@ -5,9 +5,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>done</status>
+    <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>.029a DS~C RAVC2 PASS — `safe_json_serialize.py` at canonical path `data/orion/scripts/gold/lib/safe_json_serialize.py` with S3-deployed SHA-MATCH</dispatch_unblock_condition>
+    <completed>2026-05-14</completed>
     <project_code>ADHC_COMPIL_V4</project_code>
     <priority>P1 — Wave 2 follow-on to .029a; closes ADHC_GOLDNAN cross-script discipline pattern</priority>
     <sla>~1-1.5 days wall per PRD §15.4 sizing</sla>
