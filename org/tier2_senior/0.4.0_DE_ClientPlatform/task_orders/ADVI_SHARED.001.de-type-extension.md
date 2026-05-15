@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-05-14</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completion_note>SHIPPED 2026-05-14 (portal 755dc104 / CLOUD 8df348bd0) + CTO RAVC4 ACCEPT. CanonicalFirmId + TenantLayoutConfig type extension landed; consumed by .002/.003/.006 (all complete, CLOUD 8d8b173aa pushed). Status flipped 2026-05-15 by DE 0.4 startup GT recon — stale-pending cleanup.</completion_note>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_SHARED</project_code>
     <priority>P0 — critical-path foundation; .002/.003/.006 cannot proceed until type shape lands</priority>
