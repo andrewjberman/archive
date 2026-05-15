@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-05-15</date>
-    <status>active</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED — INFINC.005 capability probe RAVC2 received (734a2aec6). TXN firm-level windowed endpoint empirically confirmed; PERF no mechanism on probed surface. This TO implements the confirmed TXN mechanism + folds in a short-window PERF probe.</dispatch_unblock_condition>
     <project_code>ADVI_INFINC</project_code>
