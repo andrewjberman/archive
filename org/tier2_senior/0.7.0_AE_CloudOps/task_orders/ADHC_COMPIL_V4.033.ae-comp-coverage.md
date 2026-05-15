@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-14</date>
-    <status>active</status>
+    <status>done</status>
+    <completed>2026-05-15</completed>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED — Wave 3 RAVC2 received (890f8d2fe). Wave 4 dispatched 2026-05-15. Not gated on other Wave 4 tools — ships in parallel.</dispatch_unblock_condition>
     <project_code>ADHC_COMPIL_V4</project_code>
