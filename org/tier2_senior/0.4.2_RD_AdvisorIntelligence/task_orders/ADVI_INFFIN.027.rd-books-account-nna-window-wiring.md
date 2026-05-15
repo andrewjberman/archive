@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-14</date>
-    <status>cascade_ds</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
-    <dispatch_unblock_condition>Phase 1 investigation complete 2026-05-14. Per-account per-window NNA (nna_qtd/ytd/max) not emitted by DS in detail.json — Path B DS cascade confirmed. Window selector IS wired in FeeSummaryPanel (L230 effectiveWindow ternary) but no per-account window NNA data to populate. COO routing DS cascade TO for DS lane to augment detail.json accounts[].nna_qtd/ytd/max emit.</dispatch_unblock_condition>
+    <dispatch_unblock_condition>DS~C INF_D_02 commit b8dceb3b0 emitted nna_qtd/nna_ytd/nna_max per account in detail.json. FE adapter wired 2026-05-15: typed InflecClientDetailRaw.accounts[].nna_qtd/ytd/max + passed through in accounts map. FeeSummaryPanel.pickNna already consumed these fields via effectiveWindow ternary (L229-230). AC1 window wiring PASS; AC4 49F regression unaffected (Inflection-adapter-only change).</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>
     <priority>P1 — Books tab Account NNA window selector wiring; Andrew direct walkthrough</priority>
     <sla>~1-2h wall actual per Pod 4 velocity</sla>
