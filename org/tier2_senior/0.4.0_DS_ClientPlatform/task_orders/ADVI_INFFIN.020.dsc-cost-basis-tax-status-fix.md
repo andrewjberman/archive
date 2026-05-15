@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>superseded</status>
     <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>Cascade unblock post ADVI_INFFIN.019 RAVC2. Scope of this TO determined by investigation brief recommendation (gold-script fix? FE tooltip? schema rename?).</dispatch_unblock_condition>
+    <dispatch_unblock_condition>SUPERSEDED — pre-investigation draft. Active TO is ADVI_INFFIN.020.dsc-cost-basis-top-positions-gold-fix.md (authored post INFFIN.019 RAVC2 close 08e9e4301). Do not execute this file.</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>
     <priority>P1 — Andrew empirical reconciliation gap fix</priority>
     <sla>~1-3h wall (scope-dependent on investigation finding)</sla>
