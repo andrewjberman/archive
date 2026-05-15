@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>Cascade unblock post ADVI_ECLDAT.002 (Phase 2 bronze puller) RAVC2. Phase 3 silver consumes Phase 2 bronze outputs; gates on bronze artifacts materializing on S3 + sentinel manifest empirically valid.</dispatch_unblock_condition>
+    <status>active</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>UNBLOCKED — ECLDAT.002 RAVC2 received (8a8f5dc76). Bronze artifacts on S3 confirmed. Phase 3 authorized.</dispatch_unblock_condition>
     <project_code>ADVI_ECLDAT</project_code>
     <priority>P1 — Andrew dashboard tomorrow gate; silver layer enables future gold script (Phase 4 deferred per Andrew "gold layers can wait")</priority>
     <sla>~2h wall actual per Pod 4 velocity</sla>
