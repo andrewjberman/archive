@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-05-14</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED 2026-05-14 ~21:0XZ by COO per CTO 5-Q ratify + Andrew direct "set up the same jwt refresher that we did for orion for eclipse as well as figuring out bronze and silver ingestion, gold layers can wait for now". DS~A bench-clear post Phase 1.1 P1/P2 close. No further Andrew engagement needed per CTO route. Phase 2 ships in parallel with ADVI_ECLDAT.001 (AE 0.6.1 JWT extension); stop-gap uses Andrew JWT direct from .runtmp pre-Phase-1; supersedes to Lambda-managed JWT post-Phase-1 ship.</dispatch_unblock_condition>
     <project_code>ADVI_ECLDAT</project_code>
