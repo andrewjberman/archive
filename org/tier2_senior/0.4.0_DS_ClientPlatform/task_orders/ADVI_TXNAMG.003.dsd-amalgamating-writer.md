@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-05-15</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>HELD until ADVI_TXNAMG.001 (TO-1) brief is delivered and validated by COO — TO-3 needs TO-1's definitive join column set + confirmed join key + historical/daily schema-parity verdict. COO releases dispatch_held on TO-1 RAVC2 validation. Same receiver (DS~D) — TO-1 then TO-3 sequential in-lane.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>HELD until ADVI_TXNAMG.001 (TO-1) brief is delivered and validated by COO — TO-3 needs TO-1's definitive join column set + confirmed join key + historical/daily schema-parity verdict. COO releases dispatch_held on TO-1 RAVC2 validation. Same receiver (DS~D) — TO-1 then TO-3 sequential in-lane. RELEASED 2026-05-15 by COO — TO-1 RAVC2 validated (brief docs/briefs/txnamg-001-join-key-column-audit-20260515.md; AC1-5 PASS; the 11-column join set, confirmed join key, and schema-parity verdict are all delivered — see to1_contract). TO-3 is GO.</dispatch_unblock_condition>
     <project_code>ADVI_TXNAMG</project_code>
     <priority>P1 — the core deliverable: establishes the single canonical silver/transactions writer. Gates TO-4 (Lambda trim) and TO-6 (INFINC.006 resume).</priority>
     <sla>~6-8h wall post-unblock + 1-2 chain-validation iterations.</sla>
@@ -15,8 +15,18 @@
 
   <references>
     <prd>docs/architecture/ADVI_TXNAMG.md (PRD v0.1, commit e7fecbf93) — §3 architecture + sequencing invariant, §4.1 component spec, §6 TO-3.</prd>
-    <input>ADVI_TXNAMG.001 deliverable brief — the definitive join column set, confirmed join key, historical/daily schema-parity verdict. This TO does not start until that brief lands.</input>
+    <input>ADVI_TXNAMG.001 deliverable — docs/briefs/txnamg-001-join-key-column-audit-20260515.md (DELIVERED + COO-validated 2026-05-15, AC1-5 PASS). The brief's §4 "Deliverables to TO-3" is the binding no-ambiguity contract — transcribed into to1_contract below.</input>
   </references>
+
+  <to1_contract>
+    From the COO-validated TO-1 brief (docs/briefs/txnamg-001-join-key-column-audit-20260515.md, §4 "Deliverables to TO-3") -- the binding no-ambiguity contract for this writer:
+    JOIN KEY: REST `id` (left spine) == Custom-Report `Transaction ID` (right). 100% key fidelity wherever the account exists in the REST spine. `orderId`/`tradeOrderId` are 100% NULL in REST bronze -- not keys.
+    CARRY EXACTLY THESE 11 Custom-Report-unique columns (from bronze/orion-api/*/transactions.csv): LName, Activity Category, Dwnld Symbol, CreatedDate, CreatedBy, EditedDate, EditedBy, RepName, CurrentAccountValue, CurrentCashValue, Managed Account. camelCase silver naming is a TO-3 call; the SET is binding.
+    DO NOT CARRY the other 18 -- 17 are aliases of existing REST columns; `fkTradeStatus` is an encoding variant of REST `status` (TO-1 recommends not carried; absent a CTO override, do not carry).
+    CSV HEADER HYGIENE: the Custom-Report CSV header carries whitespace artifacts (e.g. ` Reg ID` with a leading space) -- TO-3 MUST `.str.strip()` the CR CSV headers when reading the join source.
+    NO PER-ERA RECONCILIATION: schema parity is confirmed identical across all 14 sampled CSVs 2020-05-26 -> 2026-05-14; the per-era-drift reconciliation item in scope below is MOOT -- no reconciliation logic needed.
+    CLOSED-ACCOUNT / UNION FLAG (brief §1.2): the REST pull iterates currently-existing Orion accounts, so the REST spine excludes accounts closed before the pull date -- a left-join-onto-REST-spine drops ~5% of deep-backfill (2021-era) Custom-Report transactions on now-closed accounts. PRD §4.1 as ratified specifies LEFT-JOIN -- BUILD THAT, it is the working directive; do NOT block on the flag. COO has surfaced the left-join-vs-UNION question to CTO in parallel (a PRD §4.1 amendment question). Structure the writer so that, IF CTO later rules UNION, appending the Custom-Report-only rows (id absent from the REST spine; REST-spine columns NULL) is a clean ADDITIVE extension -- do not architect the join in a way that forecloses it.
+  </to1_contract>
 
   <context>
     silver/transactions/{date}.parquet has two live daily writers (PRD §2). This TO makes convert_transactions_to_silver.py the SOLE canonical writer by amalgamation: the REST full-history spine, left-joined with every Custom-Report-unique column by Orion transaction id. The Custom-Report enrichment source already spans the full history (bronze/orion-api/*/transactions.csv — 1,509 files, 2020-05-26→present, already backfilled May 2026 — PRD §2.2). Writer #2 already emits a full-history snapshot every run, so TO-3's first run produces the entire transaction history amalgamated into one partition — there is NO separate 6-year re-pull and no separate "re-run history" step (PRD §4.1). Andrew's "consolidate the backfill data" was already done; this TO consolidates the WRITE FUNCTION.
