@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <completion_note>DS~A 2026-05-15: A/B/D + C geo-derivation shipped (INF_D_04 commits 7a1b57a2b, 9ad466d1d), materialized via the --from INF_C_02 rerun (20:56Z), AC5 smoke-test 7/7 PASS. AC4 Defect C canonical client_count DESIGNATION held per the CTO amended ruling -- blocked on the dimension-freshness item (silver/accounts_dim + silver/api_dims/household orphaned from the chain). RAVC2 to COO 20:02Z.</completion_note>
     <dispatch_unblock_condition>DISPATCHED GO 2026-05-15 -- Andrew-flagged URGENT. Defects A/B/D proceed immediately. Defect C (client_count canonicalization) is gated on the CTO ruling (see cross_domain_coordination) -- author the A/B/D fix now; hold the C rewrite for the ruling.</dispatch_unblock_condition>
     <project_code>ADVI_INFDRF</project_code>
     <priority>P1 -- Andrew-flagged URGENT. Inflection live-portal Segment Analytics shows reconciliation slippage (state count != sum of city counts; histogram plotted != total). DS~A is the BE root-cause author and the designated owner.</priority>
