@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>done</status>
     <dispatch_held>false</dispatch_held>
+    <completed>2026-05-14</completed>
     <project_code>ADHC_COMPIL_V4</project_code>
     <priority>P1 — Wave 1 highest empirical leverage; retroactive validates against today's INF_D_00c bug-shadows cascade</priority>
     <sla>~1 day wall per PRD §15.4 sizing</sla>
