@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_TXNAMG</project_code>
     <priority>P1 — gates TO-3 (the amalgamating writer); read-only investigation, no ship risk; runs immediately and in parallel with TO-2.</priority>

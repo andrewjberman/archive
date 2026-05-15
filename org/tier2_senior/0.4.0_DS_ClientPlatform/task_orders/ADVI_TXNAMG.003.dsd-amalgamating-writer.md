@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>HELD until ADVI_TXNAMG.001 (TO-1) brief is delivered and validated by COO — TO-3 needs TO-1's definitive join column set + confirmed join key + historical/daily schema-parity verdict. COO releases dispatch_held on TO-1 RAVC2 validation. Same receiver (DS~D) — TO-1 then TO-3 sequential in-lane. RELEASED 2026-05-15 by COO — TO-1 RAVC2 validated (brief docs/briefs/txnamg-001-join-key-column-audit-20260515.md; AC1-5 PASS; the 11-column join set, confirmed join key, and schema-parity verdict are all delivered — see to1_contract). TO-3 is GO.</dispatch_unblock_condition>
     <project_code>ADVI_TXNAMG</project_code>
