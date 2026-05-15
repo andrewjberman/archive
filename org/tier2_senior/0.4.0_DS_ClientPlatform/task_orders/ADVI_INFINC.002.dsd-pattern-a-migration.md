@@ -5,8 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-05-15</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>complete</status>
+    <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DS~D INFFIN.021 RAVC2 close. Phase 1 (.001) RAVC2 already complete (d88b7a7a4 + 64e583272 + f45f01460).</dispatch_unblock_condition>
     <project_code>ADVI_INFINC</project_code>
     <priority>P1 — Pattern A migration; gates 35-40 min/day chain waste elimination</priority>
