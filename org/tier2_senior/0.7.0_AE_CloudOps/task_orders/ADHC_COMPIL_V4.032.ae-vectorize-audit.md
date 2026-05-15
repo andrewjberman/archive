@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>Wave 1+2+3 RAVC2 PASS. Empirical anchor (DS~B `a4a4fd0b2` cash_drag 553s→<30s) pending AE chain re-fire wall-time validation — that empirical RAVC2 from DS~B/AE is the corpus signal this tool retroactively validates against.</dispatch_unblock_condition>
+    <status>active</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>UNBLOCKED — Wave 3 RAVC2 received (890f8d2fe). Wave 4 dispatched 2026-05-15. Empirical anchor: DS~B `a4a4fd0b2` cash_drag 553s→<30s corpus signal.</dispatch_unblock_condition>
     <project_code>ADHC_COMPIL_V4</project_code>
     <priority>P1 — Wave 4 cross-script hygiene; pandas vectorization opportunity detection</priority>
     <sla>~1.5-2 days wall per PRD §15.4 sizing</sla>

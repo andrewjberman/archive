@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>Wave 1+2+3 RAVC2 PASS. ADHC_TRIGMRK TO-001 ship may absorb related stale-marker forensic data; coord at dispatch time. .030 retitled 2026-05-14 ~19:0XZ per CTO ratify (Option C): scope generalized from stale-marker-specific to phantom-consumer-class sweep via `comp-blast --check-consumers` flag extension. Original scope (stale-marker) becomes derivable special case (producers emitting markers where consumer-count=0 = stale-by-design).</dispatch_unblock_condition>
+    <status>active</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>UNBLOCKED — Wave 3 RAVC2 received (890f8d2fe). Wave 4 dispatched 2026-05-15. .030 retitled per CTO ratify (Option C): scope generalized to phantom-consumer-class sweep via `comp-blast --check-consumers`.</dispatch_unblock_condition>
     <project_code>ADHC_COMPIL_V4</project_code>
     <priority>P1 — phantom-consumer sweep diagnostic; ADHC_TRIGMRK + ADHC_LEDGEH + ADHC_FECACHE_COHERENCE + ADHC_BPMVH companion (4-project ADHC defense-in-depth corpus structural cousin)</priority>
     <sla>~1 day wall per PRD §15.4 sizing (unchanged; scope generalize doesn't expand implementation surface significantly since comp-blast already walks downstream dependency-chain)</sla>

@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>Wave 1+2+3 RAVC2 PASS. Phase 1 lib (DS~D `d88b7a7a4` skip-gate lib) already shipped — that's the underlying primitive this tool diagnoses against. Tool itself sequences in Wave 4.</dispatch_unblock_condition>
+    <status>active</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>UNBLOCKED — Wave 3 RAVC2 received (890f8d2fe). Wave 4 dispatched 2026-05-15.</dispatch_unblock_condition>
     <project_code>ADHC_COMPIL_V4</project_code>
     <priority>P1 — Wave 4 incremental architecture enabler; makes ADVI_INFINC Phase 2-6 migrations diagnostic-ready</priority>
     <sla>~2-3 days wall per PRD §15.4 sizing</sla>
