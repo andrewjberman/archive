@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-05-14</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED 2026-05-14 by COO. All gates met: (1) PRD v0.2.1 canonical at `docs/architecture/ADHC_FECACHE_COHERENCE.md` per CTO `37ea514b7` git mv; (2) All 5 implementation choices CTO RATIFIED 2026-05-14 17:54Z + Option A multi-key normalization 18:05Z; (3) Phase 2a per-callsite ship LANDED `d0bbc856` (14 P1 callsites disarmed); (4) Census complete (28 canonical / 3 aliases / 7 flags); (5) defense-in-depth pair with ADHC_LEDGEH structurally ratified.</dispatch_unblock_condition>
     <project_code>ADHC_FECACHE_COHERENCE</project_code>

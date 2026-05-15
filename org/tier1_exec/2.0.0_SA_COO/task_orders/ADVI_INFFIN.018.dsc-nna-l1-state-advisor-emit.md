@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-14</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED 2026-05-14 ~19:35Z by COO per CTO 19:30Z routing (Track B Backend DS lane). RD 0.4.2 Track A FE display-bug fix dispatched directly by CTO in parallel.</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>

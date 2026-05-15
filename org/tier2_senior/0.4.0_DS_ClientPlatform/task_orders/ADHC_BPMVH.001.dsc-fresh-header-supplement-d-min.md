@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-14</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED 2026-05-14 ~18:35Z by COO per Andrew direct product-strategy ratify (via DS~C surface): Q1 D-min YES + Q2 Cottonwood Option (a) ship-before-Cottonwood. 3-project ADHC bundle (LEDGEH + FECACHE_COHERENCE + BPMVH) lands before Cottonwood live ship.</dispatch_unblock_condition>
     <project_code>ADHC_BPMVH</project_code>
