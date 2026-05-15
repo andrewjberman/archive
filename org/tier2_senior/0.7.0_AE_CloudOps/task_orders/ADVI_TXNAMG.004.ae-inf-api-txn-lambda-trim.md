@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>HELD until ADVI_TXNAMG.003 (TO-3, the amalgamating writer) ships and is RAVC2-validated. SEQUENCING INVARIANT (PRD §3): TO-4 removes writer #3's silver-write — it must land BEFORE OR SAME-WAVE AS TO-3, NEVER before. The consolidation must never produce a zero-writer window. COO releases this dispatch_held on TO-3's RAVC2 receipt; coordinate the same-wave deploy with DS~D. RELEASED 2026-05-15 by COO — ADVI_TXNAMG.003 (TO-3) RAVC2 received + COO-validated (commit 10de8e67f; the amalgamating writer is shipped + deployed-to-S3, AC1-4/6 PASS, AC5 substantively proven against prod S3; the live in-EC2 chain-run that materializes the amalgamated artifact is THIS TO-3/TO-4 deploy wave). TO-4 is GO. Coordinate the same-wave deploy directly with DS~D: TO-4's Lambda silver-write removal lands together with the runner-start chain-run that materializes TO-3's amalgamated silver — no zero-writer window, no writer-#3 clobber of the amalgamated output.</dispatch_unblock_condition>
     <project_code>ADVI_TXNAMG</project_code>
