@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform + 0.4.2_RD_AdvisorIntelligence (joint)</issued_to>
     <date>2026-05-14</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>IMMEDIATE for DE 0.4 (bench-clear post FECACHE_COHERENCE Phase 2a Q2 ship). RD 0.4.2 propagation phase gated on DE shared-constant commit + RD H3 patch close. Andrew direct "push them along" override.</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>

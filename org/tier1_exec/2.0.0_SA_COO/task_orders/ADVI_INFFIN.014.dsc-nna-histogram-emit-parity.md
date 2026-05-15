@@ -5,7 +5,12 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>complete</status>
+    <shipped_commit>a731e8461</shipped_commit>
+    <shipped_s3_etag>c5758d28a534fd387704a5e6a023c7f0</shipped_s3_etag>
+    <shipped_at>2026-05-14T14:10:47Z</shipped_at>
+    <ravc4_accept>1.0.0_SA_CTO 2026-05-14T14:13Z; 2.0.0_SA_COO RAVC1 ACCEPTED + AE chain-fire on RAVC2 receipt</ravc4_accept>
+    <session_log>org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-05-14/DS_C_session1_inffin014_nna_histogram_emit.md</session_log>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_INFFIN</project_code>
     <priority>P1 — Andrew-flagged partner-visible defect; INF NNA bell curve cannot render (no histogram data); 49F parity exists; smallest possible delta on INF gold emit side</priority>
