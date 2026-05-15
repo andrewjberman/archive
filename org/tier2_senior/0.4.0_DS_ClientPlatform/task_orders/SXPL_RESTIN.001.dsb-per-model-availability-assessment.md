@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>SXPL_RESTIN</project_code>
     <priority>P1 -- the designated INITIAL TO (Andrew, brief section-9). Produces the ground-truth schemas + per-model availability matrix that TO-3+ (silver/gold modeling) is scoped against. Read-only investigation.</priority>
