@@ -809,7 +809,7 @@
   <!-- =========================================================== -->
   <pipeline name="smartx-pipeline"
             terraform_module="infra/aws/terraform/smartx-pipeline/"
-            current_tag="smartx-v2.0.0"
+            current_tag="smartx-v2.2.0"
             s3_backend_key="smartx-pipeline/tfstate">
 
     <lambdas>
@@ -839,6 +839,34 @@
         <trigger>Invoked by smartx-exporter EC2 after export completes</trigger>
         <last_deployed_commit>81ba66ea7f3644e36cca8b7abafcbd5e392f2787</last_deployed_commit>
       </lambda>
+      <lambda>
+        <name>smartx-jwt-refresher</name>
+        <source_path>infra/aws/lambda/smartx_jwt_refresher</source_path>
+        <artifact_s3_key>smartx-pipeline/smartx-jwt-refresher.zip</artifact_s3_key>
+        <memory_mb>128</memory_mb>
+        <timeout_s>120</timeout_s>
+        <runtime>python3.11</runtime>
+        <package_type>Zip</package_type>
+        <layers/>
+        <trigger>EventBridge Scheduler (smartx-jwt-refresher-daily: cron(0 9 * * ? *) America/New_York, ENABLED)</trigger>
+        <note>SXPL_RESTIN.002 — ROPC password grant; parks JWT to SM smartx/jwt/current + s3://opal-data-bd/smartx/jwt/current.json. Stdlib-only, no layer.</note>
+        <last_deployed_commit>1e824dd99</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>smartx-rest-pull</name>
+        <source_path>infra/aws/lambda/smartx_rest_pull</source_path>
+        <artifact_s3_key>smartx-pipeline/smartx-rest-pull.zip</artifact_s3_key>
+        <memory_mb>512</memory_mb>
+        <timeout_s>300</timeout_s>
+        <runtime>python3.11</runtime>
+        <package_type>Zip</package_type>
+        <layers>
+          <layer>var.pandas_layer_arn (injected via Terraform variable)</layer>
+        </layers>
+        <trigger>EventBridge Scheduler (smartx-rest-pull-daily: cron(15 9 * * ? *) America/New_York, ENABLED)</trigger>
+        <note>SXPL_RESTIN.002 — reads parked JWT; pulls daily model value + holdings weights for 7 Opal models; lands raw + bronze to opal-data-bd. Bundle: lambda_function.py + pull_smartx_models_rest.py + smartx_jwt_reader.py.</note>
+        <last_deployed_commit>1e824dd99</last_deployed_commit>
+      </lambda>
     </lambdas>
 
     <step_functions>
@@ -847,6 +875,8 @@
 
     <eventbridge_rules>
       <rule><name>smartx-daily-export-trigger</name><schedule>cron(0 14 ? * MON-FRI *)</schedule><state>ENABLED</state><target>smartx-ec2-autostart</target></rule>
+      <rule><name>smartx-jwt-refresher-daily</name><type>aws_scheduler_schedule</type><schedule>cron(0 9 * * ? *) America/New_York</schedule><state>ENABLED</state><target>smartx-jwt-refresher</target></rule>
+      <rule><name>smartx-rest-pull-daily</name><type>aws_scheduler_schedule</type><schedule>cron(15 9 * * ? *) America/New_York</schedule><state>ENABLED</state><target>smartx-rest-pull</target></rule>
     </eventbridge_rules>
 
     <ec2_resources>
