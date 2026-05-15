@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>done</status>
+    <completed>2026-05-15</completed>
+    <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>Wave 1 (.027 + .028) + Wave 2 (.029a + .029b) RAVC2 PASS. May share ts-morph install setup with .026 (Wave 3 sibling) — coord at ship time.</dispatch_unblock_condition>
     <project_code>ADHC_COMPIL_V4</project_code>
     <priority>P1 — Wave 3 multi-tenant readiness; Class-D pattern detection; corpus-strong empirical anchor</priority>
