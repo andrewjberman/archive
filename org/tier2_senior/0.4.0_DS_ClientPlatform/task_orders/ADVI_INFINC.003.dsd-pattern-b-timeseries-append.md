@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-05-15</date>
-    <status>active</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED — INFINC.002 RAVC2 received (649617a58). Phase 3 authorized.</dispatch_unblock_condition>
     <project_code>ADVI_INFINC</project_code>
