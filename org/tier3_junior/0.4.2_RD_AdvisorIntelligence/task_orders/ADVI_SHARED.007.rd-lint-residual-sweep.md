@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED 2026-05-14 by COO. All three gates met: (1) .004 SHIPPED 2057099c + 74a29229 (Cat A 16→0); (2) .005 SHIPPED d9882117 (Cat B 9→0; audit predicted 12); (3) .006 SHIPPED bf97a24b→35e0adf9 (firmId canonicalization). Audit §F.0 drift pattern confirmed third consecutive correction — expect Cat OTHER actual count significantly under 76 predicted; lint baseline should be tight enough that .007 ships in well under the original ~1d SLA.</dispatch_unblock_condition>
     <project_code>ADVI_SHARED</project_code>

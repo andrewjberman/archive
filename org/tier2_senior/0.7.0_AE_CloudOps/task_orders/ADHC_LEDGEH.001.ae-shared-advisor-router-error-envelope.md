@@ -5,10 +5,10 @@
 | **Project** | `ADHC_LEDGEH` (Lambda@Edge Defense Envelope Hardening) |
 | **Owner** | `0.7.0_AE_CloudOps` |
 | **Lane** | AE / lambda-edge / portal-auth-infrastructure |
-| **Status** | `staged` — gates on COO per-TO dispatch GO |
-| **Dispatch_held** | `true` — unblocks on COO RAVC2 dispatch signal |
-| **Effort** | ~1d wall (Option A locked per CTO Q2 ratify 16:55Z) |
-| **PRD** | `org/tier2_senior/0.7.0_AE_CloudOps/drafts/ADHC_LEDGEH.md` v0.2 (AE draft; pending CTO authoring-lane consumption + canonicalize to `docs/architecture/ADHC_LEDGEH.md`) |
+| **Status** | `pending` — dispatch GO unblocked per COO routing 17:1XZ; ready for AE 0.7 pickup |
+| **Dispatch_held** | `false` — CTO canonicalize (`5362d0295`) + COO dispatch GO both received |
+| **Effort** | ~3-5h actual (~1d wall budget; CTO downsize per `5362d0295` canonicalize — Option A locked, scope narrowed, FIRMSEP.04 test surface known) |
+| **PRD** | `docs/architecture/ADHC_LEDGEH.md` v0.2+canonicalize (CTO `5362d0295` git mv from AE drafts preserved AE authorship trail; CTO added §11 canonicalize entry + §7.Q3 ruling on top) |
 
 ---
 
@@ -151,3 +151,4 @@ Per PRD §9.
 
 - **v0.1** — 2026-05-14 ~16:55Z — initial author; staged + dispatch_held; gates on CTO Option A/B ratify
 - **v0.2** — 2026-05-14 ~17:05Z — Option A locked per CTO Q2 ratify 16:55Z; Option B section stripped (path-scoped CF behavior approach ruled out due to distribution-level `custom_error_response` constraint); staged + dispatch_held=true gating now on COO per-TO dispatch GO only
+- **v0.3** — 2026-05-14 ~17:20Z — CTO canonicalize at `5362d0295` (git mv from AE drafts/ to docs/architecture/ADHC_LEDGEH.md preserving AE authorship trail; CTO commit added §11 canonicalize entry + §7.Q3 ruling on top). FIRMSEP.04 test surface extension AC added per CTO Q3 ruling. Effort estimate downsized ~3-5h actual per CTO. Status flipped to `pending` (dispatch_held=false); COO per-TO dispatch GO unblocked. Sequencing per CTO `.029b → .027 → .028 → LEDGEH.001` lock — natural Wave 1+2 momentum into LEDGEH ~3-4d wall from now.

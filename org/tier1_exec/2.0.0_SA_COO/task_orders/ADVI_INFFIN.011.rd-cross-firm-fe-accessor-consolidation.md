@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED 2026-05-14 by COO. Original conditions met: DS~B audit 9c3a4693e shipped + DS~C INFFIN.003 c5d98d41f + .010 5e5f18edd aligned INF schema (top-level book block + fee_summary.by_account[] per CTO Q1 Option A) + RD bench-available this session (per RD .002 log "Bench-available for .006 unblock"). 49F BD-pipeline retrofit per CTO Q1 ruling is a separate follow-on TO not yet authored — RD ships consolidation where alignment exists and documents fork-preserved divergences (per AC5).</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>

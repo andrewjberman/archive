@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-13</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED 2026-05-14 by COO. DS~C INFFIN.003 c5d98d41f + .010 5e5f18edd shipped fields on platinum (book.fee_earning_aua/non_fee_earning_aua, clients[].is_fee_paying, fee_summary.by_account[]). v1.7.56 Lambda verified passthrough. RD bench-available. Per CTO scope-reduced plan: FE-side toggle filter from per-account is_fee_paying + book totals — no per-period parallel fields required. Final dev-smoke for AC8 chain-fresh data gates on chain #30 (in flight) but RD can code against the source-of-truth shape now.</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>
