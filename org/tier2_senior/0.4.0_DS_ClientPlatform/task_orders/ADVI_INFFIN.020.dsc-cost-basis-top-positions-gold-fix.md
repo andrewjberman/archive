@@ -5,9 +5,11 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-15</date>
-    <status>active</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>Cascade from ADVI_INFFIN.019 RAVC2 (08e9e4301). All 4 root causes empirically confirmed.</dispatch_unblock_condition>
+    <completed_at>2026-05-15T01:56Z</completed_at>
+    <completed_commit>9e5d5359d</completed_commit>
     <project_code>ADVI_INFFIN</project_code>
     <priority>P1 — Andrew dashboard tomorrow gate; CBBY $1.31B vs $27M semantic error + Top Gain Positions N/A</priority>
     <sla>~2-3h wall actual per Pod 4 velocity</sla>
