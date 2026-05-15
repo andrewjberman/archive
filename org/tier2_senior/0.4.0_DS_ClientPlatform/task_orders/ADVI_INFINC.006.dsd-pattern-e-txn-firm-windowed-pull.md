@@ -69,8 +69,8 @@
 
   <phase id="2" when="TXN daily incremental — firm-level windowed pull">
     <step>
-      <run>Implement the daily incremental path: firm-level /Portfolio/Transactions windowed pull. Use a trailing window sized to the safe limit (~7-14 days/call; chunk into multiple windowed calls if a longer trailing range is wanted). Append to prior bronze; dedupe by transaction id keeping last. Mon-Sat = incremental; Sunday = Phase 1 backstop.</run>
-      <expect>Daily run pulls the trailing window in ~1-2 firm-level calls (~10-60s) vs ~1,160 account calls (~7min). Bronze output shape byte-identical to the full-pull shape.</expect>
+      <run>Implement the daily incremental path: firm-level /Portfolio/Transactions windowed pull. Daily trailing window = EXACTLY 7 days (CTO spec — gives 6 days of overlap-safety against missed/failed runs; well under the 30-day API cap). Do NOT size the window to the ~14-day ceiling. Append to prior bronze; dedupe by transaction id keeping last. Mon-Sat = incremental; Sunday = Phase 1 backstop.</run>
+      <expect>Daily run pulls the 7-day trailing window in 1 firm-level call (~10s) vs ~1,160 account calls (~7min). Bronze output shape byte-identical to the full-pull shape.</expect>
     </step>
     <step>
       <run>Intraday re-fire handling: if the chain re-fires same-day after the morning pull, re-pull the trailing window to catch intraday activity. Make explicit (--since vs --start-date), not accidental.</run>
@@ -127,7 +127,7 @@
     AC4: Bronze output shape byte-identical between incremental and full-pull modes — downstream silver consumers unaffected
     AC5: Daily incremental wall materially less than full-pull (~7min → &lt;1min target)
     AC6: Intraday re-fire handled explicitly (--since vs --start-date)
-    AC7: 30-day window cap respected — daily window stays ≤14d/call; longer ranges chunked into multiple calls
+    AC7: Daily trailing window = EXACTLY 7 days (CTO spec — 6-day overlap-safety; not sized to the ~14d/30d ceiling)
     AC8: In-window backdated correction empirically captured by the daily incremental run
     AC9: Weekly backstop empirically catches an out-of-window backdated correction
     AC10: Phase 0 PERF short-window probe executed — 7d/14d client Performance windows tested; viable-or-not documented with evidence
@@ -142,6 +142,7 @@
     HARD DEPENDENCY: INFINC.005 RAVC2 (734a2aec6) — COMPLETE.
     SEQUENCING (carried from CTO Phase 5 conditions): the weekly full-history backstop (Phase 1) lands FIRST or SAME-COMMIT as the daily narrowing (Phase 2). Never narrow the daily pull before the backstop exists.
     BACKSTOP MECHANISM: script-internal Sunday/env-var branch — ships atomically with the narrowing, no AE cron dependency. (If an external scheduling reason forces a separate EventBridge rule, coordinate AE 0.6.1 — but script-internal is strongly preferred for atomic-ship sequencing safety.)
+    FIRM-LEVEL FALLBACK (CTO ruling): if the firm-level windowed endpoint regresses or its behavior proves unstable in production, the client-level endpoint (GET /Clients/{id}/Transactions, ~314 calls, no 31-day cap) is the documented fallback for the daily path — slower than firm-level but still well under the ~1,160-account baseline. Note this fallback in the script.
     DOWNSTREAM: silver converters consuming bronze/transactions — bronze shape unchanged, unaffected.
     AE 0.6.1: CC on RAVC2.
     PERF: out of implementation scope here — Phase 0 probe only. COO authors a PERF TO off the RAVC2 if the short-window probe is positive.
