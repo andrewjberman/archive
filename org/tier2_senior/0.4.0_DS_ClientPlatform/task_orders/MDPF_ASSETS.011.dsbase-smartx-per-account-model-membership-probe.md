@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
-    <dispatch_held>false</dispatch_held>
-    <dispatch_unblock_condition>DISPATCHED 2026-05-18 (COO, Andrew-direct) to DS Base. A read-only SmartX-backend probe; not gated on anything. This investigation OWNS the central WS-B (MDPF_ASSETS.007) Phase-0 question -- pulled into its own TO so WS-B does not redo it. WS-B's Phase-1 build gates on this TO's finding.</dispatch_unblock_condition>
+    <status>cancelled</status>
+    <dispatch_held>true</dispatch_held>
+    <dispatch_unblock_condition>SUPERSEDED + CANCELLED 2026-05-18 (COO), before DS Base spent any effort. WS-B's own Phase-0 gate (MDPF_ASSETS.007, DS~A) resolved this TO's exact question concurrently and faster: SmartX `enterprises/allocations?modelid={modelId}` returns a per-allocation roster with per-account `value` -- account-grain 49F model membership IS feasible, PRD named-gap-2 closed. The mechanism + the verdict are in DS~A's Phase-0 brief docs/briefs/mdpf-assets-007-wsb-49f-smartx-phase0-feasibility-20260518.md (commit f5991b5bd). The SmartX↔BD join (this TO's Phase 2) is also moot -- SmartX carries per-account value directly, no BD join needed. Nothing for DS Base to do; this TO is closed unstarted. The de-risking instinct was right; WS-B simply self-resolved it faster than the dedicated probe could dispatch.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
     <priority>P1 -- Andrew-direct. WS-B (49F model AUA, Cohort 1a) cannot build account-grain without an account-to-model mechanism; this probe determines whether one exists. It de-risks the largest open question in MDPF Phase 2.</priority>
     <sla>1-1.5d wall -- a read-only backend probe ending in a finding brief. NOT a build.</sla>

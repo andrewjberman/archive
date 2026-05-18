@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-05-18</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18 (COO) to DS~A. Phase 2 -- HARD-sequenced behind MDPF_ASSETS.007 (WS-B): non_model_aua(49financial) is a residual that requires model_aua(49financial) from WS-B for the same (firm_id, as_of_date); the contract §7 model_aua_input check enforces it. COO flips to pending + fires GO when .007 (WS-B) closes and model_aua(49financial) is live.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GO 2026-05-18 (COO) to DS~A. WS-B (MDPF_ASSETS.007) Phase 0+1+2 is complete -- model_aua(49financial) = $1,360,250,355 is computed + verified. WS-E builds now: the gold script (Schwab crosswalk + the residual) can be built + verified LOCALLY immediately, exactly as WS-B was. The S3-landing step + the contract §7 model_aua_input cross-check (which reads model_aua_positions from S3) gate on the opal-data-mdpf bucket -- MDPF_ASSETS.012 (AE 0.5.0); WS-E's S3 upload + final verification land concurrent with WS-B's --upload when the bucket exists.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
     <priority>P1 -- MDPF Phase 2. WS-E produces Cohort 1b (49F non-model AUA) -- the live-residual replacement for today's frozen ~$271M plug.</priority>
     <sla>1.5-2d wall -- the Schwab-custody crosswalk is already built (the .001 audit); WS-E builds it into the gold layer + computes the residual.</sla>
