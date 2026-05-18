@@ -13,6 +13,22 @@
     <sla>Phase 0 probe ~2-3h (read-only). Phase 1+ contingent on the Phase-0 data-source outcome; ~4-6h wall if the summaries block or the Orion probe yields a usable series, longer if the guard-railed X fallback is forced (escalates first).</sla>
   </metadata>
 
+  <amendment id="1" date="2026-05-18" by="2.0.0_SA_COO" ratified-by="1.0.0_SA_CTO">
+    RE-SCOPE -- the "rebuild-method-y" slug is RETIRED. The Method-Y windowed puller (Phase 1 steps 1a/1b) SHIPPED and is correct; the windowed non-annualized factor series lands in silver/performance/{date}.parquet. The remaining defect is a PHASE-1 WIRING ERROR in step 1c: INF_C_02 `_build_daily_factor_table` was pointed at silver/performance_dim/.twr_factor_period -- a DEAD ORPHAN path (no live producer, frozen 2026-05-13; INF_C_02's docstring claims INF_C_03 passes it through, but INF_C_03 writes only gold/ -- a phantom pass-through). 3 chain runs left epsilon byte-identical at 71.6% because of this.
+
+    CTO RULING 2026-05-18 (1.0.0_SA_CTO, full ruling MCP'd to DS~C + COO): OPTION A -- repoint INF_C_02, not rebuild. CTO empirically grain-verified silver/performance/2026-05-18.parquet: calendar-daily, twr_factor = continuous index inception=1.0 -- exact semantic match for `_build_daily_factor_table`; repoint is grain-safe, no conditional gate. Option B (build a silver/performance_dim producer) REJECTED as orphan-resurrection.
+
+    CONTAINED RE-SCOPED WORK (supersedes Phase 1 step 1c + Phase 2):
+    (1) `_build_daily_factor_table`: read silver/performance/{latest}.twr_factor instead of silver/performance_dim/.twr_factor_period (path + column-name change).
+    (2) Rewrite the false INF_C_03-pass-through docstring (~lines 109-116).
+    (3) Retire the dead PERF_DIM_PREFIX / performance_dim orphan-loader branch.
+    OUT OF SCOPE (CTO explicit -- do not creep): convert_performance_to_silver.py's stale "weekly" docstring + week_date/weeks_from_inception misnomer columns (future silver-touch); cumulative_twr as a silver-computed running product (latent Rule-17, not consumed by INF_C_02).
+
+    RE-RUN: INF_C_02 stays Pattern-B append-only after the repoint -- the re-run MUST be `INFINC_REBUILD=true bash orion-gold-dispatch.sh --from INF_API_SILVER_PERF --bg` to force full 2020-2026 partition re-materialization so the corrected factor source reaches all historical-window partitions. `--from` alone (append mode) recomputes only the trailing date and leaves YTD/1Y/3Y/MAX epsilon stale.
+
+    GO 2026-05-18 (COO). INFGRO.007 + ADVI_BIWNDW.002 unaffected -- stay closed. AC5 unchanged (epsilon must move OFF 71.6%, absolute-scale TWRs correct).
+  </amendment>
+
   <references>
     <cto_ruling>1.0.0_SA_CTO ruling 2026-05-18 on the INFGRO.008 Phase-0 escalation -- Method Y (authoritative Orion TWR series) ACCEPTED as primary; Method X (reconstruct cumulative from the annualized rate) REJECTED as primary (numerically unsound at daily grain + violates PRD section 2.4 measured-not-assumed) -- X retained ONLY as a guard-railed last-resort fallback; Method Z rejected. The fix is PROBE-FIRST, not blind implementation.</cto_ruling>
     <diagnosis_brief>docs/briefs/infgro-finding-b-epsilon-coverage-diagnosis-20260518.md (DS, 90e502c39) -- ROOT CAUSE: INF_C_02 `_build_daily_factor_table` misinterprets silver/performance_dim `twr_factor_period` (an inception-to-date ANNUALIZED TWR rate) as a cumulative-growth factor; return_$ comes out ~6-10x too small and epsilon_$ absorbs the remainder. Candidates (i) coverage and (ii) staleness were ruled OUT with evidence. SCOPE the fix off this brief's Method X/Y/Z framing -- NOT off the INFGRO.008 TO's A/B/C (which was coverage-framed and is superseded; coverage was ruled out).</diagnosis_brief>
