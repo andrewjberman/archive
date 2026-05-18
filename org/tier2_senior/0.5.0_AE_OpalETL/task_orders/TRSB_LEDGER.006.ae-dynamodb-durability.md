@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO 2026-05-18 (COO~B decomposition of TRSB_LEDGER PRD v0.1). Phase 2 -- pure Terraform table-config change on dynamodb.tf, runs CONCURRENT with the AE 0.7.0 backend lane. The only real parallelism in this PRD (CTO~B 2026-05-18).</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
