@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO 2026-05-18 (COO) to DS~B. MDPF_ASSETS.008 (WS-C) is COMPLETE -- DS~B's lane is free. DS~B already ran the Phase-0 read-only scope-reconciliation (per the early-start invitation) and confirmed the finding: the section-3.3 decomposition logic is ALREADY in mdpf_aggregate_aua.py:build_etf_decomposition (verified working in the .008 end-to-end run -- held_inflection(PFDE) $9.77M / (PFOE) $8.02M). .009's confirmed scope is therefore SMALL: a single etf_net_assets feeder conform (opal-data-etfs/silver/netassets_daily.parquet -- all 4 Opal ETFs, ~590 rows, near-direct column map -> opal-data-mdpf/mdpf/feeds/etf_net_assets/) + end-to-end verification. NOT a from-scratch decomposition build.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
