@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED GO 2026-05-15 -- Andrew-flagged URGENT. Root-cause + fix; no gate.</dispatch_unblock_condition>
     <project_code>ADVI_INFDRF</project_code>
