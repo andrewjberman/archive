@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED GO 2026-05-18. No external gate. ONE cross-domain sequencing requirement: orion-gold-dispatch.sh is concurrently edited by AE 0.7.0 (ADVI_INFETL.RUNDATE-DISPATCH-IMPL) -- see cross_domain_coordination; MCP 0.7.0 before committing to that file.</dispatch_unblock_condition>
     <project_code>ADVI_INFETL</project_code>
