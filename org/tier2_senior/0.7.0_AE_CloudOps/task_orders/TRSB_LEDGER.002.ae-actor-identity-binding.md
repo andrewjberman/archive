@@ -29,12 +29,15 @@
 
     FORK (§7-Q5): this TO is written assuming TO-0 confirms the authorizer passes a usable identity. If TO-0's brief finds it does NOT, do NOT improvise -- STOP and escalate to CTO~B via COO~B. The fork is: (a) an authorizer change to pass identity (larger scope, new TO), or (b) an accepted-risk deferral documented by CTO~B. CTO~B adjudicates; this TO is then re-scoped or re-issued.
 
+    TO-0 FINDING (2026-05-18, brief docs/briefs/trsb-ledger-to0-identity-seeding-probe-20260518.md): the §7-Q5 fork did NOT trigger -- the authorizer passes a verified acting-party identity at `event['requestContext']['authorizer']['lambda']['email']`. Proceed to the standard repoint. TO-0 ALSO surfaced a high-severity route-surface defect: a parallel `/api/public/trades/*` route family (`authorization_type = NONE`) hits the SAME Lambda integrations as the authenticated `/api/general/` twins -- so trade-workflow-handler is reachable UNAUTHENTICATED, arriving with NO `requestContext.authorizer` block. This TO MUST therefore hard-reject any request that arrives without an authorizer context -- the structural handler-side catch for the unauthenticated public twin. The disposition of the `/api/public/trades/*` routes themselves is TRSB_LEDGER.010 (a separate CTO~B-adjudicated TO on the shared-infra apigateway-portal module); this TO's hard-reject stands regardless of TO-10's outcome and is the defense that closes exploitability NOW.
+
     File: infra/aws/lambda/trade-pipeline/trade-workflow-handler/src/workflow_handler.py.
   </context>
 
   <scope>
     <step>Phase 1 -- Read TO-0's brief. If the authorizer carries usable identity: proceed. If NOT: STOP, escalate to CTO~B through COO~B (§7-Q5 fork); do not write code against an unverified authorizer.</step>
-    <step>Phase 1 -- In `lambda_handler`, derive the acting party from `event['requestContext']['authorizer']` (the exact claim path per TO-0's finding). Use that as the authoritative actor for the trade-users lookup and for all downstream actor fields.</step>
+    <step>Phase 1 -- In `lambda_handler`, derive the acting party from `event['requestContext']['authorizer']['lambda']['email']` (the claim path confirmed by TO-0). Use that as the authoritative actor for the trade-users lookup and for all downstream actor fields.</step>
+    <step>Phase 1 -- HARD-REJECT (403) any request that arrives with NO `event['requestContext']['authorizer']` context. This is the mandatory structural catch for the unauthenticated `/api/public/trades/*` twin (TO-0 finding §3) -- a request with no authorizer context has no verifiable actor and MUST NOT fall back to the body `user_email`. This rejection is non-negotiable and stands regardless of TO-10's route-disposition outcome.</step>
     <step>Phase 1 -- If the request body still carries `user_email` and it disagrees with the JWT principal, return 403 with a specific message ("acting-party identity mismatch"). A matching or absent body field is accepted; a conflicting one is rejected.</step>
     <step>Phase 2 -- Unit coverage: a request whose body `user_email` differs from the JWT principal is rejected 403; a request with a matching body field or no body field resolves the actor from the JWT.</step>
     <step>Phase 3 -- Deploy via terraform apply (CLAUDE.md Rules 1-6). Smoke the deployed Lambda.</step>
@@ -78,7 +81,8 @@
   <acceptance_criteria>
     <ac id="AC1">The acting party for every trade workflow action is derived from `event['requestContext']['authorizer']`, not the request body.</ac>
     <ac id="AC2">A request whose body `user_email` conflicts with the JWT principal is rejected 403 with a specific mismatch message. A matching or absent body field is accepted.</ac>
-    <ac id="AC3">Unit tests cover the mismatch-rejection and the JWT-resolved-actor path. Tests pass.</ac>
+    <ac id="AC2b">A request that arrives with NO `event['requestContext']['authorizer']` context is hard-rejected 403 -- the handler does not fall back to the body `user_email`. Verified by a smoke against the unauthenticated `/api/public/trades/workflow` route (or a synthetic event with the authorizer block absent).</ac>
+    <ac id="AC3">Unit tests cover the mismatch-rejection, the no-authorizer-context rejection, and the JWT-resolved-actor path. Tests pass.</ac>
     <ac id="AC4">Deployed-Lambda smoke: a spoofed-email request returns 403. Deployed via terraform apply (0-diff plan); pipeline tag applied.</ac>
     <ac id="AC5">IF the §7-Q5 fork triggered (authorizer carries no usable identity): no code was written; the escalation to CTO~B via COO~B is documented in the session log, and this TO is marked blocked-pending-rescope rather than complete.</ac>
     <ac id="AC6">No emoji. Session log with the Compiler Tools section. RAVC2 to 2.0.0_SA_COO~B.</ac>
