@@ -8,7 +8,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-08</issued_date>
     <revised>2026-05-18 -- MECHANISM RE-RULED by CTO (Option A, 20260518T~14:00Z). The reference-transaction hook mechanism is WITHDRAWN: AE 0.5.0's Phase-4 fixtures empirically proved that installing ANY reference-transaction hook -- including a trivial exit-0 no-op -- deterministically hangs `git rebase` on git 2.54.0/Windows Git Bash (7/7 hang WITH hook, 4/4 OK WITHOUT). The guard is now a `git()` shell-shadow FUNCTION auto-loaded from `~/.bashrc`. COO rewrote scope (Phases 1-5) + acceptance criteria for the new mechanism. The Phase-1 headmove-guard topology engine AE already built (merge-base --is-ancestor discriminator, discarded-set reporting, FORCE-HEADMOVE audit) is preserved as the function body -- only the install vector changed. This is the second empirical mechanism correction in the .010 arc (the pre-reset-hook premise fell in Phase 1; the reference-transaction install-side-effect premise falls now) -- the probe process working, not a scoping failure.</revised>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>UNBLOCKED 2026-05-18 on the CTO Option-A re-ruling. AE 0.5.0 was held at Phase 2 commit pending this rewrite; resume now. No external gate.</dispatch_unblock_condition>
     <priority>medium</priority>
