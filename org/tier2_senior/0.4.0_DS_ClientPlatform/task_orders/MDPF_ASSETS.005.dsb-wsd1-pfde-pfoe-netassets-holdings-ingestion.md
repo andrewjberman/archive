@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-18 (COO) to DS~B -- the open lane (DS~B finished MDPF_ASSETS.003). WS-D.1 ingestion is self-contained -- it extends the existing ETFS_NETAST probe and writes the existing opal-data-etfs schema; it is NOT gated on the WS-A contract (only WS-D.2, the partner-attribution decomposition, conforms to WS-A). Start now.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
