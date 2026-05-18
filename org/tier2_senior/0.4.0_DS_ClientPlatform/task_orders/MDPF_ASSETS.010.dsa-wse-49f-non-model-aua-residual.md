@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO 2026-05-18 (COO) to DS~A. WS-B (MDPF_ASSETS.007) Phase 0+1+2 is complete -- model_aua(49financial) = $1,360,250,355 is computed + verified. WS-E builds now: the gold script (Schwab crosswalk + the residual) can be built + verified LOCALLY immediately, exactly as WS-B was. The S3-landing step + the contract §7 model_aua_input cross-check (which reads model_aua_positions from S3) gate on the opal-data-mdpf bucket -- MDPF_ASSETS.012 (AE 0.5.0); WS-E's S3 upload + final verification land concurrent with WS-B's --upload when the bucket exists.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
