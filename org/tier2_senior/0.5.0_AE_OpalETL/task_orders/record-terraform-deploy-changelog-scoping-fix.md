@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED GO 2026-05-18. Ad-hoc tooling fix, no project, no gate. One cross-domain note: record-terraform-deploy.sh is shared CI tooling AE 0.7.0 has touched (ADHC_DRIFTD.003) -- see cross_domain_coordination.</dispatch_unblock_condition>
     <priority>P2 -- tooling debt, not on any critical path. infra/aws/terraform/inf-pipeline/CHANGELOG.json is 88,832 lines and grows ~12k lines per deploy; it bloats git operations + every CHANGELOG read. Worth fixing but not urgent.</priority>
