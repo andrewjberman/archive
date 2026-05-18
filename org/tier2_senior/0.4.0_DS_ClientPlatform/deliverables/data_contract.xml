@@ -1170,4 +1170,33 @@
     </artifact>
   </ofc_views_contract_notes>
 
+  <!--
+    ADVI_INFLEC activity_scan contract (added 2026-05-18, DS~D).
+    Corrects pre-existing drift: the per-window emit was undocumented here.
+    Validated against data/orion/scripts/gold/INF_D_05.activity_scan.py.
+  -->
+  <activity_scan_contract_notes>
+    <artifact>
+      <s3_key>platinum/firm/activity_scan_{qtd,ytd,1y,max}.json</s3_key>
+      <produced_by>data/orion/scripts/gold/INF_D_05.activity_scan.py</produced_by>
+      <consumer>Inflection Business Intelligence panel -- Trade Activity lens (Window toggle QTD/YTD/1Y/Max path-keys to the window artifact; portal commit 23e8ab14)</consumer>
+      <schema>
+        Top level is a JSON array of per-household rows (no envelope object).
+        <key name="household_id" type="int">Canonical household identifier.</key>
+        <key name="aua" type="float">Window-independent canonical AUA in dollars (from gold/timeseries/client_performance.parquet, latest healthy non-zero date). Rounded to 2 dp.</key>
+        <key name="txn_count" type="int">Transaction count over THIS window only. Field is `txn_count` -- NOT `txn_count_12m`.</key>
+        <key name="activity_score" type="float">Percentile rank of txn_count within this window's HH population (0-1, 4 dp).</key>
+        <key name="segment" type="string">'active' (txn_count above window median) | 'buy_and_hold' (at/below window median).</key>
+      </schema>
+      <windows>
+        Four artifacts, one per window. Window definitions parity with INF_D_06.cash_drag / 49F C_08:
+        qtd = first day of latest's calendar quarter -> latest; ytd = Jan 1 of latest's year -> latest;
+        1y = latest - 365 days -> latest; max = earliest TRN trade_date -> latest.
+      </windows>
+      <retired name="legacy platinum/firm/activity_scan.json">
+        The legacy single-file emit (1y window, `txn_count_12m` field name) was retired 2026-05-18 (ADVI_INFLEC, DS~D). It existed only for FE backward-compat while the window-keyed FE wiring was pending. The FE BI Trade Activity lens reads only activity_scan_{window}.json as of portal commit 23e8ab14 -- the legacy artifact has no remaining consumer and is no longer produced.
+      </retired>
+    </artifact>
+  </activity_scan_contract_notes>
+
 </data_contract>
