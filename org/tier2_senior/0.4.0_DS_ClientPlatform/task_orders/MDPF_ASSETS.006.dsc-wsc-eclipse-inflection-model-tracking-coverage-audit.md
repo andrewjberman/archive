@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-18 (COO) to DS~C -- Andrew spun up the lane for this. A read-only coverage-verification investigation; not gated on anything. NOTE: if this lane also holds the INF chain-#2 RAVC2 cascade (INFGRO.007 / BIWNDW.002 / INFGRO.009 verification), that cascade is chain-gated (~17:30Z) and takes precedence WHEN chain #2 lands -- run this investigation now, pause for the 3 RAVC2s when the chain completes, then resume.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
