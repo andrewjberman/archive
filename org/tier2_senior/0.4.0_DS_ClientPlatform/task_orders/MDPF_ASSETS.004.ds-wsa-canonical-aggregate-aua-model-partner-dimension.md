@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>in-progress</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-18 (COO) to DS~A -- the lane that ran the MDPF Phase-0 custody audit (.001/.002), idle + available post-Phase-0. WS-A is fully unblocked: the three Phase-0 briefs have landed, the Schwab-only custody ruling is in, PRD v0.2 (section 3.4 corrected) is shipped, and CTO is standing ready for the Phase-0 contract review. Phase 1 of MDPF_ASSETS -- the foundation TO; gates all of Phase 2 (WS-B/C/D/E emit shape) + Phase 3 (WS-F consumption).</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
