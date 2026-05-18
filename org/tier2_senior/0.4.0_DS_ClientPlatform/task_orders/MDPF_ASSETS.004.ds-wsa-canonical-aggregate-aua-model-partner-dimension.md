@@ -3,11 +3,11 @@
     <id>MDPF_ASSETS.004</id>
     <slug>ds-wsa-canonical-aggregate-aua-model-partner-dimension</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-05-18</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18 (COO, post Phase-0 close). Phase 1 of MDPF_ASSETS -- the foundation TO; gates all of Phase 2 (WS-B/C/D/E emit shape) + Phase 3 (WS-F consumption). No hard dependency -- the three Phase-0 investigation briefs (.001/.002/.003) have all landed and the Schwab-only custody ruling is in. Gated only on DS lane capacity (the gold chain is hot with INFGRO.007/.009 + BIWNDW.002 chain #2). COO flips to pending + fires GO when a DS lane frees.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>DISPATCHED 2026-05-18 (COO) to DS~A -- the lane that ran the MDPF Phase-0 custody audit (.001/.002), idle + available post-Phase-0. WS-A is fully unblocked: the three Phase-0 briefs have landed, the Schwab-only custody ruling is in, PRD v0.2 (section 3.4 corrected) is shipped, and CTO is standing ready for the Phase-0 contract review. Phase 1 of MDPF_ASSETS -- the foundation TO; gates all of Phase 2 (WS-B/C/D/E emit shape) + Phase 3 (WS-F consumption).</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
     <priority>P1 -- MDPF_ASSETS Phase 1, the single foundation. The convergent per-partner schema + the platinum aggregate-AUA contract must exist before any Phase-2 feeder (WS-B/C/D/E) can be authored to a stable emit shape. Author first.</priority>
     <sla>2-3d wall -- a data-contract design + CTO contract review + a thin aggregation gold script + fixture verification. Not a partner-pipeline build (those are Phase 2).</sla>
