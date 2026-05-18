@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO FIRED 2026-05-18 -- Andrew authorized FULL DECOMMISSION (relayed via CTO~B): both gates cleared -- (1) legacy-form supersession CONFIRMED, (2) destructive-op authorization GRANTED for the CloudFront + S3 teardown (Andrew's explicit "authorize full decommission" IS the human authorization per CLAUDE.md autonomy rule). Tier 1 of the CTO~B legacy-surface decommission ruling. REASSIGNED 2026-05-18 from 0.7.0_AE_CloudOps to 0.6.1_AE_PartnerETL (COO~B lane call): TO-10 edits routes.tf + the opal-trade-form-ui CloudFront/S3 stanzas -- a file set disjoint from 0.7.0's handler serial lane (workflow_handler.py / dashboard_api.py / dynamodb.tf), so it parallelizes cleanly. Routing it to the idle-clear 0.6.1 lets it hit its same-day SLA the moment it unblocks instead of queuing behind TO-5 (R3, multi-day) + TO-8 on 0.7.0. Dispatch is GATED on an Andrew supersession confirm -- that nobody still uses the legacy standalone trade form (trades.opalcapital.com / opal-trade-form-ui). CTO~B is requesting that confirm from Andrew. COO~B flips to pending + fires GO to 0.6.1 once Andrew confirms supersession. EXPEDITED same-day once unblocked -- the public GET routes leak all trade data unauthenticated (P1 data exposure).</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
