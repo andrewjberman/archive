@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED GO 2026-05-15. The CTO ratified the design (RATIFY 20260515T193422Z); the proposal TO ADVI_INFETL.RUNDATE-DISPATCH is ratified-closed. No external gate -- proceed.</dispatch_unblock_condition>
     <project_code>ADVI_INFETL</project_code>
