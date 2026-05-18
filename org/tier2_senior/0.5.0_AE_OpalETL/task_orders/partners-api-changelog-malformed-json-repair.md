@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED GO 2026-05-18. Ad-hoc follow-up to the CHANGELOG-scoping fix, no gate. Same cross-domain note: infra/aws/lambda/ci tooling-adjacent -- coordinate with AE 0.7.0 if needed; the CHANGELOG.json file itself is a deploy record, not lane-owned source.</dispatch_unblock_condition>
     <priority>P2 -- a pre-existing latent defect. infra/aws/terraform/partners-api/CHANGELOG.json is malformed JSON; record-terraform-deploy.sh's CHANGELOG write throws JSON.parse on it, so every future partners-api Terraform deploy fails to record. Not on a critical path, but it silently breaks deploy-recording for that pipeline.</priority>
