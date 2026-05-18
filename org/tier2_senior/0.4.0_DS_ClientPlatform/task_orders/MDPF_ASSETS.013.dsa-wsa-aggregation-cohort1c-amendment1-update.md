@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO 2026-05-18 (COO) to DS~A. Not gated -- the WS-A contract AMENDMENT 1 is the spec and is ratified. Sequence: DS~A self-sequences on its own lane AFTER WS-E (MDPF_ASSETS.010) -- both are DS~A's; the aggregation-script update consumes the §4 non_model_aua artifact shape WS-E emits, so WS-E first is the natural order. Carved out as its own TO (not folded into .007/.010) because it is a CONSUMER-layer change to a shipped script, distinct from the feeder TOs.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
