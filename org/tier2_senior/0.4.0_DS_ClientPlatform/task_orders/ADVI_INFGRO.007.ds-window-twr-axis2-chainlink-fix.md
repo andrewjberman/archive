@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED GO 2026-05-15. Phase 0 FIRST (grain confirmation + Finding B diagnosis) -- the exact compounding formula is grain-dependent; implementation follows the confirmed grain. No external gate -- proceed immediately. The INF gold chain run co-sequences with ADVI_BIWNDW.002 (same file, same owner DS~C) -- see cross_domain_coordination.</dispatch_unblock_condition>
     <project_code>ADVI_INFGRO</project_code>

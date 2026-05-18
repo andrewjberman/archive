@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED GO 2026-05-15. The 49F D_00c half has no gate -- proceed. The INF_D_00c half: author the window-emit code now, but the INF gold chain run co-sequences with the open INFGRO firm_return_pct_twr fix (same file) -- see cross_domain_coordination. Code authoring is not gated; only the INF chain run coordinates.</dispatch_unblock_condition>
     <project_code>ADVI_BIWNDW</project_code>
