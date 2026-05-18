@@ -62,7 +62,7 @@
     <phase id="3" when="after commit">
       <step>
         <run>Smoke: curl a /api/public/trades/* route; load the legacy form URL; load the authenticated portal TradeSubmission page</run>
-        <expect>Public routes return 404; the legacy form URL no longer serves; the authenticated portal page is unaffected and still reaches /api/general/trades/*.</expect>
+        <expect>Public routes return 401 OR 404 -- a removed route falls through to the authorizer-protected $default route, so 401 (active auth-reject) is the expected end state and is equivalent to 404 for the security objective (handler not reached). The legacy form URL no longer serves; the authenticated portal page is unaffected and still reaches /api/general/trades/*. (Precedent: TRSB_LEDGER.010a -- the removed workflow route returned 401 via $default; confirmed correct by CTO~B 2026-05-18.)</expect>
         <if_mismatch>If the authenticated portal broke, a shared integration or general route was disturbed -- roll back and re-isolate.</if_mismatch>
       </step>
     </phase>
@@ -84,7 +84,7 @@
     <ac id="AC2">All remaining `/api/public/trades/*` routes are removed from routes.tf. Every shared integration and every `/api/general/trades/*` authenticated route is intact.</ac>
     <ac id="AC3">The `opal-trade-form-ui` CloudFront distribution (E2RNVVND8GSGG3) is disabled + deleted, and its S3 origin bucket is emptied + deleted. No other distribution or bucket affected.</ac>
     <ac id="AC4">terraform plan isolated to the intended destructions; terraform apply succeeds with a 0-diff-after plan; pipeline git tag applied.</ac>
-    <ac id="AC5">Smoke: public routes 404; legacy form URL dead; authenticated portal TradeSubmission unaffected.</ac>
+    <ac id="AC5">Smoke: each removed public route returns 401 or 404 (401 via the authorizer-protected $default fall-through is the expected/accepted end state); legacy form URL dead; authenticated portal TradeSubmission unaffected.</ac>
     <ac id="AC6">No emoji. Session log with the Compiler Tools section + the destructive-teardown step log. RAVC2 to 2.0.0_SA_COO~B.</ac>
   </acceptance_criteria>
 
