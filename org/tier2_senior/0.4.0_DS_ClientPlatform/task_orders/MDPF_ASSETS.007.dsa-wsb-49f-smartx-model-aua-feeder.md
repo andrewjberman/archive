@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>in-progress</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-18 (COO) to DS~A -- MDPF Phase 2. WS-A contract is ratified; WS-B is authorable. NOTE: WS-B carries a genuine Phase-0 feasibility gate (per-account 49F model membership) -- it is dispatched GO because the Phase-0 assessment is real work that must happen regardless; if Phase 0 finds account-grain infeasible, DS~A STOPS and surfaces to COO before Phase 1.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
@@ -29,11 +29,11 @@
   </context>
 
   <scope>
-    <step>Phase 0 -- SmartX feeder feasibility + data-path decision (GATING). Resolve, before any build:
-      (a) Does a 49F per-account model-membership source exist? Inspect the SXPL_RESTIN TO-1 availability matrix + the live SmartX REST endpoints; determine whether per-account (account x model x value) data is obtainable, or only per-model scalars. The contract requires account grain.
+    <step>Phase 0 -- SmartX feeder data-path assessment. Resolve, before any build:
+      (a) [DELEGATED -- do NOT redo] The core "does a 49F per-account model-membership mechanism exist" question is now a dedicated DS Base probe, MDPF_ASSETS.011 (Andrew-direct 2026-05-18). WS-B CONSUMES .011's verdict; it does not re-run the SmartX backend probe.
       (b) What does the SmartX feeder produce TODAY -- is SXPL_RESTIN.002's pull flow landing data, where, at what grain? Is the existing EC2 browser-exporter's output usable (it is the proven canonical 49F source, not being decommissioned)?
       (c) The data/smartx/ owned-paths lane blocker status (POD3-registered vs Pod-4 DS work) -- can WS-B commit data/smartx/ or data/mdpf/ code, and where does the SmartX-to-convergent-schema modeling script live?
-      DECISION POINT: if per-account 49F model membership is obtainable, proceed to Phase 1. If it is NOT -- if 49F model AUA can only be sourced at model grain -- STOP and surface to COO+CTO: this is a contract-level question (model_aua_positions is account-grain by ratified contract) and must not be silently downgraded. Record the Phase-0 findings as a short brief.</step>
+      DECISION POINT: WS-B Phase 1 proceeds only on a YES verdict from MDPF_ASSETS.011 (account-to-model mechanism confirmed) -- .011's finding defines the data path WS-B builds on. If .011 returns NO, WS-B holds at Phase 0 and the account-grain contract question routes through COO+CTO -- not a silent model-grain downgrade. Record the (b)+(c) findings as a short brief.</step>
     <step>Phase 1 -- build the WS-B feeder (on the Phase-0-confirmed data path). A script that emits, for firm_id=49financial: (a) model_aua_positions -- one row per (model_key, account_id, as_of_date) with model_value (account-decomposable, contract §3.3 / ruling ii), custodian where known, source_pipeline=smartx; (b) model_composition -- one row per (model_key, as_of_date, ticker) with target_weight (decimal 0-1, sums to 1.0 per model), is_opal_etf flagged for DIVZ/IDVZ/PFDE/PFOE. model_key resolved through the §2 registry -- and CONFIRM + correct the provisional SmartX long-term-tier name alignment in mdpf_model_registry.json (contract §2 + ruling vii); a native model absent from the registry emits model_key=null + model_key_unmapped set (never silently dropped). Rule 15 (from __future__ import annotations) if a gold/silver/bronze script; ds-commit-gate exit 0.</step>
     <step>Phase 2 -- land + verify. Write the two artifacts to the opal-data-mdpf feeder prefix (coordinate the exact bucket with AE -- contract §8 / ruling vi). Verify model_aua(49financial) = Σ model_aua_positions.model_value lands near the Appendix-A reference (~$1,360.27M total; the 7 cohorts within a reasonable tolerance -- date offset expected). model_composition target_weights sum to 1.0 per model_key. Record the verified per-cohort numbers in the session log.</step>
   </scope>
