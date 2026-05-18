@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-18 (COO) to AE 0.5.0 (the Opal shared-resources AE). GO -- P1, on the MDPF Phase-2 critical path: all four feeders (WS-B/C/D.2/E) land their convergent artifacts in this bucket. WS-B (MDPF_ASSETS.007) is built + verified but its AC4 S3-landing is blocked solely on this bucket not existing.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
