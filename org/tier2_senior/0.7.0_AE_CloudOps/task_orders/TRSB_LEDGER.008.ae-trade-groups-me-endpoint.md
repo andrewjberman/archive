@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO 2026-05-18 (COO~B decomposition of TRSB_LEDGER PRD v0.1). Phase 3 (backend half) -- Andrew Q2/Q4 RESOLVED so Phase 3 is unblocked; CTO~B pre-decided the endpoint shape (dedicated endpoint, not a JWT claim), so this TO has no hard architectural gate. Sequenced after TO-5 on the AE 0.7.0 serial backend lane. References TO-0's trade-users seeding finding.</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
