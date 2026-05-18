@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO 2026-05-18 -- P0 EXPEDITE. INTERRUPT TO-1 to land this, then resume TO-1. Authored on the CTO~B architecture ruling 2026-05-18 (TRSB_LEDGER public-route exposure). Does NOT wait behind the TO-1 -> TO-2 serial queue.</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
