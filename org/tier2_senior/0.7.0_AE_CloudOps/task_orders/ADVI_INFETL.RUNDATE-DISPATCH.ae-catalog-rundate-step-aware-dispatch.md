@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- GT correction 2026-05-18 (2.0.0_SA_COO): proposal TO ratified-closed. AE 0.7.0 delivered deliverables (i)/(ii)/(iii); CTO ratified the step-aware dispatch design (RATIFY 20260515T193422Z) per the successor TO ADVI_INFETL.RUNDATE-DISPATCH-IMPL <dispatch_unblock_condition>. Proposal phase done; build phase tracked by RUNDATE-DISPATCH-IMPL. -->
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_INFETL</project_code>
     <priority>P1 -- the catalog --run-date gap blocks any windowed --chain full and is a candidate INFGRO chain #30 blocker. Deliverable (ii) is the fast unblock decision. AE 0.7.0 has near-term capacity: the other AE 0.7.0 TO (ADVI_TXNAMG.004) is dispatch_held on ADVI_TXNAMG.003.</priority>
