@@ -3,152 +3,155 @@
   <metadata>
     <id>ADHC_OWNPTH.010</id>
     <project>ADHC_OWNPTH</project>
-    <title>Unified destructive-HEAD-move guard -- gate reset/rebase/amend operations that discard or rewrite local-only commits</title>
+    <title>Unified destructive-HEAD-move guard -- a git() shell-shadow function gating reset/rebase/amend operations that discard or rewrite local-only commits</title>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-08</issued_date>
-    <revised>2026-05-15 -- scope-step-1 + AC10 rewritten by COO per the CTO Option-(a) ruling (20260515T193433Z). Mechanism corrected: git has no pre-reset hook; the guard hooks reference-transaction. Reframed from a reset-only guard to a unified destructive-HEAD-move guard (reset + rebase + amend). No new design -- this encodes AE 0.5.0's Phase-1-probe Option-A, CTO-ratified. The install-step + Phase-4 fixtures + the dependent ACs were threaded for coherence with the corrected mechanism.</revised>
+    <revised>2026-05-18 -- MECHANISM RE-RULED by CTO (Option A, 20260518T~14:00Z). The reference-transaction hook mechanism is WITHDRAWN: AE 0.5.0's Phase-4 fixtures empirically proved that installing ANY reference-transaction hook -- including a trivial exit-0 no-op -- deterministically hangs `git rebase` on git 2.54.0/Windows Git Bash (7/7 hang WITH hook, 4/4 OK WITHOUT). The guard is now a `git()` shell-shadow FUNCTION auto-loaded from `~/.bashrc`. COO rewrote scope (Phases 1-5) + acceptance criteria for the new mechanism. The Phase-1 headmove-guard topology engine AE already built (merge-base --is-ancestor discriminator, discarded-set reporting, FORCE-HEADMOVE audit) is preserved as the function body -- only the install vector changed. This is the second empirical mechanism correction in the .010 arc (the pre-reset-hook premise fell in Phase 1; the reference-transaction install-side-effect premise falls now) -- the probe process working, not a scoping failure.</revised>
     <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>UNBLOCKED 2026-05-18 on the CTO Option-A re-ruling. AE 0.5.0 was held at Phase 2 commit pending this rewrite; resume now. No external gate.</dispatch_unblock_condition>
     <priority>medium</priority>
-    <estimated_effort>~0.5d (unchanged -- AE 0.5.0 corrected-design estimate)</estimated_effort>
+    <estimated_effort>~0.5d -- the topology engine is built (Phase 1 reusable); the new work is the git()-function wrapper shell, the ~/.bashrc installer, and the re-run fixtures.</estimated_effort>
   </metadata>
 
   <references>
-    <ref type="cto_ruling_original">CTO ruling MCP 20260508T~PM -- ship a structural mitigation for the destructive-HEAD-move incident class. The original design sketch (a "pre-reset" hook) was empirically wrong -- see cto_ruling_corrected.</ref>
-    <ref type="ae_phase1_probe">0.5.0_AE_OpalETL Phase-1 synthetic-repo probe 20260515T183713Z. FINDING 1 -- git has NO pre-reset hook (any version); installed .git/hooks/pre-reset (exit 1) in a synthetic repo, ran git reset --hard, the hook never fired. FINDING 2 -- reference-transaction is the only structural hook that fires on git reset; exit 1 at state=prepared cleanly aborts the update (HEAD verified unmoved). FINDING 3 -- the hook is command-blind (GIT_REFLOG_ACTION unset; a commit and a reset present identical refs/heads/* transactions) -- topology is the only discriminator.</ref>
-    <ref type="cto_ruling_corrected">CTO ruling 20260515T193433Z -- Option (a) ACCEPT: reframe .010 as a unified destructive-HEAD-move guard. The topology discriminator necessarily also catches rebase + commit --amend; that coverage is CORRECT (same risk class -- destructive HEAD-moves that discard/rewrite local commits), not a scope violation. Option (b) allowlist-heuristic rejected (amend is topologically identical to reset; leaky by mechanism). Option (c) wrapper-script rejected (cultural, fails AC3/AC6, contradicts ADHC_OWNPTH's structural-over-cultural thesis). Load-bearing scoping: state=prepared + refs/heads/* + non-zero-old.</ref>
+    <ref type="cto_ruling_original">CTO ruling MCP 20260508T~PM -- ship a structural mitigation for the destructive-HEAD-move incident class. The original "pre-reset" hook sketch was empirically wrong (no such hook exists).</ref>
+    <ref type="ae_phase1_probe">0.5.0_AE_OpalETL Phase-1 synthetic-repo probe 20260515T183713Z -- git has NO pre-reset hook at any version; reference-transaction fires on git reset and exit 1 at state=prepared aborts it cleanly; the hook is command-blind so topology is the only discriminator.</ref>
+    <ref type="ae_phase4_hang_finding">0.5.0_AE_OpalETL Phase-4 finding 2026-05-18 -- NEW EMPIRICAL EVIDENCE. Installing ANY reference-transaction hook deterministically hangs `git rebase` on git 2.54.0.windows.1/Windows Git Bash: rebase WITH hook 7/7 HANG (trivial exit-0 no-op, cat-then-exit0, the headmove-guard -- all identical), WITHOUT hook 4/4 OK; merge --ff WITH hook flaky-hangs 1/4; reset/commit/amend/cherry-pick/branch-create WITH hook all OK. The hang is caused by the hook's PRESENCE, not its logic. Reproducible: .runtmp/hook_isolation.sh + op_matrix.sh + confirm_determinism.sh.</ref>
+    <ref type="cto_ruling_optionA">CTO re-ruling 20260518 -- Option A ACCEPT, Option-(a) reference-transaction hook WITHDRAWN. The mechanism is a `~/.bashrc`-autoloaded `git()` shell-shadow function. This resolves the CTO session-25 Option-(c) rejection: that rejection characterized a wrapper as a discretionary "remember-to-invoke" tool (the safe-commit.sh shape) and was premised on a working reference-transaction hook as the real structural alternative. A shell function that SHADOWS the `git` command itself, auto-loads into every Bash-tool shell, and intercepts every git reset/rebase/commit --amend with zero agent action is categorically structural -- typing `git` IS the trigger. On a platform with no usable pre-reset hook, a .bashrc git-shadow is as structural as achievable. Five implementation constraints (install vector / recursion guard / subcommand precision / coverage boundary / escape hatch) are baked into the scope + ACs below.</ref>
     <ref type="anchor_incident_3rd_class">2026-05-08 git-reset incident: AE 0.7 mid-FIRMSEP.07/.08 deploy. Reset to origin/CLOUD discarded 3 local commits (b2ebd19d6, c42105381, 2bd593627). 10 AWS resources destroyed by a parallel TF apply on rolled-back .tf. Recovered cleanly but recurrence risk material.</ref>
-    <ref type="prior_art_pattern">.tools/git-hooks/owned-paths-check.sh (ADHC_OWNPTH.002 -- same lane; audit-log + install-script + override-env pattern to mirror).</ref>
+    <ref type="prior_art_pattern">.tools/git-hooks/owned-paths-check.sh + install-owned-paths.sh (ADHC_OWNPTH.002 -- same lane; audit-log + idempotent-installer + override-env pattern to mirror) and .tools/safe-commit.sh (ADHC_OWNPTH.007 -- the --force / FORCE-BYPASS audit-log escape-hatch pattern to mirror).</ref>
     <ref type="prior_incident_1">2026-04-22 Andrew "this keeps happening" -- feedback_structural_commit_hygiene.md</ref>
-    <ref type="prior_incident_2">2026-04-27 base COO swept COMP_LEARNS files (2b3bfcd4) -- feedback_base_coo_git_sweep_incident.md</ref>
     <ref type="prior_incident_3">2026-04-27/28 record-terraform-deploy.sh sweep x3 -> ADHC_OWNPTH.007 -> safe-commit.sh wrapper</ref>
   </references>
 
   <context>
-    Third-class git-incident occurrence: a destructive HEAD-move during heavy multi-agent sessions discards or rewrites local-only commits without warning. The incident class spans `git reset <ref>` (the 2026-05-08 reset to origin/CLOUD) and -- by the same mechanism -- `git rebase` and `git commit --amend`. Existing safe-commit.sh (ADHC_OWNPTH.007) prevents commit-time contamination but does not gate destructive HEAD-move operations.
+    Third-class git-incident occurrence: a destructive HEAD-move during heavy multi-agent sessions discards or rewrites local-only commits without warning. The incident class spans `git reset <ref>` (the 2026-05-08 reset to origin/CLOUD) and -- by the same topology mechanism -- `git rebase` and `git commit --amend`. Existing safe-commit.sh (ADHC_OWNPTH.007) prevents commit-time index contamination but does not gate destructive HEAD-move operations.
 
-    2026-05-08 incident severity: 10 AWS resources destroyed by a parallel TF apply running with rolled-back .tf state during AE 0.7's reset window. Recovery worked but each recovery is non-trivial (manifest reconciliation + audit + 0-diff verification). Next occurrence may not recover as cleanly.
+    2026-05-08 incident severity: 10 AWS resources destroyed by a parallel TF apply running on rolled-back .tf state during AE 0.7's reset window. Recovery worked but each recovery is non-trivial; the next occurrence may not recover cleanly.
 
-    MECHANISM CORRECTION (AE 0.5.0 Phase-1 probe, CTO-ratified 2026-05-15). The original TO premised a git `pre-reset` hook. No such hook exists at any git version. The only structural hook that fires on `git reset` -- and aborts it cleanly -- is `reference-transaction`. That hook is command-blind, so the guard discriminates by TOPOLOGY (does the HEAD-move discard commits), which by mechanism also covers `git rebase` and `git commit --amend`. Per the CTO ruling that coverage is correct: rebase and amend are the same risk class. .010 is therefore a UNIFIED destructive-HEAD-move guard, not a reset-only guard -- it reopens ADHC_OWNPTH with a Phase-2 narrative: "git-workflow safety expanded to destructive HEAD-move operations."
+    MECHANISM -- TWO empirical corrections, now final (CTO Option A, 2026-05-18):
+    - Correction 1 (Phase 1): git has no `pre-reset` hook at any version.
+    - Correction 2 (Phase 4): the `reference-transaction` hook -- the only hook that fires on `git reset` -- cannot be used: its mere installation deterministically hangs `git rebase` on Windows Git Bash. AC2-as-hook-install is dead.
+    - FINAL MECHANISM: a `git()` shell-shadow function, auto-loaded from `~/.bashrc`. It shadows the `git` command in every Bash-tool shell, dispatches on the subcommand, runs the topology pre-check for the destructive subcommands (reset / rebase / commit --amend), and aborts-or-proceeds. It hangs nothing -- it is ordinary shell code, not a git-internal hook. The Phase-1 headmove-guard topology engine (merge-base --is-ancestor discriminator + discarded-set rev-list + FORCE-HEADMOVE audit) is the function body; only the install/dispatch vector is new.
 
-    Design pattern: mirror safe-commit.sh / owned-paths-check.sh -- a structural hook + an audit log + a force-flag escape hatch. Detect the discarded/rewritten-commit set, list it to stderr, require an explicit override to proceed.
+    Design pattern: mirror owned-paths-check.sh + safe-commit.sh -- a structural intercept + an audit log + a force-flag escape hatch. Detect the discarded/rewritten-commit set, list it to stderr, require an explicit override to proceed.
   </context>
 
   <scope>
     <step>
-      Phase 1 -- author the hook script (CORRECTED MECHANISM).
+      Phase 1 -- author the git() shell-shadow function (CORRECTED MECHANISM -- Option A).
 
-      File: `.tools/git-hooks/headmove-guard` (the hook logic; AE may choose a different coherent name -- NOT "pre-reset", which is a non-existent git hook).
+      File: `.tools/git-hooks/headmove-guard.sh` (the guard logic + the `git()` function definition; AE may pick a coherent name -- NOT a `.git/hooks/` hook name, this is shell code sourced into the environment, not a git hook).
 
-      Hook type: git's `reference-transaction` hook. It fires per ref-transaction with a `state` argument (preparing / prepared / committed / aborted) and stdin lines `<old-sha> <new-sha> <ref-name>`. Exit 1 at `state=prepared` cleanly aborts the transaction (`fatal: ... update aborted by the reference-transaction hook`; HEAD unmoved). This is the only hook that gates `git reset` -- there is no `pre-reset` hook.
+      The function shadows `git`. Required behavior:
+      1. SUBCOMMAND DISPATCH. Inspect the subcommand ($1) and args. Run the topology pre-check ONLY for: `git reset`, `git rebase`, `git commit --amend`. Every other invocation (including plain `git commit`, `git merge`, `git pull`, `git fetch`, `git checkout`, `git branch`, `git status`, ...) passes straight through to `command git` untouched.
+      2. SUBCOMMAND PRECISION (CTO constraint 3). For `rebase`, gate ONLY a fresh rebase start. `git rebase --continue`, `git rebase --abort`, `git rebase --skip`, `git rebase --edit-todo` are continuations of an in-progress rebase, NOT fresh HEAD-move starts -- they pass straight through ungated. (This is a precision improvement over the command-blind hook.)
+      3. RECURSION GUARD (CTO constraint 2). EVERY git call inside the function body -- the topology check, rev-list, merge-base, the final pass-through invocation -- MUST use `command git`, never bare `git`. Bare `git` re-enters the function = infinite recursion. This is load-bearing.
+      4. TOPOLOGY DISCRIMINATOR (the Phase-1 engine, reused). For the gated subcommand, derive the would-be (old-HEAD, new-HEAD) pair and apply: `command git merge-base --is-ancestor <old> <new>` -- if old IS an ancestor of new (fast-forward / ordinary advance) it is NOT destructive, proceed silently; if old is NOT an ancestor of new, commits reachable from old are discarded or rewritten = DESTRUCTIVE. The per-subcommand derivation of the (old,new) pair (reset: old=HEAD, new=resolved target ref; commit --amend: old=HEAD, new=the rewritten commit; rebase: the pre-start determination of whether the rebase drops/rewrites local commits) is AE's design -- the Phase-1 headmove-guard Pass-1/Pass-2 logic AE confirmed reusable. If pre-execution determination for `rebase` proves genuinely undecidable, surface to COO rather than silently degrading to "gate-all-rebases."
+      5. ON A DESTRUCTIVE MOVE: compute the discarded/rewritten set (`command git rev-list <new>..<old>`), print it (hash + author + subject + relative-age) to stderr under a clear "ABORTED: destructive HEAD-move would discard N local commit(s)" banner, then check the escape hatch (CTO constraint 5): if `FORCE_HEADMOVE=1` is set, proceed (`command git "$@"`) AND append a FORCE-HEADMOVE line to `org/git-author-override-audit.log`; if not set, return non-zero WITHOUT calling `command git` (the destructive op never runs).
 
-      Algorithm (per stdin transaction line):
-      1. Act ONLY when the hook's `state` argument is `prepared`. Ignore preparing / committed / aborted.
-      2. Act ONLY on `ref-name` matching `refs/heads/*`. IGNORE: HEAD, ORIG_HEAD, AUTO_MERGE, FETCH_HEAD, MERGE_HEAD, `refs/remotes/*`, `refs/stash`, `refs/tags/*`.
-      3. Act ONLY when `old-sha` is non-zero (an all-zero `old-sha` is branch creation -- ignore).
-      4. Topology discriminator: `git merge-base --is-ancestor <old-sha> <new-sha>`.
-         - PASSES (old IS an ancestor of new) -- a normal commit or a fast-forward merge -- NOT destructive -- allow silently.
-         - FAILS (old is NOT an ancestor of new) -- commits reachable from old are being discarded or rewritten -- DESTRUCTIVE HEAD-move (covers reset-to-divergent-ref, rebase, and commit --amend by mechanism).
-      5. On a destructive move:
-         - Compute the discarded/rewritten set: `git rev-list <new-sha>..<old-sha>`.
-         - Print it (hash + author + subject + relative-age) to stderr with a clear "ABORTED: destructive HEAD-move would discard N local commit(s)" banner.
-         - Check the override env var (`FORCE_HEADMOVE=1`; `RESET_FORCE=1` MAY be retained as an accepted alias for continuity -- AE's call).
-         - If not set: exit 1 (aborts the transaction at `prepared`).
-         - If set: exit 0 (allow) + append a FORCE-HEADMOVE line to `org/git-author-override-audit.log`.
-
-      The `state=prepared` + `refs/heads/*` + non-zero-old scoping is LOAD-BEARING (CTO note). It must NOT flag normal commits, fast-forward merges (old is an ancestor of new, so --is-ancestor passes), fetches (`refs/remotes/*`, filtered out), or branch creation (`old-sha` all-zero, filtered out). This is the correctness boundary -- a false positive here blocks every ordinary commit.
+      The reset / rebase-fresh-start / amend gating + the must-NOT-flag boundary (ordinary commit, fast-forward, unstage, branch creation -- see Phase 4) is the correctness boundary; a false positive blocks ordinary work.
 
       Audit log line format (mirrors safe-commit.sh / owned-paths-check.sh):
-      ```
-      YYYY-MM-DDTHHMMSSZ FORCE-HEADMOVE <serial> <prior-HEAD-sha> -> <target-sha> (<N> discarded)
-      ```
+      `YYYY-MM-DDTHHMMSSZ FORCE-HEADMOVE <serial> <prior-HEAD-sha> -> <target-sha> (<N> discarded)`
     </step>
 
     <step>
-      Phase 2 -- author the install script.
+      Phase 2 -- author the idempotent ~/.bashrc installer (CTO constraint 1).
 
       File: `.tools/git-hooks/install-headmove-guard.sh` (mirrors install-owned-paths.sh).
-
-      - Install the hook script as `.git/hooks/reference-transaction` (the real git hook name -- non-negotiable).
-      - If a `reference-transaction` hook already exists (e.g. from another lane), chain/append rather than clobber, or surface the conflict -- do NOT silently overwrite.
-      - Idempotent: re-run safe; does not duplicate.
-      - Echo the install location + a verification result (hook present + executable).
+      - `~/.bashrc` is user-local, NOT repo-tracked -- the installer appends a guarded block to `~/.bashrc` that sources `.tools/git-hooks/headmove-guard.sh` (or inlines the git() function -- AE's call; sourcing the tracked file is preferred so updates flow without re-install).
+      - Double-append guard: a sentinel comment marker; re-run must NOT duplicate the block. Idempotent.
+      - Echo install location + a verification result (the git() function is defined in a fresh `bash -lic` shell).
+      - Also add a one-line entry to `org/XXX.md` Step-1b (the owned-paths-hook-install precedent -- ADHC_OWNPTH.002 added its line there) so every agent runs the installer on startup. If the owned-paths pre-commit hook blocks the XXX.md edit as out-of-lane, surface to COO -- do not force past it.
     </step>
 
     <step>
-      Phase 3 -- Windows Git Bash 3.6.7 compatibility.
-
-      Per CLAUDE.md Rule 16, use only utilities that ship with the Git Bash 3.6.7 default install.
-      - Available: bash 5.3.9, ps, awk, sed, grep, find, timeout, curl, xargs, mktemp, realpath, stdbuf, tee, jq (workspace-local), git, python/python3, aws.
-      - NOT available: pgrep, pkill, flock, pidof, setsid, wget -- do NOT use without a `command -v` guarded fallback.
-      Test on Andrew's Windows Git Bash environment (or an equivalent dev env).
+      Phase 3 -- Windows Git Bash 3.6.7 compatibility (CLAUDE.md Rule 16).
+      Use only utilities in the Git Bash 3.6.7 default install -- available: bash 5.3.9, ps, awk, sed, grep, find, timeout, curl, xargs, mktemp, realpath, stdbuf, tee, jq, git, python/python3, aws. NOT available without a `command -v` guarded fallback: pgrep, pkill, flock, pidof, setsid, wget. Test on Windows Git Bash (or an equivalent dev env).
     </step>
 
     <step>
-      Phase 4 -- empirical validation. Use a synthetic test repo (or a throwaway worktree) for fixtures. Cover both the topology discriminator AND the load-bearing scoping:
-      - F1 (reset, destructive): `git reset --hard origin/CLOUD` from a position with local commits ahead -- aborts (exit 1) + lists the discarded commits to stderr.
+      Phase 4 -- empirical validation (synthetic test repo / throwaway worktree). Cover the topology discriminator, the must-NOT-flag boundary, the new subcommand-precision cases, AND the regression that killed the old mechanism:
+      - F1 (reset, destructive): `git reset --hard origin/CLOUD` from a position with local commits ahead -- aborts (non-zero) + lists the discarded commits to stderr; the reset does NOT run.
       - F2 (force override): `FORCE_HEADMOVE=1 git reset --hard origin/CLOUD` -- proceeds + appends a FORCE-HEADMOVE line to `org/git-author-override-audit.log`.
-      - F3 (rebase, destructive): a `git rebase` that drops or rewrites a local commit -- aborts unless forced (covered by the unified design).
-      - F4 (amend, destructive): `git commit --amend` -- aborts unless forced (covered by the unified design).
-      - F5 (normal commit -- MUST NOT flag): an ordinary `git commit` (old IS an ancestor of new) -- proceeds silently. Correctness boundary.
+      - F3 (rebase, destructive): a `git rebase` that drops/rewrites a local commit -- aborts unless forced.
+      - F4 (amend, destructive): `git commit --amend` -- aborts unless forced.
+      - F5 (normal commit -- MUST NOT flag): an ordinary `git commit` (old IS an ancestor of new) -- proceeds silently.
       - F6 (fast-forward -- MUST NOT flag): a fast-forward `git merge` / `git pull` -- proceeds silently.
       - F7 (unstage -- MUST NOT flag): `git reset HEAD <path>` (HEAD SHA unchanged) -- proceeds silently, no false positive.
-      - F8 (branch creation -- MUST NOT flag): `git checkout -b <new>` / `git branch <new>` (`old-sha` all-zero) -- proceeds silently.
-      - F9 (idempotent install): the install script run twice does not duplicate the hook.
+      - F8 (branch creation -- MUST NOT flag): `git checkout -b <new>` / `git branch <new>` -- proceeds silently.
+      - F9 (idempotent install): the installer run twice does not duplicate the ~/.bashrc block.
+      - F10 (rebase continuation -- MUST NOT gate): `git rebase --continue` / `--abort` / `--skip` pass straight through ungated (CTO constraint 3).
+      - F11 (NO HANG -- the regression test): with the git() guard active, `git rebase` COMPLETES and does not hang. This is the explicit regression gate against the withdrawn reference-transaction mechanism -- run it under a `timeout` and assert completion, mirroring AE's Phase-4 matrix. `git merge --ff` / `git pull` likewise complete (no flaky hang).
+      - F12 (recursion guard): the git() function's internal git calls use `command git` -- a gated invocation completes and does not stack-overflow / infinite-loop.
     </step>
 
     <step>
-      Commit + push. Update `org/projects/REGISTRY.md` ADHC_OWNPTH row to reflect the .010 unified-HEAD-move-guard ship.
+      Phase 5 -- commit + push. Update `org/projects/REGISTRY.md` ADHC_OWNPTH row to reflect the .010 git()-shadow unified-HEAD-move-guard ship. (The ADHC_OWNPTH PRD .010 mechanism-description correction is handled by COO -- do not edit the PRD in this TO.)
     </step>
   </scope>
 
-  <acceptance_criteria>
-    1. `.tools/git-hooks/headmove-guard` (or AE's coherent equivalent name) ships; executable; correct shebang; Git Bash 3.6.7 compatible.
-    2. `.tools/git-hooks/install-headmove-guard.sh` ships; idempotent; installs the guard as `.git/hooks/reference-transaction`; does not silently clobber a pre-existing reference-transaction hook.
-    3. F1: a destructive `git reset --hard origin/CLOUD` from a position with local commits aborts (exit 1) + lists the discarded commits to stderr.
-    4. F2: `FORCE_HEADMOVE=1` (override) proceeds + appends a FORCE-HEADMOVE line to `org/git-author-override-audit.log`.
-    5. F3 + F4: a destructive `git rebase` and a `git commit --amend` are both gated by the same guard (abort unless forced) -- the unified-guard coverage.
-    6. F5 + F6 + F7 + F8: a normal commit, a fast-forward merge, a `git reset HEAD <path>` unstage, and a branch creation are all UNAFFECTED -- no false-positive abort. This is the load-bearing correctness boundary.
-    7. Works on Windows Git Bash 3.6.7 (CLAUDE.md Rule 16).
-    8. F9: the install script is idempotent; re-run is safe.
-    9. Audit log format: `YYYY-MM-DDTHHMMSSZ FORCE-HEADMOVE <serial> <prior-HEAD-sha> -> <target-sha> (<N> discarded)`.
-    10. SCOPE: the guard covers `git reset`, `git rebase`, and `git commit --amend` BY DESIGN -- a unified destructive-HEAD-move guard. This is CORRECT coverage (one mechanism, one risk class -- destructive HEAD-moves that discard or rewrite local commits), per the CTO Option-(a) ruling 2026-05-15; it is NOT a scope overreach, and rebase/amend must not be excluded (they are topologically indistinguishable from a destructive reset). OUT OF SCOPE -- do NOT implement here; different mechanisms, separate hooks if they recur: force-push (a `pre-push` hook concern) and force-checkout / detached-HEAD discards.
-    11. Session log Compiler Tools section reproduces each `<run>` from `<compiler_tools_mandate>` with observed output + pass/fail.
-    12. RAVC2 to COO with: commit SHA, install-script invocation result, all F1-F9 fixture outputs (pass/fail), and the Windows Git Bash 3.6.7 compatibility verification.
-  </acceptance_criteria>
+  <coverage_boundary note="CTO constraint 4 -- accepted + documented, NOT hidden">
+    The git() shell-shadow protects Bash-tool shells that source `~/.bashrc`. It does NOT protect: PowerShell-tool git invocations; explicit `command git ...`; absolute-path git invocations; or any shell that does not source `~/.bashrc`. This residual is ACCEPTED -- a working narrow guard beats a hanging complete one, and agents run destructive git in the Bash tool, not PowerShell. The TO documents it explicitly here and the boundary must be stated plainly in the ADHC_OWNPTH PRD (COO) -- it must NOT be presented or logged as full coverage.
+  </coverage_boundary>
 
   <compiler_tools_mandate>
     <phase id="1" when="before write">
       <step>
-        <run>cat .tools/git-hooks/owned-paths-check.sh | head -50</run>
-        <expect>The existing hook pattern is visible -- audit-log writes, override env-var pattern, error-exit semantics. Mirror it.</expect>
-        <if_mismatch>If the hook is missing, ADHC_OWNPTH.002 did not ship properly; surface to COO before authoring.</if_mismatch>
+        <run>sed -n '1,60p' .tools/safe-commit.sh</run>
+        <expect>The safe-commit.sh --force / FORCE-BYPASS audit-log escape-hatch pattern is visible -- mirror it for FORCE_HEADMOVE + the org/git-author-override-audit.log append.</expect>
+        <if_mismatch>If safe-commit.sh is absent, ADHC_OWNPTH.007 did not ship; surface to COO before authoring.</if_mismatch>
       </step>
       <step>
-        <run>git --version</run>
-        <expect>Informational. The reference-transaction hook is present in all modern git -- AE 0.5.0 verified the abort behavior empirically on git 2.54.0.windows.1. There is no pre-reset hook at any version; do not look for one.</expect>
-        <if_mismatch>n/a (informational)</if_mismatch>
+        <run>sed -n '1,40p' .tools/git-hooks/install-owned-paths.sh</run>
+        <expect>The idempotent-installer + sentinel-marker pattern is visible -- mirror it for the ~/.bashrc append guard.</expect>
+        <if_mismatch>If install-owned-paths.sh is absent, ADHC_OWNPTH.002 did not ship; surface to COO.</if_mismatch>
       </step>
     </phase>
     <phase id="3" when="after commit">
       <step>
-        <run>.tools/git-hooks/install-headmove-guard.sh; ls -la .git/hooks/reference-transaction</run>
-        <expect>The install script runs cleanly; the reference-transaction hook is installed + executable.</expect>
-        <if_mismatch>Install failed; debug.</if_mismatch>
+        <run>bash .tools/git-hooks/install-headmove-guard.sh; bash -lic 'type git'</run>
+        <expect>The installer runs cleanly; in a fresh login shell `type git` reports `git is a function` -- the shadow is active.</expect>
+        <if_mismatch>The ~/.bashrc append or the function definition failed; debug before closing.</if_mismatch>
       </step>
       <step>
-        <run>git rev-list HEAD ^origin/CLOUD | wc -l</run>
-        <expect>The count of local-only commits; informational. If &gt;0, the F1 fixture is testable directly; if 0, the fixture needs a synthetic local commit created first.</expect>
+        <run>command git rev-list HEAD ^origin/CLOUD | wc -l</run>
+        <expect>The count of local-only commits; informational -- if &gt;0 the F1 fixture is testable directly, if 0 create a synthetic local commit first. Note `command git` is used so the count is not itself gated.</expect>
         <if_mismatch>n/a (informational)</if_mismatch>
       </step>
     </phase>
   </compiler_tools_mandate>
 
+  <acceptance_criteria>
+    1. `.tools/git-hooks/headmove-guard.sh` ships -- defines the `git()` shell-shadow function; executable/sourceable; correct shebang; Git Bash 3.6.7 compatible.
+    2. `.tools/git-hooks/install-headmove-guard.sh` ships -- idempotent; appends a sentinel-guarded block to `~/.bashrc` that activates the git() shadow; re-run does not duplicate; adds the `org/XXX.md` Step-1b install line. (AC2 is rewritten from the withdrawn "install as .git/hooks/reference-transaction" -- the install vector is `~/.bashrc`, per CTO Option A.)
+    3. F1: a destructive `git reset --hard origin/CLOUD` from a position with local commits aborts (non-zero) + lists the discarded commits to stderr + the reset does not run. (AC3 re-examined vs the new mechanism: PASSES -- the git() function intercepts pre-execution and returns non-zero without calling `command git`.)
+    4. F2: `FORCE_HEADMOVE=1` proceeds + appends a FORCE-HEADMOVE line to `org/git-author-override-audit.log`.
+    5. F3 + F4: a destructive `git rebase` and a `git commit --amend` are both gated by the same git() guard (abort unless forced).
+    6. F5 + F6 + F7 + F8: a normal commit, a fast-forward merge, a `git reset HEAD <path>` unstage, and a branch creation are all UNAFFECTED -- no false-positive abort. (AC6 re-examined vs the new mechanism: PASSES -- subcommand dispatch + the topology discriminator only gate genuine destructive moves; the must-not-flag set passes straight to `command git`.)
+    7. F10: `git rebase --continue` / `--abort` / `--skip` pass through ungated (subcommand precision -- CTO constraint 3).
+    8. F11: with the guard active, `git rebase` and `git merge --ff` / `git pull` COMPLETE and do not hang -- the explicit regression gate against the withdrawn reference-transaction mechanism (run under `timeout`, assert completion).
+    9. F12: the recursion guard holds -- the git() function's internal git calls use `command git`; a gated invocation completes without infinite recursion.
+    10. Works on Windows Git Bash 3.6.7 (CLAUDE.md Rule 16).
+    11. F9: the installer is idempotent; re-run is safe.
+    12. Audit log format: `YYYY-MM-DDTHHMMSSZ FORCE-HEADMOVE <serial> <prior-HEAD-sha> -> <target-sha> (<N> discarded)`.
+    13. SCOPE + COVERAGE BOUNDARY: the guard covers `git reset`, fresh `git rebase`, and `git commit --amend` via the git() shadow -- one mechanism, one risk class. The coverage_boundary block (PowerShell / `command git` / absolute-path / non-~/.bashrc shells are NOT protected) is documented in the session log + RAVC2 and NOT presented as full coverage. OUT OF SCOPE: force-push (pre-push concern), force-checkout / detached-HEAD discards.
+    14. Session log Compiler Tools section reproduces each `<run>` from `<compiler_tools_mandate>` with observed output + pass/fail.
+    15. RAVC2 to COO with: commit SHA, installer invocation result, all F1-F12 fixture outputs (pass/fail), the no-hang (F11) evidence explicitly, and the Windows Git Bash 3.6.7 compatibility verification.
+  </acceptance_criteria>
+
   <data_reprocess_scope>
     <no_reprocess_needed>Pure git-workflow tooling; no S3/data side-effects; no reprocessing required.</no_reprocess_needed>
   </data_reprocess_scope>
 
+  <cross_domain_coordination>
+    <none/> -- .010 ships shell tooling under `.tools/git-hooks/` + an `~/.bashrc` installer + a REGISTRY row. No overlap with the active INFGRO / INFETL / INFINC / TXNAMG TOs (none touch `.tools/git-hooks/`). The `org/XXX.md` Step-1b edit is the only shared file; it is an append of one line, the ADHC_OWNPTH.002 precedent.
+  </cross_domain_coordination>
+
   <dependencies>
-    None. AE 0.5.0's Phase-1 probe is complete and the corrected design is fully scoped. SXPL_RESTIN.002 was AE 0.5.0's P1 and has shipped -- .010 is clear to execute.
+    None. AE 0.5.0's Phase-1 topology engine + Phase-4 hang-matrix are complete; the CTO Option-A re-ruling is final. Clear to execute.
   </dependencies>
 </task_order>
