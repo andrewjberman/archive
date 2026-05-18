@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-18</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18 (COO) to DS~B. Phase 2 -- sequenced behind MDPF_ASSETS.008 (WS-C): WS-D.2's held_partner needs the partner model_composition feeds (WS-B + WS-C) for real numbers. COO flips to pending + fires GO when .008 closes (DS~B's lane frees). The Phase-0 scope-reconciliation can begin earlier if DS~B has slack -- it is read-only analysis.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GO 2026-05-18 (COO) to DS~B. MDPF_ASSETS.008 (WS-C) is COMPLETE -- DS~B's lane is free. DS~B already ran the Phase-0 read-only scope-reconciliation (per the early-start invitation) and confirmed the finding: the section-3.3 decomposition logic is ALREADY in mdpf_aggregate_aua.py:build_etf_decomposition (verified working in the .008 end-to-end run -- held_inflection(PFDE) $9.77M / (PFOE) $8.02M). .009's confirmed scope is therefore SMALL: a single etf_net_assets feeder conform (opal-data-etfs/silver/netassets_daily.parquet -- all 4 Opal ETFs, ~590 rows, near-direct column map -> opal-data-mdpf/mdpf/feeds/etf_net_assets/) + end-to-end verification. NOT a from-scratch decomposition build.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
     <priority>P1 -- MDPF Phase 2. WS-D.2 produces Cohort 0 (the non-partner Opal-ETF public residual) and the §3.3 ETF ownership decomposition.</priority>
     <sla>1-2d wall -- mechanism-dependent on the Phase-0 scope finding; likely smaller than a full feeder build (much of the decomposition logic is already in the WS-A aggregation script).</sla>
