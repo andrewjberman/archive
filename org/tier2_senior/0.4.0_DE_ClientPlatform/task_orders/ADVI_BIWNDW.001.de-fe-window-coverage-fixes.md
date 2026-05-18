@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-05-15</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <completion_note>FE-1/FE-2/FE-4 shipped portal DEV fe881e2b (pushed by DT, CLOUD pointer a2fe0811a). Code accepted by COO. Cross-firm /frontend-dev visual smoke CLEARED 2026-05-18 -- all 3 ACs PASS on 49F + Inflection (COO relay 20260518). FE-5 explicitly deferred (product Q1). Closing log: SESSION_2026-05-18_biwndw001_closeout.md.</completion_note>
     <dispatch_unblock_condition>DISPATCHED GO 2026-05-15. Backend-independent -- no gate. All three changes (FE-1/FE-2/FE-4) ship against the leaderboard.json windows that already exist; nothing here waits on TO-2.</dispatch_unblock_condition>
     <project_code>ADVI_BIWNDW</project_code>
     <priority>P1 -- Andrew-directed. Restores the Max window for both firms immediately (a pure FE typo) and makes Inflection's BI panel actually drive its metric table. Highest value-per-effort in the brief.</priority>
