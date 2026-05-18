@@ -3,11 +3,11 @@
     <id>TRSB_LEDGER.010</id>
     <slug>ae-decommission-legacy-public-trade-surface</slug>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <date>2026-05-18</date>
     <status>staged</status>
     <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18. Tier 1 of the CTO~B legacy-surface decommission ruling. Dispatch is GATED on an Andrew supersession confirm -- that nobody still uses the legacy standalone trade form (trades.opalcapital.com / opal-trade-form-ui). CTO~B is requesting that confirm from Andrew. COO~B flips to pending + fires GO once Andrew confirms supersession. EXPEDITED same-day once unblocked -- the public GET routes leak all trade data unauthenticated (P1 data exposure).</dispatch_unblock_condition>
+    <dispatch_unblock_condition>STAGED 2026-05-18. Tier 1 of the CTO~B legacy-surface decommission ruling. REASSIGNED 2026-05-18 from 0.7.0_AE_CloudOps to 0.6.1_AE_PartnerETL (COO~B lane call): TO-10 edits routes.tf + the opal-trade-form-ui CloudFront/S3 stanzas -- a file set disjoint from 0.7.0's handler serial lane (workflow_handler.py / dashboard_api.py / dynamodb.tf), so it parallelizes cleanly. Routing it to the idle-clear 0.6.1 lets it hit its same-day SLA the moment it unblocks instead of queuing behind TO-5 (R3, multi-day) + TO-8 on 0.7.0. Dispatch is GATED on an Andrew supersession confirm -- that nobody still uses the legacy standalone trade form (trades.opalcapital.com / opal-trade-form-ui). CTO~B is requesting that confirm from Andrew. COO~B flips to pending + fires GO to 0.6.1 once Andrew confirms supersession. EXPEDITED same-day once unblocked -- the public GET routes leak all trade data unauthenticated (P1 data exposure).</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
     <priority>P1 -- same-day once unblocked. The /api/public/trades/* GET routes leak ALL trade submissions (parties, securities, comments, users) with no authentication.</priority>
     <sla>Same-day from GO.</sla>
@@ -74,9 +74,9 @@
 
   <cross_domain_coordination>
     shared_resource: infra/aws/terraform/shared-infra/apigateway-portal/routes.tf
-    also_in_to: TRSB_LEDGER.010a (removes the POST /api/public/trades/workflow route from the same file -- lands FIRST)
-    last_write_owner: 0.7.0_AE_CloudOps owns both. 010a lands first (P0); this TO pulls latest routes.tf and removes the remainder.
-    required_action: Begin only after 010a has landed and Andrew's supersession confirm is relayed by COO~B.
+    also_in_to: TRSB_LEDGER.010a (removed the POST /api/public/trades/workflow route from the same file -- ALREADY LANDED, shared-infra-v1.12.0).
+    last_write_owner: 010a is complete (0.7.0_AE_CloudOps). This TO (0.6.1_AE_PartnerETL) pulls latest routes.tf and removes the remainder. 0.7.0's concurrent TRSB handler lane (TO-5/TO-8) edits a disjoint file set (workflow_handler.py / dashboard_api.py / dynamodb.tf) -- no contention; this TO parallelizes cleanly.
+    required_action: Begin only after Andrew's supersession confirm is relayed by COO~B. (010a has already landed -- that prerequisite is satisfied.)
   </cross_domain_coordination>
 
   <acceptance_criteria>
