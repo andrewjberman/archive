@@ -6,7 +6,8 @@
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <coordinates_with>0.7.0_AE_CloudOps (downstream .029b comp-validate gold-nan)</coordinates_with>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>done</status>
+    <!-- GT correction 2026-05-18 (2.0.0_SA_COO): status was stale at `staged`. Work shipped by DS~C in commit e0f51a147 — data/orion/scripts/gold/lib/safe_json_serialize.py (117 lines) + test_safe_json_serialize.py (189 lines) + INF_D_00c + INF_D_04 reference migrations. .029b (which gates on this per PRD §15.5) correctly showed `done`; .029a was shipped-ahead-of-status, not skipped. This was COMPIL_V4's sole open closure gate per CTO §16 retrospective. -->
     <dispatch_held>false</dispatch_held>
     <project_code>ADHC_COMPIL_V4</project_code>
     <priority>P1 — Wave 2 cross-pod hygiene; .029b AE 0.7 follow-on gates on this</priority>
