@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO 2026-05-18 (COO~B decomposition of TRSB_LEDGER PRD v0.1). Phase 2 -- sequenced LAST among the workflow_handler.py TOs on the AE 0.7.0 serial backend lane (after TO-4). COO~B lane note: PRD §6 named AE 0.5.0 for TO-5 as "Terraform, no Lambda-source overlap" -- that is incorrect; TO-5 edits workflow_handler.py AND dashboard_api.py AND dynamodb.tf, so it belongs on the AE 0.7.0 serial lane. Reassigned from AE 0.5.0. Flagged to CTO~B.</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
