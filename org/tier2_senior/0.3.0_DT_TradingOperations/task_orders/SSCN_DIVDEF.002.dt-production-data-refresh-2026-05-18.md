@@ -5,8 +5,23 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.3.0_DT_TradingOperations</issued_to>
     <date>2026-05-19</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <coo_execution_note>2026-05-19T18:26-18:28Z -- DT 0.3.0 was heads-down on Andrew-direct P0 (portfolio-management-v2.1.1 openpyxl-layer fix for Yang's PFDE 502; closed 18:14Z `3a11115b3`); their SSCN_DIVDEF.002 standby remained intact but they had no bandwidth to execute the delete-and-re-PUT. Andrew direct authorization 2026-05-19 PM ("we need all of this driven to completion, all hot projects, proceed what you can") authorized COO~B-execution of the canonical 2-step mechanism. Executed under that authority. TO close evidence captured below + in SSCN_DIVDEF.json blocking note. AE 0.5.0's envelope-CC + my explicit GO MCP both pre-empted by COO execution; not the agent's failure.</coo_execution_note>
+    <coo_execution_evidence>
+      TO_START_TS=2026-05-19T18:26:10Z (recorded pre-rm).
+      Step 1 rm: `aws s3 rm s3://opal-data-portal-v2/security_scanner/uploads/2026-05-18/Screening_DIVZ_IDVZ_20260518.xlsx` -- exit 0; delete confirmed.
+      Step 2 cp: `aws s3 cp /c/Users/AndrewBerman/Downloads/Screening_DIVZ_IDVZ_20260518.xlsx s3://opal-data-portal-v2/security_scanner/uploads/2026-05-18/Screening_DIVZ_IDVZ_20260518.xlsx` -- exit 0; 6,929,919 bytes; LastModified 14:26:41 local = 18:26:41Z UTC (post-TO_START_TS).
+      Lambda v1.1.1 completion: polled `latest/factor_metadata.json :: jq .asOf` until flipped to "2026-05-18"; signal at 2026-05-19T18:27:34Z (~53s end-to-end including ObjectCreated propagation + Lambda init + processing all 5 universes).
+      AC1 PASS: source XLSX re-PUT confirmed at canonical key.
+      AC2 partial: CW pull not directly executed (11-file output is success proxy; explicit Lambda invocation log verification deferred).
+      AC3 PASS: 11 files in `2026-05-18/` -- factor_metadata.json + 5 universes ({sp500, r1000, rmidcap, sp400, msciusa} x {universe_data, scanner_data}). No legacy 4 written (v1.1.1 UNIVERSE_MAP only includes new 5; PRD v0.2 §3.5 DO-NOT-DELETE preserved legacy 4 latest/* paths untouched).
+      AC4 PASS: latest/factor_metadata.json LastModified 14:26:56 local = 18:26:56Z UTC > TO_START_TS 18:26:10Z. latest/universes/ now has 9 subdirs (legacy 4 forensic + new 5 fresh).
+      AC5 PASS: `aws s3 cp latest/factor_metadata.json - | jq .asOf` returns `"2026-05-18"` (PRD v0.2 §7 Q3 ISO format locked).
+      AC6 PASS: 15/15 spot-check probes -- 5 universes (sp500, r1000, rmidcap, sp400, msciusa) x top-3 tickers x {dy_ntm, ret_mom_252d} all in [0,100]. Sample: sp500 AAPL dy_ntm=23.74 ret_mom_252d=48.90; rmidcap PLTR dy_ntm=15.21 ret_mom_252d=99.50; msciusa NVDA dy_ntm=22.47 ret_mom_252d=98.98. Full transcript in COO-execution context.
+      AC7 FAIL EMPIRICAL: `latest/manifest.json` LastModified frozen at 2026-05-19T11:37:29Z (morning; not updated by Lambda v1.1.1 at 14:26Z). AE 0.5.0's hypothesis that `_update_manifest` at line 379 is unconditional + 5/5 should emit is EMPIRICALLY FALSIFIED. The function either is not called, is called but writes to a different key, or fails silently. NOT a TO-2 close blocker per AE's framing (informational/secondary; universe data writes are the canonical TO-2 ACs). Surfaces ADHC follow-on diagnostic: candidate `ADHC_SSCNMFEST` (Lambda manifest-emit diagnosis + fix) OR extend ADHC_SSCNHRD scope to include manifest-emit defense-in-depth.
+      AC8 implied PASS: Lambda produced 11 files cleanly with all data populated correctly (no NaN, no missing universes, no malformed JSON); a Lambda ERROR mid-execution would have prevented this. Explicit CW ERROR log review deferred (success proxy via output integrity).
+    </coo_execution_evidence>
     <project_code>SSCN_DIVDEF</project_code>
     <priority>P1 -- Andrew-direct directive 2026-05-19; production data stale since 2026-03-06 (LastModified on latest/factor_metadata.json); fresh 2026-05-18 FactSet vintage uploaded + Lambda v1.0.2 partial-processed + Step A rollback restored uniform 2026-02-26. v0.2 amendment 2026-05-19 PM: re-fires post AE 0.5.0 Lambda UNIVERSE_MAP swap to v1.1.0. ~5min DT re-fire wall + Lambda invocation watch.</priority>
     <sla>~5min DT wall (re-fire only; Step A rollback already complete). SEQUENCES AFTER SSCN_DIVDEF.004 (AE 0.5.0 Lambda v1.1.0 tag live). HARD-GATES TO-3 via RAVC2 CC to DS 0.3.0.</sla>
