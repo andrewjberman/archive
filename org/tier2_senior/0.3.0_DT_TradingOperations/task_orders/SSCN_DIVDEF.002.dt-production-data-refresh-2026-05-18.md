@@ -8,17 +8,52 @@
     <status>pending</status>
     <dispatch_held>false</dispatch_held>
     <project_code>SSCN_DIVDEF</project_code>
-    <priority>P1 -- Andrew-direct directive 2026-05-19; production data stale since 2026-03-06 (LastModified on latest/factor_metadata.json); fresh 2026-05-18 FactSet vintage available locally; gates TO-3 DS validation. ~30min DT wall per CTO estimate (one s3 cp + Lambda fire watch).</priority>
-    <sla>~30min DT wall. Independent of TO-1 (FE change is vintage-agnostic). PARALLEL OK with TO-1. HARD-GATES TO-3.</sla>
-    <deadline>None -- ship at DT 0.3.0 pace; Pod 3 ~0.5 effort-day if all 3 TOs run in parallel.</deadline>
+    <priority>P1 -- Andrew-direct directive 2026-05-19; production data stale since 2026-03-06 (LastModified on latest/factor_metadata.json); fresh 2026-05-18 FactSet vintage uploaded + Lambda v1.0.2 partial-processed + Step A rollback restored uniform 2026-02-26. v0.2 amendment 2026-05-19 PM: re-fires post AE 0.5.0 Lambda UNIVERSE_MAP swap to v1.1.0. ~5min DT re-fire wall + Lambda invocation watch.</priority>
+    <sla>~5min DT wall (re-fire only; Step A rollback already complete). SEQUENCES AFTER SSCN_DIVDEF.004 (AE 0.5.0 Lambda v1.1.0 tag live). HARD-GATES TO-3 via RAVC2 CC to DS 0.3.0.</sla>
+    <deadline>None -- ship at DT 0.3.0 pace; Pod 3 ~0.5-0.75 effort-day total under v0.2 sequencing.</deadline>
+    <v0_2_amendment_date>2026-05-19 PM (CTO~B PRD v0.2 commit c34f16d13)</v0_2_amendment_date>
+    <step_a_close>2026-05-19T15:47Z -- aws s3 cp from 2026-02-26/ snapshot over 5 freshly-overwritten latest/ paths; uniform asOf=2026-02-26 verified; RAVC4 ACCEPT 20260519T154932Z (LastModified-divergence-vs-JSON-content-asOf acceptance-flex granted).</step_a_close>
   </metadata>
 
+  <v0_2_amendment>
+    PRD v0.2 ratified 2026-05-19 PM (CTO~B commit c34f16d13). Source XLSX wt_* column inventory (wt_ivv + wt_iwb + wt_iwr + wt_ijh + wt_csus) is the new canonical 5-universe US-equity set, not a defect against legacy 6. Legacy 4 (r1000v, acwx, eafe, eafev) drop from portal dropdown + Lambda stops writing them.
+
+    **Revised sequencing (replaces v0.1 sequencing):**
+    1. SSCN_DIVDEF.004 (AE 0.5.0) ships Lambda UNIVERSE_MAP v1.1.0 + tag security-scanner-v1.1.0 -- SEQUENCES FIRST.
+    2. SSCN_DIVDEF.004 RAVC2 CC to this TO IS the GO for revised Phase 2 below.
+    3. This TO (revised Phase 2): DT delete-and-re-PUT the existing source XLSX at uploads/2026-05-18/ -- canonical S3 ObjectCreated regenerates -- Lambda v1.1.0 fires and writes 11 files (factor_metadata + 5×{universe_data, scanner_data}) to BOTH 2026-05-18/ and latest/.
+    4. RAVC2 COMPLETE on full 8-AC PASS + CC DS 0.3.0 fires TO-3 dispatch_unblock.
+    5. SSCN_DIVDEF.005 (DE 0.3.0) ships UNIVERSE_IDS swap + types.ts + US_ONLY_UNIVERSES update to portal/DEV in parallel with the AE side (PARALLEL-OK; FE change is data-shape-independent).
+    6. Optional TO-4 (PROD push) gates on TO-1 (45ea7210) + TO-1b (.005) + TO-3 close + Andrew DEV smoke.
+
+    **Revised mechanism (Phase 2 -- replaces v0.1 single `aws s3 cp`):**
+    ```
+    TO_START_TS=$(date -u +%FT%TZ)
+    aws s3 rm s3://opal-data-portal-v2/security_scanner/uploads/2026-05-18/Screening_DIVZ_IDVZ_20260518.xlsx
+    aws s3 cp "C:\\Users\\AndrewBerman\\Downloads\\Screening_DIVZ_IDVZ_20260518.xlsx" \
+      s3://opal-data-portal-v2/security_scanner/uploads/2026-05-18/Screening_DIVZ_IDVZ_20260518.xlsx
+    ```
+    Two-step delete-and-re-PUT forces a fresh ObjectCreated event (versioning-config-independent + event-source-mapping-filter-independent). Preserves the original "DO NOT invoke Lambda manually" do-not rule.
+
+    **AC3 revised expectation (replaces v0.1 13-file count):**
+    `aws s3 ls s3://opal-data-portal-v2/json/security_scanner/2026-05-18/` shows 11 files: `factor_metadata.json` + `universes/{sp500,r1000,rmidcap,sp400,msciusa}/{universe_data,scanner_data}.json` (1 + 5×2). The 4 legacy universes (r1000v, acwx, eafe, eafev) are NOT written by Lambda v1.1.0; their `latest/{4-legacy}/*.json` files stay at the 2026-02-26 forensic state per PRD v0.2 §3.5 DO-NOT-DELETE rule.
+
+    **Spot-check revised (replaces v0.1 dy_ntm + ret_mom_252d on r1000 only):**
+    `aws s3 cp s3://opal-data-portal-v2/json/security_scanner/latest/universes/{token}/scanner_data.json - | jq -r '.rows[0:3] | .[] | .ticker'` for each of the 5 new tokens; for each, `.pctls.dy_ntm` is a finite number in [0,100] AND `.pctls.ret_mom_252d` is a finite number in [0,100]. Two-signal spot-check across all 5 new universes (15 jq probes total).
+
+    **Manifest-update guard (NEW concern surfaced by Lambda v1.0.2 partial-process):**
+    AC2 includes verification that `Manifest updated` final-log line emits on 5/5 universes_processed (the v1.0.2 partial-process at universes_processed=2 did NOT emit it; if v1.1.0 still has the same guard, 5>0 should clear). If absent post-re-fire, RAVC2 PARTIAL escalates to AE 0.5.0 for a SSCN_DIVDEF.004.1 manifest-guard-fix (NOT in this TO's scope).
+  </v0_2_amendment>
+
   <references>
-    <prd>docs/architecture/SSCN_DIVDEF.md (PRD v0.1, 1.0.0_SA_CTO~B, commit a5e1b7ef4 2026-05-19) -- section 3.3 has the exact upload key and Lambda flow; section 4.2 confirms no code/Terraform change.</prd>
+    <prd_v0_2>docs/architecture/SSCN_DIVDEF.md (PRD v0.2 amendment, 1.0.0_SA_CTO~B, commit c34f16d13 2026-05-19 PM) -- v0.2 §2.4 universe-set state empirical + §3.5 migration target + §4.4 sequencing + §6.4 TO-AE-1 + §6.5 TO-1b + §7 Q7/Q8 LOCKED. v0.1 content preserved verbatim below the v0.2 block.</prd_v0_2>
+    <prd>docs/architecture/SSCN_DIVDEF.md (PRD v0.1, 1.0.0_SA_CTO~B, commit a5e1b7ef4 2026-05-19) -- section 3.3 has the original upload key + Lambda flow; section 4.2 confirms no code/Terraform change at v0.1 (superseded by v0.2 amendment which DOES require AE Lambda code change in SSCN_DIVDEF.004).</prd>
+    <data_contract>docs/architecture/SSCN_DATA_CONTRACT.md §6.v0.2 (c34f16d13) -- canonical 5-universe set definitions with empirical member counts. §6.v0.1 retained as historical reference.</data_contract>
+    <upstream_dep>SSCN_DIVDEF.004 (AE 0.5.0 Lambda UNIVERSE_MAP swap + tag v1.1.0) RAVC2 CC IS the GO for revised Phase 2 below. Until that CC lands, HOLD on the delete-and-re-PUT.</upstream_dep>
     <source_file>C:\Users\AndrewBerman\Downloads\Screening_DIVZ_IDVZ_20260518.xlsx -- 3,017 rows x 331 cols, FactSet Universal Screening export dated 2026-05-18. Structural compat verified at PRD time (section 5 / section 2.3): header row 5 = "ticker" matches Lambda `pd.read_excel(buf, header=4)`; all 13 Andrew signals present; `wt_iwb` universe column present (Russell 1000).</source_file>
     <coo_section_7_rulings>Q3 (asOf format) -- accept CTO recommendation: use ISO `2026-05-18` (matches prior production key `2026-02-26/` convention). The file name `Screening_DIVZ_IDVZ_20260518.xlsx` is independent of the S3 key path segment. Q5 (upload mechanism) -- accept CTO recommendation: v0.1 ops `aws s3 cp` (this TO); defer portal DataRefresh tile to a separate project. Andrew may override either ruling by amending this TO before DT starts.</coo_section_7_rulings>
     <lambda_baseline>`opal-security-scanner-processor` (current tag `security-scanner-v1.0.2`) -- event-triggered via S3 ObjectCreated on `opal-data-portal-v2/security_scanner/uploads/{asOf}/`. No code/Terraform change in this TO. CTO PRD section 5 verified IAM via `comp-iam service opal-security-scanner-processor` -- role `sscn_processor` has `s3:PutObject` + `s3:GetObject` already granted.</lambda_baseline>
-    <output_pattern>Lambda writes outputs to BOTH `json/security_scanner/{asOf}/...` AND `json/security_scanner/latest/...` (overwrites prior latest). Portal reads only `latest/` -- once the Lambda completes, the portal serves fresh data on next React Query staleTime expiry (5min per `SSCN_STALE_TIME`). The `latest/` overwrite is the critical signal that the Lambda has finished writing all six universes (sp500 / r1000 / r1000v / acwx / eafe / eafev).</output_pattern>
+    <output_pattern>Lambda v1.1.0 writes outputs to BOTH `json/security_scanner/{asOf}/...` AND `json/security_scanner/latest/...` (overwrites prior latest). Portal reads only `latest/` -- once the Lambda completes, the portal serves fresh data on next React Query staleTime expiry (5min per `SSCN_STALE_TIME`). The `latest/` overwrite is the critical signal that the Lambda has finished writing the FIVE NEW US-equity universes (sp500 / r1000 / rmidcap / sp400 / msciusa). The 4 legacy universes (r1000v / acwx / eafe / eafev) are NOT overwritten; their latest/* files stay at 2026-02-26 forensic state per PRD v0.2 §3.5 DO-NOT-DELETE.</output_pattern>
   </references>
 
   <context>
