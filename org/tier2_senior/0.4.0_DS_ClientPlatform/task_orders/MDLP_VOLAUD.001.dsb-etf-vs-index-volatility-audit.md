@@ -5,7 +5,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-19</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED via Andrew-direct CTO authorization 2026-05-19 ~13:40Z. Read-only investigation; no upstream gates.</dispatch_unblock_condition>
     <project_code>MDLP_VOLAUD</project_code>
