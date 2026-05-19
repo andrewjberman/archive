@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO 2026-05-18 (COO). Not gated. WS-C (.008) shipped around the WS-A-contract AMENDMENT-1 ratification and predates the cohort_class column; .013's end-to-end run CONFIRMED the gap on the live S3 parquet (inflection model_aua_positions, 399 rows, no cohort_class; non_model_aua lacks sma_aua_input). This is the small WS-C re-tag .013's cross_domain_coordination named as the clean follow-on.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
