@@ -1,13 +1,13 @@
 <task_order>
   <metadata>
-    <id>ADHC_DSFLOW.005</id>
+    <id>ADHC_DSFLOW.007</id>
     <slug>ae-ds-commit-gate-msys-path-mangle-fix</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
-    <date>2026-05-18</date>
-    <status>backlog</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>BACKLOG -- authored for durability per CTO direction (origin: MDPF_ASSETS RAVC1 2026-05-18; routed by CTO to COO so the structural-enforcement integrity bug does not evaporate as a mention). NOT dispatched. AE 0.7.0 offered to take the fix TO. Dispatch gates on a COO/Andrew prioritization call. Owner is AE 0.7.0 (not DS pod) -- it is a .tools/ local-runtime bash wrapper fix (Rule 16 class), and the sole-DS-Base directive keeps DS pod off tooling work; AE/infra-tooling is the correct lane. Unblock = explicit COO GO after the prioritization call.</dispatch_unblock_condition>
+    <date>2026-05-18 (authored backlog as .005) / 2026-05-19 (dispatched GO + renumbered .005 -> .007 to avoid collision with already-shipped .005 ae-safe-deploy-gate-extension and .006 ae-orion-gold-dispatch-sentinel-logging from 2026-05-11)</date>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GO 2026-05-19 (2.0.0_SA_COO): dispatched in the 3-TO sequence behind SXIN_DAY1ZG.001 (rider-2 priority, deadline 2026-06-01) and ahead of ADVI_INFALM.001 (defense-in-depth alarm). CTO-recommended sequencing held -- this fix has higher latent-risk (silently breaks the Rule-14 gate on the primary dev host) than the alarm item.</dispatch_unblock_condition>
     <project_code>ADHC_DSFLOW</project_code>
     <priority>P2 -- structural-enforcement integrity. NOT a live data-correctness fault (AE 0.7.0 ran the 3 ds-commit-gate checks directly for MDPF -- py_compile OK, ds-precommit-check.py exit 0, ruff --target-version py39 clean -- so no bad code shipped under the broken wrapper). BUT this is the dangerous class: ds-commit-gate.sh is CLAUDE.md Rule 14, mandated for EVERY .py edit; on Windows Git Bash it silently fails (mangled invocation path), so a future agent that trusts the gate gets a silent no-op / fail-open-or-closed. Higher latent-risk than ADVI_INFALM.001 (it undermines a workspace-wide structural gate) -- COO recommends prioritizing this above the alarm item when dispatched.</priority>
     <sla>0.5d wall -- a script-dir-derivation fix in the .tools/ds-commit-gate.sh wrapper (likely an MSYS_NO_PATHCONV=1 guard or a realpath/$(dirname "$0")-based resolution), plus a Windows-Git-Bash invocation test.</sla>

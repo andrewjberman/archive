@@ -4,10 +4,10 @@
     <slug>ae-inf-gold-chain-failure-cw-alarm</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
-    <date>2026-05-18</date>
-    <status>backlog</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>BACKLOG -- authored for durability per CTO direction (origin: MDPF_ASSETS RAVC1 2026-05-18; CTO endorsed as a tracked follow-on so it does not evaporate as a mention). NOT dispatched. AE 0.7.0 offered to author/execute on COO GO. Dispatch gates on a COO/Andrew prioritization call -- this is a defense-in-depth follow-on, no active INF incident, AE MDPF lane closing pending CTO RAVC2 acceptance. COO to surface to Andrew for dispatch-priority. Unblock = explicit COO GO after that call.</dispatch_unblock_condition>
+    <date>2026-05-18 (authored backlog) / 2026-05-19 (dispatched GO, last in 3-TO sequence)</date>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GO 2026-05-19 (2.0.0_SA_COO): dispatched last in the 3-TO sequence behind SXIN_DAY1ZG.001 (rider-2 priority, deadline 2026-06-01) and ADHC_DSFLOW.007 (gate-integrity higher latent-risk). Defense-in-depth + no active INF incident keeps it bottom-of-queue but it ships in the same lane sweep so AE 0.7 closes all three rider follow-ons cleanly.</dispatch_unblock_condition>
     <project_code>ADVI_INFALM</project_code>
     <priority>P2 -- defense-in-depth observability. NOT blocking: the INF gold chain is not currently failing; this closes the unalarmed-silent-failure class, it does not fix an active fault. Real gap (the entire partner-facing INF surface depends on the chain and a hard-fail is currently unalarmed) -- CTO-endorsed, durable-tracked, dispatch-prioritized by COO/Andrew.</priority>
     <sla>0.5d wall -- a single CW alarm + SNS wiring in inf-pipeline/alarms.tf, mirroring the shipped MDPF ChainFailed/DLQ alarm pattern (tag mdpf-pipeline-v1.0.0, commit ff2368d27).</sla>
