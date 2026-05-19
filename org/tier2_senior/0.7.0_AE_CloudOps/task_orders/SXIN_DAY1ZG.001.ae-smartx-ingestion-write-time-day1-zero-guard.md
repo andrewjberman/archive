@@ -4,13 +4,14 @@
     <slug>ae-smartx-ingestion-write-time-day1-zero-guard</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
-    <date>2026-05-19</date>
-    <status>pending</status>
-    <dispatch_held>false</dispatch_held>
+    <date>2026-05-19 (authored + GO 15:09Z) / 2026-05-19 STAND-DOWN 15:27Z pending smartx-pipeline-v1.0.1 CTO RAVC1 disposition</date>
+    <status>staged</status>
+    <dispatch_held>true</dispatch_held>
+    <dispatch_unblock_condition>STAND-DOWN 2026-05-19 ~15:27Z (2.0.0_SA_COO): AE 0.7 RAVC1 to CTO for smartx-pipeline-v1.0.1 (CEO-direct methodology pivot via DS Base; broader-1b + Cohort-0-IN supersedes Schwab-only v1.0.0 shipped this morning) proposes Opt A NEUTRALIZE the `append_non_model_today` step in the Lambda -- DS's `build_legacy_compat_emit.py` (225df40bc) becomes sole SoT for non_model_assets.json. The write-time day-1-zero guard this TO scopes was designed for the Lambda as the LIVE WRITER; under Opt A neutralization the Lambda no longer writes the artifact, making the in-Lambda guard scope-orphaned. UNBLOCK = CTO RAVC1 disposition on v1.0.1 + a converged decision on the guard's placement under the new producer-consumer architecture: (a) STAND-DOWN if Opt A holds + guard logic migrates to DS Base's emit (new TO under DS lane, not AE 0.7); (b) RE-DISPATCH IN-LANE if v1.0.1 is reversed or Lambda role is preserved; (c) RE-SCOPE if a hybrid (Lambda neutralized but kept for future reactivation) preserves a future-robustness defense role for the guard. Coordination MCP sent 2026-05-19 to AE 0.7 + CC CTO + CC DS Base. Re-evaluation after CTO ruling on the RAVC1.</dispatch_unblock_condition>
     <project_code>SXIN_DAY1ZG</project_code>
-    <priority>P1 -- TIME-PRESSURED. Closes the SmartX day-1-of-period zero-emission masking class (today's 4-anchor #3) BEFORE the next at-risk live run 2026-06-01 (Mon, first first-trading-day-of-month after smartx-pipeline-v1.0.0 went live 2026-05-19 14:12Z via de03b497a). Empirical anchor: DS 0.4 root-caused SmartX upstream emits EndMarketVal = $0.00 across all model CSVs on each reporting-period day-1 (Jan 2/3/4, Feb 2, Mar 2, Apr 1, May 1 in 2026); without a write-time guard the AE Lambda's model_aum-read step silently writes (model_aum=0, non_model = partner_custody_total) on those dates. 12-day runway from authoring to the at-risk gate.</priority>
-    <sla>~0.5d wall -- a single Lambda code edit in append_non_model_today.py + tag bump (smartx-pipeline-v1.0.1 or v1.1.0 per AE convention). No new resources, no new IAM scope, no shared-state collision.</sla>
-    <deadline>2026-06-01 14:00 UTC (chain run for first trading day of June 2026)</deadline>
+    <priority>P1 -- TIME-PRESSURED (PRE-STAND-DOWN). Closes the SmartX day-1-of-period zero-emission masking class (today's 4-anchor #3) BEFORE the next at-risk live run 2026-06-01. Empirical anchor: DS 0.4 root-caused SmartX upstream emits EndMarketVal = $0.00 across all model CSVs on each reporting-period day-1; without a write-time guard the AE Lambda's model_aum-read step silently writes (model_aum=0, non_model = partner_custody_total) on those dates. 12-day runway from authoring to the at-risk gate -- preserved if Opt A reversed or guard migrates to DS lane in time.</priority>
+    <sla>~0.5d wall (pre-stand-down) -- a single Lambda code edit in append_non_model_today.py + tag bump (smartx-pipeline-v1.0.2 per AE convention since v1.0.1 is the methodology pivot ship). No new resources, no new IAM scope, no shared-state collision. Under stand-down, SLA reset on re-dispatch.</sla>
+    <deadline>2026-06-01 14:00 UTC (chain run for first trading day of June 2026) -- still applies if methodology stays in a form where the day-1-zero risk is live. If Opt A neutralization holds + DS emit becomes SoT, the deadline transfers to DS lane (separate TO).</deadline>
   </metadata>
 
   <references>
