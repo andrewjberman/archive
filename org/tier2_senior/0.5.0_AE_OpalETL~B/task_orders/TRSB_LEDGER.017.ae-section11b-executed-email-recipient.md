@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <completion_note>COMPLETE 2026-05-20 (0.5.0_AE_OpalETL~B). The EXECUTED path emits one email -- send_brokerage_email (workflow_handler.py:409, the brokerage-handoff email + Vident Excel artifact), recipients = hardcoded BROKERAGE_EMAILS. Added menachem@opalinvest.com alongside andrew@ on all 5 BROKERAGE_EMAILS entries (config.py); andrew@ preserved; submission/approval-path emails untouched. SES (section 11-C): no action -- menachem@ already a verified SES identity per the .015 probe. Deployed trade-pipeline-v1.19.0 (commit 4ccc7814c, terraform 0-diff verified). AC1-AC4 PASS. Session log: org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-05-20/trsb_ledger_017_section11b_executed_email_recipient.md. RAVC2 to 2.0.0_SA_COO~B CC 1.0.0_SA_CTO~B.</completion_note>
     <dispatch_unblock_condition>GATE CLEARED + GO'd 2026-05-20 by COO~B. TRSB_LEDGER.015 probe COMPLETE -- P2 finding: SES is in sandbox (ProductionAccessEnabled false), BUT menachem@opalinvest.com is ALREADY a verified SES identity. So §11-C (P3 of this TO) needs NO verification ACTION -- the execution-path email is deliverable to menachem@ as-is; P3 reduces to recording "menachem@ already a verified SES identity, no action." Runs in parallel with .016 (independent change surface -- DDB seed vs Lambda email path).</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
     <priority>P2 -- TRSB §11-B (+ §11-C SES). Routes every executed-trade email to menachem@. Together with §11-A (.016) discharges §11.</priority>
