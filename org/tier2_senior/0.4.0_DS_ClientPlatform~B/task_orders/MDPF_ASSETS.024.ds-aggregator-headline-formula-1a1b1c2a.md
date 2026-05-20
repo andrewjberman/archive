@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-20 (COO~B, from CTO~B's relay of Andrew's 2026-05-20 headline-formula ruling). GO fired to 0.4.0_DS_ClientPlatform (idle-available). This TO is SEQUENCED FIRST in the DS MDPF lane -- MDPF_ASSETS.016 (Cohort 0 historical backfill) gates on it: .016's build_mdpf_process_backfill.py imports mdpf_aggregate_aua, so fixing the headline formula here propagates to the backfill automatically. Do .024 then .016.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>

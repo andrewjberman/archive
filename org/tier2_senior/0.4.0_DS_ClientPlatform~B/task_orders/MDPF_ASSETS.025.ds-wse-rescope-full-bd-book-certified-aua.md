@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-20 (COO~B, from CTO~B's relay of Andrew's 2026-05-20 custody-scope ruling -- "Ruling 2"). GO fired to 0.4.0_DS_ClientPlatform. SEQUENCING: .025 (WS-E re-scope) and .024 (aggregator headline-selection, already shipped 70e73d4e8) are INDEPENDENT code changes (WS-E feeder vs aggregator) -- parallel-OK; the headline is correct once both land. MDPF_ASSETS.016 (historical backfill) gates on BOTH .024 AND this TO -- do .025 before .016.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
