@@ -2,117 +2,123 @@
   <metadata>
     <id>SSCN_DIVDEF.006</id>
     <slug>dt-portal-dev-to-prod-push</slug>
-    <issued_by>2.0.0_SA_COO~B</issued_by>
+    <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.3.0_DT_TradingOperations</issued_to>
-    <date>2026-05-19</date>
+    <date>2026-05-20</date>
     <status>staged</status>
     <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>HARD-GATES on (a) SSCN_DIVDEF.003 DS RAVC2 close (validates DIVZ preset against fresh Lambda v1.1.1 outputs + ships SSCN_GROUP_TAXONOMY.md), AND (b) Andrew DEV smoke approval. On Andrew approval, COO~B flips status pending + dispatch_held=false + sends GO MCP. Bench-staged scope below so DT can pre-prep (bun build readiness + portal/PROD merge mechanics + smoke screenshot scripts) any time before the gate clears.</dispatch_unblock_condition>
+    <dispatch_unblock_condition>Andrew DEV smoke APPROVED 2026-05-20 ("Yes it works"). Remaining gate: 1.0.0_SA_CTO gates this .006 candidate (the 7-SHA cherry-pick set + the cherry-pick mechanism) -- COO MCP'd CTO the candidate. On CTO concur, COO flips status->pending + dispatch_held=false + fires the GO. Also pending: DT's pre-PROD tree-verify RAVC2 (working tree clean + origin/DEV current + CLOUD gitlink synced) per Andrew's direct instruction -- that confirmation + the CTO gate together clear this TO.</dispatch_unblock_condition>
     <project_code>SSCN_DIVDEF</project_code>
-    <priority>P1 -- closes the SSCN_DIVDEF project lifecycle. Pod 3 + AE 0.5.0 work is the entire upstream chain; PROD push is the final ship step.</priority>
-    <sla>~15-30min DT wall once gate clears. portal/DEV -> portal/PROD merge + bun build + push to web server + PROD smoke verification.</sla>
-    <deadline>None hard -- ship at DT pace post-gate. Pod 3 closure wall complete on this TO.</deadline>
+    <priority>P1 -- the final ship step; closes the SSCN_DIVDEF project lifecycle. Andrew-direct "focus SSCN today" 2026-05-20.</priority>
+    <sla>~15-30min DT wall once the GO fires. Cherry-pick 7 commits -> portal PROD -> local build verify -> git push origin PROD -> GHA deploy.yml auto-deploy -> opalinvest.dev smoke.</sla>
+    <deadline>None hard -- ship at DT pace post-gate.</deadline>
   </metadata>
 
+  <rewrite_note>
+    This TO was originally authored 2026-05-19 by 2.0.0_SA_COO~B for the pre-v0.4 PROD push (.007/.008 era, blanket ff-merge, the old 4-group-strip UX). It is REWRITTEN base-lane 2026-05-20 by 2.0.0_SA_COO to the actual current bundle: SSCN_DIVDEF went through PRD v0.4 (layout revert), v0.5 (Presets dropdown), v0.6 (factor-grouping correction) + a smoke-bug fix (.011 Equal Weight). The PROD push is now a 7-commit SSCN-only CHERRY-PICK (not an ff-merge -- the SSCN commits are interleaved with 12 non-SSCN commits on origin/DEV). RAVC2 routing updated to the base C-suite.
+  </rewrite_note>
+
   <references>
-    <prd>docs/architecture/SSCN_DIVDEF.md PRD v0.2 §4.4 sequencing diagram + v0.1 §6 TO-4 framework (CTO~B; commits a5e1b7ef4 + c34f16d13 2026-05-19).</prd>
-    <upstream_de_commits>
-      portal/DEV inventory ready to push (3 commits):
-       - `45ea7210` (DE 0.3.0 SSCN_DIVDEF.001) -- DIVZ preset + ranking-method UI + 4-group strip + step=0.1 weight input + DEFAULT_CATEGORIES removal
-       - `2254437c` (DE 0.3.0 SSCN_DIVDEF.001 constitution ship; auxiliary commit)
-       - `b302f5cf` (DE 0.3.0 SSCN_DIVDEF.005) -- UNIVERSE_IDS 6->5 swap + types.ts UniverseId union swap + US_ONLY_UNIVERSES Set-form-retained + sscn_divdef_001_smoke.json AC10 dropdown extension
-    </upstream_de_commits>
-    <upstream_ae_commits>
-      Lambda already on PROD via Terraform deploy chain (NOT in this push scope; this TO is portal-only):
-       - `security-scanner-v1.1.1` (commit ea4062681; UNIVERSE_MAP v0.2 5-set + NON_SCORING_COLS amendment)
-       - latest/factor_metadata.json asOf=2026-05-18 confirmed; latest/universes/ has 9 subdirs (legacy 4 forensic + new 5 fresh)
-    </upstream_ae_commits>
-    <upstream_data_state>
-      SSCN_DIVDEF.002 COO-executed 2026-05-19T18:26-18:28Z under Andrew-direct "proceed what you can" mandate (DT was on P0 portfolio-management-v2.1.1 openpyxl-fix). 11-file output in `s3://opal-data-portal-v2/json/security_scanner/2026-05-18/` + latest/ overwrites verified. AC7 manifest-emit FAIL EMPIRICAL -- ADHC follow-on; NOT a TO-006 blocker (portal reads latest/factor_metadata.json + latest/universes/{token}/scanner_data.json, NOT latest/manifest.json).
-    </upstream_data_state>
-    <ds_validation_dependency>
-      SSCN_DIVDEF.003 (DS DIVZ-preset empirical validation + SSCN_GROUP_TAXONOMY.md doc) MUST CLOSE before this TO fires. DS pre-stage AC5 13/13 PASS + AC4 skeleton banked; post-GO wall ~50-60min. RAVC2 from DS -> me -> Andrew DEV smoke ask -> Andrew approval -> me flips this TO to pending + GO.
-    </ds_validation_dependency>
+    <prd>docs/architecture/SSCN_DIVDEF.md -- PRD v0.1 through v0.6 (1.0.0_SA_CTO / ~B). The shipped state is the cumulative v0.6 result.</prd>
+    <approval>Andrew DEV smoke APPROVED 2026-05-20 -- verified on http://localhost:5175/security-scanner @ portal DEV d71ac15b: DIVZ preset on load, Presets dropdown, reverted pre-5/18 layout, 18 corrected factor groups, Equal Weight fix. "Yes it works."</approval>
+    <dt_preflight>DT 0.3.0 read-only pre-flight 2026-05-20: origin/PROD..origin/DEV = 18 commits; the SSCN commits are INTERLEAVED with 12 non-SSCN (ADVI/MDPF/TRSB) -> a blanket DEV->PROD ff-merge would wrongly ship non-SSCN work to PROD; cherry-pick is structurally required. comp-routes trace getUniverseScanner + comp-cache collisions (scanner) PASS. Deploy mechanism: portal deploy.yml fires on push to the PROD branch -> bun build -> aws s3 sync dist/ s3://opalinvest-portal -> CloudFront EVTSA9VEHNZVH create-invalidation -> https://opalinvest.dev.</dt_preflight>
   </references>
 
-  <context>
-    Final PROD ship for SSCN_DIVDEF. portal/DEV carries 3 DE commits (45ea7210 + 2254437c + b302f5cf) that align with Lambda v1.1.1's new 5-universe data on `latest/`. portal/PROD currently points to whatever DEV pointer existed before TO-1 (DE preset+UI ship). On this PROD push, the user experience becomes:
-     - Default load: Russell 1000 universe + 13-factor DIVZ preset + 4-group rollup strip (Dividend 40 / Momentum 30 / Value 15 / Quality 15) + step=0.1 weight input
-     - Universe dropdown: 5 options (sp500, r1000, rmidcap, sp400, msciusa) -- legacy 4 (r1000v, acwx, eafe, eafev) NO LONGER OFFERED (forensic S3 paths preserved but dropdown drops them)
-     - Ranking method control: "Non-sector neutral" default + "Sector neutral" disabled with "Coming soon (v0.2)" tooltip
-     - Data vintage: asOf=2026-05-18 across all 5 universes; factor_metadata reflects new set
+  <the_7_sscn_commits>
+    The SSCN commit set to cherry-pick from origin/DEV onto portal PROD (DT pre-flight confirmed all 7 present on origin/DEV; 4 contiguous runs):
+    - 45ea7210 -- SSCN_DIVDEF.001 (DIVZ default preset)
+    - 2254437c -- SSCN_DIVDEF.001 (smoke constitution; auxiliary)
+    - b302f5cf -- SSCN_DIVDEF.005 (universe set 6->5 US-equity)
+    - a844f0dd -- SSCN_DIVDEF.007 (surgical pre-5/18 layout revert)
+    - b05388dc -- SSCN_DIVDEF.008 (Presets dropdown)
+    - 7ef0f4a6 -- SSCN_DIVDEF.010 (Factor Bank "Group" relabel + color polish)
+    - d71ac15b -- SSCN_DIVDEF.011 (Equal Weight remainder-spread fix)
+    NOTE: the scanner Lambda (security-scanner-v1.1.3, registry regen + 18-group fix) is already on PROD via Terraform -- the Lambda runs against a single PROD AWS account, no DEV/PROD data bifurcation. This TO is portal-branch-only. The corrected 18-group data is already live; this push aligns the portal UI with it.
+  </the_7_sscn_commits>
 
-    DE has no PROD push permission per role abilities (DT/AE gates); this TO is the canonical DT-lane portal push.
+  <context>
+    Final PROD ship for SSCN_DIVDEF. Cherry-pick the 7 SSCN commits from origin/DEV onto portal PROD. Post-push the opalinvest.dev Security Scanner becomes:
+    - Default load: Russell 1000 universe + 13-factor DIVZ preset, applied via an explicit "Presets:" dropdown showing "DIVZ -- Dividend".
+    - Layout: pre-5/18 frozen layout -- NO ranking-method control, NO 4-group rollup strip (both were unauthorized TO-1 additions, reverted by .007); weight input step=1.
+    - Universe dropdown: 5 US-equity options (sp500, r1000, rmidcap, sp400, msciusa).
+    - Factor Bank tab: factors grouped by the 18 correct master groups; column header "Group" (not "Category"); no "systematic"/"yield" artifacts.
+    - Equal Weight button: spreads weights evenly (e.g. 13 factors -> nine 8s + four 7s), no single-factor outlier.
+    - Data vintage: asOf 2026-05-18 across all 5 universes.
+
+    MUST be a cherry-pick, NOT `git merge DEV` -- origin/DEV carries 12 non-SSCN commits (ADVI/MDPF/TRSB) interleaved with the SSCN 7; a merge would promote unsmoked cross-pod work to PROD. Andrew's DEV smoke authorizes ONLY the SSCN set.
   </context>
 
   <scope>
-    <step>Phase 1 (pre-flight, bench-stage-OK before gate clears) -- merge readiness:
-      - `cd portal && git checkout DEV && git pull origin DEV` -- confirm DEV at HEAD includes b302f5cf (latest commit per the DE TO-5 ship).
-      - `git checkout PROD && git pull origin PROD` -- confirm PROD baseline state.
-      - `bun install` (clean install).
-      - `bun run typecheck` exit 0; `bun run lint` exit 0.
-      - `bun run build` exit 0 (verify the build artifact compiles against current PROD baseline before merging DEV in).
+    <step>Phase 0 (pre-PROD tree-verify -- Andrew-direct instruction, do FIRST + RAVC2 COO before the push) -- confirm the portal tree is fully committed + pushed: portal DEV working tree clean (no uncommitted SSCN source; .frontend-dev/screenshots + .runtmp untracked is fine); origin/DEV current at d71ac15b carrying all 7 SSCN commits; parent CLOUD gitlink synced + origin/CLOUD pushed. RAVC2 COO with working-tree status + origin/DEV HEAD + CLOUD gitlink commit. This is the clean-state gate Andrew asked for.</step>
+    <step>Phase 1 (pre-flight, bench-stage OK) -- `cd portal`; `git checkout PROD && git pull origin PROD` (PROD baseline); confirm the 7 SSCN SHAs are on origin/DEV; map their contiguous runs for the cherry-pick order. `bun install` clean.</step>
+    <step>Phase 2 (cherry-pick) -- after the CTO gate + GO:
+      - On portal PROD: cherry-pick the 7 SSCN commits in DEV commit order (45ea7210 -> 2254437c -> b302f5cf -> a844f0dd -> b05388dc -> 7ef0f4a6 -> d71ac15b). A range-pick of contiguous runs is fine where the runs are contiguous; the result must be exactly those 7, zero non-SSCN commits.
+      - If a cherry-pick conflict surfaces (residual risk on shared files -- constants.ts / types.ts / route config): do NOT resolve unilaterally -- RAVC2 PARTIAL to COO with the conflict; COO + CTO adjudicate.
+      - `bun run typecheck` + `bun run lint` + `bun run build` on PROD post-cherry-pick -- all exit 0 (lint: a project-wide exit-1 from the 11 known pre-existing react-hooks warnings in an unrelated AUA/Distribution component is acceptable -- it is the same baseline accepted across .007-.011; confirm NO new SecurityScanner lint issue).
     </step>
-    <step>Phase 2 (merge) -- after Andrew DEV smoke approval:
-      - `git checkout PROD`
-      - `git merge DEV --ff-only` (or `--no-ff` with explicit merge commit per existing portal/PROD convention; DT judgment on merge style consistent with prior portal PROD ships).
-      - `bun run build` (post-merge production build).
-      - Verify `dist/` (or equivalent) build artifacts produced without errors.
-    </step>
-    <step>Phase 3 (PROD ship + verification):
-      - Push portal/PROD to remote (`git push origin PROD`).
-      - Deploy artifacts per existing portal-PROD deployment pattern (CloudFront invalidation if needed; web server pull; whatever the canonical portal/PROD ship sequence is per DT's deployment_map.xml).
-      - PROD URL smoke test: page loads cleanly; first-load state matches PRD v0.2 §3 (R1000 default + 13-factor DIVZ preset + 4-group strip + new 5 universes in dropdown + asOf=2026-05-18 shown if surfaced); no console errors.
-      - CloudFront cache: invalidate as needed for `/index.html` + the portal entry chunk so users see the new build on next page-load.
-    </step>
-    <step>Phase 4 (RAVC2) -- to 2.0.0_SA_COO~B + CC 1.0.0_SA_CTO~B with: PROD merge SHA + bun build transcript + PROD URL smoke screenshot + AC1-AC8 confirmations. SSCN_DIVDEF.json status -> "complete" on TO close (3-step closure per CLAUDE.md non-negotiable: JSON + REGISTRY row move to Completed + PRD status note if applicable).</step>
+    <step>Phase 3 (PROD ship) -- `git push origin PROD`. The GHA deploy.yml workflow auto-fires: bun build -> aws s3 sync dist/ s3://opalinvest-portal -> CloudFront EVTSA9VEHNZVH create-invalidation. Monitor the workflow to green. AC8 (CF invalidation) is satisfied automatically by the workflow.</step>
+    <step>Phase 4 (PROD smoke) -- smoke https://opalinvest.dev security-scanner page per AC1-AC8. If any AC fails post-push, RAVC2 PARTIAL with the failure -- do NOT roll back unilaterally (Andrew + COO/CTO make the rollback call).</step>
+    <step>Phase 5 (RAVC2) -- to 2.0.0_SA_COO + CC 1.0.0_SA_CTO with: the cherry-pick result (PROD log showing exactly the 7 SSCN commits), the GHA deploy.yml run link/status, the opalinvest.dev smoke evidence, AC1-AC8 confirmations. On RAVC2 COMPLETE, COO executes the 3-step SSCN_DIVDEF project closure.</step>
   </scope>
 
   <acceptance_criteria>
-    <ac id="AC1">portal/PROD `HEAD` includes the 3 SSCN_DIVDEF DEV commits (45ea7210 + 2254437c + b302f5cf) post-merge. `git log --oneline PROD | head -10` shows the SSCN ship.</ac>
-    <ac id="AC2">`bun run build` exit 0 on PROD branch post-merge. Build artifacts produced in expected output directory (per portal build config).</ac>
-    <ac id="AC3">PROD URL first-load: Universe dropdown shows exactly 5 options (sp500/r1000/rmidcap/sp400/msciusa); Russell 1000 preselected; 13-factor DIVZ preset chips rendered in Dividend->Momentum->Value->Quality order with weights summing 100.0%; 4-group rollup strip shows Dividend 40 / Momentum 30 / Value 15 / Quality 15.</ac>
-    <ac id="AC4">Ranking Method control: "Non-sector neutral" selected + "Sector neutral" disabled with tooltip "Coming soon (v0.2)" (or equivalent v0.2 phrasing per CTO PRD Q1).</ac>
-    <ac id="AC5">Switching to each of the 5 universes loads scanner data successfully (no 404; jq-equivalent FE-side: page renders ranked rows for each universe). Confirms `latest/universes/{rmidcap, sp400, msciusa}/` paths are reachable from PROD's auth-validator-edge + S3-direct origin chain.</ac>
-    <ac id="AC6">Weight input: edit to `7.5` accepted (step=0.1 confirmed); sum recalculates to 100.0%.</ac>
-    <ac id="AC7">PROD URL: zero JS console errors on first load (modulo pre-existing CDP-bootstrap-401 race per TO-1 AC8 caveat which is independent of this TO).</ac>
-    <ac id="AC8">CloudFront cache invalidated for portal entry chunk; new user on the URL within 5min of push sees the new build (cache TTL behavior per existing portal CF behavior config).</ac>
+    <ac id="AC1">portal/PROD HEAD includes exactly the 7 SSCN commits (45ea7210 + 2254437c + b302f5cf + a844f0dd + b05388dc + 7ef0f4a6 + d71ac15b) and ZERO non-SSCN commits from origin/DEV. `git log --oneline PROD` verified against the 7-SHA list.</ac>
+    <ac id="AC2">`bun run typecheck` + `bun run build` exit 0 on PROD post-cherry-pick; lint shows no NEW SecurityScanner issue (the 11 pre-existing unrelated react-hooks warnings are the accepted baseline).</ac>
+    <ac id="AC3">opalinvest.dev first-load: the "Presets:" dropdown shows "DIVZ -- Dividend"; Russell 1000 preselected; the 13 DIVZ factors seeded at the PRD §3.1 weights.</ac>
+    <ac id="AC4">No ranking-method control and no 4-group rollup strip render anywhere on the page; weight input is step=1.</ac>
+    <ac id="AC5">The Universe dropdown shows exactly the 5 US-equity options (sp500/r1000/rmidcap/sp400/msciusa); switching to each loads scanner data with no 404.</ac>
+    <ac id="AC6">Factor Bank tab: factors grouped by the 18 master groups; column header reads "Group"; no "systematic"/"yield" group values; no "Category" user-facing label.</ac>
+    <ac id="AC7">Equal Weight button produces an even spread (13 factors -> nine 8s + four 7s, sum 100, no single-factor outlier).</ac>
+    <ac id="AC8">CloudFront invalidation fired by the deploy.yml workflow; a new user on opalinvest.dev within ~5min of the push sees the new build. Zero NEW JS console errors on first load (the expected unauthenticated /auth/refresh 401 console noise is pre-existing + benign per the DT 2026-05-20 root-cause -- not introduced here).</ac>
   </acceptance_criteria>
 
   <compiler_tools_mandate>
-    <before_write>
-      `comp-routes trace getUniverseScanner` -- confirm PROD route path stable (no auth changes since TO-1 + TO-5).
-      `comp-cache collisions | grep -i scanner` -- expect clean.
-    </before_write>
-    <before_commit>
-      `bun run typecheck` exit 0; `bun run lint` exit 0; `bun run build` exit 0 (pre-merge sanity on DEV).
-    </before_commit>
-    <after_commit>
-      `bun run build` exit 0 (post-merge on PROD branch).
-      PROD URL Playwright/headless smoke per AC1-AC8 (whichever portal/PROD smoke tool DT uses for canonical PROD verification).
-    </after_commit>
+    <phase id="1" when="before the cherry-pick">
+      <step>
+        <run>comp-routes trace getUniverseScanner</run>
+        <expect>The /api/general/security_scanner/latest/universes/{param}/scanner_data.json route + edge JWT + API GW auth are stable -- unchanged by the 7 SSCN commits. (DT pre-flight already ran this PASS; re-confirm if the DEV tip moved.)</expect>
+        <if_mismatch>If the route or auth changed, STOP + RAVC2 COO before pushing.</if_mismatch>
+      </step>
+      <step>
+        <run>comp-cache collisions (grep scanner)</run>
+        <expect>Clean -- no React Query key collision on scanner keys.</expect>
+        <if_mismatch>RAVC2 COO -- do not push a cache-corruption risk.</if_mismatch>
+      </step>
+    </phase>
+    <phase id="2" when="before the push">
+      <step>
+        <run>bun run typecheck + bun run build on PROD post-cherry-pick</run>
+        <expect>Both exit 0 -- the 7-commit cherry-pick result builds clean on the PROD branch.</expect>
+        <if_mismatch>A build/type failure post-cherry-pick = a conflict was mis-resolved or a commit is missing a dependency -- RAVC2 COO, do not push.</if_mismatch>
+      </step>
+    </phase>
+    <phase id="3" when="after the push">
+      <step>
+        <run>GHA deploy.yml workflow status + opalinvest.dev smoke (AC1-AC8)</run>
+        <expect>deploy.yml green; opalinvest.dev serves the new build; AC1-AC8 all pass.</expect>
+        <if_mismatch>RAVC2 PARTIAL with the failing AC; no unilateral rollback.</if_mismatch>
+      </step>
+    </phase>
   </compiler_tools_mandate>
 
   <cross_domain_coordination>
-    None. Self-contained portal/PROD ship. Lambda v1.1.1 + latest/ data are already on PROD (Lambda runs against single PROD AWS account; data lives at one set of S3 keys; no DEV/PROD bifurcation on the data side). Only portal/{DEV,PROD} branches need merging.
+    The cherry-pick mechanism IS the cross-domain control: origin/DEV carries 12 non-SSCN commits (ADVI / MDPF / TRSB) interleaved with the SSCN 7. Promoting ONLY the 7 SSCN SHAs keeps the cross-pod work OFF PROD -- those pods promote their own work under their own sign-off. A blanket `git merge DEV` is FORBIDDEN here. The scanner Lambda (security-scanner-v1.1.3) is already on PROD via Terraform -- not in this push scope; no Lambda/registry touch. No other active TO writes portal/PROD concurrently; if one appears, MCP COO before pushing.
   </cross_domain_coordination>
 
   <deliverables>
-    - portal/PROD merge commit (DEV -> PROD; SHA in RAVC2)
-    - bun build artifacts on PROD branch
-    - PROD URL smoke screenshot + AC1-AC8 evidence
-    - CloudFront invalidation evidence (if applicable)
-    - Session log under `org/tier2_senior/0.3.0_DT_TradingOperations/logs/YYYY-MM-DD/` with merge SHA, build transcript, smoke results, AC evidence.
-    - RAVC2 to 2.0.0_SA_COO~B + CC 1.0.0_SA_CTO~B on close.
-    - SSCN_DIVDEF.json status -> complete (COO~B will handle the 3-step closure: JSON + REGISTRY row move to Completed + PRD status note per CLAUDE.md non-negotiable). DT just MCPs close.
+    - portal/PROD with exactly the 7 SSCN commits cherry-picked; pushed to origin/PROD.
+    - GHA deploy.yml run to green (s3 sync + CloudFront invalidation).
+    - opalinvest.dev smoke evidence (AC1-AC8) + screenshot.
+    - Session log under org/tier2_senior/0.3.0_DT_TradingOperations/logs/2026-05-20/ with the cherry-pick log, build transcript, deploy.yml status, smoke results.
+    - RAVC2 to 2.0.0_SA_COO + CC 1.0.0_SA_CTO on close. COO then executes the 3-step SSCN_DIVDEF closure (JSON + REGISTRY + PRD status).
   </deliverables>
 
   <do_not>
-    <rule>Do NOT push to portal/PROD before SSCN_DIVDEF.003 (DS validation) closes + Andrew DEV smoke approves. The gate is structural; bypassing it ships unvalidated data state to PROD users.</rule>
-    <rule>Do NOT modify any portal/DEV code in this TO. This is a merge-and-push operation only; the upstream DE commits (45ea7210 + 2254437c + b302f5cf) are authoritative.</rule>
-    <rule>Do NOT touch S3 latest/ or Lambda code -- already shipped + verified via TO-2 + TO-4 (Lambda). This TO is portal-only.</rule>
-    <rule>Do NOT delete the legacy 4 universe directories from S3 (acwx/eafe/eafev/r1000v under latest/universes/) -- PRD v0.2 §3.5 DO-NOT-DELETE preserved for forensic. They no longer appear in the portal dropdown post-this TO but remain in S3.</rule>
-    <rule>Do NOT skip the PROD URL smoke test (AC3-AC8) -- structurally PASS-required. If any AC fails post-push, RAVC2 PARTIAL with the failure; do NOT roll back unilaterally (Andrew + COO~B/CTO~B make the rollback call).</rule>
-    <rule>No emojis in commit messages, session log, or CLI transcripts (CLAUDE.md ASCII-only).</rule>
+    <rule>Do NOT `git merge DEV` into PROD. Cherry-pick the 7 SSCN SHAs ONLY -- a merge ships 12 interleaved non-SSCN commits (ADVI/MDPF/TRSB) to PROD without their pods' sign-off.</rule>
+    <rule>Do NOT resolve a cherry-pick conflict unilaterally -- RAVC2 PARTIAL to COO; COO + CTO adjudicate.</rule>
+    <rule>Do NOT modify any portal source in this TO -- it is a cherry-pick + push only.</rule>
+    <rule>Do NOT touch S3 latest/ or the scanner Lambda -- already on PROD via Terraform (security-scanner-v1.1.3).</rule>
+    <rule>Do NOT roll back unilaterally on an AC failure -- RAVC2 PARTIAL; Andrew + COO/CTO make the rollback call.</rule>
+    <rule>No emojis in commit messages, the session log, or CLI transcripts (CLAUDE.md ASCII-only).</rule>
   </do_not>
 </task_order>
