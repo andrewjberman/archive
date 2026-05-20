@@ -9,7 +9,10 @@
 
   <files>
     <file path="portal/src/pages/TradeSubmission/TradeSubmission.tsx" type="component">
-      Main page component with 4-tab navigation (Submit, Approvals, Execution, History); renders based on auth state
+      Main page component with role-aware tab navigation (Submit, Approvals, Execution, History). Submit + History
+      render for every authenticated user; Approvals gates on the `approvers` trade-group, Execution on `executors`
+      (TRSB_LEDGER.008b A4 fix 2026-05-20 -- gates on trade-group membership from /api/general/trades/users/me,
+      NOT firm identity). A stale initialTab pointing at an ungranted tab clamps to Submit.
     </file>
     <file path="portal/src/pages/TradeSubmission/types.ts" type="types">
       Re-exports TradeSubmission type from API, defines UserRole union type (initiator|approver|executor|admin)
@@ -54,7 +57,8 @@
       Full trade details modal showing metadata, timeline, securities table, and attestations
     </file>
     <file path="portal/src/pages/TradeSubmission/hooks/useTradeSubmissionState.ts" type="hook">
-      React Query hooks for fetching submissions: getAllSubmissions, getPendingApprovals, getMySubmissions, getSubmissionsByStatus (15s-60s refetch)
+      React Query hooks for fetching submissions: getAllSubmissions, getPendingApprovals, getMySubmissions, getSubmissionsByStatus (15s-60s refetch).
+      Plus useTradeUserMe (key ['trade-user-me'], 5min staleTime) -- fetches the caller's own trade-user record for role-aware tab gating.
     </file>
     <file path="portal/src/pages/TradeSubmission/hooks/useTradeSubmissionActions.ts" type="hook">
       State and action handlers for approve, reject, execute, and download; manages modals and loading state
@@ -73,6 +77,16 @@
       <response_shape>{ count: number, submissions: TradeSubmission[] }</response_shape>
       <file>hooks/useTradeSubmissionState.ts:45</file>
       <refetch_interval>15000ms</refetch_interval>
+    </api_call>
+    <api_call>
+      <hook>useQuery (useTradeUserMe)</hook>
+      <endpoint>/api/general/trades/users/me</endpoint>
+      <method>GET</method>
+      <request_shape>none -- caller resolved server-side from the JWT principal</request_shape>
+      <response_shape>{ email: string, name: string, groups: string[], role: string }</response_shape>
+      <file>hooks/useTradeSubmissionState.ts (useTradeUserMe)</file>
+      <refetch_interval>none -- staleTime 5min, refetchOnWindowFocus false</refetch_interval>
+      <notes>Drives role-aware tab gating. groups: [] is a valid fail-closed response (show no privileged tabs), not an error.</notes>
     </api_call>
     <api_call>
       <hook>useQuery (useAllSubmissions)</hook>
@@ -234,7 +248,7 @@
     </import>
     <import>
       <from>portal/src/api/endpoints/trade-submission</from>
-      <provides>TradeSubmission type, getAllSubmissions, getPendingApprovals, getMySubmissions, getSubmissionsByStatus, submitTrade, approveSubmission, rejectSubmission, executeSubmission, downloadExcelFile, searchIdentifierCache, batchSaveIdentifiers, Fund, Brokerage</provides>
+      <provides>TradeSubmission type, TradeUserMe type, getAllSubmissions, getPendingApprovals, getMySubmissions, getSubmissionsByStatus, getTradeUserMe, submitTrade, approveSubmission, rejectSubmission, executeSubmission, downloadExcelFile, searchIdentifierCache, batchSaveIdentifiers, Fund, Brokerage (completeSubmission removed TRSB_LEDGER.008b -- COMPLETE retired per Andrew Q2)</provides>
       <used_in>All hooks and tabs</used_in>
     </import>
     <import>
@@ -308,6 +322,7 @@
       - trade-submissions:pending
       - trade-submissions:my:{email}
       - trade-submissions:status:{status}
+      - trade-user-me  (caller's own trade-user record; role-aware tab gating)
     </query_keys>
   </state_management>
 
@@ -381,7 +396,11 @@
 
   <notes>
     - All timestamps formatted in Eastern Time (ET)
-    - Trade statuses: PENDING_APPROVAL -> APPROVED -> EXECUTED -> COMPLETE (or REJECTED at any stage)
+    - Trade statuses: PENDING_APPROVAL -> APPROVED -> EXECUTED (or REJECTED at any stage). EXECUTED is the durable
+      terminal success state (Andrew Q2 ruling 2026-05-18: COMPLETE retired). COMPLETE is no longer written by any
+      FE path; it survives in the TradeSubmissionStatus union for READ tolerance only -- legacy COMPLETE rows still
+      exist in the table (not migrated) and must render cleanly. The orphaned completeSubmission FE function was
+      removed in TRSB_LEDGER.008b.
     - TradeCard component uses conditional rendering for action buttons based on status
     - FileUploadZone shows parse status feedback with success/error indicators
     - TickerAutocompleteInput supports Tab/RightArrow keyboard shortcuts to accept suggestions

@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.3.2_RD_TradeSubmission</issued_to>
     <date>2026-05-18</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18 (COO~B decomposition of TRSB_LEDGER PRD v0.1). Phase 3 (portal half). HARD-GATED on TRSB_LEDGER.008 -- the portal cannot gate on trade-groups until the `/api/general/trades/users/me` endpoint exists and its response contract is published. COO~B flips to pending + fires GO when TO-8 reports complete with the endpoint contract.</dispatch_unblock_condition>
+    <status>complete</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>DISPATCHED 2026-05-20 (COO~B). Gate cleared: TRSB_LEDGER.008 (/api/general/trades/users/me endpoint + {email,name,groups,role} contract) is COMPLETE per project JSON; CTO~B independently re-reviewed this TO 2026-05-20 -- dispatch-ready, no rework. GO fired to 0.3.2_RD_TradeSubmission on its session registration. Andrew "everything"-scope ruling 2026-05-20 keeps TO-8b IN for TRSB finalization. NOTE: this TO ends at the portal DEV commit; the PROD promotion of TO-8b's commits is a separate DT-lane TO (TRSB_LEDGER.013, authored post-completion).</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
     <priority>P2 -- Phase 3. Closes hole A4 (portal gates on firm, not role) + completes the Q2 COMPLETE-retirement on the FE side.</priority>
     <sla>1-2d wall.</sla>
