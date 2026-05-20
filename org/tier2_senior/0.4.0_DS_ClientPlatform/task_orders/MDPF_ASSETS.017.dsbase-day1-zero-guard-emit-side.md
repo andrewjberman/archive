@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-19</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>MDPF_ASSETS</project_code>
     <supersedes>SXIN_DAY1ZG.001 (closed-as-superseded-by-redirect 2026-05-19 per CTO PATH (a) disposition on AE 0.7 smartx-v1.0.1 RAVC1; the in-Lambda placement of the day-1-zero guard inside append_non_model_today.py became scope-orphaned under v1.0.1 Opt A neutralization; guard migrates to DS Base's build_legacy_compat_emit.py producer step where the methodology computation lives)</supersedes>
