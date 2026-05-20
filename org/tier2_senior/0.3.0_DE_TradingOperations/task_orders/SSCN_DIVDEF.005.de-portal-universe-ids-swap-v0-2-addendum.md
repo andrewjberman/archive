@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.3.0_DE_TradingOperations</issued_to>
     <date>2026-05-19</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>SSCN_DIVDEF</project_code>
     <priority>P1 -- Andrew-direct PRD v0.2 ratification 2026-05-19; addendum on top of `45ea7210` (TO-1 ship). FE-only; parallel-OK with TO-AE-1 (Lambda UNIVERSE_MAP swap); ~30min DE wall.</priority>
