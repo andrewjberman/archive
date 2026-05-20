@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-05-20 -- ycharts/credentials SM secret + ycharts-credentials-read IAM grant deployed inf-pipeline-v1.7.65 (commit 1f0c6b192; record-deploy c969c4113; 3-add/0-change/0-destroy; 0-diff verified). ARN arn:aws:secretsmanager:us-east-1:313476888478:secret:ycharts/credentials-2deEMz. GetSecretValue resource-scoped to IAM user Andrew_Berman (.007 runner). Value populated out-of-band (cookie-bundle format per Andrew; CTO/COO authorized in-band; never in git/TF-state/logs/MCP). comp-iam gaps 0 new gaps. Secret-ready signalled to DS 0.1.0; RAVC2 to COO + CC CTO.</completed>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO NOW — Andrew-direct via CTO, urgent (the YCharts seat is currently free; Alyssa signed out). This TO has NO gate — the secret RESOURCE + IAM can be created immediately. The credential VALUE is placed by Andrew out-of-band; this TO does not wait on it.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
