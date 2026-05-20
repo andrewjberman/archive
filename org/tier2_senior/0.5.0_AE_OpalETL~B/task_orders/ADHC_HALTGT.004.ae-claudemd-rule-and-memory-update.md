@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>complete</status>
+    <dispatch_held>false</dispatch_held>
+    <completion_note>AE DELIVERABLE COMPLETE 2026-05-20 (0.5.0_AE_OpalETL~B, batch GO). .004 content drafted as a 4-block canonical-apply package: org/tier2_senior/0.5.0_AE_OpalETL~B/drafts/ADHC_HALTGT.004-canonical-apply-package.md (Block A CLAUDE.md Rule 18; Block B org/XXX.md STOP-class sender convention; Block C memory/feedback_inbox_check_before_landing.md update; Block D MEMORY.md index line). CLAUDE.md is BASE_EXEC lane + memory/ is CTO-lane -- AE~B cannot commit them; canonical-apply ROUTED TO 1.0.0_SA_CTO~B (drafts-delta pattern, same as .000). All blocks reference only shipped + RAVC-verified tooling (AC4). Session log: org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-05-20/adhc_haltgt_004_claudemd_rule_memory_update.md. RAVC2 to 2.0.0_SA_COO~B; CTO~B canonical-apply closes the HALTGT project.</completion_note>
     <dispatch_unblock_condition>STAGED 2026-05-20 (COO~B decomposition of ADHC_HALTGT PRD v0.1 §6). HARD-GATED on ADHC_HALTGT.002 AND ADHC_HALTGT.003 -- the CLAUDE.md rule mandates wrappers that must exist + be verified before they are mandated. COO~B flips to pending + fires GO when both .002 and .003 report complete. Last TO in the HALTGT sequence.</dispatch_unblock_condition>
     <project_code>ADHC_HALTGT</project_code>
     <priority>P2 -- docs/adoption. Closes the R2 adoption risk: a wrapper only works if agents are mandated to use it.</priority>
