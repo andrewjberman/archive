@@ -5,7 +5,7 @@
     <issued_by>0.3.0_DE_TradingOperations</issued_by>
     <issued_to>0.3.4_RD_SecurityScanner</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <parent_to>org/tier2_senior/0.3.0_DE_TradingOperations/task_orders/SSCN_DIVDEF.008.de-rd-presets-dropdown.md</parent_to>
     <project_code>SSCN_DIVDEF</project_code>
     <priority>P1 -- Andrew-direct "focus SSCN today" 2026-05-20. GO is live (COO batch GO -> DE -> you). Begin immediately.</priority>
