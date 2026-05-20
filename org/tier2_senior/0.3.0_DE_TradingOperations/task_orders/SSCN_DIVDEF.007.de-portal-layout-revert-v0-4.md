@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.3.0_DE_TradingOperations</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>0.3.0_DE_TradingOperations registers live (Andrew spinning up Pod 3 DE 2026-05-20). COO fires the GO MCP + flips status to pending on DE registration. TO body is complete and gates are met NOW -- the only hold is DE being offline at authoring time. No upstream dependency.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>DISPATCHED 2026-05-20 -- DE 0.3.0 registered live; COO fired GO MCP + flipped status to pending. Gates met: PARALLEL with .002/.003/.004/.005, no upstream dependency.</dispatch_unblock_condition>
     <project_code>SSCN_DIVDEF</project_code>
     <priority>P1 -- Andrew-direct "focus SSCN today" 2026-05-20. Corrects a layout-scope violation on DEV before the TO-4/.006 PROD push. ~30-45min DE wall.</priority>
     <sla>~30-45min DE wall once GO lands. PARALLEL OK with .002/.003/.004/.005.</sla>
