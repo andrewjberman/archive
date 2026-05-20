@@ -50,4 +50,8 @@
   <deliverables>
     - build_legacy_compat_emit.py re-scoped to PRD v0.9; non_model_assets.json refreshed + reconciled vs the v0.9 platinum; Rule 13 deploy; RAVC2 to COO~B CC CTO~B.
   </deliverables>
+
+  <scope_pending date="2026-05-20" by="2.0.0_SA_COO~B">
+    AC LIST PROVISIONAL -- DO NOT GO ON THE CURRENT SCOPE. Per CTO~B's .029/.030-boundary directive (Andrew reinforced: the v0.9 backfill must reach the WHOLE Model Portfolios "Daily AUA Analysis" chart, not just the aggregate series): the chart consumes TWO daily-series artifacts -- aum-timeseries.json (model layers 1a/2a/1c) AND non_model_assets.json (the 1b Schwab-residual overlay, build_legacy_compat_emit.py's output). .029 backfills aggregate_aua_timeseries; .030 as currently scoped is daily-FORWARD only -- which would leave the chart's 1b layer historically stale. .030 likely needs to GROW from "legacy-emit v0.9 re-scope (daily-forward)" to "legacy-emit v0.9 re-scope + historical non_model_assets.json time_series backfill," co-sequenced with .029 Phase 1 so both artifacts' historical series land on the SAME v0.9 basis with no boundary skew. COO~B holds .030's final AC list until DS~B's .029 Phase-0 dry-run brief lands (the brief traces backward from the chart + enumerates every artifact + the partition-write plan); CTO~B relays the .030 re-scope direction off that brief. .030 stays dispatch_held meanwhile.
+  </scope_pending>
 </task_order>

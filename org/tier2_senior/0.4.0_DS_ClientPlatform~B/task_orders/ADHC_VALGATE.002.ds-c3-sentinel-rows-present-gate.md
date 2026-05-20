@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-18 (re-routed ~C->~B 2026-05-20 by 2.0.0_SA_COO~B)</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18 (COO decomposition of ADHC_VALGATE PRD v0.1). HARD GATE: VALGATE.001 must ship first -- C-3 reuses .001's rolling-baseline read API + the chosen gate-fire surface. COO flips to pending + fires GO once VALGATE.001 is RAVC2-accepted.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GATE CLEARED + GO'd 2026-05-20 by 2.0.0_SA_COO~B -- VALGATE.001 is RAVC-accepted (gate machinery + chain-wire all shipped + verified). C-3 reuses .001's rolling-baseline read API (valgate_baseline.py) + the gate-fire surface (the non-fatal valgate_gate.py invocation in orion-gold-dispatch.sh's run_chain loop, pre-INF_09). SEQUENCING: DS~B's MDPF_ASSETS.029 Phase-0 dry-run is the MDPF critical path and takes precedence; .002 is next-in-queue after the .029 Phase-0 brief lands.</dispatch_unblock_condition>
     <project_code>ADHC_VALGATE</project_code>
     <priority>P1 -- VALGATE Phase 1. C-3 catches known-stable key identifiers silently dropping out of partitions -- the INFGRO/INFNNA rep_id drop-out class, which ties to the INF_C_02 perf-coverage gap (INFGRO PRD section 8.4 Finding B).</priority>
     <sla>1-1.5d wall (PRD section 6 sizing) -- thin once VALGATE.001's machinery exists; the work is the gate logic + the sentinel registry.</sla>
