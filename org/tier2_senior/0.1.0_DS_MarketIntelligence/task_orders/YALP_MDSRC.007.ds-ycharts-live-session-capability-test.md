@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO NOW — Andrew-direct via CTO, urgent (YCharts seat currently free; Alyssa signed out). Phase 0 (runner prep) starts immediately, in parallel with YALP_MDSRC.006. Phase 1 (the live test) has ONE in-TO gate: the `ycharts/credentials` secret must be populated by Andrew out-of-band — proceed to Phase 1 the moment that is confirmed.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
