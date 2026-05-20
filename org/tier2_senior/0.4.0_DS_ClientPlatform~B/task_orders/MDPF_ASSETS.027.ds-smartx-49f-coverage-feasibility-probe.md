@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-20 (authored on Andrew Mandate Change 3 via CTO~B)</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>MDPF_ASSETS</project_code>
     <priority>P1 -- GATING. Andrew changed the 49F basis a 3rd time (Mandate Change 3, 2026-05-20): Cohort 1 (49F) = ONLY what SmartX covers (~$1.65B), superseding the v0.7 full-Black-Diamond-book basis (~$1.81B certified_aua). This probe is the gating feasibility question -- its outcome determines whether the re-scope uses a SmartX-direct mechanism (Andrew's preference) or a Schwab-based fallback, and CTO~B's PRD v0.9 amendment + the .024/.025/.016/.026 re-scope TOs all wait on the findings brief.</priority>
