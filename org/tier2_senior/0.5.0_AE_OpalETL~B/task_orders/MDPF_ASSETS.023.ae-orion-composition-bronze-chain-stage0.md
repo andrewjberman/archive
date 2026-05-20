@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <progress_note>IN FLIGHT 2026-05-20 (0.5.0_AE_OpalETL~B, batch GO). Phase 0 probe done; Phase 1 + Phase 2 SHIPPED: Stage-0 best-effort/non-fatal Orion-bronze step added to mdpf-daily-dispatch.sh (commit afa53a952), runner-role Orion JWT grant terraform-applied + 0-diff + tagged mdpf-pipeline-v1.0.2, dispatch script S3-deployed. BLOCKED for completion on a DS-lane dep: pull_orion_model_composition.py is not yet on s3://opal-data-mdpf/code/scripts/bronze/ (Rule 13) -- MCP'd DS 0.4. Stage 0 WARN-skips non-fatally until it lands. Phase 3 chain-re-trigger verification pending the DS upload (bundled with SXIN_PRODCT.002's). Session log: org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-05-20/mdpf_assets_023_sxin_prodct_002_mdpf_chain_stage0_and_emit.md.</progress_note>
     <dispatch_unblock_condition>STAGED 2026-05-20 (COO~B, scoped from CTO~B's WS-C bronze-gap diagnosis). Phase-2.5 hardening follow-on -- NOT urgent: Layer 1 (DS Base's resolve_bronze_date roll-forward in the WS-C feeder, commit 7d41d28cd) already makes the daily chain resilient to a missed bronze day. This TO is Layer 2 -- the root-cause fix. Queues in AE 0.7's lane behind the current MDPF/TRSB_LEDGER.009/ADHC_HALTGT/§11 load. COO~B flips to pending + fires GO when the AE 0.7 lane opens.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
     <priority>P3 -- Phase-2.5 hardening. The daily chain is already resilient via the Layer-1 roll-forward; this closes the root cause (no in-chain bronze producer) so a multi-week producer outage cannot silently consume a stale model composition.</priority>
