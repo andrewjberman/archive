@@ -6,7 +6,7 @@
     <issued_to>0.3.0_DE_TradingOperations</issued_to>
     <implementation_lane>0.3.4_RD (optional -- 2-line fix; DE may implement directly or hand to RD)</implementation_lane>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-20 -- Andrew ruled HOLD .006 for this fix (he brought 0.3.0_DE online specifically to do it). COO flipped staged->pending + fired GO. The fix is fully specified below. Post-close sequence: .011 commit -> DT DEV push origin/DEV + :5175 refresh -> Andrew re-smoke of the Equal Weight fix -> .006 PROD GO.</dispatch_unblock_condition>
     <project_code>SSCN_DIVDEF</project_code>
