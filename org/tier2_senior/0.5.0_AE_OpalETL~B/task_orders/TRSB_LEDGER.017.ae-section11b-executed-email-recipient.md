@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>HARD GATE: TRSB_LEDGER.015 (§11 probe) must report first -- §11-B's SES step (§11.2-C) depends on the probe's P2 SES-verification-state finding (whether a menachem@ verification step is needed before the email change is deliverable). COO~B flips to pending + GO once .015's findings land. Can run in parallel with .016 (independent change surface -- DDB seed vs Lambda email path).</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GATE CLEARED + GO'd 2026-05-20 by COO~B. TRSB_LEDGER.015 probe COMPLETE -- P2 finding: SES is in sandbox (ProductionAccessEnabled false), BUT menachem@opalinvest.com is ALREADY a verified SES identity. So §11-C (P3 of this TO) needs NO verification ACTION -- the execution-path email is deliverable to menachem@ as-is; P3 reduces to recording "menachem@ already a verified SES identity, no action." Runs in parallel with .016 (independent change surface -- DDB seed vs Lambda email path).</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
     <priority>P2 -- TRSB §11-B (+ §11-C SES). Routes every executed-trade email to menachem@. Together with §11-A (.016) discharges §11.</priority>
     <sla>~1-2h AE wall -- a trade-workflow-handler email-path edit + terraform deploy, plus a possible one-click SES verification.</sla>

@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>HARD GATE: TRSB_LEDGER.015 (§11 probe) must report first -- §11-A replicates the andrew@ trade-users row shape verbatim from the .015 probe's direct read, so the probe's P1 output is a required input. COO~B flips to pending + GO once .015's findings land.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GATE CLEARED + GO'd 2026-05-20 by COO~B. TRSB_LEDGER.015 probe COMPLETE -- P1 finding: the andrew@opalinvest.com trade-users row carries exactly 6 attributes -- active (BOOL), created_at (S), email (S), groups (L = [approvers, executors]), name (S), role (S = dev). §11-A replicates this 6-attribute shape for menachem@, substituting only the identity fields (email, name, and a fresh created_at); groups + role + active identical to andrew@. Use 0.5~B's .015 verbatim capture (session log org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-05-20/trsb_ledger_015_section11_menachem_probe.md) as the authoritative shape -- do not hand-construct.</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
     <priority>P2 -- TRSB §11-A. Seeds menachem@opalinvest.com into trade-users with andrew@-mirror authority. Together with §11-B (.017) it discharges §11; TRSB_LEDGER then needs only .012 (Andrew :5175 gate) to 3-step-close.</priority>
     <sla>~0.5-1h AE wall -- a single direct DDB write replicating a captured row shape.</sla>
