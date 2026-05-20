@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>complete</status>
+    <dispatch_held>false</dispatch_held>
+    <completion_note>COMPLETE 2026-05-20 (0.5.0_AE_OpalETL~B, batch GO). halt-gate-check.sh sourced into pre-push-safe-deploy.sh + safe-deploy.sh + safe-ec2-deploy.sh (one sourced call each, no duplication, existing gate logic untouched). 10/10 anchor test pass -- STOP + routine-unacked block before the irreversible step in all 3. bash -n clean; shellcheck not installed (same env gap as .001, flagged). Session log: org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-05-20/adhc_haltgt_002_wire_checkpoint_deploy_paths.md. RAVC2 to 2.0.0_SA_COO~B.</completion_note>
     <dispatch_unblock_condition>STAGED 2026-05-20 (COO~B decomposition of ADHC_HALTGT PRD v0.1 §6). HARD-GATED on ADHC_HALTGT.001 -- this TO sources the checkpoint library .001 ships. Runs in parallel with ADHC_HALTGT.003 (disjoint files). COO~B flips to pending + fires GO when .001 reports complete.</dispatch_unblock_condition>
     <project_code>ADHC_HALTGT</project_code>
     <priority>P2 -- the second net. Wires the checkpoint into the existing push/deploy structural-enforcement points.</priority>
