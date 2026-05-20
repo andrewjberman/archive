@@ -14,6 +14,11 @@
     <deadline>2026-05-22 -- 2-day window post-v1.0.1 (tomorrow 2026-05-20 14:00 UTC) to close the daily-fire gap. DS Base interim daily-fire bridges the gap; this TO ends the bridge dependency.</deadline>
   </metadata>
 
+  <amendment id="2026-05-20-sxin-option-a-split">
+    AMENDMENT 2026-05-20 (COO~B, from CTO~B's SXIN architecture ruling -- Option A). This TO's PHASE 1 (productionize / schedule the legacy non_model_assets.json emit) is SPLIT OUT to a new TO -- SXIN_PRODCT.002 (issued_to 0.7.0_AE_CloudOps~B). Reason: CTO~B ruled the emit must be an IN-CHAIN step appended to mdpf-daily-dispatch.sh (NOT a separately-scheduled trigger -- the fixed-offset cadence-race anti-pattern MDPF has paid for repeatedly); that chain script is also edited by MDPF_ASSETS.023, so both edits consolidate on the single agent 0.7.0_AE_CloudOps~B.
+    THIS TO (SXIN_PRODCT.001) is now SCOPED TO PHASE 2 ONLY: the dead-Lambda cleanup -- remove lambda_function.py STEP 6 + its import, git rm append_non_model_today.py, drop the 2 dead IAM statements in smartx-pipeline/iam.tf, remove the source-map files[] entry. Phase 2 is off-script, unambiguously the 0.5.0_AE_OpalETL~B lane, and ships independently -> smartx-pipeline-v1.0.2. The Phase-1 scope/ACs in the body below are SUPERSEDED by SXIN_PRODCT.002 -- read this TO as Phase-2-only. The earlier 2-module/2-tag question is resolved: this TO = smartx-pipeline-v1.0.2; SXIN_PRODCT.002 is a script edit + S3 upload only (no Terraform, no tag).
+  </amendment>
+
   <references>
     <origin>1.0.0_SA_CTO MCP to 2.0.0_SA_COO 2026-05-19 ~16:0XZ ("Dispositions: Phase 1B = (a) hardening TO; interim daily-fire = (a)+(b) compound; rider-1 = manual-only confirmed"). CTO disposition compound (a)+(b) on the interim-fire fork; this TO is the (b) Opt C v1.0.2 acceleration.</origin>
     <upstream_pivot>AE 0.7 smartx-pipeline-v1.0.1 RAVC1 2026-05-19 ~15:27Z (Opt A NEUTRALIZE the append_non_model_today step under the CEO-direct broader-1b + Cohort-0-IN methodology pivot via DS Base). v1.0.1 makes DS Base's build_legacy_compat_emit.py (225df40bc) sole SoT for non_model_assets.json but leaves dead Lambda code + IAM dangling + producer manual-only.</upstream_pivot>
