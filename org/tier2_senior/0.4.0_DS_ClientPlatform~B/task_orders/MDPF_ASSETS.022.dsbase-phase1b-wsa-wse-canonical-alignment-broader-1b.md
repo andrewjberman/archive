@@ -2,7 +2,7 @@
   <metadata>
     <id>MDPF_ASSETS.022</id>
     <slug>dsbase-phase1b-wsa-wse-canonical-alignment-broader-1b</slug>
-    <issued_by>2.0.0_SA_COO</issued_by>
+    <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-19 (pre-authored under Andrew "drive everything" 17:48Z directive; queued for DS Base bandwidth opening post-.017 + .019 close)</date>
     <status>staged</status>
