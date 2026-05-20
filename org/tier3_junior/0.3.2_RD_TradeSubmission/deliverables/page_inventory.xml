@@ -30,10 +30,13 @@
       Lists approved trades ready to execute; shows execution confirmation modal
     </file>
     <file path="portal/src/pages/TradeSubmission/tabs/HistoryTab.tsx" type="tab">
-      Lists completed and rejected trades with view mode toggle (My Submissions vs All Trades) and pagination
+      Lists executed and rejected trades with view mode toggle (My Submissions vs All Trades) and pagination.
+      Status filter (TRSB_LEDGER.014): All / Executed Only / Rejected Only -- "Executed Only" matches both
+      EXECUTED and legacy COMPLETE rows; StatusFilter type is 'all'|'EXECUTED'|'REJECTED'.
     </file>
     <file path="portal/src/pages/TradeSubmission/components/TradeCard.tsx" type="component">
-      Card component displaying trade summary (fund, submission ID, status, dates, counts, action buttons)
+      Card component displaying trade summary (fund, submission ID, status, dates, counts, action buttons).
+      Status badge label + color via the shared utils/tradeStatus.ts helpers (COMPLETE renders as EXECUTED).
     </file>
     <file path="portal/src/pages/TradeSubmission/components/SecuritiesTable.tsx" type="component">
       Editable table for securities with ticker autocomplete, identifier fields, weights, trade instructions
@@ -54,7 +57,8 @@
       Modal with textarea for entering rejection reason; confirms before submitting
     </file>
     <file path="portal/src/pages/TradeSubmission/components/TradeDetailsModal.tsx" type="component">
-      Full trade details modal showing metadata, timeline, securities table, and attestations
+      Full trade details modal showing metadata, timeline, securities table, and attestations.
+      Status badge via the shared utils/tradeStatus.ts helpers (COMPLETE renders as EXECUTED).
     </file>
     <file path="portal/src/pages/TradeSubmission/hooks/useTradeSubmissionState.ts" type="hook">
       React Query hooks for fetching submissions: getAllSubmissions, getPendingApprovals, getMySubmissions, getSubmissionsByStatus (15s-60s refetch).
@@ -65,6 +69,11 @@
     </file>
     <file path="portal/src/pages/TradeSubmission/services/fileParser.ts" type="service">
       Parses Excel (.xlsx) and CSV files; extracts fund, dates, comments, and securities data
+    </file>
+    <file path="portal/src/pages/TradeSubmission/utils/tradeStatus.ts" type="util">
+      Shared trade-status display helpers (TRSB_LEDGER.014). displayStatus() folds legacy COMPLETE to the
+      EXECUTED label; statusBadgeVariant() folds COMPLETE to the EXECUTED badge color. Applied at every
+      status render site so a legacy COMPLETE trade is visually identical to EXECUTED. Display-only.
     </file>
   </files>
 
@@ -303,7 +312,7 @@
       Display approved trades ready to execute. Shows success banner when trades present. Render TradeCards with execute/view/download actions. Modals: ExecuteModal, TradeDetailsModal. Uses useApprovedSubmissions hook with 20s refetch.
     </tab>
     <tab name="History" status="functional">
-      Display completed and rejected trades. Features view mode toggle (My Submissions vs All Trades), status filter (Complete/Rejected), and pagination (20 items per page). Shows TradeCards with view/download actions. Uses useMySubmissions, useCompletedSubmissions, useRejectedSubmissions hooks.
+      Display executed and rejected trades. Features view mode toggle (My Submissions vs All Trades), status filter (All/Executed/Rejected -- "Executed Only" matches both EXECUTED and legacy COMPLETE rows per TRSB_LEDGER.014), and pagination (20 items per page). Shows TradeCards with view/download actions. Uses useMySubmissions, useExecutedSubmissions, useCompletedSubmissions, useRejectedSubmissions hooks.
     </tab>
   </page_structure>
 
@@ -400,7 +409,8 @@
       terminal success state (Andrew Q2 ruling 2026-05-18: COMPLETE retired). COMPLETE is no longer written by any
       FE path; it survives in the TradeSubmissionStatus union for READ tolerance only -- legacy COMPLETE rows still
       exist in the table (not migrated) and must render cleanly. The orphaned completeSubmission FE function was
-      removed in TRSB_LEDGER.008b.
+      removed in TRSB_LEDGER.008b. TRSB_LEDGER.014 added display normalization: a legacy COMPLETE row renders
+      with the EXECUTED label + EXECUTED badge color everywhere, via the shared utils/tradeStatus.ts helpers.
     - TradeCard component uses conditional rendering for action buttons based on status
     - FileUploadZone shows parse status feedback with success/error indicators
     - TickerAutocompleteInput supports Tab/RightArrow keyboard shortcuts to accept suggestions

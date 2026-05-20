@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.3.2_RD_TradeSubmission</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-20 (COO~B). Andrew hit the EXECUTED-vs-COMPLETE dual-label confusion during his :5175 verify; CTO~B explained (same terminal state -- COMPLETE is the retired legacy name, EXECUTED canonical post-Q2) and Andrew's call is to UNIFY the display label and FOLD IT INTO the in-flight portal PROD promotion. GO fired to 0.3.2_RD_TradeSubmission (live + idle, just closed TO-8b -- same agent, same page). NOTE: .013 was cancelled (folded into .012); this relabel takes a fresh number .014, not the .013 slot.</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
