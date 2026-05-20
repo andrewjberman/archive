@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.3.0_DT_TradingOperations</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
+    <status>cancelled</status>
     <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-20 (COO~B). PROD promotion of TRSB_LEDGER.008b's portal commit. LANE: base 0.3.0_DT_TradingOperations -- same portal/PROD single-writer rationale as TRSB_LEDGER.012 (one DT owns every portal/PROD push this session to avoid a non-fast-forward race). GATED on: (1) TRSB_LEDGER.008b fully closed -- RD 0.3.2's closeout commit landed + TO RAVC-accepted; (2) Andrew's PROD-promotion authorization (production deploy is Andrew's call). COO~B flips to pending + fires GO when both gates clear.</dispatch_unblock_condition>
+    <dispatch_unblock_condition>CANCELLED 2026-05-20 (COO~B, per CTO~B 2026-05-20) -- FOLDED INTO TRSB_LEDGER.012. TO-8b landed early, so be5d7631 (the commit this TO would have promoted) is now part of TRSB_LEDGER.012's widened 4-commit cherry-pick set: one local-dev verify session + one cherry-pick + one GHA deploy promotes both the HistoryTab fix and the role-aware gating, halving Andrew's verification rounds. This TO file is retained cancelled for the record; do NOT dispatch it. --- ORIGINAL: STAGED 2026-05-20 (COO~B). PROD promotion of TRSB_LEDGER.008b's portal commit. LANE: base 0.3.0_DT_TradingOperations -- same portal/PROD single-writer rationale as TRSB_LEDGER.012 (one DT owns every portal/PROD push this session to avoid a non-fast-forward race). GATED on: (1) TRSB_LEDGER.008b fully closed -- RD 0.3.2's closeout commit landed + TO RAVC-accepted; (2) Andrew's PROD-promotion authorization (production deploy is Andrew's call). COO~B flips to pending + fires GO when both gates clear.</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
     <priority>P2 -- promotes the TO-8b role-aware-gating fix from DEV to live opalinvest.dev. Separable from the TO-012 history-fix promotion; rides its own DT-lane push.</priority>
     <sla>Same-session on both gates clearing.</sla>
