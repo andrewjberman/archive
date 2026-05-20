@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>COO holding for ONE CTO concurrence round-trip on two deltas from PRD v0.6 §6.9 TO-7 (see &lt;coo_deltas_pending_cto&gt;): (1) an added Phase-3 Lambda re-fire step -- AC4 is unverifiable without it; (2) the master-list file placement -- AE 0.5.0 cannot commit docs/architecture/** (ANY_CTO lane). COO MCP'd CTO the candidate; on CTO concurrence COO flips status to pending + fires GO. The registry-regen + redeploy scope itself is settled -- only the two deltas await CTO.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>DISPATCHED 2026-05-20 -- CTO CONCURRED on both COO deltas (re-fire step + AC7; infra/ master-list placement): see &lt;coo_deltas_pending_cto&gt; resolution. COO flipped staged->pending + fired GO. Runs PARALLEL with SSCN_DIVDEF.010.</dispatch_unblock_condition>
     <project_code>SSCN_DIVDEF</project_code>
     <priority>P1 -- Andrew-direct "focus SSCN today" 2026-05-20 (v0.6 factor-grouping correction). ~45-75min AE wall.</priority>
     <sla>~45-75min AE wall once GO lands. PARALLEL with SSCN_DIVDEF.010.</sla>
@@ -27,7 +27,7 @@
 
     DELTA 1 -- Lambda re-fire step (Phase 3). §6.9 TO-7 says "rebuild + redeploy ... so latest/factor_metadata.json emits correct groups" and AC4 verifies that. But redeploy != re-emit: opal-security-scanner-processor is an S3-upload-triggered processor -- redeploying the Lambda code updates the bundled registry but does NOT re-run the Lambda. latest/factor_metadata.json only regenerates when the Lambda processes an upload. AC4 is therefore unverifiable without an explicit post-redeploy re-fire (the canonical delete-and-re-PUT of the 2026-05-18 source XLSX -- the same mechanism executed for SSCN_DIVDEF.002). COO has baked the re-fire into Phase 3 + added &lt;data_reprocess_scope&gt;.
 
-    DELTA 2 -- master-list file placement. §6.9 TO-7 says commit the master list "into docs/architecture/security-scanner-source/." But docs/architecture/** is the ANY_CTO owned-paths lane -- AE 0.5.0 is not a permitted_agent (the same block DE 0.3.0 hit on the SSCN_GROUP_TAXONOMY.md §3.5 patch). COO's recommended resolution: place the master list at infra/aws/lambda/opal_security_scanner_processor/ (AE-owned lane, co-located with the factor_metadata_registry.json it sources -- arguably the better home for a registry source-of-record). Alternative: keep it in docs/architecture/security-scanner-source/ and route that one file's commit to CTO. This TO is WRITTEN for the infra/ placement; CTO's concurrence (or redline to docs/+route) is the dispatch gate.
+    DELTA 2 -- master-list file placement. §6.9 TO-7 says commit the master list "into docs/architecture/security-scanner-source/." But docs/architecture/** is the ANY_CTO owned-paths lane -- AE 0.5.0 is not a permitted_agent (the same block DE 0.3.0 hit on the SSCN_GROUP_TAXONOMY.md §3.5 patch). COO's recommended resolution: place the master list at infra/aws/lambda/opal_security_scanner_processor/ (AE-owned lane, co-located with the factor_metadata_registry.json it sources -- arguably the better home for a registry source-of-record). Alternative: keep it in docs/architecture/security-scanner-source/ and route that one file's commit to CTO. This TO is WRITTEN for the infra/ placement; CTO's concurrence (or redline to docs/+route) is the dispatch gate. RESOLUTION 2026-05-20: CTO CONCURRED on both deltas. Delta 1 -- re-fire + AC7 confirmed (CTO note: AC7 also guards the sharper failure mode -- if the regen accidentally touches `relationship`, percentile signs flip and AC7 catches it; AC7 protects both the .003 validation AND relationship integrity). Delta 2 -- infra/ placement confirmed. DISPATCHED.
   </coo_deltas_pending_cto>
 
   <context>
@@ -113,6 +113,7 @@
     <rule>Do NOT touch the DIVZ preset's `group` field. A factor's intrinsic master group and its preset-thesis group are legitimately distinct (PRD v0.6 §D).</rule>
     <rule>Do NOT `aws lambda invoke` to re-fire. Use the canonical delete-and-re-PUT of the 2026-05-18 source XLSX (the SSCN_DIVDEF.002 mechanism). Deploy only via Terraform (CLAUDE.md Rule 1).</rule>
     <rule>Do NOT `pip install -t .` into the Lambda source dir. Dependencies via layers only (CLAUDE.md Rule 3) -- though this TO should need no new dependency.</rule>
+    <rule>Do NOT touch the reference-duplicate registry copy at docs/architecture/security-scanner-source/factor_metadata_registry.json. Only the bundled infra/aws/lambda/opal_security_scanner_processor/factor_metadata_registry.json is authoritative + in scope for .009. The docs/ copy is cross-lane (ANY_CTO) and CTO will sync it CTO-lane in the v0.6 closeout pass (same pass as the SSCN_GROUP_TAXONOMY.md correction). Per CTO 2026-05-20.</rule>
     <rule>No emojis in the registry, code, commit messages, or the session log (CLAUDE.md ASCII-only rule).</rule>
   </do_not>
 </task_order>
