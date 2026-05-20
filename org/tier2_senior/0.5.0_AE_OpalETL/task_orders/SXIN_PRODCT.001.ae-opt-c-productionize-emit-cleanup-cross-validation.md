@@ -3,7 +3,7 @@
     <id>SXIN_PRODCT.001</id>
     <slug>ae-opt-c-productionize-emit-cleanup-cross-validation</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-19 (authored ~16:09Z; SCOPE-REDUCED ~17:1XZ per CTO re-disposition -- 2nd-producer cross-validation gate moved to MDPF_ASSETS.019 DS-lane; this TO now ships 2 items not 3; DEMOTED from FIRST to SECOND in AE 0.7 post-v1.0.1 queue behind MDPF_ASSETS.018 chain integration)</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>

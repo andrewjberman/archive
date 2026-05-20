@@ -3,7 +3,7 @@
     <id>MDPF_ASSETS.024</id>
     <slug>ds-aggregator-headline-formula-1a1b1c2a</slug>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-20</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>

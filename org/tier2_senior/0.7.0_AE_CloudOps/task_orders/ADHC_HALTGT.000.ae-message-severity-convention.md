@@ -3,7 +3,7 @@
     <id>ADHC_HALTGT.000</id>
     <slug>ae-message-severity-convention</slug>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~B</issued_to>
     <date>2026-05-20</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>

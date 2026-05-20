@@ -3,7 +3,7 @@
     <id>TRSB_LEDGER.012</id>
     <slug>dt-trsb-portal-prod-promotion</slug>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.3.0_DT_TradingOperations</issued_to>
+    <issued_to>0.4.0_DT_ClientPlatform~B</issued_to>
     <date>2026-05-20</date>
     <status>staged</status>
     <dispatch_held>true</dispatch_held>

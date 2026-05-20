@@ -3,7 +3,7 @@
     <id>ADHC_HALTGT.003</id>
     <slug>ae-safe-apply-terraform-checkpoint</slug>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~B</issued_to>
     <date>2026-05-20</date>
     <status>staged</status>
     <dispatch_held>true</dispatch_held>

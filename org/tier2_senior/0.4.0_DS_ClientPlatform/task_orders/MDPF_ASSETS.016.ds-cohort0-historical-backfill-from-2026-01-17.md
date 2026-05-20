@@ -3,7 +3,7 @@
     <id>MDPF_ASSETS.016</id>
     <slug>ds-cohort0-historical-backfill-from-2026-01-17</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-18</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>

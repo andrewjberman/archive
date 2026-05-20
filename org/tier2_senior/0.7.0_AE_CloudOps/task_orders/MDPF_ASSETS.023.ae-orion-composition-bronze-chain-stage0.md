@@ -3,7 +3,7 @@
     <id>MDPF_ASSETS.023</id>
     <slug>ae-orion-composition-bronze-chain-stage0</slug>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~B</issued_to>
     <date>2026-05-20</date>
     <status>staged</status>
     <dispatch_held>true</dispatch_held>
