@@ -27,7 +27,7 @@
 
   <scope>
     <in_scope>
-      - Create an AWS Secrets Manager secret `ycharts/credentials` (mirror Orion's `orion/credentials` shape), Terraform-managed. Create the RESOURCE with an empty / placeholder value only — do NOT populate real credentials (Andrew does that out-of-band via console).
+      - Create an AWS Secrets Manager secret `ycharts/credentials` (mirror Orion's `orion/credentials` shape); the secret RESOURCE Terraform-managed. POPULATE it (CTO update 2026-05-20 + Andrew in-band authorization for this interim recon test) with a COOKIE BUNDLE — `{"cookies":"<full Cookie request-header>"}` — extracted from `C:\Users\AndrewBerman\Downloads\ycharts.com2.har` (the most recent authenticated ycharts.com entry; jq one-liner in the COO dispatch MCP). The cookie value goes from the HAR file straight into Secrets Manager — never echoed, never into git/tfstate/logs/MCP (use `put-secret-value` so the value stays out of tfstate).
       - Grant the YALP_MDSRC.007 test runner `secretsmanager:GetSecretValue` on exactly that secret ARN (least-privilege, resource-scoped — mirror the Orion credential-read grant). MCP-confirm with 0.1.0_DS_MarketIntelligence the exact runner principal (the IAM role/identity DS will run the .007 test under) before scoping the grant.
       - Report back to COO + CTO + Andrew: the exact secret name + ARN + region, so Andrew knows precisely where to paste the credential value.
     </in_scope>
@@ -67,7 +67,7 @@
   </cross_domain_coordination>
 
   <acceptance_criteria>
-    <ac id="AC1">Secrets Manager secret `ycharts/credentials` created, Terraform-managed, with a placeholder/empty value (NOT real credentials). Mirrors the Orion `orion/credentials` pattern.</ac>
+    <ac id="AC1">Secrets Manager secret `ycharts/credentials` created (resource Terraform-managed) and POPULATED with the cookie-bundle JSON `{"cookies":"..."}` extracted from `ycharts.com2.har`. ycsessionid + csrftoken + aws-waf-token confirmed present in the string before save. Value placed via `put-secret-value` so it does not enter tfstate.</ac>
     <ac id="AC2">An IAM grant of `secretsmanager:GetSecretValue` to the confirmed YALP_MDSRC.007 test-runner principal, resource-scoped to exactly the `ycharts/credentials` ARN (least-privilege). comp-iam gaps shows 0 new gaps.</ac>
     <ac id="AC3">Deployed Terraform-only: plan -> apply -> 0-diff replan -> tag -> push --follow-tags -> record-terraform-deploy. Secret verified present via describe-secret.</ac>
     <ac id="AC4">Report to COO + CC CTO + Andrew with the exact secret name + ARN + region (the paste target for Andrew's out-of-band credential placement). Session log with Compiler Tools section. RAVC2 to 2.0.0_SA_COO + CC 1.0.0_SA_CTO.</ac>
@@ -80,7 +80,7 @@
   </deliverables>
 
   <do_not>
-    <rule>Do NOT populate the credential value — create the resource empty/placeholder; Andrew places the value out-of-band via console. Credentials must never transit chat, MCP, git, or logs.</rule>
+    <rule>Populate the secret VALUE via `put-secret-value` (not Terraform) so the cookie bundle never enters tfstate. The cookie value goes from the HAR file straight into Secrets Manager — never echoed to stdout, never into git, logs, or an MCP message.</rule>
     <rule>Do NOT grant broader than `secretsmanager:GetSecretValue` on the single `ycharts/credentials` ARN — least-privilege, resource-scoped.</rule>
     <rule>Terraform-only deploy (CLAUDE.md Rule 1). No console-created resources except Andrew's credential-value paste.</rule>
     <rule>No emojis in code, the session log, or CLI transcripts (ASCII-only).</rule>
