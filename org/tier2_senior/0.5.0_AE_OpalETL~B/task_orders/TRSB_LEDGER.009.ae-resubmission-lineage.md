@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <completion_note>COMPLETE 2026-05-20 (0.5.0_AE_OpalETL~B, batch GO). submission_handler.py accepts optional parent_submission_id -> writes it + a supersedes marker on the new row, and annotates the rejected predecessor's audit_events with a SUPERSEDED_BY event via append-only list_append (best-effort, attribute_exists-guarded). Deployed trade-pipeline-v1.18.0 (commit 173272fd9, terraform 0-diff verified). AC1/AC3/AC4 PASS. AC2 (live empirical) is CODE-VERIFIED -- a live submission fires approver notification emails (outward side effect, submission_handler.py:188-192); not triggered unilaterally. Flagged to COO~B for the AC2 disposition (recommend accept on code-verification given the P3-stretch scope + near-zero risk surface). Session log: org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-05-20/trsb_ledger_009_resubmission_lineage.md. RAVC2 to 2.0.0_SA_COO~B.</completion_note>
     <dispatch_unblock_condition>DISPATCHED 2026-05-20 (COO~B). Gate cleared: Phases 1+2 (TO-0 through TO-6) ALL shipped + RAVC-accepted (TRSB_LEDGER is 11/12 complete). Andrew "everything"-scope ruling 2026-05-20 keeps TO-9 IN -- the stretch is NOT dropped. GO fired to 0.7.0_AE_CloudOps on its session registration. NOTE: TO-9 ends at the trade-submission-handler deploy (terraform apply, AE-lane) -- no portal change, no PROD-promotion follow-on needed.</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
     <priority>P3 -- stretch. Closes hole B6 (no resubmission lineage). Recommended but droppable.</priority>
