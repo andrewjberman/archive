@@ -41,6 +41,11 @@
   </out_of_scope>
 
   <deliverables>
-    - menachem@opalinvest.com trade-users row seeded by direct write; read-back + andrew@-unchanged verification; RAVC2 to COO~B CC CTO~B; session log.
+    - menachem@opalinvest.com trade-users row at the andrew@-mirror end state (groups=[approvers,executors], role=dev); read-back + andrew@-unchanged verification; RAVC2 to COO~B CC CTO~B; session log.
   </deliverables>
+
+  <coo_disposition date="2026-05-20" by="2.0.0_SA_COO~B">
+    PREMISE DEVIATION + RULING. 0.5~B pre-checked trade-users before the §11-A write and found menachem@opalinvest.com ALREADY has a row -- active=true, created_at "2026-01-06T00:00:00Z", groups=["executors"] (executor-only), name="Menachem", role="executor". The .016 TO + the .015 probe assumed no existing row; that premise is wrong. 0.5~B's conditional attribute_not_exists(email) put_item correctly NO-OP'd (ConditionalCheckFailedException) -- the existing row is untouched.
+    RULING: .016 ships as an UPDATE-IN-PLACE, not a fresh seed. Set groups=["approvers","executors"] + role="dev"; PRESERVE created_at "2026-01-06T00:00:00Z" (the row genuinely dates to then -- do NOT stamp a fresh created_at); active/email/name unchanged. End state = exact andrew@ mirror. AUTHORITY: this is not a scope change -- the END STATE (.016 AC1: menachem@ row mirroring andrew@, approvers+executors / dev) is verbatim Andrew's §11.2-A directive + unambiguous; the only deviation is the OPERATION (update vs create), which is mechanism, not authority. No Andrew re-confirm required -- the directive is a target-state directive and the target is unchanged; knowing menachem@ already held executor-only authority only REDUCES the delta, it cannot conflict with "grant the same authority as andrew@." The executor->dev escalation IS a privilege escalation of an already-active trade user (more sensitive than a fresh seed) + confers the SoD-bypass (§11.3) -- recorded here as the material new fact (menachem@ was a partial trade user since 2026-01-06, not previously flagged) and CC'd to CTO~B. AC1 satisfied by the end state (row exists, mirrors andrew@); AC3 (andrew@ row unchanged) unaffected; the "do not touch other trade-users rows" out-of-scope rule still holds -- only menachem@'s own row is updated.
+  </coo_disposition>
 </task_order>
