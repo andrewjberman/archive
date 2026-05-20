@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.3.0_DS_TradingOperations</issued_to>
     <date>2026-05-19</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>SSCN_DIVDEF.002 (DT data refresh upload) RAVC2 close. DT 0.3.0 CC's DS 0.3.0 on the RAVC2 -- that message IS the GO. Do NOT start before that CC lands. Pulling `latest/` before the Lambda has overwritten it (AC4 anchor on TO-2) would validate against stale 2026-03-06 vintage and produce false-negative findings.</dispatch_unblock_condition>
     <project_code>SSCN_DIVDEF</project_code>
