@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-20 -- CTO CONCURRED on both COO deltas (re-fire step + AC7; infra/ master-list placement): see &lt;coo_deltas_pending_cto&gt; resolution. COO flipped staged->pending + fired GO. Runs PARALLEL with SSCN_DIVDEF.010.</dispatch_unblock_condition>
     <project_code>SSCN_DIVDEF</project_code>
