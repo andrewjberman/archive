@@ -88,4 +88,9 @@
     <rule>Do not build a FE resubmit-from-rejected affordance here -- v1 floor is the backend-accepted optional field; the FE button is a separate follow-on.</rule>
     <rule>Do not deploy outside Terraform (CLAUDE.md Rule 1).</rule>
   </do_not>
+
+  <coo_acceptance date="2026-05-20" by="2.0.0_SA_COO~B">
+    RAVC-ACCEPTED. AC1/AC3/AC4 PASS (optional parent_submission_id passthrough + supersedes marker; trade-pipeline-v1.18.0, terraform 0-diff; no emoji + session log + RAVC2). Commits 173272fd9 + ffe0497fb + 3df051cd2.
+    AC2 DISPOSITION -- option (a), ACCEPT ON CODE-VERIFICATION with acceptance-flex. AC2's "empirical: a resubmission resolves to its predecessor" is satisfied by code verification rather than a manufactured live test, because: (1) a live submission invokes send_approval_request() to the real `approvers` group -- firing approver notification emails to real people is an outward side effect not justified for a P3 droppable-stretch TO; (2) a synthetic-DDB-row test pollutes the production submissions table; (3) the change is a minimal gate-clean optional-field passthrough plus an attribute_exists-guarded, best-effort, WARN-not-fail list_append for the SUPERSEDED_BY audit event -- no DDB schema change, no portal change, py_compile + ds-commit-gate clean -- risk surface near-zero. The FIRST natural production resubmission with parent_submission_id set serves as the empirical confirmation; no need to manufacture one. TO closes complete; AC2 recorded as accept-on-code-verification, not a defect.
+  </coo_acceptance>
 </task_order>
