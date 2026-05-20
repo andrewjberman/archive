@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO 2026-05-18 (Andrew direct, this session). Backfill scope only; daily-forward chain is undisturbed (mdpf-pipeline-v1.0.0 LIVE per AE 0.7.0 ENABLE 12ec0b93d / 864c6b250). The amendment field (41f0b2605) is wired; this TO populates the historical Cohort 0 component so the Model Portfolios page reads amendment-correct opal_aggregate_aua across the full series.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
