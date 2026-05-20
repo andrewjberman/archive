@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.3.0_DT_TradingOperations</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>CLEARED 2026-05-20T17:5xZ. Andrew DEV smoke APPROVED ("Yes it works"). CTO 1.0.0_SA_CTO gated the candidate as the 8-commit cherry-pick set (added cfdf9a5c, the .011 smoke-runner counterpart -- consistency with 2254437c already in set; PROD a clean SSCN superset of DEV) + cherry-pick mechanism. GO fired by COO. Two CTO gate conditions are folded into the scope below as Phase-0 preconditions: (1) cfdf9a5c must be on origin/DEV before the pick (DT pushes it + syncs CLOUD gitlink first); (2) DT runs `git show --stat cfdf9a5c` at pick time and confirms the diff is confined to portal `.frontend-dev/**` with zero `portal/src/**` touch -- halt + re-surface to COO if any src path appears.</dispatch_unblock_condition>
     <project_code>SSCN_DIVDEF</project_code>
