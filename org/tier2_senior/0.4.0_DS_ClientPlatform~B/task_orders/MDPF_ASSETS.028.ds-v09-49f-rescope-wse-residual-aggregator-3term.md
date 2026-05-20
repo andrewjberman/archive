@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-20 (authored on PRD v0.9, 8951ce8f0)</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>DRAFT routed to 1.0.0_SA_CTO~B for confirm (CTO~B specified the v0.9 architecture in the 2026-05-20 re-scope message + PRD v0.9 §3.4/§3.0.1; this TO is the mechanics). COO~B flips to pending + GO on CTO~B's confirm. The TO's own Phase 0 (Schwab-whole-source pick: RPS silver vs revive the retired crosswalk) routes to CTO~B mid-execution -- that is an architecture call, not a dispatch gate.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>CONFIRMED by 1.0.0_SA_CTO~B 2026-05-20 (203606Z, reviewed vs PRD v0.9 §3.4/§3.0.1, no redline) + GO'd by 2.0.0_SA_COO~B. CTO~B confirmations folded in: methodology_version stamp = `v0_9`; the Phase-0 RPS-vs-crosswalk decision is CTO~B's call on DS~B's coverage/completeness characterization (CTO~B lean = the crosswalk IF the RPS ~5% gap -- ~$80M on $1.65B, material -- cannot be cleanly closed, but DS~B's empirical finding decides; do NOT pre-decide). The Phase-0 Schwab-whole-source finding routes to CTO~B mid-execution.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
     <priority>P1 -- MDPF CRITICAL PATH. PRD v0.9 (Andrew's 3rd + final 49F-basis revision) re-scopes the 49F headline to the full Schwab 49F book. This TO re-scopes WS-E (1b) + the aggregator (headline formula) TOGETHER -- they MUST co-land (the SMA-inclusive/exclusive choice has to be consistent across both or the headline double-counts or under-counts).</priority>
     <sla>~4-6h DS wall -- WS-E residual re-scope + aggregator 3-term revert + fixture re-baseline + reconciliation; the Schwab-whole-source Phase-0 decision is the variable.</sla>
