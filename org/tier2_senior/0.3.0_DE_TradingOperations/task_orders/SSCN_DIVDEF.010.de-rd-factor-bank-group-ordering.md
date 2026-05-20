@@ -6,7 +6,7 @@
     <issued_to>0.3.0_DE_TradingOperations</issued_to>
     <implementation_lane>0.3.4_RD</implementation_lane>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-20 -- decomposition of PRD v0.6 §6.9 TO-8. Gates met: PARALLEL with SSCN_DIVDEF.009 (categoryOrder.ts needs only the known 18-group master list, NOT .009's regenerated registry output). No upstream dependency.</dispatch_unblock_condition>
     <project_code>SSCN_DIVDEF</project_code>
