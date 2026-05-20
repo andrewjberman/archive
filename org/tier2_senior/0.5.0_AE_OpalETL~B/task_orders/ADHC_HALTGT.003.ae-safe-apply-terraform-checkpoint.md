@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>complete</status>
+    <dispatch_held>false</dispatch_held>
+    <completion_note>COMPLETE 2026-05-20 (0.5.0_AE_OpalETL~B, batch GO). Shipped .tools/safe-apply.sh -- the primary HALTGT net gating terraform apply. Runs the .001 checkpoint then exec-delegates to the terraform binary with full arg passthrough + exit-code propagation; gates apply only (refuses non-apply). 11/11 anchor test pass (STOP -> apply never runs; empty -> apply runs + passthrough + exit-code propagated; routine -> blocks, HALT_ACK=1 -> runs; non-apply refused). bash -n clean; shellcheck not installed (flagged). Session log: org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-05-20/adhc_haltgt_003_safe_apply_terraform_checkpoint.md. RAVC2 to 2.0.0_SA_COO~B.</completion_note>
     <dispatch_unblock_condition>STAGED 2026-05-20 (COO~B decomposition of ADHC_HALTGT PRD v0.1 §6). HARD-GATED on ADHC_HALTGT.001 -- safe-apply sources the checkpoint library .001 ships. Runs in parallel with ADHC_HALTGT.002 (disjoint files: .003 is a new wrapper, .002 edits 3 existing scripts). COO~B flips to pending + fires GO when .001 reports complete.</dispatch_unblock_condition>
     <project_code>ADHC_HALTGT</project_code>
     <priority>P1 -- the PRIMARY checkpoint. `terraform apply` is the irreversible step and it precedes the push; this is the only insertion point that fires immediately before the irreversible action (PRD §7-Q2).</priority>
