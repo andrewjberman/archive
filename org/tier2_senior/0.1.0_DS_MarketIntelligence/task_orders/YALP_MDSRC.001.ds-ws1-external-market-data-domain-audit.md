@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED — Phase 0 audit. Unblocks on Andrew GO (PRD v0.2 §9/§11: the four Phase-0 audits dispatch in parallel on Andrew GO). No inter-TO dependency — TO-1..4 are fully parallel. On GO: COO flips status->pending + dispatch_held=false + fires the GO message.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GO FIRED 2026-05-20 — Andrew GO received; COO dispatched. Original gate: STAGED — Phase 0 audit, unblocked on Andrew GO (PRD v0.2 §9/§11: the four Phase-0 audits dispatch in parallel on Andrew GO). No inter-TO dependency — TO-1..4 are fully parallel. On GO: COO flips status->pending + dispatch_held=false + fires the GO message.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P1 — Andrew-direct (CEO interview 2026-05-20). WS-1 is the "can YCharts replace the Bloomberg data_pkl market feed" core of the audit. DS 0.1.0 is already engaged on the HAR per Andrew.</priority>
     <sla>~2-4 effort-days (PRD §9). Investigation TO; parallel with TO-2/3/4.</sla>

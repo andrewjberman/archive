@@ -3,11 +3,12 @@
     <id>ADVI_INFGRO.009</id>
     <slug>dsc-infc02-twr-factor-rebuild-method-y</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <reroute_note>RE-ROUTED 2026-05-20 by 2.0.0_SA_COO: issued_to was `0.4.0_DS_ClientPlatform~C` — the ~C lane is a phantom (no live DS~C agent; the broker resolves ~C to the base folder; flagged to COO~B 20260520T164036Z). ADVI_INFGRO is base-scope (per DS~B "INFGRO stood down (base scope)"). This P1 partner-facing-critical-path TO is re-routed to the live in-domain base agent `0.4.0_DS_ClientPlatform` — INF_C_02 / pull_inflection_performance_rest.py are Client Platform base-lane scripts. DE~B's INFGRO.005/.006 are gated on this. Re-route is a within-base-lane correction of a phantom-sublane assignment, not a cross-lane change.</reroute_note>
     <date>2026-05-18</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>
-    <dispatch_unblock_condition>DISPATCHED GO 2026-05-18 on the CTO Method-Y ruling. No external gate on starting Phase 0 (the probe is read-only). NOTE: when the AE 0.7.0 chain-completion ping lands, PAUSE this TO and prioritize the INFGRO.007 + BIWNDW.002 leaderboard verification + RAVC2 closes (partner-facing-gating) -- resume .009 after.</dispatch_unblock_condition>
+    <dispatch_unblock_condition>DISPATCHED GO 2026-05-18 on the CTO Method-Y ruling; RE-ROUTED + RE-GO'd 2026-05-20 to the base serial (see reroute_note). No external gate on starting Phase 0 (the probe is read-only — and Phase 0 is already documented complete in the TO body: Method Y VIABLE). NOTE: when the AE 0.7.0 chain-completion ping lands, PAUSE this TO and prioritize the INFGRO.007 + BIWNDW.002 leaderboard verification + RAVC2 closes (partner-facing-gating) -- resume .009 after.</dispatch_unblock_condition>
     <project_code>ADVI_INFGRO</project_code>
     <priority>P1 -- the single INF_C_02 fix that clears BOTH Finding A (window-TWR ~6x absolute-scale understatement) and Finding B (epsilon-dominance 71.6%). It is now on the partner-facing critical path: INFGRO.005 cannot go partner-facing until this lands + a subsequent chain run.</priority>
     <sla>Phase 0 probe ~2-3h (read-only). Phase 1+ contingent on the Phase-0 data-source outcome; ~4-6h wall if the summaries block or the Orion probe yields a usable series, longer if the guard-railed X fallback is forced (escalates first).</sla>
