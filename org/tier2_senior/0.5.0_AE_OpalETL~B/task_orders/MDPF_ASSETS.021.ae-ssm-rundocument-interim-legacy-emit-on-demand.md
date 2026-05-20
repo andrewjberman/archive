@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-19</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <completion_note>COMPLETE-WITH-SUPERSESSION 2026-05-20 (0.5.0_AE_OpalETL~B, batch GO closeout). Deliverable shipped + live: SSM doc mdpf-legacy-emit-on-demand is Active in AWS; legacy-emit-ssm.tf committed + applied (d57a80d1f); MDPFLegacyEmitInvoker policy created (AttachmentCount 0). AC1 doc-deployed-Active; AC4 terraform-deploy PASS. AC2 (DS Base workstation invocation + policy attachment) SUPERSEDED -- SXIN_PRODCT.002's in-chain Stage 3.5 emit (shipped + verified today, run mdpf_daily_20260520_193329) replaces the interim manual-bridge mechanism; the policy attachment is moot. The SSM doc served its interim-bridge role across the 5/19-5/20 gap window and is now a redundant-but-harmless manual handle (retirement = separate follow-on). Session log: org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-05-20/mdpf_assets_021_ssm_doc_closeout.md. RAVC2 to 2.0.0_SA_COO~B.</completion_note>
     <project_code>MDPF_ASSETS</project_code>
     <priority>P1 -- GAP-WINDOW INTERIM-BRIDGE INFRASTRUCTURE. Closes CTO compound (a) disposition (DS Base interim daily-fire mechanism choice = SSM RunDocument). The gap window opens NOW (v1.0.1 SHIPPED 17:09Z, Lambda neutralized, legacy file goes stale daily without DS-side daily-fire). DS Base needs a workstation-triggerable handle by tomorrow AM ~13:00 UTC for ongoing-days coverage until SXIN_PRODCT.001 productionization lands the scheduled-firing version. Small parallel sister-TO to MDPF_ASSETS.018 (chain integration); ships in the SAME AE 0.7 session since both touch `mdpf-daily-runner` EC2 instance + adjacent Terraform module. Becomes load-bearing infra that SXIN_PRODCT.001 EXTENDS (productionization just adds EventBridge cron firing the same SSM doc; not throwaway wiring).</priority>
     <sla>~30min wall per DS Base sizing -- bundled into AE's .018 session (same EC2 touch + adjacent TF module). Single SSM document + ResourceGroup + IAM-perm review.</sla>
