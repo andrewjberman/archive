@@ -6,7 +6,7 @@
     <issued_to>0.3.0_DE_TradingOperations</issued_to>
     <implementation_lane>0.3.4_RD</implementation_lane>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-20 -- gate met: SSCN_DIVDEF.007 RAVC2 COMPLETE (DE portal DEV commit a844f0dd; all 6 ACs PASS; ScannerHeaderPanel.tsx byte-identical to 904caed5). The .007 post-revert baseline is on portal DEV; this TO refactors the DIVZ-on-load seeding it keeps. COO flipped status to pending + fired GO.</dispatch_unblock_condition>
     <project_code>SSCN_DIVDEF</project_code>
