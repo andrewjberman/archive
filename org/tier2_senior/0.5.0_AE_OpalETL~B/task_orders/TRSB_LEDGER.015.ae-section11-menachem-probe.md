@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <completion_note>COMPLETE 2026-05-20 (0.5.0_AE_OpalETL~B). Non-mutating probe -- 3 facts established by direct read. P1: andrew@ trade-users row captured verbatim (6 attrs: active BOOL, created_at S, email S, groups L[approvers,executors], name S, role S=dev). P2: SES in SANDBOX (ProductionAccessEnabled false); menachem@opalinvest.com ALREADY a verified SES identity -> section 11-B needs NO verification step. P3: menachem@ HAS a portal-auth account (opal-users-v2, userId usr_6ce8f8fdb8de, firmId=opal-capital, role admin, active) -> section 11-D NOT needed. Findings routed to 2.0.0_SA_COO~B CC 1.0.0_SA_CTO~B. Session log: org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-05-20/trsb_ledger_015_section11_menachem_probe.md.</completion_note>
     <project_code>TRSB_LEDGER</project_code>
     <priority>P2 -- TRSB §11 Phase-0 probe. §11 (second trade administrator, menachem@opalinvest.com) is the last open TRSB workstream; TRSB_LEDGER cannot 3-step-close without it. This probe is the foundation TO -- §11-A (seed) + §11-B (email recipient) hard-gate on its findings.</priority>
     <sla>~1-2h AE wall -- a non-mutating probe (DDB read + SES describe + portal-auth check).</sla>
