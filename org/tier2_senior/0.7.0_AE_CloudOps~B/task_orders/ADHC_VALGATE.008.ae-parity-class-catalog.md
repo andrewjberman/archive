@@ -2,12 +2,12 @@
   <metadata>
     <id>ADHC_VALGATE.008</id>
     <slug>ae-parity-class-catalog</slug>
-    <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
-    <date>2026-05-18</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18 (COO decomposition of ADHC_VALGATE PRD v0.1). Phase 3 -- no hard dependency on Phase 1/2 (the catalog is independent), but sequenced behind them by lane capacity. COO flips to pending + fires GO when AE 0.7 lane has capacity.</dispatch_unblock_condition>
+    <issued_by>2.0.0_SA_COO~B</issued_by>
+    <issued_to>0.7.0_AE_CloudOps~B</issued_to>
+    <date>2026-05-18 (re-routed ~base->~B + DISPATCHED 2026-05-20 by 2.0.0_SA_COO~B)</date>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>RE-ROUTED + GO'd 2026-05-20 by 2.0.0_SA_COO~B. ADHC_VALGATE execution ownership is the ~B C-suite; the original base issued_to/issued_by predate the re-org. PULLED FORWARD: per the TO's own statement this Phase-3 catalog has NO hard dependency on Phase 1/2 (it's a declared-vs-empirical parity-pair catalog, independent of the Class-C gate machinery) -- so it is dispatched NOW in parallel with the .029/.002/.003 critical path, using the idle ~B AE capacity, rather than waiting for Phase 1 to finish. Routed to 0.7.0_AE_CloudOps~B (idle watchdog standby; the original base lane was 0.7.0_AE_CloudOps -- natural ~B successor). Sibling .007 (Class-B chainrun pre/post diff) is NOT pulled forward -- its own TO explicitly gates it on VALGATE Phase 1 (.001-.003) shipping (the chain-gate surface + verdict conventions), and wiring it concurrent with .002/.003's Class-C gate edits to orion-gold-dispatch.sh is a shared-file collision risk; .007 re-routes + GOs when .002/.003 complete.</dispatch_unblock_condition>
     <project_code>ADHC_VALGATE</project_code>
     <priority>P2 -- VALGATE Phase 3. The parity gate SHAPE (declared inventory vs empirical inventory) recurs; only one instance is built. Catalog the sites + route the un-built ones.</priority>
     <sla>1d wall (PRD section 6 sizing) -- a catalog deliverable, not a build.</sla>
