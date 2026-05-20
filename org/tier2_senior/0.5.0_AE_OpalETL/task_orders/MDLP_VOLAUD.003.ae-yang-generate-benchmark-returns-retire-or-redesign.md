@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-19 (authored ~17:3XZ as base AE 0.5; LANE OVERRIDE to ~B ~17:42Z per Andrew-direct provisioning of 0.5.0_AE_OpalETL~B; re-dispatch ~17:4XZ)</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <lane_override_note>ANDREW-DIRECT LANE OVERRIDE 2026-05-19 ~17:42Z (verbatim via CTO relay): "I am provisioning 0.5.0_AE_OpalETL~B for VOLAUD, do not distract 0.5.0_AE base with this". Base AE 0.5 stays untouched on SSCN_DIVDEF.004 + their natural queue. ~B (just-provisioned, PID 7064 LIVE per COO~B observation) fully owns the MDLP_VOLAUD project arc from .003 onward. Original CTO disposition had AE 0.5 base as the lane; Andrew operational call overrides per `feedback_andrew_product_invariant_overrides_sequenced_gates` -- top-tier authority, no re-converge needed.</lane_override_note>
     <project_code>MDLP_VOLAUD</project_code>
