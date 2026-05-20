@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <phase3_note>COMPLETE 2026-05-20 (0.5.0_AE_OpalETL~B). Phase 3 verified on chain re-trigger mdpf_daily_20260520_193329 (status=complete): Stage 3.5 ran (LEGACY-EMIT ok 18s) after WS-A (Stage 3) and before ROLLUP (Stage 4) -- the designed placement, independent of Stage 4. non_model_assets.json refreshed: generated_at 2026-05-20T19:35:27Z, latest.date 2026-05-20. AC1/AC2/AC4 verified; AC3 (Stage-3-fail skips emit) structural by placement + code-read; AC5 no-Terraform correct. RAVC2 to 2.0.0_SA_COO~B.</phase3_note>
     <progress_note>IN FLIGHT 2026-05-20 (0.5.0_AE_OpalETL~B, batch GO). Phase 1 + Phase 2 SHIPPED: the Stage-3.5 in-chain legacy-emit step (build_legacy_compat_emit.py --upload, gated on the Stage-3 platinum write, run before Stage 4) added to mdpf-daily-dispatch.sh (commit afa53a952, combined edit pass with MDPF_ASSETS.023); dispatch script S3-deployed to s3://opal-data-mdpf/code/. No Terraform (correct per AC5). Phase 3 chain-re-trigger verification pending -- bundled with MDPF_ASSETS.023's re-trigger (one fire verifies both Stage 0 and Stage 3.5). Session log: org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-05-20/mdpf_assets_023_sxin_prodct_002_mdpf_chain_stage0_and_emit.md.</progress_note>
     <dispatch_unblock_condition>DISPATCHED 2026-05-20 (COO~B, from CTO~B's SXIN architecture ruling -- Option A). SXIN_PRODCT.001's Phase 1 (schedule the legacy emit) is split out here to 0.7.0_AE_CloudOps~B because it edits mdpf-daily-dispatch.sh -- the SAME chain script MDPF_ASSETS.023 edits. CONSOLIDATION: one agent owns both edits to that file. SEQUENCE with MDPF_ASSETS.023: .023 PREPENDS a Stage-0 bronze step; THIS TO APPENDS a post-platinum emit step. Do .023 first (or both in one coherent edit pass), then this -- no two-editor friction. SXIN_PRODCT.001 (0.5.0_AE_OpalETL~B) keeps SXIN Phase 2 (smartx-pipeline cleanup) -- off-script, independent.</dispatch_unblock_condition>
     <project_code>SXIN_PRODCT</project_code>
