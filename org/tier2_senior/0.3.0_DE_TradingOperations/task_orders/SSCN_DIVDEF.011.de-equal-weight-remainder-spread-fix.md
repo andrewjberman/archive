@@ -6,9 +6,9 @@
     <issued_to>0.3.0_DE_TradingOperations</issued_to>
     <implementation_lane>0.3.4_RD (optional -- 2-line fix; DE may implement directly or hand to RD)</implementation_lane>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>1.0.0_SA_CTO fires the GO once Andrew rules hold-vs-ship on the .006 PROD bundle. CTO's recommendation to Andrew: hold .006 for this fix (it is tiny). If Andrew rules ship-.006-now / fast-follow, CTO relays that and .011 ships in a follow-on push instead. COO holds .011 staged until CTO's GO. The fix itself is fully specified below -- no scoping ambiguity, only the sequencing awaits Andrew.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>DISPATCHED 2026-05-20 -- Andrew ruled HOLD .006 for this fix (he brought 0.3.0_DE online specifically to do it). COO flipped staged->pending + fired GO. The fix is fully specified below. Post-close sequence: .011 commit -> DT DEV push origin/DEV + :5175 refresh -> Andrew re-smoke of the Equal Weight fix -> .006 PROD GO.</dispatch_unblock_condition>
     <project_code>SSCN_DIVDEF</project_code>
     <priority>P1 -- bug surfaced by Andrew's 2026-05-20 DEV smoke of the SSCN bundle. Trivial fix; joins the .006 PROD bundle.</priority>
     <sla>~10-15min wall once GO lands.</sla>
