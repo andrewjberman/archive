@@ -6,9 +6,9 @@
     <issued_to>0.3.0_DE_TradingOperations</issued_to>
     <implementation_lane>0.3.4_RD</implementation_lane>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>SSCN_DIVDEF.007 (DE layout revert) RAVC2 COMPLETE. .007 and this TO both edit ScannerHeaderPanel.tsx + constants.ts -- they run SEQUENTIAL, not parallel, to avoid a working-tree collision. COO flips status to pending + fires GO MCP the moment .007 RAVCs clean. Do NOT start before .007 closes -- this TO refactors the DIVZ-on-load seeding code that .007 keeps.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>DISPATCHED 2026-05-20 -- gate met: SSCN_DIVDEF.007 RAVC2 COMPLETE (DE portal DEV commit a844f0dd; all 6 ACs PASS; ScannerHeaderPanel.tsx byte-identical to 904caed5). The .007 post-revert baseline is on portal DEV; this TO refactors the DIVZ-on-load seeding it keeps. COO flipped status to pending + fired GO.</dispatch_unblock_condition>
     <project_code>SSCN_DIVDEF</project_code>
     <priority>P1 -- Andrew-direct "focus SSCN today" 2026-05-20 (post-v0.4 directive). Delivers the default preset as an explicit, user-switchable dropdown. ~45-60min combined DE+RD wall.</priority>
     <sla>~45-60min wall once GO lands. SEQUENTIAL after .007 (gated).</sla>
@@ -47,7 +47,7 @@
       - `constants.ts` -- add the `Preset` interface, the `PRESETS` registry (DIVZ entry: id:'divz', label:'DIVZ -- Dividend', universe:'r1000', entries: the 13 DIVZ codes/weights retained by .007), and `DEFAULT_PRESET_ID = 'divz'`. `DEFAULT_PRESET` becomes `PRESETS`'s divz entries (or is re-exported from it) -- NO content change to codes/weights/group.
       - `hooks/useScannerState.ts` -- add `activePresetId` state + an `applyPreset(id)` action that sets universe + factors + weights atomically; derive a `Custom` state when the live selection diverges from the active preset.
       - `components/ScannerHeaderPanel.tsx` -- add the labeled `Presets:` `<select>` adjacent to the universe dropdown, matching its styling; wire it to `applyPreset`. ONE new control -- no panel, tab, or layout restructure.
-      - `SecurityScanner.tsx` -- the on-load seeding `useEffect` applies `DEFAULT_PRESET_ID` via `applyPreset` (replaces the direct `initializeDefaultsWithWeights` call .007 keeps).
+      - `SecurityScanner.tsx` -- the on-load seeding `useEffect` applies `DEFAULT_PRESET_ID` via `applyPreset` (replaces the direct `initializeDefaultsWithWeights` call .007 keeps). ALSO fix the stale copy at `SecurityScanner.tsx` line ~74 -- "across 6 universes" -> "across 5 universes" (the .005 6->5 universe migration left this string stale; DE 0.3.0 surfaced it during .007; folded here as a one-liner since this TO already edits SecurityScanner.tsx -- no separate TO warranted).
     </step>
     <step>Phase 3 (verify + commit) -- run the Phase 2 + Phase 3 compiler mandate. DE reviews the RD implementation against all 6 ACs. Commit via `.tools/safe-commit.sh --author "0.3.0_DE_TradingOperations &lt;0.3.0_DE_TradingOperations@opal.agent&gt;"` (or the RD serial if RD commits its own page per role abilities -- DE's call; the RAVC2 is DE's regardless). Portal DEV push is a DT lane action -- CC DT 0.3.0 if a push is needed.</step>
     <step>Phase 4 (RAVC2) -- to 2.0.0_SA_COO + CC 1.0.0_SA_CTO with: AC1-AC6 evidence (fresh-load DIVZ-applied observation; re-select re-apply; manual-edit -> Custom label; /frontend-dev visual diff vs post-.007 baseline; smoke; tsc+lint); commit SHA(s); the compiler mandate transcript. DS-mode: TO status -> complete on RAVC2 send.</step>
