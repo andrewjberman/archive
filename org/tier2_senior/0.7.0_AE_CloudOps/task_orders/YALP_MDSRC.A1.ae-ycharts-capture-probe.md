@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED — Phase 2A. Q1-INDEPENDENT (dispatchable on COO decomposition per PRD v0.3 §7/§12 — runs regardless of the Q1 official-API-vs-scrape decision; its result feeds the scrape branch if Q1 picks scrape). COO flips status->pending + fires the GO once PRD v0.3 (commit de7facf93) is confirmed on origin/CLOUD — so the runner pulls a v0.3 PRD, not v0.2. No Andrew gate.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GO FIRED 2026-05-20 — PRD v0.3 confirmed on origin/CLOUD (de7facf93 + c3c04bc9d); COO flipped pending + dispatched. Original: STAGED — Phase 2A. Q1-INDEPENDENT (dispatchable on COO decomposition per PRD v0.3 §7/§12 — runs regardless of the Q1 official-API-vs-scrape decision; its result feeds the scrape branch if Q1 picks scrape). COO flips status->pending + fires the GO once PRD v0.3 (commit de7facf93) is confirmed on origin/CLOUD — so the runner pulls a v0.3 PRD, not v0.2. No Andrew gate.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P2 — Phase 2A unblock. Cheap, fast; de-risks the Q1=scrape branch by answering empirically whether headless capture is viable.</priority>
     <sla>~1 day. External-system probe.</sla>

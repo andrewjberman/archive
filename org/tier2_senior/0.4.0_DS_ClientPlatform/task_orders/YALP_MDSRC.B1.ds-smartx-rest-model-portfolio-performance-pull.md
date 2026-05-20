@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED — Phase 2B. Q1-INDEPENDENT (SmartX REST is an official key-authed API, an active Opal integration — not gated on the YCharts Q1 decision; dispatchable on COO decomposition per PRD v0.3 §7/§12). COO flips status->pending + fires the GO once PRD v0.3 (de7facf93) is confirmed on origin/CLOUD. NOTE: Q8 (portal shows realized SmartX returns vs design model.pkl returns) is a product call that gates ONLY the portal-wiring step (Phase 2 of the scope below) — the SmartX pull build + validation (Phase 0/1) proceed without it; surface for Andrew's Q8 ruling before wiring portal columns.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GO FIRED 2026-05-20 — PRD v0.3 confirmed on origin/CLOUD (de7facf93 + c3c04bc9d); COO flipped pending + dispatched. Original: STAGED — Phase 2B. Q1-INDEPENDENT (SmartX REST is an official key-authed API, an active Opal integration — not gated on the YCharts Q1 decision; dispatchable on COO decomposition per PRD v0.3 §7/§12). COO flips status->pending + fires the GO once PRD v0.3 (de7facf93) is confirmed on origin/CLOUD. NOTE: Q8 (portal shows realized SmartX returns vs design model.pkl returns) is a product call that gates ONLY the portal-wiring step (Phase 2 of the scope below) — the SmartX pull build + validation (Phase 0/1) proceed without it; surface for Andrew's Q8 ruling before wiring portal columns.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P2 — Phase 2B. A source UPGRADE (manual weekly model.pkl -> daily SmartX-REST) for the portal's model-portfolio performance surfaces. Runs in parallel with Phase 2A/2C.</priority>
     <sla>~3-5 days (PRD §7).</sla>
