@@ -27,7 +27,7 @@
 
   <scope>
     <step>Phase 0 -- DELTA QUANTIFICATION (UNBLOCKED NOW; non-mutating). Dry-run a v0.8-corrected build_legacy_compat_emit.py against the CURRENT live non_model_assets.json for a recent production date. Compute and report the EXACT total figure the live Model Portfolios page would move by under v0.8 -- broken out by component: (i) the SMA double-count removal (~$25M est), (ii) the 1b basis change (certified_aua vs compute_49f_broader_custody), (iii) any residual. Do NOT commit, do NOT S3-deploy, do NOT touch the live artifact -- this is a local dry-run + diff only. Route the delta figure to 1.0.0_SA_CTO~B (CC 2.0.0_SA_COO~B). CTO~B takes the now-vs-WS-F timing decision to Andrew WITH this number.</step>
-    <step>Phase 1 -- STAGE 1, DISPATCH_HELD on Andrew sign-off. Apply the v0.8 taxonomy to build_legacy_compat_emit.py: mirror the .024 fix at L499-503 -- drop the `- sma_aua` term from non_model_aum so 1b is SMA-INCLUSIVE; total_49f becomes the 2-term model + non_model sum; 1c (SMA) emitted as a non-additive display-only sub-field, never summed into the headline. Align the 1b basis to certified_aua (full Black Diamond book) per .025, matching mdpf_aggregate_aua.py.</step>
+    <step>Phase 1 -- STAGE 1, DISPATCH_HELD on Andrew sign-off. [SPEC CORRECTED 2026-05-20 per the .026 Phase-0 findings -- see amendment block.] Apply the v0.8 taxonomy to build_legacy_compat_emit.py via TWO changes (NOT an SMA-term removal -- Phase 0 Finding 1 established the legacy emitter's non_model_aum at L619 is ALREADY SMA-inclusive; there is no `- sma_aua` term to drop, that part of the original spec is a verified no-op, component delta $0): (1) ALIGN THE 1b BASIS to certified_aua (full Black Diamond book) per .025, matching mdpf_aggregate_aua.py -- net effect ~+$12.5M; (2) REMOVE etf_public_residual / Cohort 0 from enterprise_total -- v0.8/.024 ruled Cohort 0 audit-only, but the legacy emitter currently sums it INTO enterprise_total (~$91.33M on RPS-coverage dates); this is the dominant component. Net live-page headline delta: -$78,832,234.94 on 2026-05-18 (~$0 to +$5M on pre-RPS-coverage historical dates). Phase-0 brief: docs/briefs/mdpf-assets-026-phase0-legacy-emit-delta-20260520.md (commit 40c74ef4e).</step>
     <step>Phase 2 -- fixture / reconciliation. Update any build_legacy_compat_emit.py fixtures to v0.8 baselines. Cross-validate: legacy non_model_assets.json totals should now reconcile to-the-cent against mdpf_aggregate_aua.py platinum output for the same date (both v0.8). Add a methodology_version="v0_8_ruling2" stamp to the legacy artifact for consumer-side discontinuity detection (consistent with .022(a) + .016).</step>
     <step>Phase 3 -- DS commit + S3 deploy cycle per Rule 13: .tools/ds-commit-gate.sh -> .tools/safe-commit.sh with agent --author -> push CLOUD -> aws s3 cp the updated script to the canonical s3:// gold-scripts path -> comp-pipescript deployed MATCH. Then trigger / await the legacy emit so non_model_assets.json refreshes to v0.8.</step>
     <step>Phase 4 -- empirical verification + RAVC2. AC1-AC5 transcripts; RAVC2 to 2.0.0_SA_COO~B CC 1.0.0_SA_CTO~B.</step>
@@ -35,8 +35,9 @@
 
   <acceptance_criteria>
     <ac id="AC0">Phase 0 delta quantified: exact total live-page AUA delta reported, component-broken-out (SMA double-count / 1b basis change / residual), routed to CTO~B. [Stage 0 -- gates Andrew decision; satisfiable before Stage 1 dispatch.]</ac>
-    <ac id="AC1">build_legacy_compat_emit.py emits the v0.8 2-term headline: total_49f = model + non_model; 1b SMA-INCLUSIVE (no `- sma_aua` subtraction); 1c emitted as a non-additive display-only sub-field.</ac>
+    <ac id="AC1">build_legacy_compat_emit.py enterprise_total EXCLUDES etf_public_residual / Cohort 0 (v0.8 audit-only ruling) -- the dominant Phase-0-quantified component; Cohort 0 still emitted as an audit field, not summed into the headline.</ac>
     <ac id="AC2">1b basis aligned to certified_aua (full Black Diamond book) per .025, matching mdpf_aggregate_aua.py.</ac>
+    <ac id="AC2b">No SMA-term change applied (Phase-0 Finding 1: legacy non_model_aum L619 is already SMA-inclusive -- verified no-op; AC2b is satisfied by confirming the emitter is left SMA-inclusive, no regression).</ac>
     <ac id="AC3">Legacy non_model_assets.json totals reconcile TO-THE-CENT against mdpf_aggregate_aua.py platinum output for the same date (both v0.8). Transcript captured.</ac>
     <ac id="AC4">methodology_version="v0_8_ruling2" stamped on the legacy artifact.</ac>
     <ac id="AC5">DS commit + S3 deploy per Rule 13: ds-commit-gate.sh -> safe-commit.sh agent --author -> push CLOUD -> aws s3 cp -> comp-pipescript deployed MATCH. No console-side shortcuts. No emoji. `from __future__ import annotations` first import. Session log with Compiler Tools section.</ac>
@@ -53,7 +54,15 @@
   </out_of_scope>
 
   <deliverables>
-    - Phase 0: delta-quantification dry-run report routed to CTO~B.
+    - Phase 0: delta-quantification dry-run report routed to CTO~B. DONE 2026-05-20 (DS~B, brief docs/briefs/mdpf-assets-026-phase0-legacy-emit-delta-20260520.md, commit 40c74ef4e).
     - Stage 1: build_legacy_compat_emit.py at v0.8 taxonomy; non_model_assets.json refreshed; fixtures re-baselined; commit on CLOUD + S3 deploy + MATCH; RAVC2.
   </deliverables>
+
+  <amendment id="A1" date="2026-05-20" by="2.0.0_SA_COO~B">
+    SPEC CORRECTION per the .026 Phase-0 delta-quantification findings (DS~B, brief docs/briefs/mdpf-assets-026-phase0-legacy-emit-delta-20260520.md, commit 40c74ef4e). The original Phase-1 spec ("mirror the .024 fix -- drop the `- sma_aua` term") was based on a mis-read of build_legacy_compat_emit.py L499-503. Phase 0 established:
+    - Finding 1: NO SMA double-count in the legacy emitter. The emitted non_model_aum (L619) is ALREADY SMA-inclusive -- there is no `- sma_aua` term to drop. The original spec's SMA-term removal is a verified no-op (component delta $0).
+    - Finding 2: the dominant component is Cohort 0. The live legacy enterprise_total currently INCLUDES etf_public_residual (~$91.33M on RPS-coverage dates); v0.8/.024 ruled Cohort 0 audit-only. Removing it is -$91.33M; the 1b basis change is only +$12.5M.
+    - Net: applying v0.8 to the legacy emitter moves the LIVE Model Portfolios headline by -$78,832,234.94 on 2026-05-18 (the live page is currently OVER-stating by that amount), ~$0 to +$5M on pre-RPS-coverage historical dates.
+    Phase 1 step + AC1 + AC2b corrected accordingly: the Stage-1 change is (1) 1b basis -> certified_aua, (2) Cohort 0 OUT of enterprise_total -- NOT an SMA-term removal. Stage 1 remains DISPATCH_HELD on Andrew sign-off (CTO~B carries the now-vs-WS-F timing decision to Andrew WITH the -$78.83M figure).
+  </amendment>
 </task_order>
