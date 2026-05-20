@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-18</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18 (COO~B decomposition of TRSB_LEDGER PRD v0.1). STRETCH TO -- explicitly droppable (PRD §4). COO~B flips to pending + fires GO ONLY if Phases 1+2 (TO-0 through TO-6) ship with AE 0.7.0 lane capacity to spare. If Phase 1+2 effort overruns, this TO is dropped, not carried.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>DISPATCHED 2026-05-20 (COO~B). Gate cleared: Phases 1+2 (TO-0 through TO-6) ALL shipped + RAVC-accepted (TRSB_LEDGER is 11/12 complete). Andrew "everything"-scope ruling 2026-05-20 keeps TO-9 IN -- the stretch is NOT dropped. GO fired to 0.7.0_AE_CloudOps on its session registration. NOTE: TO-9 ends at the trade-submission-handler deploy (terraform apply, AE-lane) -- no portal change, no PROD-promotion follow-on needed.</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>
     <priority>P3 -- stretch. Closes hole B6 (no resubmission lineage). Recommended but droppable.</priority>
     <sla>1d wall -- if dispatched at all.</sla>
