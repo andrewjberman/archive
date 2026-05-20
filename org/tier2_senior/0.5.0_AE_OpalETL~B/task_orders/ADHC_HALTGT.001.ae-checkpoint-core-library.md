@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>complete</status>
+    <dispatch_held>false</dispatch_held>
+    <completion_note>COMPLETE 2026-05-20 (0.5.0_AE_OpalETL~B, batch GO). Shipped .tools/halt-gate-check.sh (commit 504f70099) -- the HALTGT checkpoint core library. AC1-AC4 verified by the 7/7 anchor-reproduction test (empty/routine+ack/STOP+override+audit/serial-fail-loud x2/no-stdin); AC5 partial -- shellcheck not installed in this Git Bash env, bash -n clean + manual shellcheck-class self-audit substituted (flagged to COO~B/CTO~B); AC6 session log org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-05-20/adhc_haltgt_001_checkpoint_core_library.md. RAVC2 to 2.0.0_SA_COO~B.</completion_note>
     <dispatch_unblock_condition>STAGED 2026-05-20 (COO~B decomposition of ADHC_HALTGT PRD v0.1 §6). HARD-GATED on ADHC_HALTGT.000 -- the classifier cannot be written until the STOP-class convention doc (HALTGT_SEVERITY_CONVENTION.md) exists. COO~B flips to pending + fires GO when .000 reports complete.</dispatch_unblock_condition>
     <project_code>ADHC_HALTGT</project_code>
     <priority>P1 -- the checkpoint core. ADHC_HALTGT.002 and .003 both source this library; it is the project's load-bearing TO.</priority>
