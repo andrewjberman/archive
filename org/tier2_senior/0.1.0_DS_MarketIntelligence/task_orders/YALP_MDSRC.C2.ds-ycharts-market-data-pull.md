@@ -18,6 +18,7 @@
     <prd>docs/architecture/YALP_MDSRC.md — PRD v0.3. This TO = §7 Phase 2C TO-C2. Read §5.2 (the 32-surface matrix — the 7 replaceable + 10 hybrid rows), §5.3 (the WS-2/WS-3 column seam).</prd>
     <ws1_brief>docs/briefs/mdsrc-ws1-external-market-data-audit-20260520.md + matrix slice — WS-1 surfaces + the YCharts endpoint inventory.</ws1_brief>
     <ws2_brief>docs/briefs/mdsrc-ws2-portfolio-analytics-audit-20260520.md + matrix slice — the WS-2 hybrid-input legs.</ws2_brief>
+    <ticker_map>docs/briefs/mdsrc-ycharts-ticker-map-and-fidelity-20260520.{md,csv} (commit dc01d4b8a, origin/CLOUD) — the 71-row portal-entity -> Bloomberg-ticker -> YCharts-symbol crosswalk + per-ticker portal_1Y-vs-ycharts_1Y fidelity. UNLOCK (DS 0.1.0 overnight recon): the variant-pinning question is RESOLVED at source — Yang's data_pkl (`s3://opal-data-portal-v2/benchmarks/data_20260519_v1.pkl`) carries a `bbg_ticker` column giving all 71 entities their exact Bloomberg ticker; the "ask Yang / AE 0.5.0 consult" dependency is REMOVED. The C2 ticker-map work is now a DETERMINISTIC per-ticker identity crosswalk (44 fidelity-verified, ~27 to pin) — not a research problem. data_pkl also carries `return`+`price_return` (TR-vs-PR basis resolved at source) and the Valuation `return_monthly` fields. NOTE: YCharts has no Bloomberg-ticker crosswalk (MXKR -> 404; YCharts namespace is ^-symbols) — the crosswalk is per-ticker identity mapping.</ticker_map>
   </references>
 
   <context>
