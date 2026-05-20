@@ -3,7 +3,7 @@
     <id>MDPF_ASSETS.021</id>
     <slug>ae-ssm-rundocument-interim-legacy-emit-on-demand</slug>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~B</issued_to>
+    <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-19</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>

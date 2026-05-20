@@ -3,7 +3,7 @@
     <id>ADHC_HALTGT.004</id>
     <slug>ae-claudemd-rule-and-memory-update</slug>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~B</issued_to>
+    <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
     <status>staged</status>
     <dispatch_held>true</dispatch_held>
