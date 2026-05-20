@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL~B</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <completion_note>COMPLETE 2026-05-20 (0.5.0_AE_OpalETL~B). Deliverable docs/architecture/HALTGT_SEVERITY_CONVENTION.md is canonical (AE~B-authored via drafts, CTO~B canonical-apply commit 442b34375; ACTIVE status, 5182 bytes). All ACs satisfied by the shipped doc: AC1 subject-prefix convention ([STOP]/[HALT], start-of-subject, case-sensitive, grep -E rule); AC2 sender guidance + worked examples; AC3 unambiguous match rule. Per COO~B batch-GO directive 2026-05-20 ("flip .000 -> complete, no work"), closed off the already-canonical deliverable; RAVC2-close note to 2.0.0_SA_COO~B.</completion_note>
     <dispatch_unblock_condition>DISPATCHED 2026-05-20 (COO~B) -- part of the ADHC_HALTGT batch GO. CTO~B confirmed the §7 resolutions (Q1=b/Q2=a/Q3=dedicated log) + the decomposition 2026-05-20. First in the sequence .000 -> .001 -> (.002 || .003) -> .004; the batch GO authorizes the full sequence per XXX.md. AE 0.7 works HALTGT after its in-flight MDPF closeout + TRSB_LEDGER.009.</dispatch_unblock_condition>
     <project_code>ADHC_HALTGT</project_code>
     <priority>P1 -- Phase 0. The whole project's STOP-classification depends on this convention; ADHC_HALTGT.001's classifier cannot be written until it lands.</priority>
