@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-18 (authored backlog) / 2026-05-19 (dispatched GO, last in 3-TO sequence)</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-05-20 -- inf-gold-chain-failed alarm shipped (Option B / MDPF-mirror). orion-gold-dispatch.sh emits Inflection/GoldChain.ChainFailed; iam.tf +cloudwatch:PutMetricData (namespace-scoped); alarms.tf inf-gold-chain-failed -> opal-infrastructure-alerts SNS. Deployed inf-pipeline-v1.7.64 (commit d0a682901; 2 add / 0 change / 0 destroy; 0-diff verified). Script S3-deployed to s3://opal-data-inf/code/gold/ (SHA == committed bytes). Alarm live, State=OK. record-terraform-deploy 6b4e002be. RAVC2 to COO + CC CTO.</completed>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO 2026-05-19 (2.0.0_SA_COO): dispatched last in the 3-TO sequence behind SXIN_DAY1ZG.001 (rider-2 priority, deadline 2026-06-01) and ADHC_DSFLOW.007 (gate-integrity higher latent-risk). Defense-in-depth + no active INF incident keeps it bottom-of-queue but it ships in the same lane sweep so AE 0.7 closes all three rider follow-ons cleanly.</dispatch_unblock_condition>
     <project_code>ADVI_INFALM</project_code>
