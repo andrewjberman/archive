@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-05-20 -- WS-4 YCharts operational-pattern design doc shipped: docs/briefs/mdsrc-ws4-ycharts-operational-pattern-20260520.md. Orion JWT + Eclipse dual-track baseline documented (AC1); YCharts-adapted pattern declared for capture / SM cookie-bundle shape / freshness gate (Q2 = active authenticated probe) / refresh Lambda / CW namespace YCharts/SessionResilience / daily cron (AC2); jwt-vs-cookie credential difference addressed -- three structural reasons jwt_freshness.py decode-exp does not port (AC3); both capture branches designed (headless Branch A / attended Branch B) AND the shared WS-1 Q3 auth/WAF finding cited (AC4); committed design doc + session log w/ Compiler Tools section + RAVC2 (AC5). Single-concurrent-session constraint (WS-1 Finding 2) folded in as the load-bearing design driver. Design-only -- no code/TF per v0.2. RAVC2 to COO + CC CTO.</completed>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO FIRED 2026-05-20 — Andrew GO received; COO dispatched. Original gate: STAGED — Phase 0 audit, unblocked on Andrew GO (PRD v0.2 §9/§11: the four Phase-0 audits dispatch in parallel on Andrew GO). No inter-TO dependency — TO-1..4 are fully parallel. On GO: COO flips status->pending + dispatch_held=false + fires the GO message.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
