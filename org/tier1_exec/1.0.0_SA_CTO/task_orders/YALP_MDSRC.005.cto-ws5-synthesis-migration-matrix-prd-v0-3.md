@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>1.0.0_SA_CTO</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED — Phase 1 synthesis. GATED on TO-1, TO-2, TO-3, TO-4 ALL RAVC-complete (PRD v0.2 §9: Phase 1 gates on all four Phase-0 audits). On the fourth RAVC2 COMPLETE: COO verifies all four audit deliverables are committed, flips this TO status->pending + dispatch_held=false, and fires the GO to 1.0.0_SA_CTO. No Andrew GO needed for TO-5 — the TO-1..4 completion gate IS the unblock.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GATE CLEARED 2026-05-20 — all four Phase-0 audits RAVC4-accepted by COO (WS-1 1baf13dfa / WS-2 7de5d3b69+368510231 / WS-3 b7153c70c / WS-4 b88787708, all on origin/CLOUD; the four briefs + WS-1/WS-2/WS-3 matrix slices verified committed). COO flipped status->pending + fired the GO to 1.0.0_SA_CTO. Original gate: STAGED — Phase 1 synthesis, GATED on TO-1..4 ALL RAVC-complete (PRD v0.2 §9: Phase 1 gates on all four Phase-0 audits). On the fourth RAVC2 COMPLETE: COO verifies all four audit deliverables are committed, flips this TO status->pending + dispatch_held=false, and fires the GO to 1.0.0_SA_CTO. No Andrew GO needed for TO-5 — the TO-1..4 completion gate IS the unblock.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P1 — Andrew-direct (CEO interview 2026-05-20). WS-5 is the synthesis that turns four domain audits into the implementation charter (PRD v0.3).</priority>
     <sla>~1-2 CTO days (PRD §9).</sla>
