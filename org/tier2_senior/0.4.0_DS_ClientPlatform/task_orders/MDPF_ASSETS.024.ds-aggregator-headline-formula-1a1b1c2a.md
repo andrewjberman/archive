@@ -13,6 +13,18 @@
     <sla>~0.5d wall -- a focused formula change in one gold script + fixtures + the DS deploy cycle.</sla>
   </metadata>
 
+  <rework id="2026-05-20-taxonomy-correction">
+    REWORK 2026-05-20 -- DO NOT CLOSE. DS RAVC2'd .024 (commit 70e73d4e8) but CTO~B's validation verdict is REWORK. Andrew issued a taxonomy correction (verbatim: "1c is a subdivision of 1b, so cant double count that"; PRD v0.8 pending): Cohort 1c (SMA) is a SUB-SLICE of Cohort 1b (non-model), not a disjoint sibling.
+
+    THE DEFECT: the body's partner_total sums model_aua + sma_aua + non_model_aua as THREE disjoint terms. Under the corrected taxonomy, non_model_aua INCLUDES sma -- so that sum DOUBLE-COUNTS the ~$25M SMA. .024 as-deployed today is arithmetically correct ONLY because the current feeders still emit non_model EXCLUDING sma; the double-count goes LIVE the moment MDPF_ASSETS.025's re-scoped feeder emits non_model-including-sma.
+
+    CORRECTED: partner_total = Σ(model_aua + non_model_aua) -- TWO terms per partner; sma_aua is emitted as a NON-ADDITIVE sub-field (a reported breakdown of non_model), never added into the total. Headline opal_aggregate_aua = 1a + 1b + 2a (NOT 1a+1b+1c+2a -- 1c is not an additive term). The headline total (~$1,906M after .025) is unchanged; only the partner_total sum + the decomposition change.
+
+    UNCHANGED from 70e73d4e8: the HEADLINE_NONMODEL_FIRMS selection, the cohort_2b audit-field, the Cohort-0 / etf_public_residual audit-field, the §7-reconcile-update approach -- all fine. Only the partner_total sum is reworked. Small change on top of 70e73d4e8; re-RAVC2 to COO~B.
+
+    MUST-LAND-TOGETHER: .024 and MDPF_ASSETS.025 (WS-E re-scope) MUST be corrected + land TOGETHER -- a non_model-incl-sma feeder (.025) + a still-3-term .024 sum = a live double-count. Do not ship one without the other. All body ACs/scope are read with partner_total = Σ(model + non_model).
+  </rework>
+
   <references>
     <ruling>Andrew 2026-05-20 (verbatim, via CTO~B): "Cohort 0 must be tracked every day, but it must not be incorporated into Model Portfolios total AUA... We need it for audit but we will not be including it in visible MDPF pipeline to portal. The Model Portfolios global AUA will only be cohort 1a 1b 1c and 2a at this point in time." This SUPERSEDES the WS-A contract §7-Q3 "Opal Aggregate Advised AUA = sum over N>=1 of (Na+Nb)" record (which included 2b).</ruling>
     <prd_amendment>CTO~B is authoring an MDPF_ASSETS PRD amendment as the headline-formula ruling-of-record; reference it once committed (CTO~B will relay the ref). This TO may proceed on the ruling text above -- the spec is unambiguous.</prd_amendment>

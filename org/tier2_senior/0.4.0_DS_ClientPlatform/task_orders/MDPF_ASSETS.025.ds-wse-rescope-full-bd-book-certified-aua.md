@@ -13,6 +13,18 @@
     <sla>~0.5d wall -- a focused source-change in one gold script + fixtures + the DS deploy cycle. The change is a SIMPLIFICATION (drops the custodian-crosswalk filter).</sla>
   </metadata>
 
+  <amendment id="2026-05-20-taxonomy-correction" supersedes="every '- sma_aua(1c)' term in the body below">
+    URGENT CORRECTION 2026-05-20 (Andrew taxonomy ruling, via CTO~B; PRD v0.8 pending). Andrew verbatim: "1c is a subdivision of 1b, so cant double count that." Cohort 1c (SMA) is a NAMED SUB-SLICE of Cohort 1b (non-model) -- NOT a disjoint first-class sibling. This REVERSES the v0.5 three-way framing. Where the body below conflicts with this block, THIS BLOCK GOVERNS.
+
+    CORRECTED FORMULA: non_model_aua(49F) = certified_aua - model_aua(1a). There is NO "- sma_aua(1c)" / "- 1c" term -- DELETE it wherever the body says it. SMA is INSIDE 1b. sma_aua is emitted as a reported SUB-BREAKDOWN FIELD of 1b ("of which SMA: $X") -- never subtracted, never summed separately. Result: 1b (49F non-model, SMA-inclusive) ~$476.4M (the body's "~$451.6M" is WRONG -- it had SMA carved out); 1c ~$24.8M is a display-only sub-slice reported inside 1b. 49F total (1a + 1b) = certified_aua ~$1,812.4M -- a TWO-cohort decomposition, not three.
+
+    HEADLINE: opal_aggregate_aua = 1a + 1b + 2a (NOT 1a+1b+1c+2a -- 1c is not an additive term). The ~$1,906M total is unchanged; only the decomposition changes.
+
+    MUST-LAND-TOGETHER: MDPF_ASSETS.024 (aggregator) is being reworked in lockstep -- its partner_total must become Σ(model_aua + non_model_aua), two terms, sma NOT added. .024 and .025 MUST be corrected + land TOGETHER (a non_model-including-sma feeder from .025 + a still-3-term .024 sum = a live ~$25M double-count). Do not ship one without the other.
+
+    All ACs and scope steps below are read with "- sma_aua(1c)" deleted and sma_aua re-cast as a non-additive sub-field of 1b.
+  </amendment>
+
   <references>
     <ruling>Andrew 2026-05-20 "Ruling 2" (custody scope, Option C; via CTO~B): the 49 Financial headline contribution = the FULL Black Diamond book, `certified_aua` (~$1,812.4M) -- NOT the Schwab-custodied subset (~$1,655.4M). This REVERSES the 2026-05-18 v0.2 Schwab-only ruling. All four custodians count, including the $135.6M ByAll held-away aggregation. Andrew made the call with the full custody decomposition + the held-away-vs-advised trade-off in front of him -- an informed reversal.</ruling>
     <prd>docs/architecture/MDPF_ASSETS.md PRD v0.7 (commit dc780bcc4) -- §3.4 rewritten as the custody-scope formula of record; §3.0.1 headline figure updated. §3.4 is unambiguous; cite it.</prd>
