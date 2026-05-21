@@ -29,6 +29,10 @@
   </context>
 
   <scope>
+    <scope_amendment note="COO-authorized 2026-05-20 — F3 P2 finding supersedes the F1-F7 orphan diagnosis">
+      AE's F3 P1 deployed the INDICATORS 64->79 extend (yang-v2.4.5) — fixed 13/15. P2 found the root cause is bigger AND the F1-brief F7 mis-diagnosed the "orphan": fed_balance_sheet_as_pct_of_gdp.json is NOT an orphan — it is the file the frontend ACTIVELY REQUESTS (MacroTimeSeriesModal.tsx computes the slug client-side). The real defect is a GENERATOR-vs-FRONTEND slugify divergence: the generator's slugify maps & / % to '_' (writes s_p_pmi_*, fed_balance_sheet_as_of_gdp) while the frontend slugify (MacroTimeSeriesModal.tsx:187) maps & -> "and", % -> "pct" (requests sandp_pmi_*, fed_balance_sheet_as_pct_of_gdp). Mismatch on every name with & or %.
+      F3 SCOPE AMENDED: (1) align the generator's slugify() to the frontend's (& -> "and", % -> "pct", / and - -> "_") — a small generator code change + one redeploy + re-invoke. (2) The "delete the orphan" step is RE-SCOPED: do NOT delete fed_balance_sheet_as_pct_of_gdp.json (it is live) — the genuine orphans are the generator's OWN wrong-slug outputs (s_p_pmi_manufacturing.json, s_p_pmi_services.json, fed_balance_sheet_as_of_gdp.json); zero-consumer-check EACH (the consumer is a runtime-computed slug, not a literal — verify the frontend requests the sandp_pmi_/as_pct_of_ form, not these) before deleting. The original do_not "confirm zero live consumers first" is what correctly caught this — it stands.
+    </scope_amendment>
     <in_scope>
       PHASE 0 (locate + confirm): locate the yang-generate-macro-timeseries generator + its INDICATORS list (comp-pipescript io yang-generate-macro-timeseries). Confirm the 64-entry list + the exact 15 missing indicators against F1-brief §2.4. Identify the orphan timeseries file (the 80th, from the old slug scheme). Confirm the deploy mechanism for this yang generator.
       PHASE 1 (fix):
