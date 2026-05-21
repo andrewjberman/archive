@@ -4,7 +4,15 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- RAVC2-accepted by 2.0.0_SA_COO~C 2026-05-21: engine committed 7d6b1b835
+    (verified on origin/CLOUD); data/demo/scripts/transform/ (demo_transform.py +
+    fake_identities.py + README); session log advi_demov1_to2_transform_engine~C.md.
+    All 11 ACs validated against the artifact: two-pass + HardError contract,
+    value-membership path-context solution (ticker QQQ structurally untouched),
+    four PII loci, R4 secret-handling, --dry-run 0 unmapped / 0 leaks. One
+    non-blocking cleanup carried to TO-4: --prefixes help/docstring text still
+    says "gold/ pending" — superseded by PRD v0.1.3 (platinum/** only). -->
     <project_code>ADVI_DEMOV1</project_code>
   </metadata>
 
