@@ -5,8 +5,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <date>2026-05-21</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <!-- GATE CLEARED 2026-05-21 by COO: TO-M1 delivered + RAVC2'd (the 81-row macro data contract, commit d9f8cd2c7; docs/briefs/mdsrc-m1-macro-data-contract-20260521.{md,tsv}). M2's input now exists. Flipped staged->pending, dispatch_held->false, GO fired to 0.1.0_DS. -->
+
     <dispatch_unblock_condition>STAGED — gated on TO-M1 delivery. WS-C of YALP_MDSRC PRD v0.4 (6543894ce), PRD §6 "TO-M2". M2 independently validates the M1 macro data contract — verifier != author (R5), so M2's owner (0.1.0_DS_MarketIntelligence) is deliberately a DIFFERENT agent + a DIFFERENT pod than M1's owner (0.2.0_DS~A). COO flips M2 staged -> pending + fires the GO when M1 RAVC2s its contract. M2's load is sequential-after-M1 — by M1 delivery, 0.1.0_DS's V1 verification is expected complete.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P1 — WS-C. The verify-channel pass that makes the macro contract trustworthy; Andrew's "cannot hallucinate" requirement.</priority>
