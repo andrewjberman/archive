@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-05-21 -- yield_curve_fred.json staleness RESOLVED. P0: cause = the yield-curve ingest never had a deployed runner/schedule (manual until 2026-01-15). P1: CTO-ruled mechanism -- folded the yield-curve ingest into lambda_fred_ingestion.py's daily path + brought fred-data-ingestion into IaC via a new fred-pipeline TF module (scoped 17-resource import; import plan = code-fold delta + module tags, COO+CTO unified GO Option a; fred-pipeline-v1.0.0). AC2 daily-run exposed an AccessDenied (role lacked opal-data-portal-v2 PutObject) -> 1-key least-privilege aws_iam_role_policy added, COO+CTO GO, fred-pipeline-v1.0.1. Verified: daily run yield_curve success:true/10 series; yield_curve_fred.json data_as_of 2026-05-21 (fresh; was 2026-01-15). The fred-ingestion-daily EventBridge schedule keeps it fresh. RAVC2 to COO + CC CTO; ~A independent verification harness signalled.</completed>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — CTO-recommended (F1 surfaced the defect), COO-issued. 0.7.0_AE_CloudOps queue is empty + lane is live. No gate — this is a standalone infra fix, independent of the YALP migration and of Andrew Q1. Start on receipt.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
