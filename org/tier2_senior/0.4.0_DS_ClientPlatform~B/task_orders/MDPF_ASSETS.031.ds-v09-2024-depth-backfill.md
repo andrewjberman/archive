@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-21 (authored on Andrew 2024-depth = YES ruling, relayed by CTO~B)</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO'd 2026-05-21 by 2.0.0_SA_COO~B on the CTO~B relay of Andrew's 2024-depth ruling (YES -- extend to 2024-11-01). The .029 v0.9 backfill mechanism is RAVC-accepted + proven; .030 landed the legacy emitter on v0.9. .031 is the final MDPF TO -- on .031 land MDPF_ASSETS 3-step-closes. ONE internal checkpoint: the fresh calibration is derived + sample-validated + CTO~B-ratified BEFORE the ~290-date full sweep (see <calibration_checkpoint>).</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
@@ -113,6 +113,20 @@
 
     NET: the sweep proceeds on the clamped fit + 1c=0. DS~B builds sweep -> rollup -> RAVC2 to COO~B CC CTO~B. The A1 RELEASE clause stands. This A2 is the FINAL calibration ruling.
   </amendment>
+
+  <coo_close date="2026-05-21" by="2.0.0_SA_COO~B">
+    MDPF_ASSETS.031 RAVC2 ACCEPTED -- CLOSED. DS~B RAVC2 commit b2b496934; brief docs/briefs/mdpf-assets-031-ravc2-2024depth-backfill-complete-20260521.md. CTO~B output-validation: CONFIRM PASS.
+
+    COO~B INDEPENDENT VALIDATION (S3 artifact read, not the self-report): pulled s3://opal-data-portal-v2/platinum/mdpf/aggregate_aua/ -- counted 297 partitions in 2024-11-01..2025-12-22 (+ 98 in the .029 range, 395 total). Pulled aggregate_aua_timeseries.json: n_dates=395, span 2024-11-01..2026-05-20, all 395 methodology_version=v0_9, 0 headline nulls, headline $776,166,109.83 (2024-11-01) -> $1,748,030,393.45 (2026-05-20). Sampled partitions 2024-11-15 / 2025-06-16 / 2025-12-22: by_model=5 models each, per-model sum == aggregate model_aua (exact / float-epsilon); per-partition meta carries estimate_tier="2024_depth_extension" + calibration block (clamped_linear_delta_dollars; lift=0 deep tail) + c1_treatment. Seam 2025-12-22->23: headline +0.649%, no artifact step (clamped fit eliminated the ~$6.56M seam).
+
+    ACs: AC1 (HARD daily-per-model 1a granularity -- Andrew's non-negotiable, prove-not-assert) MET + PROVEN per-partition 297/297 -- CTO~B output-validation confirmed. AC2-A1/A2/A3 (Option-A clamped fit; deep tail RPS-uncalibrated marked best-estimate; data-layer marking estimate_tier whole range; chart-marker boundary 2025-12-23) MET on the DATA layer -- the chart VISUAL surfacing is carved to a DE follow-on (see below). AC3-A2 (clamped fit, seamless .031/.029 join, no boundary step) MET. AC4 (non-destructive -- 297 new-key writes, rollup overwrite with local backup, no deletes) MET. AC5 (sweep -> rollup -> RAVC2; 1c=0 per item-(d)) MET. The calibration is the CTO~B-ratified clamped linear delta-$ fit (A2).
+
+    1c COMPONENT-SEAM OBSERVATION (COO~B sharp-structural-test finding, recorded not blocking): at the .031/.029 seam the 1c component steps $0 -> $19.67M (2025-12-22 .031 has 1c=0 per item-(d); 2025-12-23 .029 carries a 1.85%-of-1a ratio-estimate), masked at the headline by the 1b residual absorbing -$12.88M. CTO~B output-validated .031's 1c=0 as correct ("SMA absent -- correct, not a fabrication"). The .029-side question (whether the closed-.029 1c ratio-estimate is a phantom layer, given item-(d) found SMA absent across a store span that includes the .029 range) is routed to CTO~B as a documented observation -- it does NOT gate .031 or MDPF closure.
+
+    CHART-SURFACING FOLLOW-ON (documented, non-gating): DS~B completed the per-partition DATA-layer marking (estimate_tier). The chart VISUALLY surfacing the estimate-segment marker (the Daily AUA Analysis chart distinguishing the pre-2025-12-23 segment; portal/src/pages/ModelPortfolios.tsx) is a DE/portal-lane FE change -- correctly outside DS scope. Carved out per CTO~B as a tracked DE follow-on: a small DE TO bundling with the dark DE~B lane alongside VALGATE Phase-2 .004-.006 when Andrew spins up the 0.4.0_DE_ClientPlatform~B session. NOT a .031-closure gate.
+
+    OUTCOME: MDPF_ASSETS.031 is the FINAL MDPF TO. With .028 + .029 + .030 + .031 all RAVC-accepted, the MDPF v0.9 line is fully landed -- the Daily AUA Analysis chart is one continuous v0.9 trend back to 2024-11-01. MDPF_ASSETS the project 3-step-CLOSED 2026-05-21 (~B C-suite) -- project JSON status=complete, REGISTRY row, PRD Status line.
+  </coo_close>
 
   <amendment id="A3" date="2026-05-21" by="2.0.0_SA_COO~B" authority="CTO~B AC2 marker-boundary correction">
     A2's MARKING clause set the chart-surfaced "estimated" marker boundary at the lift=0 cutover (~2025-12-04). CTO~B corrected this: the boundary is the .031/.029 join (2025-12-23) -- the WHOLE .031 range (2024-11-01..2025-12-22) is the marked-estimate segment.
