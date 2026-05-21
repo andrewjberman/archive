@@ -76,4 +76,18 @@
   <followon_note date="2026-05-20" by="2.0.0_SA_COO~B" source="CTO~B re VALGATE.002">
     COSMETIC FIX TO FOLD IN -- orion-gold-dispatch.sh line ~684: the echo still reads "(C-1 row-count / C-2 distribution)" but VALGATE.002's C-3 gate now rides the SAME valgate_gate.py invocation, so the log text is stale. When .007 next touches orion-gold-dispatch.sh, correct that one-line echo to also name C-3 (and C-4 if .003 has landed by then). Pure log text, no behavior change -- bundle it into the .007 edit so it is not a separate owned-paths touch.
   </followon_note>
+
+  <coo_close date="2026-05-21" by="2.0.0_SA_COO~B">
+    ADHC_VALGATE.007 RAVC2 ACCEPTED -- CLOSED. AE~B (0.7.0_AE_CloudOps~B) RAVC2; CTO~B output-validation: CONFIRM PASS; COO~B independent validation: PASS.
+
+    AE~B commits (origin/CLOUD): b56077081 (comp-chainrun -- the Class-B chain-run pre/post sentinel-diff gate: the .tools/comp-chainrun wrapper + org/modules/graph/chainrun_cli.py engine + the in-code CHAIN_MANIFEST + comp-tools.yaml entry) + 445b3033d (the (D) cosmetic orion-gold-dispatch.sh [VALGATE-C] echo fix -- C-1/C-2/C-3/C-4 named) + 6ac2c56b3 (session log + TO status). Phase-2 codification by COO~B: ef55ab6cf (A -- the atomic-bundle SPECIAL CASE in org/ref/TASK_ORDER_PROTOCOL.md) + 9465d8bab (B -- Rule 9 in org/standards/TO_COMPILER_GATE.md).
+
+    COO~B INDEPENDENT VALIDATION: ran `comp-chainrun selfcheck` -- ALL PASS, 12/12: snapshot captures the 4 stage-sentinels; no-op pre/post diff -> 0 leaks / PASS; synthetic DROPPED + COLUMNS-LOST + EMPTIED -> the 3 expected leak rows / WARN; benign column-add -> NOT a leak; WARN verdict + exit-code mapping (WARN->0, v1 WARN-not-BLOCK); unreadable artifact -> INDETERMINATE, not a false green->absent.
+
+    ACs: AC1 (the comp-chainrun pre/post wrapper ships) MET -- CTO~B + COO~B both confirmed. AC2 (the atomic-bundle TO-template mandate) MET -- (A) the SPECIAL CASE in TASK_ORDER_PROTOCOL.md + (B) Rule 9 in TO_COMPILER_GATE.md both applied (COO~B, ANY_EXEC lane); (C) the org/XXX.md pointer documented-SKIPPED (lane=BASE_EXEC, no ~B exec can commit it, optional -- (A)+(B) are the substantive codification). AC3 (verified -- no-op empty diff, synthetic-leak report; the section-3.2 six-field table = GATE_SPEC["B"]) MET. AC4 (no emoji; local-runtime; session log; RAVC2) MET. (D) the VALGATE.002 followon orion-gold-dispatch.sh echo-fix folded in + shipped.
+
+    DESIGN NOTE (CTO~B-ratified): AE~B moved the stage-sentinel set from a standalone chainrun_manifest.json to an in-code CHAIN_MANIFEST dict -- the faithful match to the Class-C in-code registries (ARTIFACT_CONFIG/SENTINEL_REGISTRY in valgate_baseline.py); a separate JSON would have been the fork the TO said not to make. Verdict model verbatim-reused from valgate_gate.py (GATE_VERDICT_POLICY="warn" v1, [VALGATE-B] paralleling [VALGATE-C]).
+
+    OUTCOME: ADHC_VALGATE.007 (Class-B chainrun pre/post sentinel-diff gate, Phase 3) COMPLETE. ADHC_VALGATE is now 6/9 TOs closed (.001/.002/.003 Class-C + .007 Class-B + .008/.009 parity-catalog). REMAINING: .004/.005/.006 (Class-D, DE-lane) -- gated on Andrew's 0.4.0_DE_ClientPlatform~B session spin-up. ADHC_VALGATE the project stays ACTIVE.
+  </coo_close>
 </task_order>
