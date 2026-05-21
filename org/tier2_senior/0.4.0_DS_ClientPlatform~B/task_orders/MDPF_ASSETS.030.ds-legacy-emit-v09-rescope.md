@@ -56,6 +56,7 @@
 
     ADDED SCOPE (Phase 5, after the Phase 0-4 daily-forward re-scope lands):
     - Phase 5 -- historical non_model_assets.json backfill: re-materialize the non_model_assets.json daily series onto the v0.9 basis across the same date range .029 covers (the 97 partitions 2025-12-23 ... 2026-05-19 + the v0.9-forward dates). build_legacy_compat_emit.py reads aggregate_aua/{date}.json as its 49F source -- so each historical date's non_model_assets.json is re-emitted off the .029-rewritten v0.9 aggregate_aua partition.
+    - PRECISION (CTO~B 2026-05-21): ONLY non_model_assets.json (the 1b overlay) gets the historical v0.9 backfill -- v0.9 changed ONLY the 1b basis; aum-timeseries.json's model layers (1a/1c/2a) do NOT need a v0.9 re-backfill. aum-timeseries.json is VERIFY-ONLY. BUT .030 Phase 0 MUST explicitly confirm build_legacy_compat_emit.py does not co-write any basis-dependent field into aum-timeseries.json (brief section (b)) -- if it does, that field is in Phase-5 scope too; if not, aum-timeseries.json needs no historical write.
 
     HARD DEPENDENCY + SEQUENCING (per the brief's risk table): .030 Phase 5 reads .029's rewritten partitions -> Phase 5 GATES on MDPF_ASSETS.029 Phase 1 completing (all 97 v0.9 partition writes + the rollup rebuild + verification). .029 and .030 historical phases MUST NOT INTERLEAVE. .030 Phases 0-4 (daily-forward) MAY proceed independently of .029; Phase 5 waits.
 
