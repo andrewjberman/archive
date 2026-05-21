@@ -6,7 +6,7 @@
     <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
     <co_owner>0.4.0_DS_ClientPlatform — owns Part A (the SmartX REST probe); rides alongside YALP_MDSRC.B1 since 0.4.0 is already in the SmartX REST API. 0.2.0_DS_PortfolioAnalytics owns Part B (the surface mapping) + the deliverable.</co_owner>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO NOW — Andrew-direct (idle agents are not acceptable; 0.2.0_DS is idle, this is its real work). Q1-INDEPENDENT — SmartX, not YCharts. Part B (0.2.0) starts immediately — surface enumeration + the Brinson question do not wait on Part A. Part A (0.4.0) rides alongside B1.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
