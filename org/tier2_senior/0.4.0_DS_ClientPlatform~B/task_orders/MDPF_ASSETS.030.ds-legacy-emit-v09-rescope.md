@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-20 (authored on .028 RAVC-accept + CTO~B sequence directive)</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>SEQUENCED AFTER MDPF_ASSETS.029 per CTO~B's directive (.028 -> .029 -> .030). Gates on .029 -- the v0.9 backfill methodology + the historical series should be settled before the legacy emitter is re-scoped (the legacy non_model_assets.json the live page reads must be consistent with the v0.9 series). COO~B flips to pending + GO when .029 has resolved (at minimum its Phase-0 methodology proven; whether .030 GOs before or after .029's Phase-1 rewrite is a COO~B call at that point). NOTE: .030 moves a LIVE CEO-visible number -- see <live_page_note>; the GO decision includes confirming whether an Andrew sign-off is needed for the live-page move at that time.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
@@ -80,4 +80,18 @@
     OUTPUT-VALIDATION (CTO~B, done): 49F 1a+1c+1b emitter == platinum $1,654,331,683.26 to the cent (the v0.9 49F re-scope is exact); with Option 1 the emitter's 2a adopts the platinum $93,698,710.19 -> headline enterprise_total == $1,748,030,393.45 == the validated .028/.029 platinum headline to the cent; the -$150.18M live-page move is validated + Andrew GO'd the live publish.
     PHASE-3 GO CRITERION (supersedes the phase0_checkpoint "CTO~B output-validates -> confirm" round-trip): COO~B GOs Phase 3 the moment DS~B's Option-1 re-run reconciliation confirms headline == $1,748,030,393.45 to the cent AND 2a residual == $0.00. That to-the-cent re-run IS CTO~B's output-validation evidence -- structural under Option 1 (the emitter reads everything from the platinum partition); NO separate CTO confirm round-trip. If the re-run does NOT hit to-the-cent -> HARD STOP + route CTO~B. aum-timeseries.json 1a-refresh = ruled IN SCOPE (Phase 5).
   </ac2_ruled>
+
+  <coo_close date="2026-05-21" by="2.0.0_SA_COO~B">
+    MDPF_ASSETS.030 RAVC2 ACCEPTED -- CLOSED. DS~B RAVC2 commit 5ff98c795; brief docs/briefs/mdpf-assets-030-ravc2-legacy-emit-v09-complete-20260521.md.
+
+    COO~B INDEPENDENT VALIDATION (artifact read, not the self-report): pulled the live s3://opal-data-portal-v2/json/portfolios/non_model_assets.json (LastModified 2026-05-21T04:03:52Z, post-Phase-5). meta.methodology_version=v0_9, meta.cutover_date=2025-12-23. 390 time_series entries; 93 method=v0_9 from 2025-12-23 -- the full .029 range. All 4 reconciliation spot-dates to the cent vs the .029 v0.9 platinum aggregate_aua headline: 2026-01-20 $1,397,318,673.86 / 03-13 $1,448,303,582.86 / 05-19 $1,743,327,627.64 / 05-20 $1,748,030,393.45 -- all MATCH, all method=v0_9. Live headline $1,748,030,393.45 (== the .028/.029 v0.9 platinum). Series continuous 2024-11-01 -> 2026-05-20; max day-over-day +5.74% at 2026-05-18 (the documented Inflection 2a-onset); the 2025-12-23 v0.9 backfill boundary shows NO step.
+
+    ACs: AC1 (v0.9 re-scope -- broader-custody override removed, Cohort 0 out of headline, retag, dead code removed) MET. AC2 (Option-1 to-the-cent reconciliation -- derive_inflection_from_platinum, platinum = single source of truth for 49F + Inflection) MET; the Phase-3 GO criterion (headline == $1,748,030,393.45, 2a residual == $0.00) hit on the Option-1 re-run -- structural CTO~B output-validation, no separate round-trip. AC3 (methodology_version=v0_9) MET. AC4 (Rule-13 deploy, ds-commit-gate, RAVC2) MET. AC5 (non_model_assets.json re-materialized v0.9 across the .029 range, reconciles per-date) MET. AC6 (continuous v0.9, no v0.8/v0.9 cliff) MET. AC7 (non-destructive -- versioned bucket + local pre-write backups) MET. Phase-5 amendment (CUTOVER 2026-01-16 -> 2025-12-23, full .029-range backfill; aum-timeseries.json 1a-refresh in scope) MET.
+
+    $614K Inflection-2a RIDER: characterized VINTAGE not methodology -- load_inflection() and the WS-C feeder sum the identical column (total_value) of the identical Eclipse file at two snapshot times. NO separate platinum-2a finding; Option 1 resolves it fully. COO~B concurs.
+
+    OUTCOME: the MDPF v0.9 line (.028 + .029 + .030) is fully landed. The live Model Portfolios "Daily AUA Analysis" page is on v0.9; the -$150,183,528.87 move (-$91.34M Cohort 0 out + -$58.85M broader-BD -> Schwab-49F) is published (Andrew GO'd). The Daily AUA chart is one continuous v0.9 trend. Sole remaining MDPF item: the 2024-depth extension (pre-2025-12-23 stays pre-v0_9) -- a separate Andrew decision CTO~B carries.
+
+    PROCESS NOTE (for the record, no action): DS~B ran heads-down through Phases 1-5 without surfacing the to-the-cent verdict requested as the tracking artifact (telemetry also froze 23:58Z) -- triggered a measured COO~B/CTO~B co-watch escalation that stood down cleanly when commit 82d3f8113 beat the deadline. DS~B acknowledged + committed to per-phase artifact surfacing going forward. Escalation discipline (track-by-artifact, armed at threshold, co-decided) worked as designed.
+  </coo_close>
 </task_order>
