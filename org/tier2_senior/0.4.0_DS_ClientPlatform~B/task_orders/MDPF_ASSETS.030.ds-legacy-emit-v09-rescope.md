@@ -67,4 +67,12 @@
 
     .030 STAYS dispatch_held: Phases 0-4 GO when COO~B dispatches (after the .030 Phase-0 live-page-delta + the Andrew live-page-move check per <live_page_note>); Phase 5 additionally gates on .029 Phase 1 landing. The AC list above is now FINAL (supersedes the provisional <scope_pending>).
   </amendment>
+
+  <phase0_checkpoint date="2026-05-21">
+    .030 GO'd 2026-05-21 (COO~B, on the .029 close). Phase 0 COMPLETE -- edit-plan brief 6db1b12fc.
+    FINDING: build_legacy_compat_emit.py is on the SUPERSEDED CEO-direct 2026-05-19 "broader" full-BD-book basis (method=ceo_directive_20260519_v1, compute_49f_broader_custody re-sums BD silver/allocations with no custodian filter + overrides the platinum Schwab-only 1b). v0.9 (Andrew Mandate Change 3, 2026-05-20) supersedes it by one day. Edit plan (contained -- .028/.029 already made the platinum partitions v0.9, so the emitter inherits v0.9 by reading them): A remove the compute_49f_broader_custody override (use the platinum v0.9 1b+1c); B drop Cohort 0 / etf_public_residual from the headline enterprise_total (audit-only); C retag method/methodology_version=v0_9; D remove dead broader constants; E (Phase 5) CUTOVER_DATE 2026-01-16 -> 2025-12-23 for the full .029-range rebuild.
+    LIVE-PAGE DELTA: enterprise_total 2026-05-20 $1,898.21M -> $1,748.03M = -$150.18M, decomposed -$91.3M (Cohort 0 out) + -$58.9M (broader-BD-book -> Schwab-49F); model_aum unchanged. It is the CORRECT v0.9 number (the legacy page is currently WRONG vs the already-live $1,748.03M platinum) -- but it is a large CEO-visible move.
+    aum-timeseries.json = VERIFY-ONLY confirmed (no 1b-basis-dependent field; model-side 1a+2a only). CAVEAT routed to CTO~B: re-running the emitter would refresh aum-timeseries.json's 1a for 05-15/18/19 to the .029-smoothed values -- CTO~B's call whether that refresh is in/out.
+    PRE-PHASE-3 CHECKPOINT (COO~B, 2026-05-21): Phases 1-2 (code edits + reconciliation, NON-LIVE -- scratch) proceed now. HARD STOP before Phase 3 (the deploy + emit that moves the live page). DS~B routes the Phase-2 reconciliation (non_model_assets.json to-the-cent vs the v0.9 platinum + the -$150.18M decomposition) to COO~B CC CTO~B. CTO~B output-validates the v0.9 legacy-page numbers -- same CEO-visible-value-change confirm given to .024/.025/.028/.029. On CTO~B's confirm, COO~B GOs Phase 3. Phase 5 (historical non_model_assets.json backfill) follows Phases 0-4; .029/.030 historical phases do not interleave.
+  </phase0_checkpoint>
 </task_order>
