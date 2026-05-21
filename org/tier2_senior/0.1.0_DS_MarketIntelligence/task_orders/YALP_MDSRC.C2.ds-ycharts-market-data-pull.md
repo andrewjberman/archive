@@ -28,7 +28,7 @@
   <scope>
     <in_scope>
       - Build the YCharts pull feeding the 7 YCharts-replaceable surfaces + the YCharts-input legs of the 10 hybrid surfaces (PRD §5.2 matrix).
-      - WS-1 surfaces (0.1.0_DS): incl. the 71-entity ticker -> YCharts-symbol map (WS1-DDB-01) and the per-indicator Bloomberg-ticker -> FRED/YCharts macro mapping (WS1-MAC-01).
+      - WS-1 surfaces (0.1.0_DS): incl. the 71-entity ticker -> YCharts-symbol map (WS1-DDB-01). SCOPE TRIM 2026-05-20 (CTO): WS1-MAC-01 (Macroeconomics) is REMOVED from TO-C2 — the macro page + its Bloomberg->FRED mapping is now owned end-to-end by YALP_MDSRC.F1 (the dedicated Macroeconomics/FRED audit, 0.2.0_DS_PortfolioAnalytics~A). C2 does NOT pull macro indicators. If F1 surfaces a macro indicator best sourced from YCharts, F1 flags it back to C2.
       - WS-2 hybrid-input legs (0.2.0_DS co-owner): the YCharts-input side of the regime/correlation/ERP/factor-spread/benchmark-blend/peer surfaces — Opal computation unchanged.
       - The pull authenticates via the TO-C1 credential pipeline (do not build a parallel auth).
       - Per PRD §5.3: the model_portfolio_benchmarks/timeseries benchmark columns are C2's; the model columns are TO-B1's (SmartX) — coordinate the dual-sourced-producer shape with TO-B1.
@@ -76,7 +76,7 @@
 
   <acceptance_criteria>
     <ac id="AC1">The YCharts pull feeds all 7 YCharts-replaceable surfaces + the YCharts-input legs of the 10 hybrid surfaces, authenticating via the TO-C1 pipeline.</ac>
-    <ac id="AC2">The 71-entity ticker->YCharts-symbol map (WS1-DDB-01) + the per-indicator Bloomberg->FRED/YCharts macro mapping (WS1-MAC-01) delivered.</ac>
+    <ac id="AC2">The 71-entity ticker->YCharts-symbol map (WS1-DDB-01) delivered. (WS1-MAC-01 macro mapping trimmed to YALP_MDSRC.F1 — not a C2 deliverable.)</ac>
     <ac id="AC3">The model_portfolio_* benchmark-column shape coordinated with TO-B1 per the §5.3 dual-sourced-producer reconciliation.</ac>
     <ac id="AC4">Compiler mandate runs reproduced in the session log. Deliverable committed + push-confirmed on origin/CLOUD. RAVC2 to 2.0.0_SA_COO + CC 1.0.0_SA_CTO.</ac>
   </acceptance_criteria>
