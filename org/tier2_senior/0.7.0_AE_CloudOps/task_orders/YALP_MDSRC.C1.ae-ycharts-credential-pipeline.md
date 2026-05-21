@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED — Phase 2C. GATED on the Andrew Q1 (official YCharts Data API vs session-scrape) + Q7 (ToS) business calls (PRD v0.3 §8). The TO's scope BRANCHES on Q1 — see &lt;scope&gt;. COO finalizes the scope to the chosen branch + flips status->pending + fires the GO once Andrew rules Q1 (and Q7 if Q1=scrape). Also requires PRD v0.3 on origin/CLOUD. CTO recommendation (PRD §6.3): official API.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GO ON PICKUP — Andrew ruled Q1 (2026-05-20): integrate YCharts by reverse-engineering its internal JSON API, authenticated with the YCharts web session — NOT an official API key. Branch A (official-API key-auth) is RETIRED. Q7 (ToS) folded into the Q1 ruling per Andrew's directive. The build spec is committed: A3 P2 (the auth/session model) in docs/briefs/mdsrc-ycharts-internal-api-20260520.md (af5102dd3, origin/CLOUD). COO has finalized the scope to the chosen branch (see &lt;scope&gt;). 0.7.0_AE_CloudOps owns it — sequence behind F2-P1 / F5; GO on pickup.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P2 — Phase 2C. The YCharts credential/auth pipeline the market-data pull (TO-C2) depends on.</priority>
     <sla>~2-3 days (Q1=official API) or ~5-8 days (Q1=session-scrape, + the dedicated-seat dependency) — PRD §7.</sla>
@@ -16,7 +16,9 @@
   <references>
     <prd>docs/architecture/YALP_MDSRC.md — PRD v0.3. This TO = §7 Phase 2C TO-C1. Read §6.1 (the WS-4 operational pattern), §6.3 (official-API recommendation), §8 (Q1/Q7).</prd>
     <ws4_brief>docs/briefs/mdsrc-ws4-ycharts-operational-pattern-20260520.md — the full WS-4 §4 scrape-pattern design + §7 official-API footprint.</ws4_brief>
-    <probe>YALP_MDSRC.A1 — the capture probe; its Branch-A/B verdict + cookie-TTL finding feed the scrape branch of this TO.</probe>
+    <probe>YALP_MDSRC.A1 — the capture probe; its headless-WAF verdict + cookie-TTL findings + the bun/Playwright runtime-gap feed C1's capture/refresh design.</probe>
+    <a3_p2_build_spec>docs/briefs/mdsrc-ycharts-internal-api-20260520.md (A3 P1+P2, af5102dd3, origin/CLOUD) — THE C1 BUILD SPEC. P2 is the empirically-reverse-engineered auth/session model: the credential bundle, the headers, the WAF behavior, the cookie TTLs, the active-probe freshness gate, the rate-limit status. Build C1 against A3 P2 — it supersedes the generic WS-4 §4 design where they differ.</a3_p2_build_spec>
+    <standard>docs/architecture/THIRD_PARTY_DATA_INTEGRATION_STANDARD.md (RATIFIED) — C1 is the credential pipeline for an INTEGRATION against YCharts' internal API. Terminology: "reverse engineer" / "integrate", never "scrape". §3 step 2 — the YCharts session credential binds to AWS Secrets Manager.</standard>
   </references>
 
   <context>
@@ -25,9 +27,14 @@
 
   <scope>
     <in_scope>
-      BRANCH A — if Q1 = OFFICIAL YCHARTS DATA API (CTO-recommended): the key-auth path. A `ycharts/api/key` Secrets Manager secret + the resource-scoped GetSecretValue grant + a thin call-failure CloudWatch alarm (WS-4 §7 — the collapsed footprint). No capture EC2, no freshness gate, no refresh Lambda. ~2-3 days.
-      BRANCH B — if Q1 = SESSION-SCRAPE (the designed fallback; requires Q7 ToS cleared + a dedicated YCharts seat provisioned): the full WS-4 §4 pattern — the capture mechanism (Branch A/B per the YALP_MDSRC.A1 probe), the `ycharts/session/current` secret, `cookie_freshness.py` (the active authenticated-probe freshness gate), the `ycharts-session-trigger` refresh Lambda, the `YCharts/SessionResilience` CloudWatch namespace + the `ycharts-session-evicted` alarm, the daily pre-emptive cron. ~5-8 days.
-      COO finalizes this TO to the chosen branch at dispatch (post-Q1). Until then both branches are documented; the agent does NOT pre-build.
+      FINALIZED (COO, post-Q1, 2026-05-20) — the internal-API session/credential pipeline. Andrew ruled Q1 = reverse-engineer the YCharts internal JSON API, which the web app authenticates with a YCharts session (cookie bundle), NOT an official API key. Branch A (official-API key-auth) is RETIRED — not chosen. Build the session/credential pipeline that lets the TO-C2 internal-API pull authenticate, per the A3 P2 auth/session model (af5102dd3) — A3 P2 is the canonical, empirically-reverse-engineered build spec; it supersedes the generic WS-4 §4 design where they differ. Scope:
+      - SESSION CREDENTIAL SECRET: the YCharts session cookie bundle in AWS Secrets Manager. NOTE: `ycharts/credentials` already holds an Alyssa cookie-bundle capture (per A1 / A3 P2) — Phase 0: confirm whether C1 reuses/renames that secret or stands up `ycharts/session/current`; do NOT duplicate the secret.
+      - FRESHNESS GATE: per A3 P2's documented freshness check — an ACTIVE authenticated probe, not a stored-timestamp check (A1 measured aws-waf-token ~96h TTL, ycsessionid a server-side session cookie).
+      - CAPTURE / REFRESH MECHANISM: a headless capture (A1 confirmed headless Chromium clears the AWS WAF JS-challenge) that refreshes the session secret on a pre-emptive cadence. CRITICAL per A1's runtime-gap finding: Playwright launch()/connectOverCDP() HANG under bun on this host — C1's production capture MUST run on a real Node runtime (a Lambda Node image, or Node on a capture EC2) or the raw-CDP approach. Do not assume a bun runtime works.
+      - WAF HANDLING per A3 P2 — the awswaf SDK engages on app pages (not the login page); the capture must navigate to an app page to acquire the aws-waf-token.
+      - CLOUDWATCH: a session-eviction / call-failure alarm so a dead session surfaces fast.
+      - IAM: the resource-scoped GetSecretValue grant on the session secret, least-privilege.
+      SEAT COORDINATION: YCharts is single-concurrent-session. While A3 (0.1.0_DS) is still running, it holds the YCharts seat — C1's automated capture/refresh must NOT evict A3's live session. By the time C1 dispatches (behind F2-P1/F5) A3 may be complete; confirm the seat is free, or coordinate the capture window with 0.1.0_DS before running a live refresh.
     </in_scope>
     <out_of_scope>
       - The market-data pull itself — TO-C2.
@@ -67,7 +74,7 @@
   <acceptance_criteria>
     <ac id="AC1">The credential pipeline for the Q1-chosen branch is built + Terraform-deployed (plan -> apply -> 0-diff replan -> tag -> push --follow-tags -> record-terraform-deploy).</ac>
     <ac id="AC2">comp-iam gaps shows 0 new gaps after the iam.tf change; the credential secret's GetSecretValue grant is resource-scoped + least-privilege.</ac>
-    <ac id="AC3">Branch A: the `ycharts/api/key` secret + call-failure alarm live. Branch B: the full WS-4 §4 pattern live (capture / session secret / freshness gate / refresh Lambda / CW + evicted alarm / cron) — and the dedicated-seat dependency confirmed satisfied.</ac>
+    <ac id="AC3">The internal-API session/credential pipeline live, built per A3 P2: the session-credential secret (reuse-or-rename decision documented), the active-probe freshness gate, the headless capture/refresh on a confirmed-working Node runtime (not bun), the WAF handling, the session-eviction CloudWatch alarm. The single-session seat coordination with A3/0.1.0_DS confirmed before any live refresh.</ac>
     <ac id="AC4">Session log with Compiler Tools section. RAVC2 to 2.0.0_SA_COO + CC 1.0.0_SA_CTO.</ac>
   </acceptance_criteria>
 
@@ -77,8 +84,10 @@
   </deliverables>
 
   <do_not>
-    <rule>Do NOT start before Andrew rules Q1 (and Q7 if Q1=scrape) — the scope branches on it; pre-building the wrong branch is wasted work.</rule>
+    <rule>Q1 is RULED — build the internal-API session branch only; do NOT build Branch A (official-API key-auth) — it is retired.</rule>
+    <rule>Do NOT run a live YCharts capture/refresh that evicts A3/0.1.0_DS's session — YCharts is single-concurrent-session; confirm the seat is free or coordinate the window first.</rule>
+    <rule>Do NOT assume a bun runtime for the capture — A1 proved Playwright hangs under bun; use a real Node runtime or raw-CDP.</rule>
     <rule>Do NOT handle a YCharts credential value in chat/MCP/git/tfstate/logs — secret values via put-secret-value, out of Terraform state.</rule>
-    <rule>Terraform-only deploy. No emojis in code, the session log, or CLI transcripts (ASCII-only).</rule>
+    <rule>Terminology: "reverse engineer" / "integrate", never "scrape" (Third-Party Data Integration Standard). Terraform-only deploy. No emojis in code, the session log, or CLI transcripts (ASCII-only).</rule>
   </do_not>
 </task_order>
