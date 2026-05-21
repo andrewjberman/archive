@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics~A</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON BOOT — Andrew-direct. 0.2.0_DS_PortfolioAnalytics~A is a new Andrew-spawned agent; this TO is in its task_orders/ folder to be picked up on the startup protocol. No gate — begin on boot. Q1-INDEPENDENT (FRED is a separate source from the YCharts Q1 decision).</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
