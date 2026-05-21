@@ -16,7 +16,7 @@
   <references>
     <b1>YALP_MDSRC.B1 (0.4.0_DS_ClientPlatform) — the parent TO. DS 0.4.0 built + verified the SmartX-pull integration; B1 retains the yang dual-input producer modification + end-to-end verification + RAVC2. B2 is the AE-lane half: commit the pull code + deploy the Lambda.</b1>
     <sxpl>SXPL_RESTIN.002.ae-smartx-rest-pull-flow.md — the SmartX REST pull flow, your lane. B2's pull integrates against the same SmartX REST API; reuse the ROPC-JWT auth + the smartx/credentials secret. Decide (CTO-coordinate if needed) whether the monthly model-performance pull is a NEW standalone Lambda or an added endpoint in the SXPL_RESTIN pull surface — your architecture call as the lane owner.</sxpl>
-    <standard>org/tier1_exec/2.0.0_SA_COO/drafts/THIRD_PARTY_DATA_INTEGRATION_STANDARD.md (306e394c0) — the Andrew-direct Third-Party Data Integration Standard. The pull is an INTEGRATION against the SmartX REST API; terminology "reverse engineer" / "integrate", never "scrape".</standard>
+    <standard>docs/architecture/THIRD_PARTY_DATA_INTEGRATION_STANDARD.md (RATIFIED, 73e4da697) — the Andrew-direct Third-Party Data Integration Standard. The pull is an INTEGRATION against the SmartX REST API; terminology "reverse engineer" / "integrate", never "scrape". Note §3 step 2 — the SmartX credential handling binds to AWS Secrets Manager (the smartx/credentials secret) — and §3 step 6 — contract-drift detection (fail loud if the SmartX response shape changes; never silently serve stale/wrong data).</standard>
     <prd>docs/architecture/YALP_MDSRC.md — PRD v0.3.2 §5.3 (Model Portfolios seam). CTO v0.4 will consolidate.</prd>
   </references>
 

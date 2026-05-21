@@ -20,6 +20,7 @@
     <ops_pattern>docs/briefs/mdsrc-ws4-ycharts-operational-pattern-20260520.md — the WS-4 YCharts operational-access pattern audit.</ops_pattern>
     <ticker_map>docs/briefs/mdsrc-ycharts-ticker-map-and-fidelity-20260520.{md,csv} — the 71-row crosswalk + fidelity; the 27 imperfect cases to re-test against the internal API.</ticker_map>
     <a1_sibling>YALP_MDSRC.A1 (0.7.0_AE_CloudOps, in flight) — the headless-capture viability probe (does the AWS WAF JS-challenge clear headless). A1 = can a bot get IN; A3 = once in, WHAT API does the app call. Complementary — coordinate, do not duplicate.</a1_sibling>
+    <standard>docs/architecture/THIRD_PARTY_DATA_INTEGRATION_STANDARD.md (RATIFIED, 73e4da697) — the Andrew-direct Third-Party Data Integration Standard. A3 is the canonical worked example: reverse-engineer the provider's own backend API. Note §3 step 2 (captured credentials bind to AWS Secrets Manager) + step 6 (contract-drift detection — a reverse-engineered internal API has no stability guarantee; the integration must fail loud, never silently serve stale/wrong data) — P2's auth/session model + the C1/C2 build inherit both.</standard>
   </references>
 
   <context>
