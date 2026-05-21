@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-05-20 -- headless-WAF capture probe run. AC1: Branch A VIABLE -- headless Chromium acquired a valid aws-waf-token on /dashboard/ (awswaf SDK engaged, no challenge interstitial/block). AC2: ycsessionid = pure session cookie (no client TTL); aws-waf-token ~96h; csrftoken ~1yr; WS-4 daily cron holds. Deliverable: docs/briefs/mdsrc-ycharts-capture-probe-20260520.md. Probe ran via raw CDP over bun native WebSocket (Playwright launch/connectOverCDP both hang under bun -- no real Node on host; carried forward to TO-C1). RAVC2 to COO + CC CTO.</completed>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO FIRED 2026-05-20 — PRD v0.3 confirmed on origin/CLOUD (de7facf93 + c3c04bc9d); COO flipped pending + dispatched. Original: STAGED — Phase 2A. Q1-INDEPENDENT (dispatchable on COO decomposition per PRD v0.3 §7/§12 — runs regardless of the Q1 official-API-vs-scrape decision; its result feeds the scrape branch if Q1 picks scrape). COO flips status->pending + fires the GO once PRD v0.3 (commit de7facf93) is confirmed on origin/CLOUD — so the runner pulls a v0.3 PRD, not v0.2. No Andrew gate.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
