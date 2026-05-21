@@ -3,9 +3,8 @@
     <id>YALP_MDSRC.C6</id>
     <slug>ae-ycharts-credential-refresh-from-har</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~A</issued_to>
-    <reassigned_from>0.7.0_AE_CloudOps</reassigned_from>
-    <!-- REASSIGNED 2026-05-21 by COO (per CTO): the base 0.7.0_AE_CloudOps lane is NOT REGISTERED (offline) — the original C6 GO sat unread. C6 is lane-agnostic (HAR extract + a Secrets Manager write, no base-lane-specific state); reassigned to 0.7.0_AE_CloudOps~A — live, freed from B2, owned-paths-permitted (789a2f21c). Andrew is asking if C6 is done; it must not queue behind an offline agent. -->
+    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <!-- ROUTING 2026-05-21 (COO): C6 originally issued to base 0.7.0_AE_CloudOps; base went NOT-REGISTERED so COO reassigned to ~A (2450c41ea); Andrew then directed the ~A session to RE-REGISTER as base 0.7.0_AE_CloudOps (PID 31396 — the same agent throughout). issued_to restored to 0.7.0_AE_CloudOps, now the live base lane. Lane-agnostic TO (HAR extract + Secrets Manager write); no work lost in the base->~A->base routing. -->
     <date>2026-05-21</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>
