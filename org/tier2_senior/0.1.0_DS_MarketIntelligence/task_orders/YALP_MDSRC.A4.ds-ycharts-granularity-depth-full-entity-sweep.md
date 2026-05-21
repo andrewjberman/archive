@@ -6,7 +6,7 @@
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <paired_with>0.7.0_AE_CloudOps~A</paired_with>
     <date>2026-05-21</date>
-    <status>in_progress</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — Andrew-direct (2026-05-21): "It's not enough to look at the S&P alone; we need to explore every index and every ETF tracked on the portal." PAIRED TO (Andrew directive 2026-05-21): 0.1.0_DS_MarketIntelligence = deliverable lead (the analysis, verdicts, matrix, brief — holds the A3 internal-API context + crosswalk + probe method); 0.7.0_AE_CloudOps~A = paired AE, owns the YCharts authenticated-session / capture side (see <pairing> block). 0.7.0_AE_CloudOps BASE is deliberately NOT on this TO — base stays on the F2/F5/C1 critical path uninterrupted. ~A's A4 work begins AFTER ~A completes the F2/F3 post-apply verification-harness run (that fires on base's F2 v1.0.1 apply-complete signal — minutes of work); 0.1.0_DS may begin Phase 0 universe-enumeration (DynamoDB / etf_returns.json reads — no YCharts seat needed) immediately in parallel. A4 feeds C2 as a pre-build input — land before/alongside the C2 build.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
