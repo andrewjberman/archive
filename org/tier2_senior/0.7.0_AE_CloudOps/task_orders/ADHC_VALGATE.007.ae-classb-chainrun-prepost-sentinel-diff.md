@@ -72,4 +72,8 @@
     - The section-3.2 six-field gate table for the Class-B gate.
     - Session log with the Compiler Tools section. RAVC2 to COO.
   </deliverables>
+
+  <followon_note date="2026-05-20" by="2.0.0_SA_COO~B" source="CTO~B re VALGATE.002">
+    COSMETIC FIX TO FOLD IN -- orion-gold-dispatch.sh line ~684: the echo still reads "(C-1 row-count / C-2 distribution)" but VALGATE.002's C-3 gate now rides the SAME valgate_gate.py invocation, so the log text is stale. When .007 next touches orion-gold-dispatch.sh, correct that one-line echo to also name C-3 (and C-4 if .003 has landed by then). Pure log text, no behavior change -- bundle it into the .007 edit so it is not a separate owned-paths touch.
+  </followon_note>
 </task_order>
