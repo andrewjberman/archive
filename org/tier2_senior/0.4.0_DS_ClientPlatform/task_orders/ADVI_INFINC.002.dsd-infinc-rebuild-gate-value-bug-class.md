@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- COMPLETE + CTO RAVC-accepted 2026-05-21: commit 43e13faf6 — DS 0.4.0 took the PREFERRED path; added lib/skip_gate.rebuild_requested() shared helper, converged all 5 Pattern-B gates (INF_C_02/C_03/D_05/D_06/D_09) onto it, retired the re-inline-drift root cause; ds-commit-gate + comp-pipescript io clean; S3-deployed + verified. AC1-AC4 met. NOTE: this TO is mis-numbered .002 (collides with the COMPLETE Pattern-A migration ADVI_INFINC.002) — flagged to COO for renumber to the next free serial. -->
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO — CTO-ruled (the ADVI_INFINC follow-on home for the systemic INFINC_REBUILD gate-value bug). DS~D lane. NOTE: if the ~D lane has no live agent when this is read (the broker has shown no live `0.4.0_DS_ClientPlatform~D`), it re-routes to the base `0.4.0_DS_ClientPlatform` lane — same phantom-lane handling as ADVI_INFGRO.009 (~C). The 4 in-scope scripts are INF_C/INF_D Client-Platform gold scripts; base DS 0.4.0 just fixed the sibling INF_C_02, so base is a valid fallback owner. COO re-routes on a loop tick if ~D stays unpicked.</dispatch_unblock_condition>
     <project_code>ADVI_INFINC</project_code>
