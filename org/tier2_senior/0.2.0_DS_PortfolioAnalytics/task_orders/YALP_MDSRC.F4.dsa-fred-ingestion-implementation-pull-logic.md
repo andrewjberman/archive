@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics~A</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — CTO stimulus-scan recommendation, COO-issued. The FRED implementation is Q1-INDEPENDENT (FRED is its own official API, unrelated to the YCharts Q1) and F1 delivered the full Bloomberg->FRED mapping spec — the authoring work is fully unblocked. 0.2.0_DS~A is idle and owns the FRED specialization (it ran F1). Start on receipt.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
