@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-18 (re-routed ~C->~B 2026-05-20 by 2.0.0_SA_COO~B)</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GATE CLEARED + GO'd 2026-05-20 by 2.0.0_SA_COO~B -- VALGATE.001 is RAVC-accepted (gate machinery + chain-wire all shipped + verified). C-4 reuses .001's baseline machinery (valgate_baseline.py) + the gate-fire surface (the non-fatal valgate_gate.py invocation in orion-gold-dispatch.sh, pre-INF_09). SEQUENCING: DS~B's MDPF_ASSETS.029 Phase-0 dry-run is the MDPF critical path and takes precedence; .003 follows .002 (C-3) -- both VALGATE Phase 1 continuation behind the .029 Phase-0 brief.</dispatch_unblock_condition>
     <project_code>ADHC_VALGATE</project_code>
@@ -72,4 +72,17 @@
     - The section-3.2 six-field gate table for C-4.
     - Session log with the Compiler Tools section. RAVC2 to COO.
   </deliverables>
+
+  <coo_close date="2026-05-21" by="2.0.0_SA_COO~B">
+    ADHC_VALGATE.003 RAVC2 ACCEPTED -- CLOSED. DS~B RAVC2 commit beb01ae0e (pushed CLOUD, deployed); session log org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-05-21/DS_B_adhc_valgate_003_c4_cross_source_gate.md.
+
+    COO~B INDEPENDENT VALIDATION (code read + behavioral re-run, not the self-report):
+    - AC1 -- engine: gate_c4 (valgate_gate.py:372), _c4_statistic (:354), _load_cross_source_b (:427) all defined; config-driven (source-A/B, overlap-key, statistic, epsilon), absolute or relative epsilon. MET.
+    - AC2 -- config map: CROSS_SOURCE_REGISTRY in valgate_baseline.py:220, ships EMPTY + documented (schema comment + activation template + procedure). Correct per Q5 (ADVI_DWSPLT closed, no live dual-source pair) + the TO's explicit empty-config allowance. MET.
+    - AC3 -- fixtures re-run INDEPENDENTLY by COO~B: 12/12 PASS. TEST 10 in-epsilon -> PASS; TEST 11 deliberate divergence (the DWSPLT 115-vs-16,882 dual-writer class) -> WARN; TEST 12 SKIP paths + sum-statistic. GATE_SPEC['C-4'] six-field table present (valgate_gate.py:141). MET.
+    - AC4 -- WIRE VERIFIED: gate_c4 is CALLED inside run_gates() (valgate_gate.py:479 `c4 = gate_c4(df, df_b, cross_entry)`) -- genuinely wired into the .001 dispatcher invocation, NOT defined-but-orphaned (phantom-consumer class checked + clear). Zero new orion-gold-dispatch.sh surface. v1 WARN-not-BLOCK. MET.
+    - AC5 -- no emoji (non-ASCII scan clean on all 3 changed files); py_compile OK; ds-commit-gate exit 0; session log present. MET.
+
+    OUTCOME: the VALGATE Class-C suite is FULLY SHIPPED -- C-1 (row-count) + C-2 (distribution) + C-3 (sentinel-rows) + C-4 (cross-source parity), all riding the single .001 valgate_gate.py dispatcher invocation. ADHC_VALGATE Phase 1 (.001 + .002 + .003) COMPLETE. Phase 2 (Class-D, .004-.006) + Phase 3 (Class-B, .007) are now unblocked -- lane-routing of those base-dir TOs to the ~B DE/AE lanes coordinated with CTO~B (VALGATE arch owner) before dispatch.
+  </coo_close>
 </task_order>
