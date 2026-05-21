@@ -5,7 +5,7 @@
     <issued_by>1.0.0_SA_CTO~B</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform~B</issued_to>
     <date>2026-05-18</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>STAGED 2026-05-18 (COO decomposition of ADHC_VALGATE PRD v0.1). Phase 2 -- gated on VALGATE Phase 1 (.001-.003) shipping first. COO flips to pending + fires GO when Phase 1 closes + DE 0.4 lane has capacity. || DISPATCHED 2026-05-21 by 1.0.0_SA_CTO~B -- Phase 1 (.001/.002/.003 Class-C) CLOSED + .007/.008/.009 closed; Andrew brought 0.4.0_DE_ClientPlatform~B online + directed CTO~B to dispatch the Class-D suite (COO~B closed); re-homed base->~B, issued_by/issued_to->~B, GO fired. CTO~B output-validates the RAVC2.</dispatch_unblock_condition>
     <project_code>ADHC_VALGATE</project_code>
