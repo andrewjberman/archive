@@ -5,8 +5,8 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-20 (authored on .028 RAVC-accept + CTO~B sequence directive)</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>SEQUENCED AFTER MDPF_ASSETS.029 per CTO~B's directive (.028 -> .029 -> .030). Gates on .029 -- the v0.9 backfill methodology + the historical series should be settled before the legacy emitter is re-scoped (the legacy non_model_assets.json the live page reads must be consistent with the v0.9 series). COO~B flips to pending + GO when .029 has resolved (at minimum its Phase-0 methodology proven; whether .030 GOs before or after .029's Phase-1 rewrite is a COO~B call at that point). NOTE: .030 moves a LIVE CEO-visible number -- see <live_page_note>; the GO decision includes confirming whether an Andrew sign-off is needed for the live-page move at that time.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
     <priority>P2 -- the v0.9 successor to the cancelled MDPF_ASSETS.026. Brings build_legacy_compat_emit.py (the SoT for non_model_assets.json -- the artifact the LIVE Model Portfolios page reads) to the PRD v0.9 full-Schwab-49F basis, so the live legacy page matches the v0.9 platinum aggregate.</priority>

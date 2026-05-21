@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-20 (authored on .028 RAVC-accept + CTO~B .029-scoping directive)</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>PHASE 0 + PHASE 1 BOTH GO'd. Phase 0 GO'd 2026-05-20 (COO~B) -- dry-run COMPLETE, brief e8d176d8f. PHASE 1 GO'd 2026-05-21 by 2.0.0_SA_COO~B on ANDREW SIGN-OFF ("GO 97 + probe 2024 depth", relayed via CTO~B who reviewed + accepted the Phase-0 brief, no redline). The Phase-1 authoritative scope is in the <phase1_go> block below -- it supersedes the original speculative Phase-1 <scope> step.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
