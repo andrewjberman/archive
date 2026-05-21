@@ -3,11 +3,11 @@
     <id>ADHC_VALGATE.007</id>
     <slug>ae-classb-chainrun-prepost-sentinel-diff</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
-    <date>2026-05-18</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18 (COO decomposition of ADHC_VALGATE PRD v0.1). Phase 3 -- gated on VALGATE Phase 1 (.001-.003) shipping (the chain-gate surface + the verdict conventions land there first). COO flips to pending + fires GO when Phase 1 closes + AE 0.7 lane has capacity.</dispatch_unblock_condition>
+    <issued_to>0.7.0_AE_CloudOps~B</issued_to>
+    <date>2026-05-18 (re-homed base->~B + GO'd 2026-05-21 by 2.0.0_SA_COO~B)</date>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>GO'd 2026-05-21 by 2.0.0_SA_COO~B. VALGATE Phase 1 (.001-.003, the Class-C suite) is CLOSED -- the chain-gate surface + verdict conventions landed. CTO~B (VALGATE arch owner) pre-reviewed .007 GO-ready (152719Z verdict -- WARN-mode v1, reuses the .001-.003 Class-C conventions, the cosmetic orion-gold-dispatch.sh echo-fix folded in). Andrew brought 0.7.0_AE_CloudOps~B online; .007 re-homed from the base 0.7.0_AE_CloudOps dir to the ~B lane dir + issued_to fixed. Zero CTO gate at dispatch. RAVC2 routes to CTO~B CC COO~B.</dispatch_unblock_condition>
     <project_code>ADHC_VALGATE</project_code>
     <priority>P2 -- VALGATE Phase 3. Class B HALF-exists: the chain-run shape sentinels exist but the GATE (structural fire + pre/post diff) does not. N7 = formalize it.</priority>
     <sla>1.5-2d wall (PRD section 6 sizing) -- part discipline-codification (a TO-template mandate), part tooling (a comp-chainrun pre/post wrapper).</sla>
