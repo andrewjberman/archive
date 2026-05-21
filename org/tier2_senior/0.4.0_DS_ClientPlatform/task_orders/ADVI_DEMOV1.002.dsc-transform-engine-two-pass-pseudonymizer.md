@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-21</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>ADVI_DEMOV1</project_code>
   </metadata>
 
@@ -20,8 +20,8 @@
   </objective>
 
   <context>
-    ADVI_DEMOV1 PRD: docs/architecture/ADVI_DEMOV1.md (v0.1, 2e1321f79). Read §4
-    rulings R1/R2/R4/R6, §6 TO-2, §7 risks. Read proposal
+    ADVI_DEMOV1 PRD: docs/architecture/ADVI_DEMOV1.md (v0.1.3, commit c01273c5c).
+    Read §4 rulings R1/R2/R4/R6, §6 TO-2, §7 risks. Read proposal
     docs/proposals/advisor-intelligence-demo-dataset-20260521.md §6 (the transform
     engine design — you authored it).
 
@@ -52,14 +52,16 @@
       that IS a known real identity) is the safe core — but it must also walk
       object KEYS and bare LIST-STRINGS, and the exec_summary free-text narrative
       needs substring replacement, not keyed-field replacement.
-    - Transform scope is NOT platinum-only: the L3 client-detail route
-      (handle_client_detail / getClientDetail) reads
-      gold/entities/clients/{id}/detail.json. The engine must take its prefix
-      list as a PARAMETER — platinum/** is confirmed in scope; whether
-      gold/entities/clients/ is included is an open item COO~C is resolving with
-      CTO/DE (is getClientDetail superseded by getPlatinumClientSummary?). Build
-      the engine prefix-agnostic so the final list is a run-time input, not a
-      code change. The definitive prefix list will be confirmed before TO-4.
+    - Transform scope is platinum/** ONLY — RESOLVED by CTO ruling, PRD v0.1.3
+      (commit c01273c5c, 2026-05-21). The one gold/ reader — handle_client_detail
+      reading gold/entities/clients/{id}/detail.json via the getClientDetail
+      route — is ORPHANED: zero portal call sites; the live L3 client-detail
+      surfaces (ClientsTab.tsx, AdvisorBookView.tsx) call getPlatinumClientSummary
+      -> platinum/clients/{id}/summary.json, which superseded it. The gold/ prefix
+      is NOT cloned. Clone + transform s3://opal-data-bd/platinum/** only. Still
+      build the engine prefix-agnostic (prefix list as a run-time PARAMETER, not
+      hardcoded) — good design and it keeps TO-4 a config input — but the
+      definitive list is now settled: platinum/** only, no open item remaining.
 
     CTO rulings that bind this TO:
     - R1 — Two-pass, deterministic, seeded. Pass 1 builds the COMPLETE mapping
@@ -152,10 +154,10 @@
        under partner_analytics segments/clients and cumulative_chart adv_drill
        they are names — transformed. The engine decides by path/value-membership,
        NOT by field name. Verified against the brief §3 reconciliation table.
-    3c. The engine takes its S3 prefix list as a PARAMETER (not hardcoded).
-       platinum/** is confirmed in scope; gold/entities/clients/ is a pending
-       resolution (COO~C / CTO / DE) — the engine must accept the final list as
-       a run-time input so the resolution needs no code change.
+    3c. The engine takes its S3 prefix list as a PARAMETER (not hardcoded). The
+       definitive list is platinum/** ONLY — CTO ruling PRD v0.1.3 (the gold/
+       prefix is dropped; its only reader is an orphaned route). Pass the prefix
+       as a run-time input regardless, for TO-4 cleanliness.
     4. An unmapped id encountered in Pass 2 raises a HARD ERROR (non-zero exit) —
        demonstrated by a test/dry-run with a deliberately unmapped id.
     5. Dollar values: verbatim by default; the value-handling is a single config
