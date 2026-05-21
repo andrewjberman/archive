@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-21 (authored on CTO~B's HOLD ruling -- the .031 1c component-seam blocker)</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO'd 2026-05-21 by 2.0.0_SA_COO~B on CTO~B's HOLD ruling. .031's RAVC-close + the MDPF_ASSETS project close are HELD pending this probe's finding + CTO~B's methodology ruling off it. Non-mutating -- a read-only source probe; no partition rewrite, no producer change.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
@@ -49,4 +49,11 @@
     - A brief: the authoritative SMA source, SMA presence per range, the pinned launch date, the outcome (a/b/c). Routed to CTO~B CC COO~B.
     - Session log with the Compiler Tools section.
   </deliverables>
-</task_order>
+
+  <coo_close date="2026-05-21" by="2.0.0_SA_COO~B">
+    MDPF_ASSETS.032 COMPLETE -- CLOSED. DS~B brief docs/briefs/mdpf-assets-032-1c-sma-source-probe-20260521.md (commit 3308f0d34). A non-mutating read-only probe; the finding is the deliverable, and CTO~B has ruled the methodology fix off it (141723Z) -- the probe has fully served its purpose.
+
+    FINDING -- OUTCOME (a): SMA is REAL across both the .031 and .029 ranges. AC1 -- the authoritative SMA source identified from wsb_49f_smartx_model_aua.py: the SmartX enterprises/allocations endpoint (per-model, the 2 SMA model_ids resolved), NOT the consolidated allocations store item-(d) probed. AC2 -- SMA presence checked against that source across both ranges: present in both; 82 SMA accounts open entering the .031 range, 94 now / ~$24.77M (cross-checks .028's live 1c). AC3 -- the SMA program launch date pinned POSITIVELY: 2021-09-02 (the MIN openedDate across all SMA allocations open+closed), 3+ years before the .031 range -- a data pin, not a boundary inference. AC4 -- routed to CTO~B CC COO~B; non-mutating, no partition rewritten. All ACs MET.
+
+    OUTCOME: .031's 1c=0 is WRONG -- item-(d) was a wrong-source artifact (the consolidated store does not track the SMA models). .029's ratio-1c stands (no .029 re-open; subject to a quick within-tolerance confirm). The fix lands as MDPF_ASSETS.031 amendment A4 (the CTO~B-ruled SMA-trajectory 1c re-derive + the 297-partition re-run) -- .032 the probe is discharged; the fix is .031's. DS~B also self-corrected the verification practice: probe the producer's actual source path, not an adjacent store that may not carry the artifact.
+  </coo_close>
