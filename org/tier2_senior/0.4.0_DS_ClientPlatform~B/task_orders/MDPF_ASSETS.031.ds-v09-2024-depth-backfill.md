@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-21 (authored on Andrew 2024-depth = YES ruling, relayed by CTO~B)</date>
-    <status>complete</status>
+    <status>active</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO'd 2026-05-21 by 2.0.0_SA_COO~B on the CTO~B relay of Andrew's 2024-depth ruling (YES -- extend to 2024-11-01). The .029 v0.9 backfill mechanism is RAVC-accepted + proven; .030 landed the legacy emitter on v0.9. .031 is the final MDPF TO -- on .031 land MDPF_ASSETS 3-step-closes. ONE internal checkpoint: the fresh calibration is derived + sample-validated + CTO~B-ratified BEFORE the ~290-date full sweep (see <calibration_checkpoint>).</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
@@ -127,6 +127,14 @@
 
     OUTCOME: MDPF_ASSETS.031 is the FINAL MDPF TO. With .028 + .029 + .030 + .031 all RAVC-accepted, the MDPF v0.9 line is fully landed -- the Daily AUA Analysis chart is one continuous v0.9 trend back to 2024-11-01. MDPF_ASSETS the project 3-step-CLOSED 2026-05-21 (~B C-suite) -- project JSON status=complete, REGISTRY row, PRD Status line.
   </coo_close>
+
+  <close_retracted date="2026-05-21" by="2.0.0_SA_COO~B" authority="CTO~B HOLD ruling (crossed the CONFIRM-PASS)">
+    THE coo_close ABOVE IS RETRACTED. CTO~B's CONFIRM-PASS and a subsequent HOLD ruling crossed in transit; COO~B executed the close (commit dd08ef0bc) on the CONFIRM-PASS before the HOLD arrived. The HOLD supersedes -- .031 + MDPF_ASSETS are RE-OPENED.
+
+    CTO~B HOLD reasoning: the 1c component-seam (COO~B's RAVC finding -- 1c steps $0 -> $19.67M at the .031/.029 seam, masked at the headline by the 1b residual) is NOT a non-blocking observation. .031's 1c=0 and .029's 1c~=$19.67M CONTRADICT -- one is wrong -- and item-(d) may have probed the WRONG SmartX source: it checked the CONSOLIDATED allocations store (opal-data-smartx-v2/consolidated/, 5 models, no SMA) while .028's live 1c=$24.93M is pulled by the WS-B feeder from a DIFFERENT SmartX path (the per-model/SMA roster endpoint). So item-(d)'s "zero SMA" may be an artifact of probing a store that simply does not carry SMA.
+
+    GATING: .031 close + MDPF_ASSETS close are HELD pending MDPF_ASSETS.032 -- a focused 1c-source probe (DS~B). The probe's outcome dictates the .031 1c fix: (a) SMA real across BOTH ranges -> .031 1c=0 is WRONG, re-derive 1c+1b, re-run affected partitions; (b) SMA real only from ~2025-12-23 -> both tiers right, the seam is a genuine launch step, legitimately marked; (c) SMA never real in either range -> .029's 1c is a PHANTOM layer, closed .029 RE-OPENS for a 1c=0 fix. CTO~B rules the methodology fix off the probe finding; .031 then closes with whatever 1c correction the probe dictates, and MDPF closes after. Item-2 (chart-surfacing) is RULED (DE follow-on, MDPF closes on the data deliverable) but moot until Item-1 clears.
+  </close_retracted>
 
   <amendment id="A3" date="2026-05-21" by="2.0.0_SA_COO~B" authority="CTO~B AC2 marker-boundary correction">
     A2's MARKING clause set the chart-surfaced "estimated" marker boundary at the lift=0 cutover (~2025-12-04). CTO~B corrected this: the boundary is the .031/.029 join (2025-12-23) -- the WHOLE .031 range (2024-11-01..2025-12-22) is the marked-estimate segment.
