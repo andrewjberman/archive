@@ -24,6 +24,9 @@
   </context>
 
   <scope>
+    <scope_split note="COO routing ruling 2026-05-20 — B1 option (c)">
+      The SmartX-pull CODE + Lambda deploy is SHARED_OPAL_ETL lane (data/smartx/scripts/) and was split to YALP_MDSRC.B2 (0.5.0_AE_OpalETL). DS 0.4.0 BUILT + VERIFIED the pull script (pull_smartx_model_monthly_performance.py — gate-clean, live dry-run, YTD cross-check 0.002pp); AE-OpalETL commits + deploys it under B2. B1 (this TO, DS 0.4.0) RETAINS: the yang dual-input producer modification (yang Lambda = ClientPlatform lane), the end-to-end model_portfolio_benchmarks.json verification, and the RAVC2. Phase 1's pull-build is DONE; B1's remaining active work is the yang-side producer + the end-to-end verify (the latter consumes B2's deployed sidecar).
+    </scope_split>
     <in_scope>
       Phase 0 (verify-first): confirm against REAL SmartX REST data — `reportedmodels/{rmid}/historicalperformance` cadence + the `performanceValue` units/semantics, and `models/{id}/statistics` — before building. Surface any data-shape surprise.
       Phase 1 (build) — PATH A, RULED 2026-05-20 (CTO+COO converged on the B1 Phase-0 finding that SmartX model-perf is monthly-cadence; the originally-stated daily pull of historicalperformance/statistics is SUPERSEDED — those endpoints are stale/buggy). HYBRID BY CADENCE:
