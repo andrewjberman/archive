@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps~B</issued_to>
     <date>2026-05-18 (re-homed base->~B + GO'd 2026-05-21 by 2.0.0_SA_COO~B)</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO'd 2026-05-21 by 2.0.0_SA_COO~B. VALGATE Phase 1 (.001-.003, the Class-C suite) is CLOSED -- the chain-gate surface + verdict conventions landed. CTO~B (VALGATE arch owner) pre-reviewed .007 GO-ready (152719Z verdict -- WARN-mode v1, reuses the .001-.003 Class-C conventions, the cosmetic orion-gold-dispatch.sh echo-fix folded in). Andrew brought 0.7.0_AE_CloudOps~B online; .007 re-homed from the base 0.7.0_AE_CloudOps dir to the ~B lane dir + issued_to fixed. Zero CTO gate at dispatch. RAVC2 routes to CTO~B CC COO~B.</dispatch_unblock_condition>
     <project_code>ADHC_VALGATE</project_code>
