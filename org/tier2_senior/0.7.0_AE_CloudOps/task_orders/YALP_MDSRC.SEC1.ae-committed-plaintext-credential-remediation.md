@@ -5,8 +5,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
-    <dispatch_held>false</dispatch_held>
+    <status>cancelled</status>
+    <!-- CANCELLED 2026-05-21 by COO per CTO supersede ruling (MCP ~13:16Z). Andrew, escalated via CTO, deprioritized: the 4 keys are free API keys, low-stakes; OpenAI likely non-functional; NO git-history scrub. Credential rotation + the .gitignore one-liner for the snapshot path fold into the P3 fred-family cleanup TO whenever it lands -- no standalone urgency. ONE carve-out preserved into P3 scope: a single JWT_SECRET verify step -- does the committed JWT_SECRET value still match the live auth-validator-edge secret? If yes, rotate in P3 with a planned cutover (no live-session break); if stale vs live, no action (dead value). This TO was authored + committed (358546739) + GO-dispatched before the supersede landed; AE was told to finish F2 first so SEC1 was never picked up. No work performed under this TO. -->
+    <dispatch_held>true</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — dispatched immediately per CTO ruling 2026-05-21T13:xx Z. This is a STANDALONE security-remediation TO. It is NOT folded into the P3 fred-family cleanup TO and is NOT gated on F2/F5 or any implementation-chain milestone. It dispatches on its own clock. Phase 0 (AUDIT) is read-only AWS-state inspection — non-conflicting with the in-flight F2 apply; begin it the moment the F2 apply/tag/push mechanical sequence is clear of your hands (minutes away) or interleave it if you have a window. Rotation work (Phase 1+) is the substantive effort.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P0 — live-credential exposure in a public-history git object. Four plaintext secrets are committed in a tracked file. JWT_SECRET is the highest-severity item: a token-forgery surface across the entire auth fabric. This dispatches now, ahead of debt-paydown work.</priority>
