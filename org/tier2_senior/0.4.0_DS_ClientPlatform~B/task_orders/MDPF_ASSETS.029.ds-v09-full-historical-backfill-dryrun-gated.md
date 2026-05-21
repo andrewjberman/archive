@@ -7,7 +7,7 @@
     <date>2026-05-20 (authored on .028 RAVC-accept + CTO~B .029-scoping directive)</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>
-    <dispatch_unblock_condition>GO'd 2026-05-20 by 2.0.0_SA_COO~B on the .028 RAVC-accept (CTO~B output-confirm). The GO covers PHASE 0 ONLY -- a non-mutating dry-run + mechanism validation. PHASE 1 (the actual historical partition rewrite) is HARD-STOPPED inside this TO: it does NOT execute on this GO; it is an explicitly-Andrew-gated second step (CTO~B carries the Phase-0 dry-run findings + a go/no-go-to-rewrite recommendation to Andrew; COO~B flips the Phase-1 gate only on Andrew's sign-off).</dispatch_unblock_condition>
+    <dispatch_unblock_condition>PHASE 0 + PHASE 1 BOTH GO'd. Phase 0 GO'd 2026-05-20 (COO~B) -- dry-run COMPLETE, brief e8d176d8f. PHASE 1 GO'd 2026-05-21 by 2.0.0_SA_COO~B on ANDREW SIGN-OFF ("GO 97 + probe 2024 depth", relayed via CTO~B who reviewed + accepted the Phase-0 brief, no redline). The Phase-1 authoritative scope is in the <phase1_go> block below -- it supersedes the original speculative Phase-1 <scope> step.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
     <priority>P1 -- MDPF critical path. The .016-equivalent historical backfill, re-scoped to PRD v0.9. Brings the full aggregate_aua_timeseries historical series onto the v0.9 full-Schwab-49F basis. SUPERSEDES the .016 Option-(a) split-basis (which split at 2026-03-11 only because certified_aua's earliest partition was 03-11 -- moot under v0.9, since Schwab + SmartX both have daily data back to 2024 per Andrew 2026-05-20).</priority>
     <sla>Phase 0: ~1h DS wall -- a non-mutating dry-run + a small scratch-location sample validation + the findings brief. [SLA CORRECTED 2026-05-20 by 2.0.0_SA_COO~B, from a wildly over-padded "~3-5h" -- a padded SLA suppresses stall-detection: .029 sat un-picked-up ~2h under cover of the inflated number. Track this TO by its work ARTIFACT (the .029 session log + commits + brief on origin), NOT by an elapsed-SLA clock; if 30-40min pass post-session-engagement with no .029 log appearing, escalate to CTO~B.] Phase 1 (Andrew-gated, NOT on this GO): ~2-3h -- the partition rewrite + verification.</sla>
@@ -49,7 +49,23 @@
   </out_of_scope>
 
   <deliverables>
-    - Phase 0: a non-mutating dry-run + mechanism-validation brief (docs/briefs/), routed to CTO~B CC COO~B. HARD STOP.
-    - Phase 1 (post-Andrew-gate): the v0.9 historical re-materialization + RAVC2.
+    - Phase 0: a non-mutating dry-run + mechanism-validation brief (docs/briefs/), routed to CTO~B CC COO~B. HARD STOP. -- DONE 2026-05-20, brief e8d176d8f.
+    - Phase 1 (post-Andrew-gate): the v0.9 historical re-materialization + RAVC2. -- GO'd 2026-05-21, scope below.
   </deliverables>
+
+  <phase1_go date="2026-05-21" by="2.0.0_SA_COO~B" authority="Andrew sign-off via CTO~B">
+    PHASE 1 GATE FLIPPED -- ANDREW SIGNED OFF on the Phase-0 brief: "GO 97 + probe 2024 depth." CTO~B reviewed + accepted the Phase-0 brief (mechanism proven bit-identical, non-destructive plan sound, no redline) and carried the go/no-go to Andrew. This block is the AUTHORITATIVE Phase-1 scope; it supersedes the original speculative Phase-1 <scope> step.
+
+    PHASE 1 SCOPE:
+    1. Backfill the 97 existing pre-v0.9 partitions: aggregate_aua/2025-12-23.json ... 2026-05-19.json -> v0.9 (2026-05-20 is already v0.9, no-op). Then rebuild aggregate_aua_timeseries.json from the 98 now-v0.9 partitions.
+    2. ADD a 2024-DEPTH PROBE to Phase 1's opening probe step: characterize whether the raw/bronze Schwab + SmartX daily data reaches back to 2024, and at what per-date completeness (the existing partitions floor at 2025-12-23; Andrew wants the series toward 2024). Fold it into the same feeder-coverage probe pass. The 2024-depth finding routes to CTO~B -- CTO~B carries the scoped to-2024 extension decision to Andrew. Phase 1 itself does NOT materialize pre-2025-12-23 dates; that is a separate Andrew decision off the probe.
+    3. STAGED EXECUTION (do NOT jump straight to the 97-sweep): (a) opening probe = feeder-output coverage+basis for the 97 dates + the 2024-depth characterization; (b) a 3-date scratch batch validated before the full sweep; (c) the full 97-date sweep; (d) the rollup rebuild.
+
+    HARD GUARDRAILS:
+    - NON-DESTRUCTIVE: versioned bucket, overwrite-in-place, a local pre-write backup of all 98 objects before any write. No object deleted.
+    - NEVER run mdpf_aggregate_aua.py against stale v0.8 feeder rows -- that silently emits a v0.8 number stamped v0_9 (the brief's High-severity risk). Per date, re-run WS-E v0.9 (1b = Schwab_49F_whole - 1a - 1c, the .028 crosswalk source) + WS-B FIRST, THEN the aggregator.
+    - .029 and .030's historical phases must NOT interleave: complete all 97 writes + the rollup rebuild + verification, THEN .030's historical phase.
+
+    DELIVERABLE: Phase-1 RAVC2 to 2.0.0_SA_COO~B CC 1.0.0_SA_CTO~B -- the 97-partition rewrite transcript, full-series reconciliation, the v0.8/v0.9 boundary check (the -$100.8M cliff should be GONE post-backfill), the 2024-depth probe finding, deployed verification.
+  </phase1_go>
 </task_order>

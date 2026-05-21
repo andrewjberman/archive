@@ -44,14 +44,26 @@
   </acceptance_criteria>
 
   <out_of_scope>
-    The v0.9 platinum aggregate / WS-E (.028, already live). The historical backfill (.029). WS-F portal Phase 3 (the legacy-page replacement -- separate workstream). Re-deciding the v0.9 methodology (Andrew-ruled).
+    The v0.9 platinum aggregate / WS-E (.028, already live). The aggregate_aua_timeseries.json historical backfill (.029 Phase 1 -- a DIFFERENT artifact; NOTE per amendment A1, .030 DOES own the non_model_assets.json historical backfill). WS-F portal Phase 3 (the legacy-page replacement -- separate workstream). Re-deciding the v0.9 methodology (Andrew-ruled). Materializing pre-2025-12-23 dates (gated on the .029 2024-depth probe + a separate Andrew decision).
   </out_of_scope>
 
   <deliverables>
     - build_legacy_compat_emit.py re-scoped to PRD v0.9; non_model_assets.json refreshed + reconciled vs the v0.9 platinum; Rule 13 deploy; RAVC2 to COO~B CC CTO~B.
   </deliverables>
 
-  <scope_pending date="2026-05-20" by="2.0.0_SA_COO~B">
-    AC LIST PROVISIONAL -- DO NOT GO ON THE CURRENT SCOPE. Per CTO~B's .029/.030-boundary directive (Andrew reinforced: the v0.9 backfill must reach the WHOLE Model Portfolios "Daily AUA Analysis" chart, not just the aggregate series): the chart consumes TWO daily-series artifacts -- aum-timeseries.json (model layers 1a/2a/1c) AND non_model_assets.json (the 1b Schwab-residual overlay, build_legacy_compat_emit.py's output). .029 backfills aggregate_aua_timeseries; .030 as currently scoped is daily-FORWARD only -- which would leave the chart's 1b layer historically stale. .030 likely needs to GROW from "legacy-emit v0.9 re-scope (daily-forward)" to "legacy-emit v0.9 re-scope + historical non_model_assets.json time_series backfill," co-sequenced with .029 Phase 1 so both artifacts' historical series land on the SAME v0.9 basis with no boundary skew. COO~B holds .030's final AC list until DS~B's .029 Phase-0 dry-run brief lands (the brief traces backward from the chart + enumerates every artifact + the partition-write plan); CTO~B relays the .030 re-scope direction off that brief. .030 stays dispatch_held meanwhile.
-  </scope_pending>
+  <amendment id="A1" date="2026-05-21" by="2.0.0_SA_COO~B" authority="CTO~B re-scope direction off the .029 Phase-0 brief e8d176d8f">
+    SCOPE GROWN -- the .029 Phase-0 dry-run brief (e8d176d8f) CONFIRMED, as a firm finding, the scope_pending hypothesis: the Model Portfolios "Daily AUA Analysis" chart reads aum-timeseries.json + non_model_assets.json, and BOTH are build_legacy_compat_emit.py's output (the .030 script). aggregate_aua_timeseries.json (the .029 target) has NO portal consumer. So a daily-forward-only .030 would leave the chart's historical 1b layer stale. .030 therefore GROWS from "legacy-emit v0.9 daily-forward re-scope" to ALSO include the **historical non_model_assets.json time_series backfill**.
+
+    ADDED SCOPE (Phase 5, after the Phase 0-4 daily-forward re-scope lands):
+    - Phase 5 -- historical non_model_assets.json backfill: re-materialize the non_model_assets.json daily series onto the v0.9 basis across the same date range .029 covers (the 97 partitions 2025-12-23 ... 2026-05-19 + the v0.9-forward dates). build_legacy_compat_emit.py reads aggregate_aua/{date}.json as its 49F source -- so each historical date's non_model_assets.json is re-emitted off the .029-rewritten v0.9 aggregate_aua partition.
+
+    HARD DEPENDENCY + SEQUENCING (per the brief's risk table): .030 Phase 5 reads .029's rewritten partitions -> Phase 5 GATES on MDPF_ASSETS.029 Phase 1 completing (all 97 v0.9 partition writes + the rollup rebuild + verification). .029 and .030 historical phases MUST NOT INTERLEAVE. .030 Phases 0-4 (daily-forward) MAY proceed independently of .029; Phase 5 waits.
+
+    ADDED ACs:
+    - AC5: the non_model_assets.json daily series is re-materialized v0.9 across the .029 date range; each historical date's non_model_assets.json reconciles against its .029-rewritten v0.9 aggregate_aua/{date}.json partition (same 49F source, no boundary skew).
+    - AC6: the Model Portfolios "Daily AUA Analysis" chart's 1b layer (non_model_assets.json overlay) shows a consistent v0.9 historical trend with NO v0.8/v0.9 cliff at the boundary -- same no-cliff bar as .029's aggregate-series check.
+    - AC7: non-destructive -- versioned bucket, overwrite-in-place, pre-write backup; no object deleted (same guardrail class as .029 Phase 1).
+
+    .030 STAYS dispatch_held: Phases 0-4 GO when COO~B dispatches (after the .030 Phase-0 live-page-delta + the Andrew live-page-move check per <live_page_note>); Phase 5 additionally gates on .029 Phase 1 landing. The AC list above is now FINAL (supersedes the provisional <scope_pending>).
+  </amendment>
 </task_order>
