@@ -61,4 +61,29 @@
     - Phase 3 verification: continuity proof + per-component series-walk + the AC1 daily-per-model granularity proof.
     - Session log with the Compiler Tools section. RAVC2 to COO~B CC CTO~B.
   </deliverables>
+
+  <amendment id="A1" date="2026-05-21" by="2.0.0_SA_COO~B" authority="CTO~B method ruling (125643Z) + CTO~B release on Andrew informed-YES">
+    METHOD RULED -- OPTION A. The DS~B Phase-0 probe (fb5c4f556) established there is NO calibration anchor anywhere in the .031 range (the crosswalk floors at 2026-01-16; the whole 2024-11-01..2025-12-22 span is out-of-sample). CTO~B ruled: any fitted lift (DS~B's clamped-linear candidate, or a saturating Option B) is FALSE PRECISION -- every parameter is itself unanchored. The honest method is OPTION A: RPS uncalibrated, NO lift, across the ENTIRE .031 range. The understatement is known, bounded (<=~1.13% at the 2026-01-16 edge, shrinking toward 0 going back as the missing-account set scales with book size), and CONSERVATIVE (understates, never overstates).
+
+    ANDREW INFORMED-YES: the best-estimate caveat (deep tail NOT reconciled-to-the-cent, RPS-based, marked-estimate, <=~1.13%-declining conservative understatement) was put to Andrew explicitly. Andrew confirmed -- verbatim "proceed, RPS is acceptable for this purpose." The .031 YES now stands on complete information.
+
+    SUPERSEDES:
+    - <calibration_checkpoint> -- VOID. Option A has no calibration to derive and nothing to ratify; the method ruling IS the checkpoint and it is ruled. There is NO calibration-ratification round-trip. DS~B's clamped-linear candidate (from its ACK) is superseded -- use RPS raw, lift=0, whole range.
+    - <scope> Phase 1 "FRESH CALIBRATION" -- VOID. There is no calibration phase. The build is: sweep -> rollup -> verification -> RAVC2.
+    - AC2 -- REPLACED (see AC2-A1 below).
+    - AC3 seam clause -- AMENDED (see AC3-A1 below).
+    - <deliverables> "The fresh calibration (form + parameters + sample-validation evidence), CTO~B-ratified" -- VOID; replaced by "the estimated-segment marking (per-partition + chart-surfaced)".
+
+    AC2-A1 (replaces AC2): OPTION A -- the emitter uses RPS uncalibrated, NO lift, for the entire 2024-11-01..2025-12-22 range. 1b = RPS_Schwab_whole - 1a - 1c with calibrated_Schwab == RPS. The deep-tail segment is a BEST-ESTIMATE, not a reconciled-to-the-cent series. It MUST be marked: (i) per-partition -- a field on each .031 aggregate_aua/{date}.json partition flagging it as estimated/RPS-uncalibrated (distinct from the .029 reconciled partitions); (ii) chart-surfaced -- the marking propagates so the Daily AUA chart itself visibly flags the estimated segment; a reader must be able to see where the .029 reconciled series ends and the .031 marked-estimate begins.
+
+    AC3-A1 (amends AC3): under Option A the .031/.029 seam (2025-12-22 -> 2025-12-23) is EXPECTED to show a small step -- .029's 2025-12-23 partition carries the linear lift (~$6.56M, ~0.4% of headline) while .031's 2025-12-22 is uncalibrated (lift=0). That step is the HONEST reconciled/estimated boundary and is exactly what the AC2-A1 markers flag -- it is NOT a defect and NOT a v0.8/v0.9-class cliff. AC3's continuity requirement applies WITHIN the .031 estimated segment (no spurious internal steps; per-component series-walk plausible); the .031/.029 seam is permitted the lift-difference step and MUST be marked, not smoothed away.
+
+    1c (SMA): per DS~B's parallel SMA-start-date probe (TO item d) -- if the SMA program was not live in 2024-11, 1c=0 for those early .031 dates (correct, not a defect); if it was live, ratio-estimate as .029 did (1.85% of 1a). DS~B applies per the probe finding.
+
+    2a (Inflection): MOOT for the whole range -- Inflection data starts ~2026-05-15, so the entire .031 span is 49F-only (1a+1b+1c, no synthesized 2a). Correct, consistent with .029's pre-2026-05-15 handling.
+
+    AC1 -- UNCHANGED. The HARD daily-per-model 1a granularity requirement holds in full. It remains the priority AC; Phase 3 PROVES it per-partition.
+
+    RELEASE: the sweep is GO'd 2026-05-21 (COO~B, on CTO~B's release). DS~B builds sweep -> rollup -> RAVC2 to COO~B CC CTO~B. CTO~B output-validates the RAVC2 -- the AC1 per-partition granularity proof + the estimated-segment marking are the key checks. On .031 RAVC-accept, MDPF_ASSETS 3-step-closes -- the final TO. If at RAVC the marking or the granularity fails, .031 does not close.
+  </amendment>
 </task_order>
