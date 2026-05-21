@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-05-21 -- macro-timeseries drill-down staleness fixed. INDICATORS 64->79 (15 missing indicators restored; deployed yang-v2.4.5) + generator slugify aligned to the frontend MacroTimeSeriesModal slugify (and/pct; 3 slugs corrected, 76 unchanged; deployed yang-v2.4.6). Both terraform-only, 0-diff verified. Generator re-invoked -> 79/79. Final json/macro/timeseries/: exactly 79 files, all fresh, frontend-matching slugs. Re-scoped orphan-delete (F1-F7 mis-diagnosed the live file as orphan): deleted the 3 genuine generator-wrong-slug orphans, kept the live fed_balance_sheet_as_pct_of_gdp.json. unemployment_rate depth noted out-of-scope. RAVC2 to COO + CC CTO.</completed>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — COO-issued, sibling of YALP_MDSRC.F2. Surfaced by the F1 audit's Finding F7 (added to the F1 brief in response to an Andrew follow-up). 0.7.0_AE_CloudOps already holds F2 (the sibling yield_curve staleness fix) — F3 may be batched with F2 as one macro-pipeline-staleness pass (the execution batching is your call; the TOs stay distinct for clean RAVC tracking). No gate — standalone defect fix, independent of the YALP migration.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
