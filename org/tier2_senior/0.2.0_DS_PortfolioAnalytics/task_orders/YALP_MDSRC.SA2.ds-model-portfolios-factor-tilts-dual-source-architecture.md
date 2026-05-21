@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — WS-B of YALP_MDSRC PRD v0.4 (6543894ce). PRD §6 candidate "TO-S2"; COO renamed to SA2 (S1/S2 task codes were already used by the YALP_MDSRC SmartX TOs). Authors in parallel with SA1/SA3/M1.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
