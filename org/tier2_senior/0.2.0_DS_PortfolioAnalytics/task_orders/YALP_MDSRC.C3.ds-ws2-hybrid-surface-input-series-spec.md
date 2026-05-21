@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — CTO stimulus-scan recommendation, COO-issued. A3-INDEPENDENT and Q1-INDEPENDENT — this enumerates what the yang generators ALREADY consume, no YCharts dependency. 0.2.0_DS is idle and owns the WS-2 domain (it ran YALP_MDSRC.002). Start on receipt.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
