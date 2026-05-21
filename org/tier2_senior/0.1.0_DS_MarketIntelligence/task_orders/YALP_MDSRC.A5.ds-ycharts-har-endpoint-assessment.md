@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <date>2026-05-21</date>
-    <status>in_progress</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — Andrew-direct (2026-05-21). Andrew had Alyssa record an HAR (HTTP Archive — a full browser network capture) of a YCharts session and is handing the file directly to 0.1.0_DS. This is the INTERIM unblock: live YCharts exploration is gated on the dedicated seat Andrew is acquiring, but a static HAR lets 0.1.0_DS assess endpoints NOW without a live seat. A5 is 0.1.0_DS's immediate priority — its output feeds the A4 follow-ups + the C2 pre-stage already in flight. Interleave with / ahead of C2 pre-stage.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
