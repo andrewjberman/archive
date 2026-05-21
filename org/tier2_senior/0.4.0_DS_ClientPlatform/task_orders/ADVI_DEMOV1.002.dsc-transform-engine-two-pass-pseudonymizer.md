@@ -29,17 +29,47 @@
     built in parallel with TO-1 (infra) — the build does not gate on infra; only
     the TO-4 run does.
 
+    PHASE-0 DELTAS (TO-0 probe brief, RAVC2-accepted 2026-05-21 — these REFINE
+    this TO; read brief §3/§4/§7):
+    - The opal-partners-data pseudonymizer is RETIRED (Andrew 2026-04-15) —
+      `needs_pseudonymization()` returns False; there is NO serve-time PII
+      masking. Real 49F PII is currently served cleartext, gated only by
+      firm-scoped auth. CONSEQUENCE: the demo bucket must be 100% fake AT REST —
+      there is no serve-time net behind it. The TO-4 R5 leak scanner is the SOLE
+      PII defense; build the engine accordingly.
+    - The ADVI_ANONYM field map still EXISTS (in pseudonymizer.py
+      `_transform_field`) as a field-classification REFERENCE — reuse it as a
+      reference only. Do NOT frame the engine as "extending the serve-time
+      module"; the module is dead code. The engine is a fresh standalone walker.
+    - JSON-PATH-CONTEXT-AWARENESS IS MANDATORY (brief §3, the highest Phase-2
+      risk). `label` / `key` / `display_label` are NOT universally PII: in
+      concentration/items[], top_holdings[], mix[] they carry TICKERS (`QQQ`,
+      `IEFA`) and asset-class labels (`Equities`) — SAFE, keep verbatim; in
+      partner_analytics segments[]/clients[] and cumulative_chart adv_drill they
+      carry advisor/client names — PII. A blind field-name pseudonymizer is WRONG
+      (it corrupts tickers or misses names). The engine must decide by JSON path,
+      not field name. The mapping-table-value-match approach (replace any string
+      that IS a known real identity) is the safe core — but it must also walk
+      object KEYS and bare LIST-STRINGS, and the exec_summary free-text narrative
+      needs substring replacement, not keyed-field replacement.
+    - Transform scope is NOT platinum-only: the L3 client-detail route
+      (handle_client_detail / getClientDetail) reads
+      gold/entities/clients/{id}/detail.json. The engine must take its prefix
+      list as a PARAMETER — platinum/** is confirmed in scope; whether
+      gold/entities/clients/ is included is an open item COO~C is resolving with
+      CTO/DE (is getClientDetail superseded by getPlatinumClientSummary?). Build
+      the engine prefix-agnostic so the final list is a run-time input, not a
+      code change. The definitive prefix list will be confirmed before TO-4.
+
     CTO rulings that bind this TO:
     - R1 — Two-pass, deterministic, seeded. Pass 1 builds the COMPLETE mapping
       table before Pass 2 touches anything. Any unmapped id encountered in Pass 2
       is a HARD ERROR, never a passthrough — referential integrity across 22 k
       files depends on it.
-    - R2 — Reuse the ADVI_ANONYM PII-field classification map + determinism
-      contract; REPLACE its hash output with a seeded faker (realistic names, not
-      `a3f9b2..` hashes). pseudonymizer.py
-      (infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/pseudonymizer.py)
-      is the SERVE-TIME module — EXTEND its field map into a bulk offline walker;
-      do NOT author over it or modify it in place.
+    - R2 — Reuse the ADVI_ANONYM PII-field classification map (as a REFERENCE —
+      the pseudonymizer module is retired, see deltas above) + the determinism
+      contract; REPLACE hash output with a seeded faker (realistic names, not
+      `a3f9b2..` hashes). Do NOT modify pseudonymizer.py in place.
     - R4 — The real->fake mapping table is a re-identification key. Treat it as a
       secret: it must NEVER be written to opal-data-demo, NEVER committed to git,
       NEVER printed to logs or agent messages. Persist it (if at all) only to a
@@ -110,7 +140,22 @@
     3. Pass 2 re-keys S3 paths (advisors/{real_slug}/ -> advisors/{fake_slug}/,
        clients/{z-id}/ -> clients/{fake-id}/, accounts likewise,
        platinum/49financial/ -> platinum/demo/) AND deep-walks JSON content
-       replacing names/slugs/ids/embedded firm_id — including id-valued KEYS.
+       replacing names/slugs/ids/embedded firm_id.
+    3a. The content walk handles ALL FOUR PII loci the Phase-0 brief enumerated:
+       (i) string VALUES; (ii) object KEYS that are identities (e.g.
+       cumulative_chart adv_drill keyed by advisor name, role_breakdown.{name});
+       (iii) bare LIST-STRINGS (e.g. cumulative_chart categories[] entries like
+       "Chan, William & Shelley (z08327149)"); (iv) the exec_summary free-text
+       narrative — substring replacement of any real identity appearing in prose.
+    3b. JSON-PATH-CONTEXT-AWARE: label/key/display_label under
+       concentration/top_holdings/mix are tickers/asset-classes — left verbatim;
+       under partner_analytics segments/clients and cumulative_chart adv_drill
+       they are names — transformed. The engine decides by path/value-membership,
+       NOT by field name. Verified against the brief §3 reconciliation table.
+    3c. The engine takes its S3 prefix list as a PARAMETER (not hardcoded).
+       platinum/** is confirmed in scope; gold/entities/clients/ is a pending
+       resolution (COO~C / CTO / DE) — the engine must accept the final list as
+       a run-time input so the resolution needs no code change.
     4. An unmapped id encountered in Pass 2 raises a HARD ERROR (non-zero exit) —
        demonstrated by a test/dry-run with a deliberately unmapped id.
     5. Dollar values: verbatim by default; the value-handling is a single config

@@ -42,6 +42,25 @@
     this TO confirms ROUTING resolves (correct bucket, no 403/401), not data
     richness. COO~C issues the GO when TO-1 + TO-2 are RAVC-closed.
 
+    PHASE-0 DELTAS (TO-0 probe brief §5, RAVC2-accepted 2026-05-21): a `demo`
+    firm trips TWO firm-specific portal branches that MUST be handled or the demo
+    login renders nothing:
+    - `portal/src/lib/firmAccess.ts` `FIRM_ALLOWED_PATHS` — a per-firm allowlist
+      that FAILS CLOSED: an unknown firmId = deny-all = the demo user sees no
+      pages. A `'demo'` entry mirroring the `49financial` path set is REQUIRED.
+    - `portal/src/pages/AdvisorIntelligence/_partners/{firm}/` — a per-firm
+      tenant-layout dir resolved via `useTenantLayout`. Demo needs a
+      `_partners/demo/` dir (mirror `49financial/`) or a `useTenantLayout`
+      default. REQUIRED.
+    Both are portal-component changes = DE-owned, NOT DS lane. COO~C is flagging a
+    DE-lane need to CTO + Andrew. Until a DE lane is up these two items are
+    CARVED from this TO's executable scope — DS~C does the DynamoDB FIRM#demo +
+    Cognito user + ROUTER_FIRM_SUFFIX entry; the firmAccess.ts + _partners/demo/
+    changes are issued separately to DE (or folded here once a DE lane exists).
+    The TO-3 end-to-end demo-login check (criterion 7) depends on BOTH the DS
+    items AND the DE items — so this TO does not fully close until the DE items
+    land. Coordinate sequencing via COO~C.
+
     Precedent: `mockadv` is an existing non-real test firm — its FIRM# record,
     Cognito user, and routing follow the same shape; use it + the FIRMSEP.10
     Cottonwood onboarding as the working templates. The PRD ADVI_FIRMSEP
@@ -116,8 +135,13 @@
        BOTH serving paths to opal-data-demo with no 403/401 routing error.
     7. A demo login authenticates and the Advisor Intelligence portal loads for
        the demo firm (data may be empty/sparse until TO-4 populates — routing +
-       auth resolution is what this criterion verifies).
-    8. Session log with Compiler Tools section committed.
+       auth resolution is what this criterion verifies). NOTE: this criterion
+       requires the DE items (firmAccess.ts FIRM_ALLOWED_PATHS['demo'] +
+       _partners/demo/) to have landed — without them firmAccess.ts fails closed.
+    8. The DE items — firmAccess.ts `FIRM_ALLOWED_PATHS['demo']` entry and the
+       `_partners/demo/` tenant-layout dir — are landed (by the DE lane; tracked
+       by COO~C). DS~C confirms they are present before signing criterion 7.
+    9. Session log with Compiler Tools section committed.
   </acceptance_criteria>
 
   <scope>

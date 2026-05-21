@@ -4,7 +4,12 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- RAVC2-accepted by 2.0.0_SA_COO~C 2026-05-21: brief
+    docs/briefs/advi-demov1-phase0-serving-path-pii-probe-20260521.md (commits
+    5ecfa2ceb, a15ffd67a verified on origin/CLOUD); all 8 acceptance criteria
+    met; §3.2 linchpin definitively resolved; compiler tools logged. Four
+    Phase-0 deltas folded into TO-2/TO-3 amendments + relayed to CTO. -->
     <project_code>ADVI_DEMOV1</project_code>
   </metadata>
 
