@@ -7,7 +7,7 @@
     <date>2026-05-20</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>
-    <dispatch_unblock_condition>GO NOW — Andrew-direct, 2026-05-20. Andrew ruled Q1: YCharts IS scrapeable; the directive is to go DEEPER — reverse-engineer the internal API that feeds the YCharts web app, not scrape rendered HTML. No gate. Start on receipt. 0.1.0_DS is idle and holds the YCharts capture seat — this is its real work.</dispatch_unblock_condition>
+    <dispatch_unblock_condition>GO NOW — Andrew-direct, 2026-05-20. Andrew ruled Q1: integrate YCharts by reverse-engineering the internal API that feeds its web app, and go DEEPER than A2's page-level spec. Andrew framing — this is NOT "scraping": it is integrating against the provider's own backend API, and it is the TEMPLATE approach for ALL third-party data sources. No gate. Start on receipt. 0.1.0_DS is idle and holds the YCharts capture seat — this is its real work.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P1 urgent — Andrew-direct. This is the definitive YCharts access mechanism. It upgrades the A2 page-level endpoint spec to the actual backend JSON API and becomes the real build spec for TO-C1 (credential/session pipeline) + TO-C2 (market-data pull).</priority>
     <sla>Substantial structured reverse-engineering — comparable to a WS-domain audit (~2-4 effort-days). Deep, empirical, complete. Interim partials welcome — Andrew wants depth, not speed.</sla>
@@ -25,7 +25,7 @@
   <context>
     Andrew-direct, 2026-05-20, verbatim intent: "We can definitely scrape them, we just need to go deeper. We need to study their endpoints and how their endpoints actually feed the web app. Obviously what is feeding the web app is an API to their database, so we should be able to get very high-fidelity robust data by reverse-engineering their endpoints. That is what 0.1.0_DS should be doing."
 
-    This RULES Q1 (official Data API vs scrape): scrape — but specifically by reverse-engineering the YCharts web app's INTERNAL JSON API, the XHR/fetch calls the single-page app issues to the YCharts backend. That backend is an API to their database; calling it directly yields structured, high-fidelity JSON — far more robust than parsing rendered HTML, and it sidesteps the paid official Data API. A2 catalogued the YCharts surfaces and a page-level endpoint spec; A3 goes one layer down to the actual request/response contract of the backend API so TO-C1/C2 can be built against a concrete, empirically-verified API — not a scrape of the DOM.
+    This RULES Q1 (official paid Data API vs. self-integration): self-integrate, by reverse-engineering the YCharts web app's INTERNAL JSON API — the XHR/fetch calls the single-page app issues to the YCharts backend. That backend is an API to their database; calling it directly yields structured, high-fidelity JSON. Andrew's framing, 2026-05-20: this is explicitly NOT "scraping" — it is integrating against the provider's OWN backend API, the same contract their web app uses, and it is the CANONICAL TEMPLATE approach for ALL third-party data sources (not a YCharts one-off). A2 catalogued the YCharts surfaces and a page-level endpoint spec; A3 goes one layer down to the actual request/response contract of the backend API so TO-C1/C2 can be built against a concrete, empirically-verified API — not a parse of the rendered DOM.
   </context>
 
   <scope>
@@ -87,7 +87,8 @@
   </deliverables>
 
   <do_not>
-    <rule>Do NOT scrape rendered HTML / the DOM — the explicit Andrew directive is to reverse-engineer the internal JSON API behind the web app. HTML parsing is the fallback of last resort, only for a datum genuinely served no other way, and must be flagged as such.</rule>
+    <rule>Do NOT parse rendered HTML / the DOM — the explicit Andrew directive is to integrate against the internal JSON API behind the web app, not "scrape" a page. DOM parsing is the fallback of last resort, only for a datum genuinely served no other way, and must be flagged as such.</rule>
+    <rule>Frame the deliverable as an INTEGRATION spec, not a "scraping" guide — Andrew directive 2026-05-20: "we do not scrape." This is integration against the provider's own backend API; the brief's language must reflect that.</rule>
     <rule>Do NOT build the pull or the credential pipeline — A3 is the empirical spec; TO-C1/C2 build against it.</rule>
     <rule>Do NOT re-run A1's headless-capture viability probe — consume its result; A3 owns the API contract, A1 owns session acquisition.</rule>
     <rule>Do NOT expose YCharts credentials / cookie values in chat / MCP / git / logs / the brief — document the auth MECHANISM (which cookie, which header) without the secret values.</rule>
