@@ -3,7 +3,9 @@
     <id>YALP_MDSRC.B2</id>
     <slug>ae-b1-lambda-artifacts-commit-and-deploy</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.5.0_AE_OpalETL</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~A</issued_to>
+    <reassigned_from>0.5.0_AE_OpalETL</reassigned_from>
+    <!-- REASSIGNED 2026-05-21 by COO (stimulus-scan): the entire OpalETL lane (0.5.0_AE_OpalETL base + ~B) is offline (NOT_REGISTERED). B1 is e2e-verified + staged and 0.4.0_DS is blocked on this deploy; B2 cannot sit indefinitely on an offline lane. Reassigned to 0.7.0_AE_CloudOps~A — a live, idle, AE-capable CloudOps-lane agent (consistent with the original dispatch_unblock_condition's anticipation that ~A may take it). One known friction: if the SHARED_OPAL_ETL-lane B1 artifact trips the owned-paths pre-commit hook for ~A's serial, ~A surfaces to COO and COO does the one-line .owned-paths.yaml permitted_agents add (the documented tilde-lane owned-paths-gap pattern) — fast, not a blocker. The CLOUD_OPS_OR_ETL (any-AE) artifact commits clean. -->
     <date>2026-05-20</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>
