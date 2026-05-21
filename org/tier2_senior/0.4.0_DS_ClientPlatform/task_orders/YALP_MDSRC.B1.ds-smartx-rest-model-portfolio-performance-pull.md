@@ -24,8 +24,11 @@
   </context>
 
   <scope>
-    <scope_split note="COO routing ruling 2026-05-20 — B1 option (c)">
-      The SmartX-pull CODE + Lambda deploy is SHARED_OPAL_ETL lane (data/smartx/scripts/) and was split to YALP_MDSRC.B2 (0.5.0_AE_OpalETL). DS 0.4.0 BUILT + VERIFIED the pull script (pull_smartx_model_monthly_performance.py — gate-clean, live dry-run, YTD cross-check 0.002pp); AE-OpalETL commits + deploys it under B2. B1 (this TO, DS 0.4.0) RETAINS: the yang dual-input producer modification (yang Lambda = ClientPlatform lane), the end-to-end model_portfolio_benchmarks.json verification, and the RAVC2. Phase 1's pull-build is DONE; B1's remaining active work is the yang-side producer + the end-to-end verify (the latter consumes B2's deployed sidecar).
+    <scope_split note="COO routing ruling 2026-05-20 — B1 / B2 split (UPDATED)">
+      BOTH B1 build artifacts are AE-lane infra/aws/lambda code — DS 0.4.0 authors + verifies, AE commits + deploys (CLAUDE.md Rule 1; the DS commit carve-out Rule 13 is `data/*/scripts/{gold,silver,bronze}/*.py` only). The COO's earlier "yang Lambda = your ClientPlatform lane" framing was WRONG — all of infra/aws/lambda/ is AE lane (CLOUD_OPS_OR_ETL); DS 0.4.0 correctly caught it. Both artifacts split to YALP_MDSRC.B2 (0.5.0_AE_OpalETL):
+        - Artifact 1: data/smartx/scripts/pull_smartx_model_monthly_performance.py (SHARED_OPAL_ETL).
+        - Artifact 2: infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-model-portfolio-benchmarks/lambda_function.py (CLOUD_OPS_OR_ETL).
+      DS 0.4.0 BUILT + VERIFIED both (gate-clean; pull dry-run + YTD cross-check 0.002pp; yang dual-source override logic tested vs a synthetic sidecar). B1 (this TO, DS 0.4.0) is now honestly scoped to: author + verify the two code artifacts (DONE); write the AE hand-off brief; coordinate the sidecar S3 path/shape with B2; run the end-to-end model_portfolio_benchmarks.json verification once B2 deploys both Lambdas; RAVC2. B1's build work is complete — the remaining active B1 work is the hand-off brief + the post-deploy end-to-end verification.
     </scope_split>
     <in_scope>
       Phase 0 (verify-first): confirm against REAL SmartX REST data — `reportedmodels/{rmid}/historicalperformance` cadence + the `performanceValue` units/semantics, and `models/{id}/statistics` — before building. Surface any data-shape surprise.
