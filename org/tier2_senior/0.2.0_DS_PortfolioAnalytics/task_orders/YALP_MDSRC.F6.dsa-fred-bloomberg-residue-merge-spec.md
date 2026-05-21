@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics~A</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — stimulus-scan reallocation (0.2.0_DS~A idle since F4 completed). Q1-independent. The concrete next FRED implementation step; F4 explicitly flagged this as the integration decision to spec. Start on receipt.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
