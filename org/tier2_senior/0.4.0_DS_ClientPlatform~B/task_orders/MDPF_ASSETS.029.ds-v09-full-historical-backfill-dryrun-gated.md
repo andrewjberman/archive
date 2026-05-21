@@ -68,4 +68,8 @@
 
     DELIVERABLE: Phase-1 RAVC2 to 2.0.0_SA_COO~B CC 1.0.0_SA_CTO~B -- the 97-partition rewrite transcript, full-series reconciliation, the v0.8/v0.9 boundary check (the -$100.8M cliff should be GONE post-backfill), the 2024-depth probe finding, deployed verification.
   </phase1_go>
+
+  <phase1_checkpoint1 date="2026-05-21" note="MECHANISM CORRECTION -- supersedes the phase1_go guardrail">
+    Checkpoint 1 (opening probe) COMPLETE -- brief 07b7f7687. ANDREW CORRECTED THE MECHANISM mid-probe: the phase1_go guardrail's literal "re-run WS-E v0.9 + WS-B per date FIRST" is NOT EXECUTABLE for the historical series -- WS-B's SmartX call is current-state-only, and silver/allocations floors at 2026-01-16. CORRECTED MECHANISM (Andrew-direct, authoritative; detail in brief 07b7f7687): re-materialize each date's v0.9 49F from THREE EXISTING daily artifacts -- 1a from aum-timeseries.json (the portal Daily AUA panel series), Schwab-whole from schwab/silver/rps, 1c from the SmartX SMA daily mechanism. The non-destructive + no-interleave guardrails STAND; only the per-date feeder-recompute mechanism is replaced. 2024-depth: the series can reach 2024-11-01 -- routed to CTO~B for the to-Andrew extension decision (Phase 1 still does only the 97 dates 2025-12-23..2026-05-19 on this GO). OPEN RULING (CTO~B, gates checkpoint 3 / the 97-sweep): a ~$56M RPS-vs-crosswalk basis-seam -- .028 daily-forward used the crosswalk Schwab-whole source; Andrew directed RPS for the historical series; RPS undershoots the crosswalk ~$56M -> a v0.9/v0.9 internal seam at the 2026-05-20 boundary. DS~B measures it empirically in checkpoint 2 (3-date scratch batch) + hard-stops for CTO~B's ruling if material.
+  </phase1_checkpoint1>
 </task_order>
