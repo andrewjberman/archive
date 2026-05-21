@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-21 (authored on Andrew 2024-depth = YES ruling, relayed by CTO~B)</date>
-    <status>active</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO'd 2026-05-21 by 2.0.0_SA_COO~B on the CTO~B relay of Andrew's 2024-depth ruling (YES -- extend to 2024-11-01). The .029 v0.9 backfill mechanism is RAVC-accepted + proven; .030 landed the legacy emitter on v0.9. .031 is the final MDPF TO -- on .031 land MDPF_ASSETS 3-step-closes. ONE internal checkpoint: the fresh calibration is derived + sample-validated + CTO~B-ratified BEFORE the ~290-date full sweep (see <calibration_checkpoint>).</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
@@ -157,4 +157,23 @@
 
     NET: the .031 re-run is the live ~B critical path. DS~B re-derives 1c + 1b, re-runs the 297 partitions, RAVC2 to COO~B CC CTO~B. CTO~B output-validates; COO~B independent S3 re-validation (1c now non-zero per-partition + the seam now level-continuous + AC1 still proven). On accept, .031 re-closes and MDPF_ASSETS 3-step-closes. RE-RUN GO'd 2026-05-21 by COO~B on this ruling.
   </amendment>
+
+  <coo_reclose date="2026-05-21" by="2.0.0_SA_COO~B">
+    MDPF_ASSETS.031 RE-CLOSED -- COMPLETE. This supersedes BOTH the earlier coo_close (the first close, dd08ef0bc) and its close_retracted block: the A4 1c re-run resolved the 1c component-seam that triggered CTO~B's HOLD; .031 is now genuinely closed, no retraction pending.
+
+    DS~B A4 re-run RAVC2: commit 156223c36, brief docs/briefs/mdpf-assets-031-a4-1c-rerun-ravc2-20260521.md. CTO~B output-validation: CONFIRM PASS. COO~B independent S3 re-validation: PASS.
+
+    COO~B INDEPENDENT S3 RE-VALIDATION (live artifacts, not the self-report):
+    - 1c re-derived to flat $19,673,469.29 across all 297 .031 partitions -- rollup aggregate_aua_timeseries.json sma_aua[:297] = exactly 1 distinct value; the .029 range untouched (92 distinct).
+    - HEADLINE + 1a INVARIANT to the cent vs the pre-re-run S3 reads (2025-12-22 headline $1,319,699,960.83 / 1a $1,063,027,807.88; 2024-11-15 1a $361,025,434.53) -- the 1c choice moved only the 1c/1b split, the daily AUA headline trend did not move.
+    - 1c COMPONENT-SEAM 2025-12-22 -> 2025-12-23: $19,673,469.29 -> $19,673,469.29, step $0.00 -- CLOSED, level-continuous. The $0 -> $19.67M discontinuity that triggered CTO~B's HOLD is resolved.
+    - 3-term identity 0 breaks in the .031 range; 0 negative 1b across all 395; c1_treatment.method = sma_trajectory_flat_seam_anchored per-partition; rollup rebuilt (395 dates, generated_at 2026-05-21T14:57:58Z).
+    - The full-395 identity sweep's 3 apparent "breaks" (2026-05-18/19/20) positively identified as Cohort 2b exactly (the documented PRD-v0.6 out-of-headline Inflection-non-model exclusion) -- not a defect, not from the re-run; .031-range identity holds exactly (49F-only).
+
+    .029 QUICK-CHECK: PASSED -- .029's ratio-1c within ~$1.50M (worst, upper-bracket estimate) of the real SMA, inside the ~$2-3M tolerance. .029 STANDS, no re-open. The bounded ~$1.5M overstatement is a documented known-small-imprecision observation (non-gating, no action).
+
+    ACs (full .031, A1-A4): AC1 (HARD daily-per-model 1a granularity, Andrew non-negotiable) MET + PROVEN per-partition 297/297. AC2 (Option A clamped-fit calibration, A2; the 1c term corrected A2->A4 to the SMA-trajectory flat $19,673,469.29) MET. AC3 (clamped fit, seamless .031/.029 join) MET. AC2-A3 marking (estimate_tier whole range, boundary 2025-12-23) MET. AC4 (non-destructive) MET. AC5 (sweep -> rollup -> RAVC2) MET. The 1c component-seam -- the sole CTO~B HOLD blocker -- CLOSED.
+
+    OUTCOME: MDPF_ASSETS.031 (2024-depth v0.9 backfill) is COMPLETE. With .028 + .029 + .030 + .031 all RAVC-accepted, the MDPF v0.9 line is fully landed -- the Daily AUA Analysis chart is one continuous v0.9 trend back to 2024-11-01. MDPF_ASSETS the project 3-step-CLOSED 2026-05-21 (~B C-suite): TO + project JSON + REGISTRY by COO~B; PRD Status line by CTO~B (ANY_CTO lane). Two documented non-gating follow-ons: MDPF_ASSETS.033 (chart-surfacing DE stub, parked) + the .029 known-small-imprecision observation (no action).
+  </coo_reclose>
 </task_order>
