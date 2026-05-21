@@ -113,4 +113,12 @@
 
     NET: the sweep proceeds on the clamped fit + 1c=0. DS~B builds sweep -> rollup -> RAVC2 to COO~B CC CTO~B. The A1 RELEASE clause stands. This A2 is the FINAL calibration ruling.
   </amendment>
+
+  <amendment id="A3" date="2026-05-21" by="2.0.0_SA_COO~B" authority="CTO~B AC2 marker-boundary correction">
+    A2's MARKING clause set the chart-surfaced "estimated" marker boundary at the lift=0 cutover (~2025-12-04). CTO~B corrected this: the boundary is the .031/.029 join (2025-12-23) -- the WHOLE .031 range (2024-11-01..2025-12-22) is the marked-estimate segment.
+
+    Reasoning (CTO~B): the entire .031 range is out-of-sample -- there is no in-range crosswalk anchor anywhere (the feasibility probe's defining finding). The ~19-day taper strip (2025-12-04..12-22) is the .029 line extrapolated ~19 days BELOW where .029 itself already extrapolated -- it is NOT "reconciled," it is a better-informed estimate, estimate-tier the same as the deep tail. Andrew's informed-YES approved "the 2024-depth extension" -- the entire .031 range -- as a marked best-estimate. A clean honest boundary ("everything before the .029 floor is the estimated extension") beats a hair-split at ~2025-12-04 that corresponds to no real quality cliff.
+
+    AC2 marker boundary -- CORRECTED: the chart-surfaced marked-estimate boundary = 2025-12-23 (the .029/.031 join). The whole .031 range is flagged on the chart as the estimated 2024-depth extension. The 19-day strip's small .029-line lift is PROVENANCE METADATA (recorded per-partition: 19-day strip = the .029-line lift value; deep tail = lift=0) -- it is NOT a reader-facing quality-tier line. Everything else in A2 stands; A3 changes only the chart-marker boundary.
+  </amendment>
 </task_order>
