@@ -86,4 +86,31 @@
 
     RELEASE: the sweep is GO'd 2026-05-21 (COO~B, on CTO~B's release). DS~B builds sweep -> rollup -> RAVC2 to COO~B CC CTO~B. CTO~B output-validates the RAVC2 -- the AC1 per-partition granularity proof + the estimated-segment marking are the key checks. On .031 RAVC-accept, MDPF_ASSETS 3-step-closes -- the final TO. If at RAVC the marking or the granularity fails, .031 does not close.
   </amendment>
+
+  <amendment id="A2" date="2026-05-21" by="2.0.0_SA_COO~B" authority="CTO~B calibration ratification (130657Z) + CTO~B RESOLVE directive superseding AC3-A1">
+    A1's AC3 framing is REVERSED by CTO~B. The reversal rests on a NEW artifact -- DS~B's Phase-1 commit 8a11acbed (the clamped-linear-delta-$ derivation + 3-date sample validation), which was not in hand when A1's Option A was framed off the probe (fb5c4f556). CTO~B reviewed + RATIFIED the clamped fit (130657Z) and issued the RESOLVE directive: the clamped fit governs; A1's "accept the ~$6.56M seam" is the wrong call. COO~B concurs on the merits -- a bare ~$6.56M step at the 2025-12-22/23 boundary is a methodology-APPLICATION artifact (the calibration applied to 12-23 but not 12-22), not an honest economic boundary; "marked-not-smoothed" does not fix an artifactual overnight jump. The clamped fit eliminates it correctly.
+
+    THE RATIFIED CALIBRATION (.031's calibration of record): the clamped linear delta-$ fit --
+        lift(d) = max(0, 14,796,793 + 343,246 x days_since(2026-01-16))
+        calibrated_Schwab(d) = RPS_whole(d) + lift(d)
+    It is the ALREADY-RATIFIED .029 linear delta-$ fit + a physical floor (max with 0). Behavior across the .031 range:
+    - 2024-11-01..~2025-12-03 (~265 days, the genuinely-unanchored deep tail): clamps to lift=0 -- RPS uncalibrated. This IS Option A. Marked best-estimate (AC2).
+    - ~2025-12-04..2025-12-22 (the ~19-day strip): carries a positive lift that is the .029 ratified line tapering from ~$6.22M (12-22) down to $0 (~12-04). It is a 19-day continuation of an already-ratified fit -- NOT a fabricated/unanchored calibration -- and it makes the .031/.029 join seamless (12-22 lift ~$6.22M joins .029's 12-23 lift ~$6.56M one slope-step apart -- zero boundary step, the same line).
+
+    SUPERSEDES (within A1):
+    - <calibration_checkpoint> "VOID" -- REVERSED. The checkpoint produced the clamped fit and CTO~B ratified it (130657Z). The .031 calibration of record = the clamped linear delta-$ fit above.
+    - AC2-A1 "RPS uncalibrated, NO lift, entire range" -- CORRECTED to: RPS uncalibrated (lift=0) for the ~265-day deep tail; the .029-line taper for the ~19-day strip. AC2 stays Option-A-in-substance: the genuinely-unanchored deep tail is RPS-uncalibrated, marked best-estimate. Andrew's informed-YES is fully honored -- the deep tail is exactly the RPS-uncalibrated marked-estimate he approved; the 19-day strip uses the .029 calibration he already has, tapering. No Andrew re-surface needed (CTO~B's call).
+    - AC3-A1 "the .031/.029 seam carries an expected ~$6.56M step, marked not smoothed" -- DELETED. AC3-A2: the clamped fit produces NO boundary step; the .031/.029 join is seamless by construction (same line). AC3's within-segment continuity + per-component series-walk still hold.
+    - DS~B's calibration-derivation STOP (COO~B 130722Z message) -- LIFTED. DS~B's clamped-linear fit (8a11acbed) is correct and IS the calibration used.
+
+    MARKING (AC2 clarification): the per-partition + chart-surfaced "estimated" marker flags the lift=0 deep-tail segment (2024-11-01..~2025-12-03) -- that is the RPS-uncalibrated best-estimate a reader must be able to see. The ~19-day taper strip is .029-line-calibrated, not in the same "unanchored estimate" class. DS~B sets the precise marker boundary at the lift=0 cutover (~2025-12-04) and surfaces it for CTO~B output-validation at RAVC.
+
+    1c (SMA) -- RESOLVED by DS~B's item-(d) probe (commit 265a3f04f, brief docs/briefs/mdpf-assets-031-item-d-1c-sma-and-gaps-20260521.md): 1c = $0 at EVERY .031 date. The 2 SMA-type models (opal_growth_sma, opal_div_sma) are entirely absent from the SmartX consolidated allocations store across the whole .031 span -- the SMA program had no book footprint in 2024-11..2025-12. The .029 ratio-estimate (1c = 1.85% x 1a) MUST NOT be carried into .031 -- it would fabricate a non-existent SMA layer. .031 per-date formula: 1a daily-per-model from aum-timeseries.json at full grain; calibrated_Schwab = RPS + clamped-lift; 1c = 0; 1b = calibrated_Schwab - 1a.
+
+    GAP HANDLING -- per DS~B item-(d): identical to .029 (a partition only for a business day with both RPS + a 1a point; weekends/holidays/year-end get no partition + no synthetic fill; rollup connects across).
+
+    AC1 -- UNCHANGED. The HARD daily-per-model 1a granularity requirement holds in full; Phase 3 PROVES it per-partition.
+
+    NET: the sweep proceeds on the clamped fit + 1c=0. DS~B builds sweep -> rollup -> RAVC2 to COO~B CC CTO~B. The A1 RELEASE clause stands. This A2 is the FINAL calibration ruling.
+  </amendment>
 </task_order>
