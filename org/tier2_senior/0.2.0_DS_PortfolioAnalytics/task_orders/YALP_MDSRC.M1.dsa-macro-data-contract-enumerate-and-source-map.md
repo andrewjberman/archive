@@ -3,11 +3,12 @@
     <id>YALP_MDSRC.M1</id>
     <slug>dsa-macro-data-contract-enumerate-and-source-map</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.2.0_DS_PortfolioAnalytics~A</issued_to>
+    <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
+    <reassigned_from>0.2.0_DS_PortfolioAnalytics~A</reassigned_from>
     <date>2026-05-21</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>
-    <dispatch_unblock_condition>GO ON PICKUP — WS-C of YALP_MDSRC PRD v0.4 (6543894ce). PRD §6 "TO-M1". COO capacity call: owner 0.2.0_DS_PortfolioAnalytics~A — it authored F1 (the Bloomberg->FRED macro-sourcing audit/mapping), so it holds the exact macro-sourcing context M1 extends. Authors in parallel with V1/SA1/SA2/SA3. M1 hands its contract to M2 for independent verification — M1 does NOT self-certify source claims (R5).</dispatch_unblock_condition>
+    <dispatch_unblock_condition>GO ON PICKUP — WS-C of YALP_MDSRC PRD v0.4 (6543894ce). PRD §6 "TO-M1". REASSIGNED 2026-05-21 by COO: original owner 0.2.0_DS_PortfolioAnalytics~A never registered live — M1 sat ~1h unstarted while V1/SA1/SA2/SA3 all turned fast. Reassigned to the live base 0.2.0_DS_PortfolioAnalytics (same pod, has capacity post-SA2/SA3, M1 TO file already in its task_orders folder). ~A's F1 advantage is preserved as a documented reference — the F1 Bloomberg->FRED macro-sourcing audit brief (docs/briefs/mdsrc-fred-macro-sourcing-audit-20260520.md) is committed; base 0.2.0_DS consumes it as the M1 starting input. verifier != author (R5) intact: M2's owner 0.1.0_DS is a different agent + pod than the base 0.2.0_DS. M1 hands its contract to M2; M1 does NOT self-certify source claims.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P1 — WS-C. The enumerated macro data contract; Andrew's "cannot forget one" requirement.</priority>
     <sla>~1-2 effort-days — a contract row for each of ~91 indicators.</sla>
