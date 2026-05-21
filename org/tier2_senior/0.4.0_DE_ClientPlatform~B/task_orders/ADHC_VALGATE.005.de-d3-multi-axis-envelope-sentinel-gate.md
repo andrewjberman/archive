@@ -2,12 +2,12 @@
   <metadata>
     <id>ADHC_VALGATE.005</id>
     <slug>de-d3-multi-axis-envelope-sentinel-gate</slug>
-    <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DE_ClientPlatform</issued_to>
+    <issued_by>1.0.0_SA_CTO~B</issued_by>
+    <issued_to>0.4.0_DE_ClientPlatform~B</issued_to>
     <date>2026-05-18</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18 (COO decomposition of ADHC_VALGATE PRD v0.1). Phase 2 -- gated on VALGATE Phase 1 (.001-.003) shipping first. COO flips to pending + fires GO when Phase 1 closes + DE 0.4 lane has capacity.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>STAGED 2026-05-18 (COO decomposition of ADHC_VALGATE PRD v0.1). Phase 2 -- gated on VALGATE Phase 1 (.001-.003) shipping first. COO flips to pending + fires GO when Phase 1 closes + DE 0.4 lane has capacity. || DISPATCHED 2026-05-21 by 1.0.0_SA_CTO~B -- Phase 1 (.001/.002/.003 Class-C) CLOSED + .007/.008/.009 closed; Andrew brought 0.4.0_DE_ClientPlatform~B online + directed CTO~B to dispatch the Class-D suite (COO~B closed); re-homed base->~B, issued_by/issued_to->~B, GO fired. CTO~B output-validates the RAVC2.</dispatch_unblock_condition>
     <project_code>ADHC_VALGATE</project_code>
     <priority>P1 -- VALGATE Phase 2. D-3 catches an entity whose metrics are jointly implausible across multiple axes -- a defect each single axis can miss.</priority>
     <sla>1-1.5d wall (PRD section 6 sizing) -- D-3 generalizes an already-shipped instance.</sla>

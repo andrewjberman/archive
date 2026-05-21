@@ -2,12 +2,12 @@
   <metadata>
     <id>ADHC_VALGATE.006</id>
     <slug>de-d2-visual-rendering-baseline-gate</slug>
-    <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DE_ClientPlatform</issued_to>
+    <issued_by>1.0.0_SA_CTO~B</issued_by>
+    <issued_to>0.4.0_DE_ClientPlatform~B</issued_to>
     <date>2026-05-18</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18 (COO decomposition of ADHC_VALGATE PRD v0.1). Phase 2 -- gated on VALGATE Phase 1 (.001-.003). ALSO: PRD section 7 Q4 (the D-2 mechanism) is a Phase-0 step OF THIS TO -- DE 0.4 confirms the mechanism before the build. COO flips to pending + fires GO when Phase 1 closes + DE 0.4 lane has capacity.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>STAGED 2026-05-18 (COO decomposition of ADHC_VALGATE PRD v0.1). Phase 2 -- gated on VALGATE Phase 1 (.001-.003). ALSO: PRD section 7 Q4 (the D-2 mechanism) is a Phase-0 step OF THIS TO -- DE 0.4 confirms the mechanism before the build. COO flips to pending + fires GO when Phase 1 closes + DE 0.4 lane has capacity. || DISPATCHED 2026-05-21 by 1.0.0_SA_CTO~B -- Phase 1 (.001/.002/.003 Class-C) CLOSED + .007/.008/.009 closed; Andrew brought 0.4.0_DE_ClientPlatform~B online + directed CTO~B to dispatch the Class-D suite (COO~B closed); re-homed base->~B, issued_by/issued_to->~B, GO fired. CTO~B output-validates the RAVC2.</dispatch_unblock_condition>
     <project_code>ADHC_VALGATE</project_code>
     <priority>P2 -- VALGATE Phase 2. Lower than .004/.005: D-2's mechanism is the least-settled of the suite (PRD section 7 Q4) and full screenshot-diffing is explicitly NOT the recommended path.</priority>
     <sla>1.5-2.5d wall (PRD section 6 -- mechanism-dependent; the structural-assertion variant is the lighter, recommended end).</sla>

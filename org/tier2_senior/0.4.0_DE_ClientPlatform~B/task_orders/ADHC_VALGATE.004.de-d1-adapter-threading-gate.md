@@ -2,12 +2,12 @@
   <metadata>
     <id>ADHC_VALGATE.004</id>
     <slug>de-d1-adapter-threading-gate</slug>
-    <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DE_ClientPlatform</issued_to>
+    <issued_by>1.0.0_SA_CTO~B</issued_by>
+    <issued_to>0.4.0_DE_ClientPlatform~B</issued_to>
     <date>2026-05-18</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED 2026-05-18 (COO decomposition of ADHC_VALGATE PRD v0.1). Phase 2 -- gated on VALGATE Phase 1 (.001-.003) shipping first per the PRD phasing. Hard dependency ADHC_COMPIL_V4.031 (comp-adapter-audit) is CONFIRMED SHIPPED (702fe31c5). COO flips to pending + fires GO when Phase 1 closes + DE 0.4 lane has capacity.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>STAGED 2026-05-18 (COO decomposition of ADHC_VALGATE PRD v0.1). Phase 2 -- gated on VALGATE Phase 1 (.001-.003) shipping first per the PRD phasing. Hard dependency ADHC_COMPIL_V4.031 (comp-adapter-audit) is CONFIRMED SHIPPED (702fe31c5). COO flips to pending + fires GO when Phase 1 closes + DE 0.4 lane has capacity. || DISPATCHED 2026-05-21 by 1.0.0_SA_CTO~B -- Phase 1 (.001/.002/.003 Class-C) CLOSED + .007/.008/.009 closed; Andrew brought 0.4.0_DE_ClientPlatform~B online + directed CTO~B to dispatch the Class-D suite (COO~B closed); re-homed base->~B, issued_by/issued_to->~B, GO fired. CTO~B output-validates the RAVC2.</dispatch_unblock_condition>
     <project_code>ADHC_VALGATE</project_code>
     <priority>P1 -- VALGATE Phase 2. D-1 catches the INFFIN-arc class: a typed nested path a portal component reads that was never threaded from the raw S3 envelope -- tsc passes, the logic-walk reads correct, runtime does not crash, and partner data is silently absent.</priority>
     <sla>1-1.5d wall (PRD section 6 sizing) -- D-1 wraps an existing tool; the work is the structural fire + verdict + pre-push wiring.</sla>
