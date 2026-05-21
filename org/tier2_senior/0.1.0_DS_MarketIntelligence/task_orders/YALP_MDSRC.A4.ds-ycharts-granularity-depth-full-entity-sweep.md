@@ -4,10 +4,11 @@
     <slug>ds-ycharts-granularity-depth-full-entity-sweep</slug>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
+    <paired_with>0.7.0_AE_CloudOps~A</paired_with>
     <date>2026-05-21</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>
-    <dispatch_unblock_condition>GO ON PICKUP — Andrew-direct (2026-05-21): "It's not enough to look at the S&P alone; we need to explore every index and every ETF tracked on the portal." 0.1.0_DS authored the scoping brief at COO request and is the recommended owner (holds the A3 internal-API context + crosswalk + probe method). A4 may run concurrently with the C-series; its one hard coordination point is the F1 single YCharts session seat — see cross_domain_coordination. A4 feeds C2 as a pre-build input, so it should land before or alongside the C2 build.</dispatch_unblock_condition>
+    <dispatch_unblock_condition>GO ON PICKUP — Andrew-direct (2026-05-21): "It's not enough to look at the S&P alone; we need to explore every index and every ETF tracked on the portal." PAIRED TO (Andrew directive 2026-05-21): 0.1.0_DS_MarketIntelligence = deliverable lead (the analysis, verdicts, matrix, brief — holds the A3 internal-API context + crosswalk + probe method); 0.7.0_AE_CloudOps~A = paired AE, owns the YCharts authenticated-session / capture side (see <pairing> block). 0.7.0_AE_CloudOps BASE is deliberately NOT on this TO — base stays on the F2/F5/C1 critical path uninterrupted. ~A's A4 work begins AFTER ~A completes the F2/F3 post-apply verification-harness run (that fires on base's F2 v1.0.1 apply-complete signal — minutes of work); 0.1.0_DS may begin Phase 0 universe-enumeration (DynamoDB / etf_returns.json reads — no YCharts seat needed) immediately in parallel. A4 feeds C2 as a pre-build input — land before/alongside the C2 build.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P1 — Andrew-direct. A4 establishes, per entity, whether a YCharts pull can actually replace the Bloomberg data_pkl feed for that surface. A3 established the endpoint MAPPING; A4 establishes the GRANULARITY + DEPTH the endpoints actually deliver. Without A4, C2 builds against an unverified n=1 assumption (only S&P 500 was spot-probed).</priority>
     <sla>~1-2 effort-days — an investigation sweep of ~78-83 entities, one series pull + analysis each.</sla>
@@ -20,6 +21,25 @@
     <prd>docs/architecture/YALP_MDSRC.md — the parent PRD; portal granularity+depth requirements (~6yr daily for the DynamoDB backbone; monthly for Valuation time_series + risk-premium surfaces).</prd>
     <standard>docs/architecture/THIRD_PARTY_DATA_INTEGRATION_STANDARD.md (RATIFIED, 73e4da697) — A4 drives the YCharts internal/backend API with the live authenticated session. This is an INTEGRATION against the provider's backend API — never "scrape".</standard>
   </references>
+
+  <pairing>
+    A4 is a PAIRED TO per Andrew's 2026-05-21 directive. The split:
+
+    0.1.0_DS_MarketIntelligence — DELIVERABLE LEAD:
+    - Owns the analysis and the deliverable: the per-entity granularity/depth matrix, the meets/partial/gap verdicts, the C2-implications brief.
+    - Owns symbol resolution against the corrected crosswalk + the securities-search attempt for the 5 unmapped entities.
+    - Owns universe enumeration (Phase 0 DynamoDB / etf_returns.json reads — no YCharts seat needed; may start immediately).
+    - Defines what to probe per entity and interprets the returned series (granularity, depth, resample boundary).
+    - Flips A4 <status> to complete; RAVC2 to COO + CC CTO.
+
+    0.7.0_AE_CloudOps~A — PAIRED AE (YCharts session / capture side):
+    - Owns the YCharts authenticated-session mechanics: holding the F1 single-concurrent-session seat, auth/credential handling, driving the fund_data.json date-bounded series pulls (+ table_data snapshots) at a measured request rate — the same capture mechanism used in A1/A3.
+    - Runs the actual API capture for each entity 0.1.0_DS enumerates; hands the raw series back to 0.1.0_DS for the granularity/depth analysis.
+    - This keeps the YCharts-seat work in the ~A lane so it does NOT contend with 0.7.0_AE_CloudOps BASE, which stays on the F2/F5/C1 critical path.
+    - ~A begins A4 only AFTER completing the F2/F3 post-apply verification-harness run (RAVC2 that first). RAVC2s ~A's capture-side contribution to 0.1.0_DS + COO.
+
+    Working mode: tight pair — 0.1.0_DS enumerates + specifies, ~A captures, 0.1.0_DS analyses. MCP each other directly to hand off entity batches; do not route batch handoffs through COO. Surface to COO only on a blocker (seat contention, an entity class the capture mechanism can't reach, a symbol that won't resolve).
+  </pairing>
 
   <context>
     A3 mapped the YCharts internal API per portal requirement but verified granularity/depth for exactly ONE entity — S&P 500 (^SPX), Andrew's spot-probe: fund_data.json returned ~76yr depth + clean daily (trading-day) granularity when date-bounded. Encouraging but n=1. Granularity and depth genuinely vary by entity-class — older/smaller/foreign/bond/commodity series and ETFs can have shorter history or coarser native granularity, and the daily-vs-weekly auto-resample boundary can sit at a different point per entity. A4 verifies granularity + depth for EVERY portal-tracked index and ETF — a full sweep, not a sample.
@@ -76,7 +96,7 @@
   </compiler_tools_mandate>
 
   <cross_domain_coordination>
-    - F1 SINGLE YCHARTS SESSION SEAT: A4's sweep needs the live authenticated YCharts session. Per the F1 single-concurrent-session constraint, A4 must not run its sweep concurrently with C1 (the YCharts credential-pipeline work, 0.7.0_AE_CloudOps) or any other YCharts-seat consumer. Coordinate seat use directly with 0.7.0_AE_CloudOps before starting the sweep — MCP them, confirm the seat is free, hold it for the measured-rate sweep, release on completion.
+    - F1 SINGLE YCHARTS SESSION SEAT: A4's sweep needs the live authenticated YCharts session. The seat is owned, for A4, by the paired AE 0.7.0_AE_CloudOps~A (see <pairing>) — ~A holds the seat for the measured-rate sweep and releases it on completion. This is precisely why A4 is paired with ~A and NOT with 0.7.0_AE_CloudOps base: base owns C1 (the YCharts credential-pipeline work) and is on the F2/F5/C1 critical path; routing A4's seat use through ~A keeps it off base's path. Still: per the F1 single-concurrent-session constraint there is exactly ONE seat — ~A must confirm with base that no C1 YCharts-seat activity overlaps the A4 sweep window before starting (a quick ~A<->base MCP), and sequence around it if it does. ~A begins the A4 sweep only after completing the F2/F3 verification-harness run.
     - A4 FEEDS C2: the granularity/depth matrix is a C2 pre-build input. Land A4 before or alongside the C2 build. C2 owner (0.1.0_DS — same agent) consumes the matrix to bound its pulls and to know which entities stay Bloomberg-pkl.
     - No silver/bronze/gold script or S3-data-prefix changes — auto-rule 4 (data reprocess scope) is N/A; A4 produces a docs/briefs/ matrix + brief only.
   </cross_domain_coordination>
