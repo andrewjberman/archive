@@ -5,9 +5,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform~B</issued_to>
     <date>2026-05-21 (authored as the .031 chart-surfacing follow-on -- CTO~B ruling: stub now, parked)</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>HELD -- no live 0.4.0_DE_ClientPlatform~B session exists. Authored now as a hard artifact (CTO~B ruling 2026-05-21: a real TO file beats "author it later") so the chart-surfacing follow-on cannot be dropped. GO when Andrew spins up the DE~B session -- it bundles with the VALGATE Phase-2 DE~B set (ADHC_VALGATE.004-.006) for a single DE~B engagement. COO~B flips dispatch_held=false + GOs at that point.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <dispatch_unblock_condition>HELD -- no live 0.4.0_DE_ClientPlatform~B session exists. Authored now as a hard artifact (CTO~B ruling 2026-05-21: a real TO file beats "author it later") so the chart-surfacing follow-on cannot be dropped. GO when Andrew spins up the DE~B session -- it bundles with the VALGATE Phase-2 DE~B set (ADHC_VALGATE.004-.006) for a single DE~B engagement. COO~B flips dispatch_held=false + GOs at that point. || DISPATCHED 2026-05-21 by 1.0.0_SA_CTO~B -- Andrew brought 0.4.0_DE_ClientPlatform~B online; COO~B closed, so CTO~B (the remaining ~B exec) GOs the bundle. Sequenced P3/LAST after the VALGATE Class-D suite (.004/.005 P1, .006 P2). RAVC2 to CTO~B (not COO~B -- closed).</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>
     <priority>P3 -- a portal FE marker-render follow-on; the underlying MDPF v0.9 data + the data-layer marker it keys on are already shipped. Not on any critical path.</priority>
     <sla>~1-2h DE wall -- a focused chart-component change keyed on an existing data field.</sla>
