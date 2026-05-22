@@ -5,8 +5,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <!-- COMPLETE 2026-05-22 by 0.1.0_DS_MarketIntelligence. Verify-channel pass done: 80 CONFIRMED / 1 REWORK (idx 41 MARTSSM44X72USS 404 -> M1). Deliverables: docs/briefs/mdsrc-m2-validated-macro-contract-20260522.{md,tsv}. YCharts coverage of the 19 originating-body rows: 15 carried / 4 not (idx 1/4/5/29). RAVC2 to COO CC CTO. -->
+
     <!-- GATE CLEARED 2026-05-21 by COO: TO-M1 delivered + RAVC2'd (the 81-row macro data contract, commit d9f8cd2c7; docs/briefs/mdsrc-m1-macro-data-contract-20260521.{md,tsv}). M2's input now exists. Flipped staged->pending, dispatch_held->false, GO fired to 0.1.0_DS. -->
 
     <dispatch_unblock_condition>STAGED — gated on TO-M1 delivery. WS-C of YALP_MDSRC PRD v0.4 (6543894ce), PRD §6 "TO-M2". M2 independently validates the M1 macro data contract — verifier != author (R5), so M2's owner (0.1.0_DS_MarketIntelligence) is deliberately a DIFFERENT agent + a DIFFERENT pod than M1's owner (0.2.0_DS~A). COO flips M2 staged -> pending + fires the GO when M1 RAVC2s its contract. M2's load is sequential-after-M1 — by M1 delivery, 0.1.0_DS's V1 verification is expected complete.</dispatch_unblock_condition>
