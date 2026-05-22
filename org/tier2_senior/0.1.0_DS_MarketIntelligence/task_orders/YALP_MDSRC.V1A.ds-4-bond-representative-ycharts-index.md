@@ -5,8 +5,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <!-- COMPLETE 2026-05-22 by 0.1.0_DS_MarketIntelligence. 1 of 4 bands resolved (0-1Yr Treasury -> Bloomberg US Treasury Bills 1-3 Month ^BBUTB13MTR, depth-confirmed); 3 escalated to COO -- YCharts carries no Bloomberg maturity-band index for HY-short / TIPS-short / 20+yr-Treasury-pure (maturity-band coverage there is ICE-vendored). Deliverable: docs/briefs/mdsrc-v1a-4-bond-representative-index-20260522.md. C2 pull-spec 4 rows corrected. RAVC2 to COO CC CTO. -->
+
     <dispatch_unblock_condition>GO ON PICKUP — a small V1 addendum. Andrew re-ruled the 4 Bloomberg maturity-band bonds (2026-05-21, via CTO): NEITHER the ETF-proxy NOR manual-Bloomberg — instead find a representative Bloomberg bond index that YCharts carries. This SUPERSEDES the ETF-proxy resolution 0.1.0_DS folded into the C2 pull-spec; V1A produces the corrected resolution. Small/bounded — runs alongside or right after M2 (your primary).</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P1 — corrects 4 rows of the C2 pull-spec that currently carry the Andrew-rejected ETF-proxy resolution. Small task, but the pull-spec is wrong until it lands.</priority>
