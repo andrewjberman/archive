@@ -6,9 +6,10 @@
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <co_owner>0.2.0_DS_PortfolioAnalytics — owns the WS-2 hybrid-input legs (see scope). COO finalizes at dispatch whether C2 ships as one TO with a co-owner or is split C2a (0.1.0_DS / WS-1 surfaces) + C2b (0.2.0_DS / WS-2 inputs).</co_owner>
     <date>2026-05-20</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
-    <dispatch_unblock_condition>STAGED — Phase 2C. GATED on the Andrew Q1 decision (PRD v0.3 §8) AND on TO-C1 (the credential pipeline this pull authenticates through). On Q1 + TO-C1 RAVC-complete: COO finalizes the one-TO-vs-C2a/C2b split, flips status->pending + fires the GO. Requires PRD v0.3 on origin/CLOUD.</dispatch_unblock_condition>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
+    <!-- GO 2026-05-22 (COO /loop drive). Gates cleared: TO-C1 RAVC2-complete (ycharts-pipeline-v1.1.0, terraform 0-diff, record-deploy 48da66b7c; capture Lambda deployed dormant). Andrew Q1 resolved by the 2026-05-20 reverse-engineer-the-provider-API directive -- the A3 reverse-engineered internal API + the C1 session-capture pipeline IS the chosen path; the official Data API was not pursued. COO finalized the split decision: ONE TO, co-owner model (0.1.0_DS lead = WS-1 surfaces; 0.2.0_DS co-owner = WS-2 hybrid-input legs) -- NOT split into C2a/C2b. FREEZE-AWARE SCOPE: C2 BUILDS + structurally validates the pull module now; it does NOT run live against YCharts -- the YCharts execution freeze holds until the dedicated seat lands (Andrew procurement). Same dormant-build pattern as C1. Sequence per the C3 spec: MP-01/02/03 first (build-ready), FT-02/03 last. Build against the V1B-completed C2 pull-spec (76/76 rows). -->
+    <dispatch_unblock_condition>GO ON PICKUP — gates cleared 2026-05-22 (see GO comment above). Build proceeds FREEZE-AWARE: write + structurally validate the pull module, NO live YCharts execution until the dedicated seat lands + the freeze lifts.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P2 — Phase 2C. The market-data pull that feeds the 7 YCharts-replaceable + the YCharts-input legs of the 10 hybrid surfaces.</priority>
     <sla>~5-8 days (PRD §7).</sla>
