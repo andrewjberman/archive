@@ -28,6 +28,23 @@
     <deadline>None -- ship at DT 0.3.0 pace; Pod 3 ~0.5-0.75 effort-day total under v0.2 sequencing.</deadline>
     <v0_2_amendment_date>2026-05-19 PM (CTO~B PRD v0.2 commit c34f16d13)</v0_2_amendment_date>
     <step_a_close>2026-05-19T15:47Z -- aws s3 cp from 2026-02-26/ snapshot over 5 freshly-overwritten latest/ paths; uniform asOf=2026-02-26 verified; RAVC4 ACCEPT 20260519T154932Z (LastModified-divergence-vs-JSON-content-asOf acceptance-flex granted).</step_a_close>
+    <ac7_close_amendment>
+      2026-05-19T18:43Z -- AC7 NOW PASS (previously COO-marked EMPIRICAL FAIL at 18:27Z). Andrew-direct verbatim OVERRIDE 2026-05-19 "no we need IAMs sorted out, make sure its handled and logged" supersedes the COO defer-as-ADHC framing per [[feedback-andrew-product-invariant-overrides-sequenced-gates]].
+
+      Root cause: NOT count-guard (AE 0.5.0's structural hypothesis was correct). Lambda v1.1.1 DID call `_update_manifest` at line 381 unconditionally (proven by stack trace landing there); failure was `s3:PutObject` AccessDenied on `arn:aws:s3:::opal-data-portal-v2/json/latest/manifest.json` -- pre-existing IAM scope gap in `sscn_processor_s3` policy (only granted `s3:PutObject` on `json/security_scanner/*`, not the shared cross-pipeline manifest registry key).
+
+      Fix: narrow IAM amendment in `infra/aws/terraform/security-scanner-pipeline/iam.tf` -- new `ReadWriteSharedManifest` statement on `sscn_processor_s3` granting `s3:GetObject` + `s3:PutObject` on EXACTLY `arn:aws:s3:::opal-data-portal-v2/json/latest/manifest.json` (narrow scope deliberately avoids `json/latest/*` blast radius into peer pipelines' registries: attribution_excel, cma_excel, data_pkl, model_pkl, peer_excel).
+
+      Empirical close (Lambda v1.1.1 + new IAM, RequestId 58bcc881-fbb1-4ee8-b656-5ff9b96fc8e8, START 18:36:38Z, END 18:37:09Z, wall ~30.7s):
+       - Lambda log: `INFO: Wrote s3://opal-data-portal-v2/json/latest/manifest.json (1507 bytes)` + `INFO: Updated manifest.json with screening_excel as_of=2026-05-18` at 18:37:09.424Z
+       - manifest.json LastModified 2026-05-19T18:37:10Z > TO_START_TS2 18:36:28Z
+       - jq verify: `.sources.screening_excel.data_as_of="2026-05-18"`, timestamp=2026-05-19T18:37:09.357869+00:00; sources_keys = [attribution_excel, cma_excel, data_pkl, model_pkl, peer_excel, screening_excel]
+       - ZERO ERROR lines in invocation log
+
+      Ship: `security-scanner-v1.1.2` at commit `9ddbfe529` (Andrew-direct GIT_COMMIT_AUTHOR_OVERRIDE=SSCN_AC7_MANIFEST_IAM; audit log 18:43:22Z). AE 0.5.0_AE_OpalETL notified pre-apply (structural lane owner ratification path); COO~B notified pre-apply (sequenced-gate override transparency).
+
+      Side-observation for AE 0.5.0 (non-blocking): `_update_manifest` writes 6 sources but manifest's `source_count` field stayed at 5 (Lambda adds to `.sources` dict but doesn't recompute `.source_count`). Minor consistency drift; flag for AE 0.5.0 amendment if they care.
+    </ac7_close_amendment>
   </metadata>
 
   <v0_2_amendment>
