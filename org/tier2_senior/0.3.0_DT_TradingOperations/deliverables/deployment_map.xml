@@ -13,7 +13,7 @@
   <metadata>
     <agent>0.3.0_DT_TradingOperations</agent>
     <pod>TradingOperations</pod>
-    <date>2026-03-05</date>
+    <date>2026-05-22</date>
     <pages_served>PortfolioManagement, TradeSubmission, DataRefresh, SecurityScanner</pages_served>
   </metadata>
 
@@ -124,5 +124,55 @@
     </service>
 
   </ec2_services>
+
+  <!-- =========================================================== -->
+  <!-- PORTAL PROD PROMOTION PROCEDURE                              -->
+  <!-- =========================================================== -->
+
+  <portal_prod_promotion>
+    <summary>
+      Canonical mechanism for promoting portal commits from the DEV branch to
+      the PROD branch (opalinvest.dev). Adopt the ephemeral-worktree form for
+      EVERY portal PROD promotion. Never `git checkout PROD` in the portal main
+      working tree.
+    </summary>
+
+    <defect_history>
+      The pre-2026-05-22 cherry-pick mechanism (SSCN_DIVDEF.006 Phase 1, used
+      for the .001-.011 set and the SSCN_UNVREV set) ran `git checkout PROD`
+      directly in the SHARED portal main working tree, cherry-picked, pushed,
+      tagged -- with NO terminating `git checkout DEV`. The main tree was left
+      abandoned on PROD. The state was sticky: subsequent promotions stacked
+      onto PROD because the tree was already there, and any agent running a dev
+      server off the main tree saw PROD code instead of DEV. Found stranded
+      twice (portal reflog 4f8502e6 2026-05-20 14:39 DEV->PROD with no return;
+      again 2026-05-22). Flagged by 0.3.0_DE_TradingOperations 2026-05-22,
+      Andrew-escalated.
+    </defect_history>
+
+    <procedure>
+      <step>1. `cd portal &amp;&amp; git fetch origin` -- main tree stays on DEV.</step>
+      <step>2. `git worktree add .runtmp/portal-prod-promote PROD` -- ephemeral
+        worktree checked out on PROD; the main tree never moves.</step>
+      <step>3. `cd .runtmp/portal-prod-promote &amp;&amp; git pull origin PROD` -- PROD baseline.</step>
+      <step>4. Cherry-pick the approved commit set in DEV commit order. On a
+        conflict: do NOT resolve unilaterally -- RAVC2 PARTIAL to COO/CTO.</step>
+      <step>5. `bun install &amp;&amp; bun run typecheck &amp;&amp; bun run build` -- all exit 0.</step>
+      <step>6. `git push origin PROD` -- GHA deploy.yml auto-fires (bun build ->
+        S3 sync s3://opalinvest-portal -> CloudFront EVTSA9VEHNZVH invalidation).</step>
+      <step>7. Tag if the TO requires it (`portal-vX.Y.Z`).</step>
+      <step>8. `cd portal &amp;&amp; git worktree remove .runtmp/portal-prod-promote`
+        -- teardown.</step>
+      <step>9. Verify: `git -C portal branch --show-current` MUST report DEV.
+        Bump the parent CLOUD `portal` gitlink to the new PROD HEAD if the TO
+        calls for it.</step>
+    </procedure>
+
+    <invariant>
+      The portal main working tree is permanently on DEV. Branch state cannot
+      leak to a dev server or a later promotion because the main tree never
+      moves. Same isolation 0.3.0_DE uses for the :5175 DEV preview worktree.
+    </invariant>
+  </portal_prod_promotion>
 
 </deployment_map>
