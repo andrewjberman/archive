@@ -6,7 +6,7 @@
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <co_owner>0.2.0_DS_PortfolioAnalytics -- owns the WS-2 leg (FT-02/03 spread-definition reconcile + any WS-2 hybrid-leg residual). 0.1.0_DS leads WS-1 (the 71-entity surface confirmation). Same co-owner split as C2/D2.</co_owner>
     <date>2026-05-22</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <!-- GO ON PICKUP 2026-05-22 (Andrew directive, COO dispatch). Andrew verbatim 2026-05-22: "we need to figure out every single surface, if there are 29 that are not confirmed, then we need to figure out how to confirm them. If that is a function of having to adjust to new tickers, or derive data, or etc. then we need to surface that and go through it and get it done." D3 supersedes the D2-brief framing that carried the 29 unconfirmed surfaces "forward to the future D1 cutover" -- they are IN-SCOPE NOW, not deferred. -->
     <project_code>YALP_MDSRC</project_code>
