@@ -5,7 +5,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-05-22</completed>
+    <!-- CLOSE 2026-05-22 (0.7.0_AE_CloudOps): the internal-API session/credential pipeline is deployed. ycharts-session-capture container-image Lambda built (Lambda-compatible single-manifest) + pushed to ECR; terraform apply 9-add/1-change, 0-diff replan PASS; tag ycharts-pipeline-v1.1.0. Deployed DORMANT -- EventBridge schedule DISABLED, 0 invocations, no live YCharts call (freeze respected). Probe wired to invoke capture on 403. ycharts/session/current created (capture output); ycharts/credentials = login input. Go-live gated on the dedicated-seat creds (Andrew procurement). RAVC2 sent. Session log: logs/2026-05-22/c1_ycharts_capture_pipeline_deploy.md. -->
+
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — Andrew ruled Q1 (2026-05-20): integrate YCharts by reverse-engineering its internal JSON API, authenticated with the YCharts web session — NOT an official API key. Branch A (official-API key-auth) is RETIRED. Q7 (ToS) folded into the Q1 ruling per Andrew's directive. The build spec is committed: A3 P2 (the auth/session model) in docs/briefs/mdsrc-ycharts-internal-api-20260520.md (af5102dd3, origin/CLOUD). COO has finalized the scope to the chosen branch (see &lt;scope&gt;). 0.7.0_AE_CloudOps owns it — sequence behind F2-P1 / F5; GO on pickup.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
