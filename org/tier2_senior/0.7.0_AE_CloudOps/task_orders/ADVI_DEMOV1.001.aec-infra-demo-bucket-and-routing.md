@@ -4,8 +4,11 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~C</issued_to>
     <date>2026-05-21</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>ADVI_DEMOV1</project_code>
+    <!-- GO issued by 2.0.0_SA_COO~C 2026-05-22: the sole gate (Andrew standing up
+         the 0.7.0_AE_CloudOps~C infra lane) is cleared — AE~C registered LIVE on
+         the broker. Flipped staged -> pending. -->
   </metadata>
 
   <objective>
