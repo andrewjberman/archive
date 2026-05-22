@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.3.0_DT_TradingOperations</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — CTO stimulus-scan recommendation, COO-issued. DT lane is clear (SSCN_DIVDEF closed, no active Pod-3 project). A3/Q1-independent — a current-state baseline. Start on receipt.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
