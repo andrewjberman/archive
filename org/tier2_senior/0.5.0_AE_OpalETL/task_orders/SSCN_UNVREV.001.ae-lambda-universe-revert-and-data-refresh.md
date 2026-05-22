@@ -5,7 +5,7 @@
     <issued_by>0.3.0_DE_TradingOperations</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>DISPATCHED 2026-05-21. Andrew-direct: Andrew brought 0.5.0_AE_OpalETL online "to assist as needed in the cloud" for this Security Scanner update and ruled (AskUserQuestion 2026-05-21) to REVERT the SSCN_DIVDEF v0.2 universe migration. The GO is this dispatch — begin immediately. COO/CTO are CC'd for project-state + doc coherence (the SSCN_DIVDEF v0.2 universe contract is being reversed); that notification does not gate your start.</dispatch_unblock_condition>
     <project_code>SSCN_UNVREV</project_code>
