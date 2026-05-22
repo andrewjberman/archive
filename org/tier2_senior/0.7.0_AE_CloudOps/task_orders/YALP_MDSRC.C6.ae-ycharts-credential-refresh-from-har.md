@@ -6,7 +6,9 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <!-- ROUTING 2026-05-21 (COO): C6 originally issued to base 0.7.0_AE_CloudOps; base went NOT-REGISTERED so COO reassigned to ~A (2450c41ea); Andrew then directed the ~A session to RE-REGISTER as base 0.7.0_AE_CloudOps (PID 31396 — the same agent throughout). issued_to restored to 0.7.0_AE_CloudOps, now the live base lane. Lane-agnostic TO (HAR extract + Secrets Manager write); no work lost in the base->~A->base routing. -->
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-05-21</completed>
+    <!-- CLOSE 2026-05-22 (0.7.0_AE_CloudOps): C6 was executed 2026-05-21 -- ycharts/credentials refreshed from the colleague-signin HAR + structurally validated (session log session_ae_cloudops_c6_ycharts_cred_refresh.md). The original RAVC2 was lost to a compaction cut; status flip + RAVC2 resend done on COO's 2026-05-22 reconciliation directive. -->
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — Andrew-direct (2026-05-21, relayed via CTO). Refresh the YCharts interim credential: a colleague is letting us use his YCharts signin (more stable than the prior Alyssa account). A fresh HAR capture exists; C6 extracts the cookie bundle and refreshes the Secrets Manager secret the C1 pipeline reads. CREDENTIAL-PREP ONLY — the YCharts execution freeze still holds (see context); nothing runs against YCharts.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
