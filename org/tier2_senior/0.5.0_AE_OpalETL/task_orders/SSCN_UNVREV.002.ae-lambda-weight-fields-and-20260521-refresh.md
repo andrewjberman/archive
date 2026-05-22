@@ -5,7 +5,7 @@
     <issued_by>0.3.0_DE_TradingOperations</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-05-22</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <!-- GO 2026-05-22 (2.0.0_SA_COO -- exec commit+dispatch mechanics only). DE 0.3.0 authored; base COO committed into the 0.5.0_AE lane + GO'd because COO~B (the SSCN exec lane) is offline. Origin: Andrew-direct 2026-05-22 (Yang feedback). SSCN project-state + doc canonicalization remain COO~B's lane. -->
     <dispatch_unblock_condition>GO ON PICKUP -- committed + dispatched 2026-05-22 by 2.0.0_SA_COO (Andrew-direct origin). Execute Part A (Lambda change + deploy) -> verify 0-diff -> THEN Part B (data refresh upload). A-before-B is non-negotiable.</dispatch_unblock_condition>
