@@ -5,7 +5,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-05-22</completed>
+    <!-- CLOSE 2026-05-22 (0.7.0_AE_CloudOps): both B3 AE-lane files committed + deployed -- smartx-pipeline-v1.2.0 (smartx-model-monthly-pull) + yang-v2.4.8 (yang-model-portfolio-benchmarks); both invoked; daily sidecar + additive timeseries_realized verified live; RAVC2 sent. 0.4.0_DS signalled for the closing b1_e2e_verify.py re-verify. Session log: logs/2026-05-22/b4_b3_daily_smartx_direct_deploy.md. -->
+
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — the AE deploy-half of YALP_MDSRC.B3 (the daily-SmartX-direct upgrade). 0.4.0_DS completed + locally-verified B3 Phase 0+1 (brief docs/briefs/yalp-mdsrc-b3-daily-smartx-direct-swap-20260521.md, cb11be941); two AE-lane files sit uncommitted in the shared working tree for the AE to commit + deploy. Same DS-author / AE-deploy split as B1/B2. SEQUENCE on the AE: C6 (done) -> C1 -> B4. SmartX is NOT under the YCharts freeze — B4 deploys + runs normally.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
