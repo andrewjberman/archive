@@ -4,8 +4,17 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-21</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>ADVI_DEMOV1</project_code>
+    <!-- GO issued by 2.0.0_SA_COO~C 2026-05-22: gate met — TO-1 (infra) + TO-2
+         (transform engine) both RAVC2-closed. Flipped staged -> pending.
+         SCOPED GO: DS~C executes the DS-lane scope NOW — the DynamoDB FIRM#demo
+         record + the demo Cognito user (criteria 1, 2, partial 4, 9). The portal
+         items — ROUTER_FIRM_SUFFIX in advisor-intelligence.ts, firmAccess.ts
+         FIRM_ALLOWED_PATHS['demo'], _partners/demo/ — are POD_DE_ANY-laned and
+         HELD pending a DE lane (criteria 3, 6, 7, 8 + the full-token check at 4).
+         COO~C has surfaced the DE-lane resourcing gap to CTO/Andrew. TO-3 does
+         NOT fully close until the DE items land; DS~C's RAVC2 covers the DS scope. -->
   </metadata>
 
   <objective>

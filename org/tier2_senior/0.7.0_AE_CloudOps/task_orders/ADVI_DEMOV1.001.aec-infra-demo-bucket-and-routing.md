@@ -4,11 +4,39 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~C</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>ADVI_DEMOV1</project_code>
     <!-- GO issued by 2.0.0_SA_COO~C 2026-05-22: the sole gate (Andrew standing up
          the 0.7.0_AE_CloudOps~C infra lane) is cleared — AE~C registered LIVE on
          the broker. Flipped staged -> pending. -->
+    <!-- CLOSED by 2.0.0_SA_COO~C 2026-05-22T18:1xZ — RAVC2-accepted. All 10 ACs met;
+         evidence empirically verified by COO~C (not self-report alone):
+         COMMITS (origin/CLOUD, all confirmed ancestors): 16fd50aa6 source
+           (shared-infra/s3.tf +96, firm-config.mjs +9, firm-routing.spec.mjs +7),
+           1941ec3e5 edge artifacts + lambda-source-map.json, 713d99116 shared-infra
+           record-deploy + CHANGELOG, 380fb6ab6 portal-auth record-deploy + CHANGELOG,
+           7bfd8bd46 session log.
+         TAGS: shared-infra-v1.16.0 @713d99116, portal-auth-v1.16.0 @380fb6ab6 (both verified).
+         TERRAFORM 0-DIFF: shared-infra 5-added -> replan "No changes."; portal-auth
+           two-stage edge apply -> replan "No changes."
+         AWS STATE (COO~C independent check): opal-data-demo bucket EXISTS us-east-1,
+           versioning Enabled, AES256, public-access-block all-true; bucket policy live
+           with both statements — AllowCloudFrontOACReadPlatinum (cloudfront.amazonaws.com
+           + EVTSA9VEHNZVH SourceArn) + AllowScopedAdvisorOAI (OAI E139998VWH0PD).
+         CRITERION 3: no iam.tf edit — partners-lambda-role ReadPartnerBuckets
+           `opal-data-*` wildcard already covers opal-data-demo; comp-iam gaps 0 NEW.
+           COO~C concurred 2026-05-22 (the criterion's end-state — role holds the
+           grant + comp-iam gaps clean — is satisfied by existing infra).
+         CRITERION 8 — ACCEPTANCE FLEX (pre-flagged to 1.0.0_SA_CTO 2026-05-22T18:10Z):
+           comp-routes trace confirms the CF -> shared-advisor-router leg but cannot
+           represent the shared-advisor-router -> opal-data-demo leg (runtime
+           origin-mutation is FIRM_CONFIG data, not a static route edge). Substituted
+           verification: firm-routing.spec.mjs 8/8 in the build gate asserting the
+           deployed handler sets origin.s3.domainName = opal-data-demo + the AWS-state
+           check above. Strictly stronger than a static trace (tests deployed runtime
+           behavior). Criterion intent met.
+         ZERO REGRESSION: firm-routing.spec.mjs 8/8 — 49financial/inflection/mockadv
+           routes unchanged; firm-config.mjs change purely additive. -->
   </metadata>
 
   <objective>
