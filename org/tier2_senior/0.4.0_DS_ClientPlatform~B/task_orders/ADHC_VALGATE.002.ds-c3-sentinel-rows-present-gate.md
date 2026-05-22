@@ -5,7 +5,8 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-18 (re-routed ~C->~B 2026-05-20 by 2.0.0_SA_COO~B)</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- CLOSED 2026-05-22 (stale-status correction, 2.0.0_SA_COO at Andrew direction): work shipped 2fd7415fb (0.4.0_DS_ClientPlatform~B -- C-3 sentinel-rows-present gate); RAVC2-accepted + closed by 2.0.0_SA_COO~B in b4d9836b5 ("close ADHC_VALGATE.002 -- C-3 sentinel-rows gate accepted"); follow-up cosmetic stale-echo fix cc56f8dfe. ADHC_VALGATE project closed 9/9 on 2026-05-21 (930bcc235). The TO <status> flag was simply never synced at close -- no work outstanding. -->
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GATE CLEARED + GO'd 2026-05-20 by 2.0.0_SA_COO~B -- VALGATE.001 is RAVC-accepted (gate machinery + chain-wire all shipped + verified). C-3 reuses .001's rolling-baseline read API (valgate_baseline.py) + the gate-fire surface (the non-fatal valgate_gate.py invocation in orion-gold-dispatch.sh's run_chain loop, pre-INF_09). SEQUENCING: DS~B's MDPF_ASSETS.029 Phase-0 dry-run is the MDPF critical path and takes precedence; .002 is next-in-queue after the .029 Phase-0 brief lands.</dispatch_unblock_condition>
     <project_code>ADHC_VALGATE</project_code>
