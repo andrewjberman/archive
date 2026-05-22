@@ -5,8 +5,10 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <date>2026-05-19</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <!-- COMPLETE -- status flip 2026-05-22 by 0.1.0_DS_MarketIntelligence, CTO-authorized (1.0.0_SA_CTO). Work delivered 2026-05-19: 4-layer comprehensive crypto removal + the 5th surface (backfill_from_layer2) caught in verification and hotfixed; v2.9.8/2.9.9/2.9.10 deployed; +1h end-to-end verification PASS; CTO RAVC ratified. The pending flag was stale (un-flipped since delivery). Ship-attestation re-confirmed per CTO belt-and-suspenders step: git tag news-v2.9.10 EXISTS; Lambda opal-news-layer3-curation LastModified 2026-05-19T17:01:56Z (runtime agrees with the v2.9.10 deploy log). ADHC_CRYPCT.002 stays cancelled (Andrew vetoed v2.9.11; +24h residual ruled acceptable). -->
+
     <dispatch_unblock_condition>DISPATCHED via Andrew-direct CTO authorization 2026-05-19 ~14:35Z (verbatim: "we need to get rid of any and all crypto news sources from the news scanner process. i thought i already fixed this with 0.1.0_DS [...] but we're still seeing crypto news dominating. Please investigate and write a TO to 0.1.0_DS under ADHC"). No upstream gates -- start on receipt.</dispatch_unblock_condition>
     <project_code>ADHC_CRYPCT</project_code>
     <priority>P1 -- Andrew-direct: crypto news still dominating despite the 2026-05-12 fix `c72c9368a`. Defense-in-depth gap: prior fix cut INGESTION + added SOURCE BLOCKLIST + RECENCY FLOOR, but DID NOT remove crypto from the RANKING / NORMALIZATION / PROMPTING layers. Non-blocked sources (TechCrunch, Bloomberg, Reuters, Yahoo Finance, MarketWatch, CNBC) all cover crypto stories which still flow through Layer 2 -> Layer 3, get normalized into `crypto`/`bitcoin` keyword buckets, and are explicitly prompted as preferred portal keywords. Comprehensive removal at all 4 layers required.</priority>
