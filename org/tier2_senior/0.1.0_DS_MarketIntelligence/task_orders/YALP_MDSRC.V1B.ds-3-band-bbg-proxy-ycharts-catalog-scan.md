@@ -5,8 +5,10 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <date>2026-05-22</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <!-- COMPLETE 2026-05-22 by 0.1.0_DS_MarketIntelligence. All 3 bands resolved to a representative Bloomberg-origin YCharts index: 0-5Yr HY -> ^BBUSCOHYTR, 0-5Yr TIPS -> ^BBUTISTR, 20+Yr Treasury -> ^BBUSLGCRTR. All depth-confirmed live. Deliverable: docs/briefs/mdsrc-v1b-3-band-bbg-proxy-20260522.md. C2 pull-spec 3 rows corrected -- pull-spec now 76/76 complete. RAVC2 to COO CC CTO. -->
+
     <dispatch_unblock_condition>GO ON PICKUP — Andrew ruling 2026-05-22 on the V1A 3-band escalation. V1A resolved 1 of 4 bands and escalated 3 (0-5Yr High Yield, 0-5Yr TIPS, 20+Yr Treasury) because YCharts carries no Bloomberg maturity-BAND index for them. Andrew's ruling: do NOT go ICE cross-vendor and do NOT keep them on the pkl — scan the available Bloomberg indices on YCharts and find a representative BBG-origin proxy per band. Bounded; runs in parallel — does not need C1.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P1 — closes the last 3 open rows of the C2 pull-spec. C2 itself is staged on C1, but the pull-spec must be correct and complete before C2 builds against it.</priority>
