@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <dispatch_unblock_condition>GO ON PICKUP — unified COO+CTO ruling 2026-05-21 (B1 Path-A premise empirically superseded). B3 is the daily-SmartX-direct upgrade follow-on to B1. It begins once B1 ships v1 via B2 (the artifact B3 upgrades must exist deployed first); B3's endpoint-validation work (Phase 0) can start immediately in parallel — SmartX is NOT under the YCharts freeze. HARD SEQUENCE CONSTRAINT: B3 MUST land before the Q8-gated portal-wiring step (see scope) — that is the load-bearing condition that makes shipping Path-A v1 quality-equivalent to a full re-scope.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
@@ -75,5 +75,6 @@
     - AC3 — model.pkl retired for PERFORMANCE sourcing only; retained as the Q4 proprietary design view.
     - AC4 — ds-commit-gate clean; session log Compiler Tools section reproduces the Phase-0/Phase-2 checks.
     - AC5 — RAVC2 to COO + CC CTO; brief documents the swap + the Phase-0 generalization evidence + any artifact-contract delta. B3 code-ready triggers the AE deploy-half TO.
+    - AC6 — graceful-UST handling (added 2026-05-22 per Andrew Q-v0.4-A realized-primary ruling; COO relay 20260521T213603Z + RULING 20260522T14xxZ). SATISFIED BY CONSTRUCTION at the B3 data layer: B3 emits both model-return series honestly and additively — `timeseries` (design, byte-identical pre-B3) + `timeseries_realized` (SmartX-realized). The UST realized series is genuinely short (326 records from 2025-02-03) and is emitted as such — no padding, no fabricated points. B3/B4 contain NO rolling-Sharpe / max-drawdown computation; those metrics are computed client-side in the MDLP_RVVALT portal components. The "insufficient history for this window" rendering (never a crash, never a garbage/NaN value shown as a number) is therefore a PORTAL-implementation concern (the SA2-derived wiring TO), not a B3/B4 code touch. On record: B3 as-built requires no change for this AC.
   </acceptance_criteria>
 </task_order>
