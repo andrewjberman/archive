@@ -6,7 +6,7 @@
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <co_owner>0.2.0_DS_PortfolioAnalytics -- owns the WS-2 hybrid-input-leg comparison; 0.1.0_DS leads WS-1. Same co-owner split as C2 (they built the pulls, they run + diff them).</co_owner>
     <date>2026-05-22</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <!-- GO ON PICKUP 2026-05-22 (COO /loop drive). Andrew directive 2026-05-22, verbatim: "we definitely want to run the pulls and compare with what we currently have from bloomberg (on the same dates for accuracy/consistency, as bloomberg data in the portal is a few days lagged). However we do not want to cut over or make any switches in PROD or aws cloud, that will be a future project not now." + "we have the menachem cookie bundle available for pulling/testing whatever we need ... no holdup on exploring the ycharts data and validating." D2 is the comparison/validation half of the original D1; the production cutover (D1) is CARVED OUT to a future project. NO dedicated-seat gate -- D2 runs on the Menachem session NOW. -->
     <project_code>YALP_MDSRC</project_code>
