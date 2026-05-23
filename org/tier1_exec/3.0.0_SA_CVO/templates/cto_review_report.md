@@ -92,7 +92,7 @@ but must name each.*
 ### For CTO
 
 **Q1.** [Grounded in a specific file:line observable] ... [specific enough that
-Codex can give a mechanism-level answer, not a generic one].
+CVO can give a mechanism-level answer, not a generic one].
 
 **Q2.** ...
 

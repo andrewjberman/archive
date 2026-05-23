@@ -1,10 +1,8 @@
 # [Template] CVO to CTO/COO/DS/AE/DT Response
 
-Codex fills in against this shape. The CTO saves the response (pasted from Codex)
-to `../responses/{YYYYMMDDTHHMMSSZ}_to_{primary_recipient_serial}_{subject_slug}.md`
-and commits under CVO author line.
+CVO fills in against this shape, saves to `../responses/{YYYYMMDDTHHMMSSZ}_to_{primary_recipient_serial}_{subject_slug}.md`, and commits under its own author line via `.tools/safe-commit.sh`.
 
-Delete italic template commentary before Codex fills in.
+Delete italic template commentary before filling in.
 
 ---
 
@@ -26,7 +24,7 @@ verdict: NORMAL                           # NORMAL | MALFORMED_REPORT | WAIVED_A
 
 ## §0 — Convergence reading
 
-*Codex: one-paragraph synthesis. What did the evidence converge on? What is
+*CVO: one-paragraph synthesis. What did the evidence converge on? What is
 the single most important thing the CTO should walk away knowing?*
 
 *This is the part the CTO reads in 30 seconds. Make it count.*
@@ -85,7 +83,7 @@ sequence change", "IAM gap fix", "CW alarm addition", "S3 sentinel pattern appli
 
 ## §2 — Deferrals
 
-*Codex: things the CTO asked about or you considered but are explicitly NOT
+*CVO: things the CTO asked about or you considered but are explicitly NOT
 recommending. Each with reasoning.*
 
 - **Deferred: {topic}** — Reason: *{why this is not a recommendation now; what
@@ -97,7 +95,7 @@ recommending. Each with reasoning.*
 
 ## §3 — Malformed questions or premise errors
 
-*Codex: if any of the CTO questions were malformed, had incorrect citations,
+*CVO: if any of the CTO questions were malformed, had incorrect citations,
 or had false premises, call them out here. One paragraph per issue.*
 
 - **Q{N} premise issue:** *{description + specific correction}*
@@ -108,7 +106,7 @@ or had false premises, call them out here. One paragraph per issue.*
 
 ## §4 — Unknown-unknowns (MANDATORY)
 
-*Codex: what you should have been asked but were not. This is the one section
+*CVO: what you should have been asked but were not. This is the one section
 that does not respond to an enumerated question. It surfaces a gap the CTO
 did not know to name.*
 
@@ -120,7 +118,7 @@ the project cannot see its own blind spots.*
 
 ## §5 — Cross-cutting observations (optional)
 
-*Codex: if there are themes that run across multiple drivers recommendations —
+*CVO: if there are themes that run across multiple drivers recommendations —
 systematic deployment gaps, repeated silent-failure patterns, IAM scope creep,
 architectural stress points — surface them here. Not a required section; skip if none.*
 
@@ -128,7 +126,7 @@ architectural stress points — surface them here. Not a required section; skip 
 
 ## §6 — Routing
 
-*Codex: every P0 recommendation must be routed. Each line = one CC.*
+*CVO: every P0 recommendation must be routed. Each line = one CC.*
 
 - CC `1.0.0_SA_CTO` — R-CTO-1, R-COO-1 (cross-driver)
 - CC `2.0.0_SA_COO` — R-COO-1, R-COO-2
