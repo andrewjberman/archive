@@ -1,6 +1,6 @@
 <task_order>
   <metadata>
-    <id>2.0.0_SA_COO-2026-05-23-valfin-005-cap-gains-rename</id>
+    <id>2.0.0_SA_COO-2026-05-23-valfin-008-cap-gains-rename</id>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-23</date>
@@ -13,7 +13,22 @@
          per spot_check_0453Z_LD0012_capital_gains_verdict.md (commit 1247fa15b).
          DS Base Phase-2 forensic (commit f55ef0dc7) confirmed: computation is correct,
          broadly distributed across 609 accounts, no data defect; FIELD NAME is the
-         sole defect. -->
+         sole defect.
+
+         RENUMBER NOTE 2026-05-23T07:05Z: this TO was originally authored as
+         ADVI_VALFIN.005 (commit 3ecf66be8) but .005 was conceptually slotted in
+         the original 7-TO PRD staging for pipeline-robustness/self-healing-audit.
+         DS Base's INF_B_00 bronze-complete gate fix (commit 0419ae771) correctly
+         cites "ADVI_VALFIN P2-1 / TO-5" -- that work IS the first contribution to
+         the .005 pipeline-robustness umbrella. CVO /spot-check cycle 11 caught
+         the double-assignment (commit 15e1bbcaa); renumbered to .008 (next slot
+         beyond the original 7-TO PRD staging) per CVO Option (a) resolution.
+
+         Historical commit references that still point at "ADVI_VALFIN.005" for
+         the field-rename work (commits 3ecf66be8 + 92a18ce03 "ADVI_VALFIN.005/
+         PhaseA"): immutable; brief documents the renumber as historical-tag
+         drift. Going-forward commits for field-rename work cite ADVI_VALFIN.008. -->
+
   </metadata>
 
   <references>
