@@ -7,7 +7,9 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>pending</status>
+    <status>cancelled</status>
+    <cancelled_date>2026-05-23</cancelled_date>
+    <cancelled_reason>Andrew-directed surgical rollback 2026-05-23 alongside .005. Same architectural misalignment — AdvisorsTab is not Inflection's user-visible surface (Inflection's UX is Distribution + Books only). MAX-window TWR re-enable would have applied to a tab Inflection users do not navigate to. ADVI_INFGRO project closed. Data layer retained; MAX-coverage data work (DS~A) remains available for any future re-target.</cancelled_reason>
     <dispatch_held>false</dispatch_held>
     <dispatch_note>Receiver routing TBD — COO bench-state check 2026-05-12 morning. DS~A + DS~C killed or STANDDOWN 2026-05-11 ~22:31Z. Do NOT pick up this TO until COO issues GO.</dispatch_note>
     <priority>P1</priority>

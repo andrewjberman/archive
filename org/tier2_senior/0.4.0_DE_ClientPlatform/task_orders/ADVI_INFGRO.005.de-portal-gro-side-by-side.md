@@ -7,7 +7,9 @@
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>pending</status>
+    <status>cancelled</status>
+    <cancelled_date>2026-05-23</cancelled_date>
+    <cancelled_reason>Andrew-directed surgical rollback 2026-05-23. TO architecturally misaligned: targeted shared AdvisorsTab.tsx but Inflection's user-visible UX is Distribution + Books only (AdvisorsTab is a 49F-only surface in the live nav). DE 0.4 ship `abe33b0c` (Return per-advisor column gated on advisor_return_pct_twr !== undefined — only Inflection emits, so dead code on both surfaces: 49F hides via gate, Inflection doesn't navigate to AdvisorsTab) reverted by CTO `5cee8276` on portal DEV. ADVI_INFGRO project closed. Data layer (.001-.009) retained — leaderboard.json continues to emit the per-advisor fields for any future re-target on an Inflection-appropriate surface.</cancelled_reason>
     <dispatch_held>false</dispatch_held>
     <dispatch_note>Receiver routing TBD — COO bench-state check 2026-05-12 morning. DS~A + DS~C killed or STANDDOWN 2026-05-11 ~22:31Z. Do NOT pick up this TO until COO issues GO.</dispatch_note>
     <priority>P1</priority>
