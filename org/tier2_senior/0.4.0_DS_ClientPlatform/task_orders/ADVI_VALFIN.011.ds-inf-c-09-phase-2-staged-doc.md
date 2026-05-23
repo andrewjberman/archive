@@ -2,7 +2,10 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-05-23-valfin-011-inf-c-09-phase-2-staged-doc</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <re_routed_from>0.4.0_DS_ClientPlatform (base)</re_routed_from>
+    <re_routed_at>2026-05-23T19:15Z UTC</re_routed_at>
+    <re_routed_reason>Bundled re-route with sibling ADVI_VALFIN.010 per CTO toolkit option (c) -- DS~C lane re-routing via COO lane-routing-hub authority. Both .010 + .011 close LD-0018 findings (F1 + F2 respectively); siblings naturally pair in re-route. Original TO content + ACs + scope + not_authorized UNCHANGED -- only the recipient lane changes. Pick-up timing: "after current DEMOV1.004 attempt-9 completes; not blocking your current work."</re_routed_reason>
     <date>2026-05-23</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>

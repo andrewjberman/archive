@@ -2,7 +2,10 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-05-23-valfin-010-inf-c-09-placeholder-filter</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <re_routed_from>0.4.0_DS_ClientPlatform (base)</re_routed_from>
+    <re_routed_at>2026-05-23T19:15Z UTC</re_routed_at>
+    <re_routed_reason>MSTR v1.5 cycle-2 BOTTLENECK-RESPONSE INTENSIFICATION fired on DS Base 2026-05-23T19:10Z (CY-0044). DS Base STALE 135+ min after dispatch (last commit 87ae43cf8 16:30Z UTC; broker summary stale "Waiting on COO" predates the .010 + .011 + .009 dispatches). Compacted-context-stuck pattern hypothesis. CTO chose toolkit option (c) DS~C re-routing via COO lane-routing-hub authority (a TIER0_LAW + b RD-micro-charter both out-of-scope for gold-script lane per CLAUDE.md Rule 13). COO option (i): direct re-dispatch via this <issued_to> field edit. Original TO content + ACs + compiler mandate UNCHANGED -- only the recipient lane changes.</re_routed_reason>
     <date>2026-05-23</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>
