@@ -4,7 +4,21 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-21</date>
-    <status>staged</status>
+    <status>pending</status>
+    <!-- GO'd 2026-05-22 by 2.0.0_SA_COO~C, SCOPED. The gating text below
+         ("TO-1 + TO-2 + TO-3 all RAVC-closed") predates the 2026-05-22 TO-3
+         DS/DE split: TO-3 was split into a DS-scope (DynamoDB FIRM#demo +
+         USER#demo) and a DE-laned portal track. The operative gate for TO-4
+         is TO-3 DS-scope, which is RAVC2-accepted (COO~C-validated:
+         records verified in opal-users-v2; script 2ea34ba81 on origin/CLOUD).
+         SCOPED GO: ACs 1,2,3,5,6,7,8 (EC2 one-shot transform + PII-leak scan
+         + Sigma-identity reconcile) proceed now. AC4 (visual smoke across
+         Advisor Intelligence surfaces AS THE DEMO USER) is DEFERRED to the
+         post-DE verification track -- it needs the carved portal items
+         (ROUTER_FIRM_SUFFIX, firmAccess.ts, _partners/demo/) live, and the
+         ~C team has no DE lane yet. Surface the EC2 write-role need (cross-
+         domain block) at Phase 1 -- AE~C is pre-warned. -->
+
     <project_code>ADVI_DEMOV1</project_code>
   </metadata>
 
