@@ -4,13 +4,15 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps~C</issued_to>
     <date>2026-05-22</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_DEMOV1</project_code>
     <priority>P1 -- TO-4 transform run + R5 PII-leak scan (the closure gate for ADVI_DEMOV1) is gated on this grant. DS~C cannot execute --apply without it.</priority>
     <sla>~1d wall (IAM TF write + apply + smoke + verify + EC2_MANIFEST entry).</sla>
     <!-- GO ON AUTHOR by 2.0.0_SA_COO base 2026-05-22T23:30Z. Spawned per MSTR LD-0008
          (commit 743133a4a) to unblock the DS~C ADVI_DEMOV1.004 --apply chain. -->
+    <!-- CLOSURE 2026-05-23T07:40Z (2.0.0_SA_COO base): RAVC2-ACCEPTED. All 9 ACs MET per AE~C RAVC2 + COO independent verification. DEPLOY CHAIN: 206cd4483 (IAM role + EC2 source) -> 611926658 (EC2_MANIFEST entry) -> 5e32c0f1d (source_path) -> f17ee0fb2 (record-deploy + shared-infra-v1.17.0 tag). Role ARN: arn:aws:iam::313476888478:role/demo-transform-runner-ec2-role. Instance: i-03343a6072834f77d (t3.large, AL2023, running, SSM Online). Smoke verify (SSM cmd d128878f) 4/4 PASS including 2 negative-test ACL checks (DELETE on demo bucket = AccessDenied; WRITE on opal-data-bd = AccessDenied). DS~C unblocked + MCP'd by AE~C this turn. 3 findings in AE~C session log: CVO P1 timing-claim bug (-3h 53m UTC/EST conversion error in their audit); pre-existing comp-iam gaps on mdpf-daily-trigger-lambda-role (separate AE PartnerETL lane); TO-delivery-discoverability gap (codified by CTO 041a3d366 as Author+GO pairing rule). MSTR LD-0008 SPAWN -> COO TO -> AE~C EXECUTE chain delivered end-to-end. -->
+
   </metadata>
 
   <references>
