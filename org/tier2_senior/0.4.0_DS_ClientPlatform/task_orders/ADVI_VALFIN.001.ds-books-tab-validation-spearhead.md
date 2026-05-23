@@ -6,9 +6,11 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <co_owner>0.4.0_DE_ClientPlatform -- owns the portal-consumer-confirm half (Phase 3 comp-platinum reverse + sanity that the books-tab component renders against the corrected gold artifact). 0.4.0_DS leads the gold-side validation + corrections. Full visual FE-display verification is TO-6 (cross-cutting), not this TO.</co_owner>
     <date>2026-05-22</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <!-- GO ON PICKUP 2026-05-22. COO holds full authority for the remainder of this session (Andrew directive 2026-05-22; CTO + MSTR sessions down). ADVI_VALFIN PRD v0.1 just landed; TO-1 is the spearhead per priority order TO-1 -> TO-2 -> TO-3. -->
+    <!-- CLOSURE 2026-05-23T07:35Z (2.0.0_SA_COO base): RAVC2-ACCEPTED. All 6 ACs PASS per DS RAVC2 (20260523T073000Z). Brief: docs/briefs/advi-valfin-001-inflection-books-tab-validation-20260523.md (commit 5365d96f2). EVIDENCE: Phase 1 verify-channel (12 surfaces 4-check PASS); Phase 2 methodology (6 findings; 0 gold defects; 2 corrections shipped -- bronze-gate 0419ae771 + dual-emit shim 92a18ce03+a1b80c9e8); Phase 3 portal consumer confirm (AdvisorBookView+ClientsTab all books-tab fields correctly wired). KNOWN DEFERRALS (terminal dispositions per AC4): (1) INF_C_08 fee billing gap -- awaiting Andrew biz confirm; (2) ADVI_VALFIN.008 Phase B portal type rename -- banked pending DE pod-4 re-spawn (LD-0014); (3) ADVI_VALFIN.008 Phase C dual-emit collapse -- gated on Phase B. Pre-existing comp-validate config ERRORs (INF_D_02 stale path + INF_D_00 geo_drill) route as separate config-correction TOs -- out of TO-1 scope per AC5. D-001 SPEARHEAD COMPLETE. -->
+
     <project_code>ADVI_VALFIN</project_code>
     <priority>P1 -- THE SPEARHEAD. The Inflection books/ tab cost-basis cluster is the lowest-confidence surface in the ADVI product per PRD section 2. First and deepest validation pass. Findings either correct in-place or route to the active ADVI lane that owns the surface.</priority>
     <sla>3-5 days wall, multi-agent. 9 gold scripts + the books-tab portal surface. The 3-layer method per PRD section 3 -- verify-channel data, meta-analysis correctness, portal-consumer confirm -- applied per surface.</sla>
