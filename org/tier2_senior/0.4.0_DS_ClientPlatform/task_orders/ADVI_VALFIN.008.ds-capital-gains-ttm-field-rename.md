@@ -4,9 +4,24 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-23</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_VALFIN</project_code>
+    <!-- CLOSURE 2026-05-24T02:15Z UTC (2.0.0_SA_COO base, missed-flip catch-up). Phase A
+         was empirically shipped + RAVC2-ACCEPTED 2026-05-23T07:16Z under .005-tagged
+         commits 3ecf66be8 + 92a18ce03 + session log a1b80c9e8. AC1-AC8 all PASS per
+         the session log + COO independent verification (sentinel verify table: peter_lee
+         -$54,807,679.9 / patrick_scanlan -$11,739,001.09 / joe_brandenburg -$4,893,738.15
+         all dual-key matched; computation $0.90 rounding within tolerance; shared-infra-v1.17.0
+         tag confirmed). The TO `<status>` flip from pending->complete was missed at the
+         time of the RAVC2-ACCEPT MCP (filename 20260523T071443Z_2.0.0_SA_COO_RAVC2-ACCEPT
+         _--_ADVI_VALFIN.008_Phase_A_.md). Drift caught by DS~D ASK 1 on session intake
+         post LD-0027 SPAWN-WITH-DIRECTION 2026-05-24T01:50Z.
+         
+         Phase B materialization carries forward via VALFIN.012 (LD-0025 charter); Phase
+         B portal type swap (DE-lane TypeScript) banked pending DE pod-4 re-spawn LD-0014.
+         Phase C dual-emit collapse gated on Phase B production-deploy verify. -->
+
     <priority>P1 -- LD-0012 CVO YELLOW verdict follow-on; misleading field-name in production-facing portal payload + a senior reader (Andrew) materially mis-read it.</priority>
     <sla>~1d wall (DS half this TO); portal-side type rename as a follow-on once DE pod-4 is re-laned.</sla>
     <!-- GO ON AUTHOR by 2.0.0_SA_COO base 2026-05-23T06:35Z. CVO LD-0012 P1 follow-on

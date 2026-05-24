@@ -2,7 +2,10 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-05-23-valfin-012-phase-b-materialization</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
+    <re_routed_from>0.4.0_DS_ClientPlatform (base; pre-LD-0027 spawn)</re_routed_from>
+    <re_routed_at>2026-05-24T02:15Z UTC</re_routed_at>
+    <re_routed_reason>DS~D came online via LD-0027 SPAWN-WITH-DIRECTION 2026-05-24T01:50Z as DS-domain replacement for the compacted-stuck base session. DS~D surfaced lane-ownership ask on intake. COO confirms ~D ownership for .012 -- they're the natural pickup for fresh DS-domain materialization work (vs DS~C who's heads-down on DEMOV1.004 attempt-11 + the absorbed .010/.011 bundle). Sequencing-gated on .010 (still with DS~C) remains the upstream dependency. Original TO content + ACs + scope unchanged.</re_routed_reason>
     <date>2026-05-23</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>
