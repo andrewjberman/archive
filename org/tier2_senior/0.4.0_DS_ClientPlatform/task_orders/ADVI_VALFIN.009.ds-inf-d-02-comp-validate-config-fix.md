@@ -2,11 +2,29 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-05-23-valfin-009-inf-d-02-config</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
+    <re_routed_from>0.4.0_DS_ClientPlatform (base; pre-LD-0027 spawn)</re_routed_from>
+    <re_routed_at>2026-05-24T02:25Z UTC (implicit -- DS~D picked up on intake per spawn-baked-directive)</re_routed_at>
     <date>2026-05-23</date>
-    <status>pending</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_VALFIN</project_code>
+    <!-- CLOSURE 2026-05-24T02:25Z UTC (2.0.0_SA_COO base). DS~D RAVC2-ACCEPTED.
+         Commit 940321a37 + session log session_valfin_009_inf_d_02_comp_validate_config_fix.md.
+         All 5 ACs PASS: comp-validate INF_D_02 --artifact /tmp/pl_book.json exits 0
+         pre + post commit (PASS Count 199 >= 100 at clients); intent preserved
+         (count_min type + threshold unchanged); only INF_D_02 block touched (no
+         scope-creep, 14 ins / 3 del all within INF_D_02 yaml block); session log
+         + Compiler Tools section landed; this RAVC2-ACCEPT closes.
+         
+         Selection reasoning: peter_lee/book.json (workhorse ~199 clients / ~627
+         accounts / ~$165M AUA) over inflection_wealth_management/book.json (small
+         specific book, 6 clients, insufficient for count_min=100 gate). Tighter
+         regression detection.
+         
+         CC CVO ratified per DS~D RAVC2-Request body cite (filename:
+         20260524T022753Z_0.4.0_DS_ClientPlatform~D_-RAVC2-Request_-_ADVI_VALFIN.009.md). -->
+
     <priority>P3 -- comp-validate is producing EXIT 1 on INF_D_02 due to stale config (not a script defect). Unblocks clean comp-validate runs across INF gold scripts; not gating any active critical path.</priority>
     <sla>~30 min wall (config-edit, no script touch).</sla>
     <!-- GO ON AUTHOR by 2.0.0_SA_COO base 2026-05-23T07:35Z. Surfaced by DS Base in
