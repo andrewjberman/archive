@@ -2,22 +2,32 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-05-24-demov1-006-mechanism-class-change</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-05-24</date>
     <status>pending</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_DEMOV1</project_code>
-    <priority>P1 -- LD-0030 mechanism-class change for DEMOV1.004 leak-detection. Supersedes substring-scan iteration approach (~12 attempts post-LD-0019); structurally addresses the failure class.</priority>
+    <priority>P1 -- LD-0030 mechanism-class change for DEMOV1.004 leak-detection. Durable follow-on per attempt-13 SUCCESS sequencing (NOT immediate supersession; reserved branch for attempt-13 failure no longer fires).</priority>
     <sla>~4-8h wall (architectural primitive implementation + regression-test fixture + full transform re-run + R5 PII scan validation).</sla>
     <!-- GO ON AUTHOR by 2.0.0_SA_COO base 2026-05-24T03:35Z UTC. CVO LD-0029 priority-
          consult CORROBORATE Path B verdict (commit 293649cc0) ratified via LD-0026
          backstop. MSTR LD-0030 charter (b58751842) supersedes LD-0029; routes
          materialization via COO with M-1 + FN-1 baked.
 
-         Sequencing: DS~C picks up post-attempt-13 (success or final-fail empirical
-         anchor). NOT blocking attempt-13 -- CVO confirms attempt-13 continues running;
-         if attempt-13 succeeds, this TO becomes the structural-rethink follow-on; if
-         attempt-13 fails, this TO supersedes immediately. -->
+         Original sequencing: DS~C picks up post-attempt-13 (success or final-fail
+         empirical anchor); NOT blocking attempt-13.
+
+         REASSIGNMENT 2026-05-24T21:5xZ (ws COO): attempt-13 SUCCESS empirically
+         settled (DS~C close-out commit 469df551f + ws COO RAVC2-Accept commit
+         f93f52969 + ws CVO CORROBORATE AC5 verdict commit 95e2b366e). Per LD-0030
+         attempt-13-SUCCESS branch + LD-0021 staging materialization: issued_to
+         changes from 0.4.0_DS_ClientPlatform~C to 0.4.0_DS_ClientPlatform~D.
+         Rationale: Path B is mechanism-class-change (substring-scan -> structural-
+         disjointness-at-build-time); fresh ~D context-baggage-free is cleaner than
+         ~C's 13-attempt substring-scan muscle memory; ~C's close-out + monitor logs
+         (paired in 469df551f) are the SPAWN-WITH-DIRECTION orient bundle for ~D's
+         first cycle. MSTR LD-0050 covers DS~D demand-justified spawn at CY-0088
+         per SS-0002 §7 step 14 materialization. -->
   </metadata>
 
   <references>
@@ -46,9 +56,13 @@
 
     Iteratively-grown set going forward -- any future leak discovery adds to the regression-test fixture.
 
-    SEQUENCING: attempt-13 continues running concurrent with this TO's authoring. CVO confirms attempt-13 is NOT BLOCKED by this change. DS~C picks up this TO when attempt-13 settles:
-      - If attempt-13 SUCCEEDS empirically (R5 PII scan clean): this TO becomes the structural-rethink follow-on; ships as the durable mechanism for any future demo-data refresh (per Q2 snapshot-only ruling, future refresh = manual rebuild + Andrew direction; Path B is the rebuild's leak-detection primitive).
-      - If attempt-13 FAILS or surfaces more leaks: this TO supersedes immediately; DS~C transitions from substring-scan iteration to Path B build-time-tagging implementation.
+    SEQUENCING (RESOLVED 2026-05-24): attempt-13 SUCCESS empirically settled (R5 PII scan: leak_count=0 over 22,260 objects scanned vs 9,665 real z-IDs + 3,291 real literals; AC5 reconciliation cent-perfect; DS~C close-out commit 469df551f; ws COO RAVC2-Accept commit f93f52969; ws CVO CORROBORATE on AC5 method commit 95e2b366e). Per attempt-13-SUCCESS branch: this TO is the DURABLE-FOLLOW-ON for any future demo-data refresh (per Q2 snapshot-only ruling, future refresh = manual rebuild + Andrew direction; Path B is the rebuild's leak-detection primitive). NOT immediate supersession of the existing demo snapshot. DS~D picks up this TO post-CY-0088 spawn per LD-0021 staging materialization.
+
+    ORIENT BUNDLE FOR DS~D (SPAWN-WITH-DIRECTION fast-orient inputs):
+      - DS~C close-out log: org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-05-24/advi_demov1_004_attempt13_close~C.md (commit 469df551f) -- full AC1-8 evidence + reconciliation method + mechanism-class observation
+      - DS~C monitor log: org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-05-24/advi_demov1_004_attempt13_monitor~C.md (paired in 469df551f) -- Phase-1/2 compiler-tools mandates + mid-run state
+      - ws COO RAVC2-Accept MCP: filesystem inbox archive 20260524T213658Z_2.0.0_SA_COO__RAVC2-ACCEPT__ADVI_DEMOV1.004_attempt-1.md
+      - CVO AC5 verdict log: org/tier1_exec/3.0.0_SA_CVO/logs/2026-05-24/cvo_loop_2141Z_ADVI_DEMOV1_004_AC5_disjointness_verdict.md (commit 95e2b366e) -- includes FN-1 per-slice coverage characterization + FN-2 2D-pattern as load-bearing insight + FN-3 common-name collision false-negative bound; potentially informative for Path B regression-test fixture design
   </context>
 
   <scope>
@@ -88,11 +102,11 @@
   </scope>
 
   <cross_domain_coordination>
-    Lead: 0.4.0_DS_ClientPlatform~C (deeply familiar with pseudonymizer iteration history; lane authority preserved).
+    Lead: 0.4.0_DS_ClientPlatform~D (durable-follow-on owner per LD-0021 staging materialization + LD-0030 attempt-13-SUCCESS sequencing). DS~D's lane authority for this work derives from SS-0002 §7 step 14 + MSTR LD-0050 demand-justified spawn at CY-0088. Iteration history (12-attempt substring-scan series) lives in DS~C's close-out + monitor logs cited in &lt;context&gt; ORIENT BUNDLE; DS~D consumes that history as orient input, not as muscle memory.
     Sub-forks within Path B implementation route under LD-0026 backstop: surface to COO → Andrew 1-cycle SLA → CVO/CTO if silent.
-    No cross-lane coordination needed for primary implementation.
-    CC AE~C on RAVC2 (instance teardown coordination per existing demo-static-snapshot design once R5 scan clean).
-    CC CVO on RAVC2 -- they'll re-verify the regression-test fixture + R5 scan and ratify LD-0030 closed.
+    No cross-lane coordination needed for primary implementation. DS~C standby cycle 1 (per ws COO recommendation MCP 21:46Z; reassess CY-0089 for LD-0036 step-2 stand-down) -- if DS~D needs iteration-history clarification beyond what the close-out + monitor logs surface, MCP DS~C directly OR route through ws COO.
+    CC AE~C on RAVC2 (instance teardown coordination per existing demo-static-snapshot design once R5 scan clean) -- AE~C cross-domain thread on EC2 write-role grant closed at .004 close-out (20260524T213744Z); .006's transform re-run reuses the same demo-transform-runner IAM + EC2 infra unless DS~D surfaces a new mechanism-class need.
+    CC CVO on RAVC2 -- they'll re-verify the regression-test fixture (FN-1) + R5 scan and ratify LD-0030 closed. CVO has prior context via the AC5 disjointness verdict (commit 95e2b366e) which is conceptually adjacent (haystack + corpus 2D-coverage pattern shares the structural-knowledge-of-corpus framing with Path B build-time disjointness).
   </cross_domain_coordination>
 
   <compiler_tools_mandate>
