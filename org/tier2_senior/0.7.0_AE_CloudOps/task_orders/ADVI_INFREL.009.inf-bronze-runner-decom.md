@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05T~21:15Z. Gates on ALL of: INFINGE Phase 1b TOs ACCEPTED + INFREL Phase 2 TOs (TO-4..7) ACCEPTED + 48h soak with daily Lambda crons firing clean. Final cleanup; high-impact decom. -->
+    <status>complete-as-superseded</status><!-- Authored sprint mode 2026-05-05T~21:15Z. Gates on ALL of: INFINGE Phase 1b TOs ACCEPTED + INFREL Phase 2 TOs (TO-4..7) ACCEPTED + 48h soak with daily Lambda crons firing clean. Final cleanup; high-impact decom. **SUPERSEDED 2026-05-25 (AE 0.7 queue-hygiene flip, ws COO Path 3 GO post-INFETL-close `eecc50c19`):** Parent project ADVI_INFREL closed-as-superseded into ADVI_INFETL 2026-05-22 (REGISTRY row 75); ADVI_INFETL itself closed COMPLETE 2026-05-25 `eecc50c19`. bronze-runner-decom belongs in Phase-2-follow-on charter alongside silver-aggregator txn-sentinel restoration (root cause: ADVI_TXNAMG.004 TO-4 `aa7be4b5e` regression 2026-05-22) — ws CTO architectural-domain routing per ws COO §4. No substantive ship under this TO; queue-hygiene only. -->
     <priority>medium</priority>
     <estimated_effort>~0.5d AE post all gates green</estimated_effort>
   </metadata>
