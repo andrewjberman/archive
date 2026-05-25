@@ -2,16 +2,20 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-05-25-demov1-to7-snapshot-clean</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.7.0_AE_CloudOps~C</issued_to>
+    <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-05-25</date>
-    <status>staged</status>
-    <dispatch_held>true</dispatch_held>
+    <status>pending</status>
+    <dispatch_held>false</dispatch_held>
     <project_code>ADVI_DEMOV1</project_code>
-    <priority>Medium -- Phase-5-followon (structural-bug-not-binding-gate-risk per LD-0030 sequencing pattern). Dispatches when AE~C lane available (Task #10 co-resolution at Andrew sovereign ratification moment).</priority>
-    <sla>~1-2d wall (design choice + impl + transform re-run verify).</sla>
+    <priority>Medium -- Phase-5-followon (structural-bug-not-binding-gate-risk per LD-0030 sequencing pattern). Re-routed AE~C → AE 0.7 base per Andrew sovereign LD-0068 2026-05-25T~23:05Z "just do base AE, get it going on LD 0067 and lets continue".</priority>
+    <sla>~1-2d wall (design choice + impl + transform re-run verify). Sequence in LD-0067 WS-A spec pre-positioning window (~1-2 days) when AE 0.7 capacity permits.</sla>
     <!-- AUTHORED 2026-05-25T20:0XZ by 2.0.0_SA_COO under ws CTO [RAVC2-AC1-FINDING-RULING] §6 authorization
-         block. Phase-5-followon class. Dispatch_held=true gates on AE~C spawn ratification by Andrew sovereign
-         at RAVC2-bundle-ready moment (per CY-0128 §3 + Task #10 routing decision). -->
+         block. Phase-5-followon class. Originally dispatch_held=true pending Andrew Q1 AE~C spawn auth.
+         RE-ROUTED 2026-05-25T~23:25Z by 2.0.0_SA_COO per LD-0068 base AE 0.7 spawn (not ~C tilde):
+         issued_to flipped to base; status=pending + dispatch_held=false; GO MCP dispatched to AE 0.7
+         base inbox same turn. Per LD-0068, AE 0.7 is also pre-positioning for LD-0067 Workstream B
+         (Docker quarantine impl) during ws CTO Workstream A spec landing (~1-2 days) — .007 can
+         either fit in the pre-positioning window OR sequence after LD-0067 WS-B per AE capacity-assessment. -->
 
   </metadata>
 
