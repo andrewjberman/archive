@@ -6,7 +6,15 @@
   <assigned_to>0.1.0_DS_MarketIntelligence~E</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — URGENT GO dispatched cycle 116; PRD authoring ws CTO parallel</status>
+  <status>complete</status>
+  <completion>
+    <brief>docs/briefs/yalp_causal_phase0_substrate_survey_20260526.md</brief>
+    <commit>459f230c0</commit>
+    <completed_at>2026-05-26T~23:00Z</completed_at>
+    <wall_time>~15min spawn-to-RAVC2-Request (well under sub-1h URGENT target)</wall_time>
+    <ac_status>4/4 ACs MET — SCOPE-CLARIFICATION-CLASS finding (NOT full Phase 1/2 YALP project); CausalityEngine = SEPARATE service stack (news + AI + ticker-API); 8/12 outputs OPAL-PROPRIETARY-DERIVED; 3 MATCH-class ticker primitives sister-YALP-covered; 1 DERIVED; 1 RE-GAP news paid-sub; equivalent precedent YALP_FACTOR §15 carve-out</ac_status>
+    <followon>Optional MarketOverview ticker-primitive Phase 0+ foldable into YALP_MKTOVR when wired from mock</followon>
+  </completion>
   <priority>URGENT (Andrew /goal sovereign 2026-05-26T~22:42Z portal-page-coverage discipline + cookie-fresh window NOW → tomorrow AM ET)</priority>
   <references>
     <ref type="andrew_goal">2026-05-26T~22:42Z /goal directive (verbatim per ATTRBN TO)</ref>
