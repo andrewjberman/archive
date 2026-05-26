@@ -6,7 +6,7 @@
   <assigned_to>0.1.0_DS_MarketIntelligence~A</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — GO dispatched cycle 114 extended carry-on</status>
+  <status>complete — AAIIAdapter FULL (3/3 sentiment 2024 obs live-verified) + ConferenceBoardAdapter CATALOG-DISCOVERED-only (CCI + LEI metadata; observations subscription-elevation-pending /api/indicator-infos 401 even w/ Andrew HAR auth); 5/5 ACs MET with subscription-gap honest-reporting
   <priority>HIGH (TO-008 RAVC2-ACCEPTED 30bd38cf0; Andrew HAR triage 5-set RICH 2-of-5 unlocks +5 indicators coverage 73% → ~80%; ws CTO substrate-handoff MCP `20260526T~22:21Z` pre-positioned)</priority>
   <references>
     <ref type="upstream">TO-008 multi-source RE harness build RAVC2-ACCEPTED commit `30bd38cf0` (cycle 114 ratification); AdapterBase inheritance substrate</ref>
