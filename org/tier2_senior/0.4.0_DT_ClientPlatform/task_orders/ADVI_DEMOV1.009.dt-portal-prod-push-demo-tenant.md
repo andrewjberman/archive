@@ -6,7 +6,15 @@
   <assigned_to>0.4.0_DT_ClientPlatform</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending</status>
+  <status>complete</status>
+  <completed>2026-05-26T17:38Z by 0.4.0_DT_ClientPlatform</completed>
+  <ship_evidence>
+    Phase 1: portal/origin/DEV @ 03a8544155 (push 4938bf36..03a85441; VALGATE D-1 PASS; GitHub CI run 26460394795 GREEN 2m15s; bun tsc + bun build clean locally).
+    Phase 2: Andrew UAT PASS-frontend-scope ~17:30Z (Smoke-A dropdown ✓, Smoke-B 3-tab ✓, Smoke-C populates with F1 finding, Smoke-D names pseudonymized excellent with F2 finding). Backend findings briefed via docs/briefs/advi-demov1-uat-backend-findings-20260526.md (commit ad37838b1) routing F1+F2 to AE 0.6.0, F3 to DE pod.
+    Phase 3: portal/origin/PROD @ b7b201a610 (cherry-pick 03a85441 onto PROD via ephemeral worktree at portal/.runtmp/portal-prod-cherry; tsc -b --noEmit gate PASS; pushed 0be05530..b7b201a6). Ephemeral worktree removed clean.
+    Phase 4: parent CLOUD commit 794cf9c0a (portal gitlink 0be05530 -> b7b201a6 via update-index --cacheinfo; main portal tree stayed on DEV throughout per strand-discipline). Tag portal-v2.1.73 (6e5d9a9257) pushed --follow-tags.
+    Strand AC5 SAT: main portal tree on DEV @ 03a85441 post-ship (pre-existing 0.3.0_DT strand un-done at Phase 3 prep).
+  </ship_evidence>
   <priority>HIGH (Andrew sovereign direct ~15:45Z Phase 6 completion chain; TO-009 closes the DEV→PROD ship gap)</priority>
   <references>
     <ref type="prd">docs/architecture/ADVI_DEMOV1.md v0.4.1 commit `332a56f0f` (ws CTO; Phase 6 §6.1 TO-009 spec).</ref>
