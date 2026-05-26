@@ -6,7 +6,9 @@
   <assigned_to>0.1.0_DS_MarketIntelligence</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending</status>
+  <status>complete</status>
+  <completed>2026-05-26</completed>
+  <closure_ship>TO-002 deliverable: §13 of source brief docs/briefs/yalp_mktovr_market_overview_field_comparison_2026-05-22.md (commit dcbc50710; RAVC2-ACCEPT ws COO 15:11Z). 18/18 OK YCharts pulls on T*=2026-05-22; freshness_probe HTTP 200 (menachem cookie clean); C2 dormant Lambda pre-check PASS (State=Active; LastModified 2026-05-22T17:30Z). C2 module structural finding banked for AE 0.7 v1.3 follow-on (run_full_pull lacks scope-filter + propagates per-leg exceptions unhandled). Local-harness workaround proven sufficient. AC1-AC5 all met. Status flip retroactive (was missed at original commit window 15:06Z; caught during /work tick housekeeping).</closure_ship>
   <priority>HIGH (Andrew sovereign direct priority elevation)</priority>
   <references>
     <ref type="prd">docs/architecture/YALP_MKTOVR.md v0.3 `42cbf164c` (1.0.0_SA_CTO; DDB-intermediate canonicalized). Full scope + AC details in PRD §6 (TO-002 section).</ref>
