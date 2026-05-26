@@ -6,7 +6,15 @@
   <assigned_to>0.4.0_DE_ClientPlatform</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending</status>
+  <status>complete</status>
+  <completed>2026-05-26</completed>
+  <ship_evidence>
+    portal/DEV commit `03a85441` (9 files, +499/-2; 6 items single coordinated commit — 4 PRD-enumerated + 2 COO scope-ratify additives for useTenantLayout LAYOUTS registration + CanonicalFirmId union extension);
+    workspace/CLOUD session log commit `bafe89aa6`;
+    AC1+AC4+AC5+AC6+AC7 PASS; AC2+AC3 tool-gap deferred (comp-graph multi-"index" component-name collision; structurally satisfied; flagged for CVO comp-* expansion follow-up);
+    AC8 RAVC2-Request sent to ws COO 2026-05-26 ~16:00Z;
+    ~37min spawn-to-ship wall (Andrew sovereign-direct /allocation #7 ALLOCATION-IMPLICIT-LIFT → MSTR /mstr-spawn 15:23Z → DE-pod-4 revival → ship 16:00Z).
+  </ship_evidence>
   <priority>HIGH (Andrew sovereign direct 2026-05-26 ~15:45Z verbatim: "if all the data is prepared in opal-data-demo, then it is time to connect it to frontend. We should be able to go to Advisor Intelligence portal page and hit the 'Select Partner:' dropdown, select 'Demo', and see all the data populate there in canonical format just how it is already done for 49 Financial and Inflection Wealth Management.")</priority>
   <references>
     <ref type="prd">docs/architecture/ADVI_DEMOV1.md v0.4 commit `9ee0b92ec` 2026-05-26 (1.0.0_SA_CTO; Phase 6 Frontend Connection addendum). Full scope + 5 risks + mitigations in PRD §6.1.</ref>
