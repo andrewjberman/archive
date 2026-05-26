@@ -6,7 +6,7 @@
   <assigned_to>0.1.0_DS_MarketIntelligence~B</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — URGENT GO dispatched cycle 116; PRD authoring ws CTO parallel</status>
+  <status>complete — RAVC2-Request sent ws COO 2026-05-26 work-cycle:6; brief at `docs/briefs/yalp_attrbn_phase0_substrate_survey_20260526.md`; 4/4 ACs MET; ~25 atomic field classes mapped; 5 Brinson-class TRUE-GAP-AFTER-SUBSTITUTE-EXHAUSTED; Option C Bloomberg-PORT retention recommended (same canonical-primary class as VALUAT)</status>
   <priority>URGENT (Andrew /goal sovereign 2026-05-26T~22:42Z portal-page-coverage discipline + cookie-fresh window NOW → tomorrow AM ET; Andrew explicit ATTRBN mention in URGENT cascade ~22:38Z)</priority>
   <references>
     <ref type="andrew_goal">2026-05-26T~22:42Z /goal: "running a project for every single portal page... figuring out side by side what data we can get from Ycharts/smartx/etc raw and what we have to derive to get to the same numbers Yang has from BBG/yang-pipeline"</ref>
