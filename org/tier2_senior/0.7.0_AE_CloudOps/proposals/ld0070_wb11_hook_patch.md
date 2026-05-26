@@ -131,9 +131,9 @@ Once applied, verify with synthetic tool calls from each lane state:
 
 | Test | Setup | Expected |
 |---|---|---|
-| Base session, session-keyed file present | `mkdir -p org/mcp/sessions; echo "0.7.0_AE_CloudOps" > org/mcp/sessions/${CLAUDE_SESSION_ID}.serial` then fire any tool call | JSONL entry has `serial_source: "session-keyed"` + agent `0.7.0_AE_CloudOps`; no hook_errors.log entry |
+| Base session, session-keyed file present | `mkdir -p org/mcp/sessions; echo "0.7.0_AE_CloudOps" > org/mcp/sessions/${CLAUDE_CODE_SESSION_ID}.serial` then fire any tool call | JSONL entry has `serial_source: "session-keyed"` + agent `0.7.0_AE_CloudOps`; no hook_errors.log entry |
 | Tilde lane, session-keyed file present | `~B` session writes own session file with `0.X.0_..~B`; fires any tool call | JSONL entry has correct `~B` suffix; no leak to base-serial file |
-| Session-keyed file MISSING, env set | `rm org/mcp/sessions/${CLAUDE_SESSION_ID}.serial; export OPAL_AGENT_SERIAL=test_agent; fire tool` | JSONL entry has `serial_source: "env"` + agent `test_agent`; WARN entry in `org/mcp/hook_errors.log` |
+| Session-keyed file MISSING, env set | `rm org/mcp/sessions/${CLAUDE_CODE_SESSION_ID}.serial; export OPAL_AGENT_SERIAL=test_agent; fire tool` | JSONL entry has `serial_source: "env"` + agent `test_agent`; WARN entry in `org/mcp/hook_errors.log` |
 | Session-keyed file MISSING, no env, .comp-graph present | (default state for legacy sessions) | JSONL entry has `serial_source: "comp-graph-fallback"`; WARN entry in `org/mcp/hook_errors.log` |
 | All sources missing | (catastrophic) | JSONL entry has `serial_source: "unresolved"` + agent `_unknown_lane_check_needed`; WARN entry |
 
@@ -154,18 +154,16 @@ The session-id-keyed pattern requires `org/XXX.md` Step 1b to write the session 
 +**A.1 — Write session-id-keyed serial file (LD-0070 §7.2):**
 +```bash
 +mkdir -p org/mcp/sessions
-+# CLAUDE_SESSION_ID is set per-session by Claude Code; if not set, omit this step.
++# CLAUDE_CODE_SESSION_ID is set per-session by Claude Code (empirically verified by ws CTO 2026-05-26).
 +# The PostToolUse hook will fall back to env/.comp-graph chain with WARN entry.
-+if [ -n "${CLAUDE_SESSION_ID:-}" ]; then
-+    echo "{your_full_suffixed_serial}" > "org/mcp/sessions/${CLAUDE_SESSION_ID}.serial"
++if [ -n "${CLAUDE_CODE_SESSION_ID:-}" ]; then
++    echo "{your_full_suffixed_serial}" > "org/mcp/sessions/${CLAUDE_CODE_SESSION_ID}.serial"
 +fi
 +```
 +This enables the PostToolUse hook to resolve serial via session-id-keyed file (per-session deterministic, tilde-lane-safe, broker-outage-resilient).
 ```
 
-OPEN QUESTION (for MSTR + ws CTO): does Claude Code export `$CLAUDE_SESSION_ID` to the shell environment? If yes, the ritual above works directly. If no, we need an alternative session-id source available at session-start (the hook stdin provides it on first hook-fire so we can back-fill there, but that breaks the "file exists BEFORE first tool call" property).
-
-If Claude Code does NOT export session_id at shell level: the alternative is to do the session-file write inside the FIRST PostToolUse hook fire (back-fill pattern). Cost: the FIRST tool call's JSONL entry has `serial_source: "comp-graph-fallback"` (or wherever the fallback chain lands); subsequent tool calls have `serial_source: "session-keyed"`. One legacy-tagged entry per session vs zero.
+**ENV VAR NAME RESOLVED (2026-05-26 by ws CTO empirical verification per MCP `20260526T~0130Z`):** Claude Code DOES export the session ID at shell level — variable name is **`$CLAUDE_CODE_SESSION_ID`** (with the `_CODE_` infix; NOT `$CLAUDE_SESSION_ID`). Value matches the `session_id` field in PostToolUse hook stdin (confirmed identical UUID). The Step 1b ritual above works directly with no back-fill complexity needed. Locally verified in AE 0.7 session 2026-05-26: `CLAUDE_CODE_SESSION_ID=deac8e65-c5a9-4c2a-bd91-dacf55b4d0d8`. Spec v0.3 `566647bfd` §7.2 anchors this empirical name explicitly for future implementers.
 
 ---
 
