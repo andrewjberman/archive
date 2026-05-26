@@ -7,7 +7,7 @@
   <co_authors>0.1.0_DS_MarketIntelligence~B (Wave-3 BLSAdapter overlay), 0.1.0_DS_MarketIntelligence~C (Wave-4 CensusAdapter overlay), 0.1.0_DS_MarketIntelligence~D (Wave-4 TreasuryAdapter overlay), 0.1.0_DS_MarketIntelligence~E (Wave-1 YahooFinanceAdapter + Wave-2 HAR-RE-CANDIDATE adapters)</co_authors>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — GO dispatched cycle 113</status>
+  <status>complete — Wave 1+3+4 shipped 30bd38cf0 (5 adapters + base + secrets + README); 7/7 ACs met (3-way cross-validation EMPIRICALLY MATCHES); Wave 2 HAR-RE deferred to TO-008b per cap-discipline + sub-scope-deferrable; Wave 5 RE-DEFERRED documented; standing for ws COO RAVC2 disposition</status>
   <priority>HIGH (Phase 2b sequential follow-on to TO-007 RAVC2-ACCEPT 59ab271de + §12 amendment 7024d6aba; Andrew sovereign 2026-05-26T~21:00Z RE-OPEN Phase 2 mandate)</priority>
   <references>
     <ref type="prd">docs/architecture/YALP_MACROS.md v0.5 §8 line 180 — TO-008 canonical scope</ref>
