@@ -6,7 +6,9 @@
   <assigned_to>0.1.0_DS_MarketIntelligence</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending</status>
+  <status>complete</status>
+  <completed>2026-05-26</completed>
+  <closure_ship>TO-VAL deliverable: §15+§16 of source brief. Per-component cutover-trust verdict: 3 TRUST + 4 NEEDS-INVESTIGATION-representative-bound + 3 n/a-out-of-cutover-scope; no NO-TRUST. 8/8 project-level ACs met per §16.1 scorecard. CVO /verify-channel project-level MCP fired this cycle.</closure_ship>
   <priority>HIGH (Andrew sovereign direct 2026-05-26 ~15:00Z)</priority>
   <references>
     <ref type="prd">docs/architecture/YALP_MKTOVR.md v0.4 §6 TO-VAL block.</ref>

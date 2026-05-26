@@ -6,7 +6,9 @@
   <assigned_to>0.1.0_DS_MarketIntelligence</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending</status>
+  <status>complete</status>
+  <completed>2026-05-26</completed>
+  <closure_ship>TO-004 deliverable consolidated as §14 of source brief docs/briefs/yalp_mktovr_market_overview_field_comparison_2026-05-22.md (single-doc continuity). 15 sampled × 8 fields + 56 D2/D3 carry-forward + 3 RSI + 4 regime = ~583 verdicts. MATCH 384 / REPRESENTATIVE 167 / GAP 8 / DRIFT 0. Endpoint 403 (NOT session-evict; evicted=False) banked for AE 0.7 follow-on.</closure_ship>
   <priority>HIGH (Andrew sovereign direct 2026-05-26 ~15:00Z: "finish YALP_MKTOVR end-to-end, call CVO for verify-channel at completion"; LD-0090 ALWAYS-PROCEED authorized; DS 0.1.0 cascading per same direct)</priority>
   <references>
     <ref type="prd">docs/architecture/YALP_MKTOVR.md v0.4 commit `1f6387616` (1.0.0_SA_CTO; TO-005 add + serialization auth + DRIFT routing). §6 TO-004 block.</ref>

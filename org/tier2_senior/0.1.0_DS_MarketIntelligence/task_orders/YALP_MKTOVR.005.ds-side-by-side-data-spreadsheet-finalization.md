@@ -6,7 +6,9 @@
   <assigned_to>0.1.0_DS_MarketIntelligence</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending</status>
+  <status>complete</status>
+  <completed>2026-05-26</completed>
+  <closure_ship>TO-005 deliverable: docs/briefs/yalp_mktovr_side_by_side_spreadsheet_2026-05-22.csv (799 populated rows) + .md updated with §0 DRIFT-status surface (zero DRIFT) + executive summary. Andrew direct ~15:30Z verbatim satisfied. Populated D/E/F from yang fresh + D2/D3 baseline carry-forward.</closure_ship>
   <priority>HIGH (Andrew sovereign direct 2026-05-26 ~15:30Z addendum)</priority>
   <references>
     <ref type="prd">docs/architecture/YALP_MKTOVR.md v0.4 §6 TO-005 block (CTO `1f6387616` per Andrew direct).</ref>
