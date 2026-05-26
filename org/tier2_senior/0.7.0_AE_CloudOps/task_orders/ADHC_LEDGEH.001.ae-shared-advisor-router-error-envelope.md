@@ -5,7 +5,7 @@
 | **Project** | `ADHC_LEDGEH` (Lambda@Edge Defense Envelope Hardening) |
 | **Owner** | `0.7.0_AE_CloudOps` |
 | **Lane** | AE / lambda-edge / portal-auth-infrastructure |
-| **Status** | `pending` — dispatch GO unblocked per COO routing 17:1XZ; ready for AE 0.7 pickup |
+| **Status** | `complete` — shipped `48977e269` 2026-05-14 16:39Z (prior session pre-compaction); TO closure-bookkeeping flipped 2026-05-26 ~15:3XZ /work cycle #2 post-ws-COO-dispatch ACK + state-of-truth gap reconciliation. AC1 (TO-VAL empirical regression sweep) deferred to ADHC_LEDGEH.VAL (just-in-time post-CDNCOHT TO-001 ship per ws COO 15:11Z dispatch). AC7 (Andrew empirical UAT) satisfied via FIRMSEP.10 Cottonwood live-ship deployment-window evidence. AC2/AC3/AC4/AC5/AC6 satisfied structurally (handler pass-through logic + L@E reuses lambda-edge-execution-role + Terraform plan 0-diff at deploy time + tag portal-auth-vX.Y.Z series). |
 | **Dispatch_held** | `false` — CTO canonicalize (`5362d0295`) + COO dispatch GO both received |
 | **Effort** | ~3-5h actual (~1d wall budget; CTO downsize per `5362d0295` canonicalize — Option A locked, scope narrowed, FIRMSEP.04 test surface known) |
 | **PRD** | `docs/architecture/ADHC_LEDGEH.md` v0.2+canonicalize (CTO `5362d0295` git mv from AE drafts preserved AE authorship trail; CTO added §11 canonicalize entry + §7.Q3 ruling on top) |
