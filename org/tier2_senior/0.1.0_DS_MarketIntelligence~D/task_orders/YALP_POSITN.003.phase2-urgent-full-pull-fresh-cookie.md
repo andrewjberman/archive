@@ -6,7 +6,7 @@
   <assigned_to>0.1.0_DS_MarketIntelligence~D</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — URGENT GO dispatched this cycle</status>
+  <status>complete — brief shipped 2026-05-26 ~22:55Z; 4/4 ACs MET; 7-shape verdict taxonomy defined + applied; spreadsheet patched in-place (2 IBTF rows SUBSTITUTED with IBTG); standing for project-close 3-step atomic</status>
   <priority>URGENT (Andrew sovereign direct 2026-05-26T~22:38Z + ~22:40Z + earlier substitute-security ruling cycle 114; full-pull while cookie fresh)</priority>
   <references>
     <ref type="phase1_substrate">YALP_POSITN Phase 1 brief `292218f1f` + .002 `873b36313` (84 pulls dual-T*) + cascade `a52a7ca18` (4943-row spreadsheet)</ref>
