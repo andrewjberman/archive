@@ -6,7 +6,7 @@
   <assigned_to>0.7.0_AE_CloudOps</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>in_review — chain-wire SHIPPED commit `1a320180e` 2026-05-26T~22:25Z; AC1-AC4 MET; AC5 live-fire deferred to next 15:00 UTC EventBridge tick (or expedited via SSM ad-hoc per ws COO direction); RAVC2-Request to ws COO this cycle</status>
+  <status>complete — chain-wire SHIPPED `1a320180e` + pmc<5 pin fix `c64df3c84` (Python 3.9 PEP-604 lib-internal incompat surfaced + resolved at AC5 expedite); AC1-AC5 all MET via SSM ad-hoc Lambda invoke `67ea401f-2306-44fd-b92f-46e8e998b181` 2026-05-26T22:43:35Z — 4/4 etf_ownership_timeseries ticker artifacts emitted clean; reconcile gates PASS; DoD anomaly flag fires on Inflection PFOE 2026-05-21 + 2026-05-26; PRD §8.2 AC1-AC7 also all MET (gates MDPF_OWNTS.003 dispatch); RAVC2-ACCEPT received from ws COO at 1a320180e ship + RAVC2-Continue close-out this cycle</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH (Andrew sovereign chain; ws CTO PRD canonical; sequential after MDPF_OWNTS.001)</priority>
   <references>
