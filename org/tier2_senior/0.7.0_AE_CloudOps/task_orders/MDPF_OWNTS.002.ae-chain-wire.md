@@ -6,8 +6,8 @@
   <assigned_to>0.7.0_AE_CloudOps</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — dispatch_held (gates on MDPF_OWNTS.001 RAVC2-ACCEPT)</status>
-  <dispatch_held>true</dispatch_held>
+  <status>in_review — chain-wire SHIPPED commit `1a320180e` 2026-05-26T~22:25Z; AC1-AC4 MET; AC5 live-fire deferred to next 15:00 UTC EventBridge tick (or expedited via SSM ad-hoc per ws COO direction); RAVC2-Request to ws COO this cycle</status>
+  <dispatch_held>false</dispatch_held>
   <priority>HIGH (Andrew sovereign chain; ws CTO PRD canonical; sequential after MDPF_OWNTS.001)</priority>
   <references>
     <ref type="prd">docs/architecture/MDPF_OWNTS.md v0.1 (commit `8a125c682`)</ref>
