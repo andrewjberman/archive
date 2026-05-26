@@ -6,7 +6,13 @@
   <assigned_to>0.1.0_DS_MarketIntelligence~E</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — URGENT GO dispatched this cycle</status>
+  <status>complete</status>
+  <completion>
+    <brief>docs/briefs/yalp_factor_t002_validate_fresh_cookie_20260526.md</brief>
+    <completed_at>2026-05-26T~22:09Z</completed_at>
+    <wall_time>~14min spawn-to-RAVC2-Request (well under sub-30min target)</wall_time>
+    <ac_status>4/4 ACs MET — 10/10 constituents + 6/6 spreads pulled OK in 11.6s; freshness HTTP 200; ZERO failures; Phase 2 dispatch READY; ^MSACWI HTTP 400 from Phase 1 §13.1 empirically CONFIRMED cookie-stale class (Andrew sovereign [[feedback_ycharts_http_400_is_cookie_stale_class]] validated)</ac_status>
+  </completion>
   <priority>URGENT (Andrew sovereign direct ~21:54Z via ws CTO; time-pressure window NOW → tomorrow AM ET)</priority>
   <references>
     <ref type="cookie_refresh">AWS Secrets Manager `ycharts/credentials` REFRESHED ~21:55Z</ref>
