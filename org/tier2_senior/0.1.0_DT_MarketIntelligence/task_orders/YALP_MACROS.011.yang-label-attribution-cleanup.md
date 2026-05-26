@@ -74,5 +74,38 @@ Yang's "Industrial Productivity" label for the INDPRO series is **misleading** f
 
 This TO is the deferred-from-cycle-0042 bundle per ws CTO commitment in cycle 0042 per-tick log `org/tier1_exec/1.0.0_SA_CTO/logs/2026-05-26/ws-charter_2207Z.md`. Cycle 0042 priority went to Andrew HAR substrate triage; cycle 0043 absorbs the cleanup bundle alongside the substitute-security doctrine codification + 2 PRD addenda.
 
-**Status:** pending dispatch
+**Status:** blocked (architectural — pending ws CTO ruling on AC2 coupled-rename path)
 **Authored:** 2026-05-26 ~22:35Z (cycle 0043)
+**Dispatched:** 2026-05-26 ~22:46Z (MSTR spawn-with-direction)
+**Started:** 2026-05-26 ~22:50Z (DT 0.1.0)
+
+---
+
+## §6 — Execution log
+
+### AC1 — VERIFIED NO-OP (close as misclassification-class non-finding)
+
+Grep across `infra/aws/lambda/v2_portal/yang_pipeline/**`, `infra/aws/lambda/fred-macro-ingestion/`, `infra/aws/lambda/fred-data-ingestion/`, `data/yang_macros_re/**` for `BLS` / `Bureau of Labor`:
+- **Zero matches anywhere.** No false BLS attribution claim is made for ICSA / CCSA (or any other series) in any yang-side or FRED-ingest Lambda or yang_macros_re module.
+- `data/yang_macros_re/adapters/fred_adapter.py:68-69` already explicitly comments `"DoL ETA mirror -- NOT BLS"` for ICSA + CCSA (correctly attributed).
+- yang-generate-macro uses Bloomberg tickers (`INJCJC   Index` / `INJCSP   Index`) for jobless claims; no attribution label string in code.
+
+**Resolution path (b) from TO §1 Finding #3:** AC1 = no-op. Closed as misclassification-class non-finding.
+
+### AC2 — BLOCKED on architectural coupling
+
+**Issue surfaced during implementation:**
+
+The MACRO_GROUPS key in `yang-generate-macro/lambda_function.py:41` (`'Industrial Productivity MoM'`) is load-bearing as the JOIN key against `df['index_name']` from the upstream Bloomberg-fed PKL (yang's `market_indices_data_pull.ipynb` assigns `index_name` from the same dict). The INDICATORS list entry in `yang-generate-macro-timeseries/lambda_function.py:27` carries the same coupling, AND the portal `MacroTimeSeriesModal` slugifies the indicator name client-side -> the per-indicator timeseries filename in S3 must match the slug the portal computes from its own indicator list.
+
+A naive rename of `'Industrial Productivity MoM'` -> `'Industrial Production MoM'` at every yang-side site SILENTLY DROPS INDPRO from `macro_data.json` output (JOIN miss against PKL's `index_name`), contradicting the TO's "no pipeline-correctness impact" claim.
+
+**Decoupled-override workaround attempted** (introduce `INDICATOR_LABEL_OVERRIDES` map; keep match key on PKL side, translate to corrected label only at emit time; keep slug filename on old key for portal modal compat): **reverted** — signal: wrong approach.
+
+**Concrete unblock needed** — ws CTO design call between:
+- **Path A — Coordinated full rename** across yang's notebook PKL gen (`market_indices_data_pull.ipynb`) + yang-generate-macro + yang-generate-macro-timeseries + fred-macro-ingestion + portal `indicators.ts` + portal `MacroTimeSeriesModal.tsx`, all shipped together; AC5 portal follow-on becomes IN-SCOPE not OUT-OF-SCOPE.
+- **Path B — Decoupled output-label rename via override map** (as attempted + reverted) — keep PKL match keys intact; rename only the emit-time label and filename slug coordinated with portal-side; lower blast radius but more code surface area.
+- **Path C — Defer the rename entirely** until portal-side label update lands first (portal owns the slug-compute chain; yang follows portal's choice).
+- **Path D — Other** (CTO design).
+
+Routed via [BLOCKED-ASK] -> ws COO -> ws CTO. Resume on UNBLOCK_RECEIVED with chosen path.
