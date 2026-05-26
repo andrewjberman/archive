@@ -7,7 +7,8 @@
   <consult>0.6.1_AE_PartnerETL</consult>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending</status>
+  <status>complete</status>
+  <shipped>2026-05-26T~16:15Z; commit `6ffc457d5`; AC1+AC2+AC3+AC4+AC5+AC6 all MET; EC2 services 1->8 (bd-allocations + bd-assets + bd-fees + bd-price-runner + bd-transactions on bd-exporter-ec2-role + demo-transform-runner + moltbot + preserved bd-gold-runner); underscore↔dash normalization in cmd_service; cloudfront:CreateInvalidation verified MATCHED on bd-exporter-ec2-role (AC1) + inf-gold-layer-ec2-role (AC2); Lambda baseline preserved (AC3 via bd-portal-publisher); 2 pre-existing gaps surfaced (AC4); py_compile clean (AC5); comp-tools.yaml V5.001 note (AC6). ~30min wall TO start -> RAVC2 ready (PRD est ~3-5h; ~6-10x faster).</shipped>
   <priority>HIGH (3-fire convergence empirical anchor + LD-0097 §A north-star operationalization)</priority>
   <references>
     <ref type="prd">docs/architecture/ADHC_COMPIL_V5.md v0.1 commit `701103ccf` 2026-05-26 (1.0.0_SA_CTO; PRD chartered per Andrew direct → CVO brief `92b198aac` → CTO charter). Full §3 dispositions + §5 compiler mandate + §6 TO-001 block.</ref>
