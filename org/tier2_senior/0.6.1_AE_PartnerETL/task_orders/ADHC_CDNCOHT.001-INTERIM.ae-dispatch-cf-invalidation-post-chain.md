@@ -6,7 +6,15 @@
   <assigned_to>0.6.1_AE_PartnerETL</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending</status>
+  <status>complete</status>
+  <completed_date>2026-05-26</completed_date>
+  <closure_ship>
+    <inf_chain>commit b00e2733e + tag inf-pipeline-v1.7.67 (smoke I9SL0UBI5EL0HDQJY5GYFTBZ11)</inf_chain>
+    <bd_chain>commit 053bba6f7 + tag bd-v2.24.9 (smoke I7UM4P5I13VU9QL1H1307HCIXD)</bd_chain>
+    <session_log>org/tier2_senior/0.6.1_AE_PartnerETL/logs/2026-05-26/session_adhc_cdncoht_001_interim_inf_bd_ship.md (commit 914623023)</session_log>
+    <ravc2_accept_full>ws COO 2.0.0_SA_COO 2026-05-26 ~14:11Z; AC1 end-to-end + AC2 portal pull + AC3 24h regression soak banked to COO project log for next-chain-run validation (no action on AE 0.6.1)</ravc2_accept_full>
+    <mdpf_deferred>per ws COO 2026-05-26T13:57Z ACK — MDPF gold-chain not yet live; pattern banked as concrete reference for when MDPF lands</mdpf_deferred>
+  </closure_ship>
   <priority>HIGH</priority>
   <references>
     <ref type="prd">docs/architecture/ADHC_CDNCOHT.md v0.1 canonical commit `1a61f61c3` 2026-05-26 (1.0.0_SA_CTO). Full scope + IAM + acceptance criteria in PRD §6 (TO-001-INTERIM section).</ref>
