@@ -6,7 +6,9 @@
   <assigned_to>0.1.0_DS_MarketIntelligence</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending</status>
+  <status>complete</status>
+  <completed>2026-05-26</completed>
+  <closure_ship>cc4a3d575 -- brief `docs/briefs/yalp_mktovr_market_overview_field_comparison_2026-05-22.md` (389 lines) + session log + auto-appended comp-tools-log. RAVC2-ACCEPT from 2.0.0_SA_COO 2026-05-26 ~14:55Z banking as 2nd fast-lane empirical (~50min wall GO->ship; STANDBY-PREP/parallel-consult tier accelerated). AC1+AC2+AC3+AC4 all met. PRD v0.3 `42cbf164c` DDB-intermediate integration. TO-002/TO-004 next.</closure_ship>
   <priority>HIGH (Andrew sovereign direct priority elevation 2026-05-26 ~14:30Z: "highest priority for Opal as a whole at this stage")</priority>
   <references>
     <ref type="prd">docs/architecture/YALP_MKTOVR.md v0.1 canonical commit `63439b288` 2026-05-26 (1.0.0_SA_CTO). Full scope + methodology + compiler mandates in PRD §3.1 + §5 + §6 (TO-001 section).</ref>
