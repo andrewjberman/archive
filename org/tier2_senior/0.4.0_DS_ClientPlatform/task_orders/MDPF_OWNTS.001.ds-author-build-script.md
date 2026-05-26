@@ -9,8 +9,8 @@
   <status>pending — GO dispatched this cycle</status>
   <priority>HIGH (Andrew sovereign direct 2026-05-26 3 asks + 2 methodology refinements; ws CTO PRD v0.1 8a125c682 canonical; substrate-rich brief author this lane)</priority>
   <references>
-    <ref type="prd">docs/architecture/MDPF_OWNTS.md v0.1 (commit `8a125c682`)</ref>
-    <ref type="prd_section">§3.1 Option A architecture (CTO selected v1; flagged for Andrew ratification §10 Q1); §5.2 artifact shape; §8.2 AC1-AC7</ref>
+    <ref type="prd">docs/architecture/MDPF_OWNTS.md v0.1.1 (commit `d30a73cd6` — same-cycle precision-pin amendment supersedes v0.1 `8a125c682`; 3 narrow author-chain refinements folded pre-impl per [[feedback_self_correction_upstream_of_verify_channel]] — Tier-1+Tier-2 pair refinement; /verify-channel REPAIR-AMENDMENT NOT triggered)</ref>
+    <ref type="prd_section">§3.1 Option A architecture (CTO selected v1; flagged for Andrew ratification §10 Q1); §4.1 rollup math (v0.1.1 refined); §5.2 artifact shape; §5.3 reconcile dual-gate (v0.1.1 refined); §8.2 AC1-AC7</ref>
     <ref type="substrate">docs/briefs/mdpf-etf-ownership-inflection-tracking-20260526.md (`12f01b4e1` + methodology amendment `d0aa4073b`) — DS-authored substrate, this lane's prior work</ref>
     <ref type="depends_on">MDPF_ASSETS (CLOSED 2026-05-21) — read-only consumer of platinum aggregate-AUA artifact</ref>
     <ref type="andrew_sovereign">2026-05-26 verbal "variation on INF-gold-runner with smaller CPU" (Q1 flagged Andrew ratification) + Refinements 4-5 trading-day-basis + prorated-partial-month methodology</ref>
@@ -53,7 +53,15 @@
    - Missing-trading-day null (explicit null, NOT interpolation per PRD §10 Q8)
    - Multi-month YTD compose (>30 trading-days across month boundary)
 
-5. **comp-validate config** + new **self-consistency reconcile check** (per PRD §5.3): `ownership_pct == held / etf_total_net_assets` to 0.001% tolerance. >0.001% divergence = fail LOUD + skip emit + preserve prior version.
+5. **comp-validate config** + new **self-consistency reconcile DUAL gate** (per PRD v0.1.1 §5.3 — replaces ambiguous v0.1 "0.001%"):
+   - Absolute gate (a): `$0.01` on `held` reconstruction (`abs(held - ownership_pct * etf_total_net_assets) < 0.01`)
+   - Absolute gate (b): `0.0001` on `ownership_pct` recompute (= 0.01 percentage points; `abs(ownership_pct - held/etf_total_net_assets) < 0.0001`)
+   - EITHER gate failing → chain step fails LOUD + skip emit + preserve prior version
+
+**PRD v0.1.1 §4.1 null-vs-pre-onboard-zero rollup math (binding):**
+- Pre-onboard zeros COUNT in numerator + denominator (full-window canonical headline)
+- Missing-emit nulls EXCLUDED from BOTH numerator and denominator
+- Fixture coverage: ADD a `mixed pre-onboard-zero + missing-emit-null` row to verify the right code path on each (folds into the 5+ fixtures list)
 
 **Per CLAUDE.md Rule 13:** DS owns the FULL commit → push CLOUD → S3 upload → `comp-pipescript deployed` MATCH → SSM dispatch (or RAVC2 ACK to AE for PROD).
 
@@ -65,7 +73,7 @@
 <acceptance_criteria>
 - AC1: Augmented `mdpf_aggregate_aua.py` emits `ownership_pct` per partner per ETF; existing aggregate-AUA reconciliation invariants UNAFFECTED (per PRD §8.2 AC1).
 - AC2: New `build_mdpf_etf_ownership_timeseries.py` emits per-ticker artifact for all 4 Opal ETFs (DIVZ + IDVZ + PFDE + PFOE) cleanly on fixture-run.
-- AC3: MTD + YTD rollups arithmetically verify to-the-cent against DS brief findings (post-onboard window n=6 PFOE 6.520% + PFDE 7.413% present-only; pre-onboard-zero full-window PFOE ~2.30% + PFDE ~2.61%).
+- AC3: MTD + YTD rollups arithmetically verify to-the-cent against DS brief findings — May 2026 = **16 emitted trading days** (NOT 17 calendar trading-day count; 5/1 missing-emit excluded from denom per PRD v0.1.1 §4.1 null-rule); post-onboard window n=6 PFOE 6.520% + PFDE 7.413% present-only; pre-onboard-zero full-window PFOE ~2.30% + PFDE ~2.61%. Brief findings table is canonical AC3 ground-truth.
 - AC4: Trading-day calendar binding enforced; missing-trading-day emit is explicit `null`.
 - AC5: DoD anomaly soft-flag fires on PFOE 5/21-5/22 fixture (no block; audit-only).
 - AC6: comp-validate config PASS on fixture run + self-consistency reconcile gate runs PASS.
