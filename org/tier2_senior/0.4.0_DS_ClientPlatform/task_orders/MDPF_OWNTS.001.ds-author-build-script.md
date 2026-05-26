@@ -6,7 +6,14 @@
   <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — GO dispatched this cycle</status>
+  <status>complete</status>
+  <!-- RAVC2-ACCEPT by 2.0.0_SA_COO 2026-05-26 ~22:0NZ /drive cycle 113 extended carry-on.
+       SHIP commit `0a7c18df0` + session log `57e296236` + S3 byte-match 5/5 + 7/7 OWNTS
+       fixtures PASS + aggregate baseline 5/6 preserved + AC1-AC7 all MET. 3 flags absorbed:
+       Flag 1 routed to ws CTO same-turn for PRD v0.1.2 amendment (scale-aware tol recognized
+       as canonical); Flag 2 path-deviation accepted (PRD §6 designer-call license);
+       Flag 3 (pandas_market_calendars runtime-dep) folded to MDPF_OWNTS.002 AE 0.7 scope.
+       ~1h wall vs PRD ~1d target = ~24x sub-day compression. -->
   <priority>HIGH (Andrew sovereign direct 2026-05-26 3 asks + 2 methodology refinements; ws CTO PRD v0.1 8a125c682 canonical; substrate-rich brief author this lane)</priority>
   <references>
     <ref type="prd">docs/architecture/MDPF_OWNTS.md v0.1.1 (commit `d30a73cd6` — same-cycle precision-pin amendment supersedes v0.1 `8a125c682`; 3 narrow author-chain refinements folded pre-impl per [[feedback_self_correction_upstream_of_verify_channel]] — Tier-1+Tier-2 pair refinement; /verify-channel REPAIR-AMENDMENT NOT triggered)</ref>
