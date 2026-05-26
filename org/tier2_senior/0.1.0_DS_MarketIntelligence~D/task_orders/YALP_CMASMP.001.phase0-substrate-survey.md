@@ -6,7 +6,7 @@
   <assigned_to>0.1.0_DS_MarketIntelligence~D</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — URGENT GO dispatched cycle 116; PRD authoring ws CTO parallel</status>
+  <status>complete — brief shipped 2026-05-26 ~23:15Z; 4/4 ACs MET; 9-shape verdict taxonomy extended (shapes 8 OPAL-PROPRIETARY-DERIVED + 9 OUT-OF-CUTOVER-SCOPE) + applied 84/84 universal-opal; Phase 1 LIGHTWEIGHT recommended + Phase 2 DEFERRED unless input-layer validation</status>
   <priority>URGENT (Andrew /goal sovereign 2026-05-26T~22:42Z portal-page-coverage discipline + cookie-fresh window NOW → tomorrow AM ET)</priority>
   <references>
     <ref type="andrew_goal">2026-05-26T~22:42Z /goal directive (verbatim per ATTRBN TO)</ref>
