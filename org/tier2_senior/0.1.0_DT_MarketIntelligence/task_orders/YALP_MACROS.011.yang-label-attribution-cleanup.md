@@ -74,7 +74,7 @@ Yang's "Industrial Productivity" label for the INDPRO series is **misleading** f
 
 This TO is the deferred-from-cycle-0042 bundle per ws CTO commitment in cycle 0042 per-tick log `org/tier1_exec/1.0.0_SA_CTO/logs/2026-05-26/ws-charter_2207Z.md`. Cycle 0042 priority went to Andrew HAR substrate triage; cycle 0043 absorbs the cleanup bundle alongside the substitute-security doctrine codification + 2 PRD addenda.
 
-**Status:** blocked (architectural — pending ws CTO ruling on AC2 coupled-rename path)
+**Status:** complete-partial (AC1 done; AC2 deferred out-of-FIX-class-scope per ws CTO Path C ruling 20260526T231839Z)
 **Authored:** 2026-05-26 ~22:35Z (cycle 0043)
 **Dispatched:** 2026-05-26 ~22:46Z (MSTR spawn-with-direction)
 **Started:** 2026-05-26 ~22:50Z (DT 0.1.0)
@@ -109,3 +109,23 @@ A naive rename of `'Industrial Productivity MoM'` -> `'Industrial Production MoM
 - **Path D — Other** (CTO design).
 
 Routed via [BLOCKED-ASK] -> ws COO -> ws CTO. Resume on UNBLOCK_RECEIVED with chosen path.
+
+### AC2 — RULING: Path C (DEFERRED out-of-FIX-class-scope)
+
+ws CTO ruled 2026-05-26 ~23:18Z (`20260526T231839Z_1.0.0_SA_CTO__CTO_RULING_Path_C__YALP_MACROS.011`):
+
+- **Path A** (coordinated-full-rename across yang notebook + 2 Lambdas + portal x2 + fred-ingest) is structurally OUT of FIX-class scope premise ("cosmetic LABEL-only; no pipeline-correctness impact").
+- **Path B** (decoupled-override map) reverted in-context = "wrong approach" signal accepted.
+- **Path C** is doctrine-aligned: portal owns the slug-compute chain (`indicators.ts` canonical for portal-side); yang follows portal's choice; portal-initiated rename safely cascades down.
+
+**Disposition:** AC1 NO-OP CLOSED (banked as misclassification-class non-finding). AC2 DEFERRED out-of-FIX-class-scope (NOT failed; explicitly carved-out per Path C). Future coordinated-rename = a fresh dedicated project (candidate `YALP_LABELS.001` or `ADHC_INDLBLS.001`), portal-side-initiated.
+
+**TO status:** `blocked` -> `complete-partial`.
+
+### AC3-AC4 (deploy/gate) — N/A
+
+No code changes shipped per Path C; pre-commit gate had been verified clean for the reverted override-map proposal; no Terraform plan/apply needed.
+
+### AC5 — RAVC2-Status
+
+Routed to ws COO with CC ws CTO (TO author) + ~A (Finding #5 source) + ~B (Finding #3 source) per TO CC list.
