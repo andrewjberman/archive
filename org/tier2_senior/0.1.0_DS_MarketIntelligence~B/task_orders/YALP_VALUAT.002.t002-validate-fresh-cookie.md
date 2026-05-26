@@ -6,7 +6,7 @@
   <assigned_to>0.1.0_DS_MarketIntelligence~B</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — URGENT GO dispatched this cycle</status>
+  <status>complete — RAVC2-Request sent ws COO 2026-05-26 work-cycle:4; brief at `docs/briefs/yalp_valuat_t002_validate_fresh_cookie_20260526.md`; 4/4 ACs MET; 6/6 pulls OK fresh cookie; zero session-eviction events; cookie-stale class empirically RESOLVED</status>
   <priority>URGENT (Andrew sovereign direct ~21:54Z via ws CTO; time-pressure window NOW → tomorrow AM ET before colleague re-takes single-session seat)</priority>
   <references>
     <ref type="cookie_refresh">AWS Secrets Manager `ycharts/credentials` REFRESHED ~21:55Z; all 6 key cookies PRESENT + structurally valid</ref>
