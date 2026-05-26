@@ -7,7 +7,7 @@
   <issued_by>0.7.0_AE_CloudOps (self-authored per ws COO sequencing 15:11Z + 15:34Z RAVC2-ACCEPT-PARTIAL)</issued_by>
   <issued_date>2026-05-26</issued_date>
   <status>complete</status>
-  <shipped>2026-05-26T~15:40Z; commits forthcoming this /work cycle #3; 13/13 synthetic harness tests pass; LEDGEH AC1 + CDNCOHT AC1/AC2 covered; Andrew empirical UAT remains gated on Andrew availability (non-blocking; harness validates structural correctness)</shipped>
+  <shipped>2026-05-26T~15:40Z initial 13/13 (LEDGEH + CDNCOHT branches); 2026-05-26T~17:35Z COMPIL_V5 TO-VAL composite extension 8/8 (`.tools/comp-v5-composite-test.sh`) covering V5.001 AC1/AC2 (AE 0.6.1 IAM anchors) + V5.002 AC2/AC3 (DS 0.1.0 YALP §11 brief reproduction + BD-gold regression) + AC-VAL-X.2 (intermediate-var) + AC-VAL-Y + AC-VAL-Y.5 (TF-canonical alias) + cross-stack blast walk. Andrew empirical UAT remains gated on Andrew availability (non-blocking; both synthetic harnesses validate structural correctness)</shipped>
   <references>
     <ref type="parent_to_001_shipped">ADHC_LEDGEH TO-001 SHIPPED 48977e269 2026-05-14 + CLOSED d8b02694f 2026-05-26 ~15:30Z</ref>
     <ref type="parent_to_001_shipped">ADHC_CDNCOHT TO-001 SHIPPED 0a9c90b16 (handler) + be724538a (source-map) + 216dd8a45 (record) + tag portal-auth-v1.16.1 2026-05-26 ~15:33Z</ref>
