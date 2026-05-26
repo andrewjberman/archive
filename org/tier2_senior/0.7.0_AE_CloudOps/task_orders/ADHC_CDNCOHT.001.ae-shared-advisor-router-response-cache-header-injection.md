@@ -6,7 +6,8 @@
   <assigned_to>0.7.0_AE_CloudOps</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending</status>
+  <status>complete</status>
+  <shipped>2026-05-26T~15:33Z; commits 0a9c90b16 (handler) + be724538a (source-map) + 216dd8a45 (record); tag portal-auth-v1.16.1; 2 terraform applies (Lambda v2 publish 6s + CF distribution 4-behavior :1->:2 pin 1m20s); CF invalidation ID31U80S1MI2V6UGFRQDWOCHAF InProgress per AC7; AC1-AC2 deferred to consolidated TO-VAL per ws COO sequencing; AC3-AC7 closed</shipped>
   <priority>HIGH (canonical CDN staleness class-eliminator; sister to LEDGEH error-envelope already shipped)</priority>
   <references>
     <ref type="prd">docs/architecture/ADHC_CDNCOHT.md v0.2 canonical commit `c5262507c` 2026-05-26 (1.0.0_SA_CTO; REPAIR-AMENDMENT (a) accepting blanket pattern for TO-001-INTERIM). Full scope + AC + pseudocode in PRD §3.1 + §6.</ref>
