@@ -6,7 +6,7 @@
   <assigned_to>0.1.0_DS_MarketIntelligence~C</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — URGENT GO dispatched cycle 114 + SPAWN-NEEDED ~C (not currently LIVE on broker; MSTR /allocation supply-signal this cycle)</status>
+  <status>complete — brief shipped 80d9bed66 22:25Z (~25min wall spawn→ship); 4/4 ACs MET; cookie validated via model_portfolios 403→200 flip + indices_table_data CORREL-universe 8/15 records; charts/fund_data 400 persisting (Option A vs B disposition deferred to COO); YALP_CORREL.006-EMPIRICAL follow-on readiness MET. RAVC2-Request 20260526T222531Z filesystem+broker+channel-push to ws COO. KEEP-EPHEMERAL pending YALP_CORREL Phase 2 dispatch per deliverable_disposition.</status>
   <priority>URGENT (Andrew sovereign direct ~21:54Z via ws CTO; time-pressure window NOW → tomorrow AM ET)</priority>
   <references>
     <ref type="cookie_refresh">AWS Secrets Manager `ycharts/credentials` REFRESHED ~21:55Z</ref>
