@@ -6,7 +6,7 @@
   <assigned_to>0.1.0_DS_MarketIntelligence~D</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — URGENT GO dispatched this cycle</status>
+  <status>complete — brief e43c93e3c shipped 2026-05-26 ~22:16Z; 4/4 ACs MET; zero deltas vs Phase 1 baseline; IBTF persistence under fresh cookie = doctrine edge-case for sovereign ratification</status>
   <priority>URGENT (Andrew sovereign direct ~21:54Z via ws CTO; time-pressure window NOW → tomorrow AM ET)</priority>
   <references>
     <ref type="cookie_refresh">AWS Secrets Manager `ycharts/credentials` REFRESHED ~21:55Z</ref>
