@@ -6,7 +6,7 @@
   <assigned_to>0.7.0_AE_CloudOps</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending</status>
+  <status>complete — SHIPPED `03f0d42f2` 2026-05-26 ~16:16Z (Fix 2 comp-pipescript io Lambda-path-mode + module-constant resolution; AC1+AC3+AC4+AC6 MET; AC2+AC5 PARTIAL closed via downstream TO-VAL `a30fb1a15` AC-VAL-Y + `ee08dc740` AC-VAL-Y.5 honest-partial bridging). Project ADHC_COMPIL_V5 closed: TO-001 `6ffc457d5` + TO-002 `03f0d42f2` + TO-003 `0030aea6c` + TO-VAL `3365f258d` 8/8 PASS + CVO Mode B CLEAN `cc7fede51` 4/4 axes GREEN. End-to-end ~3hr wall vs PRD est 14-22h = ~5-7x fast-lane compression. Per `org/projects/ADHC_COMPIL_V5.json` status=complete completed=2026-05-26. TO file status flipped this cycle to retire pending-narrative drift surfaced by /work tick TO-queue scan (was stale at `pending` per [[feedback_drive_read_json_not_registry]] JSON-authoritative discipline -- 0.7.0_AE_CloudOps 2026-05-27 ~08:5XZ).</status>
   <priority>HIGH (CVO Wave 2; LD-0097 §A north-star operationalization)</priority>
   <references>
     <ref type="prd">docs/architecture/ADHC_COMPIL_V5.md v0.1 commit `701103ccf` (1.0.0_SA_CTO; PRD §6 TO-002).</ref>
