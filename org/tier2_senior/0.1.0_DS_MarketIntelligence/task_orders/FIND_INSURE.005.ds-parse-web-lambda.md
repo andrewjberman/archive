@@ -22,7 +22,14 @@
 - AC5: BeautifulSoup4 + lxml backend (`BeautifulSoup(html, "lxml")`); zero new layer dependencies
 - AC6: blocked-page minimal record with `blocked_reason` enum `{robots|rate-limit|http_4xx|http_5xx|non-html|parse-error|fetch-timeout}`; classify_metadata_block infers from upstream status; minimal record always written (no skip)
 - AC7: Lambda handler signature `lambda_handler(event, context)` with event `{company_slug, run_date, bronze_prefix, [bronze_bucket], [silver_bucket]}` → returns `{pages_processed, pages_blocked, parse_errors, silver_prefix, started_at, ended_at, duration_ms}`; CloudWatch logs structured via stdlib logging
-- AC8: DEFERRED — pending .004 bronze data for Carl Ostenson Associates / Developers Marketing Corporation / Gordon Marketing (or equivalent 3-IMO sample set). Will ship as evidence Phase 2 of RAVC2 once .004 lands.
+- AC8: **DONE 2026-05-27T~18:15Z empirical PASS** — AE 0.7 .004 shipped bronze for 3 sample IMOs (`2d302b998` end-to-end validated DS~A iter_bronze_pages); local invocation of `parse_imo()` against real S3 bronze:
+  - `1st-atlantic-insurance-group` (small site, https, 5 bronze pages): 5/5 parsed clean, 0 blocked, 0 parse_errors
+  - `avantax-wealth-management` (large site, https, 5 bronze pages): 5/5 parsed clean, 0 blocked, 0 parse_errors
+  - `carl-ostenson` (bare-domain TLS-cert-mismatch, 1 bronze page meta-only no html): 0 parsed, 1 blocked (minimal record with `blocked_reason: "fetch-timeout"`, `page_text: null`, audit-trail preserved per AC6)
+  - **Universe-completeness:** 11/11 bronze pages → 11 silver records (no skips per Rule 17 + AC6)
+  - **Spot-check Avantax `dbe847e2ca23d510.json`:** title="Tax-Intelligent Investment Planning - Avantax® Wealth Management" (Unicode ® preserved); meta_tags_count=12 (no whitelist); h1=1 + h2=7 (headings preserved h1-h6); body_text=6807 chars; 75 internal_links + 6 external_links; 1 JSON-LD structured_data block; content_hash present. Compared against bronze HTML 32KB → silver 28KB (structure-extraction; full text preserved). MATCH.
+  - **Carl Ostenson minimal record:** `{url, url_hash, fetched_at, http_status: 200, content_type: null, bronze_key: null, blocked_reason: "fetch-timeout", page_text: null}` — 239 bytes; AC6 audit-trail discipline confirmed for the TLS-edge-case (bronze had .meta.json but no .html because AE upstream got x-brd-error TLS-cert-mismatch; my code correctly fell through `raw_html is None → "fetch-timeout"` classifier branch).
+  - Silver objects: `s3://opal-data-imo/corp/{slug}/silver/web-scrape/2026-05-27/{url_hash}.json` × 11
 - AC9: silver→gold contract handshake locked with DS~B per design brief 752b1fcee; schema-change discipline binding — no breaking changes to silver schema without ~B sign-off
 - AC10: comp-pipescript io ran (Unknown script — pending .003 comp-graph register); comp-iam service deferred to .001 RAVC2-ACCEPT (find-insure-lambda-role exists then). Both will validate clean post-.001+.003.
 
