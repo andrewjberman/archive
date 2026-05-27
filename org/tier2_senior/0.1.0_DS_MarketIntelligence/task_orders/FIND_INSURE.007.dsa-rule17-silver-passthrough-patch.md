@@ -9,7 +9,7 @@
 **Sizing:** ~30-60min wall (1-file edit + unit-test extension + ds-commit-gate + small empirical re-run against existing 3-IMO bronze)
 **Authority anchor:** CVO /verify-channel verdict `54ace66c8` §S1 Rule 17 sub-finding + REPAIR-AMENDMENT-AUTHORIZED (b)(ii) 2026-05-27T~21:00Z + Andrew sovereign goal-set 22:49Z (drive FIND_INSURE end-to-end through Phase 3 close); CVO routes this as routine silver-script impl per [[feedback_silver_no_field_slimming]].
 
-<status>pending</status>
+<status>complete</status>
 
 ## Objective
 
