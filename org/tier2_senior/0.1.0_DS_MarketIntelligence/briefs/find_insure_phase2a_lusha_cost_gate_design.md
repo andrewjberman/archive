@@ -95,7 +95,18 @@ Per PRD §3.2 (`config/` prefix) + §3.4 (lifecycle: `config/*` NEVER expire) + 
   "alert_channels": {
     "AE 0.7": "broker_mcp",
     "ws COO": "broker_mcp",
-    "IR-team-budget-watcher": "(TBD — Andrew direct or SNS topic)"
+    "IR-team-budget-watcher": "sns:find-insure-budget-alerts"
+  },
+  "overshoot_tolerance": {
+    "overshoot_tolerance_pct": 5,
+    "tolerance_rationale": "eventually-consistent DDB + concurrent Lambdas worst-case 5% over hard ceiling; v0.1 empirical-first-run posture per CTO Q-C3 ratify 20260527T17:46Z",
+    "tighten_path": "DDB conditional-update at gate-check tier (Q-C3 follow-up authoring if Andrew demands tighter post-first-run)"
+  },
+  "per_imo_lambda_timeout": {
+    "max_calls_per_imo_per_run": 20,
+    "max_calls_rationale": "Lambda 15min ceiling vs worst-case ~30 calls × (1s API + 60s rate-limit pause) ~30min per IMO (UNK-D); hard-cap structural-safe; CTO Q-C4 ratify pending AE 0.7 final-ratify next /work cycle",
+    "soft_abort_class": "per_imo_call_cap",
+    "ec2_fallback_per_prd": "PRD §3.3 EC2 fallback preserved as escape valve if any single IMO routinely overshoots 20-call cap"
   }
 }
 ```
@@ -474,3 +485,90 @@ Payload:
 ---
 
 — 0.1.0_DS_MarketIntelligence~C 2026-05-27T~17:35Z (v0.1 sibling scaffold; ws COO RAVC2-ACCEPT-SCAFFOLD Option 1 parallel-prep pick)
+
+---
+
+## 15. v0.2 amendment — CTO Q-C1/Q-C2/Q-C3/Q-C4 dispositions absorbed (2026-05-27T~17:50Z)
+
+ws CTO arch-disposition `20260527T17:46Z` cleared all 4 Q-C* open questions + committed PRD v0.4 bundle authoring next /ws-charter cycle. ~16min wall from sibling brief RAVC2-Request (17:39Z) to CTO disposition (17:46Z) — within Tier-1 disposition empirical band per banking notes.
+
+### 15.1 Q-C1 (DDB single-table) — APPROVE
+
+DDB single-table `find-insure-cost-state` standard fabric pattern (yang `yang-cost-state` analog; orion JWT refresh-burn analog). Cost trivial ~$1/yr; 50ms cold-start acceptable for rare cost-check path.
+
+**IAM amendment** (`find-insure-lambda-role`):
+- `dynamodb:UpdateItem + GetItem + Query` on `arn:aws:dynamodb:us-east-1:313476888478:table/find-insure-cost-state`
+
+Lands in PRD v0.4 §3.5 (CTO bundle).
+
+### 15.2 Q-C2 (IR-team-budget-watcher alert channel) — Option (b) SNS APPROVE
+
+SNS topic `find-insure-budget-alerts` for fan-out. AE 0.7 provisions in imo-pipeline module amendment. Cost-gate Lambdas publish to topic on ceiling-hit. Initial subscriber: Andrew direct via email (AE 0.7 binds Andrew's preferred email at provisioning; ask Andrew direct or default admin email).
+
+**IAM amendment** (`find-insure-lambda-role`):
+- `sns:Publish` on `find-insure-budget-alerts` topic
+
+Lands in PRD v0.4 §3.5 (CTO bundle). Cost-gate config schema §3 updated: `alert_channels.IR-team-budget-watcher` → `"sns:find-insure-budget-alerts"`.
+
+### 15.3 Q-C3 (overshoot tolerance) — APPROVE empirical-first-run posture
+
+5% overshoot at hard ceiling acceptable v0.1 (UNK-A). Tightening via DDB conditional-update at gate-check tier adds latency + complexity; not warranted pre-empirical evidence. First-run telemetry reveals actual overshoot variance; tighten then if Andrew demands.
+
+**Schema addition** to `cost-budgets-v0.1.json` (per CTO transparency directive):
+
+```json
+"overshoot_tolerance": {
+  "overshoot_tolerance_pct": 5,
+  "tolerance_rationale": "eventually-consistent DDB + concurrent Lambdas worst-case 5% over hard ceiling; v0.1 empirical-first-run posture per CTO Q-C3 ratify",
+  "tighten_path": "DDB conditional-update at gate-check tier (Q-C3 follow-up authoring if Andrew demands tighter post-first-run)"
+}
+```
+
+Updated §3 schema this amendment.
+
+### 15.4 Q-C4 (per-IMO Lambda timeout) — CTO APPROVE pending AE 0.7 final-ratify
+
+CTO approves my proposed shape: `max_calls_per_imo_per_run = 20` hard-cap + soft-abort + telemetry record + EC2 fallback per PRD §3.3 preserved as escape valve. AE 0.7 final-ratify pending their next /work cycle (their lane primary on Lambda runtime envelope).
+
+**Schema addition** to `cost-budgets-v0.1.json`:
+
+```json
+"per_imo_lambda_timeout": {
+  "max_calls_per_imo_per_run": 20,
+  "max_calls_rationale": "Lambda 15min ceiling vs worst-case ~30 calls × (1s API + 60s rate-limit pause) ~30min per IMO (UNK-D); hard-cap structural-safe",
+  "soft_abort_class": "per_imo_call_cap",
+  "ec2_fallback_per_prd": "PRD §3.3 EC2 fallback preserved as escape valve if any single IMO routinely overshoots 20-call cap"
+}
+```
+
+Updated §3 schema this amendment. CC AE 0.7 same turn for final-ratify on Lambda envelope question.
+
+### 15.5 PRD v0.4 bundle commitment (CTO authoring next /ws-charter)
+
+CTO commits to single atomic v0.4 commit bundling:
+- §3.1 SSE config `aws:s3:AES256` → `aws:kms` with `find-insure-data-key` CMK ARN (UNK-1)
+- §3.5 IAM additions: `kms:GenerateDataKey`+`kms:Decrypt` (UNK-1) + `dynamodb:UpdateItem`+`GetItem`+`Query` (Q-C1) + `sns:Publish` (Q-C2)
+- §3.6 NEW: KMS rotation guidance + cost-gate config schema reference + alert-channel SNS subscription guidance
+- §3.7 NEW: overshoot tolerance documentation (Q-C3 empirical-first-run posture)
+- §3.8 NEW: per-IMO Lambda timeout config (Q-C4 hard-cap + soft-abort + EC2-fallback escape)
+- §4 Phase 0 deliverable 1: KMS resource + DDB table + SNS topic added to AE 0.7 .001 Terraform module
+- Authoring lineage v0.4 citing UNK-1 + Q-C1/2/3/4 + this sibling brief v0.2 source
+
+ETA: 1-2 /ws-charter cycles wall (~30-60min). Single atomic commit.
+
+### 15.6 HARD CONSTRAINT chain (extended)
+
+Phase 1 ships + Andrew subset cut + KMS upgrade lands + **DDB table provisioned** + **SNS topic provisioned + Andrew email bound** → Lusha live calls authorized.
+
+Per LD-0090 ALWAYS-PROCEED:
+- Andrew silent ≥1 cycle on UNK-1 KMS = Option 2 + 3 conditions bind ✓
+- Andrew silent on Q-C1/Q-C2/Q-C3/Q-C4 = CTO dispositions bind via this MCP ✓
+
+### 15.7 v0.2 amendment summary
+
+- `cost-budgets-v0.1.json` schema §3 updated: alert_channels.IR-team-budget-watcher = SNS topic; overshoot_tolerance + per_imo_lambda_timeout objects added
+- §15 added (this section) documenting Q-C1/Q-C2/Q-C3/Q-C4 dispositions + PRD v0.4 bundle commitment
+- AE 0.7 CC for Q-C4 final-ratify on Lambda envelope question + Q-C2 SNS provisioning + KMS resource authoring
+- Sibling brief v0.2 ratified scope-of-work for DS~E's FIND_INSURE.E2 concretization next /drive cycle
+
+— 0.1.0_DS_MarketIntelligence~C 2026-05-27T~17:50Z (v0.2 sibling amendment — CTO Q-C1/2/3/4 dispositions absorbed; PRD v0.4 bundle commitment noted; schema updated with overshoot tolerance + per-IMO Lambda timeout)
