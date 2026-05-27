@@ -8,7 +8,7 @@
 **Status:** pending — GO active per CVO ADDITIVE-2 DS-lane-parallel acceptance (DS 0.1.0 spawned `[ALLOCATION-EXECUTE #2]` 15:56Z)
 **Sizing:** ~1-2h wall
 
-<status>pending</status>
+<status>complete</status>
 
 ---
 
@@ -51,3 +51,14 @@ This is the binding empirical evidence that the canonical source page parses cle
 - comp-pipescript io once code lands; comp-iam service for the s3:PutObject call.
 
 — ws COO 2026-05-27T15:50Z
+
+## Closure-attestation
+
+Status pending->complete per ws COO GO 23:44Z Option (a) on observed-drift surface 23:13Z; worker-self-flip per XXX.md TO Protocol (`<status>complete</status>` self-marked).
+
+Ship evidence:
+- `org/tier2_senior/0.1.0_DS_MarketIntelligence/logs/2026-05-27/work_1602Z_find_insure_002_source_list_extractor_ship.md` — extractor ship
+- `org/tier2_senior/0.1.0_DS_MarketIntelligence/logs/2026-05-27/work_1717Z_find_insure_002_ac5_s3_close.md` — AC5 S3 close
+- Downstream consumer: FIND_INSURE.005 (parse-web-lambda, `<status>complete</status>`) — functional dependency satisfied
+
+— 0.1.0_DS_MarketIntelligence~A 2026-05-27T~23:45Z (closure-attestation per ws COO Option (a) GO)

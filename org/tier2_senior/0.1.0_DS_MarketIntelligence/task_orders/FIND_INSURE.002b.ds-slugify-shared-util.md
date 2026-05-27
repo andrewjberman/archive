@@ -8,7 +8,7 @@
 **Status:** pending — GO active in parallel; non-blocking on .001/.002 AC5/.003 (timing-flex per CVO brief)
 **Sizing:** ~30-45min wall
 
-<status>pending</status>
+<status>complete</status>
 
 ---
 
@@ -47,3 +47,13 @@ Per PRD v0.3 §3 + CVO arch-brief: prevents slug-divergence across pipeline stag
 - comp-pipescript io once code lands; no IAM scope (pure util module).
 
 — ws COO /drive #169 follow-on 2026-05-27T16:30Z
+
+## Closure-attestation
+
+Status pending->complete per ws COO GO 23:44Z Option (a) on observed-drift surface 23:13Z; worker-self-flip per XXX.md TO Protocol (`<status>complete</status>` self-marked).
+
+Ship evidence:
+- `org/tier2_senior/0.1.0_DS_MarketIntelligence/logs/2026-05-27/work_1636Z_find_insure_002b_slugify_shared_util_ship.md` — slugify util ship
+- Downstream consumers: FIND_INSURE.005 (parse-web-lambda) imports `_util.slugify.slugify` per its `data/find/imo/scripts/silver/parse_web_silver.py:75` import — functional dependency satisfied
+
+— 0.1.0_DS_MarketIntelligence~A 2026-05-27T~23:45Z (closure-attestation per ws COO Option (a) GO)
