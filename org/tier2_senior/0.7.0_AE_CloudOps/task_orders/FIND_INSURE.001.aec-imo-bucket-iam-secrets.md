@@ -8,7 +8,7 @@
 **Status:** pending — GO held on .012 Fire 1 RAVC2-Accept per CVO ADDITIVE-2 timing gate (unchanged across v0.2→v0.3)
 **Sizing:** ~2-3h wall (expanded from ~1-2h per v0.3 scope additions)
 
-<status>pending</status>
+<status>complete</status>
 
 ---
 
