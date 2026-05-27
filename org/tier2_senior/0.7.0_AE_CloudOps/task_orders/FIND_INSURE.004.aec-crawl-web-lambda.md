@@ -8,7 +8,7 @@
 **Status:** pending — GO active per Andrew sovereign peak-priority 16:46Z; **self-fire post-.001 RAVC2-Request internal**
 **Sizing:** ~3-5h wall (Lambda + Bright Data wiring + fan-out + sample-IMO empirical crawl)
 
-<status>pending</status>
+<status>complete</status>
 
 ---
 
