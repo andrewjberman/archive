@@ -104,9 +104,20 @@ Per PRD §3.2 (`config/` prefix) + §3.4 (lifecycle: `config/*` NEVER expire) + 
   },
   "per_imo_lambda_timeout": {
     "max_calls_per_imo_per_run": 20,
-    "max_calls_rationale": "Lambda 15min ceiling vs worst-case ~30 calls × (1s API + 60s rate-limit pause) ~30min per IMO (UNK-D); hard-cap structural-safe; CTO Q-C4 ratify pending AE 0.7 final-ratify next /work cycle",
+    "max_calls_rationale": "Lambda 15min ceiling vs worst-case ~30 calls × (1s API + 60s rate-limit pause) ~30min per IMO (UNK-D); hard-cap structural-safe; CTO Q-C4 + AE 0.7 Q-C4 final-ratify BINDING per LD-0090 explicit-concur 20260527T17:55Z",
     "soft_abort_class": "per_imo_call_cap",
-    "ec2_fallback_per_prd": "PRD §3.3 EC2 fallback preserved as escape valve if any single IMO routinely overshoots 20-call cap"
+    "ec2_fallback_per_prd": "PRD §3.3 EC2 fallback preserved as escape valve if any single IMO routinely overshoots 20-call cap",
+    "empirical_first_run_decision_rule": {
+      "trigger": "after Phase 2A first full subset-run (~20 IMOs)",
+      "rule": "if <10% of IMOs hit 15min Lambda timeout -> retain Path A hard-cap (Lambda only); if 10-25% -> mixed strategy (Lambda primary + EC2 escape for repeat-offender IMOs); if >25% -> EC2 fallback class for all Phase 2A IMOs",
+      "source": "CVO observation UNK-D 20260527T17:53Z (architectural-robustness observation-not-verdict per LD-0084 §2)"
+    }
+  },
+  "overshoot_alert_instrumentation": {
+    "actual_vs_budget_delta_logged": "per Lambda-completion telemetry record with `actual_credits_used / budget_ceiling` ratio",
+    "sustained_overshoot_alert_trigger": "if delta_pct > overshoot_tolerance_pct (5%) sustained over N=3 consecutive runs",
+    "alert_target": "alert_channels.AE 0.7 + alert_channels.ws COO",
+    "rationale": "5% overshoot tolerance acceptable IF alert chain catches sustained breach within tolerance window; without instrumentation, 'hard ceiling' framing is misleading per CVO observation UNK-A 20260527T17:53Z"
   }
 }
 ```
@@ -572,3 +583,67 @@ Per LD-0090 ALWAYS-PROCEED:
 - Sibling brief v0.2 ratified scope-of-work for DS~E's FIND_INSURE.E2 concretization next /drive cycle
 
 — 0.1.0_DS_MarketIntelligence~C 2026-05-27T~17:50Z (v0.2 sibling amendment — CTO Q-C1/2/3/4 dispositions absorbed; PRD v0.4 bundle commitment noted; schema updated with overshoot tolerance + per-IMO Lambda timeout)
+
+---
+
+## 16. v0.3 sibling amendment — AE 0.7 Q-C4 BINDING + COO Q-C2 RECONCILED + CVO observation-not-verdict (2026-05-27T~18:00Z)
+
+Three Tier-1/AE convergence dispositions landed ~17:53-17:58Z; absorbed.
+
+### 16.1 AE 0.7 Q-C4 explicit-CONCUR — BINDING
+
+AE 0.7 final-ratify `20260527T~17:55Z`: CONCUR all 4 sub-questions (Path A as v0.1 default; max=20; soft_abort; EC2 fallback PRD §3.3 preserved). LD-0090 ALWAYS-PROCEED satisfied via explicit-concur — strongest ratification class.
+
+AE empirical rationale: 20 × (1s + worst-case 60s) ≈ 20min IF 60s pauses are rare (design assumption per Lusha rate-limit semantics). If empirical shows 60s pauses common, EC2 fallback per PRD §3.3 activates. ADVI_DEMOV1 Fire 7 graceful-completion-with-audit-trail-resume pattern banked as soft_abort reference.
+
+`per_imo_lambda_timeout` schema entry marked BINDING (no longer "pending"). AE cross-stack absorption: SNS topic `find-insure-budget-alerts` + DDB `find-insure-cost-state` + KMS `find-insure-data-key` to fold into next imo-pipeline TF amendment alongside CTO PRD v0.4.
+
+### 16.2 ws COO Q-C2 RECONCILED — CONCEDE to CTO SNS path
+
+ws COO `20260527T17:58Z`: explicit CONCEDE to CTO ARCH-DISPOSITION 17:46Z APPROVE SNS topic `find-insure-budget-alerts`. COO's 17:50Z "lean broker-MCP default" was uninformed framing pre-CTO-MCP-absorption + "sister to FIND_INSURE existing pattern" was loose (FIND_INSURE has no existing alert pattern — net-new project).
+
+CTO authority-domain ratifies for IAM/infra primitives. **Schema state `alert_channels.IR-team-budget-watcher: "sns:find-insure-budget-alerts"` STANDS as-authored v0.2.** No re-amendment.
+
+DS~E `cost-budgets-v0.1.json` `6ee4c7eb2` impact: their config is about ceiling values + thresholds (not alert-channel-mechanism). Alert-channel choice lives in cost-gate brief operationalization layer; ~E E2 likely does NOT need re-concretization. If ~E surfaces re-concretization need at next /work tick, COO ratifies clean amendment under sibling brief v0.2 schema-as-canonical.
+
+Banking note: "divergence-resolution discipline at COO-CTO peer-disposition layer" — when COO+CTO Tier-1 disposition diverge: (1) worker surfaces via LD-0116 worker→COO routing; (2) COO checks CTO ARCH-DISPOSITION authority surface (IAM/infra primitives → CTO); (3) CONCEDE if CTO disposition is authority-domain-binding. Sister-pattern to `[[feedback_corroborate_with_additives_meta_materializes_immediately]]` LD-0025 absorbing-discipline. Candidate `feedback_coo_cto_disposition_divergence_authority_domain_binds` per COO MCP closing.
+
+### 16.3 CVO observation-not-verdict — Andrew-refined-focus-defer absorbed
+
+ws CVO `20260527T17:53Z` posture-refined per Andrew direct 17:40Z (`feedback_cvo_find_insure_focus_high_leverage_risk_moments`): 6 named empirical-data-correctness moments + DEFER routine PRD/brief 4-axis treatment. Cost-gate brief is architectural-robustness class, NOT one of Andrew's 6 named moments → CVO **declining explicit 4-shape verdict** per LD-0084 §2 absent-explicit-verdict = observation-not-veto.
+
+NOT a verdict-of-noConcern. CVO Mode B will re-engage on empirical-data fire (e.g., if cost-halt firing mid-IMO produces partial-data correctness class). Cost-gate is architectural-robust → "no-finding" implicit-default.
+
+**3 CVO observations FOLDED (per CVO "fold or skip per your call" framing):**
+
+**UNK-A observation (overshoot alert instrumentation):** 5% tolerance acceptable IF alert chain catches sustained breach. Schema additions §3:
+- `overshoot_alert_instrumentation.actual_vs_budget_delta_logged` per Lambda-completion telemetry
+- `sustained_overshoot_alert_trigger`: if delta > 5% sustained over N=3 consecutive runs
+- `alert_target`: AE 0.7 + ws COO
+
+Without instrumentation, "hard ceiling" framing is misleading. Fold = strengthens v0.1 robustness without infrastructure cost.
+
+**UNK-D observation (Lambda timeout empirical decision rule):** schema addition §3 to `per_imo_lambda_timeout`:
+- `empirical_first_run_decision_rule.trigger`: after Phase 2A first full subset-run (~20 IMOs)
+- `empirical_first_run_decision_rule.rule`: `<10%` IMOs hit 15min → retain Path A hard-cap; `10-25%` → mixed strategy (Lambda primary + EC2 escape for repeat-offender IMOs); `>25%` → EC2 fallback class for all Phase 2A IMOs
+- Source: CVO observation 20260527T17:53Z
+
+Fold = converts empirical-defer into explicit decision-rule rather than narrative; cheaper to act on post-first-run.
+
+**DDB state-persistence observation:** CVO confirms DDB > S3 > SQS-FIFO > in-memory > Redis ordering for our v0.1 scope. No schema change; observation banks the rationale for retrospective audit.
+
+### 16.4 CVO Mode A 4-check on first bronze-write — next CVO fire
+
+Per AE crawler ship-chain (`1a622ac92→672066fa3→95988f9b4→6cff51feb` ~10min wall): crawler LIVE pending first bronze-write. CVO Mode A 4-check on first bronze-write fires next — load-bearing "scraping correct locations?" gate. Empirical bronze landing expected ~30-90min per AE cascade momentum.
+
+Phase 2A LinkedIn first-run (Series-detect FP/FN) is the second named-Andrew-focus-moment; fires when crawl_linkedin_bronze Lambda lands + Lusha credits authorized (Phase 1 ships + KMS lands + DDB + SNS provisioned).
+
+### 16.5 v0.3 amendment summary
+
+- `cost-budgets-v0.1.json` schema §3 updated: `overshoot_alert_instrumentation` + `per_imo_lambda_timeout.empirical_first_run_decision_rule` objects added
+- AE 0.7 Q-C4 BINDING via explicit-concur (no longer pending)
+- COO Q-C2 RECONCILED: schema SNS path stands as-authored
+- CVO observation-not-verdict absorbed: 2 observations folded into schema; DDB observation banks rationale
+- No further Tier-1 verdict required on cost-gate brief class; next Tier-1 fire = CVO Mode A on empirical bronze-write (architectural-robustness class observation-no-veto-default for cost-gate per LD-0084 §2)
+
+— 0.1.0_DS_MarketIntelligence~C 2026-05-27T~18:00Z (v0.3 sibling amendment — AE Q-C4 BINDING + COO Q-C2 RECONCILED SNS + CVO observation-not-verdict 3 observations 2 folded; schema additions for overshoot_alert_instrumentation + empirical_first_run_decision_rule)
