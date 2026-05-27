@@ -76,6 +76,7 @@ What silver is NOT permitted to do:
 
 | Column | Type | Source | Notes |
 |---|---|---|---|
+| `schema_version` | str | constant `"v1.0"` (CTO Q-S1 disposition §12.1) | forward-compat detection across schema amendments |
 | `company_slug` | str | derived via `data/find/imo/scripts/_util/slugify.py` from source-list `company_name` | join key to Phase 1 web-scrape gold + Phase 3 serving |
 | `lusha_company_id` | Int64 | `companies-enrich-response.json` `companyId` | resolved at bronze stage |
 | `lusha_contact_id` | Int64 | `contacts-enrich-response.json` per-contact `id` | dedupe key + Phase 3 join |
@@ -426,4 +427,58 @@ Payload:
 - **CVO architectural authority:** LD-0022 priority architectural-corroborator + LD-0025 CORROBORATE-with-additive-META materializes-immediately
 - **Operating-mode doctrine:** LD-0090 ALWAYS-PROCEED + Andrew-non-response-1tick-route-to-CVO
 
-— 0.1.0_DS_MarketIntelligence~C 2026-05-27T~17:0?Z
+---
+
+## 12. Architectural ratifications (v0.2 amendment — ws CTO arch-disposition 2026-05-27T~17:08Z)
+
+ws CTO landed disposition `20260527T170844Z` (~3min spawn-to-disposition after RAVC2-Request) on all three open questions. Absorbed wholesale:
+
+### 12.1 Q-S1 (parquet nested-struct) — APPROVED
+
+- **Primary:** parquet via pyarrow native nested-struct support for `prior_positions` + `certifications` (standard fabric pattern; yang-pipeline + other parquet artifacts have nested already)
+- **Fallback:** JSON if Lambda-runtime pyarrow nested-struct support proves fragile at scale-test (mirrors Phase 0 .002 extract_source_list JSON emit)
+- **Schema versioning:** add `schema_version: "v1.0"` field to silver records (forward-compat detection)
+- **Compression:** parquet snappy default
+
+§3.3 silver schema amended: insert `schema_version str "v1.0"` row at the top of the column table; carry forward to all downstream Lambdas.
+
+### 12.2 Q-L3 (opt-out webhook receiver Phase 2A scope) — PULL-FORWARD
+
+CTO disposition: pull-forward unless Andrew overrides (LD-0090 ALWAYS-PROCEED: Andrew silent ≥1 cycle = pull-forward binds; Andrew CC'd for sovereign-window visibility on scope expansion).
+
+Reasoning confirmed:
+- GDPR opt-out structurally mandatory if any EU-located individual surfaces
+- safemoneybroadcasting US-focused not US-exclusive
+- v0.3 catch-up cost > Phase 2A upfront (retrofit into populated silver = data hygiene nightmare)
+- Receiver design (API GW → Lambda HMAC-SHA256 verify per Lusha v3 §9.3 → SQS → silver writer) canonical
+- `find-insure/lusha-ai/webhook-secret` sub-namespace under existing §3.5 IAM = zero IAM amend
+
+**Phase 2A receiver discipline (CTO directive):** stub endpoint at Phase 2A but DO NOT subscribe-to-Lusha until Phase 2A execution gate fires — avoids credit overhead on delivered-but-unused webhook events. Subscription via `POST /api/subscriptions/opt-out` (Lusha v3 §9 endpoint catalog) deferred to Phase 2A execute.
+
+§6 GDPR section amended: subscription deferred; receiver-stub mandatory at Phase 2A scaffold-impl.
+
+### 12.3 Q4 (Lusha credit budget) — Andrew sovereign; CTO proposed defaults bind per LD-0090
+
+| Tier | Default (LD-0090: Andrew silent ≥1 cycle = binds) | Rationale |
+|---|---|---|
+| **Per-IMO ceiling Phase 2A** | 50 credits | ~10 leadership × (Search + Enrich-email + Enrich-phone + company-reveal) + headroom; soft-abort cleanly if ceiling trips |
+| **Global daily ceiling Phase 2A** | 1500 credits | ~2x headroom over post-Phase-1-subset worst-case (~700-900); ~3x headroom over conservative subset |
+| **Abort behavior** | soft-stop | Lambda completes current IMO + telemetry record with `cost_ceiling_hit: true` + clean exit; next-run resumes from next IMO |
+| **Config path** | `config/cost-budgets-v1.json` | PRD v0.3 §3.2 + §3.5 (Lambda-init load, in-memory increment) |
+
+§7 cost-discipline section amended: defaults baked + soft-stop abort semantics added to bronze TO scope.
+
+### 12.4 Hard constraint (CTO) — Phase 1 / Phase 2A sequencing
+
+**No Lusha API endpoint calls until Phase 1 ships + Andrew confirms subset cut.** Scaffold + impl unit-test-clean against fixture JSON; live API calls Phase-1-RAVC2-Accept-gated. STANDBY-PREP class discipline (sister to ~A parse-web scaffold today).
+
+### 12.5 Disposition summary
+
+All three open questions cleared at scaffold layer; no architectural blockers remain. Phase 2A TO decomposition (ws COO) now has explicit:
+- Schema version pin (Q-S1)
+- Receiver-stub-at-2A + subscription-defer-to-2A-execute (Q-L3)
+- Per-IMO + global cost ceilings + soft-stop abort semantics + config path (Q4)
+- STANDBY-PREP discipline (CTO hard constraint)
+
+— 0.1.0_DS_MarketIntelligence~C 2026-05-27T~17:0?Z (v0.1 scaffold)
+— 0.1.0_DS_MarketIntelligence~C 2026-05-27T~17:11Z (v0.2 amendment — CTO Q-S1/Q-L3/Q4 dispositions absorbed)
