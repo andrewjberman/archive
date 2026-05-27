@@ -1,26 +1,35 @@
-# FIND_INSURE.003 — comp-graph registration for data/find_insure/ subtree
+# FIND_INSURE.003 — comp-graph registration for data/find/imo/ subtree
 
 **Project:** [FIND_INSURE](../../../projects/FIND_INSURE.json)
-**PRD:** `docs/architecture/FIND_INSURE.md` §6 (Compiler-tools mandate)
+**PRD:** `docs/architecture/FIND_INSURE.md` v0.2 §6 (Compiler-tools mandate); ws CTO `bacf90484` 2026-05-27 ARCH-RULING Option (a)
 **Pod:** 0.7.0_AE_CloudOps
 **Lane:** AE base
-**Author:** 2.0.0_SA_COO 2026-05-27T~15:50Z
-**Status:** pending — GO via [DRIVE] MCP this cycle
+**Author:** 2.0.0_SA_COO 2026-05-27T~15:50Z; v0.2 path amendment 2026-05-27T~16:10Z
+**Status:** pending — GO held on .012 Fire 1 RAVC2-Accept per CVO ADDITIVE-2 timing gate
 **Sizing:** ~30-60min wall
 
 <status>pending</status>
 
 ---
 
+## Amendment 2026-05-27T~16:10Z (path + subdir per ws CTO ARCH-RULING bacf90484)
+
+Per ws CTO ARCH-RULING on AE 0.7 BLOCKED-ASK 16:02Z + COO ARCH-ASK 16:05Z, FIND_INSURE adopts:
+- **Path:** `data/find/imo/scripts/` (NOT `data/find_insure/scripts/`)
+- **Subdir convention:** medallion-by-layer (`bronze/silver/gold/serving/_meta`) with stage-name embedded in filename, matching fabric convention across orion/mdpf/black_diamond
+- ws CTO v0.2 `bacf90484` ships the macro+project READMEs + medallion skeleton with `.gitkeep`s
+
+This TO's AC1 below reflects the amended scope. Original v0.1 AC1 (8 stage-named subdirs at `data/find_insure/scripts/`) is superseded.
+
 ## Objective
 
-Register the new `data/find_insure/scripts/` subtree with compiler tools (comp-graph + comp-pipescript) so that future Phase 1+ FIND_INSURE Lambda authoring exercises the standard CLAUDE.md compiler discipline (Rule 4 source map; comp-validate; comp-blast; comp-iam).
+Register the `data/find/imo/scripts/` medallion subtree with compiler tools (comp-graph + comp-pipescript) so that future Phase 1+ FIND_INSURE Lambda authoring exercises the standard CLAUDE.md compiler discipline (Rule 4 source map; comp-validate; comp-blast; comp-iam).
 
-Per PRD §6 explicit note: "the `data/find_insure/scripts/` tree is new — comp-graph registration is a Phase 0 sub-deliverable. The compiler tools won't fully exercise FIND_INSURE artifacts until the graph knows about them."
+Per PRD v0.2 §6: `data/find/imo/scripts/` tree exists post-`bacf90484`; per-script registration as scripts land in later phases.
 
 ## Acceptance criteria
 
-- **AC1.** `data/find_insure/scripts/` directory created with subdirs matching PRD §3.4 orchestration: `crawl-web/`, `parse-web/`, `score-web/`, `crawl-linkedin/`, `parse-linkedin/`, `score-linkedin/`, `serving-build/`, `refresh-source-list/`. Each subdir has a `.keep` marker.
+- **AC1.** Confirm `data/find/imo/scripts/{bronze,silver,gold,serving,_meta}/` subtree exists (shipped by ws CTO `bacf90484`) and is recognized by comp-graph. No new directory creation needed at this TO scope; per-script registration deferred to Phase 1+ as scripts land.
 - **AC2.** `infra/aws/lambda/ci/lambda-source-map.json` updated to include placeholder entries for the Phase 1 Lambdas OR a structural commit that the source map will track once Phase 1 Lambdas land (whichever fits ADHC_DSFLOW pattern best).
 - **AC3.** comp-graph indexing surface: confirm `comp-graph` either auto-discovers the new subtree OR document the manual step in the FIND_INSURE PRD §6 if a config-add is needed.
 - **AC4.** comp-pipescript dry-run on the empty subtree exits 0 (no false-positive findings on placeholder structure).
