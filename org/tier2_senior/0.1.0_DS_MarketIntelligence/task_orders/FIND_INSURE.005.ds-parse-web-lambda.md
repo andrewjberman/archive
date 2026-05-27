@@ -9,7 +9,26 @@
 **Sizing:** ~3-5h wall (Lambda development + unit tests + sample-IMO empirical run)
 **Design baseline:** `752b1fcee` — DS~A design brief v0.2 already absorbed ws CTO 4 hints + ~B silver→gold contract handshake
 
-<status>pending</status>
+<status>in_progress</status>
+
+## Progress 2026-05-27T~17:20Z (DS~A)
+
+**Code shipped:** `data/find/imo/scripts/silver/parse_web_silver.py` -- AC1-AC7, AC9 satisfied; AC8 (empirical run against ≥3 sample IMOs) DEFERRED pending FIND_INSURE.004 crawl-web ship. AC10 comp-pipescript io ran but reports `Unknown script` because FIND_INSURE.003 comp-graph registration (AE 0.7) has not yet ingested the new `data/find/imo/scripts/silver/` subtree -- runs clean after .003 ships.
+
+- AC1: `from __future__ import annotations` first import; ds-commit-gate clean; ruff `--target-version py39` clean
+- AC2: per-page silver schema authored exactly per design baseline v0.2 (752b1fcee) — `{url, url_hash, content_hash, fetched_at, http_status, content_type, etag, last_modified, bronze_key, title, meta_tags (ALL preserved), headings (h1-h6), body_text, link_graph (internal_links + external_links), structured_blocks (addresses + emails + phones), structured_data (json_ld)}`
+- AC3: silver path = `corp/{slug}/silver/web-scrape/{run-date}/{url_hash}.json`; `slugify` imported from `_util/slugify.py` per .002b discipline
+- AC4: Rule 17 strict — no field-pruning / no fillna / no business-row-filter; preserves ALL meta tags (no whitelist) + ALL headings h1-h6 + ALL link URLs (no host-filter beyond internal/external split); no contact_blocks dedup; no classification/scoring
+- AC5: BeautifulSoup4 + lxml backend (`BeautifulSoup(html, "lxml")`); zero new layer dependencies
+- AC6: blocked-page minimal record with `blocked_reason` enum `{robots|rate-limit|http_4xx|http_5xx|non-html|parse-error|fetch-timeout}`; classify_metadata_block infers from upstream status; minimal record always written (no skip)
+- AC7: Lambda handler signature `lambda_handler(event, context)` with event `{company_slug, run_date, bronze_prefix, [bronze_bucket], [silver_bucket]}` → returns `{pages_processed, pages_blocked, parse_errors, silver_prefix, started_at, ended_at, duration_ms}`; CloudWatch logs structured via stdlib logging
+- AC8: DEFERRED — pending .004 bronze data for Carl Ostenson Associates / Developers Marketing Corporation / Gordon Marketing (or equivalent 3-IMO sample set). Will ship as evidence Phase 2 of RAVC2 once .004 lands.
+- AC9: silver→gold contract handshake locked with DS~B per design brief 752b1fcee; schema-change discipline binding — no breaking changes to silver schema without ~B sign-off
+- AC10: comp-pipescript io ran (Unknown script — pending .003 comp-graph register); comp-iam service deferred to .001 RAVC2-ACCEPT (find-insure-lambda-role exists then). Both will validate clean post-.001+.003.
+
+**Bronze input contract — ASSUMPTION (open question for .004 author):** parse-web assumes per-page bronze layout `{url_hash}.html` + `{url_hash}.meta.json` sidecar. Bronze adapter `iter_bronze_pages()` is encapsulated so a different bronze schema can be amended without touching parse logic. If .004 chooses a different layout (e.g., single manifest.json), I update only that adapter. Surfacing as a [SYNC] question to AE 0.7 at RAVC2 time.
+
+**Self-test:** 35/35 checks pass via `python data/find/imo/scripts/silver/parse_web_silver.py` (synthetic HTML fixture exercises every parse path + every blocked-reason classifier + every link-class).
 
 ---
 
