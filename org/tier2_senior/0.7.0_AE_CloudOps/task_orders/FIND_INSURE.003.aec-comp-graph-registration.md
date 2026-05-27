@@ -29,7 +29,7 @@ Per PRD v0.2 §6: `data/find/imo/scripts/` tree exists post-`bacf90484`; per-scr
 
 ## Acceptance criteria
 
-- **AC1.** Confirm `data/find/imo/scripts/{bronze,silver,gold,serving,_meta}/` subtree exists (shipped by ws CTO `bacf90484`) and is recognized by comp-graph. No new directory creation needed at this TO scope; per-script registration deferred to Phase 1+ as scripts land.
+- **AC1.** Confirm `data/find/imo/scripts/{bronze,silver,gold,serving,_meta,_util}/` subtree exists (shipped by ws CTO `bacf90484` v0.2; `_util/` added per v0.3 `0719c576f` for slugify shared discipline per FIND_INSURE.002b) and is recognized by comp-graph. No new directory creation needed at this TO scope; per-script registration deferred to Phase 1+ as scripts land.
 - **AC2.** `infra/aws/lambda/ci/lambda-source-map.json` updated to include placeholder entries for the Phase 1 Lambdas OR a structural commit that the source map will track once Phase 1 Lambdas land (whichever fits ADHC_DSFLOW pattern best).
 - **AC3.** comp-graph indexing surface: confirm `comp-graph` either auto-discovers the new subtree OR document the manual step in the FIND_INSURE PRD §6 if a config-add is needed.
 - **AC4.** comp-pipescript dry-run on the empty subtree exits 0 (no false-positive findings on placeholder structure).
