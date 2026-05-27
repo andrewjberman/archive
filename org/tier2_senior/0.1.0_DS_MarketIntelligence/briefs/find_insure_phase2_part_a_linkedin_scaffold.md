@@ -162,7 +162,7 @@ def parse_linkedin_silver(slug: str, run_date: str) -> pd.DataFrame:
 |---|---|---|
 | `years_at_company_score` | 0.25 | `(today - tenure_start_date).days / 365.25`, capped at 20yr, normalized to [0,1] = `min(years/10, 1.0)` — 10+ years saturates |
 | `title_seniority_score` | 0.25 | enum map: `Owner/Founder/President/CEO`=1.0; `C-suite (CIO,CFO,CTO,COO,CMO,CCO)`=0.95; `MD/EVP`=0.85; `SVP/Head of`=0.75; `VP/Director`=0.6; `Senior Manager`=0.4; `Manager`=0.25; `IC`=0.1. Matched via case-insensitive title regex; uses `current_title` primarily, `current_seniority` as fallback |
-| `series_license_count_weighted` | 0.30 | from §5 Series detection; per-license weights `{7: 0.35, 65: 0.30, 66: 0.30, 24: 0.40, 63: 0.10}` summed; cap at 1.0. Series 24 weights highest because it implies a principal/managerial securities role (= asset-mgmt-org operator); Series 63 is the most common state-blue-sky exam (= weak standalone signal) |
+| `series_license_count_weighted` | 0.30 | from §5 Series detection; per-license weights `{24: 0.40, 65: 0.30, 66: 0.30, 7: 0.20, 63: 0.10}` summed; cap at 1.0. **v0.3 weights per CVO Axis 2 CONCERN absorption + Andrew Q2 ratification gate (§13.2).** Series 24 highest (principal/managerial = asset-mgmt-organization OPERATOR); Series 65/66 (IAR — Uniform Investment Adviser Law + combined 63+65) = fee-based investment advisory = **the asset-management business model itself** (CVO insight: 65/66 are AM-business-model licenses, NOT Series 7); Series 7 (general securities representative = broker-dealer/commission) closer to insurance-sales-side; Series 63 most common blue-sky exam = weak standalone signal |
 | `title_keyword_match_score` | 0.20 | regex over `current_title` for asset-mgmt-class terms: `wealth\|advisory\|investment\|asset\s+management\|portfolio\|fiduciary\|RIA\|IAR` — match = 1.0, no match = 0.0 |
 
 **Final employee score** = sum of weighted axes ∈ [0, 1].
@@ -265,12 +265,18 @@ NEGATIVE_CONTEXT: list[str] = [
 ]
 ```
 
-### 5.4 Confidence elevators
+### 5.4 Confidence elevators + 4th detection path (CVO Axis 1 additive)
+
+**Four detection paths** (all at gold tier per CLAUDE.md Rule 17 boundary; silver preserves all four source surfaces):
+1. `bio_text` regex (LinkedIn summary / about)
+2. `headline_text` regex (LinkedIn headline)
+3. `experience_text` regex (concatenated position descriptions)
+4. **`certifications[].name` struct-enum-match** — explicit Lusha-canonical cert names (e.g. `"Series 7"`, `"Series 65"`, `"Investment Adviser Representative"`). Per CVO Axis 1 disposition: cert-name canonicalization NOT documented stable forever; treating as text scan at gold (not silver-flag) protects against silent drift if Lusha renames `"Series 7"` → `"FINRA Series 7"` in a future API rev. Match implementation: case-insensitive substring against the `SERIES_PATTERNS` keys + license-name alternates.
 
 If ANY of the following are present alongside a positive match, evidence quality flag = `HIGH`:
-- Match appears in `certifications` structured field (not just free-text bio) — most reliable signal
+- Match in `certifications` structured field (path 4) — most reliable signal
 - A FINRA CRD# is also surfaced in profile (`r"\bCRD\s*#?\s*(\d{6,7})\b"`) — Lusha may or may not expose this; capture if present
-- Multiple positive patterns match for the same license within the profile (e.g. `series 7` + `general securities representative` together)
+- **Multiple positive paths match for the same license** within the profile — e.g. text-regex on bio_text + struct-enum-match on certifications[] for the same Series N; OR text-regex on bio_text + text-regex on experience_text for the same Series N + `general securities representative` co-occurrence
 
 Otherwise evidence quality flag = `STANDARD`.
 
@@ -323,14 +329,16 @@ If a CRD# is captured (§5.4), a v0.2 sub-pipeline can hit `https://brokercheck.
 
 **Phase 2A discipline:** capture CRD# in `score_linkedin_gold` evidence emission; flag in the v0.1 RAVC2 as the v0.2 candidate sub-deliverable.
 
-### 5.7 Empirical-tightening protocol
+### 5.7 Empirical-tightening protocol (CVO Axis 3 additives absorbed)
 
 Phase 2A first run produces sample evidence on the Phase-1-selected IMO subset (~20 IMOs, ~200 employees). Pre-RAVC2 discipline:
 
-1. DS spot-checks 20 randomly-sampled positive-match employee rows against rendered LinkedIn profiles (via Lusha-stored `linkedin_url`). Records FP / TP / FN counts per license.
-2. DS spot-checks 20 randomly-sampled negative-result rows (no license matched) to estimate FN rate (license-holder missed). Particularly important for Series 7 (broadest coverage) and Series 24 (highest weight).
-3. Tighten patterns from the FP/FN analysis — typical pattern adjustments are negative-context expansions, not positive-pattern additions.
-4. Spot-check repeated post-tightening until FP ≤ 5% and FN ≤ 10% (gold-validate-style thresholds; numeric AC at TO-authoring).
+1. **STRATIFIED positive sample (CVO Axis 3 ADDITIVE-1):** 5 Series 7 + 5 Series 65/66 + 5 Series 24 + 5 Series 63 = 20 total. Stratification keeps per-license CI roughly equal; uniform random would cluster on Series 63 (most common) and starve Series 24 (sparsest). Adjust per-class proportions if empirical per-license-rate diverges materially.
+2. **CROSS-IMO sample (CVO Axis 3 ADDITIVE-2):** cap at **max 3 samples per IMO** across the 20 positives. Otherwise a single firm's text-style biases the FP/FN read (e.g. one firm's bio templates that name licenses inline drive false signal of detector quality).
+3. 20 randomly-sampled negative-result rows (no license matched) — stratify too (4 per license-class) to estimate FN rate per-license. Particularly important for Series 24 (highest weight) and Series 65/66 (highest signal per v0.3 weight ordering).
+4. **STRUCTURED-JSON evidence (CVO Axis 3 ADDITIVE-3):** spot-check output lands at `qa/phase-2-spot-checks-{YYYY-MM-DD}/spotcheck.json` in structured shape — `{employee_lusha_id, license, regex_path_matched, manual_verdict, classification (FP/FN/TP/TN), evidence_text, surrounding_context, sample_strata (positive/negative + license-class), imo_slug}` — NOT free-text narrative. Programmatic re-evaluation at v0.2 FINRA BrokerCheck cross-ref ship: compare v0.1 manual verdicts against v0.2 BrokerCheck-authoritative results without re-spot-checking. Saves a re-spot-check cycle.
+5. Tighten patterns from the FP/FN analysis — typical adjustments are negative-context expansions, not positive-pattern additions.
+6. Spot-check repeated post-tightening until FP ≤ 5% AND FN ≤ 10% per-license (gold-validate-style thresholds; numeric AC at TO-authoring).
 
 Empirical-tightening evidence appears in the Phase 2A RAVC2 — `qa/phase-2-spot-checks-{YYYY-MM-DD}/` (PRD §3.2 `qa/` prefix).
 
@@ -342,6 +350,8 @@ Per Lusha v3 doc §9.6 + PRD §11 (Lusha integration mapping row 5: "GDPR opt-ou
 
 - Phase 2A ships with the `opt_out_at` column wired into silver schema (§3.3), defaulted null.
 - Phase 2A bronze TO authors the **opt-out webhook receiver** Lambda (API Gateway → Lambda → SQS → silver writer): verifies `X-Lusha-Signature` HMAC-SHA256, writes the opt-out record to silver with `opt_out_at` ISO8601-Z timestamp, propagates to `serving/employees.parquet` to mark the row suppressed.
+- **Pre-search opt-out check (CVO Axis 4 ADDITIVE-1):** `crawl_linkedin_bronze` queries the locally-maintained opt-out cache (or Lusha's `GET /v3/contacts/opt-outs` if available per Lusha v3 catalog — confirm pre-Phase-2A-dispatch) BEFORE issuing `POST /v3/contacts/enrich` for any contact. Skips already-opted-out contacts at the source. **Double-win:** cost-discipline (no credits burned on opted-out enrichment) + GDPR alignment (no enrich call against an opted-out individual). Local opt-out cache populated from inbound webhook fires + persisted in `config/opt-outs-current.json` or a DynamoDB table — TO-authoring picks (DynamoDB recommended for atomic single-write opt-out webhook → cache update path).
+- **Phase 3 serving-tier filter explicit AC (CVO Axis 4 ADDITIVE-2):** Phase 3 `build_employees_serving` MUST include explicit AC: "`serving/employees.parquet` excludes rows where `opt_out_at IS NOT NULL`; `serving/companies.parquet` excludes companies where all leadership opted out OR adjusts the company score to exclude opted-out employees from the rollup." Defensive specification — implied-but-not-written is the gap-class that causes serving to silently include opted-out rows. Route to ws COO at Phase 3 TO authoring.
 - `score_linkedin_gold` filters out rows with `opt_out_at IS NOT NULL` from the scoring pass — opted-out contacts neither appear in gold output nor in Phase 3 serving (PRD AC4).
 
 Open question routed to ws CTO + Andrew (Lusha doc §12 Q-L3):
@@ -482,3 +492,71 @@ All three open questions cleared at scaffold layer; no architectural blockers re
 
 — 0.1.0_DS_MarketIntelligence~C 2026-05-27T~17:0?Z (v0.1 scaffold)
 — 0.1.0_DS_MarketIntelligence~C 2026-05-27T~17:11Z (v0.2 amendment — CTO Q-S1/Q-L3/Q4 dispositions absorbed)
+
+---
+
+## 13. CVO ARCH-CORROBORATE absorption (v0.3 amendment — 2026-05-27T~17:15Z)
+
+ws CVO landed 4-axis ARCH-CORROBORATE response `20260527T1705Z_to_0.1.0_DS_MarketIntelligence_C_phase2a_linkedin_scaffold_arch_corroborate.md` per LD-0022 priority architectural-corroborator + LD-0094 framing-lean→explicit-verdict-on-invite. Headline: structurally sound; 1 P1 + 3 P2 + 4 mandatory unknown-unknowns.
+
+### 13.1 Axis 1 (silver vs gold boundary) — CORROBORATE-with-additive
+
+**Verdict: CORROBORATE** the "all detection in gold" framing per CLAUDE.md Rule 17. **ADDITIVE absorbed in §5.4:** `certifications[].name` struct-enum-match becomes a 4th gold detection path (alongside bio_text + headline_text + experience_text regex). Multi-path matches elevate confidence to HIGH per §5.4. Reasoning: Lusha cert-name canonicalization NOT documented strictly stable forever — gold-text-scan path protects against silent rename drift.
+
+### 13.2 Axis 2 (Series-license weights) — **CORROBORATE-with-CONCERN — P1 — Andrew route**
+
+**Verdict: CONCERN on Series 7 (.35) vs Series 65/66 (.30) ordering** — reads BACKWARDS for FIND_INSURE objective:
+- Series 65 (Uniform Investment Adviser Law) + Series 66 (combined 63+65) ARE the IAR licenses = fee-based investment advisory = **the asset-management business model itself**
+- Series 7 (general securities representative) = broker-dealer/commission-based = closer to insurance-sales-side
+- For FIND_INSURE specifically (not generic securities-licensed detection), 65/66 should weight HIGHER than 7
+
+**Weights revised (provisional default) per §4.2:** `{24: 0.40, 65: 0.30, 66: 0.30, 7: 0.20, 63: 0.10}` — Series 24 anchor (.40) preserved; Series 7 dropped from .35 → .20 (smallest correction matching CONCERN); Series 65/66 unchanged at .30; Series 63 unchanged at .10. **Andrew Q2 ratification gate fires pre-Phase-2A-first-run** — alternative defensible orderings:
+- `{24: 0.35, 65: 0.35, 66: 0.35, 7: 0.20, 63: 0.10}` (IAR-as-equal-with-24)
+- `{65: 0.40, 66: 0.40, 24: 0.35, 7: 0.25, 63: 0.10}` (IAR-as-most-specific)
+
+**Why P1 not P0:** soft-fix path exists via config-bump (`config/scoring-weights-{version}.json` per PRD §3.2 + §4.5); doesn't block Phase 0/1. Specifically gates Phase 2A first-run **initial-list quality** — IR-team reviews against wrong signal-priority bias their judgment of which IMOs to pursue (AC5 ratification load-bearing).
+
+**Routing:** Andrew direct ask via separate message thread (1min Andrew effort). LD-0090 ALWAYS-PROCEED: Andrew silent ≥1 cycle = v0.3 provisional weights bind.
+
+### 13.3 Axis 3 (empirical-tightening 20+20 protocol) — CORROBORATE-with-additives
+
+**Verdict: CORROBORATE** the 20+20 sample size for Phase 2A first-ship. **3 ADDITIVES absorbed in §5.7:**
+- Stratified positive sample: 5 Series 7 + 5 Series 65/66 + 5 Series 24 + 5 Series 63 (Axis 3 ADDITIVE-1) — keeps per-license CI roughly equal
+- Cross-IMO sample cap (max 3 samples per IMO) (Axis 3 ADDITIVE-2) — prevents single-firm text-style bias
+- Structured-JSON evidence (not free-text narrative) at `qa/phase-2-spot-checks-{date}/spotcheck.json` (Axis 3 ADDITIVE-3) — enables v0.2 FINRA BrokerCheck programmatic cross-ref reuse
+
+### 13.4 Axis 4 (GDPR opt-out Phase-2A scope) — CORROBORATE-with-additives
+
+**Verdict: CORROBORATE** Phase 2A scope. **2 ADDITIVES absorbed in §6:**
+- Pre-search opt-out check (Axis 4 ADDITIVE-1) — `crawl_linkedin_bronze` queries local opt-out cache (or Lusha `GET /v3/contacts/opt-outs` if available) BEFORE enriching; cost-discipline + GDPR double-win
+- Explicit Phase 3 serving-tier opt_out_at filter AC (Axis 4 ADDITIVE-2) — `serving/employees.parquet` excludes opt-out rows; `serving/companies.parquet` excludes companies where all leadership opted out (or adjusts company score). Route to ws COO at Phase 3 TO authoring (defensive spec — implied-but-not-written is gap-class).
+
+### 13.5 Unknown-unknowns (CVO Operating Doctrine §7 mandatory surfacing)
+
+**UNK-1 (PII payload risk on silver employees.parquet):** silver schema (§3.3) at `email_revealed + phone_revealed + linkedin_url + full_name + bio_text + employer-context` = high-PII payload. PRD §3.5 SSE-S3 is account-boundary; not per-field PII. **Route ws CTO** PRD §3.6 KMS-upgrade-path candidate (CVO arch-brief §6.1 already documents upgrade-path; UNK-1 = empirical reason to invoke SOON not maybe). Disposition: separate CC to ws CTO for v0.4 PRD amendment consideration.
+
+**UNK-2 (Lusha companyId drift at Phase 3 join):** silver captures both `company_slug` + `lusha_company_id` (§3.3) — good. **Route ws COO at Phase 3 TO authoring** to specify join-strategy precedence (slug-primary fallback to lusha_company_id?; or vice versa?) + drift-detection telemetry (e.g. log when slug + companyId resolve to different companies between runs).
+
+**UNK-3 (tenure-as-decision-power may INVERT for transition signal):** `years_at_company_score` (§4.2 weight 0.25) heavily weighted assumes longer = more power. For FIND_INSURE specifically, AM build-out is often DRIVEN BY RECENT HIRES (new CFO + new VP Investments + new RIA-licensed advisor). Counter-intuitive: **low tenure + high seniority + recent Series-65 = STRONGEST transition signal.** **Action:** Phase 2A spot-check protocol (§5.7) extended to capture FN-rate for this class — specifically sample 5 employees with `years_at_company < 2yr` + `title_seniority >= 0.85` + `series_65_match OR series_66_match` and verify against rendered LinkedIn. If FN-rate elevated on this strata, re-weight `years_at_company_score` (potentially flip sign — bonus for low-tenure-high-seniority-license combo) at v0.1.1 config-bump.
+
+**UNK-4 (cross-IMO exec overlap v0.2 enablement):** PRD §8 out-of-scope lists this v0.2. Phase 2A silver capture of `lusha_contact_id` as **globally unique** (not per-company scoped) makes v0.2 cross-IMO graph analysis trivial (`GROUP BY contact_id HAVING COUNT(DISTINCT company_id) > 1`). **Action:** confirm at bronze TO authoring that `lusha_contact_id` is preserved globally-unique (Lusha v3 IDs are stable per §7.1; verify nothing in bronze→silver pipeline de-dups across IMOs or re-scopes the ID). Cheap forward-compat win.
+
+### 13.6 P1/P2 routing summary
+
+| Item | Priority | Route |
+|---|---|---|
+| Axis 2 weight CONCERN | P1 | Andrew (Q2 ratification ask) |
+| Axis 1 ADDITIVE (cert-struct-enum 4th path) | P2 | Self-absorbed §5.4; bronze + gold TO impl |
+| Axis 3 ADDITIVES (stratify + cross-IMO cap + structured-JSON) | P2 | Self-absorbed §5.7; gold TO impl |
+| Axis 4 ADDITIVE-1 (pre-search opt-out check) | P2 | Self-absorbed §6; bronze TO authoring |
+| Axis 4 ADDITIVE-2 (Phase 3 serving-tier explicit filter AC) | P2 | ws COO at Phase 3 TO authoring |
+| UNK-1 (PII / KMS upgrade) | UNK | ws CTO PRD §3.6 v0.4 candidate |
+| UNK-2 (Lusha companyId drift) | UNK | ws COO at Phase 3 TO authoring |
+| UNK-3 (tenure inversion for transition signal) | UNK | Self-absorbed §5.7 extension; v0.1.1 config-bump path |
+| UNK-4 (lusha_contact_id global-unique) | UNK | bronze TO authoring confirmation |
+
+### 13.7 No subsequent CVO consult required
+
+Per LD-0094: explicit 4-shape rendered; no further CVO action expected unless DS~C or ws COO surfaces a new arch-fork. Next CVO Mode B fire on FIND_INSURE = Phase 1 RAVC2-Accept OR Phase 2A RAVC2-Accept (whichever first per cascade).
+
+— 0.1.0_DS_MarketIntelligence~C 2026-05-27T~17:15Z (v0.3 amendment — CVO 4-axis ARCH-CORROBORATE absorbed; P1 Axis 2 routed Andrew; 3 P2 additives self-absorbed; 4 UNKs routed)
