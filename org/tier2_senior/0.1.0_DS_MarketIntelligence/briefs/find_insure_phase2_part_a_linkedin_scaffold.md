@@ -162,7 +162,7 @@ def parse_linkedin_silver(slug: str, run_date: str) -> pd.DataFrame:
 |---|---|---|
 | `years_at_company_score` | 0.25 | `(today - tenure_start_date).days / 365.25`, capped at 20yr, normalized to [0,1] = `min(years/10, 1.0)` — 10+ years saturates |
 | `title_seniority_score` | 0.25 | enum map: `Owner/Founder/President/CEO`=1.0; `C-suite (CIO,CFO,CTO,COO,CMO,CCO)`=0.95; `MD/EVP`=0.85; `SVP/Head of`=0.75; `VP/Director`=0.6; `Senior Manager`=0.4; `Manager`=0.25; `IC`=0.1. Matched via case-insensitive title regex; uses `current_title` primarily, `current_seniority` as fallback |
-| `series_license_count_weighted` | 0.30 | from §5 Series detection; per-license weights `{24: 0.40, 65: 0.30, 66: 0.30, 7: 0.20, 63: 0.10}` summed; cap at 1.0. **v0.3 weights per CVO Axis 2 CONCERN absorption + Andrew Q2 ratification gate (§13.2).** Series 24 highest (principal/managerial = asset-mgmt-organization OPERATOR); Series 65/66 (IAR — Uniform Investment Adviser Law + combined 63+65) = fee-based investment advisory = **the asset-management business model itself** (CVO insight: 65/66 are AM-business-model licenses, NOT Series 7); Series 7 (general securities representative = broker-dealer/commission) closer to insurance-sales-side; Series 63 most common blue-sky exam = weak standalone signal |
+| `series_license_count_weighted` | 0.30 | from §5 Series detection; **CANONICAL weights live at `data/find/imo/config/scoring-weights-v0.1.json` (DS~E `6257f3d77`; COO RAVC2-ACCEPT-SCAFFOLD DRAFT 17:08Z)** — `score_linkedin_gold` reads from S3 path `s3://opal-data-imo/config/scoring-weights-v0.1.json` at runtime; NO baked-in Lambda defaults. **Illustrative ordering (NON-AUTHORITATIVE):** canonical config has Series 65/66 at 0.40 (RIA-axis primary; direct asset-mgmt business model), Series 7/24 at 0.30 (broad capability + principal authority), Series 79/82 at 0.20 (M&A-correlated per Andrew "begets m&a/growth activity"), Series 63/6 at 0.05-0.10 (broker-only/narrow), specialized 51/52/53/22/26 at 0.05-0.10. DS~E + CVO independently converged on Series 65/66 > Series 7/24 ordering within ~3min — see §13.2 supersession note. Empirical-ratify path: `O-5-final` per DS~E `open_items_pending_empirical_ratify` — finalize post-Phase-2-LinkedIn-data fit (≥20 IMOs sample threshold) |
 | `title_keyword_match_score` | 0.20 | regex over `current_title` for asset-mgmt-class terms: `wealth\|advisory\|investment\|asset\s+management\|portfolio\|fiduciary\|RIA\|IAR` — match = 1.0, no match = 0.0 |
 
 **Final employee score** = sum of weighted axes ∈ [0, 1].
@@ -195,9 +195,9 @@ Silver schema (preserved) +:
 - `employee_score` (float [0,1]) — final weighted sum
 - `scoring_methodology_version` (str; e.g. `v0.1`)
 
-### 4.5 Methodology version pinning
+### 4.5 Methodology version pinning + config-as-sole-source-of-truth
 
-`scoring_methodology_version` is the link to `s3://opal-data-imo/config/scoring-weights-{version}.json` (PRD §3.2). Default v0.1 weights are baked into the Lambda; loading from config enables tuning post-IR-team-review (PRD §9 Q2). Phase 3 `serving/_history/{date}/scoring.json` time-travel archive (PRD §3.2 + Q-B ruling) captures the methodology+weights at each ship — re-scoring under a new regime preserves the audit trail.
+`scoring_methodology_version` (silver column; gold inherits) is the link to canonical config at **`s3://opal-data-imo/config/scoring-weights-v0.1.json`** (PRD §3.2 binding; DS~E `6257f3d77` lands `data/find/imo/config/scoring-weights-v0.1.json` as the workspace-side source; AE deploys to S3 path). Per DS~E `config_contract.hot_swap_safe: true` doctrine + CVO post-supersession reconciliation Option A (§13.2): **config is the SOLE source-of-truth** — no baked-in Lambda defaults. `score_linkedin_gold` Lambda reads from S3 path at runtime; v0.1 → v0.2 = author `scoring-weights-v0.2.json` + bump Lambda env var; v0.1 path persists for re-run audit. Phase 3 `serving/_history/{YYYY-MM-DD}/scoring.{json,parquet}` time-travel archive (PRD §3.2 + Q-B ruling) captures the methodology+weights at each ship — re-scoring under a new regime preserves the audit trail. Per DS~E `ratify_class` taxonomy: `DRAFT` → `EMPIRICAL-RATIFIED` (post-Phase-3-impl + IR-team-review-pass) → `ANDREW-FINAL` (Andrew sovereign sign-off). Phase 2A first-run loads `DRAFT`-class config; Andrew engagement on weights happens at `ANDREW-FINAL` transition (post-empirical) NOT pre-Phase-2A-first-run.
 
 ---
 
@@ -560,3 +560,53 @@ ws CVO landed 4-axis ARCH-CORROBORATE response `20260527T1705Z_to_0.1.0_DS_Marke
 Per LD-0094: explicit 4-shape rendered; no further CVO action expected unless DS~C or ws COO surfaces a new arch-fork. Next CVO Mode B fire on FIND_INSURE = Phase 1 RAVC2-Accept OR Phase 2A RAVC2-Accept (whichever first per cascade).
 
 — 0.1.0_DS_MarketIntelligence~C 2026-05-27T~17:15Z (v0.3 amendment — CVO 4-axis ARCH-CORROBORATE absorbed; P1 Axis 2 routed Andrew; 3 P2 additives self-absorbed; 4 UNKs routed)
+
+---
+
+## 14. v0.4 amendment — empirical supersession on Axis 2 + UNK-1 KMS disposition (2026-05-27T~17:30Z)
+
+Three Tier-1 dispositions landed in parallel at ~17:25-17:30Z; absorbed wholesale.
+
+### 14.1 CVO supersession on Axis 2 (DS~E parallel-lane canonical-config preempts my v0.3 weights)
+
+DS~E `0.1.0_DS_MarketIntelligence~E` shipped `data/find/imo/config/scoring-weights-v0.1.json` at commit `6257f3d77` 13:09Z — **3min before CVO's verdict landed at 13:12Z** — covering scope I (DS~C) was simultaneously designing in this scaffold. Two independent reasoning chains (DS~E + CVO) converged on Series 65/66 > Series 7/24 ordering. CVO post-supersession reconciliation recommends **Option A: §4.2 reframe as illustrative + pointer to canonical config; Lambda baseline-default = canonical config (no baked-in defaults).**
+
+**Absorbed:** §4.2 reframed (CANONICAL pointer to DS~E config; illustrative ordering shown for human reading; weights are NON-AUTHORITATIVE). §4.5 amended (config sole source-of-truth; `DRAFT` → `EMPIRICAL-RATIFIED` → `ANDREW-FINAL` ratify_class taxonomy per DS~E).
+
+**Canonical config covers wider taxonomy** than my v0.3 5-license design — 13 FINRA licenses with M&A-signal weighting (Series 79/82 IB) per Andrew "begets m&a/growth activity" framing. §5 Series-license regex/NLP detection MUST be extended at impl to cover all 13 licenses (7, 24, 65, 66, 63, 6, 79, 82, 51, 52, 53, 22, 26) — config-weights presume detection covers all. Brief §5.2 `SERIES_PATTERNS` extended at TO-authoring (pattern symmetry already established; mechanical add for 8 more licenses).
+
+**MSTR ANDREW-ASK Q2 disposition:** WITHDRAWN — Andrew engagement on weights happens at `ANDREW-FINAL` transition per DS~E ratify_class taxonomy (post-Phase-3-impl + IR-team-review-pass), NOT pre-Phase-2A-first-run. My earlier ANDREW-ASK to MSTR (`20260527T171857Z`) timing was authored without knowledge of DS~E canonical config (timing race). Withdrawal MCP fired same turn to MSTR.
+
+### 14.2 CTO UNK-1 disposition (KMS upgrade Option 2 APPROVED with 3 conditions)
+
+CTO ARCH-DISPOSITION on UNK-1 PII-payload concern: **OPTION 2 (Pre-Phase-2A KMS upgrade) APPROVED** with 3 conditions; Andrew sovereign window open per LD-0090 ALWAYS-PROCEED. Routing via MSTR /govern + COO + AE 0.7 + CVO parallel CC.
+
+**Conditions absorbed:**
+
+1. **KMS scope:** SSE-KMS on `silver/linkedin-scrape/* + silver/job-posting-scrape/* + serving/*` + (CTO reconsidered include) `bronze/linkedin-scrape/* + bronze/job-posting-scrape/*` (raw Lusha JSON has PII too). **NOT** on `code/* + telemetry/* + qa/* + archives/* + config/* + serving/_meta/*` (non-PII).
+2. **Key-policy:** CMK `find-insure-data-key` with key-policy explicit `kms:Decrypt` grant to `find-insure-lambda-role` ONLY at v0.1. Portal/IR-team principals added via key-policy amendment at Phase 3b surface trigger (NOT now — Andrew has not authorized portal scope yet).
+3. **Rotation:** annual rotation enabled at CMK provisioning. Standard fabric pattern.
+
+**Impact on Phase 2A scaffold:**
+- DS~C lane scaffold (THIS brief) unaffected — no schema change; just SSE config at AWS level.
+- AE 0.7 lane authors KMS CMK + IAM amendment as **Phase 2A pre-execution sub-deliverable** (sequenced BEFORE first live Lusha call).
+- CTO authors PRD v0.4 amendment capturing §3.1 SSE config change + §3.5 IAM addition for `kms:GenerateDataKey` + `kms:Decrypt` + §3.6 KMS rotation guidance + authoring lineage v0.4 entry citing UNK-1 escalation + Option 2 ratification.
+- HARD CONSTRAINT chain extended: NO live Lusha calls until (Phase 1 ships + Andrew subset cut + **KMS upgrade lands**) — STANDBY-PREP discipline preserved.
+
+LD-0090 ALWAYS-PROCEED: Andrew silent ≥1 cycle = Option 2 + 3 conditions bind.
+
+### 14.3 COO GO-CONFIRM on Lusha cost-gate sibling brief (Option 1 parallel-prep)
+
+ws COO ratified Option 1 next-action pick. Sibling brief lands at `org/tier2_senior/0.1.0_DS_MarketIntelligence/briefs/find_insure_phase2a_lusha_cost_gate_design.md` (target ~45min wall; sub-30min plausible per cascade-compression precedent). Cross-lane handshake: my `config/cost-budgets-v0.1.json` schema design becomes substrate for COO TO `FIND_INSURE.E2` to DS~E next /drive cycle (#172) — ~E concretizes the JSON artifact per `[[feedback_concretize_config_as_artifact_pattern]]`.
+
+### 14.4 v0.4 amendment summary
+
+- §4.2 reframed: illustrative + canonical-config pointer
+- §4.5 amended: config sole source-of-truth + ratify_class taxonomy
+- §5 implicit extension: SERIES_PATTERNS to cover all 13 FINRA licenses per canonical config taxonomy (at TO-authoring)
+- §13.2 supersession note (this section)
+- §13.5 UNK-1 disposition (Option 2 KMS upgrade binds)
+- HARD CONSTRAINT: Phase 1 ships + Andrew subset cut + KMS upgrade lands → Lusha live calls authorized
+- ANDREW-ASK Q2 WITHDRAWN per DS~E ratify_class taxonomy
+
+— 0.1.0_DS_MarketIntelligence~C 2026-05-27T~17:30Z (v0.4 amendment — DS~E canonical config supersession + CTO UNK-1 KMS Option 2 + COO cost-gate GO-CONFIRM + ANDREW-ASK withdrawal)
