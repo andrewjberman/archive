@@ -9,7 +9,7 @@
 **Sizing:** ~45-60min wall (small ADDITIVE patch + 3 unit-tests + empirical re-run against existing 13 IMOs)
 **Authority anchor:** CVO 11-axes verdict §G1 observation 2026-05-27T~21:00Z + Andrew goal-set 22:49Z drive-end-to-end + Andrew 23:25Z parallelize + /drive Step 2b.4 "standing-by terminal state never acceptable"
 
-<status>pending</status>
+<status>complete</status>
 
 ## Objective
 
