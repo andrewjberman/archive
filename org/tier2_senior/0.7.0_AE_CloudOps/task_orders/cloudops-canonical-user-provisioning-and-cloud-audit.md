@@ -6,7 +6,7 @@
 **Authority anchor:** Andrew direct 2026-05-28 — "make a standard script for adding users to opal-users-v2 in canonical form... include the script and process in their system prompt like the convert-and-upload schwab rps for 0.6.1_AE_PartnerETL... then do an entire audit of the cloud, updating compiler graph and scanning for security issues."
 **AMENDMENT 2026-05-28T~22:30Z (Andrew direct):** the old `create_user.py` is **deprecated** — build from the CURRENT state of opal-users-v2 + the partner tables. Provisioning is **firm-branched**: partner firms carry different scoped permissions that vary by the structure of their business, so the canonical process must apply the firm-appropriate scope. Phase 1 reframed below (was "canonicalize the old script" → now "deprecate it; reverse-engineer the live per-firm model + build firm-aware provisioning").
 
-<status>pending</status>
+<status>complete</status>
 
 ## Sequencing (STRICT — Andrew said "once it is done... after that is done")
 
