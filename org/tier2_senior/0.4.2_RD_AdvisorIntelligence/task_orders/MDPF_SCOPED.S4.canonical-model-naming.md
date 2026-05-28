@@ -9,7 +9,7 @@
 **Sizing:** Audit ~30-45min; rename sized after audit (30 files match the grep anchor)
 **Authority anchor:** CTO PRD v0.1 486da0470 + Andrew direct 2026-05-28
 
-<status>in_progress</status>
+<status>complete</status>
 
 ## Objective
 
