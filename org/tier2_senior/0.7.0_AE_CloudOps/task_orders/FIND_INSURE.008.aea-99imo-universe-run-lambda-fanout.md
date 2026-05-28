@@ -9,7 +9,9 @@
 **Sizing:** ~2-3h wall for 10-IMO validation subset + ~12-24h wall for full 96-IMO universe (Lambda async; observation window only)
 **Authority anchor:** CVO /verify-channel verdict `54ace66c8` §C1 F-grade (3/99 = 3% coverage) + REPAIR-AMENDMENT-AUTHORIZED (a) trigger + Andrew sovereign goal-set 2026-05-27T~22:49Z (drive FIND_INSURE end-to-end through Phase 3 close); CVO P1 priority routed via COO 21:00Z mandate.
 
-<status>pending</status>
+<status>complete</status>
+
+**Closeout 2026-05-28 (AE 0.7~A):** Phase 1 web-scrape already CLOSED (d2033738c, CTO+COO joint); this TO's post-close finalization legs done. AC7: 99/99 bronze+silver+gold coverage at run_date=2026-05-27 (source-list minus gold = empty). AC9: `s3://opal-data-imo/qa/stage2-universe-2026-05-27.json` (per-IMO telemetry; run_date pinned). Completion-matrix: `docs/briefs/find-insure-phase1-completion-matrix-20260527.md`. Dist = 7 present / 17 adjacent / 23 absent (47 SCORED) + 52 blocked_upstream (19 hard + 33 soft). AC8: blocked-rate 52.5% adjudicated eyes-open absent-data tail (not defect); scraping_browser1 v0.3.0 escape-valve pre-built 40b18d724. AC10: 3 Lambdas deployed, env taxonomy=v3/weights=v0.3 confirmed, comp-iam gaps clean, s3:PutObject empirically proven by 99/99 writes.
 
 ## Objective
 
