@@ -4,6 +4,7 @@
 **Issued to:** 0.7.0_AE_CloudOps
 **Author:** 1.0.0_SA_CTO 2026-05-28T~22:10Z (Andrew explicitly directed CTO to author this ad-hoc TO)
 **Authority anchor:** Andrew direct 2026-05-28 — "make a standard script for adding users to opal-users-v2 in canonical form... include the script and process in their system prompt like the convert-and-upload schwab rps for 0.6.1_AE_PartnerETL... then do an entire audit of the cloud, updating compiler graph and scanning for security issues."
+**AMENDMENT 2026-05-28T~22:30Z (Andrew direct):** the old `create_user.py` is **deprecated** — build from the CURRENT state of opal-users-v2 + the partner tables. Provisioning is **firm-branched**: partner firms carry different scoped permissions that vary by the structure of their business, so the canonical process must apply the firm-appropriate scope. Phase 1 reframed below (was "canonicalize the old script" → now "deprecate it; reverse-engineer the live per-firm model + build firm-aware provisioning").
 
 <status>pending</status>
 
@@ -15,37 +16,49 @@ This is a **3-phase sequence**, gated and ordered. **It is LOWER priority than y
 
 ---
 
-## Phase 1 — Canonical user-provisioning script for opal-users-v2
+## Phase 1 — Canonical, FIRM-AWARE user-provisioning for opal-users-v2
 
-### Pre-authoring finding (CTO, already done — do NOT greenfield)
-A script **already exists** at `users/scripts/create_user.py` (plus siblings `users/tools/list_users.py`, `users/tools/view_config.py`). This Phase is **verify + canonicalize the existing script into THE standard**, not author-from-scratch. The existing script is functional but has defects:
-1. **EMOJI VIOLATION (must fix):** it prints emoji characters (✅ ⚠️ ❌ 🚀 📋 🔑 📧). This violates CLAUDE.md "No emojis in code" — they break CloudWatch log queries on Windows (charmap codec) and log-parsing tools. Replace ALL with ASCII prefixes (`OK:`, `WARN:`, `ERROR:`, etc.).
-2. Authored "Systems Architect" 2026-02-17, pre-org-system; not registered in the compiler graph; no canonical-contract documentation.
+### Pre-authoring finding + AMENDMENT (CTO + Andrew direct 2026-05-28T~22:30Z)
+The existing `users/scripts/create_user.py` (+ `users/tools/list_users.py`, `view_config.py`) is **DEPRECATED — reference only, do NOT build on it.** It writes a flat `FIRM#/CONFIG#defaults` map that does not reflect the current per-firm permission model. The `infra/aws/auth/migration/00*.py` scripts are likewise **stale** — migration `003_create_firms.py` still has only `opal-capital` uncommented; 49financial / inflection / cottonwood are LIVE in prod but absent from it. **Derive the canonical process from the LIVE state of the table + partner tables, NOT from these scripts.** Archive/supersede the old script so there is no ambiguity about what is canonical. (The emoji defect in the old script is moot once it's retired — the new script is ASCII-only from the start.)
+
+### Core requirement (Andrew direct): provisioning is FIRM-BRANCHED
+Adding a user is **not one-size-fits-all** — the correct permission scope depends on which firm the user belongs to, and **partner firms carry different scoped permissions that vary by the structure of their business.** Current-state (empirical, confirm + extend at discovery):
+- **opal-capital** (internal, tier=internal): sees everything; no allowlist restriction.
+- **49financial** (tier=advisor): full advisor hierarchy — regions / offices / advisors; allowlist incl. advisor-intelligence + trade-submission; region/office scoping applies.
+- **inflection**: advisor-intelligence (Distribution + Books, no per-advisor drill); NO trade-submission; simpler structure; no region/office hierarchy.
+- **cottonwood**: NO advisor-intelligence; trade-submission yes; identity-and-allowlist only (no data pipeline).
+- **demo**: pseudonymized clone; full canonical path set.
+
+A user's scope is assembled across **multiple LIVE layers** the process must read and apply coherently:
+1. **opal-users-v2** — `USER#{id}/PROFILE` (user) + `FIRM#{firmId}/META` (firm: tier, status, domain) + `FIRM#{firmId}/MEMBER#{userId}` (membership). GSIs: email-index (login), firmId-index (list-by-firm).
+2. **firmAccess.ts** (`portal/src/lib/firmAccess.ts`) — `FIRM_ALLOWED_PATHS` per-firm page allowlist + `FIRM_EMAIL_DOMAINS` per-firm email domain (provisioning should validate the new user's email domain matches their firm; deny-by-default on unknown firm, mirroring `isPathAllowedForFirm`).
+3. **JWT claim contract** — firmId, role, advisorId/advisorRole, tier (issued at login, read by `auth-validator-edge`).
+4. **Partner tables** — `opal-partners-data` (partner API), `opal-partner-cottonwood` (cottonwood-specific), any other `opal-partner-*` — the partner-specific scoped-permission structures.
+5. **TenantLayoutConfig** (`portal/src/pages/AdvisorIntelligence/_shared/types/TenantLayoutConfig.ts`) — per-tenant layout/feature/data-source primitive.
 
 ### Objective
-Produce ONE canonical, ASCII-only, auditable script that is the single standard mechanism for adding a user to `opal-users-v2` in canonical form. "Canonical form" = the exact item shape the **production auth path actually consumes**, not merely what the old script happened to write.
+Produce **(a)** a documented **per-firm provisioning scope-profile map** — "what a user at firm X gets" across all the layers above, for each live firm — and **(b)** a canonical, firm-aware, ASCII-only provisioning script that branches on `--firm` and applies the correct scope (PROFILE fields incl. tier/role/region-office applicability, the `FIRM#/MEMBER#` write, email-domain validation, partner-table linkage where required), refusing unknown firms deny-by-default.
 
 ### Requirements
-- **(a) Verify the canonical item contract empirically.** Before locking the schema, confirm what the live runtime requires: read the auth/login path (`auth-validator-edge` `index.mjs`, `infra/aws/lambda/portal_authorizer/`, and the login handler that issues the RS256 JWT) to enumerate every field + exact casing the runtime reads off a `opal-users-v2` PROFILE item. Cross-check against the migration scripts (`infra/aws/auth/migration/001_create_users_v2_table.py`, `002_migrate_users.py`) and a live `get-item` sample. Document the contract in the script header.
-- **(b) Canonical item shape** (confirm/correct against (a)): `PK=USER#{userId}`, `SK=PROFILE`, `email-index` GSI; fields `userId, email, name, passwordHash (bcrypt), role, tier, firmId, status, mustChangePassword, regionId, officeId, createdAt, updatedAt, createdBy`. Org-defaults pattern (`FIRM#{firm}` / `CONFIG#defaults`) retained.
-- **(c) ASCII-only.** Zero Unicode > U+007F anywhere — prints, docstrings, comments.
-- **(d) Idempotent + safe.** Existing-user guard via `email-index` (already present — keep + harden). `--force` overwrite path stays explicit and logged. No destructive default.
-- **(e) bcrypt hashing retained; SES verify stays behind a flag (`--no-ses` opt-out).**
-- **(f) Deterministic, auditable output** — print the resulting userId + canonical field set written, in ASCII, so an operator run is self-documenting.
-- **(g) Canonical location + name.** Keep `users/scripts/create_user.py` as the canonical path OR rename to an unambiguous canonical name (your call; if renamed, leave no orphaned duplicate). One script, one path — delete/supersede any near-duplicate so there is exactly one standard.
+- **(a) Empirical current-state discovery FIRST (before writing the script).** Scan the LIVE `opal-users-v2` (enumerate `FIRM#*/META` records + a sample `PROFILE` per firm to see the real field set each firm's users carry); read the partner tables (`opal-partners-data`, `opal-partner-cottonwood`, any `opal-partner-*`); read the portal scoping layers (firmAccess.ts, TenantLayoutConfig, the JWT-issuing login path). Capture the **per-firm scope-profile map** as a deliverable doc (`docs/reference/user-provisioning-firm-scope-profiles-20260528.md` or dated equivalent).
+- **(b) Firm-branched script.** Takes `--firm`; applies that firm's scope profile — correct tier, the role set valid for that firm, region/office fields only where the firm's structure has them (49F yes; inflection/cottonwood no), the `FIRM#/MEMBER#` relationship write, email-domain validation against FIRM_EMAIL_DOMAINS, and partner-table linkage where the firm requires it. Unknown / unprofiled firm → refuse (deny-by-default).
+- **(c) Canonical item contract verified against the production auth path** — read `auth-validator-edge index.mjs`, `infra/aws/lambda/portal_authorizer/`, the RS256-JWT login handler, plus a live `get-item` sample, to confirm the exact field set + casing the runtime reads off a PROFILE item. Document in the script header.
+- **(d) ASCII-only** — zero Unicode > U+007F anywhere (the old script's emojis are a CLAUDE.md violation; the new one is ASCII from line 1).
+- **(e) Idempotent + safe** — existing-user guard via email-index; `--force` explicit + logged; no destructive default; bcrypt retained; SES behind `--no-ses` opt-out.
+- **(f) One canonical script, one path** — supersede/archive the deprecated `create_user.py`; no orphaned duplicate. Deterministic ASCII output (userId + canonical field set + firm scope applied) so an operator run is self-documenting.
 
 ### Compiler mandate (Phase 1)
-- Phase 1 (before): `comp-pii audit` — opal-users-v2 holds PII (email, name); confirm the field set you write matches the pseudonymization/cleartext policy. Enumerate the boto3 call surface (`dynamodb:PutItem`, `dynamodb:Query` on email-index, `ses:VerifyEmailIdentity`) — this runs under operator creds (local-runtime admin script, not a Lambda), so note the required operator-IAM actions in the header rather than a Lambda role.
-- Phase 3 (after): re-run `comp-pii audit`; register the canonical script as a node in the compiler graph (`comp-build`).
+- Before: `comp-pii audit` — opal-users-v2 + partner tables hold PII (email, name); confirm the field set you write matches the pseudonymization/cleartext policy. Enumerate the boto3 surface (`dynamodb:PutItem/Query/GetItem/Scan` across users + partner tables, `ses:VerifyEmailIdentity`) — runs under operator creds (local-runtime admin script, not a Lambda); note required operator-IAM actions in the header.
+- After: re-run `comp-pii audit`; register the canonical script + the scope-profile doc as nodes in the compiler graph (`comp-build`).
 
 ### Acceptance criteria (Phase 1)
-- **AC1.** Canonical script writes an item that the production auth path reads successfully (empirically: create a test user, confirm the field contract matches what the JWT-issuing login path expects — do NOT smoke against a real human's account; use a disposable test email and clean it up).
-- **AC2.** Zero emoji / zero non-ASCII bytes in the script (`grep -P '[^\x00-\x7F]'` returns nothing).
-- **AC3.** Idempotency guard verified: re-running on an existing email without `--force` refuses safely; with `--force` overwrites with an audit line.
-- **AC4.** Exactly one canonical script exists (no orphaned duplicate). Canonical field contract documented in the header.
+- **AC1.** Per-firm scope-profile map documented for every live firm (opal-capital / 49financial / inflection / cottonwood / demo), grounded in empirical live-table + partner-table reads (not the stale migration scripts).
+- **AC2.** Canonical script is firm-branched: provisioning a user at firm X applies X's correct scope, verified for at least 2 structurally-different firms (e.g. 49financial WITH region/office + trade-submission vs inflection WITHOUT). Unknown firm refused (deny-by-default).
+- **AC3.** Item the script writes is read successfully by the production auth path (empirical test-user create/verify/cleanup on a DISPOSABLE email — never a real human's account).
+- **AC4.** Zero non-ASCII bytes (`grep -P '[^\x00-\x7F]'` returns nothing). Idempotency guard verified. Exactly one canonical script; deprecated `create_user.py` archived/superseded. Canonical contract documented in header.
 
 ### RAVC2 (Phase 1)
-`[RAVC2-Request] cloudops-user-provisioning Phase 1 — canonical create_user script` to COO; CC CTO. Body: script path + commit hash + the canonical field contract + comp-pii output + the test-user create/verify/cleanup evidence.
+`[RAVC2-Request] cloudops-user-provisioning Phase 1 — firm-aware canonical provisioning` to COO; CC CTO. Body: the per-firm scope-profile doc + script path + commit hash + the canonical field contract + comp-pii output + the 2-firm provisioning verify evidence + test-user create/verify/cleanup.
 
 ---
 
@@ -55,10 +68,11 @@ Gated on Phase 1 RAVC2-accept. **Mirror the pattern Andrew cited** — the same 
 
 ### Action
 Add a dedicated section to **your own** `org/tier2_senior/0.7.0_AE_CloudOps/prompt.md` — title it e.g. `## User Provisioning Ownership (opal-users-v2)`. It must contain:
-- The canonical script path + the exact command to add a user (with the common flag forms).
+- The canonical script path + the exact command forms, including the `--firm` branch (one example per live firm class).
+- The **per-firm scope-profile summary** from Phase 1 (what a user at each firm gets — tier, allowlist, region/office applicability, partner-table linkage) + a pointer to the full scope-profile doc.
 - The canonical item contract (field set + casing) from Phase 1.
 - The explicit statement that **0.7.0_AE_CloudOps is solely responsible** for opal-users-v2 user provisioning going forward — new-user requests route here, this is the only sanctioned mechanism (no console-direct PutItem, no ad-hoc one-off scripts).
-- The PII/least-privilege note + the existing-user guard behavior.
+- The PII/least-privilege note + the existing-user guard + deny-by-default-on-unknown-firm behavior.
 
 This is a self-edit of your own core persona doc — permitted (Abilities: you write your own prompt + session logs). Commit under your author line.
 
@@ -101,10 +115,11 @@ Gated on Phase 2 ship. Scope: a **structured** audit across clear axes — not b
 
 ## Cross-domain coordination
 
-`<scoped>` — Phase 1 touches `users/` (identity-infra, CloudOps/security domain — your lane). If owned-paths blocks the commit, coordinate with the registered owner or flag to CTO. Phase 2 is your own prompt.md. Phase 3 is read-mostly audit (graph refresh writes comp-graph artifacts + the brief; any infra *change* surfaced is a follow-on TO, not in-scope here — audit FINDS, it does not FIX). Do not deploy remediations under this TO without a separate GO.
+`<scoped>` — Phase 1 touches `users/` (identity-infra, CloudOps/security domain — your lane) + writes a scope-profile doc under `docs/reference/`, and READS the partner tables + `portal/src/lib/firmAccess.ts` + TenantLayoutConfig (read-only — do not edit portal source). If owned-paths blocks the `users/` commit, coordinate with the registered owner or flag to CTO. Phase 2 is your own prompt.md. Phase 3 is read-mostly audit (graph refresh writes comp-graph artifacts + the brief; any infra *change* surfaced is a follow-on TO, not in-scope here — audit FINDS, it does not FIX). Do not deploy remediations under this TO without a separate GO.
 
 ## Notes
-- "Short script" intent: keep the canonical script lean — it's a verify-and-canonicalize of an existing ~290-line script, not a rewrite. If your work balloons past ~2x that, flag back to CTO (per dispatch-with-size-guard discipline).
+- "Short" intent (per Andrew's "short ad hoc TO"): the SCRIPT stays lean, but Phase 1 is now a genuine build grounded in live-state discovery (the old script is deprecated, not a base) — the firm-branched logic + the per-firm scope-profile doc are the substance. Keep the script tight; if it balloons well past the old ~290-line script's size, flag back to CTO (dispatch-with-size-guard discipline).
+- The per-firm scope-profile map is the load-bearing deliverable — the script implements it. Get the profiles right (empirical, from live tables) before coding the branches.
 - Phase 3 "entire audit of the cloud" is real but bounded by the 4 axes above — if you find the scope materially larger than ~1 session, surface a phased follow-on to CTO rather than running indefinitely.
 
 — 1.0.0_SA_CTO (Andrew-directed ad-hoc) 2026-05-28T~22:10Z
