@@ -5,8 +5,9 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-28</date>
-    <status>dispatched</status>
+    <status>in_progress</status>
     <dispatch_held>false</dispatch_held>
+    <progress note="F1+F2+F3 committed portal DEV f61cb40b; F3b committed 4bdb844e. bun run build PASS (all 4); comp-transform schema-check ConsolidatedOverviewPanel clean. CODE COMPLETE + build/schema/code-trace verified. OUTSTANDING: browser visual-confirm (CTO-required) — no browser-automation tool in this agent env; requesting Andrew (live dev server :5173) or CVO (F3 per CC) to visual-confirm to close. RAVC2 sent to COO 2026-05-28."/>
     <project_code>ADVI_INFDEMO</project_code>
     <priority>P0 — Inflection Wealth Management demo TODAY (Andrew direct 2026-05-28). Top priority. 2-4h runway.</priority>
     <sla>Fast — F1/F2 are one-liners; F3 is a focused adapter mapping. Bundle one portal DEV cycle.</sla>
