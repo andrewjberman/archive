@@ -37,7 +37,7 @@ The keyword/topic-cloud instant-analysis popup must **work and be fast**. Move t
 ## Dependencies
 
 - Independent of F1/F2/F4/F5 (PRD §4 — F3 parallel).
-- **MDPF_SCOPED overlap — IMPORTANT:** Andrew is authoring a sibling whole-Portal PRD (MDPF_SCOPED) that **explicitly overlaps F3** (general-portal keyword popup). Do Phase-0 investigation now, but **flag ws COO before heavy Phase-1 infra build** so we reconcile against MDPF_SCOPED and avoid double-dispatch on the shared keyword-popup surface (PRD §7 Q3).
+- **MDPF_SCOPED overlap — RESOLVED 2026-05-28T~19:58Z (ws COO + CTO).** MDPF_SCOPED v0.1 landed (486da0470); CTO confirmed (PRD §6+§7 explicit) that MDPF_SCOPED does **NOT** touch the keyword-popup surface — it stays sole-owned by this F3. **The earlier COO-gate-before-Phase-1 hold is RELEASED:** proceed F3 Phase-0 → Phase-1 without an MDPF reconciliation gate. (The only ADVI↔MDPF shared primitive is firmAccess.ts + the partner-view pattern, which is F2/RD's surface, not F3's.) Still confirm cadence Q1 with COO before Phase-1 (that gate persists).
 
 ## Sequencing
 
