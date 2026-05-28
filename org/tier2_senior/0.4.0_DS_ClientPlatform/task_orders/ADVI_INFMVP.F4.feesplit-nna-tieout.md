@@ -9,8 +9,8 @@
 **Sizing:** ~varies; sequenced after F5 canonical-NNA lands
 **Authority anchor:** CTO PRD v0.1 5f6018778 + Andrew direct 2026-05-28
 
-<status>pending</status>
-**Dispatch-held:** HARD-GATED on [ADVI_INFMVP.F5](ADVI_INFMVP.F5.canonical-advisor-nna.md) RAVC2-Accept — F4's fee-split sub-buckets must sum to F5's canonical Advisor-NNA total. COO GO's F4 on F5 accept.
+<status>complete</status>
+<!-- DS self-flip on RAVC2-Request 2026-05-28T~22:10Z (per /work Step 3.4). AC4-sum PASS: fee_paying.nna + no_fee.nna == total.nna (delta=0.00) for peter_lee + joe_brandenburg + firm across QTD/YTD/MAX, verified empirically against deployed artifact s3://opal-data-inf/platinum/firm/advisor_nna_canonical.json (generated_at 2026-05-28T20:29:29Z). No new code needed — sub-buckets already in F5 emit. Cohort dimension (new-vs-existing) flagged as small follow-on per COO direction. RAVC2 to COO CC CTO+CVO. -->
 
 ## Objective
 
