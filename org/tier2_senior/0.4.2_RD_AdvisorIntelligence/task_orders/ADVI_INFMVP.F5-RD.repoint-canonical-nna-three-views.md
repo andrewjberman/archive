@@ -9,7 +9,10 @@
 **Sizing:** ~60-90min (3-view repoint + fee-split render + window-label harmonize)
 **Authority anchor:** F5 emit RAVC2-Accept (DS-CP bcc29881c) + Andrew direct 2026-05-28 WITH SCREENSHOTS (DS+CVO RIGID; NNA cannot vary between views)
 
-<status>pending</status>
+<status>complete</status>
+
+<!-- Delivery complete 2026-05-28T~22:30Z (RD~B): portal/DEV 48566175 + pointer 0deedc7fd, pushed, tsc clean, build exit 0, comp-transform schema-check clean. 3 views repointed to advisor_nna_canonical.json (snapshot donut windows[period].nna; continuous firm.series[granularity] bucket-summed = 60%-bug fix; Lifetime advisors[id].series[interval]); F4 fee-split headline renders fee_paying.nna/no_fee.nna. Cross-view equality self-certified consistent-by-construction. ACCEPTANCE PENDING CVO RIGID cross-view-equality gate (AC5-gate — not self-certifiable). COO proxy-commit (RD~B owned-paths gap). -->
+
 
 ## Objective
 
