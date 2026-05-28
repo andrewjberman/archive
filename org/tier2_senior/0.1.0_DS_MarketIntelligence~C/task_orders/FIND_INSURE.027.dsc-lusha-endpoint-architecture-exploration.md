@@ -9,7 +9,9 @@
 **Sizing:** ~4-6h wall (structured exploration + documentation artifacts; no live API calls — references-only deep-dive)
 **Authority anchor:** Andrew direct 2026-05-27T~23:25Z verbatim: "exploring lusha endpoint data structure and how this informs bucket structuring and downstream analytics shape/optionality" + 2026-05-27T~23:26Z verbatim: "have them document their findings in structured format" + Andrew goal-set 22:49Z FIND_INSURE end-to-end drive.
 
-<status>pending</status>
+<status>complete</status>
+
+**Completion 2026-05-27T~23:58Z (0.1.0_DS_MarketIntelligence~C):** All 4 structured artifacts shipped. AC1 `docs/reference/lusha-endpoint-architecture-map.md` (per-endpoint deep-dive + cost/rate/error/coverage); AC2 `docs/architecture/find-insure-bucket-structuring-implications.md` (per-endpoint silver schema + cross-endpoint joins + per-endpoint silver/per-data-class gold recommendation); AC3 `docs/architecture/find-insure-downstream-analytics-shape-options.md` (Phase 3 hybrid Option C MUST-HAVE v0.1 + Lookalike-expansion Pattern 2 v0.2 + Webhook real-time Pattern 3 v0.3); AC4 `docs/reference/find-insure-phase2a-endpoint-decision-matrix.md` (8-step per-IMO execution chain + failure-mode + cost-gate). AC5 doc-of-record discipline met (header + author + date + authority chain + cross-refs). AC6 no live API calls (cost = $0). AC7 sister-coord MCP sent to DS~B at draft-of-AC3 moment. AC8 CVO architectural brief cross-ref inline in each artifact (zero divergence; 2 extension recommendations additive to CVO baseline). AC9 W1 threshold semantics flag surfaced in AC3 §8 for ws CTO REPAIR-AMENDMENT scribe.
 
 ## Objective
 
