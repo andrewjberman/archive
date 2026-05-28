@@ -9,8 +9,8 @@
 **Sizing:** sized after S3 Inflection artifact lands (this is a data-shape requirement on that artifact)
 **Authority anchor:** CTO PRD v0.1 486da0470 + Andrew direct 2026-05-28
 
-<status>pending</status>
-**Dispatch-held:** gated on [MDPF_SCOPED.S3](MDPF_SCOPED.S3.multifirm-daily-parsed-data-architecture.md) producing the Inflection per-firm artifact (S2 is a data-shape requirement on it). COO GO's on S3 Inflection-artifact availability.
+<status>in_progress</status>
+**Andrew decision 2026-05-28 (via CTO):** Option 2 — full Orion daily backfill for rolling-365d Non-Model AUA. Backfill in progress.
 
 ## Objective
 
