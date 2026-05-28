@@ -9,7 +9,9 @@
 **Sizing:** ~4-6h wall (multi-board survey + parser system design + Stage routing matrix + structured documentation)
 **Authority anchor:** Andrew direct 2026-05-27T~23:25Z verbatim: "various channel architecture using various job boards (exploring them and developing systems)" + 2026-05-27T~23:26Z verbatim: "have them document their findings in structured format" + Andrew goal-set 22:49Z FIND_INSURE end-to-end drive.
 
-<status>pending</status>
+<status>complete</status>
+<!-- RAVC2-ACCEPT-CLOSE by ws COO 2026-05-28T~00:08Z (all 10 ACs PASS; Tier-3 Wave-1 promotion RATIFIED; AC10 HAR-ask enumeration FORWARDED TO ANDREW). Deliverables: AC1 docs/reference/job-board-channel-architecture-matrix.md + AC2 docs/briefs/find-insure-phase2b-multi-board-design-v0.1.md + AC3 docs/reference/find-insure-phase2b-stage-routing-matrix.md + AC4 docs/briefs/find-insure-phase2b-cross-board-analytics-v0.1.md + AC5 data/find/imo/scripts/_util/har_parser_base.py. Commits fbe1bf264 (4-artifact suite + AC5) + 2f2ec094d (AC4 v0.1.1 CVO SUBSTANCE-META YELLOW->GREEN fix). Path-flag (docs/briefs vs docs/architecture for AC2/AC4) ACCEPTED by ws COO. Status tag corrected here 2026-05-28 (was lagging at pending). -->
+<dispatch_held>false</dispatch_held>
 
 ## Objective
 
