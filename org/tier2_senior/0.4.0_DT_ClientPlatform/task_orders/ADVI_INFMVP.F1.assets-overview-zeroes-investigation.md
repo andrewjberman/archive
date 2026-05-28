@@ -9,7 +9,24 @@
 **Sizing:** ~60-90min wall (end-to-end trace + 49F comparison; fix sized after root cause)
 **Authority anchor:** CTO PRD v0.1 5f6018778 + Andrew direct 2026-05-28 (Peter sees all-zeroes Assets Overview)
 
-<status>pending</status>
+<status>complete</status>
+
+## RESOLUTION (2026-05-28T~20:10Z, DT 0.4.0)
+
+**Root cause (AC1a) — CLIENT-SIDE rendering bug (none of the 4 PRD zero-origin classes).**
+The S3 data is correct + non-zero (verified `opal-data-inf`: `header_metrics_fresh.json`=$205.5M, `timeseries_chart.json` 25 quarters real nmnc/nmec, `timeseries_overview.json`=$205.5M). X-Firm-Id data-routing (`shared-advisor-router` → `opal-data-inf`) is correct. The defect is purely FE tenant-LAYOUT resolution:
+
+`PartnerAnalytics.tsx:158` resolved its layout via `useTenantLayout(firmOverride)`. External partner users (Peter) carry firm scope through the X-Firm-Id JWT (`auth-validator-edge`), so `firmOverride === undefined` for them (`inflection/index.tsx:154`) while the DATA served is still Inflection's. `useTenantLayout(undefined)` → `DEFAULT_LAYOUT`, the 49F-shaped pattern (`auaDonut.source='gold_aua'`, `barChart.stacked=false`). The panel then read Inflection's data through 49F accessors → donut segments resolved `null` + the NMNC/NMEC stacked-bar query was disabled (`enabled:usesStackedBars=false`) → **all-zeroes**. Internal Opal admins (`firmOverride='inflection'`) got `INFLECTION_LAYOUT` → correct, which masked the bug (Andrew-as-internal saw it fine; Peter-external saw zeroes). No auth-edge fallback exists at the FE layout layer (unlike the data layer) — the documented "scopes align" assumption in `TenantLayoutConfig.ts` is false for external users.
+
+**Q1 (AC1d) RESOLVED:** neither a DS emit gap nor an auth/firm-filter gap — a **FE layout-resolution defect**. No DS follow-on needed.
+
+**Fix:** add `firmId` prop to `PartnerAnalytics` + resolve layout via `useTenantLayout(firmId ?? firmOverride)`; pass `firmId` at all 3 call sites (inflection/49financial/demo). Portal DEV commit `7c03cd4b` (pushed `c40f08b6..7c03cd4b`, VALGATE PASS). `tsc -b --noEmit` exit 0.
+
+**AC1c no-regression (VERIFIED, field-by-field):** 49F + demo explicit layouts are identical to `DEFAULT_LAYOUT` on every field PartnerAnalytics reads (`auaDonut.source`, `barChart.stacked`, `assetClasses.ordered`, `includesCash`, no `defaultViewMode`/`allowedViewModes`). Zero behavior change for 49F/demo, internal or external. Only Inflection flips to `INFLECTION_LAYOUT`.
+
+**AC1b verification:** deterministic — post-fix external Inflection → `INFLECTION_LAYOUT` + `opal-data-inf` data (same bucket internal admins already render non-zero from). External X-Firm-Id data load cannot be simulated locally (needs a real Inflection JWT at the CloudFront edge); the live external-user smoke is a post-DEV→PROD-promotion check. Flagged in RAVC2.
+
+**PROD promotion:** NOT auto-promoted — client-facing surface, gated on CVO GO + ephemeral-worktree promotion per Rule 19 / rollback-first playbook. Pending COO/CVO ratification.
 
 ## Objective
 
