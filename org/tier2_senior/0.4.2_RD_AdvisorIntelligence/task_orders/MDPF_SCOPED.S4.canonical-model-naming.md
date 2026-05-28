@@ -2,14 +2,14 @@
 
 **Project:** [MDPF_SCOPED](../../../projects/MDPF_SCOPED.json)
 **PRD:** `docs/architecture/MDPF_SCOPED.md` v0.1 §3 S4 + §8 Q3 (commit 486da0470)
-**Pod:** 0.4.2_RD_AdvisorIntelligence~B
-**Lane:** RD_AdvisorIntelligence ~B (MDPF on tilde-lane; ADVI_INFMVP F2 holds RD base — parallel)
-**Issued to:** 0.4.2_RD_AdvisorIntelligence~B
-**Author:** 2.0.0_SA_COO 2026-05-28T~20:00Z (/drive — CTO MDPF_SCOPED NOVEL_PRD_READY 19:54Z)
+**Pod:** 0.4.2_RD_AdvisorIntelligence (base)
+**Lane:** RD_AdvisorIntelligence **base** (RE-ROUTED from ~B 2026-05-28T~20:06Z /drive pace-pickup: F2 shipped, base lane is warm + idle; S4 is independent + does NOT touch firmAccess.ts, so it parallelizes with RD~B's S1 cleanly). RD~B keeps S1.
+**Issued to:** 0.4.2_RD_AdvisorIntelligence
+**Author:** 2.0.0_SA_COO 2026-05-28T~20:00Z (/drive — CTO MDPF_SCOPED NOVEL_PRD_READY 19:54Z); re-routed to base ~20:06Z
 **Sizing:** Audit ~30-45min; rename sized after audit (30 files match the grep anchor)
 **Authority anchor:** CTO PRD v0.1 486da0470 + Andrew direct 2026-05-28
 
-<status>pending</status>
+<status>in_progress</status>
 
 ## Objective
 
