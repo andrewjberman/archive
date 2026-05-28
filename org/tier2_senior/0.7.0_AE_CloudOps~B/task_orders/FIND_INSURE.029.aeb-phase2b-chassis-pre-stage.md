@@ -9,7 +9,22 @@
 **Sizing:** ~1-2h wall (3 TF chassis files + tag bump + safe-apply + RAVC2)
 **Authority anchor:** Andrew 23:25Z parallelize directive + AE 0.7~B BLOCKED-ASK 23:42Z + ws COO disposition 23:44Z OPTION (b) CHASSIS-PRE-STAGE + LD-0090 ALWAYS-PROCEED
 
-<status>pending</status>
+<status>complete</status>
+
+## Close-out verification (0.7.0_AE_CloudOps~B respawn 2026-05-28T~17:11Z)
+
+Authoring + apply + tag were completed by the prior ~B session **before it wedged**, but the close-out chain (AC9 + AC10 + status-flip) never fired — which is why COO /drive cycle 1635Z re-dispatched against a stale `pending` status. Respawn session verified all ACs against committed + deployed state:
+
+- **AC1** — `phase2b-secrets.tf`: 8 per-board secret placeholders (6 chassis + 2 DS~D Wave 1 fold-in: efinancialcareers, insurancejobs). Committed `83ecb5da6` + amend `40a7cf1a5`. **Applied to AWS** (all 9 `find-insure/job-board/*` secrets present per `list-secrets`).
+- **AC2** — `phase2b-eventbridge.tf`: comment-block + per-board `aws_lambda_permission` append template. Orchestrator-side `find-insure-job-posting-fanout` rule **deferred to v0.1+** (prior-session judgment: zero-target rule = structural noise; rule binds at Bα-vs-Bβ manifest fill). Documented deviation from literal AC2 — flagged in RAVC2.
+- **AC3** — `phase2b-lambdas.tf`: header + per-board yang-lambda module append template. Committed `83ecb5da6`.
+- **AC4** — `phase2b-iam.tf` (NEW file chosen over folding): comment-block + existing-coverage analysis concluding ZERO IAM amendments needed for Phase 2B per-board work. Committed `83ecb5da6`.
+- **AC5** — `terraform validate`: Success (configuration valid).
+- **AC6** — In-scope apply (the 8 secrets) executed by prior session under ws COO STORM-CLEAR PHASE-2 GREEN-LIGHT 01:13Z; deferred orchestrator rule waits for manifest v0.1 — consistent with COO 2026-05-28T16:27Z GO "do NOT safe-apply (apply waits for Phase 2B manifest + HAR-supplied board content)". No apply performed this session.
+- **AC7** — Tag `imo-pipeline-phase2b-v0.0.0` (annotated `217a0bfad` → `14ae60cc1`) created + **pushed to origin**.
+- **AC8** — N/A (no Lambda chassis this cycle; TF-only).
+- **AC9** — `comp-iam gaps`: "No permission gaps detected" (134 services, 74 roles).
+- **AC10** — RAVC2-Request to ws COO (this session).
 
 ## Objective
 
