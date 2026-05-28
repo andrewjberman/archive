@@ -9,8 +9,9 @@
 **Sizing:** sized after S3 Inflection artifact lands (this is a data-shape requirement on that artifact)
 **Authority anchor:** CTO PRD v0.1 486da0470 + Andrew direct 2026-05-28
 
-<status>in_progress</status>
-**Andrew decision 2026-05-28 (via CTO):** Option 2 — full Orion daily backfill for rolling-365d Non-Model AUA. Backfill in progress.
+<status>blocked</status>
+**Andrew decision 2026-05-28 (via CTO):** Option 2 — full Orion daily backfill for rolling-365d Non-Model AUA.
+**Blocker:** Waiting on AE 0.7.0_AE_CloudOps to run backfill script on EC2 (~5h). Script committed `ca9a1ae34` (`data/mdpf/scripts/backfill/build_mdpf_wsc_inflection_nonmodel_backfill.py`). COO dispatched for AE routing 20260528T220051Z. Resume: re-run `build_aggregate_aua_timeseries.py --upload` once AE confirms feeder files landed, then verify AC2 + RAVC2.
 
 ## Objective
 
