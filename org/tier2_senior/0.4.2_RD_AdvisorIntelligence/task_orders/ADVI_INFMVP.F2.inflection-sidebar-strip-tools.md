@@ -9,7 +9,7 @@
 **Sizing:** ~15-25min wall (one-line allowlist edit + Peter/49F sidebar verify)
 **Authority anchor:** CTO PRD v0.1 5f6018778 + Andrew direct 2026-05-28 ("Inflection users should have no Tools pages at this time")
 
-<status>pending</status>
+<status>complete</status>
 
 ## Objective
 
