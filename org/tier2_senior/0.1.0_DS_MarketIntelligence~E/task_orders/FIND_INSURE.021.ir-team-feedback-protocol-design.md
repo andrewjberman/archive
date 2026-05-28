@@ -6,7 +6,7 @@
 | **Owner** | 0.1.0_DS_MarketIntelligence~E |
 | **Authored** | 2026-05-27T~21:15Z (2.0.0_SA_COO /drive cycle #188) |
 | **GO** | YES — dispatch_held=false |
-| **Status** | in_progress (dispatch ACK 2026-05-27T~21:28Z; substantive Thread A authoring picks up next /work cycle) |
+| **Status** | complete (AC-A1+A2+A3 shipped 2026-05-28T~04:0XZ work-cycle:0002; AC-A4 = ws CTO scope (PRD §7 AC5 fold) — decision-tree text supplied in protocol §D, CTO folds at IR-team-named-individual landing) |
 | **Authority** | Brief `b67ad03ec` (docs/briefs/find-insure-phase3-ir-feedback-and-lambda-skeleton-20260527.md) + Andrew sovereign 2026-05-27T~19:50Z pace-pickup + ws COO greenlight 20:03Z |
 | **Sequencing** | Fully parallel to Phase 1 + Phase 2A critical paths (substrate-ready when upstream gates clear) |
 
