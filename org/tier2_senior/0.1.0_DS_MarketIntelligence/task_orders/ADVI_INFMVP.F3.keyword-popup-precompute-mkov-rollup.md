@@ -9,7 +9,7 @@
 **Sizing:** Phase-0 investigation ~45-60min; Phase-1 build sized after Phase-0
 **Authority anchor:** CTO PRD v0.1 5f6018778 + Andrew direct 2026-05-28 (keyword popup slow/not working; precompute it)
 
-<status>in_progress</status>
+<status>complete</status>
 
 ## Phase-0 FINDINGS (DS 0.1 lead, 2026-05-28T~20:18Z) — precompute infra EXISTS; it's a bug, not a greenfield build
 
