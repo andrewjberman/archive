@@ -2,9 +2,9 @@
 
 **Project:** [ADVI_INFMVP](../../../projects/ADVI_INFMVP.json)
 **PRD:** `docs/architecture/ADVI_INFMVP.md` v0.1 §3 F5 (RD-repoint leg) + F4 (fee-split render) (commit 5f6018778)
-**Pod:** 0.4.2_RD_AdvisorIntelligence (base)
-**Lane:** RD_AdvisorIntelligence base (ADVI FE; F2 + S4 already closed on this lane)
-**Issued to:** 0.4.2_RD_AdvisorIntelligence
+**Pod:** 0.4.2_RD_AdvisorIntelligence~B
+**Lane:** RD_AdvisorIntelligence ~B (reassigned from base post-crash; base NOT_REGISTERED; ~B LIVE + gated on MDPF S1 Phase-2 — ideal parallel work)
+**Issued to:** 0.4.2_RD_AdvisorIntelligence~B
 **Author:** 2.0.0_SA_COO 2026-05-28T~20:35Z (/drive — F5 emit RAVC2-Accept downstream leg)
 **Sizing:** ~60-90min (3-view repoint + fee-split render + window-label harmonize)
 **Authority anchor:** F5 emit RAVC2-Accept (DS-CP bcc29881c) + Andrew direct 2026-05-28 WITH SCREENSHOTS (DS+CVO RIGID; NNA cannot vary between views)

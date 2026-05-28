@@ -9,7 +9,13 @@
 **Sizing:** scaffold ~60-90min against Global; per-firm wiring as S3 artifacts land
 **Authority anchor:** CTO PRD v0.1 486da0470 + Andrew direct 2026-05-28
 
-<status>pending</status>
+<status>in_progress</status>
+
+## Progress
+
+- **Scaffold (Phase-1) — RAVC2-ACCEPTED 20260528T201910Z (ws COO):** `Select Partner:` dropdown upper-right via `PageHeaderCleanBadge` (AI-parity placement+styling), `[Global (All), 49 Financial, Inflection]`, default Global, canonical L1 firm-id namespace (no firmAccess fork), Global mode working end-to-end. portal/DEV `d9e74ec3` + outer-repo pointer `def371104`. tsc clean.
+- **Q1 answered:** Internal Opal admins default to `Global` (COO confirmed — full aggregate is right first-view for internal admins; Andrew may override later if firm-pinned preferred, non-blocking).
+- **Phase-2 (per-firm wiring) — GATED:** awaiting (1) COO RAVC2-Accept of MDPF_SCOPED.S3 DS_CP~B per-firm emit (RAVC2-Request sent 20260528T202456Z) and (2) AE CF routing for `/api/general/mdpf/{firm_id}/aggregate-aua-timeseries.json`. Once both land, wire 49F + Inflection mode fetches against live per-firm artifacts + final RAVC2.
 
 ## Objective
 
