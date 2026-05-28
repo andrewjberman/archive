@@ -9,7 +9,7 @@
 **Sizing:** Phase-0 locate ~60-90min; design + emit sized after Phase-0
 **Authority anchor:** CTO PRD v0.1 486da0470 + Andrew direct 2026-05-28
 
-<status>pending</status>
+<status>in_progress</status>
 
 ## Objective — the backend spine
 
