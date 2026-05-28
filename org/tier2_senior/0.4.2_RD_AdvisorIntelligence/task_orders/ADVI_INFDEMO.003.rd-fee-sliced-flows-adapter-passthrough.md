@@ -5,8 +5,9 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-28</date>
-    <status>dispatched</status>
+    <status>complete</status>
     <dispatch_held>false</dispatch_held>
+    <finding note="FE side VERIFIED-READY, NO code change needed. (a) The Inflection leaderboard adapter does NOT drop fee_breakdown: all three leaderboard fetches (getFirmLeaderboard:1710, getEmployeeLeaderboard:805, getPlatinumFirmDashboard:894) are raw JSON.parse/cast passthroughs — no field selection. Inflection partner index (inflection/index.tsx:71) uses getFirmLeaderboard, the IDENTICAL fetch 49F uses (49financial/index.tsx:92). (b) End-to-end PROVEN on 49F through this exact path: getFirmLeaderboard -> employeeData -> rawEntry -> applyFeeBucket (feeBucket.ts:85-102 spreads ...entry, preserves fee_breakdown, tenant-agnostic no-op when absent) -> SummaryCard slice (AdvisorPublicProfile.tsx:332 entry.fee_breakdown?.[feeView], optional-chained, NO Inflection gating). Type declares fee_breakdown (types.ts:2050). So the consuming chain is complete + ready. IWM activation = DS F11 emitting fee_breakdown into Inflection's platinum/firm/leaderboard.json (the TRIMMED artifact getFirmLeaderboard reads — same field 49F's trimmed leaderboard includes). NO FE passthrough to add (the CTO's 'if it drops it' condition is false). Sister: DS ADVI_INFDEMO.F11. Verified by /work 2026-05-28."/>
     <project_code>ADVI_INFDEMO</project_code>
     <priority>P1 — IWM demo-prep (Andrew direct). Explore/confirm; likely POST-DEMO (gated on DS F11 emit).</priority>
   </metadata>
