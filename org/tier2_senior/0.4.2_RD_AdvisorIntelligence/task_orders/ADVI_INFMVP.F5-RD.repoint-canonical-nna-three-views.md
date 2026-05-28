@@ -9,9 +9,9 @@
 **Sizing:** ~60-90min (3-view repoint + fee-split render + window-label harmonize)
 **Authority anchor:** F5 emit RAVC2-Accept (DS-CP bcc29881c) + Andrew direct 2026-05-28 WITH SCREENSHOTS (DS+CVO RIGID; NNA cannot vary between views)
 
-<status>complete</status>
+<status>in_progress</status>
 
-<!-- Delivery complete 2026-05-28T~22:30Z (RD~B): portal/DEV 48566175 + pointer 0deedc7fd, pushed, tsc clean, build exit 0, comp-transform schema-check clean. 3 views repointed to advisor_nna_canonical.json (snapshot donut windows[period].nna; continuous firm.series[granularity] bucket-summed = 60%-bug fix; Lifetime advisors[id].series[interval]); F4 fee-split headline renders fee_paying.nna/no_fee.nna. Cross-view equality self-certified consistent-by-construction. ACCEPTANCE PENDING CVO RIGID cross-view-equality gate (AC5-gate — not self-certifiable). COO proxy-commit (RD~B owned-paths gap). -->
+<!-- v1 SHIPPED 48566175 (22:30Z) → CVO RIGID gate BLOCKED 22:40Z (verify_2240Z). REWORK dispatched 22:44-22:46Z (RD~B, one re-ship): (1) THE BLOCK — continuous-3Y $21.69M != Lifetime-3Y $24.46M by $2.77M; DistributionTab.tsx:1567-9 (setDate -1095) vs AdvisorAnalytics.tsx:161-3 (setFullYear -3) compute window cutoff differently + derive from FUTURE latest period_end 2026-06-30; Q2'23 bucket boundary. Fix: unify cutoff, anchor to precomputed windows[W].nna OR canonical window_bounds[W]. (2) Exec Summary Flows repoint to canonical (CVO concern#2 confirmed — durable single-source vs fragile leaderboard as-of-match). Substrate CLEAN (CVO: served artifact exists+correct; pure FE windowing). CVO concern#1 (firm.series L0/L1) = NOT a bug. Re-ship → CVO re-fires full RIGID gate. -->
 
 
 ## Objective

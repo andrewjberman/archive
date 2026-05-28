@@ -9,7 +9,9 @@
 **Sizing:** scaffold ~60-90min against Global; per-firm wiring as S3 artifacts land
 **Authority anchor:** CTO PRD v0.1 486da0470 + Andrew direct 2026-05-28
 
-<status>in_progress</status>
+<status>complete</status>
+
+<!-- Phase-1 scaffold RAVC2-ACCEPTED 20:19Z. Phase-2 trend-chart re-scope SHIPPED portal/DEV 931b22e3 (pointer de6e0ca17), RAVC2-ACCEPTED 22:43Z: per-firm timeseries wired to trend chart, 49F+Inflection modes re-scope, Global unchanged, tsc clean. AC1 trend-analysis portion satisfied. ACCEPTANCE-FLEX (CTO affirmed no-redline 22:46Z): AC1's whole-page re-scope (donut/distribution/metrics) DEFERRED to Phase-2b — data-gated on a DS~B per-firm SNAPSHOT emit (platinum/mdpf/{firm_id}/snapshot.json: headline/by_model/distribution per RD~B spec 22:46Z) extending S3; within S3's multi-firm-daily-parsed scope, no new project. Not scope-cutting — real data dependency (S3 emitted timeseries, not snapshots). COO proxy-commit (RD~B owned-paths gap). -->
 
 ## Progress
 
