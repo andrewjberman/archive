@@ -5,7 +5,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-28</date>
-    <status>dispatched</status>
+    <status>complete</status><!-- F6+F8+F9 shipped portal DEV b5487690 (prior session). tsc clean. RAVC2 sent 2026-05-28. -->
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_INFDEMO</project_code>
     <priority>P0 — IWM demo TODAY (Andrew direct, batch 2). Early-PM demo, ~2-3h runway.</priority>
