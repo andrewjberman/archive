@@ -11,6 +11,27 @@
 
 ---
 
+## §0 — v0.7.3 read-contract addendum (2026-05-28, post DS~B `0e53822a4`)
+
+**This brief's §2/§3/§6 below were written against the v0.7.1 gold schema (class_diversity-based wm_classification). PRD v0.7.3 re-architected the W1 classifier — `am_prominence` ratio replaces `class_diversity` (retired from the classifier). DS~B confirmed the FINAL v0.7.3 gold/score.json schema (`0e53822a4`, dual-bar PASS). The consolidate code (`consolidate_scoring.py`) + tests were revised to the v0.7.3 read-contract; this addendum records the delta. The sections below are retained for lineage; where they conflict, this addendum governs.**
+
+**v0.7.3 gold/score.json fields `.023` consolidate reads:**
+- `wm_classification` — RETAINED (read-through primary survives; now gold-computed via `am_prominence >= T_present`).
+- `am_prominence` (float 0-1) — NEW v0.7.3 decision driver; surfaced in each ranked entry + is the IR-team discrimination score.
+- `am_prominence_components` — NEW `{high_signal_weight, annuity_baseline_weight, any_AM_signal}`; surfaced per entry.
+- `class_diversity` — KEPT as telemetry only (retired from the classifier decision; read into the entry but not load-bearing).
+- `scoring_weights_version` — NEW (`v0.3`); stamped alongside `taxonomy_version` (`v3`) in the output header.
+- `class_diversity_multiplier` — REMOVED (retired with the multiplier); dropped from the consolidate entry.
+
+**wm_classification handling under v0.7.3 (replaces §6 below):**
+- Read-through primary: read gold-emitted `wm_classification`.
+- Derive-fallback (gold lacking the field): `present iff am_prominence >= T_present (0.5)`; `absent iff any_AM_signal=false`; `adjacent otherwise` (incl. the adjacent-floor: high-signal=0 with any_AM_signal=true). class_diversity is NOT used.
+- `BLOCKED_UPSTREAM → wm_classification=null` override RETAINED + reinforced (v0.7.3 adds SPA-render-fail → BLOCKED_UPSTREAM, e.g. Cambridge IR no-JS shell).
+
+Empirical AC8 remains gated on `.008` AC7 / Stage-2 gold output; the code revision is done now since the schema is FINAL (no schema change pending per DS~B). Revised code: `consolidate_scoring.py` (24 tests PASS) + this addendum.
+
+---
+
 ## §1 — Objective + W3 close context
 
 Author the `serving-consolidate` Lambda (`data/find/imo/scripts/serving/consolidate_scoring.py`) that reads all 99 per-IMO `corp/{slug}/gold/web-scrape/{run-date}/score.json` files and emits the consolidated **`serving/scoring.json`** ranked scoring table — the canonical IR-team-facing ranked-companies artifact. This is the structural close for CVO §W3 ("Until consolidation lands, 'ranking output' is a per-IMO score-file enumeration only").
