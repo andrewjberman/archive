@@ -9,9 +9,10 @@
 **Sizing:** ~3-5h wall (Lambda authoring + unit tests + empirical run against 99-IMO universe output post-.008 close)
 **Authority anchor:** CVO /verify-channel verdict `54ace66c8` §W3 INCOMPLETE — "NO consolidated serving/scoring.json exists; CONDITIONAL on C1 + Phase 1 close + consolidation TO" + Andrew sovereign goal-set 2026-05-27T~22:49Z (drive FIND_INSURE end-to-end through Phase 3 close); CVO P2 priority routed via COO 21:00Z mandate.
 
-<status>staged</status>
-<dispatch_held>true</dispatch_held>
-<dispatch_unlock_gate>FIND_INSURE.008 AC7 RAVC2-Accept (99-IMO universe-run complete + 99 gold/score.json files exist)</dispatch_unlock_gate>
+<status>complete</status>
+<dispatch_held>false</dispatch_held>
+<dispatch_unlock_gate>FIND_INSURE.008 AC7 RAVC2-Accept (99-IMO universe-run complete + 99 gold/score.json files exist) — CLEARED; Phase 1 closed d2033738c</dispatch_unlock_gate>
+<completion>RAVC2-ACCEPTED by 2.0.0_SA_COO 2026-05-28T~14:19Z (/drive 1419Z). Empirical run: 99/99 consolidated (scored=99, blocked=0, no_pages=0), run_date PINNED 2026-05-27, taxonomy v3 / weights v0.3 consistent, wm_dist {present 7, adjacent 17, absent 75, null 0}, 78 serving tests pass. Shipped s3://opal-data-imo/serving/scoring.json + serving/_history/scoring/2026-05-27.json (round-trip verified). Roster = source-list-2026-05-27.json 99 IMOs, carl-ostenson stray-dup excluded. W3 axis closed; DS~C .024 Phase-2A unblocked. Ranking-flag (rollup_score vs v0.7.3 am_prominence decision-driver) queued v0.2+ by COO → CVO + .021 owner. Run log: logs/2026-05-28/work_1413Z_find_insure_023_serving_consolidate_W3_CLOSE_99of99.md</completion>
 
 ## Objective
 
