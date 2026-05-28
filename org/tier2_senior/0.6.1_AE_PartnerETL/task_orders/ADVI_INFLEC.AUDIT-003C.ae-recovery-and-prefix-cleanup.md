@@ -5,6 +5,7 @@
 **Project:** ADVI_INFLEC
 **Priority:** P0 — first thing this session
 **Authored:** 2026-05-06
+**Status:** `complete` — Phase 0+1 ratified (CTO AC1+AC2 PASS) + Phase 2 qa/advisors/joe_brunswick prefix termination (1 object, 1534B); RAVC4 ACCEPT `20260506T150520Z`; session-close `c7008e132`; parent ADVI_INFLEC CLOSED COMPLETE 2026-05-22. Status-tag backfilled 2026-05-28 by owner /work scan (TO authored without a status field).
 
 ---
 
