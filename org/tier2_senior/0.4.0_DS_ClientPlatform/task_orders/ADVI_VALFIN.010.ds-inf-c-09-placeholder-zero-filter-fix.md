@@ -7,7 +7,7 @@
     <re_routed_at>2026-05-23T19:15Z UTC</re_routed_at>
     <re_routed_reason>MSTR v1.5 cycle-2 BOTTLENECK-RESPONSE INTENSIFICATION fired on DS Base 2026-05-23T19:10Z (CY-0044). DS Base STALE 135+ min after dispatch (last commit 87ae43cf8 16:30Z UTC; broker summary stale "Waiting on COO" predates the .010 + .011 + .009 dispatches). Compacted-context-stuck pattern hypothesis. CTO chose toolkit option (c) DS~C re-routing via COO lane-routing-hub authority (a TIER0_LAW + b RD-micro-charter both out-of-scope for gold-script lane per CLAUDE.md Rule 13). COO option (i): direct re-dispatch via this <issued_to> field edit. Original TO content + ACs + compiler mandate UNCHANGED -- only the recipient lane changes.</re_routed_reason>
     <date>2026-05-23</date>
-    <status>pending</status>
+    <status>in_progress</status>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_VALFIN</project_code>
     <priority>P1 -- CVO LD-0018 F1 finding: placeholder-zero partitions pollute the fee_status_audit; 61% of accounts get wrong `first_known_fee_status_date=2023-05-25` instead of 2026-04-01. One-line filter fix; corrects a real data-correctness defect in the audit output.</priority>
