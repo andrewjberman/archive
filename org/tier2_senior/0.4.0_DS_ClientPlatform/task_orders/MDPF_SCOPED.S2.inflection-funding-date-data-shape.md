@@ -11,7 +11,7 @@
 
 <status>blocked</status>
 **Andrew decision 2026-05-28 (via CTO):** Option 2 — full Orion daily backfill for rolling-365d Non-Model AUA.
-**Blocker:** Waiting on AE 0.7.0_AE_CloudOps to run backfill script on EC2 (~5h). Script committed `ca9a1ae34` (`data/mdpf/scripts/backfill/build_mdpf_wsc_inflection_nonmodel_backfill.py`). COO dispatched for AE routing 20260528T220051Z. Resume: re-run `build_aggregate_aua_timeseries.py --upload` once AE confirms feeder files landed, then verify AC2 + RAVC2.
+**Blocker:** AE EC2 backfill running — mdpf-daily-runner i-02448edb624a7a7cf, PID 2061, dispatched 20260528T222116Z, ETA ~5h (~246 trading days × ~300 households, 73.8k Orion calls). Output: `s3://opal-data-mdpf/mdpf/feeds/non_model_aua/inflection/{date}.parquet`. AE checking progress via SSM ~1h; will signal DS~B on complete. Resume: re-run `build_aggregate_aua_timeseries.py --upload` → verify AC2 → RAVC2.
 
 ## Objective
 
