@@ -11,7 +11,7 @@
 
 <status>blocked</status>
 **Andrew decision 2026-05-28 (via CTO):** Option 2 — full Orion daily backfill for rolling-365d Non-Model AUA.
-**Blocker:** AE EC2 backfill running — mdpf-daily-runner i-02448edb624a7a7cf, PID 2061, dispatched 20260528T222116Z, ETA ~5h (~246 trading days × ~300 households, 73.8k Orion calls). Output: `s3://opal-data-mdpf/mdpf/feeds/non_model_aua/inflection/{date}.parquet`. AE checking progress via SSM ~1h; will signal DS~B on complete. Resume: re-run `build_aggregate_aua_timeseries.py --upload` → verify AC2 → RAVC2.
+**Blocker:** AE EC2 backfill running — mdpf-daily-runner i-02448edb624a7a7cf, PID 2493 (PID 2061 FAILED: ACCESS_DENIED s3:ListBucket on opal-data-inf/accounts_v2 — zero dates processed; IAM patched mdpf-pipeline-v1.0.3; re-dispatched 20260528T223438Z). LOG=/tmp/mdpf_backfill_20260528_223438.log. ETA ~03:30-04:00Z 2026-05-29. Output: `s3://opal-data-mdpf/mdpf/feeds/non_model_aua/inflection/{date}.parquet`. AE signals DS~B on complete. Resume: re-run `build_aggregate_aua_timeseries.py --upload` (now with json/ dual-write 44afa1dd2) → verify AC2 → RAVC2.
 
 ## Objective
 
