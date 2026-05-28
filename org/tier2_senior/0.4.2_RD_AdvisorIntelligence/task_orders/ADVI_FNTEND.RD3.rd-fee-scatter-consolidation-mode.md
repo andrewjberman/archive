@@ -4,9 +4,10 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-04-16</date>
-    <status>active</status>
+    <status>complete</status>
     <project_code>ADVI_FNTEND</project_code>
     <wave>RD3</wave>
+    <reconciled note="Shipped + committed 0f0fcb1ca (Consolidation scatter sub-mode) + 5e4904974 (dot-color role-filter follow-up). FeeEfficiencyPanel.tsx now under _shared/tabs/; ScatterMode/consolidation/small_account_avg_aua all live. Parent ADVI_FNTEND merged into ADVI_ROLLUP. Status reconciled active->complete by /work entity-truth sweep 2026-05-28."/>
   </metadata>
 
   <references>
