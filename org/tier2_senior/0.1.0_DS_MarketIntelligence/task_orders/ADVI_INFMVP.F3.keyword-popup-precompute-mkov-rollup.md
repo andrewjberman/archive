@@ -9,7 +9,19 @@
 **Sizing:** Phase-0 investigation ~45-60min; Phase-1 build sized after Phase-0
 **Authority anchor:** CTO PRD v0.1 5f6018778 + Andrew direct 2026-05-28 (keyword popup slow/not working; precompute it)
 
-<status>pending</status>
+<status>in_progress</status>
+
+## Phase-0 FINDINGS (DS 0.1 lead, 2026-05-28T~20:18Z) — precompute infra EXISTS; it's a bug, not a greenfield build
+
+**Current path traced:** portal `KeywordSentimentModal.tsx` → `getKeywordIntelligence()` → `POST /v1/sentiment/keyword-intelligence` → `portal_data_proxy.get_keyword_intelligence` (cache-first: reads `opal-keyword-intelligence` DynamoDB keyed on `{keyword, generated_date=today-UTC}`; on MISS → live GPT + write-back). Precompute = `keyword-intelligence-generator` Lambda, **chain-invoked async by `news-trending-analysis`** (`news_trending_analysis:1590`) 2x/day after writing `keyword-sentiments.json`. Standalone EventBridge rule `keyword-intelligence-generator-daily` intentionally DISABLED (fallback). DynamoDB cache (not S3) is the artifact store.
+
+**ROOT CAUSE (empirical):** generator calls **gpt-5.4 with legacy `max_tokens`** → 400 `use max_completion_tokens` on EVERY keyword. CloudWatch `/aws/lambda/keyword-intelligence-generator` 2026-05-28 = "0 written, 20 errors / 20 total". DynamoDB: 05-27=0, 05-26=0, 05-28=3 (live write-backs only). ⇒ cache effectively never populated ⇒ every popup click misses ⇒ slow live path (gpt-4o-mini, degraded vs intended gpt-5.4+web).
+
+**FIX:** `max_tokens`→`max_completion_tokens` on both gpt-5.4 calls — committed `d73c281dd` → CLOUD `9e236e3ca`, ds-commit-gate PASS. DEPLOY (zip-rebuild + `terraform apply`, Rules 1-6) handed to 0.7.0_AE_CloudOps. Risk: `temperature=0.2` may be the next gpt-5.4 400 (flagged to AE for post-deploy verify).
+
+**Cadence Q1:** already 2x-daily via chain-invoke; daily-default satisfied; no schedule change.
+
+**Residual Phase-1 (small, COO-gated):** UTC today-partition cold-window in request path → latest-available-partition lookup (today → most-recent prior date) in portal_data_proxy (same class as FIND_INSURE.037). Post-deploy CVO verify on Inflection demo surface (AC3a/AC3d).
 
 ## Objective
 
