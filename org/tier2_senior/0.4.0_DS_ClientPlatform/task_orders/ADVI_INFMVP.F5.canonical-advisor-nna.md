@@ -9,7 +9,9 @@
 **Sizing:** Phase-0 ~60-90min (locate/define canonical series) + emit ~varies by Phase-0 finding
 **Authority anchor:** CTO PRD v0.1 5f6018778 + Andrew direct 2026-05-28 WITH SCREENSHOTS ("DS + CVO must be RIGID that NNA cannot vary between Segment Analytics and Lifetime Activity panels")
 
-<status>pending</status>
+<status>complete</status>
+<!-- DS self-flip on RAVC2-Request 2026-05-28T~20:31Z (per /work Step 3.4). Emit: INF_D_00f.advisor_nna_canonical.py (bcc29881c) -> platinum/firm/advisor_nna_canonical.json (deployed+verified). Phase-0 brief: docs/briefs/advi-infmvp-f5-canonical-advisor-nna-phase0-20260528.md. RAVC2 to COO CC CTO+CVO. AC5-DS-self-check: canonical-exact QTD/YTD/MAX/q1 for Peter; continuous-chart 60%-flow-loss sampling bug found + corrected via bucket-summed series. COO owns ratification + RD-repoint/CVO-gate leg authoring. -->
+
 
 ## Objective — the spine
 
