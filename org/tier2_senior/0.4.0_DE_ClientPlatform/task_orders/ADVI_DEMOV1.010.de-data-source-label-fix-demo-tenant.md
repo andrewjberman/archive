@@ -6,7 +6,7 @@
   <assigned_to>0.4.0_DE_ClientPlatform</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — GO dispatch this cycle (follow-on post-Phase-6 close)</status>
+  <status>complete — shipped portal/DEV 81fc3b38 (2026-05-29). AC1+AC2 satisfied, tsc exit 0. AC4 authenticated visual smoke deferred to DT PROD-promotion / Andrew (CLI cannot auth demo tenant; playwright MCP unavailable this session). RAVC2 to COO.</status>
   <priority>MEDIUM (Andrew UAT finding F3; tiny 3-line patch; non-blocking on Phase-6 close which IS shipped end-to-end)</priority>
   <references>
     <ref type="prd">docs/architecture/ADVI_DEMOV1.md — Phase 6 close-out follow-on; v0.4.2 wording-refinement candidate alongside Cognito→DynamoDB + §6.1 internal-staff dropdown</ref>
