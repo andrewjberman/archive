@@ -8,6 +8,7 @@
     <date>2026-05-20</date>
     <status>staged</status>
     <dispatch_held>true</dispatch_held>
+    <deferral_note>DEFERRED 2026-06-01 per COO (20260601T134837Z [DRIVE]) — parent project closed via D3/L1 path (b8a6e83bf) + Andrew-direct pure-yang Benchmark revert (80224d674); D1 Bloomberg-&gt;YCharts cutover superseded-by-closure, NOT completed. 2C gate (DS YCharts pull) has unresolved material gaps (403 session-eviction on burst pulls + macro-class 404s) = NOT RAVC-complete. YCharts-cutover revival pending a future YALP phase + 2C pull-gap resolution. Keep dispatch_held=true; do not cancel (Andrew-adjacent artifact).</deferral_note>
     <dispatch_unblock_condition>STAGED — Phase 2D. GATED on Phase 2C complete (TO-C1 credential pipeline + TO-C2 market-data pull both RAVC-complete) — there is nothing to cut over to until the YCharts pull exists. COO flips status->pending + fires the GO on TO-C1 + TO-C2 close. Requires PRD v0.3 on origin/CLOUD.</dispatch_unblock_condition>
     <project_code>YALP_MDSRC</project_code>
     <priority>P2 — Phase 2D. The final step — switches portal surfaces off the Bloomberg data_pkl onto the YCharts pull, behind a parallel-run diff gate.</priority>
