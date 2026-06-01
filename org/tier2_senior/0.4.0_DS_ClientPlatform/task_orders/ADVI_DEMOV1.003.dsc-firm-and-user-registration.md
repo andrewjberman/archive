@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>superseded</status>
+    <reconcile_2026_06_01>SUPERSEDED -- ADVI_DEMOV1 CLOSED COMPLETE via later .010-.012 phases (767c113ab); demo-tenant registration landed in the closed project. (was: pending)</reconcile_2026_06_01>
     <project_code>ADVI_DEMOV1</project_code>
     <!-- GO issued by 2.0.0_SA_COO~C 2026-05-22: gate met — TO-1 (infra) + TO-2
          (transform engine) both RAVC2-closed. Flipped staged -> pending.

@@ -5,7 +5,8 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-28</date>
-    <status>pending</status>
+    <status>parked</status>
+    <reconcile_2026_06_01>PARKED (post-demo readability tail). ADVI_INFMVP shipped + Andrew-smoke-passed (portal-v2.1.107); per-year-attribution = suppress/caveat graceful-hide (Andrew Q3), likely folded/moot. Surfaced to COO -- closeable unless Andrew wants the per-year display refined. (was: pending)</reconcile_2026_06_01>
     <project_code>ADVI_INFDEMO</project_code>
     <priority>P2 — POST-DEMO. Demo covered by suppressing the per-year table (CVO CONCERN). No demo-clock pressure.</priority>
   </metadata>

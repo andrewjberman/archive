@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~D</issued_to>
     <date>2026-05-24</date>
-    <status>pending</status>
+    <status>complete</status>
+    <reconcile_2026_06_01>DONE (~D lane) -- Path B structured-PII-tagging shipped by 0.4.0_DS_ClientPlatform~D Phases 1-3 (115af15f8/50176a86e/7e9969a5d); COO already flagged work-shipped-2026-05-24-but-TO-pending (19fdf2155). ~D-issued; flipped as queue-hygiene per COO reconcile-direction. (was: pending)</reconcile_2026_06_01>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_DEMOV1</project_code>
     <priority>P1 -- LD-0030 mechanism-class change for DEMOV1.004 leak-detection. Durable follow-on per attempt-13 SUCCESS sequencing (NOT immediate supersession; reserved branch for attempt-13 failure no longer fires).</priority>

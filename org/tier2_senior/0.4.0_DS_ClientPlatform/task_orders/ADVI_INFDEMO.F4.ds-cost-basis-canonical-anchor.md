@@ -5,7 +5,8 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-28</date>
-    <status>in_progress</status>
+    <status>complete</status>
+    <reconcile_2026_06_01>DONE -- cost-basis canonical anchor shipped + verify-channel PASS-mechanical, ship-gate (a)-(d) met (a8be3399e, b570b342a). Per-year-display concern spun to F4-followon. (was: in_progress)</reconcile_2026_06_01>
     <project_code>ADVI_INFDEMO</project_code>
     <priority>P1 — demo-critical; IWM demo early afternoon 2026-05-28; Andrew Q2=table IS shown</priority>
     <sla>race full-speed; ship-vs-caveat decided by COO on CVO verify result</sla>

@@ -5,7 +5,8 @@
     <issued_by>0.6.1_AE_PartnerETL (Andrew-direct consult) -> self-authored DS</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-28</date>
-    <status>pending</status>
+    <status>complete</status>
+    <reconcile_2026_06_01>DONE (leg-1) -- real daily fee sub-streams shipped 982394f01 (leg-1 LIVE); leg-2 deferred per 1f1d47c28. (was: pending)</reconcile_2026_06_01>
     <project_code>ADVI_INFDEMO</project_code>
     <priority>P2 — POST-DEMO. Not demo-blocking; leaderboard Flows split (F11) is the authoritative real split for the demo.</priority>
   </metadata>

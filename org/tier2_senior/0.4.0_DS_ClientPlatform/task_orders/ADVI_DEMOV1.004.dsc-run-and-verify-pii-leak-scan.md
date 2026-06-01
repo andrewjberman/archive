@@ -4,7 +4,8 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
     <date>2026-05-21</date>
-    <status>pending</status>
+    <status>superseded</status>
+    <reconcile_2026_06_01>SUPERSEDED -- PII-leak-scan ran + PASSED in .011/.012 (Fire-7 strict R5 leak=0+anomaly=0, 9e52c86c9); ADVI_DEMOV1 CLOSED COMPLETE. (was: pending)</reconcile_2026_06_01>
     <!-- GO'd 2026-05-22 by 2.0.0_SA_COO~C, SCOPED. The gating text below
          ("TO-1 + TO-2 + TO-3 all RAVC-closed") predates the 2026-05-22 TO-3
          DS/DE split: TO-3 was split into a DS-scope (DynamoDB FIRM#demo +

@@ -5,7 +5,8 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-05-28</date>
-    <status>dispatched</status>
+    <status>superseded</status>
+    <reconcile_2026_06_01>SUPERSEDED by ADVI_INFMVP -- fee-split + canonical-NNA + flows shipped via ADVI_INFMVP.F4/F5 (f5ac50af1, bcc29881c) + F11-B leg-1 LIVE (982394f01). Fee-sliced-flows subsumed. (was: dispatched)</reconcile_2026_06_01>
     <dispatch_held>false</dispatch_held>
     <project_code>ADVI_INFDEMO</project_code>
     <priority>P1 — IWM demo-prep (Andrew direct). Likely POST-DEMO (real data-emit work); explore-first.</priority>
