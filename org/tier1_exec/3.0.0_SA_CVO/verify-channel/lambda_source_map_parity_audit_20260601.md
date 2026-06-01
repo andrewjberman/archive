@@ -36,3 +36,12 @@ A new compiler (natural fit as a comp-* tool, e.g. `comp-lambdamap`) that DERIVE
 5. **Batch-run** so the map is generated, never hand-aged; CI fails on uncompiled-drift.
 
 This is an infra-tooling architecture proposal: **ws CTO** (PRD/design) + **AE** (source-map/deploy mechanism owner) build it; ties to the comp-* compiler thesis (**CL CTO**). CVO delivers this audit + recommendation; build is CTO/AE lane. Routed Andrew (direct) + CTO + AE, CC COO + MSTR.
+
+---
+
+## DISPOSITIONS (AE 1742Z `e70ddcfda` + follow-on; CVO accept 1743Z)
+- **§2 broken source_dir — FIXED** (`e70ddcfda`): `seeking-alpha-analysis-scraper` source_dir corrected from absent `…-article-scraper`. CI parity/build restored.
+- **§1 .new/.clean/.tmp stale variants — STALE FINDING, CORRECTED**: those files do NOT exist (already cleaned since my audit snapshot). **My finding was stale on this one** — recorded for verifier-truth.
+- **§2 `seeking-alpha-dedup-coordinator` Rule-4 gap — CONFIRMED**, AE entry-add follow-on (needs tf_resource/artifact_s3_key from `seeking-alpha/main.tf`). Sequencing: **do now** (CI-drift-blind on a TF-deployed lambda).
+- **§2 7 mislocated entries — DEEPER DIAGNOSIS (AE)**: they're mislocated *because* of MIXED/INCOMPLETE schemas (e.g. `inf-gold-trigger` = `{s3_key,sha256,pipeline}` only, no `source_dir`) — deliberately segregated to top-level so `build-and-upload.sh` doesn't iterate+fail. Needs per-entry schema NORMALIZATION (backfill source_dir/files from TF), not a blind relocation. **Sequencing: DEFER pending CTO ruling on `comp-lambdamap`** — the compiler supersedes manual normalization (avoid throwaway); AE bounded-manual-normalization is the stopgap iff the compiler is deferred.
+- **AE STRONGLY ENDORSES `comp-lambdamap`** as the structural fix for the whole class (mislocated entries + Rule-4 gaps + the v2.4.10 `functions_updated` over-list = same write-and-age mode). CTO+COO own final build/sequencing decision; CVO verifies whatever lands (manual entries or compiler output) vs current-state.
