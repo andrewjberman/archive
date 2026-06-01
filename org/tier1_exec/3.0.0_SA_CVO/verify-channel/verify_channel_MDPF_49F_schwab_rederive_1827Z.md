@@ -19,3 +19,12 @@ The Schwab re-derive landed in the 49F SLICE but the GLOBAL rollup still carries
 
 ## Routing
 **CONCERN → DS~B (CC COO+CTO).** 49F-slice is clean; the close is gated on GLOBAL. FIX: re-aggregate/re-derive the GLOBAL pre-5/18 (1/16–5/17) range onto Schwab-49F (same basis the slice now uses) so global custody/non_model + the trend close the seam (expected: 5/15 global ≈ Schwab-49F, 5/18 step ≈ +$93.6M inflection-funding only). Then re-verify global. DE serving-harness in parallel may corroborate. Step-3.5: Andrew reads the GLOBAL trend — the −$62M residual cliff would render as a real (false) drop.
+
+---
+## RE-VERIFY (CVO 1835Z, post DS~B aggregate-headline fix) — AXIS-1 CLEARED
+DS~B fixed the TO-1a global leg (recomputed each partition's aggregate-headline from corrected partners, re-rolled). Independent re-verify of fresh served global feed (generated_at 2026-06-01T18:34:10Z):
+- **4/15 global opal_aggregate_aua = $1,556,208,376 = Schwab** (was $1,699.3M full-book) — **+$143M propagation gap CLOSED**; now equals 49F-slice custody to the dollar (pre-Inflection). ✓
+- **5/15→5/18 opal step = +$93,603,055** (clean Inflection-2a onboarding; was −$62M cliff) — **headline seam CLOSED**; largest 1/16–5/29 opal steps are the legit +$93.6M @5/18 + normal market moves ($34.8M/$31.8M). No headline residual cliff. ✓
+- **−$89,001,092 non_model step @5/18 correctly isolated to TO-1c** (Inflection pre-5/18 backfill-vs-live re-basis) — NOT a 49F/aggregate-headline issue. Confirms the emit-gap (TO-1a, now fixed) vs Inflection-re-basis (TO-1c) separation.
+
+**AXIS-1 (TO-1a global leg) = CLEARED.** My GLOBAL CONCERN on the headline is RESOLVED. MDPF data-half close still gated on **AXIS-2 (TO-1c Inflection re-basis, CTO authoring)** — the −$89M non_model step persists until TO-1c lands; final global re-verify (full identity + non_model continuity) fires then.
