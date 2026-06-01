@@ -28,3 +28,21 @@ DS~B fixed the TO-1a global leg (recomputed each partition's aggregate-headline 
 - **−$89,001,092 non_model step @5/18 correctly isolated to TO-1c** (Inflection pre-5/18 backfill-vs-live re-basis) — NOT a 49F/aggregate-headline issue. Confirms the emit-gap (TO-1a, now fixed) vs Inflection-re-basis (TO-1c) separation.
 
 **AXIS-1 (TO-1a global leg) = CLEARED.** My GLOBAL CONCERN on the headline is RESOLVED. MDPF data-half close still gated on **AXIS-2 (TO-1c Inflection re-basis, CTO authoring)** — the −$89M non_model step persists until TO-1c lands; final global re-verify (full identity + non_model continuity) fires then.
+
+---
+## ADJUDICATION (CVO 1838Z) — Inflection band step: ACCEPT, NO TO-1c [DS~B vs CTO/DE dispute, CVO independent decider]
+COO routed the DS~B(TO-1c-basis-defect) vs CTO/DE(accept-honest-breakout) dispute for CVO adjudication. Independently verified Inflection served feed (json/mdpf/inflection/aggregate-aua-timeseries.json):
+| date | model(2a) | non_model(2b) | total |
+|---|---|---|---|
+| 5/15 | 0 | $203,845,242 | $203,845,242 |
+| 5/18 | $93,603,055 | $106,112,060 | $199,715,115 |
+- **TOTAL step 5/15→5/18 = −$4,130,127** (−$4.1M, continuous; matches DE). model step **+$93,603,055** ≈ −(non_model step **−$97,733,183**) → non_model drop OFFSET by model rise = the **model breaking out at funding**, total preserved.
+- pre-5/18 total avg $203.4M ≈ post-5/18 $199.8M → **basis-CONSISTENT, NOT inflated** (the COO discriminator: pre-5/18 total is NOT inflated like 49F's full-book was). 
+- DS~B's "$200M non_model vs $107M live" = apples-to-oranges across the funding boundary (pre-5/18 all-AUA-in-non_model vs post-5/18 non_model-only-after-$93.6M-split-to-model). The $93.6M moved to model, didn't vanish.
+
+**VERDICT: ACCEPT** — the band step is the HONEST MDPF-S2-designed model-breakout (gray pre-5/18 / models split 5/18-fwd), total-continuous. **NO TO-1c basis re-derive.** Optional: cosmetic pre-5/18 back-decompose for display = Andrew preference (not a data gate).
+
+## MDPF GLOBAL DATA-HALF = CLEAN (both axes resolved)
+- Axis-1 (TO-1b headline propagation): CLEARED (+$143M gap closed, headline seam +$93.6M clean).
+- Axis-2 (Inflection band): ACCEPT (honest breakout, total-continuous). NO TO-1c.
+Global headline + band both verified. MDPF data-half data-layer VERIFIED — remaining for project close = the VISUAL smoke gate (Andrew/frontend-dev) per closure discipline (data-correct ≠ FE-renders-correct).
