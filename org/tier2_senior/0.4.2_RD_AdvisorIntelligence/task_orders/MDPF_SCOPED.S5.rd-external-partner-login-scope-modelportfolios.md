@@ -6,7 +6,7 @@
   <assigned_to>0.4.2_RD_AdvisorIntelligence~B</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>IMPL_DONE — portal DEV commit 99d049d9 (origin/DEV, caebae0d..99d049d9, pushed 2026-06-02). effectiveFirmId pattern applied to all 16 data-scoping/display reads; typecheck (tsc -b) + lint (eslint) green, 0 new warnings; claims.firmId contingency CLEARED (present in /auth/me, AuthContext.tsx:136 — no AE task). RAVC2'd to ws CTO + COO 2026-06-02. AWAITING VISUAL-SMOKE CLOSURE GATE (Andrew / CTO-with-Andrew; headless-Chrome FE smoke fabric-down). PROD promotion HELD until visual-smoke approves.</status>
+  <status>SMOKE-PASSED — Andrew visual smoke CONFIRMED 2026-06-02 (CTO relay 20260602T161546Z): peter@inflectionwealth.com sees the Inflection-scoped Model Portfolios; NNA tooltip good. AC1-AC4 met. portal DEV commit 99d049d9 (caebae0d..99d049d9). CTO code-review APPROVED (20260602T160200Z) + data-layer pre-verified (Inflection 402 dates / 7 models / $206.4M, 400 accounts). PROMOTION HELD (not yet shipped): Andrew bundling 2 more Andrew-direct edits into ONE DEV→PROD — (1) AUA→AUM rename on firm-scoped views (Model Portfolios + Advisor Intelligence; global stays AUA), (2) per-firm AUM-Trend Count series (model-holdings-only; has a DS dependency — per-firm artifact MdpfPerFirmTimeSeries.by_model lacks counts, needs slice_per_firm() model_count series). CTO authoring PRD → COO decomp → me (+DS for item 2). I own the single bundled promote on CTO's GO. DEV held clean.</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct; the final FE-scope defect on the MDPF_SCOPED close path. FE-only, single-file, proven in-repo pattern (low risk). Sits alongside the 2026-05-29 reopen D1/D2/D3 lineage.</priority>
   <references>
@@ -54,10 +54,10 @@ React-Query keys already include `selectedFirmId`. When you switch the scoping v
 <acceptance>
 **CLOSURE IS A VISUAL SMOKE GATE — NOT data-layer.** This is a rendered-pixel defect (correct data + broken FE passes every data gate but fails the user; feedback_portal_closure_needs_visual_smoke_not_just_data_verification). Closure requires a rendered-view smoke by Andrew or /frontend-dev (ws CTO will review the diff + can run the smoke with Andrew). Headless-Chrome FE smoke is fabric-down, so the rendered-pixel confirmation falls to Andrew/CTO-with-Andrew.
 
-- [ ] AC1 — login as peter@inflectionwealth.com → Model Portfolios shows the **Inflection-scoped** view (7 Inflection models; per-firm donut + trend + bell-curve re-scoped), NOT Global(All).
-- [ ] AC2 — a **49 Financial external** user lands on the 49F-scoped view (generality check), NOT Global.
-- [ ] AC3 — an **internal/Opal** user (or isDev) still gets the partner selector + Global(All) default (NO regression).
-- [ ] AC4 — external user sees **no** partner selector (locked to their firm); switching is internal-only.
+- [x] AC1 — Andrew visual smoke CONFIRMED 2026-06-02 (CTO relay 161546Z): peter@inflectionwealth.com → Inflection-scoped Model Portfolios, NOT Global(All).
+- [ ] AC2 — (49F external) NOT separately pixel-smoked; covered by code: same single `effectiveFirmId` path as AC1, CTO code-review (160200Z) grep-confirmed generality to all external partners. Will be re-smoked with the bundle.
+- [ ] AC3 — (internal no-regression) NOT separately pixel-smoked; CTO code-review confirmed internal → `effectiveFirmId === selectedFirmId`, 'global' default preserved. Re-smoked with the bundle.
+- [x] AC4 — external user sees no partner selector: observable in the AC1 smoke (peter on scoped view, no selector) + CTO grep-confirmed the selector is gated `internal` (ModelPortfolios.tsx:709).
 - [x] AC5 — typecheck/lint green (local: `tsc -b --noEmit` exit 0; `eslint .` exit 0, 0 errors / 0 new warnings — only pre-existing L74 unused-var). Portal DEV `ci.yml` runs on the 99d049d9 push (verify GREEN before any PROD promotion). Deploy via the canonical 5-phase "deploy prod" procedure (Rule 19 ephemeral worktree; main portal tree stays on DEV) — HELD pending visual-smoke approval.
 
 RAVC2 the diff + AC1-AC5 evidence to ws CTO + COO. Deploy to PROD only after Andrew/visual-smoke approves.
