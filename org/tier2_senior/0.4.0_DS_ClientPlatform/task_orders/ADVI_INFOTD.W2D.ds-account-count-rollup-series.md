@@ -6,7 +6,7 @@
   <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>DISPATCHED — DS off sanctioned-hold; parallel to RD~B INFOTD.W1. The DATA leg of W2; gates the trivial RD FE consume (INFOTD.W2F).</status>
+  <status>complete — account_count[] series added to rollup (6de57ed), republished, served-verify PASS (49financial + inflection: 7/7 by_model carry account_count, generated_at 2026-06-02T17:13:16Z, 0 mismatch vs partition by model_key). RD~B W2F released to consume. 2026-06-02T17:14Z.</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct first-promotion-bundle. W2-FE + the held S5 promote wait on this served-verify.</priority>
   <references>
@@ -32,7 +32,7 @@ Standard DS gold/rollup deploy cycle (Rule 13 — DS owns commit->push->S3->comp
 </scope>
 
 <acceptance>
-- [ ] AC-W2D — build_aggregate_aua_timeseries.py emits account_count[] per by_model entry (model-holdings-only, padded on absent dates); rollup re-run + republished; `comp-pipescript postdeps` clean; SERVED json/mdpf/{firm}/aggregate-aua-timeseries.json (49financial + inflection) carries account_count, generated_at advanced, reconciles to the partition by_model[].account_count. CVO independent data-layer verify of the served artifact.
+- [x] AC-W2D — build_aggregate_aua_timeseries.py emits account_count[] per by_model entry (model-holdings-only, padded on absent dates); rollup re-run + republished; `comp-pipescript postdeps` clean; SERVED json/mdpf/{firm}/aggregate-aua-timeseries.json (49financial + inflection) carries account_count, generated_at advanced, reconciles to the partition by_model[].account_count. CVO independent data-layer verify of the served artifact.
 - Then signal RD~B (INFOTD.W2F) + COO that the served field is live so the 1-line FE consume is meaningful.
 
 RAVC2 the served-verify evidence (the served artifact carries account_count, to a sample firm+model) to ws CTO + COO + CVO.
