@@ -146,11 +146,12 @@ def run(artifact, header=None, partner=None):
                 got = sum((leaf_val(c, w, fld) or 0) for c in clients.values())
                 g.money_eq(f"I3 clients sum == advisor[{ak}] [{w}.{fld}]", got, leaf_val(a, w, fld))
 
-    # I4 cross-view (YTD anchor)
-    w = KEYS["ytd"]
-    geo_ytd = sum((leaf_val(s, w, "nna") or 0) for s in states.values()) if states else None
-    firm_ytd = leaf_val(firm, w, "nna")
-    g.money_eq("I4 geo-states YTD sum == firm YTD", geo_ytd, firm_ytd)
+    # I4 cross-view -- SAME-WINDOW comparisons ONLY (window-mismatch is the F5 failure
+    # mode: geo-YTD vs a single snapshot calendar-quarter can NEVER tie by construction).
+    # (a) YTD identity: geo-states YTD == firm YTD == header_metrics YTD
+    firm_ytd = leaf_val(firm, KEYS["ytd"], "nna")
+    geo_ytd = sum((leaf_val(s, KEYS["ytd"], "nna") or 0) for s in states.values()) if states else None
+    g.money_eq("I4a geo-states YTD == firm YTD", geo_ytd, firm_ytd)
     if header is not None:
         hv = None
         for path in HEADER_YTD:
@@ -160,21 +161,39 @@ def run(artifact, header=None, partner=None):
             if isinstance(node, (int, float)):
                 hv = node
                 break
-        g.money_eq("I4 firm YTD == header_metrics YTD", firm_ytd, hv)
+        g.money_eq("I4a firm YTD == header_metrics YTD", firm_ytd, hv)
+    # (b) snapshot cross-view at the SAME window: partner_analytics 'current' period == q_current
     if partner is not None:
-        # snapshot geo YTD: partner_analytics views.nna current-equiv; best-effort, advisory if path differs
         try:
-            nna = partner.get("views", {}).get("nna", {})
-            # sum the geo donut for the YTD-equivalent period if present
-            per = nna.get("ytd") or nna.get("current") or {}
+            per = partner.get("views", {}).get("nna", {}).get("current", {})  # snapshot q_current
             seg = (per.get("geo", {}) or {}).get("donut", {}).get("segments", [])
-            sv = sum(s.get("value", 0) for s in seg) if seg else None
-            if sv is not None:
-                g.money_eq("I4 firm YTD == snapshot partner_analytics geo (period)", firm_ytd, sv)
+            snap_qc = sum(s.get("value", 0) for s in seg) if seg else None
+            geo_qc = sum((leaf_val(s, "q_current", "nna") or 0) for s in states.values()) if states else None
+            if snap_qc is not None:
+                g.money_eq("I4b geo q_current == snapshot partner_analytics q_current geo", geo_qc, snap_qc)
             else:
-                g.flags.append("I4 partner_analytics geo YTD donut not located at expected path -- verify manually before cert")
+                g.flags.append("I4b snapshot partner_analytics q_current geo donut not located -- verify manually")
         except Exception as e:  # noqa: BLE001
-            g.flags.append(f"I4 partner_analytics parse skipped ({e}) -- verify manually")
+            g.flags.append(f"I4b partner_analytics parse skipped ({e}) -- verify manually")
+
+    # W6 -- producer self-recon block (DS emit): assert it agrees AND is zero-delta.
+    # Double-confirmation: my independent I1-I3 + the producer's standing self-recon.
+    recon = artifact.get("reconciliation")
+    if isinstance(recon, dict):
+        if recon.get("all_pass") is not True:
+            g.fails.append(f"W6 reconciliation.all_pass != True (got {recon.get('all_pass')})")
+        else:
+            g.passes += 1
+        for fld in ("max_abs_delta", "series_tie_max_abs_delta"):
+            v = recon.get(fld)
+            if v is None:
+                g.flags.append(f"W6 reconciliation.{fld} absent")
+            elif abs(v) > TOL:
+                g.fails.append(f"W6 reconciliation.{fld}={v} > {TOL}")
+            else:
+                g.passes += 1
+    else:
+        g.flags.append("W6 reconciliation block absent -- independent I1-I3 still bind")
 
     return g
 
