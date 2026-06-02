@@ -6,7 +6,7 @@
   <assigned_to>0.4.2_RD_AdvisorIntelligence~B</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>READY-TO-DISPATCH (decomposed by COO from ws CTO scoping handoff 9de86aae3, Andrew-direct 2026-06-02). Action when the RD FE lane is live — 0.4.2_RD_AdvisorIntelligence~B currently offline; spawn pending MSTR (offline) / Andrew. CTO bundling the spawn into the Andrew-direct escalation alongside AE OPS1.</status>
+  <status>IMPL_DONE — portal DEV commit 99d049d9 (origin/DEV, caebae0d..99d049d9, pushed 2026-06-02). effectiveFirmId pattern applied to all 16 data-scoping/display reads; typecheck (tsc -b) + lint (eslint) green, 0 new warnings; claims.firmId contingency CLEARED (present in /auth/me, AuthContext.tsx:136 — no AE task). RAVC2'd to ws CTO + COO 2026-06-02. AWAITING VISUAL-SMOKE CLOSURE GATE (Andrew / CTO-with-Andrew; headless-Chrome FE smoke fabric-down). PROD promotion HELD until visual-smoke approves.</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct; the final FE-scope defect on the MDPF_SCOPED close path. FE-only, single-file, proven in-repo pattern (low risk). Sits alongside the 2026-05-29 reopen D1/D2/D3 lineage.</priority>
   <references>
@@ -58,7 +58,7 @@ React-Query keys already include `selectedFirmId`. When you switch the scoping v
 - [ ] AC2 — a **49 Financial external** user lands on the 49F-scoped view (generality check), NOT Global.
 - [ ] AC3 — an **internal/Opal** user (or isDev) still gets the partner selector + Global(All) default (NO regression).
 - [ ] AC4 — external user sees **no** partner selector (locked to their firm); switching is internal-only.
-- [ ] AC5 — typecheck/lint green; portal DEV `ci.yml` GREEN before any PROD promotion. Deploy via the canonical 5-phase "deploy prod" procedure (Rule 19 ephemeral worktree; main portal tree stays on DEV).
+- [x] AC5 — typecheck/lint green (local: `tsc -b --noEmit` exit 0; `eslint .` exit 0, 0 errors / 0 new warnings — only pre-existing L74 unused-var). Portal DEV `ci.yml` runs on the 99d049d9 push (verify GREEN before any PROD promotion). Deploy via the canonical 5-phase "deploy prod" procedure (Rule 19 ephemeral worktree; main portal tree stays on DEV) — HELD pending visual-smoke approval.
 
 RAVC2 the diff + AC1-AC5 evidence to ws CTO + COO. Deploy to PROD only after Andrew/visual-smoke approves.
 </acceptance>
