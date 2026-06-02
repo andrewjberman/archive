@@ -6,7 +6,7 @@
   <assigned_to>0.7.0_AE_CloudOps</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>DISPATCHED — IMMEDIATE (gates Andrew's Segment-drill re-smoke). W4(a)+(c)+(d) of the access-model. CTO scoped DT for (a) but DT OFFLINE -> routed to AE (DynamoDB = CloudOps domain; AE traced the exact record). CC DT for lane-awareness.</status>
+  <status>COMPLETE (2026-06-02), RAVC2-pending CTO+CVO. (a) DONE/LIVE: opal-users-v2 USER#peter@inflectionwealth.com SK=PROFILE firmRole=admin set (scoped UpdateItem, read-back verified; role=user/tier=advisor/firmId=inflection/advisorId=null unchanged; Patrick/Joe untouched). (c) CONFIRMED: edge admin-path code-traced record->JWT (auth-handler lib/partner:30 + jwt.ts:81)->portal-authorizer:210->edge:310 isAdmin -> :311 skips the ENTIRE 004c block (advisorId req + ownership_map fetch). (d) NOT NEEDED: getOwnershipMap is inside if(!isAdmin); admins never reach it. CRITICAL: firmRole baked at LOGIN -> Peter must RE-LOGIN before Andrew re-smokes (current session JWT pre-change = firmRole=null = still 403). PRIOR: DISPATCHED IMMEDIATE, DT-offline-routed-to-AE.</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct; (a) is the smallest/highest-leverage fix + gates the Segment relationship-drill re-smoke.</priority>
   <references>
