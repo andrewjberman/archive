@@ -6,7 +6,7 @@
   <assigned_to>0.4.2_RD_AdvisorIntelligence~B</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>DISPATCHED — RD~B PRIORITY-2 (after the INFOTD first-bundle work W1+W2F; CTO says P0 can start in parallel, so interleave the investigation as capacity allows). Read-heavy; gates INFPRM W1/W2 scope.</status>
+  <status>COMPLETE — finding delivered + committed (brief docs/briefs/advi-infprm-p0-firmoverride-resolution-sweep-finding-20260602.md, c35e3cd40, pushed CLOUD). AC-P0 MET: all 3 symptoms pinned to file:line; exhaustive per-site list with FE-vs-edge determination. DECISIVE: firm resolution bifurcated (static-S3 = JWT-resolved FE-fine; Lambda = ?firmId=-no-fallback). W1 (FE-only, me) = 3 useTenantLayout(firmOverride)->firmId sites (AdvisorBookView:143, AdvisorPublicProfile:1155, ClientsTab:150); W2 (AE-conditional) = getClientsTab (Symptom 2, only true backend bug) + Lambda ?firmId= routes. FE mechanics RD-verified; edge claims flagged for AE. RAVC2'd CTO+COO+CVO 174821-174836Z. Awaiting COO+CTO W1/W2 authoring.</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct (5 screenshots); but SECOND-promotion (after INFOTD). P0 is the fast sizing pass that unblocks W1/W2 authoring.</priority>
   <references>

@@ -6,7 +6,7 @@
   <assigned_to>0.4.2_RD_AdvisorIntelligence~B</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>DISPATCHED — RD~B PRIORITY-1 (gates the held S5 first-promotion). FE-only, INDEPENDENT (no data dep), can land immediately.</status>
+  <status>IMPL-COMPLETE on portal DEV (836c02fd, 30 files +189/-157). AC1 CODE GATE MET: tsc -b clean + eslint 0 errors; assetsLabel helper + ModelPortfolios conditional (16 sites) + AdvisorIntelligence unconditional (~90 sites/22 files); 0 keys/dataKeys/values/sortKeys/types/constants/component-names touched (verified by broken-key signature scan + diff review). CLOSURE (visual smoke Andrew/CTO) PENDING — headless FE smoke fabric-down; CTO owns smoke + promotion GO. RAVC2'd to CTO+COO 2026-06-02. Bundles into held S5+NNA first promote.</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct; first-promotion-bundle (S5 + NNA + INFOTD-W1 + INFOTD-W2). The held S5 PROD promote waits on this + W2.</priority>
   <references>
