@@ -6,8 +6,8 @@
   <assigned_to>0.4.2_RD_AdvisorIntelligence~B</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>QUEUED — GATED on DS INFOTD.W2D: do NOT start until DS confirms account_count is live in the SERVED json/mdpf/{firm}/aggregate-aua-timeseries.json (else Count still renders 0). Trivial once the field is present.</status>
-  <dispatch_held>true</dispatch_held>
+  <status>RELEASED 2026-06-02T17:14Z — DS W2D COMPLETE (6de57ed); served-verify PASS, COO-independently-re-verified (inflection served generated_at 17:13:16Z, 7/7 by_model carry account_count, populated integer series). account_count is LIVE in json/mdpf/{firm}/aggregate-aua-timeseries.json. GO to consume — RD~B priority after INFOTD.W1.</status>
+  <dispatch_held>false</dispatch_held>
   <priority>HIGH — first-promotion-bundle; trivial effort, gated on the DS data leg.</priority>
   <references>
     <ref type="prd">docs/architecture/ADVI_INFOTD.md (sec.3.W2 changes 2+3)</ref>
