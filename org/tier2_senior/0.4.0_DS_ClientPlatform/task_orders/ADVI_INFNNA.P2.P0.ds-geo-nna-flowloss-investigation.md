@@ -6,7 +6,7 @@
   <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>DISPATCHED — DS PRIORITY-2 (behind ADVI_INFOTD.W2D, which is bundle-critical for the held S5 promote). INFNNA P2 is its own track, NOT in the S5 bundle. P0 is the fast investigation pass that gates W1 emit correctness.</status>
+  <status>complete — VERDICT mechanism (a) weekly-snapshot-SAMPLING loss (NOT definitional). Both producers read same canonical_nna + same net_nna; only diff = INF_D_00d _weekly_sample (L458-459). Reproduced to-the-cent: full daily sum YTD $4,225,486.45 (=canonical) vs served weekly $1,456,681.11 (34.5%). W1 = STRAIGHT re-aggregation (no definitional reconcile); state/city via account_id->accounts_v2/household_dim join (not in parquet). Finding: docs/briefs/infnna-p0-geo-nna-flowloss-mechanism-20260602.md. RAVC2'd CTO+COO+CVO. 2026-06-02T17:24Z.</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct (3rd Inflection PRD); DS-led + CVO-gated. Own track (not the held S5 bundle). P0 gates the W1 canonical-GEO emit spec.</priority>
   <references>
@@ -32,7 +32,7 @@ Mechanism identified + documented (weekly-differencing vs definitional, with the
 </scope>
 
 <acceptance>
-- [ ] AC-P0 — flow-loss mechanism documented (weekly-snapshot-differencing vs definitional, line-level evidence); canonical_nna.parquet state/city presence empirically confirmed; W1 emit-spec determination (straight re-aggregation vs definitional-reconcile-first). RAVC2 to CTO + COO + CVO (evidence-base author).
+- [x] AC-P0 — flow-loss mechanism documented (weekly-snapshot-differencing vs definitional, line-level evidence); canonical_nna.parquet state/city presence empirically confirmed; W1 emit-spec determination (straight re-aggregation vs definitional-reconcile-first). RAVC2 to CTO + COO + CVO (evidence-base author).
 </acceptance>
 
 <notes>
