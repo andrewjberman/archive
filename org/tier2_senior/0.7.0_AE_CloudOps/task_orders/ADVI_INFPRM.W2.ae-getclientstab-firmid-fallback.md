@@ -6,7 +6,7 @@
   <assigned_to>0.7.0_AE_CloudOps</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>READY-TO-DISPATCH (Andrew-directed parallel velocity 2026-06-02). AE spawning for this (was Wed-gated on MDPF OPS1 AC4#2 — time-gated, runs independent). Runs PARALLEL to RD~B INFOTD + RD~C INFPRM-W1. CONFIRM-FIRST: the edge/Lambda claims below are subagent-traced by RD~B's P0 — AE confirms against live infra/aws before landing.</status>
+  <status>BLOCKED-ASK (deploy-scope, routed COO 2026-06-02). AC-W2-confirm PASS (P0 bifurcation confirmed against live infra). W2 fix BUILT + gate-clean + committed 15d500737; artifact staged. BLOCKER: deploying repo HEAD via terraform-from-repo would also ship INFLFE.005 Part A (94f8d45f9, COO-accepted 2026-05-05 but NEVER deployed) whose required cloudwatch:PutMetricData IAM grant is absent from BOTH live partners-lambda-role AND repo partners-api/iam.tf -> INFLFE.005 would deploy non-functional (AccessDenied, caught) + log-spam every inflection platinum request. Need deploy-scope ruling: (A) isolate W2 [recommended], (B) deploy HEAD + adopt INFLFE.005 IAM grant [cross-lane], (C) hold W2 til INFLFE.005 completed/backed-out. Prior: READY-TO-DISPATCH Andrew-direct parallel velocity; CONFIRM-FIRST done.</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct (Symptom 2 Firm Overview, the ONE true backend bug in INFPRM). INFPRM = 2nd PROD promotion.</priority>
   <references>
