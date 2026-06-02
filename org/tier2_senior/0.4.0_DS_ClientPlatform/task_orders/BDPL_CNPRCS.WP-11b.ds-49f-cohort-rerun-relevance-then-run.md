@@ -6,7 +6,9 @@
   <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>DISPATCHED (Andrew-direct 2026-06-02 — "verify + re-run"). DS off sanctioned-hold. INVESTIGATE-FIRST: BDPL_CNPRCS is status=MERGED (into ADVI_ROLLUP, 2026-04-15) + WP-11 stranded since 2026-04-15 — verify still-valid BEFORE re-running (likely-superseded by the MDPF Schwab-re-derive + canonical_prices churn since April).</status>
+  <status>complete</status>
+  <!-- VERDICT 2026-06-02T1906Z (DS): SUPERSEDED/MOOT — re-run NOT run (correct per SUPERSEDED branch). Evidence: scoped-override 864b6d7a is STILL LIVE in the canonical_prices path and the ~$24.3M phantom correction is ALREADY permanently realized on the current basis. Verified against the live served artifact s3://opal-data-bd/silver/prices/canonical_prices.parquet (rebuilt 2026-06-02 00:03, 11.2M rows). All 3 override bonds pinned through 2026-06-02 at exactly the WP-11 inception prices, single-source bd_txn_price, zero equity-price contamination: BNP PARIBAS SA (CUSIP_05613L3H2)=1.0188; WELLS FARGO 4.15% 2029 (CUSIP_95000U2D4)=0.9804; NEWMONT 2.8% 2029 (CUSIP_651639AX4)=0.9037. inject_scoped_overrides.py is a BLOCKING postdep (gold_pipeline_deps.yaml) re-pinning every rebuild + S3 MATCH, so the correction has flowed continuously since 2026-04-15. A re-run today would yield ~$0 incremental delta (NOT a fresh $24.3M) because the current 49F basis already includes the override. Phantom in_progress CLEARED. Close-rec for parent WP-11 RAVC2'd to COO. Optional low-pri follow-up (not done here, was bundled with the moot re-run branch): a dedicated override-presence regression sentinel in gold_validate_config.yaml — structurally redundant given the BLOCKING postdep, but a cheap belt-and-suspenders if COO/CVO want it as a separate micro-TO. -->
+  <!-- prior: DISPATCHED (Andrew-direct 2026-06-02 — "verify + re-run"). DS off sanctioned-hold. INVESTIGATE-FIRST per merged-project + 6-week-stale state. -->
   <dispatch_held>false</dispatch_held>
   <priority>MEDIUM — capacity-fill of DS's free lane (Andrew-directed); NOT on any Inflection critical path. Clears a phantom in_progress either way (run-or-close).</priority>
   <references>
@@ -31,7 +33,7 @@ Either branch CLEARS the phantom in_progress — that's the goal. Don't blindly 
 </scope>
 
 <acceptance>
-- [ ] AC — STEP-1 relevance determination documented (still-valid vs superseded, with evidence: is the scoped-override + $24.3M delta still live on the current 49F-cohort/canonical_prices basis?). Then EITHER (still-valid) re-run + comp-blast + gold_validate_config entry + served-verify + RAVC2 the delta, OR (superseded) close-recommendation documented + RAVC2'd. Phantom in_progress cleared either way. To COO (+ CTO/CVO if a re-run lands a data change).
+- [x] AC — STEP-1 relevance determination documented: **SUPERSEDED/MOOT** (verdict in metadata comment + cycle log `logs/2026-06-02/work_1906Z.md`). Branch taken: SUPERSEDED → did NOT re-run; close-rec for WP-11 RAVC2'd to COO. Phantom in_progress cleared. No data change landed (verify-only), so no CTO/CVO CC required. (still-valid vs superseded, with evidence: is the scoped-override + $24.3M delta still live on the current 49F-cohort/canonical_prices basis?). Then EITHER (still-valid) re-run + comp-blast + gold_validate_config entry + served-verify + RAVC2 the delta, OR (superseded) close-recommendation documented + RAVC2'd. Phantom in_progress cleared either way. To COO (+ CTO/CVO if a re-run lands a data change).
 </acceptance>
 
 <notes>
