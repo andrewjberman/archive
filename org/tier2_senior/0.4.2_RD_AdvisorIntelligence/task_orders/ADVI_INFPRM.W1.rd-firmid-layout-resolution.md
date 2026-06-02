@@ -6,7 +6,7 @@
   <assigned_to>0.4.2_RD_AdvisorIntelligence~C</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>READY-TO-DISPATCH (Andrew-directed parallel velocity 2026-06-02). Assigned to the 2nd RD-FE lane (0.4.2_RD_AdvisorIntelligence~C) MSTR is spawning — runs PARALLEL to RD~B's INFOTD/INFNNA track. COO dispatches on ~C register. (If MSTR spawns a different serial, COO re-addresses.) Authored correct-by-construction off INFPRM.P0 finding c35e3cd40.</status>
+  <status>IMPL-COMPLETE — RAVC2-pending (CVO regression-matrix verify + Andrew/CTO visual smoke). Implemented by ~C 2026-06-02T~1825Z, committed portal DEV 3d5d05b8 (8 files, scoped; RD~B's concurrent types.ts/DistributionTab.tsx excluded), pushed 80f285c8..3d5d05b8 VALGATE-PASS. Durable SHARED.006 two-param useTenantLayout(firmId, firmOverride?) shipped + firmId threaded to AdvisorPublicProfile/AdvisorBookView + all 5 render sites (incl inflection NonAdminProfileTab which lacked firmId). tsc -b + eslint green (1 pre-existing unrelated warning). Regression matrix logic-verified all 4 contexts (see RAVC2). Visual smoke = Andrew/CTO (headless fabric-down). ws-repo portal gitlink bump deferred to coordinated promote (RD~B concurrent on same tree).</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct (5 screenshots). INFPRM = 2nd PROD promotion (after INFOTD). W1 (FE-only) fixes 2 of 3 symptoms.</priority>
   <references>
