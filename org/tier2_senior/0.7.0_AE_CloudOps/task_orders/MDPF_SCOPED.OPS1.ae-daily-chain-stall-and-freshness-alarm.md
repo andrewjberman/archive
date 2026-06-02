@@ -6,7 +6,7 @@
   <assigned_to>0.7.0_AE_CloudOps</assigned_to>
   <issued_by>1.0.0_SA_CTO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>DISPATCH-READY (AE offline at authoring — fabric wound down; action on next AE session or post-spawn)</status>
+  <status>PARTIALLY-LANDED by ws CTO (Andrew-direct /cloud-ops 2026-06-02). DELIVERABLE 2 (root fix) DONE: root-caused via CloudTrail to ec2-auto-shutdown-enforcer reaping the runner mid eclipse-wait; fixed by adding i-02448edb624a7a7cf to the enforcer EXCLUDED_INSTANCES (it was omitted from the sibling-runner list) — commit cef6e5d6d, safe-apply 0-diff, tag enforcer-v1.0.5, pushed. Validation run dispatched (mdpf_daily_20260602_133354). REMAINING for AE: Deliverable 1 (6/1 gap backfill — data-judgment on date semantics), Deliverable 3 (staleness/heartbeat alarm), Deliverable 4 (eclipse/INF gold upstream staleness since 5/29), AC4 (>=2 consecutive clean SCHEDULED runs), AC6 (RAVC2 closure package).</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — closure gate for MDPF_SCOPED (Andrew-direct 2026-06-02: "assess MDPF is good to go on daily scheduling ... if scheduled adequately and organized in pattern, then we can close that, need AEs to go through it and review"). FE + data are Andrew-confirmed good; daily-scheduling health is the last open gate.</priority>
   <references>
