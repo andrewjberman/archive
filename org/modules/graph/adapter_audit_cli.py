@@ -106,7 +106,6 @@ def _extract_type_fields_from_interface(ts_src: str, type_name: str) -> dict[str
     fields: dict[str, list[str]] = {}
     current_top = None
     depth = 0
-    nested_lines: list[str] = []
 
     for line in body.splitlines():
         stripped = line.strip()
@@ -119,7 +118,6 @@ def _extract_type_fields_from_interface(ts_src: str, type_name: str) -> dict[str
             if fm:
                 current_top = fm.group(1)
                 fields[current_top] = []
-                nested_lines = []
         elif depth > 0:
             # inside a nested block
             fm = re.match(r'(\w+)\??:', stripped)
@@ -215,7 +213,7 @@ def _audit_field_threading(
         findings.append({
             'field': field,
             'status': 'TYPE-ONLY',
-            'detail': f'Declared in typed interface but NOT in S3 actual envelope; may be historical or never emitted',
+            'detail': 'Declared in typed interface but NOT in S3 actual envelope; may be historical or never emitted',
             'severity': 'INFO',
         })
 
@@ -226,7 +224,7 @@ def _audit_field_threading(
             findings.append({
                 'field': field,
                 'status': 'NOT-THREADED',
-                'detail': f'In S3 raw envelope but adapter body has no explicit reference; silently dropped',
+                'detail': 'In S3 raw envelope but adapter body has no explicit reference; silently dropped',
                 'severity': 'WARN',
             })
         elif is_ref:
@@ -237,7 +235,7 @@ def _audit_field_threading(
                 findings.append({
                     'field': f'{field}.{nf}',
                     'status': 'NESTED-SCHEMA-DRIFT',
-                    'detail': f'Nested field in S3 raw envelope but not in typed interface; may be silently dropped',
+                    'detail': 'Nested field in S3 raw envelope but not in typed interface; may be silently dropped',
                     'severity': 'WARN',
                 })
 
@@ -289,7 +287,7 @@ def cmd_audit(args: argparse.Namespace) -> int:
     # Phase 2: Extract raw type name
     raw_type_name = _extract_raw_type_name(function_body)
     if not raw_type_name:
-        print(f'  WARN: could not detect raw input type from function body')
+        print('  WARN: could not detect raw input type from function body')
         raw_type_name = 'Unknown'
     print(f'  Raw input type: {raw_type_name}')
 
@@ -299,31 +297,39 @@ def cmd_audit(args: argparse.Namespace) -> int:
     print(f'  Typed fields: {len(raw_type_fields)} top-level fields in {raw_type_name}')
 
     # Phase 4: Fetch S3 raw envelope
-    print(f'  Fetching S3 raw envelope...')
+    print('  Fetching S3 raw envelope...')
     s3_raw_fields = _fetch_s3_raw_fields(adapter_name, function_body)
     if s3_raw_fields:
         print(f'  S3 raw fields: {len(s3_raw_fields)} top-level keys')
     else:
-        print(f'  WARN: S3 fetch failed or returned no data; skipping live schema check')
+        print('  WARN: S3 fetch failed or returned no data; skipping live schema check')
 
-    # Phase 5: Threading audit
-    findings = _audit_field_threading(raw_type_fields, s3_raw_fields, function_body, adapter_name)
-
-    # Print results
-    print(f'\n  Field threading audit ({len(findings)} finding(s)):\n')
-    if not findings:
-        print('  PASS: all S3 fields are typed and threaded through adapter')
+    # Phase 5: Threading audit -- ONLY meaningful with live S3 data. absence != a
+    # verdict: an empty/failed fetch (e.g. the python -m awscli call below failing)
+    # would otherwise (a) flag EVERY typed field as "not in S3" = spurious findings,
+    # OR (b) yield zero findings = a false "PASS: all threaded". Both are wrong, so
+    # short-circuit to UNVERIFIED and skip the comparison entirely.
+    if not s3_raw_fields:
+        print('\n  UNVERIFIED: S3 fetch returned NO data -- live-envelope threading audit SKIPPED')
+        print('    (0 live fields). This is NOT a pass, and NOT a set of real findings --')
+        print('    comparing against an empty envelope would flag every typed field spuriously.')
+        print('    Re-run with working S3 access (see the WARN above) before trusting this adapter.')
+        findings: list[dict] = []
     else:
-        severity_rank = {'WARN': 0, 'INFO': 1}
-        findings_sorted = sorted(findings, key=lambda f: (severity_rank.get(f['severity'], 2), f['field']))
-
-        print(f'  {"STATUS":<22}  {"SEV":<5}  FIELD / DETAIL')
-        print(f'  {"-"*22}  {"-"*5}  {"-"*60}')
-        for f in findings_sorted:
-            if severity_filter == 'error' and f['severity'] != 'WARN':
-                continue
-            print(f'  {f["status"]:<22}  {f["severity"]:<5}  {f["field"]}')
-            print(f'  {"":22}  {"":5}  {f["detail"][:100]}')
+        findings = _audit_field_threading(raw_type_fields, s3_raw_fields, function_body, adapter_name)
+        print(f'\n  Field threading audit ({len(findings)} finding(s)):\n')
+        if not findings:
+            print('  PASS: all S3 fields are typed and threaded through adapter')
+        else:
+            severity_rank = {'WARN': 0, 'INFO': 1}
+            findings_sorted = sorted(findings, key=lambda f: (severity_rank.get(f['severity'], 2), f['field']))
+            print(f'  {"STATUS":<22}  {"SEV":<5}  FIELD / DETAIL')
+            print(f'  {"-"*22}  {"-"*5}  {"-"*60}')
+            for f in findings_sorted:
+                if severity_filter == 'error' and f['severity'] != 'WARN':
+                    continue
+                print(f'  {f["status"]:<22}  {f["severity"]:<5}  {f["field"]}')
+                print(f'  {"":22}  {"":5}  {f["detail"][:100]}')
 
     # Count severities
     warns = [f for f in findings if f['severity'] == 'WARN']
@@ -341,7 +347,7 @@ def cmd_audit(args: argparse.Namespace) -> int:
         f's3_field_count: {len(s3_raw_fields)}',
         f'total_findings: {len(findings)}',
         f'warn_count: {len(warns)}',
-        f'findings:',
+        'findings:',
     ]
     for f in findings:
         yaml_lines.append(f'  - field: {f["field"]}')
