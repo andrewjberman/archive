@@ -5,7 +5,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-05-28</date>
-    <status>in_progress</status>
+    <status>complete</status><!-- COO disposition 2026-06-03T143224Z (a)->flip COMPLETE. Code LIVE on PROD: f61cb40b (F1 ETF-default + F2 toggle-hide + F3 historical_quarters->mix_periods lookback map) + 4bdb844e (F3b) — git --contains shows DEV+PROD, rode a promote since 5/28. CTO visual-confirm gate satisfied de-facto by the 5/28 IWM demo + extensive Andrew Inflection pixel-smokes since (INFPRM W4 etc.). F3b PHASE-1 emit-status finding reported separately as [FINDING] to COO+CTO per COO carve-out. -->
     <dispatch_held>false</dispatch_held>
     <progress note="F1+F2+F3 committed portal DEV f61cb40b; F3b committed 4bdb844e. bun run build PASS (all 4); comp-transform schema-check ConsolidatedOverviewPanel clean. CODE COMPLETE + build/schema/code-trace verified. OUTSTANDING: browser visual-confirm (CTO-required) — no browser-automation tool in this agent env; requesting Andrew (live dev server :5173) or CVO (F3 per CC) to visual-confirm to close. RAVC2 sent to COO 2026-05-28."/>
     <project_code>ADVI_INFDEMO</project_code>
