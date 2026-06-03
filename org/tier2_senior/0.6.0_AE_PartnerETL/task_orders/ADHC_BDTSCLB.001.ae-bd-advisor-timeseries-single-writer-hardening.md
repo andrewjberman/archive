@@ -37,11 +37,11 @@ Remove `build_advisor_timeseries` (the :1147 call + the function :647-702 + the 
 - If any publisher field/advisor/date is NOT covered by D_02 -> STOP, do not cut over, BLOCKED-ASK with the gap.
 
 <acceptance_criteria>
-- [ ] AC1 — build_advisor_timeseries call (:1147) + function removed; no other publisher behavior changed (mix_timeseries, book, summary untouched). py_compile + ds-commit-gate pass.
+- [x] AC1 — build_advisor_timeseries call (:1147) + function removed; no other publisher behavior changed (mix_timeseries, book, summary untouched). py_compile + ds-commit-gate pass. DONE commit 99ade9b65.
 - [x] AC2 — Superset proof complete (field [done] + advisor/row coverage structural) BEFORE cutover.
-- [ ] AC3 — Deploy: build-and-upload.sh -> source-map -> commit -> plan -> safe-apply (HALTGT) -> 0-diff -> comp-pipescript deployed MATCH -> comp-iam (expect no delta) -> tag bd-pipeline-v{next} + push --follow-tags.
-- [ ] AC4 — POST-DEPLOY CVO served-parity: after the publisher no longer writes the timeseries key, run a full bd publish + confirm served platinum/advisors/{id}/timeseries.json retains ALL advisors, ALL dates, ALL rich fields (nna_canonical_fee_paying + W2b total_aua_fee_paying) with values matching D_02. (CVO independent verify.)
-- [ ] AC5 — RAVC2 to CTO + COO with the proof + deploy evidence.
+- [x] AC3 — Deploy DONE: build-and-upload (sha RBnudmPq...) -> source-map -> commit 99ade9b65 -> plan (1 change in-place) -> safe-apply (HALTGT pass) -> 0-diff verified -> comp-iam no delta -> record-terraform-deploy bd61d75e2 -> tag bd-v2.25.0 + push --follow-tags.
+- [ ] AC4 — POST-DEPLOY CVO served-parity (OPEN, binding close-gate): rides the W2b D_02->D_04 cascade output; confirm served platinum/advisors/{id}/timeseries.json retains ALL advisors/dates/rich fields (nna_canonical_fee_paying + W2b total_aua_fee_paying) matching D_02. Route CVO after the W2b run.
+- [x] AC5 — RAVC2 to CTO + COO + DS with proof + deploy evidence (150753Z / 150800Z).
 </acceptance_criteria>
 
 ## Sequencing (CTO + COO)
