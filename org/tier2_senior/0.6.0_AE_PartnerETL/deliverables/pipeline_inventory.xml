@@ -437,27 +437,13 @@
         <last_deployed_at>2026-03-02T20:34:09Z</last_deployed_at>
       </lambda>
 
-      <lambda>
+      <!-- bd-portal-advisor-publisher DECOMMISSIONED 2026-06-03 (ADHC_BDTSCLB.001, Andrew direct; tag bd-v2.26.0, commit f68a270de).
+           Removed entirely: TF module, IAM invoke ARN, bd-portal-publisher ADVISOR_PUBLISHER_FUNCTION fan-out env var, source-map entry, Lambda source.
+           Reason: crashed at load_sources on a missing 'nna' column (account_performance no longer materializes it; D_02 derives it), dormant since 2026-04-07, and fully superseded.
+           PRODUCERS NOW: D_02.advisor_client_detail.py writes gold/entities/advisors/{id}/{book.json, timeseries.json (rich: per-role aua + fee splits + canonical NNA)}; the gold chain writes mix_timeseries.json. D_04 promotes to served platinum/advisors/{id}/*. AWS function confirmed gone (ResourceNotFoundException). -->
+      <lambda decommissioned="2026-06-03">
         <name>bd-portal-advisor-publisher</name>
-        <source_path>infra/aws/lambda/bd-pipeline/bd-portal-advisor-publisher</source_path>
-        <artifact_s3_key>bd-pipeline/bd-portal-advisor-publisher.zip</artifact_s3_key>
-        <memory_mb>6144</memory_mb>
-        <timeout_s>900</timeout_s>
-        <runtime>python3.11</runtime>
-        <layers>
-          <layer>pandas-pyarrow-layer:1</layer>
-        </layers>
-        <trigger>Lambda-to-Lambda async invoke from bd-portal-publisher (NOT directly S3-triggered)</trigger>
-        <role>bd-gold-layer-lambda-role</role>
-        <env_vars>
-          INPUT_BUCKET=opal-data-bd;
-          OUTPUT_BUCKET=opal-data-bd;
-          FIRM_ID=49financial;
-          FIRM_NAME=49 Financial
-        </env_vars>
-        <role_in_pipeline>Builds per-advisor AdvisorIntelligence views from gold parquets. Writes per-advisor JSON to opal-data-bd portal paths (books, mix_timeseries). 6144 MB allocated to handle full advisor dataset in memory. Fan-out from bd-portal-publisher due to S3 notification rule constraint. CONTRACT CHANGE (ADHC_BDTSCLB.001, 2026-06-03): no longer writes gold/entities/advisors/{id}/timeseries.json — D_02.advisor_client_detail.py is now the SOLE writer of that key (rich per-role aua + fee splits + canonical NNA); the former build_advisor_timeseries subset writer was removed to kill a latent dual-writer clobber. build_advisor_mix_timeseries (mix_timeseries.json) + book dual-writes unchanged.</role_in_pipeline>
-        <last_deployed_commit>99ade9b65</last_deployed_commit>
-        <last_deployed_at>2026-06-03T15:05:58Z</last_deployed_at>
+        <status>DECOMMISSIONED (ADHC_BDTSCLB.001) — superseded by D_02 + gold chain; see comment above</status>
       </lambda>
 
       <lambda>
