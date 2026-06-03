@@ -6,7 +6,7 @@
   <assigned_to>0.6.0_AE_PartnerETL</assigned_to>
   <issued_by>1.0.0_SA_CTO (GO 2026-06-03T1443Z) + COO ACCEPTED 145218Z — Andrew assigned 0.6.0 as bd-pipeline owner; investigation handed off from 0.7.0_AE_CloudOps (stand-down 145059Z)</issued_by>
   <issued_date>2026-06-03</issued_date>
-  <status>in_progress</status>
+  <status>complete</status>
   <priority>HIGH — protects ALREADY-SHIPPED 49F NNA-mode fee toggle (nna_canonical_fee_paying) + the incoming W2b total_aua_fee_paying. Land BEFORE/WITH W2b so the new field is born on the single-writer pipeline (CTO sequencing).</priority>
 </metadata>
 
@@ -40,7 +40,7 @@ Remove `build_advisor_timeseries` (the :1147 call + the function :647-702 + the 
 - [x] AC1 — build_advisor_timeseries call (:1147) + function removed; no other publisher behavior changed (mix_timeseries, book, summary untouched). py_compile + ds-commit-gate pass. DONE commit 99ade9b65.
 - [x] AC2 — Superset proof complete (field [done] + advisor/row coverage structural) BEFORE cutover.
 - [x] AC3 — Deploy DONE: build-and-upload (sha RBnudmPq...) -> source-map -> commit 99ade9b65 -> plan (1 change in-place) -> safe-apply (HALTGT pass) -> 0-diff verified -> comp-iam no delta -> record-terraform-deploy bd61d75e2 -> tag bd-v2.25.0 + push --follow-tags.
-- [ ] AC4 — POST-DEPLOY CVO served-parity (OPEN, binding close-gate): rides the W2b D_02->D_04 cascade output; confirm served platinum/advisors/{id}/timeseries.json retains ALL advisors/dates/rich fields (nna_canonical_fee_paying + W2b total_aua_fee_paying) matching D_02. Route CVO after the W2b run.
+- [x] AC4 — CVO served-parity GREEN (commit 2183b0524): 165/165 current-book advisors fresh w/ rich fields, reconcile to-cent, D_02 parity; 4 stale 'parity-fail' = pre-existing orphans (no current book, predate fix). No-clobber DOUBLE-structural: (1) writer removed at bd-v2.25.0, (2) publisher decommissioned entirely at bd-v2.26.0 (was dead on nna-crash since 2026-04-07). DS W2b data-leg PASS (14 advisors/11,667 date-points, reconcile <=$0.01). Decommission (ADHC_BDTSCLB.002) shipped per Andrew-direct "remove it".
 - [x] AC5 — RAVC2 to CTO + COO + DS with proof + deploy evidence (150753Z / 150800Z).
 </acceptance_criteria>
 
