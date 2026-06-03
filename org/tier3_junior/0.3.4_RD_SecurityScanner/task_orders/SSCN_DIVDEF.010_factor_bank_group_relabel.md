@@ -5,7 +5,7 @@
     <issued_by>0.3.0_DE_TradingOperations</issued_by>
     <issued_to>0.3.4_RD_SecurityScanner</issued_to>
     <date>2026-05-20</date>
-    <status>pending</status>
+    <status>complete</status><!-- VERIFIED-LIVE-CLOSE 2026-06-03 by 0.4.0_DT (COO verify-then-close dispatch): relabel + 4-color polish shipped in committed portal/DEV via 7ef0f4a6 (0.3.0_DE) — FactorBankTab.tsx L117 "Group:", L125 "All Groups", L277 label="Group" (internals retain category naming, correct display-only relabel). Parked-for-offline-0.3.4 TO was already satisfied by the parent DE commit. Source-verified, no authed smoke needed. -->
     <parent_to>org/tier2_senior/0.3.0_DE_TradingOperations/task_orders/SSCN_DIVDEF.010.de-rd-factor-bank-group-ordering.md</parent_to>
     <project_code>SSCN_DIVDEF</project_code>
     <priority>P1 -- Andrew-direct "focus SSCN today". GO is live. Begin immediately. ~15-20min RD wall.</priority>
