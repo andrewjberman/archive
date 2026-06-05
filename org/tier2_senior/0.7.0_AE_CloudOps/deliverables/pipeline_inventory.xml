@@ -501,8 +501,8 @@
       <source_dir>infra/aws/lambda/ec2-auto-shutdown-enforcer/ (self-contained TF root; backend key ec2-auto-shutdown-enforcer/tfstate)</source_dir>
       <trigger>EventBridge rate(5 minutes) — ec2-auto-shutdown-enforcer-schedule</trigger>
       <purpose>UNIVERSAL cost-protection (R8 NFRA_COSTRED, Andrew sovereign 2026-06-05): reaps ANY running instance up &gt;3h AND idle (Maximum CPU &lt;3% in every 5-min bucket) across the entire 3h window. Idle-AWARE — active runs spared (no mid-write corruption). No per-ID allowlist; only exemption = a consciously-set AutoShutdown=disabled tag. MAX_RUNTIME_HOURS=0 (hard-cap disabled — pure idle-aware per Andrew). ec2.stop_instances = reliable AWS-side stop-path.</purpose>
-      <terraform_status>DEPLOYED via own TF root (safe-apply 2026-06-05, 0-diff verified). Tag enforcer-v1.1.0 @ 4caa6d458. Tests test_enforcer.py 10/10. NOT in lambda-source-map.json (standalone TF root, not the pipeline-lambda packaging model).</terraform_status>
-      <history>v1.0.6 (per-ID EXCLUDED/IDLE_CEILING allowlist) -&gt; v1.1.0 (universal idle-aware, allowlists retired). bd-gold + moltbot AutoShutdown=disabled exemptions removed for true zero-exceptions.</history>
+      <terraform_status>DEPLOYED via own TF root (safe-apply 2026-06-05, 0-diff verified). Tag enforcer-v1.1.1 (live: IDLE_CEILING_HOURS=3.0, IDLE_CPU_THRESHOLD=1.0, MAX_RUNTIME_HOURS=0). Tests test_enforcer.py 10/10. NOT in lambda-source-map.json (standalone TF root, not the pipeline-lambda packaging model).</terraform_status>
+      <history>v1.0.6 (per-ID EXCLUDED/IDLE_CEILING allowlist) -&gt; v1.1.0 @ 4caa6d458 (universal idle-aware, allowlists retired, Andrew GO) -&gt; v1.1.1 @ 84a2bd24d (IDLE_CPU_THRESHOLD 3.0-&gt;1.0 calibration: I/O-bound runners like inf-gold gold-phase hover ~2.8% CPU = were misclassified idle; fleet bimodal idle 0.002-0.3% / active 2.8%+ = clean 1.0% cut, zero-exemption). bd-gold AutoShutdown=disabled removed; moltbot (last exemption) Andrew-direct delete in progress.</history>
     </function>
 
     <functions_not_found>
