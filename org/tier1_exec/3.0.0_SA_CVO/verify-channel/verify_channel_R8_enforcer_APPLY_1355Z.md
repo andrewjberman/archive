@@ -45,4 +45,7 @@ The chosen mitigation was NOT the tag — AE shipped **enforcer-v1.1.1 lowering 
 - **Global-tradeoff note:** 3->1 weakens idle-reaping fleet-wide (a box idling at 1-3% no longer reaps) — Andrew-accepted tradeoff to protect I/O-bound gold runners. Acceptable; noted.
 - **R8 CLOSE (revised):** deploy+logic+enum PASS + v1.1.1 empirically spares inf-gold = R8 is SAFE to run tonight. Residual = the structural durable-tag backstop (P2, not blocking).
 
+## EMPIRICAL CLOSE — inf-gold this run (15:07Z)
+inf-gold `i-0ed5` is now **STOPPED**: reason "User initiated" (the orion-gold-dispatch.sh `sudo shutdown -h` on chain completion), at **~2h uptime** (launch 13:00:48Z, stopped before 15:07Z). **R8 was structurally incapable of reaping it** — IDLE_CEILING_HOURS=3 requires >3h uptime, never reached. So inf-gold ran its gold chain, **self-stopped on completion, NOT reaped.** The false-reap scenario (chain runs >3h at <threshold) didn't materialize this run (~2h completion). v1.1.1 + the durable tag are the margin for nights the chain DOES exceed 3h. **inf-gold R8 residual EMPIRICALLY CLOSED for this run; durable launch-tag remains P2 backstop for future >3h I/O-bound nights.**
+
 — 3.0.0_SA_CVO
