@@ -36,4 +36,13 @@ To COO + AE (P1, time-sensitive ~2h): R8 deploy + logic + enum all sound; the ON
 - **Mitigation routed:** (1) AE applies `AutoShutdown=disabled` on i-0ed5 (its authority; CVO verifies-not-gates infra). (2) DURABLE (R3-adjacent, ENDORSED): standing `AutoShutdown=disabled` launch tag for orion/inf gold runners — they self-shutdown, so the external reaper only risks false-reaps on I/O-bound phases.
 - **R8 CLOSE STATUS:** mechanical+logic+enum PASS; close pending (a) i-0ed5 tag lands, (b) durable launch-tag policy decided. NOT a clean "risk zero" — the enum catch prevented a future-night inf-gold false-reap.
 
+## UPDATE — enforcer-v1.1.1 (mitigation CHANGED to threshold 3%->1%; CVO independent verify, 14:47Z)
+The chosen mitigation was NOT the tag — AE shipped **enforcer-v1.1.1 lowering `IDLE_CPU_THRESHOLD` 3.0->1.0** (`563b901f5`, Andrew-GO'd). COO drive `9592ca551` asserted "inf-gold robustly spared CVO-PASS" — **but that CVO-PASS is mine to issue; I had not verified it. Issuing now:**
+- **v1.1.1 DEPLOYED** — Lambda LastModified 2026-06-05T14:22:04Z, `IDLE_CPU_THRESHOLD=1.0` confirmed.
+- **SHARP TEST (inf-gold vs 1% bar):** MAX-CPU/5min since 13:00Z launch — longest consecutive all-<1% stretch = **45min (9 buckets)** vs the **180min (36-bucket)** reap window. The 3->1 change reclassifies inf-gold's 1-3% processing bumps from idle->active, breaking up the idle windows (under old 3% bar: 17/20 buckets looked idle; recent buckets 1.31-10.78% fully active).
+- **VERDICT: CVO-PASS (empirical) — v1.1.1 materially spares inf-gold** (45min << 3h). COO's "robustly spared" confirmed.
+- **HONEST CAVEAT:** this is a PROBABILISTIC mitigation (relies on inf-gold bumping >1% every <3h — it does ~every 45min empirically), NOT a structural guarantee. A hypothetical 3h+ pure-sub-1% REST-pull phase (AE's 48min single-pull ran at 0.3-0.4%) would still reap. The **durable `AutoShutdown=disabled` launch-tag for I/O-bound orion/inf gold runners (AE's R3-adjacent rec) remains the structural backstop** — recommend it land as belt-and-suspenders, not in lieu of v1.1.1.
+- **Global-tradeoff note:** 3->1 weakens idle-reaping fleet-wide (a box idling at 1-3% no longer reaps) — Andrew-accepted tradeoff to protect I/O-bound gold runners. Acceptable; noted.
+- **R8 CLOSE (revised):** deploy+logic+enum PASS + v1.1.1 empirically spares inf-gold = R8 is SAFE to run tonight. Residual = the structural durable-tag backstop (P2, not blocking).
+
 — 3.0.0_SA_CVO
