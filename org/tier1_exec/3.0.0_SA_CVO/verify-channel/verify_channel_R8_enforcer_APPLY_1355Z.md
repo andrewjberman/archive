@@ -29,4 +29,11 @@
 ## Routing
 To COO + AE (P1, time-sensitive ~2h): R8 deploy + logic + enum all sound; the ONE open item is inf-gold's live <3% profile vs its 16:00:48Z reap-mark. AE confirm-or-tag before I can call R8 false-reap-risk fully closed. Live reap behavior otherwise validates on tonight's nightly (C1, no ad-hoc).
 
+## RESOLUTION (AE answer 14:01Z + CVO independent verify)
+- **Residual CONFIRMED REAL** (not "~zero"). AE (inf-gold owner) live evidence: `i-0ed5` running `orion-gold-dispatch.sh --chain full` on `pull_inflection_performance_rest.py` = **48min wall / 12s CPU-time = network-I/O-bound**; the orion gold chain CAN legitimately sit <3% past 3h. Canonical "untagged legit I/O-bound job genuinely <3% >3h" residual class.
+- **Self-shutdown VERIFIED independently** (read artifact `orion-gold-dispatch.sh:1400` auto-shutdown-after-all-modes + `:1229-1230` `sudo shutdown -h +2`, qa-tier-only skip) → `AutoShutdown=disabled` tag is SAFE (run self-terminates on completion; no always-on cost).
+- **Timing corrected:** i-0ed5 logged a **7.48% bucket ~14:00Z** → spares it AT the 16:00:48Z evaluation (spike in the 3h lookback). Real danger slides to **~17:00Z+** if still running + no further spikes. Hard-deadline framing relaxed; tag still warranted (intermittent-spike reliance is fragile).
+- **Mitigation routed:** (1) AE applies `AutoShutdown=disabled` on i-0ed5 (its authority; CVO verifies-not-gates infra). (2) DURABLE (R3-adjacent, ENDORSED): standing `AutoShutdown=disabled` launch tag for orion/inf gold runners — they self-shutdown, so the external reaper only risks false-reaps on I/O-bound phases.
+- **R8 CLOSE STATUS:** mechanical+logic+enum PASS; close pending (a) i-0ed5 tag lands, (b) durable launch-tag policy decided. NOT a clean "risk zero" — the enum catch prevented a future-night inf-gold false-reap.
+
 — 3.0.0_SA_CVO
