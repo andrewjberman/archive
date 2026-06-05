@@ -496,13 +496,22 @@
       <terraform_status>Lambda permission exists in portal-notifications/main.tf. Function itself NOT in lambda-source-map.json — source directory, TF resource, and deployment status unknown. HIGH PRIORITY GAP.</terraform_status>
     </function>
 
+    <function>
+      <name>ec2-auto-shutdown-enforcer</name>
+      <source_dir>infra/aws/lambda/ec2-auto-shutdown-enforcer/ (self-contained TF root; backend key ec2-auto-shutdown-enforcer/tfstate)</source_dir>
+      <trigger>EventBridge rate(5 minutes) — ec2-auto-shutdown-enforcer-schedule</trigger>
+      <purpose>UNIVERSAL cost-protection (R8 NFRA_COSTRED, Andrew sovereign 2026-06-05): reaps ANY running instance up &gt;3h AND idle (Maximum CPU &lt;3% in every 5-min bucket) across the entire 3h window. Idle-AWARE — active runs spared (no mid-write corruption). No per-ID allowlist; only exemption = a consciously-set AutoShutdown=disabled tag. MAX_RUNTIME_HOURS=0 (hard-cap disabled — pure idle-aware per Andrew). ec2.stop_instances = reliable AWS-side stop-path.</purpose>
+      <terraform_status>DEPLOYED via own TF root (safe-apply 2026-06-05, 0-diff verified). Tag enforcer-v1.1.0 @ 4caa6d458. Tests test_enforcer.py 10/10. NOT in lambda-source-map.json (standalone TF root, not the pipeline-lambda packaging model).</terraform_status>
+      <history>v1.0.6 (per-ID EXCLUDED/IDLE_CEILING allowlist) -&gt; v1.1.0 (universal idle-aware, allowlists retired). bd-gold + moltbot AutoShutdown=disabled exemptions removed for true zero-exceptions.</history>
+    </function>
+
     <functions_not_found>
       The following functions were expected per task order requirements but are NOT present
       in lambda-source-map.json and have no source directories found:
-      <missing>ec2-auto-shutdown-enforcer</missing>
       <missing>cost-anomaly-scanner</missing>
       <missing>access-anomaly-scanner</missing>
       These may be planned but not yet created, or may exist unregistered in AWS.
+      (ec2-auto-shutdown-enforcer was previously listed here — now EXISTS + DEPLOYED v1.1.0, see its function entry above.)
     </functions_not_found>
 
     <function>
@@ -684,14 +693,14 @@
       <action>Locate or create source at infra/aws/lambda/cloudfront-market-generator/. Register in lambda-source-map.json and add TF resource in an appropriate pipeline module. Verify function exists in AWS console.</action>
     </issue>
 
-    <issue id="2" severity="MEDIUM">
-      <title>ec2-auto-shutdown-enforcer, cost-anomaly-scanner, access-anomaly-scanner — not found</title>
+    <issue id="2" severity="LOW">
+      <title>cost-anomaly-scanner, access-anomaly-scanner — not found (ec2-auto-shutdown-enforcer RESOLVED)</title>
       <detail>
-        These three monitoring Lambda functions were expected per CloudOps scope but are
-        absent from lambda-source-map.json. No source directories found in the repo.
-        May be planned but not yet created, or may exist in AWS unregistered.
+        ec2-auto-shutdown-enforcer EXISTS + DEPLOYED (v1.1.0, own TF root) — see its function entry.
+        cost-anomaly-scanner + access-anomaly-scanner remain absent from lambda-source-map.json with
+        no source dirs — planned (NFRA W5 cost-anomaly-scanner wiring) but not yet created.
       </detail>
-      <action>Verify in AWS Lambda console whether these functions exist. If yes, register in lambda-source-map.json. If no, create or remove from scope documentation.</action>
+      <action>NFRA W5 will create cost-anomaly-scanner. Verify access-anomaly-scanner need or drop from scope.</action>
     </issue>
 
     <issue id="3" severity="MEDIUM">
