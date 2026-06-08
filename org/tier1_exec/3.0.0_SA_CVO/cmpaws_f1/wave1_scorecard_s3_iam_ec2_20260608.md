@@ -6,7 +6,14 @@
 **Method:** `CMPAWS_F1_CERT_METHODOLOGY.md` — existence vs LIVE re-pull; typing/provenance vs CVO
 state-union + certified oracle; ARN-keyed; strict headline.
 
-## VERDICT: all three CERTIFIED (gate met) — named non-blocking fixes below.
+## VERDICT: all three CERTIFIED at ~1.00 (Wave-1 complete at full marks).
+**Update 2026-06-08 ~16:00Z:** AE fixed the 2 IAM FNs (commit 2f30c548b, shared-primitive: TF
+data-sources + §1.4 HCL-secondary). CVO re-cert confirms all 3 named roles → DECLARED, **0 residual
+false-shadow** vs my state-union → IAM provenance 0.982→1.00. Fixes are cross-class (data-source +
+HCL-secondary lift provenance for every class). Minor semantics note for CTO: tf_kind ∈ {managed,
+data, hcl-config} now distinguishes TF-MANAGED vs TF-REFERENCED(data-source) vs HCL-not-applied — a
+richer-than-oracle provenance sub-axis; "DECLARED via data-source" (TF-aware-but-not-managed) is
+defensible + tf_kind preserves the distinction; flag only if CTO wants a distinct drift sub-class.
 
 **Compiler scored:** 877674403; FINAL is 2c9ccab3c (additive Wave-2 eventing only per its commit msg →
 S3/IAM/EC2 nodes unchanged; spot-confirm on next full derive). Brittleness verified on the FINAL.
@@ -14,7 +21,8 @@ S3/IAM/EC2 nodes unchanged; spot-confirm on next full derive). Brittleness verif
 | Class | enum-F1 (vs live) | typing-acc | provenance-acc | untyped | headline-F1 | brittleness | VERDICT |
 |---|---|---|---|---|---|---|---|
 | **S3** (31 buckets + 9 policies) | 1.00 (31/31, 9/9) | 1.00 | **1.00** (19 decl/12 shadow = state-union exactly) | 0 | **1.00** | **PASS** | **CERTIFIED** |
-| **IAM** (111 roles) | 1.00 (111/111) | 1.00 | 0.982 (2 false-shadow) | 0 | **0.991** | **PASS** | **CERTIFIED** (≥0.95) |
+| **IAM** (111 roles) | 1.00 (111/111) | 1.00 | **1.00** (0 residual false-shadow after fix 2f30c548b) | 0 | **1.00** | **PASS** | **CERTIFIED** |
+| ~~IAM (pre-fix)~~ | 1.00 | 1.00 | ~~0.982 (2 FN)~~ | 0 | ~~0.991~~ | — | superseded by 2f30c548b |
 | **EC2** (23 instances) | 1.00 (23/23) | 1.00 | ~1.00 (11 decl/12 shadow, plausible) | 0 | **~1.00** | **PASS** | **CERTIFIED** |
 
 **Brittleness = PASS (CVO independently verified, not AE-asserted):** grepped the compiler source —
