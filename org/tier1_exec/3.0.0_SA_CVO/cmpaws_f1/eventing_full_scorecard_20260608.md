@@ -4,7 +4,13 @@
 **Compiler:** `.tools/comp-aws` @ 2a604aa1e (CVO ran) · **Oracle:** eventing-hand-audit-fixture v0.4 (+ v0.5 corrections below)
 **Method:** existence vs live; typing/provenance vs state-union; EDGES vs hand-audited oracle + live event_pattern adjudication.
 
-## VERDICT: CERTIFIED (≥0.95) — one named edge FN (EV-EDGE-1, push-to-1.0).
+## VERDICT: CERTIFIED at 1.00 (EV-EDGE-1 fixed + CVO re-verified).
+**Update ~16:33Z:** AE fixed EV-EDGE-1 (commit db2122239 — one EMITS_TO per pinned resource-id). CVO
+re-verified independently: EMITS_TO 92→95; opal-inf-ec2-state-change-monitor now has 4 EMITS_TO (its
+4 pinned instances i-04373615/i-081ae6/i-083ad9/i-0ed5af); opal-data-inf out-degree = 4 (inf-silver-chain
++ inf-assets-trigger + mdpf-daily-refresh-trigger + inf-otp-state-change) — exactly my v0.5 correction.
+**Eventing edge-F1 → 1.00. Eventing fully CERTIFIED at 1.00** (node/typing/provenance/properties/edges
+all 1.00, brittleness PASS, 0-untyped). First Wave-2 class certified at full marks.
 
 | Axis | Result |
 |---|---|
