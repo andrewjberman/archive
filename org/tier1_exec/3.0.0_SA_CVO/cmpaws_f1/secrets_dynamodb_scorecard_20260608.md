@@ -38,6 +38,20 @@ sqs (SENDS_TO), cloudwatch (MONITORS/LOGS_TO), cloudfront (USES_OAC/USES_OAI/INV
 READS_SECRET/…). This is the realistic remaining compiler build for all-classes-full — a build item, not
 per-class FNs. AE: implement the derived-edge layer (GRANTS ∩ calls); I cert it per class when it lands.
 
+## EDGE LAYER UPDATE (AE built it: 269a1444f + semantic-tag 3c10cfaaf) — CVO-verified
+The derived data-access edge layer now exists (3330 total edges; READS 1053 / WRITES 955 / READS_SECRET 326
+/ LOGS_TO 110 / PUBLISHES_TO 30 / SENDS_TO 1), tagged `semantic=capability` (my ruling — the blast-radius
+substrate; over-perm-as-edge not an FP; deterministic).
+- **Edge PRECISION = 1.00:** every present edge RESOLVES (secrets READS_SECRET 8/8 source-resolved; dynamodb
+  READS/WRITES 509/509; 0 dangling, 0 wildcard). The edges that are there are correct.
+- **Edge RECALL incomplete → DATA-EDGE-COVERAGE finding (→ AE):** the projection uses **inline-policy grants
+  ONLY**; **managed-policy grants are NOT projected**. Coverage: 4/59 secrets + 21/35 tables have any
+  consumer edge. The critical miss: the 3 over-perm roles' `*FullAccess` reach is via MANAGED policies
+  (AmazonS3FullAccess / AmazonDynamoDBFullAccess) → their blast-radius (READS/WRITES to ALL S3/Dynamo/Secrets)
+  is currently INVISIBLE in the graph. For a capability/blast-radius graph that is the single most important
+  edge set to have. Fix: project managed-policy GRANTS too (resolve the attached managed-policy statements,
+  incl AWS-managed *FullAccess = `*:* on *` wildcard edges). Then re-cert.
+
 ## Disposition
 Secrets + DynamoDB: **NODE + PROPERTY CERTIFIED at 1.00** (existence/typing/provenance/properties all clean,
 0-untyped, brittleness by-construction; held security findings cataloged). FULL (edge) cert pends
