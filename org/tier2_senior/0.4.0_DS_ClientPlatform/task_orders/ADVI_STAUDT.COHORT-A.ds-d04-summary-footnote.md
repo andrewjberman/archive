@@ -6,7 +6,7 @@
     <lane_preference>~D (or whichever DS lane is idle post-chain-full recovery per CTO 2026-04-21T15:50Z ACK)</lane_preference>
     <co_owner>0.4.0_DE_ClientPlatform (portal footnote display, sub-deliverable inline)</co_owner>
     <date>2026-04-21</date>
-    <status>in_progress</status><!-- DS side complete 2026-04-29: D_04 MATCH on S3 (uploaded this session); D-group dispatched CommandId 36fd1043 on i-0090b823a4a0997e3 (--bg in flight); comp-validate cohort_a_summary exit 0 (6 PASS, 0 ERROR, 2 WARN); DE signaled 10:34Z with artifact key + footnote spec. cohort_a_summary.json LIVE at s3://opal-data-bd/gold/platinum/firm/cohort_a_summary.json (account_count=380, total_aua=$47M, snapshot_date=2026-04-27). Awaiting DE footnote sub-deliverable. -->
+    <status>cancelled</status><!-- CANCELLED 20260609 Andrew-direct: project scope unrecognizable after 7 weeks, likely deprecated. DS side was complete 2026-04-29 (cohort_a_summary.json LIVE, comp-validate PASS). DE portal footnote sub-deliverable never started. Artifact is additive/read-only — no live surface consumes it, no breaking change. -->
     <acked>2026-04-21 ~13:02 ET (DS)</acked>
     <project_code>ADVI_STAUDT</project_code>
     <priority>P2 — small transparency surface. Headline summary only. NO gold-runner filter changes. Scoped to Cohort A (599 accts / $44.7M dropped silver→canonical).</priority>
