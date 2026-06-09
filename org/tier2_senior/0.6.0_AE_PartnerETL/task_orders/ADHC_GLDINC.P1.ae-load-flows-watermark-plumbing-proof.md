@@ -6,7 +6,7 @@
   <assigned_to>0.6.0_AE_PartnerETL</assigned_to>
   <issued_by>self (GLDINC LEAD) — COO GO to stage 2026-06-08T1316Z; CTO "proceed with GLDINC P1" 2026-06-08T1316Z. Awaits COO/CTO endorsement of this brief before BUILD (mirrors P0 design→endorse→build).</issued_by>
   <issued_date>2026-06-08</issued_date>
-  <status>staged</status>
+  <status>active</status>
   <priority>NEXT after P0+W2a (both validated-live + RAVC-closed 6/8). First shadow/parity phase → activates the GLDINC daily_watch scorecard obligation (COO /drive attests through 2026-07-05). LOW risk (zero-correctness by construction).</priority>
 </metadata>
 
