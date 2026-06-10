@@ -6,8 +6,8 @@
   <assigned_to>0.6.0_AE_PartnerETL</assigned_to>
   <issued_by>1.0.0_SA_CTO design ruling 2026-06-08T1415Z + precondition-confirm 1417Z (CVO originator). COO sequences + registers.</issued_by>
   <issued_date>2026-06-08</issued_date>
-  <status>staged</status>
-  <priority>Queued — COO sequences me BEHIND the CMPAWS D-list + the 15:55Z one-shot. Build on COO's slot. (GLDINC P1 deployed-live runs in parallel.)</priority>
+  <status>in_progress</status>
+  <priority>Gate BUILT + DEPLOYED (eventbridge S3-sentinel rule replaced cron, IAM granted, DLQ alarm live, DLQ=0). Remaining close gates: AC3 simulated weekend-fire proof (COO GO 2026-06-10 — build independent of the INF_D_08 spine stall) + AC6 RAVC2. Status flipped staged→in_progress per COO 2026-06-10T1307Z.</priority>
 </metadata>
 
 <scope>
