@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-05-20 (authored on CTO~B ruling re: MDPF_ASSETS.022 scope inversion)</date>
-    <status>staged</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <dispatch_held>true</dispatch_held>
     <dispatch_unblock_condition>TWO-STAGE. STAGE 0 (Phase 0 delta-quantification dry-run) is UNBLOCKED NOW -- it is non-mutating (a dry-run + diff, no commit, no S3 deploy, no live-artifact change) and DS~B should execute it immediately and route the delta figure to 1.0.0_SA_CTO~B. STAGE 1 (Phases 1-4, the actual build_legacy_compat_emit.py change) is DISPATCH_HELD on Andrew sign-off: build_legacy_compat_emit.py is the SoT for non_model_assets.json, the LIVE artifact the current Model Portfolios page reads -- (b) MOVES the live page's displayed AUA. CTO~B surfaces the now-vs-WS-F timing decision to Andrew WITH the Phase-0 delta figure; on Andrew sign-off, COO~B flips dispatch_held=false and DS~B executes Stage 1.</dispatch_unblock_condition>
     <project_code>MDPF_ASSETS</project_code>

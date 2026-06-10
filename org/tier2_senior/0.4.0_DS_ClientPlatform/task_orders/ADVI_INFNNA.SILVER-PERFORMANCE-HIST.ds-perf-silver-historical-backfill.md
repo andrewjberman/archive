@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
-    <status>staged</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <priority>low</priority>
     <estimated_effort>~30-60 min</estimated_effort>
     <authorized_by>Andrew direct 2026-05-11 (approved COO recommended routing)</authorized_by>

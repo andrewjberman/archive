@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-27</date>
-    <status>open</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <priority>MEDIUM — ship if feasible; explicit DEFER acceptable if documented</priority>
   </metadata>
 

@@ -152,3 +152,5 @@ Per PRD §9.
 - **v0.1** — 2026-05-14 ~16:55Z — initial author; staged + dispatch_held; gates on CTO Option A/B ratify
 - **v0.2** — 2026-05-14 ~17:05Z — Option A locked per CTO Q2 ratify 16:55Z; Option B section stripped (path-scoped CF behavior approach ruled out due to distribution-level `custom_error_response` constraint); staged + dispatch_held=true gating now on COO per-TO dispatch GO only
 - **v0.3** — 2026-05-14 ~17:20Z — CTO canonicalize at `5362d0295` (git mv from AE drafts/ to docs/architecture/ADHC_LEDGEH.md preserving AE authorship trail; CTO commit added §11 canonicalize entry + §7.Q3 ruling on top). FIRMSEP.04 test surface extension AC added per CTO Q3 ruling. Effort estimate downsized ~3-5h actual per CTO. Status flipped to `pending` (dispatch_held=false); COO per-TO dispatch GO unblocked. Sequencing per CTO `.029b → .027 → .028 → LEDGEH.001` lock — natural Wave 1+2 momentum into LEDGEH ~3-4d wall from now.
+
+**Status:** closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)

@@ -11,7 +11,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <supporting>0.3.0_DT_TradingOperations (Phase B backfill)</supporting>
     <date>2026-04-28</date>
-    <status>draft</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <project_code>TRSB_PATHFIX</project_code>
     <wave>W4 — FIRM-SCOPED TRADE DATA (post-portal-partner-rollout)</wave>
     <prd_ref>see context section below — no PRD update yet, follow-up scope from portal commit cbbc07c8</prd_ref>

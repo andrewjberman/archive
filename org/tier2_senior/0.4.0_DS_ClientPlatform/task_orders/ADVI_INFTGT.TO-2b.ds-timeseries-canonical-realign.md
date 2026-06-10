@@ -8,7 +8,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-11</issued_date>
     <revised>2026-05-11 — scope flipped post-Andrew correction: dashboard.json is STALE, not canonical</revised>
-    <status>active</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <priority>P1 — parity gap (RD HOLDING on hero patch; coordinated rerun is the resolution)</priority>
     <authorized_by>CTO ruling 2026-05-11 (REVISION post-Andrew direct correction); Andrew direct: "dashboard.json must be stale then, dashboard.json should be updated with group D run and stay in parity with the rest"</authorized_by>
   </metadata>

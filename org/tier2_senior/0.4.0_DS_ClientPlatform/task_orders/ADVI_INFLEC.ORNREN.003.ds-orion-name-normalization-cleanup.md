@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-04-30</date>
-    <status>STAGED — Andrew Option B + divergence-rule confirmed 2026-04-30 PM ("yes it should be option B … the premise is that we dont add the INF_ prefix unless there is actually a change in the script from the BD version"). DS~A assigned. Andrew will activate when ready ("i'll get that up and running").</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <lane_rationale>~A lane — historically owns INFLEC chain authoring (W4.* gold chain, ORNREN.001 author, INFGRD.003 chain rerun). Has deepest context on which orion scripts diverged from BD vs not.</lane_rationale>
     <project_code>ADVI_INFLEC</project_code>
     <theme>ORNREN follow-up — naming-debt cleanup surfaced post-ORNREN.001/.002</theme>

@@ -7,7 +7,7 @@
   <coordinated_by>2.0.0_SA_COO</coordinated_by>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — Andrew UAT engagement</status>
+  <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
   <priority>HIGH (Phase 6 close-out gate; closes original Phase 5 deferred AC4 visual-smoke)</priority>
   <references>
     <ref type="prd">docs/architecture/ADVI_DEMOV1.md v0.4.1 commit `332a56f0f` (Phase 6 §6.1 TO-VAL-FE spec).</ref>

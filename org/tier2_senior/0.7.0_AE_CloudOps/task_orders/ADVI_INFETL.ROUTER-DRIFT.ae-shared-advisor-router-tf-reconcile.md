@@ -7,7 +7,7 @@
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-07</issued_date>
-    <status>folded</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <completed_date>2026-05-11</completed_date>
     <completed_note>Absorbed into FIRMSEP.05 cleanup per COO REGISTRY 2026-05-11. Not a standalone deliverable.</completed_note>
     <priority>high</priority>

@@ -92,3 +92,5 @@
 - 16th memory candidate flagged from TO-013: `ycharts-macro-class-entitlement-gap-is-structural-not-cookie-eviction-class` — sister to LD-31 + Andrew sovereign 400-cookie-stale doctrine. Not in TO-008b scope but banking continues.
 </notes>
 </task_order>
+
+**Status:** closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)

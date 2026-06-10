@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-06</issued_date>
-    <status>staged</status><!-- Gates on ADVI_INFLFE.006-data (DS~A) completing and RAVC landing to COO. Partner_analytics files must show $199.6M before DT debugging begins — otherwise error investigation may chase stale-data red herrings. -->
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status><!-- Gates on ADVI_INFLFE.006-data (DS~A) completing and RAVC landing to COO. Partner_analytics files must show $199.6M before DT debugging begins — otherwise error investigation may chase stale-data red herrings. -->
     <priority>high</priority>
     <estimated_effort>~2-3h DT (investigation + fix + portal commit + RD sweep)</estimated_effort>
   </metadata>

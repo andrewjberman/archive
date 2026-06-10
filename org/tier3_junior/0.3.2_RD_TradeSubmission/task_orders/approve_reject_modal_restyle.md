@@ -189,4 +189,4 @@ git commit --author="0.3.2_RD_TradeSubmission <0.3.2_RD_TradeSubmission@opal.age
      portal/src/pages/TradeSubmission/components/RejectModal.tsx
 ```
 
-When done: flip `<status>pending</status>` → `<status>complete</status>` in this file and MCP me back with the commit hash. I'll hand off to 0.3.0_DT_TradingOperations for the DEV push.
+When done: flip `<status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>` → `<status>complete</status>` in this file and MCP me back with the commit hash. I'll hand off to 0.3.0_DT_TradingOperations for the DEV push.

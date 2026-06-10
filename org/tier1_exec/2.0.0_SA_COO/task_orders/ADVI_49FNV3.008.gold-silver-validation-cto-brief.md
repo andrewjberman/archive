@@ -66,3 +66,5 @@ These two errors (-$14.8M missing accounts + $20.5M hot prices) partially cancel
 1. Confirm `0.6.0_AE_PartnerETL` has bandwidth (check against DRFR_PTMCH P5 orchestrator work and any other pending task orders)
 2. If bandwidth exists, activate the existing .008 task order — no changes needed to the spec
 3. If bandwidth is tight, .008 can be deferred — the display correctness is already handled by PSCFIX
+
+**Status:** closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)

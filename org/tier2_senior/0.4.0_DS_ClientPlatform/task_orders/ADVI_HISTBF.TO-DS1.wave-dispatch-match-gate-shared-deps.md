@@ -6,7 +6,7 @@
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-01</issued_date>
-    <status>staged</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <priority>P3 — procedural defense-in-depth; runtime issue already resolved by AE 0.6.1 dispatch_histbf_backfill_v2.sh update; this TO codifies the upstream MATCH-gate assertion for future waves</priority>
     <estimated_effort>0.5h (script + checklist update)</estimated_effort>
     <gates_on>None — Wave B+C have proceeded operationally without this gate via runtime fix; this TO is forward-looking procedural codification, not a blocker. Pick up when DS bandwidth permits.</gates_on>

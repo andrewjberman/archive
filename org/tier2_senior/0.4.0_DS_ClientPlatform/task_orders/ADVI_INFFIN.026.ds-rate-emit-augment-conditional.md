@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~? (route at conditional dispatch)</issued_to>
     <date>2026-05-14</date>
-    <status>not-applicable</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <dispatch_held>true</dispatch_held>
     <dispatch_unblock_condition>PATH A CONFIRMED (INFFIN.025 RAVC2 4187ebec): detail.json accounts[].fee fields already present on S3. No DS emit augment needed for fee rates. This TO will never fire. §3.6a also already working (zero FE changes). CLOSED without execution.</dispatch_unblock_condition>
     <project_code>ADVI_INFFIN</project_code>

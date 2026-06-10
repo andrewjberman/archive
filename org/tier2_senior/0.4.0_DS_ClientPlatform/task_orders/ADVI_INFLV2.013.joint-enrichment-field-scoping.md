@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform + 0.4.0_DS_ClientPlatform~A + 0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-04-27</date>
-    <status>open</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <priority>HIGH — Andrew directed; gates INFLV2.004 + potential ADVI_INFLEC_ENRICH project</priority>
   </metadata>
 

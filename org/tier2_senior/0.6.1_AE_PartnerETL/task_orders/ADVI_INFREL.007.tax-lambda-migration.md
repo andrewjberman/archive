@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05T~21:15Z. Gates on TO-6 (billing) RAVC5. Pure clone+prefix substitute. Closes Phase 2; unblocks TO-9 (decom). -->
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status><!-- Authored sprint mode 2026-05-05T~21:15Z. Gates on TO-6 (billing) RAVC5. Pure clone+prefix substitute. Closes Phase 2; unblocks TO-9 (decom). -->
     <priority>high</priority>
     <estimated_effort>~0.5d AE post TO-6 ship; pure clone+prefix substitute</estimated_effort>
   </metadata>

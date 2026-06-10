@@ -82,3 +82,5 @@ Per `ADVI_APISCP.003.cloudfront-oai-cache-key-v5.md`:
 - Touch any other origin on the distribution (OAC stays on portal-v2 and all other origins)
 - Create a new Lambda source package — `publish-version` from existing deployed code is correct
 - Tag before end-to-end verification passes (200 JSON, not HTML)
+
+**Status:** closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)

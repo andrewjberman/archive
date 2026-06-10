@@ -67,3 +67,5 @@ For each of the 79 indicators in the Macroeconomics page universe, execute live 
 **Post-RAVC2-ACCEPT:** TO-010 Phase 2 spreadsheet finalize (~1-2h) + TO-VAL-v2 consolidated RAVC2 (~1-2h) + project-close 3-step atomic OR Phase 3 dispatch.
 </deliverable_disposition>
 </task_order>
+
+**Status:** closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)

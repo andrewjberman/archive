@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform~C</issued_to>
     <date>2026-04-09</date>
-    <status>pending -- Phase 1 DONE (DEV 33fef24); Phase 2 blocked on DS .023 + AE deploy</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>6</wave>
     <phase>P3 compliance</phase>

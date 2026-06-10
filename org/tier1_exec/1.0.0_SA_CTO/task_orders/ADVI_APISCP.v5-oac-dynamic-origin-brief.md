@@ -156,3 +156,5 @@ the mutation approach is the same. Only the CloudFront + IAM configuration diffe
   while every fetch silently returned HTML (masked 403). Once v3 is restored and
   CloudFront cache is cleared, users will see March 6 gold data.
 - All other ADVI_APISCP Phase 1/2 deliverables remain valid and complete.
+
+**Status:** closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)

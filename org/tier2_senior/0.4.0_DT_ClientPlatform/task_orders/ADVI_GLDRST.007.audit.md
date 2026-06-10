@@ -165,3 +165,5 @@ For each file, after editing:
    - Be a comment/docstring that has been updated
 2. No orphaned old-format read paths remain
 3. All write paths have both old + new
+
+**Status:** closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)

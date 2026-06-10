@@ -6,7 +6,7 @@
     <issued_to>0.4.0_DT_ClientPlatform</issued_to>
     <coordinates_with>0.4.2_RD_AdvisorIntelligence (visual smoke + Playwright)</coordinates_with>
     <date>2026-05-14</date>
-    <status>staged</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <dispatch_held>true</dispatch_held>
     <dispatch_unblock_condition>(1) .001 + .002 + .003 + .004 + .005 + .006 + .007 ALL RAVC2 PASS. .008 is the Phase 1 close gate — runs only when every other Phase 1 TO has shipped.</dispatch_unblock_condition>
     <project_code>ADVI_SHARED</project_code>

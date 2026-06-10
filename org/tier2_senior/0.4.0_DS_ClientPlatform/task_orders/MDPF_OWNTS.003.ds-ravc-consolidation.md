@@ -6,7 +6,7 @@
   <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-05-26</issued_date>
-  <status>pending — dispatch_held (gates on MDPF_OWNTS.002 RAVC2-ACCEPT + first live chain fire post-Stage-4-wire)</status>
+  <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
   <dispatch_held>true</dispatch_held>
   <priority>HIGH (project-close gate; Andrew sovereign chain final validation)</priority>
   <references>

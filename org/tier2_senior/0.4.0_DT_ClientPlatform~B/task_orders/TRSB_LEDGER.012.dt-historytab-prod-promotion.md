@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform~B</issued_to>
     <date>2026-05-20</date>
-    <status>staged</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <dispatch_held>true</dispatch_held>
     <dispatch_unblock_condition>STAGED 2026-05-20 (COO~B, per CTO~B relay of Andrew's TRSB rulings). SCOPE WIDENED 2026-05-20: originally the HistoryTab fix only; TO-8b (role-aware gating) landed early, so per CTO~B this TO now promotes BOTH portal-side TRSB changes in one deploy and TRSB_LEDGER.013 is CANCELLED (folded here). FURTHER UPDATE 2026-05-20: Andrew's :5175 verify surfaced an EXECUTED/COMPLETE display-label issue -> TRSB_LEDGER.014 (RD relabel) authored + dispatched; its DEV commit is f9b2d81e -- RAVC2-accepted 2026-05-20. The cherry-pick list is now FINAL at 5 commits: bc5da3d2 + 43b36707 + 00841008 + be5d7631 + f9b2d81e. DT must NOT dispatch Phase 1 until Andrew has re-verified all 3 fixes on :5175 (DT git pull origin DEV first so the :5175 server carries f9b2d81e). LANE: base 0.3.0_DT_TradingOperations -- portal/PROD single-writer (TO-012 + SSCN TO-006 both push origin/PROD; one DT owns all portal/PROD pushes this session). Two-phase dispatch: Phase 0 (local-dev verification) -- the base DT already has a dev server UP on :5175 at portal DEV (b05388dc tree includes all 4 fix commits), so Andrew can verify immediately; no separate Phase-0 GO needed. Phase 1 (portal/PROD promotion) is HARD-GATED on Andrew's local-dev thumbs-up -- production deploy is Andrew's call. COO~B relays Andrew's explicit approval to trigger Phase 1.</dispatch_unblock_condition>
     <project_code>TRSB_LEDGER</project_code>

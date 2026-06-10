@@ -80,3 +80,5 @@ There are two NMNC/NMEC definitions. They must never share a rendering path:
 
 DS must preserve the rolling definition as a code comment in the publisher
 (`aua_rolling` key, future use). It must not appear in `timeseries_chart.json → aua`.
+
+**Status:** closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)

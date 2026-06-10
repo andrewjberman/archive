@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-04-09</date>
-    <status>IN PROGRESS -- portal deployed + CF invalidated (I9EWQID3AKOM2ELXCMTF65MLIQ); auth smoke test blocked on JWT; browser QA pending Andrew</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <project_code>ADVI_49PUSH</project_code>
     <wave>5</wave>
     <phase>P3+P4</phase>

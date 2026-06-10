@@ -161,3 +161,5 @@ Every change above matches exactly what is in `portal/src/components/AccountDist
 - Code changes to `portal/src/pages/AdvisorIntelligence/tabs/DistributionTab.tsx`
 - Session log at `logs/sessions/2026-03-02/react_designer/xtick_spacing_advisor_intelligence.md`
 - Commit message: `"fix(DistributionTab): apply custom tick renderer and axis label centering to SnapshotDistributionChart"`
+
+**Status:** closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)

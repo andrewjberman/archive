@@ -7,7 +7,7 @@
     <issued_to>0.6.1_AE_PartnerETL</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-05</issued_date>
-    <status>staged</status><!-- Authored sprint mode 2026-05-05T~21:15Z. Gates on TO-1 silver-chain fix (per dim Lambda bronze writes still need silver-chain to convert) AND INFINGE TO-2 layer publish (pandas-pyarrow-requests-layer:1). Phase 2 ship-first per PRD §6 (most foundational; many downstream readers). -->
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status><!-- Authored sprint mode 2026-05-05T~21:15Z. Gates on TO-1 silver-chain fix (per dim Lambda bronze writes still need silver-chain to convert) AND INFINGE TO-2 layer publish (pandas-pyarrow-requests-layer:1). Phase 2 ship-first per PRD §6 (most foundational; many downstream readers). -->
     <priority>high</priority>
     <estimated_effort>~0.5d AE; pure clone+prefix substitute from INFINGE Phase 1b template</estimated_effort>
   </metadata>

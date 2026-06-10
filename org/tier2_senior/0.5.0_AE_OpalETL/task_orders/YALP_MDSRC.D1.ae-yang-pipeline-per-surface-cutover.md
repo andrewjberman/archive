@@ -6,7 +6,7 @@
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <co_owner>A DS partner for the per-surface diff validation (0.1.0_DS / 0.2.0_DS per the surface domain) — COO finalizes at dispatch.</co_owner>
     <date>2026-05-20</date>
-    <status>staged</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <dispatch_held>true</dispatch_held>
     <deferral_note>DEFERRED 2026-06-01 per COO (20260601T134837Z [DRIVE]) — parent project closed via D3/L1 path (b8a6e83bf) + Andrew-direct pure-yang Benchmark revert (80224d674); D1 Bloomberg-&gt;YCharts cutover superseded-by-closure, NOT completed. 2C gate (DS YCharts pull) has unresolved material gaps (403 session-eviction on burst pulls + macro-class 404s) = NOT RAVC-complete. YCharts-cutover revival pending a future YALP phase + 2C pull-gap resolution. Keep dispatch_held=true; do not cancel (Andrew-adjacent artifact).</deferral_note>
     <dispatch_unblock_condition>STAGED — Phase 2D. GATED on Phase 2C complete (TO-C1 credential pipeline + TO-C2 market-data pull both RAVC-complete) — there is nothing to cut over to until the YCharts pull exists. COO flips status->pending + fires the GO on TO-C1 + TO-C2 close. Requires PRD v0.3 on origin/CLOUD.</dispatch_unblock_condition>

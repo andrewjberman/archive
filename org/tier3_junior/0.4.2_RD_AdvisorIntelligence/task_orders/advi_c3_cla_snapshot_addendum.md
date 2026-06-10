@@ -8,7 +8,7 @@
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <also_applies_to>0.4.0_DE_ClientPlatform, 0.4.0_DS_ClientPlatform</also_applies_to>
     <date>2026-03-04</date>
-    <status>active</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <supersedes>advi_c3_cla_snapshot.md (requirements C3.2, C3.3, C3.4 and the data source)</supersedes>
   </metadata>
 

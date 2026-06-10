@@ -255,3 +255,5 @@ If TO ships first, comp-blast --check-consumers can retroactively scan for other
 | Phase 3 — Acceptance regression sweep | AC1-AC14 empirical PASS (this TO's RAVC5 gate) | ~2.5h |
 | Phase 4 — PROD deploy + Andrew UAT | Standard Lambda Deployment Sequence + `safe-ec2-deploy.sh` + `inf-v{X.Y.Z}` tag | ~1h |
 | Phase 5 — Memory + cross-ref cleanup | Mark `[[feedback_lambda_pending_marker_no_daemon]]` RESOLVED post-deploy; update `[[reference_inf_ssm_direct_single_script_runbook]]` to note canonical-via-Lambda; cross-reference `[[feedback_phantom_consumer_marker_pattern]]` + `[[feedback_drafts_delta_canonical_apply_pattern]]` | ~30min |
+
+**Status:** closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)

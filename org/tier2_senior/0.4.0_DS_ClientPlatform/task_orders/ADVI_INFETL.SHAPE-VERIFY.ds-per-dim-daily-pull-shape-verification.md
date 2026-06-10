@@ -7,7 +7,7 @@
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_date>2026-05-07</issued_date>
-    <status>active</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <priority>medium</priority>
     <estimated_effort>~1d cumulative across 9 dims; ~1h per dim post-Lambda-deploy</estimated_effort>
   </metadata>

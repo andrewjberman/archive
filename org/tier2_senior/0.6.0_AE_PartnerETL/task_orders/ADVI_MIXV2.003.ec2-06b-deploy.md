@@ -4,7 +4,7 @@
     <issued_by>0.4.0_DS_ClientPlatform</issued_by>
     <issued_to>0.6.0_AE_PartnerETL</issued_to>
     <date>2026-03-17</date>
-    <status>in_progress</status>
+    <status>closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)</status>
     <project_code>ADVI_MIXV2</project_code>
   </metadata>
 

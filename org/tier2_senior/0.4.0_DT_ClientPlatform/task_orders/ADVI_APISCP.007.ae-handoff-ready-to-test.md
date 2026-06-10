@@ -39,3 +39,5 @@ Your task order `ADVI_APISCP.007.router-v7-opal-routing.md` is now unblocked:
   and routes to the correct `opal-data-{firm}` bucket
 
 **AE session log:** `org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-03-11/advi_apiscp_007_dynamo_patch_cf_cache_key.md`
+
+**Status:** closed -- COO stale-TO sweep 2026-06-10 (Andrew directive: close all TOs >14d old)
