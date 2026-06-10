@@ -6,7 +6,7 @@
   <assigned_to>0.6.0_AE_PartnerETL</assigned_to>
   <issued_by>1.0.0_SA_CTO design ruling 2026-06-08T1415Z + precondition-confirm 1417Z (CVO originator). COO sequences + registers.</issued_by>
   <issued_date>2026-06-08</issued_date>
-  <status>in_progress</status>
+  <status>complete</status><!-- CLOSED 2026-06-10 CVO-originator close (COO+CTO AC6 sign-off, JSON+REGISTRY 1002e74c3; TO flip by AE 0.6.0 per COO 133541Z — CVO lane-gap on this file). Cadence convergence-gate scope complete, 6/6 ACs; AC3 weekend-proof CVO-re-ran 7 green. CAVEAT (RESOLVED, separate lane): served rollup was frozen 06-05 = separate MDPF chain defect (WS-C AccessDenied on opal-data-inf client_performance, NOT the gate). Fixed: InfClientPerfReadWSC IAM grant (e49c4bdee, mdpf-pipeline-v1.2.1); recovery re-dispatch advanced served aggregate_aua_timeseries.json to as_of_last=2026-06-09 (verified 06-10 09:34Z). -->
   <priority>Gate BUILT + DEPLOYED (eventbridge S3-sentinel rule replaced cron, IAM granted, DLQ alarm live, DLQ=0). Remaining close gates: AC3 simulated weekend-fire proof (COO GO 2026-06-10 — build independent of the INF_D_08 spine stall) + AC6 RAVC2. Status flipped staged→in_progress per COO 2026-06-10T1307Z.</priority>
 </metadata>
 
