@@ -1,6 +1,6 @@
 # TO PMTRDX.001 — Portfolio Management export → Trade Submission: weight ×100 (bps rendered as percent)
 
-**Class:** FIX (bug — explore then fix). **Author:** 1.0.0_SA_CTO (Andrew-direct 2026-06-03 1729Z). **Receiver:** RD~B (PM/Trade-Submission domain; MSTR-spawning). **Status:** in_progress — RD prep COMPLETE 2026-06-03 ~1754Z, handed to AE 0.7.0 for deploy.
+**Class:** FIX (bug — explore then fix). **Author:** 1.0.0_SA_CTO (Andrew-direct 2026-06-03 1729Z). **Receiver:** RD~B (PM/Trade-Submission domain; MSTR-spawning). **Status:** closed -- COO verified-done sweep 2026-06-10 (Andrew directive; patch 13618900 rode portal v2.1.114 promote, RAVC2'd).
 
 > **Determination (2026-06-03):** NOT a live bad-trade — broker order is CORRECT (Vident CSV `0.200000` = 0.20% for 20bps). The ×100 is a stored-record + display unit-contract violation: PM export Lambda wrote `securities[]` weights as percent-numbers into a DynamoDB field whose canonical unit (CTO ruling) is decimal FRACTION. Brief: `docs/briefs/pm-export-trade-submission-weight-x100-determination-20260603.md`.
 > **Prep delivered to AE 0.7.0** (4 patches; py_compile+ruff validated): #1 `portfolio_excel_generator/lambda_function.py` build_trade_securities ÷100 + `weight_unit` marker (Vident CSV/Excel untouched); #2 both `trade-pipeline/*/excel_generator.py` aligned to fraction; #3 `remediate_weight_unit_pmtrdx001.py` (dry-run-first, scoped, marker-idempotent, `--apply` gated); #4 `trade-submission.ts` TradeSecurity type contract note.
