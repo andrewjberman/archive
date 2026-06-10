@@ -9,7 +9,7 @@
 **Sizing:** sized after S3 Inflection artifact lands (this is a data-shape requirement on that artifact)
 **Authority anchor:** CTO PRD v0.1 486da0470 + Andrew direct 2026-05-28
 
-<status>blocked</status>
+<status>closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)</status>
 **Andrew decision 2026-05-28 (via CTO):** Option 2 — full Orion daily backfill for rolling-365d Non-Model AUA.
 **Blocker:** AE EC2 backfill running — mdpf-daily-runner i-02448edb624a7a7cf, PID 2195 (3rd attempt; PID 2493 died ~23:01Z when EC2 auto-shutdown cleared /tmp; ~21 days written before stop; --skip-existing resumes from day 22). LOG=/tmp/mdpf_backfill_r3.log. ETA ~03:30-04:00Z 2026-05-29. Output: `s3://opal-data-mdpf/mdpf/feeds/non_model_aua/inflection/{date}.parquet`. AE monitoring + signals DS~B on complete. Resume: re-run `build_aggregate_aua_timeseries.py --upload` (json/ dual-write 44afa1dd2 in place) → verify AC2 → RAVC2.
 

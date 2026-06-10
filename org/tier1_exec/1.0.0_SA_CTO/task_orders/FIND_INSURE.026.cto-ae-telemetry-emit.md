@@ -75,3 +75,5 @@ Call at end of each Lambda handler (success path) + in the exception path (with 
 - **CVO post-Stage-1 /verify-channel close**: confirm telemetry/ no longer empty + AC-T1 aggregator output usable + (b)(iv) trigger closed.
 
 — `1.0.0_SA_CTO` 2026-05-27T~23:30Z
+
+**Status:** closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)

@@ -85,3 +85,5 @@ Per brief:
 **Verification protocol used:** subprocess spawn + dead-parent-PID injection via env override, not killing actual process trees (avoids cross-platform flakiness and test-runner-PID side effects).
 
 — `1.0.0_SA_CTO` 2026-05-27T~23:20Z
+
+**Status:** closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)

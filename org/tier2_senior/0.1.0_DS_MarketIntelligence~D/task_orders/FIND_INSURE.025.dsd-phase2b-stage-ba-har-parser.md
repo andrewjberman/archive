@@ -9,7 +9,7 @@
 **Sizing:** ~3-5h wall (per-board HAR parser + bronze emit + silver schema + ~5 unit-tests per board; Andrew HAR captures gate)
 **Authority anchor:** Andrew sovereign goal-set 2026-05-27T~22:49Z + Andrew direct 2026-05-15 SXPL_RESTIN-pattern analogue (HAR-analysis primary, Bright Data fallback for HAR-infeasible boards).
 
-<status>staged</status>
+<status>closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)</status>
 <dispatch_held>true</dispatch_held>
 <dispatch_unlock_gate>Andrew supplies HAR captures from at least 1 job-posting board (Glassdoor, Indeed, LinkedIn-jobs, or per Andrew's board preference). Each HAR enables 1 per-board parser; per-board TO instances spawn from this template.</dispatch_unlock_gate>
 

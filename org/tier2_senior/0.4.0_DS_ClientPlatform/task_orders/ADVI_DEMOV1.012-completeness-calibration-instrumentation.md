@@ -1,7 +1,7 @@
 # Task Order: ADVI_DEMOV1.012 — Completeness + calibration + instrumentation
 
 **TO ID:** ADVI_DEMOV1.012
-**Status:** DISPATCHED 2026-05-27T~13:55Z
+**Status:** closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)
 **Project:** ADVI_DEMOV1 (status remains `complete` per cycle 145 LANDMARK + cycle 158 .011 RAVC2-ACCEPT-CLOSE; this is FIX-class post-close TO under "Phase 6+ reopen for completeness" framing per Andrew `feedback_prd_addendum_phase_n_reopen_over_new_project`)
 **Classification:** FIX-class FOLD per ws CTO /ws-charter cycle 0072-sub RATIFY (same-page-extension within §3.6 mandate; symmetric-substrate test passes; no NOVEL framing)
 **Owner:** Phase 1 DS-lane source-edit → 0.4.0_DS_ClientPlatform~D primary (~D session continuity from .011) | Phase 2-3 AE-lane → 0.7.0_AE_CloudOps

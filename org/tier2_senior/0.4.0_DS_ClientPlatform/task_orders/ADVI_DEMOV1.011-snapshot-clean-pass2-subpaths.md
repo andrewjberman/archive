@@ -1,7 +1,7 @@
 # Task Order: ADVI_DEMOV1.011 — `_snapshot_clean_pass2_subpaths()` generalization
 
 **TO ID:** ADVI_DEMOV1.011
-**Status:** DISPATCHED 2026-05-27T~08:50Z
+**Status:** closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)
 **Project:** ADVI_DEMOV1 (F2-cutover-envelope-discharged; this is post-close durable structural-fix per PRD v0.1.4 §3.6 amendment)
 **Owner:** 0.4.0_DS_ClientPlatform~D (default per DS~D 0838Z standing posture + LD-0027 SPAWN-WITH-DIRECTION arc continuity; base-lane fallback acceptable if ~D capacity-constrained)
 **Coordinated with:** 0.7.0_AE_CloudOps (IAM terraform-apply Phase 2 coordination), 1.0.0_SA_CTO (PRD v0.1.4 §3.6 spec author + REPAIR-AMENDMENT scribe)

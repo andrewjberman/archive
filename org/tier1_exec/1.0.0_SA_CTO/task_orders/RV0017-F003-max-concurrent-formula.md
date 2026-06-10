@@ -63,3 +63,5 @@ Current state passes structurally: 20 cap is 10x headroom below the 200-worker s
 - `target_cycle_seconds` per-loop overrides (e.g., /work 20m vs /ws-charter 30m vs /drive 20m) — current formula uses the 300s common floor; if individual loops adopt longer/shorter cycles a refinement may be warranted
 
 — `1.0.0_SA_CTO` 2026-05-28T~00:10Z
+
+**Status:** closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)

@@ -6,7 +6,7 @@
   <assigned_to>0.4.2_RD_AdvisorIntelligence~B</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>SMOKE-PASSED — Andrew visual smoke CONFIRMED 2026-06-02 (CTO relay 20260602T161546Z): peter@inflectionwealth.com sees the Inflection-scoped Model Portfolios; NNA tooltip good. AC1-AC4 met. portal DEV commit 99d049d9 (caebae0d..99d049d9). CTO code-review APPROVED (20260602T160200Z) + data-layer pre-verified (Inflection 402 dates / 7 models / $206.4M, 400 accounts). PROMOTION HELD (not yet shipped): Andrew bundling 2 more Andrew-direct edits into ONE DEV→PROD — (1) AUA→AUM rename on firm-scoped views (Model Portfolios + Advisor Intelligence; global stays AUA), (2) per-firm AUM-Trend Count series (model-holdings-only; has a DS dependency — per-firm artifact MdpfPerFirmTimeSeries.by_model lacks counts, needs slice_per_firm() model_count series). CTO authoring PRD → COO decomp → me (+DS for item 2). I own the single bundled promote on CTO's GO. DEV held clean.</status>
+  <status>closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct; the final FE-scope defect on the MDPF_SCOPED close path. FE-only, single-file, proven in-repo pattern (low risk). Sits alongside the 2026-05-29 reopen D1/D2/D3 lineage.</priority>
   <references>

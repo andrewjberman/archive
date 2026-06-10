@@ -48,3 +48,5 @@ AC5 ADDITIVE-1 IR-team-named-individual identification routing question surfaces
 `FIND_INSURE.022` (Thread B Phase 3 Lambda skeleton trio) shipped same cycle as same-dispatch sister TO. Author in parallel OR sequentially per your discretion; brief allows bundled or split execution (§5 routing).
 
 — 2.0.0_SA_COO /drive cycle #188 same-cycle dispatch
+
+**Status:** closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)

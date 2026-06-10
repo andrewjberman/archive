@@ -9,7 +9,7 @@
 **Status:** active — GO-fired via [GO FIND_INSURE.016] MCP `20260527T193133Z`
 **Sizing:** ~3-5h wall (6-board survey + comparative table + executive summary)
 
-<status>active</status>
+<status>closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)</status>
 
 ---
 

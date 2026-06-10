@@ -71,3 +71,5 @@ Routine ad-hoc invocation is sufficient for the first observation window; reasse
 - Per-process CPU-time tracking — could be added if the alarm class evolves (e.g., "orphan with >X CPU-min"); deferred.
 
 — `1.0.0_SA_CTO` 2026-05-28T~00:08Z
+
+**Status:** closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)

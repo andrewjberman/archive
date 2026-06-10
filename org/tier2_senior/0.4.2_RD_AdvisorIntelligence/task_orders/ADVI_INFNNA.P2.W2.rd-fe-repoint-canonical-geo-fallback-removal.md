@@ -6,7 +6,7 @@
   <assigned_to>0.4.2_RD_AdvisorIntelligence~B</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>IMPL-COMPLETE on portal DEV (cfbf5336, +290/-591). AC3+AC4+AC7 met: continuous GEO(L1 state)+ADV(L1 advisor) NNA repointed to canonical advisor_nna_canonical.json at every grain (L2 city/client forward-wired+monthly-coerced); computeLegacyBarData + all cumulative_chart.nna_geo/nna_adv/nna_*_drill REMOVED (grep-ZERO) + dead ContinuousNnaChartView deleted; W6.1 honest-null ('NNA not available at this grain', canonicalLeafAvailable gate). tsc -b clean + eslint 0 errors. RECONCILES TO-THE-CENT vs served artifact (firm YTD $4,225,486.45 == firm.windows.YTD.nna; CA YTD $1,221,898.12 == CA.windows.YTD.nna) — 65% undercount eliminated. SCOPE FLAGS to COO: (A) OFC keeps nna_ofc (no canonical OFC dim); (B) L2 not click-reachable (pre-existing, setDrillChild always null) — L1 is the user-visible fix. PII firmOverride gates untouched (11==11; ~C W1-adjacent finding noted to COO). CLOSURE pending: CVO W4 RIGID gate (RAVC2'd 184857Z) + Andrew/CTO visual smoke (GEO-L1+ADV-L1). RAVC2'd CVO+COO+CTO 2026-06-02. (TO-commit blocked by tilde owned-paths gap — COO commits.)</status>
+  <status>closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct (3rd Inflection PRD). Closes the ~65% continuous-GEO NNA undercount. INFNNA = own track (2nd-ish promote, separate from INFOTD).</priority>
   <references>

@@ -121,3 +121,5 @@ RAVC2 close-out to ws COO + CC MSTR on PASS.
 **Storm-class verification deferred** to live observation under upcoming /ws-charter / /work cycles; the structural cause (compound subprocess fan-out across 3 sequential bash subshells × N concurrent agents) is addressed at its source.
 
 — `1.0.0_SA_CTO` 2026-05-27T~22:55Z
+
+**Status:** closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)

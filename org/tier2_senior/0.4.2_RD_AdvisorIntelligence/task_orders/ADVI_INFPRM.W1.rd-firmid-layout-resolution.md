@@ -6,7 +6,7 @@
   <assigned_to>0.4.2_RD_AdvisorIntelligence~C</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>DATA/LOGIC CLOSED-PASS — sole remaining gate = Andrew/CTO rendered-pixel visual smoke (headless fabric-down). Implemented by ~C 2026-06-02T~1825Z (portal DEV 3d5d05b8, 8 files scoped excluding RD~B's concurrent types.ts/DistributionTab.tsx, VALGATE-PASS). Durable SHARED.006 two-param useTenantLayout(firmId, firmOverride?) + firmId threaded to AdvisorPublicProfile/AdvisorBookView + 5 render sites (incl inflection NonAdminProfileTab). tsc+eslint green. COO RAVC2-ACCEPT (clean). CVO RAVC2-VERIFY PASS — cross-tenant regression matrix independently verified to layout literals: 49F/demo/internal byte-identical, inflection-external = intended asymmetric fix (S1 Role-Comp hidden, S3 static-adapter, cash=true). Cert: org/tier1_exec/3.0.0_SA_CVO/verify-channel/verify_channel_ADVI_INFPRM_W1_regression_matrix_1840Z.md. ws-repo portal gitlink HELD for coordinated INFPRM promote (RD~B INFNNA-W2 + AE INFPRM-W2 concurrent on tree). W2 (AE getClientsTab) = ISOLATE, parallel.</status>
+  <status>closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct (5 screenshots). INFPRM = 2nd PROD promotion (after INFOTD). W1 (FE-only) fixes 2 of 3 symptoms.</priority>
   <references>

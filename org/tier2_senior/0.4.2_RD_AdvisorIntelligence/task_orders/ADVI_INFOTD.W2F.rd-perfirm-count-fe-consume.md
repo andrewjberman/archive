@@ -6,7 +6,7 @@
   <assigned_to>0.4.2_RD_AdvisorIntelligence~B</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>IMPL-COMPLETE on portal DEV (80f285c8). Released gate consumed: TYPE (portal-proxy.ts by_model.account_count?: Array<number|null>) + FE (ModelPortfolios per-firm timeSeriesData useMemo emits account_count per per-model point); Count read :1360-1363 resolves naturally; model-holdings-only preserved (Non-Model band value-only). tsc -b clean + eslint 0 errors. Pushed 836c02fd..80f285c8. CLOSURE (AC2 visual smoke) pending CTO/Andrew (headless fabric-down). Bundles into held S5+NNA+W1 first promote. RAVC2'd CTO+COO 173536Z. (TO-file commit blocked by tilde-lane owned-paths gap — COO to commit.)</status>
+  <status>closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — first-promotion-bundle; trivial effort, gated on the DS data leg.</priority>
   <references>

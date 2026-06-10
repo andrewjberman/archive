@@ -6,7 +6,7 @@
   <assigned_to>0.7.0_AE_CloudOps</assigned_to>
   <issued_by>2.0.0_SA_COO</issued_by>
   <issued_date>2026-06-02</issued_date>
-  <status>IMPL-COMPLETE + DEPLOYED, RAVC2-pending CVO regression-matrix + Andrew/CTO visual smoke (2026-06-02). AC-W2-confirm PASS. Fix committed 15d500737. Deployed via COO ruling A (ISOLATE W2): W2-isolated artifact dMa8oXxOP2FDd12GYDzy7/V0rSFLTPftAMFTvaMVp9s= (LIVE base + W2 fallback ONLY, excludes stranded INFLFE.005 Part A). safe-apply 0-diff verified; partners-api-v1.16.2 tagged+pushed; source-map updated (e7f16a12b); comp-iam no-gap. FUNCTIONAL+REGRESSION+SECURITY (live invoke): T1 external no-firmId 200/firm=inflection (was 400); T2 explicit-firmId 200 unchanged; T3 49financial no-firmId 200/firm=49financial; T4 internal opal-capital explicit 200 unchanged; T5 cross-firm ?firmId=demo for inflection user -> 401 (authz preserved, no bypass). INFLFE.005 undeployed-tail flagged + tracked separately by COO (routed CTO+DT). FE visual smoke (Peter sees Firm Overview render) = Andrew/CVO gate, pairs w/ RD~C W1.</status>
+  <status>closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)</status>
   <dispatch_held>false</dispatch_held>
   <priority>HIGH — Andrew-direct (Symptom 2 Firm Overview, the ONE true backend bug in INFPRM). INFPRM = 2nd PROD promotion.</priority>
   <references>

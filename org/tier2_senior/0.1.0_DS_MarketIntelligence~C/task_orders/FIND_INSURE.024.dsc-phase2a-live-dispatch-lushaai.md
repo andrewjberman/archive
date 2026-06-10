@@ -9,7 +9,7 @@
 **Sizing:** ~3-5h wall (LushaAI Lambda live-dispatch + per-employee scoring + RAVC2; cost-gate constrained)
 **Authority anchor:** Andrew sovereign goal-set 2026-05-27T~22:49Z + CVO Phase 2A entry gates per CVO Mode B comprehensive verify-channel in flight; gates on `.011` RAVC2-Accept + Andrew Q1 subset-cut decision.
 
-<status>staged</status>
+<status>closed -- COO verified-done sweep 2026-06-10 (Andrew directive; ground-truth: parent project complete in registry or work landed/superseded per git)</status>
 <dispatch_held>true</dispatch_held>
 <dispatch_unlock_gate>FIND_INSURE.011 RAVC2-Accept (Phase 2A Lambda skeleton + Lusha client + opt-out webhook scaffold all shipped) AND Andrew Q1 sovereign ratify (subset-cut rule: top-quintile + Series-license-mention OR refined criterion)</dispatch_unlock_gate>
 
