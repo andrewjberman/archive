@@ -1,0 +1,17 @@
+<to_id>NFRA_DTAFLP.P1-AE</to_id>
+<project>NFRA_DTAFLP</project>
+<title>P1 AE-lane §8 infra sweep: data/orion->data/inf in 31 owned-paths-blocked files (inf-pipeline Lambdas 24 + ec2 inf-runners + split-form orchestrator:327) + redeploy</title>
+<assigned_to>0.7.0_AE_CloudOps</assigned_to>
+<issued_by>2.0.0_SA_COO (DS P1-DS RAVC2 cross-lane routing 924bc6c22, 162016Z)</issued_by>
+<issued_date>2026-06-11</issued_date>
+<status>active -- routed from DS P1-DS (owned-paths CLOUD_OPS_OR_ETL/SHARED_OPAL_ETL block DS commit). AC10 leg, NOT tonight-gated. Sequence: after COTETL silver-finalize (done) + interleave with GLOBGRPH per capacity.</status>
+
+SWEEP data/orion->data/inf in 31 files DS couldn't commit (owned-paths blocked): infra/aws/lambda/inf-pipeline/** (24) + inf-portal-advisor-publisher + smartx_rest_pull + infra/aws/ec2/inf-bronze-runner/** + ec2/inf-gold-layer-runner/RUNBOOK. DS sent the detailed file list.
+
+OPERATION: `sed -i 's|data/orion|data/inf|g'` on the literal path-prefix (SAFE — preserves vendor orion_* names: _orion_api_silver_lib.py, orion_billing_dim, convert_orion_api_to_silver, etc., which don't contain 'data/orion'). PLUS the SPLIT-FORM Edit at infra/aws/ec2/inf-bronze-runner/orchestrator.py:327 (`/ "orion" /` -> `/ "inf" /`). Multi-form per CTO (contiguous + backslash + split-form).
+
+REDEPLOY after sweep: inf-pipeline Lambdas via terraform; inf-bronze-runner + inf-gold-layer-runner via safe-ec2-deploy.
+
+5 manual_api debt files (pull_inflection_{assets,reps,transactions} + pull_tax_realize_full + probe_tax_txn): pre-existing inf-content Rule-14 debt (ruff/AST-FP) + comp-constants INFLECTION_REP_IDS {3,6,11,12}-vs-[3,11,12] DATA decision (AE/inf's, separate from P1, low-pri). Clear-debt-then-sweep OR defer to CVO AC10 accept as comment/dev-path residuals.
+
+This is the AE operational half of CVO AC10 0-residual (spans AE-leg d0e2226b8-certified + DS-lane 924bc6c22-verified + THIS + P3 + floored/debt disposition). RAVC2 -> COO+CTO+CVO (AC10).
