@@ -50,6 +50,19 @@ Activated as Rule-13 deploy-coordinator for AE_PartnerETL's GLDINC 7-script incr
 
 CTO accepted my ramp bar (≥~10 clean commits + B/C precision agreement) + asked for the evidence engine. Instrumented (`98d3c4fe9`): `append_tally()` logs every finding to a gitignored jsonl; new `tally` subcommand summarizes by-category/by-file + distinct lines for FP review + the ramp bar. Tested (selfcheck still PASS, ruff clean, write/read cycle verified). Flip = one-line config edit when both bars met; until then advisory (never blocks).
 
+## 8. GLDINC A_01 oracle-fix (never-widen) + B_02 deploy — deploy-coordinator + gold-script-owner
+
+**A_01 non-determinism (CTO-ruled, my DS gold-lane).** AE's offline A_01 shadow FAILED parity (63 keys); root-caused to a PRE-EXISTING oracle defect — `advisor_assignments_history` flips run-to-run on identical data (4-build jitter 14,733–14,742; in-process full-vs-full sym_diff=36 = definitional). Mechanism: `(account_id,trade_date)`+`txn_id` dedups use `keep='last'` over a `ThreadPoolExecutor as_completed` concat = thread-completion (random) order; at cross-file ties the survivor is a coin-flip → served advisor/split attribution flips night-to-night, flowing to C_08/D_00c/D_02 (Andrew-visible, GLDINC-P1 class).
+- **Verify-before-escalate:** independently confirmed the nondeterminism premise; recognized it as a never-widen served-output change (NOT a silent fix) needing CTO ruling.
+- **CTO ruled** fix-oracle-first: deterministic tiebreak as a standalone DS gold-lane change, documented delta, then AE re-proves parity vs the stabilized oracle. Rejected cutover-modulo-instability.
+- **Clean file-split:** AE took option-1 (engineered the standalone fix + self-de-entangled the incremental to `.runtmp`). Fix = 4 pieces: `_file_date`+`_intra_pos` provenance (dropped after dedup), total-order sort before both `keep='last'` dedups (latest-export-wins), + a load-completeness guard (failed read → raise; failure-path-only; fixes a 2nd live defect where a transient read silently served a 192-row-short build).
+- **My review (4 criteria, all PASS):** gate clean; determinism via code + AE's 4/4 byte-identical proof; **containment INDEPENDENTLY verified from AE's artifacts** — 122 changed keys / 60 accounts, all 60 ⊆ the 72-account tie-population (account-level containment TRUE, zero stable accounts move); load-guard failure-path-only (no served-key widening).
+- **Never-widen sign-off:** HELD commit/deploy + surfaced the delta to COO+CTO for explicit sign-off (per COO "not a silent land"). Both GRANTED (CTO 221138Z / COO 221154Z). Committed `73ec87a84` with the verified-drift acceptance record embedded (mirrors CVO efc47a9b2), HALT_ACK=1 push (HALTGT correctly fired on the pending sign-off messages), deployed-MATCH. Lands next nightly.
+
+**B_02 (3/7) deploy** (`4a62d0fdf`, deployed-MATCH): additive per-date input-fingerprint incremental, full path untouched + dispatch default unchanged, terminal watermark sidecar, gate clean, io graph-safe. AE appends to the dispatcher GLDINC_SHADOW_SET (their lane).
+
+**Open:** AE rebases the A_01 incremental on `73ec87a84` + re-proves parity (now achievable); `build_history_for_account()` dead-path (A_01 legacy per-account builder, confirmed dead vs vectorized) → route as a separate low-pri cleanup.
+
 ## Compiler Tools
 
 | Tool | Command | Result |
