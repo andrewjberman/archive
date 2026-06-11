@@ -79,6 +79,13 @@ CTO accepted my ramp bar (≥~10 clean commits + B/C precision agreement) + aske
 - **A_03 (5/7) + B_01 (6/7) deployed** (`5d2fca51f`, both MATCH): additive whole-run input-fingerprint gates (the measured byte-identical-rerun reality replaced the brief's hybrid designs); ~1,294s combined no-change-night capture. I **resolved CTO's A_03 release conditions** before deploying — the L333 `_latest_cum_units` trace = deterministic (unit_events ≤1 row per (account,asset,date), index-slot-loaded + sorted, no tie to flip); determinism established 5 ways.
 - **GLDINC 6/7.** Only **A_04** left → oracle-fix-first (A_01 model), AE proving materiality, I deploy under CTO+COO never-widen sign-off.
 
+## 11. GLDINC 7/7 COMPLETE — A_04 + D_02 close
+
+- **D_02** confirmed structurally IMMATERIAL (AE: per-date parts, dedup tie-keys include `date` → intra-part ties only → deterministic). No fix lane; hygiene batch. Census brief updated as disposition of record (`164043c03`).
+- **A_04 client_dimension** (`9a89926fd`, deployed-MATCH): the one genuine CLASS-N member. Structural oracle-hardening (A_01 pattern: index-slot + provenance + total-order sort; schema preserved). **DELTA=0** — AE proof battery (MATERIALITY HEAD×2=0 / DETERMINISM FIXED×2=0 / DELTA FIXED-vs-HEAD=0): the defect was a latent **time bomb**, not an active wobble. I verified the fix is structural-only + the DELTA=0 logic (HEAD×2=0 → no differing ties today → deterministic survivor == old pick → 0 served bytes). Trivial never-widen → proof battery is the acceptance record; deployed without a sign-off hold (no served change), flagged CTO the disposition (the A_03-substitution approach CTO praised). **Keep-full** (now()-stamps make a gate not worth it for a 31s script).
+- **GLDINC 7/7 ENGINEERING COMPLETE.** 6 converted (A_02/A_01/B_02/B_03/A_03/B_01) + A_04 hardened-keep-full. 4 patterns. **3 production defects fixed, all surfaced BY the GLDINC work:** A_01 served-attribution nondeterminism (Andrew-visible, dual never-widen sign-off), swallowed-read-failure (silently served incomplete builds), A_04 latent CLASS-N. 0 cutovers (gated on nightly shadow evidence + Andrew). 6 shadow streams ride tonight's 04:00Z.
+- **Next (gated):** AM review of the 6 scorecards → per-script cutover when clean-nights + Andrew nod; I deploy each cutover when greenlit. Residue: E_13 + D_02/E_* index-slot hygiene (COO cross-tree AM queue).
+
 ## Compiler Tools
 
 | Tool | Command | Result |
