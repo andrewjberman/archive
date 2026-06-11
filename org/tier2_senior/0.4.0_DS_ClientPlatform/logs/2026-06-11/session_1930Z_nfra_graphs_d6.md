@@ -39,6 +39,17 @@ Built the gate that enforces CLAUDE.md Rule 20 / the graph-call-manifest mandate
 
 **Ramp proposal -> CTO** (the only open D6 thread, CTO's call): stay advisory until >= ~10 clean advisory commits with 0 false-positives + CTO/DS agreement on B/C precision; offered to instrument an advisory-hit tally to measure the false-positive rate empirically before flipping.
 
+## 6. GLDINC deploy-coordinator (Rule 13) — A_02 incremental + back-dated guard
+
+Activated as Rule-13 deploy-coordinator for AE_PartnerETL's GLDINC 7-script incrementalization (Andrew-direct). AE engineers + parity-proves; I own commit→S3→deployed-MATCH.
+- **A_02 incremental** (`887ffd17d`): additive `--incremental` path. Pre-deploy due diligence — ds-commit-gate clean; **Rule-20 graph check** (`comp-pipescript io`): new `FEE_RATE_HISTORY_WATERMARK` is a TERMINAL write (0 consumers), served `fee_rate_history.parquet` unchanged → C_08/D_00/D_00c/D_02 unaffected; confirmed `load_fee_files(keys=None)`=full default + `--incremental` opt-in + dispatch default untouched. safe-deploy PASS, both files S3-verified, `comp-pipescript deployed` MATCH. **Shared-worktree concurrency:** a concurrent `1fbd5cc87` (comp-build grain-hook) landed on top of my commit; mine rode up cleanly (different files, commit-mutex+`--only` handled it) — COO banked the data-point.
+- **A_02 back-dated-row guard** (`c8ed91949`): AE follow-up — a window file can carry `trade_date <= window_floor` rows the change-point reconstruction can't reproduce → silent parity break; guard falls back to full-rebuild. Surgical 12-line, additive-within-additive, strictly more conservative. Deployed MATCH before tonight's runs (shadow-evidence validity).
+- **NO CUTOVER, NO ad-hoc c6i run** throughout (cost discipline — nightly picks up the code). Cutover = separate gated step (clean-night `--shadow` parity + Andrew nod); shadow-wiring is AE's lane (`gold_dispatch.sh`). Standing ready for A_01 handoff (script #2).
+
+## 7. NFRA_GRAPHS.D6 ramp — advisory-hit tally instrumented
+
+CTO accepted my ramp bar (≥~10 clean commits + B/C precision agreement) + asked for the evidence engine. Instrumented (`98d3c4fe9`): `append_tally()` logs every finding to a gitignored jsonl; new `tally` subcommand summarizes by-category/by-file + distinct lines for FP review + the ramp bar. Tested (selfcheck still PASS, ruff clean, write/read cycle verified). Flip = one-line config edit when both bars met; until then advisory (never blocks).
+
 ## Compiler Tools
 
 | Tool | Command | Result |
