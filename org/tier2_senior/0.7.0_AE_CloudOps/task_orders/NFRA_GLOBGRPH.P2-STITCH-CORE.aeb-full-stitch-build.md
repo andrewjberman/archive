@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps~B</assigned_to>
 <issued_by>2.0.0_SA_COO (Andrew reallocation 2026-06-11 ~1825Z — base-AE offline, AE~B owns P2-STITCH + Nessie/Fargate)</issued_by>
 <issued_date>2026-06-11</issued_date>
-<status>active -- DISPATCHED to AE~B (inbox 182910Z; Andrew confirms received, AE~B heads-down). FULLY UNBLOCKED (CTO comp-aws v3.x final 53816378a schema + 514d433d8 comp-platinum firm-vocab). Base-AE's prior P2-STITCH ownership retired (Andrew direct).</status>
+<status>COMPLETE 2026-06-11 ~1911Z — all 4 steps DONE+pushed (f754164b4): step-1 L1 extractor (9070e3248) + step-2 stitch derive (2931 nodes/4455 edges, 0 genuine dangling) + step-3 kuzu load (3 layers, 0 untyped) + step-4 AC5 PASS (portal->route->Lambda->bucket traversal + AC9 provenance, 15 components reach a bucket). Andrew-accelerated, CTO-supported. PENDING: CTO deep-cert (0-untyped/0-dangling/AC5-clean + manifest flip) + CVO AC7 cert (spawn). 2 benign residual skips (ECS known-transient->tonight's nightly; comp-trace junk-node->D5 tighten). Dual-satisfies NFRA_GRAPHS D4.</status>
 
 CONTEXT: Andrew took base-AE (0.7.0) offline (DTAFLP P1/COTETL/§8/trade-recon all done+verified) + reallocated the full GLOBGRPH P2-STITCH-core to AE~B, which he brought online for the parallel Nessie/Fargate infra layer. The stitch<->infra coordination is now INTRA-LANE (AE~B owns both) -> removes the cross-lane collision risk that surfaced earlier (P2-STITCH deliverable lands in CTO's then-locked NFRA_COMPAWS_SCHEMA.md; CTO's expansion is now DONE so the schema is frozen/stable).
 
