@@ -61,7 +61,9 @@ CTO accepted my ramp bar (≥~10 clean commits + B/C precision agreement) + aske
 
 **B_02 (3/7) deploy** (`4a62d0fdf`, deployed-MATCH): additive per-date input-fingerprint incremental, full path untouched + dispatch default unchanged, terminal watermark sidecar, gate clean, io graph-safe. AE appends to the dispatcher GLDINC_SHADOW_SET (their lane).
 
-**Open:** AE rebases the A_01 incremental on `73ec87a84` + re-proves parity (now achievable); `build_history_for_account()` dead-path (A_01 legacy per-account builder, confirmed dead vs vectorized) → route as a separate low-pri cleanup.
+**A_01 incremental** (`ba7b20807`, deployed-MATCH): AE rebased on the oracle-fix + proved **3/3 byte-identical vs the stabilized oracle** (parity unachievable pre-fix). Verified PURELY ADDITIVE (oracle-fix dedup preserved; cache grain mirrors the total-order dedup → union-survivor==full-survivor by construction; full path/served output unchanged; gate + io clean). The defect#2 load-guard FIRED on a real transient S3 read mid-proof + refused the build = live validation. So the full A_01 chain (oracle-fix + incremental) is complete; **GLDINC scorecard = 3/7 deployed** (A_02 + B_02 + A_01).
+
+**Open / tracked:** (1) retry-with-backoff hardening on the A_01 load-guard (AE-flagged, my lane — near-term robustness pass; not tonight-urgent per my read); (2) `build_history_for_account()` dead-path → separate low-pri cleanup; (3) AE: B_03 next + appends A_02/B_02/A_01 to the dispatcher GLDINC_SHADOW_SET; (4) D6 advisory-tally ~10-commit review with CTO. Cutover for any GLDINC script = separate gated step (clean shadow nights + Andrew nod).
 
 ## Compiler Tools
 
