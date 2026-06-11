@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (from AE morning-review RAVC2 anomaly-2, 20260611T132445Z)</issued_by>
 <issued_date>2026-06-11</issued_date>
-<status>active -- GREENLIT, sequenced AFTER NFRA_DTAFLP P1 + TO-2. Low customer-impact (cot served stale 06-09, no corruption); fixes cot freshness.</status>
+<status>active -- AE-LEG DONE+ACCEPTED (cot-pipeline-v0.4.0 + v0.4.1). bronze/silver-complete -> aws.s3 Object Created sentinels; S3 EventBridge notif enabled on opal-data-cot; cosmetic ssm.tf:272 scrubbed (AC10 closed). ENTRY-TRIGGER FIX (COO verify-catch 160707Z, AE owned+fixed efdac02ab v0.4.1): cot-session-complete was still on invalid 'EC2 Run Command Result'+documentName -> fixed to 'EC2 Command Status-change Notification'+document-name; aws events test-event-pattern VERIFIED fires (old=false/new=true). REMAINING: DS sentinel emission (cot_bronze_ingest + cot_silver_merge, EMIT-ONLY-ON-VERIFIED-SUCCESS, TIME-GATED today) -> then END-TO-END verify = OPTION (a) tonight's scheduled 02:00 UTC nightly + next-morning review (no manufactured run, no watcher per LD-0176). Low customer-impact (cot non-customer, gold separately blocked).</status>
 
 ROOT CAUSE (AE-diagnosed): the 3 cot event-chain rules (cot-session-complete / cot-bronze-complete / cot-silver-complete) use EventBridge detail-type "EC2 Run Command Result" which is NOT a valid SSM detail-type (real one: "EC2 Command Invocation Status-change Notification"). Result: cot-session-complete fires 0 times -> bronze never auto-dispatches -> the whole bronze->silver->gold chain has never fired in prod; only the cron session-fetch works. cot bronze EMPTY, served platinum frozen 06-09.
 
