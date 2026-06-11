@@ -65,6 +65,13 @@ CTO accepted my ramp bar (≥~10 clean commits + B/C precision agreement) + aske
 
 **Open / tracked:** (1) retry-with-backoff hardening on the A_01 load-guard (AE-flagged, my lane — near-term robustness pass; not tonight-urgent per my read); (2) `build_history_for_account()` dead-path → separate low-pri cleanup; (3) AE: B_03 next + appends A_02/B_02/A_01 to the dispatcher GLDINC_SHADOW_SET; (4) D6 advisory-tally ~10-commit review with CTO. Cutover for any GLDINC script = separate gated step (clean shadow nights + Andrew nod).
 
+## 9. Barrel-through (Andrew "barrel through this") — B_03 + A_01 own-lane + proactive defect-class finding
+
+- **A_01 load-guard hardening** (`e5575c018`, deployed-MATCH): bounded retry-with-backoff (3×, 1/2/4s) before the raise — transient S3 blip self-heals, persistent still fails loud, failure-path-only (no served change). Took the AE-flagged follow-up.
+- **A_01 dead-cluster removal** (`27ffaa55b`, deployed-MATCH): removed the dead per-account SCD builder `build_history_for_account` + its 2 exclusive helpers (`_make_record`, `assignment_changed`), 81 lines, 0 live callers (AST gate confirms no orphaned ref); live vectorized path untouched.
+- **B_03 account_gains** (`0aa50c017`, deployed-MATCH): additive per-date input-fingerprint (pure etags, no global refs); AE proof determinism 2,352/0-diff + self-diff exactly 0. **GLDINC = 4/7** (A_02, A_01, B_02, B_03).
+- **PROACTIVE DEFECT-CLASS FINDING (high-value):** scanned the 3 remaining scripts — the A_01 nondeterminism signature (`drop_duplicates(['transaction_id'], keep='last')` over a thread-order `as_completed` concat, no total-order sort, no `_file_date`/`_intra_pos` provenance) is **copy-pasted + unfixed** in A_03 (L913 + the L331 asset-tie dedup), B_01 (L263), A_04 (L120). It's a defect CLASS, not an A_01 one-off. Flagged AE (run full-vs-full materiality test + apply the A_01 oracle-fix pattern fix-oracle-first BEFORE each incremental, avoiding A_01's mid-proof round-trip) + CTO (extend the fix-oracle-first ruling to the class + a possible fabric-wide audit of the pattern in other bd gold). Materiality unproven (signature, not a full-vs-full test) — but cross-file txn dupes are known to exist (32,277 dataset-wide).
+
 ## Compiler Tools
 
 | Tool | Command | Result |
