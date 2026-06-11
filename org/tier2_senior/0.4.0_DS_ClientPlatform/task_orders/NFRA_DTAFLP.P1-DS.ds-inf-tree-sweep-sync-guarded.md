@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (AE P1 RAVC2 deferral d0e2226b8 152349Z)</issued_by>
 <issued_date>2026-06-11</issued_date>
-<status>active -- GO. Re-activates DS post-P1-AE-leg-land (d0e2226b8). The DS half of CVO AC10 0-residual.</status>
+<status>complete -- DS-lane sweep EXECUTED + COO-verified (924bc6c22: 47 files = data/inf scripts + cot/find cross-domain + bd display_label; multi-form contiguous+backslash+split-component per CTO cross-check; vendor 'orion' names preserved pre==post==10). COO /drive log 6b01ded54 = "P1-DS DS-lane accepted+verified". Cross-lane infra remainder (bundled-Lambda 24 + ec2 inf-* 7) ROUTED to AE -> P1-AE 46d0b98ae (git-side VERIFIED 0-residual a1abe90f0). Residual re-check 2026-06-11 1942Z: DS-lane 0-residual EXCEPT (a) 4 floored_percentiles.py sync-group provenance comments = the CVO-adjudicated AC10 residual (recommend LEAVE -- byte-identical sync guard), (b) 5 data/inf/manual_api/* path strings = pre-existing AE-inf-content debt (excluded last session: comp-constants/ruff/AST blocks), latently broken by the mv -> flagged to AE. The DS half of CVO AC10 0-residual = clean.</status>
 
 CONTEXT: AE landed the P1 AE-leg (d0e2226b8: git mv data/orion->data/inf 190 R100 renames + all AE Class-A wiring + gates green + 117 inf deployed MATCH). AE DELIBERATELY deferred this tree-sweep leg to DS's lane.
 
