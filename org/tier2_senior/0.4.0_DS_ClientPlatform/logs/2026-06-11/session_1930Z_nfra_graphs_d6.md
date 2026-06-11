@@ -51,10 +51,17 @@ Built the gate that enforces CLAUDE.md Rule 20 / the graph-call-manifest mandate
 
 No `comp-pipescript io` this session: D6 touched ZERO gold scripts (tooling only — `.tools/` + `org/modules/graph/`), so the gold-script minimum does not apply. The relevant compiler artifact here IS comp-manifest-check, which I built + AC4-verified.
 
+## 4. NFRA_DTAFLP orphan removal — data/inf/scripts/gold/D_04.client_portal_summary.py (CTO-ruled)
+
+COO dispatched (CTO ground-truth) the removal of a stale orphan gold file blamed for 9 RED inf-DAG tests. **Verified before deleting** (deletion-safety: look at the target; the framing said "0 live refs / dead code"):
+- bare D_04 (1065-line) = shadow of the real **INF_D_04** (4198-line, cataloged `INF_D_04` in orion-gold-dispatch.sh, writes the SAME `platinum/firm/*` keys).
+- 0 catalog/chain refs, 0 live INF_-script invocations, 0 python import/exec. **One ref found** — bare `09.generate_partner_analytics.py:295` invokes it via `_run_script` — BUT bare `09` is **itself** an orphan (live chain runs `INF_09 --skip-sub-scripts`, never invoking bare sub-publishers). Orphan->orphan = 0 live runtime impact. CTO's call confirmed; COO's "0 refs" wording slightly imprecise but substance correct.
+- **Structural finding (surfaced to CTO):** D_04 is one of a **4-file bare SHADOW SET** (`09`/`D_00c`/`D_02`/`D_04`) left by the INF_-prefix rename, + 4 `org/modules/graph/` configs/tests (gold-nan / shadow-detect / test_multi_pipeline / comp-tools) referencing it (CTO's lane). Stayed in-scope to the single-file GO; asked CTO to authorize the companion bare-orphan cleanup + own the org/modules/graph config/test updates for the green cert. Commit `0ddffb4ce` (deletion only, no deploy).
+
 ## Commits this session
-`27e5fe7c5` (D6 deliverable: comp-manifest-check engine+config+wrapper+gate-wiring) · `20f5e85d6` (DTAFLP TO-1b/TO-4/P1-DS `<status>` true-ups). Pushed to CLOUD (safe-deploy: no deploy-scope scripts).
+`27e5fe7c5` (D6 deliverable: comp-manifest-check engine+config+wrapper+gate-wiring) · `20f5e85d6` (DTAFLP TO-1b/TO-4/P1-DS `<status>` true-ups) · `3b833ce83` (session log) · `0ddffb4ce` (orphan D_04 removal). All pushed to CLOUD (safe-deploy: no deploy-scope scripts).
 
 ## Open / event-driven
-- CTO: D6 advisory->blocking ramp decision (proposal sent); optional advisory-hit-tally instrumentation if CTO wants the false-positive rate measured first.
+- CTO: (1) D6 advisory->blocking ramp decision (proposal sent); optional advisory-hit-tally instrumentation. (2) Scope call on the companion bare-set orphan cleanup (09/D_00c/D_02) — I GO on CTO's word. (3) org/modules/graph configs/tests referencing the removed D_04 (CTO-lane) for the green cert.
 - AE: data/inf/manual_api/* (5 files) data/orion->data/inf path-ref fix folded into clearing that pre-existing inf-content debt (latent breakage flagged).
 - CVO: AC10 floored_percentiles guard-comment residual (recommend LEAVE).
