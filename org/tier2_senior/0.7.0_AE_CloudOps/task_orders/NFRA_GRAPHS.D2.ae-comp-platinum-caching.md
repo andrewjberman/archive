@@ -4,6 +4,6 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO decompose handoff 184809Z)</issued_by>
 <issued_date>2026-06-11</issued_date>
-<status>P1 -- parallel, no cross-dep. AE-lane partly offline -> activates on respawn. Per NFRA_GRAPHS.md D2.</status>
+<status>COMPLETE 2026-06-11 ~2013Z (0bc6939cc, pushed; RAVC2-accepted by COO) — comp-platinum query-vs-rebuild cache: warm 0.18s vs cold 4.9s, per-firm keyed (--firm), bd cold==warm regression-clean (PartnerAnalytics+ClientsTab), --fresh rebuilds on touched gold, 5-min TTL default; graph_cache.py = executable freshness contract. Manifest entry-updates routed to CTO (D1 .yaml re-cert).</status>
 
 comp-platinum currently REBUILDS the graph every call (the outlier vs the cached query layer). Bring it under the query-vs-rebuild contract: add caching with a freshness/invalidation policy consistent with the manifest (query the cached graph by default; rebuild only on explicit --fresh/--force or staleness). RAVC2 -> COO+CTO. Pairs with D3 (uniform freshness contract).
