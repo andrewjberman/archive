@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO ruling 1fc184f05, 135214Z)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>pending</status>
+<status>complete</status> -- Part 1: compact-realized.py A_01-provenance fix (index-slot + _file_date/_intra_pos + total-order sort) committed df9797b9d, deployed opal-data-bd/code/silver/ MATCH (a86b2726), AST-DEDUP SILENT (regression self-check), Rule-15 future-import added. CONDITIONS a/b/c proven READ-ONLY (no conflated regen): (a) agg byte-identical = ANALYTIC (trade_date in dedup key -> max invariant to survivor); (b) compact movement isolated to per-group survivor, (cusip,asset_name) pair-set invariant (0 multi-cusip dedup groups / 892,588 rows); (c) B_00 residual DISSOLVED -> delta structurally 0 (the only multi-name "cusip" is empty-string, which B_00 filters out; 7,655 valid cusips all 1:1). 2nd consumer B_00 (CTO ruling named only A_03) caught Phase-1 + verified survivor-independent; CTO conditional never-widen sign-off 1c06682e5. STALENESS FINDING: deployed compact/agg = 2026-03-30 (2mo stale), dailies 1198->1242; a blind --upload conflates the survivor-fix w/ a 2-month data refresh (out-of-scope, unsigned) -> actual regen = separate deliberate/scoped run, NOT forced now (cost+conflation). Part 2: cot silver/fees EMPTY (0 files) -> A_02 reopen condition VACUOUSLY BENIGN-confirmed; re-probe when cot fee ingestion begins. RAVC2 -> COO+CTO.
 <priority>Low — fix-before-next-upload-run (not emergency wave); fold into COT-FIX delivery window or bd hygiene slot</priority>
 
 <references>
