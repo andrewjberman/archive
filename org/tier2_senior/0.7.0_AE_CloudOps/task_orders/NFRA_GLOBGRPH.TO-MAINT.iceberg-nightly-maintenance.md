@@ -29,7 +29,7 @@ The Item-1 "nightly Iceberg maintenance" leg was never built — only an ECR ima
 
 ## Acceptance Criteria
 
-- (a) post-maintenance file count BOUNDED + MEASURED (before/after on the warehouse prefix)
+- (a) post-maintenance file count BOUNDED + MEASURED (before/after on the warehouse prefix). **Day-0 BASELINE (CVO-verified e38b873f5, TO-D4 D4-F2): warehouse/ = 56,527 objects / 364MB (29,851 metadata-class + 10,113 snap files at census). Measure compaction against this baseline.**
 - (b) canonical rebuild + AC3-class diff STILL PASS on the maintained warehouse (maintenance doesn't move served numbers)
 - (c) ONE tarball-restore drill proving `>retention` time-travel works (policy operating-rule 1 DEMONSTRATED, not assumed — natural verify-channel item, CC CVO)
 - (d) maintenance failure-injection → derive STILL LANDS, loud log (best-effort, never blocks the marker-stamp)
