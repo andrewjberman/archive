@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DE_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (NFRA_GRAPHS D8 decomposition, ~171200Z 2026-06-12)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>active</status>
+<status>complete — 2026-06-12T~1820Z by 0.4.0_DE_ClientPlatform; files on disk pending COO exec-lane commit (owned-paths ANY_EXEC: org/modules/graph/)</status>
 <priority>high — last deliverable before NFRA_GRAPHS AC8 close; companion D8-AE TO (alarm infra) and CTO registry authority also in flight</priority>
 
 <background>
