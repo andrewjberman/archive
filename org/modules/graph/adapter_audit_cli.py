@@ -128,30 +128,69 @@ def _extract_type_fields_from_interface(ts_src: str, type_name: str) -> dict[str
     return fields
 
 
-def _fetch_s3_raw_fields(adapter_name: str, function_body: str) -> dict[str, list[str]]:
+PLATINUM_S3_ROOT = 's3://opal-data-inf/platinum'
+
+
+def _sample_id(segment: str) -> str | None:
+    """List a real sample id under platinum/{segment}/ (clients|advisors) so the
+    audit can fetch a concrete per-entity artifact. Deterministic: sorted-first."""
+    try:
+        result = subprocess.run(
+            [sys.executable, '-m', 'awscli', 's3', 'ls', f'{PLATINUM_S3_ROOT}/{segment}/'],
+            capture_output=True, text=True, timeout=30,
+        )
+        ids = sorted(
+            line.split()[-1].rstrip('/')
+            for line in result.stdout.splitlines() if 'PRE' in line
+        )
+        return ids[0] if ids else None
+    except Exception:
+        return None
+
+
+def _derive_s3_target(function_body: str, raw_type_name: str, artifact_name: str) -> str | None:
+    """Derive the S3 prefix from the adapter's ACTUAL fetch path (NO hardcode).
+    Resolves the path segment (firm | clients/{id} | advisors/{id}) by reading the
+    apiRequest<raw_type>(`url`) call + any `${base}` var it interpolates. Returns the
+    full S3 prefix to prepend to artifact_name, or None if undeterminable."""
+    m = re.search(r'apiRequest<' + re.escape(raw_type_name) + r'>\s*\(\s*`([^`]+)`', function_body)
+    url = m.group(1) if m else ''
+    ctx = url
+    for vm in re.finditer(r'\$\{(\w+)\}', url):  # resolve interpolated base vars
+        bm = re.search(r'\b' + re.escape(vm.group(1)) + r'\s*=\s*`([^`]+)`', function_body)
+        if bm:
+            ctx += ' ' + bm.group(1)
+    for scope in (ctx, function_body):  # raw-type's own path first, then whole body
+        for seg in ('clients', 'advisors'):
+            if re.search(r'/' + seg + r'/', scope):
+                sid = _sample_id(seg)
+                return f'{PLATINUM_S3_ROOT}/{seg}/{sid}/' if sid else None
+        if re.search(r'/firm/', scope):
+            return f'{PLATINUM_S3_ROOT}/firm/'
+    return None
+
+
+def _fetch_s3_raw_fields(adapter_name: str, function_body: str, raw_type_name: str = '') -> dict[str, list[str]]:
     """Fetch actual S3 raw envelope for the adapter's data source.
 
-    Returns {top_field: [nested_field, ...]} from the live JSON.
+    Returns {top_field: [nested_field, ...]} from the live JSON. The S3 prefix is
+    DERIVED from the adapter's own fetch path (firm/ vs clients/ vs advisors/) so a
+    client adapter is never compared against an advisor envelope (manufactured-drift
+    bug, T1b false-positive 2026-06-12). Tie the artifact to the raw_type's own call.
     """
-    # Extract S3 path from the function body
-    s3_patterns = [
-        r'`\$\{[^}]+\}/advisors/\$\{[^}]+\}/(\w+\.json)`',
-        r'"([^"]+\.json)"',
-        r'PLATINUM_BASE\}/advisors/\$\{[^}]+\}/(\w+\.json)',
-    ]
-    artifact_name = 'book.json'  # default for advisor adapter
-    for pat in s3_patterns:
-        m = re.search(pat, function_body)
-        if m:
-            artifact_name = m.group(1)
-            break
+    # Extract the artifact (.json) from the raw_type's apiRequest call, else any .json
+    artifact_name = None
+    m = re.search(r'apiRequest<' + re.escape(raw_type_name) + r'>\s*\(\s*`([^`]+)`', function_body) if raw_type_name else None
+    search_space = m.group(1) if m else function_body
+    am = re.search(r'/(\w+\.json)', search_space) or re.search(r'`([\w./${}-]*\b\w+\.json)`', search_space) or re.search(r'"([^"]*\b\w+\.json)"', search_space)
+    if am:
+        artifact_name = am.group(1).split('/')[-1]
+    if not artifact_name:
+        return {}
 
-    # Determine which S3 prefix to use
-    # For advisor-intelligence adapters, use a known advisor path
-    s3_prefixes = [
-        's3://opal-data-inf/platinum/advisors/inflection_wealth_management/',
-        's3://opal-data-inf/platinum/advisors/peter_lee/',
-    ]
+    # DERIVE the S3 prefix from the actual fetch path (condition (a): no hardcode)
+    prefix = _derive_s3_target(function_body, raw_type_name, artifact_name)
+    s3_prefixes = [prefix] if prefix else []
 
     for prefix in s3_prefixes:
         try:
@@ -298,7 +337,7 @@ def cmd_audit(args: argparse.Namespace) -> int:
 
     # Phase 4: Fetch S3 raw envelope
     print('  Fetching S3 raw envelope...')
-    s3_raw_fields = _fetch_s3_raw_fields(adapter_name, function_body)
+    s3_raw_fields = _fetch_s3_raw_fields(adapter_name, function_body, raw_type_name)
     if s3_raw_fields:
         print(f'  S3 raw fields: {len(s3_raw_fields)} top-level keys')
     else:
