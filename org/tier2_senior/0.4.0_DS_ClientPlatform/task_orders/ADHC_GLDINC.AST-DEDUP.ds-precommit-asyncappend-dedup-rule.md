@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO arch-ruling queue item 230400Z — "ratified architecturally; needs a small tooling TO")</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>staged</status>
+<status>complete</status> -- ab0cd8ba0 (pushed CLOUD). check_completion_order_dedup() in .tools/ds-precommit-check.py: 3-part conjunction (append-under-as_completed/imap_unordered + pd.concat DATA-FLOW LINK + order-sensitive drop_duplicates NOT sort-guarded), per-function-scope. SEVERITY=WARN-first (advisory, 1-line _ASTDEDUP_SEVERITY ramp knob) -- fabric-shared checker + new heuristic + live genuine findings would freeze lanes if ERROR now. ACCEPTANCE: 2/2 fixtures FIRE (A_01 73ec87a84^ L192, A_04 9a89926fd^ L120); 0 FP on live bd gold (67 files; data-flow link killed the C_02/C_01 same-function-conjunction FPs); post-fix A_01/A_04 SILENT; checker passes own gate. Durable regression: test_ds_precommit_check.py +4 cases (1 FIRE + 3 SILENT: index-slot/sort-guarded/unrelated-dedup), suite 7/7. PHASE-3 sweep (211 files bd/cot/inf x gold/silver/bronze): 3 CLASS-N findings = cot A_01, cot A_04, bd silver compact-realized -> routed CTO+COO, converging w/ AE 0.6.0 CENSUS-XT. Known gap: pool.add_done_callback append undetected. RAVC2 -> COO.
 <priority>Low — small tooling TO; no gate on GLDINC</priority>
 
 <references>
