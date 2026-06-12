@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform (pipescript families) + 0.7.0_AE_CloudOps (IAM family)</assigned_to>
 <issued_by>2.0.0_SA_COO (NFRA_DEBTSCAN decomposition, 180600Z 2026-06-12; per CTO PRD §9 handoff 7caee952a)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>queued — DS lane: start after NFRA_GRAPHS T4 follow-ups complete or parallel; AE lane: start after D8-AE Part B RAVC2</status>
+<status>complete (DS lane) — ledger org/modules/graph/debtscan/2026-06-12_D2_composition_ds.md. Estate composition-debt CLEAN: 0 column gaps/160 gold scripts (bd MATCH-fresh; inf/cot ADVISORY UNKNOWN-VINTAGE), 0 cache-corruption (5/5 same-type FP suppressed-visible), 0 missing post-step config ($22M inject_scoped_overrides guard PRESENT). 1 REAL finding D2-DS-01 = comp-pipescript deployed bd-only enumeration gap (freshness-binding unverifiable for inf/cot/mdpf) -> CVO-acked, routed CTO (--firm scoping, engine bucket-overrides already at pipeline_cli.py:1450-1466). Precision: promoted 1/1=1.00 (>=0.80 PASS), suppression 5/5. AC1 (>=1 CVO-real + precision sample) MET, AC2 (zero mutations) MET, AC6 (provenance header) MET. AE lane (comp-iam) sequenced after D8-AE Part B. RAVC2 -> COO.
 <priority>P1 — companion to TO-D1; uses existing certified tools; read-only (Rule 13 untouched)</priority>
 
 <background>
