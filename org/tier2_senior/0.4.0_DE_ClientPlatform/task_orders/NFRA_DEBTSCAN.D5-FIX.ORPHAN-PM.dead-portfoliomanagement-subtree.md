@@ -37,13 +37,24 @@ CVO flagged: "benchmark-adjacent removals will fire the D8 surface gate by desig
 
 ---
 
+## PRODUCT-CONFIRM GATE (CVO 9d024bce5 — added 2003Z)
+
+A "dead refactor sub-tree under the live page" is AMBIGUOUS: it could be (a) truly abandoned, OR (b) a PAUSED in-progress refactor someone intends to resume. The orphan census (0 inbound) cannot distinguish them. Deleting (b) destroys real WIP.
+
+**Therefore: DO NOT COMMIT THE DELETION until product-confirm.** Sequence:
+1. Verify-before-delete trace (below) + CHARACTERIZE the subtree (read git history: abandoned-evidence — old dates, live path superseded it, TODO-removed — vs paused-WIP — recent commits, feature-flag, half-wired new path).
+2. STAGE the deletion (prepare) but do NOT commit it.
+3. RAVC2 COO with analysis + recommendation ("abandoned, safe" vs "possibly paused-WIP").
+4. COO routes to Andrew for product-confirm. Deletion commits ONLY after confirm.
+
 ## Scope
 
 1. Re-verify all 19 ORPHAN-PM files per the verify-before-delete chain above
-2. Delete only the confirmed-dead files (pull any with live inbound)
-3. tsc --noEmit clean post-deletion
-4. Smoke the live PortfolioManagement page (renders identically)
-5. Portal change → goes through normal DEV path + VALGATE (this is portal/src — Rule 20: comp-* graph check before commit)
+2. Characterize abandoned-vs-paused-WIP per the product-confirm gate (git history evidence)
+3. STAGE deletion of confirmed-dead files (pull any with live inbound); HOLD the commit pending product-confirm
+4. tsc --noEmit clean on the staged change
+5. Smoke the live PortfolioManagement page (renders identically with the staged removal)
+6. Portal change → normal DEV path + VALGATE + Rule 20 comp-* graph check; deletion commits ONLY post product-confirm
 
 ---
 
