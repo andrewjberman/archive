@@ -4,7 +4,7 @@
 <assigned_to>0.6.0_AE_PartnerETL</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO arch-ruling queue item 230400Z)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>staged</status>
+<status>complete -- delivered 315c8fab6, CTO-accepted 0e745d9ed, COO RAVC3 134119Z</status>
 <priority>Low — no gate on GLDINC cutovers; fits any capacity window</priority>
 
 <references>

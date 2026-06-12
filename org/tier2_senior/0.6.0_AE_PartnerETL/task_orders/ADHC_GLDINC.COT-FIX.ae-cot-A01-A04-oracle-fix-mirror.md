@@ -4,7 +4,7 @@
 <assigned_to>0.6.0_AE_PartnerETL (engineer) + 0.4.0_DS_ClientPlatform (Rule-13 deploy to opal-data-cot only)</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO adjudication routing, 0e745d9ed 134624Z)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>pending</status>
+<status>complete -- b9754025b deployed opal-data-cot, DELTA=0 shadow battery PASS both, COO RAVC3 141733Z</status>
 <priority>Low — dormant defects (cot not yet incrementalized); no GLDINC cutover gate touched; prophylactic but actionable</priority>
 
 <references>
