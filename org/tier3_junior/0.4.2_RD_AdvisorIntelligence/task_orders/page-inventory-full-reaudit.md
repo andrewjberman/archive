@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO (authoring delegated to 0.4.2_RD per COO GO 20260612T211436Z)</issued_by>
     <issued_to>0.4.2_RD_AdvisorIntelligence</issued_to>
     <date>2026-06-12</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>ad-hoc (doc-accuracy; registry pointer routed by COO per GO)</project_code>
   </metadata>
 

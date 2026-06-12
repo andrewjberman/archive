@@ -4,531 +4,366 @@
     <agent>0.4.2_RD_AdvisorIntelligence</agent>
     <page>AdvisorIntelligence</page>
     <directory>portal/src/pages/AdvisorIntelligence/</directory>
-    <date>2026-04-14</date>
-    <audit_scope>Full re-audit covering ADVI_REBORN, ADVI_PROFIL, ADVI_PROFAU, ADVI_OFFICE W1-W4 (portal DEV). Previous audit: 2026-03-16.</audit_scope>
-    <update date="2026-06-12">D5 ORPHAN-AI deletion pass (Andrew-approved, DE-applied on portal DEV): 19 dead AdvisorIntelligence files removed — AdvisorBookAccountDetail, panels/ClientsTable, tabs/AssetIntelligenceTab, tabs/FeeRoleBreakdownPanel, components/{HeaderMetrics, AUACompositionChart, AUATrendChart, DimensionSelector, MetricSelector}, the entire ClientDetail/ subtree (ClientDetailPage, types, panels/{AISummaryPanel, PortfolioBalancePanel, TimeSeriesPanel, MixTimeseriesPanel, ConcentrationPanel} + 2 barrels), and the _partners/inflection/overrides barrel. Their entries are dropped below and dependent narratives corrected. NOTE: file paths in this inventory predate the ADVI_INFLEC 9423f71e _shared/_partners refactor (live layout is portal/src/pages/AdvisorIntelligence/{_shared,_partners}/...); full path re-audit queued as a follow-up TO.</update>
+    <date>2026-06-12</date>
+    <audit_scope>FULL RE-AUDIT at portal DEV HEAD 61e1677f (post D5 ORPHAN-AI 27-file deletion ab1c11b0).
+      Enumerated from git ls-files (50 files: 26 .tsx + 24 .ts); every entry verified against the live
+      file header. Endpoint consumers verified by per-function reference grep over src/.
+      TO: page-inventory-full-reaudit (COO GO 20260612T211436Z).
+      Audit history: 2026-03-16 (v5 audit) -> 2026-04-14 (REBORN/PROFIL audit, pre-_shared paths) ->
+      2026-06-12 surgical D5 ORPHAN-AI update -> this full re-audit (supersedes all prior path claims).</audit_scope>
+    <update date="2026-06-12">D5 ORPHAN-AI deletion (Andrew-approved, portal DEV ab1c11b0): 19 dead
+      AdvisorIntelligence files removed (AdvisorBookAccountDetail, panels/ClientsTable,
+      tabs/AssetIntelligenceTab, tabs/FeeRoleBreakdownPanel, 5 v1-era components/ files, the whole
+      ClientDetail/ subtree, 3 barrels). Stale comment refs in surviving files fixed in 61e1677f.</update>
   </metadata>
 
+  <architecture_overview>
+    Multi-tenant page. Root index.tsx is a thin PARTNER ROUTER: PARTNER_VIEWS maps canonical L1
+    firmIds ('49financial' | 'inflection' | 'cottonwood' | 'demo', from firmAccess.ts) to per-tenant
+    view components under _partners/. Internal/dev users get a firm selector over ALL_PARTNER_FIRMS;
+    external users are pinned to claims.firmId. Default + fallback view: 49financial.
+    All shared rendering lives under _shared/ (tabs, panels, charts, components, lib, hooks, types);
+    per-tenant divergence is expressed through _partners/{firm}/layout.ts TenantLayoutConfig objects
+    read via the useTenantLayout() hook — NOT through firmId === '...' conditionals in components.
+  </architecture_overview>
+
   <files>
-    <!-- =====================================================================
-         Page-level orchestrators
-         ===================================================================== -->
-    <file path="portal/src/pages/AdvisorIntelligence/AdvisorIntelligence.tsx" type="page-component">
-      Main page component (v5). Partner AUA analytics dashboard with firm selector (firmOverride prop + URL param),
-      3-tab layout (Distribution, Advisors, Books), PartnerAnalytics header panel, ErrorBoundary per tab.
-      Fetches getPlatinumPartnerAnalytics() at page level and passes down as prop.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/index.ts" type="barrel">
-      Barrel export for AdvisorIntelligence component.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/types.ts" type="types">
-      Comprehensive type definitions (v4+). Partner/Firm types, NNA metrics, time series, snapshot, filters,
-      client growth, tax breakdown, header metrics, partner analytics with nested drill-down and time machine,
-      cumulative charts (legacy + platinum), leaderboard (LeaderboardEntry, PlatinumLeaderboardEntry with
-      role_breakdown per-role AUA/NNA/fee), employee leaderboard, advisor book, rolling flows,
-      PartnerAnalyticsResponse (views: aua/nna/geo/adv/ofc), Books types (BooksClientDetailResponse,
-      BooksTimeseriesResponse, BooksCompositionResponse, MixItem, ConcentrationItem), Addendum A types
-      (MixAssetClass, MixTimeseriesPoint, ConcentrationPoint, ConcentrationResponse, MixWindow),
-      PlatinumLeaderboardResponse, PlatinumRoleBreakdown, FeeEfficiencyResponse, AdvisorDrilldownSummary,
-      AdvisorTimeseriesResponse, PlatinumFirmDashboard, PlatinumAdvisorSummary, PlatinumClientSummary,
-      PlatinumAccountSummary. Includes type guards and helper functions.
-      LeaderboardEntry now has primary_role?: AdvisorRole (commit a30c403, 2026-04-14).
+    <!-- ============================ Root ============================ -->
+    <file path="portal/src/pages/AdvisorIntelligence/index.tsx" type="router">
+      Partner router (55L). PARTNER_VIEWS dispatch + ALL_PARTNER_FIRMS selector list + PartnerViewProps
+      contract ({firmId, allFirms?, onFirmChange?}). L2 dispatcher converged on L1 canonical firmId
+      namespace (ADVI_SHARED.006 Commit B); 'demo' added as first-class firm (ADVI_DEMOV1.008 Phase 6).
     </file>
 
-    <!-- =====================================================================
-         Tabs
-         ===================================================================== -->
-    <file path="portal/src/pages/AdvisorIntelligence/tabs/DistributionTab.tsx" type="tab-component">
-      Distribution tab (2600+ lines). Dual-mode: Snapshot and Continuous.
-      Cohort toggle: GEO / ADV / OFC (3-way — OFC added ADVI_OFFICE W3, commit 7dd0a7e portal DEV).
-      Metric toggle: AUA / NNA (CLA removed).
-      Snapshot: ApexCharts donut (lazy-loaded react-apexcharts), time machine strip (quarterly/annual periods),
-      bell curve histogram (P10/P25/Median/P75/P90), drill-down (state->city for GEO, architect->client for ADV,
-      office->advisor for OFC). NNA diverging colors at city/advisor drill level.
-      Continuous: stacked area/bar chart (Recharts ComposedChart), hero metrics panel, window selector
-      (1Y/3Y/Max), per-cohort series (geo/adv/ofc). NNA view uses diverging bar with net line overlay.
-      OFC parity fixes (W6) pending (staged, DE task order).
-      D5 (ADVI_FNTEND.B0, portal DEV 5ea017c): module-level `pseudonymizeChildLabel(key, cohort, isDrilled, ordinalMap)`
-      forces `Client N` labels in Continuous-ADV drilled view (breadcrumb + hero + legend + tooltip). Stable
-      per-drill-parent ordinal maps derived server-sorted from nna_adv_drill / adv_drill categories. Forced
-      regardless of `canSeeCleartext()` — surface-specific, not role-gated. `(pseudonymized)` hero note also forced.
+    <!-- ===================== _partners/ tenant layer ===================== -->
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/49financial/index.tsx" type="tenant-view">
+      49 Financial tenant view (353L) — the v5 dashboard exemplar: PartnerAnalytics header +
+      Distribution / Advisors / Books tabs. Fetches getPlatinumPartnerAnalytics, getFirmLeaderboard,
+      getCohortASummary at view level. BD-pipeline native.
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/tabs/AdvisorsTab.tsx" type="tab-component">
-      Advisors tab (1200+ lines). Unified all-roles leaderboard using PlatinumLeaderboardResponse
-      (getFirmLeaderboard). Role filter checkboxes (architect/implementor/consultant/local_ops/additional_advisor),
-      fee view filter (all/fee_paying/no_fee). Metric toggle: AUA/NNA/GRO. Window toggle: 3M/6M/1Y/2Y/3Y.
-      Top 3 highlights panel (QTD/YTD/1Y/Max). Primary Type badge on each leaderboard card — AUA-dominant role
-      from role_breakdown (commit a30c403, 2026-04-14 — fixes static priority bug).
-      Click leaderboard card -> opens AdvisorPublicProfile inline drilldown (admin-gated by onAdvisorClick prop).
-      Pinned bottom rows for 49F House and Unassigned.
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/49financial/layout.ts" type="tenant-layout">
+      TenantLayoutConfig for 49F (ADVI_SHARED.001 §E). Every field explicit — zero implicit
+      DEFAULT_LAYOUT fall-through for diverging properties.
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/tabs/ClientsTab.tsx" type="tab-component">
-      Books tab (exported as BooksTab). Admin-gated (isFirmAdmin = isInternal() or isDev()).
-      N1: AdvisorSummaryTable with 3d leaderboard-style card rows using PlatinumFirmDashboard.
-      FeeEfficiencyPanel at N1 level.
-      L2: AdvisorBookView (book overview for selected advisor).
-      L3 drill delegated to AdvisorBookClientDetail; L4 renders as AdvisorBookAccountModal
-      constructed into AdvisorBookClientDetail's accountDetailSlot.
-      Uses CanonicalBookView orchestrator for consistent panel layout at all levels.
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/49financial/roles.ts" type="tenant-roles">
+      5-role taxonomy (architect/implementor/consultant/local_ops/additional_advisor) with
+      AdvisorRoleMeta (label/color/order from chartColors).
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/tabs/FeeSummaryPanel.tsx" type="tab-component">
-      Fee Summary Panel for L3 (relationship) level. Left half of Row 3.
-      Weighted avg fee headline + per-account fee table. Consumed by CanonicalBookView at L3.
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/49financial/constants.ts" type="tenant-constants">
+      BD source-attribution strings. DEFAULT_FIRM_ID/AVAILABLE_FIRMS removed in SHARED.007 dead-code
+      sweep (router owns firm identity).
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/tabs/FeeEfficiencyPanel.tsx" type="tab-component">
-      Fee Efficiency Panel for N1 (firm dashboard). Recharts scatter plot:
-      NNA (X) vs Revenue (Y), dot size = AUA, color = growth rate. Replaces TaxCostBasisPanel at firm level.
-      Consumed by ClientsTab/CanonicalBookView at N1.
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/inflection/index.tsx" type="tenant-view">
+      Inflection Wealth Management tenant view (313L). Firm-centric tenant; renders
+      InflectionInsightsPanel (BI) + FidelityCustodianBar overlay in the Data Source panel.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/inflection/InflectionInsightsPanel.tsx" type="tenant-panel">
+      Business Intelligence panel (1719L): Trade Activity lens (scatter + table, window-scoped
+      activity_scan artifacts), cash drag, firm concentrations. Data: getInflectionActivityScan(window),
+      getInflectionCashDrag, getInflectionFirmConcentrations.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/inflection/layout.ts" type="tenant-layout">
+      TenantLayoutConfig for Inflection (179L) — incl. dataSourcePanel overlay = FidelityCustodianBar,
+      static per-account timeseries path (usesStaticAccountTimeseries), small-account threshold.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/inflection/roles.ts" type="tenant-roles">
+      Platinum leaderboard vocab: 'rep' (Advisor) + 'firm' (aggregate entity).
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/inflection/constants.ts" type="tenant-constants">
+      FIRM_ID 'inflection' (L1 canonical post-SHARED.006 Commit A), display name, attribution,
+      custodian, small-account threshold.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/inflection/overrides/FidelityCustodianBar.tsx" type="tenant-override">
+      Static 99.4% Fidelity custodian bar (PRD business knowledge — no custodian field in platinum
+      JSON yet; static until DS publishes custodian_concentration). Imported DIRECT by inflection
+      index.tsx + layout.ts (the overrides/ barrel was deleted in D5 ORPHAN-AI).
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/cottonwood/index.tsx" type="tenant-view">
+      Cottonwood Capital Advisors tenant view (151L) — ADVI_PRTORG Track 3 (2026-06-09), cloned from
+      49financial (both BD-native). OUTCOME-B reductions: Distribution-centric only; Advisors/Books
+      suppressed for v1 (2-founder joint-coverage rep codes, no segmentable advisor dimension).
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/cottonwood/layout.ts" type="tenant-layout">
+      TenantLayoutConfig for COT (140L): composition.enabled=false, advisors.enabled=false per
+      OUTCOME-B §6.1. Re-enable when COT advisor dimension materializes (§5-A.1 REVISIT-LATER).
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/cottonwood/roles.ts" type="tenant-roles">
+      v1 placeholder single-role taxonomy ('architect') — advisor surfaces suppressed.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/cottonwood/constants.ts" type="tenant-constants">
+      BD attribution (same custodian lineage as 49F) + FIRM_DISPLAY_NAME per ADVI_PRTORG §5-B.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/demo/index.tsx" type="tenant-view">
+      Demo tenant view (313L) — ADVI_DEMOV1.008 Phase 6. Mirrors 49financial (opal-data-demo is a
+      z-pseudonymized clone of opal-data-bd); surfaces fictional firm "Lone Pine Analytics" as the
+      data source (no upstream custodian leak per Andrew UAT F3).
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/demo/layout.ts" type="tenant-layout">
+      TenantLayoutConfig for demo — structurally mirrors FORTY_NINE_FINANCIAL_LAYOUT; lambdaScopeKey
+      'demo'.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/demo/roles.ts" type="tenant-roles">
+      Mirrors the 49F 5-role taxonomy; identities pseudonymized at the data layer.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_partners/demo/constants.ts" type="tenant-constants">
+      "Lone Pine Analytics" attribution strings (ADVI_DEMOV1.010).
     </file>
 
-    <!-- =====================================================================
-         Top-level advisor views (ADVI_PROFIL / ADVI_PROFAU)
-         ===================================================================== -->
-    <file path="portal/src/pages/AdvisorIntelligence/AdvisorPublicProfile.tsx" type="subpage">
-      Advisor drilldown view (ADVI_49PUSH .041). Inline panel rendered by AdvisorsTab on card click (admin).
-      2x2 layout: top-left Summary Card (identity + AUA + flows + fee), top-right Role Composition Donut
-      (ApexCharts), bottom full-width timeseries (AUA stacked area by role | NNA diverging ComposedChart).
-      Hero metrics panel + inflow/outflow bars + net line overlay (ADVI standard, commits fe81096 + 7628498).
-      Data: getPlatinumAdvisorDrilldownSummary(advisorId) + getPlatinumAdvisorTimeseries(advisorId).
-      Embedded AdvisorBookView for book-of-business drilldown.
+    <!-- ===================== _shared/ top level ===================== -->
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/AdvisorPublicProfile.tsx" type="subpage">
+      Advisor drilldown (1394L, ADVI_49PUSH .041). 2x2: Summary Card / Role Composition Donut /
+      full-width AdvisorAnalytics timeseries. Profile/Book toggle hosts AdvisorBookView. Data:
+      getPlatinumAdvisorDrilldownSummary, getPlatinumAdvisorTimeseries, getAdvisorExecSummary,
+      getAdvisorNnaCanonical. The old inline TimeSeriesPanel was deleted (SHARED.007) and replaced
+      by components/AdvisorAnalytics.
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/AdvisorBookView.tsx" type="subpage">
-      Single-advisor book of business view. Owns L2 -> L3 -> L4 drill state chain.
-      L2: book overview (ConsolidatedOverviewPanel + ClientListPanel).
-      Delegates L3 to AdvisorBookClientDetail; L4 renders as AdvisorBookAccountModal
-      constructed into the accountDetailSlot.
-      Data: getAdvisorBook(advisorId), getBooksAdvisorComposition(advisorId), getAdvisorMixTimeseries().
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/AdvisorBookView.tsx" type="subpage">
+      Single-advisor book of business (705L). Owns the L2 -> L3 -> L4 drill state chain; rendered as
+      the "Book" face of the Profile/Book toggle. L2 = ConsolidatedOverviewPanel + ClientListPanel;
+      delegates L3 to AdvisorBookClientDetail; constructs AdvisorBookAccountModal into the
+      accountDetailSlot for L4. Owns all fetches (getPlatinumAdvisorSummary, getPlatinumClientSummary,
+      getPlatinumClientDetailStatic, getPlatinumAccountSummary, getPlatinumAccountTimeseriesStatic).
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/AdvisorBookClientDetail.tsx" type="subpage">
-      L3 relationship detail view. Extracted from tabs/ClientsTab.tsx during ADVI_PROFIL.005.
-      Client summary, accounts table, Mix+Concentration snapshot pies (linked selection),
-      compact AUA/NNA composed chart, Tax Intelligence, Open Lots, Engagement.
-      Data: getBooksClientDetail(clientKey), getBooksRelationshipComposition(relationshipId),
-      getBooksRelationshipTimeseries(relationshipId), getPlatinumClientSummary(clientKey).
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/AdvisorBookClientDetail.tsx" type="subpage">
+      L3 relationship detail (197L). Pure renderer extracted from ClientsTab (ADVI_PROFIL.005);
+      consumed by tabs/ClientsTab.tsx (admin path) + AdvisorBookView.tsx (non-admin path). Slot-based
+      composition: accountDetailSlot (L4 modal), openLotsSlot, headerSlot. Shared RFS window state
+      lifted to parents (ADVI_FNTEND.B2).
     </file>
     <file path="portal/src/pages/AdvisorIntelligence/_shared/AdvisorBookAccountModal.tsx" type="subpage">
-      L4 account drill view (modal). Superseded the pre-modal inline AdvisorBookAccountDetail
-      renderer in the INFSHIP Phase-2 cutover (AdvisorBookAccountDetail deleted in D5 ORPHAN-AI).
-      Constructed by ClientsTab + AdvisorBookView into AdvisorBookClientDetail's accountDetailSlot.
-      Data fetched by parents: getPlatinumAccountSummary(accountId) + getPlatinumAccountTimeseriesStatic
-      (Inflection static per-account timeseries path).
+      L4 account drilldown popout (721L). IndexPerformanceModal-pattern modal (30D/90D/1Y/3Y rolling
+      windows) bound to account AUA timeseries. Superseded the pre-modal inline AdvisorBookAccountDetail
+      renderer (INFSHIP Phase 2; AccountDetail deleted D5 ORPHAN-AI). Constructed by ClientsTab +
+      AdvisorBookView into AdvisorBookClientDetail's accountDetailSlot; parents own the data fetches.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/SmallAccountsByRoleModal.tsx" type="subcomponent">
+      Modal listing small accounts per role (client_key/name, count, AUA) — small-account threshold
+      drill surface.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/types.ts" type="types">
+      Page type system (2569L, v3+). Partner-agnostic AdvisorRoleMeta; platinum response shapes
+      (PlatinumLeaderboardResponse/Entry, PlatinumFirmDashboard, PlatinumAdvisorSummary,
+      PlatinumClientSummary, PlatinumAccountSummary, partner analytics views, timeseries shapes);
+      type guards + helpers. Partner-specific role values live in _partners/{firm}/roles.ts.
     </file>
 
-    <!-- =====================================================================
-         Components (permanent header)
-         ===================================================================== -->
-    <file path="portal/src/pages/AdvisorIntelligence/components/PartnerAnalytics.tsx" type="subcomponent">
-      Permanent header panel above all tabs. Donut chart (4+ views: AUA/NNA/GEO/ADV/OFC),
-      time machine (quarterly snapshots), bell curve distribution, drill-down navigation,
-      partner firm selector dropdown. Data from getPlatinumPartnerAnalytics() (prop passed from page).
+    <!-- ===================== _shared/tabs ===================== -->
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/tabs/DistributionTab.tsx" type="tab-component">
+      Distribution tab (4237L). Snapshot (ApexCharts donut + time machine + bell curve, GEO/ADV/OFC
+      cohorts, drill-down) + Continuous (Recharts stacked area / NNA diverging bars, window toggle).
+      Data: getPlatinumCumulativeChart, getPlatinumAdvisorNnaClients, getAdvisorNnaCanonical,
+      getTimeseriesOverview, getPlatinumPartnerAnalytics (prop/queries).
     </file>
-    <!-- v1-era header/selector components (HeaderMetrics, AUACompositionChart,
-         AUATrendChart, DimensionSelector, MetricSelector) deleted in D5 ORPHAN-AI
-         2026-06-12 — superseded by PartnerAnalytics multi-view + inline
-         DistributionTab cohort/metric toggles. -->
-
-    <!-- =====================================================================
-         Shared chart primitives (ADVI_INFFIN.001, 2026-05-13)
-         Universal NNA/AUA chart design system per Andrew directive
-         ===================================================================== -->
-    <file path="portal/src/pages/AdvisorIntelligence/_shared/charts/ChartTooltip.tsx" type="shared-primitive">
-      Canonical dark-card tooltip wrapper for AdvisorIntelligence charts. Exports ChartTooltip
-      shell, ChartTooltipRow (colored-bullet + label + value, optional sign-tint + emphasis),
-      ChartTooltipDivider, ChartTooltipSubsection (e.g. Projected Period overlay). Matches
-      PartnerAnalytics Assets Overview tooltip visual structure (border-white/10, SURFACE.tooltip
-      bg, white/40 caption, structured rows). Consumers should compose body content from these
-      primitives so every tooltip across the page is visually identical.
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/tabs/AdvisorsTab.tsx" type="tab-component">
+      Advisors tab (1619L). Unified all-roles leaderboard (getFirmLeaderboard), role-filter checkboxes,
+      fee-view filter, metric/window toggles, Top 3 highlights, Rolling Flows interval toggle
+      (Month/Quarter/Year). Card click -> AdvisorPublicProfile inline (admin-gated).
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/_shared/charts/NnaBarLineChart.tsx" type="shared-primitive">
-      Canonical NNA diverging-bars + amber net-line ComposedChart primitive. Inflows blue
-      (NNA_BAR.inflow #2196F3), Outflows red (NNA_BAR.outflow #EF4444), Net amber
-      (NNA_BAR.net #F59E0B). Defaults height 360, accepts custom Y formatter + tooltip title
-      + extra tooltip rows. netOnly mode renders single sign-tinted Net bar when gross data
-      absent. Also exports NnaTooltipBody for charts that need to compose their own
-      tooltip but want canonical Inflows/Outflows/Net rows. Consumed by AdvisorAnalytics NnaChart.
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/tabs/ClientsTab.tsx" type="tab-component">
+      Books tab (1329L, exported as BooksTab; admin-gated). Canonical 3-row framework at every level
+      via CanonicalBookView. N1 firm dashboard (getPlatinumFirmDashboard split-mode +
+      getPlatinumFirmMixSummary + getClientDirectory + getHeaderMetrics); L2 advisor; L3 via
+      AdvisorBookClientDetail; L4 via AdvisorBookAccountModal in the slot.
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/_shared/charts/index.ts" type="barrel">
-      Barrel export for _shared/charts primitives.
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/tabs/FeeEfficiencyPanel.tsx" type="tab-component">
+      Fee Efficiency Panel (986L, N1 firm level). NNA-vs-Revenue scatter (dot=AUA, color=growth) with
+      regression + R^2, Scatter/Table toggle. Routed by CanonicalBookView at N1; suppressible per
+      tenant (ADVI_INFPRTY flag for partners without fee data).
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/tabs/FeeEfficiencyPanel.constants.ts" type="constants">
+      B8 canonical role set for the fee-efficiency role filter (SHARED.004 extraction so component
+      files export only components).
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/tabs/FeeSummaryPanel.tsx" type="tab-component">
+      Fee Summary Panel (628L, L3 relationship level). "Client Fee" headline + per-advisor rollup
+      rows (FE-owned rollup over DS team_attribution[], CTO-ratified 2026-04-14). Consumed by
+      AdvisorBookClientDetail.
     </file>
 
-    <!-- =====================================================================
-         Shared panels (canonical book framework, ADVI_PROFIL.005)
-         ===================================================================== -->
-    <file path="portal/src/pages/AdvisorIntelligence/panels/CanonicalBookView.tsx" type="shared-panel">
-      Orchestrator that renders the canonical book framework at every drill level
-      (N1 firm / L2 advisor / L3 client / L4 account). Routes to level-specific Row 3 layouts
-      (FeeEfficiencyPanel at N1, FeeRoleBreakdownPanel at L2, FeeSummaryPanel at L3)
-      while always rendering ConsolidatedOverviewPanel at Rows 1+2.
+    <!-- ===================== _shared/panels ===================== -->
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/panels/CanonicalBookView.tsx" type="shared-panel">
+      Orchestrator (159L) of the canonical book framework at N1/L2/L3/L4: ConsolidatedOverviewPanel
+      at Rows 1+2, level-routed Row 3 (FeeEfficiencyPanel at N1; level-specific splits below).
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/panels/ConsolidatedOverviewPanel.tsx" type="shared-panel">
-      Canonical header panel used at every book drill level. Renders headline AUA/NNA/fee metrics,
-      client/account counts, date range. Shared between BooksTab and AdvisorBookView.
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/panels/ConsolidatedOverviewPanel.tsx" type="shared-panel">
+      Canonical header panel (527L) at every drill level: AUA tile row, asset-mix donut + legend,
+      top-holdings bars, quarterly metrics strip. Lazy ApexCharts.
     </file>
     <file path="portal/src/pages/AdvisorIntelligence/_shared/panels/ClientListPanel.tsx" type="shared-panel">
-      Sorted client roster rows for L2 advisor book view (AdvisorBookView). Superseded
-      panels/ClientsTable.tsx, which was deleted in D5 ORPHAN-AI 2026-06-12.
+      L2 left-half client roster (382L) — mirrors TaxCostBasisPanel section-for-section (AUA by
+      Relationship bar etc.). Superseded panels/ClientsTable.tsx (deleted D5 ORPHAN-AI). Consumed by
+      AdvisorBookView.
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/panels/TaxCostBasisPanel.tsx" type="shared-panel">
-      Cost basis and tax liability panel. Used at L3/L4 of book drilldown.
-      Extracted from ClientsTab.tsx (ADVI_PROFIL.005) for sharing between BooksTab and AdvisorBookView.
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/panels/TaxCostBasisPanel.tsx" type="shared-panel">
+      Cost basis &amp; tax liability panel (489L) at N1/L2/L3/L4. Pure presentational; CanonicalTax prop.
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/panels/types.ts" type="types">
-      Shared type aliases for canonical book panels (ConsolidatedOverviewPanel, TaxCostBasisPanel,
-      CanonicalBookView). Extracted from ClientsTab.tsx during ADVI_PROFIL.005.
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/panels/SyncedHeightProvider.tsx" type="shared-panel">
+      Context provider for useSyncedHeight (SHARED.004 component/hook file split).
     </file>
-
-    <!-- =====================================================================
-         Utility library
-         ===================================================================== -->
-    <file path="portal/src/pages/AdvisorIntelligence/lib/composition.ts" type="utility">
-      Pure composition helpers (no React imports). Extracted from ClientsTab.tsx (ADVI_PROFIL.005)
-      for shared use by BooksTab and AdvisorBookView. Normalizes asset class mix, concentration data.
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/panels/useSyncedHeight.ts" type="hook">
+      Cross-panel height sync so L3's FeeSummaryPanel and TaxCostBasisPanel top blocks align.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/panels/types.ts" type="types">
+      CanonicalOverview / CanonicalTax shared aliases for the canonical book panels.
     </file>
 
-    <!-- ClientDetail/ sub-page subtree (ClientDetailPage, types, 5 panels, 2 barrels)
-         deleted in D5 ORPHAN-AI 2026-06-12 — the pre-AdvisorBook* client drill,
-         fully superseded by the AdvisorBookClientDetail chain; resolved-path census
-         confirmed 0 external inbound on all 9 files. The "still active" claim in the
-         2026-04-14 audit was already stale at the 9423f71e refactor. -->
+    <!-- ===================== _shared/components ===================== -->
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/components/PartnerAnalytics.tsx" type="subcomponent">
+      Permanent header panel (2311L, "Assets Overview"). Multi-view donut + bell curve + time machine +
+      firm selector; canonical NNA tooltip/design reference for the whole page. Data:
+      getTimeseriesOverview, getPlatinumPartnerAnalytics, getPlatinumInflecTimeseriesChart,
+      getHeaderMetricsFresh, getCumulativeChart, getFirmMixViews.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/components/AdvisorAnalytics.tsx" type="subcomponent">
+      Advisor-scoped mirror (780L) of PartnerAnalytics' Continuous view ("Lifetime Activity" in
+      AdvisorPublicProfile): AUA/NNA/GRO mode toggle (GRO pending DS publisher). Replaced the deleted
+      inline TimeSeriesPanel. Data: getPlatinumAdvisorTimeseries, getAdvisorMixViews,
+      getAdvisorNnaCanonical.
+    </file>
+
+    <!-- ===================== _shared/charts ===================== -->
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/charts/ChartTooltip.tsx" type="shared-primitive">
+      Canonical dark-card tooltip primitive (Andrew universal-design rule 2026-05-13): ChartTooltip,
+      ChartTooltipRow, ChartTooltipDivider, ChartTooltipSubsection.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/charts/NnaBarLineChart.tsx" type="shared-primitive">
+      Canonical NNA diverging-bars + amber net-line ComposedChart primitive (+ NnaTooltipBody);
+      netOnly mode for gross-less series.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/charts/index.ts" type="barrel">
+      Live barrel for charts primitives (ChartTooltip* + NnaBarLineChart exports).
+    </file>
+
+    <!-- ===================== _shared/{lib,hooks,constants,types} ===================== -->
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/lib/composition.ts" type="utility">
+      Pure composition normalizers (mix/concentration) shared by ClientsTab + AdvisorBookView
+      (ADVI_PROFIL.005 extraction).
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/lib/feeBucket.ts" type="utility">
+      Cross-firm fee-view projection primitives (INFFIN.011) over PlatinumLeaderboardEntry + optional
+      book snapshot.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/lib/nmncBucketing.ts" type="utility">
+      NMCOHT per-HH inception cohort bucketing (FE companion to DS 2e45c8e25) — replaces legacy
+      rolling-365d NMNC reads per Andrew no-rolling directive 2026-05-14.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/lib/clientName.ts" type="utility">
+      "Last, First" -> "First Last" display flip for gold-emitted relationship names.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/hooks/useTenantLayout.ts" type="hook">
+      Per-firm TenantLayoutConfig map + hook; unknown firmIds fall through to DEFAULT_LAYOUT. Keys on
+      L1 canonical namespace post-SHARED.006 Commit B.
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/constants/window-anchors.ts" type="constants">
+      Shared "Max" window anchor = 2021 Q1 across ADVI (Andrew direct 2026-05-14).
+    </file>
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/types/TenantLayoutConfig.ts" type="types">
+      TenantLayoutConfig contract (389L): tab gates, panel gates/overlays (dataSourcePanel.overlay),
+      custodian, static-timeseries flags. Replaces scattered firmId conditionals.
+    </file>
   </files>
 
   <api_calls>
-    <!-- =====================================================================
-         Page-level (partner analytics + cumulative)
-         ===================================================================== -->
-    <api_call>
-      <name>Platinum Partner Analytics</name>
-      <hook>useQuery</hook>
-      <query_key>platinum-partner-analytics</query_key>
-      <function>getPlatinumPartnerAnalytics(firmOverride?)</function>
-      <endpoint>/api/scoped/advisor-intelligence/platinum/firm/partner_analytics.json</endpoint>
-      <method>GET</method>
-      <response_shape>PlatinumPartnerAnalyticsResponse: views { aua, nna, geo, adv, ofc, cla? } each with donut + distribution + metrics. Time machine periods.</response_shape>
-      <file>AdvisorIntelligence.tsx (page-level fetch, prop to PartnerAnalytics + DistributionTab)</file>
-    </api_call>
-    <api_call>
-      <name>Platinum Cumulative Chart</name>
-      <hook>useQuery</hook>
-      <query_key>platinum-cumulative-chart</query_key>
-      <function>getPlatinumCumulativeChart(firmOverride?)</function>
-      <endpoint>/api/scoped/advisor-intelligence/platinum/firm/cumulative_chart.json</endpoint>
-      <method>GET</method>
-      <response_shape>PlatinumCumulativeChartResponse: weekly-sampled geo/adv/ofc/nna timeseries. Replaces daily timeseries_chart.json (~7x smaller).</response_shape>
-      <file>DistributionTab.tsx (continuous view)</file>
-    </api_call>
+    <!-- LIVE set: 26 functions in src/api/endpoints/advisor-intelligence.ts with verified consumers
+         (per-function reference grep at 61e1677f). Endpoint shown where a literal path exists in the
+         function body; "(constructed)" = path built via helper/template — see the endpoints file. -->
+    <surface name="header / firm analytics">
+      <fn name="getPlatinumPartnerAnalytics" endpoint="/api/scoped/advisor-intelligence/platinum/firm/partner_analytics_{suffix}.json" consumers="router-level tenant views (49financial, cottonwood, demo, inflection), PartnerAnalytics, DistributionTab, AuthContext (prefetch)"/>
+      <fn name="getTimeseriesOverview" endpoint="/api/scoped/advisor-intelligence/platinum/firm/timeseries_overview.json" consumers="PartnerAnalytics, DistributionTab, AuthContext (prefetch)"/>
+      <fn name="getHeaderMetricsFresh" endpoint="/api/scoped/advisor-intelligence/platinum/firm/header_metrics_fresh.json" consumers="PartnerAnalytics"/>
+      <fn name="getCumulativeChart" endpoint="/api/scoped/advisor-intelligence/artifacts/timeseries_chart.json" consumers="PartnerAnalytics (legacy daily series, Assets Overview)"/>
+      <fn name="getPlatinumInflecTimeseriesChart" endpoint="/api/scoped/advisor-intelligence/platinum/firm/timeseries_chart.json" consumers="PartnerAnalytics"/>
+      <fn name="getFirmMixViews" endpoint="/api/scoped/partners/books/firm/all/mix-views?firmId=..." consumers="PartnerAnalytics"/>
+    </surface>
+    <surface name="distribution">
+      <fn name="getPlatinumCumulativeChart" endpoint="/api/scoped/advisor-intelligence/platinum/firm/cumulative_chart.json" consumers="DistributionTab, AuthContext (prefetch)"/>
+      <fn name="getPlatinumAdvisorNnaClients" endpoint="(constructed)" consumers="DistributionTab"/>
+      <fn name="getAdvisorNnaCanonical" endpoint="platinum/firm/header_metrics_fresh.json (advisor projection)" consumers="DistributionTab, AdvisorAnalytics, AdvisorPublicProfile"/>
+      <fn name="getCohortASummary" endpoint="(constructed)" consumers="49financial + demo tenant views"/>
+    </surface>
+    <surface name="advisors / profile">
+      <fn name="getFirmLeaderboard" endpoint="/api/scoped/advisor-intelligence/platinum/firm/leaderboard.json" consumers="AdvisorsTab, ClientsTab, 49financial/demo/inflection tenant views"/>
+      <fn name="getPlatinumAdvisorDrilldownSummary" endpoint="/api/scoped/partners/books/advisor/{advisorId}/platinum-summary" consumers="AdvisorPublicProfile"/>
+      <fn name="getPlatinumAdvisorTimeseries" endpoint="(constructed)" consumers="AdvisorPublicProfile, AdvisorAnalytics"/>
+      <fn name="getAdvisorExecSummary" endpoint="(constructed)" consumers="AdvisorPublicProfile"/>
+      <fn name="getAdvisorMixViews" endpoint="/api/scoped/advisor-intelligence/advisors/{advisorId}/mix-views?firmId=..." consumers="AdvisorAnalytics"/>
+    </surface>
+    <surface name="books (N1/L2/L3/L4)">
+      <fn name="getPlatinumFirmDashboard" endpoint="(constructed; split-mode parallel sub-fetches)" consumers="ClientsTab N1, AuthContext (prefetch)"/>
+      <fn name="getPlatinumFirmMixSummary" endpoint="(constructed)" consumers="ClientsTab, AuthContext (prefetch)"/>
+      <fn name="getClientDirectory" endpoint="(constructed)" consumers="ClientsTab"/>
+      <fn name="getHeaderMetrics" endpoint="/api/scoped/advisor-intelligence/artifacts/summary/header_metrics.json" consumers="ClientsTab"/>
+      <fn name="getPlatinumAdvisorSummary" endpoint="/api/scoped/partners/books/advisor/{advisorId}/platinum-summary" consumers="AdvisorBookView, AdvisorPublicProfile, ClientsTab, DistributionTab"/>
+      <fn name="getPlatinumClientSummary" endpoint="/api/scoped/partners/books/relationship/{clientKey}/platinum-summary" consumers="AdvisorBookView, ClientsTab"/>
+      <fn name="getPlatinumClientDetailStatic" endpoint="(constructed; Inflection static path)" consumers="AdvisorBookView, ClientsTab, inflection layout"/>
+      <fn name="getPlatinumAccountSummary" endpoint="(constructed)" consumers="AdvisorBookView, ClientsTab (L4 modal data)"/>
+      <fn name="getPlatinumAccountTimeseriesStatic" endpoint="(constructed; INF_D_09 per-account artifact)" consumers="AdvisorBookView, ClientsTab (L4 modal data)"/>
+    </surface>
+    <surface name="inflection BI">
+      <fn name="getInflectionActivityScan" endpoint="(constructed: platinum/firm/activity_scan_{qtd|ytd|1y|max}.json)" consumers="InflectionInsightsPanel"/>
+      <fn name="getInflectionCashDrag" endpoint="(constructed)" consumers="InflectionInsightsPanel"/>
+      <fn name="getInflectionFirmConcentrations" endpoint="(constructed)" consumers="InflectionInsightsPanel"/>
+    </surface>
 
-    <!-- =====================================================================
-         Advisors tab
-         ===================================================================== -->
-    <api_call>
-      <name>Firm Leaderboard (Platinum)</name>
-      <hook>useQuery</hook>
-      <query_key>firm-leaderboard</query_key>
-      <function>getFirmLeaderboard(firmOverride?)</function>
-      <endpoint>/api/scoped/advisor-intelligence/platinum/firm/leaderboard.json</endpoint>
-      <method>GET</method>
-      <response_shape>PlatinumLeaderboardResponse: windows Record of PlatinumLeaderboardWindow. Each entry has role_breakdown: Record&lt;string, PlatinumRoleBreakdown&gt; with per-role AUA/NNA/fee partitions (fee_paying/no_fee sub-buckets added DS W6-005).</response_shape>
-      <file>AdvisorsTab.tsx (replaces getArchitectLeaderboard + getImplementorLeaderboard)</file>
-    </api_call>
-
-    <!-- =====================================================================
-         Advisor public profile + book
-         ===================================================================== -->
-    <api_call>
-      <name>Platinum Advisor Drilldown Summary</name>
-      <hook>useQuery</hook>
-      <query_key>platinum-advisor-drilldown</query_key>
-      <function>getPlatinumAdvisorDrilldownSummary(advisorId, firmOverride?)</function>
-      <endpoint>/api/scoped/advisor-intelligence/platinum/advisors/{advisorId}/drilldown_summary.json</endpoint>
-      <method>GET</method>
-      <response_shape>AdvisorDrilldownSummary: identity, role breakdown donut, headline AUA/NNA/fee metrics, role_composition.</response_shape>
-      <file>AdvisorPublicProfile.tsx</file>
-    </api_call>
-    <api_call>
-      <name>Platinum Advisor Timeseries</name>
-      <hook>useQuery</hook>
-      <query_key>platinum-advisor-timeseries</query_key>
-      <function>getPlatinumAdvisorTimeseries(advisorId, firmOverride?)</function>
-      <endpoint>/api/scoped/advisor-intelligence/platinum/advisors/{advisorId}/timeseries.json</endpoint>
-      <method>GET</method>
-      <response_shape>AdvisorTimeseriesResponse: array of AdvisorTimeseriesPoint { date, aua_by_role, inflows_canonical, outflows_canonical, nna_canonical }.</response_shape>
-      <file>AdvisorPublicProfile.tsx</file>
-    </api_call>
-    <api_call>
-      <name>Advisor Book</name>
-      <hook>useQuery</hook>
-      <function>getAdvisorBook(advisorId, firmOverride?)</function>
-      <endpoint>/api/scoped/advisor-intelligence/artifacts/advisors/{advisorId}/book.json</endpoint>
-      <method>GET</method>
-      <response_shape>AdvisorBookResponse: summary, nna, growth, tax_exposure, income_fees, portfolio_composition, engagement, clients[].</response_shape>
-      <file>AdvisorBookView.tsx, ClientsTab.tsx</file>
-    </api_call>
-    <api_call>
-      <name>Platinum Firm Dashboard</name>
-      <hook>useQuery</hook>
-      <function>getPlatinumFirmDashboard(firmOverride?)</function>
-      <endpoint>/api/scoped/advisor-intelligence/platinum/firm/dashboard.json (split-mode fetches leaderboard + fee_efficiency + clients_tab in parallel)</endpoint>
-      <method>GET</method>
-      <response_shape>PlatinumFirmDashboard: leaderboard, fee_efficiency, clients_tab. Split mode issues sub-requests.</response_shape>
-      <file>ClientsTab.tsx (N1 firm dashboard)</file>
-    </api_call>
-    <api_call>
-      <name>Advisor Fee Efficiency</name>
-      <hook>useQuery (part of firm dashboard split)</hook>
-      <function>getAdvisorFeeEfficiency(firmOverride?)</function>
-      <endpoint>/api/scoped/advisor-intelligence/platinum/firm/fee_efficiency.json</endpoint>
-      <method>GET</method>
-      <response_shape>FeeEfficiencyResponse: scatter plot data points { name, nna, revenue, aua, growth_pct, advisor_id }.</response_shape>
-      <file>tabs/FeeEfficiencyPanel.tsx</file>
-    </api_call>
-
-    <!-- =====================================================================
-         Books tab (L3/L4 detail)
-         ===================================================================== -->
-    <api_call>
-      <name>Clients Tab (Book View)</name>
-      <function>getClientsTab(firmOverride?)</function>
-      <endpoint>/api/scoped/advisor-intelligence/artifacts/clients_tab.json</endpoint>
-      <method>GET</method>
-      <response_shape>ClientsTabResponse: headline, tax, income_fees, portfolio, engagement, clients: ClientOption[].</response_shape>
-      <file>ClientsTab.tsx</file>
-    </api_call>
-    <api_call>
-      <name>Books Client Detail</name>
-      <function>getBooksClientDetail(clientKey, firmOverride?)</function>
-      <endpoint>/api/scoped/advisor-intelligence/artifacts/clients/{clientKey}.json</endpoint>
-      <method>GET</method>
-      <response_shape>BooksClientDetailResponse: headline, tax, income_fees, portfolio, engagement, accounts[].</response_shape>
-      <file>AdvisorBookClientDetail.tsx, ClientsTab.tsx</file>
-    </api_call>
-    <api_call>
-      <name>Books Relationship Composition</name>
-      <function>getBooksRelationshipComposition(relationshipId, firmOverride?)</function>
-      <endpoint>/api/scoped/partners/books/relationship/{relationshipId}/composition</endpoint>
-      <method>GET</method>
-      <response_shape>BooksCompositionResponse: mix[], concentration { top_n, items, other }, unclassified.</response_shape>
-      <file>AdvisorBookClientDetail.tsx</file>
-    </api_call>
-    <api_call>
-      <name>Books Advisor Composition</name>
-      <function>getBooksAdvisorComposition(advisorId, firmOverride?)</function>
-      <endpoint>/api/scoped/partners/books/advisor/{advisorId}/composition</endpoint>
-      <method>GET</method>
-      <response_shape>BooksCompositionResponse (same shape as relationship)</response_shape>
-      <file>AdvisorBookView.tsx</file>
-    </api_call>
-    <api_call>
-      <name>Books Account Composition</name>
-      <function>getBooksAccountComposition(accountId, firmOverride?)</function>
-      <endpoint>/api/scoped/partners/books/account/{accountId}/composition</endpoint>
-      <method>GET</method>
-      <response_shape>BooksCompositionResponse (same shape)</response_shape>
-      <file>UNUSED — sole consumer AdvisorBookAccountDetail deleted in D5 ORPHAN-AI 2026-06-12; endpoint function remains in advisor-intelligence.ts (dead-function sweep candidate, DE lane).</file>
-    </api_call>
-    <api_call>
-      <name>Books Relationship Timeseries</name>
-      <function>getBooksRelationshipTimeseries(relationshipId, firmOverride?)</function>
-      <endpoint>/api/scoped/partners/books/relationship/{relationshipId}/timeseries</endpoint>
-      <method>GET</method>
-      <response_shape>BooksTimeseriesResponse: data: BooksTimeseriesPoint[].</response_shape>
-      <file>AdvisorBookClientDetail.tsx</file>
-    </api_call>
-    <api_call>
-      <name>Books Account Timeseries</name>
-      <function>getBooksAccountTimeseries(accountId, firmOverride?)</function>
-      <endpoint>/api/scoped/partners/books/account/{accountId}/timeseries</endpoint>
-      <method>GET</method>
-      <response_shape>BooksTimeseriesResponse (same shape)</response_shape>
-      <file>UNUSED — sole consumer AdvisorBookAccountDetail deleted in D5 ORPHAN-AI 2026-06-12; endpoint function remains in advisor-intelligence.ts (dead-function sweep candidate, DE lane). getMixTimeseries/getConcentrationTimeseries similarly consumer-less since the ClientDetail panels deletion.</file>
-    </api_call>
-
-    <!-- =====================================================================
-         Legacy / unused (kept for reference)
-         ===================================================================== -->
-    <api_call>
-      <name>Architect Leaderboard (LEGACY)</name>
-      <function>getArchitectLeaderboard()</function>
-      <endpoint>/api/scoped/advisor-intelligence/artifacts/architect_leaderboard.json</endpoint>
-      <method>GET</method>
-      <response_shape>LeaderboardResponse (roles-split shape, pre-ADVI_REBORN)</response_shape>
-      <file>UNUSED in current AdvisorsTab — replaced by getFirmLeaderboard. May remain in ClientsTab legacy path.</file>
-    </api_call>
-    <api_call>
-      <name>Implementor Leaderboard (LEGACY)</name>
-      <function>getImplementorLeaderboard()</function>
-      <endpoint>/api/scoped/advisor-intelligence/artifacts/implementor_leaderboard.json</endpoint>
-      <method>GET</method>
-      <response_shape>LeaderboardResponse</response_shape>
-      <file>UNUSED in current AdvisorsTab — replaced by getFirmLeaderboard.</file>
-    </api_call>
-    <api_call>
-      <name>Cumulative Chart (LEGACY)</name>
-      <function>getCumulativeChart(firmOverride?)</function>
-      <endpoint>/api/scoped/advisor-intelligence/artifacts/timeseries_chart.json</endpoint>
-      <method>GET</method>
-      <response_shape>CumulativeChartResponse (daily, pre-platinum)</response_shape>
-      <file>LEGACY — replaced by getPlatinumCumulativeChart() for DistributionTab; still consumed by PartnerAnalytics.tsx (Assets Overview). AssetIntelligenceTab reference gone (deleted D5 ORPHAN-AI).</file>
-    </api_call>
-
-    <!-- =====================================================================
-         Inflection partner — Business Intelligence panel (InflectionInsightsPanel)
-         ===================================================================== -->
-    <api_call>
-      <name>Inflection Activity Scan (per-window)</name>
-      <hook>useQuery</hook>
-      <query_key>inflection-activity-scan, firmOverride, selectedWindow</query_key>
-      <function>getInflectionActivityScan(firmOverride?, window='1y')</function>
-      <endpoint>/api/scoped/advisor-intelligence/platinum/firm/activity_scan_{qtd|ytd|1y|max}.json</endpoint>
-      <method>GET</method>
-      <response_shape>InflectionActivityScanRow[]: { household_id, aua, txn_count, activity_score, segment }. txn_count is window-scoped (DS INF_D_05.activity_scan.py emits one file per window). Was txn_count_12m on the legacy single-window activity_scan.json — retired by ADVI_BIWNDW activity-scan window wiring 2026-05-18.</response_shape>
-      <file>_partners/inflection/InflectionInsightsPanel.tsx (Business Intelligence panel, Trade Activity lens — scatter + table)</file>
-    </api_call>
+    <dead_functions count="31" note="Exported from advisor-intelligence.ts with ZERO references outside
+      the endpoints file (direct-name grep at 61e1677f). Flagged to DE 2026-06-12 as DC-sweep candidates
+      (shared file = DE lane; verify with resolved-path tooling before deleting):
+      getAdvisorBook, getAdvisorFeeEfficiency, getAdvisorMixTimeseries, getAdvisorTimeseries,
+      getAllowedPartners, getBooksAccountComposition, getBooksAccountTimeseries,
+      getBooksAdvisorComposition, getBooksClientDetail, getBooksFirmComposition,
+      getBooksRelationshipComposition, getBooksRelationshipTimeseries, getClientDetail,
+      getClientGrowth, getClientsTab, getConcentrationTimeseries, getEmployeeLeaderboard, getFilters,
+      getFirmMixTimeseries, getHeaderSummary, getInflectionConcentrationRisk, getMixTimeseries,
+      getPlatinumClientConcentration, getPlatinumClientMixTimeseries, getRelationshipCompositionStatic,
+      getRelationshipMixViews, getSnapshot, getTaxBreakdown, getTaxDeferredCandidates, getTimeSeries
+      (+1: see endpoints file for the full export census)."/>
   </api_calls>
 
-  <shared_imports>
-    <import>
-      <from>@/ui/components/panels</from>
-      <exports>Panel, PanelHeader, PanelContent, PanelFooter, PanelGrid, NestedCard</exports>
-      <used_in>AdvisorIntelligence.tsx, DistributionTab.tsx, AdvisorsTab.tsx, ClientsTab.tsx, AdvisorPublicProfile.tsx, AdvisorBookView.tsx, panels/*</used_in>
-    </import>
-    <import>
-      <from>@/components/LoadingSpinner</from>
-      <exports>LoadingInline</exports>
-      <used_in>DistributionTab.tsx, AdvisorsTab.tsx, ClientsTab.tsx, AdvisorPublicProfile.tsx</used_in>
-    </import>
-    <import>
-      <from>@/components/ErrorBoundary</from>
-      <exports>ErrorBoundary</exports>
-      <used_in>AdvisorIntelligence.tsx</used_in>
-    </import>
-    <import>
-      <from>@/components/DataTooltip</from>
-      <exports>DataTooltip, DataTooltipRow</exports>
-      <used_in>AdvisorPublicProfile.tsx, DistributionTab.tsx</used_in>
-    </import>
-    <import>
-      <from>@/components/HelperTip</from>
-      <exports>HelperTip</exports>
-      <used_in>AdvisorPublicProfile.tsx</used_in>
-    </import>
-    <import>
-      <from>@/hooks/useAuth</from>
-      <exports>useAuth</exports>
-      <used_in>ClientsTab.tsx, AdvisorPublicProfile.tsx, AdvisorBookView.tsx</used_in>
-    </import>
-    <import>
-      <from>@/lib/universalNumberFormatter</from>
-      <exports>formatCurrency, formatNumberTo3Digits</exports>
-      <used_in>DistributionTab.tsx, AdvisorsTab.tsx, ClientsTab.tsx, AdvisorPublicProfile.tsx, panels/*</used_in>
-    </import>
-    <import>
-      <from>@/lib/chartColors</from>
-      <exports>PALETTE, NNA_BAR, SURFACE, ADVISOR_ROLE_COLORS, ADVISOR_ROLE_LABELS, withOpacity</exports>
-      <used_in>AdvisorsTab.tsx, AdvisorPublicProfile.tsx, DistributionTab.tsx</used_in>
-    </import>
-    <import>
-      <from>@/api/endpoints/advisor-intelligence</from>
-      <exports>getPlatinumPartnerAnalytics, getPlatinumCumulativeChart, getFirmLeaderboard, getPlatinumAdvisorDrilldownSummary, getPlatinumAdvisorTimeseries, getPlatinumFirmDashboard, getAdvisorBook, getClientsTab, getBooksClientDetail, getBooksRelationshipComposition, getBooksAdvisorComposition, getBooksAccountComposition, getBooksRelationshipTimeseries, getBooksAccountTimeseries, getAdvisorFeeEfficiency, getMixTimeseries, getConcentrationTimeseries, getAdvisorMixTimeseries, (+ legacy: getCumulativeChart, getArchitectLeaderboard, getImplementorLeaderboard)</exports>
-      <used_in>All tabs and subpages</used_in>
-    </import>
-    <import>
-      <from>recharts</from>
-      <exports>AreaChart, Area, BarChart, Bar, ComposedChart, Line, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, ReferenceLine, LineChart, PieChart, Pie, ScatterChart, Scatter</exports>
-      <used_in>DistributionTab.tsx, AdvisorsTab.tsx, AdvisorPublicProfile.tsx, tabs/FeeEfficiencyPanel.tsx, panels/*</used_in>
-    </import>
-    <import>
-      <from>react-apexcharts</from>
-      <exports>Chart (lazy loaded via React.lazy)</exports>
-      <used_in>DistributionTab.tsx (snapshot donut), AdvisorPublicProfile.tsx, panels/ConsolidatedOverviewPanel.tsx</used_in>
-    </import>
-    <import>
-      <from>lucide-react</from>
-      <exports>Brain, Trophy, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, ArrowLeft, User, BookOpen, LogIn, Search, HelpCircle, Building2, etc.</exports>
-      <used_in>Various components</used_in>
-    </import>
-    <import>
-      <from>@tanstack/react-query</from>
-      <exports>useQuery</exports>
-      <used_in>AdvisorIntelligence.tsx, AdvisorsTab.tsx, AdvisorPublicProfile.tsx, ClientsTab.tsx</used_in>
-    </import>
-  </shared_imports>
-
   <page_structure>
-    <tab name="Distribution" status="functional">
-      Dual-mode: Snapshot and Continuous.
-      Cohort toggle: GEO / ADV / OFC (3-way; OFC added ADVI_OFFICE W3, portal DEV commit 7dd0a7e — not yet on PROD).
-      Metric toggle: AUA / NNA (CLA removed).
-      Snapshot: ApexCharts donut (lazy), time machine strip (quarterly/annual), bell curve histogram
-      (P10/P25/P50/P75/P90), drill-down (state->city for GEO, architect->client for ADV, office->advisor for OFC).
-      NNA diverging colors at city drill level (commit 3ae13c9).
-      Continuous: Recharts ComposedChart stacked area + NNA diverging bars, window toggle (1Y/3Y/Max),
-      hero metrics panel, legend. OFC continuous parity fixes pending (ADVI_OFFICE W6, DE staged).
-      Window toggle grayed in Snapshot mode (commit 4d9f50e + 4150822).
-    </tab>
-    <tab name="Advisors" status="functional">
-      Unified all-roles view using PlatinumLeaderboardResponse.
-      Role filter checkboxes (5 roles, all checked by default).
-      Fee view filter: All / Fee-Paying / No Fee.
-      Metric toggle: AUA / NNA / GRO. Window toggle: 3M / 6M / 1Y / 2Y / 3Y.
-      Top 3 highlights panel with QTD/YTD/1Y/Max selector.
-      Leaderboard cards: Rank badge, Name, Primary Type badge (AUA-dominant role, commit a30c403),
-      NNA, AUA, Growth%, New Clients.
-      Click card -> opens AdvisorPublicProfile inline (admin-gated).
-      Pinned bottom rows: 49F House, Unassigned (opacity-40, no drill).
-    </tab>
-    <tab name="Books" status="functional">
-      Admin-gated (isFirmAdmin).
-      N1 (firm dashboard): AdvisorSummaryTable + FeeEfficiencyPanel scatter plot.
-      L2 (advisor): AdvisorBookView — book overview, ClientListPanel.
-      L3 (client): AdvisorBookClientDetail — client summary, accounts, Mix+Concentration pies,
-      compact AUA/NNA chart, tax intel, open lots, engagement.
-      L4 (account): AdvisorBookAccountModal — constructed into AdvisorBookClientDetail's
-      accountDetailSlot (modal superseded the inline AccountDetail renderer, INFSHIP Phase 2).
-      All levels use CanonicalBookView orchestrator + ConsolidatedOverviewPanel for consistent layout.
-    </tab>
-    <!-- AssetIntelligence tab (legacy-unwired since v5) deleted in D5 ORPHAN-AI 2026-06-12. -->
+    <router>index.tsx PARTNER_VIEWS: internal/dev users get firm selector (49financial | inflection |
+      cottonwood | demo); external users pinned to claims.firmId; fallback 49financial.</router>
+    <tenant name="49financial" tabs="Distribution, Advisors, Books">v5 exemplar; BD-pipeline native;
+      5-role taxonomy; PartnerAnalytics header.</tenant>
+    <tenant name="demo" tabs="Distribution, Advisors, Books">Mirrors 49F; z-pseudonymized
+      opal-data-demo ("Lone Pine Analytics").</tenant>
+    <tenant name="inflection" tabs="Distribution, Advisors, Books + InflectionInsightsPanel (BI)">
+      Firm-centric; rep/firm roles; FidelityCustodianBar overlay; static per-account timeseries.</tenant>
+    <tenant name="cottonwood" tabs="Distribution only (OUTCOME-B v1)">Advisors/Books suppressed —
+      no segmentable advisor dimension yet (ADVI_PRTORG §6.1).</tenant>
+    <books_drill>N1 firm dashboard -> L2 AdvisorBookView (ConsolidatedOverviewPanel + ClientListPanel)
+      -> L3 AdvisorBookClientDetail (slot-composed) -> L4 AdvisorBookAccountModal in accountDetailSlot.
+      CanonicalBookView orchestrates the 3-row framework at every level.</books_drill>
   </page_structure>
 
   <lifecycle_and_state>
     <state_management>
-      Page-level: React Query (TanStack Query) for getPlatinumPartnerAnalytics.
-      AdvisorsTab: React Query (getFirmLeaderboard). Local state for role filter, fee view, metric,
-      window, selectedAdvisorId (drill), sort, search.
-      DistributionTab: Local state for viewStyle, cohort (geo/adv/ofc), metric (aua/nna), timePeriod,
-      drill keys (selectedStateKey, selectedCityKey, selectedArchitectKey, selectedClientKey,
-      selectedOfficeKey), window. React Query for getPlatinumCumulativeChart.
-      ClientsTab: React Query for getPlatinumFirmDashboard. Local state for drill hierarchy.
-      AdvisorPublicProfile: React Query for advisor drilldown summary + timeseries.
-      All S3 static files via portal-proxy (CloudFront -> S3 opal-data-portal-v2).
+      TanStack React Query throughout (some surfaces prefetched from AuthContext). Tenant divergence
+      via useTenantLayout() TenantLayoutConfig flags, never firmId conditionals in shared components.
+      Drill state (selectedAdvisorId / selectedClientKey / selectedAccountId) owned by the fetch-owning
+      parents (ClientsTab, AdvisorBookView); shared RFS window lifted so toggles persist across L2/L3.
+      Cross-panel height sync via SyncedHeightProvider/useSyncedHeight at L3.
     </state_management>
-    <data_flow>
-      1. Page mounts -> getPlatinumPartnerAnalytics fires -> PartnerAnalytics header renders
-      2. Distribution tab mounts -> getPlatinumCumulativeChart fires
-      3. Advisors tab mounts -> getFirmLeaderboard fires
-      4. Books tab mounts -> getPlatinumFirmDashboard fires (split mode: leaderboard + fee_efficiency + clients_tab)
-      5. Advisor card click -> selectedAdvisorId set -> AdvisorPublicProfile renders with
-         getPlatinumAdvisorDrilldownSummary + getPlatinumAdvisorTimeseries
-      6. Drill-down: OFC/GEO/ADV cohort click -> nested drill state updated -> donut segments + bell curve update
-      7. Time machine: click period strip -> timePeriod state updates -> historical snapshot renders
-    </data_flow>
   </lifecycle_and_state>
 
   <known_limitations>
-    <limitation>OFC cohort on portal DEV only (ADVI_OFFICE W3, commit 7dd0a7e). W6 DE parity fixes staged. W8 DT deploy pending after W5+W6+W7.</limitation>
-    <limitation>getArchitectLeaderboard/getImplementorLeaderboard remain in endpoints file but are no longer consumed by current AdvisorsTab — replaced by platinum endpoints. Post-D5-ORPHAN-AI additions to the dead-function set: getBooksAccountComposition, getBooksAccountTimeseries, getMixTimeseries, getConcentrationTimeseries (consumers deleted). Endpoints file is shared code — sweep is DE lane.</limitation>
-    <limitation>All data refreshed daily by bd-portal-publisher and bd-portal-advisor-publisher Lambdas. No real-time updates.</limitation>
-    <limitation>ClientsTab and Books admin gate: isFirmAdmin = isInternal() or isDev(). External firm admins cannot access Books tab.</limitation>
+    <limitation>31 dead endpoint functions in advisor-intelligence.ts (see dead_functions) — DE-lane
+      DC-sweep flagged 2026-06-12, coordinate post-v2.1.122.</limitation>
+    <limitation>Cottonwood v1 is Distribution-only; Advisors/Books re-enable blocked on a segmentable
+      COT advisor dimension (ADVI_PRTORG §5-A.1 REVISIT-LATER).</limitation>
+    <limitation>AdvisorAnalytics GRO mode pending DS publisher.</limitation>
+    <limitation>FidelityCustodianBar is static (99.4% PRD constant) until DS publishes a
+      custodian_concentration artifact.</limitation>
+    <limitation>All data daily-refreshed via the gold/platinum publishers; no real-time updates.</limitation>
   </known_limitations>
 
   <audit_summary>
-    <total_tsx_files>30</total_tsx_files>
-    <total_ts_files>5</total_ts_files>
-    <total_api_calls>18 active + 3 legacy</total_api_calls>
-    <total_shared_imports>14</total_shared_imports>
-    <total_tabs>3 active (Distribution, Advisors, Books)</total_tabs>
-    <files_added_since_last_audit>13 (AdvisorPublicProfile, AdvisorBookView, AdvisorBookClientDetail, AdvisorBookAccountDetail, tabs/FeeSummaryPanel, tabs/FeeRoleBreakdownPanel, tabs/FeeEfficiencyPanel, panels/CanonicalBookView, panels/ConsolidatedOverviewPanel, panels/ClientsTable, panels/TaxCostBasisPanel, panels/types, lib/composition)</files_added_since_last_audit>
-    <files_removed_2026_06_12>19 (D5 ORPHAN-AI deletion — see metadata update note)</files_removed_2026_06_12>
-    <completeness>File-entry set current to the 2026-06-12 D5 ORPHAN-AI deletion; counts and non-_shared paths reflect the 2026-04-14 audit — full path/count re-audit queued.</completeness>
+    <audited_head>portal DEV 61e1677f (2026-06-12)</audited_head>
+    <total_files>50 (26 .tsx + 24 .ts) — git ls-files enumeration</total_files>
+    <total_api_functions>57 exported (26 live with verified consumers + 31 dead)</total_api_functions>
+    <total_tenants>4 (49financial, inflection, cottonwood, demo)</total_tenants>
+    <total_tabs>Distribution, Advisors, Books (+ Inflection BI panel); per-tenant gating via TenantLayoutConfig</total_tabs>
+    <files_removed_2026_06_12>19 (D5 ORPHAN-AI — see metadata update note)</files_removed_2026_06_12>
+    <completeness>100% — all 50 live files entered with verified _shared/_partners paths; every entry
+      checked against the file's own doc header at 61e1677f.</completeness>
   </audit_summary>
-
 </page_inventory>
