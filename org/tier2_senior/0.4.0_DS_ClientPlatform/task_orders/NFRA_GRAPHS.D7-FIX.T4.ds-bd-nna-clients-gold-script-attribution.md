@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (D7 real_bug candidate #4, 164849Z RAVC2)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>active</status>
+<status>complete</status> -- VERDICT (read-only, no code change): comp-platinum's prefix-match to D_04::build_firm_mix_summary() is WRONG for all 3, in 2 ways. (1) nna_clients.json: D_04 IS the producer but via build_advisor_nna_clients() (writes L2653), NOT build_firm_mix_summary (which writes only platinum/firm/mix_summary.json L482) -> right SCRIPT, WRONG FUNCTION. (2) timeseries.json: D_04 producer via build_advisor_summaries() (writes L687) -> right SCRIPT, WRONG FUNCTION. (3) exec_summary.json: D_04 does NOT write it (only a stale-cleanup comment L708); REAL producer = the exec_summary_generator LAMBDA (aws_lambda_function.exec_summary_generator, infra/aws/lambda/exec-summary-generator/exec_summary/; nightly batch reads platinum/advisors/{id}/summary.json -> writes exec_summary.json; portal advisor-intelligence.ts:1352 confirms "nightly batch artifact") -> WRONG SCRIPT entirely (Lambda, not gold tree). Root cause: comp-platinum resolves by platinum/advisors/{id}/ PREFIX to the earliest D_04 function, not by full key->actual-writer; and it has no Lambda producers in its graph so Lambda-produced platinum artifacts get swept onto a prefix-sharing gold script. RAVC2 -> COO.
 <priority>medium — potential producer gap if D_04 is the wrong gold script for these per-advisor artifacts</priority>
 
 <scope>
