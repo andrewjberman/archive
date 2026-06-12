@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO ruling 984773e0e, 160643Z 2026-06-12)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>active</status>
+<status>complete</status>
 <priority>P1 — silent intraday data loss (bounded by nightly heal), bounded-scope fix, no architectural changes</priority>
 
 <references>
