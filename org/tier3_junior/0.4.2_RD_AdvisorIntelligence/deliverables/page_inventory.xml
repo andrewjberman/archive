@@ -6,6 +6,7 @@
     <directory>portal/src/pages/AdvisorIntelligence/</directory>
     <date>2026-04-14</date>
     <audit_scope>Full re-audit covering ADVI_REBORN, ADVI_PROFIL, ADVI_PROFAU, ADVI_OFFICE W1-W4 (portal DEV). Previous audit: 2026-03-16.</audit_scope>
+    <update date="2026-06-12">D5 ORPHAN-AI deletion pass (Andrew-approved, DE-applied on portal DEV): 19 dead AdvisorIntelligence files removed — AdvisorBookAccountDetail, panels/ClientsTable, tabs/AssetIntelligenceTab, tabs/FeeRoleBreakdownPanel, components/{HeaderMetrics, AUACompositionChart, AUATrendChart, DimensionSelector, MetricSelector}, the entire ClientDetail/ subtree (ClientDetailPage, types, panels/{AISummaryPanel, PortfolioBalancePanel, TimeSeriesPanel, MixTimeseriesPanel, ConcentrationPanel} + 2 barrels), and the _partners/inflection/overrides barrel. Their entries are dropped below and dependent narratives corrected. NOTE: file paths in this inventory predate the ADVI_INFLEC 9423f71e _shared/_partners refactor (live layout is portal/src/pages/AdvisorIntelligence/{_shared,_partners}/...); full path re-audit queued as a follow-up TO.</update>
   </metadata>
 
   <files>
@@ -66,21 +67,13 @@
       N1: AdvisorSummaryTable with 3d leaderboard-style card rows using PlatinumFirmDashboard.
       FeeEfficiencyPanel at N1 level.
       L2: AdvisorBookView (book overview for selected advisor).
-      L3/L4 drill chain delegated to AdvisorBookClientDetail / AdvisorBookAccountDetail.
+      L3 drill delegated to AdvisorBookClientDetail; L4 renders as AdvisorBookAccountModal
+      constructed into AdvisorBookClientDetail's accountDetailSlot.
       Uses CanonicalBookView orchestrator for consistent panel layout at all levels.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/tabs/AssetIntelligenceTab.tsx" type="tab-component">
-      LEGACY: Asset Intelligence tab. Cumulative NNA trend chart + snapshot table.
-      Not wired into main page tab navigation (v5). Present but unreachable.
     </file>
     <file path="portal/src/pages/AdvisorIntelligence/tabs/FeeSummaryPanel.tsx" type="tab-component">
       Fee Summary Panel for L3 (relationship) level. Left half of Row 3.
       Weighted avg fee headline + per-account fee table. Consumed by CanonicalBookView at L3.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/tabs/FeeRoleBreakdownPanel.tsx" type="tab-component">
-      Fee Role Breakdown Panel for L2 (advisor) level. Left half of Row 3.
-      ApexCharts donut showing role AUA breakdown + role legend with fee bps per role.
-      Consumed by CanonicalBookView at L2.
     </file>
     <file path="portal/src/pages/AdvisorIntelligence/tabs/FeeEfficiencyPanel.tsx" type="tab-component">
       Fee Efficiency Panel for N1 (firm dashboard). Recharts scatter plot:
@@ -101,8 +94,9 @@
     </file>
     <file path="portal/src/pages/AdvisorIntelligence/AdvisorBookView.tsx" type="subpage">
       Single-advisor book of business view. Owns L2 -> L3 -> L4 drill state chain.
-      L2: book overview (ConsolidatedOverviewPanel + FeeRoleBreakdownPanel + ClientsTable).
-      Delegates L3 to AdvisorBookClientDetail, L4 to AdvisorBookAccountDetail.
+      L2: book overview (ConsolidatedOverviewPanel + ClientListPanel).
+      Delegates L3 to AdvisorBookClientDetail; L4 renders as AdvisorBookAccountModal
+      constructed into the accountDetailSlot.
       Data: getAdvisorBook(advisorId), getBooksAdvisorComposition(advisorId), getAdvisorMixTimeseries().
     </file>
     <file path="portal/src/pages/AdvisorIntelligence/AdvisorBookClientDetail.tsx" type="subpage">
@@ -112,11 +106,12 @@
       Data: getBooksClientDetail(clientKey), getBooksRelationshipComposition(relationshipId),
       getBooksRelationshipTimeseries(relationshipId), getPlatinumClientSummary(clientKey).
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/AdvisorBookAccountDetail.tsx" type="subpage">
-      L4 account drill view. Pure renderer. Extracted from tabs/ClientsTab.tsx during ADVI_PROFIL.005.
-      Inline slot inside AdvisorBookClientDetail. Account-scoped composition pies, compact timeseries,
-      open lots. Data: getBooksAccountComposition(accountId), getBooksAccountTimeseries(accountId),
-      getPlatinumAccountSummary(accountId).
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/AdvisorBookAccountModal.tsx" type="subpage">
+      L4 account drill view (modal). Superseded the pre-modal inline AdvisorBookAccountDetail
+      renderer in the INFSHIP Phase-2 cutover (AdvisorBookAccountDetail deleted in D5 ORPHAN-AI).
+      Constructed by ClientsTab + AdvisorBookView into AdvisorBookClientDetail's accountDetailSlot.
+      Data fetched by parents: getPlatinumAccountSummary(accountId) + getPlatinumAccountTimeseriesStatic
+      (Inflection static per-account timeseries path).
     </file>
 
     <!-- =====================================================================
@@ -127,22 +122,10 @@
       time machine (quarterly snapshots), bell curve distribution, drill-down navigation,
       partner firm selector dropdown. Data from getPlatinumPartnerAnalytics() (prop passed from page).
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/components/HeaderMetrics.tsx" type="subcomponent">
-      Header metrics display (legacy). Total AUA, NNA periods, client counts, quarterly breakdowns.
-      Largely superseded by PartnerAnalytics but file still present.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/components/AUACompositionChart.tsx" type="subcomponent">
-      AUA composition donut/radial chart component. Used within PartnerAnalytics.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/components/AUATrendChart.tsx" type="subcomponent">
-      AUA trend stacked area chart. Rolling 12M NNA data visualization.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/components/DimensionSelector.tsx" type="subcomponent">
-      Dimension selector dropdown for grouping snapshot data (architect, region, tax_status, etc.).
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/components/MetricSelector.tsx" type="subcomponent">
-      Metric selector for NNA breakdown (NMNC, NMEC_NA, NMEC_SA, inflow, outflow, net).
-    </file>
+    <!-- v1-era header/selector components (HeaderMetrics, AUACompositionChart,
+         AUATrendChart, DimensionSelector, MetricSelector) deleted in D5 ORPHAN-AI
+         2026-06-12 — superseded by PartnerAnalytics multi-view + inline
+         DistributionTab cohort/metric toggles. -->
 
     <!-- =====================================================================
          Shared chart primitives (ADVI_INFFIN.001, 2026-05-13)
@@ -181,9 +164,9 @@
       Canonical header panel used at every book drill level. Renders headline AUA/NNA/fee metrics,
       client/account counts, date range. Shared between BooksTab and AdvisorBookView.
     </file>
-    <file path="portal/src/pages/AdvisorIntelligence/panels/ClientsTable.tsx" type="shared-panel">
-      Sorted client roster rows for L2 advisor book view. Extracted from ClientsTab.tsx (ADVI_PROFIL.005)
-      so BooksTab (admin) and AdvisorBookView (non-admin profile) share the same renderer.
+    <file path="portal/src/pages/AdvisorIntelligence/_shared/panels/ClientListPanel.tsx" type="shared-panel">
+      Sorted client roster rows for L2 advisor book view (AdvisorBookView). Superseded
+      panels/ClientsTable.tsx, which was deleted in D5 ORPHAN-AI 2026-06-12.
     </file>
     <file path="portal/src/pages/AdvisorIntelligence/panels/TaxCostBasisPanel.tsx" type="shared-panel">
       Cost basis and tax liability panel. Used at L3/L4 of book drilldown.
@@ -202,40 +185,11 @@
       for shared use by BooksTab and AdvisorBookView. Normalizes asset class mix, concentration data.
     </file>
 
-    <!-- =====================================================================
-         ClientDetail sub-page (legacy admin drill, still active)
-         ===================================================================== -->
-    <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/ClientDetailPage.tsx" type="subpage">
-      Legacy client detail drilldown page — individual client view with portfolio balance, AI summary,
-      time series panels. Route: /advisor-intelligence/clients/:clientKey.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/index.ts" type="barrel">
-      Barrel export for ClientDetailPage.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/types.ts" type="types">
-      Client detail specific types (legacy).
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/AISummaryPanel.tsx" type="subcomponent">
-      AI-generated executive summary panel for individual client.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/PortfolioBalancePanel.tsx" type="subcomponent">
-      Portfolio balance visualization panel.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/TimeSeriesPanel.tsx" type="subcomponent">
-      Time series chart panel for client AUA/NNA history.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/MixTimeseriesPanel.tsx" type="subcomponent">
-      100% stacked area chart (Recharts) showing asset class allocation over time. 5 series:
-      equity, fixed_income, structured_notes, cash, other. 1Y/3Y/Max window toggle.
-      Click area to filter selectedAssetClass. Fetches getMixTimeseries().
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/ConcentrationPanel.tsx" type="subcomponent">
-      Top-N holdings stacked area chart over time. Filtered by selectedAssetClass when set.
-      Fetches getConcentrationTimeseries(). "Top {top_n} Holdings" header from response.
-    </file>
-    <file path="portal/src/pages/AdvisorIntelligence/ClientDetail/panels/index.ts" type="barrel">
-      Barrel export for client detail panels.
-    </file>
+    <!-- ClientDetail/ sub-page subtree (ClientDetailPage, types, 5 panels, 2 barrels)
+         deleted in D5 ORPHAN-AI 2026-06-12 — the pre-AdvisorBook* client drill,
+         fully superseded by the AdvisorBookClientDetail chain; resolved-path census
+         confirmed 0 external inbound on all 9 files. The "still active" claim in the
+         2026-04-14 audit was already stale at the 9423f71e refactor. -->
   </files>
 
   <api_calls>
@@ -369,7 +323,7 @@
       <endpoint>/api/scoped/partners/books/account/{accountId}/composition</endpoint>
       <method>GET</method>
       <response_shape>BooksCompositionResponse (same shape)</response_shape>
-      <file>AdvisorBookAccountDetail.tsx</file>
+      <file>UNUSED — sole consumer AdvisorBookAccountDetail deleted in D5 ORPHAN-AI 2026-06-12; endpoint function remains in advisor-intelligence.ts (dead-function sweep candidate, DE lane).</file>
     </api_call>
     <api_call>
       <name>Books Relationship Timeseries</name>
@@ -385,7 +339,7 @@
       <endpoint>/api/scoped/partners/books/account/{accountId}/timeseries</endpoint>
       <method>GET</method>
       <response_shape>BooksTimeseriesResponse (same shape)</response_shape>
-      <file>AdvisorBookAccountDetail.tsx</file>
+      <file>UNUSED — sole consumer AdvisorBookAccountDetail deleted in D5 ORPHAN-AI 2026-06-12; endpoint function remains in advisor-intelligence.ts (dead-function sweep candidate, DE lane). getMixTimeseries/getConcentrationTimeseries similarly consumer-less since the ClientDetail panels deletion.</file>
     </api_call>
 
     <!-- =====================================================================
@@ -413,7 +367,7 @@
       <endpoint>/api/scoped/advisor-intelligence/artifacts/timeseries_chart.json</endpoint>
       <method>GET</method>
       <response_shape>CumulativeChartResponse (daily, pre-platinum)</response_shape>
-      <file>LEGACY — replaced by getPlatinumCumulativeChart(). May still be referenced in AssetIntelligenceTab.</file>
+      <file>LEGACY — replaced by getPlatinumCumulativeChart() for DistributionTab; still consumed by PartnerAnalytics.tsx (Assets Overview). AssetIntelligenceTab reference gone (deleted D5 ORPHAN-AI).</file>
     </api_call>
 
     <!-- =====================================================================
@@ -485,7 +439,7 @@
     <import>
       <from>react-apexcharts</from>
       <exports>Chart (lazy loaded via React.lazy)</exports>
-      <used_in>DistributionTab.tsx (snapshot donut), tabs/FeeRoleBreakdownPanel.tsx</used_in>
+      <used_in>DistributionTab.tsx (snapshot donut), AdvisorPublicProfile.tsx, panels/ConsolidatedOverviewPanel.tsx</used_in>
     </import>
     <import>
       <from>lucide-react</from>
@@ -525,16 +479,14 @@
     <tab name="Books" status="functional">
       Admin-gated (isFirmAdmin).
       N1 (firm dashboard): AdvisorSummaryTable + FeeEfficiencyPanel scatter plot.
-      L2 (advisor): AdvisorBookView — book overview, FeeRoleBreakdownPanel, ClientsTable.
+      L2 (advisor): AdvisorBookView — book overview, ClientListPanel.
       L3 (client): AdvisorBookClientDetail — client summary, accounts, Mix+Concentration pies,
       compact AUA/NNA chart, tax intel, open lots, engagement.
-      L4 (account): AdvisorBookAccountDetail — inline slot inside L3.
+      L4 (account): AdvisorBookAccountModal — constructed into AdvisorBookClientDetail's
+      accountDetailSlot (modal superseded the inline AccountDetail renderer, INFSHIP Phase 2).
       All levels use CanonicalBookView orchestrator + ConsolidatedOverviewPanel for consistent layout.
     </tab>
-    <tab name="AssetIntelligence" status="legacy-unwired">
-      Present as AssetIntelligenceTab.tsx but not wired into main page tab navigation (v5).
-      Unreachable from UI.
-    </tab>
+    <!-- AssetIntelligence tab (legacy-unwired since v5) deleted in D5 ORPHAN-AI 2026-06-12. -->
   </page_structure>
 
   <lifecycle_and_state>
@@ -563,8 +515,7 @@
 
   <known_limitations>
     <limitation>OFC cohort on portal DEV only (ADVI_OFFICE W3, commit 7dd0a7e). W6 DE parity fixes staged. W8 DT deploy pending after W5+W6+W7.</limitation>
-    <limitation>AssetIntelligenceTab.tsx present but not wired into tab navigation (v5).</limitation>
-    <limitation>getCumulativeChart and getArchitectLeaderboard/getImplementorLeaderboard remain in endpoints file but are no longer consumed by current AdvisorsTab/DistributionTab — replaced by platinum endpoints.</limitation>
+    <limitation>getArchitectLeaderboard/getImplementorLeaderboard remain in endpoints file but are no longer consumed by current AdvisorsTab — replaced by platinum endpoints. Post-D5-ORPHAN-AI additions to the dead-function set: getBooksAccountComposition, getBooksAccountTimeseries, getMixTimeseries, getConcentrationTimeseries (consumers deleted). Endpoints file is shared code — sweep is DE lane.</limitation>
     <limitation>All data refreshed daily by bd-portal-publisher and bd-portal-advisor-publisher Lambdas. No real-time updates.</limitation>
     <limitation>ClientsTab and Books admin gate: isFirmAdmin = isInternal() or isDev(). External firm admins cannot access Books tab.</limitation>
   </known_limitations>
@@ -574,9 +525,10 @@
     <total_ts_files>5</total_ts_files>
     <total_api_calls>18 active + 3 legacy</total_api_calls>
     <total_shared_imports>14</total_shared_imports>
-    <total_tabs>3 active (Distribution, Advisors, Books) + 1 legacy-unwired (AssetIntelligence)</total_tabs>
+    <total_tabs>3 active (Distribution, Advisors, Books)</total_tabs>
     <files_added_since_last_audit>13 (AdvisorPublicProfile, AdvisorBookView, AdvisorBookClientDetail, AdvisorBookAccountDetail, tabs/FeeSummaryPanel, tabs/FeeRoleBreakdownPanel, tabs/FeeEfficiencyPanel, panels/CanonicalBookView, panels/ConsolidatedOverviewPanel, panels/ClientsTable, panels/TaxCostBasisPanel, panels/types, lib/composition)</files_added_since_last_audit>
-    <completeness>100% — all 35 files in directory accounted for as of 2026-04-14</completeness>
+    <files_removed_2026_06_12>19 (D5 ORPHAN-AI deletion — see metadata update note)</files_removed_2026_06_12>
+    <completeness>File-entry set current to the 2026-06-12 D5 ORPHAN-AI deletion; counts and non-_shared paths reflect the 2026-04-14 audit — full path/count re-audit queued.</completeness>
   </audit_summary>
 
 </page_inventory>
