@@ -4,7 +4,7 @@
 <assigned_to>0.6.0_AE_PartnerETL</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO cleared no-scoping 141911Z; COT-FIX coverage gap surfaced 141659Z)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>pending</status>
+<status>complete -- 6bc1f1ce3 (code+config); comp-validate cot PASS + deployed cot MATCH verified; manifest patch = COO ANY_EXEC handoff (uncommitted)</status>
 <priority>Low — tooling coverage fill; no gate on cot cutovers; GO at capacity</priority>
 
 <references>
