@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO decompose handoff 232252Z + v0.4.1 delta 233040Z)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>staged</status>
+<status>complete</status>
 <priority>P1 — ungated; lands first, closes the frozen-vintage class (CVO verdict be17d49eb)</priority>
 
 <references>

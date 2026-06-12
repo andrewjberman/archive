@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO decompose handoff 232252Z)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>staged</status>
+<status>complete</status>
 <priority>P2 — after TO-F1; independent of the TO-F2 gate</priority>
 
 <references>
