@@ -281,6 +281,67 @@ def cmd_validate(data):
     sys.exit(0 if ok else 1)
 
 
+# P3.2: frontend-reachability gate. CTO-confirmed phantom class (scaffolded-but-not-mounted).
+_KNOWN_PHANTOMS = {"bd-time-machine"}  # Andrew-confirmed never-built (CTO canonical case)
+_PHANTOM_PAT = re.compile(r"scaffold|timemachineprovider|never (built|implemented|mounted|live)", re.I)
+
+
+def _fe_classify(t):
+    """Classify a thread's frontend reachability from its census frontend claim + portal/src
+    existence (P3.2). REACHABLE / FRONTEND-ORPHAN / BROKEN-REF / NAMED-UNVERIFIED / PHANTOM.
+    """
+    fe = (t.get("frontend_resolution") or "").strip()
+    fel = fe.lower()
+    if t.get("thread_id", "") in _KNOWN_PHANTOMS or _PHANTOM_PAT.search(fel):
+        return ("PHANTOM", "scaffolded but not mounted/live -> CVO adjudicate (Andrew-confirmed-phantom class)")
+    if not fe or fel.startswith("none") or fel.startswith("(none)"):
+        return ("FRONTEND-ORPHAN", "no portal consumer (debtscan frontend-orphan)")
+    paths = [p.rstrip(".,;)") for p in re.findall(r"portal/src/[\w./@-]+", fe)]
+    if not paths:
+        return ("NAMED-UNVERIFIED", "consumer named but no portal/src path to existence-check")
+    exist = [p for p in paths if os.path.exists(os.path.join(ROOT, p))]
+    if exist:
+        extra = f" (+{len(exist) - 1} more)" if len(exist) > 1 else ""
+        return ("REACHABLE", f"mounted: {exist[0]}{extra}")
+    return ("BROKEN-REF", f"names {paths[0]} but NOT found in portal/ -> verify (possible FE gap)")
+
+
+def cmd_fe_reachability(data, name=None):
+    """P3.2 frontend-reachability gate (CTO hybrid: tool automates + flags phantoms to CVO).
+
+    Per thread, automates the served-artifact -> portal-consumer -> mounted check by
+    existence-checking the census frontend claim against portal/src; flags the phantom class
+    (scaffolded-but-not-mounted, e.g. bd-time-machine) for CVO adjudication. Deeper MOUNTED
+    verification is comp-routes trace + comp-transform schema-check (the human drills in).
+    """
+    threads = data["threads"]
+    if name:
+        if name not in set(data["named_threads"]):
+            sys.stderr.write(f"pipescript: '{name}' is NOT a known named thread (see --list).\n")
+            sys.exit(2)
+        threads = [t for t in threads if t["named_thread"] == name]
+    rows = [(t["named_thread"], t["thread_id"], *_fe_classify(t)) for t in threads]
+    order = ["BROKEN-REF", "PHANTOM", "FRONTEND-ORPHAN", "NAMED-UNVERIFIED", "REACHABLE"]
+    summ = Counter(v for _, _, v, _ in rows)
+    print(f"pipescript --fe-reachability ({name or 'estate'}) - {len(rows)} threads")
+    print("=" * 78)
+    for v in order:
+        for nt, tid, vv, reason in rows:
+            if vv == v:
+                print(f"  [{v:<16}] {nt}/{tid}")
+                if v in ("BROKEN-REF", "PHANTOM", "NAMED-UNVERIFIED"):
+                    print(f"       {reason}")
+    print("-" * 78)
+    print("SUMMARY: " + " | ".join(f"{k} {summ.get(k, 0)}" for k in order))
+    phantoms = [f"{nt}/{tid}" for nt, tid, v, _ in rows if v == "PHANTOM"]
+    if phantoms:
+        print(f"PHANTOMS -> CVO adjudication ({len(phantoms)}): {', '.join(phantoms)}")
+    print(
+        "Note: REACHABLE = the named portal/src consumer exists; deeper MOUNTED verification "
+        "= comp-routes trace + comp-transform schema-check. PHANTOM/BROKEN-REF -> CVO."
+    )
+
+
 def cmd_debt(data):
     """P3.1: surface DEBTSCAN flags across the estate, grouped by named thread.
 
@@ -406,6 +467,9 @@ def main(argv):
         return 0
     if argv[0] == "--debt":
         cmd_debt(data)
+        return 0
+    if argv[0] == "--fe-reachability":
+        cmd_fe_reachability(data, argv[1] if len(argv) > 1 else None)
         return 0
     if argv[0] == "--list":
         cmd_list(data)
