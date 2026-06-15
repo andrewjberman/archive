@@ -114,6 +114,26 @@ def cmd_list(data):
     print(f"{'TOTAL':<20} {len(threads):>7}")
 
 
+def _drill_call(tool, threads):
+    """P1b.2 (CTO Option-A + call-string): the EXACT runnable sub-resolver command to drill
+    into a thread for live/deeper detail. pipescript stays READ-ONLY and renders the catalog
+    traversal; the human copy-pastes this to invoke the owning tool (F5 -- never re-run here).
+    """
+    sample = next((t["thread_id"] for t in threads if t["owning_tool"] == tool), "<resource>")
+    return {
+        "comp-pipescript": f"comp-pipescript io {sample} ; comp-pipescript deployed {sample}",
+        "globgrph": (
+            f"comp-kuzu \"MATCH (n)-[r]-(m) WHERE n.name CONTAINS '{sample}' "
+            f"RETURN n,r,m LIMIT 50\""
+        ),
+        "stitch": f"comp-stitch {sample}",
+        "portal-consumer-tools": (
+            "comp-routes trace <served-path> ; comp-transform schema-check <Component>"
+        ),
+        "none": "(ops/local -- no owning tool; explicit-out, nothing to drill)",
+    }.get(tool)
+
+
 def cmd_thread(data, name):
     threads = [t for t in data["threads"] if t["named_thread"] == name]
     resources = data.get("resources_by_named_thread", {}).get(name, [])
@@ -143,9 +163,12 @@ def cmd_thread(data, name):
         fe = _a(t.get("frontend_resolution") or "(none)")
         print(f"    -> frontend: {fe}")
     print("\n" + "-" * 78)
-    print("owning tools in this thread:")
+    print("owning tools in this thread (drill in for live detail -- pipescript stays read-only):")
     for tool, n in tc.most_common():
         print(f"  {n:>3}  {tool:<22} {OWNING_TOOLS.get(tool, '')}")
+        drill = _drill_call(tool, threads)
+        if drill:
+            print(f"       -> drill: {drill}")
     # Authoritative resource roster (CVO per-lambda taxonomy 26b32687a) - every lambda/resource
     # in this named thread, the single source the golden fixtures also derive from.
     if resources:
