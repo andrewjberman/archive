@@ -29,11 +29,16 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 from collections import Counter, defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 RESOLVER = os.path.join(ROOT, "org", "modules", "graph", "estate-coverage-resolver.json")
+GOLDEN_FIXTURES = os.path.join(
+    ROOT, "org", "tier1_exec", "3.0.0_SA_CVO", "logs", "2026-06-15",
+    "estate_census", "golden_fixtures.json",
+)
 
 OWNING_TOOLS = {
     "comp-pipescript": "comp-pipescript io/deployed/postdeps (medallion data-pipeline)",
@@ -235,10 +240,95 @@ def cmd_validate(data):
     sys.exit(0 if ok else 1)
 
 
+def cmd_gate_b(data, fixtures_path=None):
+    """Standing gate-b regression oracle (CVO extraction spec 2026-06-15T190748Z).
+
+    GATE-B (resource completeness, STRICT): per named thread, the resource set the CLI
+    surfaces (the resources_by_named_thread roster cmd_thread prints) must equal
+    golden_fixtures[<name>].resources EXACTLY -- no missing AND no extra. Also reports
+    producer-line TRAVERSAL coverage (how many of the expected resources are NAMED in the
+    thread's census producers vs surfaced roster-only); a roster-only resource is a gate-c
+    ASSIGNMENT row, NOT a gate-b traversal miss (per CVO's gate-b/gate-c split), so it never
+    fails gate-b. GATE-C (assignment, STRICT): every live resource -> exactly ONE named
+    thread (no double-claim). Exit 2 on any gate-b FAIL or gate-c double-claim; 0 only on
+    all-clean. Standing oracle: re-run after any resolver/manifest/fixture change.
+    """
+    fxpath = fixtures_path or GOLDEN_FIXTURES
+    try:
+        fixtures = json.load(open(fxpath, encoding="utf-8"))["fixtures"]
+    except (FileNotFoundError, KeyError, json.JSONDecodeError) as exc:
+        sys.stderr.write(f"pipescript --gate-b: cannot load fixtures at {fxpath} ({exc})\n")
+        sys.exit(3)
+    rbnt = data.get("resources_by_named_thread", {})
+    if not rbnt:
+        sys.stderr.write(
+            "pipescript --gate-b: resolver has no resources_by_named_thread roster "
+            "(regenerate from the authoritative per-lambda taxonomy).\n"
+        )
+        sys.exit(3)
+    vocab = sorted({r for rs in rbnt.values() for r in rs}, key=len, reverse=True)
+    threads_by_nt = defaultdict(list)
+    for t in data["threads"]:
+        threads_by_nt[t["named_thread"]].append(t)
+
+    def producer_named(name):
+        text = " ".join(
+            p for t in threads_by_nt.get(name, []) for p in (t.get("producers") or [])
+        )
+        return {
+            v for v in vocab
+            if re.search(r"(?<![\w-])" + re.escape(v) + r"(?![\w-])", text)
+        }
+
+    print(f"pipescript --gate-b (standing oracle; fixtures: {os.path.basename(fxpath)})")
+    print("=" * 78)
+    gb_fail = 0
+    for name in sorted(fixtures):
+        expected = set(fixtures[name].get("resources") or [])
+        surfaced = set(rbnt.get(name, []))
+        missing = expected - surfaced
+        extra = surfaced - expected
+        trav = expected & producer_named(name)
+        roster_only = len(expected) - len(trav)
+        ok = not missing and not extra
+        gb_fail += 0 if ok else 1
+        line = (
+            f"  [{'PASS' if ok else 'FAIL'}] {name:<20} {len(expected):>3} res | "
+            f"traversal {len(trav)}/{len(expected)}"
+        )
+        if roster_only:
+            line += f" (+{roster_only} roster-only=gate-c)"
+        if missing:
+            line += f" | MISSING {sorted(missing)}"
+        if extra:
+            line += f" | EXTRA {sorted(extra)}"
+        print(line)
+
+    assign = defaultdict(list)
+    for nt, rs in rbnt.items():
+        for r in rs:
+            assign[r].append(nt)
+    doubles = {r: nts for r, nts in assign.items() if len(nts) > 1}
+    print("-" * 78)
+    print(f"GATE-B: {len(fixtures) - gb_fail}/{len(fixtures)} named threads resource-complete (no missing/extra)")
+    print(
+        f"GATE-C: {len(assign)} live resources mapped; "
+        f"{len(doubles)} double-claimed"
+        + (f" {dict(list(doubles.items())[:3])}" if doubles else "")
+        + "  (orphan-vs-live-AWS = CVO's authoritative gate-c)"
+    )
+    clean = gb_fail == 0 and not doubles
+    print("RESULT:", "PASS" if clean else "FAIL")
+    sys.exit(0 if clean else 2)
+
+
 def main(argv):
     data = load()
     if not argv or argv[0] in ("-h", "--help"):
         cmd_list(data)
+        return 0
+    if argv[0] == "--gate-b":
+        cmd_gate_b(data, argv[1] if len(argv) > 1 else None)
         return 0
     if argv[0] == "--list":
         cmd_list(data)
