@@ -180,6 +180,10 @@ def cmd_thread(data, name):
             print(f"    {'-> served:' if i == 0 else '          '} {_a(s)}")
         fe = _a(t.get("frontend_resolution") or "(none)")
         print(f"    -> frontend: {fe}")
+        # P3.2: surface CVO's authoritative reachability when authored (never assert from grep)
+        _st, _auth = _fe_status(t)
+        if _auth:
+            print(f"    -> reachable: {_st} [CVO ground-truth]")
     print("\n" + "-" * 78)
     print("owning tools in this thread (drill in for live detail -- pipescript stays read-only):")
     for tool, n in tc.most_common():
@@ -281,38 +285,61 @@ def cmd_validate(data):
     sys.exit(0 if ok else 1)
 
 
-# P3.2: frontend-reachability gate. CTO-confirmed phantom class (scaffolded-but-not-mounted).
-_KNOWN_PHANTOMS = {"bd-time-machine"}  # Andrew-confirmed never-built (CTO canonical case)
+# P3.2: frontend-reachability gate (CTO 193238Z: DATA-primary). The AUTHORITATIVE reachability
+# determination is CVO's ground-truth `frontend_reachability` field {mounted-reachable |
+# frontend-orphan | phantom | unreviewed}; the CLI SURFACES it. A live portal/src grep is only
+# ADVISORY INPUT -- it is FOOLED by scaffolding (bd-time-machine's TimeMachineProvider EXISTS in
+# portal/src but the restore was never built = phantom; portal-time-machine's Provider IS
+# mounted in App.tsx = reachable -- a grep cannot tell those apart, and DID mis-flag the latter).
+# So the grep NEVER asserts reachable/phantom. Un-adjudicated -> LOUD 'unreviewed', not reachable.
 _PHANTOM_PAT = re.compile(r"scaffold|timemachineprovider|never (built|implemented|mounted|live)", re.I)
+_FE_STATUS = ("mounted-reachable", "frontend-orphan", "phantom", "unreviewed")
+_OPS_THREADS = {"ops-internal", "security-scanner"}  # no portal surface BY DESIGN (CVO rule)
 
 
-def _fe_classify(t):
-    """Classify a thread's frontend reachability from its census frontend claim + portal/src
-    existence (P3.2). REACHABLE / FRONTEND-ORPHAN / BROKEN-REF / NAMED-UNVERIFIED / PHANTOM.
+def _fe_advisory(t):
+    """ADVISORY grep hint only (P3.2 INPUT, NOT the gate). Existence-checks the census frontend
+    claim against portal/src to FEED CVO's authoritative adjudication. Never asserts reachable
+    or phantom -- a grep cannot distinguish mounted-live from scaffolded-never-built.
     """
     fe = (t.get("frontend_resolution") or "").strip()
     fel = fe.lower()
-    if t.get("thread_id", "") in _KNOWN_PHANTOMS or _PHANTOM_PAT.search(fel):
-        return ("PHANTOM", "scaffolded but not mounted/live -> CVO adjudicate (Andrew-confirmed-phantom class)")
     if not fe or fel.startswith("none") or fel.startswith("(none)"):
-        return ("FRONTEND-ORPHAN", "no portal consumer (debtscan frontend-orphan)")
+        if t.get("named_thread", "") in _OPS_THREADS:
+            return "no-consumer (ops/internal -- frontend-orphan BY DESIGN, expected; CVO: no flag)"
+        return "no-consumer (product thread -- frontend-orphan candidate -> CVO confirm)"
+    if _PHANTOM_PAT.search(fel):
+        return "scaffolding referenced -- grep CANNOT tell mounted vs phantom -> CVO ground-truth"
     paths = [p.rstrip(".,;)") for p in re.findall(r"portal/src/[\w./@-]+", fe)]
     if not paths:
-        return ("NAMED-UNVERIFIED", "consumer named but no portal/src path to existence-check")
-    exist = [p for p in paths if os.path.exists(os.path.join(ROOT, p))]
-    if exist:
-        extra = f" (+{len(exist) - 1} more)" if len(exist) > 1 else ""
-        return ("REACHABLE", f"mounted: {exist[0]}{extra}")
-    return ("BROKEN-REF", f"names {paths[0]} but NOT found in portal/ -> verify (possible FE gap)")
+        return "consumer named, no portal/src path -> comp-routes/comp-transform mount-verify"
+    if any(os.path.exists(os.path.join(ROOT, p)) for p in paths):
+        return f"consumer file present ({paths[0]}) -- but grep != MOUNTED; CVO/comp-routes authoritative"
+    return f"names {paths[0]} but not found in portal/ -> verify (possible FE gap)"
+
+
+def _fe_status(t):
+    """AUTHORITATIVE per-thread reachability: CVO's `frontend_reachability` field if authored,
+    else a provisional auto-class for the trivially-clear no-consumer product case (CTO-permitted,
+    marked *), else LOUD 'unreviewed' -- never silently reachable (false-clean on the FE layer).
+    Returns (status, cvo_authored).
+    """
+    # accept either field name CVO authors (coordinating the canonical one); values are _FE_STATUS
+    field = t.get("frontend_reachability") or t.get("reachability_status")
+    if field in _FE_STATUS:
+        return (field, True)
+    fel = (t.get("frontend_resolution") or "").strip().lower()
+    no_consumer = (not fel) or fel.startswith("none") or fel.startswith("(none)")
+    if no_consumer and t.get("named_thread", "") not in _OPS_THREADS:
+        return ("frontend-orphan*", False)
+    return ("unreviewed", False)
 
 
 def cmd_fe_reachability(data, name=None):
-    """P3.2 frontend-reachability gate (CTO hybrid: tool automates + flags phantoms to CVO).
-
-    Per thread, automates the served-artifact -> portal-consumer -> mounted check by
-    existence-checking the census frontend claim against portal/src; flags the phantom class
-    (scaffolded-but-not-mounted, e.g. bd-time-machine) for CVO adjudication. Deeper MOUNTED
-    verification is comp-routes trace + comp-transform schema-check (the human drills in).
+    """P3.2 frontend-reachability gate (CTO DATA-primary). Surfaces CVO's authoritative
+    `frontend_reachability` field; the portal/src grep is advisory INPUT only. Un-adjudicated
+    -> LOUD 'unreviewed'. Tag (CVO) = CVO-authored authoritative; (cli) + * = provisional CLI
+    auto-flag pending CVO; the phantom-vs-mounted call is CVO ground-truth, never the grep.
     """
     threads = data["threads"]
     if name:
@@ -320,25 +347,26 @@ def cmd_fe_reachability(data, name=None):
             sys.stderr.write(f"pipescript: '{name}' is NOT a known named thread (see --list).\n")
             sys.exit(2)
         threads = [t for t in threads if t["named_thread"] == name]
-    rows = [(t["named_thread"], t["thread_id"], *_fe_classify(t)) for t in threads]
-    order = ["BROKEN-REF", "PHANTOM", "FRONTEND-ORPHAN", "NAMED-UNVERIFIED", "REACHABLE"]
-    summ = Counter(v for _, _, v, _ in rows)
+    rows = [(t["named_thread"], t["thread_id"], *_fe_status(t), _fe_advisory(t)) for t in threads]
+    order = ["phantom", "frontend-orphan", "frontend-orphan*", "unreviewed", "mounted-reachable"]
+    summ = Counter(s for _, _, s, _, _ in rows)
     print(f"pipescript --fe-reachability ({name or 'estate'}) - {len(rows)} threads")
+    print("AUTHORITATIVE = CVO frontend_reachability field; * = provisional CLI flag; grep = advisory input")
     print("=" * 78)
-    for v in order:
-        for nt, tid, vv, reason in rows:
-            if vv == v:
-                print(f"  [{v:<16}] {nt}/{tid}")
-                if v in ("BROKEN-REF", "PHANTOM", "NAMED-UNVERIFIED"):
-                    print(f"       {reason}")
+    for s in order:
+        for nt, tid, st, auth, adv in rows:
+            if st == s:
+                print(f"  [{s:<17}] ({'CVO' if auth else 'cli'}) {nt}/{tid}")
+                if not auth and s in ("phantom", "frontend-orphan*", "unreviewed"):
+                    print(f"        grep: {adv}")
     print("-" * 78)
-    print("SUMMARY: " + " | ".join(f"{k} {summ.get(k, 0)}" for k in order))
-    phantoms = [f"{nt}/{tid}" for nt, tid, v, _ in rows if v == "PHANTOM"]
-    if phantoms:
-        print(f"PHANTOMS -> CVO adjudication ({len(phantoms)}): {', '.join(phantoms)}")
+    print("SUMMARY: " + " | ".join(f"{k} {summ.get(k, 0)}" for k in order if summ.get(k)))
+    unrev = summ.get("unreviewed", 0) + summ.get("frontend-orphan*", 0)
+    if unrev:
+        print(f"UN-ADJUDICATED ({unrev}) -> CVO authors frontend_reachability (never silently reachable).")
     print(
-        "Note: REACHABLE = the named portal/src consumer exists; deeper MOUNTED verification "
-        "= comp-routes trace + comp-transform schema-check. PHANTOM/BROKEN-REF -> CVO."
+        "Note: the grep is ADVISORY INPUT (fooled by scaffolding); CVO ground-truth + the "
+        "comp-routes/comp-transform mount-verify are authoritative. phantom/orphan = CVO's call."
     )
 
 
