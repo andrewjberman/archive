@@ -662,8 +662,19 @@
     <service name="seeking-alpha-scraper" type="persistent" instance_id="null (not synced)" ec2_host="44.201.69.3">
       Seeking Alpha news scraper.
     </service>
-    <service name="bd-gold-layer-runner" type="persistent" instance_id="i-01003b035d2988dfb">
-      Runs BD gold layer scripts. S3-pull model: s3://opal-data-bd/code/{bronze,silver,gold}/
+    <service name="bd-gold-layer-runner" type="start-on-demand" instance_id="i-01003b035d2988dfb">
+      PROD BD gold-layer nightly runner (r6i.4xlarge). S3-pull model: s3://opal-data-bd/code/{bronze,silver,gold}/.
+      Start-on-demand: launched for the nightly (~04:00Z), runs ~70min, self-stops. ALREADY RIGHT-SIZED
+      (CTO 2026-06-09 175b3ae64: peak CPU 96.9% on r6i.4xlarge after the May->06-09 c6i.16xlarge->r6i.4xlarge
+      right-size; do NOT downsize). TF-managed in bd-pipeline (aws_instance.bd_gold_layer_runner). System=BDGoldLayer.
+    </service>
+    <service name="bd-gold-qa-runner" type="purpose-kept-start-on-demand" instance_id="i-0090b823a4a0997e3">
+      c6i.16xlarge ad-hoc QA box for 49 Financial logic-update testing. PURPOSE-KEPT, NOT decommissionable
+      (Andrew-direct 2026-06-15 via COO 145613Z): deliberately PROD-ISOLATED from bd-gold-layer-runner so heavy
+      QA never disrupts the PROD nightly schedule. Correct posture = STOPPED + start-on-demand; its 0 run-hours
+      are INTENTIONAL idle, NOT dead infra. DEBTSCAN/cost-sweep MUST NOT re-flag as reclaimable (supersedes the
+      prior "dormant cleanup candidate" disposition). 8GB gp2 root (~$0.80/mo EBS, $0 compute while stopped).
+      TF-managed in bd-pipeline (aws_instance.bd_gold_qa_runner). Governance record: NFRA_COSTAWS.json history 2026-06-15.
     </service>
     <service name="bd-allocations" type="persistent" instance_id="i-0800437d1dbb0b5cc">
       BD allocation downloads via SSM document opal-bd-allocation-download. Terraform: bd-pipeline/ec2.tf
