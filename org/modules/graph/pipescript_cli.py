@@ -111,7 +111,8 @@ def cmd_list(data):
 
 def cmd_thread(data, name):
     threads = [t for t in data["threads"] if t["named_thread"] == name]
-    if not threads:
+    resources = data.get("resources_by_named_thread", {}).get(name, [])
+    if not threads and not resources:
         # LOUD unknown name - never a silent empty result
         sys.stderr.write(f"pipescript: '{name}' is NOT a known named thread.\n")
         sys.stderr.write(f"  -> known threads: {', '.join(data['named_threads'])}\n")
@@ -140,6 +141,13 @@ def cmd_thread(data, name):
     print("owning tools in this thread:")
     for tool, n in tc.most_common():
         print(f"  {n:>3}  {tool:<22} {OWNING_TOOLS.get(tool, '')}")
+    # Authoritative resource roster (CVO per-lambda taxonomy 26b32687a) - every lambda/resource
+    # in this named thread, the single source the golden fixtures also derive from.
+    if resources:
+        print("\n" + "-" * 78)
+        print(f"resources ({len(resources)}) - every lambda/EC2/StepFn in '{name}':")
+        for r in resources:
+            print(f"  {_a(r)}")
     print("\nrun `pipescript --tool <name> <tool>` to assert a tool owns it (LOUD OUT-OF-SCOPE if not).")
 
 
