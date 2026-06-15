@@ -8,9 +8,9 @@
 **Sizing:** ~45-75min wall (state-extraction step + CSV writer + empirical re-run against most-recent harvested set)
 **Authority anchor:** Andrew-direct 2026-06-15 week agenda ("the first of which" = FIND_DUALBIZ State column) via 1.0.0_SA_CTO kickoff 20260615T145935Z; COO pre-auth repo check 20260615T150x Z (owner + no-canonical-CSV confirmed)
 
-<status>staged</status>
+<status>complete</status>
 
-> STAGED, GO-ready. Authorized to flip to `pending` + begin on the COO GO message (pending Andrew's spawn of this lane). Do not start before the GO.
+> COMPLETE 2026-06-15 (commit `8edf221f5`). GO was Andrew-direct (sovereign, overrides the COO-GO gate): "get the same output but with the state column, do it now." Delivered: `_extract_state` (precision-first heuristic from harvested Rule-17 silver text, no re-fetch) + `state` on json/md/csv + new stdlib-csv serving writer + `--reserve` no-fetch regen mode. Empirical fill 228/315 = 72.4%, strong fills verified vs real postal addresses. ds-commit-gate clean; comp-pipescript io = Unknown (find-dualbiz not in bd/inf graph, accounted per AC7). ADV/IAPD authoritative principal-office state = flagged optional v2 (AC5).
 
 ## Objective
 
