@@ -48,6 +48,19 @@ OWNING_TOOLS = {
     "none": "(ops/local - explicit-out, no owning tool)",
 }
 
+# P3.1: DEBTSCAN flag meanings surfaced inline in the traversal (the resolver carries the
+# census-static flags; the live DEBTSCAN ledger org/modules/graph/debtscan/ is the
+# authoritative live-flag source for deeper enrichment).
+_FLAG_MEANING = {
+    "orphan-candidate": "no live invoker/consumer found -- possible dead resource",
+    "dormant": "deployed but not invoked recently",
+    "stranded": "committed code never reached the runner (stale-deployed)",
+    "freshness-risk": "served artifact may be stale vs its schedule",
+    "frontend-orphan": "backend artifact no MOUNTED portal component renders",
+    "needs-consumer-trace": "consumer not yet traced -- reachability UNVERIFIED (not clean)",
+    "needs-owner": "owning tool/lane not yet adjudicated",
+}
+
 # The resolver/census payload can carry non-ASCII (em/en dash, smart quotes) inherited
 # from upstream docs. Stdout MUST be ASCII-only (CLAUDE.md: non-ASCII breaks charmap/
 # grep/CI). _a() transliterates the common cases + drops any residual so a named-thread
@@ -145,15 +158,20 @@ def cmd_thread(data, name):
         sys.exit(2)
     sc = Counter(t["status"] for t in threads)
     tc = Counter(t["owning_tool"] for t in threads)
+    n_debt = sum(1 for t in threads if t.get("debtscan_flags"))
     print(
         f"pipescript {name} - {len(threads)} threads "
         f"(in-scope {sc.get('in-scope', 0)} / explicit-out {sc.get('explicit-out', 0)} / "
         f"unreviewed {sc.get('unreviewed', 0)})"
+        + (f" | {n_debt} with DEBT flags" if n_debt else "")
     )
     print("=" * 78)
     for t in threads:
-        flags = (" flags=" + ",".join(t["debtscan_flags"])) if t["debtscan_flags"] else ""
-        print(f"\n[{status_tag(t['status'])} | {t['owning_tool']}] {_a(t['thread_id'])}{flags}")
+        print(f"\n[{status_tag(t['status'])} | {t['owning_tool']}] {_a(t['thread_id'])}")
+        # P3.1: surface DEBTSCAN flags inline with their meaning, not a silent code
+        fl = t.get("debtscan_flags") or []
+        if fl:
+            print(f"  DEBT: {', '.join(fl)}  ({'; '.join(_FLAG_MEANING.get(f, '?') for f in fl)})")
         if t.get("description"):
             print(f"  what: {_a(t['description'])}")
         for i, p in enumerate(t.get("producers") or ["(none recorded)"]):
@@ -263,6 +281,39 @@ def cmd_validate(data):
     sys.exit(0 if ok else 1)
 
 
+def cmd_debt(data):
+    """P3.1: surface DEBTSCAN flags across the estate, grouped by named thread.
+
+    Renders the resolver's census-static debtscan flags (orphan-candidate / dormant /
+    stranded / freshness-risk / frontend-orphan / needs-consumer-trace / needs-owner) so a
+    flagged thread is never silent. The live DEBTSCAN ledger (org/modules/graph/debtscan/)
+    is the authoritative live-flag source for deeper enrichment.
+    """
+    flagged = [
+        (t["named_thread"], t["thread_id"], t["debtscan_flags"])
+        for t in data["threads"]
+        if t.get("debtscan_flags")
+    ]
+    print(f"pipescript --debt - {len(flagged)} threads carry DEBTSCAN flags")
+    print("=" * 78)
+    by_nt = defaultdict(list)
+    for nt, tid, fl in flagged:
+        by_nt[nt].append((tid, fl))
+    for nt in sorted(by_nt):
+        print(f"\n{nt}:")
+        for tid, fl in by_nt[nt]:
+            print(f"  {tid:<42} {', '.join(fl)}")
+    seen = sorted({f for _, _, fl in flagged for f in fl})
+    if seen:
+        print("\n" + "-" * 78)
+        for f in seen:
+            print(f"  {f:<22} {_FLAG_MEANING.get(f, '?')}")
+    print(
+        "\nNote: these are the resolver's census-static flags; the live DEBTSCAN ledger "
+        "(org/modules/graph/debtscan/) is the authoritative live-flag source."
+    )
+
+
 def cmd_gate_b(data, fixtures_path=None):
     """Standing gate-b regression oracle (CVO extraction spec 2026-06-15T190748Z).
 
@@ -352,6 +403,9 @@ def main(argv):
         return 0
     if argv[0] == "--gate-b":
         cmd_gate_b(data, argv[1] if len(argv) > 1 else None)
+        return 0
+    if argv[0] == "--debt":
+        cmd_debt(data)
         return 0
     if argv[0] == "--list":
         cmd_list(data)
