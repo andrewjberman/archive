@@ -335,11 +335,12 @@ def _fe_status(t):
     return ("unreviewed", False)
 
 
-def cmd_fe_reachability(data, name=None):
+def cmd_fe_reachability(data, name=None, orphans_only=False):
     """P3.2 frontend-reachability gate (CTO DATA-primary). Surfaces CVO's authoritative
-    `frontend_reachability` field; the portal/src grep is advisory INPUT only. Un-adjudicated
-    -> LOUD 'unreviewed'. Tag (CVO) = CVO-authored authoritative; (cli) + * = provisional CLI
-    auto-flag pending CVO; the phantom-vs-mounted call is CVO ground-truth, never the grep.
+    reachability field (reachability_status / frontend_reachability); the portal/src grep is a
+    demoted supplementary hint only. Un-adjudicated by CVO -> LOUD 'unreviewed', never silently
+    reachable. Tag (CVO) = CVO-authored authoritative; (cli) + * = provisional pending CVO.
+    orphans_only drops mounted-reachable (the --orphans debt view).
     """
     threads = data["threads"]
     if name:
@@ -348,10 +349,13 @@ def cmd_fe_reachability(data, name=None):
             sys.exit(2)
         threads = [t for t in threads if t["named_thread"] == name]
     rows = [(t["named_thread"], t["thread_id"], *_fe_status(t), _fe_advisory(t)) for t in threads]
-    order = ["phantom", "frontend-orphan", "frontend-orphan*", "unreviewed", "mounted-reachable"]
+    order = ["phantom", "frontend-orphan", "frontend-orphan*", "unreviewed"]
+    if not orphans_only:
+        order = order + ["mounted-reachable"]
     summ = Counter(s for _, _, s, _, _ in rows)
-    print(f"pipescript --fe-reachability ({name or 'estate'}) - {len(rows)} threads")
-    print("AUTHORITATIVE = CVO frontend_reachability field; * = provisional CLI flag; grep = advisory input")
+    label = "--orphans" if orphans_only else "--fe-reachability"
+    print(f"pipescript {label} ({name or 'estate'}) - {len(rows)} threads")
+    print("AUTHORITATIVE = CVO reachability_status field; * = provisional CLI flag; grep = supplementary hint")
     print("=" * 78)
     for s in order:
         for nt, tid, st, auth, adv in rows:
@@ -361,12 +365,18 @@ def cmd_fe_reachability(data, name=None):
                     print(f"        grep: {adv}")
     print("-" * 78)
     print("SUMMARY: " + " | ".join(f"{k} {summ.get(k, 0)}" for k in order if summ.get(k)))
-    unrev = summ.get("unreviewed", 0) + summ.get("frontend-orphan*", 0)
+    unrev = summ.get("unreviewed", 0)
+    prov = summ.get("frontend-orphan*", 0)
     if unrev:
-        print(f"UN-ADJUDICATED ({unrev}) -> CVO authors frontend_reachability (never silently reachable).")
+        print(
+            f"UNREVIEWED ({unrev}) -- CVO ground-truth not-yet-determined; needs comp-routes/"
+            "comp-transform mount-verify. LOUD, never silently reachable."
+        )
+    if prov:
+        print(f"PROVISIONAL ({prov}) -- no CVO field yet; CVO confirms (0 once fully authored).")
     print(
-        "Note: the grep is ADVISORY INPUT (fooled by scaffolding); CVO ground-truth + the "
-        "comp-routes/comp-transform mount-verify are authoritative. phantom/orphan = CVO's call."
+        "Note: reachability is CVO's authoritative reachability_status field; the portal/src grep "
+        "is a demoted supplementary hint (it is fooled by scaffolding -- see the time-machine phantoms)."
     )
 
 
@@ -498,6 +508,9 @@ def main(argv):
         return 0
     if argv[0] == "--fe-reachability":
         cmd_fe_reachability(data, argv[1] if len(argv) > 1 else None)
+        return 0
+    if argv[0] == "--orphans":
+        cmd_fe_reachability(data, argv[1] if len(argv) > 1 else None, orphans_only=True)
         return 0
     if argv[0] == "--list":
         cmd_list(data)
