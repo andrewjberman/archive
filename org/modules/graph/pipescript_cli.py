@@ -324,8 +324,8 @@ def _fe_status(t):
     marked *), else LOUD 'unreviewed' -- never silently reachable (false-clean on the FE layer).
     Returns (status, cvo_authored).
     """
-    # accept either field name CVO authors (coordinating the canonical one); values are _FE_STATUS
-    field = t.get("frontend_reachability") or t.get("reachability_status")
+    # CVO's canonical ground-truth key (locked 65101a18a); values are _FE_STATUS
+    field = t.get("reachability_status")
     if field in _FE_STATUS:
         return (field, True)
     fel = (t.get("frontend_resolution") or "").strip().lower()
@@ -374,6 +374,11 @@ def cmd_fe_reachability(data, name=None, orphans_only=False):
         )
     if prov:
         print(f"PROVISIONAL ({prov}) -- no CVO field yet; CVO confirms (0 once fully authored).")
+    if summ.get("mounted-reachable"):
+        print(
+            "Caveat: 'mounted-reachable' = NAMED-live-consumer (census lambda->S3->named .tsx), NOT strict "
+            "mounted-UI-rendered; comp-routes/comp-transform mount-verify is the next rigor level (follow-on)."
+        )
     print(
         "Note: reachability is CVO's authoritative reachability_status field; the portal/src grep "
         "is a demoted supplementary hint (it is fooled by scaffolding -- see the time-machine phantoms)."
