@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DE_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (D7 real_bug #3, 164849Z RAVC2)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>active</status>
+<status>complete — 2026-06-12T~1800Z by 0.4.0_DE_ClientPlatform; commit 8b6a6466 (portal DEV)</status>
 <priority>low — stale comment with unresolved TODO; decision needed before cleanup</priority>
 
 <scope>

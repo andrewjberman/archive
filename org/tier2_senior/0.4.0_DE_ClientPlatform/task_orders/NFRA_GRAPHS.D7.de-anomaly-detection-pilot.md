@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DE_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (MSTR veto-window close 565f56f89, 162825Z; Andrew-direct greenlight via /goal + /loop)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>active</status>
+<status>complete — 2026-06-12T~1730Z by 0.4.0_DE_ClientPlatform; RAVC2 sent to COO</status>
 <priority>P1 — runnable now (pre-full-stitch) with comp-platinum + trace tools; AC7 close-gate for NFRA_GRAPHS</priority>
 
 <references>
