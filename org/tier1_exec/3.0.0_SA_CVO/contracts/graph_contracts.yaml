@@ -23,18 +23,16 @@
 #
 # WAVE STATUS (2026-06-16):
 #   [LIVE+RATIFIED] benchmark (SEV1) — Andrew-signed, in-VPC on Nessie main, BOTH axes verified (TO-2b).
-#   [AUTHORED, pending CTO+COO] peers (SEV2) — THIS pass; clean yang-Lambda producer, Q2-resolvable.
-#   REMAINING (each needs its own grounded pass):
+#   [AUTHORED, pending CTO+COO] peers (SEV2) — THIS session; clean yang-Lambda producer, Q2-resolvable.
+#   [AUTHORED, pending CTO+COO] aum (SEV2) — THIS session; smartx-ingestion-lambda-role (CloudWatch-confirmed
+#       live writer 06-16 11:30, MDPF-sourced); smartx-exporter EC2 = dormant dual-writer (stopped since 06-01,
+#       Q2-invisible -> declarative forbidden_writers until the 06-17 EC2-WRITES-derive fix). SEV2 ceiling COMPLETE.
+#   REMAINING:
 #     - headline (SEV1)  — Andrew sign-off; AUA-total surface (MDPF aggregate + account-distribution; $1.71B
 #         stale-headline incident history) -> careful value-contract analysis required.
 #     - advisor_intelligence/NNA (SEV1) — value-limb authorable; POLICY limb HELD to the 06-17 nightly derive
 #         (EC2-produced canonical_writer was Q2-invisible; AE deployed the iam:GetInstanceProfile fix, re-verify
-#         pends the nightly).
-#     - aum (SEV2) — CENSUS FINDING (do NOT transfer the yang pattern): account-distribution.json is
-#         SMARTX-produced (opal-smartx-ingestion-pipeline ASSUMES smartx-ingestion-lambda-role, 11:30 cron),
-#         NOT yang. canonical_writer = smartx-ingestion-lambda-role; point-in-time (period=as-of date, not
-#         trailing windows); a smartx-exporter EC2 dual-writer concern + a 2nd AUM-metrics/growth artifact to
-#         locate. Needs its own careful pass.
+#         pends the nightly). aum's EC2-dual-writer tripwire rides the SAME 06-17 fix.
 #     - the period_defs value-check assertion (CVO-owned, §9 homing) — the runnable codified BMKAUD WS-2 check.
 
 contracts:
@@ -109,3 +107,41 @@ contracts:
     ratified_at: PENDING-CTO-COO-SIGNOFF  # AE stamps the authoring Nessie commit hash on in-VPC write, AFTER CTO+COO sign-off
     active: true
     provenance: "TO-3 SEV2 wave; producer census 2026-06-16 (comp-kuzu: yang-generate-peer-performance ASSUMES yang-pipeline-lambda-role; bucket-grain WRITES opal-data-portal-v2); lambda-source-map module.generate_peer_performance; served peer_performance.json data_as_of 2026-05-31 (intermittent, peer_excel-gated)"
+
+  # ── SEV2 #2 — model_portfolios.aum (account-distribution + aum-metrics + aum-timeseries) ──
+  # Census 2026-06-16 (CVO). DO-NOT-TRANSFER lesson applied: aum is SMARTX-produced, NOT yang.
+  # LIVE CANONICAL WRITER DISAMBIGUATED via CloudWatch: at 2026-06-16T11:30:35Z opal-smartx-ingestion-pipeline
+  # (smartx-ingestion-lambda-role) logged "MDLP daily re-source job ... all MDPF-feed-sourced; dead-source
+  # pipeline skipped" and uploaded account-distribution.json + aum-metrics.json + aum-timeseries.json + per-firm.
+  # The smartx-exporter EC2 (i-06ebcb27395eb3f49, ai-supervisor-v2.py writes the SAME keys) is a DORMANT
+  # dual-writer: STOPPED since 2026-06-01 (the "dead-source" path) -> it did NOT write today's files. The Lambda
+  # is Q2-VISIBLE (has the WRITES edge) so the aum row IS authorable now (unlike NNA). CAVEAT: the EC2 dormant
+  # dual-writer is Q2-INVISIBLE (0 EC2 WRITES edges, the NNA-class gap) -> its forbidden_writers tripwire is
+  # DECLARATIVE-only until the 06-17 EC2-WRITES-derive fix lands; today its containment = EC2-stopped + IAM + value-limb.
+  - contract_id: aum-model-portfolios
+    surface: "critical-surfaces:model_portfolios.aum (SEV2) | producer:opal-smartx-ingestion-pipeline (MDLP daily re-source)"
+    artifact_keys:
+      - s3://opal-data-portal-v2/json/portfolios/account-distribution.json
+      - s3://opal-data-portal-v2/json/portfolios/aum-metrics.json
+      - s3://opal-data-portal-v2/json/portfolios/aum-timeseries.json
+      - s3://opal-data-portal-v2/json/mdpf/49financial/account-distribution.json
+      - s3://opal-data-portal-v2/json/mdpf/inflection/account-distribution.json
+    canonical_writer: smartx-ingestion-lambda-role
+    canonical_producer: "opal-smartx-ingestion-pipeline (MDLP daily re-source job: compute_account_distribution.py + compute_per_firm_account_distribution.py + append_new_dates_only.py); trigger smartx-account-distribution-daily cron(30 11 UTC)"
+    source_of_truth: "the MDPF feed (opal-data-mdpf) -- 'all MDPF-feed-sourced' per the 11:30 producer log; the legacy smartx-scrape EC2 source path is DEAD ('dead-source pipeline skipped')"
+    period_defs:
+      "as_of":       "POINT-IN-TIME snapshot as-of the latest complete business day (period field = the as-of date). account-distribution + aum-metrics are NOT trailing-window metrics."
+      "aum_basis":   "total_aum = sum of FUNDED account balances as-of; active_accounts_count vs excluded_unfunded_count demarcated (unfunded EXCLUDED from total_aum) -- the never-widen value invariant"
+      "timeseries":  "aum-timeseries.json = append-only by period(date); historical points IMMUTABLE (never-widen on past dates)"
+      "_per_firm":   "json/mdpf/{firm}/account-distribution.json mirrors the global schema EXACTLY (49financial + inflection); global json/portfolios/account-distribution.json untouched by the per-firm pass"
+    models: [UST, ST, INT, LTC, LTA, "Opal Blend 5050 Int Ltc", "Opal Blend 5050 St Int"]   # served by_model set (codes + 2 blends present in account-distribution)
+    forbidden_writers:
+      - smartx-exporter-role        # EC2 smartx-exporter ai-supervisor-v2.py dual-write of json/portfolios/* -- DORMANT (EC2 i-06ebcb27395eb3f49 STOPPED since 2026-06-01, the dead-source path). Q2-INVISIBLE (0 EC2 WRITES edges) so this tripwire is DECLARATIVE until the 06-17 EC2-WRITES-derive fix; same gap class as NNA.
+    enforcement:
+      iam_backstop: "none surface-specific (no json/portfolios/* Deny found). The dormant EC2 dual-writer is contained by the EC2 being stopped + (post-06-17-fix) Q2; a novel Lambda writer -> Q2 WATCH (advisory, bucket-grain) + the value_check."
+      surface_gate: "comp-surface-check SEV2 (model_portfolios.aum in critical-surfaces.yaml)"
+      value_check:  "point-in-time AUM contract: total_aum = FUNDED-accounts sum as-of latest-complete-day (NOT trailing-window, unfunded EXCLUDED); aum-timeseries append-only (past points immutable). CVO-owned."
+    ratified_by: [CTO, COO]               # SEV2 tier (§9)
+    ratified_at: PENDING-CTO-COO-SIGNOFF  # AE stamps the authoring Nessie commit on in-VPC write, AFTER CTO+COO sign-off
+    active: true
+    provenance: "TO-3 SEV2 wave; CloudWatch 2026-06-16T11:30:35Z MDLP daily re-source (opal-smartx-ingestion-pipeline wrote all aum artifacts, MDPF-feed-sourced, dead-source skipped); smartx-exporter EC2 i-06ebcb27395eb3f49 STOPPED since 06-01 (dormant dual-writer); smartx-ingestion-lambda-role Q2-visible; served account-distribution.json/aum-metrics.json period=2026-06-15"
