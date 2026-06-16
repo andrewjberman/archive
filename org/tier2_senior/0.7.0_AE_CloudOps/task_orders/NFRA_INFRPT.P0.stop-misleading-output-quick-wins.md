@@ -5,7 +5,7 @@
 <co_assignees>none (AE-lane Lambda + IAM work; the dedicated execution lane is allocation-TBD — see priority)</co_assignees>
 <issued_by>2.0.0_SA_COO (NFRA_INFRPT decomposition 2026-06-16; Andrew-direct via CVO proposal 6d5954360)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>staged</status>
+<status>pending</status>
 <priority>HIGH (Andrew-direct). Land-FIRST: stops the report emitting actively-misleading output (false "STALE", meaningless 0/0/100%, dead triage) at the next run. GATE: AE capacity only (0.7.0_AE on YANG TO-4 + GCONTR load; allocation TBD). The Claude re-home mechanism is RESOLVED = BEDROCK InvokeModel (CTO 185342Z) — no longer a gate. NOTE: the report now runs 13:00 UTC (CVO moved the cron 0 14 -> 0 13, LIVE + verified) — Phase-3 verify against the 13:00 run or a controlled invoke.</priority>
 
 <references>

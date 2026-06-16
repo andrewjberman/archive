@@ -5,7 +5,7 @@
 <co_assignees>none (CloudOps operational fix; execution lane = allocation-TBD, see priority)</co_assignees>
 <issued_by>2.0.0_SA_COO (NFRA_INFRPT 2026-06-16; the report's one legitimate signal, surfaced by CVO 6d5954360)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>staged</status>
+<status>pending</status>
 <priority>HIGHEST in NFRA_INFRPT — this is an ACTIVE operational failure, not report content. `infrastructure-daily-snapshot` (the 2AM DR backup, 30-day rollback) is failing 3/3 = ~3 days with no fresh DR restore point. Fix BEFORE/ALONGSIDE the report-content TOs. Gate: AE capacity (execution lane allocation-TBD).</priority>
 
 <references>
