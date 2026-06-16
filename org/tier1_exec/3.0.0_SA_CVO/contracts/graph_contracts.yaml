@@ -21,10 +21,21 @@
 #   - active: true = live contract (retire-without-delete sets false; CTO amendment).
 #   - v1 enforcement is ADVISORY (UNSANCTIONED WARNs, does NOT exit 2) until the CTO ramp-flip.
 #
-# WAVE STATUS: benchmark seed = THIS row (authored, RAVC2->COO, pending Andrew sign-off).
-#   NEXT WAVE (separate authoring pass — needs per-surface producer + forbidden_writers census):
-#   model_portfolios.headline, advisor_intelligence/NNA (SEV1); model_portfolios.peers,
-#   model_portfolios.aum (SEV2). Plus the period_defs value-check assertion (CVO-owned, §9 homing).
+# WAVE STATUS (2026-06-16):
+#   [LIVE+RATIFIED] benchmark (SEV1) — Andrew-signed, in-VPC on Nessie main, BOTH axes verified (TO-2b).
+#   [AUTHORED, pending CTO+COO] peers (SEV2) — THIS pass; clean yang-Lambda producer, Q2-resolvable.
+#   REMAINING (each needs its own grounded pass):
+#     - headline (SEV1)  — Andrew sign-off; AUA-total surface (MDPF aggregate + account-distribution; $1.71B
+#         stale-headline incident history) -> careful value-contract analysis required.
+#     - advisor_intelligence/NNA (SEV1) — value-limb authorable; POLICY limb HELD to the 06-17 nightly derive
+#         (EC2-produced canonical_writer was Q2-invisible; AE deployed the iam:GetInstanceProfile fix, re-verify
+#         pends the nightly).
+#     - aum (SEV2) — CENSUS FINDING (do NOT transfer the yang pattern): account-distribution.json is
+#         SMARTX-produced (opal-smartx-ingestion-pipeline ASSUMES smartx-ingestion-lambda-role, 11:30 cron),
+#         NOT yang. canonical_writer = smartx-ingestion-lambda-role; point-in-time (period=as-of date, not
+#         trailing windows); a smartx-exporter EC2 dual-writer concern + a 2nd AUM-metrics/growth artifact to
+#         locate. Needs its own careful pass.
+#     - the period_defs value-check assertion (CVO-owned, §9 homing) — the runnable codified BMKAUD WS-2 check.
 
 contracts:
 
@@ -65,3 +76,36 @@ contracts:
     ratified_at: PENDING-ANDREW-SIGNOFF  # AE stamps the authoring Nessie commit hash on in-VPC write, AFTER Andrew sign-off
     active: true
     provenance: "BMKAUD 2026-06-01 (benchmark-yang-truth-audit-20260601.md); revert 80224d674; Deny b1a3543c9; seed 48635a865"
+
+  # ── SEV2 #1 — model_portfolios.peers (peer-universe percentiles + model/benchmark per window) ──
+  # Census 2026-06-16 (CVO, comp-kuzu canonical graph HEAD current): producer yang-generate-peer-performance
+  # ASSUMES yang-pipeline-lambda-role (SAME canonical_writer as the benchmark seed — both yang-pipeline, Q2-resolvable).
+  # Bucket-grain WRITES into opal-data-portal-v2 (~58 Lambda co-tenants); peers has NO known non-canonical writer
+  # (no smartx peer override, unlike benchmark's smartx-model-monthly-pull) -> forbidden_writers HONESTLY EMPTY.
+  - contract_id: peers-model-portfolios
+    surface: "critical-surfaces:model_portfolios.peers (SEV2) | pipescript:model-portfolios/yang-peer-performance"
+    artifact_keys:
+      - s3://opal-data-portal-v2/json/peers/peer_performance.json
+    canonical_writer: yang-pipeline-lambda-role
+    canonical_producer: "yang-generate-peer-performance (peer_excel branch; module.generate_peer_performance)"
+    source_of_truth: "peer-universe Excel in the uploads/ manifest (peer_excel branch input) for the percentiles + canonical model/benchmark Yang returns for the model+benchmark legs"
+    period_defs:
+      "1M":  "trailing-1-calendar-month -> as-of"   # SAME BMKAUD-class invariant as benchmark (NOT last-complete-calendar-month)
+      "QTD": "quarter-start -> as-of  (PARTIAL current quarter)"
+      "1Q":  "trailing-3-calendar-months -> as-of"
+      "YTD": "year-start -> as-of"
+      "1Y":  "trailing-365-CALENDAR-days, TOTAL return (incl dividends)"
+      "Since Inception": "since-inception, annualized"
+      "_return_basis":      "TOTAL return (dividends included) + calendar-day arithmetic"
+      "_per_period_fields": "{percentiles:{p5,p25,p50,p75,p95}, model, benchmark}"
+      "_percentile_source": "peer-universe Excel; the model+benchmark legs MUST agree with the benchmark contract (1M=trailing) = the cross-surface value-check"
+    models: [UST, ST, INT, LTC, LTA]
+    forbidden_writers: []   # HONEST: no known non-canonical peer writer (no smartx peer override). Catch rests on canonical_writer match + WATCH(advisory, bucket-grain) + the value-limb + bucket policy. A co-tenant only ever reaches WATCH by construction.
+    enforcement:
+      iam_backstop: "none surface-specific (no peer override observed; no json/peers/* Deny). Bucket policy governs writers; a novel writer -> Q2 WATCH (advisory) + the value_check."
+      surface_gate: "comp-surface-check SEV2 (model_portfolios.peers in critical-surfaces.yaml)"
+      value_check:  "period_defs check: model+benchmark legs vs canonical Yang returns (1M=trailing-1-calendar-month); CVO-owned"
+    ratified_by: [CTO, COO]               # SEV2 tier (§9) — co-signable by CTO+COO (NOT Andrew-gated)
+    ratified_at: PENDING-CTO-COO-SIGNOFF  # AE stamps the authoring Nessie commit hash on in-VPC write, AFTER CTO+COO sign-off
+    active: true
+    provenance: "TO-3 SEV2 wave; producer census 2026-06-16 (comp-kuzu: yang-generate-peer-performance ASSUMES yang-pipeline-lambda-role; bucket-grain WRITES opal-data-portal-v2); lambda-source-map module.generate_peer_performance; served peer_performance.json data_as_of 2026-05-31 (intermittent, peer_excel-gated)"
