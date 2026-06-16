@@ -19,6 +19,7 @@ The clean end-state CTO ruled (three wins: unwinds the over-grant / fixes the co
 2. **Repoint** the Lambda's execution role from the shared `opal-portal-lambda-role` to the EXISTING dedicated `infrastructure-snapshot-role` (already has the verified-complete correct perms).
 3. **REMOVE** the temporary DR-fix grant from the shared portal role (the EC2 image/snapshot Resource=* + InfraSnapshotIO added in NFRA_INFRPT.DR) -> least-privilege restored, the time-boxed exception unwound.
 4. **Verify 0-loss to DR:** a real restore point must still land post-repoint (the repoint must not break the just-restored DR).
+5. **EBS rate-limit code fix + land the COMPLETE manifest (folded in from DR's 2nd bug; Rule-1-coupled to THIS import):** in `lambda_function.py` `snapshot_ebs_volumes` (~L206) — make per-volume `create_snapshot` NON-FATAL (try/except + continue, so one component error doesn't re-raise + abort the whole manifest) + SKIP volumes whose instance was AMI'd in step 1 (kills the `SnapshotCreationPerVolumeRateExceeded` double-snapshot race + cuts the redundant snapshots/cost). This lands the COMPLETE manifest (manifest.json + restore.sh + the 7 component JSONs) that DR's AMIs-only close deferred. The code fix is Rule-1-coupled to this import (no console hotfix — the Lambda enters TF + CI-zip->S3 here), which is why it rides DR2 not DR.
 
 NOTE: this is NFRA_INFRPT eating its own dogfood — the console-orphan drift fixed here is the exact class the report's DRIFT (P1/E) section is built to catch. Note the linkage.
 </scope>

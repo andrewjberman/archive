@@ -5,7 +5,8 @@
 <co_assignees>none (CloudOps operational fix; execution lane = allocation-TBD, see priority)</co_assignees>
 <issued_by>2.0.0_SA_COO (NFRA_INFRPT 2026-06-16; the report's one legitimate signal, surfaced by CVO 6d5954360)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-16T2017Z (COO-accepted, option-a). Root cause = 4-MONTH outage (Lambda NEVER produced a restore point since 2026-02-17, not 3d): 3 bugs (missing bucket / wrong shared role missing 16/20 perms / unused dedicated role / console-orphan). Minimal pure-TF fix f6c905fdb (6add/1change/0destroy, HALTGT clear). VERIFIED via controlled DR smoke: 9 instance AMIs + ec2-instances.json LANDED (real restore capability where 0 existed) = the TO's "fresh restore point" bar MET. A 2nd distinct pre-existing CODE bug (EBS per-volume rate-limit, redundant w/ AMI backing snaps) gated the COMPLETE manifest -> folded into DR2 (Rule-1-coupled to the import) along w/ the complete-manifest + the exception-unwind. Ledger 20260616T2001Z CLOSED (TF complete+verified, not stranded). CTO acceptance-flex heads-up sent (a)-basis. -->>
 <priority>HIGHEST in NFRA_INFRPT — this is an ACTIVE operational failure, not report content. `infrastructure-daily-snapshot` (the 2AM DR backup, 30-day rollback) is failing 3/3 = ~3 days with no fresh DR restore point. Fix BEFORE/ALONGSIDE the report-content TOs. Gate: AE capacity (execution lane allocation-TBD).</priority>
 
 <references>
