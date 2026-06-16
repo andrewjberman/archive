@@ -638,6 +638,26 @@
         <lambda>opal-portal-data-proxy — API proxy: routes /v1/aum/* /v1/benchmarks/* /v1/peers/* to DynamoDB/S3</lambda>
         <lambda>opal-smartx-ingestion-pipeline — ingests SmartX EC2 AUM time series into DynamoDB</lambda>
       </lambdas>
+      <mdpf_global_timeseries>
+        Producer: data/mdpf/scripts/backfill/build_aggregate_aua_timeseries.py (rollup of
+        platinum/mdpf/aggregate_aua/{date}.json partitions). Served (opal-data-portal-v2):
+        json/mdpf/global/aggregate-aua-timeseries.json + json/mdpf/{firm_id}/...; consumed by
+        getMdpfAggregateAUATimeSeriesByFirm() (portal-proxy.ts) on the ModelPortfolios Global +
+        per-firm AUA trend. Columnar shape: dates[], aggregate {opal_aggregate_aua, model_aua,
+        non_model_aua}, per-firm {model_aua, non_model_aua, partner_custody_total}, by_model
+        {model_value, account_count, cohort_class}.
+        SHAPE CHANGE — YANG_SITTW.TO-1 (2026-06-16, Andrew-direct): the sma_aua (1c) term is
+        REMOVED from the aggregate + per-firm slices and FOLDED into non_model_aua
+        (1b' = Schwab_total - 1a, SMA-inclusive). It carried a fabricated non-zero interpolated
+        estimate pre-launch (real SMA == $0 until ~2026-05-20); because 1b is a plug, the fold is
+        never-widen-safe (opal_aggregate_aua + model_aua + the combined non-model band all
+        UNCHANGED at every date; verified before/after = $0 movement on global/49financial/
+        inflection). REAL SMA detail survives in the by_model cohort_class='sma' sleeves (honestly
+        null pre-launch; already filtered out of the model stack by the FE). FE CONSUMER NOTE:
+        ModelPortfolios.tsx folds non_model_aua + sma_aua via `?? 0` / lastNonNull(undefined)->0,
+        so dropping sma_aua is BACKWARD-COMPATIBLE (renders identical); the FE leg (RD/DE) then
+        removes the now-redundant `+ sma_aua` + makes MdpfPerFirmTimeSeries.sma_aua optional/removed.
+      </mdpf_global_timeseries>
     </page_pipeline>
 
     <page_pipeline name="AdvisorIntelligence">
