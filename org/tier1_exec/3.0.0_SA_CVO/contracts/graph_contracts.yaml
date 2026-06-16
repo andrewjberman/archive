@@ -1,0 +1,67 @@
+# graph_contracts — CVO-authored rows for globgrph.graph_contracts (NFRA_GCONTR TO-3)
+#
+# AUTHORING MODEL (lane split, per AE convergence 2026-06-16):
+#   - CVO authors this YAML declaratively (the row CONTENT; value-layer lane).
+#   - AE runs `--load-contracts <this file>` IN-VPC (the Nessie REST catalog is in-VPC only;
+#     no dev-box pyiceberg write). Every row write = an attributable Nessie commit; the loader
+#     stamps `ratified_at` = that authoring commit hash at write time (existence-in-window = exact).
+#
+# RATIFICATION (§9 tiered — authored here, NOT self-ratified):
+#   - SEV1 rows (benchmark / headline / advisor_intelligence): ratified_by MUST be [Andrew].
+#     The row is AUTHORED here but is NOT a ratified sign-off until Andrew signs off (routed via COO)
+#     AND AE writes it in-VPC. Until then `ratified_at: PENDING-ANDREW-SIGNOFF` — it does NOT count
+#     as a sanctioning edit (AE's existence-in-window check keys on a real commit hash).
+#   - SEV2 rows (peers / aum): ratified_by [CTO, COO] (co-signable by CTO+COO).
+#
+# SEMANTICS (converged w/ AE, CTO-endorsed):
+#   - canonical_writer = the single IAM role-id == the WRITES-edge principal node-id, verbatim.
+#   - forbidden_writers = the UNSANCTIONED tripwire; CVO-curated COMPLETE per surface (CTO cond. (a)):
+#     a co-tenant NOT in this list only ever reaches WATCH, so catch-power depends on completeness.
+#   - period_defs = the value-layer semantic contract (CVO-owned value_check runs the served col vs it).
+#   - active: true = live contract (retire-without-delete sets false; CTO amendment).
+#   - v1 enforcement is ADVISORY (UNSANCTIONED WARNs, does NOT exit 2) until the CTO ramp-flip.
+#
+# WAVE STATUS: benchmark seed = THIS row (authored, RAVC2->COO, pending Andrew sign-off).
+#   NEXT WAVE (separate authoring pass — needs per-surface producer + forbidden_writers census):
+#   model_portfolios.headline, advisor_intelligence/NNA (SEV1); model_portfolios.peers,
+#   model_portfolios.aum (SEV2). Plus the period_defs value-check assertion (CVO-owned, §9 homing).
+
+contracts:
+
+  # ── SEV1 #1 — the benchmark seed (the BMKAUD-catch; fully worked in the seed brief) ──
+  - contract_id: benchmark-model-portfolios
+    surface: "critical-surfaces:model_portfolios.benchmark (SEV1) | pipescript:model-portfolios/yang-benchmarks-etf-returns"
+    artifact_keys:
+      - s3://opal-data-portal-v2/json/benchmarks/model_portfolio_benchmarks.json
+      - s3://opal-data-portal-v2/json/benchmarks/benchmark_returns.json
+      - s3://opal-data-portal-v2/json/benchmarks/model_portfolio_timeseries.json
+      - s3://opal-data-portal-v2/json/benchmarks/etf_returns.json
+    canonical_writer: yang-pipeline-lambda-role
+    canonical_producer: "yang-model-portfolio-benchmarks (ProcessBothPKLs branch)"
+    source_of_truth: "s3://opal-data-portal-v2/benchmarks/data_YYYYMMDD_v1.pkl  # Yang PKL (BMKAUD WS-1)"
+    period_defs:
+      "1D":  "prior-trading-day -> as-of"
+      "WTD": "week-start(Mon) -> as-of"
+      "MTD": "month-start -> as-of  (PARTIAL current month)"
+      "1M":  "trailing-1-calendar-month -> as-of"   # NOT last-complete-calendar-month = the SmartX violation
+      "1Q":  "trailing-3-calendar-months -> as-of"
+      "YTD": "year-start -> as-of"
+      "1Y":  "trailing-365-CALENDAR-days, TOTAL return (incl dividends)"   # feca94a1f: 365 not 252, total not price
+      "3Y":  "trailing-3Y, annualized"
+      "SI":  "since-inception, annualized"
+      "_rfr_tenor":    "duration-matched per model: UST/ST=1Y, INT=5Y, LTC/LTA=10Y (2c18f0c06)"
+      "_return_basis": "TOTAL return (dividends included) + calendar-day arithmetic"
+    models: [UST, ST, INT, LTC, LTA]
+    forbidden_writers:
+      - smartx-model-monthly-pull        # ROOT CAUSE: 1M=last-complete-calendar-month != contract
+      - opal-generate-benchmark-returns  # EC2 smartx-exporter generate_benchmark_performance.py, own period-math (dormant dual-writer)
+      - smartx-ingestion-role            # latent writer (BMKAUD writer census)
+      - news-pipeline-role               # latent writer (BMKAUD writer census)
+    enforcement:
+      iam_backstop: "DenyNonYangWriteBenchmarks on opal-data-portal-v2/json/benchmarks/* (b1a3543c9)"
+      surface_gate: "comp-surface-check SEV1 (model_portfolios.benchmark in critical-surfaces.yaml)"
+      value_check:  "period_defs check vs the Yang PKL (codifies BMKAUD WS-2; CVO-owned)"
+    ratified_by: [Andrew]                # SEV1 tier (§9) — PENDING Andrew sign-off via COO; do NOT treat as ratified until AE writes with a real ratified_at
+    ratified_at: PENDING-ANDREW-SIGNOFF  # AE stamps the authoring Nessie commit hash on in-VPC write, AFTER Andrew sign-off
+    active: true
+    provenance: "BMKAUD 2026-06-01 (benchmark-yang-truth-audit-20260601.md); revert 80224d674; Deny b1a3543c9; seed 48635a865"
