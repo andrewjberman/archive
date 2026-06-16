@@ -6,7 +6,7 @@
 <issued_by>2.0.0_SA_COO (PRD §7 decomposition, 2026-06-16; CTO handoff YANG_SITTW v0.2 42f6d414a)</issued_by>
 <issued_date>2026-06-16</issued_date>
 <status>staged</status>
-<priority>Yang-ad-hoc, NOT urgent — slot behind live OPLMCP/GCONTR. **EXECUTION-GATED ON SPAWN**: Pod 4 DS 0.4.0 + RD 0.4.1 + DE 0.4.0 are OFFLINE (allocation surfaced to MSTR/Andrew 2026-06-16). TO-1 is the FIRST YANG TO to GO (self-contained; the data-correction has standalone integrity value — removes a fabricated served layer).</priority>
+<priority>**UP-FIRST — Andrew-direct 2026-06-16 "YANG macro project up first"** (supersedes the prior "NOT urgent / slot behind OPLMCP/GCONTR"). **EXECUTION-GATED ON SPAWN**: Pod 4 DS 0.4.0 + RD 0.4.1 + DE 0.4.0 are OFFLINE — COO spawn-request routed to MSTR 2026-06-16. TO-1 is the FIRST YANG TO to GO (self-contained; the data-correction has standalone integrity value — removes a fabricated served layer). COO fires GO on spawn-confirm.</priority>
 
 <references>
   <ref type="prd">docs/architecture/YANG_SITTW.md (v0.2, 42f6d414a) — §3 WS-1 RESOLVED (data-lineage trace), §6 compiler evidence, §7 TO-1, §8 acceptance</ref>
