@@ -657,6 +657,14 @@
         ModelPortfolios.tsx folds non_model_aua + sma_aua via `?? 0` / lastNonNull(undefined)->0,
         so dropping sma_aua is BACKWARD-COMPATIBLE (renders identical); the FE leg (RD/DE) then
         removes the now-redundant `+ sma_aua` + makes MdpfPerFirmTimeSeries.sma_aua optional/removed.
+        CONSUMER WARNING (molecule 2026-06-16): SMA is now represented in TWO places -- folded into
+        non_model_aua (1b') AND retained in the by_model cohort_class='sma' sleeves (opal_div_sma,
+        opal_growth_sma; real detail, honestly null pre-launch). A consumer MUST NOT sum by_model
+        ALL-classes WITH non_model_aua -- that double-counts the SMA. Read the model stack as by_model
+        cohort_class='model' only (the live FE filters 'sma'), and read the non-model band as
+        non_model_aua alone. The pre-change invariant `sum(by_model all) + non_model_aua == total`
+        no longer holds; the correct identity is `sum(by_model where class='model') + non_model_aua
+        == opal_aggregate_aua` (= model_aua + 1b').
       </mdpf_global_timeseries>
     </page_pipeline>
 
