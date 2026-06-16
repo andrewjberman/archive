@@ -5,7 +5,7 @@
 <co_assignees>none (CloudOps IAM + TF-import; the ~B NFRA_INFRPT lane)</co_assignees>
 <issued_by>2.0.0_SA_COO (NFRA_INFRPT 2026-06-16; CTO architectural ruling 201006Z -- the clean end-state for the DR fix)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>staged</status>
+<status>pending</status>
 <priority>BINDING near-term (CTO 201006Z) -- NOT open-ended. Unwinds the TIME-BOXED least-privilege EXCEPTION the DR fast-fix added (EC2 image/snapshot lifecycle Resource=* on the SHARED opal-portal-lambda-role, which widens that portal-serving role's blast radius). GATE: ~B's DR (NFRA_INFRPT.DR) must FIRST verify a REAL restore point lands (close-gate = DR producing restore points, NOT TF-applied) -- do NOT repoint onto an unverified base. GOes on ~B's DR restore-point RAVC2.</priority>
 
 <references>
