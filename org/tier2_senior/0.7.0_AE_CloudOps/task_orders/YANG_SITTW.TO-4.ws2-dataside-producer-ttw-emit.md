@@ -5,7 +5,8 @@
 <co_assignees>none (AE-lane producer touch; FE legs are TO-2 0.1.0_DE + TO-3 0.4.0_DE, gated on this)</co_assignees>
 <issued_by>2.0.0_SA_COO (YANG_SITTW Phase-0 outcome 2026-06-16; both DE leads classified DATA-SIDE + identified the producers as AE-lane Lambdas, correcting the original TO "DS if data-side" co-assignee)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-16T1916Z (COO-accepted): both producer legs live + value-verified (A market-overview all-returns.json 71/71, B yang-pipeline model_portfolio_benchmarks.json + benchmark_returns.json, served TTW == independent 10-session recompute 0-mismatch, additive-safe every existing value byte-unchanged, 0-diff TF, 0 new IAM, ledger 20260616T1901Z CLOSED). Both DE FE legs unblocked + deploy-sequenced. §5 trading-day-counted trap avoided. -->
 <priority>**UP-FIRST — Andrew-direct 2026-06-16 "YANG macro project up first."** This is the WS-2 critical path: both FE legs (TO-2 + TO-3) render the TTW column N/A until this producer key lands. Deploy-sequencing: the producer TTW key must land BEFORE/WITH each FE promote (no all-N/A column ships). Additive + never-widen-safe (no existing return moves) -> no CTO+COO never-widen co-sign required (distinct from TO-1).</priority>
 
 <references>
