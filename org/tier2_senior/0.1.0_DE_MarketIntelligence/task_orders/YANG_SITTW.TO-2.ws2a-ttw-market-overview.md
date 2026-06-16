@@ -5,7 +5,7 @@
 <co_assignees>0.1.1_RD_MarketPerformance (components) + 0.1.0_DS_MarketIntelligence (ONLY if Phase-0 = data-side)</co_assignees>
 <issued_by>2.0.0_SA_COO (PRD §7 decomposition, 2026-06-16; CTO handoff YANG_SITTW v0.2 42f6d414a + TTW-def 172336Z)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>staged</status>
+<status>pending</status>
 <priority>Yang-ad-hoc, NOT urgent — slot behind live OPLMCP/GCONTR. **EXECUTION-GATED ON SPAWN**: Pod 1 DE 0.1.0 + RD 0.1.1 (+ DS 0.1.0 if data-side) are OFFLINE (allocation surfaced to MSTR/Andrew 2026-06-16). Pairs with TO-3 (same TTW computation).</priority>
 
 <references>
