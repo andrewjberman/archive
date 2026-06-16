@@ -1199,4 +1199,67 @@
     </artifact>
   </activity_scan_contract_notes>
 
+  <!--
+    ADVI_49NNAFIX D1 contract (added 2026-06-16, DS base).
+    Documents the NEW bd canonical Advisor-NNA artifact (D_00f). Published
+    2026-06-15 (89d4ac6a7 + gzip-fix 81798abf0), wired into the bd gold chain
+    PHASE_D5 dispatcher (AE c91a1335); FIRST scheduled-nightly refresh CONFIRMED
+    2026-06-16 05:14:23Z (ETag 7708f826..., 1.76MB gzip). bd port of inf INF_D_00f
+    -- same artifact class as activity_scan above (firm-isolated twins).
+    Closes the data_contract gap flagged at D1 ship (core-doc not updated in the
+    ship commit).
+  -->
+  <advisor_nna_canonical_contract_notes>
+    <artifact>
+      <s3_key>platinum/firm/advisor_nna_canonical.json (opal-data-bd; gzipped at origin, Content-Encoding: gzip -- &gt;10MB raw, CF auto-compress cap workaround)</s3_key>
+      <produced_by>data/black_diamond/scripts/gold/D_00f.advisor_nna_canonical.py</produced_by>
+      <inputs>
+        gold/canonical/nna/{date}.parquet (C_01 atomic account x date NNA; net_nna = daily_inflow - daily_outflow, all rows)
+        gold/dimensions/accounts_dimension_latest.parquet (geo client_state/client_city + relationship_first_seen_date inception + relationship_display_name)
+      </inputs>
+      <consumer>
+        portal AdvisorIntelligence DistributionTab.tsx -- Continuous-NNA GEO view (state L1 / city L2) + ADV view (advisor L1 / client L2).
+        SOLE NNA source for those views (replaces the lossy cumulative_chart weekly series, which had no window vocabulary).
+        Fetched in portal/src/api/endpoints/advisor-intelligence.ts:383
+        (GET /api/scoped/advisor-intelligence/.../advisor_nna_canonical.json).
+      </consumer>
+      <definition>
+        Advisor-NNA(advisor, window) = sum of nna_txn over [window_start, window_end] filtered to architect.
+        nna_txn = daily_inflow - daily_outflow (external client flows; ALL rows -- the boolean nna_clean is a QUALITY flag, NOT an aggregation filter).
+        nna = inflows - outflows. Parity-verified value-for-value against the bd served cumulative_chart firm MAX total AND the inf INF_D_00f net_nna semantics (CVO gate-2 EXACT, 2026-06-15).
+      </definition>
+      <schema>
+        Top-level envelope:
+        <key name="firm_id" type="string">"49financial"</key>
+        <key name="firm_name" type="string">"49 Financial"</key>
+        <key name="generated_at" type="string">ISO8601 UTC</key>
+        <key name="data_as_of" type="string">YYYY-MM-DD (latest atomic NNA date)</key>
+        <key name="definition" type="string">Self-describing canonical definition (see above).</key>
+        <key name="source" type="string">"gold/canonical/nna/{date}.parquet (C_01, bd atomic)"</key>
+        <key name="window_vocabulary" type="object">9 windows: QTD, YTD, MAX, 1Y, 3Y (rolling/standard) + q_current(==QTD), q1, q2, q3 (prior full calendar quarters; snapshot strip).</key>
+        <key name="window_bounds" type="object">{ [window]: { start: YYYY-MM-DD, end: YYYY-MM-DD } }</key>
+        <key name="firm" type="object">{ windows: { [window]: LEAF }, series: SERIES }</key>
+        <key name="advisors" type="object">{ [architect_name]: { windows: { [window]: LEAF }, series?: SERIES, clients: { [client_key]: { windows: { [window]: LEAF } } } } }</key>
+        <key name="geo" type="object">{ states: { [state]: { windows: { [window]: LEAF }, cities: { [city]: { windows: { [window]: LEAF } } } } } }  ("Other" state / no_city buckets carry join-misses.)</key>
+        <key name="reconciliation" type="object">{ all_pass: bool, tolerance_usd: 0.01, max_abs_delta, series_tie_max_abs_delta, per_window } -- partition-completeness invariants (sum of leaves == parent to the cent across adv/geo/client dims + series-tie).</key>
+        <key name="granularity_coverage" type="object">{ n_advisors, n_states, n_states_real, n_cities, n_client_leaves, dimensions: ["adv","geo","client"], fee_split, series_policy }</key>
+
+        LEAF (every window entry, every grain):
+          { nna: float, inflows: float, outflows: float, account_count: int,
+            fee_paying: null, no_fee: null,        -- bd has NO clean per-account fee source; NULL (not fabricated-zero); consumers MUST tolerate null (Inflection/INF_D_00c precedent)
+            nmnc: { nna, inflows, outflows, account_count },   -- households whose relationship_first_seen_date falls within the window (new money new client)
+            nmec: { nna, inflows, outflows, account_count } }  -- all others; INVARIANT nmnc.nna + nmec.nna == total.nna (F4b)
+          All dollar values rounded to the cent ONCE at serialization (full precision during aggregation -> round-once; avoids ~0.005*n_leaves cent drift at bd's 61-advisor scale).
+
+        SERIES (L1 only -- firm / advisor / state):
+          { weekly: [PERIOD], monthly: [PERIOD], quarterly: [PERIOD] }   -- city/client L2 drill carry light monthly-only series or none.
+          PERIOD = { period: str, period_end: YYYY-MM-DD, nna, inflows, outflows } (bucket-summed; sum of buckets == leaf MAX-window nna).
+      </schema>
+      <firm_separation>Reads + writes opal-data-bd ONLY (no inf cross-reference). bd port of inf INF_D_00f; the two are firm-isolated twins.</firm_separation>
+      <io_graph_note>
+        comp-pipescript io D_00f (run 2026-06-16) UNDER-DETECTS this artifact: the static extractor reports "WRITES: (none detected)" and only the accounts_dimension read -- it does NOT recognize the gzip _write_json_s3 helper write NOR the gold/canonical/nna/ glob-prefix read. The io manifest for D_00f is therefore approximate; THIS contract block is the authoritative I/O record. (Tooling gap surfaced to AE/comp-owner for the extractor's gzip-write + prefix-read patterns.)
+      </io_graph_note>
+    </artifact>
+  </advisor_nna_canonical_contract_notes>
+
 </data_contract>
