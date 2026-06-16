@@ -1,4 +1,7 @@
 # Task Order: NFRA_DEBTSCAN.D5-FIX.ORPHAN-PM
+
+**Status:** complete -- dead PortfolioManagement subtree removed (portal DEV 5ad23559, RAVC4 CLOSED 2026-06-12; ephemeral-worktree deletion-proof). Portal-submodule evidence. [recon 2026-06-16 COO]
+
 ## Remove the dead PortfolioManagement refactor sub-tree (19 files, HIGH) — verify-before-delete
 
 **Project:** NFRA_DEBTSCAN (TO-D5 PORTALSWEEP fix phase)

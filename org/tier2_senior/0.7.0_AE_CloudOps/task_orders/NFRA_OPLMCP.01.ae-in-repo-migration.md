@@ -4,6 +4,6 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (NFRA_OPLMCP decomposition per CTO dispatch 205110Z; PRD sec.5)</issued_by>
 <issued_date>2026-06-10</issued_date>
-<status>active -- GO, no gate (parallelizable now); sequenced behind live NFRA queue</status>
+<status>complete -- in-repo migration DONE (orig 8b0e7d241 + ~B re-sync 2026-06-16 66a9a353b/a2fe54360/0c767fa8c, AE~B RAVC2). NB DUPLICATE to_id (sibling inrepo file); both reconciled complete. [recon 2026-06-16 COO]</status>
 
 Migrate the M365 MCP gateway + kit into the repo at the canonical paths, register in EC2_MANIFEST.json, ensure comp-graph coverage picks up the new nodes. PRD: docs/architecture/NFRA_OPLMCP_PRD.md. SEQUENCING: behind the live LD-0177 NFRA queue (GLOBGRPH P2-STITCH, COSTAWS W3-W5, COMPAWS x3 pull first); no rush, backend leg IT-gated. CTO reviews infra vs PRD AC1-6 before any go-live. RAVC2 to COO + CTO.

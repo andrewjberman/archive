@@ -1,4 +1,7 @@
 # Task Order: NFRA_DEBTSCAN.TOOL-01
+
+**Status:** complete -- comp-pipescript deployed all-PIPELINE_MAP-tree scope (b5050f6b2); inf/cot/mdpf UNKNOWN-VINTAGE blind spot closed; RAVC2 to COO filed. [recon 2026-06-16 COO]
+
 ## comp-pipescript all-PIPELINE_MAP-tree scope (firm-scoped + mdpf)
 
 **Project:** NFRA_DEBTSCAN (tooling sub-track)

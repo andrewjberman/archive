@@ -1,4 +1,7 @@
 # Task Order: NFRA_DEBTSCAN.TOOL-03
+
+**Status:** complete -- comp-pipescript bronze first-class + aux check-only prefixes (b2ff049ce); Rule-13 bronze-verifiability gap closed. [recon 2026-06-16 COO]
+
 ## comp-pipescript bronze + auxiliary-prefix coverage (closes the Rule-13 bronze-verifiability gap)
 
 **Project:** NFRA_DEBTSCAN (tooling sub-track)

@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (NFRA_OPLMCP sub-stream decomposition, 181700Z 2026-06-12; per CTO PRD §OPLMCP sub-streams 7caee952-era)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>queued — start after D8-AE Part B remaining items (B2-alarm + B1/B3/B4/B5) RAVC2</status>
+<status>complete -- in-repo migration DONE (orig 8b0e7d241 + ~B re-sync 2026-06-16 66a9a353b/a2fe54360/0c767fa8c, AE~B RAVC2). NB DUPLICATE to_id: 2 .01 files (inrepo + in-repo); both reconciled complete. [recon 2026-06-16 COO]</status>
 <priority>P2 — first OPLMCP sub-stream; unblocks OPLMCP.02 backend integration + OPLMCP.03 TF infra</priority>
 
 <background>

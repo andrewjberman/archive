@@ -1,4 +1,7 @@
 # Task Order: NFRA_DEBTSCAN.TO-D5
+
+**Status:** complete -- portal sweep DE lane: sec-7 joint summary finalized (35b02dc05), DE findings merged, ROUTE-01/02 dispositioned. [recon 2026-06-16 COO]
+
 ## PORTALSWEEP — full portal/webapp structural sweep (DT + DE JOINT)
 
 **Project:** NFRA_DEBTSCAN (v0.2, Andrew-direct)

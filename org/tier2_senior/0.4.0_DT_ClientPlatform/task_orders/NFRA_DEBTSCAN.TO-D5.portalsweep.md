@@ -6,7 +6,7 @@
 **Priority:** P1 — JOINT, Andrew-named both serials
 **Authority:** CTO PRD v0.2 a5e58490e (Andrew-direct ~19:15Z 2026-06-12)
 **Sequence:** GO immediately for DT; DE pending spawn (MSTR spawn request in parallel)
-**Status:** COMPLETE — joint RAVC2 sent 20260612T~1958Z; CVO adjudication queued on co-signed ledger
+**Status:** complete -- portal sweep DT lane complete (c2539b2bb); ledger authored + TO status update. [recon 2026-06-16 COO]
 
 ---
 

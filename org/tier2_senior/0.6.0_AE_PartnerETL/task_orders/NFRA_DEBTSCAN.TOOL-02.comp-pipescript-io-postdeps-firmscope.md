@@ -1,4 +1,7 @@
 # Task Order: NFRA_DEBTSCAN.TOOL-02
+
+**Status:** complete -- comp-pipescript io+postdeps all-trees (5ba07e0b6); cot 28/28 + mdpf 18/18, 0 Unknown/0 gaps, coverage axis CLOSED. [recon 2026-06-16 COO]
+
 ## comp-pipescript io + postdeps all-tree extension (closes the coverage axis TOOL-01 opened)
 
 **Project:** NFRA_DEBTSCAN (tooling sub-track)

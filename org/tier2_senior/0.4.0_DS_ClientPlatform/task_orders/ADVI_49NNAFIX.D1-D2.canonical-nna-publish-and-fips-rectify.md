@@ -1,5 +1,8 @@
 # Task Order: ADVI_49NNAFIX — D1 canonical-NNA publish + D2 FIPS-34 lineage-rectify
 
+**Status:** active -- D1 SHIPPED + FULLY CERTIFIED (ledger eb0cd93ee CLOSED + CVO gate-4 PASS + 06-16 nightly CLEAN PASS 8aba8c4b0); D2 FIPS '34'->'NJ' rectification SHIPPED (de1bb995d). CLOSE-ELIGIBLE pending CVO D2 FIPS-leak/USPS-uniform acceptance. [recon 2026-06-16 COO]
+
+
 **Project:** ADVI_49NNAFIX (1a3daf344, Andrew-direct ASAP)
 **Assigned to:** 0.4.0_DS_ClientPlatform (data lane — canonical publisher + lineage)
 **Design doc (PRD-grade, no re-authored PRD):** `docs/briefs/advi-49nnafix-project-request-20260612.md` (DE's brief — FE control-trace + live-S3 ground truth)
