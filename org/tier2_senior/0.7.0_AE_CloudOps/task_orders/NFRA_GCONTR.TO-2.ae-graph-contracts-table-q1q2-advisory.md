@@ -4,7 +4,8 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (PRD §7 decomposition, 2026-06-16; CTO handoff 125904Z)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-16 (0.7.0_AE_CloudOps): all 4 limbs shipped + verified. graph_contracts LIVE on Nessie main (graph_contracts_bccbceec; RATIFIED §3 schema StaticTable-verified, 0 rows). Q1/Q2 engine (contract_engine.py) + comp-aws contract-diff + comp-surface-check ADVISORY wiring (file-gate NON-REGRESSED, rc-invariant; contract-selfcheck BMKAUD T1 -> UNSANCTIONED). Code 730117858; in-VPC bootstrap via CodeBuild 5fdd33bf -> ecs run-task --ensure-contracts-only exit 0; deploy-completion ledger 5103dbfbc/7f9eb5acb CLOSED. CTO-ratified (140717Z), COO lane-grant 67d4d3137, CVO-converged. RAVC2 154146Z. CVO TO-3 + DS TO-4 unblocked. -->
 <priority>HIGH — the long pole. TO-3 (CVO rows) is parallel-once-table-exists; TO-4 (DS surface) reads the rows. This TO unblocks the chain. GO'd 2026-06-16T1321Z (0.7.0_AE_CloudOps spawned LIVE 1319Z by MSTR; chain unblocked).</priority>
 
 <references>
