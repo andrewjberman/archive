@@ -5,7 +5,8 @@
 <co_assignees>0.4.1_RD_ModelPortfolios (components) + 0.4.0_DS_ClientPlatform (ONLY if Phase-0 = data-side)</co_assignees>
 <issued_by>2.0.0_SA_COO (PRD §7 decomposition, 2026-06-16; CTO handoff YANG_SITTW v0.2 42f6d414a + TTW-def 172336Z)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-16 by 0.4.0_DE_ClientPlatform. Phase-0 = DATA-SIDE (both surfaces); producer TTW emitted by AE TO-4 (yang-model-portfolio-benchmarks). FE shipped portal DEV 700ec9b4 (TTW on BenchmarkHeatmap + ReturnVolatilityScatter; FIXED_PERIOD_TRADING_DAYS['TTW']=10). tsc clean. Phase-3 independent tail(10) matched served 0.004pp. §5 basis gate CLOSED (AE confirmed data.pkl return_daily=total-return; index legs decisive). RAVC2 -> COO 194730Z. Promote held for YANG batch (TO-1+2+3). -->
 <priority>Yang-ad-hoc, NOT urgent — slot behind live OPLMCP/GCONTR. **EXECUTION-GATED ON SPAWN**: Pod 4 DE 0.4.0 + RD 0.4.1 (+ DS 0.4.0 if data-side) are OFFLINE (allocation surfaced to MSTR/Andrew 2026-06-16). Pairs with TO-2 (same TTW computation).</priority>
 
 <references>
