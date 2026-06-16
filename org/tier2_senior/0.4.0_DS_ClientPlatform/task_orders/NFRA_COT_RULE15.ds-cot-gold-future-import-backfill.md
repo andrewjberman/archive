@@ -1,5 +1,5 @@
 <to_id>NFRA_COT_RULE15</to_id>
-<project>NFRA_DTAFLP (Rule-15 compliance; same Rule-13 deploy pattern)</project>
+<project>NFRA_COT_RULE15</project>
 <title>Rule-15 backfill — insert `from __future__ import annotations` in the 20 cot gold scripts missing it</title>
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO gap-sizing 141911Z; COT-FIX b9754025b exposed gap — cot gold escaped the 71-script backfill)</issued_by>
@@ -17,7 +17,9 @@
 <scope>
 Mechanical backfill: insert `from __future__ import annotations` as the FIRST import statement in all 20 cot gold scripts currently missing it.
 
-**Step 1 — Enumerate:** Request the exact 20-script list from CTO (141911Z MCP, he has it from his direct sweep). Alternatively: `grep -rL "from __future__ import annotations" data/cot/scripts/gold/*.py` to derive it independently.
+**Step 1 — Enumerate (PRE-SATISFIED — CTO re-derived live 2026-06-16T130213Z, exactly 20, 0 tree-drift vs the 141911Z sweep, so the Phase-1 "count differs -> surface to CTO" branch does NOT fire).** The 20 cot gold scripts missing `from __future__ import annotations` (all under `data/cot/scripts/gold/`):
+`A_00.accounts_dimension.py`, `A_02.fee_rate_history.py`, `B_02.canonical_lots.py`, `B_03.account_gains.py`, `C_00.canonical_performance.py`, `C_01.canonical_nna.py`, `C_01b.role_aua_backfill.py`, `C_02.client_performance.py`, `C_03.account_performance.py`, `C_05.client_tax_liability.py`, `C_07.advisor_attribution.py`, `C_08.advisor_fee_efficiency.py`, `E_00.decompose_aua_gap.py`, `E_01.account_quality_tiers.py`, `E_18.detect_new_securities.py`, `E_20.cross_script_validation.py`, `E_21.generate_reconciliation_reference.py`, `E_22.diagnose_unassigned_accounts.py`, `E_23.diagnose_fee_splits.py`, `E_24.rebuild_fee_scorecard.py`.
+CTO latency-rescan: 0 live PEP-604 union annotations across the 20 (the one apparent C_08 hit is `|nna|` absolute-value notation in a comment, not an annotation) — "fully latent, nothing crashes today" holds. Re-run the grep at execution time as a freshness re-confirm; if the count still = 20, proceed straight to Step 2.
 
 **Step 2 — Verify pre-condition:** confirm each missing script has 0 live PEP-604 union syntax (`str | None`, `X | Y`, `X | None`) before touching — CTO's sizing says 0, but confirm per-file before the batch commit.
 
