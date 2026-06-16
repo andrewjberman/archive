@@ -4,8 +4,8 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (PRD §7 decomposition, 2026-06-16; CTO handoff 125904Z)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>staged</status>
-<priority>HIGH — the long pole. TO-3 (CVO rows) is parallel-once-table-exists; TO-4 (DS surface) reads the rows. This TO unblocks the chain. GO gated on 0.7.0_AE_CloudOps being spawned (globgrph lane owner currently offline — surfaced to MSTR/Andrew).</priority>
+<status>pending</status>
+<priority>HIGH — the long pole. TO-3 (CVO rows) is parallel-once-table-exists; TO-4 (DS surface) reads the rows. This TO unblocks the chain. GO'd 2026-06-16T1321Z (0.7.0_AE_CloudOps spawned LIVE 1319Z by MSTR; chain unblocked).</priority>
 
 <references>
   <ref type="prd">docs/architecture/NFRA_GCONTR_PRD.md (v0.2) — §3 RATIFIED schema, §4 BMKAUD replay, §5 tool surface, §7 TO-2, §9 RESOLVED policy</ref>
