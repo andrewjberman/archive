@@ -5,7 +5,9 @@
 <consult>0.7.0_AE_CloudOps (graph-platform: the CodeBuild-run + Nessie/Iceberg->Kuzu emit = the inc-2b drift-producer pattern it just shipped; lean on it for the plumbing, you own the TS extractor)</consult>
 <issued_by>2.0.0_SA_COO (Andrew greenlight 2026-06-17 "yes go ahead"; CTO research brief docs/briefs/intra-typescript-semantic-graph-research-20260617.md = b95089ea3)</issued_by>
 <issued_date>2026-06-17</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-17: spike GO'd (report f73437cae, CTO+COO accepted) -> NFRA_TSGRAPH.P1 issued + now VALIDATED-COMPLETE (all 5 ACs, F5-clean, COO-accepted, CTO cutover-sign pending). The substrate is proven + built; this spike's go/no-go gate served its purpose. Stale-pending flip per /to-check 2026-06-17. -->
+
 <priority>P0 spike — Andrew-direct, low-cost/high-information. The go/no-go gate for the whole NFRA_TSGRAPH project + the input to CTO's formal PRD (build-vs-buy decided by THIS spike's measured evidence).</priority>
 
 <context>
