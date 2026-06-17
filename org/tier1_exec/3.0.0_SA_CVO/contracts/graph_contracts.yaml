@@ -135,6 +135,49 @@ contracts:
     active: true
     provenance: "TO-3 SEV1 wave; producer census cvo_1555Z 2026-06-16; EC2-WRITES policy-limb HOLD LIFTED 2026-06-17 (CVO comp-kuzu re-verify: EC2 WRITES 0->~66, INSTANCE_PROFILE/HAS_PROFILE 0->11/24, iam:GetInstanceProfile egress-proven); via_role attribution code-grounded (contract_engine writes_into); value-limb AUDIT-RESHAPED 2026-06-17 (cvo_1804Z_nna_estate_audit_seams_verdict.md, plan approved): /seams root-caused dual attribution source (C_01 acct_dim SCD parks 34.5%/$35.3M placeholders vs C_07 account_team resolved); scope=all-roles + MAX=2021-Q1 (Andrew); served advisor_nna_canonical generated_at 2026-06-17T05:04Z data_as_of 2026-06-15"
 
+  # ── SEV1 #3 — model_portfolios.headline (Model Portfolios page "Portfolio Analytics" top panel) ──
+  # Census 2026-06-17 (CVO). DISTINCT from the bd-NNA ADVI headline (that = advisor_intelligence/F-4). This is
+  # the AUM headline: total/model/non-model AUM + quarterly growth (q0..q3). Shares the aum.ts backend +
+  # json/portfolios/aum-metrics.json chain with the model_portfolios.aum SEV2 row (critical-surfaces.yaml
+  # severity_resolution note) -> SAME canonical_writer/producer = smartx-ingestion-lambda-role (MDLP daily
+  # re-source, MDPF-sourced; aum-metrics.json last_updated 11:30:40Z matches the aum row's producer log).
+  # Served 2026-06-17: total.aum $1,805,679,796 (FUNDED), model $1.53B + non_model $355M, account_count 7410.
+  - contract_id: headline-model-portfolios
+    surface: "critical-surfaces:model_portfolios.headline (SEV1) | ModelPortfolios.tsx 'Portfolio Analytics' panel + portal/src/api/endpoints/aum.ts"
+    artifact_keys:
+      - s3://opal-data-portal-v2/json/portfolios/aum-metrics.json
+      - s3://opal-data-portal-v2/json/portfolios/account-distribution.json
+    canonical_writer: smartx-ingestion-lambda-role
+    canonical_producer: "opal-smartx-ingestion-pipeline (MDLP daily re-source; compute_account_distribution.py + aum-metrics build); trigger smartx-account-distribution-daily cron(30 11 UTC) -- SAME chain as model_portfolios.aum"
+    source_of_truth: "the MDPF feed (opal-data-mdpf) -- 'all MDPF-feed-sourced' per the 11:30 producer log; legacy smartx-scrape EC2 path DEAD"
+    period_defs:
+      "as_of":      "POINT-IN-TIME: total.aum + by_model AUM as-of the latest complete business day (period field). NOT a trailing-window metric."
+      "q0":         "current calendar quarter (quarter-to-date growth vs priorLevel = quarter-start AUM)"
+      "q1":         "prior FULL calendar quarter (growth vs its priorLevel)"
+      "q2":         "2 calendar quarters ago (FULL)"
+      "q3":         "3 calendar quarters ago (FULL)"
+      "MAX":        "since 2021-Q1 (start 2021-01-01)  # AUDIT F-2 + Andrew 2026-05-14: 2021-Q1 across ADVI/model-portfolios, NOT 2000"
+      "_aum_basis": "total.aum = FUNDED account balances as-of (unfunded EXCLUDED -- the never-widen invariant); model_aum + non_model_aum is the ALL-basis split (incl unfunded), so model_aum+non_model_aum >= total.aum by the unfunded delta (observed 2026-06-17: $1.888B all vs $1.806B funded, ~$82M = the funded-exclusion; the reconciliation rule must net this, NOT assert raw equality)"
+      "_growth":    "qN.change = aum - priorLevel (level-diff, NOT a flow); qN.growth% = change/priorLevel; historical quarter levels IMMUTABLE (never-widen on past dates)"
+    forbidden_writers:
+      - smartx-exporter-role        # EC2 smartx-exporter dual-writer of json/portfolios/* -- DORMANT (EC2 stopped since 2026-06-01); Q2-visibility rides the 06-17 EC2-WRITES-derive fix (same as aum row)
+    enforcement:
+      iam_backstop: "none surface-specific (no json/portfolios/* Deny); dormant EC2 dual-writer contained by EC2-stopped + (post-06-17) Q2; a novel Lambda writer -> Q2 WATCH advisory + value_check"
+      surface_gate: "comp-surface-check SEV1 (model_portfolios.headline in critical-surfaces.yaml; shares aum.ts nodes with model_portfolios.aum -> MAX-severity resolution = SEV1 wins)"
+      value_check:  >-
+        CVO-owned, advisory v1: (1) CROSS-SURFACE AUM IDENTITY -- the headline total.aum == the
+        model_portfolios.aum surface total == the firm additive account-once AUM (one AUM number across the
+        Model Portfolios page; same spirit as the NNA cross-route identity). (2) FUNDED-BASIS reconciliation:
+        total.aum = FUNDED-only; model_aum + non_model_aum nets to total + the unfunded delta (NOT raw
+        equality -- ~$82M unfunded 2026-06-17); by_model AUM sums to total.aum funded-basis. (3) POINT-IN-TIME +
+        never-widen: as_of latest-complete-day; historical quarter levels immutable. (4) MAX window start ==
+        2021-01-01. (5) AUA-vs-AUM: this is AUM (under management); do NOT assert equality with the bd ADVI
+        AUA headline (under advisement) -- different metric, expected to differ.
+    ratified_by: [Andrew]                # SEV1 tier (§9)
+    ratified_at: PENDING-ANDREW-SIGNOFF  # AE stamps the authoring Nessie commit on in-VPC write, AFTER Andrew sign-off
+    active: true
+    provenance: "TO-3 SEV1 wave (completes the SEV1 ceiling: benchmark + advisor_intelligence-NNA + headline); census CVO 2026-06-17; shares the aum.ts/MDLP chain with aum-model-portfolios (smartx-ingestion-lambda-role, CloudWatch 11:30 MDLP re-source); served aum-metrics.json period 2026-06-16 total.aum $1.806B funded; DISTINCT from F-4 bd-NNA headline (-> ADVI_NNAATTR)"
+
   # ── SEV2 #1 — model_portfolios.peers (peer-universe percentiles + model/benchmark per window) ──
   # Census 2026-06-16 (CVO, comp-kuzu canonical graph HEAD current): producer yang-generate-peer-performance
   # ASSUMES yang-pipeline-lambda-role (SAME canonical_writer as the benchmark seed — both yang-pipeline, Q2-resolvable).
