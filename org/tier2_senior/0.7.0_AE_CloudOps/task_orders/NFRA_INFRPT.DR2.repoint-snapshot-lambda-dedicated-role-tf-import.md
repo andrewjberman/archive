@@ -5,7 +5,8 @@
 <co_assignees>none (CloudOps IAM + TF-import; the ~B NFRA_INFRPT lane)</co_assignees>
 <issued_by>2.0.0_SA_COO (NFRA_INFRPT 2026-06-16; CTO architectural ruling 201006Z -- the clean end-state for the DR fix)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COO closeout 2026-06-17T13:05Z (startup ground-truth pass; status-field lag corrected): COMPLETE+VERIFIED 2026-06-16T2205Z, RAVC2 COO-ACCEPTED; commits 4cd7f74e5 (deploy) / 51a43ec25 (ledger CLOSE 20260616T2155Z) / b0254c1ed+bbf3adc72 (monitor-logs, labeled-separate). Repoint to dedicated infrastructure-snapshot-role done (CreateImage works); shared opal-portal-lambda-role EC2-snapshot/InfraSnapshotIO over-grant UNWOUND (least-privilege restored, time-boxed exception closed); orphan Lambda+EventBridge IMPORTED to TF (comp-manifest-check clean, 0-diff re-plan); COMPLETE manifest landed (10 artifacts + 25 EBS snaps, 0 failed = 0-loss close-gate MET). EBS skip-AMI'd-vols empirical proof = standing confirmation on the 06-17 07:00 UTC scheduled run (AE_CloudOps morning artifact-review); today's InvalidAMIName.Duplicate was benign same-day name-collision, not a regression. NOT gating this close. -->
 <priority>BINDING near-term (CTO 201006Z) -- NOT open-ended. Unwinds the TIME-BOXED least-privilege EXCEPTION the DR fast-fix added (EC2 image/snapshot lifecycle Resource=* on the SHARED opal-portal-lambda-role, which widens that portal-serving role's blast radius). GATE: ~B's DR (NFRA_INFRPT.DR) must FIRST verify a REAL restore point lands (close-gate = DR producing restore points, NOT TF-applied) -- do NOT repoint onto an unverified base. GOes on ~B's DR restore-point RAVC2.</priority>
 
 <references>

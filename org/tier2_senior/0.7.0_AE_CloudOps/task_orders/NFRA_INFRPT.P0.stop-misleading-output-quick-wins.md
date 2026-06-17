@@ -5,7 +5,8 @@
 <co_assignees>none (AE-lane Lambda + IAM work; the dedicated execution lane is allocation-TBD — see priority)</co_assignees>
 <issued_by>2.0.0_SA_COO (NFRA_INFRPT decomposition 2026-06-16; Andrew-direct via CVO proposal 6d5954360)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COO closeout 2026-06-17T13:05Z (startup ground-truth pass; status-field lag corrected): a+b+c LIVE+invoke-verified, RAVC2 COO-ACCEPTED 2026-06-16T2150Z; commits 902c96f76 / 26a950431 / 1eb0ad881 / 57288ecb2; leg-c deploy ledger CLOSED 20260616T2140Z. Phase-3 controlled-invoke verified the emitted report: §3 dead 0/0/100% AI-calls tracker GONE; §2 REAL served-artifact freshness (not the dead-EC2 i-06ebcb27 false-STALE); §6 Claude per-error triage live + §5 Claude security briefing live ("AI summary unavailable" gone); monitor-role logs read fixed (b0254c1ed/bbf3adc72). Standing post-deploy confirmation = the 13:00 UTC scheduled report (AE_CloudOps morning artifact-review 06-17). NOT gating this close. -->
 <priority>HIGH (Andrew-direct). Land-FIRST: stops the report emitting actively-misleading output (false "STALE", meaningless 0/0/100%, dead triage) at the next run. GATE: AE capacity only (0.7.0_AE on YANG TO-4 + GCONTR load; allocation TBD). The Claude re-home mechanism is RESOLVED = BEDROCK InvokeModel (CTO 185342Z) — no longer a gate. NOTE: the report now runs 13:00 UTC (CVO moved the cron 0 14 -> 0 13, LIVE + verified) — Phase-3 verify against the 13:00 run or a controlled invoke.</priority>
 
 <references>
