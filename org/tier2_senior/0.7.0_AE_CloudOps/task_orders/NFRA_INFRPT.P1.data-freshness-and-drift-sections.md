@@ -5,7 +5,8 @@
 <co_assignees>0.4.0_DS_ClientPlatform (or a data-platform DS) — the served-artifact freshness wiring (comp-freshness / pipescript reuse); AE owns the Lambda + drift checks</co_assignees>
 <issued_by>2.0.0_SA_COO (NFRA_INFRPT decomposition 2026-06-16; CVO proposal 6d5954360 §B/§E)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-17 (0.7.0_AE~B, RAVC2-accepted across the increments). P1 done through inc-2b incl. coverage-iterate: inc-1 FRESHNESS (per-pipeline served-artifact age + cot + sec-F) + inc-2a DEPLOY-DRIFT (in-Lambda source-map-vs-CodeSha256) + inc-2b PRODUCER-DRIFT (comp-manifest/comp-surface CI + terraform-plan nightly, Option-D coverage 66%, the coverage/staleness meta-guards). Both highest-value sections LIVE + in-Lambda-verified, both catching real previously-silent findings. Stale-pending flip per /to-check 2026-06-17. FOLLOW-ON (separate TOs): P2 money-depth, P3 contract-integrity (GCONTR-gated); the inc-2a detector-tuning + the lock-file producer-fix (CTO) + the config-tail iterate ride the DRIFT continuation. -->
 <priority>HIGH (biggest operational payoff; all from existing comp-tools). Lands AFTER P0 (P0 stops the misleading output; P1 adds the signals the fabric keeps getting bitten by). Gate: P0 landed + AE/DS capacity.</priority>
 
 <references>

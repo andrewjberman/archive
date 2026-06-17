@@ -4,7 +4,8 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO D8 adjudication 141614Z; base-AE diagnosis 140936Z; single-router dispatch)</issued_by>
 <issued_date>2026-06-17</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-17 (RAVC2-ACCEPTED COO 182914Z; CTO close-review). All 4 ACs met: AC1 FP-confirmed (baseline-provenance mismatch), AC2 Option-A AWS-backend-membership re-impl DEPLOYED (fdc1ddf31 + baseline re-signed d8fp-aws-backend-membership-v1), AC3 de-noise-WITHOUT-blinding ALL PASS (firm-sep + co-tenant control + 2 category rows), AC4 served-healthy. Deploy ledger d8fp-surface-scan-membership CLOSED (ee0b1d6bf), --red clean. Stale-pending flip per /to-check 2026-06-17. RESIDUAL (non-gating): 06-18 02:00Z nightly live-scan verify (base-AE morning check, event-driven). -->
 <priority>HIGH — CTO-prioritized AHEAD of base-AE's lower items (COSTAWS). A false SEV1/SEV2 on the must-always-be-right critical-surfaces SNS = cried-wolf erosion. NOT a fire (failure mode is noise, not blindness; base-AE landed interim KNOWN-FP ledger 79d999355 = the 02:00Z FP is contained -> proceed deliberately). base-AE diagnosed it + owns the D8 alarm infra + is idle-pending-TO-3.</priority>
 
 <scope_ruling>
