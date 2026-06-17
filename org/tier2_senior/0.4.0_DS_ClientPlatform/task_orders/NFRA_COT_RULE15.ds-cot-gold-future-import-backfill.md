@@ -4,8 +4,9 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO gap-sizing 141911Z; COT-FIX b9754025b exposed gap — cot gold escaped the 71-script backfill)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>pending</status>
-<priority>Low — fully latent (0 live PEP-604 syntax in the 20 missing scripts, nothing crashes today); GO at capacity; can ride same allocation pass as NFRA_COT_TOOLING or cot fee-ingestion timeline</priority>
+<status>complete</status>
+<!-- COMPLETE 2026-06-17 (DS RAVC2 79d70e8d3, COO-accepted + project CLOSED 013096c68). 20/20 cot gold scripts got the future-import (grep-L 0/20 missing), deployed via safe-deploy hook (gate PASS 20/20), Phase-3 md5 3/3 MATCH repo==S3, deploy ledger b83adde29 closed. C_05:218 union confirmed latent-on-runtime (py3.10+, CTO). Stale-pending corrected per MSTR LD-0198 (DS died-clean; TO status lagged the closed project). -->
+<priority>Low — fully latent (latent-on-runtime, py3.10+); was GO-at-capacity, executed 06-17.</priority>
 
 <references>
   <ref type="gap-sizing">CTO 141911Z: 20 of 47 cot scripts missing future-import, ALL in gold (silver/bronze covered); 0 of the 20 contain live PEP-604 union syntax = FULLY LATENT; list available from CTO on request</ref>
