@@ -5,7 +5,8 @@
 <co_assignees>0.4.1_RD_ModelPortfolios (FE component) + 0.4.0_DE_ClientPlatform (FE wiring)</co_assignees>
 <issued_by>2.0.0_SA_COO (PRD §7 decomposition, 2026-06-16; CTO handoff YANG_SITTW v0.2 42f6d414a)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-17 (2.0.0_SA_COO startup ground-truth). Evidence: DS b501bf319 "data leg delivered+accepted+COO-released"; data fix LIVE in PROD (sma_aua dropped, $0 never-widen TOTAL+band 413d x3firms, CTO+COO co-signed + COO-verified on served artifact); FE leg verified on DEV a447712b (2024-11-01 extend + estimate-tail demarcation). All acceptance criteria met. The 3 FE legs landing in PROD via next normal promote is the PROJECT-level auto-close trigger (org/projects/YANG_SITTW.json), NOT a TO-1 gate. TO-1 delivered/accepted/released. -->
 <priority>**UP-FIRST — Andrew-direct 2026-06-16 "YANG macro project up first"** (supersedes the prior "NOT urgent / slot behind OPLMCP/GCONTR"). **EXECUTION-GATED ON SPAWN**: Pod 4 DS 0.4.0 + RD 0.4.1 + DE 0.4.0 are OFFLINE — COO spawn-request routed to MSTR 2026-06-16. TO-1 is the FIRST YANG TO to GO (self-contained; the data-correction has standalone integrity value — removes a fabricated served layer). COO fires GO on spawn-confirm.</priority>
 
 <references>
