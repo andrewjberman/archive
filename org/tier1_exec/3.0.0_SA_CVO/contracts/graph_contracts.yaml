@@ -93,8 +93,10 @@ contracts:
   # (Andrew). The audit found per-advisor NNA DIVERGES by route from a DUAL ATTRIBUTION SOURCE (D_00f via
   # C_01 acct_dim SCD parks 34.5%/$35.3M in Unassigned+49F House placeholders; D_00c via C_07 account_team
   # resolves them). value_check below asserts the POST-REMEDIATION target invariants (advisory v1) and so
-  # CURRENTLY FLAGS the live divergence -- that is the point. OPEN (Andrew/CTO): adopt C_07's INFERRED
-  # architect resolution vs keep unknown accounts Unassigned -- F-0 remediation shape turns on it.
+  # CURRENTLY FLAGS the live divergence -- that is the point. F-0 RESOLVED (Andrew 2026-06-17): 49F House =
+  # canonical bucket (kept, NEVER inferred into individuals); Unassigned = transient (self-resolves, research-
+  # confirmed); individuals EXCLUDE both; the D_00c C_07-Layer-3 placeholder->individual inference is the
+  # leaderboard-side over-attribution to REMOVE (the canonical's bucket-preservation was correct).
   - contract_id: advisor-intelligence-nna
     surface: "critical-surfaces:advisor_intelligence (SEV1) | pipescript:advi-bd/advisor_nna_canonical"
     artifact_keys:
@@ -127,7 +129,7 @@ contracts:
         (2) CROSS-ROUTE IDENTITY (F-1): for a given (advisor, window), the per-advisor NNA is IDENTICAL across every served route (advisor_nna_canonical, leaderboard, rendered profile, rendered Distribution) -- one C_07-resolved attribution source + one tenure rule. CURRENTLY FAILS (Travis QTD $4.14M canonical vs $6.95M leaderboard) -- catches the live divergence.
         (3) WITHIN-SURFACE COHERENCE (F-1c): on each surface, served nna == inflows - outflows.
         (4) FIRM-ADDITIVE vs PER-ADVISOR ALL-ROLES: firm = account-once additive (Sigma(account-once)==firm, tol 0.01) + F4b (nmnc+nmec==total); per-advisor = all-roles, declared non-additive (NOT summed against firm).
-        (5) ATTRIBUTION-COMPLETENESS (F-0): the % of firm NNA in Unassigned/49F House is bounded + tracked (was 34.5%/$35.3M QTD on the acct_dim-SCD source); resolves under the C_07-resolved attribution. If the INFERRED-architect path is adopted (open Andrew/CTO decision), that inference is the declared, tested rule.
+        (5) BUCKET INTEGRITY (F-0, ANDREW-DECIDED 2026-06-17): 49F House is a RECOGNIZED CANONICAL bucket (49 Financial house book) -- kept as its own row, NEVER resolved/inferred into individual advisors. Unassigned is a BOUNDED TRANSIENT bucket (research: purely 2026 arrivals, YTD==MAX, q2/q3==0; self-resolves to a real advisor within ~1-2 quarters; its share MUST collapse in long windows -- ~80% of MAX is QTD, ~2.5% of MAX is pre-current). Individual-advisor per-advisor NNA EXCLUDES both buckets. The C_07 Layer-3 placeholder->individual INFERENCE is DISABLED (it over-credits individuals with the $357.6M house book + the transient pool -- that is the leaderboard-side cross-route divergence to remove).
     ratified_by: [Andrew]                # SEV1 tier (§9)
     ratified_at: PENDING-ANDREW-SIGNOFF  # AE stamps the authoring Nessie commit hash on in-VPC write, AFTER Andrew sign-off
     active: true
