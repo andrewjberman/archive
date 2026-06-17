@@ -5,7 +5,13 @@
 <issued_by>2.0.0_SA_COO (CTO D8 adjudication 141614Z; base-AE diagnosis 140936Z; single-router dispatch)</issued_by>
 <issued_date>2026-06-17</issued_date>
 <status>pending</status>
-<priority>HIGH — CTO-prioritized AHEAD of base-AE's lower items (COSTAWS). A false SEV1/SEV2 on the must-always-be-right critical-surfaces SNS = cried-wolf erosion. NOT a fire (failure mode is noise, not blindness) but the live SNS published real alerts -> resolve promptly. base-AE diagnosed it + owns the D8 alarm infra + is idle-pending-TO-3, so this is the productive fill while the GCONTR contract-row load is gated.</priority>
+<priority>HIGH — CTO-prioritized AHEAD of base-AE's lower items (COSTAWS). A false SEV1/SEV2 on the must-always-be-right critical-surfaces SNS = cried-wolf erosion. NOT a fire (failure mode is noise, not blindness; base-AE landed interim KNOWN-FP ledger 79d999355 = the 02:00Z FP is contained -> proceed deliberately). base-AE diagnosed it + owns the D8 alarm infra + is idle-pending-TO-3.</priority>
+
+<scope_ruling>
+SCOPE GREW + RULED OPTION A (CTO 143843Z; AC1 already satisfied — FP definitive per 142338Z). base-AE code-grounded that the originally-framed "AWS-scoped re-sign" would BLIND the scan (every AWS derive node has file_path="full-derive"; the finding loop fires only on portal-source-path matches -> after an AWS-scoped re-sign NO removed AWS node could ever fire = fails AC3 de-noise-without-blinding). The scan's matching mechanism is structurally incompatible with the AWS-only derive.
+
+CTO RULED OPTION A (rejected Option B retire-the-layer = loses out-of-band AWS-drift coverage commit-time can't give): RE-IMPLEMENT the in-derive scan to attribute removed/changed AWS nodes to surfaces by BACKEND-CHAIN MEMBERSHIP (per-surface AWS-backend subgraph carve by ARN/node_id) + re-sign the baseline AS that carved subgraph. This implements the yaml scheduled_scan's actual spec ("diff current SUBGRAPH vs signed baseline") and PRESERVES runtime out-of-band AWS-drift detection on the must-always-be-right surfaces. So this is a CODE change (scan matching: file_path -> AWS-backend membership) + per-surface carve + re-sign + AC3 egress-test — bigger than a data re-sign; scope/effort accordingly. base-AE carves from the 06-17 derive (no ad-hoc run). COO coverage-stake input concurred (Option B's commit-time-only loses runtime/infra-removal detection).
+</scope_ruling>
 
 <references>
   <ref type="adjudication">CTO 141614Z — high-confidence FP (baseline-scope mismatch), design ruling = domain-match the scan baseline; NOT declared definitive until AC1 provenance confirmed.</ref>
@@ -64,7 +70,7 @@ DO NOT: widen/weaken the critical-surface alarm coverage; touch the merged-AWS+p
 
 <acceptance_criteria>
 - AC1 (FIRST, GATING): 2139 baseline provenance confirmed — merged/stitched (-> FP confirmed, proceed) vs supposed-AWS-only (-> REAL drop, INVERT to SEV1, escalate, do NOT rescope). Evidence: the baseline source + node-type census.
-- AC2: in-derive surface-scan baseline domain-matched to the derive scope (AWS-only current <-> AWS-only baseline).
+- AC2 (RULED OPTION A — see scope_ruling): re-implement the in-derive scan matching from file_path-match to AWS-BACKEND-CHAIN MEMBERSHIP (per-surface AWS-backend subgraph carve by ARN/node_id) + re-sign the baseline AS that carved per-surface subgraph (implements the yaml scheduled_scan "diff current SUBGRAPH vs signed baseline" spec). A plain AWS-scoped re-sign is REJECTED (blinds the scan — fails AC3).
 - AC3: re-run/dry-run -> 0 false SEV1/SEV2 on the AWS-only derive AND a synthetic true-removal STILL fires the SNS alarm (egress-verified — de-noised, not blinded).
 - AC4: model_portfolios + advisor_intelligence independently confirmed healthy on SERVED state.
 - Deployed via Terraform (0-diff); comp-iam gaps clean if iam.tf changed.
