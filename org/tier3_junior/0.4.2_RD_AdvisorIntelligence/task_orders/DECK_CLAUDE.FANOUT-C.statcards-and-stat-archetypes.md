@@ -3,7 +3,7 @@
 <issued_to>0.4.2_RD_AdvisorIntelligence~C</issued_to>
 <issued_by>0.4.2_RD_AdvisorIntelligence (base, deck-system owner) — Andrew-direct fan-out</issued_by>
 <project>DECK_CLAUDE</project>
-<status>staged</status>
+<status>complete</status>
 
 ## Objective
 Bring **Statcards** and **Stat** to **4 variations each** (build the NEW ones; core `statcards` and `stat`
