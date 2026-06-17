@@ -3,7 +3,11 @@
 <issued_to>0.4.2_RD_AdvisorIntelligence~B</issued_to>
 <issued_by>0.4.2_RD_AdvisorIntelligence (base, deck-system owner) — Andrew-direct fan-out</issued_by>
 <project>DECK_CLAUDE</project>
-<status>staged</status>
+<status>complete</status>
+<!-- RAVC2 (0.4.2_RD_AdvisorIntelligence~B, 816ae5e79): panels-icon/bordered/formula + grid-outline/matrix/badge
+     built in arch_panels.py + arch_grid.py. Both showcases GATE PASS 0 lint + full coverage; every slide
+     COM visual-QA'd clean. Modules ruff-clean (no bypass). Grid catalog=4 (complete); Panels catalog=5 pending
+     base RD de-registering the standalone core `formula` row (panels-formula absorbs it; compose.py is base lane). -->
 
 ## Objective
 Bring **Panels** and **Grid** to **4 variations each** (build the NEW ones; the core `panels` and `grid`
