@@ -5,7 +5,7 @@
 <co_assignees>0.4.0_DS_ClientPlatform (or a data-platform DS) — the served-artifact freshness wiring (comp-freshness / pipescript reuse); AE owns the Lambda + drift checks</co_assignees>
 <issued_by>2.0.0_SA_COO (NFRA_INFRPT decomposition 2026-06-16; CVO proposal 6d5954360 §B/§E)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>staged</status>
+<status>pending</status>
 <priority>HIGH (biggest operational payoff; all from existing comp-tools). Lands AFTER P0 (P0 stops the misleading output; P1 adds the signals the fabric keeps getting bitten by). Gate: P0 landed + AE/DS capacity.</priority>
 
 <references>
@@ -17,6 +17,8 @@
 **(B) DATA FRESHNESS section.** For each pipeline (bd-gold, inf, cot, mdpf, yang/model_portfolios, NNA, news): served-artifact age vs its cadence -> STATUS OK/WATCH/RED. THE signal the firm keeps getting bitten by (inf/mdpf staleness P0; the SmartX false-STALE P0 replaced a stand-in for this). Reuse comp-freshness + the pipescript served lists; do NOT hardcode paths (that is exactly what made the SmartX section drift). For a D-1 pipeline, freshness = serving-day keyed (per the D1-freshness lesson), not same-day.
 **(E) DRIFT section.** "Did anything change/deploy that shouldn't have?" — comp-manifest-check (source-map drift) + comp-surface-check (critical-surface drift) + lambda-source-map vs deployed + terraform drift. Surface NEW drift since the last report (state-change, not a standing list).
 Both sections emit the per-line STATUS (OK/WATCH/ACT/RED) + a one-line reason + a pointer (the action-first format).
+
+**(F) RIDE-ALONG dogfood fix (LOW; folded in 2026-06-17 from the P0 13:00Z scheduled run, COO-sequenced per AE recommendation -- P1 already works this exact Lambda).** opal-infrastructure-monitor's `fetch_error_logs` passes a bare `*` term to CloudWatch Logs FilterLogEvents -> "InvalidParameterException: Invalid character(s) in term '*'" on the trade + snapshot log searches. Pre-existing latent bug, surfaced now that the restored §6 triage works (same dogfood class as the DescribeLogGroups gap caught last session). Fix: drop/omit the bare `*` filterPattern (an empty pattern returns all events) or move to Logs Insights StartQuery. Non-blocking (triage still produced full output) -- fix while already in this Lambda for B/E, do NOT open a one-off on the just-closed P0/DR2 deliverable.
 </scope>
 
 <compiler_tools_mandate>
