@@ -3,7 +3,7 @@
 <issued_to>0.4.2_RD_AdvisorIntelligence~A</issued_to>
 <issued_by>0.4.2_RD_AdvisorIntelligence (base, deck-system owner) — Andrew-direct fan-out</issued_by>
 <project>DECK_CLAUDE</project>
-<status>staged</status>
+<status>complete</status>
 
 ## Objective
 Build **4 Cover variations** + **4 Statement/Mood variations** as bible-compliant, registered,
