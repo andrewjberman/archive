@@ -5,7 +5,9 @@
 <consult>0.7.0_AE_CloudOps (P2-2 materializes these nodes/edges into the canonical Nessie graph -- the additive node/edge schema is the shared interface; agree it BEFORE P2-2 derive-deploy)</consult>
 <issued_by>2.0.0_SA_COO (CTO PRD section-9 handoff 151724Z; PRD docs/architecture/NFRA_TSGRAPH_PRD.md @ 2b61ac87e, Andrew-steered 2026-06-18)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>pending</status>
+<!-- GO 2026-06-18 (COO /drive cycle-1): DE 0.4.0 spawned LIVE (MSTR, pid 24732); P2-1 is the ready lead (rides live P1/P4 graph, HEAD-current). staged->pending. RAVC2 to COO (CC CTO). -->
+
 <priority>HIGH -- Andrew-steered P2 (PAGE->PANEL->DRILLDOWN lens). Rides the LIVE P1/P4 graph (comp-kuzu HEAD-current, 12500n/19138e, pin==marker). Lead TO of P2; P2-2 + P2-3 gate on it.</priority>
 
 <context>
