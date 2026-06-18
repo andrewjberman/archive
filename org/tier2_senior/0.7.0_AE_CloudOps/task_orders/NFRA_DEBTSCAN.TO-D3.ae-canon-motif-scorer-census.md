@@ -5,7 +5,9 @@
 <consult>0.4.0_DE_ClientPlatform (SERVED_LINEAGE frontend-graph motifs if they reach the portal layer); 1.0.0_SA_CTO (canon-patterns author -- spec + AC4); 3.0.0_SA_CVO (adjudicates the outlier candidates -> the >=1 true deviation AC4 needs)</consult>
 <issued_by>2.0.0_SA_COO (NFRA_DEBTSCAN PRD section 2c + AC4; canon-patterns.yaml v0.1 ef6110129 CTO-RATIFIED 2026-06-18 = the gate-clear)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>pending</status>
+<!-- GO 2026-06-18 (COO /drive cycle-1): gate CLEARED -- AE RAVC2'd D8-AE Part B CORE (B1 ledger + B2-Layer1 scan + B5 hooks) COMPLETE, live-verified (82e27199c). TO-D3's real dep = the live scan+ledger surface + marker-current graph, all confirmed. The D8 residual (B4 real-time leg + AC8(d) demos + blocking-flip ramp) does NOT gate TO-D3. staged->pending. RAVC2 to COO (CC CTO+CVO). -->
+
 <priority>QUEUED behind NFRA_GRAPHS.D8-AE Part B RAVC2 (shared AE 0.7 slot; D8-AE takes priority). Both CONTENT gates now CLEARED -- canon gate (ef6110129 delivered) + P1-precision gate (NFRA_TSGRAPH P1 complete) -> AUTHORABLE. Only AE-capacity sequencing remains (the D8-AE-Part-B priority).</priority>
 
 <gate>NFRA_GRAPHS.D8-AE Part B RAVC2 (frees the shared AE 0.7 slot). COO GOes after that RAVC2.</gate>
