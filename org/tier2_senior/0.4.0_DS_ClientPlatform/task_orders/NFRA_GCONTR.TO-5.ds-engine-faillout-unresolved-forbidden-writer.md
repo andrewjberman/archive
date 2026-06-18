@@ -5,7 +5,7 @@
 <consult>1.0.0_SA_CTO (contract-engine + comp-surface-check owner -- spec'd this ruling); 3.0.0_SA_CVO (the benchmark-contract DATA disposition is separate/parallel -- TO-3 lane)</consult>
 <issued_by>2.0.0_SA_COO (CTO contract-engine RULING 163207Z, off the GCONTR.TO-4 forbidden_writers name-mismatch finding DS surfaced)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>pending</status>
+<status>complete</status>
 <!-- GO 2026-06-18 (COO /drive cycle-2): DS idle/event-gated w/ ready non-nightly-coupled contract-engine work (same lane as TO-4). CTO-spec'd ruling. GO now. -->
 
 <priority>HIGH -- a never-widen forbidden_writers guard that silently reads CLEAN on an IAM name-drift is the guard going INERT = a FALSE-NEGATIVE (a forbidden write slips through), the dangerous direction, on SEV1 surfaces. The BMKAUD-class failure GCONTR exists to catch. Non-nightly-coupled (contract-engine, like TO-4) -> good pre-nightly-window work while NNA/cot are event-gated.</priority>
