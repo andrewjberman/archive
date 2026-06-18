@@ -3,7 +3,14 @@
 <issued_to>0.4.2_RD_AdvisorIntelligence~B</issued_to>
 <issued_by>0.4.2_RD_AdvisorIntelligence (base, deck-system owner) — Andrew-direct chart fan-out</issued_by>
 <project>DECK_CLAUDE</project>
-<status>staged</status>
+<status>complete</status>
+<!-- RAVC2 (0.4.2_RD_AdvisorIntelligence~B, 5a3e69179): chart-scatter-riskreturn + chart-line-rolling +
+     chart-quartile-peers (Yang) built in engine/archetypes/charts/scatter.py. Showcase GATE PASS 0 lint +
+     full coverage; every slide COM visual-QA clean. /seams all 3 = SOUND (M+D+SEMANTIC PASS); Peers (Yang)
+     SEMANTIC = PASS (box spans p25-p75, median+whiskers placed right, model > benchmark all periods). Did
+     NOT dodge D3 -- restored colored box after base RD lint fix (00ec056cb); scatter delegates to base RD
+     opal_scatter fix (bcf700d17). chart-bubble optional deferred. -->
+
 
 ## Objective
 Port the portal's **scatter / risk-return** charts into the Charts family. You own
