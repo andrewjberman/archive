@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (NFRA_GRAPHS D8 decomposition, ~171200Z 2026-06-12; scope expanded per CTO §10.6, 5226efca9, ~175600Z)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>active — Part A COMPLETE (RAVC3-PASS, e329623b0, 174826Z); Part B expanded scope per CTO §10.6; blocking-flip ruling received</status>
+<status>active — Part A COMPLETE (RAVC3-PASS, e329623b0). Part B CORE COMPLETE 2026-06-18 (B1 ledger + B2-Layer1 scan+SNS + B5 hooks all live-verified; RAVC2-pending COO; on accept COO GOs NFRA_DEBTSCAN.TO-D3). RESIDUAL tracked explicitly (NOT a hidden gap): (1) B4 marker-keyed real-time leg = separate build-TO (COO authoring, multi-day); (2) AC8(d) resign+staleness class demos; (3) 2 Fargate-driven spec divergences = CTO-ruling-pending (B2-Layer2-in-commit-hook; B3 staleness-to-S3-not-git-dir); (4) advisory->blocking flip = CTO ~1-2 day nightly ramp. COO split-call OPTION (a), 162206Z.</status>
 <priority>P2 — last infrastructure deliverable before NFRA_GRAPHS AC8 close; scope now includes durable ledger + real-time keying (AC8(d)/(e))</priority>
 
 <background>
