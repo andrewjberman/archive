@@ -566,6 +566,10 @@ def cmd_contract(surface):
                  "uncontracted = LOUD unreviewed. NOT silently clean (PRD AC4)."))
         return 2
     c = ce.contract_for_surface(surface, contracts)
+    if c is None:
+        # also accept a verbatim contract_id (CVO note: `--contract <contract_id>` should
+        # resolve too, not just the surface-name) before declaring uncontracted.
+        c = next((x for x in contracts if x.get("contract_id") == surface), None)
     crit = dict(_critical_surfaces())
     if c is None:
         print(_a(f"  UNCONTRACTED -- no graph_contracts row governs '{surface}'."))
@@ -598,8 +602,12 @@ def cmd_contract(surface):
         return 0
     canonical = c.get("canonical_writer", "")
     forbidden = set(fw)
+    live = ce.live_iam_roles(cur)
     intruders = [r for r in observed if r and r != canonical]
     forbidden_hits = [r for r in observed if r in forbidden]
+    # TO-5: a forbidden_writer naming 0 live IAM role (and not itself observed) is an
+    # INERT tripwire -- surface it LOUD here too (not just --flipped).
+    unresolved = sorted(x for x in forbidden if x not in live and x not in set(observed))
     print(_a("  OBSERVED (WRITES edges into the contracted bucket(s), latest snapshot):"))
     print(_a(f"    writers           : {', '.join(observed) if observed else '(none)'}"))
     if forbidden_hits:
@@ -611,7 +619,10 @@ def cmd_contract(surface):
         print(_a("    MATCH             : only the canonical writer observed."))
     if wildcard:
         print(_a(f"    wildcard roles    : {', '.join(sorted(wildcard))} (broad *:writes; advisory-soft)"))
-    return 0
+    if unresolved:
+        print(_a(f"  UNRESOLVED (TO-5)   : {', '.join(unresolved)} -- forbidden_writer(s) name 0 live "
+                 f"IAM role -> INERT tripwire (LOUD); name them with verbatim live IAM role-ids."))
+    return 2 if (forbidden_hits or unresolved) else 0
 
 
 def cmd_flipped(since):
@@ -653,7 +664,7 @@ def cmd_flipped(since):
         print(_a(f"  [{st:<12}] {surf}"))
         if v.get("reason"):
             print(_a(f"               {v['reason']}"))
-        if st == "UNSANCTIONED":
+        if st in ("UNSANCTIONED", "UNRESOLVED_FORBIDDEN_WRITER"):
             rc = 2
     # uncontracted critical surfaces -> LOUD unreviewed (the false-clean discipline)
     for sid, sev in _critical_surfaces():
