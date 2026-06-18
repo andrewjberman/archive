@@ -68,7 +68,8 @@ contracts:
       - smartx-ingestion-role            # latent writer (BMKAUD writer census)
       - news-pipeline-role               # latent writer (BMKAUD writer census)
     enforcement:
-      iam_backstop: "DenyNonYangWriteBenchmarks on opal-data-portal-v2/json/benchmarks/* (b1a3543c9)"
+      forbidden_writer_grain: "bucket"   # DEMOTED to declarative/advisory (TO-5; CVO 2026-06-18). The 4 forbidden_writers below are process-names (NOT verbatim IAM role-ids) AND bucket-grain cannot enforce key-grain -- it false-trips benign _smartx_*-namespaced co-tenancy (smartx writes its own _smartx_model_monthly/_daily keys, NOT the yang value keys; served values verified yang_design = CVO (b) verdict cvo 1647Z). Kept as intent-documentation; engine does NOT hard-flip. Never-widen rests on canonical_writer + value_check (primary) + the recommended Deny.
+      iam_backstop: "NONE LIVE (the prior 'DenyNonYangWriteBenchmarks' claim was a PHANTOM). That Deny (json/benchmarks/* except yang-pipeline-lambda-role) was DESIGNED + Andrew-directed 2026-06-01 (b1a3543c9 = a PLAN log, 'ready for Andrew apply-ratify') but NEVER APPLIED: not in any TF file, no TF commit references the Sid, absent from the live opal-data-portal-v2 bucket policy (CVO verified 2026-06-18 via comp-iam reconcile + get-bucket-policy). So never-widen is currently CONVENTIONAL (smartx writes _smartx_* by code), NOT IAM-enforced: smartx-model-monthly-pull-role holds live PutObject on json/benchmarks/* + smartx-ingestion-lambda-role/smartx-exporter-role hold bucket-wide. REMEDIATION (AE least-priv leg, routed via COO): APPLY the already-designed Andrew-directed Deny (one resource-based Deny denies ALL non-yang writers + future rogues -- stronger than per-role scoping). Until applied, enforcement = canonical_writer + value_check."
       surface_gate: "comp-surface-check SEV1 (model_portfolios.benchmark in critical-surfaces.yaml)"
       value_check:  "period_defs check vs the Yang PKL (codifies BMKAUD WS-2; CVO-owned)"
     ratified_by: [Andrew]                # SEV1 tier (§9) — PENDING Andrew sign-off via COO; do NOT treat as ratified until AE writes with a real ratified_at
@@ -162,6 +163,7 @@ contracts:
     forbidden_writers:
       - smartx-exporter-role        # EC2 smartx-exporter dual-writer of json/portfolios/* -- DORMANT (EC2 stopped since 2026-06-01); Q2-visibility rides the 06-17 EC2-WRITES-derive fix (same as aum row)
     enforcement:
+      forbidden_writer_grain: "bucket"   # DEMOTED to declarative (TO-5; CVO 2026-06-18): forbidden_writers (smartx-exporter-role) is a process-name on a shared bucket -> bucket-grain can't enforce key-grain; advisory only, no hard-flip. SAME phantom pattern as benchmark/aum -- DS-engine to confirm headline reads clean post-demote (DS flagged benchmark+aum; headline carries the identical smartx-exporter-role phantom). Never-widen rests on canonical_writer + value_check.
       iam_backstop: "none surface-specific (no json/portfolios/* Deny); dormant EC2 dual-writer contained by EC2-stopped + (post-06-17) Q2; a novel Lambda writer -> Q2 WATCH advisory + value_check"
       surface_gate: "comp-surface-check SEV1 (model_portfolios.headline in critical-surfaces.yaml; shares aum.ts nodes with model_portfolios.aum -> MAX-severity resolution = SEV1 wins)"
       value_check:  >-
@@ -241,6 +243,7 @@ contracts:
     forbidden_writers:
       - smartx-exporter-role        # EC2 smartx-exporter ai-supervisor-v2.py dual-write of json/portfolios/* -- DORMANT (EC2 i-06ebcb27395eb3f49 STOPPED since 2026-06-01, the dead-source path). Q2-INVISIBLE (0 EC2 WRITES edges) so this tripwire is DECLARATIVE until the 06-17 EC2-WRITES-derive fix; same gap class as NNA.
     enforcement:
+      forbidden_writer_grain: "bucket"   # DEMOTED to declarative (TO-5; CVO 2026-06-18): forbidden_writers (smartx-exporter-role) is a process-name on a shared bucket -> bucket-grain can't enforce key-grain; advisory only, no hard-flip (DS-engine confirmed aum reads UNRESOLVED pre-demote). Never-widen rests on canonical_writer + value_check.
       iam_backstop: "none surface-specific (no json/portfolios/* Deny found). The dormant EC2 dual-writer is contained by the EC2 being stopped + (post-06-17-fix) Q2; a novel Lambda writer -> Q2 WATCH (advisory, bucket-grain) + the value_check."
       surface_gate: "comp-surface-check SEV2 (model_portfolios.aum in critical-surfaces.yaml)"
       value_check:  "point-in-time AUM contract: total_aum = FUNDED-accounts sum as-of latest-complete-day (NOT trailing-window, unfunded EXCLUDED); aum-timeseries append-only (past points immutable). CVO-owned."
