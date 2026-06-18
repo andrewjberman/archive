@@ -4,7 +4,7 @@
 <assigned_to>3.0.0_SA_CVO</assigned_to>
 <issued_by>2.0.0_SA_COO (PRD decomposition, 2026-06-18; hardened per CTO DELTA 49b236dea)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>pending</status>
 <priority>MEDIUM-HIGH — two legs, different gates. LEG A (coverage-audit backlog seed) can START EARLY (seeded from the existing HUD log + comp-tools.yaml `replaces` fields) — it informs TO-2's coverage-proof + TO-4's per-tier coverage gate, so an early seed is high-leverage. LEG B (post-enforce telemetry re-measure + tune) is GATED on TO-4 (needs a post-enforce window + the override-marker feed). Extends the NFRA_TOOLHUD hud3_classify CVO follow-on already on BACKLOG.</priority>
 
 <references>
