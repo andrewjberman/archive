@@ -5,8 +5,9 @@
 <consult>0.4.0_DE_ClientPlatform (P2-1 defines the Cluster/PanelCluster node + CLUSTERS/CONTAINS_DRILLDOWN/SHARES_SOURCE edge SCHEMA you materialize -- the shared interface)</consult>
 <issued_by>2.0.0_SA_COO (CTO PRD section-9 handoff 151724Z; 2b61ac87e)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
-<priority>HIGH -- GATED on P2-1 (cannot materialize a schema P2-1 has not yet emitted). Same atomic-ledgered / never-half-land derive deploy as P4.</priority>
+<status>pending</status>
+<!-- GO 2026-06-18 (COO /drive): gate MET -- P2-1 schema delivered (DE fbf8549b1) + AE interface verified+aligned (AE broker status). SEQUENCE AFTER TO-D3 (it's a ledgered derive DEPLOY -- never-half-land; don't interleave with the scorer build). On materialize, DE's P2-1 close-verify fires (cluster edges on the live graph) -> P2-1+P2-2 close together. -->
+<priority>HIGH -- gate MET (P2-1 schema delivered + AE-interface-aligned). Same atomic-ledgered / never-half-land derive deploy as P4. Sequence after TO-D3.</priority>
 
 <gate>P2-1 <status>complete</status> AND the cluster node/edge schema agreed with DE (the additive CloudNode/CloudEdge string discriminators). COO GOes after P2-1 RAVC2 + schema-confirm.</gate>
 
