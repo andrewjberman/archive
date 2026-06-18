@@ -6,7 +6,7 @@
 <parity_gate_reviewer>1.0.0_SA_CTO (cross-domain join correctness + the D8 key-space constraint = the cutover/accept gate)</parity_gate_reviewer>
 <issued_by>2.0.0_SA_COO (Andrew drive-directive via the 5m loop = work-auth; CTO ruled it a co-designed P4 follow-on; base-AE scoped + flagged 231757Z)</issued_by>
 <issued_date>2026-06-17</issued_date>
-<status>active</status>
+<status>complete -- SHIPPED + ACCEPTED 2026-06-18. P4 cross-domain SERVED_FROM live-landed via atomic 5-leg ledger (tsgraph-p4-servedfrom, CLOSED, commit 4dc5d08be): grant 36231cc50 (s3:GetObject on opal-data-portal-v2/json/*, CTO+COO never-widen signed) -> safe-apply 0/1/0 -> image rebuilt (in-container sha d9432c119484351a verified) -> re-derive (marker f79542e8) -> 29 SERVED_FROM both-ends-verified LIVE on canonical graph under the REAL derive task-role. CTO gate-#5 RAVC2 ACCEPTED (20260618T132015Z, independent live-graph verify). /seams MECHANICAL silent-no-op RESOLVED. 4 visible-unresolved = confirmed-absent stale-FE objects (no grant/no widen). NFRA_TSGRAPH stays ACTIVE (P2/P3 ahead); COO reconciles project phase P4->complete. Status flipped this cycle (zombie cleanup -- was stale at 'active' post-accept).</status>
 <priority>HIGH — Andrew-direct (chose drive-P4-now over winding down). Rides NFRA_TSGRAPH as the P4 leg (PRD P4-scope), NOT a new project. The substrate (P1 semantic graph) is live; P4 stitches it to the cloud/trace domain = the full fine-lineage (goal-1) + the backend half of AC5.</priority>
 
 <context>

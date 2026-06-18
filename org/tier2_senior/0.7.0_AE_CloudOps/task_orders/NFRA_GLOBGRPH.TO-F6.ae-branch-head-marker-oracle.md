@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO decomposition handoff 154026Z, PRD v0.4.3 F6, ws-charter cycle 0009)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>active</status>
+<status>complete -- branch-head marker oracle SHIPPED (7d6f8e2ba, PRD v0.4.3 F6). Writer-stamp + reader-key + PROVISIONAL label live; directly OBSERVED working 2026-06-18 (MARKER_STAMPED writer=derive_runner hash=f79542e8... in the live P4 re-derive; comp-kuzu reads marker HEAD + provenance=current). Parent project NFRA_GLOBGRPH CLOSED COMPLETE. Status reconciled this cycle (zombie cleanup -- flip missed at project close).</status>
 <priority>P0-follow — AC10(b) re-cert required; PROVISIONAL label is same-day; writer+reader parts follow in-session</priority>
 
 <references>

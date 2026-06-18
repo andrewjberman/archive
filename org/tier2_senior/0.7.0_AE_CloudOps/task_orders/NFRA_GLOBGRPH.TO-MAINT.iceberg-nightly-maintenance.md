@@ -3,6 +3,7 @@
 
 **Project:** NFRA_GLOBGRPH
 **Assigned to:** 0.7.0_AE_CloudOps
+**Status:** complete — nightly Iceberg maintenance (Nessie-ref-aware mark+sweep, dry-run-first) SHIPPED e3d806c2d (dispatched cbcf16d81). Directly OBSERVED working 2026-06-18 in the live P4 re-derive: `MAINT_MARK refs=8` / `MAINT_SWEEP_PLAN scanned=166056 live=66 candidates=165945` / `MAINT_DRY_RUN_COMPLETE would_delete=30000 (cap) mode=dry-run`. Runs every nightly post-marker-stamp (GLOBGRPH_MAINT_MODE=dry-run pending Andrew flip-to-live after log review). Parent project NFRA_GLOBGRPH CLOSED COMPLETE. Status field added this cycle (zombie cleanup — TO authored without a status line).
 **Priority:** LOW-normal — ride the back of AE 0.7 queue (behind TO-D4 COSTRECON + TO-D1 iteration + COSTAWS W3/W4/W5)
 **Authority:** CTO PRD v0.4.4 §3 + Andrew-ratified retention policy (29b36516b — docs/reference/record-retention-policy-v1.md)
 **Boundary note:** TO-D4 COSTRECON *censuses/attributes* the Iceberg-maintenance gap (revised item b); THIS TO *implements* the remediation. Clean census-vs-action split.

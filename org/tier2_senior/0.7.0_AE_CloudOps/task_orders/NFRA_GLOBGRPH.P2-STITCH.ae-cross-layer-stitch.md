@@ -4,6 +4,6 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (follow-on per AE ITEM-3 RAVC2 185013Z; CTO schema ready)</issued_by>
 <issued_date>2026-06-10</issued_date>
-<status>pending -- SEQUENCED: tomorrow, after morning artifact review (3 fixes + CUR). Pull order: review -> P2-STITCH -> COSTAWS W3/W4/W5 -> COMPAWS x3. AC5 done-gate = kuzu_ac_traversals.py harness (already standing, fail-honest SUBSTRATE-MISSING until this lands)</status>
+<status>complete-as-superseded -- ABSORBED by NFRA_GLOBGRPH.P2-STITCH-CORE (the full cross-layer stitch build, COMPLETE 2026-06-11, f754164b4: L1 extractor + stitch derive + kuzu load + AC5 PASS). This original P2-STITCH TO's scope was delivered by -CORE; the grain-sentinel follow-on also shipped (48a8e9ae6). Parent project NFRA_GLOBGRPH CLOSED COMPLETE. Status reconciled this cycle (zombie cleanup -- flip missed at project close).</status>
 
 Build the P2 cross-layer stitch joining the repo-derived graph (comp-build artifacts, git intent) to the cloud-derived graph (Nessie commits, AWS reality) per CTO schema 82f766166. Done-gate: kuzu_ac_traversals.py AC5 flips SUBSTRATE-MISSING -> PASS on a real cross-layer traversal. AC8 (P3-A frontend AST) + AC9 (P3-C external boundary) remain separate follow-ons. RAVC2 to COO + CVO.

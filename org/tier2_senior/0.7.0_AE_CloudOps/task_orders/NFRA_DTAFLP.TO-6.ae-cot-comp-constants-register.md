@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (from DS TO-4 RAVC2 cross-lane follow-up, 20260611T134335Z)</issued_by>
 <issued_date>2026-06-11</issued_date>
-<status>active -- LOW-PRI, sequenced post-P1/TO-2. Runtime UNAFFECTED (cot FIRM_ID='cottonwood' correct+deployed). Must land before P3/CVO AC10 0-residual close.</status>
+<status>complete -- cot lane registered in comp-constants.config.yaml (FIRM_ID/FIRM_NAME + search_surface) SHIPPED 55a61c43a (+ prior patch-file 2a3fb7136); closes cot comp-constants drift + CVO AC10 residual. Parent project NFRA_DTAFLP CLOSED COMPLETE 2026-06-12. Status reconciled this cycle (zombie cleanup -- flip missed at project close).</status>
 
 DS's TO-4 (cot firm-native FIRM_ID drop, 6ce1ff5fc) surfaced a comp-constants drift: cot's FIRM_ID='cottonwood' diverges from bd/inf canonicals because cot is not registered in comp-constants.config.yaml. That file is ANY_EXEC_OR_AE-owned (owned-paths guard blocks DS commit). DS prepared a ready-to-apply patch:
   docs/briefs/dtaflp-to4-cot-comp-constants-registration.patch
