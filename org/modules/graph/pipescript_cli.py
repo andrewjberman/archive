@@ -24,6 +24,13 @@ Usage:
     pipescript --tool <name> <tool>   # GUARD: LOUD OUT-OF-SCOPE + exit 2 if <tool>
                                       #        owns nothing in named thread <name>
     pipescript --validate             # completeness gate (every thread -> 1 named thread)
+    pipescript --contract <surface>   # VALUE LAYER (NFRA_GCONTR.TO-4): the declared
+                                      #   graph_contracts contract + observed writer drift;
+                                      #   uncontracted -> LOUD unreviewed (exit 2)
+    pipescript --flipped --since <s>  # VALUE LAYER: per-surface writer flips since snapshot
+                                      #   <s> tagged SANCTIONED/UNSANCTIONED/WATCH/CLEAN +
+                                      #   uncontracted critical surfaces LOUD (exit 2 on any
+                                      #   UNSANCTIONED or uncontracted-critical)
 """
 from __future__ import annotations
 
@@ -39,6 +46,11 @@ GOLDEN_FIXTURES = os.path.join(
     ROOT, "org", "tier1_exec", "3.0.0_SA_CVO", "logs", "2026-06-15",
     "estate_census", "golden_fixtures.json",
 )
+# NFRA_GCONTR.TO-4: the critical-surfaces registry -- the AUTHORITATIVE set of
+# SEV1/SEV2 surfaces. --flipped enumerates it so a critical surface with NO
+# graph_contracts row reads LOUD `uncontracted` (false-clean discipline, PRD AC4),
+# never silently absent.
+CRITICAL_SURFACES = os.path.join(ROOT, "org", "modules", "graph", "critical-surfaces.yaml")
 
 OWNING_TOOLS = {
     "comp-pipescript": "comp-pipescript io/deployed/postdeps (medallion data-pipeline)",
@@ -500,6 +512,164 @@ def cmd_gate_b(data, fixtures_path=None):
     sys.exit(0 if clean else 2)
 
 
+# ---------------------------------------------------------------------------
+# NFRA_GCONTR.TO-4 -- value-layer contract surface over globgrph.graph_contracts
+# (--contract / --flipped). Reads delegate to contract_engine.py (the canonical
+# graph_contracts reader + Q1/Q2 drift/flip logic) -- this CLI is the human surface,
+# not a re-implementation. ADDITIVE: does not touch the named-thread traversal.
+# ---------------------------------------------------------------------------
+
+def _contract_engine():
+    """Lazy import of contract_engine (dev-box only; not COPY'd into the derive
+    container). Returns the module, or None with a LOUD stderr line."""
+    sys.path.insert(0, os.path.join(ROOT, "org", "modules", "graph"))
+    try:
+        import contract_engine as ce
+        return ce
+    except Exception as e:
+        sys.stderr.write(f"ERROR: contract_engine unavailable ({type(e).__name__}: {e})\n")
+        return None
+
+
+def _critical_surfaces():
+    """[(id, severity)] from the critical-surfaces registry; [] if unreadable
+    (read failure is surfaced LOUD by the caller, never silently treated as empty)."""
+    try:
+        import yaml
+        with open(CRITICAL_SURFACES, encoding="utf-8") as f:
+            d = yaml.safe_load(f) or {}
+        return [(s.get("id"), s.get("severity")) for s in (d.get("surfaces") or []) if s.get("id")]
+    except Exception:
+        return []
+
+
+def cmd_contract(surface):
+    """--contract <surface>: show the DECLARED graph_contracts contract for <surface>
+    (canonical_writer / period_defs / ratified_by / ratified_at / forbidden_writers)
+    alongside the OBSERVED writers on the WRITES edges into the contracted bucket(s),
+    flagging drift (a writer != canonical_writer, or in forbidden_writers).
+
+    Uncontracted -> LOUD `unreviewed` (exit 2), NEVER silently clean (PRD AC4)."""
+    ce = _contract_engine()
+    if ce is None:
+        return 3
+    contracts, status = ce.load_contracts()
+    print("=" * 78)
+    print(_a(f"CONTRACT: {surface}"))
+    print("=" * 78)
+    if status.startswith("unavailable"):
+        print(_a(f"  graph_contracts UNAVAILABLE ({status}) -- cannot assert (advisory). "
+                 f"Treating as UNREVIEWED."))
+        return 2
+    if status == "absent":
+        print(_a("  graph_contracts table ABSENT (not created yet) -> every surface is "
+                 "uncontracted = LOUD unreviewed. NOT silently clean (PRD AC4)."))
+        return 2
+    c = ce.contract_for_surface(surface, contracts)
+    crit = dict(_critical_surfaces())
+    if c is None:
+        print(_a(f"  UNCONTRACTED -- no graph_contracts row governs '{surface}'."))
+        print(_a("  -> LOUD unreviewed: no declared canonical writer / never-widen sign-off."))
+        print(_a("     NOT silently clean (false-clean discipline, PRD AC4)."))
+        if surface in crit:
+            print(_a(f"  SEVERITY: {crit[surface]} CRITICAL surface with NO contract row "
+                     f"-> contract authoring + ratification OWED."))
+        return 2
+    print(_a("  DECLARED:"))
+    print(_a(f"    canonical_writer  : {c.get('canonical_writer') or '(none)'}"))
+    if c.get("canonical_producer"):
+        print(_a(f"    canonical_producer: {c.get('canonical_producer')}"))
+    if c.get("source_of_truth"):
+        print(_a(f"    source_of_truth   : {c.get('source_of_truth')}"))
+    pds = c.get("period_defs") or {}
+    print(_a(f"    period_defs       : {', '.join(f'{k}={v}' for k, v in pds.items()) if pds else '(none)'}"))
+    fw = c.get("forbidden_writers") or []
+    print(_a(f"    forbidden_writers : {', '.join(fw) if fw else '(none)'}"))
+    print(_a(f"    ratified_by       : {', '.join(c.get('ratified_by') or []) or '(none)'}"))
+    print(_a(f"    ratified_at       : {c.get('ratified_at') or '(none)'}"))
+    # OBSERVED -- writers on the current snapshot's WRITES edges into the bucket(s).
+    try:
+        cur = ce.load_graph_snapshot("latest")
+        buckets = ce.contract_bucket_arns(c)
+        named, wildcard = ce.writes_into(cur, buckets)
+        observed = sorted({role for (role, _t) in named if role})
+    except Exception as e:
+        print(_a(f"  OBSERVED: snapshot read failed ({type(e).__name__}) -- drift UNVERIFIED (advisory)."))
+        return 0
+    canonical = c.get("canonical_writer", "")
+    forbidden = set(fw)
+    intruders = [r for r in observed if r and r != canonical]
+    forbidden_hits = [r for r in observed if r in forbidden]
+    print(_a("  OBSERVED (WRITES edges into the contracted bucket(s), latest snapshot):"))
+    print(_a(f"    writers           : {', '.join(observed) if observed else '(none)'}"))
+    if forbidden_hits:
+        print(_a(f"    DRIFT (FORBIDDEN) : {', '.join(forbidden_hits)} -- forbidden writer(s) on the bucket!"))
+    elif intruders:
+        print(_a(f"    drift (non-canon) : {', '.join(intruders)} -- non-canonical, non-forbidden "
+                 f"(shared-bucket s3:put capability; advisory)"))
+    else:
+        print(_a("    MATCH             : only the canonical writer observed."))
+    if wildcard:
+        print(_a(f"    wildcard roles    : {', '.join(sorted(wildcard))} (broad *:writes; advisory-soft)"))
+    return 0
+
+
+def cmd_flipped(since):
+    """--flipped --since <snap>: classify each contracted surface's writer-flip since
+    <snap> -- SANCTIONED (a ratified contract edit lands in the window) / UNSANCTIONED
+    (a forbidden writer appeared, no ratified edit) / WATCH (non-canonical shared-bucket
+    capability) / CLEAN -- and enumerate every CRITICAL surface with NO contract row as
+    uncontracted = LOUD unreviewed (PRD AC4). Exit 2 on any UNSANCTIONED or uncontracted-
+    critical (the CLI's own non-advisory signal; distinct from comp-surface-check's v1
+    advisory gate)."""
+    ce = _contract_engine()
+    if ce is None:
+        return 3
+    contracts, cstatus = ce.load_contracts()
+    print("=" * 78)
+    print(_a(f"FLIPPED --since {since}"))
+    print("=" * 78)
+    if cstatus.startswith("unavailable"):
+        print(_a(f"  graph_contracts UNAVAILABLE ({cstatus}) -- cannot assert (advisory)."))
+        return 2
+    import datetime as _dt
+    today = _dt.date.today()
+    since_date = ce._parse_date(since)
+    window = (since_date, today) if since_date else (today, today)
+    result, rstatus = ce.run_contract_check(base_ref=since, current_ref="latest",
+                                            contracts=contracts, window=window)
+    if rstatus.startswith("unavailable"):
+        print(_a(f"  snapshot/check UNAVAILABLE ({rstatus}) -- could not diff {since}..latest "
+                 f"(advisory)."))
+        return 2
+    print(_a(f"  window {window[0]}..{window[1]}  (base={since}, current=latest)"))
+    print("-" * 78)
+    by_id = {c["contract_id"]: c for c in contracts}
+    rc = 0
+    for cid, v in sorted(result.items(), key=lambda kv: by_id.get(kv[0], {}).get("surface", kv[0])):
+        c = by_id.get(cid, {})
+        surf = c.get("surface", cid)
+        st = v.get("status", "?")
+        print(_a(f"  [{st:<12}] {surf}"))
+        if v.get("reason"):
+            print(_a(f"               {v['reason']}"))
+        if st == "UNSANCTIONED":
+            rc = 2
+    # uncontracted critical surfaces -> LOUD unreviewed (the false-clean discipline)
+    for sid, sev in _critical_surfaces():
+        if ce.contract_for_surface(sid, contracts) is None:
+            print(_a(f"  [UNCONTRACTED] {sid} [{sev}] -- LOUD unreviewed: critical surface with NO "
+                     f"contract row (never silently clean, PRD AC4)"))
+            rc = 2
+    print("-" * 78)
+    if rc == 2:
+        print(_a("RESULT: UNSANCTIONED flip(s) and/or uncontracted critical surface(s) present "
+                 "-> exit 2 (CLI non-advisory signal)."))
+    else:
+        print(_a("RESULT: no UNSANCTIONED flips; every critical surface is contracted."))
+    return rc
+
+
 def main(argv):
     data = load()
     if not argv or argv[0] in ("-h", "--help"):
@@ -535,6 +705,24 @@ def main(argv):
             sys.exit(3)
         cmd_tool(data, argv[1], argv[2])
         return 0
+    if argv[0] == "--contract":
+        if len(argv) < 2:
+            sys.stderr.write("usage: pipescript --contract <surface>\n")
+            sys.exit(3)
+        return cmd_contract(argv[1])
+    if argv[0] == "--flipped":
+        # --since is REQUIRED: a writer/period flip is meaningless without a base snapshot.
+        since = None
+        if "--since" in argv:
+            i = argv.index("--since")
+            if i + 1 < len(argv):
+                since = argv[i + 1]
+        if not since:
+            sys.stderr.write(
+                "usage: pipescript --flipped --since <snapshot>"
+                "  (e.g. 20260617 | latest | s3://.../graph-*.tar.gz)\n")
+            sys.exit(3)
+        return cmd_flipped(since)
     cmd_thread(data, argv[0])
     return 0
 
