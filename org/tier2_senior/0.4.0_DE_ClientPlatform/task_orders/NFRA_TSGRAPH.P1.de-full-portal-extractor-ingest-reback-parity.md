@@ -6,7 +6,8 @@
 <parity_gate_reviewer>1.0.0_SA_CTO (close-reviews the per-tool parity results = the cutover gate)</parity_gate_reviewer>
 <issued_by>2.0.0_SA_COO (CTO P1-decompose direction 194141Z; formal PRD v0.1 31a0b0e92 = docs/architecture/NFRA_TSGRAPH_PRD.md, decision-complete)</issued_by>
 <issued_date>2026-06-17</issued_date>
-<status>active</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-18: P1 cutover SIGNED by parity-gate reviewer 1.0.0_SA_CTO (msg 125227Z; RAVC ACCEPT to DE 125215Z). Non-tautological parity-review on the LIVE post-nightly canonical graph PASSED: 961/961 FLOWS_TO carry props (HEAD=derive_runner 02:02:23Z, pin==marker current), etf_spread binding intact (kind=recompute/guarded + condition + srcField/dstField), anti-collapse 961 edges/961 distinct pairs 0-collapse (MERGE-on-{edge_type,props} + DE collapse-detector 10-exposure guards). AC1 PARITY + AC2 FINE-LINEAGE met at the cutover gate. COO-flipped per CTO 2-step authorization (DE 0.4.0 offline at flip-time). Phase-advance only -- project stays ACTIVE (P4 deploying, P2/P3 ahead). -->
 <priority>HIGH — Andrew-direct lineage (the "expand graphing into the TS" ask). P0 GO'd + measured (7.2s cold / 12.5ms incremental fits the derive); P1 makes it real. Build-primary ts-morph, SCIP deferred (P0 verdict).</priority>
 
 <context>
