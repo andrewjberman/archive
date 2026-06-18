@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (PRD §7 decomposition, 2026-06-16; CTO handoff 125904Z)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>staged</status>
+<status>complete</status>
 <priority>MEDIUM — the surface, last in the build order. GO gated on TO-3 (rows must exist to read). DS owns the pipescript CLI (owned-paths grant 0096b5cbb) so this is same-tool, DS-lane (no cross-tool owner-review).</priority>
 
 <references>
