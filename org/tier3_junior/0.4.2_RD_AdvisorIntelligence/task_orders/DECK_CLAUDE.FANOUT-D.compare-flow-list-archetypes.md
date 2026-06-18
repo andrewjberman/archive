@@ -3,7 +3,7 @@
 <issued_to>0.4.2_RD_AdvisorIntelligence~D</issued_to>
 <issued_by>0.4.2_RD_AdvisorIntelligence (base, deck-system owner) — Andrew-direct fan-out</issued_by>
 <project>DECK_CLAUDE</project>
-<status>staged</status>
+<status>complete</status>
 
 ## Objective
 Bring **Compare**, **Flow**, and **List** to **4 variations each** (build the NEW ones; cores exist). You
