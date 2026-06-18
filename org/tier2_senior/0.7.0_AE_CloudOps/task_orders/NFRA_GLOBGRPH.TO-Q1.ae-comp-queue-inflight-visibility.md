@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (Andrew-direct authorized, AE proposal 170220Z 2026-06-12)</issued_by>
 <issued_date>2026-06-12</issued_date>
-<status>active</status>
+<status>closed-superseded -- per COO ruling 20260618T154005Z. NFRA_GLOBGRPH genuinely CLOSED 2026-06-16 (Completed table, completed-date set, forward-work re-homed to BACKLOG). TO-Q1 was a deferred P3 visibility enhancement (in-flight/uncommitted event surfacing in the comp-kuzu provenance header) NOT a correctness fix (read-your-own-writes goes live per F5) and was not captured in the close re-home; COO adding it to BACKLOG.md. Not shipped, not a zombie -- a deferred enhancement re-homed to backlog. Status flipped this cycle (TO-recon, COO-ruled).</status>
 <priority>P3 — visibility enhancement, NOT a correctness fix (read-your-own-writes still goes live per F5). Cheap, closes the last "header could quietly mislead" seam.</priority>
 
 <background>
