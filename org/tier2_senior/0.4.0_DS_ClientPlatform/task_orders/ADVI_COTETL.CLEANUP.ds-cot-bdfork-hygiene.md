@@ -4,8 +4,8 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (COTETL closeout; CTO-flagged 171350Z + 140130Z)</issued_by>
 <issued_date>2026-06-22</issued_date>
-<status>staged</status>
-<!-- NON-URGENT, post-P0. NOT GO'd: DS just carried the 5-layer $24M P0 -- pick up on your capacity-signal. Both items are NON-CORRECTNESS hygiene (the served data is right + certified); neither blocks anything. -->
+<status>active</status>
+<!-- GO 2026-06-22 1723Z: DS signaled bandwidth (P0 closed, idle-available). NON-URGENT/DS-paced. Sequence (DS-proposed): Leg-1a comp-blast re-confirm 0 live cot consumers -> CTO rules retire-vs-snapshot-wire -> Leg-1c execute; Leg-2 ruff cleanup in parallel (no CTO-gate). Both NON-CORRECTNESS, cot-scoped, firm-separated. -->
 
 <objective>
 Two same-class bd-fork hygiene items surfaced by the COTETL $24M served-AUA fix (5c80bf6ca, CVO-certified). Both are NON-CORRECTNESS, cot-path-scoped, DS-lane (gold-script Rule-13). The served firm-AUA is CORRECT + certified ($395.30M/06-18); this is debt-cleanup so the dead-fork remnants don't mislead a future toucher.
