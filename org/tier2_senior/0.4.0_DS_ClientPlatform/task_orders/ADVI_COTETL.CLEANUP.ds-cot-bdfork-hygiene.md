@@ -12,7 +12,10 @@ Two same-class bd-fork hygiene items surfaced by the COTETL $24M served-AUA fix 
 </objective>
 
 <the_fix>
-1. RETIRE/QUARANTINE the dead lots-FIFO path for cot: account_gains (B_03) -> C_00 canonical_performance -> C_02 client_performance are now UNCONSUMED for cot (the C_03/C_01 snapshot-wire bypassed them; D_00 uses C_03-primary, C_02-fallback never fires; account_gains stays frozen-06-09 harmlessly). GROUND the consumer-map first (comp-blast/comp-pipescript io -- re-confirm 0 LIVE cot consumers, per the cert finding), THEN either (a) cot-conditional skip the dead B_03/C_00/C_02 build for cot (don't waste the run + don't emit a stale-dated artifact), or (b) snapshot-wire C_00/C_02 too (if any future cot surface will want client_performance). CTO architect-confirms the (a)-vs-(b) call before implement (same pattern as the C_03 fix). This is the "C_02 follow-on" CVO/DS referenced.
+1. RETIRE the dead lots-FIFO path for cot -- CTO-RULED = RETIRE (not snapshot-wire); pre-gated CLEAN (0-live-consumers, firm-separated, portal refs are comments-not-reads). **DESTRUCTIVE MULTI-LANE -- COORDINATED LANDING, COO-SCHEDULED, HARD SEQUENCE (delete-before-dechain = a gold-chain FAIL):**
+   - **DS stages NOW (authored, NOT committed):** comp-blast re-confirm 0 live cot consumers + author the diff = remove the C_00/C_02 fallback branches from D_00/D_00b/D_00c + delete C_00.py/C_02.py (cot-scoped). DO NOT LAND SOLO.
+   - **AE lane (goes FIRST or atomic):** drop C_00/C_02 from the cot SSM gold chain (ssm.tf:234) -- the de-chain MUST precede the script-delete.
+   - **COO schedules the coordinated DS+AE landing** (AE-dechain-FIRST -> DS-delete-AFTER) on a NON-P0-adjacent clean window, under a deploy-completion ledger (multi-lane destructive). Post-verify: served $395.30M + all 7 @06-18 UNCHANGED on that one nightly. NON-URGENT (0 consumers, zero rush).
 2. cot-gold per-class RUFF cleanup: C_01 carries 8 pre-existing bd-fork ruff violations (all OUTSIDE the C00SNAPSHOT change; RULE15 gate-note-bypass documented in 5c80bf6ca). Clean them per-class MANUALLY (py_compile + AST + ruff --select FA must stay green), NOT a `ruff --fix` bundle on the live script (banked: bd-fork ruff debt on a live cot gold script). Sweep the broader C_01/C_03 bd-fork debt in the same pass if cheap.
 </the_fix>
 
