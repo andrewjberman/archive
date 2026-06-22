@@ -4,7 +4,8 @@
 <assigned_to>1.0.0_SA_CTO</assigned_to>
 <issued_by>2.0.0_SA_COO (PRD decomposition, 2026-06-18; hardened per CTO DELTA 49b236dea)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-22 (CTO landed+enabled, COO-flipped per CTO 143603Z; both gates cleared: TO-2 proven-complete + TO-3 Leg A/B announce done). LIVE-ENFORCING fabric-wide: 3741da067 deny logic (18/18 FP/TP) + 89217d3ad settings.json matcher Grep|Glob->Bash|Grep|Glob (also closed the side-finding: the 06-18 Bash-HUD ext was never wired -- now is). LIVE-VERIFIED: Bash 'grep .tf' DENIED w/ override instruction; same+rail-checked marker ALLOWED; native Grep/Glob + operational aws + git/python = unaffected. ENFORCING tiers: tier-1 raw-aws-INSPECTION + tier-2a infra/.tf grep; broad repo-file-grep STAGED (own FP pass); native Grep/Glob = nudge. Override = trailing `# rail-checked:` (audited org/mcp/comp-which-rail.log). COO broadcast enforcement-LIVE to all live agents. NFRA_COMPRAIL CTO-side COMPLETE; only TO-5 (CVO post-enforce telemetry+coverage-audit+broad-grep-tier tuning) remains. -->
 <priority>HIGH — but GATED + SEQUENCED. The enforcement wall (PRD rollout step 4, hardened). Three enable tiers in HARDNESS ORDER, each enabling ONLY after its rail-coverage is proven; native Grep/Glob is the LAST + broadest + most friction-sensitive tier. DO NOT enable ANY tier until (a) TO-2 landed + proven-complete-enough (rail never-dead-ends — else gating DEADLOCKS) AND (b) TO-3 landed (CLAUDE.md amended + fabric announced — else surprise wall). A gate on EVERY Bash + native Grep/Glob is the highest-stakes change in this initiative; the build phase owns the test burden. COO flips staged->pending + GO's per-tier as gates clear.</priority>
 
 <references>
