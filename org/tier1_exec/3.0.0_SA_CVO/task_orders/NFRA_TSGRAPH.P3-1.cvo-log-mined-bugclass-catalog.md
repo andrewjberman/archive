@@ -5,7 +5,7 @@
 <consult>NFRA_DEBTSCAN owner (2.0.0_SA_COO) -- the cross-domain partition is a CONSUMED input to the estate scanner; CC at P3-1 close</consult>
 <issued_by>2.0.0_SA_COO (CTO PRD section-9 handoff 151724Z; PRD docs/architecture/NFRA_TSGRAPH_PRD.md @ 2b61ac87e, Andrew-steered 2026-06-18)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>pending</status>
 <priority>HIGH -- Andrew-steered P3 substrate. INDEPENDENT lead (mines the log corpus; does NOT need the graph or a DE lane) -> the live-startable P3 lead. P3-2 + P3-3 gate on this catalog.</priority>
 
 <context>
