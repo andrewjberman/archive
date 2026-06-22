@@ -4,7 +4,9 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (CVO NNA audit 9543c4392, Andrew-approved + all 4 decisions settled in-session 2026-06-17)</issued_by>
 <issued_date>2026-06-17</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- 2026-06-22 re-verify (DS): all 5 ACs PASS on SERVED 06-22 artifacts. AC1 cross-route identity Travis QTD/YTD/MAX nna IDENTICAL to the cent (advisor_nna_canonical.json D_00f == leaderboard.json D_00c: $8,900,055.22 / $21,233,843.54 / $214,876,465.97); $4.14M-vs-$6.95M divergence GONE. AC2 49F House+Unassigned is_bucket rows preserved, D_00c reads architect_no_infer (Layer-3 removed not bypassed), C_07 emits it. AC3 all-roles + firm account-once (geo delta 0.0; per-advisor non-additive by design F-1a/invariant-4). AC4 MAX=2021-Q1; nna==inflows-outflows <=$0.01; reconciliation all_pass=true. AC5 D_02 F-5 fallback logging present. RAVC2 -> CVO 134444Z (CC COO/CTO) for #9 fast re-cert -> NNAATTR close. -->
+
 <priority>HIGH — the unblocked critical path. F-0/F-1a are ungated (Andrew decided); they fix a SILENT financial-display defect (same advisor reads $4.14M vs $6.95M by route). Validate on the SERVED artifact, never self-report (Rule: verify against served, not rc=0).</priority>
 
 <context>
