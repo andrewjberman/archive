@@ -18,7 +18,8 @@ LD-0207 (Andrew-direct, b612199dd): a comp-rail SKIP IS a Rule 22 grounding SLIP
 </the_3_gates>
 
 <legs>
-- LEG-A (CTO): implement Gate-1 + Gate-2 in comp-tool-hud.sh (the PreToolUse hook); classify_path-scoped for Gate-2; #rail-checked escape preserved for Gate-1.
+- LEG-0 (CTO -- PREREQUISITE GATE, LD-0208 fefcae83a): FIX comp-which routing FIRST. The Andrew-commissioned audit found comp-which routes only ~8/36 tools (manifest backstop dead: reads use_cases but manifest uses entries; flow greps a term before the backstop; registry tagging is fine, router ignores it). MUST land BEFORE (or in the same enforce batch as) Gate-1/2 -- else denying raw grep funnels agents into grep-dumps/misroutes. Gate-1/2 ENFORCE is GATED on LEG-0 done. TO-5 RUN-GREP-vs-ROUTE rate measures it.
+- LEG-A (CTO): implement Gate-1 + Gate-2 in comp-tool-hud.sh (the PreToolUse hook); classify_path-scoped for Gate-2; #rail-checked escape preserved for Gate-1. ENFORCE only after LEG-0 (comp-which routes well).
 - LEG-B (CVO): Gate-3 grounding-field extension (mandatory comp-transform/comp-blast cite for component/function mechanism claims) into molecule/seams/verify-channel; CTO ratifies (cross-tool, commits-through-owner per the grounding-doctrine precedent).
 - LEG-C (CTO+COO): announce-then-enforce per gate (TO-3/TO-4 precedent -- announce -> grace -> enforce; COO relays the fabric announce).
 - LEG-D (CVO TO-5 extension): override-rate telemetry post-enforce for the new gates (repeat override for one intent = a coverage gap -> build the tool). org/mcp/comp-which-rail.log.
