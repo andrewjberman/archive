@@ -1,6 +1,13 @@
 # ADVI_COTETL.CLEANUP Leg-1 — RETIRE dead account_gains->C_00->C_02 path — STAGED (HELD, not applied)
 
-**Status:** STAGED-READY, HELD. CTO ruled RETIRE (173237Z) + ENDORSED coordinated-queue (173738Z).
+**Status:** EXECUTED 2026-06-22 ~1758Z (AE-first coordinated landing). AE de-chain DONE (7240a8933, live-verified
+C_00/C_02 gone from opal-cot-gold-run); DS landed AFTER: D_00/D_00b fallback->fail-loud-raise (1703ac61d, deployed
+[cot], structurally proven no-silent-return) + C_00/C_02 source DELETED (bba478b66). Functional retire COMPLETE.
+RESIDUAL: 2 inert S3 code-orphans (code/gold/C_00.py,C_02.py -- safe-deploy doesn't S3-delete; de-chained-harmless)
+pending sanctioned-delete decision (RAVC AE+COO 175855Z). Nightly-verify (served $395.30M unchanged) rides tomorrow.
+Original ruling+plan retained below.
+
+**[ORIG] Status:** STAGED-READY, HELD. CTO ruled RETIRE (173237Z) + ENDORSED coordinated-queue (173738Z).
 **Do NOT commit/apply the DS diff ahead of AE's SSM-drop** (deleted-but-chained = half-landed chain failure,
 NEVER-rule in spirit). COO schedules the coordinated DS+AE landing on a non-P0-adjacent window, under a
 deploy-completion ledger. Leg-2 (C_01 ruff) already DONE+deployed (5d43b4304).
@@ -15,10 +22,15 @@ deploy-completion ledger. Leg-2 (C_01 ruff) already DONE+deployed (5d43b4304).
 - **Firm-sep:** cot fork only; 49F/bd C_00/C_02 + INF_* are separate forks, untouched.
 
 ## DS-LANE STAGED DIFF (author at landing-time; held now)
-1. **D_00.portal_aggregates.py `_load_perf` (lines 286-292):** remove the `except Exception:` CLIENT_PERFORMANCE
-   fallback -> FAIL-LOUD (account_performance is required for cot snapshot-first; raise a clear error if absent,
-   rather than silently serving stale C_02 — the silent-stale fallback IS the freeze-bug class the CTO named).
-2. **D_00b.portal_timeseries.py `_load_perf` (lines 1294-1300):** same — remove the CLIENT_PERFORMANCE fallback -> fail-loud.
+**CTO fail-loud guardrail (174605Z):** removal must FAIL LOUD, NOT silent-empty — replace the `except` body
+with an EXPLICIT raise (`except Exception as e: raise RuntimeError("cot snapshot-first: account_performance
+required, no client_performance fallback") from e`), NOT a bare except-deletion (which could let a raw error
+propagate or return empty). Verify it ERRORS VISIBLY (don't trade one silent failure for another).
+1. **D_00.portal_aggregates.py `_load_perf` (lines 286-292):** replace the `except Exception:` CLIENT_PERFORMANCE
+   fallback (print WARN -> _load_parquet(CLIENT_PERFORMANCE) -> return df,None,False) with the explicit RuntimeError
+   raise above. account_performance (C_03 snapshot) is required for cot; the silent-stale C_02 fallback IS the
+   freeze-bug class the CTO named -> fail loud instead.
+2. **D_00b.portal_timeseries.py `_load_perf` (lines 1294-1300):** same — replace the CLIENT_PERFORMANCE fallback with the explicit RuntimeError raise -> fail-loud.
 3. **Delete** `data/cot/scripts/gold/C_00.canonical_performance.py` + `C_02.client_performance.py` (the dead lots-path producers).
 4. **D_00c.portal_leaderboard.py = NO CHANGE** — it has NO C_02 fallback (its "falling back" lines are
    role_aua/account_team, unrelated). The CTO "D_00/D_00b/D_00c" list over-included D_00c; verified clean.
