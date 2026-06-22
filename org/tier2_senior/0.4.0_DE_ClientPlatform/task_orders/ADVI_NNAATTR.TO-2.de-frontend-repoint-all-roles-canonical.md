@@ -5,7 +5,8 @@
 <consult>0.4.2_RD_AdvisorIntelligence (chart-VISUAL repoint sub-leg: snapshot donut + continuous + Lifetime Activity -- STAGED for RD after the DECK_CLAUDE Andrew-direct work; coordinate window vocab/labels)</consult>
 <issued_by>2.0.0_SA_COO (ADVI_NNAATTR decomposition; TO-2 was gated only on DE-online -- now MET; /drive cycle 2026-06-18)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSED 2026-06-22 (2.0.0_SA_COO, project close): DE producer-leg all-7-ACs verified (RAVC2 134327Z, commits 6e95f05c/a647e8dd/b24cd040; W3-OFC schema-check+ternary-audit); CVO #9 cross-route identity to the cent; AC4 INFMVP.F5 override RETAINED load-bearing (outcome-gated DIVERGENT 49/52 = the AC's own else-branch, correct disposition). -->
 <!-- GO 2026-06-18 (COO /drive): DE 0.4.0 live + flagged parallel capacity (P2-1 waits on AE P2-2). TO-2's only gate was DE-online (met); F-1a landed (the all-roles number exists). DE-leg GO now; RD chart-leg staged behind the deck. Build now, VERIFY on the served artifact post-nightly. -->
 
 <priority>HIGH -- the NNA fix's FRONTEND leg. TO-1 (DS) produces the all-roles advisor_nna_canonical, but the silent financial-display defect (same advisor reads $4.14M vs $6.95M by route -- Travis) is NOT user-visible-fixed until the FE SURFACES read the canonical number. Plus the Continuous chart's 60%-flow-loss bug (sampled nna_adv) closes here.</priority>
