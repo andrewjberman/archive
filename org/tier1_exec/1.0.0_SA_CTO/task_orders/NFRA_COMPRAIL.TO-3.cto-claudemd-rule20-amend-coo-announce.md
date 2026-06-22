@@ -4,7 +4,20 @@
 <assigned_to>1.0.0_SA_CTO (rule-amendment leg) + 2.0.0_SA_COO (announce-broadcast leg)</assigned_to>
 <issued_by>2.0.0_SA_COO (PRD decomposition, 2026-06-18; hardened per CTO DELTA 49b236dea)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-22: LEG A (ea0570377) + LEG B (COO announce broadcast to all 7 live agents) both done.
+     Downstream TO-4 ENABLED + LIVE same day (3741da067 + 89217d3ad). -->
+<!-- LEG A (CTO rule-amend) COMPLETE 2026-06-22, commit ea0570377: CLAUDE.md NEW Rule 21 (comp-which-first
+     DEFAULT + hive-brain why + GATED-not-banned 3-surface model: Bash raw repo-grep/find + raw-aws-inspection
+     deny unless inline `# rail-checked: <why>` marker [audited]; native Grep/Glob nudge-and-proceed [own light
+     escape, Andrew 2026-06-22 'native escape is fine']; native Read + operational aws + pipe-greps free) +
+     comp-grep/comp-glob row in the situation->command table. PRD reconciled to the same model (resolves the
+     COO-flagged §4/§8 self-contradiction): §3 refinement banner + native row -> nudge-and-proceed; §8 harness-fit;
+     §9 AC2. The OVERRIDE-MARKER single-source-of-truth = `# rail-checked: <why no comp-tool fits this exact search>`.
+     Rule 21 IS the durable note (loaded every session) for sessions cycling in after the live broadcast.
+     LEG B (COO announce-broadcast) PENDING -- dispatched to COO; fires BEFORE TO-4 enables. -->
+<!-- TO stays pending until Leg B (COO announce) fires. -->
+
 <priority>HIGH — announce-then-enforce (PRD rollout step 3). The gate (TO-4) must NOT be a surprise wall: every agent must know the comp-which-first rule + that native Grep/Glob is now GATED + the override-marker escape BEFORE enforcement. CTO rule-amend leg can begin in parallel with TO-2. COO announce-leg fires AFTER TO-2 (comp-which proven complete-enough) lands AND the CLAUDE.md amendment lands. GO'd NOW (CTO leg).</priority>
 
 <references>
