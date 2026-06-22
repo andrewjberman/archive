@@ -1,0 +1,37 @@
+# ADHC_GLDINC.SS4c -- watch-the-watcher DRAFT (unknown-unknown #2)
+# Author: 0.6.0_AE_PartnerETL 2026-06-22. FOR 0.7.0_AE_CloudOps review + fold into the D8-FP
+# critical-surfaces registry (cross-tool, LD-0193 review+commit-through-owner). NOT committed into
+# critical-surfaces.yaml here -- CloudOps owns that file + is actively reworking its shape (D8-FP),
+# so this is a content draft to fold, not an in-place edit (avoids a working-tree conflict).
+#
+# CONCEPT: a verifier (the SS4c load_flows oracle) is BLIND if its alarm publishes to a non-delivering
+# topic -- the "globgrph 0-sub-topic" class, one level up (a verifier whose own alarm reaches no one).
+# The registry must assert DELIVERY-CAPABILITY (NumberOfNotificationsDelivered>0 / a confirmed
+# delivering subscriber), NOT bare subscriber-PRESENCE -- a sub can exist and not deliver. This is
+# live RIGHT NOW: opal-critical-surface-alerts has Delivered=0 since ~06-16 (CloudOps F-1: the email
+# sub was unconfirmed -> AWS auto-deleted it at 72h; only a sandboxed SMS sub remains). So all 4 SS4c
+# alarms currently publish into a void.
+#
+# Shape per CloudOps directive (140218Z): {alarm_name, sns_topic, deliverable, owning_*}; KEY field =
+# the delivery-capability assertion (sourced from the hardened check_sns_egress, shared-infra-v1.30.0),
+# NOT subscriber-presence. Slot under whatever final D8-FP section name CloudOps lands on
+# (verifier_egress / monitoring_egress / a deliverable field on an alarm registry).
+
+verifier_egress:
+  - owning_verifier: ADHC_GLDINC.SS4c            # the post-cutover load_flows standing oracle (PRD sec 4c)
+    sns_topic: opal-critical-surface-alerts       # the canonical critical-surface topic (correct wiring)
+    deliverable: ASSERTED                         # gate: check_sns_egress NumberOfNotificationsDelivered>0
+    delivery_status: BROKEN_F1                     # Delivered=0 since ~06-16; Andrew-gated topic fix
+    re_flag_on: ["deliverable==0", "subscriber_removed", "delivered_metric_zero_over_window"]
+    alarms:
+      - name: gldinc-ss4c-canary-break            # CanaryStructuralOK Min<1 over 1d (cache dtype/structural break)
+      - name: gldinc-ss4c-canary-absence          # CanaryStructuralOK SampleCount<1 over 2d, breaching (canary stopped)
+      - name: gldinc-ss4c-weekly-divergence       # WeeklyScorecardClean Min<1 (full_scan-vs-served value diff)
+      - name: gldinc-ss4c-weekly-absence          # WeeklyScorecardClean SampleCount<1 over 7d, breaching (weekly leg stopped)
+    note: >
+      All 4 publish to the canonical critical-surface topic (correct, intentional reuse -- not a new
+      parallel path). End-to-end DELIVERED>0 is gated on the F-1 topic fix (re-confirm email OR lift
+      the SMS sandbox), which unblocks ALL critical-surface consumers, not just SS4c. comp-surface-check
+      must RE-FLAG if the deliverable assertion drops to 0 or the topic's delivering subscriber is removed
+      -- that is the watch-the-watcher guarantee. SS4c is one of 4+ consumers of this topic (per CVO
+      140722Z: critical-surface F-1 / graph-freeze G-1 / cot-AUA-L4 / SS4c).

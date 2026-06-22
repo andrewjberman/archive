@@ -1214,4 +1214,54 @@
 
   </pipeline>
 
+  <pipeline name="adhc_gldinc_ss4c_oracle">
+    <description>ADHC_GLDINC SS4c -- post-cutover standing oracle re-validation for the GLDINC P1
+      load_flows windowed/incremental cutover (PRD sec 4c; CVO cvo_1330Z). Restores the live
+      full_scan-vs-served oracle the L3-cleanup retired. Two tiers, both VERIFICATION-ONLY: write
+      ONLY gold/_parity/load_flows/ss4c/ + GLDINC/SS4c CW metrics; never a served key.</description>
+
+    <tier name="TIER-1 daily structural canary">
+      <resource type="lambda">gldinc-ss4c-canary (py3.11, 3008MB, pandas layer; role gldinc-ss4c-canary-role:
+        s3:GetObject opal-data-bd/gold/_state/load_flows/* + cloudwatch:PutMetricData ns GLDINC/SS4c).
+        Source infra/aws/lambda/bd-pipeline/gldinc-ss4c-canary/lambda_function.py; TF
+        infra/aws/terraform/bd-pipeline/gldinc-ss4c.tf (module gldinc_ss4c_canary, yang-lambda).
+        Reads preflt_events.parquet + watermark.json; asserts transaction_id int/str round-trip +
+        trade_date str-normalized (object dtype) + required base cols; emits CanaryStructuralOK +
+        CacheRowCount/TxidInt/TxidStr/WatermarkAgeHours. Independent of lib/nna_flows (cert bar #1).
+        memory 3008MB grounded: Max Memory Used ~1750MB on the live 66MiB cache. Deployed bd-v2.32.0
+        2026-06-22 (verified invoke ok:true).</resource>
+      <resource type="schedule">EventBridge gldinc-ss4c-canary-daily cron(30 6 * * ? *) -- daily 06:30Z,
+        after the nightly chain + load_flows cache advance settle.</resource>
+    </tier>
+
+    <tier name="TIER-2 weekly value-diff (runner-side)">
+      <resource type="gold_script">data/black_diamond/scripts/gold/gldinc_ss4c_weekly.py -- ORACLE
+        load_flows_from_transactions_full_scan() (preserved full recompute, un-tautology'd) vs SERVED
+        load_flows_from_transactions_windowed(read_load_flows_watermark())[0] (PURE windowed twin, no
+        persist; DS-review pure-swap, CVO re-cert PASS); diff via gldinc_p1_shadow.compute_scorecard;
+        emits WeeklyScorecardClean + WeeklyMaxAbsDiff/KeySymDiff/RowDelta. Runs WED on the c6i nightly
+        gold_dispatch.sh chain (Wed-leg ~L1348: CHAIN_LABEL=chain:full and DRY_RUN=0 and chain_exit=0
+        and date -u +%u==3; synchronous-before-shutdown, NON-FATAL). NFRA_COSTAWS: piggybacks the
+        already-up runner, 0 incremental runner-hours. (TIER-2 release = DS Rule-13 commit-through-owner,
+        in flight 2026-06-22; target before the 06-24 Wed run.)</resource>
+    </tier>
+
+    <alarms sns_topic="opal-critical-surface-alerts">
+      <alarm>gldinc-ss4c-canary-break (CanaryStructuralOK Min&lt;1)</alarm>
+      <alarm>gldinc-ss4c-canary-absence (SampleCount&lt;1/2d, breaching)</alarm>
+      <alarm>gldinc-ss4c-weekly-divergence (WeeklyScorecardClean Min&lt;1)</alarm>
+      <alarm>gldinc-ss4c-weekly-absence (SampleCount&lt;1/7d, breaching)</alarm>
+      <egress_note>Alarms publish to the canonical critical-surface topic (correct wiring) but end-to-end
+        delivery is GATED on the F-1 topic fix -- opal-critical-surface-alerts Delivered=0 since ~06-16
+        (email sub auto-deleted unconfirmed; only sandboxed SMS). Watch-the-watcher draft (deliverable
+        assertion) at deliverables/ADHC_GLDINC.SS4c.watch-the-watcher-draft.yaml for CloudOps D8-FP fold.</egress_note>
+    </alarms>
+
+    <operations>
+      <verify>aws lambda invoke gldinc-ss4c-canary -> ok:true (4.06M rows, txid int/str distinct,
+        watermark fresh). gate-3 CVO synthetic divergence/absence test post-06-24 (first weekly
+        datapoint). deploy_ledger gldinc-ss4c-tier1-canary CLOSED 2026-06-22.</verify>
+    </operations>
+  </pipeline>
+
 </pipeline_inventory>
