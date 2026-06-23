@@ -38,3 +38,6 @@ Full backfill from 04-22 (per cb62104b1 sec 3):
 5. Firm-separated (cot-tree only); ds-commit-gate PASS; served firm-AUA UNCHANGED at $395.30M (this is additive dim+backfill, must not move the certified number -- verify on the next nightly's served, no ad-hoc gold run for validation).
 6. GATED: do not start live pulls until AE signals the fresh BD session. RAVC2 COO + CVO as each piece (assets_dim / realized / lookback-probe) lands; CVO verifies each.
 </acceptance_criteria>
+
+---
+**RECONCILED-COMPLETE 2026-06-23** (COO /drive 132528Z): WORK A (A_05 assets_dim cbbbefb01 + 56-date backfill + nightly-chain 2ab5124dc) + WORK B (realized/txn/unrealized/allocations per-day backfill); CVO-verified 06-23. DONE.

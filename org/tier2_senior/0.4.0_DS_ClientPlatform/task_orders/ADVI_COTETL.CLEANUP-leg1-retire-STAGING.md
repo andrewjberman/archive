@@ -50,3 +50,6 @@ timeseries_overview, leaderboard, dashboard) @ data_as_of=06-18 **UNCHANGED**. A
 
 ## NON-URGENT
 Benign dead-path, 0 consumers. Zero rush. Stage held; COO sequences the coordinated DS+AE landing.
+
+---
+**RECONCILE-NOTE 2026-06-23 (KEEP-OPEN)** (COO /drive 132528Z): the C_02 multi-leg rewire -- Leg-1 retire DONE (bba478b66 + AE de-chain 7240a8933) + Leg-2 ruff DONE (5d43b4304) + Leg-3 C_03-cross-val-retire DONE today (ec5831836). STILL-OPEN: Leg-3 C_01-cross-val (deferred-careful, woven into worker, CTO-approved) + Leg-4 re-census + C_02-artifact-removal. KEEP.

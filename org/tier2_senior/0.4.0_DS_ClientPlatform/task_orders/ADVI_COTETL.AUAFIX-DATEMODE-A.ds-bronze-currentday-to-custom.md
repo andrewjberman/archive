@@ -54,3 +54,6 @@ REPROCESS REQUIRED (bronze patch, CTO Auto-Rule #4). Forward-fix alone leaves si
 3. Coordinated with AE DATEMODE-B (template re-provision + backfill). 
 4. BINDING VERIFICATION GATE (project-level, shared with DATEMODE-B): served cot firm-AUA data_as_of advances PAST 06-09 AND total_aua ~$397.7M on the NEXT SCHEDULED NIGHTLY (validate-on-served, no ad-hoc gold run). NOT accepted until the nightly confirms.
 </acceptance_criteria>
+
+---
+**RECONCILED-COMPLETE 2026-06-23** (COO /drive 132528Z): bronze CurrentDay->Custom landed (un-froze holdings advance); CVO-certified 06-22. The over-advance-to-incomplete-today EDGE was a NEW class (06-23 P0) handled by the C_03/C_01 completeness-guard (e171ca3e1) + (b) source-guard (fdd5f28d4) -- NOT a DATEMODE-A reopen. DONE.

@@ -65,3 +65,6 @@ DS commit cycle per Rule 13 (ds-commit-gate; comp-pipescript io on D_04/D_03/C_0
 </acceptance_criteria>
 
 <data_reprocess_scope><conditional>The exclusion-rule fix re-emits the corrected AUA on the next gold-run (the L1 nightly or a manual run). No bronze/silver reprocessing -- a gold-tier business-rule correction in lib/exclusions.py. Served AUA value changes (~$362.6M -> ~$365.7M) -- this is a CORRECTION (fresher-AND-more-correct), not a widen; ships with a before/after note (the +$3M is the dormant-but-real re-inclusion, Andrew-direct).</conditional></data_reprocess_scope>
+
+---
+**RECONCILED-COMPLETE 2026-06-23** (COO /drive 132528Z): snapshot-zeroed-only exclusion rule landed; part of the $24M AUAFIX, CVO-certified 06-22. DONE.

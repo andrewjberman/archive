@@ -52,3 +52,6 @@ Determine the CORRECT AUA-basis cadence for cot. The PRD's Layer B observed the 
 </acceptance_criteria>
 
 <data_reprocess_scope><conditional>If CTO rules "advance the basis" (genuine freeze), the BD-export advance + re-run is a DS gold-run (Rule 13). If CTO rules "by-design-periodic" -> cadence-surfacing is a served-metadata honesty change, no basis reprocessing. The reprocess scope is CONTINGENT on the CTO determination -- do not pre-commit to either.</conditional></data_reprocess_scope>
+
+---
+**RECONCILED-COMPLETE 2026-06-23** (COO TO-hygiene /drive 132528Z): AUA-basis cadence settled (snapshot-first basis, DS+AE); part of the $24M served-AUA fix, CVO-certified 06-18->06-22. DONE.

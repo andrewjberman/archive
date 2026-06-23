@@ -56,3 +56,6 @@ DS commit cycle per Rule 13 (ds-commit-gate; comp-pipescript io on the touched g
 </acceptance_criteria>
 
 <data_reprocess_scope><no_reprocess_needed>A firm_id label correction in the cot gold/platinum generation -- re-emits on the next scheduled gold-run (or the L1 manual run). No basis/data reprocessing; corrects a served-metadata label.</no_reprocess_needed></data_reprocess_scope>
+
+---
+**RECONCILED-COMPLETE 2026-06-23** (COO /drive 132528Z): firm-id fork-shadow cleaned; part of the $24M AUAFIX, CVO-certified 06-22. DONE.

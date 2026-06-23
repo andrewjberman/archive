@@ -67,3 +67,6 @@ CTO's 4 CONDITIONS (all binding):
 </acceptance_criteria>
 
 <data_reprocess_scope><no_reprocess_needed>Gate-emission logic only; zero silver transform/content change (Rule 17). Once it emits, the chain auto-fires gold on the next scheduled run forward — no historical re-emit needed (the freshness section + the BD-source determination handle the historical staleness separately).</no_reprocess_needed></data_reprocess_scope>
+
+---
+**RECONCILED-COMPLETE 2026-06-23** (COO /drive 132528Z): emit_silver_sentinel run-processed/fail-closed gate landed; chain auto-fires (verified-on-nightly). DONE.
