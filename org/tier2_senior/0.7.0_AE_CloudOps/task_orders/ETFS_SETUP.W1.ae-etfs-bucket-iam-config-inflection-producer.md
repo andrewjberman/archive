@@ -5,15 +5,16 @@
 <consult>0.4.0_DS_ClientPlatform (daily-artifact contract shape -- DS's AVGCAP compute reads it; agree the schema before the producer writes)</consult>
 <issued_by>2.0.0_SA_COO (ETFS_SETUP decomposition; CTO PRD 1e3db994b + Andrew decisions fd41dc052)</issued_by>
 <issued_date>2026-06-22</issued_date>
-<status>staged</status>
-<!-- STAGED (not GO'd): no-rush per CTO (full June view ~early-July) + AE saturated (COTETL-wrap/F-1/DEBTSCAN/TSGRAPH). COO flips staged->pending + GO's when AE signals capacity. This is the immediate provable slice once AE is free. -->
+<status>active</status>
+<!-- GO 2026-06-22 151x Z: AE signaled capacity. Non-DS-dependent parts startable now; the daily-artifact contract step loops DS (AE proposes, DS confirms async). No-rush overall (full June ~early-July). -->
+<!-- SCOPE-CORRECTION 2026-06-23 (CTO Andrew-direct, COO-amended): the opal-data-etfs bucket ALREADY EXISTS -- shared-infra/s3.tf:164 (Terraform-managed, ETFS_NETAST-created 05-22, ~296 net-assets objects; also mdpf-pipeline/main.tf:58 ref). REUSE it, do NOT create (a safe-apply 'create' = duplicate-resource/state collision). The real W1 infra delta = the write-out IAM + the daily/{partner}/ prefix-contract + the Inflection producer, NOT the bucket. Objective/the_fix#1/safe-apply-phase/AC1 amended below. -->
 
 <objective>
-Stand up the ETFS aggregation foundation using the WRITE-OUT model (CTO-ruled, comp-iam-grounded): each per-firm producer reads ONLY its own firm bucket (already IAM-allowed) + WRITES a small daily ETF-ownership slice to a NEW opal-data-etfs bucket; ETFS_AVGCAP reads opal-data-etfs ONLY (zero firm-bucket grants). This never fights the firm-bucket Deny statements (Deny-on-own-ARN) -> NEVER#1 (no cross-firm-bucket) holds BY CONSTRUCTION. W1 delivers the foundation + the FIRST producer (Inflection, the live-daily provable-now source).
+Stand up the ETFS aggregation foundation using the WRITE-OUT model (CTO-ruled, comp-iam-grounded): each per-firm producer reads ONLY its own firm bucket (already IAM-allowed) + WRITES a small daily ETF-ownership slice to the EXISTING shared opal-data-etfs bucket (REUSE -- already NETAST-managed, see scope-correction note; do NOT create); ETFS_AVGCAP reads opal-data-etfs ONLY (zero firm-bucket grants). This never fights the firm-bucket Deny statements (Deny-on-own-ARN) -> NEVER#1 (no cross-firm-bucket) holds BY CONSTRUCTION. W1 delivers the foundation + the FIRST producer (Inflection, the live-daily provable-now source).
 </objective>
 
 <the_fix>
-1. opal-data-etfs BUCKET (Terraform, infra/aws/terraform/...): the new ETFS aggregation bucket. Deliberately-scoped IAM: per-firm producer roles get WRITE to opal-data-etfs/<their-firm-slice> only; the AVGCAP compute role gets READ opal-data-etfs only (NO firm-bucket grants). No cross-firm read anywhere.
+1. opal-data-etfs BUCKET -- REUSE the EXISTING shared bucket (CTO 2026-06-23 source-confirmed: shared-infra/s3.tf:164, Terraform-managed, ETFS_NETAST-created 05-22, ~296 net-assets objects). DO NOT create it (duplicate-resource/state collision). The real W1 infra delta = (a) the daily/{partner}/ prefix structure under the existing bucket + (b) prefix-scoped co-tenancy with the existing net-assets series (NETAST lives under its OWN prefix -- ZERO-touch it). Scoped IAM in #2.
 2. WRITE-OUT IAM: grant the Inflection producer role read opal-data-inf (already allowed) + write opal-data-etfs/inflection/. comp-iam-verify the new grants don't widen any firm-bucket Deny.
 3. ETF-UNIVERSE CONFIG (shared, one source not hardcoded x3): {DIVZ, IDVZ, PFDE, PFOE}. One config the 3 producers + AVGCAP all read.
 4. DAILY-ARTIFACT CONTRACT: define the per-firm daily ETF-ownership slice schema (partner, ETF-ticker, date, sum(market_value) across the partner's accounts holding the ETF, account_count, source_as_of). Agree with DS (consumer) before the producer writes. This is the contract AVGCAP averages.
@@ -30,9 +31,9 @@ Stand up the ETFS aggregation foundation using the WRITE-OUT model (CTO-ruled, c
   </phase>
   <phase id="2" when="before apply">
     <step>
-      <run>.tools/safe-apply.sh (TF: bucket + IAM)</run>
-      <expect>Plan = the opal-data-etfs bucket + the scoped write-out IAM, 0 unexpected diff. HALTGT clean. Open a deploy-completion ledger.</expect>
-      <if_mismatch>STOP; do not apply a dirty plan.</if_mismatch>
+      <run>.tools/safe-apply.sh (TF: write-out IAM only -- the bucket already exists)</run>
+      <expect>Plan = ONLY the new scoped write-out IAM (0-diff on the EXISTING opal-data-etfs bucket). A 'create opal-data-etfs bucket' diff = STOP (duplicate-resource/state collision; it's NETAST-managed at shared-infra/s3.tf:164). HALTGT clean. Open a deploy-completion ledger.</expect>
+      <if_mismatch>STOP; do not apply. A bucket-create diff = the reuse wasn't wired -> re-point at the existing resource (don't create).</if_mismatch>
     </step>
   </phase>
   <phase id="3" when="after deploy">
@@ -49,7 +50,7 @@ opal-data-etfs is a NEW shared cross-partner aggregation bucket (the audited wri
 </cross_domain_coordination>
 
 <acceptance_criteria>
-1. opal-data-etfs bucket live (Terraform, safe-apply 0-diff, deploy-ledger opened+closed) + scoped write-out IAM (comp-iam-verified: no firm-bucket-Deny widening, no cross-firm read).
+1. opal-data-etfs bucket REUSED (already-live, NETAST-managed -- W1 plan shows 0-diff on the bucket itself, NOT recreated) + the new scoped write-out IAM is the only infra add (safe-apply 0-diff-except-the-IAM, deploy-ledger opened+closed; comp-iam-verified: no firm-bucket-Deny widening, no cross-firm read) + the daily/{partner}/ prefix co-tenants cleanly with NETAST's net-assets prefix (zero-touch).
 2. ETF-universe config (one shared source, {DIVZ,IDVZ,PFDE,PFOE}) + daily-artifact contract (DS-agreed schema) committed.
 3. Inflection daily producer deployed + writing opal-data-etfs/inflection/{date}.json (schema-valid, 4 ETFs, source_as_of, clock=05-15) -- verified on the served slice (validate-on-served).
 4. Session-log Compiler Tools section reproduces every <run> + result + pass/fail.
