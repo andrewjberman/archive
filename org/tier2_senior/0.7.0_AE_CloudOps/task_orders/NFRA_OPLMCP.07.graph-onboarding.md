@@ -10,7 +10,7 @@
 <!-- GATED: POST-.02-GO-LIVE. Model the FINAL architecture -- the new EC2 instance-id (STEP-A replace), the OIDC listener config, the final go-live IAM all settle at go-live; modeling the in-flight state = stale. NON-BLOCKING on the .02 cutover (the STEP-A manual-IAM-review + rail-checked override carry .02). Formalizes the (i) coverage-gap ~B surfaced at STEP-A (comp-iam "No service matching" for m365-mcp-gateway). -->
 
 <objective>
-Bring the FULL OPLMCP architecture onto the comp-* graph so it's graph-backed -- the rail covers it NATIVELY, retiring the manual-IAM-review + rail-checked-override path for the gateway's IAM. Andrew-direct.
+Bring the FULL OPLMCP architecture onto the comp-* graph so it's graph-backed -- the rail covers it NATIVELY, retiring the manual-IAM-review + rail-checked-override path for the gateway's IAM. Andrew-direct. SPEC-OF-RECORD: PRD Addendum A (docs/architecture/NFRA_OPLMCP_PRD.md) -- decompose against it. PRINCIPLE (Addendum A): a permanent estate service is "done" ONLY when the comp-* graph RESOLVES it -- graph-onboarding is definition-of-done, not afterthought (OPLMCP first; estate-wide generalization = CTO follow-on).
 </objective>
 
 <the_work>
