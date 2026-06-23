@@ -1,13 +1,13 @@
 <to_id>ETFS_SETUP.W2</to_id>
 <project>ETFS_SETUP</project>
-<title>ETFS_SETUP W2 (AE~B) -- 49F silver/RPS build (/49-schwab-conv converter) + register canonical thread + 49F daily ETF-ownership producer</title>
-<assigned_to>0.7.0_AE_CloudOps~B</assigned_to>
+<title>ETFS_SETUP W2 (AE) -- 49F silver/RPS build (/49-schwab-conv converter) + register canonical thread + 49F daily ETF-ownership producer</title>
+<assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <consult>0.4.0_DS_ClientPlatform (daily-slice contract -- same as W1)</consult>
 <verify>3.0.0_SA_CVO</verify>
 <issued_by>2.0.0_SA_COO (ETFS_SETUP decomposition wave-2; Andrew-direct 2026-06-23 "get started"; PRD docs/architecture/ETFS_SETUP.md)</issued_by>
 <issued_date>2026-06-23</issued_date>
 <status>pending</status>
-<!-- GATED on W1 (the opal-data-etfs REUSE + write-out IAM + ETF-universe config + daily-artifact contract must land first). B1: 49F silver/RPS is EMPTY (this TO BUILDS it via /49-schwab-conv). B2: 49F Schwab = manual monthly batch (latest raw 06-09, next ~early-July) -> build the converter NOW (provable on the 06-09 batch); the daily-producer rides the next batch. AE~B lane (ETFS build offloaded from base-AE per Andrew ~B-spawn 2026-06-23). -->
+<!-- GATED on W1 (the opal-data-etfs REUSE + write-out IAM + ETF-universe config + daily-artifact contract must land first). B1: 49F silver/RPS is EMPTY (this TO BUILDS it via /49-schwab-conv). B2: 49F Schwab = manual monthly batch (latest raw 06-09, next ~early-July) -> build the converter NOW (provable on the 06-09 batch); the daily-producer rides the next batch. Base 0.7.0_AE_CloudOps lane (Andrew-direct 2026-06-23: base AE free post-go-live, no ~B spawn). -->
 
 <objective>
 Build the 49Financial leg of the ETFS write-out model: stand up the 49F silver/RPS data (currently EMPTY = B1) via the /49-schwab-conv RPS converter, register it as a canonical thread, + a 49F daily ETF-ownership producer that writes the daily slice to opal-data-etfs/49financial/{date}.json per the W1 daily-artifact contract.

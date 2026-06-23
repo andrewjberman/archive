@@ -1,9 +1,8 @@
 <to_id>ETFS_SETUP.W1</to_id>
 <project>ETFS_SETUP</project>
 <title>ETFS_SETUP W1 (AE) -- opal-data-etfs bucket + write-out IAM + ETF-universe config + daily-artifact contract + Inflection daily-ownership producer (the provable-now foundation)</title>
-<assigned_to>0.7.0_AE_CloudOps~B</assigned_to>
-<!-- REASSIGNED base-AE -> ~B 2026-06-23 (Andrew-direct ~B-spawn to relieve base-AE's 36-TO load; ~B owns the ETFS_SETUP build W1/W2/W3). Reverts to base-AE if MSTR declines the spawn. -->
-<reassigned_from>0.7.0_AE_CloudOps</reassigned_from>
+<assigned_to>0.7.0_AE_CloudOps</assigned_to>
+<!-- ETFS lane = base 0.7.0_AE_CloudOps (Andrew-direct 2026-06-23: base AE is FREE post-go-live -> take ETFS W1/W2/W3 directly; the ~B spawn was stood down). -->>
 <consult>0.4.0_DS_ClientPlatform (daily-artifact contract shape -- DS's AVGCAP compute reads it; agree the schema before the producer writes)</consult>
 <issued_by>2.0.0_SA_COO (ETFS_SETUP decomposition; CTO PRD 1e3db994b + Andrew decisions fd41dc052)</issued_by>
 <issued_date>2026-06-22</issued_date>

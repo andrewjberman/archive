@@ -1,13 +1,13 @@
 <to_id>ETFS_SETUP.W3</to_id>
 <project>ETFS_SETUP</project>
-<title>ETFS_SETUP W3 (AE~B) -- Cottonwood daily ETF-ownership producer (COTETL gate cleared)</title>
-<assigned_to>0.7.0_AE_CloudOps~B</assigned_to>
+<title>ETFS_SETUP W3 (AE) -- Cottonwood daily ETF-ownership producer (COTETL gate cleared)</title>
+<assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <consult>0.4.0_DS_ClientPlatform (daily-slice contract)</consult>
 <verify>3.0.0_SA_CVO</verify>
 <issued_by>2.0.0_SA_COO (ETFS_SETUP decomposition wave-3; Andrew-direct 2026-06-23 "get started"; PRD docs/architecture/ETFS_SETUP.md)</issued_by>
 <issued_date>2026-06-23</issued_date>
 <status>pending</status>
-<!-- GATED on W1 (bucket REUSE + IAM + config + contract). B3 (COTETL CurrentDay freeze) CLEARED -- fix deployed a7a4d974c 2026-06-22 + cot now GO-LIVE ($397.98M@06-22, render+served verified). So W3 is unblocked beyond the W1 foundation. AE~B lane. -->
+<!-- GATED on W1 (bucket REUSE + IAM + config + contract). B3 (COTETL CurrentDay freeze) CLEARED -- fix deployed a7a4d974c 2026-06-22 + cot now GO-LIVE ($397.98M@06-22, render+served verified). So W3 is unblocked beyond the W1 foundation. Base 0.7.0_AE_CloudOps lane (Andrew-direct 2026-06-23: base AE free post-go-live, no ~B spawn). -->
 
 <objective>
 Build the Cottonwood leg of the ETFS write-out model: a cot daily ETF-ownership producer that writes opal-data-etfs/cottonwood/{date}.json per the W1 daily-artifact contract, reading the cot pipeline (opal-data-cot) ONLY.
