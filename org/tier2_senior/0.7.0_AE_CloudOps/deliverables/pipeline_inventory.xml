@@ -135,6 +135,25 @@
       <terraform_resource>shared-infra owns lifecycle config only</terraform_resource>
     </bucket>
 
+    <bucket>
+      <name>opal-data-astn</name>
+      <purpose>ASTN_WSJFT CEO daily WSJ/FT news-digest article + digest store. The 3am-ET one-shot scraper writes raw fetched articles, the verbatim-gated AI digest, and the rendered email here. NOT a content lake (PRD legal posture: fetch -> summarize -> email -> discard).</purpose>
+      <key_patterns>
+        <pattern>raw/{date}/{source}/{id}.json (one fetched article each — the verbatim source text)</pattern>
+        <pattern>digest/{date}/digest.json (the verbatim-gated AI output — cited bullets)</pattern>
+        <pattern>email/{date}/digest.html (the rendered Opal-branded email, for audit)</pattern>
+      </key_patterns>
+      <consumers>
+        <consumer>astn-wsjft-scraper EC2 (store.py: writes raw/digest/email, reads raw/ back in analyze)</consumer>
+      </consumers>
+      <versioning>enabled</versioning>
+      <encryption>AES256</encryption>
+      <public_access_block>all blocked</public_access_block>
+      <lifecycle_config>aws_s3_bucket_lifecycle_configuration.astn (astn-pipeline/main.tf) — raw/ expire 14d (copyright fast-discard, no content-lake) + 7d noncurrent; email/ + digest/ expire 90d (audit) + 30d noncurrent; abort-incomplete-MPU 7d.</lifecycle_config>
+      <terraform_resource>aws_s3_bucket.astn (astn-pipeline/main.tf; backend key astn-pipeline/tfstate; tag astn-pipeline-v0.1.0)</terraform_resource>
+      <note>Created 2026-06-24 (ASTN_WSJFT.B S1; commit 2644d523d). Read/written exclusively by the astn-wsjft-scraper EC2 instance role (least-priv: PutObject/GetObject/ListBucket on this bucket only).</note>
+    </bucket>
+
   </s3_buckets>
 
   <!-- =========================================================
