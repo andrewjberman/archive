@@ -8,7 +8,9 @@
 <verify>3.0.0_SA_CVO (reconcile-verify spec vs the HAR / live SmartX)</verify>
 <issued_by>2.0.0_SA_COO (DATA_PLATFORM Phase-1 decomposition; Andrew-direct via CTO 2026-06-23; PRD S6/S11; LD-0209)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>active</status>
+<status>complete</status>
+<!-- SPEC-COMPLETE 2026-06-24: docs/briefs/DATA_PLATFORM_D4_SMARTX_ENDPOINT_SWEEP.md v0.2 (6d7d30ba0). AC1 (completeness-rigor-upgrade: spec-hunt no-spec + fresh 06-24 exhaustion sweep + per-surface basis taxonomy), AC2 (build-vs-buy/leverage boundary), AC3 CVO PASS, AC4 spec-not-build. CTO-ACCEPTED + canonicalizing. COO validated+closed. DEEP downstream: DC-LEV capability-leverage-map on the DC0/DC3 crawl. -->
+
 <!-- SPEC/AUDIT (Phase-1), NOT a build. SmartX partnership-terms run PARALLEL (no gate, Andrew-confirmed). -->
 
 <objective>

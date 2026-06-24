@@ -8,7 +8,9 @@
 <verify>3.0.0_SA_CVO (reconcile-verify spec vs live Schwab data / DATA_DICTIONARY)</verify>
 <issued_by>2.0.0_SA_COO (DATA_PLATFORM Phase-1 decomposition; Andrew-direct via CTO 2026-06-23; PRD S6/S11; LD-0209)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>active</status>
+<status>complete</status>
+<!-- SPEC-COMPLETE 2026-06-24: docs/briefs/DATA_PLATFORM_D1_SCHWAB_FIELD_SPEC.md v0.2 (7fda2ea32). AC1/AC2 DS-VERIFIED (§13), AC3 done, AC4 CVO reconcile-to-live PASS, AC5 spec-not-build. CTO-ACCEPTED + canonicalizing. COO validated+closed. Tracked fast-follows (separate): ULN cutover step-2 + SS4c IAM. -->
+
 <!-- This is a SPEC/AUDIT (Phase-1), NOT a build (Phase 2/3 build against it). SmartX/Schwab partnership-terms parallel, no external gate (Andrew-confirmed). -->
 
 <objective>
