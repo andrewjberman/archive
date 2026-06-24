@@ -6,7 +6,7 @@
 <verify>3.0.0_SA_CVO (reconcile-verify spec vs live inf/Orion pipeline)</verify>
 <issued_by>2.0.0_SA_COO (DATA_PLATFORM Phase-1 decomposition; Andrew-direct via CTO 2026-06-23; PRD S6/S11; LD-0209)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>active</status>
+<status>pending</status>
 <!-- SPEC/AUDIT (Phase-1), NOT a build. -->
 
 <objective>
