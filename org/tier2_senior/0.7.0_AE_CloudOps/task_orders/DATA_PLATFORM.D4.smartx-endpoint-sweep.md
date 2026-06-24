@@ -1,0 +1,26 @@
+<to_id>DATA_PLATFORM.D4</to_id>
+<project>DATA_PLATFORM</project>
+<title>D4 SmartX endpoint + structure sweep -- full surface map + partnership-slot/build-vs-buy boundary</title>
+<assigned_to>0.7.0_AE_CloudOps (base; AE-lead; DS-consult)</assigned_to>
+<consult>0.4.0_DS_ClientPlatform</consult>
+<verify>3.0.0_SA_CVO (reconcile-verify spec vs the HAR / live SmartX)</verify>
+<issued_by>2.0.0_SA_COO (DATA_PLATFORM Phase-1 decomposition; Andrew-direct via CTO 2026-06-23; PRD S6/S11; LD-0209)</issued_by>
+<issued_date>2026-06-24</issued_date>
+<status>active</status>
+<!-- SPEC/AUDIT (Phase-1), NOT a build. SmartX partnership-terms run PARALLEL (no gate, Andrew-confirmed). -->
+
+<objective>
+Produce the full SmartX endpoint + structure sweep -- map the entire SmartX surface + the partnership-slot map, so the build-vs-buy boundary (self-build the Eclipse-class trade/rebalance layer vs SmartX-partner) is explicit. SPEC-OF-RECORD: PRD S6 row D4.
+</objective>
+
+<the_work>
+The full SmartX surface: identity / core-3.1 / performance / legacy-3.0 / GraphQL -- enterprises-aggregation, holdings, performance-SoR, model-management; field/endpoint-level; the partnership-slot map. Seed: smartx-rest-integration-design-20260515.md (the HAR of 243 entries).
+SCOPE the build-vs-buy boundary explicitly (PRD insight #2/#6): reporting is displaceable; the active portfolio-management / rebalance layer is the genuinely-hard new surface -- where does self-build end + SmartX-partner begin? (Partnering deepens a vendor dependency we'd be reducing vis-a-vis BD/Orion -- name the tradeoff.)
+</the_work>
+
+<acceptance_criteria>
+1. Complete SmartX endpoint+structure sweep: all surfaces (identity/core-3.1/performance/legacy-3.0/GraphQL), field/endpoint-level.
+2. The partnership-slot map + the build-vs-buy boundary scoped (self-build-vs-partner, with the dependency tradeoff).
+3. CVO reconcile-verifies the spec vs the HAR / live SmartX.
+4. SPEC only -- no build. RAVC2 COO + CTO.
+</acceptance_criteria>
