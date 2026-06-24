@@ -6,7 +6,8 @@
 <verify>3.0.0_SA_CVO (coverage-verify + TO-5 (i)-gap close)</verify>
 <issued_by>2.0.0_SA_COO (charter per CTO 174037Z; Andrew-direct "bring opalmcp server + architecture onto the graph"; PRD S5)</issued_by>
 <issued_date>2026-06-23</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSED 2026-06-24: AC1 (comp-iam resolves gateway) + AC2 (comp-aws 4 ALB derive-classes, 692142c9d) + AC3 (pipescript m365-mcp thread) + AC4 (CVO coverage-verify PASS 132813Z -> TO-5(i) coverage-gap CLOSED). Manual-IAM-review/rail-checked path for the gateway RETIRED (graph-native). Post-close hardening (non-blocking, tracked): CVO per-class oracle-cert for the 4 ALB classes. -->
 <!-- GATED: POST-.02-GO-LIVE. Model the FINAL architecture -- the new EC2 instance-id (STEP-A replace), the OIDC listener config, the final go-live IAM all settle at go-live; modeling the in-flight state = stale. NON-BLOCKING on the .02 cutover (the STEP-A manual-IAM-review + rail-checked override carry .02). Formalizes the (i) coverage-gap ~B surfaced at STEP-A (comp-iam "No service matching" for m365-mcp-gateway). -->
 
 <objective>
