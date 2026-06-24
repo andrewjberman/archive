@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (CTO ADVI_COTETL architecture sign-off 150108Z; root-cause 0.6.0_AE 145519Z; single-router)</issued_by>
 <issued_date>2026-06-17</issued_date>
-<status>pending</status>
+<status>complete</status>
 <priority>MEDIUM-NEAR-TERM. This is the fix for a real defect: the cot silver->gold EVENT chain has NEVER auto-fired in production (COT served data stale end-to-end since 6/9). CTO-APPROVED + DECOUPLED from the BD-source call (needed EITHER WAY — makes the chain auto-resume when data flows — and safe regardless). Not a fire (the freshness section now catches the staleness; cot may be pre-partner-live), but it's the standing chain-fix. Sequence after the joint INFRPT P1 inc-1 RAVC2; DS is event-driven IDLE so this is the held "sentinel GO" you were waiting for.</priority>
 
 <references>

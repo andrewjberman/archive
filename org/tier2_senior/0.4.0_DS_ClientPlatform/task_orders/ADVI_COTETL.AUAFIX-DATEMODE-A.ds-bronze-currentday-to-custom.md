@@ -5,7 +5,7 @@
 <consult>0.7.0_AE_CloudOps (diagnosing owner -- supplies the exact ("Custom-N",end) tuple + the 3-table mapping; cross-tool: AE diagnoses, DS commits per Rule 13)</consult>
 <issued_by>2.0.0_SA_COO (COTETL AUAFIX re-scope; supersedes the RETIRED consolidated-merge CHAINFIX; CTO L2 ruling 135603Z)</issued_by>
 <issued_date>2026-06-22</issued_date>
-<status>pending</status>
+<status>complete</status>
 <!-- 2026-06-22 DEPLOY LEG COMPLETE + COO-ACCEPTED (141734Z): commit a7a4d974c atomic (cot_bronze_ingest.py TABLE_DATE_MODE holdings/alloc/unrealized ("CurrentDay",0)->("Custom",14) + 3 template JSON dateRangeType CurrentDay->Custom in-place keep-templateId). Deployed: safe-deploy .py [cot] + DS aws s3 cp 3 templates; all 4 local-md5==S3-etag MATCH; deployed dateRangeType=Custom confirmed. Both binding RAVC-checks PASS (Custom-14 window reaches 06-18; repo+deploy atomic no drift). ds-commit-gate clean; comp-pipescript deployed=cot-Unknown->md5/etag substitute. STATUS still pending = AC4 BINDING VERIFY (served AUA past 06-09 + ~$397.7M) rides the NEXT SCHEDULED NIGHTLY + AE per-day backfill 06-10..06-18. Final project-accept tomorrow AM on served nightly. -->
 
 <!-- GO 2026-06-22 (COO /drive cycle-5): P0 ~$24M/6.5% cot firm-AUA understatement. AE probe (135354Z) PROVED internal CurrentDay date-mislabeling; CTO L2 RULED (135603Z). This is the REAL fix; the consolidated-merge CHAINFIX is RETIRED (off-target/0-consumer). -->
