@@ -6,8 +6,8 @@
 <verify>3.0.0_SA_CVO (reconcile-verify spec vs live inf/Orion pipeline)</verify>
 <issued_by>2.0.0_SA_COO (DATA_PLATFORM Phase-1 decomposition; Andrew-direct via CTO 2026-06-23; PRD S6/S11; LD-0209)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>pending</status>
-<!-- SPEC/AUDIT (Phase-1), NOT a build. -->
+<status>active</status>
+<!-- SPEC/AUDIT (Phase-1), NOT a build. GO'd 2026-06-24 (Andrew start-now); CTO scope-confirmed. -->
 
 <objective>
 Produce the Orion + Eclipse architecture spec -- the full REST surfaces + the join model + the valuation-lag, so we know what Orion/Eclipse aggregate + the genuinely-hard trade/rebalance surface. SPEC-OF-RECORD: PRD S6 row D3.
@@ -16,6 +16,7 @@ Produce the Orion + Eclipse architecture spec -- the full REST surfaces + the jo
 <the_work>
 The FULL Orion REST surface (Portfolio / Trading / Reporting / Envision) + the Eclipse surface (models / portfolios / rebalance) + the join model across them + the valuation-lag (the ~3.4% characterized) -- field-level. Seeds: data/inf/manual_api/README.md + the feasibility briefs.
 NOTE (PRD insight #2): the Eclipse-class trade/rebalance layer is the genuinely-hard new surface (reporting is displaceable; active portfolio management is not trivially self-built) -- characterize it so the D5 self-build-vs-partner decision (with D4) is informed.
+SCOPE-REFINE (DS orientation 06-24, COO-confirmed): D3 spans THREE distinct surfaces (not just the README's one): (1) Orion Envision/ExcelReports saved-query path (data/inf/manual_api/README.md); (2) Orion Portfolio per-day Assets SNAPSHOT path (INF_B_00.canonical_holdings, PRD S3.3 -- the cleanest snapshot pass-through); (3) Eclipse (www.orioneclipse.com, SEPARATE JWT/ID-space: models/portfolios/rebalance, seed data/inf/scripts/bronze/pull_eclipse_portfolios.py). Deeper seeds: docs/architecture/ADVI_ORIAPI.md (45KB, HAR Appendix A) + go_nogo.md + PATH_DISCOVERY.md. Spec must span all three + the join model + the ~3.4% Orion-vs-Eclipse valuation-lag.
 </the_work>
 
 <acceptance_criteria>

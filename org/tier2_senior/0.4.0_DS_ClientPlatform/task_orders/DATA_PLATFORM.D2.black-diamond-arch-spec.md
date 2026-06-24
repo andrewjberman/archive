@@ -6,8 +6,8 @@
 <verify>3.0.0_SA_CVO (reconcile-verify spec vs live BD / cot pipeline)</verify>
 <issued_by>2.0.0_SA_COO (DATA_PLATFORM Phase-1 decomposition; Andrew-direct via CTO 2026-06-23; PRD S6/S11; LD-0209)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>pending</status>
-<!-- SPEC/AUDIT (Phase-1), NOT a build. -->
+<status>active</status>
+<!-- SPEC/AUDIT (Phase-1), NOT a build. GO'd 2026-06-24 (Andrew start-now); CTO scope-confirmed. -->
 
 <objective>
 Produce the Black Diamond architecture spec -- how BD aggregates + surfaces custodian data (the model we'd have to replicate/replace to own the aggregation layer). SPEC-OF-RECORD: PRD S6 row D2.
@@ -15,6 +15,7 @@ Produce the Black Diamond architecture spec -- how BD aggregates + surfaces cust
 
 <the_work>
 The BD DataMining template/level/fact model; the FULL template catalog + every dimension/measure BD exposes; the auth/session/IP-binding model; the lots FIFO-vs-snapshot methodology (the cost-basis/lot-accounting approach). Seeds: cot_bronze_ingest.py + the templates + COTETL_METHODOLOGY_THESIS.md.
+SCOPE-REFINE (DS orientation 06-24, COO-confirmed): the local templates/{table}.json are THIN ENVELOPES -- the full dimension/level/fact selection (Team->Relationship->Portfolio->Account->Holding->TaxLot star + the MV/units/income/fee measures) is PERSISTED SERVER-SIDE under the templateId, materializing only via GET /datamining/request/v1/template/{id} at runtime. So D2 INCLUDES pulling the LIVE-ENRICHED template bodies for all 5 tables (transactions/allocations/realized/unrealized/holdings = qt2/5/3/4/1) off the IP-bound cot-exporter EC2 -- the ONLY way to spec the full BD query model + it IS the CVO reconcile-to-live ground. (Operational live read off the exporter EC2; no firm-bucket cross-ref.)
 </the_work>
 
 <acceptance_criteria>
