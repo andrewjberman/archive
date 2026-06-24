@@ -1,7 +1,9 @@
 <to_id>DATA_PLATFORM.D1</to_id>
 <project>DATA_PLATFORM</project>
 <title>D1 Schwab field spec -- full SI2 feed field/grain/join-key audit + ingest-automation scoping</title>
-<assigned_to>0.7.0_AE_CloudOps (base; AE-lead -- SI2 feed/RPS infra + ingest-automation; DS-consult for field-modeling)</assigned_to>
+<assigned_to>0.6.0_AE_PartnerETL (AE-lead -- SI2 feed/RPS ingest expertise + ingest-automation; DS-consult for field-modeling)</assigned_to>
+<!-- RE-ASSIGNED 0.7.0->0.6.0 2026-06-24 (COO offloaded D1/D4 to the 2nd AE lane to keep base-AE on .07/.05/D2-pull). DS-consult = 0.4.0. -->
+
 <consult>0.4.0_DS_ClientPlatform (field-modeling)</consult>
 <verify>3.0.0_SA_CVO (reconcile-verify spec vs live Schwab data / DATA_DICTIONARY)</verify>
 <issued_by>2.0.0_SA_COO (DATA_PLATFORM Phase-1 decomposition; Andrew-direct via CTO 2026-06-23; PRD S6/S11; LD-0209)</issued_by>
