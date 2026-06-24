@@ -8,6 +8,7 @@
 <issued_date>2026-06-24</issued_date>
 <status>active</status>
 <!-- PACED: contained scheduled product, behind the hot recon (DC2-Eclipse) + nightly priorities. B1 is the load-bearing FIRST open item (the paywall-access-method shapes everything downstream + the ToS posture). -->
+<!-- DISCOVERY-RESULT (CTO ran it live 2026-06-24): WSJ one-shotter = FULL article text (citable-bullets feasible) -> WSJ-path GO. FT one-shotter = paywall-wall (body=subscription-page, headline-only). ANDREW DECISION: hold BOTH subs -> FT IN via the authenticated-session-ride (Bright-Data Scraping-Browser login -> session-cookies parked-in-SM -> 3am one-shotter rides -> refresh; MFA via inf-otp-relay/device-cookie -- the established parked-auth pattern, 4th instance). Bright-Data key ROTATED + ISOLATED (4 other BD consumers on distinct keys). FT GATED on Andrew handing WSJ/FT login-creds -> CTO SM-store + authed-full-body-test. BOTH-in (NOT WSJ-only-v1). -->
 
 <objective>
 The load-bearing discovery for the CEO daily WSJ/FT digest (3am-ET one-shot: Bright-Data pull top ~15-20 WSJ+FT stories -> GPT-5.4 cited-bullet summary -> SES email to the CEO, grouped by section). Surface the section-URLs + the Bright-Data ACCESS-METHOD options (the PAYWALL path) + confirm the integration prereqs, so Andrew can decide the access-method + ToS-posture (Andrew-owned).
