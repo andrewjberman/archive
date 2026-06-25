@@ -1,11 +1,11 @@
 {
-  "project_code": "PREMCP",
+  "project_code": "SCTY_PREMCP",
   "macro_code": "SCTY",
   "name": "Wrap the MCP surface in defense-in-depth protection -- harden the M365 MCP gateway (own-attack-surface, gateway-first) + the inter-agent broker",
   "description": "Andrew-direct 2026-06-25 (triggered by the BD /otp/fetch auth-model decision generalizing to 'is the whole MCP surface hardened?'). SCTY workstream #3 (own-attack-surface red-team, 'the OPLMCP gateway first') turned into a concrete, prioritized hardening BUILD. The M365 MCP gateway (mcp.opalinvest.dev) is the highest-value single target in the estate: it brokers Andrew's FULL delegated Graph envelope (Mail/Files/Calendar/Teams read+WRITE) to Claude, holds the crown-jewel secrets (RS256 signing key, App-2 Graph secret, Fernet cache key), and is going live (OPLMCP STEP-C). FRAMING (load-bearing): the gateway is ALREADY substantially hardened (RS256 no-downgrade + strict per-resource audience guard, PKCE-S256, loopback-DCR, Fernet-at-rest, no app-only token, kill-switch+blocklist, audit lake, IMDSv2, scoped IAM) -- PREMCP resolves the GAPS, does NOT re-pave. Grounded risk-surface inventory -> prioritized resolutions: P0 = token REVOCATION (leaked 30d refresh token has no kill path), the VA-signature verify=False TODO, the /otp machine-route auth model (RULED Option A static capability bearer -- arch-GO), secrets-rotation SOP; P1 = write-scope entitlements (full Mail.Send/Files.ReadWrite granted, no second gate), per-resource scope split, rate-limiting/size/timeout, WAF; P2 = network (private subnet/drop public IP), the opal-agent-comms broker review. SCOPE: gateway PRIMARY + broker SECONDARY; OUT = Graph API itself + the agent-fabric prompt-injection class (SCTY #4, separate). Defensive hardening of OWN infra. The /otp ruling (section 4 of the PRD) unblocks the BD durable auto-login.",
   "prds": [
     {
-      "path": "docs/architecture/PREMCP_PRD.md",
+      "path": "docs/architecture/SCTY_PREMCP_PRD.md",
       "label": "CTO PRD v0.1 -- premise (the MCP surface = a first-class identity-bearing attack surface; gateway already strong, resolve the gaps) + grounded risk-surface inventory (8 classes A-H) -> prioritized 3-phase resolutions + the /otp auth-model RULING (Option A static capability bearer, arch-GO, with the audience-guard grounding update) + guardrails (verify-on-live, don't-regress, don't-block-STEP-C, capability-over-identity) + COO decomposition (Phase-1 TOs: revocation / VA-sig / otp-build / rotation-SOP)",
       "date": "2026-06-25"
     }
