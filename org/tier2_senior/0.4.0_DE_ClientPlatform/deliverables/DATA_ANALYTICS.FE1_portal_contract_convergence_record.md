@@ -31,5 +31,17 @@
 - **Inflection (Orion):** `INF_09` + `INF_D_00/00b/00c/00d/00e/00f/02/02b/02c/02d/03/04/04b/05/06/07a/08/09` (all load-bearing).
 - **Cottonwood (BD-native):** `D_00, D_00b, D_01, D_04` ONLY (PartnerAnalytics aua/nna/geo + Distribution-geo). Rest = agnostic-drop (decision 5).
 
+## Non-custodian dependencies the unified contract MUST flag (DS-raised, FE-mapped)
+
+The Schwab-raw-native rebuild's bronze=raw-forms does NOT carry two classes of field the portal panels consume — these are Opal-owned-or-bridged relationship-intelligence, not custodian-produced. The arch-gate must see them as explicit non-custodian inputs to the contract:
+
+| # | Non-custodian input | Supply (DS) | FE consumers (DE) — panels that BREAK without it |
+|---|---|---|---|
+| N1 | **FEES** (fee_bps / fee_schedule → `dim_fee`) | bd-fees pipeline → `A_02 fee_rate_history` / `C_08 advisor_fee_efficiency` (NOT in Schwab raw) | Books: `FeeEfficiencyPanel` + `FeeSummaryPanel` (`platinum/firm/fee_efficiency.json`, D_00c→D_04); `ClientsTab` income/fees headline; `AdvisorPublicProfile` fee section; advisor/client summary `fee_summary` |
+| N2 | **HOUSEHOLD / RELATIONSHIP GROUPING** (which taxpayers form one client/household) | BD relationship grouping (Schwab `ssn_tin` = 4,188 taxpayers; portal `client_count` = 2,928 BD-relationship multi-taxpayer grouping). **Andrew ruling source now: bridge-via-xref vs Opal-owned dim.** | EVERY `client_count` headline (PartnerAnalytics/dashboard/ClientsTab); `client_directory.json` (`INF_D_02c` / D_04); `ClientListPanel`; the entire L3 client drill `platinum/clients/{hh}/*` |
+
+Both feed the portal contract but are NON-CUSTODIAN — N1 is Opal-bridged (fee data), N2 is Opal-owned-or-bridged relationship intelligence (Andrew-ruling pending). The unified contract carries them as first-class inputs so the canonize-gold rebuild provisions them explicitly (a Schwab-raw-only rebuild would silently drop `client_count` correctness + all fee panels).
+
 ## Status
+DS rulings A/B/C/D received + folded (gold-up essential set = §"Essential producer set"; COT drops confirmed; both gaps ruled intended-absent). DS handing its gold-up essential set + Schwab-raw-native D-tier field list (silver-dim design v0.1/v0.2_keys/v0.3/v0.4) → DE authors the UNIFIED portal-contract artifact for CTO arch-gate; DS co-signs.
 DS folding FE1 §2 consumer-contract into A1 field-requirements v1.0 for a single co-signed publish. CVO certs FE1 completeness + rules gap 4a; CTO arch-gates the unified contract into the Schwab-raw-native canonize-gold rebuild. No blocks.
