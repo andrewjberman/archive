@@ -2,8 +2,8 @@
 
 **Agent:** 0.5.0_AE_OpalETL | **Date:** 2026-06-25 | **archetype:** TRACE (scoping)
 **Trigger:** COO idle-redirect (DRIVE) -- pre-stage downstream of the about-to-ship DS Schwab-raw-native canonical-gold rebuild (`0.4.0_DS_ClientPlatform`/DATA_ANALYTICS).
-**Status:** PRE-STAGE SCOPE -- ready to convert to a build-TO when the DS canonical LOCKS (CTO arch-gate + CVO value-parity cert + DS co-sign). NOT a change; no code touched.
-**RAVC:** COO (cc DS).
+**Status:** PROSPECTIVE forward-exploration -- BANKED/complete (COO RAVC accepted 2026-06-25). RE-BASELINED (COO 172022Z, Andrew-via-DS 171807Z): the Schwab-raw-native canonical is a PARALLEL R&D/foundation build that COEXISTS with the live BD pipeline -- NOT a cutover/excise/lock/served-move; it touches no production path. So there is NO canonical-lock gate to convert this against, and MDPF's production path is NOT changing. This doc characterizes "what WOULD re-point IF the canonical ever fed production" -- useful design input for the parallel build, NOT a pending build-TO. The Fidelity-basis fork (below) is therefore MOOT for production (live served 49F basis unchanged); it remains a design question only for the parallel build.
+**RAVC:** COO (cc DS) -- accepted.
 
 ## Headline
 
