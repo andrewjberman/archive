@@ -37,6 +37,16 @@ Per-ETF 06-18: DIVZ -3.53%, IDVZ -4.09%, PFDE -4.13%, PFOE -4.17%. Consistency =
 
 source_as_of handles the GRANULARITY label (monthly->daily), but NOT this BASIS shift. If 49F flips to the canonical/holdings source, the served 49F ETF-ownership STEPS DOWN ~4% at the switchover (RPS-basis $519M @06-18 -> canonical-basis $499M). That is a visible AVGCAP/report discontinuity. DECISION NEEDED: which basis is canonical for 49F-daily -- raw-Schwab-custody (RPS, what W2/the live monthly uses) or BD-reconciled (canonical/holdings, daily-capable)? They are ~4% apart by design. (Ties to the broader RPS-vs-BD-reconcile basis question -- cf. the Schwab-raw-native canonical rebuild + the MDPF WS-E Schwab-only v0.9 basis.)
 
+## UPDATE 2026-06-25T18:25Z -- RPS is DAILY-GRANULAR -> the ~4% fork LARGELY DISSOLVES
+
+A fresh 49F Schwab RPS batch landed (silver thru 06-24, commit 964c0a763). Grounded (Rule 22): the new RPS partitions 06-22/23/24 are GENUINE DISTINCT DAILY SNAPSHOTS -- each its own file_date, distinct DIVZ MVs (172.89M -> 173.76M -> 172.38M = real daily moves), varying acct/row counts (5460/5439/5431; 91857/91421/91200). So the ~4% finding's PREMISE ("raw-Schwab-RPS = monthly-only, daily REQUIRES BD-reconciled canonical/holdings") is FALSIFIED -- **RPS is daily-granular at the raw-Schwab basis**.
+
+REFRAMED DECISION (fed to the basis thread CTO/CVO/COO): not "which basis (~4% apart)" but **"daily-VALUES vs daily-FRESHNESS"**:
+- RAW-SCHWAB-DAILY (recommended primary): the LIVE W2 producer already emits daily slices at Andrew's v0.9 basis (I ran it per-day for 06-22/23/24 -> live). NO ~4% step, NO new code, no served discontinuity. Caveat: S-D2 batch delivery (~monthly) -> daily VALUES, batch FRESHNESS.
+- CANONICAL/HOLDINGS (this staged producer = FALLBACK): the only thing it adds is real-time continuous daily freshness -- at the ~4% lower BD-reconciled basis + a served step. Use ONLY if Andrew's bar is real-time daily-freshness, not daily-values.
+
+So this staged producer is the FALLBACK path, not the primary. It stays staged + deploy-ready regardless. ITEM-1 fresh W2 slices: daily/49financial/ 06-22 $518.93M / 06-23 $513.53M / 06-24 $509.35M (live; DS signaled for AVGCAP re-run).
+
 ## Remaining (when the silver fire clears -> deploy-and-go)
 
 1. IAM delta: the daily variant reads `opal-data-bd/gold/canonical/holdings/*` (the W2 role only grants `schwab/silver/rps/*`) -> add one ReadOwnFirmCanonicalHoldings Sid (same bucket, no cross-firm widen). comp-iam-verify.
