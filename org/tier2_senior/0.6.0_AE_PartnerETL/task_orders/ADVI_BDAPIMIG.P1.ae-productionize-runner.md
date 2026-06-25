@@ -26,19 +26,33 @@ fixed without manual cookie/run intervention.
 </objective>
 
 <the_work>
-1. SCHEDULED RUNNER: stand up the `bd-exporter` API runner -- one light HTTP/xlsx-passthrough box or Lambda
+INTERIM ARCHITECTURE (CTO arch-gated 2026-06-25, off CVO brief 65f83dc7b; password/auto-login ON HOLD per
+Andrew -> this keepalive-extended-manual-cookie interim keeps 49F flowing). It IS PRD Phase-1 (B runner + C
+alarm = permanent) MINUS auto-login PLUS the keepalive cron (A); only (D) gets automated when password resumes.
+
+(B) SCHEDULED REST PULL RUNNER: the `bd-exporter` API runner -- one light HTTP/xlsx-passthrough box or Lambda
    (NO browser for the data pull) on the cot-exporter EventBridge->SSM model -- running cot_bronze_ingest.py
-   firm-bound to bd (the 4 env vars; secret blackdiamond/49f/session). Nightly, ahead of the bd silver stage.
-   Add RETRY/BACKOFF on the DataMining run call (CVO hit a TRANSIENT server Error on allocations 2026-06-25
-   that cleared on retry -- the productionized runner must not fail a nightly on a transient).
-2. SESSION-REFRESH: the (headless-browser) session-fetch job (ported cot_bd_session_fetch.py) that refreshes
-   .bd.identity into blackdiamond/49f/session on its ~20h TTL -- SEPARATE from the pull runner (don't
-   conflate). Its design depends on the DEVICE-TRUST PROBE (below): B-headless-auto-refresh if device-trust
-   skips MFA, else the Option-A (vendor-exempt) / Option-C (OTP-automation) path.
-3. PER-TABLE ABSENCE ALARM (NON-OPTIONAL -- closes the 6-day silent gap): a freshness/absence check per
-   bd silver table, EGRESS-verified (fires on a missing table; SNS-confirmed != delivers -- prove delivery).
-   Reference the ASTN 4am-absence-check pattern.
-4. (PHASE 2) PARITY + DECOMMISSION: parity-verify API vs the last good scrape, then decommission the 4
+   firm-bound to bd (the 4 env vars; secret blackdiamond/49f/session). Daily, ahead of the bd silver stage.
+   RETRY/BACKOFF that DISTINGUISHES 401 (auth -> route to C's alert, do NOT retry-storm) from 5xx (transient
+   -> retry; CVO hit a transient allocations Error 2026-06-25 that cleared on retry). *** FIRM-SEP (AC#4) is
+   the load-bearing gate -- see cross-domain. ***
+(A) KEEPALIVE CRON (interim-specific): a tiny Lambda, EventBridge at cot's keepalive cadence (MATCH it, not an
+   arbitrary aggressive interval -- stealth baseline-match), reads .bd.identity from SM (GetSecretValue,
+   READ-ONLY -- keepalive extends server-side, mints no new cookie) -> GET /datamining/auth/keepalive (=204
+   proven). Stretches the cookie to BD's absolute cap (>=24h expected; the cap is the one empirical unknown,
+   determined by running A) -> minimizes manual re-capture. FAIL-LOUD on 401 (cookie dead -> feed C's alert).
+(C) FRESHNESS-PROBE + PER-TABLE ABSENCE ALARM (NON-OPTIONAL -- closes the 6-day silent gap): (i) auth probe
+   GET /auth/token, 401-SPECIFIC (not any non-200; a 5xx is transient, don't cry wolf) -> SNS to Andrew
+   "re-capture .bd.identity", run AHEAD of B's window + periodically so a dead cookie alerts with lead time;
+   (ii) per-table silver freshness/absence check. BOTH EGRESS-VERIFIED (SNS-confirmed != delivers -- prove
+   delivery). ASTN 4am-absence-check is the reference.
+(D) MANUAL RESEED (stays manual until password resumes): Andrew pastes a fresh .bd.identity -> SM
+   put-secret-value (30-sec) when C alerts. The secret maintains ONLY .bd.identity (DROP __cf_bm -- CVO proved
+   .bd.identity-alone auths, __cf_bm-alone=401, it's a 30-min CF cookie = stale-confound).
+DEFERRED: the headless SESSION-REFRESH / auto-login (ported cot_bd_session_fetch.py) + the DEVICE-TRUST PROBE
+   are DEFERRED until Andrew's password/login-automation hold lifts -- the keepalive cron (A) replaces them for
+   the interim (no headless login needed). Do NOT build the auto-login now.
+(PHASE 2) PARITY + DECOMMISSION: parity-verify API vs the last good scrape, then decommission the 4
    Playwright scrape boxes (bd-allocations/bd-transactions/bd-fees/bd-assets) -- cost + reliability win.
    Per-table cutover; do NOT double-write the opal-data-bd/forwardfill_v2/{table} partition during the
    parallel-run window.
@@ -59,18 +73,23 @@ fixed without manual cookie/run intervention.
   defaults are cot). CVO confirmed firm-sep clean on the manual run; the SCHEDULED runner must encode it.
 - S3 forwardfill_v2/{table} parallel-run window with the scraper -- no double-write; per-table cutover.
 - DS (0.4.0): the silver merge ingests the API xlsx zero-change (confirmed-pending on the manual run).
-- CVO (3.0.0): owns BD + the §6 co-verification close-gate. Andrew: the device-trust capture + Option-A ask.
+- CVO (3.0.0): owns BD + the §6 co-verification close-gate + drives AE on this build. Andrew (interim): the
+  manual .bd.identity reseed (D) when C alerts; (deferred until the password hold lifts) the device-trust
+  capture + the Option-A SS&C MFA-exempt ask.
 </cross_domain_coordination>
 
 <acceptance_criteria>
 1. The bd-exporter runner runs cot_bronze_ingest.py firm-bound to bd on a nightly schedule, lands all
    tables to opal-data-bd/forwardfill_v2, with retry/backoff on transient DataMining errors. comp-freshness
    chain bd = PASS on the scheduled run (not just the manual one).
-2. The session-refresh job keeps blackdiamond/49f/session valid across the .bd.identity TTL without manual
-   re-injection (design per the device-trust probe outcome).
-3. DEVICE-TRUST PROBE result recorded (headless login + bd_DeviceRegistration -> skips OTP y/n + evidence)
-   -> the Phase-1 steady-state decision (B-auto-refresh vs A-primary/C-fallback). STILL PENDING Andrew
-   providing bd_DeviceRegistration (he gave .bd.identity + __cf_bm only 2026-06-25).
+2. (A) KEEPALIVE: the keepalive cron measurably EXTENDS the .bd.identity life (GET /auth/keepalive=204 on
+   schedule; the achieved absolute cap recorded, >=24h target) -> the manual re-capture cadence is set by
+   that cap, NOT by an un-extended ~session TTL. Read-only on the secret (no PutSecretValue).
+3. (C) AUTH-STALENESS ALERT: a 401 on the /auth/token probe (or a runner 401) DELIVERS an SNS alert to Andrew
+   "re-capture .bd.identity" -- EGRESS-VERIFIED (prove it delivers, not just publishes), 401-specific (a 5xx
+   does NOT alert). The secret maintains ONLY .bd.identity (__cf_bm dropped). [DEFERRED, not an AC for this
+   interim: the headless auto-login session-refresh + the DEVICE-TRUST PROBE -- both wait on Andrew's
+   password/login-automation hold lifting; the keepalive cron replaces them for now.]
 4. FIRM-SEPARATION fail-closed guard in the runner (49f run with BD_S3_BUCKET unset FAILS, no opal-data-cot
    write). Proven via a dry-run.
 5. Per-table absence alarm EGRESS-verified (fires + DELIVERS on a missing table).
