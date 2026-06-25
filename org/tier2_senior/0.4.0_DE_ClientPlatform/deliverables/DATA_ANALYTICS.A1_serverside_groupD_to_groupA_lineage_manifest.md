@@ -1,7 +1,7 @@
 # DATA_ANALYTICS — SERVER-SIDE Group-D → Group-A LINEAGE MANIFEST (49F / BD)
 
 **TO:** DATA_ANALYTICS (server-side companion to FE1) | **Author:** 0.4.0_DE_ClientPlatform | **Date:** 2026-06-25
-**archetype:** TRACE | **Partners:** PART 1 = 49 Financial (`49financial`, BD, `opal-data-bd`); PART 2 = Cottonwood (`cottonwood`, BD-native, `opal-data-cot`) — **v0.2 (49F + COT; INF to follow)**
+**archetype:** TRACE | **Partners (COMPLETE):** PART 1 = 49 Financial (`49financial`, BD, `opal-data-bd`); PART 2 = Cottonwood (`cottonwood`, BD-native, `opal-data-cot`); PART 3 = Inflection (`inflection`, Orion, `opal-data-inf`) — **v1.0 (all three)**
 **Pairs with:** `DATA_ANALYTICS.FE1_advi_panel_platinum_groupd_manifest.md` (panel→D). Together = the complete `panel → platinum → D → C → B → A → Schwab-raw` vertical.
 **Spine tool:** `comp-pipescript io` (per-script READS `<-` edge map) + `pipescript advi-bd`. Rail-grounded, not raw grep.
 
@@ -171,5 +171,57 @@ Field-detail (`total_aua` / `nna` / `tax_liability`) follows the SAME chains as 
 ---
 ---
 
-## NEXT (successive, per Andrew)
-- **v1.0 — Inflection** (Orion, `data/inf/scripts/gold`): the ~20 `INF_D_0x` fan-out backtracked through the INF C/B/A tiers to **Orion-raw** (not Schwab); distinct shape, separate track (not the Schwab-raw rebuild target).
+---
+---
+
+# PART 3 — INFLECTION (`inflection`, Orion, `opal-data-inf`) — v1.0
+
+**Custodian/source:** Inflection Wealth Management via **Orion / Eclipse** (NOT Schwab, NOT BD). **Pipeline:** `inf-gold-dispatch-ec2` (`inf-gold-layer-runner`, `orion-gold-dispatch.sh`, ~40 `INF_*` scripts). **FE consumes** (FE1): the RICHEST surface — PartnerAnalytics(geo) + Distribution(geo/adv) + Books(advisorDrill, static-S3) + Profile + the INF-unique **Insights panel** + GRO.
+
+> **THE STRUCTURAL DIVERGENCE:** Inflection keeps the SAME A/B/C canonical tier as 49F (`INF_A_00..04`, `INF_B_00..03`,
+> `INF_C_00..09`) — it DOES build canonical analytics the same way — but the D-tier is a **~20-publisher FAN-OUT, not a single
+> `D_04` funnel.** Each platinum family has its OWN emitting script (FE1 §3 listed them). AND several D-publishers reach
+> **directly back to `bronze/orion-api/*`** (INF_D_04, INF_D_08), a FLATTER lineage that bypasses the full A→B→C chain in
+> places. The leaves are **Orion** (`bronze/orion-api/{household,activity,performance,assets,transactions}.csv`, Eclipse via
+> INF_E_00) + `silver/{accounts_dim,api_dims}`. **INF is a SEPARATE TRACK — NOT the Schwab-raw rebuild target** (per the
+> reverse-ETL census: no Fidelity-direct; Inflection is bounded at Orion = the supplant-prerequisite frontier).
+
+## 3.0 INF tiers — A/B/C mirror 49F; D fans out; leaf = Orion
+| Tier | Scripts | vs 49F |
+|---|---|---|
+| **D (fan-out, ~20)** | INF_09 (partner_analytics), INF_D_00, 00b, 00c, **00d** (cumulative), **00e** (fresh_header — gap-4b ORIGIN), 00f, 02, **02b** (top_holdings), **02c** (client_directory), **02d** (firm_mix), 03, 04, **04b** (client_publishers), **05** (activity_scan), **06** (cash_drag), **07/07a** (concentration — Insights), **08** (nmec_nmnc_nna), **09** (account_timeseries), INF_E_00 (eclipse models) | **NO single publisher** — each artifact family has its own script; many INF-unique (bold) |
+| **C** | INF_C_00..C_08 + **C_09 (fee_status_audit)** | same canonical shape + an INF fee-audit |
+| **B** | INF_B_00, **B_01 (FIFO)**, B_02, B_03 | same shape (but INF is separate-track, so the B_01 excise is NOT INF-scoped) |
+| **A** | INF_A_00..A_04 + **A_-1 (materialize_txn_cache)** | +txn-cache materializer (Orion txn volume) |
+| **bronze/raw (Orion leaf)** | `bronze/orion-api/{household,activity,performance,assets,transactions}.csv`, Eclipse, `silver/{accounts_dim,api_dims/accounts_v2}` | **Orion REST + Eclipse**, NOT Schwab/BD |
+
+## 3.1 The fan-out (publisher → platinum family — no funnel; cross-ref FE1 §2)
+Each INF D-publisher writes its OWN platinum key(s) — e.g. `INF_D_00`→aggregates/header, `INF_D_00b`→timeseries, `INF_D_00d`→cumulative_chart, `INF_D_00e`→header_metrics_fresh, `INF_D_02`→advisor book, `INF_D_02c`→client_directory, `INF_D_02d`→firm_mix_summary, `INF_D_05`→activity_scan, `INF_D_06`→cash_drag, `INF_D_07a`→firm_concentrations, `INF_D_09`→account_timeseries. (Demand side = FE1 §2.1-2.7; this is the supply side of the SAME map.)
+
+## 3.2 INF served spine → Orion (mirrors 49F C/B/A; Orion leaf)
+```
+INF_D_0x publishers
+  <- INF_C_01 nna, INF_C_02/C_03 perf, INF_C_05 tax, INF_C_06 mix, INF_C_07 attribution, INF_C_08 fee
+    <- INF_B_00/B_02 holdings/lots, INF_B_03 account_gains, INF_B_01 holdings_lots (FIFO)
+      <- INF_A_00 accounts_dim, INF_A_02 fee_rate, INF_A_03 positions_cube, INF_A_04 client_dim, INF_A_-1 txn_cache
+        <- bronze/orion-api/* (household/activity/performance/assets/transactions) + silver/{accounts_dim,api_dims} + Eclipse
+```
+**Bronze-reach divergence:** INF_D_04 + INF_D_08 read `bronze/orion-api/*` DIRECTLY (flatter than the full A→B→C chain).
+**Insights-panel lineage (INF-unique FE surface):** `INF_D_05`(activity_scan) / `INF_D_06`(cash_drag) ← `gold/cache/hh_timeseries_anchors` (← INF_D_09) + `silver/accounts_dim`; `INF_D_07a`(firm_concentrations) ← `silver/accounts_dim`; `INF_D_08`(nmec_nmnc_nna) ← `bronze/orion-api/{assets,transactions}.csv` direct.
+
+## 3.3 INF rebuild-relevance
+| Tag | INF lineage | Note |
+|---|---|---|
+| **Separate track** | leaves = Orion, not Schwab/BD | INF is NOT in the Schwab-raw rebuild scope; the Orion supplant is a distinct frontier (reverse-ETL census) |
+| **gap-4b ORIGIN** | `INF_D_00e.fresh_header_supplement` → `header_metrics_fresh.json` | this is the artifact 49F/COT fall back FROM; the rebuild can emit a bd/cot equivalent natively (contract §4 gap-4b) |
+| **fan-out shape** | ~20 publishers vs 49F's 1 (`D_04`) | if INF ever migrates, the essential-script set is ~20, not 1 — a different rebuild SHAPE |
+| **N1/N2** | INF fees via INF_C_08/A_02; household via INF_A_04 | same classes, Orion-sourced |
+
+## 3.4 Grounding caveat (no silent Unknown)
+`comp-pipescript io` returned EMPTY read-edges for 3 INF scripts (`INF_B_02`, `INF_A_03`, `INF_09`) — the io index does not carry their read map (pattern/dynamic reads not captured). Their position is inferred from naming + resolved siblings (INF_B_02 = canonical_lots ← INF_B_00 + Orion lots; INF_A_03 = positions_cube ← Orion positions; INF_09 = partner_analytics ← INF_C tier). **Flagged, not silently omitted** — a `comp-pipescript io` coverage gap for the INF tree (sibling to the comp-platinum-reverse BD-only-index gap noted in FE1).
+
+---
+---
+
+## COMPLETE — all three partners threaded D→A (v1.0)
+49F (PART 1, full + field-detail), Cottonwood (PART 2, BD-native divergence), Inflection (PART 3, Orion fan-out). The Schwab-raw-native rebuild targets **49F first** (clean custodian-direct), **COT second** (BD-native, gated on COTETL/BDAPIMIG), **INF separate** (Orion track). This server-side D→A map + FE1's panel→D map = the complete `panel → platinum → D → C → B → A → raw` vertical, and §4 (49F) is the value-parity census substrate for CTO's G2 excise gate.
