@@ -818,4 +818,55 @@
 
   </known_issues>
 
+  <!-- =========================================================
+       ETFS_SETUP WRITE-OUT PRODUCERS (added 2026-06-25, 0.7.0_AE_CloudOps)
+       Each per-firm producer reads ONLY its own firm bucket + WRITES a small
+       daily ETF-ownership slice to the shared opal-data-etfs aggregation bucket.
+       NEVER#1-clean by construction (no cross-firm read; write target is the
+       Deny-free etfs bucket). ETFS_AVGCAP reads opal-data-etfs ONLY.
+       PRD: docs/architecture/ETFS_SETUP.md. Universe: {DIVZ,IDVZ,PFDE,PFOE}.
+       Contract (W1, DS-pinned schema_version 1.0): per (partner,etf,date) row
+       {ownership_value=sum(market_value), account_count, source_artifact,
+        source_as_of}. Written to opal-data-etfs/daily/{partner}/{date}.json.
+       ========================================================= -->
+  <etfs_writeout_producers>
+
+    <producer>
+      <function_name>inf-etf-ownership-daily</function_name>
+      <wave>ETFS_SETUP.W1 (Inflection leg)</wave>
+      <source_dir>infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily</source_dir>
+      <tf_file>infra/aws/terraform/inf-pipeline/inf-etf-ownership-daily.tf</tf_file>
+      <reads>opal-data-inf/gold/holdings/{date}.parquet (own-firm only)</reads>
+      <writes>opal-data-etfs/daily/inflection/{date}.json</writes>
+      <trigger>S-D4 EventBridge sentinel on opal-data-inf gold/meta/pipeline-complete.json (eventbridge=true on opal-data-inf)</trigger>
+      <date_targeting>event["date"]="YYYY-MM-DD" backfills a historical partition (additive; default = latest partition). Added 2026-06-25 (inf-pipeline-v1.7.75) for the AVGCAP.AC#2 backfill.</date_targeting>
+      <tag>inf-pipeline-v1.7.75</tag>
+      <layer>pandas-pyarrow-requests-layer:1 (shared ARN)</layer>
+      <notes>Live forward + backfilled 40 days 2026-05-15..06-23 (~$82M/4-ETF @06-22).</notes>
+    </producer>
+
+    <producer>
+      <function_name>cot-etf-ownership-daily</function_name>
+      <wave>ETFS_SETUP.W3 (Cottonwood leg)</wave>
+      <source_dir>infra/aws/lambda/cot-pipeline/cot-etf-ownership-daily</source_dir>
+      <tf_file>infra/aws/terraform/cot-pipeline/cot-etf-ownership-daily.tf</tf_file>
+      <reads>opal-data-cot/gold/canonical/holdings/{date}.parquet (own-firm only; NEVER bd -- firm-separated)</reads>
+      <writes>opal-data-etfs/daily/cottonwood/{date}.json</writes>
+      <trigger>Daily EventBridge SCHEDULE cron(30 10 * * ? *). cot has no gold-complete sentinel + opal-data-cot EventBridge is DISABLED, so the inf sentinel chain does not apply. cot is periodic-snapshot (snapshot-first by design) -- effectively periodic, not strictly daily; idempotent re-process of the latest partition.</trigger>
+      <date_targeting>event["date"]="YYYY-MM-DD" backfills a historical partition (additive).</date_targeting>
+      <tag>cot-pipeline-v0.4.4</tag>
+      <layer>pandas-pyarrow-requests-layer:1 (shared ARN)</layer>
+      <notes>Valued series starts 2026-06-08 (cot onboarding 04-22; 05-15..06-07 unpriced -> SKIP'd no-valued-source). 10 valued slices 06-08..06-22 (~$1.04M/4-ETF @06-22). W2 (49F leg) owned by 0.5.0_AE_OpalETL.</notes>
+    </producer>
+
+    <iam_note>
+      Each producer role grants: GetObject on its own firm bucket holdings prefix +
+      GetObject on opal-data-etfs/config/* + Put/GetObject on opal-data-etfs/daily/{partner}/* +
+      scoped ListBucket. NO grant on any other firm bucket. comp-iam-verified CLEAN (no
+      firm-bucket-Deny widening, no cross-firm read). Roles: inf-etf-ownership-daily-role,
+      cot-etf-ownership-daily-role.
+    </iam_note>
+
+  </etfs_writeout_producers>
+
 </pipeline_inventory>
