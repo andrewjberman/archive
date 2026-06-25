@@ -6,8 +6,9 @@
 <verify>3.0.0_SA_CVO</verify>
 <issued_by>2.0.0_SA_COO (ETFS_AVGCAP decomposition; CTO-GO + Andrew-direct 2026-06-23; PRD docs/architecture/ETFS_AVGCAP.md, 8 Andrew-decisions resolved)</issued_by>
 <issued_date>2026-06-23</issued_date>
-<status>active</status>
+<status>complete</status>
 <!-- GATED on ETFS_SETUP-W1's Inflection producer (daily slice live + daily-artifact contract). DATA-ONLY (no DE/portal, D8). DS-compute lane; CVO verifies. P2 (49F)/P3 (Cottonwood) = phased follow-ons gated on their blockers (below) -- charter'd when those clear. No-rush (full 3-partner June ~early-July); methodology + Inflection leg start as soon as SETUP-W1's slice is live. -->
+<!-- COMPLETE 2026-06-25 (COO flip, ETFS TO-status convention; CVO cert-PASS + DS served-artifact RAVC2): AC#1 methodology (avgcap_monthly_average.py 116c84ed7, cert) + AC#2 served (opal-data-etfs/monthly/2026-05.json $24.29M + 2026-06.json $76.21M, inflection-only, CVO-cert-matched-to-cent, scope-corrected off auto-discovery widen) + AC#3 bd<->RPS recon (daeddb41a, reproduces PRD anchor $529.9M/$508.6M/-4.02% exactly). Served = real completion gate met. FOLLOW-ONS (separate, NOT this W1): Cottonwood AVGCAP rollup (cot June-only, needs own cert) + inf-gold reprice (queued DS, window 06-18..06-23). -->
 
 <objective>
 Build the ETFS_AVGCAP averaging methodology + the FIRST partner leg (Inflection, provable-now) per the PRD (docs/architecture/ETFS_AVGCAP.md, all 8 Andrew-decisions resolved). DATA-ONLY (ETF business, no model-portfolio/DE lane). Reads the ETFS_SETUP daily ETF-ownership slices (opal-data-etfs/{partner}/{date}.json), computes monthly-average ETF ownership per partner + the bd<->Schwab-RPS account-level reconciliation.
