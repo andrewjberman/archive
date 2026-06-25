@@ -1,0 +1,81 @@
+diff --git a/data/black_diamond/scripts/gold/gldinc_ss4c_weekly.py b/data/black_diamond/scripts/gold/gldinc_ss4c_weekly.py
+index 65b0894d9..6d4509d4b 100644
+--- a/data/black_diamond/scripts/gold/gldinc_ss4c_weekly.py
++++ b/data/black_diamond/scripts/gold/gldinc_ss4c_weekly.py
+@@ -58,34 +58,51 @@ PHASE = "P1"
+ PARITY_PREFIX = "gold/_parity/load_flows/ss4c"
+ 
+ 
++def _num(scorecard: dict, key: str) -> float:
++    """None-safe numeric coalesce. compute_scorecard leaves the observability deltas
++    (max_abs_diff / key_set_symmetric_diff / row_count_delta) as None on a clean
++    DELTA=0 run (the key is PRESENT-but-None, so dict.get's default never applies) ->
++    a bare float(None) raised TypeError and crashed _emit, so WeeklyScorecardClean
++    NEVER landed despite a clean run (0 datapoints + a paradoxically-firing absence
++    alarm on a working verifier -- the exact silent-blind class one level up). Coalesce
++    None/unparseable -> 0.0."""
++    v = scorecard.get(key)
++    try:
++        return float(v) if v is not None else 0.0
++    except (TypeError, ValueError):
++        return 0.0
++
++
+ def _emit(clean: bool, scorecard: dict) -> None:
++    """Emit the SS4c weekly metrics. NON-FATAL + load-bearing-first: the critical
++    WeeklyScorecardClean (1/0, what the divergence+absence alarms bind to) is emitted
++    even if the observability batch fails -- a CloudWatch hiccup or a None field must
++    never blind the alarm layer. A total emit failure WARNs (the absence alarm then
++    correctly catches a genuinely metric-less run)."""
++    clean_dp = {
++        "MetricName": "WeeklyScorecardClean",
++        "Dimensions": [{"Name": "Phase", "Value": PHASE}],
++        "Value": 1.0 if clean else 0.0,
++        "Unit": "None",
++    }
+     data = [
+-        {
+-            "MetricName": "WeeklyScorecardClean",
+-            "Dimensions": [{"Name": "Phase", "Value": PHASE}],
+-            "Value": 1.0 if clean else 0.0,
+-            "Unit": "None",
+-        },
+-        {
+-            "MetricName": "WeeklyMaxAbsDiff",
+-            "Dimensions": [{"Name": "Phase", "Value": PHASE}],
+-            "Value": float(scorecard.get("max_abs_diff", 0.0)),
+-            "Unit": "None",
+-        },
+-        {
+-            "MetricName": "WeeklyKeySymDiff",
+-            "Dimensions": [{"Name": "Phase", "Value": PHASE}],
+-            "Value": float(scorecard.get("key_set_symmetric_diff", 0)),
+-            "Unit": "Count",
+-        },
+-        {
+-            "MetricName": "WeeklyRowDelta",
+-            "Dimensions": [{"Name": "Phase", "Value": PHASE}],
+-            "Value": float(abs(scorecard.get("row_count_delta", 0))),
+-            "Unit": "Count",
+-        },
++        clean_dp,
++        {"MetricName": "WeeklyMaxAbsDiff", "Dimensions": [{"Name": "Phase", "Value": PHASE}],
++         "Value": _num(scorecard, "max_abs_diff"), "Unit": "None"},
++        {"MetricName": "WeeklyKeySymDiff", "Dimensions": [{"Name": "Phase", "Value": PHASE}],
++         "Value": _num(scorecard, "key_set_symmetric_diff"), "Unit": "Count"},
++        {"MetricName": "WeeklyRowDelta", "Dimensions": [{"Name": "Phase", "Value": PHASE}],
++         "Value": abs(_num(scorecard, "row_count_delta")), "Unit": "Count"},
+     ]
+-    _cw.put_metric_data(Namespace=METRIC_NS, MetricData=data)
++    try:
++        _cw.put_metric_data(Namespace=METRIC_NS, MetricData=data)
++    except Exception as exc:  # noqa: BLE001 -- non-fatal; still try the load-bearing flag alone
++        print("WARN: SS4c full metric batch emit failed (%s) -- retrying WeeklyScorecardClean alone" % exc, flush=True)
++        try:
++            _cw.put_metric_data(Namespace=METRIC_NS, MetricData=[clean_dp])
++        except Exception as exc2:  # noqa: BLE001
++            print("ERROR: SS4c WeeklyScorecardClean emit FAILED (%s) -- the absence alarm will fire "
++                  "(verifier ran but could not signal)." % exc2, flush=True)
+ 
+ 
+ def _write_parity(run_date: str, scorecard: dict) -> str:
