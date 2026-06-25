@@ -119,3 +119,42 @@ DEFERRED: the headless SESSION-REFRESH / auto-login (ported cot_bd_session_fetch
 6. (Phase 2) the 4 scrape boxes decommissioned without regression; EC2_MANIFEST.json updated.
 7. Session log w/ Compiler Tools. RAVC2 to CTO (arch) + CVO (the §6 close-gate).
 </acceptance_criteria>
+
+<durable_auto_auth_extension>
+<!-- ADDED 2026-06-25 (Andrew-direct GO via CVO; brief docs/briefs/bd-49f-durable-auto-auth-cv-login-otp-relay-20260625.md).
+EXTENDS this TO from the scheduled-runner interim to the DURABLE auto-RE-AUTHENTICATION layer that retires the
+manual cookie reseed. WHY: measured today the .bd.identity ABSOLUTE SSO cap is SHORT (~hours) -- keepalive can't
+beat it; only a fresh LOGIN resets the absolute clock. (The dead-cookie was caught live in the 2026-06-25 health verify.) -->
+
+ARCH (CTO-ruled 2026-06-25): VISION = Kimi-VL (already wired, SM astn/kimi/api-key, model kimi-k2.6; reuse the
+analyze.py:_chat OpenAI-compat call shape + the harvest_ft_session.js grid-localization pattern). COMPUTE = co-opt
+the ASTN CV stack (EC2 astn-wsjft-scraper -- has residential-proxy + Chromium + Kimi-VL; a Lambda can't hold the
+human-OTP wait). Same-box-scheduled-nonoverlap vs AMI-sibling = 0.7.0 coordination (proxy-zone 2nd-concurrent-session).
+
+ANDREW-LOCKED: OTP return-channel = the m365 gateway (NOT SMS -- SNS-SMS dependency DROPPED). 0.5.0 grounded the
+gateway = Andrew's OWN identity (not a bot) -> DESIGN FORK (CVO ruling pending, 0.5.0 confirming the channel):
+  PATH A (target, if BD email-delivers the OTP): the automation runs AS Andrew -> reads the OTP from his EMAIL
+    directly (search_email scoped to the SS&C/BD sender) -> FULLY AUTOMATED, no human-in-loop, no >15min wait.
+  PATH B (fallback, if SMS-only): Andrew types the code once into a designated Teams chat -> poll_addressed_teams
+    _messages + read_chat_messages reads it. Human-in-loop only on SMS-OTP.
+
+ROE (CTO-ruled, CVO-verified, NON-NEGOTIABLE): observe-act-only; NEVER log/persist OTP or credential VALUES
+(response/commit/log/S3); single-use OTP not stored; ONLY persisted artifact = fresh .bd.identity -> SM
+blackdiamond/49f/session. Firm-sep NEVER#1 binds (49F never opal-data-cot).
+
+LEGS:
+  L1 CORE auto-login (channel-independent): extend cot_bd_session_fetch's OIDC login + MFA-fail branch into a
+     49F bd_auto_login -- Playwright+Chromium on the residential proxy -> Kimi-VL perceive->act loop (screenshot
+     -> classify login/modal/OTP/logged-in + grid-localize -> Playwright act) -> capture .bd.identity -> SM.
+  L2 OTP-RELAY adapter (Path A read-email | Path B Teams-poll), channel-selected by 0.5.0's finding.
+  L3 DEVICE-TRUST: capture bd_DeviceRegistration on success + inject on subsequent logins to SKIP OTP where BD
+     allows (the OTP-minimizer; works WITH or WITHOUT it -- Andrew owes a capture to fully prove the quiet path).
+  L4 FRESHNESS-GATE TRIGGER: extend bd-49f-freshness-probe to TRIGGER the refresh on 401 (not just alert).
+  L5 COMPUTE wrapper: the ASTN-box deploy (S3->box->SSM) or AMI-sibling, 49F-scoped IAM/secrets.
+
+STATUS 2026-06-25: launched. CTO arch ruled (vision+compute). 0.5.0 surfaced the Andrew-identity gateway ->
+design fork out to CVO/0.5.0 (channel confirm) + 0.7.0 (box-arch). Kimi-VL call shape + cot login base grounded.
+Core (L1) authorable channel-independent once 0.7.0 confirms same-box-vs-AMI-sibling (wrapper shape).
+DELIVERY: standard cycle + deploy-ledger at first deploy-start. CVO verifies end-to-end (live-cookie refresh +
+OTP-path + device-trust-skips + ROE + firm-sep + no runner/keepalive/alarm regression). Interim stays the bridge until this lands.
+</durable_auto_auth_extension>
