@@ -5,7 +5,9 @@
 <verify>3.0.0_SA_CVO (root-cause grounding + served-freeze characterization)</verify>
 <issued_by>2.0.0_SA_COO (Andrew-direct 2026-06-25: "MDPF has been frozen for days -- investigate what is going on")</issued_by>
 <issued_date>2026-06-25</issued_date>
-<status>pending</status>
+<status>dx-delivered-pending-verify</status>
+<!-- 2026-06-25 0.5.0_AE: DIAGNOSIS COMPLETE + RAVC'd to COO (Rule-22 grounded: source mdpf-daily-trigger/lambda_function.py:54-179,222-236 + runtime CloudWatch gate decisions + s3 partition ground-truth). ROOT = MDPF convergence gate correctly DEFERS on stale BD silver/fees (latest 06-18, frozen since 06-19 BD-49F break); NOT an MDPF-side break. Cross-link CONFIRMED: downstream victim, fees is a separate scrape feed (bd_fees EC2, COO-EXEMPT) NOT covered by 0.6.0's DataMining-REST P1 (which fixed allocations). FIX routes to BD lane (CVO/0.6.0 restore bd-fees); MDPF auto-recovers forward once fees <=2 trading-days fresh; interior gap-day backfill optional+manual. No MDPF code change. dx report: logs/2026-06-25/MDPF_ASSETS.FREEZE-DX_diagnosis.md. <verify> = 3.0.0_SA_CVO (grounding citations handed). Standing by on MDPF re-run/verify. -->
+
 <!-- GO: Andrew-direct 2026-06-25 (COO spawning 0.5.0_AE FOR this). INVESTIGATION/DIAGNOSIS TO -- find + ground the root cause; PROPOSE the fix; do NOT self-authorize a fix-deploy (RAVC the dx + proposed fix to COO first; a fix-TO follows). -->
 
 <objective>
