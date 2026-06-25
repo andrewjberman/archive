@@ -6,7 +6,8 @@
 <verify>3.0.0_SA_CVO</verify>
 <issued_by>2.0.0_SA_COO (ETFS_SETUP decomposition wave-3; Andrew-direct 2026-06-23 "get started"; PRD docs/architecture/ETFS_SETUP.md)</issued_by>
 <issued_date>2026-06-23</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- STATUS-DRIFT CORRECTED 2026-06-25 (2.0.0_SA_COO, per CVO ETFS audit brief): W3 is DONE -- Cottonwood daily producer deployed cot-pipeline-v0.4.4, 10 slices served 06-08..06-22, CVO-certed VERIFIED/GO, ledger closed. The pending->complete drift was stale bookkeeping, not open work. -->
 <!-- GATED on W1 (bucket REUSE + IAM + config + contract). B3 (COTETL CurrentDay freeze) CLEARED -- fix deployed a7a4d974c 2026-06-22 + cot now GO-LIVE ($397.98M@06-22, render+served verified). So W3 is unblocked beyond the W1 foundation. Base 0.7.0_AE_CloudOps lane (Andrew-direct 2026-06-23: base AE free post-go-live, no ~B spawn). -->
 
 <objective>
