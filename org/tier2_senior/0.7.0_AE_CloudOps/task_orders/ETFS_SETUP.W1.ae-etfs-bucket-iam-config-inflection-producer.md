@@ -6,8 +6,9 @@
 <consult>0.4.0_DS_ClientPlatform (daily-artifact contract shape -- DS's AVGCAP compute reads it; agree the schema before the producer writes)</consult>
 <issued_by>2.0.0_SA_COO (ETFS_SETUP decomposition; CTO PRD 1e3db994b + Andrew decisions fd41dc052)</issued_by>
 <issued_date>2026-06-22</issued_date>
-<status>active</status>
+<status>complete</status>
 <!-- GO 2026-06-22 151x Z: AE signaled capacity. Non-DS-dependent parts startable now; the daily-artifact contract step loops DS (AE proposes, DS confirms async). No-rush overall (full June ~early-July). -->
+<!-- COMPLETE 2026-06-25 (COO flip per ETFS-TO-status convention; AE RAVC2 131248Z + DS corroboration): W1 LANDED+LIVE+verified-on-served -- ledger d2dd0d5d6 CLOSED (13-add/0/0, tagged inf-pipeline-v1.7.74 + shared-infra-v1.31.0), comp-iam CLEAN (548904bbd), served slice opal-data-etfs/daily/inflection/2026-06-23.json comp-freshness=PASS, 4 ETFs sum ~$82.2M ties DS $82.14M/476-accts + PRD ~$82M anchor, reuse-bucket version. NOTE: the forward producer is W1's verified deliverable; the HISTORICAL BACKFILL needed for ETFS_AVGCAP.AC#2 (monthly-avg) is a SEPARATE follow-on leg dispatched to AE 0.7.0 (2026-06-25), NOT a W1 reopen. -->
 <!-- SCOPE-CORRECTION 2026-06-23 (CTO Andrew-direct, COO-amended): the opal-data-etfs bucket ALREADY EXISTS -- shared-infra/s3.tf:164 (Terraform-managed, ETFS_NETAST-created 05-22, ~296 net-assets objects; also mdpf-pipeline/main.tf:58 ref). REUSE it, do NOT create (a safe-apply 'create' = duplicate-resource/state collision). The real W1 infra delta = the write-out IAM + the daily/{partner}/ prefix-contract + the Inflection producer, NOT the bucket. Objective/the_fix#1/safe-apply-phase/AC1 amended below. -->
 
 <objective>
