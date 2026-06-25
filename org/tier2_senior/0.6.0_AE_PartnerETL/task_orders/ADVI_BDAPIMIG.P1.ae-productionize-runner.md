@@ -4,13 +4,36 @@
 <assigned_to>0.6.0_AE_PartnerETL (staged for when the AE PartnerETL lane spins up; CVO/Andrew drive BD)</assigned_to>
 <issued_by>1.0.0_SA_CTO (PRD author/arch; re-scoped 2026-06-25 from Phase-0 after CVO drove the P0 recovery manually)</issued_by>
 <issued_date>2026-06-25 (re-scoped from the Phase-0 TO d09a612d4)</issued_date>
-<status>staged</status>
+<status>pending</status>
 <!-- PHASE-0 P0 RECOVERY DONE 2026-06-25 by 3.0.0_SA_CVO (AE lane cold, BD on CVO per Andrew): auth proven
 live, blackdiamond/49f/session created, 4 templates provisioned (Custom dateRangeType), cot_bronze_ingest.py
 run firm-bound to bd (all 4 env vars explicit), 4 tables re-landed @06-24 to opal-data-bd/forwardfill_v2,
 firm-sep verified (opal-data-cot negative-checked, no 49f leak). DS holds the silver-zero-change trigger;
 CVO co-verifies the un-freeze (§6). THIS TO is now the DURABLE Phase-1 productionization, STAGED for an AE
 lane. GO when an AE PartnerETL session is live + CVO/Andrew direct. PRD: docs/architecture/ADVI_BDAPIMIG_PRD.md. -->
+<!-- PHASE-1 INTERIM BUILD DONE 2026-06-25 by 0.6.0_AE_PartnerETL (CVO GO + drive). All 3 components SHIPPED +
+live-proven, build order A->C->B:
+  (A) bd-49f-keepalive Lambda, EventBridge rate(15m), GET /auth/keepalive -> live invoke {ok:true,status:204}.
+      401/403 -> direct SNS re-capture alert + KeepaliveOK=0 + absence alarm. READ-ONLY secret, zero cot.
+      tag bd-v2.33.0. CVO: ALL-4-BARS PASS / ACCEPTED (email egress Andrew-confirmed delivery-proven).
+  (C) bd-49f-freshness-probe Lambda, rate(1h): AuthTokenOK (401-specific, 5xx=no-page) + per-table
+      SilverAgeHours{4 tables}. Alarm-driven paging (authtoken-dead/absence + 4x silver-stale) to
+      opal-bd-49f-cookie-alerts. tag bd-v2.34.0. CVO: FULL PASS / ACCEPTED (alarms discriminate frozen-vs-
+      fresh on live data). Egress: SMS sub DROPPED (no origination entity + sandbox = false coverage);
+      EMAIL = single proven channel. {test_alert:true} hook on A+C for re-provable delivery.
+  (B) bd-49f-runner Lambda, daily cron(0 2 UTC): pulls shared cot_bronze_ingest.py from opal-data-bd/code/
+      bronze/ (Model-B, no fork), 4 env vars EXPLICIT, runs 4 REST tables -> forwardfill_v2. Retry/backoff
+      401(no-storm)/5xx-Error(retry). tag bd-v2.35.0. FIRM-SEP HARD GATE (AC#4): _assert_firm_separation()
+      added to the shared script (commit eb0ce40f6) -- PROVEN matrix (49f+unset=ABORT, 49f+cot=ABORT,
+      49f+bd=PASS, cot-default=no-abort) + 3-layer defense (explicit env / script guard / IAM Deny cot).
+      Live smoke: ingested transactions 76MB -> forwardfill_v2/transactions/TRANSACTIONS_DAILY_2026-06-25.xlsx,
+      222s. CVO formal dry-run + full-4-table verify PENDING.
+3 deploy-ledgers opened+CLOSED (bd-49f-p1a-keepalive / p1c-freshness / p1b-runner), no stranded legs.
+REMAINING (this TO stays pending): (B) full-4-table run gated on CVO/Andrew silver-fire GO (realized/unrealized
+still 138h-stale in SILVER -- B lands their bronze, DS-owned silver trigger re-lands); cron-timing vs bd-silver
+precedence (DS confirm); (D) Andrew manual reseed when C alerts; PHASE 2 decommission of the 4 Playwright scrape
+boxes (parity-verify + separate GO, destructive). Durable follow-up (non-blocking): SMS 2nd channel = SNS
+origination identity + production access (account-owner). DEFERRED per Andrew hold: auto-login session-refresh. -->
 
 <context>
 Phase 0 (the P0 unblock) is DONE -- CVO recovered the 4 frozen bd silver tables manually via the proven
