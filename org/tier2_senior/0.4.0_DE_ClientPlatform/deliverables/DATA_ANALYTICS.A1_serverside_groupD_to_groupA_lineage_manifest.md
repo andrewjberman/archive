@@ -106,7 +106,13 @@ platinum tax  (D_00 / D_02 <- C_05 client_tax_liability)
 ```
 A-scope: `A_00` (tax_status per account).
 
-## 4. REBUILD-RELEVANCE TAGS — the value-parity census substrate (CTO G2 rider)
+## 4. FIELD-DERIVATION CHARACTERIZATION (R&D) — how served fields derive through the BD layers
+
+> **REFRAME (2026-06-25, CTO `172040Z`):** the Schwab-raw-native canonical is PARALLEL R&D coexisting with BD — **no excise,
+> no cutover.** This section is retained as a **field-derivation map** (how each served field derives, incl. via B_01-FIFO /
+> B_00-reconcile) — useful R&D characterization for designing the parallel build's strict-form. It is NOT a production
+> "excise value-parity census" (there is no excise). Read the tags as "where the parallel strict-form differs from BD by
+> design," not "what a cutover must value-match."
 
 CTO's G2 ruling: excising B_01-FIFO + B_00-reconcile requires a VALUE-PARITY census — every served field whose lineage passes through a FIFO-derived or reconcile-adjusted node must reproduce its value Schwab-native. This lineage flags the exact targets:
 

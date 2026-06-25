@@ -1,5 +1,9 @@
 # DATA_ANALYTICS — Portal Contract Convergence Record (FE-down ⇄ gold-up)
 
+> **REFRAME (Andrew-direct via DS, 2026-06-25; CTO `172040Z`):** the Schwab-raw-native canonical is **PARALLEL R&D coexisting
+> with BD — no excise, no cutover, no contract-LOCK.** The DE↔DS convergence below (publisher shapes, agnostic-drops, the N1/N2
+> deps) stays valid as R&D foundation design; any "lock / excise / partial-lock" language is stood down to prospective framing.
+
 **Authors:** 0.4.0_DE_ClientPlatform (FE-down / demand) + 0.4.0_DS_ClientPlatform (gold-up / supply)
 **Date:** 2026-06-25 | **archetype:** COORDINATE
 **Inputs:** FE1 manifest `DATA_ANALYTICS.FE1_advi_panel_platinum_groupd_manifest.md` @ 98764fb65 (demand side) × DS A1 D-tier field-requirements + Schwab-raw-native silver-dim design `docs/briefs/DATA_ANALYTICS_A1_*` (supply side)
