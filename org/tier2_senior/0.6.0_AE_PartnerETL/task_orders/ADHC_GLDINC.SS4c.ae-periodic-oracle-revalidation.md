@@ -6,6 +6,19 @@
 <issued_by>2.0.0_SA_COO (CVO 06-17 action item 143909Z -> CTO scope-bless 144451Z; single-router dispatch)</issued_by>
 <issued_date>2026-06-17</issued_date>
 <status>pending</status>
+<!-- GROUNDED STATUS 2026-06-25 (0.6.0_AE, COO GO): the oracle is BUILT+DEPLOYED+WIRED+RUNNING,
+NOT unbuilt -- gldinc_ss4c_weekly.py @ opal-data-bd/code/gold (06-22), Wed leg in gold_dispatch.sh:1349-69
+(CloudOps-signed placement), TIER-1 canary live (gldinc-ss4c-canary), TIER-2 alarms exist, parity
+scorecards landing (gold/_parity/load_flows/ss4c/06-23,24/). BUT it was BLIND: WeeklyScorecardClean=0
+datapoints/30d (absence alarm firing on a working verifier). Two root breaks FIXED: (1) IAM -- runner role
+bd-exporter-ec2-role had NO cloudwatch:PutMetricData -> GLDINC/SS4c AccessDenied; GRANTED ns-scoped + APPLIED
+(commit 3ad886929, comp-iam clean). (2) _emit float(None) crash on a clean DELTA=0 scorecard; fix authored +
+unit-verified, handed to DS as a patch (Rule-13 gold-script lane; DS accepted+queued, deploys at next
+breakpoint, metric lands the 07-01 Wed nightly). NOT cost-gated (zero compute change; placement already
+CloudOps-signed). REMAINING: watch-the-watcher (#2, register ss4c-weekly-absence sub-presence into
+comp-surface-check/D8 -- offered to author through 0.7.0/base-AE owner, awaiting COO sequencing) + cost-model
+NFRA_COSTAWS §7 line (#3, CloudOps). The verifier-emits-and-alarms CORE is one DS-deploy from DONE. -->
+
 <priority>NEAR-TERM, not a fire. The GLDINC P1 cutover is clean by EMPIRICAL basis (9-night 06-08..06-16 windowed-vs-full_scan DELTA=0 + fresh 06-17 canary + shadow-free deploy) — but post-L3-cleanup there is NO LIVE oracle verifier on the runner, so the DELTA=0 guarantee now rides BY-CONSTRUCTION only. The retired gate (windowed-vs-full_scan via shadow.py) is the entrypoint-delegation-tautology class (a cutover that repoints/retires its own oracle defeats the gate). Build the standing verifier before that guarantee rides indefinitely. GO-at-capacity for 0.6.0_AE (its morning-surge loops are closed); behind any real interrupt (e.g. an Andrew "chase the BD-source stall" call).</priority>
 
 <references>
