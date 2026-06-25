@@ -1,7 +1,7 @@
 # DATA_ANALYTICS — SERVER-SIDE Group-D → Group-A LINEAGE MANIFEST (49F / BD)
 
 **TO:** DATA_ANALYTICS (server-side companion to FE1) | **Author:** 0.4.0_DE_ClientPlatform | **Date:** 2026-06-25
-**archetype:** TRACE | **Partner:** 49 Financial (`49financial`, BD pipeline, `opal-data-bd`) — **v0.1 (49F first; COT then INF to follow, successively)**
+**archetype:** TRACE | **Partners:** PART 1 = 49 Financial (`49financial`, BD, `opal-data-bd`); PART 2 = Cottonwood (`cottonwood`, BD-native, `opal-data-cot`) — **v0.2 (49F + COT; INF to follow)**
 **Pairs with:** `DATA_ANALYTICS.FE1_advi_panel_platinum_groupd_manifest.md` (panel→D). Together = the complete `panel → platinum → D → C → B → A → Schwab-raw` vertical.
 **Spine tool:** `comp-pipescript io` (per-script READS `<-` edge map) + `pipescript advi-bd`. Rail-grounded, not raw grep.
 
@@ -12,6 +12,8 @@
 > CTO's G2 rider needs). No silent Unknown — every edge is a grounded `comp-pipescript io` read or an explicit `(external/silver)` leaf.
 
 ---
+
+# PART 1 — 49 FINANCIAL (`49financial`, BD, `opal-data-bd`)
 
 ## 0. The 49F gold tiers (28 scripts; the contract waist is D, the leaves are A→silver)
 
@@ -119,6 +121,55 @@ CTO's G2 ruling: excising B_01-FIFO + B_00-reconcile requires a VALUE-PARITY cen
 ## 5. Completeness attestation (no silent Unknown)
 All 8 D-publishers threaded to their transitive A-tier + silver leaves (§1), every script's direct upstream grounded via `comp-pipescript io` `<-` edges (§2), field-lineage on the 3 headline numbers (§3), rebuild-excise/retain/deferred dependencies tagged (§4). `(external/silver)` leaves are explicit, not gaps. Rail-grounded (comp-pipescript io + pipescript advi-bd), not raw grep.
 
+---
+---
+
+# PART 2 — COTTONWOOD (`cottonwood`, BD-native, `opal-data-cot`) — v0.2
+
+**Custodian/source:** Cottonwood Capital Advisors. **Pipeline:** `cot-pipeline` (`cot-exporter` EC2 runs a **BD DataMining session fetch** → bronze ingest → silver merge → `gold_dispatch.sh`). **FE consumes** (per FE1 + contract): PartnerAnalytics (aua/nna/geo) + Distribution-geo ONLY (Books/Advisors disabled v1).
+
+> **THE LOAD-BEARING COT DIVERGENCE (grounds CTO's G3 "BD-native not Schwab-native" ruling):** COT's gold scripts are
+> **structural CLONES of 49F's** — same A→D shape, same `D_04`-sole-publisher, even the same `schwab/silver/{rld,uln,ult}`
+> read-path NAMES in B_02. **But COT's bronze/silver is BD-DataMining-native, NOT Schwab-custodian-direct** — those
+> `schwab/silver/*` paths are populated from the **BD session export**, not a Schwab feed. So COT's rebuild CANNOT just
+> "read Schwab raw" the way 49F can; it is gated on the BD leaner-snapshot / custodian-direct methodology proving out
+> (ADVI_COTETL + ADVI_BDAPIMIG REST ingest) BEFORE COT migrates. **Sequence COT after 49F proves the pattern.**
+
+## 2.0 COT tiers — mirrors 49F + COT-specific additions
+| Tier | Scripts | vs 49F |
+|---|---|---|
+| **D** | D_00, D_00b, D_00c, D_01, D_02, D_03, **D_04 (sole publisher)** | **NO `D_00f`** (no advisor_nna_canonical → gap-4a; COT advisor NNA intended-absent) |
+| **C** | C_01(+b/c), C_03, C_05, C_06, C_07, C_08 | **NO `C_00`/`C_02`** standalone (canonical/client perf folded; account_performance C_03 present) |
+| **B** | B_00, **B_01 (FIFO)**, B_02, B_03 | same shape; B_02 reads the same `schwab/silver/{rld,uln,ult}` path NAMES (BD-populated) |
+| **A** | A_00, A_01, A_02, A_03, A_04, **A_05 (assets_dimension)** | **+A_05** (COT folds asset-dim as a gold A-script; ← B_00 holdings + accounts_dim) |
+| **E (COT-only)** | E_00 aua_gap, E_01 quality_tiers, E_18/E_20/E_21 detect/validate/recon, E_22 unassigned, E_23 fee_splits, E_24 fee_scorecard | **diagnostic/QA tier — OFF the served D→A lineage** (reconciliation + validation, not portal-consumed) |
+
+## 2.1 COT essential vs agnostic (the lean-rebuild cut — from FE1 + contract §4)
+- **ESSENTIAL (consumed → must rebuild):** `D_00`, `D_00b`, `D_01`, **`D_04`** → PartnerAnalytics(aua/nna/geo) + Distribution-geo.
+- **AGNOSTIC-DROP (produced, NOT consumed v1):** `D_00c` (leaderboard), `D_02` (advisor-client detail), `D_03` (composition) + `D_04`'s `cohort_a_summary.json` / `cash_coverage_summary.json` — Books/Advisors disabled (no advisor dimension; 2-founder joint-coverage). Re-add when COT advisor dim materializes (ADVI_PRTORG §5-A.1).
+
+## 2.2 COT served spine (essential publishers → A; mirrors 49F §1/§2)
+The consumed COT chain is the 49F chain minus the advisor-dimension branches:
+```
+D_04 / D_00 / D_00b / D_01
+  <- C_01 canonical_nna, C_03 account_performance, C_05 tax, C_06 mix, C_07 attribution, C_08 fee
+    <- B_00/B_02 canonical_holdings/lots, B_03 account_gains, B_01 holdings_lots (FIFO)
+      <- A_00 accounts_dim, A_02 fee_rate, A_03 positions_cube, A_04 client_dim, A_05 assets_dim
+        <- silver/{allocations, prices(S_00), realized, unrealized, transactions} + schwab/silver/{rld,uln,ult}  [BD-session-populated for COT]
+```
+Field-detail (`total_aua` / `nna` / `tax_liability`) follows the SAME chains as 49F §3 — with the source-substitution caveat: COT's leaf data is BD-session-export, so the field VALUES trace to BD DataMining, not a direct Schwab custodian feed.
+
+## 2.3 COT rebuild-relevance tags (value-parity substrate)
+| Tag | COT lineage | Note vs 49F |
+|---|---|---|
+| **BD-native source** (G3 gate) | B_02/A_03 `schwab/silver/*` + `silver/*` ← **BD session export** | COT migration GATED on BD custodian-direct methodology (ADVI_COTETL/BDAPIMIG) — NOT a clean Schwab-direct read |
+| **B_01-FIFO** (excise) | `tax_liability` (C_05), holdings-lots in D_00b/D_02/D_03 | same excise-parity target as 49F |
+| **N1 fee** (retain) | C_08 ← A_02 ← silver fees | + COT E_23/E_24 fee-split/scorecard diagnostics (COT fee-attribution is thinner — 2-founder) |
+| **N2 household** (deferred) | A_04 ← A_00 | same partial-lock |
+| **agnostic-drop** | D_00c/D_02/D_03 + cohort_a/cash_coverage | NOT in the COT rebuild scope v1 |
+
+---
+---
+
 ## NEXT (successive, per Andrew)
-- **v0.2 — Cottonwood** (BD-native, `data/cot/scripts/gold`): same D→A backtrack; expect the same `D_04`-publisher shape but the reduced essential set (D_00/D_00b/D_01/D_04) + the COT custodian-direct-snapshot methodology (ADVI_COTETL).
-- **v1.0 — Inflection** (Orion, `data/inf/scripts/gold`): the ~20 `INF_D_0x` fan-out backtracked through the INF C/B/A tiers to Orion-raw; distinct shape (not the Schwab-raw target).
+- **v1.0 — Inflection** (Orion, `data/inf/scripts/gold`): the ~20 `INF_D_0x` fan-out backtracked through the INF C/B/A tiers to **Orion-raw** (not Schwab); distinct shape, separate track (not the Schwab-raw rebuild target).
