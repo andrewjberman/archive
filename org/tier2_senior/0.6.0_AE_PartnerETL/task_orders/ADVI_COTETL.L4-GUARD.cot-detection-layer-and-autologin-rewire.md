@@ -25,7 +25,10 @@ PART A — DETECTION LAYER (firm-twin of the 49F pattern; so a cot session stale
   2. cot-cookie-alerts SNS topic (firm-param twin of 49F's), wired so a cot session/freeze failure publishes to opal-critical-surface-alerts (the COO SQS rider) — i.e. the failure reaches the COO /drive loop, not a silent void.
   3. Keepalive as designed with CTO (so the device-trust cookie does not lapse between nightly runs).
 
-PART B — REWIRE cot's 02:00 trigger off `cot_bd_session_fetch.py` to the canonical firm-parameterized auto-login (bd-49f-auto-login, firm=cot/${BD_FIRM_ID}), so the 02:00 refresh uses the WORKING auto-login + device-trust path. Verify the rewired trigger writes a live, mintable cot session that cot_bronze_ingest.py consumes successfully.
+PART B — REWIRE cot's 02:00 trigger off `cot_bd_session_fetch.py` to the WORKING auto-login + device-trust path. END-STATE (Andrew-direct 2026-06-26, via CVO, verbatim sense): the EC2 RUNNER must SELF-FETCH the OTP via the GATEWAY, unattended — the relay-bridge (a live agent grabs the OTP) is "useless"/"not your job" as an end-state. So Part B targets the GATEWAY self-fetch path, NOT a relay rewire:
+  - Gateway /otp/fetch + /otp/health are DEPLOYED+LIVE (401-gated); 49f bearer provisioned. GAP: cot NOT onboarded (no blackdiamond/cot/otp-gateway-token; cot box still BD_OTP_ADAPTER=relay) AND the gateway path is UNPROVEN end-to-end (built-but-never-exercised-in-prod — today still required CVO's manual relay grab).
+  - LANE SPLIT: 0.6.0 (this TO) = box-env flip BD_OTP_ADAPTER relay->gateway + cot gateway-token onboarding box-side. 0.7.0_AE = gw-side cot bearer provision (blackdiamond/cot/otp-gateway-token) + prove gateway /otp/fetch end-to-end for cot. CVO = verify the runner self-fetches unattended in prod. CTO = arch-gate the gateway-adapter seam (box-Node-deps + OTP-adapter confirm).
+  - Acceptance: the rewired 02:00 trigger writes a live, mintable cot session that cot_bronze_ingest.py consumes — with the OTP obtained by the RUNNER via the gateway, NO live-agent relay grab.
 </scope>
 
 <compiler_tools_mandate>
