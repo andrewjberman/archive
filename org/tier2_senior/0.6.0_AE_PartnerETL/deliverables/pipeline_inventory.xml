@@ -1265,7 +1265,7 @@
   </pipeline>
 
   <pipeline name="cot-detection-layer" project="ADVI_COTETL.L4-GUARD" owner="0.6.0_AE_PartnerETL"
-            tf="infra/aws/terraform/cot-pipeline/cot-detection-layer.tf" tag="cot-pipeline-v0.5.0">
+            tf="infra/aws/terraform/cot-pipeline/cot-detection-layer.tf" tag="cot-pipeline-v0.5.1">
     <purpose>Part-A re-freeze GUARD: makes a cot BD session staleness/freeze ALARM instead of going
       silent (cot served AUA froze SILENTLY 9d on 06-09). Firm-parameterized twin of the 49F A+C
       (bd-49f-interim.tf). PIECE 2 (rewire cot 02:00 to canonical gateway-self-fetch auto-login) is a
@@ -1278,8 +1278,12 @@
     <lambda name="bd-cot-freshness-probe" runtime="python3.12" mem="128" timeout="60"
             schedule="rate(1 hour)" role="bd-cot-freshness-probe-role">
       (i) GET /auth/token -> BD/COT/Auth AuthTokenOK (401-specific). (ii) per-table cot silver
-      trading-day-lag -> BD/COT/Silver TradingDayLag{transactions,allocations,realized,unrealized}
-      over opal-data-cot silver/{table}/ (weekday-only, threshold 2td, weekend-FP-free).
+      trading-day-lag -> BD/COT/Silver TradingDayLag{transactions,allocations,realized,unrealized,holdings}
+      over opal-data-cot silver/{table}/ (weekday-only, threshold 2td, weekend-FP-free). (iii) v0.5.1:
+      SERVED firm-AUA data_as_of (read from platinum/firm/timeseries_overview.json CONTENT, NOT mtime)
+      -> BD/COT/Served AUADataAsOfLag -- the actual user-visible freeze symptom (TO Part A.1). holdings +
+      served watched because served AUA derives from the DECOUPLED holdings leg (B_00->C_03): the 4 gated
+      tables can be fresh while served stays frozen (the 06-22 false-all-clear gap this closes).
     </lambda>
     <firm_sep>Both roles: GetSecretValue ONLY on blackdiamond/cot/session, ListBucket ONLY opal-data-cot
       silver/*, BD/COT/* metric namespace, + EXPLICIT Deny s3:* on opal-data-bd (DenyBdPlane, LIVE-confirmed
@@ -1289,7 +1293,8 @@
       <alarm>bd-cot-keepalive-absence (KeepaliveOK SampleCount&lt;1/2h, breaching)</alarm>
       <alarm>bd-cot-authtoken-dead (AuthTokenOK Min&lt;1)</alarm>
       <alarm>bd-cot-authtoken-absence (AuthTokenOK SampleCount&lt;1/3h, breaching)</alarm>
-      <alarm>bd-cot-silver-stale-{transactions,allocations,realized,unrealized} (TradingDayLag Max&gt;2, breaching)</alarm>
+      <alarm>bd-cot-silver-stale-{transactions,allocations,realized,unrealized,holdings} (TradingDayLag Max&gt;2, breaching)</alarm>
+      <alarm>bd-cot-served-aua-stale (BD/COT/Served AUADataAsOfLag Max&gt;2, breaching) -- v0.5.1, the headline served-AUA freeze symptom</alarm>
       <egress_note>All alarms publish to BOTH opal-bd-cot-cookie-alerts (email andrew@opalinvest.com,
         one-time confirm) AND opal-critical-surface-alerts (COO /drive SQS rider, AC#2). Egress
         delivery EXERCISED at deploy (AC#1).</egress_note>
