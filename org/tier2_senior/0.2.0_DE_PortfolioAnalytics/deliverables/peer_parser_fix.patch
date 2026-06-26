@@ -1,0 +1,31 @@
+diff --git a/infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-generate-peer-performance/lambda_function.py b/infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-generate-peer-performance/lambda_function.py
+index 4cd81eb13..7e3194389 100644
+--- a/infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-generate-peer-performance/lambda_function.py
++++ b/infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-generate-peer-performance/lambda_function.py
+@@ -145,8 +145,24 @@ def parse_peer_excel(excel_bytes: bytes) -> dict:
+ 
+     output = {}
+ 
+-    # Search for model sections across columns 0 and 20
+-    for start_col in [0, 20]:
++    # Discover the columns that begin a model-section block by locating EVERY
++    # "Return/Risk" header cell, instead of assuming fixed columns. The source
++    # workbook's second block has shifted right as the layout widened (col 20 in
++    # the 2025 layout -> col 26 in the wider 2026-06 layout). A hardcoded [0, 20]
++    # silently dropped every model in the shifted block (ST / LTC / LTA were
++    # missing from the served peer toggle); scanning for the headers is layout-
++    # agnostic and recovers all five models on both old and new files.
++    section_cols = sorted({
++        c
++        for r in range(len(df))
++        for c in range(df.shape[1])
++        if pd.notna(df.iloc[r, c]) and 'Return/Risk' in str(df.iloc[r, c])
++    })
++    if not section_cols:
++        logger.warning("No 'Return/Risk' section headers found in '%s' sheet", peer_sheet)
++
++    # Search for model sections across the discovered header columns
++    for start_col in section_cols:
+         current_row = 0
+         while current_row < len(df):
+             if start_col >= df.shape[1]:
