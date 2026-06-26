@@ -12,6 +12,15 @@
 
 So the heat layer is **Trino-federated**: Iceberg (the materialized graph) ⋈ git (queried live). Trino was chosen precisely because it is a *federator* — this is its sweet spot, not a single-source query over Iceberg.
 
+## FINAL MODEL (Andrew-direct 2026-06-26, post-sign-off — supersedes the 5-layer below)
+
+Andrew (sovereign) simplified the taxonomy after the CTO/CVO sign-off to the **3 layers that map to the 3 real SOURCES** and have real content — and dropped the noise:
+- **`aws`** = cloud infrastructure (the 28 resource types — UNCHANGED, so CVO's frozen COND-A baseline is intact). **`portal`** = the frontend app (the 15 component/code types; `dash` renamed → `portal`). **`ms`** = the SharePoint/OneDrive estate.
+- **DROPPED `external`** — it was just `EXTERNAL_ENDPOINT` (3 nodes: andrew@opalinvest.com + 2 phones, the email/SMS destinations SNS alarms notify — operational alert plumbing + contact-PII, not estate). The node + its `SUBSCRIBES` edges are removed; the `SNS_TOPIC` resources stay in `aws`.
+- **DROPPED `pipeline`** — `GOLD_SCRIPT`/`S3_DATA_KEY` were 0 nodes (empty placeholder) and conceptually muddy (S3=aws, scripts=code). Re-introduce only when the data pipeline is actually graphed, gated by the fail-loud completeness cert.
+
+**COND-A unaffected:** the `aws` layer is still exactly the 28 CVO-certified resource types (SNS_TOPIC included), so the per-class frozen baseline CVO signed (58a7d26d1) is preserved. Implemented in `derive_runner` (`NODE_TYPE_LAYER` 3-layer map + `DROP_NODE_TYPES={EXTERNAL_ENDPOINT}` drop-pass + the fail-loud cert). The 5-layer text below is the as-gated record; this note is the shipped model.
+
 ## 1. Decision A — canonical `node_type → layer` taxonomy
 
 Today every node without an explicit `layer` defaults to `'aws'` (`derive_runner.py:324`), so portal-code + clusters get mislabeled `aws` (the exact thing that made COND-A read alarming). The fix is an explicit, canonical partition:
