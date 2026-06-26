@@ -1,0 +1,61 @@
+diff --git a/infra/aws/globgrph/derive_runner.py b/infra/aws/globgrph/derive_runner.py
+index 1bf80bc36..5c1a38b48 100644
+--- a/infra/aws/globgrph/derive_runner.py
++++ b/infra/aws/globgrph/derive_runner.py
+@@ -35,7 +35,10 @@ import boto3
+ # comp_aws_cli.py is at /app/org/modules/graph/; WS = /app via parents[3]
+ _APP = Path(__file__).resolve().parent
+ sys.path.insert(0, str(_APP / "org" / "modules" / "graph"))
++sys.path.insert(0, str(_APP))  # NFRA_MSGRAPH S2: ms_cloud_extract.py is a sibling
+ import comp_aws_cli  # noqa: E402  (path inserted above)
++# NFRA_MSGRAPH S2 (additive): the MS doc-cloud fold + its fail-closed content/comms cert.
++from ms_cloud_extract import extract_ms_cloud, MsContentCommsLeak  # noqa: E402
+ 
+ NESSIE_URI      = os.environ.get("NESSIE_URI",      "http://nessie.opal-globgrph.local:19120")
+ WAREHOUSE_URI   = os.environ.get("WAREHOUSE_URI",   "s3://opal-313476888478-globgrph/warehouse")
+@@ -320,7 +323,10 @@ def commit_to_iceberg(graph: dict, batch_ts: int):
+             "name":        [str(n.get("name", ""))          for n in all_nodes],
+             "layer":       [str(n.get("layer", "aws"))      for n in all_nodes],
+             "drift_class": [str(n.get("drift_class", ""))   for n in all_nodes],
+-            "source":      ["full-derive"                    for _ in all_nodes],
++            # NFRA_MSGRAPH S2 (additive): read per-node source so MS nodes carry source='ms'
++            # (the comp-kuzu discriminator); AWS nodes set no source -> default 'full-derive'
++            # (UNCHANGED -- additive-safe).
++            "source":      [str(n.get("source", "full-derive")) for n in all_nodes],
+             "snapshot_ts": [batch_ts                         for _ in all_nodes],
+             "props":       _props_and_guard(all_nodes, _NODE_FIXED_KEYS, "graph_nodes"),
+         }, schema=nodes_pa_schema)
+@@ -349,7 +355,9 @@ def commit_to_iceberg(graph: dict, batch_ts: int):
+             "src_id":      [_nid(e, "source", "src")  for e in all_edges],
+             "dst_id":      [_nid(e, "target", "dst")  for e in all_edges],
+             "edge_type":   [str(e.get("edge_type", "")) for e in all_edges],
+-            "layer":       ["aws"                        for _ in all_edges],
++            # NFRA_MSGRAPH S2 (additive): read per-edge layer so MS edges carry layer='ms';
++            # AWS edges set no layer -> default 'aws' (UNCHANGED -- additive-safe).
++            "layer":       [str(e.get("layer", "aws")) for e in all_edges],
+             "snapshot_ts": [batch_ts                     for _ in all_edges],
+             "props":       _props_and_guard(all_edges, _EDGE_FIXED_KEYS, "graph_edges"),
+         }, schema=edges_pa_schema)
+@@ -1468,6 +1476,22 @@ def main() -> int:
+     except Exception as e:
+         print(f"WARN: SERVED_FROM_STITCH_FAIL err={e} -- derive continues without the cross-domain join")
+ 
++    # NFRA_MSGRAPH S2 (additive): fold the MS doc-cloud into the single graph. Two error
++    # regimes, DELIBERATELY different:
++    #  - a CONTENT/COMMS LEAK (MsContentCommsLeak from the SS4 cert) FAILS THE DERIVE CLOSED
++    #    (return 1, no commit, no marker) -- the catastrophic-floor: a leak must NEVER reach
++    #    Iceberg, and a silent WARN would be exactly the policy-not-mechanism failure the
++    #    cert exists to prevent.
++    #  - a gateway/enumeration error is best-effort (the AWS derive must never fail because
++    #    the MS gateway hiccuped). MS-disabled (default) returns the graph unchanged.
++    try:
++        extract_ms_cloud(graph)
++    except MsContentCommsLeak as e:
++        print(f"ERROR: MS_CONTENT_COMMS_LEAK -- failing derive CLOSED (no commit): {e}")
++        return 1
++    except Exception as e:
++        print(f"WARN: MS_EXTRACT_FAIL err={type(e).__name__}: {e} -- AWS derive continues without MS")
++
+     catalog = None
+     try:
+         catalog = commit_to_iceberg(graph, batch_ts)
