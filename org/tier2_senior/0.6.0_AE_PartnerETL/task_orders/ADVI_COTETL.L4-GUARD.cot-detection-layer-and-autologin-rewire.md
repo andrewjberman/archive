@@ -69,7 +69,8 @@ PART B — REWIRE cot's 02:00 trigger off `cot_bd_session_fetch.py` to the WORKI
   1. DETECTION proven LIVE: deliberately stale/missing cot session is detected and an alert lands on opal-critical-surface-alerts (verify the COO SQS rider or the alarm transitions to ALARM) — the "silent freeze can never recur" gate. EXERCISE it, do not just configure it.
   2. REWIRE proven: cot's 02:00 trigger no longer invokes cot_bd_session_fetch.py; it invokes the canonical firm-parameterized auto-login; a coordinated run writes a live cot session that cot_bronze_ingest.py mints successfully (cite S3/Secrets path + mtime + a 200/mint evidence line).
   3. Terraform-only deploy (safe-apply), iam.tf 0-gap, tag + push --follow-tags; EC2 code via S3->pull (never inline/on-VM). Coordinate the cot box (i-0643a5bee8a8feabf) start-on-demand with CVO/0.7.0.
-  4. CTO arch-gate sign-off on the detection-layer design + rewire cutover BEFORE deploy.
+  4. CTO arch-gate sign-off on the detection-layer design + rewire cutover BEFORE deploy. [DONE 2026-06-26 13:28Z: mailbox ruling SAME=YES -> cot config-add; gateway multi-bearer-ready.]
+  4a. RELIABILITY conditions (CTO ruling 06-26, content-identical cot+49F OTPs -> recency-only correlation): (i) fetch_otp correlates by since-trigger RECENCY [0.7.0 verifies in gw code]; (ii) cot 02:00 trigger STAGGERED off the 49F OTP window, never concurrent [0.6.0 owns; CVO adversarially tests the stagger gap]. These are reliability, NOT firm-sep (Stmt-9 Deny + cot-only reach unchanged). Both are hard acceptance items — the batched gateway apply is not COMPLETE until both hold.
   5. Session log Compiler Tools section reproduces every &lt;run&gt; above with observed output + pass/fail vs &lt;expect&gt;. Missing rows = REWORK.
 </acceptance_criteria>
 
