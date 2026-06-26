@@ -53,6 +53,15 @@ for (let attempt = 1; attempt <= MAX_LOGIN_ATTEMPTS; attempt++) {
 5. **BD device-trust interaction** — each fresh attempt re-checks "Remember My Device"; verify the retry
    doesn't burn device-trust state. (Test on the cot box; 49F deploy only after 0.7.0 signs off.)
 
+## Deploy-time watch (0.7.0 49F-blast, 162902Z -- non-blocking, flag-not-gate)
+The outer retry relies on BD re-sending a FRESH OTP each attempt (each attempt resets otpSent -> a new
+"Send code" click -> a new email). If BD RATE-LIMITS OTP resends ("too many codes requested"), a retry
+could fail in a NEW mode. BOUNDED (cap+backoff) + LOUD on exhaust -> worst-case = the SAME terminal rc=1
+we have today (NOT a regression). WATCH: on the FIRST cot night that actually triggers a retry, check the
+gateway audit + box log for a BD resend-throttle signal; if seen, tune backoff UP / cap DOWN (e.g. cap=2).
+0.7.0 49F-blast VERDICT = PASS (all 5 invariants source-grounded, no-half-mint confirmed at smPut lines);
+deploy-cleared from the 49F side. Remaining gate = CTO arch sign-off.
+
 ## CVO clause-6c contingency
 - If CVO accepts **next-cycle-recovery** (02:30 re-run re-attempts with a fresh code = recovers, not a
   hang) as satisfying 6c -> retry stays fast-follow; activation proceeds on the rest of the bar.
@@ -62,7 +71,7 @@ for (let attempt = 1; attempt <= MAX_LOGIN_ATTEMPTS; attempt++) {
 ## Build checklist (when triggered)
 - [x] Implement the outer loop + 5 guards in `bd_49f_auto_login.js`. (65908e4a3: extract attemptLogin() returning rc; main() outer retry.)
 - [x] `BD_MAX_LOGIN_ATTEMPTS` (default 3) + `BD_LOGIN_BACKOFF_MS` (default 5000) env, documented. (cot secret-ids.env set =3; 49F env is 0.7.0's box -- they set =1 at their deploy.)
-- [~] CTO arch sign-off on the DIFF (shared script). (RAVC'd 162427Z -- AWAITING.)
-- [~] 0.7.0 coordination (49F inherits the script; 49F sets cap=1 until they opt in). (Looped 162456Z for comp-blast + 49F regression -- AWAITING.)
+- [~] CTO arch sign-off on the DIFF (shared script). (RAVC'd 162427Z -- AWAITING; sole remaining gate.)
+- [x] 0.7.0 coordination (49F inherits the script; 49F sets cap=1 until they opt in). (49F-blast PASS 162902Z -- all 5 invariants source-grounded, no-half-mint confirmed; 49F-pin=1 is 0.7.0's deploy-time action; 1 non-blocking watch-item banked above.)
 - [x] js lint (node --check PASS). [ ] local dry-run + deploy cot box first (S3->box), e2e in-run recovery, THEN 49F on 0.7.0 GO. (box-pull gated.)
 - [ ] Deploy ledger; tag. (at box-pull.)
