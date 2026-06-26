@@ -1,6 +1,9 @@
 # ADVI_COTETL.L4-GUARD CTO-B — retry-on-login-failure (pre-staged design)
 
-**Owner:** 0.6.0_AE_PartnerETL · **Status:** PRE-STAGED (design only; not built).
+**Owner:** 0.6.0_AE_PartnerETL · **Status:** BUILT + committed (65908e4a3, pushed CLOUD) — NOT deployed.
+RAVC'd to CTO for the arch-gate on the diff (162427Z); 0.7.0 looped for comp-blast + 49F regression (162456Z).
+Box-pull gated on CTO arch sign-off + 0.7.0 49F-blast GO. node --check PASS. Plan: cot box first (e2e the
+in-run recovery), then 49F on 0.7.0 GO (49F sets BD_MAX_LOGIN_ATTEMPTS=1 until opt-in). Deploy ledger + tag at box-pull.
 **Timing:** FAST-FOLLOW per CTO ruling 145308Z (catastrophic-safety floor already met without it) —
 becomes a HARD pre-activation gate ONLY if CVO rules clause-6c requires IN-RUN self-heal (CTO asking CVO).
 **Build gate:** touches the SHARED firm-parameterized `bd_49f_auto_login.js` (affects 49F too) ->
@@ -57,9 +60,9 @@ for (let attempt = 1; attempt <= MAX_LOGIN_ATTEMPTS; attempt++) {
   0.7.0-coord + deploy BEFORE the 02:00 re-point.
 
 ## Build checklist (when triggered)
-- [ ] Implement the outer loop + 5 guards in `bd_49f_auto_login.js`.
-- [ ] `BD_MAX_LOGIN_ATTEMPTS` (default 3) + `BD_LOGIN_BACKOFF_MS` (default e.g. 5000) env, documented in both secret-ids.env templates.
-- [ ] CTO arch sign-off on the DIFF (shared script).
-- [ ] 0.7.0 coordination (49F inherits the script; 49F sets cap=1 until they opt in).
-- [ ] py/js lint + local dry-run; deploy cot box first (S3->box), e2e the 6c self-heal, THEN 49F on 0.7.0 GO.
-- [ ] Deploy ledger; tag.
+- [x] Implement the outer loop + 5 guards in `bd_49f_auto_login.js`. (65908e4a3: extract attemptLogin() returning rc; main() outer retry.)
+- [x] `BD_MAX_LOGIN_ATTEMPTS` (default 3) + `BD_LOGIN_BACKOFF_MS` (default 5000) env, documented. (cot secret-ids.env set =3; 49F env is 0.7.0's box -- they set =1 at their deploy.)
+- [~] CTO arch sign-off on the DIFF (shared script). (RAVC'd 162427Z -- AWAITING.)
+- [~] 0.7.0 coordination (49F inherits the script; 49F sets cap=1 until they opt in). (Looped 162456Z for comp-blast + 49F regression -- AWAITING.)
+- [x] js lint (node --check PASS). [ ] local dry-run + deploy cot box first (S3->box), e2e in-run recovery, THEN 49F on 0.7.0 GO. (box-pull gated.)
+- [ ] Deploy ledger; tag. (at box-pull.)
