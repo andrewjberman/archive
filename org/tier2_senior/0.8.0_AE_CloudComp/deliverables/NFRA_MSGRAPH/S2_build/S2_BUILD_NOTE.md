@@ -1,17 +1,17 @@
 # NFRA_MSGRAPH.S2 — extract_ms_cloud BUILD NOTE (CTO arch-gate request; pre-deploy)
 
 **TO:** NFRA_MSGRAPH.S2 | **Lane:** 0.8.0_AE_CloudComp | **Date:** 2026-06-26
-**Status:** BUILT + locally PROVEN (11/11 regression green). NOT deployed. **Routed to CTO for the implementable-change arch-gate** (TO acceptance #6) BEFORE any irreversible deploy.
+**Status:** BUILT + PROVEN (11/11 regression green) + **LANDED in-place** (commit `fb625d0f5`, MS-disabled). **Routed to CTO for the implementable-change arch-gate** (TO acceptance #6) BEFORE any irreversible deploy.
 
-## Canonical locations (the real change lives in the shared globgrph tree)
+## Canonical locations (the real change — now committed in the shared globgrph tree)
 
-| Artifact | Canonical path | This dir |
-|---|---|---|
-| MS extractor + SS4 cert | `infra/aws/globgrph/ms_cloud_extract.py` | `ms_cloud_extract.py` (reviewable copy) |
-| Adversarial regression (the acceptance artifact) | `infra/aws/globgrph/tests/test_ms_cloud_cert.py` | `test_ms_cloud_cert.py` (reviewable copy) |
-| derive_runner additive edits | `infra/aws/globgrph/derive_runner.py` | `derive_runner.additive.patch` (unified diff) |
+| Artifact | Canonical path (committed `fb625d0f5`) |
+|---|---|
+| MS extractor + SS4 cert | `infra/aws/globgrph/ms_cloud_extract.py` |
+| Adversarial regression (the acceptance artifact) | `infra/aws/globgrph/tests/test_ms_cloud_cert.py` |
+| derive_runner additive edits | `infra/aws/globgrph/derive_runner.py` |
 
-> The 3 changes are in the working tree at their canonical infra paths but **UNCOMMITTED** — `infra/aws/globgrph/` is owned-paths lane `CLOUD_OPS_OR_ETL` ("any AE agent") and `0.8.0_AE_CloudComp` is not yet enumerated in `permitted_agents` (the tilde-lane enumeration gap the lane itself documents; COO previously added `~A`/`~C` as correct permanent adds). **COO RAVC sent to add my serial** so I can land in-place. This dir is the durable reviewable copy meanwhile.
+> The 3 changes LANDED in-place at their canonical infra paths (COO enumerated `0.8.0_AE_CloudComp` in the `CLOUD_OPS_OR_ETL` lane, `f580ddfe9` — the tilde-lane gap fix; the code committed `fb625d0f5`, gated OFF/safe). The source copies that briefly lived in this dir were **removed to avoid two-source-drift** — read the canonical infra files. This note remains as the arch-gate record.
 
 ## What it does (per the CTO-PASS'd S1 schema, minimal-viable per invariant #4)
 
