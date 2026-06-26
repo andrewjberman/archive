@@ -865,6 +865,33 @@
       </consumed_by>
     </shared_source>
 
+    <shared_source name="model_portfolio_timeseries.json" scope="out_of_pod">
+      <lambda_function>yang-model-portfolio-benchmarks</lambda_function>
+      <s3_key>json/benchmarks/model_portfolio_timeseries.json</s3_key>
+      <served_url>/api/general/benchmarks/model_portfolio_timeseries.json</served_url>
+      <consumed_by>
+        portal ReturnVolatilityScatter panel sub-views: Rolling Sharpe, Up/Down Capture
+        (RollingCaptureChart), Max Drawdown. Read via getModelPortfolioTimeseries()
+        (portal-proxy.ts ~line 836). NOT the scatter view (that reads benchmarkData).
+      </consumed_by>
+      <row_shape>
+        One row per (date, model_code). Return fields are daily DECIMAL fractions (not %).
+        Fields: date, model_code, model_return, benchmark_return, index_benchmark_return,
+        etf_benchmark_return, rfr.
+      </row_shape>
+      <change_2026_06_26 to="MDLP_RVVALT index/etf toggle">
+        Added index_benchmark_return + etf_benchmark_return per row (both daily decimal).
+        Source: data.pkl return_daily already carries both the index ('... Term Benchmark')
+        and ETF-blend ('... Term ETF') daily series per model; build_timeseries now emits
+        both instead of index-only. benchmark_return RETAINED as a back-compat alias equal
+        to index_benchmark_return (prior behavior) so pre-toggle FE consumers do not break
+        during the cutover. Enables the portal Index/ETF benchmark toggle to re-bench the
+        capture / Sharpe / drawdown views (previously index-only). FE threading owned by
+        Pod2 DE; deploy owned by Pod2 DT. Lambda: yang-model-portfolio-benchmarks
+        build_timeseries().
+      </change_2026_06_26>
+    </shared_source>
+
     <shared_source name="useYangDataAsOf hook">
       <source>portal/src/hooks/useDataSource.ts</source>
       <consumed_by>Positioning, Attribution, FactorTilts, Valuation, Macroeconomics (5 of 6 pages)</consumed_by>
