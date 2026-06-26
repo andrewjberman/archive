@@ -83,6 +83,17 @@ The git-code-heat federation spans **two distinct git repos**, each its own heat
 
 **Submodule subtlety (load-bearing):** `portal/` is its own repo (CLAUDE.md — a bare `git log` at the ajb root does NOT see portal commits, and inside `portal/` only sees portal's). So the heat pass runs **per-repo**: `object_freshness --root .` for ajb_workspace (which must exclude the `portal/` submodule path to avoid a gap/double-count), and `object_freshness --root portal` for portal. **`repo` is a dimension** on the code-heat view (`{repo: ajb_workspace|portal, path, last_commit, heat_band, author_churn}`) so "coldest code across BOTH repos" is one federated query.
 
+## 3.5 — SUMMARY GRAIN: heat/cluster views aggregate at STRUCTURAL UNITS, not AST detail (Andrew-direct 2026-06-26)
+
+The portal layer is a fine-grained AST/semantic parse of 374 real `portal/src` files (sources verified clean: 0 node_modules/test/dist/generated). Of its 11,338 nodes, ~86% (9,773) are ultra-fine AST detail (`Field`, `JSXElement`, `JSXRender`, `TypeDecl`, `Prop`) — accurate, but the *guts* of components, not units you heat/cluster on. So: **KEEP every node in the graph (it's the semantic-clustering producer's raw material), but the heat/cluster SUMMARY views + Trino aggregate at the STRUCTURAL UNITS; the AST detail is drill-down, never a top-level summary unit.**
+
+Canonical `SUMMARY_NODE_TYPES` (the structural grain per layer — what comp-heat/the summary views cluster on):
+- **portal** (1,565 structural of 11,338): `PanelCluster` (panels), `Page`, `ReactComponent`, `Component`, `Module` (files), `Hook`, `Endpoint`, `DataFetch`, `ServedURL`, `ReactQueryKey`. **Drill-down (NOT summary):** `Field`, `JSXElement`, `JSXRender`, `TypeDecl`, `Prop`.
+- **aws** (all 28 resource types are meaningful units — no drill-down split).
+- **ms**: `MS_SITE`, `MS_LIBRARY`, `MS_FOLDER`, `MS_FILE`, `MS_USER` (all meaningful; summarize at folder/file).
+
+So a portal heat summary shows ~440 components / 374 files / 91 panels / 15 pages — not 4,969 fields. The fine AST stays queryable (a component's heat can drill into its fields), but it never inflates the summary. This is a VIEW/lens decision (the graph is unchanged) — it lands in the heat-layer build (the comp-heat/Trino summary queries filter to `SUMMARY_NODE_TYPES`), no re-derive.
+
 ## 4. The federated shape (Trino)
 
 ```
