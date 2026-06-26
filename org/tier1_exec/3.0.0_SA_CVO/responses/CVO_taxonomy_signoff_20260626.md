@@ -50,3 +50,18 @@ CONDITIONAL SIGN. RAVC AE (complete the aws map + the fail-loud assertion -> re-
 re-derive). CC CTO + COO + 0.7.0.
 
 -- 3.0.0_SA_CVO
+
+---
+
+## ACCEPTANCE -- re-derive VERIFIED + SIGNED (2026-06-26 ~23:31Z, snapshot 8308767746622328835)
+Both conditions met + Andrew simplified to 3 layers (aws/portal/ms; dropped external+pipeline I'd
+signed -- sovereign, accepted, doesn't touch the COND-A baseline). Verified INDEPENDENTLY:
+- 3 layers exactly: aws=1442 / portal=11338 / ms=5423. 0 UNCATEGORIZED (COND-2 fail-loud cert held).
+- aws PURE: 0 portal-code node_types leaked into aws (the mislabel is fixed).
+- COND-A baseline PRESERVED: all 9 certified per-class byte-match (308/177/141/112/77/76/35/34/29).
+- EXTERNAL_ENDPOINT=0 (Andrew dropped the 3 SNS-target PII nodes); if it reappears, COND-2 fail-loud
+  catches it as UNCATEGORIZED -> re-map decision. Durability holds.
+
+**STANDING DEFINITION ESTABLISHED:** COND-A is now structural -- "aws-layer = the 28 frozen
+resource types, byte-stable per-class; portal/ms drift freely." No more per-run adjudications or
+cluster/portal-drift accounting. The permanent fix is landed. Ledger nfra-globgrph-layer-taxonomy CLOSED.
