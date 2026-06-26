@@ -25,6 +25,31 @@ Today every node without an explicit `layer` defaults to `'aws'` (`derive_runner
 
 Implementation: a single centralized `NODE_TYPE_LAYER` map + a post-fold relabel pass (so `ingest_ts_semantic_producer` + the cluster producer stop defaulting to `aws`). Folds 0.7.0's `db4d40246` (clusters→portal). **Naming:** the portal/dashboard layer is canonically **`dash`** (Andrew's term); `extract_portal_stitch`'s existing `'portal'` value is aliased/migrated to `dash` so there is ONE name. Result: `aws` = pure resources (the frozen baseline COND-A actually wants), and every summary view groups by `(layer, node_type)` — the natural analytics shape.
 
+### 1.1 — the COMPLETE canonical `NODE_TYPE_LAYER` map (CVO Condition 1, d43b49e61)
+
+Diffed against the LIVE 49-node_type census (comp-kuzu snapshot 3929343047371898635). Enumerating EVERY observed type — an incomplete map would silently drop ~108 real resources (incl `API_ROUTE`=77, which is IN the COND-A aws-resource baseline CVO signed 58a7d26d1) out of `aws` when default-to-aws dies → break the next COND-A. Complete map:
+
+**`aws` (28 resource types — the FROZEN COND-A baseline, pure AWS resources):**
+`API_GW`, `API_ROUTE`, `CLOUDFRONT_DISTRIBUTION`, `CW_ALARM`, `DYNAMODB_TABLE`, `EC2_INSTANCE`, `ECS_CLUSTER`, `ECS_TASK_DEFINITION`, `EVENT_RULE`, `EVENT_SOURCE`, `IAM_POLICY`, `IAM_ROLE`, `IAM_USER`, `INSTANCE_PROFILE`, `KMS_KEY`, `LAMBDA`, `LOAD_BALANCER`, `LOG_GROUP`, `ROUTE53_RECORD`, `S3_BUCKET`, `S3_BUCKET_POLICY`, `SECRET`, `SECURITY_GROUP`, `SERVICE_PRINCIPAL`, `SNS_TOPIC`, `SQS_QUEUE`, `STATE_MACHINE`, `VPC_ENDPOINT`
+
+**`dash` (15 portal-code/component/cluster types — live-portal-tracking):**
+`Component`, `DataFetch`, `Endpoint`, `Field`, `Hook`, `JSXElement`, `JSXRender`, `Module`, `Page`, `PanelCluster`, `Prop`, `ReactComponent`, `ReactQueryKey`, `ServedURL`, `TypeDecl`
+
+**`ms` (the SharePoint/OneDrive estate — incl. schema types at 0 today):**
+`MS_SITE`, `MS_LIBRARY`, `MS_FOLDER`, `MS_FILE`, `MS_USER`, `MS_DRIVE_ONEDRIVE`, `MS_GROUP`
+
+**`pipeline` (gold/data — in map, 0 observed in this snapshot):** `GOLD_SCRIPT`, `S3_DATA_KEY`
+
+**`external` (non-AWS endpoints — CVO's "decide + MAP it"):** `EXTERNAL_ENDPOINT` (3). Proposed a distinct `external` class so the `aws` baseline stays pure AWS-resources (an external endpoint is not an AWS resource). Flag for sign-off: `external` vs fold-into-`aws`.
+
+**Serving-types boundary (the one nuanced call — flag for sign-off):** `API_ROUTE`→`aws` (it's the API-Gateway route resource; CVO counted 77 in the signed COND-A baseline), while `Endpoint`/`ServedURL`→`dash` (portal-code/served constructs). Confirm this aws-vs-dash split for the three serving types.
+
+### 1.2 — FAIL-LOUD map-completeness assertion (CVO Condition 2, BLOCKER)
+
+The relabel MUST NOT replace silent-default-to-`aws` with silent-default-to-`UNCATEGORIZED` (that would silently drop a FUTURE new node_type out of the frozen baseline). Required:
+1. An unmapped node_type → `layer='UNCATEGORIZED'` LOUD (a `WARN:` line per type), never a silent assignment.
+2. A **map-completeness assertion in the relabel/derive**: `assert set(observed_node_types) <= set(NODE_TYPE_LAYER)` — every OBSERVED type must be in the map, else **FAIL the derive (raise)**, exactly like the SS4 / UNCATEGORIZED cert. This is what makes the frozen-`aws` baseline DURABLE: a new AWS resource type next month FAILS LOUD (forcing a map update) instead of silently falling out of the COND-A count. Provenance discipline carried to the taxonomy.
+
 ## 2. Decision B — heat is a FEDERATION; the recency SOURCE is per-layer
 
 `node_health.heat_band` is **universal** (HOT/WARM/COLD, the reused `heat_map` banding). But the *recency signal* feeding it comes from the layer-appropriate source:
