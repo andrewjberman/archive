@@ -68,6 +68,34 @@ deploy-cleared from the 49F side. Remaining gate = CTO arch sign-off.
 - If CVO requires **in-run self-heal** -> this becomes a HARD pre-activation gate; build + CTO-sign-off +
   0.7.0-coord + deploy BEFORE the 02:00 re-point.
 
+## TOMORROW-AM DEPLOY RUNBOOK (ready to execute -- survives context boundary)
+**Timing ruling (UNANIMOUS, CTO 170231/170240Z + COO 170418Z-confirmed):** FULL POST-NIGHTLY.
+Nothing deployed to the cot box tonight; box + S3 cot prefix BOTH on the proven pre-CTO-B .js
+(md5 28dd27a0 / 35049B) -- NO revert needed (never swapped). WHY: bd_49f_auto_login.js is EXECUTED
+in the 02:00 PIECE-2 mint, so any CTO-B on the box tonight (even happy-path-inert) makes the first
+PIECE-2 production proof multi-variable. Tonight = clean single-variable PIECE-2 proof on proven code.
+
+**STEP 0 (pre-req, gates the deploy):** content-verify the 02:00 nightly FIRST -- keepalive 204 +
+.bd.identity session-fresh + freshness-probe (CONTENT, not rc=0). RAVC COO the PIECE-2 first-proof
+result. Only AFTER that clean proof -> proceed to the CTO-B deploy.
+
+**STEP 1 -- deploy (one in-session ledgered shot, NEVER#6):**
+1. Open deploy-completion ledger at deploy-start (`deploy_ledger.py`), legs: L1 git(65908e4a3 on origin), L2 S3-staged, L3 box-pulled+md5, L4 happy-path-smoke, L5 forced-fail-e2e.
+2. UPLOAD (local->S3, Rule-12): `aws s3 cp infra/aws/ec2/bd-49f-auto-login/bd_49f_auto_login.js s3://opal-313476888478-lambda-artifacts/ec2/bd-cot-auto-login/bd_49f_auto_login.js`
+3. BOX PULL (SSM RunShellScript on i-0643a5bee8a8feabf): `aws s3 cp s3://opal-313476888478-lambda-artifacts/ec2/bd-cot-auto-login/bd_49f_auto_login.js /opt/bd-cot-auto-login/bd_49f_auto_login.js && md5sum /opt/bd-cot-auto-login/bd_49f_auto_login.js` (trailing md5sum = post hash; pre baseline = 28dd27a0). firm-clean: cot-own prefix, never bd-49f-auto-login/.
+4. VERIFY on box: `node --check /opt/bd-cot-auto-login/bd_49f_auto_login.js` PASS + md5 = the committed CTO-B .js (NOT 28dd27a0).
+
+**STEP 2 -- happy-path smoke (refresh, non-disruptive):** one normal run (default MAX_ATTEMPTS=3) ->
+confirm attempt-1 success, rc=0, keepalive 204, NO retry triggered, device-trust intact (= byte-identical happy path).
+
+**STEP 3 -- forced-fail in-run-recovery e2e (restore-guarded, controlled):**
+- BACKUP first: read current `blackdiamond/cot/session` -> save (restore-on-failure guard, the 6c precedent). Restore if recovery fails -- NEVER leave the session dead.
+- FORCED-FAIL METHOD (deterministic, no prod test-hook): run with reduced `BD_OTP_TRIES=3` + `BD_MAX_LOGIN_ATTEMPTS=2` (override env for THIS run only; production keeps TRIES=30). Mechanism: attempt-1 polls only ~30s and GIVES UP before the OTP email arrives (~60s) -> attempt-1 fails (OTP_GATEWAY_NO_CODE) -> backoff -> attempt-2 (fresh loginStart/context, fresh Send) polls again and CATCHES the now-arrived code -> rc=0. Confirms: attempt-1 fail + attempt-2 fresh-OTP recovery + keepalive 204 + device-trust no-burn across attempts.
+- WATCH (0.7.0/CTO): the e2e fires 2 Sends -> watch the gateway audit + box log for a BD resend-throttle signal; if seen, tune backoff up / cap to 2.
+- Restore TRIES=30 default after (env override was for the test run only; the box secret-ids.env already has BD_MAX_LOGIN_ATTEMPTS=3 + BD_LOGIN_BACKOFF_MS=5000 for production).
+
+**STEP 4 -- close:** ledger close (all legs proven), tag (per-box), RAVC CTO the e2e result + RAVC COO. 49F is 0.7.0's separate timing (they set BD_MAX_LOGIN_ATTEMPTS=1).
+
 ## Build checklist (when triggered)
 - [x] Implement the outer loop + 5 guards in `bd_49f_auto_login.js`. (65908e4a3: extract attemptLogin() returning rc; main() outer retry.)
 - [x] `BD_MAX_LOGIN_ATTEMPTS` (default 3) + `BD_LOGIN_BACKOFF_MS` (default 5000) env, documented. (cot secret-ids.env set =3; 49F env is 0.7.0's box -- they set =1 at their deploy.)
