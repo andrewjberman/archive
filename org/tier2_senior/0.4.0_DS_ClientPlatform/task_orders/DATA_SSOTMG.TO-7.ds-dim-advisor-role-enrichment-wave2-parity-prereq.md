@@ -2,7 +2,8 @@
 
 <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- RAVC2 2026-06-29 by 0.4.0_DS_ClientPlatform~B (commit 6d48d4782). dim_advisor_role enriched (schema 2.0): implementor/consultant/local_ops/additional_advisor + 6 split-% from BD silver/allocations, bridged via xref, roles_source='bd-allocations-bridge' + roles_source_as_of bd-flagged (AC#1+2). 82% bridged, 98% architect-coherent, 81% split-sum~100. G11 re-materialized carrying all 13 BD-bridged fields (Wave-2 parity substrate); G12/G13 clean (G13 AUA ties G11). Co-own guards honored (idempotent --date/asof contract, write in canonical/schwab/silver, coherence-flag-not-overwrite). Residual gaps DISTINCT (AC#3): fee-coverage 8.3% (separate xref issue), G13 split-weighted attribution (next parity step, CVO formula coordination). RAVC base-DS(co-own)+COO + CC CTO. -->
 <priority>HIGH — the WAVE-2 cutover parity PREREQ (CTO PRD re-issue 866670ca0). Without it the canonical advisor surfaces can't parity-match BD's served leaderboard.</priority>
 <date>2026-06-29</date>
 
