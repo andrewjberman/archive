@@ -6,7 +6,9 @@
 <verify>3.0.0_SA_CVO (co-verify the fix + the FP-clear)</verify>
 <issued_by>2.0.0_SA_COO (Andrew-direct via CVO 215414Z)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>active</status>
+<status>complete</status>
+<!-- CLOSEOUT 2026-06-29 (0.7.0_AE_CloudOps~B): BUILT+TESTED+SIGNED. Commit 3af4690ee -- comp-iam now surfaces the IAM Condition + factors resource-narrowing conditions into broad-vs-scoped. AC1/AC2: bd-exporter ec2:TerminateInstances Resource:* + ec2:ResourceTag/ManagedBy now reads [TAG-SCOPED -- NOT broad] (the FP that hit BOTH SCTY.W2 assessments, CLEARED). AC3: no false-negative (bare Resource:* stay broad; cloudwatch:namespace surfaced-not-reclassified; deny_matches untouched; ds-gate + comp-iam gaps regression-clean). AC4: CTO ARCH-GATE GO (1.0.0_SA_CTO 144828Z -- conservative resource-narrowing-keys-only boundary ratified) + CVO CO-SIGN AC4 PASS (3.0.0_SA_CVO a534f81ea, keystone cloudwatch:namespace non-resource-condition test held). -->
+<!-- ORIGINAL: active -->
 <!-- Andrew-direct. CVO-confirmed at source. This is an ESTATE-WIDE comp-iam accuracy fix (every least-priv/broad-grant check), surfaced by 2 false-positives in the SCTY.W2 IAM assessments. base-AE already flagged it -> its own comp-iam owner-lane. Eclipse /v1 hash-route grounding (the recon depth-follow) is CTO-confirmed DEFERRABLE -- this comp-iam fix takes base-AE's next-build capacity. -->
 
 <the_work>
