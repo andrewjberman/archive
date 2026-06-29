@@ -15,7 +15,7 @@ the record and nothing is forgotten.
 
 | Seam | A -> B | MECH | DECL | SEM | grounded note |
 |---|---|---|---|---|---|
-| S1 | SI2/Quartz (EC2) -> opal-data-schwab/01_raw/ | FAIL | n/a | n/a | NOT BUILT (DERISK-1, AE/DT). Today = local OneDrive `sync_schwab_onedrive_to_s3.py --upload`, manual |
+| S1 | SI2/Quartz (EC2) -> opal-data-schwab/01_raw/ | FAIL | FAIL | n/a | UPDATE 2026-06-29: EC2 i-0f3d57a97f14727af BUILT (0.6.2, DERISK-1 closed) + landing raw -- BUT in `01_raw_quartz_validation/` (segregated), while the orchestrator reads `Prefix="01_raw/"`. **PREFIX MISMATCH** -> S1->S2 mechanically broken until reconciled. Held for Andrew cutover steer (promote validation->prod, or point orchestrator at the validation prefix for the parallel run) |
 | S2 | 01_raw/ -> canonical/schwab/silver/ (17f+5d) | PASS | PASS | PASS | build_canonical_daily.py, single-partition incremental (verified) |
 | S3 | silver -> canonical/schwab/gold/ G1-G10 | PASS | PASS | PASS | wired 1026138a7, dry-run 21/21, reconciles to served AUA |
 | S4 | SCHEDULER -> build_canonical_daily.py | FAIL | FAIL | n/a | **NO scheduled trigger** — runs only as the manual /49-schwab-conv Step 7.5 tail |
@@ -28,9 +28,12 @@ the record and nothing is forgotten.
 
 ## The hookup checklist — every un-hooked seam, in deploy order (the deliverable)
 
-1. **S1 — SI2/Quartz raw ETL (AE/DT, DERISK-1):** build the EC2 SI2 delivery (or Schwab SFTP/API) + a
-   **scheduled (daily-AM) sync** to `opal-data-schwab/01_raw/` **with `--sse AES256`** (bucket DENIES PutObject
-   without it — only seam that writes the raw bucket).
+1. **S1 — SI2/Quartz raw ETL (AE/DT, DERISK-1 CLOSED 2026-06-29):** EC2 `i-0f3d57a97f14727af` is BUILT + landing
+   raw, but in a SEGREGATED prefix `opal-data-schwab/01_raw_quartz_validation/` while the orchestrator reads
+   `Prefix="01_raw/"`. **RAW-PREFIX MISMATCH = the live S1->S2 break** — the orchestrator won't see Quartz raw until
+   reconciled. Cutover options (Andrew steer): (a) promote `01_raw_quartz_validation/` -> `01_raw/` once validated, or
+   (b) param the orchestrator's `SRC_BUCKET`/prefix at the validation prefix for the parallel-observation window. Keep
+   the daily-AM schedule + `--sse AES256` (bucket DENIES PutObject without it — only seam that writes the raw bucket).
 2. **S+ — code deploy path (DS): STAGED 2026-06-29** (COO GO 182930Z). 28 scripts -> `s3://opal-data-bd/code/canonical/schwab/{,silver/,gold/}` (verified MATCH/AES256; EC2 i-0f3d57a97f14727af can pull, Rule-12). Residual: io-estate registration (the "Unknown script in tree" close) routed to CVO -- the resolver is generated from CVO's authoritative estate-coverage-manifest; tooling-visibility, NOT a runtime blocker.
 3. **S4 — orchestration trigger (DS+AE):** EventBridge cron (or S3-event on the last `01_raw/` land) -> SSM
    RunCommand / EC2 cron -> `build_canonical_daily.py --upload`. Without this the canonical layer never advances unattended. **#1 finding.**
