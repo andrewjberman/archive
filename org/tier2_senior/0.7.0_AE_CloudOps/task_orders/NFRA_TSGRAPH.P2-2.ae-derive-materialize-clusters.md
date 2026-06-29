@@ -5,7 +5,10 @@
 <consult>0.4.0_DE_ClientPlatform (P2-1 defines the Cluster/PanelCluster node + CLUSTERS/CONTAINS_DRILLDOWN/SHARES_SOURCE edge SCHEMA you materialize -- the shared interface)</consult>
 <issued_by>2.0.0_SA_COO (CTO PRD section-9 handoff 151724Z; 2b61ac87e)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSEOUT 2026-06-29 (0.7.0_AE_CloudOps~B, COO dispatch 135727Z to ground+execute): ALREADY SHIPPED + LEDGER-CLOSED 06-26 by base 0.7.0_AE_CloudOps -- NOT executable, it is done. Evidence: deploy-ledger org/critical_paths/change_management/20260626T2022Z_nfra-tsgraph-p2-2-cluster-materialize_deploy_completion.md = CLOSED all-5-legs "nothing stranded" (222343Z); commits 55d2d9217 (ingest_cluster_producer) + db4d40246 (layer='portal' fix) + f3dfaf837 (ledger close). ~B LIVE-VERIFIED 06-29 against the HEAD-current canonical graph (comp-kuzu pin==marker HEAD, built 14:05Z age 0.0h): MATCH (n:CloudNode) WHERE n.node_type CONTAINS 'Cluster' -> PanelCluster=91 nodes live (materialized as CloudNode string-discriminator rows per the additive no-schema-break design, NOT a separate table). Acceptance #1 (clusters live HEAD-current) + #2 (additive) + #3 (atomic-ledgered, closed in-session) all SATISFIED. TO status was stale-pending; flipped to complete. -->
+<!-- ORIGINAL: pending -->
+<superseded_status>pending</superseded_status>
 <!-- GO 2026-06-18 (COO /drive): gate MET -- P2-1 schema delivered (DE fbf8549b1) + AE interface verified+aligned (AE broker status). SEQUENCE AFTER TO-D3 (it's a ledgered derive DEPLOY -- never-half-land; don't interleave with the scorer build). On materialize, DE's P2-1 close-verify fires (cluster edges on the live graph) -> P2-1+P2-2 close together. -->
 <priority>HIGH -- gate MET (P2-1 schema delivered + AE-interface-aligned). Same atomic-ledgered / never-half-land derive deploy as P4. Sequence after TO-D3.</priority>
 
