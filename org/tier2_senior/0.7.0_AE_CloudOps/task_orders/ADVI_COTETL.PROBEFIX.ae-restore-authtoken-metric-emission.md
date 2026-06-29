@@ -2,7 +2,7 @@
 
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>in-progress — SCOPE REFRAMED (hypothesis falsified; see grounding note below)</status>
+<status>complete — CLOSED as already-satisfied (cot self-recovered via human re-auth 06-29 01:57Z; hypothesis falsified from source; NO cot code defect). The real live dead-cookie is 49f -> handled via ADVI_BDAPIMIG.P1-DURABLE (0.6.2_AE) per Andrew's durable-port-only call. The probe SEMANTIC fix (200-no-token -> emit 0) is GO'd as follow-on. COO-accepted 2026-06-29.</status>
 <date>2026-06-29</date>
 <priority>P2 — critical-surface blind monitor (do FIRST, ahead of the AUAFIX queue; small fix)</priority>
 
