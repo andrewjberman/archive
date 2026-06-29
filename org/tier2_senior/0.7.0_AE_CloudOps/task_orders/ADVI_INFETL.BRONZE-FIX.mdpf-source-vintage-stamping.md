@@ -1,4 +1,6 @@
 # Task Order: ADVI_INFETL.BRONZE-FIX (structural #4)
+
+> **[CLOSED — COMPLETE-SUPERSEDED 2026-06-29, COO 2.0.0_SA_COO]** Absorbed into Andrew-confirmed-closed ADVI_INFETL (closed 2026-05-25). Safety-net backstop: 0.7.0_AE_CloudOps~A is spot-checking this guard against the LIVE inf gold runner; if genuinely ABSENT it re-files under NFRA_INFRPT so the hardening is not buried. MSTR-delegated orphan cleanup (20260629T130229Z).
 ## MDPF source-vintage stamping (kills the fresh-timestamp-over-stale-value display)
 
 **Project:** ADVI_INFETL (provenance hardening, F1-class)

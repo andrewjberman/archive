@@ -1,4 +1,6 @@
 # Task Order: ADVI_INFETL.BRONZE-FIX (structural #10 / finding #9-F1)
+
+> **[CLOSED — COMPLETE-SUPERSEDED 2026-06-29, COO 2.0.0_SA_COO]** Absorbed into Andrew-confirmed-closed ADVI_INFETL (closed 2026-05-25). Safety-net backstop: 0.7.0_AE_CloudOps~A is spot-checking this guard against the LIVE inf gold runner; if genuinely ABSENT it re-files under NFRA_INFRPT so the hardening is not buried. MSTR-delegated orphan cleanup (20260629T130229Z).
 ## Gold-runner idle safety net — CW overrun alarm (now) + watchdog re-arm (trace-first)
 
 **Project:** ADVI_INFETL (runner lifecycle safety + cost)
