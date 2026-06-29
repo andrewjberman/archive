@@ -5,7 +5,7 @@
 <consult>0.4.0_DS_ClientPlatform (silver-side co-author if the merge invocation/contract needs a DS change; DS + AE both recommended this option-a)</consult>
 <issued_by>2.0.0_SA_COO (COTETL go-forward; CTO CADENCE RULING 145520Z)</issued_by>
 <issued_date>2026-06-22</issued_date>
-<status>pending</status>
+<status>complete</status>
 <!-- GO 2026-06-22: CTO already GO'd AE the SSM edit (145520Z); this TO formalizes + carries the verify-gate + timing. DS+AE both recommended option-a; CTO ruled DAILY. -->
 
 <objective>
@@ -47,3 +47,17 @@ Add `cot_silver_merge.py --table holdings` to the opal-cot-silver-run SSM runCom
 2. Session-log Compiler Tools section reproduces every <run> + result + pass/fail.
 3. BINDING VERIFY-GATE (CTO): on the NEXT TWO scheduled nightlies (tomorrow + day-after), served cot AUA data_as_of CONTINUES ADVANCING past 06-18 (tracks the latest complete biz day) -- NOT re-capped at a new freeze date. Validate-on-served (no ad-hoc gold run). NOT accepted until the 2nd nightly confirms continued advance. Pairs with L4 vintage-alert as the standing backstop.
 </acceptance_criteria>
+
+<closeout author="0.7.0_AE_CloudOps~B" date="2026-06-29" reviewer="2.0.0_SA_COO (steer 133313Z, grounding accepted in full)">
+BUILD COMPLETE + DEPLOYED (AC#1 met) -- grounded against live state, not self-report:
+- SOURCE: commit ded252bae "infra(ADVI_COTETL.DATEMODE-C): add non-gating daily holdings refresh to opal-cot-silver-run SSM chain (decoupled; sentinel unaffected) + deploy ledger".
+- LIVE: `aws ssm get-document --name opal-cot-silver-run` CONTAINS the holdings step (drift-check: present). Design matches CTO 145458Z -- non-gating brace-group `{ ... --table holdings || echo WARN; } &&` placed right before `--finalize`, so a holdings failure NEVER breaks the && chain to the sentinel.
+- SENTINEL INTACT: cot_silver_merge.py:624 `_SILVER_STAGE_TABLES = ['transactions','allocations','realized','unrealized']` -- holdings correctly EXCLUDED (CHAINFIX intent preserved; emit_silver_sentinel does not gate on holdings).
+
+AC#3 (BINDING VERIFY-GATE: nightly holdings advance) -- BLOCKED UPSTREAM, NOT on C:
+- holdings silver is PARTITION-STALE at as_of 06-26 while the 4 gated tables advanced to 06-28 (comp-freshness chain cot); served platinum AUA content as_of 06-25 (the 2td-lag the probe reports).
+- ROOT (grounded at live S3, Rule-22 mechanism): the holdings EXPORT INPUT is frozen. `forwardfill_v2/holdings` stops at HOLDINGS_DAILY_2026-06-25.xlsx (uploaded 06-26 10:59 as a manual 3-file backfill batch); no 06-26/27/28/29 files. Contrast: `forwardfill_v2/unrealized` advances daily to UNREALIZED_DAILY_2026-06-29.xlsx. So the deployed daily holdings merge runs but has no fresh input -> holdings stays frozen.
+- This is a DATEMODE-B-class gap (holdings DataMining export not pulling daily), the auth/DataMining surface. Base (0.7.0_AE_CloudOps) confirmed B is NOT landed (DATEMODE-B still open in queue; live probe holdings trading_day_lag=2 / served_aua_lag=2). COO routing B to the holdings-unfreeze owner separately.
+
+VERDICT: C is DONE (build deployed + verified). Its verify-gate cannot pass until DATEMODE-B unfreezes the export; that is a B dependency, not C work. C requires NO further AE action. The L4 serve-time vintage-alert remains the standing backstop.
+</closeout>
