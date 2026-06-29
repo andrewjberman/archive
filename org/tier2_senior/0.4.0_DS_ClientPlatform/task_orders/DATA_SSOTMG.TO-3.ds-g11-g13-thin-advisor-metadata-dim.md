@@ -2,7 +2,8 @@
 
 <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- RAVC2 2026-06-29 by 0.4.0_DS_ClientPlatform~B (commit d81ea44a0). G11 advisor_attribution (5894 accts/$1.591B, ties holdings), G12 advisor_fee_efficiency (55 architects, eff_bps 64-125; fee-coverage 8.3% xref-bridge gap flagged), G13 partner_analytics leaderboard (55 partners, G13 AUA ties G11 AUA clean roll). All materialized canonical/schwab/gold/{table}/date=2026-06-24/ AES256, parallel/NOT-served. AC#2 bd-source flags on every BD field. NOT daily-wired (D4 open). GAP flagged: implementor/consultant/local_ops/split-% not in dim_advisor_role (follow-on silver enrichment, base-DS lane). RAVC COO + CC CTO. -->
 <priority>HIGH — the now-UNBLOCKED gold piece (Andrew decided the source). PRD §7 TO-3.</priority>
 <date>2026-06-29</date>
 
