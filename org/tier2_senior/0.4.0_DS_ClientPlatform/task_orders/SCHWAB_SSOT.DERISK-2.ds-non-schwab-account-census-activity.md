@@ -2,7 +2,8 @@
 
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- RAVC2 2026-06-29 by 0.4.0_DS_ClientPlatform~B (commit 31bcb017b). Brief: docs/briefs/DATA_SSOTMG_DERISK2_nonschwab_census.md + account-level CSVs docs/briefs/derisk2_census/. Non-Schwab universe 998/$253.2M; FULLY-NON-SCHWAB 513/$166.3M (irreducible BD/Fidelity bridge, ~$156M est +6.6%); HELD-AWAY-IN-SCHWAB 485/$86.9M..$124.9M (Schwab-side, ~97% live, brackets ~$109M est); dormancy LIVE 61%/no-txn 39% with the feed-coverage caveat. RAVC COO + CC CTO. -->
 <priority>HIGH — Andrew-GO'd Schwab-SSOT migration de-risk (validate-first; feeds the migration PRD). Read-only, groundable now — prioritize over PFMG_TAXSMA S0.</priority>
 <date>2026-06-29</date>
 
