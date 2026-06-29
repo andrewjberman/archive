@@ -9,10 +9,11 @@
 <status>complete</status>
 <!-- CLOSEOUT 2026-06-29 (0.7.0_AE_CloudOps~B, COO reconciliation-pass GO 184506Z; corrects my own earlier false-positive call -- I'd read the TO objective only, not the LIVE state; live-grounding shows R8 is BUILT + LIVE). Grounded:
 - AC1 (audit reaches the lake, queryable): audit-lake.tf is APPLIED -- s3 opal-mcp-audit + opal-mcp-athena-results buckets + Glue DB opal_mcp + Glue table mcp_audit (JSON-over-S3, partition PROJECTION on dt, location s3://opal-mcp-audit/audit/). The bucket is RECEIVING date-partitioned per-call audit LIVE (audit/dt=2026-06-29/*.jsonl landing today). audit.py ships each record to AUDIT_S3_BUCKET via _s3_client.put_object (in-VPC S3 gateway endpoint, no Firehose).
-- AC2 (redaction preserved): the Athena rows carry ts/user/tool/outcome only -- NO message bodies (privacy bar held).
-- AC3 (CVO lake-reach: a sample audit row queryable via Athena): VERIFIED ~B 2026-06-29 -- Athena query (QID b0addd0b) "SELECT ts,user,tool,outcome FROM opal_mcp.mcp_audit WHERE dt='2026-06-29' LIMIT 5" SUCCEEDED, returned 5 real redacted rows (andrew@opalinvest.com / ms_site_children / ok). CVO co-signs the AC3 lake-reach (verify-owner).
+- AC3 (CVO lake-reach: a sample audit row queryable via Athena): SATISFIED -- ~B Athena query (QID b0addd0b) + CVO independent re-run (QID d5e3f081) SUCCEEDED with real rows. Lake live, partition-projection works.
+- AC2 (no message bodies) -- CORRECTED per CVO co-verify (my initial "ts/user/tool/outcome only" was INACCURATE: I queried 4 of the table's 6 cols). The table logs ts/user/tool/ARGS/outcome/DETAIL; args is UNREDACTED, detail empty. CVO verified across ALL current tools/cols: ms_site_children args={site_id,folder_path}=access metadata; otp_fetch args={sender,found:bool} (NO OTP value); whoami none. => no bodies/secrets leak in the CURRENT scope -- the no-bodies bar HOLDS because the 3 audited tools carry request-METADATA not content in args, NOT because args is redacted.
 - AC4 (infra applied): live (buckets + Glue table present + queryable).
-Flipped active->complete; CVO co-signs AC3. -->
+P2 STRUCTURAL CAVEAT (CVO, forward-looking; for the AC2 owner): args UNREDACTED => the no-bodies property is SCOPE-DEPENDENT. If the audit scope expands to content-carrying tools (read_email/send_email/read_file, or any args-carrying-text tool) those args land UNREDACTED -> the privacy bar breaks. Needs an explicit AC2 args-handling determination (truncate/redact args OR an audited-tool allowlist) BEFORE scope grows. Not blocking AC3 today.
+Flipped active->complete; CVO CO-SIGNED AC3 with the corrected (args-unredacted-but-currently-metadata-safe) statement. -->
 <!-- ORIGINAL: active -->
 <!-- Queued after .07 AC2 in base-AE's lane. AC4-lake-reach gates the OPLMCP macro-close. The on-box audit is the v1 FLOOR (already live); this is the real .05 lake-routing build. -->
 
