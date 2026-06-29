@@ -5,7 +5,13 @@
 <consult>1.0.0_SA_CTO (comp-aws owner -- spec'd this; architectural beat if the walker structure needs it); 3.0.0_SA_CVO (re-certifies the StepFunctions node class after)</consult>
 <issued_by>2.0.0_SA_COO (orig 2026-06-10; CTO-spec'd refinement 2026-06-18 per the comp-aws-owner call on the AE TO-recon SFN coverage-hole finding)</issued_by>
 <issued_date>2026-06-10 (CTO-spec refined 2026-06-18)</issued_date>
-<status>active -- queued (security-scanner correctness gap; behind AE live work, NOT backlog-buried)</status>
+<status>complete</status>
+<!-- CLOSEOUT 2026-06-29 (0.7.0_AE_CloudOps~B, COO self-pull GO 183228Z; readiness-read RAVC 183527Z). The CORE landed + was CVO-certified 06-08, BEFORE the 06-18 TO-refinement (the refinement post-dated the fix; the 06-18 recon mis-flagged it open -- stale-registry class). Grounded:
+- AC1/AC2 (recursive walk + both Map syntaxes + both resource forms incl FunctionName-from-Parameters + arn co-key): DONE in HEAD -- comp_aws_cli.py:624-664 (_walk_asl_states recurses Branches/ItemProcessor/Iterator at any depth; _sfn_task_invokes resolves direct-arn + arn:aws:states::: SDK-integration Parameters.FunctionName/FunctionArn with the .$-runtime-ref guard). Fix e13e93391. AC1 RE-VERIFIED LIVE 2026-06-29: comp-kuzu STATE_MACHINE-[:INVOKES]->count = 27 on the HEAD-current canonical graph (full nested set, not the top-level-only subset).
+- AC5 (CVO re-cert): cee3f6993 -- StepFunctions CERTIFIED 1.00, INVOKES 26/26 vs live truth, recall 0.346->1.0 (0 missed/spurious/dangling). AC4 (comp-iam reconcile vs complete set) rode the cert.
+- AC3 (regression fixture): WAS the only gap -- AUTHORED 2026-06-29 (org/modules/graph/tests/test_sfn_asl_walker.py, 3 tests pass: nested Parallel + both Map syntaxes + both resource forms extracted, runtime-ref skipped, _walk_asl_states recursion-depth contract). tests/ is ANY_EXEC -> left in the working tree, HANDED TO CVO to commit in-lane (CVO is the re-cert owner). Substantively complete; CVO commits the guard + re-confirms.
+-->
+<!-- ORIGINAL: active -- queued (security-scanner correctness gap; behind AE live work, NOT backlog-buried) -->
 <priority>SECURITY-CORRECTNESS GAP (CTO comp-aws-owner call 2026-06-18). comp-aws blast-radius is the DESTRUCTIVE-OP pre-gate (trade-recon teardown precedent: "0 cross-edges" before a teardown). The SFN-nested-Parallel blind spot means a "0 cross-edges" verdict could be FALSE for any of the 17 SFN-orchestrated Lambdas -- the exact by-EDGE-not-by-NAME failure the pre-gate exists to prevent. BOUNDED (1 STATE_MACHINE, 17 known edges, no imminent destructive op) -> queued behind AE's live work (P4 done; NFRA_GRAPHS D7/D8, INFRPT P2/P3 are live), but it gets a TO not a backlog row. STANDING MITIGATION until this lands: the BINDING INTERIM CAVEAT (manual SFN-Parallel cross-check before any destructive-op blast-radius; COO-enforced as the pre-gate driver; CTO-banked to the destructive-op-pre-gate memory).</priority>
 
 <context>
