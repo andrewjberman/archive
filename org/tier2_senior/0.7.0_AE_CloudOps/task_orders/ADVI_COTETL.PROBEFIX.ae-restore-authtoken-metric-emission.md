@@ -2,7 +2,7 @@
 
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>in-progress — SCOPE REFRAMED (hypothesis falsified; see grounding note below)</status>
 <date>2026-06-29</date>
 <priority>P2 — critical-surface blind monitor (do FIRST, ahead of the AUAFIX queue; small fix)</priority>
 
@@ -40,6 +40,17 @@ bd-cot monitoring Lambda — cot-firm-separated infra, AE-owned. No DS/portal su
 3. Redeploy was Terraform (0-diff plan→apply), source map updated if source changed.
 4. RAVC to 2.0.0_SA_COO with the confirmed mechanism + the alarm OK evidence.
 </acceptance_criteria>
+
+## GROUNDING NOTE — 0.7.0_AE_CloudOps, 2026-06-29T13:02Z (Rule 22, before any fix)
+
+Mechanism grounded from source + live state. **TO hypothesis FALSIFIED; objective already satisfied.** RAVC to COO 20260629T130233Z.
+
+- **Hypothesis falsified:** probe Lambda has only 2 commits ever (33cf3ec71, 952417807 v0.5.1); NO probe edit at 06-26T14:14. `put_metric_data(AuthTokenOK)` present + correct at `bd-cot-freshness-probe/lambda_function.py:124-139` (emit) and `:312-325` (call). AuthTokenOK emitted hourly for ~2 days AFTER the alleged mod for both firms — a dropped emit cannot do that.
+- **cot already healthy (no fix):** AuthTokenOK Firm=cot emitting hourly 06-29 02:00Z->12:00Z; alarm `bd-cot-authtoken-absence` = OK live. Recovery cause: cot session secret re-authed by a human at 06-29 01:57Z (`blackdiamond/cot/session` LastChanged). The 06-28 09:00Z->06-29 02:00Z gap was the soft-dead-cookie window. A cot "metric restore" deploy would be a NO-OP. **Holding.**
+- **The live ALARM is 49f (different firm), a REAL dead cookie:** `bd-49f-authtoken-absence` = ALARM; `bd-49f-keepalive` logs HTTP 401 cookie DEAD every cycle since >=04:33Z, publishing opal-bd-49f-cookie-alerts; `blackdiamond/49f/session` LastChanged 06-26 21:13Z. Needs the SAME human BD re-auth that fixed cot. 49f silver still 1td-fresh (not yet frozen).
+- **Probe SEMANTIC bug (both twins):** a soft-dead cookie returns `/auth/token` HTTP 200 WITHOUT access_token; code `:313-321` mis-buckets `200 && !has_token` as transient (auth_ok=None -> no datapoint) instead of dead (emit 0). So `authtoken-dead` stays falsely OK and the dead state masquerades as "absence/blind." Proposed fix (firm-parameterized -> covers cot+49f): emit AuthTokenOK=0 on 200-without-token so the DEAD alarm fires the real re-auth signal. **RAVC1 GO requested before TF deploy** (cross-firm + alarm-behavior change).
+
+Awaiting COO: (1) close cot PROBEFIX as already-satisfied; (2) routing of the 49f human re-auth; (3) GO on the probe semantic fix.
 
 ## Sequencing
 
