@@ -4,7 +4,15 @@
 <assigned_to>3.0.0_SA_CVO</assigned_to>
 <issued_by>2.0.0_SA_COO (PRD decomposition, 2026-06-18; hardened per CTO DELTA 49b236dea)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-26 (3.0.0_SA_CVO). Both legs delivered + accepted; status reconciled
+     2026-06-29 startup (was stale-pending). LEG A (AC4): coverage-audit backlog seed 0596969bd
+     + CTO-RAVC fold a0aec78b7 -- intent->tool/no-tool prioritized build-list (aws_freshness P1
+     candidate). LEG B (AC5): post-enforce telemetry 8b8795ac2 (COO-ACCEPTED) -- Gate-1 first full
+     day, override rate collapsed 2.80%->0.19% (~15x), all 6 DENY classes tool-routed/0 escapes,
+     LEG-A aws_freshness candidate de-escalated P1->P2 (0 overrides under enforce, comp-freshness F3
+     258d968bb closed the gap), gap-B reason-capture CONFIRMED FIXED; recommended keep-enforcing +
+     next-tier ramp. NFRA_COMPRAIL PROJECT remains active under TO-6 (CVO LEG-D); only TO-5 closes. -->
 <priority>MEDIUM-HIGH — two legs, different gates. LEG A (coverage-audit backlog seed) can START EARLY (seeded from the existing HUD log + comp-tools.yaml `replaces` fields) — it informs TO-2's coverage-proof + TO-4's per-tier coverage gate, so an early seed is high-leverage. LEG B (post-enforce telemetry re-measure + tune) is GATED on TO-4 (needs a post-enforce window + the override-marker feed). Extends the NFRA_TOOLHUD hud3_classify CVO follow-on already on BACKLOG.</priority>
 
 <references>
