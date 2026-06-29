@@ -19,7 +19,7 @@ the record and nothing is forgotten.
 | S2 | 01_raw/ -> canonical/schwab/silver/ (17f+5d) | PASS | PASS | PASS | build_canonical_daily.py, single-partition incremental (verified) |
 | S3 | silver -> canonical/schwab/gold/ G1-G10 | PASS | PASS | PASS | wired 1026138a7, dry-run 21/21, reconciles to served AUA |
 | S4 | SCHEDULER -> build_canonical_daily.py | FAIL | FAIL | n/a | **NO scheduled trigger** — runs only as the manual /49-schwab-conv Step 7.5 tail |
-| S5 | silver -> gold G11-G13 | FAIL | FAIL | PASS | G11-G13 materialized but NOT in the orchestrator GOLD_CORE (D4-cadence-open) |
+| S5 | silver -> gold G11-G14 | PASS | PASS | PASS | CLOSED 47cc26a7f -- G11-G14 wired into GOLD_EXT (advisor_attribution/fee_efficiency/partner_analytics/split_reconciliation); dry-run 25/25 (was: materialized but un-wired) |
 | S6 | cross-bucket IAM + SSE (EC2 instance role) | UNVER | PASS | — | runs on local creds today; EC2 role not provisioned |
 | S7 | canonical gold -> parity harness (observe) | UNVER | PASS | — | CVO comp-parity map grounded (b65335016) but not yet scheduled for the parallel window |
 | S8 | ordering: raw-land -> silver -> gold (per run) | PARTIAL | PASS | PASS | silver->gold sequential OK; raw-land -> trigger ordering undefined on EC2 |
@@ -35,8 +35,9 @@ the record and nothing is forgotten.
    pulls (they are NOT in any deploy graph today — `comp-pipescript io` = "Unknown script in tree"). Most-likely-forgotten seam: the scripts "exist" so it looks done, but there's no mechanical path onto the box.
 3. **S4 — orchestration trigger (DS+AE):** EventBridge cron (or S3-event on the last `01_raw/` land) -> SSM
    RunCommand / EC2 cron -> `build_canonical_daily.py --upload`. Without this the canonical layer never advances unattended. **#1 finding.**
-4. **S5 — wire G11-G13 into the orchestrator (DS, my lane):** add advisor_attribution / advisor_fee_efficiency /
-   partner_analytics to `GOLD_CORE` (after the dim_advisor_role/_fee dims; they read the TO-7-enriched dim). Same class of gap I closed for G3-G10.
+4. **S5 — wire G11-G14 into the orchestrator (DS, my lane): DONE 47cc26a7f** (COO GO 175112Z). Added
+   GOLD_EXT (G11 advisor_attribution -> G12 advisor_fee_efficiency -> G13 partner_analytics v3.0 -> G14
+   advisor_split_reconciliation[_firm]) after GOLD_CORE; dry-run 25/25. The full G1-G14 set now rolls daily.
 5. **S6 — EC2 instance-role IAM (AE/DT):** `s3:GetObject` on `opal-data-schwab/01_raw/*` + `s3:{Get,Put,List}` on
    `opal-data-bd/canonical/schwab/*` (SSE-AES256). comp-iam-check before first run.
 6. **S8 — ordering (DS+AE):** fire the orchestrator AFTER the day's raw fully lands (S3 sentinel or sequenced
