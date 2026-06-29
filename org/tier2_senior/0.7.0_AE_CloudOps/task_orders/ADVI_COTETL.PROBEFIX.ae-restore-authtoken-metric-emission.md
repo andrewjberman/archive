@@ -2,7 +2,7 @@
 
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>complete — CLOSED as already-satisfied (cot self-recovered via human re-auth 06-29 01:57Z; hypothesis falsified from source; NO cot code defect). The real live dead-cookie is 49f -> handled via ADVI_BDAPIMIG.P1-DURABLE (0.6.2_AE) per Andrew's durable-port-only call. The probe SEMANTIC fix (200-no-token -> emit 0) is GO'd as follow-on. COO-accepted 2026-06-29.</status>
+<status>complete — CLOSED as already-satisfied (cot self-recovered via human re-auth 06-29 01:57Z; hypothesis falsified from source; NO cot code defect). The real live dead-cookie is 49f -> handled via ADVI_BDAPIMIG.P1-DURABLE (0.6.2_AE) per Andrew's durable-port-only call. The probe SEMANTIC fix (200-no-token -> emit 0) SHIPPED + live-verified by 0.7.0_AE (cot-pipeline-v0.6.1 / bd-v2.39.1; 49f dead-alarm fired live; CTO no-quiet condition satisfied; RAVC-DONE 133507Z). COO-accepted 2026-06-29.</status>
 <date>2026-06-29</date>
 <priority>P2 — critical-surface blind monitor (do FIRST, ahead of the AUAFIX queue; small fix)</priority>
 
@@ -51,6 +51,18 @@ Mechanism grounded from source + live state. **TO hypothesis FALSIFIED; objectiv
 - **Probe SEMANTIC bug (both twins):** a soft-dead cookie returns `/auth/token` HTTP 200 WITHOUT access_token; code `:313-321` mis-buckets `200 && !has_token` as transient (auth_ok=None -> no datapoint) instead of dead (emit 0). So `authtoken-dead` stays falsely OK and the dead state masquerades as "absence/blind." Proposed fix (firm-parameterized -> covers cot+49f): emit AuthTokenOK=0 on 200-without-token so the DEAD alarm fires the real re-auth signal. **RAVC1 GO requested before TF deploy** (cross-firm + alarm-behavior change).
 
 Awaiting COO: (1) close cot PROBEFIX as already-satisfied; (2) routing of the 49f human re-auth; (3) GO on the probe semantic fix.
+
+## CLOSEOUT — 0.7.0_AE_CloudOps, 2026-06-29T13:35Z
+
+All three dispositioned by COO (RAVC-CLOSE 131823Z): (1) cot CLOSED already-satisfied; (2) 49f re-auth -> durable port (0.6.2_AE ADVI_BDAPIMIG.P1-DURABLE), NOT manual re-auth (Andrew durable-only call); (3) semantic fix GO'd + CTO no-quiet condition.
+
+**Probe SEMANTIC fix SHIPPED + LIVE-VERIFIED:**
+- Both twins: new branch `elif status==200 and not has_token -> auth_ok=False` emits AuthTokenOK=0 (soft-DEAD). Commit 310c1ba2b; source-map cdaf4ea11.
+- TF-only, S3-sourced (build-and-upload before apply per protocol 4a), safe-apply -target, 0-diff, live CodeSha256 verified. Tags cot-pipeline-v0.6.1 + bd-v2.39.1. PutMetricData already granted.
+- Invoke-verified: cot auth_ok=true (emits 1), 49f auth_ok=false (emits 0); 49f log "cookie soft-DEAD". Watched bd-49f-authtoken-dead flip OK->ALARM live.
+- Post-fix topology (CTO no-quiet SATISFIED): 49f dead=ALARM + absence=OK (signal RELOCATED to correct semantic, not quiet); cot both OK. RAVC-DONE 133507Z.
+
+Next: DATEMODE-B (cot holdings export unfreeze) per COO FLAG 133325Z.
 
 ## Sequencing
 
