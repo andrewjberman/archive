@@ -2,7 +2,13 @@
 
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-29: G3-G10 all built+committed+materialized+independently-verified at
+canonical/schwab/gold/{table}/date=2026-06-24/ (AES256, parallel/not-served). Commits
+a3d295652/17483c572/39ea0e927/8080d6cbc/0e80042f8/97ee6b48f/891685f8f/0d8c72dd7. Batch 1/3
+(G3-6) + 2/3 (G7-8) COO-ACCEPTED; 3/3 (G9-10) RAVC'd. G11-G13 HELD for Andrew (not built).
+Cross-stack tie-out: composition=06-24 EMV=06-24 AUA=$1,591,227,965; 06-18 AUA=$1.631B served-AUA. -->
+
 <date>2026-06-29</date>
 <priority>HIGH — Andrew sovereign-parked Monday-first task</priority>
 
