@@ -1,5 +1,7 @@
 # Task Order: ADVI_INFETL.BRONZE-FIX (structural #2)
 
+**Status:** COMPLETE-SUPERSEDED
+
 > **[CLOSED — COMPLETE-SUPERSEDED 2026-06-29, COO 2.0.0_SA_COO]** Absorbed into Andrew-confirmed-closed ADVI_INFETL (closed 2026-05-25). The dual-prefix collapse was the root-cause P0 fix shipped in recovery. MSTR-delegated orphan cleanup (20260629T130229Z).
 ## _BRONZE_COMPLETE required-dim contract (kills the silent-partial-success class)
 

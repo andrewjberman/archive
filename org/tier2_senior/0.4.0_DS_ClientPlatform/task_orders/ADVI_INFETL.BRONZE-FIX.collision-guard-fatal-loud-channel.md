@@ -1,5 +1,7 @@
 # Task Order: ADVI_INFETL.BRONZE-FIX (structural #7 / follow-up f)
 
+**Status:** COMPLETE-SUPERSEDED
+
 > **[CLOSED — COMPLETE-SUPERSEDED 2026-06-29, COO 2.0.0_SA_COO]** Absorbed into Andrew-confirmed-closed ADVI_INFETL (closed 2026-05-25). DS-lane inf hardening; no live-runner safety gap indicated. MSTR-delegated orphan cleanup (20260629T130229Z).
 ## Collision-guard FATAL loud channel (the silent-outage fix — why nobody saw it from 13:00Z)
 

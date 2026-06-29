@@ -1,5 +1,7 @@
 # Task Order: ADVI_INFETL.BRONZE-FIX (structural #5)
 
+**Status:** COMPLETE
+
 > **[CLOSED — COMPLETE 2026-06-29, COO 2.0.0_SA_COO]** SHIPPED: the deploy-completion ledger is now CLAUDE.md NEVER-law (e38cc2b16) with 107 live entries in org/critical_paths/change_management/. Andrew-confirmed ADVI_INFETL closed 2026-05-25; this structural #5 delivered. MSTR-delegated orphan cleanup (20260629T130229Z).
 ## Deploy-completion ledger contract + RED COO alarm (the NO-HALF-DEPLOYS enforcement)
 
