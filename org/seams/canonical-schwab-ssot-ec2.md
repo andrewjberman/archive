@@ -23,7 +23,7 @@ the record and nothing is forgotten.
 | S6 | cross-bucket IAM + SSE (EC2 instance role) | UNVER | PASS | — | runs on local creds today; EC2 role not provisioned |
 | S7 | canonical gold -> parity harness (observe) | UNVER | PASS | — | CVO comp-parity map grounded (b65335016) but not yet scheduled for the parallel window |
 | S8 | ordering: raw-land -> silver -> gold (per run) | PARTIAL | PASS | PASS | silver->gold sequential OK; raw-land -> trigger ordering undefined on EC2 |
-| S+ | canonical build scripts -> EC2 (code deploy path) | FAIL | FAIL | — | scripts run from local repo; NO S3 code/ deploy path for the EC2 to pull |
+| S+ | canonical build scripts -> EC2 (code deploy path) | PASS | PARTIAL | — | STAGED 2026-06-29: 28 scripts -> s3://opal-data-bd/code/canonical/schwab/ (verified MATCH/AES256, EC2 i-0f3d57a97f14727af can pull). DECL=PARTIAL: io-estate registration (estate-coverage-manifest) routed to CVO -- resolver is generated, not hand-edited |
 | S9 | BD silver/allocations -> canonical dim_advisor_role | PASS | PASS | PASS | NEW edge (TO-7 6d48d4782): same-firm 49f bridge, vintage-flagged, <=date fallback non-fatal |
 
 ## The hookup checklist — every un-hooked seam, in deploy order (the deliverable)
@@ -31,8 +31,7 @@ the record and nothing is forgotten.
 1. **S1 — SI2/Quartz raw ETL (AE/DT, DERISK-1):** build the EC2 SI2 delivery (or Schwab SFTP/API) + a
    **scheduled (daily-AM) sync** to `opal-data-schwab/01_raw/` **with `--sse AES256`** (bucket DENIES PutObject
    without it — only seam that writes the raw bucket).
-2. **S+ — code deploy path (DS):** repo `data/canonical/schwab/**/build_*.py` -> an S3 `code/` prefix the EC2
-   pulls (they are NOT in any deploy graph today — `comp-pipescript io` = "Unknown script in tree"). Most-likely-forgotten seam: the scripts "exist" so it looks done, but there's no mechanical path onto the box.
+2. **S+ — code deploy path (DS): STAGED 2026-06-29** (COO GO 182930Z). 28 scripts -> `s3://opal-data-bd/code/canonical/schwab/{,silver/,gold/}` (verified MATCH/AES256; EC2 i-0f3d57a97f14727af can pull, Rule-12). Residual: io-estate registration (the "Unknown script in tree" close) routed to CVO -- the resolver is generated from CVO's authoritative estate-coverage-manifest; tooling-visibility, NOT a runtime blocker.
 3. **S4 — orchestration trigger (DS+AE):** EventBridge cron (or S3-event on the last `01_raw/` land) -> SSM
    RunCommand / EC2 cron -> `build_canonical_daily.py --upload`. Without this the canonical layer never advances unattended. **#1 finding.**
 4. **S5 — wire G11-G14 into the orchestrator (DS, my lane): DONE 47cc26a7f** (COO GO 175112Z). Added
