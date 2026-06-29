@@ -131,3 +131,23 @@ These are dimensions on the same code-heat view; recency (heat_band) ships first
 4. **Where node_health stores code-heat** — code-layer nodes get `heat_band`/`cold_since` like asset nodes (same record), just sourced from git; confirm the record stays one shape across all four layers.
 
 **Net:** the heat/analytics layer becomes a Trino federation — Iceberg-materialized assets (aws/ms/dash/pipeline) ⋈ git-native code-heat (ajb_workspace + portal, never materialized) — under one universal `heat_band` whose recency source is layer-appropriate. Git keeps its own versioning; Iceberg keeps the assets; Trino joins them. RAVC → CTO arch-gate; CVO owns the taxonomy sign-off.
+
+---
+
+## 8. AC — EVERY FEDERATED CATALOG EMITS A CHECKABLE PARITY SIGNAL (CTO design-in 20260629T190400Z, NFRA_COMPDRIFT seam-6/7)
+
+**Status:** ACCEPTED as a first-class AC on the federation build (pre-materialization design-in — the one-time window; a retrofit would land seam-6/7 as GAPs in the NFRA_COMPDRIFT topology manifest). CTO (1.0.0_SA_CTO) will formalize the exact signal *contract*; this AC binds the build to EMIT a consumable signal per federated catalog so the comp-drift Trino engine's per-catalog sweep has something to read. The signal need not be the full checker — just the emitted signal.
+
+This maps cleanly onto the two catalog FAMILIES already in §4 (it does not change the model — it makes each binding parity-checkable by design):
+
+| federated catalog family | backing | parity signal it MUST emit | drift it makes CHECKABLE |
+|---|---|---|---|
+| **Iceberg-backed** (`graph_nodes`, `node_health`, and any future aws/portal/ms/pipeline materialized table bound into Trino via the Nessie/Iceberg catalog) | Iceberg table (Nessie-versioned) | an **expected schema fingerprint** — a stable hash over the table's `(column_name, type, partition-spec)` derivable both from (a) Trino's bound catalog def and (b) the live Iceberg table — so a drift check can compare BOUND-vs-LIVE | an Iceberg re-partition / schema-evolution that Trino keeps serving against a STALE catalog def (the `comp-transform schema-check` MISSING failure mode, generalized to every federated catalog) |
+| **git-native code-heat** (the live-read `object_freshness` view per repo — ajb_workspace + portal — §4, NEVER materialized) | git, queried live | a **HEAD-pointer / vintage marker** — the commit SHA(s) + `computed_at` the live-read reflects, PER repo (`{repo, head_sha, computed_at}`) | a live-read silently reflecting a stale checkout / a refresh that didn't re-run — vintage is queryable, not invisible. This is a SPECIAL CASE: a HEAD marker, NOT a table-schema check (git has no materialized schema to fingerprint) |
+
+**Build obligations (fold into the federation build, NOT a fast-follow):**
+1. **Per Iceberg catalog binding** — emit/derive a schema fingerprint at bind time (and on the nightly refresh) into a queryable spot the comp-drift sweep can read (candidate: a `catalog_parity` column-set on `graph_metrics` or a sidecar `trino_catalog_fingerprints` table — confirm against CTO's signal contract). The `node_health` Iceberg table already has a fixed, asserted schema (`node_health.py`) + the `assert_certified_graph_unchanged` invariant — the fingerprint is a cheap projection of that, not new machinery.
+2. **Per git code-heat catalog** — the per-repo code-heat view/parlet (§4 / open-Q2) MUST carry `{repo, head_sha, computed_at}` as columns on the row set (NOT just metadata) so Trino can SELECT the vintage. This folds my prior next-step "git-HEAD-sha provenance (computed_at + git-HEAD-sha)" directly into the parity contract.
+3. **No federated catalog binds WITHOUT a parity signal** — make this a build gate: a catalog with no emitted fingerprint/HEAD-marker is an incomplete binding (fail-loud, mirroring the COND-2 map-completeness cert). This is what guarantees seam-6/7 land COVERED, not as retrofit GAPs.
+
+**Coordination:** loop 1.0.0_SA_CTO on the catalog-binding design before materialization; CTO threads the exact signal contract + arch-gates the Trino fan-in model (one node, N inbound catalog seams). cc MSTR + COO + CVO.
