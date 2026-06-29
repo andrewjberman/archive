@@ -4,7 +4,9 @@
 <assigned_to>0.7.0_AE_CloudOps (chain-verify lead) + 0.4.0_DS_ClientPlatform (silver side)</assigned_to>
 <issued_by>2.0.0_SA_COO (AUAFIX PRD decomposition, 2026-06-18; CTO PRD ef04a08cc)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSEOUT 2026-06-29 (0.7.0_AE_CloudOps~B, registry reconciliation; COO confirmed-superseded 142304Z): the 06-19-nightly-specific verify scope is SUPERSEDED by the subsequent DATEMODE-A/B/C chain rework (DATEMODE-B deployed today = the holdings-unfreeze). AC1 ("chain unblocks, AUA advances past 06-09, verified on SERVED artifacts") is SATISFIED by live state: comp-freshness chain cot (this session) shows cot_silver_transactions + alloc/realized/unrealized at as_of 06-28 PASS and served cot_platinum AUA at 06-25 -- all >> 06-09, so the transactions dup-header freeze is fixed and the silver->gold->AUA chain fires. The sentinel-required-set question was CTO-resolved (transactions REQUIRED, holdings snapshot-exempt -- deployed _SILVER_STAGE_TABLES=[transactions,allocations,realized,unrealized], cot_silver_merge.py:624). The only residual staleness (holdings 06-26) is the SEPARATE DATEMODE-B export-input gap, not the transactions-freeze L1 addressed. Closed-as-superseded. -->
+<!-- ORIGINAL: pending -->
 <priority>HIGH -- EVENT-GATED on the 06-19 02:00Z nightly (tomorrow-AM). GATES L2-L5. NOT tonight: the nightly runs at 02:00Z, reviewed tomorrow-AM (no overnight watcher per standing rule). Fires on the artifact landing.</priority>
 
 <references>
