@@ -2,7 +2,9 @@
 
 <issued_to>0.6.2_AE_PartnerETL</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>complete</status>
+<!-- COMPLETE 2026-06-29: SI2-on-EC2 (i-0f3d57a97f14727af) proven -- June AllNewFiles 13 files/720MB S3-verified in opal-data-schwab/01_raw_quartz_validation/ (acct 08242234); durability proven (relaunch no-login); fully-unattended pipeline BUILT (SchwabAutoDownload UI-automation daily 12/16/20Z + SchwabS3Sync 30min + SchwabKeepConsole 5min); 5 PRD findings (account-level MFA, no CLI trigger, scheduler-service needs Schwab enterprise MSI, production-was-manual, in-process-Quartz session model); box PERSISTENT (Andrew-direct). RAVC-ACCEPTED COO 183610Z, CC CTO. Follow-ups (not blockers): monitor first with-files run tomorrow 12:00Z; cutover seam = validation-prefix vs 01_raw/ (build_canonical_daily.py) held for Andrew; Path-C = Schwab enterprise MSI ask. -->
+
 <priority>HIGH — Andrew-GO'd Schwab-SSOT migration de-risk (validate-first; feeds the PRD). START after the off-cycle bd-49f-runner confirms the 49f silver unfreeze (AC#3).</priority>
 <date>2026-06-29</date>
 
