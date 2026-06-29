@@ -2,7 +2,9 @@
 
 <issued_to>0.7.0_AE_CloudOps~B</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>active -- BUILT, awaiting base-AE deploy + CVO served-verify (AC4)</status>
+<!-- PROGRESS 2026-06-29 (0.7.0_AE_CloudOps~B): code BUILT + committed 838d8790b (gateway audit.py _safe_args). AC1 (fail-closed per-tool field allowlist, default-OMIT, no-schema-tool->args-omitted) + AC2 (256-char length-cap backstop) DONE -- 5 unit assertions pass (declared-keep, otp-VALUE-omit, read_email-args-omit, cap, whoami-empty). AC3 current-3-tools schema (ms_site_children:{site_id,folder_path}, otp_fetch:{sender,found}, whoami:{}) CVO-pre-verified in the R8 close; future content-tools (read_email/send_email/read_file) stay fail-closed-OMITTED until declared+CVO-schema-verified at scope-expansion. REMAINING: base-AE gateway DEPLOY (S3->EC2->restart; coordinated) -> AC4 CVO served-verify (NEVER#7: content-tool test -> metadata-only Athena row, no body). -->
+<!-- ORIGINAL: pending -->
 <priority>MEDIUM — privacy gate before audit-scope-grow (no current leak; the scope-hold prevents one until this lands). ~B-surfaced + CVO-co-found; CTO-ruled the policy (190109Z).</priority>
 <date>2026-06-29</date>
 
