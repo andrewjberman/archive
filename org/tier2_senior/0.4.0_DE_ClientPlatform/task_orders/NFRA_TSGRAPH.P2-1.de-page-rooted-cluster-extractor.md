@@ -5,8 +5,9 @@
 <consult>0.7.0_AE_CloudOps (P2-2 materializes these nodes/edges into the canonical Nessie graph -- the additive node/edge schema is the shared interface; agree it BEFORE P2-2 derive-deploy)</consult>
 <issued_by>2.0.0_SA_COO (CTO PRD section-9 handoff 151724Z; PRD docs/architecture/NFRA_TSGRAPH_PRD.md @ 2b61ac87e, Andrew-steered 2026-06-18)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>pending</status>
+<status>complete</status>
 <!-- GO 2026-06-18 (COO /drive cycle-1): DE 0.4.0 spawned LIVE (MSTR, pid 24732); P2-1 is the ready lead (rides live P1/P4 graph, HEAD-current). staged->pending. RAVC2 to COO (CC CTO). -->
+<!-- COMPLETE 2026-06-30 (0.4.0_DE): built+materialized (commits fbf8549b1 + b47839cff; extractor org/modules/graph/tsgraph_spike/cluster_extract.py). VERIFIED against the LIVE HEAD-current Nessie graph (Rule 20: queried, not rebuilt) -- all 6 ACs MET: AC1 Page 15/PanelCluster 91 + CLUSTERS 91/CONTAINS_DRILLDOWN 241/SHARES_SOURCE 55 (live==local emit, zero drift); AC2 community detection 15 pages (AdvisorIntelligence 11 clusters, 6-source superset grouping); AC3 drilldown depth 1..4 + per-firm cohort populated (inflection 23/49financial 3/demo 3/cottonwood 2), carried in CloudEdge props JSON; AC4 coverage 119/119 (118 assigned + 1 VISIBLE unresolved Attribution/constants/holdings-shared.tsx, 0 silent); AC5 additive CloudNode/CloudEdge string discriminators; AC6 session log. DERIVE-not-EMIT (COO~B at-parity #1) confirmed: extractor emits node_types+containment/membership only, NO grain/level/referenceable. Grain-map registration of {Page,PanelCluster} dispatched to ~C (COMPUNIFY governor). RAVC2 -> COO~B (CC CTO/MSTR/~C/CVO~B). -->
 
 <priority>HIGH -- Andrew-steered P2 (PAGE->PANEL->DRILLDOWN lens). Rides the LIVE P1/P4 graph (comp-kuzu HEAD-current, 12500n/19138e, pin==marker). Lead TO of P2; P2-2 + P2-3 gate on it.</priority>
 
