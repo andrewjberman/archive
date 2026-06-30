@@ -77,3 +77,40 @@ touch the 49f alarm topic.
 5. ≥24h with no manual reseed + the `opal-bd-49f-cookie-alerts` topic quiet.
 6. RAVC to 2.0.0_SA_COO with LEG0 delta-to-cot report + LEG2 live-test evidence (cookie present + next-runner silver landing). CTO arch-gates the window_seconds disambiguation before LEG2 deploy.
 </acceptance_criteria>
+
+---
+
+## LEG0 GROUNDING — BANKED 2026-06-30T21:01Z (0.6.2_AE) — Andrew-HELD; resume when sequenced
+
+COO HELD LEG1 (mutation) 2026-06-30T21:03Z: ADVI_BDAPIMIG is Andrew-HELD (Part A + B folded into
+BDAPIMIG until Andrew sequences it). Read-only LEG0 grounding done during inf-warm-standby gaps;
+LEG1 (start box + deploy wrapper/env) NOT executed. All findings grounded on live AWS + cot repo ref.
+
+**49f box:** bd-49f-auto-login `i-0fa1846f04ed7e337` (transient, was STOPPED at grounding, last
+launch 16:34Z 06-30). cot reference = `infra/aws/ec2/bd-cot-auto-login/{secret-ids.env,run-bd-auto-login.sh}`
+(canonical firm-agnostic wrapper: APP_DIR self-locating + device-trust re-inject keyed off BD_FIRM_ID).
+
+**Delta-to-cot (LEG1 port targets, when un-held):**
+- BD_FIRM_ID cot -> 49f; deploy the SAME canonical wrapper (S3->box, Rule 12); set BD_OTP_ADAPTER=gateway
+  (49f current value UNREAD — box was stopped); BD_OTP_GATEWAY_SECRET_ID -> blackdiamond/49f/otp-gateway-token
+  (EXISTS); BD_MAX_LOGIN_ATTEMPTS 1->3 (+BD_LOGIN_BACKOFF_MS=5000); BD_OTP_RELAY_SECRET_ID ->
+  blackdiamond/49f/otp-relay (EXISTS, revert-parity).
+- **BD_OTP_WINDOW_SECONDS ~120 = the CTO ARCH-GATE** (firm-disambig; 49f + cot share the mailbox; a
+  cross-firm code = silent firm-sep break, NEVER#1). BDAPIMIG-phase CTO gate, not tonight.
+
+**Live secrets:** blackdiamond/49f/{session,credentials,otp-relay,otp-gateway-token} all EXIST.
+session last-changed ~00:15Z 06-30 (FRESHER than the TO's "2.7d stale" written 06-29 — re-ground
+session/device-trust state on-box when BDAPIMIG runs).
+
+**IAM (live get-role-policy bd-49f-auto-login-role):** GetSecretValue = blackdiamond/49f/* + astn/kimi/*
+(covers gateway-token+session+relay); PutSecretValue = session-* (fresh-cookie writeback). =>
+**LEG1a/b IAM precondition SATISFIED — no IAM change needed** (except possibly a proxy grant, below).
+
+**>>> LOAD-BEARING (COO-elevated 21:03Z) — PROXY-GAP HYPOTHESIS, ground FIRST in BDAPIMIG-design: <<<**
+NO `blackdiamond/49f/proxy` secret exists AND no proxy ARN in the box role. The TO LEG1d presumes
+"resi-proxy stays ON (49f datacenter IP BD-blocked)" — but there is no backing secret/grant.
+HYPOTHESIS (Rule-22, UNVERIFIED): if the 49f IP is BD-blocked with no proxy wired, login fails ->
+session dies -> feeds freeze == this may be the MECHANISM of the systemic 49f session-death (the
+~3.5-day dark gap), i.e. the actual durable-fix target. GROUND BEFORE BUILDING: (1) verify the
+BD-IP-block claim; (2) confirm proxy presence/mechanism (a to-be-created secret + IAM grant? a URL
+env? or block-claim stale?). Do NOT treat as fact until source/live-grounded.
