@@ -1,53 +1,71 @@
-# 49F BD Persistent Login — Design Proposal (no re-OTP per refresh)
+# 49F / BD Persistent Login — Design (RE-AIMED v2: dedicated cookie-getter -> SM -> runner-reads -> OTP-fallback)
 
 **Author:** 0.6.0_AE_PartnerETL (dedicated 49F AE) | **Date:** 2026-06-30
-**Status:** PROPOSAL for the ADVI_BREAKS durable phase (Andrew-sovereign direction 2026-06-30; COO carrying as a follow-on TO; gated on CTO arch + CVO re-cert). NOT yet implemented.
-**Andrew direction (verbatim intent):** "log in on the box responsible for ingestion, so we don't need to OTP every single time... we already proved this with the Schwab box, 0.0.1_UA built that system."
+**Status:** PROPOSAL v2 for the ADVI_BREAKS / ADVI_BDAPIMIG durable phase. RE-AIMED per Andrew-direct via CTO (180855Z) — DROP consolidation; adopt the dedicated-auth-box -> SM-transfer -> runner-reads -> OTP-fallback doctrine (the inf pattern). NOT implemented.
+**Gates:** apply HELD until 49F GREEN (tomorrow-AM penny-test) + Andrew-sequences; CVO re-certs the dedicated-box + SM-transfer threat model. v1 (consolidation) superseded by this.
 
 ## Problem (grounded)
 
-Today the 49F BD session refreshes via the **bd-49f-auto-login** box (i-0fa1846f04ed7e337): a Playwright/Chromium browser that, **on every `.bd.identity` death (401)**, re-runs a FULL SS&C login + MFA cycle (OTP auto-read from email via Microsoft Graph / otp-relay). Andrew does not hand-enter the OTP, but it still runs a full MFA every refresh — and that fragility produced the observed **3.5-day session dark gap (06-26..06-28)** before the burst-recovery 06-29 (secret version history: 06-25 21:13Z -> [dark] -> 06-29 14:15/15:20/22:21Z -> 06-30 00:02Z). The auth box is also auth-ONLY (CVO-certified least-priv: no opal-data-bd access), separate from any ingestion box.
+49F BD session refreshes via the **bd-49f-auto-login** box (i-0fa1846f04ed7e337): a Playwright/Chromium browser that, **on every `.bd.identity` death (401)**, re-runs a FULL SS&C login + MFA cycle (OTP auto-read via Graph/otp-relay). Andrew never hand-enters the OTP, but a full MFA fires every refresh — fragility that produced the **3.5-day session dark gap (06-26..06-28)** (secret version history: 06-25 21:13Z -> [dark] -> 06-29 burst -> 06-30 00:02Z). Steady-state should be OTP-FREE; OTP should be a bounded fallback, not the refresh mechanism.
 
-## Key finding: the persistent-login mechanism is ~80% ALREADY BUILT
+## The target architecture (Andrew-direct, the inf doctrine)
 
-`infra/aws/ec2/bd-49f-auto-login/bd_49f_auto_login.js` already:
-- **Injects the device-trust cookie pre-login** if `BD_DEVICE_REGISTRATION` is set (L290-297: "so BD recognizes the device + skips MFA").
-- **Checks "Remember My Device"** before Continue (L414-438; multi-strategy + Kimi-vision fallback; logs `device-trust: Remember-My-Device checked=`).
-- **Persists the full cookie jar** incl. `bd_DeviceRegistration` to the session secret (L475).
+```
+  [dedicated cookie-getter BOX]            (single-purpose auth tool; the ONLY box that logs in / runs a browser)
+        | logs into BD (device-trusted -> NO MFA to the device-trust TTL; OTP only on TTL lapse)
+        v
+  [Secrets Manager TRANSFER LINE]          blackdiamond/49f/session (cookie) + blackdiamond/49f/device-registration (device-trust)
+        | read-only
+        v
+  [BD INGESTION RUNNER]                     reads the cookie from SM; NEVER logs in; NO browser; NO login creds
+        | mints DataMining bearer from the cookie -> pulls -> lands bronze -> silver-merge
+        v
+  opal-data-bd  (bronze/silver/served)
+```
 
-The "trusted device" path is the same pattern Schwab uses (and the BD MFA screen offers "Remember My Device" — L97).
+This is **exactly the inf pattern** (grounded): inf-exporter logs in -> writes JWT to SM `orion/jwt/current` -> the inf gold runner READS it (same for `orion/eclipse_jwt/current`, `smartx/jwt/current`). One persistent-login DOCTRINE across inf / 49F / cot: **dedicated-auth-box -> SM-transfer -> runner-reads -> OTP-fallback.**
 
-## The gap (why we still re-MFA every time)
+## Why this is strictly better than consolidation (v1, dropped)
 
-The orchestrator's `secret-ids.env` (TF `instance.tf` user_data, L87-104) **never sets `BD_DEVICE_REGISTRATION`**. So:
-- On each login the `if (process.env.BD_DEVICE_REGISTRATION)` inject is SKIPPED -> BD sees an unrecognized device -> full MFA.
-- The `bd_DeviceRegistration` cookie IS captured into the session bundle each run, but it is **never read back out and re-fed** into the next login. The trust loop is open.
+- **Better least-priv:** the ingestion runner holds NO login creds + runs NO browser — it only READS one scoped SM secret. Smaller attack surface than a login+pull box.
+- **Auth isolated, single-surface:** one dedicated box owns login; SM is the rotatable / auditable / TTL'd transfer. RESOLVES the inf-vs-49F isolation tension (this is NOT consolidation; it PRESERVES the existing auth-box separation that today's snag-finding surfaced — the auth box correctly CANNOT run ingestion).
+- **CVO threat model is CLEANER:** the ingestion box drops from auth-surface to SM-reader; the dedicated cookie-getter stays the only login surface (its CVO-certified least-priv posture is preserved + extended only by the device-trust secret).
 
-## Proposed fix (two parts)
+## Part A (CORE, KEEP) — close the device-trust loop on the cookie-getter
 
-### Part A — Close the device-trust loop (the no-re-OTP core)
-1. **Persist the device-trust token to its OWN durable secret**, separate from the volatile `.bd.identity` session (which dies often). E.g. `blackdiamond/49f/device-registration`. After a successful MFA login where "Remember My Device" was checked, extract `bd_DeviceRegistration` from the jar and `PutSecretValue` there. (Distinct lifetime: the device trust is long-lived; the session cookie is short-lived.)
-2. **Re-inject on every login:** orchestrator reads that secret -> sets `BD_DEVICE_REGISTRATION` -> the existing L290-297 inject presents it -> BD recognizes the device -> **skips MFA** -> mints a fresh `.bd.identity` with NO OTP.
-3. **Re-OTP only when the device trust itself expires** (BD device-trust TTL — to be observed empirically; typically weeks-months). At that point one MFA re-establishes it, captured back into the device secret.
-4. IAM: add `secretsmanager:PutSecretValue` + `GetSecretValue` on `blackdiamond/49f/device-registration-*` to the auth role (small, firm-scoped, 49f-only).
+The persistent-login engine is ~80% ALREADY BUILT in `bd_49f_auto_login.js`:
+- injects the device-trust cookie pre-login if `BD_DEVICE_REGISTRATION` set (L290-297),
+- checks "Remember My Device" before Continue (L414-438; multi-strategy + Kimi-vision fallback),
+- persists the full cookie jar incl. `bd_DeviceRegistration` to the session secret (L475).
 
-### Part B — Consolidate login + ingestion on one box (Andrew's "log in on the ingestion box")
-The 49F REST ingest currently has NO dedicated production runner (today's un-freeze ran provision local + silver-merge on bd-allocations ad-hoc). Rather than maintain a separate auth-only box + a separate ingest box, make ONE box hold the durable (device-trusted) session AND run the ingest:
-- Grant that box: opal-data-bd code/template READ + forwardfill/silver WRITE (for ingest) IN ADDITION to the 49f secret RW (for auth) + boto3/pandas/pyarrow/openpyxl.
-- This collapses the auth-box/ingest-box split — but it CROSSES the CVO-certified "auth box has no data bucket" least-priv boundary (iam.tf L8-15). **Requires CVO re-cert** of the widened scope (Andrew-sovereign direction authorizes the direction; CVO certifies the bounded implementation). This is also the natural home for the ADVI_BDAPIMIG.P1 "productionize-runner" TO.
+**Gap:** the orchestrator (`secret-ids.env`, instance.tf L87-104) never sets `BD_DEVICE_REGISTRATION` -> the inject is skipped -> the captured `bd_DeviceRegistration` is never re-fed -> full re-MFA every refresh (the dark-gap root).
 
-## Boundary / governance notes
-- **Firm-sep intact:** all grants stay `blackdiamond/49f/*` + `opal-data-bd` (49F's own plane) — zero cot, NEVER#1 clean.
-- **ROE preserved:** never log/persist OTP or credential VALUES (the device-trust token is a device-binding cookie, not a credential — same persist-class as the `.bd.identity` session already persisted).
-- **Net effect:** session refresh becomes OTP-free for the device-trust lifetime -> eliminates the recurring dark-gap fragility -> durable 49F session (closes the "durable session unproven" item from my launch mandate).
+**Fix (what the cookie-getter does before writing the cookie to SM):**
+1. After a successful device-trusted login, extract `bd_DeviceRegistration` -> `PutSecretValue` to a DEDICATED durable secret `blackdiamond/49f/device-registration` (distinct lifetime from the volatile `.bd.identity` session).
+2. On each login the orchestrator reads it -> sets `BD_DEVICE_REGISTRATION` -> the existing L290-297 inject presents it -> BD recognizes the device -> SKIPS MFA -> mints a fresh `.bd.identity` with NO OTP -> writes it to the SM transfer line.
+3. **OTP = bounded fallback ONLY** when the device-trust TTL lapses (one MFA re-establishes it, re-captured to the device secret). The existing Graph/otp-relay adapter is retained for exactly this fallback, no longer steady-state.
+4. IAM: add `secretsmanager:Get/PutSecretValue` on `blackdiamond/49f/device-registration-*` to the auth-box role (small, 49f-scoped).
 
-## Implementation steps (on GO + CTO arch + CVO re-cert)
-1. Add `blackdiamond/49f/device-registration` secret + the auth-role IAM grant (TF, safe-apply).
-2. Patch the orchestrator (`run-bd-auto-login.sh` / secret-ids.env): read the device secret -> export `BD_DEVICE_REGISTRATION`; after a checked-Remember login, write the fresh `bd_DeviceRegistration` back to the device secret.
-3. Observe one device-trust cycle: confirm a 2nd refresh skips MFA (log `Remember-My-Device checked=true` + no OTP fetch + fresh `.bd.identity`).
-4. (Part B) Provision the consolidated login+ingest box (deps + opal-data-bd IAM) = the ADVI_BDAPIMIG runner; move provision + nightly bronze REST + silver-merge onto it (replaces today's ad-hoc local/bd-allocations path; documents 486228 + the provision as reproducible per CTO's process note).
-5. Wire the bronze nightly trigger (EventBridge — note 0.6.2 found the box's built-in scheduler dead; same fix-class).
+## Part B (RE-AIMED) — the BD ingestion runner reads the cookie from SM (the ADVI_BDAPIMIG.P1 runner)
 
-## Open empirical questions (to ground at implementation)
-- BD device-trust TTL (how long before a re-OTP is forced)?
-- Does BD bind device-trust to IP/UA (the box's native AWS IP + the fixed Playwright UA should be stable)?
+Today the 49F REST ingest has NO production runner (today's un-freeze ran provision local + silver-merge on bd-allocations ad-hoc). Build the dedicated ingestion runner that:
+- READS the session cookie from `blackdiamond/49f/session` (the cot_bronze_ingest `load_bd_session` already does exactly this) — NEVER logs in, NO browser, NO login creds.
+- Holds opal-data-bd code/template READ + forwardfill/silver WRITE + SM READ of the session line only.
+- Runs the nightly bronze REST pull + silver-merge (replaces today's ad-hoc local path; documents 486228 + the provision as reproducible per CTO's process note).
+- This is the ADVI_BDAPIMIG.P1 "productionize-runner" TO; same runner pattern serves Cottonwood (BD source-shared, firm-scoped buckets/secrets).
+
+## Implementation steps (on GO: 49F GREEN + Andrew-sequences + CVO re-cert)
+1. Create `blackdiamond/49f/device-registration` secret + the auth-box IAM Get/Put grant (TF, safe-apply).
+2. Patch the cookie-getter orchestrator: read the device secret -> export `BD_DEVICE_REGISTRATION`; after a checked-Remember login, write the fresh `bd_DeviceRegistration` back.
+3. Observe one device-trust cycle: a 2nd refresh skips MFA (log `Remember-My-Device checked=true`, no OTP fetch, fresh `.bd.identity`).
+4. Stand up the dedicated BD ingestion runner (SM-reader; opal-data-bd RW; no login) = ADVI_BDAPIMIG.P1; move provision + nightly bronze REST + silver-merge onto it.
+5. Wire the bronze nightly trigger via EventBridge (0.6.2 found the box built-in scheduler dead — same fix-class; ties the SI2/streak productionization).
+6. Replicate the doctrine to Cottonwood (cot cookie-getter + cot ingestion runner already SM-mediated; add the device-trust loop).
+
+## Open empirical questions (ground at implementation)
+- BD device-trust TTL (how long before a forced re-OTP)?
+- BD device-trust binding to IP/UA (box native AWS IP + fixed Playwright UA should be stable)?
+
+## CVO re-cert scope (cleaner than v1)
+- Dedicated cookie-getter: login surface unchanged + one new device-trust secret (Get/Put).
+- Ingestion runner: NEW box, but auth-surface = SM-READER only (no creds/browser) — a REDUCTION in auth surface vs any consolidation. Firm-sep intact (blackdiamond/49f/* + opal-data-bd; zero cot, NEVER#1 clean). ROE: never log OTP/cred VALUES; device-trust token persisted same-class as the existing `.bd.identity`.
