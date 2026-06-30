@@ -8,9 +8,9 @@
 
 | leg | owner | step | proof required | status |
 |---|---|---|---|---|
-| L1 | DS~B | commit populated unrealized.json (repo-track) + s3 cp to opal-data-bd/code/bronze/templates/ | commit hash + S3 facts=1 | OPEN |
-| L2 | 0.6.0_AE | `--provision` unrealized -> BD mints NEW persisted id N carrying populated facts | created-template facts!=[] + id N | OPEN |
-| L3 | DS~B | write templateId=N + re-commit + s3 cp | commit hash + S3 templateId=N | OPEN |
+| L1 | DS~B | commit populated unrealized.json (repo-track) + s3 cp to opal-data-bd/code/bronze/templates/ | commit hash + S3 facts=1 | CLOSED 82009e463; live S3 facts=1/id17 verified |
+| L2 | 0.6.0_AE | `--provision` unrealized -> BD mints NEW persisted id N carrying populated facts | created-template facts!=[] + id N | CLOSED id N=486228; BD GET /template/486228 facts=1/id17 verified |
+| L3 | DS~B | write templateId=N + re-commit + s3 cp | commit hash + S3 templateId=N | CLOSING (see log) |
 | L4 | 0.6.0_AE | test-pull --table unrealized --date <run-date> (persisted N) | row-count ~100K (06-24=103,022) non-empty | OPEN |
 | L5 | DS~B | VERIFY: silver/unrealized run-date + legacy key non-empty; next scheduled gold run B_01 delta-0 -> D_03 non-empty -> D_04 republish -> 49F served data_as_of ADVANCES (NEVER#4, no ad-hoc) | served header un-freeze + penny-test | OPEN |
 
@@ -18,3 +18,5 @@
 
 ## Log
 - 20260630T1655Z OPENED. Block verified field-for-field (only `facts` 0->1; id17 MV; B_01 4 identity dims intact). CTO-co-sign-gated before serving.
+- 20260630T1658Z L1 CLOSED: commit 82009e463 + s3 cp; live S3 unrealized.json verified facts=1/id17. Handed 0.6.0_AE GO for L2 --provision.
+- 20260630T1708Z L2 DELAYED ~15m (0.6.0_AE): --provision failed on the handed-off bd-49f-auto-login box (browser-login-only: no boto3 / opal-data-bd 403) -> rerouting to a bd-exporter-profile box (RW+python). L1 unaffected (live S3 facts=1 stands). Awaiting id N.
