@@ -32,10 +32,20 @@ repoint EACH consumer atomically + parity-check, NOT bulk-retire.
 
 ### Also: INF_B_00 reads `bronze/orion-api/{date}/assets.csv` (BRONZE, not silver) for its holdings reconcile.
 
-## CONSOLIDATION VERDICT (per dim, never-widen)
-1. **DEAD -- safe retire now (no live gold reader):** `silver/performance_dim/` (confirmed frozen/no-producer).
-   STILL-TO-VERIFY-DEAD (grep showed no gold reader; confirm no live producer + no FE/other consumer before retire):
-   `silver/accounts_dim/` (legacy, superseded by accounts_v2), `silver/orion-rest/` (stray).
+## CONSOLIDATION VERDICT (per dim, never-widen) -- DEAD-CONFIRM FINAL (CTO arch-gated)
+1. **DEAD-CONFIRMED -> retire-eligible (DOCUMENT-dead-now + DEFER S3 tree delete to RT confirm-first batch,
+   Andrew-confirm per CLAUDE.md destructive-delete; NOT a one-off delete):**
+   - `silver/performance_dim/` -- no producer, frozen 2026-05-13, no consumer (INF_C_02 comment corroborates
+     the dead phantom path). DEAD.
+   - `silver/orion-rest/` -- no producer, frozen 2026-04-30, ZERO consumers anywhere (grep data/ + portal/src +
+     infra/aws = empty). DEAD-confirmed (final no-FE/non-gold check passed).
+   - `silver/accounts_dim/` -- **NOT DEAD (census corrected).** LIVE-consumed by INF_09:22 / INF_C_09:125 /
+     INF_D_00:49, but FROZEN 04-29 (legacy convert_orion_to_silver.py:55 stopped). -> REPOINT bucket (#2b),
+     NOT retire -- retiring it would break 3 gold consumers; it's a STALENESS finding (flagged COO->Andrew).
+2b. **accounts_dim REPOINT = a CORRECTNESS FIX, not byte-parity** (CTO distinction): repoint INF_09/INF_C_09/
+   INF_D_00 -> accounts_v2 (live primary, accounts_dim superseded). Output DELIBERATELY changes (stale 04-29 ->
+   fresh). Gate: (a) source-confirm accounts_v2 primary; (b) sane 2-month delta (counts/names/first_trade_date),
+   not a regression; (c) served AUA UNAFFECTED (holdings/positions_mv-derived, not accounts_dim). Andrew-aware.
 2. **LIVE-MULTI-CONSUMED -- atomic per-consumer repoint required (NOT bulk retire):** performance (flat
    silver/performance/ [INF_C_02] + api_dims/performance/ [INF_D_00c, INF_D_02]); assets_v2 (api_dims/assets_v2/
    [INF_D_02d] + flat silver/assets_v2/ [INF_D_03]); assets (api_dims/assets/ [INF_D_02b]); transactions (flat
