@@ -62,6 +62,13 @@ Today the 49F REST ingest has NO production runner (today's un-freeze ran provis
 5. Wire the bronze nightly trigger via EventBridge (0.6.2 found the box built-in scheduler dead — same fix-class; ties the SI2/streak productionization).
 6. Replicate the doctrine to Cottonwood (cot cookie-getter + cot ingestion runner already SM-mediated; add the device-trust loop).
 
+## Concurrency-governor — EVALUATED + RULED N/A for 49F (grounded, CTO 201027Z)
+
+The inf perf-parallelize fix (bounded per-client concurrency UP TO the rate-limit ceiling + per-client error isolation) was evaluated for the 49F runner and ruled NOT APPLICABLE — grounded, not mirrored blind:
+- inf freeze root = per-CLIENT fan-out (313 clients x 8 windows = 2,504 serial REST calls ~1/s = 42min) -> a real serial-vs-rate-limit gap -> parallelize to 25rps = the fix.
+- 49F BD DataMining = SINGLE-QUERY-PER-TABLE exports (each table: 1 run_query + poll + 1 download; ~dozens of calls over minutes total; retry-net adds ~5 per-date holdings pulls). No high-volume per-unit fan-out; nowhere near the BD rate limit.
+=> the 49F bottleneck is the freshest-date AVAILABILITY lag (T+N) + session durability, NOT call-rate. A concurrency governor would govern nothing. The durable 49F runner set is therefore: persistent-login/SM-reader (Parts A+B) + the allocations/holdings RETRY-NET (freshest-date self-heal) + the 0-row guards. (Re-evaluate only if a future per-account/per-client 49F pull pattern is introduced.)
+
 ## Open empirical questions (ground at implementation)
 - BD device-trust TTL (how long before a forced re-OTP)?
 - BD device-trust binding to IP/UA (box native AWS IP + fixed Playwright UA should be stable)?
