@@ -69,3 +69,10 @@ Today the 49F REST ingest has NO production runner (today's un-freeze ran provis
 ## CVO re-cert scope (cleaner than v1)
 - Dedicated cookie-getter: login surface unchanged + one new device-trust secret (Get/Put).
 - Ingestion runner: NEW box, but auth-surface = SM-READER only (no creds/browser) — a REDUCTION in auth surface vs any consolidation. Firm-sep intact (blackdiamond/49f/* + opal-data-bd; zero cot, NEVER#1 clean). ROE: never log OTP/cred VALUES; device-trust token persisted same-class as the existing `.bd.identity`.
+
+## Arch refinements (CTO 181328Z — endorsed v2 in direction; folded)
+1. **Proactive re-mint, never fall to OTP in steady-state:** the cookie-getter must RE-MINT the device-trust + cookie BEFORE the TTL lapses — a pre-expiry alarm modeled on inf's cookie-age monitor (re-mint at ~T-7d). OTP-fallback is the bounded exception (TTL genuinely lapsed / device-trust revoked), NEVER a recurring steady-state event.
+2. **SM least-priv ROLE SPLIT (firm-sep):** two distinct roles, never one. INGESTION runner role = `secretsmanager:GetSecretValue` READ-ONLY on `blackdiamond/49f/{session,device-registration}` ONLY (no write, no other firm). COOKIE-GETTER role = `secretsmanager:PutSecretValue` WRITE on those (no broad read). All scoped to `blackdiamond/49f/*`; cot uses its OWN line (`blackdiamond/cot/{session,device-registration}`) — the two firms NEVER share a secret (NEVER#1-clean).
+3. **COT parity:** cot adopts the IDENTICAL doctrine on its own firm-scoped line (cot already SM-mediates the session via blackdiamond/cot/session + cot_bronze_ingest.load_bd_session; add the device-trust loop + the role split there too). The design covers both BD firms identically.
+
+(Full CTO arch read is async/post-firefight; these 3 notes are folded for that read. Apply remains HELD per Andrew sequencing — fold the whole into ADVI_BDAPIMIG.)
