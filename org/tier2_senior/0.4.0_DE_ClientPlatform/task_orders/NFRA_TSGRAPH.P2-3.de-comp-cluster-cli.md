@@ -5,7 +5,9 @@
 <consult>DT lane for the graph-call-manifest.yaml registration (canonical comp-* entry)</consult>
 <issued_by>2.0.0_SA_COO (CTO PRD section-9 handoff 151724Z; 2b61ac87e)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>pending</status>
+<!-- GO 2026-06-30T2313Z (COO~B): gate met (P2-2 materialized+verified live; P2-1 ACCEPTED 6/6 ACs); CTO inv-2 edge ruling landed (22cb21116) -> canonical CONTAINS+depth / CLUSTERS / SHARES_SOURCE. staged->pending. Execute. RAVC2 COO~B cc CTO. -->
+<!-- BUILT+VERIFIED, LANDING HELD (Andrew->MSTR fold-in) 2026-06-30T2346Z (0.4.0_DE): comp-cluster built + ALL ACs verified locally (comp-cluster AdvisorIntelligence = real PAGE->PANEL->DRILLDOWN tree depth 1..4 + per-firm cohort fork; comp-manifest-check exit 0; comp_coverage_view --verify 35/35; comp-which routing 34/35 (lone fail comp-drift PRE-EXISTING); coverage 118/119 + 1 visible unresolved, 0 silent). LANDING is lane-blocked for a DE: comp_cluster_cli.py -> infra/aws/globgrph (AE lane), graph-call-manifest.yaml entry -> ANY_EXEC lane, .tools/comp-cluster -> .gitignore negation needed. Andrew steered the approach to 0.0.0_AB_MSTR for fold-in into a more-developed approach (brief: docs/briefs/comp-cluster-graph-manifest-approach-brief-20260630.md; durable bundle + landing recipe in scratchpad p2-3-comp-cluster-bundle/). Status held pending: built+verified but NOT landed (awaiting MSTR fold-in decision on engine-home/landing). Shared-tree edits reverted (preserved in bundle patch); new engine+wrapper remain on-disk (comp-cluster runs). -->
 <priority>MEDIUM -- GATED on P2-2 (the CLI queries the materialized cluster graph). Generalizes comp-cache collisions.</priority>
 
 <gate>P2-2 <status>complete</status> (cluster nodes/edges live on the canonical graph). COO GOes after P2-2 RAVC2.</gate>
