@@ -59,3 +59,12 @@ The recurring nightly freeze is the gold chain's **REDUNDANT inline perf re-pull
 4. CVO co-signs the LANDED artifact (deployed != resolved); parity-gated cutover before any P3 teardown.
 
 **Open question for CTO/~A:** does the single-pull-stage land as a NEW front-of-chain stage in `orion-gold-dispatch.sh` (pull-all-then-build), or as a separate pre-chain pull script the trigger invokes before the gold chain? Both satisfy "one guarded pull per dim"; the first keeps one runner/one script, the second cleanly separates pull from compute. Rec: **front-of-chain stage in the existing dispatch** (one runner, one script, minimal disruption — PRD §1 silver "minimal disruption" ethos), with each pull individually timeout-guarded.
+
+---
+
+## 6. ADDENDUM — D3 IAM baseline grounding (read-only, `infra/aws/terraform/inf-pipeline/iam.tf`)
+
+Captured the current `inf_gold_layer_runner` instance role (`inf-gold-layer-ec2-role`, profile `inf-gold-layer-profile`) as the never-widen "before":
+- **`s3-scoped-inf`:** `GetObject/PutObject/DeleteObject/HeadObject/ListBucket` on `opal-data-inf` + `opal-data-inf/*` — **WILDCARD over the whole bucket.** ⇒ the expanded bronze prefixes (full `bronze/orion-api/{date}/` surface + `bronze/eclipse-api/{date}/` on this runner) are **ALREADY covered — NO S3 IAM widening needed for the pull-surface expansion.** Also covers the S3-mirror JWT read (`orion/jwt/current.json`).
+- **`runner-shared-read`:** RO `opal-runner-shared/*` (telemetry profiler). **`ssm-access`:** `ssm:GetParameter*` (Resource `*`). **`cloudwatch-logs`** + **`cloudwatch-put-metric`** (namespace-scoped `Inflection/GoldChain`).
+- **Net D3 surface is SMALL** — the only plausibly-new grants when the pull-stage expands: (a) `secretsmanager:GetSecretValue` IF the Eclipse pull / a new endpoint reads its token from SM directly rather than the S3-mirror the role already covers (TBD — confirm read-path with `~A` at build); (b) cross-bucket read IF the crawler-frontier ingests from `opal-crawl-catalog/`. **Build-time gate:** `comp-iam service`/`gaps` + LIVE `aws iam get-role-policy inf-gold-layer-ec2-role` ground-truth (Rule 22, not TF-DESIRED) once the dim list is fixed. This de-risks the apply: most of the "stand up the full pull surface" leg requires zero IAM change.
