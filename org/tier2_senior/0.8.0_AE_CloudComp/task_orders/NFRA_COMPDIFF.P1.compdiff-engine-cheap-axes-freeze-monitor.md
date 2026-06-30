@@ -2,7 +2,8 @@
 
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>complete</status>
+<closure>complete-as-superseded (2026-06-30) — deliverables landed under the ADVI_BREAKS TO-6 value-parity track: inf+cot value-parity readers LIVE + freeze-monitor (CVO co-signed two-sided fire-test 3.0.0_SA_CVO 172054Z/172505Z), cheap axes b2a7d3b9a (~B), comp-xray CLI 81798d511 (LD-0223); both deploy-completion ledgers CLOSED (inf 1730Z, cot 1803Z), tree clean. All 4 ACs substantively MET. Flipped by 0.8.0_AE_CloudComp~B per COO~B GO 20260630T212623Z (registry-truthfulness reconciliation).</closure>
 <priority>HIGH (within prevention-tier) — Andrew-direct, born from the inf-AUA freeze. The P1 FREEZE-MONITOR is the standing guard against the value-froze-while-mtime-advanced class that bit us 3x today (cot/bd/inf). Sequences BEHIND the live priorities (it's prevention, not a fire) — start as you clear the S5 wrapper / post-#1.</priority>
 <date>2026-06-29</date>
 
