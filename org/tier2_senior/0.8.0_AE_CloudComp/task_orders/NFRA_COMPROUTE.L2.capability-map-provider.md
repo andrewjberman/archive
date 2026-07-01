@@ -2,7 +2,8 @@
 
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>pending</status>
+<status>complete</status>  <!-- LANDED 3277cc38a (pushed CLOUD); provider comp_capability_provider.py + role_surface_affinity governor ADD; all 4 acceptance criteria met; mandate triad reproduced; RAVC'd COO~B + CC CTO/~E. ~C 2026-07-01T0345Z -->
+
 <priority>HIGH — Andrew-direct DRIVE-NOW (2026-07-01). Stage-1 is NOT gate-lift-gated: reads the already-live COMPUNIFY map. Start now; your Phase-B derive co-sign priority-interrupt still stands (yield to the ~B-fired derive if the gate lifts mid-build, then resume).</priority>
 <date>2026-07-01</date>
 
