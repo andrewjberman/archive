@@ -2,7 +2,8 @@
 
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>dispatched</status>
+<status>complete</status>  <!-- DR2 COMPLETE. Phases 1-2: SignalExtractors + shadow harness (2033b8d70, SHADOW-GREEN: 0-reg/0-div/read-never-rebuilds/sane-fallback) + E1 write_path provider + 2-tier rail. Phase-3 THE FLIP: 94b64a5af (comp-which default -> comp_route), CVO~B DRV-certified (4c1d93be5), Andrew-authorized. Live post-flip fixture GREEN (34/34+3/3+20/20+3/3), rail intact, SEV1 gates clean. RAVC'd COO~B/CVO~B/CTO/~E. ~C 2026-07-01T1420Z -->
+
 <priority>HIGH -- Andrew-direct default-router promotion. CTO design BLESSED (132556Z). You own the surface + the shadow harness + the flip -- the SEV1 gate lives here.</priority>
 <date>2026-07-01</date>
 
