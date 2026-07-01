@@ -2,7 +2,9 @@
 
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-07-01 (0.8.0_AE_CloudComp~D): P3(c) seam-6 Trino closer (trino_catalog_parity.py, commit 37f916540) -- all 5 seam-6 legs COVERED, GAP=0, live-verified 3x MATCH. P4 drift_producer fold into comp-drift sweep (commit 5a05e23f5). Both pushed. RAVC->COO~B, CC CTO+CVO~B. CVO~B close-verify + manifest-refresh(exec-lane, diff->CTO) + PRD sec-8 emit/retire tail (coordinated deploy) are the residual acceptance/follow-on items. -->
+
 <priority>HIGH — Andrew-direct close-out drive (2026-07-01). Your P3(c) gate is CLEARED: it was held on the heat-federation surface, which is now LIVE (COMPLEARN P1 gap_heat federation). Start P3(c) NOW. Your Phase-B compute co-sign priority-interrupt still stands — yield to the ~B-fired derive if the gate lifts, then resume.</priority>
 <date>2026-07-01</date>
 
