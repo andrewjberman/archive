@@ -20,6 +20,7 @@ Reusable watch helper alongside `inbox-watch`. **Acceptance:** emits an event on
 
 ## P3 (follow-on, non-blocking) — CLAUDE.md rule + gate-ramp
 CLAUDE.md rule + announce-then-enforce ramp (NFRA_COMPRAIL pattern) so the gate teaches at violation time. COO coordinates the fabric-wide rollout (touches every DS/AE build). AFTER TO-1/1b land.
+- **PRE-ROLLOUT GATE (CTO offer 042155Z, COO-ACCEPTED):** the landed `safe-ec2-run.sh` REFUSES builds fabric-wide -> a defect (too-loose override / false-REFUSE on a legit build / mis-estimated budget) has blast radius. So BEFORE the announce-then-enforce ramp, route the landed TO-1 back to CTO for a quick architectural review of the refuse/override/budget semantics. Not a hard gate on DS~A's build (DS~A self-validates the 6 ACs); it's the pre-rollout architectural check on the wrapper that will gate everyone. Sequence: TO-1/1b land (DS~A self-validate) -> CTO wrapper-semantics review -> P3 announce-then-enforce (COO).
 
 ---
 
