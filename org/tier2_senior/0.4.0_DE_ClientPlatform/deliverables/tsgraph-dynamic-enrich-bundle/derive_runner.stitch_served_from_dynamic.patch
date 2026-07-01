@@ -1,0 +1,121 @@
+diff --git a/infra/aws/globgrph/derive_runner.py b/infra/aws/globgrph/derive_runner.py
+index 80c15afcf..0e78a9307 100644
+--- a/infra/aws/globgrph/derive_runner.py
++++ b/infra/aws/globgrph/derive_runner.py
+@@ -1394,6 +1394,101 @@ def stitch_served_from(graph: dict) -> None:
+         print(f"INFO: SERVED_FROM_UNRESOLVED (+{len(unresolved) - 60} more not listed)")
+ 
+ 
++# NFRA_TSGRAPH (COMPTEAM B1 graph-gap enrichment, CTO-routed 2026-07-01): the DYNAMIC tier.
++# stitch_served_from (above) grounds only the static /api/general ServedURL family. The ADVI/PM
++# dynamic endpoints are Lambda-mediated (advisor-intelligence -> FIRM_CONFIG -> opal-data-{firm}/
++# platinum) and have NO ServedURL node -- the portal Endpoint node is TERMINAL. So this derive keys
++# off the ENDPOINT nodes + the B1-map resolution table (endpoint-label -> relative platinum key) and
++# FANS OUT per firm, forming an Endpoint -SERVED_FROM(tier=dynamic)-> firm-bucket edge, both-ends-
++# verified (head_object + existing S3 node), so the canonical graph carries BOTH serving tiers.
++_DYN_FIRMS = {"bd": "opal-data-bd", "cot": "opal-data-cot", "inf": "opal-data-inf"}
++_DYN_RESOLUTION_TABLE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
++                                     "tsgraph_dynamic_served_resolution.json")
++
++
++def stitch_served_from_dynamic(graph: dict) -> None:
++    """NFRA_TSGRAPH dynamic-tier SERVED_FROM enrichment (mirrors stitch_served_from; additive, string
++    edge_type discriminator + tier:"dynamic" prop -- NO schema change). For each portal Endpoint node
++    whose label is in the B1-map resolution table, resolve its relative platinum key under EACH firm
++    bucket and emit an Endpoint -SERVED_FROM-> firm-bucket edge, BOTH-ENDS VERIFIED (co-key by
++    construction, D8/CTO both-ends rule): the S3 object EXISTS (head_object; 403 IAM-denied is a LOUD
++    config error, distinct from a 404 absence) AND the firm bucket is an EXISTING cloud-graph S3 node
++    (edge targets its actual node_id). Unresolved -> VISIBLE-logged, never force-keyed. Best-effort:
++    any failure logs + SKIPS, never fails the derive. Param-templated + PER-ENTITY endpoints are the
++    durable follow-on (recorded VISIBLE-unresolved here)."""
++    try:
++        table = json.load(open(_DYN_RESOLUTION_TABLE)).get("endpoint_to_platinum_key", {})
++    except Exception as e:
++        print(f"WARN: SERVED_FROM_DYN_TABLE_MISS err={e} -- skipping dynamic enrichment")
++        return
++    if not table:
++        return
++    # TARGET-side index: bucket-name -> the cloud-graph S3 node's ACTUAL node_id (same as stitch_served_from).
++    s3_by_bucket: dict = {}
++    for cdata in graph.get("classes_data", {}).values():
++        for n in cdata.get("nodes", []):
++            if (n.get("type") or "").upper() in ("S3_BUCKET", "S3"):
++                nid = n.get("id")
++                if not nid:
++                    continue
++                bname = n.get("name") or (nid.split(":::")[-1] if ":::" in nid else nid)
++                if bname:
++                    s3_by_bucket.setdefault(bname, nid)
++    s3c = boto3.client("s3", region_name="us-east-1")
++    edges: list[dict] = []
++    unresolved: list[dict] = []
++    n_obj_miss = n_node_miss = n_iam_denied = 0
++    seen_endpoints = 0
++    for cdata in graph.get("classes_data", {}).values():
++        for node in cdata.get("nodes", []):
++            if node.get("type") != "Endpoint":
++                continue
++            nid = node.get("id") or ""
++            label = nid[len("endpoint:"):] if nid.startswith("endpoint:") else (node.get("name") or "")
++            rel_key = table.get(label)
++            if not rel_key:
++                continue
++            seen_endpoints += 1
++            for firm, bucket in _DYN_FIRMS.items():
++                target_id = s3_by_bucket.get(bucket)
++                if not target_id:
++                    n_node_miss += 1
++                    unresolved.append({"endpoint": label, "firm": firm, "reason": f"target-node-absent ({bucket})"})
++                    continue
++                try:
++                    s3c.head_object(Bucket=bucket, Key=rel_key)
++                except Exception as he:
++                    status = None
++                    resp = getattr(he, "response", None)
++                    if isinstance(resp, dict):
++                        status = resp.get("ResponseMetadata", {}).get("HTTPStatusCode")
++                    if status == 403:
++                        n_iam_denied += 1
++                        unresolved.append({"endpoint": label, "firm": firm, "reason": f"iam-denied-403 (s3://{bucket}/{rel_key} -- CONFIG error, NOT absence)"})
++                    else:
++                        n_obj_miss += 1
++                        unresolved.append({"endpoint": label, "firm": firm, "reason": f"object-absent (s3://{bucket}/{rel_key})"})
++                    continue
++                edges.append({
++                    "source": nid,
++                    "target": target_id,
++                    "edge_type": "SERVED_FROM",
++                    "tier": "dynamic",
++                    "firm": firm,
++                    "s3_key": rel_key,
++                    "bucket": bucket,
++                    "resolution": "advisor-intelligence-firm-config-fanout (B1-map, both-ends-verified)",
++                    "verified": "object+node",
++                })
++    graph.setdefault("edges", []).extend(edges)
++    print(f"INFO: SERVED_FROM_DYN_STITCH endpoints_matched={seen_endpoints} formed={len(edges)} "
++          f"unresolved_visible={len(unresolved)} (object_miss={n_obj_miss} iam_denied={n_iam_denied} node_miss={n_node_miss})")
++    for u in unresolved[:60]:
++        print(f"INFO: SERVED_FROM_DYN_UNRESOLVED {u}")
++    if len(unresolved) > 60:
++        print(f"INFO: SERVED_FROM_DYN_UNRESOLVED (+{len(unresolved) - 60} more not listed)")
++
++
+ # =============================================================================
+ # NFRA_GRAPHS.D8-FP --sign-baseline (CTO 204916Z ADOPT (a)) -- BY-CONSTRUCTION baseline signer
+ # =============================================================================
+@@ -1718,6 +1813,14 @@ def main() -> int:
+     except Exception as e:
+         print(f"WARN: SERVED_FROM_STITCH_FAIL err={e} -- derive continues without the cross-domain join")
+ 
++    # NFRA_TSGRAPH dynamic-tier enrichment (COMPTEAM B1 graph-gap, CTO-routed): additive Endpoint
++    # -SERVED_FROM(tier=dynamic)-> firm-bucket edges so the canonical graph carries BOTH tiers.
++    # Best-effort; never fails the derive. Requires Endpoint nodes + the B1-map resolution table.
++    try:
++        stitch_served_from_dynamic(graph)
++    except Exception as e:
++        print(f"WARN: SERVED_FROM_DYN_STITCH_FAIL err={e} -- derive continues without the dynamic enrichment")
++
+     # NFRA_MSGRAPH S2 (additive): fold the MS doc-cloud into the single graph. Two error
+     # regimes, DELIBERATELY different:
+     #  - a CONTENT/COMMS LEAK (MsContentCommsLeak from the SS4 cert) FAILS THE DERIVE CLOSED
