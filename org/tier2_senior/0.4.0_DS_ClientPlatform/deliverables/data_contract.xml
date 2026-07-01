@@ -1182,6 +1182,40 @@
     </artifact>
   </fee_efficiency_contract_notes>
 
+  <advi_tagattr_contract_notes>
+    <artifact>
+      <s3_key>platinum/firm/leaderboard.json (served, Advisors tab) &lt;- gold/artifacts/employee_leaderboard.json</s3_key>
+      <produced_by>D_00c.portal_leaderboard.py (employee_leaderboard.json emit) -> D_04.client_portal_summary.py (trim to platinum/firm/leaderboard.json)</produced_by>
+      <consumer>AdvisorsTab (role-filter path) + AdvisorPublicProfile Role Composition (DE-owned FE)</consumer>
+
+      <shipped name="ADVI_TAGATTR.DS-1 -- role_breakdown FULL-TAGGED (AUA + NNA + inflows/outflows)">
+        Andrew-direct 2026-07-01 (CTO arch-gated). Commits: D_00c 0ab172d3f, D_04 fc8c18361.
+        SEMANTIC CHANGE: windows[*].entries[].role_breakdown[role].{aua,nna,inflows,outflows} are now
+        FULL TAGGED and NON-ADDITIVE -- each carries the FULL account value for every account where that
+        (advisor, role) is tagged, with NO split_pct weighting. An account where the advisor holds N roles
+        contributes its FULL value to EACH of the N role buckets. Role buckets therefore do NOT sum to the
+        advisor dedup total_aua, nor across advisors to a firm total. (Was: split_pct "three-case" weighted,
+        which under-counted -- e.g. travis_penfield role-sum ~358.34M vs dedup 439.97M.)
+        SOURCE: recomputed from the account_team melt (full total_aua deduped per advisor+account; role
+        NNA/flows via per-role pairs at weight 1.0). The canonical role_aua path (aua_tagged_total) was NOT
+        used -- its D_00c consumption is disabled (if False, P1-shadow INTERIM-REVERT 2026-04-20, underscaled ~5x).
+        NEW FIELDS (ARCH-GATE 1 non-additive labeling; carried through D_04's _LEADERBOARD_ROLE_FIELDS whitelist):
+          - per-role: `aua_basis` = "tagged_full_nonadditive"
+          - top-level: `role_breakdown_semantics` = "advisor_tagged_full_nonadditive"
+        CONSUMERS MUST NOT sum role_breakdown (or sum advisor total_aua across advisors) to a firm total.
+        UNCHANGED: advisor total_aua (dedup tagged ~439.97M; served value sourced from D_02 book.json via D_04 L2313).
+      </shipped>
+
+      <held name="fee-basis leg gated to CTO (ARCH-GATE 2)">
+        Per-role fee_paying.aua is scaled to the C_08 canonical billing total (fee_aua; D_00c L602-624) and
+        implied_revenue is sourced from C_08's advisor_fee_detail. Full-tagging the fee-basis rebases it across
+        the C_08 lane (fee-scorecard integrity) -> HELD pending CTO arch-adjudication (ADR ask 2026-07-01T13:53Z).
+        In leg 1 the fee sub-buckets are unchanged; role_breakdown[role].no_fee.aua shifts only as the
+        full-tagged residual (role.aua == fee_paying.aua + no_fee.aua invariant preserved).
+      </held>
+    </artifact>
+  </advi_tagattr_contract_notes>
+
   <!--
     ADVI_FNTEND.B6 contract notes (pending-fix surfacing, 2026-04-15 22:13Z).
     Validated against post-19:35Z artifact gold/artifacts/partner_analytics/header_metrics_quarterly.json.
