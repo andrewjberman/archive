@@ -41,6 +41,10 @@ ADVI_INFREF must NOT be closed (project JSON / REGISTRY flip) until COMPLETELY c
 - **P2 BATCH (post-cutover, non-blocking) = 3:** (1) household/accounts DIM stale since 04-28; (2) nightly orphan-GC BROKEN (cruft re-accretes) = real fix; (3) clients/{hh} vs {hh}.0 keying quirk; (+ CloudFront invalidation of platinum/firm/* + 307 clients for immediate edge freshness, else TTL cadence — non-gating).
 - **P2 residuals (post-cutover, non-blocking):** (1) household/accounts DIM stale since 04-28; (2) **nightly orphan-GC BROKEN** (never GC'd 691 departed households since ~April -> cruft re-accretes) = real fix-needed, not just "orphans persist" (CTO-sharpened); (3) clients/{hh} vs {hh}.0 dir-keying quirk. COO to batch to Andrew post-cutover.
 
+## Tail-watch timing UPDATE (0.6.1 13:41Z, b2f61bed8/35b6c9898)
+- **L1 first-nightly-pull now fires ~9:00-9:47 ET (~13:00-13:47 UTC) tomorrow, NOT 8:30** — Andrew-direct: inf morning pull shifted +47min so it doesn't pull before Orion settles prior-day close (~$440K/0.22% AUA understatement Andrew spotted). 12 EventBridge rules shifted, safe-apply 0add/12change/0destroy, live-verified. **Do NOT read old-8:30-time silence as an L1 miss.**
+- **L7 CARRY-OVER GATE:** the 9:00 ET start MUST carry into the --chain full single-runner schedule at cutover (L7 decommissions these crons) — else the timing fix REVERTS when the crons are deleted. 0.6.1 flagged CTO + filed under this tail. Track as an L7-close condition.
+
 ## Close-criterion REFINED (CTO 13:23Z, f134c6b15)
 - **CLOSE = L1 + L6 + L7 CLOSED + 3-way tri-attestation (AE+DS~A+CVO) -> COO flips REGISTRY.** Realistic ~07-02/03 (L1 first-nightly-pull, L6 temporal-stability ~tomorrow, L7 cron-delete after L6).
 - **L4 RE-SCOPED OUT** (CTO author call): perf-incremental flip / perf-cron decommission = a DISTINCT future optimization (incremental artifact not built yet) -> its OWN project/ledger, does NOT hold THIS cutover's close.
