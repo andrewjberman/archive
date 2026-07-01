@@ -1,6 +1,6 @@
 <to_id>ADVI_TAGATTR.DS-2</to_id>
 <project>ADVI_TAGATTR</project>
-<title>DS-2 -- D_02 + D_01 served advisor AUA -> architect_no_infer (stop crediting 49F House / impl-pairing-inferred accounts to named individuals; keep Layer-2). Firm = 49F (BD).</title>
+<title>DS-2 -- served advisor AUA basis = a SHARED 2-way toggle (default no_infer), single-sourced across D_00c/D_00f/D_02/D_01 + stamped into the served artifact. D_02+D_01 stop crediting 49F House / impl-pairing-inferred accounts (served MOVE); D_00c/D_00f = no-op-at-default rewire. Keep Layer-2. Firm = 49F (BD).</title>
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>Andrew-direct 2026-07-01 (accepted 0.4.0_DS recommendation; staged by 0.4.0_DS)</issued_by>
 <consult>0.4.0_DE_ClientPlatform (FE consumer of served total_aua + PartnerAnalytics ADV); 1.0.0_SA_CTO (arch-gate -- served-number move); 2.0.0_SA_COO (blast-radius + sequencing); 3.0.0_SA_CVO (served-verify of the number movement)</consult>
@@ -23,8 +23,17 @@ Source-grounded 2026-07-01 (DS, Rule 22):
 - Post-TAGATTR.DS-1 the SAME served leaderboard entry mixes bases: role_breakdown[role].aua uses architect_no_infer (House excluded) while total_aua uses D_02's Layer-3-inferred architect (House rolled up). This TO removes that inconsistency.
 </grounding>
 
+<toggle_design andrew_direct="2026-07-01 -- keep it as a toggle, 2-way">
+Implement the basis as a SINGLE SHARED, ARTIFACT-STAMPED, 2-way TOGGLE -- NOT a per-script hard-repoint (a per-script toggle would REINTRODUCE the exact drift this fixes: D_00c on no_infer while D_02 on inferred).
+- ONE source of truth: a shared selector in lib (e.g. lib.advisor_nna_attribution ARCHITECT_BASIS, env-overridable ADVI_ARCHITECT_BASIS) = `no_infer` (DEFAULT) | `inferred`. NO third level (2-way per Andrew; explicit-tag-only would need a C_07 column -- OUT of scope).
+- ALL FOUR advisor-AUA producers read that ONE selector so they always move together: D_02 + D_01 (the served MOVE; today inferred -> default no_infer) AND D_00c + D_00f (today hard-no_infer -> now READ the selector; NO-OP at the default -- their served numbers must stay BYTE-UNCHANGED at no_infer).
+- STAMP the active basis into the served artifacts (`attribution_basis: "no_infer"` in book.json / leaderboard.json / partner_analytics ADV) so the served number self-documents which basis produced it (CVO/FE/audit assertable).
+- FLIPPING the toggle is a DELIBERATE GATED DEPLOY (config-as-code, versioned), NOT a runtime env-flip on a live financial number -- a flip carries the same never-widen + CVO-verify + Andrew magnitude-confirm as any served move. Default no_infer is correct; `inferred` retained for revert/A-B.
+- bd/cot-pipeline scope only: inf uses a separate orion per-advisor attribution (not C_07 no_infer) -- untouched.
+</toggle_design>
+
 <scope>
-Migrate the 49F (BD) SERVED advisor-AUA attribution from the Layer-3-inferred architect to architect_no_infer, on the TWO consumers that attribute AUA:
+Ship the shared toggle (default no_infer). At the default, migrate the 49F (BD) SERVED advisor-AUA attribution from the Layer-3-inferred architect to architect_no_infer, on the TWO consumers that attribute AUA:
 1. D_02.advisor_client_detail.py: replace the Layer-3 `resolved_architect` overlay (L3155-3166) source with account_team.architect_no_infer so book.json summary.total_aua (the SERVED advisor total via D_04) no longer credits 49F House / impl-pairing-inferred accounts to named individuals. (Other-role attribution -- implementor/consultant/etc -- is unchanged; only the architect-role inference source changes.)
 2. D_01.partner_analytics.py: switch the ADV-view architect source (L355/L916-929) to architect_no_infer so the PartnerAnalytics architect AUA donut matches the same basis.
 
@@ -47,12 +56,16 @@ DO NOT touch the other ~12 inferred-`architect` consumers (they use architect fo
 <cross_domain_coordination>D_02 -> D_04 (D_04 sources served leaderboard total_aua from D_02 book.json L2311-2313); D_01 -> PartnerAnalytics ADV. Sequence AFTER TAGATTR.DS-1 leg-1 validates on the nightly (clean baseline; both touch the same served advisor artifact -- do not confound). FE (AdvisorPublicProfile total_aua hero + PartnerAnalytics ADV) is DE-owned; the number moves but the shape does not (zero FE change expected -- DE confirms render + the moved number is expected).</cross_domain_coordination>
 
 <acceptance_criteria>
-1. On the served nightly artifacts (book.json / platinum/firm/leaderboard.json / partner_analytics ADV -- scheduled nightly, NOT ad-hoc): 49F advisor total_aua + ADV-donut AUA no longer credit 49F House / impl-pairing-inferred accounts to named individuals; they use architect_no_infer.
-2. Layer-2 PRESERVED: a blank-architect account still credits the relationship's modal REAL architect (advisors do NOT lose real-sibling-inherited accounts; only House + impl-pairing-guesses are removed).
-3. role_breakdown[role].aua (DS-1) and total_aua (this TO) now share the architect_no_infer basis on the same served entry -- the mixed-basis inconsistency is gone.
-4. The ~12 label-only inferred-architect consumers UNTOUCHED; inf + cot UNTOUCHED; firm separation held (bd tree only; comp-pipescript deployed MATCH, 49F-only).
-5. Pre-serve delta quantified + CTO arch-gate + Andrew-confirm on the downward total_aua shift obtained BEFORE it serves.
-6. Session-log Compiler Tools reproduces the mandate. RAVC2 to COO + CTO + DE (CC CVO); CVO served-verifies the number movement.
+1. A SINGLE shared basis selector exists (lib, env-overridable, `no_infer` default | `inferred`), and ALL FOUR advisor-AUA producers (D_00c, D_00f, D_02, D_01) read THAT ONE selector -- no per-script hard-code, no drift path. 2-way only (no explicit-tag-only / no C_07 column add).
+2. The served artifacts stamp the active basis (`attribution_basis` in book.json / leaderboard.json / partner_analytics ADV).
+3. Toggle REVERTS cleanly: setting the selector to `inferred` reproduces the pre-DS-2 (Layer-3) served numbers (dry-run-provable), confirming it is a true toggle, not a one-way migration.
+4. At the DEFAULT (`no_infer`): on the served nightly artifacts (scheduled nightly, NOT ad-hoc), 49F advisor total_aua + ADV-donut AUA no longer credit 49F House / impl-pairing-inferred accounts to named individuals.
+5. D_00c + D_00f served output BYTE-UNCHANGED at the default (they already produced no_infer; the rewire to read the selector is a no-op at default -- prove unchanged, must not move DS-1 leg-1's leaderboard numbers).
+6. Layer-2 PRESERVED: a blank-architect account still credits the relationship's modal REAL architect (advisors do NOT lose real-sibling-inherited accounts; only House + impl-pairing-guesses removed).
+7. role_breakdown[role].aua (DS-1) and total_aua (this TO) share the no_infer basis on the same served entry -- the mixed-basis inconsistency is gone.
+8. The ~12 label-only inferred-architect consumers UNTOUCHED; inf + cot UNTOUCHED; firm separation held (bd tree only; comp-pipescript deployed MATCH, 49F-only).
+9. Pre-serve delta quantified (D_02/D_01 downward shift) + CTO arch-gate + COO never-widen co-sign + Andrew magnitude-confirm obtained BEFORE it serves. Flipping the toggle later carries the SAME gate (it is not a casual env-flip).
+10. Session-log Compiler Tools reproduces the mandate. RAVC2 to COO + CTO + DE (CC CVO); CVO served-verifies the number movement + confirms attribution_basis stamp.
 </acceptance_criteria>
 
 <references><ref type="source">data/black_diamond/scripts/gold/D_02.advisor_client_detail.py (L354-359 resolved_architect load; L3155-3166 overlay; L1235-1260 total_aua over role_mask); D_01.partner_analytics.py (L355 rel_arch_lookup; L916-929 ADV multi-role AUA); C_07.advisor_attribution.py (L232-262 resolve_architect Layer-3; L269-307 resolve_architect_no_infer)</ref><ref type="precedent">ADVI_NNAATTR F-0 (Andrew 2026-06-17) -- Layer-3-off basis for leaderboard + canonical NNA; this extends it to the served advisor total_aua + ADV.</ref><ref type="memory">memory/reference_bd_architect_inference_no_infer_split.md</ref></references>
