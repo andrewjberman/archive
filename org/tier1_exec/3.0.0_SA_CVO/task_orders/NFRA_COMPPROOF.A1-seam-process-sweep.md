@@ -2,7 +2,7 @@
 
 <issued_to>3.0.0_SA_CVO~B</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>dispatched</status>
+<status>complete -- 12 seams (11 PASS/1 charted FAIL) + 4 processes (PASS), 3-axis on live, wave 6-of-6; ledger 1432Z</status>
 <priority>MEDIUM-HIGH -- concurrent on live; rides the wave-close (GRAPHUNI/GRAPHDEPTH already CLOSED, so no preempt concern). PRD SS2-A + SS6.</priority>
 <date>2026-07-01</date>
 
