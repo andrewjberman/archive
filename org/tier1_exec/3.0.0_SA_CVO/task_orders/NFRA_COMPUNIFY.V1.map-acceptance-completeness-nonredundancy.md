@@ -2,7 +2,7 @@
 
 <issued_to>3.0.0_SA_CVO~B</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>complete</status>
 <priority>HIGH — Andrew-direct close-out drive (2026-07-01). SEQUENCED behind your in-flight GRAPHDEPTH gate-lift verdict (that fires first). The COMPUNIFY map (the comp-tool taxonomy) is independent of the GRAPHDEPTH substrate population — V1 can run right after the gate-lift; flag me if you read a dependency I've missed.</priority>
 <date>2026-07-01</date>
 
