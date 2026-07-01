@@ -5,7 +5,7 @@
 <issued_by>0.4.0_DE_ClientPlatform (Andrew-direct ruling 2026-07-01, relayed with source grounding)</issued_by>
 <consult>0.4.0_DE_ClientPlatform (FE consumer + verification); 2.0.0_SA_COO (blast-radius coordination); 3.0.0_SA_CVO (served-verify)</consult>
 <issued_date>2026-07-01</issued_date>
-<status>staged</status>
+<status>pending</status>
 <priority>HIGH -- Andrew-direct; live advisor-facing AUA inconsistency on the 49F AdvisorIntelligence page.</priority>
 
 <andrew_ruling verbatim="near">
@@ -41,6 +41,12 @@ DO NOT touch inflection (INF_D_00c is a separate producer; inflection advisors a
 comp-blast D_00c + comp-pipescript io/consumers before changing. Known/suspected consumers to check: D_01.partner_analytics (firm-level -- should stay dedup), D_02.advisor_client_detail (book.json -- drilldown overlay), C_08.advisor_fee_efficiency + E_23/E_24 fee scorecard (fee semantics), portal AdvisorsTab (leaderboard partial-role path) + AdvisorPublicProfile Role Composition (DE-owned FE). Non-additivity is EXPECTED + accepted by Andrew (sum of advisor AUAs > firm AUA).
 </blast_radius>
 
+<arch_gates issued_by="1.0.0_SA_CTO 2026-07-01" status="REQUIRED before DS lands">
+CTO GO'd the direction (full-tag, Andrew-set) but gated the SEMANTICS. Both are BINDING:
+1. NON-ADDITIVE LABELING INVARIANT (schema/labeling, enforce not just accept). Full-tagged role_aua is NON-ADDITIVE to firm total. (a) The DS emit MUST label the per-role tagged field DISTINCTLY as advisor-TAGGED / non-additive, NOT firm-AUA (ties to the AUA/NNA-terminology non-negotiable). (b) NO consumer may SUM role_breakdown (or sum advisor total_aua across advisors) and present it as a firm total. DE FE-side verification (DONE, see note): the firm total renders from the CLIENT-level firm artifact (PartnerAnalytics views.aua.current.donut.total / gold_aua), NOT from advisor sums; the lone cross-advisor sum (AdvisorsTab summary.total_aua, line 537) is COMPUTED-BUT-UNRENDERED (latent risk -- DE to remove/guard in the FE follow-on); all other total_aua renders are per-advisor (entry.total_aua). SEV1-adjacent: a non-additive value presented as additive = wrong-number incident.
+2. FEE-TAGGING BLAST-GATE (COO lane, CTO-required). comp-blast the FEE surface (role-fee field in D_00c + every fee-scorecard consumer C_08/E_23) BEFORE landing the fee change; enumerate ALL role-fee consumers; confirm each intends the full-tagged fee-BASIS or is excluded/coordinated. Full-fee-per-advisor RE-BASES the fee basis vs the "three-case" split rule -> must not silently change a fee scorecard (C_08 silent-rebasing precedent). Breaking consumer -> STOP + CTO arch-adjudicates. COO is driving this blast; DS executes it before the fee leg lands.
+</arch_gates>
+
 <compiler_tools_mandate>
   <phase id="1" when="before write"><step><run>comp-pipescript io D_00c.portal_leaderboard</run><expect>COLUMN GAPS + downstream portal consumers of role_breakdown.aua/nna + fee buckets.</expect></step><step><run>comp-blast D_00c</run><expect>every consumer of the emitted leaderboard.json fields.</expect></step></phase>
   <phase id="2" when="before commit"><step><run>.tools/ds-commit-gate.sh</run><expect>py_compile + ruff clean.</expect></step></phase>
@@ -55,6 +61,8 @@ comp-blast D_00c + comp-pipescript io/consumers before changing. Known/suspected
 3. NNA + inflows/outflows + fee sub-buckets at the role level are full-tagged consistently.
 4. A short note back to DE stating whether aua_tagged_total was available in the canonical role_aua source (preferred) or had to be recomputed, and the blast-radius result for the fee path.
 5. Session log Compiler Tools section reproduces the mandate. RAVC2 to DE (CC COO + CVO).
+6. ARCH-GATE 1 (labeling): the emitted per-role tagged field is named/labeled as advisor-TAGGED (non-additive), distinct from firm-AUA; no field invites cross-advisor summation as a firm total. (DE verifies the FE side; DS ensures the schema/label side.)
+7. ARCH-GATE 2 (fee blast): comp-blast of the fee surface (D_00c role-fee + C_08/E_23) run BEFORE the fee leg lands, with every role-fee consumer enumerated + confirmed intending the full-tagged basis (or excluded/coordinated). Breaking consumer -> STOP + escalate to CTO. RAVC the fee-blast result to COO+DE before landing fees.
 </acceptance_criteria>
 
 <references><ref type="source">data/black_diamond/scripts/gold/D_00c.portal_leaderboard.py (lines 161-190 canonical loader; 442-518 role_detail; 865/590 tagged; 876-931 split_pct three-case)</ref><ref type="fe">portal/src/pages/AdvisorIntelligence/_shared/AdvisorPublicProfile.tsx (Role Composition ~790-847); _shared/tabs/AdvisorsTab.tsx (getDisplayMetrics ~330-439)</ref></references>
