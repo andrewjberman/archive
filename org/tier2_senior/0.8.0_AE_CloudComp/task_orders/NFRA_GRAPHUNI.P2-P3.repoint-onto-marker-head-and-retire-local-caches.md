@@ -2,7 +2,9 @@
 
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-07-01 (0.8.0_AE_CloudComp~D) -- (b)-interim per JOINT VERDICT (CTO ruling + CVO~B fixture-bar). P2 read-handle comp_marker_read.py (dfad285bf/42b7f3c48, GRAPHDEPTH P3 composes). Re-point = (b) HEAD-PINNED build_graph (NOT literal Kuzu -- (a) deferred, coverage-equivalence-gated): 4 structure tools head-pinned (cli.py e0d839996 + graph_cache 70ff64a56) + the producer (extract_gold_compute 57518fc3a) -- the actual phantom source. CVO~B (b) re-point cert GREEN (150e0b8b4, 0 regression). D3 = no cache-DELETE under (b) (head-pinned cache IS the source). D4 one-head asserted -- test PASSING (org/modules/graph/tests/test_graphuni_headpin_d4.py, exec-land routed to CVO~B, AE-lane-blocked). Residual: D4-test SoD-land + COO~B 2-step close + (a) coverage-equivalence follow-on (CVO~B-gated). -->
+
 <priority>HIGH — Andrew-direct close-out drive (2026-07-01). P1 (D1-fill) is COMPLETE + CVO-ACCEPTED (Phase-B derive landed, CVO~B L3 GREEN 5fc0bce73, marker 5434137157015633165). This is the UNIFICATION PAYOFF -- and it structurally kills the stale-cache-phantom class we just caught on the Phase-B derive. You're the registered GRAPHUNI build lane.</priority>
 <date>2026-07-01</date>
 
