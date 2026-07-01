@@ -7,7 +7,7 @@
 INFREF rebuild STEP2a OVERWROTE live inf silver IN-PLACE (all 4 dims; pre-rebuild backup `_pre_rebuild_backup/20260630T234458Z/`). The served-GOLD nightly compute is HELD (inf-gold-incremental-daily @18Z + inf-etf-ownership-on-gold-complete both DISABLED — verified live 0357Z), so no gold computes against mid-rebuild silver. BUT the daily bronze->silver ingest chain is ENABLED and kicks at **~12:13Z** (opal-inf-jwt-fetch @12:13Z -> api pulls 12:30-14:00Z -> inf-silver-chain-bronze-complete overwrites silver). If the cutover has NOT completed by then, the daily chain overwrites the rebuilt silver mid-cutover.
 
 ## The trigger (fire IF ANY holds)
-1. Current re-fire FAILS -> heading into a 2nd relaunch, OR
+1. **INTRACTABLE repeat failure** — a re-fire fails AGAIN on a NEW reason with no tractable known-fix (NOT any trivial known-fix re-fire; CTO-refined 042537Z — the original "2nd relaunch" wording meant intractability, not re-fire count), OR
 2. hang-diagnosis (hang-vs-slow) drags past ~2h, OR
 3. cutover simply NOT done by **~10:00Z**.
 
