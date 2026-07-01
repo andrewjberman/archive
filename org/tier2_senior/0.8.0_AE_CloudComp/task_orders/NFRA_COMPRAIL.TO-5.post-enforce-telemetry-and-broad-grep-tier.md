@@ -2,7 +2,9 @@
 
 <issued_to>0.8.0_AE_CloudComp~E</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>complete</status>
+<!-- DELIVERED 2026-07-01: comp-rail-audit 3b87a05a1 (pushed). Telemetry 89% rail-found; broad-grep FP/TP scoped to governed repo-grep = 4% on 27 thin/dryrun events -> HOLD recommendation (data-insufficient for a fabric-wide hard-deny; nudge already works, 769 comp-grep adoptions). RAVC'd COO~B + CVO~B + CTO. COMPRAIL close finalizes on COO+CVO disposition of the HOLD (their gate). Coverage-gap classes -> COMPLEARN. -->
+
 <priority>MEDIUM — Andrew-direct close-out drive (2026-07-01). COMPRAIL core is LIVE + enforcing fabric-wide (TO-2/3/4 complete, Andrew GO 06-22). TO-5 is the LAST tier + the close TO. NOT gate-lift-gated; sequence behind your COMPLEARN close + the active wave. You own the rail-log via COMPLEARN's tool_activity, so you're the natural owner.</priority>
 <date>2026-07-01</date>
 
