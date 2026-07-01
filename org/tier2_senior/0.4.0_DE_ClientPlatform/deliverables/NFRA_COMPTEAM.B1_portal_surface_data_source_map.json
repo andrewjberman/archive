@@ -2,9 +2,12 @@
  "meta": {
   "deliverable": "NFRA_COMPTEAM B1 -- portal-surface -> data-source map (TSGRAPH PanelCluster + SERVED_FROM/FIRM_CONFIG, grounded vs live served, cadence-aware)",
   "owner": "0.4.0_DE_ClientPlatform",
-  "version": "v0.2",
-  "generated_at": "2026-07-01T20:53:07Z",
-  "status": "v0.2 -- STATIC tier fully grounded+live+cadence-aware; DYNAMIC tier grounded (FIRM-LEVEL live-confirmed across bd/cot/inf, PER-ENTITY pattern-resolved, TAIL enumerated for v0.3)",
+  "version": "v0.3",
+  "schema_version": "1.0-FROZEN",
+  "schema_contract": "FROZEN as the B1->B2 hand-off contract (CTO arch-gate 2026-07-01, ask-3). B2 keys off pages[].clusters[].sources[].{bucket,s3_key} (STATIC) + {relative_key, firm} (DYNAMIC). A schema change = a re-RAVC to CTO.",
+  "arch_gate": "CTO-ACCEPTED 2026-07-01 (965c0a8c1 + v0.3): two-tier method ACCEPTED; expected_cadence ADOPTED first-class; JSON schema = B1->B2 contract (interim, until TSGRAPH dynamic-edge enrichment lands in the NFRA_TSGRAPH lane); graph-gap = ENRICH (routed to DE TSGRAPH lane, B1-map-fed).",
+  "generated_at": "2026-07-01T21:00:20Z",
+  "status": "v0.3 -- STATIC grounded+live+cadence-aware (incl. 5 TAIL labels reclassified to static portal-v2); DYNAMIC grounded (FIRM-LEVEL live bd/cot/inf, PER-ENTITY pattern); non_model_assets cadence-VERIFIED (daily, real-stale) per CTO gate.",
   "grounding": "comp-cluster live Kuzu (nessie HEAD current 2026-07-01T04:45Z) + SERVED_FROM (static) + comp-platinum tab-audit / advisor-intelligence endpoints FIRM_CONFIG (dynamic); live-confirm via comp-freshness (2026-07-01); CMA cadence Andrew-confirmed yearly.",
   "method": {
    "STATIC": "Endpoint -READS_URL-> ServedURL -SERVED_FROM-> {bucket,s3_key}; comp-freshness; cadence-aware verdict.",
@@ -17,20 +20,20 @@
   "clusters": 91,
   "source_bindings": 125,
   "tier_distribution": {
-   "DYNAMIC": 83,
-   "STATIC": 42
+   "DYNAMIC": 78,
+   "STATIC": 47
   },
   "static_verdicts": {
-   "FRESH": 33,
+   "FRESH": 36,
    "EXPECTED-CADENCE": 6,
-   "REAL-STALE": 3
+   "REAL-STALE": 5
   },
   "dynamic_classes": {
    "PER-ENTITY": 32,
    "FIRM-LEVEL": 38,
-   "TAIL": 13
+   "TAIL": 8
   },
-  "real_stale": 1,
+  "real_stale": 2,
   "expected_cadence_not_stale": 2
  },
  "findings": [
@@ -41,7 +44,18 @@
    "artifact": "s3://opal-data-portal-v2/json/portfolios/non_model_assets.json",
    "last_modified": "2026-06-25T16:42:16+00:00",
    "expected_cadence": "daily",
-   "detail": "Served past ITS OWN cadence. (non_model_assets = 49F/Schwab freeze -> folds into MDPF basis-switch per COO.)"
+   "cadence_evidence": "daily -- sibling portfolios/mdpf artifacts (aum-metrics, account-distribution, aum-timeseries) updated 2026-07-01T11:30Z; this one frozen.",
+   "detail": "Served past ITS OWN (daily) cadence. non_model_assets.json (frozen 2026-06-25T16:42:16) AND mdpf/aggregate-aua-timeseries.json (frozen 2026-06-25T16:42:42) share the EXACT freeze timestamp = one 49F/Schwab non-model-asset feed freeze event -> BOTH fold into the MDPF basis-switch thread (COO-routed); self-resolve on the roll-forward."
+  },
+  {
+   "severity": "REAL-STALE",
+   "page": "ModelPortfolios",
+   "cluster": "peer-performance",
+   "artifact": "s3://opal-data-portal-v2/json/mdpf/aggregate-aua-timeseries.json",
+   "last_modified": "2026-06-25T16:42:42",
+   "expected_cadence": "daily",
+   "cadence_evidence": "daily -- sibling portfolios/mdpf artifacts (aum-metrics, account-distribution, aum-timeseries) updated 2026-07-01T11:30Z; this one frozen.",
+   "detail": "Served past ITS OWN (daily) cadence. non_model_assets.json (frozen 2026-06-25T16:42:16) AND mdpf/aggregate-aua-timeseries.json (frozen 2026-06-25T16:42:42) share the EXACT freeze timestamp = one 49F/Schwab non-model-asset feed freeze event -> BOTH fold into the MDPF basis-switch thread (COO-routed); self-resolve on the roll-forward."
   },
   {
    "severity": "EXPECTED-CADENCE-NOT-STALE",
@@ -1828,12 +1842,17 @@
        "node": "rqk:aum-metrics",
        "kind": "ReactQueryKey",
        "via_endpoint": "getAUMMetrics",
-       "tier": "DYNAMIC",
+       "tier": "STATIC",
        "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
-       "dyn_class": "TAIL",
-       "resolution_route": "static: /api/general/portfolios/aum-metrics.json",
-       "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "reclassified_from": "DYNAMIC-TAIL",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/aum-metrics.json",
+       "expected_cadence": "daily",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T11:30:41"
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "aum-timeseries",
@@ -1877,12 +1896,17 @@
        "source": "getAUMMetrics",
        "node": "endpoint:getAUMMetrics",
        "kind": "Endpoint",
-       "tier": "DYNAMIC",
+       "tier": "STATIC",
        "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
-       "dyn_class": "TAIL",
-       "resolution_route": "static: /api/general/portfolios/aum-metrics.json (portal-v2)",
-       "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "reclassified_from": "DYNAMIC-TAIL",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/aum-metrics.json",
+       "expected_cadence": "daily",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T11:30:41"
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getAUMTimeSeries",
@@ -1924,12 +1948,17 @@
        "source": "getAccountDistributionByFirm",
        "node": "endpoint:getAccountDistributionByFirm",
        "kind": "Endpoint",
-       "tier": "DYNAMIC",
+       "tier": "STATIC",
        "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
-       "dyn_class": "TAIL",
-       "resolution_route": "static: /api/general/portfolios/account-distribution.json (portal-v2)",
-       "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "reclassified_from": "DYNAMIC-TAIL",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/account-distribution.json",
+       "expected_cadence": "daily",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T11:30:39"
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getETFBenchmarkReturns",
@@ -1953,12 +1982,17 @@
        "source": "getMdpfAggregateAUATimeSeriesByFirm",
        "node": "endpoint:getMdpfAggregateAUATimeSeriesByFirm",
        "kind": "Endpoint",
-       "tier": "DYNAMIC",
+       "tier": "STATIC",
        "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
-       "dyn_class": "TAIL",
-       "resolution_route": "static: /api/general/mdpf/aggregate-aua-timeseries.json (portal-v2) OR mdpf lambda",
-       "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "reclassified_from": "DYNAMIC-TAIL",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/mdpf/aggregate-aua-timeseries.json",
+       "expected_cadence": "daily",
+       "live": {
+        "status": "FAIL",
+        "last_modified": "2026-06-25T16:42:42"
+       },
+       "stale_verdict": "REAL-STALE"
       },
       {
        "source": "getModelPortfolioBenchmarks",
@@ -2019,12 +2053,17 @@
        "node": "rqk:mdpf-aggregate-timeseries",
        "kind": "ReactQueryKey",
        "via_endpoint": "getMdpfAggregateAUATimeSeriesByFirm",
-       "tier": "DYNAMIC",
+       "tier": "STATIC",
        "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
-       "dyn_class": "TAIL",
-       "resolution_route": "static: /api/general/mdpf/aggregate-aua-timeseries.json (portal-v2)",
-       "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "reclassified_from": "DYNAMIC-TAIL",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/mdpf/aggregate-aua-timeseries.json",
+       "expected_cadence": "daily",
+       "live": {
+        "status": "FAIL",
+        "last_modified": "2026-06-25T16:42:42"
+       },
+       "stale_verdict": "REAL-STALE"
       },
       {
        "source": "mdpf-per-firm-distribution",
