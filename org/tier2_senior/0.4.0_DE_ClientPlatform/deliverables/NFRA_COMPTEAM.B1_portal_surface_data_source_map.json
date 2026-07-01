@@ -1,13 +1,15 @@
 {
  "meta": {
-  "deliverable": "NFRA_COMPTEAM B1 -- portal-surface -> data-source map (TSGRAPH PanelCluster + SERVED_FROM, grounded vs live served)",
+  "deliverable": "NFRA_COMPTEAM B1 -- portal-surface -> data-source map (TSGRAPH PanelCluster + SERVED_FROM/FIRM_CONFIG, grounded vs live served, cadence-aware)",
   "owner": "0.4.0_DE_ClientPlatform",
-  "generated_at": "2026-07-01T20:41:53Z",
-  "status": "v0.1 -- STATIC tier fully grounded + live-confirmed; DYNAMIC tier enumerated + flagged (graph gap)",
-  "grounding": "comp-cluster live canonical Kuzu (nessie HEAD current, built 2026-07-01T04:45Z) + SERVED_FROM lineage; STATIC tier live-confirmed vs S3 via comp-freshness (2026-07-01)",
+  "version": "v0.2",
+  "generated_at": "2026-07-01T20:53:07Z",
+  "status": "v0.2 -- STATIC tier fully grounded+live+cadence-aware; DYNAMIC tier grounded (FIRM-LEVEL live-confirmed across bd/cot/inf, PER-ENTITY pattern-resolved, TAIL enumerated for v0.3)",
+  "grounding": "comp-cluster live Kuzu (nessie HEAD current 2026-07-01T04:45Z) + SERVED_FROM (static) + comp-platinum tab-audit / advisor-intelligence endpoints FIRM_CONFIG (dynamic); live-confirm via comp-freshness (2026-07-01); CMA cadence Andrew-confirmed yearly.",
   "method": {
-   "STATIC": "Endpoint -READS_URL-> ServedURL -SERVED_FROM-> {bucket,s3_key}  (or served-URL-labelled source direct) -> comp-freshness EXISTS/FRESH",
-   "DYNAMIC": "portal Endpoint terminal (Hook -FETCHES-> Endpoint, no SERVED_FROM); Lambda-mediated via advisor-intelligence/portal-proxy/mdpf -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum. NOT graph-grounded (see GRAPH-COVERAGE-GAP)."
+   "STATIC": "Endpoint -READS_URL-> ServedURL -SERVED_FROM-> {bucket,s3_key}; comp-freshness; cadence-aware verdict.",
+   "DYNAMIC": "endpoint/rqk -> relative platinum key (comp-platinum tab-audit + advisor-intelligence endpoints); firm prefix selects opal-data-{bd,cot,inf}; FIRM-LEVEL live-confirmed across all 3 firms; PER-ENTITY parameterized by {id}.",
+   "cadence": "expected_cadence per artifact (yearly CMA ... nightly platinum ... daily portal-v2); stale = past ITS OWN cadence."
   }
  },
  "summary": {
@@ -18,44 +20,44 @@
    "DYNAMIC": 83,
    "STATIC": 42
   },
-  "unique_static_artifacts": 12,
-  "static_live_pass": 9,
-  "static_live_fail": 3
+  "static_verdicts": {
+   "FRESH": 33,
+   "EXPECTED-CADENCE": 6,
+   "REAL-STALE": 3
+  },
+  "dynamic_classes": {
+   "PER-ENTITY": 32,
+   "FIRM-LEVEL": 38,
+   "TAIL": 13
+  },
+  "real_stale": 1,
+  "expected_cadence_not_stale": 2
  },
  "findings": [
   {
-   "severity": "STALE-SERVED",
-   "page": "CapitalMarketAssumptions",
-   "cluster": "opal-views",
-   "source": "/api/general/capital-markets/assumptions.json",
-   "artifact": "s3://opal-data-portal-v2/json/capital-markets/assumptions.json",
-   "last_modified": "2026-03-11T00:45:53+00:00",
-   "age": "2707.8h",
-   "detail": "PanelCluster served from a STALE artifact (beyond 48h fail threshold)."
-  },
-  {
-   "severity": "STALE-SERVED",
-   "page": "CapitalMarketAssumptions",
-   "cluster": "opal-views",
-   "source": "/api/general/capital-markets/views.json",
-   "artifact": "s3://opal-data-portal-v2/json/capital-markets/views.json",
-   "last_modified": "2026-01-09T18:28:35+00:00",
-   "age": "4154.1h",
-   "detail": "PanelCluster served from a STALE artifact (beyond 48h fail threshold)."
-  },
-  {
-   "severity": "STALE-SERVED",
+   "severity": "REAL-STALE",
    "page": "ModelPortfolios",
    "cluster": "peer-performance",
-   "source": "/api/general/portfolios/non_model_assets.json",
    "artifact": "s3://opal-data-portal-v2/json/portfolios/non_model_assets.json",
    "last_modified": "2026-06-25T16:42:16+00:00",
-   "age": "147.9h",
-   "detail": "PanelCluster served from a STALE artifact (beyond 48h fail threshold)."
+   "expected_cadence": "daily",
+   "detail": "Served past ITS OWN cadence. (non_model_assets = 49F/Schwab freeze -> folds into MDPF basis-switch per COO.)"
+  },
+  {
+   "severity": "EXPECTED-CADENCE-NOT-STALE",
+   "artifacts": [
+    "s3://opal-data-portal-v2/json/capital-markets/assumptions.json",
+    "s3://opal-data-portal-v2/json/capital-markets/views.json"
+   ],
+   "detail": "CapitalMarketAssumptions views.json/assumptions.json -- Andrew-confirmed YEARLY cadence; ~6mo age is INTENTIONAL, NOT stale. Cadence-aware verdict prevents the false-FAIL."
   },
   {
    "severity": "GRAPH-COVERAGE-GAP",
-   "detail": "SERVED_FROM lineage grounds source->artifact ONLY for the 29 static ServedURL endpoints (ServedURL -SERVED_FROM-> bucket/s3_key). The DYNAMIC Lambda-mediated endpoints (advisor-intelligence / portal-proxy / mdpf -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum) terminate at the portal Endpoint node with NO modeled artifact edge -- so 83 of 125 source-bindings cannot be graph-grounded to a served artifact. RECOMMEND: enrich TSGRAPH with Endpoint->artifact (or Endpoint->Lambda->READS_S3) edges for dynamic endpoints so B1 grounding is fully graph-native (feeds NFRA_TSGRAPH / GLOBGRPH; unblocks a machine-checkable B2 read-partition over BOTH serving tiers)."
+   "detail": "SERVED_FROM grounds only the 29 static ServedURLs. The DYNAMIC tier (Lambda-mediated ADVI/PM/MDPF) is grounded in v0.2 via comp-platinum tab-audit + the advisor-intelligence endpoints map (FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum), NOT via the graph. RECOMMEND: enrich TSGRAPH with Endpoint->artifact edges (the FIRM_CONFIG map IS the enrichment input) so grounding is fully graph-native for B2."
+  },
+  {
+   "severity": "SCHEMA-RULE (cadence-per-artifact)",
+   "detail": "Freshness verdict is now cadence-aware: stale = past the artifact's OWN expected_cadence (daily/weekly/monthly/quarterly/yearly/event-driven), not a blanket 48h threshold. Slow-cadence served artifacts (yearly CMA) no longer false-FAIL -- this is what makes AC-3's live-grounded flag actionable. For CTO spec-gate: adopt expected_cadence as a first-class map field + a cadence registry per served artifact."
   }
  ],
  "pages": [
@@ -74,7 +76,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAccountSummary",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/book_account.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_account.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "advisor-book-client",
@@ -82,7 +89,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "then",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/book_client.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_client.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "firm-leaderboard",
@@ -90,56 +102,120 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getFirmLeaderboard",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/leaderboard.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/leaderboard.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "WARN",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getClientDirectory",
        "node": "endpoint:getClientDirectory",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/client_directory.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/client_directory.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "WARN(absent/pending)",
+        "cot": "WARN(absent -> emits tonight, COTMVP-B)",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getFirmLeaderboard",
        "node": "endpoint:getFirmLeaderboard",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/leaderboard.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/leaderboard.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "WARN",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getHeaderMetrics",
        "node": "endpoint:getHeaderMetrics",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/header_metrics.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/header_metrics.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getPlatinumAccountSummary",
        "node": "endpoint:getPlatinumAccountSummary",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/accounts/{id}/summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/accounts/{id}/summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getPlatinumAccountTimeseriesStatic",
        "node": "endpoint:getPlatinumAccountTimeseriesStatic",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/clients/{hh}/accounts/{id}/timeseries.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/clients/{hh}/accounts/{id}/timeseries.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getPlatinumFirmDashboard",
        "node": "endpoint:getPlatinumFirmDashboard",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/dashboard.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/dashboard.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getPlatinumFirmMixSummary",
        "node": "endpoint:getPlatinumFirmMixSummary",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/mix_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/mix_summary.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "header-metrics",
@@ -147,7 +223,16 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getHeaderMetrics",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/header_metrics.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/header_metrics.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "inflec-account-timeseries",
@@ -155,7 +240,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAccountTimeseriesStatic",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/clients/{hh}/accounts/{id}/timeseries.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/clients/{hh}/accounts/{id}/timeseries.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "inflection-client-directory",
@@ -163,7 +253,16 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getClientDirectory",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/client_directory.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/client_directory.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "WARN(absent/pending)",
+        "cot": "WARN(absent -> emits tonight, COTMVP-B)",
+        "inf": "PASS"
+       }
       },
       {
        "source": "platinum-firm-dashboard",
@@ -171,7 +270,16 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumFirmDashboard",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/dashboard.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/dashboard.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "platinum-firm-mix-summary",
@@ -179,7 +287,16 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumFirmMixSummary",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/mix_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/mix_summary.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       }
      ]
     },
@@ -194,21 +311,44 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getFirmLeaderboard",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/leaderboard.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/leaderboard.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "WARN",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getFirmLeaderboard",
        "node": "endpoint:getFirmLeaderboard",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/leaderboard.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/leaderboard.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "WARN",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getPlatinumPartnerAnalytics",
        "node": "endpoint:getPlatinumPartnerAnalytics",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/partner_analytics_{gran}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/partner_analytics_{gran}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       },
       {
        "source": "partner-analytics",
@@ -216,7 +356,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumPartnerAnalytics",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/partner_analytics_{gran}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/partner_analytics_{gran}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       }
      ]
     },
@@ -231,7 +376,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAccountSummary",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/book_account.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_account.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "advisor-book-client",
@@ -239,7 +389,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "then",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/book_client.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_client.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "advisor-book-view",
@@ -247,28 +402,48 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAdvisorSummary",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/book_view.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_view.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getPlatinumAccountSummary",
        "node": "endpoint:getPlatinumAccountSummary",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/accounts/{id}/summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/accounts/{id}/summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getPlatinumAccountTimeseriesStatic",
        "node": "endpoint:getPlatinumAccountTimeseriesStatic",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/clients/{hh}/accounts/{id}/timeseries.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/clients/{hh}/accounts/{id}/timeseries.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getPlatinumClientDetailStatic",
        "node": "endpoint:getPlatinumClientDetailStatic",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/clients/{id}/summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/clients/{id}/summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "inflec-account-timeseries",
@@ -276,7 +451,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAccountTimeseriesStatic",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/clients/{hh}/accounts/{id}/timeseries.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/clients/{hh}/accounts/{id}/timeseries.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       }
      ]
     },
@@ -291,7 +471,11 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAdvisorNnaClients",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "the advisor-intelligence Lambda itself (endpoint family root, not a single artifact)",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "advisor-mix-views",
@@ -299,7 +483,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getAdvisorMixViews",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/mix.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/mix.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "advisor-timeseries",
@@ -307,28 +496,52 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAdvisorTimeseries",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/timeseries.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/timeseries.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getAdvisorMixViews",
        "node": "endpoint:getAdvisorMixViews",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/mix.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/mix.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getAdvisorNnaCanonical",
        "node": "endpoint:getAdvisorNnaCanonical",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/advisor_nna_canonical.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/advisor_nna_canonical.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "WARN",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getPlatinumAdvisorTimeseries",
        "node": "endpoint:getPlatinumAdvisorTimeseries",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/timeseries.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/timeseries.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       }
      ]
     },
@@ -343,7 +556,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getCohortASummary",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/cohort_a_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/cohort_a_summary.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       },
       {
        "source": "firm-leaderboard",
@@ -351,28 +569,56 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getFirmLeaderboard",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/leaderboard.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/leaderboard.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "WARN",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getCohortASummary",
        "node": "endpoint:getCohortASummary",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/cohort_a_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/cohort_a_summary.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       },
       {
        "source": "getFirmLeaderboard",
        "node": "endpoint:getFirmLeaderboard",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/leaderboard.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/leaderboard.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "WARN",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getPlatinumPartnerAnalytics",
        "node": "endpoint:getPlatinumPartnerAnalytics",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/partner_analytics_{gran}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/partner_analytics_{gran}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       },
       {
        "source": "partner-analytics",
@@ -380,7 +626,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumPartnerAnalytics",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/partner_analytics_{gran}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/partner_analytics_{gran}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       }
      ]
     },
@@ -395,7 +646,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "then",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/activity_scan_{window}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/activity_scan_{window}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       },
       {
        "source": "inflection-cash-drag",
@@ -403,7 +659,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "then",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/cash_drag_{window}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/cash_drag_{window}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       },
       {
        "source": "inflection-firm-concentrations",
@@ -411,7 +672,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "then",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/firm/concentrations.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/concentrations.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       }
      ]
     },
@@ -425,7 +691,12 @@
        "node": "endpoint:getPlatinumPartnerAnalytics",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/partner_analytics_{gran}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/partner_analytics_{gran}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       },
       {
        "source": "partner-analytics",
@@ -433,7 +704,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumPartnerAnalytics",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/partner_analytics_{gran}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/partner_analytics_{gran}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       }
      ]
     },
@@ -448,7 +724,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAdvisorSummary",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/book_view.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_view.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "advisor-drilldown-summary",
@@ -456,7 +737,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAdvisorDrilldownSummary",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/drilldown_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/drilldown_summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "advisor-drilldown-timeseries",
@@ -464,7 +750,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAdvisorTimeseries",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/drilldown_timeseries.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/drilldown_timeseries.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "advisor-exec-summary",
@@ -472,7 +763,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getAdvisorExecSummary",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/exec_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/exec_summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "advisor-intelligence",
@@ -480,42 +776,75 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAdvisorNnaClients",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "the advisor-intelligence Lambda itself (endpoint family root, not a single artifact)",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "getAdvisorExecSummary",
        "node": "endpoint:getAdvisorExecSummary",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/exec_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/exec_summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getAdvisorNnaCanonical",
        "node": "endpoint:getAdvisorNnaCanonical",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/advisor_nna_canonical.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/advisor_nna_canonical.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "WARN",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getPlatinumAdvisorDrilldownSummary",
        "node": "endpoint:getPlatinumAdvisorDrilldownSummary",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/drilldown_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/drilldown_summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getPlatinumAdvisorSummary",
        "node": "endpoint:getPlatinumAdvisorSummary",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getPlatinumAdvisorTimeseries",
        "node": "endpoint:getPlatinumAdvisorTimeseries",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/timeseries.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/timeseries.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       }
      ]
     },
@@ -530,35 +859,71 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAdvisorNnaClients",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "the advisor-intelligence Lambda itself (endpoint family root, not a single artifact)",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "getHeaderMetricsFresh",
        "node": "endpoint:getHeaderMetricsFresh",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/header_metrics.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/header_metrics.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getPlatinumInflecTimeseriesChart",
        "node": "endpoint:getPlatinumInflecTimeseriesChart",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/timeseries_chart.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/timeseries_chart.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getPlatinumPartnerAnalytics",
        "node": "endpoint:getPlatinumPartnerAnalytics",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/partner_analytics_{gran}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/partner_analytics_{gran}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       },
       {
        "source": "getTimeseriesOverview",
        "node": "endpoint:getTimeseriesOverview",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/timeseries_overview.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/timeseries_overview.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "header-metrics-fresh",
@@ -566,7 +931,16 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getHeaderMetricsFresh",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/header_metrics.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/header_metrics.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "inflec-timeseries-chart",
@@ -574,7 +948,16 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumInflecTimeseriesChart",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/timeseries_chart.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/timeseries_chart.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "partner-analytics",
@@ -582,7 +965,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumPartnerAnalytics",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/partner_analytics_{gran}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/partner_analytics_{gran}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       }
      ]
     },
@@ -597,7 +985,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAdvisorSummary",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/relationship_stacks.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/relationship_stacks.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "advisor-intelligence",
@@ -605,49 +998,95 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumAdvisorNnaClients",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "the advisor-intelligence Lambda itself (endpoint family root, not a single artifact)",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "getAdvisorNnaCanonical",
        "node": "endpoint:getAdvisorNnaCanonical",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/advisor_nna_canonical.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/advisor_nna_canonical.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "WARN",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getPlatinumAdvisorNnaClients",
        "node": "endpoint:getPlatinumAdvisorNnaClients",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/nna_clients.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/nna_clients.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getPlatinumAdvisorSummary",
        "node": "endpoint:getPlatinumAdvisorSummary",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getPlatinumCumulativeChart",
        "node": "endpoint:getPlatinumCumulativeChart",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/cumulative_chart.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/cumulative_chart.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "getPlatinumPartnerAnalytics",
        "node": "endpoint:getPlatinumPartnerAnalytics",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/partner_analytics_{gran}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/partner_analytics_{gran}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       },
       {
        "source": "getTimeseriesOverview",
        "node": "endpoint:getTimeseriesOverview",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/timeseries_overview.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/timeseries_overview.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": {
+        "bd": "PASS",
+        "cot": "PASS",
+        "inf": "PASS"
+       }
       },
       {
        "source": "partner-analytics",
@@ -655,7 +1094,12 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getPlatinumPartnerAnalytics",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "FIRM-LEVEL",
+       "relative_key": "platinum/firm/partner_analytics_{gran}.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/partner_analytics_{gran}.json",
+       "expected_cadence": "nightly",
+       "live_by_firm": "see partner_analytics/activity_scan windowed set"
       }
      ]
     },
@@ -686,11 +1130,13 @@
        "s3_key": "json/positioning/positioning_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:38+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getPositioningData",
@@ -702,11 +1148,13 @@
        "s3_key": "json/positioning/positioning_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:38+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "positioning-data",
@@ -719,11 +1167,13 @@
        "s3_key": "json/positioning/positioning_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:38+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       }
      ]
     },
@@ -742,11 +1192,13 @@
        "s3_key": "json/positioning/holdings_attribution_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T17:03:50+00:00",
         "age": "3.6h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "allocation-summary",
@@ -754,14 +1206,24 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getAllocationSummary",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/allocation_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/allocation_summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getAllocationSummary",
        "node": "endpoint:getAllocationSummary",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/allocation_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/allocation_summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getHoldingsAttribution",
@@ -773,11 +1235,13 @@
        "s3_key": "json/positioning/holdings_attribution_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T17:03:50+00:00",
         "age": "3.6h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "holdings-attribution",
@@ -790,11 +1254,13 @@
        "s3_key": "json/positioning/holdings_attribution_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T17:03:50+00:00",
         "age": "3.6h"
-       }
+       },
+       "stale_verdict": "FRESH"
       }
      ]
     },
@@ -815,14 +1281,24 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getAllocationSummary",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/allocation_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/allocation_summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       },
       {
        "source": "getAllocationSummary",
        "node": "endpoint:getAllocationSummary",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "PER-ENTITY",
+       "relative_key": "platinum/advisors/{id}/allocation_summary.json",
+       "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/allocation_summary.json",
+       "expected_cadence": "nightly",
+       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
       }
      ]
     }
@@ -847,11 +1323,13 @@
        "s3_key": "json/capital-markets/assumptions.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "yearly",
        "live": {
         "status": "FAIL",
         "last_modified": "2026-03-11T00:45:53+00:00",
         "age": "2707.8h"
-       }
+       },
+       "stale_verdict": "EXPECTED-CADENCE"
       },
       {
        "source": "/api/general/capital-markets/views.json",
@@ -863,11 +1341,13 @@
        "s3_key": "json/capital-markets/views.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "yearly",
        "live": {
         "status": "FAIL",
         "last_modified": "2026-01-09T18:28:35+00:00",
         "age": "4154.1h"
-       }
+       },
+       "stale_verdict": "EXPECTED-CADENCE"
       },
       {
        "source": "cma-assumptions",
@@ -880,11 +1360,13 @@
        "s3_key": "json/capital-markets/assumptions.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "yearly",
        "live": {
         "status": "FAIL",
         "last_modified": "2026-03-11T00:45:53+00:00",
         "age": "2707.8h"
-       }
+       },
+       "stale_verdict": "EXPECTED-CADENCE"
       },
       {
        "source": "getCMAAssumptions",
@@ -896,11 +1378,13 @@
        "s3_key": "json/capital-markets/assumptions.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "yearly",
        "live": {
         "status": "FAIL",
         "last_modified": "2026-03-11T00:45:53+00:00",
         "age": "2707.8h"
-       }
+       },
+       "stale_verdict": "EXPECTED-CADENCE"
       },
       {
        "source": "getOpalViews",
@@ -912,11 +1396,13 @@
        "s3_key": "json/capital-markets/views.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "yearly",
        "live": {
         "status": "FAIL",
         "last_modified": "2026-01-09T18:28:35+00:00",
         "age": "4154.1h"
-       }
+       },
+       "stale_verdict": "EXPECTED-CADENCE"
       },
       {
        "source": "opal-views",
@@ -929,11 +1415,13 @@
        "s3_key": "json/capital-markets/views.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "yearly",
        "live": {
         "status": "FAIL",
         "last_modified": "2026-01-09T18:28:35+00:00",
         "age": "4154.1h"
-       }
+       },
+       "stale_verdict": "EXPECTED-CADENCE"
       }
      ]
     }
@@ -983,7 +1471,11 @@
        "node": "endpoint:fetchPortalManifest",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "data-freshness-manifest (portal-proxy)",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "portal-manifest",
@@ -991,7 +1483,11 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "fetchPortalManifest",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "data-freshness-manifest (portal-proxy)",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       }
      ]
     },
@@ -1094,11 +1590,13 @@
        "s3_key": "json/macro/volatility_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T12:30:33+00:00",
         "age": "8.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getVolatilityData",
@@ -1110,11 +1608,13 @@
        "s3_key": "json/macro/volatility_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T12:30:33+00:00",
         "age": "8.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "volatility-data",
@@ -1127,11 +1627,13 @@
        "s3_key": "json/macro/volatility_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T12:30:33+00:00",
         "age": "8.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       }
      ]
     }
@@ -1204,11 +1706,13 @@
        "s3_key": "json/benchmarks/etf_returns.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:36+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "/api/general/benchmarks/model_portfolio_benchmarks.json",
@@ -1220,11 +1724,13 @@
        "s3_key": "json/benchmarks/model_portfolio_benchmarks.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:35+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "/api/general/peers/peer_performance.json",
@@ -1236,11 +1742,13 @@
        "s3_key": "json/peers/peer_performance.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T19:30:10+00:00",
         "age": "1.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "/api/general/portfolios/account-distribution.json",
@@ -1252,11 +1760,13 @@
        "s3_key": "json/portfolios/account-distribution.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T11:30:39+00:00",
         "age": "9.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "/api/general/portfolios/aum-timeseries.json",
@@ -1268,11 +1778,13 @@
        "s3_key": "json/portfolios/aum-timeseries.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T11:30:41+00:00",
         "age": "9.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "/api/general/portfolios/non_model_assets.json",
@@ -1284,11 +1796,13 @@
        "s3_key": "json/portfolios/non_model_assets.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "FAIL",
         "last_modified": "2026-06-25T16:42:16+00:00",
         "age": "147.9h"
-       }
+       },
+       "stale_verdict": "REAL-STALE"
       },
       {
        "source": "account-distribution",
@@ -1301,11 +1815,13 @@
        "s3_key": "json/portfolios/account-distribution.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T11:30:39+00:00",
         "age": "9.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "aum-metrics",
@@ -1313,7 +1829,11 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getAUMMetrics",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "static: /api/general/portfolios/aum-metrics.json",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "aum-timeseries",
@@ -1326,11 +1846,13 @@
        "s3_key": "json/portfolios/aum-timeseries.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T11:30:41+00:00",
         "age": "9.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "etf-benchmark-returns",
@@ -1343,18 +1865,24 @@
        "s3_key": "json/benchmarks/etf_returns.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:36+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getAUMMetrics",
        "node": "endpoint:getAUMMetrics",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "static: /api/general/portfolios/aum-metrics.json (portal-v2)",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "getAUMTimeSeries",
@@ -1366,11 +1894,13 @@
        "s3_key": "json/portfolios/aum-timeseries.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T11:30:41+00:00",
         "age": "9.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getAccountDistribution",
@@ -1382,18 +1912,24 @@
        "s3_key": "json/portfolios/account-distribution.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T11:30:39+00:00",
         "age": "9.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getAccountDistributionByFirm",
        "node": "endpoint:getAccountDistributionByFirm",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "static: /api/general/portfolios/account-distribution.json (portal-v2)",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "getETFBenchmarkReturns",
@@ -1405,18 +1941,24 @@
        "s3_key": "json/benchmarks/etf_returns.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:36+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getMdpfAggregateAUATimeSeriesByFirm",
        "node": "endpoint:getMdpfAggregateAUATimeSeriesByFirm",
        "kind": "Endpoint",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "static: /api/general/mdpf/aggregate-aua-timeseries.json (portal-v2) OR mdpf lambda",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "getModelPortfolioBenchmarks",
@@ -1428,11 +1970,13 @@
        "s3_key": "json/benchmarks/model_portfolio_benchmarks.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:35+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getNonModelAssets",
@@ -1444,11 +1988,13 @@
        "s3_key": "json/portfolios/non_model_assets.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "FAIL",
         "last_modified": "2026-06-25T16:42:16+00:00",
         "age": "147.9h"
-       }
+       },
+       "stale_verdict": "REAL-STALE"
       },
       {
        "source": "getPeerPerformance",
@@ -1460,11 +2006,13 @@
        "s3_key": "json/peers/peer_performance.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T19:30:10+00:00",
         "age": "1.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "mdpf-aggregate-timeseries",
@@ -1472,7 +2020,11 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getMdpfAggregateAUATimeSeriesByFirm",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "static: /api/general/mdpf/aggregate-aua-timeseries.json (portal-v2)",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "mdpf-per-firm-distribution",
@@ -1480,7 +2032,11 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getAccountDistributionByFirm",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "mdpf per-firm route (portal-proxy/mdpf lambda)",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "mdpf-per-firm-timeseries",
@@ -1488,7 +2044,11 @@
        "kind": "ReactQueryKey",
        "via_endpoint": "getMdpfAggregateAUATimeSeriesByFirm",
        "tier": "DYNAMIC",
-       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM",
+       "dyn_class": "TAIL",
+       "resolution_route": "mdpf per-firm route",
+       "expected_cadence": "unknown",
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
       },
       {
        "source": "model-portfolio-benchmarks",
@@ -1501,11 +2061,13 @@
        "s3_key": "json/benchmarks/model_portfolio_benchmarks.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:35+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "non-model-assets",
@@ -1518,11 +2080,13 @@
        "s3_key": "json/portfolios/non_model_assets.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "FAIL",
         "last_modified": "2026-06-25T16:42:16+00:00",
         "age": "147.9h"
-       }
+       },
+       "stale_verdict": "REAL-STALE"
       },
       {
        "source": "peer-performance",
@@ -1535,11 +2099,13 @@
        "s3_key": "json/peers/peer_performance.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T19:30:10+00:00",
         "age": "1.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       }
      ]
     }
@@ -1678,11 +2244,13 @@
        "s3_key": "json/positioning/positioning_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:38+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getPositioningData",
@@ -1694,11 +2262,13 @@
        "s3_key": "json/positioning/positioning_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:38+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "positioning-data",
@@ -1711,11 +2281,13 @@
        "s3_key": "json/positioning/positioning_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:38+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       }
      ]
     },
@@ -1734,11 +2306,13 @@
        "s3_key": "json/positioning/holdings_attribution_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T17:03:50+00:00",
         "age": "3.6h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getHoldingsAttribution",
@@ -1750,11 +2324,13 @@
        "s3_key": "json/positioning/holdings_attribution_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T17:03:50+00:00",
         "age": "3.6h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "holdings-attribution",
@@ -1767,11 +2343,13 @@
        "s3_key": "json/positioning/holdings_attribution_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T17:03:50+00:00",
         "age": "3.6h"
-       }
+       },
+       "stale_verdict": "FRESH"
       }
      ]
     }
@@ -1946,11 +2524,13 @@
        "s3_key": "json/valuation/risk_premium_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:36+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "getRiskPremiumData",
@@ -1962,11 +2542,13 @@
        "s3_key": "json/valuation/risk_premium_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:36+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       },
       {
        "source": "risk-premium-data",
@@ -1979,11 +2561,13 @@
        "s3_key": "json/valuation/risk_premium_data.json",
        "graph_verified": "object+node",
        "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "expected_cadence": "daily",
        "live": {
         "status": "PASS",
         "last_modified": "2026-07-01T16:31:36+00:00",
         "age": "4.1h"
-       }
+       },
+       "stale_verdict": "FRESH"
       }
      ]
     },
