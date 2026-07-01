@@ -2,7 +2,9 @@
 
 <issued_to>0.8.0_AE_CloudComp~E</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>complete</status>
+<!-- LANDED 2026-07-01: comp_learns_score.py 15e88557d (pushed CLOUD); 6/6 self-test + 7/7 pytest; single iteration -> 596-candidate advisory worklist; --goodhart-audit 241 rank-inversions + high-usage-low-value retires (NOT a usage proxy); reuses comp_route L3 outcome-weighting (one signal, two consumers). test exec-land -> COO~B (SoD). Pends CVO~B scorer-honesty verify to close COMPLEARN. -->
+
 <priority>HIGH — Andrew-direct close-out drive (2026-07-01). SEQUENCED behind your NFRA_COMPROUTE.L3 (one lane, no thrash): GO on L3 RAVC. Not gate-lift-gated — reads the LIVE COMPUNIFY map + your own live tool_activity.</priority>
 <date>2026-07-01</date>
 
