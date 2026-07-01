@@ -2,7 +2,7 @@
 
 <issued_to>3.0.0_SA_CVO~B</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>dispatched</status>
+<status>complete -- GREEN, flip AUTHORIZED (5-point cert on comproute-dr1-v0.1.1 + shadow 2033b8d70; verdict 1412Z)</status>
 <priority>HIGH -- the HARD gate on the default-router flip. comp-which is LIVE + enforcing = SEV1. CTO: shadow-GREEN-before-flip is NON-NEGOTIABLE (132556Z). Your cert authorizes ~C's flip.</priority>
 <date>2026-07-01</date>
 
