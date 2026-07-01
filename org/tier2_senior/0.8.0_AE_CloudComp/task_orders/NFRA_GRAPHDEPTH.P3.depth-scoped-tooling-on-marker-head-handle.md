@@ -2,7 +2,8 @@
 
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>pending</status>
+<status>complete</status>  <!-- LANDED: comp-depth tool 3e8d457a9 + drilldown-derive fold 08dc06ebe. Depth-scoped drill/rollup/scope/blast on the marker-head handle, grain-calibrated, size-invariant; drilldown DERIVED from grain_contract (not hardcoded). Phase-3 demonstrated: same blast @function=575 / @object=175 / @resource=4 (depth differentiates). All 3 scope items + acceptance met; provenance current. RAVC'd COO~B + CC CTO/~D/CVO~B. ~C 2026-07-01T0550Z -->
+
 <priority>HIGH — Andrew-direct 2026-07-01: "GRAPHUNI and GRAPHDEPTH need to be finished." The LAST GRAPHDEPTH phase. UNBLOCKED: P1 (populate) done (Phase-B derive, CVO~B L3 GREEN 5fc0bce73); P2 (calibration = COMPUNIFY S4 grain_contract) done; ~D's marker-head read-handle (comp_marker_read.py dfad285bf) is BUILT + you grain-co-verified it GREEN (all 4 governor conditions, D4 one-head works). You're the grain governor -- natural owner.</priority>
 <date>2026-07-01</date>
 
