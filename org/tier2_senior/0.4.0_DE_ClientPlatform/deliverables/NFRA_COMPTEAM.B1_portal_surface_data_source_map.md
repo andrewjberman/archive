@@ -1,9 +1,10 @@
 # NFRA_COMPTEAM B1 -- Portal-surface -> data-source map (grounded vs live served, cadence-aware)
 
-**Owner:** 0.4.0_DE_ClientPlatform | **Version:** v0.3 | **Schema:** 1.0-FROZEN | **Date:** 2026-07-01
+**Owner:** 0.4.0_DE_ClientPlatform | **Version:** v0.3.1 (B1 FULLY CLOSED) | **Schema:** 1.0-FROZEN | **Date:** 2026-07-01
 **Machine-checkable map:** `NFRA_COMPTEAM.B1_portal_surface_data_source_map.json` (this dir)
 **PRD:** `docs/architecture/NFRA_COMPTEAM_PRD.md` SS3 / SS8-B1 / AC-3 / arch-gate-4
 **Arch-gate:** CTO-ACCEPTED 2026-07-01 (all 4 asks ruled -- see below).
+**v0.3.1 closure:** all 3 grounding tiers live-confirmed -- STATIC (exhaustive) + DYNAMIC FIRM-LEVEL (exhaustive bd/cot/inf) + PER-ENTITY (representative: advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS, accounts/{id}/summary=PASS, clients/{id}/detail.json exists; inf client path refined summary.json->detail.json; exec_summary sparse). TAIL residual noted (portal-manifest/mdpf-per-firm, low-value). Exhaustive per-{id} enum = low-value follow, not decision-useful for the frozen B1->B2 contract.
 
 ## What this is
 The "give me the data behind panel X" map: every portal **PanelCluster** (TSGRAPH `CLUSTERS`) -> its served

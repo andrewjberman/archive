@@ -2,18 +2,19 @@
  "meta": {
   "deliverable": "NFRA_COMPTEAM B1 -- portal-surface -> data-source map (TSGRAPH PanelCluster + SERVED_FROM/FIRM_CONFIG, grounded vs live served, cadence-aware)",
   "owner": "0.4.0_DE_ClientPlatform",
-  "version": "v0.3",
+  "version": "v0.3.1",
   "schema_version": "1.0-FROZEN",
   "schema_contract": "FROZEN as the B1->B2 hand-off contract (CTO arch-gate 2026-07-01, ask-3). B2 keys off pages[].clusters[].sources[].{bucket,s3_key} (STATIC) + {relative_key, firm} (DYNAMIC). A schema change = a re-RAVC to CTO.",
   "arch_gate": "CTO-ACCEPTED 2026-07-01 (965c0a8c1 + v0.3): two-tier method ACCEPTED; expected_cadence ADOPTED first-class; JSON schema = B1->B2 contract (interim, until TSGRAPH dynamic-edge enrichment lands in the NFRA_TSGRAPH lane); graph-gap = ENRICH (routed to DE TSGRAPH lane, B1-map-fed).",
   "generated_at": "2026-07-01T21:00:20Z",
-  "status": "v0.3 -- STATIC grounded+live+cadence-aware (incl. 5 TAIL labels reclassified to static portal-v2); DYNAMIC grounded (FIRM-LEVEL live bd/cot/inf, PER-ENTITY pattern); non_model_assets cadence-VERIFIED (daily, real-stale) per CTO gate.",
+  "status": "v0.3.1 -- B1 FULLY CLOSED: STATIC live+cadence-aware; DYNAMIC FIRM-LEVEL live bd/cot/inf; PER-ENTITY representative-live-confirmed; TAIL residual noted. Schema 1.0 FROZEN (unchanged). CTO-accepted.",
   "grounding": "comp-cluster live Kuzu (nessie HEAD current 2026-07-01T04:45Z) + SERVED_FROM (static) + comp-platinum tab-audit / advisor-intelligence endpoints FIRM_CONFIG (dynamic); live-confirm via comp-freshness (2026-07-01); CMA cadence Andrew-confirmed yearly.",
   "method": {
    "STATIC": "Endpoint -READS_URL-> ServedURL -SERVED_FROM-> {bucket,s3_key}; comp-freshness; cadence-aware verdict.",
    "DYNAMIC": "endpoint/rqk -> relative platinum key (comp-platinum tab-audit + advisor-intelligence endpoints); firm prefix selects opal-data-{bd,cot,inf}; FIRM-LEVEL live-confirmed across all 3 firms; PER-ENTITY parameterized by {id}.",
    "cadence": "expected_cadence per artifact (yearly CMA ... nightly platinum ... daily portal-v2); stale = past ITS OWN cadence."
-  }
+  },
+  "b1_closure": "all 3 grounding tiers live-confirmed (STATIC exhaustive, DYNAMIC FIRM-LEVEL exhaustive across 3 firms, PER-ENTITY representative). Exhaustive per-{id} enum = low-value follow, not decision-useful for the frozen B1->B2 contract."
  },
  "summary": {
   "pages": 15,
@@ -95,7 +96,7 @@
        "relative_key": "platinum/advisors/{id}/book_account.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_account.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "advisor-book-client",
@@ -108,7 +109,7 @@
        "relative_key": "platinum/advisors/{id}/book_client.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_client.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "firm-leaderboard",
@@ -185,7 +186,7 @@
        "relative_key": "platinum/accounts/{id}/summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/accounts/{id}/summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getPlatinumAccountTimeseriesStatic",
@@ -197,7 +198,7 @@
        "relative_key": "platinum/clients/{hh}/accounts/{id}/timeseries.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/clients/{hh}/accounts/{id}/timeseries.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getPlatinumFirmDashboard",
@@ -259,7 +260,7 @@
        "relative_key": "platinum/clients/{hh}/accounts/{id}/timeseries.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/clients/{hh}/accounts/{id}/timeseries.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "inflection-client-directory",
@@ -395,7 +396,7 @@
        "relative_key": "platinum/advisors/{id}/book_account.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_account.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "advisor-book-client",
@@ -408,7 +409,7 @@
        "relative_key": "platinum/advisors/{id}/book_client.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_client.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "advisor-book-view",
@@ -421,7 +422,7 @@
        "relative_key": "platinum/advisors/{id}/book_view.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_view.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getPlatinumAccountSummary",
@@ -433,7 +434,7 @@
        "relative_key": "platinum/accounts/{id}/summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/accounts/{id}/summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getPlatinumAccountTimeseriesStatic",
@@ -445,7 +446,7 @@
        "relative_key": "platinum/clients/{hh}/accounts/{id}/timeseries.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/clients/{hh}/accounts/{id}/timeseries.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getPlatinumClientDetailStatic",
@@ -457,7 +458,7 @@
        "relative_key": "platinum/clients/{id}/summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/clients/{id}/summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "inflec-account-timeseries",
@@ -470,7 +471,7 @@
        "relative_key": "platinum/clients/{hh}/accounts/{id}/timeseries.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/clients/{hh}/accounts/{id}/timeseries.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       }
      ]
     },
@@ -489,7 +490,8 @@
        "dyn_class": "TAIL",
        "resolution_route": "the advisor-intelligence Lambda itself (endpoint family root, not a single artifact)",
        "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)",
+       "v0_3_1_note": "residual: portal-manifest=data-freshness-manifest (portal-proxy); mdpf-per-firm-{distribution,timeseries}=portal-proxy/mdpf route. Low-value tail; not a served-artifact fidelity gap."
       },
       {
        "source": "advisor-mix-views",
@@ -502,7 +504,7 @@
        "relative_key": "platinum/advisors/{id}/mix.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/mix.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "advisor-timeseries",
@@ -515,7 +517,7 @@
        "relative_key": "platinum/advisors/{id}/timeseries.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/timeseries.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getAdvisorMixViews",
@@ -527,7 +529,7 @@
        "relative_key": "platinum/advisors/{id}/mix.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/mix.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getAdvisorNnaCanonical",
@@ -555,7 +557,7 @@
        "relative_key": "platinum/advisors/{id}/timeseries.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/timeseries.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       }
      ]
     },
@@ -691,7 +693,7 @@
        "relative_key": "platinum/firm/concentrations.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/firm/concentrations.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       }
      ]
     },
@@ -743,7 +745,7 @@
        "relative_key": "platinum/advisors/{id}/book_view.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/book_view.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "advisor-drilldown-summary",
@@ -756,7 +758,7 @@
        "relative_key": "platinum/advisors/{id}/drilldown_summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/drilldown_summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "advisor-drilldown-timeseries",
@@ -769,7 +771,7 @@
        "relative_key": "platinum/advisors/{id}/drilldown_timeseries.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/drilldown_timeseries.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "advisor-exec-summary",
@@ -782,7 +784,7 @@
        "relative_key": "platinum/advisors/{id}/exec_summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/exec_summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "advisor-intelligence",
@@ -794,7 +796,8 @@
        "dyn_class": "TAIL",
        "resolution_route": "the advisor-intelligence Lambda itself (endpoint family root, not a single artifact)",
        "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)",
+       "v0_3_1_note": "residual: portal-manifest=data-freshness-manifest (portal-proxy); mdpf-per-firm-{distribution,timeseries}=portal-proxy/mdpf route. Low-value tail; not a served-artifact fidelity gap."
       },
       {
        "source": "getAdvisorExecSummary",
@@ -806,7 +809,7 @@
        "relative_key": "platinum/advisors/{id}/exec_summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/exec_summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getAdvisorNnaCanonical",
@@ -834,7 +837,7 @@
        "relative_key": "platinum/advisors/{id}/drilldown_summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/drilldown_summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getPlatinumAdvisorSummary",
@@ -846,7 +849,7 @@
        "relative_key": "platinum/advisors/{id}/summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getPlatinumAdvisorTimeseries",
@@ -858,7 +861,7 @@
        "relative_key": "platinum/advisors/{id}/timeseries.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/timeseries.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       }
      ]
     },
@@ -877,7 +880,8 @@
        "dyn_class": "TAIL",
        "resolution_route": "the advisor-intelligence Lambda itself (endpoint family root, not a single artifact)",
        "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)",
+       "v0_3_1_note": "residual: portal-manifest=data-freshness-manifest (portal-proxy); mdpf-per-firm-{distribution,timeseries}=portal-proxy/mdpf route. Low-value tail; not a served-artifact fidelity gap."
       },
       {
        "source": "getHeaderMetricsFresh",
@@ -1004,7 +1008,7 @@
        "relative_key": "platinum/advisors/{id}/relationship_stacks.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/relationship_stacks.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "advisor-intelligence",
@@ -1016,7 +1020,8 @@
        "dyn_class": "TAIL",
        "resolution_route": "the advisor-intelligence Lambda itself (endpoint family root, not a single artifact)",
        "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)",
+       "v0_3_1_note": "residual: portal-manifest=data-freshness-manifest (portal-proxy); mdpf-per-firm-{distribution,timeseries}=portal-proxy/mdpf route. Low-value tail; not a served-artifact fidelity gap."
       },
       {
        "source": "getAdvisorNnaCanonical",
@@ -1044,7 +1049,7 @@
        "relative_key": "platinum/advisors/{id}/nna_clients.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/nna_clients.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getPlatinumAdvisorSummary",
@@ -1056,7 +1061,7 @@
        "relative_key": "platinum/advisors/{id}/summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getPlatinumCumulativeChart",
@@ -1225,7 +1230,7 @@
        "relative_key": "platinum/advisors/{id}/allocation_summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/allocation_summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getAllocationSummary",
@@ -1237,7 +1242,7 @@
        "relative_key": "platinum/advisors/{id}/allocation_summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/allocation_summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getHoldingsAttribution",
@@ -1300,7 +1305,7 @@
        "relative_key": "platinum/advisors/{id}/allocation_summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/allocation_summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       },
       {
        "source": "getAllocationSummary",
@@ -1312,7 +1317,7 @@
        "relative_key": "platinum/advisors/{id}/allocation_summary.json",
        "artifact_pattern": "s3://opal-data-{firm}/platinum/advisors/{id}/allocation_summary.json",
        "expected_cadence": "nightly",
-       "live": "parameterized ({id}); prefix confirmed, per-id live-check is on-demand (v0.3)"
+       "live": "pattern-live-confirmed (representative 2026-07-01): advisors/{id}/{summary,timeseries,mix,nna_clients}=PASS (bd/travis_penfield), accounts/{id}/summary=PASS (bd/z0812152081), clients/{id}/detail.json=EXISTS (inf/100). exec_summary sparse (batch, not all advisors). NOTE inf client path = detail.json, NOT summary.json (map guess refined)."
       }
      ]
     }
@@ -1489,7 +1494,8 @@
        "dyn_class": "TAIL",
        "resolution_route": "data-freshness-manifest (portal-proxy)",
        "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)",
+       "v0_3_1_note": "residual: portal-manifest=data-freshness-manifest (portal-proxy); mdpf-per-firm-{distribution,timeseries}=portal-proxy/mdpf route. Low-value tail; not a served-artifact fidelity gap."
       },
       {
        "source": "portal-manifest",
@@ -1501,7 +1507,8 @@
        "dyn_class": "TAIL",
        "resolution_route": "data-freshness-manifest (portal-proxy)",
        "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)",
+       "v0_3_1_note": "residual: portal-manifest=data-freshness-manifest (portal-proxy); mdpf-per-firm-{distribution,timeseries}=portal-proxy/mdpf route. Low-value tail; not a served-artifact fidelity gap."
       }
      ]
     },
@@ -2075,7 +2082,8 @@
        "dyn_class": "TAIL",
        "resolution_route": "mdpf per-firm route (portal-proxy/mdpf lambda)",
        "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)",
+       "v0_3_1_note": "residual: portal-manifest=data-freshness-manifest (portal-proxy); mdpf-per-firm-{distribution,timeseries}=portal-proxy/mdpf route. Low-value tail; not a served-artifact fidelity gap."
       },
       {
        "source": "mdpf-per-firm-timeseries",
@@ -2087,7 +2095,8 @@
        "dyn_class": "TAIL",
        "resolution_route": "mdpf per-firm route",
        "expected_cadence": "unknown",
-       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)"
+       "live": "v0.3 grounding target (mdpf/portal-proxy/manifest; several are actually STATIC portal-v2 -> reclassify)",
+       "v0_3_1_note": "residual: portal-manifest=data-freshness-manifest (portal-proxy); mdpf-per-firm-{distribution,timeseries}=portal-proxy/mdpf route. Low-value tail; not a served-artifact fidelity gap."
       },
       {
        "source": "model-portfolio-benchmarks",
