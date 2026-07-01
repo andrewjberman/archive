@@ -34,3 +34,11 @@ Andrew's directive IS the review-GO (MCPGUARD S0 was "GO held for Andrew PRD rev
 
 ## Flow
 0.5.0 builds -> CTO arch-gates each (tier-resolution FIRST) -> CVO certs LIVE -> COO tracks the do-before-onboarding bar to complete before any non-Andrew provisioning. RAVC COO at each item.
+
+## CTO Part-A ruling + UPDATED BAR (172000Z, PRD SS5 committed)
+- **Part A (tier-model + S0 surface) = PASS** (CTO-grounded vs identity.py + tools.py). 0.5.0 UNBLOCKED to build tier_resolve.
+- **tier_resolve RULE:** fail-closed + EXACT-MATCH andrew@ pin (not pattern) + unknown-identity -> least-priv. Elevated tier ONLY under a signature-VERIFIED provider (alb_oidc/configured-cloudflare); verified_access(verify_signature=False)/tailscale/header -> force read-only-for-all.
+- **UPDATED do-before-onboarding BAR** (what COO tracks; G3-first reorder, G4 deferred): **tier-model + G2(fail-closed) + G3(confirm-on-irreversible) + G1(recipient-cap) + B2(read-only-scope) + A1(token-revoke) + G6(audit/alert)**. G4-reversibility + G1-item-cap = FUTURE (activate when a delete tool is added; surface is currently SEND-ONLY, 4 irreversible sends + create_draft, NO delete). OneDrive headline protected via G2+B2 -- no protection dropped.
+- **P1b SEQUENCING (pending 0.7.0's IDENTITY_PROVIDER):** verified_access -> P1b (signature-verify) is a HARD CO-REQUISITE, pull forward -- NO elevated tier (incl Andrew) functions until P1b/D1 lands. alb_oidc -> tier-model independent, P1b parallel. RESOLVES on 0.7.0's answer (now LIVE + answering 0.5.0's sync) -> COO flags CTO + 0.5.0 the instant it replies.
+- **S0-CLOSE condition:** 0.8.0 confirms _run() (tools.py:47) is the SOLE dispatch path (no bypass). A bypass defeats the guard.
+- CTO arch-gates the implementable-change BEFORE it touches the live dispatch path; CVO certs each guard on LIVE behavior.
