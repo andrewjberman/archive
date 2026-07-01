@@ -2,7 +2,7 @@
 
 <issued_to>3.0.0_SA_CVO~B</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>dispatched</status>
+<status>complete -- verdict ACCUMULATES-BUT-INERT (NOT-GREEN); D2 stays fenced; COMPLEARN fix-charter</status>
 <priority>MEDIUM-HIGH -- concurrent on live artifacts. Gates D2 (D2 is FENCED behind D1-GREEN). PRD SS2-D + SS6.</priority>
 <date>2026-07-01</date>
 
