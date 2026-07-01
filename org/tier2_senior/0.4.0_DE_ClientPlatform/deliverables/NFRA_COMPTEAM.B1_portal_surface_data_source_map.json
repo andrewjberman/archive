@@ -1,0 +1,2029 @@
+{
+ "meta": {
+  "deliverable": "NFRA_COMPTEAM B1 -- portal-surface -> data-source map (TSGRAPH PanelCluster + SERVED_FROM, grounded vs live served)",
+  "owner": "0.4.0_DE_ClientPlatform",
+  "generated_at": "2026-07-01T20:41:53Z",
+  "status": "v0.1 -- STATIC tier fully grounded + live-confirmed; DYNAMIC tier enumerated + flagged (graph gap)",
+  "grounding": "comp-cluster live canonical Kuzu (nessie HEAD current, built 2026-07-01T04:45Z) + SERVED_FROM lineage; STATIC tier live-confirmed vs S3 via comp-freshness (2026-07-01)",
+  "method": {
+   "STATIC": "Endpoint -READS_URL-> ServedURL -SERVED_FROM-> {bucket,s3_key}  (or served-URL-labelled source direct) -> comp-freshness EXISTS/FRESH",
+   "DYNAMIC": "portal Endpoint terminal (Hook -FETCHES-> Endpoint, no SERVED_FROM); Lambda-mediated via advisor-intelligence/portal-proxy/mdpf -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum. NOT graph-grounded (see GRAPH-COVERAGE-GAP)."
+  }
+ },
+ "summary": {
+  "pages": 15,
+  "clusters": 91,
+  "source_bindings": 125,
+  "tier_distribution": {
+   "DYNAMIC": 83,
+   "STATIC": 42
+  },
+  "unique_static_artifacts": 12,
+  "static_live_pass": 9,
+  "static_live_fail": 3
+ },
+ "findings": [
+  {
+   "severity": "STALE-SERVED",
+   "page": "CapitalMarketAssumptions",
+   "cluster": "opal-views",
+   "source": "/api/general/capital-markets/assumptions.json",
+   "artifact": "s3://opal-data-portal-v2/json/capital-markets/assumptions.json",
+   "last_modified": "2026-03-11T00:45:53+00:00",
+   "age": "2707.8h",
+   "detail": "PanelCluster served from a STALE artifact (beyond 48h fail threshold)."
+  },
+  {
+   "severity": "STALE-SERVED",
+   "page": "CapitalMarketAssumptions",
+   "cluster": "opal-views",
+   "source": "/api/general/capital-markets/views.json",
+   "artifact": "s3://opal-data-portal-v2/json/capital-markets/views.json",
+   "last_modified": "2026-01-09T18:28:35+00:00",
+   "age": "4154.1h",
+   "detail": "PanelCluster served from a STALE artifact (beyond 48h fail threshold)."
+  },
+  {
+   "severity": "STALE-SERVED",
+   "page": "ModelPortfolios",
+   "cluster": "peer-performance",
+   "source": "/api/general/portfolios/non_model_assets.json",
+   "artifact": "s3://opal-data-portal-v2/json/portfolios/non_model_assets.json",
+   "last_modified": "2026-06-25T16:42:16+00:00",
+   "age": "147.9h",
+   "detail": "PanelCluster served from a STALE artifact (beyond 48h fail threshold)."
+  },
+  {
+   "severity": "GRAPH-COVERAGE-GAP",
+   "detail": "SERVED_FROM lineage grounds source->artifact ONLY for the 29 static ServedURL endpoints (ServedURL -SERVED_FROM-> bucket/s3_key). The DYNAMIC Lambda-mediated endpoints (advisor-intelligence / portal-proxy / mdpf -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum) terminate at the portal Endpoint node with NO modeled artifact edge -- so 83 of 125 source-bindings cannot be graph-grounded to a served artifact. RECOMMEND: enrich TSGRAPH with Endpoint->artifact (or Endpoint->Lambda->READS_S3) edges for dynamic endpoints so B1 grounding is fully graph-native (feeds NFRA_TSGRAPH / GLOBGRPH; unblocks a machine-checkable B2 read-partition over BOTH serving tiers)."
+  }
+ ],
+ "pages": [
+  {
+   "page": "AdvisorIntelligence",
+   "rootFile": "portal/src/pages/AdvisorIntelligence/index.tsx",
+   "clusters": [
+    {
+     "id": "cluster:AdvisorIntelligence:0",
+     "label": "platinum-firm-mix-summary",
+     "memberFileCount": 8,
+     "sources": [
+      {
+       "source": "advisor-book-account",
+       "node": "rqk:advisor-book-account",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAccountSummary",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "advisor-book-client",
+       "node": "rqk:advisor-book-client",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "then",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "firm-leaderboard",
+       "node": "rqk:firm-leaderboard",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getFirmLeaderboard",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getClientDirectory",
+       "node": "endpoint:getClientDirectory",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getFirmLeaderboard",
+       "node": "endpoint:getFirmLeaderboard",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getHeaderMetrics",
+       "node": "endpoint:getHeaderMetrics",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumAccountSummary",
+       "node": "endpoint:getPlatinumAccountSummary",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumAccountTimeseriesStatic",
+       "node": "endpoint:getPlatinumAccountTimeseriesStatic",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumFirmDashboard",
+       "node": "endpoint:getPlatinumFirmDashboard",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumFirmMixSummary",
+       "node": "endpoint:getPlatinumFirmMixSummary",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "header-metrics",
+       "node": "rqk:header-metrics",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getHeaderMetrics",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "inflec-account-timeseries",
+       "node": "rqk:inflec-account-timeseries",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAccountTimeseriesStatic",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "inflection-client-directory",
+       "node": "rqk:inflection-client-directory",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getClientDirectory",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "platinum-firm-dashboard",
+       "node": "rqk:platinum-firm-dashboard",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumFirmDashboard",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "platinum-firm-mix-summary",
+       "node": "rqk:platinum-firm-mix-summary",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumFirmMixSummary",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    },
+    {
+     "id": "cluster:AdvisorIntelligence:1",
+     "label": "firm-leaderboard",
+     "memberFileCount": 3,
+     "sources": [
+      {
+       "source": "firm-leaderboard",
+       "node": "rqk:firm-leaderboard",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getFirmLeaderboard",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getFirmLeaderboard",
+       "node": "endpoint:getFirmLeaderboard",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumPartnerAnalytics",
+       "node": "endpoint:getPlatinumPartnerAnalytics",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "partner-analytics",
+       "node": "rqk:partner-analytics",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumPartnerAnalytics",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    },
+    {
+     "id": "cluster:AdvisorIntelligence:2",
+     "label": "inflec-account-timeseries",
+     "memberFileCount": 3,
+     "sources": [
+      {
+       "source": "advisor-book-account",
+       "node": "rqk:advisor-book-account",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAccountSummary",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "advisor-book-client",
+       "node": "rqk:advisor-book-client",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "then",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "advisor-book-view",
+       "node": "rqk:advisor-book-view",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAdvisorSummary",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumAccountSummary",
+       "node": "endpoint:getPlatinumAccountSummary",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumAccountTimeseriesStatic",
+       "node": "endpoint:getPlatinumAccountTimeseriesStatic",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumClientDetailStatic",
+       "node": "endpoint:getPlatinumClientDetailStatic",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "inflec-account-timeseries",
+       "node": "rqk:inflec-account-timeseries",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAccountTimeseriesStatic",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    },
+    {
+     "id": "cluster:AdvisorIntelligence:3",
+     "label": "advisor-timeseries",
+     "memberFileCount": 3,
+     "sources": [
+      {
+       "source": "advisor-intelligence",
+       "node": "rqk:advisor-intelligence",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAdvisorNnaClients",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "advisor-mix-views",
+       "node": "rqk:advisor-mix-views",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getAdvisorMixViews",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "advisor-timeseries",
+       "node": "rqk:advisor-timeseries",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAdvisorTimeseries",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getAdvisorMixViews",
+       "node": "endpoint:getAdvisorMixViews",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getAdvisorNnaCanonical",
+       "node": "endpoint:getAdvisorNnaCanonical",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumAdvisorTimeseries",
+       "node": "endpoint:getPlatinumAdvisorTimeseries",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    },
+    {
+     "id": "cluster:AdvisorIntelligence:4",
+     "label": "partner-analytics",
+     "memberFileCount": 2,
+     "sources": [
+      {
+       "source": "cohort-a-summary",
+       "node": "rqk:cohort-a-summary",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getCohortASummary",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "firm-leaderboard",
+       "node": "rqk:firm-leaderboard",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getFirmLeaderboard",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getCohortASummary",
+       "node": "endpoint:getCohortASummary",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getFirmLeaderboard",
+       "node": "endpoint:getFirmLeaderboard",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumPartnerAnalytics",
+       "node": "endpoint:getPlatinumPartnerAnalytics",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "partner-analytics",
+       "node": "rqk:partner-analytics",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumPartnerAnalytics",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    },
+    {
+     "id": "cluster:AdvisorIntelligence:5",
+     "label": "inflection-firm-concentrations",
+     "memberFileCount": 2,
+     "sources": [
+      {
+       "source": "inflection-activity-scan",
+       "node": "rqk:inflection-activity-scan",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "then",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "inflection-cash-drag",
+       "node": "rqk:inflection-cash-drag",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "then",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "inflection-firm-concentrations",
+       "node": "rqk:inflection-firm-concentrations",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "then",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    },
+    {
+     "id": "cluster:AdvisorIntelligence:6",
+     "label": "partner-analytics",
+     "memberFileCount": 1,
+     "sources": [
+      {
+       "source": "getPlatinumPartnerAnalytics",
+       "node": "endpoint:getPlatinumPartnerAnalytics",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "partner-analytics",
+       "node": "rqk:partner-analytics",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumPartnerAnalytics",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    },
+    {
+     "id": "cluster:AdvisorIntelligence:7",
+     "label": "advisor-intelligence",
+     "memberFileCount": 1,
+     "sources": [
+      {
+       "source": "advisor-book-view",
+       "node": "rqk:advisor-book-view",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAdvisorSummary",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "advisor-drilldown-summary",
+       "node": "rqk:advisor-drilldown-summary",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAdvisorDrilldownSummary",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "advisor-drilldown-timeseries",
+       "node": "rqk:advisor-drilldown-timeseries",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAdvisorTimeseries",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "advisor-exec-summary",
+       "node": "rqk:advisor-exec-summary",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getAdvisorExecSummary",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "advisor-intelligence",
+       "node": "rqk:advisor-intelligence",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAdvisorNnaClients",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getAdvisorExecSummary",
+       "node": "endpoint:getAdvisorExecSummary",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getAdvisorNnaCanonical",
+       "node": "endpoint:getAdvisorNnaCanonical",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumAdvisorDrilldownSummary",
+       "node": "endpoint:getPlatinumAdvisorDrilldownSummary",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumAdvisorSummary",
+       "node": "endpoint:getPlatinumAdvisorSummary",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumAdvisorTimeseries",
+       "node": "endpoint:getPlatinumAdvisorTimeseries",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    },
+    {
+     "id": "cluster:AdvisorIntelligence:8",
+     "label": "partner-analytics",
+     "memberFileCount": 1,
+     "sources": [
+      {
+       "source": "advisor-intelligence",
+       "node": "rqk:advisor-intelligence",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAdvisorNnaClients",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getHeaderMetricsFresh",
+       "node": "endpoint:getHeaderMetricsFresh",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumInflecTimeseriesChart",
+       "node": "endpoint:getPlatinumInflecTimeseriesChart",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumPartnerAnalytics",
+       "node": "endpoint:getPlatinumPartnerAnalytics",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getTimeseriesOverview",
+       "node": "endpoint:getTimeseriesOverview",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "header-metrics-fresh",
+       "node": "rqk:header-metrics-fresh",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getHeaderMetricsFresh",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "inflec-timeseries-chart",
+       "node": "rqk:inflec-timeseries-chart",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumInflecTimeseriesChart",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "partner-analytics",
+       "node": "rqk:partner-analytics",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumPartnerAnalytics",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    },
+    {
+     "id": "cluster:AdvisorIntelligence:9",
+     "label": "partner-analytics",
+     "memberFileCount": 1,
+     "sources": [
+      {
+       "source": "advisor-book-relationship-stacks",
+       "node": "rqk:advisor-book-relationship-stacks",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAdvisorSummary",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "advisor-intelligence",
+       "node": "rqk:advisor-intelligence",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumAdvisorNnaClients",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getAdvisorNnaCanonical",
+       "node": "endpoint:getAdvisorNnaCanonical",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumAdvisorNnaClients",
+       "node": "endpoint:getPlatinumAdvisorNnaClients",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumAdvisorSummary",
+       "node": "endpoint:getPlatinumAdvisorSummary",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumCumulativeChart",
+       "node": "endpoint:getPlatinumCumulativeChart",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getPlatinumPartnerAnalytics",
+       "node": "endpoint:getPlatinumPartnerAnalytics",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getTimeseriesOverview",
+       "node": "endpoint:getTimeseriesOverview",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "partner-analytics",
+       "node": "rqk:partner-analytics",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPlatinumPartnerAnalytics",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    },
+    {
+     "id": "cluster:AdvisorIntelligence:10",
+     "label": "index.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    }
+   ]
+  },
+  {
+   "page": "Attribution",
+   "rootFile": "portal/src/pages/Attribution/Attribution.tsx",
+   "clusters": [
+    {
+     "id": "cluster:Attribution:0",
+     "label": "positioning-data",
+     "memberFileCount": 2,
+     "sources": [
+      {
+       "source": "/api/general/positioning/positioning_data.json",
+       "node": "endpointurl:/api/general/positioning/positioning_data.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/positioning_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/positioning_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:38+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "getPositioningData",
+       "node": "endpoint:getPositioningData",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/positioning_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/positioning_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:38+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "positioning-data",
+       "node": "rqk:positioning-data",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPositioningData",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/positioning_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/positioning_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:38+00:00",
+        "age": "4.1h"
+       }
+      }
+     ]
+    },
+    {
+     "id": "cluster:Attribution:1",
+     "label": "holdings-attribution",
+     "memberFileCount": 1,
+     "sources": [
+      {
+       "source": "/api/general/positioning/holdings_attribution_data.json",
+       "node": "endpointurl:/api/general/positioning/holdings_attribution_data.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/holdings_attribution_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/holdings_attribution_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T17:03:50+00:00",
+        "age": "3.6h"
+       }
+      },
+      {
+       "source": "allocation-summary",
+       "node": "rqk:allocation-summary",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getAllocationSummary",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getAllocationSummary",
+       "node": "endpoint:getAllocationSummary",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getHoldingsAttribution",
+       "node": "endpoint:getHoldingsAttribution",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/holdings_attribution_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/holdings_attribution_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T17:03:50+00:00",
+        "age": "3.6h"
+       }
+      },
+      {
+       "source": "holdings-attribution",
+       "node": "rqk:holdings-attribution",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getHoldingsAttribution",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/holdings_attribution_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/holdings_attribution_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T17:03:50+00:00",
+        "age": "3.6h"
+       }
+      }
+     ]
+    },
+    {
+     "id": "cluster:Attribution:2",
+     "label": "HoldingsCustomTreemapContent.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:Attribution:3",
+     "label": "allocation-summary",
+     "memberFileCount": 1,
+     "sources": [
+      {
+       "source": "allocation-summary",
+       "node": "rqk:allocation-summary",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getAllocationSummary",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getAllocationSummary",
+       "node": "endpoint:getAllocationSummary",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "page": "CapitalMarketAssumptions",
+   "rootFile": "portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx",
+   "clusters": [
+    {
+     "id": "cluster:CapitalMarketAssumptions:0",
+     "label": "opal-views",
+     "memberFileCount": 6,
+     "sources": [
+      {
+       "source": "/api/general/capital-markets/assumptions.json",
+       "node": "endpointurl:/api/general/capital-markets/assumptions.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/capital-markets/assumptions.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/capital-markets/assumptions.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "FAIL",
+        "last_modified": "2026-03-11T00:45:53+00:00",
+        "age": "2707.8h"
+       }
+      },
+      {
+       "source": "/api/general/capital-markets/views.json",
+       "node": "endpointurl:/api/general/capital-markets/views.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/capital-markets/views.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/capital-markets/views.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "FAIL",
+        "last_modified": "2026-01-09T18:28:35+00:00",
+        "age": "4154.1h"
+       }
+      },
+      {
+       "source": "cma-assumptions",
+       "node": "rqk:cma-assumptions",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getCMAAssumptions",
+       "tier": "STATIC",
+       "served_url": "/api/general/capital-markets/assumptions.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/capital-markets/assumptions.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "FAIL",
+        "last_modified": "2026-03-11T00:45:53+00:00",
+        "age": "2707.8h"
+       }
+      },
+      {
+       "source": "getCMAAssumptions",
+       "node": "endpoint:getCMAAssumptions",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/capital-markets/assumptions.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/capital-markets/assumptions.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "FAIL",
+        "last_modified": "2026-03-11T00:45:53+00:00",
+        "age": "2707.8h"
+       }
+      },
+      {
+       "source": "getOpalViews",
+       "node": "endpoint:getOpalViews",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/capital-markets/views.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/capital-markets/views.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "FAIL",
+        "last_modified": "2026-01-09T18:28:35+00:00",
+        "age": "4154.1h"
+       }
+      },
+      {
+       "source": "opal-views",
+       "node": "rqk:opal-views",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getOpalViews",
+       "tier": "STATIC",
+       "served_url": "/api/general/capital-markets/views.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/capital-markets/views.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "FAIL",
+        "last_modified": "2026-01-09T18:28:35+00:00",
+        "age": "4154.1h"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "page": "Correlation",
+   "rootFile": "portal/src/pages/Correlation/Correlation.tsx",
+   "clusters": [
+    {
+     "id": "cluster:Correlation:0",
+     "label": "Correlation.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:Correlation:1",
+     "label": "CorrelationMatrix.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:Correlation:2",
+     "label": "TickerSelector.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    }
+   ]
+  },
+  {
+   "page": "DataRefresh",
+   "rootFile": "portal/src/pages/DataRefresh/DataRefresh.tsx",
+   "clusters": [
+    {
+     "id": "cluster:DataRefresh:0",
+     "label": "DataRefresh.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:DataRefresh:1",
+     "label": "portal-manifest",
+     "memberFileCount": 1,
+     "sources": [
+      {
+       "source": "fetchPortalManifest",
+       "node": "endpoint:fetchPortalManifest",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "portal-manifest",
+       "node": "rqk:portal-manifest",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "fetchPortalManifest",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      }
+     ]
+    },
+    {
+     "id": "cluster:DataRefresh:2",
+     "label": "FileDropZone.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:DataRefresh:3",
+     "label": "ManifestPreview.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:DataRefresh:4",
+     "label": "PipelineProgress.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:DataRefresh:5",
+     "label": "UploadProgress.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:DataRefresh:6",
+     "label": "HistoryTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:DataRefresh:7",
+     "label": "UploadTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    }
+   ]
+  },
+  {
+   "page": "FactorTilts",
+   "rootFile": "portal/src/pages/FactorTilts/FactorTilts.tsx",
+   "clusters": [
+    {
+     "id": "cluster:FactorTilts:0",
+     "label": "FactorTilts.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:FactorTilts:1",
+     "label": "ModelTiltTimeSeriesView.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:FactorTilts:2",
+     "label": "FactorTiltOverviewPanel.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:FactorTilts:3",
+     "label": "SummaryMetricsTable.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:FactorTilts:4",
+     "label": "FactorTiltBarsTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:FactorTilts:5",
+     "label": "FactorTiltTimeSeriesTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    }
+   ]
+  },
+  {
+   "page": "Macroeconomics",
+   "rootFile": "portal/src/pages/Macroeconomics/Macroeconomics.tsx",
+   "clusters": [
+    {
+     "id": "cluster:Macroeconomics:0",
+     "label": "volatility-data",
+     "memberFileCount": 5,
+     "sources": [
+      {
+       "source": "/api/general/macro/volatility_data.json",
+       "node": "endpointurl:/api/general/macro/volatility_data.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/macro/volatility_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/macro/volatility_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T12:30:33+00:00",
+        "age": "8.1h"
+       }
+      },
+      {
+       "source": "getVolatilityData",
+       "node": "endpoint:getVolatilityData",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/macro/volatility_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/macro/volatility_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T12:30:33+00:00",
+        "age": "8.1h"
+       }
+      },
+      {
+       "source": "volatility-data",
+       "node": "rqk:volatility-data",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getVolatilityData",
+       "tier": "STATIC",
+       "served_url": "/api/general/macro/volatility_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/macro/volatility_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T12:30:33+00:00",
+        "age": "8.1h"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "page": "MarketPerformance",
+   "rootFile": "portal/src/pages/MarketPerformance/MarketPerformance.tsx",
+   "clusters": [
+    {
+     "id": "cluster:MarketPerformance:0",
+     "label": "MarketPerformance.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:MarketPerformance:1",
+     "label": "ExecutiveSummaryPanel.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:MarketPerformance:2",
+     "label": "SentimentPanel.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:MarketPerformance:3",
+     "label": "CommoditiesTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:MarketPerformance:4",
+     "label": "EquitiesTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:MarketPerformance:5",
+     "label": "FixedIncomeTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:MarketPerformance:6",
+     "label": "MultiAssetTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    }
+   ]
+  },
+  {
+   "page": "ModelPortfolios",
+   "rootFile": "portal/src/pages/ModelPortfolios.tsx",
+   "clusters": [
+    {
+     "id": "cluster:ModelPortfolios:0",
+     "label": "peer-performance",
+     "memberFileCount": 2,
+     "sources": [
+      {
+       "source": "/api/general/benchmarks/etf_returns.json",
+       "node": "endpointurl:/api/general/benchmarks/etf_returns.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/benchmarks/etf_returns.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/benchmarks/etf_returns.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:36+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "/api/general/benchmarks/model_portfolio_benchmarks.json",
+       "node": "endpointurl:/api/general/benchmarks/model_portfolio_benchmarks.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/benchmarks/model_portfolio_benchmarks.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/benchmarks/model_portfolio_benchmarks.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:35+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "/api/general/peers/peer_performance.json",
+       "node": "endpointurl:/api/general/peers/peer_performance.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/peers/peer_performance.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/peers/peer_performance.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T19:30:10+00:00",
+        "age": "1.1h"
+       }
+      },
+      {
+       "source": "/api/general/portfolios/account-distribution.json",
+       "node": "endpointurl:/api/general/portfolios/account-distribution.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/portfolios/account-distribution.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/account-distribution.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T11:30:39+00:00",
+        "age": "9.1h"
+       }
+      },
+      {
+       "source": "/api/general/portfolios/aum-timeseries.json",
+       "node": "endpointurl:/api/general/portfolios/aum-timeseries.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/portfolios/aum-timeseries.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/aum-timeseries.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T11:30:41+00:00",
+        "age": "9.1h"
+       }
+      },
+      {
+       "source": "/api/general/portfolios/non_model_assets.json",
+       "node": "endpointurl:/api/general/portfolios/non_model_assets.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/portfolios/non_model_assets.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/non_model_assets.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "FAIL",
+        "last_modified": "2026-06-25T16:42:16+00:00",
+        "age": "147.9h"
+       }
+      },
+      {
+       "source": "account-distribution",
+       "node": "rqk:account-distribution",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getAccountDistribution",
+       "tier": "STATIC",
+       "served_url": "/api/general/portfolios/account-distribution.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/account-distribution.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T11:30:39+00:00",
+        "age": "9.1h"
+       }
+      },
+      {
+       "source": "aum-metrics",
+       "node": "rqk:aum-metrics",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getAUMMetrics",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "aum-timeseries",
+       "node": "rqk:aum-timeseries",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getAUMTimeSeries",
+       "tier": "STATIC",
+       "served_url": "/api/general/portfolios/aum-timeseries.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/aum-timeseries.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T11:30:41+00:00",
+        "age": "9.1h"
+       }
+      },
+      {
+       "source": "etf-benchmark-returns",
+       "node": "rqk:etf-benchmark-returns",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getETFBenchmarkReturns",
+       "tier": "STATIC",
+       "served_url": "/api/general/benchmarks/etf_returns.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/benchmarks/etf_returns.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:36+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "getAUMMetrics",
+       "node": "endpoint:getAUMMetrics",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getAUMTimeSeries",
+       "node": "endpoint:getAUMTimeSeries",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/portfolios/aum-timeseries.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/aum-timeseries.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T11:30:41+00:00",
+        "age": "9.1h"
+       }
+      },
+      {
+       "source": "getAccountDistribution",
+       "node": "endpoint:getAccountDistribution",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/portfolios/account-distribution.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/account-distribution.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T11:30:39+00:00",
+        "age": "9.1h"
+       }
+      },
+      {
+       "source": "getAccountDistributionByFirm",
+       "node": "endpoint:getAccountDistributionByFirm",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getETFBenchmarkReturns",
+       "node": "endpoint:getETFBenchmarkReturns",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/benchmarks/etf_returns.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/benchmarks/etf_returns.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:36+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "getMdpfAggregateAUATimeSeriesByFirm",
+       "node": "endpoint:getMdpfAggregateAUATimeSeriesByFirm",
+       "kind": "Endpoint",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "getModelPortfolioBenchmarks",
+       "node": "endpoint:getModelPortfolioBenchmarks",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/benchmarks/model_portfolio_benchmarks.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/benchmarks/model_portfolio_benchmarks.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:35+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "getNonModelAssets",
+       "node": "endpoint:getNonModelAssets",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/portfolios/non_model_assets.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/non_model_assets.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "FAIL",
+        "last_modified": "2026-06-25T16:42:16+00:00",
+        "age": "147.9h"
+       }
+      },
+      {
+       "source": "getPeerPerformance",
+       "node": "endpoint:getPeerPerformance",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/peers/peer_performance.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/peers/peer_performance.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T19:30:10+00:00",
+        "age": "1.1h"
+       }
+      },
+      {
+       "source": "mdpf-aggregate-timeseries",
+       "node": "rqk:mdpf-aggregate-timeseries",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getMdpfAggregateAUATimeSeriesByFirm",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "mdpf-per-firm-distribution",
+       "node": "rqk:mdpf-per-firm-distribution",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getAccountDistributionByFirm",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "mdpf-per-firm-timeseries",
+       "node": "rqk:mdpf-per-firm-timeseries",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getMdpfAggregateAUATimeSeriesByFirm",
+       "tier": "DYNAMIC",
+       "note": "Endpoint terminal on portal side (Lambda-mediated: advisor-intelligence/portal-proxy -> FIRM_CONFIG -> opal-data-{bd,cot,inf}/platinum); not modeled by SERVED_FROM"
+      },
+      {
+       "source": "model-portfolio-benchmarks",
+       "node": "rqk:model-portfolio-benchmarks",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getModelPortfolioBenchmarks",
+       "tier": "STATIC",
+       "served_url": "/api/general/benchmarks/model_portfolio_benchmarks.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/benchmarks/model_portfolio_benchmarks.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:35+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "non-model-assets",
+       "node": "rqk:non-model-assets",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getNonModelAssets",
+       "tier": "STATIC",
+       "served_url": "/api/general/portfolios/non_model_assets.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/portfolios/non_model_assets.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "FAIL",
+        "last_modified": "2026-06-25T16:42:16+00:00",
+        "age": "147.9h"
+       }
+      },
+      {
+       "source": "peer-performance",
+       "node": "rqk:peer-performance",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPeerPerformance",
+       "tier": "STATIC",
+       "served_url": "/api/general/peers/peer_performance.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/peers/peer_performance.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T19:30:10+00:00",
+        "age": "1.1h"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "page": "PortfolioManagement",
+   "rootFile": "portal/src/pages/PortfolioManagement/PortfolioManagement.tsx",
+   "clusters": [
+    {
+     "id": "cluster:PortfolioManagement:0",
+     "label": "PortfolioManagement.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:1",
+     "label": "AutoSaveIndicator.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:2",
+     "label": "BulkEditModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:3",
+     "label": "ExportModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:4",
+     "label": "LoadingOverlay.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:5",
+     "label": "OptimizationSummaryHeader.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:6",
+     "label": "PortfolioGrid.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:7",
+     "label": "RemoveConfirmationModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:8",
+     "label": "SecurityDetailModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:9",
+     "label": "SecurityLookupModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:10",
+     "label": "UploadConfirmationModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:11",
+     "label": "UploadPortfolioModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:12",
+     "label": "VersionHistoryModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:13",
+     "label": "AlphaTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:14",
+     "label": "HistoryTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:15",
+     "label": "ModelTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:16",
+     "label": "SectorTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:PortfolioManagement:17",
+     "label": "TradeTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    }
+   ]
+  },
+  {
+   "page": "Positioning",
+   "rootFile": "portal/src/pages/Positioning/Positioning.tsx",
+   "clusters": [
+    {
+     "id": "cluster:Positioning:0",
+     "label": "positioning-data",
+     "memberFileCount": 2,
+     "sources": [
+      {
+       "source": "/api/general/positioning/positioning_data.json",
+       "node": "endpointurl:/api/general/positioning/positioning_data.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/positioning_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/positioning_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:38+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "getPositioningData",
+       "node": "endpoint:getPositioningData",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/positioning_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/positioning_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:38+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "positioning-data",
+       "node": "rqk:positioning-data",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getPositioningData",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/positioning_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/positioning_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:38+00:00",
+        "age": "4.1h"
+       }
+      }
+     ]
+    },
+    {
+     "id": "cluster:Positioning:1",
+     "label": "holdings-attribution",
+     "memberFileCount": 1,
+     "sources": [
+      {
+       "source": "/api/general/positioning/holdings_attribution_data.json",
+       "node": "endpointurl:/api/general/positioning/holdings_attribution_data.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/holdings_attribution_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/holdings_attribution_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T17:03:50+00:00",
+        "age": "3.6h"
+       }
+      },
+      {
+       "source": "getHoldingsAttribution",
+       "node": "endpoint:getHoldingsAttribution",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/holdings_attribution_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/holdings_attribution_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T17:03:50+00:00",
+        "age": "3.6h"
+       }
+      },
+      {
+       "source": "holdings-attribution",
+       "node": "rqk:holdings-attribution",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getHoldingsAttribution",
+       "tier": "STATIC",
+       "served_url": "/api/general/positioning/holdings_attribution_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/positioning/holdings_attribution_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T17:03:50+00:00",
+        "age": "3.6h"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "page": "SecurityScanner",
+   "rootFile": "portal/src/pages/SecurityScanner/SecurityScanner.tsx",
+   "clusters": [
+    {
+     "id": "cluster:SecurityScanner:0",
+     "label": "SecurityScanner.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:SecurityScanner:1",
+     "label": "FactorChip.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:SecurityScanner:2",
+     "label": "ScannerFilterToolbar.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:SecurityScanner:3",
+     "label": "ScannerHeaderPanel.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:SecurityScanner:4",
+     "label": "FactorBankTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:SecurityScanner:5",
+     "label": "UniverseDataTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:SecurityScanner:6",
+     "label": "UniverseScannerTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    }
+   ]
+  },
+  {
+   "page": "TradeSubmission",
+   "rootFile": "portal/src/pages/TradeSubmission/TradeSubmission.tsx",
+   "clusters": [
+    {
+     "id": "cluster:TradeSubmission:0",
+     "label": "TradeSubmission.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:1",
+     "label": "ApproveModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:2",
+     "label": "ExecuteModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:3",
+     "label": "FileUploadZone.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:4",
+     "label": "RejectModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:5",
+     "label": "SecuritiesTable.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:6",
+     "label": "TickerAutocompleteInput.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:7",
+     "label": "TradeCard.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:8",
+     "label": "TradeDetailsModal.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:9",
+     "label": "ApprovalsTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:10",
+     "label": "ExecutionTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:11",
+     "label": "HistoryTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:TradeSubmission:12",
+     "label": "SubmitTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    }
+   ]
+  },
+  {
+   "page": "Valuation",
+   "rootFile": "portal/src/pages/Valuation/Valuation.tsx",
+   "clusters": [
+    {
+     "id": "cluster:Valuation:0",
+     "label": "Valuation.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:Valuation:1",
+     "label": "ValuationRangePanel.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:Valuation:2",
+     "label": "ValuationSummaryPanel.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:Valuation:3",
+     "label": "risk-premium-data",
+     "memberFileCount": 1,
+     "sources": [
+      {
+       "source": "/api/general/valuation/risk_premium_data.json",
+       "node": "endpointurl:/api/general/valuation/risk_premium_data.json",
+       "kind": "ServedURL",
+       "tier": "STATIC",
+       "served_url": "/api/general/valuation/risk_premium_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/valuation/risk_premium_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:36+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "getRiskPremiumData",
+       "node": "endpoint:getRiskPremiumData",
+       "kind": "Endpoint",
+       "tier": "STATIC",
+       "served_url": "/api/general/valuation/risk_premium_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/valuation/risk_premium_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:36+00:00",
+        "age": "4.1h"
+       }
+      },
+      {
+       "source": "risk-premium-data",
+       "node": "rqk:risk-premium-data",
+       "kind": "ReactQueryKey",
+       "via_endpoint": "getRiskPremiumData",
+       "tier": "STATIC",
+       "served_url": "/api/general/valuation/risk_premium_data.json",
+       "bucket": "opal-data-portal-v2",
+       "s3_key": "json/valuation/risk_premium_data.json",
+       "graph_verified": "object+node",
+       "resolution": "api-general-prepend-json (ground-truthed, both-ends-verified)",
+       "live": {
+        "status": "PASS",
+        "last_modified": "2026-07-01T16:31:36+00:00",
+        "age": "4.1h"
+       }
+      }
+     ]
+    },
+    {
+     "id": "cluster:Valuation:4",
+     "label": "ValuationTimeSeriesTab.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    }
+   ]
+  },
+  {
+   "page": "auth",
+   "rootFile": "portal/src/pages/auth/ChangePasswordPage.tsx",
+   "clusters": [
+    {
+     "id": "cluster:auth:0",
+     "label": "ChangePasswordPage.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:auth:1",
+     "label": "ForgotPasswordPage.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:auth:2",
+     "label": "LoginPage.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    },
+    {
+     "id": "cluster:auth:3",
+     "label": "ResetPasswordPage.tsx",
+     "memberFileCount": 1,
+     "sources": []
+    }
+   ]
+  }
+ ]
+}
