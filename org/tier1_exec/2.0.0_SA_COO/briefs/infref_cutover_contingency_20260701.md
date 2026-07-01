@@ -1,7 +1,7 @@
 # INFREF cutover — COO-owned STATE-TRIGGERED CONTINGENCY (durable across session churn)
 
 **Opened:** 2026-07-01T04:02Z · **Owner:** 2.0.0_SA_COO · **Co-auth:** 1.0.0_SA_CTO (per CTO decision 040039Z)
-**Status:** ARMED (expected never to fire — cutover should settle ~05:00-06:00Z)
+**Status:** STOOD DOWN 05:42Z (STEP3 2961fd47 Success rc=0 — full re-derivation DONE; L2b CLOSED-verified aa4deb725; chain rides to cutover ~6.5h before the ~12:13Z deadline -> no cron-hold ever needed; midday silver crons stayed ENABLED/untouched, the timing-dependent design held). The cron-hold contingency NEVER FIRED. Remaining: the tri-validation CLOSURE GATE below (still ACTIVE — COO holds REGISTRY flip until AE+DS~A+CVO attest).
 
 ## The risk
 INFREF rebuild STEP2a OVERWROTE live inf silver IN-PLACE (all 4 dims; pre-rebuild backup `_pre_rebuild_backup/20260630T234458Z/`). The served-GOLD nightly compute is HELD (inf-gold-incremental-daily @18Z + inf-etf-ownership-on-gold-complete both DISABLED — verified live 0357Z), so no gold computes against mid-rebuild silver. BUT the daily bronze->silver ingest chain is ENABLED and kicks at **~12:13Z** (opal-inf-jwt-fetch @12:13Z -> api pulls 12:30-14:00Z -> inf-silver-chain-bronze-complete overwrites silver). If the cutover has NOT completed by then, the daily chain overwrites the rebuilt silver mid-cutover.
