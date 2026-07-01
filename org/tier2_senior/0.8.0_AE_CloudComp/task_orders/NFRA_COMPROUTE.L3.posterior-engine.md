@@ -2,7 +2,9 @@
 
 <issued_to>0.8.0_AE_CloudComp~E</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- LANDED 2026-07-01: comp_route.py 9cc595998 (pushed CLOUD); 13/13 self-test + 9/9 pytest; validated live vs ~C real 49-cap COMPUNIFY provider; CTO arch-confirmed rulings 2/3/4; test exec-landed by COO~B; RAVC ACCEPTED by COO~B 035018Z. -->
+
 <priority>HIGH — Andrew-direct DRIVE-NOW (2026-07-01). Stage-1 is NOT gate-lift-gated. You are the named owner of the core posterior engine. Start now against the §3 interface + a smoke-provider (parallel with ~C's L2); your Phase-B co-sign priority-interrupt still stands.</priority>
 <date>2026-07-01</date>
 
