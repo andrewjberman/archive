@@ -5,7 +5,7 @@
 <issued_by>0.4.0_DE_ClientPlatform (COO owner-confirm 2026-07-01T1425Z; DS lane freed + offered)</issued_by>
 <consult>0.4.0_DE_ClientPlatform (FE consumer -- schema below is what CottonwoodClientsSection reads); 2.0.0_SA_COO (owner-confirm); 3.0.0_SA_CVO (served count-verify)</consult>
 <issued_date>2026-07-01</issued_date>
-<status>staged</status>
+<status>pending</status>
 <priority>MEDIUM -- lower than ADVI_TAGATTR/49F, but the priority gap-work in the cot-DS lane per COO: it unblocks a SHIPPED-but-empty FE (CottonwoodClientsSection, DEV 07d5887f).</priority>
 
 <context>
@@ -51,5 +51,12 @@ The FE sorts by aua desc then name, shows "<N> clients". So N must == the firm's
 5. Session-log Compiler Tools reproduces the mandate. RAVC2 to DE (CC COO + CVO). On serve, DE verifies the roster renders + CVO count-verifies.
 </acceptance_criteria>
 
+<nightly_validation_runbook note="COO-requested fresh-DS handoff -- run if the base session is not live at the cot nightly. Code = bb2d62ef8 (cot D_04 build_client_directory), deployed+sha256-verified on opal-data-cot/code/gold/.">
+After the cot nightly regenerates s3://opal-data-cot/platinum/firm/client_directory.json (currently ABSENT -- do NOT verify before it exists):
+1. comp-validate D_04.client_portal_summary --artifact &lt;served cot client_directory.json&gt; (or direct: households present, ~218).
+2. Pull the served client_directory.json: shape {households:[{household_id,display_name,aua}]}; 218 rows (== cot clients_tab headline.client_count, NOT 217 -- 218 is faithful/correct); each display_name a CLIENT/household name (not advisor); all aua finite (one legit aua=0); sum(aua) reconciles to clients_tab headline.total_aua (~$433.84M, data_as_of advances).
+3. firm-sep: bd/49F leaderboard.json + inf served NOT moved by this cot-only change (comp-pipescript deployed bd/inf MATCH).
+4. PASS -> RAVC2 0.4.0_DE_ClientPlatform (CC 2.0.0_SA_COO + 3.0.0_SA_CVO); DE renders CottonwoodClientsSection (218 roster sorted by $), CVO count-verifies 218. MISMATCH -> STOP.
+</nightly_validation_runbook>
 <references><ref type="fe">portal/src/pages/AdvisorIntelligence/_partners/cottonwood/CottonwoodClientsSection.tsx (toRoster -- the exact consumed fields); _shared getClientDirectory -> platinum/firm/client_directory.json</ref><ref type="peer-artifact">inf + 49F platinum/firm/client_directory.json (same shape, reference implementation)</ref></references>
 <lane_note>DS owns the cot-gold emit (rule 13). DE owns the FE (already shipped). Owner single-routed to base-DS by COO 2026-07-01 (off the 06-30 base-COO/MSTR routing). GATE: land on the scheduled nightly, never an ad-hoc gold run.</lane_note>

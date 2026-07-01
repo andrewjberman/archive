@@ -65,5 +65,12 @@ CTO GO'd the direction (full-tag, Andrew-set) but gated the SEMANTICS. Both are 
 7. ARCH-GATE 2 (fee blast): comp-blast of the fee surface (D_00c role-fee + C_08/E_23) run BEFORE the fee leg lands, with every role-fee consumer enumerated + confirmed intending the full-tagged basis (or excluded/coordinated). Breaking consumer -> STOP + escalate to CTO. RAVC the fee-blast result to COO+DE before landing fees.
 </acceptance_criteria>
 
+<nightly_validation_runbook note="COO-requested fresh-DS handoff -- run if the base session is not live at the bd nightly ~04:00Z. leg-1 code = 0ab172d3f (D_00c) + fc8c18361 (D_04), deployed+MATCH; leg-2 = 3ba105354 (~A, fee labeling+assert).">
+After the bd nightly regenerates s3://opal-data-bd/platinum/firm/leaderboard.json (data_as_of advances):
+1. comp-validate D_00c.portal_leaderboard --artifact &lt;served leaderboard.json&gt; -> expect PASS/WAIVED.
+2. Pull served leaderboard.json; travis_penfield (any window): role_breakdown[architect].aua = FULL tagged AUA of his architect accounts (NOT ~358,338,361 the old split-weighted role-sum); role buckets NON-ADDITIVE (sum role.aua > total_aua is EXPECTED); each role rd has aua_basis="tagged_full_nonadditive"; top-level role_breakdown_semantics="advisor_tagged_full_nonadditive".
+3. total_aua UNCHANGED ~439,968,591 (dedup, from D_02 book.json via D_04).
+4. PASS -> RAVC2 0.4.0_DE_ClientPlatform (CC 2.0.0_SA_COO + 3.0.0_SA_CVO); DE render-verifies + CVO served-verifies. MISMATCH -> STOP, do NOT signal safe, flag COO.
+</nightly_validation_runbook>
 <references><ref type="source">data/black_diamond/scripts/gold/D_00c.portal_leaderboard.py (lines 161-190 canonical loader; 442-518 role_detail; 865/590 tagged; 876-931 split_pct three-case)</ref><ref type="fe">portal/src/pages/AdvisorIntelligence/_shared/AdvisorPublicProfile.tsx (Role Composition ~790-847); _shared/tabs/AdvisorsTab.tsx (getDisplayMetrics ~330-439)</ref></references>
 <lane_note>DS owns the D_00c gold-script change (rule 13). DE owns the FE follow-on + verification. GATE: land on the scheduled nightly artifact, never an ad-hoc gold run (NEVER rule).</lane_note>
