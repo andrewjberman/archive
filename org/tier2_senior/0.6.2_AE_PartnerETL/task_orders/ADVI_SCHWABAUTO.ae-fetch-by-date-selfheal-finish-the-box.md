@@ -24,6 +24,23 @@ other 12; box CAN download RPS on non-contended dates; manual 13:39 fetch preced
 Andrew quiescing (quiesce = eventual cleanup, NOT a correctness prerequisite). Design: `docs/briefs/
 schwab-ingest-automation-ws3-prescope-20260702.md` (commits f925d3033, 83ff0ea67).
 
+> **MECHANISM PIVOT — 2026-07-02 (ANDREW-RATIFIED): the fetch-by-date-via-GUI mechanism above is SUPERSEDED
+> by A-PRIME (fetch-via-REST).** Rule-22a EXERCISE of the GUI-driver FAILED: the SI2 app is UIAutomation-
+> OPAQUE for data entry (only top-level named buttons scriptable, not the date/type/master wizard fields;
+> coordinate-clicking = too fragile for prod). Non-GUI spike then found the SI2 REST backend
+> (`REST_SI2Desktop = https://si2.schwabinstitutional.com/fileservices/SDDServices/`; auth = OAuth via the
+> Schwab **LMS SSO gateway** `sws-gateway.schwab.com`, `LMS_ClientId=SDD`, + Windows Credential Manager).
+> **A-PRIME MECHANISM (Andrew-directed):** RIDE the box's STANDING authenticated SI2 session → call
+> SDDServices REST directly (list + download by date/type/master), no re-login/MFA/OTP/GUI. Same live-
+> session-REST pattern as 0.6.0's bd `.bd.identity` fix + 0.7.0's OAuth-gateway technique (reuse, firm-sep
+> binding: technique shared, auth NEVER). This SUPERSEDES both the GUI-driver (unviable) AND Option-B
+> sole-client (moots Andrew's manual-pull cessation — no sovereign gate). LEG 0/1 GUI-driver legs below
+> are RETIRED; the LEG-1 build is now the REST-ingest. **BINDING GUARDRAILS:** (a) firm-sep — reuse the bd
+> technique, never bd creds/session/data; (b) SESSION-LIVENESS fail-LOUD alarm built INTO it (WS-4-class —
+> the standing-auth is a single-point-of-freshness); (c) CTO arch-gate BEFORE any live REST call; (d) prod
+> repoint stays Caution-B N=5-gated. RAVC MSTR + CTO. The IAM code-deploy path + console-session + daily-
+> bridge prereqs still stand. New design section to be authored on 0.6.0/0.7.0 pattern input.
+
 ## Authorization + context
 
 - **Andrew ruled OPTION A** (automate — "that's the entire point of the box"), COO GO 20260702T194245Z.
