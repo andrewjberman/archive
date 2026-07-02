@@ -3,6 +3,7 @@
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
 <status>staged</status>
+<!-- GO FIRED 2026-07-02 (COO~B) per MSTR RAVC-ACCEPT + FLAG-1 ruling (fire S1 GO on concurrence; sim-build in scope under Andrew-direct-auth, no Directive needed). AUTHORIZED to start -- but LOW-PRI + YIELD to base COO's ETL P0 on-call (post-fix re-publish); begin when your ETL standby frees. Loop CTO for the arch-gate (his arch-gate = this TO's acceptance + the S2-S4 unlock). Flip staged->pending when you start. RAVC COO~B. -->
 
 <priority>HIGH -- S1 is the load-bearing design; it GATES S2-S4. IN SCOPE under Andrew-direct-auth (design phase). PRD docs/architecture/NFRA_AGENTBUS_PRD.md SS3 + SS5 + SS8-S1.</priority>
 <date>2026-07-02</date>
