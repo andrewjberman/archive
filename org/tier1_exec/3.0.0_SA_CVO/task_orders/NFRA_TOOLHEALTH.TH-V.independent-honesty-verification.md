@@ -3,6 +3,7 @@
 <issued_to>3.0.0_SA_CVO~B</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
 <status>staged</status>
+<!-- GO FIRED 2026-07-02T~19:57Z (COO~B): MSTR spawned CVO~B for this (TH-B produced skeleton 64c89d675). PHASE-1 SCOPE (this pass, on the TH-B skeleton): independently re-derive KEEP/RETIRE from the LIVE substrate (NOT by re-running TH-B's code) + confirm zero usage-Goodhart + reproduce >=1 RETIRE on LIVE. EFFECTIVE-honesty portion (FIX reproduction + isolation-on-eval) follows post-TH-A/Phase-B. Art. XIV: VERIFY, do NOT co-author. Exercise proofs: comp-tool-health --self-test / --goodhart-audit / --json. Flip staged->pending on start; RAVC COO~B CC CTO. -->
 
 <priority>HIGH -- the honesty gate. CVO independence: verifies TH-A/B/C are honest, NOT graded on data they were tuned on. GATED on TH-A + TH-B + TH-C. PRD SS5 + SS6.3.</priority>
 <date>2026-07-02</date>
