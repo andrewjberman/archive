@@ -2,8 +2,9 @@
 
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>pending</status>
 <!-- GO FIRED 2026-07-02 (COO~B) per MSTR RAVC-ACCEPT + FLAG-1 ruling (fire S1 GO on concurrence; sim-build in scope under Andrew-direct-auth, no Directive needed). AUTHORIZED to start -- but LOW-PRI + YIELD to base COO's ETL P0 on-call (post-fix re-publish); begin when your ETL standby frees. Loop CTO for the arch-gate (his arch-gate = this TO's acceptance + the S2-S4 unlock). Flip staged->pending when you start. RAVC COO~B. -->
+<!-- STARTED 2026-07-02T171xZ (0.4.0_DE): flipped staged->pending. ETL sequencing judgment: inf re-publish is a LONG-window event (full 63-step chain re-run gold->platinum->served; served still data_as_of 06-30 = hours out, not minutes), so authoring S1 in the genuine ETL-standby window -- DROP-INSTANTLY-ON-REPUBLISH-PING preserved (Monitor bdkbu3y08 + periodic inf-state re-check). Phase-1 recon: all 4 interface PRDs exist (SCTY_MCPGUARD/SCTY_PREMCP/NFRA_COMPTEAM/NFRA_AGENTBUS) -- interface-unblocked, no still-decomposing interface to flag. -->
 
 <priority>HIGH -- S1 is the load-bearing design; it GATES S2-S4. IN SCOPE under Andrew-direct-auth (design phase). PRD docs/architecture/NFRA_AGENTBUS_PRD.md SS3 + SS5 + SS8-S1.</priority>
 <date>2026-07-02</date>
