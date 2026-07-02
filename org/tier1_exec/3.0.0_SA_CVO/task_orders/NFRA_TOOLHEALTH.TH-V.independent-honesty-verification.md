@@ -2,7 +2,8 @@
 
 <issued_to>3.0.0_SA_CVO~B</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>done</status>
+<!-- PHASE-1 VERDICT 2026-07-02 (CVO~B): VALIDATED_WITH_GAPS. Independent re-derivation (scratchpad/indep_rederive.py, zero subject imports) -> 50/50 verdict match + mean_outcome exact to 3dp -> value-anchored, ZERO usage-Goodhart (comp-drift rank18/85ev->FIX). RETIRE reproduced on live (comp-secrets: 0 rolling invocations + manifested = dead node). 2 advisory gaps to TH-B (goodhart-audit [:15] window excludes comp-drift@rank18; value_unknown KEEP basis over-claim). NO REWORK -- skeleton fit for Phase-1 accept. EFFECTIVE-honesty (isolation + used-but-ineffective FIX + TH-C D1) = Phase-2, GATED on TH-A/TH-C. Deliverable: deliverables/NFRA_TOOLHEALTH_TH-V_independent_honesty_verdict_20260702.md. RAVC->COO~B CC CTO. -->
 <!-- GO FIRED 2026-07-02T~19:57Z (COO~B): MSTR spawned CVO~B for this (TH-B produced skeleton 64c89d675). PHASE-1 SCOPE (this pass, on the TH-B skeleton): independently re-derive KEEP/RETIRE from the LIVE substrate (NOT by re-running TH-B's code) + confirm zero usage-Goodhart + reproduce >=1 RETIRE on LIVE. EFFECTIVE-honesty portion (FIX reproduction + isolation-on-eval) follows post-TH-A/Phase-B. Art. XIV: VERIFY, do NOT co-author. Exercise proofs: comp-tool-health --self-test / --goodhart-audit / --json. Flip staged->pending on start; RAVC COO~B CC CTO. -->
 
 <priority>HIGH -- the honesty gate. CVO independence: verifies TH-A/B/C are honest, NOT graded on data they were tuned on. GATED on TH-A + TH-B + TH-C. PRD SS5 + SS6.3.</priority>
