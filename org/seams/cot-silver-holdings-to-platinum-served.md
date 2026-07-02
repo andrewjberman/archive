@@ -93,6 +93,25 @@ surface) is content-frozen at 2026-06-30 while the pipeline runs fresh nightly. 
 - alloc/unrealized 0-row (chronic; Andrew-flagged) is a SEPARATE seam (silver/{allocations,unrealized} ->
   C_04/C_02/B_00) — routed to COO as a follow-on WS candidate; not folded here.
 
+## H1 resolution (cadence-confirmed 2026-07-02 ~2023Z, CTO ruling 201308Z)
+CTO ruled 2td-stale on the #1 served AUA surface IS page-worthy, CONDITIONAL on confirming the
+normal holdings cadence first (don't cry-wolf). Cadence-confirm (grounded):
+- holdings export is **T+2 steady-state** -- 07-02 nightly->holdings 06-30, 07-01->06-29,
+  06-30->06-26, all exactly 2 trading-days behind run-date (last 2 are clean single-file silver logs).
+  Caveat: only ~3 clean nightlies (06-24..06-29 was a disrupted/batched delivery window overlapping
+  the 06-22 AUAFIX-DATEMODE re-pull) -- current steady-state proven T+2, "chronic over 10d" not.
+- => S4 SEMANTIC is NOT a threshold defect; it's a STRUCTURAL cadence: the served AUA is ~2td stale
+  EVERY day by normal vendor cadence, so paging at >=2 would cry-wolf daily.
+- **Final (routed to CTO for arch-sign):** PAGE at **>=3td** (T+2 normal +1) interim + re-confirm after
+  ~5 clean nightlies; SOFT/report WARN (comp-freshness + DE WS-4) stays >=2 (two-tier, not one number --
+  corrects DE's >=2-page relay to AE). Structural-2td-AUA ESCALATED to CTO+COO+Andrew (accept T+2 floor /
+  push vendor / reconsider snapshot-first gating) so the current freeze is human-visible regardless.
+- **Authoritative key (reconcile):** `platinum/firm/timeseries_overview.json` -- backs the Total-AUA label
+  (AuthContext.tsx:18,51 getTimeseriesOverview; frontend-dev advi_rdvsds_003 baseline); already the alarm
+  probe's SERVED_AUA_KEY. Add it to gold_freshness_config.yaml so tool+alarm watch the SAME object.
+- DS-side deliverables (land in the H1 window on CTO arch-sign): add timeseries_overview.json to the
+  comp-freshness registry as authoritative + rewrite the :119 config-note (T+2 cadence, WARN>=2/PAGE>=3).
+
 ## Compiler Tools
 - `comp-freshness chain cot` — surfaced the S3->S4 symptom (platinum WARN, MTIME-FRESH/CONTENT-STALE).
 - `comp-which` — routed the platinum-stale question (near-tie: comp-freshness/comp-xray/comp-lambdamap).
