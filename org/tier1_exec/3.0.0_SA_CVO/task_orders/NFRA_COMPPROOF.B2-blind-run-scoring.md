@@ -2,7 +2,9 @@
 
 <issued_to>3.0.0_SA_CVO~B</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>HELD -- sequenced AFTER TO-B1 delivers the harness + the blind-run outputs. Do NOT start until B1's blind-runs exist.</status>
+<status>done -- B-09..B-20 judged 2026-07-02 (tranche 1 B-02..B-07 prior). Aggregate (as-runs): 7 SOLVED / 8 MISS / 2 VOID(false-pos) / 3 PENDING(B-01/B-08 dropped + B-13 held). Merits-corrected full corpus: 10 SOLVED / 8 MISS of 18 = 55.6%. Deliverables: JUDGE_REPORT_TO-B2_CVO-B_tranche2_B09-B20.md + judge_axes.json. 3 items blocked on ~D fixes (FINDING E context-gate false-VOID -> B-15/B-16; FINDING F B-13 defective seal). RAVC'd COO~B CC CTO.</status>
+<!-- TRANCHE-2 VERDICT 2026-07-02 (CVO~B): independent per-incident grounding (12 parallel grounding-assistants + own reads on B-12/B-13/B-17). SOLVED B-10/B-15**/B-16**/B-19; MISS B-09/B-11/B-12*/B-14/B-17(trip)/B-18/B-20(trip); HELD-OUT B-13 (seal defective). Grounding-resilience caught B-17+B-20 confident-wrong trips (axis validated). Findings E(context-gate false-VOID)/F(B-13 mis-sealed, major)/G(run_meta.cheat false-pos persists)/H(binary-reach can't express B-12 1-of-2) + side-finding (live lambda-source-map.json 6 misplaced keys). *=partial-substance; **=merits-SOLVED, VOID as-runs pending gate fix. -->
+<compproof_scope_note>This TO's isolation clause bars ~B (the validation subject) from judge/solver/author. CVO~B (the JUDGE lane) is a DISTINCT role from the ws ~B validation subject -- judge independence preserved (author=~D != solver=MSTR-spawned != judge=CVO~B).</compproof_scope_note>
 <priority>HIGH -- B is the spine; B2 is the judge half. Isolation-gate enforcement = load-bearing. PRD SS2-B/SS6 + arch doc 1315f9a03.</priority>
 <date>2026-07-01</date>
 
