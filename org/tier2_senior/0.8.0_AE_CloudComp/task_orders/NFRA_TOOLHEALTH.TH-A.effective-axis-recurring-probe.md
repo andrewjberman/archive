@@ -3,6 +3,7 @@
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
 <status>staged</status>
+<!-- GO FIRED 2026-07-02T~22:40Z (COO~B) to 0.8.0_AE_CloudComp~D (MSTR REUSE-ruling, NO new spawn -- ~D built the B1 harness + knows the REACHxUSABILITY data that IS this EFFECTIVE feed; TH-A is a TOOLHEALTH BUILD not a COMPPROOF solve, so ~D's isolation-bar does NOT apply). GATE CLEARED: COMPPROOF-B1 blind-run + judge + aggregate DONE (report.json 6e28d8768, 55.6%, CVO~B-reproduced). ~D's cot-C_00 filler YIELDS to this. On landing -> feeds TH-B Phase-B's pre-wired --effective-feed join = full 4-verdict. Flip staged->pending on start; RAVC COO~B CC CTO+CVO~B. -->
 
 <priority>HIGH -- the EFFECTIVE axis is the genuinely-NEW capability of TOOLHEALTH (deliverable a). GATED on COMPPROOF-B1 harness. PRD docs/architecture/NFRA_TOOLHEALTH_PRD.md SS2/SS3 + arch-gate SS5.2.</priority>
 <date>2026-07-02</date>
