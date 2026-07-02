@@ -42,7 +42,7 @@ Provision (in a single-tenant simulation) the per-collaboration SQS queue-pair +
 </compiler_tools_mandate>
 
 <cross_domain_coordination>
-- NFRA_AGENTBUS-S1 (0.4.0_DE): the binding partition design. Build to the S1 spec; gated on its CTO arch-gate.
+- NFRA_AGENTBUS-S1 (0.4.0_DE): the binding partition design. **Binding S1 interface = `docs/briefs/nfra_agentbus_s1_security_model_spec_DRAFT_20260702.md` (committed 4aa59029f, full 5-control spec; the docs/architecture promotion never landed -- use the brief).** S1 CTO arch-gate = PASS (5b7ef1613, S1 COMPLETE), so S2's FLAG-1 gate is MET; S2 execution now yields ONLY to the P0-clear greenlight (MSTR FLAG-2).
 - 1.0.0_SA_CTO: arch-gate on control-1 (partition provably-scoped, SS5.2).
 - SCTY lane (base COO): the per-collaboration grant model coordinates with SCTY entitlements. CC base COO.
 - opal-agent-comms: the transport bridges to the broker via the S3 adapter (not S2). S2 is the SQS + partition layer only.

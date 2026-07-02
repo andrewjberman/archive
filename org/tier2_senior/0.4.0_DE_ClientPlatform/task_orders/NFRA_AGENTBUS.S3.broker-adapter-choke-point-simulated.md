@@ -42,7 +42,7 @@ Build the broker adapter bridging `opal-agent-comms` <-> the SQS bus (S2), apply
 </compiler_tools_mandate>
 
 <cross_domain_coordination>
-- NFRA_AGENTBUS-S1 (0.4.0_DE, same owner): the binding 5-control design. Gated on S1 CTO arch-gate.
+- NFRA_AGENTBUS-S1 (0.4.0_DE, same owner): the binding 5-control design. **Binding S1 interface = `docs/briefs/nfra_agentbus_s1_security_model_spec_DRAFT_20260702.md` (committed 4aa59029f; the docs/architecture promotion never landed -- use the brief; CTO may re-land the architecture home later, same content).** S1 CTO arch-gate = PASS (5b7ef1613). S3 BUILD still hard-gates on the C2/C3/C4 IMPLEMENTATIONS (MCPGUARD/PREMCP/COMPTEAM) landing + the P0-clear greenlight.
 - NFRA_AGENTBUS-S2 (0.7.0_AE_CloudOps): the adapter bridges to S2's SQS queue-pair; respects S2's partition (control-1).
 - COMPLEARN owner + NFRA_TOOLHEALTH (TH-A/TH-B): tool_activity is COMPLEARN-owned + shared with TOOLHEALTH (2-project surface). S3 APPENDS cross-employee rows; it MUST NOT fork or mutate COMPLEARN's tables. Coordinate the row schema with TH-B (the query consumer).
 - NFRA_COMPTEAM: control-3 signature-root + control-4 strip-list (reuse the kit, don't re-derive).
