@@ -869,4 +869,31 @@
 
   </etfs_writeout_producers>
 
+  <nfra_agentbus>
+    <!-- Cross-principal Agent Bus transport + IAM/KMS partition (control-1 of the S1 5-control
+         security model). NFRA_AGENTBUS.S2. SINGLE-TENANT-SIMULATED ONLY (both fleets = same-account
+         assumable IAM roles under our own principal; NO cross-principal activation -- fenced AB-ACTIVATE). -->
+    <module>
+      <tf_dir>infra/aws/terraform/nfra-agentbus/</tf_dir>
+      <state_key>nfra-agentbus/tfstate</state_key>
+      <tag>nfra-agentbus-v1.0.0</tag>
+      <spec>docs/briefs/nfra_agentbus_s1_security_model_spec_DRAFT_20260702.md (S1, 5b7ef1613)</spec>
+      <resources>
+        2 FIFO SQS queues (agentbus-sim01-alpha-to-beta.fifo = beta inbound; agentbus-sim01-beta-to-alpha.fifo
+        = alpha inbound), SSE-KMS + message-group scoping; per-collaboration KMS key (alias/agentbus-sim01,
+        rotation on) with kms:Decrypt/GenerateDataKey scoped to the 2 fleet roles + root; 2 sim fleet roles
+        (agentbus-sim01-fleet-{alpha,beta}-role, same-account assumable) with least-privilege identity policies
+        (SEND to the pair + RECEIVE own-inbound ONLY); default-deny + explicit two-principal-allow queue policies.
+      </resources>
+      <partition>
+        Control-1 = each fleet role receives ONLY its own inbound; DENIED the other's. Enforced fail-closed by
+        least-privilege identity policies (the enforced partition in the sim) + queue policies (model the
+        cross-principal gate) + scoped KMS. PROVEN live 2026-07-02 via sts assume-role + ReceiveMessage:
+        own-inbound ALLOW (msg round-trip, KMS decrypt exercised); cross-inbound = real AccessDenied both directions.
+      </partition>
+      <parameterization>Per-collaboration: collaboration_id / fleet_a_name / fleet_b_name vars. simulated=true var-guarded (a live-activation flip is blocked; that is the fenced AB-ACTIVATE Directive item).</parameterization>
+      <downstream>S3 (broker adapter, separate lane) consumes the exported outputs (queue urls/arns, role arns, KMS arn). S4 (CVO) independently re-verifies this partition -- resources PERSIST for that.</downstream>
+    </module>
+  </nfra_agentbus>
+
 </pipeline_inventory>

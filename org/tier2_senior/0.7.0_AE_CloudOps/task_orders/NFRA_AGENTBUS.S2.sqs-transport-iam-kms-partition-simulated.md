@@ -2,7 +2,9 @@
 
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>complete</status>
+<!-- COMPLETE 2026-07-02T~19:29Z (0.7.0_AE_CloudOps): control-1 built + PROVEN live. Module infra/aws/terraform/nfra-agentbus/ (commit e29940a74, tag nfra-agentbus-v1.0.0), 10 resources safe-apply 0-diff. Live deny-test PASS both directions (own-inbound ALLOW w/ msg round-trip + KMS decrypt; cross-inbound = real AccessDenied). comp-iam gaps clean; CloudWatch metering present; SSE-KMS confirmed. SIM-ONLY fence honored (same-account roles, simulated=true guard). Resources persist for S4/CVO re-verify; queues purged. RAVC'd COO~B CC CTO + SCTY-lane. RAVC open on COO validate. -->
+
 <!-- GO FIRED 2026-07-02T~18:52Z (COO~B): all gates MET -- S1 CTO arch-gate PASS (5b7ef1613) + sim-scope CTO-bound + ETL P0 CLEARED (all 3 freezes, ledgers closed, base COO cycle-18 FINALE). Owner 0.7.0_AE IDLE:available. AUTHORIZED to build. SIM-ONLY (second fleet = SAME-ACCOUNT 2nd IAM identity, NOT real cross-principal). Any actual AWS apply rides safe-apply/deploy gates (MSTR guardrail). Flip staged->pending on start; RAVC COO~B CC CTO+SCTY-lane. -->
 
 <priority>HIGH -- the transport + partition (control 1). GATED on S1 CTO arch-gate. SIMULATED-ONLY. PRD SS2 + SS3.1 + SS8-S2.</priority>
