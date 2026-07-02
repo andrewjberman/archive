@@ -2,7 +2,8 @@
 
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>complete</status>
+<!-- PHASE-A DELIVERED 2026-07-02 (base 0.8.0_AE_CloudComp): org/modules/graph/comp_tool_health.py (comp-tool-health) -- the ONE fused per-tool 3-axis health query over the 2 LIVE axes (USED via tool_activity + RAIL_CONSISTENT via comproute-routing.jsonl), EFFECTIVE=pending(TH-A) with classify_full() left as the one-line join seam. Value-anchored (SS5): verdict on mean OUTCOME value + rail quality, NEVER invocation count; --self-test 12/12 (incl. load-bearing EFFECTIVE-alone-flips-KEEP<->FIX + zero usage-Goodhart); --goodhart-audit exhibits high-usage-NOT-keep + low-usage-IS-keep. Live: 50 tools, FIX?=3 (value-grounded)/RETIRE?=4/KEEP?=43. REUSED comp_learns_score un-forked (COMPLEARN stays closed). Committed <this commit>. OPEN FOLLOW-ONS (not this leg): Phase-B = join TH-A's EFFECTIVE probe -> full 4-verdict + acceptance#2 FIX-demo on a real tool (sequences on TH-A GO); TH-V = CVO~B independent honesty verify (the acceptance gate). RAVC COO~B CC CTO+CVO~B. -->
 <!-- GO FIRED 2026-07-02T~19:00Z (COO~B): MSTR spawned base 0.8.0_AE_CloudComp for TH-B (P0 cleared, cap=20 6-free per LD-0115). TH-B is the READY first leg -- ship the 2-live-axis skeleton NOW over the LIVE COMPLEARN substrate (USED via tool_activity + RAIL-CONSISTENT via comp-which-rail.log); full 4-verdict (FIX/PROMOTE) joins TH-A's EFFECTIVE feed later (TH-A gated on COMPPROOF-B1). REUSE comp_learns_score.py + tool_activity un-forked. Flip staged->pending on start; RAVC COO~B CC CTO+CVO~B. -->
 
 <priority>HIGH -- the high-value deliverable (b): ONE query -> per-tool health verdict. The 2 live axes are runnable NOW; the 4th verdict completes on TH-A. PRD SS3 + SS6.1.</priority>
