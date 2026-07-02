@@ -43,6 +43,17 @@ window (AFTER a scheduled 8,20 UTC cycle, before the next — never mid-cycle; t
 dashboard/"Download all new files" view for click-download.ps1). Capture the search UI flow (fields:
 date/account/file-type) to drive LEG 1 automation. RAVC CTO the result → CTO arch-signs the reliance.
 
+**LEG 0 grounded prerequisites (2026-07-02 exercise-confirm attempt surfaced two hard infra gaps — both block LEG 1):**
+- **PREREQ-A (code-deploy path):** the box role `quartz-si2-spike-role` grants ONLY `s3:ListBucket`
+  (opal-data-schwab) + `s3:PutObject` (01_raw/*, 01_raw_quartz_validation/*) — **NO `s3:GetObject`**. The
+  box CANNOT pull code from S3 (why the existing scripts are hand-placed). LEG 1 (deploying the self-heal
+  script) + LEG 0 (the exercise) both REQUIRE granting the role `s3:GetObject` on a scoped code prefix
+  (TF/IAM change, CTO arch/sec-gate). Until then there is NO sanctioned S3→box deploy on this box.
+- **PREREQ-B (console-session):** session-0 SSM UIAutomation CANNOT see the SI2 GUI (session isolation);
+  the automation MUST run as a scheduled task in the Administrator console session (proven: cloning
+  `SchwabAutoDownload`'s principal into a temp task runs in the console session). LEG 1's self-heal runs
+  this way, not via direct session-0 SSM.
+
 **LEG 1 — EXPECTED-SET-DRIVEN self-heal pass** (CTO gate 1). The box asserts the EXPECTED file/date set
 for the run (RPS for the expected trading date + the CORE 12 types), and self-heals ANY missing member
 via "download specific" (search-by-date) — "download all that SHOULD be here," not "whatever's new".
