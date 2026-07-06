@@ -11,9 +11,11 @@
      LIVE regression: parse_rail/parse_rolling_log/parse_telemetry crashed on a non-UTF-8 byte (truncated
      em-dash, comp-which-rail.log line 3445) -> hardened all 3 unguarded opens with errors="replace"
      (comp_learns_score.py + open#390 were already hardened; these 3 were missed) -- had been bricking
-     COMPLEARN corpus load fabric-wide since ~07-02. FOLLOW-ON (RAVC'd, CTO/COO~B call): the recurring
-     TRIGGER cadence/host (same decision-class as the emit-wiring cloud-vs-local pick) -- probe is
-     recurring-CAPABLE (append-only) but no auto-schedule wired (blind-runs are cost-heavy). RAVC COO~B CC CTO+CVO~B. -->
+     COMPLEARN corpus load fabric-wide since ~07-02. FOLLOW-ON RESOLVED same session: CTO GO 2026-07-06 =
+     HOST=local + TRIGGER=consumption-driven with a 7d staleness ceiling (NOT cron/SessionEnd/cloud) +
+     --force. Wired as tool_probe.ensure_fresh (reuse if <=7d, run-fresh-then-read if >7d/missing/force);
+     self-test extended (staleness gate) + both paths exercised. COO RAVC2-ACCEPT (TH-A CLOSED); CVO
+     running the independent TH-V blind re-run. RAVC COO CC CTO+CVO. -->
 
 <!-- GO FIRED 2026-07-02T~22:40Z (COO~B) to 0.8.0_AE_CloudComp~D (MSTR REUSE-ruling, NO new spawn -- ~D built the B1 harness + knows the REACHxUSABILITY data that IS this EFFECTIVE feed; TH-A is a TOOLHEALTH BUILD not a COMPPROOF solve, so ~D's isolation-bar does NOT apply). GATE CLEARED: COMPPROOF-B1 blind-run + judge + aggregate DONE (report.json 6e28d8768, 55.6%, CVO~B-reproduced). ~D's cot-C_00 filler YIELDS to this. On landing -> feeds TH-B Phase-B's pre-wired --effective-feed join = full 4-verdict. Flip staged->pending on start; RAVC COO~B CC CTO+CVO~B. -->
 
