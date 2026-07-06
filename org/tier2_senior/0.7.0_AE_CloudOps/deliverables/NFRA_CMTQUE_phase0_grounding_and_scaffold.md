@@ -177,3 +177,36 @@ while true:
 **Nothing touches the live commit path until TO-2's flag is flipped (TO-6, CTO-gated).** TO-3 + TO-1 are pure additive scaffold — zero fabric risk to build now.
 
 **CTO arch-gates:** (a) worker gate-integration (TO-1/TO-5), (b) the TO-6 cutover. Both flagged for 1.0.0_SA_CTO review before landing on the live path.
+
+---
+
+## 7. TO-4 — Observability + alarms (design; Terraform apply HELD for box recovery)
+
+**Status:** design authored 2026-07-06. TO-1's worker already emits metrics to a local sink (`cw_metric` -> `<queue>/metrics.log`); TO-4 replaces that sink body with `aws cloudwatch put-metric-data` and provisions the alarms via Terraform (Rule 1). The apply is HELD only for box health (terraform would time out on the currently-degraded host) — the design is complete.
+
+### 7.1 Metrics (namespace `Opal/CommitQueue`, dimension `Repo=<gitdir basename>`)
+| Metric | Emit point | Meaning |
+|---|---|---|
+| `WorkerLiveness` (=1 each loop) | daemon loop top | worker is alive + draining; ABSENCE = stall |
+| `QueueDepth` | each idle poll | pending requests not yet claimed (backlog) |
+| `CommitLatencyMs` | on each result | enqueue_ts -> result (the metric G1 targets: no storm/timeout) |
+| `Committed` (count) | on committed result | throughput |
+| `RejectedCount` (count) | on client-visible rejection | user-error rate (NOT poison) |
+| `DlqDepth` (count) | on any DLQ move | POISON: transient-exhausted / corrupt / crash-orphan |
+| `RecoveredCommitted` (count) | crash-sweep landed-recovery | how often the PRE_HEAD recovery saved a landed commit |
+
+### 7.2 Alarms (Terraform)
+1. **WorkerDown (CRITICAL)** — `WorkerLiveness` **missing for >= 3 min** with `treat_missing_data = breaching`. Worker down = commits not landing (the fabric falls back to today's mutex via D6, so it degrades not halts, but the loud signal is mandatory). This is the alarm that must DELIVER.
+2. **DlqDepth > 0** — any poison request. Fires on `DlqDepth >= 1`. (The DLQ-split — TO-5 — is WHY this stays a real poison signal: user-errors never enter the DLQ, so depth>0 is always actionable.)
+3. **QueueBacklog** — `QueueDepth > N` sustained M min (slow-drain / stuck worker not yet dead).
+4. **CommitLatencyHigh** — `CommitLatencyMs` p-high over the mutex baseline (degradation; tune against the TO-6 load-test baseline).
+
+### 7.3 Delivering-subscriber (the PendingConfirmation lesson — AC4)
+The alarm SNS topic MUST have a **CONFIRMED** subscriber, not a silently-expiring email PendingConfirmation. Wire the alarm to the fabric's existing **ops-alert channel** (a confirmed endpoint), and VERIFY delivery by an exercise (fire a test alarm -> observe it arrive), not by reading the TF config. "Assert a real subscriber" — a config-read that shows a subscription is INSUFFICIENT (Rule 22a: BEHAVIOR claims need exercise). AC4 = "alarm DELIVERS", exercised.
+
+### 7.4 IAM nuance (flag for CTO / comp-iam)
+The commit-worker is a **LOCAL daemon** on the repo host, not a Lambda — so its `put-metric-data` runs under **whatever IAM identity the local `aws` CLI assumes on that host**, NOT a Terraform-modeled Lambda/EC2 role. Consequence: `comp-iam service <lambda>` does NOT cover this grant (it models TF Lambda/EC2 policies). TO-4 must: (a) identify the local host's aws identity, (b) attach a least-privilege `cloudwatch:PutMetricData` (scoped to the `Opal/CommitQueue` namespace via a condition if supported), (c) the alarm->SNS publish is CloudWatch-service-principal on the SNS topic policy (Terraform-modeled, comp-iam-visible). Ground the local-identity grant on **live** `aws sts get-caller-identity` + `get-role-policy`/`get-user-policy` (Rule 22a APPLIED layer), not the comp-iam DESIRED view.
+
+### 7.5 Degradation tie-in (D6)
+WorkerDown (7.2 #1) is the loud signal that pairs with `cq_worker_alive()` returning false -> `safe-commit` (TO-2) falling back to the in-line mutex. So a worker death is: (a) invisible to callers (they degrade to today's behavior), (b) LOUD to ops (the delivering alarm). Never a silent fabric stall.
+
