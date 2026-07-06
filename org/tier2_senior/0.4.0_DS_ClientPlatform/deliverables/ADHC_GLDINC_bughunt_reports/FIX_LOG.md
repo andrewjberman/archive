@@ -274,6 +274,32 @@ validated against source before fixing).
 - ap.get(total_aua,0).fillna() is a numpy scalar -> AttributeError -> abort when col absent; Series-guard.
   **Commit:** `4a51114a4`
 
+## Reports 21-31 (Group C tail + Group D publishers) -- condensed fix batch
+Commit hashes greppable via `git log --grep "ADHC_GLDINC #NN"` (git log intermittently slow this session).
+- **Report 21 / INF_C_08** (`9bcfa0f2d`): F1 advisor_key producer-mismatch WARN (silent $0 ytd_nna);
+  F2 fee_bps autodetect + bps->decimal (forward-compat, A_02 no-op); F3 account_fee_map str-normalize;
+  F4 Series-guard total_aua.
+- **Report 22 / INF_C_09** (`18e29b9a5`): F1 pin fee-status cols to nullable boolean in both write-paths
+  (PARKED artifact); F2 row-grain divergence NOTED/deferred (parked/unconsumed).
+- **Report 24 / INF_D_00b** (#24): F1 pin household_id Int64 (merge-key-drift abort); F2 default
+  total_aua + fail-clear on missing household_id -- centralized in load_client_performance.
+- **Report 25 / INF_D_00c** (#25): F1 the only account_id INNER merge missing the sibling .astype(str)
+  -> served new_clients silent 0-collapse on dtype drift; F2 net_nna fallback guard.
+- **Report 26 / INF_D_00d** (#26): F1 build_nna_geo_view account_id guard (empty-hh_dim fallback KeyError
+  abort); F2 None before len(); F3 household_id numeric->Int64->str ('18' vs '18.0' geo merge-miss,
+  the $14M-invisible class).
+- **Report 27 / INF_D_00f** (#27): F1 (HIGH) empty acct_dim nmnc=nmec=0 breaks AC-F4b.1 invariant ->
+  abort; nmec=total. F2 casefold-normalize state (case-variant dup-key collision abort).
+- **Report 28 / INF_D_02** (#28): F1 normalize 2 account_id merge keys before the merge (silent advisor/
+  reg_type served fallback); F2 top_position guard extended (unwrapped-loop KeyError abort).
+- **Report 29 / INF_D_02b** (#29): F1 (HIGH, DI-8) frozen assets input -> interim staleness WARN; F2
+  empty input -> return 0 (was abort-the-D-chain); F3 account_id groupby guard.
+- **Report 30 / INF_D_02c** (#30): F1 json.loads inside try + broaden except (malformed/transient
+  book.json aborted the D-chain).
+- **Report 31 / INF_D_02d** (#31): F1 guard ticker inside the fallback (KeyError abort); F2 missing
+  firm_composition -> return 0 (cold-start asymmetry vs INF_D_03); F3 flagged DI-9.
+- **Report 23 / INF_D_00**: no ~A patch -- CRITICAL live tax-bucket regression, flagged DI-7 (below).
+
 ---
 
 ## DESIGN ITEMS (flagged -- need a cross-script decision, NOT a safe autonomous per-report patch)
@@ -330,6 +356,39 @@ if C_05 emits that split; (3) INF_B_03 DEMOTE-not-silent-delete -- comp-blast ac
 first (INF_C_03 account_performance may read it; don't break non-tax readers); (4) vintage-honest
 (served tax carries the Orion pull date). Path: grain-confirm RAVC -> CTO arch-gate -> impl -> deploy
 -> CVO re-cert (served == Orion-native $13.3M-class, ST/LT intact, exercised on the served artifact).
+
+## DI-7 -- INF_D_00 finding 1 (CRITICAL, LIVE, served tax BUCKET -- confirmed on the artifact)
+Report 23. The ADVI_INFREF P1 LEG-1 repoint (cf4a05a9c, 2026-06-30) switched INF_D_00.load_accounts_dim
+off silver/accounts_dim/latest.parquet (has tax_status) onto accounts_v2 (has NEITHER tax_status NOR
+reg_type), so build_firm_tax_block falls all AUA into 'taxable' (fallback_rate=1.0, WARN-only).
+**GROUNDED LIVE:** served s3://opal-data-inf/platinum/firm/clients_tab.json (LastModified 07-06 16:55)
+tax = {taxable $202,542,849.81 / 100.0%, tax_deferred 0/0%, tax_free 0/0%} -- the whole $202.5M firm
+AUA served 100% taxable when the tax_status.py census is ~48% IRA/Roth. Silent since 06-30 (portal
+TaxCostBasisPanel, via INF_D_04 clients_tab_slim). SEPARATE from DI-1 (this is the tax CLASS bucket,
+not unrealized gain). **FIX (regression repair, needs a lane -- flagged to COO 224126Z):** restore a
+real reg_type/tax_status source (reg-type is registration-static so silver/accounts_dim/latest is fine
+for CLASS) joined to accounts_v2; + promote fallback_rate==1.0 to a hard guard. Do NOT substitute
+account_type. NOT ~A-patched (served-number regression, Andrew "discovery not sidetrack").
+
+## DI-8 -- INF_D_02b finding 1 (HIGH, wiring/architecture, silent stale served top-holdings)
+Report 29. `silver/api_dims/assets/` (INF_D_02b's input) has NO producer wired into the dispatch chain
+-- its only writer `build_assets_dim.py` is unwired, and the daily `convert_assets_v2_to_silver` writes
+a DIFFERENT prefix (`silver/assets_v2/`, different 58-col schema) that D_02b does not read. So
+top_holdings.json republishes months-stale holdings every night with a FRESH `generated_at` (evades the
+freshness monitor, which keys on regeneration). **FIX (DT/architecture):** wire `build_assets_dim.py`
+into the chain ahead of INF_D_02b, OR repoint INF_D_02b at the live `silver/assets_v2/` (adapt the col
+map: current_value->position_mv, ticker->asset_ticker). Interim staleness WARN landed (FIX report-29 F1).
+
+## DI-9 -- INF_D_02d finding 3 (medium, served mix time-series methodology mismatch)
+Report 31. The mix time-series classifies its CURRENT point from firm_composition.json (INF_D_03's own
+`asset_class` column) but RECLASSIFIES historical quarters via the assets_v2 `product_category` keyword
+classifier, defaulting any ticker absent from today's assets_v2 to `alternatives`. The two ends of the
+same series use different methodologies -> a fund that is `fixed_income` at the current point but
+keyword-unmatched / liquidated shows as `alternatives` historically -> QuarterlyMetricsBar renders a
+FICTITIOUS fixed_income-collapse/alternatives-spike that is a classifier mismatch, not a real allocation
+change. **FIX:** classify all points with ONE methodology + route unknown tickers to an explicit
+`other`/`unclassified` bucket, not silently `alternatives`. Served-number methodology decision -- not
+autonomously patched.
 
 ---
 
