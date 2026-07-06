@@ -2,7 +2,19 @@
 
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>complete</status>
+<!-- STARTED 2026-07-02 by 0.8.0_AE_CloudComp~D per COO~B GO (224348Z). Flipped staged->pending. -->
+<!-- COMPLETED 2026-07-06 by 0.8.0_AE_CloudComp (base) -- picked up the ~D build stranded uncommitted by
+     the 07-03..07-06 holiday dormancy. tool_probe.py (per-tool EFFECTIVE probe, isolation-gated) +
+     tool_corpus.py (sealed corpus) landed; self-test 13-assert PASS; LIVE run demonstrated the FIX-catch
+     (comp-freshness KEEP->FIX flip via --effective-feed, grounded Rule 22). AC1-3 met. En route, fixed a
+     LIVE regression: parse_rail/parse_rolling_log/parse_telemetry crashed on a non-UTF-8 byte (truncated
+     em-dash, comp-which-rail.log line 3445) -> hardened all 3 unguarded opens with errors="replace"
+     (comp_learns_score.py + open#390 were already hardened; these 3 were missed) -- had been bricking
+     COMPLEARN corpus load fabric-wide since ~07-02. FOLLOW-ON (RAVC'd, CTO/COO~B call): the recurring
+     TRIGGER cadence/host (same decision-class as the emit-wiring cloud-vs-local pick) -- probe is
+     recurring-CAPABLE (append-only) but no auto-schedule wired (blind-runs are cost-heavy). RAVC COO~B CC CTO+CVO~B. -->
+
 <!-- GO FIRED 2026-07-02T~22:40Z (COO~B) to 0.8.0_AE_CloudComp~D (MSTR REUSE-ruling, NO new spawn -- ~D built the B1 harness + knows the REACHxUSABILITY data that IS this EFFECTIVE feed; TH-A is a TOOLHEALTH BUILD not a COMPPROOF solve, so ~D's isolation-bar does NOT apply). GATE CLEARED: COMPPROOF-B1 blind-run + judge + aggregate DONE (report.json 6e28d8768, 55.6%, CVO~B-reproduced). ~D's cot-C_00 filler YIELDS to this. On landing -> feeds TH-B Phase-B's pre-wired --effective-feed join = full 4-verdict. Flip staged->pending on start; RAVC COO~B CC CTO+CVO~B. -->
 
 <priority>HIGH -- the EFFECTIVE axis is the genuinely-NEW capability of TOOLHEALTH (deliverable a). GATED on COMPPROOF-B1 harness. PRD docs/architecture/NFRA_TOOLHEALTH_PRD.md SS2/SS3 + arch-gate SS5.2.</priority>
