@@ -216,6 +216,38 @@ validated against source before fixing).
 - `main`. `--start-date` leaves prev_aua unseeded -> boundary date `aua_change == full AUA` (spike).
   Now warned loudly (full fix = seed prev_aua, DI-3). low/empty-null. **Commit:** `b9cc7c93a`
 
+## FIX-026 -- INF_C_01: retain unmapped-advisor NNA flow (report 13 F1, CRITICAL)
+- `INF_C_01.canonical_nna.py` -- `_normalize_silver_schema`. The rep->advisor map is a hardcoded
+  4-entry dict; a NEWLY-ONBOARDED advisor's rep_id (or a null rep_id) -> NaN advisor_key/rep_bucket,
+  which are groupby KEYS (dropna=True) -> that advisor's ENTIRE NNA flow SILENTLY DROPPED ->
+  under-counted served NNA (advisor-acquisition is Inflection's core model). Fill catch-all bucket
+  (retain flow) + loud WARN (reps + $). **Commit:** `944765ba0`
+## FIX-027 -- INF_C_01: require rep_id/trans_type_desc at source-selection (report 13 F2, HIGH)
+- `load_all_transactions`. Source-selection required only {accountId,transDate,transTypeId} but the
+  downstream classifier needs conditionally-created type_desc/advisor_key/rep_bucket -> a snapshot
+  lacking rep_id/trans_type_desc passed selection then RuntimeError'd mid-classifier -> chain abort.
+  Added both to the required set. **Commit:** `944765ba0`
+## FIX-028 -- INF_C_01: fail-loud on missing/empty taxonomy (report 13 F3, medium)
+- `_load_cashflow_taxonomy` + module init. Missing YAML -> clear error (was bare import-time
+  FileNotFoundError abort); ZERO NNA types -> assert (was silent-ZERO served NNA at exit 0).
+  **Commit:** `944765ba0`
+## FIX-029 -- INF_C_01: surface NNA sign/direction disagreements (report 13 F4, medium -> DI-4)
+- `classify_nna`. abs()+type_desc counts a negative-amount reversal as a +inflow -> over-stated NNA.
+  Did NOT flip abs() (taxonomy-owner question); added a diagnostic WARN (count+$). **Commit:** `944765ba0`
+## FIX-030 -- INF_C_01b: degrade-not-abort on missing account_performance (report 14 F1, HIGH)
+- `INF_C_01b.role_aua_backfill.py` -- `main`. C_01b runs BEFORE its producer C_03, so a cold-start
+  (absent account_performance) made `return 1` -> sys.exit(1) hard-fail the chain (bootstrap
+  deadlock). Nothing consumes role_aua today -> WARN + return 0. Durable fix = dispatch reorder (DI-6).
+  **Commit:** `85bc929c7`
+## FIX-031 -- INF_C_02: Int64 client_id cast (report 15 F2, low)
+- `INF_C_02.client_performance.py` -- `_build_daily_factor_table`. astype('int64') on nullable
+  client_id raises TypeError on any <NA> -> sys.exit(1) -> C_02 aborts the whole D-chain. astype('Int64').
+  **Commit:** `6432206a5`
+## FIX-032 -- INF_C_02: surface dropped NA-household AUA (report 15 F1, medium -> DI-5)
+- `client_performance` household groupby. dropna silently drops <NA> household_id rows -> served
+  household-grain total_aua UNDER-counted (D-chain consumers). Loud WARN (count+$); repair = DI-5.
+  **Commit:** `6432206a5`
+
 ---
 
 ## DESIGN ITEMS (flagged -- need a cross-script decision, NOT a safe autonomous per-report patch)
@@ -243,6 +275,35 @@ lineage; a naive per-report patch could worsen them. Surfaced here for a deliber
 **Validation flag:** FIX-019 + FIX-020 (INF_B_02) change served cost-basis attribution -- recommend a
 CVO/DS eye on the next nightly's `gold/lots/lots_latest.parquet` (row count + per-account cost_basis
 sanity vs prior) before treating the tax-lot numbers as certified.
+
+- **DI-4 -- INF_C_01 finding 4 (medium, served NNA):** abs()+type_desc counts a negative-amount
+  reversal/clawback as a +inflow -> over-stated NNA. Needs Orion taxonomy-owner confirmation (do
+  reversals reuse the base type_desc?). WARN-visible now (FIX-029); CVO quantifies from tonight's WARN.
+- **DI-5 -- INF_C_02 finding 1 (medium, served AUA):** <NA> household_id dropped at the household
+  groupby -> served household-grain total_aua under-counted. Repair = route unassigned to a bucket vs
+  upstream household-fill (served-grain decision). WARN-visible now (FIX-032).
+- **DI-6 -- INF_C_01b finding 1 (DT lane, chain orchestration):** the durable fix for the C_01b
+  cold-start deadlock is a DISPATCH REORDER (run C_01b AFTER C_03/C_07 in orion-gold-dispatch.sh); the
+  landed FIX-030 is the defensive degrade-not-abort. Route the reorder to DT.
+
+## DI-1 STATUS UPDATE (2026-07-06, CTO-ruled -> RE-POINT, PROMOTED to top priority)
+DI-1 escalated: CVO grounded -> CTO re-ruled -> COO driving. Magnitude quantified **13.6x** (derived
+served unrealized_gain **$180.8M vs Orion-native $13.3M**; the unit-mismatch limb dwarfs the $24.5M
+phantom). ROOT FIX (not the (b)+(a) derivation-patch, which is RETIRED): re-point **INF_C_05**
+(currently `gold/account_gains` derived, GAINS_PREFIX:67) **+ INF_C_03** to source from the native
+**Orion `tax_unrealized`** dim (`build_tax_dim.py:61-70`, ST/LT-split, point-in-time), reuse the
+`INF_D_02.advisor_client_detail.py:114/348` reader; **retire/demote INF_B_03 account_gains**. UNGATED
+(the pull exists + is fresh-to-today; the "stale" was an mtime red-herring CVO caught). SEQUENCING
+(Andrew-ruled, COO-reconciled): the sweep **CONTINUES IN-ORDER** (C_03 -> C_04 -> C_05); the re-point
+grounding+design lands NATURALLY at **INF_C_05 in-pass (~report 18)**, and once reached is driven
+STRAIGHT THROUGH to **DEPLOYED + CVO-verified THIS SESSION** (not deferred). Interim = leave the
+number showing (Andrew's client-trust call). CTO's 4 ARCH-GATE CRITERIA to build toward:
+(1) field-map 1:1 to the Orion-native Total/ST/LT Gain-Loss columns (`build_tax_dim.py:61-70`) -- READ
+them, do NOT re-derive/re-subtract; (2) grain = per-account ST/LT + household, qual/non-qual map only
+if C_05 emits that split; (3) INF_B_03 DEMOTE-not-silent-delete -- comp-blast account_gains consumers
+first (INF_C_03 account_performance may read it; don't break non-tax readers); (4) vintage-honest
+(served tax carries the Orion pull date). Path: grain-confirm RAVC -> CTO arch-gate -> impl -> deploy
+-> CVO re-cert (served == Orion-native $13.3M-class, ST/LT intact, exercised on the served artifact).
 
 ---
 
