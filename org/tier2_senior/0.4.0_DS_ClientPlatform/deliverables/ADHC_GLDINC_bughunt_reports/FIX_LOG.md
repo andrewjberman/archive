@@ -300,6 +300,43 @@ Commit hashes greppable via `git log --grep "ADHC_GLDINC #NN"` (git log intermit
   firm_composition -> return 0 (cold-start asymmetry vs INF_D_03); F3 flagged DI-9.
 - **Report 23 / INF_D_00**: no ~A patch -- CRITICAL live tax-bucket regression, flagged DI-7 (below).
 
+## Reports 32-46 (Group D publishers + E + misc runners) -- condensed fix batch
+Hashes greppable via `git log --grep "ADHC_GLDINC #NN"`.
+- **Report 32 / INF_D_03** (#32): F2 dedup classifier per (account_id,ticker) (fan-out double-count of
+  served MV); F3 degrade-not-abort on absent/drifted classifier (was chain-abort); F1 flagged DI-10.
+- **Report 33 / INF_D_04** (#33): F1 (CRITICAL) acct_perf/account_team init BEFORE the try -> no
+  NameError abort on absent C-stage outputs; F2 to_numeric account_id (was bare int() ValueError).
+- **Report 34 / INF_D_04b** (#34): F1 (HIGH) surface unmatched-household MV (was silent under-serve);
+  F2 numeric account_id normalize (12345.0 vs 12345 0-row-join); F3 publish fan-out resilience; F5
+  required-column guard. F4 noted DI-11.
+- **Report 35a / INF_D_05.activity_scan** (#35a): F1 NoSuchKey-tolerant reads (was abort); F2 behavior-noted.
+- **Report 35b / INF_D_05.client_top_holdings** (#35b): F1 (CRITICAL) restore int household_id -- float
+  upcast wrote clients/9001.0/ -> portal 404 -> EVERY client Top Holdings empty; F2 guard None normalize.
+- **Report 36a / INF_D_06.cash_drag** (#36a): F1 null-household WARN (shrinking panel); F3 guard reads;
+  F4 reset_index label-align. F2 behavior-noted.
+- **Report 36b / INF_D_06.client_timeseries** (#36b): F1 (HIGH) household_id float64 -> clients/12345.0//
+  nan/ 404; F2 (HIGH) `nan or 0` -> NaN pcts -> invalid `NaN`-token JSON. Both coerced.
+- **Report 37 / INF_D_07** (#37): F3 floor guard (empty '[]' overwrite of served concentration); F1
+  flagged DI-12; F2 noted.
+- **Report 38 / INF_D_07a**: CLEAN (confirmed: guarded reads, dropna-before-astype).
+- **Report 39 / INF_D_08** (#39): F4 Series-guard representative_name; **F1+F3 REFUTED on live grounding**
+  (bronze/orion-api/2026-07-06/transactions.csv fresh 09:32, 8.8MB full-history -- NOT the frozen/single-
+  day the reviewer inferred from a stale docstring + dispatch catalog). F2 noted.
+- **Report 40 / INF_D_09** (#40): F1 guard account_performance read; F2 filter account_id notna (int('<NA>')
+  ValueError); F3 empty-quarters IndexError guard. F4 noted.
+- **Report 41 / INF_E_00** (#41): F1 (HIGH) NaN-safe model AUM (was NaN served firm headline + invalid
+  JSON); F2 reindex slices (KeyError/eclipse-dark); F3 holiday NoSuchKey skip-clean; F4 dedup merge keys
+  (double-count).
+- **Report 42 / INF_09** (#42): F1 incremental-staleness WARN (data_as_of lag; DI-8/DI-11 class).
+- **Report 45 / INF_build_canonical_prices** (#45): F3 empty-results RuntimeError + total==0 guard (was
+  cryptic concat crash / div-by-zero abort); F1+F2 flagged DI-14.
+- **Report 46 / INF_run_c_chain** (#46): F1 (CRITICAL) --upload opt-out (C_04 validator aborted runner);
+  F2 (HIGH) drop durable-output skip guards (C_00/C_02/C_03/C_07 skipped forever); F3 download guard.
+
+**SWEEP COMPLETE: 46/46 reports.** ~110 fixes landed across ~44 scripts (2 clean: A_02, B_01b, D_07a;
+several findings refuted/behavior-noted). Verify-confirmed + live-grounded throughout; served-number-
+changing cross-script issues FLAGGED as design items (DI-1..14), not autonomously patched.
+
 ---
 
 ## DESIGN ITEMS (flagged -- need a cross-script decision, NOT a safe autonomous per-report patch)
@@ -389,6 +426,41 @@ FICTITIOUS fixed_income-collapse/alternatives-spike that is a classifier mismatc
 change. **FIX:** classify all points with ONE methodology + route unknown tickers to an explicit
 `other`/`unclassified` bucket, not silently `alternatives`. Served-number methodology decision -- not
 autonomously patched.
+
+## DI-10 -- INF_D_03 finding 1 (medium, served composition era-alignment)
+Report 32. In incremental mode the classifier is refreshed (assets_v2 in incremental) to D1 while
+holdings are frozen at the last full-run D0 (INF_B_00 not in incremental), so tickers rotated out
+between D0 and D1 are absent from the D1 classifier -> mis-bucketed to `unclassified` -> served
+composition under-counts real classes. **Fix:** load the classifier partition aligned to data_as_of
+(nearest <= data_as_of), not `_latest`. Cluster with DI-9.
+
+## DI-11 -- INF_D_04b finding 4 (medium, incremental stale-holdings served-as-fresh)
+Report 34. INF_D_04b is in CHAIN_INCREMENTAL but its holdings source (INF_B_00) is not, so incremental
+re-publishes composition.json with a fresh generated_at but stale (last-full-run) data. **Fix (DT):**
+exclude INF_D_04b from CHAIN_INCREMENTAL, or gate/warn on holdings-date lag. Same class as DI-8, and the
+INF_09 (report 42) + INF_D_09 (report 40 F4) incremental-staleness notes.
+
+## DI-12 -- INF_D_07 finding 1 (HIGH, served concentration, incomplete repoint)
+Report 37. The ADVI_INFREF repoint (2026-06-30, which CAUSED DI-7 on D_00) was applied INCONSISTENTLY:
+D_00/D_00c/C_09 moved to accounts_v2, but **INF_D_07 was NOT repointed** and is stuck on the FROZEN
+04-29 `silver/accounts_dim` -> accounts opened after 04-29 get household_id=NaN -> dropped -> a
+genuinely concentrated household served as diversified (silent wrong served concentration). **Fix:**
+repoint ACCTS_DIM_KEY to the live accounts_v2 dim (as INF_C_09.load_accounts_dim does). DI-7 cluster.
+
+## DI-13 -- INF_D_08 finding 1 (claimed CRITICAL) -- REFUTED ON LIVE GROUNDING (kept for the record)
+Report 39. Reviewer claimed D_08 serves FROZEN NNA/AUA from a deprecated bronze CSV path. **REFUTED:**
+`bronze/orion-api/2026-07-06/transactions.csv` exists, written today 09:32, 8.8MB (full-history) -- D_08
+reads a FRESH full-history source. The "frozen/single-day" claim was inferred from a stale docstring +
+the dispatch catalog, not the live bronze. No action. (Grounding-discipline catch, Rule 22.)
+
+## DI-14 -- INF_build_canonical_prices findings 1+2 (medium, served-valuation risk-control policy)
+Report 45. The T1 365-day staleness cap is DEAD CODE (applied pre-ffill on observation-only data), so a
+delisted/dormant ticker keeps its last observed price carried to today indefinitely (misstated
+valuation); and interpolate forward-extrapolates so the `carry_forward` tier is mislabeled
+`linear_interpolation` (staleness signal corrupted, masking the first). Entangled + touch served
+position valuations via a risk-control policy (value a dormant position at a stale price vs null).
+**Fix:** apply the staleness cut AFTER T4 ffill + `interpolate(limit_area='inside')`. Not autonomously
+patched (changes served valuations).
 
 ---
 
