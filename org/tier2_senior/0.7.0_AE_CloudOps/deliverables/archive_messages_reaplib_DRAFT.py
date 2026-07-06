@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+"""DRAFT for MSTR review -- proposed refactor of org/mcp/archive_messages.py onto the
+shared .tools/reap_lib.py. DO NOT commit this file to org/mcp/ blindly: it touches the
+LIVE broker (broker.py `_maybe_archive_on_startup()` calls offload(retention_days=7,
+do_vacuum=True), and the broker max-uptime self-restart depends on it). MSTR verifies
+the broker startup-catch-up still runs clean, then lands it as org/mcp/archive_messages.py.
+
+WHAT CHANGED vs the current archive_messages.py:
+  - offload()'s SIGNATURE + RETURN dict + observable behavior are UNCHANGED
+    (backward-compat -> broker.py's call needs NO change). Only the BODY is rewired:
+    it builds a SQLite ReapSubstrate and delegates the archive-then-delete-verified
+    -> VACUUM POLICY to reap_lib.reap(), instead of open-coding it. The reap contract
+    (never-touch-in-flight, verify-before-delete, reclaim-is-the-fix, no-silent-trunc)
+    now lives in ONE place shared with .tools/commit_queue_gc.py (no copy-drift).
+  - The weekly-breakdown print + the SQLite specifics stay in the substrate callbacks.
+  - main() / CLI flags UNCHANGED.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sqlite3
+import sys
+from collections import Counter
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+# reap_lib lives in .tools/ (owned-paths: org/mcp is the exec lane, .tools is AE's).
+_REPO = Path(__file__).resolve().parents[4]  # <- from this DRAFT's deliverables/ location.
+#   IN THE LIVE FILE at org/mcp/archive_messages.py this MUST become:
+#       _REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(_REPO / ".tools"))
+from reap_lib import ReapSubstrate, reap  # noqa: E402
+
+MCP_DIR = Path(__file__).resolve().parent   # LIVE: org/mcp/
+DB_PATH = MCP_DIR / "broker.db"
+ARCHIVE_DIR = MCP_DIR / "message_archive"
+
+
+def iso_week(sent_at: str) -> str:
+    try:
+        dt = datetime.fromisoformat(sent_at)
+    except (ValueError, TypeError):
+        return "unknown"
+    y, w, _ = dt.isocalendar()
+    return f"{y}-W{w:02d}"
+
+
+def offload(db_path: Path = DB_PATH, archive_dir: Path = ARCHIVE_DIR,
+            retention_days: int = 0, dry_run: bool = False,
+            archive_only: bool = False, do_vacuum: bool = True) -> dict:
+    """UNCHANGED public interface. Body now delegates the reap POLICY to reap_lib.reap()
+    with SQLite substrate callbacks. retention_days=0 archives ALL delivered."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=retention_days)).isoformat()
+
+    # total (for the return dict + the "keeping N" log); RO, live-safe.
+    ro0 = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=30)
+    total = ro0.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
+    ro0.close()
+
+    def select_eligible() -> list:
+        # NEVER in-flight: delivered=1 only, older than the retention cutoff.
+        ro = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=30)
+        ro.row_factory = sqlite3.Row
+        rows = ro.execute(
+            "SELECT id, from_serial, to_serial, subject, body, sent_at, delivered "
+            "FROM messages WHERE delivered=1 AND sent_at < ? ORDER BY id",
+            (cutoff,),
+        ).fetchall()
+        ro.close()
+        # weekly breakdown (preserved observable behavior)
+        wk = Counter(iso_week(r["sent_at"]) for r in rows)
+        print(f"eligible (delivered=1, sent_at<{cutoff[:10]}): {len(rows)} of {total} "
+              f"total  (keeping {total - len(rows)})")
+        for w, c in sorted(wk.items()):
+            print(f"   {w}: {c}")
+        return list(rows)
+
+    def total_count() -> int:
+        return total
+
+    def archive(rows: list) -> int:
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        by_week: dict = {}
+        for r in rows:
+            by_week.setdefault(iso_week(r["sent_at"]), []).append(dict(r))
+        written = 0
+        for wk, msgs in sorted(by_week.items()):
+            fp = archive_dir / f"messages_{wk}.jsonl"
+            with open(fp, "a", encoding="utf-8") as f:
+                for m in msgs:
+                    f.write(json.dumps(m, ensure_ascii=True) + "\n")
+                    written += 1
+                f.flush()
+                os.fsync(f.fileno())
+        print(f"OK: archived {written} messages -> {archive_dir} ({len(by_week)} weekly files)")
+        return written
+
+    # DELETE + VACUUM share one rw connection (VACUUM needs it after the delete commits).
+    _rw: dict = {}
+
+    def _rw_conn() -> sqlite3.Connection:
+        if "c" not in _rw:
+            c = sqlite3.connect(str(db_path), timeout=30, isolation_level=None)
+            c.execute("PRAGMA busy_timeout = 30000")
+            _rw["c"] = c
+        return _rw["c"]
+
+    def delete(rows: list) -> int:
+        rw = _rw_conn()
+        ids = [r["id"] for r in rows]
+        deleted = 0
+        rw.execute("BEGIN")
+        ch = 500
+        for i in range(0, len(ids), ch):
+            chunk = ids[i:i + ch]
+            rw.execute(f"DELETE FROM messages WHERE id IN ({','.join('?' * len(chunk))})", chunk)
+            deleted += len(chunk)
+        rw.execute("COMMIT")
+        print(f"OK: deleted {deleted} rows from broker.db")
+        return deleted
+
+    def reclaim():
+        rw = _rw_conn()
+        before = db_path.stat().st_size
+        try:
+            rw.execute("VACUUM")
+            after = db_path.stat().st_size
+            msg = f"{before / 1e6:.1f}MB -> {after / 1e6:.1f}MB"
+            print(f"OK: VACUUM {msg}")
+            return msg
+        except sqlite3.OperationalError as e:
+            print(f"WARN: VACUUM could not lock (broker still holding broker.db?): {e}",
+                  file=sys.stderr)
+            print("      Rows are archived + deleted; re-run VACUUM with the broker stopped.",
+                  file=sys.stderr)
+            return None
+
+    substrate = ReapSubstrate(
+        name="broker", select_eligible=select_eligible, archive=archive,
+        delete=delete, total_count=total_count,
+        reclaim=(reclaim if do_vacuum else None),
+    )
+    try:
+        r = reap(substrate, dry_run=dry_run, archive_only=archive_only,
+                 do_reclaim=do_vacuum)
+    finally:
+        if "c" in _rw:
+            _rw["c"].close()
+
+    # map reap() result back to offload()'s backward-compatible dict shape.
+    return {"eligible": r["eligible"], "total": total,
+            "archived": r["archived"], "deleted": r.get("deleted", 0),
+            **({"dry_run": True} if r.get("dry_run") else {})}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--retention-days", type=int, default=0)
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--archive-only", action="store_true")
+    ap.add_argument("--no-vacuum", action="store_true")
+    args = ap.parse_args()
+    offload(retention_days=args.retention_days, dry_run=args.dry_run,
+            archive_only=args.archive_only, do_vacuum=not args.no_vacuum)
+
+
+if __name__ == "__main__":
+    main()
