@@ -247,6 +247,32 @@ validated against source before fixing).
 - `client_performance` household groupby. dropna silently drops <NA> household_id rows -> served
   household-grain total_aua UNDER-counted (D-chain consumers). Loud WARN (count+$); repair = DI-5.
   **Commit:** `6432206a5`
+## FIX-033 -- INF_C_03: align account_gains merge-key dtype (report 16 F1)
+- `INF_C_03.account_performance.py`. all_perf.account_id Int64 vs all_gains.account_id str (diff
+  upstream paths, no contract) -- align both to Int64 (defensive; join works today per DI-1 populated
+  $180.8M, but drift would ValueError-abort / silent-0-join). **Commit:** `d06b8d4cd` (NOTE: C_03 now
+  being RE-POINTED by DS~B to Orion tax_unrealized -- this fix was on the derived path.)
+## FIX-034 -- INF_C_03: household_id KeyError guard (report 16 F2)
+- backfill indexer raised KeyError when household_id absent from acct_dim -> degrade to null.
+  **Commit:** `d06b8d4cd`
+## FIX-035 -- INF_C_04: same-date holdings cross-check (report 17 F1, validator)
+- cross-checked firm_aua@target_date vs holdings@independent-latest -> false drift WARN; + div-by-
+  max(holdings,1) nonsense %. Now same-date holdings + skip drift when <=0. **Commit:** `b7b8c6685`
+## FIX-036 -- INF_C_04: date-only compare so latest validates (report 17 F2, validator)
+- tz/time-naive equality matched 0 rows -> latest AUA validation silently skipped. `.dt.date` compare.
+  **Commit:** `b7b8c6685`
+## FIX-037 -- INF_C_04: surface NaN total_aua (report 17 F3, validator)
+- NaN total_aua invisible to firm-sum + zero-AUA check -> now flagged. **Commit:** `b7b8c6685`
+## FIX-038 -- INF_C_06: re-check empty after NaT-drop + guard max/strftime (report 19 F1)
+- emptiness guard was BEFORE the NaT-drop -> all-unparseable dates empty cp -> firm_ts.max() NaT ->
+  json.dumps TypeError -> chain abort. Re-check empty + NaT->None. **Commit:** `331cb4bcc`
+## FIX-039 -- INF_C_07: partial-pull coverage guard (report 20 F1, HIGH)
+- total_aua from single global max perf date + outer-merge fillna(0) -> a tolerated PARTIAL perf pull
+  silently collapses served advisor AUA/tagged_aua to ~0 firm-wide (rc=0). Now fall back to the most-
+  recent >=80%-covered date + WARN. **Commit:** `4a51114a4`
+## FIX-040 -- INF_C_07: Series-guard total_aua default (report 20 F2)
+- ap.get(total_aua,0).fillna() is a numpy scalar -> AttributeError -> abort when col absent; Series-guard.
+  **Commit:** `4a51114a4`
 
 ---
 
@@ -312,6 +338,12 @@ first (INF_C_03 account_performance may read it; don't break non-tax readers); (
 
 - **report 9 / `INF_B_01b`** (classify_new_securities) -- CLEAN (confirmed): `_read_s3` is unguarded
   but both callers wrap it in try/except; writes an auxiliary classification list, not a served number.
+- **report 18 / `INF_C_05`** (client_tax_liability) -- GROUNDED, NOT ~A-edited: DS~B owns C_05's DI-1
+  re-point this session (avoid a merge conflict). Both findings HANDED to DS~B (RAVC 222325Z):
+  F1 (household_id/advisor_key unconditional access -> KeyError chain-abort) folds into the re-point
+  (attribution merge survives); F2 (ST/LT term-mask -> silent $0 served liability) is RESOLVED by the
+  re-point's direct tax_unrealized st/lt_gain_loss field passthrough, with a coverage-assert to add at
+  the new source. Current source grounded for DS~B: reads GAINS_PREFIX derived path; ST/LT via term mask.
 
 - **report 3 / `INF_A_01` finding 3** (low, unguarded `rep_name` access) -- REAL but not actionable
   in isolation: its trigger (a walk-back to a pre-rename accounts_v2 partition missing
