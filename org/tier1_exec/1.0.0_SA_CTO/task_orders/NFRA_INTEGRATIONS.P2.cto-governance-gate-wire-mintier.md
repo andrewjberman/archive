@@ -7,7 +7,23 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>1.0.0_SA_CTO</issued_to>
     <date>2026-07-02</date>
-    <status>active</status>
+    <status>complete</status>
+    <completed>2026-07-06</completed>
+    <completion_note>
+      All 3 ACs met. AC1 (repeatable 3-axis arch-gate checklist SS8.1 G1-G8 + read-only
+      + min_tier + audit) + AC3 (ownership model SS8 + fail-closed invariant SS6/SS8.1)
+      codified in NFRA_INTEGRATIONS_STANDARD.md v1.2 (commit 8dca11976). AC2 -- the last
+      open gate -- CLOSED on CVO's independent gate-3 CERT = PASS (3.0.0_SA_CVO
+      20260702T221522Z): below-tier-deny LIVE-GROUNDED on the DEPLOYED gateway
+      (i-07dccb1615503ac99) + SERVED audit lake -- readonly-cert-probe (tier read_only)
+      DENIED min_tier 'standard' on ycharts_freshness @2026-07-01T22:32:50Z (credential
+      never fetched = zero egress), and andrew@ (master_admin) PASS @22:32:52Z; ONE shared
+      SCTY guard for _run() AND the integration path (base.py:106-115). CTO ACK'd the cert
+      20260702T221836Z. Generalizes the YCharts self-cert into the STANDARD gate-3
+      requirement. Grounded on deployed bytes + served audit, not self-report. Parent
+      project NFRA_INTEGRATIONS stays ACTIVE (P1/P3 pillars ongoing). Closed on Monday-boot
+      reconciliation -- flip lagged the 07-02 gate-3 verdict (session was un-logged).
+    </completion_note>
     <thread_serial>NFRA_INTEGRATIONS-002</thread_serial>
     <prd_ref>docs/architecture/NFRA_INTEGRATIONS_PRD.md (Pillar 2, sec 3) + sec 6 gates 2-3-5</prd_ref>
   </metadata>
