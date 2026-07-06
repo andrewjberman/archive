@@ -5,8 +5,19 @@
 <issued_by>0.4.0_DE_ClientPlatform (Andrew-direct ruling 2026-07-01, relayed with source grounding)</issued_by>
 <consult>0.4.0_DE_ClientPlatform (FE consumer + verification); 2.0.0_SA_COO (blast-radius coordination); 3.0.0_SA_CVO (served-verify)</consult>
 <issued_date>2026-07-01</issued_date>
-<status>pending</status>
+<status>complete</status>
 <priority>HIGH -- Andrew-direct; live advisor-facing AUA inconsistency on the 49F AdvisorIntelligence page.</priority>
+
+<validation_close date="2026-07-06" by="0.4.0_DS_ClientPlatform">
+DS-validated CORRECT on the served nightly artifact (post-holiday re-confirm per COO DRIVE GO 20260706T130757Z). Served s3://opal-data-bd/platinum/firm/leaderboard.json (generated 07-04 00:00Z, data_as_of 2026-07-01 -- freshest POST-code-landing nightly; BD source frozen over the holiday weekend, so this artifact already runs leg-1 0ab172d3f + leg-2 3ba105354).
+EVIDENCE (served + SOURCE, not label-only):
+- role_breakdown_semantics="advisor_tagged_full_nonadditive"; every role rd.aua_basis="tagged_full_nonadditive".
+- Source chain confirms genuine full-tag (not relabel): rd.aua (D_00c L496) <- at_role_breakdown <- _build_at_role_slice(melted, full_tagged=True) (L1091), melt = "one row per (account_id, advisor) -- full AUA, no split weight" (L1050), "NO split_pct weighting, NO intra-advisor role normalization" (L1011), canonical role_aua.aua override (L1137-47). split_pct path demoted to avg_split_pct metadata.
+- travis_penfield: architect 328,627,561.48 / implementor 28,341,715.87 / consultant 2,783,237.31 / additional_advisor 948,635.70; total_aua 444,185,773.56 (dedup, unchanged basis). Roles moved differentially vs split baseline (consultant +76.5%, architect ~flat) = coherent split->full signature. Per-role NNA present + non-additive.
+- ARCH-GATE 1 (labeling) MET: non-additive semantics labeled at top-level + per-role.
+- ARCH-GATE 2 EVOLVED vs this TO's original "full-tag fees" scope: deployed fee_basis="per_account_actuals_conserved_reconciled_to_c08_canonical" (fees ADDITIVE, reconciled to C_08) per Andrew's account-level fee ruling 2026-07-01 (D_00c L508-513). AUA/NNA/flows full-tagged; fees are per-account actuals. SCOPE items 3 (fee full-tag) superseded by that ruling -- flagged to COO+DE+CVO.
+RAVC2 fired 20260706T1325Z: COO (2.0.0_SA_COO), DE render-verify (0.4.0_DE), CVO served-verify (3.0.0_SA_CVO). Data-advance re-confirm comes free on the next fresh BD nightly (when source un-freezes). DS deliverable COMPLETE; DE/CVO downstream verify pending.
+</validation_close>
 
 <andrew_ruling verbatim="near">
 "They should not be split weighted. If he's working with a client and tagged to that client, the full amount should be tagged to him. We DO want to split roles in the sense that if Travis is an architect on a $200M account, he should have $200M included in his architect-role AUA. If an implementor is also tagged to the same account, the implementor should also have $200M tagged in his implementor balance. Doesn't matter what fee split they have or anything like that. If they are tagged to it, that full amount is included in their AUA, and tagged in 'Role Decomposition' to the advisorRole (architect, implementor, consultant, etc)."

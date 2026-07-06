@@ -5,8 +5,13 @@
 <issued_by>0.4.0_DE_ClientPlatform (COO owner-confirm 2026-07-01T1425Z; DS lane freed + offered)</issued_by>
 <consult>0.4.0_DE_ClientPlatform (FE consumer -- schema below is what CottonwoodClientsSection reads); 2.0.0_SA_COO (owner-confirm); 3.0.0_SA_CVO (served count-verify)</consult>
 <issued_date>2026-07-01</issued_date>
-<status>pending</status>
+<status>complete</status>
 <priority>MEDIUM -- lower than ADVI_TAGATTR/49F, but the priority gap-work in the cot-DS lane per COO: it unblocks a SHIPPED-but-empty FE (CottonwoodClientsSection, DEV 07d5887f).</priority>
+
+<validation_close date="2026-07-06" by="0.4.0_DS_ClientPlatform">
+DELIVERED + LIVE-SERVING (corrects the "D1 DS leg STOOD DOWN" registry note -- that phase is stale vs live truth). Code bb2d62ef8 (cot D_04 build_client_directory) deployed; s3://opal-data-cot/platinum/firm/client_directory.json is LIVE: regenerated 07-06 02:05:46Z, data_as_of 2026-07-02, 220 households, shape {household_id,display_name,aua}, 0 missing display_name, 0 non-finite aua (2 legit zero), sum(aua)=$434.17M (~= clients_tab headline.total_aua), display_names are CLIENT/household names (Thiessen/Beecherl), not advisor. Firm-sep held (cot-only; bd/inf ZERO-touch). Count 220 (TO anticipated ~217-218; advanced with data -- CVO to confirm faithful). Meets AC 1-5.
+RAVC2 fired 20260706T1325Z: COO (reconcile project phase), DE render-verify (CottonwoodClientsSection roster lights up), CVO count-verify (220). DS deliverable COMPLETE.
+</validation_close>
 
 <context>
 COTMVP-B FE is DONE + CTO-arch-approved (Andrew-direct 2026-06-30): CottonwoodClientsSection ships COT-ISOLATED with a graceful empty-state and renders EMPTY until the COT client directory is served. Ground-confirmed 2026-07-01: s3://opal-data-cot/platinum/firm/ has NO client_directory.json (only clients-tab-slim.json @529B). COT gold already aggregates 217 clients / 805 accounts (dashboard-level), so the data exists -- it just isn't emitted as the directory artifact. inf + 49F already serve this artifact shape; COT is the only gap.
