@@ -2,8 +2,9 @@
 
 <issued_to>0.8.0_AE_CloudComp~B</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
-<status>staged</status>
+<status>pending</status>
 <!-- STAGED (not dispatched): a GENUINE net-new COMP* improvement per Andrew's 2026-07-01 carve-out (comp-blast SFN blast-radius completeness, NOT a COMPAWS re-cert). Held pending Andrew's go, since he just gave a deprioritize signal on the comp-aws area. Authored + ready; ~B proposed it + is free; oracle (~A 26-INVOKE census) ready. COO~B surfaces it for the go/no-go. -->
+<!-- BUILD COMPLETE + SELF-VERIFIED 2026-07-06 by 0.8.0_AE_CloudComp (base; issued to ~B, dormant -- Andrew+COO GO). extract_sfn.py bridges SFN->Lambda invoke edges into trace_graph reusing the CERTIFIED _sfn_task_invokes walker (no rewrite), STATIC (reads the co-located yang-pipeline-definition.json, zero API). 26 unique (SM,Lambda) edges in the BUILT cache = the oracle (deduped from 27 Task-state invokes: yang-generate-allocation-summary invoked by 2 states = 1 edge). Dual-direction (SFN_INVOKES SM->L + SFN_INVOKED_BY L->SM) so blast resolves from either end. Exercised LIVE: comp-blast YangDataPipeline was NOT-FOUND -> now shows the orchestrated Lambdas; comp-blast yang-generate-valuation now shows STATE_MACHINE(1) YangDataPipeline in its blast radius. comp-surface-check CLEAN before+after (no SEV1 regression). AC-3 formal cert (~A 26-invoke oracle re-diff + CVO~B cert) PENDING -- both holiday-dormant; RAVC'd COO CC CTO+~A+CVO~B. TWO items flagged for the cert: (1) the 26-vs-27 reconciliation (I bridged 26 unique targets to match the stated oracle + correct blast grain; ~A confirm vs comp-aws's raw 27 state-invokes); (2) the dual-edge-direction decision (SEV1 -- CTO/CVO confirm). -->
 <priority>MEDIUM — CTO-identified real gap (050531Z), not urgent (26 invokes; priority-proportional). Bounded + oracle-ready + your comp-lambdamap/trace_graph domain. NOT a COMPAWS close-blocker (SFN-FIX in comp-aws is by-design-done + certified); this is a SEPARATE comp-blast/trace_graph enhancement.</priority>
 <date>2026-07-01</date>
 
