@@ -51,7 +51,37 @@ validated against source before fixing).
   `registration_name = pd.NA` + WARN (graceful degrade, chain proceeds).
 - **Commit:** `1e54a311a` (pushed; safe-deploy auto-deployed + verified)
 
+## FIX-004 -- INF_A_01: drop <NA> account_id before dedup (silent collapse)
+- **From report:** `review_INF_A_01.advisor_assignments.py.md` finding 1 (report 3)
+- **Severity / verify:** medium / ground-truthed by DS
+- **File:** `data/inf/scripts/gold/INF_A_01.advisor_assignments.py` -- `build_advisor_assignments`
+- **Defect:** `account_id` coerced to `<NA>` on parse failure (L127), then
+  `drop_duplicates(subset=['account_id'])` treats every `<NA>` as equal -> multiple accounts with a
+  blank/non-numeric account_id silently COLLAPSE to one row; the rest vanish from
+  `advisor_assignments` -> downstream advisor rollups (INF_C_07, INF_D_00f) under-count, no error.
+- **Fix:** explicitly `dropna(subset=['account_id'])` with a loud WARN count BEFORE the dedup.
+- **Commit:** `7dcc02c83`
+
+## FIX-005 -- INF_A_01: distinguish rep_id coercion-failure from allowlist drop
+- **From report:** `review_INF_A_01.advisor_assignments.py.md` finding 2 (report 3)
+- **Severity / verify:** low / ground-truthed by DS
+- **File:** `data/inf/scripts/gold/INF_A_01.advisor_assignments.py` -- `build_advisor_assignments`
+- **Defect:** a present-but-non-numeric `rep_id` (coercion failure) was folded into the "not in
+  INFLECTION_REP_IDS allowlist" WARN and silently dropped, misdirecting diagnosis of a real
+  upstream data problem.
+- **Fix:** capture the present-but-non-numeric count before coercion + log it distinctly; reword the
+  allowlist WARN. (Diagnostics only -- the row is still dropped; now the cause is visible.)
+- **Commit:** `7dcc02c83`
+
 ---
 
 ## Reports reviewed but NO fix applied
-(added as I go -- reviewer verdict clean, or finding refuted/not-actionable on DS ground-truth)
+(reviewer verdict clean, or a finding refuted / not-actionable on DS ground-truth)
+
+- **report 3 / `INF_A_01` finding 3** (low, unguarded `rep_name` access) -- REAL but not actionable
+  in isolation: its trigger (a walk-back to a pre-rename accounts_v2 partition missing
+  `representative_name`) aborts at **INF_A_00 upstream first** (identical dependency, runs before),
+  so guarding A_01 alone changes nothing. Proper fix = a shared required-source-column validation
+  across A_00/A_01 -- deferred as a small robustness follow-up, not a per-report fix.
+- **report 4 / `INF_A_02`** (fee_rate_history) -- CLEAN (confirmed): a DEPRECATED no-op (early
+  `sys.exit(0)`, no data processing). Reviewer verdict correct; nothing to fix.
