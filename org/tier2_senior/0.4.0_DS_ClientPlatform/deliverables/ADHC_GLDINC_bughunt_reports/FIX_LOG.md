@@ -73,6 +73,107 @@ validated against source before fixing).
   allowlist WARN. (Diagnostics only -- the row is still dropped; now the cause is visible.)
 - **Commit:** `7dcc02c83`
 
+## FIX-006 -- INF_A_03: coerce units (bronze noUnits) to numeric before position arithmetic
+- **From report:** `review_INF_A_03.positions_cube.py.md` finding 1 (report 5)
+- **Severity / verify:** medium (type-issue) / ground-truthed by DS
+- **File:** `data/inf/scripts/gold/INF_A_03.positions_cube.py` -- `load_transactions`
+- **Defect:** `units` is an un-coerced passthrough from bronze (silver reads `pd.read_json(dtype=False)`,
+  coerces only ids/dates) but is consumed by `groupby.sum -> cumsum -> units_arr > 1e-9`. Object/string
+  `noUnits` -> string-concat + `TypeError` -> no-timeout chain abort; a NaN unit also poisons `cumsum`
+  and survives the `!= 0` zero-drop.
+- **Fix:** `pd.to_numeric(errors='coerce').fillna(0.0)` after the rename (mirrors `coerce_id_columns`).
+- **Commit:** `a98c8598c`
+
+## FIX-007 -- INF_A_04: coerce household_id merge key to Int64 (verify-confirmed HIGH crash)
+- **From report:** `review_INF_A_04.client_dimension.py.md` finding 1 (report 6)
+- **Severity / verify:** HIGH / verify-**confirmed**
+- **File:** `data/inf/scripts/gold/INF_A_04.client_dimension.py` -- `build_client_dimension`
+- **Defect:** `agg.household_id` is Int64 (from INF_A_00's coerced accounts dim) but
+  `household_names.household_id` is an un-coerced object passthrough from the aum_snapshot silver;
+  `pandas.merge` on Int64-vs-object (populated) raises `ValueError` -> `sys.exit(1)` -> whole
+  no-timeout chain aborts at A_04.
+- **Fix:** coerce both merge keys to Int64 before the merge (SILVER-ID-DTYPE-UNIFY) -- cannot crash +
+  names join on the numeric path.
+- **Commit:** `e6f608e29`
+
+## FIX-008 -- INF_A_04: surface silent all-null household_name
+- **From report:** `review_INF_A_04.client_dimension.py.md` finding 2 (report 6)
+- **Severity / verify:** low / ground-truthed by DS
+- **File:** `data/inf/scripts/gold/INF_A_04.client_dimension.py` -- `load_household_names`
+- **Defect:** a missing HH Name/HH ID column -> empty fallback -> every household_name NULL estate-wide
+  in served client_dimension, chain stays green (one quiet WARN).
+- **Fix:** upgrade to a prominent impact-stating log (non-fatal -- a display-field gap should not
+  hard-abort the chain, but no longer silent).
+- **Commit:** `e6f608e29`
+
+## FIX-009 -- INF_B_00: guard bronze-MV over-count from un-deduped pmv (silent AUA)
+- **From report:** `review_INF_B_00.canonical_holdings.py.md` finding 1 (report 7)
+- **Severity / verify:** medium (silent firm-AUA over-count) / ground-truthed by DS
+- **File:** `data/inf/scripts/gold/INF_B_00.canonical_holdings.py` -- `build_snapshot_reconciled`
+- **Defect:** `build_snapshot` does not dedup pmv to (account_id, ticker) but bronze IS deduped, so the
+  outer-merge is many-to-one and the `market_value = _bronze_mv` override assigns the FULL bronze MV to
+  EACH duplicate pmv row -> firm AUA (the number D-max exists to tie to Orion's canonical Total) silently
+  over-counted. INERT today (pmv is unique -- ties to Orion at the cent).
+- **Fix:** no-op-when-unique dedup guard on pmv_out (+ WARN) before the reconciliation merge.
+- **Commit:** `08f42804a`
+
+## FIX-010 -- INF_B_00: fail-loud on empty accounts_v2 (was raw min() ValueError)
+- **From report:** `review_INF_B_00.canonical_holdings.py.md` finding 2 (report 7)
+- **Severity / verify:** medium / ground-truthed by DS
+- **File:** `data/inf/scripts/gold/INF_B_00.canonical_holdings.py` -- `main`
+- **Defect:** `min()/max()` on empty accounts_v2 -> raw `"min() arg is an empty sequence"` ValueError ->
+  `sys.exit(1)` -> chain abort at B_00 with a misleading message (the clean guard deeper never reached).
+- **Fix:** explicit empty-check with a clear ERROR + `sys.exit(1)` before the min/max log.
+- **Commit:** `08f42804a`
+
+## FIX-011 -- INF_B_00: float64 pmv_market_value on the AC8 bronze-only path
+- **From report:** `review_INF_B_00.canonical_holdings.py.md` finding 3 (report 7)
+- **Severity / verify:** low (type-issue) / ground-truthed by DS
+- **File:** `data/inf/scripts/gold/INF_B_00.canonical_holdings.py` -- `_build_bronze_only`
+- **Defect:** `'pmv_market_value': None` made the column object dtype on this path (float64 elsewhere) ->
+  a multi-partition read (pd.concat / pyarrow dataset) could raise a null-vs-double schema mismatch.
+- **Fix:** `float('nan')` so every path emits float64.
+- **Commit:** `08f42804a`
+
+## FIX-012 -- INF_B_01: fail-loud on a required-date holdings failure (was always exit 0)
+- **From report:** `review_INF_B_01.holdings_lots.py.md` finding 1 (report 8)
+- **Severity / verify:** HIGH (silent success-on-failure) / ground-truthed by DS
+- **File:** `data/inf/scripts/gold/INF_B_01.holdings_lots.py` -- `main`
+- **Defect:** the ThreadPool `as_completed` loop caught every per-date error as a WARN and `main()`
+  returned 0 unconditionally, so a failed newest-date left `gold/holdings/{today}.parquet` stale/absent
+  while the chain proceeded as "success" (no ChainFailed alarm) -> downstream B_03/D_03/D_06/D_07 served
+  stale.
+- **Fix:** collect failures; raise on total failure OR a newest-partition failure; tolerate older
+  backfill-partition failures (they retain prior S3 partitions).
+- **Commit:** `8aaa1317a`
+
+## FIX-013 -- INF_B_01: surface UNPRICED holdings (silent AUA under-count)
+- **From report:** `review_INF_B_01.holdings_lots.py.md` finding 2 (report 8)
+- **Severity / verify:** medium / ground-truthed by DS
+- **File:** `data/inf/scripts/gold/INF_B_01.holdings_lots.py` -- `process_one_date`
+- **Defect:** a ticker absent from canonical_prices -> price NaN -> market_value NaN -> downstream sums
+  (skipna=True) silently treat as 0 -> under-counted AUA/concentration; only a whole-day-empty WARN.
+- **Fix:** count + log unpriced rows (+ sample tickers) per date.
+- **Commit:** `8aaa1317a`
+
+## FIX-014 -- INF_B_01: dedup canonical_prices per ticker before the join
+- **From report:** `review_INF_B_01.holdings_lots.py.md` finding 3 (report 8)
+- **Severity / verify:** low (latent double-count) / ground-truthed by DS
+- **File:** `data/inf/scripts/gold/INF_B_01.holdings_lots.py` -- `process_one_date`
+- **Defect:** the left-merge trusts canonical_prices unique per (date, ticker); a future dup would
+  fan-out the holding row -> silent double-count.
+- **Fix:** `drop_duplicates(subset=['ticker'], keep='last')` before the merge.
+- **Commit:** `8aaa1317a`
+
+## FIX-015 -- INF_B_01: fail-loud on required-column loss from positions_cube
+- **From report:** `review_INF_B_01.holdings_lots.py.md` finding 4 (report 8)
+- **Severity / verify:** low (schema-drift) / ground-truthed by DS
+- **File:** `data/inf/scripts/gold/INF_B_01.holdings_lots.py` -- `process_one_date`
+- **Defect:** `output_cols` filtered to `available` silently dropped a missing required column (e.g.
+  account_id) -> downstream INF_B_03 KeyErrors far from the cause.
+- **Fix:** assert `date/account_id/ticker/units` present, raise on drift; keep custodian defaulted.
+- **Commit:** `8aaa1317a`
+
 ---
 
 ## Reports reviewed but NO fix applied
@@ -85,3 +186,9 @@ validated against source before fixing).
   across A_00/A_01 -- deferred as a small robustness follow-up, not a per-report fix.
 - **report 4 / `INF_A_02`** (fee_rate_history) -- CLEAN (confirmed): a DEPRECATED no-op (early
   `sys.exit(0)`, no data processing). Reviewer verdict correct; nothing to fix.
+- **report 5 / `INF_A_03` finding 2** (low, skip-gate freshness key = per-date silver vs the actual
+  single canonical snapshot) -- REAL but INERT: `orion-gold-dispatch.sh` never exports
+  `INFINC_PHASE1=1`, so `should_skip` always returns COMPUTE (every partition recomputed). Bites only
+  if phase-1 incremental is switched on -> fix belongs to that feature's enablement, not here.
+- **report 7 / `INF_B_00` finding 4** (low, skip-gate `input_keys` omit accounts_v2 + bronze assets)
+  -- REAL but INERT for the same reason (`INFINC_PHASE1` off). Deferred to phase-1 enablement.
