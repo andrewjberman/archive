@@ -174,10 +174,83 @@ validated against source before fixing).
 - **Fix:** assert `date/account_id/ticker/units` present, raise on drift; keep custodian defaulted.
 - **Commit:** `8aaa1317a`
 
+## FIX-016 -- INF_B_02: coerce units/nav_price to numeric (report 10 F5)
+- `data/inf/scripts/gold/INF_B_02.canonical_lots.py` -- `load_transactions`. Un-coerced bronze
+  passthrough consumed by `.abs()`/`>0`/`remaining*buy_price` -> object dtype TypeErrors + aborts the
+  chain. `pd.to_numeric(errors='coerce')`. low/type. **Commit:** `cc8956eb8`
+## FIX-017 -- INF_B_02: strip ticker on both sides of the canonical anchor (report 10 F4)
+- `load_transactions` + `load_canonical_units`. A whitespace/representational ticker mismatch made the
+  anchor lookup miss -> `if not anchor` DROPPED every FIFO lot for a real held position -> silent zero
+  cost basis. Strip both sides. medium/merge. **Commit:** `cc8956eb8`
+## FIX-018 -- INF_B_02: fail-open on the canonical-holdings read (report 10 F2)
+- `load_canonical_units`. Unguarded `_read_s3(keys[-1])` violated the function's own "empty dict if
+  unavailable -- fail-open" docstring -> a read error hard-aborted the chain. try/except -> `{}`.
+  medium/unguarded-read. **Commit:** `cc8956eb8`
+## FIX-019 -- INF_B_02: dust-scale threshold in the FIFO clamp (report 10 F3) [VALIDATE]
+- `build_lots`. `scale = h / remaining_total` exploded when traceable lots were trivial dust vs H,
+  inflating a stale near-noise lot to the full position at a wrong old price/year. Take the residual
+  path when `remaining_total < h*1e-6`; scale only lots > 1e-9. **Changes cost-basis attribution --
+  validate on next nightly `lots_latest`.** medium/numeric. **Commit:** `cc8956eb8`
+## FIX-020 -- INF_B_02: residual lots for held-but-no-in-window-buys positions (report 10 F1) [VALIDATE]
+- `build_lots`. The in-loop residual recovery never fired for a canonical-held (account_id, ticker)
+  with zero in-window buys -> the position was 100% MISSING from gold/lots -> cost basis understated.
+  Post-loop pass emits a floor-year residual (mirrors the in-loop pattern). **Changes cost-basis --
+  validate on next nightly `lots_latest`.** high/merge. **Commit:** `cc8956eb8`
+## FIX-021 -- INF_B_03: pin holding_period_days to Int64 (report 11 F3)
+- `data/inf/scripts/gold/INF_B_03.account_gains.py` -- `process_one_date`. `.dt.days` flips
+  int64<->float64 across partitions on NaT -> strict-schema-reader mismatch. `.astype('Int64')`.
+  low/type. **Commit:** `0ba30a4fd`
+## FIX-022 -- INF_B_03: fail-loud on systematic/newest account_gains failure (report 11 F2)
+- `main`. Blanket except + unconditional return 0 hid a total schema-drift failure (written=0/rc=0 ->
+  stale served gains/tax). Raise on total or newest-partition failure; tolerate old backfill.
+  medium/other. **Commit:** `0ba30a4fd`
+## FIX-023 -- INF_C_00: fail-loud on systematic performance failure (report 12 F1)
+- `data/inf/scripts/gold/INF_C_00.canonical_performance.py` -- `main`. Blanket except + return 0 hid a
+  total failure -> stale served household/account performance. `return 1` when 0 written and 0 skipped.
+  high/other. **Commit:** `b9cc7c93a`
+## FIX-024 -- INF_C_00: loud NNA-drop visibility (report 12 F2, partial -- see DI-2)
+- `process_date`. Holdings-only spine left-drops NNA-only/liquidation accounts -> lost outflow ->
+  over-stated served net_nna/growth. Now logs the count + $ magnitude of dropped NNA (full UNION-spine
+  fix is a design item). medium/merge. **Commit:** `b9cc7c93a`
+## FIX-025 -- INF_C_00: unseeded --start-date backfill warn (report 12 F3, partial -- see DI-3)
+- `main`. `--start-date` leaves prev_aua unseeded -> boundary date `aua_change == full AUA` (spike).
+  Now warned loudly (full fix = seed prev_aua, DI-3). low/empty-null. **Commit:** `b9cc7c93a`
+
+---
+
+## DESIGN ITEMS (flagged -- need a cross-script decision, NOT a safe autonomous per-report patch)
+These are REAL findings whose correct fix changes served tax/NNA numbers via cross-script data
+lineage; a naive per-report patch could worsen them. Surfaced here for a deliberate decision + CVO eye.
+
+- **DI-1 -- INF_B_03 finding 1 (HIGH, tax liability):** `unrealized_gain = market_value - cost_basis`
+  subtracts operands from DIFFERENT unit universes -- `market_value` is I_B01 holdings (positions_cube
+  RAW-txn cumsum units x price) while `cost_basis` is I_B02 lots (`current_units` CLAMPED to canonical
+  Orion holdings). I_B02's own docstring says raw-txn units diverge from the positions API (~3.15x
+  over-retain on some books), so the subtraction mixes unit counts. Plus `fillna(0.0)` on the operands
+  books a full-MV phantom gain when cost_basis is missing (or a phantom full loss when MV is unpriced).
+  Flows into I_C05 tax-liability + I_C03 unrealized_gain -> materially overstated served tax numbers.
+  **Decision needed:** anchor I_B01 market_value to canonical holdings (single unit base), or derive MV
+  from the canonical-anchored lots' current_units x price; and stop `fillna(0)` on the operands (leave
+  NaN so downstream sums exclude, don't phantom-book). Owner: CVO/CTO + DS.
+- **DI-2 -- INF_C_00 finding 2 (medium, NNA/growth):** the account spine is holdings-only; NNA-only /
+  liquidation-day accounts are left-dropped with their outflow -> over-stated household net_nna/growth.
+  **Fix:** build the spine as the UNION of holdings + NNA accounts (carry `aua_prior` for NNA-only
+  accounts). Now WARN-visible (FIX-024).
+- **DI-3 -- INF_C_00 finding 3 (low, backfill):** `--start-date` leaves prev_aua unseeded -> corrupt
+  boundary partition. **Fix:** seed prev_aua from the trading day before start_date, or refuse
+  `--upload`+`--start-date` without a valid seed. Now WARN-visible (FIX-025).
+
+**Validation flag:** FIX-019 + FIX-020 (INF_B_02) change served cost-basis attribution -- recommend a
+CVO/DS eye on the next nightly's `gold/lots/lots_latest.parquet` (row count + per-account cost_basis
+sanity vs prior) before treating the tax-lot numbers as certified.
+
 ---
 
 ## Reports reviewed but NO fix applied
 (reviewer verdict clean, or a finding refuted / not-actionable on DS ground-truth)
+
+- **report 9 / `INF_B_01b`** (classify_new_securities) -- CLEAN (confirmed): `_read_s3` is unguarded
+  but both callers wrap it in try/except; writes an auxiliary classification list, not a served number.
 
 - **report 3 / `INF_A_01` finding 3** (low, unguarded `rep_name` access) -- REAL but not actionable
   in isolation: its trigger (a walk-back to a pre-rename accounts_v2 partition missing
