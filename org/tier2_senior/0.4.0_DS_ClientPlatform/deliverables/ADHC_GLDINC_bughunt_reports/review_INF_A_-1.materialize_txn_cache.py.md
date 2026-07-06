@@ -1,0 +1,24 @@
+# REVIEW -- INF_A_-1.materialize_txn_cache.py
+
+- script: `data/inf/scripts/gold/INF_A_-1.materialize_txn_cache.py`
+- verdict: **issues-found**
+- runs_in_incremental: False
+- findings: 3
+
+## Finding 1 -- [high/other/full]
+- **Location:** `data/inf/scripts/gold/lib/txn_cache_reader.py:176-203 (_load_canonical_snapshot, called by INF_A_-1.materialize line 76)`
+- **Mechanism:** The 'canonical snapshot' is selected purely by S3 LastModified DESC (keys_with_mtime.sort(reverse=True); first of the newest 5 that carries accountId+transDate). There is NO check that the filename-encoded date is the newest date. Each silver/transactions/{date}.parquet is a FULL-history snapshot whose content ends at that date's pull, so selecting the file with the newest LastModified is only correct when the newest mtime == the newest date. A backfill/re-upload of an OLD-date partition stamps it with a fresh LastModified while its content stops months earlier.
+- **Failure scenario:** An operator (the documented ADVI_HISTBF backfill lane) re-runs `convert_transactions_to_silver.py --pull-date 2026-04-30 --upload` today (2026-07-06). This overwrites silver/transactions/2026-04-30.parquet with LastModified=now; its history ends 2026-04-30. The next gold cascade's INF_A_-1 selects THIS file as canonical (newest LastModified), so the cache silently loses all May/Jun/Jul transactions. INF_A_00 first/last trade_date bounds truncate; INF_A_03 position cumsum drops ~2 months of trades -> served positions/quantities materially wrong, no crash, no warning.
+- **Proposed fix:** Select the canonical snapshot by the DATE encoded in the key (max parseable YYYY-MM-DD filename), not by LastModified; or assert the selected file's filename-date == max(filename-date) across partitions and fail loud on a mismatch. At minimum log the selected filename-date vs the newest filename-date so a mtime/date divergence is visible.
+
+## Finding 2 -- [medium/schema-column/full]
+- **Location:** `data/inf/scripts/gold/lib/txn_cache_reader.py:92 (REQUIRED_CANONICAL_COLS) & 196-202 (WARN-and-proceed column filter), consumed by INF_A_-1.materialize line 76`
+- **Mechanism:** The canonical-snapshot validation enforces only REQUIRED_CANONICAL_COLS={accountId, transDate}. When the requested CACHE_COLUMNS (accountId, transDate, ticker, noUnits, registrationName) include a column NOT present in the selected snapshot, _load_canonical_snapshot only logs 'WARN: requested columns missing' and returns the reduced frame. INF_A_-1 then writes a cache MISSING that column without failing. Downstream consumers hard-depend on those non-required columns.
+- **Failure scenario:** If the selected snapshot lacks registrationName or noUnits (e.g. a schema-regressed or older-schema partition that still carries accountId+transDate but not the camelCase display/units columns), INF_A_-1 succeeds (WARN only). Then INF_A_00 (cache hit path drops the absent col via `cols=[c for c in columns if c in df.columns]`) hits `groupby('accountId')['registrationName']` -> KeyError; INF_A_03 renames noUnits->units then `groupby(...)['units']` -> KeyError. Either raises an uncaught exception -> non-zero exit -> the no-timeout gold chain HARD-ABORTS at the A-stage, skipping B/C/D served producers.
+- **Proposed fix:** Fail loud in INF_A_-1 (or _load_canonical_snapshot) when a REQUESTED cache column is missing from the selected snapshot, instead of WARN-and-proceed -- the A-layer consumers treat noUnits/ticker/registrationName as required. Alternatively widen REQUIRED_CANONICAL_COLS to the full consumer-required set, or have INF_A_-1 assert set(CACHE_COLUMNS) <= set(df.columns) before writing the cache.
+
+## Finding 3 -- [low/other/full]
+- **Location:** `data/inf/scripts/gold/INF_A_-1.materialize_txn_cache.py:99-104 (silver_partition_count pagination)`
+- **Mechanism:** After _load_canonical_snapshot has already fully paginated silver/transactions/ (txn_cache_reader.py:167), INF_A_-1 performs a SECOND full ListObjectsV2 pagination of the same ~1,510-object prefix solely to compute silver_partition_count for the sidecar. This is a redundant second S3 failure surface, and it runs AFTER the cache parquet is already written (line 93).
+- **Failure scenario:** A transient S3 list error (throttle/network) on this second pagination raises after the cache was already written; INF_A_-1 exits non-zero -> the no-timeout chain hard-aborts even though the usable cache exists. The next run also self-recovers, so impact is a spurious full-chain abort rather than corruption.
+- **Proposed fix:** Derive silver_partition_count from the key list already gathered inside _load_canonical_snapshot (return it alongside the frame), avoiding the second pagination; or wrap the count computation in a try/except that logs a WARN and records silver_partition_count=-1 (a benign value that just forces the reader to treat the cache as stale) rather than aborting the chain over an optional freshness hint.

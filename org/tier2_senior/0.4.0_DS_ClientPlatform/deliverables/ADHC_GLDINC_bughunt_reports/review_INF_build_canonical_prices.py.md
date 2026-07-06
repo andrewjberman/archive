@@ -1,0 +1,24 @@
+# REVIEW -- INF_build_canonical_prices.py
+
+- script: `data/inf/scripts/gold/INF_build_canonical_prices.py`
+- verdict: **issues-found**
+- runs_in_incremental: False
+- findings: 3
+
+## Finding 1 -- [medium/other/full]
+- **Location:** `INF_build_canonical_prices.py:285-294 (resolve_prices_for_ticker, T1 staleness cap)`
+- **Mechanism:** The T1_STALENESS_DAYS=365 cap is applied to the price series BEFORE interpolation/ffill, when the series only holds values at actual observation dates. stale_mask = (price.index > last_t1 + 365d) & t1_mask, but t1_mask marks only T1-LABELED rows, and by definition the latest T1-labeled row IS last_t1 -- so no row can exist beyond last_t1+365 that is also T1-labeled. The cap can never null anything; it is dead code. The intended risk control (do not carry a T1 price forward more than 365 days past the last real observation) is inert, so dormant/delisted tickers keep their last observed price carried to global_end (today) indefinitely.
+- **Failure scenario:** A security last transacted 2021-03-01 (delisted/merged but still a held position) is in silver/transactions. Spine extends to 2026-07-06. last_t1=2021-03-01, cutoff=2022-03-01, but stale_mask matches 0 rows (verified empirically: n_stale=0). The 2021 price (e.g. 102.0) is carried to 2026-07-06 and served in canonical_prices, feeding downstream INF position valuation with a ~5-year-old price where the code explicitly intended to drop it after 365 days -> misstated market value for that holding.
+- **Proposed fix:** Apply the staleness cut AFTER the T4 ffill step (or bound the ffill): after price=price_ffill.ffill(), compute last_t1 from the T1-labeled dates, then null price/source for rows where index > last_t1 + T1_STALENESS_DAYS that are carried (interp/carry_forward) beyond that horizon. As written the cap operates on observation-only data and is structurally unable to fire.
+
+## Finding 2 -- [low/other/full]
+- **Location:** `INF_build_canonical_prices.py:296-307 (resolve_prices_for_ticker, T3 interp / T4 carry_forward)`
+- **Mechanism:** price.interpolate(method='index') with pandas default limit_direction='forward' forward-extrapolates the last known value flat across ALL trailing gaps (verified: [nan,10,15,20,20,20]). Because the trailing NaN are already filled by interpolate, the subsequent T4 branch new_ffill = price_ffill.notna() & price.isna() matches nothing. Every date after a ticker's last real observation is therefore labeled source='linear_interpolation' instead of 'carry_forward'. The documented T4 carry_forward tier is effectively dead, and the source taxonomy served downstream is wrong.
+- **Failure scenario:** T1-only dormant ticker: last obs 2021-03-01, spine to 2026-07-06. Verified value_counts on the resolved series: 1953 rows labeled 'linear_interpolation', 0 'carry_forward'. A downstream consumer that trusts source='linear_interpolation' as 'interpolated between two real anchors' (higher confidence than carry-forward) treats a 5-year flat-held stale price as interpolated, and any audit that flags/excludes carry_forward prices is defeated. Price value is unchanged (same flat last value), but the source label -- and thus the staleness signal -- is corrupted, masking finding #1.
+- **Proposed fix:** Restrict interpolation to interior gaps: price.interpolate(method='index', limit_area='inside'). Trailing NaN then remain for the T4 ffill branch to fill and correctly label 'carry_forward', restoring the tier taxonomy and making stale trailing carry visible.
+
+## Finding 3 -- [low/empty-null-handling/full]
+- **Location:** `INF_build_canonical_prices.py:425 (pd.concat(results)) and :452 (coverage_pct division)`
+- **Mechanism:** If the per-ticker resolution loop produces no priced rows (results == []), pd.concat([], ignore_index=True) raises 'No objects to concatenate'. Even if results is non-empty but yields total==0, coverage_pct = non_fallback.sum() / total * 100 divides by zero. Neither path is guarded. This step (INF_S_00 silver-prep-pre) runs with NO timeout and hard-fails the full chain: dispatch line 1421-1424 does exit "$_silver_prep_rc", aborting the whole nightly full run BEFORE the freshness gate, so nothing downstream rebuilds/serves that night.
+- **Failure scenario:** A canonical silver/transactions snapshot where every trade row is filtered out (all non-trade type_desc, or nav_price<=0, or units~0), or all transDate coerce to NaT leaving an empty txns/spine. Then no ticker yields a valid price row -> results=[] -> pd.concat raises ValueError at line 425 -> silver-prep-pre exits non-zero -> full chain aborts at dispatch line 1421-1424.
+- **Proposed fix:** After the loop: if not results, log a clear domain error and either write an empty/typed output or raise a descriptive RuntimeError; and guard total==0 before the coverage division (e.g. coverage_pct = 0.0 if total==0 else ...).

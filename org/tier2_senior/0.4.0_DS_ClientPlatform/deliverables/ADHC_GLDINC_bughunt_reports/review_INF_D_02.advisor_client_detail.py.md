@@ -1,0 +1,18 @@
+# REVIEW -- INF_D_02.advisor_client_detail.py
+
+- script: `data/inf/scripts/gold/INF_D_02.advisor_client_detail.py`
+- verdict: **issues-found**
+- runs_in_incremental: True
+- findings: 2
+
+## Finding 1 -- [low/type-issue/both]
+- **Location:** `build_client_details line 2093 (dim.merge(team_map, on='account_id')); sibling at build_advisor_books line 1763 (dim.merge(accounts_dim[meta_cols], on='account_id'))`
+- **Mechanism:** These two left-merges join accounts_dim.account_id against account_team.account_id (line 2093) / accounts_dim.account_id (line 1763) on the RAW column dtypes, WITHOUT the pd.to_numeric(...).astype('Int64') normalization the same functions apply to the immediately-following acct_aua/acct_nna merges (lines 1766-1767, 2102-2103). Today the dtypes coerce-match (silver accounts_dim.account_id = int64 from pd.read_csv inference in convert_orion_to_silver.py; account_team.account_id = Int64 from INF_A_00/C_07; pandas matches int64 to Int64). The asymmetry is a latent fragility: if silver accounts_dim.account_id ever parses as object/str (e.g. any non-numeric or blank 'Account ID' in a source TRN CSV flips the whole column to object under low_memory=False inference), the int-vs-object join silently matches 0 rows.
+- **Failure scenario:** A single non-numeric/blank Account ID in a source Orion TRN CSV makes silver accounts_dim.account_id object-dtype. At line 2093 the object-vs-Int64 join yields all-NaN advisor_key_team, so line 2095 falls back to the accounts_dim firm placeholder -> EVERY platinum/clients/{hh}/detail.json is served with advisor_key='inflection_wealth_management' instead of the real advisor. At line 1763 the same mismatch drops registration_name/reg_type/account_code from every book.json clients[] entry (blank display_name, missing reg_type). No crash, no warning - a silent served-field corruption. Both modes; not currently triggering under all-numeric account IDs.
+- **Proposed fix:** Normalize both merge keys before the join, matching the sibling merges: cast dim.account_id and team_map.account_id (line 2093) and dim.account_id/accounts_dim.account_id (line 1763) with pd.to_numeric(...,errors='coerce').astype('Int64') prior to .merge().
+
+## Finding 2 -- [low/schema-column/both]
+- **Location:** `_compute_top_position_performance lines 899-900 (entry guard) vs lines 928 and 940 (usage)`
+- **Mechanism:** The entry guard only checks that holdings_now has 'account_id' and 'ticker' (lines 899-900), but the body then unconditionally aggregates 'market_value' and 'units' (agg_cols, line 928) and computes now.groupby('ticker')['nav_price'].mean() (line 940). This function is called inside the per-advisor loop of build_advisor_books (line 1902) and the per-HH _build_one; build_advisor_books runs UN-wrapped, so a missing column raises KeyError up through main() -> sys.exit(1) -> the no-timeout gold chain hard-aborts. (_build_one is ThreadPool-wrapped so the per-HH path would only drop that household.)
+- **Failure scenario:** If a stale/regressed gold/canonical/holdings_*.parquet (read as-is in incremental, since B_00 is skipped) lacks 'nav_price' or 'units' or 'market_value' while still having account_id+ticker, the guard passes but line 928/940 raises KeyError: 'nav_price' inside build_advisor_books's unwrapped advisor loop -> whole INF gold chain aborts at INF_D_02 with no artifact emitted. Not currently triggering (B_00 always writes nav_price/units/market_value).
+- **Proposed fix:** Extend the entry guard at lines 897-900 to also require {'market_value','units','nav_price'} (return [] if any are absent), or wrap the per-advisor _compute_top_position_performance call so a positions-computation failure degrades top_gain_positions to omitted rather than aborting the chain.

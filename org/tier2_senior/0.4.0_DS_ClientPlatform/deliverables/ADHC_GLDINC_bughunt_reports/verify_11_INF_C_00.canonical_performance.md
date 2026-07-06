@@ -1,0 +1,14 @@
+# VERIFY #11 -- target: INF_C_00.canonical_performance.py
+
+- is_real: **False**
+- confidence: **refuted**
+- corrected_severity: low
+
+## Reasoning
+REFUTED. The finding correctly identifies all_perf.account_id as Int64 (INF_C_00.canonical_performance.py:133 coerces via pd.to_numeric(...).astype('Int64') before write). But its claim that all_gains.account_id is object/str rests on a WRONG lineage and misses an upstream coercion.
+
+Reviewer's lineage error: it claims account_gains inherits a string account_id from canonical_holdings (INF_B_00, which does .astype(str) at lines 293/304/531). But INF_B_03.account_gains.py does NOT read canonical_holdings. INF_B_03:55 sets HOLDINGS_PREFIX='gold/holdings/' and its docstring (line 23) names 'gold/holdings/{date}.parquet (I_B01 output)' as the input. canonical_holdings (gold/canonical/holdings_) feeds only INF_C_00, where account_id is itself re-coerced to Int64 (line 133) — the string never reaches account_gains.
+
+Actual lineage, dtype-traced: INF_A_03.positions_cube.py _prepare_partition line 315 calls `df = coerce_id_columns(df)` immediately before to_parquet, so gold/positions_cube/{date}.parquet account_id is Int64 (dtype_coerce.py:57-60 = pd.to_numeric().astype('Int64')). INF_B_01.holdings_lots.py reads positions_cube and merges on 'ticker' only (line 118), passing account_id through unchanged; pyarrow round-trips the nullable Int64 extension dtype, so gold/holdings/{date}.parquet account_id is Int64. INF_B_02.canonical_lots.py:368 coerces lots to Int64 (coerce_id_columns). INF_B_03:115 merges holdings(Int64) against lots(Int64) on [account_id,ticker] and succeeds; its output account_gains/{date}.parquet account_id is Int64. INF_C_03.load_gains_for_date:108 groupby('account_id') preserves Int64 -> all_gains.account_id is Int64. Thus line 233 merges Int64 vs Int64: no pandas ValueError and no silent 0-row/all-NaN join.
+
+Self-refuting failure scenario: the scenario requires account_gains partitions to EXIST while their account_id is object/str. Those are mutually exclusive. lots_latest is definitively Int64 (coerce_id_columns at INF_B_02:368), so if holdings.account_id were object/str, INF_B_03's OWN merge at line 115 would raise the identical 'merge on Int64 and object' ValueError first and account_gains/{date}.parquet would never be written (the except at INF_B_03:202 logs WARN and skips the date). The very precondition the finding relies on ('account_gains partitions exist for the processed dates') proves the join key is numeric on both sides. Path to the crash is unreachable; the dtype is pinned Int64 by three independent coerce points (INF_A_03:315, INF_B_02:368, INF_C_00:133). Corrected severity: low (no real defect; residual is only the theoretical case of pre-2026-05-11 stale partitions predating the coerce lib, which the daily CHAIN_FULL re-derives with Int64 keys anyway).

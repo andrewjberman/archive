@@ -1,0 +1,18 @@
+# VERIFY #20 -- target: INF_D_06.client_timeseries.py
+
+- is_real: **True**
+- confidence: **confirmed**
+- corrected_severity: high
+
+## Reasoning
+REAL defect, mechanism source-confirmed end-to-end.
+
+CODE MECHANISM (INF_D_06.client_timeseries.py, re-verified line by line): The holdings parquet carries a `market_value` column (INF_B_00 output schema), so at line 456 `row.get('market_value', 0)` returns the actual cell value (not the `0` default). A NaN cell survives the `or 0` guard because `bool(np.float64('nan')) is True`, so `nan or 0` -> `nan`, mv=nan. Line 458 `hh_class_mv[hh_id][bucket] += mv` makes that bucket nan. In assembly, line 511 `total = sum(class_mv.values())` = nan; line 512 `if total <= 0: continue` does NOT fire because `nan <= 0` is False, so the period is retained; `pct()` (515-516) = `round(x/nan*100,2)` = nan for all four classes; `total_household_mv` (527) = `round(nan,2)` = nan. `_write_json_s3` (117) `json.dumps(obj, default=str)` emits a bare `NaN` token because numpy.float64 is a subclass of Python float (encoder serializes it as float with allow_nan=True; `default=str` is not invoked for a float subclass) -> invalid JSON that JS `JSON.parse` rejects.
+
+NaN IS REACHABLE (source-grounded): market_value == Orion current_value, coerced in convert_orion_api_to_silver.py:766-768 via `pd.to_numeric(errors='coerce').astype('float64')` -> null/non-numeric currentValue becomes NaN. INF_B_00's only positions filter (line 288) drops on current_shares!=0, NOT current_value, so a position with shares but a null value survives; INF_B_00:312 `current_value.astype(float)` preserves NaN into gold/canonical/holdings_*.parquet. pmv_only rows and the historical pmv-only fallback (INF_B_00:364-388) pass raw current_value through untouched, and INF_D_06 reads exactly these historical quarter-end-nearest partitions.
+
+CORROBORATION: 8 sibling canonical-holdings consumers explicitly defend against MV NaN with `pd.to_numeric(errors='coerce').fillna(0.0)` and/or `dropna(subset=['market_value'])` (INF_D_07:113-115, INF_D_07a:250-253, INF_D_04b:249, INF_D_06.cash_drag:214, INF_C_00:122, INF_B_02:207, INF_B_03:125, INF_D_08:124). INF_D_06.client_timeseries is the sole outlier using the fragile `or 0`.
+
+REFUTATIONS DEFEATED: (a) INF_B_00:20 '100%' refers to '100% 200 OK and historical depth', i.e. HTTP success, not per-position value completeness -- does not pin MV non-null. (b) share-filter does not remove unpriced positions. (c) `_compute_period_mix` (line 300), whose `.groupby().sum()` WOULD skip NaN, is dead code (never called); the live path is the manual iterrows loop that does not skip NaN. (d) not mode-gated (D-chain runs in both full and incremental). (e) cache-poison claim confirmed: lines 474-477 write `float(cmv.get(...))`=nan into the anchor-cache parquet and the CACHE HIT path (407-413) reads it back, freezing NaN for stable historical-quarter etags until a forced rebuild.
+
+SEVERITY high: produces a malformed served artifact (a hard JSON.parse break of the client timeseries page for affected households, not merely a wrong number) and self-persists via the anchor cache. Blast radius is per-household (only households holding an unpriced/null-MV position in a quarter), not firm-wide, so not critical. RESIDUAL: I confirmed the pipeline can produce the NaN and the code mishandles it fully; I did not inspect a live S3 parquet to prove a NaN-MV position exists on a specific current production day. The correct fix mirrors the siblings: coerce market_value with `pd.to_numeric(errors='coerce').fillna(0.0)` (or guard total with `if not np.isfinite(total) or total <= 0`).

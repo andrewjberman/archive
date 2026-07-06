@@ -1,0 +1,14 @@
+# VERIFY #12 -- target: INF_C_07.py
+
+- is_real: **False**
+- confidence: **refuted**
+- corrected_severity: low
+
+## Reasoning
+The flagged code at INF_C_07.py:300-307 is structurally as described (latest_date = ap['date'].max(); latest = single-date slice; how='outer' merge with acct_dim; total_aua.fillna(0.0); no coverage guard). However, the failure scenario's causal chain is factually broken at its first link, so the concrete trigger never reaches the cited line.
+
+LINEAGE (traced in source): account_performance.total_aua does NOT derive from the timeout-tolerated Orion performance pull (INF_API_PULL_PERF -> silver/perf). INF_C_03.account_performance.py reads gold/canonical/canonical_performance_{date}.parquet (PERF_PREFIX='gold/canonical/', list_perf_dates filters 'canonical_performance_*'; load_one_perf) and NEVER reads silver/perf; its date column is the partition filename _date_str (lines 123, 203). INF_C_00.canonical_performance.py computes total_aua as the SUM of holdings market_value per account (process_date, lines 122-131) from gold/canonical/holdings_{date}.parquet + canonical_nna + accounts_dim -- no silver/perf. INF_B_00.canonical_holdings.py builds holdings from silver/api_dims/positions_mv (the POSITIONS pull) reconciled with bronze assets.csv. The dispatch confirms this explicitly (orion-gold-dispatch.sh:578: 'the served AUA derives from positions/holdings, so even a stale perf still yields a fresh-AUA rich header'). The reviewer conflated account_performance (a holdings-derived AUA timeseries) with silver/perf (Orion's returns/performance-dim feed) -- a name collision. A partial/tolerated INF_API_PULL_PERF therefore cannot make account_performance's latest date partial. The stated trigger is unreachable.
+
+STEELMAN (partial latest-date via the REAL positions/holdings path) is also guarded: INF_B_00._bronze_assets_ok (lines 552-596) was purpose-built for this exact class -- its comment documents the 2026-05-20 incident (ReadTimeout -> assets.csv absent -> 64% row reduction) and the fix SUPPRESSES the date rather than emitting partial holdings. A timed-out positions pull (SIGTERM) writes no new snapshot, so INF_B_00 emits no holdings_{today} and the max date stays at the last complete day (full book) -- no partial-latest-date. INF_C_00 also returns None on an empty holdings partition (line 118-119). INF_C_04.validate_aua is non-blocking (always exit 0), so it is only a WARN, not a guard -- but it is not needed here because the collapse path itself does not materialize from the flagged source.
+
+Net: the specific flagged defect (perf-pull -> C_07 latest-date collapse) is refuted on a wrong-source premise. The bare code pattern (no completeness guard on the latest-date snapshot) is a minor latent smell, but its realistic trigger is a different, upstream-guarded source, so corrected severity is low.
