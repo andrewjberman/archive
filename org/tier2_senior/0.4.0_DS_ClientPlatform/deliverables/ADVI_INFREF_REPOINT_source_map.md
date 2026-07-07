@@ -100,3 +100,23 @@ by AXIS because accounts_v2 (fresh 07-06) CARRIES some-but-not-all of what the c
    interim (silver-rejoin) until the un-freeze lands.
 3. NFRA_GLDINV repoint-completeness invariant: assert no served D-script reads a frozen dim -- across
    BOTH the accounts axis and the household axis (consumer-set).
+
+## DEPLOYED (2026-07-06) + open geo axis (tracked)
+
+**HOUSEHOLD-MAP repoint: DEPLOYED** (commit 33c9569d7, safe-deploy 7/7 PASS). The 7 stragglers
+(D_02/D_04/D_04b/D_05.client_top_holdings/D_06.client_timeseries/D_07/D_07a) now read A_00's gold dim
+for account->household. Namespace-verified 99.5% stable (+81 recovered = DI-12 fix / -48 retired / 4
+reassigned). Served effect lands on the next scheduled nightly (no ad-hoc runs); CVO uniform-namespace
+exercise-gate confirms post-nightly.
+
+**OPEN -- household GEO axis (a 3rd frozen SoT, DISTINCT fix-shape, DS~A owns, near-term):**
+- INF_D_04 L494 reads frozen silver/api_dims/household (04-28) for GEO (state/city/country/name), NOT
+  the account->household map. A_00's gold dim has no geo; the bronze Tier-2 (bronze/orion-api/household/)
+  is 404-DEAD -> no consumer-repoint target -> fix-shape = PRODUCER UN-FREEZE.
+- **Interim served geo (CTO-sharpened, honest-surfacing REQUIRED):** a MIX, not uniformly unknown --
+  post-04-28 households serve NULL geo (honest-unknown); EXISTING (in the 04-28 dim) serve their 04-28
+  geo = BOUNDED-STALE-PRESENT (geo slowly-changing; stale only if the client moved since 04-28). Ship a
+  served "geo as_of 04-28" vintage flag WITH the producer un-freeze.
+- **Producer scope (initial):** pull_orion_households.py + build_household_dim.py (named in D_04b's
+  error) do NOT exist in-repo; only probe_inflec_household.py (manual_api/). So the household-geo dim
+  needs a producer REBUILD/revival, not a re-run -- the reason it froze 04-28.
