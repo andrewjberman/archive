@@ -1,8 +1,9 @@
 # TASK ORDER -- NFRA_AGENTBUS.S3 (the broker adapter = the 5-control choke point + tool_activity meter -- SIMULATED)
 
-<issued_to>0.4.0_DE_ClientPlatform</issued_to>
+<issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO~B</issued_by>
 <status>staged</status>
+<reconcile_note>RE-LANED DE->0.7.0_AE_CloudOps 2026-07-07 by COO~B (backend-infra, not portal; 0.7.0_AE built S2 live). THIS is the authoritative S3 (full 5-control spec + compiler-mandate + acceptance criteria); it SUPERSEDES the thin stub org/tier1_exec/2.0.0_SA_COO/task_orders/NFRA_AGENTBUS.S3.broker-adapter-simulated.md. File retained in the DE folder for history; owner is 0.7.0_AE_CloudOps. GO held until S3's real deps verified: COMPTEAM strip-list/sig-root (C3/C4) + SCTY authz (C2, PREMCP P1 now certed) landed.</reconcile_note>
 
 <priority>HIGH -- the adapter is the single choke point where all 5 controls apply. GATED on S1 CTO arch-gate. SIMULATED-ONLY. PRD SS2 + SS3 + SS4.2 + SS8-S3.</priority>
 <date>2026-07-02</date>

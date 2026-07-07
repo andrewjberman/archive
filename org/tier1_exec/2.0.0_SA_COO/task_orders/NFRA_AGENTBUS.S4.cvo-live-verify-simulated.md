@@ -7,9 +7,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>3.0.0_SA_CVO~B</issued_to>
     <date>2026-07-07</date>
-    <status>pending</status>
-    <dispatch_state>WRITTEN-NOT-DISPATCHED (wind-down 2026-07-07; Andrew directed decomposition materialized before device reboot; dispatch on restart per the allocation-map in the session handoff /log)</dispatch_state>
-    <gate_note>Follows S3 (simulated). COO-RESOLVABLE.</gate_note>
+    <status>superseded -- authoritative S4 = org/tier1_exec/3.0.0_SA_CVO/task_orders/NFRA_AGENTBUS.S4.cvo-live-verification-simulated-proof.md (CVO~B working copy; control-1 partition already independently re-verified 1/5, controls 2-5 gated on S3)</status>
+    <dispatch_state>SUPERSEDED (dedup 2026-07-07, COO~B NFRA completion drive) -- this thin stub is retired; the CVO-dir proof file is the single authoritative S4.</dispatch_state>
+    <gate_note>Follows S3. Superseded stub retained for history.</gate_note>
   </metadata>
 
   <objective>The §6 acceptance run on live state (partition-scoped, attribution-signed, strip-fail-closed, action-authz-enforced) + the intra-fleet opal-agent-comms regression.</objective>

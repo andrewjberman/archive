@@ -5,7 +5,7 @@
 <co_assignees>none (AE-lane: Cost Explorer + security sweep + the Lambda)</co_assignees>
 <issued_by>2.0.0_SA_COO (NFRA_INFRPT decomposition 2026-06-16; CVO proposal 6d5954360 §A/§4 + §G/§5)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>staged</status>
+<status>complete -- shipped 2026-07-07 (3 increments: cost-depth/security-trend + snapshot-reaper; COO commit "NFRA_INFRPT.P2 complete", CI artifacts uploaded for opal-infrastructure-monitor). Status backfilled by COO~B 2026-07-07 dedup -- worker-dir copy was stale-open; the COO-dir NFRA_INFRPT.P2.cost-depth-reaper is the completed reaper sub-slice of this same P2.</status>
 <priority>HIGH — cost is the section Andrew VALUES + the biggest enhancement lever. Lands after P1. Gate: P0/P1 landed + AE capacity.</priority>
 
 <references>
