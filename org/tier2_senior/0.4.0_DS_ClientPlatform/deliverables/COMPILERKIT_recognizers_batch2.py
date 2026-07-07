@@ -43,6 +43,32 @@ from extract_pipeline import (  # noqa: E402
     _extract_fstring_template, _find_aliases, _WRITE_CALLEES, _READ_CALLEES,
 )
 
+# CTO RULING (2026-07-07, relayed via 0.8.0~D off AE~D's structural parity diff): a basename-only subject
+# ref collides across firms (bd/cot/inf both parse a "gold_dispatch.sh"; confirmed HERE too -- bd's and
+# cot's lib/s3_layout.py independently define ACCOUNTS_DIMENSION = the IDENTICAL relative path
+# 'gold/dimensions/accounts_dimension_latest.parquet', so an unscoped `s3key:{value}` ref would conflate
+# two DIFFERENT firms' S3 objects into one graph node -- the same firm-separation failure-mode CLAUDE.md's
+# NEVER-rule polices one layer up). Ruling: firm-scope any collision-prone ref, derived from
+# provenance.source -- never guessed. Reuses safe_deploy_core.PIPELINE_MAP (the deployed data-dir->firm-
+# label authority DS/DT/AE already commit against) as the single source of truth rather than a second
+# hand-maintained mapping.
+_TOOLS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", ".tools")
+if os.path.isdir(_TOOLS):
+    sys.path.insert(0, os.path.abspath(_TOOLS))
+from safe_deploy_core import PIPELINE_MAP  # noqa: E402
+
+
+def _firm_from_source(source: str) -> str:
+    """Derive the firm label from a repo-relative source path via PIPELINE_MAP (bd/inf/cot) -- never
+    guessed. Returns 'unscoped' (explicit, not silently invented) if source doesn't match a known
+    data/{pipeline}/ prefix -- honest-degrade for the ref-scoping question, mirroring LAW 1's
+    never-a-guess spirit without touching the CSE confidence channel itself."""
+    norm = source.replace("\\", "/")
+    for data_dir, (_bucket, label) in PIPELINE_MAP.items():
+        if norm.startswith(f"data/{data_dir}/"):
+            return label
+    return "unscoped"
+
 
 class S3KeyConstRecognizer(Recognizer):
     """Compiler #1's ast mechanism -- lib/s3_layout.py's constant assignments (ACCOUNTS_DIMENSION = '...')
@@ -80,10 +106,11 @@ class S3KeyConstRecognizer(Recognizer):
                             break
 
     def emit(self, site: Site, tree: EnrichedTree, *, marker_head: str):
+        firm = _firm_from_source(site.source)
         prov = Provenance(source=site.source, locus=site.locus, recognizer=self.concept, evidence=site.evidence)
         return [emit_cse(
             verb=Transformation.CREATE.value,
-            subject=EntityRef(Entity.S3BUCKET.value, f"s3key:{site.payload['value']}"),
+            subject=EntityRef(Entity.S3BUCKET.value, f"s3key:{firm}:{site.payload['value']}"),
             edges=[], provenance=prov, confidence=1.0, marker_head=marker_head,
             producer_kind=self.producer_kind, compiler_id=self.compiler_id, artifact_class=self.artifact_class,
         )]
@@ -139,12 +166,13 @@ class S3KeyReadWriteRecognizer(Recognizer):
 
     def emit(self, site: Site, tree: EnrichedTree, *, marker_head: str):
         rel = Relationship.WRITES.value if site.payload["kind"] == "write" else Relationship.READS.value
+        firm = _firm_from_source(site.source)
         script = Path(tree.source).stem
         prov = Provenance(source=site.source, locus=site.locus, recognizer=self.concept, evidence=site.evidence)
         return [emit_cse(
             verb=Transformation.CREATE.value,
-            subject=EntityRef(Entity.MODULE.value, f"gold:{script}"),
-            edges=[RelationshipDelta(rel, EntityRef(Entity.S3BUCKET.value, f"s3key:{site.payload['s3_path']}"))],
+            subject=EntityRef(Entity.MODULE.value, f"gold:{firm}:{script}"),
+            edges=[RelationshipDelta(rel, EntityRef(Entity.S3BUCKET.value, f"s3key:{firm}:{site.payload['s3_path']}"))],
             provenance=prov, confidence=1.0, marker_head=marker_head,
             producer_kind=self.producer_kind, compiler_id=self.compiler_id, artifact_class=self.artifact_class,
         )]
@@ -169,13 +197,28 @@ if __name__ == "__main__":
     cses_layout, cov_layout = S3KeyConstRecognizer().recognize(t_layout, marker_head="h1")
     names_found = {c.transformation["subject"].ref for c in cses_layout}
     ck("s3-key-const: real s3_layout.py resolves >=10 keys", len(cses_layout) >= 10)
-    ck("s3-key-const: ACCOUNTS_DIMENSION const captured",
-       "s3key:gold/dimensions/accounts_dimension_latest.parquet" in names_found)
+    ck("s3-key-const: ACCOUNTS_DIMENSION const captured (firm-scoped bd)",
+       "s3key:bd:gold/dimensions/accounts_dimension_latest.parquet" in names_found)
     ck("s3-key-const: advisor_fee_detail_key() function captured (f-string template)",
-       any(r.startswith("s3key:gold/canonical/advisor_fee_detail/") for r in names_found))
+       any(r.startswith("s3key:bd:gold/canonical/advisor_fee_detail/") for r in names_found))
     ck("s3-key-const: every CSE AC6-fidelity-ok", all(cse.cse_fidelity_ok(c)[0] for c in cses_layout))
     ck("s3-key-const: coverage clean (no silent drop)", cov_layout.resolved == cov_layout.attempted
        and not cov_layout.unresolved)
+
+    # --- CTO ruling proof: bd + cot both define ACCOUNTS_DIMENSION with the IDENTICAL relative path;
+    # firm-scoping must produce two DISTINCT nodes, not a conflated one (the confirmed-live collision). ---
+    cot_layout_path = (layout_path.parent.parent.parent.parent.parent / "cot" / "scripts" / "gold" / "lib"
+                        / "s3_layout.py").resolve()
+    cot_layout_text = cot_layout_path.read_text(encoding="utf-8")
+    t_cot_layout = EnrichedTree(source="data/cot/scripts/gold/lib/s3_layout.py",
+                                capability=FrontEndCapability.LEXICAL_AST, text=cot_layout_text,
+                                root=ast.parse(cot_layout_text), meta={"marker_head": "h1"})
+    cses_cot_layout, _cov_cot = S3KeyConstRecognizer().recognize(t_cot_layout, marker_head="h1")
+    cot_names_found = {c.transformation["subject"].ref for c in cses_cot_layout}
+    bd_key = "s3key:bd:gold/dimensions/accounts_dimension_latest.parquet"
+    cot_key = "s3key:cot:gold/dimensions/accounts_dimension_latest.parquet"
+    ck("CTO ruling: bd + cot ACCOUNTS_DIMENSION (identical relative path) get DISTINCT firm-scoped refs",
+       bd_key in names_found and cot_key in cot_names_found and bd_key != cot_key)
 
     # --- S3KeyReadWriteRecognizer vs REAL gold scripts, cross-checked against the DEPLOYED classifier -----
     s3_constants = {
@@ -191,7 +234,7 @@ if __name__ == "__main__":
                          meta={"marker_head": "h1", "s3_constants": s3_constants})
     cses_a00, cov_a00 = S3KeyReadWriteRecognizer().recognize(t_a00, marker_head="h1")
     kinds_a00 = {(c.transformation["edges"][0].rtype) for c in cses_a00
-                 if c.transformation["subject"].ref == "gold:A_00.accounts_dimension"}
+                 if c.transformation["subject"].ref == "gold:bd:A_00.accounts_dimension"}
     deployed_verdict_a00 = _classify_constant("ACCOUNTS_DIMENSION", a00_text)
     ck("s3-read-write: A_00 emits >=2 CSEs (read + write sites)", len(cses_a00) >= 2)
     ck("s3-read-write: A_00 READS ACCOUNTS_DIMENSION (get_object)", "reads" in kinds_a00)
@@ -207,7 +250,7 @@ if __name__ == "__main__":
                          meta={"marker_head": "h1", "s3_constants": s3_constants})
     cses_a01, cov_a01 = S3KeyReadWriteRecognizer().recognize(t_a01, marker_head="h1")
     kinds_a01 = {c.transformation["edges"][0].rtype for c in cses_a01
-                 if c.transformation["subject"].ref == "gold:A_01.advisor_assignments"
+                 if c.transformation["subject"].ref == "gold:bd:A_01.advisor_assignments"
                  and c.transformation["edges"][0].target.ref.endswith("accounts_dimension_latest.parquet")}
     deployed_verdict_a01 = _classify_constant("ACCOUNTS_DIMENSION", a01_text)
     ck("s3-read-write: A_01 READS ACCOUNTS_DIMENSION only (_read_s3), no WRITES",
