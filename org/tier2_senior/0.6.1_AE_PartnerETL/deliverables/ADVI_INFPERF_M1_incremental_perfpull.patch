@@ -1,0 +1,340 @@
+diff --git a/data/inf/manual_api/pull_inflection_performance_rest.py b/data/inf/manual_api/pull_inflection_performance_rest.py
+index 9eb819528..ffe691404 100644
+--- a/data/inf/manual_api/pull_inflection_performance_rest.py
++++ b/data/inf/manual_api/pull_inflection_performance_rest.py
+@@ -40,14 +40,25 @@ OUTPUT: s3://opal-data-inf/bronze/performance/{pull_date}.parquet
+   quantity this TO replaces, and no downstream consumer reads them (INF_C_03
+   requires only client_id/date/factor).
+ 
+-Usage:
+-  python3 pull_inflection_performance_rest.py --upload
+-  python3 pull_inflection_performance_rest.py --limit-clients 10 --dry-run
+-  python3 pull_inflection_performance_rest.py --pull-date 2026-05-18 --upload
++ADVI_INFPERF M1 (CTO-gated 2026-07-06): the nightly used to re-pull inception->today for
++EVERY client (~2400 calls, hangs 40-100min, timeout-killed -> bronze frozen since 06-30).
++`--mode incremental` (default) instead pulls ONE trailing window per client (<= TRAILING_DAYS)
++and chain-links its daily returns onto the PRIOR bronze's cumulative factor -- ~1 call/client,
++same continuous index, <600s. `--mode full` is the inception backstop (new client / gap >
++TRAILING_DAYS / integrity-fail auto-escalate to it per-client; run it weekly to self-heal drift).
++The trailing window stays <= CHUNK_DAYS so it returns TRUE daily NON-annualized details (a >1yr
++window annualizes = the Finding-B trap). `--parity-check` re-pulls one client full + asserts the
++incremental index conserves it (CTO condition 3).
+ 
+-Author: 0.4.0_DS_ClientPlatform (DS~C)
+-Project: ADVI_INFGRO.009
+-Date: 2026-05-18
++Usage:
++  python3 pull_inflection_performance_rest.py --mode incremental --upload   # nightly (default)
++  python3 pull_inflection_performance_rest.py --mode full --upload          # weekly backstop
++  python3 pull_inflection_performance_rest.py --mode incremental --parity-check --upload
++  python3 pull_inflection_performance_rest.py --limit-clients 5 --parity-check --dry-run
++
++Author: 0.4.0_DS_ClientPlatform (DS~C); M1 incremental: 0.6.1_AE_PartnerETL (ADVI_INFPERF)
++Project: ADVI_INFGRO.009 (windowed TWR) + ADVI_INFPERF M1 (incremental)
++Date: 2026-05-18; M1 2026-07-06
+ """
+ from __future__ import annotations
+ 
+@@ -89,6 +100,24 @@ CHUNK_DAYS = 300
+ # Earliest plausible Inflection inception; the endpoint clamps to real inception.
+ HISTORY_START = dt.date(2020, 1, 1)
+ 
++# ADVI_INFPERF M1 (CTO-gated 2026-07-06): incremental trailing-window pull. The nightly
++# re-fetches inception->today for every client (~2400 calls, hangs 40-100min); the tail
++# is all that changes. Incremental pulls ONE trailing window per client + chain-links the
++# new daily returns onto the PRIOR bronze's cumulative factor at the splice date. Must stay
++# <= CHUNK_DAYS so the window returns TRUE daily non-annualized details (proven: REST 90d
++# probe = 91 daily non-annualized; >1yr = the Finding-B annualized trap). 30d >> nightly
++# cadence, so a normal night (or a short outage) is one gap-free window; a gap > TRAILING_DAYS
++# auto-escalates that client to a full inception pull (CTO condition 4).
++TRAILING_DAYS = 30
++BRONZE_PERF_PREFIX = "bronze/performance/"
++# Orion's most-recent-days performance factors are PROVISIONAL and get revised as the
++# period settles (empirically: a 06-30 bronze pulled 07-01 diverged ~0.46% from a fresh
++# full re-pull, the drift starting ~2 trading days before the pull date). So the incremental
++# must NOT anchor on the prior bronze's LAST (provisional) date -- it re-anchors SETTLE_DAYS
++# back onto a SETTLED date and RE-PULLS the provisional tail, correcting it. 7 calendar days
++# clears Orion's ~2-day revision window + a weekend. (ADVI_INFPERF M1 parity-diagnosed.)
++SETTLE_DAYS = 7
++
+ 
+ def _log(msg: str) -> None:
+     ts = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+@@ -290,6 +319,168 @@ def _pull_client_continuous(
+     return out, "ok"
+ 
+ 
++def _load_prior_bronze(s3, pull_date: dt.date) -> tuple[dict[int, list[dict]] | None, str | None]:
++    """Load the most-recent bronze/performance/{date}.jsonl.gz BEFORE pull_date.
++
++    Returns (prior_by_client, prior_date_str) where prior_by_client maps
++    client_id -> the client's continuous [{date, factor}] index (sorted by date),
++    or (None, None) if no prior bronze exists (-> caller runs a full pull).
++    """
++    paginator = s3.get_paginator("list_objects_v2")
++    keys = []
++    for page in paginator.paginate(Bucket=S3_BUCKET, Prefix=BRONZE_PERF_PREFIX):
++        for obj in page.get("Contents", []):
++            k = obj["Key"]
++            if k.endswith(".jsonl.gz"):
++                # bronze/performance/{YYYY-MM-DD}.jsonl.gz
++                stem = k.rsplit("/", 1)[-1].replace(".jsonl.gz", "")
++                try:
++                    d = dt.date.fromisoformat(stem)
++                except ValueError:
++                    continue
++                if d < pull_date:
++                    keys.append((d, k))
++    if not keys:
++        _log("no prior bronze/performance partition < pull_date -- full pull")
++        return None, None
++    keys.sort()
++    prior_date, prior_key = keys[-1]
++    obj = s3.get_object(Bucket=S3_BUCKET, Key=prior_key)
++    raw = gzip.decompress(obj["Body"].read()).decode("utf-8")
++    by_client: dict[int, list[dict]] = {}
++    for line in raw.splitlines():
++        if not line.strip():
++            continue
++        rec = json.loads(line)
++        cid = int(rec["client_id"])
++        by_client.setdefault(cid, []).append({"date": rec["date"], "factor": rec["factor"]})
++    for cid in by_client:
++        by_client[cid].sort(key=lambda r: r["date"])
++    _log(f"prior bronze loaded: {prior_key} -- {len(by_client)} clients, "
++         f"{sum(len(v) for v in by_client.values()):,} rows")
++    return by_client, prior_date.isoformat()
++
++
++def _pull_client_incremental(
++    jwt: str, client_id: int, prior_rows: list[dict], end: dt.date,
++    limiter: AdaptiveRateLimiter,
++) -> tuple[list[dict] | None, str]:
++    """Extend a client's prior continuous index with ONE trailing window.
++
++    Pulls [anchor_date, end] (anchor_date = the client's last prior-bronze date),
++    chain-links the within-window daily returns onto the prior cumulative factor at
++    the splice, and returns the gap-free merged index. Status:
++      'ok'       -> merged rows returned
++      'escalate' -> caller must full-pull this client (new client / gap > TRAILING_DAYS
++                    / anchor missing / integrity fail -- NEVER splice onto a bad anchor)
++      'fail'     -> the trailing fetch hard-failed
++    """
++    if not prior_rows:
++        return None, "escalate"  # new client -> full pull
++
++    try:
++        last_date = dt.date.fromisoformat(prior_rows[-1]["date"][:10])
++    except (ValueError, TypeError, KeyError):
++        return None, "escalate"
++    if (end - last_date).days > TRAILING_DAYS:
++        return None, "escalate"  # data gap wider than the trailing window -> full pull
++
++    # Re-anchor SETTLE_DAYS back onto a SETTLED date (the prior bronze's last days are
++    # provisional and get revised); keep prior rows THROUGH the anchor, re-pull the rest.
++    settle_cutoff = last_date - dt.timedelta(days=SETTLE_DAYS)
++    anchor_idx = None
++    for i in range(len(prior_rows) - 1, -1, -1):
++        if prior_rows[i]["date"][:10] <= settle_cutoff.isoformat():
++            anchor_idx = i
++            break
++    if anchor_idx is None:
++        return None, "escalate"  # prior too short to find a settled anchor -> full pull
++
++    anchor_date_str = prior_rows[anchor_idx]["date"][:10]
++    try:
++        anchor_date = dt.date.fromisoformat(anchor_date_str)
++        anchor_factor = float(prior_rows[anchor_idx]["factor"])
++    except (ValueError, TypeError, KeyError):
++        return None, "escalate"
++    if (end - anchor_date).days <= 0:
++        return list(prior_rows), "ok"  # already current
++
++    details, status = _fetch_window(jwt, client_id, anchor_date, end, limiter)
++    if status != 200:
++        return None, "fail"
++    # CTO condition 1 -- ANCHOR-OVERLAP HARD-ASSERT: the window MUST anchor on the
++    # settled anchor_date with a usable factor. Never splice onto a missing/mismatched anchor.
++    if not details or (details[0].get("asOfDate") or "")[:10] != anchor_date_str:
++        return None, "escalate"
++    if details[0].get("factor") in (None, 0):
++        return None, "escalate"
++
++    cum = 1.0
++    new_rows: list[dict] = []
++    for i in range(1, len(details)):
++        prev_f = details[i - 1]["factor"]
++        cur_f = details[i]["factor"]
++        r = 0.0 if (prev_f in (None, 0) or cur_f is None) else (cur_f / prev_f - 1.0)
++        cum *= (1.0 + r)
++        d_str = (details[i].get("asOfDate") or "")[:10]
++        if d_str and d_str > anchor_date_str:  # dates strictly after the settled splice
++            new_rows.append({"date": d_str, "factor": anchor_factor * cum})
++
++    # keep prior THROUGH the settled anchor; the re-pull replaces the provisional tail.
++    merged = list(prior_rows[:anchor_idx + 1]) + new_rows
++
++    # CTO condition 2 -- INTEGRITY ASSERTS on the merged frame (per-client, fail-isolated):
++    # inception anchored at 1.0 + strictly positive factors. A fail escalates THIS client.
++    if abs(float(merged[0]["factor"]) - 1.0) > 1e-9:
++        return None, "escalate"
++    if any((r["factor"] is None or float(r["factor"]) <= 0) for r in merged):
++        return None, "escalate"
++    return merged, "ok"
++
++
++def _run_parity_check(
++    jwt: str, prior_by_client: dict[int, list[dict]], all_rows: list[dict],
++    end: dt.date, limiter: AdaptiveRateLimiter, tol: float = 1e-4,
++) -> bool:
++    """CTO condition 3: re-pull ONE incrementally-served client via the FULL path and
++    assert its continuous index matches the incremental one (relative tol on shared dates).
++
++    Picks the incrementally-served client with the most rows (a well-established series =
++    the strongest drift test). Returns True on parity, False on divergence.
++    """
++    inc_by_client: dict[int, dict[str, float]] = {}
++    for rec in all_rows:
++        inc_by_client.setdefault(int(rec["client_id"]), {})[rec["date"][:10]] = float(rec["factor"])
++    # candidates = clients that HAD a prior index (went the incremental path)
++    candidates = [cid for cid in inc_by_client if cid in prior_by_client]
++    if not candidates:
++        _log("parity: no incrementally-served client to check (all escalated) -- skip")
++        return True
++    cid = max(candidates, key=lambda c: len(inc_by_client[c]))
++    full_rows, status = _pull_client_continuous(jwt, cid, end, limiter)
++    if status != "ok" or not full_rows:
++        _log(f"parity: full re-pull of client {cid} returned {status} -- inconclusive, skip")
++        return True
++    full_map = {r["date"][:10]: float(r["factor"]) for r in full_rows}
++    inc_map = inc_by_client[cid]
++    shared = sorted(set(full_map) & set(inc_map))
++    if not shared:
++        _log(f"parity: no shared dates for client {cid} -- inconclusive, skip")
++        return True
++    max_rel = 0.0
++    worst_date = None
++    for d in shared:
++        f, g = full_map[d], inc_map[d]
++        if f == 0:
++            continue
++        rel = abs(g / f - 1.0)
++        if rel > max_rel:
++            max_rel, worst_date = rel, d
++    _log(f"parity: client={cid} shared_dates={len(shared)} max_rel_diff={max_rel:.2e} "
++         f"@ {worst_date} tol={tol:.0e} -> {'PASS' if max_rel <= tol else 'FAIL'}")
++    return max_rel <= tol
++
++
+ def main(argv: list[str] | None = None) -> int:
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("--limit-clients", type=int, default=0,
+@@ -300,14 +491,22 @@ def main(argv: list[str] | None = None) -> int:
+                         help="Upload to s3://opal-data-inf/bronze/performance/{date}.parquet")
+     parser.add_argument("--dry-run", action="store_true",
+                         help="Fetch and log without writing to S3.")
++    parser.add_argument("--mode", choices=("incremental", "full"), default="incremental",
++                        help="incremental (default): one trailing window/client merged onto "
++                             "prior bronze (~1 call/client). full: re-pull inception->today "
++                             "(the backstop; ~8 calls/client). ADVI_INFPERF M1.")
++    parser.add_argument("--parity-check", action="store_true",
++                        help="After the incremental pull, re-run FULL for a sample client and "
++                             "assert the continuous index matches (CTO condition 3). Also runs "
++                             "automatically on a weekly cadence when scheduled with --mode full.")
+     args = parser.parse_args(argv)
+ 
+     assert_fresh_or_exit(script_name=Path(__file__).name)
+ 
+     pull_date = args.pull_date or dt.datetime.now(dt.timezone.utc).date().isoformat()
+     end_date = dt.date.fromisoformat(pull_date)
+-    _log(f"pull_date={pull_date} upload={args.upload} dry_run={args.dry_run} "
+-         f"chunk_days={CHUNK_DAYS}")
++    _log(f"pull_date={pull_date} mode={args.mode} upload={args.upload} "
++         f"dry_run={args.dry_run} chunk_days={CHUNK_DAYS} trailing_days={TRAILING_DAYS}")
+ 
+     s3 = boto3.client("s3", region_name="us-east-1")
+     jwt = _load_jwt(s3)
+@@ -317,9 +516,20 @@ def main(argv: list[str] | None = None) -> int:
+         client_ids = client_ids[: args.limit_clients]
+         _log(f"limit-clients={args.limit_clients}: pulling {len(client_ids)} clients")
+ 
++    # Incremental prior-bronze index (M1). Absent -> every client escalates to full (a
++    # first run / backfill self-heals to the full path with no special-casing).
++    prior_by_client: dict[int, list[dict]] = {}
++    prior_date = None
++    if args.mode == "incremental":
++        loaded, prior_date = _load_prior_bronze(s3, end_date)
++        prior_by_client = loaded or {}
++        if not prior_by_client:
++            _log("WARN: incremental requested but no prior bronze -- all clients full-pull "
++                 "(expected on a first run / after a gap; self-heals to a fresh baseline)")
++
+     n_windows = len(_chunk_windows(HISTORY_START, end_date))
+-    _log(f"Pulling performance for {len(client_ids)} clients "
+-         f"({n_windows} windows/client, ~{len(client_ids) * n_windows} calls)")
++    _log(f"Performance pull: {len(client_ids)} clients, mode={args.mode} "
++         f"(full path = {n_windows} windows/client)")
+ 
+     limiter = AdaptiveRateLimiter(dim_name="performance")
+     limiter.load_state()
+@@ -327,16 +537,32 @@ def main(argv: list[str] | None = None) -> int:
+     ok_count = 0
+     empty_count = 0
+     fail_count = 0
++    inc_count = 0       # served incrementally (one trailing window)
++    escalated_count = 0  # incremental -> full fallback (new client / gap / integrity)
+     all_rows: list[dict] = []
+     t_start = time.time()
+ 
+     for i, cid in enumerate(client_ids, start=1):
+         if i == 1 or i % 50 == 0 or i == len(client_ids):
+             elapsed = time.time() - t_start
+-            _log(f"  [{i}/{len(client_ids)}] client={cid} "
+-                 f"ok={ok_count} empty={empty_count} fail={fail_count} "
++            _log(f"  [{i}/{len(client_ids)}] client={cid} ok={ok_count} inc={inc_count} "
++                 f"esc={escalated_count} empty={empty_count} fail={fail_count} "
+                  f"elapsed={elapsed:.1f}s")
+-        rows, status = _pull_client_continuous(jwt, cid, end_date, limiter)
++
++        status = None
++        rows = None
++        if args.mode == "incremental":
++            rows, status = _pull_client_incremental(
++                jwt, cid, prior_by_client.get(cid, []), end_date, limiter)
++            if status == "ok":
++                inc_count += 1
++            elif status == "escalate":
++                # CTO condition 4 -- fall back to the full inception pull for THIS client.
++                escalated_count += 1
++                rows, status = _pull_client_continuous(jwt, cid, end_date, limiter)
++        else:
++            rows, status = _pull_client_continuous(jwt, cid, end_date, limiter)
++
+         if status == "fail":
+             fail_count += 1
+             continue
+@@ -355,11 +581,23 @@ def main(argv: list[str] | None = None) -> int:
+     limiter.flush()
+     limiter.persist_state()
+ 
++    # CTO condition 3 -- FULL-PATH PARITY GATE: an incremental index MUST conserve the full
++    # inception-pull index. Re-pull ONE served client via the full path and assert the
++    # continuous factor matches (the incremental splice must not drift).
++    if args.parity_check and args.mode == "incremental" and all_rows:
++        _parity_ok = _run_parity_check(jwt, prior_by_client, all_rows, end_date, limiter)
++        if not _parity_ok:
++            _log("ERROR: PARITY GATE FAILED -- incremental index diverged from full pull. "
++                 "NOT trusting incremental; exiting 1 (run --mode full to self-heal).")
++            return 1
++
+     elapsed_total = time.time() - t_start
+     avg_days = len(all_rows) / max(ok_count, 1)
+     _log("")
+     _log("=== pull_inflection_performance_rest.py COMPLETE ===")
+-    _log(f"  clients={len(client_ids)} ok={ok_count} empty={empty_count} fail={fail_count}")
++    _log(f"  mode={args.mode} clients={len(client_ids)} ok={ok_count} "
++         f"incremental={inc_count} escalated_to_full={escalated_count} "
++         f"empty={empty_count} fail={fail_count}")
+     _log(f"  total_daily_rows={len(all_rows):,} avg_days/client={avg_days:.0f} "
+          f"elapsed={elapsed_total:.1f}s rate={limiter.current_rps():.3f}rps")
+ 
