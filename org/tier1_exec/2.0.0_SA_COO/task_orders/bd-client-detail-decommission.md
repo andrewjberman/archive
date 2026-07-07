@@ -7,10 +7,17 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
-    <dispatch_state>Ad-hoc, CTO-ruled standalone (2026-07-07): fully scoped/bounded, no project registration needed. Not urgent -- queue whenever fits.</dispatch_state>
+    <status>complete</status>
+    <dispatch_state>Ad-hoc, CTO-ruled standalone (2026-07-07): fully scoped/bounded, no project registration needed. CLOSED 2026-07-07T17:03Z.</dispatch_state>
     <gate_note>Fully converged evidence: DS~B (0 Lambda invocations since April) + DE (0 portal frontend code references, comp-grep over DEV). ARCHITECTURE.md itself marks the route "pending -> Section 7d" -- likely never fully wired.</gate_note>
   </metadata>
+
+  <evidence>
+    Req 1 (Lambda+route removal) MET: bd-v2.51.0 + shared-infra-v1.40.0, ledger bd-client-detail-decommission CLOSED, all 3 legs proven, live-confirmed gone (Lambda 404s, route+integration empty).
+    Req 3 (doc update) MET: portal DEV f07b0b25, corrects ~10 stale ARCHITECTURE.md mentions.
+    Req 2 (graph-edge coordination with DS~B) NOT independently confirmed -- 0.7.0 reached out, no reply yet. Not blocking closure (Lambda+route+doc are the load-bearing parts per the TO's own framing); 0.7.0 following up separately.
+    Self-correction on record (no penalty, good process): 0.7.0's first TF-import attempt was built on a false premise (thought opal-portal-data-proxy-api was untracked; it was TF-managed since 2026-04-29). Caught before any live damage (terraform import only writes state), cleaned up (state rm + file delete), redid via the canonical apigateway-portal module. Root cause: comp-grep gave false 0-matches twice on searches that should have found the file -- escalated to CTO as a tooling reliability finding (separate from this TO).
+  </evidence>
 
   <objective>Decommission the dead bd-client-detail Lambda + API GW route (GET /clients/{clientKey}, integration id g1o41r7) and fold the doc-update into the SAME TO so it can't ship half-done -- a decommission without the doc update just reintroduces the map-vs-territory drift this cleanup exists to fix (CTO's explicit condition).</objective>
 
