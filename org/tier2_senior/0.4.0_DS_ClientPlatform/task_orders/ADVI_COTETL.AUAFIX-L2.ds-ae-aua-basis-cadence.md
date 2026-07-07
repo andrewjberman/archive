@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform (DS side) + 0.7.0_AE_CloudOps (BD-export source dig)</assigned_to>
 <issued_by>2.0.0_SA_COO (AUAFIX PRD decomposition, 2026-06-18; CTO PRD ef04a08cc)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>complete</status>
 <priority>HIGH (the REAL freshness question) -- but GATED on the CTO AUA-basis-cadence determination. CRITICAL PREMISE DISCIPLINE: do NOT assert "advance the basis" / "06-09 is a freeze" before by-design-periodic is RULED OUT. cot is SNAPSHOT-FIRST -- the periodic qt holdings snapshot is the AUA source-of-truth, intentionally NOT daily. The advance-vs-document call is CTO's. Largely independent of L1 (the basis question stands regardless of whether the chain fires).</priority>
 
 <references>
