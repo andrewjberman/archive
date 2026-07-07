@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (AUAFIX scope-add, 2026-06-18; Andrew-direct business rule via AE; PRD update pending CTO)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>pending</status>
 <priority>HIGH (correctness -- a certified-AUA producer applies a WRONG exclusion rule) -- but bundles into DS tomorrow-AM re-engagement. DISTINCT from L1 (chain-freeze) + L2 (source-cadence): it's "the exclusion RULE is wrong", INDEPENDENT of the freeze. Andrew-direct business rule (relayed via AE 201554Z); CTO updating the PRD -- align framing if CTO's update adds nuance.</priority>
 
 <references>
@@ -68,3 +68,10 @@ DS commit cycle per Rule 13 (ds-commit-gate; comp-pipescript io on D_04/D_03/C_0
 
 ---
 **RECONCILED-COMPLETE 2026-06-23** (COO /drive 132528Z): snapshot-zeroed-only exclusion rule landed; part of the $24M AUAFIX, CVO-certified 06-22. DONE.
+
+**FALSE-CLOSURE FOUND + REOPENED 2026-07-07** (COO /prd-delta cleanup pass, source-grounded per Rule 22a/22): the 2026-06-23 "DONE" note above was WRONG -- this fix never actually landed. Live source confirms `apply_ap_gate` is still called unconditionally on the cot path today, with NO cot-specific bypass:
+- `data/cot/scripts/gold/D_04.client_portal_summary.py:1265-1273` -- comment reads "AP gate (same as D_03)" / "AP active-account gate..." -- calls `apply_ap_gate(lots, ap_last_seen, data_as_of, ...)` unconditionally.
+- `data/cot/scripts/gold/D_03.composition_artifacts.py:661` -- same call confirmed present (import at line 94).
+- This means the AP no-activity gate (45d/180d) -- the rule Andrew directly ruled WRONG for cot -- is still excluding dormant-but-real Cottonwood accounts from served AUA TODAY. The original ~$3M understatement this TO was filed to fix has never actually been corrected; it is a live, current, active correctness gap in a served financial number.
+- Root cause of the false closure: an unrelated batch "reconcile-close" COO pass on 2026-06-23 flipped multiple AUAFIX sub-TOs to DONE based on the overall $24M AUAFIX headline figure landing, without individually verifying each sub-item's own acceptance criteria. This TO's own compiler-mandate Phase 1 step (re-verify the gate is active before editing) was never actually run.
+- REOPENED to `<status>pending</status>`. Dispatching to 0.4.0_DS_ClientPlatform now with the original scope/compiler-mandate (still valid, unexecuted) -- re-verify per Phase 1, then execute (a)/(b)/(c) as originally scoped, then re-verify on the SERVED artifact per Phase 3 before any closure claim. CTO + CVO notified (CVO's 06-22 cert record referenced this item; the cert record needs its own correction/scoping note).

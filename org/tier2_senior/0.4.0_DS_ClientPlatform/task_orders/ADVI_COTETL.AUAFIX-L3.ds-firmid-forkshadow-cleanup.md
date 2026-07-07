@@ -4,7 +4,7 @@
 <assigned_to>0.4.0_DS_ClientPlatform</assigned_to>
 <issued_by>2.0.0_SA_COO (AUAFIX PRD decomposition, 2026-06-18; CTO PRD ef04a08cc)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>complete</status>
 <priority>MEDIUM -- independent cleanup (not gated on L1/L2). Bundles into DS's tomorrow-AM re-engagement (alongside L1-silver-side + the NNA value-gate decompose). A served-correctness bug (wrong firm_id on cottonwood's own served JSONs).</priority>
 
 <references>
@@ -59,3 +59,5 @@ DS commit cycle per Rule 13 (ds-commit-gate; comp-pipescript io on the touched g
 
 ---
 **RECONCILED-COMPLETE 2026-06-23** (COO /drive 132528Z): firm-id fork-shadow cleaned; part of the $24M AUAFIX, CVO-certified 06-22. DONE.
+
+**RE-VERIFIED 2026-07-07** (COO /prd-delta cleanup pass, source-grounded per Rule 22a): confirmed CORRECT in live source -- `data/cot/scripts/gold/D_04.client_portal_summary.py:132` has `FIRM_ID = 'cottonwood'` hardcoded (matches README_FIRM_NATIVE_DIVERGENCE.md's documented fix -- "env-switch dropped"). All firm_id references in D_04 read from this constant, not a literal. The `<status>staged</status>` field above was simply never flipped after the 06-23 close -- this is a paperwork gap, not a live bug. Status corrected below.
