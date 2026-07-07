@@ -4,6 +4,12 @@
 <issued_by>2.0.0_SA_COO~B</issued_by>
 <status>staged</status>
 <reconcile_note>RE-LANED DE->0.7.0_AE_CloudOps 2026-07-07 by COO~B (backend-infra, not portal; 0.7.0_AE built S2 live). THIS is the authoritative S3 (full 5-control spec + compiler-mandate + acceptance criteria); it SUPERSEDES the thin stub org/tier1_exec/2.0.0_SA_COO/task_orders/NFRA_AGENTBUS.S3.broker-adapter-simulated.md. File retained in the DE folder for history; owner is 0.7.0_AE_CloudOps. GO held until S3's real deps verified: COMPTEAM strip-list/sig-root (C3/C4) + SCTY authz (C2, PREMCP P1 now certed) landed.</reconcile_note>
+<dep_check_verdict date="2026-07-07" by="COO~B (grounded dep-check)">NOT-GO yet -- 3/4 deps READY, 1 hard blocker + 1 caveat:
+  - control-1 (S2-bus partition): READY -- e29940a74, tag nfra-agentbus-v1.0.0, live deny-test PASS.
+  - control-2 (SCTY authz): READY -- MCPGUARD tier-model CVO-certed 4/4 (8b24cd2bb, live); PREMCP C3-WAF 5/5 (6d73bb889).
+  - control-4 (COMPTEAM strip-list): READY-to-reuse (d48e363e8, .tools/comp-kit-striplist-gate) BUT its fail-closed proof (planted-secret/clean-kit fixture) + CTO arch-gate are OPEN -> control-4 cert needs that proof.
+  - control-3 (attribution signing): BLOCKER -- the "COMPTEAM signature-root" is a PHANTOM dep (never scoped/built by COMPTEAM). RESOLUTION PROPOSED to CTO (arch-ratify 2026-07-07): bind control-3 to SCTY's EXISTING gateway RS256 identity root (no new auth, per COMPTEAM PRD SS4). ON CTO RATIFY -> GO S3 to 0.7.0_AE + wire control-3 to SCTY RS256.
+  Status stays STAGED pending the CTO control-3 ratify + the strip-list fail-closed proof.</dep_check_verdict>
 
 <priority>HIGH -- the adapter is the single choke point where all 5 controls apply. GATED on S1 CTO arch-gate. SIMULATED-ONLY. PRD SS2 + SS3 + SS4.2 + SS8-S3.</priority>
 <date>2026-07-02</date>
