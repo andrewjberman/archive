@@ -566,26 +566,78 @@ def _self_test(live_nodes=None, live_edges=None) -> bool:
     return passed == total
 
 
+class LivePullError(Exception):
+    """A --live inventory pull FAILED. Raised LOUD (CVO hygiene finding): --live must mean 'pull
+    live or FAIL', never a silent snapshot fallback -- the honest-missing-never-silent-default
+    invariant applied to the validator's own live-check (else a future live-drift goes uncaught)."""
+
+
 def _pull_live_types():
-    """Pull the live distinct node_type/edge_type via comp-kuzu (AC4 --live mode). Best-effort:
-    returns (None,None) if comp-kuzu is unavailable so the snapshot is used."""
+    """Pull the live distinct node_type/edge_type via comp-kuzu --json (AC4 --live mode). Uses the
+    structured --json output + a JSON parse (NOT a fragile stdout heuristic). FAILS LOUD on any
+    error (LivePullError) rather than silently returning the snapshot -- so `--live` is honest: it
+    verifies against the LIVE graph or it errors, it never quietly degrades to the embedded set."""
+    import json
     import subprocess
+
+    # Resolve the workspace root (walk up for .tools/comp-kuzu) so the wrapper is invokable
+    # regardless of CWD. comp-kuzu is a bash wrapper (.tools/comp-kuzu) around kuzu_cli.py; invoke
+    # it via bash (resolves its venv/env) -- more reliable than spawning the bare PATH name on
+    # Windows. Falls back to kuzu_cli.py via the current interpreter if the wrapper path is absent.
+    _ws = os.path.abspath(os.path.dirname(__file__))
+    for _ in range(8):
+        if os.path.isfile(os.path.join(_ws, ".tools", "comp-kuzu")):
+            break
+        _ws = os.path.dirname(_ws)
+    _wrapper = os.path.join(_ws, ".tools", "comp-kuzu")
+    _cli = os.path.join(_ws, "infra", "aws", "globgrph", "kuzu_cli.py")
+
     def _q(cypher):
+        cmds = []
+        if os.path.isfile(_wrapper):
+            cmds.append(["bash", _wrapper, "--json", cypher])
+        if os.path.isfile(_cli):
+            cmds.append([sys.executable, _cli, "--json", cypher])
+        out = None
+        last = None
+        for cmd in cmds:
+            try:
+                out = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+                if out.stdout.find("[") >= 0:
+                    break
+            except Exception as ex:
+                last = ex
+        if out is None:
+            raise LivePullError(f"comp-kuzu invocation failed (no wrapper/cli found or spawnable): {last}")
+        # --json prints a provenance preamble then a JSON array; slice from the first '['.
+        s = out.stdout
+        i = s.find("[")
+        if i < 0:
+            raise LivePullError(f"comp-kuzu --json returned no JSON array (rc={out.returncode}); "
+                                f"stderr={out.stderr[:200]!r}")
         try:
-            out = subprocess.run(["comp-kuzu", cypher], capture_output=True, text=True, timeout=120)
-            vals = set()
-            for ln in out.stdout.splitlines():
-                s = ln.strip()
-                if s and s.isupper() or (s and s[:1].isalpha() and " " not in s and ":" not in s):
-                    vals.add(s)
-            return vals or None
-        except Exception:
-            return None
+            rows = json.loads(s[i:])
+        except Exception as ex:
+            raise LivePullError(f"comp-kuzu --json parse failed: {ex}")
+        vals = {str(r["t"]) for r in rows if isinstance(r, dict) and r.get("t")}
+        if not vals:
+            raise LivePullError("comp-kuzu --json returned 0 distinct types (empty live inventory) "
+                                "-- refusing a silent snapshot fallback")
+        return vals
+
     n = _q("MATCH (n:CloudNode) RETURN DISTINCT n.node_type AS t ORDER BY t")
     e = _q("MATCH ()-[x:CloudEdge]->() RETURN DISTINCT x.edge_type AS t ORDER BY t")
     return n, e
 
 
 if __name__ == "__main__":
-    _ln, _le = (_pull_live_types() if "--live" in sys.argv else (None, None))
+    if "--live" in sys.argv:
+        try:
+            _ln, _le = _pull_live_types()
+            print(f"[--live] pulled {len(_ln)} node_types + {len(_le)} edge_types from the live graph")
+        except LivePullError as _ex:
+            print(f"ERROR: --live inventory pull FAILED (no silent snapshot fallback): {_ex}")
+            sys.exit(2)
+    else:
+        _ln, _le = (None, None)
     sys.exit(0 if _self_test(_ln, _le) else 1)
