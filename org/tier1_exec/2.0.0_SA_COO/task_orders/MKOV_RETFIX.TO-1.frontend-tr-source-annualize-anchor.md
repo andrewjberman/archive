@@ -19,6 +19,8 @@
     <requirement id="2">Annualize display for periods &gt;1Y (3Y, 5Y) per (1 + cumulative) ** (365.25/PERIOD_CALENDAR_DAYS[period]) - 1; leave 1Y and shorter as period return (already ~annualized for 1Y). Label explicitly (e.g. "3Y Return (annualized)").</requirement>
     <requirement id="3">Window anchoring: period_returns is already data-date-anchored on the backend, so reading it directly (req 1) resolves the STAT's anchoring defect as a side effect. Separately confirm the chart's date-range display (if any) also reflects the data's latest date, not new Date(), for consistency with the stat.</requirement>
     <requirement id="4">Rider: quick check whether ExecutiveSummary has the same price-diff pattern (per PRD SS4) -- if yes, same fix; if no, note it in the session log and move on.</requirement>
+    <requirement id="5">ANDREW FINAL SIGN-OFF ADDITION (20260707T1656Z, via 0.2.0_DS_PortfolioAnalytics) -- trailing-period capping: every trailing window is bounded to EXACTLY its full period from the data date -- no undershoot (the 2.97y bug) and no overshoot; if available history is shorter than the requested period, cap gracefully + label rather than silently showing a truncated "3Y". Verify each toggle spans its true period.</requirement>
+    <requirement id="6">NON-NEGOTIABLE (CTO audit, restated in Andrew's sign-off): the chart's price LINE stays sourced from the unchanged price tickers -- do not break RSI/regime. (Already true per PRD SS4's "chart line unchanged in this PRD" -- this requirement is a verify-not-broken check, not new scope.)</requirement>
   </requirements>
 
   <compiler_tools_mandate>
@@ -51,6 +53,8 @@
     <criterion>Bloomberg cross-check re-run post-fix for every period toggle exercised, cited with actual numbers.</criterion>
     <criterion>ExecutiveSummary rider check result documented (fixed, or confirmed not-applicable).</criterion>
     <criterion>Session log's Compiler Tools section documents the schema-check attempt + cache-collision re-run.</criterion>
+    <criterion>Trailing-period capping verified per toggle: no undershoot/overshoot vs the requested period, graceful+labeled degradation when history is shorter than requested. This is Andrew's explicit GO condition for the DT promote -- must be verified before DT pushes, not assumed from req 1-3's fix.</criterion>
+    <criterion>Chart price-line source confirmed unchanged (still the raw price tickers, not touched by this fix).</criterion>
   </acceptance_criteria>
 
   <cross_domain_coordination><none/></cross_domain_coordination>
