@@ -1,35 +1,35 @@
-# Task Order: MKOV_TRSRCE TO-1 -- Yang terminal: ticker confirmation + full-history pull
+# Task Order: MKOV_TRSRCE TO-1 (v1.1, REPLACES v1.0) -- Yang mechanism question (gates everything else)
 
 ```xml
 <task_order>
   <metadata>
-    <id>2.0.0_SA_COO-2026-07-07-mkov-trsrce-to1</id>
+    <id>2.0.0_SA_COO-2026-07-07-mkov-trsrce-to1-v1.1</id>
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <date>2026-07-07</date>
-    <status>held</status>
-    <dispatch_state>HELD 2026-07-07T16:54Z per CTO -- scope-narrowing correction (new empirical evidence, not a re-read): the dividend add-back tracks real ex-date flow, not a smoothed synthetic yield -- US indices (S&amp;P/Russell) may already be correct as-is, EAFE may only need a dividend-basis fix rather than a full TR-ticker migration. No work was in flight (DS lane was already held pending Andrew's Yang timeline) -- nothing lost. Awaiting CTO's revised PRD before re-dispatching.</dispatch_state>
-    <gate_note>Gates: none (starting point). Effort: Yang-dependent (terminal access, human timeline) -- coordinate with Andrew on the Yang terminal pull, do not attempt to self-source.</gate_note>
+    <status>pending</status>
+    <dispatch_state>DISPATCHED 2026-07-07T16:57Z -- REVISED scope per PRD v1.1 (commit 41de08a6b, project JSON 683c092d9). REPLACES the original "confirm ticker symbols + pull 3 tickers' full history" ask -- this is now a QUESTION not an extraction, per DS 0.2.0's new empirical evidence (real ex-date dividend flow, not synthetic smoothing). Likely much faster than v1.0's estimate.</dispatch_state>
+    <gate_note>Gates: none (starting point). Effort: Yang-dependent, likely much faster than a full data pull (this is a question, not an extraction).</gate_note>
   </metadata>
 
-  <objective>Confirm exact Bloomberg terminal symbols for SPXT/RU20INTR/NDDUEAFE (published TR indices for S&amp;P/Russell2000/EAFE-net) and pull full history matching the existing PKL depth (1095+ days minimum, per the 3Y support requirement) for all three -- coordinating the Yang terminal pull with Andrew/whoever executes it. Confirm the unchanged price-ticker series (SPX/RTY/MXEA) continue delivering unchanged in the same PKL.</objective>
+  <objective>Answer, don't yet build: how does Yang source/compute the dividend contribution folded into `return` -- gross vs net, from what Bloomberg field or point series? Does his pipeline already have (or can it cleanly add) a net-dividend variant for international indices, or would a net figure require sourcing an entirely different published index?</objective>
 
   <requirements>
-    <requirement id="1">Confirm exact Bloomberg terminal symbols for SPXT, RU20INTR, NDDUEAFE.</requirement>
-    <requirement id="2">Coordinate the full-history pull (matching existing price-ticker depth, no gaps) for all 3 TR tickers.</requirement>
-    <requirement id="3">Confirm price-ticker series (SPX/RTY/MXEA) continue unchanged in the same PKL delivery -- this is the non-negotiable from TO-2 that TO-1 must not break at the source.</requirement>
+    <requirement id="1">Get a concrete answer routing to one of: (a) apply a net-dividend adjustment to the existing gross figure [cheap, primary path]; (b) source a net-dividend point series Yang already has access to [moderate, primary path]; (c) neither is clean, fall back to sourcing NDDUEAFE directly [heavier, EAFE-only fallback].</requirement>
+    <requirement id="2">Confirm as a sanity check on the corrected framing (not a new investigation): does this affect S&amp;P/Russell at all? Expected answer: no, gross==net domestically.</requirement>
   </requirements>
 
   <acceptance_criteria>
-    <criterion>New PKL delivery contains both series (unchanged price tickers + new TR tickers) for all 3 benchmarks, full history, no gaps vs the existing price-ticker history depth.</criterion>
+    <criterion>Concrete path (a/b/c) identified with Yang's confirmation.</criterion>
+    <criterion>S&amp;P/Russell domestic-unaffected sanity check confirmed.</criterion>
   </acceptance_criteria>
 
   <cross_domain_coordination>
-    <item>This is the hard gate for MKOV_TRSRCE.TO-2 (ingest+backfill, 0.1.0_DS_MarketIntelligence/0.1.0_AE) and TO-3 (re-verification, 0.2.0_DS_PortfolioAnalytics). Both stay staged (not dispatched) until this TO's acceptance criteria are met -- notify COO on completion so TO-2 can be GO'd.</item>
+    <item>This is the hard gate for MKOV_TRSRCE.TO-2 (implement the dividend-basis fix, EAFE-only, path depends on this TO's answer) -- notify COO on completion so TO-2 can be scoped+GO'd to the right path.</item>
   </cross_domain_coordination>
 
   <references>
-    <ref type="prd">docs/architecture/MKOV_TRSRCE_PRD.md SS6 TO-1</ref>
+    <ref type="prd">docs/architecture/MKOV_TRSRCE_PRD.md v1.1 SS6 TO-1 (commit 41de08a6b)</ref>
     <ref type="project">org/projects/MKOV_TRSRCE.json</ref>
   </references>
 </task_order>
