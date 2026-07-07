@@ -47,3 +47,31 @@ audit is a distinct pass).
    un-freeze durable (recovers the DI-7 81 accts, fallback 9.56%->~0.2%; DS~B grounding).
 3. **RAVC COO** the verified straggler-list -> COO gates to CTO (arch the reconciled SoT +
    REPOINT-COMPLETENESS invariant NFRA_GLDINV) -> straggler fixes deploy (pipeline, no local).
+
+## Phase-2 findings (role verification -- grounded 2026-07-06, rail-checked s3 mtimes)
+
+Source freshness (the pivot for the fallback-role scripts):
+- **accounts_v2** (repoint target / correct SoT): **FRESH** -- latest snapshot_date=2026-07-06. Current.
+- **silver/accounts_dim/latest.parquet** (the accounts_dim fallback): frozen **2026-04-29**.
+- **silver/api_dims/household/** (the D_05/D_06 PRIMARY household source): **FROZEN at 2026-04-28** --
+  a SECOND frozen source-of-truth the audit surfaced, even older than accounts_dim.
+
+Verified roles:
+| Script | Role (grounded) | Verdict |
+|---|---|---|
+| D_07 concentration_risk | PRIMARY read of frozen accounts_dim | **STRAGGLER** (DI-12, confirmed) |
+| D_07a firm_concentrations | PRIMARY read of frozen accounts_dim (household map) | **STRAGGLER** (new; accidentally-stale) |
+| D_05.client_top_holdings | primary=household dim (frozen 04-28); fallback=accounts_dim (frozen 04-29) | **STRAGGLER** -- BOTH sources frozen, so the served household map is stale regardless of which fires (NOT a rarely-fires fallback) |
+| D_06.client_timeseries | same dual-frozen pattern (household-first, accounts_dim-fallback) | **STRAGGLER** (same) |
+| D_04 client_portal_summary | frozen accounts_dim -> household_id + hh count (L786/835) + legacy first_trade_date (L982, self-labeled LEGACY HEURISTIC FALLBACK) | **STRAGGLER (hh count/id)** -- the count path reads the frozen dim; first_trade_date is legacy-fallback (lower-pri) |
+| D_02 advisor_client_detail | frozen accounts_dim + account_team both present | **PENDING** -- what does the frozen read feed vs account_team? |
+| D_06.cash_drag | load_accounts_dim (reg_type + household), L581 | **PENDING** -- confirm its KEY (frozen silver vs fresh gold-dim) |
+
+**SECOND SOURCE-OF-TRUTH GAP (new):** `silver/api_dims/household` (froze 04-28) is a DISTINCT frozen
+dependency from accounts_dim. The reconciled SoT must address BOTH (household dim + accounts_dim ->
+fresh accounts_v2 / A_00 gold dim). Flag to CTO alongside the accounts_dim repoint -- it widens the
+NFRA_GLDINV completeness invariant to the household axis too.
+
+**Verified stragglers so far: D_07, D_07a, D_05.client_top_holdings, D_06.client_timeseries, D_04**
+(5, all accidentally-stale). PENDING: D_02, D_06.cash_drag role confirmation -> then the final VERIFIED
+list -> RAVC COO -> CTO gate.
