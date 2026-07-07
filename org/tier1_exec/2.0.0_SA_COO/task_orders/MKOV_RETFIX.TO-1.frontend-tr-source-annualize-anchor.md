@@ -7,8 +7,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DE_MarketIntelligence</issued_to>
     <date>2026-07-07</date>
-    <status>pending</status>
-    <dispatch_state>DISPATCHED 2026-07-07 -- Andrew-direct P0, PRD docs/architecture/MKOV_RETFIX_PRD.md (commit c8eed34f8) SS6 TO-1. Supersedes the held ad-hoc TO market-overview-3y-return-modal-fix.md (which stays on record for the routing-correction history, not dispatched).</dispatch_state>
+    <status>complete</status>
+    <dispatch_state>DISPATCHED 2026-07-07 -- Andrew-direct P0, PRD docs/architecture/MKOV_RETFIX_PRD.md (commit c8eed34f8) SS6 TO-1. Supersedes the held ad-hoc TO market-overview-3y-return-modal-fix.md (which stays on record for the routing-correction history, not dispatched). CLOSED 2026-07-07T17:22Z -- promoted to PROD.</dispatch_state>
     <gate_note>Gates: none -- pipeline is faithful, no upstream dependency. Effort: 2-4h. Andrew wants this driven to a DEPLOYED fix, not parked.</gate_note>
   </metadata>
 
@@ -56,6 +56,10 @@
     <criterion>Trailing-period capping verified per toggle: no undershoot/overshoot vs the requested period, graceful+labeled degradation when history is shorter than requested. This is Andrew's explicit GO condition for the DT promote -- must be verified before DT pushes, not assumed from req 1-3's fix.</criterion>
     <criterion>Chart price-line source confirmed unchanged (still the raw price tickers, not touched by this fix).</criterion>
   </acceptance_criteria>
+
+  <evidence>
+    PROD promote LANDED: commit f3ce600c (--no-ff merge of origin/DEV df9323de, empty parity diff), tag portal-v2.1.132 (peeled-verified), CI run 28884926281 conclusion SUCCESS, workspace pointer CLOUD e2004a5a4 pushed. All 7 requirements + all 7 acceptance criteria met, including req 5 (trailing-period capping, added post-hoc from Andrew's final sign-off, fixed+verified in df9323de -- zero live tickers actually affected, but the guard is real and committed). DT's promote pre-flight independently caught the uncommitted req-5 change and correctly HELD until DE committed it -- no half-verified batch shipped. Batch (whole-head, 4 commits): df9323de (req4/5 cap) + 7a58a54d (items 1-3) + f07b0b25 (AE docs) + 4d646417 (unrelated ClientPlatform NNA fix, pre-existing in the batch). DE running served-parity eyeball on the live PROD modal as final confirm.
+  </evidence>
 
   <cross_domain_coordination><none/></cross_domain_coordination>
 
