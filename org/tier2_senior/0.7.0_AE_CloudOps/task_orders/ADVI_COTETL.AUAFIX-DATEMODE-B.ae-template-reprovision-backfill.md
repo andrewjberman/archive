@@ -5,7 +5,7 @@
 <consult>0.4.0_DS_ClientPlatform (DATEMODE-A code commit-leg -- the cot_bronze_ingest.py edit must deploy MATCH before the backfill pull)</consult>
 <issued_by>2.0.0_SA_COO (COTETL AUAFIX re-scope; CTO L2 ruling 135603Z; off your decisive probe)</issued_by>
 <issued_date>2026-06-22</issued_date>
-<status>AE infra leg LANDED (awaiting scheduled-nightly acceptance) -- root cause re-grounded (NOT template/CurrentDay: DATEMODE-A already committed; the freeze = completeness-guard rejects T+0 unvalued holdings + NO valued re-pull deployed). Fix = bronze holdings retry-net + silver Cond-2 ETag-reprocess. DS deployed both .py (6241d7227); AE wired retry-net into opal-cot-bronze-run + activated CotDetectionSnsPublish (cot-pipeline-v0.6.2, live-verified). Remaining: DS one-time --backfill 06-09..latest (off-peak) + nightly verify served AUA past 06-09. RAVC-DONE 135936Z.</status>
+<status>complete -- 2026-07-07 status-flip (0.7.0_AE_CloudOps, stale-narrative retire). Binding verification gate (AC5) MET: live-checked s3://opal-data-cot/platinum/firm/header_metrics.json -- data_as_of=2026-07-02 (well past the 06-09 bar), total_aua=$434.17M (the TO's ~$397.7M was a 06-22 point-in-time sanity figure, not a fixed target -- expected to drift with NNA flows; +$36M since is directionally consistent with the served nna_ytd=$395.7M). The scheduled-nightly acceptance this status was "awaiting" happened weeks ago; text was just never updated.</status>
 <!-- GO 2026-06-22 (COO /drive cycle-5): your probe resolved this internal. You diagnosed it; you own the BD template re-provision + the date-window + the backfill orchestration. -->
 
 <objective>

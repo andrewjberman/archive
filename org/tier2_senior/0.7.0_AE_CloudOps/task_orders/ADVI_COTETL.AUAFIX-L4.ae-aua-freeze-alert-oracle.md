@@ -4,7 +4,7 @@
 <assigned_to>0.7.0_AE_CloudOps</assigned_to>
 <issued_by>2.0.0_SA_COO (AUAFIX PRD decomposition, 2026-06-18; CTO PRD ef04a08cc)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>staged</status>
+<status>cancelled -- Andrew-direct 2026-07-07 ("if this rides solely on sms alert programming then fuck it, mark all as done or canceled"). Ground-truthed before closing: opal-critical-surface-alerts is dead on BOTH subscribed channels, not just SMS -- the SMS number (+17862617679) is SNS-sandbox/unverified (same root cause as the partner-etl-ops-alerts P1 today), AND the SQS subscriber (opal-critical-surface-alerts-coo) has ZERO Lambda event-source-mappings, same zero-consumer pattern as the P1 fix. The comp-freshness oracle-registration half of this TO's scope appears independently closed (cot IS registered in comp-freshness as of 2026-07-07, verified live) -- likely landed via other freshness-rollout work, not this TO. The staleness-alarm-wiring half was never built and is not being built. Not reopening without a fresh Andrew/COO directive.</status>
 <priority>HIGH -- the "never-silent-again" hardening. RIDES F-1 (already #1 on AE's post-TO-D3 queue): F-1 (opal-critical-surface-alerts SES-migrate/sub-confirm) IS L4's egress leg -- same fix, now also a cot-AUA-freshness dependency. The comp-freshness oracle registration + the staleness alarm are the additional L4 work. Sequenced behind TO-D3 alongside F-1.</priority>
 
 <references>
