@@ -1,0 +1,47 @@
+{
+  "slug": "scty-premcp-p1-c1c2-ratelimit-size",
+  "title": "SCTY_PREMCP P1 C1/C2: app-layer rate-limit (per-IP + per-identity) + request-size cap (m365-mcp-gateway)",
+  "author": "0.7.0_AE_CloudOps~A",
+  "status": "OPEN",
+  "opened_at": "2026-07-07T08:15:46.779432+00:00",
+  "window_hours": 8.0,
+  "entry_path": "org/critical_paths/change_management/20260707T0815Z_scty-premcp-p1-c1c2-ratelimit-size_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "git",
+      "target": "CLOUD commit: ratelimit.py + config RL_* + server.py middleware + lock-test",
+      "proof_required": "hash pushed",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "ec2-baked-asset",
+      "target": "m365-mcp-gateway app/ on-instance via safe-ec2-deploy",
+      "proof_required": "SSM md5 of running ratelimit.py+server.py+config.py",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "activation",
+      "target": "gateway restart picks up the middleware; /health ok + /mcp 401 unchanged",
+      "proof_required": "SSM systemctl active + live probes",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "verify",
+      "target": "CVO live-cert: 429-on-over-rate (per-IP + per-identity) + Retry-After + 413-on-oversize + legit passes + fail-open/closed + XFF right-most keying",
+      "proof_required": "CVO cert msg",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20260707T081546Z OPENED by 0.7.0_AE_CloudOps~A with 4 leg(s)"
+  ],
+  "last_red_at": null
+}
