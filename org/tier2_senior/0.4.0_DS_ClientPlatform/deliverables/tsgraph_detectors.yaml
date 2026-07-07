@@ -1,0 +1,363 @@
+# NFRA_TSGRAPH P3-2 -- frontend bug/logic detector library
+# =========================================================================
+# TO: NFRA_TSGRAPH.P3-2 (0.4.0_DE_ClientPlatform) | anchors: P3-1 catalog
+#   (org/tier1_exec/3.0.0_SA_CVO/deliverables/NFRA_TSGRAPH_P3-1_bugclass_catalog.md)
+# PRD: docs/architecture/NFRA_TSGRAPH_PRD.md section 9
+#
+# PURPOSE
+#   Codify the frontend-detectable bug/logic classes from the P3-1 catalog
+#   (partition A1-A11) into canonical comp-kuzu / Cypher detectors that run
+#   against the LIVE NFRA_TSGRAPH graph (Rule 20: QUERY, never rebuild).
+#   Each detector is EMPIRICALLY VALIDATED: its query was run against the live
+#   graph and MUST return its log-anchored exemplar. A detector that returns 0
+#   rows / does not catch its exemplar is REJECTED and reported as a finding
+#   (not faked). The `empirical` block on each detector records the actual run.
+#
+# SUBSTRATE
+#   Single CloudNode / CloudEdge table, string discriminators (node_type /
+#   edge_type), props = JSON STRING. The Kuzu build lacks SPLIT() -- every
+#   query below is SPLIT-free (CONTAINS / STARTS WITH / CASE / count(DISTINCT)).
+#   Run surface: `.tools/comp-kuzu --json "<cypher>"` (HEAD-current; auto-refresh
+#   marker oracle; read the provenance header on every call).
+#
+# HEAD-CURRENT PROVENANCE (the graph these detectors + empirical runs were validated on)
+provenance:
+  db: kuzu_nessie_db
+  source: nessie
+  nodes_snapshot_id: 8205589666541874180
+  edges_snapshot_id: 7012385084254624612
+  built_utc: "2026-07-07T06:09:57.795057+00:00"
+  nessie_head: current            # pin == marker HEAD (not BEHIND / not UNKNOWN VINTAGE)
+  node_census: {Field: 4969, JSXElement: 2205, JSXRender: 1433, ReactComponent: 442, Prop: 359, Endpoint: 125, Hook: 111, ReactQueryKey: 57, Page: 15}
+  edge_census: {RENDERS: 2447, READS_FIELD: 2110, PROP_PASSES: 1382, INSTANTIATES: 1298, FLOWS_TO: 961, FETCHES: 109, HAS_KEY: 85}
+  validated_by: 0.4.0_DE_ClientPlatform
+  validated_utc: "2026-07-07"
+
+# =========================================================================
+# HONEST GAPS -- classes NOT built as graph detectors here (routed OUT)
+# The P3-1 frontend partition names A4 (any-erosion) + A7 (hook-dep-mismatch)
+# as frontend classes, but the NFRA_TSGRAPH extractor does not model the
+# substrate they need. They are documented, not faked. A6 (prop-drill-depth)
+# was SPEC'd as a P3-2 detector but the EMPIRICAL GATE demoted it to a gap
+# (see D6 below + honest_gaps.D6) -- the live graph disproved the design
+# assumption that PROP_PASSES chains transitively.
+honest_gaps:
+  D8_any_erosion:
+    catalog_class: A4
+    defect: "`: any` / `as any` at a data boundary defeats the type-check -> undetected shape drift downstream"
+    why_not_graph_derivable: >
+      The extractor does not emit `any`-typed annotations as nodes/props. tsType
+      is captured for Field nodes, but a bare `: any` / `as any` cast is not a
+      Field/edge in the graph -- there is nothing to MATCH. A4's own catalog
+      anchor is a FILE:LINE ESLint hit (portfolio.ts:433-439, 7x no-explicit-any),
+      i.e. it was already found file-level, not graph-level.
+    route_to: "extractor-extension (emit an `AnyCast` node w/ file:line) OR NFRA_DEBTSCAN file-level ESLint sweep (PORTALSWEEP already covers no-explicit-any)"
+  D9_hook_dep_mismatch:
+    catalog_class: A7
+    defect: "useEffect/useMemo dependency array omits/over-lists a dep -> stale closure or render storm"
+    why_not_graph_derivable: >
+      Hook nodes exist (111) with FETCHES/HAS_KEY edges, but the extractor does
+      NOT model a hook's dependency ARRAY nor the set of identifiers referenced
+      in the hook body. Detecting omit/over-list requires (referenced-idents vs
+      declared-deps) set-diff, neither side of which is in the graph.
+    route_to: "extractor-extension (emit HookDep edges: Hook->{declared} + Hook->{referenced}) THEN a set-diff detector; interim -> NFRA_DEBTSCAN react-hooks/exhaustive-deps ESLint"
+
+# The D7 extractor ask (D7 ships ADVISORY because the graph cannot see the guard):
+extractor_ask_D7_guarded_bool: >
+  Add a boolean `guarded` prop to the RENDERS edge (or the render-site Field):
+  true iff the render expression is wrapped in a null/optional guard
+  (`x && <.../>`, `x?.y`, `x ?? default`, ternary null-check). Today the graph
+  models nullability of the FIELD (optional / |null / |undefined tsType) but not
+  whether the RENDER SITE guards it -- so D7 can only WARN (a nullable field is
+  rendered), never CONFIRM (rendered WITHOUT a guard). With `guarded:bool`, D7
+  promotes from advisory to gate-ready (fires only on guarded=false).
+
+# =========================================================================
+detectors:
+
+  - id: D1
+    name: detect-silent-display-fork
+    catalog_class: A1/A3   # OFC-cohort/ternary-fork + silent-display-fork
+    defect: >
+      A display output (an `out:` render-site expression) is fed by >=2 guarded
+      FLOWS_TO edges from DISTINCT source fields on the SAME guard variable ->
+      the user silently sees a different field's value depending on the branch,
+      with no visual/error signal of which source rendered.
+    tier: gate-ready
+    promote_first: true
+    kuzu_query: |
+      MATCH (a:CloudNode)-[e:CloudEdge]->(b:CloudNode)
+      WHERE e.edge_type='FLOWS_TO'
+        AND e.props CONTAINS 'recompute/guarded'
+        AND NOT (e.props CONTAINS '"condition": null')
+        AND b.node_id STARTS WITH 'out:'
+      WITH b.node_id AS dst, count(DISTINCT a.node_id) AS srcCount
+      WHERE srcCount >= 2
+      RETURN dst, srcCount ORDER BY dst
+    exemplar: "portal/src/pages/ModelPortfolios.tsx:725#spread"   # etf_spread (benchmarkType==='index'==false) vs index_spread (==true)
+    empirical:
+      rows: 5
+      exemplar_caught: true
+      returned:
+        - "out:portal/src/pages/ModelPortfolios.tsx:725#spread (srcCount=2)   <- EXEMPLAR"
+        - "out:portal/src/pages/ModelPortfolios.tsx:724#benchmark (srcCount=2)"
+        - "out:portal/src/pages/ModelPortfolios.tsx:727#benchmark_volatility (srcCount=2)"
+        - "out:portal/src/pages/AdvisorIntelligence/_shared/tabs/ClientsTab.tsx:291#name (srcCount=2)"
+        - "out:portal/src/pages/AdvisorIntelligence/_shared/tabs/DistributionTab.tsx:3901#count (srcCount=2)"
+      note: >
+        Catches the exemplar + the 3 other design-confirmed forks (724/727/ClientsTab:291)
+        AND one the design's illustrative list did not enumerate: DistributionTab.tsx:3901#count
+        (histogram vs counts into the same display sink, gated on useLogScale) -- a genuine
+        2-source guarded display fork, not a false positive. Superset of the design's 4; exemplar caught.
+    fp_avoidance: >
+      Restricted to dst node_id STARTS WITH 'out:' (inline render-site expressions =
+      the DISPLAY sinks) -- this is what makes it a *display* fork and drops the
+      `type:`-declared intermediate LeaderboardEntry#name (AdvisorsTab:374) which is a
+      type-field, not a terminal display expression. count(DISTINCT a.node_id) enforces
+      DISTINCT source fields (a field recomputed from the SAME source on both branches
+      -> srcCount=1 -> excluded). SPLIT-free proxy for "opposite conditions": the
+      structural fact (>=2 distinct guarded sources into one display sink) is the defect;
+      it holds whether the branches are literally ==true/==false (ModelPortfolios) or the
+      same guard (ClientsTab firm-anonymization).
+
+  - id: D2
+    name: detect-cross-firm-asymmetry
+    catalog_class: A2   # cross-firm-conditional-asymmetry
+    defect: >
+      A guarded FLOWS_TO whose condition matches a firm-identity literal treats one
+      firm's display path differently with NO symmetric firm-branch into the same
+      dstField (only the `==false` non-firm branch flows; the firm case is silently
+      special-cased / suppressed).
+    tier: gate-ready
+    promote_first: false
+    kuzu_query: |
+      MATCH (a:CloudNode)-[e:CloudEdge]->(b:CloudNode)
+      WHERE e.edge_type='FLOWS_TO'
+        AND e.props CONTAINS 'inflection_wealth_management'
+      WITH b.node_id AS dst,
+           sum(CASE WHEN e.props CONTAINS '== true'  THEN 1 ELSE 0 END) AS trueBranch,
+           sum(CASE WHEN e.props CONTAINS '== false' THEN 1 ELSE 0 END) AS falseBranch,
+           count(e) AS firmEdges
+      WHERE trueBranch = 0 OR falseBranch = 0
+      RETURN dst, firmEdges, trueBranch, falseBranch ORDER BY dst
+    exemplar: "portal/src/pages/AdvisorIntelligence/_shared/tabs/ClientsTab.tsx:291#name"   # the inflection name-fork
+    empirical:
+      rows: 2
+      exemplar_caught: true
+      returned:
+        - "out:...ClientsTab.tsx:291#name (firmEdges=2, trueBranch=0, falseBranch=2)   <- EXEMPLAR (inflection name-fork)"
+        - "type:...AdvisorIntelligence/_shared/types.ts#LeaderboardEntry#name (firmEdges=2, trueBranch=0, falseBranch=2)  <- AdvisorsTab:374 sibling inflection fork"
+      note: >
+        Both live inflection firm-forks are asymmetric (falseBranch=2, trueBranch=0 --
+        only the non-inflection path flows into `name`; the inflection case has no
+        symmetric branch). Exactly the 4 firm-conditional FLOWS_TO edges live (2 dst x
+        2 srcFields each), matching the design's "4 firm-conditional FLOWS_TO live".
+    fp_avoidance: >
+      Firm literal matched as the exact string 'inflection_wealth_management' (the only
+      firm-identity literal present in FLOWS_TO conditions on the live graph). The
+      asymmetry test (trueBranch=0 OR falseBranch=0) is what distinguishes a genuine
+      one-sided firm special-case from a balanced if/else firm split -- a symmetric
+      firm branch would populate BOTH counters and be dropped.
+
+  - id: D3
+    name: detect-hardcoded-firm-literal
+    catalog_class: A9   # hardcoded-firm/env-literal
+    defect: >
+      A firm-identity value hardcoded as a bare string literal in a branch position
+      (a FLOWS_TO.condition or a PROP_PASSES.value) instead of read from context/config
+      -> breaks the moment a 2nd firm/env appears (the ADVI_SHARED.006 class).
+    tier: advisory
+    promote_first: false
+    kuzu_query: |
+      MATCH (a:CloudNode)-[e:CloudEdge]->(b:CloudNode)
+      WHERE (e.edge_type='FLOWS_TO' OR e.edge_type='PROP_PASSES')
+        AND (e.props CONTAINS 'inflection_wealth_management'
+             OR e.props CONTAINS "'bd'"
+             OR e.props CONTAINS "'cot'")
+      RETURN e.edge_type AS et, a.node_id AS src, b.node_id AS dst ORDER BY dst
+    exemplar_spec: "portal/src/contexts/AuthContext.tsx:35 'bd'"        # ORIGINAL P3-1/A9 anchor -- see empirical.exemplar_caught=false
+    exemplar_live: "FLOWS_TO condition 'entry.advisor_id === \\'inflection_wealth_management\\'' (ClientsTab.tsx:291 / AdvisorsTab.tsx:374)"  # RE-ANCHOR
+    empirical:
+      rows: 4
+      exemplar_caught: false     # the ORIGINAL 'bd' anchor is REMEDIATED (see finding); the CLASS catches a live literal
+      returned:
+        - "FLOWS_TO EmployeeLeaderboardEntry#advisor_id -> out:ClientsTab.tsx:291#name   ('inflection_wealth_management')"
+        - "FLOWS_TO EmployeeLeaderboardEntry#name       -> out:ClientsTab.tsx:291#name   ('inflection_wealth_management')"
+        - "FLOWS_TO PlatinumLeaderboardEntry#advisor_id -> type:...LeaderboardEntry#name ('inflection_wealth_management')"
+        - "FLOWS_TO PlatinumLeaderboardEntry#name       -> type:...LeaderboardEntry#name ('inflection_wealth_management')"
+      finding: >
+        MISS on the ORIGINAL anchor, and the miss is CORRECT: AuthContext.tsx no longer
+        contains a hardcoded 'bd' literal. Source-grounded: AuthContext.tsx:35 now reads
+        `const internal = claims?.firmId === 'opal-capital'`; AuthContext.tsx:36-37 comment
+        documents "was hardcoded 'bd' (legacy raw firmId)" removed by the ADVI_SHARED.006
+        hotfix (POSTMORTEM_SHARED006). The graph correctly carries no 'bd'/'cot' literal in
+        any FLOWS_TO/PROP_PASSES props. Two-layer honesty: (1) the 'bd' anchor is a
+        remediated incident -- a fabric WIN, not a detector defect; (2) even the current
+        `firmId === 'opal-capital'` guard is a boolean const-assignment the extractor does
+        NOT model as a FLOWS_TO condition, so it is graph-invisible.
+      re_anchor: >
+        RE-SCOPE (per TO if_mismatch, CVO/CTO): D3's live exemplar = the
+        'inflection_wealth_management' literal baked into the 4 FLOWS_TO conditions
+        (ClientsTab:291 / AdvisorsTab:374). D3 the DETECTOR passes the empirical bar on
+        this live instance; only the specific historical anchor moved.
+    fp_avoidance: >
+      Matches only bare quoted firm-identity literals ('inflection_wealth_management',
+      'bd', 'cot'); the surrounding "=== '<lit>'" pattern in a FLOWS_TO condition confirms
+      branch position. Overlap with D2 on the inflection edges is EXPECTED and correct --
+      the inflection fork exhibits BOTH defects (hardcoded literal AND cross-firm
+      asymmetry); the detectors are different lenses, not duplicates.
+    extractor_ask: >
+      To reach A9's canonical shape (a `firmId === '<lit>'` guard that is a plain boolean
+      const, not a field-to-field flow), the extractor must emit a `LiteralGuard` node/edge
+      for equality comparisons against string literals in conditionals -- otherwise the
+      cleanest A9 instances (AuthContext-style) stay graph-invisible.
+
+  - id: D4
+    name: detect-dead-component
+    catalog_class: A5   # dead-code
+    defect: >
+      A ReactComponent with NO inbound INSTANTIATES edge (i.e. no JSXElement ever
+      constructs it) -> a retired/never-wired component that still compiles and reads
+      as live.
+    tier: gate-ready
+    promote_first: true
+    kuzu_query: |
+      MATCH (rc:CloudNode) WHERE rc.node_type='ReactComponent'
+      OPTIONAL MATCH (j:CloudNode)-[e:CloudEdge]->(rc)
+      WITH rc, sum(CASE WHEN e.edge_type='INSTANTIATES' THEN 1 ELSE 0 END) AS inst
+      WHERE inst = 0
+      RETURN rc.node_id AS id ORDER BY id
+    exemplar_spec: "PORTALSWEEP DC-01..07 dead module"                  # ORIGINAL P3-1/A5 anchor -- PURGED (see finding)
+    exemplar_live: "portal/src/components/MetricsRow.tsx#MetricsRow"    # RE-ANCHOR: source-confirmed dead in current graph
+    empirical:
+      rows: 121                  # raw candidates (matches design pass exactly: 121/442)
+      exemplar_caught: true      # on the RE-ANCHORED live exemplar (MetricsRow); ORIGINAL DC-01..07 remediated
+      returned_sample:
+        - "rc:portal/src/components/MetricsRow.tsx#MetricsRow          <- RE-ANCHORED EXEMPLAR (source-confirmed dead)"
+        - "rc:portal/src/ui/components/panels/PanelExamples.tsx#PanelExamples  (demo primitive, unreferenced)"
+        - "rc:portal/src/pages/PortfolioManagement/tabs/AlphaTab.tsx#SortableHeader"
+        - "... 118 more (full list = the 121-row query above)"
+      exemplar_grounding: >
+        MetricsRow source-confirmed dead: grep `MetricsRow\b` over portal/src returns ONLY
+        the definition (MetricsRow.tsx:25 `export const MetricsRow`) and a TYPE-only import
+        in ModelPortfolios.tsx:26 (`import { type MetricsPeriod }`) -- no `<MetricsRow>` JSX
+        anywhere. The component is shipped but unused (only its sibling type is consumed).
+      finding: >
+        The ORIGINAL DC-01..07 anchor is REMEDIATED: DC-01..07 (7 files) + ORPHAN-PM(19) +
+        ORPHAN-AI/MISC(27) + DC-round-2(29 fns) = 82 dead files/fns were PURGED
+        (portal DEV 0ac642ad et al., NFRA_DEBTSCAN.TO-D5). They are gone from the current
+        graph AND several were endpoint/util modules, not ReactComponents. So D4 cannot
+        catch DC-01..07 literally; it catches the LIVE dead-component population (121 raw)
+        and a source-confirmed instance (MetricsRow) -> re-anchor.
+    fp_avoidance: >
+      Raw candidate count (121) is FP-DENSE; three FP classes must be filtered before
+      promoting a hit above candidate:
+        (1) CONDITIONAL-RENDER GAP -- the extractor misses JSX inside `{cond && <Comp/>}`.
+            PROVEN: DataRefresh/tabs/HistoryTab.tsx#HistoryTab shows 0 inbound INSTANTIATES
+            in the graph but IS instantiated at DataRefresh.tsx:45 `{activeTab==='history'
+            && <HistoryTab .../>}`. Do NOT file conditional-render components as dead.
+        (2) DESIGN-SYSTEM BARREL -- portal/src/ui/components/catalyst/* (Catalyst library
+            primitives) dominate the raw list; used via barrel/re-export the extractor does
+            not resolve as INSTANTIATES -> unresolved, not dead.
+        (3) PAGE ROUTE-ROOTS (15) + React.lazy/dynamic -- page roots are mounted by the
+            router (Page nodes connect ONLY via CLUSTERS->PanelCluster; there is no
+            Page->ReactComponent edge, so route-mount is graph-invisible) and lazy roots
+            (e.g. _partners/*/index.tsx) are dynamically imported. Mark UNRESOLVED, exclude.
+      MANDATE: a D4 candidate is promoted to a dead-code FINDING only after FILE-LEVEL
+      confirmation (grep/knip-style: no import + no JSX usage), per the TO-D5 "graph-blind,
+      sweep file-level not kuzu" lesson. D4 is promote-first as a CANDIDATE GENERATOR, not
+      an autonomous gate.
+
+  - id: D5
+    name: detect-orphan-endpoint
+    catalog_class: A5-variant   # dead-code (data-channel)
+    defect: "An Endpoint with no inbound FETCHES edge -> an API endpoint no hook fetches (dead data channel)."
+    tier: advisory
+    promote_first: false
+    kuzu_query: |
+      MATCH (ep:CloudNode) WHERE ep.node_type='Endpoint'
+      OPTIONAL MATCH (h:CloudNode)-[e:CloudEdge]->(ep)
+      WITH ep, sum(CASE WHEN e.edge_type='FETCHES' THEN 1 ELSE 0 END) AS f
+      WHERE f = 0
+      RETURN ep.node_id AS id ORDER BY id
+    exemplar: "endpoint:getDataRefreshHistory"   # a real returned orphan endpoint (no inbound FETCHES)
+    empirical:
+      rows: 49                   # matches design pass exactly: 49/125
+      exemplar_caught: true
+      returned_sample:
+        - "endpoint:getDataRefreshHistory   <- EXEMPLAR (no inbound FETCHES)"
+        - "endpoint:getBenchmarkReturns     (echoes the A5 benchmarks.ts dead-shadow theme)"
+        - "endpoint:getAUMFlows"
+        - "endpoint:getClientsTab"
+        - "endpoint:getAUMMetricsWithCalculations   (see fp_avoidance -- getAUM* known-FP class)"
+        - "... 44 more (49 total)"
+    fp_avoidance: >
+      ADVISORY because the 49 mix true-dead endpoints with NON-HOOK CALLERS the extractor
+      cannot resolve to a FETCHES edge (the PORTALSWEEP Day-0 known FP: `getAUMMetrics`
+      unresolved fetch). An endpoint called only outside a react hook (util fn, direct
+      apiRequest, event handler) reads as orphan but is UNRESOLVED, not dead. Confirm
+      true-deadness with a file-level caller grep before filing.
+
+  - id: D6
+    name: detect-prop-drill-depth
+    catalog_class: A6   # prop-drill-depth
+    defect: "A prop threaded through N>=4 intermediate components; a drop at any level silently undefines it downstream."
+    tier: advisory   # EMPIRICAL GATE -> GAP (not buildable on this substrate; see finding + honest_gaps.D6)
+    promote_first: false
+    kuzu_query: |
+      MATCH (a:CloudNode)-[e1:CloudEdge]->(b:CloudNode)-[e2:CloudEdge]->(c:CloudNode)-[e3:CloudEdge]->(d:CloudNode)-[e4:CloudEdge]->(f:CloudNode)
+      WHERE e1.edge_type='PROP_PASSES' AND e2.edge_type='PROP_PASSES'
+        AND e3.edge_type='PROP_PASSES' AND e4.edge_type='PROP_PASSES'
+      RETURN count(*) AS depth4_paths
+    exemplar_spec: "1.0.0_SA_CTO/2026-04-08 compiler_toolchain_buildout (A6, freq 6)"
+    empirical:
+      rows: 0                    # depth4_paths = 0
+      exemplar_caught: false     # STRUCTURAL MISS
+      corroborating_run: "2-hop PROP_PASSES chain (a)-[PROP_PASSES]->(m)-[PROP_PASSES]->(b) = 0 rows"
+      finding: >
+        REJECTED on this substrate. The empirical gate disproved the design assumption
+        that PROP_PASSES chains transitively: PROP_PASSES is modeled as a FLAT one-hop
+        binding whose SOURCE is ALWAYS a JSXElement and whose TARGET is a Prop (417) or
+        Field (965) -- a Prop/Field is NEVER a PROP_PASSES source, so NO chain of length
+        >=2 exists (2-hop = 0, therefore depth>=4 = 0). Prop-drill DEPTH cannot be derived
+        from PROP_PASSES alone; it needs a bridge linking a component's RECEIVED prop to
+        the JSXElements inside that component that RE-PASS it.
+      route_to: "extractor-extension (emit a transitive PROP_DRILL edge, or link Prop-receipt->child JSXElement re-pass) -- then depth>=4 becomes queryable. Same bucket as D8/D9."
+    fp_avoidance: "n/a -- 0 rows (gap)."
+
+  - id: D7
+    name: detect-render-without-null-guard
+    catalog_class: A8   # render-guard-vs-nullability
+    defect: >
+      A render reads a possibly-undefined field (optional:true or |null/|undefined tsType).
+      Without the render-site guard modeled, this is a WARN: the field is nullable AND
+      rendered -- a blank/NaN/crash risk IF the render site does not guard it.
+    tier: advisory   # ADVISORY-ONLY by design: graph does not model the guard (see extractor_ask_D7_guarded_bool)
+    promote_first: false
+    kuzu_query: |
+      MATCH (jr:CloudNode)-[e:CloudEdge]->(f:CloudNode)
+      WHERE e.edge_type='RENDERS' AND f.node_type='Field'
+        AND (f.props CONTAINS '"optional": true'
+             OR f.props CONTAINS '| null'
+             OR f.props CONTAINS '| undefined')
+      RETURN DISTINCT f.node_id AS id ORDER BY id
+    exemplar: "portal/src/App.tsx#NavItem#requiresAdmin"   # optional field rendered
+    empirical:
+      rows: 197                  # DISTINCT nullable fields that are RENDERS-targets (478 render-site edges)
+      exemplar_caught: true
+      returned_sample:
+        - "type:portal/src/App.tsx#NavItem#requiresAdmin   <- EXEMPLAR (optional:true)"
+        - "type:portal/src/App.tsx#NavItem#requiresTier"
+        - "type:portal/src/App.tsx#NavSection#dividerAbove"
+        - "... 194 more (197 distinct fields; 478 RENDERS edges)"
+      note: >
+        Current-HEAD count = 197 DISTINCT nullable rendered fields / 478 RENDERS edges to
+        them. The design-era figure "352 fields" differs (graph is HEAD-current + rebuilt;
+        counts drift; the exact population is not load-bearing for an advisory detector).
+        Returns a real population + exemplar -> catch. ADVISORY: without guarded:bool, every
+        hit is a WARN candidate (many ARE correctly guarded at the render site).
+    fp_avoidance: >
+      WARN-ONLY. High FP rate is expected -- the graph cannot see the render-site guard, so
+      a correctly-guarded `{x && <.../>}` render of a nullable field is indistinguishable
+      from an unguarded one. Do NOT gate on D7 until the extractor emits guarded:bool
+      (extractor_ask_D7_guarded_bool); then filter to guarded=false and promote to gate-ready.
