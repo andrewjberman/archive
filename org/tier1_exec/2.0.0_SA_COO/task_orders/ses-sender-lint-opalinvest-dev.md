@@ -5,10 +5,10 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-07-07-ses-sender-lint</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.7.0_AE_CloudOps</issued_to>
+    <issued_to>0.7.0_AE_CloudOps~B</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
-    <dispatch_state>STAGED, not urgent -- no live incident. CTO-ratified rule (commit 888c4b381), from today's partner-etl-ops-alerts P1 (an unauthenticated andrew@opalinvest.com sender triggered an EOP quarantine). Pick up whenever it fits.</dispatch_state>
+    <status>pending</status>
+    <dispatch_state>DISPATCHED 2026-07-07T17:05Z -- re-routed to ~B (idle, all Wave-1 work closed) since base 0.7.0 is busy on DNS/decommission work. CTO-ratified rule (commit 888c4b381), from today's partner-etl-ops-alerts P1 (an unauthenticated andrew@opalinvest.com sender triggered an EOP quarantine).</dispatch_state>
     <gate_note>Deterministic, cheap check -- no architecture decision needed.</gate_note>
   </metadata>
 
