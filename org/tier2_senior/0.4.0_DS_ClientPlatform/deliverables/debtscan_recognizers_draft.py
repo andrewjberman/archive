@@ -67,11 +67,35 @@ def parse_gold_direct_invoke(ws_root: Path) -> dict[str, str]:
     # 0.8.0-grounded (gold_dispatch.sh:1387 Wed-guard / :1397 direct invoke). Catches gldinc_ss4c_weekly.
 
 
-# --- Recognizer 3: smartx/portal lambda S3-reads (STUB -- reader-edge family, needs the consumer list) -
-# smartx_allocations.parquet / wsb / wsd read isolated because the smartx/portal LAMBDA readers aren't
-# parsed for their S3 get_object reads. This is the READ/WRITE-CLASSIFIER family (extract_pipeline's
-# existing read-callee classifier), extended to the smartx/portal lambda sources. TODO(DS): enumerate
-# the smartx/portal lambdas that read these keys (per CVO's "portal/smartx readers") + run the existing
-# _READ_CALLEES classifier over them -> reader edges -> the keys gain consumers.
-def parse_smartx_portal_reads(ws_root: Path) -> dict[str, list[str]]:
-    raise NotImplementedError("DS to enumerate the smartx/portal lambda readers first")
+# --- Recognizer 3: smartx/portal lambda S3-reads (READY -- 0.8.0-grounded, read-callee-disciplined) ----
+# smartx_allocations.parquet reads isolated because the smartx/portal LAMBDA readers aren't parsed for their
+# S3 reads. READ/WRITE-CLASSIFIER family: a lambda READS the key IFF a read-callee (download_file/get_object/
+# read_parquet) references the key LITERAL or a KEY-const bound to it -- NOT a mere comment mention
+# (compute_account_distribution mentions it DEAD in a comment but reads the MDPF feed -> correctly excluded).
+_SMARTX_KEY_FRAG = "smartx_allocations.parquet"
+_READ_CALLEE = re.compile(r"\b(download_file|get_object|read_parquet)\s*\(")
+
+
+def parse_smartx_reads(ws_root: Path) -> dict[str, list[str]]:
+    """Return {'smartx_allocations': [lambda basenames that genuinely READ it]}. inject_pipeline_edges emits
+    lambda -[READS]-> S3_DATA_KEY(smartx_allocations) for each -- the reader-edges that clear the isolated key."""
+    readers: set[str] = set()
+    dirs = [ws_root / "infra" / "aws" / "lambda" / "smartx_ingestion_pipeline",
+            ws_root / "infra" / "aws" / "lambda" / "portal"]
+    for d in dirs:
+        if not d.exists():
+            continue
+        for f in d.glob("*.py"):
+            content = f.read_text(encoding="utf-8")
+            if _SMARTX_KEY_FRAG not in content:
+                continue
+            # KEY constants bound to the smartx key (e.g. S3_CONSOLIDATED_KEY / PARQUET_KEY = "...parquet")
+            key_consts = set(re.findall(r'(\w+)\s*=\s*["\'][^"\']*' + re.escape(_SMARTX_KEY_FRAG) + r'["\']',
+                                        content))
+            # A read-callee whose arg window references the key LITERAL or a bound KEY-const = a real read.
+            for m in _READ_CALLEE.finditer(content):
+                args = content[m.end(): m.end() + 200]
+                if _SMARTX_KEY_FRAG in args or any(k in args for k in key_consts):
+                    readers.add(f.stem)
+                    break
+    return {"smartx_allocations": sorted(readers)}
