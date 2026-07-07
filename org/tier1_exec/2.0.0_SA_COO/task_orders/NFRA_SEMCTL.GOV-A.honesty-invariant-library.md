@@ -7,8 +7,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>1.0.0_SA_CTO + 3.0.0_SA_CVO (cross-project)</issued_to>
     <date>2026-07-07</date>
-    <status>ready</status>
-    <dispatch_state>WRITTEN-NOT-DISPATCHED (wind-down 2026-07-07; Andrew directed decomposition materialized before device reboot; dispatch on restart per the allocation-map in the session handoff /log)</dispatch_state>
+    <status>dispatched</status>
+    <dispatch_state>DISPATCHED 2026-07-07T21:0xZ by 2.0.0_SA_COO~B (NFRA full-program completion drive, Andrew-direct). GO fired to 1.0.0_SA_CTO + 3.0.0_SA_CVO (both live). Zero-spawn — exec-lane owners.</dispatch_state>
     <gate_note>COO-RESOLVABLE. CTO+CVO cross-project. Governance item (a) from the SEMCTL charter.</gate_note>
   </metadata>
 
