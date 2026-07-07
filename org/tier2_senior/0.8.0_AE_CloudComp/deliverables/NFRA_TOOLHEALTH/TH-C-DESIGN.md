@@ -2,7 +2,17 @@
 
 **Author:** 0.8.0_AE_CloudComp~D (2026-07-07). **Lane:** COO~B (NFRA_COMP*).
 **TO:** 2.0.0_SA_COO [DRIVE -- TO: NFRA_TOOLHEALTH TH-C] (20260707T054915Z).
-**Status:** DESIGN -- RAVC1 to COO~B. Build-now = the DRV-INDEPENDENT emitter + differential proof; EXECUTE = the D1 behavior-change confirmation on CTO's DRV-flip green.
+**Status:** BOTH CLAUSES COMPLETE (2026-07-07). Clause-A emitter landed 49dbc84dc/4f71ccaf2 (self-test 11/11).
+Clause-B RUN + PROVEN 08266a3ea -- close-loop causal chain live-exercised. Handed CVO~B for the blind-re-run cert.
+
+**RESOLUTION UPDATE (supersedes the "EXECUTE on DRV-flip green" framing below):** clause-B did NOT need the
+affinity (w_h) DRV flip. Grounding corrected the premise -- (1) the ROLE-PASSING fix LANDED (comp-which:698
+`_agent_role()`, 87bc48d3f) so `surface_prior` is live+role-conditioned; (2) TH-C's PROMOTE vehicle is the
+`surface_prior` (w_s) knob, NOT the learned affinity (w_h) -- so clause-B runs on w_s, live now. CVO~B (D1 owner)
+ruled the w_s delta COUNTS (it IS TH-C's own mechanism; the w_h/affinity loop is a SEPARATE COMPLEARN concern,
+explicitly out of clause-B scope). Clause-B was EXERCISED (comp-depth PROMOTE -> w_s bump -> live route flip
+top1 comp-chainrun->comp-depth rank 6->0, negative control holds). The sections below describing clause-B as
+DRV-flip-gated reflect the ORIGINAL (pre-grounding) design premise and are retained for the record.
 
 ---
 
