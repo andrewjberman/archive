@@ -47,13 +47,24 @@ def parse_mdpf_dispatch(ws_root: Path) -> dict[str, str]:
     # run_step target; it edges via the import-recognizer OR stays a FP_UTIL (CVO-ruled util, benign).
 
 
-# --- Recognizer 2: gold_dispatch WEEKLY/Wed leg (STUB -- needs the weekly-dispatch format grounded) ----
-# gldinc_ss4c_weekly reads isolated because _parse_dispatch parses CHAIN_* (daily) but the WEEKLY/Wed
-# cadence leg isn't in a CHAIN_ the daily parse resolves. TODO(DS): ground how the weekly leg is
-# dispatched in orion-gold-dispatch.sh (a CHAIN_WEEKLY? a `case $(date +%u)` Wed guard? a separate
-# weekly catalog?) -> extend _parse_dispatch to capture it -> ss4c_weekly gains its TRIGGERS edge.
-def parse_gold_weekly_leg(ws_root: Path) -> dict[str, str]:
-    raise NotImplementedError("DS to ground the orion-gold-dispatch weekly/Wed cadence format first")
+# --- Recognizer 2: gold_dispatch Wed-conditional DIRECT python3 invoke (READY -- 0.8.0-grounded) --------
+# ss4c-weekly is dispatched in data/black_diamond/scripts/gold/gold_dispatch.sh as a WED-guarded DIRECT
+# invoke (line 1397: python3 "$SCRIPTS/gldinc_ss4c_weekly.py" --run-date ...), NOT a CHAIN_ member (why the
+# daily _parse_dispatch misses it). gldinc-ss4c.tf is ONLY the monitoring canary + alarms (does NOT dispatch).
+def parse_gold_direct_invoke(ws_root: Path) -> dict[str, str]:
+    """Return {basename: relpath} for every `python3 "$SCRIPTS/<script>.py"` DIRECT invoke in BD gold_dispatch.sh
+    (the Wed/conditional legs not in a CHAIN_). inject_pipeline_edges emits gold_dispatch -[TRIGGERS]-> gold:X.
+    Catches gldinc_ss4c_weekly + any other conditional direct-invoke (same run_step-family shape as #1)."""
+    f = ws_root / "data" / "black_diamond" / "scripts" / "gold" / "gold_dispatch.sh"
+    if not f.exists():
+        return {}
+    content = f.read_text(encoding="utf-8")
+    scripts: dict[str, str] = {}
+    for m in re.finditer(r'python3\s+"?\$\{?SCRIPTS\}?/(\S+?\.py)"?', content):
+        rel = m.group(1)
+        scripts[Path(rel).stem] = rel
+    return scripts
+    # 0.8.0-grounded (gold_dispatch.sh:1387 Wed-guard / :1397 direct invoke). Catches gldinc_ss4c_weekly.
 
 
 # --- Recognizer 3: smartx/portal lambda S3-reads (STUB -- reader-edge family, needs the consumer list) -
