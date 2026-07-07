@@ -1,0 +1,54 @@
+{
+  "exercise": "NFRA_TOOLHEALTH TH-C clause-B -- close-the-loop causal chain (w_s vehicle)",
+  "vehicle": "surface_prior (w_s) -- TH-C's own PROMOTE-commission knob (CVO~B ruling 2026-07-07)",
+  "role_passed": "AE",
+  "intent": "how deep is the dependency chain",
+  "target_tool": "comp-depth",
+  "chain": {
+    "1_verdict": {
+      "tool": "comp-depth",
+      "verdict": "PROMOTE",
+      "is_promote": true,
+      "note": "real gate classifier; EFFECTIVE=True seeded (TH-A feed not yet joined)"
+    },
+    "2_commission": {
+      "action": "comproute-route-proposal",
+      "engine_knob": "comp_route.surface_prior (the w_s term)",
+      "is_w_s_vehicle": true,
+      "rationale": "effective-but-ignored (effective but not used -- a routing/HUD miss (feeds COMPROUTE)): the router does not surface comp-depth. Raise its surface_prior / add it as a routable surface so a matching intent routes to it. Concrete comp_route change, CTO/COMPROUTE-ratified."
+    },
+    "3_apply": {
+      "knob": "comp_route.surface_prior",
+      "target_affinity_key": "TRINO",
+      "delta": 0.9,
+      "isolation": "single-cap bump; role/intent/engine unchanged"
+    },
+    "4_flip": {
+      "pre": {
+        "top1": "comp-chainrun",
+        "kind": "disambiguation",
+        "target_rank": 6,
+        "target_score": 0.2433,
+        "target_prior": 0.3
+      },
+      "post": {
+        "top1": "comp-depth",
+        "kind": "disambiguation",
+        "target_rank": 0,
+        "target_score": 0.3833,
+        "target_prior": 1.0
+      },
+      "top1_changed": true,
+      "target_rank_improved": true
+    }
+  },
+  "negative_control": {
+    "tool_verdict_without_effective_seed": "RETIRE",
+    "emits_route_altering_commission": false,
+    "control_holds": true,
+    "note": "without the PROMOTE verdict there is NO route-altering commission -> NO bump -> the route stays at the PRE baseline. The flip is CONTINGENT on the health verdict."
+  },
+  "route_delta_observed": true,
+  "caused_by_commission": true,
+  "verdict": "CLOSE-LOOP PROVEN: health verdict (PROMOTE) -> commission (w_s bump) -> live route delta at a real role, attributable SOLELY to the bump (negative control holds: no verdict => no commission => no flip)"
+}
