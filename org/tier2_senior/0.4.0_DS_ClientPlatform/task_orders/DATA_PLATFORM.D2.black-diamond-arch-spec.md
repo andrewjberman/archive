@@ -6,8 +6,10 @@
 <verify>3.0.0_SA_CVO (reconcile-verify spec vs live BD / cot pipeline)</verify>
 <issued_by>2.0.0_SA_COO (DATA_PLATFORM Phase-1 decomposition; Andrew-direct via CTO 2026-06-23; PRD S6/S11; LD-0209)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>active</status>
+<status>complete</status>
 <!-- SPEC/AUDIT (Phase-1), NOT a build. GO'd 2026-06-24 (Andrew start-now); CTO scope-confirmed. -->
+<!-- STATUS CORRECTED 2026-07-07 (COO /prd-delta registry-hygiene pass): v0.1 spec-of-record promoted to docs/architecture, CTO arch-gated (bb335a2b5). Field was never flipped from active after landing. -->
+
 
 <objective>
 Produce the Black Diamond architecture spec -- how BD aggregates + surfaces custodian data (the model we'd have to replicate/replace to own the aggregation layer). SPEC-OF-RECORD: PRD S6 row D2.

@@ -6,8 +6,10 @@
 <arch_gate>1.0.0_SA_CTO (the reverse-ETL methodology + the gradient; consumes it into D5 = the gold-replicate spec)</arch_gate>
 <issued_by>2.0.0_SA_COO (Andrew-direct DATA_PLATFORM deep-expansion; CTO Phase-1-DEEP decomposition 141811Z; formalized for coverage per CTO 150331Z)</issued_by>
 <issued_date>2026-06-24</issued_date>
-<status>active</status>
+<status>complete</status>
 <!-- IN-FLIGHT: census + method v0.1 (69208f93b) DELIVERED; 49F/Schwab anchor-cut + chunk-calibration underway (chunk-1 lot-diff = base-DS; chunks 2-4 = ~B; chunk-2 allocations + chunk-3 txn/NNA DONE+CVO-verified). Formalizes the existing dispatch-driven work for TO-5 coverage. -->
+<!-- STATUS CORRECTED 2026-07-07 (COO /prd-delta registry-hygiene pass): the supplant proof is complete per org/projects/DATA_PLATFORM.json's own phase text ("THE SUPPLANT PROOF COMPLETE... CVO chunk-1A keystone PASS"). Field was never flipped from active after landing. -->
+
 <roe>Complies with docs/architecture/DATA_PLATFORM_RECON_ROE.md (Option-B own-account diffs within the 4 constraints; our-data-only).</roe>
 
 <objective>
