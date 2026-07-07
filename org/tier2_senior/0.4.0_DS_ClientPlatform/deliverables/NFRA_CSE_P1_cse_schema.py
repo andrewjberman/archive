@@ -239,20 +239,74 @@ CLOUDNODE_PREFIX_TO_ENTITY: dict = {
     "tool:": Entity.TOOL, "tier:": Entity.TIER, "scope:": Entity.GRAPHSCOPE,
 }
 
-# CloudEdge edge_type -> Relationship (live discriminators, CTO S4 + ms + code)
+# CloudEdge edge_type -> Relationship. TOTAL over the LIVE distinct edge_type inventory (comp-kuzu
+# MATCH ()-[e:CloudEdge]->() RETURN DISTINCT e.edge_type, 2026-07-07: 52 types). The algebra
+# INTENTIONALLY compresses many concrete edges into fewer governed relationships (C0->C1
+# compression); this is a defensible many-to-one reconcile, not an invent. CTO AC4 condition:
+# every LIVE edge_type maps -> gap-fail-closed (a new live edge_type is a coverage-gap CSE).
 CLOUDEDGE_TO_RELATIONSHIP: dict = {
+    # direct algebra-named edges
     "RENDERS": Relationship.RENDERS, "FLOWS_TO": Relationship.FLOWS_TO, "FETCHES": Relationship.FETCHES,
     "SERVED_FROM": Relationship.SERVED_FROM, "CONTAINS": Relationship.CONTAINS,
-    "CALLS": Relationship.CALLS, "IMPORTS": Relationship.IMPORTS, "READS": Relationship.READS,
-    "WRITES": Relationship.WRITES, "TRIGGERS": Relationship.TRIGGERS, "DENIED": Relationship.DENIED,
-    "ALLOWED": Relationship.ALLOWED, "REQUIRES": Relationship.REQUIRES,
-    "AUTHENTICATES": Relationship.AUTHENTICATES, "AUTHORIZES": Relationship.AUTHORIZES,
-    "OWNED_BY": Relationship.GOVERNS, "HAS_ACCESS": Relationship.REFERENCES,
-    "SHARED_WITH": Relationship.REFERENCES, "MEMBER_OF": Relationship.CONTAINS,
-    "DEPENDS_ON": Relationship.DEPENDS_ON, "REFERENCES": Relationship.REFERENCES,
-    "PRODUCES": Relationship.PRODUCES, "CONSUMES": Relationship.CONSUMES,
-    "IMPLEMENTS": Relationship.IMPLEMENTS,
+    "CALLS": Relationship.CALLS, "READS": Relationship.READS, "WRITES": Relationship.WRITES,
+    "TRIGGERS": Relationship.TRIGGERS, "REFERENCES": Relationship.REFERENCES,
+    # containment / structural
+    "CONTAINS_DRILLDOWN": Relationship.CONTAINS, "CLUSTERS": Relationship.CONTAINS,
+    "HAS_FIELD": Relationship.CONTAINS, "HAS_PROP": Relationship.CONTAINS, "HAS_ROUTE": Relationship.CONTAINS,
+    "HAS_KEY": Relationship.CONTAINS, "DECLARES": Relationship.CONTAINS,
+    # reference / typing
+    "ALIAS_TO": Relationship.REFERENCES, "HAS_TYPE": Relationship.REFERENCES,
+    "HAS_PROPS_TYPE": Relationship.REFERENCES, "REFERENCES_TYPE": Relationship.REFERENCES,
+    "SHARES_SOURCE": Relationship.REFERENCES, "MONITORS": Relationship.REFERENCES,
+    "IS_ENDPOINT": Relationship.IMPLEMENTS, "HAS_PROFILE": Relationship.REFERENCES,
+    # data-flow reads/writes (concrete -> reads/writes/fetches)
+    "READS_FIELD": Relationship.READS, "READS_S3": Relationship.READS, "READS_SECRET": Relationship.READS,
+    "READS_URL": Relationship.FETCHES, "WRITES_S3": Relationship.WRITES, "LOGS_TO": Relationship.WRITES,
+    "PROP_PASSES": Relationship.FLOWS_TO, "ROUTES_TO": Relationship.FLOWS_TO,
+    "DEAD_LETTERS_TO": Relationship.FLOWS_TO, "EMITS_TO": Relationship.FLOWS_TO,
+    # produce / consume / project
+    "PRODUCES": Relationship.PRODUCES, "PUBLISHES_TO": Relationship.PRODUCES,
+    "INSTANTIATES": Relationship.PRODUCES, "PROJECTS_TO": Relationship.PRODUCES,
+    "RUNS": Relationship.PRODUCES, "CONSUMES": Relationship.CONSUMES, "SUBSCRIBES": Relationship.CONSUMES,
+    "NOTIFIES": Relationship.TRIGGERS, "INVOKES": Relationship.CALLS, "ORIGIN": Relationship.SERVED_FROM,
+    # governance / auth / requires
+    "OWNED_BY": Relationship.GOVERNS, "HAS_POLICY": Relationship.GOVERNS,
+    "ASSUMES": Relationship.AUTHORIZES, "CAN_ASSUME": Relationship.AUTHORIZES, "GRANTS": Relationship.AUTHORIZES,
+    "ENCRYPTS_WITH": Relationship.REQUIRES, "USES_OAC": Relationship.REQUIRES,
+    "USES_OAI": Relationship.REQUIRES, "USES_SG": Relationship.REQUIRES, "IN_VPC": Relationship.DEPENDS_ON,
+    # implements / imports (code)
+    "IMPLEMENTS": Relationship.IMPLEMENTS, "IMPORTS": Relationship.IMPORTS,
+    "DEPENDS_ON": Relationship.DEPENDS_ON,
+    # ms edges + code auth (retained)
+    "HAS_ACCESS": Relationship.REFERENCES, "SHARED_WITH": Relationship.REFERENCES,
+    "MEMBER_OF": Relationship.CONTAINS, "DENIED": Relationship.DENIED, "ALLOWED": Relationship.ALLOWED,
+    "REQUIRES": Relationship.REQUIRES, "AUTHENTICATES": Relationship.AUTHENTICATES,
+    "AUTHORIZES": Relationship.AUTHORIZES,
 }
+
+# LIVE inventory snapshot (comp-kuzu, 2026-07-07, kuzu_nessie_db 19917 nodes/34948 edges) -- the
+# AC4 ground-truth CTO's condition binds against (verify totality vs REALITY, not a hardcoded count).
+# CVO re-pulls fresh (assert_live_coverage accepts a freshly-pulled set); this is the P1 snapshot.
+LIVE_NODE_TYPES_20260707 = frozenset({
+    "API_GW", "API_ROUTE", "CLOUDFRONT_DISTRIBUTION", "CW_ALARM", "Component", "DYNAMODB_TABLE",
+    "DataFetch", "EC2_INSTANCE", "ECS_CLUSTER", "ECS_TASK_DEFINITION", "EVENT_RULE", "EVENT_SOURCE",
+    "Endpoint", "Field", "Hook", "IAM_POLICY", "IAM_ROLE", "IAM_USER", "INSTANCE_PROFILE", "JSXElement",
+    "JSXRender", "KMS_KEY", "LAMBDA", "LOAD_BALANCER", "LOG_GROUP", "MS_FILE", "MS_FOLDER", "MS_LIBRARY",
+    "MS_SITE", "MS_USER", "Module", "Page", "PanelCluster", "Pipeline", "PipelineFunction",
+    "PipelineScript", "Prop", "ROUTE53_RECORD", "ReactComponent", "ReactQueryKey", "S3Key", "S3_BUCKET",
+    "S3_BUCKET_POLICY", "SECRET", "SECURITY_GROUP", "SERVICE_PRINCIPAL", "SNS_TOPIC", "SQS_QUEUE",
+    "STATE_MACHINE", "ServedURL", "TypeDecl", "VPC_ENDPOINT",
+})
+LIVE_EDGE_TYPES_20260707 = frozenset({
+    "ALIAS_TO", "ASSUMES", "CALLS", "CAN_ASSUME", "CLUSTERS", "CONTAINS", "CONTAINS_DRILLDOWN",
+    "DEAD_LETTERS_TO", "DECLARES", "EMITS_TO", "ENCRYPTS_WITH", "FETCHES", "FLOWS_TO", "GRANTS",
+    "HAS_FIELD", "HAS_KEY", "HAS_POLICY", "HAS_PROFILE", "HAS_PROP", "HAS_PROPS_TYPE", "HAS_ROUTE",
+    "HAS_TYPE", "INSTANTIATES", "INVOKES", "IN_VPC", "IS_ENDPOINT", "LOGS_TO", "MONITORS", "NOTIFIES",
+    "ORIGIN", "OWNED_BY", "PROJECTS_TO", "PROP_PASSES", "PUBLISHES_TO", "READS", "READS_FIELD",
+    "READS_S3", "READS_SECRET", "READS_URL", "REFERENCES_TYPE", "RENDERS", "ROUTES_TO", "RUNS",
+    "SERVED_FROM", "SHARES_SOURCE", "SUBSCRIBES", "TRIGGERS", "USES_OAC", "USES_OAI", "USES_SG",
+    "WRITES", "WRITES_S3",
+})
 
 
 def map_cloudnode(nid: str, node_type: str = "") -> Entity:
@@ -381,6 +435,44 @@ def coverage_sweep(observed_node_types: set, observed_edge_types: set) -> tuple:
     return (not un_n and not un_e, un_n, un_e)
 
 
+def assert_live_coverage(live_node_types: set = None, live_edge_types: set = None) -> tuple:
+    """AC4 (CTO condition): mapping-totality against the ACTUAL LIVE distinct type inventory (not a
+    hardcoded count). Pass freshly-pulled live sets (comp-kuzu DISTINCT node_type/edge_type) or use
+    the 2026-07-07 snapshot. Returns (ok, unmapped_node_types, unmapped_edge_types). Fail-closed: a
+    live type with no algebra mapping is an AC4 FAIL (a real coverage gap), never silent.
+
+    CVO re-exercise: pull fresh -> comp-kuzu "MATCH (n:CloudNode) RETURN DISTINCT n.node_type" +
+    "MATCH ()-[e:CloudEdge]->() RETURN DISTINCT e.edge_type" -> pass here -> assert ok.
+    """
+    ln = set(live_node_types) if live_node_types is not None else set(LIVE_NODE_TYPES_20260707)
+    le = set(live_edge_types) if live_edge_types is not None else set(LIVE_EDGE_TYPES_20260707)
+    un_n = sorted(t for t in ln if t not in CLOUDNODE_TYPE_TO_ENTITY)
+    un_e = sorted(t for t in le if t not in CLOUDEDGE_TO_RELATIONSHIP)
+    return (not un_n and not un_e, un_n, un_e)
+
+
+def confidence_band(conf) -> str:
+    """CTO guidance semantic (non-blocking): in a DETERMINISTIC substrate a TYPED node should be
+    HIGH (lexical-certain ~1.0; enrichment-derived ~0.8-0.9). low<=0.34 | mid 0.34-0.67 | high>0.67.
+    A TYPED node in the MID band is a soft-inference smell (LAW 1 discourages it) -- allowed in P1
+    but the coverage-sweep TRACKS recognizers producing many mid-band typed nodes (a future
+    recognizer-honesty signal). Returns 'low'|'mid'|'high'|'invalid'."""
+    if not (isinstance(conf, (int, float)) and not isinstance(conf, bool) and 0.0 <= float(conf) <= 1.0):
+        return "invalid"
+    c = float(conf)
+    return "low" if c <= LOW_CONFIDENCE_MAX else ("mid" if c <= 0.67 else "high")
+
+
+def inference_smell(cse: CSE) -> bool:
+    """CTO guidance: a TYPED (non-Concept) subject in the MID confidence band = a soft-inference
+    smell (the recognizer is inferring, not lexically matching). Non-blocking; a tracked signal."""
+    tr = cse.transformation or {}
+    subj = tr.get("subject")
+    et = subj.etype if isinstance(subj, EntityRef) else (subj or {}).get("etype")
+    conf = (cse.qualifiers or {}).get(Qualifier.CONFIDENCE.value)
+    return et != Entity.CONCEPT.value and confidence_band(conf) == "mid"
+
+
 def parity_check(cloudnodes: list, cloudedges: list) -> tuple:
     """AC4 parity SCAFFOLD: re-materializing the mapped code CSEs must reproduce the current
     CloudNode/CloudEdge graph. Given the live graph's (nid, node_type) + (src, etype, dst) lists,
@@ -412,3 +504,88 @@ COMPACTION_ENROLL = "join the 02:00Z Iceberg maintenance (AE constraint #4) -- P
 def partition_key(cse: CSE) -> dict:
     ts = str((cse.execution_meta or {}).get("timestamp", ""))
     return {"source": (cse.producer or {}).get("kind", ""), "event_date": ts[:10]}
+
+
+# ===========================================================================
+# RUNNABLE SELF-TEST (CTO condition a -- re-runnable so CVO can re-exercise the fail-closed gate).
+#   `python NFRA_CSE_P1_cse_schema.py`  runs + PRINTS every assertion; exit 0 iff all PASS.
+#   `... --live`  ALSO pulls the live distinct type inventory via comp-kuzu for AC4 (else snapshot).
+# ===========================================================================
+def _mk_cse(prov=True, etype=Entity.REQUIREMENT.value, conf=0.9,
+            verb=Transformation.STRENGTHEN.value, head=True):
+    return CSE(
+        "e1", SCHEMA_VERSION, {"kind": ProducerKind.GIT.value, "ref": "abc123"},
+        {"id": "code#1", "artifact_class": "python", "version": "1.0"},
+        {"verb": verb, "subject": EntityRef(etype, "CLAUDE.md:rule-22"),
+         "edges": [RelationshipDelta(Relationship.GOVERNS.value, EntityRef(Entity.POLICY.value, "gate"))]},
+        Provenance("CLAUDE.md", "L42", "rule_recognizer", "Rule 22 grounding") if prov
+        else Provenance("", "", "", ""),
+        {"timestamp": "2026-07-07T10:00Z", "actor": "ci", "run_id": "r1"},
+        {"marker_head": "abc123def"} if head else {},
+        {Qualifier.CONFIDENCE.value: conf},
+    )
+
+
+def _self_test(live_nodes=None, live_edges=None) -> bool:
+    results = []
+
+    def check(name, cond, detail=""):
+        results.append(cond)
+        print(f"  [{'PASS' if cond else 'FAIL'}] {name}" + (f"  -> {detail}" if (detail and not cond) else ""))
+
+    print("=== NFRA_CSE.P1 self-test (fail-closed validator + AC3/AC4/AC5) ===")
+    ok, e = validate(_mk_cse())
+    check("1  valid CSE accepted", ok, str(e))
+    ok, e = validate(_mk_cse(prov=False))
+    check("2  provenance-less REJECTED (LAW 2)", not ok)
+    ok, e = validate(_mk_cse(verb="frobnicate"))
+    check("3  off-enum verb REJECTED (reject-not-coerce)", not ok)
+    ok, e = validate(_mk_cse(head=False))
+    check("4  missing head.marker_head REJECTED (AC6)", not ok)
+    ok, e = validate(_mk_cse(etype=Entity.CONCEPT.value, conf=0.2))
+    check("5  Concept(untyped)+low(0.2) ACCEPTED (honest degrade)", ok, str(e))
+    ok, e = validate(_mk_cse(etype=Entity.CONCEPT.value, conf=0.9))
+    check("6  Concept+high(0.9) REJECTED (smuggled guess, LAW 1)", not ok)
+    ok, e = validate(_mk_cse(conf="high"))
+    check("7  non-float confidence REJECTED", not ok)
+    fok, ff = cse_fidelity_ok(_mk_cse())
+    check("8  fidelity PASS (decompresses to C0 evidence, AC5)", fok, str(ff))
+    # AC4 -- mapping totality vs the LIVE distinct type inventory (fresh if --live, else snapshot)
+    cok, un, ue = assert_live_coverage(live_nodes, live_edges)
+    src = "LIVE-pulled" if live_nodes is not None else "2026-07-07 snapshot"
+    check(f"9  AC4 node_type totality vs {src} ({len(live_nodes or LIVE_NODE_TYPES_20260707)} types)",
+          not un, f"unmapped: {un}")
+    check(f"10 AC4 edge_type totality vs {src} ({len(live_edges or LIVE_EDGE_TYPES_20260707)} types)",
+          not ue, f"unmapped: {ue}")
+    # CTO guidance: mid-band typed = inference smell (non-blocking, just report)
+    smell = inference_smell(_mk_cse(conf=0.5))
+    print(f"  [INFO] inference-smell tracker: typed+mid-band(0.5) flagged = {smell} (LAW-1 honesty signal)")
+    total = len(results)
+    passed = sum(1 for r in results if r)
+    print(f"=== {passed}/{total} PASS ===")
+    return passed == total
+
+
+def _pull_live_types():
+    """Pull the live distinct node_type/edge_type via comp-kuzu (AC4 --live mode). Best-effort:
+    returns (None,None) if comp-kuzu is unavailable so the snapshot is used."""
+    import subprocess
+    def _q(cypher):
+        try:
+            out = subprocess.run(["comp-kuzu", cypher], capture_output=True, text=True, timeout=120)
+            vals = set()
+            for ln in out.stdout.splitlines():
+                s = ln.strip()
+                if s and s.isupper() or (s and s[:1].isalpha() and " " not in s and ":" not in s):
+                    vals.add(s)
+            return vals or None
+        except Exception:
+            return None
+    n = _q("MATCH (n:CloudNode) RETURN DISTINCT n.node_type AS t ORDER BY t")
+    e = _q("MATCH ()-[x:CloudEdge]->() RETURN DISTINCT x.edge_type AS t ORDER BY t")
+    return n, e
+
+
+if __name__ == "__main__":
+    _ln, _le = (_pull_live_types() if "--live" in sys.argv else (None, None))
+    sys.exit(0 if _self_test(_ln, _le) else 1)
