@@ -7,8 +7,8 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.1.0_DS_MarketIntelligence</issued_to>
     <date>2026-07-07</date>
-    <status>pending</status>
-    <dispatch_state>DISPATCHED 2026-07-07 -- Andrew-direct implementation (not just candidate), PRD docs/architecture/MKOV_TRSRCE_PRD.md (commit 6aa0b5741) SS6 TO-1. Starting gate for TO-2/TO-3, both staged behind this.</dispatch_state>
+    <status>held</status>
+    <dispatch_state>HELD 2026-07-07T16:54Z per CTO -- scope-narrowing correction (new empirical evidence, not a re-read): the dividend add-back tracks real ex-date flow, not a smoothed synthetic yield -- US indices (S&amp;P/Russell) may already be correct as-is, EAFE may only need a dividend-basis fix rather than a full TR-ticker migration. No work was in flight (DS lane was already held pending Andrew's Yang timeline) -- nothing lost. Awaiting CTO's revised PRD before re-dispatching.</dispatch_state>
     <gate_note>Gates: none (starting point). Effort: Yang-dependent (terminal access, human timeline) -- coordinate with Andrew on the Yang terminal pull, do not attempt to self-source.</gate_note>
   </metadata>
 
