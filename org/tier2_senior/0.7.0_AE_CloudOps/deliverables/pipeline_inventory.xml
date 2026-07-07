@@ -483,10 +483,10 @@
     <function>
       <name>opal-infrastructure-monitor</name>
       <source_dir>infra/aws/lambda/infrastructure_monitor</source_dir>
-      <files>lambda_function.py</files>
-      <trigger>Unknown — no TF resource found, no EventBridge rule discoverable from source</trigger>
-      <purpose>Infrastructure health monitoring. Likely checks AWS resource states and alerts on anomalies.</purpose>
-      <terraform_status>Registered in lambda-source-map.json. No artifact_s3_key or TF resource found — not yet migrated to S3-backed deployment.</terraform_status>
+      <files>lambda_function.py, openai_cost_tracker.py</files>
+      <trigger>EventBridge rule infrastructure-monitor-daily, 13:00 UTC daily (console-managed -- TF-hygiene fast-follow, not yet folded in)</trigger>
+      <purpose>Daily OPAL INFRASTRUCTURE REPORT -> SES email to andrew@opalinvest.com + S3 archive s3://opal-data-portal-v2/infrastructure/reports/. Sections (NFRA_INFRPT, current as of P2 2026-07-07): Lambda health, SmartX/per-pipeline data freshness, deploy drift, producer drift, SNS egress, AWS costs (MTD by service), cost-depth (per-pipeline $ attribution off the Pipeline CE tag + MTD/prior-month trend + biggest movers + EC2 right-size flags), security sweep (Claude briefing + trend vs prior day + top-N new findings), AI error analysis (Claude, on-demand when Lambda errors exist), OpenAI token-accurate cost tracking.</purpose>
+      <terraform_status>TF-managed since NFRA_INFRPT.P0 (infra/aws/terraform/shared-infra/infra-monitor.tf, aws_lambda_function.infra_monitor) on the SHARED opal-portal-lambda-role (several scoped additive inline policies: MonitorAnthropicSecretRead, MonitorLogsRead, MonitorDataFreshnessRead, MonitorSnsEgressRead -- each in infra-monitor.tf). NOTE: the base "opal-infrastructure-monitor" inline policy (EC2Describe/CostExplorer/CloudWatchMetrics/etc, live-verified 2026-07-07) is itself NOT yet TF-declared -- a small adjacent IaC-drift gap found while building cost_depth(), flagged to COO/CTO, not yet fixed (out of P2 scope). Deployed shared-infra-v1.36.0.</terraform_status>
     </function>
 
     <function>
@@ -895,5 +895,34 @@
       <downstream>S3 (broker adapter, separate lane) consumes the exported outputs (queue urls/arns, role arns, KMS arn). S4 (CVO) independently re-verifies this partition -- resources PERSIST for that.</downstream>
     </module>
   </nfra_agentbus>
+
+  <nfra_cmtque_alarms>
+    <!-- NFRA_CMTQUE TO-4 (2026-07-07): observability for the local commit-worker daemon
+         (.tools/commit-worker.sh). The worker is a LOCAL host process, not a Lambda/EC2
+         TF resource -- its cw_metric() emits real aws cloudwatch put-metric-data under the
+         host's own IAM identity (Andrew_Berman, group AdministratorAccessOpalCapital;
+         live-verified, no new grant needed -- comp-iam's TF-Lambda/EC2-role model does not
+         cover this class of local-daemon grant). -->
+    <module>
+      <tf_dir>infra/aws/terraform/shared-infra/cmtque-alarms.tf</tf_dir>
+      <tag>shared-infra-v1.34.0</tag>
+      <design>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_CMTQUE_phase0_grounding_and_scaffold.md sec7</design>
+      <resources>
+        4 aws_cloudwatch_metric_alarm on namespace Opal/CommitQueue (dimension Repo=ajb_workspace):
+        cmtque-worker-down (CRITICAL -- WorkerLiveness missing-data >=3min, treat_missing_data=breaching),
+        cmtque-dlq-depth (DlqDepth>=1), cmtque-queue-backlog (QueueDepth>20 sustained 5min -- PLACEHOLDER
+        threshold), cmtque-commit-latency-high (CommitLatencyMs>5000ms over 10min -- PLACEHOLDER
+        threshold, both pending NFRA_CMTQUE.TO-6R's load-test baseline). All route to the existing
+        opal-infrastructure-alerts SNS topic (data source, not created here).
+      </resources>
+      <exercised>
+        Both AC1 (worker-killed) and AC2 (DLQ event) alarms confirmed via a LIVE fire on the real
+        repo dimension 2026-07-07 (killed the real daemon; manufactured a genuine CORRUPT request
+        hitting the real DLQ code path) -- not config-read. Real SNS subscriber confirmed
+        (list-subscriptions-by-topic: SMS +17862617679, auto-confirmed, not PendingConfirmation).
+      </exercised>
+      <downstream>CommitLatencyMs emission newly wired this TO (ENQUEUE_TS existed in the request format but was never read back) -- .tools/commit-worker.sh + commit_queue_lib.sh (cq_iso_to_epoch).</downstream>
+    </module>
+  </nfra_cmtque_alarms>
 
 </pipeline_inventory>
