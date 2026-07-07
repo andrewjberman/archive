@@ -118,5 +118,31 @@ exercise-gate confirms post-nightly.
   geo = BOUNDED-STALE-PRESENT (geo slowly-changing; stale only if the client moved since 04-28). Ship a
   served "geo as_of 04-28" vintage flag WITH the producer un-freeze.
 - **Producer scope (initial):** pull_orion_households.py + build_household_dim.py (named in D_04b's
-  error) do NOT exist in-repo; only probe_inflec_household.py (manual_api/). So the household-geo dim
-  needs a producer REBUILD/revival, not a re-run -- the reason it froze 04-28.
+  error) do NOT exist in-repo; only probe_inflec_household.py (manual_api/).
+
+## GEO AXIS CLOSED (2026-07-06, af7df5bc8) -- a cheap re-point, NOT a producer revival
+
+The producer-revival framing was WRONG (grounding corrected it twice): (1) the unified-account-dim
+Lambda is ALIVE/fresh but has NO geo; (2) 0.7.0~A confirmed the producer healthy -> it looked like a
+silver-BUILD-link repoint-gap. But the decisive grounding: **the fresh silver/api_dims/accounts_v2 (the
+REST canonical A_00 already uses) CARRIES the geo** -- state/city/zip, 866/868 (~100%) non-null,
+household roll-up unambiguous (0/290 households span >1 account-state). And the ONLY consumers of the
+frozen household dim were the 2 GEO reads (INF_D_04 L494 + INF_D_00d), both of which already referenced
+accounts_v2. So the fix collapsed to a cheap CONSUMER re-point (same class as the map), 10x cheaper than
+a rebuild:
+- **INF_D_04 + INF_D_00d geo -> accounts_v2** (account state/city -> household roll-up). Deployed
+  af7df5bc8 (2/2 safe-deploy PASS). CTO-nodded; 3 conditions met (value-check WA-vocab-grounded;
+  ZERO-active-consumers deprecate; CVO gates the by-state refresh). ~2/868 null-geo = HONEST-NULL.
+- **silver/api_dims/household -> DEPRECATE** (0 active consumers after the re-point; genuinely
+  dead-and-unconsumed). The dead bronze/orion-api/household producer needs NO revival.
+- **Alarm-concern resolved for free:** geo now follows accounts_v2's freshness (a critical silver dim
+  already in the NFRA_SILVERFRESH registry) -- no separate fragile geo-producer to alarm.
+
+## REPOINT-COMPLETE -- FINAL STATUS
+- **MAP axis** (7 stragglers -> A_00 gold dim): DONE + deployed; DI-12 content-verified live (fresh
+  288/290 HH set, HH 487 100%-FFTHX -> 'concentrated').
+- **GEO axis** (D_04 + D_00d -> accounts_v2): DONE + deployed; frozen household dim deprecated.
+- **TAX/reg_type axis**: DS~B's reg_type un-freeze (their lane; D_00 keeps the DI-7 silver-rejoin
+  interim until it lands).
+The BUILD-STEP repoint-gap sub-variant (a silver-build not repointed to a moved producer output) is
+documented here as a new NFRA_GLDINV class instance, even though the geo fix bypassed it via accounts_v2.
