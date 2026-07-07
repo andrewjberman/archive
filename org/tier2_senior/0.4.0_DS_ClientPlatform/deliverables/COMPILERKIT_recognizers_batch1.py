@@ -27,9 +27,12 @@ from comp_recognizer_sdk import (  # noqa: E402
 def _marker(tree) -> str:
     """marker_head for the CSE. NOTE(DS->~D verify-don't-trust finding): emit(site,tree) has NO marker_head
     param (recognize() passes it only to degrade()), so a real recognizer can't reach it. Reading tree.meta
-    is the clean path IF the front-end sets it -- flagged to ~D to standardize (front-end sets tree.meta
-    ['marker_head'], OR recognize() threads it to emit)."""
+    is the clean path IF the front-end sets it."""  # SUPERSEDED below.
     return (getattr(tree, "meta", None) or {}).get("marker_head", "")
+
+
+# marker_head: ~D RULED (b) 2026-07-07 (SDK 7af2db209) -- recognize() threads marker_head into emit()
+# (emit(self, site, tree, *, marker_head)). The _marker/tree.meta workaround above is retired; emit takes it.
 
 
 class DispatchCatalogRecognizer(Recognizer):
@@ -55,7 +58,7 @@ class DispatchCatalogRecognizer(Recognizer):
                        evidence=m.group(0).strip(),
                        payload={"script_id": m.group(1), "filename": m.group(2)})
 
-    def emit(self, site, tree):
+    def emit(self, site, tree, *, marker_head):
         script = Path(site.payload["filename"]).stem
         prov = Provenance(source=site.source, locus=site.locus, recognizer=self.concept, evidence=site.evidence)
         return [emit_cse(
@@ -63,7 +66,7 @@ class DispatchCatalogRecognizer(Recognizer):
             subject=EntityRef(Entity.SERVICE.value, f"dispatch:{Path(site.source).stem}"),
             edges=[RelationshipDelta(Relationship.TRIGGERS.value,
                                      EntityRef(Entity.MODULE.value, f"gold:{script}"))],
-            provenance=prov, confidence=1.0, marker_head=_marker(tree),
+            provenance=prov, confidence=1.0, marker_head=marker_head,
             producer_kind=self.producer_kind, compiler_id=self.compiler_id, artifact_class=self.artifact_class,
         )]
 
@@ -85,7 +88,7 @@ class MdpfDispatchRecognizer(Recognizer):
                 yield Site(source=tree.source, locus=locus_at(tree.text, m.start()),
                            evidence=m.group(0).strip(), payload={"relpath": m.group(1)})
 
-    def emit(self, site, tree):
+    def emit(self, site, tree, *, marker_head):
         script = Path(site.payload["relpath"]).stem
         prov = Provenance(source=site.source, locus=site.locus, recognizer=self.concept, evidence=site.evidence)
         return [emit_cse(
@@ -93,7 +96,7 @@ class MdpfDispatchRecognizer(Recognizer):
             subject=EntityRef(Entity.SERVICE.value, "mdpf-daily-runner"),
             edges=[RelationshipDelta(Relationship.TRIGGERS.value,
                                      EntityRef(Entity.MODULE.value, f"gold:{script}"))],
-            provenance=prov, confidence=1.0, marker_head=_marker(tree),
+            provenance=prov, confidence=1.0, marker_head=marker_head,
             producer_kind=self.producer_kind, compiler_id=self.compiler_id, artifact_class=self.artifact_class,
         )]
 
