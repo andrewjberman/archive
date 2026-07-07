@@ -535,10 +535,10 @@
 
     <function>
       <name>infrastructure-daily-snapshot</name>
-      <source_dir>(inferred from shared-infra/main.tf IAM context)</source_dir>
-      <trigger>Unknown — likely EventBridge daily schedule</trigger>
-      <purpose>Creates EC2 AMI snapshots. IAM policy for ec2:CreateImage, ec2:DescribeImages, ec2:CreateTags is explicitly attached to opal-portal-lambda-role via shared-infra/main.tf (aws_iam_role_policy.portal_lambda_ec2_snapshot).</purpose>
-      <terraform_status>IAM policy managed in shared-infra. Lambda function itself not found in lambda-source-map.json.</terraform_status>
+      <source_dir>infra/aws/lambda/infrastructure-daily-snapshot</source_dir>
+      <trigger>EventBridge rule infrastructure-snapshot-daily, cron(0 7 * * ? *) (07:00 UTC daily, console-managed)</trigger>
+      <purpose>DR backup: AMIs + EBS snapshots + config exports (Lambda/IAM/EventBridge/SG/S3/DynamoDB) into s3://opal-infrastructure-snapshots/{date}/, 30-day rollback capability. As of NFRA_INFRPT.P2 (2026-07-07) also runs reap_old_snapshots() (step 8b): deletes AMIs + EBS snapshots (tag Purpose=DailySnapshot) older than 30 days -- those are EC2 resources, not S3 objects, so the S3 lifecycle policy never touched them; they accumulated unbounded until this reaper.</purpose>
+      <terraform_status>TF-managed since NFRA_INFRPT.DR2 (infra/aws/terraform/shared-infra/infra-snapshot.tf, aws_lambda_function.infra_snapshot) on the DEDICATED infrastructure-snapshot-role (infra/aws/terraform/shared-infra/iam_legacy.tf) -- NOT the shared opal-portal-lambda-role (that was the DR2 fix; the entry above this one is now historical/superseded). Deployed shared-infra-v1.33.0.</terraform_status>
     </function>
 
   </monitoring_lambdas>
@@ -562,7 +562,7 @@
         arn:aws:ec2:us-east-1::image/*,
         arn:aws:ec2:us-east-1:313476888478:snapshot/*
       </resources>
-      <note>opal-portal-lambda-role predates Terraform. Rather than importing the full role, shared-infra attaches a scoped inline policy for EC2 snapshot needs only.</note>
+      <note>SUPERSEDED by NFRA_INFRPT.DR2 (2026-06-16): this was a time-boxed exception on the SHARED opal-portal-lambda-role while infrastructure-daily-snapshot had no dedicated role. DR2 repointed the Lambda to the dedicated infrastructure-snapshot-role and REMOVED this grant (least-privilege restored). Kept here as historical record only -- current perms are on infrastructure-snapshot-role, see the infrastructure-daily-snapshot function entry above.</note>
     </policy>
 
     <policy>
