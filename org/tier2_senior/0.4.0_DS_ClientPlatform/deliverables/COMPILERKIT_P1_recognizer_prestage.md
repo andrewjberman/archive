@@ -53,11 +53,15 @@ reference implementation.
 2. **Whole-project vs per-file front-ends:** ts-morph needs a persistent Project/program (+ incremental
    1-level dependent closure); #1 is per-artifact + authoritative-map assembly. SDK front-end must support
    both lifecycles + reconcile incrementality.
-3. **LIVE-AWS leg breaks lexical-provenance (THE decision):** comp_aws_cli/extract_event_invoke recognize
-   RUNTIME state via boto3 -- NO file:line to decompress to, so AC6 fidelity_check doesn't cleanly apply.
-   -> either a distinct provenance-kind (api-response + timestamp + freshness) for live nodes, OR the
-   live-AWS layer is OUT of COMPILERKIT scope (the PRD frames it as *artifact* compilation + names
-   NFRA_INTEGRATIONS/ingest as the "observe" plane). **CTO/COO: is live-AWS a compiler or the ingest plane?**
+3. **LIVE-AWS -- RULED (CTO 2026-07-07): COMPILERKIT = PURE-LEXICAL; live-AWS re-homes to FEDOBS.** A
+   live-AWS node's evidence is a MUTABLE, timestamp-bound, non-reproducible api-response -- NOT lexical
+   (no file:line), NOT deterministic; a "runtime-evidence fidelity variant" would let fidelity_check pass
+   a node decompressing to a mutable api-response = the slide LAW-1 forbids. So the SDK provenance is
+   LEXICAL-ONLY {source,locus,evidence}=file:line. ACTION: DROP compiler #1's boto3-LIVE recognizers
+   (LIVE-AWS-resource #11 + the live extract_event_invoke leg) -> they become FEDOBS (the applied-state
+   observer, a 6th federation-plane observer). COMPILERKIT-P1 parity-oracle pair = the 2 PURE-LEXICAL
+   compilers (code #1's ast/regex/TF recognizers #1-10, all parse SOURCE->file:line; + TSX #2). CTO owns
+   the other 4 hard-parts on P1-un-gate.
 4. **Preserve the FLOWS_TO KIND discriminator:** #2's most valuable recognizer (recompute/guarded flow =
    the spread-bug the regex can't see). The CSE Relationship IR MUST carry edge-KIND + condition first-class
    or the generalization regresses the capability that justified TSGRAPH.
@@ -67,5 +71,7 @@ reference implementation.
 
 ## Ready-to-build on P1 kickoff
 The recognizer-SDK build starts from comp_ladder.py (prototype) + NFRA_CSE_P1_cse_schema.py (IR, DS-owned)
--> wrap #1's 12 + #2's 11 recognizers -> AC2 parity-oracle each -> AC6 fidelity gate -> hot registry.
-Blocked-on: NFRA_CSE finalization + the CTO/COO ruling on hard-part #3 (live-AWS scope). ~F backs if tied.
+-> wrap #1's ~10 PURE-LEXICAL recognizers (ast/regex/TF #1-10; the 2 boto3-LIVE ones -> FEDOBS per CTO's
+#3 ruling) + #2's 11 -> AC2 parity-oracle each -> AC6 fidelity gate (lexical-only) -> hot registry.
+Blocked-on: NFRA_CSE finalization (hard-part #3 RESOLVED: pure-lexical, live-AWS->FEDOBS; CTO owns the
+other 4 on un-gate). ~F backs if tied.
