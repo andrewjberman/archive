@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -44,8 +45,23 @@ SPEC_ARTIFACT = os.path.join(_HERE, "motif_c2c3_materialize.json")
 
 
 def _c1_instances(motif) -> list:
-    """The existing C1 instance node_ids a C2 motif CONTAINS (its decompression-chain C1 layer)."""
+    """The existing C1 instance node_ids a C2 motif CONTAINS (its decompression-chain C1 layer).
+    Ladder-provenance form 'c1:D{n}:<type>:...' (D{n} = the TSGRAPH detector that surfaced it)."""
     return [n.nid for _, n in decompress(motif) if n.layer == "C1"]
+
+
+# The decompression ladder emits C1 nids in the provenance form 'c1:D{n}:<type>:...'. The ESTATE graph
+# (where 0.7.0 ingests) uses the BARE '<type>:...' canonical node_id -- comp-kuzu verified 2026-07-08
+# (0.7.0 RAVC1): the c1:D{n}: form resolves to 0 store nodes; stripped, 30/30 distinct resolve. Strip the
+# discriminator so the CONTAINS edge targets the REAL node; keep the detector(s) in props (lossless).
+_C1_DISCRIM = re.compile(r"^c1:(D\d+):(.*)$")
+
+
+def _canonical_c1(nid: str):
+    """(canonical_estate_node_id, detector|None) -- strip the ladder 'c1:D{n}:' discriminator to the bare
+    '<type>:...' estate node_id the store actually carries; return the detector for provenance."""
+    m = _C1_DISCRIM.match(nid)
+    return (m.group(2), m.group(1)) if m else (nid, None)
 
 
 def build_spec() -> dict:
@@ -69,9 +85,20 @@ def build_spec() -> dict:
                       "props": {"motif_type": spec["ntype"], "catalog_class": spec["catalog_class"],
                                 "tier": spec["tier"], "recurrence": recurrence,
                                 "n_instances": len(_c1_instances(motif))}})
+        # C2->C1 CONTAINS -> the EXISTING estate node (canonical '<type>:...'; discriminator stripped).
+        # DEDUP the collapse-cases (same canonical node surfaced by >1 detector, e.g. the D2 n D3 overlap-lens),
+        # merging the detector provenance so nothing is lost.
+        by_target: dict = {}
         for inst in _c1_instances(motif):
-            edges.append({"source": motif.nid, "target": inst, "edge_type": "CONTAINS",
-                          "props": {"layer": "C2->C1"}})
+            tgt, det = _canonical_c1(inst)
+            slot = by_target.setdefault(tgt, set())
+            if det:
+                slot.add(det)
+        for tgt, dets in by_target.items():
+            props = {"layer": "C2->C1"}
+            if dets:
+                props["via_detectors"] = sorted(dets)
+            edges.append({"source": motif.nid, "target": tgt, "edge_type": "CONTAINS", "props": props})
 
     # C3 system nodes + their CONTAINS->C2 edges
     for sys_node, why in systems:
@@ -92,8 +119,12 @@ def build_spec() -> dict:
         "grounding": {"c2_catalog_cert": "b783dd504", "c3_emergence": "43c3e4701",
                       "graph": "comp-kuzu fresh HEAD (fix-verified 06fbc6832)",
                       "nodes_snapshot_hint": prov.get("nodes_snapshot_id")},
-        "convention_note": ("proposed node_type C2Motif/C3System + CONTAINS edges; 0.7.0/CVO confirm the "
-                            "exact store discriminators. CONTAINS->C1 links to EXISTING graph nodes (intact decompression)."),
+        "convention_note": ("node_type C2Motif/C3System + CONTAINS edges. C2->C1 targets are the CANONICAL "
+                            "estate node_ids (bare '<type>:...'; the ladder 'c1:D{n}:' discriminator STRIPPED "
+                            "so the edge resolves to the EXISTING store node -- comp-kuzu RAVC1 2026-07-08: "
+                            "c1:D{n}: form=0 store rows, stripped=30/30 resolve). Detector provenance kept in "
+                            "props.via_detectors (lossless). C3->C2 targets are the motif: nodes created in this "
+                            "same batch. 0.7.0/CVO confirm the exact C2Motif/C3System node_type on ingest."),
         "taxonomy_prereq": {
             "gate": "C2Motif + C3System are NEW node_types -> derive_runner.relabel_layers_by_node_type FAILS CLOSED "
                     "(COND-2 durability) on any node_type not in NODE_TYPE_LAYER (derive_runner.py:~1497). Ingesting "
