@@ -1,6 +1,7 @@
-# NFRA_SYSTEM P1 -- SCOPE CLASS 3 inventory: COMP-TOOLS + COMP-WHICH + COMPRAIL
+# NFRA_SYSTEM P1 class-3 inventory + NFRA_TOOLCHECK P1 verification matrix: COMP-TOOLS + COMP-WHICH + COMPRAIL
 
-**Author:** 0.8.0_AE_CloudComp~D | **Date:** 2026-07-08 | **TO:** NFRA_SYSTEM.P1.audit-investigation.md (req 3, owner 0.8.0_AE_CloudComp~D)
+**Author:** 0.8.0_AE_CloudComp~D | **Date:** 2026-07-08 | **TOs:** NFRA_SYSTEM.P1.audit-investigation.md (req 3) + NFRA_TOOLCHECK.P1.functional-verification.md (req 1-5)
+**Dual-purpose (COO SYNERGY, CTO flag):** the ONE shared comp-tool artifact both projects read -- Sections 1-9 = the SYSTEM class-3 MAP (what the tools ARE + interact); Section 10 = the TOOLCHECK HEALTH overlay (do they WORK -- WORKS/BROKEN/friction/gate-firing/retire, real-invocation + log-grounded). SYSTEM-P4 maturity consumes both.
 **Discipline:** Rule-22 grounded, honest current-state. `built-proven` requires exercise/usage evidence; `built-unproven` = exists but no exercise evidence found; `forming` = partial/stub; `designed-only` = design/PRD, no working code. Consolidate-don't-duplicate: this is the synthesis + gap-list, the cited docs are the deep source.
 
 ## 0. Scope + authoritative counts (grounded)
@@ -165,3 +166,64 @@ The class-3 surface is not 40 loose tools -- it is a **routed catalog over a sha
 
 ## 9. RAVC
 RAVC 2.0.0_SA_COO~B (assembles the 6-class synthesis + routes CTO arch-gate / CVO grounded-not-recalled cert). Class-3 grounded against live source + exercised tools; built-but-unproven labeled as such.
+
+---
+
+# 10. NFRA_TOOLCHECK P1 -- functional-verification overlay (the HEALTH layer on the class-3 MAP)
+
+**Method (non-negotiable):** real-invocation + usage-log-grounded (`org/compiler-tools-log.md`, 14,356 rows), NEVER `--help`. The false-green lesson cuts BOTH ways: a `--help` pass can HIDE a break AND a raw log-fail-count can OVERCOUNT honest-nonzero exits as breaks. Verdicts: **WORKS / BROKEN / GATE-FIRING-CORRECTLY / HONEST-UNVERIFIABLE / DISCOVERABILITY-FRICTION / RETIRE-CANDIDATE.**
+
+## 10.0 PREREQUISITE (req#1) -- DONE + LIVE + COMMITTED
+
+The telemetry-substrate jq starvation is FIXED (`org/mcp/hooks/post-tool-telemetry.sh`, SoD-committed 417004b7d). GROUNDED root cause (Rule 22, CORRECTED the hypothesis): NOT "no fallback" -- the fallback + `.tools/jq.exe` existed + installed==canonical; the real mechanism = `SCRIPT_DIR=$(cd $(dirname $0))` resolves to `.` INTERMITTENTLY when `$CLAUDE_PROJECT_DIR` is empty in the PostToolUse shell -> `${SCRIPT_DIR}/../jq.exe` missed + PATH missed -> starve (proof: NO_JQ log lines carry `script_dir=.` AND telemetry lands SOME calls -- intermittent, not total). FIX: a jq-resolution ladder independent of SCRIPT_DIR + a pure-bash guarded fallback that still emits telemetry. EXERCISED: NO_JQ frozen at 252 (zero new post-fix), telemetry landing every call, comp-shell r16-clean. **The USED-axis is un-starved -> RETIRE verdicts are now trustworthy** (do NOT retire on pre-fix starved data).
+
+## 10.1 The per-tool verdict overlay (real-invocation + log-grounded)
+
+**WORKS (log-grounded majority):** the bulk of the ~55 tools -- every class-3 built-proven tool (Sections 1-6) with heavy PASS rows in the 14,356-row log AND Part-0's log-mining confirming no break: comp-kuzu / aws / iam / routes / lambdamap / secrets / dups / trace / blast / build / diff / xref / transform / cache / cluster / pii / types / adapter-audit / pipescript / comp-pipescript / platinum / freshness / chainrun / incrparity / parity / heat / xray / graph / shell / registry / coverage / honesty / fedobs(reader) / comp-which / comp-grep / comp-glob. Grounded on real use, NOT --help.
+
+**BROKEN (confirmed on REAL invocation this pass):**
+| tool | real-invocation | verdict | grounding |
+|---|---|---|---|
+| comp-learns-run | `comp-learns-run` -> `No module named comp.framework.run` rc=1 | BROKEN (hard, every invocation) | packaging: the comp.framework.run module is absent. P2 fix #2. CONFIRMED real (Part-0 + my run) |
+| comp-tooltip | `comp-tooltip --help` -> `comp-tooltip <U+FFFD> Portal tooltip...` | BROKEN (mojibake, r16/ASCII violation) + 46% scan-fail (Part-0) | a non-ASCII char in --help output (CLAUDE.md Code Quality). CONFIRMED. P2 fix #4 (-> ASCII). Also a RETIRE-CANDIDATE (one-off, 13 log rows) |
+
+**Part-0 CORRECTIONS (my real-invocation grounding reclassifies 2 of the 4 pre-populated "breaks"):**
+| tool | Part-0 said | my real-invocation finding | corrected verdict |
+|---|---|---|---|
+| comp-drift | "REAL BREAK 50% (41/82 FAIL, all forms), TOP break" | `coverage` rc=0 WORKS; `sweep` rc=2 = "EXIT: 2 (unverifiable)" -- the HONEST tri-state on the Trino seams (SCTY-held from this host), COVERAGE LEDGER COVERED=4/PARTIAL=2/SELF-HEAL=1 | **HONEST-UNVERIFIABLE, largely NOT a break** -- the exit-2 is never-silent-MATCH working as designed. A P2 fix must target only GENUINE crashes, NOT the honest-unverifiable Trino legs. (Some forms may still crash -- I ran coverage+sweep, not <path>/--deep; flag for the P2 pass to separate crash-legs from unverifiable-legs before "fixing" the 50%.) |
+| comp-constants | "52% FAIL" | `comp-constants` -> detected real drift (GUARD_B_AUA_UPPER 400M vs canonical 300M); `check --lane bd` -> "OK: no drift across 34 constants" rc=0 | **GATE-FIRING-CORRECTLY** (nonzero on real drift = working, like comp-validate) + unmarked synthetic fixtures -- NOT a hard break |
+
+**GATE-FIRING-CORRECTLY (nonzero exit = the gate working, NOT a break):** comp-validate (exit nonzero on NO_CONFIG/violation), comp-manifest-check (exit nonzero on a manifest violation), comp-surface-check (WARN/exit on a real critical-surface touch -- exercised this session on the promote_seam), comp-constants (above).
+
+**DISCOVERABILITY-FRICTION (high fail-count from SURFACE, not a break):** comp-pipescript (21% -- canonical script/resource token-resolution: agents can't guess the token); comp-kuzu (12% -- Cypher-dialect: agents write typed relationships vs the CloudNode/CloudEdge-with-properties schema). Self-inflicted-by-surface -> P2 optimization (alias/`--list-resources`; schema-surface-at-prompt), NOT a fix.
+
+**RETIRE-CANDIDATE (re-confirm on the NOW-un-starved telemetry -- do NOT retire on pre-fix data):** comp-tooltip (one-off migration tool, 13 log rows, mojibake), + Part-0's comp-dups/secrets/dispatch named low-usage -- BUT my class-3 grounded comp-secrets/dups built-proven + CVO-owned + skip the auto-logger (0 log-rows EXPECTED, not non-use). So their retire-candidacy is a FALSE SIGNAL from the starved+no-auto-log substrate; re-confirm usage post-telemetry-fix before any retire (P2 principle: fix-substrate-first).
+
+## 10.2 Coverage-gap list (66 no-rich-tool rail escapes) -- ROUTE-vs-BUILD flagged (resolve in P3 before building)
+
+| gap cluster | ROUTE-vs-BUILD | note |
+|---|---|---|
+| symbol/file-outline ("list functions/classes in a file") | **ROUTE** (comp-symbols EXISTS -- in comp-which RULES:107 but NOT in the manifest tools_index) | G1 from Section 7: comp-symbols is exist-but-under-projected. P3 routing fix, not a new build |
+| type-def lookup ("show me the TenantLayoutConfig type") | **ROUTE** (comp-types EXISTS, comp-which routes `trace.types.type_consumers`) | verify the routing reaches it for a "show me the TYPE" phrasing vs "who consumes"; likely a phrasing-route gap |
+| source-of-record "where is X" (LARGEST cluster) | **BUILD-or-ROUTE (P3 decide)** | named .tf/secret/script/function locate that pipescript/blast/kuzu didn't satisfy -> currently falls to comp-grep (the never-dead-end). May be the legit grep-primitive floor OR a missing locate-tool |
+| live-AWS verify (SNS-delivers / SG-ingress / secret-read / s3-prefix-age) | **off-graph by design (likely)** | partly covered (comp-secrets read, comp-freshness artifact); the verify-live-behavior class is arguably operational, not a comp-tool gap |
+| live-progress / staged-vs-served key-diff / mtime-localize | **BUILD-candidate (P3)** | a repeated `# rail-checked` override theme -> a real recurring intent with no rich tool |
+
+## 10.3 The SYNTHETIC-MARKER problem (req#5)
+
+The `(SYNTHETIC TEST FIXTURE)` marker is effectively UNUSED (1/1,302 FAILs marked) -> synthetic test-fixture invocations are INDISTINGUISHABLE from real failures in the usage log. This structurally BLOCKS a clean automated works/broken filter (a fail-count includes deliberate synthetic-FAIL fixtures, e.g. comp-honesty's D_02/A_00 red-fixtures, comp-chainrun's synthetic DROPPED/COLUMNS-LOST). FIX (P2): a commit/emit-time gate or lint that REQUIRES the marker on a synthetic-fixture invocation, so the log's real-fail signal is clean. This is exactly why the comp-drift/comp-constants "fail %" over-counted -- gate-firing + synthetic fixtures inflate the raw FAIL rate.
+
+## 10.4 Break list (for P2), grounded on real use
+
+1. **comp-learns-run** -- HARD BREAK (No module comp.framework.run) -- packaging fix. CONFIRMED.
+2. **comp-tooltip** -- mojibake (r16/ASCII) + 46% scan-fail. CONFIRMED. (also retire-candidate.)
+3. **comp-drift** -- NOT the flat 50% break Part-0 read; the exit-2 is largely HONEST-UNVERIFIABLE (Trino seams). P2: run <path>/--deep to isolate any GENUINE crash-legs from the honest-unverifiable before "fixing."
+4. **comp-constants** -- NOT a break (gate-firing + synthetic fixtures). No fix needed; feeds the synthetic-marker fix.
+5. **telemetry substrate** -- FIXED (417004b7d).
+6. **synthetic-marker gate** -- P2 lint (unblocks automated works/broken).
+
+## 10.5 Coordination + status
+
+- **DS~B pull sent** (org/modules/graph engines -- comp-pipescript/validate/platinum/chainrun/incrparity/transform/cache/pii/types/constants/freshness): DS~B real-invokes + returns verdicts -> folded here. (My comp-constants correction shared.)
+- Verdicts for the live-AWS tools (comp-aws/iam/lambdamap/secrets/freshness) rest on the 14,356-row log PASS evidence + class-3 built-proven grounding (not re-run this pass -- live AWS), per the log-ground-truth method.
+- RAVC COO~B -> CTO arch-gate (verification-completeness) + CVO real-use-grounding cert -> P2 (fixes-first).
