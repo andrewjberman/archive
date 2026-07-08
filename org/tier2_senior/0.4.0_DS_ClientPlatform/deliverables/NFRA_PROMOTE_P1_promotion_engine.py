@@ -70,7 +70,15 @@ PROMOTION_CLASS_ROUTING = {
 
 # ANTI-GOODHART floor (invariant #2): a coupling must recur across >= FLOOR distinct producer sessions to be
 # a warrant; a single coincidental co-occurrence is not (CTO ratify-ruling). Structural, not tuned-to-metric.
-MEANINGFUL_CO_OCCURRENCE_FLOOR = 2
+# CONFIG, not a hardcoded literal (CTO tuning note 2026-07-08): tunable without a code change via env
+# PROMOTE_ANTI_GOODHART_FLOOR (default 2). It is a PRE-FILTER only -- the owner's explicit ratify remains the
+# FINAL meaningfulness gate (a thin 2-session warrant can still be rejected). Revisit vs real data once
+# frontend co-evolution measures land (raise if 2-co-occurrences prove noisy at scale); clamped >= 2 so the
+# coincidence-floor invariant (a single one-off is never a warrant) can never be tuned away.
+try:
+    MEANINGFUL_CO_OCCURRENCE_FLOOR = max(2, int(os.environ.get("PROMOTE_ANTI_GOODHART_FLOOR", "2")))
+except ValueError:
+    MEANINGFUL_CO_OCCURRENCE_FLOOR = 2
 
 
 @dataclass
