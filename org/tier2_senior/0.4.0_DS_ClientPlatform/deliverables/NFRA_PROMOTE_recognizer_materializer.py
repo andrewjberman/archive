@@ -30,7 +30,9 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import sys
+import tempfile
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 WS = os.path.abspath(os.path.join(_HERE, "..", "..", "..", ".."))
@@ -40,6 +42,15 @@ import NFRA_PROMOTE_P1_promotion_engine as P1  # noqa: E402
 
 MANIFEST = os.path.join(_HERE, "promote_recognizer_manifest.json")   # the git-versioned critical surface (R3)
 MEASURE_ARTIFACT = os.path.join(_HERE, "fedobs_frontend_coevolution.json")
+CSE_TRAIL = os.path.join(_HERE, "promote_materializer_cse.jsonl")     # R4/AC5: durable MATERIALIZED/DEMOTED CSE trail
+
+
+def _emit_cse(cse: dict) -> None:
+    """R4/AC5: every materialize/demote emits a DURABLE CSE (append to the inspectable trail). Emitted at
+    the point of the manifest write so ANY caller (CLI or programmatic) produces the audit record -- a
+    critical-surface mutation with no durable CSE was the CVO-caught gap (2026-07-08)."""
+    with open(CSE_TRAIL, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(cse) + "\n")
 
 
 def _measures() -> dict:
@@ -116,8 +127,9 @@ def materialize(cid: str, commission_id: str | None) -> tuple:
     man["recognizers"][entry["recognizer_id"]] = entry
     with open(MANIFEST, "w", encoding="utf-8") as fh:
         json.dump(man, fh, indent=2)
-    return entry, _cse("materialize", entry["recognizer_id"], commission_id, "recognizer registered in manifest"), \
-        "MATERIALIZED -> manifest (reversible; write is a comp-surface-check'd commit)"
+    cse = _cse("materialize", entry["recognizer_id"], commission_id, "recognizer registered in manifest")
+    _emit_cse(cse)   # R4/AC5: durable MATERIALIZED CSE
+    return entry, cse, "MATERIALIZED -> manifest (reversible; write is a comp-surface-check'd commit)"
 
 
 def demote(cid: str, commission_id: str | None) -> tuple:
@@ -130,8 +142,9 @@ def demote(cid: str, commission_id: str | None) -> tuple:
     removed = man["recognizers"].pop(rid)
     with open(MANIFEST, "w", encoding="utf-8") as fh:
         json.dump(man, fh, indent=2)
-    return removed, _cse("demote", rid, commission_id, "recognizer deregistered from manifest (exact inverse)"), \
-        "DEMOTED -> deregistered (the exact inverse of materialize; manifest restored)"
+    cse = _cse("demote", rid, commission_id, "recognizer deregistered from manifest (exact inverse)")
+    _emit_cse(cse)   # R4/AC5: durable DEMOTED CSE
+    return removed, cse, "DEMOTED -> deregistered (the exact inverse of materialize; manifest restored)"
 
 
 def run_propose() -> int:
@@ -156,6 +169,20 @@ def run_propose() -> int:
 
 def self_test() -> int:
     print("=== NFRA_PROMOTE recognizer-materializer self-test ===")
+    # isolate the writes to a temp dir so the self-test never mutates the REAL manifest / CSE trail (audit-clean)
+    global MANIFEST, CSE_TRAIL
+    _real = (MANIFEST, CSE_TRAIL)
+    _td = tempfile.mkdtemp(prefix="promote_selftest_")
+    MANIFEST = os.path.join(_td, "manifest.json")
+    CSE_TRAIL = os.path.join(_td, "cse.jsonl")
+    try:
+        return _self_test_body()
+    finally:
+        MANIFEST, CSE_TRAIL = _real
+        shutil.rmtree(_td, ignore_errors=True)
+
+
+def _self_test_body() -> int:
     ok = []
 
     def chk(name, cond):
@@ -175,19 +202,31 @@ def self_test() -> int:
     chk("2  ratify-gate: materialize REFUSES without a ratifier commission_id (zero auto-mutation)",
         e is None and "REFUSED" in reason)
 
+    def _trail_lines():
+        if not os.path.exists(CSE_TRAIL):
+            return 0
+        with open(CSE_TRAIL, encoding="utf-8") as fh:
+            return sum(1 for ln in fh if ln.strip())
+
     # WITH a commission -> registers; carries the git-real warrant (shas) + template+params (no code-gen)
+    t0 = _trail_lines()
     e, cse, _ = materialize(cid, "CTO-commission-TEST")
     reg_ok = e is not None and e["kind"]["code_gen"] is False and len(e["warrant"]["co_session_shas"]) >= 1 \
         and cse["verb"] == "materialize"
     chk("3  with commission -> registered: template+params (no code-gen), git-real shas, MATERIALIZED CSE", reg_ok)
+    # R4/AC5 (CVO-caught gap fix): the MATERIALIZED CSE is DURABLY EMITTED to the trail, not just returned.
+    chk("3b R4/AC5: materialize EMITS a durable MATERIALIZED CSE to the trail (not just returns it)", _trail_lines() == t0 + 1)
 
     # REVERSIBILITY: demote deregisters (exact inverse) + DEMOTED CSE; manifest restored
     man_after_reg = _load_manifest()["recognizers"]
+    t1 = _trail_lines()
     d, dcse, _ = demote(cid, "CTO-commission-TEST")
     man_after_demote = _load_manifest()["recognizers"]
-    chk("4  reversible: demote deregisters (exact inverse) + DEMOTED CSE; manifest restored",
+    chk("4  reversible: demote deregisters (exact inverse); manifest restored",
         d is not None and dcse["verb"] == "demote" and ("recognizer:" + cid.split(":", 1)[1]) not in man_after_demote
         and ("recognizer:" + cid.split(":", 1)[1]) in man_after_reg)
+    # R4/AC5: the DEMOTED CSE is DURABLY EMITTED (this is exactly the demote-CSE that was 0-before-0-after)
+    chk("4b R4/AC5: demote EMITS a durable DEMOTED CSE to the trail (the CVO-caught gap, fixed)", _trail_lines() == t1 + 1)
 
     # the manifest is left clean (round-trip)
     chk("5  round-trip clean: manifest has no test recognizer after demote", len(man_after_demote) == 0)
