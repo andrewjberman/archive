@@ -5,9 +5,9 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-07-07-nfra-cse-p3</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>per-producer owners (git/agent/deploy/graph-HEAD)</issued_to>
+    <issued_to>0.4.0_DS~B (DS-side: per-producer CSE emission-contract spec, now -- unblocked by CSE-P2 close) + 0.5.0_AE_OpalETL (producer-wiring: graph-HEAD-advance emitter + OPLMCP audit-lake agent/deploy integration, sequenced AFTER FEDOBS-P3)</issued_to>
     <date>2026-07-07</date>
-    <status>pending</status>
+    <status>dispatched -- GO'd 2026-07-08 (COO~B). DS-side (emission contracts) starts now; AE producer-wiring after FEDOBS-P3. Owner-split resolved from the generic 'per-producer owners'.</status>
     <prd_ref>docs/architecture/NFRA_CSE_PRD.md (P3)</prd_ref>
     <backfill_note>TO FILE backfilled 2026-07-07 -- the SEMCTL plane was dispatched + built via MCP + arch-gate RAVC but the durable TO records were not materialized (Andrew/CTO caught the gap 2026-07-07). This TO reflects the REAL current state. Standing-fix adopted: TO-file + MCP-dispatch, both, every time.</backfill_note>
   </metadata>
