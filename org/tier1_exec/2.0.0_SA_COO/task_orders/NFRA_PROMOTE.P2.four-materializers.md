@@ -5,9 +5,9 @@
   <metadata>
     <id>2.0.0_SA_COO~B-2026-07-07-nfra-promote-p2</id>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.8.0_AE_CloudComp~D + 0.4.0_DS~A (materializers) + 1.0.0_SA_CTO (ratify owner)</issued_to>
+    <issued_to>0.8.0_AE_CloudComp~D (GOV-B producer + recognizer/compiler-rule materializer -- arch-ratified design 4d0886493, RESPAWN requested) + 0.4.0_DS_ClientPlatform~B (CSE-schema / graph / router materializers -- reallocated from the down DS~A) + 1.0.0_SA_CTO (ratify owner, cross-plane)</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>staged -- GO on PROMOTE-P1 landing. ~D respawn requested (GOV-B arch-ratified = instant-build); DS materializers reallocated DS~A->DS~B.</status>
     <prd_ref>docs/architecture/NFRA_PROMOTE_PRD.md (P2, S4.1) + docs/architecture/NFRA_SEMCTL_PRD.md (GOV-B seam)</prd_ref>
     <dispatch_state>STAGED -- GO at Wave-4, AFTER NFRA_PROMOTE.P1 (contract/lifecycle). Authored by COO~B on the NFRA full-program completion drive. PROMOTE is LAST -- the only plane that writes back.</dispatch_state>
     <gate_note>Gated on PROMOTE-P1. The recognizer/compiler-rule materializer CLOSES SEMCTL GOV-B (the hot-registration seam producer side -- the RecognizerRegistry consumer half is already landed in comp_recognizer_sdk.py).</gate_note>

@@ -5,9 +5,9 @@
   <metadata>
     <id>2.0.0_SA_COO~B-2026-07-07-nfra-promote-p3</id>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.8.0_AE_CloudComp~D + 0.4.0_DS~A (materializers) + 0.5.0_AE_OpalETL (FEDOBS monitor)</issued_to>
+    <issued_to>0.5.0_AE_OpalETL (FEDOBS post-promotion monitor + the in-VPC cse_coevolution measure -- RESPAWN requested; also owns the frontend-co-occurrence measure gap DS~B flagged in MOTIF-P3) + 0.8.0_AE_CloudComp~D (demote seam) + 0.4.0_DS_ClientPlatform~B (reallocated from the down DS~A)</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>staged -- GO on PROMOTE-P2 + FEDOBS-P3 both. 0.5.0 respawn requested (FEDOBS monitor + the in-VPC measure that closes the CANDIDATE->MEASURED gate).</status>
     <prd_ref>docs/architecture/NFRA_PROMOTE_PRD.md (P3 + AC4/AC5)</prd_ref>
     <dispatch_state>STAGED -- GO at Wave-4, AFTER PROMOTE-P2 (materializers) + FEDOBS-P3 (post-promotion measure). Authored by COO~B on the NFRA full-program completion drive. This is what makes promotion SAFE to do at all.</dispatch_state>
     <gate_note>Gated on PROMOTE-P2 + FEDOBS-P3. The LAST arm -- closes the Feedback Contract loop (promote -> monitor -> demote-if-degraded). This is the acceptance-run's reversibility leg.</gate_note>

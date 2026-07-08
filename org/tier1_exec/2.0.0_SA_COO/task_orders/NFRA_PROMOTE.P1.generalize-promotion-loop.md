@@ -5,9 +5,9 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-07-07-nfra-promote-p1</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>1.0.0_SA_CTO (ratify) + AE/DS (materializers)</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~B (build the typed-commission contract + lifecycle state-machine + 5-invariant gate; rolls from MOTIF-P3, owns the candidate/handoff side) + 1.0.0_SA_CTO (ratify the contract + own cross-plane promotion ratify)</issued_to>
     <date>2026-07-07</date>
-    <status>forming</status>
+    <status>dispatched -- GO'd 2026-07-08 by COO~B to 0.4.0_DS~B + CTO-ratify. MOTIF candidates READY (deliverables/motif_promote_candidates.json, 7 evidence-carrying records, 5faf0d509). PROMOTE is the LAST plane; P1 opens it. HONEST GATE (DS~B-flagged): the FEDOBS co-occurrence measure for the frontend candidates is PENDING_IN_VPC + currently keys on CSE/backend subjects not frontend-motif constituents -> the CANDIDATE->MEASURED transition (invariant #1 measure-before-promote) needs the in-VPC measure (0.5.0) + a frontend-co-evolution producer, OR the acceptance-run exercises the full chain on a genuinely-measurable candidate + carries frontend-measure as an honest follow-on (do NOT fake a measurement).</status>
     <prd_ref>docs/architecture/NFRA_PROMOTE_PRD.md</prd_ref>
     <backfill_note>TO FILE backfilled 2026-07-07 -- the SEMCTL plane was dispatched + built via MCP + arch-gate RAVC but the durable TO records were not materialized (Andrew/CTO caught the gap 2026-07-07). This TO reflects the REAL current state. Standing-fix adopted: TO-file + MCP-dispatch, both, every time.</backfill_note>
   </metadata>
