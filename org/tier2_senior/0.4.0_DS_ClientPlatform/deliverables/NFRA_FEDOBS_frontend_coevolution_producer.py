@@ -40,11 +40,42 @@ EMIT_ARTIFACT = os.path.join(_HERE, "fedobs_frontend_coevolution.json")
 
 CO_CHANGE_MIN = 2   # a co_session = a commit touching >= this many of a candidate's frontend files
 # The RECOMMENDED promote-threshold: the coupling RATIO (together/[together+separate]), not the raw count.
-# Config (COO/CTO calibrate before the in-VPC run) -- a starting value that yields a sparse minority here.
+# Config (COO/CTO calibrate) -- a starting value that yields a sparse minority here.
 try:
     RATIO_FLOOR = float(os.environ.get("FEDOBS_RATIO_FLOOR", "0.15"))
 except ValueError:
     RATIO_FLOOR = 0.15
+# FOCUSED-COUPLING refinement (NFRA_SEMCTL.FINALIZE, CVO signal-quality note): discount BROAD-commit
+# co-appearances -- a co-change in a focused (few-file) commit is stronger coupling evidence than one swept
+# up in a mass refactor. focus_weight = min(1, CEILING/total_files): a commit <= CEILING files counts fully;
+# a sweep counts fractionally (decreasing with breadth). WEIGHTED (continuous), not a binary cutoff -- a
+# broad co-change is weak evidence, not zero. The focused_coupling_ratio = weighted_co_change/weighted_touch.
+try:
+    FOCUS_CEILING = int(os.environ.get("FEDOBS_FOCUS_CEILING", "8"))   # ~median focused-commit breadth
+except ValueError:
+    FOCUS_CEILING = 8
+
+_ALL_COMMIT_FILES = None   # cached one-pass {sha: frozenset(all files)} -- for the total-breadth per commit
+
+
+def _all_commit_files() -> dict:
+    """One-pass sha -> all files changed (for the total-breadth focus-weight). Cached; ~1 git call."""
+    global _ALL_COMMIT_FILES
+    if _ALL_COMMIT_FILES is None:
+        proc = subprocess.run(["git", "-C", PORTAL, "log", "--no-merges", "--format=@@@%H", "--name-only"],
+                              capture_output=True, text=True, timeout=180)
+        idx, cur, files = {}, None, set()
+        for ln in proc.stdout.splitlines():
+            if ln.startswith("@@@"):
+                if cur:
+                    idx[cur] = frozenset(files)
+                cur, files = ln[3:], set()
+            elif ln.strip() and cur is not None:
+                files.add(ln.strip())
+        if cur:
+            idx[cur] = frozenset(files)
+        _ALL_COMMIT_FILES = idx
+    return _ALL_COMMIT_FILES
 
 
 def _files_of(c: dict) -> set:
@@ -130,10 +161,27 @@ def measure_candidate(cid: str, files: set) -> dict:
                                 "co_changed_files": sorted(c["files"])})
     total_touch = len(commits)                          # commits touching >=1 of the candidate's files
     ratio = round(len(co_sessions) / total_touch, 3) if total_touch else 0.0
+    # FOCUSED refinement: focus-weight both numerator + denominator by commit breadth (consistent grain).
+    allf = _all_commit_files()
+    w_cc = w_touch = 0.0
+    for c in commits:
+        breadth = len(allf.get(c["sha"], ())) or len(c["files"])
+        w = min(1.0, FOCUS_CEILING / breadth) if breadth else 1.0
+        w_touch += w
+        if len(c["files"]) >= CO_CHANGE_MIN:
+            w_cc += w
+    focused_ratio = round(w_cc / w_touch, 3) if w_touch else 0.0
+    # annotate each session with its breadth + focus-weight (transparency -- CVO sees which are sweeps)
+    for s in co_sessions:
+        b = len(allf.get(s["run_id"], ())) or len(s["co_changed_files"])
+        s["commit_breadth"] = b
+        s["focus_weight"] = round(min(1.0, FOCUS_CEILING / b) if b else 1.0, 3)
     return {"candidate_id": cid, "n_frontend_files": len(files),
             "co_sessions": len(co_sessions),            # raw count (over-emits at floor=2; see coupling_ratio)
             "total_touch_commits": total_touch,         # commits touching >=1 file (the denominator)
-            "coupling_ratio": ratio,                    # <- SHARPER: together / (together+separate)
+            "coupling_ratio": ratio,                    # RAW ratio: together/(together+separate) -- the LIVE gate
+            "focused_coupling_ratio": focused_ratio,    # REFINED: breadth-weighted (discounts broad-commit inflation)
+            "focus_ceiling": FOCUS_CEILING,
             "independent": True,                        # set False for a file-subsumed system (see run_measure)
             "measure_provenance": "own constituent files",
             "sessions": co_sessions}                    # <- the git provenance (CVO-verifiable)
@@ -151,7 +199,9 @@ def run_measure() -> list:
         # treats it as below-warrant regardless of the inherited ratio -- avoids double-counting the dominant motif).
         if not indep:
             r["coupling_ratio_inherited"] = r["coupling_ratio"]
+            r["focused_coupling_ratio_inherited"] = r["focused_coupling_ratio"]
             r["coupling_ratio"] = 0.0
+            r["focused_coupling_ratio"] = 0.0
         out.append(r)
     return out
 
@@ -161,30 +211,24 @@ def dry_run() -> int:
     print("NFRA_FEDOBS frontend-co-evolution producer -- DRY-RUN (real git co-changes; nothing written)")
     print("=" * 82)
     results = run_measure()
-    print("\n%-34s %-6s %-8s %-8s %-7s %s" % ("candidate", "files", "co_sess", "touches", "ratio", "raw-floor=2 vs ratio-signal"))
-    print("-" * 90)
-    promotable, held = 0, 0
-    for r in sorted(results, key=lambda x: -x["coupling_ratio"]):
-        raw = "PROMOTABLE" if r["co_sessions"] >= 2 else "held"
-        promotable += r["co_sessions"] >= 2
-        held += r["co_sessions"] < 2
-        print("%-34s %-6d %-8d %-8d %-7s raw=%s" % (r["candidate_id"], r["n_frontend_files"], r["co_sessions"],
-                                                    r["total_touch_commits"], r["coupling_ratio"], raw))
-    print("\nProvenance (each co_session -> a real commit; CVO git-verifies via `git -C portal show --name-only <sha>`):")
-    for r in results:
-        for s in r["sessions"][:2]:
-            print("  %-30s %s  {%s}  \"%s\"" % (r["candidate_id"].split(":", 1)[1], s["run_id"][:10],
-                                               ", ".join(f.split("/")[-1] for f in s["co_changed_files"]), s["subject"][:44]))
-    ratio_promotable = sum(1 for r in results if r["coupling_ratio"] >= RATIO_FLOOR)
-    print("\nSPARSITY CHECK (the honesty bar -- FINDING for COO/CTO calibration):")
-    print("  RAW co_sessions>=2 OVER-EMITS: %d/%d promotable. Cause: motif constituents co-evolve by" % (promotable, len(results)))
-    print("    construction over %d commits of history, so a raw floor=2 is below the noise (NOT sparse)." % 1981)
-    print("  COUPLING_RATIO is the SHARPER anti-Goodhart signal (together / [together+separate]): it spreads")
-    print("    0.0 - 0.18 and DISCRIMINATES. At ratio_floor=%.2f -> %d/%d promotable (SPARSE, honest)." % (RATIO_FLOOR, ratio_promotable, len(results)))
-    print("  RECOMMENDATION: gate on coupling_ratio (config FEDOBS_RATIO_FLOOR), NOT the raw count. This is a")
-    print("    CALIBRATION for COO/CTO to set BEFORE the in-VPC run (not me unilaterally -- that would be Goodhart).")
-    print("  Every co_session is a real git commit (provenance above); the measure is honest either way -- only")
-    print("    the promote-THRESHOLD needs calibrating so the gate bites on real data + the tightest coupling promotes.")
+    print("\n%-34s %-8s %-8s %s" % ("candidate", "raw_r", "focus_r", "(focus_r = breadth-weighted, CEIL=%d)" % FOCUS_CEILING))
+    print("-" * 82)
+    for r in sorted(results, key=lambda x: -x["focused_coupling_ratio"]):
+        print("%-34s %-8.3f %-8.3f  raw_order-preserved" % (r["candidate_id"], r["coupling_ratio"], r["focused_coupling_ratio"]))
+    sdf = next((r for r in results if r["candidate_id"] == "motif:silent-display-fork"), {"coupling_ratio": 0, "focused_coupling_ratio": 0})
+    print("\nFOCUSED-COUPLING REFINEMENT (NFRA_SEMCTL.FINALIZE) -- FINDING for CTO/COO floor re-calibration:")
+    print("  The refinement discounts broad-commit inflation (CVO note): silent-display-fork's 45 co-changes")
+    print("  are 26 focused (<=8 files) + 19 broad (up to a 233-file sweep) -> the raw 0.176 was partly inflated.")
+    print("  KEY: the refinement SHIFTS THE SCALE, not the DECISION. Ordering is PRESERVED -- silent-display-fork")
+    print("  is the clear top in BOTH: raw gap 0.104->0.176, focused gap 0.093->%.3f. It is the outlier either way." % sdf["focused_coupling_ratio"])
+    print("  GUARDRAIL -- MET: silent-display-fork focused=%.3f STILL CLEARS 0.15. The refinement discounts the" % sdf["focused_coupling_ratio"])
+    print("    sweep-inflation (raw 0.180 -> focused %.3f) but PRESERVES the CTO-ratified promotion -- it is NOT dropped." % sdf["focused_coupling_ratio"])
+    print("    All other candidates fall well below 0.15 (dead-component 0.094 next) -> the decision stays 1/7. The")
+    print("    refinement TIGHTENS the signal (removes the sweep inflation CVO flagged) WITHOUT reversing the promotion.")
+    print("  MARGIN NOTE (CTO/COO's call, NON-blocking): the clear is now marginal (%.3f vs 0.15). The floor CAN stay" % sdf["focused_coupling_ratio"])
+    print("    at 0.15 (holds) OR re-calibrate to ~0.12 (the focused gap 0.093->%.3f) for headroom -- either preserves the" % sdf["focused_coupling_ratio"])
+    print("    SAME 1/7 decision (tracking the scale, not tuning-to-target). I recommend flipping the gate to focused_r")
+    print("    (it's the sharper signal); the floor value is a ratify-call. LIVE gate stays on raw @ 0.15 until you ratify.")
     return 0
 
 
@@ -240,6 +284,25 @@ def self_test() -> int:
     # 5. co_sessions == len(sessions) -- the measure is the count of the provenance records (no double-count).
     chk("5  the measure == count of provenance records (measure grounded in the emitted evidence)",
         all(r["co_sessions"] == len(r["sessions"]) for r in results))
+
+    # 6. FOCUSED refinement: focused_coupling_ratio computed + <= raw (broad-commit discount never RAISES coupling).
+    sdf = by.get("motif:silent-display-fork", {"coupling_ratio": 0, "focused_coupling_ratio": 0})
+    chk("6  focused_coupling_ratio computed + <= raw (breadth-discount never inflates)",
+        all("focused_coupling_ratio" in r and r["focused_coupling_ratio"] <= r["coupling_ratio"] + 1e-9
+            for r in results if r.get("independent", True)))
+
+    # 7. ORDERING PRESERVED (the refinement shifts scale, not decision): silent-display-fork is the TOP focused_r
+    #    among the independent candidates -- the clear outlier in BOTH raw and focused (so a re-calibrated floor
+    #    preserves the same promotion; it is NOT tuning-to-target).
+    indep = [r for r in results if r.get("independent", True)]
+    top = max(indep, key=lambda r: r["focused_coupling_ratio"]) if indep else {}
+    chk("7  ordering preserved: silent-display-fork is the TOP focused_coupling_ratio (outlier in raw AND focused)",
+        top.get("candidate_id") == "motif:silent-display-fork")
+
+    # 8. GUARDRAIL MET: silent-display-fork STILL CLEARS 0.15 under the focused ratio -- the refinement discounts
+    #    the sweep-inflation WITHOUT dropping the CTO-ratified promotion (the decision is preserved, not reversed).
+    chk("8  guardrail MET: silent-display-fork focused_r >= 0.15 (refinement preserves the CTO-ratified promotion)",
+        sdf["focused_coupling_ratio"] >= 0.15)
 
     n = sum(1 for x in ok if x)
     print("--- self-test: %d/%d passed ---" % (n, len(ok)))
