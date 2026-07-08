@@ -1,0 +1,69 @@
+# comp-fedobs RAIL REGISTRATION -- staged for COO SoD-land (graph-call-manifest + comp-coverage-map are ANY_EXEC lane).
+# Per CTO taxonomy ruling (1.0.0_SA_CTO 20260708T020847Z): comp-which-ROUTABLE (option 2), layer=meta,
+# mode=read, freshness=SERVED-ARTIFACT-vintage (not live), + the thin-signal anti-pattern. Authored by
+# 0.5.0_AE_OpalETL (NFRA_FEDOBS.P3). CTO arch-gate requested before COO lands.
+
+# =========================================================================================
+# 1) graph-call-manifest.yaml -- add these 3 entries to entries[] (a `meta.fedobs.*` per reflective question)
+# =========================================================================================
+manifest_entries:
+  - id: meta.fedobs.co_evolution
+    use_case: "Which artifacts/systems consistently CHANGE TOGETHER (CSEs co-occurring in a producer session) -- the coupling/blast-radius signal MOTIF composes into C2."
+    canonical_call: |
+      comp-fedobs coevolution        # co-evolving subject pairs (subject_a/subject_b/co_sessions/producers)
+      comp-fedobs                     # all 3 signals + vintage + provenance
+    tool: comp-fedobs
+    mode: read
+    layer: meta
+    cost: "~ms (reads the served fedobs_observations.json; no recompute)"
+    freshness: "SERVED-ARTIFACT vintage -- as-of the last fedobs_observe run; read the comp-fedobs vintage header (computed_at + marker_head + cse_log_total). NOT live -- a stale observation surface is VISIBLE in the header, never quoted as current. Refreshed by the scheduled in-VPC producer (fedobs_observe.py, run AS the fedobs read-only role)."
+    rebuild_trigger: "served surface stale (header past the refresh cadence) -> re-run fedobs_observe.py in-VPC (scheduled task-def; ad-hoc run-task otherwise)"
+    anti_pattern: "quoting a co-evolution answer without its observation-vintage; reading a THIN signal (e.g. 0 pairs over N CSEs, log still filling) as a real 'nothing co-evolves' negative -- comp-fedobs reports thinness LOUD, honor it"
+    status: canonical
+
+  - id: meta.fedobs.coverage_gaps
+    use_case: "Where are the RECOGNIZER / compiler-coverage GAPS -- the Concept(untyped)+confidence:low rate per artifact_class (feeds COMPILERKIT recognizer gaps + a new-primitive PROMOTE candidate)."
+    canonical_call: |
+      comp-fedobs coverage           # untyped_low_rate per artifact_class (over total_cses denominator)
+    tool: comp-fedobs
+    mode: read
+    layer: meta
+    cost: "~ms (served-artifact read)"
+    freshness: "SERVED-ARTIFACT vintage (as-of the last fedobs_observe run); read the vintage header. NOT live."
+    rebuild_trigger: "served surface stale -> re-run fedobs_observe.py in-VPC"
+    anti_pattern: "reading a 0.0 untyped-low rate as 'no gaps' WITHOUT the total_cses denominator -- 0.0 over N>0 = an HONEST measured zero; a class ABSENT (0/0) = missing data. comp-fedobs distinguishes them; don't quote the zero as a real negative if the denominator is empty"
+    status: canonical
+
+  - id: meta.fedobs.directive_effectiveness
+    use_case: "Did a promoted directive MEASURABLY reduce the churn/pattern it targeted (the measure-before-promote warrant PROMOTE gates on) -- per-period transformation-pattern rate."
+    canonical_call: |
+      comp-fedobs direff             # per-period pattern rate (verb x subject_etype x firm x date)
+    tool: comp-fedobs
+    mode: read
+    layer: meta
+    cost: "~ms (served-artifact read)"
+    freshness: "SERVED-ARTIFACT vintage (as-of the last fedobs_observe run); read the vintage header. NOT live. The MEASURE (before/after a directive's promoted_at) binds at Wave-4 when PROMOTE materializes real directives; the per-period BASELINE is live now."
+    rebuild_trigger: "served surface stale -> re-run fedobs_observe.py in-VPC"
+    anti_pattern: "quoting a directive-effect without its observation-vintage; treating the pre-PROMOTE baseline as an effectiveness verdict (there is no directive to measure against yet)"
+    status: canonical
+
+# =========================================================================================
+# 2) graph-call-manifest.yaml -- add to tools_index (one line)
+# =========================================================================================
+tools_index_line:
+  comp-fedobs: { does: "NFRA_FEDOBS reflective-observation SURFACE (reader): the 3 measure signals (co-evolution / compiler-coverage / directive-effectiveness) over the C0 CSE log as answerable reflective questions; the standing surface MOTIF (co-occurrence) + PROMOTE (directive-effectiveness + compiler-coverage) consume. Served-artifact read (SS3), provenance-linked (AC3 -> source-CSE file:line), served-vintage header, thin-signal LOUD (I1)", subcommands: ["coevolution", "coverage", "direff", "provenance", "--json", "--uri"], entries: [meta.fedobs.co_evolution, meta.fedobs.coverage_gaps, meta.fedobs.directive_effectiveness] }
+
+# =========================================================================================
+# 3) comp-coverage-map.yaml -- inventory comp-fedobs (the SoT completeness check requires it in tools[])
+#    Grain: [meta] (a reflective/meta tool, like comp-honesty/comp-registry -- reads the CSE-log measure
+#    surface, not a below/above-file estate grain). COO/CTO finalize the exact surface/concern placement.
+# =========================================================================================
+coverage_map_inventory:
+  # under the tool->grain map (mirror `comp-honesty: [meta]` style):
+  grain_line: "comp-fedobs:       [meta]   # NFRA_FEDOBS reflective-observation surface (CSE-log measure signals)"
+  # + a tools[] union entry so inventory_completeness passes (comp-fedobs present in tools[]).
+  concern: "reflective observation over the C0 CSE log (co-evolution / compiler-coverage / directive-effectiveness); the measure-plane surface MOTIF/PROMOTE consume"
+
+# NOTE for the SoD-land: also `git mv` org/tier2_senior/0.5.0_AE_OpalETL/deliverables/comp-fedobs -> .tools/comp-fedobs
+# (chmod +x) so it's on PATH. Verify: `python org/modules/graph/comp_coverage_view.py --verify` (non-breaking)
+# + comp-manifest-check. The producer (fedobs_observe.py) is already landed (my lane, 2dab5db8a).

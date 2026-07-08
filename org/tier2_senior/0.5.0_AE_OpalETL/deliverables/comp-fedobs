@@ -46,24 +46,37 @@ def _load(uri: str) -> dict:
 
 
 def _vintage(doc: dict) -> str:
+    # SERVED-ARTIFACT vintage, NOT live (CTO ruling): the observation is as-of the last producer run.
     ts = doc.get("computed_at")
     when = (dt.datetime.fromtimestamp(ts, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             if ts else "?")
     mh = str(doc.get("marker_head", "?"))[:12]
-    return f"computed_at={when}  marker_head={mh}  source={doc.get('source_table','?')}"
+    n = doc.get("cse_log_total")
+    return (f"SERVED vintage (NOT live) as-of {when}  marker_head={mh}  "
+            f"source={doc.get('source_table','?')}  cse_log_total={n if n is not None else '?'}")
 
 
-def _print_signal(name: str, sig: dict) -> None:
+def _print_signal(name: str, sig: dict, cse_log_total=None) -> None:
     print(f"\n== {name} ==  ({sig.get('consumer','?')})")
     if sig.get("error"):
         print(f"  ERROR: {json.dumps(sig['error'])}")
         return
     cols = sig.get("columns") or []
     rows = sig.get("rows") or []
+    n = sig.get("row_count", len(rows))
+    if n == 0:
+        # HONEST-THINNESS (CTO I1): a thin/empty signal is LOUD, never a silent empty that reads as
+        # a real "nothing X". The log is still filling -- report the denominator, not a false negative.
+        tot = cse_log_total if cse_log_total is not None else "?"
+        print(f"  THIN/EMPTY: 0 {name} rows over {tot} CSE(s) -- the C0 log is still filling; this is "
+              f"NOT a real 'nothing here' negative. Signal matures as CSE-P3 adds producers.")
+        if sig.get("provenance"):
+            print(f"  provenance: {sig['provenance']}")
+        return
     print("  " + " | ".join(cols))
     for r in rows[:50]:
         print("  " + " | ".join("" if v is None else str(v) for v in r))
-    print(f"  rows={sig.get('row_count', len(rows))}")
+    print(f"  rows={n}" + ("" if cse_log_total is None else f"  (over {cse_log_total} CSEs)"))
     if sig.get("provenance"):
         print(f"  provenance: {sig['provenance']}")
 
@@ -89,11 +102,12 @@ def main() -> int:
 
     print(f"comp-fedobs -- FEDOBS reflective observations  [{_vintage(doc)}]")
     signals = doc.get("signals", {})
+    total = doc.get("cse_log_total")
     key = _ALIASES.get(args.signal.lower(), args.signal.lower())
     if args.signal == "all":
         for name in ("coevolution", "compiler_coverage", "directive_effectiveness"):
             if name in signals:
-                _print_signal(name, signals[name])
+                _print_signal(name, signals[name], total)
         pi = doc.get("provenance_instrument") or {}
         print(f"\n== provenance_instrument ==  (AC3 decompression: {pi.get('note','')})")
         print(f"  {len(pi.get('rows') or [])} CSE evidence rows -- `comp-fedobs provenance` for the full trace.")
@@ -104,7 +118,7 @@ def main() -> int:
         for r in (pi.get("rows") or [])[:50]:
             print("  " + " | ".join("" if v is None else str(v) for v in r))
     elif key in signals:
-        _print_signal(key, signals[key])
+        _print_signal(key, signals[key], total)
     else:
         print(f"ERROR: unknown signal '{args.signal}'. Options: all | coevolution | coverage | direff | provenance")
         return 1
