@@ -91,16 +91,24 @@ def propose_entry(rec, m: dict) -> dict:
         },
         "vintage": {"promoted_at": None, "live_as_of": "<load-marker at materialize>"},   # R1 -- filled at materialize
         "commission_id": None,   # R3 -- filled with the CTO ratifier's commission at materialize (ratify-gated)
+        # DISCOVERABILITY (CTO ruling 2026-07-08): route an inspector from the entry to its durable event log.
+        "trail_ref": os.path.basename(CSE_TRAIL) + " (append-only MATERIALIZED/DEMOTED CSE event log; grep verb+subject_ref)",
         "state": "PROPOSED",
     }
+
+
+_EVENT_TRAIL_DESC = (os.path.basename(CSE_TRAIL) + " (durable append-only MATERIALIZED/DEMOTED CSE events -- R4/AC5; "
+                     "the manifest is the STATE snapshot, this trail is the EVENT log -- event-log-vs-state-snapshot separation)")
 
 
 def _load_manifest() -> dict:
     if os.path.exists(MANIFEST):
         with open(MANIFEST, encoding="utf-8") as fh:
-            return json.load(fh)
+            man = json.load(fh)
+        man.setdefault("event_trail", _EVENT_TRAIL_DESC)   # backfill the discoverability pointer on load (CTO ruling)
+        return man
     return {"surface": "promote_recognizer_manifest (NAMED CRITICAL SURFACE -- comp-surface-check on write)",
-            "recognizers": {}}
+            "event_trail": _EVENT_TRAIL_DESC, "recognizers": {}}
 
 
 def _cse(verb, rid, commission, extra=""):
