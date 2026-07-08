@@ -94,6 +94,16 @@ def build_spec() -> dict:
                       "nodes_snapshot_hint": prov.get("nodes_snapshot_id")},
         "convention_note": ("proposed node_type C2Motif/C3System + CONTAINS edges; 0.7.0/CVO confirm the "
                             "exact store discriminators. CONTAINS->C1 links to EXISTING graph nodes (intact decompression)."),
+        "taxonomy_prereq": {
+            "gate": "C2Motif + C3System are NEW node_types -> derive_runner.relabel_layers_by_node_type FAILS CLOSED "
+                    "(COND-2 durability) on any node_type not in NODE_TYPE_LAYER (derive_runner.py:~1497). Ingesting "
+                    "WITHOUT adding them first re-freezes the derive (the exact ~24h freeze fixed today). MUST "
+                    "pre-add + CVO count re-sign + CTO arch-gate BEFORE ingest (0.7.0 drives, like today's aws +3 dual-sign).",
+            "recommended_layer": "a NEW 'semctl' (or 'motif') analysis/composition layer -- NOT portal/aws/pipeline. "
+                                 "Rationale: C2Motif/C3System are the SEMCTL compression layers (C2/C3) ABOVE the C1 "
+                                 "estate, discovered-architecture nodes, not infra. A distinct layer keeps the taxonomy "
+                                 "honest (C0 facts / C1 estate / C2 motifs / C3 systems) + isolates them from estate blast-radius.",
+        },
         "counts": {"c2_motif_nodes": sum(1 for n in nodes if n["node_type"] == "C2Motif"),
                    "c3_system_nodes": sum(1 for n in nodes if n["node_type"] == "C3System"),
                    "contains_edges": len(edges)},
