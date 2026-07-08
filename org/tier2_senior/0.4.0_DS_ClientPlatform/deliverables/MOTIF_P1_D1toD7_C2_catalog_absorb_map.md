@@ -63,4 +63,36 @@ Every node_id is a `file:line`(+symbol) address -> the lossless-toward-provenanc
 5. Reuse GRAPHDEPTH CONTAINS-rollup for the compression; emit stable motifs as PROMOTE candidates with recurrence + FEDOBS co-occurrence + decompression chain (P3, AC5).
 
 ---
-*Pre-stage only. No graph mutation, no C2 materialization performed. Grounded entirely in the already-certed detector library + live-graph provenance. Event-driven for the MOTIF-P1 GO.*
+
+## 5. BUILD EXECUTED -- GO'd 2026-07-08T0202Z by COO~B (re-allocated to 0.4.0_DS_ClientPlatform~B)
+
+DS~A went idle (2 respawn-requests didn't take); COO~B re-allocated MOTIF-P1 to DS~B (LIVE + free + graph-capable). The pre-stage absorb-map above is now EXECUTED as a runnable, grounded, fidelity-passing artifact.
+
+**Deliverable:** `deliverables/NFRA_MOTIF_P1_c2_catalog.py` -- the C2 catalog absorb.
+- `python NFRA_MOTIF_P1_c2_catalog.py` -> live absorb (runs each detector on comp-kuzu HEAD-current, composes each into a C2 motif `Node`, fidelity-checks each).
+- `--self-test` -> 7/7 (fidelity POSITIVE + 2 NEGATIVE controls [latent motif / evidence-less C0 both FAIL the gate] + AC3 threshold + the D2 type-bug regression).
+- `--ladder Dn` -> the full comp-ladder (compression up + decompression down to file:line evidence) for one motif.
+
+**Live absorb result (HEAD-current: Nessie HEAD=current, nodes-snap 6127141211382924351, edges-snap 7012385084254624612):**
+
+| Dn | motif | tier | recurrence | AC3 | comp-ladder fidelity (AC6) | verdict |
+|---|---|---|---|---|---|---|
+| D1 | silent-display-fork | gate-ready | 5 | STABLE | **PASS** | ABSORB |
+| D2 | cross-firm-asymmetry | gate-ready | 2 | STABLE | **PASS** | ABSORB |
+| D3 | hardcoded-firm-literal | advisory | 4 | STABLE | **PASS** | ABSORB-overlap-lens |
+| D4 | dead-component | candidate-gen | 121 | STABLE | **PASS** | ABSORB-candidate |
+| D5 | orphan-endpoint | advisory | 49 | STABLE | **PASS** | ABSORB-advisory |
+| D7 | render-without-null-guard | advisory | 197 | STABLE | **PASS** | ABSORB-advisory |
+
+**6/6 STABLE motifs PASS the AC6 fidelity gate** (every motif decompresses C2 -> C1 interaction -> C0 lexical fact at file:line; no LATENT node). Gaps D6/D8/D9 routed as coverage-channel entries (not dropped). Recurrence matches the certed detector empirical exactly.
+
+### D2 TYPE-BUG (grounded HEAD-current -- Rule 22 mechanism-confirmed; re-validation earned its keep)
+The pre-stage recorded D2 recurrence=2; the live re-validation returned **0 rows**. Grounded the mechanism (did NOT paper over it): the graph was rebuilt since pre-stage (nodes-snapshot `8205589666541874180` -> `6127141211382924351`); on the current build `sum(CASE WHEN ... THEN 1 ELSE 0 END)` yields a **STRING-typed** column, so the yaml D2 query's final `WHERE trueBranch = 0 OR falseBranch = 0` compares string-vs-int and silently matches nothing. **The cross-firm-asymmetry motif is genuinely LIVE** -- 2 asymmetric inflection forks (`ClientsTab.tsx:291#name` + `LeaderboardEntry#name`, both trueBranch=0/falseBranch=2), grounded via the un-filtered bucket query. **Fix = `CAST(trueBranch AS INT64) = 0`** (confirmed: recovers the 2 rows), adopted as this catalog's canonical D2 query. **ACTION: flag the fix to the detector-library owner (`tsgraph_detectors.yaml`, 0.4.0_DE_ClientPlatform).** Structure held; the detector's filter had a build-exposed type bug.
+
+### Scope executed now vs staged (P2-2-gated / P3)
+- **DONE NOW (not P2-2-gated):** catalog absorb + template-match re-validation + recurrence (AC3) + decompression chains (AC2) + comp-ladder fidelity (AC6) + gap routing. The detectors match over the EXISTING C1 edges (FLOWS_TO/RENDERS/INSTANTIATES), so this leg needs no cluster edges.
+- **STAGED on MOTIF-P0 (TSGRAPH P2-2 materialize, 0.7.0_AE):** materializing the motifs AS C2 nodes + CONTAINS edges IN the store; the GRAPHDEPTH CONTAINS-rollup on live cluster edges (req#2 -- semantics applied now, engine-on-live-edges staged); C3 emergence (P2).
+- **STAGED P3:** PROMOTE candidate emission with the FEDOBS co-occurrence join (`iceberg.globgrph.cse` `cse_coevolution`, in-VPC/Trino).
+
+---
+*Pre-stage authored 2026-07-07 (DS~A); BUILD EXECUTED 2026-07-08 (DS~B) -- runnable + live-grounded + AC6-fidelity-passing. No graph mutation (C2-in-graph materialization is P2-2-gated). Grounded entirely in the certed detector library + live-graph HEAD-current provenance.*
