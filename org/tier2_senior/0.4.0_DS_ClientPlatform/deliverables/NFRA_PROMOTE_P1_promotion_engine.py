@@ -80,6 +80,21 @@ try:
 except ValueError:
     MEANINGFUL_CO_OCCURRENCE_FLOOR = 2
 
+# ANTI-GOODHART SIGNAL (CTO-RATIFIED 2026-07-08, COO co-set): gate on the COUPLING_RATIO
+# (co_change_commits / commits_touching_either) -- edit-frequency-robust real coupling -- NOT the raw
+# co_sessions count (a Goodhart-able activity proxy that over-emitted 6/7). FEDOBS_RATIO_FLOOR=0.15 is the
+# CTO-reasoned starting default: above the coincidental-noise band (~0.05-0.10) + in the natural distribution
+# GAP (0.097 -> 0.18, a real weak/tight bimodal split). CONFIG (tunable; a SMALL 7-sample -- revisit estate-wide).
+# A PRE-FILTER only: the owner's promotion-ratify is the FINAL meaningfulness gate.
+try:
+    FEDOBS_RATIO_FLOOR = float(os.environ.get("FEDOBS_RATIO_FLOOR", "0.15"))
+except ValueError:
+    FEDOBS_RATIO_FLOOR = 0.15
+
+# The FEDOBS frontend-co-evolution measure artifact (git-real, CVO-verifiable) -- joined into the candidates
+# at load so the gate reads a REAL per-candidate coupling_ratio (the CANDIDATE->MEASURED bind).
+FEDOBS_MEASURE_ARTIFACT = os.path.join(_HERE, "fedobs_frontend_coevolution.json")
+
 
 @dataclass
 class PromotionRecord:
@@ -110,12 +125,20 @@ def inv1_measured(rec: PromotionRecord) -> tuple:
 
 
 def inv2_anti_goodhart(rec: PromotionRecord) -> tuple:
-    """ANTI-GOODHART: the warrant must be MEANINGFUL (co_sessions >= floor), not any-non-zero / tuned."""
-    co = (rec.fedobs_measure or {}).get("co_sessions", 0)
-    if co >= MEANINGFUL_CO_OCCURRENCE_FLOOR:
-        return True, "co_sessions=%d >= floor %d (structural, generalizing)" % (co, MEANINGFUL_CO_OCCURRENCE_FLOOR)
-    return False, "co_sessions=%d < floor %d -- coincidental, NOT a warrant (anti-Goodhart bites)" % (
-        co, MEANINGFUL_CO_OCCURRENCE_FLOOR)
+    """ANTI-GOODHART (CTO-ratified signal 2026-07-08): gate on the COUPLING_RATIO (edit-frequency-robust real
+    coupling), NOT the raw co_sessions count (a Goodhart-able activity proxy). A warrant needs a MEANINGFUL
+    coupling (ratio >= FEDOBS_RATIO_FLOOR), not any active pair. Legacy measures (no ratio) fall back to the
+    co_sessions floor for back-compat."""
+    m = rec.fedobs_measure or {}
+    ratio = m.get("coupling_ratio")
+    if ratio is None:
+        co = m.get("co_sessions", 0)
+        return (co >= MEANINGFUL_CO_OCCURRENCE_FLOOR,
+                "co_sessions=%d vs floor %d (legacy: no coupling_ratio)" % (co, MEANINGFUL_CO_OCCURRENCE_FLOOR))
+    if ratio >= FEDOBS_RATIO_FLOOR:
+        return True, "coupling_ratio=%.3f >= floor %.2f (real coupling, edit-frequency-robust)" % (ratio, FEDOBS_RATIO_FLOOR)
+    return False, "coupling_ratio=%.3f < floor %.2f -- weak/coincidental, NOT a warrant (anti-Goodhart bites)" % (
+        ratio, FEDOBS_RATIO_FLOOR)
 
 
 def inv3_human_ratify(rec: PromotionRecord, owner_verdict: str | None) -> tuple:
@@ -233,17 +256,33 @@ def _classify(candidate: dict) -> str:
     return "KNOWLEDGE_NODE" if candidate.get("kind") == "system" else "COMPILER_RULE"
 
 
+def _load_fedobs_measures() -> dict:
+    """The git-real frontend-co-evolution measures (candidate_id -> {coupling_ratio, co_sessions}). When
+    present, this is the CANDIDATE->MEASURED bind -- the gate reads a REAL per-candidate coupling."""
+    if not os.path.exists(FEDOBS_MEASURE_ARTIFACT):
+        return {}
+    with open(FEDOBS_MEASURE_ARTIFACT, encoding="utf-8") as fh:
+        payload = json.load(fh)
+    return {m["candidate_id"]: m for m in payload.get("measures", [])}
+
+
 def load_candidates() -> list:
     if not os.path.exists(CANDIDATE_ARTIFACT):
         return []
     with open(CANDIDATE_ARTIFACT, encoding="utf-8") as fh:
         payload = json.load(fh)
+    measures = _load_fedobs_measures()   # JOIN the FEDOBS measure-bind if it has run
     recs = []
     for c in payload.get("candidates", []):
-        fed = dict(c.get("fedobs_cooccurrence", {}))
-        # map the MOTIF slot -> the lifecycle measure. PENDING_IN_VPC => not MEASURED (the gate will bite).
-        measure = {"status": "MEASURED" if fed.get("status") == "MEASURED" else "PENDING_IN_VPC",
-                   "co_sessions": fed.get("co_sessions", 0), "source": fed.get("source_view")}
+        fm = measures.get(c["candidate_id"])
+        if fm is not None:
+            # MEASURED: a real git-grounded coupling bound. The gate now evaluates it (anti-Goodhart ratio).
+            measure = {"status": "MEASURED", "coupling_ratio": fm.get("coupling_ratio"),
+                       "co_sessions": fm.get("co_sessions", 0), "source": "frontend-co-evolution (git, CVO-verifiable)"}
+        else:
+            fed = dict(c.get("fedobs_cooccurrence", {}))
+            measure = {"status": "MEASURED" if fed.get("status") == "MEASURED" else "PENDING_IN_VPC",
+                       "co_sessions": fed.get("co_sessions", 0), "source": fed.get("source_view")}
         recs.append(PromotionRecord(
             candidate_id=c["candidate_id"], promotion_class=_classify(c),
             recurrence=c.get("recurrence", 0), decompression_chain=c.get("decompression_chain", {}),
@@ -276,10 +315,11 @@ def run_engine() -> int:
     print("AC1 measure-before-promote: FIRING -- no candidate reaches PROMOTED without a FEDOBS measure.")
     print("  This matches the CTO ratify-ruling (7 RATIFIED-AS-CANDIDATES, PROMOTION WITHHELD). The gate is")
     print("  a REFUSAL, not a blocker -- an unmeasured candidate CANNOT materialize (zero auto-mutation).")
-    print("Next: 0.5.0_AE binds the in-VPC FEDOBS co-occurrence (needs CSE-P3 frontend coverage). On a")
-    print("  MEANINGFUL measure (co_sessions >= %d, anti-Goodhart), re-route to CTO for the PROMOTION ratify;"
-          % MEANINGFUL_CO_OCCURRENCE_FLOOR)
-    print("  a candidate with no meaningful measure after coverage is DROPPED (reversible, not zombie-held).")
+    proposed = [r.candidate_id for r in recs if r.state == "PROPOSED"]
+    if proposed:
+        print("RE-ROUTE to CTO (promotion ratify -- coupling_ratio warrant, invariant #5 cited): %s" % ", ".join(proposed))
+    print("Anti-Goodhart: coupling_ratio >= %.2f (CTO-ratified; a candidate below it is DROPPED, reversible not zombie-held)."
+          % FEDOBS_RATIO_FLOOR)
     print("Lifecycle CSE trail: %s" % os.path.relpath(LIFECYCLE_LOG, WS))
     return 0
 
@@ -307,26 +347,26 @@ def self_test() -> int:
     chk("1b AC1 negative control: unmeasured candidate NEVER reaches MATERIALIZED/SUSTAINED",
         r.state not in ("MATERIALIZED", "SUSTAINED"))
 
-    # AC3 anti-Goodhart: a MEASURED-but-COINCIDENTAL (co_sessions=1 < floor) candidate is DROPPED, not promoted.
-    r = advance(_mk("m:coincidental", "COMPILER_RULE", {"status": "MEASURED", "co_sessions": 1}), owner_verdict="RATIFY")
-    chk("3  AC3: coincidental measure (co_sessions=1<floor) DROPPED, not promoted (anti-Goodhart bites)",
+    # AC3 anti-Goodhart: a MEASURED-but-WEAK-coupling (coupling_ratio 0.05 < floor 0.15) is DROPPED, not promoted.
+    r = advance(_mk("m:weak", "COMPILER_RULE", {"status": "MEASURED", "coupling_ratio": 0.05}), owner_verdict="RATIFY")
+    chk("3  AC3: weak coupling (ratio 0.05<0.15) DROPPED, not promoted (anti-Goodhart bites on the RATIFIED signal)",
         r.state == "DROPPED")
 
     # AC2 human-ratify: a MEASURED+MEANINGFUL candidate with NO owner verdict is HELD at PROPOSED (zero auto-mutation).
-    r = advance(_mk("m:unratified", "KNOWLEDGE_NODE", {"status": "MEASURED", "co_sessions": 3}), owner_verdict=None)
+    r = advance(_mk("m:unratified", "KNOWLEDGE_NODE", {"status": "MEASURED", "coupling_ratio": 0.18}), owner_verdict=None)
     chk("2  AC2: meaningful-but-unratified candidate HELD at PROPOSED (zero auto-mutation; no auto-ratify)",
         r.state == "PROPOSED")
     # AC2 negative control: owner REJECT -> REJECTED (not materialized)
-    r = advance(_mk("m:rejected", "KNOWLEDGE_NODE", {"status": "MEASURED", "co_sessions": 3}), owner_verdict="REJECT")
+    r = advance(_mk("m:rejected", "KNOWLEDGE_NODE", {"status": "MEASURED", "coupling_ratio": 0.18}), owner_verdict="REJECT")
     chk("2b AC2: owner REJECT -> REJECTED, never materialized", r.state == "REJECTED")
 
-    # HAPPY PATH: measured + meaningful + ratified -> MATERIALIZED (the gate PASSES a real warrant).
-    r = advance(_mk("m:promotable", "COMPILER_RULE", {"status": "MEASURED", "co_sessions": 4}), owner_verdict="RATIFY",
+    # HAPPY PATH: measured + meaningful (ratio>=floor) + ratified -> MATERIALIZED (the gate PASSES a real warrant).
+    r = advance(_mk("m:promotable", "COMPILER_RULE", {"status": "MEASURED", "coupling_ratio": 0.18}), owner_verdict="RATIFY",
                 post_effect="SUSTAINED")
     chk("H  happy path: measured+meaningful+ratified -> MATERIALIZED -> SUSTAINED", r.state == "SUSTAINED")
 
     # AC4 reversible: a materialized promotion that DEGRADES post-promotion is DEMOTED.
-    r = advance(_mk("m:degrades", "COMPILER_RULE", {"status": "MEASURED", "co_sessions": 4}), owner_verdict="RATIFY",
+    r = advance(_mk("m:degrades", "COMPILER_RULE", {"status": "MEASURED", "coupling_ratio": 0.18}), owner_verdict="RATIFY",
                 post_effect="DEGRADED")
     chk("4  AC4 reversible: a DEGRADED post-promotion effect -> DEMOTED", r.state == "DEMOTED")
     # AC4 reversible (de-candidate): unmeasured AFTER coverage landed -> DROPPED, not zombie-held.
