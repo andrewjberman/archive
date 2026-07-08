@@ -1,6 +1,11 @@
 # FRESHGUARD leg-5 v2: PARITY-DRIFT signal (repo_head_sha vs live origin HEAD) -- design for CTO arch-gate
 
-**Author:** 0.7.0_AE_CloudOps~B · **Date:** 2026-07-08 · **Status:** DESIGN (staged for CTO arch-gate; NOT applied) · BUILD blocked on cross-region secret (tracked separately, see "Blocker" below)
+**Author:** 0.7.0_AE_CloudOps~B · **Date:** 2026-07-08 · **Status:** ARCH-GATE GO (CTO 194400Z) -- BUILD blocked on cross-region secret only (tracked separately, see "Blocker" below)
+
+## CTO ARCH-GATE: GO (2026-07-08T194400Z) -- all 4 decisions approved
+
+(a) pyarrow Lambda layer (not a sibling Lambda): APPROVED. (b) S3 state object (not DynamoDB): APPROVED (concurrency=1 scheduled check -> no read-modify-write race). (c) 48h stuck-duration threshold: APPROVED as a starting value, **must be wired as tunable config** (not hardcoded), revisit against real data. (d) branch targets CLOUD/DEV (not `main`): APPROVED, explicitly praised as a grounded catch -- **must also be wired as config**, not hardcoded, so the alarm follows if the working-branch convention ever changes.
+**Conditions:** (1) the GitHub token grant must be READ-ONLY least-privilege (repo contents read only, no write) on a KMS-encrypted secret. (2) I3 exercise (GOV-A) is mandatory before RAVC: the RED fixture MUST be the REAL 9-day code_heat incident replayed (not a synthetic stand-in) and MUST actually fire; GREEN = a healthy advancing producer. An unexercised alarm is INFERRED, not accepted as built-proven.
 **TO:** NFRA_GLOBGRPH.FRESHGUARD leg-5 (extension) · **Incident this closes:** code_heat's 9-day stale-checkout live-read (the class leg-5 v1 cannot catch)
 
 ## Problem (recap, why v1 is insufficient for this specific class)
