@@ -1,6 +1,6 @@
 # FRESHGUARD leg-5 v2: PARITY-DRIFT signal (repo_head_sha vs live origin HEAD) -- design for CTO arch-gate
 
-**Author:** 0.7.0_AE_CloudOps~B · **Date:** 2026-07-08 · **Status:** ARCH-GATE GO (CTO 194400Z) -- BUILD blocked on cross-region secret only (tracked separately, see "Blocker" below)
+**Author:** 0.7.0_AE_CloudOps~B · **Date:** 2026-07-08 · **Status:** ARCH-GATE GO (CTO 194400Z) -- BUILD blocked on a same-region IAM grant only (tracked separately, see "Blocker" below; CORRECTED 202141Z -- no cross-region issue exists)
 
 ## CTO ARCH-GATE: GO (2026-07-08T194400Z) -- all 4 decisions approved
 
@@ -29,7 +29,7 @@ leg-5 v1 (`freshness_alarm.tf`, commit 94c4739a0) alarms on served-object AGE. I
 
 ## Blocker (tracked, not blocking the design)
 
-Cross-region secret: `github-token` lives in `us-east-2`; the `freshness_alarm` Lambda is `us-east-1`. Base `0.7.0_AE_CloudOps` offered a multi-region Secrets Manager replica (~5min TF) after their leg-4/collision-fix work. **This design is build-ready the moment that lands** -- no other blocker.
+**CORRECTED 2026-07-08T202141Z:** originally written up as a cross-region blocker (`github-token` assumed in `us-east-2` vs the `freshness_alarm` Lambda's `us-east-1`) based on a stale reference in `infra/aws/terraform/news-pipeline/iam.tf`. Live-verified via `aws secretsmanager list-secrets` in both regions: the secret is actually `arn:aws:secretsmanager:us-east-1:313476888478:secret:github-token-6FYoJ6` -- **same region as the Lambda, no cross-region issue exists.** The remaining blocker is a trivial same-region IAM grant (`secretsmanager:GetSecretValue` on that ARN, scoped to `arn:aws:iam::313476888478:role/opal-globgrph-freshness-alarm`), landed by base `0.7.0_AE_CloudOps`. **This design is build-ready the moment that grant lands** -- no other blocker.
 
 ## Blast radius / rollback
 
@@ -43,4 +43,4 @@ Additive: 1 pyarrow Lambda layer, 1 new IAM grant (`secretsmanager:GetSecretValu
 
 ## Ask
 
-Arch-gate GO on: (a) the pyarrow-layer-vs-sibling-Lambda choice (recommend layer), (b) the S3-state-object-vs-DynamoDB choice (recommend S3, consistency with leg-5's design), (c) the 48h stuck-duration threshold, (d) branch targets CLOUD (ajb_workspace) / DEV (portal) -- grounded live this session, not the repos' GitHub-default `main`. On GO + the cross-region token landing: I implement (Lambda layer + state objects + 2 alarms + registry-consistent IAM), exercise the RED/GREEN fixtures, RAVC CTO + CVO.
+Arch-gate GO on: (a) the pyarrow-layer-vs-sibling-Lambda choice (recommend layer), (b) the S3-state-object-vs-DynamoDB choice (recommend S3, consistency with leg-5's design), (c) the 48h stuck-duration threshold, (d) branch targets CLOUD (ajb_workspace) / DEV (portal) -- grounded live this session, not the repos' GitHub-default `main`. On GO + the same-region IAM grant landing: I implement (Lambda layer + state objects + 2 alarms + registry-consistent IAM), exercise the RED/GREEN fixtures, RAVC CTO + CVO.
