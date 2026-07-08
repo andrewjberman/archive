@@ -47,20 +47,49 @@ except ValueError:
     RATIO_FLOOR = 0.15
 
 
-def candidate_files() -> dict:
-    """candidate_id -> its set of portal-repo-relative frontend FILE constituents (.tsx/.ts only).
-    Endpoint symbols / non-file constituents are excluded (they don't co-change as files -- honest)."""
+def _files_of(c: dict) -> set:
+    files = set()
+    for e in c["decompression_chain"].get("c0_evidence", []):
+        src = (e.get("source") or "")
+        if src.startswith("portal/") and (src.endswith(".tsx") or src.endswith(".ts")):
+            files.add(src[len("portal/"):])
+    return files
+
+
+def candidate_index() -> dict:
+    """candidate_id -> {kind, files, member_motifs}. Files = portal-repo-relative .tsx/.ts constituents
+    (endpoint symbols excluded -- they don't co-change as files)."""
     with open(CANDIDATE_ARTIFACT, encoding="utf-8") as fh:
         payload = json.load(fh)
-    out = {}
+    idx = {}
     for c in payload.get("candidates", []):
-        files = set()
-        for e in c["decompression_chain"].get("c0_evidence", []):
-            src = (e.get("source") or "")
-            if src.startswith("portal/") and (src.endswith(".tsx") or src.endswith(".ts")):
-                files.add(src[len("portal/"):])   # portal-repo-relative
-        out[c["candidate_id"]] = files
-    return out
+        idx[c["candidate_id"]] = {"kind": c.get("kind"), "files": _files_of(c),
+                                  "member_motifs": c.get("member_motifs", [])}
+    return idx
+
+
+def candidate_files() -> dict:
+    return {cid: meta["files"] for cid, meta in candidate_index().items()}
+
+
+def system_independence(cid: str, idx: dict) -> tuple:
+    """For a SYSTEM candidate: is its constituent-file UNION distinguishable from its dominant member
+    motif, or is it FILE-SUBSUMED (the other members add 0 unique files)? A subsumed system's coupling
+    measure IS its dominant motif's -- promoting it separately DOUBLE-COUNTS that motif's warrant, so it
+    is NOT an independent warrant (CVO smell + COO disposition: measure independently, do not inherit)."""
+    meta = idx[cid]
+    if meta["kind"] != "system":
+        return True, "motif -- own measure"
+    union = meta["files"]
+    for m in meta["member_motifs"]:
+        mfiles = idx.get(m, {}).get("files", set())
+        if mfiles and mfiles == union:
+            others = [x for x in meta["member_motifs"] if x != m]
+            extra = set().union(*[idx.get(o, {}).get("files", set()) for o in others]) - mfiles if others else set()
+            if not extra:
+                return False, ("file-subsumed by %s: the other members add 0 unique files -> the union measure "
+                               "IS %s's, NOT an independent system warrant (would double-count)" % (m.split(':', 1)[1], m.split(':', 1)[1]))
+    return True, "union adds independent files beyond any single member -- an independent system measure"
 
 
 def _git_commits_touching(files: list) -> list:
@@ -105,11 +134,26 @@ def measure_candidate(cid: str, files: set) -> dict:
             "co_sessions": len(co_sessions),            # raw count (over-emits at floor=2; see coupling_ratio)
             "total_touch_commits": total_touch,         # commits touching >=1 file (the denominator)
             "coupling_ratio": ratio,                    # <- SHARPER: together / (together+separate)
+            "independent": True,                        # set False for a file-subsumed system (see run_measure)
+            "measure_provenance": "own constituent files",
             "sessions": co_sessions}                    # <- the git provenance (CVO-verifiable)
 
 
 def run_measure() -> list:
-    return [measure_candidate(cid, files) for cid, files in candidate_files().items()]
+    idx = candidate_index()
+    out = []
+    for cid, meta in idx.items():
+        r = measure_candidate(cid, meta["files"])
+        indep, why = system_independence(cid, idx)
+        r["independent"] = indep
+        r["measure_provenance"] = why
+        # A file-subsumed system carries no INDEPENDENT warrant -> its promote-signal is neutralized (the gate
+        # treats it as below-warrant regardless of the inherited ratio -- avoids double-counting the dominant motif).
+        if not indep:
+            r["coupling_ratio_inherited"] = r["coupling_ratio"]
+            r["coupling_ratio"] = 0.0
+        out.append(r)
+    return out
 
 
 def dry_run() -> int:
