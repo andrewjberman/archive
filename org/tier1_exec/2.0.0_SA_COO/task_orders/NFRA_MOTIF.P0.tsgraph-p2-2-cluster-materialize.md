@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.7.0_AE_CloudOps (globgrph derive) + 0.4.0_DE_ClientPlatform (producer publish + live verify, gated on base-DE release)</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>dispatched -- GO'd 2026-07-08 by COO~B to 0.7.0_AE (globgrph derive lane), QUEUED behind INFRPT recurring-schedule + GUARD-REFILE + AGENTBUS-S3. Unblocks MOTIF-P1's C2-in-graph leg. Primary path is 0.7.0_AE (locate/regenerate portal_clusters.json + run derive + verify cluster edges live via comp-cluster/comp-kuzu query -- no hard DE dependency); DE producer-publish only if the JSON is stale/missing (coordinate base COO for DE-base).</status>
     <prd_ref>docs/architecture/NFRA_MOTIF_PRD.md (P1 gate) + docs/architecture/NFRA_TSGRAPH_PRD.md (P2-2, re-homed to MOTIF)</prd_ref>
     <dispatch_state>STAGED -- the MOTIF accelerator, sequence FIRST within MOTIF. FINISH-AND-VERIFY, not a rebuild. Authored by COO~B on the NFRA full-program completion drive.</dispatch_state>
     <gate_note>Unblocks MOTIF-P1's C2-in-graph leg. RECORDS CONFLICT: a 07-02 record claims "materialized+verified"; the freshest 07-07 CVO grounding (SEMCTL synergy #3b) says the cluster edges are NOT live on the canonical graph. GROUND ON THE LIVE CANONICAL GRAPH, never the stale record (Rule 22). DE-verify leg holds until base COO releases 0.4.0_DE from its live client call.</gate_note>

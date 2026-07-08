@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A (graph-lane, resolved 2026-07-07 -- thematic fit with its live COMPILERKIT parity-oracle/graph work) + 0.4.0_DE_ClientPlatform (gated)</issued_to>
     <date>2026-07-07</date>
-    <status>pending</status>
+    <status>dispatched -- GO'd 2026-07-08 by COO~B: CSE-C1 live (CSE-P2 CLOSED) + FEDOBS co-occurrence LIVE (cse_coevolution view, iceberg.globgrph.cse, be2a6670f) = MOTIF's inputs exist. START the C2-catalog absorb NOW via the comp-cluster CLI extraction (req#4); the C2-IN-GRAPH leg gates on MOTIF-P0 (TSGRAPH-P2-2 materialize, 0.7.0_AE). DE-side is a follow-on sync, not a hard gate on the DS~A absorb.</status>
     <prd_ref>docs/architecture/NFRA_MOTIF_PRD.md (P1)</prd_ref>
     <backfill_note>TO FILE backfilled 2026-07-07 -- the SEMCTL plane was dispatched + built via MCP + arch-gate RAVC but the durable TO records were not materialized (Andrew/CTO caught the gap 2026-07-07). This TO reflects the REAL current state. Standing-fix adopted: TO-file + MCP-dispatch, both, every time.</backfill_note>
     <lane_allocation_note>Lane-allocation resolved 2026-07-07 13:51Z (COO /drive cycle 3) -- generic "0.4.0_DS (graph-lane)" resolved to DS~A specifically, since DS~B is committed to CSE-P2 and DS~A's COMPILERKIT recognizer work is graph-adjacent. DS~A should treat this as queued behind COMPILERKIT-P1/P2, not drop current work -- DE is only gated pending an initial sync, not full DS~A availability.</lane_allocation_note>
