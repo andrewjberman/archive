@@ -181,11 +181,11 @@ The telemetry-substrate jq starvation is FIXED (`org/mcp/hooks/post-tool-telemet
 
 **WORKS (log-grounded majority):** the bulk of the ~55 tools -- every class-3 built-proven tool (Sections 1-6) with heavy PASS rows in the 14,356-row log AND Part-0's log-mining confirming no break: comp-kuzu / aws / iam / routes / lambdamap / secrets / dups / trace / blast / build / diff / xref / transform / cache / cluster / pii / types / adapter-audit / pipescript / comp-pipescript / platinum / freshness / chainrun / incrparity / parity / heat / xray / graph / shell / registry / coverage / honesty / fedobs(reader) / comp-which / comp-grep / comp-glob. Grounded on real use, NOT --help.
 
-**BROKEN (confirmed on REAL invocation this pass):**
+**BROKEN / DEFECTIVE (confirmed on REAL invocation this pass):**
 | tool | real-invocation | verdict | grounding |
 |---|---|---|---|
-| comp-learns-run | `comp-learns-run` -> `No module named comp.framework.run` rc=1 | BROKEN (hard, every invocation) | packaging: the comp.framework.run module is absent. P2 fix #2. CONFIRMED real (Part-0 + my run) |
-| comp-tooltip | `comp-tooltip --help` -> `comp-tooltip <U+FFFD> Portal tooltip...` | BROKEN (mojibake, r16/ASCII violation) + 46% scan-fail (Part-0) | a non-ASCII char in --help output (CLAUDE.md Code Quality). CONFIRMED. P2 fix #4 (-> ASCII). Also a RETIRE-CANDIDATE (one-off, 13 log rows) |
+| comp-learns-run | `comp-learns-run` -> `No module named comp.framework.run` rc=1 | BROKEN (hard) -> **RETIRE (CTO-ruled)** | ROOT CAUSE (Rule 22): NOT a packaging fix -- `comp/framework/` exists ONLY in worktrees/comp-learns-_stub/ (an UN-LANDED stub, also the class-3 G8 stale-duplicate source), never merged to main. CTO ruled RETIRE (superseded by the PROMOTE loop; landing regresses GOV-A). Scope grounded + SoD-split, held for P2 GO |
+| comp-tooltip | `comp-tooltip summary` -> "37 sites / 31 canonical / 6 drift" rc=0 (DS~B real-invoke) | **WORKS-functionally + COSMETIC mojibake defect** (r16/ASCII, --help-only) | reclassified from BROKEN: it FUNCTIONS (summary rc=0); the defect is 8x U+2014 em-dash in tooltip_cli.py (lines 1/12-16/81/84) -> cp1252 replacement char in --help ONLY. FIX = ASCII the 8 em-dashes + drop a dead `import os` (F401). LANE: ANY_EXEC_OR_AE = **MY lane** (DS~B owned-paths-blocked, routed to me + PRE-VERIFIED the fix: commit-gate clean + summary rc=0). Held for P2 GO. Also a RETIRE-CANDIDATE (one-off, 13 rows) |
 
 **Part-0 CORRECTIONS (my real-invocation grounding reclassifies 2 of the 4 pre-populated "breaks"):**
 | tool | Part-0 said | my real-invocation finding | corrected verdict |
@@ -224,6 +224,10 @@ The `(SYNTHETIC TEST FIXTURE)` marker is effectively UNUSED (1/1,302 FAILs marke
 
 ## 10.5 Coordination + status
 
-- **DS~B pull sent** (org/modules/graph engines -- comp-pipescript/validate/platinum/chainrun/incrparity/transform/cache/pii/types/constants/freshness): DS~B real-invokes + returns verdicts -> folded here. (My comp-constants correction shared.)
+- **DS~B graph-engine fold -- BATCH 1 (real-invoked, folded):**
+  - comp-constants -> WORKS (DS~B CONFIRMS my finding: `check --lane bd` "OK: no drift across 34 constants" rc=0; the "52% fail" = gate-firing + synthetic fixtures). DS-lane side-finding (NOT comp-constants' fault): a real py3.12 `SyntaxWarning invalid escape '\$'` in data/black_diamond/scripts/gold/C_05.client_tax_liability.py:91 + the cot twin -> DS~B folds into a separate gold-script pass.
+  - comp-pipescript deployed -> WORKS / GATE-REPORTING-CORRECTLY (all-trees sweep: 16 MATCH / 0 STALE / 3 MISSING_ON_S3 = real mdpf-backfill deploy findings, HeadObject 404 = tool working, rc=0).
+  - comp-tooltip -> WORKS-functionally + cosmetic mojibake (folded above); fix is MY lane (ANY_EXEC_OR_AE), DS~B pre-verified it.
+  - **BATCH 2 pending** (DS~B, behind a CVO re-verify): comp-freshness, comp-drift (confirm the coverage-rc0/sweep-rc2 tri-state), comp-validate, comp-transform/cache/types -> fold on return.
 - Verdicts for the live-AWS tools (comp-aws/iam/lambdamap/secrets/freshness) rest on the 14,356-row log PASS evidence + class-3 built-proven grounding (not re-run this pass -- live AWS), per the log-ground-truth method.
-- RAVC COO~B -> CTO arch-gate (verification-completeness) + CVO real-use-grounding cert -> P2 (fixes-first).
+- **P1 completion RAVC to COO** pends the DS~B batch-2 fold -> then CTO arch-gate (verification-completeness) + CVO real-use-grounding cert -> P2 (fixes-first).
