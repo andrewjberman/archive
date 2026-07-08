@@ -5,7 +5,7 @@
 <co_assignees>0.4.0_DS_ClientPlatform (contract-integrity wiring vs NFRA_GCONTR comp-surface-check Q2 + value-check); COO co-designs the JSON-feed -> /drive coupling (the /drive lane)</co_assignees>
 <issued_by>2.0.0_SA_COO (NFRA_INFRPT decomposition 2026-06-16; CVO proposal 6d5954360 §C/§D + delivery; CTO false-clean note 185342Z)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>staged</status>
+<status>complete -- LANDED + live-verified 2026-07-08 (0.7.0_AE, COO~B-accepted). Section C graph-HEAD (UNKNOWN-VINTAGE vs FROZEN distinct) + Section D contract-integrity (producer/consumer seam, false-clean hard-qualifier surfacing 2 SEV1 uncontracted LOUD = GOV-A I3) + action-first ASCII delivery + agent-consumable feed. Rule-22a: safe-apply 1-add/1-change/0-destroy, 0-diff re-plan, exercised on the live Lambda, deploy-ledger closed. Tag shared-infra-v1.42.0 (2b45cd422/e7a30eb53/5af96e9f9/ff935886f). Follow-ons GO'd non-blocking: producer recurring-schedule (fold to nightly derive-runner, before 30h) + 174.6s/180s timeout bump; /drive-consumer wiring routed to base COO.</status>
 <priority>Lands LAST. GATE: NFRA_GCONTR going live (SEV2 ceiling now LIVE + byte-verified -> the graph_contracts surface is materializing) + P0-P2 landed + AE/DS capacity. The runtime period_defs value-check assertion (CVO-owned) is a sibling input.</priority>
 
 <references>

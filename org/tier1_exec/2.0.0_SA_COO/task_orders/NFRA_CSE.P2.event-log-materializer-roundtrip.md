@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B (DS-items) + 0.5.0_AE_OpalETL (store-writer)</issued_to>
     <date>2026-07-07</date>
-    <status>active</status>
+    <status>complete -- CLOSED 2026-07-08 (NFRA full-program drive, COO~B). CVO closing cert b9e81b153 (clean 100% parity, blind-re-run: 19915/19915 nodes + 34891/34891 distinct edges, materializer_fault=false, 0 gaps @ landed 0.3; the honest-bar residual now ZERO, source-verified closed via HONEST re-type NOT a validator hack). Close set GREEN: event-log LIVE (2e858ad85, 6 CSEs read-back-grounded, 4-table one-marker, ledger-closed) + materializer AC4 (6311852d9) + coverage-sweep (4cf14ce3d) + 0.3 canonical SoD-land (42b569a52) + honest-bar cert (871aa5a3d) + closing cert (b9e81b153). AC2/AC3/AC4/AC6 met+grounded. Non-blocking follow-on (CVO->DS~B): 34913-vs-34891 CloudEdge delta characterization (early read: 0 dangles by construction, live-vintage-growth + 1 dup-tuple). FEDOBS-P2 already GO'd on the live log.</status>
     <prd_ref>docs/architecture/NFRA_CSE_PRD.md (P2)</prd_ref>
     <backfill_note>TO FILE backfilled 2026-07-07 -- the SEMCTL plane was dispatched + built via MCP + arch-gate RAVC but the durable TO records were not materialized (Andrew/CTO caught the gap 2026-07-07). This TO reflects the REAL current state. Standing-fix adopted: TO-file + MCP-dispatch, both, every time.</backfill_note>
   </metadata>
