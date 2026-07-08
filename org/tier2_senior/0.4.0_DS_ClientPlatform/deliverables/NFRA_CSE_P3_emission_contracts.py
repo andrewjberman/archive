@@ -65,7 +65,9 @@ def contract_git() -> dict:
         "ref": "the commit SHA",
         "compiler": {"id": "code-infra-compiler#1", "artifact_class": "python|ts|tf|yaml", "version": CSE.SCHEMA_VERSION},
         "recognizer": "lambda_s3_write_recognizer (+ the code-compiler recognizer family)",
-        "subject_rule": "the lexically-named code/infra entity (Lambda/Function/S3Bucket/...); HIGH confidence (a put_object Key is lexically certain)",
+        "subject_rule": "the lexically-named code/infra entity (Lambda/Function/S3Bucket/...); HIGH confidence "
+                        "(a put_object Key is lexically certain); verb = create|modify per whether the commit ADDS "
+                        "vs CHANGES the entity (a commit modifying an existing Lambda is MODIFY, not CREATE)",
         "provenance_map": {"source": "the source file path", "locus": "L<line>",
                            "evidence": "the literal call text (e.g. s3.put_object(Bucket=B, Key=K))"},
         "example": example_git,
