@@ -324,12 +324,20 @@ def run_engine() -> int:
               % (rec.candidate_id, rec.promotion_class, owner, rec.state))
         print("       %s" % rec.history[-1]["reason"])
     held = sum(1 for r in recs if r.state == "CANDIDATE")
+    proposed_n = sum(1 for r in recs if r.state == "PROPOSED")
+    dropped_n = sum(1 for r in recs if r.state == "DROPPED")
     promoted = sum(1 for r in recs if r.state in ("MATERIALIZED", "SUSTAINED"))
     print("\n" + "-" * 80)
-    print("GATE RESULT: %d/%d HELD at CANDIDATE (measure PENDING_IN_VPC) | %d promoted." % (held, len(recs), promoted))
-    print("AC1 measure-before-promote: FIRING -- no candidate reaches PROMOTED without a FEDOBS measure.")
-    print("  This matches the CTO ratify-ruling (7 RATIFIED-AS-CANDIDATES, PROMOTION WITHHELD). The gate is")
-    print("  a REFUSAL, not a blocker -- an unmeasured candidate CANNOT materialize (zero auto-mutation).")
+    # Summary reflects the BOUND-measure reality (FEDOBS focused_coupling_ratio joined per candidate): the gate
+    # now discriminates on the warrant, so candidates flow to PROPOSED (cleared) / DROPPED (weak) -- NOT the
+    # pre-bind "all HELD at CANDIDATE, measure PENDING" state (CVO cosmetic-note 2026-07-08, stale-template fix).
+    print("GATE RESULT (of %d): %d PROPOSED (cleared anti-Goodhart -> owner-ratify) | %d DROPPED (below focused"
+          " floor) | %d HELD at CANDIDATE (measure pending) | %d promoted."
+          % (len(recs), proposed_n, dropped_n, held, promoted))
+    print("AC1 measure-before-promote: measures BOUND -- the gate discriminates on the warrant, not a blanket hold.")
+    print("  A cleared candidate reaches PROPOSED (owner-ratify is the FINAL gate, zero auto-mutation); a")
+    print("  weak-coupling candidate is DROPPED (reversible, not zombie-held). Promotion still WITHHELD from")
+    print("  every candidate until its owner explicitly ratifies (matches the CTO ratify-ruling).")
     proposed = [r.candidate_id for r in recs if r.state == "PROPOSED"]
     if proposed:
         print("RE-ROUTE to CTO (promotion ratify -- coupling_ratio warrant, invariant #5 cited): %s" % ", ".join(proposed))
