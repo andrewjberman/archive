@@ -7,9 +7,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>dispatched -- GO'd 2026-07-08 by COO~B: the CSE-P2 C0 event log is LIVE + grounded (globgrph.cse, 6 real code-producer CSEs read-back-verified, 2e858ad85), so the 0-rows block is CLEARED. Build the measurement library against the live log now; data thickens as CSE-P3 adds producers.</status>
     <prd_ref>docs/architecture/NFRA_FEDOBS_PRD.md (P2 + AC3/AC4/AC5)</prd_ref>
-    <dispatch_state>STAGED -- authored by COO~B on the NFRA full-program completion drive (Andrew-direct, plan approved). GO at Wave-2, AFTER NFRA_CSE.P2's append-only event log lands + is CVO-certed (this TO's co-evolution signal is 0-rows until that log exists).</dispatch_state>
+    <dispatch_state>DISPATCHED 2026-07-08 to 0.5.0_AE_OpalETL. Gate cleared: CSE-P2 event log LIVE+grounded (NOT waiting on CSE-P2's own 100%-parity close, which is a separate parallel gate on the 0.3 version-bump -- the log EXISTS with real rows, which is FEDOBS-P2's only hard dependency).</dispatch_state>
     <gate_note>HARD-GATED on NFRA_CSE.P2 event log. FEDOBS-P1 (federation substrate + read-only boundary) is COMPLETE + CVO-certed. This is the load-bearing MEASURE arm that MOTIF (co-occurrence) + PROMOTE (measured effect) both depend on -- without it the federated learning loop cannot close.</gate_note>
   </metadata>
 
