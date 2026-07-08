@@ -7,9 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS~A (graph-lane)</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
-    <prd_ref>docs/architecture/NFRA_MOTIF_PRD.md (P2 + AC2/AC4/AC6)</prd_ref>
-    <dispatch_state>STAGED -- GO at Wave-3, AFTER NFRA_MOTIF.P1 (C2 catalog) lands. Authored by COO~B on the NFRA full-program completion drive.</dispatch_state>
+    <status>dispatched -- GO'd 2026-07-08 by COO~B to 0.4.0_DS~B. Both gates CLEARED: MOTIF-P1 C2 catalog CVO-certed (b783dd504) + MOTIF-P0 MET (91 CLUSTERS edges + 91 PanelCluster nodes + 241 CONTAINS_DRILLDOWN + 55 SHARES_SOURCE live at the fresh canonical HEAD, snapshot 20260708, via the FRESHGUARD derive un-freeze). CAVEAT: comp-kuzu canonical-DB rebuild to the new HEAD is FAILING (rc=143 Arrow-S3, serving stale pre-derive DB, BEHIND-flagged) -> QUERY THE AUTHORITATIVE snapshot 20260708 (not comp-kuzu) until the rebuild is fixed (tracked finding).</dispatch_state>
     <gate_note>Gated on MOTIF-P1 (the C2 motif catalog). comp-ladder fidelity gate binds every C3 node.</gate_note>
   </metadata>
 
