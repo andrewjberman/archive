@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 """NFRA_PROMOTE-P2 / GOV-B R4 -- the PROPOSED 5th-producer CSE emission contract (PROMOTE / MATERIALIZER).
 
-STATUS: PROPOSAL (a governed migration for ratify), NOT a landed change. Authored by 0.8.0_AE_CloudComp~D
-(the GOV-B producer). Routes CTO arch-gate -> CVO re-sign -> COO SoD-land -- the SAME governed path as the
-0.3 Entity.TYPE/SYMBOL bump. This module does NOT mutate cse_schema.py; it proposes the migration + proves
-the contract shape validates through the REAL cse_schema.validate under a SANDBOXED in-memory enum extension.
+STATUS: CTO-ARCH-GATED (2026-07-08, GO -- CTO exercised the self-test 10/10 himself); routing CVO re-sign
+-> COO SoD-land @0.4. A governed migration, NOT yet a landed change. Authored by 0.8.0_AE_CloudComp~D (the
+GOV-B producer). The path is the SAME governed one as the 0.3 Entity.TYPE/SYMBOL bump. This module does NOT
+mutate cse_schema.py; it proposes the migration + proves the contract shape validates through the REAL
+cse_schema.validate under a SANDBOXED in-memory enum extension.
+
+CONSUMER NOTE (CTO arch-gate): the LOW confidence (0.2) on a MATERIALIZED/DEMOTED CSE is the SUBJECT's
+TYPE-confidence (untyped-Concept per S3.5) -- NOT the promotion EVENT's certainty. The promotion DEFINITELY
+happened; that is carried by the event EXISTING + the verb + the commission_id, not the confidence field.
+FEDOBS directive-effectiveness consumers must NOT discount the event because the band is LOW (LOW = "a
+recognizer has no governed algebra-type", NOT "maybe it didn't promote"). An event-certainty-vs-type-
+confidence split (a separate field) is a future refinement; within the current S3.5 rule, Concept->LOW is right.
 
 WHY (CTO arch-gate 4d0886493, R4): the promotion MATERIALIZED/DEMOTED transition is itself an observation
 (invariant #5) -- it should feed FEDOBS directive-effectiveness (before/after the promotion) as a first-class,
@@ -15,9 +23,9 @@ The GOV-B loop CLOSED using the lifecycle/trail-record CSE (interim, non-gating 
 THE GOVERNED MIGRATION (what CTO ratifies + COO SoD-lands into org/modules/graph/cse_schema.py):
   ProducerKind: add ONE enum member ->   PROMOTE = "promote"
   (_PRODUCER_VALUES = frozenset(p.value for p in ProducerKind) derives it automatically -- no other edit.)
-  VERSION: coordinate with DS~B before staging. cse_schema is @0.3 (TYPE/SYMBOL). PROMOTE is the NEXT clean
-  SEQUENTIAL bump (0.4 candidate), NOT a parallel one -- DS~B + CTO confirmed one-clean-bump sequencing
-  (2026-07-08). The enum add is additive/back-compat; a SCHEMA_VERSION bump is the governance marker.
+  VERSION: cse_schema @0.3 -> 0.4 (DS~B-confirmed 2026-07-08 as version-owner; CTO arch-gate GO). A MINOR,
+  single additive/back-compat enum member -- goes SOLO (DS~B has no queued SCHEMA_VERSION change), no parallel
+  bump. The SCHEMA_VERSION bump is the governance marker.
 
 THE CONTRACT (P3 pattern): a MATERIALIZED/DEMOTED CSE emitted by the promote-materializer when a ratified
 recognizer is hot-loaded LIVE (materialize -> verb CREATE) or hot-deregistered (demote -> verb DELETE).
@@ -53,8 +61,11 @@ PROPOSED_MIGRATION = {
     "file": "org/modules/graph/cse_schema.py",
     "change": "add one ProducerKind member: PROMOTE = \"promote\" (after GRAPH_HEAD)",
     "derived": "_PRODUCER_VALUES = frozenset(p.value for p in ProducerKind) picks it up automatically",
-    "version": "coordinate with DS~B: cse_schema @0.3 -> next SEQUENTIAL bump (0.4 candidate); additive/back-compat",
-    "governed_by": "CTO arch-gate + CVO re-sign + COO SoD-land (same path as the 0.3 TYPE/SYMBOL bump)",
+    "version": "cse_schema @0.3 -> 0.4 (DS~B-confirmed 2026-07-08, version-owner): a MINOR bump, single additive/back-compat enum member; goes solo (no batched change)",
+    "version_history_line": "extend the SCHEMA_VERSION comment at cse_schema.py:42: "
+                            "'0.3->0.4 (CTO-ratified <date>): +ProducerKind.PROMOTE (governed 5th-producer "
+                            "emission-contract, back-compat additive)' -- keeps the version lineage self-documenting",
+    "governed_by": "CTO arch-gate GO (2026-07-08) -> CVO re-sign -> COO SoD-land (same path as the 0.3 TYPE/SYMBOL bump)",
     "back_compat": "additive enum member -- no existing CSE invalidated; a new producer only widens the accepted set",
 }
 
@@ -77,6 +88,12 @@ def contract_promote() -> dict:
         "provenance_map": {"source": "the git-versioned promote_recognizer_manifest.json entry",
                            "locus": "the recognizer_id",
                            "evidence": "commission_id + coupling_ratio warrant (decompresses to the manifest entry)"},
+        "consumer_note": "the LOW confidence (0.2) is the SUBJECT's TYPE-confidence (untyped-Concept, S3.5), "
+                         "NOT the promotion EVENT's certainty. The promotion DEFINITELY happened -- carried by "
+                         "the event EXISTING + the verb + the commission_id, not the confidence field. FEDOBS "
+                         "directive-effectiveness consumers must NOT discount the event for a LOW band (LOW = "
+                         "'a recognizer has no governed algebra-type', NOT 'maybe it didn't promote'). "
+                         "[CTO arch-gate note 2026-07-08]",
         "example": example_materialized,
         "example_demote": example_demoted,
     }
@@ -184,6 +201,14 @@ def self_test() -> bool:
         example_materialized().transformation["verb"] == CSE.Transformation.CREATE.value
         and example_demoted().transformation["verb"] == CSE.Transformation.DELETE.value)
 
+    # 6. CTO arch-gate consumer note documented: LOW = subject TYPE-confidence, not event certainty.
+    chk("6  contract documents the consumer note (LOW=type-confidence, NOT event-certainty; CTO arch-gate)",
+        "NOT the promotion EVENT's certainty" in contract_promote()["consumer_note"])
+
+    # 7. version pinned to the DS~B-confirmed 0.4 (version-owner) -- de-risks the SoD-land.
+    chk("7  version pinned @0.3 -> 0.4 (DS~B-confirmed version-owner; solo sequential MINOR bump)",
+        "0.4" in PROPOSED_MIGRATION["version"] and "version_history_line" in PROPOSED_MIGRATION)
+
     passed = sum(1 for c in checks if c)
     print(f"=== {passed}/{len(checks)} PASS (PROPOSAL -- routes CTO arch-gate -> CVO re-sign -> COO SoD-land) ===")
     return passed == len(checks)
@@ -199,6 +224,7 @@ def print_spec() -> None:
     print(f"   subject rule: {c['subject_rule']}")
     print(f"   provenance  : source={c['provenance_map']['source']}")
     print(f"                 locus={c['provenance_map']['locus']}  evidence={c['provenance_map']['evidence']}")
+    print(f"   consumer    : {c['consumer_note']}")
     print("\n## THE GOVERNED MIGRATION (CTO ratifies -> COO SoD-lands):")
     for k, v in PROPOSED_MIGRATION.items():
         print(f"   {k:12s}: {v}")
