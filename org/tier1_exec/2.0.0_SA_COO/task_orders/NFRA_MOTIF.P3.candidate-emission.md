@@ -5,7 +5,7 @@
   <metadata>
     <id>2.0.0_SA_COO~B-2026-07-07-nfra-motif-p3</id>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.4.0_DS~A (graph-lane)</issued_to>
+    <issued_to>0.4.0_DS_ClientPlatform~B (RE-ALLOCATED 2026-07-08 from DS~A -- DS~A down; DS~B holds the MOTIF lane P1/P2)</issued_to>
     <date>2026-07-07</date>
     <status>staged</status>
     <prd_ref>docs/architecture/NFRA_MOTIF_PRD.md (P3 + AC3/AC5)</prd_ref>
