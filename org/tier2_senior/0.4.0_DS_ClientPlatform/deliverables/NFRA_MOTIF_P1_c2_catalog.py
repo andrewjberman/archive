@@ -405,6 +405,111 @@ def run_absorb() -> int:
 
 
 # ---------------------------------------------------------------------------
+# C3 EMERGENCE PRE-STAGE (MOTIF-P2 head-start; substrate-independent, NOT the P2-2-gated build).
+#   A C3 system (PRD S4.2 / AC4) is a CONNECTED set of C2 motifs forming a coherent capability,
+#   EMERGENT (not declared). Connectivity signal used here: shared constituents -- two motifs are
+#   connected iff they share a C1/C0 node_id (an instance both idioms match). This needs NO cluster
+#   edges (it reads the C2 catalog I already built), so it is available NOW; P2-2's cluster edges
+#   will ADD a co-membership connectivity signal (enrich, not replace) when the GO'd P2 build runs.
+# ---------------------------------------------------------------------------
+def motif_constituents(motif: Node) -> set:
+    """The set of C1/C0 constituent node_ids in a motif's decompression subtree (its 'footprint')."""
+    return {n.nid for _, n in decompress(motif) if n.layer in ("C0", "C1")}
+
+
+def build_c3_systems(motifs: list) -> tuple:
+    """Compose connected C2 motifs into emergent C3 systems (connected-components over shared
+    constituents). Returns (systems: list[Node], singletons: list[str]). A component of >=2 motifs is
+    a C3 system; an isolated motif is NOT a system (reported, not forced)."""
+    foot = {m.nid: motif_constituents(m) for m in motifs}
+    by_nid = {m.nid: m for m in motifs}
+    # union-find over motifs by shared constituent
+    parent = {m.nid: m.nid for m in motifs}
+
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+
+    ids = [m.nid for m in motifs]
+    shared_map = {}  # (mi,mj) -> the shared constituents (the 'why connected' evidence)
+    for i in range(len(ids)):
+        for j in range(i + 1, len(ids)):
+            shared = foot[ids[i]] & foot[ids[j]]
+            if shared:
+                union(ids[i], ids[j])
+                shared_map[(ids[i], ids[j])] = shared
+    comps = {}
+    for mid in ids:
+        comps.setdefault(find(mid), []).append(mid)
+
+    systems, singletons = [], []
+    for _, members in sorted(comps.items()):
+        if len(members) < 2:
+            singletons.append(members[0])
+            continue
+        member_motifs = [by_nid[m] for m in members]
+        # the discovered capability name: from the shared sink theme
+        shared_all = set()
+        for (a, b), sh in shared_map.items():
+            if a in members and b in members:
+                shared_all |= sh
+        theme = "firm-conditional-display" if any("ClientsTab" in s or "inflection" in s for s in shared_all) \
+            else "shared-sink-cluster"
+        sys_node = Node(
+            "system:" + theme, "C3", "EmergentSystem", theme,
+            rule="C3 EMERGENCE: motifs {%s} connected via shared constituents %s -> capability (DISCOVERED, not declared)"
+                 % (", ".join(m.split(":", 1)[1] for m in members),
+                    ", ".join(sorted(shared_all)[:3]) + (" ..." if len(shared_all) > 3 else "")),
+            children=member_motifs)
+        systems.append(sys_node)
+    return systems, singletons
+
+
+def c3_prestage() -> int:
+    print("=" * 78)
+    print("NFRA_MOTIF P2 C3-EMERGENCE PRE-STAGE (AC4 reachability proof; NOT the P2-2-gated build)")
+    print("=" * 78)
+    motifs = []
+    for spec in CATALOG:
+        motif, recurrence, _ = build_motif(spec)
+        if recurrence >= AC3_THRESHOLD:
+            motifs.append(motif)
+    systems, singletons = build_c3_systems(motifs)
+
+    print("\nEmergent C3 systems (connected motif-sets, discovered via shared constituents):")
+    all_ok = True
+    for s in systems:
+        ok, failures = fidelity_check(s)
+        all_ok = all_ok and ok
+        members = [c.nid.split(":", 1)[1] for c in s.children]
+        print("  system:%s  <- {%s}   fidelity(AC6): %s" % (s.label, ", ".join(members), "PASS" if ok else "FAIL"))
+        print("     rule: " + s.rule)
+        for f in failures:
+            print("       ! " + f)
+    if singletons:
+        print("\nMotifs not yet composed into a system (isolated -- correctly NOT forced into one):")
+        for sg in singletons:
+            print("  - " + sg)
+
+    print("\nAC4 (emergence): %s -- %d C3 system(s) DISCOVERED from connected motifs (not declared)."
+          % ("PASS" if systems else "NONE YET", len(systems)))
+    print("AC6 (fidelity for C3): %s -- every C3 decompresses C3->C2->C1->C0 evidence."
+          % ("PASS" if all_ok else "FAIL"))
+    print("\nNOTE: PRE-STAGE. Connectivity = shared-constituent (substrate-independent, no cluster edges).")
+    print("  The GO'd MOTIF-P2 build ADDS P2-2's cluster co-membership as a 2nd connectivity signal +")
+    print("  materializes the C3 systems + CONTAINS edges IN the graph (P2-2-gated). This proves the")
+    print("  compose-middle CLOSES: connected C2 motifs -> an emergent, decompressable C3 capability.")
+    return 0 if (systems and all_ok) else 1
+
+
+# ---------------------------------------------------------------------------
 # Self-test -- gate logic, no live graph needed (CI-able, exercisable by CTO/CVO).
 # ---------------------------------------------------------------------------
 def self_test() -> int:
@@ -485,6 +590,8 @@ def main() -> int:
     args = sys.argv[1:]
     if "--self-test" in args:
         return self_test()
+    if "--c3-prestage" in args:
+        return c3_prestage()
     if "--catalog" in args:
         return print_catalog()
     if "--ladder" in args:

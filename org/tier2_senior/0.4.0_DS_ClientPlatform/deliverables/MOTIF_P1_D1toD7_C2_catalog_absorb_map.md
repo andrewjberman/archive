@@ -94,5 +94,18 @@ The pre-stage recorded D2 recurrence=2; the live re-validation returned **0 rows
 - **STAGED on MOTIF-P0 (TSGRAPH P2-2 materialize, 0.7.0_AE):** materializing the motifs AS C2 nodes + CONTAINS edges IN the store; the GRAPHDEPTH CONTAINS-rollup on live cluster edges (req#2 -- semantics applied now, engine-on-live-edges staged); C3 emergence (P2).
 - **STAGED P3:** PROMOTE candidate emission with the FEDOBS co-occurrence join (`iceberg.globgrph.cse` `cse_coevolution`, in-VPC/Trino).
 
+## 6. MOTIF-P2 C3-EMERGENCE PRE-STAGE (bounded head-start; AC4 reachability PROVEN -- substrate-independent)
+
+While MOTIF-P2's graph-materialization leg is P2-2-gated, the C3-emergence LOGIC is substrate-independent (it composes the C2 catalog above, no cluster edges), so I pre-staged a runnable AC4 proof (`--c3-prestage` on the same deliverable) rather than idle.
+
+**Connectivity signal:** two C2 motifs are connected iff they SHARE a C1/C0 constituent (an instance both idioms match). Connected-components over shared constituents -> a component of >=2 motifs is an emergent C3 system.
+
+**Result (AC4 PASS + AC6-for-C3 PASS):**
+- **1 C3 system DISCOVERED (not declared): `system:firm-conditional-display`** <- {silent-display-fork, cross-firm-asymmetry, hardcoded-firm-literal}, connected via the shared constituent `out:...ClientsTab.tsx:291#name` (+ the `EmployeeLeaderboardEntry#advisor_id/#name` fields). The org never diagrammed that the ClientsTab:291 inflection name-fork is SIMULTANEOUSLY a display-fork AND a firm-asymmetry AND a hardcoded-literal -- the compiler DISCOVERS this firm-conditional-display subsystem from shared constituents. That IS architecture-discovery (AC4).
+- The C3 system PASSES comp-ladder fidelity (AC6): decompresses C3 -> C2 motifs -> C1 interactions -> C0 lexical facts.
+- The 3 absence/advisory motifs (dead-component, orphan-endpoint, render-without-null-guard) are correctly LEFT ISOLATED (not forced into a system) -- honest.
+
+**Proves the compose-middle of the learning loop CLOSES:** connected C2 motifs -> an emergent, decompressable C3 capability. The GO'd MOTIF-P2 build ADDS P2-2's cluster co-membership as a 2nd connectivity signal (enrich, not replace) + materializes the C3 systems + CONTAINS edges IN the graph (P2-2-gated). This pre-stage does NO graph mutation.
+
 ---
-*Pre-stage authored 2026-07-07 (DS~A); BUILD EXECUTED 2026-07-08 (DS~B) -- runnable + live-grounded + AC6-fidelity-passing. No graph mutation (C2-in-graph materialization is P2-2-gated). Grounded entirely in the certed detector library + live-graph HEAD-current provenance.*
+*Pre-stage authored 2026-07-07 (DS~A); BUILD EXECUTED 2026-07-08 (DS~B) -- runnable + live-grounded + AC6-fidelity-passing, incl. a bounded MOTIF-P2 C3-emergence AC4 pre-stage. No graph mutation (C2/C3-in-graph materialization is P2-2-gated). Grounded entirely in the certed detector library + live-graph HEAD-current provenance.*
