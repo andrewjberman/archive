@@ -158,7 +158,9 @@ def build_c3_systems(motifs: list, file_to_clusters: dict, coupled: dict) -> tup
         theme = _name_system(member_motifs, why_const, why_clus)
         rule = ("C3 EMERGENCE (structural, no embedding): motifs {%s} connected via %s -> capability (DISCOVERED)"
                 % (", ".join(m.split(":", 1)[1] for m in members), _why_str(why_const, why_clus, why_coupled)))
-        sys_node = Node("system:" + theme, "C3", "EmergentSystem", theme, rule=rule, children=member_motifs)
+        # node_id = theme prefix + a stable member-set discriminator (collision-safe; CVO gate 2026-07-08).
+        sys_node = Node(P1.system_node_id(theme, members), "C3", "EmergentSystem", theme,
+                        rule=rule, children=member_motifs)
         systems.append((sys_node, {"shared_constituents": sorted(why_const),
                                    "shared_clusters": sorted(why_clus),
                                    "coupled_clusters": sorted(why_coupled)}))
@@ -192,20 +194,28 @@ def _name_system(motifs: list, const: set, clus: set) -> str:
 # Live emergence run.
 # ---------------------------------------------------------------------------
 def _build_stable_motifs() -> tuple:
-    motifs, prov_seen = [], {}
+    """Build the STABLE C2 motifs. Fail-loud + degrade per detector: a detector whose live query fails
+    (graph latency/error) is reported UNVERIFIABLE and SKIPPED -- never a silent recurrence-0 that would
+    drop the motif from emergence (CVO gate 2026-07-08). Returns (motifs, prov, unverifiable_detectors)."""
+    motifs, prov_seen, unverifiable = [], {}, []
     for spec in P1.CATALOG:
-        motif, recurrence, prov = P1.build_motif(spec)
+        try:
+            motif, recurrence, prov = P1.build_motif(spec)
+        except P1.GraphUnavailable as ex:
+            print("  [%s] UNVERIFIABLE (graph): %s" % (spec["id"], ex))
+            unverifiable.append(spec["id"])
+            continue
         prov_seen = prov or prov_seen
         if recurrence >= P1.AC3_THRESHOLD:
             motifs.append(motif)
-    return motifs, prov_seen
+    return motifs, prov_seen, unverifiable
 
 
 def run_emergence() -> int:
     print("=" * 80)
     print("NFRA_MOTIF P2 -- C3 SYSTEM EMERGENCE (compose certed C2 catalog -> discovered architecture)")
     print("=" * 80)
-    motifs, prov = _build_stable_motifs()
+    motifs, prov, unverifiable = _build_stable_motifs()
     file_to_clusters, cprov = load_cluster_index()
     coupled = load_shares_source()
     prov = cprov or prov
@@ -252,7 +262,10 @@ def run_emergence() -> int:
     print("GRAPHDEPTH rollup: each C3 is the fine->coarse EXISTENTIAL rollup of its motif set")
     print("                   (comp_depth_cli semantics reused; store-write of C3+CONTAINS edges is the materialize leg).")
     print("Feeds MOTIF-P3:    these emergent systems -> promotion candidates (recurrence + FEDOBS co-occurrence + decompression chain).")
-    return 0 if (systems and all_ok) else 1
+    if unverifiable:
+        print("UNVERIFIABLE detectors (live query failed -- graph latency/error, NOT 'no motif'): %s"
+              % ", ".join(unverifiable) + " -- emergence ran on a PARTIAL motif set; re-run when the graph is reachable.")
+    return 0 if (systems and all_ok and not unverifiable) else 1
 
 
 # ---------------------------------------------------------------------------
@@ -304,6 +317,20 @@ def self_test() -> int:
     chk("5  AC1: emergence imports NO ML/embedding library (structural set-logic only, no embedding-similarity)",
         not any(lib in ln for ln in import_lines for lib in ml_libs))
 
+    # 6/7 COLLISION GATE (CVO 2026-07-08): 2 GENUINELY DISTINCT components sharing a theme must get
+    #     DISTINCT node_ids (was: both -> 'system:firm-conditional-display' -> silent store MERGE on ingest).
+    fa = motif("firm-a", ["type:portal/p/inflection.ts#I#s1", "out:portal/p/A.tsx:1#x"])
+    fb = motif("plain-b", ["type:portal/p/inflection.ts#I#s1", "out:portal/p/B.tsx:2#y"])   # comp1 shares s1
+    fc = motif("firm-c", ["type:portal/q/inflection.ts#I#s2", "out:portal/q/C.tsx:3#z"])
+    fd = motif("plain-d", ["type:portal/q/inflection.ts#I#s2", "out:portal/q/D.tsx:4#w"])   # comp2 shares s2
+    sysc, _, _ = build_c3_systems([fa, fb, fc, fd], {}, {})   # systems = list of (sys_node, why) tuples
+    ids = [s.nid for s, _ in sysc]
+    chk("6  collision gate: 2 distinct same-theme components -> 2 DISTINCT node_ids (was 1-of-2 collapse)",
+        len(sysc) == 2 and len(set(ids)) == 2 and all(i.startswith("system:firm-conditional-display:") for i in ids))
+    sysc2, _, _ = build_c3_systems([fa, fb, fc, fd], {}, {})
+    chk("7  collision gate: node_id STABLE across re-runs (same member-set -> same id; full-overwrite derive no-churn)",
+        sorted(s.nid for s, _ in sysc) == sorted(s.nid for s, _ in sysc2))
+
     n = sum(1 for r in ok if r)
     print("--- self-test: %d/%d passed ---" % (n, len(ok)))
     return 0 if n == len(ok) else 1
@@ -311,7 +338,7 @@ def self_test() -> int:
 
 def ladder_one() -> int:
     from comp_ladder import print_ladder
-    motifs, _ = _build_stable_motifs()
+    motifs, _, _ = _build_stable_motifs()
     f2c, _ = load_cluster_index()
     coupled = load_shares_source()
     systems, _, _ = build_c3_systems(motifs, f2c, coupled)

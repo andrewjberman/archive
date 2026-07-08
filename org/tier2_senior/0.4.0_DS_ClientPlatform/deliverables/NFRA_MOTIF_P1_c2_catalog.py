@@ -49,6 +49,7 @@ materializer discipline: spec-as-code, grounded on live rows, an exercisable gat
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
@@ -59,6 +60,25 @@ WS = os.path.abspath(os.path.join(_HERE, "..", "..", "..", ".."))
 # bind to the ACTUAL fidelity gate (req#3: every C2/C3 node PASSES comp-ladder fidelity_check)
 sys.path.insert(0, os.path.join(WS, "org", "modules", "graph"))
 from comp_ladder import Node, decompress, fidelity_check  # noqa: E402
+
+
+class GraphUnavailable(RuntimeError):
+    """comp_kuzu could not get a VERIFIABLE answer (timeout / nonzero rc / unparseable output).
+    Raised LOUD -- a failed query is NEVER a silent [] (which a caller would misread as 'detector found
+    nothing' -> a discovery false-negative / completeness corruptor). Callers degrade PER DETECTOR:
+    report UNVERIFIABLE + continue, never crash the whole run and never absorb as recurrence-0.
+    (CVO gate 2026-07-08 -- fixes the uncaught TimeoutExpired + the silent-[]-on-error twin.)"""
+
+
+def system_node_id(theme: str, member_motif_nids) -> str:
+    """Collision-SAFE, STABLE C3 system node_id: a human-readable `theme` prefix + a deterministic
+    discriminator derived from the SORTED member-motif nid set. The theme vocabulary is small (~4
+    values) so two DISTINCT components can share a theme -- but never a node_id, because the member-set
+    hash is the identity. STABLE by construction: the same member set -> the same id across runs, so the
+    full-overwrite derive re-materializes to the same node (no churn / no orphan). (CVO gate 2026-07-08:
+    fixes the ~4-value-theme node_id COLLAPSE where distinct systems shared one id -> a silent store MERGE.)"""
+    disc = hashlib.sha1("|".join(sorted(member_motif_nids)).encode("utf-8")).hexdigest()[:8]
+    return "system:" + theme + ":" + disc
 
 
 # ---------------------------------------------------------------------------
@@ -72,12 +92,29 @@ def comp_kuzu(query: str) -> tuple:
     (Rule 20). We call the python entrypoint rather than the bash wrapper because `bash` is not
     reachable from a python subprocess on this host (it resolves to WSL's relay, which errors).
     The CLI prints a provenance header then the JSON array; we capture Nessie HEAD + snapshot ids.
+
+    FAIL-LOUD (CVO gate 2026-07-08): raises GraphUnavailable on timeout / nonzero rc / unparseable
+    output -- it NEVER returns a silent [] that a caller would misread as 'no motif' (a discovery
+    false-negative). A LEGITIMATE empty result (kuzu prints `[]`, rc=0) still returns ([], prov). The
+    timeout is configurable via MOTIF_KUZU_TIMEOUT (default 240s; was a hardcoded 120 that crashed
+    run_emergence uncaught under graph latency).
     """
     cli = os.path.join(WS, "infra", "aws", "globgrph", "kuzu_cli.py")
-    proc = subprocess.run(
-        [sys.executable, cli, "--json", query],
-        capture_output=True, text=True, cwd=WS, timeout=120,
-    )
+    try:
+        timeout = int(os.environ.get("MOTIF_KUZU_TIMEOUT", "240"))
+    except ValueError:
+        timeout = 240
+    try:
+        proc = subprocess.run(
+            [sys.executable, cli, "--json", query],
+            capture_output=True, text=True, cwd=WS, timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as ex:
+        raise GraphUnavailable(
+            "TIMEOUT after %ss (graph load/query latency; set MOTIF_KUZU_TIMEOUT to raise) -- query: %s"
+            % (timeout, query[:120])) from ex
+    if proc.returncode != 0:
+        raise GraphUnavailable("kuzu_cli rc=%d -- %s" % (proc.returncode, (proc.stderr or "").strip()[:200]))
     out = proc.stdout + ("\n" + proc.stderr if proc.stderr else "")
     prov = {}
     for line in out.splitlines():
@@ -88,12 +125,13 @@ def comp_kuzu(query: str) -> tuple:
             prov["nodes_snapshot_id"] = s.split(":", 1)[1].strip()
         elif s.startswith("edges snapshot-id:"):
             prov["edges_snapshot_id"] = s.split(":", 1)[1].strip()
-    # JSON begins at the first '[' at column 0 (the header lines are all indented or ===-ruled)
+    # JSON begins at the first '[' (header lines are indented or ===-ruled). A legit empty result is `[]`;
+    # NO array at all on rc=0 = unparseable output -> fail LOUD (never a silent [] masking a real answer).
     idx = out.find("\n[")
     if idx < 0:
         idx = out.find("[")
     if idx < 0:
-        return [], prov
+        raise GraphUnavailable("kuzu_cli rc=0 but no JSON array in output (unparseable) -- query: %s" % query[:120])
     try:
         rows = json.loads(out[idx:].strip())
     except json.JSONDecodeError:
@@ -108,7 +146,9 @@ def comp_kuzu(query: str) -> tuple:
                 if depth == 0:
                     end = i + 1
                     break
-        rows = json.loads(out[start:end]) if end > 0 else []
+        if end <= 0:
+            raise GraphUnavailable("kuzu_cli output has an unbalanced/invalid JSON array -- query: %s" % query[:120])
+        rows = json.loads(out[start:end])
     return rows, prov
 
 
@@ -350,8 +390,15 @@ def run_absorb() -> int:
     all_ok = True
     prov_seen = {}
     results = []
+    unverifiable = []   # detectors whose live query failed (graph latency/error) -- LOUD, never silent-0
     for spec in CATALOG:
-        motif, recurrence, prov = build_motif(spec)
+        try:
+            motif, recurrence, prov = build_motif(spec)
+        except GraphUnavailable as ex:
+            print("  [%s] UNVERIFIABLE (graph): %s" % (spec["id"], ex))
+            unverifiable.append(spec["id"])
+            all_ok = False   # a detector we could not verify is NOT a clean pass
+            continue
         prov_seen = prov or prov_seen
         ok, failures = fidelity_check(motif)
         stable = recurrence >= AC3_THRESHOLD
@@ -401,6 +448,9 @@ def run_absorb() -> int:
           % (absorbed, sum(1 for r in results if r[3] and r[4]), len(GAPS)))
     print("AC6 FIDELITY GATE (every C2 motif decompresses to C0 evidence): %s"
           % ("PASS -- all motifs grounded, no LATENT node" if all_ok else "FAIL -- latent node(s) found"))
+    if unverifiable:
+        print("UNVERIFIABLE detectors (live query failed -- graph latency/error, NOT 'no motif'): %s"
+              % ", ".join(unverifiable) + " -- re-run when the graph is reachable (fail-loud, not silent-0).")
     return 0 if all_ok else 1
 
 
@@ -463,7 +513,7 @@ def build_c3_systems(motifs: list) -> tuple:
         theme = "firm-conditional-display" if any("ClientsTab" in s or "inflection" in s for s in shared_all) \
             else "shared-sink-cluster"
         sys_node = Node(
-            "system:" + theme, "C3", "EmergentSystem", theme,
+            system_node_id(theme, members), "C3", "EmergentSystem", theme,
             rule="C3 EMERGENCE: motifs {%s} connected via shared constituents %s -> capability (DISCOVERED, not declared)"
                  % (", ".join(m.split(":", 1)[1] for m in members),
                     ", ".join(sorted(shared_all)[:3]) + (" ..." if len(shared_all) > 3 else "")),
@@ -549,6 +599,27 @@ def self_test() -> int:
     fixed = [b for b in buckets if int(b["trueBranch"]) == 0 or int(b["falseBranch"]) == 0]  # -> 2
     passed.append(("D2 type-bug: buggy int-compare drops all rows", len(buggy) == 0))
     passed.append(("D2 fix: CAST/int-compare recovers 2 asymmetric forks", len(fixed) == 2))
+
+    # 6. COLLISION GATE (CVO 2026-07-08): two GENUINELY DISTINCT components that share a theme must get
+    #    DISTINCT node_ids (was: both collapsed to 'system:firm-conditional-display' -> silent store MERGE).
+    def _mk(nid, c0ids):
+        c0 = [Node(x, "C0", "F", x, provenance={"source": x.split("#")[0], "locus": "-", "evidence": x})
+              for x in c0ids]
+        c1 = Node("c1:" + nid, "C1", "I", nid, rule="d", children=c0)
+        return Node("motif:" + nid, "C2", "M", nid, rule="ABSORB", children=[c1])
+    a = _mk("A", ["out:portal/a/X.tsx:1#p", "type:portal/a/inflection.ts#Inf#s1"])
+    b = _mk("B", ["type:portal/a/inflection.ts#Inf#s1", "out:portal/a/Y.tsx:2#q"])   # comp1: A-B share s1
+    c = _mk("C", ["out:portal/z/M.tsx:3#r", "type:portal/z/inflection.ts#Inf#s2"])
+    d = _mk("D", ["type:portal/z/inflection.ts#Inf#s2", "out:portal/z/N.tsx:4#t"])   # comp2: C-D share s2
+    systems_c, _ = build_c3_systems([a, b, c, d])
+    sys_ids = [s.nid for s in systems_c]
+    passed.append(("collision gate: 2 distinct same-theme components -> 2 DISTINCT node_ids (was 1-of-2 collapse)",
+                   len(systems_c) == 2 and len(set(sys_ids)) == 2))
+    passed.append(("collision gate: node_id keeps the human-readable theme prefix (system:firm-conditional-display:...)",
+                   all(s.nid.startswith("system:firm-conditional-display:") for s in systems_c)))
+    systems_c2, _ = build_c3_systems([a, b, c, d])   # STABILITY: same member-set -> same id across re-runs
+    passed.append(("collision gate: node_id is STABLE across re-runs (full-overwrite derive must not churn/orphan)",
+                   sorted(s.nid for s in systems_c) == sorted(s.nid for s in systems_c2)))
 
     n_ok = sum(1 for _, p in passed if p)
     for name, p in passed:

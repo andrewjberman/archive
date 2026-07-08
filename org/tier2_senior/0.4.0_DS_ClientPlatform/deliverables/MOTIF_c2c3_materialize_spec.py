@@ -149,7 +149,14 @@ def main() -> int:
             _s.reconfigure(errors="replace")
         except Exception:  # noqa: BLE001
             pass
-    spec = build_spec()
+    try:
+        spec = build_spec()
+    except P1.GraphUnavailable as ex:
+        # FAIL-CLOSED (CVO gate 2026-07-08): this artifact is derive-BAKED (folded into every Nessie
+        # commit), so a partial/empty spec would be silently ingested. Refuse to write it on a graph error.
+        print("SPEC NOT REGENERATED -- graph unavailable: %s" % ex)
+        print("  (fail-closed: keeping the last-good motif_c2c3_materialize.json; re-run when the graph is reachable.)")
+        return 2
     with open(SPEC_ARTIFACT, "w", encoding="utf-8") as fh:
         json.dump(spec, fh, indent=2)
     c = spec["counts"]
