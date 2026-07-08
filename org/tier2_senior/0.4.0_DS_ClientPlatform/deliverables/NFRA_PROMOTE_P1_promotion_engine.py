@@ -80,16 +80,22 @@ try:
 except ValueError:
     MEANINGFUL_CO_OCCURRENCE_FLOOR = 2
 
-# ANTI-GOODHART SIGNAL (CTO-RATIFIED 2026-07-08, COO co-set): gate on the COUPLING_RATIO
-# (co_change_commits / commits_touching_either) -- edit-frequency-robust real coupling -- NOT the raw
-# co_sessions count (a Goodhart-able activity proxy that over-emitted 6/7). FEDOBS_RATIO_FLOOR=0.15 is the
-# CTO-reasoned starting default: above the coincidental-noise band (~0.05-0.10) + in the natural distribution
-# GAP (0.097 -> 0.18, a real weak/tight bimodal split). CONFIG (tunable; a SMALL 7-sample -- revisit estate-wide).
-# A PRE-FILTER only: the owner's promotion-ratify is the FINAL meaningfulness gate.
+# ANTI-GOODHART SIGNAL (CTO-RATIFIED gate-flip 2026-07-08T1713Z, COO~B co-set): gate on the
+# FOCUSED_COUPLING_RATIO (breadth-weighted co-change / breadth-weighted touch) -- the SHARPER anti-Goodhart
+# signal: a co-change swept up in a 233-file mass-commit is weak coupling; one in a focused <=CEIL-file commit
+# is strong. SUPERSEDES the raw coupling_ratio gate (raw over-weights sweep co-appearances). Raw is carried
+# ALONGSIDE for transparency; the store stays RAW (0.5.0 layer) -- only the gate applies the focus-weight.
+# FEDOBS_RATIO_FLOOR=0.12 is the CTO re-calibrated floor for the focused measure: mid-gap of the natural split
+# (next-highest focused=0.094 -> outlier focused=0.151), threshold-INSENSITIVE/robust vs the raw 0.151-vs-0.15
+# knife-edge -- SAME 1/7 decision, chosen for robustness NOT outcome (silent-display-fork clears with headroom;
+# floor was not fitted to it). FORWARD-LOOKING: the flip pre-filters FUTURE candidates; NO retroactive
+# un-promotion (a candidate already cleared/materialized stays). CONFIG (tunable; small 7-sample, revisit
+# estate-wide). A PRE-FILTER only: the owner's promotion-ratify is the FINAL meaningfulness gate (CTO note:
+# 0.12 lets a modest-but-genuine coupling REACH his ratify rather than auto-rejecting at the pre-filter).
 try:
-    FEDOBS_RATIO_FLOOR = float(os.environ.get("FEDOBS_RATIO_FLOOR", "0.15"))
+    FEDOBS_RATIO_FLOOR = float(os.environ.get("FEDOBS_RATIO_FLOOR", "0.12"))
 except ValueError:
-    FEDOBS_RATIO_FLOOR = 0.15
+    FEDOBS_RATIO_FLOOR = 0.12
 
 # The FEDOBS frontend-co-evolution measure artifact (git-real, CVO-verifiable) -- joined into the candidates
 # at load so the gate reads a REAL per-candidate coupling_ratio (the CANDIDATE->MEASURED bind).
@@ -125,20 +131,26 @@ def inv1_measured(rec: PromotionRecord) -> tuple:
 
 
 def inv2_anti_goodhart(rec: PromotionRecord) -> tuple:
-    """ANTI-GOODHART (CTO-ratified signal 2026-07-08): gate on the COUPLING_RATIO (edit-frequency-robust real
-    coupling), NOT the raw co_sessions count (a Goodhart-able activity proxy). A warrant needs a MEANINGFUL
-    coupling (ratio >= FEDOBS_RATIO_FLOOR), not any active pair. Legacy measures (no ratio) fall back to the
-    co_sessions floor for back-compat."""
+    """ANTI-GOODHART (CTO-ratified gate-flip 2026-07-08): gate on the FOCUSED_COUPLING_RATIO (breadth-weighted
+    real coupling -- discounts broad-commit/sweep inflation), the sharper signal. Falls back to the raw
+    coupling_ratio when focused is absent (legacy measure), then to the co_sessions floor when neither ratio is
+    present (oldest measures) -- back-compat. A warrant needs a MEANINGFUL coupling (signal >= FEDOBS_RATIO_FLOOR),
+    not any active pair. The RAW ratio is carried ALONGSIDE in the reason for transparency (CVO sees both)."""
     m = rec.fedobs_measure or {}
-    ratio = m.get("coupling_ratio")
-    if ratio is None:
+    focused = m.get("focused_coupling_ratio")
+    raw = m.get("coupling_ratio")
+    signal = focused if focused is not None else raw
+    if signal is None:
         co = m.get("co_sessions", 0)
         return (co >= MEANINGFUL_CO_OCCURRENCE_FLOOR,
                 "co_sessions=%d vs floor %d (legacy: no coupling_ratio)" % (co, MEANINGFUL_CO_OCCURRENCE_FLOOR))
-    if ratio >= FEDOBS_RATIO_FLOOR:
-        return True, "coupling_ratio=%.3f >= floor %.2f (real coupling, edit-frequency-robust)" % (ratio, FEDOBS_RATIO_FLOOR)
-    return False, "coupling_ratio=%.3f < floor %.2f -- weak/coincidental, NOT a warrant (anti-Goodhart bites)" % (
-        ratio, FEDOBS_RATIO_FLOOR)
+    label = "focused_coupling_ratio" if focused is not None else "coupling_ratio(raw-fallback)"
+    alongside = "" if (raw is None or focused is None) else " (raw=%.3f, transparency)" % raw
+    if signal >= FEDOBS_RATIO_FLOOR:
+        return True, "%s=%.3f >= floor %.2f -- real coupling, breadth-weighted%s" % (
+            label, signal, FEDOBS_RATIO_FLOOR, alongside)
+    return False, "%s=%.3f < floor %.2f -- weak/sweep-inflated, NOT a warrant (anti-Goodhart bites)%s" % (
+        label, signal, FEDOBS_RATIO_FLOOR, alongside)
 
 
 def inv3_human_ratify(rec: PromotionRecord, owner_verdict: str | None) -> tuple:
@@ -276,8 +288,11 @@ def load_candidates() -> list:
     for c in payload.get("candidates", []):
         fm = measures.get(c["candidate_id"])
         if fm is not None:
-            # MEASURED: a real git-grounded coupling bound. The gate now evaluates it (anti-Goodhart ratio).
-            measure = {"status": "MEASURED", "coupling_ratio": fm.get("coupling_ratio"),
+            # MEASURED: a real git-grounded coupling bound. The gate evaluates the FOCUSED ratio (raw carried
+            # alongside for transparency; the store keeps both -- 0.5.0 layer stays raw, gate applies focus-weight).
+            measure = {"status": "MEASURED",
+                       "focused_coupling_ratio": fm.get("focused_coupling_ratio"),
+                       "coupling_ratio": fm.get("coupling_ratio"),
                        "co_sessions": fm.get("co_sessions", 0), "source": "frontend-co-evolution (git, CVO-verifiable)"}
         else:
             fed = dict(c.get("fedobs_cooccurrence", {}))
@@ -318,8 +333,8 @@ def run_engine() -> int:
     proposed = [r.candidate_id for r in recs if r.state == "PROPOSED"]
     if proposed:
         print("RE-ROUTE to CTO (promotion ratify -- coupling_ratio warrant, invariant #5 cited): %s" % ", ".join(proposed))
-    print("Anti-Goodhart: coupling_ratio >= %.2f (CTO-ratified; a candidate below it is DROPPED, reversible not zombie-held)."
-          % FEDOBS_RATIO_FLOOR)
+    print("Anti-Goodhart: focused_coupling_ratio >= %.2f (CTO-ratified gate-flip; breadth-weighted, raw carried"
+          " alongside; a candidate below it is DROPPED, reversible not zombie-held)." % FEDOBS_RATIO_FLOOR)
     print("Lifecycle CSE trail: %s" % os.path.relpath(LIFECYCLE_LOG, WS))
     return 0
 
@@ -347,26 +362,26 @@ def self_test() -> int:
     chk("1b AC1 negative control: unmeasured candidate NEVER reaches MATERIALIZED/SUSTAINED",
         r.state not in ("MATERIALIZED", "SUSTAINED"))
 
-    # AC3 anti-Goodhart: a MEASURED-but-WEAK-coupling (coupling_ratio 0.05 < floor 0.15) is DROPPED, not promoted.
-    r = advance(_mk("m:weak", "COMPILER_RULE", {"status": "MEASURED", "coupling_ratio": 0.05}), owner_verdict="RATIFY")
-    chk("3  AC3: weak coupling (ratio 0.05<0.15) DROPPED, not promoted (anti-Goodhart bites on the RATIFIED signal)",
+    # AC3 anti-Goodhart: a MEASURED-but-WEAK focused coupling (focused 0.05 < floor 0.12) is DROPPED, not promoted.
+    r = advance(_mk("m:weak", "COMPILER_RULE", {"status": "MEASURED", "focused_coupling_ratio": 0.05}), owner_verdict="RATIFY")
+    chk("3  AC3: weak focused coupling (focused 0.05<0.12) DROPPED (anti-Goodhart bites on the focused signal)",
         r.state == "DROPPED")
 
     # AC2 human-ratify: a MEASURED+MEANINGFUL candidate with NO owner verdict is HELD at PROPOSED (zero auto-mutation).
-    r = advance(_mk("m:unratified", "KNOWLEDGE_NODE", {"status": "MEASURED", "coupling_ratio": 0.18}), owner_verdict=None)
+    r = advance(_mk("m:unratified", "KNOWLEDGE_NODE", {"status": "MEASURED", "focused_coupling_ratio": 0.18}), owner_verdict=None)
     chk("2  AC2: meaningful-but-unratified candidate HELD at PROPOSED (zero auto-mutation; no auto-ratify)",
         r.state == "PROPOSED")
     # AC2 negative control: owner REJECT -> REJECTED (not materialized)
-    r = advance(_mk("m:rejected", "KNOWLEDGE_NODE", {"status": "MEASURED", "coupling_ratio": 0.18}), owner_verdict="REJECT")
+    r = advance(_mk("m:rejected", "KNOWLEDGE_NODE", {"status": "MEASURED", "focused_coupling_ratio": 0.18}), owner_verdict="REJECT")
     chk("2b AC2: owner REJECT -> REJECTED, never materialized", r.state == "REJECTED")
 
-    # HAPPY PATH: measured + meaningful (ratio>=floor) + ratified -> MATERIALIZED (the gate PASSES a real warrant).
-    r = advance(_mk("m:promotable", "COMPILER_RULE", {"status": "MEASURED", "coupling_ratio": 0.18}), owner_verdict="RATIFY",
+    # HAPPY PATH: measured + meaningful (focused>=floor) + ratified -> MATERIALIZED (the gate PASSES a real warrant).
+    r = advance(_mk("m:promotable", "COMPILER_RULE", {"status": "MEASURED", "focused_coupling_ratio": 0.18}), owner_verdict="RATIFY",
                 post_effect="SUSTAINED")
     chk("H  happy path: measured+meaningful+ratified -> MATERIALIZED -> SUSTAINED", r.state == "SUSTAINED")
 
     # AC4 reversible: a materialized promotion that DEGRADES post-promotion is DEMOTED.
-    r = advance(_mk("m:degrades", "COMPILER_RULE", {"status": "MEASURED", "coupling_ratio": 0.18}), owner_verdict="RATIFY",
+    r = advance(_mk("m:degrades", "COMPILER_RULE", {"status": "MEASURED", "focused_coupling_ratio": 0.18}), owner_verdict="RATIFY",
                 post_effect="DEGRADED")
     chk("4  AC4 reversible: a DEGRADED post-promotion effect -> DEMOTED", r.state == "DEMOTED")
     # AC4 reversible (de-candidate): unmeasured AFTER coverage landed -> DROPPED, not zombie-held.
@@ -377,6 +392,36 @@ def self_test() -> int:
     r = advance(_mk("m:inspect", "COMPILER_RULE", {"status": "MEASURED", "co_sessions": 3}), owner_verdict="RATIFY")
     ok5, _ = inv5_inspectable(r)
     chk("5  AC5 inspectable: record cites evidence (decompression) + a CSE-logged transition trail", ok5)
+
+    # --- CTO GATE-FLIP guardrails (ratified 2026-07-08T1713Z): focused signal @ floor 0.12 ---
+    # 6  floor boundary: focused exactly at 0.12 CLEARS (>=), 0.11 DROPS -- proves the live 0.12 threshold.
+    r_at = advance(_mk("m:at-floor", "COMPILER_RULE", {"status": "MEASURED", "focused_coupling_ratio": 0.12}), owner_verdict=None)
+    r_below = advance(_mk("m:below-floor", "COMPILER_RULE", {"status": "MEASURED", "focused_coupling_ratio": 0.11}), owner_verdict="RATIFY")
+    chk("6  gate-flip floor: focused==0.12 clears (PROPOSED) + focused==0.11 DROPS (the 0.12 floor is live)",
+        r_at.state == "PROPOSED" and r_below.state == "DROPPED")
+
+    # 7  back-compat: a legacy measure with ONLY raw coupling_ratio (no focused) still gates via the raw fallback.
+    r_raw_ok = advance(_mk("m:raw-only-ok", "COMPILER_RULE", {"status": "MEASURED", "coupling_ratio": 0.18}), owner_verdict=None)
+    r_raw_weak = advance(_mk("m:raw-only-weak", "COMPILER_RULE", {"status": "MEASURED", "coupling_ratio": 0.05}), owner_verdict="RATIFY")
+    chk("7  gate-flip back-compat: focused-absent measure falls back to raw (raw 0.18 clears, 0.05 drops)",
+        r_raw_ok.state == "PROPOSED" and r_raw_weak.state == "DROPPED")
+
+    # 8  REAL-DATA guardrail (CVO signal cert -- decision-stable + not-tuned-to-pass): the actual git measures
+    #    through the flipped gate. silent-display-fork (focused 0.151) is the SOLE candidate clearing 0.12 ->
+    #    exactly 1 reaches PROPOSED; every other DROPS. Ordering preserved (top outlier in raw AND focused);
+    #    floor 0.12 sits mid-gap (next-highest focused=0.094), headroom both sides -> robustness not outcome-fit.
+    real = load_candidates()
+    if real:
+        for rr in real:
+            advance(rr)   # no owner verdict: a cleared candidate rests at PROPOSED, a weak one DROPS
+        cleared = [rr for rr in real if rr.state not in ("CANDIDATE", "DROPPED")]
+        sdf = next((rr for rr in real if rr.candidate_id.endswith("silent-display-fork")), None)
+        chk("8  gate-flip real-data: exactly 1/%d clears the focused gate @ %.2f (decision-stable vs raw @ 0.15)"
+            % (len(real), FEDOBS_RATIO_FLOOR), len(cleared) == 1)
+        chk("8b gate-flip real-data: silent-display-fork is the SOLE cleared candidate (ordering preserved)",
+            sdf is not None and sdf.state == "PROPOSED" and cleared == [sdf])
+    else:
+        chk("8  gate-flip real-data guardrail (fedobs measure artifact present to exercise the flipped gate)", False)
 
     n = sum(1 for x in ok if x)
     print("--- self-test: %d/%d passed (the gate bites on AC1/AC2/AC3/AC4; passes a real warrant) ---" % (n, len(ok)))
@@ -391,7 +436,9 @@ def print_lifecycle() -> int:
     print("\nPromotion class -> target artifact -> ratify owner:")
     for cls, (target, owner) in PROMOTION_CLASS_ROUTING.items():
         print("  %-18s -> %-38s -> %s" % (cls, target, owner))
-    print("\nAnti-Goodhart floor: co_sessions >= %d distinct producer sessions (a single co-occurrence is coincidental)."
+    print("\nAnti-Goodhart gate (CTO-ratified flip 2026-07-08): focused_coupling_ratio >= %.2f (breadth-weighted,"
+          " discounts sweep inflation; raw carried alongside)." % FEDOBS_RATIO_FLOOR)
+    print("  Fallbacks: raw coupling_ratio (focused absent) -> co_sessions >= %d (oldest legacy, no ratio)."
           % MEANINGFUL_CO_OCCURRENCE_FLOOR)
     return 0
 
