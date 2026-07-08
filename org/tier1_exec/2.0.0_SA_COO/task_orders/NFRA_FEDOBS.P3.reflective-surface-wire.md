@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL (surface) + 0.4.0_DS~A (query library, gated)</issued_to>
     <date>2026-07-07</date>
-    <status>dispatched -- GO'd 2026-07-08 by COO~B to 0.5.0_AE. FEDOBS-P2 measure arm CLOSED+certed (7735815e3) = the signals P3 surfaces are live+certed. Build the reflective surface + wire the standing inputs NOW; it does NOT gate on the fedobs-role apply (that's the AC2 crown-jewel, parallel).</status>
+    <status>complete -- CLOSED 2026-07-08 (NFRA drive, COO~B). CVO standing-wiring EXERCISE-CERT PASS (d3c6106c7): served surface queryable + carries live rows per NAMED consumer, comp-fedobs reader + producer both exercised. LANDED: fedobs_observe.py producer (2dab5db8a, runs the 3 signals + AC3 provenance via Trino AS the read-only role, writes served fedobs_observations.json) + comp-fedobs reader (SoD-landed 588cbe75a, rail-registered, coverage-check PASS). req#1 (queryable surface) + req#2 (standing-wiring contract: MOTIF reads .coevolution, PROMOTE reads .directive_effectiveness+.compiler_coverage from the served artifact) + req#3 (provenance-linked, AC3) all DONE+grounded. Non-blocking residual to 0.5.0: served marker_head='unknown' (honest self-label; producer to pin the real Nessie HEAD).</status>
     <prd_ref>docs/architecture/NFRA_FEDOBS_PRD.md (P3)</prd_ref>
     <dispatch_state>DISPATCHED 2026-07-08 to 0.5.0_AE (surface) + DS~A (query library, gated). Builds on the live+certed P2 measure library. This is the standing-input wiring PROMOTE (measure arm) + MOTIF (co-occurrence) consume.</dispatch_state>
     <gate_note>Gated on FEDOBS-P2. Makes the measured signals STANDING inputs so PROMOTE/MOTIF consume them continuously (not a one-off query).</gate_note>
