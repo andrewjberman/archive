@@ -13,10 +13,12 @@ MOTIF/PROMOTE candidate for a new recognizer, tracked, never a silent skip (LAW 
 that grows the algebra DELIBERATELY: a version-bump adds a primitive -> the sweep flags it un-emitted
 until a compiler ships a recognizer for it -> then it clears.
 
-LIVE SELF-DEMONSTRATION (schema 0.2): the CTO-ratified 0.2 EdgeKind bump {passthrough, rename,
-recompute_guarded} is the first kind'd-edge capability -- NO compiler emits a kind yet (COMPILERKIT #2's
-FLOWS_TO-with-kind is pending). So this sweep FLAGS EdgeKind as an open coverage-gap RIGHT NOW, and
-CLEARS when #2's FLOWS_TO ships. The version-governance closing its own loop, runnably.
+LIVE SELF-DEMONSTRATION -> LOOP CLOSED (schema 0.2 EdgeKind bump {passthrough, rename,
+recompute_guarded}): the sweep FLAGGED EdgeKind un-emitted while COMPILERKIT #2's FLOWS_TO-with-kind
+was pending; 0.8.0~D's SDK (`comp_recognizer_sdk.derive_compiler_emits`, landed 4e8306597) now DECLARES
+the tsx-compiler emitting those kinds (== CSE._EDGEKIND_VALUES; grounded -- live FLOWS_TO carry
+"kind":"recompute/guarded"), so the sweep now CLEARS EdgeKind. The version-governance closed its own
+loop, runnably (flagged -> #2 shipped its declaration -> cleared). SDK overlay wired 2026-07-08 (~B).
 
 Compiler registry (P2): DERIVED from the grounded estate mappings (derive_runner.NODE_TYPE_LAYER
 layer->compiler + cse_schema.CLOUDNODE_TYPE_TO_ENTITY / CLOUDEDGE_TO_RELATIONSHIP) -- NOT a
@@ -106,11 +108,30 @@ def _load_node_type_layer() -> dict:
         raise RuntimeError(f"could not load NODE_TYPE_LAYER (grounded layer source): {ex}")
 
 
+def _sdk_declared_emits() -> dict:
+    """The SDK-DECLARED emits source (0.8.0~D `comp_recognizer_sdk.derive_compiler_emits`, landed
+    4e8306597). DRIFT-PROOF: derived from every registered `Recognizer.emits` declaration across the
+    4 SDK-refactored COMPILERKIT compilers (code/tsx/config/ticket), not a hand-list. Grounded live
+    2026-07-08: edge_kinds {passthrough,recompute_guarded,rename} == CSE._EDGEKIND_VALUES exactly;
+    CONCEPT emitted per-compiler by construction; ticket-compiler emits Requirement. RAISES if the SDK
+    is unreadable -> the caller honest-degrades (never a silent false-clean of CONCEPT)."""
+    from comp_recognizer_sdk import RecognizerRegistry, derive_compiler_emits  # noqa: E402
+    import comp_recognizers_code  # noqa: E402
+    import comp_recognizers_config  # noqa: E402
+    import comp_recognizers_ticket  # noqa: E402
+    import comp_recognizers_tsx  # noqa: E402
+    reg = RecognizerRegistry()
+    for _m in (comp_recognizers_code, comp_recognizers_tsx, comp_recognizers_config, comp_recognizers_ticket):
+        _m.register_all(reg)
+    return derive_compiler_emits(reg)
+
+
 def compiler_emits() -> dict:
     """THE SEAM (SDK-migration point): compiler_id -> {entities:set, relationships:set, edge_kinds:set}.
 
-    DERIVED (P2) from the grounded estate mappings. Durable form = each Recognizer's SDK `emits`
-    declaration replaces this function body; callers (coverage_sweep) are unchanged.
+    DERIVED (P2) from the grounded estate mappings, then OVERLAID with the SDK-declared source
+    (0.8.0~D derive_compiler_emits, 4e8306597) -- the drift-proof authoritative declaration for the
+    4 SDK-refactored compilers. The overlay is additive to coverage (union): it can only CLEAR gaps.
     """
     ntl = _load_node_type_layer()
     emits: dict = {}
@@ -130,23 +151,35 @@ def compiler_emits() -> dict:
         cid = _EDGE_TO_COMPILER.get(et)
         if cid:
             _ensure(cid)["relationships"].add(rel.value)
-    # Entity.CONCEPT is the LAW-1 UNIVERSAL honest-degrade target -- EVERY recognizer emits it BY
-    # CONSTRUCTION (Concept(untyped)+low whenever it cannot lexically type a node). It is emitted-by-
-    # design, never a coverage-gap. Before the 0.3 bump this was MASKED because "TypeDecl"->CONCEPT made
-    # a node_type map to it; the 0.3 TypeDecl->TYPE remap EXPOSED that the node_type-derivation alone
-    # would wrongly flag CONCEPT un-emitted. Model the degrade-fallback explicitly (a synthetic emitter).
-    _ensure("_honest_degrade")["entities"].add(CSE.Entity.CONCEPT.value)
     # Entity.SYMBOL (0.3): emitted by the LIVE ts-morph/extract_api SYMBOL extractor -- a REAL existing
-    # producer for symbol:-> nodes (the very nodes the 0.3 round-trip re-typed out of CONCEPT), just not
-    # yet SDK-refactored onto the COMPILERKIT framework. COO ruling 2026-07-08 (GOV-A I1): attribute
-    # SYMBOL to its REAL emitter (not fabricated, not the node_type-derivation which can't see prefixes),
-    # so the primitive clears green HONESTLY. TRACKED FOLLOW-ON (loud, additive, NOT a silent skip):
-    # extract_api SYMBOL extractor -> COMPILERKIT SDK `emits:[SYMBOL]` refactor (0.8.0~D). TYPE is
-    # covered via TypeDecl->tsx-compiler#2 (and ~D emitted 136 TYPE nodes) -- also not a gap.
+    # producer for symbol:-> nodes, not yet SDK-refactored onto COMPILERKIT. COO ruling 2026-07-08
+    # (GOV-A I1): attribute SYMBOL to its REAL emitter (not fabricated, not the node_type-derivation which
+    # can't see prefixes), so the primitive clears green HONESTLY. KEPT explicit here (0.8.0~D confirmed
+    # 2026-07-08 the SymbolRecognizer is genuinely artifact-BLOCKED: extract_api.py is the OLD coarse
+    # regex extractor (no symbols), the ts-morph symbol: nodes aren't in any local lexical artifact, and
+    # COMPILERKIT is pure-lexical -- so a SDK SymbolRecognizer has no source until a symbol-resolved
+    # extractor output lands; derive_compiler_emits is READY to carry SYMBOL the instant it does).
     _ensure("extract_api-symbol-extractor(live, pre-SDK-refactor)")["entities"].add(CSE.Entity.SYMBOL.value)
-    # Edge-kinds: NO compiler declares emitting a kind yet (schema 0.2 fresh; COMPILERKIT #2's
-    # FLOWS_TO-with-kind pending) -> edge_kinds stay EMPTY -> the sweep flags EdgeKind as a live gap.
-    # When #2 ships, add its declared kinds here (or the SDK `emits` carries them) -> the gap clears.
+
+    # OVERLAY the SDK-DECLARED source (0.8.0~D derive_compiler_emits, 4e8306597) -- the drift-proof
+    # authoritative declaration for the 4 SDK-refactored compilers (code/tsx/config/ticket). This
+    # RETIRES two prior hand-modeled bits: (1) the synthetic `_honest_degrade` CONCEPT emitter -- CONCEPT
+    # is now per-compiler BY CONSTRUCTION (every SDK compiler declares it); (2) the edge_kinds-empty gap
+    # -- tsx-compiler now DECLARES {passthrough,rename,recompute_guarded} (== CSE._EDGEKIND_VALUES),
+    # closing the 0.2 EdgeKind governance-loop this sweep was built to demonstrate (grounded: live
+    # FLOWS_TO edges carry "kind":"recompute/guarded"). Overlay is a UNION (additive to coverage only).
+    try:
+        for cid, decl in _sdk_declared_emits().items():
+            e = _ensure(cid)
+            e["entities"] |= set(decl.get("entities", ()))
+            e["relationships"] |= set(decl.get("relationships", ()))
+            e["edge_kinds"] |= set(decl.get("edge_kinds", ()))
+    except Exception as ex:  # noqa: BLE001
+        # HONEST DEGRADE (never-false-clean): if the SDK source is unreadable, fall back to the explicit
+        # synthetic CONCEPT emitter so CONCEPT never falsely un-clears, and leave EdgeKind un-emitted
+        # (the sweep correctly re-flags it) -- loud, not silent.
+        _ensure("_honest_degrade(SDK-unreadable-fallback: %s)" % type(ex).__name__)["entities"].add(
+            CSE.Entity.CONCEPT.value)
     return emits
 
 
@@ -205,24 +238,27 @@ def _self_test() -> bool:
 
     # 1. the sweep runs tri-state (not UNVERIFIABLE -- the registry loaded)
     check("1  sweep loaded the grounded compiler registry (not UNVERIFIABLE)", code in (PASS, FAIL))
-    # 2. the LIVE 0.2 EdgeKind gap is FLAGGED (the self-demonstration -- no compiler emits a kind yet)
+    # 2. the 0.2 EdgeKind governance-loop is now CLOSED: the sweep FLAGGED EdgeKind un-emitted until
+    #    COMPILERKIT #2 shipped its FLOWS_TO-with-kind; 0.8.0~D's SDK (derive_compiler_emits, 4e8306597)
+    #    now DECLARES tsx-compiler emits {passthrough,rename,recompute_guarded} (== CSE._EDGEKIND_VALUES,
+    #    grounded: live FLOWS_TO carry "kind":"recompute/guarded"), so EdgeKind CLEARS. The loop the
+    #    module was built to demonstrate closed HONESTLY (flagged -> #2 shipped its declaration -> cleared).
     edgekind_gaps = [g for g in gaps if g.startswith("EdgeKind:")]
-    check("2  flags the live 0.2 EdgeKind gap (self-demonstration: kinds un-emitted until #2 FLOWS_TO)",
-          len(edgekind_gaps) >= 1, f"EdgeKind gaps found: {edgekind_gaps}")
-    print(f"       (EdgeKind gaps: {[g.split(' -- ')[0] for g in edgekind_gaps]})")
+    check("2  0.2 EdgeKind governance-loop CLOSED -- #2's SDK declaration cleared the gap (0 EdgeKind gaps)",
+          len(edgekind_gaps) == 0, f"unexpected EdgeKind gaps: {edgekind_gaps}")
     # 3. THE SWEEP IS FAIL-CLOSED + CORRECT: on the current estate it FINDS real coverage-gaps (the
     #    feature, not a bug). Characterize the EXPECTED gap set -- these are legitimate un-emitted
     #    primitives (org-level awaiting COMPILERKIT's org-artifact compilers + representation choices
     #    that tie to the live-graph grounding). The sweep correctly returns FAIL + NAMES them.
-    #    Org-level entities no CODE compiler emits (Requirement/Tool/Tier/GraphScope) + IAMStatement
-    #    (folded into IAM_POLICY, NOT a discrete node -- matches the AC4 grounding: no stmt: node live).
-    #    0.3 RESOLUTION (COO ruling 2026-07-08): the version-bump's TYPE/SYMBOL both clear GREEN, not
-    #    gaps -- TYPE covered (TypeDecl->tsx-compiler#2; ~D emitted 136 TYPE nodes), SYMBOL attributed to
-    #    the LIVE extract_api SYMBOL extractor (a real emitter; SDK-refactor onto COMPILERKIT is a TRACKED
-    #    follow-on, above), CONCEPT modeled always-emitted (honest-degrade). So the entity gaps return to
-    #    the org-level set awaiting COMPILERKIT's org-artifact compilers -- the governance loop CLOSED
-    #    honestly on a real bump (flagged -> real emitter found/attributed -> cleared, never fabricated).
-    _EXPECTED_ENTITY_GAPS = {"Requirement", "Tool", "Tier", "GraphScope", "IAMStatement"}
+    #    Org-level entities no compiler emits yet (Tool/Tier/GraphScope) + IAMStatement (folded into
+    #    IAM_POLICY, NOT a discrete node -- matches the AC4 grounding: no stmt: node live).
+    #    0.3 + SDK-OVERLAY RESOLUTION (COO ruling 2026-07-08 + 0.8.0~D SDK 4e8306597): TYPE covered
+    #    (TypeDecl->tsx-compiler#2 + SDK tsx-compiler emits Type); SYMBOL attributed to the LIVE
+    #    extract_api extractor (real emitter, SDK-blocked-on-artifact per ~D); CONCEPT now per-compiler by
+    #    construction (SDK). **Requirement CLEARED** -- the SDK ticket-compiler DECLARES it, so it is no
+    #    longer a gap (the org-artifact ticket compiler shipped). The residual entity gaps are the still-
+    #    un-emitted org-level set (Tool/Tier/GraphScope) + the IAMStatement representation choice.
+    _EXPECTED_ENTITY_GAPS = {"Tool", "Tier", "GraphScope", "IAMStatement"}
     entity_gap_names = {g.split(" -- ")[0].split(":", 1)[1] for g in gaps if g.startswith("Entity:")}
     check("3  sweep flags the EXPECTED org-level/representation Entity gaps (fail-closed, correct)",
           entity_gap_names == _EXPECTED_ENTITY_GAPS,
@@ -236,12 +272,16 @@ def _self_test() -> bool:
           f"got {sorted(rel_gap_names)} expected {sorted(_EXPECTED_REL_GAPS)}")
     print(f"       (the {len(gaps)} live coverage-gaps are the SWEEP WORKING -- deliberate MOTIF/PROMOTE "
           f"candidates + COMPILERKIT org-artifact-compiler targets, fail-closed not silent)")
-    # 5. the gap CLEARS when compiler #2 declares its FLOWS_TO kinds (simulate #2 shipping)
+    # 5. NEGATIVE CONTROL: the SDK declaration is what clears EdgeKind (not a hardcode). Strip the SDK
+    #    tsx-compiler edge_kinds back out -> the EdgeKind gap REAPPEARS -> proves the clear in #2 is caused
+    #    by ~D's real SDK declaration, and the sweep is still fail-closed (would re-flag if #2 regressed).
     sim = compiler_emits()
-    sim["tsx-compiler#2"]["edge_kinds"] |= set(getattr(CSE, "_EDGEKIND_VALUES", frozenset()))
+    for cid in list(sim.keys()):
+        if "tsx-compiler" in cid:
+            sim[cid]["edge_kinds"] = set()
     code2, gaps2, _ = coverage_sweep(sim)
-    check("5  EdgeKind gap CLEARS when #2 ships FLOWS_TO kinds (governance loop closes)",
-          not [g for g in gaps2 if g.startswith("EdgeKind:")])
+    check("5  negative control: stripping the SDK tsx edge_kinds RE-FLAGS EdgeKind (SDK declaration is the cause; still fail-closed)",
+          len([g for g in gaps2 if g.startswith("EdgeKind:")]) >= 1)
 
     passed = sum(1 for r in ok if r)
     print(f"=== {passed}/{len(ok)} PASS ===")
