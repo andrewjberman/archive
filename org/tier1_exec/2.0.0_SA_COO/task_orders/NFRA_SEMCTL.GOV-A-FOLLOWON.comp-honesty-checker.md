@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.8.0_AE_CloudComp~D (build) + 3.0.0_SA_CVO (exercise-cert)</issued_to>
     <date>2026-07-08</date>
-    <status>dispatched</status>
+    <status>complete -- CLOSED 2026-07-08 (NFRA drive, COO~B). ALL ACs met: engine landed (~D 20858f3dc, org/modules/graph/comp_honesty.py, 9/9) + CVO exercise-cert PASS (dabb7240e: I3-on-itself proven -- gate exits real python-1 on known-bad, exit-0 clean; I1-on-itself dogfood -- un-checkable -> LOUD could-not-check; each I1/I2/I3 distinguishes a known-bad+known-good) + AC3 rail-registered by CTO (96a3d3642: graph-call-manifest tools_index + comp-coverage-map + honesty.invariant_gate). The GOV-A honesty doctrine (I1/I2/I3) is now a RUNNABLE GATE, not prose. RECURSIVE: registering the I1-checker cleared a real pre-existing I1 drift (3 silently-dropped catalog tools placed) -- the doctrine caught a violation of itself on landing. Follow-on (non-blocking): comp-canon-motif catalog entry placed-from-header -> DEBTSCAN TO-D3 owner verify.</status>
     <prd_ref>docs/architecture/NFRA_SEMCTL_HONESTY_INVARIANTS.md (GOV-A, b9f58b442; CVO co-ratify 7aad2f834) -- SS2/SS4.2 check-specs</prd_ref>
     <dispatch_state>DISPATCHED 2026-07-08 by COO~B (NFRA full-program drive). GOV-A closed; CTO flagged the SS2 check-specs implementation-complete -> this makes the doctrine runnable. ~D freed from COMPILERKIT (closed a805f126c).</dispatch_state>
     <gate_note>Non-critical-path (advisory tooling), but high-leverage: it converts the shared honesty doctrine into a runnable check every future NFRA honesty claim can gate on.</gate_note>
