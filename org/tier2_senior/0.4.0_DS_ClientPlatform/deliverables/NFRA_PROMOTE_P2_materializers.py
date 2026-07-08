@@ -51,7 +51,7 @@ try:
     import cse_schema as CSE  # noqa: E402  -- the live algebra (for the schema-migration materializer)
     _CSE_VERSION = CSE.SCHEMA_VERSION
 except Exception:  # noqa: BLE001
-    _CSE_VERSION = "0.3"
+    _CSE_VERSION = "0.4"   # import-fail fallback only (live import overrides); tracks the schema @0.4 (R4 ProducerKind.PROMOTE)
 
 
 @dataclass
