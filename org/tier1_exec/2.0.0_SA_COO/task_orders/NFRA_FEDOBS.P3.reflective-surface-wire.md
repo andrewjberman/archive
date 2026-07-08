@@ -7,9 +7,9 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.5.0_AE_OpalETL (surface) + 0.4.0_DS~A (query library, gated)</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>dispatched -- GO'd 2026-07-08 by COO~B to 0.5.0_AE. FEDOBS-P2 measure arm CLOSED+certed (7735815e3) = the signals P3 surfaces are live+certed. Build the reflective surface + wire the standing inputs NOW; it does NOT gate on the fedobs-role apply (that's the AC2 crown-jewel, parallel).</status>
     <prd_ref>docs/architecture/NFRA_FEDOBS_PRD.md (P3)</prd_ref>
-    <dispatch_state>STAGED -- GO at Wave-2, AFTER NFRA_FEDOBS.P2 lands. Authored by COO~B on the NFRA full-program completion drive.</dispatch_state>
+    <dispatch_state>DISPATCHED 2026-07-08 to 0.5.0_AE (surface) + DS~A (query library, gated). Builds on the live+certed P2 measure library. This is the standing-input wiring PROMOTE (measure arm) + MOTIF (co-occurrence) consume.</dispatch_state>
     <gate_note>Gated on FEDOBS-P2. Makes the measured signals STANDING inputs so PROMOTE/MOTIF consume them continuously (not a one-off query).</gate_note>
   </metadata>
 
