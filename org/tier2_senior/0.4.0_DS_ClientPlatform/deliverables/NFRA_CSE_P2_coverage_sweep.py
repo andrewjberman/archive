@@ -130,6 +130,12 @@ def compiler_emits() -> dict:
         cid = _EDGE_TO_COMPILER.get(et)
         if cid:
             _ensure(cid)["relationships"].add(rel.value)
+    # Entity.CONCEPT is the LAW-1 UNIVERSAL honest-degrade target -- EVERY recognizer emits it BY
+    # CONSTRUCTION (Concept(untyped)+low whenever it cannot lexically type a node). It is emitted-by-
+    # design, never a coverage-gap. Before the 0.3 bump this was MASKED because "TypeDecl"->CONCEPT made
+    # a node_type map to it; the 0.3 TypeDecl->TYPE remap EXPOSED that the node_type-derivation alone
+    # would wrongly flag CONCEPT un-emitted. Model the degrade-fallback explicitly (a synthetic emitter).
+    _ensure("_honest_degrade")["entities"].add(CSE.Entity.CONCEPT.value)
     # Edge-kinds: NO compiler declares emitting a kind yet (schema 0.2 fresh; COMPILERKIT #2's
     # FLOWS_TO-with-kind pending) -> edge_kinds stay EMPTY -> the sweep flags EdgeKind as a live gap.
     # When #2 ships, add its declared kinds here (or the SDK `emits` carries them) -> the gap clears.
@@ -202,7 +208,12 @@ def _self_test() -> bool:
     #    that tie to the live-graph grounding). The sweep correctly returns FAIL + NAMES them.
     #    Org-level entities no CODE compiler emits (Requirement/Tool/Tier/GraphScope) + IAMStatement
     #    (folded into IAM_POLICY, NOT a discrete node -- matches the AC4 grounding: no stmt: node live).
-    _EXPECTED_ENTITY_GAPS = {"Requirement", "Tool", "Tier", "GraphScope", "IAMStatement"}
+    #    0.3 ADD: "Symbol" is the version-bump's TRANSIENT gap -- symbol: is a nid-PREFIX (no node_type
+    #    maps to SYMBOL), so the node_type-derived registry doesn't attribute it to a compiler yet; it
+    #    CLEARS on 0.8.0~D's COMPILERKIT recognizer emit-declare pass (SDK `emits: [SYMBOL]`). This IS
+    #    the governance loop firing on a real bump. (TYPE is already covered -- TypeDecl->TYPE, portal->
+    #    tsx-compiler#2. Concept is NOT a gap -- the honest-degrade target, modeled always-emitted above.)
+    _EXPECTED_ENTITY_GAPS = {"Requirement", "Tool", "Tier", "GraphScope", "IAMStatement", "Symbol"}
     entity_gap_names = {g.split(" -- ")[0].split(":", 1)[1] for g in gaps if g.startswith("Entity:")}
     check("3  sweep flags the EXPECTED org-level/representation Entity gaps (fail-closed, correct)",
           entity_gap_names == _EXPECTED_ENTITY_GAPS,
