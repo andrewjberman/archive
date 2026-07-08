@@ -1,6 +1,6 @@
 # NFRA_PROMOTE-P2 / GOV-B -- the hot-registration PRODUCER-side design (pre-stage)
 
-**Author:** 0.8.0_AE_CloudComp~D | **Date:** 2026-07-08 | **Status:** DESIGN (pre-stage; build gated on PROMOTE-P1 landing)
+**Author:** 0.8.0_AE_CloudComp~D | **Date:** 2026-07-08 | **Status:** ARCH-RATIFIED (CTO 2026-07-08 -- all 4 Qs RATIFIED w/ 4 refinements folded, see S9); build gated on PROMOTE-P1 landing
 **For:** CTO arch-gate review -> instant-to-build on the PROMOTE-P1-land signal. COO~B-directed productive-use-of-wait.
 **Seam:** CVO gap #8 (NFRA_SEMCTL_PRD.md:178, NFRA_COMPILERKIT_PRD.md:69) -- the promoted-recognizer -> LIVE-compiler HOT-REGISTRATION path. **COMPILERKIT owns the registry (CONSUMER -- built); PROMOTE owns the materializer (PRODUCER -- this design.)**
 
@@ -84,14 +84,37 @@ Sub-question for CTO: the `recognizer_source` realization -- a promoted recogniz
 5. Self-test: materialize a template-recognizer spec -> register -> assert in dispatch set -> demote -> assert gone + both surfaced (exercised, GOV-A I3 on the materializer itself).
 6. Hand CVO the exercise-cert (does a promoted recognizer ACTUALLY reach live dispatch + reverse cleanly).
 
-## 7. Open questions for CTO arch-gate (before build)
-1. Confirm option **(A)** (registry-manifest + run-time load) as the hot-registration mechanism.
-2. Confirm **(i)** (template+params, pure-lexical) as the P2 recognizer_source realization; defer code-gen (ii).
-3. The manifest STORE location + write-authority (who may write a promoted-recognizer entry -- the ratify-gated materializer only).
-4. Does the MATERIALIZED/DEMOTED CSE go through the same cse_schema emit path (yes, recommend) -> the promotion is itself a compiled event.
+## 7. Open questions for CTO arch-gate -- RESOLVED (all 4 RATIFIED w/ refinements; see S9)
+1. Hot-registration mechanism -> (A) registry-manifest + run-time load. **RATIFIED.**
+2. recognizer_source -> (i) template+params. **RATIFIED; (ii) code-gen HARD-DEFERRED.**
+3. Manifest store + write-authority -> ratify-gated materialize() only. **RATIFIED w/ refinements.**
+4. MATERIALIZED/DEMOTED via cse_schema emit path -> **RATIFIED yes (needs a 5th P3 emission-contract).**
 
 ## 8. Grounding
 - `org/modules/graph/comp_recognizer_sdk.py` (RecognizerRegistry + PROMOTE_SEAM + register/reload/deregister + on_register + Recognizer.emits) -- the consumer seam, read + owned.
 - `docs/architecture/NFRA_PROMOTE_PRD.md` (P2 materializers S5:71, lifecycle S4.3, invariants S4.2) -- read.
 - `docs/architecture/NFRA_SEMCTL_PRD.md:178` + `NFRA_COMPILERKIT_PRD.md:69` (CVO gap #8 hot-registration seam) -- read.
 - Build GATED on PROMOTE-P1 (MOTIF candidates; MOTIF-P1 certed, P2/P3 running) -- design-only per the Wave-4 gate.
+
+## 9. Arch-gate ruling (CTO 2026-07-08) -- RATIFIED + the 4 refinements (build-ready)
+
+All 4 recommendations RATIFIED (the S5 5-invariant + I1/I3 binding table stands as-is). The 4 refinements, folded:
+
+**R1 (Q1) -- next-run VINTAGE HONESTY.** "Hot" = next-run, which has a LATENCY -- honor it: the manifest entry carries `promoted_at`/vintage + the live compiler surfaces "recognizer live as-of <load-marker>" (comp-kuzu/comp-fedobs served-vintage discipline). A promoted recognizer is NOT instantaneous; a consumer must see WHEN it took. -> add `promoted_at` to PromotedRecognizerSpec + a compiler-reported load-marker.
+
+**R2 (Q2) -- code-gen (ii) HARD-DEFERRED; do NOT smuggle into P2.** (i) template+params stays pure-lexical + fidelity-checkable by construction (a parameterized instance of a KNOWN recognizer class; params are lexical). (ii) generated code is a CATEGORY CHANGE needing its OWN arch-gate: a sandbox + the fidelity/pure-lexical gate (a generated recognizer that can't decompress = a LATENT representation -> LAW-1/2 reject) + a security review (arbitrary-code-injection surface). P2 builds (i) ONLY.
+
+**R3 (Q3) -- git-versioned, inspectable, critical-surface manifest.** The promoted-recognizer store is a GIT-TRACKED versioned manifest (PROMOTE LAW 2: a first-class inspectable reversible artifact; git = the audit trail + the ratify-author binding: materialize() commits under the ratifier's authority/`commission_id`). The manifest is a NAMED CRITICAL SURFACE -- every write goes through comp-surface-check (same I3 binding as PROMOTE_SEAM). The (A) run-time load keys off the manifest HEAD/marker so the compiler loads the CURRENT vintage.
+
+**R4 (Q4) -- a 5th P3-style EMISSION-CONTRACT.** MATERIALIZED/DEMOTED CSEs go through cse_schema (LAW 2 inspectable + provenance-bound; feeds FEDOBS directive-effectiveness before/after `promoted_at`). Needs a 5th producer emission-contract (the promote/materializer producer): the MATERIALIZED/DEMOTED CSE shape + a ProducerKind (PROMOTE or MATERIALIZER) validated through cse_schema like the git/graph_head/agent/deploy four. Author it as the 5th producer in the P3 emission-contract pattern (DS~B's NFRA_CSE_P3_emission_contracts.py).
+
+### Refined build plan (supersedes S6 on the PROMOTE-P1-land + this ruling)
+1. `PromotedRecognizerSpec` (S2 + `promoted_at` [R1] + `commission_id` [R3]) + the git-versioned manifest schema (R3).
+2. `materialize(spec, live_registry)` + `demote(...)` in `comp_promote_materializer.py` -- reuse the registry primitives un-forked; template+params recognizer_source ONLY (R2).
+3. Manifest write -> comp-surface-check (R3 critical surface) + the ratification-block gate (reject unratified specs) + commit under the ratifier's commission_id (R3 author-binding).
+4. Run-time manifest-load in each compiler's register_all, keyed off the manifest HEAD/marker (R3) + surface "live as-of <load-marker>" (R1 vintage honesty).
+5. The 5th promote emission-contract (R4): MATERIALIZED/DEMOTED CSE + PROMOTE/MATERIALIZER ProducerKind, via cse_schema (P3 pattern).
+6. on_register->comp-surface-check + post-register dispatch-set VERIFY (S3, GOV-A I3 on the promotion).
+7. Self-test: template-spec -> materialize -> assert in dispatch set + vintage surfaced -> demote -> assert gone + both surfaced (exercised). Then CVO exercise-cert.
+
+**Status: arch-ratified + build-ready. Blocked ONLY on the PROMOTE-P1-land signal (MOTIF candidates).**
