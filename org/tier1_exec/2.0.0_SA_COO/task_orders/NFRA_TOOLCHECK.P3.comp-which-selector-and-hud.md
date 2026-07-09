@@ -5,9 +5,9 @@
   <metadata>
     <id>2.0.0_SA_COO~B-2026-07-08-nfra-toolcheck-p3-selector-hud</id>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.8.0_AE_CloudComp~D (comp-which selector + the HUD/COMPHUD rail) | CTO arch-gate + CVO routing-oracle-green + HUD-measured cert</issued_to>
+    <issued_to>0.8.0_AE_CloudComp (comp-which selector + the HUD/COMPHUD rail) -- EXECUTED as base 0.8.0_AE_CloudComp post-respawn 2026-07-09 (TO originally named the ~D lane; base lane carried it after the 073939Z wedge-respawn) | CTO arch-gate + CVO routing-oracle-green + HUD-measured cert (ALL MET)</issued_to>
     <date>2026-07-08</date>
-    <status>staged -- GO after P2 (fixes land first). Any further tool-breaks P3 surfaces route BACK to P2.</status>
+    <status>complete 2026-07-09 -- both legs CVO-certed + CTO P3-phase-close DECLARED (084508Z). SELECTOR leg: comp-system router-wire (5d21baa6f), live oracle 37/38 -> 38/38 GREEN, CVO oracle-GREEN cert 080106Z (deeper cause = candidate-set exclusion, system-compiler not in _ROUTABLE_META_ROLES; fix = role-add + curated rule, non-regression exercised). HUD leg: req#3 a-d (c37c6ab27), each exercised against the live hook, self-gating log-truncation found+fixed (head -c 80 multi-line split), AC#2 honestly measured (35.2% false-fires-gated baseline; 2 own-confounds disclosed not shipped), CVO HUD-cert 084324Z. CTO dispositioned the 35.2% as an honestly-measured BASELINE (not a threshold-pass) -> no reopen. AUA interleave (base COO thread, non-NFRA) also landed clean. TOOLCHECK DONE -- P3 was the last phase.</status>
     <prd_ref>docs/architecture/NFRA_TOOLCHECK_PRD.md (SS2 selector+HUD findings, SS4 P3, SS8 Q3)</prd_ref>
     <dispatch_state>STAGED. Gated on P2. ROUTE-BEFORE-BUILD: the coverage-gap tools (comp-symbols/comp-types) may be a ROUTING miss not an absent tool -- resolve here before P2 authorizes any new-tool build (Q4).</dispatch_state>
     <gate_note>The selector + HUD are the shared cognition's entry point -- a mis-route or a banner-blind HUD degrades every agent invisibly. Part 0 did the first pass; P3 fixes + measures it.</gate_note>
