@@ -406,11 +406,56 @@ def live_coverage_check(contract_path: str = None) -> tuple:
     return subgraph_coverage_check(contract.get("intra_system_edges", []), live_records)
 
 
+def canonical_refresh_failure(db_path: str = None) -> dict:
+    """Return the canonical DB's refresh-FAILURE marker (0.7.0_AE a4076e020), or None if healthy.
+
+    WHY THIS GUARD EXISTS -- the coverage-check can pass VACUOUSLY on a stale substrate.
+    _canonical.ensure_fresh returns False for BOTH benign outcomes ("already fresh", "reused concurrent
+    winner's rebuild") AND for a genuine failure ("rebuild failed (...)"). The boolean is ambiguous; only the
+    reason string differs, and the caller-facing signal is a TEXT banner in the provenance header on stderr.
+    This module runs kuzu_cli as a subprocess and parses JSON from stdout -- it never reads that header.
+
+    So without this guard: a rebuild FAILS -> the canonical serves STALE -> our live recompute reads the stale
+    graph -> the frozen contract matches the stale selection -> missing_from_contract = 0 -> rc=0 GREEN.
+    A vacuous pass, on the very check CVO~B runs at the deploy-gate. That is the guard-fed-a-proxy-input class
+    landing on the guard itself: the check's INPUT (the graph) would be a proxy for the live estate.
+
+    The marker suffix is read from _provenance._REFRESH_STATUS_SUFFIX -- the single source AE deliberately
+    put there "so the writer/reader contract can't drift" -- never a hardcoded filename.
+    """
+    sys.path.insert(0, os.path.join(WS, "infra", "aws", "globgrph"))
+    import _canonical  # noqa: E402
+    import _provenance  # noqa: E402
+
+    target = db_path or _canonical.CANONICAL_DB_PATH
+    marker = target.rstrip("/\\") + _provenance._REFRESH_STATUS_SUFFIX
+    if not os.path.exists(marker):
+        return None
+    try:
+        with open(marker, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, json.JSONDecodeError) as ex:
+        # A marker we cannot read is still a marker: fail UNVERIFIABLE, never silently healthy.
+        return {"kind": "unreadable-marker", "detail": str(ex), "failed_at_iso": "?"}
+
+
 def run_coverage_check() -> int:
     """AE's R3-verify leg. rc=0 clean; rc=1 FAIL LOUD (missing_from_contract > 0); rc=2 UNVERIFIABLE."""
     print("=" * 88)
     print("NFRA_EDGES P3 -- (a) SET-COMPLETENESS coverage-check (post-derive, live canonical)")
     print("=" * 88)
+
+    # SUBSTRATE GUARD, before any query: a served-stale canonical makes this check vacuous, not clean.
+    rf = canonical_refresh_failure()
+    if rf:
+        print("  UNVERIFIABLE (substrate): the canonical DB is SERVED-STALE -- its last refresh FAILED.")
+        print("    failed_at=%s kind=%s detail=%s"
+              % (rf.get("failed_at_iso", "?"), rf.get("kind", "?"), str(rf.get("detail", ""))[:120]))
+        print("  This is NOT a pass. The live recompute would read a stale graph, the frozen contract would")
+        print("  match that stale selection, and missing_from_contract=0 would report a VACUOUS GREEN.")
+        print("  Heal the canonical (0.7.0_AE), then re-run. Marker: _provenance._REFRESH_STATUS_SUFFIX.")
+        return 2
+
     try:
         ok, missing, absent = live_coverage_check()
     except P1M.GraphUnavailable as ex:
@@ -862,6 +907,38 @@ def self_test() -> int:
     # The projection must NOT collapse a guard difference (test-20 discipline, now through the projection).
     chk("25 PROJECTION preserves the guard: two edges differing only by condition stay DISTINCT after projection",
         project_edge_props(e_contract["props"]) != project_edge_props(e_other_guard["props"]))
+
+    # ---- SUBSTRATE GUARD (0.7.0_AE's a4076e020 fail-loud marker, consumed programmatically).
+    # Without it the coverage-check reports a VACUOUS GREEN on a served-stale canonical.
+    import tempfile
+    sys.path.insert(0, os.path.join(WS, "infra", "aws", "globgrph"))
+    import _provenance as _prov  # noqa: E402
+
+    _tmpdir = tempfile.mkdtemp()
+    _fake_db = os.path.join(_tmpdir, "kuzu_fake_db")
+    chk("26 substrate guard: a HEALTHY db (no refresh-failure marker) reports None (no false-fire)",
+        canonical_refresh_failure(_fake_db) is None)
+
+    with open(_fake_db + _prov._REFRESH_STATUS_SUFFIX, "w", encoding="utf-8") as _fh:
+        json.dump({"failed_at_iso": "2026-07-09T13:00:00Z", "kind": "rebuild-failed",
+                   "detail": "kuzu_nessie_load rc=143"}, _fh)
+    _rf = canonical_refresh_failure(_fake_db)
+    chk("27 substrate guard GATE: a refresh-FAILURE marker is detected -> the check must go UNVERIFIABLE, "
+        "never a vacuous GREEN on a stale substrate",
+        _rf is not None and _rf["kind"] == "rebuild-failed")
+
+    # An unreadable marker is still a marker: never silently healthy.
+    with open(_fake_db + _prov._REFRESH_STATUS_SUFFIX, "w", encoding="utf-8") as _fh:
+        _fh.write("{ this is not json")
+    chk("28 substrate guard: an UNREADABLE marker is still a marker (fails UNVERIFIABLE, not healthy)",
+        (canonical_refresh_failure(_fake_db) or {}).get("kind") == "unreadable-marker")
+
+    # The suffix is single-sourced from _provenance, not hardcoded (AE's writer/reader no-drift contract).
+    chk("29 substrate guard: the marker suffix is single-sourced from _provenance._REFRESH_STATUS_SUFFIX",
+        _prov._REFRESH_STATUS_SUFFIX.endswith("_refresh_status.json"))
+
+    import shutil as _shutil
+    _shutil.rmtree(_tmpdir, ignore_errors=True)
 
     n = sum(1 for r in ok if r)
     print("--- self-test: %d/%d passed ---" % (n, len(ok)))
