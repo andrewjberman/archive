@@ -278,6 +278,54 @@ def to_intra_edge_record(edge: Node, snapshot_ts: int) -> dict:
     }
 
 
+def subgraph_coverage_check(contract_edges: list, live_edges: list) -> tuple:
+    """SET-COMPLETENESS check (COO~B scope-ruling 111120Z, option (a)) -- run at DERIVE time by the ingest.
+
+    THE HOLE THIS CLOSES: ingest_c2c3_motif_producer (derive_runner.py:1320-1360) replays a FROZEN spec list
+    with NO live discovery. Its endpoint resolution makes DELETIONS loud (edges_unresolved > 0), but a NEWLY
+    APPEARED qualifying estate edge is simply absent from the list and is SILENTLY never materialized. So a
+    C3 subgraph can be perfectly per-entity fresh (every snapshot_ts != firing) and permanently INCOMPLETE.
+
+    AC5's snapshot_ts is a per-ENTITY freshness contract; it is a PROXY for the property we actually want,
+    which is set-COMPLETENESS. This check asserts the property directly.
+
+    Returns (ok, missing_from_contract, absent_from_live):
+      missing_from_contract -- live qualifying edges NOT in the frozen contract. THE SILENT HALF. ok is False
+                               iff this is non-empty: the ingest must FAIL LOUD, never quietly under-materialize.
+      absent_from_live      -- contract edges no longer live. Already surfaced as edges_unresolved; reported
+                               here too so the ingest never has to infer it.
+
+    Edges are compared on the STORE identity tuple (src, dst, edge_type, props) -- the same key
+    kuzu_nessie_load MERGEs on. Comparing on anything else would make the check itself a proxy.
+    """
+    def key(e):
+        return intra_edge_identity(e["src"], e["dst"], e["edge_type"], e["props"])
+
+    contract_keys = {key(e) for e in contract_edges}
+    live_keys = {key(e) for e in live_edges}
+    missing_from_contract = sorted(live_keys - contract_keys)
+    absent_from_live = sorted(contract_keys - live_keys)
+    return (len(missing_from_contract) == 0), missing_from_contract, absent_from_live
+
+
+SELECTION_RULE = {
+    "description": "Recompute the intra-system edge set from the LIVE graph at derive time, then run "
+                   "subgraph_coverage_check against the frozen contract. FAIL LOUD on any live qualifying "
+                   "edge absent from the contract.",
+    "predicate": "edge_type in {FLOWS_TO, RENDERS} AND both endpoints resolve to C0/C1 constituents of the "
+                 "C3's member motifs (a one-endpoint-inside edge is a BOUNDARY edge: excluded + counted)",
+    "compare_on": ["src", "dst", "edge_type", "props"],
+    "fail_loud_when": "missing_from_contract > 0  (a NEW qualifying estate edge the frozen list would have "
+                      "silently dropped)",
+    "emit_counter": "c3_subgraph_edges_missing_from_contract  (belongs in the R3-verify beside edges_unresolved=0)",
+    "why": "ingest_c2c3_motif_producer replays a frozen list with no live discovery: deletions are loud, "
+           "ADDITIONS are silent. AC5 covers per-entity freshness, not set-completeness.",
+    "root_fix_routed": "COO~B -> CTO, estate-wide: derive the selection live at derive time and demote the "
+                       "frozen contract to an R3 expected-value FIXTURE. The C2/C3 CONTAINS materialize has "
+                       "this same hole today, so it is a pattern change, not a P3 bolt-on.",
+}
+
+
 def to_c3_node_record(system: Node, signature: dict, snapshot_ts: int) -> dict:
     """The C3 node record: the SAME EmergentSystem node_type (req2 -- no new node_type), carrying the
     data-flow signature as a PROPERTY, plus AC5's snapshot_ts."""
@@ -387,6 +435,18 @@ def run_live(emit_contract: bool = False) -> int:
                 "NOT_the_edge_key": "P1 edge_node_id() is an analysis-side NODE id -- keying CloudEdges on it "
                                     "makes them invisible to kuzu_incremental_refresh (born drift-blind)",
                 "boundary_edges_excluded": len(boundary),
+                # COO~B scope-ruling 111120Z option (a): the ingest MUST recompute the live selection at
+                # derive time and FAIL LOUD on any live qualifying edge absent from this frozen list.
+                "selection_rule": SELECTION_RULE,
+                "coverage_check": {
+                    "required": True,
+                    "expected_edge_count": len(intra),
+                    "run_at": "derive time, before materialize",
+                    "fail_loud_when": "missing_from_contract > 0",
+                    "note": "A frozen row-set is per-entity fresh (snapshot_ts) and can still be permanently "
+                            "INCOMPLETE. AC5 covers the entity, this covers the SET. Deletions are already "
+                            "loud (edges_unresolved); this closes the silent ADDITION half.",
+                },
                 "c3_node_id_is_unchanged": "system:firm-conditional-display:25558d98 == the SERVED id "
                                            "(round-trip verified) -> NOT a served-identity replacement; no "
                                            "orphan, no consumer re-pin. Still a STORE WRITE: never-half-land "
@@ -491,6 +551,39 @@ def self_test() -> int:
     okl, fl = fidelity_check(latent)
     chk("15 AC6: the C3 decompresses C3->C2->C1->C0 evidence (fidelity PASS)", okf)
     chk("16 negative control: a LATENT C3 (no members) FAILS fidelity (the gate bites)", okl is False and fl)
+
+    # ---- COO~B 111120Z option (a): the derive-time SET-COMPLETENESS check, AND ITS EXERCISE.
+    # "Don't ship a coverage-check you haven't proven bites." A check that cannot fire is itself a proxy.
+    e_contract = to_intra_edge_record(shared_edge, SELFTEST_SNAPSHOT_TS_MS)
+    e_new_live = to_intra_edge_record(
+        P1E.reify_edge("out:n/N.tsx:5#n", "out:m/M.tsx:6#m", "FLOWS_TO", "firm == true", "recompute/guarded"),
+        SELFTEST_SNAPSHOT_TS_MS)
+
+    ok_same, miss_same, _abs_same = subgraph_coverage_check([e_contract], [e_contract])
+    chk("17 coverage-check PASSES when the frozen contract matches the live selection",
+        ok_same is True and not miss_same)
+
+    # THE SILENT HALF, exercised: a live qualifying edge that the frozen contract does not contain.
+    ok_add, miss_add, _abs_add = subgraph_coverage_check([e_contract], [e_contract, e_new_live])
+    chk("18 coverage-check GATE: a live qualifying edge ABSENT from the contract -> FAIL LOUD (the silent "
+        "under-materialization the frozen-spec replay would never have reported)",
+        ok_add is False and len(miss_add) == 1)
+
+    # The already-loud half is still REPORTED, never inferred -- and it must NOT trip the fail-loud gate,
+    # because a deletion already surfaces as edges_unresolved at the ingest.
+    ok_del, miss_del, abs_del = subgraph_coverage_check([e_contract, e_new_live], [e_contract])
+    chk("19 coverage-check: a contract edge no longer live is REPORTED as absent_from_live, and does NOT "
+        "trip the fail-loud gate (deletions are already loud via edges_unresolved)",
+        len(abs_del) == 1 and ok_del is True and not miss_del)
+
+    # Non-vacuity: the gate must key on the STORE identity tuple. Two edges differing ONLY by their guard
+    # condition (which lives in props) must be DISTINCT to the check -- else a swapped guard reads as covered.
+    e_other_guard = to_intra_edge_record(
+        P1E.reify_edge("out:a/A.tsx:1#x", "out:b/B.tsx:2#y", "FLOWS_TO", "firm == false", "recompute/guarded"),
+        SELFTEST_SNAPSHOT_TS_MS)
+    ok_guard, miss_guard, _ = subgraph_coverage_check([e_contract], [e_other_guard])
+    chk("20 coverage-check keys on the STORE identity (props carries the guard): an edge differing ONLY by "
+        "its condition is NOT considered covered", ok_guard is False and len(miss_guard) == 1)
 
     n = sum(1 for r in ok if r)
     print("--- self-test: %d/%d passed ---" % (n, len(ok)))

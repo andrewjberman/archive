@@ -31,6 +31,13 @@
     "snapshot_ts": null
   },
   "c3_node_id_is_unchanged": "system:firm-conditional-display:25558d98 == the SERVED id (round-trip verified) -> NOT a served-identity replacement; no orphan, no consumer re-pin. Still a STORE WRITE: never-half-land deploy-completion ledger + R3-style live verify still required.",
+  "coverage_check": {
+    "expected_edge_count": 21,
+    "fail_loud_when": "missing_from_contract > 0",
+    "note": "A frozen row-set is per-entity fresh (snapshot_ts) and can still be permanently INCOMPLETE. AC5 covers the entity, this covers the SET. Deletions are already loud (edges_unresolved); this closes the silent ADDITION half.",
+    "required": true,
+    "run_at": "derive time, before materialize"
+  },
   "edge_identity_key": [
     "src",
     "dst",
@@ -208,6 +215,20 @@
       "src": "type:portal/src/pages/AdvisorIntelligence/_shared/types.ts#PlatinumLeaderboardEntry#name"
     }
   ],
+  "selection_rule": {
+    "compare_on": [
+      "src",
+      "dst",
+      "edge_type",
+      "props"
+    ],
+    "description": "Recompute the intra-system edge set from the LIVE graph at derive time, then run subgraph_coverage_check against the frozen contract. FAIL LOUD on any live qualifying edge absent from the contract.",
+    "emit_counter": "c3_subgraph_edges_missing_from_contract  (belongs in the R3-verify beside edges_unresolved=0)",
+    "fail_loud_when": "missing_from_contract > 0  (a NEW qualifying estate edge the frozen list would have silently dropped)",
+    "predicate": "edge_type in {FLOWS_TO, RENDERS} AND both endpoints resolve to C0/C1 constituents of the C3's member motifs (a one-endpoint-inside edge is a BOUNDARY edge: excluded + counted)",
+    "root_fix_routed": "COO~B -> CTO, estate-wide: derive the selection live at derive time and demote the frozen contract to an R3 expected-value FIXTURE. The C2/C3 CONTAINS materialize has this same hole today, so it is a pattern change, not a P3 bolt-on.",
+    "why": "ingest_c2c3_motif_producer replays a frozen list with no live discovery: deletions are loud, ADDITIONS are silent. AC5 covers per-entity freshness, not set-completeness."
+  },
   "snapshot_ts": "NULL BY DESIGN -- STAMP AT DERIVE TIME",
   "snapshot_ts_WARNING": "Do NOT copy a literal ts from this file. A CONSTANT snapshot_ts is never re-upserted (kuzu_incremental_refresh.py:165-166 upserts iff snapshot_ts != cur_ts[key]) -> the entity is born DRIFT-BLIND. This is the latent NFRA_EDGES_P1:162 defect, absorbed at P3 by COO~B/CTO disposition. The P3 AC5 cert EXERCISES the value: a real derive-run must stamp a 13-digit ms ts that CHANGES across runs so the != fires.",
   "snapshot_ts_source": "derive_runner.py:1821 batch_ts = int(time.time()*1000)  [13-digit ms]"
