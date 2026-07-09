@@ -326,14 +326,45 @@ SELECTION_RULE = {
 }
 
 
+# THE NODE-TYPE TRAP -- the exact twin of the edge-identity trap, and I walked into it (0.7.0_AE caught it
+# pre-build, 111217Z). comp_ladder's Node.ntype is an ANALYSIS-side type name. The STORE's node_type is a
+# different vocabulary, governed by derive_runner.NODE_TYPE_LAYER:
+#   - the SERVED node system:firm-conditional-display:25558d98 carries node_type "C3System" (live-verified);
+#   - NODE_TYPE_LAYER maps {"C2Motif": "semctl", "C3System": "semctl"} and has NO "EmergentSystem" entry;
+#   - "EmergentSystem" appears NOWHERE in infra/aws/globgrph (0 matches / 63 files) -- it is not a store type;
+#   - the precedent contract motif_c2c3_materialize.json uses "C3System" for this same node_id.
+# Emitting node_type="EmergentSystem" would therefore (i) FAIL-CLOSE relabel_layers_by_node_type on an
+# unmapped type (aborting the derive) and (ii) be a node_TYPE change on a served node -- a different animal
+# from the node_ID stability we measured. req2 ("no new node_type") is satisfied by using the EXISTING STORE
+# type, not by echoing the analysis ntype.
+_ANALYSIS_TO_STORE_NODE_TYPE = {"EmergentSystem": "C3System"}
+
+
+def store_node_type(analysis_ntype: str) -> str:
+    """Map an analysis-side ntype onto the governed STORE node_type. FAIL LOUD on an unmapped type: an
+    unmapped node_type reaches the derive and fail-closes relabel_layers_by_node_type, so it is far better
+    to fail here, at contract-emission, than at 02:00Z inside the nightly."""
+    try:
+        return _ANALYSIS_TO_STORE_NODE_TYPE[analysis_ntype]
+    except KeyError:
+        raise RuntimeError(
+            "analysis ntype %r has no governed STORE node_type. Do NOT emit it: derive_runner's "
+            "NODE_TYPE_LAYER would fail-close on an unmapped type. Add the mapping (and the "
+            "NODE_TYPE_LAYER entry, 0.7.0_AE's lane) deliberately." % analysis_ntype) from None
+
+
 def to_c3_node_record(system: Node, signature: dict, snapshot_ts: int) -> dict:
-    """The C3 node record: the SAME EmergentSystem node_type (req2 -- no new node_type), carrying the
-    data-flow signature as a PROPERTY, plus AC5's snapshot_ts."""
+    """The C3 node record: the existing STORE node_type (req2 -- no new node_type), carrying the data-flow
+    signature as a PROPERTY, plus AC5's snapshot_ts.
+
+    node_type is the STORE type (C3System), NOT system.ntype (the analysis-side "EmergentSystem"). See the
+    node-type trap above. This is the same analysis-vs-store confusion as the edge-identity trap, one node up.
+    """
     return {
-        "node_id": system.nid,          # settled, collision-safe (req4)
-        "node_type": system.ntype,      # EmergentSystem -- unchanged, no new type
+        "node_id": system.nid,                      # settled, collision-safe (req4)
+        "node_type": store_node_type(system.ntype),  # STORE type, governed by NODE_TYPE_LAYER
         "layer": "semctl",
-        "snapshot_ts": snapshot_ts,     # AC5
+        "snapshot_ts": snapshot_ts,                 # AC5
         "props": {"theme": system.label, "signature": signature},
     }
 
@@ -522,8 +553,23 @@ def self_test() -> int:
     sysnode = Node(id_x, "C3", "EmergentSystem", "firm-conditional-display", rule="r", children=[m1, m2])
     sig = c3_signature(sysnode, [shared_edge])
     rec = to_c3_node_record(sysnode, sig, SELFTEST_SNAPSHOT_TS_MS)
-    chk("9  req2: signature rides as a PROP on the existing EmergentSystem node_type (no new node_type)",
-        rec["node_type"] == "EmergentSystem" and "signature" in rec["props"] and sig["edge_count"] == 1)
+    chk("9  req2: signature rides as a PROP on the existing STORE node_type (no new node_type)",
+        rec["node_type"] == "C3System" and "signature" in rec["props"] and sig["edge_count"] == 1)
+
+    # THE NODE-TYPE TRAP (0.7.0_AE caught this pre-build): the emitted node_type must be the STORE type
+    # (C3System, governed by NODE_TYPE_LAYER + carried by the served node), NOT comp_ladder's analysis-side
+    # ntype ("EmergentSystem", which appears nowhere in infra/aws/globgrph and would FAIL-CLOSE the derive).
+    chk("9a node-type TRAP: the record carries the STORE node_type, NOT the analysis-side ntype",
+        rec["node_type"] == "C3System" and rec["node_type"] != sysnode.ntype)
+
+    # and an UNMAPPED analysis ntype must FAIL LOUD at contract-emission, not reach the derive.
+    try:
+        store_node_type("SomeUngovernedType")
+        raised = False
+    except RuntimeError:
+        raised = True
+    chk("9b node-type TRAP: an UNMAPPED analysis ntype raises at emission (never reaches the derive's "
+        "fail-close relabel)", raised)
 
     # Intra vs boundary: a boundary edge (one endpoint outside) is EXCLUDED and COUNTED, never dropped.
     outside_edge = P1E.reify_edge("out:a/A.tsx:1#x", "out:zz/Z.tsx:9#z", "FLOWS_TO", "", "passthrough")
