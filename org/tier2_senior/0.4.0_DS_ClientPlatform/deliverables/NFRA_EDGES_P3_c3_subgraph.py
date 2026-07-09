@@ -428,15 +428,39 @@ def canonical_refresh_failure(db_path: str = None) -> dict:
     import _provenance  # noqa: E402
 
     target = db_path or _canonical.CANONICAL_DB_PATH
+
+    # PRIMARY: 0.7.0_AE's PUBLIC helper (0ea89b9cf), shipped for exactly this consumer. Legitimate coupling.
+    rf = _canonical.refresh_failure(target)
+    if rf:
+        return rf
+
+    # CONSERVATIVE FALLBACK -- and it is load-bearing, not belt-and-braces. refresh_failure() swallows
+    # `except (OSError, ValueError): return None`, so it returns None for BOTH "healthy" AND "marker present
+    # but UNREADABLE". Verified empirically. Its own docstring says callers "must treat None-from-error
+    # conservatively" -- but the helper gives the caller no way to tell the two Nones apart. That is the same
+    # ambiguous-return shape as ensure_fresh's False, reproduced inside the fix for it. And a truncated marker
+    # is precisely what a process dying mid-write during a rebuild crash leaves behind -- the exact scenario
+    # the marker exists for. So EXISTENCE is the signal: a marker we cannot parse is still a marker.
+    # Reported to 0.7.0_AE. Remove this only when refresh_failure() distinguishes unreadable from healthy.
     marker = target.rstrip("/\\") + _provenance._REFRESH_STATUS_SUFFIX
-    if not os.path.exists(marker):
-        return None
-    try:
-        with open(marker, "r", encoding="utf-8") as fh:
-            return json.load(fh)
-    except (OSError, json.JSONDecodeError) as ex:
-        # A marker we cannot read is still a marker: fail UNVERIFIABLE, never silently healthy.
-        return {"kind": "unreadable-marker", "detail": str(ex), "failed_at_iso": "?"}
+    if os.path.exists(marker):
+        return {"kind": "unreadable-marker", "failed_at_iso": "?",
+                "detail": "marker present but refresh_failure() returned None (unparseable)"}
+    return None
+
+
+def _substrate_unverifiable(before: dict, after: dict) -> dict:
+    """The substrate verdict across the whole run. Returns the failure marker if EITHER the pre-check or the
+    post-check saw one, else None.
+
+    WHY BOTH ENDS (a TOCTOU the pre-check alone does not close): the pre-check catches a PRIOR failed rebuild,
+    because the marker was written by the earlier failing call. But _canonical.ensure_fresh runs INSIDE each
+    kuzu_cli invocation, so a rebuild can fail DURING this run -- the marker is written while our queries
+    execute, our pre-check has already passed, and we would report GREEN on the stale graph we just read.
+    3.0.0_SA_CVO~B has folded rc!=2 in as a PRECONDITION of their membership-injection cert, so this window
+    sits directly beneath their bar. Re-check after the queries; either end failing is UNVERIFIABLE.
+    """
+    return before or after or None
 
 
 def run_coverage_check() -> int:
@@ -445,16 +469,19 @@ def run_coverage_check() -> int:
     print("NFRA_EDGES P3 -- (a) SET-COMPLETENESS coverage-check (post-derive, live canonical)")
     print("=" * 88)
 
-    # SUBSTRATE GUARD, before any query: a served-stale canonical makes this check vacuous, not clean.
-    rf = canonical_refresh_failure()
-    if rf:
-        print("  UNVERIFIABLE (substrate): the canonical DB is SERVED-STALE -- its last refresh FAILED.")
+    def _unverifiable(rf: dict, when: str) -> int:
+        print("  UNVERIFIABLE (substrate, %s): the canonical DB is SERVED-STALE -- a refresh FAILED." % when)
         print("    failed_at=%s kind=%s detail=%s"
               % (rf.get("failed_at_iso", "?"), rf.get("kind", "?"), str(rf.get("detail", ""))[:120]))
-        print("  This is NOT a pass. The live recompute would read a stale graph, the frozen contract would")
-        print("  match that stale selection, and missing_from_contract=0 would report a VACUOUS GREEN.")
+        print("  This is NOT a pass. The live recompute reads a stale graph, the frozen contract matches that")
+        print("  stale selection, and missing_from_contract=0 would report a VACUOUS GREEN.")
         print("  Heal the canonical (0.7.0_AE), then re-run. Marker: _provenance._REFRESH_STATUS_SUFFIX.")
         return 2
+
+    # SUBSTRATE GUARD (pre): a served-stale canonical makes this check vacuous, not clean.
+    rf_before = canonical_refresh_failure()
+    if rf_before:
+        return _unverifiable(rf_before, "before the queries")
 
     try:
         ok, missing, absent = live_coverage_check()
@@ -462,6 +489,11 @@ def run_coverage_check() -> int:
         print("  UNVERIFIABLE (graph): %s" % ex)
         print("  NOT a pass. A silent [] here would read as 'nothing missing' -- a vacuous GREEN.")
         return 2
+
+    # SUBSTRATE GUARD (post): a rebuild may have FAILED while we were querying. Closes the TOCTOU window.
+    rf_after = canonical_refresh_failure()
+    if _substrate_unverifiable(rf_before, rf_after):
+        return _unverifiable(rf_after, "DURING the queries -- the graph we just read was stale")
     print("  c3_subgraph_edges_missing_from_contract = %d   (FAIL LOUD if > 0)" % len(missing))
     print("  contract_edges_absent_from_live          = %d   (reported; already loud as edges_unresolved)"
           % len(absent))
@@ -936,6 +968,17 @@ def self_test() -> int:
     # The suffix is single-sourced from _provenance, not hardcoded (AE's writer/reader no-drift contract).
     chk("29 substrate guard: the marker suffix is single-sourced from _provenance._REFRESH_STATUS_SUFFIX",
         _prov._REFRESH_STATUS_SUFFIX.endswith("_refresh_status.json"))
+
+    # TOCTOU: the pre-check catches a PRIOR failure; a rebuild can fail DURING the run (ensure_fresh lives
+    # inside each kuzu_cli call). CVO~B folded rc!=2 in as a cert PRECONDITION, so this window sits under
+    # their bar. Verdict must go UNVERIFIABLE if EITHER end saw a marker.
+    _fail = {"kind": "rebuild-failed", "failed_at_iso": "t", "detail": "d"}
+    chk("30 substrate guard TOCTOU: a failure appearing only AFTER the queries (mid-run rebuild failure) "
+        "still makes the run UNVERIFIABLE", _substrate_unverifiable(None, _fail) is not None)
+    chk("31 substrate guard TOCTOU: a failure seen only BEFORE still bites",
+        _substrate_unverifiable(_fail, None) is not None)
+    chk("32 substrate guard: a clean run (no marker at either end) is NOT flagged (no false-fire)",
+        _substrate_unverifiable(None, None) is None)
 
     import shutil as _shutil
     _shutil.rmtree(_tmpdir, ignore_errors=True)
