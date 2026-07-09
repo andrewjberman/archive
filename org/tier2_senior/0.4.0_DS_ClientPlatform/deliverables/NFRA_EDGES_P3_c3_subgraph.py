@@ -315,6 +315,23 @@ SELECTION_RULE = {
     "predicate": "edge_type in {FLOWS_TO, RENDERS} AND both endpoints resolve to C0/C1 constituents of the "
                  "C3's member motifs (a one-endpoint-inside edge is a BOUNDARY edge: excluded + counted)",
     "compare_on": ["src", "dst", "edge_type", "props"],
+    # THE PROXY-INPUT TRAP (0.7.0_AE asked exactly this at build-planning; CTO 112711Z named the risk).
+    # The "inside" set MUST be recomputed from the LIVE detector queries. It must NOT be obtained by walking
+    # the C3's materialized CONTAINS subtree: those CONTAINS rows are themselves materialized from the FROZEN
+    # spec (derive_runner.py:1383 `for se in spec_edges`), so using them to define "inside" makes this
+    # coverage-check inherit the very freeze it exists to detect. A new estate node that SHOULD be a
+    # constituent would not be "inside", its edges would not qualify, missing_from_contract would be empty,
+    # and the check would PASS SILENTLY on a proxy input -- a check that cannot fire on the case it exists for.
+    "constituent_resolution": "RECOMPUTE live: run each member detector's recurrence + expansion queries "
+                              "against the live graph and take the resulting C0/C1 constituent ids. Do NOT "
+                              "walk the materialized CONTAINS subtree (it is frozen-spec-derived).",
+    "constituent_resolution_MUST_NOT": "walk the C3's CONTAINS edges in the derive graph -- they are formed "
+                                       "from the frozen motif_c2c3_materialize.json (derive_runner.py:1383), "
+                                       "so the inside-set would be frozen and the coverage-check vacuous.",
+    "faithfulness_exercise": "The self-test proves the check's LOGIC (it is fed live_edges directly). It does "
+                             "NOT prove the derive-time recompute is FAITHFUL. Only a live derive-run that "
+                             "injects a genuinely-new qualifying ESTATE edge proves that -- CVO~B's live "
+                             "round-trip, a hard condition on the materialize deploy-gate (CTO 112711Z).",
     "fail_loud_when": "missing_from_contract > 0  (a NEW qualifying estate edge the frozen list would have "
                       "silently dropped)",
     "emit_counter": "c3_subgraph_edges_missing_from_contract  (belongs in the R3-verify beside edges_unresolved=0)",
