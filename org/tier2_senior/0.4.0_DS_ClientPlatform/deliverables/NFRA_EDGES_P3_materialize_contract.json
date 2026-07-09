@@ -225,10 +225,13 @@
     ],
     "constituent_resolution": "RECOMPUTE live: run each member detector's recurrence + expansion queries against the live graph and take the resulting C0/C1 constituent ids. Do NOT walk the materialized CONTAINS subtree (it is frozen-spec-derived).",
     "constituent_resolution_MUST_NOT": "walk the C3's CONTAINS edges in the derive graph -- they are formed from the frozen motif_c2c3_materialize.json (derive_runner.py:1383), so the inside-set would be frozen and the coverage-check vacuous.",
-    "description": "Recompute the intra-system edge set from the LIVE graph at derive time, then run subgraph_coverage_check against the frozen contract. FAIL LOUD on any live qualifying edge absent from the contract.",
+    "description": "Recompute the intra-system edge set from the LIVE graph, then run subgraph_coverage_check against the frozen contract. FAIL LOUD on any live qualifying edge absent from the contract.",
+    "detects_not_prevents": "A failed check fails the R3 leg -> the deploy fails -> the never-half-land ledger stays OPEN -> rollback. Set-incompleteness is a data-coverage defect, not a corruption, so detect-and-roll-back is the right instrument and the ledger already provides it.",
     "emit_counter": "c3_subgraph_edges_missing_from_contract  (belongs in the R3-verify beside edges_unresolved=0)",
+    "executor": "python org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/NFRA_EDGES_P3_c3_subgraph.py --coverage-check   ->  rc=0 clean | rc=1 FAIL LOUD | rc=2 UNVERIFIABLE",
     "fail_loud_when": "missing_from_contract > 0  (a NEW qualifying estate edge the frozen list would have silently dropped)",
     "faithfulness_exercise": "The self-test proves the check's LOGIC (it is fed live_edges directly). It does NOT prove the derive-time recompute is FAITHFUL. Only a live derive-run that injects a genuinely-new qualifying ESTATE edge proves that -- CVO~B's live round-trip, a hard condition on the materialize deploy-gate (CTO 112711Z).",
+    "no_reimplementation": "AE imports nothing into the derive image and re-implements nothing. The entrypoint runs the SAME live detector queries through the SAME P1M/P1E code as the analysis-side emission -- one builder, so the recompute cannot drift into a second proxy (AE + COO~B's same-source-of-truth condition).",
     "predicate": "edge_type in {FLOWS_TO, RENDERS} AND both endpoints resolve to C0/C1 constituents of the C3's member motifs (a one-endpoint-inside edge is a BOUNDARY edge: excluded + counted)",
     "projection": {
       "apply_to": "BOTH sides before comparison (project_edge_props; idempotent, so contract records pass through unchanged)",
@@ -248,6 +251,7 @@
       "layer_is_not_identity": "layer is a SET-field in kuzu_incremental_refresh._cur_edges {(src,dst,edge_type,props): (layer, snapshot_ts)}, NOT part of the identity tuple. So aws-vs-semctl does not distinguish edges; only props does."
     },
     "root_fix_routed": "COO~B -> CTO, estate-wide: derive the selection live at derive time and demote the frozen contract to an R3 expected-value FIXTURE. The C2/C3 CONTAINS materialize has this same hole today, so it is a pattern change, not a P3 bolt-on.",
+    "run_at": "POST-DERIVE, in the existing R3-verify leg (the comp-kuzu round-trip), against the freshly loaded canonical -- NOT inside the derive ingest.",
     "why": "ingest_c2c3_motif_producer replays a frozen list with no live discovery: deletions are loud, ADDITIONS are silent. AC5 covers per-entity freshness, not set-completeness."
   },
   "snapshot_ts": "NULL BY DESIGN -- STAMP AT DERIVE TIME",

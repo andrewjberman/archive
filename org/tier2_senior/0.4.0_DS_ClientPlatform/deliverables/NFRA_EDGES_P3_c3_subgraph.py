@@ -348,10 +348,90 @@ def subgraph_coverage_check(contract_edges: list, live_edges: list) -> tuple:
     return (len(missing_from_contract) == 0), missing_from_contract, absent_from_live
 
 
+def live_coverage_check(contract_path: str = None) -> tuple:
+    """THE (a) CHECK, AS AE ACTUALLY RUNS IT. One entrypoint, one builder, zero re-implementation.
+
+    WHERE THIS RUNS -- and this CORRECTS my own earlier spec (`run_at: derive time, before materialize`),
+    which was unimplementable on this substrate. Grounded: derive_runner imports kuzu NOWHERE; its ingest
+    operates over the in-memory `graph` dict; the Kuzu DB only exists AFTER kuzu_nessie_load reads Iceberg
+    post-Nessie-commit. The D1-D7 detectors are Cypher over CloudNode/CloudEdge, so they CANNOT execute at
+    derive time. The check therefore belongs in AE's existing POST-DERIVE R3-VERIFY leg (the "comp-kuzu
+    round-trip" leg of the deploy ledger), against the freshly-loaded canonical.
+
+    CONSEQUENCE, stated honestly: the check DETECTS rather than PREVENTS. That is correct here and not a
+    weakening -- a failed R3 leg fails the deploy, the never-half-land ledger stays OPEN, and the deploy rolls
+    back. Set-incompleteness is a data-coverage defect, not a corruption; detect-and-roll-back is the right
+    instrument, and it is the instrument the ledger already provides.
+
+    WHY THIS ANSWERS "the recompute must BE build_motif, not a drifting re-impl" (AE + COO~B): it literally is.
+    This function runs the SAME live detector queries through the SAME P1M/P1E code the analysis-side emission
+    used. AE imports nothing into the derive image and re-implements nothing. AE's R3 leg is one call:
+        python NFRA_EDGES_P3_c3_subgraph.py --coverage-check     # rc=0 clean, rc=1 FAIL LOUD
+
+    Satisfies CTO's "LIVE ALL THE WAY DOWN": there is no frozen branch -- the constituents come from the live
+    detector recompute, and the edges from the live expansion queries. Fail-loud on GraphUnavailable, never a
+    silent [] (which would read as "nothing missing" -- a vacuous pass).
+    """
+    path = contract_path or os.path.join(_HERE, "NFRA_EDGES_P3_materialize_contract.json")
+    with open(path, "r", encoding="utf-8") as fh:
+        contract = json.load(fh)
+
+    ts = derive_batch_ts()
+    motifs, all_edges = [], {}
+    for spec in P1M.CATALOG:                       # LIVE detector recompute -- no frozen branch
+        motif, edges, _recs, rec = P1E.build_motif_with_edges(spec, ts)
+        if rec < P1M.AC3_THRESHOLD:
+            continue
+        motifs.append(motif)
+        all_edges[motif.nid] = edges
+
+    components, _evidence, _edge_only = c3_emergence(motifs)
+    live_records: list = []
+    for comp in components:
+        if len(comp) < 2:
+            continue
+        theme = "firm-conditional-display" if any("firm" in m.nid or "display" in m.nid for m in comp) \
+            else "shared-sink-cluster"
+        system = Node(settled_system_node_id(theme, [m.nid for m in comp]), "C3", "EmergentSystem", theme,
+                      rule="coverage-check", children=list(comp))
+        reified = [e for m in comp for e in all_edges.get(m.nid, [])]
+        seen, uniq = set(), []
+        for e in reified:
+            if e.nid not in seen:
+                seen.add(e.nid)
+                uniq.append(e)
+        intra, _boundary, _outside = intra_system_edges(system, uniq)
+        live_records.extend(to_intra_edge_record(e, ts) for e in intra)
+
+    return subgraph_coverage_check(contract.get("intra_system_edges", []), live_records)
+
+
+def run_coverage_check() -> int:
+    """AE's R3-verify leg. rc=0 clean; rc=1 FAIL LOUD (missing_from_contract > 0); rc=2 UNVERIFIABLE."""
+    print("=" * 88)
+    print("NFRA_EDGES P3 -- (a) SET-COMPLETENESS coverage-check (post-derive, live canonical)")
+    print("=" * 88)
+    try:
+        ok, missing, absent = live_coverage_check()
+    except P1M.GraphUnavailable as ex:
+        print("  UNVERIFIABLE (graph): %s" % ex)
+        print("  NOT a pass. A silent [] here would read as 'nothing missing' -- a vacuous GREEN.")
+        return 2
+    print("  c3_subgraph_edges_missing_from_contract = %d   (FAIL LOUD if > 0)" % len(missing))
+    print("  contract_edges_absent_from_live          = %d   (reported; already loud as edges_unresolved)"
+          % len(absent))
+    for m in missing[:5]:
+        print("    MISSING (live qualifying edge absent from the frozen contract): %s" % (m,))
+    for a in absent[:5]:
+        print("    absent-from-live: %s" % (a,))
+    print("\n  COVERAGE: %s" % ("PASS -- the frozen contract covers the live selection" if ok
+                                else "FAIL LOUD -- the frozen contract UNDER-COVERS the live estate"))
+    return 0 if ok else 1
+
+
 SELECTION_RULE = {
-    "description": "Recompute the intra-system edge set from the LIVE graph at derive time, then run "
-                   "subgraph_coverage_check against the frozen contract. FAIL LOUD on any live qualifying "
-                   "edge absent from the contract.",
+    "description": "Recompute the intra-system edge set from the LIVE graph, then run subgraph_coverage_check "
+                   "against the frozen contract. FAIL LOUD on any live qualifying edge absent from the contract.",
     "predicate": "edge_type in {FLOWS_TO, RENDERS} AND both endpoints resolve to C0/C1 constituents of the "
                  "C3's member motifs (a one-endpoint-inside edge is a BOUNDARY edge: excluded + counted)",
     "compare_on": ["src", "dst", "edge_type", "props"],
@@ -404,6 +484,22 @@ SELECTION_RULE = {
     "fail_loud_when": "missing_from_contract > 0  (a NEW qualifying estate edge the frozen list would have "
                       "silently dropped)",
     "emit_counter": "c3_subgraph_edges_missing_from_contract  (belongs in the R3-verify beside edges_unresolved=0)",
+    # CORRECTED (my own earlier spec said "derive time, before materialize" -- unimplementable on this
+    # substrate). derive_runner imports kuzu NOWHERE; the ingest works over the in-memory graph dict; Kuzu only
+    # exists after kuzu_nessie_load reads Iceberg post-commit. The D1-D7 detectors are Cypher over
+    # CloudNode/CloudEdge, so they cannot execute at derive time.
+    "run_at": "POST-DERIVE, in the existing R3-verify leg (the comp-kuzu round-trip), against the freshly "
+              "loaded canonical -- NOT inside the derive ingest.",
+    "executor": "python org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/NFRA_EDGES_P3_c3_subgraph.py "
+                "--coverage-check   ->  rc=0 clean | rc=1 FAIL LOUD | rc=2 UNVERIFIABLE",
+    "no_reimplementation": "AE imports nothing into the derive image and re-implements nothing. The entrypoint "
+                           "runs the SAME live detector queries through the SAME P1M/P1E code as the "
+                           "analysis-side emission -- one builder, so the recompute cannot drift into a "
+                           "second proxy (AE + COO~B's same-source-of-truth condition).",
+    "detects_not_prevents": "A failed check fails the R3 leg -> the deploy fails -> the never-half-land ledger "
+                            "stays OPEN -> rollback. Set-incompleteness is a data-coverage defect, not a "
+                            "corruption, so detect-and-roll-back is the right instrument and the ledger already "
+                            "provides it.",
     "why": "ingest_c2c3_motif_producer replays a frozen list with no live discovery: deletions are loud, "
            "ADDITIONS are silent. AC5 covers per-entity freshness, not set-completeness.",
     "root_fix_routed": "COO~B -> CTO, estate-wide: derive the selection live at derive time and demote the "
@@ -761,6 +857,8 @@ def main() -> int:
     args = sys.argv[1:]
     if "--self-test" in args:
         return self_test()
+    if "--coverage-check" in args:      # AE's R3-verify leg (post-derive, live canonical)
+        return run_coverage_check()
     return run_live(emit_contract="--contract" in args)
 
 
