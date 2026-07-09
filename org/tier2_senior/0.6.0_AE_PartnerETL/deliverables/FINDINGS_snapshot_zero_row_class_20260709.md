@@ -24,6 +24,21 @@ Tonight's instances, all on the same data path:
 | 3 | `sorted(keys)[-1]` | the newest **stub** | newest name, not newest data |
 | 4 | `row_count > 0` | 11,754 rows at `nzf = 0.0000` | rows exist, values do not |
 | 5 | a latched CloudWatch ALARM | silence | cannot re-notify; silence is the rail, not the state |
+| 6 | `cloudtrail lookup-events` on the PutObject | an empty result | the `opal-data-bd` data-event selector is `readWriteType = ReadOnly` — the write was **never captured**, not "never happened" |
+| 7 | `grep -c '\`'` on a commit message | `0` | never written, **or written and executed away** |
+| 8 | `gap_pct` inside its historical band | two operands degrading together | a ratio is stable while both sides die (§2) |
+| 9 | a `SKIP` from a guard that fails closed | total silence | **a control that fails closed and silently is indistinguishable from a control that never ran** |
+
+**The discriminating question is never "did I see nothing." It is "would I have seen something, had there been
+something to see?"** Every instrument used below was given a positive control before it was allowed to report.
+
+**And the corresponding test on any proposed REMEDY** (CTO 210135Z, adopted as a standing check):
+
+> **The locally-correct fix is often the destructive one. The tell: it turns a red thing green without changing
+> the underlying truth.**
+
+Two proposals tonight failed that test — reaping `bd-allocation-processor` (§4), and repointing the `C_02` picker
+at the latest non-empty partition (§3). Both would have turned a red signal green. Neither moves the truth.
 
 ---
 
@@ -92,9 +107,47 @@ from being **written** at all.
 **enforced nowhere**. The defect and its detector are three lines apart.
 
 ### Proposed change
-`|gap_pct|` beyond a threshold → **SKIP + alarm**, not `log()`. Hold last-good. This is the guard that makes the
-whole class impossible, and it is independent of any lag value. CTO asked for this written up tonight even if it
-lands next week.
+`|gap_pct|` beyond a **calibrated, signed** threshold → **SKIP + alarm**, not `log()`. Hold last-good.
+
+### RE-SCOPED (CTO 210135Z, after I calibrated it): `gap_pct` is a CERT-QUALITY guard. It is **not** a partial detector.
+
+I built the 02:30Z harness, dry-ran it, and it flagged the last **healthy** cert as understated. So I measured the
+distribution before relying on it:
+
+```
+  n = 70 certs      min = -3.0971%     max = +11.6661%     median = +2.2219%
+  2026-06-11..06-18 :  +1.32% .. +1.65%     (scrape era)
+  2026-06-24..07-02 :  +5.42% .. +11.67%    (recent, HEALTHY)
+```
+
+Three reasons it cannot be the partial detector:
+
+1. **A symmetric `|gap_pct| > 2%` band false-alarms on every recent healthy cert.** I picked 2% from nothing — a
+   threshold sized on no baseline. The same error as the flat `nzf >= 0.95`, repeated ninety minutes later on a
+   different quantity. *Knowing the lesson did not prevent it. Calibrating did.*
+2. **The sign is backwards.** A partial *understates* `certified_aua` → `gap_pct` goes strongly **negative**.
+   Healthy certs are strongly **positive**, and the historical floor already reaches **-3.10%**, so a mild partial
+   lands inside the known-good band and passes.
+3. **The fatal one — it is measuring the wrong operand:**
+   ```
+     06-18  certified 1,853,454,815.85   gold 1,829,248,213.41   +1.32%
+     06-24  certified 1,815,151,730.66   gold 1,714,581,760.81   +5.87%
+            certified barely moved.  GOLD FELL ~$115M.
+   ```
+   The gap widened because the *other* operand degraded. And the two operands **share an upstream failure**: the
+   same 0-row stubs null `account_type` in `A_00`'s `accounts_dimension`, which feeds **both** `C_02`'s liability
+   exclusion **and** the gold side.
+
+> **GENERAL FORM (bank this): a comparison is only a detector if its operands fail INDEPENDENTLY.**
+> Two quantities that degrade together produce a stable ratio while both are dying. **The gap looks healthiest
+> precisely when the failure is total.**
+
+**The 02:30Z primary is therefore the direct `nzf` + `sum` read on the landed `silver/allocations/{data_date}.parquet`**
+against the tenant envelope (§5): it binds the property the cert depends on, it shares no operand with gold, and it
+is the only instrument here with a validated positive control. `gap_pct` is recorded, never decisive.
+
+COO's catch stands — a computed-and-discarded quantity in an artifact *is* a finding. **Re-scope its claim, do not
+discard it.** It catches a cert diverging from gold for *any* reason; it never catches a partial.
 
 ---
 
@@ -134,14 +187,101 @@ Both branches, computed on the real bytes:
 
 `1,844,022,461.17` is penny-identical to `0.4.0_DS~B`'s independent C_02 simulation.
 
-### Proposed change
-`:310` must assert **`row_count > 0`**, not `exists`. And the selection at `:306` should resolve to the latest
-**non-empty** allocations partition rather than assume `data_date`'s partition has rows — the same "latest
-non-empty" fix DS already has open for `A_00` (`A_00:337 latest_key = sorted(alloc_keys)[-1]`, which today selects
-the 07-09 stub and nulls `account_type`).
+### Proposed change — and the remedy is NOT the same as `A_00`'s
+
+`:310` must assert **`row_count > 0`**, not `exists`. But what it does on failure differs by artifact kind, and
+this distinction is load-bearing (CTO ruling 204424Z, correcting my first proposal):
+
+> **For an ENRICHMENT: substitute, with provenance and a max-age bound.**
+> **For a DATED CERTIFICATION: ABSTAIN + alarm. A cert may never borrow a value from a date it does not claim.**
+
+- `A_00` enriches a **dimension**. Substituting the latest non-empty allocations partition — carrying provenance
+  and bounded by a max age — is acceptable, because an enrichment asserts no date.
+  (`A_00:337 latest_key = sorted(alloc_keys)[-1]` today selects the 07-09 stub and nulls `account_type`.)
+- `C_02` writes a **dated certification**: *"as of `data_date`, certified AUA is X."* Silently sourcing 07-08's
+  allocations while `data_date` reads 07-07 would emit a cert that is **internally false** — right number, wrong
+  date — and it would pass every check we have. So `C_02` must **ABSTAIN + alarm**, never substitute.
+
+The real defect is upstream: `data_date` (the performance frontier) walked into a stub range on 07-03 and never
+came out. **That is the thing to fix; the abstain is what makes it visible instead of silent.**
+
+### CORRECTION (MSTR 205418Z, source-refuted by DS `b8ee3a08a`) — and it is better than what I wrote
+
+`C_02:331`'s `certified_aua <= 0` floor **already fires**, and its log line already prints the row count. So
+**`C_02` fails closed. It is the guard working, not the guard missing** — and fixing the `:310` proxy un-freezes
+nothing.
+
+Worse, the "obvious" repair is destructive. Repointing the picker at the latest **non-empty** partition selects
+07-08 (6,870 rows) while `gold_aua` still derives from 07-07 — `:306-307` co-derive both. A cert lands, the freeze
+visibly ends, and **the artifact keyed `{07-07}` carries a 07-08 number. It lies about its own as-of.**
+(And the `+$6,862,595.49` is **real market flow**, not an error being corrected.)
+
+That is the same species as reaping `bd-allocation-processor`: **the locally-correct fix is the destructive one.
+The tell, both times: the "fix" turns a red thing green without changing the underlying truth.**
+
+**THE REAL DEFECT: the SKIP is silent and unbounded. Nothing watches for cert ABSENCE.**
+
+Seven days passed with no certification written and no signal, because `data_as_of` kept advancing while only the
+*value* was dead. The system correctly refused to certify garbage — and then said nothing about refusing, for a
+week, on a client-facing number.
+
+> **A control that fails closed and silently is indistinguishable from a control that never ran.**
+
+This is the session's through-line arriving from the opposite direction: not an instrument reporting what it did
+not measure, but an instrument measuring correctly and **reporting nothing at all.**
+
+**So the watcher goes on the guard FIRING, not on the picker:**
+```
+  alarm when: no gold/validation/aua_certification/{d}.json exists for the current performance frontier
+              (i.e. C_02 ran and SKIPped) for N consecutive runs
+  the SKIP must be LOUD and BOUNDED: emit a metric/alarm on the skip path itself, not only a log line
+  C_02:310 -> row_count > 0 else ABSTAIN + ALARM (the abstain is what makes the refusal visible)
+```
+Cert **absence** is the signal. It was available for seven days and nobody was listening for it.
 
 **Consequence if unfixed:** the un-freeze fires **iff** the chain lands `data_date` on exactly 2026-07-08. One day
 either side is a stub. Tomorrow `data_date` is 07-09 → stub → **the freeze returns**.
+
+### Where `data_date` lands is MEASURABLE, not a guess — and the answer inverts the intuition
+
+`data_date` is txn-anchored: `A_03:1545 global_end_date = unit_events['trade_date'].max()`. Confirmed on live data
+— `trade_date.max()` today is **2026-07-07**, and `client_performance.date.max()` is **2026-07-07**, exactly.
+
+The lag from partition-date to `trade_date.max()` **changed regime**, so extrapolating it is unsafe:
+
+```
+  06-29..07-06 partitions (scrape era) : trade_date.max() == partition date   (lag 0)
+  07-08, 07-09 partitions (REST era)   : trade_date.max() == partition - 2    (lag 2, n=2)
+  07-07 partition                      : 0 ROWS (empty)
+```
+
+So instead of extrapolating from n=2, ask BD (read-only, single-day `Custom` windows ≤3d to avoid the 14d
+heavy-query error), 49F tenant, measured 2026-07-09T21:00Z:
+
+```
+  transactions trade_date 2026-07-08 : rows = 4,204  ->  POSTED
+  transactions trade_date 2026-07-09 : rows =     0  ->  NOT POSTED
+```
+
+⇒ tonight's pull sees `trade_date.max() = 07-08` ⇒ `perf.date.max() = 07-08` ⇒ `C_02` reads the **real** partition
+⇒ **the un-freeze fires.**
+
+**THE INVERSION — this is the state to guard:**
+
+| BD posts 07-09 txns? | allocations 07-09 | `perf` lands | `C_02` reads | outcome |
+|---|---|---|---|---|
+| **NO** (state at 21:00Z) | n/a | 07-08 | REAL, 6,870 rows | **UN-FREEZE** |
+| **YES** | 0-row STUB (runner REJECTs it at `:711`) | 07-09 | the STUB | SKIP → **STILL FROZEN** |
+
+The runner's reject guard means allocations 07-09 **cannot** land tonight. So if BD posts 07-09 **transactions**
+before 02:00Z, the performance frontier steps onto a date whose allocations partition is a stub, and the freeze
+holds.
+
+> **More data breaks the un-freeze.** The transaction feed advancing is normally the healthy signal; tonight it is
+> the failure mode. The observation that means "progress" and the observation that means "regression" are the same
+> observation.
+
+Same ET root, wearing a different coefficient: a 00:00Z pull asks BD for a date that has not posted in ET.
 
 ---
 
