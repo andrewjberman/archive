@@ -417,6 +417,71 @@ canonical converter is permanently one day off for snapshot tables whenever the 
 
 ---
 
+## 4b. DETECTOR-LAYER AUTOPSY — why 18 days went undetected, and why tonight's reject is quiet
+
+`_ingest_one:712-716` promises that on a REJECT *"the per-table freshness/absence alarm is the (loud) signal."*
+**On the cot plane that alarm cannot produce one.** Three layers report healthy on a dead table.
+
+### (i) The alarm measures the filename
+`bd-cot-freshness-probe/lambda_function.py:211-220` resolves `max_as_of` from the object's **key name**, never
+from row count:
+```
+  mobj = _DATE_RE.search(key.rsplit("/",1)[-1]) or _DATE_RE.search(key)
+  as_of = date.fromisoformat(mobj.group(1))
+  if max_as_of is None or as_of > max_as_of: max_as_of = as_of
+```
+Measured, live:
+```
+  cot silver/allocations
+    newest partition BY NAME  (what the probe reads) : 2026-07-09   <- a 0-ROW STUB
+    newest partition WITH ROWS (the truth)           : 2026-06-18   (683 rows)
+
+    TradingDayLag REPORTED    (filename proxy)  =  0    threshold >2  -> alarm OK
+    TradingDayLag CONTENT-BOUND (bd's fix)      = 15    -> ALARM ~13 trading days ago
+```
+`bd-cot-silver-stale-allocations` and `-unrealized` are in state **OK**, wired to `opal-critical-surface-alerts`,
+on a table that has produced nothing real since **June 18**.
+
+### (ii) The fix exists and shipped to one plane
+```
+  bd-49f-freshness-probe   deployed 2026-07-09T09:58:34Z   has _num_rows_from_footer (CONTENT ASSERTION)
+  bd-cot-freshness-probe   deployed 2026-06-29T13:26:53Z   filename proxy
+```
+The bd probe's own header, written today, about bd:
+> *"A 0-row stub partition NAMED silver/allocations/2026-07-09.parquet therefore reported TradingDayLag = 0 → the
+> bd-49f-silver-stale-* alarms read GREEN for FIVE straight days… **A monitor bound to an existence proxy does not
+> merely fail to detect the problem, it manufactures confidence that there is none.**"*
+
+That sentence is **currently true of cot**. The remediation for the 5-day bd freeze was applied to bd; the plane
+with the 18-day freeze still runs the old probe. Nobody ported it.
+
+### (iii) The silver layer reports success on zero work
+`cot_silver_merge.py:493-496`, its own comment:
+```
+  if not target_files:
+      print("No new or re-landed files to process")
+      _mark_table_run_complete(table, manifest)   # CHAINFIX: frozen no-op = successful run
+      return
+```
+With the guard live, allocations bronze stops landing → silver finds no files → **marks the run complete** →
+`last_successful_run` advances → the silver sentinel emits → gold runs. **`failures == 0` because there was nothing
+to attempt.** *Everything processed* and *nothing was there* are the same signal — the null again, in the success
+path this time. It is why the stub era and the guard era look identical downstream.
+
+### Consequence for the record
+**Tonight's reject is loud in exactly one place: the bronze run log**
+(`s3://opal-data-cot/logs/cot-exporter/bronze-run/`, validated end-to-end — it lands ~70s after run start and
+demonstrably carries a `REJECT:` line). Everywhere else reads normal.
+
+> **cot's alarm reading GREEN tomorrow is not evidence the reject worked. It is evidence the probe is still
+> measuring the filename. Nothing may be closed on cot's alarm state.**
+
+Remediation (queued, **not** inside the window — it is a Lambda deploy on the plane whose runner fires at 02:00Z,
+and it would page critical-surface truthfully for the first time in three weeks): port
+`_num_rows_from_footer` from `bd-49f-freshness-probe` to `bd-cot-freshness-probe`.
+
+---
+
 ## 5. Threshold doctrine: measure NORMAL, not ABNORMAL
 
 **CTO ruling 202240Z**, replacing a flat `nzf >= 0.95`:
