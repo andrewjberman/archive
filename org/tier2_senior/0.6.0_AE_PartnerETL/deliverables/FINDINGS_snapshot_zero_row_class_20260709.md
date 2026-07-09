@@ -523,6 +523,54 @@ and one caught by the **sum** co-signal alone while `nzf` passed. Two independen
 extrapolated from the normal side. Enough to establish that 0.95 is loose; not enough to certify any specific
 replacement. Sizing it properly needs a real partial or a vendor statement on settlement semantics.
 
+### 5b. AN ENVELOPE IS ONLY VALID ON THE LAYER IT WAS MEASURED ON
+
+The envelope above is measured on the **bronze xlsx**. The 02:30Z primary check reads the **landed silver
+parquet**. They are not the same grain — bronze carries multiple allocation rows per account:
+
+```
+                 BRONZE (measured)               SILVER (what the check reads)
+  cot  rows      1,432 - 1,441                    666 - 683
+       sum       $814.5M - $818.5M                $390.1M - $398.1M            2.09x
+  bd   rows      32,739 - 32,851                  6,828 - 6,870
+       sum       $9.608B - $9.672B                $1.825B - $1.841B            5.25x
+```
+
+`nzf` **transferred** (dedup preserves the zero-fraction: bd bronze 0.9727–0.9736 vs silver 0.9733–0.9742).
+`sum` **did not**, by a factor of five.
+
+Negative control — the bronze band applied to bd's **known-good** 07-08 silver partition:
+```
+  rows=6,870  nzf=0.9734  sum=1,840,781,732.39   dev 80.87% vs the bronze median
+  -> ENVELOPE FAIL -> "DEPARTURE FROM NORMAL" -> ABORT/DISARM bd lag=1
+```
+A perfectly healthy partition, on the **client-facing** plane, failing by 81%. And because the doctrine is *bias
+hard toward abort*, that abort would have **disarmed bd's `lag=1` on the one night the un-freeze was expected**.
+The asymmetry designed to protect the number would have destroyed the outcome — on a measurement-layer error.
+
+> **An envelope is only valid on the layer it was measured on. Ratios travel across a grain boundary; totals do
+> not.** A threshold carried across a boundary reports confidently on nothing.
+
+Same family as `gap_pct` across two co-dependent operands, and as a modal lag computed across a scrape/REST regime
+boundary. **The probe is not exempt from the disease it probes for.**
+
+**SILVER envelope, validated in both directions before it was allowed to govern anything:**
+```
+  cot   nzf_min 0.9935   sum_median   395,474,627.49   rows_min   600
+  bd    nzf_min 0.9683   sum_median 1,833,937,950.47   rows_min 6,000
+  positive control : 7 of 7 known-good silver days PASS (max deviation 1.36%)
+  negative controls: bronze band on a healthy silver day -> FAIL (80.87%);
+                     0-row stub -> caught by the ROW check before the value check is reached
+```
+Cross-check: bd silver 07-08 sums to `1,840,781,732.39`, penny-identical to DS~B's independently measured figure;
+`certified_aua` is *higher* (`1,844,022,461.17`) because the liability exclusion removes negative
+`CreditCard`/`Mortgage`/`Loans` values. Three numbers, mutually consistent, three routes.
+
+Hardening folded into the checker rather than left as a lesson: it **asserts `account_market_value` exists** before
+trusting any value (*a missing column and a zero column print the same number* — §0 null #10, this author's own),
+and adds `rows_min` as a third term, because a partition where `nzf` and `sum` scale down together is still a
+departure.
+
 ---
 
 ## 6. Instrument discipline that produced the above
