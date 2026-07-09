@@ -79,3 +79,48 @@ DS commit cycle per Rule 13 (ds-commit-gate; comp-pipescript io on D_04/D_03/C_0
 **PART (a) LANDED+DEPLOYED 2026-07-07T18:18Z** (DS): Re-verified per Phase 1 (gate confirmed active at D_03:661 + D_04:1270, source-grounded). Andrew separately reconfirmed in-session: "any 'dormant' rules need to go immediately." Executed (a) cot-wide -- commit fa7792b70, deployed to s3://opal-data-cot/code/gold/, verified deployed-byte-identical (not rc=0). Rule 13 cot-scoped (49F/bd untouched). BONUS FINDING: swept the whole cot gold tree (not just the D_03/D_04 originally cited) and found a THIRD dormant-gate instance -- an inline reimplementation in C_06.client_mix_timeseries.py (feeding mix_daily_summary.json + client AUA timeseries) that the original reopen note missed. Fixed + dead apply_ap_gate/build_ap_last_seen/load_insurance_config defs removed from cot lib/exclusions.py (0 callers post-sweep) so it can't silently re-wire.
 SERVED-VERIFY PENDING: next natural cot gold chain run, 02:00 UTC nightly (no ad-hoc run per CLAUDE.md). Corrected AUA ~$365.7M expected vs ~$362.6M currently served. NOT claiming (a) fully closed until served-verified + co-verified with L1/L2 at L5.
 (b)/(c) IN PROGRESS: DS found a real new risk in (c) before touching cube-build logic -- a naive <$100 dust-floor flip could let a stale-cube ghost account (e.g. z0812933851: $0.04 silver / $2.26M stale cube) leak past bd_diminished's alloc>=$100 check, causing a NEW ~$2.26M overstatement. (c) needs a reconciliation-aware fix, not a 1-liner; grounding against live silver/allocations before proposing one. (c) still carries the Andrew-veto dust-floor flag either way.
+
+**(b)/(c) HARD-BLOCKED 2026-07-09T19:35Z (DS) -- the grounding source is CORRUPT, not merely stale.**
+(b) automates "snapshot-zeroed" as the exclusion predicate and (c)'s reconciliation-aware fix grounds
+against live `silver/allocations`. Both are UNSAFE to author right now: **`silver/allocations` has been
+0 rows since 2026-06-22.** Data-confirmed, not inferred:
+- `s3://opal-data-cot/silver/allocations/2026-07-09.parquet` -> **0 rows**, 59 cols (the constant
+  32,535 B is bare parquet schema).
+- Bronze source: `forwardfill_v2/allocations/ALLOCATIONS_DAILY_*.xlsx` = real 275-292 KB through
+  06-21, then constant ~4,303 B for 06-22..07-09 (18 days). Row-counted (openpyxl): 06-15 = 1,278
+  data rows; 07-08 = **0** data rows. `unrealized` likewise (~3,742 B). PERIOD tables (realized,
+  transactions) unaffected -- the exact SNAPSHOT-vs-PERIOD split `SNAPSHOT_TABLES` predicts.
+- Mechanism (source-confirmed): `a7a4d974c` (2026-06-22, DS) set the snapshot tables
+  `CurrentDay -> ("Custom",14)`. Under Custom, `_window_for` ends at `_as_of_for(table, run_date)`,
+  which with `BD_SNAPSHOT_ASOF_LAG_BDAYS` defaulted to 0 (cot never opts in) is `run_date` verbatim.
+  `run_date = args.date or _today_utc()` (cot_bronze_ingest.py:890/:264, wall-clock UTC) and the runner
+  fires 02:00Z = 22:00 ET the PRIOR day -> BD is asked for a point-in-time snapshot on a date that has
+  not begun in ET -> a well-formed header-only workbook. The prior `CurrentDay` masked this by ignoring
+  the dates. The 06-22 AUAFIX-DATEMODE-A traded a mis-stamp freeze for a zero-row freeze.
+
+**Why this BLOCKS (b) specifically, and why proceeding would be a severe error:** an automated
+snapshot-zeroed predicate reads "account absent from / $0 in the snapshot" as "money gone -> EXCLUDE."
+Against a 0-row allocations table, EVERY account is snapshot-zeroed -> the predicate would exclude the
+entire book, and it would do so *silently and plausibly*. Authoring or tuning it against this data would
+bake the freeze into the exclusion rule. Held until the forward path is unfrozen.
+
+**Design requirement this incident adds to (b) (carry into the implementation):** the snapshot-zeroed
+predicate MUST **fail-closed / ABSTAIN** when its snapshot source is empty or absent -- if the snapshot
+table has 0 rows, the predicate must refuse to classify and ALARM, never mark the book zeroed. An
+exclusion rule whose input can silently vanish needs a source-liveness precondition, exactly as
+`_export_has_data_rows` gives the bronze layer. This is the durable form of AC6(b).
+
+Escalated 2026-07-09T19:27-19:28Z to 0.6.0_AE_PartnerETL (owns `BD_SNAPSHOT_ASOF_LAG_BDAYS` + the
+runner), 1.0.0_SA_CTO (gate call on setting it =1 for cot, before the 02:00Z run), 2.0.0_SA_COO.
+Runner env is infra, not the DS lane (Rule 13) -- DS did not touch it.
+
+**Phase-3 served-verify for (a): RAN, INCONCLUSIVE -- not claiming (a) closed.**
+Served `platinum/firm/dashboard.json` + `header_metrics.json` (generated 2026-07-09T02:04Z,
+data_as_of 2026-07-07): `total_aua = $434,451,347.11`. The TO's expected ~$365.7M was derived from
+06-18-era data and is NOT a valid comparator against a 07-07 as-of, so AC "corrected AUA ~$365.7M+ on
+the SERVED artifact" cannot be evaluated as written -- the expected value needs recomputing on current
+data before (a) can be certified. Two observations recorded, neither asserted as defects:
+- `fee_earning_aua = 0.00`, `non_fee_earning_aua == total_aua` (may be legitimate for cot).
+- `total.new_client_aua = 0.00` AND `total.existing_client_aua = 0.00` while `total.aua = $434.45M` --
+  these do not sum to the total. Needs grounding; flagged, not claimed.
+Per the TO's own rule, (a) is NOT certified off L6 alone while L1/L2 move (co-verify at L5).
