@@ -175,16 +175,90 @@ which `build_mdpf_wsc_inflection_feeder.py:158` already asserts as an invariant
 **AMENDED (CTO 215642Z + DS 215306Z) — the predicate is EQUALITY on an INTERSECTION, not `<` on two
 independently-selected dates:**
 
+**SUPERSEDED TWICE. Read both corrections — the second one is my own law turned on my own design.**
+
+**(i) CORRECTION 1 (COO 221829Z, binding): THE ABSTAINING FEEDER EMITS THE ROW.**
+
+I originally wrote *"ABSTAIN: emit NO row."* DS wrote *"emit `null` + `abstain_reason`."* **CTO ratified both
+within forty minutes and nobody caught it** — the two halves of one co-activation specified different artifacts.
+
+> **An omitted row and a run that never happened print the same nothing.**
+
+**Absence is not evidence.** A missing partner-date is indistinguishable from a dispatch failure, a crashed feeder,
+or a partner never onboarded. **A `null` with a reason is a statement.** "Emit no row" is the *silent-skip* pattern —
+`A_00`'s `print("0 accounts")`-then-proceed, `C_02`'s SKIP, and `cot_silver_merge:493-496`'s literal
+`# CHAINFIX: frozen no-op = successful run` — **sitting inside the fix for it.** I found that last one four hours
+ago and then wrote its shape into my own remedy.
+
+**(ii) CORRECTION 2: the predicate must be stated over a field that will exist.**
+`partner_custody_as_of` does not exist on the row today (§1). A predicate over a field the artifact does not carry
+is unauditable the day after it ships. **It is a contract §4 schema change (`COLS_NON_MODEL_AUA`), not a one-liner**
+— and it is the *same* field whose absence made the blast-radius census un-runnable. **A precondition for the
+guard AND for the census.**
+
 ```python
-# in build_mdpf_wse_49f_non_model_aua.py
-common = max(RPS_dates & WSB_dates)      # the intersection. NOT _latest_rps_partition(), NOT max(RPS <= as_of)
-if not (as_of(custody) == as_of(model_input) == as_of(sma_input) == common):
-    ABSTAIN: emit NO row; emit MDPF/Partner PartnerResidualAbstain=1 {Partner=49financial}
-    log LOUDLY with all three vintages. Do NOT roll the residual forward.
+# in build_mdpf_wse_49f_non_model_aua.py -- REQUIRES contract §4: partner_custody_as_of on the row
+common = max(RPS_valuation_dates & WSB_valuation_dates)   # CANONICAL VALUATION DATES, never partition names (§2.3b)
+
+aligned = (custody_vintage == model_vintage == sma_vintage == common)
+
+# ALWAYS emit the row. Never omit it.
+row = {
+    "firm_id": "49financial",
+    "as_of_date":            common,
+    "partner_custody_as_of": custody_vintage,   # NEW, contract §4 -- a VALUATION date, not a partition name
+    "model_aua_input":  model_val,
+    "sma_aua_input":    sma_val,
+    "partner_custody_total": custody_val,
+    "non_model_aua":  (custody_val - model_val - sma_val) if aligned else None,   # NULL, not absent
+    "abstain_reason": None if aligned else
+        f"vintage_mismatch custody={custody_vintage} model={model_vintage} sma={sma_vintage} common={common}",
+}
+if not aligned:
+    emit MDPF/Partner PartnerResidualAbstain=1 {Partner=49financial}
+    log LOUDLY with all three vintages
 ```
+**The aggregate then abstains for that partner-date on a POSITIVE ASSERTION (`non_model_aua is null` +
+`abstain_reason`), never on an absence.**
 The calendars are **not nested** (`06-30`/`07-01` are RPS-only; `06-27`/`06-28`/`07-07`/`07-08` are WS-B-only), so
 `<` vs `==` is a **$10.47M** distinction. And it must bind **three** operands to one as-of, not two —
 `sma_aua_input` is a full term in the identity, not a rounding detail.
+
+### 2.3b — BLOCKED: the intersection must be taken on VALUATION DATES, and neither vendor's is grounded
+
+**CTO STOP (221132Z), and it is not liftable yet.** `max(RPS ∩ WSB)` intersects **partition names**. A name is not a
+valuation instant, and Andrew's Orion anchor proved the two can differ: the Inflection spine's row `D` holds the
+close of `D-1`.
+
+> **You cannot assert operand agreement on labels whose semantics you have not established.**
+
+What I established, read-only, tonight:
+
+| feed | name ↔ internal field | valuation instant | anchor |
+|---|---|---|---|
+| Schwab RPS | **ESTABLISHED** — `date=D` == the vendor's own `Business Date`, asserted at `H1[4]` and on every `D1` row of the raw `CRS{D}.RPS` | **UNDETERMINED** | none |
+| WS-B model_aua_positions | name == internal `as_of_date`, 3/3 | **UNDETERMINED** | none |
+| Inflection spine | — | `D` = close of `D-1` | **Orion, via Andrew** |
+
+- The **raw file states its own date** (the header is split across `H2`/`H3` — `Business` + `Date` — which is why a
+  naive scan of `H2` finds none). **The docstring `"schwab/bd — their labels are accurate"` is eliminated as
+  evidence; we have the vendor's field instead.** And `convert_schwab_rps_to_parquet.py:53` regexes the partition
+  date **from the filename**, while `:39`'s `business_date` column **never lands** — silver keeps only `file_date`,
+  the filename echoed back. **The converter discards the vendor's own date**, which is why the artifact could not
+  answer and the raw bytes could.
+- **WS-B's name matching its own internal field is internal self-consistency, which is not correctness.**
+  *Self-consistency requires an anchor outside the system.*
+- I attempted an external anchor and **discarded it because it failed its own sanity check**: bd `silver/prices/`
+  `2026-07-06` and `2026-07-07` are identical to four decimals across four tickers — **forward-filled**. A
+  forward-filled series cannot anchor a valuation date, and its non-match proves nothing in either direction.
+
+**The one call that settles it:** `IEFA`'s actual market close on `2026-07-06`. RPS prices it at `98.3100`.
+If that is 07-06's close → RPS `D = close(D)`. If it is 07-02's close → the guard is unsafe. YCharts returned
+**HTTP 403** this session. One ticker, one date.
+
+**If RPS `D` really is `close(D)`, then `opal_aggregate_aua(D)` has been summing 49F@`close(D)` with
+Inflection@`close(D-1)` under one label since inception** — invisible to every check that tests the sum, and
+independent of the stall.
 
 **The row cannot express this today.** DS established there is **no custody vintage field**: the row's only date,
 `as_of_date`, tracks the WS-B valuation date (`:67-68`), i.e. the *subtrahend*. The minuend's vintage comes from
