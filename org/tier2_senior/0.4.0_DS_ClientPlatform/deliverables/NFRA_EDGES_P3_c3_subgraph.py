@@ -632,6 +632,26 @@ def run_live(emit_contract: bool = False) -> int:
                 return r
 
             contract = {
+                # (C) IS THE ARCHITECTURE (CTO ruling 115438Z). The intra-system edges are NOT materialized:
+                # semctl twins would feed back through the LAYER-BLIND D2/D3 detectors (4 of them carry the
+                # inflection literal in `condition`) -> D3 recurrence 4->8 -> P2's edge-motif node_id changes
+                # -> the AC4 stability invariant is broken by P3's own output. So the ONLY materialized entity
+                # is the C3 node (its req2 signature prop + AC5 snapshot_ts). The 21 edges below are an
+                # EXPECTED-VALUE FIXTURE for the R3 traversal-assertion and for the (a) coverage-check.
+                "architecture": "(C) no-duplicate: the C3 carries its subgraph by REACHABILITY "
+                                "(C3 -CONTAINS-> C2Motif -CONTAINS-> C1 constituents; the FLOWS_TO/RENDERS "
+                                "estate edges among them already exist at layer=aws). CTO ruling 115438Z.",
+                "materialize": ["c3_node"],
+                "do_NOT_materialize": "intra_system_edges -- they already exist as live estate CloudEdges. "
+                                      "Writing semctl twins is a SELF-REFERENTIAL FEEDBACK CORRUPTION: no "
+                                      "detector filters layer, D2/D3 select on props CONTAINS "
+                                      "'inflection_wealth_management', 4 of the 21 carry it -> they would be "
+                                      "re-detected, D3 recurrence 4->8, P2's canonical edge-set and therefore "
+                                      "its motif node_id CHANGE. (A) REJECTED. (B) MERGEs onto the estate edge "
+                                      "and flaps its layer aws<->semctl every derive -- REJECTED.",
+                "intra_system_edges_role": "EXPECTED-VALUE FIXTURE. Assert present + both-ends resolve + "
+                                           "unresolved=0 + boundary=0 by LIVE traversal (AC-1). Compare against "
+                                           "the live recompute for the (a) coverage-check. Never written.",
                 "c3_node": _strip_ts(to_c3_node_record(system, sig, ts)),
                 "intra_system_edges": [_strip_ts(to_intra_edge_record(e, ts)) for e in intra],
                 "edge_identity_key": ["src", "dst", "edge_type", "props"],
