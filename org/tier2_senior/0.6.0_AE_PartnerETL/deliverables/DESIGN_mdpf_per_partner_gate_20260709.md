@@ -76,15 +76,55 @@ Measured on `s3://opal-data-mdpf/mdpf/feeds/non_model_aua/49financial/`:
 > **49F's served `non_model_aua` is the motion of its subtrahends, sign-flipped, against a frozen minuend.**
 > The plug is not measuring non-model assets. It is measuring SmartX's daily P&L, backwards.
 
-Refinement to CTO's statement (`214455Z`): the plug rose by **`-(d_model + d_sma)`**, not by `-d_model` alone.
-His `model_aua` figure `-10,474,162.28` is exact; the `+93,737.35` SMA drift accounts for the residual difference.
+### TWO FIELDS, BOTH EXACT — do not "reconcile" one with the other (my error, CTO 215642Z)
+
+I initially "corrected" CTO's figure. **The correction was wrong; we measured different fields.**
+
+```
+  SERVED  platinum/mdpf/aggregate_aua_ts : non_model_aua = custody - model
+          -> d(served) = -d(model) = +10,474,162.28          <- CTO's "exactly that". EXACT.
+  FEEDER  mdpf/feeds/non_model_aua/49financial : non_model_aua = custody - model - sma
+          -> d(feeder) = -(d_model + d_sma) = +10,380,424.93 <- the table above. EXACT.
+
+  served(non_model) - feeder(non_model) == that date's sma_aua_input, to the cent, on all three dates.
+```
+Both numbers are right. **I corrected a served-artifact claim using a feeder artifact.** The `$93,737.35` is the
+drift of a term the served field does not contain.
+
+> **Rule taken from it: never publish a delta without the operands that produced it.**
+> Had I shown only the difference, a false correction would have been accepted.
+
+**And the discrepancy is itself a finding (CTO, separate track — NOT part of this co-activation):** the aggregation
+layer publishes `custody - model` as `non_model_aua`, folding **$23.47M of 49F's SMA book into "non-model"**, which
+violates Andrew-direct Contract AMENDMENT 1 (*"1a and 1c … never a combined figure"*). The identity
+`model + non_model == custody` still closes — **a classification error that preserves the sum is invisible to every
+check that tests the sum.** COO owns it separately.
 
 **Therefore: ship the gate alone and MDPF publishes a fabricated 49F number EVERY DAY instead of once.**
 The gate is currently the only thing suppressing it.
 
-*(Caveat, held: I verified the arithmetic identity on the served feed. The `source_pipeline`/vintage attribution of
-each input — i.e. that `partner_custody_total` genuinely carries a 07-06 vintage while the inputs carry 07-08 — is
-`0.4.0_DS`'s to source-ground per CTO's dispatch. My claim is the closure, not the provenance.)*
+### BLAST RADIUS: UNDETERMINED — and it is not computable from the artifact
+
+I produced two censuses and **retracted the first**:
+- assuming the builder selects `max(RPS <= as_of)` → **6 rows**;
+- selector-independent (custody unchanged vs prior feeder row while a subtrahend moved) → **8 rows**;
+- **overlap: only `2026-07-07` and `2026-07-08`** — the two days already known.
+
+They disagree because **neither can read the minuend's vintage.** Source: `:762 rps_date = args.rps_date or
+_latest_rps_partition()` — the latest RPS partition **at build time**, a wall-clock property that is never recorded.
+My first census inferred a selector and printed it as *"custody TRUE vintage."* That was an inference presented as a
+measurement, and it is retracted.
+
+> **`partner_custody_as_of` (contract §4) is not merely a precondition for the GUARD. It is a precondition for the
+> CENSUS. You cannot count the damage until the field exists.**
+
+**Recoverable without the schema change**, from the producer's inputs rather than the artifact: each row carries
+`_ingested_at` (write time); reconstruct `_latest_rps_partition()` as of that instant from the RPS partitions'
+`LastModified`. *When the artifact cannot answer, the producer's inputs still exist.* Not run inside the 02:00Z
+window; CTO's call on the owner.
+
+*(The 06-13/14 weekend rows show `d(model)=+0.00, d(sma)=+0.00` and are correctly flagged by neither method — the
+positive control on the discriminator, and the one thing both runs agree on.)*
 
 ---
 
@@ -132,12 +172,26 @@ This is CTO's own `C_02` rule, one pipeline over:
 which `build_mdpf_wsc_inflection_feeder.py:158` already asserts as an invariant
 (*"model_aua_positions (gold) and non_model_aua (silver) views share a vintage"*).
 
+**AMENDED (CTO 215642Z + DS 215306Z) — the predicate is EQUALITY on an INTERSECTION, not `<` on two
+independently-selected dates:**
+
 ```python
-# in build_mdpf_wse_49f_non_model_aua.py, before emitting the row
-if as_of(partner_custody_total) < as_of(model_aua_input):
-    ABSTAIN: emit NO row for this date; emit MDPF/Partner PartnerResidualAbstain=1 {Partner=49financial}
-    log LOUDLY with both vintages. Do NOT roll the residual forward.
+# in build_mdpf_wse_49f_non_model_aua.py
+common = max(RPS_dates & WSB_dates)      # the intersection. NOT _latest_rps_partition(), NOT max(RPS <= as_of)
+if not (as_of(custody) == as_of(model_input) == as_of(sma_input) == common):
+    ABSTAIN: emit NO row; emit MDPF/Partner PartnerResidualAbstain=1 {Partner=49financial}
+    log LOUDLY with all three vintages. Do NOT roll the residual forward.
 ```
+The calendars are **not nested** (`06-30`/`07-01` are RPS-only; `06-27`/`06-28`/`07-07`/`07-08` are WS-B-only), so
+`<` vs `==` is a **$10.47M** distinction. And it must bind **three** operands to one as-of, not two —
+`sma_aua_input` is a full term in the identity, not a rounding detail.
+
+**The row cannot express this today.** DS established there is **no custody vintage field**: the row's only date,
+`as_of_date`, tracks the WS-B valuation date (`:67-68`), i.e. the *subtrahend*. The minuend's vintage comes from
+`:762 rps_date = args.rps_date or _latest_rps_partition()` — **the latest RPS partition at BUILD TIME**, a
+wall-clock property that is discarded. So `partner_custody_total` is not stale-and-unlabelled; **it is stamped
+with a date it does not have.** The guard therefore requires emitting `partner_custody_as_of` on the derived row —
+**a contract §4 schema change, not a one-liner.**
 **Roll-forward is legal for a partner's own last-good *level* (the contract's §3.5-decision-iv). It is illegal for
 a *residual computed across two vintages*.** The contract roll-forwards `as_of_date <= target` **per partner** — it
 does not authorize mixing one partner's stale minuend with that same partner's fresh subtrahends.
