@@ -29,11 +29,22 @@ READ-ONLY. Source PKL is resolved the way the PRODUCER resolves it (benchmarks/L
 data_pkl), not by an ls-sort -- an ls-sort picks model_*.pkl over data_*.pkl (m > d) and cannot see a
 pointer that names a version the listing filter excludes.
 
+VACUITY GATE (added 2026-07-09 after feeding this check its own degenerate input -- it FAILED):
+**A gate whose checks pass VACUOUSLY on the degenerate input is not a gate.** An assertion over a set is
+vacuously TRUE on the empty set. Fed a served artifact with `periods: []`, this script reported
+`CHECKED 0 cells | VIOLATIONS 0` and printed "every served cell reproduces" -- a clean bill for an artifact
+containing nothing. Every conformance limb agreed, because there was nothing to disagree about.
+This is the same defect as `C_02:310` (existence, not rows), `A_00:337` (`sorted()[-1]` onto a 0-row stub),
+and the bd/49F `QTD entry_count = 0` outage that served an empty window for 39.8h while `mtime`, `size`,
+`generated_at` and `data_as_of` all advanced correctly. **Always pair a conformance limb with a
+NON-EMPTINESS limb, and run the non-emptiness limb FIRST.** Exit 5 covers this.
+
 Usage: value_check_benchmark_period_defs.py [--pkl <s3|local>] [--served <s3|local>] [--tol 0.01]
 Exit 0 = all served cells reproduce AND every rolling window is discriminating at this as-of.
 Exit 2 = VIOLATION (loud).
 Exit 3 = VINTAGE-SKEW: served as-of != reproduced as-of, so a diff would be meaningless. Undecidable.
 Exit 4 = cells reproduce, but >=1 rolling window is UNDISCRIMINATING at this as-of (partial coverage).
+Exit 5 = VACUOUS: the served artifact carried nothing to check. NEVER a pass.
 """
 from __future__ import annotations
 import argparse
@@ -65,7 +76,7 @@ CONTRACT_PERIODS = {
 }
 VIOLATION_SIGNATURE = "last-complete-calendar-period (the reverted SmartX override)"
 
-EXIT_CLEAN, EXIT_VIOLATION, EXIT_VINTAGE_SKEW, EXIT_UNDISCRIMINATING = 0, 2, 3, 4
+EXIT_CLEAN, EXIT_VIOLATION, EXIT_VINTAGE_SKEW, EXIT_UNDISCRIMINATING, EXIT_VACUOUS = 0, 2, 3, 4, 5
 FIELDS = ["model", "index_benchmark", "etf_benchmark", "index_spread", "etf_spread"]
 LEGS = ["model", "index_benchmark", "etf_benchmark"]
 
@@ -175,6 +186,17 @@ def main() -> int:
     print(f"VALUE-CHECK benchmark: repro_end={end_date.date()} served_as_of={served_as_of} "
           f"periods={len(periods)} models={len(served_models)}")
 
+    # --- Gate -1: VACUITY. Runs FIRST. An assertion over a set is vacuously true on the empty set,
+    # so a conformance check on an artifact containing nothing reports a clean bill for nothing. ---
+    expected_cells = len(lf.MODEL_CODES) * len(periods) * len(FIELDS)
+    if not periods or not served_models or expected_cells == 0:
+        print(f"VACUOUS: the served artifact carried nothing to check "
+              f"(periods={len(periods)}, models={len(served_models)}, expected_cells={expected_cells}). "
+              f"Every conformance limb would pass because there is nothing to disagree about. "
+              f"A gate whose checks pass vacuously on the degenerate input is not a gate. "
+              f"NEVER a pass. exit {EXIT_VACUOUS}.")
+        return EXIT_VACUOUS
+
     # --- Gate 0: vintage. A diff across vintages measures data drift, not a period_defs breach. ---
     if served_as_of and str(end_date.date()) != str(served_as_of):
         print(f"VINTAGE-SKEW: served data_as_of={served_as_of} but source PKL reproduces to "
@@ -205,7 +227,12 @@ def main() -> int:
                 if a_ is None or b_ is None or abs(a_ - b_) > a.tol:
                     violations.append((code, period, f, a_, b_))
 
-    print(f"CHECKED {checked} cells | VIOLATIONS {len(violations)}")
+    if checked == 0:   # belt-and-braces: the loop compared nothing. Never report clean.
+        print(f"VACUOUS: 0 cells compared. A clean result here is a clean bill for nothing. "
+              f"NEVER a pass. exit {EXIT_VACUOUS}.")
+        return EXIT_VACUOUS
+
+    print(f"CHECKED {checked} cells (expected {expected_cells}) | VIOLATIONS {len(violations)}")
     print("DETECTION POWER (canonical vs '" + VIOLATION_SIGNATURE + "') at this as-of:")
     for period, (ok, delta) in sorted(disc.items()):
         verdict = "DISCRIMINATING" if ok else "UNDISCRIMINATING -- windows COINCIDE, check is BLIND"
