@@ -35,6 +35,35 @@ precedence (DS confirm); (D) Andrew manual reseed when C alerts; PHASE 2 decommi
 boxes (parity-verify + separate GO, destructive). Durable follow-up (non-blocking): SMS 2nd channel = SNS
 origination identity + production access (account-owner). DEFERRED per Andrew hold: auto-login session-refresh. -->
 
+<!-- ROOT-CAUSE FIX LANDED 2026-07-09 by 0.6.0_AE_PartnerETL (CTO GO 083650Z). The productionized runner
+was itself the source of a SECOND client-facing freeze: it fires at 00:00Z off the session chain, so
+run_date=_today_utc() asked BD for an as-of date that had not begun in ET. BD answers a point-in-time
+SNAPSHOT query for a non-existent date with a header-only ~4.6KB xlsx -> allocations + unrealized landed
+0-row stubs 07-05..07-09 while transactions + realized (PERIOD queries over a 14d window) kept flowing.
+Stubs -> 0-row silver -> C_02 certified_aua<=0 -> D_00 held a frozen served AUA. Auth was REFUTED: same
+invocation, same bearer, allocations=4,592B while realized=993,387B. Exercised: asOfDate 07-09 -> 0 rows,
+07-08 -> 32,726 rows.
+  FIX 1 (content-grounded guards; CTO calls it the freshness-integrity reference fix): 0-data-row SNAPSHOT
+    exports REJECTED pre-write; the holdings-only completeness sidecar generalized to every table
+    (has_data_rows); _already_landed + emit_bronze_sentinel now bind to that sidecar instead of
+    head_object EXISTENCE (four existence proxies were masking the freeze, incl. a sentinel that fired
+    bd-silver-merge on stubs). Legacy stubs now re-pull themselves.
+  FIX 2 (empty-root): BD_SNAPSHOT_ASOF_LAG_BDAYS=1 on bd-49f-runner -- snapshot tables request the LAST
+    COMPLETE BUSINESS DAY and land under that TRUE as-of date. Default 0 = OFF = byte-identical = zero cot
+    regression (same firm-safety shape as BD_TXN_CHUNK_DAYS). cot's snapshot tables carry the same latent
+    bug -- flagged to CTO+DS, deliberately NOT folded in.
+  Self-caught pre-re-pull: the first row probe counted bare '<row ' but BD emits NAMESPACED '<x:row' --
+    it would have REJECTED a small VALID export. Rebound to '<dimension ref>'. Tests 57/57 incl. the 22
+    cot retry-net no-regression tests + 3 real-BD-artifact fixtures.
+  Source repaired under CTO GO: as_of 07-08 re-pulled real -> silver/allocations/2026-07-08 = 6,870 rows /
+    $1,840,781,732.39 (was a 46,277B 0-row stub); silver/unrealized/2026-07-08 = 103,490 rows.
+  SERVED un-freeze is GOLD-GATED (~04:00Z; D_00 only runs inside the scheduled gold). Predicted cert
+    @data_date 2026-07-08 = $1,844,022,461.17. NOTE: the "~$185M/11% overstated" premise is NOT supported --
+    the served figure is $6.86M (0.372%) UNDERstated and the frozen cert is dated 07-02 (7d, not ~3wk).
+  Commits 9d44d6af5 / 7a229eaaf / 463238356 / d37ae51b6. Ledger 20260709T0855Z_bd-49f-empty-stub-asof-lag-
+  root-fix (L1-L4 CLOSED, L6 HELD-external on the gold gate). Findings: docs/briefs/{bd-unrealized-export-
+  500k-row-cap-finding,comp-freshness-is-mtime-bound-greenlit-a-5day-client-facing-freeze}-20260709.md. -->
+
 <context>
 Phase 0 (the P0 unblock) is DONE -- CVO recovered the 4 frozen bd silver tables manually via the proven
 cot DataMining REST flow (4 tables re-landed @06-24, firm-separation held). But that recovery is a MANUAL
