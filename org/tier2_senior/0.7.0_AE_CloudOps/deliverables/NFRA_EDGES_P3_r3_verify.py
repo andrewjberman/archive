@@ -58,6 +58,18 @@ COVERAGE_ENTRYPOINT = os.path.join(
     "NFRA_EDGES_P3_c3_subgraph.py")
 C3_NODE_ID = "system:firm-conditional-display:25558d98"
 
+# NEVER-RENAME-SERVED-OUTPUT baseline (CTO hard condition, P3 deploy-gate 133335Z). The req2
+# signature merge MUST be ADDITIVE -- and it is FORCED, not preferred: derive_runner:1364 derives the
+# node `name` from props.system_type, so a REPLACE that dropped system_type would silently rename the
+# SERVED node 25558d98 from "EmergentSystem" to its raw nid. This baseline is the served identity
+# grounded live pre-P3-derive (comp-kuzu, 2026-07-09); post-materialize it MUST be unchanged with ONLY
+# the signature (+ theme) added.
+SERVED_BASELINE = {
+    "name": "EmergentSystem",              # derived from props.system_type; a replace -> the nid
+    "node_type": "C3System",
+    "preserved_prop_keys": {"connectivity", "member_motifs", "recurrence", "source", "system_type"},
+}
+
 
 def _git_bash() -> str:
     """The Git Bash executable (comp-kuzu is a Git Bash script). On Windows, a bare `bash` resolves to
@@ -178,9 +190,45 @@ def check_c3_node_ac5(contract: dict) -> dict:
             "signature_edge_count": sig.get("edge_count")}
 
 
+def check_never_rename() -> dict:
+    """CTO hard condition (P3 deploy-gate): the additive merge must NOT rename the served node. Assert
+    the served C3 node keeps its name (EmergentSystem, derived from props.system_type), node_type, and
+    every pre-existing prop key -- only the signature (+ theme) added. A REPLACE would drop system_type
+    -> name silently becomes the nid. Grounded served baseline (pre-P3-derive, comp-kuzu 2026-07-09)."""
+    rows, err = _comp_kuzu_json(
+        "MATCH (c:CloudNode {node_id:'%s'}) RETURN c.node_type AS node_type, c.name AS name, "
+        "c.props AS props" % C3_NODE_ID)
+    if rows is None:
+        return {"check": "never-rename", "status": "UNVERIFIABLE", "detail": err}
+    if not rows:
+        return {"check": "never-rename", "status": "FAIL", "detail": "C3 node absent"}
+    r = rows[0]
+    try:
+        props = json.loads(r.get("props") or "{}")
+    except (json.JSONDecodeError, TypeError):
+        props = {}
+    live_keys = set(props.keys())
+    dropped = sorted(SERVED_BASELINE["preserved_prop_keys"] - live_keys)
+    name_ok = r.get("name") == SERVED_BASELINE["name"]
+    type_ok = r.get("node_type") == SERVED_BASELINE["node_type"]
+    if not name_ok:
+        return {"check": "never-rename", "status": "FAIL",
+                "detail": "served name=%r (expected %r) -- a REPLACE renamed the served node"
+                          % (r.get("name"), SERVED_BASELINE["name"])}
+    if not type_ok:
+        return {"check": "never-rename", "status": "FAIL",
+                "detail": "node_type=%r (expected %r)" % (r.get("node_type"), SERVED_BASELINE["node_type"])}
+    if dropped:
+        return {"check": "never-rename", "status": "FAIL",
+                "detail": "pre-existing prop key(s) DROPPED (non-additive merge): %s" % dropped}
+    added = sorted(live_keys - SERVED_BASELINE["preserved_prop_keys"])
+    return {"check": "never-rename", "status": "PASS",
+            "name": r.get("name"), "preserved": True, "added_props": added}
+
+
 def main() -> int:
     contract = json.load(open(CONTRACT, encoding="utf-8"))
-    results = [check_ac1(contract), check_coverage(), check_c3_node_ac5(contract)]
+    results = [check_ac1(contract), check_coverage(), check_c3_node_ac5(contract), check_never_rename()]
 
     if "--json" in sys.argv[1:]:
         print(json.dumps(results, indent=2))
