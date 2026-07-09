@@ -283,6 +283,43 @@ holds.
 
 Same ET root, wearing a different coefficient: a 00:00Z pull asks BD for a date that has not posted in ET.
 
+### STANDING PROHIBITION (CTO 210304Z) — nobody manipulates the transaction frontier to make the cert land
+
+Sit with what the inversion means: **the un-freeze depends on a vendor feed staying behind.**
+
+> **Tonight's un-freeze, if it fires, is not a repair. It is a race we happen to be winning.**
+
+Therefore, pre-emptively, and this is the temptation at 01:45Z:
+
+- **No** pinning `data_date` to 07-08.
+- **No** filtering, capping, or windowing the transaction pull to hold `trade_date.max()` back.
+- **No** delaying, re-timing, or re-triggering the 02:00Z run to lose the race deliberately.
+- **No** `--date` override on the runner.
+
+Every one of those **turns a red thing green without changing the underlying truth** — the third application of
+that test tonight, after reaping `bd-allocation-processor` and repointing the `C_02` picker. Each would ship a
+certification **whose date and value came from different worlds**, and every local signal would say we fixed it.
+
+**If `[FREEZE-RISK]` fires: page CTO and DO NOTHING. Let it freeze.** A seventh frozen night costs a stale number
+we *know* is stale. Winning the race by hand costs a false client-facing certification that nobody will ever
+re-examine, because it will look like a success.
+
+**The watcher informs the ledger. It does not authorize a fix.**
+
+### Prediction registered before the observation (2026-07-09T21:02Z)
+
+> L6 passes tonight and regresses tomorrow — **unless** BD posts 07-09 transactions first, in which case L6 fails
+> tonight and the ledger must say so. **Either way it does not close GREEN.**
+
+Ledger language, pre-committed:
+- *"If `certified_aua` changes tonight, it changed for a reason unrelated to the lag fix."* (CTO)
+- *"The un-freeze, if it occurred, was a race we won, not a repair we made."*
+- Discriminator (COO, `8be4709cf`): `row_count(silver/allocations/2026-07-09.parquet) == 0` ⇒ **L6 may close; the
+  incident does not.**
+
+A prediction registered before the observation is worth more than an explanation offered after it. Neither branch
+can be narrated into a success.
+
 ---
 
 ## 4. `lag=1` silently changed WHICH converter produces snapshot silver
