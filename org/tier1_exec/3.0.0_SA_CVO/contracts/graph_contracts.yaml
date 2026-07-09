@@ -1,5 +1,19 @@
 # graph_contracts — CVO-authored rows for globgrph.graph_contracts (NFRA_GCONTR TO-3)
 #
+# ############################################################################################
+# !!! THIS FILE'S `ratified_at` FIELDS ARE A STALE PROXY. DO NOT READ RATIFICATION STATE HERE.
+#     Every row below still reads `PENDING-*-SIGNOFF`. The LIVE table says otherwise:
+#     as of 2026-07-09, benchmark [Andrew-signed] + peers + aum [CTO+COO] are LIVE + RATIFIED
+#     with real 16-char hashes (COO grounded on the AE in-VPC contract_engine read, 150336Z);
+#     only headline + advisor_intelligence are genuinely unsigned.
+#     The loader stamps `ratified_at` in the LIVE table on in-VPC write; it never writes back here.
+#     => The PROPERTY is the live `globgrph.graph_contracts` table. This YAML is the AUTHORING
+#     source and a PROXY for ratification. Ground on the table, never on this field.
+#     (Prior-CVO bound TO-3 status to this proxy on 2026-07-09 and re-authored 5 rows that already
+#      existed -- deliverable removed in d39ae51d9. Fourth application of the session through-line:
+#      partial-signal-read-as-whole. Do not repeat it.)
+# ############################################################################################
+#
 # AUTHORING MODEL (lane split, per AE convergence 2026-06-16):
 #   - CVO authors this YAML declaratively (the row CONTENT; value-layer lane).
 #   - AE runs `--load-contracts <this file>` IN-VPC (the Nessie REST catalog is in-VPC only;
@@ -53,6 +67,18 @@ contracts:
       "1D":  "prior-trading-day -> as-of"
       "WTD": "week-start(Mon) -> as-of"
       "MTD": "month-start -> as-of  (PARTIAL current month)"
+      # !!! DRIFT -- DO NOT LOAD THESE TWO LINES AS-IS. CVO 2026-07-09 (ec33fe59d, 960fe82d1).
+      # Both lines below declare the option Andrew did NOT rule. Methodology-of-record is
+      # TRAILING-30 / TRAILING-91 CALENDAR DAYS (lambda_function.py:445-455, :475-483; Andrew ruling
+      # 2026-06-01, directive 631d8d0d9, "KEEP trailing-30/91d"). The WS-3 brief enumerated
+      # trailing-Nd vs trailing-N-calendar-months as COMPETING options and warned at :34 they
+      # "coincide now but will drift on 31-day months / month-end dates". Andrew ruled (a); these
+      # declare (b). No served number is wrong today, but the contract is the ENFORCED invariant, so
+      # an implementer honoring it would swap in relativedelta and silently break the ruling.
+      # Text left UNCHANGED on purpose: this row is LIVE+RATIFIED (real hash, since 06-16), and a
+      # SEV1 edit requires Andrew sign-off (PRD 9). Corrected text is staged as a PROPOSED AMENDMENT in
+      # deliverables/NFRA_GCONTR_SEV1_amendment_package_20260709.md -- apply ONLY on Andrew's re-sign.
+      # (The 1Y line at :59 already got this day-count precision via feca94a1f; 1M/1Q never did.)
       "1M":  "trailing-1-calendar-month -> as-of"   # NOT last-complete-calendar-month = the SmartX violation
       "1Q":  "trailing-3-calendar-months -> as-of"
       "YTD": "year-start -> as-of"
@@ -126,11 +152,12 @@ contracts:
       surface_gate: "comp-surface-check SEV1 (advisor_intelligence in critical-surfaces.yaml)"
       value_check:  >-
         AUDIT-RESHAPED 2026-06-17 (cvo_1804Z); advisory v1; CVO-owned. FIVE invariants:
-        (1) WINDOW-BOUND conformance: served window_bounds[w] match window_vocabulary[w] (1Y.start==end-365d; 3Y.start==end-1095d; QTD/q_current.start==calendar-quarter-start; YTD.start==Jan-1; q1/q2/q3==prior 1/2/3 FULL calendar quarters; **MAX.start==2021-01-01** per F-2/Andrew, NOT 2000) -- a non-conforming bound = violation independent of who wrote it (PRD 3.3).
-        (2) CROSS-ROUTE IDENTITY (F-1): for a given (advisor, window), the per-advisor NNA is IDENTICAL across every served route (advisor_nna_canonical, leaderboard, rendered profile, rendered Distribution) -- one C_07-resolved attribution source + one tenure rule. CURRENTLY FAILS (Travis QTD $4.14M canonical vs $6.95M leaderboard) -- catches the live divergence.
+        (1) WINDOW-BOUND conformance (DECLARATIVE): every served route PUBLISHES a window_bounds block, the blocks AGREE across routes, and each matches window_vocabulary[w] (1Y.start==data_as_of-365d; 3Y.start==data_as_of-1095d; QTD/q_current.start==calendar-quarter-start; YTD.start==Jan-1; q1/q2/q3==prior 1/2/3 FULL calendar quarters; **MAX.start==2021-01-01** per F-2/Andrew, NOT 2000). EVERY bound on EVERY route derives from the DATA date (data_as_of = nna['date'].max()), NEVER from wall-clock. A non-conforming bound = violation independent of who wrote it (PRD 3.3). NOTE: a published window_bounds block is the producer's own CLAIM about the window it used; it is NOT evidence the window was used. Limb (1) alone cannot carry this contract -- it must bind with (2).
+        (2) CROSS-ROUTE IDENTITY (F-1, SEMANTIC): for a given (advisor, window), the per-advisor NNA is IDENTICAL across every served route (advisor_nna_canonical, leaderboard, rendered profile, rendered Distribution) -- one C_07-resolved attribution source + one tenure rule -- AND the assertion must be DISCRIMINATING at this data_as_of (i.e. the mis-anchored window would produce a DIFFERENT number on this data; if it would not, report UNDISCRIMINATING, never green). Root cause of the 2026-07-09 RED (DS 0.4.0, source-confirmed): a ROLLING-WINDOW ANCHOR defect -- D_00c anchored window START on wall-clock _today() (lib/gold_utils.py:102-103) while the END stayed the data date (D_00c:817), so a 2-day ingest lag silently dropped 2 business days of flow. NOT "a 1Y-specific bug": 3Y was EQUALLY mis-anchored and converged only by CALENDAR LUCK -- its dropped band (2023-07-08 Sat, 07-09 Sun) carried $0.00 of firm flow while 1Y's (2025-07-07 Mon, 07-08 Tue) carried $3,516,778.16. Asserting "1Y-specific" would bank a false invariant that goes green for the wrong reason on the next lag change. Fix anchors BOTH bounds on data_as_of (D_00c:830 `anchor = latest_date`, 2af63847d; D_04 publishes bounds, 3ea2bdbf9); a fail-loud tripwire (D_00c:1247-1253) raises if any start is ever re-anchored off wall-clock. STATUS 2026-07-09: fix committed+deployed, NOT YET SERVED -- the served platinum/firm/leaderboard.json is still the pre-fix artifact, so this limb CORRECTLY reads RED until the scheduled nightly (D_00c ~09:53Z / D_04 ~10:18Z). Ratification of this row is HARD-WITHHELD until the SERVED artifact is re-read post-nightly (Rule 22a: committed+deployed != served). The prior 06-17 QTD divergence example has been REMOVED from this limb -- it is resolved, and a resolved example left standing in an invariant reads as a live failure.
         (3) WITHIN-SURFACE COHERENCE (F-1c): on each surface, served nna == inflows - outflows.
         (4) FIRM-ADDITIVE vs PER-ADVISOR ALL-ROLES: firm = account-once additive (Sigma(account-once)==firm, tol 0.01) + F4b (nmnc+nmec==total); per-advisor = all-roles, declared non-additive (NOT summed against firm).
         (5) BUCKET INTEGRITY (F-0, ANDREW-DECIDED 2026-06-17): 49F House is a RECOGNIZED CANONICAL bucket (49 Financial house book) -- kept as its own row, NEVER resolved/inferred into individual advisors. Unassigned is a BOUNDED TRANSIENT bucket (research: purely 2026 arrivals, YTD==MAX, q2/q3==0; self-resolves to a real advisor within ~1-2 quarters; its share MUST collapse in long windows -- ~80% of MAX is QTD, ~2.5% of MAX is pre-current). Individual-advisor per-advisor NNA EXCLUDES both buckets. The C_07 Layer-3 placeholder->individual INFERENCE is DISABLED (it over-credits individuals with the $357.6M house book + the transient pool -- that is the leaderboard-side cross-route divergence to remove).
+        (6) WINDOW LIVENESS (added 2026-07-09; DS 0.4.0 latent-defect catch -- this class was INVISIBLE to limbs 1-5): entry_count > 0 for EVERY served window on EVERY route. Same root cause as (2): a wall-clock-anchored QTD/YTD/MTD start lands AFTER the data end at a quarter/month/year roll (e.g. today=2026-10-01, data_as_of=2026-09-29 -> QTD.start > data end); D_00c:394 returns empty on an empty window, so the served leaderboard would have carried ZERO advisors for QTD on the first days of every quarter -- silently, and limbs (1)-(5) all pass on an empty window because there is nothing to disagree about. Now unreachable via the data-date anchor + the fail-loud tripwire, but the invariant is asserted here because an EMPTY served window must be a LOUD violation, never a vacuous pass. (Doctrine: an assertion over a set is vacuously true on the empty set -- always pair a conformance limb with a non-emptiness limb.)
     ratified_by: [Andrew]                # SEV1 tier (§9)
     ratified_at: PENDING-ANDREW-SIGNOFF  # AE stamps the authoring Nessie commit hash on in-VPC write, AFTER Andrew sign-off
     active: true
