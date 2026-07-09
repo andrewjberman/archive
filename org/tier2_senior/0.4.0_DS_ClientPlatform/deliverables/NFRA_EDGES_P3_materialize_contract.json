@@ -216,6 +216,7 @@
     }
   ],
   "selection_rule": {
+    "OPEN_ARCH_QUESTION_materialize_identity": "0.7.0_AE Q3, escalated to CTO -- NOT decided here. The 21 intra-system edges ALREADY EXIST as live estate CloudEdges (layer=aws, full props). Materializing the PROJECTED form creates a SECOND CloudEdge per pair (different props => different identity). Materializing the RAW form would instead MATCH the estate edge's identity and re-layer it aws->semctl in place (layer is a SET-field), corrupting the estate layer and churning drift-vector-2 every derive. Neither is obviously right; it is a graph-topology decision with blast radius. AWAITING CTO. Do not materialize until ruled.",
     "compare_on": [
       "src",
       "dst",
@@ -229,6 +230,23 @@
     "fail_loud_when": "missing_from_contract > 0  (a NEW qualifying estate edge the frozen list would have silently dropped)",
     "faithfulness_exercise": "The self-test proves the check's LOGIC (it is fed live_edges directly). It does NOT prove the derive-time recompute is FAITHFUL. Only a live derive-run that injects a genuinely-new qualifying ESTATE edge proves that -- CVO~B's live round-trip, a hard condition on the materialize deploy-gate (CTO 112711Z).",
     "predicate": "edge_type in {FLOWS_TO, RENDERS} AND both endpoints resolve to C0/C1 constituents of the C3's member motifs (a one-endpoint-inside edge is a BOUNDARY edge: excluded + counted)",
+    "projection": {
+      "apply_to": "BOTH sides before comparison (project_edge_props; idempotent, so contract records pass through unchanged)",
+      "compare_props_keys": [
+        "condition",
+        "kind"
+      ],
+      "dropped_live_keys": [
+        "dstField",
+        "rename",
+        "resolution",
+        "srcField",
+        "via"
+      ],
+      "guard_preserved": "condition stays in the compare-identity, so two edges differing only by their guard remain DISTINCT after projection (test 25, and the test-20 discipline).",
+      "kind_normalization": "P1E._EDGEKIND_NORMALIZE -- the ONE governed map {recompute/guarded -> recompute_guarded, passthrough, rename, '' -> passthrough}. NOT an ad-hoc slash->underscore rewrite (that would silently mis-handle a future kind).",
+      "layer_is_not_identity": "layer is a SET-field in kuzu_incremental_refresh._cur_edges {(src,dst,edge_type,props): (layer, snapshot_ts)}, NOT part of the identity tuple. So aws-vs-semctl does not distinguish edges; only props does."
+    },
     "root_fix_routed": "COO~B -> CTO, estate-wide: derive the selection live at derive time and demote the frozen contract to an R3 expected-value FIXTURE. The C2/C3 CONTAINS materialize has this same hole today, so it is a pattern change, not a P3 bolt-on.",
     "why": "ingest_c2c3_motif_producer replays a frozen list with no live discovery: deletions are loud, ADDITIONS are silent. AC5 covers per-entity freshness, not set-completeness."
   },

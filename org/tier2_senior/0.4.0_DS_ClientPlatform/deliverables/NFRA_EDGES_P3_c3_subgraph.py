@@ -278,6 +278,44 @@ def to_intra_edge_record(edge: Node, snapshot_ts: int) -> dict:
     }
 
 
+_PROJECTED_PROP_KEYS = ("condition", "kind")
+
+
+def _norm_kind(edge_kind: str) -> str:
+    """Normalize a live props `kind` onto the governed EdgeKind vocabulary. Delegates to P1's map, which is
+    the ONE source ({recompute/guarded -> recompute_guarded, passthrough, rename, "" -> passthrough}). An
+    ad-hoc slash->underscore rewrite would silently mis-handle any future kind."""
+    return P1E._EDGEKIND_NORMALIZE.get(edge_kind, edge_kind or "passthrough")
+
+
+def project_edge_props(props_json: str) -> str:
+    """Project a LIVE estate edge's props into the C3-subgraph CANONICAL form: {condition, kind}, with kind
+    normalized onto the governed EdgeKind vocabulary. Deterministic (sorted keys) and IDEMPOTENT.
+
+    WHY THIS EXISTS (0.7.0_AE caught it pre-build; the third consumer-catch, and it is a defect in the (a)
+    check I had already had gated). A live estate FLOWS_TO edge and my contract edge are NOT comparable raw:
+        LIVE     layer="aws"     props = {condition, dstField, kind:"recompute/guarded", rename, resolution,
+                                          srcField, via}      -- 7 keys, kind with a SLASH
+        CONTRACT layer="semctl"  props = {condition, kind:"recompute_guarded"}  -- 2 keys, kind with an
+                                          UNDERSCORE (the governed EdgeKind value)
+    Comparing them on (src,dst,edge_type,props) NEVER matches, so every live edge reads as
+    missing_from_contract and the coverage-check FAILS LOUD spuriously on every derive. A check that cries
+    wolf on every run is as useless as one that never fires -- the same proxy failure, mirrored.
+
+    So BOTH sides are projected before comparison. kind normalization uses P1E._EDGEKIND_NORMALIZE (the one
+    governed map: recompute/guarded -> recompute_guarded, passthrough, rename, "" -> passthrough) -- NOT an
+    ad-hoc slash->underscore rewrite, which would silently mis-handle any future kind.
+    """
+    try:
+        p = json.loads(props_json or "{}")
+    except (json.JSONDecodeError, TypeError):
+        p = {}
+    if not isinstance(p, dict):
+        p = {}
+    return json.dumps({"condition": p.get("condition") or "",
+                       "kind": _norm_kind(p.get("kind") or "")}, sort_keys=True)
+
+
 def subgraph_coverage_check(contract_edges: list, live_edges: list) -> tuple:
     """SET-COMPLETENESS check (COO~B scope-ruling 111120Z, option (a)) -- run at DERIVE time by the ingest.
 
@@ -299,7 +337,9 @@ def subgraph_coverage_check(contract_edges: list, live_edges: list) -> tuple:
     kuzu_nessie_load MERGEs on. Comparing on anything else would make the check itself a proxy.
     """
     def key(e):
-        return intra_edge_identity(e["src"], e["dst"], e["edge_type"], e["props"])
+        # BOTH sides projected. project_edge_props is idempotent, so an already-canonical contract record is
+        # unchanged while a RAW live estate row (7 props keys, slash-kind) is normalized into comparable form.
+        return intra_edge_identity(e["src"], e["dst"], e["edge_type"], project_edge_props(e["props"]))
 
     contract_keys = {key(e) for e in contract_edges}
     live_keys = {key(e) for e in live_edges}
@@ -332,6 +372,35 @@ SELECTION_RULE = {
                              "NOT prove the derive-time recompute is FAITHFUL. Only a live derive-run that "
                              "injects a genuinely-new qualifying ESTATE edge proves that -- CVO~B's live "
                              "round-trip, a hard condition on the materialize deploy-gate (CTO 112711Z).",
+    # THE PROJECTION (0.7.0_AE's third consumer-catch). A live estate edge and a contract edge are NOT raw-
+    # comparable: live props carry 7 keys with a SLASH kind ("recompute/guarded") at layer "aws"; the contract
+    # carries the canonical {condition, kind-underscore} at layer "semctl". Compared raw, EVERY live edge reads
+    # as missing_from_contract -> the coverage-check FAILS LOUD spuriously on every derive. A check that cries
+    # wolf every run is as useless as one that never fires.
+    "projection": {
+        "apply_to": "BOTH sides before comparison (project_edge_props; idempotent, so contract records pass "
+                    "through unchanged)",
+        "compare_props_keys": list(_PROJECTED_PROP_KEYS),
+        "kind_normalization": "P1E._EDGEKIND_NORMALIZE -- the ONE governed map "
+                              "{recompute/guarded -> recompute_guarded, passthrough, rename, '' -> passthrough}. "
+                              "NOT an ad-hoc slash->underscore rewrite (that would silently mis-handle a future kind).",
+        "dropped_live_keys": ["dstField", "rename", "resolution", "srcField", "via"],
+        "guard_preserved": "condition stays in the compare-identity, so two edges differing only by their guard "
+                           "remain DISTINCT after projection (test 25, and the test-20 discipline).",
+        "layer_is_not_identity": "layer is a SET-field in kuzu_incremental_refresh._cur_edges "
+                                 "{(src,dst,edge_type,props): (layer, snapshot_ts)}, NOT part of the identity "
+                                 "tuple. So aws-vs-semctl does not distinguish edges; only props does.",
+    },
+    "OPEN_ARCH_QUESTION_materialize_identity": "0.7.0_AE Q3, escalated to CTO -- NOT decided here. The 21 "
+                                               "intra-system edges ALREADY EXIST as live estate CloudEdges "
+                                               "(layer=aws, full props). Materializing the PROJECTED form "
+                                               "creates a SECOND CloudEdge per pair (different props => "
+                                               "different identity). Materializing the RAW form would instead "
+                                               "MATCH the estate edge's identity and re-layer it aws->semctl "
+                                               "in place (layer is a SET-field), corrupting the estate layer "
+                                               "and churning drift-vector-2 every derive. Neither is obviously "
+                                               "right; it is a graph-topology decision with blast radius. "
+                                               "AWAITING CTO. Do not materialize until ruled.",
     "fail_loud_when": "missing_from_contract > 0  (a NEW qualifying estate edge the frozen list would have "
                       "silently dropped)",
     "emit_counter": "c3_subgraph_edges_missing_from_contract  (belongs in the R3-verify beside edges_unresolved=0)",
@@ -647,6 +716,36 @@ def self_test() -> int:
     ok_guard, miss_guard, _ = subgraph_coverage_check([e_contract], [e_other_guard])
     chk("20 coverage-check keys on the STORE identity (props carries the guard): an edge differing ONLY by "
         "its condition is NOT considered covered", ok_guard is False and len(miss_guard) == 1)
+
+    # ---- THE PROJECTION (0.7.0_AE's third consumer-catch). A RAW live estate edge carries 7 props keys and a
+    # SLASH-form kind; the contract carries the canonical {condition, kind-underscore}. Without projecting both
+    # sides, every live edge reads as missing_from_contract and (a) FAILS LOUD spuriously on every derive.
+    raw_live = {
+        "src": "out:a/A.tsx:1#x", "dst": "out:b/B.tsx:2#y", "edge_type": "FLOWS_TO",
+        "props": json.dumps({"condition": "firm == true", "dstField": "y", "kind": "recompute/guarded",
+                             "rename": False, "resolution": "getSymbol ...", "srcField": "X.p",
+                             "via": "mapping a/A.tsx:1"}, sort_keys=True),
+    }
+    chk("21 PROJECTION: a RAW live estate edge (7 props keys, slash-kind) projects to the contract's canonical "
+        "{condition,kind} form", project_edge_props(raw_live["props"]) == e_contract["props"])
+
+    ok_proj, miss_proj, _ = subgraph_coverage_check([e_contract], [raw_live])
+    chk("22 PROJECTION GATE: the SAME edge in raw-live form vs contract form must NOT read as missing "
+        "(no spurious FAIL LOUD every derive)", ok_proj is True and not miss_proj)
+
+    # Non-vacuity of the projection: comparing the RAW props un-projected WOULD have reported it missing.
+    raw_key = intra_edge_identity(raw_live["src"], raw_live["dst"], raw_live["edge_type"], raw_live["props"])
+    con_key = intra_edge_identity(e_contract["src"], e_contract["dst"], e_contract["edge_type"], e_contract["props"])
+    chk("23 PROJECTION non-vacuity: un-projected raw props != contract props (so the projection is doing real "
+        "work, not a no-op)", raw_key != con_key)
+
+    # Idempotence: projecting an already-canonical contract record must not change it.
+    chk("24 PROJECTION is idempotent (contract records pass through unchanged)",
+        project_edge_props(e_contract["props"]) == e_contract["props"])
+
+    # The projection must NOT collapse a guard difference (test-20 discipline, now through the projection).
+    chk("25 PROJECTION preserves the guard: two edges differing only by condition stay DISTINCT after projection",
+        project_edge_props(e_contract["props"]) != project_edge_props(e_other_guard["props"]))
 
     n = sum(1 for r in ok if r)
     print("--- self-test: %d/%d passed ---" % (n, len(ok)))
