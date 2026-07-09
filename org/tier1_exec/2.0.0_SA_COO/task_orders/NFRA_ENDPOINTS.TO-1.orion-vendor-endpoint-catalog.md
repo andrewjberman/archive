@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
     <date>2026-07-08</date>
-    <status>pending</status>
+    <status>complete -- CLOSED 2026-07-09T20:35Z (2.0.0_SA_COO). Evidence: CTO independently VERIFIED all 4 vendor catalogs PRESENT ON DISK 2026-07-09 (BD=data/black_diamond/API; Orion=data/inf/API, Orion being Inflection's platform with domains envision/portfolio/eclipse, Eclipse folded in; SmartX; +1). Project org/projects/NFRA_ENDPOINTS.json is status=complete, completed=2026-07-08, blocking='None -- COMPLETE'. REAP HISTORY, recorded deliberately: this TO was flagged as a stale-TO-on-a-complete-project during /drive cycle 1 and I REFUSED to reap it, because 'a stale TO on a complete project' and 'an open TO proving the project is NOT complete' are indistinguishable from the TO side -- reaping first destroys the evidence. CTO's on-disk catalog verification is the evidence that discriminates them, and it arrived 5 hours later. The hold was correct; the reap is now grounded rather than assumed.</status>
     <dispatch_state>DISPATCHED + GO 2026-07-08 (Andrew-direct via CTO decomp directive; PRD d7b8c9ba2). Orion FIRST per PRD SS9 -- highest existing-value-to-uncover (real probe work already exists, uncataloged). DS~A is the natural owner: just built the data/black_diamond/API/ reference instance + is available + warm on this exact pattern. TO-1 of a per-vendor sequence (Orion -> SmartX retrofit -> Eclipse stand-up -> Schwab file-feed assess).</dispatch_state>
     <gate_note>Gates: none upstream. CTO arch-gates the convention + the Orion catalog's grounded-completeness; CVO certs the claims are REAL captures (roster-is-a-floor honesty). REST-vendor variant (PRD SS4a).</gate_note>
   </metadata>
