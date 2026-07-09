@@ -420,33 +420,27 @@ def canonical_refresh_failure(db_path: str = None) -> dict:
     A vacuous pass, on the very check CVO~B runs at the deploy-gate. That is the guard-fed-a-proxy-input class
     landing on the guard itself: the check's INPUT (the graph) would be a proxy for the live estate.
 
-    The marker suffix is read from _provenance._REFRESH_STATUS_SUFFIX -- the single source AE deliberately
-    put there "so the writer/reader contract can't drift" -- never a hardcoded filename.
+    The marker path/suffix stays entirely inside _canonical.refresh_failure (single-sourced from
+    _provenance._REFRESH_STATUS_SUFFIX) -- we never reconstruct a filename here.
     """
     sys.path.insert(0, os.path.join(WS, "infra", "aws", "globgrph"))
     import _canonical  # noqa: E402
-    import _provenance  # noqa: E402
 
     target = db_path or _canonical.CANONICAL_DB_PATH
 
-    # PRIMARY: 0.7.0_AE's PUBLIC helper (0ea89b9cf), shipped for exactly this consumer. Legitimate coupling.
-    rf = _canonical.refresh_failure(target)
-    if rf:
-        return rf
-
-    # CONSERVATIVE FALLBACK -- and it is load-bearing, not belt-and-braces. refresh_failure() swallows
-    # `except (OSError, ValueError): return None`, so it returns None for BOTH "healthy" AND "marker present
-    # but UNREADABLE". Verified empirically. Its own docstring says callers "must treat None-from-error
-    # conservatively" -- but the helper gives the caller no way to tell the two Nones apart. That is the same
-    # ambiguous-return shape as ensure_fresh's False, reproduced inside the fix for it. And a truncated marker
-    # is precisely what a process dying mid-write during a rebuild crash leaves behind -- the exact scenario
-    # the marker exists for. So EXISTENCE is the signal: a marker we cannot parse is still a marker.
-    # Reported to 0.7.0_AE. Remove this only when refresh_failure() distinguishes unreadable from healthy.
-    marker = target.rstrip("/\\") + _provenance._REFRESH_STATUS_SUFFIX
-    if os.path.exists(marker):
-        return {"kind": "unreadable-marker", "failed_at_iso": "?",
-                "detail": "marker present but refresh_failure() returned None (unparseable)"}
-    return None
+    # 0.7.0_AE's PUBLIC helper (0ea89b9cf, defect-fixed at source in 8d0a7af7e). Straight delegation -- the
+    # existence-is-the-signal semantics now live IN the helper, where they belong:
+    #   absent marker (FileNotFoundError)      -> None                      (the ONLY healthy None)
+    #   genuine failure                        -> {"kind": "rebuild-failed", ...}
+    #   present but UNREADABLE (truncated)     -> {"kind": "unreadable-marker", ...}
+    # My conservative fallback is REMOVED as promised, once the source distinguished the two Nones.
+    #
+    # Self-test 28 is now a CONTRACT TEST on that helper: if refresh_failure() ever regresses to returning None
+    # for an unreadable marker, 28 fails here. We do not re-implement the semantics; we assert them.
+    # (AE caught that my own proposed one-liner -- `except (OSError, ValueError) -> unreadable` -- would have
+    #  false-positived a HEALTHY db, since FileNotFoundError IS an OSError. They catch absent FIRST. My fix
+    #  was wrong; theirs is right. Verified all three cases empirically before deleting the fallback.)
+    return _canonical.refresh_failure(target)
 
 
 def _substrate_unverifiable(before: dict, after: dict) -> dict:
