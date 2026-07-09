@@ -26,8 +26,9 @@ Tonight's instances, all on the same data path:
 | 5 | a latched CloudWatch ALARM | silence | cannot re-notify; silence is the rail, not the state |
 | 6 | `cloudtrail lookup-events` on the PutObject | an empty result | the `opal-data-bd` data-event selector is `readWriteType = ReadOnly` — the write was **never captured**, not "never happened" |
 | 7 | `grep -c '\`'` on a commit message | `0` | never written, **or written and executed away** |
-| 8 | `gap_pct` inside its historical band | two operands degrading together | a ratio is stable while both sides die (§2) |
+| 8 | `gap_pct` inside its historical band | operands that may degrade together | a ratio is stable while both sides die (§2) |
 | 9 | a `SKIP` from a guard that fails closed | total silence | **a control that fails closed and silently is indistinguishable from a control that never ran** |
+| 10 | a plausible causal story attached to a real number | a grounded observation | **the observation is not the mechanism** — §2's retraction is this author's own instance |
 
 **The discriminating question is never "did I see nothing." It is "would I have seen something, had there been
 something to see?"** Every instrument used below was given a positive control before it was allowed to report.
@@ -128,19 +129,58 @@ Three reasons it cannot be the partial detector:
 2. **The sign is backwards.** A partial *understates* `certified_aua` → `gap_pct` goes strongly **negative**.
    Healthy certs are strongly **positive**, and the historical floor already reaches **-3.10%**, so a mild partial
    lands inside the known-good band and passes.
-3. **The fatal one — it is measuring the wrong operand:**
+3. **It moves when the *other* operand moves:**
    ```
      06-18  certified 1,853,454,815.85   gold 1,829,248,213.41   +1.32%
      06-24  certified 1,815,151,730.66   gold 1,714,581,760.81   +5.87%
             certified barely moved.  GOLD FELL ~$115M.
    ```
-   The gap widened because the *other* operand degraded. And the two operands **share an upstream failure**: the
-   same 0-row stubs null `account_type` in `A_00`'s `accounts_dimension`, which feeds **both** `C_02`'s liability
-   exclusion **and** the gold side.
+   The gap widened because the *other* operand degraded. **Why `gold_aua` fell is NOT ESTABLISHED** (see the
+   retraction below). What matters for the detector is only that `gap_pct` is as sensitive to `gold_aua` as to
+   `certified_aua`, and nobody has shown the two fail independently.
 
-> **GENERAL FORM (bank this): a comparison is only a detector if its operands fail INDEPENDENTLY.**
-> Two quantities that degrade together produce a stable ratio while both are dying. **The gap looks healthiest
-> precisely when the failure is total.**
+> **GENERAL FORM (bank this, in its burden-of-proof form): a comparison may not be USED as a detector until its
+> operands are ESTABLISHED to fail independently.** The burden is on establishing independence, not on proving
+> dependence. Two quantities that degrade together produce a stable ratio while both are dying — **the gap looks
+> healthiest precisely when the failure is total.**
+
+#### RETRACTION (mine, 2026-07-09T21:13Z) — I asserted a mechanism I never read
+
+I originally wrote, and CTO banked and COO committed (`8be4709cf`):
+
+> *"the same 0-row stubs null `account_type` in `A_00`'s `accounts_dimension`, which feeds **both** `C_02`'s
+> liability exclusion **and** the gold side."*
+
+**Both halves are false.** Source, `[bd-gold]` tree:
+
+```
+  C_02:325   excl_mask = silver['account_type'].isin(LIABILITY_TYPES)
+               ^ 'silver' is the silver/allocations PARQUET (read at :314-315), NOT accounts_dimension
+  C_02:13    "00: accounts_dimension (for relationship_id, tax_status)"        <- not account_type
+  C_02:407-409  rename_map['aua_current'] = 'total_aua'  ->  gold_aua (:307) descends from canonical
+                                                             performance, not from account_type
+```
+
+`C_02`'s liability exclusion never reads `A_00`'s `accounts_dimension`, and `gold_aua` does not descend from
+`account_type`. I had a grounded **observation** (certified barely moved; `gold_aua` fell ~$115M) and attached a
+**causal story** to it that I had not read. **The $115M attribution is RETRACTED: the observation stands, the
+cause is NOT ESTABLISHED.** It is the same violation this brief enforces on everyone else, and mine reached an
+exec ruling and a committed spec before `0.4.0_DS` handed it back.
+
+**What survives, and why the ruling is unaffected:** reasons (1) and (2) are pure measurement. Either alone
+disqualifies `gap_pct`. And independence is genuinely **not established** — `A_03.positions_cube` reads
+`silver/allocations/{date}.parquet` (`:151`, `:174`) for its open/alive signals, so `silver/allocations` sits
+upstream of `positions_cube → canonical performance → client_performance.total_aua = gold_aua` **and** upstream of
+`certified_aua` directly. A shared ancestor exists.
+
+**And I stop there.** `A_03`'s docstring says a missing/short allocation file returns an empty set and *"the caller
+falls back to existing BKF cap behavior"* — benign by design. **Whether the stubs actually moved `gold_aua` is
+INFERRED and non-actionable.** Structural path, not intermediate computation.
+
+Measured separately by DS and standing on its own: bd `accounts_dimension_latest.account_type` = **0 / 10,545
+non-null** (cot: 0 / 828) — a real, client-facing, previously-unmeasured degradation caused by `A_00:337`
+`sorted(alloc_keys)[-1]` selecting the 0-row stub. It is a finding. It is not evidence for the sentence it was
+offered to support.
 
 **The 02:30Z primary is therefore the direct `nzf` + `sum` read on the landed `silver/allocations/{data_date}.parquet`**
 against the tenant envelope (§5): it binds the property the cert depends on, it shares no operand with gold, and it
