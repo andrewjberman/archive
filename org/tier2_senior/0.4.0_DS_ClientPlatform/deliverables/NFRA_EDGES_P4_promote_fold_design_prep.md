@@ -53,6 +53,41 @@ candidate kind is carried where candidate kind belongs — a `candidate_kind` fi
 mechanism … rides the existing 5-invariant gate") **more faithfully than its req1 wording does**, and it needs
 no schema bump at all — which also means no SoD chain and no sweep gap.
 
+**RATIFIED by CTO 123525Z (no bump), conditional on a reverse-consumer check on the enum. Condition DISCHARGED
+— see §1.3. Two further facts, grounded while discharging it, make the bump worse than argued above.**
+
+### 1.3 Reverse-consumer-acceptance on the ENUM — PASS; and `producer.kind` is a PARTITION COLUMN
+
+**No consumer BRANCHES on `ProducerKind`.** Every estate use is emit-side (`cse_emit_agent/deploy/graphhead/
+frontend_coevolution/gen_cse_seed`; `comp_promote_materializer:230` sets
+`producer={"kind": ProducerKind.PROMOTE.value, "ref": commission_id}`). The only reads are a log line
+(`cse_emit_promote:153`), that emitter's own self-test (`:203`), and a passthrough copy into the inspectable
+trail (`comp_promote_materializer:252` — a label carried forward, not a dispatch). **Zero `if`/match on
+`producer_kind` anywhere.** So `candidate_kind` on the candidate serves every kind-consumer that exists.
+
+**The finding that settles it: `producer.kind` IS the CSE store's PARTITION column.**
+`cse_store.py:16` — *"Partitioned by (source, event_date) == (producer.kind, execution ts date) — the
+`cse_schema.PARTITION_COLUMNS` contract constant"*; Iceberg schema `:103` —
+`NestedField(1, "source", StringType(), required=True)  # producer.kind`.
+
+So a new `ProducerKind` does not merely add an enum member — it **mints a new partition** in a log the same file
+declares *"immutable by construction … NEVER overwrite; NEVER delete."* We would partition an append-only event
+log by **candidate kind** rather than by **producer**, durably and un-reversibly by that log's own contract. The
+category error does not stay abstract; it lands in the storage layout permanently.
+
+**`candidate_kind` is genuinely a NEW field** (checked, not assumed). `PromotionRecord.promotion_class` is the
+TARGET routing key (`PROMOTION_CLASS_ROUTING[rec.promotion_class] -> target, owner`, derived by `_classify(c)`) —
+i.e. what the candidate BECOMES (recognizer / primitive / directive / knowledge-node). That is a different axis
+from what it CAME FROM. `candidate_kind` is additive on `PromotionRecord`: no schema change, no SoD chain, no
+CVO re-sign, no sweep gap, no new partition.
+
+**Near-miss, recorded because it nearly became a filed defect.** `comp_promote_materializer:104` reads
+`producer_kind = ProducerKind.INFRA.value` — which looks inconsistent with the PROMOTE emission. It is not:
+`:104` is `ManifestRecognizer.producer_kind` (a RECOGNIZER's kind; compilerkit emits as INFRA), while the promote
+CSE is built at `:230` under `ProducerKind.PROMOTE`. Different producers, correctly distinguished. The
+`"PROMOTE/MONITOR"` strings in `fedobs/promote_monitor.py` are labels in a monitor trail record, not CSE producer
+kinds. Checked the context before filing, which is the only reason this is a footnote and not a retraction.
+
 **If CTO rules the bump is wanted anyway**, then it is a governed `0.4 → 0.5` bump and the SoD chain binds:
 author (me) → CTO arch-gate → CVO re-sign → **COO SoD-lands** → and the new primitive must be *emitted by a
 registered compiler* in the same wave, or the sweep goes to 10 gaps and we have shipped the thing we gate against.
