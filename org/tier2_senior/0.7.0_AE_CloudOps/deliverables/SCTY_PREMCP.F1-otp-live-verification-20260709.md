@@ -40,10 +40,45 @@ PREMCP §4 asserts the `/otp` static bearer is accepted **only** by `/otp/fetch`
 flags the assertion as unproven: *"it won't, it's not a valid RS256 JWT, but **verify**."*
 Under Rule 22a an unexercised security assertion is `INFERRED` and non-actionable. Exercised now.
 
-**Method — zero credential handling.** The real capability bearer was never read. The claim under
-test is *"an opaque non-JWT bearer cannot pass the `/mcp` guard."* A random 32-byte opaque token
-of the same shape is a sound negative control: if the guard rejects **any** opaque bearer, it
-rejects the real one. (This is strictly stronger than testing with the live secret, and leaks nothing.)
+**Method — zero credential handling.** The real capability bearer was never read. A random 32-byte
+opaque token of the same shape was used as a negative control.
+
+> ### CORRECTION (CVO 190631Z) — my original reasoning here was WRONG. Do not reuse it.
+>
+> I originally wrote: *"if the guard rejects **any** opaque bearer, it rejects the real one —
+> strictly stronger than testing with the live secret."* **That inference does not hold, and CVO
+> refuted it.** A random token and the real bearer differ in exactly the one property a guard could
+> key on: **membership in a static allowlist.** Had `/mcp` contained a branch like
+> `if hmac.compare_digest(token, cfg.OTP_BEARER): accept`, my random token would still 401 while the
+> real bearer returned 200. The probe **cannot distinguish** *"no static-bearer path exists on /mcp"*
+> from *"a static-bearer path exists that a random token can never trigger."* On the precise failure
+> mode the PRD flagged — accidental static-bearer acceptance on `/mcp` — the random-token control has
+> **zero power**. It is strictly *weaker*, not stronger.
+>
+> The tell was in the PRD text I was verifying: *"it's not a valid RS256 JWT, so it could never pass."*
+> That is a **mechanism claim about the guard's logic**, and Rule 22 says a mechanism claim closes at
+> **SOURCE**, never by a behavioral probe against a different input. I ran a behavioral probe at a
+> mechanism claim and then called it dominant. That is the error.
+
+**What actually closes it — SOURCE, independently re-derived (not taken from CVO's word):**
+
+- `server.py:91-106` `_bearer_email()` — `Bearer ` prefix → `oauth_as.validate_access_token()` (RS256
+  sig / iss / aud / exp) → non-empty `sub` → required scope. **No static branch, no allowlist, no
+  `compare_digest` anywhere on this path.**
+- `otp.check_bearer` has exactly **two** call sites — `server.py:446` and `:486`, both `/otp/*` routes.
+  `ms_ingest.check_bearer` has exactly **one** — `:507`, on `/ms/*`. Neither is reachable from `/mcp`.
+  *(CVO cited `:439`/`:479`/`:500`; the 7-line offset is my own comment edit in `bfbf89ba7`, not drift.)*
+- The only other `compare_digest` in the app is `oauth_as.py:224` — the **PKCE** challenge check, not a
+  bearer path.
+
+That **call-site enumeration** is what makes *"the OTP bearer is accepted ONLY by /otp/*"* SOURCE-CONFIRMED.
+
+**Both artifacts are required, and neither dominates** (CVO's synthesis, adopted):
+the probe proves the **deployed binary behaves as the source says** (mechanical axis — source alone
+cannot prove that: the deployed sha could differ, a route could shadow, the ALB could rewrite);
+the source read proves the **guard has no allowlist** (the probe alone cannot prove that). Together
+they close it. The error was not running the probe — keep the probe. The error was the "strictly
+stronger" framing.
 
 | Probe | Result | Want | |
 |---|---|---|---|
@@ -54,9 +89,15 @@ rejects the real one. (This is strictly stronger than testing with the live secr
 | `GET /otp/health` w/ real bearer (via liveness λ) | **200** | 200 | PASS — positive control |
 | `GET /teams/poll` w/ opaque non-JWT bearer | **302** | 401/403 | see §3 |
 
-**F1 bearer-isolation: VERIFIED.** The property holds, and holds *more strongly* than the PRD
-claimed. Positive and negative controls both fire. CVO may re-derive independently; the probes
-are non-destructive, read-only, and use no secret.
+**F1 bearer-isolation: CERTIFIED** (CVO 190631Z, on the source enumeration above — *not* on the probe).
+Positive and negative controls both fire, so the `/otp` leg is airtight behaviorally; the `/mcp` leg
+needed source, and got it. The zero-credential *instinct* is endorsed; the *"strictly stronger"*
+reasoning is retracted.
+
+**Transferable lesson (the one worth keeping):** *a behavioral probe cannot close a mechanism claim.*
+Ask what property distinguishes your control input from the real one — if a guard could key on exactly
+that property, your control has zero power against the failure mode you care about. Reach for source
+(here: a call-site enumeration), then use the probe to prove the deployed artifact matches it.
 
 ---
 
