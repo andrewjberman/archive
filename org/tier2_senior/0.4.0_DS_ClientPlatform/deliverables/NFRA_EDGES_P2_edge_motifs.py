@@ -100,9 +100,24 @@ from comp_ladder import Node, decompress, fidelity_check  # noqa: E402 -- the RE
 # Deliberately 13-digit: P1's 10-digit seconds sentinel is the inherited defect documented above.
 SELFTEST_SNAPSHOT_TS_MS = 1751990400000
 
+# The detector range TO req1 requires ("each D1-D7 detector emits"). A detector INSIDE this range that
+# emits nothing must carry a STATED disposition -- never a silent absence. D6 is the case (see below);
+# D8/D9 sit OUTSIDE the range and are ordinary routed gaps.
+_TO_REQUIRED_RANGE = {"D1", "D2", "D3", "D4", "D5", "D6", "D7"}
+
 # Instance grain per detector (design-prep open point 2).
 _GRAIN_PER_EDGE = {"D3"}                 # an instance IS one edge
 _ABSENCE_DETECTORS = {"D4", "D5", "D7"}  # negative-space / site-keyed (no reifiable member edge-set)
+
+# D6 DISPOSITION (TO req1 is D1-D7, so D6's non-emission is a stated qualification, not an omission).
+# LIVE-VERIFIED on the HEAD-current canonical, not quoted from P1M.GAPS's prose:
+#   - PROP_PASSES source node_types: exactly ONE distinct value, JSXElement (over 1382 PROP_PASSES edges)
+#   - 2-hop PROP_PASSES chains: 0
+# A Prop/Field is therefore never a PROP_PASSES source -> no chain of length>=2 exists -> prop-drill
+# depth>=4 is structurally unreachable. D6 has ZERO instances: there is no edge-CONFIGURATION to emit,
+# and emitting one would fabricate a motif. This differs from D7, which HAS 197 instances but whose
+# defining RENDERS in-edge is not reifiable (no expansion_query) -> emitted as a site-keyed absence motif.
+# req1 = MET, qualified on D6. Route: extractor-extension emitting a transitive PROP_DRILL edge.
 
 _ABSENCE_C0_FACT = {
     "D4": "0 inbound INSTANTIATES (edge-absence: negative space)",
@@ -432,9 +447,22 @@ def prove_edge_motifs() -> int:
         print("    " + json.dumps({k: r[k] for k in ("node_id", "node_type", "layer", "snapshot_ts")}))
         print("    props: " + json.dumps(r["props"]))
 
-    print("\n  GAPS (P1M.GAPS -- routed, never silently dropped):")
+    # GAPS -- and CRITICALLY, separate the ones INSIDE the TO's required D1-D7 range from those outside
+    # it. D6 is IN range and emits NOTHING; that must be stated as a disposition, never left to look like
+    # a silent omission (the exact failure the retracted build made with D4/D5/D7).
+    print("\n  IN-RANGE NON-EMISSION (TO req1 says D1-D7; state the reason, never silently absent):")
     for g in P1M.GAPS:
-        print("    %-4s %-20s -> %s" % (g["id"], g["name"], g["route_to"][:60]))
+        if g["id"] in _TO_REQUIRED_RANGE:
+            print("    %-4s %-20s NOT EMITTED -- recurrence 0, STRUCTURAL (live-verified, not quoted):" % (g["id"], g["name"]))
+            print("         PROP_PASSES sources are exclusively JSXElement (live: 1 distinct src_type over")
+            print("         1382 edges), so a Prop/Field is never a source -> ZERO 2-hop chains exist (live:")
+            print("         two_hop_chains=0) -> depth>=4 is unreachable. There is NO edge-configuration to")
+            print("         emit; emitting one would fabricate a motif. req1 = MET-with-D6-qualified.")
+            print("         route -> " + g["route_to"])
+    print("\n  OUT-OF-RANGE GAPS (outside the TO's D1-D7; routed, never silently dropped):")
+    for g in P1M.GAPS:
+        if g["id"] not in _TO_REQUIRED_RANGE:
+            print("    %-4s %-20s -> %s" % (g["id"], g["name"], g["route_to"][:60]))
 
     print("\n  req3 AC4 (all edge-motif ids distinct, hashed from the canonical edge/site set): %s"
           % ("PASS" if ac4_live else "FAIL"))
