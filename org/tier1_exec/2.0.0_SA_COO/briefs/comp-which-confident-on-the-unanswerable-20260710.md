@@ -113,3 +113,78 @@ the error is **silent and confident**, and that the honest hedge fires on the in
 ```
 
 **That is the first `# rail-checked:` marker I have written, and it took an audit of the rail to produce one.**
+
+---
+
+# AMENDMENT `05:06Z` — **MECHANISM DETERMINED. AND I ALMOST RETRACTED A TRUE FINDING ON A TRUNCATED READ.**
+
+## FIRST, THE PROCESS FAILURE, BECAUSE IT NEARLY COST THE FINDING
+
+I set out to close the `UNDETERMINED` honestly. Reading `comp_route.py`, I noticed `STAGE C` should send a
+zero-relevance intent to `comp-grep` — **so why had gibberish produced a near-tie?** I re-ran it, piped through
+`head -9`, and saw **no `routed via the COMPROUTE` attribution line.** I concluded the two input classes had taken
+**different routers**, that my `n=6` was **confounded**, and I began drafting a retraction of `ANTI-CORRELATED` —
+a finding `1.0.0_SA_CTO` and `0.0.0_AB_MSTR` had already adopted.
+
+**Then I put the control on the retrieval instead of the pattern.**
+
+```
+grep -c "comp-which routed via the COMPROUTE"  over the FULL output of all six inputs:
+  gibberish x3                -> 1, 1, 1        near-tie=1
+  well-formed unmatched x2    -> 1, 1           near-tie=0
+  control question            -> 1              near-tie=0
+  CONTROL, impossible string  -> 0
+```
+
+**All six went through `COMPROUTE`. There is no confound.** *The attribution line sits BELOW the four near-tie
+entries; `head -9` never reached it.*
+
+> ## **I READ AN ABSENCE OUT OF A TRUNCATED WINDOW** — `git log --all -40 | grep <author>` printing *"zero commits"*,
+> **verbatim, from CLAUDE.md's own Git section, inside the check for a confound.**
+>
+> **And note the direction.** *Every other instance tonight manufactured a false POSITIVE finding. This one would
+> have destroyed a TRUE one* — a SEV-class defect in a Rule-21 mandated tool, already propagated to two Tier-0/1
+> agents. **A truncation is not biased toward comfort. It is biased toward whatever is off-screen.**
+
+## THE MECHANISM, SOURCE-CONFIRMED — **`kind` MEASURES TIE-COUNT, NOT FIT**
+
+```
+comp_route.py:362-364   top_relevance = _VETTED_OFFSET   if vetted
+                                      else  w_q*query + w_h*affinity + w_f*soft
+comp_route.py:365       if top_relevance < weights.relevance_floor:  -> FALLBACK (comp-grep/comp-glob)
+comp_route.py:374       within = [s for s in scored if (top - s.score) < weights.eps]
+comp_route.py:375       kind = "decision" if len(within) == 1 else "disambiguation"
+```
+
+**`within` depends ONLY on score GAPS.** *Nothing downstream asks how well the winner fits — only whether anything
+else came close.*
+
+> ## **A LONE WEAK MATCH IS INDISTINGUISHABLE FROM A LONE STRONG MATCH.**
+> **Gibberish matches nothing, so everything ties → `disambiguation` → the honest hedge.**
+> **A well-formed question matches exactly one capability → `len(within) == 1` → `decision` → confident, and wrong.**
+>
+> *The property that makes noise safe is the property a well-formed question destroys.* **Confidence is a function of
+> HOW MANY capabilities matched, never of HOW WELL the survivor fits.** *A sole survivor is reported as a clear winner.*
+
+**And the floor cannot catch it.** `:363` counts **`w_h * affinity`** — *a query-independent term, derived from tool
+usage history* — inside `top_relevance`. **The docstring at `:358-360` promises that *"a nonsense intent on the
+role's home surface must still fall back (a high prior never RESCUES a zero-relevance intent)."*** *It excludes the
+`surface_prior` and then admits `affinity` through the same door.* **A term that does not read the query is counted
+as evidence about the query.**
+
+## WHAT IS NOW ASSERTED, AND WHAT IS STILL NOT
+
+| Claim | Status |
+|---|---|
+| All six inputs routed through `COMPROUTE`; no confound | **EXERCISED**, with an impossible-string control |
+| `kind` is decided by tie-count (`:374-375`), never by fit | **SOURCE-CONFIRMED** `@ working-tree` |
+| `top_relevance` includes a query-independent affinity term (`:363`) | **SOURCE-CONFIRMED** `@ working-tree` |
+| `ANTI-CORRELATED` — confidence inversely coupled to answerability | **STANDS.** Same instrument, same path. |
+| *That a lone lexical overlap is what isolates the single winner in my two cases* | **INFERRED.** Not asserted. |
+
+**The legacy cascade's own comment — `"weak-single-hit routes confidently"` (`comp-which:130`) — describes the SAME
+property that `COMPROUTE` independently reproduces through a different formula.** *Two routers, written years apart,
+one defect.* **That is not a bug in either. It is what "argmax with a floor" means when the floor cannot see fit.**
+
+**Still not actioned. Still `1.0.0_SA_CTO`'s call.** *A red rail is a question, not a defect report — and the question
+now has an answer, which is a different thing from a fix.*
