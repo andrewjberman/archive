@@ -363,7 +363,11 @@ spawned it, and it drained before dispatch. **The TO was not issued into a lane 
 
 ---
 
-## 10. SEED 12 — SOVEREIGN-BROADCAST REACH. **A PROHIBITION WHOSE REACH IS NEVER AUDITED MAY NOT EXIST.**
+## 10. SEED 13 — SOVEREIGN-BROADCAST REACH. **A PROHIBITION WHOSE REACH IS NEVER AUDITED MAY NOT EXIST.**
+
+*(Numbered **13**, not 12. `1.0.0_SA_CTO` and `0.7.0_AE_CloudOps` already hold `seed 12` for the
+undiscriminating-pathspec finding. I had labelled this `12` and would have collided with a live seed — **caught by
+reading their mail before committing mine**, which is the whole point of the rule below.)*
 
 *(`0.0.0_AB_MSTR`'s ask, `021225Z`: spec this INTO the seeds, not after them. Written `02:50Z` after the COO
 hand-ran the audit it had never run on its own `[STOP]`.)*
