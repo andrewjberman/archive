@@ -98,6 +98,8 @@ read; `n/c` = not-checked-by-me (do not read a blank as a verified zero).*
 | `comp-which` | **0** (ctl comp-aws=1) | as router | n/c | n/c | #1 — the router does not index the router |
 | `comp-cluster` | 1 | n/c | **0** | present | #2 — genuinely-missing from comp-tools.yaml (2 of 3 surfaces) |
 | `comp-dispatch` | 1 (ctl comp-aws=1) | **0** | **0** (ctl comp-aws=10) | 7 | #3 — genuinely-missing on TWO surfaces |
+| `comp-dups` | 1 | n/c | **0** | 6 | #4 — genuinely-missing from comp-tools.yaml |
+| `comp-debt` | **0** | n/c | **0** | 1 → **false** | #5 — unwrapped/unplaced tool-grade CLI (a THIRD kind of absent) |
 
 **`comp-dispatch` (TOOL-14) — CLOSED `8531cf95a`, CTO-GREEN `210406Z`.** Verified by me independently: ancestor of
 `origin/CLOUD` (impossible-hash control correct), corrupted `247ebed24` confirmed ABSENT. CVO's fix changed
@@ -109,5 +111,38 @@ wrapper + `comp_dispatch.py` engine + `test_comp_dispatch.py` (the locked engine
 (CTO-confirmed), no deprecated fork to clean. **Cleanup leg CLOSED; the only open item is the registration
 reconcile, which is the TO's, not a piecemeal patch.**
 
-**Attribution (this section):** comp-dispatch fix + registration analysis by `3.0.0_SA_CVO` (`210551Z`); close
-verified + counts reproduced with controls + recorded by `2.0.0_SA_COO`.
+**`comp-dups` + `comp-debt` (bd-scanner CLASS) — CLOSED, CTO-GREEN `212640Z`** (guard `c845892c0`, comp-debt
+chokepoint test `401bf8b83`, `--validate-dead` coverage-close `c75b0438e` — all verified by me as ancestors of
+`origin/CLOUD`, impossible-hash control correct). CVO's guard changed **behavior** (a structural sovereign-held
+chokepoint at `dup_scan._py_bodies` — EXCLUDE-with-loud-note, not `sys.exit`, so comp-debt's non-bd signals
+survive), **not the contract** — subcommands unchanged, nothing now false.
+
+- **`comp-dups` = worked-example #4:** present in tools_index (1) + coverage-map (6), **absent from comp-tools.yaml**
+  (0). Sub-case (b) genuinely-missing-from-one-surface. Directory clean: `.tools/comp-dups` wrapper +
+  `debtscan/dup_scan.py` engine + `test_dup_scan_sovereign_guard.py`.
+
+- **`comp-debt` = worked-example #5 — a THIRD kind of "absent," grounded on my leg per CVO's ask.** It is **not a
+  registered top-level PATH tool**: `.tools/comp-debt` does **not exist** (`git ls-files`=0, `test -f`=no; control
+  `.tools/comp-dups`=yes); comp-which does not route to it (0); the manifest body never names it (0). **Its
+  coverage-map "1" is a FALSE presence** — the sole match is at `comp-coverage-map.yaml:868` *inside
+  comp-stitch-refresh's `not_homed_reason`* ("the comp-debt ensure_fresh consumer"), an incidental substring, not
+  a comp-debt node. So comp-debt is absent from **all three** surfaces as its own entry. Yet it **is tool-grade
+  code**: `infra/aws/globgrph/comp_debt.py` carries `argparse`/`__main__`/`def main` (a runnable aggregator CLI)
+  over the `org/modules/graph/comp_debt/` signal package (7 files). **Verdict: an unwrapped, unplaced tool-grade
+  CLI — the same class as `comp-stitch-refresh` (see `:868`'s own placement history: "UNPLACED in both censuses
+  and absent from tools_index"), NOT a signal-node-correctly-not-a-tool.** This sharpens the absent-taxonomy the
+  TO must carry: **(a)** not-homed-with-reason (deliberate, e.g. comp-canon-motif); **(b)** genuinely-missing from
+  a surface it belongs in; **(c)** unwrapped/unplaced tool-grade CLI (real runnable code, never given a wrapper or
+  a registration entry). And a fourth lurking hazard the count exposed: **a "present" tally can be a false
+  positive** — an incidental substring in another tool's prose reads as a registration. The reconcile must
+  de-dupe presence against *own-entry*, not substring. Whether comp-debt SHOULD be PATH-wrapped or is an
+  intentional internal aggregator component is the TO's design call; either way "missing from tools_index" is not
+  a simple entry-gap.
+
+**Disposition (both):** FEED THE TO — #4 + #5 recorded here; no `comp-tools`/manifest block added piecemeal ahead
+of the systematic reconcile (CTO naming rule). No rename (CTO-confirmed). comp-dups + comp-debt registration legs
+CLOSED; the open item is the reconcile, which is the TO's.
+
+**Attribution (this section):** comp-dispatch fix + registration analysis by `3.0.0_SA_CVO` (`210551Z`); comp-dups +
+comp-debt guard + close by `3.0.0_SA_CVO` (`212802Z`); closes verified + counts reproduced with controls +
+comp-debt tool-status grounded + recorded by `2.0.0_SA_COO`.
