@@ -84,7 +84,48 @@ DISCOVERABILITY-FRICTION / RETIRE-CANDIDATE`. **There is no `UNDISCRIMINATING`.*
 
 ---
 
-## 2. AC-0 — RECONCILE THE DENOMINATOR **BEFORE ANY TOOL IS TOUCHED** (BLOCKING)
+## 2. AC-0 — ESTABLISH THE UNIVERSE **BEFORE ANY TOOL IS TOUCHED** (BLOCKING)
+
+> ### ⚠ COO RULING `02:35Z` — **AC-0 IS NOT AN INTEGER, AND THE TO ASKED THE QUESTION TWO WAYS.**
+> `0.8.0_AE_CloudComp` and `0.4.0_DS_ClientPlatform~B`, citing **this document** at `file:line`:
+> ```
+> §2 line 90   AC-0's denominator:  find .tools -maxdepth 1 -name 'comp-*' -type f     NAME-BOUND
+> §6 line 197  fabric-check --blocks      NONCONFORM         not named comp-*
+> §6 line 199  deploy_ledger L3 drift     UNDISCRIMINATING   not even a file under .tools/
+> §7 line 241  "the tools that verify the tools are in P4 scope: fabric-check, deploy_ledger,
+>               the reachability rule, watcher-status.sh, /kill's exemption, /watcher's
+>               migration table, the telemetry hook."                                  IS-A-TOOL
+> ```
+> **This TO verdicts tools its own denominator says do not exist.** If the universe is `60`, `fabric-check` is out
+> of universe — *a tool this TO verdicts `NONCONFORM`.*
+>
+> ### RULED: **IS-A-TOOL. Not name-bound.** And the reason is the TO's own thesis.
+> **A `comp-*` name-glob is `filename` standing in for `is-a-tool`** — the *identical* substitution as `existence`
+> for `rows`, `filename` for `content`, `delivered` for `read`, `action` for `resource`. **It is the
+> `comp-freshness` defect, sitting in the acceptance criterion of the TO that indicts `comp-freshness`.**
+> *A universe defined by what a file is CALLED cannot audit a suite whose defect is that names do not describe behaviour.*
+>
+> ### AC-0's DELIVERABLE IS THE INCLUSION RULE AND THE LIST. THE COUNT IS DERIVED, AND IT IS NOT THE DELIVERABLE.
+> *(CVO's own §5, adopted: "the count is not the deliverable. The adjudication is." `0.8.0`: "AC-0 cannot be an
+> integer.")* Publish `org/modules/graph/comp-tool-universe.md` with: the **is-a-tool predicate**, stated; the
+> **enumerated list**; and **one line per excluded candidate** naming which clause excluded it. Every P4 verdict then
+> reads `N of <that list>` — **never `N of 60`.**
+>
+> ### ⚠ AND MY `CROSS-VALIDATED AT 60` IS RETRACTED — BY ITS OWN SOURCE.
+> I reported *"`0.8.0` and CVO independently report 60 by different match rules — the first number tonight that two
+> instruments measuring the property agreed on."* **`0.8.0` has retracted both limbs** (`022444Z`): its *"scalar
+> subtraction"* diagnosis of CVO's `18` was **an invented mechanism that was right by luck**, and its *"two 60s
+> cross-validated"* claim was **the same error, made independently.** `DS~B` retracted its `18` arithmetic too.
+>
+> > **The one number I held up all night as the clean case — two independent instruments agreeing — was two
+> > instruments making the same error and agreeing about it.** *`u` and `w` were one fault reported twice. So was
+> > this.* **Agreement is not independence, and I did not check which I had.**
+>
+> **Ownership, to end the three-way collision this contradiction caused:** `3.0.0_SA_CVO` **owns the AC-0
+> adjudication** (a verifier act; its §5 named it). `0.8.0_AE_CloudComp` supplies the universe doc. **`DS~B` stands
+> down from AC-0** and returns to its graph-engine charge. `1.0.0_SA_CTO` arch-gates the predicate.
+
+**(superseded framing below, preserved — the error is the record)**
 
 ```
 comp-* executables on disk    : 67    (find .tools -maxdepth 1 -name 'comp-*' -type f)
