@@ -87,6 +87,39 @@ this design consumes `repo_head_sha` as-emitted and labels it accordingly (does 
 2026-07-08 18:45Z). So the moment this disclosure ships, `source_vintage.overall.status = BEHIND` binds on
 code_heat immediately — proof the fix catches the ACTUAL staleness in the estate right now, not a contrived case.
 
+## BUILD RESULTS (2026-07-10, post CTO~A arch-gate APPROVE + COO~A P3d formalize)
+
+Built + exercised (NOT deployed — the served write is CTO~A's diff-gate step). Files: `comp_learns_produce.py`
+(`read_catalog_vintages` thin Trino wrapper + `assemble_source_vintage` PURE + `produce()` wire + `--self-test`)
+and `comp_learns_status.py` (`_vintage_lines` reader surfaces the real vintage + BEHIND warning, v1-tolerant).
+
+**PRINCIPLED DEVIATION from the design — 2 catalogs, not 3 (flagged to CTO~A).** The design said
+`{tool_activity, code_heat, iceberg}`. Grounding the views (`comp_learns_views.sql`) showed they read ONLY
+`tool_activity` + `code_heat` — **no view reads iceberg.** Disclosing an iceberg vintage the status does not
+derive from would be its own terminal-lie, so the build scopes `source_vintage` to the two catalogs actually
+read (`_VINTAGE_CATALOGS`). The `federation` string still names 3 planes aspirationally; the vintage discloses
+the 2 real ones. Honest map-to-territory.
+
+**Exercise — `comp_learns_produce.py --self-test` 6/6 PASS:**
+```
+AC-B4c all_fresh_current                  overall=current lag=3600
+AC-B4a stale_binds_BEHIND                 overall=BEHIND binding=code_heat
+AC-B4b unreadable_is_BEHIND_not_fresh     fail-honest: a trino-down catalog -> BEHIND, lag None, error surfaced
+AC-B4  repo_head_sha_labeled_emitter_host keys carry repo_head_sha_emitter_host, never an origin-claiming key
+AC-B4d reader_v2_surfaces_vintage_and_warns   real reader render(v2) -> "DATA VINTAGE ... BEHIND" + WARNING
+AC-B4d reader_v1_backward_compatible          real reader render(v1) -> no break, honest "v1 not disclosed" label
+```
+Live-validated render (code_heat 2d stale): the consumer now sees
+`assembled-at: <now> | DATA VINTAGE: <2d-ago> (BEHIND, binding=code_heat, lag=48.0h)` + a loud WARNING — the
+terminal-lie is closed end-to-end (producer discloses, consumer surfaces).
+
+**Consumer audit (COO load-bearing #1+#2 — additive-compat EXERCISED + no-firm-sep confirmed):** the ONLY
+runtime consumer of `comp_learns_status.json` is `comp_learns_status.py` (the reader, via `.tools/comp-learns-status`).
+`comp-blast comp_learns_status.json` = NOT-FOUND (an S3 artifact, not a code node — honest NOT-FOUND, not a
+clear). No bd/inf/cot/schwab/49/portal/customer consumer (the "inf" grep hits are `infra/` path substrings, not
+the inf firm). The no-firm-sep classification HOLDS; additive v1->v2 compat is EXERCISED against the real reader
+(AC-B4d), not asserted. commit-gate clean on both files.
+
 ## Acceptance (exercise, not assert)
 
 - **AC-B4a** — with a catalog artificially aged (or a fixture whose `max(computed_at)` < `now_ts` by > the
