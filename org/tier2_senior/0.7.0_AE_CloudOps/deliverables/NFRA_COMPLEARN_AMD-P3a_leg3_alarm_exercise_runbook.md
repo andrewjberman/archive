@@ -2,6 +2,25 @@
 
 **Author:** `0.7.0_AE_CloudOps~B` · 2026-07-10 · **GATED:** do NOT run until CTO~A green-lights + the Andrew-awareness on the SMS page is handled (see Blast Radius). Option-independent (the alarm exists under both design options).
 
+## BANKED LESSON (2026-07-10, incident-derived, CTO~A-ratified) -- NEW-ALARM CREATION-PAGE RACE
+
+Creating the telemetry alarm in the B2 apply fired a STRAY ~2-min ALARM->OK on a brand-new alarm
+(2 SMS to the sovereign's phone, 2 SQS to COO), self-recovered. Root cause: a new CloudWatch metric
+alarm with `treat_missing_data=breaching` evaluates missing-data -> ALARM within ~1-2 min of creation,
+while a PutMetricData datapoint takes ~1-2 min to become alarm-visible. So **seeding AFTER the alarm
+is created (with actions enabled) is structurally racy -- the alarm fires empty before the seed lands.**
+
+**CORRECT PATTERN for any new breaching alarm on a paging path (NEVER seed-after-create-with-actions-enabled):**
+1. CREATE the alarm with `actions_enabled=false` (or `treat_missing_data=missing`).
+2. `PutMetricData` a fresh seed datapoint (or invoke the producer).
+3. CONFIRM the datapoint is alarm-visible AND the alarm reads OK (poll `describe-alarms`).
+4. THEN enable actions / flip `treat_missing_data` to `breaching`.
+
+This is a SHARED miss (the arch-gate ratified seed-after-create too). It is banked in
+`memory/feedback_new_alarm_creation_page_race_seed_before_enable.md`. The exercise below is
+unaffected (it drives an EXISTING alarm), but any FUTURE alarm-creation on a sovereign-paging path
+follows the 4-step pattern above.
+
 ## What we are proving
 Invariant #2 / AC-L3a: the freshness gate is not merely *configured* but *fires*. The alarm `opal-globgrph-tool-activity-stale` has been OK since 2026-07-06 and has **never** transitioned to ALARM. An alarm never shown to fire has not been shown to work ("census of survived failures"). This drives it OK→ALARM and back, capturing the transition + the SNS delivery as evidence.
 
