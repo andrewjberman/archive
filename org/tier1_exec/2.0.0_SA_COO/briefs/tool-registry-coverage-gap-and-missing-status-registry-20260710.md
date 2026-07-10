@@ -82,3 +82,32 @@ brief is the durable record; the TO is CTO's to author when the assurance sweep 
 
 **Attribution:** finding originated in CTO's front-pass census; surfaced by COO across the comp-blast + comp-build
 legs; endorsed for durable-artifact routing by CVO per LD-0269.
+
+---
+
+## WORKED EXAMPLES ACCUMULATING — the concrete cases the reconcile TO must resolve
+
+*As the assurance sweep closes tools one at a time, each one surfaces its own registration state. These are the
+grounded per-surface counts the reconcile TO (`TOOLPASS-D1`) will resolve systematically. **None is patched
+piecemeal** — a mid-sweep `id:`/`comp-tools` edit breaks the alphabetical audit index (CTO's standing naming
+rule); recording the case here IS the feed. Every asserted cell carries a live control proving the file was
+read; `n/c` = not-checked-by-me (do not read a blank as a verified zero).*
+
+| tool | tools_index | `- id:` entry | comp-tools.yaml | coverage-map | sub-case |
+|---|---|---|---|---|---|
+| `comp-which` | **0** (ctl comp-aws=1) | as router | n/c | n/c | #1 — the router does not index the router |
+| `comp-cluster` | 1 | n/c | **0** | present | #2 — genuinely-missing from comp-tools.yaml (2 of 3 surfaces) |
+| `comp-dispatch` | 1 (ctl comp-aws=1) | **0** | **0** (ctl comp-aws=10) | 7 | #3 — genuinely-missing on TWO surfaces |
+
+**`comp-dispatch` (TOOL-14) — CLOSED `8531cf95a`, CTO-GREEN `210406Z`.** Verified by me independently: ancestor of
+`origin/CLOUD` (impossible-hash control correct), corrupted `247ebed24` confirmed ABSENT. CVO's fix changed
+**behavior** (a more honest `--gates` — discloses the gate detector's closed-allowlist boundary rather than
+under-reporting silently), **not the contract** — the tools_index `does:` stays accurate, so no surface is now
+*false*. The two gaps (`- id:` canonical entry absent; comp-tools.yaml absent) are **pre-existing** and are
+sub-case (b) genuinely-missing-from-a-surface-it-belongs-in, twice. Directory/naming clean: `.tools/comp-dispatch`
+wrapper + `comp_dispatch.py` engine + `test_comp_dispatch.py` (the locked engine/tool convention); no rename
+(CTO-confirmed), no deprecated fork to clean. **Cleanup leg CLOSED; the only open item is the registration
+reconcile, which is the TO's, not a piecemeal patch.**
+
+**Attribution (this section):** comp-dispatch fix + registration analysis by `3.0.0_SA_CVO` (`210551Z`); close
+verified + counts reproduced with controls + recorded by `2.0.0_SA_COO`.
