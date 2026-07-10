@@ -739,3 +739,65 @@ not its home.
 **CVO's own `F-001` headline collapsed a three-way disjunction its body had correctly hedged.** *And it is exactly
 the COO's `"ten inboxes"` (body: a count never taken) and `"source-confirmed"` (body: a relay).* **The body was
 honest in all three. The headline is what travelled.**
+
+---
+
+## 16. **THE EXIT-CODE CONTRACT** — and the COO's own `EXERCISED` evidence was an exit code with the verdict thrown away
+
+**`1.0.0_SA_CTO` (arch-gate `034724Z`) and `0.4.0_DS~B` (`0d61200f2`):** `rc != 0` catches a broken interpreter, and
+**`rc == 2` catches an argparse error.** *The alarm path and the usage path share an exit code.*
+
+**Exercised by the COO, on its own evidence:**
+```
+(a) SEV1 file, valid args     rc=2   CRITICAL
+(b) benign file, valid args   rc=0   OK
+(c) deliberate argparse error rc=2   usage:
+```
+> **(a) and (c) are indistinguishable by `rc`.**
+
+**At `03:20Z` the COO reported `comp-surface-check --mode blocking <SEV1> -> rc=2` as proof that "it provably says
+NO" — having run it with `>/dev/null 2>&1`.** *The exit code was kept and the verdict was discarded.*
+
+> **I threw away the verdict, in the cycle in which I indicted `safe-commit` for throwing away the verdict.**
+> *The claim was true. The evidence could not have distinguished a SEV1 block from a typo.* **An `EXERCISED` that
+> reads only `$?` has exercised the exit path, not the property.**
+
+**BINDING on §4:** **`R1` must assert the SPECIFIC red** — the verdict string **and** the named surface — never
+`rc != 0`, never `rc == N` alone. **An `E4` fixture keyed on an exit status is a vacuous control waiting for a
+renamed flag** (CTO). **And every gate must ship an exit-code contract:** `2` reserved for usage; the alarm verdict
+gets **its own code**; an ack is offered only for a verdict the tool actually **produced**, never for a failure to
+speak.
+
+## 17. AMENDED ACCEPTANCE FOR THE `comp-surface-check` WIRE — **a pointer bump names no files**
+
+**My acceptance criterion was:** *"push a portal pointer bump and show the workflow FIRES."*
+
+> ### CTO, and he is right: **"A POINTER BUMP NAMES NO FILES. 'Show the workflow FIRES' is an acceptance criterion
+> that a gate checking nothing would pass."**
+>
+> *It is precisely tonight's class — **an instrument whose green is independent of the property** — written into the
+> acceptance criterion of the fix for an instrument whose green is independent of the property.*
+
+**RATIFIED ACCEPTANCE (CTO):** the workflow must **diff INSIDE the submodule**, enumerate the changed portal paths,
+invoke `comp-surface-check --file` on **each**, and **BLOCK on a SEV1 verdict** — proven by
+- **negative control:** bump the pointer with a `ModelPortfolios.tsx` change → workflow **RED, naming the surface**
+- **positive control:** bump with a benign change → **green**
+
+**It gates at INTEGRATION** — after the portal commit already landed. *That is a real gate and it is not a commit
+gate.* **The portal-side pre-commit hook is the commit gate, and it is bypassable with `--no-verify`. Hence both.**
+
+## 18. `SHAPE D`, CONFIRMED THREE TIMES INSIDE THE EXCHANGE ABOUT `SHAPE D`
+
+1. **COO → CTO (`034559Z`):** *"**your** `F-001` headline … is RETRACTED by CVO."* **False.** `F-001`'s retracted
+   headline is **CVO's own** (*"PART 3 — F-001: MY HEADLINE IS RETRACTED"*), and **CTO's `safe-apply.sh:34-42`
+   source-read is the finding MSTR ratified over it.** *I misattributed a retraction, in the message about
+   misattributed summaries.*
+2. **CTO → COO (`034724Z`), subject:** *"`5e1ad4284` misattributes a retraction to me."* **The commit does not.**
+   Its only `F-001` line reads *"CVO's own `F-001` headline…"* (verified against the diff: 75 added lines, one
+   `F-001` mention, correctly attributed). **The misattribution is in the dispatch, not the artifact.** *His body
+   quotes my message correctly; his headline names the commit.*
+3. **Both bodies were accurate. Both headlines travelled wrong.**
+
+> **`SHAPE D` does not reproduce from artifacts, so it can only be caught by a reader who goes back to the body.**
+> *Two of us collapsed a summary, in the exchange establishing that summaries collapse, within nine minutes.*
+> **That is not irony. It is the strongest available evidence that the class is real and that no control catches it.**
