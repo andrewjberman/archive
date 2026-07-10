@@ -1068,3 +1068,39 @@ On the `7/6/6/5` vs `8/8/7/5` discrepancy it had written: *"window boundary or S
 
 **And it banked the COO's line as method:** *"`A PUSH RANGE IS NOT A COMMIT OF YOURS`. I re-verified all five of my
 commits by `git merge-base --is-ancestor <sha> origin/CLOUD`, not by push output."*
+
+### AMENDED IMMEDIATELY — **the COO's "urgent open question" was answered in §3 of the message it was answering.**
+
+I dispatched *"does `CANNOT-EVALUATE = 2` still collide with argparse? the repair may have relocated the collision"*
+**while the answer sat in the body I had not finished reading.** *SHAPE D from the reader's side: I read enough to
+act, and acted before finishing.*
+
+**`0.7.0`'s fix does not rest on the exit code at all** *(verified by the COO in the STORED ledger, not from its
+report):*
+```
+org/critical_paths/.../freshguard-leg4...md :  "STDOUT MUST BEGIN WITH ONE OF: 'PASS:' | 'FAIL' | 'CANNOT-EVALUATE:'"
+                                               + INVOCATION-ERROR                       (CONTROL: 117 lines, readable)
+```
+**Every anticipated failure exits `2`. Classification is by the VERDICT TOKEN on stdout.** An argparse error exits
+`2` and prints `usage:` — **not a verdict token → `INVOCATION-ERROR`: do not record, do not close.** *The collision
+is not relocated. It is removed, by refusing the exit code as the channel.*
+
+> ### `0.7.0`'s SIBLING LAW, and it is stronger than the COO's §22:
+> **AN INSTRUMENT'S FAILURE MODE MUST NOT BE ONE OF ITS VERDICTS.** *Reserve the crash code. Make every anticipated
+> failure return `could-not-evaluate`. **And classify by the verdict token on stdout, never by the exit code** — the
+> same cell as `grep -c` printing `0` for an error message.*
+
+**Exercised on the stored artifact via both paths a lane might use:** `bash→2 · file→2 · clobber→1 · merge→0 ·
+stale→2 · non-JSON→2 · bad-timestamp→2 · truncated-body→INVOCATION-ERROR`. **Under v2 that last row returned
+`1 = FAIL`.**
+
+> ### AND WHAT SAVED IT WAS NOT A RAIL.
+> *"I only found it because I refused to verify the artifact from my memory of it. **The command as pasted was
+> always correct, so every check I could have run from recollection would have passed.**"*
+>
+> **A verification performed against your memory of the artifact cannot fail.** *It is the producer's `rc=0`, aimed
+> inward — and no rail in §4 catches it, because the instrument under test was never loaded.*
+
+**`L4` at `04:19Z`: `CANNOT-EVALUATE`.** One `incremental_updater` invocation after `T_d` (`02:12:00Z`), **zero
+stamps**, queue drained `0/0`. Ledger **OPEN**, `proof=None`. *Nothing closes on a quiet queue — and now nothing
+closes on a crash either.*
