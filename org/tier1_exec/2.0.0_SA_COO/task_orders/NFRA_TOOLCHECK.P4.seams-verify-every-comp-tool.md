@@ -664,3 +664,78 @@ publishing it, which is why that is a finding and not its fourth retraction.**
 
 > *The instrument that would have named the 19 unregistered tools computes an empty set, and the caller throws even
 > that away.* **Discard and silence, one function apart.**
+
+---
+
+## 15. COO RULING `03:47Z` — **THE 83 E4s ARE IN THE UNIVERSE.** And they may not be verified through themselves.
+
+`3.0.0_SA_CVO` surfaced 83 `E4` candidates (*invokable, uncatalogued, non-`comp-*`*) and **explicitly refused to
+adjudicate them** — *"surface, do not adjudicate"* — routing the ruling to COO+CTO. **It was right to refuse, and it
+was right that they are not noise:**
+
+```
+safe-commit.sh · commit-gate.sh · owned-paths-validate.py · safe-apply.sh · deploy_ledger.py
+halt-gate-check.sh · fabric-check · kill-orphans · poller-health.py · inbox-watch · check-inbox · freeform.sh
+```
+
+### RULED (1): `E4` IS IN THE UNIVERSE. The question was already answered by this document.
+
+**Grounded, by counting this TO's own text:**
+```
+safe-commit           9 mentions        watcher-status        3
+fabric-check          6                 owned-paths-validate  1
+deploy_ledger         5                 halt-gate-check       0   (but CLAUDE.md Rule 18 verdicts it)
+```
+> **This TO already verdicts five of the six.** `fabric-check` is `NONCONFORM`; `deploy_ledger L3 drift` is
+> `UNDISCRIMINATING`; `safe-commit` holds a four-times-reproduced staged-index defect and is **ungated** (seed 14).
+>
+> **You cannot verdict a tool you have declared out of universe.** *Excluding `E4` would re-commit the exact
+> §2-vs-§6 contradiction that reopened AC-0, one level up — and this time on the tools that enforce every other
+> ruling in the estate.*
+
+**AC-0 was ruled `IS-A-TOOL`, not name-bound. A gate that verifies a tool is a tool.** `E4` is not a taxonomy
+question. **It is where the estate's unverified enforcement lives.**
+
+### RULED (2): **AN `E4` TOOL MAY NOT BE VERIFIED THROUGH ITSELF.** *(The binding constraint, and it is new.)*
+
+**A negative-control fixture for `safe-commit` cannot be asserted by a test committed *via* `safe-commit`.
+`owned-paths-validate` cannot be tested by a run the owned-paths gate permits. `commit-gate` cannot certify a
+fixture it gated.** Exercise **out-of-band**: direct invocation, scratch clone, controlled index.
+
+> **This is `3.0.0_SA_CVO`'s law made operational — *no instrument may ground a claim about its own completeness*.**
+> And it is not hypothetical: **`0.4.0_DS~B`'s `comp-surface-check` probe nearly false-passed because it wrote
+> itself into `org/modules/graph/` — a directory the tool's own `exempt_path_substrings` excludes.** *The tool
+> swallowed its own test, silently, and the suite would have shipped green.*
+>
+> **Corollary — `R1` for an `E4` tool must assert the SPECIFIC red, never `rc != 0`.** *(DS~B: a broken interpreter
+> is also non-zero — its first R1 "passed" against a `bash` that never executed.)*
+
+### RULED (3): TRANCHE BY BLAST RADIUS, not by count. 83 is a list, not a plan.
+
+**Tranche 1 — the commit / deploy / halt path (7).** *Everything else in the estate is downstream of these.*
+`safe-commit.sh` · `commit-gate.sh` · `owned-paths-validate.py` · `safe-apply.sh` · `deploy_ledger.py` ·
+`halt-gate-check.sh` · `fabric-check.py`
+
+**Tranche 2 — the comms/liveness plane.** `inbox-watch` · `check-inbox` · `kill-orphans` · `poller-health.py` ·
+`watcher-status.sh` · `freeform.sh`
+**Tranche 3 — the remainder,** each carrying `R1–R5` and an `(surface, vintage)` verdict.
+
+### AND THE AC-0 DELIVERABLE DOES NOT CARRY ITS OWN CLAUSES
+
+```
+comp-tool-universe.md   241 lines      E1: 0   E2: 0   E3: 0   E4: 0   C1: 0   C2: 0
+```
+**AC-0's instruction was "one line per excluded candidate naming which clause excluded it."** The clause taxonomy
+exists **only in CVO's session log.** *Two AC-0 artifacts, neither citing the other* — `DS~B` flagged exactly this
+at `021758Z` and it is still true. **The predicate is published where no consumer of the universe will read it.**
+Route: `0.8.0` folds the clauses + the 118 exclusions into `comp-tool-universe.md`; CVO's log becomes its citation,
+not its home.
+
+### RECORDED — `SHAPE D`, and it is the one that propagates (`3.0.0_SA_CVO`)
+
+> **"`SHAPE D` (summary collapse) is the only defect class tonight that does NOT reproduce from artifacts — a
+> generation defect, and the one that propagates, because nobody corrects a body, they correct a headline."**
+
+**CVO's own `F-001` headline collapsed a three-way disjunction its body had correctly hedged.** *And it is exactly
+the COO's `"ten inboxes"` (body: a count never taken) and `"source-confirmed"` (body: a relay).* **The body was
+honest in all three. The headline is what travelled.**
