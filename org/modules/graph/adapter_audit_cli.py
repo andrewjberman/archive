@@ -7,13 +7,37 @@ PURPOSE (ratified by Andrew 2026-07-10; both failures are SILENT -- nothing erro
   2. Catch the TS type drifting from the real envelope. `apiRequest<T>` is an unchecked
      cast, so the compiler blesses `raw.x` reading `undefined` forever.
 
+SCOPE -- NARROWER THAN THE NAME SUGGESTS. Censused from source 2026-07-10 (Andrew-direct).
+  Of 122 exported adapters across the 13 portal/src/api/endpoints/*.ts files, this tool can
+  audit 19. It reads ONE bucket, ONE firm, ONE layer -- s3://opal-data-inf/platinum -- under
+  exactly THREE path shapes (firm/, clients/{id}/, advisors/{id}/). 96 adapters are
+  Lambda-backed (no static artifact); 7 more serve static .json from a path shape this tool
+  does not model. It is NOT a general portal-artifact auditor and it never touches gold.
+  A rename to `comp-portal-thread` was proposed and CANCELLED by Andrew on exactly this
+  ground: the name promises coverage the tool does not have.
+
+  THE FIRM AXIS IS UNMODELLED. The portal routes firms to different buckets
+  (ROUTER_FIRM_SUFFIX, advisor-intelligence.ts: 49financial->bd, inflection->inf, demo),
+  selected at fetch time via `?firm=`. This tool ignores that and always reads `inf`, so
+  auditing a 49F-served adapter would compare its types against Inflection's envelope --
+  the same manufactured-drift class the clients-vs-advisors fix closed on the SEGMENT axis
+  and left open on the FIRM axis. That `inf` hardcode is currently the ONLY thing keeping
+  this tool out of `opal-data-bd`, which is under a standing sovereign prohibition. Do not
+  parameterise the firm without routing that decision.
+
 VERDICT DISCIPLINE (the whole point of the 2026-07-10 repair):
-  An audit has THREE distinct non-OK outcomes, and collapsing them is how this tool lied:
-    NO_S3_SOURCE    the adapter has no static artifact (it calls a Lambda). The audit
-                    DOES NOT APPLY. This is not a failure and not a pass.
-    FETCH_FAILED    an S3 source was derived but the object could not be read.
-    TYPE_UNRESOLVED the raw input type could not be resolved (or is ambiguous), so the
-                    typed side of the comparison is empty.
+  An audit has FOUR distinct non-OK outcomes, and collapsing them is how this tool lied:
+    NO_S3_SOURCE           the adapter has no static artifact (it calls a Lambda).
+    UNSUPPORTED_PATH_SHAPE the adapter reads a static .json, but from a path this tool does
+                           not model. NOTHING WAS ATTEMPTED.
+    FETCH_FAILED           an S3 source WAS derived and the read WAS attempted, and failed.
+    TYPE_UNRESOLVED        the raw input type could not be resolved, so the typed side is empty.
+  NO_S3_SOURCE and UNSUPPORTED_PATH_SHAPE mean the audit DOES NOT APPLY. Only FETCH_FAILED
+  may claim a read happened. Reporting a never-attempted read as a failed read is what
+  manufactured three false hypotheses during the 2026-07-10 hand-audit -- and it SURVIVED the
+  first repair in a second limb (`prefix is None`), reaching `getYieldCurveData` as a
+  "FETCH_FAILED" for a fetch that never occurred. Hence four statuses, not three.
+  A failed read is not a verdict; a read that never happened is not even an observation.
   In every one of those, `verified` is false and there are ZERO findings. A zero-finding
   UNVERIFIED run MUST NOT be readable as a clean audit -- not on the terminal, and not in
   the manifest, which `.tools/portal-hooks/d1_adapter_threading_gate.py` parses to render
@@ -53,10 +77,15 @@ _ENDPOINT_FILES = [
 PLATINUM_S3_ROOT = 's3://opal-data-inf/platinum'
 
 # Verification statuses. Only OK admits findings.
+# NOT_APPLICABLE_STATUSES: nothing was attempted, so there is nothing to have failed.
 OK = 'OK'
 NO_S3_SOURCE = 'NO_S3_SOURCE'
+UNSUPPORTED_PATH_SHAPE = 'UNSUPPORTED_PATH_SHAPE'
 FETCH_FAILED = 'FETCH_FAILED'
 TYPE_UNRESOLVED = 'TYPE_UNRESOLVED'
+
+NOT_APPLICABLE_STATUSES = (NO_S3_SOURCE, UNSUPPORTED_PATH_SHAPE)
+SUPPORTED_SEGMENTS = ('firm/', 'clients/{id}/', 'advisors/{id}/')
 
 # Exit codes follow the fabric CANNOT-EVALUATE convention:
 #   0 = audited (PASS or WARN)   1 = FAIL (--severity error) / adapter not found
@@ -300,7 +329,14 @@ def _sample_id(segment: str) -> str | None:
         return None
 
 
-def _derive_s3_target(function_body: str, raw_type_name: str) -> str | None:
+def _derive_s3_target(function_body: str, raw_type_name: str) -> tuple[str | None, str]:
+    """(prefix, status). A None prefix has TWO causes and they are not the same event.
+
+    If the body names a segment we model but `_sample_id` yields nothing, we DID list S3 and
+    it failed -> FETCH_FAILED. If the body names no segment we model, we never touched S3 at
+    all -> UNSUPPORTED_PATH_SHAPE. Collapsing these is the second limb of the mislabel that
+    manufactured U1's three false hypotheses.
+    """
     m = re.search(r'apiRequest<' + re.escape(raw_type_name) + r'>\s*\(\s*`([^`]+)`',
                   function_body) if raw_type_name else None
     url = m.group(1) if m else ''
@@ -312,11 +348,13 @@ def _derive_s3_target(function_body: str, raw_type_name: str) -> str | None:
     for scope in (ctx, function_body):
         for seg in ('clients', 'advisors'):
             if re.search(r'/' + seg + r'/', scope):
-                sid = _sample_id(seg)
-                return f'{PLATINUM_S3_ROOT}/{seg}/{sid}/' if sid else None
+                sid = _sample_id(seg)   # an S3 ls WAS issued
+                if sid:
+                    return f'{PLATINUM_S3_ROOT}/{seg}/{sid}/', OK
+                return None, FETCH_FAILED
         if re.search(r'/firm/', scope):
-            return f'{PLATINUM_S3_ROOT}/firm/'
-    return None
+            return f'{PLATINUM_S3_ROOT}/firm/', OK
+    return None, UNSUPPORTED_PATH_SHAPE
 
 
 def _artifact_name(function_body: str, raw_type_name: str) -> str | None:
@@ -342,9 +380,9 @@ def _fetch_s3_raw_fields(function_body: str, raw_type_name: str
     if not artifact:
         return {}, NO_S3_SOURCE, '', ''
 
-    prefix = _derive_s3_target(function_body, raw_type_name)
+    prefix, dstatus = _derive_s3_target(function_body, raw_type_name)
     if not prefix:
-        return {}, FETCH_FAILED, '', ''
+        return {}, dstatus, '', ''
 
     uri = f'{prefix}{artifact}'
     try:
@@ -598,8 +636,14 @@ def cmd_audit(args: argparse.Namespace) -> int:
 
     reason = {
         NO_S3_SOURCE: ('adapter has NO static S3 artifact -- it fetches from a Lambda '
-                       'endpoint. The S3-envelope threading audit DOES NOT APPLY.'),
-        FETCH_FAILED: f'an S3 source was derived ({s3_uri or "prefix undeterminable"}) but could not be read.',
+                       'endpoint. The S3-envelope threading audit DOES NOT APPLY. '
+                       'NOTHING WAS FETCHED.'),
+        UNSUPPORTED_PATH_SHAPE: (
+            'adapter reads a static .json, but from a path this tool does not model. '
+            f'Supported shapes under {PLATINUM_S3_ROOT}: {", ".join(SUPPORTED_SEGMENTS)}. '
+            'The audit DOES NOT APPLY here. NOTHING WAS FETCHED -- this is a scope limit, '
+            'not a failed read.'),
+        FETCH_FAILED: (f'an S3 read WAS attempted ({s3_uri or "a segment listing"}) and it failed.'),
         TYPE_UNRESOLVED: f'the raw input type could not be resolved ({how}); the typed side is empty.',
         OK: '',
     }[status]
@@ -619,7 +663,7 @@ def cmd_audit(args: argparse.Namespace) -> int:
                 print(f'  {"":22}  {"":5}  {f["detail"][:110]}')
     else:
         findings = []
-        label = 'NOT-APPLICABLE' if status == NO_S3_SOURCE else 'UNVERIFIED'
+        label = 'NOT-APPLICABLE' if status in NOT_APPLICABLE_STATUSES else 'UNVERIFIED'
         print(f'\n  {label}: {status} -- threading audit SKIPPED')
         print(f'    {reason}')
         print('    This is NOT a pass and NOT a set of real findings. Zero findings here')
@@ -637,7 +681,7 @@ def cmd_audit(args: argparse.Namespace) -> int:
     # D6: the success token is bound to the AUDIT, not to the absence of a severity filter.
     # 15 WARNs must never print PASS; an unaudited adapter must never print PASS.
     if status != OK:
-        print(f'\n{"NOT-APPLICABLE" if status == NO_S3_SOURCE else "UNVERIFIED"}: '
+        print(f'\n{"NOT-APPLICABLE" if status in NOT_APPLICABLE_STATUSES else "UNVERIFIED"}: '
               f'comp-adapter-audit could not evaluate {adapter_name} ({status})')
         return RC_CANNOT_EVALUATE
     if severity_filter == 'error' and warns:
