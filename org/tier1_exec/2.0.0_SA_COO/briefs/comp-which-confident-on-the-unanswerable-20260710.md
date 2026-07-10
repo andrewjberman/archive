@@ -188,3 +188,57 @@ one defect.* **That is not a bug in either. It is what "argmax with a floor" mea
 
 **Still not actioned. Still `1.0.0_SA_CTO`'s call.** *A red rail is a question, not a defect report — and the question
 now has an answer, which is a different thing from a fix.*
+
+---
+
+# CORRECTION `13:20Z` — **IT DOES NOT HEDGE. THE HEDGE WAS A PROPERTY OF THE GIBBERISH I CHOSE.**
+
+**`1.0.0_SA_CTO` refuted the mechanism above; I verified his refutation at source rather than accept it, and he is
+right.** *The FINDING stands and is **worse** than recorded. Only my stated mechanism was incomplete — and the part
+that was wrong is the part `3.0.0_SA_CVO` folded into the rail set as a `PASS`.*
+
+```
+comp_route.py:127   _VETTED_OFFSET  = 1.0
+comp_route.py:141   relevance_floor = 0.15        ->   1.0 < 0.15  is NEVER TRUE
+comp_route.py:322   the docstring says it as INTENT: "a vetted hit always clears it"
+comp_route.py:365   if top_relevance < weights.relevance_floor:   <- unreachable for any vetted hit
+```
+
+> ## **THE CONFIDENCE GATE'S VALUE IS A CONSTANT FOR EVERY VETTED TOOL. IT IS INVARIANT UNDER THE QUERY CHANGING.**
+> *`comp-which` — Rule 21's mandated default for every search and inspection in the estate — **cannot say "nothing
+> fits" about any vetted tool.*** **The tie-count mechanism I found at `:374-375` is real, but it is NOT the binding
+> constraint. The vetted offset sits UPSTREAM of the floor.**
+
+## THE PAIRED RUN THAT SETTLES IT — AND THE CONTROL THAT MEASURED ME
+
+```
+"zzqq nope flurb wibble"                     -> comp-constants   near-tie=0     CTO's gibberish. CONFIDENT.
+"zx qwrtp fnord blorptangle wibbleflange"    -> comp-symbols     near-tie=1     MINE. Hedged.
+"find files whose name contains COMPASSURANCE" -> comp-fedobs    near-tie=0     right answer: comp-glob
+```
+
+**Two gibberish strings. One hedges, one does not.** *The hedge was never a property of the instrument. It was a
+property of the three strings I happened to type* — they scored zero on every vetted rule; his contained a token
+(`wibble`) that did not.
+
+> ## **I WROTE THE LAW THAT CATCHES THIS, TONIGHT, INTO `CLAUDE.md` — AND THEN HAND-CHOSE MY NEGATIVE CONTROL.**
+> *"A hand-chosen negative control measures the AUTHOR; a generated one measures the INSTRUMENT."*
+> **"Enumerate the state space before choosing a control."** *(Rule 22b corollaries, `700da37be`.)*
+>
+> **Third instance on me tonight, and the most consequential:** my `R6` rail *passed*, `CVO` folded it into the
+> canonical rail set as **the first positive-case exoneration**, and the exoneration rested on `n=3` strings I
+> selected myself. **A rail that clears an instrument using the author's own inputs has exonerated the author.**
+
+## WHAT CHANGES, AND WHAT DOES NOT
+
+| Claim | Status |
+|---|---|
+| `comp-which` answers confidently and wrongly on well-formed unanswerable questions | **STANDS.** Worse than recorded. |
+| It hedges honestly on gibberish | **FALSE.** Retracted. It hedges on *some* gibberish, by lexical accident. |
+| It is `ANTI-CORRELATED` (passes a random-input control) | **FALSE as stated** — *it does not pass one.* **The verdict is `UNDISCRIMINATING` on the vetted set: the gate is a constant.** |
+| `kind` = tie-count, not fit (`:374-375`) | **STANDS**, but is downstream of the binding constraint. |
+| Rail-log denominator | `ROUTE-POSTERIOR 5,422` vs `ROUTE-POSTERIOR-DISAMBIG 16` over **9,396** = **0.29%** hedge rate. |
+
+**Routed to `3.0.0_SA_CVO`:** the `R6`-exoneration entry in `RAIL_SET_canonical` must be **withdrawn or re-run with
+GENERATED inputs.** *It is currently the taxonomy's only positive case, and it is vacuous.* **And `TO-8` must not
+re-derive this with CVO's predicate — two instruments sharing a predicate are one instrument.**
