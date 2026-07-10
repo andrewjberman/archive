@@ -360,3 +360,65 @@ spawned it, and it drained before dispatch. **The TO was not issued into a lane 
 ---
 
 *A tool that has always been wrong produces a flawless usage log. The log was the oracle. That is the whole finding.*
+
+---
+
+## 10. SEED 12 — SOVEREIGN-BROADCAST REACH. **A PROHIBITION WHOSE REACH IS NEVER AUDITED MAY NOT EXIST.**
+
+*(`0.0.0_AB_MSTR`'s ask, `021225Z`: spec this INTO the seeds, not after them. Written `02:50Z` after the COO
+hand-ran the audit it had never run on its own `[STOP]`.)*
+
+### THE AUDIT, RUN AT LAST — on the vendor-egress `[STOP]` of `2026-07-09T22:29Z`
+
+```
+ISSUED to 9 inboxes            not 10.  "Ten" was CTO's number; the COO repeated it twice without counting.
+1.0.0_SA_CTO   NEVER RECEIVED IT        He RELAYED Andrew's directive to the COO. He was never sent the broadcast.
+REPLIED + named it   7 of 9
+SILENT               0.4.0_DS_ClientPlatform   dead session (its copy is the one the orphan handled)
+                     0.7.0_AE_CloudOps~A       dead lane -- AND THE AUTHOR OF AN OPEN DEPLOY LEDGER
+```
+
+**Three defects, and the first two are in the audit itself.**
+
+1. **The matcher could not match a tilde-lane.** It built the key `0.4.0_DS_ClientPlatform/~B` (inbox-path form) and
+   searched for it in a **filename**, where the tilde renders `_`. It reported `NO REPLY AT ALL` for a lane that had
+   replied seven times. *An empty result from a broken query — the sixth of the night.*
+2. **Then a wrong-key-prefix collision.** `_0.4.0_DS_ClientPlatform_` is a substring of `_0.4.0_DS_ClientPlatform_B_`.
+   **The base lane — a session dead since `22:25Z` — was credited with its own tilde-lane's seven replies.** *This is
+   exactly `0.8.0`'s rule: wrong-bucket RED is table stakes; **same-bucket / wrong-key-prefix must also RED.*** Caught
+   by a control that asked: *a dead session must have zero replies.* **Grounded finally on the `# Message from`
+   header — the filename is a wrapper; the header is the property.**
+3. **`named-the-prohibition` is a WEAK ORACLE.** It counts *mention*, not *receipt*. **Nothing in this fabric emits an
+   acknowledgement.** Seven agents discussed the prohibition; **not one of them ever stated they had received it**, and
+   no artifact anywhere records that they did.
+
+### AND THE DENOMINATOR IS UNDEFINED — this is AC-0, for broadcasts
+
+**I cannot say who *should* have received a "fabric-wide" prohibition.** 43 base serials exist; 38 nested lanes; the
+live set at `22:29Z` was never captured. **A broadcast with no manifest cannot be audited for reach, and a reach that
+cannot be audited cannot be claimed.** *The COO wrote "I broadcast that `[STOP]` to ten inboxes" in a log, in a
+message to MSTR, and in a message to CTO. The true number was 9, the set omitted CTO, and nobody — including its
+author — could have told you either.*
+
+> **`CLAUDE.md` Rule 18 already concedes `[STOP]` does not reliably hard-block** (HALTGT resolves a `~lane` to the
+> flat decoy dir). **This is a second, independent, silent failure of the same convention.** They belong in one fix.
+
+### SPEC — ack-or-escalate, and it must be able to FAIL
+
+```
+1. MANIFEST     A sovereign broadcast returns a MANIFEST of intended recipients, computed from a stated
+                predicate ("every base serial with a live session at T"), never an ad-hoc list.
+                THE PREDICATE IS THE DELIVERABLE. The count is derived.  (AC-0, same shape.)
+2. ACK          Reach closes ONLY on an agent-side ACK, per serial. NOT `delivered`. NOT a file in read/
+                (three actors move files there; an orphan forges it for hours). NOT `channel push`
+                (it pushes to the SENDER). NOT `.unread-deliveries` (it records the EMIT).
+3. ESCALATE     Unacked serials after N minutes -> Andrew + MSTR, BY NAME, with the un-reached SET.
+4. SET-DIFF     The manifest is audited by set difference. The COO audited the RETRACTION's reach that night
+                by set difference and found {MSTR}. It never once audited the PROHIBITION's.
+5. R1/R2/R3     Mutant-killed, per CTO: kill the ack path and show the loop goes RED. A green loop that has
+                never been shown capable of failing is the next vacuous control.
+                R2 (0.7.0): the recorder must be shown able to emit a NON-ack. An audit that can only say
+                "reached" is `UNDISCRIMINATING`.
+```
+
+**Owner:** unassigned; `server.py` ack surface is CTO's. **Blocking on nothing. It is a build, and it is owed.**
