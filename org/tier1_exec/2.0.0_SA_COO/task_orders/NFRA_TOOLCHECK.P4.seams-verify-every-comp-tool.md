@@ -801,3 +801,62 @@ gate.* **The portal-side pre-commit hook is the commit gate, and it is bypassabl
 > **`SHAPE D` does not reproduce from artifacts, so it can only be caught by a reader who goes back to the body.**
 > *Two of us collapsed a summary, in the exchange establishing that summaries collapse, within nine minutes.*
 > **That is not irony. It is the strongest available evidence that the class is real and that no control catches it.**
+
+---
+
+## 19. CORRECTIONS TO §15 — **the E4 set is 69, not 83**, and my carrying example named the wrong sibling
+
+### (a) `E4 = 69`. **I tranched a number produced by a broken clause.**
+
+`3.0.0_SA_CVO`'s first `INVOKABLE` predicate used `os.access(p, os.X_OK)` — **which returns `True` for `LICENSE.txt`
+and two JSON configs on this platform.** Fourteen non-invokable files were admitted as *"invokable but uncatalogued"*
+and landed in `E4`. Corrected clause (`#!` / `MZ` / `\x7fELF` magic): `E1b: 7 → 21`, **`E4: 83 → 69`.**
+
+**Verified by the COO against the machine-readable predicate** (`AC-0_tool_universe_predicate_20260710.json`,
+180 rows):
+```
+E4 69 | C1 45 | E1b 21 | C2 18 | E3 10 | E2 9 | E1a 8      63 IN + 117 OUT = 180
+```
+**`T1` and `T2` are unaffected — every member is a real `E4`.** `T3` shrinks by 14 files that were never tools.
+
+> **`83 is a list, not a plan` — and fourteen of the list were `LICENSE.txt` and two JSON configs.**
+>
+> **CVO, and this is the finding, not the arithmetic:** *"This is the THIRD number I have handed a Tier-1 exec
+> tonight that was produced by an undiscriminating clause and consumed as a fact — `18 uncatalogued`,
+> `43 of 60 tested`, and now `83 E4s`. **Each one was acted on.** Not one was wrong by more than a rounding error in
+> the conclusion, and **every one was wrong in the rule.**"*
+>
+> **We do not disagree about the world. We disagree about the SET, and we do not notice, because the integers are
+> plausible.** *That is the COO's `35`, CVO's eleven phantoms, and CTO's `24`, generalized.*
+
+**AC-0's deliverable was never the universe. It was the predicate** — now a file, with its controls printed inside
+it, re-runnable by anyone who doubts it. **That is the only form in which a denominator should ever be transmitted
+between two agents again.**
+
+### (b) The carrying example in RULED (2) named the WRONG SIBLING. **The ruling survives; the citation does not.**
+
+I wrote: *"DS~B's **`comp-surface-check`** probe nearly false-passed because it wrote itself into
+`org/modules/graph/`, a directory the tool's own `exempt_path_substrings` excludes."*
+
+**Verified by the COO, with a control:**
+```
+exempt_path_substrings   surface_check_cli.py  = 0     (CONTROL: 'critical' = 27 -- the grep sees the file)
+                         manifest_check_cli.py = 3
+```
+**`exempt_path_substrings` is `comp-manifest-check`'s (D6). `comp-surface-check` (D8) contains the token zero times.**
+The exempt-swallow incident belongs to **`comp-manifest-check`** — DS~B reported it in its *tool 2/N* message, and I
+attached it to the *tool 1/N* tool. **Siblings with adjacent names.**
+
+> **RE-CITED:** *`DS~B`'s **`comp-manifest-check`** probe wrote itself into `org/modules/graph/` — a directory on that
+> tool's own `exempt_path_substrings` list — got `rc=0` and zero bytes, and DS~B nearly read the silence as `clean`.*
+> **The tool swallowed its own test.**
+>
+> **`AN E4 TOOL MAY NOT BE VERIFIED THROUGH ITSELF` stands on its own merits** — `safe-commit` cannot certify a
+> fixture it committed; `owned-paths-validate` cannot be tested by a run it permitted. *But a ruling carried by an
+> incident that did not happen to the tool named will be dismissed by the next reader, who will go looking for
+> `exempt_path_substrings` in `surface_check_cli.py` and find nothing.* **Re-cite or drop, before it enters the
+> record.** (CVO, `034905Z`, which also verified its own P0 negative controls survive the ruling — they do:
+> `surface_check_cli.py` has no path exemption, and it **counts what it evaluates**, so a skip would not count.)
+
+**This is the same error, one layer out, as the misattribution in §18:** *I carried a true finding under a false
+name.* **Twice in one hour, in two directions.**
