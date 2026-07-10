@@ -426,3 +426,72 @@ author — could have told you either.*
 ```
 
 **Owner:** unassigned; `server.py` ack surface is CTO's. **Blocking on nothing. It is a build, and it is owed.**
+
+---
+
+## 11. SEED 14 — **THE ENFORCER IS IN NO LANE.** And SEED 15 — **A CORRECT GATE THAT IS NEVER INVOKED.**
+
+### SEED 14 — `.tools/**` is lane `ANY`
+
+```
+.tools/safe-commit.sh           lane=ANY              9.9.9_NOBODY = PERMIT   <- the wrapper that ENFORCES owned-paths
+.tools/owned-paths-validate.py  lane=ANY              9.9.9_NOBODY = PERMIT   <- the ENGINE that decides every lane
+.owned-paths.yaml               lane=ANY_EXEC_OR_AE   9.9.9_NOBODY = DENY
+CLAUDE.md                       lane=BASE_EXEC        9.9.9_NOBODY = DENY
+debtscan/suppression_v1.yaml    lane=ANY_EXEC         9.9.9_NOBODY = DENY
+```
+**The control is discriminating** — it denies a fabricated serial on three paths. **These two are genuinely ungated.**
+
+> **An agent who may not edit the policy may edit the code that enforces it.** *That is `comp-manifest-check` — the
+> gate absent from the manifest it validates — one level up, sitting on the commit path every agent runs.*
+
+**And `safe-commit.sh` already contains the staged-index remedy, wired to exactly ONE of its four post-staging
+exits.** `:451` (commit-gate) does `git reset -q HEAD -- "$_gf"`, commented *"must never leave its files staged for a
+later invocation to (mis-)inherit."* `:309`, `:352`, `:405` do not. **The author knew the hazard, wrote the fix, and
+applied it to one branch.** Four agents reproduced it in one hour; **none by testing for it.**
+
+*The COO is permitted to patch it and did not.* **Writing to the commit wrapper because the gate cannot stop you is
+the wrong lesson.** Diff authored, held, CTO to GO.
+
+### SEED 15 — `comp-surface-check`: THE TOOL IS NOT BROKEN. THE WIRE DOES NOT EXIST.
+*(`3.0.0_SA_CVO`, Andrew-direct P0. Every limb re-verified by the COO with controls.)*
+
+```
+comp-surface-check   3/3 SEV1 files -> rc=2 "CRITICAL ... BLOCKED"   |  2/2 benign -> rc=0
+   => IT PROVABLY SAYS NO. One of the very few instruments examined tonight that can.
+
+root git    log --since=06-01 -- portal/src/pages/ModelPortfolios.tsx  ->  0    <- BLIND
+portal git  log --since=06-01 -- src/pages/ModelPortfolios.tsx         ->  16
+   CONTROLS: root git has 6390 commits since 06-01; portal git has 2053 total. Both work.
+
+portal ACTIVE HOOKS      pre-push   -- AND NOTHING ELSE. NO PRE-COMMIT HOOK EXISTS.
+hooks calling comp-*     0          (CONTROL: 15 files match '#!', so the grep works)
+portal CI                0 of 3 workflows call comp-*
+```
+**All three SEV1 watch paths live in `portal/`. `safe-commit` runs at the workspace root and is NEVER in the path
+for a portal file. 16 commits touched `ModelPortfolios.tsx` since 2026-06-01 with the gate never firing once.**
+
+> **Repairing `safe-commit`'s `|| true` would fix a code path portal files never take — and the gate would then read
+> GREEN for the same reason it reads GREEN today: NOTHING EVER ASKS IT.** *A repair that changes no behaviour, on a
+> gate whose defect is that it is never invoked, is the purest placebo on the board — and it would have shipped with
+> a green fixture.*
+
+**A new verdict class, above `UNDISCRIMINATING` and `ANTI-CORRELATED`:**
+
+| verdict | the tool's answer | why it is worse |
+|---|---|---|
+| `UNDISCRIMINATING` | independent of the property | fails a random-input control |
+| `ANTI-CORRELATED` | inversely coupled to the property | **passes** that control |
+| **`UNINVOKED`** | **correct, and never asked** | **passes EVERY control the tool can be given.** The defect is not in the tool. It is in the absence of a caller — *and no test of the tool can ever find it.* |
+
+**Therefore §4 gains a fourth rail, and it is not about the tool:**
+> **R4 — INVOCATION.** *Prove the tool is CALLED on the surface it claims to guard.* Cite the caller at
+> `file:line @ vintage`. **A gate with no caller is not a gate. `N of <universe>` verified means nothing if the
+> number of them that anything invokes is zero.**
+
+**And the trap that nearly buried it, in two pairs of hands:** CVO was *"one line from reporting the exposure as
+theoretical"* because workspace-root `git log -- portal/...` returns `0`. The COO then ran
+`git -C portal rev-parse --git-path hooks`, got a **relative** `.git/hooks`, grepped the **root's** hooks dir, found
+`pre-commit`, and was one sentence from writing *"CVO is wrong."*
+
+> **A ZERO FROM THE WRONG REPOSITORY LOOKS EXACTLY LIKE SAFETY.**
