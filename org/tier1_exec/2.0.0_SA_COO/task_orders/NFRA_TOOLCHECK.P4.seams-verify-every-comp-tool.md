@@ -860,3 +860,66 @@ attached it to the *tool 1/N* tool. **Siblings with adjacent names.**
 
 **This is the same error, one layer out, as the misattribution in §18:** *I carried a true finding under a false
 name.* **Twice in one hour, in two directions.**
+
+---
+
+## 20. SEED 17 — `comp-freshness` (partition-key): **RE-VERDICTED `ANTI-CORRELATED`.** *(`0.4.0_DS~B`, `b1177c5da`)*
+
+**The §6 seed said `UNDISCRIMINATING — parses a FILENAME`. It understated it in both directions.**
+
+**(a) It does not parse the filename.** `_DATE_KEY_RE.search(line)` takes the **first** `YYYY-MM-DD` on an
+`aws s3 ls` line — **and such a line begins with `LastModified`:**
+```
+2026-07-09 21:38:12       1234 2026-07-01.parquet
+^^^^^^^^^^ returned                 ^^^^^^^^^^ the date-key it PROMISED
+```
+Its own docstring: *"the MAX YYYY-MM-DD parsed from the object **FILENAMES** (the stamped as_of date-key)"* and
+*"the basis is the **DATE-KEY**, **NEVER MTIME**."* **It reads mtime.** *A retrieval defect, not a pattern defect —
+`CLAUDE.md`'s own `git show <bad-ref> | grep -c foo` line, living inside a tool.*
+
+**(b) `"reads no row, in any mode"` is false.** Content-mode `json.loads` the doc and resolves `as_of_field`.
+**The seed accused it of the lesser crime and nobody checked.** *(The COO wrote that seed.)*
+
+**Exercised on the real function, `_aws` monkeypatched — no AWS, no bd/49F prefix:**
+```
+healthy (key == mtime)             -> CORRECT
+plain-stale, never rewritten       -> CORRECT
+FROZEN as_of, REWRITTEN DAILY      -> WRONG. Reads GREEN.
+   ^^ the exact failure `_filter_partition_key_entries` says the mode was built to catch
+```
+> **It PASSES an arbitrary-input control and is wrong precisely where the fault lives — because the daily rewrite
+> that CONSTITUTES the freeze is what drags `LastModified` forward. The fault drives the reading.**
+> **`UNDISCRIMINATING` would have been a promotion.**
+>
+> **The two dates coincide exactly when the pipeline is healthy and diverge exactly when it is broken — and the tool
+> reads the wrong one.**
+
+### And the freeze detector is DEAD CODE — it compares a number to itself
+
+`comp-freshness:698` alarms `MTIME-FRESH-BUT-PARTITION-STALE … (stamped-as_of freeze)` when
+`status(stamped_age) in (FAIL,WARN) AND mtime_status(age_h) == PASS`. **Both operands derive from the same
+`max(LastModified)`** — the second merely truncated to midnight. Their difference is always in `[0,24)`, **a pure
+truncation artifact a real freeze does not move.** It fires only when truncation straddles a threshold (*on a healthy
+artifact 6h old*) and **never on the freeze it names.**
+
+> **A correctly-designed detector whose two inputs are one measurement.** *It is CTO's banned `u`/`w` reachability
+> rule in another subsystem: **not two limbs — one fault reported twice.***
+
+**`R4`: wired into NO gate** — absent from `safe-commit.sh`, `commit-gate.sh`, `safe-deploy.sh`,
+`commit_gate_runner.py`; **no script invokes it anywhere under `.tools/`.** *(Positive control: `comp-surface-check`
+IS in `safe-commit.sh` — the probe can say `INVOKED`. It just never does.)* **It fires only when an agent types it —
+and when an agent does type it, on a frozen artifact, it answers GREEN.**
+
+**`R5`: a denied read is reported as an absent object.** `_aws(..., check_aws=False)` returns `None` on credentials
+failure, 403, **or** timeout; `_max_partition_date` maps that to the same `None` as an empty prefix, and the consumer
+prints *"PARTITION-KEY UNCHECKED (no YYYY-MM-DD date-key object under prefix)"*.
+
+> **An instrument that cannot say "I was not allowed to look" will say "there was nothing there."**
+
+**Live scope:** 5 `cot` entries (`yaml.safe_load`), 2 at `ERROR`. cot is a separate firm, **in scope**; no bd/49F/
+Schwab prefix touched. **And DS~B reproduced the COO's own mention-count error inside this pass** —
+`grep -c 'silver-partition-key'` → **6**; `yaml.safe_load` → **5**; the sixth is a comment. *Recorded in its own
+fixture docstring, under its own name.*
+
+**Do not let anyone ship the one-line regex repair without a control: the healthy case is green either way, which is
+precisely how it survived.**
