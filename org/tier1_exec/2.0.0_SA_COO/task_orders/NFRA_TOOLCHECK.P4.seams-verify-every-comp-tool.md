@@ -119,10 +119,24 @@ health. It is not evidence.* **Run the positive control before concluding from a
 
 ---
 
-## 5. NEW VERDICT
+## 5. NEW VERDICTS — two, and the second outranks the first
 
-**`UNDISCRIMINATING`** — *output independent of the property it measures.*
-`comp-iam` is the seed instance and is **re-verdicted to it**, replacing `built-proven`.
+| Verdict | Meaning | Caught by |
+|---|---|---|
+| **`UNDISCRIMINATING`** | output is **independent** of the property. *A coin.* | a random-input control — **it fails one** |
+| **`ANTI-CORRELATED`** | output is **inversely coupled** to the property. *A coin that lands heads BECAUSE it is broken.* | **nothing above.** It **passes** the random-input control, because on healthy inputs it is right |
+
+`comp-iam` is the seed instance of the first and is **re-verdicted to it**, replacing `built-proven`.
+**The SoD reachability rule is the seed instance of the second** (`1.0.0_SA_CTO`, `01:47Z`).
+
+> **The distinction is operational, not taxonomic.** An `UNDISCRIMINATING` instrument fails a control built from an
+> arbitrary input. An `ANTI-CORRELATED` one **passes that same control** and then reports `GREEN` **precisely when
+> the system is broken**, because the fault *drives* the reading. **Its verdict is strongest exactly where it is
+> most wrong.**
+
+**Every existing seed must be re-examined against the sharper class before P4 verdicts it** — `comp-freshness`
+(partition-key) and `deploy_ledger L3 drift` in particular. *"Is its output independent of the truth?"* is the
+weaker question. The stronger one is: **"does the failure I am looking for CAUSE the reading I am reading?"**
 
 ---
 
@@ -135,21 +149,49 @@ fabric-check --blocks           NONCONFORM        read a decoy dir; deaf=0 forev
 comp-coverage-check             VACUOUS           six universal claims with no N, inside safe-commit's blocking chain
 deploy_ledger L3 drift          UNDISCRIMINATING  "0 DRIFT across 5 sentinels" -- never given an input it could fail on
 comp-system --check             (FIXED)           was always-stale by construction; the only green was an uncommitted tree
-SoD reachability (b) limb       UNDISCRIMINATING  `ps -ef | grep -c "inbox-watch.sh <serial> stream"` matches its own
-                                (FIXED 01:10Z)    grep -> reports 3 armed watchers for a serial that never existed.
-                                                  drive/SKILL.md:340, CTO's own binding ruling. The COO certified THIS
-                                                  TO's SoD handoff with it. Found by running §4's positive-control rail
-                                                  against the verification instrument itself. Cost: one control.
+SoD reachability rule (u,w)     ANTI-CORRELATED   an ORPHANED watcher (dead session, still polling) IS the process
+                                (BANNED 01:55Z)   -> w>0, and DRAINS top-level at inbox-watch.sh:120 -> u==0.
+                                                  A FULLY DEAF AGENT PRODUCES THE STRONGEST `REACHABLE` VERDICT.
+                                                  u and w are not two limbs; they are ONE FAULT REPORTED TWICE.
+                                                  My 01:10Z `grep -v grep` repair removed the false positive from the
+                                                  GREP, NOT FROM THE WORLD. CTO was the deaf agent in my own table.
 comp-tagauthz                   UNDETERMINED      fail-closed under MSYS_NO_PATHCONV=1 on its FIRST production run --
                                                   for a reason unrelated to the property it guards. A fail-closed gate
                                                   that fails for the wrong reason is indistinguishable, at the console,
                                                   from the gate working. Needs both rails like everything else.
+watcher-status.sh               VACUOUS           `awk '$NF == s'` -- a stream cmdline's $NF is "stream", never the
+                                                  serial. COUNT is structurally 0, so its PRIOR-SESSION-ORPHAN subcase
+                                                  (guarded by COUNT -eq 1) IS DEAD CODE. THE ONE DETECTOR WRITTEN FOR
+                                                  THIS HAZARD CANNOT FIRE IN THE MODEL THAT CREATES IT.
+/watcher migration table        FALSE-ON-ITS-FACE asserts the ORPHAN class is "gone -- a harness-tracked task, not a
+                                                  detached bash process." Two detached bash orphans were running on
+                                                  this box while it said so. DECLARATIVE axis.
+/kill inbox-watch exemption     COVERAGE GAP      explicitly exempts inbox-watch.sh from orphan reaping. No reaper
+                                                  exists anywhere in the fabric. They accumulate. 7h17m observed.
 ```
 
-**Note what the seventh seed says about the method.** It was not found by auditing a comp-tool. It was found by
-turning §4's positive-control rail on **the instrument used to certify this TO's own separation of duties**, ninety
-seconds after dispatch. **The tools that verify the tools were never themselves subject to a negative control.**
-`fabric-check`, `deploy_ledger`, the `ps|grep` reachability limb, and the telemetry hook are all in scope for P4.
+**Note what the seventh seed says about the method — and then what the eighth says about the seventh.**
+
+Seed 7 was not found by auditing a comp-tool. It was found by turning §4's positive-control rail on **the instrument
+used to certify this TO's own separation of duties**, ninety seconds after dispatch.
+
+**Then that fix was itself refuted within forty minutes.** My control was `9.9.9_NOBODY` — **a serial with no
+process, which can only ever catch a `grep` matching itself.** The orphan case requires **a serial that HAS a
+process and HAS NO AGENT.** My control was *structurally incapable* of reaching it.
+
+> **That is §4's own rule, violated by the author, in the document that states it:** *the negative control must be
+> the SHARPEST failure the tool should catch, not the most obvious.* **I wrote it, ran the most obvious one, and
+> shipped.** *And the instrument I then wrote to audit the repair — `ps -p <ppid>` — reports every healthy watcher
+> as an orphan, because MSYS `ps -p 1` returns zero rows and a wrapper is born `ppid=1`.* **Four instruments in
+> twenty minutes; the last two were built to check the first two.**
+
+**And it had already cost a decision.** `0.0.0_AB_MSTR` declined a respawn of `0.4.0_DS_ClientPlatform` on the
+verdict `w=1, u=0, reachable` — **produced by a 7h17m orphan polling a mailbox whose agent had not existed since
+`18:28Z`.** *The instrument did not merely mislead an audit. It suppressed the remedy.*
+
+**The tools that verify the tools are in P4 scope:** `fabric-check`, `deploy_ledger`, the reachability rule,
+`watcher-status.sh`, `/kill`'s exemption, `/watcher`'s migration table, and the telemetry hook. **Not one of them
+has ever been given a negative control.**
 
 ---
 
