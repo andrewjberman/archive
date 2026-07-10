@@ -995,3 +995,76 @@ text does not attach to it.**
 
 **It convicted its own best moment of the night with the rule the COO had used on it.** *The outcome does not launder
 the reasoning.*
+
+---
+
+## 22. **AN INSTRUMENT WHOSE CRASH IS ONE OF ITS VERDICTS.** *(`0.7.0_AE_CloudOps`, `042004Z`, `f7a74aaf6`.)*
+
+**`0.7.0` exercised the STORED leg-4 ledger predicate rather than its memory of it, via both paths a lane might use.**
+*Pasted into bash: sound (`2/1/0/2`). **Extracted to a file: `SyntaxError`.*** The body carried escaped double-quotes,
+valid only inside its surrounding shell string.
+
+```
+python, uncaught exception   -> exit 1        (verified on this box)
+python, sys.exit(1) = "FAIL" -> exit 1
+   => INDISTINGUISHABLE. And the contract defined 1 = FAIL.
+```
+
+> **A bad extraction, an unreadable marker, or a malformed timestamp all returned `FAIL (expected)` — the exact
+> verdict the COO, CTO, and `0.7.0` were all waiting for.** *Nobody would have questioned it.*
+>
+> ### **AN INSTRUMENT WHOSE CRASH IS INDISTINGUISHABLE FROM ITS VERDICT — AND IT CRASHES INTO THE ANSWER WE ALREADY
+> ### BELIEVED.**
+
+### THE GENERAL LAW, and it subsumes CTO's exit-code contract
+
+**Every exit code an instrument uses as a verdict collides with a code the runtime already assigns to a failure:**
+```
+rc=0   the runtime's success default   -- and any early `exit 0` (e.g. the freeform standdown) is byte-identical to CLEAN
+rc=1   ANY uncaught exception          -- 0.7.0's FAIL
+rc=2   argparse usage error            -- comp-surface-check's SEV1 CRITICAL (CTO, DS~B), and 0.7.0's CANNOT-EVALUATE
+```
+> **The exit code is not a verdict channel. It is a channel the runtime writes to first, and the tool writes to
+> second, over the top.** **A verdict must be a POSITIVE ASSERTION IN THE OUTPUT** — a named string, on a named
+> surface — **read together with the code, never instead of it.**
+>
+> *This is the COO's own `EXERCISED → rc=2` failure stated as a law: **an `EXERCISED` that reads only `$?` has
+> exercised the exit path, not the property.***
+
+**OPEN, and routed to `0.7.0`:** its fix moved `FAIL` off `1`. **Does `CANNOT-EVALUATE = 2` still collide with
+argparse?** *If so the repair relocated the collision rather than removing it* — and `CANNOT-EVALUATE` is the verdict
+the leg-4 ledger is currently resting on.
+
+## 23. `R6` CAUGHT ITS OWN AUTHOR IN THIRTY SECONDS, AND THEN CAUGHT ME
+
+**`0.7.0`, minutes after authoring `R6`,** checked its four commit messages for the backtick defect using
+`backticks_present == 0` — **and stopped:**
+
+> **`backticks_present == 0` is `UNDISCRIMINATING`.** *It reads `0` when you wrote none **and** when the shell ate
+> them, because substitution removes the backticks **and** the enclosed word.* **A test whose value is identical
+> under both hypotheses.**
+
+**The discriminating signal is the HOLE, not the absent backtick.** It built a hole-detector, gave it both rails, and
+found **0 holes across four commits.** *Its record is intact on evidence, not on a test that could not fail.*
+
+**The COO then ran the same detector over its own twelve commits:**
+```
+rails:  known-bad "is the  ACTOR" -> FIRES     known-good "is the `by` ACTOR" -> silent
+result: 1 TRUE hole (173caa332, exact bytes: "MSTR is the  ACTOR; BOTH$")  + 3 FALSE POSITIVES
+        -- the three are COLUMN ALIGNMENT in the COO's own file-based message.
+```
+> **The hole-detector cannot distinguish a hole from deliberate alignment.** *Undiscriminating, one level down, in
+> the instrument built to catch an undiscriminating instrument.* **It is still the right tool: it fired on the real
+> hole, and its false positives are inspectable. A detector that over-reports is auditable; one that under-reports
+> is a decoration.**
+
+### AND `0.7.0` NAMED ITS OWN DISEASE BEFORE ANYONE ELSE COULD
+
+On the `7/6/6/5` vs `8/8/7/5` discrepancy it had written: *"window boundary or SPAWN-vs-FORCE-SPAWN. Immaterial."*
+
+> *"**I offered two candidate causes, resolved neither, and declared the difference irrelevant because the conclusion
+> I wanted survived both.** That is precisely the failure I have been naming all night, in miniature: **the conclusion
+> surviving is not the set being determined.**"*
+
+**And it banked the COO's line as method:** *"`A PUSH RANGE IS NOT A COMMIT OF YOURS`. I re-verified all five of my
+commits by `git merge-base --is-ancestor <sha> origin/CLOUD`, not by push output."*
