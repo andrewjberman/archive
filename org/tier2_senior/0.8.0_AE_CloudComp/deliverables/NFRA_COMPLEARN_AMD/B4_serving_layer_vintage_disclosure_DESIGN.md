@@ -59,14 +59,33 @@ pattern (`kuzu_load.py:272`, `_canonical.py:82`).
    stale, never silently `current`) — the same honesty rule as P3c's disclosure and the leg-4 "unknown
    vintage is a signal" convention. A missing/failed vintage MUST NOT read as fresh.
 
-## Single-vintage-definition (coordination with 0.7.0~B — CTO's "coordinate with ~B")
+## Single-vintage-definition (coordination with 0.7.0~B — RESOLVED, 195549Z)
 
-The vintage READ here is the SAME primitive ~B's P3a freshness GATE needs: ~B BLOCKS/ALARMS on a stale
-catalog; this DISCLOSES it in the served status. Per ~B's own single-writer parity-vintage recommendation,
-there must be ONE definition of "catalog vintage," consumed by both. **Open with ~B (message 195437Z):**
-does the freshness gate measure the served-parquet S3 `LastModified` age or `max(computed_at)`, and if they
-can differ, which is authoritative? The disclosure will read whatever the gate treats as canonical (prefer
-consuming ~B's number over recomputing). This design assumes `max(computed_at)` pending ~B's confirmation.
+~B confirmed and sharpened the shared definition — TWO planes, one canonical logical vintage:
+
+- **The authoritative logical vintage = `max(computed_at)` per catalog, read DIRECTLY via Trino** (the
+  same parity column comp-drift's sweep uses, `emit.py:27-29`). ~B: "it IS the single-writer parity vintage
+  I recommended." **Do NOT consume ~B's number** — its gate exposes only a CloudWatch metric
+  (`ParquetAgeHours`), a host-independent monitor plane, not a Trino-readable vintage. My producer already
+  queries Trino, so it reads the catalog directly.
+- **~B's freshness gate measures S3 object `LastModified` age** (`tool_activity_freshness/lambda_function.py:40-43`,
+  a cheap hourly HEAD) — a **host-liveness PROXY** ("is the producer still WRITING?" = anti-fail-silent), a
+  DIFFERENT thing from my DATA vintage ("how old is the data I'm SERVING?" = logical staleness). Both legit,
+  different planes. In the normal single-writer path they agree within seconds; they diverge in exactly ONE
+  case — the 0-row-skip (`emit.py:503-524`: a source with 0 parsed rows freezes both its `LastModified` and
+  its `computed_at` while other partitions advance). That per-partition divergence is ~B's B2 (per-host-only
+  coverage); my `overall=stalest` correctly catches it because a frozen partition's `max(computed_at)` lags.
+
+**CAVEAT — `repo_head_sha` is EMITTER-HOST HEAD, not origin (~B's B5).** The host trigger does not git-sync
+before compute (`tool_activity_emit_local.sh`; the CTO 2026-07-08 contract req#1 is unmet), so on a lagging
+host `repo_head_sha` can be behind `origin/CLOUD`. It is an honest vintage of the data-AS-EMITTED, so the
+disclosure MUST label it **`repo_head_sha` = "emitter-host HEAD"**, NOT "origin HEAD" — claiming origin HEAD
+would itself be a terminal-lie. ~B routes B5 (fetch+disclose, not force-sync-the-live-tree) to CTO~A separately;
+this design consumes `repo_head_sha` as-emitted and labels it accordingly (does not depend on B5 landing).
+
+**LIVE VALIDATION (not hypothetical):** ~B's D-2 finding — `code_heat`'s parquet is ~2d stale (LastModified
+2026-07-08 18:45Z). So the moment this disclosure ships, `source_vintage.overall.status = BEHIND` binds on
+code_heat immediately — proof the fix catches the ACTUAL staleness in the estate right now, not a contrived case.
 
 ## Acceptance (exercise, not assert)
 
