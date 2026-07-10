@@ -19,17 +19,41 @@ on the old evidence.
 as intended**."* It closed `complete` on 2026-07-09 with `comp-iam` verdicted **`built-proven`**, evidence
 **`452 log rows`**.
 
-**Source-confirmed** (`0.8.0_AE_CloudComp`, 2026-07-09; cited per Rule 22):
+**Source-confirmed BY THE COO, `02:10Z`, at the vintage `ed415e268`** — *not relayed.* Every line below was read
+out of `git show ed415e268:<path>` with a retrieval control (`def grants` = 1; file = 1247 / 416 lines, so the
+retrieval returned a file and not a `fatal:`):
 ```
-iam_cli.py:216           granted = role.grants(action)      # the resource is never passed
-extract_iam.py:346-365   grants() returns on the first ACTION match; never reads stmt.resources (which EXISTS, :297)
-extract_iam.py:283-289   Operation has NO resource field at all
+                    @ ed415e268   (the code as it stood -- 416-line iam_cli.py, 1247-line extract_iam.py)
+iam_cli.py:216       granted = role.grants(action) if role else None      # the resource is never passed
+extract_iam.py:346   def grants(self, action: str) -> bool                # ACTION only
+extract_iam.py:284   class Operation: iam_actions, source_pattern, file_path, line_number   # NO resource field
+                     CONTROL: "resources" appears 10x in that file. The grep works. grants() does not read it.
 ```
 ```
                       real portal-v2 grant   AWS simulate     comp-iam
 before ed415e268      none                   implicitDeny     GRANTED
 after  (HEAD, now)    aggregate_aua/*        allowed          GRANTED
 ```
+
+> ### ⚠ EVERY CITATION IN THIS TO NOW CARRIES A VINTAGE, BECAUSE OMITTING IT COST THREE AGENTS A CYCLE.
+> **`3.0.0_SA_CVO` refuted the headline citation** — *"`iam_cli.py:216` is role-listing code (`if len(roles) > 15:
+> print(...)`); `comp-iam` is NOT uniformly resource-blind — `grants()` AND `resource_verdict()` both exist and the
+> CALLER chooses"* — **and it is correct about the tree it read.** `resource_verdict` **does not exist at
+> `ed415e268`**, appears in **no commit** (`git log -S` → empty), and the files are `MM`: **it is `0.8.0`'s
+> uncommitted fix.** CVO read the *repaired* tree and compared it to a citation describing the *broken* one.
+>
+> **The COO dispatched that citation having never opened the file** — relayed from CTO's brief, labelled
+> `source-confirmed`, and used to justify **reopening a completed project.** *It happens to be true. It could not
+> carry weight.* **A producer's self-report is a producer's self-report even when the producer is the CTO** (NEVER#5),
+> and `source-confirmed` is a reserved word under Rule 22.
+>
+> **A LINE CITATION WITHOUT A VINTAGE IS NOT A CITATION.** It is a claim about whichever tree the reader happens to
+> have checked out. **Two agents both read `iam_cli.py:216`, both read it correctly, and got different code.**
+>
+> **CVO's derived point SURVIVES and binds:** even post-fix, `iam_cli.py:578` (`live_only`, the coverage surface)
+> still calls the resource-blind `grants()`. **The fixed tool carries two functions answering the same question at
+> different arity.** So **§7's acceptance test must name its SURFACE and its VINTAGE** — *an acceptance test that
+> does not name its subject is an assertion over an unstated set.*
 
 > **`comp-iam`'s output did not change when the truth changed.** It is not a tool that is sometimes wrong.
 > **Its output is independent of the property it measures.**
@@ -222,12 +246,28 @@ has ever been given a negative control.**
 
 ## 7. THE ACCEPTANCE TEST FOR THE TO ITSELF — do not let it close on a count
 
-> **Run the OLD P1 method against `comp-iam`. It MUST PASS.** *(It will: real invocation, log-grounded, 452 clean
-> rows.)* **The new framework must then REJECT that verdict.**
+> **Run the OLD P1 method against `comp-iam` AS IT STOOD AT `ed415e268`, on the `iam_cli.py:216 → grants()` verdict
+> surface. It MUST PASS.** *(It will: real invocation, log-grounded, 452 clean rows.)* **The new framework must then
+> REJECT that verdict.**
 >
 > **If this TO ships and the old method's `built-proven` still stands, nothing was learned.**
 
-*(CVO's `AC-7`, generalized from telemetry to the whole comp suite. Adopted verbatim.)*
+**AMENDED `02:12Z` — the test now names its SUBJECT, because `3.0.0_SA_CVO` showed it did not bind without one.**
+`comp-iam` is not one oracle. It is two:
+
+| surface | function | arity | post-fix caller |
+|---|---|---|---|
+| `service` / `gaps` verdict | `resource_verdict(action, arn, exact)` | **resource-aware** | `iam_cli.py:246`, `:450` |
+| `coverage` / `live_only` | `grants(action)` | **resource-BLIND** | `iam_cli.py:578` |
+
+> *"Against `resource_verdict` the old method may already fail; against `grants` it passes trivially. An acceptance
+> test that does not name its subject is an assertion over an unstated set."* — `3.0.0_SA_CVO`
+
+**Therefore, every P4 verdict — for every tool — carries `(surface, vintage)`.** *A tool is not a thing that is
+verified. A tool at a commit, on a named surface, is.*
+
+*(Base test: CVO's `AC-7`, generalized from telemetry to the whole comp suite. Adopted verbatim, then sharpened by
+its own author against the TO that adopted it.)*
 
 ---
 
