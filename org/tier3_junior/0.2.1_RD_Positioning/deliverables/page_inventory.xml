@@ -10,7 +10,8 @@
 
   <files>
     <file path="portal/src/pages/Positioning/Positioning.tsx" type="component">
-      Main page component that orchestrates positioning page layout with header, positioning summary panel, and holdings tab
+      Main page component that orchestrates positioning page layout with header, positioning summary panel, and holdings tab.
+      Owns the lifted custom model-blend state (POSN_CUSTOM.001) shared by PositioningSummary (now) and HoldingsTab CSM (POSN_CUSTOM.002); ephemeral, not persisted.
     </file>
     <file path="portal/src/pages/Positioning/index.ts" type="export">
       Barrel export exposing Positioning component and type definitions
@@ -31,7 +32,11 @@
       Diverging bar chart and attribution table comparing style positioning vs benchmark with allocation analysis
     </file>
     <file path="portal/src/pages/Positioning/tabs/HoldingsTab.tsx" type="component">
-      Holdings view with treemap visualization (size=weight, color=performance) and dense attribution table
+      Holdings view with treemap visualization (size=weight, color=performance) and dense attribution table.
+      POSN_CUSTOM.002 (pulled forward): in Custom mode a gold "CSM" toggle appears left of AGG; selecting it recompiles the custom
+      portfolio client-side in BOTH the treemap and the Holdings Breakdown table -- each security weight = Sum_i (customWeight_i/100) *
+      model_i_weight[ticker] merged by ticker (buildCustomCurrentHoldings; there is no served current_holdings['CSM']). Reads the shared
+      customBlend prop; shown only when customBlend.active; invalid blend -> empty state; resets to AGG when Custom mode turns off.
     </file>
     <file path="portal/src/pages/Positioning/tabs/AttributionTab.tsx" type="component">
       Asset allocation attribution analysis tab showing style vs benchmark positioning comparison
@@ -40,13 +45,26 @@
       ETF selection analysis tab with treemap and attribution across time periods (QTD/YTD/1Y/SI)
     </file>
     <file path="portal/src/pages/Positioning/panels/PositioningSummary.tsx" type="component">
-      Consolidated panel combining allocation bars with allocation matrix table, supports 3 view modes (Portfolio/Benchmark/Relative)
+      Consolidated panel combining allocation bars with allocation matrix table. View toggle: Portfolio / Benchmark / Relative / Custom.
+      POSN_CUSTOM.001: the "Custom" View option adds a 6th "Custom" column/bar (advisor's client-side weighted blend of the 5 models,
+      computed in PORTFOLIO terms) + a weights control (5 inputs, must total 100) + a Sum=100 guardrail (red + "--" until valid). The
+      whole custom UI is HIDDEN unless the Custom view is selected. Target-Equity (Mode B) is deactivated pending spec. Custom value =
+      weighted average via blendSeries in generateSections (null/N-A contributors skipped, average taken over the models that have a value).
     </file>
     <file path="portal/src/pages/Positioning/panels/PortfolioRadialCharts.tsx" type="component">
       Portfolio allocation bars panel showing stacked vertical bars for 5 model portfolios with Fixed Income/Equity mix
     </file>
     <file path="portal/src/pages/Positioning/shared/gridConfig.ts" type="config">
-      Shared grid template constants ensuring vertical alignment between allocation bars and matrix table
+      Shared grid template constants ensuring vertical alignment between allocation bars and matrix table.
+      POSN_CUSTOM.001: base template is 5 model columns; portfolioGridTemplate(n) builds the dynamic template and the panel adds a 6th
+      (Custom) data column ONLY in Custom view. CUSTOM_COLUMN_NAME holds the Custom header.
+    </file>
+    <file path="portal/src/pages/Positioning/shared/customBlend.ts" type="module">
+      POSN_CUSTOM.001: shared custom-blend contract + pure helpers. CustomBlendState (active/inputMode/weights/targetEquity),
+      MODEL_IDS, defaults, sumWeights/isBlendValid (Sum=100 guardrail), blendSeries (weighted average; skips null/N-A contributors and
+      averages over the models that have a value, so one missing metric like UST Beta does not blank the cell; 'N/A' only if NO weighted
+      model has a value), and solveTargetEquityWeights (Mode B ST&lt;-&gt;INT interpolation -- retained but DORMANT: Mode B UI deactivated
+      pending spec). Imported by Positioning.tsx + PositioningSummary.tsx; will be read by HoldingsTab CSM (.002).
     </file>
     <file path="portal/src/pages/Positioning/utils/buildAttributionData.ts" type="utility">
       Attribution data builder that transforms portfolio holdings and returns into hierarchical asset class/segment/ETF structure
@@ -276,14 +294,16 @@
       <view name="Portfolio (Model)" status="functional">Shows actual model portfolio allocations in stacked bars and matrix cells</view>
       <view name="Benchmark (ETF)" status="functional">Shows benchmark/policy allocations for comparison</view>
       <view name="Relative (Delta/Tilt)" status="functional">Shows tilts (active weights) relative to benchmark with color coding (green overweight, red underweight)</view>
-      <subsection name="Allocation Bars">Shows 5 stacked vertical bars for UST, ST, INT, LTC, LTA portfolios with Fixed Income (green) and Equity (blue) mix</subsection>
-      <subsection name="Allocation Matrix">Grid table with portfolios as columns, asset classes/segments as rows, with style weight, policy weight, and tilt metrics</subsection>
+      <subsection name="Allocation Bars">Shows 5 stacked vertical bars for UST, ST, INT, LTC, LTA portfolios (+ a 6th Custom blend bar in Custom view only), with Fixed Income (green) and Equity (blue) mix</subsection>
+      <subsection name="Allocation Matrix">Grid table with portfolios as columns (5 models; + Custom in Custom view), asset classes/segments as rows, with style weight, policy weight, and tilt metrics</subsection>
+      <subsection name="Custom Blend Control" status="functional">POSN_CUSTOM.001: shown ONLY when the "Custom" View toggle is selected. 5 model-weight inputs (must sum to 100); Sum!=100 -> red warning + Custom column renders "--". Target-Equity (Mode B) DEACTIVATED pending spec (Andrew 2026-07-10). Null metric (e.g. UST Beta) -> blend averages the models that have a value.</subsection>
     </section>
     <section name="HoldingsTab">
       <description>Holdings view with treemap visualization and dense attribution table</description>
       <status>functional</status>
       <subsection name="Treemap">Interactive treemap showing holdings where size=weight, color=performance (red/green for negative/positive)</subsection>
       <subsection name="Attribution Table">Dense table with columns for each holding showing actual weight, policy weight, fund return, style return, excess return, and various attribution effects</subsection>
+      <subsection name="CSM Custom View" status="functional">POSN_CUSTOM.002 (pulled forward): gold CSM toggle (left of AGG) appears in Custom mode; recompiles the custom portfolio in the treemap + table with each security weight recalculated per the advisor's custom model weighting. Follow-up (deferred): AGG-style model-weights breakdown column in the CSM table.</subsection>
     </section>
     <section name="AttributionTab">
       <description>Asset allocation attribution analysis comparing style positioning vs benchmark</description>
