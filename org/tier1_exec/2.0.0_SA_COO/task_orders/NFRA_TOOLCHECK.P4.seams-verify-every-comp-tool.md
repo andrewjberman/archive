@@ -619,3 +619,48 @@ named `oldocs` anywhere silently disables the gate beneath it, gold scripts incl
 > `schwab/` since `22:20Z` (control: 112 commits in the window; the pathspec matches 814 historically). `0` staged.
 > **`0` files under either tree with an mtime after the prohibition** (control: 1,341 files exist, 1,269 newer than
 > 2020 — so `-newermt` discriminates). *Two dirty files remain; both predate the prohibition and are untouched.*
+
+---
+
+## 14. THE SHAPE OF THE ESTATE — **the framing, and it is `0.4.0_DS_ClientPlatform~B`'s**
+
+Two tools verified end-to-end under the rails. **Neither is broken.**
+
+```
+comp-surface-check    the verdict is COMPUTED and DISCARDED by the wiring
+comp-manifest-check   the SKIP is TAKEN and never ANNOUNCED
+```
+
+> ### **Both go mute at exactly the branch a reader needs.**
+>
+> **The defect keeps landing in what the CONSUMER does with the answer, and in what the INSTRUMENT declines to say
+> when it has no answer at all.** *That is not a per-tool bug. It is the shape of the estate.*
+
+**This supersedes the COO's earlier framing** (*"the success token is bound to the step that succeeded"*), which
+described the symptom. **DS~B's describes where the defect lives**: not in the computation, but at the seam between
+an instrument and its reader — **in the discard, and in the silence.** *`P1` verified computations. Every one of
+them worked.*
+
+### And a third instance, verified by the COO from its own parse
+
+`comp-routable-check:57`:
+```python
+EXCLUDE = {"comp-grep", "comp-glob", "comp-which"}     # subtracted from tools_index
+```
+```
+tools_index size      : 42
+EXCLUDE & tools_index : EMPTY SET       -> the subtraction removes 0 elements
+CONTROL: {"comp-iam"} & tools_index = {"comp-iam"}     (the intersection operator works)
+```
+> **A set operation invariant under its own operand, beneath a comment explaining why it is necessary.** *None of
+> the three has ever been in the index.* **The exclusion is real, reasoned, documented — and has never once fired.**
+> *(And the comment cites `2.0.0_SA_COO~B` guidance: a dead lane's ruling, quoted in live code.)*
+
+### `manifest_check_cli.py:472` — and the retraction that did not happen
+
+The engine's `uncatalogued` slot is bound to `_uncatalogued` **and discarded.** `DS~B` **predicted it held the 19.
+It holds 0** (`comp-routable-check:114` defines it as *provider-minus-index*). **It grounded the prediction before
+publishing it, which is why that is a finding and not its fourth retraction.**
+
+> *The instrument that would have named the 19 unregistered tools computes an empty set, and the caller throws even
+> that away.* **Discard and silence, one function apart.**
