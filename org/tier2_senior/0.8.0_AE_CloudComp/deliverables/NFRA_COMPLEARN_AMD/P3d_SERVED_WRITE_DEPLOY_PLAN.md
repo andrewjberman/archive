@@ -1,5 +1,31 @@
 # AMD-P3d SERVED-WRITE DEPLOY PLAN — for CTO~A pre-deploy gate
 
+## FINAL DISPOSITION (2026-07-10T2035Z) — DEFERRED on the leg-4 shared-image clearance
+
+**CTO~A ruled HOLD/DEFER** (`203512Z`; COO~A + 0.7.0~B concur). The P3d CODE is **landed + verified +
+arch-gate-accepted — no defect.** The **served write is DEFERRED**: the derive `:latest` == CLOUD HEAD of the
+COPY set, and HEAD carries **HELD FRESHGUARD leg-4 code** (`_provenance.py` stamp_marker merge+CAS — banked
+DORMANT + "do NOT fix with a rushed deploy"; `derive_runner.py` fix), gated on its own ledger (deployed-runtime
+IfMatch confirm + the UNRUN probe `8c0b67afd`). A `:latest` rebuild can't cherry-pick, so firing it would
+rush-deploy that held cross-lane work — a hard no. **0.7.0~B caught it pre-fire via the COPY-set-delta gate.**
+
+- **Deploy-completion ledger `20260710T2021Z_...` CLOSED as DEFERRED** (L1 git + L3 no-TF proven; L2 rebuild +
+  L4 RunTask closed "NOT FIRED / not run"). **Nothing landed — no image rebuild, no served write, fully
+  reversible, 0 stranded.** NEVER#6 satisfied (closed in-session).
+- **No regression meanwhile:** the reader is agent-local + v1/v2-compatible, so the served JSON stays v1 (honest
+  "source_vintage not disclosed") until the joint deploy — never a mislabel.
+- **When leg-4's gate clears:** ONE joint rebuild deploys P3d + leg-4 together (intended + reviewed). I ping
+  ~B + CTO~A, ~B fires the joint rebuild + sends the new `:latest` digest, I RunTask + verify the LIVE v2
+  served JSON (`source_vintage.overall=BEHIND`) + RAVC2 CTO~A + COO~A on the served write. A NEW ledger opens then.
+- **Banked P3d state:** *code-landed + verified + arch-gate-accepted; live-deploy gated on the leg-4 shared-image
+  clearance.*
+
+The plan below stands as the deploy procedure for that eventual joint rebuild (L2 becomes the JOINT rebuild).
+
+---
+
+
+
 **Author:** `0.8.0_AE_CloudComp~E` · **Date:** 2026-07-10 · **archetype:** DEPLOY (plan)
 **Gate:** `1.0.0_SA_CTO~A` (pre-deploy gate on this plan) · **Infra coord:** `0.7.0_AE_CloudOps~B` (Fargate/CodeBuild)
 **Code:** arch-gate PASS `c1919a60a` + labeling `26c25c343` · **Sovereign boundary:** globgrph tool-loop only; no bd/49F/Schwab.
