@@ -495,3 +495,64 @@ theoretical"* because workspace-root `git log -- portal/...` returns `0`. The CO
 `pre-commit`, and was one sentence from writing *"CVO is wrong."*
 
 > **A ZERO FROM THE WRONG REPOSITORY LOOKS EXACTLY LIKE SAFETY.**
+
+---
+
+## 12. R4 SHARPENED — **THREE LIMBS.** And my own first R4 sweep was `UNDISCRIMINATING`.
+
+**I implemented R4 as `grep -rl <tool> .tools .githooks .github`. It reported `comp-surface-check: callers=5` —
+for the gate we had just proven is never invoked on the surface it guards.**
+
+> **`grep` for a tool's NAME is a NAME match. It counts mentions.** *Filename standing in for invocation, in the
+> first tool written to catch exactly that substitution.* **The rail caught its own author on its first run.**
+
+**The five "callers," classified:**
+```
+drift_producer.py:183            _run(["bash",".tools/comp-surface-check","scan"])   REAL, executed, rc IS read
+safe-commit.sh:417               --mode advisory | sed || true                       executed, verdict DISCARDED
+safe-commit.legacy-golden.sh:351 a golden COPY -- never runs
+drift-producer-push.yml:25       a `paths:` TRIGGER FILTER -- not a call at all
+__pycache__/drift_producer.pyc   a compiled artifact
+```
+
+### R4 — a gate is INVOKED only if all three hold
+
+| limb | question | `comp-surface-check` |
+|---|---|---|
+| **R4a CALLED** | an *executed* call site — not a comment, doc, golden copy, path-filter, or `.pyc` | **yes**, two |
+| **R4b CONSEQUENTIAL** | its verdict is **read** and can change the outcome | `safe-commit`: **NO** (rc discarded 3×) |
+| **R4c REACHABLE** | the call site can actually be reached **on the guarded surface** | `drift_producer`: **NO** (see below) |
+
+> **It fails a different limb at each of its two call sites, and neither covers `portal/`.** *A gate can be called,
+> and read, and still guard nothing.*
+
+### R4c — THE TRIGGER NAMES A PATH THE REPOSITORY NEVER PRODUCES
+
+`.github/workflows/drift-producer-push.yml` — the workflow that runs the **one** invocation whose `rc` is read:
+```yaml
+on: push:
+    paths:
+      - 'portal/src/**'      # <-- names the CONTENT path
+```
+**`portal` is a SUBMODULE. A root-repo commit records a GITLINK bump, never a path under `portal/src/`.** Measured:
+```
+root commits touching 'portal/src/**'  since 2026-06-01 :   0     <- what the filter names
+root commits touching 'portal' (gitlink)                :  19     <- what the root actually records
+CONTROL: root commits since 2026-06-01                  : 6395    <- the search works
+example 27f543ade  ->  portal | 2 +-   (one line: the pointer)
+```
+**Nineteen portal changes passed through and the trigger could not fire once.**
+
+> **The filter reads like coverage.** *It names the content path while the repository records the pointer* —
+> `filename` for `content`, `pointer` for `payload`, one more time, in the trigger of the gate that guards the
+> firm's model portfolios. **`portal/src/**` in a root-repo `paths:` list is not a narrow filter. It is a filter
+> that can never match.**
+
+**The remedy is one line and it is CI/DT lane, not a `safe-commit` edit:** add `- 'portal'` (the gitlink) to the
+`paths:` list, **and** wire a portal-side pre-commit hook (portal has **one** active hook, `pre-push`).
+**Its acceptance is R4c itself: push a portal pointer bump and show the workflow FIRES.** *A trigger that has never
+fired has never been tested.*
+
+**And note what this does to `N of <universe>`:** CVO's AC-0 table needs an **INVOKED** column with all three limbs
+cited at `file:line @ vintage`. **`comp-surface-check` would be the first row and it would read
+`called: yes · consequential: no · reachable: no`.**
