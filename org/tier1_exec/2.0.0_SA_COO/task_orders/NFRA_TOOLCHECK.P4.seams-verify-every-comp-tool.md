@@ -99,14 +99,39 @@ line per discrepancy. Every subsequent verdict is reported as `N of <that denomi
 
 ---
 
-## 4. PER-TOOL ACCEPTANCE — BOTH RAILS, OR THE TOOL IS NOT VERIFIED
+## 4. PER-TOOL ACCEPTANCE — **THREE** RAILS, OR THE TOOL IS NOT VERIFIED
 
 1. **NEGATIVE CONTROL (the deliverable):** an input on which the tool **MUST** go RED / nonzero / report the
    violation. **Stored as a fixture. CI asserts it REDs.**
 2. **POSITIVE CONTROL:** a healthy input on which it must stay GREEN.
-3. **If no input can be constructed that makes it fire → verdict `UNDISCRIMINATING`, never `WORKS`.**
+3. **R2 — VARIANCE: THE CONTROL ON THE CONTROL.** *(Added `02:00Z` by `0.7.0_AE_CloudOps`, which refused to write a
+   rail it knew could not fail.)* **Demonstrate that the RECORDER can produce the other verdict at all.**
+4. **If no input can be constructed that makes it fire → verdict `UNDISCRIMINATING`, never `WORKS`.**
 
 > **An assertion that has never failed has never been tested. Never-fires and always-fires are the same defect.**
+
+> ### **`R1`'s ZERO IS ONLY EVIDENCE IF THE RECORDER CAN EVER SEE A ONE. IT CAN. NOW IT IS EVIDENCE.**
+> — `0.7.0_AE_CloudOps`, `020030Z`
+
+**Why rail 3 is not a formality: the POSITIVE control is itself a tool, and it needs its own negative control.**
+This TO originally demanded a negative control that must fire and a positive control that must stay green. **`0.7.0`
+showed the positive control was `UNDISCRIMINATING`** — it specified *"send to a correct-suffix live recipient; the
+warning must stay silent,"* and that silence holds **whether or not the recipient can receive anything at all**,
+because `channel push` pushes to the **sender's own context** (`server.py:1119-1120` sets `_active_ctx = ctx`;
+`:369` reads it; `:377` sends). *Its verdict is invariant under the truth changing.* **It would have certified the
+fix, exactly as `grep -c "9.9.9_NOBODY"` → `3` certified this TO's own SoD.**
+
+**Worked shape** (`0.7.0`'s exercise, no writes, no broker calls):
+```
+R1  NEGATIVE   the input that MUST fire       _active_ctx=sender    -> sender_got=1, recipient_got=0, returned True
+R2  VARIANCE   THE CONTROL ON THE CONTROL     _active_ctx=recipient -> recipient_got=1     <- proves R1's 0 is real
+R3  NULL       the degenerate input           _active_ctx=None      -> returned False, zero deliveries
+```
+
+**This is the general form of every failure that produced this TO:** a `grep` reporting `3` watchers for a serial
+that never existed; `comp-iam`'s `GRANTED` that never became `DENIED`; an error log with **zero lines during 57%
+loss**; a usage log with **452 clean rows**. **An instrument's zero is evidence only after you have seen it produce
+a one. Nobody had ever asked any of them to.**
 
 **Sharper (`0.8.0`, learned 2026-07-09):** wrong-bucket RED is table stakes; **same-bucket / wrong-key-prefix must
 also RED.** *A check one level too coarse passes the obvious test and ships wearing a green suite.* **Every tool's
