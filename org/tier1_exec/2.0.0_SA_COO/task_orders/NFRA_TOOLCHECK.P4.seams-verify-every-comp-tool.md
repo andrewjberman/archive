@@ -135,7 +135,21 @@ fabric-check --blocks           NONCONFORM        read a decoy dir; deaf=0 forev
 comp-coverage-check             VACUOUS           six universal claims with no N, inside safe-commit's blocking chain
 deploy_ledger L3 drift          UNDISCRIMINATING  "0 DRIFT across 5 sentinels" -- never given an input it could fail on
 comp-system --check             (FIXED)           was always-stale by construction; the only green was an uncommitted tree
+SoD reachability (b) limb       UNDISCRIMINATING  `ps -ef | grep -c "inbox-watch.sh <serial> stream"` matches its own
+                                (FIXED 01:10Z)    grep -> reports 3 armed watchers for a serial that never existed.
+                                                  drive/SKILL.md:340, CTO's own binding ruling. The COO certified THIS
+                                                  TO's SoD handoff with it. Found by running §4's positive-control rail
+                                                  against the verification instrument itself. Cost: one control.
+comp-tagauthz                   UNDETERMINED      fail-closed under MSYS_NO_PATHCONV=1 on its FIRST production run --
+                                                  for a reason unrelated to the property it guards. A fail-closed gate
+                                                  that fails for the wrong reason is indistinguishable, at the console,
+                                                  from the gate working. Needs both rails like everything else.
 ```
+
+**Note what the seventh seed says about the method.** It was not found by auditing a comp-tool. It was found by
+turning §4's positive-control rail on **the instrument used to certify this TO's own separation of duties**, ninety
+seconds after dispatch. **The tools that verify the tools were never themselves subject to a negative control.**
+`fabric-check`, `deploy_ledger`, the `ps|grep` reachability limb, and the telemetry hook are all in scope for P4.
 
 ---
 
@@ -161,10 +175,31 @@ comp-system --check             (FIXED)           was always-stale by constructi
 | **AC-0** | unassigned until the universe is published | Blocking on everything below it. |
 
 **Reachability verified before dispatch** (CTO ruling 2026-07-09T23:28Z — *SoD by routing is not SoD; `delivered`
-is not `read`*): all four recipients confirmed `0` undelivered in their canonical inbox dir **and** an armed
-`inbox-watch.sh` for that exact serial, at `00:52Z`. `3.0.0_SA_CVO` was **NOT reachable** when this TO was drafted
-(1 undelivered, no watcher); Andrew spawned it, and it drained before dispatch. **The TO was not issued into a
-lane that could not read it.**
+is not `read`*). `3.0.0_SA_CVO` was **NOT reachable** when this TO was drafted (1 undelivered, no watcher); Andrew
+spawned it, and it drained before dispatch. **The TO was not issued into a lane that could not read it.**
+
+> ### CORRECTION `01:10Z` — **THE INSTRUMENT I CERTIFIED THAT WITH IS A SEED INSTANCE OF THIS TO.**
+> The line above originally read *"all four recipients confirmed `0` undelivered **and an armed `inbox-watch.sh`
+> for that exact serial**, at `00:52Z`."* **The watcher half of that claim was produced by
+> `ps -ef | grep -c "inbox-watch.sh <serial> stream"` — which matches its own grep process.** Positive control:
+> ```
+> grep -c  on serial 9.9.9_NOBODY, which has never existed   ->  3
+> | grep -v grep | wc -l,  same fictional serial              ->  0
+> ```
+> **It reports armed watchers for an agent that does not exist. Output independent of the property. `UNDISCRIMINATING`.**
+>
+> **Corrected, both limbs, control-verified:** `0.8.0_AE_CloudComp`, `3.0.0_SA_CVO`, `1.0.0_SA_CTO` — **REACHABLE**
+> (`u=0, w=2`). `0.4.0_DS_ClientPlatform~B` — **`w=0`**, so the claim as written was **false for it.** Delivery is
+> nonetheless *observed*, and by the stronger signal: the `010500Z` dispatch was found in its `read/` as the newest
+> file. **A file moving into `read/` is not a proxy for delivery; it is delivery.**
+>
+> **This defect was found ninety seconds after this TO was dispatched, by running §4's own positive-control rail
+> against the COO's own verification instrument.** The rule it violates is `drive/SKILL.md:340` — CTO's binding SoD
+> ruling, which shipped the self-matching `grep` while the older `/watcher` skill had carried `grep -v grep` all
+> along. *The tightening lost the control.* Both fixed at `01:10Z`.
+>
+> **Add to §6 as the seventh seed** — and note what it cost to find: nothing. **One positive control, on an
+> instrument nobody had ever asked to fail.**
 
 ---
 
