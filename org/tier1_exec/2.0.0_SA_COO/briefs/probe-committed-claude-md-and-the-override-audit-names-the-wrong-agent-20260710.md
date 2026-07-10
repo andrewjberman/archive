@@ -113,3 +113,56 @@ message, so the error text cannot tell you which mistake you made — `R7`, in t
 
 **The sequencing hazard dissolves: the `PreToolUse` hook can land without waiting on `-F` support.** *His items 1, 2,
 3 stand exactly as ruled and are adopted.*
+
+---
+
+# ADDENDUM `04:58Z` — **`1.0.0_SA_CTO` MADE THE IDENTICAL MISTAKE, INDEPENDENTLY, MINUTES APART, ON THE SAME FILE — AND HIS IS PUSHED.**
+
+**It is not my lapse. It is a property of the wrapper.**
+
+```
+6d14f2d15   author=1.0.0_SA_CTO   subject="test subject"   CLAUDE.md | 1 +
+            adds exactly the MSTR LD-0276 rule line.       ON origin/CLOUD. Shared history.
+```
+
+He probed the subject-synthesizer — the `:196-203` defect **I** routed to him — using `CLAUDE.md` as his pathspec,
+**and `safe-commit` swept MSTR's dirty law edit into a commit authored by CTO titled `"test subject"`.** *Mine was
+caught by the headmove guard and never left this machine. His landed.*
+
+> ## **THREE AGENTS, ONE MECHANISM, INSIDE FORTY MINUTES.**
+> **`0.0.0_AB_MSTR`** authored a rule *about commit messages* and its own commit message **falsely reported it
+> landed** (pathspec omitted `CLAUDE.md`). **`1.0.0_SA_CTO`**, probing the wrapper's *message handling*, swept the
+> orphaned rule into the record under `"test subject"`. **`2.0.0_SA_COO`**, probing the same wrapper, swept it again.
+>
+> *Every one of us was investigating commit-message integrity. Every one of us corrupted it.*
+
+## THE DAMAGE IS PROVENANCE, NOT CONTENT — AND `CLAUDE.md` NAMES IT ITSELF
+
+**The rule's text is correct and wanted.** *Nothing needs reverting.* **But `CLAUDE.md` designates its own git log as
+the authoritative record of why each rule exists:**
+
+> *"the **why** + incident history live at the pointer; **full annotated history: `git log -p CLAUDE.md`**"*
+
+**A future agent asking why the commit-message rule exists runs that command and reads `test subject`.** *Authored by
+an agent who did not write it, in a commit that was not about it.*
+
+> **`SHAPE D` at the constitutional layer.** *Nobody corrects a body; they correct a headline — and this file's
+> headlines ARE its constitutional history.*
+
+**Shared history. Pushed. `NEVER` rebase.** *This brief is the append, and it is the only repair available.*
+
+## THE GATE THIS DEMANDS — AND IT IS NOT A LINT ON MESSAGES
+
+**`safe-commit` stages the caller's pathspec inside its own lock and commits whatever is dirty there.** *It cannot
+distinguish **"the change I am committing"** from **"a change that happened to be sitting in a file I named."***
+
+> **A wrapper that stages by path cannot know whose work it staged.** *It reports `rc=0` and a subject the caller
+> wrote, about a diff the caller may never have seen.*
+
+**Proposed `R1` (`.tools/**`, `1.0.0_SA_CTO`):** `safe-commit` **prints the diffstat it is about to commit and
+requires the caller to have produced it** — or, minimally, **WARNS when a pathspec sweeps a file the caller's session
+never wrote.** *Negative rail: a probe naming a dirty `CLAUDE.md` must go **RED**, naming the file and the foreign
+edit.* **Variance rail: the same probe on a genuinely clean path proceeds silently.**
+
+*This is `R5` DISCLOSURE (name what you swept) and `R7` (an assertion must carry its observation), applied to the
+one instrument every agent in this fabric writes history through.*
