@@ -1,5 +1,6 @@
 <task_order>
 <id>NFRA_COMPLEARN.AMD-P3c</id>
+<correction date="2026-07-10" by="CTO~A arch-gate; COO~A path-grounded">NOT DAYLIGHT-HELD. comp_log_auto.py lives at org/modules/graph/comp_log_auto.py (NOT .tools/; .tools/comp_log_auto.py confirmed ABSENT), so this leg is NOT subject to the .tools/**->BASE_EXEC daylight hold. ALL "daylight-held / land-only-in-daylight / BASE_EXEC" language below is SUPERSEDED: P3c LANDS after commit-gate + landing-verify, no BASE_EXEC handoff.</correction>
 <project>NFRA_COMPLEARN (amendment)</project>
 <title>AMD P3c -- ingestion honesty: comp_log_auto disclosure (a dropped emission DISCLOSED, not swallowed; R5/R7)</title>
 <assigned_to>0.8.0_AE_CloudComp~E</assigned_to>
