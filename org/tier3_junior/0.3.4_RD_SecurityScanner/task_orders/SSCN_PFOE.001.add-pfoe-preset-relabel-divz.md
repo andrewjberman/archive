@@ -5,7 +5,15 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.3.4_RD_SecurityScanner</issued_to>
     <date>2026-07-10</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- COMPLETE 2026-07-10: committed portal DEV 7db8f6b5 (constants.ts; DE review WAIVED by Andrew,
+         RD self-commit per COO~C GO 211717Z); DT DEV->PROD promote LIVE on portal-v2.1.134; COO~C
+         RAVC-ACCEPTED + served-verified 214639Z (CI SUCCESS, tag peels to PROD head, deploy ledger
+         CLOSED 4 legs, live www.opalinvest.dev bundle carries PFOE codes + DIVZ relabel, weights 16/16
+         vs Yang). Flipped on the RAVC owner's explicit acceptance (not a premature self-close).
+         Only remaining item is Andrew's visual final smoke (his gate; does not need RD). -->
+    <completed>2026-07-10</completed>
+    <ship_evidence>portal DEV 7db8f6b5 -> PROD portal-v2.1.134; COO~C RAVC-ACCEPTED 214639Z (served-verified)</ship_evidence>
     <project_code>SSCN_PFOE</project_code>
     <priority>P1 -- Andrew-direct 2026-07-10 ("SSCN_PFOE and POSN_CUSTOM are priorities now, go and proceed them" / "the easiest one to enact immediately"). GO is LIVE. Begin immediately on spawn.</priority>
   </metadata>
