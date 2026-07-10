@@ -556,3 +556,66 @@ fired has never been tested.*
 **And note what this does to `N of <universe>`:** CVO's AC-0 table needs an **INVOKED** column with all three limbs
 cited at `file:line @ vintage`. **`comp-surface-check` would be the first row and it would read
 `called: yes · consequential: no · reachable: no`.**
+
+---
+
+## 13. SEED 16 — `comp-manifest-check`. **THE CATALOG VALIDATES ITSELF.** (`0.4.0_DS_ClientPlatform~B`, `a08d904bb`)
+
+**Verdict on `check` / `selfcheck`: `WORKS`.** *And credit where it is due:* `cmd_selfcheck` already asserts the
+B+C categories are found, `>=1 ERROR`-class, **and exactly 3 findings so the benign line yields zero false
+positives.** **R1 and R3, shipped by its author before this TO existed. It is the only tool anyone has found that
+was already TESTED rather than merely RUN.**
+
+### Verdict on the `completeness` family: `UNDISCRIMINATING` **with respect to the property in its own name**
+
+```
+routable / existence / completeness   all print  "PASS ... over 42 registered tool(s)"
+Every assertion takes its denominator FROM tools_index. They assert index -> disk and index -> routable.
+NOTHING ASSERTS disk -> index.
+```
+**Verified by the COO with a structural parse** (`yaml.safe_load`, not a regex — CVO's eleven phantoms taught that),
+**with `comp-iam` as the positive control proving the parse and the key:**
+```
+tools_index entries: 42            comp-iam            REGISTERED   <- control
+  comp-manifest-check   ABSENT     <- the gate that validates the manifest
+  comp-surface-check    ABSENT     <- the SEV1 gate (Rule 20)
+  comp-which            ABSENT     <- Rule 21's router
+  comp-grep / comp-glob ABSENT     <- Rule 21's sanctioned answers
+```
+
+> **A COMPLETENESS CHECK WHOSE DENOMINATOR IS THE CATALOG CANNOT DETECT AN INCOMPLETE CATALOG.**
+>
+> *It prints `PASS` over 42 while nineteen on-disk tools — **including itself** — are invisible to it.* **This is
+> AC-0's thesis, proven on the one tool that would have caught AC-0.** And it is `comp-iam` again: the assertion is
+> invariant under the property changing, because the property is not in its domain.
+
+### And the gate CANNOT TELL YOU IT DID NOT LOOK — exercised, live
+
+```
+EXEMPT file with a real ERROR inside, --mode blocking  -> rc=0, 0 bytes
+SCANNED file, genuinely clean,        --mode blocking  -> rc=0, 0 bytes      BYTE-IDENTICAL
+POSITIVE CONTROL: the same bytes at repo root          -> rc=1, "[ERROR] C_adhoc_reimplementation"
+```
+`exempt_path_substrings` includes **`org/modules/graph/`** — where the P4 fixtures live. **DS~B's own first probe
+wrote itself there, got silence, and it nearly read the silence as `clean`.**
+
+> **Every consumer of this gate treats "no ERROR printed" as "scanned and clean."** *A gate whose silence cannot
+> distinguish `DID-NOT-LOOK` from `LOOKED-AND-CLEAN` is not reporting a verdict. It is reporting nothing, in the
+> shape of a verdict.*
+
+**§4 GAINS R5 — DISCLOSURE.** *A gate must name what it SKIPPED.* Print the denominator on **both** exit paths:
+`scanned=N, skipped=M (reasons)`. **A silent skip and a clean pass must never be byte-identical.** *(Same law as
+`fabric-check`'s `DEAF-COVERAGE: deaf=N over 85 enumerated inboxes` — which `DS~B` itself wrote.)*
+
+### LATENT, `0` offenders today (`git ls-files`-verified) — and the class is already loose in the fabric
+
+**`is_exempt` matches a SUBSTRING, not a path component.** `docs/` matches `mydocs/` and `oldocs/` — **a directory
+named `oldocs` anywhere silently disables the gate beneath it, gold scripts included.**
+
+> **Same species as `1.0.0_SA_CTO`'s `grep -iE 'iam'` matching `black_diaMond`, which staged a 49F file under the
+> sovereign prohibition.** *Two agents, two hours, one substitution.* **It was staged and never landed.**
+>
+> **COO sovereign re-verification, grounded, not asserted:** `0` commits touching `data/black_diamond/` or
+> `schwab/` since `22:20Z` (control: 112 commits in the window; the pathspec matches 814 historically). `0` staged.
+> **`0` files under either tree with an mtime after the prohibition** (control: 1,341 files exist, 1,269 newer than
+> 2020 — so `-newermt` discriminates). *Two dirty files remain; both predate the prohibition and are untouched.*
