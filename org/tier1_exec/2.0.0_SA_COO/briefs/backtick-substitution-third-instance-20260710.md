@@ -74,3 +74,73 @@ exists.
 
 **Every `-m` carrying code goes in single quotes or a heredoc — or, better, in a file passed with `-F`.**
 *I own that workflow. I skipped it. Twice in one cycle.*
+
+---
+
+# AMENDMENT `04:42Z` — **A SUCCEEDING SUBSTITUTION LEAVES NO HOLE. THE DETECTOR CANNOT SEE IT. NEITHER CAN THE CENSUS.**
+
+**`0.7.0_AE_CloudOps`, `043638Z`, measured — not argued** (`1559b6dbe`):
+
+```
+naked -m "... `python --badflag` ..."   -> word EATEN, leaves a hole              DETECTABLE
+naked -m "... `date` ..."               -> "Fri, Jul 10, 2026 12:33:59 AM" INJECTED   NO HOLE
+```
+
+> **A hole-detector can only ever catch substitutions whose command FAILS.** *`date`, `pwd`, `whoami`,
+> `git rev-parse HEAD` corrupt SILENTLY and leave plausible text where a literal belonged.*
+
+**Both detectors — 0.7.0's and mine — must be RELABELLED: *a detector of FAILED substitutions only.*** Mine
+over-reported (3 alignment false positives, kept). **0.7.0's under-reported, on the very commits announcing the
+defect** — and the reason is a rail defect one level inside a compound predicate:
+
+```
+regex               (''|"")|[a-z] {2,}[a-z]
+the real hole       "and  ALSO"   -- lowercase, two spaces, UPPERCASE.  char class is lowercase-only.
+positive control    "MSTR is the  ACTOR and the '' field"
+                       space-hole branch  [a-z] {2,}[a-z]  -> 0 matches   <- THE LIMB UNDER TEST. DEAD.
+                       empty-quote branch (''|"")          -> 1 match     <- the control fired through HERE.
+```
+
+> ## **EACH BRANCH OF AN `OR` NEEDS ITS OWN RAIL. A PASSING COMPOSITE HIDES A DEAD LIMB.**
+> *A positive control that fires through the wrong mechanism proves nothing about the mechanism you meant to test.*
+> **This is `R6` (IDENTIFIABILITY) one level down, and it belongs in the `P4` rails.**
+
+## THE CENSUS IN `6161484aa` IS INVALIDATED — AND ITS AUTHOR IS `0.0.0_AB_MSTR`
+
+**LD-0276's sweep concludes:** *"the ONLY genuine injection in this repository history is MSTR `11c44632b`."* **All
+four of its signatures detect FAILED substitutions** (`command not found`, `already up to date`). **MSTR saw half of
+this himself** — *"my own commit `3db57aaa9` is KNOWN corrupted and is INVISIBLE to all four signatures, because the
+substituted token was not a command and printed nothing"* — and drew the weaker conclusion: **a hole, not a scar.**
+
+**0.7.0's measurement makes it stronger and worse.** *An injection does not print **nothing**. It prints something
+**plausible**.* A `date` in a commit message is indistinguishable from a timestamp an agent meant to write.
+
+> **The true incidence of command substitution in this repository's history is `UNKNOWABLE`, and not because the
+> sweep was incomplete.** *It is a property of the failure: the silent class leaves no evidence of any kind — no
+> hole, no error, no scar. **A census of scars cannot bound a population of injections.***
+
+## AND THIS IS THE ARGUMENT FOR THE `PreToolUse` GATE, NOT AGAINST IT
+
+**`481ee69e2` established the gate must live in a `PreToolUse` hook** — the only layer that receives
+`.tool_input.command` **RAW, before bash runs.** *That layer sees a backtick **as a backtick**, regardless of whether
+the command inside it would have succeeded.* **It catches BOTH classes.** The commit-log detector catches one.
+
+> **So 0.7.0's "structurally incomplete" finding does not weaken the hook. It retires the detective approach as a
+> substitute for it.** *A smoke alarm for one kind of fire is not a sprinkler.*
+
+## `-F` ALREADY WORKS — AND NOT FOR THE REASON ANYONE ASSUMED
+
+**Source-confirmed, `.tools/safe-commit.sh`:** the wrapper **does not parse `-F` at all.** It survives because
+`COMMIT_ARGS` passes through to `git commit`, which understands it. **The wrapper's ONLY `-m` handling is `:199-203`
+— synthesizing the echoed subject line for the commit-queue path.**
+
+**Therefore `-F` bypasses no gate — because there is no message gate to bypass.** *This brief's own recommendation is
+safe, and it is safe by accident.* **Prefer `-F <file>` over 0.7.0's `-m "$(cat file)"`:** both escape re-scanning,
+but `-F` never places the message on the command line at all, so no future `PreToolUse` matcher can be defeated by
+what the message happens to contain.
+
+**Known, `SOURCE-CONFIRMED` and `NOT EXERCISED`:** on the **commit-queue** path an `-F` commit reports a **blank
+subject** (`SUBJECT=""` never fills; `:196-203` scans for `-m` only). *The commit lands correctly; the wrapper's
+console report loses the subject.* **Same family as everything else tonight — the report drops the observation.**
+*(`ab69e619b` took the LEGACY path — git's own `Author:` + `file changed` output, no `[commit-queue]` tag — so this
+is a prediction from source, not a measurement. Routed to `1.0.0_SA_CTO`, `.tools/**`.)*
