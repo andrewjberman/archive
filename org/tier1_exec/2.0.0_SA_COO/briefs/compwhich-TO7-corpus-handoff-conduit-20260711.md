@@ -19,8 +19,14 @@ ENGINE is not** -- see below; that is the corpus's real target.
 `org/modules/graph/tests/test_compwhich_toolpass_rules.py` (18 tests, landed `2777924da`) -- the canonical
 route-assertion harness: asserts the 5 fixed routes rank-1 + bidirectional non-vacuity + regression + the `--json`
 contract, exercising the LIVE launcher via `--json --route-only` (side-effect-free). **In my comp-tool-tests CI
-gate's scope -> auto-enforced** (a routing regression now fails CI). The ad-hoc N=12 scorecard scripts are
-reproducible but session-local (scratchpad); CVO can durably commit a full sweep-runner if 0.8.0 wants it.
+gate's scope -> auto-enforced** (a routing regression now fails CI).
+
+**The full N=12 sweep-runner is now DURABLE** (CVO committed it 2026-07-11, `172b898c6`):
+`org/modules/graph/tests/compwhich_routing_scorecard.py` -- a MEASUREMENT script (NO `test_` prefix, so NOT
+pytest-collected), it emits PICK/SURFACED/ABSENT per label + the raw-engine baseline, complementing the pass/fail
+harness above. Reproduces launcher 10/12 (83%) vs RAW fuzzy engine 0/12 top-1 -- **that two-row gap IS the TO-8
+target** (engine scoring, not curated patches). So TO-8 has the measurement instrument even after CVO's session
+ends -- it won't age out.
 
 ## 2. THE ENGINE-LEVEL FINDING (the load-bearing corpus target -- the curated rules do NOT fix this)
 
