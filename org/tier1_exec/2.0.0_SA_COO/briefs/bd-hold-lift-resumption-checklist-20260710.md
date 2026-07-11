@@ -35,9 +35,27 @@ switch, so lifting the hold correctly requires remembering all 6.
 not source -- its re-enable is a **deployed-cron env-flag** (0.7.0_AE_CloudOps~C's leg), distinct from the tool-side
 flags above. When the hold lifts, its cron-flag flips too. Confirm the exact var with 0.7.0~C's freeze-monitor deploy.
 
-**CLASS STATUS (CTO-declared 2026-07-10):** the bd-reader class is now CLOSED -- 9 source/config surfaces (the 7
-flags above + `comp-debt`/`comp-platinum` via shared engines) + 1 DATA-tier (`comp-xray`). Every one caught
-source-first, every one guarded by a str-prefix held-check with a re-enable override.
+**CLASS STATUS: closure IN PROGRESS -- NOT closed (corrected 2026-07-11).** CTO *declared* the class closed at
+comp-validate, but `3.0.0_SA_CVO~B`'s independent source-only CENSUS (`031046Z`) found **6 unguarded
+bd-content-readers the alphabetical sweep MISSED** -- so the enumeration below is INCOMPLETE and MUST NOT be locked
+as the consolidation TO's set until the C0 guard phase lands. (This is the verify-before-asserting-closed lesson on
+the sweep's own closure claim: a source-first CENSUS is the ground truth, not the alphabetical pass's "final tool.")
+
+CENSUS-FOUND UNGUARDED READERS (C0 guard-first queue; CVO~B escalated the scope calls to CTO `031001Z`):
+1. `comp_dispatch.py` -- open+read bd `gold_dispatch.sh` (SOURCE-CONFIRMED).
+2. `extract_pipeline._extract_column_gaps:994` -> `comp-pipescript io` -- `deployed` is guarded, **`io` is NOT** (SOURCE-CONFIRMED gap).
+3. `comp_recognizers_config.py` -- bd `gold_freshness_config.yaml`.
+4. `comp_recognizers_code.py` -- bd `gold_dispatch.sh` / `s3_layout` / `A_00` / `A_01`.
+5. `.tools/freshness_manifest_gen.py` -- bd `gold_freshness_config.yaml` (comp-freshness guards its sibling; this does NOT).
+6. `incrparity_core.py` -- s3 `opal-data-bd` (CAVEAT: a designed-bd parity ENGINE, likely OUT of scope -- CTO scope call B).
+
+CENSUS ALSO CONFIRMED the known-guarded readers intact + found 4 MORE already-guarded (comp_constants, dup_scan,
+extract_iam, comp-freshness) -- the guarded set is solid and larger than tracked; the gap is precisely these 6.
+
+**SO for the flag enumeration:** the 7 tool-flags above are the CURRENTLY-guarded set; C0 will GROW it by the new
+guards' override vars (~5 in-scope), then C1 collapses ALL of them into the single `COMP_INCLUDE_HELD` signal.
+Do NOT finalize the per-flag list until C0 lands. The one-flip end-state is unchanged (`COMP_INCLUDE_HELD=1` lifts
+everything); only the pre-consolidation count is still growing.
 
 ## THE CONSOLIDATION TARGET -- ONE flip, not seven+ (CTO is OPENING the post-sweep TO 2026-07-10; it KEYS ON this checklist)
 
