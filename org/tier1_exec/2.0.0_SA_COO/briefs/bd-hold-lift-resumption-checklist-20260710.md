@@ -26,11 +26,20 @@ switch, so lifting the hold correctly requires remembering all 6.
 | `comp-iam` | `COMP_IAM_INCLUDE_HELD=1` | env var | the bd gold + EC2-manifest service-source IAM scan |
 | `comp-pipescript` | `COMP_PIPESCRIPT_INCLUDE_HELD=1` | env var | the bd `deployed` verify (md5 vs opal-data-bd) + the all-trees firm-separated deploy-verify sweep's bd leg (Rule 13, DS) |
 | `comp-secrets` | `COMP_SECRETS_INCLUDE_HELD=1` | env var | the `consumers` git-grep over bd source for a secret name/arn |
+| `comp-validate` | `COMP_VALIDATE_INCLUDE_HELD=1` | env var | the bd `gold_validate_config.yaml` read (alias map, `--list`, every non-INF validation) + the bd validators-dir stat/dispatch (the 7th/FINAL source/config reader) |
 
 **Inheriting via shared engines (no own flag -- covered by the above):** `comp-debt` (its DUPLICATES signal rides
 `dup_scan` -> `--allow-held`); `comp-platinum` + any future caller ride the shared `_held_path_hit` chokepoint.
 
-## THE CONSOLIDATION TARGET (post-sweep; CTO-noted) -- ONE flip, not six
+**DATA-tier member (separate mechanism):** `comp-xray` / freeze-monitor (`04de28c0b`) reads a held bd DATA bucket,
+not source -- its re-enable is a **deployed-cron env-flag** (0.7.0_AE_CloudOps~C's leg), distinct from the tool-side
+flags above. When the hold lifts, its cron-flag flips too. Confirm the exact var with 0.7.0~C's freeze-monitor deploy.
+
+**CLASS STATUS (CTO-declared 2026-07-10):** the bd-reader class is now CLOSED -- 9 source/config surfaces (the 7
+flags above + `comp-debt`/`comp-platinum` via shared engines) + 1 DATA-tier (`comp-xray`). Every one caught
+source-first, every one guarded by a str-prefix held-check with a re-enable override.
+
+## THE CONSOLIDATION TARGET -- ONE flip, not seven+ (CTO is OPENING the post-sweep TO 2026-07-10; it KEYS ON this checklist)
 
 The 6 mechanisms are heterogeneous (CLI vs env, three name-shapes) -- a resumption is exactly the kind of
 "remember all N or a control silently no-ops" trap the whole sweep is about. **The right end state is a SINGLE
