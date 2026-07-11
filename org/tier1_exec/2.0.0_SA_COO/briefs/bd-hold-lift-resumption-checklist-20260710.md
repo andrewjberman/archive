@@ -17,10 +17,11 @@ comp-recognizers (code+config), freshness_manifest_gen, comp-iam, comp-constants
 (deployed + io), comp-incrparity, + the trace-graph indexer / extract_pipeline / extract_s3 / platinum (via the
 shared predicate).
 
-**ONE TEMPORARY EXCEPTION:** `freeze_monitor` (comp-xray, the deployed lambda in `infra/aws/compdiff`) is
-`0.7.0_AE_CloudOps~C`'s lane and not yet migrated -- until their C-x lands it honors **`COMP_XRAY_INCLUDE_HELD=1`**
-separately. So for now the lift is: **`COMP_INCLUDE_HELD=1` (14 in-repo tools) + `COMP_XRAY_INCLUDE_HELD=1`
-(freeze_monitor).** CVO~B pings when C-x lands; then this exception drops and it is truly one flip.
+**NO EXCEPTIONS (C-x landed 2026-07-11, `345aeb90b`).** `freeze_monitor` (comp-xray, the deployed lambda in
+`infra/aws/compdiff`) now delegates to `include_held("COMP_XRAY_INCLUDE_HELD")` -- so `COMP_INCLUDE_HELD=1` lifts it
+too, alongside the other 15 readers. **The lift is truly ONE flip across all 16 bd-readers: `set COMP_INCLUDE_HELD=1`
+(+ verify), zero per-tool exceptions.** (The legacy per-tool vars, incl `COMP_XRAY_INCLUDE_HELD`, still work for
+back-compat / single-tool override -- the deployed cron sets its own and is unaffected; no redeploy needed.)
 
 **Drift-guarded:** `test_sovereign_held_no_drift.py` (`7854a9977`) FAILS CI if any tool re-introduces a local
 held-marker copy -- the single-source-of-truth cannot silently erode.
