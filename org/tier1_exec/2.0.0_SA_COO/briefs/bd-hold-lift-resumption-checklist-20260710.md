@@ -1,12 +1,37 @@
 # bd-hold-lift resumption checklist -- the 6 re-enable mechanisms the guarded bd-readers need flipped when the sovereign hold lifts
 
 **`2.0.0_SA_COO`, 2026-07-10.** *Authored in the COO lane per CTO GO (`000829Z`); `1.0.0_SA_CTO` owns/tracks the
-bd-hold lifecycle (this pairs with the bd-cron-under-hold decision Andrew + CTO track). Durable capture now; the
-CONSOLIDATION to a single signal is post-sweep (see below).*
+bd-hold lifecycle (this pairs with the bd-cron-under-hold decision Andrew + CTO track). **UPDATE 2026-07-11: the
+CONSOLIDATION IS COMPLETE (CVO~B, C1->C8, CTO-gated). One signal now lifts everything -- see THE ONE-FLIP below;
+the per-tool flags are retained only as back-compat overrides.***
 
 ---
 
-## THE LATENT GAP
+## THE ONE-FLIP (post-consolidation, 2026-07-11) -- THE resumption instruction
+
+**When Andrew lifts the sovereign bd hold: `set COMP_INCLUDE_HELD=1` (+ verify).** That ONE env var re-enables ALL
+14 in-repo guarded bd-readers at once, via the shared `sovereign_held.include_held()` predicate
+(`org/modules/graph/sovereign_held.py`, `f2ead7904` -- no underscore: a public 15-tool API). **Polarity:**
+`COMP_INCLUDE_HELD=="1"` -> read held; unset / anything-else -> held (skip). The 14: comp-validate, comp-dispatch,
+comp-recognizers (code+config), freshness_manifest_gen, comp-iam, comp-constants, comp-secrets, comp-pipescript
+(deployed + io), comp-incrparity, + the trace-graph indexer / extract_pipeline / extract_s3 / platinum (via the
+shared predicate).
+
+**ONE TEMPORARY EXCEPTION:** `freeze_monitor` (comp-xray, the deployed lambda in `infra/aws/compdiff`) is
+`0.7.0_AE_CloudOps~C`'s lane and not yet migrated -- until their C-x lands it honors **`COMP_XRAY_INCLUDE_HELD=1`**
+separately. So for now the lift is: **`COMP_INCLUDE_HELD=1` (14 in-repo tools) + `COMP_XRAY_INCLUDE_HELD=1`
+(freeze_monitor).** CVO~B pings when C-x lands; then this exception drops and it is truly one flip.
+
+**Drift-guarded:** `test_sovereign_held_no_drift.py` (`7854a9977`) FAILS CI if any tool re-introduces a local
+held-marker copy -- the single-source-of-truth cannot silently erode.
+
+**VERIFY after the flip** (resumption is not "set it and trust"): exercise one guarded reader per tier against bd and
+confirm it now READS, not loud-skips (e.g. `comp-freshness chain bd` returns a real freshness verdict, not the
+held-skip note).
+
+---
+
+## THE LATENT GAP (why the consolidation exists -- historical)
 
 As the NFRA_TOOLPASS sweep guarded the bd-reader-class tools one-by-one, **each grew its OWN re-enable
 mechanism** so a normal agent invocation loud-SKIPS bd under the sovereign hold, while a pipeline/opt-in
@@ -16,9 +41,13 @@ deploy-verify, IAM-scan, freshness-gate, dedup, consumers-scan all quietly no-op
 covering nothing. There are **6 heterogeneous mechanisms** (2 CLI flags + 4 env vars, 3 name-shapes) -- no single
 switch, so lifting the hold correctly requires remembering all 6.
 
-## THE CHECKLIST -- flip ALL of these when the sovereign bd hold lifts
+## LEGACY PER-TOOL OVERRIDE FLAGS (back-compat -- the ONE-FLIP above supersedes these; `include_held()` still honors each)
 
-| tool | mechanism | shape | re-enables (what silently skips bd without it) |
+*Pre-consolidation, each guard had its own flag. Post-consolidation these STILL work (per-tool override for a single
+tool without lifting the whole hold), but the resumption default is the one-flip `COMP_INCLUDE_HELD=1`. Kept for
+reference + single-tool override.*
+
+| tool | legacy override | shape | re-enables (what silently skips bd without it) |
 |---|---|---|---|
 | `comp-dups` | `--allow-held` | CLI flag | the estate dedup/dead-confirm scan over bd source |
 | `comp-constants` | `--allow-held-scan` | CLI flag | the firm-constant drift scan over bd source (`check --file <bd>`, bare `check`) |
