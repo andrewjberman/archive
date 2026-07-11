@@ -26,7 +26,15 @@ switch, so lifting the hold correctly requires remembering all 6.
 | `comp-iam` | `COMP_IAM_INCLUDE_HELD=1` | env var | the bd gold + EC2-manifest service-source IAM scan |
 | `comp-pipescript` | `COMP_PIPESCRIPT_INCLUDE_HELD=1` | env var | the bd `deployed` verify (md5 vs opal-data-bd) + the all-trees firm-separated deploy-verify sweep's bd leg (Rule 13, DS) |
 | `comp-secrets` | `COMP_SECRETS_INCLUDE_HELD=1` | env var | the `consumers` git-grep over bd source for a secret name/arn |
-| `comp-validate` | `COMP_VALIDATE_INCLUDE_HELD=1` | env var | the bd `gold_validate_config.yaml` read (alias map, `--list`, every non-INF validation) + the bd validators-dir stat/dispatch (the 7th/FINAL source/config reader) |
+| `comp-validate` | `COMP_VALIDATE_INCLUDE_HELD=1` | env var | the bd `gold_validate_config.yaml` read (alias map, `--list`, every non-INF validation) + the bd validators-dir stat/dispatch |
+| `comp-dispatch` | `COMP_DISPATCH_INCLUDE_HELD=1` | env var | reads bd `gold_dispatch.sh` (C0-#1, `c56421407`) |
+| `comp_recognizers` | `COMP_RECOGNIZERS_INCLUDE_HELD=1` | env var | code+config recognizers read bd `gold_freshness_config.yaml` + `gold_dispatch.sh`/`s3_layout`/`A_00`/`A_01` (C0-#4/#5, `5f893de0d`) |
+| `comp-incrparity` (CLI) | `COMP_INCRPARITY_INCLUDE_HELD=1` | env var | the comp-tool incrparity CLI reads s3 `opal-data-bd` (C0-#7, `54c1b9ab5`) |
+
+**No new var (C0):** `freshness_manifest_gen` (C0-#2, `c2b306806`) reuses **`COMP_FRESHNESS_PIPELINE`** (its sibling
+comp-freshness's flag now covers both). `extract_pipeline:994` -> `comp-pipescript io` (C0-#3, `f51ee8323`) uses a
+bare `_held_path_hit` -- a C1 note threads `include_held` so `io` honors `COMP_PIPESCRIPT_INCLUDE_HELD` like `deployed`
+(comp-pipescript is now fully guarded, deployed+io, not half).
 
 **Inheriting via shared engines (no own flag -- covered by the above):** `comp-debt` (its DUPLICATES signal rides
 `dup_scan` -> `--allow-held`); `comp-platinum` + any future caller ride the shared `_held_path_hit` chokepoint.
@@ -35,13 +43,14 @@ switch, so lifting the hold correctly requires remembering all 6.
 not source -- its re-enable is a **deployed-cron env-flag** (0.7.0_AE_CloudOps~C's leg), distinct from the tool-side
 flags above. When the hold lifts, its cron-flag flips too. Confirm the exact var with 0.7.0~C's freeze-monitor deploy.
 
-**CLASS STATUS: closure IN PROGRESS -- NOT closed (corrected 2026-07-11).** CTO *declared* the class closed at
-comp-validate, but `3.0.0_SA_CVO~B`'s independent source-only CENSUS (`031046Z`) found **6 unguarded
-bd-content-readers the alphabetical sweep MISSED** -- so the enumeration below is INCOMPLETE and MUST NOT be locked
-as the consolidation TO's set until the C0 guard phase lands. (This is the verify-before-asserting-closed lesson on
-the sweep's own closure claim: a source-first CENSUS is the ground truth, not the alphabetical pass's "final tool.")
+**CLASS STATUS: CLOSED -- census-verified 2026-07-11 (C0 exit).** The alphabetical pass's "final tool =
+comp-validate = closed" was PREMATURE; `3.0.0_SA_CVO~B`'s independent source-only CENSUS found 6 more unguarded
+readers, they were GUARDED in the C0 phase, and the census now confirms closure. **DENOMINATOR (CTO-confirmed):**
+28 bd-referencing tool sources / 16 content-readers / **15 GUARDED** / 1 designed-bd OUT-of-scope (`incrparity_core`,
+pure library no CLI) / **0 UNGUARDED**. (The lesson stands: a source-first CENSUS is the ground truth of closure,
+not the alphabetical pass's "final tool" -- the census caught 6 gaps the tool-by-tool pass had declared away.)
 
-CENSUS-FOUND UNGUARDED READERS (C0 guard-first queue; CVO~B escalated the scope calls to CTO `031001Z`):
+CENSUS-FOUND READERS -- NOW GUARDED in C0 (CVO~B, each fixture mutation-proven, CTO-gated):
 1. `comp_dispatch.py` -- open+read bd `gold_dispatch.sh` (SOURCE-CONFIRMED).
 2. `extract_pipeline._extract_column_gaps:994` -> `comp-pipescript io` -- `deployed` is guarded, **`io` is NOT** (SOURCE-CONFIRMED gap).
 3. `comp_recognizers_config.py` -- bd `gold_freshness_config.yaml`.
@@ -52,10 +61,14 @@ CENSUS-FOUND UNGUARDED READERS (C0 guard-first queue; CVO~B escalated the scope 
 CENSUS ALSO CONFIRMED the known-guarded readers intact + found 4 MORE already-guarded (comp_constants, dup_scan,
 extract_iam, comp-freshness) -- the guarded set is solid and larger than tracked; the gap is precisely these 6.
 
-**SO for the flag enumeration:** the 7 tool-flags above are the CURRENTLY-guarded set; C0 will GROW it by the new
-guards' override vars (~5 in-scope), then C1 collapses ALL of them into the single `COMP_INCLUDE_HELD` signal.
-Do NOT finalize the per-flag list until C0 lands. The one-flip end-state is unchanged (`COMP_INCLUDE_HELD=1` lifts
-everything); only the pre-consolidation count is still growing.
+**SO for the flag enumeration:** the pre-C1 set is now COMPLETE (census-verified) -- the 7 core tool-flags above +
+the 3 C0 override vars (`COMP_DISPATCH`/`COMP_RECOGNIZERS`/`COMP_INCRPARITY`_INCLUDE_HELD) + the shared-engine
+inheritance (comp-debt/comp-platinum) + the two no-new-var C0 cases (freshness_manifest_gen reuses
+`COMP_FRESHNESS_PIPELINE`; comp-pipescript `io` rides `COMP_PIPESCRIPT_INCLUDE_HELD` post-C1). **C1**
+(`_sovereign_held.py`, gated to CTO) collapses ALL of them into ONE `COMP_INCLUDE_HELD` signal. **FINAL POLARITY
+(CVO~B-confirmed): `COMP_INCLUDE_HELD=1` LIFTS the hold** -- one flip re-enables every guarded bd-reader. Once
+C1-C7 land, this checklist becomes "set `COMP_INCLUDE_HELD=1` + verify", and the per-tool flags become back-compat
+legacy vars the shared predicate still honors.
 
 ## THE CONSOLIDATION TARGET -- ONE flip, not seven+ (CTO is OPENING the post-sweep TO 2026-07-10; it KEYS ON this checklist)
 
