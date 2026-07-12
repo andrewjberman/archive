@@ -84,10 +84,21 @@ never fires on live data (defensive-only). Keil/DeMuth excluded (Andrew).
   own read would be the fifth. CVO~B independently grounds: the P1/P5 reproduction on the REAL loader (|fold|==164,
   firm-conserved on LIVE data), the 5 guards EXERCISED (not config-read), and the POST-ACTIVATION served-verify.
 - **Sign-off chain:** base CTO principal + COO + Andrew final GO. Banked BEFORE the DS release commit. NOT 3-of-4.
-- **My (COO) due-diligence before I co-sign:** (1) CVO~B's independent verification is IN + PASSED (the reproduction
-  + guards grounded on the real loader/live -- gate 2); (2) I confirm the FINAL firm-conservation DELTA=0 from
-  CVO~B's VERIFIED reproduced numbers (Rule 22a -- not the runbook target, not the synthetic path); (3) the
-  served-verify plan is real + the rollback rehearsed. I withhold my co-sign until CVO~B's verification is in.
+- **DRIFT-ROBUSTNESS is a CO-SIGN REQUIREMENT (round-5, CTO~B /code-review 2026-07-12):** the co-sign authorizes a
+  DYNAMIC DAILY mechanism, so "correct on today's data" is NOT sufficient -- the fold must be robust on a FUTURE
+  DRIFT day. The round-4 fold was correct-today (CVO V1/V2/V3) but the /code-review found it silently WIDENS on
+  drift: **F1** (a bad-pull/silver-drift night -> servicing-reps don't resolve -> ~150 movers silently kept-on-servicing,
+  Noel loses ~$12M, only a log line = NEVER#2 SILENT WIDEN -- CONFIRMED-BY-EXERCISE, CVO~B null-servicing probe:
+  120/200 null-servicing explicit accts silently kept, fold=40, no raise); **F2** (household/account grain desync);
+  **F4** (thin/partial roster FALSE-RAISES -> whole INF nightly crashes). A fold right-today that silently-widens-on-drift
+  is EXACTLY what NEVER#2 forbids. So the co-sign is WITHHELD until round-5 fixes the unified guard model + CVO
+  re-verifies the fix INCLUDING these drift classes (the null-servicing-at-scale probe re-run). Correct-today is
+  necessary, not sufficient.
+- **My (COO) due-diligence before I co-sign:** (1) CVO~B's independent verification is IN + PASSED -- the reproduction
+  + guards grounded on the real loader/live AND the DRIFT-ROBUSTNESS classes (F1/F2/F4) re-verified on the round-5
+  fix (gate 2, drift-inclusive); (2) I confirm the FINAL firm-conservation DELTA=0 from CVO~B's VERIFIED reproduced
+  numbers (Rule 22a -- not the runbook target, not the synthetic path); (3) the served-verify plan is real + the
+  rollback rehearsed. I withhold my co-sign until CVO~B's drift-inclusive verification is in.
 - Then: the ONE atomic go-live (ledger open -> DS release commit with SERVE-RELEASE-ACK, base CTO gates -> DT FE
   promote -> served-verify on the next scheduled nightly -> ledger close).
 
