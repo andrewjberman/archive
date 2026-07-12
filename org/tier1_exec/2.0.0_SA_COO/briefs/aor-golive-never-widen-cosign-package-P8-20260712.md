@@ -94,6 +94,14 @@ never fires on live data (defensive-only). Keil/DeMuth excluded (Andrew).
   is EXACTLY what NEVER#2 forbids. So the co-sign is WITHHELD until round-5 fixes the unified guard model + CVO
   re-verifies the fix INCLUDING these drift classes (the null-servicing-at-scale probe re-run). Correct-today is
   necessary, not sufficient.
+  **STATUS 2026-07-12T1958Z: DRIFT-ROBUSTNESS MET (round-5 `4818dfa5f`, CVO~B gate-2 re-verified by EXERCISE).** F1
+  CLOSED: the null-servicing ceiling RAISES `[NULL-SERVICING-CEILING]` at 60% (needle-matched) -> a systemic bad
+  pull now REFUSES to serve. F2 CLOSED: null-servicing folds to AoR in BOTH maps at 4% (grains agree). Ceiling
+  BRACKETED (fires 9.1%, quiet 4.0%, threshold 5%); RULE-2 armed BOTH directions (gross-over + thin-under); full
+  battery green; 164+$+firm-$202.32M re-reproduced LIVE by CVO's own derivation (RULE-1 no-ops today: zero
+  null-servicing accounts, so today's fold + the co-sign numbers are UNCHANGED; the guard is for the drift day).
+  Co-sign basis now COMPLETE: correct-today (V1/V2/V3) AND robust-on-drift (round-5). Waits only on gate (1) CTO~B
+  /code-review CLEAN on `4818dfa5f` (`w0cf5gz8z`, running ~40min) + CHANGE-2 (fold-review + CVO-verify).
 - **My (COO) due-diligence before I co-sign:** (1) CVO~B's independent verification is IN + PASSED -- the reproduction
   + guards grounded on the real loader/live AND the DRIFT-ROBUSTNESS classes (F1/F2/F4) re-verified on the round-5
   fix (gate 2, drift-inclusive); (2) I confirm the FINAL firm-conservation DELTA=0 from CVO~B's VERIFIED reproduced
