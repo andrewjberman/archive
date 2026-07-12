@@ -8,6 +8,37 @@ on 3-of-4. **NUMBERS ARE FILLED FROM THE FINAL REPRODUCTION (P1/P5 on the REAL l
 
 ---
 
+## FORK-B FINAL CO-SIGN BASIS (2026-07-12T2333Z -- SUPERSEDES the count-guard / round-5 drift-robustness sections)
+
+Andrew chose Fork B (auto-nightly) + DETECT-AND-ALERT (not block). The count-based BLOCKING guards are DROPPED (moot).
+The co-sign no longer rests on a per-account blocking guard (the 6-round ceiling); it rests on the detect-and-alert
+safety being EXERCISED end-to-end + Andrew's op-risk acceptance. The round-4/round-5 count-guard + drift-robustness
+sections below are HISTORICAL (retained for the record; that basis is moot under Fork-B). Fold-correctness numbers
+are UNCHANGED (fork-independent).
+
+**WHAT I SIGN (the Fork-B basis):**
+1. **FOLD SERVES CORRECT ATTRIBUTION -- CVO-verified, UNCHANGED:** 164 movers / peter $135.24M / joe $29.19M /
+   patrick $24.13M / noel NEW $12.42M / IWM $1.34M / firm $202.32M conserved / 871. (V1/V2/V3 + independent-164 STAND.
+   udf7ADVISOROF is the attribution the client ACTUALLY uses -- serving it is truth, not a widen.)
+2. **DRIFT IS VISIBLE-NOT-SILENT -- EXERCISED** (CVO~B gate-2 Fork-B on `d082f2eef`, all 4 legs, battery 9/9):
+   count-neutral per-account SWAP fires 2 named findings (the exact thing 6 rounds of count-guards couldn't catch --
+   keyed diff, not aggregate count); source-change fires all 3 shapes; identical/first-day SILENT; NEVER BLOCKS
+   (all 3 CLI exit paths rc 0, non-fatal + switch-gated at source).
+3. **THE SAFETY WORKS END-TO-END (hard co-sign preconditions -- verified before I sign):**
+   (a) **EMIT write-verified** -- the spot-check PutObject lands a real row (Rule 22a-IAM: non-fatal missing grant =
+       silent no-spot-check = safety absent = basis (2) false). Fix: covered-prefix (DS option b) or simulate + PC + live write.
+   (b) **ALERT reaches a HUMAN -- delivery EXERCISED to a CONFIRMED endpoint.** The channel (INF_D_11 push + AE SNS/SES)
+       must deliver to a CONFIRMED sub -- a LOG-only alert no one reads, OR a PendingConfirmation SNS sub, = a
+       SILENTLY-ABSENT safety (same class as 3a). CVO~B exercises the end-to-end delivery. Andrew's op-preference on the grade.
+4. **ANDREW OWNS THE RESIDUAL OPERATIONAL RISK KNOWINGLY** -- "deal with problems as we get them / don't hold when
+   it may actually be fine." The co-sign records his explicit acceptance.
+
+I co-sign once: gate (1) CTO~B /code-review CLEAN (detect-and-SURFACE bar) + gate (2) Fork-B DETECTION verified [DONE]
++ (3a) emit-write-verified + (3b) delivery-exercised-to-confirmed-endpoint + CHANGE-2/hh286. Chain: -> co-sign
+(CTO~B principal + COO + Andrew) -> Andrew GO -> release. hh286 $0-noel-flip flagged at final GO.
+
+---
+
 ## THE NEVER-WIDEN ARGUMENT -- why this is a RE-ATTRIBUTION, not a widen
 
 NEVER#2 governs MOVING/WIDENING served output. This change **re-keys advisor attribution WITHIN a conserved firm
