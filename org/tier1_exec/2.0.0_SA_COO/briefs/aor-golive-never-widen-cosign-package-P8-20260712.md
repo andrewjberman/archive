@@ -56,11 +56,20 @@ never fires on live data (defensive-only). Keil/DeMuth excluded (Andrew).
 
 ## THE GATE
 
+**Updated go-live gate chain (Andrew added a DEDICATED verification lane 2026-07-12):**
+`(1) CTO~B /code-review CLEAN (w83xbuei1 + CHANGE-2)` -> `(2) 3.0.0_SA_CVO~B independent VERIFICATION` ->
+`(3) never-widen co-sign (base CTO principal + COO + Andrew)` -> `(4) Andrew final GO`.
+
+- **THE CO-SIGN RESTS ON CVO~B's INDEPENDENT VERIFICATION (gate 2), not on my read or a self-report.** This session
+  produced FOUR false-greens (P5 synthetic-frame blind spot; tautological reproduction-gate checks; the rate-limit
+  vacuous pass; the mis-scoped review) -- all verification-instrument failures. A never-widen co-sign resting on my
+  own read would be the fifth. CVO~B independently grounds: the P1/P5 reproduction on the REAL loader (|fold|==164,
+  firm-conserved on LIVE data), the 5 guards EXERCISED (not config-read), and the POST-ACTIVATION served-verify.
 - **Sign-off chain:** base CTO principal + COO + Andrew final GO. Banked BEFORE the DS release commit. NOT 3-of-4.
-- **My (COO) due-diligence before I co-sign:** (1) FINAL firm-conservation DELTA=0 grounded on the reproduced
-  numbers (P1/P5 real-loader, not the synthetic account_team path that false-greened them); (2) the 5 guards
-  EXERCISED on the final build; (3) the served-verify plan is real (leaderboard=5, hh286->noel, firm-conserved, FE
-  renders, INF_D_10 OK) and the rollback is rehearsed. I withhold my co-sign until all three are grounded.
+- **My (COO) due-diligence before I co-sign:** (1) CVO~B's independent verification is IN + PASSED (the reproduction
+  + guards grounded on the real loader/live -- gate 2); (2) I confirm the FINAL firm-conservation DELTA=0 from
+  CVO~B's VERIFIED reproduced numbers (Rule 22a -- not the runbook target, not the synthetic path); (3) the
+  served-verify plan is real + the rollback rehearsed. I withhold my co-sign until CVO~B's verification is in.
 - Then: the ONE atomic go-live (ledger open -> DS release commit with SERVE-RELEASE-ACK, base CTO gates -> DT FE
   promote -> served-verify on the next scheduled nightly -> ledger close).
 
