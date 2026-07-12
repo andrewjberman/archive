@@ -21,12 +21,30 @@ cohort** -- it does not add served AUA or widen the served surface beyond the fi
 3. **No stranding.** Blank-AoR accounts keep the servicing-rep key (fallback); the 34 blank-udf7ADVISOROF accounts
    stay servicing; the 164 movers re-key within-firm. Every account still lands on exactly one advisor.
 
-**CO-SIGN EVIDENCE (grounded, filled at go-live from the FINAL reproduction):**
-- firm served AUA before = `<FILL>` ; after = `<FILL>` ; **DELTA = 0** (must be exact, grounded on the reproduced numbers).
-- account count before = after = 871.
-- per-advisor re-attribution (transparent): peter `<FILL ~135.24M>` / joe `<FILL ~29.19M>` / patrick `<FILL ~24.13M>`
-  / **noel NEW `<FILL ~12.42M>`** / IWM `<FILL ~1.34M>`. Each delta from the pre-fold servicing number, summing to 0 firm-wide.
-- `|fold| == 164` on the final build (the signed mover count).
+**CO-SIGN EVIDENCE -- VERIFIED by `3.0.0_SA_CVO~B` (gate 2, V1) 2026-07-12T1923Z, from CVO~B's OWN independent
+re-derivation (own canonicalization + servicing maps + mover logic, never calling DS's build; live silver av2
+2026-07-12 + live roster; oracle sym-diff=0 on BOTH servicing bases). These are the numbers the co-sign carries
+(Rule 22a -- verified, not the runbook target):**
+- firm served AUA before = **$202.32M** ; after = **$202.32M** ; **DELTA = 0, conserved EXACTLY**.
+- account count before = after = **871** (CVO~B applied to the SERVED account_team 871).
+- per-advisor (post-fold, transparent): peter **$135.24M** / joe **$29.19M** / patrick **$24.13M** /
+  **noel NEW $12.42M** / IWM **$1.34M** (residual). All within <0.05M of target; each a within-firm re-attribution
+  from the pre-fold servicing number, summing to 0 firm-wide.
+- **INERT-STATE VERIFIED LIVE (the BEFORE / firebreak proof):** served TODAY is PRE-FOLD -- peter **$160.61M**,
+  noel **$0.00** (not yet an advisor). So the co-signed move is peter -$25.37M / noel +$12.42M (NEW) etc., firm flat.
+- `|fold| == 164` (CVO~B: 164 movers / 837 explicit / 0 dropped).
+
+**HONEST SCOPE LINE the co-sign MUST carry (CVO~B O2):** "loader+fold EXERCISED on production schema + live data;
+the deployed SILVER JOIN is VERIFIED-BY-MIMIC (the gate's mimic == `convert_orion_api_to_silver.py:574-581`,
+semantically confirmed) and is FIRST EXERCISED on the go-live nightly -- the sentinel holds the advisor_key column
+out of deployed silver until then." NOT a blocker; a truthful scope qualification so the co-sign does not overclaim
+the deployed join is exercised pre-go-live. (The post-activation served-verify, gate-2 V-served, closes it.)
+
+**GUARDS -- EXERCISED-VERIFIED by CVO~B (gate 2, V2):** own fresh-process poisoned/fake-boto3 probes (independent of
+DS's tests): OFF = ZERO S3 I/O; RAISE bites on all 5 (no-raw-column / all-null-raw / populated-but-0-movers /
+GROSS-over-fold [A3, tripped CVO~B's own first fixture] / no-rep-name); positive control loads clean (not reject-all);
+the 2 neg-controls (swap + 165th mover) BOTH caught = non-placebo. S1-allowlist-no-mint + INF_D_10-over-286 covered
+in the suites (20/20 + 21/21); CVO~B doing an independent S1-no-mint spot-exercise before final determination (belt+braces, COO-requested).
 
 ## WHAT THE CO-SIGN AUTHORIZES -- the DYNAMIC mechanism + its guards, NOT a frozen 164
 
