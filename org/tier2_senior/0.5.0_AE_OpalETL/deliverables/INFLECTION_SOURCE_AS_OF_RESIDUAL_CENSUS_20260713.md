@@ -126,3 +126,24 @@ My scope-flag (routed by MSTR) was picked up by DS~A, who owns `INF_B_00.canonic
 - **FIX GOES AT THE PULL, not any consumer** (DS~A owns it). Correcting the date in a consumer would be a second source of truth for vintage — the class killed today. Also: `INF_B_00`'s docstring claims bronze was deprecated 2026-07-01; it actually stopped 2026-06-13 — a comment with no vintage/test sent everyone to the wrong date.
 
 **End-to-end story, consistent across three layers:** silver pull stamps the lie → gold faithfully reports it → etfs producer inherits it → **0.8.0's emitter value-repeat guard refuses the freshness claim at the served layer (deployed, verified)**, and AVGCAP carries weekends forward correctly by design. DS~A's pull-fix kills the Monday lie at source; the historical etfs residual stays **disclosed here, not mutated**.
+
+---
+
+## PULL LOCATE (COO-ordered DELIVERABLE 1+2, 2026-07-13) — source-confirmed; the origin is ORION, and there is NO fix at any Opal layer
+
+COO measured the lane boundary: the positions pull is `infra/aws/lambda/inf-pipeline/inf-api-positions/` — **infra/ = AE lane (mine), NOT DS's tree.** Ownership corrected (I was wrong that DS~A owns it). Then COO (Rule 22) required I source-confirm the mechanism instead of carrying DS~A's output-measurement as a causal claim. Done, all read-only:
+
+### DELIVERABLE 1 — the line, and the true origin
+- **The stamp:** `pull_inflection_positions_daily.py:396` — `row["snapshot_date"] = snap_iso`, where `snap_iso` is the loop's REQUESTED date (`:372`). **infra/, my lane.**
+- **The deeper origin is ORION itself.** Orion's native `asOfDate` field ALSO equals the requested date — proven in bronze: `asOfDate` uniques = `['2026-06-13']`/`['2026-06-14']`/`['2026-06-15']` across a cluster whose `current_value` is 100% identical. **Orion, queried for date X, returns the latest-available book and stamps `asOfDate=X` regardless of true vintage.** There is NO true data-vintage field anywhere in the source.
+- **Lane verdict: the fix does NOT cross into DS's `data/` tree, AND there is no field-swap fix.** The silver `as_of_date` column is a passthrough/rename of Orion's `asOfDate` — NOT assigned in `convert_orion_api_to_silver.py` nor in either `_orion_api_silver_lib.py` copy (the lib is vendored into 6 locations — 1 in `data/`, 5 in infra lambdas). "Use `asOfDate` instead of `snapshot_date`" does NOT help — `asOfDate` is ALSO the echoed query date. **The pull is a faithful reporter (like gold); Orion is the liar.**
+
+### DELIVERABLE 2 — proven-red + positive control (value-movement is the only honest signal)
+- **PROVEN-RED:** silver `positions_mv` Sun 06-14 → Mon 06-15 (trading day): **`current_value` changed on 0 of 33,381 rows**; `asOfDate` = 06-14 → 06-15. The book is carried; the label asserts a Monday vintage on Friday-close values.
+- **POSITIVE CONTROL:** Tue 07-07 → Wed 07-08 (trading days): the book genuinely changed (row count 33,732→33,737 + values moved). A relabel-detector that shows the carried Monday AND a real trading-day pair is a real detector.
+
+### NEAR-MISS I caught with the positive control (the reason COO demanded one)
+My body-hash-excluding-date instrument flagged silver 06-15 as a "distinct book" (hash `0899` vs weekend `af47`) — I was one step from reporting a false "silver→gold collapse" mechanism CONTRADICTING DS~A. The precise column diff caught it: the hash difference was **2 rows of `asset_class` metadata**, with **`current_value` identical on all 33,381 rows.** DS~A's root-cause holds; my over-sensitive detector nearly manufactured a mechanism. *An instrument sensitive to metadata noise reports a movement that the values do not have.*
+
+### THE FIX (co-sign-gated, NOT started) — and it may be a no-op
+Since the honest vintage does not exist in the Orion response, the only producer-side option is a **value-movement disclosure at the pull** (identical-values-on-a-trading-day → flag `asOfDate` as not-vintage-trustworthy). But that is **redundant with 0.8.0's deployed emitter guard**, which already does exactly this (trading-day value-repeat → `vintage_state=missing`) at the served layer. So a pull-side fix may add nothing the served layer doesn't already have. **Design call for CTO~B/COO; held-chain blast radius → NEVER-co-sign; LOCATE delivered, FIX not started.**
