@@ -5,7 +5,7 @@
 <assigned_to>0.7.0_AE_CloudOps~A</assigned_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_date>2026-07-13</issued_date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 fabric-safety, NON-blocking. STAGED -- GO fires the moment you deliver the OPAL_ASSETS queryable table to Andrew (that's the higher pace priority right now). This gate makes the identity chaos structurally unsustainable; it does not block live work, so it waits for your table hand-off, then starts.</priority>
 <dispatch>STAGED by COO 2026-07-13. GO on your table-delivery. Base CTO (1.0.0_SA_CTO) arch-gates the diff.</dispatch>
 <full_spec>org/tier1_exec/1.0.0_SA_CTO/deliverables/SEV_IDENTITY_MISADOPTION_GATE_20260713.md @ d1aa23968 -- the authoritative design (G-A + G-B). Read it before building; this TO is the G-A build + its routing.</full_spec>

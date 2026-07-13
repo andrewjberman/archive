@@ -1,0 +1,28 @@
+NFRA_IDENTITY.G-A -- broker PID identity guard, exercised
+
+AC1 REPLAY FALSIFIER (the 07-12/13 SEV):
+  PASS PID live as 1.0.0_SA_CTO claims 0.8.0 -> REFUSED
+        the phantom's FIRST registration names the collision
+        -> IDENTITY CONFLICT -- NOT REGISTERED. PID 21228 is currently 1.0.0_SA_CTO (live 3s ago); you claimed 0.8.0_AE_C
+
+AC2 NO-REGRESSION (must NOT refuse legitimate registrations):
+  PASS same serial + same PID (routine re-register/heartbeat) -> ALLOWED
+  PASS same serial + fresh PID after restart (incumbent DEAD) -> ALLOWED
+        the discriminator: incumbent process is gone, not a conflict
+  PASS first registration, empty liveness -> ALLOWED
+  PASS stale incumbent under same serial -> ALLOWED
+
+AC3 SERIAL-HELD (protects the real lane from a phantom):
+  PASS claimed serial held by a LIVE different PID -> REFUSED
+        -> IDENTITY CONFLICT -- NOT REGISTERED. 0.8.0_AE_CloudComp is already held by a LIVE process (PID 21228, heartbea
+
+RESIDUAL (documented): respawn inside 120s while the dead session's
+process still lingers (orphan) -- direction-2 currently REFUSES:
+  behaviour: REFUSE  (pinned; CTO rules hard-vs-advisory)
+
+AC4 _pid_alive primitive (the discriminator that saves restarts):
+  PASS _pid_alive(self=21228) is True
+  PASS _pid_alive(999999) is False
+
+================================================================
+ALL 8 CHECKS PASS -- guard refuses the cross, never the restart.
