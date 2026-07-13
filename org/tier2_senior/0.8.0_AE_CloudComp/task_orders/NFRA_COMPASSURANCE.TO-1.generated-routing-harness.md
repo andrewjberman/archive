@@ -160,6 +160,49 @@ If this number is flattering, every gate built on it is decorative.
     in front of you.** A rate-based bar would let the exact failure we are hunting hide inside an acceptable margin.
   </ruling>
 
+  <ruling id="d" question="[ADDED AFTER THE WORKER'S BLOCKER-CLASS FINDING] The harness EATS ITS OWN DENOMINATOR. Is the scratch-WS mirror enough?"
+           finding_by="0.8.0_AE_CloudComp~Z -- EXERCISED, not inferred: ROUTE events 6310 -> 6311 on one invocation.">
+    **THE FINDING IS VALIDATED AND IT IS FIRST-CLASS.** comp-which appends a ROUTE row on EVERY invocation
+    (`_log_rail`, no suppress flag, `RAIL_LOG` derived from `__file__` so not env-overridable). Cohort R is
+    defined as `count == 1` singletons. **Measuring the live binary on 347 R-probes makes every one of them
+    `count == 2`, and the next run ejects all 347.**
+    > **AC5 (exercise the live binary) WAS KILLING AC8 (a re-runnable baseline). The instrument destroys its
+    > own denominator on first use -- and the destroyed run would NOT look broken.** It would return a plausible
+    > `n` and a plausible rate. **A SILENTLY-SWAPPED DENOMINATOR READS EXACTLY LIKE A REAL IMPROVEMENT.**
+
+    **THE SCRATCH-WS MIRROR IS APPROVED** -- byte-identical binary + catalogs in a scratch tree so `WS`
+    resolves there and `RAIL_LOG` lands in scratch. AC5 is met LITERALLY (real binary, real subprocess, real
+    posterior router), not reinterpreted. Your parity control (route N questions through BOTH, require
+    byte-identical routes) is exactly right, and running it on questions ALREADY at `count>=2` so the control
+    cannot damage cohort R is the sharpest thing in your message. **A mirror you did not validate is a
+    reimplementation you are calling the live binary.**
+
+    ## BUT THE MIRROR IS NECESSARY AND **NOT SUFFICIENT**, AND AC8 IS STILL DEAD WITHOUT THIS:
+    **The mirror stops YOU from polluting the log. It does not stop ANYONE ELSE.** The rail log is APPEND-LIVE
+    and the fabric is routing through `comp-which` right now -- CTO~Z, MSTR, the HUD hook on every nudge. So
+    **between YOUR baseline and TO-2's re-run, the log grows and cohort R's composition changes ANYWAY** --
+    singletons become duplicates, new singletons appear. **A cohort defined by a query over a mutable log is
+    not a population; it is a timestamp.**
+
+    > ### **THEREFORE: FREEZE THE COHORT. The baseline artifact MUST contain the ACTUAL PROBE STRINGS of cohort R -- the materialized list -- NOT a recipe for re-deriving it.**
+    > **TO-2 RE-RUNS AGAINST THE FROZEN LIST. It does not re-derive.** A baseline that re-derives its own
+    > population is not a baseline -- it is a fresh measurement wearing a baseline's name, and the regression
+    > it reports is uninterpretable.
+
+    Commit the frozen cohort (R_raw list, R_strict list, the printed strip list, and cohort C + G's generated
+    sets with their seed). **The point of AC8 is that TO-2 can prove it improved something. It cannot prove that
+    against a population that moved.**
+  </ruling>
+
+  <ruling id="e" question="[ADDED] --route-only is not side-effect-free; the HUD hook uses it. Chase it?">
+    **CHARACTERIZE IT. DO NOT FIX IT.** `--route-only` guards `_run_primitive()` only, and still calls
+    `_log_rail` -- so **every HUD PreToolUse nudge appends a ROUTE row.** That is squarely IN SCOPE for TO-1,
+    because it bears directly on **what cohort R actually contains**: a HUD-injected row may not be an agent's
+    QUESTION at all, and if so it is contamination of a class we have not named. **Quantify how much of the log
+    is HUD-injected and report it.** That is measurement -- your job.
+    **Touching the binary or the flag is NOT your job** (TO-2/TO-4). Write it up as a finding; do not chase it.
+  </ruling>
+
   <ruling id="c" question="Does TO-1 own measurement only, or also the abstain-threshold recommendation?">
     **MEASUREMENT ONLY. Your assumption was right and I am confirming it in writing.**
     **But it comes with an obligation you did not ask about:** PRD Q2 says the floor **must be set from TO-1's
@@ -251,7 +294,10 @@ If this number is flattering, every gate built on it is decorative.
   <ac id="5" machine_checkable="true">Harness measures the LIVE BINARY'S ROUTE (subprocess), not only the RULES score. An assert on comp-which's actual output, never on its promise.</ac>
   <ac id="6" machine_checkable="true">Metric is recall@k with k=3 and MULTI-LABEL ground truth ("is a usable tool visible in the top-3"). NOT precision@1.</ac>
   <ac id="7" machine_checkable="true">The rail-log denominator is decomposed in the output: events / distinct / organic-singletons.</ac>
-  <ac id="8">A committed baseline artifact exists for TO-2/TO-3 to regress against.</ac>
+  <ac id="8" machine_checkable="true">**A committed baseline artifact exists AND IT CONTAINS THE FROZEN COHORT -- the ACTUAL PROBE STRINGS of cohort R (R_raw list + R_strict list + the full printed strip list), plus cohort C and G's generated sets with their seed.** NOT a recipe for re-deriving them. **TO-2 re-runs against the FROZEN LIST; it does not re-derive.** The rail log is append-live and the whole fabric routes through comp-which -- **a cohort re-derived from a mutable log is not a population, it is a timestamp, and the regression it reports is uninterpretable.**</ac>
+  <ac id="12" machine_checkable="true">**The measuring act does not mutate the measured thing.** The harness writes ZERO rows to the LIVE `org/mcp/comp-which-rail.log`. Assert it: capture the live log's ROUTE count before and after a full harness run -- **delta MUST be 0.** (The scratch-WS mirror achieves this. **Prove it; do not assume it** -- comp-which appends a ROUTE row on every invocation, `_log_rail`, no suppress flag.)</ac>
+  <ac id="13" machine_checkable="true">**The mirror is PARITY-CONTROLLED against the real binary:** N questions routed through BOTH must return byte-identical routes. **Run the control on questions already at `count>=2`, so validating the instrument cannot damage cohort R.** A control that corrupts the denominator is not a control; a mirror you did not validate is a reimplementation you are calling the live binary.</ac>
+  <ac id="14" machine_checkable="true">**HUD-injected contamination of the rail log is QUANTIFIED and REPORTED** (`--route-only` still calls `_log_rail`, so every HUD PreToolUse nudge appends a ROUTE row -- those may not be agent QUESTIONS at all). Measure it; do NOT fix the binary.</ac>
   <ac id="9">Session log includes a **Compiler Tools** section reproducing EVERY &lt;run&gt; above with observed output and explicit pass/fail vs &lt;expect&gt;. **Missing rows = REWORK, not COMPLETE.** Append the org/compiler-tools-log.md line in the same pass.</ac>
   <ac id="10">"Code runs" is NOT acceptance. Every criterion above is an artifact/field assertion.</ac>
 </acceptance_criteria>
