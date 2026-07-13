@@ -41,6 +41,32 @@
   <out>OPAL_ASSETS -- your base owns a LIVE 28-row AUM emitter + G4/G5. **DOWN under Andrew's hold. Not yours.**</out>
 </scope>
 
+<retrieval_traps note="SEVEN retrieval failures by THREE agents in this ONE file tonight. Every one: the pattern could not see the evidence that would have moderated the claim. Read this before you write a single filter.">
+  <trap id="1">**A FILTER WHOSE COMPLEMENT YOU NEVER LOOKED AT IS A FILTER YOU HAVE NOT TESTED.** (COO~Z: `ROUTE-` could not see 1,487 bare-`ROUTE` rows -- and the miss was BIASED toward the catalog FAILING. CTO~Z: `ROUTE-|GREP-|NO-|FALLBACK` could not see `RUN-GREP`. Worker: `ROUTE-[A-Z-]+|RUN-[A-Z]+` tallied 8,159 of 10,518 lines and never asked what the other 2,359 were.) **Enumerate every tag. Print the full tally. Name what you do NOT consume, and why.**</trap>
+
+  <trap id="2">**EQUALITY AGAINST A LOSSY RECORD IS NOT A TEST.** (CTO~Z, attempt 2.) The rail log **TRUNCATES and RE-ENCODES** the `q` it stores (`"...(the WRITE-PATH <?> scheduled"`), so `q in use_case_set` can **NEVER** match and silently returns ~0. **Match on a normalized prefix -- AND PRINT THE MATCH RATE, so a zero-match filter ANNOUNCES ITSELF instead of quietly passing.**
+  **EXERCISED ON MY OWN STRIP, and it caught me:** my 60-char prefix strip matched **31 of 65** corpus questions; **exact-equality would have matched 2.** **34 catalog questions SURVIVED my strip** -- because the corpus is generated from a **MOVING manifest** and I was stripping historical rows with today's text. *(It proved harmless -- the SINGLETON filter excludes them anyway at 50-149x. But I did not know that until I printed the rate, and "harmless" was luck, not design.)*</trap>
+
+  <trap id="3">**PREFER THE DISTRIBUTION TO THE PREDICATE.** (CTO~Z, attempt 3 -- the only one that worked.) A predicate encodes the hypothesis you already have; **a histogram does not.** When you can simply PRINT THE SHAPE OF THE DATA, do that FIRST. *His attempts 1 and 2 gave 1.6% and 5.2% -- both were him testing a hypothesis with a pattern shaped by that hypothesis. Attempt 3 assumed nothing, printed the repetition distribution, and found **87.6%**. He had typed the conclusion into the print statement before he saw the number.*</trap>
+
+  <trap id="4">**A TRUNCATED SCAN IS NOT A NEGATIVE RESULT.** (Worker.) He piped his reverse-dependency clearing scan through `head`, read 10 lines, saw no consumer, and deleted a symbol a **fail-closed repo-wide commit gate** imports -- blocking **every agent's commits.** Re-run un-truncated: **7 consumers, not 2.** *He failed "print the denominator" on the one scan whose entire job was to prove he was safe to delete something.*</trap>
+
+  <trap id="5">**A PASS OVER AN EMPTY SET IS NOT A PASS.** (Worker.) `commit_gate_runner.py` printed `OK: pre-commit gate clean for 0 file(s)` -- **a green light over nothing.** Had he stopped there he would have declared himself unblocked on a gate that ran over zero files.</trap>
+
+  <trap id="6">**ARITHMETIC CANNOT ATTRIBUTE; ONLY IDENTITY CAN.** (Worker, correcting MY AC12.) I specified the pollution check as a before/after COUNT DELTA -- **confounded by concurrency.** The fabric writes to the log while you run, so it reports `POLLUTED` **for writes that are not yours.** It fires correctly for the wrong reason, **which is its own kind of lie.** Attribute by identity: does a NEW row carry a question *YOU* probed?</trap>
+
+  <trap id="7">**THE DENOMINATOR IS MOVING WHILE YOU MEASURE IT.** `self_route_verdicts()` shells comp-which across the WHOLE manifest, and a **FAIL-CLOSED COMMIT GATE RUNS IT ON EVERY COMMIT** -- so **87.6% of the rail log is 66 questions (one per catalog entry) replayed ~148x each**, and **every commit any of us makes injects 66 more.** COO~Z measured 697 distinct / 545 singletons; CTO~Z measured 805 / 638 minutes later. **BOTH ARE RIGHT. THE LOG GREW BETWEEN THEM.**
+  > **THE INSTRUMENT BUILT TO MEASURE THE ROUTER BECAME THE LARGEST SINGLE AUTHOR OF THE TRAFFIC ANYONE WOULD MEASURE IT BY -- AND A FAIL-CLOSED GATE GUARANTEES IT KEEPS DOING SO, ON EVERY COMMIT, FOREVER.**
+  **THIS IS WHY AC8 (THE FROZEN COHORT) IS NON-NEGOTIABLE. ANY NUMBER YOU QUOTE IS STALE ON ARRIVAL UNLESS THE POPULATION IS MATERIALIZED AND PINNED.** Do NOT fix the gate (TO-2/TO-4). Do NOT swap its subject to suit your convenience -- **redesigning another lane's guard is not your TO**, and you were right to refuse.</trap>
+
+  <residual_bias note="KNOWN, ACCEPTED, REPORT IT -- do not silently fix it">
+    Cohort R = **singletons**, so it EXCLUDES legitimately-repeated REAL agent questions. A question two agents
+    both asked is *more* likely to be a common one the catalog COVERS -- **so the singleton filter may still bias
+    the zero-rate UPWARD.** State this as a known limit of the headline. **Do not "fix" it by including repeats
+    (that re-admits the 87.6% corpus). Name it, bound it, move on.**
+  </residual_bias>
+</retrieval_traps>
+
 <why_this_goes_first>
 We have NO honest coverage number. Building the fix before the measurement is grading our own homework.
 Every downstream TO (abstain, top-k, catalog) is graded against the number THIS harness produces.
@@ -241,9 +267,9 @@ If this number is flattering, every gate built on it is decorative.
 
   <phase id="1" when="before write">
     <step>
-      <run>comp-which "how fresh is the platinum mdpf aggregate"</run>
-      <expect>rc=0 and a single confident route (today it answers comp-platinum page; CLAUDE.md's own table says comp-freshness). Capture this PRE-change behavior verbatim -- it is baseline evidence.</expect>
-      <if_mismatch>If it already emits top-k or rc=1, the binary changed under you -- STOP and MCP COO~Z. TO-2/TO-3 must not have landed before TO-1's baseline.</if_mismatch>
+      <run>**RETRACTED -- DO NOT RUN THIS AGAINST THE LIVE BINARY.** (was: `comp-which "how fresh is the platinum mdpf aggregate"`)</run>
+      <expect>**THIS MANDATE WAS ITSELF A COHORT-R-DESTROYING INSTRUCTION AND I WROTE IT.** That probe string is a REAL QUESTION in the rail log. Every time it is run against the LIVE binary it is `_log_rail`'d -- and between CTO~Z's PRD probes, your Phase-1 run, and my own verification, it now appears **10+ times tonight**, which **EJECTS IT FROM THE SINGLETON COHORT FOREVER.** I mandated the exact act the TO exists to prevent, in the TO that prevents it. **Run it through the MIRROR, never the live binary.**</expect>
+      <if_mismatch>If you already ran it live: you did so on my instruction, it is disclosed, it goes in the printed strip list, and it is MY error on the record -- not yours.</if_mismatch>
     </step>
     <step>
       <run>python -c "import yaml;d=yaml.safe_load(open('org/modules/graph/graph-call-manifest.yaml'));e=d['entries'];print(len(e), sum(1 for x in e if x.get('use_case')), len({x['tool'] for x in e}))"</run>
@@ -321,7 +347,8 @@ If this number is flattering, every gate built on it is decorative.
   <ac id="6" machine_checkable="true">Metric is recall@k with k=3 and MULTI-LABEL ground truth ("is a usable tool visible in the top-3"). NOT precision@1.</ac>
   <ac id="7" machine_checkable="true">The rail-log denominator is decomposed in the output: events / distinct / organic-singletons.</ac>
   <ac id="8" machine_checkable="true">**A committed baseline artifact exists AND IT CONTAINS THE FROZEN COHORT -- the ACTUAL PROBE STRINGS of cohort R (R_raw list + R_strict list + the full printed strip list), plus cohort C and G's generated sets with their seed.** NOT a recipe for re-deriving them. **TO-2 re-runs against the FROZEN LIST; it does not re-derive.** The rail log is append-live and the whole fabric routes through comp-which -- **a cohort re-derived from a mutable log is not a population, it is a timestamp, and the regression it reports is uninterpretable.**</ac>
-  <ac id="12" machine_checkable="true">**The measuring act does not mutate the measured thing.** The harness writes ZERO rows to the LIVE `org/mcp/comp-which-rail.log`. Assert it: capture the live log's ROUTE count before and after a full harness run -- **delta MUST be 0.** (The scratch-WS mirror achieves this. **Prove it; do not assume it** -- comp-which appends a ROUTE row on every invocation, `_log_rail`, no suppress flag.)</ac>
+  <ac id="12" machine_checkable="true" superseded_by="12a">**SUPERSEDED -- MY VERSION OF THIS AC WAS ITSELF A LYING INSTRUMENT.** I specified the pollution check as a **before/after COUNT DELTA**. **It is CONFOUNDED BY CONCURRENCY:** the fabric routes through comp-which while the harness runs, so other lanes' rows land in the log and the control reports `POLLUTED` **for writes that were not yours.** It fired correctly and **for the wrong reason -- which is its own kind of lie**, and it would have blocked a clean baseline. Worker caught it. **Arithmetic cannot attribute; only identity can.**</ac>
+  <ac id="12a" machine_checkable="true">**The measuring act does not mutate the measured thing -- verified BY ATTRIBUTION, not by arithmetic.** After a full harness run, assert that **no NEW row in the live `org/mcp/comp-which-rail.log` carries a question string that YOU probed.** Only you would have submitted your probe strings, so identity attributes the write; **a count delta cannot, because the fabric is writing concurrently.** (The scratch-WS mirror should make this vacuous. **Prove it; do not assume it.**)</ac>
   <ac id="13" machine_checkable="true">**The mirror is PARITY-CONTROLLED against the real binary:** N questions routed through BOTH must return byte-identical routes. **Run the control on questions already at `count>=2`, so validating the instrument cannot damage cohort R.** A control that corrupts the denominator is not a control; a mirror you did not validate is a reimplementation you are calling the live binary.</ac>
   <ac id="14" machine_checkable="true">**HUD-injected contamination of the rail log is QUANTIFIED and REPORTED** (`--route-only` still calls `_log_rail`, so every HUD PreToolUse nudge appends a ROUTE row -- those may not be agent QUESTIONS at all). Measure it; do NOT fix the binary.</ac>
   <ac id="9">Session log includes a **Compiler Tools** section reproducing EVERY &lt;run&gt; above with observed output and explicit pass/fail vs &lt;expect&gt;. **Missing rows = REWORK, not COMPLETE.** Append the org/compiler-tools-log.md line in the same pass.</ac>
