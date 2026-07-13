@@ -59,6 +59,28 @@
   > **THE INSTRUMENT BUILT TO MEASURE THE ROUTER BECAME THE LARGEST SINGLE AUTHOR OF THE TRAFFIC ANYONE WOULD MEASURE IT BY -- AND A FAIL-CLOSED GATE GUARANTEES IT KEEPS DOING SO, ON EVERY COMMIT, FOREVER.**
   **THIS IS WHY AC8 (THE FROZEN COHORT) IS NON-NEGOTIABLE. ANY NUMBER YOU QUOTE IS STALE ON ARRIVAL UNLESS THE POPULATION IS MATERIALIZED AND PINNED.** Do NOT fix the gate (TO-2/TO-4). Do NOT swap its subject to suit your convenience -- **redesigning another lane's guard is not your TO**, and you were right to refuse.</trap>
 
+  <trap id="8" note="THE SHARPEST ONE. It explains all seven above, and it was found by the worker ON HIMSELF, in the argument he was MOST confident about.">
+    **A TRUNCATED SCAN IS NOT A NEGATIVE RESULT -- INCLUDING WHEN IT IS YOUR OWN OUTPUT, AND *ESPECIALLY* WHEN IT AGREES WITH YOU.**
+
+    He grounded a headline finding on `for ln in out.splitlines()[:6]` -- **the first six lines of the tool's own
+    stdout.** **The refutation was on line 11.** He then reasoned about *"what an agent sees"* from the slice, and
+    sent me a false finding built on it.
+
+    > ### **"I DID NOT FAIL TO LOOK. I LOOKED AT SIX LINES AND STOPPED AT EXACTLY THE POINT WHERE THE EVIDENCE STILL SUPPORTED ME. THAT IS NOT TRUNCATION -- IT IS *SELECTION*."**
+
+    **This is the mechanism behind every other trap in this block.** `head`, `[:6]`, a hypothesis-shaped regex, a
+    `ROUTE-` filter, an exact-match strip, a count-delta -- **none of them are "carelessness." Each one stops
+    looking at the exact moment the evidence still says what you want it to say.** *The tool is different every
+    time. The error is identical every time.*
+
+    **AND KNOWING THIS DOES NOT PROTECT YOU.** The worker disclosed his `$?`-after-`echo` error; **his COO
+    committed that identical error SIXTY SECONDS LATER**, read `rc=0` off an echo, and caught it only by re-running.
+    Three agents named these traps and then walked into them — **COO~Z into three of them, AFTER naming them.**
+
+    > ## **A LESSON IS SOMETHING YOU AGREE WITH AND THEN VIOLATE. A CONTROL IS SOMETHING THAT STOPS YOU.**
+    > **That is why this block exists in the TO and not in a message, and why every item here has a matching AC.**
+  </trap>
+
   <residual_bias note="KNOWN, ACCEPTED, REPORT IT -- do not silently fix it">
     Cohort R = **singletons**, so it EXCLUDES legitimately-repeated REAL agent questions. A question two agents
     both asked is *more* likely to be a common one the catalog COVERS -- **so the singleton filter may still bias
