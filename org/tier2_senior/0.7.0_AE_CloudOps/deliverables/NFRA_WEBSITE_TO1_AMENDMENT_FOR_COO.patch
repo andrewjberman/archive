@@ -1,0 +1,43 @@
+diff --git a/org/tier1_exec/2.0.0_SA_COO/task_orders/NFRA_WEBSITE.TO-1.wordpress-ec2-platform-build.md b/org/tier1_exec/2.0.0_SA_COO/task_orders/NFRA_WEBSITE.TO-1.wordpress-ec2-platform-build.md
+index 939fcdc64..391129026 100644
+--- a/org/tier1_exec/2.0.0_SA_COO/task_orders/NFRA_WEBSITE.TO-1.wordpress-ec2-platform-build.md
++++ b/org/tier1_exec/2.0.0_SA_COO/task_orders/NFRA_WEBSITE.TO-1.wordpress-ec2-platform-build.md
+@@ -1,5 +1,29 @@
+ # Task Order: NFRA_WEBSITE TO-1 (W1) -- stand up the WordPress-on-AWS platform (EC2 in Opal VPC) + hand WP-admin to TWLC
+ 
++> # !! READ THIS BEFORE THE TO BELOW -- AMENDED 2026-07-13T21:40Z (0.7.0_AE_CloudOps) !!
++>
++> ## THIS TO IS `complete` AND ITS BUILD STANDS. BUT ONE PIECE OF ITS CLOSURE EVIDENCE IS NOW KNOWN-FALSE.
++>
++> **SOVEREIGN DOMAIN CORRECTION (Andrew-direct 2026-07-13): the target is `opalinvest.com`. `opalcapital.com`
++> IS NOT A DOMAIN OPAL OWNS** -- *"We do not even own opalcapital.com, thats on me, we need to not be using that
++> and not having it get wrapped into this process any further."*
++>
++> **>> THE CONTAMINATED AC: `AC-5` was closed on "DNS opalcapital.com -> 72.167.58.121 ... rollback point
++> preserved". THAT HOST IS ON A DOMAIN WE DO NOT OWN, SO IT WAS NEVER OUR ROLLBACK POINT.** The AC verified a
++> true *fact* (the record was untouched) that licensed a **false conclusion** (that we held a fallback). Had the
++> cutover gone wrong, "roll back" would have meant pointing at **a stranger's host**.
++> **THE REAL ROLLBACK IS THE LIVE WIX SITE** at `185.230.63.107 / .171 / .186`, which is what `opalinvest.com`
++> serves today and which stays up and untouched throughout. *An AC can be measured correctly, pass honestly, and
++> still certify the wrong thing -- because it was never asked whether the thing it measured was ours.*
++>
++> Also superseded in the status below: *"W3 is a clean apex-A flip"* is **still true**, but the apex it flips is
++> **`opalinvest.com`**, which -- unlike the empty target this TO assumed -- serves **Opal's live public website**
++> AND carries **Opal's live Microsoft 365 email** (MX / SPF / `_domainkey` / autodiscover / DMARC).
++>
++> **CURRENT STATE + THE REMAINING WORK: `org/projects/NFRA_WEBSITE.json` + `org/projects/REGISTRY.md` +
++> `NFRA_WEBSITE.TO-2` (the cutover TO). Procedure/gates/rollback: `infra/website/RUNBOOK.md` §4.**
++> **Do NOT re-derive the cutover plan from this TO -- it was written on the wrong domain.**
++
+ ```xml
+ <task_order>
+   <metadata>
+@@ -8,7 +32,7 @@
+     <issued_to>0.7.0_AE_CloudOps~A</issued_to>
+     <co_assignee>0.5.0_AE_OpalETL</co_assignee>
+     <date>2026-07-08</date>
+-    <status>complete -- W1 CLOSED 2026-07-09T19:45Z. RAVC-4 ACCEPTED by 2.0.0_SA_COO after INDEPENDENT live re-verification of 4 of the 6 ACs (a verifier who accepts a producer's self-report is not a verifier): AC-4 `aws ec2 describe-security-groups sg-062bbb40a6c92509c` -> tcp/80 + tcp/443 ONLY, ZERO port 22; AC-4 `get-bucket-versioning`/`get-bucket-encryption` on opal-website-backups -> Versioning=Enabled, SSE=AES256; AC-4 `list-attached-role-policies opal-website-wp-role` -> AmazonSSMManagedInstanceCore ONLY (firm-sep intact, zero data-estate reach); AC-5 DNS opalcapital.com -> 72.167.58.121 (GoDaddy host untouched, rollback point preserved, no record changed -- cutover is W3). Both W1 deploy ledgers CLOSED via the tool (nfra-website-w1 6/6, nfra-website-iam 4/4); `deploy_ledger check --red` shows no nfra-website entry. Owner 0.7.0_AE_CloudOps~A exercised every AC against LIVE state per CLAUDE.md 22a -- none config-read. THE DELIVERABLE WAS THE CATCH, not the build: the WordPress DB user held `ALL PRIVILEGES ON *.*` because the least-priv enforcement regex matched the WRONG SIDE of `ON *.*` -- i.e. a control that existed, ran, reported success, and enforced nothing (fixed + exercised, f05629cf5). That is the session's through-line in its purest form -- an instrument whose own success condition was decoupled from the property it existed to guarantee -- alongside the deploy-ledger prose-vs-sentinel drift, cmtque-worker-down latched-in-ALARM, the parity alarms blind on a 401, the 18-day cot ingest guard asserting BYTES where the property is ROWS, fabric-check calling 5 legitimately-HELD ledgers "half-landed RISK", and COO's own `--quiet 2>/dev/null` stale read. Two self-found defects also closed: EC2_MANIFEST duplicate `opal-website-wp` key (c88de96f7) + stale infra/website README inventory. Grounded W3 de-risk banked: the apex resolves to the GoDaddy host DIRECT, not a Cloudflare edge IP, so Turnstile is CAPTCHA-widget-only and W3 is a clean apex-A flip with no proxy to unwind. NFRA_WEBSITE remains ACTIVE -- W2 (TLS/SMTP/backups/hardening) GO'd 194309Z; W3 (GoDaddy apex-A cutover) follows. This TO covers W1 only.</status>
++    <status>complete -- W1 CLOSED 2026-07-09T19:45Z. RAVC-4 ACCEPTED by 2.0.0_SA_COO after INDEPENDENT live re-verification of 4 of the 6 ACs (a verifier who accepts a producer's self-report is not a verifier): AC-4 `aws ec2 describe-security-groups sg-062bbb40a6c92509c` -> tcp/80 + tcp/443 ONLY, ZERO port 22; AC-4 `get-bucket-versioning`/`get-bucket-encryption` on opal-website-backups -> Versioning=Enabled, SSE=AES256; AC-4 `list-attached-role-policies opal-website-wp-role` -> AmazonSSMManagedInstanceCore ONLY (firm-sep intact, zero data-estate reach); [[AC-5 RETRACTED 2026-07-13 -- see the AMENDMENT BLOCK at the top of this file. It read: "AC-5 DNS opalcapital.com -> 72.167.58.121 (GoDaddy host untouched, rollback point preserved, no record changed -- cutover is W3)". THE MEASUREMENT WAS CORRECT AND THE CONCLUSION WAS FALSE: opalcapital.com is NOT a domain Opal owns, so 72.167.58.121 was never a rollback point we held. The REAL rollback is the LIVE WIX SITE (185.230.63.107/.171/.186) that opalinvest.com serves today. An AC can pass honestly and still certify the wrong thing, if nobody asked whether what it measured was OURS.]] Both W1 deploy ledgers CLOSED via the tool (nfra-website-w1 6/6, nfra-website-iam 4/4); `deploy_ledger check --red` shows no nfra-website entry. Owner 0.7.0_AE_CloudOps~A exercised every AC against LIVE state per CLAUDE.md 22a -- none config-read. THE DELIVERABLE WAS THE CATCH, not the build: the WordPress DB user held `ALL PRIVILEGES ON *.*` because the least-priv enforcement regex matched the WRONG SIDE of `ON *.*` -- i.e. a control that existed, ran, reported success, and enforced nothing (fixed + exercised, f05629cf5). That is the session's through-line in its purest form -- an instrument whose own success condition was decoupled from the property it existed to guarantee -- alongside the deploy-ledger prose-vs-sentinel drift, cmtque-worker-down latched-in-ALARM, the parity alarms blind on a 401, the 18-day cot ingest guard asserting BYTES where the property is ROWS, fabric-check calling 5 legitimately-HELD ledgers "half-landed RISK", and COO's own `--quiet 2>/dev/null` stale read. Two self-found defects also closed: EC2_MANIFEST duplicate `opal-website-wp` key (c88de96f7) + stale infra/website README inventory. Grounded W3 de-risk banked: the apex resolves to the GoDaddy host DIRECT, not a Cloudflare edge IP, so Turnstile is CAPTCHA-widget-only and W3 is a clean apex-A flip with no proxy to unwind. NFRA_WEBSITE remains ACTIVE -- W2 (TLS/SMTP/backups/hardening) GO'd 194309Z; W3 (GoDaddy apex-A cutover) follows. This TO covers W1 only.</status>
+     <dispatch_state>DISPATCHED + GO 2026-07-08 (Andrew-direct un-park + GO). NFRA_WEBSITE was HELD at PRD since 2026-07-01; Andrew greenlit it now + the 5 PRD open-decisions are resolved (see below). DEDICATED AE per Andrew: 0.7.0_AE_CloudOps~A = OWNER (CloudOps lane, spawn via MSTR), 0.5.0_AE_OpalETL = IMMEDIATE first-mover (online+idle now -- starts the TF scaffold + backup/signal grounding so we don't wait on the spawn). PRD: docs/architecture/NFRA_WEBSITE_PRD.md (CTO 2026-07-01, grounded vs the 2 backups). W1 of W1/W2/W3.</dispatch_state>
+     <gate_note>Gates: none upstream (DNS already on GoDaddy). HARD LEASH (PRD): lift-and-shift (NO redesign); keep GoDaddy DNS (NO record changes in W1 -- cutover is W3); NEVER destroy/touch the old host; harden the public WP surface; network-isolate from the data estate. Deploy discipline: Terraform-only, safe-apply + HALTGT, deploy-ledger open->close, EC2_MANIFEST registration.</gate_note>
+   </metadata>
