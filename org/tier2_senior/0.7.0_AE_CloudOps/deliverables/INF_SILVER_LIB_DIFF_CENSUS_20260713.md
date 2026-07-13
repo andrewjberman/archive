@@ -379,3 +379,65 @@ which (row 2) would corrupt the observability of the gold-chain hold.
 
 **NOTHING APPLIED. No Terraform, no layer, no ledger. NO CLOCK -- zero live drift, nothing bleeding, the layer
 is PREVENTIVE.**
+
+---
+
+# CENSUS v8 -- RE-SCOPED FROM THE CHANGE TO THE DEFECT. IT FINDS A LAMBDA NO EARLIER VERSION COULD SEE.
+
+**Every census v1-v7 enumerated "lambdas that VENDOR `_orion_api_silver_lib.py`" (5). That is the LAYER's
+blast radius. IT IS NOT THE DEFECT'S.**
+
+```
+LAYER'S set    lambdas that VENDOR the lib                                              = 5
+DEFECT'S set   deployed body vs its canonical counterpart, DISAGREEING ABOUT A DATA KEY = 3 lambdas
+OVERLAP        inf-api-positions only
+```
+
+**UNIT OF ANALYSIS (v8):** every deployed `.py` with a canonical counterpart in `data/inf/`, where the two
+bodies **disagree about a bronze/silver key**. Denominator: **24 inf-* lambdas, 0 unresolvable.**
+
+**TWO PROVEN-RED CASES, both asserted before any verdict (exit 2 if either fails):
+`inf-api-positions` AND `inf-api-assets-v2`. BOTH FIRED.** *A census that scores assets SAFE is broken, and
+its verdicts on everything else are worth nothing.*
+
+## >> THE FINDING: `inf-api-assets-v2` IS THE SAME SPLIT-BRAIN, AND IT IS A FULL ONE <<
+
+| | producer `pull_inflection_assets_v2.py` | consumer `convert_assets_v2_to_silver.py` |
+|---|---|---|
+| **DEPLOYED (running)** | writes `bronze/assets/{}.parquet` | reads `bronze/assets/{snap}.parquet` |
+| **CANONICAL (`data/`)** | writes `bronze/assets/{}.jsonl.gz` | reads `bronze/assets/{snap}.jsonl.gz` |
+
+**S3 ground truth -- and it is the SAME CUTOVER DATE as positions:**
+```
+bronze/assets/     last .jsonl.gz = 2026-07-10 · .parquet ONLY on 07-11, 07-12, 07-13
+bronze/positions/  last .jsonl.gz = 2026-07-10 · .parquet ONLY on 07-11, 07-12, 07-13
+```
+**The `.jsonl.gz -> .parquet` migration landed in the DEPLOYED bodies on 2026-07-10 and `data/` NEVER FOLLOWED.
+The deployed world is self-consistent and working. `data/` is stale, systemically, on the bronze key format.**
+
+> ## **`inf-api-assets-v2` IS AN ARMED LANDMINE, NOT A LIVE FIRE.**
+> **It is safe tonight for exactly one reason: it does not vendor the lib, so the layer does not touch it.**
+> ## **THAT IS FILE LAYOUT. IT IS NOT A CONTROL.**
+> Anyone who "consolidates" `convert_assets_v2_to_silver.py` onto canonical -- an obvious, reasonable,
+> good-looking cleanup -- makes it **write `.parquet` and read `.jsonl.gz`. `assets_v2` dies.**
+> **A HALF-consolidation of a producer/consumer PAIR is fatal, and consolidating ONE FILE IS THE NATURAL MOVE.**
+
+**And my census could never have found it, because I was enumerating THE CHANGE, and the defect does not live
+in the change.** *That is the same class as everything else today, one level up again: the instrument's SCOPE
+was the blind spot, not its logic.*
+
+## THE FULL KEY-SPLIT SET
+
+| lambda | file | deployed | canonical |
+|---|---|---|---|
+| `inf-api-assets-v2` | `pull_inflection_assets_v2.py` | `bronze/assets/{}.parquet` | `.jsonl.gz` |
+| `inf-api-assets-v2` | `convert_assets_v2_to_silver.py` | `bronze/assets/{snap}.parquet` | `.jsonl.gz` |
+| `inf-api-positions` | `pull_inflection_positions_daily.py` | `bronze/positions/{}.parquet` | `.jsonl.gz` |
+| `inf-api-positions` / `-reps` / `-txn` / `inf-accounts-v2-daily` | `convert_orion_api_to_silver.py` | `bronze/positions/{snap}.parquet` | `.jsonl.gz` |
+
+**DISPOSITION: DEPLOYED WINS, EVERYWHERE. `data/` IS THE STALE SIDE.** The fix belongs in the repo, and it is
+**DS's**, not mine. **ROUTED. NOT CHASED.**
+
+## STANDING
+**Nothing applied. No Terraform, no layer, no ledger. No clock.** The deployed estate is self-consistent and
+working. **The only danger tonight is shipping half of the other world -- and it is blocked.**
