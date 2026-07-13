@@ -88,9 +88,30 @@
 
     PHASE B -- APEX CUTOVER. Only on Andrew's explicit word.
       B1. Re-key WP `new.` -> https://opalinvest.com. ASSERT zero residual `new.opalinvest.com` rows.
-      B2. [ADMIN_EMAIL GATE -- HARD, Andrew-ruled] WP admin_email is currently `mike@hirst.digital` (TWLC's
-          dev, external). At cutover EVERY WordPress PASSWORD-RESET LINK for the live Opal site routes to a
-          third party's inbox. Change to an Opal-controlled address BEFORE the flip. NOT cosmetic -- security.
+      B2. [ADMIN_EMAIL GATE -- CLOSED 2026-07-13, verified live] DONE. admin_email was `mike@hirst.digital`
+          (external); it is now `andrew@opalinvest.com`. Verified by re-read, not by the wp-cli success line.
+          >> AND THE DB HELD A LIVE RE-HIJACK SLOT: WordPress parks an UNCONFIRMED admin-email change in the
+          `new_admin_email` option, and it contained `mike@hirst.digital` with an outstanding confirmation
+          link. ANYONE CLICKING THAT LINK WOULD HAVE SILENTLY FLIPPED admin_email BACK to the external
+          address, undoing the fix with no trace. DELETED; verified NONE. <<
+          LESSON: fixing `admin_email` alone was NOT sufficient -- the setting had a SHADOW that would have
+          restored the defect. A control is not closed until its shadow state is closed too.
+
+      B2a. [ADMIN ACCESS -- ANDREW-RULED 2026-07-13, DEFERRED TO GO-LIVE ON PURPOSE. DO NOT ACT EARLY.]
+          Andrew, verbatim: *"that's fine, we can cross that bridge when we get to it. The only admin that
+          matters is me and patricia@whitelabelcreative.com, the rest we can add if Patricia wants it."*
+          TARGET STATE AT GO-LIVE (not now):
+            KEEP   opaladmin            andrew@opalinvest.com                 (Opal)
+            KEEP   patricia@thewhitelabelcreative.com                         (TWLC lead)
+            DROP   mike                 mike@extonwebdesign.com               (re-add ONLY if Patricia asks)
+            DROP   Lindsay@thewhitelabelcreative.com                          (re-add ONLY if Patricia asks)
+          WHY DEFERRED, and this is a real reason not a stall: mike + Lindsay may be MID-MIGRATION. Removing
+          a working dev's admin before the site is cut over breaks their work to fix a problem that is not
+          yet live. The exposure only becomes real AT THE FLIP, which is exactly when this gets actioned.
+          NOTE: three distinct vendor domains are in play (@extonwebdesign.com, @thewhitelabelcreative.com,
+          and the old admin_email @hirst.digital) -- confirm identities with Patricia before removing, do not
+          infer from a name. DEMOTE (role -> none) before DELETE: deleting a WP user forces a content
+          reassignment prompt and can orphan authored posts.
       B3. Lower apex A + www TTL -> 600. WAIT 24-48h.
       B4. `tls-cutover.sh issue` (+ `show-txt` from a SECOND SSM call) -- DNS-01, covering apex + www + new.
           HTTP-01 CANNOT work here: the apex still resolves to WIX, so LE cannot reach the box to validate it.
@@ -118,7 +139,11 @@
           AND exercise it: send a real mail to an @opalinvest.com mailbox and confirm receipt. A config read
           is NOT sufficient here (Rule 22a: behavior claims are EXERCISED).
     AC-5  `wp option get blog_public` -> 1.
-    AC-6  `wp option get admin_email` -> an @opalinvest.com address (NOT mike@hirst.digital).
+    AC-6  `wp option get admin_email` -> `andrew@opalinvest.com` **AND** `wp option get new_admin_email`
+          -> absent/empty. BOTH, not just the first -- the shadow slot silently restores the defect, so an
+          AC that checks only `admin_email` PASSES on a site that is one click from reverting.
+    AC-8  ADMIN ROSTER (Andrew-ruled) = exactly `opaladmin` (andrew@opalinvest.com) +
+          `patricia@thewhitelabelcreative.com`. Others re-added only if Patricia asks. Demote, don't delete.
     AC-7  ROLLBACK IS REAL, NOT ASSUMED: the Wix IPs are captured in the ledger BEFORE the flip, and the
           apex TTL is <=600 at flip time (so a rollback propagates in ~10 min, not ~24h).
   </acceptance_criteria>
