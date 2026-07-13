@@ -1,13 +1,26 @@
-# INFLECTION ~$133M "MODEL ASSETS" IS **NOT** AN INFLUX OF CAPITAL
+# THE ~$13M **RISE** IN INFLECTION MODEL ASSETS IS A RE-LABELLING, NOT AN INFLUX
 
 **Author:** 0.7.0_AE_CloudOps · **Date:** 2026-07-13 · **Asked by:** Andrew (direct, in-session)
 **Question:** *"Inflection appeared with ~133m model assets, up from ~120m I recall. Check the Eclipse
 records for the last few days — does anything resemble an influx in capital?"*
 
-> # ANSWER: NO. NOT ONE DOLLAR OF NEW CAPITAL.
-> ## It is an INTERNAL RE-MODELING: on **2026-07-10**, **65 existing Inflection accounts (~$11.4M)** were
-> ## re-assigned from **Inflection's own in-house `IWM` models** onto **Opal models**.
-> ## The money was already at Inflection, already in Eclipse, already managed. **It moved shelves.**
+> ## ⚠️ TITLE CORRECTED (MSTR, 233737Z) — THE ORIGINAL HEADLINE OVERCLAIMED AND IS RETRACTED.
+> This file was first published as *"the ~$133M IS NOT AN INFLUX."* **That is a bigger claim than the
+> evidence supports, and it is the one that travels.** *"The ~$13M RISE is a re-labelling"* (proved) and
+> *"the ~$133M is not an influx"* (**not** proved — it would imply the whole Inflection cohort is not real
+> Opal AUM, which I did not measure **and do not believe**) are **different sentences.** The body below was
+> always bounded correctly; the headline was not. **The 540 portfolios really are assigned to Opal models
+> and that is real. A CLAIM IS ONLY AS BOUNDED AS THE PLACE IT GETS READ.**
+
+> # ANSWER: NO INFLUX. THE **RISE** IS A TRANSFER BETWEEN SHELVES.
+> ## On **2026-07-10**, **65 existing Inflection accounts (~$11.4M)** were re-assigned from **Inflection's
+> ## own in-house `IWM` models** onto **Opal models**. The money was already at Inflection, already in
+> ## Eclipse, already managed. **It moved shelves.**
+>
+> **SCOPE OF THE CLAIM, EXPLICITLY:** proved = *no new capital entered the Eclipse book in the observed
+> window (whole book flat-to-down).* **NOT claimed** = *the $133M cohort is not genuine Opal model AUM.*
+> **It is genuine.** ~$11.4M of it is **assigned but not yet traded** (§4) — a basis question, not a
+> reality question.
 
 **READ-ONLY INVESTIGATION.** INF chain remains HELD. No gold run, no ad-hoc trigger, no sentinel write,
 no guard flipped. Every number below is read from landed bronze artifacts.
@@ -124,6 +137,30 @@ their old IWM allocations.** Consequences, and they cut both ways:
 - **Eclipse's ~3.4% valuation lag vs Orion EOD is structural** (DOMAIN.md §2: Eclipse `currentValue` is
   rebalance-day intraday; Orion is EOD/T+1-settled). **These numbers will NOT tie exactly to an
   Orion-sourced AUM figure, and forcing them to is a known error.**
+
+## 5b. >> SECOND FINDING: THE NUMBER BEING SPOKEN IS NOT THE NUMBER BEING SERVED <<
+
+Measured on the SERVED artifact (DDB `opal-assets-daily-aua`, read-only):
+
+```
+run_date 2026-07-10 · cohort_id inflection_models · cohort_name "Inflection (Opal Models)"
+  value         136,859,722.32     <-- my bronze totalValue: 136,859,722.32   EXACT TO THE CENT
+                                       managedValue would be 132,747,440 -- IT IS NOT THIS
+  value_class   partner_model_total     basis  partner_aua     additive  TRUE
+  source_field  sum(partners[inflection].by_model[].model_value)
+```
+
+> ## **THE "~133m" IN CIRCULATION IS `managedValue`. THE SYSTEM SERVES `totalValue` = $136.9M.**
+> **They differ by $4.1M. Nothing in the artifact declares which is which, so both have been circulating
+> under one name — and the spoken one reached the principal.** **Neither figure is quotable without its
+> basis: say WHICH, or say NEITHER.**
+
+**AND THE ROW CANNOT CARRY THE TRUTH AS IT STANDS.** `account_count` **ABSENT** (the `etf_*__held_inflection`
+rows *do* carry it — 476/478; this one does not) · `trades_pending` **ABSENT** · `value_basis` **ABSENT** ·
+and `additive: TRUE`, so it is summed as-is. **The one row that most needs to declare its basis is the one
+row with no field to declare it in.** Required (CTO~B, PRD v0.20 `a12e7d0b9`): `value_basis`,
+`trades_pending_count`, `trades_pending_value`. **I did NOT touch the emitter — INF is HELD and it is not my
+file. Flagging, not fixing. A verified defect is not a licence.**
 
 ## 6. THE HEADLINE FOR ANYONE REPORTING THIS NUMBER
 
