@@ -133,10 +133,54 @@ total - held_sum` (`:452`) absorbed **100% of its holdings into `public_residual
 > **An empty input produced a plausible, well-formed, completely wrong artifact.** This is the same class as
 > the zero-row roster walk-back (`INF_B_00`): *absence rendered as a confident value.*
 
-**WHY the override went empty is still `INFERRED`:** the 49F block is `rolled_forward` at `as_of 2026-07-06`
-(the known G1 staleness). The RPS-derived ETF attribution appears to have **dropped rather than rolled
-forward** with it. **I have NOT source-confirmed the producer of `partner_held`, so I am not asserting that.**
-It is the next thing to ground, and it does **not** change (1) or the guard analysis.
+### 3a. MECHANISM CLOSED -- the `INFERRED` link is now OBSERVED + SOURCE-CONFIRMED
+
+*(This section replaces an earlier "still INFERRED" note. The chain is now complete inside mdpf.)*
+
+**THE RPS OVERRIDE FEEDER DID NOT GO STALE. IT WENT ABSENT.** Served `source_vintage.by_feeder`:
+
+```
+07-07:  partner_held_etf = {'49financial': '2026-07-07'}   -> 49F in held_by_partner
+07-08:  partner_held_etf = {'49financial': '2026-07-08'}   -> 49F in held_by_partner
+07-10:  partner_held_etf = {}                              -> 49F GONE
+```
+
+**The full chain, every link grounded:**
+
+1. **`partner_held_etf` feeder ABSENT on 07-10.** [OBSERVED -- served `by_feeder`, above]
+2. **By design: absent feeder -> empty frame -> fall back to the `target_weight` estimate path.**
+   [SOURCE -- `mdpf_aggregate_aua.py:163-164`: *"Absent feeder -> empty frame -> estimate path
+   (zero-feeder behaviour preserved -- the reader machinery is generic)"*]
+3. **But 49financial has NO composition rows -- it was NEVER in the `target_weight` path.** Its basis on every
+   good partition is `rps_actual:49financial`, never `target_weight:49financial`. [OBSERVED, 3 partitions]
+4. **So the "fallback" yields NOTHING for 49F.** The firm falls out of the `held_by_partner` loop entirely.
+   [SOURCE -- `:446-450`]
+5. **`residual = total - held_sum` (`:452`) absorbs 100% of its ~$528mm into `public_residual`.**
+6. **And `partner_held_etf` is EXCLUDED from `vintage_bearing_feeders` BY DESIGN** -- served list is
+   `['model_aua_positions', 'non_model_aua']`; the exclusion is deliberate (`:121-125`: *"both are reported in
+   by_feeder but EXCLUDED from the overall/status computation, else the artifact would read BEHIND
+   permanently"*). **So the artifact's own freshness machinery is STRUCTURALLY BLIND to this feeder vanishing.**
+
+> ## **THE DEFECT, IN ONE SENTENCE:**
+> ### **THE GRACEFUL-DEGRADATION PATH ASSUMES EVERY FIRM HAS AN ESTIMATE TO FALL BACK TO. 49F DOES NOT.**
+> For the one firm whose ETF holdings are known **only** via RPS, *"fall back to the estimate"* means
+> **"fall back to nothing"** -- and nothing renders as **zero held**, which renders as **public float**.
+> **The docstring calls this "zero-feeder behaviour preserved." IT IS PRESERVED -- FAITHFULLY -- FOR THE ONE
+> FIRM IT DESTROYS.** *A fallback is only safe if the thing you fall back TO exists.*
+
+> **AND THE SECOND HALF, WHICH IS WHY NOTHING CAUGHT IT:**
+> **A ROLL-FORWARD FIELD EXCLUDED FROM THE FRESHNESS COMPUTATION CANNOT DISTINGUISH "ROLLED FORWARD 3 DAYS
+> (BY DESIGN)" FROM "GONE ENTIRELY."** The exclusion was added for a *good* reason -- `partner_held_etf` rolls
+> RPS forward ~3 days by contract (section 3.4), so including it would make the artifact read `BEHIND`
+> permanently. **The cost of suppressing a nuisance signal is that the same signal's CATASTROPHIC value is
+> suppressed with it.** *The 07-10 artifact does read `BEHIND` -- but for the partner-block roll-forward, NOT
+> for the vanished feeder. It is right for the wrong reason, which is why `overall: PASS` on the ETF gates.*
+
+**THE REMAINING OPEN LINK IS UPSTREAM AND I AM NOT CHASING IT:** *why the `wsd_partner_held_etf.py` feeder
+itself produced nothing* lives in the **Schwab RPS / `opal-data-bd`** domain, which is under the **sovereign
+49F/bd hold**. The OPAL_ASSETS lift does not obviously reach it and I will not stretch it to. **Bounded, named,
+and left for CTO~B to route.** *(Leading hypothesis, UNPROVEN and deliberately unpursued: the same G1 49F
+staleness that rolled the partner block forward to 07-06 starved the RPS feeder.)*
 
 ## 4. 🔴 BOTH GUARDS SAW IT. NEITHER STOPPED IT.
 
