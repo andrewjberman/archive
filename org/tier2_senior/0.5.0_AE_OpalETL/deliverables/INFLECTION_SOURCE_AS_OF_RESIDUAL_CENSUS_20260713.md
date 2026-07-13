@@ -1,0 +1,67 @@
+# Inflection `source_as_of` Residual Census — co-sign evidence packet
+
+**Author:** 0.5.0_AE_OpalETL · **Date:** 2026-07-13 · **Status:** HOLD (no writes/deletes) pending sign-off
+**Dispatch:** MSTR 2026-07-13 (per-partner ETF producer stamps FILE date not DATA date)
+**Grounding:** live `opal-data-etfs/daily/inflection/` reads (62 slices) + deployed `inf-etf-ownership-daily` zip (`aws lambda get-function`) + repo `infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily/lambda_function.py:137-141,158 @ HEAD`.
+
+## Headline
+- **The PRODUCER IS ALREADY FIXED — repo AND deployed (verified on the live zip).** It stamps `source_as_of = df["date"].max()` (true vintage) and keys output on the source-partition date. It cannot mint a weekend slice.
+- **What MSTR measured is RESIDUE** from the pre-06-29 buggy version (a daily cron keyed on the RUN date). Weekend/holiday slices STOP at 2026-06-29; every slice 06-30→07-10 is trading-day-only with `source_as_of == date` correct.
+- **A present-day fix and a stale-artifact bug print the same RED on a served read** (MSTR's doctrine line). This is served-artifact cleanup, not a code change.
+- **Scope: inflection-only.** cot served slices are trading-day-keyed with correct `source_as_of`; bd-49f is a frozen 06-25 backfill (no weekend keys). cot's live output (07-08→07-10 correct) proves its deployed producer is also fixed.
+
+## The residual set — THREE issue classes (buggy era 2026-05-16 … 2026-06-29)
+
+### Class A — 16 PROVABLE carried-value lies (behavioral, sound lower bound)
+A slice whose `total_ownership` is unchanged from the prior slice, yet `source_as_of == its own date` (claims own-day-fresh while carrying an older value).
+
+| # | key(date) | dow | total_ownership | current source_as_of (lie) | value first appeared |
+|---|---|---|---|---|---|
+| 1 | 2026-05-17 | Sun | 13,009,266.18 | 2026-05-17 | 2026-05-16 |
+| 2 | 2026-05-18 | Mon | 13,009,266.18 | 2026-05-18 | 2026-05-16 |
+| 3 | 2026-05-24 | Sun | 11,780,520.83 | 2026-05-24 | 2026-05-23 |
+| 4 | 2026-05-25 | Mon (Memorial Day) | 11,780,520.83 | 2026-05-25 | 2026-05-23 |
+| 5 | 2026-05-26 | Tue | 11,780,520.83 | 2026-05-26 | 2026-05-23 |
+| 6 | 2026-05-31 | Sun | 12,125,081.42 | 2026-05-31 | 2026-05-30 |
+| 7 | 2026-06-01 | Mon | 12,125,081.42 | 2026-06-01 | 2026-05-30 |
+| 8 | 2026-06-07 | Sun | 39,729,672.70 | 2026-06-07 | 2026-06-06 |
+| 9 | 2026-06-08 | Mon | 39,729,672.70 | 2026-06-08 | 2026-06-06 |
+| 10 | 2026-06-14 | Sun | 42,661,203.94 | 2026-06-14 | 2026-06-13 |
+| 11 | 2026-06-15 | Mon | 42,661,203.94 | 2026-06-15 | 2026-06-13 |
+| 12 | 2026-06-20 | Sat | 42,366,075.01 | 2026-06-20 | 2026-06-19 |
+| 13 | 2026-06-21 | Sun | 42,366,075.01 | 2026-06-21 | 2026-06-19 |
+| 14 | 2026-06-22 | Mon | 42,366,075.01 | 2026-06-22 | 2026-06-19 |
+| 15 | 2026-06-28 | Sun | 43,129,968.77 | 2026-06-28 | 2026-06-27 |
+| 16 | 2026-06-29 | Mon | 43,129,968.77 | 2026-06-29 | 2026-06-27 |
+
+### Class B — 7 non-trading-day ORIGIN slices (suspect; classify via method-1)
+A *new* value on a Saturday/holiday, stamped that non-trading day. The value is the settled prior-trading-day book, so the honest vintage is the prior trading day — but the slice cites a real `holdings_{that-day}.parquet`, so confirming its true internal `date` needs a read of `opal-data-inf` holdings (method-1, awaiting MSTR clearance).
+
+| key(date) | dow | total_ownership | stamped source_as_of | honest vintage (hypothesis) |
+|---|---|---|---|---|
+| 2026-05-16 | Sat | 13,009,266.18 | 2026-05-16 | 2026-05-15 Fri (needs method-1) |
+| 2026-05-23 | Sat | 11,780,520.83 | 2026-05-23 | 2026-05-22 Fri |
+| 2026-05-30 | Sat | 12,125,081.42 | 2026-05-30 | 2026-05-29 Fri |
+| 2026-06-06 | Sat | 39,729,672.70 | 2026-06-06 | 2026-06-05 Fri |
+| 2026-06-13 | Sat | 42,661,203.94 | 2026-06-13 | 2026-06-12 Fri |
+| 2026-06-19 | Fri (Juneteenth) | 42,366,075.01 | 2026-06-19 | 2026-06-18 Thu |
+| 2026-06-27 | Sat | 43,129,968.77 | 2026-06-27 | 2026-06-26 Fri (but see Class C) |
+
+### Class C — missing trading day(s)
+- **2026-06-26 (Fri, trading day): NO slice exists.** The series jumps 06-25 Thu → 06-27 Sat, and 06-27's value ($43.13M) differs from 06-25's — i.e. 06-27 carries 06-26's data. So a real trading day is absent while its data surfaces under a Saturday key. "A missing date in a daily series is its own lie" (MSTR).
+- Fixed-era gaps (07-01, 07-03) are NOT defects — the fixed producer is event-driven off the gold sentinel; no gold completion → no slice (expected, honest).
+
+## The re-stamp problem (why it is not "one line")
+`source_artifact` carries the SAME run-date lie — a Sunday slice cites `holdings_2026-06-14.parquet`. So the honest vintage is **not recoverable from the etfs slice alone**:
+- **method-2 (value-origin, no inf read):** resolves a carry to its origin date — but the origin is itself a non-trading-day (Class B), so it stops one hop short of the true trading-day vintage.
+- **method-1 (read the holdings partition's internal `date` max):** ground truth, but reads `opal-data-inf` gold — cleared as a READ (not a run) only on MSTR's explicit ok given the INF sensitivity today.
+
+## Reconciliation flag
+My independent census = **16 provable (A) + 7 suspect (B) = 23 non-honest-vintage slices** + 1 missing trading day (C). 0.8.0's emitter guard reported **10 rows** — likely a windowed lookback (recent N days / current AVGCAP month) vs my full 62-slice history. **Reconcile against his exact fired-row set before any remediation** — his guard is the acceptance oracle; my 23 is the full-history superset.
+
+## Remediation (HELD, both gated)
+- **RE-STAMP** `source_as_of` → true vintage (MSTR-recommended; reversible; disclosure-doctrine). Needs **NEVER#2 CTO+COO co-sign**. Blast radius = up to 23 keys, `source_as_of` field only, all values/other fields unchanged.
+- **DELETE** the non-trading-day slices → needs **Andrew** (unrecoverable).
+- **Acceptance test:** 0.8.0's guard goes quiet on those rows (self-classify `fresh`→`rolled_forward`). NOT my own output.
+
+Full 62-row census TSV colocated: `inflection_census_20260713.tsv`.
