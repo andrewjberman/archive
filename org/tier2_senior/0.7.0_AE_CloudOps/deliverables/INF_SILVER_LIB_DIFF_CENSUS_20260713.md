@@ -312,3 +312,70 @@ own accepted census, and a DS ruling. **Nobody was wrong. The instrument was.**
 
 **STATUS: CANARY HELD. Nothing applied, no Terraform, no layer, no ledger. No clock -- there is no live drift,
 nothing is bleeding, and the layer is PREVENTIVE, not remedial.**
+
+---
+
+# CENSUS v7 -- THE REBUILT CLASSIFIER + THE PER-DIVERGENCE DISPOSITION
+
+**Scope added:** module-level constants · path/key literals · bucket/prefix/dim names · the two mirror
+questions (**what STOPS**, **what is READ FROM ELSEWHERE**).
+
+**PROVEN-RED CASE (asserted before any verdict is trusted): `POSITIONS_BRONZE_KEY_TPL`.** The script exits 2
+if it does not fire. **It FIRED** -- the rebuilt classifier sees the line v4 was blind to, so its verdicts are
+admissible. *(Same bar `inf-api-txn` was for v2 -- which v1 failed.)*
+
+## THE DISPOSITION -- canonical gets NO presumption (CTO~B ruling)
+
+Identical divergence set across all four targets.
+
+| # | divergence | disposition | why |
+|---|---|---|---|
+| 1 | **`POSITIONS_BRONZE_KEY_TPL`** fork `.parquet` / canonical `.jsonl.gz` | **>> FORK WINS. HARD BLOCKER. <<** | The producer has written `.parquet` **only** since 2026-07-10. **Canonical reads a key dead for three days.** The fix belongs in `data/`, not in the Lambdas. **Routed to DS.** |
+| 2 | **`+ CW_NAMESPACE='Inflection/GoldChain'`** · **`+ CW_SERVICE='inf-gold-layer-runner'`** (`_orion_api_silver_lib.py:499-500`, emitted at `:511`) | **>> REFUSED. <<** | The **silver** Lambdas would emit CloudWatch metrics **identifying themselves as the gold-chain runner, during the gold-chain FREEZE.** An agent auditing whether the hold is working would see gold telemetry, conclude the chokepoint **FAILED**, and reach for a **destructive** remedy. *It poisons the instrument that answers the one question the hold exists to answer.* (Alternative outcome, if the namespace is IAM-scoped to the runner role: a denied emit spraying errors. Both bad; **neither visible in a reach set.**) |
+| 3 | `+ _DIM_DEFER_GUARD = {'performance': (...)}` | **UNDISPOSED** | A defer guard the forks do not have. New behaviour. Needs a ruling before it ships. |
+| 4 | `+ _FIPS_TO_USPS` | **CANONICAL WINS** | A pure FIPS->state lookup table. No source implication, no behaviour risk. |
+| 5 | `LOCAL_BRONZE_API_DIR` / `LOCAL_SILVER_API_DIMS_DIR` | **CANONICAL WINS** | fork hardcodes literals; canonical **resolves them dynamically** (`_resolve_local_bronze_dir()` / `_resolve_local_silver_dims_dir()`, handling EC2 / local-dev / env-override). Strictly better. **The handler's `/tmp` monkeypatch (`lambda_function.py:78`) still governs -- it assigns the module attribute AFTER import.** Not a break. |
+
+## >> AND ROW 5 IS A THIRD HOLE IN MY OWN INSTRUMENT -- A FALSE POSITIVE, CAUGHT BEFORE IT SHIPPED <<
+
+v7 first reported rows 5 as **"canonical would REMOVE these two constants"** -- which, given
+`lambda_function.py` monkeypatches one of them and the converter reads the other **four times**, reads as a
+**hard break: the layer kills positions and reps at import.** I was one message away from reporting it.
+
+**IT IS FALSE. Canonical defines both.**
+```
+CANONICAL  :66  LOCAL_BRONZE_API_DIR      = _resolve_local_bronze_dir()        <- a CALL
+           :105 LOCAL_SILVER_API_DIMS_DIR = _resolve_local_silver_dims_dir()   <- a CALL
+FORK       :57  LOCAL_BRONZE_API_DIR      = 'data/inf/manual_api/pulls'        <- a LITERAL
+           :58  LOCAL_SILVER_API_DIMS_DIR = 'data/inf/silver/api_dims'         <- a LITERAL
+```
+**My extractor used `ast.literal_eval` and silently `continue`d on any non-literal value. A constant COMPUTED
+BY A FUNCTION CALL WAS INVISIBLE TO IT -- so it reported the name as ABSENT from canonical.**
+
+> ## **A FALSE FAIL IS MORE DANGEROUS THAN A FALSE PASS, BECAUSE ITS REMEDY IS DESTRUCTIVE.**
+> Had I shipped it: *"positions/reps cannot take the layer -- it breaks them at import."* **Wrong, and it would
+> have killed a correct change.** *Caught only because I grounded the claim at source before reporting it --
+> the same rule that caught everything else today.*
+
+**Third instrument hole found in my own work today** (v1: presence-not-reachability · v4: blind to module
+constants · v7: blind to computed constants). **All three self-reported. The pattern is not that the
+instruments are bad -- it is that EVERY instrument is blind to something, and the only defence is to ground
+the claim at source before you act on it.**
+
+## THE VERDICT
+
+**THE CANARY CANNOT PROCEED AS DESIGNED.** Not because of a process failure -- because **the layer body is
+wrong** in two independent ways, one of which (row 1) would break the holdings book's bronze read and one of
+which (row 2) would corrupt the observability of the gold-chain hold.
+
+**REQUIRED BEFORE ANY LAYER SHIPS:**
+1. **`data/` is FIXED** -- `POSITIONS_BRONZE_KEY_TPL` -> `.parquet`. **DS's call, not mine.** *(And check: if
+   anything currently executes the canonical converter, IT IS READING A DEAD KEY TODAY. Possible live defect
+   in `data/`. Routed, not chased.)*
+2. **The CW namespace/service is resolved** -- the layer must NOT make silver Lambdas emit as the gold-chain
+   runner. Parameterise per-consumer, or strip it from the shared body.
+3. **`_DIM_DEFER_GUARD` is disposed.**
+4. Only then: re-plan the canary.
+
+**NOTHING APPLIED. No Terraform, no layer, no ledger. NO CLOCK -- zero live drift, nothing bleeding, the layer
+is PREVENTIVE.**
