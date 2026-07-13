@@ -5,6 +5,58 @@
 **archetype:** DIAGNOSE
 **Routed to:** 1.0.0_SA_CTO~B (architect), 0.0.0_AB_MSTR
 **Status:** OBSERVED (served bytes, 3 partitions) + mechanism SOURCE-CONFIRMED. **NO CODE CHANGED. NO RUN TRIGGERED.**
+**AMENDED 2026-07-13 (same session) -- SEE SECTION 0. I QUOTED A MAGNITUDE WHOSE VINTAGE I HAD NOT CHECKED. IT IS WITHDRAWN.**
+
+---
+
+## 0. ⚠️ AMENDMENT -- **THE ~$95mm PUBLIC-FLOAT FIGURE IS WITHDRAWN. IT IS NOT MEASURABLE ON ANY CURRENT ARTIFACT.**
+
+**I published sec 1/6 quoting `public_residual ~= $95mm` and recommended the 2026-07-08 partition as the
+"last good" source. That recommendation was WRONG, and I did not catch it -- CTO~B did**, by grounding the
+ETF net-assets feeder (`build_mdpf_wsd2_etf_netassets_feeder.py:126-131 @ d971650a3`: an **unbounded
+roll-forward with no staleness ceiling**, whose only errors are zero-rows and missing-ticker, so **a 6-day
+stale valuation prints `OK: all 4 Opal ETFs present`**).
+
+**I took `etf_total_net_assets` at face value. It is a rolled-forward number.** Measured with the canonical
+`lib/trading_calendar.py` (NEVER#1 -- trading days, never wall-clock):
+
+| partition | ETF net-assets vintage | **trading days behind** | 49F attribution | `public_residual` |
+|---|---|---:|---|---:|
+| 2026-07-07 | DIVZ/IDVZ @ 06-29, PFDE/PFOE @ 06-30 | **5** | present | 95.42mm |
+| 2026-07-08 | DIVZ/IDVZ @ 06-29, PFDE/PFOE @ 06-30 | **6** | present | 94.38mm |
+| 2026-07-10 | DIVZ/IDVZ @ 07-08, PFDE/PFOE @ 07-09 | **2 / 1** | **DROPPED** | 622.58mm |
+
+> ### **THERE IS NO CLEAN PARTITION. NOT ONE.**
+> - **07-08 has CORRECT attribution and 6-TRADING-DAY-STALE net assets.**
+> - **07-10 has the FRESHEST net assets and BROKEN attribution.**
+>
+> **`public_residual = net_assets - held`. On every available partition that subtraction MIXES VINTAGES** --
+> a fresh(er) minuend against a stale subtrahend, or vice versa. **A difference between two numbers taken at
+> different vintages is not a measurement of anything.** So `$94.38mm` is not "the last good value"; it is a
+> **6-trading-day-stale numerator minus a 07-06 denominator**, and I presented it as measured.
+
+**THE TELL WAS IN MY OWN TABLE AND I WALKED PAST IT:** net assets were **byte-identical on 07-07 and 07-08**
+(668.47mm, every ticker to the cent). **Live ETF net assets do not do that across two trading days.** I had
+the roll-forward on screen, in a table I wrote, and read it as corroboration (two partitions agreeing) rather
+than as the signature of a frozen feeder. *That is the "a question carrying a false premise gets answered ON
+it" class, self-inflicted: I asked "what is the public float" instead of "is this number current."*
+
+**WHAT SURVIVES, AND IT IS THE PART THAT MATTERS.** The **STRUCTURE** in sec 1/6 is a claim about *which
+dollars are double-counted*, not about their size. **It does not depend on the magnitudes and it stands:**
+- partner-held ETF dollars are **already inside partner AUA** -> adding them **double-counts**;
+- the **public float** is genuinely Opal-managed and in **no** partner's AUA -> the only honestly-addable piece;
+- **`etf_fund` (the whole ~$678mm row) is NEVER additive.** *That is arithmetic, not judgment.*
+
+**WHAT IS WITHDRAWN:** every **magnitude** (~$95mm float, ~$578mm double-count, ~$678mm total).
+**They are UNQUOTABLE until the ETF feeder has a staleness ceiling AND 49F attribution is restored.**
+
+> **=> THE DECISION IS LEGIBLE. THE NUMBER IS NOT. Andrew can be asked the QUESTION today; he must not be
+> shown a FIGURE today.** Anyone who puts a dollar amount on the ETF gap right now is quoting a
+> vintage-mixed difference. **Do not let a magnitude from this document escape into a PRD, a deck, or a
+> sovereign decision.** *(And note the recursion: this whole document exists because a field was labelled
+> with a computation it did not perform. I nearly shipped a number labelled "measured" that was estimated.)*
+
+---
 
 > ## ⛔ READ SECTION 5 BEFORE YOU ACT ON ANY OF THIS.
 > **The repair this document implies is `re-run mdpf`. THAT IS DOOR 6.** The mdpf chain is *correctly idle*
