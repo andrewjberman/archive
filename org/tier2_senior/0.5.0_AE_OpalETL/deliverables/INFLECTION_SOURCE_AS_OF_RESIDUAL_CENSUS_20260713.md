@@ -147,3 +147,18 @@ My body-hash-excluding-date instrument flagged silver 06-15 as a "distinct book"
 
 ### THE FIX (co-sign-gated, NOT started) — and it may be a no-op
 Since the honest vintage does not exist in the Orion response, the only producer-side option is a **value-movement disclosure at the pull** (identical-values-on-a-trading-day → flag `asOfDate` as not-vintage-trustworthy). But that is **redundant with 0.8.0's deployed emitter guard**, which already does exactly this (trading-day value-repeat → `vintage_state=missing`) at the served layer. So a pull-side fix may add nothing the served layer doesn't already have. **Design call for CTO~B/COO; held-chain blast radius → NEVER-co-sign; LOCATE delivered, FIX not started.**
+
+### FINAL SYNTHESIS (0.5.0 + DS~A, agreed 2026-07-13) — a faithful chain reporting a vendor-authored lie
+```
+ORION  fabricates the vintage (asOfDate = the requested date)
+   ->  bronze positions   faithful
+   ->  silver positions_mv faithful
+   ->  INF_B_00 gold holdings faithful
+   ->  etfs daily producer faithful
+   ->  opal-assets emitter  DETECTS it (value-repeat guard, served layer)
+```
+**Every layer in the estate is a faithful reporter of a lie we did not author.** No agent fabricates the vintage — which is *precisely why no single-layer code review could ever have found it*: each layer is individually correct. The defect is real and the honest vintage **does not exist in the source** — there is no field to swap to and nothing to recover; the only available signal is **value-movement** (Andrew's rule), and the only place it can act is a **detector at the serving layer** (0.8.0's guard), not a fix at the data layer.
+
+**Do NOT "just correct" `snapshot_date`/`as_of_date` to the last trading day** — that invents a vintage the vendor never gave us and becomes a second source of truth for exactly the thing we cannot know. (DS~A + 0.5.0, both explicit.)
+
+**Method note banked:** when a claim says "the ONLY difference is X," the cheapest check is to ask the data whether that is true — and the person most likely to skip it is the one who made the claim. DS~A's "silver identical except date columns" was substantively right (`current_value` 0/33,381 changed) but overstated (2 `asset_class` rows differ); my body-hash-excluding-date flipped on those 2 rows and nearly produced a false "silver→gold collapse." The `current_value`-diff arm is the one that carries the claim.
