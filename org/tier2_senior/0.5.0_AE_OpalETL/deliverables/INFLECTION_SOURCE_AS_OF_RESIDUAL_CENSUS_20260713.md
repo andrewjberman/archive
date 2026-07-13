@@ -88,3 +88,28 @@ Read the internal `date` column of every cited `opal-data-inf/gold/canonical/hol
 **SCOPE FLAG (surface, do not adjudicate):** the current served inf gold holdings carry relabeled weekend books — a probable inf-gold-layer defect in the SAME "date field that lies about itself" class as the standing INF hazards. **I did NOT act on inf and did NOT read the inf gold producer SOURCE, so I do not assert the mechanism (Rule 22) — flagging the observed served-artifact fact for MSTR/CTO to route.**
 
 Method-1 outputs colocated: `method1_verdict.txt` (per-slice internal-date table) + the body-hash cluster proof.
+
+---
+
+## CONSUMER BLAST-RADIUS — and the DISCLOSURE MECHANISM ALREADY EXISTS, DEPLOYED (2026-07-13)
+
+**The load-bearing finding: option (a) — disclose-the-carry — is ALREADY BUILT, DEPLOYED, and Andrew-direct, at the layer that matters (the served AUM freshness).**
+
+`opal-assets-daily-emitter` carries `apply_value_repeat_guard` (Andrew-direct, "option A", 2026-07-13). **VERIFIED IN THE DEPLOYED BINARY** (pulled the live zip, not the repo): defined at `:830`, and CALLED in the handler at `:1122` (daily) + `:1164` (backfill). It grounds on Andrew's ACTUAL rule — *"it's only ambiguous on weekends/holidays. otherwise there is no way that we're going to be displaying the same number twice"* — i.e. on WHETHER THE VALUE MOVED, the one signal that does not lie. On a TRADING-day value-repeat claiming `fresh`, it sets `vintage_state=missing`, **keeps the value** (additive-sum invariant), and names the reason. This is the value-grounded disclosure the label-grounded controls (and any etfs-slice re-stamp) cannot be.
+
+### 23-vs-10 RECONCILED — they measure DIFFERENT LAYERS (do not equate)
+- **My 23** = source-artifact lies across the FULL etfs history.
+- **0.8.0's 10** = emitter OUTPUT rows the value-repeat guard downgraded (it reads the emitter's own `cohort_history` DDB GSI + the NEWEST slice per partner, `_latest_partner_key`). **The guard never reads the 23 historical slices.** So the counts are not supposed to match; the reconciliation is "different instruments, different layers," not "who is right." His guard remains the close oracle for the emitter.
+
+### Full consumer map of `opal-data-etfs/daily/{partner}/{date}.json`
+| consumer | reads | residual impact |
+|---|---|---|
+| `opal-assets-daily-emitter` (0.8.0) | newest slice + own DDB history | **PROTECTED** — value-repeat guard (deployed, verified). Served AUM freshness is safe. |
+| `avgcap_monthly_average.py` (etfs gold) | all in-window daily slices | **values CORRECT by Andrew-design** (D1 calendar-day carry-forward — the Friday book IS the Sat/Sun position). Only the **AC6 worst-case `source_as_of` LABEL** is mildly optimistic from the lie. |
+| `etf_ownership_dashboard.py` (DE) | LATEST slice per partner | historical residual **not surfaced** (shows latest only). |
+| `etfs-canon-fanin` (etfs lambda) | daily slices -> DDB upsert | **copies `source_as_of` verbatim into DDB (`:102`)** -> propagates the lie to any downstream freshness reader of that field. |
+
+### Consequence for the CO-SIGNED remediation (lower stakes than the served RED implied)
+The CRITICAL freshness protection **already exists** (Andrew-direct, deployed, value-grounded). Option (a)'s disclosure field on the etfs source slices would improve only **label accuracy** (AVGCAP AC6 + the fan-in DDB `source_as_of`) — NOT the core protection. **So the co-sign is now a cost/benefit on label honesty, not on preventing a served-freshness lie** (that lie is already refused at the emitter). Recommendation for CTO~B/0.8.0/co-sign: weigh a served-write + NEVER#2 co-sign against "a couple of staleness LABELS become honest," given the value is correct-by-design and the freshness claim is already guard-refused. The residual is largely INERT.
+
+**Grounding:** deployed binaries (`inf-etf-ownership-daily`, `opal-assets-daily-emitter` — live zips) + source (`avgcap_monthly_average.py`, `etf_ownership_dashboard.py`, `etfs-canon-fanin/lambda_function.py` @ HEAD). Emitter guard call sites verified in the DEPLOYED zip, not self-reported.
