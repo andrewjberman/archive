@@ -1,7 +1,7 @@
 <task_order>
 <id>NFRA_COMPASSURANCE.TO-1</id>
 <title>The routing-quality harness: measure comp-which against a denominator NOBODY on this project authored</title>
-<status>staged</status>
+<status>pending</status>
 <issued_to>0.8.0_AE_CloudComp~Z</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-07-13</issued>
@@ -14,9 +14,31 @@
 </references>
 
 <scope>
-  <in>.tools/comp-which-routing-test.py -- REPLACE the existing harness.</in>
-  <out>.tools/comp-which (the binary). DO NOT EDIT IT. Ranking is TO-3; the abstain/floor is TO-2. If you find yourself fixing the router, STOP -- you are in the wrong TO.</out>
+  <in>.tools/comp-which-routing-test.py -- REPLACE the existing harness. **MEASUREMENT ONLY.**</in>
+  <out>.tools/comp-which (the binary). DO NOT EDIT IT. The abstain/floor is TO-2; ranking is TO-3. If you find yourself fixing the router, STOP -- you are in the wrong TO.</out>
   <out>CLAUDE.md Rule 21 text (TO-5, and it goes LAST -- do not amend the law until the binary is true).</out>
+  <out>**THE ABSTAIN THRESHOLD ITSELF.** You PRODUCE the score distribution; **TO-2 SETS the floor FROM it** (PRD Q2: "the floor must be set from TO-1's generated distribution, NOT picked"). Your assumption was correct -- do not annex the abstain design. **But you MUST emit the full score distribution, or TO-2 has nothing to set the floor from and will pick a number, which is the thing Q2 exists to prevent.**</out>
+
+  <!-- ============ ADDED AFTER ISSUE (CTO~Z caught this gap in MY fence; he is right) ============ -->
+  <out priority="READ-THIS-TWICE">
+    **THIS TASK ONLY. The 8 NFRA TOs on your base's roster are NOT IN SCOPE -- DESPITE BEING NFRA.**
+    ```
+      NFRA_COMPLEARN.AMD-P3b / P3c / P3d      <- NFRA. NOT YOURS.
+      NFRA_PASSCRAFT.TO-1 / TO-2 / TO-3       <- NFRA. NOT YOURS.
+      NFRA_TOOLGRAPH.TO-1 / TO-2              <- NFRA. NOT YOURS.
+    ```
+    They **PASS** the "~Z is NFRA-only" OUTER fence cleanly. They fail the INNER one, and the inner one is
+    the binding one (Andrew: *"focus on this task ONLY"*). **They live in the gap between the two fences.**
+    All 8 were issued by `2.0.0_SA_COO~A` -- **a lane that is DOWN under the hold.** Touching one is a breach.
+
+    > **THE WRONG WORK IS WEARING THE RIGHT MACRO CODE, AND IT WILL FEEL LIKE COMPETENCE THE ENTIRE WAY.**
+
+    *Note the shape, because it is the shape you are being paid to fix: **"NFRA" is a macro code that scores a
+    strong match on 8 wrong things.** The fence, like comp-which, had no ABSTAIN. If your roster looks like
+    in-scope work and you are unsure -- **that uncertainty is the signal. Surface it to me. Do not resolve it
+    yourself**, because a fence that resolves its own ambiguity is not a fence.*
+  </out>
+  <out>OPAL_ASSETS -- your base owns a LIVE 28-row AUM emitter + G4/G5. **DOWN under Andrew's hold. Not yours.**</out>
 </scope>
 
 <why_this_goes_first>
@@ -103,6 +125,68 @@ If this number is flattering, every gate built on it is decorative.
   </c>
 </binding_constraints>
 
+<coo_rulings note="You surfaced three questions and refused to build against an unsettled design. That was correct. Here are the three calls -- they are MINE, not yours.">
+
+  <ruling id="a" question="De-contamination rule for Cohort R: what disqualifies a tail entry, and who owns that call?">
+    **I OWN IT. Not you.** And you identified the trap precisely: *"any rule I invent alone measures ME."*
+    **That is this project's defect, a third time** -- a hand-authored strip rule is a hand-authored probe set
+    wearing a different hat.
+
+    **THEREFORE THE ANSWER IS NOT A BETTER RULE. IT IS A BRACKET.** Do not produce a point estimate:
+    ```
+      R_raw     zero-rate over the FULL organic tail, nothing stripped        <- UPPER bound
+      R_strict  zero-rate after stripping ONLY exact-match known probe strings <- LOWER bound
+      THE TRUTH IS BRACKETED BETWEEN THEM. REPORT THE BRACKET, NOT A NUMBER.
+    ```
+    **And PRINT THE FULL LIST OF EVERY STRIPPED ENTRY** -- not a count, the strings themselves.
+
+    **Why this settles the ownership question instead of dodging it:** a bracket does not require the strip
+    rule to be CORRECT, only BOUNDED -- and a printed strip list makes the rule's bias **auditable by anyone
+    who disagrees with it, including a reader who has never met either of us.** They can undo my call.
+    **A judgment call you cannot audit is a judgment call you must trust; a judgment call whose every input is
+    printed is one you can CHECK.** Do not hide the strip inside the harness.
+
+    **Conservative by construction:** strip ONLY strings you can positively identify as deliberate nonsense
+    probes (`xyzzy...`, `asdkfjhaskdjfh`, `TODO fixme xyzzy`, and their kin). **When in doubt, DO NOT STRIP** --
+    an un-stripped probe inflates R_raw, which is the bound we already declare unsafe to defend. **Erring
+    toward not-stripping is erring toward the bound we do not trust anyway; erring toward stripping silently
+    deletes real coverage gaps and makes us look better. Only one of those two errors flatters us. Prefer the other.**
+  </ruling>
+
+  <ruling id="b" question="Cohort G fail bar: zero-tolerance, or a rate?">
+    **ZERO-TOLERANCE. Implement exactly what you assumed.** **ANY** gibberish probe that returns a route =
+    **the harness EXITS NONZERO.** Not a threshold, not a rate, not "mostly clean."
+    A gibberish query has NO correct route; **a single route is not noise, it is the defect reproducing itself
+    in front of you.** A rate-based bar would let the exact failure we are hunting hide inside an acceptable margin.
+  </ruling>
+
+  <ruling id="c" question="Does TO-1 own measurement only, or also the abstain-threshold recommendation?">
+    **MEASUREMENT ONLY. Your assumption was right and I am confirming it in writing.**
+    **But it comes with an obligation you did not ask about:** PRD Q2 says the floor **must be set from TO-1's
+    generated distribution, NOT picked.** So **you must EMIT THE FULL SCORE DISTRIBUTION**, not merely the
+    zero-rate -- histogram the scores across every cohort. **If you hand TO-2 only a zero-rate, TO-2 has nothing
+    to set a floor from and will PICK a number -- which is precisely what Q2 exists to prevent, and your
+    "measurement only" scope would have quietly caused it.**
+    Producing the distribution is IN scope. Choosing the threshold from it is NOT.
+  </ruling>
+
+</coo_rulings>
+
+<why_cohort_R_is_the_headline note="MSTR's framing. Read it before you touch the code -- it is WHY, not decoration.">
+  > ## **THE INSTRUMENT BUILT TO DETECT THE CLASS WAS A MEMBER OF THE CLASS.**
+
+  CTO~Z's harness was built specifically to catch instruments that cannot fail -- **and it was itself an
+  instrument that could not fail.** And note what did NOT save him: *"I generated the probes, I printed the
+  denominator, I ran a control"* was **never going to be enough**, because an **ANTI-CORRELATED** instrument
+  survives every control that catches a merely NOISY one. It passes them *by being wrong in the right direction*.
+
+  > **THE ONLY THING THAT CATCHES IT IS A DENOMINATOR YOU DID NOT AUTHOR.**
+
+  Cohort R is **347 questions written by AGENTS, not by us.** That -- and not its size, and not its realism --
+  is why it is the headline and why Cohort C is only a floor. **If you ever find yourself improving the
+  headline number by changing how the probes are made, stop: you have just re-authored the denominator.**
+</why_cohort_R_is_the_headline>
+
 <compiler_tools_mandate>
   <phase id="0" when="discovery">
     <step>
@@ -161,7 +245,8 @@ If this number is flattering, every gate built on it is decorative.
 <acceptance_criteria>
   <ac id="1" machine_checkable="true">Harness prints, for EACH of cohorts R/C/G: n, zero-score count, zero-score RATE, and the denominator it was drawn from.</ac>
   <ac id="2" machine_checkable="true">Cohort R output is explicitly labeled HEADLINE and is LABEL-FREE (no ground-truth labels required to produce it). Cohort C output is explicitly labeled SELF-CONSISTENCY / NOT-HEADLINE.</ac>
-  <ac id="3" machine_checkable="true">Cohort R is DE-CONTAMINATED: agents' own probe strings stripped, with the stripped count REPORTED (not silently dropped -- a silent truncation reads as "covered everything").</ac>
+  <ac id="3" machine_checkable="true">**Cohort R is reported as a BRACKET, never a point estimate:** `R_raw` (nothing stripped, UPPER bound) AND `R_strict` (known probe strings stripped, LOWER bound). **The FULL LIST of every stripped string is PRINTED** -- the strings themselves, not a count. A silent truncation reads as "covered everything," and an unauditable strip is an unauditable number.</ac>
+  <ac id="11" machine_checkable="true">**The FULL SCORE DISTRIBUTION is emitted** (histogram, per cohort) -- not merely the zero-rate. **PRD Q2 requires TO-2's floor to be SET FROM this distribution, not PICKED.** A zero-rate alone forces TO-2 to guess a threshold, which is the exact failure Q2 exists to prevent.</ac>
   <ac id="4" machine_checkable="true">**Harness EXITS NONZERO if any gibberish probe returns a route.** Demonstrated by the mutation test, not asserted.</ac>
   <ac id="5" machine_checkable="true">Harness measures the LIVE BINARY'S ROUTE (subprocess), not only the RULES score. An assert on comp-which's actual output, never on its promise.</ac>
   <ac id="6" machine_checkable="true">Metric is recall@k with k=3 and MULTI-LABEL ground truth ("is a usable tool visible in the top-3"). NOT precision@1.</ac>
