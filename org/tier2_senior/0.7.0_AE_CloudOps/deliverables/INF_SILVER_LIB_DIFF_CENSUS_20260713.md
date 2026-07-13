@@ -221,3 +221,94 @@ everything else):**
 
 **It is promising precisely because the instrument's bias runs the safe way. It is not proven, and nothing here
 authorizes the deletion.**
+
+---
+---
+
+# >> CORRECTION -- 2026-07-13, 18:00Z. THE VERDICT ABOVE IS WRONG, AND SO IS THE PREMISE OF THE PROJECT. <<
+
+**This correction is appended, not merged into the text above.** The original verdict was ACCEPTED by base-AE
+and ratified by CTO~B. **A record that was accepted and then silently improved teaches nobody.** Read the
+original, then read why it failed.
+
+## WHAT THE CENSUS SAID
+> **FINDING 2: "ZERO behaviour-affecting reachable divergence anywhere."** (all five lambdas, headline verdict)
+
+## IT IS FALSE. AND THE CENSUS COULD NOT HAVE SEEN OTHERWISE.
+
+```
+POSITIONS_BRONZE_KEY_TPL        (a MODULE-LEVEL CONSTANT in convert_orion_api_to_silver.py)
+  DEPLOYED FORKS (running now):  'bronze/positions/{snap}.parquet'      <- CORRECT
+  CANONICAL   (the LAYER BODY):  'bronze/positions/{snap}.jsonl.gz'     <- *** STALE ***
+```
+**GROUND TRUTH, live S3, denominator printed** -- `s3://opal-data-inf/bronze/positions/`, 4,537 objects
+(2,272 `.parquet` / 2,265 `.jsonl.gz`):
+
+| date | written |
+|---|---|
+| 2026-07-08 | `.parquet` |
+| 2026-07-09 | `.parquet` + `.jsonl.gz` |
+| **2026-07-10** | `.parquet` + `.jsonl.gz` -- **THE LAST `.jsonl.gz` EVER WRITTEN** |
+| 2026-07-11 | `.parquet` **only** |
+| 2026-07-12 | `.parquet` **only** |
+| 2026-07-13 | `.parquet` **only** (today) |
+
+**Attaching the layer would re-point the positions bronze read at a key that has not been written for three
+days.** The holdings book's source.
+
+## >> AND IT FALSIFIES THE PREMISE OF THE ENTIRE CONSOLIDATION, NOT JUST THIS APPLY <<
+
+> ## **CANONICAL IS THE STALE ONE. THE FORKS ARE NOT BEHIND -- THEY ARE AHEAD.**
+
+Every argument for this project rested on *"there is ONE artifact to be in parity WITH."* **That artifact is
+wrong about the holdings book's source key.** This is the *"forks may differ for a REASON"* warning landing
+exactly: **the runtime moved forward and `data/` did not.**
+
+**The consolidation is still right as a GOAL. Its METHOD -- collapse everything onto canonical -- IS DEAD.**
+**Ruling (CTO~B, 2026-07-13): the consolidation proceeds ONLY on a per-divergence DISPOSITION -- every
+difference adjudicated, the winning side NAMED and JUSTIFIED. CANONICAL GETS NO PRESUMPTION.**
+
+## WHY MY INSTRUMENT WAS BLIND -- and this is the transferable part
+
+My v4 classifier compared **function bodies** (AST, docstrings stripped) crossed with **reachability from the
+handler**. **A MODULE-LEVEL CONSTANT IS NOT A FUNCTION BODY.**
+
+> ## **THE CODE IS IDENTICAL. THE CALL GRAPH IS IDENTICAL. THE REACH SET IS IDENTICAL. IT READS A DIFFERENT FILE.**
+> ## **A CONSTANT THAT NAMES A DATA SOURCE IS THE MOST CONSEQUENTIAL LINE IN THE FILE -- AND IT IS INVISIBLE TO EVERY CENSUS THAT DEFINES "BEHAVIOUR" AS *CODE THAT RUNS*.**
+
+**My census only ever asked ONE of the three questions a change-analysis must ask:**
+
+| question | did I ask it? |
+|---|---|
+| **What will newly EXECUTE?** | YES -- and it found `coerce_silver_ids`. |
+| **What will STOP executing?** | **NO** (computed, never reported -- see the reporting defect below). |
+| **What will now be READ FROM SOMEWHERE ELSE?** | **NO. This is the one that would have broken the holdings book.** |
+
+**A DATA PIPELINE CAN BE DESTROYED WITHOUT A SINGLE NEW LINE RUNNING.**
+
+## THE OTHER DIVERGENCES THE SOURCE DIFF FOUND (all four targets)
+
+| divergence | disposition |
+|---|---|
+| `POSITIONS_BRONZE_KEY_TPL` `.parquet` -> `.jsonl.gz` | **FORK WINS. Canonical is stale.** `data/` needs the fix, not the Lambdas. |
+| `+ _DIM_DEFER_GUARD = {'performance': ...}` | **UNDISPOSED** -- a defer guard the forks do not have. New behaviour. Needs a ruling. |
+| `+ CW_NAMESPACE='Inflection/GoldChain'` `CW_SERVICE='inf-gold-layer-runner'` | **REFUSED.** The **silver** lambdas would emit CloudWatch metrics **identifying themselves as the gold-chain runner -- DURING THE GOLD-CHAIN FREEZE.** An agent checking whether the hold is working would see gold-chain telemetry flowing and conclude the chokepoint had **FAILED** -- and the remedy for a failed safety control is **DESTRUCTIVE**. *It would have corrupted the observability of the very control we built today.* |
+| `- LOCAL_BRONZE_API_DIR` / `- LOCAL_SILVER_API_DIMS_DIR` (positions fork) | UNDISPOSED -- canonical re-adds them. |
+
+## A. DEACTIVATED SET -- MEASURED, EXPLICITLY, ALL FOUR: **NONE**
+
+**And a reporting defect of my own, recorded rather than quietly fixed:** I *had* computed this in v5
+(`before - after`) but only **printed it when non-empty**. So in the original report **"I measured zero" and
+"I did not look" SHARED A SIGNATURE** -- against my own stated bar, *in the same document where I stated it*.
+
+> **Absence-of-data and failure-to-read must never share a signature.** *Print the zero. A silent field is
+> indistinguishable from an unasked question.*
+
+## WHAT ACTUALLY CAUGHT THIS -- and it was not the instrument
+
+**Not my census. The HOLD.** Base-AE stopped the canary and forced the two mirror questions I had never asked.
+At the moment it was caught I had **FOUR GREENS**: a CTO-ratified gate, an exec-cleared Terraform window, my
+own accepted census, and a DS ruling. **Nobody was wrong. The instrument was.**
+
+**STATUS: CANARY HELD. Nothing applied, no Terraform, no layer, no ledger. No clock -- there is no live drift,
+nothing is bleeding, and the layer is PREVENTIVE, not remedial.**
