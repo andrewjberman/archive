@@ -65,3 +65,26 @@ My independent census = **16 provable (A) + 7 suspect (B) = 23 non-honest-vintag
 - **Acceptance test:** 0.8.0's guard goes quiet on those rows (self-classify `fresh`→`rolled_forward`). NOT my own output.
 
 Full 62-row census TSV colocated: `inflection_census_20260713.tsv`.
+
+---
+
+## METHOD-1 RESULT (2026-07-13, MSTR-cleared holdings read) — **COMPROMISED, and the lie is at the GOLD layer**
+
+Read the internal `date` column of every cited `opal-data-inf/gold/canonical/holdings_{date}.parquet` (READ ONLY, cleared by MSTR; no inf write/run, `build_assets_dim.py` untouched). **Result: the internal `date` column carries the SAME lie one layer down — it is NOT a usable vintage oracle.** This is exactly the trap MSTR named ("do not verify a lying-date fix with another field that can lie the same way"), and it fired.
+
+**PROOF (byte-level, three clusters):** the weekend/carry holdings partitions are the SAME book relabeled across consecutive dates —
+- `holdings_2026-06-13 / -06-14 / -06-15`: identical non-date body `0906f25f311d`, 11,487 rows each; internal `date` = 06-13 / 06-14 / 06-15 respectively.
+- `holdings_2026-05-16 / -05-17 / -05-18`: identical body `c89665fe892a`, 29,593 rows; internal date = own filename date.
+- `holdings_2026-06-06 / -06-07`: identical body `54e0823dabfc`, 32,570 rows.
+- **Fixed era 07-06…07-10: all DISTINCT bodies per trading day (11,401–11,465 rows), internal date honest.** So the relabel is buggy-era-only.
+
+**Consequences:**
+1. **The lie ORIGINATES at the inf gold holdings layer, not the etfs producer.** The etfs producer read `holdings_{weekend}.parquet` (internal date pre-lied) and faithfully stamped `source_as_of = df["date"].max()` = the relabeled date. It inherited the lie.
+2. **Even the "fixed" etfs producer would be fooled by a weekend partition** — its `df["date"].max()` trusts the same field. It is safe ONLY because it is event-driven off the gold sentinel (no weekend runs), NOT because it derives vintage from a trustworthy field. On trading days the holdings internal date is honest, so it is fine.
+3. **The TRUE trading-day vintage of a frozen weekend book is NOT recoverable from any current artifact:** internal date lies; the value-origin (method-2) is itself a non-trading day; and book structure shifts sharply (32,801 rows on 06-12 Fri → 11,487 on the 06-13 frozen book), so it is not a simple Friday-settlement revision. Also note the entire holdings history was bulk-rebuilt 2026-07-10 (all LastModified 07-10), and the rebuild mixes two extraction regimes (~29–32K-row books vs ~11K-row books).
+
+**Remediation impact:** "RE-STAMP `source_as_of` to the true vintage" is **not cleanly executable — there is no trustworthy source for the true vintage.** Options narrow to (a) DISCLOSE the carry via an additive field (`carried: true` / `value_origin: <date>` / `vintage_confidence: uncertain`) without asserting a false precise date; (b) accept the value-origin date as `source_as_of` with an explicit caveat that it is "value-first-appeared," not a certified holdings vintage; (c) DELETE (leaves the 06-26 gap). **This is now a DESIGN decision for CTO~B (OPAL_ASSETS owner) + 0.8.0 (emitter semantics) + the NEVER#2 co-sign — not a lane call.**
+
+**SCOPE FLAG (surface, do not adjudicate):** the current served inf gold holdings carry relabeled weekend books — a probable inf-gold-layer defect in the SAME "date field that lies about itself" class as the standing INF hazards. **I did NOT act on inf and did NOT read the inf gold producer SOURCE, so I do not assert the mechanism (Rule 22) — flagging the observed served-artifact fact for MSTR/CTO to route.**
+
+Method-1 outputs colocated: `method1_verdict.txt` (per-slice internal-date table) + the body-hash cluster proof.
