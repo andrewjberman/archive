@@ -182,3 +182,42 @@ complete and useful deliverable -- it converts '6 copies, 4 versions' from a fog
 v1 -- and it failed in exactly the way the dispatch warned it would. **Gap found:** the gate's own txn
 exclusion rests on a mechanism that measurement falsifies, and the hazard it names is real on two *other*
 lambdas.
+
+---
+
+## FOLLOW-ON (FILED, NOT STARTED) -- THE BETTER DISPOSITION FOR `inf-api-txn`: DELETE THE TWO FILES IT NEVER IMPORTS
+
+**Status: FILED. Do NOT start it. Owner: unassigned. No clock.**
+
+The census's handler finding is bigger than the exception note it produced. `inf-api-txn/lambda_function.py`
+imports **neither** `_orion_api_silver_lib` **nor** `convert_orion_api_to_silver` -- and has not since
+`ADVI_TXNAMG.004` (2026-05-15) removed the silver/transactions write. **Both files nevertheless still ship
+inside the production deployment package.** That is not merely *consistent* with the measured reach set of
+7 -> 7 -- **it is the MECHANISM of it.**
+
+So the right long-term disposition is **not "excluded forever, with a note."** It is **delete the dead files**:
+
+| what it removes | how |
+|---|---|
+| the fork | one fewer copy of the silver lib in the estate |
+| the comp-constants drift | the file carrying the weakened 50M-400M band ceases to exist |
+| the gate block | permanently -- **without touching a single constant** |
+| the exception note | unnecessary: **you cannot consolidate a file that is not there** |
+| vestigial baggage | dead weight shipped in a production package since 2026-05-15 |
+
+> ## **STRUCTURE BEATS ASSERTION. Rather than documenting an exception forever, REMOVE THE THING THE EXCEPTION IS ABOUT.**
+> *A note saying "do not consolidate this fork" is a comment -- a claim with no vintage and no test. **A deleted
+> file cannot be consolidated.*** Today taught us what comments are worth; this is the structural version of the
+> same fix.
+
+**BAR BEFORE ANYONE TOUCHES IT (it is a package change to a LIVE production Lambda, and it gets the same bar as
+everything else):**
+1. **Download the DEPLOYED package** and prove the handler imports neither file **in the bytes that actually run**
+   -- not in the repo.
+2. **EXERCISE** the Lambda after removal. **A static reach set is not a runtime observation, and I said so:** this
+   census's instrument **OVER-reports** reachability, so *"not reachable"* is the **strong** direction of its
+   error -- which is what makes this **promising, not proven.**
+3. Terraform-only, coordinate with CTO~B, ledger at the apply.
+
+**It is promising precisely because the instrument's bias runs the safe way. It is not proven, and nothing here
+authorizes the deletion.**
