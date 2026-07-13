@@ -1,9 +1,106 @@
-# BRIEF -> CTO: what is NOT running, what is NOT accruing, and the ONE BUCKET
+# BRIEF -> CTO: THE GRAND CONSOLIDATION -- opal-data-assets
 
 **From:** 0.4.0_DS_ClientPlatform
 **To:** 1.0.0_SA_CTO -- **for PRD + TO dispatch to the AEs**
-**Date:** 2026-07-13
-**Commissioned:** Andrew-direct.
+**Date:** 2026-07-13 (AMENDED ~23:55Z on Andrew's second direct instruction)
+**Commissioned:** Andrew-direct. **HIGHEST PRIORITY -- his word, this hour.**
+
+---
+
+# 0. ⚡ AMENDMENT -- THE GRAND CONSOLIDATION (supersedes the scoping in §3-§4 below)
+
+**ANDREW, VERBATIM (~23:55Z, my channel):**
+> ***"What I want to accomplish here is a grand consolidation. I want an opal-data-assets bucket that basically
+> takes all of these things, brings them into one place, organizes them religiously, and is hyperrobust... I want
+> smartx, orion/eclipse, the schwab ec2 box, etf issuers, black diamond (for cottonwood), all of it, accruing into
+> a dedicated opal-data-assets bucket, bronze raw, silver parquet, gold master table, exactly as ive described
+> 1000x times."*** ... ***"tell CTO this is the highest priority now."***
+
+**Combined with his standing constraint (§ header below): no alarms, no gates, no process layers. ONE bucket,
+ONE grammar, ETL ON.**
+
+## 0.1 THE BUCKET
+
+```
+s3://opal-data-assets/                       ONE grammar, every source: {layer}/{source}/{scope}/{feed}/{date}/
+
+  bronze/                                    RAW. Byte-for-byte as the vendor shipped. NEVER parquet.
+    schwab/08242234/{TYPE}/{YYYY-MM-DD}/CRS{yyyymmdd}.{EXT}         "49F Schwab SmartX"   (SI2 EC2 box)
+    schwab/08335338/{TYPE}/{YYYY-MM-DD}/{m}.CRS{date}.{CODE}.zip    "49F Schwab Black Diamond"
+    smartx/49financial/exports/{YYYY-MM-DD}/{raw export}            5 term models + 2 SMAs + platform
+    orion/inflection/{feed}/{YYYY-MM-DD}/...                        accounts_v2, positions, txn, assets_v2, reps
+    eclipse/inflection/models/{YYYY-MM-DD}/portfolios_full.json     Inflection Opal Models
+    blackdiamond/cottonwood/{feed}/{YYYY-MM-DD}/...                 Cottonwood
+    trueshares/{DIVZ|IDVZ}/{YYYY-MM-DD}/{as-fetched}                ETF net assets
+    pathfinder/{PFOE|PFDE}/{YYYY-MM-DD}/{filepoint csv}             ETF net assets
+
+  silver/                                    CLEAN PARQUET. Dedup + dtype ONLY. Every vendor column preserved.
+    {source}/{scope}/{feed}/date=YYYY-MM-DD/data.parquet            same tree, mirrored exactly
+
+  gold/                                      THE MASTER TABLE.
+    DynamoDB opal-assets-daily-aua           1 item per cohort per day, organized by run_date:
+      0824 total - 0833 total - 7 SmartX models - Inflection models - Cottonwood AUA -
+      4 ETF net-assets - per-partner ETF ownership (3 partners x 4 tickers) - public FLOAT per ticker
+    snapshots/{run_date}.parquet             daily dump of the table -> the bucket is self-contained
+```
+**Derived series (per-partner ownership, float) are GOLD rows, not bronze -- bronze is vendors only; nothing
+appears twice.** The master/partner/ticker is **in the key**; Schwab identity is read from the file's **H1
+header**, never inferred from the folder; unreadable identity -> quarantine, never a default.
+
+## 0.2 INPUT MECHANISMS -- per source
+
+| source | mechanism | interval | today |
+|---|---|---|---|
+| **Schwab 0824** (EC2 box) | existing SI2 cron; upload target -> `bronze/schwab/08242234/` | 08:35+20:35Z | pull RUNS; retarget only |
+| **Schwab 0833** | `0.6.2`'s REST puller, lands **directly** in the new bucket from day one | daily | built; deploy + schedule |
+| **SmartX** | re-enable `smartx-daily-export-trigger`; exporter also drops raw payload to bronze | weekdays 14:00Z | **DISABLED -- flip on** |
+| **Orion** (Inflection) | 5 `inf-api-*` pulls already run; **ingest-router mirrors** bronze in | 13:17-13:47Z | running; mirror only |
+| **Eclipse** | same mirror off `opal-data-inf` eclipse partitions | daily | running; mirror only |
+| **Black Diamond / cot** | same mirror off `opal-data-cot` -- **one-way fan-in (the ETFS_CANON precedent)** | nightly | running; mirror only |
+| **ETF issuers** | `0.5.0`'s cloud producer -- **set its landing target to the new bucket NOW**, mid-migration | 22:00Z | in flight; retarget pre-cutover |
+
+**THE ONE NEW COMPONENT -- the ingest-router.** A single copy function, event-driven on `ObjectCreated`, static
+prefix map (source key -> canonical key). Never transforms; verifies every landed object by `head-object`. It
+exists so we do NOT rebuild five working pulls on day one -- **each native retarget retires one row of its map
+until it has nothing to do.** That is the entire new machinery. No schedulers, no orchestrator, no queue.
+
+**SILVER is event-driven off bronze:** object lands -> its parser (one registry, keyed by source+TYPE) converts
+that file -> `date=` partition. **No cron anywhere downstream of the pulls.** **GOLD** = the existing emitter
+(17:15Z), repointed to read ONLY this bucket.
+
+## 0.3 HYPERROBUST -- five properties, ZERO new alarms
+1. **Idempotent everywhere** -- any day re-runnable; converted dates skipped; `--force` rewrites; backfills bounded by date.
+2. **An absent day is ABSENT** -- no roll-forward, no zeros; the gap in the tree IS the record.
+3. **Identity in the key** -- master/partner/ticker on every path; Schwab from H1; unreadable -> quarantine.
+4. **Delivery verified** -- every writer confirms the landed object; `exit 0` means bytes-in-S3, nothing less.
+5. **Grain preserved** -- silver keeps every vendor column at the vendor's own grain; **nothing summed below gold.**
+
+## 0.4 MIGRATION -- three phases, no big bang
+- **P1 (this week):** Terraform the bucket + IAM (router: per-source READ, assets WRITE -- explicit grants,
+  fan-in one-way) - arm the router - deploy 0833 direct - retarget the ETF producer - re-enable SmartX.
+  **Result: everything accruing.**
+- **P2:** retarget each native pull to land in `opal-data-assets` directly; retire router rows one by one.
+- **P3:** emitter reads only `opal-data-assets`; the six old buckets stop being inputs to anything.
+- 0833's existing backfill (`opal-data-schwab/backfill/08335338/`) **copies over** into the canonical tree; the
+  legacy prefixes are **inventory, not cleanup** (deletion-class; untouched).
+
+## 0.5 RE-PRIORITIZED TOs (supersedes §4's ordering; every deliverable = a landed byte)
+| # | TO | assignee |
+|---|---|---|
+| **1** | **Terraform `opal-data-assets`** + prefixes + router IAM | **AE CloudOps** |
+| **2** | **Ingest-router** (one Lambda, prefix map, head-object verify) | **AE CloudOps** |
+| **3** | **Deploy 0833 puller -> new bucket + schedule** | **`0.6.2_AE_PartnerETL`** |
+| **4** | **Retarget the ETF cloud producer -> new bucket** (mid-migration, do it now) | **`0.5.0_AE_OpalETL`** |
+| **5** | **Re-enable `smartx-daily-export-trigger`** (find out why it was disabled first) + raw drop to bronze | **AE CloudOps** |
+| **6** | **Silver parser registry** (Schwab CRS/CBUGL, Orion, Eclipse, cot, issuers) -- event-driven, Rule 17 | **DS (me)** |
+| **7** | **Repoint the emitter** to the one bucket; add 0833 + Cottonwood-AUA cohorts as their sources land | **DS (me)** |
+| **8** | **Source a Cottonwood AUA figure** (none exists anywhere) | **AE + DS** |
+
+**STILL THE ONE PROHIBITION (unchanged, §5):** nobody writes `opal-data-inf/gold/meta/pipeline-complete.json`.
+The Orion/Eclipse/cot mirrors are READ-ONLY on their sources and advance no held chain.
+
+---
+*(Original brief below -- the gap measurements in §1-§2 remain the evidence base for the TOs above.)*
 
 > **ANDREW, VERBATIM -- THE CONSTRAINT ON THIS ENTIRE PRD:**
 > ***"What I DO NOT WANT, is a bunch of process architecture bullshit, alarms, and other middleman non-value
