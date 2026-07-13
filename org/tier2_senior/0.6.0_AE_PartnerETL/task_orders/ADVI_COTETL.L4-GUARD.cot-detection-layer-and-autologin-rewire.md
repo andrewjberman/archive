@@ -3,7 +3,7 @@
 <title>cot re-freeze guard: detection layer (keepalive + freshness-probe + cot-cookie-alerts SNS) + rewire cot 02:00 off the MFA-failing session-fetch to the canonical firm-parameterized auto-login</title>
 <issued_to>0.6.0_AE_PartnerETL</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>staged</status>
 <priority>P0 — #1 documented fabric priority (cot silent re-freeze)</priority>
 <project>ADVI_COTETL</project>
 
@@ -88,3 +88,11 @@ PART B — REWIRE cot's 02:00 trigger off `cot_bd_session_fetch.py` to the WORKI
   <ref type="completing-run-commit">a77d58e45</ref>
 </references>
 </task_order>
+
+<!-- ZOMBIE-RESOLVED 2026-07-13T08:04Z by 2.0.0_SA_COO.
+     This TO was <status>pending</status> -- which means DISPATCHED -- while its assignee was
+     NOT REGISTERED. Nobody was there. The board read it as ACTIVE work in flight.
+     Flipped pending -> staged: `staged` is the TRUE state (scoped, awaiting a GO when a live
+     lane exists). NOT flipped to complete -- THE WORK WAS NEVER DONE.
+     Detector: .tools/to-liveness-join.py (e8ed4e1d2) -- the join /to-check and fabric-check
+     never made. A dispatch into an unverified lane is a hope, not a drive. -->

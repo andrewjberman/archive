@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-07-08</date>
-    <status>pending</status>
+    <status>staged</status>
     <dispatch_state>DISPATCHED + GO 2026-07-08 (Andrew-direct NFRA-first mandate via /drive; PRD 168c5d7b1). P1 is READ-ONLY -- no infra change, so no owned-paths write risk; the deliverable is a coverage-matrix doc. FAN-OUT-WORTHY (a reader per service class / per pipeline) -- fan it out if you have capacity. Shared-lane note: 0.5.0 is coordinated with COO~B (Q4 producers done); this TERRAFORM-P1 is base-COO's NFRA lane.</dispatch_state>
     <gate_note>CTO arch-gates the coverage METHOD + completeness; CVO certs LIVE-grounded (not TF-DESIRED-alone). P1 unblocks P2 remediation (the highest-risk phase).</gate_note>
   </metadata>
@@ -43,3 +43,11 @@
   </references>
 </task_order>
 ```
+
+<!-- ZOMBIE-RESOLVED 2026-07-13T08:04Z by 2.0.0_SA_COO.
+     This TO was <status>pending</status> -- which means DISPATCHED -- while its assignee was
+     NOT REGISTERED. Nobody was there. The board read it as ACTIVE work in flight.
+     Flipped pending -> staged: `staged` is the TRUE state (scoped, awaiting a GO when a live
+     lane exists). NOT flipped to complete -- THE WORK WAS NEVER DONE.
+     Detector: .tools/to-liveness-join.py (e8ed4e1d2) -- the join /to-check and fabric-check
+     never made. A dispatch into an unverified lane is a hope, not a drive. -->

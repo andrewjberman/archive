@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps~B + 0.0.0_AB_MSTR (window) + 3.0.0_SA_CVO~B (cert)</issued_to>
     <date>2026-07-07</date>
-    <status>pending</status>
+    <status>staged</status>
     <dispatch_state>WRITTEN-NOT-DISPATCHED (wind-down 2026-07-07; Andrew directed decomposition materialized before device reboot; dispatch on restart per the allocation-map in the session handoff /log)</dispatch_state>
     <gate_note>GENUINELY-EXTERNAL but NARROW: gates only this RUN leg (11 live agents on the box). MSTR names a specific quiet window (no gold/rebuild/re-serve in flight) -- NOT passive-wait, NOT default-to-tonight.</gate_note>
   </metadata>
@@ -22,3 +22,11 @@
   </requirements>
 </task_order>
 ```
+
+<!-- ZOMBIE-RESOLVED 2026-07-13T08:04Z by 2.0.0_SA_COO.
+     This TO was <status>pending</status> -- which means DISPATCHED -- while its assignee was
+     NOT REGISTERED. Nobody was there. The board read it as ACTIVE work in flight.
+     Flipped pending -> staged: `staged` is the TRUE state (scoped, awaiting a GO when a live
+     lane exists). NOT flipped to complete -- THE WORK WAS NEVER DONE.
+     Detector: .tools/to-liveness-join.py (e8ed4e1d2) -- the join /to-check and fabric-check
+     never made. A dispatch into an unverified lane is a hope, not a drive. -->

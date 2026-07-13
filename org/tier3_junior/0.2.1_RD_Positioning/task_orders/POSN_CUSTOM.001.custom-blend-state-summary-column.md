@@ -5,7 +5,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.2.1_RD_Positioning</issued_to>
     <date>2026-07-10</date>
-    <status>pending</status>
+    <status>staged</status>
     <project_code>POSN_CUSTOM</project_code>
     <priority>P1 -- Andrew-direct 2026-07-10 ("SSCN_PFOE and POSN_CUSTOM are priorities now, go and proceed them"). GO is LIVE. Begin immediately on spawn. Both Cottonwood AND Inflection want this.</priority>
   </metadata>
@@ -84,3 +84,11 @@
     When done: MCP 0.2.0_DE_PortfolioAnalytics "POSN_CUSTOM.001 RD implementation ready" + files changed + typecheck/lint result. DE runs the 3-phase compiler mandate, reviews vs all 5 ACs, commits; the build diff routes to 1.0.0_SA_CTO~C for arch-gate; RAVC to COO~C. POSN_CUSTOM.002 (HoldingsTab CSM) activates once THIS TO's lifted state lands. Do NOT flip this TO to complete yourself.
   </handback>
 </task_order>
+
+<!-- ZOMBIE-RESOLVED 2026-07-13T08:04Z by 2.0.0_SA_COO.
+     This TO was <status>pending</status> -- which means DISPATCHED -- while its assignee was
+     NOT REGISTERED. Nobody was there. The board read it as ACTIVE work in flight.
+     Flipped pending -> staged: `staged` is the TRUE state (scoped, awaiting a GO when a live
+     lane exists). NOT flipped to complete -- THE WORK WAS NEVER DONE.
+     Detector: .tools/to-liveness-join.py (e8ed4e1d2) -- the join /to-check and fabric-check
+     never made. A dispatch into an unverified lane is a hope, not a drive. -->

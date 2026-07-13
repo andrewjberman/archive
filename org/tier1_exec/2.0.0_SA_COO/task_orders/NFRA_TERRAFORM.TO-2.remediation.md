@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-07-09</date>
-    <status>pending</status>
+    <status>staged</status>
     <dispatch_state>DISPATCHED + GO 2026-07-09 (Andrew NFRA-first). Executes UNDER the CTO-ARCH-GATED remediation-safety model (infra/aws/NFRA_TERRAFORM_P2_remediation_safety_model.md, 603750209 + c70aeb817 clarification -- CTO arch-gate PASS stands). 0.5.0 owns it end-to-end (did P1 7b4c484fe + P1.5 6ca51a1c0; has the full grounding + wrote the safety model). LIVE-verified reachable (17 work-calls this tick).</dispatch_state>
     <gate_note>THE HIGHEST-RISK PHASE. safe-apply(HALTGT) for EVERY apply; deploy-completion ledger for each multi-step batch; CTO arch-gates each remediation BATCH; CVO certs 0-diff APPLIED==DESIRED (Rule 22a, EXERCISED not config-read).</gate_note>
   </metadata>
@@ -42,3 +42,11 @@
   </references>
 </task_order>
 ```
+
+<!-- ZOMBIE-RESOLVED 2026-07-13T08:04Z by 2.0.0_SA_COO.
+     This TO was <status>pending</status> -- which means DISPATCHED -- while its assignee was
+     NOT REGISTERED. Nobody was there. The board read it as ACTIVE work in flight.
+     Flipped pending -> staged: `staged` is the TRUE state (scoped, awaiting a GO when a live
+     lane exists). NOT flipped to complete -- THE WORK WAS NEVER DONE.
+     Detector: .tools/to-liveness-join.py (e8ed4e1d2) -- the join /to-check and fabric-check
+     never made. A dispatch into an unverified lane is a hope, not a drive. -->
