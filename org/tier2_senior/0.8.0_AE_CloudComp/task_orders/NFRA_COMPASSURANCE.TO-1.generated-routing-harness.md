@@ -286,6 +286,32 @@ If this number is flattering, every gate built on it is decorative.
 </compiler_tools_mandate>
 
 <acceptance_criteria>
+  <ac id="15" machine_checkable="true" priority="THIS ONE WOULD HAVE CAUGHT ALL THREE OF US">
+    **ENUMERATE EVERY DISTINCT ROW-TAG IN THE RAIL LOG AND PRINT THE FULL TALLY *BEFORE* FILTERING ANYTHING.**
+    Not only the tags you expect. **If a tag exists that your filter does not consume, SAY SO AND SAY WHY.**
+    > **A FILTER WHOSE COMPLEMENT YOU NEVER LOOKED AT IS A FILTER YOU HAVE NOT TESTED.**
+
+    **COHORT R's CORRECT FILTER IS THE FULL `ROUTE` FAMILY, NOT `ROUTE-`:**
+    ```python
+    re.match(r'^\S+\s+ROUTE[\s-]', line)   # bare ROUTE (LEGACY cascade) + ROUTE-* (posterior/surface/pointer)
+    ```
+    **WHY THIS AC EXISTS -- I BROKE THIS MYSELF AND YOU WERE BUILDING ON IT.** My original cohort-R filter was
+    `ROUTE-` **with a hyphen**, and it could not see **1,487 bare `ROUTE` rows** (the legacy curated-strong
+    cascade, `:1280`/`:1331`/`:1349`) -- **196 distinct real agent questions, 36% of the headline cohort.**
+    **And it was BIASED, not partial:** bare-`ROUTE` fires only on a STRONG curated match, so *"was it tagged
+    `ROUTE-`?"* is **correlated with the catalog FAILING.** Kept: 44.6% zero. Missed: **14.8%** zero.
+    **My selection criterion selected for the failure I was measuring, and inflated my own headline from 34.0% to 44.4%.**
+    **Corrected: cohort R zero-rate = 34.0% (n=544); understatement factor 1.87x, NOT 2.4x.**
+    **Do not quote 44.4% or 2.4x. Re-derive both from YOUR snapshot and print YOUR numbers.**
+
+    *Three agents made this identical error in this one file tonight -- CTO~Z's F-1 regex could not see `RUN-GREP`;
+    his retraction counted other tools' `RUN-GREP` rows as comp-which's own (claimed 1,722 abstains; the real
+    number is **200** -- `comp-grep:185` logs ITSELF, and 1,530 rows are agents using the primitive DIRECTLY);
+    my filter could not see bare `ROUTE`.* **EVERY ONE IS THE SAME DEFECT: THE RETRIEVAL PATTERN SILENTLY
+    EXCLUDED THE EVIDENCE THAT WOULD HAVE MODERATED THE CLAIM.** Rule 22 already says *"put the control on the
+    RETRIEVAL, not the pattern."* **We all cite that rule. Three of us violated it in the same file within an hour,
+    each while catching someone else's version of it. Knowing a failure mode by name does not immunize you against writing it.**
+  </ac>
   <ac id="1" machine_checkable="true">Harness prints, for EACH of cohorts R/C/G: n, zero-score count, zero-score RATE, and the denominator it was drawn from.</ac>
   <ac id="2" machine_checkable="true">Cohort R output is explicitly labeled HEADLINE and is LABEL-FREE (no ground-truth labels required to produce it). Cohort C output is explicitly labeled SELF-CONSISTENCY / NOT-HEADLINE.</ac>
   <ac id="3" machine_checkable="true">**Cohort R is reported as a BRACKET, never a point estimate:** `R_raw` (nothing stripped, UPPER bound) AND `R_strict` (known probe strings stripped, LOWER bound). **The FULL LIST of every stripped string is PRINTED** -- the strings themselves, not a count. A silent truncation reads as "covered everything," and an unauditable strip is an unauditable number.</ac>
