@@ -1,3 +1,45 @@
+> # ⛔ CORRECTION (2026-07-13, SAME SESSION, BY THE AUTHOR) — **THE HEADLINE NUMBER IN THIS BRIEF IS WRONG. IT IS 34.0%, NOT 44.4%. THE FINDING SURVIVES; THE MAGNITUDE DOES NOT.**
+>
+> **MY OWN INSTRUMENT WAS ANTI-CORRELATED — THE EXACT DEFECT THIS BRIEF EXISTS TO REPORT.**
+> I extracted Cohort R by filtering rail-log lines on **`ROUTE-` — with a hyphen.** The log also carries
+> **1,487 bare `ROUTE` rows** (`_log_rail("ROUTE", …)` at `:1280`/`:1331`/`:1349` — the **LEGACY curated-strong
+> cascade**). They all carry a `q=`. **My pattern could not see one of them: 196 distinct real agent questions,
+> 36% of my own headline cohort, invisible.**
+>
+> **It was not merely partial. It was BIASED, in the direction that flattered the finding:**
+> ```
+>   questions my filter KEPT   (n=350)  zero-rate 44.6%   mean 2.14
+>   questions my filter MISSED (n=196)  zero-rate 14.8%   mean 3.04   <- the catalog handles these WELL
+>   CORRECTED COHORT R         (n=544)  zero-rate 34.0%
+> ```
+> **Mechanism:** bare-`ROUTE` is emitted by the legacy cascade, which fires **only on a STRONG curated match.**
+> So *"was it tagged `ROUTE-`?"* is **correlated with the catalog FAILING. My selection criterion selected for
+> the failure I was measuring.**
+>
+> | | claimed | corrected |
+> |---|---|---|
+> | Cohort R zero-rate | 44.4% | **34.0%** |
+> | Cohort C zero-rate | 18.2% | 18.2% (unchanged) |
+> | **understatement factor** | **2.4×** | **1.87×** |
+>
+> **WHAT SURVIVES:** catalog-derived probes DO understate the coverage hole, and materially (**1.87×**).
+> **WHAT DOES NOT:** the 2.4× magnitude, and my own error bar. I wrote *"the 2.4× direction is not in doubt;
+> the THIRD significant figure is."* **The error was in the FIRST significant figure. I hedged the digit I had
+> right and not the one I had wrong.**
+>
+> **AND SECTION 0 BELOW IS NOW IRONIC RATHER THAN EXCULPATORY.** I disclosed that my *scorer* lied and was caught
+> by a control — then shipped a *retrieval filter* that lied and had no control on it at all. **I put the control
+> on the scorer and not on the retrieval, which is precisely what CLAUDE.md Rule 22 tells us not to do.**
+>
+> **THE CONTROL THAT WOULD HAVE CAUGHT IT** (now an acceptance criterion on TO-1): **enumerate every distinct
+> row-tag and print the full tally BEFORE filtering.** If a tag exists your filter does not consume, say so and
+> say why. **A FILTER WHOSE COMPLEMENT YOU NEVER LOOKED AT IS A FILTER YOU HAVE NOT TESTED.**
+>
+> *Left standing below, uncorrected, so the error is legible. The original text is the record; this block is the
+> retraction. Do not quote 44.4% or 2.4× from the body.*
+
+---
+
 # FINDING — comp-which TO-1: a catalog-derived probe set measures the CATALOG, not the instrument
 
 **Author:** `2.0.0_SA_COO~Z` · **2026-07-13** · **archetype:** VALIDATE
