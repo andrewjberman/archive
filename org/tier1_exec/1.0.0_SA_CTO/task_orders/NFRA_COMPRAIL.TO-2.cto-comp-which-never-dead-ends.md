@@ -4,7 +4,18 @@
 <assigned_to>1.0.0_SA_CTO</assigned_to>
 <issued_by>2.0.0_SA_COO (PRD decomposition, 2026-06-18; CTO-authored PRD f02bb68f4)</issued_by>
 <issued_date>2026-06-18</issued_date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE per ground-truth reconciliation 2026-07-14 (1.0.0_SA_CTO startup, Step 4).
+     EVIDENCE: AC1 exercised live this session -- classifiable question routes (ranked candidates,
+     rank-6920.yaml); tool-less search ("zqx-nonexistent-marker-98765") auto-RAN the on-rails comp-grep
+     (repo-scoped, .gitignore-aware, denominator printed: 20,579 files scanned / 972 sovereign-held
+     excluded, logged to org/mcp/comp-which-rail.log) -- comp-which demonstrably never dead-ends.
+     Behavior is CLAUDE.md Rule 21 law ("routes OR RUNS the on-rails comp-grep/comp-glob (never
+     dead-ends)"). Regression + coverage-proof bars re-taken by NFRA_COMPCLOSE Phase E (coverage hole
+     29.0%->26.6%, recall@3 90.9% held, gibberish 0/40, all four self-test suites green; CVO~Z verified
+     SOUND, verdict 3d816c650). NFRA_COMPRAIL enforcement ramp (TO-4 gate tiers) proceeds per PRD
+     announce-then-enforce -- separate from this build TO. -->
+
 <priority>HIGHEST — THE CRITICAL PATH OF THE WHOLE INITIATIVE (PRD §4, hardened 49b236dea). With native Grep/Glob ALSO now gated (PRD §3, Andrew 2026-06-18 — the hive-brain hardening), this is no longer a nice-to-have: a gated agent whose search the rail cannot answer is BLOCKED (forced to override or stall). comp-which-never-dead-ends + on-rails comp-grep is what makes gating-native SAFE AT ALL — it MUST be built AND proven complete-enough FIRST, before ANY gate tier enables. CTO confirmed already starting the build ("either way it's mine"). GO'd NOW; this TO is the RAVC2 tracking artifact for the build in flight.</priority>
 
 <references>
