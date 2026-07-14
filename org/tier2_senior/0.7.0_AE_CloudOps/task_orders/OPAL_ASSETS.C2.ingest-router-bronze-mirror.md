@@ -43,6 +43,15 @@ blackdiamond/cottonwood <- opal-data-cot bronze (nightly cube)  poll after cot's
   prefix.
 - Idempotent skip-if-landed; an absent source day is ABSENT in the monolith; verify per ruling 13c's
   3-tier protocol (listing-ETag single-part / source-stream-MD5 multipart / size always).
+- **THE DENOMINATOR MANDATE (DS request 02:27Z, COO-adopted; ruling-11a precedent — the T1 hard-raise,
+  one layer up):** the mirror EMITS ITS COUNTS every cycle — objects enumerated in the source window vs
+  objects written/skipped in the monolith — and **RAISES on a mismatch rather than logging it.** A
+  per-object event model is structurally blind to the object that never arrived; a polling mirror
+  necessarily enumerates the source window, so the denominator is free AT BUILD TIME and unbuildable
+  later. A mirror that copies 37 of 40 and exits 0 is indistinguishable from one that copied 40 — only
+  the mirror is ever in a position to know, so it publishes. *(This is a hard-raise inside the component
+  — the ruling-11a class, not a new alarm/watchdog under §0's constraint; CTO ratifies the distinction
+  at the plan gate.)*
 - **Monolith-side event wiring is UNCHANGED and stays event-driven** — `opal-data-assets` is new
   territory; its own notification config is ours to create freely, and DS's C6 parsers fire on the
   monolith's ObjectCreated. Only SOURCE-bucket attaches are dead.
