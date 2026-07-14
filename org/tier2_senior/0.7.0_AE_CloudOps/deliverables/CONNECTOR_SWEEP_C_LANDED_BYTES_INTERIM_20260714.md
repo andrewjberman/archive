@@ -57,4 +57,33 @@ ORPHANED endpoint whose only remaining function is to answer probes with 5-month
 - INF-chain ligaments: read-only observation ONLY (standing hold; a freshness guard reading RED there is a
   guard WORKING).
 
-**Escalations so far: none** — the one candidate (NT-1) downgraded to drift on code-grounding.
+## FINDING SA-1 (ESCALATED to COO same-turn, 081832Z): both seeking-alpha ligaments believed-live + content-dead ~4.5 months
+
+- `seeking-alpha-news-daily` (cron 14:00Z) + `seeking-alpha-analysis-daily` (cron 21:00Z): ENABLED,
+  firing 2/50h each, invocations match, **Lambda Errors metric 0** — and newest article CONTENT is
+  `seeking-alpha/news/articles/2026-02-24/` (news) / manifests dead since 2026-04-13 (analysis).
+- **Mechanism (CloudWatch, both lambdas, latest runs):** every Bright Data fetch → `401 Unauthorized`
+  (`api.brightdata.com/request`) — dead vendor credential — caught-and-continued, so rc=0.
+- **The mask:** the news coordinator still writes a well-formed `dedup_report.json` manifest DAILY —
+  a fresh-looking landing that satisfies every listing check while carrying nothing. Ruling-26 specimen
+  (the C5 267-byte class, at ligament scale, live for ~4.5 months).
+- Vendor-held: Bright Data egress is NOT lifted; fix = Andrew's word; retire-vs-revive = above my lane.
+  Blast-radius open cell: opal-data-news-av consumers (portal sentiment rides the SEPARATE
+  opal-news-articles DDB chain, healthy — user impact possibly nil, unconfirmed).
+
+## Batch-2 verdicted rows (code-grounded exact surfaces, ~08:1xZ)
+
+| ligament | code-grounded surface | landed frontier | (c) verdict |
+|---|---|---|---|
+| bd-49f-{fees-,}session-daily | opal-data-bd/blackdiamond/49f/session-trigger-mode.json | TODAY 00:00:19Z | HEALTHY (trigger writes; downstream = EC2 session chain, separately owned) |
+| cot-bd-session-daily | opal-data-cot/blackdiamond/cot/session-trigger-mode.json | TODAY 02:02:46Z | HEALTHY trigger; downstream cot silver freeze = the KNOWN held finding |
+| etf-ownership-dashboard-daily | opal-data-etfs/platinum/etf_ownership_dashboard.json | 07-13 16:00:03Z | HEALTHY (today's 16:00Z not yet due) |
+| news-api-*/news-rss-* (16 ligaments, one lambda) | opal-data-news-v2/logs/ingestion_* | TODAY 08:00:50Z | HEALTHY (log surface; article DDB keyed read queued) |
+| seeking-alpha-news-daily | seeking-alpha/news/{articles,manifests} | articles 02-24 / manifest 07-13 | **SA-1 FAIL — manifest masks dead content** |
+| seeking-alpha-analysis-daily | seeking-alpha/analysis/manifests/ | 2026-04-13 | **SA-1 FAIL** |
+| opal-cot-value-parity-hourly | — | — | **GAP: lambda NOT in lambda-source-map.json (Rule 4)** — source-map registration queued as a finding; sibling opal-inf-value-parity maps to infra/aws/compdiff |
+
+**Escalations: 1 (SA-1, same-turn).** NT-1 downgraded to drift on code-grounding (see above); COO PARKED
+it with named triggers (081510Z). Remaining queue: ~12 reader-only probe rows ((c)=N/A-reader; their (d)/(e)
+answered at their read-surface guards), DDB keyed reads, opal-inf-value-parity cfg resolution (INF domain,
+read-only observation).
