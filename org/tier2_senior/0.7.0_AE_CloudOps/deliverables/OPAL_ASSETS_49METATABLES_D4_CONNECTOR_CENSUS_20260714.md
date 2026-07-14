@@ -112,7 +112,7 @@ encoding reality — check exactly those two seams first at the etf/smartx/schwa
 | G5 | ~~unquote at event boundary~~ | — | CLOSED @ 8e46370bf | DS (done) |
 | G6 | `opal-cot-value-parity` missing from lambda-source-map (Rule 4) | DECLARATIVE | LOW | 0.7.0 queue (pre-existing find) |
 | G7 | smartx TF comment "pull role does NOT get this ARN yet" is stale — the live role HAS the yaliu grant | DECLARATIVE drift | LOW | 0.5.0 next touch |
-| G8 | `ListMonolithSmartx` is unconditioned (whole-bucket List; every other monolith role conditions on own prefixes) | APPLIED, never-widen nit | LOW | 0.5.0 next touch |
+| G8 | ~~`ListMonolithSmartx` unconditioned~~ **FALSIFIED (0.5.0 live measure 11:07Z: the statement IS conditioned `s3:prefix=["smartx/*"]`, DESIRED==APPLIED since the role landed). The defect was MY READER: my policy-dump printer rendered Sid/Effect/Action/Resource and silently DROPPED Condition blocks — a conditioned statement rendered as unconditioned. An instrument that cannot display a field reports the field absent; the census's own bar caught its author.** | — | RETRACTED | 0.7.0 (corrected here, 11:1xZ) |
 | G9 | orion sweep backlog ~4,640 partitions vs 600s timeout — first sweep measures; >1wk projection commissions V2-9 | EXERCISED, pending measurement | watch | 0.7.0 reports post-16:00Z → CTO rules |
 
 **Convergence input (PRD sec-4):** the D4 half is this census; remaining = D1 joint design.
