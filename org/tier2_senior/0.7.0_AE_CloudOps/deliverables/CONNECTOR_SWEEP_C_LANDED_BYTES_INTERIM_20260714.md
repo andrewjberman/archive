@@ -107,3 +107,31 @@ as the CLAUDE.md NEVER#1 comp-freshness caveat (missing freshness_basis falls ba
 ROUTED to COO for tool-owner routing: these two tables need per-table config entries (real PK
 pattern + freshness_basis trading-day-frontier where applicable), and the empty-read should say
 CONFIG-MISS, not WARN-empty.
+
+## Priority code-grounding batch 2 (2026-07-14 ~18:5xZ)
+
+| ligament | lambda | (c)/(d)/(e) verdict |
+|---|---|---|
+| gldinc-ss4c-canary-daily (06:30Z) | gldinc-ss4c-canary | HEALTHY + GUARD-POSITIVE: fired 2/50h (cadence-exact); pure reader/asserter on the LIVE gold/_state/load_flows cache (no S3 writes; CW metrics out); (e) FOUR bound alarms (absence/break/weekly-absence/weekly-divergence) ALL OK -- the canary is itself the guard, and its absence is alarmed. Nothing to fix. |
+| etfs-canon-fanin-daily | etfs-canon-fanin | CLOSED (C9 + DDB row above). |
+| opal-assets-daily-emitter-daily | opal-assets-daily-emitter | CLOSED (DDB row above). |
+| mdpf-daily-refresh-trigger | mdpf-daily-trigger | OBSERVED-HELD BY DESIGN: event-pattern on the Door-6 sentinel key; fired 0/50h == the hold HOLDING. Read-only observation per the standing INF hold; a zero here is the healthy reading. |
+| inf-silver-chain-bronze-complete | inf-silver-chain | OBSERVED-CONSISTENT-WITH-KNOWN-STATE: fired 2/50h -- the parquet bronze producer still runs (17a ongoing, known) and its bronze-complete events drive the silver chain. Read-only observation ONLY per the hold; no verdict beyond consistency. |
+
+## FINDING ES-1 (GROUNDED): exec-summary-generator source tree DELETED from the repo 2026-04-27 by an unrelated log commit; deployed lambda now unrebuildable; source-map lists 15 phantom files
+
+- git: commit 64b6b9d65 (2026-04-27, subject "log(COMP_LEARNS.session13)...") deleted the ENTIRE
+  infra/aws/lambda/exec-summary-generator/ source set (lambda_function.py 455 lines, config.py,
+  metrics.py, platinum_reader.py, validator.py, 6 prompt files, exec_summary/ package ~484 lines).
+  `git ls-files` on the dir: ZERO tracked files today; only __pycache__ remains on disk.
+- Consequence: the DEPLOYED lambda cannot be rebuilt from the repo (Rule-10-class violation state),
+  and the source-map row still lists all 15 files -- map drift, files[] is a phantom census.
+- The ligament (exec-summary-trigger, EVENT-pattern, opal-data-bd env) fired 0/50h -- whether the
+  0 is a dead upstream (platinum write pattern never matching) or dormant-by-design needs the
+  TRIGGER pattern read against bd platinum write cadence; NOT settled here.
+- Same sweep-deletion family as c36710809/fbdb335b4 (a broad pathspec in an unrelated commit) --
+  the class the 2026-07-14 safe-commit fix now guards against for pycache; SOURCE deletions
+  swept into log commits remain possible and this one went unnoticed for 11 weeks.
+- ROUTED to COO: restore-vs-decommission is an ownership call (ADVI_49EXEC lineage). Recovery is
+  mechanical if wanted: `git checkout 64b6b9d65~1 -- infra/aws/lambda/exec-summary-generator/`
+  then verify vs the DEPLOYED CodeSha256 before any motion.
