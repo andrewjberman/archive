@@ -263,6 +263,8 @@ def address(events: list):
 def _render(stats, unaddressed_refs):
     from collections import Counter
     L = ["nerves-traffic -- the universal traffic record (NFRA_NERVES L2)",
+         "  INVOCATION (pin beside any number you quote -- nothing here is re-derivable without it):",
+         "    %s" % stats.get("invocation", "(not recorded -- direct address() call)"),
          "  EVENTS: %d seen | %d MADE AN ADDRESS ATTEMPT | %d addressed | %d UNADDRESSED -> hit-rate %.1f%%"
          % (stats["events_total"], stats["events_with_an_address_attempt"], stats["events_addressed"],
             stats["events_unaddressed"], stats["event_hit_rate_pct"]),
@@ -271,7 +273,7 @@ def _render(stats, unaddressed_refs):
          "  LEXICAL: %d search terms that were NEVER address attempts -- banded, NOT counted as misses"
          % stats["lexical_terms_not_address_attempts"],
          "           (a ref that was never an address CANNOT be a missing address. My own first run",
-         "            reported an 11.6%% rail hit-rate with a band full of English words. Fixed.)",
+         "            reported an 11.6% rail hit-rate with a band full of English words. Fixed.)",
          "  PHANTOM-LIMB events (searched for, NOT found): %d  <- the demand map for knowledge that does not exist"
          % stats["phantom_limb_events"],
          "",
@@ -375,6 +377,12 @@ def main() -> int:
 
     events = collect(args.stream, args.since_days, args.limit)
     records, stats, unaddr = address(events)
+    # CVO~Z verify P2 (2d2080e1e): a headline number nobody can re-derive is not evidence.
+    # RESOLVED args, not raw argv -- defaults are invisible in argv, and rail is uncapped
+    # under --stream all, so the effective knobs must ride WITH the numbers they produced.
+    stats["invocation"] = "cmd=%s stream=%s since_days=%d limit=%d (argv: %s)" % (
+        args.cmd, args.stream, args.since_days, args.limit,
+        " ".join(sys.argv[1:]) or "<defaults>")
 
     if args.cmd == "emit":
         os.makedirs(os.path.dirname(SINK), exist_ok=True)
