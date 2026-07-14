@@ -24,7 +24,9 @@ A wrapper that cannot express removal pushes every closure step off the safe pat
    distinguishable from a gate run that passed everything (the ZERO_CHECKS lesson).
 3. TESTS: extend the gate tests with (a) pure deletion, (b) mixed add+delete in one commit,
    (c) tracked-vs-untracked-missing -- untracked+missing = pathspec error, still FAILS loud (caller
-   typo, not a deletion).
+   typo, not a deletion), (d) staged RENAME (assignee's own repro, 0.7.0 07:5xZ committing the
+   contract-note git mv: R staged = add-side + delete-side, the wrapper must stage BOTH from a
+   pathspec naming both; the old path exists in neither worktree nor unstaged index).
 
 ## <compiler_tools_mandate>
 <phase id="1" when="before write">
@@ -59,7 +61,7 @@ mid-commit is surprised by new SKIP lines. No other shared files.
 ## <acceptance_criteria>
 1. One measured staging branch per the ruled shape -- no new mode flag, no caller-visible convention change.
 2. `SKIP: deleted` printed per deleted path; never a silent skip.
-3. Three new test classes green; untracked+missing fails loud.
+3. Four new test classes green (incl. staged rename); untracked+missing fails loud.
 4. Replay acceptance: both historical override cases commit clean without override (transcript committed).
 5. Session-log Compiler Tools section reproduces every <run> with observed output + pass/fail vs <expect>.
 </acceptance_criteria>
