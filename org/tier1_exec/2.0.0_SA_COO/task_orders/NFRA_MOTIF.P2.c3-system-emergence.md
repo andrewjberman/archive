@@ -5,9 +5,9 @@
   <metadata>
     <id>2.0.0_SA_COO~B-2026-07-07-nfra-motif-p2</id>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~B (RE-ALLOCATED 2026-07-08 from DS~A -- DS~A down; DS~B holds MOTIF-P1 done+CVO-certed b783dd504 + pre-staged the P2 C3-emergence core cd022f539; same re-allocation as P1)</issued_to>
+    <issued_to>0.8.0_AE_CloudComp~Z (REDIRECTED 2026-07-14 from 0.4.0_DS~B [consumed by AoR lane] per SOVEREIGN REDIRECT @ 14c2aeeba + AMENDMENT-1 @ 552667ccd; BUILD ON the pre-staged C3-emergence core @ cd022f539, do not re-derive. Prior chain: DS~A down -> DS~B re-allocated 2026-07-08)</issued_to>
     <date>2026-07-07</date>
-    <status>dispatched -- GO'd 2026-07-08 by COO~B to 0.4.0_DS~B. Both gates CLEARED: MOTIF-P1 C2 catalog CVO-certed (b783dd504) + MOTIF-P0 MET (91 CLUSTERS edges + 91 PanelCluster nodes + 241 CONTAINS_DRILLDOWN + 55 SHARES_SOURCE live at the fresh canonical HEAD, snapshot 20260708, via the FRESHGUARD derive un-freeze). CAVEAT: comp-kuzu canonical-DB rebuild to the new HEAD is FAILING (rc=143 Arrow-S3, serving stale pre-derive DB, BEHIND-flagged) -> QUERY THE AUTHORITATIVE snapshot 20260708 (not comp-kuzu) until the rebuild is fixed (tracked finding).</dispatch_state>
+    <status>dispatched -- GO'd 2026-07-08 by COO~B to 0.4.0_DS~B. Both gates CLEARED: MOTIF-P1 C2 catalog CVO-certed (b783dd504) + MOTIF-P0 MET (91 CLUSTERS edges + 91 PanelCluster nodes + 241 CONTAINS_DRILLDOWN + 55 SHARES_SOURCE live at the fresh canonical HEAD, snapshot 20260708, via the FRESHGUARD derive un-freeze). CAVEAT: comp-kuzu canonical-DB rebuild to the new HEAD is FAILING (rc=143 Arrow-S3, serving stale pre-derive DB, BEHIND-flagged) -> QUERY THE AUTHORITATIVE snapshot 20260708 (not comp-kuzu) until the rebuild is fixed (tracked finding).</status>
     <gate_note>Gated on MOTIF-P1 (the C2 motif catalog). comp-ladder fidelity gate binds every C3 node.</gate_note>
   </metadata>
 

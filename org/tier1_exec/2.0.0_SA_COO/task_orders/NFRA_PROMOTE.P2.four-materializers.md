@@ -5,7 +5,7 @@
   <metadata>
     <id>2.0.0_SA_COO~B-2026-07-07-nfra-promote-p2</id>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.8.0_AE_CloudComp~D (GOV-B producer + recognizer/compiler-rule materializer -- arch-ratified design 4d0886493, RESPAWN requested) + 0.4.0_DS_ClientPlatform~B (CSE-schema / graph / router materializers -- reallocated from the down DS~A) + 1.0.0_SA_CTO (ratify owner, cross-plane)</issued_to>
+    <issued_to>0.8.0_AE_CloudComp~Z (GOV-B producer + recognizer/compiler-rule materializer share -- arch-ratified design 4d0886493; REDIRECTED 2026-07-14 from the dead 0.8.0~D lane [respawn never happened, idle 6d] per SOVEREIGN REDIRECT @ 14c2aeeba + AMENDMENT-1 @ 552667ccd) + 0.4.0_DS_ClientPlatform~B (CSE-schema / graph / router materializers -- NOT moved by the redirect table; reallocated from the down DS~A) + 1.0.0_SA_CTO (ratify owner, cross-plane -- UNCHANGED)</issued_to>
     <date>2026-07-07</date>
     <status>staged -- GO on PROMOTE-P1 landing. ~D respawn requested (GOV-B arch-ratified = instant-build); DS materializers reallocated DS~A->DS~B.</status>
     <prd_ref>docs/architecture/NFRA_PROMOTE_PRD.md (P2, S4.1) + docs/architecture/NFRA_SEMCTL_PRD.md (GOV-B seam)</prd_ref>

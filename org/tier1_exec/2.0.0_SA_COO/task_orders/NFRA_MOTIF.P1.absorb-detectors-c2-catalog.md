@@ -5,7 +5,7 @@
   <metadata>
     <id>2.0.0_SA_COO-2026-07-07-nfra-motif-p1</id>
     <issued_by>2.0.0_SA_COO</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~B (RE-ALLOCATED 2026-07-08 by COO~B -- DS~A went idle + 2 respawn-requests didn't take; DS~B is LIVE, free [CSE-P2/P3 done+certed], and graph-capable [built the CSE-C1 materializer]; unblock the critical-path MOTIF wave now rather than stall on a dead lane) + 0.4.0_DE_ClientPlatform (gated)</issued_to>
+    <issued_to>0.8.0_AE_CloudComp~Z (REDIRECTED 2026-07-14 from 0.4.0_DS~B [consumed by AoR lane] per SOVEREIGN REDIRECT @ 14c2aeeba + AMENDMENT-1 @ 552667ccd; PICK UP DS~B's staged work, do not discard partials. Prior chain: DS~A idle -> DS~B re-allocated 2026-07-08 by COO~B) + 0.4.0_DE_ClientPlatform (gated -- UNCHANGED)</issued_to>
     <date>2026-07-07</date>
     <status>dispatched -- GO'd 2026-07-08 by COO~B: CSE-C1 live (CSE-P2 CLOSED) + FEDOBS co-occurrence LIVE (cse_coevolution view, iceberg.globgrph.cse, be2a6670f) = MOTIF's inputs exist. START the C2-catalog absorb NOW via the comp-cluster CLI extraction (req#4); the C2-IN-GRAPH leg gates on MOTIF-P0 (TSGRAPH-P2-2 materialize, 0.7.0_AE). DE-side is a follow-on sync, not a hard gate on the DS~A absorb.</status>
     <prd_ref>docs/architecture/NFRA_MOTIF_PRD.md (P1)</prd_ref>

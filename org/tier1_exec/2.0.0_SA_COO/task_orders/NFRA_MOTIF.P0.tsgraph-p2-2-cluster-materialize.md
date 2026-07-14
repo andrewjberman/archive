@@ -5,7 +5,7 @@
   <metadata>
     <id>2.0.0_SA_COO~B-2026-07-07-nfra-motif-p0</id>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.7.0_AE_CloudOps (globgrph derive) + 0.4.0_DE_ClientPlatform (producer publish + live verify, gated on base-DE release)</issued_to>
+    <issued_to>0.8.0_AE_CloudComp~Z (globgrph derive -- REDIRECTED 2026-07-14 from 0.7.0_AE_CloudOps [buried: FRESHGUARD+OPAL_ASSETS] per SOVEREIGN REDIRECT @ 14c2aeeba + AMENDMENT-1 @ 552667ccd; CONSTRAINT TRAVELS: coordinate with 0.7.0 before touching the globgrph TF module -- ONE applier per module) + 0.4.0_DE_ClientPlatform (producer publish + live verify, gated on base-DE release -- UNCHANGED, DE publish stays DE-gated)</issued_to>
     <date>2026-07-07</date>
     <status>dispatched -- GO'd 2026-07-08 by COO~B to 0.7.0_AE (globgrph derive lane), QUEUED behind INFRPT recurring-schedule + GUARD-REFILE + AGENTBUS-S3. Unblocks MOTIF-P1's C2-in-graph leg. Primary path is 0.7.0_AE (locate/regenerate portal_clusters.json + run derive + verify cluster edges live via comp-cluster/comp-kuzu query -- no hard DE dependency); DE producer-publish only if the JSON is stale/missing (coordinate base COO for DE-base).</status>
     <prd_ref>docs/architecture/NFRA_MOTIF_PRD.md (P1 gate) + docs/architecture/NFRA_TSGRAPH_PRD.md (P2-2, re-homed to MOTIF)</prd_ref>

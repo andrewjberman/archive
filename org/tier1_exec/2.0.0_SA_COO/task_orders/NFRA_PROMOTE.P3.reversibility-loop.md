@@ -5,7 +5,7 @@
   <metadata>
     <id>2.0.0_SA_COO~B-2026-07-07-nfra-promote-p3</id>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.5.0_AE_OpalETL (FEDOBS post-promotion monitor + the in-VPC cse_coevolution measure -- RESPAWN requested; also owns the frontend-co-occurrence measure gap DS~B flagged in MOTIF-P3) + 0.8.0_AE_CloudComp~D (demote seam) + 0.4.0_DS_ClientPlatform~B (reallocated from the down DS~A)</issued_to>
+    <issued_to>0.8.0_AE_CloudComp~Z (the STANDING MONITOR leg -- REDIRECTED 2026-07-14 per SOVEREIGN REDIRECT @ 14c2aeeba row "NFRA_PROMOTE.P3 (standing monitor leg)" + AMENDMENT-1 @ 552667ccd) + 0.5.0_AE_OpalETL (the in-VPC cse_coevolution measure + frontend-co-occurrence gap -- NOT moved by the redirect table) + 0.8.0_AE_CloudComp~D (demote seam -- dead lane, NOT moved by the table; surface at next staffing pass) + 0.4.0_DS_ClientPlatform~B (reallocated from the down DS~A -- NOT moved)</issued_to>
     <date>2026-07-07</date>
     <status>staged -- GO on PROMOTE-P2 + FEDOBS-P3 both. 0.5.0 respawn requested (FEDOBS monitor + the in-VPC measure that closes the CANDIDATE->MEASURED gate).</status>
     <prd_ref>docs/architecture/NFRA_PROMOTE_PRD.md (P3 + AC4/AC5)</prd_ref>
