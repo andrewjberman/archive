@@ -31,8 +31,10 @@ distinct from revision v1.2's scope letters -- do not cross-reference them:
         migration completion (closure step).
 NOT GO'd -- HARD STOPS: no `terraform apply` of anything (every apply gate stays with 1.0.0_SA_CTO); no
 LANDING (gated on C1, which 404'd live 2026-07-14 01:0xZ; 0.7.0_AE_CloudOps owns it -- apply GO'd 02:03Z,
-in flight); no EventBridge repoint yet. The 0824 wide pull continues under Andrew's direct GO, unchanged.
-Evidence returns to COO; gates and forks to CTO through COO.
+in flight; **SUBSEQUENTLY LANDED + COO-verified live ~02:55Z — the landing gate is DISCHARGED and the
+landing GO issued 20260714T025839Z**); the schedule work per (c)-as-amended: CREATE-NEW only, no repoint.
+The 0824 wide pull continues under Andrew's direct GO, unchanged. Evidence returns to COO; gates and
+forks to CTO through COO.
 </hold_released>
 <project>OPAL_ASSETS — Grand Consolidation P1</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 row C3 + §3 rulings 5/6-as-amended/9/13b/13c + the v1.3.8 Glacier ruling (binding vintage: v1.3.8 @ a0ed08933 + the 01_raw scope addition @ 27841e6ab; ruling 4 is SUPERSEDED-BY-5, provenance only)</prd>
@@ -80,7 +82,13 @@ THE MONOLITH (Andrew-direct, PRD v1.2 §3 ruling 9) — this TO's final scope:
     pattern; include the 0824 wide-pull remainder as it completes; use a scoped read-source/write-target
     role this time — your own self-flagged gap);
 (b) daily REST pull SCHEDULED, both masters, landing DIRECT in the monolith; same-day catch-up >= 07-13;
-(c) EventBridge repoint off the dead GUI SchwabAutoDownload task (absorbs C8);
+(c) *(AMENDED per CTO ruling 20260714T030017Z under the new-territory rule — the original "EventBridge
+    repoint off the dead GUI SchwabAutoDownload task" is DEAD: a repoint MODIFIES an existing scheduler,
+    which new-territory forbids.)* **CREATE A NEW EventBridge schedule driving the REST puller.** The
+    dead GUI task and `canonical-schwab-si2-download-schedule` stay UNTOUCHED — they do harmless nothing
+    on the 08:35/20:35 cycle (verified live) and retire WITH the legacy pipeline per the standing
+    pattern; two schedules do not collide when one drives a corpse. (Still absorbs C8's intent: the
+    daily pull gets a working schedule.)
 (d) NEW IAM grant against the exact opal-data-assets ARNs (masters enumerated, never wildcarded,
     no GetObject on data) — 22a live-simulate, one --resource-arns per call, positive control separate.
     The exercised opal-data-schwab grant does NOT transfer.
