@@ -9,7 +9,22 @@
 
 ## 0. READ THIS BEFORE YOU DELETE ANYTHING — the `01_raw` finding
 
-> ### The PRD contradicts itself about the same 257 objects, and **the later ruling is the destructive one.**
+> ## ✅ RULED BY ANDREW, 2026-07-14 ~01:46Z (PRD v1.3.5, `27841e6ab`)
+> **Verbatim: *"We can keep those unique files in bronze, bring them over in migration."***
+>
+> **Disposition: `MIGRATE-257-THEN-RETIRE-PER-SEQUENCE`.** The 257 pre-floor objects — including the
+> **121 RLD realized-lot tax files** — are **KEPT BY RULING**. They migrate into the monolith with the
+> rest of bronze; the folder retires only afterwards, behind the consumer repoint, on a final Andrew
+> confirm. Execution is `0.6.2_AE_PartnerETL`'s (C3 scope addition).
+>
+> **The measurement below stays even though the question is answered** — it is the evidence the eventual
+> delete-confirm gets audited against. A resolved question with its evidence deleted is a question that
+> re-opens later with nothing to answer it.
+
+**What follows is the finding as it stood before the ruling.** It is retained because the *reasoning* is
+the audit trail, not just the answer.
+
+> ### The PRD contradicted itself about the same 257 objects, and **the later ruling was the destructive one.**
 
 | Where | What it says |
 |---|---|
@@ -59,16 +74,19 @@ evidence in the record that he was told so when he ruled.
 canonical_lots`). That is 121 business days of realized gain/loss history, Jan–Jul 2023, reconstructable
 from nothing.**
 
-### Disposition recorded here
+### Disposition — RULED (was: pending Andrew)
 
-`01_raw` = **RETIRE-SEQUENCED — WITH A CARVE-OUT PENDING ANDREW.** The 257 pre-floor objects are
-**NOT** covered by the disposable ruling's premise and must not ride its authority. Recommended (CTO
-holds; Andrew decides): **copy the 257 into the monolith first — additive, cheap, reversible — then
-retire the folder.** The copy is all three of those things; the delete is none of them.
+`01_raw` = **`MIGRATE-257-THEN-RETIRE-PER-SEQUENCE`** (Andrew, 2026-07-14; PRD v1.3.5 `27841e6ab`).
+The recommendation put to him — *copy the 257 first (additive, cheap, reversible), then retire* — was
+adopted. The copy is all three of those things; the delete is none of them.
 
 > **A document that resolves a contradiction by taking the later ruling is how the irreversible thing
-> happens.** This inventory is the checklist the eventual delete will be run from. It therefore carries
-> the ruling **and** the fact that falsifies it, adjacent and unresolved, on purpose.
+> happens.** This inventory refused to do that: it carried the ruling **and** the fact that falsified
+> it, adjacent and unresolved, until a human with the authority to decide actually decided.
+>
+> **The choice was never Andrew's to get wrong — it was ours to surface.** He ruled to keep the files
+> within the hour of being shown that his own premise ("what we are getting here… will be the canonical
+> form") was true for 6,885 objects and false for 257. Nobody had told him. That is the whole job.
 
 ---
 
@@ -91,7 +109,7 @@ consumer repoint · `ACTIVE-PIPE` a live non-OPAL_ASSETS pipeline, out of this c
 
 | Prefix | Objects | Size | written | business | Disposition | Replaced by |
 |---|---:|---:|---|---|---|---|
-| **`01_raw/`** | **7,142** | 178.2 GB | 2025-11-14 … 2026-07-07 | **2023-01-17 … 2026-07-06** | **RETIRE-SEQ — ⚠ 257-object carve-out PENDING ANDREW (§0)** | C3(b) REST pull — **for 6,885 of 7,142 only** |
+| **`01_raw/`** | **7,142** | 178.2 GB | 2025-11-14 … 2026-07-07 | **2023-01-17 … 2026-07-06** | **MIGRATE-257-THEN-RETIRE-PER-SEQUENCE** — Andrew-RULED 2026-07-14 (§0) | C3(b) REST pull for 6,885; **the 257 pre-floor migrate as bytes** (C3, `0.6.2`) |
 | `backfill/` | 6,935 | 13.4 GB | 2026-07-13 | — | RETIRE-SEQ (superseded by the canonical bronze remap) | C3(a) |
 | `08335338/` | 6,932 | 13.4 GB | 2026-07-14 | 20230712 … 20260710 | **MONOLITH** → `assets/schwab/08335338/bronze/…` | C3(a) |
 | `_archive/` | 3,988 | 75.4 GB | 2026-04-01 | — | RETIRE-SEQ | — |
@@ -195,6 +213,29 @@ runners + platinum buckets stay put for the ADVI partner structures"). **Nothing
 2. **Schwab attests its own row count in every file's `T1` trailer** and nothing in the estate read it.
    Now a required hard-raise on every monolith Schwab parser (**PRD v1.3.2 ruling 11a**, landed
    `44a5328ce`). A parser that misses a section cannot tie to the trailer.
+
+3. **⚠ THE RULE 17a VIOLATION IN `opal-data-inf/bronze/` IS NOT HISTORICAL — IT IS ONGOING, AND IT LOSES
+   ONE MORE DAY EVERY DAY.** Measured live 2026-07-14:
+
+   | feed | raw `.jsonl.gz` | `.parquet` | consequence |
+   |---|---:|---:|---|
+   | `assets` | 2,265 — ends **2026-07-10** | 2,268 — runs to **2026-07-13** | **3 dates parquet-only** |
+   | `positions` | 2,265 — ends **2026-07-10** | 2,272 — runs to **2026-07-13** | **7 dates parquet-only** |
+
+   **The RAW producer died 2026-07-10. The PARQUET producer is still running.** For those dates the raw
+   feed is **unrecoverable** — a parquet ingest coerces schema/dtypes at ingest, which is exactly the
+   irreversibility Rule 17a exists to prevent (*"each layer has exactly one job; doing a later layer's
+   job early is IRREVERSIBLE"*). Consistent with the known two-parallel-producers condition; **the
+   quantification and the still-accruing loss are the new part.**
+
+   **C6's parsers REFUSE a `.parquet` under `bronze/`** (`raw_json_reader.assert_raw_key`, mutant-
+   exercised). A parquet-only date is reported **UNCONVERTIBLE**, never silently converted — reading it
+   would launder an irreversible defect into the monolith and the result would look sound.
+
+   **OPEN ARCHITECTURE FORK for CTO (surfaced, not adjudicated):** what does the C2 ingest-router mirror
+   into the monolith for those dates — the raw that does not exist, or the parquet that violates 17a?
+   Both answers are bad; only one is *ours to choose*. The INF chain is HELD, so nothing here touches
+   the producer.
 
 ---
 
