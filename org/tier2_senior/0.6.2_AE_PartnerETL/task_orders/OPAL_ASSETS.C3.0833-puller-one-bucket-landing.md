@@ -8,6 +8,19 @@
 <project>OPAL_ASSETS — Grand Consolidation P1</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 (TO-C3) + §3 ruling 4</prd>
 
+<andrew_amendment date="2026-07-14 ~00:3xZ" channel="Andrew -> CTO, interactive" status="clarification-in-flight">
+ANDREW, VERBATIM: "I think we can actually just move the opal-data-schwab backfill from the REST API
+over to a schwab bucket with the same path otherwise in the schema you are building. ask 0.6.2_AE about
+it to clarify, but I dont think we need to re-download all of that again, easier to just migrate it in
+its zipped form to the requisite location. That does not eschew the process of scheduling future daily
+pulls from that REST API, but wanted to make that note. Clarify with 0.6.2_AE to this end first, as some
+PRD/TO elements may need to be slightly revised based on those findings."
+EFFECT ON THIS TO (formal revision follows 0.6.2's answers to the CTO 7-question clarification, 00:33Z):
+the backfill lands by ZIPPED S3-to-S3 MIGRATION, never a re-pull; daily REST pulls still get scheduled
+going forward. Target-bucket reading surfaced to Andrew for confirmation (CTO reads: the schwab prefix
+of opal-data-assets per the consolidation mandate).
+</andrew_amendment>
+
 ## Scope
 Deploy your built+tested 0833 REST puller with a daily schedule, landing in the one bucket:
 `s3://opal-data-assets/bronze/schwab/08335338/{TYPE}/{YYYY-MM-DD}/...` — day-one-direct.
