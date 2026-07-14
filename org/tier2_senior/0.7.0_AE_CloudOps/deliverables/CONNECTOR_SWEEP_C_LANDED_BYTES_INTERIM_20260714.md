@@ -20,19 +20,31 @@ DDB-table surfaces: queued for keyed reads. Frontier: expected last trading day 
 | news-trending-analysis-daily (11:15, 21:15) | news-trending-analysis | **code-grounded** opal-data-portal-v2/json/sentiment/keyword-sentiments.json | yesterday 21:17:03Z, 155,935 B | HEALTHY on the REAL surface. **FINDING NT-1 below** — the ENV-named surface is dead config. |
 | etfs-reports-monthly-run + -absence-check (1st/mo) | etfs-reports-orchestrator | opal-data-etfs/platinum/reports/ | 2026-06/etf_ownership.html (written ~07-01) | HEALTHY ON MONTHLY CADENCE (a daily-frontier tdays number is the wrong axis for a monthly ligament; next expected write 2026-08-01). |
 
-## FINDING NT-1 (declarative drift + stale-orphan hazard; NOT an outage)
+## FINDING NT-1 (FULLY GROUNDED: orphaned endpoint + orphaned key + doc drift; NO live user impact)
 
 `news-trending-analysis` env carries `S3_KEY=sentiment/keyword-sentiments.json`, but the DEPLOYED code
 (source-map @ 903fbe9a8, deployed 2026-06-11) hardcodes `json/sentiment/keyword-sentiments.json`
 (`lambda_function.py:1524`) and never reads that env var for the write. Measured:
 - REAL key `json/sentiment/keyword-sentiments.json`: fresh (last write yesterday 21:17Z, 155,935 B). Fires 4/50h, 0 errors.
-- LEGACY key `sentiment/keyword-sentiments.json`: EXISTS, frozen ~127 trading days (~2026-02). **A stale
-  record says something false with authority** — any consumer still reading the old path consumes
-  February data with no error. Portal consumption path check queued (comp-cache/comp-transform) before
-  any cleanup ask; the delete itself is human-confirmation class regardless.
+- LEGACY key `sentiment/keyword-sentiments.json`: EXISTS, frozen ~127 trading days (~2026-02).
+
+**Consumer trace, grounded on DEPLOYED bytes (proxy zip downloaded via GetFunction, not repo):** the live
+`opal-portal-data-proxy` carries BOTH reads — `get_keyword_sentiments()` (route `GET /v1/sentiment/keywords`)
+reads the **LEGACY** key and would serve **February data with rc=200** to any caller; its sibling GPT
+"why" endpoint in the same deployed zip reads the NEW key (fresh). **The live frontend is NOT affected:**
+`portal-proxy.ts:1857 getKeywordSentiments()` fetches `/api/general/sentiment/keyword-sentiments.json`
+(the static/S3 route onto the NEW key) — TopicCloud gets fresh data. So `/v1/sentiment/keywords` is an
+ORPHANED endpoint whose only remaining function is to answer probes with 5-month-old data that looks alive.
+- Doc drift: `portal/docs/architecture/PORTAL_DATA_ARCHITECTURE.md:75` claims `/v1/sentiment/keywords`
+  reads the NEW path — false at the deployed proxy.
+- Residual hazards: (1) any future consumer/agent wiring to the documented `/v1` endpoint inherits
+  February data with no error; (2) the legacy key invites the same false-staleness read this sweep
+  almost made. Cleanup candidates (BOTH out of my lane/authority): proxy endpoint fix or removal
+  (DE/DT lane), legacy-key delete (human-confirmation class). ROUTED to COO as table finding, not P1.
 - (e) lesson, generalized: **an env var is DESIRED-ish config, not a write receipt** — this sweep's own
   method upgraded mid-pass: env-grounded surface first, code-grounding REQUIRED whenever the env surface
-  reads stale before any escalation (this row would have been a false P1 otherwise).
+  reads stale before any escalation (this row would have been a false P1 otherwise). And its mirror:
+  **an rc=200 endpoint is not a fresh endpoint** — the proxy serves the frozen key without error.
 
 ## Method + queue state
 
