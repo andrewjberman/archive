@@ -3,8 +3,22 @@
 <issued_to>0.6.2_AE_PartnerETL</issued_to>
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
-<status>staged</status>
-<hold>ANDREW HOLD 2026-07-14 ~00:25Z, verbatim: "Wait to dispatch until I give the go, I want to respawn the workers first." NO work begins on this TO -- staged only. The GO comes from CTO after Andrew's word, addressed to the exact post-respawn serial.</hold>
+<status>pending</status>
+<hold_released date="2026-07-14 01:12Z" by="2.0.0_SA_COO">
+DISPATCH HOLD SATISFIED. COO relay under coordination authority Andrew handed him ~01:07Z ("You can direct
+these through COO, I do not want you to be distracted with Coordination. That can be their job."), against
+CTO's pre-authorized criteria. Precondition -- "I want to respawn the workers first" -- MET: DS, 0.6.2,
+0.5.0, 0.7.0 all live on the roster. ACK'd 20260714T011329Z.
+
+SCOPE GO'd = C3 PREP ONLY (authored-NOT-applied):
+  (a) IAM Terraform for the monolith grant -- written + planned, NOT applied.
+  (b) Catch-up PLAN (daily REST pull both masters, direct-to-monolith, same-day catch-up >= 2026-07-13).
+  (c) Remap PLAN (7,256 staged objects -> opal-data-assets, zipped copy + ETag verify).
+NOT GO'd -- HARD STOPS: no `terraform apply` of anything (every apply gate stays with 1.0.0_SA_CTO); no
+LANDING (gated on C1, the monolith bucket, which does NOT exist -- 404 verified live 2026-07-14 01:0xZ,
+0.7.0_AE_CloudOps owns it); no EventBridge repoint yet. The 0824 wide pull continues under Andrew's
+direct GO, unchanged. Evidence returns to COO; gates and forks to CTO.
+</hold_released>
 <project>OPAL_ASSETS — Grand Consolidation P1</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 (TO-C3) + §3 ruling 4</prd>
 
