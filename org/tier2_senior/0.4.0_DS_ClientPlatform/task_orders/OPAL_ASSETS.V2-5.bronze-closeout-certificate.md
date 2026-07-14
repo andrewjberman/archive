@@ -41,5 +41,9 @@ event-driven landing gap during the hold is BY DESIGN, per 0.7.0's 05:47Z ground
 1. 7 rows (schwab/0833, schwab/0824, orion, eclipse, cottonwood, smartx, etf) x 4 columns, every cell
    cited; UNKNOWN rendered as UNKNOWN.
 2. The full 22a IAM sweep over every monolith producer role, recorded simulate outputs committed.
-3. Certificate committed; CTO acceptance = the Phase-II dispatch trigger (COO dispatches V2-7 on it).
+3. CONTENT NON-EMPTINESS SPOT-CHECK per channel (CTO instruction 20260714T061206Z, ruling 26 / PRD
+   v2.1 @ 3eb67983d): one landed object per channel OPENED and asserted non-shell — conservation proves
+   arrival, never meaning; the seeking-alpha legs read green for 3 months on empty-shell manifests. A
+   shell verdict is a FAIL row, not a note.
+4. Certificate committed; CTO acceptance = the Phase-II dispatch trigger (COO dispatches V2-7 on it).
 </acceptance_criteria>
