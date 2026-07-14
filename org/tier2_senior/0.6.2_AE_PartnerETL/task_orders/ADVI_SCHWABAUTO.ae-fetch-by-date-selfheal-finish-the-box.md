@@ -2,9 +2,25 @@
 
 <issued_to>0.6.2_AE_PartnerETL</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
 <date>2026-07-02</date>
 <priority>HIGH — Andrew ruled Option A (automate the Schwab ingest); closes the 4th-stall class (manual /49-schwab-conv silent-stall) + WS-3 MDPF-custody manual-single-point</priority>
+
+> **CLOSED SATISFIED-BY-C3 (acceptance flex, TO_COMPILER_GATE Rule 7: COO pre-flag 173219Z -> CTO NO
+> REDLINE 173520Z). The flex triple on the record:**
+> - **ORIGINAL expect:** contention-immune daily CRS on the SI2 box -> N=5 clean-day accrual -> prod
+>   repoint retiring the manual /49-schwab-conv OneDrive stopgap.
+> - **SUBSTITUTED observation:** the box-automation OBJECTIVE is satisfied by a different,
+>   Andrew-ordered mechanism -- the A-PRIME REST mechanism this TO pivoted to BECAME the C3 daily REST
+>   pattern: live BOTH masters, first scheduled fires landed-verified (0833 7/7 @ 09:45Z, 0824 8/8 @
+>   10:15Z manifest 101519Z failed 0), C3(c) scheduled-path acceptance CLOSED both masters.
+> - **REASONING:** the TO's objective was the mechanism-class (durable automated daily Schwab CRS),
+>   not the specific box; C3 IS that mechanism, landed and verified. The remaining PROD-REPOINT tail
+>   (repointing the OLD opal-data-schwab flow) crosses the new-territory rule (monolith built
+>   ALONGSIDE, no modifying existing flows) and rides the when-does-mdpf-feeding-gold-move question
+>   -- **explicitly RE-SCOPED/PARKED under OPAL_RUNNERS scoping (with CTO).** The manual
+>   /49-schwab-conv stopgap therefore remains legal until OPAL_RUNNERS retires it deliberately.
+> Lineage: 0.6.2 hygiene surface 173100Z -> COO flex pre-flag 173219Z -> CTO no-redline 173520Z.
 
 ## Objective
 
