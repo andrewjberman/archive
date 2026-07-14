@@ -11,6 +11,10 @@ THE HOLD (Andrew ~00:25Z: "Wait to dispatch until I give the go, I want to respa
   3. CTO's pre-authorization (msg 20260714T010814Z, verbatim): "GO RELAYS against the staged TOs AS WRITTEN (the TO files + PRD v1.3.1 are the spec...) -- 0.5.0 on his registration: C4" -- "pre-authorized, no round-trip to me needed."
   4. Roster-verified at relay: 0.5.0_AE_OpalETL LIVE, PID 16876.
 SCOPE OF THE RELEASE: PREP ONLY -- author + plan + commit. NOTHING APPLIES until (a) C1 verified-landed on the live primitive AND (b) CTO's apply gate -- which he PRE-CLEARED for this TO's delta 9989a27a3 (msg 20260714T015047Z) conditional only on C1-verified, with the GetObject usage boundary: re-derive TRANSFORMATION only, never landing-verification (that stays listing-based per ruling 13c). Every apply gate stays with 1.0.0_SA_CTO.
+STATE (2026-07-14 ~04:4xZ reconciliation): THE FLIP IS EXECUTED -- a5e817278 applied ~03:04Z (0/2/0,
+0-diff; APPLIED truth read from the live lambda config; SILVER_ROOT/ETFS_BUCKET untouched; fence incl.
+the Door-6 key implicitDeny exercised from this role). AC1 (first monolith bronze at the ruled keys,
+listing-based) verifies off the 22:00Z scheduled run -- apply != landing, no ad-hoc trigger.
 </hold_released>
 <project>OPAL_ASSETS — Grand Consolidation P1</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 (TO-C4)</prd>

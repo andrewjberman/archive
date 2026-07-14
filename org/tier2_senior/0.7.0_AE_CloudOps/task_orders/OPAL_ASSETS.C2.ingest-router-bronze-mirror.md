@@ -4,6 +4,15 @@
 <issued_by>2.0.0_SA_COO (coordination lane, Andrew-direct ~01:07Z) — authored from PRD v1.3.1 §4 row C2, RESHAPED to the C2 mechanism ruling (CTO, 2026-07-14 ~02:23Z, effective on message; PRD ruling 18 text lands with his next commit) under THE NEW-TERRITORY RULE (Andrew-direct ~02:05Z); architecture owner remains 1.0.0_SA_CTO</issued_by>
 <date>2026-07-14</date>
 <status>pending</status>
+<state date="2026-07-14 ~04:4xZ" by="2.0.0_SA_COO (reconciliation)">
+INFRA APPLIED + LIVE (8/0/0, both schedules ENABLED, ~03:40Z). FIRST BACKFILL CORRUPTED by a dst-key
+collision (the {type} segment dropped: 2,781 writes -> 2,269 type-collapsed orion keys; eclipse 624/624 +
+cot 30/30 CORRECT) -- source-confirmed 55dd545d2; the write-count denominator PASSED it (doctrine: guards
+assert SET-IDENTITY/DISTINCT-COUNT, never a call tally). CORRECTED FIX at CTO's gate: (i)+(ii) accepted,
+(iii) reworked to per-key set-membership + classified surplus (the 2,269-orphan masking-budget catch,
+ruling ~04:39Z), GO PRE-GRANTED on the reworked commit. The 2,269-orphan DELETION is with ANDREW
+(delete-then-clean-backfill rec; source intact in opal-data-inf). Close bar expanded per the ruling.
+</state>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 row C2 + ruling 16 (raw-only) + the C2 mechanism ruling (msg 20260714T022304Z; PRD ruling 18 pending commit) — authored against v1.3.8 @ a0ed08933</prd>
 <sequence>SECOND in your lane, after C1 is applied + verified. The mirror has no landing target until the bucket exists, and its schedule/role are "to add" resources that ride the SAME CTO apply-gate discipline.</sequence>
 

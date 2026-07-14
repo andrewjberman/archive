@@ -4,6 +4,13 @@
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
 <status>pending</status>
+<state date="2026-07-14 ~04:4xZ" by="2.0.0_SA_COO (reconciliation)">
+LANDED SO FAR: 0833 remap DONE (6,932/6,932, 3-tier, AC3-historical + AC4 partially discharged for 0833);
+BOTH-MASTERS daily REST schedules APPLIED + LIVE (0d8607926 -> 6/1/0, tag schwab-si2-iam-v1.3.0, rules
+ENABLED staggered, session-locked -- Andrew-direct ~03:4xZ executed ~04:08Z); RestoreObject grant applied
++ 217/217 Bulk restore RUNNING background. REMAINING: 0824 remap on pull-terminal (~06:00Z) + the live
+per-master exercise on SDD-session-free + Glacier collection + grant removal (AC5). Pending is correct.
+</state>
 <hold_released date="2026-07-14 01:12Z" by="2.0.0_SA_COO" amended="2026-07-14 ~02:3xZ per Andrew-ordered review (findings 18/24/34/48) + rulings v1.3.8">
 DISPATCH HOLD SATISFIED. The full authority chain (cited in full because a release without its chain is
 indistinguishable from a breach):
