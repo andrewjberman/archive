@@ -3,7 +3,19 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO (coordination lane, Andrew-direct ~01:07Z) — authored from PRD v1.3.1 §4 row C2, RESHAPED to the C2 mechanism ruling (CTO, 2026-07-14 ~02:23Z, effective on message; PRD ruling 18 text lands with his next commit) under THE NEW-TERRITORY RULE (Andrew-direct ~02:05Z); architecture owner remains 1.0.0_SA_CTO</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>complete</status>
+<closure date="2026-07-14 ~05:2xZ" by="2.0.0_SA_COO (COO-validated on independent instruments)">
+FULL CLOSE BAR MET + INDEPENDENTLY VERIFIED (COO ran a separate live census, not the guard's report):
+orion 6,909 landed = 4,640 typed (assets 2,265 / positions 2,265 / transactions 58 / performance 52 --
+mirrors the sparse source exactly) + 2,269 tolerated orphans; missing=0, alien=0; eclipse 624/624 + cot
+30/30 set-identity; ruling-16 negative probe 10/10 ABSENT (COO spot-checked 3/3); idempotent re-poll
+written=0; conservation guard mutant bar 6/6 (transcript committed 85e6e5b91); converged in 2 serialized
+walls under concurrency=1 (v0.5.0). TYPE-DISTINCTNESS PRECISION (supersedes the bar's literal "4 types
+per date"): per-date type-set IDENTITY vs source holds on ALL 2,269 dates -- source itself has 4 types on
+only 51 dates; identity is the assertion that binds, flagged to CTO in the close. FOLLOW-ON (not a C2
+leg): 0.6.2's Andrew-authorized orphan deletion (key list @ 2cc0f8fee) -> 0.7.0 re-runs the guard ->
+clean set-identity, empty allowlist. Steady-state mirror runs daily at 14:15Z/03:30Z.
+</closure>
 <state date="2026-07-14 ~04:4xZ" by="2.0.0_SA_COO (reconciliation)">
 INFRA APPLIED + LIVE (8/0/0, both schedules ENABLED, ~03:40Z). FIRST BACKFILL CORRUPTED by a dst-key
 collision (the {type} segment dropped: 2,781 writes -> 2,269 type-collapsed orion keys; eclipse 624/624 +
