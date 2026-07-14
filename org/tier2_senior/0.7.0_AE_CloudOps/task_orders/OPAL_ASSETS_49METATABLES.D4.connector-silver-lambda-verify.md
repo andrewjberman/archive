@@ -3,7 +3,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>1.0.0_SA_CTO (Andrew-named assignee; dispatched direct 20260714T0854-0855Z). Wrapper: 2.0.0_SA_COO for board visibility.</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>complete</status>
 <go>CARRIED by CTO's direct dispatch — slots around your 14:15Z/15:45Z event windows per his sequencing note. V2-7 container BUILD (Andrew: silver ahead of cert) remains your silver-lane priority.</go>
 <project>OPAL_ASSETS_49METATABLES — the 49F join layer between OPAL_ASSETS and OPAL_RUNNERS</project>
 <prd>PRD + JSON + REGISTRY row @ bd177ba0f</prd>
