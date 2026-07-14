@@ -148,3 +148,29 @@ e) **TCF conflation.** Per-trade execution cost is Schwab-native `fact_billing`;
    unbridged-report as its guard).
 5. The BD allocations feed's frozen-empty state post-06-26 — the daily pull needs the feed itself
    healthy or the REST pattern replaces it at the source (0.7.0/CTO at the daily-REST design).
+
+## ADDENDUM 2026-07-14 ~17:2xZ -- 49f tenancy MEASURED (probe-v2 template bodies): the split model is ROLE-DECOMPOSED
+
+Grounded on the landed probe bytes (blackdiamond/49f/_ops/probe/20260714T171101_template_{390224,435407}.json,
+37,055B + 12,223B; every leaf walked; gated fetch = DS word 114230Z, CTO path confirm 114255Z):
+
+- **Open cell 2 is now PARTIALLY MEASURED at the source template layer** (the 0824 runner-scope
+  measurement stays open for the data layer): 390224 'Allocation_Template' (Portfolio Group x
+  Account, CurrentDay, emv) selects ALL 70 account dims + ALL 26 portfolio dims. The FEE SCHEDULE
+  block ties to the cottonwood 225507 substrate FULLY, at BOTH levels (Schedule/ID/Description/
+  Level/Rate Type/Type/DetailId/Basis Points/Upper+Lower Range/Flat Fee).
+- **SHAPE DELTA, design-binding:** cottonwood's single 'Account - Rep Fee Split' string and
+  'Advisor of Record Name & B2B ID' field DO NOT EXIST in the 49f tenancy (0 occurrences of
+  'record'/'b2b' body-wide). The 49f carrier is a ROLE-DECOMPOSED split model, all selected:
+  Architect/+Split %, Implementor/+Split %, Consultant/+Split %, Local Ops/+Split %,
+  Additional Advisor/+Split %, '49 House Split %' (11 columns for the one cottonwood string).
+  **The D1 advisor-fee dim binds the DECOMPOSED model** -- no split-string parsing; the
+  architect/implementor vocabulary is the same advisor-of-record model the bd gold scripts
+  (07/08) already use, so the dim's role taxonomy has a served precedent.
+- 435407 'Fees_OpalCapital_Daily' (transactions qt): Transactions(3)/Relationship(1)/
+  Account(21, full fee block + Billing Start/End/Account/Custodian)/Holding(4) + measures
+  Units/Market Value/Transaction Fee/Income/Account Fee = the daily fee-flow feed.
+- Apply B floors (to 0.7.0 172059Z): EXPECT_FEEDS=3 confirmed; hard MIN_ALLOCATION_ROWS=1000
+  REFUSED as ungrounded (only measured analog: cottonwood ~357 rows/day same template family);
+  first fire = structural floors (3 feeds, rows>0, landed columns asserted against this persisted
+  selection), then ratchet to floor(0.8 x first-fire measured).
