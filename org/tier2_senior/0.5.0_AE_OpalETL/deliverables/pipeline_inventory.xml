@@ -810,7 +810,7 @@
   <!-- =========================================================== -->
   <pipeline name="smartx-pipeline"
             terraform_module="infra/aws/terraform/smartx-pipeline/"
-            current_tag="smartx-pipeline-v1.3.0"
+            current_tag="smartx-pipeline-v1.4.0"
             s3_backend_key="smartx-pipeline/tfstate">
     <!-- current_tag was stale at v1.0.2 while the CHANGELOG showed v1.2.0 deployed --
          pre-existing declarative drift, corrected 2026-07-14 with the v1.3.0 fence tag. -->
@@ -865,6 +865,21 @@
         <trigger>EventBridge Scheduler (smartx-jwt-refresher-daily: cron(0 9 * * ? *) America/New_York, ENABLED)</trigger>
         <note>SXPL_RESTIN.002 — ROPC password grant; parks JWT to SM smartx/jwt/current + s3://opal-data-bd/smartx/jwt/current.json. Stdlib-only, no layer.</note>
         <last_deployed_commit>1e824dd99</last_deployed_commit>
+      </lambda>
+      <lambda>
+        <name>smartx-assets-daily-pull</name>
+        <source_path>infra/aws/lambda/smartx_assets_pull</source_path>
+        <artifact_s3_key>smartx-pipeline/smartx-assets-daily-pull.zip</artifact_s3_key>
+        <memory_mb>1024</memory_mb>
+        <timeout_s>900</timeout_s>
+        <runtime>python3.11</runtime>
+        <package_type>Zip</package_type>
+        <layers>
+          <layer>pandas-pyarrow-requests-layer:1 (data-source lookup; runtime pinned 3.11 to match its build)</layer>
+        </layers>
+        <trigger>EventBridge Scheduler (smartx-assets-daily-pull-daily: cron(30 9 * * ? *) America/New_York, ENABLED; own scheduler role -- legacy smartx-rest-scheduler-role NOT widened)</trigger>
+        <note>OPAL_ASSETS.C5 (smartx-pipeline-v1.4.0, 2026-07-14) -- the daily SmartX -> opal-data-assets/smartx/* bronze delta: platform (2 feeds) + 11 models (5 feeds, re-pointed enterprises/allocations + enterprises/aum) + THE ATOM (one holdings call per allocation, ~9.5k, ThreadPool x16, unpaced -- NO vendor rate limit, Andrew-direct 2026-07-14). FAIL-LOUD: DirtyRunError on any dirty scope / failed feed / fleet-content violation (ruling 26); re-invoke converges via skip_if_landed. First-fire exercise 2026-07-14 08:24Z: imported+authed under the fenced role, converged the landed book, raised DirtyRunError correctly naming the ONE true problem (models_summary = persistent vendor 500 at opal7's platform id -- open item, true alarm until vendor heals). silver.py ships in the bundle INERT; silver writes phase-gated behind V2-8.</note>
+        <last_deployed_commit>46645df00</last_deployed_commit>
       </lambda>
       <lambda>
         <name>smartx-rest-pull</name>
