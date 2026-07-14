@@ -810,8 +810,20 @@
   <!-- =========================================================== -->
   <pipeline name="smartx-pipeline"
             terraform_module="infra/aws/terraform/smartx-pipeline/"
-            current_tag="smartx-pipeline-v1.0.2"
+            current_tag="smartx-pipeline-v1.3.0"
             s3_backend_key="smartx-pipeline/tfstate">
+    <!-- current_tag was stale at v1.0.2 while the CHANGELOG showed v1.2.0 deployed --
+         pre-existing declarative drift, corrected 2026-07-14 with the v1.3.0 fence tag. -->
+
+    <iam_roles>
+      <role>
+        <name>smartx-assets-pull-role</name>
+        <terraform>infra/aws/terraform/smartx-pipeline/assets-pull-iam.tf</terraform>
+        <purpose>OPAL_ASSETS.C5 -- SmartX -> opal-data-assets/smartx/* bronze pull (daily lambda pending; backfills to date ran local)</purpose>
+        <attached_policies>opal-assets-one-way-fan-in-fence (attached 2026-07-14, targeted safe-apply, plan 1/0/0 pure-add, 0-diff confirmed)</attached_policies>
+        <note>22a battery on the record 2026-07-14 ~07:4xZ: positive control ISOLATED (PutObject opal-data-assets/smartx/platform/meta/pulls/probe.json = allowed); PutObject opal-data-etfs/... = explicitDeny (closes the V2-5 S04/S05 no-grant-only gap); PutObject opal-data-inf/gold/meta/pipeline-complete.json (Door 6) = explicitDeny; applied truth via list-attached-role-policies; policy v1 verified UNCONDITIONED before skipping --context-entries. BEHAVIORAL leg PENDING-DEPLOY (the role's first real meta/pulls write lands at daily-lambda first fire).</note>
+      </role>
+    </iam_roles>
 
     <lambdas>
       <lambda>
