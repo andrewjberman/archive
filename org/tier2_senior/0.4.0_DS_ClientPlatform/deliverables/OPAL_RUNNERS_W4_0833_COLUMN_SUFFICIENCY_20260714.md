@@ -174,6 +174,19 @@ Four facts from 0.6.2's landing-facts half that this column census must not trip
 4. The **257 pre-floor** objects are a separate thawing leg, **not in this tree tonight** — pre-floor
    history for any type does not exist here yet; flag, do not wait.
 
+## 8. FAM/SLM completeness is UNVERIFIABLE-BY-TRAILER (0.6.2, producer-confirmed)
+
+A limitation of the Group-A identity finding that must travel with it: **FAM/SLM are headerless AND carry
+no T1 trailer** (confirmed on the bytes + both producers land them raw, no transform). So unlike the 13
+pipe/CRS types, **there is no custodian-attested row count to reconcile against** — the free completeness
+control (rider b's T1 oracle) does not exist for these two types. My "6 fields × 7,091 rows, all exactly 6"
+is a *structural* consistency check (uniform width), which is real but **weaker than a vendor-attested
+count, and it must be labeled as weaker, not dressed up as a T1 equivalent.** So the Group-A identity is
+PRESENT but its COMPLETENESS is unverifiable-by-trailer. **The FAM/SLM spec Andrew provides should be
+checked to include a row-count/control field**; if it does not, W4's standing note is that FAM/SLM
+completeness needs a different control (a cross-count against another 0833 type's account universe, e.g.).
+Provenance: the spec, when it arrives, maps **1:1 to the raw S3 bytes** (no Opal transform in between).
+
 ---
 
 *Every count enumerated at run time, none sampled. `crs_reader` positive-controlled before any absence
