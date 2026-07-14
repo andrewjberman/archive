@@ -1,5 +1,25 @@
 # OPAL_RUNNERS W4 — 0833 column sufficiency for Groups A/B (the COLUMN half)
 
+> ## ✅ FORK RESOLVED — ANDREW-DIRECT RULING (verbatim, to `0.4.0_DS_ClientPlatform`, ~03:57Z 2026-07-14)
+> **"If we have to hit one scoped dim table daily from Black Diamond, so be it, I can live with that."**
+>
+> This resolves the sufficiency fork this deliverable + the provenance trace (below) surfaced. **The 49F
+> advisor-role / split-fee model is BD-sourced** (`dim_advisor_role`/`dim_advisor_fee` read `opal-data-bd`
+> allocations + fees feed; the role builder's own docstring: *"the advisor-role isn't in Schwab raw"*), so
+> a strictly 0833-exclusive runner would drop it. **Andrew's ruling: option (1) — the refactor MAY retain
+> ONE scoped BD dim table, hit daily.** It is NOT required to be 0833-exclusive.
+>
+> **SCOPE — do not over-read:** ONE scoped dim, daily. Not "BD back in the pipeline," not a general BD
+> read, not a lift of anything else. Does not touch the INF hold / 0824-0833-never-summed / bronze-17a /
+> Door 6. CTO binds the exact dim + wiring at OPAL_RUNNERS sec-4.3; Andrew set the *principle* (one BD dim
+> acceptable), not the wiring. Broadcast per XXX.md: CTO `035806Z`, COO `035814Z`, MSTR `035828Z`.
+>
+> **W4 verdict, now CLOSED by ruling:** 0833 is sufficient for **Group B** (events/holdings/lots/positions,
+> all types tie to T1) and **Group A account identity** (0833 CRS + FAM/SLM names); the **advisor-role/fee
+> layer** is BD-sourced, and that single BD dependency is **ruled acceptable**. sec-4.3 can lock the 49F
+> premise as *"0833 + one scoped BD advisor dim,"* not *"0833-exclusive."*
+
+
 **TO:** OPAL_RUNNERS W4 (JOINT: `0.4.0_DS_ClientPlatform` = columns · `0.6.2_AE_PartnerETL` = landing facts)
 **Author of this half:** `0.4.0_DS_ClientPlatform` · **Measured:** 2026-07-14 ~03:15Z · **READ-ONLY**
 **Source:** `opal-data-assets/schwab/08335338/bronze/` (0.6.2's 3-tier-verified monolith copy; terminal)
