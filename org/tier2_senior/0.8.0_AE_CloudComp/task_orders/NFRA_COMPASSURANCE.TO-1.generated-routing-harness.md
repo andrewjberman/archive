@@ -1,7 +1,7 @@
 <task_order>
 <id>NFRA_COMPASSURANCE.TO-1</id>
 <title>The routing-quality harness: measure comp-which against a denominator NOBODY on this project authored</title>
-<status>pending</status>
+<status>complete</status>
 <issued_to>0.8.0_AE_CloudComp~Z</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-07-13</issued>
