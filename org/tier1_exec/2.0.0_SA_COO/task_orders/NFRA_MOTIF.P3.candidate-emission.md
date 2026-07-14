@@ -5,7 +5,7 @@
   <metadata>
     <id>2.0.0_SA_COO~B-2026-07-07-nfra-motif-p3</id>
     <issued_by>2.0.0_SA_COO~B</issued_by>
-    <issued_to>0.4.0_DS_ClientPlatform~B (RE-ALLOCATED 2026-07-08 from DS~A -- DS~A down; DS~B holds the MOTIF lane P1/P2)</issued_to>
+    <issued_to>0.8.0_AE_CloudComp~Z (REDIRECTED 2026-07-14 from 0.4.0_DS~B [base-track + consumed by AoR lane] per Andrew-direct P3-extension ruling to CTO~Z, VERBATIM "yes P3 goes to 0.8.0~Z too" -- record @ ANDREW_DIRECT_ZGROUP_COMMS_PARTITION_20260714.md AMENDMENT 1; extends SOVEREIGN REDIRECT @ 14c2aeeba + 552667ccd which named P0/P1/P2 only. Gate UNCHANGED: MOTIF-P2 + FEDOBS-P2. Prior chain: DS~A down -> DS~B re-allocated 2026-07-08)</issued_to>
     <date>2026-07-07</date>
     <status>staged</status>
     <prd_ref>docs/architecture/NFRA_MOTIF_PRD.md (P3 + AC3/AC5)</prd_ref>
