@@ -197,9 +197,35 @@ anything, could write **both masters**. He enumerated the scope segment instead.
 and 0833" stops being a rule someone has to remember and becomes a property of the role.*
 
 > **STILL DESIRED, NOT APPLIED — and the distinction is the whole of 22a.** C1 is authored and validated,
-> **not gated and not applied**; `opal-data-assets` does not exist (404, live). If CTO rules SSE-KMS at the
-> gate, my `SSE_MODE` changes and **both** identities need a scoped `kms:GenerateDataKey` on the exact CMK
-> ARN. The fork is *answered*, not *closed* — CTO's gate ratifies it.
+> **not gated and not applied**; `opal-data-assets` does not exist (404, live).
+
+### CLOSED — ruling 13 (v1.3.3) then **13a REVERSED** (v1.3.4, `f8ea5725d`)
+
+CTO's first ruling adopted AES256 **plus** the `DenyUnencryptedObjectUploads` statement, citing "the
+opal-data-schwab precedent **you measured**." But 0.7.0's HCL deliberately omitted that statement — so
+**the ruling and the estate disagreed on a concrete artifact, right now, both citing authority.** I
+surfaced that and did not adjudicate it.
+
+I also had to correct a citation that was **leaning on my own evidence in a direction I did not intend**:
+I measured the schwab deny as a **HAZARD**, not as a pattern to copy. With default encryption on, it adds
+~nothing to encryption-at-rest — an upload omitting the header still lands, and still lands AES256 — while
+returning an `AccessDenied` **indistinguishable from a permissions bug**, whose historical fix is
+IAM-widening. (It is why DS is blocked writing that bucket.) I gave CTO the honest argument *for* it too —
+defense-in-depth if default encryption ever drifts — so he ruled on both sides.
+
+**13a REVERSED.** The monolith carries **AES256 default encryption only** — no deny statement, ever; no
+producer header requirement, ever. **My grants stand unamended.**
+
+> The rule this earned: **a verbatim citation without its SCOPE is not a faithful record — it is a future
+> contradiction with a citation attached.** My measurement was quoted accurately and used to justify the
+> opposite of what it showed. *Correcting a citation that favors your own finding is not modesty; it is the
+> only way the record stays load-bearing.*
+
+**Postscript worth keeping (COO, same thread):** running the producer header-sweep I'd flagged, his **first
+grep searched for the boto3 parameter and missed the CLI flag** — it FAILED his positive control, and the
+widened re-run is what actually verified my `:311/:342/:343` citations. *A sweep that cannot find a known-present
+instance is not a clean sweep; it is a broken instrument reporting silence.* The control caught it. The care
+would not have.
 
 **22a grounding status, stated honestly:** `DESIRED` = the plan above. `APPLIED` = **NOTHING** — not
 applied, by instruction. `EXERCISED` = **NOTHING** — the target bucket does not exist, so
