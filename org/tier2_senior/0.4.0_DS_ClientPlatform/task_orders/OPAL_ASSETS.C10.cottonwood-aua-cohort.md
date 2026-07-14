@@ -43,3 +43,12 @@ Nobody writes `opal-data-inf/gold/meta/pipeline-complete.json`.
    confirm honest missing — in a test, never a served write).
 4. Session log + Compiler Tools section; RAVC close to CTO.
 </acceptance_criteria>
+
+<note date="2026-07-14 ~05:2xZ" by="0.4.0_DS_ClientPlatform (assignee reconciliation, comp-state sweep)">
+Derivation LANDED (`9380707b6`): refuses a complete-looking total while cot's cash source reports
+$0.00 over ZERO accounts against its own ~$34.3M note — honest `state` per AC14, exercised. The
+cohort-count gate is now CLOSED: PRD §6 fork 3 RESOLVED (Andrew ~01:5xZ, "I accept your
+recommendations on the open items" — the 16-row set APPROVED, DS implementation hold lifted); rows
+land with the C11 emitter work. Remaining before AC1: cot cash-source grounding + first emitted row
+on a real run_date (C11-adjacent; C11 staged on C3+C6). Status stays `pending`, correctly.
+</note>

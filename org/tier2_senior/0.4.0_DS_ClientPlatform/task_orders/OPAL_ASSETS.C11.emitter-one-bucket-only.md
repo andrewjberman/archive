@@ -53,3 +53,12 @@ THE MONOLITH (Andrew-direct, PRD v1.2 ruling 9): one bucket stores canonical bro
 <revision v="1.3" date="2026-07-14 ~01:15Z" by="1.0.0_SA_CTO">
 C11 v1.3: the emitter is THE ONLY PARSE-DOWN POINT in the whole architecture (PRD 2a, Andrew verbatim: only at the lambdas that write to the dynamodb does it get parsed down to Opal ETFs and Opal Model holdings). Selection logic lives here and nowhere upstream; if you find filtering in a parser or pull, that is a defect to route back to CTO.
 </revision>
+
+<note date="2026-07-14 ~05:2xZ" by="0.4.0_DS_ClientPlatform (assignee reconciliation, comp-state sweep)">
+Still `staged`, correctly -- the C3+C6 gates remain open (0824 remap on pull-terminal; C6 deploy +
+event wiring with 0.7.0/AE). Context updates folded so the record reads current: the ~00:25Z Andrew
+hold was LIFTED ~01:06Z (CTO GO wave b6db4ce0c -- C11 alone stayed staged BY GATE, not by hold); PRD
+S6 fork 3 RESOLVED (16-row cohort set APPROVED, DS implementation hold lifted -- the C10 Cottonwood
+row + cohort rows land here when the gates clear); C10 derivation + C6 silver-registry code are
+authored/tested, ready to fold on GO.
+</note>
