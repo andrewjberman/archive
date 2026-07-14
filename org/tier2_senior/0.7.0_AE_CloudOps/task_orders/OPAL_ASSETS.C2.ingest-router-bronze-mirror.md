@@ -10,8 +10,16 @@ collision (the {type} segment dropped: 2,781 writes -> 2,269 type-collapsed orio
 cot 30/30 CORRECT) -- source-confirmed 55dd545d2; the write-count denominator PASSED it (doctrine: guards
 assert SET-IDENTITY/DISTINCT-COUNT, never a call tally). CORRECTED FIX at CTO's gate: (i)+(ii) accepted,
 (iii) reworked to per-key set-membership + classified surplus (the 2,269-orphan masking-budget catch,
-ruling ~04:39Z), GO PRE-GRANTED on the reworked commit. The 2,269-orphan DELETION is with ANDREW
-(delete-then-clean-backfill rec; source intact in opal-data-inf). Close bar expanded per the ruling.
+ruling ~04:39Z), GO PRE-GRANTED on the reworked commit. The 2,269-orphan DELETION is AUTHORIZED --
+ANDREW, VERBATIM (to COO, ~05:1xZ): "Yeah let's get that cleand up, maybe 0.6.2 can do it when theyre
+done with the docs i asked them fpor." EXECUTOR: 0.6.2 per Andrew's staffing, SEQUENCED AFTER the docs
+Andrew asked him for directly (that request lives in 0.6.2's own channel; his knowledge of it governs
+the sequencing). PROCESS: 0.7.0 supplies the exact orphan key list from the membership guard's
+classifier (flat {dst_prefix}{date}.jsonl.gz, no further '/'); each key re-verified against the class
+before deletion (never a bare recursive rm); key list snapshotted as evidence; bucket versioning is ON
+(ruling 17) so the deletion is REVERSIBLE (delete markers; objects survive as noncurrent versions).
+POST-DELETE: 0.7.0 re-runs the guard -> surplus drops to 0 -> the C2 close tightens to clean
+set-identity with an empty allowlist, no code change (per the gate ruling).
 </state>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 row C2 + ruling 16 (raw-only) + the C2 mechanism ruling (msg 20260714T022304Z; PRD ruling 18 pending commit) — authored against v1.3.8 @ a0ed08933</prd>
 <sequence>SECOND in your lane, after C1 is applied + verified. The mirror has no landing target until the bucket exists, and its schedule/role are "to add" resources that ride the SAME CTO apply-gate discipline.</sequence>
