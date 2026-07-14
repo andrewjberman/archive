@@ -25,20 +25,35 @@ name-proposals pending IO.
 
 | script | → group | basis |
 |---|:---:|---|
-| `build_gold_holdings` | **B** | **[IO-verified]** reads `silver/fact_position` + `dim_account` → `gold/canonical_holdings` (event/holdings) |
-| `build_gold_canonical_lots` | **B** | [name-proposal] lots = event layer |
-| `build_gold_realized_gains` | **B** | [name-proposal] realized-lot event |
-| `build_gold_account_gains` | **B** | [name-proposal] |
-| `build_gold_canonical_nna` | **C** | [name-proposal] NNA = derived metric |
-| `build_gold_account_performance` | **C** | [name-proposal] |
+| `build_gold_holdings` | **B** | **[IO-verified]** reads `silver/fact_position` + `dim_account` → holdings |
+| `build_gold_canonical_lots` | **B** | **[IO-verified]** reads `silver/fact_lot_realized` + `fact_lot_unrealized` + `dim_account` (lot event layer) — B confirmed |
+| `build_gold_realized_gains` | **B→C** | **[IO-verified, REVISED]** reads `gold/` (canonical_lots), derives a gain metric → leans **C** (derived from B's gold), not B. The name said B; the IO says C. |
+| `build_gold_account_gains` | **B** | **[IO-verified]** reads `silver/fact_position` + `fact_transaction` + `dim_account` (event grain) — B confirmed |
+| `build_gold_canonical_nna` | **C** | **[IO-verified]** reads `gold/account_gains` (derived) — C confirmed |
+| `build_gold_account_performance` | **C** | **[IO-verified]** reads `gold/account_gains` (derived) — C confirmed |
 | `build_gold_client_performance` | **C** | **[IO-verified]** reads `gold/*_performance` + `dim_relationship` (derived) |
-| `build_gold_client_tax_liability` | **C** | [name-proposal] |
-| `build_gold_firm_composition` | **C** | [name-proposal] |
-| `build_gold_advisor_attribution` | **A** | **[IO-verified]** reads `silver/dim_advisor_role` + `dim_relationship` → `gold/advisor_attribution` |
-| `build_gold_advisor_fee_efficiency` | **A/C** | [name-proposal] — **the 49F split-fee-adjacent one; verify before mapping** |
-| `build_gold_advisor_split_reconciliation` | **A** | [name-proposal] — **49F split-fee; likely a NAMED VARIANCE, not a clean A** |
-| `build_gold_partner_analytics` | **D** | [name-proposal] presentation aggregate |
+| `build_gold_client_tax_liability` | **C** | **[IO-verified]** reads `silver/fact_lot_unrealized_tax` + `fact_tax_1099div` + `dim_account` — derives a C output but reads silver facts DIRECTLY (skips the gold B layer); C with a silver-fact read |
+| `build_gold_firm_composition` | **C** | **[IO-verified]** reads `silver/dim_account` + `dim_asset` + `fact_position` — aggregate, C |
+| `build_gold_advisor_attribution` | **A** | **[IO-verified]** reads `silver/dim_advisor_role` + `dim_relationship` → attribution |
+| `build_gold_advisor_fee_efficiency` | **NAMED VARIANCE (49F)** | **[IO-verified, RECLASSIFIED]** reads `silver/dim_advisor_fee` + `dim_advisor_role` + `fact_billing` — this is the **49F split-fee model consumer**, not a clean A. It is a NAMED VARIANCE. |
+| `build_gold_advisor_split_reconciliation` | **NAMED VARIANCE (49F)** | **[IO-verified]** reads `gold/advisor_attribution` → `split_reconciliation` + `_firm` — the 49F split-fee reconciliation. NAMED VARIANCE. |
+| `build_gold_partner_analytics` | **D** | **[IO-verified]** reads `gold/account_performance` + `advisor_attribution` (presentation) |
 | `build_gold_portal_aggregates` | **D** | **[IO-verified]** reads `gold/*` → portal aggregates (presentation) |
+
+**All 14 now IO-VERIFIED (was 4).** The name-proposals resolved: 11 confirm their proposed group, **1
+revised** (`build_gold_realized_gains` B→C — the name said event, the IO says derived-from-gold), and **2
+reclassified to NAMED VARIANCE** (the 49F split-fee pair). The lock gate is satisfied for these 14.
+
+> ### THE FINDING THAT ADVANCES W4 — surfaced to CTO
+> `build_gold_advisor_fee_efficiency` reads **`silver/dim_advisor_fee`, `silver/dim_advisor_role`, and
+> `silver/fact_billing`.** **The 49F advisor-ROLE and split-FEE/billing model is ALREADY BUILT in the
+> canonical/schwab silver** — as dims and a fact table. Those are the exact columns W4 reported as absent
+> from *raw 0833 custody data*. So the Group-A answer sharpens again: **the role/fee data IS in the
+> estate, as canonical/schwab silver dims — it is just not in the raw Schwab custody files.** The 49F
+> refactor's "draws exclusively on the 0833 schwab data" premise runs straight into this: **if the
+> advisor-role/fee model is sourced from something OTHER than 0833 custody (BD? a separate advisory
+> feed?), a 0833-exclusive runner cannot reproduce it.** That is the real W4 sufficiency question, and it
+> is Andrew's — but it is now grounded in a built artifact, not a maybe.
 
 > **W4 cross-connection, surfaced not adjudicated:** `build_gold_advisor_attribution` reads
 > `silver/dim_advisor_role`. **The canonical/schwab silver ALREADY carries an advisor-role dimension.**
@@ -99,7 +114,8 @@ is a tractable list, and it was a manufactured crisis at 40.7%.
 
 ## The lock gate (PRD 2.1) — what must happen before any contract locks
 
-- **Run `comp-pipescript io` on every [name-proposal]** — turn each into [IO-verified] or a variance.
-  Naming is a claim; IO is the fact. I verified 4; 10 remain.
+- **§A COMPLETE: all 14 IO-verified** (2026-07-14). 11 confirmed their name-proposal, 1 revised (B→C),
+  2 reclassified to NAMED VARIANCE (the 49F split-fee pair). Naming is a claim; IO is the fact — and the
+  IO overturned 3 of 14 name-proposals, which is exactly why the lock gate is IO and not the name.
 - **Diff the §C shared-logic siblings** before consolidating — the divergence matrix says do not assume.
 - **The 2 sovereign scripts are recorded, not mapped** — the ruling is the contract.
