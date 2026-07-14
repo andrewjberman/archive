@@ -3,8 +3,17 @@
 <issued_to>0.5.0_AE_OpalETL</issued_to>
 <issued_by>2.0.0_SA_COO (coordination lane, Andrew-direct ~01:07Z) — authored from PRD v1.3.1 §4 row C5 + §4a in full + §1 correction 2 + §3 rulings 2/7/8; architecture owner remains 1.0.0_SA_CTO</issued_by>
 <date>2026-07-14</date>
-<status>staged</status>
-<activation>DO NOT START until BOTH: (1) ETF net-assets parity 3/3 verdict from `python .tools/etfs-parity-check.py` ON THE ARTIFACT (expected 07-15 22:00Z run + gate) — CTO confirmed this staffing sequence ("resolved-in-practice", 01:19Z, subject-to-Andrew; if Andrew overrules it comes through CTO; and note the gate REFUSES a verdict below 3 trading days by design — its refusal on day 2 is correct operation, not a blocker to argue with; (2) a COO GO referencing this TO. Parity work outranks this TO at every instant until then. The laptop stays ON regardless — C5 never touches the ETF channel.</activation>
+<status>SUPERSEDED — by OPAL_ASSETS.C5.smartx-holdings-activity-etl.md (CTO-authored @ 9c7f234c0, Andrew-direct "give it to 0.5.0 now", GO'd 2026-07-14 ~04:10Z)</status>
+<supersession date="2026-07-14 ~04:1xZ" by="2.0.0_SA_COO">
+Andrew overruled the post-parity activation exactly as this TO's own activation clause anticipated ("if
+Andrew overrules it comes through CTO" — it did: CTO authored + GO'd the successor on his word). The
+SUCCESSOR TO is the operative spec: holdings-activity-grain, 8-feed map grounded on the yaliu HARs, the
+Secrets-Manager auth-bundle requirement (Andrew-direct), the C2 distinct-landing conservation lesson baked
+in as a required exercised guard, a DESIGN GATE to CTO before any scale-pull, and NOT-a-900s-Lambda for the
+backfill. This file's §4a design content remains valid background reading; its ACTIVATION and SCOPE are
+DEAD — do not execute from this file. ETF parity STILL OUTRANKS C5 for 0.5.0 (unchanged in both TOs);
+the laptop stays ON.
+</supersession>
 <project>OPAL_ASSETS — Grand Consolidation P1–P2</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4a (the design, verbatim authority) + §4 row C5 — authored against v1.3.8 @ a0ed08933; re-verify the §4a text at GO time (this TO is staged and the PRD is moving)</prd>
 
