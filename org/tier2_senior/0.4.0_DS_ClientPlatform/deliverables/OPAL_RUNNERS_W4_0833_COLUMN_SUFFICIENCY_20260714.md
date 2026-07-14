@@ -18,13 +18,23 @@
 Group A *advisor-role / attribution / split-fee* did not match in the 13 parsed types — but that negative
 is SOFT, and here is why it must stay soft:**
 
-> ### The 5 "unparseable" types include FAM and SLM — and those carry account+person-name identity.
+> ### The 5 "unparseable" types include FAM and SLM — and those DO carry account+person-name identity.
 > **My reader returned nothing for them because they are CSV, not pipe-delimited CRS.** Had I reported
 > the parsed-types result as the answer, I would have filed *"0833 has no advisor/name identity"* — a
 > false negative on the exact axis the 49F case turns on, produced not by unwrapping (0.6.2's version)
 > but by my reader silently not handling a second file format. **The types most likely to carry Group A
-> identity are precisely the ones my reader cannot yet read.** That is rider (b), earned a second time in
-> one night.
+> identity are precisely the ones my reader could not yet read.** That is rider (b), earned a second time
+> in one night.
+>
+> **Extracted positionally 03:20Z (proof, not inference):** FAM is a clean 6-field CSV, **7,091 rows,
+> every row exactly 6 fields** (structural completeness without a T1 trailer). The fields carry a 7-digit
+> id, an **institution name** (`49 WEALTH MANAGEMENT LLC` / `CHARLES SCHWAB TRUST BANK` / `T. ROWE
+> PRICE`), a **person name** (`ANDERSON ROY CLAYTO`), an 8-digit **account number**, a second name/title,
+> and a 9-digit id. **0833 carries account+name identity.** But **whether the institution field is the
+> ADVISOR firm or the custodian, and whether either name is a REP, cannot be read off the bytes — there
+> is no header and NO FAM/SLM COLUMN SPEC IN THE REPO.** Naming these columns would be a confidently-wrong
+> label; it needs the vendor layout. So the Group A answer is: **identity PRESENT; advisor-ROLE
+> semantics UNRESOLVED pending the FAM/SLM spec** — not absent.
 
 **Nothing here adjudicates what a gap MEANS.** I assert what the columns carry and what I could not read.
 The joint gap list goes to Andrew; neither of us decides whether an absence makes 0833 insufficient.
@@ -91,8 +101,8 @@ anything** — they are evidence that my reader has 4 formats left to cover.
 
 | type | container | why it did not parse | what it appears to carry |
 |---|---|---|---|
-| **`fam`** | zip→zip→**CSV** | **comma-delimited + quoted, NO H-rows** — not the pipe/H1 grammar | account# · custodian name · **PERSON NAME** · account# · registration name · id → **looks like account↔name identity (Group A)** |
-| **`slm`** | zip→zip→**CSV** | same CSV grammar as FAM | same identity shape as FAM |
+| **`fam`** | zip→zip→**CSV** | **comma-delimited + quoted, NO H-rows, NO T1** — not the pipe/H1 grammar | **6 fields × 7,091 rows (all exactly 6):** id · institution-name · **PERSON NAME** · account# · name/title · 9-digit id → **account↔name identity (Group A) CONFIRMED; column semantics need the vendor spec** |
+| **`slm`** | zip→zip→**CSV** | same CSV grammar as FAM (7,091 rows) | same identity shape as FAM |
 | **`tcf`** | zip→zip→CRS | **H1 layout differs**: `H1\|SCHWAB\|CONFIRM \|08335338\|…` — master in field 3, not field 2; my H1 regex expects `SCHWAB\|<digits>` | trade CONFIRMS: bus date, account#, trade/settle date, action, symbol, CUSIP (Group B events) |
 | **`tcfx`** | zip→zip→CRS | **3 header rows (H1/H2/H3) for 2 data sections (D1/D2)** — fits neither my 2:1 nor 1:1 pairing | confirms-extended, two sections |
 | **`tnn`** | zip→zip→CRS | **`H01`/`T01`/`T02` two-digit prefixes**, 3 lines, no data rows | a 1099 tax-download **notice** (its own T02 says "NOT an official tax document") — likely genuinely no data |
@@ -103,10 +113,14 @@ question is OPEN, not answered** — and reported as open.
 
 ## 5. Joint gap list → Andrew (UNADJUDICATED)
 
-1. **Does 0833 carry advisor-role / attribution / split-fee-payout at all?** Not in the 13 parsed types.
-   **Blocked on reading FAM/SLM (CSV) first** — I will not answer it while the likely carrier is unread.
-   If the answer is still no after FAM/SLM, that is a real Group-A sufficiency gap, and whether it makes
-   0833 insufficient (vs. needing a second advisory source) is **Andrew's call, not ours.**
+1. **Does 0833 carry advisor-role / attribution / split-fee-payout?** UPDATED after reading FAM/SLM
+   positionally: **0833 DOES carry account+name identity** (FAM/SLM, 7,091 rows). What is **UNRESOLVED**
+   is whether the FAM institution/name fields encode the ADVISOR (role, attribution) vs the custodian —
+   and that cannot be answered from the bytes because **there is no FAM/SLM column spec in the repo.**
+   **The real gap is now a SPEC gap, not a data gap:** get the Schwab FAM/SLM layout, name the columns,
+   then the advisor-role question resolves. Whether 0833 is Group-A sufficient (vs. needing a second
+   advisory source) is **Andrew's call** — but it is no longer blocked on "is the data there," it is
+   blocked on "what do these six columns mean," which is a document request, not a measurement.
 2. **The split-fee distinction:** 0833 `trn` has trade fees but no evident advisor payout layer. Whether
    the 49F split-fee model can be built from trade fees or needs its own source — Andrew/CTO.
 3. **`read_schwab_raw()` drops RPS D2 on 0833 too** (7,144 account-balance rows) — the both-masters
@@ -114,8 +128,11 @@ question is OPEN, not answered** — and reported as open.
 
 ## 6. What THIS half owes next (my work, not a gap)
 
-- **Add a CSV path to `crs_reader`** and re-parse FAM/SLM — this is the single highest-value reader gap,
-  because it gates the entire Group A identity answer. Then re-run §3.
+- **Add a CSV path to `crs_reader`** for FAM/SLM. Positional extraction is done (§0/§4); the remaining
+  work is (i) the reader path itself with a completeness control — **note there is NO T1 for CSV, so the
+  control is weaker; the all-rows-same-width check (7,091/7,091 at 6 fields) is the substitute, and it
+  must be stated as weaker, not dressed up as a T1 equivalent** — and (ii) **column naming, which is
+  BLOCKED on the vendor FAM/SLM spec** (0.6.2 or Andrew to source). I will not invent the names.
 - **`tcf` alt-H1 + `tcfx` 3-header shape** — two more reader variances; lower stakes (Group B, already
   covered by trn/uln), but they are UNCONVERTED and must not read as absent.
 - 0824 column census: **deferred** — 0.6.2 reports it still moving (3,202→3,208 in 20s, climbing to
@@ -124,6 +141,22 @@ question is OPEN, not answered** — and reported as open.
 
 ---
 
+## 7. Landing-side denominator facts folded in (0.6.2, `adea13886`)
+
+Four facts from 0.6.2's landing-facts half that this column census must not trip on:
+1. **Types have different start dates** — `rld`/`tcf` reach the 2023-07-12 floor; `acc`/`rps`/`trn`/U-series
+   begin 2024-07-08; `tcfx` only 2025-10-17. A "column present since when?" question is **per type against
+   its OWN first date**, never the corpus minimum — the single most likely manufacturer of a false gap.
+2. `rlu`/`rtu`/`rly`/`rty` are **sparse by nature** (monthly/quarterly products), not truncated.
+3. **`fam`/`slm` use `CS{MMDDYY}`, not `CRS{YYYYMMDD}`** — confirmed here (`08335338.CS071026.FAM`). A date
+   re-derivation must handle both grammars or misplace 1,006 objects. `crs_reader.date_from_key` currently
+   handles only `CRS{YYYYMMDD}` — **another reason FAM/SLM need their own reader path.**
+4. The **257 pre-floor** objects are a separate thawing leg, **not in this tree tonight** — pre-floor
+   history for any type does not exist here yet; flag, do not wait.
+
+---
+
 *Every count enumerated at run time, none sampled. `crs_reader` positive-controlled before any absence
 was trusted. The negatives in §3 are checkable against the full column inventory, and marked SOFT
-wherever an unparsed type could overturn them.*
+wherever an unparsed type could overturn them. The Group-A answer moved from "blocked on reading" to
+"identity present, column semantics blocked on the vendor spec" — a document request, not a measurement.*
