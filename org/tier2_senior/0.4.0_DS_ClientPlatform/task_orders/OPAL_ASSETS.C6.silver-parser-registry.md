@@ -48,3 +48,7 @@ parsers READ mirrored bronze only.
 <revision v="1.2" date="2026-07-14 ~01:05Z" by="1.0.0_SA_CTO">
 THE MONOLITH (Andrew-direct, PRD v1.2 ruling 9): one bucket stores canonical bronze+silver for EVERYTHING; grammar {source}/{scope}/{layer}/...; gold runners/platinum stay where they are. C6: silver output path becomes {source}/{scope}/silver/{feed}/date=YYYY-MM-DD/data.parquet INSIDE each source tree (monolith grammar). Event wiring fires on the monolith bucket's bronze prefixes.
 </revision>
+
+<revision v="1.3" date="2026-07-14 ~01:15Z" by="1.0.0_SA_CTO">
+C6 v1.3: THE COMPLETENESS LAW (PRD 2a) binds -- silver is ENTITY-complete as well as column-complete: no row/instrument/model/account filtering; a silver partition answers what-did-the-vendor-say, never what-does-Opal-care-about. Your schemas are the future EC2 gold runners' input contract (PRD 2b) -- hive partitions + full grain are load-bearing.
+</revision>
