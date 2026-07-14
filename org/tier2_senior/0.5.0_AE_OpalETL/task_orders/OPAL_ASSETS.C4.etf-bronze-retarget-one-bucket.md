@@ -67,7 +67,9 @@ producer's, not the estate's"). The one prohibition binds: nobody writes
 ## <acceptance_criteria>
 1. First trading day post-C1: the 4 raw as-fetched files present at the RULED keys
    (`trueshares/{TICKER}/bronze/netassets/…`, `pathfinder/filepoint/bronze/{holdings,dailynav}/…`),
-   head-object verified. NO parquet under any bronze/ path.
+   **verified LISTING-BASED — ListObjectsV2 key + ETag + Size (CTO ruling, msg 20260714T024205Z:
+   head-object IS s3:GetObject and is NEVER the acceptance instrument; a listing is the only instrument
+   that can prove the negative below).** NO parquet under any bronze/ path (provable only by enumeration).
 2. Parity measurements for 07-14/07-15 recorded per the standing order, unaffected (quote them).
 3. An absent day is ABSENT: no roll-forward, no zeros written (attest by construction, cite the code path).
 4. Session log with Compiler Tools section; RAVC close **to COO** with evidence (gates and forks route to

@@ -96,7 +96,9 @@ Phase 1 (before writing): **live re-verify BOTH trigger paths** — `aws events 
 vintage — verify, don't trust; §4a mandate verbatim). `comp-blast` on the smartx lambdas you will touch.
 Phase 2 (before commit): `.tools/commit-gate.sh` (automatic); `comp-iam service <pull-lambda>` after the
 boto3 surface exists — necessary, NOT sufficient; the monolith is a new bucket and comp-iam FAILS GREEN.
-Phase 3 (after CTO-gated apply): head-object of landed raw objects per feed (denominators printed:
+Phase 3 (after CTO-gated apply): LISTING-BASED verification of landed raw objects per feed — ListObjectsV2
+key + ETag + Size; head-object is never the acceptance instrument (CTO ruling 20260714T024205Z)
+(denominators printed:
 N models on the live roster × M feeds = expected objects vs landed); live simulate per 22a — one
 `--resource-arns` per call, positive control separate.
 </compiler_tools_mandate>
@@ -115,7 +117,8 @@ N models on the live roster × M feeds = expected objects vs landed); live simul
 1. Phase-1 live trigger re-verify quoted (both rules, states, last-invoke) BEFORE any build — if it
    contradicts the census hypothesis, STOP and route the contradiction (it changes ruling 2's premise).
 2. Bronze accruing daily: for one full scheduled cycle, every roster model × every §4a feed lands raw
-   `.json`, head-object verified, denominators printed (expected vs landed, per feed). Roster count read
+   `.json`, verified LISTING-BASED (ListObjectsV2 key + ETag + Size — never head-object, ruling
+   20260714T024205Z), denominators printed (expected vs landed, per feed). Roster count read
    LIVE from `GET models` in the same cycle — not from this TO, not from D4.
 3. Zero parquet under `smartx/*/bronze/` (17a) — quoted listing.
 4. Idempotency exercised: same-day re-run lands 0 new objects, reports skip.

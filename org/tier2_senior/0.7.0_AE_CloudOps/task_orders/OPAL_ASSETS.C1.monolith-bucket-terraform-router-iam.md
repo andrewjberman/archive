@@ -133,11 +133,13 @@ role against the **EXACT new-bucket ARNs**.
 1. `aws s3api head-bucket` / `get-bucket-location` on `opal-data-assets` returns success against LIVE AWS —
    not a plan output, not `rc=0` from Terraform.
 2. Terraform `plan` is **0-diff** after apply. Quote it.
-3. The prefix grammar is realized and demonstrated: create + head-object one probe object per source tree,
-   **landed under an explicit `_probe/` prefix and said so — the ONLY sanctioned mechanism** (review
-   findings 26/30/38: probes at canonical paths would plant synthetic non-vendor bytes in bronze trees,
-   and "then remove them" instructs an S3-object deletion, a human-confirmation class per CLAUDE.md Agent
-   Autonomy; `_probe/` needs neither). `_probe/` objects stay; C12-class inventories mark them.
+3. The prefix grammar is realized and demonstrated: create one probe object per source tree, **landed
+   under an explicit `_probe/` prefix and said so — the ONLY sanctioned mechanism** (review findings
+   26/30/38: probes at canonical paths would plant synthetic non-vendor bytes in bronze trees, and
+   "then remove them" instructs an S3-object deletion, a human-confirmation class per CLAUDE.md Agent
+   Autonomy; `_probe/` needs neither), **verified LISTING-BASED — ListObjectsV2 key + ETag + Size (CTO
+   ruling 20260714T024205Z: head-object is never the acceptance instrument).** `_probe/` objects stay;
+   C12-class inventories mark them.
 4. **Router IAM live-simulated per Rule 22a** — corrected per review findings 27/12/10 (the original deny
    leg was a GUARANTEED-PASS instrument: simulating PutObject against a BUCKET ARN returns implicitDeny
    for every role, because object-scoped Allows do not match a bucket ARN):

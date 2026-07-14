@@ -115,7 +115,9 @@ confirm the SchwabBronzeList grant covers the actual list calls (post-apply live
 `--resource-arns` per call, positive control separate). If landing in the NEW bucket: fresh live
 simulate against the exact `opal-data-assets` ARNs — comp-iam FAILS GREEN on a new bucket.
 Phase 2 (before committing): `.tools/commit-gate.sh` (automatic); any `iam.tf` delta → `comp-iam gaps`.
-Phase 3 (after landing): head-object partition listing of landed objects = the RAVC evidence.
+Phase 3 (after landing): ListObjectsV2 partition listing (key + ETag + Size) of landed objects = the
+RAVC evidence (listing-based per the 20260714T024205Z ruling; head-object is never the acceptance
+instrument).
 </compiler_tools_mandate>
 
 ## <cross_domain_coordination>
@@ -128,7 +130,9 @@ prohibition binds: nobody writes `opal-data-inf/gold/meta/pipeline-complete.json
 *(Reconciled 2026-07-14 ~02:3xZ to the v1.2 final scope + v1.3.8 — review finding 33: the original AC set
 predated rulings 9/13b/13c and did not cover the GO'd scope.)*
 1. `aws s3 ls` shows ≥1 dated partition per 0833 daily type under the MONOLITH landing target
-   (`opal-data-assets/schwab/{master}/bronze/{type}/{YYYYMMDD}/`), head-object verified, master read from
+   (`opal-data-assets/schwab/{master}/bronze/{type}/{YYYYMMDD}/`), **verified LISTING-BASED —
+   ListObjectsV2 key + ETag + Size (CTO ruling 20260714T024205Z; your remap role structurally cannot
+   head-object the monolith, and that role shape is the ratified design property)**, master read from
    the vendor's bytes (not the folder).
 2. Schedule exists and is ENABLED (`aws events describe-rule` / scheduler equivalent, output quoted).
 3. *(SATISFIED-HISTORICAL — v1.1: the 0833 backfill migration is DONE, 6,932/6,932 ETag-identical,

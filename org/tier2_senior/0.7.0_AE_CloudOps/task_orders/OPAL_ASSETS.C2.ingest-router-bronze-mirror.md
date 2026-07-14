@@ -80,9 +80,10 @@ awareness only — you are adding a reader, and the graph should know); `comp-pi
 (no gold script). NO source-bucket notification enumeration — retired with the mechanism it served.
 Phase 2 (before commit): `comp-iam service <mirror-lambda>` once the boto3 surface exists — necessary,
 NOT sufficient (fails GREEN on the new bucket); `.tools/commit-gate.sh` automatic.
-Phase 3 (after CTO-gated apply): head-object verification of a mirrored object per map row (3/3, ruling
-13c tiers) + the live simulate matrix per the corrected deny-leg protocol above. DESIRED / APPLIED /
-EXERCISED reported separately; a simulate is APPLIED-layer, not EXERCISED.
+Phase 3 (after CTO-gated apply): LISTING-BASED verification of a mirrored object per map row —
+ListObjectsV2 key + ETag + Size, 13c tiers for multipart (CTO ruling 20260714T024205Z: head-object is
+never the acceptance instrument) — + the live simulate matrix per the corrected deny-leg protocol above.
+DESIRED / APPLIED / EXERCISED reported separately; a simulate is APPLIED-layer, not EXERCISED.
 </compiler_tools_mandate>
 
 ## <cross_domain_coordination>
@@ -98,8 +99,9 @@ EXERCISED reported separately; a simulate is APPLIED-layer, not EXERCISED.
 ## <acceptance_criteria>
 1. Terraform plan quoted: **N to add / 0 to change / 0 to destroy** — the zeros ARE an acceptance
    criterion under the new-territory rule, not a nicety.
-2. For each of the three map rows: a source object mirrored to its canonical monolith key, verified per
-   ruling 13c (tier stated per object), denominators printed (rows in map = rows verified = 3).
+2. For each of the three map rows: a source object mirrored to its canonical monolith key, verified
+   LISTING-BASED per ruling 13c (ListObjectsV2 key + ETag + Size; tier stated per object; never
+   head-object — ruling 20260714T024205Z), denominators printed (rows in map = rows verified = 3).
 3. Zero `.parquet` under any monolith bronze path after a full mirror cycle — quoted listing; the
    parquet-only INF dates absent (spot-check one known date, expect NO object).
 4. Simulate matrix per the corrected protocol: source-write denies on exact object ARNs (inf incl. the
