@@ -1,0 +1,80 @@
+# D2 FINDINGS — OPAL_ASSETS_49METATABLES (join concept 1: SmartX ↔ 49F client identity)
+
+**0.5.0_AE_OpalETL · 2026-07-14 ~09:3xZ · for the sec-4 convergence gate (Andrew + CTO runner
+architecture session). PRD @ `bd177ba0f`. Every number in this note is a same-day measurement;
+grounding artifacts cited inline.**
+
+## THE DELIVERED STATE (all CTO-gated, all exercised)
+
+| piece | state | evidence |
+|---|---|---|
+| feed 9 resolver bronze | LANDED, 7/7 bundle-visible models, daily-wired | `smartx/model/{rmid}/bronze/allocation_accounts/{d8}/` (first landing 08:39Z; wired v1.5.0 @ `72bcaa3c7`) |
+| closed-identity sweep | CONVERGED 6,620/6,620 accounts, 0 failed | `smartx/account/{id}/bronze/allocations/20260714/` + manifest `smartx/platform/meta/pulls/20260714/account_allocations_sweep_manifest.json` |
+| bundle credential | live, tested, structurally separated | `smartx/credentials/yaliu-bundle` (SM only); `mint_bundle_token` in-memory; separation test permanent |
+| daily go-forward | feed 9 in `smartx-assets-daily-pull` 09:30 ET | coverage guards = measured constants; fail-loud reconciliation |
+
+## THE IDENTITY TABLE, IN RUNNER-CONSUMABLE TERMS
+
+**Grain:** `model × allocation × run_date` (date-effectivity: a row asserts "allocation A was in
+model M with account X **on day D**" — accounts move between models; the runner asks WHEN, and the
+daily snapshot accumulation answers it. Never collapse run_date out of the dim.)
+
+**Columns (silver `allocation_account_map`, pinned pyarrow schema @ `fd0b2636f`):**
+`model_id, rmid, allocation_id, account_id, account_number (STRING, byte-faithful), account_name,
+aum_value, run_date`.
+
+**Sources, by identity class:**
+1. LIVING allocations → feed 9 (`enterprises/reports/model/{modelId}/allocations`, bundle grant).
+   Measured semantics: returns `open`+`workingClose` allocations **of reporting-visible accounts**.
+2. CLOSED allocations → the account-side sweep (`3.1/allocations?accountId=&status=open,close`,
+   one call per enumerable account) — run once as backfill 2026-07-14; the daily feed-9
+   accumulation covers closures go-forward (yesterday's living row persists).
+
+## COVERAGE — measured, per class (2026-07-14)
+
+```
+LIVING  (open+workingClose, all 11 models):  7,141 / 7,144  = 99.96%
+  gap  = 3 allocations on non-reporting-visible accounts (CG-3: verified OPEN in feed 5
+         right now, absent from resolver AND sweep; their accounts are not in the 6,620
+         enumerable actives) + note 1 more living allocation sits in the bundle-invisible
+         'Opal Global All Equity TR' (counted in the 7,144 denominator; identity unresolvable
+         at any held grant)
+CLOSED  (status=close, all 11 models):       1,315 / 2,381  = 55.2%
+  gap  = 1,066 closed allocations whose accounts are NOT enumerable at the bundle grant
+         (4.1/accounts exposes ZERO closed/inactive accounts -- measured; the direct
+         allocation-detail endpoint 400s). STRUCTURALLY INVISIBLE at every credential we
+         hold. If gold needs pre-2026-07-14 closed-client attribution beyond 55.2%, that
+         is a VENDOR-GRANT conversation, not an engineering one.
+```
+Per-model living coverage: 6 of 7 bundle-visible models tie feed-5-living EXACTLY; Conservative
+Growth −3 (the CG-3 above — account-visibility, NOT timing; the timing hypothesis was falsified by
+re-reading feed 5 live). The 3 unfunded Global models: nothing to cover.
+
+## THE JOIN RULE (dictionary open-cell 4) — measured, residual honestly open
+
+```
+join:  smartx.account_number.zfill(10) == crs_acc.account_id
+       (SmartX emits 8-digit numeric (7,130/7,141; 11 at 9 digits);
+        CRS account_id is 10-digit, universally zero-padded)
+rate:  96.4% (5,419/5,624 distinct) against silver/ACC date=20260508
+```
+**The residual 205 stays UNPINNED** (CTO concurrence 084515Z): the CRS side is a 2-month-stale
+vintage; fresh ACC bytes exist in monolith bronze through 07-13 (DS pointer: C3 lands
+`08242234.CRS*.ACC.zip` daily; the staging silver/ACC table is also MEASURED LOSSY — the long-term
+join substrate is 0.6.2's V2-8 converter output, not the legacy table). Re-measure there before
+pinning.
+
+## GUARDS THE RUNNER INHERITS (all live in v1.5.0)
+- Coverage constants are MEASUREMENTS (`OPAL_FAMILY_VIEW_MIN=7`, `BUNDLE_ACCOUNTS_MIN=452`) — a
+  grant shrink fails loud before a partial identity table can look clean.
+- Feed9-vs-feed5(living) same-vintage reconciliation — a partial resolver payload fails loud.
+- Fleet-zero = broken endpoint (the 267B class, both directions — the instrument itself was
+  fixed once for reading POPULATED as EMPTY on nested shapes).
+- Two-writers-one-scope: registered account-tier feeds are not surplus; unregistered keys still trip.
+
+## OPEN CELLS FOR THE ARCHITECTURE SESSION
+1. The 55.2% closed-history ceiling → vendor-grant question (named, quantified).
+2. The join residual → re-measure on fresh CRS bronze / V2-8 converter output.
+3. The 9-digit account_number minority (11 rows) → classify at CRS contact.
+4. silver `allocation_account_map` build → V2-8 lane (schema pinned, writes phase-open per
+   Andrew's silver-ahead-of-cert word; converter slots after 22:00Z per my sequencing).
