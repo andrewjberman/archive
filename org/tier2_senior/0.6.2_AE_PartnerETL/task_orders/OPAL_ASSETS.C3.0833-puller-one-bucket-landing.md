@@ -21,6 +21,18 @@ going forward. Target-bucket reading surfaced to Andrew for confirmation (CTO re
 of opal-data-assets per the consolidation mandate).
 </andrew_amendment>
 
+<revision v="1.1" date="2026-07-14 ~00:55Z" by="1.0.0_SA_CTO">
+RESOLVED — PRD v1.1 §3 rulings 5–6 bind this TO. Andrew named the bucket to 0.6.2 directly:
+**opal-data-schwab/{master}/bronze/{type}/{YYYYMMDD}/** — NOT opal-data-assets. Under Andrew's direct GO
+(~00:28Z) 0.6.2 already EXECUTED the backfill half: 0833 migrated zipped 6,932/6,932 (ETag-identical,
+0 quarantine; CTO-verified on live S3), 0824 full-history REST pull running. REMAINING SCOPE of this TO:
+(a) daily pull SCHEDULED, both masters (EventBridge repoint off the dead GUI task — merges C8 if you
+take it); (b) same-day catch-up for business dates >= 2026-07-13; (c) NO dependency on C1 anymore.
+Landing target sections above referencing opal-data-assets/bronze/schwab are SUPERSEDED by ruling 5.
+Acceptance criteria 3 (backfill parity) is SATISFIED — evidence in PRD §5 R6. Still STAGED under the
+dispatch hold.
+</revision>
+
 ## Scope
 Deploy your built+tested 0833 REST puller with a daily schedule, landing in the one bucket:
 `s3://opal-data-assets/bronze/schwab/08335338/{TYPE}/{YYYY-MM-DD}/...` — day-one-direct.

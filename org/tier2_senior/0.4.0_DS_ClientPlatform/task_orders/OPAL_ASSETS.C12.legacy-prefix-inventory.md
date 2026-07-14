@@ -14,11 +14,15 @@ buckets: what it holds, object counts + date ranges (denominators printed, no sa
 row replaced it, and its disposition class. **INVENTORY, NOT CLEANUP** — deletion is a deletion-class
 action requiring explicit human sign-off, and it is NOT in this project.
 
-## The one entry that must be in bold
-`opal-data-schwab/01_raw/` holds **257 objects Schwab can no longer serve** (REST history floor
-2023-07-12; 01_raw reaches to 2023-01-17). **IRREPLACEABLE.** Their migration into the bronze layout is
-a COPY job (separate, future TO) — never a re-pull, never a delete. The inventory marks them
-`irreplaceable — copy-only`.
+## The one entry that must be in bold — REVISED at PRD v1.1 (§3 ruling 6)
+`opal-data-schwab/01_raw/` (7,142 objects, 257 pre-REST-floor): **Andrew has ruled it disposable**
+(*"we do not care about 01_raw, that entire folder can be deleted... what we are getting here is more
+important, and will be the canonical form"*) and 0.6.2's measurement disqualifies it from bronze
+migration (unzipped GUI-era artifacts, no master in the filename, lossy provenance). The inventory
+marks it `Andrew-ruled disposable — retirement SEQUENCED, not deleted`: live consumers exist
+(`build_canonical_daily.py:130,155` paginates it; `mdpf011_rematch.py:68` reads it), so the sequence is
+finish bronze → verify → repoint consumers → THEN delete under the normal deletion-class protocol with
+a final Andrew confirm. **This TO still performs zero deletions.**
 
 ## <compiler_tools_mandate>
 Phase 1: generic `aws s3 ls` enumeration (operational, un-nudged) per prefix; every count carries its
