@@ -39,6 +39,17 @@ forks to CTO through COO.
 <project>OPAL_ASSETS — Grand Consolidation P1</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 row C3 + §3 rulings 5/6-as-amended/9/13b/13c + the v1.3.8 Glacier ruling (binding vintage: v1.3.8 @ a0ed08933 + the 01_raw scope addition @ 27841e6ab; ruling 4 is SUPERSEDED-BY-5, provenance only)</prd>
 
+<andrew_amendment date="2026-07-14 ~03:4xZ" channel="Andrew -> COO, interactive" status="binding -- answers 0.6.2's ~03:2xZ offer">
+ANDREW, VERBATIM: "We need daily rest pattern for both 0833 and 0824 on that box, yes."
+SCOPE AS RECORDED: the "yes" answers 0.6.2's standing offer -- stand up the daily REST pull pattern for
+BOTH masters on the Schwab SI2 box, SOONER rather than waiting for the 0824 wide pull to go terminal.
+This elevates C3(b) [puller retarget, both masters, monolith-direct] + C3(c)-as-amended [CREATE-NEW
+schedule -- the create-new ruling stands] to the lane's front. Mechanics remain the assignee's + CTO's
+gates: the do-not-repoint-a-running-producer discipline governs HOW the deploy lands while the 0824 wide
+pull is mid-flight (0.6.2's own staging escape hatch exists for exactly this); applies via safe-apply
+through CTO as always. The 0833 silent-freeze-at-07-10 exposure 0.6.2 flagged is the WHY.
+</andrew_amendment>
+
 <andrew_amendment date="2026-07-14 ~02:41Z" channel="Andrew -> COO, interactive" status="binding -- priority ruling on the Glacier/257 leg">
 ANDREW, VERBATIM: "i dont care about the glacier schwab data that much to hold up our work here."
 SCOPE AS RECORDED (surfaced, not adjudicated): a PRIORITY ruling, not a reversal -- the ~01:4xZ migrate
