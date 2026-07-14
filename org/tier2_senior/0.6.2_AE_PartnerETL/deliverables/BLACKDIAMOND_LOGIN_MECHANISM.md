@@ -10,6 +10,11 @@ exercise** to confirm, and records the doc-drift it found rather than papering o
 > session (44 tool calls), reading actual file contents; every mechanism claim carries a `file:line`. Runtime/live-AWS
 > claims (alarms firing, a login actually succeeding) are labelled as such and were **not** independently exercised for
 > this doc — they are the mechanism as coded and deployed-by-Terraform, not a live-fire verification.
+>
+> **>> LIVE-VERIFICATION ADDENDUM (2026-07-14, added after an Andrew challenge "did you actually check the active runner
+> resources?"). The original body above documented the LOGIN/MINT side from a source-read and was RUNNER-LIGHT. The
+> consume/REST side + live state were then checked against live AWS — see §6A. Two corrections resulted; read §6A before
+> trusting §6's original framing. <<**
 
 ---
 
@@ -213,6 +218,63 @@ T only accepts a code emailed in `[T, T+120s]`, so a cot login and a 49f login c
 - **Consumption:** the bd runners / keepalive / freshness Lambdas read `BD_SESSION_SECRET_ID=blackdiamond/49f/session`
   (`bd-49f-interim.tf:140,316`; `bd-49f-session-chain.tf:172`); cot bronze reads `blackdiamond/cot/session`
   (`cot-pipeline/ssm.tf:119`).
+
+---
+
+## 6A. The RUNNER (consume side) — grounded against live AWS, 2026-07-14
+
+The original §6 sourced the "how pipelines consume the cookie" claim from one TF line + `AUTHENTICATION.md`. That was
+too thin, and the challenge that produced this addendum was right. Here is the consume side grounded on the **actual
+runner handler + live Lambda config + live CloudWatch + live S3**.
+
+**The runner is a Lambda, not the login box.** `bd-49f-runner`
+(`infra/aws/lambda/bd-pipeline/bd-49f-runner/lambda_function.py`, live: python3.12, deployed 2026-07-09,
+`CodeSha q37ovM/F...`, 1024MB/900s). It does **no browser and no login** — its docstring is explicit: *"reads the
+`.bd.identity` cookie (A keepalive-extended) from Secrets Manager"* (`:8-9`). The login box (§3) only MINTS the cookie;
+this Lambda CONSUMES it. Those are two different resources on two different cadences.
+
+**The consume→REST chain, grounded** (shared module `data/cot/scripts/bronze/cot_bronze_ingest.py`, firm-bound to bd
+via 4 env vars the runner hardcodes + sets before import, `lambda_function.py:54-57,108-111`):
+1. `cookie = mod.load_bd_session()` (`cot_bronze_ingest.py:178`) — reads `blackdiamond/49f/session`, prefers the FULL
+   7-cookie jar (`.AspNetCore.Antiforgery` + idsrv are needed for `POST /v1/run`, not just `.bd.identity`); fail-loud on
+   empty.
+2. `token = mod.get_datamining_token(cookie)` (`:246-252`) — `GET /datamining/auth/token` cookie-authorized →
+   opaque `access_token` Bearer. Via `_request` (`:221-243`, urllib; `Cookie:` + `Authorization: Bearer`).
+3. `mod.ingest_table(cookie, token, table, start, end)` (`:645`) — pulls each of the 4 REST tables
+   (`transactions, allocations, realized, unrealized`) from `https://bd3.bdreporting.com`, landing
+   `s3://opal-data-bd/forwardfill_v2/{table}/`.
+4. Bronze-complete sentinel on ALL-table success → EventBridge → `bd-silver-merge` (a partial pull must not advance
+   silver, `lambda_function.py:199-211`).
+
+**The bearer-vs-cookie distinction (the operational heart, AUTHCHAIN-F3F6, `lambda_function.py:159-197`):** the
+datamining Bearer has a SHORT TTL; a long chunked transaction sweep outlives it. So a **401 mid-sweep is usually a
+lapsed BEARER, not a dead COOKIE** — the runner re-mints the Bearer ONCE from the SAME cookie and retries; cookie-death
+is confirmed only if the re-mint itself auth-fails (or a 401 persists past `MAX_RETRIES`). This fixed the 2026-07-06
+incident where a 401 short-circuited to cookie-death and killed 3/4 tables. **So "runs the REST API" = re-mint a
+short-lived Bearer per run (and mid-run on 401) from a long-standing cookie; only the cookie is long-lived.**
+
+### Live evidence (read-only, 2026-07-14 ~04:5xZ)
+- `bd-49f-runner`: **1 invocation/day, 0 errors, last 7 days** (CloudWatch). The consume/REST side WORKS.
+- `opal-data-bd/forwardfill_v2/` landing: `realized` as-of **2026-07-14** written today; `transactions` written
+  2026-07-14; `allocations`/`unrealized` as-of 2026-07-10 written 07-12 (snapshot tables under `BD_SNAPSHOT_ASOF_LAG_BDAYS=1`
+  — a per-table trading-day resolution I did **not** run, so I make **no** staleness claim on those two).
+- Live session secret `blackdiamond/49f/session`: exists, `LastAccessed` = today.
+
+### CORRECTION 1 — "self-re-minted every run" is UNCONFIRMED in live state
+§0 framed BD as "re-mints its own session from scratch on a schedule." **What is confirmed:** a long-standing,
+keepalive-extended cookie that the runner consumes successfully. **What is NOT confirmed:** that the nightly browser
+re-mint actually rewrites the cookie. The session secret's **`LastChanged` = 2026-07-06 00:02Z — 8 days stale**, yet
+`bd-49f-session-trigger` ran daily with **0 Lambda errors**. Those reconcile because a trigger-Lambda success only means
+it *dispatched* the SSM login on the box — the browser login + `smPut` run **async on the box**, and their result is
+NOT in the trigger's metrics. So the mint could be silently no-op'ing/failing since 07-06 while keepalive carries the
+07-06 cookie and the runner keeps working. **Functionally healthy today; the self-re-mint safety net is UNVERIFIED.**
+Determining which needs the SSM login-command result / `bd-49f-session-complete` firing / box node logs — 0.7.0~A /
+ADVI_BDAPIMIG lane. Recorded, not resolved.
+
+### CORRECTION 2 — the "long-standing" framing was Andrew's, and it was the accurate one
+The challenge phrased it as the "long-standing bd identity token." The runner's own docstring ("keepalive-extended")
+confirms that is the correct characterization of the CONSUME side; the doc's "re-minted daily" language described the
+MINT intent, not the observed cookie lifetime.
 
 ---
 
