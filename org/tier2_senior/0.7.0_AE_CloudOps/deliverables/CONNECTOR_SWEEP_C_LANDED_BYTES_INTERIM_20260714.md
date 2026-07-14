@@ -87,3 +87,23 @@ ORPHANED endpoint whose only remaining function is to answer probes with 5-month
 it with named triggers (081510Z). Remaining queue: ~12 reader-only probe rows ((c)=N/A-reader; their (d)/(e)
 answered at their read-surface guards), DDB keyed reads, opal-inf-value-parity cfg resolution (INF domain,
 read-only observation).
+
+## DDB-surface rows (queued keyed reads -- verdicted 2026-07-14 ~18:5xZ session)
+
+| DDB surface | writer ligament | (c) verdict | (d)/(e) notes |
+|---|---|---|---|
+| opal-etfs-ownership-daily | etfs-canon-fanin (15:45Z) | HEALTHY -- CLOSED BY TODAY'S C9 cond-3 verify: 12/12 slices true-vintage, exactly one 12-write burst/day at 15:45Z (CW metric, 07-11..14), ingested_utc ties | (d) CW invoke log + write-capacity metric + row stamps; (e) the C9 tripwire class reads the ROW (the landed property), not a proxy |
+| opal-assets-daily-aua | opal-assets-daily-emitter (17:15Z) | WRITER CADENCE-HEALTHY / CONTENT PINNED-BY-HOLD: daily fires (07-13+07-14 both 17:15Z, rows_written=28, rc clean) re-emit the FROZEN mdpf platinum 07-10 vintage -- the held INF/mdpf chain's shadow, BY DESIGN; close nothing on it. Row semantics are self-documenting (staleness=99 SENTINEL shared by contract with the 14 mdpf-cohort alarms; vintage_state/coverage_state are the unambiguous read) | (d) emitter OK-line carries partition_key+rows_written; (e) the row ITSELF carries the staleness measure + sentinel -- a guard reading the landed property by construction |
+| opal-news-articles | news ingest chain | SAMPLE-LIVE (item ingested 2026-07-12T08:00Z observed); NEWEST-ITEM read OPEN -- needs the table's key/GSI schema for an efficient newest query (full scan disproportionate); the chain's S3 surfaces already verdicted HEALTHY (NT-1 row) | (d)/(e) fill with the newest-item read |
+
+## FINDING CF-1: comp-freshness `ddb` mode reads FALSE-EMPTY on populated tables (2/2 tested)
+
+`comp-freshness ddb opal-assets-daily-aua` and `... opal-news-articles` both printed
+`WARN / NOTE: No items found with PK prefix ''` -- while direct scans return items on BOTH tables.
+The instrument's default PK-prefix mechanism does not fit either table's key shape, and the
+resulting verdict is BYTE-INDISTINGUISHABLE from a genuinely empty table (verification law #5:
+no channel for "I don't know" -- not-knowing renders as a WARN that looks measured). Same family
+as the CLAUDE.md NEVER#1 comp-freshness caveat (missing freshness_basis falls back silently).
+ROUTED to COO for tool-owner routing: these two tables need per-table config entries (real PK
+pattern + freshness_basis trading-day-frontier where applicable), and the empty-read should say
+CONFIG-MISS, not WARN-empty.
