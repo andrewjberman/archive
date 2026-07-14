@@ -37,8 +37,9 @@ import tempfile
 _HERE = os.path.dirname(os.path.abspath(__file__))
 WS = os.path.abspath(os.path.join(_HERE, "..", "..", "..", ".."))
 sys.path.insert(0, _HERE)
+sys.path.insert(0, os.path.join(WS, "org", "modules", "graph"))
 
-import NFRA_PROMOTE_P1_promotion_engine as P1  # noqa: E402
+import comp_promote_lifecycle as lifecycle  # noqa: E402  -- the CANONICAL P1 machine (@cb6a86177; DS~B engine retired with provenance)
 
 MANIFEST = os.path.join(_HERE, "promote_recognizer_manifest.json")   # the git-versioned critical surface (R3)
 MEASURE_ARTIFACT = os.path.join(_HERE, "fedobs_frontend_coevolution.json")
@@ -58,12 +59,26 @@ def _measures() -> dict:
         return {m["candidate_id"]: m for m in json.load(fh).get("measures", [])}
 
 
+class _PromotedRec:
+    """Read-only attribute adapter over a CANONICAL lifecycle record (a dict) -- preserves this
+    module's certed attribute-access surface (rec.candidate_id / .promotion_class /
+    .decompression_chain) across the cb6a86177 rewire WITHOUT re-implementing any machine logic."""
+
+    def __init__(self, record: dict):
+        self.candidate_id = record["candidate_id"]
+        self.promotion_class = record["promotion_class"]
+        self.state = record["state"]
+        self.decompression_chain = record.get("decompression_chain") or {}
+
+
 def acceptance_set() -> list:
-    """The candidates the PROMOTE-P1 gate advanced to PROPOSED (coupling_ratio >= floor) -- the promote-eligible."""
-    recs = P1.load_candidates()
-    for r in recs:
-        P1.advance(r)   # gate on the real joined measures -> PROPOSED for the tight-coupled
-    return [r for r in recs if r.state == "PROPOSED"]
+    """The candidates the canonical PROMOTE-P1 gate advanced to PROPOSED (invariant-2 floor passed,
+    awaiting/holding ratify) -- the promote-eligible. Eligibility is a STATE of the ONE canonical
+    machine (org/modules/graph/comp_promote_lifecycle.py, @cb6a86177) read from its manifest --
+    never re-derived here (the retired DS~B engine's advance() is not re-implemented)."""
+    man = lifecycle.load_manifest(lifecycle.MANIFEST)   # explicit path: honors self-test isolation
+    return [_PromotedRec(r) for _, r in sorted((man.get("promotions") or {}).items())
+            if r.get("state") == "PROPOSED"]
 
 
 def _template_params(rec) -> dict:
@@ -161,7 +176,7 @@ def run_propose() -> int:
     print("=" * 80)
     ms = _measures()
     eligible = acceptance_set()
-    print("\nPromote-eligible (coupling_ratio >= %.2f, gate-passed -> PROPOSED): %d\n" % (P1.FEDOBS_RATIO_FLOOR, len(eligible)))
+    print("\nPromote-eligible (coupling_ratio >= %.2f, gate-passed -> PROPOSED): %d\n" % (lifecycle.FEDOBS_RATIO_FLOOR, len(eligible)))
     for rec in eligible:
         e = propose_entry(rec, ms.get(rec.candidate_id, {}))
         print("  %s  <- %s" % (e["recognizer_id"], e["from_candidate"]))
@@ -175,18 +190,52 @@ def run_propose() -> int:
     return 0
 
 
+def _seed_lifecycle_fixture(td: str) -> None:
+    """Isolated CANONICAL-manifest fixture, driven through the REAL gate (open_candidate + advance
+    with full evidence -- synthetic data, exercised machine; this test breaks loudly if the canonical
+    API drifts): silent-display-fork lands at PROPOSED (eligible), render-without-null-guard is
+    admitted and HELD at CANDIDATE (not eligible)."""
+    lifecycle.MANIFEST = os.path.join(td, "lifecycle_manifest.json")
+    trail = os.path.join(td, "lifecycle_cse.jsonl")
+    man = lifecycle.load_manifest(lifecycle.MANIFEST)
+    chain = {"c0_evidence": [{"fact": "x", "source": "f.tsx", "locus": "L1"}], "n_c0_facts": 1,
+             "c1_interactions": ["silent-display-fork @ f.tsx"]}
+    prop = lifecycle.open_candidate(
+        {"candidate_id": "motif:silent-display-fork", "decompression_chain": chain,
+         "recurrence": 5, "kind": "motif"}, man, promotion_class="COMPILER_RULE", trail_path=trail)
+    lifecycle.advance(prop, "MEASURED", evidence={
+        "why": "self-test fixture measure",
+        "measured_effect": {"effect": 0.18, "basis": "focused git co-evolution",
+                            "source": "self-test fixture", "vintage": "fixture",
+                            "focused_coupling_ratio": 0.18, "coupling_ratio": 0.18,
+                            "co_sessions": 4}},
+        manifest=man, actor="self-test", trail_path=trail)
+    lifecycle.advance(prop, "PROPOSED", evidence={
+        "why": "self-test fixture propose",
+        "anti_goodhart": {"structural_rationale": "recurring cross-file display fork",
+                          "not_tuned_to_own_metric": True,
+                          "generalizes_beyond_fixture": "portal pages beyond the fixture set"}},
+        manifest=man, actor="self-test", trail_path=trail)
+    lifecycle.open_candidate(
+        {"candidate_id": "motif:render-without-null-guard", "decompression_chain": dict(chain),
+         "recurrence": 3, "kind": "motif"}, man, promotion_class="COMPILER_RULE", trail_path=trail)
+    lifecycle.save_manifest(man, lifecycle.MANIFEST)
+
+
 def self_test() -> int:
     print("=== NFRA_PROMOTE recognizer-materializer self-test ===")
-    # isolate the writes to a temp dir so the self-test never mutates the REAL manifest / CSE trail (audit-clean)
+    # isolate the writes to a temp dir so the self-test never mutates the REAL manifest / CSE trail
+    # (audit-clean) -- incl. the CANONICAL lifecycle manifest (@cb6a86177: eligibility reads it).
     global MANIFEST, CSE_TRAIL
-    _real = (MANIFEST, CSE_TRAIL)
+    _real = (MANIFEST, CSE_TRAIL, lifecycle.MANIFEST)
     _td = tempfile.mkdtemp(prefix="promote_selftest_")
     MANIFEST = os.path.join(_td, "manifest.json")
     CSE_TRAIL = os.path.join(_td, "cse.jsonl")
     try:
+        _seed_lifecycle_fixture(_td)
         return _self_test_body()
     finally:
-        MANIFEST, CSE_TRAIL = _real
+        MANIFEST, CSE_TRAIL, lifecycle.MANIFEST = _real
         shutil.rmtree(_td, ignore_errors=True)
 
 
@@ -198,10 +247,10 @@ def _self_test_body() -> int:
         print("  [%s] %s" % ("PASS" if cond else "FAIL", name))
 
     eligible = acceptance_set()
-    # exactly 1 promote-eligible on the honest measure: silent-display-fork (independent motif warrant).
-    # firm-conditional-display (the system) is HELD -- file-subsumed by silent-display-fork, no independent
-    # co-evolution warrant (the CVO-smell / COO disposition: measure the system independently, don't inherit).
-    chk("1  exactly 1 promote-eligible: silent-display-fork (system HELD -- file-subsumed, not independent)",
+    # exactly 1 promote-eligible in the fixture: silent-display-fork reached PROPOSED through the REAL
+    # canonical gate; render-without-null-guard was admitted but HELD at CANDIDATE -- eligibility is
+    # the canonical manifest's PROPOSED state, nothing else (@cb6a86177).
+    chk("1  exactly 1 promote-eligible: the fixture's PROPOSED record (held CANDIDATE not eligible)",
         len(eligible) == 1 and eligible[0].candidate_id == "motif:silent-display-fork")
     cid = eligible[0].candidate_id if eligible else "motif:silent-display-fork"
 
