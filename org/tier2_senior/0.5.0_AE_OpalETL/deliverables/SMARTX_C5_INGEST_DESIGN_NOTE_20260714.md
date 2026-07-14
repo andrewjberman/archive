@@ -13,6 +13,43 @@ Every endpoint semantic below cites one of those; nothing here is invented.
 
 ---
 
+## 0a. THE GOVERNING PREMISE (Andrew-direct, verbatim, 2026-07-14 ~04:50–04:52Z ET)
+
+Two direct instructions to me, recorded verbatim (the phrasing is the ruling), broadcast to CTO/COO/MSTR:
+
+> **(1)** *"Yeah the premise behind eveyrthing we're doing is not to interfere with existing pipelines, its to
+> assess existing pipelines, take anything useful, and build the opal-data-assets monolith equivalent"*
+>
+> **(2)** *"Frankly to make the opal-data-assets monolith version way better considering how our tech and
+> frameworks are significantly advnaced from a lot of this stuff we built a long time ago"*
+
+**Three verbs, in order — ASSESS existing → TAKE anything useful → BUILD a BETTER monolith equivalent — under
+one hard constraint: do NOT interfere with existing pipelines.** This is the NEW-TERRITORY RULE (PRD sec-0)
+elevated: build alongside, and build materially better than the legacy, leveraging how far our frameworks
+have advanced.
+
+**What it CORRECTS in this note (a self-flagged over-reach):** an earlier draft said C5 *"retires the
+opal-data-bd JWT co-park."* **That is interference with an existing pipeline** — the `smartx-jwt-refresher`
+*writes* that co-park and the legacy `smartx-rest-pull` *reads* it. So: **C5 builds the Secrets-Manager auth
+path ALONGSIDE; the co-park stays, serving the legacy pipeline UNTOUCHED; its retirement sequences with the
+legacy pipeline's DECOMMISSION — a separate later step, not C5.** Likewise the 3 legacy lambdas'
+`s3_object_version` drift is FLAGGED, never reconciled by C5, and my apply is `-target`-scoped to the 4 new
+resources so it cannot touch an existing pipeline. (CTO ratified all three readings.)
+
+**What "build it BETTER" means here (implementation + framework quality, WITHIN the ruled architecture —
+the key grammar and the set-identity guard are gated and do not re-open):**
+- **HTTP:** modern `requests` (in the pandas-pyarrow-requests layer) with real retry/backoff/timeout +
+  connection reuse — NOT a port of the legacy raw `urllib`.
+- **Typed vendor models** at the parse boundary → a vendor shape change fails LOUD, not silently.
+- **Resumable, S3-checkpointed backfill** built cleanly — not the legacy forked-script shape.
+- **pyarrow-direct silver**, schema-explicit.
+- **A per-pull provenance manifest** (endpoint, run-time denominator, vintage) — every landing self-describing.
+- **Structured observability**; never a token in a log; the denominator printed.
+The legacy Playwright EC2 scrape and the `opal-data-bd`-colocated DDB path are exactly the "stuff built a long
+time ago" this replaces — by building the better equivalent alongside, never by ripping them out mid-flight.
+
+---
+
 ## 1. THE GRAIN + WHAT ROLLS UP FROM IT
 
 Atomic unit: **(account | model) × holding-symbol × day** — a position/flow and its movement over time.
@@ -105,6 +142,18 @@ modelId appears ONLY as (a) a fetch parameter and (b) a recorded field inside th
 scope (`trueshares`, `filepoint`). This is a legitimate grammar question for the gate (§7-Q2): is a per-entity
 2-segment scope in-grammar, or does CTO want `{entity_type}_{id}` as one token, or the id as a `{feed}`-level segment?
 
+**THE META LAYER (CTO grammar ruling 2026-07-14, forced by the "build it better" provenance-manifest upgrade).**
+The per-pull provenance manifest is OUR artifact, not vendor bytes — under Rule 17a it may **NEVER land inside
+`bronze/`** (a manifest under bronze pollutes the raw spine exactly like a `.parquet` would). Ruled home: a distinct
+**META layer segment, sibling of bronze/silver under the same scope** — `smartx/{scope}/meta/pulls/{YYYYMMDD}/…`.
+Two binding riders:
+- **(a) META KEYS ARE OUTSIDE THE GUARD'S RECONCILIATION SET — BY SCOPE, not by exception-list.** The distinct-landing
+  guard reconciles a *bronze* prefix only; `meta/` is a disjoint prefix, so the guard is blind to it by construction.
+  (If a manifest landed in-prefix, the guard would RAISE on our own metadata as surplus — a self-inflicted false alarm.)
+- **(b) MANIFEST KEYS ARE INERT BY CONVENTION — NOTHING may ever event-trigger on a `meta/pulls/*` key.** The Door-6
+  lesson: a metadata completion key that something dispatches on becomes a back-door release. A meta key is a *record*,
+  never a *signal*. (Encoded in `key_mapping.meta_key`'s docstring so the constraint travels with the builder.)
+
 ---
 
 ## 4. THE DISTINCT-LANDING GUARD (set-identity, baked in pass one — EXERCISED)
@@ -149,6 +198,48 @@ Reuse the existing `smartx-jwt-refresher` (OIDC ROPC → Secrets Manager); do NO
   control separate (comp-iam FAILS GREEN on a new secret ARN).
 - **Rotation-safe / fail-LOUD:** an expired/rotated JWT triggers a re-mint from the ROPC seed — NEVER a silent 401
   read as "no data" (the 0824-outage class). Confirm the auth-failure SNS alert reaches a CONFIRMED subscription.
+
+**WRITE-BACK IS OPT-IN — RATIFIED (CTO 2026-07-14), a scoped reading of §3a's verbatim.**
+§3a verbatim: *"the retrieval devices read it from env, mint/refresh as needed, and write the refreshed token back."*
+Ratified reading: §3a's INTENT is that **Secrets Manager is the single durable source and tokens re-mint LOUD rather
+than rot** — NOT that every device must persist. A concurrent write-back from ≤17/min backfill workers is
+last-writer-wins on one secret (the C2 conservation hazard one layer over). So single-writer discipline:
+- **daily delta Lambda:** `write_back=True` — single invocation, persists the re-mint.
+- **backfill workers:** `write_back=False` — read + mint-in-memory, never write; the `smartx-jwt-refresher` stays the
+  durable writer. (Same reasoning as C2's permanent concurrency=1 shape.)
+The verbatim and its scoped reading travel together, on the record, per CTO's instruction.
+
+**⛔ GATE BEFORE AT-SCALE CONCURRENT BACKFILL (CTO rider) — the coexistence probe.**
+This design carries an **unexamined premise: that two live SmartX JWTs COEXIST.** If a new mint INVALIDATES prior
+sessions (single-session vendor semantics), then mint-in-memory-per-worker THRASHES — worker B's mint kills worker A's
+token *and* the SM-stored token the daily lambda reads; the race returns wearing vendor clothes, write-back or not.
+**PROBE (2 calls, SmartX egress lifted standing), result RECORDED here before the at-scale pull starts:** while token A
+is live, mint token B, then assert A is **still accepted** on a harmless authenticated GET.
+- **COEXIST →** the opt-in-write-back shape above stands exactly as built.
+- **EXCLUSIVE →** backfill workers NEVER mint: read the SM secret only, refuse-LOUD on expiry, and a **single minter**
+  (the `smartx-jwt-refresher` lane) is the only mint path during a backfill window.
+**Do NOT start the at-scale concurrent pull until this probe result is on the record.** (It does NOT gate the first
+single pull — only the at-scale concurrent backfill.)  **PROBE RESULT: [PENDING — run before at-scale backfill].**
+
+**⛔⛔ THE PROBE IS ALSO A NON-INTERFERENCE GATE (CTO upgrade 2026-07-14, forced by Andrew-direct #1).**
+Under EXCLUSIVE session semantics, **ANY C5 mint outside the refresher — a backfill worker's, the daily lambda's,
+AND THE COEXISTENCE PROBE'S OWN token-B mint — invalidates the co-parked JWT the LEGACY `smartx-rest-pull` reads.**
+That is interference with an existing pipeline — the exact thing Andrew reaffirmed against. **So the probe is not
+merely a concurrency gate; it is the non-interference gate for the entire C5 auth design, and the probe can itself
+cause the interference it tests for.** Therefore:
+- **TIME THE PROBE outside every legacy auth window.** Legacy auth-dependent schedule (from the live TF,
+  `America/New_York`): **refresher re-mints 09:00 ET → `rest-pull` reads 09:15 ET → `model-perf-pull` 09:35 ET**
+  (plus the 11:30 UTC / 14:00-UTC-weekday rules — confirm their auth-dependence before the probe). **Refresher
+  re-mint cadence = daily 09:00 ET** — that is the worst-case legacy-outage bound if the probe invalidates the
+  co-parked token, and it must be ACCEPTABLE before the probe fires. Run the probe well clear of the morning ET
+  window so a worst-case invalidation self-heals at the next 09:00 ET refresher, before any legacy pull needs it.
+- **If EXCLUSIVE:** C5 **NEVER mints while the legacy pipeline is live** — not workers, not the daily lambda. The
+  single-minter shape becomes the ONLY shape (daily lambda included): everything reads the refresher lane's output;
+  the auth module's `expired → re-mint LOUD` becomes **`expired → REFUSE LOUD and wait for the refresher`**. This
+  holds until legacy decommission changes the premise. (My `auth_bundle` mints in-memory today — under EXCLUSIVE
+  that path is disabled by config, refuse-loud instead.)
+- **If COEXIST:** everything stands as ratified (opt-in write-back, mint-in-memory workers, the probe was harmless).
+**The probe fires only after its own timing + the refresher cadence are on the record and acceptable.**
 
 ---
 
