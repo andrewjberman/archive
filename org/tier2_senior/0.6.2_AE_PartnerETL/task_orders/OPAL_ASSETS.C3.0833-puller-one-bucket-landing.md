@@ -1,0 +1,52 @@
+# OPAL_ASSETS.C3 — 0833 puller deployed → `bronze/schwab/08335338/` + scheduled; backfill copied in
+
+<issued_to>0.6.2_AE_PartnerETL</issued_to>
+<issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
+<date>2026-07-14</date>
+<status>pending</status>
+<project>OPAL_ASSETS — Grand Consolidation P1</project>
+<prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 (TO-C3) + §3 ruling 4</prd>
+
+## Scope
+Deploy your built+tested 0833 REST puller with a daily schedule, landing in the one bucket:
+`s3://opal-data-assets/bronze/schwab/08335338/{TYPE}/{YYYY-MM-DD}/...` — day-one-direct.
+Copy the parked backfill (`opal-data-schwab/backfill/08335338/`) into the canonical tree (**COPY job,
+never a re-pull, never a delete** — 257 of the 01_raw objects are irreplaceable per your own finding;
+that class of caution binds here too).
+
+**Gate:** landing target exists only after C1 (bucket Terraform) lands — staffing-forked to Andrew.
+**Fallback (CTO ruling 4, already in your apply-GO message):** if C1 slips >48h, landing in
+`opal-data-schwab/08335338/bronze/*` per Andrew's ~20:45Z verbatim grammar is authorized; the
+consolidation retarget then becomes a copy job. Prep now either way. **The 0824 backlog recovery under
+the apply GO (e6f618f66) is separate and does NOT wait on this TO.**
+
+## Fences
+Pull + raw bronze ONLY. No silver, no gold, no served re-derive ("No 49 Yet"). Never rewrite historical
+bronze keys in place. Identity from the vendor's bytes (H1 / vendor filename for headerless fam/slm);
+unreadable → quarantine. Masters never commingle. No new alarms/watchdogs (Andrew constraint — the
+oracle stays held per the apply-GO message).
+
+## <compiler_tools_mandate>
+Phase 1 (before writing): enumerate the target-prefix state before first write (your idempotency index);
+confirm the SchwabBronzeList grant covers the actual list calls (post-apply live simulate per 22a — one
+`--resource-arns` per call, positive control separate). If landing in the NEW bucket: fresh live
+simulate against the exact `opal-data-assets` ARNs — comp-iam FAILS GREEN on a new bucket.
+Phase 2 (before committing): `.tools/commit-gate.sh` (automatic); any `iam.tf` delta → `comp-iam gaps`.
+Phase 3 (after landing): head-object partition listing of landed objects = the RAVC evidence.
+</compiler_tools_mandate>
+
+## <cross_domain_coordination>
+`opal-data-schwab` prefixes are your own active lane (0824 recovery in flight). C1/C2/C8 assignee (TBD,
+Andrew staffing) must MCP you before touching any schwab prefix. The one prohibition binds: nobody
+writes `opal-data-inf/gold/meta/pipeline-complete.json`.
+</cross_domain_coordination>
+
+## <acceptance_criteria>
+1. `aws s3 ls` shows ≥1 dated partition per 0833 daily type under the landing target, head-object
+   verified, with the master read from the vendor's bytes (not the folder).
+2. Schedule exists and is ENABLED (`aws events describe-rule` / scheduler equivalent, output quoted).
+3. Backfill copied: object count parity between `backfill/08335338/` and the canonical tree, both
+   denominators printed (source count = landed count; no sampling).
+4. Idempotency exercised: a re-run of the same day lands 0 new objects and reports skip (not error).
+5. Session log with Compiler Tools section; RAVC close to CTO with evidence (partition list + rule state).
+</acceptance_criteria>

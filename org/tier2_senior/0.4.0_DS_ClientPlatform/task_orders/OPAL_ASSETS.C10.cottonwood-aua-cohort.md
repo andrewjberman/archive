@@ -1,0 +1,44 @@
+# OPAL_ASSETS.C10 — Cottonwood AUA figure sourced from the cot positions cube → new cohort row
+
+<issued_to>0.4.0_DS_ClientPlatform (+ AE if infra needed — join to staffing fork)</issued_to>
+<issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
+<date>2026-07-14</date>
+<status>pending</status>
+<project>OPAL_ASSETS — Grand Consolidation P2</project>
+<prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 (TO-C10)</prd>
+
+## Scope
+There is NO Cottonwood partner-total anywhere in the estate (measured). Source one from
+`opal-data-cot/gold/positions_cube/` → a Cottonwood-AUA cohort row in the gold table, carrying the full
+v0.21 identity tuple (as_of · state · scope · basis · valuation source · presentation case).
+
+## Fences + the landmine this row must not arm
+- The cube is POSITIONS-grain; the cohort row is partner-day grain; **the sum happens AT GOLD only.**
+- **AC14 (CTO~B, measured):** Cottonwood's source is positions-based with NO target_weight rows anywhere
+  — on the day Cottonwood is onboarded into any decomposition, a missing measured source MUST emit an
+  honest partial/missing, NEVER a fallback to intent. The emitter already states this contract at
+  `opal-assets-daily-emitter` (lines ~611-613). This row ships with `state` honest from day one.
+- cot is one-way fan-in (READ only, never the reverse); cot↔bd complete separation binds.
+- Cohort COUNT is Andrew's (the 14→16 question is being re-asked) — this TO adds the row's PRODUCTION,
+  and its inclusion in any served row-set waits on his taxonomy ruling if it would change the count.
+
+## <compiler_tools_mandate>
+Phase 1: `comp-pipescript io` on the emitter (column gaps + consumers) before adding the cohort; grain
+check written into the code path (positions → partner-day, sum at gold only).
+Phase 2: `.tools/commit-gate.sh`; Rule 15.
+Phase 3: `comp-validate --artifact` on the first emitted row before signaling it live.
+</compiler_tools_mandate>
+
+## <cross_domain_coordination>
+Reads `opal-data-cot` gold only. MCP 0.6.x/cot lane owners before touching any cot-adjacent config.
+Nobody writes `opal-data-inf/gold/meta/pipeline-complete.json`.
+</cross_domain_coordination>
+
+## <acceptance_criteria>
+1. A `cottonwood_aua` (naming per v0.21 taxonomy) row exists in `opal-assets-daily-aua` for a real
+   run_date with value derived from the cube, full identity tuple populated, `state` honest.
+2. The derivation prints its denominator (accounts/positions counted, none sampled).
+3. No decomposition/remainder path absorbs this row's absence (AC14 exercised: withhold the source,
+   confirm honest missing — in a test, never a served write).
+4. Session log + Compiler Tools section; RAVC close to CTO.
+</acceptance_criteria>
