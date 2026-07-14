@@ -3,8 +3,8 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO (V2 decomposition; PRD author 1.0.0_SA_CTO)</issued_by>
 <date>2026-07-14</date>
-<status>staged</status>
-<go>HARD GATE: the V2-5 certificate ACCEPTED by CTO (bronze categorically wrapped). COO dispatches the GO on that acceptance. Your V2-5 IAM-sweep half is separate and starts now under that TO.</go>
+<status>pending</status>
+<go>BUILD NOW -- ANDREW-DIRECT (2026-07-14 ~08:4xZ, COO session, verbatim: "Yes, start silver builds ahead of the certificate") SUPERSEDES the V2-5-cert hard gate for the BUILD. Author the TF against contract note v1 (d68982c1e), plan pure to-add. UNCHANGED: CTO gates every apply (deploy rule 18/safe-apply); the V2-5 certificate continues in parallel as the Phase-II completeness instrument and its emission gates are untouched. Your event slots (mirror verdict, 14:15Z, 15:45Z C9) interleave -- work-order, not wall-clock.</go>
 <project>OPAL_ASSETS — V2 Phase II silver conversion layer</project>
 <prd>docs/architecture/OPAL_ASSETS_V2_PRD.md §3 rulings 22-25 + V2-7 (@ 53ba45c5f); inherits CONSOLIDATION_PRD v1.6.0 whole</prd>
 

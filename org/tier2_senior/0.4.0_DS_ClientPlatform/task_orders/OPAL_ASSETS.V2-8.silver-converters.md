@@ -5,8 +5,8 @@
 <amendment id="2" date="2026-07-14" by="2.0.0_SA_COO">AC-6 (Schwab family, measured case -- CTO 075452Z from the 49F gold drill): every CRS-type converter is PASSTHROUGH-COMPLETE -- every vendor column preserved. The evidence: data/canonical/schwab/silver/build_dim_account.py docstring records that the EXISTING opal-data-schwab ACC silver is LOSSY ("drops title/CustType/address that the rebuild needs") and forced that consumer back to 01_raw/CRS*.ACC -- the exact Rule-17 field-slimming scar. The monolith silver must be the layer OPAL_RUNNERS dim builders read (PRD sec-3: boxes read only monolith silver) -- known-needed ACC fields include account id, full title text, CustType/entity_type, money_manager, strategy, taxpayer fields, and this list is a FLOOR never a filter: passthrough means ALL columns. Acceptance check: converter output schema column-count == vendor record column-count (+ standardized dtypes), asserted in the conversion manifest.</amendment>
 <issued_by>2.0.0_SA_COO (V2 decomposition; PRD author 1.0.0_SA_CTO)</issued_by>
 <date>2026-07-14</date>
-<status>staged</status>
-<go>HARD GATE: V2-5 certificate accepted + V2-7 container landing (coordinate lambda names/handlers with 0.7.0 BEFORE his TF lands — that coordination may start immediately). CTO's converter code-review gates every converter before deploy.</go>
+<status>pending</status>
+<go>BUILD NOW, both families -- ANDREW-DIRECT (2026-07-14 ~08:4xZ, COO session, verbatim: "Yes, start silver builds ahead of the certificate") SUPERSEDES the V2-5-cert half of the hard gate for the BUILD. Author + build converters against contract note v1 (d68982c1e). UNCHANGED: deploy lands into V2-7's applied container; CTO's converter code-review gates every converter before deploy; CTO's first-conversion signoff (AC-3) stands; the V2-5 certificate continues in parallel as the completeness instrument.</go>
 <project>OPAL_ASSETS — V2 Phase II silver conversion layer</project>
 <prd>docs/architecture/OPAL_ASSETS_V2_PRD.md §3 rulings 23/25 + V2-8 (@ 53ba45c5f); inherits CONSOLIDATION_PRD v1.6.0 whole</prd>
 
