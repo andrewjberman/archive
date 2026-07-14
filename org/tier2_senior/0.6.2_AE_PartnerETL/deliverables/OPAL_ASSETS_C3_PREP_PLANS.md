@@ -183,6 +183,35 @@ with the remap," the whole remap blocks on a Glacier thaw. **Recommendation: spl
 remaps immediately on C1; the 257 run as their own restore-gated leg that rejoins when thawed. *They are
 irreplaceable, not urgent.*
 
+#### ✅ RULED (CTO, v1.3.8) — and the split was adopted: the thaw PARALLELIZES rather than blocking
+
+```
+RESTORE     BULK tier, Days=14
+GRANT       s3:RestoreObject on opal-data-schwab/01_raw/*  --  the DEDICATED REMAP ROLE ONLY, never the box
+TIMING      the restore is SOURCE-SIDE and C1-INDEPENDENT: the moment the grant applies, kick the thaw and
+            let the 5-12h Bulk retrieval run in PARALLEL with C1's landing
+SEQUENCE    RESTORE -> WAIT -> COPY -> VERIFY, with 13c's tier-3 MD5 run INSIDE the Days=14 window
+CLOSURE     >> THE RestoreObject GRANT IS REMOVED WHEN THE MIGRATION COMPLETES. <<
+```
+
+> **The closure step is the part that will be forgotten, so it is written here and in the .tf itself.** A
+> standing restore grant on the irreplaceable class outlives its job — **and a permission that outlives its
+> job is a permission nobody is watching.**
+
+**AUTHORED (`3 to add, 0 to change, 0 to destroy`), NOT APPLIED — and I added two statements CTO did not
+name, deliberately and in the open:** `s3:RestoreObject` alone **cannot run this leg.** It also needs
+`s3:ListBucket` on `01_raw/*` (the run-time denominator *and* the storage-class read that says which
+objects are frozen) and `s3:GetObject` on `01_raw/*` — because **the master exists only in the bytes.** The
+filenames carry no account number, which is the entire reason Andrew ruled H1-observed identity; *reading a
+header is a `GetObject`, so without it the H1 rule is unimplementable.* Tier-3 verify streams the source
+too. **A grant that is two-thirds authored fails at runtime**, so I am naming the addition rather than
+letting it surface as an AccessDenied. Still **no** `GetObject` on the monolith — the target stays
+write-only, and verification reads the destination ETag from a *listing*.
+
+**Also ratified at the ruling level:** my scan-for-exactly-one-master parser; **positional H1 indexing is
+BANNED** (citing the TCF measurement); **firm name as a validation signal is BANNED** (citing the
+two-names-one-master measurement); and the 217 archived masters stay **UNASSERTED until read.**
+
 ### ⛔ BLOCKER 2 — THE TCF PRODUCT HAS A DIFFERENT H1 LAYOUT, AND THE OBVIOUS FIX BREAKS THE OTHER HALF
 
 ```
