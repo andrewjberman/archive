@@ -219,7 +219,15 @@ is live, mint token B, then assert A is **still accepted** on a harmless authent
 - **EXCLUSIVE →** backfill workers NEVER mint: read the SM secret only, refuse-LOUD on expiry, and a **single minter**
   (the `smartx-jwt-refresher` lane) is the only mint path during a backfill window.
 **Do NOT start the at-scale concurrent pull until this probe result is on the record.** (It does NOT gate the first
-single pull — only the at-scale concurrent backfill.)  **PROBE RESULT: [PENDING — run before at-scale backfill].**
+single pull — only the at-scale concurrent backfill.)
+
+**✅ PROBE RESULT: COEXIST (run 2026-07-14 ~01:19 ET / 05:19Z, outside the legacy window).** Minted token A, then
+token B on the SAME opal7 credential (A≠B); an authenticated `GET api/3.1/benchmarks` with **token A returned HTTP 200**
+(394B) *after* B was minted — token A survived. Control: token B also 200. **Two independent sessions COEXIST on one
+credential.** ⇒ **The opt-in-write-back + mint-in-memory-workers shape STANDS exactly as ratified; the EXCLUSIVE branch
+is NOT taken; a C5 mint does NOT invalidate the legacy co-parked token → no non-interference risk from minting.** This
+also live-exercised the whole auth path (ROPC mint against real SmartX + authenticated GET) — deployed=exercised, not
+just unit-green.
 
 **⛔⛔ THE PROBE IS ALSO A NON-INTERFERENCE GATE (CTO upgrade 2026-07-14, forced by Andrew-direct #1).**
 Under EXCLUSIVE session semantics, **ANY C5 mint outside the refresher — a backfill worker's, the daily lambda's,
