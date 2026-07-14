@@ -5,6 +5,7 @@
 <date>2026-07-14</date>
 <status>staged</status>
 <go>HARD GATE: V2-8 converters deployed + CTO first-conversion signoff. COO dispatches the GO.</go>
+<amendment id="1" date="2026-07-14" by="2.0.0_SA_COO">EXECUTION NOTE (CTO 162522Z, first-conversion window verdict): the ORION backlog drain is COMMISSIONED to 0.7.0 as an operational lane -- sequential {"mode":"sweep"} invokes of the DEPLOYED converter (same code as the event path = ruling 24 compliant), single-writer honored, heavy-unit duration measured en route, stop condition = in-window completion + verdict manifest (a unit that cannot fit 600s stops the drain and goes to CTO as a sizing plan). This TO's DS scope (per-family set-identity verdicts, backfill-status.json written by the process, convergence proof over EVERY channel) is UNCHANGED and still COO-GO-gated -- 0.7.0's drain is one channel's execution leg, not a reassignment.</amendment>
 <project>OPAL_ASSETS — V2 Phase II silver conversion layer</project>
 <prd>docs/architecture/OPAL_ASSETS_V2_PRD.md §3 ruling 24 + V2-9 (@ 53ba45c5f); inherits CONSOLIDATION_PRD v1.6.0 whole</prd>
 
