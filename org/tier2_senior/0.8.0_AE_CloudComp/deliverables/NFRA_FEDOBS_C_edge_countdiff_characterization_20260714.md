@@ -37,12 +37,16 @@ MERGE-collapsed exact duplicates.**
 | Class | Endpoints | Edges | Reading |
 |---|---|---|---|
 | **Wildcard pseudo-endpoints** (IAM `Resource:"*"` grants materialized as edges to a `*:<verb>` pseudo-target) | `*:logs_to` (174), `*:reads_secret` (51), `*:reads` (41), `*:writes` (32), `*:publishes_to` (13), `*:sends_to` (4) | **315 (91.9%)** | CORRECT drops: a wildcard grant has no node to land on; the edge row preserves the grant fact in the lake, the graph declines to fabricate a node. |
-| **Deleted-Lambda target** | `arn:...function:bd-client-detail` (2 TRIGGERS + 1 more ref = 3 edges incl. the TRIGGERS pair) | **3** | **THE REAL FINDING** -- live-verified `ResourceNotFoundException` 2026-07-14: EventBridge rules still target a Lambda that no longer exists. Exactly the desired-vs-applied drift class FEDOBS(a) now systematizes. SURFACED, not adjudicated. |
-| **AWS-managed / out-of-account SSM resources** | `AWS-RunPowerShellScript`, `AWS-StartEC2Instance`, `dc2-test1-offpeak-orchestrator:$DEFAULT` | **3** | Census-scope boundary: AWS-owned documents are not estate nodes. Honest. |
+| **Deleted-Lambda target** | `arn:...function:bd-client-detail` (2 TRIGGERS edges) | **2** | **THE REAL FINDING** -- live-verified `ResourceNotFoundException` 2026-07-14: EventBridge rules still target a Lambda that no longer exists. Exactly the desired-vs-applied drift class FEDOBS(a) now systematizes. SURFACED, not adjudicated. |
+| **AWS-managed / out-of-account SSM resources** | `AWS-RunPowerShellScript` (1), `AWS-StartEC2Instance` (1), `dc2-test1-offpeak-orchestrator:$DEFAULT` (1 -- the third TRIGGERS skip) | **3** | Census-scope boundary: AWS-owned documents are not estate nodes. Honest. |
 | **Subnets (class not censused)** | 2 subnet ARNs (IN_SUBNET) | **2** | comp-aws has no subnet node class yet; the 2 IN_SUBNET edges wait on one. A (small) coverage gap, named. |
 
 Per-type: LOGS_TO 174 · READS_SECRET 51 · READS 41 · WRITES 32 · PUBLISHES_TO 13 · SENDS_TO 4 ·
-TRIGGERS 3 · IN_SUBNET 2 · READS_S3 1 · WRITES_S3 1. (Sums to 322.)
+TRIGGERS 3 (= bd-client-detail 2 + the SSM automation-definition 1) · IN_SUBNET 2 · READS_S3 1 ·
+WRITES_S3 1. (Sums to 322; class rows 315 + 2 + 3 + 2 = 322 -- tables agree to zero.
+CORRECTION @ CVO F-nit 955e39d48: the deleted-lambda row previously read 3 by double-counting the
+SSM automation-definition TRIGGERS skip into it; bd-client-detail carries exactly 2 edge references
+in the skip census. The routed finding is unchanged -- 2 stale TRIGGERS rules, Lambda deleted live.)
 
 ## The 21 collapsed duplicates
 
