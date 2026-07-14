@@ -4,10 +4,15 @@
 **Authority/brief:** 1d9f9c4f6 (0.7.0~Z hand-in) + bd825cc93 (amend-1) | **Payload source:** 0.8.0~Z GATE-OPENER msg 20260714T081638Z
 
 ## Posture (binding)
-Both gates are **read-only pre-flighted and match the delivered facts exactly**. The two irreversible
-executions -- Gate A `--go` (CodeBuild) and Gate B `safe-apply` -- **remain HELD pending Andrew routing to
-this lane** (per my brief + CTO~Z: both gates await Andrew routing; the one-applier base-0.7.0 concurrent-
-apply residual is surfaced-not-adjudicated). 0.8.0~Z's payload is the FACTS, not the apply-GO.
+**UPDATE 08:5xZ -- BOTH GATES EXECUTED + VERIFIED under CTO~Z GO 083509Z (Andrew instantiation = routing;
+3 conditions met; no Andrew countermand in the open window).** Gate A: image rebuilt (digest 514ef81a !=
+07-09 baseline 2b7f5ec0), fedobs in-image. Gate B: targeted 6/0/0 applied + 0-diff, SNS sub excluded,
+freeze_monitor untouched, Rule-22a IAM discriminates, served fedobs_observations.json UNFROZEN
+(07-08 -> 07-14 08:51Z) with marker_pin.pinned=True + verified_stable=True + pinned_snapshot_id +
+bracket-equal heads. NEVER#5 ledger 20260714T0842Z_globgrph-fedobs-producer-gateB CLOSED (4/4 legs). The
+whole ~Z plane apply-gate is OPEN (CVO~Z FEDOBS(b) re-take pinged, 0.8.0~Z's 7 PROMOTE candidates advance).
+
+The pre-flight below is the record of what was verified READ-ONLY before execution.
 
 ## GATE A -- derive-image rebuild -- VERIFIED, helper landed
 - **Mechanism:** CodeBuild `globgrph-derive-build`, source = S3 zip
