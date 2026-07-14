@@ -31,10 +31,14 @@ OR a recorded exemption ruling. This list = the expectation-report skeleton for 
 Silver = fact_{type} COMPLETE tables; gold = dim_* projections; gold is the ONE parse-down
 point. => planned names: fact_allocation_positions, fact_allocation_valuation,
 fact_model_aum_daily, fact_model_allocation_roster, fact_allocation_account_map.
-OPEN FOR CTO: the 2 pre-naming-law DRAFT silver objects
-(smartx/platform/silver/allocation_{positions,valuation}/date=2026-07-14/, pandas-inferred
-schemas, drafted pre-V2-8) sit at NON-fact_ keys — superseded by the family build; delete vs
-leave is CTO's call (bronze-never-rewritten does NOT bind silver, but key hygiene does).
+RULED (CTO 231703Z): LEAVE-AND-QUEUE — the 2 pre-naming-law DRAFT silver objects join Andrew's
+NEXT deletion batch (2,269-orphan precedent; versioning makes the wait free). DRAFT-SUPERSEDED,
+copy-paste-ready for the batch:
+```
+s3://opal-data-assets/smartx/platform/silver/allocation_positions/date=2026-07-14/data.parquet   # DRAFT-SUPERSEDED (pandas-inferred schema, pre-V2-8, non-fact_ key; ~3.05MB)
+s3://opal-data-assets/smartx/platform/silver/allocation_valuation/date=2026-07-14/data.parquet   # DRAFT-SUPERSEDED (pandas-inferred schema, pre-V2-8, non-fact_ key; ~1.13MB)
+```
+(bronze-never-rewritten does NOT bind silver; key hygiene + the batched-deletion law do.)
 
 ## C. Rule-17 constraints already ruled (do not re-litigate)
 - Dedup + dtype ONLY; every vendor column preserved (incl. vendor bugs: assetType uniformly
