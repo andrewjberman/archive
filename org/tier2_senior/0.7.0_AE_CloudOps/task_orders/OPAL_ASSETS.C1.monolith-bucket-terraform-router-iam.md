@@ -29,6 +29,13 @@ Andrew, verbatim (~01:05Z), which IS the scope:
 
 Deliverables (each = a landed byte, via Terraform):
 1. **`s3://opal-data-assets`** — the bucket, in Terraform, under `.tools/safe-apply.sh`.
+   **SSE RULED (PRD v1.3.3 ruling 13 @ 5f530a074, then 13a REVERSED at v1.3.4 @ f8ea5725d — final state):
+   SSE-S3/AES256 DEFAULT ENCRYPTION ONLY. NO `DenyUnencryptedObjectUploads` statement — 13a's deny was
+   formally reversed on 0.6.2's evidence (his schwab measurement was a HAZARD report, not a pattern
+   endorsement: that deny's failure mode is a permissions-bug-shaped AccessDenied whose historical fix is
+   IAM-widening, and S3 encrypts unconditionally since 2023). NO KMS — every producer role stays KMS-free.
+   Producers write plain; the bucket default encrypts; NO producer ever carries an SSE header requirement
+   for the monolith. Your deliberate omission in the HCL stands as written.**
 2. **The prefix grammar** — `{source}/{scope}/{layer}/{type|feed}/{date}/` (PRD §2 layout, reproduced below).
 3. **Router IAM** — per-source READ, assets WRITE, **explicit grants, fan-in ONE-WAY**.
 4. **(v1.3) Reserve the `{source}/{scope}/gold/` grammar** — *naming reserved, NOTHING BUILT.*
@@ -38,11 +45,20 @@ Deliverables (each = a landed byte, via Terraform):
 s3://opal-data-assets/            grammar: {source}/{scope}/{layer}/{type|feed}/{date}/
   schwab/08242234/bronze/{type}/{YYYYMMDD}/{vendor}.zip     raw zips, as Schwab ships them
   schwab/08242234/silver/{TYPE}/date=YYYY-MM-DD/data.parquet
-  schwab/08335338/bronze/... + silver/...
+  schwab/08335338/bronze/... + silver/...   (staged objects remap in from opal-data-schwab -- C3;
+                                             the denominator is ENUMERATED AT RUN TIME from the source,
+                                             never read from a doc: the 0824 pull is still landing and
+                                             any fixed count in a document is stale the moment it is
+                                             written -- 0.6.2 F-1, 2026-07-14)
   smartx/{model|platform}/bronze/{feed}/{YYYYMMDD}/...json
   orion/inflection/bronze|silver/...        eclipse/inflection/bronze|silver/...
   blackdiamond/cottonwood/bronze|silver/... trueshares/{DIVZ,IDVZ}/bronze|silver/...
-  pathfinder/{PFOE,PFDE}/bronze|silver/...
+  pathfinder/filepoint/bronze/{feed}/{YYYYMMDD}/       (ruling 15, PRD v1.3.3: BRONZE SCOPE = THE
+                                             VENDOR'S DELIVERY SCOPE -- Filepoint ships ONE file
+                                             carrying BOTH funds; per-fund {PFOE,PFDE} scope
+                                             materializes at SILVER only)
+  msn/{TICKER}/bronze/netassets/{YYYYMMDD}/{instrument_id}.{tag}.json   (fallback tier, homed by
+                                             ruling 15 -- fires only when a primary issuer feed breaks)
   {source}/{scope}/gold/                    <-- RESERVED IN THE LAYOUT. BUILD NOTHING HERE.
 
   BRONZE law: raw byte-for-byte as the vendor shipped (zips stay zips), NEVER parquet, compact YYYYMMDD.
