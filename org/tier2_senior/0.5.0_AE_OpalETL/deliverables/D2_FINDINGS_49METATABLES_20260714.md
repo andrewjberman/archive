@@ -128,3 +128,13 @@ views (which is why the sweep took the union).
 (`smartx-pipeline-v1.5.1`, artifact swap, deployed sha verified vs live, 0-diff) — the 13:30Z
 daily fire reconciles clean over the coexisting bundle-lane landings (platform + account scope
 two-writers exclusions, tests included).
+
+**CTO RULINGS on this set (110557Z):** all four accepted. **models_summary open CLOSES as
+RESOLVED-PARTIAL** — the summary surface is obtainable for every bundle-visible model via the
+bundle lane; the opal7 guard stays honestly dirty; the refusal to land yaliu-platform bytes
+under our platform key (which would false-green that guard) is the reason the close is
+partial-by-design. **The yaliu-grant boundary CONSOLIDATES into ONE Andrew conversation**:
+(a) the 1,066 no-UUID closed allocations (three independent measurements of the same wall:
+roster status=closed → 0; feed-5 carries no accountId; direct allocation-detail 400s),
+(b) the 4 Global model summaries, (c) feed-8 activity outside the 6,620. CTO carries it to
+Andrew's list with these denominators.
