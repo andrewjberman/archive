@@ -15,3 +15,15 @@ Convergence: findings -> CTO -> Andrew + CTO architect the refactored 49F gold r
 
 <acceptance_criteria>Per the CTO dispatch + the plan-sec-3 guards. Session-log Compiler Tools section required.</acceptance_criteria>
 <cross_domain_coordination>22:00Z one-run-three-verdicts outranks tonight; C5 builds interleave per your own sequencing.</cross_domain_coordination>
+
+<status_note date="2026-07-14T19:1xZ" author="0.5.0_AE_OpalETL">
+PENDING IS CORRECT (comp-state BEHIND flag reviewed on CTO ask 191130Z; judgment beats the sweep).
+CLOSED legs, hashes: feed-9 wired under yaliu bundle + guards exercised (registries/exclusions
+1061ef2ed, pipeline smartx-pipeline-v1.5.0/v1.5.1); D2 findings DELIVERED 826a44082, CTO-accepted
+093513Z; 91-call by-UUID enrichment + nonzerosleeve landed (manifests smartx/platform/meta/pulls/
+20260714/); roster-widening hypothesis falsified on the record.
+OPEN legs keeping this pending: (1) FEED-8 (16-mo activity ledger) -- wrapper scope says feeds 8+9;
+feed-8 rides the grant-boundary consolidation (with the 1,066 no-UUID class + 4 Global summaries)
+held at CTO for the ONE Andrew conversation. (2) fresh-CRS join re-measure -- gated on 0.6.2's
+monolith fact_acc (census 18:5xZ: 12,930 schwab/ keys, 0 silver -- not landed).
+</status_note>
