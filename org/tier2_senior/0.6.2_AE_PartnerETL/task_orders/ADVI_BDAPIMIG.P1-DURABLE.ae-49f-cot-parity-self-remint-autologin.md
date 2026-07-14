@@ -2,9 +2,18 @@
 
 <issued_to>0.6.2_AE_PartnerETL</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>blocked</status>
 <date>2026-06-29</date>
 <priority>HIGH — sole 49f unfreeze path (Andrew declined the manual reseed band-aid; durable port IS the fix)</priority>
+
+> **BLOCKED-ON-RULING (COO, 2026-07-14 17:3xZ; 0.6.2 hygiene surface 173100Z, fork routed to CTO 173219Z).**
+> The world moved under this TO: Andrew ordered the daily BD REST pattern for BOTH masters into the
+> MONOLITH (~03:4xZ 07-14); 0.7.0's D1a REST vehicle is LIVE in probe mode (Apply B pending); 0833 BD
+> bronze is monolith-side. OPEN FORK (CTO's): is D1a Apply B the durable 49f BD feed (-> this TO
+> SUPERSEDED), or must the legacy opal-data-bd flow stay durably alive in parallel until OPAL_RUNNERS
+> re-points gold (-> this TO still live)? COO rec on the record: supersede-expected; no new legacy-box
+> auto-login investment while D1a converges; reactivate only if the legacy feed degrades before Apply B
+> lands. **Assignee does nothing here until the ruling; do not self-close.**
 
 ## Objective
 
