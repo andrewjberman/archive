@@ -135,3 +135,15 @@ CONFIG-MISS, not WARN-empty.
 - ROUTED to COO: restore-vs-decommission is an ownership call (ADVI_49EXEC lineage). Recovery is
   mechanical if wanted: `git checkout 64b6b9d65~1 -- infra/aws/lambda/exec-summary-generator/`
   then verify vs the DEPLOYED CodeSha256 before any motion.
+
+## Batch 3 (~19:0xZ): the mirror rule pair -- HEALTHY-NEW, and the enumeration's lookback-vs-birthdate lesson
+
+| ligament | schedule | verdict |
+|---|---|---|
+| opal-assets-ingest-mirror-inf-daily | 14:15Z | HEALTHY-NEW: TriggeredRules metric shows exactly 1 fire (07-14 -- TODAY'S 14:15Z walk, the run this session verified end-to-end with full denominators). The enumeration's fired_50h=0 is NOT a dead ligament: the rule was born in this week's V2 mirror build, after the snapshot's lookback start. A 0-count on a rule younger than the lookback window is a BIRTHDATE artifact, not a silence finding. |
+| opal-assets-ingest-mirror-cot-daily | 03:30Z | HEALTHY-NEW, same reasoning (1 fire = today's 03:30Z). |
+
+Method note for the sweep: fired_50h MUST be read against rule creation time before any dead-ligament
+verdict -- the seeking-alpha rows (SA-1) were content-dead on OLD rules (real finding); a young rule
+with a small count is the opposite case. Sweep-wide: the scheduled+env-bucket-only set (10 rows) is
+now FULLY VERDICTED; remaining code-grounding backlog is the pattern-triggered + richer-env classes.
