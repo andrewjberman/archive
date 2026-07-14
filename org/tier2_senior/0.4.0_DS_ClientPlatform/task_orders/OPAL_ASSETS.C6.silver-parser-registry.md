@@ -4,6 +4,11 @@
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
 <status>pending</status>
+<state date="2026-07-14 ~05:0xZ" by="2.0.0_SA_COO (reconciliation)">LANDED: inc-1 Schwab CRS reader on
+real 0824 bytes (44a5328ce, 30/30 + guard mutated) + inc-2 raw Orion/Eclipse/INF reader refusing .parquet
+under bronze/ (37752c64f, 45/45) -- both RAVC-closed; ruling 11a (T1 hard-raise) binds; conservation-guard
+audit ALL SOUND. REMAINING: Orion/Eclipse parser completion + monolith event WIRING (with 0.7.0) + the
+completeness law across remaining sources. Pending is correct (assignee-held, external-gated legs).</state>
 <hold>ANDREW HOLD 2026-07-14 ~00:25Z, verbatim: "Wait to dispatch until I give the go, I want to respawn the workers first." LIFTED 2026-07-14 ~01:06Z: CTO GO issued to the respawned, roster-verified serial per Andrew's begin-on-readiness protocol (C7 = author half only; C11 remains gated on C3+C6).</hold>
 <project>OPAL_ASSETS — Grand Consolidation P2</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 (TO-C6)</prd>

@@ -3,7 +3,18 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO (coordination lane, Andrew-direct ~01:07Z) — authored from PRD v1.3.1 §4 row C9 + master plan §1 row 8; architecture owner remains 1.0.0_SA_CTO</issued_by>
 <date>2026-07-14</date>
-<status>phase-a-grounding-REOPENED--phase-b-scoping-via-CTO</status>
+<status>phase-a-DELIVERED--phase-b-rec-at-CTO-gate</status>
+<phase_a_delivery date="2026-07-14 ~05:00Z" msg="20260714T050046Z">
+GROUNDED, source-confirmed: THE INPUT NEVER DIED. Producer bd-49f-etf-ownership-daily is a DESIGNED
+manual-monthly-batch Lambda (its own source :22-29: "Trigger: none scheduled (monthly batch). Invoke
+per-batch"); NO resource policy exists (nothing CAN invoke it but a hand); last hand-run batch 06-25.
+The fan-in is healthy + honest (re-upserts the latest slice with true vintage labeled). No INF resource
+in the path -- advancing the input cannot advance the held chain. Staleness calendar-resolved: input 13
+trading days behind, its RPS source 6. Row 8's "its input died" = a designed cadence mistaken for an
+outage (the TO's named trap, second form). PHASE-B REC at CTO's gate: (a) GO-narrow -- per-date manual
+invokes as designed (13 -> 6 today; moves served internal numbers, hence gated); (b) producer cadence ->
+OPAL_RUNNERS scoping (the monthly-batch premise dissolves under the both-masters daily REST schedules).
+</phase_a_delivery>
 <sovereign_lift date="2026-07-14 ~03:3xZ" channel="Andrew -> COO, interactive" recorded_by="2.0.0_SA_COO">
 ANDREW, VERBATIM: "Oh that is retarded, 49 is back on the menu now, take the sovereign block off
 completely, that is no excuse to not verify the work."

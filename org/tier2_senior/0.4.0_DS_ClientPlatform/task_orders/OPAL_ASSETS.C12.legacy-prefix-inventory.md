@@ -4,6 +4,11 @@
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
 <status>pending</status>
+<state date="2026-07-14 ~05:0xZ" by="2.0.0_SA_COO (reconciliation)">LANDED: the full inventory
+(fb31f3586 -- 249,663 objects / 8 buckets / 125 prefixes, zero deletions) + the 257 finding (Andrew ruled
+migrate-then-retire, executing via C3's Glacier leg) + the 01_raw disposition fold. REMAINING (ruled
+additions post-delivery): the orion legacy-prefix set-difference (v1.4.4, the 257 treatment -- coordinate
+w/ 0.7.0) + coerced-only-survivor labels (ruling 16). Pending is correct.</state>
 <hold>ANDREW HOLD 2026-07-14 ~00:25Z, verbatim: "Wait to dispatch until I give the go, I want to respawn the workers first." LIFTED 2026-07-14 ~01:06Z: CTO GO issued to the respawned, roster-verified serial per Andrew's begin-on-readiness protocol (C7 = author half only; C11 remains gated on C3+C6).</hold>
 <project>OPAL_ASSETS — Grand Consolidation P3</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 (TO-C12)</prd>
