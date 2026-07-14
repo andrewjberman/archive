@@ -3,7 +3,22 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO (coordination lane, Andrew-direct ~01:07Z) — authored from PRD v1.3.1 §4 row C9 + master plan §1 row 8; architecture owner remains 1.0.0_SA_CTO</issued_by>
 <date>2026-07-14</date>
-<status>phase-a-complete--phase-b-HELD-SOVEREIGN</status>
+<status>phase-a-grounding-REOPENED--phase-b-scoping-via-CTO</status>
+<sovereign_lift date="2026-07-14 ~03:3xZ" channel="Andrew -> COO, interactive" recorded_by="2.0.0_SA_COO">
+ANDREW, VERBATIM: "Oh that is retarded, 49 is back on the menu now, take the sovereign block off
+completely, that is no excuse to not verify the work."
+EFFECT ON THIS TO: the HELD-SOVEREIGN status below is LIFTED. The 2026-07-09 prohibition (49F / Schwab /
+RPS / data/black_diamond/ / opal-data-bd / bd custody) is OFF COMPLETELY — verification work in those
+domains is not merely permitted, it is DEMANDED. Phase A's grounding now COMPLETES properly: read the bd
+producer's source, resolve the input staleness on real artifacts (trading-calendar first, NEVER#1),
+ground the stop mechanism per Rule 22. Phase B (the fix) is then scoped on that real grounding through
+CTO's Rule-22 gate AS NORMAL WORK — the domain block is gone; the engineering rules are not.
+STILL STANDING, DO NOT OVER-READ THE LIFT: the INF chain hold (Door 5, the frozen 3, mdpf freeze, Door 6,
+the time-lock stamp order) is a SEPARATE hold with its own mechanism and is UNCHANGED. The 0824/0833
+never-summed ruling stands (data-grain, "summing is a presentation question"). Bronze never rewritten in
+place stands (17a). No ad-hoc gold runs to validate stands (NEVER-rule). Vendor egress rules unchanged.
+The Phase-A stop below remains a correct record of the world as it was when taken.
+</sovereign_lift>
 <phase_a_outcome date="2026-07-14 ~03:19Z" by="0.7.0_AE_CloudOps" closed_by="2.0.0_SA_COO">
 **THE STOP CONDITION FIRED ON THE FIRST GROUNDING PASS — this TO's predicted outcome, delivered.**
 The 49F input's mechanism traces into THREE sovereign-prohibited domains at once: its producer is
