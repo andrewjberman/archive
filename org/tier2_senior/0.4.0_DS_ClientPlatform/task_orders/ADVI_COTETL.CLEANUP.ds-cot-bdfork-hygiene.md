@@ -6,6 +6,14 @@
 <issued_date>2026-06-22</issued_date>
 <status>active</status>
 <!-- GO 2026-06-22 1723Z: DS signaled bandwidth (P0 closed, idle-available). NON-URGENT/DS-paced. Sequence (DS-proposed): Leg-1a comp-blast re-confirm 0 live cot consumers -> CTO rules retire-vs-snapshot-wire -> Leg-1c execute; Leg-2 ruff cleanup in parallel (no CTO-gate). Both NON-CORRECTNESS, cot-scoped, firm-separated. -->
+<!-- RECONCILE 2026-07-14 (DS, comp-state candidate routed by CTO 073443Z): the C2 cot-map re-scope
+     (59249227c, applied+verified 07:2xZ) changes what the MONOLITH mirrors FROM opal-data-cot
+     (bronze/ markers -> forwardfill_v2/; opal-data-cot itself untouched per new-territory). This TO's
+     items live in the cot GOLD tree + SSM chain (C_00/C_02 retire, D_00* fallback branches, C_01 ruff)
+     -- none read the mirror's source mapping, so the re-scope changes NOTHING here. Status stays
+     `active`: DS half staged-not-committed by design, awaiting the COO-scheduled coordinated
+     AE-dechain-FIRST landing window. NOT stale, correctly parked. -->
+
 
 <objective>
 Two same-class bd-fork hygiene items surfaced by the COTETL $24M served-AUA fix (5c80bf6ca, CVO-certified). Both are NON-CORRECTNESS, cot-path-scoped, DS-lane (gold-script Rule-13). The served firm-AUA is CORRECT + certified ($395.30M/06-18); this is debt-cleanup so the dead-fork remnants don't mislead a future toucher.
