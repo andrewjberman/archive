@@ -44,6 +44,8 @@ NOT touch until the ruled cutover); denominator printed on every conversion run.
 2. Silver set-identity guard mutant-exercised BEFORE first real conversion (ruling 25).
 3. First real conversion signed off by CTO (silver first-conversion signoff is his gate).
 4. Rule 17 compliance stated per converter (what dedup key, what dtype map, NOTHING else).
-5. Schwab Group-A column naming BLOCKED-named on the FAM/SLM doc until Andrew's item closes — build the
-   rest, leave that seam explicit.
+5. Schwab Group-A column naming UNBLOCKED (Andrew ruling ~05:5xZ ET via CTO 20260714T060537Z,
+   superseding ruling 23's waits-on-doc clause): mechanical/positional names + empirical dtypes NOW;
+   the FAM/SLM vendor doc, when it arrives, becomes a documentation OVERLAY in the meta layer — never
+   a schema change.
 </acceptance_criteria>
