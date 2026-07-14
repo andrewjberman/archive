@@ -5,14 +5,25 @@
 <date>2026-07-14</date>
 <status>pending</status>
 <project>OPAL_ASSETS — Grand Consolidation P1</project>
-<prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §2 (target architecture) + §2b (end-state) + §4 row C1 + §4a compiler mandates + §4 cross-domain</prd>
-<priority>P1 — **THE CRITICAL PATH. C2, C3-landing, C4 and C6-wiring all wait on this bucket.** Nothing else in the consolidation lands until C1 does.</priority>
+<prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §2 (target architecture) + §2b (end-state) + §4 row C1 + §4a compiler mandates + §4 cross-domain — **authored at v1.3.1 @ 34333469b; ruled amendments folded through v1.3.8 @ a0ed08933 (SSE final state, grammar rulings 15/v1.3.6, denominator law 13b)**</prd>
+<priority>P1 — **THE CRITICAL PATH for every LANDING: C2, C3-landing, C4-landing and C6-wiring all wait on this bucket.** (C6-authoring, C7's DS half, C10, C12 and the 0824 recovery are C1-independent and proceed in parallel — the dependency map is PRD §4's, not broader.)</priority>
 
-<authority>
-Andrew, verbatim (~01:07Z, to CTO, interactive): "You can direct these through COO, I do not want you to be
-distracted with Coordination. That can be their job." Coordination lane is COO's; CTO retains architecture,
-rulings, and EVERY APPLY GATE. The 00:25Z dispatch hold ("Wait to dispatch until I give the go, I want to
-respawn the workers first") is SATISFIED — the worker respawn wave is complete and all four workers are live.
+<authority amended="2026-07-14 ~02:3xZ per Andrew-ordered review (findings 8/47) — the release chain is now CITED, not inferred">
+The 00:25Z dispatch hold ("Wait to dispatch until I give the go, I want to respawn the workers first") is
+RELEASED on this chain:
+  1. Andrew's release protocol (CTO relay, msg 20260714T005942Z): "Andrew is spawning YOU + DS + 0.6.2...
+     Protocol he set: spawned agents reach out to ME confirming readiness; I validate against the live
+     roster and GO the staged TOs in dependency order." The GO condition Andrew set = respawn + readiness
+     confirms, with CTO holding the GO authority.
+  2. Andrew, verbatim (~01:07Z, to CTO, interactive): "You can direct these through COO, I do not want you
+     to be distracted with Coordination. That can be their job."
+  3. CTO's pre-authorization (msg 20260714T010814Z, verbatim): "GO RELAYS against the staged TOs AS
+     WRITTEN... 0.7.0 on his registration + confirm: the CONTAINER package -- C1 (critical path, first),
+     C2, C7 deploy-half, C9" — "pre-authorized, no round-trip to me needed."
+  4. Precondition met on the live roster (all four workers LIVE, verified immediately before relay);
+     0.7.0's readiness confirm received 20260714T011240Z.
+Coordination lane is COO's; CTO retains architecture, rulings, and EVERY APPLY GATE (C1's apply
+subsequently GO'd by CTO 20260714T020311Z).
 </authority>
 
 ## Scope
@@ -37,7 +48,10 @@ Deliverables (each = a landed byte, via Terraform):
    Producers write plain; the bucket default encrypts; NO producer ever carries an SSE header requirement
    for the monolith. Your deliberate omission in the HCL stands as written.**
 2. **The prefix grammar** — `{source}/{scope}/{layer}/{type|feed}/{date}/` (PRD §2 layout, reproduced below).
-3. **Router IAM** — per-source READ, assets WRITE, **explicit grants, fan-in ONE-WAY**.
+3. **Router IAM** — per-source READ, assets WRITE, **explicit grants, fan-in ONE-WAY**. **The source
+   read-set is EXACTLY: `opal-data-inf` (orion + eclipse bronze) and `opal-data-cot` (cottonwood bronze)**
+   — the C2-ruling's three map rows; the fence below bans PutObject on ANY `opal-data-*` source, and the
+   deny must be demonstrated against EACH bucket in this read-set, not just inf.
 4. **(v1.3) Reserve the `{source}/{scope}/gold/` grammar** — *naming reserved, NOTHING BUILT.*
 5. **(v1.3) IAM shaped so future per-source runner roles attach without restructure.**
 
@@ -51,6 +65,7 @@ s3://opal-data-assets/            grammar: {source}/{scope}/{layer}/{type|feed}/
                                              any fixed count in a document is stale the moment it is
                                              written -- 0.6.2 F-1, 2026-07-14)
   smartx/{model|platform}/bronze/{feed}/{YYYYMMDD}/...json
+  smartx/{model|platform}/silver/{feed}/date=YYYY-MM-DD/data.parquet
   orion/inflection/bronze|silver/...        eclipse/inflection/bronze|silver/...
   blackdiamond/cottonwood/bronze|silver/... trueshares/{DIVZ,IDVZ}/bronze|silver/...
   pathfinder/filepoint/bronze/{feed}/{YYYYMMDD}/       (ruling 15, PRD v1.3.3: BRONZE SCOPE = THE
@@ -119,18 +134,47 @@ role against the **EXACT new-bucket ARNs**.
    not a plan output, not `rc=0` from Terraform.
 2. Terraform `plan` is **0-diff** after apply. Quote it.
 3. The prefix grammar is realized and demonstrated: create + head-object one probe object per source tree,
-   proving the layout, then remove the probes (or land them under an explicit `_probe/` prefix and say so).
-4. **Router IAM live-simulated per Rule 22a**: for the router role, `simulate-principal-policy` shows
-   `allowed` for `s3:PutObject` on an EXACT `opal-data-assets/{source}/...` key, and — separately invoked —
-   **`implicitDeny`/`explicitDeny` for `s3:PutObject` against `opal-data-inf`** (the one-way fan-in fence,
-   exercised, not asserted). ONE `--resource-arns` per call; positive control a SEPARATE invocation.
+   **landed under an explicit `_probe/` prefix and said so — the ONLY sanctioned mechanism** (review
+   findings 26/30/38: probes at canonical paths would plant synthetic non-vendor bytes in bronze trees,
+   and "then remove them" instructs an S3-object deletion, a human-confirmation class per CLAUDE.md Agent
+   Autonomy; `_probe/` needs neither). `_probe/` objects stay; C12-class inventories mark them.
+4. **Router IAM live-simulated per Rule 22a** — corrected per review findings 27/12/10 (the original deny
+   leg was a GUARANTEED-PASS instrument: simulating PutObject against a BUCKET ARN returns implicitDeny
+   for every role, because object-scoped Allows do not match a bucket ARN):
+   a. POSITIVE leg: `allowed` for `s3:PutObject` on an EXACT `opal-data-assets/{source}/...` OBJECT key.
+   b. DENY leg, **against EXACT OBJECT-KEY ARNs, never the bucket ARN**, one per invocation, for EACH
+      source bucket in the read-set: `arn:aws:s3:::opal-data-inf/gold/meta/pipeline-complete.json` (a
+      simulate is a pure IAM evaluation — it writes nothing; there is no safer key to prove the fence
+      against), one ordinary inf key, and one `opal-data-cot` key. Expect `implicitDeny`/`explicitDeny`
+      on every one. `--context-entries` for any conditioned statement.
+   c. **INSTRUMENT POSITIVE CONTROL, its own separate invocation:** the SAME action on the SAME inf
+      object ARN for a role KNOWN to hold PutObject on `opal-data-inf` (an INF producer role) →
+      `allowed`. This single call proves the deny instrument CAN fail; without it every deny verdict is
+      indistinguishable from the vacuous bucket-ARN pass.
+   ONE `--resource-arns` per call throughout. **Label honestly: a simulate verifies the APPLIED layer —
+   it is NOT "exercised"** (an exercise would be a real denied PutObject attempt); report
+   DESIRED / APPLIED / EXERCISED separately and mark the fence APPLIED-VERIFIED unless a real attempt
+   was made.
 5. `{source}/{scope}/gold/` grammar reserved in the layout doc/TF comments — **and nothing built under it.**
 6. Source map updated if any Lambda is touched (`infra/aws/lambda/ci/lambda-source-map.json`).
-7. Session log with a Compiler Tools section. RAVC close **to COO** with evidence (bucket head, 0-diff plan,
-   the simulate outputs including the DENY control, prefix listing with denominators).
+7. Deliverable 5 (IAM shaped for future per-source runner roles) evidenced as a DESIGN-REVIEW item: the
+   role/policy shape documented in the module README or TF comments (what a future runner role attaches
+   to, without restructure) and CTO's ack of that shape cited — no runtime check exists for a future
+   property, so the evidence is the reviewed design, stated as such (review finding 35).
+8. Session log with a Compiler Tools section. RAVC close **to COO** with evidence (bucket head, 0-diff plan,
+   the simulate outputs including the instrument positive control, prefix listing with denominators).
 </acceptance_criteria>
 
 ## RAVC
 ACK to COO immediately. Report evidence to **COO** (2.0.0_SA_COO) — coordination traffic is mine.
-Route the **apply gate** and any architecture fork to **CTO** (1.0.0_SA_CTO) — those are his, and I take
-them to him. Do not adjudicate scope yourself; surface it.
+**Apply gates and architecture forks: send them to COO, who ferries them to CTO — one path, no direct
+routing needed from you** (review finding 50 killed the ambiguous double-instruction). Do not adjudicate
+scope yourself; surface it.
+
+## Sentinel disposition (so this TO's silence on it reads as ruled, not dropped)
+The Door-6 sentinel DENY (PRD §6 fork 4) was PLACED into this lane by CTO (msg 20260714T012053Z),
+authored + imported + planned by 0.7.0 per ruling 14iii — and then **CANCELLED-SOVEREIGN by Andrew
+(~02:05Z: "I dont want more sentinels and alarms... the thing I never wanted is holding up progress on
+our P0 project"), never applied, fully unwound, estate live-verified untouched.** Door-6 protection is
+the institutional prohibition; the ETag baseline (`fbcddcbf4d9370310e0e5dccbbaa3efd`/135B) is a MANUAL
+reference value, not a control. Nobody re-places the sentinel without Andrew's word.

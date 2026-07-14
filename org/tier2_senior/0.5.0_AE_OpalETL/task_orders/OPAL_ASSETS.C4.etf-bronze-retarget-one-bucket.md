@@ -4,19 +4,36 @@
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
 <status>pending</status>
-<hold>ANDREW HOLD 2026-07-14 ~00:25Z, verbatim: "Wait to dispatch until I give the go, I want to respawn the workers first." NO work begins on this TO -- staged only. The GO comes from CTO after Andrew's word, addressed to the exact post-respawn serial.</hold>
+<hold_released date="2026-07-14 ~01:15Z" by="2.0.0_SA_COO" corrected="2026-07-14 ~02:2xZ per Andrew-ordered review finding [0]">
+THE HOLD (Andrew ~00:25Z: "Wait to dispatch until I give the go, I want to respawn the workers first" -- NO work, staged only, GO from CTO after Andrew's word) IS RELEASED. The full authority chain, cited because a release without its chain is indistinguishable from a breach:
+  1. Andrew's release protocol (relayed by CTO, msg 20260714T005942Z): "Andrew is spawning YOU + DS + 0.6.2... Protocol he set: spawned agents reach out to ME confirming readiness; I validate against the live roster and GO the staged TOs in dependency order." The GO condition Andrew set = respawn + readiness confirms, with CTO holding the GO.
+  2. Andrew ~01:07Z (verbatim, to CTO): "You can direct these through COO, I do not want you to be distracted with Coordination. That can be their job."
+  3. CTO's pre-authorization (msg 20260714T010814Z, verbatim): "GO RELAYS against the staged TOs AS WRITTEN (the TO files + PRD v1.3.1 are the spec...) -- 0.5.0 on his registration: C4" -- "pre-authorized, no round-trip to me needed."
+  4. Roster-verified at relay: 0.5.0_AE_OpalETL LIVE, PID 16876.
+SCOPE OF THE RELEASE: PREP ONLY -- author + plan + commit. NOTHING APPLIES until (a) C1 verified-landed on the live primitive AND (b) CTO's apply gate -- which he PRE-CLEARED for this TO's delta 9989a27a3 (msg 20260714T015047Z) conditional only on C1-verified, with the GetObject usage boundary: re-derive TRANSFORMATION only, never landing-verification (that stays listing-based per ruling 13c). Every apply gate stays with 1.0.0_SA_CTO.
+</hold_released>
 <project>OPAL_ASSETS — Grand Consolidation P1</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 (TO-C4)</prd>
 
 ## Scope
-Retarget your cloud ETF net-assets producer's **bronze** landing to
-`s3://opal-data-assets/bronze/trueshares/{DIVZ|IDVZ}/{YYYY-MM-DD}/...` and
-`.../bronze/pathfinder/{PFOE|PFDE}/{YYYY-MM-DD}/...` — raw as-fetched bytes, mid-migration, so the new
-bucket accrues from day one of its existence. This ABSORBS G8-bronze (pending Andrew's formal nod on the
-G-series disposition — the bytes land either way; only the ledger label waits).
+Retarget your cloud ETF net-assets producer's **bronze** landing to the monolith, at the RULED grammar
+(ruling 9 v1.2 layer-inside-tree; ruling 15 v1.3.3 vendor-delivery scope; v1.3.6 ratified `{feed}`
+tokens — these ARE your own implemented landing map, ratified as chosen 2026-07-14 ~01:47Z):
+```
+trueshares/{TICKER}/bronze/netassets/{YYYYMMDD}/          divz.html, idvz.html
+pathfinder/filepoint/bronze/holdings/{YYYYMMDD}/          ETF_Holdings.csv  (ONE file, BOTH funds --
+pathfinder/filepoint/bronze/dailynav/{YYYYMMDD}/          DailyNAV.csv       whole and raw; per-fund
+                                                          scope materializes at SILVER only)
+msn/{TICKER}/bronze/netassets/{YYYYMMDD}/{iid}.{tag}.json fallback tier, homed by ruling 15
+```
+Raw as-fetched bytes, mid-migration, so the new bucket accrues from day one. This ABSORBS G8-bronze
+(CLOSED-ABSORBED — Andrew accepted the G-series disposition 2026-07-14 ~01:5xZ, PRD v1.3.7).
+*(The original grammar in this TO's v1.0 text — `bronze/{source}/{scope}/{date}` layer-first with hive
+dates — is SUPERSEDED and must not be built; the v1.2 revision block below documents the pivot.)*
 
-**Gate:** C1 (bucket Terraform) must land first — staffing-forked to Andrew. Prep the retarget now
-(config/env delta authored + committed, applied on C1 landing).
+**Gate:** C1 (bucket Terraform) must land first — `0.7.0_AE_CloudOps` owns it (v1.3.1 container/content
+split); plans at CTO's gate. Prep the retarget now (config/env delta authored + committed, applied on C1
+landing — DONE at d69efaad2 + 9989a27a3, pre-cleared by CTO).
 
 ## ⚠ THE PARITY PROTOCOL IS UNTOUCHED — this TO must be provably incapable of corrupting it
 - **THE LAPTOP STAYS ON.** Parity 2/3 on 07-14 and 3/3 on 07-15 proceed exactly as ordered.
@@ -26,7 +43,9 @@ G-series disposition — the bytes land either way; only the ledger label waits)
   share any config, split them before retargeting — state in your RAVC close how the parity path was
   isolated from the retarget.
 - Your IAM fence precedent (role cannot reach `opal-data-inf` at all) is the model: the retargeted role
-  gets WRITE on `opal-data-assets/bronze/{trueshares,pathfinder}/*` and nothing wider.
+  gets `opal-data-assets/{trueshares,pathfinder,msn}/*` — PutObject + scoped GetObject (the AC10
+  re-derive TRANSFORMATION only, never landing-verification, per CTO's pre-rule) + prefix-conditioned
+  ListBucket, NO DeleteObject, and nothing wider. Never `opal-data-assets/*`.
 
 ## <compiler_tools_mandate>
 Phase 1: re-read the parity-window record (`project_etfs_netassets_cloud_parity_window`); enumerate
@@ -38,18 +57,21 @@ untouched (listing mtimes unchanged by this TO's deploy).
 </compiler_tools_mandate>
 
 ## <cross_domain_coordination>
-`_cloudprobe/` parity artifacts (your own lane) — this TO must not disturb them. The router (C2, TBD
-assignee) may temporarily mirror your legacy landing; MCP the C2 assignee when native landing goes live
-so the map row is retired. The one prohibition binds: nobody writes
+`_cloudprobe/` parity artifacts (your own lane) — this TO must not disturb them. The C2 router does NOT
+carry ETF feeds (C2 mechanism ruling, 2026-07-14 ~02:23Z: the map is exactly three rows —
+orion/eclipse/cot — and never grows; ETF lands NATIVE via this TO, "a producer's env var is the
+producer's, not the estate's"). The one prohibition binds: nobody writes
 `opal-data-inf/gold/meta/pipeline-complete.json`.
 </cross_domain_coordination>
 
 ## <acceptance_criteria>
-1. First trading day post-C1: 4 tickers' raw as-fetched files present under
-   `opal-data-assets/bronze/{trueshares,pathfinder}/`, head-object verified. NO parquet under bronze/.
+1. First trading day post-C1: the 4 raw as-fetched files present at the RULED keys
+   (`trueshares/{TICKER}/bronze/netassets/…`, `pathfinder/filepoint/bronze/{holdings,dailynav}/…`),
+   head-object verified. NO parquet under any bronze/ path.
 2. Parity measurements for 07-14/07-15 recorded per the standing order, unaffected (quote them).
 3. An absent day is ABSENT: no roll-forward, no zeros written (attest by construction, cite the code path).
-4. Session log with Compiler Tools section; RAVC close to CTO with evidence.
+4. Session log with Compiler Tools section; RAVC close **to COO** with evidence (gates and forks route to
+   CTO through COO — the wave's standing routing).
 </acceptance_criteria>
 
 <revision v="1.2" date="2026-07-14 ~01:05Z" by="1.0.0_SA_CTO">

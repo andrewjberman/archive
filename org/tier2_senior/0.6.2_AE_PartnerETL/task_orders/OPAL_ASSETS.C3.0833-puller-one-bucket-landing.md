@@ -4,23 +4,38 @@
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
 <status>pending</status>
-<hold_released date="2026-07-14 01:12Z" by="2.0.0_SA_COO">
-DISPATCH HOLD SATISFIED. COO relay under coordination authority Andrew handed him ~01:07Z ("You can direct
-these through COO, I do not want you to be distracted with Coordination. That can be their job."), against
-CTO's pre-authorized criteria. Precondition -- "I want to respawn the workers first" -- MET: DS, 0.6.2,
-0.5.0, 0.7.0 all live on the roster. ACK'd 20260714T011329Z.
+<hold_released date="2026-07-14 01:12Z" by="2.0.0_SA_COO" amended="2026-07-14 ~02:3xZ per Andrew-ordered review (findings 18/24/34/48) + rulings v1.3.8">
+DISPATCH HOLD SATISFIED. The full authority chain (cited in full because a release without its chain is
+indistinguishable from a breach):
+  1. Andrew's release protocol (CTO relay, msg 20260714T005942Z): "Andrew is spawning YOU + DS + 0.6.2...
+     spawned agents reach out to ME confirming readiness; I validate against the live roster and GO the
+     staged TOs in dependency order." The GO condition Andrew set = respawn + readiness confirms, CTO
+     holding the GO.
+  2. Andrew ~01:07Z, verbatim: "You can direct these through COO, I do not want you to be distracted
+     with Coordination. That can be their job."
+  3. CTO's pre-authorization (msg 20260714T010814Z, verbatim): "GO RELAYS against the staged TOs AS
+     WRITTEN... 0.6.2 on his readiness confirm: C3 PREP (IAM TF authored-NOT-applied + catch-up plan +
+     remap plan). C3 landing/apply still gates through me" -- "pre-authorized, no round-trip to me needed."
+  4. Precondition MET on the live roster (DS/0.6.2/0.5.0/0.7.0 all LIVE, verified at relay). ACK'd
+     agent-side 20260714T011329Z.
 
-SCOPE GO'd = C3 PREP ONLY (authored-NOT-applied):
-  (a) IAM Terraform for the monolith grant -- written + planned, NOT applied.
-  (b) Catch-up PLAN (daily REST pull both masters, direct-to-monolith, same-day catch-up >= 2026-07-13).
-  (c) Remap PLAN (7,256 staged objects -> opal-data-assets, zipped copy + ETag verify).
+SCOPE GO'd = C3 PREP ONLY (authored-NOT-applied). Item letters below are THIS BLOCK'S GO-scope letters,
+distinct from revision v1.2's scope letters -- do not cross-reference them:
+  (i)   IAM Terraform for the monolith grant -- written + planned, NOT applied.
+  (ii)  Catch-up PLAN (daily REST pull both masters, direct-to-monolith, same-day catch-up >= 2026-07-13).
+  (iii) Remap PLAN (staged objects -> opal-data-assets; denominator ENUMERATED AT RUN TIME per ruling 13b
+        -- never a document count; verify per ruling 13c's 3-TIER protocol, never naive ETag-identity).
+  (iv)  [v1.3.8 addition] Glacier leg: RestoreObject grant (01_raw/* on the dedicated remap role ONLY,
+        BULK/Days=14) authored + planned to CTO's gate; restore is C1-INDEPENDENT and kicks off on grant
+        apply; RESTORE -> WAIT -> COPY -> VERIFY(13c MD5 tier inside the window); grant REMOVED at
+        migration completion (closure step).
 NOT GO'd -- HARD STOPS: no `terraform apply` of anything (every apply gate stays with 1.0.0_SA_CTO); no
-LANDING (gated on C1, the monolith bucket, which does NOT exist -- 404 verified live 2026-07-14 01:0xZ,
-0.7.0_AE_CloudOps owns it); no EventBridge repoint yet. The 0824 wide pull continues under Andrew's
-direct GO, unchanged. Evidence returns to COO; gates and forks to CTO.
+LANDING (gated on C1, which 404'd live 2026-07-14 01:0xZ; 0.7.0_AE_CloudOps owns it -- apply GO'd 02:03Z,
+in flight); no EventBridge repoint yet. The 0824 wide pull continues under Andrew's direct GO, unchanged.
+Evidence returns to COO; gates and forks to CTO through COO.
 </hold_released>
 <project>OPAL_ASSETS — Grand Consolidation P1</project>
-<prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 (TO-C3) + §3 ruling 4</prd>
+<prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 row C3 + §3 rulings 5/6-as-amended/9/13b/13c + the v1.3.8 Glacier ruling (binding vintage: v1.3.8 @ a0ed08933 + the 01_raw scope addition @ 27841e6ab; ruling 4 is SUPERSEDED-BY-5, provenance only)</prd>
 
 <andrew_amendment date="2026-07-14 ~00:3xZ" channel="Andrew -> CTO, interactive" status="clarification-in-flight">
 ANDREW, VERBATIM: "I think we can actually just move the opal-data-schwab backfill from the REST API
@@ -69,11 +84,13 @@ Copy the parked backfill (`opal-data-schwab/backfill/08335338/`) into the canoni
 never a re-pull, never a delete** — 257 of the 01_raw objects are irreplaceable per your own finding;
 that class of caution binds here too).
 
-**Gate:** landing target exists only after C1 (bucket Terraform) lands — staffing-forked to Andrew.
-**Fallback (CTO ruling 4, already in your apply-GO message):** if C1 slips >48h, landing in
-`opal-data-schwab/08335338/bronze/*` per Andrew's ~20:45Z verbatim grammar is authorized; the
-consolidation retarget then becomes a copy job. Prep now either way. **The 0824 backlog recovery under
-the apply GO (e6f618f66) is separate and does NOT wait on this TO.**
+**Gate:** landing target exists only after C1 (bucket Terraform) lands — `0.7.0_AE_CloudOps` owns it,
+apply GO'd 02:03Z.
+**Fallback — SUPERSEDED, DO NOT USE (review finding 23/31/44):** the v1.0 fallback ("if C1 slips >48h,
+land in `opal-data-schwab/08335338/bronze/*`") is DEAD under ruling 9 (THE MONOLITH is the only home;
+`opal-data-schwab` is STAGING) and under the hold_released hard stop (no landing anywhere until C1). It
+is retained in this paragraph only so its absence is not mistaken for an omission. **The 0824 backlog
+recovery under the apply GO (e6f618f66) is separate and does NOT wait on this TO.**
 
 ## Fences
 Pull + raw bronze ONLY. No silver, no gold, no served re-derive ("No 49 Yet"). Never rewrite historical
@@ -91,17 +108,32 @@ Phase 3 (after landing): head-object partition listing of landed objects = the R
 </compiler_tools_mandate>
 
 ## <cross_domain_coordination>
-`opal-data-schwab` prefixes are your own active lane (0824 recovery in flight). C1/C2/C8 assignee (TBD,
-Andrew staffing) must MCP you before touching any schwab prefix. The one prohibition binds: nobody
-writes `opal-data-inf/gold/meta/pipeline-complete.json`.
+`opal-data-schwab` prefixes are your own active lane (0824 recovery in flight). `0.7.0_AE_CloudOps`
+(C1/C2 owner; C8 is absorbed into this TO) must MCP you before touching any schwab prefix. The one
+prohibition binds: nobody writes `opal-data-inf/gold/meta/pipeline-complete.json`.
 </cross_domain_coordination>
 
 ## <acceptance_criteria>
-1. `aws s3 ls` shows ≥1 dated partition per 0833 daily type under the landing target, head-object
-   verified, with the master read from the vendor's bytes (not the folder).
+*(Reconciled 2026-07-14 ~02:3xZ to the v1.2 final scope + v1.3.8 — review finding 33: the original AC set
+predated rulings 9/13b/13c and did not cover the GO'd scope.)*
+1. `aws s3 ls` shows ≥1 dated partition per 0833 daily type under the MONOLITH landing target
+   (`opal-data-assets/schwab/{master}/bronze/{type}/{YYYYMMDD}/`), head-object verified, master read from
+   the vendor's bytes (not the folder).
 2. Schedule exists and is ENABLED (`aws events describe-rule` / scheduler equivalent, output quoted).
-3. Backfill copied: object count parity between `backfill/08335338/` and the canonical tree, both
-   denominators printed (source count = landed count; no sampling).
-4. Idempotency exercised: a re-run of the same day lands 0 new objects and reports skip (not error).
-5. Session log with Compiler Tools section; RAVC close to CTO with evidence (partition list + rule state).
+3. *(SATISFIED-HISTORICAL — v1.1: the 0833 backfill migration is DONE, 6,932/6,932 ETag-identical,
+   CTO-verified, PRD §5 R6. Kept for provenance; not re-run.)*
+4. REMAP (v1.2 scope a): staged objects copied into the monolith with the denominator ENUMERATED AT RUN
+   TIME from the source at copy time (ruling 13b — never a document count), remap run after the 0824 pull
+   is terminal or re-run to convergence, verified per ruling 13c's 3-TIER protocol (listing-ETag
+   single-part / source-stream-MD5 vs dest-ETag multipart / size always). Both denominators printed.
+5. GLACIER LEG (v1.3.8): the 257-class pre-floor objects restored (BULK), copied inside the restore
+   window, H1-observed master per file (scan-for-exactly-one, positional indexing banned), unreadable ->
+   quarantine; the RestoreObject grant REMOVED at completion, removal evidenced by a fresh live simulate
+   showing implicitDeny.
+6. MONOLITH IAM (v1.2 scope d): live simulate per 22a against the exact opal-data-assets ARNs — one
+   `--resource-arns` per call, positive control its own invocation, `--context-entries` on conditioned
+   statements. DESIRED + APPLIED + EXERCISED reported separately.
+7. Idempotency exercised: a re-run of the same day lands 0 new objects and reports skip (not error).
+8. Session log with Compiler Tools section; RAVC close **to COO** with evidence (partition list + rule
+   state + simulate outputs); gates and forks to CTO through COO.
 </acceptance_criteria>
