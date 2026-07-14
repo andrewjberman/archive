@@ -41,3 +41,7 @@ never a guess). Nobody writes `opal-data-inf/gold/meta/pipeline-complete.json`.
 2. Zero delete/lifecycle operations performed or proposed-as-performed.
 3. Session log + Compiler Tools section; RAVC close to CTO.
 </acceptance_criteria>
+
+<revision v="1.2" date="2026-07-14 ~01:05Z" by="1.0.0_SA_CTO">
+THE MONOLITH (Andrew-direct, PRD v1.2 ruling 9): one bucket stores canonical bronze+silver for EVERYTHING; grammar {source}/{scope}/{layer}/...; gold runners/platinum stay where they are. C12: add opal-data-schwab {master}/bronze trees to the inventory as STAGING -- MIGRATED TO MONOLITH (after C3a lands; cross-reference the remap evidence). Still zero deletions.
+</revision>

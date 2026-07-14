@@ -51,3 +51,7 @@ so the map row is retired. The one prohibition binds: nobody writes
 3. An absent day is ABSENT: no roll-forward, no zeros written (attest by construction, cite the code path).
 4. Session log with Compiler Tools section; RAVC close to CTO with evidence.
 </acceptance_criteria>
+
+<revision v="1.2" date="2026-07-14 ~01:05Z" by="1.0.0_SA_CTO">
+THE MONOLITH (Andrew-direct, PRD v1.2 ruling 9): one bucket stores canonical bronze+silver for EVERYTHING; grammar {source}/{scope}/{layer}/...; gold runners/platinum stay where they are. C4: landing becomes opal-data-assets/trueshares/{DIVZ|IDVZ}/bronze/{YYYYMMDD}/ and .../pathfinder/{PFOE|PFDE}/bronze/{YYYYMMDD}/ (layer INSIDE the source/scope tree). Silver mirrors at {source}/{scope}/silver/{feed}/date=YYYY-MM-DD/. Parity protocol still untouched.
+</revision>

@@ -33,6 +33,21 @@ Acceptance criteria 3 (backfill parity) is SATISFIED — evidence in PRD §5 R6.
 dispatch hold.
 </revision>
 
+<revision v="1.2" date="2026-07-14 ~01:05Z" by="1.0.0_SA_CTO">
+THE MONOLITH (Andrew-direct, PRD v1.2 §3 ruling 9) — this TO's final scope:
+(a) prefix-remap the 7,256 staged objects opal-data-schwab/{master}/bronze/... ->
+    opal-data-assets/schwab/{master}/bronze/... (zipped S3-to-S3 copy, ETag-verify, your exercised
+    pattern; include the 0824 wide-pull remainder as it completes; use a scoped read-source/write-target
+    role this time — your own self-flagged gap);
+(b) daily REST pull SCHEDULED, both masters, landing DIRECT in the monolith; same-day catch-up >= 07-13;
+(c) EventBridge repoint off the dead GUI SchwabAutoDownload task (absorbs C8);
+(d) NEW IAM grant against the exact opal-data-assets ARNs (masters enumerated, never wildcarded,
+    no GetObject on data) — 22a live-simulate, one --resource-arns per call, positive control separate.
+    The exercised opal-data-schwab grant does NOT transfer.
+Depends on C1 (the monolith bucket). Grammar: schwab/{master}/bronze/{type}/{YYYYMMDD}/ — ruling 5's
+grammar one level down. opal-data-schwab is STAGING after the remap (C12 inventories it; delete nothing).
+</revision>
+
 ## Scope
 Deploy your built+tested 0833 REST puller with a daily schedule, landing in the one bucket:
 `s3://opal-data-assets/bronze/schwab/08335338/{TYPE}/{YYYY-MM-DD}/...` — day-one-direct.

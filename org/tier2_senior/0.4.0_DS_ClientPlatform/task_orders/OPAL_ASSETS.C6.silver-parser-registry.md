@@ -44,3 +44,7 @@ parsers READ mirrored bronze only.
 3. `comp-validate` run before signaling any consumer (NO_CONFIG/ZERO_CHECKS = UNVALIDATED, never SAFE).
 4. Session log with Compiler Tools section; RAVC close to CTO with evidence.
 </acceptance_criteria>
+
+<revision v="1.2" date="2026-07-14 ~01:05Z" by="1.0.0_SA_CTO">
+THE MONOLITH (Andrew-direct, PRD v1.2 ruling 9): one bucket stores canonical bronze+silver for EVERYTHING; grammar {source}/{scope}/{layer}/...; gold runners/platinum stay where they are. C6: silver output path becomes {source}/{scope}/silver/{feed}/date=YYYY-MM-DD/data.parquet INSIDE each source tree (monolith grammar). Event wiring fires on the monolith bucket's bronze prefixes.
+</revision>

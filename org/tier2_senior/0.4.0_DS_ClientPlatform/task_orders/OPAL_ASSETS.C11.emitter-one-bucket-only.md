@@ -45,3 +45,7 @@ retirement is row-by-row precisely so a surprise consumer surfaces loudly, not s
 4. Six legacy reads retired one-by-one, each with a passing emit in evidence.
 5. Session log + Compiler Tools section; RAVC close to CTO.
 </acceptance_criteria>
+
+<revision v="1.2" date="2026-07-14 ~01:05Z" by="1.0.0_SA_CTO">
+THE MONOLITH (Andrew-direct, PRD v1.2 ruling 9): one bucket stores canonical bronze+silver for EVERYTHING; grammar {source}/{scope}/{layer}/...; gold runners/platinum stay where they are. C11: the daily gold snapshot dump (AC3) is DEFERRED per Andrew (gold just the dynamodb to start) -- do not build it in this TO. Emitter reads the monolith trees at {source}/{scope}/silver/. Serving boundary: gold runners/platinum buckets stay where they are; this TO touches ONLY the internal opal-assets-daily-aua path.
+</revision>
