@@ -149,6 +149,84 @@ that never refuses anything is a default with extra steps, so it was run against
 and the positive control was run **separately** from the target, because a control batched with the thing
 it validates is corrupted by its own presence.
 
+## 2b. THE 01_raw PRE-FLOOR LEG (Andrew-direct, v1.3.5) — AND WHY IT IS NOT A COPY JOB
+
+> Andrew, verbatim: *"We can keep those unique files in bronze, bring them over in migration."*
+
+These 257 objects predate Schwab's REST floor (2023-07-12). **Schwab can no longer serve them at any
+price** — a re-pull is not an option, so this is a copy job or it is nothing. I went to ground-truth them
+before writing code, and the ruling **cannot execute as written.** Both blockers are measured, not inferred.
+
+### ⛔ BLOCKER 1 — 217 OF THE 257 ARE IN GLACIER
+
+```
+the 257 IRREPLACEABLE pre-floor objects:   GLACIER 217  |  STANDARD  40
+all of 01_raw (7,142 objects):             GLACIER 6,075 |  STANDARD 1,067
+```
+
+An archived object cannot be server-side `CopyObject`'d — it fails `InvalidObjectState`. I did not reason
+my way there; **I hit it: my H1 probe failed on 224 of 257 reads.**
+
+> **AND IT BITES TWICE, WHICH IS THE PART THAT MATTERS.** The landing spec says the master is *observed
+> from the H1 header*. **You cannot read the header of an archived object either.** So the restore is not
+> a precondition of the *copy* — it is a precondition of knowing **which master the file even belongs to.**
+
+This leg is therefore **RESTORE → WAIT (hours) → COPY → VERIFY**, not a copy. It needs `s3:RestoreObject`,
+an action **no role in this estate holds** — mine included. I have **not** authored that grant: it is a new
+action on the irreplaceable class, so it goes to CTO rather than quietly into my role. Recommended tier:
+**Bulk** — retrieval dollars are noise (largest object 67.9 MB), the cost is latency, and nothing is waiting
+on files that have sat frozen for years. Restored copies are **temporary**; the copy must finish inside the
+window or we pay for the thaw twice.
+
+**Scheduling consequence:** this cannot be a step inside the C3 remap window. Sequenced as "the 257 land
+with the remap," the whole remap blocks on a Glacier thaw. **Recommendation: split it** — the .zip corpus
+remaps immediately on C1; the 257 run as their own restore-gated leg that rejoins when thawed. *They are
+irreplaceable, not urgent.*
+
+### ⛔ BLOCKER 2 — THE TCF PRODUCT HAS A DIFFERENT H1 LAYOUT, AND THE OBVIOUS FIX BREAKS THE OTHER HALF
+
+```
+RLD/RLY/RLU/RTU/RTY :  H1|SCHWAB  |0008242234|49 WEALTH MANAGEMENT LLC|20230117|CBRGLDLT|01.06
+                            field 2 = MASTER (10-digit, zero-padded)
+TCF (confirms)      :  H1|SCHWAB|CONFIRM |08242234|49 WEALTH MANAGEMENT LLC|20230119|01.01
+                            field 2 = "CONFIRM"      field 3 = MASTER (8-digit, unpadded)
+```
+
+TCF is **120 of the 257** — the second-largest type (RLD 121, TCF 120, RLY 6, RTY 6, RLU 2, RTU 2).
+
+> **A POSITIONAL PARSER IS WRONG FOR HALF THE SET WHICHEVER INDEX YOU PICK.** `f[2]` hands you the string
+> `"CONFIRM"` on a TCF. And the fix — `f[3]` — hands you **`"49 WEALTH MANAGEMENT LLC"` on an RLD, *without
+> raising*,** because a firm name is a perfectly good string. **The crash is the lucky case.** The silent
+> one mis-attributes an irreplaceable custody file.
+
+**The parser therefore does not index. It SCANS** every field for a value that normalizes to a *known*
+master and requires **exactly one** candidate — zero or ambiguous ⇒ quarantine, never a default.
+
+### TWO SMALLER ONES, BOTH REAL
+
+- **THE FIRM NAME IS NOT A CROSS-CHECK.** Master `08242234` appears as **both** `49 WEALTH MANAGEMENT LLC`
+  **and** `49 FINANCIAL` in the same corpus — the account was renamed. I nearly used it as a confirming
+  signal. It would have been a confident, well-grounded, **wrong** control.
+- **11 of the 257 carry multipart ETags** → ruling 13c's tier-3 source-stream-MD5 is **load-bearing here,
+  not theoretical** (and it costs a full GetObject of a *restored* object, inside the thaw window).
+
+### EXERCISED (live bytes, read-only)
+
+```
+H1 parser, BOTH layouts + 0833            4/4 exact
+NEGATIVE CONTROLS (must all raise)        4/4 rejected: not-H1 · unknown master · TWO masters (ambiguous) · no date
+01_raw leg, end-to-end dry run            257 enumerated · 40 STANDARD / 217 GLACIER split correctly
+                                          40/40 identified from H1 bytes, masters {08242234: 40}
+                                          -- INCLUDING the 7 TCF files the positional parse choked on
+then BLOCKED, legibly, on s3://opal-data-assets not existing (C1) -- not a defect, a dependency
+```
+
+**WHAT I WILL NOT CLAIM:** all readable pre-floor objects attest `08242234`. **I cannot say that about the
+217 in Glacier — I have not read them, and I will not assert their master until I have.** If one attests
+`08335338` it belongs in the 0833 tree, and that is exactly the case Andrew's H1-observed rule exists to
+catch. The leg **returns a non-zero "INCOMPLETE BY DESIGN"** if it copies only the thawed subset — it will
+not let a partial run be recorded as a closed one.
+
 ## 3. C3(d) — IAM (AUTHORED + PLANNED, NOT APPLIED)
 
 **File:** `infra/aws/terraform/canonical-schwab-ec2/monolith-iam.tf`
