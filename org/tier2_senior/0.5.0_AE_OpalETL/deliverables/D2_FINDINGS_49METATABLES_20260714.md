@@ -78,3 +78,53 @@ pinning.
 3. The 9-digit account_number minority (11 rows) → classify at CRS contact.
 4. silver `allocation_account_map` build → V2-8 lane (schema pinned, writes phase-open per
    Andrew's silver-ahead-of-cert word; converter slots after 22:00Z per my sequencing).
+
+---
+
+## UPDATE 2026-07-14 ~11:0xZ — the CTO-GO'd four-item set EXECUTED (GO 095823Z)
+
+**1. By-UUID number enrichment: COMPLETE, 91/91.** Unresolved set re-enumerated at run time
+(reproduced exactly: 2,381 closed / 1,315 sweep-matched / 1,066 no-UUID / **91 unresolved
+accounts**). `GET 3.1/accounts/{uuid}` under the bundle: 91/91 landed
+(`smartx/account/{uuid}/bronze/detail/20260714/`), **brokerageAccountNumber present 91/91**,
+status census `{active: 91}`, guard listing-based missing=0/surplus=0. Manifest:
+`smartx/platform/meta/pulls/20260714/account_detail_enrichment_manifest.json`.
+**CONSEQUENCE: every sweep-matched closed allocation (1,315, across 1,009 accounts) now has a
+brokerage number pair** — 918 accounts via the living map + 91 via detail enrichment.
+The by-UUID view carries **NO amount/date fields** (identity only) — Andrew's "amount+date in
+the uuid view" hypothesis measured NO; the money leg rides nonzerosleeve + the atom, per the
+addendum's own ranking.
+
+**2. nonzerosleeve: LANDED.** 394,660B → `smartx/platform/bronze/nonzerosleeve/20260714/`,
+511 rows / 511 distinct accounts / 511 with brokerageAcctNum / **47 outside the living map —
+all 47 already inside the sweep universe** (no new enumeration unlock; their value is
+corroboration). Money-leg fields confirmed on-row: `asOfTimestamp` + full opening/closing
+valuation envelope (equity/cash/dividend/fee/interest + position counts). Registered as
+`ACCOUNT_TIER_PLATFORM_FEEDS` @ `1061ef2ed`; agreement-rate vs fact_rps rides the V2-8/CRS
+convergence (identity leg stays primary; money leg confidence-reported, never sole
+determination).
+
+**3. models/summary content check (read-only, NOT landed): 7/11.** The 5,234,127B served under
+the bundle (platform `09a26328...`) carries **exactly the 7 bundle-visible Opal models**
+(keyed by modelId; 897 entries total; per-model statistics: today/mtd/qtd/ytd, sharpe,
+sortino, std_dev, annualizedReturn...). The 4 misses are the 4 Global models the yaliu grant
+lacks — the same boundary as feed-9. **The models_summary open closes PARTIALLY via the bundle
+path**; the 4 Global summaries (3 unfunded + Opal Global All Equity TR) are unreachable at
+every held credential. Yaliu-platform bytes deliberately never land under our platform
+models_summary key (would false-green the honest-dirty opal7 guard).
+
+**4. Roster status-filter probe: THE WIDENING IS ZERO — hypothesis FALSIFIED.**
+`4.1/accounts` DOES take a `status` param (and pages via `page`, not `pageNumber`):
+`status=active` = 6,620 (= baseline), **`status=closed` = 0 rows, `status=inactive` = 0 rows**
+at this grant. No enumeration-side widening exists; the 1,066 no-UUID class stands on its own
+terms (vendor-grant conversation, unchanged). The "roster walk was default-status-filtered"
+reading conflated the ROSTER with the LIVING MAP: measured, **91/91 enriched accounts ARE in
+the active roster** — they were never roster-invisible, only living-map-absent (no living Opal
+allocation ⇒ no feed-9 row). Denominator disclosure: the sweep universe is **7,066 = 6,620
+roster ∪ 446 resolver-only accounts** — the two enumeration surfaces are overlapping partial
+views (which is why the sweep took the union).
+
+**Infrastructure note:** the two new bronze feeds are registered + guard-integrated
+(`smartx-pipeline-v1.5.1`, artifact swap, deployed sha verified vs live, 0-diff) — the 13:30Z
+daily fire reconciles clean over the coexisting bundle-lane landings (platform + account scope
+two-writers exclusions, tests included).
