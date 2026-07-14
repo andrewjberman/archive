@@ -20,7 +20,7 @@
 
 | # | pipeline | feeds (cohorts) | PULL today | BRONZE | SILVER | GOLD row | schedule to CREATE/FIX |
 |---|---|---|---|---|---|---|---|
-| 1 | **Schwab 0824 SmartX** (SI2 EC2 box) | `49f_schwab_custody` 1621.25 + RPS basis for 49F ETF ownership | ✅ RUNS `cron(35 8,20)` | ✅ HAVE (wrong bucket, flat keys, no master) | 🔴 **MANUAL** (`/49-schwab-conv`, 7 steps, human-run) | ✅ HAVE | **SCHEDULE THE SILVER CONVERSION** + retarget bronze -> one bucket |
+| 1 | **Schwab 0824 SmartX** (SI2 EC2 box) | `49f_schwab_custody` 1621.25 + RPS basis for 49F ETF ownership | 🔴 **CRON FIRES, PULL FUNCTIONALLY DEAD since 07-02** (rc=0 landing NOTHING -- CTO correction 00:07Z, grounded by 0.6.2 vs Schwab's live catalogue, 5,966 files; IAM apply GO for the rebuilt puller sent) | 🟡 HAVE thru 07-02 (wrong bucket, flat keys, no master) | 🔴 **MANUAL** (`/49-schwab-conv`, 7 steps, human-run) | ✅ HAVE (stale) | **UNBLOCK THE REBUILT PULLER (in flight)** + SCHEDULE THE SILVER CONVERSION + retarget bronze -> one bucket |
 | 2 | **Schwab 0833 Black Diamond** | `49f_schwab_account` ~1.71b | 🔴 **NONE** (puller BUILT, not deployed) | 🔴 NONE (85-file backfill parked) | 🔴 NONE (CBUGL converter = spec only) | 🔴 **NO ROW** (disclosed `incomplete`) | **DEPLOY + SCHEDULE the puller; build CBUGL silver on first bytes** |
 | 3 | **SmartX exporter** (models) | 5 term models + 2 SMAs + platform view | 🔴 **DISABLED** (`smartx-daily-export-trigger`, weekdays 14:00Z) | 🔴 NONE (exports go straight to Dynamo, no raw kept) | 🔴 NONE | ✅ HAVE (stale 07-06 via mdpf G1) | **RE-ENABLE the trigger** (find out why it was disabled) **+ add raw drop to bronze** |
 | 4 | **Orion (Inflection)** | `inflection_models` inputs, positions/txn/accounts | ✅ RUNS (5 pulls, 13:17-13:47Z) | ✅ HAVE (in `opal-data-inf`) | ✅ HAVE (event-driven inf silver chain) | ✅ HAVE, fresh 07-10 | none -- **MIRROR bronze into one bucket** (router) |
@@ -97,9 +97,16 @@ gold snapshot dump              daily after emitter                 DS
 ingest-router                   event-driven (no schedule)          AE
 ```
 **RE-ENABLE (exists, off):** `smartx-daily-export-trigger` (weekdays 14:00Z) -- **diagnose why it was disabled
-first**, then flip. `inf-canonical-prices-daily` -- confirm intent with CTO.
-**DO NOT TOUCH:** `inf-gold-*` (the hold) · `bd-49f-*` (sovereign hold) · and **nobody writes
-`opal-data-inf/gold/meta/pipeline-complete.json`** -- the armed mdpf trigger fires on that exact key.
+first**, then flip.
+**DO NOT TOUCH:** `inf-gold-*` (the hold) · **`inf-canonical-prices-daily` -- CTO RULED 00:07Z: HELD, not a gap**
+(INF-domain; the functional test is "would this advance the INF chain," not "does the row say INF") ·
+`bd-49f-*` (sovereign hold) · and **nobody writes `opal-data-inf/gold/meta/pipeline-complete.json`** -- the
+armed mdpf trigger fires on that exact key.
+
+> **CORRECTION LOG (CTO, 2026-07-14T00:07Z):** row 1's pull was listed "RUNS" -- true of the CRON, false of the
+> PULL (functionally dead since 07-02, rc=0 landing nothing). **Corrected above so "RUNS" is never quoted as
+> freshness.** *The cron firing is a statement about a SCHEDULER; only landed bytes are a statement about a PULL --
+> a producer cannot report its own death.*
 
 ---
 
