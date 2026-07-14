@@ -122,6 +122,33 @@ TARGET  opal-data-assets/schwab/{master}/bronze/{type}/{YYYYMMDD}/{vendor}.zip
 **Runs under `opal-schwab-monolith-remap-role`** (§3) — assumed, scoped, no delete, cannot read the
 monolith. This closes my own self-flagged gap: the 6,932 migration ran under broad AE user creds.
 
+### THE SCRIPT IS WRITTEN, AND ITS PARSER IS EXERCISED ON THE LIVE CORPUS
+
+`infra/aws/ec2/canonical-schwab-si2/remap-bronze-to-monolith.py` — **dry-run by default; `--execute` is
+required to copy a byte, and it cannot run at all until C1 and the role exist.**
+
+I wrote it now, unprompted, for one reason: **the hazard in F-2 is not that the remap fails — it is that
+someone writes the naive twenty-line `aws s3 cp --recursive` with an ETag-equality check, watches it
+"fail" on 52 objects, and loosens the check.** The correct verify existing first is the control. Its
+ancestor (`migrate-0833-to-canonical.py`, the exercised 6,932 migration) counted objects and **never
+proved a byte** — that gap is closed here.
+
+**EXERCISED, read-only, against every object that exists right now:**
+
+```
+08242234   enumerated 1,496   parsed clean 1,496   QUARANTINE 0    multipart ETags  54  <- tier-3
+08335338   enumerated 6,932   parsed clean 6,932   QUARANTINE 0    multipart ETags   0  <- tier-2 only
+                                                                   single-part     8,374
+
+NEGATIVE CONTROL (must ALL raise):  no-master / bad-date-encoding / no-date   -> all 3 REJECTED
+POSITIVE CONTROL (run separately):  CRS20260710 -> 20260710 · CS071026 -> 20260710  -> both exact
+```
+
+The multipart asymmetry F-2 predicted is **confirmed on live bytes**: 54 in 0824, 0 in 0833. A decoder
+that never refuses anything is a default with extra steps, so it was run against inputs it must reject —
+and the positive control was run **separately** from the target, because a control batched with the thing
+it validates is corrupted by its own presence.
+
 ## 3. C3(d) — IAM (AUTHORED + PLANNED, NOT APPLIED)
 
 **File:** `infra/aws/terraform/canonical-schwab-ec2/monolith-iam.tf`
@@ -143,24 +170,36 @@ The box **cannot** do the remap: `CopyObject` needs `GetObject` on the source, a
 read access to its own bronze to save a role would permanently retire its write-only-for-data
 invariant for the convenience of a one-time job.
 
-### ⚠ OPEN FORK FOR CTO — THE ONE WAY THIS APPLIES GREEN AND DENIES 100% AT RUNTIME
+### ✅ THE SSE FORK — ANSWERED (0.7.0_AE_CloudOps, 01:31Z; source-confirmed by me, not taken on his word)
 
-Neither grant says anything about **encryption**, and C1 decides whether they are sufficient:
+Neither grant says anything about **encryption** — the one way both APPLY GREEN, read perfectly in every
+IAM instrument, and DENY 100% OF CALLS AT RUNTIME. I raised it to CTO as a fork and to 0.7.0 as a
+C1 dependency, *before* he landed the bucket. He answered, and I verified the answer against his HCL
+rather than his summary:
 
-- **`opal-data-assets` = SSE-S3/AES256** -> grants are complete; the copy passes `--sse AES256`.
-- **`opal-data-assets` = SSE-KMS** -> grants are **NOT sufficient**. Both identities also need
-  `kms:GenerateDataKey` (+`Encrypt`/`DescribeKey`) on that **exact CMK ARN**, and the failure arrives
-  as `AccessDenied` on PutObject **from an IAM policy that reads perfectly**.
+```
+infra/aws/terraform/opal-assets/monolith.tf:129   sse_algorithm = "AES256"
+  KMS references in the module source          :  ZERO
+  DenyUnencryptedObjectUploads statement       :  ABSENT -- deliberately
+```
 
-I deliberately did **not** author a speculative KMS statement: there is no key ARN yet, and the only
-way to write one blind is a wildcard — precisely the never-widen failure the file exists to avoid.
-**Sequence:** C1 declares the SSE mode -> I add one scoped KMS statement against the exact key ARN (or
-none) -> live `simulate-principal-policy` -> apply gate.
+**MY GRANTS ARE COMPLETE AS AUTHORED. No KMS statement. Nothing widened.**
 
-**Surfaced, not adjudicated.** SSE-S3 keeps every producer role KMS-free and matches the source;
-SSE-KMS buys per-key auditability on a bucket that will hold multiple firms' custody data, at the cost
-of a KMS grant in every producer role that ever writes to the monolith. **CTO's call. `0.7.0_AE_CloudOps`
-needs it before C1 lands.**
+And he made it better than I asked: the monolith carries **no forced-SSE bucket policy**, so a producer
+that omits the header still succeeds *and still lands encrypted* (default encryption applies server-side
+regardless). That is the deliberate inverse of `opal-data-schwab`, whose forced-SSE deny returns an
+`AccessDenied` **indistinguishable from a permissions bug** — which is precisely how an encryption-header
+problem gets "fixed" by widening IAM. (It is also why DS is blocked writing that bucket.) He wrote the
+reasoning into the TF comment so the next person cannot helpfully add it back.
+
+He also found that his own first C1 draft granted a blanket `schwab/*` write — which, attached to
+anything, could write **both masters**. He enumerated the scope segment instead. *"Do not commingle 0824
+and 0833" stops being a rule someone has to remember and becomes a property of the role.*
+
+> **STILL DESIRED, NOT APPLIED — and the distinction is the whole of 22a.** C1 is authored and validated,
+> **not gated and not applied**; `opal-data-assets` does not exist (404, live). If CTO rules SSE-KMS at the
+> gate, my `SSE_MODE` changes and **both** identities need a scoped `kms:GenerateDataKey` on the exact CMK
+> ARN. The fork is *answered*, not *closed* — CTO's gate ratifies it.
 
 **22a grounding status, stated honestly:** `DESIRED` = the plan above. `APPLIED` = **NOTHING** — not
 applied, by instruction. `EXERCISED` = **NOTHING** — the target bucket does not exist, so
