@@ -24,6 +24,7 @@
       <pipeline>data-refresh</pipeline>
       <pipeline>causality</pipeline>
       <pipeline>seeking-alpha</pipeline>
+      <pipeline>etfs-netassets</pipeline>
     </pipelines_owned>
     <artifact_bucket>opal-313476888478-lambda-artifacts</artifact_bucket>
     <layer_bucket>opal-313476888478-lambda-layers</layer_bucket>
@@ -1408,6 +1409,90 @@
         Processed SSCN JSON artifacts proxied to portal client.
       </path>
     </s3_artifacts>
+
+  </pipeline>
+
+  <!-- ===========================================================
+       ETFS_NETASSETS : the ETF net-assets producer (LAPTOP to CLOUD).
+       Added 2026-07-14. It was MISSING from this inventory entirely: the stack
+       went live 2026-07-13 and this core doc never learned of it. Recording the
+       gap rather than quietly backfilling it. An inventory that silently
+       acquires a pipeline it never had is not an inventory.
+       =========================================================== -->
+  <pipeline name="etfs-netassets"
+            terraform_module="infra/aws/terraform/etfs-netassets/"
+            s3_backend_key="etfs-netassets/tfstate"
+            project="OPAL_ASSETS"
+            trigger_model="EventBridge cron(0 22 * * ? *) -- 22:00 UTC daily"
+            status="LIVE (cloud producer); PARITY WINDOW OPEN -- the laptop is still the producer of record">
+
+    <lambdas>
+      <lambda name="etfs-netassets-daily"
+              source_path="infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/lambda_function.py"
+              memory_mb="1024"
+              timeout_s="300"
+              runtime="python3.11"
+              layers="pandas-pyarrow-requests-layer:1"
+              trigger="EventBridge rule etfs-netassets-daily"
+              artifact="s3://opal-313476888478-lambda-artifacts/etfs-netassets/etfs-netassets-daily.zip"
+              iam_role="etfs-netassets-daily"
+              iam_policy="s3-rw-etfs-bronze-silver">
+        Produces 4 of Opal's 14 AUM cohorts -- DIVZ, IDVZ (TrueShares) and PFDE,
+        PFOE (Pathfinder, via Filepoint). Replaces the Windows Task Scheduler job
+        on Andrew's personal laptop. MSN Money is a fallback tier.
+      </lambda>
+    </lambdas>
+
+    <s3_artifacts>
+      <path bucket="opal-data-etfs" prefix="bronze/" direction="write">
+        RAW as-fetched issuer bytes, byte-for-byte, before any parse (Rule 17a).
+        NO parquet under bronze/ -- verified. GetObject is the AC10 re-derive path
+        (silver is rebuildable from stored bronze bytes alone, network hard-cut).
+      </path>
+      <path bucket="opal-data-etfs" prefix="silver/" direction="write">
+        Parquet. LIVE prefix -- currently written by the LAPTOP, not this lambda.
+      </path>
+      <path bucket="opal-data-etfs" prefix="_cloudprobe/" direction="write">
+        THE PARITY MEASUREMENT. The cloud lambda's silver is QUARANTINED here
+        (SILVER_ROOT="_cloudprobe/") while the laptop remains the producer of
+        record. These artifacts are the measurement, not a by-product -- moving or
+        corrupting them costs the window, not just a number.
+      </path>
+    </s3_artifacts>
+
+    <parity_protocol status="OPEN -- day 1 (07-13) EXACT: 0 mismatches, sum(net_assets) delta $0.00">
+      Gate: `python .tools/etfs-parity-check.py` -- reads BOTH sides from S3, so
+      neither is a producer self-report. Refuses a cutover verdict below 3 trading
+      days and exits non-zero. It refuses its own best day, by design.
+      CUTOVER ORDER, NON-NEGOTIABLE: (1) &gt;=3 trading days of value-by-value parity
+      ON THE ARTIFACT -- never on rc=0; (2) flip local.silver_root to ""; (3) VERIFY
+      the cloud writes LIVE silver (the LAMBDA's stamp, not the laptop's 18:00 one);
+      (4) ONLY THEN disable the Windows task. Two producers briefly is SAFE (the
+      history upsert is idempotent on (run_date,key)); A GAP IS NOT -- it is a hole
+      in 27% of fee-paying AUM.
+    </parity_protocol>
+
+    <opal_assets_c4 status="STAGED -- code + TF committed, NOT APPLIED (gated on C1)">
+      Retargets the BRONZE landing to the opal-data-assets monolith. Bronze resolves
+      its bucket SEPARATELY from silver (BRONZE_BUCKET vs ETFS_BUCKET): SILVER_ROOT
+      quarantines the silver PREFIX, never the BUCKET, so a naive retarget would have
+      carried the _cloudprobe/ parity artifacts into the monolith mid-window.
+      Landing map (PRD v1.3.6 ruling 15 -- the bronze scope is the VENDOR'S DELIVERY
+      scope; per-fund partitioning happens at SILVER, never at ingest):
+        trueshares/{TICKER}/bronze/netassets/{YYYYMMDD}/
+        pathfinder/filepoint/bronze/{holdings|dailynav}/{YYYYMMDD}/   (one file, BOTH funds, whole+raw)
+        msn/{TICKER}/bronze/netassets/{YYYYMMDD}/
+      Commits: d69efaad2 (code), 9989a27a3 (TF). The C1 flip is TWO locals:
+      bronze_bucket -> "opal-data-assets", bronze_grammar -> "monolith".
+    </opal_assets_c4>
+
+    <iam_fence>
+      ZERO grants to any other data-estate bucket -- no inf / cot / bd / schwab
+      (NEVER#2 intact). This role CANNOT write opal-data-inf/gold/meta/pipeline-complete.json,
+      the sentinel that dispatches the HELD INF gold chain. The fence is IAM, not
+      the author's care. The staged monolith grant names THREE trees
+      (opal-data-assets/{trueshares,pathfinder,msn}/*) and never opal-data-assets/*.
+    </iam_fence>
 
   </pipeline>
 
