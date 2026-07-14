@@ -37,6 +37,17 @@ Evidence returns to COO; gates and forks to CTO through COO.
 <project>OPAL_ASSETS — Grand Consolidation P1</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 row C3 + §3 rulings 5/6-as-amended/9/13b/13c + the v1.3.8 Glacier ruling (binding vintage: v1.3.8 @ a0ed08933 + the 01_raw scope addition @ 27841e6ab; ruling 4 is SUPERSEDED-BY-5, provenance only)</prd>
 
+<andrew_amendment date="2026-07-14 ~02:41Z" channel="Andrew -> COO, interactive" status="binding -- priority ruling on the Glacier/257 leg">
+ANDREW, VERBATIM: "i dont care about the glacier schwab data that much to hold up our work here."
+SCOPE AS RECORDED (surfaced, not adjudicated): a PRIORITY ruling, not a reversal -- the ~01:4xZ migrate
+ruling ("We can keep those unique files in bronze, bring them over in migration") STANDS, but the
+Glacier/257 restore leg is BACKGROUND FILL: it holds up NOTHING, it preempts NOTHING, and no main-line
+work (C1 apply, C3 remap/schedule, any C-series lane) waits on or yields to it. The restore-kick urgency
+in the 02:37Z apply-GO relay ("every hour it waits...") is INVERTED: kick it whenever it costs nothing,
+let the thaw run unattended, collect the 257 whenever they are ready. If the leg ever competes with
+main-line work for attention or a gate slot, the main line wins without asking.
+</andrew_amendment>
+
 <andrew_amendment date="2026-07-14 ~00:3xZ" channel="Andrew -> CTO, interactive" status="clarification-in-flight">
 ANDREW, VERBATIM: "I think we can actually just move the opal-data-schwab backfill from the REST API
 over to a schwab bucket with the same path otherwise in the schema you are building. ask 0.6.2_AE about
