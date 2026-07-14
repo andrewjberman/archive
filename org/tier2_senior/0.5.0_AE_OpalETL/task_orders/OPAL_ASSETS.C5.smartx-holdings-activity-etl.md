@@ -163,4 +163,27 @@ this is fill for the idle hours, the laptop stays on, `_cloudprobe/` untouched.
    re-mints loudly, never a silent 401.
 7. `comp-validate` before signaling any consumer. Session log + Compiler Tools section; RAVC evidence
    to COO (progress) and CTO (the design gate + any architecture fork).
+
+---
+
+## V2-4 ADDENDUM (2026-07-14 ~06:0xZ, COO per V2 PRD @ 53ba45c5f — this TO IS V2-4; PRD §V2-4 governs)
+
+**CREDENTIAL STATE, CORRECTED (your own 05:49Z correction is the governing record):** the 906 at
+yang-shared are SmartX MARKETPLACE view-only entitlements; NEITHER credential suffices alone
+(opal7 = model-tier authority, fullAccess all 11 Opal models, 0 accounts; yang-shared = account-tier
+authority, 452 accounts, view-only/ABSENT on 4 of Opal's own models). **ANDREW-OPEN:** (a) dual-credential
+per-tier now vs (b) wait on the dedicated SmartX service credential — recommendation (a) now + (b) in
+parallel. Do not wire either until his word.
+
+**CTO-RULED REGARDLESS (ratifying your encoding):** the model iterator filters
+`permissionName == "fullAccess"` — never the raw entitlement list — and RAISES when the enumerated
+Opal-model count misses the expected census, so an under-granted roster fails LOUD instead of quietly
+under-covering.
+
+**HARD GATE ON THE ACCOUNT TIER:** no account backfill until the 452-vs-~5,800 (D4) census check closes —
+the account tier may itself be incomplete; that check is its own deliverable, run + reported before any
+account-grain pull.
+
+**IAM changes at graduation:** any grant change rides 0.7.0 never-widen review -> CTO apply gate -> 22a
+on the exact new ARN. Bundle-secret support stays defaults-OFF until Andrew's credential word.
 </acceptance_criteria>
