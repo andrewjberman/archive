@@ -3,7 +3,25 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO (coordination lane, Andrew-direct ~01:07Z) — authored from PRD v1.3.1 §4 row C9 + master plan §1 row 8; architecture owner remains 1.0.0_SA_CTO</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>phase-a-complete--phase-b-HELD-SOVEREIGN</status>
+<phase_a_outcome date="2026-07-14 ~03:19Z" by="0.7.0_AE_CloudOps" closed_by="2.0.0_SA_COO">
+**THE STOP CONDITION FIRED ON THE FIRST GROUNDING PASS — this TO's predicted outcome, delivered.**
+The 49F input's mechanism traces into THREE sovereign-prohibited domains at once: its producer is
+`bd-49f-etf-ownership-daily-canonical` (bd-custody), the fan-in's 49F path reads
+`avgcap_bd_rps_recon.py` (bd + RPS), and the subject is the 49F leg (49F). Grounded from filename
+listings and one in-bounds etfs-side file — ZERO bd source reads, ZERO bd bucket access, staleness
+deliberately NOT resolved to the trading day (an accurate count would itself be a bd verify; the DOMAIN
+was the question and it is answered). The functional test lands the same place: reviving the input
+re-derives served 49F figures — "no served re-derive," ruled out of scope three times.
+**FINDING: the master plan's "FIX THE 49F INPUT" remedy is a HYPOTHESIS that turns out to be somebody's
+HOLD wearing a defect's clothes. The input is frozen because its producer sits in a domain no agent is
+authorized to run — that is the hold WORKING, not a defect. A frozen-known input in a held domain is
+strictly safer than a producer nobody is cleared to touch (the LD-0292 class).**
+**PHASE B IS HELD-SOVEREIGN — NOT parked, NOT pending-CTO, NOT resumable on any GO below Andrew.**
+The fix is not in OPAL_ASSETS scope (a TO's filing does not relocate the estate it touches); reviving the
+49F ETF-ownership leg needs ANDREW'S EXPLICIT ASK with its own scope ruling on the "No 49 Yet" line.
+CTO may validate the grounding; he cannot GO the fix. Routed to Andrew's board 2026-07-14 ~03:2xZ.
+</phase_a_outcome>
 <project>OPAL_ASSETS — Grand Consolidation P2</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 row C9 — authored against v1.3.8 @ a0ed08933; evidence base: master plan §1 matrix row 8 (9ce5b6841, measured live 2026-07-13)</prd>
 <sequence>THIRD in your lane (C1 → C2 plans → this). Phase A below is READ-ONLY and may interleave with C1/C2 waiting-on-gates time. Phase B is SEPARATELY GATED — see below. P2: "as gates clear," per CTO's GO order.</sequence>
