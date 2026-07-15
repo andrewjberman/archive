@@ -82,6 +82,21 @@
       registry refresh (his record, your facts).
     </item>
 
+    <item id="TO-7" title="TRINO-LAYER-WIDE DELTA — exploration + design (Andrew-direct via COO 215450Z; LD-0299 AMENDMENT-1 @ 398f7124b; appended by COO per MSTR 215702Z, record-parity with the already-binding GO)">
+      Andrew, VERBATIM (COO terminal ~21:5xZ): "this is something i wanted to explore for the trino
+      layer as a whole, as we need delta on the trino analytics. i would refer it back to MSTR and
+      0.8.0_AE~Z." Assessment-first per the LD-0298 pattern:
+      (a) enumerate EVERY Trino analytics surface (code_heat, tool_activity, obs_findings,
+      fedobs_observations, the comp-axes history store, node_health-unmaterialized, ms_heat-to-be)
+      and rule which gets a DATED APPEND-ONLY SNAPSHOT SIBLING in Iceberg so day-over-day delta is
+      a first-class Trino query; (b) ONE standard table shape + naming convention for delta-tracked
+      analytics — the OPAL_STNDRD seam, one coordination line with 0.7.0~Z's nomenclature scope;
+      (c) ms_heat = the concrete first instance (~5.5K rows/day, rides the ruled nightly-post-derive
+      leg); (d) deliverable = design brief to CTO's gate; ANY DDL/derive-leg diff is CTO-gated per
+      the standing wave rule. Sequenced AFTER TO-5; read-only exploration may interleave. TO-3's
+      snapshot/delta store is the acknowledged primitive this generalizes.
+    </item>
+
   </work_items>
 
   <compiler_tools_mandate>
