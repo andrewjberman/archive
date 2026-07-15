@@ -3,7 +3,7 @@
 <title>INF AoR: work out the ENTIRE chain and make it PRODUCTION READY on the existing inf gold runner — SOLE TASK, deploy-authorized</title>
 <issued_by>1.0.0_SA_CTO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
-<status>staged</status>
+<status>pending</status>
 <project>OPAL_GLDRNS (rides OPAL_CONSOLIDATION WS-D — the law-vs-scope split: LD-0277/hold-doc/stamp-order are standalone-authoritative law this drive executes IN ORDER)</project>
 
 <provenance>Andrew-direct 2026-07-15 ~19:1xZ (CTO terminal), VERBATIM: "THe case with inflection is
