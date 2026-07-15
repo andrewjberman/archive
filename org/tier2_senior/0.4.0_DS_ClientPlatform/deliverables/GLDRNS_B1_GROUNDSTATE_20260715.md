@@ -96,6 +96,24 @@ CTO→MSTR when the validation battery is staged (drive step 4).
 8. CVO~B V4 re-take on the SERVED artifact; portal: noel platinum surfaces appear; Andrew SEES it.
 ```
 
+## C-addendum (20:4xZ): G1 CLOSED + the sweep result
+
+**G1 CLOSED — dispatch deployed + download-verified.** Pre-flight: basename in the sync_scripts flatten set
+only at the target (`code/gold` 1, `manual_api`/`silver`/`bronze` 0 — a same-prefix update, not a collision);
+no serve-held sentinel; source commit `ff6b2ff87` on origin/CLOUD, origin==local md5. Deployed 20:41:41Z;
+downloaded bytes md5 `3aef4ae7…` == repo; AoR markers now in deployed bytes (ASOF 14 / SRC_ETAG 10 /
+FOLD_ACTIVE 3 / aor_resolver 4); step-zero `sync_scripts` preserved at `:892`; Door-5 collision ETags
+re-checked UNCHANGED post-deploy. Chain still held (deploy != run).
+
+**comp-pipescript deployed sweep (inf-gold tree):** the remaining deploy gap maps EXACTLY onto the
+DEPLOY-SERVE-HELD set — `INF_A_0.aor_resolver.py` + `INF_D_11.aor_attribution_drift.py` **MISSING_ON_S3**;
+`INF_A_00, INF_A_01, INF_C_02, INF_C_07, INF_D_00c, INF_D_00d, INF_D_00f, INF_D_02b` **STALE**; everything
+else MATCH (incl. INF_C_01). **These 10 deploy ONLY as the atomic serve-held bundle after the G3 arch-gate
+clears** (deploy-import-lint, chokepoint still held) — the sentinel is the mechanism and I will not walk
+around it. NOTE: the resolver being MISSING means presence-gating in the new dispatch currently reads
+`resolver=<absent>` — chains stay resolver-less until the gated bundle lands, which is correct-dark today
+and a hard prerequisite of the release run.
+
 ## Compiler Tools
 
 comp-grep (fold builder locate, CHANGE-2 census, DEPLOY-SERVE-HELD census — 3 runs, all with denominators
