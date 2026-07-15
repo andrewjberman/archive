@@ -107,6 +107,13 @@ CTO-relayed additions (his terminal, verbatim in his 205159Z): the 50/50s are "c
 Eclipse only not smartx" -- **STRUCK from the SmartX roster BY DESIGN; never again a smartx
 coverage gap** -- and the identification method = AUM-magnitude match on MY landed tables.
 
+3. (my terminal, ~21:2xZ, VERBATIM -- THE SMA CONFIRM): "THis is perfect regarding opal
+   dividend income and Pathfinder focused opportunities, these are the two SMAs i was looking
+   for." **BOTH SMA IDENTIFICATIONS ANDREW-CONFIRMED** -- Opal Dividend Income (the ~$18M
+   main SMA) + Pathfinder Focused Opportunities (the ~$4M SMA; the 'Tax' colloquial attaches
+   to it via the ~$4M magnitude he stated in message 2 + this confirm). The map's only
+   remaining open row = 'Opal Equity Growth' (UNMATCHED, unaddressed by this confirm).
+
 ## 6. THE COLLOQUIAL -> PROPER NAME MAP (the ruled deliverable; measured 2026-07-15 ~20:5xZ)
 
 Method: fact_model_aum_daily date=2026-07-15, latest day per rmid, closing_equity basis (D4
@@ -122,8 +129,8 @@ carry no aum rows at all; 'Opal Global All Equity Total Return' has a $0 row @ 0
 | Intermediate Term | **Opal Intermediate-Term** | $293,106,045 | 1,597 | 14540628-6eb8-4155-856c-e3264a39ac6c / 729210dd-444c-47c9-997d-8a3bcede7afd |
 | Long Term Conservative (LTC) | **Opal Conservative Growth** (ANDREW-CONFIRMED) | $755,282,826 | 3,195 | 3f111210-1fe6-445c-8db2-c98733e3f478 / 74c119db-73d6-4cf1-9535-740026df8121 |
 | Long Term Aggressive | **Opal Long-Term Aggressive** | $203,464,677 | 1,387 | 54e83021-43cc-44cc-a2f8-b1a36310f38e / 69cc5e3b-b14c-4640-bb4b-ead7837c1bc9 |
-| Main SMA (~$18M) | **Opal Dividend Income** -- MAGNITUDE MATCH, $18.59M, the only candidate in [12M, 25M] | $18,586,236 | 40 | ea6cbb22-d04e-49dd-a12a-654058fa733b / 48af6559-593a-48a9-8ac4-3c78ded93ad8 |
-| Tax SMA (~$4M) | **Pathfinder Focused Opportunities?** -- MAGNITUDE-ONLY candidate ($4.66M, the only one in [2.5M, 6M]); the name carries no 'Tax', and Andrew allowed "maybe we don't have the Tax" -- NEEDS HIS CONFIRM (or the Tax SMA is not in SmartX and this match is coincidence) | $4,659,490 | 45 | ab0a2a03-a201-475c-ab4c-b291ad267422 / 843d875b-62f7-4ef8-b833-5078a3f637d5 |
+| Main SMA (~$18M) | **Opal Dividend Income** -- MAGNITUDE MATCH ($18.59M, sole candidate in [12M, 25M]) + **ANDREW-CONFIRMED ~21:2xZ** (§5c msg 3) | $18,586,236 | 40 | ea6cbb22-d04e-49dd-a12a-654058fa733b / 48af6559-593a-48a9-8ac4-3c78ded93ad8 |
+| Tax SMA (~$4M) | **Pathfinder Focused Opportunities** -- **ANDREW-CONFIRMED ~21:2xZ** ("these are the two SMAs i was looking for", §5c msg 3); 'Tax' colloquial attaches via his stated ~$4M magnitude + the confirm | $4,659,490 | 45 | ab0a2a03-a201-475c-ab4c-b291ad267422 / 843d875b-62f7-4ef8-b833-5078a3f637d5 |
 | 50/50 INT/ST | STRUCK -- **Eclipse-only by design** (ruling, CTO record 205159Z) | -- | -- | -- |
 | 50/50 INT/LTC | STRUCK -- Eclipse-only by design | -- | -- | -- |
 | Opal Equity Growth | **UNMATCHED (honest row)** -- no magnitude-plausible or name-plausible candidate; nearest dormant name 'Opal Global All Equity Total Return' carries a $0 book (rmid 4d85401b...) | -- | -- | -- |
