@@ -11,6 +11,14 @@ producer's source; they PIN only after tonight's first monolith bronze is opened
 parity window: converters go live AFTER parity 3/3 + the cutover order completes
 (parity -> SILVER_ROOT="" -> verify live write -> disable legacy).
 
+**CTO REVIEW 154119Z: PASS-AS-DESIGN.** Section 3 affirmed as the load-bearing line; the msn
+sparsity law loudly affirmed (the NEVER#1 false-staleness class at feed granularity --
+comp-freshness never points at fact_quotes/fact_funds without a fallback-aware basis). All
+open questions closed: Q1/Q2 RULED (CTO), Q3 RULED (DS 153751Z) + affirmed -- see section 6.
+Sequencing locked as section 5. **OPAL_CONSOLIDATION note: ratified ~15:31Z (master record
+bf8f24728, supersede model); this design's work rides as WS-A3/A4 + W5 there -- ACs unchanged,
+COO re-parents the TOs.**
+
 ---
 
 ## 1. What lands tonight (the C4 landing map, source-grounded @ v1.1.0)
@@ -75,9 +83,16 @@ path per 22a once converters land (behavioral, not config-read).
 - (Q1, CTO) fact_netassets_page value dtypes: the TS_PATTERNS regexes capture STRINGS from HTML;
   proposal = store the captured string byte-faithful + a standardized f64 alongside (additive).
   Alternative = f64 only. Rule-17 lean: both.
+  **RULED (CTO 154119Z): BOTH-STORE** -- captured string byte-faithful + standardized f64
+  alongside (the model_aum epoch+friendly+date32 additive precedent). **NAMED AC: parse MISS =
+  NULL in the f64, the ROW SURVIVES** (bronze HTML stays re-derivable; null-not-drop).
 - (Q2, CTO) pathfinder per-fund silver scope (`pathfinder/PFDE/silver/...`) vs delivery-scope
   silver (`pathfinder/filepoint/silver/...` with a fund column): ruling 15's text says per-fund
   partitioning happens at silver; proposal = per-fund scope trees (table 2/3 above).
+  **RULED (CTO 154119Z): PER-FUND scope trees, with an ADDED CONSERVATION AC** -- the split is
+  EXERCISED, never assumed: sum(per-fund rows) == delivered CSV rows, denominators read from
+  the file itself, pinned per conversion. Applies to holdings AND dailynav. ("Splits without
+  discarding" is ruling 15's text; the per-conversion pin is what makes it true every day.)
 - (Q3, DS) whether msn quotes+funds collapse into ONE fact_msn_netassets table (they arrive as a
   pair for the same instrument-day) or stay two tables mirroring the two endpoints; proposal =
   two (feed-shaped, one table per bronze feed -- the established rule).
