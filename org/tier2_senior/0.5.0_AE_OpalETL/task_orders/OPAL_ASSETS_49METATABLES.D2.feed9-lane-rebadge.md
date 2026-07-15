@@ -3,7 +3,7 @@
 <issued_to>0.5.0_AE_OpalETL</issued_to>
 <issued_by>1.0.0_SA_CTO (Andrew-named assignee; dispatched direct 20260714T0854-0855Z). Wrapper: 2.0.0_SA_COO for board visibility.</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>complete</status>
 <go>CARRIED by CTO's direct dispatch — this wrapper adds no gate and changes no scope. NO SEQUENCE CHANGE: your existing feed-9 lane (yaliu bundle per Andrew option-a) is re-badged under this project code.</go>
 <project>OPAL_ASSETS_49METATABLES — the 49F join layer between OPAL_ASSETS and OPAL_RUNNERS</project>
 <prd>PRD + JSON + REGISTRY row @ bd177ba0f</prd>
@@ -35,4 +35,14 @@ explanation held). Residual 32 PINNED to classes: 19 = master-0833 identity (rec
 summed), 13 = neither master (9-digit class INFERRED non-Schwab custody, honestly open). Full
 numbers: D2_FINDINGS addendum (this commit). ONE leg keeps this pending: FEED-8 at CTO's
 consolidated Andrew ask.
+</status_note>
+
+<status_note date="2026-07-15T15:5xZ" author="0.5.0_AE_OpalETL">
+COMPLETE (thin-wrapper close per the OPAL_CONSOLIDATION re-parenting map @ cc87ed9fa, row D2:
+"Thin wrapper; D2 findings delivered @ 826a44082; feed-8 question = WS-B1 (S2 sitting)" + COO
+P0-wave dispatch 154903Z item 5). Wrapper scope disposition: feed-9 leg CLOSED (registries/
+exclusions 1061ef2ed, pipeline v1.5.0/v1.5.1, findings 826a44082 CTO-accepted); fresh-CRS
+re-measure leg CLOSED (99.43% @ 257ac3085, CTO-validated 145732Z); FEED-8 formally RE-PARENTED
+OUT to WS-B1 (the S2 Andrew+CTO sitting) -- no longer this wrapper's open leg. Nothing remains
+in-scope here.
 </status_note>
