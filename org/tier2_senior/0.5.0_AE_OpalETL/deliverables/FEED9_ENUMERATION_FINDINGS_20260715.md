@@ -90,7 +90,51 @@ INT/LTC", "Opal Equity Growth", and "Tax SMA" have no obvious match in the live 
 either keyed differently in SmartX, or not yet a SmartX model, or a genuine entitlement gap.
 The reconciliation report carries the measured verdict per name.
 
-## 5. WHAT THIS RESOLVED TO (the decision as it was presented; §5a-b rule it)
+## 5c. FURTHER ANDREW-DIRECT RULINGS (my terminal, ~20:2x-20:4xZ, VERBATIM; CTO's terminal
+carried the fuller parallel ruling, his record 205159Z / memory ruling 7)
+
+1. "You are right about Opal Conservative Growth, that is LTC. If we don't have the 50/50 models
+   in here that is fine. However, we definitely have the SMAs in here. Maybe we don't have the
+   Tax, but look around for any models that say both Opal and SMA in their name, see what comes
+   up for that."
+2. "We must be getting them from somewhere because they're already being ingested in our smartx
+   bucket of opal-data-assets. We found the other day the main SMA had around ~18m, tax was
+   around ~4m, etc. The purpose i think here is just to identify explicitly how these items are
+   keyed in SmartX so we refer to them by their proper names and match them in our records based
+   on their colloquial names."
+
+CTO-relayed additions (his terminal, verbatim in his 205159Z): the 50/50s are "covered in
+Eclipse only not smartx" -- **STRUCK from the SmartX roster BY DESIGN; never again a smartx
+coverage gap** -- and the identification method = AUM-magnitude match on MY landed tables.
+
+## 6. THE COLLOQUIAL -> PROPER NAME MAP (the ruled deliverable; measured 2026-07-15 ~20:5xZ)
+
+Method: fact_model_aum_daily date=2026-07-15, latest day per rmid, closing_equity basis (D4
+§8.6: totalAum is mis-scaled); names + id pairs from fact_model_allocation_roster; open counts =
+roster status=='open'. Denominators: 8 rmids carry books; 3 entitled 'Opal Global *' models
+carry no aum rows at all; 'Opal Global All Equity Total Return' has a $0 row @ 07-13.
+**Total $1,426,386,759 @ day=2026-07-14 -- ties the ~$1.428B/$1.4B ground truth.**
+
+| Colloquial (Andrew) | SmartX PROPER name | AUM (closing_equity @ 07-14) | open | rmid / model_id |
+|---|---|---|---|---|
+| Ultra Short Term | **Opal Ultra Short-Term Income** | $44,872,335 | 170 | 3f8e94c4-2fc7-4cc3-957d-fecf70647b39 / c000fe6a-4f29-42e6-ae2e-75ea6162d175 |
+| Short Term | **Opal Short-Term** | $106,415,150 | 691 | 955c9631-74ed-4f3c-9691-38c24b5a6d0d / 0f76a5a0-3b8e-4433-846c-ad41765b51d8 |
+| Intermediate Term | **Opal Intermediate-Term** | $293,106,045 | 1,597 | 14540628-6eb8-4155-856c-e3264a39ac6c / 729210dd-444c-47c9-997d-8a3bcede7afd |
+| Long Term Conservative (LTC) | **Opal Conservative Growth** (ANDREW-CONFIRMED) | $755,282,826 | 3,195 | 3f111210-1fe6-445c-8db2-c98733e3f478 / 74c119db-73d6-4cf1-9535-740026df8121 |
+| Long Term Aggressive | **Opal Long-Term Aggressive** | $203,464,677 | 1,387 | 54e83021-43cc-44cc-a2f8-b1a36310f38e / 69cc5e3b-b14c-4640-bb4b-ead7837c1bc9 |
+| Main SMA (~$18M) | **Opal Dividend Income** -- MAGNITUDE MATCH, $18.59M, the only candidate in [12M, 25M] | $18,586,236 | 40 | ea6cbb22-d04e-49dd-a12a-654058fa733b / 48af6559-593a-48a9-8ac4-3c78ded93ad8 |
+| Tax SMA (~$4M) | **Pathfinder Focused Opportunities?** -- MAGNITUDE-ONLY candidate ($4.66M, the only one in [2.5M, 6M]); the name carries no 'Tax', and Andrew allowed "maybe we don't have the Tax" -- NEEDS HIS CONFIRM (or the Tax SMA is not in SmartX and this match is coincidence) | $4,659,490 | 45 | ab0a2a03-a201-475c-ab4c-b291ad267422 / 843d875b-62f7-4ef8-b833-5078a3f637d5 |
+| 50/50 INT/ST | STRUCK -- **Eclipse-only by design** (ruling, CTO record 205159Z) | -- | -- | -- |
+| 50/50 INT/LTC | STRUCK -- Eclipse-only by design | -- | -- | -- |
+| Opal Equity Growth | **UNMATCHED (honest row)** -- no magnitude-plausible or name-plausible candidate; nearest dormant name 'Opal Global All Equity Total Return' carries a $0 book (rmid 4d85401b...) | -- | -- | -- |
+
+Note for the record: NO SmartX model carries 'SMA' in its name (the account-tier 'SMA' string
+hits are all 'SMARTX' custodial titles); the SMAs are keyed as ORDINARY MODELS named
+'Opal Dividend Income' (+ candidate 'Pathfinder Focused Opportunities') -- which is exactly why
+colloquial matching failed until magnitude matching was ruled. Standing copy of this map:
+SMARTX_INGESTION_ARCHITECTURE.md name-map table.
+
+## 5. WHAT THIS RESOLVED TO (the decision as it was presented; §5a-c rule it)
 
 The "enumeration fix" is not an engineering defect to patch -- the enumeration correctly
 mirrors the grant, and the grant is the boundary. The decision is Andrew's:
