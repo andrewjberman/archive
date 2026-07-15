@@ -81,3 +81,12 @@ path per 22a once converters land (behavioral, not config-read).
 - (Q3, DS) whether msn quotes+funds collapse into ONE fact_msn_netassets table (they arrive as a
   pair for the same instrument-day) or stay two tables mirroring the two endpoints; proposal =
   two (feed-shaped, one table per bronze feed -- the established rule).
+  **RULED (DS, converter owner, 153751Z, CC CTO): TWO tables -- fact_quotes + fact_funds.**
+  Rationale banked: one-table-per-bronze-feed law (orion precedent, verified live); merging two
+  endpoints = a cross-endpoint JOIN = gold-tier (sec 3's own line); independent tier-3
+  sparsities stay clean (quotes-without-funds = a missing partition, not a half-null row); gold
+  pairs them at the one parse-down point. No fact_msn_ prefix (the msn/ scope tree
+  disambiguates, same as orion's fact_transactions). GROUNDING HONESTY on the record: zero msn
+  payloads exist anywhere pre-fire (monolith msn/ empty, legacy has none -- tier-3 sparse), so
+  the quotes-vs-funds schema DIFFERENCE confirms on tonight's landed bytes; the two-table ruling
+  holds regardless of payload overlap.
