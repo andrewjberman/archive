@@ -2,7 +2,20 @@
 
 <issued_to>0.6.2_AE_PartnerETL</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>superseded-pending-D1a-verify</status>
+<status>complete-superseded</status>
+<!-- CLOSED-SUPERSEDED 2026-07-15 ~13:0xZ (COO, on the D1a-verify close condition, CTO ruling 173520Z).
+     Close condition MET AND EVIDENCE-GROUNDED (not a self-report): D1a Apply B landed 07-14 18:05Z
+     (v0.11.0, ledger 1802Z 3/3) AND its FIRST SCHEDULED pull VERIFIED on the live listing 07-15 02:30Z.
+     Evidence (0.7.0 @ 130558Z, live ListObjectsV2 on opal-data-assets): scheduled fire START 02:30:33Z
+     RequestId 379d9ba3-... matching cron(30 2 * * ? *) to the second (0.7.0 idle since ~20:17Z = no manual
+     invoke; 04:30Z re-attempt correctly 3x skipped-idempotent); landings blackdiamond/49f/bronze/
+     {allocation_390224,fees_435407,template_roster}/2026-07-14/ with keys+ETags+sizes 02:31-02:32Z;
+     content ABOVE floors (allocation 30,541 rows/92 cols vs floor 70; fees 1,208 rows/34 cols vs floor 21
+     NOT a quiet-day zero; roster 47 templates); as_of=2026-07-14; zero refusals. The legacy-box auto-login
+     port is SUPERSEDED by the monolith daily-REST path (Andrew ~03:4xZ 07-14) -- the underlying 49f freeze
+     condition is now cleared by a different mechanism, exactly as the supersede ruling anticipated. Did NOT
+     reopen (the conditional-reopen triggers -- D1a slip / legacy degrade before verify -- did not fire). -->
+
 <date>2026-06-29</date>
 <priority>HIGH — sole 49f unfreeze path (Andrew declined the manual reseed band-aid; durable port IS the fix)</priority>
 
