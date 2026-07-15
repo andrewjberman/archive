@@ -3,6 +3,18 @@
 # objective, CTO relay 185839Z). Rides to CTO with tonight's conversion report.
 # GROUNDING: live ListObjectsV2 census 19:0xZ (denominator 16,764 smartx keys — matches
 # CTO's number) + silver.py at HEAD 0a5d7e609 + SMARTX_C5_DATA_SHAPE_PLAN_20260714.md §4.
+#
+# STATUS UPDATE 2026-07-15 ~15:1xZ: THE PLANNED FAMILY (sec A rows 1-5) IS 5/5 LIVE SILVER.
+#   fact_allocation_account_map 7,141 rows @ date=2026-07-14 (first V2-8 conversion, 07-14 night)
+#   fact_allocation_positions 107,309 rows @ date=2026-07-15 (DS pin-tied to the row, 2 instruments)
+#   fact_allocation_valuation    9,540 rows @ date=2026-07-15 (1:1 hard AC exact)
+#   fact_model_aum_daily         4,278 rows @ date=2026-07-15 (3 named empty-series-unfunded holes)
+#   fact_model_allocation_roster 9,540 rows @ date=2026-07-15 (status split exact; cross-feed tied)
+# Contract amended per CTO rulings a1/keep/(c) 145610Z; (c) discriminator live @ 7f76de167.
+# Expectation reports: DS part-1 @ 43bbc0385 + part-1b @ 6663a320a (PINNED). Manifests in
+# smartx/platform/meta/pulls/20260715/. OPEN: the 7-feed table-or-exemption wave (sec A rows
+# 6-12; DS part-2 -> CTO rulings) + the to_frames dedup-semantics ruling (latent, at CTO) +
+# ETF family (design filed @ 9efe4ae0e, schemas pin on tonight's landed bytes).
 
 ## A. SMARTX — live bronze census vs converter status
 
