@@ -62,7 +62,35 @@ gated before any enumeration change: **proposed code leg (evidence-before-code, 
 the model_allocations parse asserts every returned record's model.id == the requested modelid
 and REFUSES on mismatch.**
 
-## 5. WHAT THIS RESOLVES TO (the decision, stated plainly)
+## 5a. RULED (ANDREW-DIRECT, ~19:5xZ, my own terminal, VERBATIM): "The three missing models do not matter for our needs."
+
+**= OPTION (B), BOUNDARY ACCEPTED.** No vendor entitlement ask. Consequences, so the record is
+one consistent read: the allocation-driven augmentation + the CTO two-class guard design =
+MOOT (nothing to augment); the 3 models' model-tier detail is PERMANENTLY absent-BY-RULING
+(not absent-with-reason-pending); the account-tier sweep remains the complete record for their
+9 allocations. **The R3 model-open-outside-map finding class STAYS LOUD in future sweep
+conversions by design (a NEW out-of-scope model appearing must still surface), but hits on
+these 3 model ids are EXPECTED-PER-RULING, not an escalation.** DS's permanent coverage
+asterisk re-grounds on this ruling (theirs to fold). The §4 filter-integrity refuse-gate is
+UNAFFECTED -- it guards owned-model ingest integrity against the vendor's silent filter-drop
+regardless of this ruling; it stays staged at CTO's gate.
+
+## 5b. THE NEEDS ROSTER (ANDREW-DIRECT, ~19:5xZ, my own terminal, second message, VERBATIM):
+"I do not know exactly how they are keyed in SmartX but the models that we need are something
+like: Ultra Short Term, Short Term, Intermediate Term, Long Term Conservative, Long Term
+Aggressive, 50/50 INT/ST, 50/50 INT/LTC, Opal Equity Growth, Maybe some Tax SMA model(s), and
+there may be another SMA i'm forgetting, but it's all Opal-specific models, not other brand
+models."
+
+**What this changes:** the coverage question is no longer the 3 other-brand models (§5a ruled
+them irrelevant -- consistent: Vanguard/Martin/Suncoast are exactly "other brand"). It becomes:
+**does the entitled 11 cover the OPAL-SPECIFIC needs list?** Reconciliation measured same
+turn (see the needs-reconciliation report + broadcast); names like "50/50 INT/ST", "50/50
+INT/LTC", "Opal Equity Growth", and "Tax SMA" have no obvious match in the live 11 -- each is
+either keyed differently in SmartX, or not yet a SmartX model, or a genuine entitlement gap.
+The reconciliation report carries the measured verdict per name.
+
+## 5. WHAT THIS RESOLVED TO (the decision as it was presented; §5a-b rule it)
 
 The "enumeration fix" is not an engineering defect to patch -- the enumeration correctly
 mirrors the grant, and the grant is the boundary. The decision is Andrew's:
