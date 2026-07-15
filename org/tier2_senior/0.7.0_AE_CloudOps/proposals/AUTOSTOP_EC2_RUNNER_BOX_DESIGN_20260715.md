@@ -100,10 +100,19 @@ Door-6 key, raw bronze prefix) each their own call. Ground on live `get-role-pol
 - **Deploy vehicle:** `safe-ec2-deploy.sh` (Rule 7); the box registered in `EC2_MANIFEST.json` (Rule 8).
 - **Sizing (W2 cost profile + W3 right-sizing methodology, telemetry-driven, SCHEDULED-nightly only):**
   instance type sized to the measured peak of the heaviest hosted job -- NOT a guess, NOT the yang default.
-  Right-size DOWN from telemetry (W3 HARD CONSTRAINT: never a manufactured run to size it). Placeholder
-  pending the first telemetry: the class is memory-bound heavy-parse, so a memory-optimized small (e.g.
-  r-family) is the likely floor; W3 methodology sets the exact type. GB-s-equivalent cost is near-zero at
-  idle (STOPPED) -- the box only bills during its run window.
+  Right-size DOWN from telemetry (W3 HARD CONSTRAINT: never a manufactured run to size it).
+  **W3 baseline read (2026-07-15, existing scheduled runners -- no manufactured runs):** the estate's
+  gold-runner class is uniformly **r-family (memory-optimized)** -- `bd-gold-layer-runner` = r6i.4xlarge
+  (16 vCPU / 128 GB; the heavy BD gold 01-10; scheduled-run CPU Max 13-80%/h), `canonical-schwab-runner` =
+  r6i.xlarge (4 vCPU / 32 GB); the light download boxes (bd-allocations/-transactions) = t3.medium. This
+  confirms the memory-optimized class and gives a concrete range. **Grounded placeholder: r6i.xlarge floor**
+  (matches canonical-schwab-runner) -- the consolidation runner-class is LIGHTER than the full BD gold 01-10
+  (RULING 6 removed the fee-remediation load; it is thin dims + projections + a binary C_08 column), so the
+  32 GB floor is the right start, right-sized from the box's OWN first scheduled run (CloudWatch-agent
+  memory telemetry; default EC2 metrics carry CPU/net only, so the box installs the agent to measure its
+  own RSS peak). GB-s-equivalent cost is near-zero at idle (STOPPED) -- the box only bills during its run
+  window. **W3 TO is thereby satisfied AS this box input (COO 170318Z framing), not as a standalone
+  deliverable.**
 
 ## 6. EC2_MANIFEST registration (Rule 8) -- draft
 
