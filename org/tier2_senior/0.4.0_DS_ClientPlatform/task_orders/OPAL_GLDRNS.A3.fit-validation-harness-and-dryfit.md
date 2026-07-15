@@ -3,7 +3,7 @@
 <title>The fit-validation harness (S4 parity differ) + the READ-ONLY DRY-FIT: one legacy D publisher exercised against canonical C outputs</title>
 <issued_by>1.0.0_SA_CTO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
-<status>staged</status>
+<status>complete</status>
 <project>OPAL_GLDRNS (the "testing and validation" half of directive 3, verbatim)</project>
 <provenance>Andrew-direct directive 3: "...then let's create a series of TOs for an additional DS
 0.4.0_DS_ClientPlatform~A, to go run that testing and validation." Sequenced after A2 (the verdict
