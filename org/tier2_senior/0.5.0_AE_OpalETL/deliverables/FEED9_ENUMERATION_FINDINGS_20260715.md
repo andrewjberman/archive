@@ -119,6 +119,18 @@ coverage gap** -- and the identification method = AUM-magnitude match on MY land
    BY RULING, not resolved and not unmatched-needs-search.** Open rows after this: 'Opal
    Equity Growth' (unmatched) + 'Tax SMA' (deferred, "later").
 
+5. (my terminal, ~21:3x-21:4xZ, VERBATIM -- THE WRAP + THE BRONZE VERIFICATION ASK):
+   "Don't care about Opal Equity Growth for now, what we have is good, we can wrap it here,
+   just make sure that we're properly pulling all of these in our smartx bronze" +
+   clarification: "specifically in the opal-data-assets/smartx/ bronze".
+   **Opal Equity Growth -> PARKED BY RULING (not unmatched-open; 'for now'). The thread is
+   WRAPPED.** The verification ran same turn (listing instrument, bucket opal-data-assets):
+   **ALL 7 CONFIRMED MODELS x ALL 5 MODEL-TIER FEEDS PRESENT @ smartx/model/{rmid}/bronze/
+   {feed}/20260715/** -- holdings / changerequests / performance / model_allocations /
+   model_aum, one object each, sizes internally consistent (model_allocations scales with
+   book: LTC 1,316KB vs SMA 25-42KB, matching 3,195 vs 40-45 allocations). Grid verbatim in
+   the session log.
+
 ## 6. THE COLLOQUIAL -> PROPER NAME MAP (the ruled deliverable; measured 2026-07-15 ~20:5xZ)
 
 Method: fact_model_aum_daily date=2026-07-15, latest day per rmid, closing_equity basis (D4
@@ -139,7 +151,7 @@ carry no aum rows at all; 'Opal Global All Equity Total Return' has a $0 row @ 0
 | Tax SMA | **DEFERRED BY RULING** (§5c msg 4: "we will figure out the tax stuff later") -- no SmartX identification attempted until his word; NOT an unmatched-needs-search row | -- | -- | -- |
 | 50/50 INT/ST | STRUCK -- **Eclipse-only by design** (ruling, CTO record 205159Z) | -- | -- | -- |
 | 50/50 INT/LTC | STRUCK -- Eclipse-only by design | -- | -- | -- |
-| Opal Equity Growth | **UNMATCHED (honest row)** -- no magnitude-plausible or name-plausible candidate; nearest dormant name 'Opal Global All Equity Total Return' carries a $0 book (rmid 4d85401b...) | -- | -- | -- |
+| Opal Equity Growth | **PARKED BY RULING** (§5c msg 5: "Don't care about Opal Equity Growth for now") -- was honest-UNMATCHED (no magnitude/name candidate; nearest dormant name 'Opal Global All Equity Total Return' carries a $0 book); reopens only on his word | -- | -- | -- |
 
 Note for the record: NO SmartX model carries 'SMA' in its name (the account-tier 'SMA' string
 hits are all 'SMARTX' custodial titles); the SMAs are keyed as ORDINARY MODELS named
