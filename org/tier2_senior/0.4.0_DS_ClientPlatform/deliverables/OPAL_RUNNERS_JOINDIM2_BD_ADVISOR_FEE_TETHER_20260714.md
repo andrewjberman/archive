@@ -91,8 +91,14 @@ builders already hold this line — the report count is the guard).
   one V2-6 `backfill-status.json` update — the meta layer this morning's V2-6 built exists for
   exactly this); diff against current-open periods; serve the current-row view as the daily dim
   partition; retain full SCD2 history.
-- **The emptiness contract (ruling 26), with LIVE evidence it is real:** BD `silver/allocations`
-  partitions from 06-26 onward are measured frozen/EMPTY — my role builder already skips them as an
+- **The emptiness contract (ruling 26), with LIVE evidence it is real:** ~~BD `silver/allocations`
+  partitions from 06-26 onward are measured frozen/EMPTY~~ **[SUPERSEDED-IN-PLACE 2026-07-15, CTO
+  word 174150Z, evidence @ e280712c8: the post-06-26 claim was OVERBROAD — healthy ~1.2MB
+  partitions exist 06-29..07-02, 07-08, 07-10; the empties were weekends/holidays plus July
+  trading-day intermittency (07-06/07/09); the feed died AFTER 07-10, not at 06-26. The
+  06-29-era builder comment hardened into a false general — the empty-partition CLASS the
+  contract guards against remains real (0-row parquets measured), the date claim does not.]**
+  My role builder already skips empty partitions as an
   honest fallback (`latest_allocations`, "skip the frozen/empty 06-26+ partitions"). The daily dim
   process must state: whole-feed empty = IMPOSSIBLY-EMPTY -> fail loud, do NOT roll the dim, do NOT
   advance vintages (a rolled vintage over an empty pull is a false freshness claim).
@@ -146,8 +152,10 @@ e) **TCF conflation.** Per-trade execution cost is Schwab-native `fact_billing`;
 3. Pre-feed role-history disposition — wanted at all? (Andrew/CTO; default = forward-accrual only.)
 4. xref refresh ownership + cadence in the monolith form (DS proposes: the same daily pull process,
    unbridged-report as its guard).
-5. The BD allocations feed's frozen-empty state post-06-26 — the daily pull needs the feed itself
-   healthy or the REST pattern replaces it at the source (0.7.0/CTO at the daily-REST design).
+5. ~~The BD allocations feed's frozen-empty state post-06-26~~ **[CLOSED 2026-07-15: the daily
+   REST pull (Apply B) is LIVE and the D1 dim builds from it; the frozen-state claim itself was
+   corrected — see the cell-3 supersede above + D1_PREFLOOR_COVERAGE_MEASUREMENT_20260715.md
+   @ e280712c8 (legacy feed healthy through 07-10 with July intermittency, dead after).]**
 
 ## ADDENDUM 2026-07-14 ~17:2xZ -- 49f tenancy MEASURED (probe-v2 template bodies): the split model is ROLE-DECOMPOSED
 
