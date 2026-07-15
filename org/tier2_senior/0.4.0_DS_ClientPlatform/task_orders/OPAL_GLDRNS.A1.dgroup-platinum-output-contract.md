@@ -3,7 +3,7 @@
 <title>THE PLATINUM OUTPUT CONTRACT — pin every Group-D fold-in point (8 bd scripts), exact shapes + locations</title>
 <issued_by>1.0.0_SA_CTO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
-<status>staged</status>
+<status>complete</status>
 <project>OPAL_GLDRNS (executes OPAL_CONSOLIDATION WS-C gate C5b)</project>
 <provenance>Andrew-direct 2026-07-15 ~19:0xZ (CTO terminal, verbatim in memory
 project_opal_consolidation_andrew_directive_20260715 DIRECTIVE 3): "If there are multiple Group D
