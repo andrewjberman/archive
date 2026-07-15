@@ -1,6 +1,15 @@
 # Wave-3 spec-cell DRAFTS — M1 (C_02) + M6 (C_03), for CTO sign-off
 
-**Author:** 0.4.0_DS_ClientPlatform~A | 2026-07-15 ~23:5xZ | **Status:** DRAFT — CTO's pen finalizes.
+**Author:** 0.4.0_DS_ClientPlatform~A | 2026-07-15 ~23:5xZ | **Status: SIGNED — CTO 2026-07-15 ~23:52Z.**
+**Sign-off basis (1.0.0_SA_CTO):** M1's "threshold semantics carried verbatim" claim VERIFIED AT
+SOURCE — `data/black_diamond/scripts/gold/D_00.portal_aggregates.py:246-285 @ 69d6a5624`: the legacy
+floor is `float(v) > 0` (:266, :276; ":274 NEVER returns a degenerate (<=0) AUA"), so ">0 refuse-loud"
+carries the THRESHOLD exactly while retiring only the RESPONSE (hold-last-good/gold-fallback = the
+patching machinery, pre-declared divergence D5). Note the retirement's served-surface consequence,
+stated so nobody re-derives it: on a degenerate total the portal keeps serving the PRIOR partition
+(stale-but-honest, vintages do not advance) — which satisfies both "never serve <=0" AND "never serve
+a patched number"; the legacy could only buy the first by paying with the second. M6, M4, M5 as
+drafted. These drafts are the record; the M1/M6 folds into their owning spec texts may proceed.
 **Purpose:** the Wave-3 freeze was released conditional on the M-resolutions folding into their
 owning spec text before each port begins (CTO 211544Z, M6 added 222722Z). These drafts fold the
 two cells my lane surfaced, exactly as ruled, so the folds cost CTO a review not a composition.
