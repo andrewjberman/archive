@@ -69,7 +69,10 @@ partition + the live 0833 silver + the live xref seed THIS SESSION (scratchpad s
 ## 4. Outputs the build must land (contract grammar, ruling 23/21)
 
 1. **`blackdiamond/49f/silver/dim_advisor_fee_role/date=2026-07-14/data.parquet`** — the ONE dim.
-   PK `account_id` (10-digit padded string). Pinned schema v1.0 (38 cols): key+echo
+   PK `account_id` (10-digit padded string). Pinned schema v1.0 (43 cols — CORRECTION
+   pre-build, same commit as the converter: the original line said "38", an arithmetic
+   slip; the pinned column GROUPS below were and are the pin, 3+6+6+5+9+2+3+2+6+1=43):
+   key+echo
    (account_id, bd_account_id, bd_account_number) · 6 roles ('No X Value Assigned'/'None'→
    'Unassigned') · 6 split pcts float64 · 5 per-role `{role}_split_source` ('bd-allocation-feed'
    unless curated-override; override CSV currently 0 rows = honest no-op) · fee block
