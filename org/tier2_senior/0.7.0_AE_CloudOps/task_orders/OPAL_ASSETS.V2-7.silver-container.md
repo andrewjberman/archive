@@ -3,7 +3,9 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO (V2 decomposition; PRD author 1.0.0_SA_CTO)</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>complete</status>
+<!-- WS-A2 close-on-evidence (P0 OPAL_CONSOLIDATION, COO 154923Z): container LIVE, applied 2026-07-14, tag opal-assets-v0.7.0 (CTO-gated apply at build). AC1: tag exists + DLQ opal-assets-silver-dlq live. AC2: monolith notification config carries 11 lambda event configs binding */bronze/ prefixes -> silver converters (orion/schwab x2/smartx x6/blackdiamond/eclipse), verified live 2026-07-15. AC3: 5 silver sweep rules ALL ENABLED with per-channel crons (orion cron(0 16), etc.), verified live. AC4: per-role 22a evidence committed at build RAVC (CTO-accepted). Transitive proof: V2-8 converter artifact swaps (delta-5/6/7) land into this container -- a container that is not live cannot be swapped into. Status file lagged reality; no new work. Re-parents into CONSOLIDATION per cc87ed9fa. -->
+
 <go>BUILD NOW -- ANDREW-DIRECT (2026-07-14 ~08:4xZ, COO session, verbatim: "Yes, start silver builds ahead of the certificate") SUPERSEDES the V2-5-cert hard gate for the BUILD. Author the TF against contract note v1 (d68982c1e), plan pure to-add. UNCHANGED: CTO gates every apply (deploy rule 18/safe-apply); the V2-5 certificate continues in parallel as the Phase-II completeness instrument and its emission gates are untouched. Your event slots (mirror verdict, 14:15Z, 15:45Z C9) interleave -- work-order, not wall-clock.</go>
 <project>OPAL_ASSETS — V2 Phase II silver conversion layer</project>
 <prd>docs/architecture/OPAL_ASSETS_V2_PRD.md §3 rulings 22-25 + V2-7 (@ 53ba45c5f); inherits CONSOLIDATION_PRD v1.6.0 whole</prd>
