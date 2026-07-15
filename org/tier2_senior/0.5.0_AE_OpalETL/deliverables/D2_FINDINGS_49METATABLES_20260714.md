@@ -64,6 +64,30 @@ vintage; fresh ACC bytes exist in monolith bronze through 07-13 (DS pointer: C3 
 join substrate is 0.6.2's V2-8 converter output, not the legacy table). Re-measure there before
 pinning.
 
+### ADDENDUM 2026-07-15 ~14:5xZ — RE-MEASURED on the ruled substrate; residual PINNED to classes
+
+Substrate: 0.6.2's V2-8 `fact_acc` (the long-term join substrate named above), fresh partitions,
+both masters — `schwab/08242234/silver/fact_acc/date=2026-07-14/` (7,066 rows, 7,066 distinct
+10-digit account_id; 0824 leg CTO-CERTIFIED 07-15, manifest shortfall_post=0) and
+`schwab/08335338/silver/fact_acc/date=2026-07-14/` (7,139 rows). SmartX side unchanged:
+fact_allocation_account_map date=2026-07-14 (7,141 rows, 5,624 distinct account_numbers — the
+SAME denominator as the 20260508 measure).
+
+```
+rate:  99.43% (5,592/5,624 distinct) against fact_acc/date=2026-07-14 (master 0824)
+       (was 96.4% = 5,419/5,624 on the stale lossy staging table -- the stale-vintage
+        explanation HELD: 173 of the 205 residual join on fresh bytes)
+residual: 32 distinct, $29.2M of $1.42B map AUM (2.06%), decomposed:
+  19 = PRESENT ON MASTER 0833 (identity probe against 08335338 fact_acc same-date).
+       RECORDED AS IDENTITY, NOT SUMMED (0824/0833 never-summed law). $21.0M map AUM.
+  13 = ON NEITHER MASTER (9 nine-digit + 4 eight-digit; $8.2M map AUM).
+       INFERRED (unpinned): the nine-digit class (346482072, 6383xxxxx, 6554xxxxx,
+       645624489) does not fit Schwab's numbering -- plausibly non-Schwab custody.
+       No instrument we hold can confirm custodian from these tables; stays open.
+```
+Gold-join consequence: the runner's 0824-scope join substrate is CLEAN at 99.43% with every miss
+named; the 19 other-master accounts are a ROUTING fact (they join 0833's view), not a data hole.
+
 ## GUARDS THE RUNNER INHERITS (all live in v1.5.0)
 - Coverage constants are MEASUREMENTS (`OPAL_FAMILY_VIEW_MIN=7`, `BUNDLE_ACCOUNTS_MIN=452`) — a
   grant shrink fails loud before a partial identity table can look clean.

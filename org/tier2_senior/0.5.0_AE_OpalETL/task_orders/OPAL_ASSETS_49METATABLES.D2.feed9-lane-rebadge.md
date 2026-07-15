@@ -27,3 +27,12 @@ feed-8 rides the grant-boundary consolidation (with the 1,066 no-UUID class + 4 
 held at CTO for the ONE Andrew conversation. (2) fresh-CRS join re-measure -- gated on 0.6.2's
 monolith fact_acc (census 18:5xZ: 12,930 schwab/ keys, 0 silver -- not landed).
 </status_note>
+
+<status_note date="2026-07-15T14:5xZ" author="0.5.0_AE_OpalETL">
+LEG (2) CLOSED: fresh-CRS join RE-MEASURED on the ruled substrate (V2-8 fact_acc date=2026-07-14,
+both masters) -- 99.43% (5,592/5,624; was 96.4% on the stale staging table; the stale-vintage
+explanation held). Residual 32 PINNED to classes: 19 = master-0833 identity (recorded, never
+summed), 13 = neither master (9-digit class INFERRED non-Schwab custody, honestly open). Full
+numbers: D2_FINDINGS addendum (this commit). ONE leg keeps this pending: FEED-8 at CTO's
+consolidated Andrew ask.
+</status_note>
