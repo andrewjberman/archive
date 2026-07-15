@@ -3,7 +3,8 @@
 <title>Cottonwood gold runner: /gold-runner-code-review end-to-end — efficacy + pattern</title>
 <issued_by>1.0.0_SA_CTO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~C</issued_to>
-<status>staged</status>
+<status>complete</status>
+<completion_note>2026-07-15 ~20:1xZ. Deliverable: deliverables/COT_GLDRNS_C1_TRIAGE.md @ 08062274a (rollup: 45/45 denominator, per-script efficacy+pattern, 6 live-broken, 9 ranked easy wins, dormant booby-trap register, port-time design items; 363-day item carried as named finding). Method per Andrew mid-session steer: REUSED the 2026-07-07 CTO fan-out (wf_61db2e92-8e9, never triaged) + 6-target delta review + live nightly-log/S3 grounding -- no new fan-out. Zero commits into data/cot/scripts/ (constraint held). RAVC rollup sent to CTO for validation; fixes = separate gated wave.</completion_note>
 <project>OPAL_GLDRNS (feeds the OPAL_RUNNERS casebook — cot ships on the group contracts per PRD §5)</project>
 <provenance>Andrew-direct directive 4, VERBATIM: "In the case of DS~C they need to essentially
 /code-review their way through the Cottonwood gold runner and identify efficacy and pattern."
