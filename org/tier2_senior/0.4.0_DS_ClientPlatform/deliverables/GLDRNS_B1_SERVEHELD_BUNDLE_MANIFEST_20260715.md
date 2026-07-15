@@ -50,3 +50,17 @@ co-sign on SERVING stays at its own gate). Deploy != run: chokepoint verified HE
 **NOT in this bundle by law:** the frozen-3 (`build_assets_dim.py`, `_orion_api_silver_lib.py`,
 `convert_transactions_to_silver.py`) — unfreeze only as in-order chain steps with the hold-lift, CTO-flagged
 at that moment. Door 5/6 untouched.
+
+## POST-DEPLOY ADDENDUM (22:4xZ) — executed, verified, and the NAMED LAW this manifest earned
+
+Deployed 22:1x-22:2xZ on CTO clearance (222734Z ACCEPTED). 11/11 md5 ties; doors/chokepoint re-verified.
+The import verify (honest spec-based form; deploy-import-lint's dotted-name blindness found + fix staged)
+caught that **INF_D_11 imports `lib/aor_attribution_audit` — a lib THIS MANIFEST NEVER LISTED because it
+censused the file list, not the import closure.** Set-diff (repo 20 vs deployed 19) found exactly the one;
+deployed + verified TIE; lib parity 20/20, zero deployed-orphans.
+
+> ### NAMED LAW (CTO-ruled into the B1 evidence, carries to the refactor's deploy standard):
+> ### **A DEPLOY MANIFEST CENSUSES THE IMPORT CLOSURE, NOT THE FILE LIST.**
+> A manifest that diffs scripts but not their dependencies ships atomic sets with holes — the 5-file-atomic
+> lesson (AMEND 30) generalized: the atomic unit is the CLOSURE of everything the shipped files import,
+> computed against the DEPLOYED lib set, verified by importing the downloaded deployed bytes.
