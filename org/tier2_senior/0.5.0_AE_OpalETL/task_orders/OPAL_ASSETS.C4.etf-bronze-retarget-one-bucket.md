@@ -3,7 +3,7 @@
 <issued_to>0.5.0_AE_OpalETL</issued_to>
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>complete</status>
 <!-- COO status note 2026-07-15 01:5xZ (comp-state next-batch item): status=pending is CORRECT and carries
      tonight's full arc -- AC1 first-fire FAILED-TO-LAND 22:00Z (HALF-LANDED deploy: env leg 03:05Z landed,
      code leg never built; artifact predated bucket-split d69efaad2; source-confirmed by assignee, Rule-22a
@@ -12,6 +12,23 @@
      22:00Z scheduled fire (ONE run = parity day-3 + first monolith bronze); V2-1 GO rides that evidence
      (COO-confirmed 230300Z). Do NOT flip complete until the monolith listing shows the vendor prefixes
      populated on the scheduled fire. -->
+<!-- COO CLOSE 2026-07-15 ~18:3xZ (2.0.0_SA_COO): COMPLETE on the guarded flip. AC1 PASS on the MANUAL
+     fire ordered by Andrew-direct ~18:2xZ VERBATIM "we are not waiting on a scheduled run for the ETFs,
+     that goes NOW" -- the guard's original letter said "on the scheduled fire" (written when that was the
+     only expected fire, to prevent a config-read flip); the sovereign NOW order re-timed the proof legs to
+     this run, and the guard's INTENT (real bytes from a real fire, listing-verified, never a config read)
+     is satisfied. EVIDENCE (0.5.0 RAVC 183243Z): deployed v1.1.0 fired as-is (CodeSha256 re-verified
+     pre-fire, StatusCode 200 no FunctionError); LISTING-BASED AC1 = 4 keys @ /20260715/ (trueshares DIVZ
+     462,322B + IDVZ 252,697B netassets html; pathfinder/filepoint DailyNAV.csv 543B + ETF_Holdings.csv
+     14,305B), attestation tie listing-bytes 729,867 == producer bronze_bytes 729,867, 4==4 objects, none
+     parquet; bytes OPENED (TS_PATTERNS match both funds, as_of Jul-14 = T-1 correct; Q2 conservation ties
+     85+23=108==108); msn tier NEVER FIRED, issuer route carried all funds incl. PFOE-via-filepoint
+     (Andrew msn-strike order honored, sole-source guard resolved clean on actuals). AC2 parity quoted
+     (07-13 + 07-14 GREEN 52/52 x2; day-3 = tonight's laptop leg). AC3 by construction (prior record).
+     AC4 = the 183243Z RAVC itself. SEPARATE AND UNCHANGED: V2-1 GO stays HELD pending parity day-3
+     (tonight); the SCHEDULED-trigger confirmation leg for CTO's matrix rides tonight's 22:00Z fire
+     (watcher re-armed w/ LastModified>=21:55Z discrimination) -- this TO's completion does not close
+     that leg. Re-parented under OPAL_CONSOLIDATION WS-A1 (map @ cc87ed9fa). -->
 <hold_released date="2026-07-14 ~01:15Z" by="2.0.0_SA_COO" corrected="2026-07-14 ~02:2xZ per Andrew-ordered review finding [0]">
 THE HOLD (Andrew ~00:25Z: "Wait to dispatch until I give the go, I want to respawn the workers first" -- NO work, staged only, GO from CTO after Andrew's word) IS RELEASED. The full authority chain, cited because a release without its chain is indistinguishable from a breach:
   1. Andrew's release protocol (relayed by CTO, msg 20260714T005942Z): "Andrew is spawning YOU + DS + 0.6.2... Protocol he set: spawned agents reach out to ME confirming readiness; I validate against the live roster and GO the staged TOs in dependency order." The GO condition Andrew set = respawn + readiness confirms, with CTO holding the GO.
