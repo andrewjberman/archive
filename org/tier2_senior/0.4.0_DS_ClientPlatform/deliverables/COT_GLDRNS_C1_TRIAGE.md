@@ -25,6 +25,22 @@ Consequences of the never-runs, all verified live:
 
 ---
 
+## 0.5 END-TO-END PROD VERDICT (C1 AMENDED PRIMARY — CTO relay of Andrew-direct ~21:0xZ, 4-check per layer, probed 2026-07-15 ~21:0xZ)
+
+**VERDICT: the cot PROD pipeline IS RUNNING SUCCESSFULLY END TO END** — the 4-phase EventBridge chain fired last night (and every night on record this month), exit 0, every layer's artifacts advanced. It runs **degraded, not down**: the six quality defects in §1 live INSIDE the successful run, and no layer is frozen. Nothing DOWN → no outage escalation (the fix-wave escalation CTO raised is quality, not availability).
+
+| Layer | EXISTS | FRESH (trading-calendar: today Wed 07-15, T-1 convention → expected content 07-14) | SCALED | NOT-FROZEN |
+|---|---|---|---|---|
+| Bronze `bronze/{date}/` | ✓ | ✓ 2026-07-15 partition written this morning 02:0xZ | evidenced transitively (silver built from it at scale) | ✓ 13/14/15 partitions advancing daily |
+| Silver | ✓ | holdings/transactions/realized as_of **07-14 = AT the T-1 frontier**; `silver_complete.json` 02:03:24Z | ~11.8k holdings rows/day, daily parquets | ✓ advancing — **EXCEPT allocations + unrealized frozen at 07-08: the KNOWN tracked failure** (memory: cot snapshot-zero-row 2026-07-09; the `bd-cot-silver-stale-*` alarms fire TRUE on it — named, not news, close nothing on it here) |
+| Gold | ✓ | dims data_as_of 07-15 (run-stamp); canonical holdings/nna content through **07-13** | 11,873 holdings / $433.7M (sane growth vs $373M June baseline) | ✓ all mtimes 02:03–02:04Z today |
+| Platinum | ✓ all firm/advisor/client/account keys | mtimes 02:05–02:06Z today; content as_of 07-13 | headline consistent across independent surfaces ($433,747,822 / 221 clients / 844 accounts in both D_00-derived dashboard and D_04-synth leaderboard) | ✓ advancing nightly |
+| Portal-consumed | advisor-intelligence Lambda FIRM_CONFIG `cottonwood` → `opal-data-cot/platinum` (ADVI_PRTORG.04 companion gate); D_00's CloudFront invalidation OK in last night's log | same vintage as platinum | — | — |
+
+**Honest residuals:** (a) rendering-level portal verify (screenshot) not run this session — served-state grounding stops at the Lambda/S3 boundary; (b) gold/platinum content sits at 07-13 = one trading day short of the T-1 frontier while silver holdings carry 07-14 — measured cadence question (§4 D6: either a listing race at 02:03Z or BD's delivery frontier; NOT called an outage, the layer demonstrably advances daily); (c) bronze scale probed by existence + downstream evidence only.
+
+**BD-as-source (per the amendment): a constraint we make do with, not a finding.** The BD-induced fragilities are carried as NAMED RISKS: no lots/fee/attribution feed (→ the fallback lattice, D1), allocations-feed fragility (→ B6 + the known freeze), header-drift exposure in snapshot ingest (→ easy win 4 guards). No migration proposals herein.
+
 ## 1. OUTRIGHT BROKEN (live, confirmed, in the running chain)
 
 | # | What | Evidence | Blast |
