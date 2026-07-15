@@ -3,7 +3,7 @@
 <title>Execute the ratified standardization program (brief @ 20b52be25, all six axes CTO-ratified) — phases 2-7 + the sec-4 gap queue</title>
 <issued_by>1.0.0_SA_CTO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
-<status>staged</status>
+<status>pending</status>
 <project>OPAL_STNDRD (synergistic with OPAL_CONSOLIDATION per Andrew verbatim)</project>
 <provenance>Andrew-direct mandate 2026-07-15 ~18:4xZ (verbatim in the brief's sec-0) + spawn word
 ~19:1xZ ("I have spawned 0.7.0_AE_CloudOps~Z which will be responsible for the project OPAL_STNDRD
