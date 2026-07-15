@@ -3,7 +3,7 @@
 <issued_to>0.5.0_AE_OpalETL</issued_to>
 <issued_by>2.0.0_SA_COO (V2 decomposition; PRD author 1.0.0_SA_CTO)</issued_by>
 <date>2026-07-14</date>
-<status>staged</status>
+<status>pending</status> <!-- GO fired 2026-07-15 220354Z (COO, auto-fire clause on the GREEN 07-15 parity row) -->
 <go>HARD GATE: tonight's 22:00Z first-fire proof (parity day-2 + first monolith bronze C4 AC1) lands and is reported CLEAN. COO issues the GO after reading that report. DO NOT touch the producer before its first monolith landing — parity evidence stays clean (CTO sequencing note, handoff 20260714T055215Z).</go>
 <project>OPAL_ASSETS — V2 Phase I bronze close-out</project>
 <prd>docs/architecture/OPAL_ASSETS_V2_PRD.md §2.2 + §2 bar (@ 53ba45c5f); inherits CONSOLIDATION_PRD v1.6.0 whole</prd>
