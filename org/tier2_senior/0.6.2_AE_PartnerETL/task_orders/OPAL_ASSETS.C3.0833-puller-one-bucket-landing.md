@@ -3,7 +3,29 @@
 <issued_to>0.6.2_AE_PartnerETL</issued_to>
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>complete</status>
+<closure date="2026-07-15 ~17:3xZ" by="0.6.2_AE_PartnerETL" authority="COO idle-capacity dispatch 20260715T170053Z item 2 (close-on-evidence citing the WS-A1 AC, no new work) + Andrew-direct proceed on the Glacier closure leg; re-parented into OPAL_CONSOLIDATION WS-A1 per the P0 wave 154917Z">
+CLOSED ON EVIDENCE -- every AC discharged; the LAST open leg (AC5 Glacier) closed this window:
+  AC1/AC2  daily REST pattern BOTH masters LIVE since 2026-07-14 (tag schwab-si2-iam-v1.3.0, rules
+           canonical-schwab-si2-{08242234,08335338}-daily-pull ENABLED; monolith partitions landing daily,
+           listing-verified -- the WS-A1 drain consumes them).
+  AC3      SATISFIED-HISTORICAL (0833 backfill 6,932/6,932, CTO-verified, PRD S5 R6).
+  AC4      remap both masters complete (0833 6,932/6,932 3-tier; 0824 remap run post-pull-terminal 07-14).
+  AC5      GLACIER LEG COMPLETE 2026-07-15: 257 pre-floor objects enumerated AT RUN TIME (40 STANDARD +
+           217 restored-ready, 0 frozen; window to 07-29), all 257 H1-attested 08242234, 0 quarantined ->
+           257/257 copied + 3-TIER verified (set 257/257, size 257/257, ETag 246 single-part, MD5 11
+           multipart streamed+hashed). PreFloorRestore grant REMOVED (commit 83c81bae5, apply 0-diff,
+           tag schwab-si2-iam-v1.5.0); removal evidenced LIVE: simulate s3:RestoreObject on the exact
+           01_raw key -> implicitDeny; positive control s3:GetObject same key SEPARATE invocation ->
+           allowed (Rule 22a). Two remap-script defects found+fixed at execution (restored-visibility via
+           listing RestoreStatus; dst listing per conditioned prefix) -- in the same commit.
+  AC6      22a simulate battery banked at v1.2.0-v1.4.0 (6/6, DESIRED+APPLIED+EXERCISED).
+  AC7      idempotency exercised (re-run skip counts in the remap; converter skipped-idempotent law).
+  AC8      session logs 2026-07-14/15 with Compiler Tools; RAVC close to COO 20260715 (this closure's
+           companion message), gates routed through CTO.
+NOTE: PreFloorRawRead/PreFloorRawList grants REMAIN (their closure was not ruled) -- flagged to CTO as a
+follow-up candidate. opal-data-schwab stays STAGING (C12 inventories it; nothing deleted).
+</closure>
 <state date="2026-07-14 ~04:4xZ" by="2.0.0_SA_COO (reconciliation)">
 LANDED SO FAR: 0833 remap DONE (6,932/6,932, 3-tier, AC3-historical + AC4 partially discharged for 0833);
 BOTH-MASTERS daily REST schedules APPLIED + LIVE (0d8607926 -> 6/1/0, tag schwab-si2-iam-v1.3.0, rules
