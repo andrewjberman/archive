@@ -3,7 +3,8 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>1.0.0_SA_CTO (131908Z, DS D1 co-read finding 131819Z routed)</issued_by>
 <date>2026-07-15</date>
-<status>staged</status>
+<status>staged-fix-authored -- SWAP GATES ON TONIGHT 22:00Z CLEAN VERDICTS (CTO 163603Z)</status>
+<!-- PROGRESS 2026-07-15 ~16:4xZ (0.7.0): AC1+AC2 MET. Fix authored + committed 459ded842 (_selected_dim_floor now walks levels + parentDimensionLevels + childDimensionLevels, family-agnostic; collision-safe max). EXERCISED on the REAL probe bodies: allocation_390224 floor 0->70 (census {Relationship:7, Portfolio Group:2, Portfolio:26, Account:70}); fees_435407 unchanged 21 (census {Transactions:3, Relationship:1, Account:21, Holding:4}) -- NO regression. commit-gate clean. Artifact STAGED: build-verified sha tj4T5e1B, source-map 8c39c7fcc, plan bd49f-cell3-swap.tfplan = 0/1/0 (source_code_hash only). SWAP HELD: live sha still Ir0PmpFI (unchanged) -- apply gated on tonight's 22:00Z ETF/0833 verdicts reading clean per CTO; 02:30Z fire = natural runtime-confirm (AC3) post-swap. AC4 swap+session-log on apply. -->
 <priority>BEHIND everything parity-critical (delta-7, ES-1, Amendment-2, any 0833/orion/etf work). TRACKED, not dropped. No ledger urgency -- normal fix once the parity push clears.</priority>
 <project>OPAL_ASSETS_49METATABLES (D1 Apply B, opal-assets-bd49f-daily-pull)</project>
 
