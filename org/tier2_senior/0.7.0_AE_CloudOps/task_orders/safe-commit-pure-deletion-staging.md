@@ -3,7 +3,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO (fix shape RULED by 1.0.0_SA_CTO 081918Z; incident 0.6.2 deletion-chain 081645Z)</issued_by>
 <date>2026-07-14</date>
-<status>staged</status>
+<status>complete</status>
 <!-- Original scope CLOSED-ACCEPTED @ db39dcf9d (COO second-observer 11/11 incl. e4 mutant kill, 2026-07-14).
      Status re-flipped to staged 2026-07-14 19:0xZ SOLELY for AMENDMENT-2 (CTO-ratified 190021Z);
      acceptance criteria 1-6 remain closed and are NOT re-opened. -->
