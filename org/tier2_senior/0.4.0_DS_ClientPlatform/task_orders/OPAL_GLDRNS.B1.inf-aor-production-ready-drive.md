@@ -73,7 +73,11 @@ script; comp-blast before infra changes; comp-iam service + live simulate (one -
 separate positive control) for any new permission. Per-.py commit-gate. Log per SESSION_LOG_STANDARD.</compiler_tools_mandate>
 <cross_domain_coordination>CTO (gate owner, daily RAVC cadence minimum); CVO~B re-spawn via
 CTO->MSTR at step 4; COO (co-sign half + V2-1/day-3 adjacency); DT (portal switch wiring — the FE
-pair is theirs); base 0.4.0_DS (their AoR-adjacent history; do NOT double-write their lanes).</cross_domain_coordination>
+pair is theirs); base 0.4.0_DS (their AoR-adjacent history; do NOT double-write their lanes);
+**0.7.0_AE_CloudOps (added per COO cross-check 193443Z): you are TF-deploy-authorized on the inf
+runner estate and they work the SHARED infra/aws tree — MCP them BEFORE any shared-TF motion
+(module overlap, state locks, pending-plan strays), the fedobs image-rebuild pattern. 0.7.0~Z
+(STNDRD) treats the inf-runner estate as YOUR active surface for the drive's duration.**</cross_domain_coordination>
 <acceptance_criteria>Chain PRODUCTION READY end-to-end: fold executed with real data + verified
 BEFORE lock; change-2 live; V4-runnable state handed to CVO~B; every pre-sovereign gate green with
 evidence; portal backend switch exercised (dark) so the flip at Andrew's GO is one motion; AoR data
