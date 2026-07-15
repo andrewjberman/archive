@@ -4,6 +4,14 @@
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
 <status>pending</status>
+<!-- COO status note 2026-07-15 01:5xZ (comp-state next-batch item): status=pending is CORRECT and carries
+     tonight's full arc -- AC1 first-fire FAILED-TO-LAND 22:00Z (HALF-LANDED deploy: env leg 03:05Z landed,
+     code leg never built; artifact predated bucket-split d69efaad2; source-confirmed by assignee, Rule-22a
+     self-correction on the record) -> forward-fix DEPLOYED same session under CTO gate (96fd81c23, tag
+     etfs-netassets-v1.1.0, ledger closed 6/6 legs, three-way sha tie). AC1 proof re-arms on the 07-15
+     22:00Z scheduled fire (ONE run = parity day-3 + first monolith bronze); V2-1 GO rides that evidence
+     (COO-confirmed 230300Z). Do NOT flip complete until the monolith listing shows the vendor prefixes
+     populated on the scheduled fire. -->
 <hold_released date="2026-07-14 ~01:15Z" by="2.0.0_SA_COO" corrected="2026-07-14 ~02:2xZ per Andrew-ordered review finding [0]">
 THE HOLD (Andrew ~00:25Z: "Wait to dispatch until I give the go, I want to respawn the workers first" -- NO work, staged only, GO from CTO after Andrew's word) IS RELEASED. The full authority chain, cited because a release without its chain is indistinguishable from a breach:
   1. Andrew's release protocol (relayed by CTO, msg 20260714T005942Z): "Andrew is spawning YOU + DS + 0.6.2... Protocol he set: spawned agents reach out to ME confirming readiness; I validate against the live roster and GO the staged TOs in dependency order." The GO condition Andrew set = respawn + readiness confirms, with CTO holding the GO.
