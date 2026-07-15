@@ -21,6 +21,29 @@ COO re-parents the TOs.**
 
 ---
 
+> ## AMENDMENT 2026-07-15 ~18:5xZ (supersede-in-place; the yaliu-doc form)
+> **Sovereign ruling (Andrew-direct, COO terminal ~18:2xZ, relay 182059Z, verbatim recorded by
+> COO): "we do not use msn, we use the issuer route only."** CTO formal amendment to the 154119Z
+> review: **ETF FAMILY REVIEW AMENDED 182228Z** -- the family goes **5 tables -> 3**:
+> - **Tables 4 + 5 (fact_quotes, fact_funds) are STRUCK.** fact_dailynav is filepoint fund-admin
+>   delivery, NOT msn -- it STAYS.
+> - **Q3 (two-vs-one msn tables) = MOOT.** The **msn sparsity-law affirmation = RETIRED** (no
+>   table left to apply it to). **Q1 both-store + Q2 per-fund + conservation AC = UNCHANGED** on
+>   the three survivors.
+> - msn code-removal from the C4 producer rides CTO's normal artifact-swap gate, sequenced AFTER
+>   tonight's scheduled fire (deployed v1.1.0 stays untouched so the scheduled-trigger leg runs
+>   on the certified artifact). Until then **a landed msn key = a FINDING, never a landing**
+>   (watcher v2 emits it as one). DS contract note: contract sec-3 rule 9 (msn -> silver
+>   disposition) STRUCK per the same ruling; the TF never adds its event rule.
+> - **Manual fire executed 18:26Z (Andrew-NOW order, same relay): C4 AC1 CLOSED at CTO's gate
+>   183506Z** on the landed listing (4 vendor-prefix keys, byte-sum attestation tie 729,867B).
+>   The msn tier NEVER FIRED (tiers=[filepoint,trueshares], degraded=[]); the PFOE sole-source
+>   guard resolved clean on actuals (PFOE is filepoint-served: 2 dailynav + 23 holdings rows).
+>   Measured landed-bytes evidence folded into section 2 below; the scheduled-trigger leg +
+>   day-3 parity row still ride tonight's 22:00Z fire. Cutover order unchanged.
+
+---
+
 ## 1. What lands tonight (the C4 landing map, source-grounded @ v1.1.0)
 
 `_bronze_key` (lambda_function.py, three-way sha tie 40KaO/7j..., env verified live 14:2xZ:
@@ -34,6 +57,12 @@ pathfinder/filepoint/bronze/dailynav/{YYYYMMDD}/DailyNAV.csv       ONE file, BOT
 msn/{TICKER}/bronze/netassets/{YYYYMMDD}/{iid}.{quotes|funds}.json tier-3 FALLBACK -- absence normal
 ```
 
+> **AMENDED 182228Z:** the msn line describes the DEPLOYED v1.1.0 artifact only (the leg is baked
+> in until CTO's post-tonight artifact-swap). Under the issuer-route-only ruling **a landed msn
+> key is a FINDING, not a landing**. Measured on the 18:26Z manual fire: the first four keys
+> landed exactly as mapped (divz.html 462,322B / idvz.html 252,697B / ETF_Holdings.csv 14,305B /
+> DailyNAV.csv 543B); msn/ = 0 keys, tier never exercised.
+
 Vendor delivery scopes are the bronze scopes (PRD v1.3.3 ruling 15): the Filepoint CSVs land WHOLE
 under scope `filepoint`; per-fund partitioning happens at silver, where the parser splits without
 discarding (that is the ruling's own text).
@@ -45,8 +74,22 @@ discarding (that is the ruling's own text).
 | 1 | fact_netassets_page | trueshares/{TICKER}/silver/ | netassets html | 1 row / fund / run-day | the 4 TS_PATTERNS fields (nav, market_price, net_assets, shares_outstanding) + as_of, RAW-parsed values as strings-or-f64 (pin on landed bytes); a parse MISS lands NULL, never a dropped row -- the bronze HTML stays re-derivable |
 | 2 | fact_holdings | pathfinder/{FUND}/silver/ | filepoint holdings csv | 1 row / holding / fund / run-day | ALL 13 vendor header cols preserved (Date, Account, StockTicker, CUSIP, SecurityName, Shares, Price, MarketValue, Weightings, NetAssets, SharesOutstanding, CreationUnits, MoneyMarketFlag); split per fund AT SILVER per ruling 15 |
 | 3 | fact_dailynav | pathfinder/{FUND}/silver/ | filepoint dailynav csv | 1 row / fund / run-day | ALL 14 vendor header cols preserved; Rate Date stays vendor-rendered string + a standardized date col alongside (additive, Rule 17) |
-| 4 | fact_quotes | msn/{TICKER}/silver/ | msn quotes json | 1 row / fund / run-day | SPARSE by design (tier-3 fallback): a missing partition is the NORMAL case, never a freshness alarm -- comp-freshness must NOT be pointed at this table without a fallback-aware basis |
-| 5 | fact_funds | msn/{TICKER}/silver/ | msn funds json | 1 row / fund / run-day | same sparsity law as fact_quotes |
+| ~~4~~ | ~~fact_quotes~~ | -- | -- | -- | **STRUCK (amendment 182228Z; sovereign issuer-route-only ruling). Never built.** |
+| ~~5~~ | ~~fact_funds~~ | -- | -- | -- | **STRUCK (amendment 182228Z). Never built.** |
+
+**Measured on landed bytes (manual fire 18:26Z, harness field reports; CTO content assertion
+honored -- bytes opened, not inferred):**
+- **table 1 (fact_netassets_page):** all 4 TS_PATTERNS MATCHED on both funds' HTML -- DIVZ nav
+  38.02 / market_price 38.06 / net_assets 278695788 / shares_outstanding 7330000; IDVZ 34.47 /
+  34.64 / 181982790 / 5280000; as_of "Jul 14, 2026" both (T-1 correct). Captured values are
+  STRINGS from HTML (Q1 both-store confirmed applicable). Parse-miss=NULL AC stands.
+- **table 2 (fact_holdings):** header == the 13-col expected vendor header exactly; 108 data
+  rows; per-Account split PFDE 85 / PFOE 23, sum 108 == delivered (the Q2 conservation
+  denominator, read from the file itself).
+- **table 3 (fact_dailynav):** header == the 14-col expected vendor header exactly; 2 rows ==
+  both funds (PFDE, PFOE). Filepoint delivery, NOT msn -- unaffected by the strike.
+- DS owns the pyarrow pins + expectation skeletons off these same bytes (their 182428Z plan;
+  contract rules 6-8 fill CONFIRMED against the landed keys verbatim).
 
 **Key grammar:** `{source}/{scope}/silver/{fact_table}/date=YYYY-MM-DD/data.parquet` (the
 established mirror shape; smartx/schwab precedent).
@@ -93,7 +136,10 @@ path per 22a once converters land (behavioral, not config-read).
   EXERCISED, never assumed: sum(per-fund rows) == delivered CSV rows, denominators read from
   the file itself, pinned per conversion. Applies to holdings AND dailynav. ("Splits without
   discarding" is ruling 15's text; the per-conversion pin is what makes it true every day.)
-- (Q3, DS) whether msn quotes+funds collapse into ONE fact_msn_netassets table (they arrive as a
+- **[Q3 = MOOT, amendment 182228Z: both msn tables STRUCK by the sovereign issuer-route-only
+  ruling; nothing below is operative. The msn sparsity-law affirmation is RETIRED with it.
+  Preserved verbatim for the record:]**
+  (Q3, DS) whether msn quotes+funds collapse into ONE fact_msn_netassets table (they arrive as a
   pair for the same instrument-day) or stay two tables mirroring the two endpoints; proposal =
   two (feed-shaped, one table per bronze feed -- the established rule).
   **RULED (DS, converter owner, 153751Z, CC CTO): TWO tables -- fact_quotes + fact_funds.**
