@@ -3,7 +3,7 @@
 <title>The D-consumed input census (column-level, all 8 publishers) + the B/C->D SUFFICIENCY VERDICT</title>
 <issued_by>1.0.0_SA_CTO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
-<status>staged</status>
+<status>complete</status>
 <project>OPAL_GLDRNS (executes OPAL_CONSOLIDATION WS-C gate C5b — no Wave-3 C-port spec freezes until this verdict)</project>
 <provenance>Andrew-direct directives 3 (~19:0xZ: "proceed through the B & C group scripts and make
 sure that we can get that fit to D_04 or whatever the final script is") + 4 (the ~A lane). Sequenced
