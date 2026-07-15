@@ -59,9 +59,13 @@ granularity). Bronze basenames per feed (grounds the contract rule-10 event-rule
   `enterpriseId`, `enterpriseName`); opening/closing value pairs float64 (Cash, Dividend, Equity,
   Fee, Interest x2); `longPositionCount`/`shortPositionCount` int; **`asOfTimestamp` is an ISO
   STRING — the third vendor timestamp rendering** (not {ts,friendly}); pin it string, no epoch.
-- **Custody carrier AC (R1):** `brokerageAcctNum` 511/511 non-null, 8-digit numeric STRING —
+- **Custody carrier AC (R1):** `brokerageAcctNum` 511/511 non-null, numeric STRING —
   byte-faithful string discipline + the leading-zero mutant in the suite (this partition has 0
   leading-zero instances — the mutant guards the day one arrives; Int64 coercion is the defect).
+  **[AMENDED post-wave, 0.5.0 delta-(i) 185150Z + DS-confirmed on served bytes 19:0xZ: the
+  original "8-digit" wording was a sample fact, not a law — fleet census is 510x8-digit +
+  1x9-DIGIT, both preserved byte-faithfully. The PIN is the string discipline, never a length
+  assertion; length is a measured census, not a boundary.]**
 - **Cross-feed note:** `allocationId` here is a JOIN EDGE to the sweep's `id` — worth a
   containment count in the manifest (informational, not a gate).
 
@@ -137,3 +141,26 @@ expectation; ids/dates string, counts int32, values float64 (family dtype law); 
 passthrough-complete; manifests cite THIS report as expectation source (the part-1 pattern);
 ListObjectsV2 acceptance; per-run manifests to the meta home. Cadence-confirm (R4) precedes any
 freshness treatment on feeds 1–3.
+
+---
+
+## POST-WAVE VALIDATION STAMP (2026-07-15 19:0xZ) + the model-tier coverage asterisk
+
+**RAVC-VALIDATED: 26/26 checks PASS on the SERVED parquets, my own instrument** (independent
+read of all six landed partitions + their conversion manifests; never the producer's message).
+Row counts 23,213 (in band) / 511 / 91 / 164 / 6,456 / 1,058 all tie; presence laws 0
+violations fleet-wide (model_id<=>type=='model' and close_ts<=>status=='close' over 23,213
+rows — the sec-1 sample laws are now FLEET-MEASURED, the assert-later frame RAISEs are
+earned); per-model recordCount multiset exact; summary_transactions double w/ 1,280
+fractional; activity {buy 641, sell 417}; acct-num census {8: 510, 9: 1}; all six manifests
+cite this report.
+
+**⚠ MODEL-TIER COVERAGE ASTERISK (carried until the enumeration fix lands — CTO-routed,
+feed-9 lane, DS co-owner):** the wave-1 R3 matrix's 9 model-open-outside-map ids resolve to
+**3 living models NOT in the 11-model resolver set** (Vanguard S&P 100/0 ETF Model Portfolio
+4ea784d7…, Martin U.S. Investing 0a1cd776…, Suncoast Dividend Growth 1115d688…; open dates
+2023–2025, vintage skew refuted). The model-tier ENUMERATION is short (11 of >=14 living
+models), so **every model-tier feed (holdings / performance / changerequests / aum / roster)
+inherits the gap and daily partitions will NOT self-heal it.** Any expectation skeleton or
+consumer of model-tier feeds carries this asterisk: per-model counts above are counts over
+the ENUMERATED 11, not over the living-model universe.
