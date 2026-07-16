@@ -3,7 +3,15 @@
 <title>INF AoR: work out the ENTIRE chain and make it PRODUCTION READY on the existing inf gold runner — SOLE TASK, deploy-authorized</title>
 <issued_by>1.0.0_SA_CTO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
-<status>pending</status>
+<status>complete — 2026-07-16, residuals carried in named successor records. Core objective COMPLETE-STAMPED:
+the release window executed end-to-end (7 runs, ledger GLDRNS_B1_AOR_RELEASE_WINDOW_20260715.md CLOSED,
+hold-doc AMEND 61, both co-signatures discharged), the stamp landed 03:51:11Z on the co-signed numbers,
+the served spine verified to the cent (noel +8,401,521.22; phantom dead at source; Patrick's $52,604.80
+home; sum==firm; vintage 07-14), portal visibility confirmed, chokepoint re-armed v1.7.92. Residual homes
+(none of them a B1 leg): V4 first-post-flip-nightly = CVO~B's independent lane (LD-0277 in-order, armed
+@ 5652424d4); debt list @ 032ac93f0 (3 legacy consumers' serve-lift; 14-acct/$439,326.22 roster-derivation
+refactor; vacuous .013 gate; dead check_freshness); deploy-import-lint fix staged for CTO (.tools =
+BASE_EXEC). Flip per CTO comp-state sweep call 20260716T121614Z, self-marked by the executing lane.</status>
 <project>OPAL_GLDRNS (rides OPAL_CONSOLIDATION WS-D — the law-vs-scope split: LD-0277/hold-doc/stamp-order are standalone-authoritative law this drive executes IN ORDER)</project>
 
 <provenance>Andrew-direct 2026-07-15 ~19:1xZ (CTO terminal), VERBATIM: "THe case with inflection is
