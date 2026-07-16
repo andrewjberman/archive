@@ -48,6 +48,25 @@ the same evidence worn two ways -- one run emits both (per CTO 201227Z).
 5. **rps-mirror membership:** each of the 338 bronze/ ETags is a member of the 01_raw set
    (or size+sampled-MD5 for shape mismatches) -- proves derivative status, closes its cell.
 
+## 3a. RUN 1 (2026-07-16 ~20:3xZ, on CTO GO 201845Z): PARTIAL -- STOP fired on an UNMEASURED PREMISE, mechanism source-confirmed
+
+- Run-time denominators: source 7,222 / target tree 6,257. Plan: COPY 6,965 / SKIP-TIED 246 /
+  SKIP-SHAPE-CLASS 11 / present-but-untied 0.
+- **COPIED 854; FAILED 6,111, all `InvalidObjectState`; STOP honored, ZERO retries.**
+- **Mechanism (measured, not inferred):** the census never measured STORAGE CLASS. 01_raw is
+  STANDARD 894 obj / 32.02 GB + **GLACIER 6,328 obj / 163.20 GB**. Restore-state census of all
+  6,328 GLACIER: **217 RESTORED (temp copies, expiry 2026-07-29 -- the recovered-history leg's
+  restores) + 6,111 NOT-RESTORED == the failure set exactly.** The 854 successes = every
+  STANDARD-planned source + every restored-GLACIER source. The copy design held; the premise gap
+  was the census's, and the STOP caught it before any retry noise.
+- **Partial state is SAFE:** additive-only, idempotent; the 854 landed objects are permanent
+  monolith-side; a re-run converges. Nothing to roll back.
+- **Path to completion (at CTO's word -- restore was never in the filed plan):** BULK-tier
+  `RestoreObject` on the 6,111 (Days>=14 so the window outlives the D-stages; bulk retrieval,
+  5-12h typical), then re-run this executor idempotently; it converges to 0 pending and the
+  verify stage + V2-5 draft certificate emit as filed. Expiry-date on the temp copies is
+  restore-side only -- the COPIES land permanent.
+
 ## 4. Explicitly NOT in this plan
 
 The ruling-pending prefixes (02_anonymized / 03_mappings [P2-sensitive] / 03_silver / _archive /
