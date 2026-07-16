@@ -59,3 +59,26 @@ keeps the manual bridge alive, defeating WP7's purpose. Measured, extended, stat
    legacy tree carries need a one-time bronze backfill ruling before 01_raw deletion.
 4. Idempotency unchanged: converters skip converted dates / --force rewrites — the deploy
    can roll forward day-one with no special sequencing.
+
+## LINEAGE RULING GROUNDED (CTO 155859Z; measured ~16:0xZ, answers 0.5.0's seam cell)
+
+**VERDICT: REPLACEMENT-NOT-CONTINUATION.** Grounded at source, two dates, same parser:
+| tree | 2026-07-15 TRN | 2026-07-06 TRN (seed-build era) |
+|---|---|---|
+| `opal-data-schwab/01_raw` | 1,110 rows / 320 accts | 15,807 rows / 4,464 accts |
+| `08242234` monolith bronze | **1,110 / 320 (universe tie 320/320)** | **15,807 / 4,464 (exact)** |
+| `08335338` monolith bronze | 1,166 / 328 (overlap 319) | 15,876 / 4,481 |
+
+`01_raw` IS the 0824 delivery (mechanism: the OneDrive sync is 0824-fenced — 0.5.0's own
+fixed fact; the row universes tie exactly). Therefore the canonical store's PRE-re-point
+history (`opal-data-bd/canonical/schwab/` silver + gold, all partitions <= 2026-07-06-era
+hand-runs) is **0824-DERIVED**, and the re-pointed ten REBUILD from 0833 going forward —
+per Andrew's 60fb1ad56 premise ("clean facts from Schwab account 0833"). NOT mixed, NOT
+ambiguous. CONSEQUENCES: (a) this annotation IS the store's lineage record line; (b)
+seed-vs-port identity verification runs WITHIN one master only — seed LOGIC re-run on 0833
+inputs vs the port, NEVER port-0833 vs the 0824-fed store partitions (the never-summed law
+in verification costume); (c) the A3 dry-fit's measurements stand as what they were — an
+0824-fed-store fit exercise, already divergence-named. **L5b (CTO pre-approved): the
+/49-schwab-conv seven get the same mechanism re-point with the master PARAMETERIZED per
+script family (0824 for that chain) — next in lane; bridge-retirement clock HELD until
+both cells close.**
