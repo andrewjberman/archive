@@ -60,6 +60,22 @@ state-shaped surface is the LD-0298 gap. Every ruling below states its shape fir
   run_iceberg_maintenance leg. No S3 lifecycle on Iceberg data (Iceberg owns its files).
 - **Size math (printed, per day):** code_heat ~24k rows; ms_heat ~5.5k; fedobs ~1.2k;
   obs_findings ~0.1k. Sum ~31k rows/day ~= 11M rows/yr -- comfortably Trino-scale.
+- **SIBLING-FAILURE VISIBILITY (CTO rider R1, 043919Z -- part of the convention, ships WITH
+  every sibling's DDL phase):** best-effort-never-fails-the-primary stays the write-path
+  priority, but a silently-failing sibling is a silently-gapped delta series -- the LD-0298
+  hole one layer up. Therefore EVERY sibling ships with a freshness twin on its latest
+  snapshot_date (the freshness_alarm.tf registry pattern: one map entry per sibling watching
+  a per-sibling heartbeat key the append leg writes; a lapsed sibling ALARMS, never ages
+  silently). The twin is part of the phase's DDL+writer change, not a follow-up.
+- **DEV-BOX WRITER PATH (CTO rider R2, named check for P2+):** Nessie REST is IN-VPC ONLY
+  (cse_store.py:33-36 -- "not reachable from the dev box"), so any DEV-BOX-RESIDENT producer
+  (code_heat post the TO-2 option-(a) ruling; potentially ms_heat's local runs) CANNOT append
+  its sibling direct. The house answer already exists: STAGE-THEN-INGEST -- the dev-box writer
+  stages the sibling batch as JSONL/parquet to the warehouse staging prefix and the in-VPC
+  nightly leg appends it (the cse_ingest sweep pattern, live since the 03:30Z producer). P2's
+  plan carries this as a VERIFIED CELL: exercise one staged batch end-to-end (stage -> sweep ->
+  Iceberg count) before code_heat_snap's DDL is called done. No direct dev-box->Nessie
+  credential path is created for this.
 
 ## 5. ms_heat: the first instance (concrete, gated, small)
 
