@@ -67,6 +67,20 @@ the same evidence worn two ways -- one run emits both (per CTO 201227Z).
   verify stage + V2-5 draft certificate emit as filed. Expiry-date on the temp copies is
   restore-side only -- the COPIES land permanent.
 
+## 3b. RESTORE LEG EXECUTED (2026-07-16 ~20:4xZ, on CTO GO 203838Z: BULK / Days=21)
+
+Run-time census (fresh, not the run-1 snapshot): 7,222 objects / 6,328 GLACIER. Verdicts:
+**REQUESTED 6,111 + SKIP-ALREADY-RESTORED 217 = 6,328/6,328, FAILED 0.** Exactly the expected
+split -- the two independent censuses agree. Bulk restores are async (typically 5-12h).
+
+**STANDING NEXT ACTION (survives session death): tomorrow 2026-07-17, AFTER the ~09:46Z seam
+read (which outranks this thread per CTO), re-run `wp8_d3_copy_executor.py` -- idempotent,
+converges to 0 pending -- then the 13c verify stage + logical-superset close + rps-mirror
+membership proof, emitting the V2-5 certificate as DRAFT-pending-CTO-acceptance (emission
+gate is CTO; never self-certified). If restores are still in flight at re-run time the
+executor STOPs harmlessly on InvalidObjectState leftovers -- re-check restore-state census
+first (`head_object` Restore field) before re-running.**
+
 ## 4. Explicitly NOT in this plan
 
 The ruling-pending prefixes (02_anonymized / 03_mappings [P2-sensitive] / 03_silver / _archive /
