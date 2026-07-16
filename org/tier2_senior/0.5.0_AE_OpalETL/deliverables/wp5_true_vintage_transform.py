@@ -83,12 +83,23 @@ def get_cited(key: str, inputs: list) -> bytes:
     return body
 
 
-def load_models() -> list[dict]:
-    """Registry smartx models + rmid pairing from LANDED roster silver."""
-    reg = json.load(open(REGISTRY_PATH, encoding="utf-8"))
+def load_models() -> tuple[list[dict], list[dict]]:
+    """Registry smartx models + rmid pairing from LANDED roster silver.
+
+    R1 FIX (CTO 051908Z): the roster and registry are INPUTS too -- both are
+    cited (roster by bucket/key/ETag via get_cited; registry by version + file
+    sha256) and returned for the manifest's shared_inputs."""
+    import hashlib
+    shared: list[dict] = []
+    reg_bytes = open(REGISTRY_PATH, "rb").read()
+    reg = json.loads(reg_bytes.decode("utf-8"))
+    shared.append({"kind": "registry", "path": REGISTRY_PATH,
+                   "version": reg.get("_version"),
+                   "sha256": hashlib.sha256(reg_bytes).hexdigest()})
     models = [m for m in reg["models"] if m.get("smartx_model_id")]
-    roster = pd.read_parquet(io.BytesIO(
-        s3.get_object(Bucket=MONO, Key=ROSTER_KEY)["Body"].read()))
+    roster_citations: list = []
+    roster = pd.read_parquet(io.BytesIO(get_cited(ROSTER_KEY, roster_citations)))
+    shared.append(dict(roster_citations[0], kind="roster"))
     pairing = (roster.groupby("model_id")["rmid"].first()).to_dict()
     for m in models:
         rmid = m.get("smartx_reported_model_id") or pairing.get(m["smartx_model_id"])
@@ -99,7 +110,7 @@ def load_models() -> list[dict]:
         m["_rmid"] = rmid
     log(f"OK: registry v{reg.get('_version')} -- {len(models)} models; rmid "
         f"pairing from landed roster ({ROSTER_KEY.split('/date=')[1][:10]})")
-    return models
+    return models, shared
 
 
 def transform_date(models: list[dict], as_of: str, d8: str,
@@ -155,6 +166,11 @@ def transform_date(models: list[dict], as_of: str, d8: str,
                 "source_pipeline": SOURCE_PIPELINE, "_ingested_at": ingested,
             })
         residual = round(1.0 - weight_sum, 8)
+        if residual < -1e-6:
+            # CTO 051908Z edge note: the feeder also skips silently here, so
+            # parity holds -- but an over-1.0 vendor weight sum deserves a voice.
+            log(f"  WARN: [{as_of}] {model_key} weight_sum {weight_sum:.6f} > 1.0 "
+                "-- no residual emitted (mirrors the feeder; vendor state)")
         if residual > 1e-6:
             all_comp.append({
                 "firm_id": PARTNER_FIRM_ID, "model_key": model_key,
@@ -213,7 +229,7 @@ def main() -> int:
                     help="the reviewed commit sha of THIS script (R2/R4)")
     args = ap.parse_args()
 
-    models = load_models()
+    models, shared_inputs = load_models()
     frames, inputs_by_date = {}, {}
     for as_of, d8 in DATES:
         inputs: list = []
@@ -238,6 +254,7 @@ def main() -> int:
         "transform": "org/tier2_senior/0.5.0_AE_OpalETL/deliverables/wp5_true_vintage_transform.py",
         "transform_commit": args.transform_commit,
         "rmid_pairing_source": f"s3://{MONO}/{ROSTER_KEY}",
+        "shared_inputs": shared_inputs,   # R1 fix: roster ETag + registry sha
         "tie_check_derived0715_vs_fresh0716": report,
     }
     for as_of, _ in DATES:
