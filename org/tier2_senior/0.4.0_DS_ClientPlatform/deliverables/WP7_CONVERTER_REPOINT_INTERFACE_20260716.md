@@ -24,19 +24,38 @@ a day behind every morning, patched by a MANUAL 0.5.0 bridge cycle — this re-p
 **Ten converters re-pointed** (SCOPE NOTE: the TO said "the seven converters"; the ESTATE
 said ten — the three dim builders read the same legacy tree directly, and leaving them alive
 keeps the manual bridge alive, defeating WP7's purpose. Measured, extended, stated):
-| converter | feed | read path |
-|---|---|---|
-| build_fact_transaction | trn | read_schwab_raw |
-| build_fact_position | rps | read_schwab_raw |
-| build_fact_lot_unrealized | uln | read_schwab_raw |
-| build_fact_lot_realized | rld | read_schwab_raw |
-| build_fact_tax_1099div | tnn | fetch_schwab_raw_text (custom H02/DIV section parser) |
-| build_fact_schwab (generic: SEC/ACC/TCF/TCFX/ULT/UPN/UPT/RLY/RLW/RLU/RTY/RTU) | {form} | read_schwab_raw |
-| build_dim_asset | sec | read_schwab_raw |
-| build_dim_account | acc | fetch_schwab_raw_text |
-| build_dim_relationship | acc | fetch_schwab_raw_text |
-| build_fact_asset | (no raw read — derives from silver; untouched) | — |
-(dim_advisor_role/fee read the opal-data-bd XREF — a different source, out of WP7 scope.)
+
+**AMENDED PER CTO 160659Z (Andrew-direct via 0.6.2 ~15:5xZ: "0833 is the master for Advisor
+Intelligence for 49 Financial. 0824 is the master for Model Portfolios... different business
+logic purposes."). TWO LAWS, CITED CORRECTLY: the NEVER-SUMMED law is the ADDITION law (never
+total across masters); Andrew's purpose ruling is the SELECTION law (which master a converter
+READS). The master is PER-CONVERTER-FAMILY CONFIG resolved by the PURPOSE column below —
+`master_for(PURPOSE)` in the lib, NO constant, NO default; unknown/ambiguous purpose REFUSES
+at import and STOPS at the CTO gate.**
+
+**PURPOSE, CONSUMER-ANCHORED (not asserted):** all ten write ONLY to the canonical store
+(`opal-data-bd/canonical/schwab/silver/*` — each converter's DST constant, verifiable). The
+store's sole consumer chain is the seed G-gold builders → the A1 platinum contract's
+D-publisher input census (A2's 16 consumed surfaces are all this store's gold + dims) →
+`ai.ts` Advisor-Intelligence portal surfaces. NO Model-Portfolios consumer touches this
+store: the MP chain reads `opal-data-schwab` silver (the /49-schwab-conv seven → wsb
+model-AUA feeder → mdpf partner_held) + SmartX/DynamoDB. Therefore all ten = ADVI = 0833.
+
+| converter | feed | PURPOSE (→ master) | read path |
+|---|---|---|---|
+| build_fact_transaction | trn | advisor_intelligence → 08335338 | read_schwab_raw |
+| build_fact_position | rps | advisor_intelligence → 08335338 | read_schwab_raw |
+| build_fact_lot_unrealized | uln | advisor_intelligence → 08335338 | read_schwab_raw |
+| build_fact_lot_realized | rld | advisor_intelligence → 08335338 | read_schwab_raw |
+| build_fact_tax_1099div | tnn | advisor_intelligence → 08335338 | fetch_schwab_raw_text (custom H02/DIV parser) |
+| build_fact_schwab (generic: SEC/ACC/TCF/TCFX/ULT/UPN/UPT/RLY/RLW/RLU/RTY/RTU) | {form} | advisor_intelligence → 08335338 | read_schwab_raw |
+| build_dim_asset | sec | advisor_intelligence → 08335338 | read_schwab_raw |
+| build_dim_account | acc | advisor_intelligence → 08335338 | fetch_schwab_raw_text |
+| build_dim_relationship | acc | advisor_intelligence → 08335338 | fetch_schwab_raw_text |
+| build_fact_asset | (no raw read — derives from silver; untouched) | inherits the store's | — |
+(dim_advisor_role/fee read the opal-data-bd XREF — a different source, out of WP7 scope.
+The /49-schwab-conv seven = PURPOSE model_portfolios → 08242234 — the L5b re-point, same
+mechanism, CTO pre-approved.)
 
 ## Exercised (Rule 22a: the path, not the config)
 
@@ -54,9 +73,11 @@ keeps the manual bridge alive, defeating WP7's purpose. Measured, extended, stat
    (source resolution is code-side) — the deploy is the code push + S3 upload per Rule 13 lanes.
 2. Retire the manual bridge + the OneDrive→01_raw sync + the 01_raw tree itself (Andrew/CTO
    word on retention).
-3. BACKFILL QUESTION (named, not answered here): monolith bronze history starts where the SI2
-   box started; sparse/periodic feeds (TNN: 4 dates in bronze today) and any pre-SI2 dates the
-   legacy tree carries need a one-time bronze backfill ruling before 01_raw deletion.
+3. ~~BACKFILL QUESTION~~ **DISSOLVED (CTO 160659Z carrying Andrew verbatim: "I dont give a
+   shit about the 01_raw folder... already all in bronze and silver for both schwab
+   accounts" — 0.6.2 measured both masters at manifest parity: 0824 bronze 6,257/silver
+   7,633; 0833 bronze 6,972/silver 8,468, shortfall 0). Deprecation is stated intent; the
+   deletion word still comes explicitly at its moment.**
 4. Idempotency unchanged: converters skip converted dates / --force rewrites — the deploy
    can roll forward day-one with no special sequencing.
 
