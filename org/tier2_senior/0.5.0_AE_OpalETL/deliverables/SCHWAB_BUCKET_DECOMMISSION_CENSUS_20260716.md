@@ -53,6 +53,28 @@ in the belt (NFRA-P2 finding), so decommission CLOSES a standing audit gap.
 5. [CTO/0.7.0] bucket -> READ-ONLY (policy) + IAM revocations.
 6. [ANDREW's final go] the delete motion itself.
 
+## 3a. VERIFY CELLS EXECUTED (successor session, 2026-07-16 ~20:1xZ -- read-only, measured)
+
+Both staging-tree "verify, then no action" cells from S1 are now MEASURED (ListObjectsV2
+key+ETag+Size both sides, relative-key join, denominators printed; script preserved in the
+session scratchpad, method = the 13c tiers, never loosened silently):
+
+- **08335338: VERIFIED-TIED.** Legacy 6,932/6,932 relative keys common; ETag exact 6,932/6,932;
+  only-legacy 0. Monolith-only 40 = the NEW daily deliveries (dates 20260713-20260715 landing
+  monolith-side directly -- the automatic chain, not a gap). **Disposition confirmed: no action.**
+- **08242234: VERIFIED copied-complete.** Legacy 5,966/5,966 keys common; only-legacy 0.
+  ETag exact 5,321/5,966; the remaining 645 are ALL multipart-vs-plain ETag shape (legacy
+  multipart upload, monolith single-part), ALL size-tied, 0 true-MD5-diff candidates.
+  Content-grade close on the shape class: 3 sampled pairs downloaded, legacy MD5 == monolith
+  plain ETag 3/3, with a separate positive control (plain-ETag legacy object, computed==listed)
+  run BEFORE the targets. Monolith-only 291 = new deliveries + recovered rld 2023 history
+  (CRS2023xxxx.RLD -- the monolith is MORE complete than the legacy staging tree).
+  **Disposition confirmed: no action.**
+
+Residual on these two prefixes: none. The copy-class work remaining in S3 stage 3 is 01_raw
+history + the ruling-pending prefixes (02_anonymized / 03_mappings / 03_silver / _archive /
+backfill / quartz), unchanged.
+
 ## 4. What this composes with
 
 WP7/L5b (the redirect spine), the WP7 backfill ruling (now bucket-wide), 0.6.2's SI2
