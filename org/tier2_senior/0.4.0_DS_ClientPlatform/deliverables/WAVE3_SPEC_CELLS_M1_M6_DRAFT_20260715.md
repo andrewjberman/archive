@@ -60,4 +60,29 @@ M4/M5 one-line riders included. (M2 -> C_08 and M3 -> the office cell are Wave-4
 - **M5:** A_01 spec note — `hh_seen` carrier verified at the G6 port (C_03 carries or A_01
   derives; one-line check, non-gating).
 
+## L3 -> the pct_priced spec lines (C_01/C_02) — DRAFT for CTO sign (A4 L3, the M4 replacement leg)
+
+**Added 2026-07-16 ~18:2xZ by 0.4.0_DS_ClientPlatform~A** per the amended TO verbatim (*"`pct_priced`
+on C_01/C_02 re-defines as a STATEMENT-PRICE COVERAGE measure (fraction of position rows carrying the
+statement's own closing_price -- the coverage the built graph actually depends on); one spec line
+each, superseding the signed M4 rider with the verbatim anchor"*). Estate grounding: monolith
+`dim_position` carries `closing_price` (the measured projection; C_03's in-kind valuation already
+reads it). Computation home stated because it is the one real design choice: **C_00 computes it**
+(the only C-unit already holding the day's position partitions -- no new I/O anywhere), **C_01
+carries it, C_02 pools it.**
+
+> - **C_01.pct_priced (account grain, per window):** the fraction of the account's period_end
+>   `dim_position` rows whose statement `closing_price` > 0 — computed in C_00 from the pos_today
+>   partition it already reads (`priced_rows / position_rows` per account, both denominators kept as
+>   columns), carried through C_01 unchanged. An account with zero position rows carries
+>   `pct_priced` NULL-not-1.0 (no rows is not full coverage) — a FLAG-shaped truth, never a filter.
+> - **C_02.pct_priced (relationship grain):** POOLED, never averaged — `SUM(priced_rows) /
+>   SUM(position_rows)` across the relationship's accounts (the returns law's sibling: coverage
+>   ratios do not average). Cross-contract: relationship-pooled numerator/denominator sums must tie
+>   the account sums to the row, same law as the M1 tie.
+> Anchor: Andrew-direct @ acabb3553 (*"any kind of transaction-based pricing framework is
+> deprecated"*); no canonical-prices unit exists to derive from — this measure is the statement's
+> own coverage, nothing rebuilt. Implementation rides the sign (touches three landed cores:
+> C_00 compute + C_01 carry + C_02 pool; fixture-first, sign-before-port per the Wave-3 freeze law).
+
 -- drafts end; CTO edits stand as the record --
