@@ -52,8 +52,11 @@ M4/M5 one-line riders included. (M2 -> C_08 and M3 -> the office cell are Wave-4
 
 ## Riders (one line each, as ruled 211544Z)
 
-- **M4:** the canonical-prices builder is PROMOTED to a named C-group unit (own dictionary rows,
-  casebook entry rides its Wave-3 port); `pct_priced` on C_01/C_02 derives from its coverage.
+- **M4:** ~~the canonical-prices builder is PROMOTED to a named C-group unit~~ **SUPERSEDED BY
+  ANDREW-DIRECT 07-16 ~14:1xZ (verbatim @ acabb3553): transaction-based pricing is DEPRECATED;
+  the canonical-prices schema is unnecessary on daily RPS-snapshot holdings. `pct_priced`
+  re-defines as a STATEMENT-PRICE COVERAGE measure (position rows carrying the statement's own
+  closing_price). Transactions remain flows-only (NNA). CTO gate ruling in A4 L3.**
 - **M5:** A_01 spec note — `hh_seen` carrier verified at the G6 port (C_03 carries or A_01
   derives; one-line check, non-gating).
 
