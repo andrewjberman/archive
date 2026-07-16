@@ -7,7 +7,43 @@
 
 ---
 
-## 1. The class, in one line
+## 0. PRIOR ART — this class was already named, ratified, and then orphaned
+
+**Added 2026-07-16 after this document was first committed (`841e5e04b`), on discovering the prior art
+while characterizing an unrelated thread. The attribution leads because the priority is his.**
+
+`0.6.0_AE_PartnerETL` named this class on **2026-07-09** in
+`org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/FINDINGS_snapshot_zero_row_class_20260709.md`
+(**CTO-ratified 200747Z / 202240Z**), and stated it **more generally than §1 below does**:
+
+> *"An instrument reports confidently on something other than what it claims to measure, and the null it
+> emits is produced by two different worlds — one healthy, one broken."*
+
+**That is the general form. §1 is its puller special case.** His table already enumerates seven instances
+on one data path — `s3_object_exists` passing on a 0-row stub; `bytes > 30KB` passing on a 0-row 94-col
+parquet (46,277 B); `sorted(keys)[-1]` returning the newest *stub*; `row_count > 0` passing on 11,754 rows
+at `nzf = 0.0000` (rows exist, values do not); a **latched** CloudWatch alarm whose silence is *the rail,
+not the state*; a CloudTrail `ReadOnly` data-event selector making a write **"never captured"**
+indistinguishable from **"never happened"**; and — item 7 — `grep -c` on a commit message returning `0`:
+*"never written, **or written and executed away**."*
+
+**Two facts about that document should outlive both it and this one:**
+
+1. **It predicted the error made while writing this file.** Its item 7 is precisely the failure in the
+   Companion Lesson below — a negative count from an unguarded read. The fabric had named my mistake, in a
+   *ratified* document, a week before I made it.
+2. **It went dark when its author did.** 0.6.0's session ended 2026-07-10; the deliverable was never
+   inherited, and this document independently re-derived a narrower version of it six days later. **A
+   ratified class taxonomy became invisible because nothing inherits a dead agent's deliverables** — which
+   is itself an instance of the class: *the absence of a finding is indistinguishable from the absence of
+   the finder.*
+
+Read his document first. This one adds the puller-specific discriminator (§3), a reference implementation
+(§4), a measured positive control (§5), and a ship checklist (§8).
+
+---
+
+## 1. The class, in one line (the puller case)
 
 > **A puller whose clean verdict is emitted identically on "the source was empty" and "I failed to see what
 > the source had" HAS NO VERDICT AT ALL — and it fails in the direction that looks healthiest.**
