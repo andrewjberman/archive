@@ -141,6 +141,39 @@ comp-similarity is a new `.tools/comp-*` → CTO registration gate + the `comp-m
 
 **Disposal is not in scope here** — it routes through OPAL_LCLRPO's existing census-cleared, CTO-gated, Andrew-delete-word pipeline. This research produces the *identification* column only.
 
+## Part E — costing the one-off summary-authoring pass (Andrew Q, 2026-07-17)
+
+**Q: if we one-off pay subagents to write a stable summary field per resource, how many nodes, and where stored?**
+
+### E.1 How many nodes — grounded on the live graph (20,429 nodes total)
+You do NOT summarize 20k nodes. Tiered by what actually needs an authored cloud-resource summary:
+
+| Scope | Count | What it is |
+|---|---|---|
+| Total graph | 20,429 | Incl. ~18,500 code-structure (Field/JSXElement/TypeDecl/Prop/Module/PipelineFunction) + document (MS_FILE/FOLDER) nodes — **out of scope** (already covered by code-heat / ms-heat / comp-dups). |
+| **All ARN-bearing cloud resources** | **1,894** | Every AWS resource in the estate. |
+| — dependent/attachment nodes | ~1,053 | LOG_GROUP 233, IAM_POLICY 450, CW_ALARM 115, EVENT_SOURCE 97, API_ROUTE 82, INSTANCE_PROFILE 19, SERVICE_PRINCIPAL 17, SECURITY_GROUP 24, S3_BUCKET_POLICY 10, VPC_ENDPOINT/ROUTE53 6 — **summary is mechanically derivable from the parent** ("log group for lambda X"); no LLM needed. |
+| **Independent resources (natural one-off scope)** | **~841** | 1,894 − 1,053. Each carries a distinct purpose worth an authored summary. |
+| — of which prime decommission targets | ~549 | LAMBDA 196, EVENT_RULE 147, S3_BUCKET 38, DYNAMODB_TABLE 36, EC2_INSTANCE 33, SSM_DOCUMENT 24, SCHEDULE 16, SNS_TOPIC 15, LAMBDA_LAYER 13, SQS_QUEUE 12, ECS_TASK_DEF 6, API_GW 5, CODEBUILD 4, ECS_CLUSTER/CLOUDFRONT/STATE_MACHINE/LOAD_BALANCER 4. |
+| — + security resources | +91 | SECRET 81, KMS_KEY 10. |
+| — + IAM identities | +201 | IAM_ROLE 197, IAM_USER 4. |
+
+**Practical one-off cost: ~550 (prime targets) to ~841 (all independent resources)** bounded per-node tasks — each: read the node's graph neighborhood + TF definition + last-modified, write 2-3 sentences. Haiku-class, small context, a tractable single fan-out. The ~1,050 dependents get derive-at-scan summaries for free; and derive-at-scan can pre-populate ALL ~841 mechanically so subagents only ENRICH the ambiguous/high-value ones — driving the true LLM count well below 841.
+
+### E.2 Where stored — Iceberg/Nessie → Kuzu projection, with ONE critical refinement
+Andrew's framing is right (Iceberg/Nessie, projected to Kuzu in full fidelity for current-state) with one structural correction:
+
+**NOT a column on `graph_nodes`.** graph_nodes is MACHINE-DERIVED and regenerated every derive / incremental_updater run — an editorial summary written as a graph_nodes column would be **clobbered on the next derive**. Editorial content and derived content must live in separate tables.
+
+**The design:** a SEPARATE append-only Iceberg table in the globgrph Nessie catalog — `resource_summaries` (or `node_cards`):
+- **Keyed on ARN** — confirmed the natural key: for cloud resources `node_id == arn` (e.g. `arn:aws:s3:::opal-data-inf`). Stable across derive regenerations; node_id for code nodes is synthetic, ARN for resources is durable.
+- Schema: `arn`, `node_type`, `summary` (the authored text), `authored_by`, `authored_at`, `source_inputs` (what it was derived from — audit/regeneration), `summary_version`.
+- **Append-only + snapshot-versioned** (same discipline as graph_nodes / cse / the `*_snap` siblings): a re-summarization appends a new row; current-state = latest-per-ARN.
+- **Projection to Kuzu:** the comp-kuzu refresh (which already projects graph_nodes → Kuzu in full fidelity) **LEFT JOINs `resource_summaries` (latest-per-ARN) onto graph_nodes on node_id/ARN** — so every current-state node carries its `summary` property. Because it is a join-overlay, **a re-derive of graph_nodes NEVER clobbers the editorial layer** — the one-off investment is durable by construction, which is the whole point of "paying the cost once."
+- **New resources after the pass** left-outer-null until an incremental summarization fills them (or the derive-at-scan fallback) — so the one-off pass is never re-done wholesale; only the trickle of new arrivals needs topping up.
+
+This is the concrete form of the assessment's "establish the stable summary location": an ARN-keyed overlay table, authored once, projected as a node property, surviving every derive. comp-similarity then reads the `summary` property off the current-state Kuzu nodes exactly as it would any other node field.
+
 ## Open questions / caveats for the gate
 - Which resource classes matter most first for comp-debris extension — S3 (the monolith) vs EC2 (the runners)? (Andrew/CTO priority call.)
 - comp-similarity corpus: derive-at-scan (i) vs node-writer enrichment (ii) — I lean (i); CTO's arch call.
