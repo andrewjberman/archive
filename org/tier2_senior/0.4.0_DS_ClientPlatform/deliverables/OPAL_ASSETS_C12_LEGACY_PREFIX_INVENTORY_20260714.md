@@ -107,6 +107,13 @@ consumer repoint · `ACTIVE-PIPE` a live non-OPAL_ASSETS pipeline, out of this c
 
 ## 2. `opal-data-schwab` — **STAGING** (PRD ruling 9). 35,947 objects · 386.0 GB
 
+> **ADDENDUM 2026-07-17 — WP8-DECOM:** Andrew ordered the whole `opal-data-schwab` bucket
+> **decommissioned** (2026-07-16, 0.5.0's record 163256Z; consumer census @ `ee59022d1`, staged D0–D6).
+> Every row below is now governed by that decommission's staged sequence, which supersedes the per-prefix
+> RETIRE-SEQ pacing here (the disposition CLASSES stay correct; the schedule is WP8-DECOM's). Known
+> bd-gold consumer: `B_02.canonical_lots` reads the UPPERCASE `silver/ULN` tree — its re-point is
+> WP8-DECOM cell 4 (this serial), blocked on the D2 redirect-target ruling. Zero deletions by this doc.
+
 | Prefix | Objects | Size | written | business | Disposition | Replaced by |
 |---|---:|---:|---|---|---|---|
 | **`01_raw/`** | **7,142** | 178.2 GB | 2025-11-14 … 2026-07-07 | **2023-01-17 … 2026-07-06** | **MIGRATE-257-THEN-RETIRE-PER-SEQUENCE** — Andrew-RULED 2026-07-14 (§0) | C3(b) REST pull for 6,885; **the 257 pre-floor migrate as bytes** (C3, `0.6.2`) |
@@ -153,6 +160,72 @@ Orion/Eclipse bronze is a **read-only source** for C6. Nothing in this consolida
 > **`gold/meta/pipeline-complete.json` is NOT written by anything in this consolidation.** It is the INF
 > spine sentinel; hand-writing it dispatches the runner and releases the held INF chain by the back door.
 > Named here so the inventory cannot be mistaken for permission.
+
+### 3a. ADDENDUM 2026-07-17 — ruling-20 measured disposition (the 257 method) + ruling-16 labels
+
+**Author:** `0.4.0_DS_ClientPlatform` · **Measured:** 2026-07-17 ~16:3xZ · **Method:** full
+`list-objects-v2` pagination per prefix (boto3, no console-encoding loss), (date × type) set-difference
+per PRD v1.4.4 ruling 20(ii). **Zero writes to S3. Zero deletions.** Note the INF-hold banner on §3 is
+HISTORICAL — the hold ended 2026-07-16 (daily dispatch restored); this addendum's measurements are
+post-restoration.
+
+**Denominators:** `bronze/orion-api/` **15,602** obj · `bronze/orion-api-v2/` **187** obj ·
+`bronze/orion/` **21** obj · flat generation: `assets/` 4,539 · `positions/` 4,548 · `transactions/`
+110 · `performance/` 105 obj. Raw evidence JSON: session scratchpad `c12_setdiff_result.json`
+(full per-type date lists; summary reproduced here in full).
+
+#### The ruling's premise is FALSIFIED by the measurement: two of the three "legacy" prefixes are LIVE
+
+Ruling 20 classed `orion-api/`, `orion-api-v2/`, `orion/` as **legacy date-dir generation**. Measured:
+
+| Prefix | Last write | Verdict |
+|---|---|---|
+| `bronze/orion-api/` | **2026-07-17 (today)** — tax_realized/tax_unrealized/billing/performance_dim/accounts_roster/_BRONZE_COMPLETE all carry today's date-dir | **LIVE PRODUCER TARGET, not legacy** |
+| `bronze/orion-api-v2/` | **2026-07-17 (today)** — `household_rep_mapping.json` + `representatives.json` daily since 2026-04-29 (75 dates) | **LIVE for the two JSON types**; parquet types dead since 2026-04-30 |
+| `bronze/orion/` | 2026-04-29 — 2 date-dirs of GUI SlickGrid/trn CSV exports | genuinely dead legacy |
+
+A retire-with-pipeline disposition **cannot attach to a prefix a live producer writes daily.**
+
+#### Set-difference (date × type-name) vs the flat generation — UNIQUE CONTENT IS MASSIVE
+
+`bronze/orion-api/` unique-by-name types (no flat counterpart exists at all): **`tax_realized.csv`
+2,090 dates (2020-01-01…2026-07-17)** · **`tax_unrealized.csv` 2,117 dates** · **`billing.csv` 1,577
+dates** · `unified_account_dim.csv` 72 · `new_portfolio_accounts.json` 73 · `accounts_roster.json` 6 ·
+`geo_verify.csv` 1 · markers/completion sentinels (~4,710 obj, non-data). Name-matched types with dates
+ABSENT from flat raw: `performance_dim.csv` **2,146 of 2,200 dates** · `transactions.csv` **1,512 of
+1,564 dates** · `assets.csv` 0 (fully covered). `bronze/orion-api-v2/` unique: `household_rep_mapping.json`
++ `representatives.json` 75 dates each; its parquet types are covered by flat (0–1 date diff).
+`bronze/orion/`: both types unique (flat `transactions/` raw starts 2026-05-12; these are 2026-04
+GUI exports).
+
+**Caveat stated per the instrument:** the set-difference keys on **type-NAME equivalence** across
+generations (e.g. `performance_dim.csv` ↔ flat `performance/`); content-level identity was NOT verified.
+That is the measurement ruling 20 prescribed, and the honest limit of it.
+
+#### Disposition per ruling 20(ii) — ANDREW-CLASS CARVE-OUT, routed via CTO/COO
+
+> "ANY unique content → the carve-out goes to ANDREW — and since these prefixes trace to INF producer
+> lineage, a unique-content disposition is Andrew-class regardless."
+
+All three prefixes hold unique content; two are additionally LIVE. **No retire-with-pipeline class is
+assigned to any of the three.** Disposition rows: `orion-api/` = `LIVE PRODUCER TARGET + unique content
+— Andrew-class` · `orion-api-v2/` = `LIVE (2 JSON types) + unique content — Andrew-class` · `orion/` =
+`dead GUI-export remnant + unique content — Andrew-class`. This TO performs zero deletions; the C2 map
+ruling (flat-generation mirror) is unaffected.
+
+#### Ruling-16 labels — `coerced-only survivor — NOT imported` (re-measured 2026-07-17)
+
+At the 2026-07-14 measurement: 3 assets + 7 positions dates, accruing +1/business day. **Post
+INF-restoration (07-16) the meter has STOPPED and partially reversed** — flat raw runs through
+2026-07-17 for all four types. Current coerced-only survivor set, **9 dates**, each inventoried
+`coerced-only survivor — NOT imported`:
+
+- `assets`: 2026-07-11 · 2026-07-12 · 2026-07-13 · 2026-07-14 · 2026-07-15 (5)
+- `positions`: 2026-07-01 · 2026-07-03 · 2026-07-04 · 2026-07-05 (4)
+- `transactions` / `performance`: 0
+
+These stay resident in `opal-data-inf`; importable later ONLY by explicit ruling into a labelled
+`_coerced/` prefix (ruling 16 verbatim). The monolith shows honest holes on these dates.
 
 ---
 
