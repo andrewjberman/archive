@@ -95,6 +95,13 @@ generalization of an existing refinement -- these are the reason to build it car
    days (via `lib/trading_calendar.py`) for pipeline buckets -- else a Monday sweep false-alarms every data
    bucket, which is exactly the mdpf/OPAL_ASSETS false-outage class. This is non-negotiable for the S3/data
    extension; the Lambda v1 never touched data buckets so it dodged this -- the extension cannot.
+6. **CADENCE-AWARE WINDOWING for scheduled resources (DISCOVERED by the prototype live run 2026-07-17):** a
+   scheduled `EVENT_RULE`/`SCHEDULE` must be judged HOT/COLD against its OWN cadence (`ScheduleExpression`
+   rate/cron), NEVER a flat window -- else every monthly/weekly rule false-alarms as COLD-DORMANT. Live proof:
+   `fred-ingestion-monthly-late` flagged cold at 23d is a MONTHLY rule = HEALTHY; `bd-49f-fees-runner-daily`
+   at 21d is a DAILY runner = a REAL finding. The cadence is the discriminator. This is control #5 (the
+   trading-calendar) generalized to the schedule axis -- the STILLBORN-OR-GUARD refinement, one level up, on
+   time. The adapter reads the schedule expression and computes "cold" as "missed >= K cadence-periods."
 
 ---
 
@@ -134,7 +141,8 @@ generalization of an existing refinement -- these are the reason to build it car
 ## 8. Open questions for the gate
 - EC2 idle threshold: what CPUUtilization + NetworkIn floor over what window = "idle" (a runner between
   scheduled jobs is idle-but-not-dead)? Needs a purpose-review band like STILLBORN-OR-GUARD, not a reap.
-- S3 read-blindness: accept UNKNOWN-read on 36 buckets, or propose enabling CloudTrail S3 data events on the
-  monolith bucket `opal-data-assets` (cost vs the decommission value of read-coldness)? CTO/Andrew call.
+- S3 read-blindness: RESOLVED (Andrew-direct 2026-07-17) -- accept UNKNOWN-read for now; do NOT enable
+  CloudTrail S3 data events on `opal-data-assets`. Write-cold via the free storage-delta is the supersession
+  signal; read-coldness deferred (write-cold + read-unknown stays advisory, never a standalone reap).
 - Trading-calendar scope: which buckets are "pipeline/T-1" (calendar-counted) vs ops buckets (wall-clock ok)?
   Likely reuse the same held/pipeline classification the freshness frontier uses.
