@@ -17,12 +17,15 @@ docs/architecture/OPAL_TAXSMA_PT2_PRD.md. Serve settled (§4): gold dim_taxsma_r
 </authority>
 
 <gate>
-** HARD GATE — VENDOR EGRESS (NEVER-rule): the portfolioreporting/api/* reporting endpoints are a NEW egress
-   surface vs today's datamining feeds (same vendor/property, DIFFERENT API). Per CLAUDE.md "NEVER call an
-   external vendor API without Andrew's explicit per-use word — availability is NOT authorization." The first
-   LIVE reporting call HOLDS for Andrew's explicit egress sanction / pipeline-remit word. Build the clone +
-   mint + parser DRY (against the finding's documented shapes) with no live call; the live pull is the gated
-   step. DT flagged this to CTO too. COO is surfacing the sanction to Andrew now. **
+** VENDOR-EGRESS SANCTION — GRANTED (Andrew-direct 2026-07-17 ~21:4xZ, COO terminal, "relay the egress word
+   to DT"; relayed to DT 214906Z). The 49F reporting API (portfolioreporting/api/*, on the existing 49F
+   .bd.identity session, this OPAL_TAXSMA_PT2 bronze producer's remit) is CLEARED to go live. The NEVER-rule
+   hold is DISCHARGED for this producer/API. DURABLE RECORD of the per-use word: this line + the COO commit.
+   SCOPE: this 49F reporting-API producer only — does NOT generalize; ycharts + every other vendor stays
+   per-use-word. Sequence: DRY_RUN=0 -> Rule-22a live verify (finding holds live) -> pull -> hand DS live bronze.
+   (Original gate text, HISTORICAL: the reporting API was a NEW egress surface vs today's datamining feeds;
+   per CLAUDE.md "availability is NOT authorization"; DT built DRY_RUN=1 refuse-in-code; the live pull was the
+   held step until this grant.) **
 </gate>
 
 <scope>
