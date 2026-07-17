@@ -83,3 +83,28 @@ negatives including Door 6.
 - Sequencing flag at the gate: CTO's msn code-strike targets the same producer at the same
   artifact-swap gate -- whether it rides THIS review/deploy cycle is his call; this diff is
   msn-untouched.
+
+---
+
+## CLOSE ADDENDUM (2026-07-17, filed by 0.5.0_AE_OpalETL on CTO ruling 20260717T160236Z)
+
+**V2-1 CLOSED WHOLE.** The remaining ACs discharged as follows:
+
+- **AC4 + deploy leg: DONE 2026-07-15 night** (not today). CTO reviewed both commits
+  (3461d1c4d build + e45606d46 bundled msn strike) and ran the deploy leg himself; tag
+  `etfs-netassets-v1.3.0` (07-15 23:54Z ET-4) records "both CTO-reviewed commits, one
+  artifact; three-way sha tie 4/6gMExw...; AC3 rides 2026-07-16 22:00Z". Live lambda
+  LastModified 2026-07-15T23:52:03Z.
+- **07-17 live re-verification (this session, 4-way tie):** live lambda CodeSha256 ==
+  S3 artifact sha256 (downloaded + hashed) == source-map `artifact_sha256` == the tag-message
+  sha, all `4/6gMExwwY1w3No9D4AeTARMXZaVjDHf1cBYq7yL5gw=`. Artifact content-verified: carries
+  `landing_guard.py`, requests+Retry client, meta/pulls persist -- the TO's three items.
+- **AC3 = the 2026-07-16 22:00:09Z SCHEDULED fire (CTO-accepted 160236Z):** manifests landed
+  both scopes (`trueshares/DIVZ/meta/pulls/20260716/` 902B + `pathfinder/filepoint/.../20260716/`
+  1197B @ 22:00:15Z), `landing_guard: "set-identity PASS (shortfall+surplus, ListObjectsV2
+  landed bytes)"`, silver keys written incl `2026-07-16.parquet`. 07-16 = Wednesday, a trading
+  day, T-0 -- no calendar resolution needed.
+- **Record-drift note (the lesson):** this session's gate ledger initially surfaced AC4 as
+  pending off THIS file's 07-15 "deploy leg awaits" line -- a stale record read as state.
+  Ground-truthing the live lambda before executing prevented a redundant deploy motion.
+  Tonight's 22:00Z is a normal scheduled fire, not a gate.

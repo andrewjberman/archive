@@ -3,7 +3,7 @@
 <issued_to>0.5.0_AE_OpalETL</issued_to>
 <issued_by>2.0.0_SA_COO (V2 decomposition; PRD author 1.0.0_SA_CTO)</issued_by>
 <date>2026-07-14</date>
-<status>pending</status> <!-- GO fired 2026-07-15 220354Z (COO, auto-fire clause on the GREEN 07-15 parity row) -->
+<status>complete</status> <!-- GO fired 2026-07-15 220354Z (COO, auto-fire clause on the GREEN 07-15 parity row). CLOSED 2026-07-17 160236Z on CTO ruling: AC1/AC2 @ 3461d1c4d evidence pack; AC4 review PASS + deploy leg 07-15 (tag etfs-netassets-v1.3.0, three-way sha tie 4/6gMExw..., live-re-verified 4-way 07-17); AC3 = the 07-16 22:00:09Z scheduled fire (landing_guard "set-identity PASS", manifests both scopes, silver keys incl 2026-07-16.parquet, T-0 trading day). Close addendum in V2_1_ETF_LEVELUP_EVIDENCE_20260715.md -->
 <go>HARD GATE: tonight's 22:00Z first-fire proof (parity day-2 + first monolith bronze C4 AC1) lands and is reported CLEAN. COO issues the GO after reading that report. DO NOT touch the producer before its first monolith landing — parity evidence stays clean (CTO sequencing note, handoff 20260714T055215Z).</go>
 <project>OPAL_ASSETS — V2 Phase I bronze close-out</project>
 <prd>docs/architecture/OPAL_ASSETS_V2_PRD.md §2.2 + §2 bar (@ 53ba45c5f); inherits CONSOLIDATION_PRD v1.6.0 whole</prd>
