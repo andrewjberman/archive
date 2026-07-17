@@ -22,13 +22,13 @@ CTO ruled the ledger (msg 200722Z). Live disposition + build state (this section
 | DC-2 `_ops` | **reserved-prefix BLESS** (as DC-1) | ~C folds census |
 | DC-3 eclipse omits `{type}` | real DEVIATE → next-touch (producer) | W3 producer-code gate |
 | DC-4 inline `_meta` | next-touch (producer) | W3 producer-code gate |
-| DC-5 `org/mcp` spill | **HOOK-FIX** (telemetry hook absolute-path) + clear the 7-stray sweep; NOT the blind commit-lint | pending: sweep + hook-fix proposal (CTO gate on the hook edit) |
+| DC-5 `org/mcp` spill | **HOOK-FIX** (telemetry hook absolute-path) + clear the 7-stray sweep; NOT the blind commit-lint | **FIX VERIFIED + POSITIVE-CONTROL PASSED + 7 strays SWEPT.** Root cause: post-tool-telemetry.sh wrote repo-relative paths from the agent's cwd. Fix = ${ROOT} anchor (all paths). Reinstalled + fired from data/assets cwd → telemetry at repo root, zero spill. Patch @a59ea7f52. Canonical commit → CTO (org/mcp/hooks = BASE_EXEC, AE-blocked). |
 | DC-6 dual schwab home | next-touch, schwab-window-gated post-D4 | W4 |
 | DC-7 landing_guard | canonical `data/assets/scripts/lib/landing_guard.py` + build-manifest sha-tie gate | W3 |
-| DC-8..11 scheduler grammar | grammar-reconcile **APPROVED**; lint WARN-first on the trigger-map gate | **BUILT @1ed893633** — reconcile validated (153/154 → 11 deviations), 9 controls PASS. `--enforce` pends CTO. 2 decisions open (bless refined definition; `fees-*-daily` DC-11 rename). |
+| DC-8..11 scheduler grammar | grammar-reconcile **APPROVED**; refined 3-check definition **BLESSED**; `fees-*-daily` DC-11 → `-weekdays` next-touch (DISABLED); enforce-flip design blessed | **BUILT + ENFORCE.** Reconcile @1ed893633 (153/154→11, 9 controls PASS); `--enforce-grammar` @e9b271291 (grandfather-pin 11, consolidation-scoped exit-2, estate-wide WARN, 9 enforce-scope controls PASS). WARN-FIRST — CI doesn't pass the flag yet (CTO's announce→enforce flip pending). |
 | DC-12 absence twins | **DEFER** (Andrew alert-suspension); requirement stands, twin-BUILD held; emitter = CTO's candidate-exception surfaced to Andrew | HELD |
 | DC-12b 3 mechanisms | ruled **YES** (bless all 3); gate enforcement defers with the suspension | HELD |
-| DC-13 AL2023 + DC-15 region | **GO build-now**, WARN-first, + live AMI→OS resolver (APPLIED) | **BUILT @4ee2888e3** — controls PASS. `--enforce` pends CTO. canonical-schwab rebuild post-D4. |
+| DC-13 AL2023 + DC-15 region | **GO build-now**, WARN-first, + live AMI→OS resolver (APPLIED) | **BUILT @4ee2888e3** — controls PASS. `--enforce` already opt-in (WARN-first; AL2023 = fleet-wide SS-E, not consolidation-scoped, per CTO). CI flip pending. canonical-schwab rebuild post-D4. |
 | DC-14 role infix | next-touch, schwab-window-gated post-D4 | W4 |
 
 **A-axis (DC-1..4) = CLASS-D confirmed** (producer-code/CI, NOT runtime deny — 17a reasoning accepted). **ALERT-SUSPENSION (Andrew-direct 2026-07-17):** new twin/alarm creation paused for the consolidation → DC-12 build held (SS-D absence-twin enforcement footnoted paused @f9fdde92a).
