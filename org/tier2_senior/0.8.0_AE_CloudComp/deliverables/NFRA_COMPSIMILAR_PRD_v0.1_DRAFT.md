@@ -175,6 +175,11 @@ Andrew named the crux: *"somehow get a stable summary location of the resource."
   the `graph_nodes` schema is `[node_id, arn, node_type, name, layer, drift_class, source,
   snapshot_ts, props]` — **there is no summary field today**, and `props` is empty for the S3 node
   sampled. So the summary location must be **established, not read.**
+  - **NO auto-freshness-twin during consolidation** (Andrew-direct standing directive, relayed 0.7.0
+    2026-07-17 194327Z: per-producer alarm-twin generation SUSPENDED for the consolidation duration —
+    alarms calibrate against mid-migration surfaces). The `resource_summaries` producer ships WITHOUT
+    a freshness-alarm twin; one calibrated monitor is a post-consolidation phase question, not this
+    build's.
   - **Storage:** a new append-only Iceberg table in the globgrph Nessie catalog — `resource_summaries`
     — keyed on **ARN** (confirmed the natural key: for cloud resources `node_id == arn`, e.g.
     `arn:aws:s3:::opal-data-inf`). Schema: `arn, node_type, summary, authored_by, authored_at,
