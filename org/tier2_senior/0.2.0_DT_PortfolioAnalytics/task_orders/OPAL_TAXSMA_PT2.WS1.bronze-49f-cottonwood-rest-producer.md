@@ -7,7 +7,7 @@
      0.6.2_AE_PartnerETL = Cottonwood REST-pattern reference/consult (the pattern being cloned). Bronze data lands
      in the BD tree (bd<->cot separation stands). -->
 <date>2026-07-17</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P2 (Andrew-direct via CTO 205620Z; OPAL_TAXSMA_PT2 @a80840fb1). Head of the WS-1→2→3 chain. **HARD GATE: Andrew's vendor-egress per-use word (below) before the first LIVE reporting call.**</priority>
 
 <authority>

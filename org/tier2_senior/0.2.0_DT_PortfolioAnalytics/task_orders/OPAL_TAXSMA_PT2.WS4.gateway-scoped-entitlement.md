@@ -7,7 +7,7 @@
      The gateway IAM apply is AE-executed (m365-mcp-gateway is AE/CloudOps infra) — DT designs, AE applies,
      CTO gates. -->
 <date>2026-07-17</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P2 (Andrew-direct via CTO 205620Z). GATE: CTO hard plan-gate (net-new external-read grant) + WS-3 gold prefix exists (the verify target). Parallel to the data chain; the read path (WS-6) needs it.</priority>
 
 <authority>
