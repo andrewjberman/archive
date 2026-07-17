@@ -18,6 +18,13 @@ The guard operates on the SERVED cells of exactly two artifacts (the two tabs):
 stats render on either tab — if yes it joins the config, if no it stays out. Page-scope is the
 test, per the ruling.)
 
+**RESOLVED (CTO 163001Z):** (1) the peers served JSON's 07-01 generation is EXPECTED — the
+generator is monthly, gated on a peer Excel in the upload manifest; next regeneration ~07-31; the
+guard baselines on accepted-upload events, cadence explicit per artifact. (2) timeseries JSON is
+PAGE-in (`ReturnVolatilityScatter` in `ModelPortfolios.tsx`); WHICH TAB pends a DE render check —
+**held OUT of the guard config until that lands** (in only if it renders on the Benchmark or Peers
+tab, per the verbatim tab-scope).
+
 ## The guard — three checks, all on served cells, all vs the LAST ACCEPTED upload
 
 **V1 — 25% proportional on comparable cells (the acknowledge-screen driver).**
