@@ -29,7 +29,7 @@ rollback to {date}' which the user acknowledges or cancels, and then displays th
 ## Surfaces
 
 - `portal/src/pages/DataRefresh/tabs/HistoryTab.tsx`
-- `portal/src/hooks/useDataRefreshState.ts`
+- `portal/src/pages/DataRefresh/hooks/useDataRefreshState.ts` (path corrected per DE ACK 134359Z)
 - `portal/src/api/portal-proxy.ts` (`rollbackDataRefresh`)
 
 ## Law that binds
