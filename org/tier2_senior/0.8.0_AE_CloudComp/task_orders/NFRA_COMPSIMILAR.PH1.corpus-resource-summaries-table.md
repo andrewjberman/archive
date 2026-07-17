@@ -3,10 +3,8 @@
 <title>comp-similar Phase 1 — stand up the STABLE resource-summary corpus: the ARN-keyed resource_summaries Iceberg table (globgrph Nessie) + Kuzu projection + derive-at-scan populate</title>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
-<!-- STAFFING PENDING (Andrew's call): 0.8.0 BASE is the Andrew-reserved research session (LD-0305) and
-     drafted the PRD, but fabric build work should NOT dispatch into a reserved session. Recommended lane =
-     a new 0.8.0~D (or ~C/~B when they free from the taxonomy census). MSTR spawns on Andrew's staffing word;
-     re-target issued_to then (same pattern as the P3-CENSUS re-target 9258b596e). -->
+<!-- STAFFING RESOLVED (Andrew-direct 2026-07-17 ~20:2xZ via COO): builder lane = 0.8.0~D (shared with
+     NFRA_KUZUSPLIT; base stays Andrew-reserved per LD-0305). MSTR spawn requested. Still gated on CTO arch-gate below. -->
 <date>2026-07-17</date>
 <status>staged</status>
 <priority>P2 (Andrew batch 2026-07-17; behind OPAL_CONSOLIDATION + OPAL_TAXONOMY). GATE: CTO arch-gate on the PRD + the 6 open arch decisions.</priority>

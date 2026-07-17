@@ -3,12 +3,11 @@
 <title>Graph-refresh split — P0 instrument the real morning cost, then P1 split into comp-kuzu-full (MSTR-startup, force full) / comp-kuzu-inc (workers, incremental-OR-serve-labeled-stale, NEVER full)</title>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
-<!-- STAFFING PENDING (Andrew's call): globgrph platform work = 0.8.0's domain, but base is Andrew-reserved
-     (LD-0305). Recommended lane = 0.8.0~D (shared with NFRA_COMPSIMILAR — same platform domain, one builder
-     lane for both). MSTR spawns on Andrew's staffing word; re-target then. -->
+<!-- STAFFING RESOLVED (Andrew-direct 2026-07-17 ~20:2xZ via COO): builder lane = 0.8.0~D (new lane, shared
+     with NFRA_COMPSIMILAR — same platform domain; base stays Andrew-reserved per LD-0305). MSTR spawn requested. -->
 <date>2026-07-17</date>
 <status>staged</status>
-<priority>P2 (Andrew batch 2026-07-17). GATE: Andrew ratification of the 4 open calls (O-1 is the substantive fork). "No build until ratified" per the PRD.</priority>
+<priority>P2 (Andrew batch 2026-07-17). GATE CLEARED: Andrew RATIFIED — GO fires on ~D registration.</priority>
 
 <authority>
 Andrew-direct verbatim: "full derive as a function of 0.0.0_AB_MSTR startup, but for the remainder of the
@@ -17,10 +16,11 @@ comp-kuzu-inc." PRD @ docs/architecture/NFRA_KUZUSPLIT_PRD.md; brief @ docs/brie
 </authority>
 
 <gate>
-DO NOT GO until Andrew ratifies (open calls §7): O-1 (comp-kuzu-inc = incremental-OR-serve-labeled-stale,
-NEVER incremental-or-full — the substantive fork that makes "workers never pay full" true; gates P1);
-O-2 (P0-instrument-first before sizing — Rule 22); O-3 (new project vs reopen NFRA_GLOBGRPH — PRD rec: new,
-already registered); O-4 (P4 build-once-distribute now vs defer). COO fires GO on Andrew's word + lane spawn.
+ANDREW RATIFIED 2026-07-17 ~20:2xZ (via COO AskUserQuestion): O-1 = YES, comp-kuzu-inc = incremental-OR-
+serve-labeled-stale, NEVER full (a worker on a large delta serves the complete prior-vintage DB labeled-stale
++ LOUD log; never a 6min mid-task rebuild — the §4 hard gate, now LAW for this build). O-2/O-3/O-4 proceed
+per PRD rec (P0-instrument-first; new project not reopen-GLOBGRPH; P4 distribute DEFERRED to the two-machine
+wave). GATE CLEARED. COO fires GO on ~D registration (MSTR spawn requested). CTO arch-gates the code as platform owner.
 </gate>
 
 <scope>
