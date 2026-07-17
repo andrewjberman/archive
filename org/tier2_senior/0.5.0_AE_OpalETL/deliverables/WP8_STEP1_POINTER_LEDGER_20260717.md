@@ -45,3 +45,32 @@ census (07-16). Every row has an owner and a close-mechanism.
 trn_nna disposition (CTO/DS) + SI2 chain re-home (0.6.2 revival) are the two long poles;
 prefix rulings land ~20:30Z tonight (CTO); D1 completes 07-19; D4 closes 07-24 17:21Z;
 D5 07-24/25; D6 package to Andrew ~07-25.
+
+## F. RESOLUTIONS (2026-07-17 ~18:2x-18:4xZ) -- both long poles now have landing paths
+
+**ASK B / trn_nna -- RULED (CTO 182433Z via COO 183152Z): OPTION (b) RETIRE.** C_01 re-derives
+NNA from monolith fact_trn; 03_silver/TRN_NNA is a legacy Rule-17 violation retired, never
+replicated into the monolith. Builder = DS~A behind their A4 wave. Two ACs: AC1 parity (gold
+NNA re-derived == legacy, to the cell, over a window, BEFORE the legacy converter retires); AC2
+field-sufficiency (missing classifier input = a silver passthrough add to fact_trn, never a
+computation move; CTO backstops). **The /49-schwab-conv retirement + B2 dormant-family retire on
+AC1 parity-pass.** MY INDEPENDENT RETIRE-SAFETY GROUNDING (source-confirmed, converges): the
+dying-bucket 03_silver/TRN_NNA has NO live production reader -- sole consumer
+`enrich_transactions_with_schwab_diagnostic.py` is explicitly retired (do-NOT-run, Path-A
+decision 2026-04-21); froze at date=20260420. Retire breaks nothing live.
+
+**03_silver PREFIX -- WHOLLY DEAD (grounding for CTO's ~20:30Z batch).** Sub-prefixes TRN /
+TRN_NNA / account_xref / scripts, all orphaned: account_xref frozen 20260421, live consumers
+ALREADY repointed 2026-06-29 to opal-data-bd/schwab/silver/account_xref (build_dim_account.py:51,
+build_dim_advisor_fee.py:47); TRN_NNA retire (above); TRN superseded by monolith fact_trn.
+Disposition = RETIRE whole; the diagnostic-header "account_xref is an approved standalone silver
+dimension" note is STALE (superseded by the 06-29 repoint).
+
+**D1 CALENDAR RESOLVED (NEVER#1, CTO Amendment B).** Producer is NOT "09:46Z" (that was a
+predecessor COORDINATION read appointment) -- it is opal-assets-silver-schwab-sweep-daily,
+cron(15 12 UTC) DAILY. Trading calendar: 07-18 Sat + 07-19 Sun NON-trading; monolith bronze
+carries ONLY trading-day partitions (empirical: every weekend + the Jul-3 holiday skipped;
+latest 20260716) -> a weekend sweep = legitimate no-op, no cycle slot. Repoint landed 13:44Z
+AFTER today's 12:15 sweep -> today = pre-repoint. **Cycles ~= 07-18 (processes date=2026-07-17)
++ ~07-21 (processes date=2026-07-20), NOT 07-18+07-19.** #5 promoted to VETO (S3-negative APPLIED
+overrides #2 provenance DESIRED). Dates held pending CTO ratify of the ~07-18/~07-21 shape.
