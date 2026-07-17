@@ -74,3 +74,21 @@ latest 20260716) -> a weekend sweep = legitimate no-op, no cycle slot. Repoint l
 AFTER today's 12:15 sweep -> today = pre-repoint. **Cycles ~= 07-18 (processes date=2026-07-17)
 + ~07-21 (processes date=2026-07-20), NOT 07-18+07-19.** #5 promoted to VETO (S3-negative APPLIED
 overrides #2 provenance DESIRED). Dates held pending CTO ratify of the ~07-18/~07-21 shape.
+
+## G. RULING-PENDING PREFIXES -- CELL STRUCTURE + LIVENESS (to CTO 185103Z, for his ~20:30Z batch)
+
+The six prefixes couple into ~4 disposition CELLS (repo consumer-census + AWS liveness only;
+NO schwab data-reads, no P2 contents opened):
+- **CELL 1 -- 03_silver** (TRN/TRN_NNA/account_xref/scripts): DEAD -> retire (section F).
+- **CELL 2 -- 02_anonymized + 03_mappings** = the ANONYMIZER cell. Producer = schwab-anonymizer
+  lambda (01_raw -> 02_anonymized + the 03_mappings re-id key). **0 invocations in 7 days =
+  DORMANT.** 03_mappings IS the client re-identification key (cross-firm-bucket-read-deny.tf:45)
+  -> CTO P2 read; likely SECURE-DELETE not plain retire.
+- **CELL 3 -- _archive**: no repo producer/consumer -> dead-archive, retire candidate.
+- **CELL 4 -- backfill + 01_raw_quartz_validation + quartz** = the QUARTZ SI2 experiment.
+  **LIVE: EC2 i-0f3d57a97f14727af RUNNING since 2026-06-29 (18 days), quartz-si2-spike-role (a
+  D5 IAM target), owner 0.7.0.** CANNOT retire on dead-prefix logic -- needs 0.7.0 stop/repoint
+  BEFORE D5; may register in the D4 window (attributable to quartz-si2-spike-role). Also a
+  standalone cost/ownership flag.
+- NB: schwab_runtime.py backfill-status writes to MONOLITH (opal-data-assets), NOT the dying
+  bucket -- checked; no false live-writer.
