@@ -10,7 +10,7 @@
      heat/dups research -- ~C reads base's deliverables when published, never tasks base. -->
 
 <date>2026-07-17</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P3 (Andrew-ratified standing allocation order, CTO relay 171739Z — behind P1 INF chain + P2 GLDRNS/re-key; parallelizable, dedicated instrument-builder)</priority>
 
 <authority>
