@@ -5,7 +5,7 @@
 **Routed to CTO for:** the ruling-20 per-DC disposition (migrate-now / migrate-at-next-touch / recorded-carve-out) + the standard-clause decisions flagged CLASS-X. **CTO rules; ~B builds the lints on the rulings.**
 
 ## Basis (what this ledger is built on)
-- **Census:** `OPAL_CONSOLIDATION_TAXONOMY_CENSUS_20260717.md` **v0.1.1 @7df414694** (`0.8.0_AE_CloudComp~C`), measured vs the standard **@cf4938c07**. Both Phase-2 controls PASS (instrument discriminates).
+- **Census:** `OPAL_CONSOLIDATION_TAXONOMY_CENSUS_20260717.md` **v0.1.2 @7d076fcfa** (`0.8.0_AE_CloudComp~C` — the FINAL measurement basis; DC-7 + DC-15 folded as scored rows, 16 classes), measured vs the standard. Both Phase-2 controls PASS (instrument discriminates). *(This ledger was first staged @6020a79c7 on v0.1.1 @7df414694; ~C's independent DC-7/DC-15 findings MATCH mine — corroboration, no rework. Rebased to v0.1.2.)*
 - **Standard (authoritative HEAD):** `docs/architecture/OPAL_CONSOLIDATION_TAXONOMY_STANDARD.md` **@59805972b** — carries the SS-C **region co-location** clause (lines 61-65) landed AFTER the census basis. **The single gap between census-basis and standard-HEAD is DC-15**, added below.
 - **Repo HEAD at authoring:** `d8eaf705e`. **READ-ONLY: zero remediation performed on any resource.** Two census residuals ground-truthed live this session (DC-5 tracking status, DC-7 sha-tie) — evidence inline, flagged for fold-back into census v0.1.2.
 - **Handoff (proposed to ~C, 192426Z):** ~C = MEASUREMENT AUTHORITY (owns census + re-census verification); ~B = FORWARD DRIVE (this ledger + lints + sequencing + STNDRD fold). Neither both-runs-census nor both-builds-lints.
@@ -155,6 +155,25 @@ Legend — **Disp** = proposed EXISTING-instance disposition · **Gate** = propo
 6. **DC-7 canonical home:** `data/assets/scripts/lib/landing_guard.py`, or bless the smartx C5 copy as the reference?
 7. **DC-5:** approve the telemetry-hook-fix + filesystem-sweep approach (the census's commit-gate lint is gate-blind), and clear the 7-file untracked cleanup?
 8. **DC-13 + DC-15 pairing:** confirm one `canonical-schwab-runner` rebuild does AL2023 + us-east-2 together, post-D4-window. And confirm DC-15 folds into census v0.1.2 (coordinating with ~C).
+
+---
+
+## RIDE-SURFACE RECONNAISSANCE (W1 build-readiness — added ~19:5xZ, before CTO rules)
+
+I read the existing hooks the W1 lints must ride BEFORE promising they ride them. Three findings materially inform the ruling — **the instruments exist, but two of them measure the WRONG breadth and must be reconciled by a CTO ruling before their enforcement mode is sound.**
+
+**RS-1 (DC-8..11) — the grammar instrument flags 153/154; the enforcement lint CANNOT ride the raw `conforms` field.**
+`infra/aws/lambda/ci/trigger-census.py` ALREADY computes grammar conformance (`GRAMMAR_RE = ^{unit}-{function}-{cadence}$`, function ∈ {run,reattempt,absence-check}, cadence ∈ {daily,weekly,monthly,hourly}) and writes a `conforms` bool + `grammar-debt` flag per trigger — **the parser exists; DC-8..11 is an ENFORCEMENT-mode add, not a new parser** (and it already has a `--warn-only` announce-then-enforce ramp). BUT `trigger-map.json` (built 2026-07-15) shows **153 of 154 triggers `conforms:false`** — because the regex REQUIRES a literal `-{run|reattempt|absence-check}-` token that ~99% of reasonable names omit (`inf-api-assets-v2-daily`, `news-api-100am`, `bd-49f-runner-daily`, `opal-assets-silver-*-sweep-daily` all fail). **The census scored only ~14 as DEVIATE by applying JUDGMENT the raw field lacks.** An enforcement lint on the raw `conforms` field would block essentially every new trigger — a false-positive flood.
+- **PREREQUISITE CTO RULING (before the lint):** reconcile the grammar with intent — **(a)** `function` OPTIONAL (default `run`, so `{unit}-{cadence}` conforms); **(b)** extend the cadence vocabulary from `{daily,weekly,monthly,hourly}` to the real estate set (`15min,5min,6h,72h,weekdays,twicedaily,6hourly,...` — enumerated live from the registry). Then re-measure; the true DC-8..11 residue = the ~14 genuinely-malformed (stutter / missing-cadence-suffix / embedded-cadence / misleading-cadence).
+- **Proposed reconciled grammar:** `^{unit}(-{function})?-{cadence}$` + a **name-vs-cron consistency check** (parse `ScheduleExpression`, compare to the cadence token) for DC-11. The census carries `expression` per trigger, so the data is present.
+
+**RS-2 (DC-12) — the twin instrument sees 1 of 3 mechanisms; DC-12b is a PREREQUISITE to a sound DC-12 gate.**
+`trigger-census.py`'s `absence_twin` field only links a NAMED `-absence-check` rule — it is **blind** to the other two twin mechanisms (`absence-config.json` + shared checker-lambda; CloudWatch freshness alarm). So it UNDER-COUNTS: the registry shows `absence_twin:null` on ~every run trigger, including the 8 the census confirmed PAIRED. A DC-12 provisioning gate built on this field would false-flag every genuinely-twinned producer. **The gate needs a THREE-mechanism resolver (named-twin OR `absence-config.json` unit OR CloudWatch freshness alarm) — which requires DC-12b (bless-both) ruled FIRST.** Confirmed against all three mechanisms: `opal-assets-daily-emitter` is genuinely untwinned (migrate-now stands).
+
+**RS-3 (DC-13) — ride-surface confirmed present + a clean fit; shovel-ready on a new-row assertion.**
+`infra/aws/ec2/manifest-lint.py` (OPAL_STNDRD ph5, WARN-first + `--enforce` flip, invoked by `safe-ec2-deploy.sh`) lints EC2_MANIFEST rows for `{telemetry,duty_cycle,autoshutdown,sizing_review}` with a **GRANDFATHER set** (26 rows @ratification, INCLUDING both DC-13 boxes) that "fill on natural touches." **`EC2_MANIFEST.json` carries an `ami` field per row.** So DC-13's AL2023 check is a clean extension: add an AL2023 assertion (propose a self-declared `os_baseline` field on NEW rows — simplest, rides the WARN-first pattern; OR an AMI→OS resolver via `describe-images` for APPLIED truth). **The existing GRANDFATHER set already implements "the 2 existing Ubuntu boxes migrate at rebuild"** — DC-13 needs only the new-row assertion. *Sub-finding: manifest `ami` (DESIRED) may differ from the census's live `describe-instances` AMI (APPLIED) — a DESIRED-vs-APPLIED reconciliation the lint should surface.*
+
+**NET:** the W1 CLASS-D gates ride EXISTING instruments (`trigger-census.py`, `manifest-lint.py`) — **no new hook to build**, exactly the consolidation win. But **DC-8..11 and DC-12 each need a CTO grammar/mechanism ruling before their enforcement mode is sound** (RS-1, RS-2); **DC-13 is shovel-ready** on a new-row assertion (RS-3). This is the "measure the ride-surface before promising the lint rides it" pass — an instrument that measures the wrong breadth is a gate that either floods or lies.
 
 ---
 
