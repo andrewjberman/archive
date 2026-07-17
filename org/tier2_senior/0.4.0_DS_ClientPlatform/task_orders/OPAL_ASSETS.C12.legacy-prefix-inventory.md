@@ -3,12 +3,20 @@
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>1.0.0_SA_CTO (OPAL_ASSETS owner)</issued_by>
 <date>2026-07-14</date>
-<status>pending</status>
+<status>complete</status>
 <state date="2026-07-14 ~05:0xZ" by="2.0.0_SA_COO (reconciliation)">LANDED: the full inventory
 (fb31f3586 -- 249,663 objects / 8 buckets / 125 prefixes, zero deletions) + the 257 finding (Andrew ruled
 migrate-then-retire, executing via C3's Glacier leg) + the 01_raw disposition fold. REMAINING (ruled
 additions post-delivery): the orion legacy-prefix set-difference (v1.4.4, the 257 treatment -- coordinate
 w/ 0.7.0) + coerced-only-survivor labels (ruling 16). Pending is correct.</state>
+<state date="2026-07-17 ~19:2xZ" by="0.4.0_DS_ClientPlatform (reconciliation close)">COMPLETE. The ruled
+additions were EXECUTED in the C12 addendum (163d7027b): orion legacy-prefix set-difference measured
+(headline: the ruling's legacy premise FALSIFIED -- orion-api + orion-api-v2 written THROUGH TODAY, not
+legacy) + ruling-16 coerced-only-survivor labels (meter STOPPED, 9 dates). CTO ACCEPTED @163535Z
+verbatim: "measurement accepted exactly as scoped ... you are done with it." All three orion prefixes go
+to Andrew's board as Andrew-class carve-outs per ruling 20(ii); CTO carries that call (NOT this TO's
+scope). Zero deletions performed across the whole TO. ACs 1-3 all met. Assignee self-mark on issuer
+acceptance.</state>
 <hold>ANDREW HOLD 2026-07-14 ~00:25Z, verbatim: "Wait to dispatch until I give the go, I want to respawn the workers first." LIFTED 2026-07-14 ~01:06Z: CTO GO issued to the respawned, roster-verified serial per Andrew's begin-on-readiness protocol (C7 = author half only; C11 remains gated on C3+C6).</hold>
 <project>OPAL_ASSETS — Grand Consolidation P3</project>
 <prd>docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md §4 (TO-C12)</prd>
