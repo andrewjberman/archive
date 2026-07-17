@@ -1,4 +1,10 @@
-# OPAL_CONSOLIDATION Taxonomy CONFORMANCE CENSUS (v0.1)
+# OPAL_CONSOLIDATION Taxonomy CONFORMANCE CENSUS (v0.1.1)
+
+**v0.1.1 (proactive, post-delivery):** the two D.2 absence-twin CANDIDATE rows resolved to firm verdicts
+from the `absence-config.json` registry ground truth — `opal-assets-daily-emitter` → **DEVIATE** (the
+Door-6 completion-signal producer is untwinned); the 5 silver sweeps → **DEVIATE-BY-LETTER /
+CONFORM-BY-DESIGN** (needs a CTO ruling). Plus a refinement: absence detection is implemented TWO ways
+(see D.2 note). No axis verdict from v0.1 changed.
 
 **Author:** 0.8.0_AE_CloudComp~C, 2026-07-17 ~18:1xZ. **TO:** OPAL_CONSOLIDATION.P3-CENSUS
 (issued 2.0.0_SA_COO; Andrew-ratified standing allocation, CTO relay 171739Z).
@@ -150,9 +156,19 @@ CONFORM (14): `opal-assets-bd49f-dim-convert-daily`, `opal-assets-bd49f-dim-conv
 | `consolidation-gold-runner` | **CONFORM** (twin = alarm) | `aws_cloudwatch_metric_alarm.schedule_absence`. | TF-DESIRED@`consolidation-gold-runner/*.tf` |
 | `canonical-schwab-runner` / si2 | **CONFORM** (twin = alarm) | `sentinel_absence` + `si2_schedule_absence` alarms. | TF-DESIRED@`canonical-schwab-*/*.tf` |
 | `bd-49f-runner` | **CONFORM** (twin = probe) | `bd-49f-freshness-probe` lambda + `bd-49f-freshness-sched`. | GRAPH + LIVE |
-| **`smartx-assets-daily-pull`** | **DEVIATE** | scheduled producer with **NO absence-detection twin** — no `*-absence-check` schedule/alarm in `smartx-pipeline/assets-pull-*.tf` (the only `twin`/`absence` hits are unrelated comments at `assets-pull-iam.tf:154`, `assets-pull-lambda.tf:147`). | LIVE grep + `scheduler list-schedules` (no smartx absence twin) |
-| `opal-assets-daily-emitter` | **CANDIDATE** | no `*-absence-check` twin found for the emitter itself; the emitter WRITES the downstream completion signal (`gold/meta/pipeline-complete.json`) but its own firing is untwinned. Verify whether an emitter-absence signal exists elsewhere before scoring. | LIVE grep (no emitter absence twin in opal-assets TF) |
-| `opal-assets-silver-{firm}-sweep` (5) | **CANDIDATE** | the 5 scheduled silver sweeps have no `*-absence-check` twin; they are S3-event-primary (scheduled sweep is a backstop), so SS-D's twin duty may be satisfied by the event path — needs a ruling on whether an event-primary producer needs a scheduled-cadence twin. | LIVE grep (no silver-sweep absence twin) |
+| **`smartx-assets-daily-pull`** | **DEVIATE** | scheduled producer with **NO absence-detection twin** — no `*-absence-check` schedule/alarm in `smartx-pipeline/assets-pull-*.tf` (the only `twin`/`absence` hits are unrelated comments at `assets-pull-iam.tf:154`, `assets-pull-lambda.tf:147`); not in `absence-config.json`. | LIVE grep + `scheduler list-schedules` + `absence-config.json` |
+
+**D.2 refinement — absence detection is implemented TWO WAYS (SS-D consistency observation):** (1)
+scheduler-schedule → shared `opal-assets-absence-check` lambda, driven by the `absence-config.json`
+registry (opal-assets units: mirror-cot/inf, bd49f-pull/dim-convert); (2) CloudWatch metric alarm on a
+freshness metric (`bd-49f-silver-stale-*`/`bd-cot-silver-stale-*` on `TradingDayLag`; schwab
+`sentinel_absence`/`si2_schedule_absence`). The `absence-config.json` registry lists **7** units but only
+**4** have opal-assets scheduler twins — the other 3 (`canonical-schwab-si2-08242234/08335338`,
+`etfs-netassets-daily`) are covered by their own-tree alarm mechanism, not the registry's scheduler. Two
+mechanisms is not a deviation per se, but SS-D names only one canonical pattern — a candidate consistency
+clause for CTO (unify the twin mechanism, or bless both explicitly).
+| `opal-assets-daily-emitter` | **DEVIATE** (resolved from CANDIDATE) | NOT in the authoritative absence registry `infra/aws/lambda/ci/absence-config.json` (7 units: the 4 opal-assets twins + schwab-si2×2 + etfs — emitter absent), no twin schedule, no invocations-lo alarm. **This is the Door-6 completion-signal producer** (`cron(15 17)` → `gold/meta/pipeline-complete.json`): if it silently stops firing, the downstream `mdpf-daily-trigger` chain simply does not fire and NOTHING pages. Highest-consequence untwinned producer found. | LIVE-20260717 `absence-config.json` (emitter not a unit) + `describe-alarms` (no emitter alarm) |
+| `opal-assets-silver-{firm}-sweep` (5) | **DEVIATE-BY-LETTER / CONFORM-BY-DESIGN** (resolved from CANDIDATE — needs CTO ruling) | not in `absence-config.json`; no OWN `*-absence-check` twin. BY LETTER SS-D (`every scheduled producer pairs...`) → DEVIATE (the daily sweep IS a scheduled producer). BY DESIGN → covered: the converters are S3-event-primary (fire on bronze landing), so silver-absence follows bronze-absence which IS twinned upstream (`bd49f-daily-pull`, `mirror-cot`, `mirror-inf` twins); converter *failures* route to `opal-assets-silver-dlq`. Ruling needed: does an event-primary producer with a scheduled backstop satisfy the twin duty via upstream coverage? | LIVE-20260717 `absence-config.json` + DLQ TF + upstream twin set |
 
 ### D.3 — Other SS-D pattern rows
 
@@ -224,7 +240,8 @@ Per-axis denominators + named deviation classes, each quotable into a lint:
 | DC-9 | Scheduler-name missing/`non-cadence` suffix (`-scheduled-start`, `-schedule`, `-sched`) | D | 5 | name-lint: suffix ∈ `{daily,hourly,weekdays,15min,...}` |
 | DC-10 | Scheduler-name cadence embedded in function (`daily-pull*`) | D | 4 | name-lint (same as DC-8/9 family) |
 | DC-11 | Misleading cadence — function says `daily`, cron fires twice-daily (schwab si2) | D | 2 | name-vs-cron cross-check lint |
-| DC-12 | Scheduled producer without absence twin (`smartx-assets-daily-pull`) | D | 1 confirmed (+2 CANDIDATE classes: emitter, 5 silver sweeps) | provisioning gate: every `aws_scheduler_schedule`/`aws_cloudwatch_event_rule` with a cron pairs with an absence alarm/twin |
+| DC-12 | Scheduled producer without absence twin | D | 2 confirmed (`smartx-assets-daily-pull`, **`opal-assets-daily-emitter`** — the latter is the Door-6 completion-signal producer) + 5 silver sweeps DEVIATE-BY-LETTER (CTO ruling: event-primary coverage?) | provisioning gate: every `aws_scheduler_schedule`/`aws_cloudwatch_event_rule` with a cron pairs with an absence alarm/twin OR declares upstream-covered |
+| DC-12b | Absence detection implemented two ways (scheduler+checker-lambda vs CloudWatch freshness alarm); registry lists 7 units, 4 scheduler-twinned | D | 1 (mechanism split) | SS-D consistency clause: one canonical twin mechanism, or bless both |
 | DC-13 | New consolidation runner not on AL2023 (`consolidation-gold-runner`, `canonical-schwab-runner` on Ubuntu 22.04) | E | 2 | provisioning lint: new `aws_instance` AMI is an AL2023 owner-alias |
 | DC-14 | IAM role naming infix (`schwab-anonymizer-lambda-role`) | E | 1 | name-lint: role matches `{resource}-role` (+ blessed helper suffixes) |
 
