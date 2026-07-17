@@ -2,7 +2,13 @@
 <to_id>OPAL_CONSOLIDATION.P3-CENSUS</to_id>
 <title>Consolidation taxonomy CONFORMANCE CENSUS — measure every consolidation-associated resource against OPAL_CONSOLIDATION_TAXONOMY_STANDARD.md; per-resource conform/deviate table with each deviation NAMED</title>
 <issued_by>2.0.0_SA_COO</issued_by>
-<issued_to>0.8.0_AE_CloudComp</issued_to>
+<issued_to>0.8.0_AE_CloudComp~C</issued_to>
+<!-- RE-TARGETED 2026-07-17 ~17:36Z per Andrew-direct via MSTR 173531Z: base 0.8.0 is RESERVED
+     (Andrew-launched research session, dc4207c7c asks); fabric census work goes to the ~C lane.
+     The 172809Z GO to base 0.8.0 is MOOT (MSTR sends the stand-down); the shared-Phase-1
+     composition note becomes a COORDINATION seam between ~C's census enumeration and base's
+     heat/dups research -- ~C reads base's deliverables when published, never tasks base. -->
+
 <date>2026-07-17</date>
 <status>staged</status>
 <priority>P3 (Andrew-ratified standing allocation order, CTO relay 171739Z — behind P1 INF chain + P2 GLDRNS/re-key; parallelizable, dedicated instrument-builder)</priority>
