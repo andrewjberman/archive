@@ -25,6 +25,17 @@ PAGE-in (`ReturnVolatilityScatter` in `ModelPortfolios.tsx`); WHICH TAB pends a 
 **held OUT of the guard config until that lands** (in only if it renders on the Benchmark or Peers
 tab, per the verbatim tab-scope).
 
+**RESOLVED (DE 164356Z — render-verified, exercised-grade):** `ReturnVolatilityScatter` renders on
+the **BENCHMARK tab only** (`ModelPortfolios.tsx:1902-1906`, `:1416` @ portal DEV `064658cd2`;
+per-tab screenshots + DOM probes; peers tab absent) → **`model_portfolio_timeseries.json` is IN
+scope.** **GRAIN RULE (CVO, binding for the config):** censused live 07-17, the artifact carries
+**14,450 numeric leaves — full daily series arrays, not summary cells.** Per-cell V1 at that grain
+is the wrong instrument (weekly restatements touch every array; 14k comparisons = pure noise).
+The guard checks **derived terminal stats per series** (terminal cumulative return + realized vol
+over the standard windows — tens of cells, computed at the gate), plus structural checks (series
+count, length-monotonic-append, last-point date == data_as_of). The 25% V1 rule applies to those
+derived cells exactly as to the other benchmarks-tab cells.
+
 ## The guard — three checks, all on served cells, all vs the LAST ACCEPTED upload
 
 **V1 — 25% proportional on comparable cells (the acknowledge-screen driver).**
