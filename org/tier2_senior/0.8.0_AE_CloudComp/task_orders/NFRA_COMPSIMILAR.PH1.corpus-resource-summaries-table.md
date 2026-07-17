@@ -6,8 +6,11 @@
 <!-- STAFFING RESOLVED (Andrew-direct 2026-07-17 ~20:2xZ via COO): builder lane = 0.8.0~D (shared with
      NFRA_KUZUSPLIT; base stays Andrew-reserved per LD-0305). MSTR spawn requested. Still gated on CTO arch-gate below. -->
 <date>2026-07-17</date>
-<status>staged</status>
-<priority>P2 (Andrew batch 2026-07-17; behind OPAL_CONSOLIDATION + OPAL_TAXONOMY). GATE: CTO arch-gate on the PRD + the 6 open arch decisions.</priority>
+<status>pending</status>
+<!-- GO LIVE 2026-07-17 ~20:5xZ (COO). CTO ARCH-GATED @c3aa13d05 (200221Z): PRD promoted to
+     docs/architecture/NFRA_COMPSIMILAR_PRD.md; §9 rules all 6 decisions. BUILD corpus derive-at-scan + table
+     DDL now; TF APPLY is the gated step (see standing condition below). Re-homed base->~D per Andrew staffing. -->
+<priority>P2 (Andrew batch 2026-07-17). GATE CLEARED — CTO arch-gated @c3aa13d05, all 6 decisions ruled §9.</priority>
 
 <authority>
 Andrew-direct (0.8.0 terminal 2026-07-17, recorded @dc4207c7c/1d81e760b/3d326af47): comp-similar = the
@@ -16,10 +19,15 @@ superseded-twin decommission heuristic. PRD v0.1 @ docs/architecture/NFRA_COMPSI
 </authority>
 
 <gate>
-DO NOT GO until: (1) CTO arch-gates the PRD (promotes to docs/architecture) AND rules the 6 open arch
-decisions in it — CRITICALLY the stable-summary-location decision (graph_nodes has NO summary field today;
-derive-at-scan for v1 vs node-writer enrichment). (2) Andrew confirms the build lane (see staffing note).
-COO fires GO when both clear.
+GATE CLEARED — CTO arch-gate @c3aa13d05 (200221Z), all 6 §9 rulings: (1) corpus v1 = DERIVE-AT-SCAN
+(authored = PH3); (2) resource_summaries Iceberg + Kuzu LEFT-JOIN APPROVED; (3) OWN TOOL (not a comp-dups
+mode); (4) authoring = PH3 gated behind PH1+PH2; (5) heat = BOTH comp-heat(data-cold) + comp-debris
+(invoke-cold), confidence-graded [carries to PH2 --supersede]; (6) registration per COMPCLOSE. Lane = ~D
+(Andrew staffing). BUILD corpus derive-at-scan + table DDL is GO.
+** STANDING CONDITION (CTO) — the TF APPLY is the gated step: NO `terraform apply` on resource_summaries until
+   (a) CTO's plan-gate reads the diff (must be NEW-TERRITORY pure-add, nothing modified) AND (b) ~D settles the
+   Kuzu-projection coordination with NFRA_KUZUSPLIT (same comp-kuzu path — PH1's LEFT-JOIN and KUZUSPLIT's
+   full/inc split must be ONE refresh model, not two). Route the plan to CTO. **
 </gate>
 
 <scope>
