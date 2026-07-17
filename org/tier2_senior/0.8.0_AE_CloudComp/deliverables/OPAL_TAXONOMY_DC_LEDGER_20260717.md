@@ -12,6 +12,31 @@
 
 ---
 
+## CTO RULING-20 DISPOSITIONS (LANDED 2026-07-17 ~20:07Z) + W1 BUILD STATUS
+
+CTO ruled the ledger (msg 200722Z). Live disposition + build state (this section is the living record; the per-DC analysis below is the original proposal):
+
+| DC | CTO disposition | Build status |
+|---|---|---|
+| DC-1 `code/`/`_probe/` | **reserved-prefix BLESS** (`code/`,`_probe/`,`_ops/`,`meta/` = reserved system prefixes → CONFORM-BY-AMENDMENT; CTO amending SS-A) | ~C folds census; no lint |
+| DC-2 `_ops` | **reserved-prefix BLESS** (as DC-1) | ~C folds census |
+| DC-3 eclipse omits `{type}` | real DEVIATE → next-touch (producer) | W3 producer-code gate |
+| DC-4 inline `_meta` | next-touch (producer) | W3 producer-code gate |
+| DC-5 `org/mcp` spill | **HOOK-FIX** (telemetry hook absolute-path) + clear the 7-stray sweep; NOT the blind commit-lint | pending: sweep + hook-fix proposal (CTO gate on the hook edit) |
+| DC-6 dual schwab home | next-touch, schwab-window-gated post-D4 | W4 |
+| DC-7 landing_guard | canonical `data/assets/scripts/lib/landing_guard.py` + build-manifest sha-tie gate | W3 |
+| DC-8..11 scheduler grammar | grammar-reconcile **APPROVED**; lint WARN-first on the trigger-map gate | **BUILT @1ed893633** — reconcile validated (153/154 → 11 deviations), 9 controls PASS. `--enforce` pends CTO. 2 decisions open (bless refined definition; `fees-*-daily` DC-11 rename). |
+| DC-12 absence twins | **DEFER** (Andrew alert-suspension); requirement stands, twin-BUILD held; emitter = CTO's candidate-exception surfaced to Andrew | HELD |
+| DC-12b 3 mechanisms | ruled **YES** (bless all 3); gate enforcement defers with the suspension | HELD |
+| DC-13 AL2023 + DC-15 region | **GO build-now**, WARN-first, + live AMI→OS resolver (APPLIED) | **BUILT @4ee2888e3** — controls PASS. `--enforce` pends CTO. canonical-schwab rebuild post-D4. |
+| DC-14 role infix | next-touch, schwab-window-gated post-D4 | W4 |
+
+**A-axis (DC-1..4) = CLASS-D confirmed** (producer-code/CI, NOT runtime deny — 17a reasoning accepted). **ALERT-SUSPENSION (Andrew-direct 2026-07-17):** new twin/alarm creation paused for the consolidation → DC-12 build held (SS-D absence-twin enforcement footnoted paused @f9fdde92a).
+
+**Sequencing now:** W1 remaining = the two enforce-flips (CTO word) + the 2 DC-8..11 decisions. W2 = reserved-prefix + DC-12b census folds (~C). W3 = DC-3/4/6/7 producer-code + at-touch. W4 = schwab-window-gated (post-D4 2026-07-24).
+
+---
+
 ## FRAMING (read before the table — this is the driver's analytic layer over the census)
 
 ### Framing 1 — every DC is TWO decisions, ruled independently
