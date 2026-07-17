@@ -1,10 +1,16 @@
-# OPAL_CONSOLIDATION Taxonomy CONFORMANCE CENSUS (v0.1.1)
+# OPAL_CONSOLIDATION Taxonomy CONFORMANCE CENSUS (v0.1.2)
 
-**v0.1.1 (proactive, post-delivery):** the two D.2 absence-twin CANDIDATE rows resolved to firm verdicts
-from the `absence-config.json` registry ground truth — `opal-assets-daily-emitter` → **DEVIATE** (the
-Door-6 completion-signal producer is untwinned); the 5 silver sweeps → **DEVIATE-BY-LETTER /
-CONFORM-BY-DESIGN** (needs a CTO ruling). Plus a refinement: absence detection is implemented TWO ways
-(see D.2 note). No axis verdict from v0.1 changed.
+**MEASUREMENT AUTHORITY:** 0.8.0_AE_CloudComp~C owns this living measurement record; the DC LEDGER +
+forward lint-authoring/sequencing is driven by 0.8.0_AE_CloudComp~B (OPAL_TAXONOMY driver, CTO founding
+brief @567b4c374). This doc is ~B's measurement spine; ~C re-censuses after each migration/lint lands.
+
+**v0.1.2:** folded DC-15 (SS-C region co-location clause landed @59805972b — `canonical-schwab-runner`
+us-east-1 vs `opal-data-schwab` us-east-2 is now a scored DEVIATE, not a smell-note; other runners
+same-region CONFORM) and firmed DC-7 (`landing_guard.py` copies byte-identical `a715b04b…` but NO
+canonical + NO sha-tie marker → DEVIATE). **v0.1.1:** resolved the two D.2 absence-twin CANDIDATEs from
+`absence-config.json` — `opal-assets-daily-emitter` → DEVIATE (Door-6 completion-signal producer
+untwinned); 5 silver sweeps → DEVIATE-BY-LETTER / CONFORM-BY-DESIGN (CTO ruling). Total: **16 named
+deviation classes (DC-1..DC-15 + DC-12b).** No Axis A/B/D/E verdict from v0.1 was reversed.
 
 **Author:** 0.8.0_AE_CloudComp~C, 2026-07-17 ~18:1xZ. **TO:** OPAL_CONSOLIDATION.P3-CENSUS
 (issued 2.0.0_SA_COO; Andrew-ratified standing allocation, CTO relay 171739Z).
@@ -95,7 +101,7 @@ Mirror the estate `data/{pipeline}/scripts/{bronze|silver|gold}/*.py`; shared li
 |---|---|---|---|
 | `data/assets/scripts/{gold,silver,lib,analysis}` | **CONFORM** (layer split + named `lib/`) with **1 DEVIATE sub-row** | layer split present (gold/silver/lib); no `bronze/` scripts is correct (bronze is raw-as-delivered). **DEVIATE:** a non-data `org/mcp/` + `org/mcp/agent_telemetry/` subtree lives under `data/assets/` and `data/assets/scripts/` — fabric agent-comms scaffolding inside the data code tree, which SS-B says should mirror the estate. | LIVE-20260717 `find data/assets -maxdepth 3 -type d` |
 | schwab silver/canonical code | **DEVIATE** | schwab converter code exists under TWO parallel homes — `data/canonical/schwab/` AND `data/schwab/` — not a single mirror-the-estate location (SS-B "Mirror the estate"). | LIVE-20260717 `find data -iname '*schwab*'` |
-| `landing_guard.py` vendored copies | **CANDIDATE** | vendored in ≥2 Lambda dirs (`etfs-netassets-daily/`, `smartx_assets_pull/`); SS-B requires a sha-tie to the canonical file verified MECHANICALLY at build. **sha-tie presence UNVERIFIED in this census** — named as the exact input to the SS-B build-manifest gate (the bd49f BUILD_MANIFEST lesson SS-B cites). | LIVE-20260717 `find -iname landing_guard*.py` |
+| `landing_guard.py` vendored copies | **DEVIATE** (resolved from CANDIDATE, DC-7) | vendored in 2 Lambda dirs (`etfs-netassets-daily/`, `smartx_assets_pull/`) — **byte-identical today** (both sha256 `a715b04be3145ca3`), BUT there is **NO canonical source file** (`data/assets/scripts/lib/` holds `backfill_status.py`, not `landing_guard.py`) and **NO sha-tie marker** in either copy. Their own header says they'll be "lifted to a shared location when the C2 fix and the connector-sweep audit adopt" it — so they are consistent by DISCIPLINE, not by a MECHANISM: nothing enforces they stay identical, and there is no canonical to tie to. Exactly the SS-B build-verified-sha-tie gap. | LIVE-20260717 `sha256sum` (both = `a715b04b…`) + `find` (no lib canonical) |
 
 ---
 
@@ -111,9 +117,16 @@ code. Size MAY vary (not a deviation); OS/telemetry/autostart/log-shipping/stamp
 | `bd-49f-auto-login` | t3.medium | **CONFORM** | registered; SG `bd-49f-auto-login-sg`; AL2023. | LIVE-20260717 + manifest (6 hits) |
 | `bd-assets` | t3.medium | **CONFORM** | registered; SSM `opal-bd-asset-dim-download`; AL2023. | LIVE-20260717 + manifest (2 hits) |
 
-**Smell-pass (not a scored deviation — no SS-C region clause):** `canonical-schwab-runner` is us-east-1
-while its data bucket `opal-data-schwab` is us-east-2 — a cross-region runner→bucket hop. Flagged for the
-ruling batch as a possible SS-C addition (region co-location), not scored DEVIATE against the current doc.
+### C.1 — Runner ↔ primary-bucket region co-location (SS-C region clause, landed @59805972b)
+
+SS-C now requires a runner to share its primary data bucket's region (cross-region = DEVIATE; dedicated
+telemetry buckets are the named exception). Re-scored from the v0.1 smell-note:
+
+| Runner (region) | Primary bucket (region) | Verdict | Deviation NAMED |
+|---|---|---|---|
+| `consolidation-gold-runner` (us-east-1) | opal-data-assets (us-east-1) | **CONFORM** | — same region |
+| `bd-49f-auto-login` / `bd-assets` (us-east-1) | opal-data-bd (us-east-1) | **CONFORM** | — same region |
+| **`canonical-schwab-runner` (us-east-1)** | **opal-data-schwab (us-east-2)** | **DEVIATE (DC-15)** | cross-region runner→bucket: runner us-east-1, primary bucket us-east-2 — latency + egress + the CrossLocation class (S3 access-logging is same-region-only, hit live on the D4 window). Cite SS-C region clause @59805972b. | LIVE-20260717 `describe-instances` + `get-bucket-location` |
 
 ---
 
@@ -235,7 +248,7 @@ Per-axis denominators + named deviation classes, each quotable into a lint:
 | DC-4 | Pull-provenance written inline (`{date}/_meta/`) not `meta/pulls/{YYYYMMDD}/` | A/D | 2 feeds (eclipse, blackdiamond) | provenance-path lint |
 | DC-5 | Non-data subtree in repo data tree (`data/assets/**/org/mcp/`) | B | 1 | commit-gate path lint: no `org/` under `data/*/` |
 | DC-6 | Dual code home (`data/canonical/schwab` + `data/schwab`) | B | 1 | structural: single mirror-the-estate home |
-| DC-7 | Vendored canonical copy without verified sha-tie (`landing_guard.py`) | B | ≥2 dirs (UNVERIFIED) | build-manifest sha-tie assertion (SS-B references the bd49f BUILD_MANIFEST) |
+| DC-7 | Vendored copy without verified sha-tie (`landing_guard.py`) | B | 2 dirs — byte-identical today (`a715b04b…`), NO canonical, NO sha-tie marker (consistent by discipline, not mechanism) | build-manifest sha-tie assertion + establish the canonical `lib/` home (SS-B references the bd49f BUILD_MANIFEST) |
 | DC-8 | Scheduler-name cadence-stutter (`daily...daily`) | D | 3 (`bd49f-daily-pull-pull-daily`, `daily-emitter-daily`, `smartx...daily-pull-daily`) | name-lint: `{cadence}` token appears once, as suffix only |
 | DC-9 | Scheduler-name missing/`non-cadence` suffix (`-scheduled-start`, `-schedule`, `-sched`) | D | 5 | name-lint: suffix ∈ `{daily,hourly,weekdays,15min,...}` |
 | DC-10 | Scheduler-name cadence embedded in function (`daily-pull*`) | D | 4 | name-lint (same as DC-8/9 family) |
@@ -244,6 +257,7 @@ Per-axis denominators + named deviation classes, each quotable into a lint:
 | DC-12b | Absence detection implemented two ways (scheduler+checker-lambda vs CloudWatch freshness alarm); registry lists 7 units, 4 scheduler-twinned | D | 1 (mechanism split) | SS-D consistency clause: one canonical twin mechanism, or bless both |
 | DC-13 | New consolidation runner not on AL2023 (`consolidation-gold-runner`, `canonical-schwab-runner` on Ubuntu 22.04) | E | 2 | provisioning lint: new `aws_instance` AMI is an AL2023 owner-alias |
 | DC-14 | IAM role naming infix (`schwab-anonymizer-lambda-role`) | E | 1 | name-lint: role matches `{resource}-role` (+ blessed helper suffixes) |
+| DC-15 | Cross-region runner→primary-bucket (`canonical-schwab-runner` us-east-1 vs `opal-data-schwab` us-east-2) | C | 1 | provisioning lint: new `aws_instance` region == its primary bucket region (SS-C @59805972b; telemetry buckets exempt) |
 
 **Named UNVERIFIED (honest residuals, not scored CONFORM):** landing_guard sha-tie (DC-7); emitter +
 silver-sweep absence twins (DC-12 CANDIDATEs); per-role scope-exactness (SS-E simulate-principal-policy
