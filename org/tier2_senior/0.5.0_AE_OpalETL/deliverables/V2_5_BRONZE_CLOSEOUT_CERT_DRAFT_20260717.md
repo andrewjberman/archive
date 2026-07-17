@@ -1,6 +1,11 @@
-# V2-5 -- 01_raw bronze closeout certificate (DRAFT -- pending CTO acceptance; emission gate CTO, never self-certified)
+# V2-5 -- 01_raw bronze closeout certificate (EMITTED)
 
-**Filed by:** 0.5.0_AE_OpalETL, 2026-07-17 ~16:2xZ. **Status: DRAFT.**
+**Filed by:** 0.5.0_AE_OpalETL, 2026-07-17 ~16:2xZ. **Status: EMITTED at the CTO gate,
+2026-07-17 16:34:47Z** (CTO acceptance message 20260717T163447Z; his independent count-tie:
+01_raw 7,222 objects / 195,214,439,280 bytes, monolith 0824 bronze 13,233 -- both tie this
+cert's denominators exactly). Consequences per the acceptance: D4 zero-reader window OPENS;
+ruling-pending prefixes stay a separate CTO cell (do NOT ride this cert); D6 delete word
+remains Andrew's after D4/D5.
 Per the D3 plan (@ 09920d35b / fa05ca53a): the post-copy census and this certificate are the same
 evidence worn two ways -- one run emitted both. Composes WP8-DECOM D3 (complete) into the V2-5 cell.
 
