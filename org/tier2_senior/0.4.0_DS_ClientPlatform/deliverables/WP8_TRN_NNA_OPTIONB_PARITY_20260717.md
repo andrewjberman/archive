@@ -4,6 +4,35 @@
 **ruling:** CTO 182433Z (option-b: C_01 re-derives NNA from monolith fact_trn; NNA-in-silver is a
 Rule-17 violation to RETIRE, not replicate). AC1 parity + AC2 field-sufficiency, behind A4.
 
+## CTO RULINGS + EXECUTION (204506Z ruling -> landed 205xZ)
+
+**D1 = GO, LANDED.** Re-pointed the gold classifier monolith source `dim_transaction` ->
+`fact_trn` (the COMPLETE 140-col silver table). Commit `37bd2fee1` (on origin/CLOUD). Deployed to
+`s3://opal-data-bd/code/gold/lib/{schwab_trn_nna_gold,schwab_flows}.py`, **md5==ETag verified**
+(`cacc4c96…`, `8f13a83d…`). Renamed `monolith_dim_transaction_prefix` -> `monolith_fact_trn_prefix`;
+5 tests pass (incl. the bronze-tie drift-detector). **Full AC1 harness re-run on the fact_trn code
+path: 26,504 cells / 0 mismatch — output-identical end-to-end.**
+- **Gate condition MET (Rule 22a APPLIED truth):** `bd-exporter-ec2-role` inline policy
+  `monolith-schwab-08242234-silver-read` has an UNCONDITIONED `s3:GetObject` Allow on
+  `opal-data-assets/schwab/08242234/silver/*` (wildcard covers `fact_trn/`); `cross-firm-bucket-deny`
+  only denies opal-data-cot (no override). `simulate-principal-policy` on the exact fact_trn key =
+  **allowed**; positive control (dim_transaction) = allowed; negative control (bronze/, outside
+  silver/*) = implicitDeny (instrument discriminates). No +1 grant needed.
+
+**D2 = (a)+(b), FILED.** The pre-2024-07-08 gap (57 days, 2024-04-12..07-05, +$18.07M net / 2,415
+cells) is **ACCEPTED as immaterial** for the retirement decision (2+ years old, latent — no live
+consumer routinely rebuilds pre-07-08; all live serving is post-07-08). **PRESERVE the frozen legacy
+TRN_NNA partitions** — do NOT secure-delete/retire the ARTIFACTS in the D-series; keep them reachable
+via `SCHWAB_FLOW_SOURCE=legacy` (env override, still in code) as the historical-rebuild fallback IF
+ever needed. Do NOT extend the monolith horizon to 04-12 (option c rejected — 0.7.0 work for a
+latent 2-year-old gap). **Retire the PRODUCER (step-5 converter), PRESERVE the ARTIFACTS.**
+
+**Converter retirement** (step 5 /49-schwab-conv `convert_schwab_trn_to_nna_silver.py`): UNBLOCKED
+on AC1 the moment D1 landed. Mine to execute on the D-sequence (queued with the /49-schwab-conv
+whole-retirement arc already in flight via L5b re-point + bd gold re-key/flip evidence). NOT actioned
+here — it edits the AE-owned /49-schwab-conv skill + sequences with the D-cells; coordinated, not
+unilateral.
+
 ## TL;DR
 
 The build is **already landed** (A4 L4 flip, 2026-07-16, CTO GO 185225Z): `lib/schwab_flows.py`
