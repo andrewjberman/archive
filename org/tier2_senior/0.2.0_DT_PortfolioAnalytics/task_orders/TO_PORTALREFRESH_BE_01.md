@@ -37,6 +37,24 @@ CLAUDE.md no-emoji law; cleanup in the same touch.
    rollback executes against state the operator never saw. The rejection payload is part of the
    FE contract cell (below).
 3. **F3:** replace emoji/non-ASCII prints with `OK:`/`WARN:`/`ERROR:` in the same deploy.
+4. **F4 — "Triggered By" identity (Andrew-direct 2026-07-17 ~13:5xZ, added by CTO amendment):**
+   Upload History (uploads AND rollback events) must record the real logged-in user, not
+   `dev@test.com`. **Mechanism MEASURED live from Andrew's 07-17 rollback events** (CloudWatch
+   `/aws/lambda/opal-data-refresh-api` 12:55:31–44Z): the authorizer WORKS — every request
+   carries `requestContext.authorizer.lambda.email = andrew@opalinvest.com` — but
+   `validate_user_type` (`lambda_function.py:~100`) reads `authorizer_context.get('email')` at
+   the WRONG DEPTH (API GW v2 nests Lambda-authorizer context under the `lambda` key), misses,
+   and falls to the Method-3 fallback (`:136` → `dev@test.com`). The Lambda's own log prints the
+   identity inside the very warning that claims no context was found. This is the SECOND
+   wrong-location fix on this field (2026-01: `authorizer.claims.email` → `authorizer.email`;
+   truth is `authorizer.lambda.email`) — so the acceptance test is behavior-grade, not a code
+   read: a real authenticated request must produce a DDB row with the real email. Fix: resolve
+   context as `authorizer.get('lambda', authorizer)` before the existing Method-1 read; keep
+   userType gating semantics identical. Rollback rows get the same treatment (`triggeredBy` at
+   `:1290` already flows from `validate_user_type`; extraction is the only break). ALSO in this
+   touch: line ~918's docstring example says `yang@opalcapital.com` — a domain WE DO NOT OWN
+   (CLAUDE.md Rule 23); change to an `opalinvest.dev` example. History rows already stored with
+   `dev@test.com` stay as-is (true record of what was captured; do not rewrite history).
 
 ## Law that binds
 
