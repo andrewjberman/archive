@@ -42,7 +42,21 @@ rollback to {date}' which the user acknowledges or cancels, and then displays th
   commits in your closure message so DT's batch picks them up (their pending batch already carries
   3b516623/84b24af8).
 
-## Cross-domain contract cell (named)
+## Scope adds (Andrew-direct to DE's session, 2026-07-17 ~13:5xZ; recorded by CTO amendment)
+
+4. **Time Machine panel REMOVAL** — delete the Time Machine panel from the DataRefresh History
+   tab; the feature is no longer in production (consistent with the parked DRFR_PTMCH_PRD).
+   Immediate; rides the FE_01 commit batch. (CTO batching ruling: YES, same batch.)
+5. **Emergency Rollback tab — SKETCH-FIRST, GATED ON ANDREW'S PICK.** New tab for non-technical
+   operators: a single panel + single button that rolls back to the last successful upload, with
+   upload-tab-style animation and panel structure. Andrew wants ASCII sketches (/draw options) in
+   DE's chat and will approve one BEFORE implementation — no code for this tab until his pick.
+   Design constraints binding when implementation starts: reuses FE_01's confirm/lockout/progress
+   machinery (single POST, existing rollback endpoint, target = last successful upload); the
+   confirm dialog is NOT optional here — an emergency control for non-technical users needs the
+   acknowledge step and the in-flight lockout MORE, not less; and it must surface BE's
+   ALREADY_RUNNING rejection as a calm "a rollback is already in progress" state, never an error
+   wall. Silver-canvas + /frontend-dev law applies (it is a new visual surface).
 
 The rollback POST response shape (`method`/`newExecutionId`/`status`) and the status-polling
 payload are the FE↔BE contract. DT's BE leg (TO_PORTALREFRESH_BE_01) may extend the status
