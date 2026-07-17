@@ -40,8 +40,9 @@ active writer), `opal-schwab-monolith-remap-role` (D3 copy path), `schwab-anonym
 (02_anonymized, ruling-pending), `quartz-si2-spike-role` (quartz, ruling-pending),
 `bd-exporter-ec2-role`, `MANAGED-POLICY:opal-assets-one-way-fan-in-fence` (deny fence).
 
-## Open items
+## Window ruling (CTO 20260717T165744Z -- deviation APPROVED as executed)
 
-- Window length N: CTO names it at clock-start (his acceptance said "per the WP8 plan").
-- Reader-verdict read cadence: this lane sweeps the delivered logs at least daily once the
-  clock runs; requester-role histogram published per sweep.
+- **N = 7 CALENDAR DAYS from the delivered-probe clock-start** ("long enough to catch any
+  weekly cron reader; a monthly reader is D5's problem -- the read-only flip is the control").
+- Clock-start reported to CTO with delivery evidence when req-id 473HDV08DW9CZ25Y lands.
+- Cadence: daily requester-role histograms to the session record; exceptions to CTO.
