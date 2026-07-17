@@ -18,6 +18,14 @@
 - **HELD (security, Andrew):** CELL 2 anonymizer -- secure-delete cell, CTO->Andrew.
 - **HELD (live, 0.7.0):** CELL 4 quartz spike -- 0.7.0 stop/repoint after the 0.6.2 code re-home, then D5.
 
+## D-sequence tracked item -- step-5 PRODUCER retirement (routed to me, CTO 214039Z via DS~A)
+
+- **WHAT:** retire the producer `convert_schwab_trn_to_nna_silver.py` (step 5 of `/49-schwab-conv`, AE-owned). **I (pod AE) execute the skill edit** when gated -- not a DS action; not a prefix-retire.
+- **WHY UNBLOCKED:** WP8 trn_nna option-b D1 landed + CTO-accepted; C_01 re-derives NNA gold-side from monolith `fact_trn` (37bd2fee1). AC1 parity = 26,504 (account,date) cells / 0 mismatch over 495 dates (2024-07-08..2026-07-15), output-identical -> monolith path fully replaces the legacy converter for the ONLY prod reader (C_01).
+- **HARD CONSTRAINT 1 -- PRESERVE, do NOT secure-delete:** the frozen legacy `opal-data-bd/schwab/silver/trn_nna/` partitions STAY (reachable via `SCHWAB_FLOW_SOURCE=legacy` env override) as the historical-rebuild fallback for pre-2024-07-08 (57 days / +$18.07M, accepted immaterial but preserved). Retire the PRODUCER, keep the ARTIFACTS. (Distinct from CELL 1's `opal-data-schwab/03_silver/TRN_NNA` retire -- different bucket.)
+- **HARD CONSTRAINT 2 -- GATED ON FLIP EVIDENCE:** the `/49-schwab-conv` retirement arc (L5b monolith re-point eac5476c1 + the bd gold re-key/flip evidence) must land + be CTO-accepted FIRST. Flip evidence still unread at CTO's gate -> **step-5 removal HELD until that clears.** Retiring the producer before the flip is proven is premature.
+- **Grounding:** `org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/WP8_TRN_NNA_OPTIONB_PARITY_20260717.md`.
+
 ## Cross-refs
 - Related dead-UI-channel retirement (`canonical-schwab-si2-download-schedule` EventBridge, ENABLED, drives frozen GUI channel): my cell-3 PART-2, source-grounded 195615Z; retires with the D5 battery (separable from the live monolith REST pull -- `monolith-daily-schedule`).
 - 0.6.2 cell-3 SI2 code re-home: additive IAM grant GO=(A) decoupled prep (214213Z); literal-flips + cutover HELD to D1 GO.
