@@ -6,7 +6,8 @@
 <!-- STAFFING RESOLVED (Andrew-direct 2026-07-17 ~20:2xZ via COO): builder lane = 0.8.0~D (new lane, shared
      with NFRA_COMPSIMILAR — same platform domain; base stays Andrew-reserved per LD-0305). MSTR spawn requested. -->
 <date>2026-07-17</date>
-<status>staged</status>
+<status>pending</status>
+<!-- flipped staged->pending 2026-07-17 on ~D read of COO GO 203150Z (GO LIVE, Andrew-ratified O-1). P0 instrument in progress. -->
 <priority>P2 (Andrew batch 2026-07-17). GATE CLEARED: Andrew RATIFIED — GO fires on ~D registration.</priority>
 
 <authority>
