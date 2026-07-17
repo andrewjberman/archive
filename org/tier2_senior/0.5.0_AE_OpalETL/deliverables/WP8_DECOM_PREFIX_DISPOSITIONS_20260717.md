@@ -28,5 +28,5 @@
 
 ## Cross-refs
 - Related dead-UI-channel retirement (`canonical-schwab-si2-download-schedule` EventBridge, ENABLED, drives frozen GUI channel): my cell-3 PART-2, source-grounded 195615Z; retires with the D5 battery (separable from the live monolith REST pull -- `monolith-daily-schedule`).
-- 0.6.2 cell-3 SI2 code re-home: additive IAM grant GO=(A) decoupled prep (214213Z); literal-flips + cutover HELD to D1 GO.
+- 0.6.2 cell-3 SI2 code re-home: additive IAM grant GO=(A) landed + independently validated + RAVC-closed (221511Z; new home has all 9 artifacts, box-read 35842B rc=0, my simulate=allowed, never-widen controls). **Literal-flips/cutover GO'd NOW (222210Z, Andrew-prompted)** -- REVERSING my earlier "held to D1" bundling: the code-read flip is ORTHOGONAL to the D1 parity clock (it changes only WHERE the box reads its byte-identical code, not what the pull writes or the silver/parity path). Guardrails: byte-identity (repo==old==new, 35842B) + prove-on-fire (landed bytes from the new-home read) BEFORE any grant retire. **STILL D5-gated (NOT pulled forward):** the old SchwabOpsCodeRead grant retirement on opal-data-schwab + the opal-data-schwab DATA decommission (those keep the D1 + full-sequence gate).
 - D1 two clean cycles (~07-18 date=2026-07-17 + ~07-21 date=2026-07-20, pending CTO date-ratify) gate the cutover + my SI2 re-home GO.
