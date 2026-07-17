@@ -89,7 +89,7 @@ Legend — **Disp** = proposed EXISTING-instance disposition · **Gate** = propo
 
 ### Axis B — Local repo `data/` tree (SS-B)
 
-**DC-5 — Non-data subtree in the data tree (`data/assets/**/org/mcp/`)** — GROUNDED THIS SESSION
+**DC-5 — Non-data subtree in the data tree (`data/assets/**/org/mcp/`)** — **CLOSED @b9c5f5243** (verified 2026-07-17 ~2205Z by 0.8.0_AE_CloudComp~B: canonical commit is an ancestor of origin/CLOUD AND on local HEAD, local<->origin in sync `0 0`; ROOT anchor present at line 41 `ROOT="${CLAUDE_PROJECT_DIR:-$(cd "${SCRIPT_DIR}/../.." ...)}"` + `.` fallback line 42; positive-control PASS; 7 strays swept, 0 tracked touched; CTO folded the stale installed `.tools/hooks` copy into the same commit, closing the pre-existing installed-vs-canonical jq-ladder sync gap). *Detail below is the pre-ruling grounding.*
 - **Instances:** 7 files `data/assets/**/org/mcp/agent_telemetry/*.jsonl` (telemetry for `0.4.0_DS`, `0.6.2_AE`, `1.0.0_SA_CTO`, `0.4.0_DS~A`). **`git ls-files` → NONE TRACKED** — untracked filesystem spill only.
 - **Root cause (grounded):** the agent_telemetry PostToolUse hook writes to a **relative** `org/mcp/agent_telemetry/` path; from a cwd inside `data/assets/scripts/...` it lands there instead of repo-root. Same class as the CLAUDE.md "lingering portal/ cwd is a defect" hazard.
 - **Disp:** **migrate-now** — remove the stray `org/mcp` subtrees under `data/assets/` (untracked telemetry debris, zero data value). *(Removal of untracked files, not recursive-delete of a real resource — CTO clears the cleanup.)*
@@ -166,7 +166,7 @@ Legend — **Disp** = proposed EXISTING-instance disposition · **Gate** = propo
 | **W1 — the one migrate-now** | DC-12 **emitter absence twin** (pure-add TF → CTO plan-gate + safe-apply). | The only ACTIVE operational blind spot (Door-6 unheld-pipeline risk). |
 | **W2 — standard decisions (no code)** | DC-12b (bless both mechanisms), DC-12 silver-sweep ruling, DC-1 `_probe/` bless-or-delete. | CTO rulings + SS-* amendments; unblock the W3 gates that depend on them. |
 | **W3 — CLASS-D producer gates + at-touch migrations** | DC-3/4 (eclipse/bd producer key templates), DC-7 (landing_guard canonical + sha-tie), DC-6 (schwab code home), DC-2 (`_ops`→`meta`), DC-1 (`code/`→`opal-runner-shared`). | Producer migrations ride natural touches; A-axis enforced at CI/producer-code layer (NOT runtime deny). |
-| **W4 — CLASS-F + schwab-window-gated** | DC-5 (telemetry-hook fix + filesystem sweep); DC-11 / DC-14 / DC-6 / DC-13+DC-15 schwab-runner rebuild — **after D4 window closes 2026-07-24.** | Untracked-spill root-cause fix; schwab-lane items respect the zero-reader window. |
+| **W4 — CLASS-F + schwab-window-gated** | ~~DC-5 (telemetry-hook fix + filesystem sweep)~~ **CLOSED @b9c5f5243**; DC-11 / DC-14 / DC-6 / DC-13+DC-15 schwab-runner rebuild — **after D4 window closes 2026-07-24.** | Untracked-spill root-cause fix DONE; schwab-lane items respect the zero-reader window. |
 
 ---
 
@@ -178,7 +178,7 @@ Legend — **Disp** = proposed EXISTING-instance disposition · **Gate** = propo
 4. **DC-14:** migrate-at-next-touch the role rename, or recorded-carve-out (rename friction > value)?
 5. **A-axis enforcement surface (DC-1/2/3/4):** confirm **CLASS-D producer-code/CI checks over CLASS-R runtime bucket-policy denies** — the latter break live producers.
 6. **DC-7 canonical home:** `data/assets/scripts/lib/landing_guard.py`, or bless the smartx C5 copy as the reference?
-7. **DC-5:** approve the telemetry-hook-fix + filesystem-sweep approach (the census's commit-gate lint is gate-blind), and clear the 7-file untracked cleanup?
+7. **DC-5:** ~~approve the telemetry-hook-fix + filesystem-sweep approach (the census's commit-gate lint is gate-blind), and clear the 7-file untracked cleanup?~~ **RULED (RULING-20): GO — hook-fix + sweep, positive-control-first. CLOSED @b9c5f5243.**
 8. **DC-13 + DC-15 pairing:** confirm one `canonical-schwab-runner` rebuild does AL2023 + us-east-2 together, post-D4-window. And confirm DC-15 folds into census v0.1.2 (coordinating with ~C).
 
 ---
