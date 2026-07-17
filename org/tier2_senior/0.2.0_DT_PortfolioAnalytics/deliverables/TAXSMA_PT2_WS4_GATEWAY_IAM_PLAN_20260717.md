@@ -66,3 +66,31 @@ Then EXERCISE end-to-end (behavior, not config): the gateway assumes Alyssa's ro
 3. AE applies the two roles + the gateway inline stmt + the entitlements file (Terraform; the IAM apply is
 AE-executed on m365-mcp-gateway infra). 4. Rule-22a verify (both controls SEPARATE + the exercise) ->
 evidence to CTO. 5. WS-6 wires Alyssa's skill. Nothing applies before CTO's plan-gate PASS.
+
+## 5. CTO PLAN-GATE = PASS (215011Z) -- 4 BINDING CONDITIONS on apply/go-live
+Design PASS ("assume-role-is-the-boundary + fail-closed + the 22a design are exactly right"). CTO
+HARD-WITHHOLDS go-live (SEV1/IAM) until APPLIED+EXERCISED evidence. The four conditions bind:
+
+- **COND-1 -- `opal-mcp-emp-*` is now a GATED SECURITY BOUNDARY.** The gateway's `sts:AssumeRole` wildcard
+  on `opal-mcp-emp-*` makes its blast radius the UNION of every role in the namespace. Compensating
+  namespace INVARIANT: every `opal-mcp-emp-*` role MUST be (a) created via CTO-gated TF, (b) single-employee
+  least-privilege (scoped prefixes, no write/delete), (c) trust ONLY `m365-mcp-gateway-role` + ExternalId.
+  **GATE CANDIDATE (flagged):** a lint denying any `opal-mcp-emp-*` role that grants beyond a scoped prefix
+  or trusts beyond the gateway. (A careless future `opal-mcp-emp-admin` would be silently gateway-assumable.)
+- **COND-2 -- the RE-ID MAPPING must live OUTSIDE her prefix.** Alyssa's PII-safety rests on single-prefix
+  scope; if the anonymization re-identification mapping (CELL-2 / 03_mappings) is under
+  `gold/dim_taxsma_report/*`, her scoped read reaches the re-id key and defeats anonymization. **CONFIRM
+  the re-id mapping is NOT under her gold prefix** -> a binding constraint on WS-3's layout.
+- **COND-3 -- PII-free-by-construction rests on WS-3 anonymization ACTUALLY holding (verified, not
+  asserted).** The IAM points at the anonymized gold prefix, but the read is PII-free only if WS-3's
+  `dim_taxsma_report` is genuinely anonymized (no re-identifiable fields). A WS-3 gate that must clear
+  before WS-6 go-live.
+- **COND-4 -- 22a APPLIED+EXERCISED; CTO hard-withholds go-live.** Sequence: WS-3 gold lands -> AE applies
+  TF -> evidence -> CTO go-live confirm -> WS-6. Evidence MUST carry: (a) positive simulate GetObject on a
+  real gold key = allowed (one --resource-arns, isolated); (b) never-widen simulate GetObject on a
+  silver/bronze key = implicitDeny (SEPARATE call); **(c) a THIRD control -- simulate `s3:ListBucket` for
+  the conditioned statement WITH `--context-entries s3:prefix=blackdiamond/49f/gold/dim_taxsma_report/...`
+  (a conditioned statement with NO --context-entries returns implicitDeny BYTE-IDENTICAL to a real deny, so
+  the ListBucket verify FALSE-DENIES without it -- CTO catch, folds into my 22a plan);** (d) the end-to-end
+  EXERCISE: gateway assumes the role, reads a gold key (OK) + a silver/bronze key (AccessDenied). DESIRED-only
+  or config-read = INFERRED, non-actionable.
