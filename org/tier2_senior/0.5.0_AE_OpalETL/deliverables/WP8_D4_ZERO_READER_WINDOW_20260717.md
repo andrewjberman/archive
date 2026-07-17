@@ -1,8 +1,24 @@
 # WP8-DECOM D4 -- the zero-reader observation window (OPENED 2026-07-17)
 
 **Filed by:** 0.5.0_AE_OpalETL. **Mechanism:** CTO ruling 20260717T164137Z = option B (S3 server
-access logging on the dying bucket), three conditions folded below. **Window clock: NOT STARTED
-until the self-read probe appears in delivered logs (condition 2).**
+access logging on the dying bucket), three conditions folded below.
+
+## >> CLOCK STARTED <<
+
+**Probe DELIVERED: log object `2026-07-17-17-21-29-4FB18819BC2128C2` carries req-id
+`473HDV08DW9CZ25Y`** (the 16:49:47Z self-read GetObject `01_raw/CRS20230117.RLD`, requester
+`arn:aws:iam::313476888478:user/Andrew_Berman`, this box). Observed by the delivery Monitor +
+confirmed by hand-sweep 17:37:18Z. **Window: 2026-07-17T17:21:29Z -> 2026-07-24T17:21:29Z
+(N=7 calendar days, CTO 165744Z).** Delivery latency measured ~30min -- the day-7 close sweep
+waits +1h past window end before the final verdict read.
+
+**Day-0 baseline sweep (4 objects, pre-clock activity included):** all requesters =
+`user/Andrew_Berman` -- the box-shared CLI identity every fabric lane runs under, so LANE
+attribution in histograms is by request-shape + req-id correlation, never by requester alone.
+Pre-clock events: my probe + logging-config calls; one failed LIST (400
+AuthorizationHeaderMalformed, wrong-region signature); one successful 6-page paginated LIST of
+the `08242234/` staging tree ~16:58Z (a fabric session's census-class read -- pre-clock, not a
+window event).
 
 ## The instrument (armed 2026-07-17 ~16:47-16:50Z)
 
