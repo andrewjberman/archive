@@ -40,16 +40,19 @@ Load-bearing + git-tracked (canonical source `infra/aws/ec2/canonical-schwab-si2
 
 ---
 
-## 2. Proposed new code home -- RECOMMENDATION
+## 2. Proposed new code home -- RECOMMENDATION (answers 0.5.0 census row 3 "0.6.2/CTO call")
 
 **`s3://opal-data-assets/code/canonical-schwab-si2/`**
 
-**Rationale:**
-- opal-data-assets is the consolidation monolith -- it SURVIVES the opal-data-schwab decommission.
-- It follows the **existing monolith code convention** `code/{pipeline}/` (already live: `code/consolidation-gold/{run-gold.sh,setup-instance.sh,watchdog-shutdown.sh}`, written 07-15). Estate-consistent, not a new pattern.
-- Keeping CODE under `code/` (not under the `schwab/` data-source prefix) preserves the code-vs-data separation and makes the box-role GetObject grant unambiguously a code read, never a firm-data read (see IAM note below).
+**Rationale -- this is the ESTATE-WIDE EC2/runner code convention, not a new pattern.** Every EC2 pipeline homes its code at `{data-bucket}/code/{pipeline}`, measured live:
+`opal-data-inf/code/{bronze-runner,gold}`, `opal-data-bd/code/{runner,bronze,silver,gold}`, `opal-data-mdpf/code/scripts`, `opal-runner-shared/code/gold` -- and the **monolith already uses it**: `opal-data-assets/code/consolidation-gold/{run-gold.sh,...}` (written 07-15). So `opal-data-assets/code/canonical-schwab-si2/` is the monolith's own convention applied to the SI2 box.
+- opal-data-assets SURVIVES the decommission; `code/` keeps CODE out of the `schwab/` data keyspace, so the box-role GetObject is unambiguously a code read, never a firm-data read (IAM note sec.3).
 
-**Alternative (for the gate):** `s3://opal-data-assets/schwab/_ops/canonical-schwab-si2/` -- chain-level, adjacent to the puller's per-master run-manifest home `schwab/{master}/_ops/`. Rejected as the recommendation because `code/{pipeline}/` is already the estate's code convention; flagged so CTO can rule if a per-source `_ops` code home is preferred instead.
+**Reconciling 0.5.0's two named candidates (census row 3):**
+- *"opal-data-assets `_ops/`"* -- `_ops/` is the puller's own RUN-MANIFEST convention (`schwab/{master}/_ops/daily_pull/`), a data-adjacent record tier, not the estate's CODE convention. Homing code there conflates code with run-records. `code/` is the right tier.
+- *"the lambda-artifacts bucket"* (`opal-313476888478-lambda-artifacts`) -- that bucket is for **Lambda deploy zips + layers**; the SI2 puller is an **EC2 box PowerShell script**, not a Lambda artifact. Wrong artifact class. Home it with the EC2-code convention.
+
+CTO gates the final choice; the recommendation is the estate-consistent one.
 
 ---
 
@@ -106,7 +109,11 @@ Ordered so the box can ALWAYS read the code at every fire:
 
 ## 7. PART 2 -- staging trees (08242234/ + 08335338/): grounded finding, routed to 0.5.0
 
-The ASK-A phrasing "re-point the staging trees, still written twice daily" does not match landed bytes: the staging trees are **FROZEN at partition 20260710** (last write 2026-07-13) and the `-daily-pull` rules already write `-Target monolith`. The only thing still firing at the staging concept is the **dead GUI channel** `canonical-schwab-si2-download-schedule` (08:35/20:35Z, still ENABLED) -> `SchwabAutoDownload` (GUI, frozen 07-02) -> `SchwabS3Sync` -> staging = an **expected no-op** (frozen source). **So there is no live data-write to re-point.** Per CTO 191834Z, the dead UI channel + its staging trees retire under **0.5.0's step-3 prefix dispositions** (CTO's ~20:30Z batch). This finding (landed-bytes evidence) is offered as INPUT to that disposition; 0.5.0 owns the prefix ruling, I do not execute a data re-point. SURFACE, not adjudicate.
+The ASK-A phrasing "re-point the staging trees, still written twice daily" does not match landed bytes: the staging trees are **FROZEN at partition 20260710** (last write 2026-07-13) and the `-daily-pull` rules already write `-Target monolith`. The only thing still firing at the staging concept is the **dead GUI channel** `canonical-schwab-si2-download-schedule` (08:35/20:35Z, still ENABLED) -> `SchwabAutoDownload` (GUI, frozen 07-02) -> `SchwabS3Sync` -> staging = an **expected no-op** (frozen source). **So there is no live data-write to re-point.**
+
+**This is independently CONFIRMED by the WP8 lead's own verified census** (0.5.0, `SCHWAB_BUCKET_DECOMMISSION_CENSUS_20260716.md` sec.3a, ETag+MD5 evidence): **08335338 VERIFIED-TIED** (6,932/6,932 keys+ETags; monolith-only 40 = *"new daily deliveries landing monolith-side directly -- the automatic chain, not a gap"*) -> **disposition: no action**; **08242234 VERIFIED copied-complete** (5,966/5,966 keys; 645 ETag-diffs all multipart-vs-plain shape, size-tied, MD5 content-grade 3/3; monolith-only 291 = new deliveries + recovered rld history) -> **disposition: no action**. So my landed-bytes finding and 0.5.0's rigorous copy-census CONVERGE: the staging data re-point is already complete and ruled no-action; the "same `{master}/bronze/` path shape in two buckets" is the only reason the phrasing reads as a live write.
+
+Per CTO 191834Z, the dead GUI channel retires under **0.5.0's step-3 prefix dispositions** (CTO's ~20:30Z batch). I offer this as corroboration; 0.5.0 owns the ruling, I do not execute a data re-point. SURFACE, not adjudicate.
 
 ---
 
@@ -114,3 +121,50 @@ The ASK-A phrasing "re-point the staging trees, still written twice daily" does 
 - EXECUTION HELD: 0.5.0's explicit GO (WP8 lead) is the gate, not any calendar date (COO 184348Z correction).
 - CTO gates: the target-location choice (sec.2), the IAM delta (sec.3), and the apply (safe-apply / HALTGT).
 - 0824/0833 NEVER SUMMED, NEVER SUBSTITUTED throughout. Bronze raw untouched (17a). This does not touch the puller's write logic, only where it reads its own code from.
+
+---
+
+## 9. Execution runbook (STAGED -- runs on 0.5.0 GO + CTO location ruling; nothing below executed yet)
+
+**Exhaustiveness (no-skip basis):** the full-repo `comp-grep` + live control-plane sweep found EXACTLY THREE live readers of the code home -- `monolith-daily-schedule.tf:119` (both `-daily-pull` SSM commands), `bootstrap.ps1:40`, and the `iam.tf` grant. No other SSM document, EventBridge rule, Lambda, or script reads it. Everything else is docs/ledgers.
+
+**Timing:** run in the GAP between the twice-daily fires -- fires are 0833 09:45/21:45Z, 0824 10:15/22:15Z, download-schedule (dead) 08:35/20:35Z. Safe windows: ~11:00-21:00Z or ~23:00-09:00Z. Never flip mid-fire. Skip-if-landed makes a same-day supervised re-run a cheap no-op.
+
+**Step 1 -- upload code to the new home (Rule 12, repo -> S3; the box only READS it, I write it).**
+```
+cd infra/aws/ec2/canonical-schwab-si2
+for f in sdd-daily-pull.ps1 schwab_sdd_session_capture.py bootstrap.ps1 cred-read.ps1 \
+         run-admin.ps1 run-admin-bg.ps1 run-capture.ps1 requirements.txt sdd-backfill-08335338.ps1; do
+  aws s3 cp "$f" "s3://opal-data-assets/code/canonical-schwab-si2/$f" --sse AES256 --only-show-errors
+done
+aws s3 ls s3://opal-data-assets/code/canonical-schwab-si2/     # verify key+ETag+Size (listing-based)
+```
+Both homes now populated -> box can read either.
+
+**Step 2 -- IAM: add the additive GetObject on the new home (old grant untouched).**
+Edit `iam.tf` (add `SchwabOpsCodeReadMonolith` to inline policy `quartz-si2-spike-inline`) ->
+`safe-commit` -> `terraform plan` -> `.tools/safe-apply.sh` -> 0-diff plan -> tag -> `git push --follow-tags`.
+Box now reads BOTH homes (never-widen: code-only, no ListBucket).
+
+**Step 3 -- Rule 22a verify (applied + exercised, live primitive, ONE resource-arn, control SEPARATE).**
+```
+aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::313476888478:role/quartz-si2-spike-role \
+  --action-names s3:GetObject --resource-arns arn:aws:s3:::opal-data-assets/code/canonical-schwab-si2/sdd-daily-pull.ps1   # expect allowed
+# positive control, SEPARATE invocation -- a firm-DATA key the box must NOT read (proves grant stayed code-only):
+aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::313476888478:role/quartz-si2-spike-role \
+  --action-names s3:GetObject --resource-arns arn:aws:s3:::opal-data-assets/schwab/08242234/bronze/rps/20260716/anything   # expect implicitDeny
+```
+
+**Step 4 -- EXERCISE from the new home BEFORE flipping the literals (AC-1, landed bytes).**
+Supervised SSM on the box: `aws s3 cp` sdd-daily-pull.ps1 from the NEW home, run as **Administrator** (identity is the whole game -- DoR top box), `-Master 08242234 -Target monolith`. Confirm a new object lands at `opal-data-assets/schwab/08242234/bronze/{type}/{partition}/` (listing-verified). This proves the box reads the new home + the pull works, WITHOUT yet changing the scheduled path.
+
+**Step 5 -- flip the two literals to the new home.**
+`monolith-daily-schedule.tf:119` `$s3=...opal-data-schwab/_ops/...` -> `...opal-data-assets/code/...` ; `bootstrap.ps1:40` capturer pull -> new home ; doc-sync `SCHWAB_AUTO_PULL_DESIGN.md` -> `safe-commit` -> plan -> `safe-apply` -> 0-diff -> tag -> push.
+
+**Step 6 -- prove on the next scheduled fire (AC-1 on the real path).**
+Watch the next 0824 + 0833 fires land bytes at new partitions. A flipped `cp` that ever fails FATALs loudly (`monolith-daily-schedule.tf:124` `throw`) -- there is NO silent stale-local-copy run. Two clean cycles = cutover proven.
+
+**Step 7 -- cleanup (LAST, folds into D5 removal battery, NOT this GO).**
+Remove `SchwabOpsCodeRead` (old opal-data-schwab grant) from `iam.tf` -> apply -> 0-diff. Delete old `_ops/canonical-schwab-si2/` objects only on Andrew's final destructive-go (0.5.0 census stage 6). Order guarantees the old home stays readable until the new one is proven.
+
+**No-skip guarantee:** Steps 1-4 keep BOTH homes readable; the flip (5) happens only after (4) proves the new home; the old grant/objects are removed LAST (7). At no instant can the box lack a readable code home.
