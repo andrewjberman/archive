@@ -54,9 +54,9 @@ plus a DEVIATION-CLASS rollup (the input to CTO's gate design) with denominators
   </phase>
   <phase id="2" when="before commit">
     <step>
-      <run>Positive + negative control: run the census instrument against ONE known-conform resource (opal-data-assets grammar row) and ONE known-deviate (the us-east-2 telemetry bucket's region deviation, surfaced+approved 165744Z — it MUST row as DEVIATE-approved, not CONFORM)</run>
-      <expect>Conform control reads CONFORM; the approved deviation reads DEVIATE with its approval cited. An instrument that cannot fail is not an instrument.</expect>
-      <if_mismatch>STOP. Fix the instrument, not the row. Do not commit a census whose controls did not discriminate.</if_mismatch>
+      <run>Positive + currency control (AMENDED per CTO 172321Z): run the census against ONE known-conform resource (opal-data-assets grammar row) AND the us-east-2 telemetry bucket — the STANDARD's sec A now blesses dedicated telemetry buckets, so that row MUST read CONFORM-BY-AMENDMENT citing sec A. A census reading it DEVIATE is reading a CACHED DRAFT of the standard, not the current doc @cc1cd96dd.</run>
+      <expect>Conform control reads CONFORM; telemetry bucket reads CONFORM-BY-AMENDMENT with the sec-A cite. Either misread = the instrument fails its currency test. An instrument that cannot fail is not an instrument.</expect>
+      <if_mismatch>STOP. Fix the instrument (re-read the standard at HEAD), not the row. Do not commit a census whose controls did not discriminate.</if_mismatch>
     </step>
   </phase>
   <phase id="3" when="after commit">
