@@ -69,9 +69,13 @@ charter being shaped with Andrew now, routed through Tier 1) sits ABOVE `canon-p
 `canon-patterns` becomes the AWS-BINDING ADAPTER mapping concrete types (S3_BUCKET, READS, bd/cot
 twins) onto substrate-neutral archetypes (Store, Producer, Guard, Twin, Fork-Shadow...). **C2
 (motif class + role) STANDS. C3 (system membership) is HELD** -- it should read the UNIVERSAL
-layer, not raw `canon-patterns`. **DO NOT BUILD the universal layer yet (awareness only);** base
-is the named likely builder (deepest in the graph/motif/ontology surfaces), pending the Tier-1
-decomposition.
+layer, not raw `canon-patterns`. **DO NOT BUILD the universal layer here.**
+
+**OWNERSHIP UPDATE (LD-0310 @3cf0758b5; Andrew-direct ~2h after the charter awareness):** NFRA_ONTOLOGY
+is CHARTERED with OWNER = **0.8.0_AE_CloudComp~C** (spawned + briefed 031312Z; Andrew: "I like them
+[base] as a coordinator... direct NFRA_ONTOLOGY to 0.8.0_AE_CloudComp~C"). **base is ~C's COORDINATOR +
+FEED, NOT the builder** (LD-0305 reserved status kept). base feeds canon-patterns / COMPSIMILAR-corpus /
+taxonomy-census authoring intent; ~C builds.
 
 ---
 
@@ -199,8 +203,10 @@ being wired (see build-notes table); the vocabulary is defined regardless.
 - **~D** -- builder (COMPSIMILAR lane), layers this on the shipped `--describe` engine. base FEEDS
   the decomposition/role-mapping walkthrough on pickup.
 - **COO** -- COMPSIMILAR registry row (PH2 content enhancement).
-- **MSTR** -- source of relays (1) + (3); shaping the NFRA_ONTOLOGY charter with Andrew; routes
-  the Tier-1 decomposition. base is the named likely NFRA_ONTOLOGY builder -- but DO NOT build yet.
+- **MSTR** -- source of relays (1) + (3); chartered NFRA_ONTOLOGY (LD-0310).
+- **0.8.0_AE_CloudComp~C** -- OWNS + builds NFRA_ONTOLOGY (LD-0310). base = ~C's coordinator/FEED
+  (deepest context: authored canon-patterns / COMPSIMILAR corpus / taxonomy census). ~C RAVCs base
+  the founding design-of-record when gate-ready.
 
 **NFRA_ONTOLOGY dependency (Andrew-direct 3):** C2 (motif class + role) is independent and
 proceeds. C3 (system membership) + the Twin/Fork-Shadow label vocabulary bind to the universal
