@@ -29,7 +29,7 @@ CURRENT (pin==marker), graph_nodes last-write 2.7h ago. Fresh, authoritative vin
 | **C1 edge types** | **53 distinct** / 35,613 edges | 11 relationships | 16 | 24 |
 | **C1 typed triples** `(src)-[edge]->(tgt)` | **109 distinct** | -- | -- | -- |
 | **C2 motifs materialized** | **6** (all DEBT; see S3) | -- | 4 pattern-classes | -- |
-| **C3 systems materialized** | **0** | -- | -- | -- |
+| **C3 systems materialized** | **1** (`EmergentSystem` -- degenerate/debt: member_motifs = the 3 debt motifs, theme "firm-conditional-display") | -- | -- | -- |
 
 **Finding 1 -- the live vocabulary is ~2x richer than any design input.** 58 node types incl. many neither
 canon-patterns nor my design named: `MS_FILE` (4582), `MS_FOLDER` (1031), `MS_USER`, `PipelineFunction`
@@ -81,8 +81,10 @@ plain-English. The top-down design got layer (c) right; it never built (b).
 
 The 6 materialized `C2Motif` nodes are **ALL DEBT/deviation motifs** (from the debtscan canon-DEVIATION
 scorer, catalog classes A1-A9): `SilentDisplayFork`, `CrossFirmAsymmetry`, `HardcodedFirmLiteral`,
-`DeadComponent`, `OrphanEndpoint`, `RenderWithoutNullGuard`. **Zero CANONICAL/structural motifs. Zero C3
-systems.**
+`DeadComponent`, `OrphanEndpoint`, `RenderWithoutNullGuard`. **Zero CANONICAL/structural motifs.** The lone
+materialized C3 system (`EmergentSystem`) is itself DEGENERATE -- its `member_motifs` are the 3 debt motifs
+(silent-display-fork / cross-firm-asymmetry / hardcoded-firm-literal), theme "firm-conditional-display". So
+the ONE system is a debt-cluster, not a canonical capability.
 
 So the estate has catalogued only its NEGATIVE space (what is broken) and never its POSITIVE structure (what
 the system normally IS). The top-20 structural motifs the scan surfaced -- all recurrence >= 900, NONE
