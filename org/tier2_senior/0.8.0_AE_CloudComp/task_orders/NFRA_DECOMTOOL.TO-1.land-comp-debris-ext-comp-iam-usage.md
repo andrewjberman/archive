@@ -7,9 +7,24 @@
      (DC-5 CLOSED, W1 lints HELD on CTO enforce-flip). base-0.8.0 built+live-validated these (Andrew-reserved
      research lane, LD-0305 — NOT a builder); ~D is loaded on KUZUSPLIT P1 + COMPSIMILAR (do not pull). -->
 <date>2026-07-17</date>
-<status>pending</status>
+<status>complete</status>
 <!-- GO LIVE 2026-07-17 ~2238Z (COO), ~B ACK'd + STARTING @223947Z. Arch RATIFIED by CTO (msg to base 0.8.0
      ~2231xZ). NON-URGENT: advisory/hold-aware decommission-identification tools, no time-sensitive trigger. -->
+<!-- COMPLETE 2026-07-18 ~0221Z (0.8.0_AE_CloudComp~B); COO to validate + close. ARCH REVISED by CTO ruling B
+     @003632Z: comp-debris-ext -> comp-debris IN-PLACE --types (no separate tool; dodges a 2nd registration).
+     ALL 5 ACs met, RAVC on the LANDED state:
+     - AC1 registration invariant PASS + comp-which reachable: comp-manifest-check "76 comp-* accounted, no BLOCKED";
+       comp-iam-usage surfaces (rank-3; curated-route-to-rank-1 routed to CTO, non-blocking). Reg @57d9c8fd2 (CTO
+       exec-SoD, wrapper+engine FOLDED -- forced by the existence-gate: a registered tool must be a git-TRACKED
+       executable + .tools/ is gitignored, so exec-lands-the-bundle for a new tool).
+     - AC2 false-outage MUTANT exercised: comp-debris IN-PLACE @97f6a8b70; self-test v1 7/7 + ext 11/11 incl the
+       discriminating trading-calendar mutant (t1 HOT under trading-days vs wall-clock reap) + cadence mutant;
+       LIVE --types s3 -> opal-data-inf/assets HOT basis=trading-days.
+     - AC3 22a limits NAMED fix-or-carry in comp-iam-usage's own output (self-test 9/9).
+     - AC4 Access Analyzer NOT enabled; no SES/SNS/CW leg.
+     - AC5 this ledger + session log + COO/CTO landing pings (022052Z/022116Z).
+     WORKED EXAMPLE for NFRA_COMPREG: the completeness-fail-closed registration-before-code ordering seam +
+     the exec-must-fold-the-bundle existence-gate finding + routable-lives-in-coverage-map grounding. -->
 <priority>P3 (OPAL_CONSOLIDATION cleanup). NON-URGENT — queue BEHIND the live wave (KUZUSPLIT P1 / COMPSIMILAR / freshness-teardown / TAXSMA WS-1) and behind any taxonomy reactivation.</priority>
 
 <authority>
