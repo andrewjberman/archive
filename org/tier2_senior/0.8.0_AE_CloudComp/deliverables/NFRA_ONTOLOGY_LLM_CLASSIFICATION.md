@@ -63,10 +63,25 @@ now via the governed emit. This makes MSTR's invariant a control, not a hope.
 ## 2. Mechanism
 
 Input per aggregate: its deterministic structure (a motif's typed-path + materialized instances; a system's
-member-motifs + anchor). Output: `{ class: <slug>, description: <plain-english>, source: "llm-classified",
-model, at }`. Attaches as an additive prop on the existing C2Motif/C3System node via the governed pipeline
-(DS~B emit + 0.7.0 ingest + CVO cert -- same path as the motifs, NOT hand-written). Re-run classifies only
-node_ids lacking a current `llm_class` (additive).
+member-motifs + anchor). Classifier OUTPUT dict per aggregate: `{ class: <slug>, description: <plain-english>,
+source: "llm-classified", model, at }`.
+
+**Node-prop MAP (SEAM-LOCKED 2026-07-18 @1f258ee21-era; base+DS~B+~D grounded, 3 source reads).** The emit
+writes the classifier output onto the existing C2Motif/C3System node as ADDITIVE props under the key MAP:
+`class` -> **`llm_class`**, `description` -> **`llm_description`**, plus the `source: llm-classified` tag +
+`model`/`at` provenance. The node-prop key MUST be exactly `llm_class` (NOT bare `class`, NOT
+`llm_classification`): the consumer (`summary_corpus.py:390` `d.get("llm_class")` -- display-only, M9-proven
+auto-upgrade) and ingest (`derive_runner.py:213` excludes `llm_class` from `_NODE_FIXED_KEYS` -> it rides the
+additive `props` JSON at :221-222) both lock on `llm_class`. **NO ingest backstop for a mis-named key** -- the
+`SCHEMA_SEAM_SILENT_DROP` guard (:224-228) is `dropped=0` by construction, so a bare `class` lands silently in
+`props.class` and renders no parens; the KEY-LOCK is the SOLE safety.
+
+**PRODUCER = the ~C classification-layer OVERLAY (seam-lock resolution -- corrects the earlier "DS~B emit"
+wording).** DS~B ground-verified the structural CSE/AB-MAT emit carries NO `llm_class` (`map_cloudedge` returns
+a Relationship enum, never a node prop; grep-confirmed estate-wide). So the `class->llm_class` producer is a
+SEPARATE governed OVERLAY emit written AFTER materialization -- the ~C classification layer -- NOT the DS~B
+structural emit. It still rides the governed 0.7.0 ingest + CVO cert (not hand-written). Re-run classifies only
+node_ids lacking a current `llm_class` (additive/idempotent).
 
 ## 3. FIRST PASS -- the 13 live A+B motifs (classified now)
 
@@ -109,8 +124,12 @@ the deterministic-inherited name wins and the LLM only characterizes.
 ## 6. Routing
 
 - **RAVC MSTR** -- the doctrine admission (additive-tagged-LLM layer; structure stays deterministic). Sent.
-- **CTO** -- gate the graph-attachment (additive `llm_class`/`llm_description` prop on the C2Motif/C3System
-  nodes, via the governed DS~B-emit + 0.7.0-ingest pipeline; no hand-write, no new node-type).
+- **CTO** -- route/gate the graph-attachment: the additive `llm_class`/`llm_description` prop on the
+  C2Motif/C3System nodes, emitted by the ~C classification-layer OVERLAY (a SEPARATE governed emit, NOT the
+  DS~B structural emit -- seam-lock 2026-07-18), riding the 0.7.0 ingest + CVO cert; no hand-write, no new
+  node-type. **THE OPEN ROUTING DECISION:** the physical attachment path for the overlay emit (a ~C-owned
+  overlay emitter vs. a DS~B governed-emit increment) -- both ride the same ingest + honor the `class->llm_class`
+  map; CTO routes which. Behind the OWNS-bump.
 - **me (~C)** -- own the classification (I am the LLM); this artifact IS the first-pass output; re-run additively.
 - **~D (COMPSIMILAR consumer)** -- the `class`/`description` is additional summary-enrichment material
   (alongside the C2 motif clause + the C3 membership), same read-from-attribute discipline.
