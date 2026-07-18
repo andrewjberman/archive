@@ -25,6 +25,15 @@ exactly what structure underdetermines and an LLM adds cheaply (~100 items, one-
 3. **BOUNDED + additive-basis** -- classify only NEW aggregates as they emerge; never per-query, never the estate.
 4. **RE-RUNNABLE + auditable** -- the (structure -> label) mapping is a recorded artifact.
 
+**>> HARD INVARIANT (MSTR, load-bearing -- the one that keeps determinism from collapsing):
+NO FEEDBACK INTO DETERMINISTIC PROCESSES. The LLM layer is a DESCRIPTIVE OVERLAY FOR HUMAN/AGENT READABILITY
+ONLY. It must NEVER be an INPUT to a deterministic process -- the canon-deviation scorer, C3-emergence, the
+completeness gate, motif/system membership must NEVER consume an `llm_class`/`llm_description` attribute as if
+it were structural. Direction is STRICTLY ONE-WAY: `structure -> LLM label`, NEVER `LLM label -> structure/gate`.
+If a deterministic decision ever reads the LLM label, a hallucination corrupts ground truth and the whole
+determinism guarantee collapses. CTO gates this as an invariant on the attachment (the attr is read by
+summaries/humans/agents, never by a scorer/gate/emergence). <<**
+
 **Governance (Andrew-GO'd split):** LOOSE (tagged, directly usable) for `class` + `description`; STRICT
 (blessed into the governed catalog) for an AUTHORITATIVE NAME. The honesty is the tag; the authority is the bless.
 
