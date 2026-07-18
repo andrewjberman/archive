@@ -6,6 +6,13 @@ routed to the SoD pipeline (CTO arch-gate + `0.4.0_DS~B` substrate-consult + `0.
 cert) -- I do NOT hand-write C2Motif/C3System nodes** (MSTR doctrine: hand-writing = a forged compression
 layer, same class as a forged pipeline-complete.json).
 
+> **Cross-ref (COO-filed 2026-07-18, CTO ruling @78a5fddbe):** the APPLIED ingest of this materialize exposed a
+> pre-existing producer id-space seam (only 79% / 4017-of-5079 C2->C1 edges formed -- the producer resolved
+> short in-memory ids while this spec's targets are canonical ARNs). The resulting standing **SEMCTL
+> MATERIALIZE-PRODUCER CONTRACT** -- (1) canonical-id resolution, (2) mandatory edge-formation denominator
+> report, (3) generated self-test control -- is filed in `org/projects/NFRA_SEMCTL.json`
+> (`materialize_producer_contract`) as the primary doctrine home. Every estate-targeting materialize follows it.
+
 ---
 
 ## 0. The mechanism gap (surfaced per MSTR -- route the EXTENSION through CTO + DS~B)
