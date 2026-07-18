@@ -152,6 +152,39 @@ hold there).
 
 ---
 
+## Governance constraint (CTO, BINDING -- 20260718T021711Z) + proposed role vocabulary
+
+CTO GO'd the C2 framing (derive-at-scan structural splice, consistent with ruling-1) with a
+BINDING constraint: **every role/system token spliced into the summary string MUST come from
+`canon-patterns.yaml` -- the vocab is CLOSED + CTO-owned, NO token invented at splice time.** The
+enricher reads the label set FROM `canon-patterns` (NOT a hardcoded list), so blessing a label ==
+editing `canon-patterns`. CTO confirms the exact C2 label set at the arch-gate when ~D's build
+lands.
+
+**Implication (design-of-record):** `canon-patterns.yaml` v0.1 carries NO explicit, enumerable
+role-label field today -- the roles are implicit in the motif SHAPE strings (e.g. DEPLOY's
+`(S3_BUCKET 'code/' prefix)-[READS]->(runner)`). To satisfy "read the label set FROM canon-patterns",
+a per-class `roles:` vocabulary must be ADDED to `canon-patterns` (a CTO-blessed addition), keyed by
+structural position. **Proposed shape (base FEED -- CTO blesses/adjusts at the gate; nothing here is
+canon until CTO edits the file):**
+
+```yaml
+# per pattern in canon-patterns.yaml, a new machine-readable field the enricher reads:
+roles:                      # structural-position -> the canon label spliced as "<role>"
+  SERVED_LINEAGE_CANON: { gold_field: "served-source", served_url: "served-url",
+                          data_fetch: "fetch", jsx_render: "render-tail", s3: "S3 tail" }
+  DEPLOY_CANON:         { code_prefix: "code-store", runner: "code-runner" }
+  AUTH_CANON:           { route: "auth-route", edge_fn: "auth-edge", origin_s3: "auth-origin" }
+  PIPELINE_CANON:       { bronze: "pipeline-bronze", silver: "pipeline-silver",
+                          gold: "pipeline-gold", served_s3: "pipeline-served-store" }
+```
+
+The enricher maps a node's structural position (its `node_type` + the edge direction/neighbor
+types it matches in the motif) to the role key, then reads the LABEL from this field. A position
+with no canon role label -> no clause (never invented). This keeps determinism + governance AT THE
+STRING, exactly as CTO required. AUTH/DEPLOY/PIPELINE roles depend on their instance-grain source
+being wired (see build-notes table); the vocabulary is defined regardless.
+
 ## Handoffs
 
 - **CTO** -- arch-gate the enrichment; canon-vocabulary owner (`canon-patterns.yaml`). Confirm the
