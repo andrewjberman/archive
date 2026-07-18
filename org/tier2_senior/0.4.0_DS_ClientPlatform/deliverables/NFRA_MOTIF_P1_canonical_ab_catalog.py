@@ -76,7 +76,7 @@ AB_CATALOG = [
      "constituents": [("actor", None), ("bucket", "S3_BUCKET")],
      "query": ("MATCH (a:%s)-[e:%s]->(b:%s) WHERE (a.node_type='LAMBDA' OR a.node_type='EC2_INSTANCE') "
                "AND (e.edge_type='READS' OR e.edge_type='WRITES') AND b.node_type='S3_BUCKET' "
-               "RETURN a.node_id AS actor, b.node_id AS bucket" % (N, E, N))},
+               "RETURN a.node_id AS actor, a.node_type AS actor__t, b.node_id AS bucket" % (N, E, N))},
     {"id": "a-table", "plane": "A", "ntype": "ATableMotif",
      "idiom": "(LAMBDA)-READS|WRITES->(DYNAMODB_TABLE)-ENCRYPTS_WITH->(KMS_KEY) -- encrypted table access",
      "constituents": [("l", "LAMBDA"), ("t", "DYNAMODB_TABLE"), ("kms", "KMS_KEY")],
@@ -91,7 +91,7 @@ AB_CATALOG = [
                "OR p.node_type='SERVICE_PRINCIPAL' OR p.node_type='INSTANCE_PROFILE') "
                "AND (e1.edge_type='ASSUMES' OR e1.edge_type='CAN_ASSUME') AND r.node_type='IAM_ROLE' "
                "AND e2.edge_type='HAS_POLICY' AND pol.node_type='IAM_POLICY' "
-               "RETURN p.node_id AS p, r.node_id AS r, pol.node_id AS pol" % (N, E, N, E, N))},
+               "RETURN p.node_id AS p, p.node_type AS p__t, r.node_id AS r, pol.node_id AS pol" % (N, E, N, E, N))},
     {"id": "a-event", "plane": "A", "ntype": "AEventMotif",
      "idiom": "(EVENT_SOURCE)-EMITS_TO->(EVENT_RULE)-TRIGGERS->(LAMBDA) -- event routing",
      "constituents": [("s", "EVENT_SOURCE"), ("ru", "EVENT_RULE"), ("l", "LAMBDA")],
@@ -122,7 +122,7 @@ AB_CATALOG = [
      "constituents": [("al", "CW_ALARM"), ("tgt", None)],
      "query": ("MATCH (al:%s)-[e:%s]->(tgt:%s) WHERE al.node_type='CW_ALARM' AND e.edge_type='MONITORS' "
                "AND (tgt.node_type='LAMBDA' OR tgt.node_type='EC2_INSTANCE') "
-               "RETURN al.node_id AS al, tgt.node_id AS tgt" % (N, E, N))},
+               "RETURN al.node_id AS al, tgt.node_id AS tgt, tgt.node_type AS tgt__t" % (N, E, N))},
     {"id": "a-orch", "plane": "A", "ntype": "AOrchMotif",
      "idiom": "(STATE_MACHINE)-INVOKES->(LAMBDA) -- step-function orchestration",
      "constituents": [("sm", "STATE_MACHINE"), ("l", "LAMBDA")],
@@ -147,7 +147,7 @@ AB_CATALOG = [
      "query": ("MATCH (src:%s)-[e1:%s]->(k:%s)-[e2:%s]->(b:%s) WHERE (src.node_type='PipelineScript' "
                "OR src.node_type='PipelineFunction') AND (e1.edge_type='READS_S3' OR e1.edge_type='WRITES_S3') "
                "AND k.node_type='S3Key' AND e2.edge_type='OWNED_BY' AND b.node_type='S3_BUCKET' "
-               "RETURN src.node_id AS src, k.node_id AS k, b.node_id AS b" % (N, E, N, E, N))},
+               "RETURN src.node_id AS src, src.node_type AS src__t, k.node_id AS k, b.node_id AS b" % (N, E, N, E, N))},
     {"id": "b-dataflow", "plane": "B", "ntype": "BDataflowMotif",
      "idiom": "(Field)-FLOWS_TO->(Field) -- field-grain data lineage",
      "constituents": [("f1", "Field"), ("f2", "Field")],
@@ -190,8 +190,11 @@ def build_ab_motif(spec: dict) -> tuple:
             for alias, ntype in sub["constituents"]:
                 nid = r.get(alias)
                 if nid:
-                    # actor/target aliases carry node_type=None (LAMBDA-or-EC2 etc.); keep the first seen or 'actor'
-                    const_type.setdefault(nid, ntype or "actor")
+                    # polymorphic aliases (ntype=None: LAMBDA|EC2, PipelineScript|PipelineFunction, ...) carry
+                    # their REAL node_type in a '<alias>__t' column -- USE IT (a PipelineScript src IS a pipeline
+                    # anchor; mislabeling it 'actor' would silently drop b-io from the pipeline system).
+                    real_t = ntype or r.get(alias + "__t") or "actor"
+                    const_type.setdefault(nid, real_t)
     # compose the C2 motif: C1 child per distinct constituent (bare estate node_id -> resolves), C0 fact each.
     c1_children = []
     for nid in sorted(const_type):
@@ -294,6 +297,52 @@ def ab_domain_view(motifs: list, const_types: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# THE RE-EMIT C3 MODEL (CTO-ruled + ~C-specced @f7f21f406): OVERLAPPING-DOMAIN-COVER.
+#   A C3 system is DEFINED by an ANCHOR constituent-type. A motif is a MEMBER iff it CONTAINS the anchor
+#   (many-to-many -> overlap). HUB types (LAMBDA/EC2, compute Transformers) are NEVER anchors (they create
+#   overlap, never define a domain) -- excluded by not listing them. Promote a domain to a C3System only at
+#   >= 2 member motifs (single-motif domains stay C2 motifs). Names from the C3 naming ladder (the anchor
+#   node-type is the name-basis). Governed anchor catalog (spec @f7f21f406 Sec-1):
+# ---------------------------------------------------------------------------
+ANCHOR_CATALOG = {
+    "object-data": {"S3_BUCKET", "S3Key"},
+    "compute-orchestration": {"EVENT_RULE", "STATE_MACHINE"},
+    "pipeline": {"PipelineScript", "PipelineFunction"},
+    "table-data": {"DYNAMODB_TABLE"},
+    "identity": {"IAM_ROLE"},
+}
+HUB_TYPES = {"LAMBDA", "EC2_INSTANCE", "actor"}  # compute Transformers: overlap-creators, NEVER anchors
+
+
+def ab_c3_cover(motifs: list, const_types: dict) -> tuple:
+    """The overlapping-domain-cover (spec @f7f21f406). Returns (systems, promoted, unpromoted_domains, orphans):
+      systems  = [(C3System Node, domain, anchor_types, [member nids])] for domains with >= 2 members
+      unpromoted_domains = {domain: [<2 member nids]} (single-motif domains -- stay C2, not promoted)
+      orphans  = [motif nids that contain NO catalog anchor at all] (an honest coverage flag)
+    HUB types are never anchors; membership = contains-anchor, so a motif can be in >1 system (overlap)."""
+    motif_types = {m.nid: {const_types.get(c.nid, "?") for c in m.children} for m in motifs}
+    systems, unpromoted = [], {}
+    covered = set()
+    for domain, anchors in ANCHOR_CATALOG.items():
+        assert not (anchors & HUB_TYPES), "anchor catalog must exclude hub types"
+        members = [m for m in motifs if motif_types[m.nid] & anchors]
+        if len(members) >= 2:
+            member_nids = [m.nid for m in members]
+            covered |= set(member_nids)
+            node = Node(P1.system_node_id(domain, member_nids), "C3", "EmergentSystem", domain,
+                        rule=("C3 OVERLAPPING-COVER: domain-anchor %s -> members {%s} (many-to-many, overlap-"
+                              "allowed; hubs LAMBDA/EC2 excluded as anchors) -- DISCOVERED, not declared"
+                              % (sorted(anchors), ", ".join(m.split(":", 1)[1] for m in member_nids))),
+                        children=members)
+            systems.append((node, domain, sorted(anchors), member_nids))
+        elif members:
+            unpromoted[domain] = [m.nid for m in members]
+    orphans = [m.nid for m in motifs if m.nid not in covered
+               and not any(motif_types[m.nid] & a for a in ANCHOR_CATALOG.values())]
+    return systems, unpromoted, orphans
+
+
+# ---------------------------------------------------------------------------
 # Build the materialize spec (nodes + CONTAINS edges) -- the motif_c2c3_materialize_ab.json-analog.
 # ---------------------------------------------------------------------------
 def build_ab_spec() -> tuple:
@@ -309,8 +358,10 @@ def build_ab_spec() -> tuple:
     _, prov = P1.comp_kuzu("MATCH (n:%s) WHERE n.node_type='S3_BUCKET' RETURN n.node_id LIMIT 1" % N)
 
     motif_nodes = [m for m, _, _ in motifs]
-    systems, singletons = ab_c3_emergence(motif_nodes, const_types)
-    domain_view = ab_domain_view(motif_nodes, const_types)   # surfaced alternative (not emitted as nodes)
+    # C3 = the CTO-ruled + MSTR-blessed OVERLAPPING-DOMAIN-COVER (spec @f7f21f406, doctrine bless @150352Z).
+    cover_systems, unpromoted, orphans = ab_c3_cover(motif_nodes, const_types)
+    # the superseded connected-components partition kept as a provenance note only (NOT emitted as nodes).
+    cc_systems, cc_singletons = ab_c3_emergence(motif_nodes, const_types)
 
     nodes, edges = [], []
     for motif, recurrence, spec in motifs:
@@ -321,15 +372,15 @@ def build_ab_spec() -> tuple:
         for tgt in c1:
             edges.append({"source": motif.nid, "target": tgt, "edge_type": "CONTAINS",
                           "props": {"layer": "C2->C1"}})
-    for sys_node, why in systems:
+    # C3System nodes (overlapping cover) + many-to-many C3->C2 CONTAINS
+    for sys_node, domain, anchors, member_nids in cover_systems:
         nodes.append({"node_id": sys_node.nid, "node_type": "C3System",
-                      "props": {"system_type": sys_node.label, "member_motifs": [c.nid for c in sys_node.children],
-                                "recurrence": len(sys_node.children),
-                                "connectivity": {"shared_types": why["shared_types"], "n_shared": why["n_shared"],
-                                                 "shared_constituents": why["shared_constituents"]}}})
-        for member in sys_node.children:
-            edges.append({"source": sys_node.nid, "target": member.nid, "edge_type": "CONTAINS",
-                          "props": {"layer": "C3->C2"}})
+                      "props": {"system_type": domain, "model": "overlapping-domain-cover",
+                                "anchor_types": anchors, "member_motifs": member_nids,
+                                "recurrence": len(member_nids)}})
+        for member_nid in member_nids:
+            edges.append({"source": sys_node.nid, "target": member_nid, "edge_type": "CONTAINS",
+                          "props": {"layer": "C3->C2", "membership": "contains-anchor"}})
 
     spec_doc = {
         "producer": "NFRA_ONTOLOGY.AB-MAT-S1 (0.4.0_DS_ClientPlatform~B) -- canonical A+B materialize",
@@ -343,18 +394,20 @@ def build_ab_spec() -> tuple:
                             "store carries -- a canonical A+B detector matches estate nodes directly, so there is "
                             "NO 'c1:D{n}:' ladder discriminator to strip and the 07-08 0-row trap does not arise. "
                             "C3->C2 targets are the motif: nodes in this same batch. 0.7.0/CVO confirm on ingest."),
-        "singletons": singletons,
-        "c3_emergence_note": {
-            "emitted_model": "connected-components union-find over shared C1 constituent INSTANCES (the certed "
-                             "P2 mechanism). RESULT: it OVER-MERGES the A-plane into 1 supersystem because "
-                             "LAMBDA/EC2_INSTANCE/S3_BUCKET/PipelineScript INSTANCES are shared across "
-                             "capabilities -- so the C3 partition is degenerate (same shape as the debt system).",
-            "surfaced_gap": "the spec's Sec-2 ~3-5 candidate systems are an OVERLAPPING domain-resource-type "
-                            "COVER (a motif can be in several); a connected-components PARTITION cannot represent "
-                            "overlapping systems. Choosing the cover model CHANGES what 'C3 system' means -> needs "
-                            "~C (vocabulary) + CTO (arch-gate) ratification. SURFACED to COO per TO Phase-3 <if_mismatch>; "
-                            "NOT unilaterally emitted.",
-            "alternative_domain_cover_SURFACED": {dom: mem for dom, mem in domain_view.items()},
+        "c3_model": {
+            "emitted_model": "OVERLAPPING-DOMAIN-COVER (CTO-ruled 144621Z; ~C spec @f7f21f406; MSTR doctrine-bless "
+                             "150352Z). A C3System is anchor-defined: a motif is a MEMBER iff it contains the "
+                             "system's ANCHOR constituent-type (many-to-many -> overlap). HUB types (LAMBDA/EC2, "
+                             "compute Transformers) are excluded as anchors -- they create overlap, never define a "
+                             "domain. Promote at >=2 member motifs; single-motif domains stay C2 motifs.",
+            "anchor_catalog": {d: sorted(a) for d, a in ANCHOR_CATALOG.items()},
+            "hub_types_excluded": sorted(HUB_TYPES),
+            "unpromoted_single_motif_domains": unpromoted,
+            "orphan_motifs_no_catalog_anchor": orphans,
+            "superseded_connected_components": {
+                "note": "the naive shared-INSTANCE connected-components partition -- SUPERSEDED (it collapsed on "
+                        "the LAMBDA/S3 hubs into 1 degenerate supersystem). Recorded for provenance, NOT emitted.",
+                "n_systems": len(cc_systems), "singletons": cc_singletons},
         },
         "counts": {"c2_motif_nodes": sum(1 for n in nodes if n["node_type"] == "C2Motif"),
                    "c3_system_nodes": sum(1 for n in nodes if n["node_type"] == "C3System"),
@@ -364,7 +417,7 @@ def build_ab_spec() -> tuple:
         "nodes": nodes,
         "edges": edges,
     }
-    return spec_doc, motifs, systems, singletons
+    return spec_doc, motifs, cover_systems, unpromoted, orphans
 
 
 # ---------------------------------------------------------------------------
@@ -391,7 +444,7 @@ def emit(do_print: bool) -> int:
         except Exception:  # noqa: BLE001
             pass
     try:
-        spec_doc, motifs, systems, singletons = build_ab_spec()
+        spec_doc, motifs, cover_systems, unpromoted, orphans = build_ab_spec()
     except P1.GraphUnavailable as ex:
         print("SPEC NOT REGENERATED -- graph unavailable: %s" % ex)
         print("  (fail-closed: keep the last-good motif_c2c3_materialize_ab.json; re-run when reachable.)")
@@ -402,7 +455,7 @@ def emit(do_print: bool) -> int:
     for motif, _, _ in motifs:
         ok, _f = fidelity_check(motif)
         all_ok = all_ok and ok
-    for sys_node, _ in systems:
+    for sys_node, _dom, _a, _m in cover_systems:
         ok, _f = fidelity_check(sys_node)
         all_ok = all_ok and ok
 
@@ -412,7 +465,7 @@ def emit(do_print: bool) -> int:
         json.dump(spec_doc, fh, indent=2)
 
     c = spec_doc["counts"]
-    print("CANONICAL A+B materialize -> %s" % os.path.relpath(SPEC_ARTIFACT, WS))
+    print("CANONICAL A+B materialize (C3 = OVERLAPPING-DOMAIN-COVER) -> %s" % os.path.relpath(SPEC_ARTIFACT, WS))
     print("  %d C2Motif + %d C3System + %d CONTAINS edges (%d C2->C1, %d C3->C2)"
           % (c["c2_motif_nodes"], c["c3_system_nodes"], c["contains_edges"], c["c2_to_c1_edges"], c["c3_to_c2_edges"]))
     print("  fidelity (comp-ladder, all C2+C3): %s" % ("PASS" if all_ok else "FAIL -- latent node"))
@@ -424,21 +477,23 @@ def emit(do_print: bool) -> int:
         print("\n  recurrence (MEASURED live):")
         for motif, recurrence, spec in motifs:
             print("    %-12s recur=%-6d n_constituents=%d" % (spec["id"], recurrence, len(motif.children)))
-        print("\n  EMERGENT C3 systems:")
-        for sys_node, why in systems:
-            members = [c.label for c in sys_node.children]
-            print("    system:%s (%s)  <- {%s}" % (sys_node.label, sys_node.nid.split(":")[-1], ", ".join(members)))
-            print("       shared types: %s | %d shared constituent(s)"
-                  % (", ".join(t for t in why["shared_types"] if t and t != "?"), why["n_shared"]))
-        if singletons:
-            print("  singletons (isolated -- correctly not forced): %s" % ", ".join(singletons))
-        dv = spec_doc["c3_emergence_note"]["alternative_domain_cover_SURFACED"]
-        print("\n  [SURFACED to COO] connected-components emergence OVER-MERGES to %d system(s); the spec's ~3-5"
-              % len(systems))
-        print("  are an OVERLAPPING domain-resource-type COVER (a partition cannot represent it). Domain cover (>=2 motifs):")
-        for dom, mem in dv.items():
-            print("    %-22s <- {%s}" % (dom, ", ".join(m.split(":", 1)[1] for m in mem)))
-    return 0 if (all_ok and resolved == denom and denom > 0) else 1
+        print("\n  C3 OVERLAPPING-DOMAIN-COVER systems (anchor-defined, many-to-many, hubs excluded):")
+        for sys_node, domain, anchors, member_nids in cover_systems:
+            print("    system:%-22s anchor=%s <- {%s}"
+                  % (domain, "/".join(anchors), ", ".join(m.split(":", 1)[1] for m in member_nids)))
+        member_count: dict = {}
+        for _sn, _d, _a, mms in cover_systems:
+            for mm in mms:
+                member_count[mm] = member_count.get(mm, 0) + 1
+        overlap = sorted(mid.split(":", 1)[1] for mid, n in member_count.items() if n > 1)
+        print("    overlap (motifs in >1 system): %s" % (", ".join(overlap) or "none"))
+        if unpromoted:
+            print("    unpromoted single-motif domains (stay C2, not systems): %s"
+                  % ", ".join("%s{%s}" % (d, ",".join(x.split(":", 1)[1] for x in m)) for d, m in unpromoted.items()))
+        if orphans:
+            print("    motifs with NO catalog anchor (honest coverage flag): %s"
+                  % ", ".join(x.split(":", 1)[1] for x in orphans))
+    return 0 if (all_ok and resolved == denom and denom > 0 and len(cover_systems) >= 2) else 1
 
 
 # ---------------------------------------------------------------------------
@@ -493,6 +548,30 @@ def self_test() -> int:
                                               "PipelineScript:g.py": "PipelineScript", "DataFetch:z": "DataFetch"})
     chk("7  C3 node_id STABLE across re-runs (same member-set -> same id; no churn)",
         [s.nid for s, _ in sysc] == [s.nid for s, _ in sysc2])
+
+    # 8. OVERLAPPING-COVER (@f7f21f406): anchor-defined membership, hub-exclusion, >=2 threshold, overlap held.
+    def mkc(nid, cids_types):
+        ch = [Node(x, "C1", t, x, rule="d", children=[P1.c0_fact(x, t, "c")]) for x, t in cids_types]
+        return Node("motif:" + nid, "C2", "M", nid, rule="C", children=ch)
+    ct = {}
+    ms = []
+    for nid, cts in [("a-store", [("arn:s3:bd", "S3_BUCKET"), ("s3key:bd/x", "S3Key")]),
+                     ("b-io", [("s3key:bd/y", "S3Key"), ("ps:g.py", "PipelineScript")]),   # object-data AND pipeline
+                     ("b-run", [("ec2:i-1", "EC2_INSTANCE"), ("ps:h.py", "PipelineScript")]),
+                     ("a-table", [("ddb:t1", "DYNAMODB_TABLE"), ("lam:f", "LAMBDA")])]:      # single-motif domain
+        m = mkc(nid, cts)
+        ms.append(m)
+        for x, t in cts:
+            ct[x] = t
+    covsys, unprom, orph = ab_c3_cover(ms, ct)
+    doms = {d for _, d, _, _ in covsys}
+    chk("8  cover: object-data{a-store,b-io} + pipeline{b-io,b-run} promoted (>=2); b-io OVERLAPS both; "
+        "table-data(1) NOT promoted",
+        doms == {"object-data", "pipeline"} and "table-data" in unprom
+        and any(d == "object-data" and "motif:b-io" in m for _, d, _, m in covsys)
+        and any(d == "pipeline" and "motif:b-io" in m for _, d, _, m in covsys))
+    chk("9  cover: LAMBDA is a HUB, never an anchor (a-table's LAMBDA does not create a compute system)",
+        "compute" not in doms and not any("LAMBDA" in a for _, _, a, _ in covsys))
 
     n = sum(1 for r in ok if r)
     print("--- self-test: %d/%d passed ---" % (n, len(ok)))
