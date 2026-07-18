@@ -8,8 +8,8 @@ binds to exactly ONE archetype with NO misc/catch-all bucket -- a catch-all is w
 dies."* This doc discharges guardrail-1: it binds the FULL concrete-type universe to the archetype
 vocabulary, and where a type does NOT bind cleanly it names a BOUNDED DECISION (never a catch-all).
 
-**The concrete-type universe.** Grounded on `org/modules/graph/cse_schema.py` (Entity :56-88 = 28 members,
-Relationship :92-117 = 24 members) -- CSE's `# code/infra` tier already SUBSUMES canon-patterns' 23
+**The concrete-type universe.** Grounded on `org/modules/graph/cse_schema.py` (Entity :56-88 = **29 members**
+[10 org-level + 19 code/infra], Relationship :92-117 = **23 members**) -- CSE's `# code/infra` tier already SUBSUMES canon-patterns' 23
 node-types + 16 edge-types (S3Bucket/Lambda/Table/IAMRole/Endpoint/Field + reads/writes/served_from/flows_to/
 triggers/fetches are the same concrete vocabulary). So binding against CSE = binding against canon-patterns +
 more. NFRA_GLOBGRPH's L1-L7 (40/14) is the STACK axis (orthogonal); its node classes bind by the same rules
@@ -31,7 +31,44 @@ opposite of a catch-all: it is the named place unknowns are COUNTED, not hidden.
 
 ---
 
-## Table A -- CSE `Relationship` (24) -> Relationship archetype
+## CSE-OWNER RULING (DS~B @d16e269bf) -- AXIS-2 owner-ratified reconciliation (D0-D7)
+
+The CSE owner (`0.4.0_DS~B`, Andrew brought in) ruled AXIS-2 (the RELATION axis), source-line-cited, folded
+into base's coherence anchor @352549fb0. These CORRECT Tables A/B below (kept for the audit trail; read these
+rulings as authoritative where they differ):
+
+- **D0 (LAW-1 denominator):** enum is Entity **29** / Relationship **23** (verified: my grep undercounted
+  Entity by 1; my earlier "24" wrongly folded in `routes-to`, which is NOT a CSE member -- `routes_to`
+  appears only in the edge->Relationship MAP, not the enum).
+- **D1:** `requires` is CONCRETE (:115), not abstract -- my `requires -> depends-on` binding stands; only the
+  grain label was off.
+- **D2:** my elevations `denies`/`triggers`/gate-family ride GRAIN -> legitimate, NOT S5 forks (no new CSE
+  primitive).
+- **D3 (governs != guards -- SPLIT; corrects Table A):** I bound BOTH `governs` AND `allowed/authenticates/
+  authorizes` to one `guards`. **Split:** `governs` = policy/authority (narrow, a distinct primitive);
+  `guards` = the GATING archetype (parent of `denied`/`allowed`/`authenticates`/`authorizes`). Narrow
+  `governs` also frees `owns`.
+- **D4:** `resolves-through` is NOT a new primitive -- it = CSE `references` + a Registry/Router/Gateway ROLE.
+- **D5:** `derives_from` AND `flows_to` both kept; **EdgeKind (passthrough/rename/recompute-guarded) MUST
+  stay on `flows_to`.**
+- **D6 (C-1 OWNS ruled -- `owns` VALIDATED):** (a) custody splits out -> a governed CSE **`OWNS` primitive**
+  (a 0.4->0.5 schema bump) -- my empirically-forced `owns` is VALIDATED, but it lands as a CSE-GOVERNED
+  primitive under S5, **NOT ontology-local**; (b) `S3Key OWNED_BY S3_BUCKET` re-maps to `contains`-inverse
+  (no new primitive); (c) the `OWNERSHIP` Qualifier AND the `OWNS` edge BOTH coexist (the AUTHORITY:AUTHORIZES
+  precedent). The 0.4->0.5 bump routes to the CTO gate as a governed schema change (CTO+CVO+COO SoD; DS~B
+  designs, does not land).
+- **D7:** `routes-to` = `flows_to` + a Router ROLE; `projects` = `served_from`'s grain-parent -- neither is a
+  new CSE primitive.
+
+**Net AXIS-2 (owner-ratified):** the abstract RELATION primitives reconcile to CSE as a RE-LAYERING (no fork):
+`produces / consumes / derives-from / depends-on / contains / triggers / guards / governs / denies / owns`
+(the last a CSE-governed `OWNS` bump). `resolves-through`/`routes-to`/`projects` are role-composites or
+grain-parents, NOT standalone primitives. **DS~B DEFERS to me/MSTR the ROLE axis, Variance-vs-`implements`,
+and Type/Symbol -- those stay mine.**
+
+---
+
+## Table A -- CSE `Relationship` (23) -> Relationship archetype
 
 | CSE relationship | grain | binds to | note |
 |---|---|---|---|
@@ -67,7 +104,7 @@ depends-on, contains, guards, denies, triggers, routes-to, projects, resolves-th
 
 ---
 
-## Table B -- CSE `Entity` (28) -> Role archetype
+## Table B -- CSE `Entity` (29) -> Role archetype
 
 **org-level (abstract):**
 
@@ -141,8 +178,11 @@ definitional axis (D8); the rest carry named decisions D5/D6/D7. **Zero catch-al
   primitives and add a `Container` Role (D1/D2). Resulting closed sets to ratify:
   - **Roles (12):** Source, Store, Producer, Transformer, Consumer, Sink, Gateway, Guard, Router, Trigger,
     Registry, **Container**. (+ Observer/Monitor still open, DoR Section 4.)
-  - **Relationships (11):** produces, consumes, derives-from, depends-on, contains, guards, denies, triggers,
-    routes-to, projects, resolves-through.
+  - **Relationships (owner-ratified AXIS-2, D0-D7):** produces, consumes, derives-from, depends-on, contains,
+    triggers, **guards** (gating parent of denied/allowed/authenticates/authorizes), **governs** (narrow
+    policy/authority -- SPLIT from guards, D3), denies, **owns** (a CSE-governed `OWNS` primitive, 0.4->0.5
+    bump, D6). `resolves-through`/`routes-to`/`projects` are role-composites or grain-parents (D4/D7), NOT
+    standalone primitives.
   - **Variance (6):** Canonical, Twin, Variant, Fork-Shadow, Superseded, Orphan.
 - **Honesty note (the whole point of running the acid test):** the binding did not "just work." It caught a
   real gap (`contains`/Container was missing) and forced 8 bounded decisions. That is the proof functioning
