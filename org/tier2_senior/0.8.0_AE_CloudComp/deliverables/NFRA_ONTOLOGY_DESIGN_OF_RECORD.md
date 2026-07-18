@@ -85,11 +85,14 @@ archetypes ever MATERIALIZE as graph nodes they must conform to / extend `cse_sc
 source-enforced enum (LAW 1/2 fail-closed) -- a change touching NFRA_SYSTEM; (b) the FRACTAL/agnostic
 ambition is CONSONANT with NFRA_SYSTEM (already "substrate-agnostic, recurses across scopes via the reusable
 recognizer keystone", `NFRA_SEMCTL_PRD:52`) ONLY IF I build ON that keystone, not a parallel one.
-**Therefore the OPERATIONAL reconciliation (classify-into-not-parallel; the `cse_schema` enum; the shared
-keystone) routes through COO to loop `0.4.0_DS~B` (the substrate author) BEFORE this is presented to CTO as
-settled** (Section 13). The archetype VOCABULARY (Sections 4-8) is mine to draft freely; the BOUNDARY is a
-COO-owned cross-domain seam. **Dependency to record (MSTR G2): NFRA_ONTOLOGY now `depends_on`
-NFRA_SYSTEM/SEMCTL -- flagged to COO for the `org/projects/NFRA_ONTOLOGY.json` update (COO's non-gated lane).**
+**OWNERSHIP (Andrew-direct correction, relayed base 040610Z, VERBATIM):** *"this work is squarely 0.8.0
+stuff... I can bring on 0.4.0_DS~B... as a consultant of sorts."* So the NFRA_ONTOLOGY<->CSE reconciliation
+is **0.8.0-OWNED, in-house -- NOT a cross-project handoff and NOT a COO-gated seam.** `0.4.0_DS~B` is a
+CONSULTANT I can pull in for `cse_schema.py` ground-truth, nothing more. The elemental de-fogging of this
+space is being rendered by peer `0.8.0_AE~A`; I coordinate with ~A so Andrew gets ONE picture (Section 3a is
+my answer to Andrew's reconcile Qs). **The only COO touch is a RECORDS update (MSTR G2): NFRA_ONTOLOGY
+`depends_on` NFRA_SYSTEM/SEMCTL -- flag it for the `org/projects/NFRA_ONTOLOGY.json` edit (COO's non-gated
+lane); it is not a gate.**
 
 ---
 
@@ -124,6 +127,49 @@ deterministically explains these relationships?"* -- and NFRA_SYSTEM already DEF
 agnostic archetype vocabulary FOR that existing ladder, with canon-patterns as the AWS binding. Building it
 beside the ladder (a parallel scheme) would be the map-vs-territory drift CTO's guardrails exist to prevent.
 
+## 3a. Reconciliation with the CSE algebra (answer to Andrew's reconcile question)
+
+Andrew is reconciling NFRA_ONTOLOGY against NFRA_SYSTEM's CSE schema -- they "say the same thing about C0-C3"
+with a "nested versions" idea to pin. **Source-grounded on `org/modules/graph/cse_schema.py` (Entity :56-88,
+Relationship :92-117):** CSE's schema is ALREADY two-tiered but FLATTENED into one enum, and the source
+LABELS the two tiers --
+- `Entity`: **`# org-level`** (Artifact/Component/Concept/Requirement/Constraint/Service/Policy -- ABSTRACT)
+  + **`# code/infra-level (concrete)`** (Function/Module/Endpoint/Table/Lambda/S3Bucket/IAMRole/IAMStatement/
+  Schedule/SecretRef/Field/ReactComponent/JSXElement/Hook).
+- `Relationship`: abstract (contains/references/depends_on/produces/consumes/implements/governs/derives_from/
+  supersedes) + **`# code/infra (CloudEdge discriminators)`** (calls/imports/reads/writes/renders/flows_to/
+  fetches/served_from/triggers/denied/allowed/requires/authenticates/authorizes).
+
+**So the vocabularies overlap because it IS the same vocabulary.** `produces/consumes/derives_from/supersedes/
+triggers/governs` are literally in CSE. The verdict (to Andrew's three options):
+
+**NFRA_ONTOLOGY is a REFINEMENT nested in CSE -- the LAYERED REFACTOR of CSE's own vocabulary + one new
+orthogonal axis. NOT a duplicate to unify away (I adopt CSE's abstract relations verbatim -- no competing
+enum), NOT orthogonal-and-coincidental.** It adds exactly three things, none a duplicate:
+1. **The layer separation the charter demands.** CSE flattens Service+Lambda, produces+reads into one enum --
+   so its Entity enum literally contains `LAMBDA`/`S3BUCKET` and FAILS the strict agnostic test. NFRA_ONTOLOGY
+   ELEVATES CSE's `org-level` terms into the pure agnostic layer and DEMOTES its `code/infra` terms into the
+   binding adapter (= canon-patterns). This refactor IS the agnostic principle (CTO gate criterion 2).
+2. **The ROLE axis -- genuinely new + orthogonal.** CSE types a node by its entity-KIND (Service/Lambda/
+   Function); it has NO relational-role classification. Roles (Store/Producer/Guard/...) are DERIVED from a
+   node's C1 edges; a node carries BOTH a CSE entity-type AND an NFRA role (a Lambda that is a Guard).
+3. **The VARIANCE calculus** generalizing CSE's flat `supersedes` into Twin/Fork-Shadow/Variant/Superseded/
+   Orphan.
+
+**"Nested versions" (Andrew's phrase) = ONE agnostic vocabulary nested THREE consistent ways:** (i) the
+ABSTRACT-OVER-CONCRETE GRAIN nesting CSE's own enum already shows (`produces` [abstract] over `reads/writes/
+fetches/served_from` [its concrete CloudEdge versions] -- the adapter formalizes "reads binds up to
+consumes"); (ii) the COMPRESSION/ARITY nesting in the ladder (a C2 motif contains C0 nodes + C1 edges; a C3
+system contains C2 motifs); (iii) the SCOPE-FRACTAL (the ladder reapplies code -> org -> any artifact class).
+The charter's "describes any system" IS the scope-fractal; the archetype layering IS the grain-nesting; the
+C0-C3 tiers ARE the compression-nesting.
+
+**Consequence for closure (Section 11):** the guardrail-1 proof must now bind cleanly against CSE's 26
+entities + 24 relationships (not only canon-patterns' 23+16) -- the binding-completeness table
+(`NFRA_ONTOLOGY_BINDING_COMPLETENESS.md`) does exactly that, and it HONESTLY surfaces the additions the
+binding forces (e.g. `contains` composition; the `depends_on`/`derives_from`/`implements` reconciliation;
+non-flow entities Person/Org/Concept/Type/Symbol) rather than bucketing them into a catch-all.
+
 ---
 
 ## 4. C0 vocabulary -- ROLE archetypes (the 1-node closed set)
@@ -141,7 +187,8 @@ adapter decides, Section 9).
   from C1). **The enricher (Section 12) consumes the FINE grain** -- so the ontology emits both, and the
   motif-position role reads from the governed catalog exactly like the C3 membership does.
 
-Proposed closed set (**11 roles**; CTO blesses/adjusts):
+Proposed closed set (**11 roles**; CTO blesses/adjusts) -- **revised to 12 by the binding proof (+Container:
+Module/GraphScope/Tier), see `NFRA_ONTOLOGY_BINDING_COMPLETENESS.md`:**
 
 | Role | Plain-English | Structural signature (how it is DERIVED from C1) |
 |---|---|---|
@@ -173,7 +220,9 @@ Proposed closed set (**11 roles**; CTO blesses/adjusts):
 
 ## 5. C1 vocabulary -- RELATIONSHIP archetypes (the 2-node closed set)
 
-A Relationship is a plain-English, DIRECTED edge label. Proposed closed set (**8**; CTO blesses/adjusts):
+A Relationship is a plain-English, DIRECTED edge label. Proposed closed set (**8**; CTO blesses/adjusts) --
+**revised to 11 by the binding proof (+`depends-on`, +`contains`, +`derives-from` promoted first-class), see
+`NFRA_ONTOLOGY_BINDING_COMPLETENESS.md`:**
 
 | Relationship (A -rel-> B) | Plain-English | Notes |
 |---|---|---|
@@ -359,9 +408,15 @@ vocabulary at each tier, plus one orthogonal operator:
   Lineage)**, a **C3 system (a System)**, or a **Variance comparison**. There is no fifth structural kind --
   the compression ladder has exactly four tiers and Variance is the single cross-tier operator.
 - The two DERIVED tiers add ZERO primitives: Lineage is a GRAMMAR over Role+Relationship; System is EMERGENT
-  from motif-connectivity (+ a governed naming catalog). **So the closed sets to RATIFY are: Role (11) +
-  Relationship (8) + Variance (6) + the read-from-file C3 system-naming catalog (governed, open-per-system).
-  Lineage needs no ratification (compositional).**
+  from motif-connectivity (+ a governed naming catalog). **So the closed sets to RATIFY are: the Role set +
+  the Relationship set + Variance (6) + the read-from-file C3 system-naming catalog (governed, open-per-
+  system). Lineage needs no ratification (compositional).**
+- **The binding-completeness proof (`NFRA_ONTOLOGY_BINDING_COMPLETENESS.md`) REVISES the primitive sets** by
+  binding the full CSE + canon-patterns concrete-type universe (28 entities + 24 relationships) with ZERO
+  catch-all: **Roles -> 12** (Sections 4's 11 + **Container**, forced by Module/GraphScope/Tier); **
+  Relationships -> 11** (Section 5's 8 + `derives-from` promoted first-class + `depends-on` + `contains`).
+  The proof caught the `contains`/Container gap and surfaced **8 bounded decisions (D1-D8) = the arch-gate
+  agenda** -- each a named fork, never a catch-all.
 - **No catch-all leak:** a concept that seems to need a new term is (a) a missed Role/Relationship, (b) a
   Lineage composition, (c) a System, or (d) a Variance comparison. No "misc" bucket, because there is no
   fifth arity. Non-relational attributes are OUT by the Boundary-2 scope-cut.
@@ -406,15 +461,16 @@ lights up with zero rework (graceful-degradation already shipped).
 5. **Binding target for closure:** canon-patterns' 23+16 only, or the fuller NFRA_GLOBGRPH L1-L7 (40 node
    classes / 14 edge families)? The latter is the more complete "bind every concrete type" target.
 
-**COO coordination seams (route BEFORE the CTO arch-gate):**
-- **NFRA_SYSTEM operational reconciliation (base, 035016Z -- loop the substrate author `0.4.0_DS~B`).** The
-  division of labor is MSTR-doctrine-blessed (Section 2), but three OPERATIONAL points need the substrate
-  author's concurrence before CTO sees it as settled: **(1)** two motif notions coexist (NFRA_SYSTEM emergent
-  vs canon-patterns curated) -- my vocabulary must be the NAMING layer BOTH classify into, not a parallel
-  detector; **(2)** if archetypes ever materialize as graph nodes they must extend `cse_schema.py`'s
-  SoD-governed, source-enforced enum -- a change touching NFRA_SYSTEM; **(3)** the FRACTAL/recognizer-keystone
-  convergence -- build ON NFRA_SYSTEM's reusable keystone, not a parallel one. COO owns this cross-domain
-  sequencing.
+**NFRA_SYSTEM reconciliation -- 0.8.0-IN-HOUSE (Andrew-direct, NOT a COO gate).** Andrew ruled this work
+"squarely 0.8.0 stuff" (Section 2); the CSE reconciliation is owned here. Three OPERATIONAL points I resolve
+in-house (consulting `0.4.0_DS~B` for `cse_schema.py` ground-truth as needed; coordinating with peer `~A`'s
+elemental rendering): **(1)** two motif notions coexist (NFRA_SYSTEM emergent vs canon-patterns curated) --
+my vocabulary is the NAMING layer BOTH classify into, NOT a parallel detector (I do not re-implement
+promotion); **(2)** if archetypes ever materialize as graph nodes they must extend `cse_schema.py`'s
+SoD-governed enum -- a change I would route to the schema owner then; **(3)** build ON NFRA_SYSTEM's reusable
+recognizer keystone (FRACTAL), not a parallel one. Section 3a is the reconciliation.
+
+**COO touches (records + adjacent lanes only -- no gate on the design):**
 - **Record the dependency (MSTR G2):** `org/projects/NFRA_ONTOLOGY.json` `depends_on` should add
   **NFRA_SYSTEM** (currently `[NFRA_COMPSIMILAR, NFRA_GLOBGRPH]`) -- COO's non-gated `org/projects` lane.
 - **Keep C0-C3 orthogonal to L1-L7 (MSTR G1):** the archetype vocabulary is the C0-C3 axis ONLY; it must not
