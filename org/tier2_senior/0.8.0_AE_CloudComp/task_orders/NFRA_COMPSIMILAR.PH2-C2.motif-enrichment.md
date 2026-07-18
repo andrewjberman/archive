@@ -4,7 +4,7 @@
 <issued_by>0.8.0_AE_CloudComp (base) — dispatched on Andrew-direct</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-07-18</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P2. Andrew-direct GO on the build (2026-07-18). Mechanism (Part A) is UNGATED — build now. Label binding (Part B) activates on CTO landing canon-patterns roles: (graceful — see scope).</priority>
 
 <authority>
