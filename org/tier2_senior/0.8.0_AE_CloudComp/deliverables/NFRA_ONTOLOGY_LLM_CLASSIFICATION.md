@@ -37,6 +37,29 @@ summaries/humans/agents, never by a scorer/gate/emergence). <<**
 **Governance (Andrew-GO'd split):** LOOSE (tagged, directly usable) for `class` + `description`; STRICT
 (blessed into the governed catalog) for an AUTHORITATIVE NAME. The honesty is the tag; the authority is the bless.
 
+## 1a. The no-feedback LINT + the permitted/forbidden consumer line (CTO arch-gate @214500Z)
+
+CTO ruled the no-feedback invariant a **LINT (a control that FAILS at violation time), not prose** -- "prose
+is not enough." The attachment may LAND now (nothing reads `llm_*` today), but the lint is a REQUIRED forward
+guard; it's a gate-candidate (same class as the `comp-manifest-check` family). The `llm_`/`source:
+llm-classified` namespace makes the surface machine-detectable.
+
+**THE LINT:** FAILS if any DETERMINISTIC STRUCTURAL/GATE surface reads an `llm_*` attribute.
+- **FORBIDDEN consumers (lint fails if they read `llm_*`):** the canon-deviation scorer (verdict),
+  C3-emergence / materialize, the completeness gate, motif/system membership resolution, semctl promotion.
+- Direction is strictly `structure -> label`; a `label -> structure/gate` read is the lint failure.
+
+**THE PERMITTED/FORBIDDEN LINE (CTO, precise -- so ~D is not blocked):**
+- **PERMITTED:** READABILITY (human/agent summaries) + ADVISORY-NON-GATING heuristics. comp-similar's
+  summary-enrichment + BM25 similarity is LEGIT (comp-similar is ADVISORY -- never auto-acts; disposal stays
+  the CTO-gated Andrew-delete-word path). So **~D consumes freely.**
+- **FORBIDDEN:** STRUCTURAL/GATE processes only (the list above).
+- **THE TEST:** does the consumer DECIDE structure or drive a gate/verdict/deletion? YES -> forbidden (lint
+  fails). Reads only for a human, or for an advisory heuristic that never auto-acts -> permitted.
+
+**Routing:** the lint BUILD routes through CTO (he gates it) as a forward guard; the attachment itself lands
+now via the governed emit. This makes MSTR's invariant a control, not a hope.
+
 ## 2. Mechanism
 
 Input per aggregate: its deterministic structure (a motif's typed-path + materialized instances; a system's
