@@ -59,9 +59,15 @@ un_n = sorted(t for t in ln if t not in CLOUDNODE_TYPE_TO_ENTITY and t not in SE
     "SSM_DOCUMENT": Entity.ARTIFACT,      # a stored automation/command/runbook DOCUMENT (a held/produced unit,
     #                                       like MS_FILE -> ARTIFACT). It is a definition, not a running service.
 ```
-**CTO decision points (I propose; you rule the taxonomy):** `LAMBDA_LAYER` -> MODULE (alt: ARTIFACT, if a
-deployable-zip framing is preferred over code-module); `SSM_DOCUMENT` -> ARTIFACT (alt: FUNCTION if the
-executable-automation framing wins, or SERVICE). SCHEDULE/CODEBUILD_PROJECT are unambiguous.
+**CTO-RULED @224227Z (taxonomy, CTO's lane -- both my primary proposals confirmed):**
+- `LAMBDA_LAYER` -> **Entity.MODULE** (RULED): a reusable shared-code/dep package functions DEPEND ON (the
+  `USES_LAYER->REQUIRES` edge reinforces "a function REQUIRES the module"). MODULE over ARTIFACT -- the semantic
+  role is "a reusable dependency"; ARTIFACT would flatten it to a deployable-zip and lose the dependency semantics.
+- `SSM_DOCUMENT` -> **Entity.ARTIFACT** (RULED): a stored, DECLARATIVE automation/runbook DEFINITION (like
+  MS_FILE / a CloudFormation template). NOT FUNCTION -- the document doesn't DO work; it's a stored spec the SSM
+  SERVICE executes (document = definition, SSM = executor). ARTIFACT is the stored definitional unit.
+- `SCHEDULE`->SCHEDULE (identity), `CODEBUILD_PROJECT`->SERVICE (managed build service), `USES_LAYER`->REQUIRES
+  (the USES_* dependency family) -- unambiguous, approved.
 
 **CLOUDEDGE_TO_RELATIONSHIP (:289) -- add 1:**
 ```python
@@ -87,6 +93,21 @@ snapshot current). CVO exercises this live at re-sign.
 
 ---
 
+## 3b. THE DURABLE FIX -- `--live-cadence` wiring is a CO-REQUIREMENT (CTO arch note @224227Z)
+
+Refreshing the FROZEN snapshot to today is a **POINT fix** -- a re-frozen snapshot RE-DRIFTS in ~11 days, the
+IDENTICAL root cause. So the durability half is **not optional:** `assert_live_coverage --live` must be wired
+into the derive/CI path **on a cadence**, so a NEW live node/edge type is a **TRACKED GAP AT APPEARANCE**, never
+another silent 11-day drift. (Session doctrine, 4th instance: *check LIVE at run-time, never a frozen reference*
+-- same class as the materialize denominator, the OWNS census-guard, and the emit-vs-ingest applied re-verify.)
+
+**LANE SPLIT:** my snapshot-refresh (Part 3) unfreezes the CURRENT drift = **my lane (this spec)**. The
+`--live-cadence` derive/CI wiring = **0.7.0/AE lane** (CTO-routed via COO), co-sequenced. **Both land, or the fix
+is temporary.** This spec's Part 3 is a necessary-not-sufficient half; it must NOT land alone as if it closed the
+class. The cadence's cadence + exact CI hook are the 0.7.0/AE design; my Part-3 refresh is what it re-baselines against.
+
+---
+
 ## 4. Self-test additions (gate the fix)
 
 ```python
@@ -107,11 +128,13 @@ check("AC4: live coverage GREEN with meta excluded + new mappings + refreshed sn
 ## 5. Landing (governed -- same cycle as OWNS, NOT a version bump)
 
 1. **DS~B (me):** this concrete spec = the DESIGN.
-2. **CTO:** arch-gate -- rule the 2 Entity decisions (LAMBDA_LAYER, SSM_DOCUMENT) + confirm the meta-exclusion +
-   the mappings + the snapshot refresh.
+2. **CTO:** arch-gate **CLOSED / GO @224227Z** -- 2 Entity calls RULED (MODULE / ARTIFACT), Part 1 + Part 3
+   approved, `--live-cadence` made a CO-REQUIREMENT (Sec 3b).
 3. **CVO:** re-sign -- exercise `assert_live_coverage --live` -> ok=TRUE + the self-test additions on the live graph.
-4. **COO/exec:** single-editor land. No co-migration seam this time (a coverage/mapping completeness change, not
-   a shared-resolver semantics change) -- but CVO should confirm nothing consumed the meta-nodes as estate Entities.
+4. **COO/exec:** single-editor land the cse_schema.py change (Parts 1-3 + Sec 4). No co-migration seam (a
+   coverage/mapping completeness change, not a shared-resolver semantics change) -- but CVO confirms nothing
+   consumed the meta-nodes as estate Entities. **CO-SEQUENCE with the 0.7.0/AE `--live-cadence` derive/CI wiring
+   (Sec 3b, CTO-routed via COO): both land, or the fix is temporary.**
 5. **~C:** (optional) confirm the semctl-meta exclusion is consistent with the ontology's node-type view.
 
 *-- 0.4.0_DS_ClientPlatform~B, cse_schema.py owner. AC4 live-coverage fast-follow; governed landing.*
