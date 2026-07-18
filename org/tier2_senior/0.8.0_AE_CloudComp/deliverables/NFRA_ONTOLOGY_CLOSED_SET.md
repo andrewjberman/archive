@@ -30,7 +30,7 @@ A Role is a plain-English label for what a C0 node IS relationally, **edge-deriv
 | 11 | **Registry** | the authoritative catalog others resolve identity/location through (absorbs `resolves-through` = references + Registry) |
 | 12 | **Container** | holds/composes other nodes as parts (Module/GraphScope/Tier; the `contains` object) |
 | 13 | **Observer** | watches a node's state without being in its flow (the `MONITORS` edge, ~305; CW_ALARM) |
-| 14 | **Custodian** | owns / is responsible-for a node (the object of an `OWNS` edge; e.g. MS_USER owns MS_FILE) |
+| 14 | **Custodian** | the OWNER -- holds/is-responsible-for a node; the **subject** of an `owns` edge (= the **object** of the concrete CSE `OWNED_BY`). e.g. MS_USER owns MS_FILE -> MS_USER is the Custodian (CTO precision fold) |
 
 **Roles 7/9/11 absorb the D4/D7 relationship-composites** (owner-ratified): `projects` =
 `served_from`->derives-from + Gateway (7) / `routes-to` = `flows_to`->derives-from + Router (9) /
