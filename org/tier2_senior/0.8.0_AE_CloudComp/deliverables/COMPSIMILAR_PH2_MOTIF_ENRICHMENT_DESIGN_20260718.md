@@ -1,8 +1,15 @@
 # COMPSIMILAR PH2 -- Deterministic Motif Enrichment of the per-ARN Summary
 
 **Design-of-record.** Author: 0.8.0_AE_CloudComp (base, FEED lane / design-of-record, LD-0305).
-Date: 2026-07-18 ~0204Z. Status: **C2 = DESIGN (feasibility-affirmed) -> CTO arch-gate -> ~D builds.
-C3 = HELD pending NFRA_ONTOLOGY (universal archetype layer, Andrew-direct 3 below).**
+Date: 2026-07-18 ~0204Z (dispatch addendum ~0240Z). Status: **C2 = DISPATCHED TO ~D (Andrew-direct
+"C2 is fine to build, dispatch it to ~D", 2026-07-18) -- TO NFRA_COMPSIMILAR.PH2-C2; CTO framing-GO +
+binding vocab-governance in hand. C3 = HELD pending NFRA_ONTOLOGY (Andrew-direct 3 below).**
+
+**Graceful-degradation design (the dispatch decision):** the enricher READS canon-patterns' roles: field
+and emits NO clause for any position lacking a blessed label -- so Part A (the classify_motif mechanism +
+derive_summary integration) SHIPS NOW per Andrew's build-GO, and the role clauses light up automatically
+when CTO lands the roles: vocabulary (Part B), with zero ~D rework. Honors Andrew's "fine to build" AND
+CTO's vocab governance simultaneously.
 
 **What this is:** a DETERMINISTIC enrichment of the per-ARN summary CONTENT produced by
 `derive_summary()` (`org/modules/graph/debtscan/summary_corpus.py:256`). It splices, into the
