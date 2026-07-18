@@ -1,5 +1,9 @@
 # NFRA_ONTOLOGY -- Universal Relational-Archetypal Ontology
 
+> **SUPERSEDED by `NFRA_ONTOLOGY_DESIGN_OF_RECORD.md` (v0.2, 2026-07-18).** This is the founding draft, kept
+> for history. v0.2 re-homes the design onto the canonical NFRA_SYSTEM C0-C3 CSE ladder and folds base's
+> steering + MSTR's guardrails. Read the living doc, not this.
+
 **Design-of-record v0.1 (DRAFT for CTO arch-gate).** Author: `0.8.0_AE_CloudComp~C` (build/author lane,
 LD-0310). Date: 2026-07-18. Status: **FOUNDING DRAFT -- design, not code.** Routes: CTO arch-gate
 (closed-set + orthogonality ruling); COO decomposition into TOs; MSTR governs the doctrine (the
