@@ -200,7 +200,10 @@ def materialize_node(cse: CSE.CSE) -> tuple:
 def recognize_edge(s, snt, et, d, dnt, marker: str, concept_conf: float = 1.0) -> tuple:
     src_ent = CSE.map_cloudnode(s, snt)
     dst_ent = CSE.map_cloudnode(d, dnt)
-    rel = CSE.CLOUDEDGE_TO_RELATIONSHIP.get(et)
+    rel = CSE.map_cloudedge(et, dnt)   # 0.5: the sanctioned edge resolver -- target-typed for OWNED_BY
+    #                                    (custody->OWNS via MS_USER / containment-inverse->CONTAINS via S3_BUCKET),
+    #                                    matching the graph-head emitter. Was a flat CLOUDEDGE_TO_RELATIONSHIP.get(et)
+    #                                    which mis-classified the 232 S3Key OWNED_BY edges. dnt = dst node_type.
     reasons = []
     if src_ent is None:
         reasons.append(f"src node unmapped (node_type={snt})")

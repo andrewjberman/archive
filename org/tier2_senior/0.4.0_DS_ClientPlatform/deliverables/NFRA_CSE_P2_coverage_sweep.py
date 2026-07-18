@@ -150,7 +150,14 @@ def compiler_emits() -> dict:
     for et, rel in CSE.CLOUDEDGE_TO_RELATIONSHIP.items():
         cid = _EDGE_TO_COMPILER.get(et)
         if cid:
-            _ensure(cid)["relationships"].add(rel.value)
+            # OWNED_BY is TARGET-TYPED (CSE.map_cloudedge, 0.5): custody->OWNS, container-inverse->CONTAINS.
+            # The flat map carries only the OWNS default; attribute BOTH senses the OWNED_BY compiler emits so
+            # the coverage attribution is complete (this is a coverage-of-TYPES sweep -- no per-edge dst here).
+            if et == "OWNED_BY":
+                _ensure(cid)["relationships"].update(
+                    {CSE.Relationship.OWNS.value, CSE.Relationship.CONTAINS.value})
+            else:
+                _ensure(cid)["relationships"].add(rel.value)
     # Entity.SYMBOL (0.3): emitted by the LIVE ts-morph/extract_api SYMBOL extractor -- a REAL existing
     # producer for symbol:-> nodes, not yet SDK-refactored onto COMPILERKIT. COO ruling 2026-07-08
     # (GOV-A I1): attribute SYMBOL to its REAL emitter (not fabricated, not the node_type-derivation which
