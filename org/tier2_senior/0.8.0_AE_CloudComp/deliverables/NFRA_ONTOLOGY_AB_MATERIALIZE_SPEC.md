@@ -29,6 +29,12 @@ is separately human-ratified + measure-gated). Keep them distinct.
 
 ---
 
+> **RECURRENCE CORRECTION (DS~B live-measure @144953Z):** the recurrence values below were 2-HOP-PATH
+> counts, which OVER-count combinatorially where a node has many children. The MOTIF-INSTANCE counts
+> (authoritative, measured live off the materialized C2) are: **a-store=232** (bounded by S3Key=232, not
+> 28902), **a-serve CDN-leg=9**, **a-watch=21**, **a-orch=28**; the other 9 detectors match. Class-lesson:
+> motif recurrence = INSTANCE count, not path count.
+
 ## 1. The A+B canonical motif detectors (13 families)
 
 Each is a typed-path detector; instances = the concrete paths matching it (recurrence from the scan
