@@ -23,7 +23,7 @@ A Role is a plain-English label for what a C0 node IS relationally, **edge-deriv
 | 4 | **Transformer** | reads input, derives new output, writes it (the work-doer) |
 | 5 | **Consumer** | reads state and acts on it |
 | 6 | **Sink** | terminal consumer -- the flow ends here |
-| 7 | **Gateway** | the single controlled entry/exit point of a zone (absorbs `projects`) |
+| 7 | **Gateway** | the single controlled entry/exit point of a zone (supplies the boundary/serve semantics of `projects` = `served_from`->derives-from + Gateway) |
 | 8 | **Guard** | a node a flow must pass, which may permit or deny it (gating) |
 | 9 | **Router** | directs a flow to one of several destinations by a rule (absorbs `routes-to` = flows_to + Router) |
 | 10 | **Trigger** | activates another node on an event/schedule -- carries the GO, not the payload |
@@ -32,9 +32,12 @@ A Role is a plain-English label for what a C0 node IS relationally, **edge-deriv
 | 13 | **Observer** | watches a node's state without being in its flow (the `MONITORS` edge, ~305; CW_ALARM) |
 | 14 | **Custodian** | owns / is responsible-for a node (the object of an `OWNS` edge; e.g. MS_USER owns MS_FILE) |
 
-**Roles 9/11 absorb the D4/D7 relationship-composites** (owner-ratified): what looked like the relationships
-`routes-to`/`resolves-through` are `flows_to`+Router / `references`+Registry -- the ROLE axis carries them,
-which is exactly why it is load-bearing (a single node's role expresses what would otherwise need a new edge).
+**Roles 7/9/11 absorb the D4/D7 relationship-composites** (owner-ratified): `projects` =
+`served_from`->derives-from + Gateway (7) / `routes-to` = `flows_to`->derives-from + Router (9) /
+`resolves-through` = `references` + Registry (11). Each concrete relation still binds UP to an abstract
+RELATION (derives-from/references); the ROLE supplies the extra semantics -- so the ROLE axis carries the
+composite WITHOUT orphaning the concrete relation (base coherence-check). This is exactly why the ROLE axis
+is load-bearing (a single node's role + a base relation express what would otherwise need a new edge).
 
 **Contextual (polymorphic) types -- one Role per instance, edge-derived:** `Lambda` (Transformer/Guard/
 Router/Trigger), `Service`/`Component` (Transformer/Container/...), and **`Person`/`Organization`** (Source
@@ -65,8 +68,12 @@ renders/authenticates/authorizes/...) bind DOWN to these via the adapter; abstra
 | 9 | **denies** | explicit prohibition (a guard-family outcome, kept named -- the cross-firm Deny control) |
 | 10 | **owns** | custody -- **a governed CSE `OWNS` primitive** (0.4->0.5 schema bump, S5, NOT ontology-local; D6). `S3Key OWNED_BY S3_BUCKET` = `contains`-inverse; the `OWNERSHIP` Qualifier + `OWNS` edge coexist. |
 
-`routes-to` / `resolves-through` / `projects` are NOT primitives -- they are Role-composites / grain-parents
-(D4/D7), carried by Roles 7/9/11 above.
+`routes-to` / `resolves-through` / `projects` are NOT primitives -- each is a **concrete CSE relation bound
+UP to an abstract RELATION, PLUS a Role** (so no concrete relation is orphaned -- base coherence-check
+@8e01fda77):
+- `routes-to` = `flows_to` (-> **derives-from**) + Router role (9)
+- `resolves-through` = `references` (-> **references**/depends-on) + Registry role (11)
+- `projects` = `served_from` (-> **derives-from**: the ServedURL derives its content from the gold Field) + Gateway role (7)
 
 ---
 

@@ -117,8 +117,8 @@ depends-on, contains, guards, denies, triggers, routes-to, projects, resolves-th
 | Policy | **Guard** | governs/constrains |
 | Constraint | **Guard** | constrains -- **[DECISION D5: spec/governance entities as Guards vs a spec axis]** |
 | Requirement | **Guard** | constrains an implementation -- **[D5]** |
-| Person | **Source / Sink** | an ACTOR at the boundary (originates or receives) -- **[DECISION D6: actor entities]** |
-| Organization | **Source / Sink** | actor/owner at the boundary -- **[D6]** |
+| Person | *contextual* | edge-derived actor: **Source** (originates) / **Sink** (terminates) / **Custodian** (object of an OWNS edge) -- NOT fixed Source/Sink (base coherence, finalized in `NFRA_ONTOLOGY_CLOSED_SET.md`: 14 roles incl. Custodian) |
+| Organization | *contextual* | edge-derived actor: Source / Sink / **Custodian** -- same as Person |
 | Concept | *(no archetype BY DESIGN)* | the LAW-1 honest-degrade / untyped target -- counted in the coverage denominator, never guessed |
 
 **code/infra-level (concrete):**
