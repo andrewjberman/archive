@@ -24,8 +24,8 @@ drift; this is the single reference the ~C build + the CTO gate reconcile agains
 ## Fixed points (LOCKED @297c12bea -- pending CTO closed-set gate)
 | Set | Fixed point | Grounding |
 |---|---|---|
-| **Roles (13)** | Source, Store, Producer, Transformer, Consumer, Sink, Gateway, Guard, Router, Trigger, Registry, Container, **Observer** | Observer empirically forced (~305 MONITORS edges). 12->13. |
-| **Relationships (12)** | produces, consumes, derives-from, depends-on, contains, guards, denies, triggers, routes-to, projects, resolves-through, **owns** | owns empirically forced (OWNED_BY 5,845 = #2 edge). 11->12. **SEE FLAG C-1.** |
+| **Roles (13, FINALIZING)** | Source, Store, Producer, Transformer, Consumer, Sink, Gateway, Guard, Router, Trigger, Registry, Container, Observer | Observer empirically forced (~305 MONITORS). ~C finalizing the ROLE axis (DS~B-deferred): + **Custodian** (the OWNS-target actor); confirm Registry/Router/Gateway ABSORB the re-homed D4/D7 composites. Count may go 13->14. |
+| **Relationships (10, OWNER-RATIFIED @a7f075a77)** | produces, consumes, derives-from, depends-on, contains, triggers, **guards**, **governs**, denies, **owns** | DS~B ruling (below): guards/governs SPLIT (2, not 1 -- governance != gating); `owns` = governed CSE primitive (0.4->0.5 bump, S5); routes-to / resolves-through / projects RE-HOMED to Role-composites (NOT primitives). C-1 RESOLVED. Supersedes the pre-ruling 12-set. |
 | **Variance (6)** | Canonical, Twin, Variant, Fork-Shadow, Superseded, Orphan | base-confirmed, MSTR-endorsed. Mechanism @f904033ea (position_key = logical-identity only; structure COMPARED; allowed_facets). |
 | **Lineage** | compositional (Role+Relationship grammar) | no ratification -- zero new primitives. |
 | **C3 naming** | INHERITED from constituents: capability-cluster -> pipeline-thread -> resource-domain -> governed-catalog -> NEVER invented | @297c12bea. Same principle as C2 typing, applied to naming; deterministic, no-invent. |
