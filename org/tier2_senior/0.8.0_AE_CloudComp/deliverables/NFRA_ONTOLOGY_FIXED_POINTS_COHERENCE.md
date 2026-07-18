@@ -35,22 +35,30 @@ Empirical grounding commits: grain scan 6fae7e7a4; canonical motif catalog (~20 
 A+B materialize spec 7892f3fbc; C3 naming 297c12bea.
 
 ## COHERENCE FLAGS (base, as coherence-keeper)
-- **C-1 (owns -- reconcile before locking on AXIS 2).** `owns` is on the RELATION axis, which the S5
-  resolution binds to "CSE re-layered, no fork." But CSE does NOT treat ownership as a free relationship:
-  `cse_schema.py` already maps `OWNED_BY -> Relationship.GOVERNS` (coarse) AND carries `OWNERSHIP` as a
-  first-class **Qualifier** (a DIFFERENT axis). So `owns` is NOT a clean coverage-gap -- it collides with
-  two existing CSE treatments. Resolution options (a CTO + CSE-owner item, per S5): (i) keep OWNED_BY as
-  `governs` (but ownership != governs semantically, and 5,845 edges argues it is too distinct to lump);
-  (ii) split `owns` out of `governs` via a GOVERNED CSE schema bump (the honest option if it is genuinely
-  distinct) AND reconcile against the `ownership` Qualifier (edge-form vs metadata-form). `owns` must NOT
-  lock as an ontology-local relationship until this routes through CSE. **The empirical case for `owns` is
-  strong; the AXIS/mechanism is the open question.**
+- **C-1 (owns) -- RESOLVED by the CSE OWNER RULING (DS~B @d16e269bf; see below).** `owns` is VALIDATED as a
+  governed CSE `OWNS` primitive (0.4->0.5 bump, exactly S5 -- NOT ontology-local), custody split out of
+  `governs`; polysemy disambiguated (principal->OWNS, container->CONTAINS, policy->GOVERNS); the OWNERSHIP
+  Qualifier + the OWNS edge COEXIST (precedent: AUTHORITY:AUTHORIZES). No longer an open flag.
 - **C-2 (Observer 13th Role + owns 12th Relationship are CTO-PENDING, not settled).** Both are the
   empirical resolution of DoR open decisions -- strong justification, but they are the CTO closed-set
   ruling's to bless. Lock them as "empirically-grounded PROPOSED", not "ratified".
 - **Coherent + no drift otherwise:** Roles-minus-Observer (12), Relationships-minus-owns (11), Variance (6),
   the C3 naming ladder, and fog-4 materialization all ride the elemental frame with zero shared term left
   implicit. The GRAIN/ARITY distinction (elemental precision) must survive into ~A's formal render.
+
+## CSE OWNER RULING (0.4.0_DS_ClientPlatform~B, @d16e269bf -- Andrew brought in; the AXIS-2 authority)
+Authoritative, source-line-cited. Folded here as the coherence-of-record for AXIS 2:
+- **D0 DENOMINATOR (LAW-1):** the real enum is **Entity=29 / Relationship=23** (not 28/24). ~C's proof miscounted (prose 28, table 29) and folded `routes-to` into "24" though it is NOT a CSE member. Same 52 total; the completeness denominator reads **29/23**. ~C to correct.
+- **D1 RELATION split CONFIRMED** (9 abstract :94-102 / 14 concrete :104-117), ONE fix: `requires` is **CONCRETE** (:115), not abstract. ~C's `requires->depends-on` binding is right; only the grain label was off.
+- **D2 the three elevations** (denies<-DENIED, triggers<-TRIGGERS, gate-family) ride GRAIN (abstract=grain-parent, concrete primitive STAYS adapter-grain) -- **legitimate, not S5 forks**; no new CSE primitive.
+- **D3 `governs` != `guards` -- SPLIT (correction).** ~C (and base's earlier read) bound BOTH `governs` and allowed/authenticates/authorizes to one `guards` archetype -- an OVER-COLLAPSE (governance != gating). Split: `governs` = policy/authority (NARROW); `guards` = gating (parent of denied/allowed/authenticates/authorizes). Narrow governs is also what frees `owns`.
+- **D4 `resolves-through` = `references` + a Router/Gateway/Registry ROLE (AXIS-3)** -- not a new relationship. Keep `references`; no CSE fork.
+- **D5 `derives_from` (abstract provenance) vs `flows_to` (concrete field-grain)** -- both kept; the **EdgeKind (passthrough/rename/recompute-guarded :146) MUST stay on flows_to** (the spread-bug detector).
+- **D6 C-1 OWNS (the sharp one, RULED):** (a) custody SPLITS OUT -> add governed CSE `OWNS` (0.4->0.5 bump) -- `owns` VALIDATED, S5-correct, not ontology-local; (b) `S3Key OWNED_BY S3_BUCKET` (~232) = `contains` inverse (no new primitive; re-map); (c) `OWNERSHIP` Qualifier + `OWNS` edge BOTH (orthogonal; AUTHORITY:AUTHORIZES precedent). Migration disambiguates OWNED_BY by object-type (principal->OWNS / container->CONTAINS / HAS_POLICY->GOVERNS; residual ~1,031 swept by the (subj,obj)-type rule, not assumed all-custody).
+- **D7 `routes-to` = flows_to + Router role; `projects` = served_from's abstract grain-parent** -- no new CSE primitives.
+- **Governance:** the OWNS bump is CTO-arch-gated + CVO re-sign + COO SoD-land (org/modules/graph EXEC-locked; DS~B owns the DESIGN, does not land the file -- same path as 0.3 TYPE/SYMBOL + 0.4 PROMOTE). DS~B **DEFERS to base/MSTR**: the ROLE-axis (D5/D6/D7 of ~C's binding), Variance-vs-implements (~C-D3), Type/Symbol taxonomy (~C-D8) -- those are NOT CSE's axis.
+
+**Coherence consequence:** AXIS 2 (RELATION) is now owner-ratified: `owns` lands as a governed CSE primitive (not a fork), `governs`/`guards` split, `requires` regrained, `resolves-through`/`routes-to`/`projects` = ontology-layer refinements. ~C folds D0-D7 into the binding proof; the OWNS bump routes to the CTO gate as a governed schema change. The ROLE-axis / Variance / Type-Symbol decisions remain base/MSTR + CTO (NOT CSE).
 
 ## NFRA_GENESIS seam
 ~A's per-company adapter + the manifest's no-per-tenant-algebra-fork invariant sit on THIS seam (the
