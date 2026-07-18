@@ -77,6 +77,17 @@ is CHARTERED with OWNER = **0.8.0_AE_CloudComp~C** (spawned + briefed 031312Z; A
 FEED, NOT the builder** (LD-0305 reserved status kept). base feeds canon-patterns / COMPSIMILAR-corpus /
 taxonomy-census authoring intent; ~C builds.
 
+**SCOPE CLARIFICATION (Andrew-direct 2026-07-18, VERBATIM):** on reconciling NFRA_ONTOLOGY against
+NFRA_SYSTEM's C0-C3 / CSE algebra -- *"I can bring on 0.4.0_DS~B... as a consultant of sorts, but this
+work is squarely 0.8.0 stuff. The question is how we take the fog out of this and render it elemental,
+0.8.0_AE~A is working on that, but id check in with them with your refined framework so that its extra
+clear where the fog is and what needs to be solved for."* So: the C0-C3 / CSE / Ontology reconciliation is
+**0.8.0-OWNED** (NOT a DS cross-project handoff); **0.4.0_DS~B = CONSULTANT** for cse_schema.py ground-truth
+only; **0.8.0_AE~A owns rendering it ELEMENTAL** (de-fog). base fed ~A the refined framework (3 constructs:
+the C0-C3 LADDER + the CSE VOCABULARY + the ONTOLOGY VOCABULARY; 4 fog-points incl. the CSE/Ontology
+overlapping-relationship-terms question; the refine/unify/orthogonal solve). This SUPERSEDES base's earlier
+"route through COO + loop 0.4.0_DS~B" framing -- that over-escalated an in-house 0.8.0 reconciliation.
+
 ---
 
 ## The capability -- AFFIRMED (Andrew-direct 2)
