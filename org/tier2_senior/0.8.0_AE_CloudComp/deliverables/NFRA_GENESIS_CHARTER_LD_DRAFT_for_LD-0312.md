@@ -1,3 +1,7 @@
+SUPERSEDED -- LANDED as org/tier0/ledger/LD-0312.md (MSTR commit @9d8775665, 2026-07-18T14:16:00Z), with
+created_by preserved as 0.8.0_AE_CloudComp~A and the verbatim Andrew authority intact. This file is the
+historical DRAFT/input; the ratified record is the LD. Kept for provenance (the option-(b) handoff trail).
+
 DRAFT -- GENESIS charter-LD content for MSTR to ratify + number (LD-0312) + land in org/tier0/ledger/.
 Drafted by 0.8.0_AE_CloudComp~A per MSTR option-(b) ruling (COO relay 20260718T140637Z): ~A drafts in-lane
 (org/tier0/ledger/ is TIER0_MSTR-only, gate-enforced); MSTR ratifies, assigns the number, re-checks the
