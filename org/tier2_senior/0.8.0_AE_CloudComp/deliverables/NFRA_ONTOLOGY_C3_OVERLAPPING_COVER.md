@@ -31,23 +31,29 @@ gate DS~B's LIVE measurement forces (below).
 **The domain-anchor catalog (governed; membership = LIVE-measured off the materialized C2, DS~B @144953Z --
 correcting my over-speculated table):**
 
-| C3 system | anchor constituent-type(s) | member A+B motifs (LIVE) | system? (>=2) |
+**RECONCILED to the LIVE re-emit @c7048f484 (DS~B/COO @151805Z -- the doctrine artifact matches what
+materialized):**
+
+| C3 system | anchor constituent-type(s) | member A+B motifs (LIVE, materialized) | system? (>=2) |
 |---|---|---|---|
 | **object-data** | `S3_BUCKET`, `S3Key` | a-store, a-access, a-serve, b-io | YES (4) |
-| **compute-orchestration** | `EVENT_RULE`, `STATE_MACHINE` | a-event, a-orch, a-watch | YES (3) |
+| **compute-orchestration** | `EVENT_RULE`, `STATE_MACHINE` | a-event, a-orch | YES (2) |
 | **pipeline** | `PipelineScript`, `PipelineFunction` | b-struct, b-run, b-io | YES (3) |
-| ~~table-data~~ | `DYNAMODB_TABLE` | a-table ONLY (live) | NO (1) -- below threshold, stays a C2 motif |
-| ~~identity~~ | `IAM_ROLE` | a-grant ONLY (live) | NO (1) -- below threshold, stays a C2 motif |
 
-**So the honest cover is ~3 C3 SYSTEMS** (object-data / compute-orchestration / pipeline), NOT 5 -- because
-DS~B measured LIVE that only a-table touches DynamoDB and only a-grant touches IAM (my earlier table wrongly
-assumed a-api/a-event/a-orch touch DDB and a-access/a-api touch IAM -- the actual DETECTORS don't include
-those edges). table-data + identity are single-motif domains: real, but below the C3 >=2 threshold, so they
-remain C2 motifs (not promoted). CTO gates the final count (his window was ~3-5; ~3 is the honest answer).
+**Below the >=2 bar -- single-motif domains, stay C2 (NOT promoted):** `table-data`{a-table} (only a-table
+touches DynamoDB), `identity`{a-grant} (only a-grant touches IAM), `a-api` (API_ROUTE, no catalog anchor),
+`a-watch` (CW_ALARM/observability -- its LIVE constituents are CW_ALARM + the LAMBDA hub, NEITHER an anchor,
+so the literal anchor mechanism correctly EXCLUDES it from compute-orchestration -- correcting my earlier
+placement), `b-dataflow` (Field, no anchor).
 
-**Overlap still holds (the point):** b-io contains `S3Key` AND `PipelineScript` -> object-data AND pipeline;
-a-watch contains `EVENT_RULE`-adjacent + monitors compute in object-data's chain. The >=2 systems overlap;
-the model is a cover, not a partition -- the single-motif domains just do not clear the promotion bar.
+**So the honest cover is 3 C3 SYSTEMS** (object-data / compute-orchestration / pipeline), NOT 5 -- the anchor
+mechanism run LIVE against the materialized C2 (not my speculated membership) yields exactly what DS~B
+re-emitted. Reporting the measured cover over the speculated one is the discipline. CTO gates the count
+(his ~3-5 window; 3 is the honest answer).
+
+**Overlap holds (the point, verified in the re-emit):** b-io contains `S3Key` AND `PipelineScript` ->
+object-data AND pipeline (overlap materialized). The >=2 systems overlap; the model is a cover, not a
+partition -- the single-motif domains just do not clear the promotion bar.
 
 ## 2. Hub vs anchor -- the deterministic discriminator (why LAMBDA is not a system)
 
