@@ -1,8 +1,10 @@
 # NFRA_ONTOLOGY -- Variance FIRM-dimension Catalog + `variance_verdict` Consumer Contract
 
-**Author:** `0.8.0_AE_CloudComp~C`, 2026-07-18. **Status:** DRAFT for base coherence-check (vs the ratified
-mechanism `@f904033ea`) BEFORE `~D` wires. **Companion to** `NFRA_ONTOLOGY_VARIANCE_MECHANISM.md` (the frozen
-mechanism) -- this is its CONCRETE, grounded, `~D`-wireable realization for the `firm` dimension.
+**Author:** `0.8.0_AE_CloudComp~C`, 2026-07-18. **Status:** rev.2 -- base coherence-check PASS (@234142Z:
+narrowing RATIFIED, realization faithful to `@f904033ea`) + the ONE correctness fix FOLDED (canonical ref =
+MODAL, not a fixed firm -- §1/§2.4/§3/§4). Ready for `~D` to wire. **Companion to**
+`NFRA_ONTOLOGY_VARIANCE_MECHANISM.md` (the frozen mechanism) -- this is its CONCRETE, grounded, `~D`-wireable
+realization for the `firm` dimension.
 
 **What this delivers (the two things base asked for):**
 1. **The governed firm-dimension catalog** -- concrete, estate-grounded `values` + `allowed_facets` + the
@@ -42,7 +44,11 @@ dimensions:
     firm_names: { bd: 49financial, cot: cottonwood, inf: inflection }
     scope: parallel-firm-pipeline            # buckets + their C2 motifs on the daily-pull firm pipelines
     allowed_facets: []                       # structural replicas -- NOTHING may legitimately differ off-key
-    canonical: bd                            # designated reference (else: modal membership-set); bd = the fullest/anchor firm
+    canonical: modal                         # ref = the MODAL membership-set among PRESENT firms (NOT a fixed firm).
+                                             # base 234142Z: a FIXED ref makes a divergence OF THE REF-FIRM invert
+                                             # (the ref clears, the correct majority reads Fork-Shadow) -> undetectable.
+                                             # DEFAULT = modal (@f904033ea §3: "designated OR the modal structure");
+                                             # an explicit designated-override MAY be declared later, but never a fixed default.
     # v1 defer (mechanism §2.1): allowed_facets empty -> only structurally-identical Twins clear,
     # ANY off-key membership-set diff = Fork-Shadow, Variant deferred. Populate per-dimension later.
 
@@ -97,7 +103,9 @@ structure(node) = frozenset( node's C2 motif-membership )   # e.g. {a-access, a-
 
 ### 2.4 The symmetry test (firm-specialized; mechanism §3, allowed_facets=[])
 For a sibling group at one `position_key` over `firm`, with declared `values V = {bd,cot,inf}` scoped to the
-node's scope, `ref = structure(canonical)` (designated `bd`, else the modal membership-set):
+node's scope, `ref = the MODAL membership-SET among PRESENT siblings` (the set with the strict plurality; NOT a
+fixed firm -- base 234142Z correctness fix; among the modal-matchers designate the Canonical by a deterministic
+tie-break, e.g. the alphabetically-first firm token -- that badge picks the reference LABEL, never the ref STRUCTURE):
 ```
 present  = { firm_value(i) : i in group }
 # (2a) COMPLETENESS
@@ -106,8 +114,13 @@ present  = { firm_value(i) : i in group }
                                                                -> the group is asymmetric -> Fork-Shadow polarity.
   a MISSING value that is out-of-scope (declared absence)   -> legitimate; not counted against symmetry.
 # (2b) STRUCTURAL SYMMETRY (membership-SET equality; allowed_facets=[] so no Variant tier for firm)
-  structure(i) == ref  for ALL present i, AND present == V(in-scope)  -> TWIN group. ref = Canonical. CLEAR.
-  structure(i) != ref  (set differs; F is empty)                     -> instance i = FORK-SHADOW of ref (debt).
+  ref = MODAL membership-SET among present siblings (strict plurality).
+  a UNIQUE modal exists:
+    structure(i) == ref                       -> instance i is a TWIN (one modal-matcher = designated Canonical). CLEAR.
+    structure(i) != ref  (set differs; F=[])  -> instance i = FORK-SHADOW of the modal (debt).  # fires for ANY diverging firm, incl. the ex-anchor
+  NO unique modal (tie for plurality: all-distinct 1-1-1, or an even split in a >3-value dim):
+    -> NO canonical majority. FLAG ALL present as divergent (Fork-Shadow polarity, of_names = the other
+       siblings, qualifier "no canonical majority"). NEVER silently pick a ref (base 234142Z). Counted, surfaced.
 # other
   group of 1, no sibling, no consumer                                -> ORPHAN.
   two instances same (position_key, firm_value), one supersedes other -> older = SUPERSEDED.
@@ -119,6 +132,7 @@ present  = { firm_value(i) : i in group }
 { kind:"Canonical",  dim:"firm", of_names:[<sibling names>] }  -> "canonical firm-twin (reference) of opal-data-cot/opal-data-inf"
 { kind:"Twin",       dim:"firm", of:<arn>, of_name:<name> }    -> "canonical firm-twin of opal-data-bd"
 { kind:"Fork-Shadow",dim:"firm", of:<arn>, of_name:<name> }    -> "divergent fork-shadow of opal-data-bd (debt)"
+{ kind:"Fork-Shadow",dim:"firm", of_names:[<others>], note:"no canonical majority" } -> "divergent fork-shadow of opal-data-cot/opal-data-inf -- no canonical majority (debt)"
 { kind:"Orphan" }                                              -> "orphan (no twin, no consumer)"
 { kind:"Superseded", by:<arn>, by_name:<name> }               -> "superseded by <by_name>"
 (none)                                                         -> NO clause (absent, counted in denominator)
@@ -140,13 +154,21 @@ STRUCTURE, and it never consumes a label). It is display-only in the enricher (g
 `position_key(opal-data-bd) = opal-data-{firm}`; siblings `opal-data-cot`, `opal-data-inf` (all present in the
 graph @ 21:43Z). `structure(opal-data-bd) = {a-access, a-serve, a-store, b-io}` (verified live via
 `comp-describe opal-data-bd` @ HEAD 76c310664).
-- **Twin case:** if `structure(cot) == structure(inf) == {a-access,a-serve,a-store,b-io}` and all three present
-  -> **(2a)** complete AND **(2b)** membership-SETs equal -> all three TWINS, `bd` Canonical. CLEAR. Renders on
-  bd: `canonical firm-twin (reference) of opal-data-cot/opal-data-inf`.
-- **Fork-Shadow case:** if `structure(inf) = {a-store, a-access}` (missing a-serve/b-io -- inf's bucket is not
-  served / has no pipeline-IO twin) -> set differs from `ref` OUTSIDE the empty `allowed_facets` -> **inf's
-  bucket = FORK-SHADOW of opal-data-bd (debt)**; bd/cot remain Twins. A PRECISE verdict, not "inf missing + an
-  inf singleton" (the over-constrained-key failure the mechanism §6 calls out).
+- **Twin case:** `structure(bd) == structure(cot) == structure(inf) == {a-access,a-serve,a-store,b-io}`, all
+  three present -> **(2a)** complete AND **(2b)** the modal set = that shared set, all three match -> all three
+  TWINS (Canonical = the alphabetically-first modal-matcher, `bd`). CLEAR. Renders: `canonical firm-twin
+  (reference) of opal-data-cot/opal-data-inf`.
+- **Fork-Shadow (inf diverges):** `structure(bd) == structure(cot) = {a-access,a-serve,a-store,b-io}` (the
+  MODAL, 2 of 3), `structure(inf) = {a-store, a-access}` (missing a-serve/b-io) -> inf differs from the modal
+  OUTSIDE the empty `allowed_facets` -> **inf's bucket = FORK-SHADOW of the modal (debt)**; bd/cot = Twins.
+  PRECISE, not "inf missing + an inf singleton" (the over-constrained-key failure the mechanism §6 calls out).
+- **Fork-Shadow (BD diverges -- the case the fixed-ref bug HID, base 234142Z):** `structure(cot) ==
+  structure(inf) = {a-access,a-serve,a-store,b-io}` (the MODAL, 2 of 3), `structure(bd) = {a-store,a-access}`
+  -> **bd = FORK-SHADOW of the modal (debt)**, cot/inf = Twins. With a fixed `ref=bd` this INVERTED (bd cleared,
+  cot+inf wrongly flagged) and a bd-drift was undetectable; the modal ref makes it DETECTABLE. This is why the
+  ref is modal, not a fixed firm.
+- **No-majority (all-distinct):** `structure(bd) != structure(cot) != structure(inf)`, all three different, no
+  set shared by >=2 -> NO unique modal -> FLAG ALL as `Fork-Shadow, no canonical majority`; never pick a ref.
 
 ---
 
@@ -158,6 +180,7 @@ graph @ 21:43Z). `structure(opal-data-bd) = {a-access, a-serve, a-store, b-io}` 
 | §2.1 `allowed_facets=[]` for firm -> ANY off-key diff = Fork-Shadow (Q2) | §2.4 no Variant tier for firm; set-diff -> Fork-Shadow |
 | §2.2 `structure` = the COMPARED thing, not the key | §2.3 structure = C2 membership-SET (base 231424Z), compared not keyed |
 | §3 two-step: GROUP by position_key, COMPARE structure | §2.4 (2a) completeness + (2b) set-equality |
+| §3 `ref = Canonical (designated, OR the modal structure)` | §2.4 ref = MODAL membership-SET among present (base 234142Z fix folded; fixed-firm ref removed -- it inverts on a ref-firm divergence, hiding a bd-drift). No-majority tie -> flag-all/never-pick |
 | §4 POLARITY: CLEAR designed parallels, FLAG only Fork-Shadow/Orphan | §2.4 Twin/Canonical clear; only Fork-Shadow/Orphan flagged |
 | §4 HARD firm invariant: Twin != fungible; never authorizes a merge | §2 the operator READS firm; never merges (never-cross lives in the adapter `denies`, not here) |
 | §5 #1 parallel sibling clause (own field/render, reference arg) | §2.1 `SummaryDoc.variance` + own render line |
