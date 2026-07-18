@@ -58,9 +58,10 @@ NARROW -- policy/authority only, per the D3 govern!=guards split @d16e269bf). Th
 
 **R3 -- add the target-typed resolver + the container set (cse_schema.py, beside `map_cloudnode` `:345`):**
 ```python
-# Live-grounded (OWNED_BY object distribution @HEAD): the CONTAINMENT-INVERSE objects. Extensible via the same
-# governed bump if a new container appears as an OWNED_BY object (a coverage-gap, caught + reconciled, not guessed).
-_OWNED_BY_CONTAINER_TYPES: frozenset = frozenset({"S3_BUCKET"})
+# Live-grounded (OWNED_BY object distribution @HEAD): the two OWNED_BY object classes. Extensible via the same
+# governed bump if a new object type appears (a coverage-gap, caught by the census in Sec 4a, reconciled, not guessed).
+_OWNED_BY_CONTAINER_TYPES: frozenset = frozenset({"S3_BUCKET"})   # containment-inverse -> CONTAINS
+_OWNED_BY_ACTOR_TYPES: frozenset = frozenset({"MS_USER"})          # custody -> OWNS
 
 
 def map_cloudedge(edge_type: str, dst_node_type: str = "") -> "Relationship":
@@ -115,7 +116,35 @@ word-family, two axes. `OWNS : OWNERSHIP :: AUTHORIZES : AUTHORITY`. **Do NOT co
 
 ---
 
-## 5. **CO-MIGRATION REQUIRED (the seam this bump opens) -- flag to CTO/COO/AE**
+## 4a. Forward denominator-guard (CTO arch-gate condition @215258Z; folds the semctl denominator discipline)
+
+The two-case disambiguation is EXHAUSTIVE **today** (OWNED_BY objects = exactly {MS_USER, S3_BUCKET} @HEAD). The
+risk is FORWARD: a NEW OWNED_BY object type -- especially a new CONTAINER -- would `map_cloudedge`-DEFAULT to OWNS
+(custody), silently mis-classifying it. Same class as the materialize denominator + the auto-classifier: make it
+VISIBLE, never silently defaulted. Add a batch census (mirrors `coverage_sweep`'s pattern):
+
+```python
+def owned_by_object_census(owned_by_object_types) -> tuple:
+    """Forward denominator-guard (semctl contract): given the LIVE OWNED_BY object node_types (one re-derive),
+    return (ok, unknown_object_types). An object type in neither _OWNED_BY_ACTOR_TYPES nor
+    _OWNED_BY_CONTAINER_TYPES currently DEFAULTS to OWNS via map_cloudedge -- which is WRONG for a new CONTAINER.
+    Surface it for a governed whitelist-bump (add to the container set, or affirm custody), NEVER silently
+    default. Print the distribution on each re-derive so a new object type is seen, not absorbed."""
+    known = _OWNED_BY_ACTOR_TYPES | _OWNED_BY_CONTAINER_TYPES
+    unknown = sorted(set(owned_by_object_types) - known)
+    return (not unknown, unknown)
+```
+
+The re-derive / CSE-emit path calls this once per pass on the live OWNED_BY object set, prints
+`OWNED_BY objects: {type: count}`, and a non-empty `unknown` is a tracked coverage-gap (a governed bump), never a
+silent OWNS-default. **Additive; does not touch R1-R4.** CTO flagged it non-blocking for this land -- folded here
+so the guard lands WITH the resolver it guards (map_cloudedge is new this bump); ride-this-land vs fast-follow is
+CTO/COO's call. This is an ADDITIVE amendment post the gated @66a30da7c -- R1-R4 UNCHANGED (only Sec 4a + 2
+self-test checks added), so it does not re-open the arch-gate.
+
+---
+
+## 5. **CO-MIGRATION REQUIRED (the seam this bump opens) -- BINDING ON THE LAND (CTO @215258Z: atomic set, one window)**
 
 `map_cloudedge` is the new sanctioned resolver, but a live consumer still resolves OWNED_BY by DIRECT `.get()`:
 
@@ -156,18 +185,33 @@ check("R3: a non-polysemous edge still resolves by the flat map",
 check("R4: OWNERSHIP Qualifier + OWNS Relationship COEXIST (AUTHORITY:AUTHORIZES precedent)",
       "ownership" in _QUAL_VALUES and "owns" in _REL_VALUES
       and "authority" in _QUAL_VALUES and "authorizes" in _REL_VALUES)
+# forward denominator-guard (Sec 4a)
+check("4a: census FLAGS an unknown OWNED_BY object type (not silently defaulted to OWNS)",
+      owned_by_object_census({"MS_USER", "S3_BUCKET", "SOME_NEW_CONTAINER"}) == (False, ["SOME_NEW_CONTAINER"]))
+check("4a: census PASSES the known object set (MS_USER actor + S3_BUCKET container)",
+      owned_by_object_census({"MS_USER", "S3_BUCKET"}) == (True, []))
 ```
 
 ---
 
-## 7. Landing path (governed -- unchanged)
+## 7. Landing path (governed) -- an ATOMIC CO-MIGRATION SET, one window (CTO arch-gate @215258Z: GO; NO partial land)
 
 1. **DS~B (me):** this concrete spec = the DESIGN. (I do NOT edit org/modules/graph/cse_schema.py -- EXEC-locked.)
-2. **CTO:** arch-gate this concrete spec (schema-vs-design; R1-R4 + the co-migration seam).
-3. **CVO:** re-sign (exercise the self-test additions + the OWNED_BY re-map parity on the live graph:
-   OWNED_BY-custody now resolves OWNS, S3Key sense resolves CONTAINS, HAS_POLICY still GOVERNS).
-4. **COO/exec:** single-editor land the cse_schema.py edit (Sec 1-4) under the SoD author line; co-sequence the
-   `cse_emit_graphhead.py:102` migration (AE/0.7.0) + the rule-bank re-point @967f23fe1 (~C) in the same window.
-5. **~C:** verify post-land that `owns`/Custodian bind to the OWNS edge + both OWNED_BY senses resolve correctly.
+2. **CTO:** arch-gate CLOSED / GO @215258Z (R1-R4 grounded/correct; co-migration made BINDING; + the Sec-4a guard).
+3. **CVO:** re-sign -- exercise the 9 self-test checks + the OWNED_BY re-map parity on the LIVE graph
+   (custody->OWNS, S3Key->CONTAINS, HAS_POLICY->GOVERNS). CVO's live exercise, not a config read.
+4. **The atomic land set (ONE window, COO-coordinated -- a schema bump without its consumers repointed is the
+   half-migration trap):**
+   a. cse_schema.py bump (Sec 1-4a) -- **COO/exec single-editor**.
+   b. `cse_emit_graphhead.py:102` flat `.get()` -> `map_cloudedge` -- **AE/0.7.0**. CRITICAL: this is the
+      graph-head EMITTER; if left on flat `.get()` the LIVE graph gets the 232 S3Key edges as OWNS not CONTAINS.
+   c. my P2 parity/coverage tools (`NFRA_CSE_P2_ac4_fullgraph_parity.py:203`, `NFRA_CSE_P2_coverage_sweep.py:150`)
+      -> `map_cloudedge` -- **me (~B), same window**, self-committed.
+   d. rule-bank @967f23fe1 GOVERNS->OWNS re-point -- **~C, same window**.
+   e. **PRE-LAND ESTATE SWEEP RE-RUN** (`comp-grep CLOUDEDGE_TO_RELATIONSHIP` + any flat OWNED_BY resolution) at
+      land-time -- the co-migration set must be COMPLETE (multi-call-site predicate-coverage; Rule 20). COO runs
+      `comp-blast` on the OWNED_BY consumers when authoring the wave.
+   f. HOUSEKEEPING: delete / no-land-mark the staged pre-canonical `deliverables/NFRA_CSE_P1_cse_schema.py`.
+5. **~C:** verify post-land -- `owns`/Custodian bind to the OWNS edge + both OWNED_BY senses resolve correctly.
 
 *-- 0.4.0_DS_ClientPlatform~B, cse_schema.py owner. Concrete OWNS 0.4->0.5 bump; governed landing.*
