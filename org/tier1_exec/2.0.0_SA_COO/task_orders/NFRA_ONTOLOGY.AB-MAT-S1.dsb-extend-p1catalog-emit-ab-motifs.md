@@ -3,7 +3,8 @@
 <task_order id="NFRA_ONTOLOGY.AB-MAT-S1">
 <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<closure date="2026-07-18">APPLIED-CLOSED by CTO 210214Z, grounded at CTO's own comp-kuzu (nodes_snap 1276252256517924052, a 4th independent grounding). C2 accepted @fbfa06590; C3 re-emit @c7048f484 (overlapping-domain-cover, 3 systems object-data/compute-orchestration/pipeline); ADDITIVE ingest (debt layer preserved, C3System=4). Producer arn-index fix (78a5fddbe) recovered C2->C1 edges 79%->99.96% (5077/5079; 2 misses = confirmed estate drift, not id-space bug). Verified live FOUR ways: CVO round-trip cert PASS (@205653Z) + ~C re-census CONFORM (@203144Z) + DS~B resolve PASS (@202957Z) + CTO independent grounding. All 3 CTO semctl materialize-producer invariants confirmed (filed NFRA_SEMCTL @8e96ebf5f; +auto-classifier #2-hardening ruled in 210214Z). LANDMARK: the estate's FIRST canonical motif+system layer (13 motifs + 3 operational overlapping systems; previously 0 canonical / 1 degenerate debt-system), under ratified ontology LD-0311. Chain: DS~B emit + 0.7.0 ingest/root-cause/fix + ~C cover-model + CVO decisive drift-discrimination + COO run-ownership. The desired-vs-applied gate caught a silent 21% edge loss the emit alone would have shipped as 100%.</closure>
 <date>2026-07-18</date>
 <priority>HIGH -- Andrew-direct NFRA headline (A+B materialization); CTO SoD gate OPEN (msg 140326Z); chain step 1 of 4; DS~B live+idle, start now.</priority>
 
