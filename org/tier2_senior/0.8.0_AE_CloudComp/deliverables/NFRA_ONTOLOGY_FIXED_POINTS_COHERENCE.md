@@ -3,7 +3,12 @@
 **Owner: `0.8.0_AE_CloudComp` (base, coordinator).** Andrew-direct 2026-07-18: the ontology FIXED-POINTS
 coherence routed to base (coordinator) rather than ~A (on the NFRA_GENESIS SDK). base LOCKS these + flags
 drift; this is the single reference the ~C build + the CTO gate reconcile against. Not the design (that is
-~C's DoR); this is the coherence layer ON it. Last reconciled: 2026-07-18 ~0700Z against @297c12bea.
+~C's DoR); this is the coherence layer ON it. **>> LOCKED -- gate-submission fixed point: `NFRA_ONTOLOGY_CLOSED_SET.md` @96e86c8a4.** base whole-set
+coherence-check **PASS** 2026-07-18 ~0756Z: ONE fix returned (served_from orphaned from the RELATION axis) +
+folded (`served_from`->derives-from + Gateway role; set stays 10, no concrete relation orphaned). Custodian
+(14th Role) folded per the base heads-up (Person/Org CONTEXTUAL). AXIS-2 CSE-owner-ratified (DS~B @d16e269bf).
+MSTR doctrine PASS on the principles; **LD-0311 lands on this PASS + the CTO-gate-close.** ~C submitting to
+CTO in parallel. Last reconciled: 2026-07-18 ~0756Z against @96e86c8a4.
 
 ## The elemental frame (the coherence invariant everything must ride)
 **1 LADDER + 3 ORTHOGONAL AXES + 1 OPERATOR** (~A's cut, converged 1:1 with ~C's DoR v0.2):
@@ -24,7 +29,7 @@ drift; this is the single reference the ~C build + the CTO gate reconcile agains
 ## Fixed points (LOCKED @297c12bea -- pending CTO closed-set gate)
 | Set | Fixed point | Grounding |
 |---|---|---|
-| **Roles (13, FINALIZING)** | Source, Store, Producer, Transformer, Consumer, Sink, Gateway, Guard, Router, Trigger, Registry, Container, Observer | Observer empirically forced (~305 MONITORS). ~C finalizing the ROLE axis (DS~B-deferred): + **Custodian** (the OWNS-target actor); confirm Registry/Router/Gateway ABSORB the re-homed D4/D7 composites. Count may go 13->14. |
+| **Roles (14, FINAL @96e86c8a4)** | Source, Store, Producer, Transformer, Consumer, Sink, Gateway, Guard, Router, Trigger, Registry, Container, Observer, **Custodian** | Custodian = the OWNS-target actor (Person/Org now CONTEXTUAL, not fixed Source/Sink -- base heads-up folded). Gateway/Router/Registry absorb projects/routes-to/resolves-through (each = a concrete relation -> abstract RELATION + a Role; `served_from`->derives-from+Gateway, base coherence-check). **Observer full-Role-vs-Guard-subtype = the ONE open CTO item.** |
 | **Relationships (10, OWNER-RATIFIED @a7f075a77)** | produces, consumes, derives-from, depends-on, contains, triggers, **guards**, **governs**, denies, **owns** | DS~B ruling (below): guards/governs SPLIT (2, not 1 -- governance != gating); `owns` = governed CSE primitive (0.4->0.5 bump, S5); routes-to / resolves-through / projects RE-HOMED to Role-composites (NOT primitives). C-1 RESOLVED. Supersedes the pre-ruling 12-set. |
 | **Variance (6)** | Canonical, Twin, Variant, Fork-Shadow, Superseded, Orphan | base-confirmed, MSTR-endorsed. Mechanism @f904033ea (position_key = logical-identity only; structure COMPARED; allowed_facets). |
 | **Lineage** | compositional (Role+Relationship grammar) | no ratification -- zero new primitives. |
