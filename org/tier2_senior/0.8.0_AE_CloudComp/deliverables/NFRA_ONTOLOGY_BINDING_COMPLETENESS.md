@@ -15,6 +15,13 @@ triggers/fetches are the same concrete vocabulary). So binding against CSE = bin
 more. NFRA_GLOBGRPH's L1-L7 (40/14) is the STACK axis (orthogonal); its node classes bind by the same rules
 (open item, DoR Section 13).
 
+**SCOPE NOTE for the gate (base, 042801Z -- so CTO does not read breadth as drift).** This binding is a
+STRICT SUPERSET of canon-patterns. canon-patterns models only the FLOW motifs (AWS infra + FE-stitch:
+reads/writes/triggers/served_from); CSE's universe ADDS STRUCTURAL/DEFINITIONAL entities
+(Module/GraphScope/Tier/Type/Symbol) that canon-patterns never modeled. So decisions D2 (Container) and D8
+(definitional scope-out) exist precisely BECAUSE the agnostic layer binds a broader universe than
+canon-patterns ever did -- that breadth is a FEATURE (the agnostic ambition), NOT canon-patterns drift.
+
 **No-catch-all discipline.** Every row binds to exactly one archetype OR is one of two HONEST non-bindings:
 (a) **contextual** -- a polymorphic type whose Role the adapter derives from edges (Lambda/Service/Component);
 this is a RESOLVED binding (one archetype per instance), not a catch-all. (b) **explicit-scope-out** -- a type
@@ -36,7 +43,7 @@ opposite of a catch-all: it is the named place unknowns are COUNTED, not hidden.
 | governs | abstract | **guards** | a Policy/authority governs = gates |
 | supersedes | abstract | *(Variance: Superseded)* | NOT a C1 edge -- a cross-instance comparison (DoR Section 8) |
 | references | abstract | **resolves-through** | a soft name/identity reference resolved via a target |
-| implements | abstract | *(scope-out or D3)* | definitional/spec-conformance (a class implements an interface) -- **[DECISION D3: `conforms-to` primitive vs code/taxonomy axis]** |
+| implements | abstract | *(scope-out, D3)* | SPEC/definitional conformance (a class implements an interface) -- scope OUT. **NOTE (MSTR doctrine lean): STRUCTURAL conformance ("conforms to the canonical pattern / diverged from its twin") STAYS IN -- that is the Variance operator, not `implements`. [DECISION D3]** |
 | requires | abstract | **depends-on** | a required precondition = a dependency |
 | triggers | concrete | **triggers** | identity (control, not payload) |
 | denied | concrete | **denies** | explicit prohibition (the cross-firm Deny control) |
@@ -47,9 +54,9 @@ opposite of a catch-all: it is the named place unknowns are COUNTED, not hidden.
 | writes | concrete | **produces** | adapter-grain of produces |
 | fetches | concrete | **consumes** | adapter-grain of consumes |
 | flows_to | concrete | **derives-from** | adapter-grain; carries the KIND |
-| served_from | concrete | **projects** | adapter-grain of projects (the served edge) |
-| renders | concrete | **projects** | projection into a Sink (frontend render) |
-| calls | concrete | **triggers** | invocation (adapter-grain of triggers; a call that returns data also carries a `consumes`) |
+| served_from | concrete | **projects** | adapter-grain of projects (the SERVER-side serve boundary) |
+| renders | concrete | **consumes** | the CLIENT-side terminal display (a Sink `consumes` a Field to render it). **KEPT DISTINCT from `served_from`->`projects`** (base catch) -- collapsing serve+render into one relationship would kill canon-patterns' `dangling_served` deviation (served-but-not-rendered vs rendered). Serve = a boundary `projects`; render = a Sink `consumes`. |
+| calls | concrete | **triggers** (+`consumes` if data-returning) | invocation; a data-returning call emits BOTH the control `triggers` AND the data `consumes` |
 | imports | concrete | **depends-on** | code import = a dependency (adapter-grain) |
 | *(no CSE term)* | -- | **routes-to** | conditional forwarding -- present in canon-patterns (Router/silent_rewrite) but NOT in CSE's enum; **[DECISION D4: propose adding `routes-to` to CSE's SoD enum, or keep as an ontology-layer refinement of `triggers`+predicate]** |
 
@@ -115,12 +122,12 @@ definitional axis (D8); the rest carry named decisions D5/D6/D7. **Zero catch-al
 |---|---|---|
 | **D1** | `depends-on` as a primitive relationship? | **Yes** -- CSE has it first-class; it is the general dependency (existence/behavior) distinct from `consumes` (state-read). |
 | **D2** | `contains` (composition) + a **Container** Role, or containment purely as the `contains` relation? | **Add `contains` as a primitive relationship; make Container a Role** (Module/GraphScope/Tier are real container nodes). Composition is fundamental to any system; omitting it was a v0.1-0.2 gap this proof caught. |
-| **D3** | `implements`/`conforms-to` -- a relationship primitive, or scope to the code/definitional axis? | **Scope out** by default (spec-conformance is a definitional/taxonomy relation, not a data-flow relation); revisit if a consumer needs it. |
+| **D3** | `implements`/`conforms-to` -- a relationship primitive, or scope to the code/definitional axis? | **Scope out SPEC/DEFINITIONAL conformance** (X implements interface Y -- definitional). **MSTR doctrine lean (carry to gate): STRUCTURAL conformance -- "conforms to the canonical pattern / diverged from its twin" -- MUST STAY IN; it is the VARIANCE operator (Canonical vs Fork-Shadow) that unblocks COMPSIMILAR, NOT `implements`.** The line: structural conformance = Variance (IN); spec/definitional conformance = `implements` (OUT). Doctrine-adjacent -> RAVC MSTR + CTO. |
 | **D4** | `routes-to` -- add to CSE's SoD enum, or keep as an ontology refinement of `triggers`+predicate? | **Keep as an ontology-layer Role/Relationship** (Router); it is a refinement CSE's enum lacks. If it must materialize, route the enum extension to the schema owner (SoD). |
 | **D5** | Spec/governance entities (Requirement/Constraint/Policy) -> Guard, or a distinct spec axis? | **Guard** -- they gate/constrain other nodes (`governs` -> `guards`). Clean and agnostic. |
 | **D6** | Actor entities (Person/Organization) -> Source/Sink, or a distinct Actor axis? | **Source/Sink at the boundary** -- an actor originates or receives; no new axis needed. |
 | **D7** | Identity/principal (IAMRole) -> Registry, Guard-principal, or its own? | **Registry** (an identity resolved-through) with a Guard-adjacency; the `IAMStatement` carries the gate. |
-| **D8** | Definitional entities (Type/Symbol/Concept) in or out of the Role axis? | **Out** (Type/Symbol = definitional/taxonomy axis); **Concept = the by-design honest-degrade** (no role, counted in the denominator). |
+| **D8** | Definitional entities (Type/Symbol/Concept) in or out of the Role axis? | **Out** (Type/Symbol = definitional/taxonomy axis); **Concept = the by-design honest-degrade** (no role, counted in the denominator). **MSTR doctrine lean = STRONG ENDORSE scope-out: Type/Symbol are what a node IS-CALLED / its type-identity = OPAL_TAXONOMY's naming axis, not the relational ontology's -- scoping them out IS the distinct-from-taxonomy guardrail working.** Doctrine-adjacent -> RAVC MSTR + CTO. |
 
 ---
 
