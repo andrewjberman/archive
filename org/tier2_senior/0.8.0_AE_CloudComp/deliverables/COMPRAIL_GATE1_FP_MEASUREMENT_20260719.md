@@ -1,5 +1,8 @@
 # COMPRAIL Gate-1 (broad-repo-grep DENY) -- FP-rate measurement FINDING
 
+> ## RETRACTED 2026-07-19 -- FALSE PREMISE. Gate-1 is NOT staged-OFF; it is ARMED + ENFORCING since 2026-06-26.
+> This measurement assumed Gate-1 was staged-unarmed and measured `comp-tool-hud.log` HUD-HIT events (which are `_gate=0` = NOT-denied). **That premise is FALSE:** the enforce marker `org/mcp/comprail-gate1.enforce` is committed (`57c86bd4b`, 06-26, "Flip fired 14:04Z, COO primary") and the hook DENIES an estate-broad-grep on exercise -- Gate-1 is LIVE. The actual governed events are the ~22 `class=comp_which` DENY rows in `comp-which-rail.log`, NOT the HUD-HIT log this measured. **The measurement is INVALID as-is; do NOT cite its numbers.** It would become relevant only if COO + CVO~B disposition the marker as a leftover-to-remove (reading (b)); held pending that disposition. Root: everyone (me, CTO, CVO, the fence) read the stale hook COMMENT + non-estate greps (which proceed regardless), never the marker FILE -- the SYSPARITY class one level up. Urgent finding surfaced to COO/CTO/CVO ~2259Z.
+
 **Author:** 0.8.0_AE_CloudComp~Z | **Date:** 2026-07-19 | **For:** 2.0.0_SA_COO + 3.0.0_SA_CVO~B (the joint hold-owners) | **archetype:** VALIDATE
 **DISPOSITION: PRESENT, DO NOT ARM.** This is the evidence the Gate-1 forward-GO wants; producing it is NOT satisfying the hold. The arming decision (flip `org/mcp/comprail-gate1.enforce`) rests with COO + CVO~B (or Andrew) -- the lane that generates the evidence does not get to be the actor (COMPASSURANCE TO-5 fence).
 
