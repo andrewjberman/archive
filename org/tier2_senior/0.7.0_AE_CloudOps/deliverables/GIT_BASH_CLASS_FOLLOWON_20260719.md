@@ -32,14 +32,25 @@ worker is serving now). **To close Stage B:** after a natural broker restart, ve
 running broker (fresh `worker.hb` + a live `worker.pid` process) and that the new-code path (not a hand-launch)
 brought it up. **Flag CTO + COO on close.** Joint-tracked: CTO holds the finding OPEN as fix-landed/prod-pending.
 
-## LOW / later -- migrate the 4 ad-hoc python->bash callers to the resolver (CTO-scoped LOW)
+## DONE @984d0be0c -- the ad-hoc python->bash callers migrated (COO idle-reallocation 211300Z, Andrew-direct)
 
-Import `git_bash_resolver.git_bash()` in place of each ad-hoc handler; exercise each (actually run the bash
-path). Not urgent -- no live fire in these; consolidation-clean when touched.
-- `org/mcp/hook_register_orphan_cleanup.py:59-75` -- documents the class (names the SILENT variant); verify it
-  already handles it or migrate.
-- `comp_system.py:91` (COMP_DRIFT_BASH env)
-- `comp_debt/grounding_lib.py:55` (shutil.which)
-- `comp_similar_phase1/summary_corpus.py:150` (local resolver)
-- `compproof/tool_probe.py:148` ("may hit WSL" fallback)
-(paths per CTO victim-scan 192702Z; confirm exact line/module at migration time -- vintage.)
+Migrated each to `git_bash_resolver.git_bash()` (kept each caller's env-override precedence), commit-gate clean,
+and EXERCISED each (imported the module, confirmed the resolver resolves the real Git Bash + the resolved bash
+actually RUNS `echo ok` rc=0 -- verify-not-assume). Committed under my author line (these paths ARE AE-permitted
+-- my earlier "likely ANY_EXEC" concern was wrong; the gate passed clean, no --force).
+
+| Caller | Was | Now | Exercised |
+|---|---|---|---|
+| `org/modules/graph/comp_system.py` | already avoids bash (`[sys.executable, kuzu_cli.py]`) | **NO-OP** -- best-practice example, untouched | n/a |
+| `org/modules/graph/comp_debt/grounding_lib.py:55` | `shutil.which("bash")` | `git_bash() or shutil.which or "bash"` | `_BASH_EXE`=Git Bash, runs |
+| `org/modules/graph/debtscan/summary_corpus.py` (`_kuzu_cmd`) | `shutil.which("bash")` | `git_bash() or shutil.which or "bash"` | interp=Git Bash, runs |
+| `org/modules/graph/compproof/tool_probe.py:120` | local hardcoded-list `_git_bash()` | delegates to shared (keeps GIT_BASH env) | `_git_bash()`=Git Bash, runs, delegates=True |
+
+**HONEST FRAMING (Rule-22, don't overclaim):** unlike server.py (a CONFIRMED 12-day live outage), these 3 were
+NOT live victims -- `shutil.which("bash")` returns Git Bash on this host's current PATH (measured), so they were
+resolving correctly. The migration retires the CONDITIONAL risk (a PATH reorder would flip which() to the WSL
+stub) + dedups tool_probe's local resolver. Consolidation-clean, additive. `hook_register_orphan_cleanup.py`
+DOCUMENTS the class (names the silent variant) -- left as-is (a documenter, not a broken caller).
+
+**The python->bash WSL-stub class is now CLOSED across the estate's python callers** the victim-scan surfaced:
+1 canonical resolver + all callers either migrated, already-safe-by-design, or (server.py) fixed.
