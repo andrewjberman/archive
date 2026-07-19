@@ -3,7 +3,9 @@
 <project>NFRA_SYSPARITY</project>
 <issued_to>0.7.0_AE_CloudOps~B</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- DELIVERED @058e21a79 (0.7.0_AE_CloudOps~B, 2026-07-19): infra/system/sdk_crosswalk.py. AC1-3 met + EXERCISED (self-test seeds divergences + confirms flag, PASS; live flags 7 SDK-uncovered globgrph files). Reuses comp-iam live view via git_bash_resolver. AC4 = LD-0318 CVO-verify PENDING (CVO pinged). AC5 = session log pending. -->
+
 <priority>P3 -- optional/high-value (PRD S4: sequence last, de-scope if effort outweighs value). Context-reallocation of 0.7.0~B (CloudOps/infra/TF lane, finished its git_bash migrations) per Andrew-direct idle-reallocation-by-context.</priority>
 
 <references>
