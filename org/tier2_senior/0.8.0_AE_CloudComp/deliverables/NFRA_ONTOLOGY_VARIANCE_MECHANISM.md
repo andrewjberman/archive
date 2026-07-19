@@ -1,7 +1,11 @@
 # NFRA_ONTOLOGY -- The Variance Mechanism (declared-dimension symmetry test)
 
 **Companion to `NFRA_ONTOLOGY_DESIGN_OF_RECORD.md` (v0.2).** Author: `0.8.0_AE_CloudComp~C`, 2026-07-18.
-Status: DRAFT (NEXT-2), **rev.2 -- base Q1/Q2 fix + ~D's 4 interface asks folded (044024Z / 043855Z).** The
+Status: **rev.3 -- v2 DISPOSITION co-change (CTO 013249Z + CVO cot adjudication): a firm fork-shadow under
+[]+advisory is a CANDIDATE, NOT confirmed debt (corrects the ratified @f904033ea "Fork-Shadow=debt" model at
+:100/:112/:155; cot = the live NON-debt proof @1fe0f5e6f). The verdict KIND is unchanged; only the disposition
+claim is corrected. HOLD re-land until CTO+MSTR co-sign the mechanism ruling.** rev.2 -- base Q1/Q2 fix + ~D's
+4 interface asks folded (044024Z / 043855Z). The
 Variance polarity + hard-firm-invariant are base-confirmed; the CORE was corrected per base's review (Q1: keep
 structure OUT of the identity key so Fork-Shadow fires; Q2: `allowed_facets` makes Variant deterministic). The
 CONFORMANCE TERMINOLOGY is doctrine-adjacent, pending the D3 joint ruling (structural conformance = Variance
@@ -97,7 +101,10 @@ a value in expected MISSING from present   -> asymmetric. legitimate IF the valu
 # (2b) STRUCTURAL SYMMETRY -- compare each instance's structure() to ref:
 structure(i) == structure(ref) for all i   -> TWIN group (all structurally identical; ref = Canonical).  CLEAR.
 structure(i) differs from ref ONLY in facets within F  -> instance i is a VARIANT (legitimate facet-diff).  CLEAR.
-structure(i) differs from ref OUTSIDE F (or F is empty) -> instance i is a FORK-SHADOW (debt) -- the diverged copy.
+structure(i) differs from ref OUTSIDE F (or F is empty) -> instance i is a FORK-SHADOW -- the diverged copy.
+   # DISPOSITION (v2, CTO 013249Z + CVO cot adjudication): a fork-shadow is CONFIRMED DEBT only on a GROUNDED
+   # dimension (allowed_facets populated+cited); under []+advisory it is a CANDIDATE (pending adjudication),
+   # NOT confirmed debt -- it can ground out to debt / graph-coverage-gap / designed-difference.
 
 # other verdicts:
 SINGLETON  group of 1, no sibling, no consumer                    -> ORPHAN.
@@ -109,9 +116,15 @@ SUPERSEDED two instances at the SAME (position_key, dim_value), one `supersedes`
 `allowed_facets` (a dev/prod config differing only in memory_size). Both CLEAR. The `allowed_facets` set is
 what makes the Twin/Variant/Fork-Shadow line a pure structural test, not a judgment.
 
-**Fork-Shadow -- the ONLY debt verdict.** It fires two ways, both now well-defined against the logical-identity
-key: (a) an instance whose STRUCTURE diverges from its siblings OUTSIDE the allowed facets (the 29-file inf
-bare-vs-INF_ shadow; the 9-RED bd-cot fork); (b) an UNDECLARED missing side of an expected sibling set.
+**Fork-Shadow -- the only debt-CANDIDATE verdict (NOT confirmed debt under advisory).** It fires two ways, both
+well-defined against the logical-identity key: (a) an instance whose STRUCTURE diverges from its siblings
+OUTSIDE the allowed facets (the 29-file inf bare-vs-INF_ shadow; the 9-RED bd-cot fork); (b) an UNDECLARED
+missing side of an expected sibling set. **DISPOSITION (v2, CTO 013249Z + CVO cot adjudication -- corrects the
+earlier "ONLY debt verdict"):** a firm fork-shadow under `[]`+advisory is a CANDIDATE pending adjudication, NOT
+confirmed debt -- it can ground out to real-debt / graph-coverage-gap / designed-legit-difference. **cot is the
+LIVE PROOF: opal-data-cot was a firm fork-shadow that grounded to a 0.7.0-derive coverage-GAP = NON-debt
+(@1fe0f5e6f).** Only a fork-shadow on a GROUNDED dimension (allowed_facets populated+cited) is confirmed debt.
+The verdict KIND (Fork-Shadow = the structural divergence) is unchanged; only the DISPOSITION claim is corrected.
 
 ---
 
@@ -152,7 +165,8 @@ variance_verdict(node, corpus?) -> one of:   # phrasing strings are FROM the gov
   { kind:"Canonical",  dim:<D>, of_names:[<sibling names>] } -> "canonical <D>-twin (reference) of <of_names>"
   { kind:"Twin",       dim:<D>, of:<arn>, of_name:<name> }   -> "canonical <D>-twin of <of_name>"
   { kind:"Variant",    dim:<D>, of:<arn>, of_name:<name> }   -> "<D>-variant of <of_name>"
-  { kind:"Fork-Shadow",dim:<D>, of:<arn>, of_name:<name> }   -> "divergent fork-shadow of <of_name> (debt)"
+  { kind:"Fork-Shadow",dim:<D>, of:<arn>, of_name:<name> }   -> "divergent fork-shadow of <of_name> <disposition>"
+      # <disposition> from fork_shadow_disposition (v2, CTO 013249Z): advisory (allowed_facets=[]) -> "(candidate -- advisory, pending adjudication)"; grounded -> "(debt)"
   { kind:"Superseded", by:<arn>, by_name:<name> }            -> "superseded by <by_name>"
   { kind:"Orphan" }                                          -> "orphan (no twin, no consumer)"
   (none)                                                     -> NO clause (absent, counted in the denominator)
