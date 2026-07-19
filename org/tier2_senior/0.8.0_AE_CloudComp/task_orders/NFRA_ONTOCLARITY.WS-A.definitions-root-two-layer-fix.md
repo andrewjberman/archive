@@ -3,7 +3,22 @@
 <project>NFRA_ONTOCLARITY</project>
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>complete</status>
+<completion>
+COMPLETE 2026-07-19 (CVO semantic-verify PASS @223800Z + (b)-completeness closed @224010Z). All 7 ACs met:
+- AC-1..5 (the 5 fogs) RESOLVED at source, verified SEMANTICALLY (ambiguity GONE, not reworded):
+  (a) RULE_BANK.yaml meta.layers -- two-layer disambiguation stated ONCE authoritatively (CSE-algebra substrate
+      vs archetype classification, each disclaiming the other); (b) meta.canonical_source single machine authority
+      + all 4 deferring copies banner-marked (mirrors SNAPSHOT + canon-patterns/CLOSED_SET DEFERS); (c) Observer
+      reconciled to SETTLED/GRANTED (LD-0311), zero live contradiction; (d) zero live Fork-Shadow=debt (advisory-
+      candidate regime; pre-LD-0315 example annotated superseded); (e) variance_dimensions header annotated
+      (dimensions=axes / verdicts=vocab), frozen-schema-safe.
+- AC-6 (CVO SEMANTIC-VERIFIED GATE, load-bearing): CVO PASS all 5 fogs on committed HEAD @223800Z.
+- AC-7 (session log + Compiler Tools): logged.
+Landed: AE deliverables @2e94df808 + CTO grantor-land of the 3 exec yaml @f7eef81f1 (WS-2 gate dogfooded --
+06 regen'd + committed together, control-honoring). CTO arch-gate @223037Z + COO design-review + RAVC.
+Next: WS-B/C/D (queue @0925fd188), same semantic bar.
+</completion>
 <priority>P1 -- DO FIRST (contains the ROOT fix everything downstream inherits). Sequenced AFTER ~C's SYSPARITY WS-4 (same ontology lane; WS-A's clarified defs then feed WS-4's representation -- one head, no seam). GO on WS-4 land. Context-owner reallocation of ~C per Andrew-direct.</priority>
 
 <references>
