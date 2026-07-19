@@ -38,9 +38,11 @@ past-SLA row surfaces. Do NOT duplicate the forward incorporation loop -- WS-6 i
 
 <acceptance_criteria>
 1. A pending-age SLA exists on the abstraction-ledger (a `pending` NA row past N days surfaces as a tracked breach), EXERCISED (seed a past-SLA row -> it surfaces; within-SLA -> silent).
+1a. **DISPOSITIONED, NOT DATED (CVO+MSTR refined bar @224903Z):** the SLA must force each pending NA row to a DISPOSITION -- INCORPORATED or EXPLICITLY-DEFERRED -- not merely log an SLA date. An SLA that logs a date is a CALENDAR; an SLA that forces each row to a disposition is a CONTROL. Exercised: each of the (currently 6) pending rows resolves to incorporated-or-deferred, not "date stamped".
+1b. **BURN-DOWN > GENERATION (CVO+MSTR refined bar):** the SLA must account for its OWN FEED -- parity/enhancement work GENERATES incorporation debt (this session: NA-0006 WS-2 gate + NA-0007 firm-aliases were the session's own fixes, loop-detected). So closing "the current 6" is insufficient: if burn-down rate <= generation rate, the debt is PERMANENT-BY-CONSTRUCTION. The design must EITHER set a burn-down cadence that exceeds the generation rate, OR explicitly BOUND what feeds the queue (e.g. only NFRA-core enhancements generate incorporation obligations). State which, and why it converges.
 2. Alert-suspension-clean (on-demand / reporting surface, no new scheduled CI/alert cadence -- consolidation suspension).
 3. Does NOT duplicate the NESTEDABSTRACT forward incorporation loop (WS-6 = the SLA/pressure; ~A's loop burns it down). The SLA-breach surface feeds COO's cadence-sweep reporting (COO cadence-owner surfaces the breach + the override-rate at milestones).
-4. LD-0318 CVO-VERIFIED GATE: CVO verifies the SLA surfaces a real breach (per PRD S7). Ping CVO on land.
+4. LD-0318 CVO-VERIFIED GATE (TWO conditions, both EXERCISED, per CVO @224903Z): (i) the 6 pending each DISPOSITIONED (incorporated-or-explicitly-deferred, exercised -- not dated); AND (ii) the SLA mechanism actually CLOSES-FASTER-THAN-IT-FEEDS (or bounds the feed). A dated-not-dispositioned SLA, or one whose burn-down <= generation, FAILS the bar. Ping CVO on land.
 5. Session log with Compiler Tools section reproducing each <run> vs <expect>.
 </acceptance_criteria>
 
