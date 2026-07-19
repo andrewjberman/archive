@@ -82,11 +82,23 @@ reference argument `<of_name>`).
 
 ### 2.2 The identity KEY: `position_key` = name-minus-firm-token (base Q1 fix, realized)
 ```
-position_key(node) = node.name with any declared firm value-token replaced by the placeholder "{firm}"
-                     (token match at a word boundary; the FIRST declared value that matches).
+position_key(node) = node.name with the firm identity collapsed to "{firm}": the FIRST declared firm VALUE
+                     token (bd/cot/inf) at a word boundary -> "{firm}", THEN any REDUNDANT same-firm client
+                     ALIAS token (governed firm_aliases) stripped, so a firm's two identity tokens collapse
+                     to one placeholder.
   opal-data-bd  -> opal-data-{firm}   |  opal-data-cot -> opal-data-{firm}  |  opal-data-inf -> opal-data-{firm}
-  bd-49f-runner -> {firm}-49f-runner  (token 'bd' at boundary)   [C2/name grain, extensible]
+  bd-49f-etf-ownership-daily -> {firm}-etf-ownership-daily   (bd value + '49f' client-alias -> one {firm};
+                                        now keys 3-way WITH cot/inf-etf-ownership-daily -- the @c2a0cd66b fix)
+  bd-49f-runner -> {firm}-runner      (alias '49f' stripped after 'bd' matched)   [C2/name grain, extensible]
 ```
+- **FIRM-ALIAS NORMALIZATION (rev.4, @c2a0cd66b fix -- CTO arch-gated).** The firm is identified by the VALUE
+  token ONLY (case-sensitive, bd/cot/inf); an alias NEVER creates a firm match, it only removes a RESIDUAL once
+  the value matched -- so nothing is newly firm-keyed (Cottonwood/Inflection in data-file / portal-component
+  names carry no value token and stay unkeyed). The COMPLETE alias map lives in `variance_dimensions.yaml`
+  `firm_aliases` (all 3 firms; only bd's `49f` fires in the estate today). **OVER-MERGE GUARD:** if alias-strip
+  would collapse two genuinely-distinct same-firm real resources onto one key, `_compute_variances` reverts them
+  to the value-only key (never guesses which is the twin) -- grounded ZERO real collisions (2026-07-19). The
+  standalone-alias / fused `bd49f` / case-insensitive widening is DEFERRED to a CTO widen-ruling.
 - **Structure is NOT in the key** (the load-bearing Q1 fix): the key is the dimension-stripped LOGICAL
   identity ONLY. If `position_key` returns unchanged (no firm token matched) -> the node carries no firm
   dimension -> **no verdict** (counted in the denominator, never guessed).
