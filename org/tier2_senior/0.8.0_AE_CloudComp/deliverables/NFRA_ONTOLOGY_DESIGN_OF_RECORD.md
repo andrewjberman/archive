@@ -310,7 +310,7 @@ it applies across the ladder. Proposed set (**6**):
 | **Canonical** | The reference instance all others are measured against. | designated, or the modal/dominant shape. |
 | **Twin** | A DESIGNED parallel instance, structurally symmetric to canonical. **NOT debt.** | matches on the IDENTITY key AND a SIBLING SET exists across all values of a DECLARED variance dimension. |
 | **Variant** | A legitimate FACET-difference (per-env, per-service, per-tenant). | differs ONLY along a declared dimension. |
-| **Fork-Shadow** | Diverged from its twin/canonical WITHOUT a declared reason. **This IS debt.** | matches identity key but differs OFF every declared dimension (asymmetric + undeclared). |
+| **Fork-Shadow** | Diverged from its twin/canonical WITHOUT a declared reason. **Advisory debt-CANDIDATE** (v2, CTO 013249Z + CVO cot adjudication): confirmed debt ONLY on a GROUNDED dimension (allowed_facets populated+cited); under `[]`+advisory a CANDIDATE pending adjudication -- can ground to debt / coverage-gap / designed-difference (cot = live NON-debt proof @1fe0f5e6f). | matches identity key but differs OFF every declared dimension (asymmetric + undeclared). |
 | **Superseded** | Replaced by a newer instance but still present. | a newer instance `supersedes` it; both live. |
 | **Orphan** | No canonical/twin/consumer relationship at all -- disconnected. | no variance peer AND no live consumer. |
 
@@ -320,7 +320,8 @@ universal layer generalizes **"firm" as a VARIANT-AXIS PARAMETER** -- a system D
 dimensions (firm, environment, region, tenant, service, ...). Then, keying identity on
 `(variant-axis-value, layer, logical-stage)`:
 - **Symmetry test:** does a SIBLING SET exist across ALL values of the declared dimension at the same
-  (layer, stage)? Yes -> **Twin/Variant** (canon). One value special-cased -> **Fork-Shadow** (debt).
+  (layer, stage)? Yes -> **Twin/Variant** (canon). One value special-cased -> **Fork-Shadow** (advisory
+  debt-CANDIDATE under `[]`+advisory; confirmed debt only when the dimension is grounded -- v2, CTO 013249Z).
 - **Polarity is load-bearing (base specific-B):** the guard **CLEARS** designed parallels (they are canon);
   it does **NOT** flag them. Only asymmetric+undeclared divergence is debt.
 
@@ -439,7 +440,7 @@ calculus. Net: ONE universal frame instead of 4 hard-coded pattern-classes.
 deterministically, from a read-from-FILE governed catalog (Section 7):
 - **Role** (C0 label) -- context adjacent to ~D's C2 motif+role clause.
 - **System membership** (C3) -- `"member of <system>"`, substrate-neutral, NOT raw canon-patterns.
-- **Variance verdict** -- `"canonical firm-twin of X"` / `"divergent fork-shadow (debt)"` from the
+- **Variance verdict** -- `"canonical firm-twin of X"` / `"divergent fork-shadow (candidate -- advisory, pending adjudication)"` (advisory dim; grounded -> "(debt)") from the
   declared-dimension symmetry test.
 
 Contract shape I will hand ~D at gate-pass (base FEEDS the walkthrough): a pure function `node -> {role,

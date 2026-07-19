@@ -61,7 +61,7 @@ phrasing:
   Canonical:   "canonical <D>-twin (reference) of <of_names>"
   Twin:        "canonical <D>-twin of <of_name>"
   Variant:     "<D>-variant of <of_name>"          # unreachable for firm (allowed_facets=[]); present for env/region
-  Fork-Shadow: "divergent fork-shadow of <of_name> (debt)"
+  Fork-Shadow: "divergent fork-shadow of <of_name> <disposition>"   # v2: <disposition> advisory-conditional (sec.2.5 fork_shadow_disposition)
   Superseded:  "superseded by <by_name>"
   Orphan:      "orphan (no twin, no consumer)"
 ```
@@ -131,7 +131,7 @@ present  = { firm_value(i) : i in group }
   ref = MODAL membership-SET among present siblings (strict plurality).
   a UNIQUE modal exists:
     structure(i) == ref                       -> instance i is a TWIN (one modal-matcher = designated Canonical). CLEAR.
-    structure(i) != ref  (set differs; F=[])  -> instance i = FORK-SHADOW of the modal (debt).  # fires for ANY diverging firm, incl. the ex-anchor
+    structure(i) != ref  (set differs; F=[])  -> instance i = FORK-SHADOW of the modal.  # KIND only; disposition = advisory-candidate under [] (v2), confirmed debt only when grounded. fires for ANY diverging firm, incl. the ex-anchor
   NO unique modal (tie for plurality: all-distinct 1-1-1, or an even split in a >3-value dim):
     -> NO canonical majority. FLAG ALL present as divergent (Fork-Shadow polarity, of_names = the other
        siblings, qualifier "no canonical majority"). NEVER silently pick a ref (base 234142Z). Counted, surfaced.
@@ -182,11 +182,11 @@ graph @ 21:43Z). `structure(opal-data-bd) = {a-access, a-serve, a-store, b-io}` 
   (reference) of opal-data-cot/opal-data-inf`.
 - **Fork-Shadow (inf diverges):** `structure(bd) == structure(cot) = {a-access,a-serve,a-store,b-io}` (the
   MODAL, 2 of 3), `structure(inf) = {a-store, a-access}` (missing a-serve/b-io) -> inf differs from the modal
-  OUTSIDE the empty `allowed_facets` -> **inf's bucket = FORK-SHADOW of the modal (debt)**; bd/cot = Twins.
+  OUTSIDE the empty `allowed_facets` -> **inf's bucket = FORK-SHADOW of the modal** (advisory candidate under []; v2); bd/cot = Twins.
   PRECISE, not "inf missing + an inf singleton" (the over-constrained-key failure the mechanism §6 calls out).
 - **Fork-Shadow (BD diverges -- the case the fixed-ref bug HID, base 234142Z):** `structure(cot) ==
   structure(inf) = {a-access,a-serve,a-store,b-io}` (the MODAL, 2 of 3), `structure(bd) = {a-store,a-access}`
-  -> **bd = FORK-SHADOW of the modal (debt)**, cot/inf = Twins. With a fixed `ref=bd` this INVERTED (bd cleared,
+  -> **bd = FORK-SHADOW of the modal** (advisory candidate under []; v2), cot/inf = Twins. With a fixed `ref=bd` this INVERTED (bd cleared,
   cot+inf wrongly flagged) and a bd-drift was undetectable; the modal ref makes it DETECTABLE. This is why the
   ref is modal, not a fixed firm.
 - **No-majority (all-distinct):** `structure(bd) != structure(cot) != structure(inf)`, all three different, no
