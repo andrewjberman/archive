@@ -101,3 +101,25 @@ Identical line under both A and B — only the script's internal commit-authoriz
    control, must not fire).
 3. Commit MANIFEST/.baseline/FINDINGS (via the resolved lane path).
 4. CTO lands the Step-1b wiring; CVO verifies fail-fires same-turn (feed stale/absent, watch it FIRE).
+
+---
+
+## 7. GATE-2 RESOLVED (2026-07-19) — Option B
+
+CTO ruled **Option B** (the tamper-lane's restricted write set IS the control; do NOT expand it to a worker).
+Redaction **accepted clean**; CTO routing the 07-13T16:16Z authorization to MSTR as a first-class
+governance entry.
+
+- **Script (mine, done):** `.tools/audit-archive-invoker.py` @ `b57030eb9` — dynamic author = the running
+  session's serial (LD-0290 file); exec startup commits the snapshot, non-exec startup DEFERS gracefully
+  (`snapshot=deferred: <serial> not GOVERNANCE_AUDIT-permitted`) while still detecting. NO owned-paths change.
+  My own non-exec dry-run confirms the defer path live. `governance_permitted()` reads the live
+  `.owned-paths.yaml` GOVERNANCE_AUDIT list; on parse-uncertainty it attempts the commit and rolls back +
+  defers on a gate lane-denial (gate is the source of truth).
+- **Integration test (mine, done):** `.tools/tests/test_audit_archive_invoker.py` — **10/10**, the full
+  finding matrix (clauses 1/2/4 fire on target + stay quiet on the false-Monday / idle-no-churn look-alikes;
+  coverage-gap both directions). `AUDIT_INVOKER_WS` test hook.
+- **Exec-side (CTO lands, per Q2 SoD):** commit `MANIFEST.txt` + `.baseline`(=S2) + `FINDINGS.md`
+  (GOVERNANCE_AUDIT) + `.gitignore`(+2, BASE_EXEC) — unstaged + ready in the shared tree; then run the invoker
+  as exec to mint S3 (de-stales + exercises the commit path live); then land the Step-1b A.2 wiring line.
+- **Then:** CVO verifies fail-fires same-turn. 07-23 clock cleared once S3 mints.
