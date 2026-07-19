@@ -3,7 +3,9 @@
 <project>NFRA_SYSPARITY</project>
 <issued_to>0.8.0_AE_CloudComp~Z</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-07-19 (0.8.0_AE_CloudComp~Z): added the explicit "## Cloud-tier acceptance bar (Rule 22a)" statement to infra/system/sdk/README.md -- v1 bar = local genesis verify --local loop-closure + sandbox storage proof; TF module = FAITHFUL-BY-CONSTRUCTION but CLOUD-UNEXERCISED (DESIRED-not-APPLIED); post-consolidation proof = one-tenant apply-smoke. Label matches reality (verify-report tier=local, both tenants, CVO fire-2 confirmed) -- no overclaim. Coordinated disjoint with ~C's WS-4 Part-B (sdk/README.md vs recognizer_sdk schema). Log: logs/2026-07-19/ws5_sdk_acceptance_bar_statement.md. CVO-pinged per LD-0318. -->
+
 <priority>P2 -- a STATEMENT, not a build (PRD S4: CTO pre-ruled, can land early, WS-1-independent). Context-reallocation of ~Z (docs/comp-tools lane, WS-7 just landed) per Andrew-direct idle-reallocation-by-context.</priority>
 
 <references>
