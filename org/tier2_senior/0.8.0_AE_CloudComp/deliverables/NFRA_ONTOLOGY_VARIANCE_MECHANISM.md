@@ -47,7 +47,8 @@ is `{name, values[], scope, allowed_facets[]}`:
 scope}` alone cannot tell a legitimate env-Variant (env changed the memory size, EXPECTED) from a Fork-Shadow
 (memory changed with no declared reason). So the dimension MUST declare WHICH facets it may legitimately
 alter. Then: an off-key difference WITHIN `allowed_facets` = **Variant** (legitimate); OUTSIDE = **Fork-Shadow**
-(debt). For `firm`, `allowed_facets = []` -- firm replicas are structurally identical, so ANY off-key diff is
+(a DEBT-CANDIDATE under advisory -- confirmed debt ONLY when the dimension is GROUNDED; v2, CTO 013249Z). For
+`firm`, `allowed_facets = []` -- firm replicas are structurally identical, so ANY off-key diff is
 a Fork-Shadow (this is exactly canon-patterns' firm-twin intent). **v1 defer option (base):** ship with
 `allowed_facets` unpopulated -> only structurally-identical Twins clear, ANY off-key diff = Fork-Shadow, and
 Variant is deferred; populate `allowed_facets` per-dimension later. Either way Variant stays deterministic.
@@ -132,8 +133,8 @@ The verdict KIND (Fork-Shadow = the structural divergence) is unchanged; only th
 
 - **POLARITY (base specific-B, confirmed):** the mechanism **CLEARS designed parallels** (Twin/Variant are
   canon) and **FLAGS only Fork-Shadow/Orphan**. It never flags a full sibling set. Inverting this polarity
-  would flag every legitimate firm-twin as debt -- the exact false-positive canon-patterns' guard exists to
-  prevent.
+  would MIS-flag every legitimate firm-twin as a fork-shadow -- the exact false-positive canon-patterns' guard
+  exists to prevent.
 - **HARD firm invariant (base specific-A):** for `D = firm`, firms are BUSINESS-SEPARATED and NEVER
   interchangeable/mergeable (IAM-denied + gate-blocked, a CLAUDE.md NEVER-rule). A `Twin` verdict on the firm
   dimension asserts "designed parallel = canonical"; it does **NOT** imply the firms are fungible or their
@@ -198,8 +199,9 @@ group keyed on LOGICAL identity (structure is NOT in the key):
   SAME `position_key` (so they ARE one sibling group -- structure is NOT in the key), but `structure(inf)`
   diverges from `structure(bd/cot)` (inf reads bronze past silver -- a layer_skip) and `allowed_facets` is
   empty -> **(2b)** inf's structure differs OUTSIDE the allowed facets -> **inf's silver-sweep = FORK-SHADOW of
-  bd/cot (debt)**. A precise verdict -- NOT the weak "inf missing + an inf singleton" the over-constrained key
-  would have produced. (The bare-vs-INF_ shadow class.)
+  bd/cot (a CANDIDATE under []+advisory -- confirmed debt only if the firm dimension is grounded; v2)**. A
+  precise verdict -- NOT the weak "inf missing + an inf singleton" the over-constrained key would have produced.
+  (The bare-vs-INF_ shadow class.) The example's point is the KIND: the divergence FIRES correctly.
 
 ---
 
