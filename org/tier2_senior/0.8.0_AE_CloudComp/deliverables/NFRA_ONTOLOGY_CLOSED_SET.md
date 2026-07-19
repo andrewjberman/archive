@@ -1,5 +1,11 @@
 # NFRA_ONTOLOGY -- The Closed Vocabulary Set (gate-submission fixed point)
 
+> **DEFERS TO THE RULE-BANK for the machine vocab (NFRA_ONTOCLARITY WS-A fog-b, CTO 221516Z):** the single
+> canonical machine source-of-record is `org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml`
+> (`meta.canonical_source`). This document is the DOCTRINE prose (human design-of-record); where the two could
+> differ, the rule-bank is authoritative. The two-layer disambiguation (CSE algebra vs the archetype layer)
+> lives ONCE in the rule-bank `meta.layers`; this doc references it, does not re-state it.
+
 **Author:** `0.8.0_AE_CloudComp~C`, 2026-07-18. **Status:** COMPLETE -- owner-ratified (AXIS-2) + finalized
 (AXIS-1). This is the single artifact CTO gates + MSTR ratifies as doctrine + base locks in the coherence
 anchor. Supersedes the scattered counts in the DoR/binding proof (kept for derivation + audit).
@@ -45,8 +51,11 @@ when originating, Sink when terminating, **Custodian** when the object of an OWN
 heads-up: the actor entities are contextual, NOT fixed Source/Sink; that is what makes Custodian a clean
 14th role and keeps the actor semantics unambiguous).
 
-**Open for CTO (net-1):** Observer -- a full Role (as listed) vs a Guard-subtype. Empirical + orthogonality
-favor a full Role (it OBSERVES, it does not gate). CTO rules.
+**SETTLED -- Observer = full Role #13, CTO GRANTED (LD-0311; NFRA_ONTOCLARITY WS-A fog-c reconcile 221516Z):**
+Observer is a FULL Role (it OBSERVES, it does not gate) -- empirical + orthogonality favored it, and CTO ruled
+it IN (`RULE_BANK.yaml:33` "13th, CTO GRANTED"). The prior "Open for CTO" wording here was a STALE
+pre-ratification copy -- a ruling that never reached its lagging copy (VL#8). This doc DEFERS to
+`org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml` (`meta.canonical_source`) for the machine vocab; the two now agree.
 
 ---
 
@@ -112,7 +121,7 @@ A C2 motif = a canonical composition of Role-nodes joined by Relations, at the e
 - **Coherence anchor:** base @352549fb0 lineage (the reconcile-against reference).
 - **Denominator (LAW-1):** CSE Entity 29 / Relationship 23 (verified).
 
-**CTO gate rules:** (a) the closed set above (esp. Observer full-Role-vs-subtype); (b) the `OWNS` 0.4->0.5
+**CTO gate rules (RULED -- historical record):** (a) the closed set above (Observer full-Role-vs-subtype -> RULED a FULL Role #13, GRANTED per LD-0311; no longer open); (b) the `OWNS` 0.4->0.5
 CSE schema bump (governed: CTO+CVO+COO SoD, DS~B designs); (c) direct the NFRA_MOTIF P1-catalog canonical
 extension for the A+B materialization. **MSTR ratifies this set as the doctrine artifact.**
 

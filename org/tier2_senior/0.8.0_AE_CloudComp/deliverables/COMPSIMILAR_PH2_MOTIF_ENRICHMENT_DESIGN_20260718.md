@@ -45,7 +45,10 @@ authored `resource_summaries` overlay (that stays Phase-3).
 >
 > BONUS: comp-canon-motif's twin_shadow_guard keys motif-identity on (firm, layer, logical-stage)
 > -- so the summary can deterministically assert "canonical firm-twin of X" vs "divergent
-> fork-shadow (debt)". [...] DETERMINISM IS THE REQUIREMENT [...] If any clause would need
+> fork-shadow (debt)". [...] DETERMINISM IS THE REQUIREMENT
+> [NFRA_ONTOCLARITY WS-A fog-d annotation: the "(debt)" render above is a PRE-LD-0315 example. LIVE render is
+> now "(candidate -- advisory, pending adjudication)" for an ungrounded dim, "(debt)" ONLY when grounded --
+> Fork-Shadow=debt as a blanket definition is RETIRED (LD-0315); canonical: RULE_BANK.yaml.] [...] If any clause would need
 > inference to name, it doesn't go in the string.
 
 *[Editorial, coherence-keeper 2026-07-18: the quoted "(debt)" is the PRE-v2 vocabulary. NFRA_ONTOLOGY's
