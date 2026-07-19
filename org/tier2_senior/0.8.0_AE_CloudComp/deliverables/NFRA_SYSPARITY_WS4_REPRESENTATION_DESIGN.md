@@ -83,3 +83,37 @@ citation stays live-generated + drift-proof, consistent with 06's contract. (cse
 ## 6. Land path
 COO design GO -> implement (00/01/03/05/07 citations + comp-system 06-emit + SDK schema/validate/tenant flip) ->
 CTO arch-gate -> RAVC -> CVO citational-verify (LD-0318, per its fire-2 bar) -> ping COO+CVO on land.
+
+## 7. Part A DRAFT prose (ready to land on the WS-1 + Part-A GO; wording aligns to ONTOCLARITY on WS-1 land)
+
+Commit trailer for the Part-A 0*_*.md land (COO cadence-owner ruling): `abstraction-ledger: n-a`.
+
+### 00_synthesis.md -- new section after "## The 5 classes at a glance"
+```
+## The archetype layer (the agnostic ontology)
+
+The 5 classes above are the CONCRETE Opal system. The ratified NFRA_ONTOLOGY archetype layer is the AGNOSTIC
+classification ON TOP of it: 14 Roles / 10 Relations / 6 Variance verdicts, ratified LD-0311/0315, canonically
+defined in org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml + org/modules/graph/variance_dimensions.yaml and
+bound to concrete substrate types by org/modules/graph/canon-patterns.yaml. This section CITES that rule-bank
+as the source of truth -- it does NOT re-list the vocabulary (a copy would drift; the anti-pattern SYSPARITY
+exists to close).
+
+TWO LAYERS, one easily-conflated word (per NFRA_ONTOCLARITY): the CSE C0-C3 ladder (class 1 substrate -- the
+TYPE axis) and the archetype layer (ROLE/RELATION/VARIANCE, agnostic, edge-derived) are NOT the same thing.
+Frame (LD-0311): TYPE = CSE; RELATION = CSE re-layered (no fork, 10); ROLE = net-new (14); VARIANCE = the
+cross-instance operator (6). The archetype layer is consumed by the canon-deviation scorer + the COMPSIMILAR
+C3 node-summary enrichment; concrete types bind DOWN onto it via the adapter (canon-patterns.yaml), and the
+SDK carries the same binding vocabulary-bound (sdk/, WS-4 Part B).
+```
+
+### threaded one-line citations (grep-of-the-citation, not grep-of-the-word)
+- **01_substrate.md:** "The archetype layer's TYPE axis IS this CSE C0-C3 ladder (ratified rule-bank org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml, LD-0311 -- RELATION re-layers onto it with no fork)."
+- **03_comp_tools.md:** "The canon-deviation scorer + COMPSIMILAR C3 enrichment read the ratified ontology vocab (variance_dimensions.yaml / canon-patterns.yaml, LD-0311/0315) -- the 6 Variance verdicts + 14 Roles."
+- **05_learning_loops.md:** "The MOTIF/canon-deviation loop consumes the ratified archetype layer (NFRA_ONTOLOGY_RULE_BANK.yaml, LD-0311); a canonical motif materializes ONLY via governed semctl promotion (never hand-written)."
+- **07_maturity.md:** "Ontology parity: the ratified 14/10/6 archetype layer (LD-0311/0315) is represented in /system (WS-4) + wired vocabulary-bound in the SDK."
+
+Each is a real CITATION (canonical path + LD ratification) -> satisfies BOTH the scope_contract grep (ANY-of:
+the terms appear) AND CVO's fire-2 citational bar (the reference points AT the rule-bank AS SUCH, not an
+incidental homonym). ont-archetypes-in-system + ont-vocab-referenced both flip to PASS on the hand-editable
+docs alone (06 untouched, comp-system unmodified).
