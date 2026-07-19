@@ -3,7 +3,7 @@
 <project>NFRA_SYSPARITY</project>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
 <!-- 2026-07-19 ~D progress: (a) DE-STALE COMPLETE @4e5a78abc -- comp-system --check = SYSTEM CURRENT
      (ledger 80->82/tools 59->61/cse_schema 0.4->0.5; post-commit still CURRENT). (b) GATE ENGINE LANDED
      INERT @2c4902a5c -- comp-system --gate, fail-closed/staleness-conditioned (rc2 genuine drift, rc0
@@ -74,6 +74,39 @@ Make `06_current_state` a live-cadence CONTROL instead of a hand-passed doc that
 4. LD-0318 CVO-VERIFIED GATE: the de-stale + the fail-closed gate are CVO-verified per PRD S7 (cron 02d90dce). Ping CVO on land.
 5. Session log with Compiler Tools section reproducing each <run> vs <expect>.
 </acceptance_criteria>
+
+<completion>
+COMPLETE 2026-07-19 (0.8.0_AE_CloudComp~D). All acceptance criteria met; TRIPLE-cleared:
+CVO LD-0318 exercise CLEAR @221442Z + COO ACCEPTED @221401Z + CTO ACCEPTED @221507Z (CTO verified the
+safe-commit.sh wiring AT SOURCE, fabric-critical).
+
+DELIVERED (all on origin):
+- (a) DE-STALE @4e5a78abc: comp-system regen -> 06 SYSTEM CURRENT (ledger 80->82 / tools 59->61 /
+  cse_schema 0.4->0.5). CVO confirms this CLOSES fire-2(a) + fire-1(b); the eng-currentstate metric FAIL cleared.
+- (b) GATE ENGINE @2c4902a5c: comp-system --gate (+ --changed source-conditioning @1df0166f5) -- fail-closed
+  on GENUINE drift (source-fingerprint/managed-region), WARN on age>=TTL alone (the NEVER#1 false-Monday
+  distinction), reuses _staleness() (one predicate). self-test 15/15 both directions.
+- (b) ENFORCEMENT LEG @748bd523a: commit-gate leg in safe-commit.sh (legacy path = active; queue dormant).
+  Fail-closed on clean rc2, FAIL-SAFE (rc1/other -> WARN+proceed, never wedges the fabric), PATHSPEC-keyed
+  (covers yaml/json sources), audited `system-current-override` trailer, surfaced age-WARN. set-e-safe rc
+  capture. bash -n clean; live block-test PASS (rc1 clean, no leak). Two bugs caught+fixed during wiring
+  (IN_SCOPE->PATHSPEC coverage-miss; set-e command-substitution rc2 mis-exit).
+
+GATES CLEARED:
+- CTO arch-gate GO @213935Z (engine) + source-verified ACCEPT @221507Z (the fabric-critical wiring).
+- COO ACCEPTED @221401Z + folded the `comp-system --gate` SWEEP-BACKSTOP into the drift-gate cadence
+  (--no-verify + dormant-queue-worker coverage) + fabric-awareness broadcast + over-rate monitoring.
+- CVO LD-0318 CLEAR @221442Z (both directions: engine 15/15 + live --gate discrimination; block direction
+  self-test-proven + my live block-test taken as integration evidence).
+
+ACCEPTANCE: 1 --check=CURRENT (CVO-exercised) DONE; 2 fail-closed/staleness-conditioned/exercised-both-
+directions/alert-suspension-clean gate DONE; 3 CTO arch-gate DONE; 4 LD-0318 CVO-verified DONE; 5 session
+logs (destale_and_gate + enforcement_landed + this close).
+
+DEFERRED (CTO-ruled, over-rate-signalled, NOT this TO): P2.5 = content-hash-vs-mtime fingerprint refinement
++ HEAD-advance auto-regen (escalation gated on the SYSTEM-CURRENT-OVERRIDE rate). TO-6-future: the
+commit-queue-worker leg when SAFE_COMMIT_USE_QUEUE flips on (COO carries the cadence trigger).
+</completion>
 
 <cross_domain_coordination>
 - COORDINATE the gate mechanism with ~A's NESTEDABSTRACT drift-gate (same fail-closed / staleness-conditioned / exercised / alert-suspension-clean pattern; reuse the shape, don't re-derive). The COO (drift-gate cadence-owner) can broker the pattern-share.
