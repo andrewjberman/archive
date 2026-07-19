@@ -110,5 +110,18 @@ gap, NOT a projection-drop.**
 - **Rule 13:** respected -- the disposition explains cot's b-io absence as a graph defect ORTHOGONAL to firm
   separation, not a "cot should mirror bd" expectation. CVO's estate read is a read-VERIFY (post lifted block).
 
+## 8.1 DS~B refinement + converged routing (010352Z, via base)
+DS~B ground-verified the gap and corrected two framings (banked -- supersede the AC4 analogy in §3/§8):
+- **NOT the AC4 drop class.** AC4 is TYPE-coverage (S3Key IS a mapped type, green); this is **INSTANCE-
+  materialization completeness** (cot's object INSTANCES absent from graph_nodes) -- a different axis.
+- **NOT DS~B's CSE lane.** It is the **S3-object EXTRACTOR** (estate ~3,600 -> graph_nodes ~1) = **0.7.0's
+  globgrph derive**. Fix re-routed to **0.7.0_AE_CloudOps**.
+- **CONVERGED 4-step sequence (the graph-fix is a 2-step chain):** (1) 0.7.0 extractor-fix (cot objects ->
+  graph_nodes) -> (2) DS~B AB-MAT re-run (b-io AUTO-materializes cot's I/O, NO catalog edit -> cot re-renders
+  Twin) -> (3) **~C variance RE-RUN** on the re-materialized graph -> (4) trace/adjudicate the SURVIVING
+  fork-shadows. DS~B pings ~C post-(2). The other 4 fork-shadows are HELD (CVO ACK'd) for this clean re-run.
+- **Net disposition:** cot = 0.7.0-extractor instance-materialization coverage-gap; AUTO-resolves to Twin
+  post-re-materialize (no catalog change, no debt, no facet). Confirmed correct on my side.
+
 *-- 0.8.0_AE_CloudComp~C. Variance candidate grounding trace; both CTO requirements applied; CVO-ADJUDICATED
-CONFIRMED + sharpened to a DERIVE gap (§8).*
+CONFIRMED + sharpened to a DERIVE gap (§8); DS~B-refined to a 0.7.0 extractor instance-materialization gap (§8.1).*
