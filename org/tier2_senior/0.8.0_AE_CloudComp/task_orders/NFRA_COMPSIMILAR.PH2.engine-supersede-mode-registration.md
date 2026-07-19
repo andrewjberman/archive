@@ -4,7 +4,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-07-17</date>
-<status>pending</status>
+<status>complete</status>
 <!-- 2026-07-19 ~D: GO'd under COO PROCEED-ALL-NFRA @180112Z (Andrew-direct via CTO). Engine comp_similar.py
      LANDED @b63b18853 (self-test 7/7, live-exercised); .tools/comp-similar wrapper + comp-tools.yaml +
      coverage-map staged. Two external gates pending, both submitted: CTO arch-gate @184502Z (PRD-4.3
@@ -91,4 +91,45 @@ PH3 (the authored ~549-target summary pass that populates the corpus for real co
   <ref type="prd">docs/architecture/NFRA_COMPSIMILAR_PRD.md</ref>
   <ref type="depends">NFRA_COMPSIMILAR.PH1 (corpus must land first)</ref>
 </references>
+
+<completion>
+COMPLETE 2026-07-19 (0.8.0_AE_CloudComp~D, under Andrew-direct PROCEED-ALL-NFRA via CTO/COO). All
+acceptance criteria met; CVO closing verify PASS (2/3 primary wave land CLOSED).
+
+DELIVERED (all on origin):
+- ENGINE comp_similar.py @b63b18853 (538 lines): BM25 SUMMARY similarity (reuses summary_corpus
+  build_corpus/SimilarityIndex which reuse dup_scan.BM25) + --supersede (summary-twin x heat-DIVERGENCE
+  x designed-parallel/held suppressors, confidence-graded HIGH both-cold/MEDIUM one-cold) + cluster +
+  pairwise. ZERO summary_corpus.py edits (~C _position_key seam held clean throughout).
+- WRAPPER .tools/comp-similar + graph-call-manifest tools_index + entries cloud.similar.resource +
+  comp-which rule = COO-SoD atomic land @e58a1bcd6 (manifest-check requires a registered tool be
+  git-tracked). AE-SoD half (comp-tools.yaml + coverage-map meta_tools home) @2956c2751.
+- comp-manifest-check registration-invariant PASS (79 tracked comp-* all accounted, comp-similar in).
+
+GATES CLEARED:
+- CTO arch-gate GO @185343Z (exercised): PRD-4.3 departure APPROVED (summary-first candidate-gen, since
+  the headline monolith cutover is name-DIFFERENT; DoR updated); read/scan gate-scoping CONFIRMED (no
+  store-writer/apply/TF/IAM this leg; no plan-gate/22a); heat-decoupling APPROVED.
+- COO registration RAVC-confirmed clean @2956c2751.
+- CVO supersede-path PASS @193302Z: (1) self-test 7/7; (2) LIVE displacement on the real corpus (CVO's
+  own heat-json pair, superseding HOT displaces superseded COLD); (3) C1 LIVE discrimination (same pair
+  both-HOT -> 0 candidates -- keys on heat-divergence not similarity); (4) registration rank-1 2.00, NO
+  theft, gibberish abstains.
+
+ACCEPTANCE CRITERIA: 1 engine+--supersede DONE; 2 dogfood -- offline C4 mutant PASS + live --heat-json
+displacement PASS (monolith pair PH3-gated: opal-data-assets UNKNOWN-thin, C3 correctly excludes --
+CTO-ruled correct, not a defect); 3 registered + routing PASS; 4 the 5 PRD controls documented + self-
+test-discriminating (7/7); 5 session logs (laneD_ph2_comp_similar_engine.md + this close).
+
+DEFERRED (CTO-ruled non-blockers, NOT this TO):
+- Heat-source CADENCE follow-on (real live-heat end-to-end): a DATA-PRODUCTION step (not an alert/monitor
+  -- respects the consolidation alert-suspension). comp-debris live >2min/partial-for-S3, comp-heat
+  repo-scoped -- v1 decouples via --heat-json. Separate follow-on.
+- PH3 authored summaries (~549 targets) -- enriches the corpus so PH3-gated pairs (e.g. the monolith
+  dogfood) surface. Separate TO (CTO §9-4).
+
+RESIDUAL SURFACED (not this TO, surfaced to COO): CVO's light aside -- comp-which "describe one specific
+AWS resource" routes rank-1 to comp-tooltip not comp-describe (pre-existing comp-which routing nuance,
+comp-similar did NOT cause it). AE-eye-worth, out of PH2 scope.
+</completion>
 </task_order>
