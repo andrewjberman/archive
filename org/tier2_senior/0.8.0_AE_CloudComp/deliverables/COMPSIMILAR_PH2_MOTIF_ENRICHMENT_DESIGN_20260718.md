@@ -48,6 +48,12 @@ authored `resource_summaries` overlay (that stays Phase-3).
 > fork-shadow (debt)". [...] DETERMINISM IS THE REQUIREMENT [...] If any clause would need
 > inference to name, it doesn't go in the string.
 
+*[Editorial, coherence-keeper 2026-07-18: the quoted "(debt)" is the PRE-v2 vocabulary. NFRA_ONTOLOGY's
+v2 render-honesty (co-land @136999d97) retired the unconditional equation -- a firm Fork-Shadow is an
+ADVISORY debt-CANDIDATE, rendering "(candidate -- advisory, pending adjudication)" unless grounded. The
+quote is preserved verbatim as the original design-input record; the deterministic-labeling requirement it
+states is unchanged.]*
+
 **(2) Andrew-direct correction, in-session (2026-07-18, to 0.8.0_AE_CloudComp base):**
 
 > its a class thing yes, but if you recall, its a class that is decomposable with full fidelity,
@@ -127,11 +133,13 @@ no new full-corpus scan for the single-ARN path), then splice:
   `canon-patterns`. Do not build C3 against `canon-patterns` in the interim. C2 does not depend on
   C3, so C2 proceeds independently.
 - **Twin/shadow (bonus):** group instances by `(firm, layer, logical-stage)` across firms; a node
-  with a SYMMETRIC cross-firm set is a `Twin`, an ASYMMETRIC one a `Fork-Shadow (debt)`. NOTE:
-  `Twin`/`Fork-Shadow` are named in Andrew-direct 3 as UNIVERSAL ARCHETYPES -- so this bonus'
-  label vocabulary should ADOPT the universal-layer terms when NFRA_ONTOLOGY lands (the
-  computation -- symmetric-vs-asymmetric cross-firm set -- is unchanged; only the labels bind
-  upward). Corpus-level op (needs the cross-firm set): full-fidelity in `build_corpus`, targeted
+  with a SYMMETRIC cross-firm set is a `Twin`, an ASYMMETRIC one a `Fork-Shadow`. NOTE:
+  `Twin`/`Fork-Shadow` are named in Andrew-direct 3 as UNIVERSAL ARCHETYPES -- and NFRA_ONTOLOGY
+  has now LANDED (v2 render-honesty, co-land @136999d97), so this bonus' label vocabulary ADOPTS
+  the universal-layer terms: a firm Fork-Shadow is an ADVISORY debt-CANDIDATE (renders
+  `(candidate -- advisory, pending adjudication)`; confirmed `(debt)` ONLY on a grounded dimension),
+  NOT unconditional debt (the computation -- symmetric-vs-asymmetric cross-firm set -- is unchanged;
+  only the labels bind upward). Corpus-level op (needs the cross-firm set): full-fidelity in `build_corpus`, targeted
   twin-set query in the single-ARN `--describe` path. Doubles as the supersede/decommission signal
   COMPSIMILAR exists for.
 

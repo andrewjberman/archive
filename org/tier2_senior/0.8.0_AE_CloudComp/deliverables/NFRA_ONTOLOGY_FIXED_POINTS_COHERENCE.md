@@ -47,13 +47,21 @@ A+B materialize spec 7892f3fbc; C3 naming 297c12bea.
 - **C-2 (Observer 13th Role + owns 12th Relationship are CTO-PENDING, not settled).** Both are the
   empirical resolution of DoR open decisions -- strong justification, but they are the CTO closed-set
   ruling's to bless. Lock them as "empirically-grounded PROPOSED", not "ratified".
-- **C-3 (render-honesty residual -- FLAGGED to ~C 2026-07-18 ~0306Z, folds into NEXT-3).** The v3
-  render-honesty fix landed + base-validated at the RUNTIME (catalog v2 + mechanism v3 + enricher, co-land
-  @136999d97) -- but the DOCTRINE artifact `NFRA_ONTOLOGY_CLOSED_SET.md:82` still hard-equates
-  `Fork-Shadow(=debt)`, the exact unconditional equation v2 retired. Verification-Law-8 / retraction-
-  propagation: a retracted equation is only as dead as its LAST-SURVIVING copy; the gate must not ratify the
-  stale label. ~C folds the advisory-conditional correction into its NEXT-3 rule-bank pass to ride the CTO
-  closed-set gate together. This anchor (Variance row) is already corrected.
+- **C-3 (render-honesty retraction DENOMINATOR -- deliverable lane RESOLVED; 2 residuals routed OUT).**
+  VL#8 / retraction-propagation: the v2 retraction (Fork-Shadow != unconditional debt) had to reach EVERY
+  governing copy, not a hand-list. Swept in FOUR passes, each catching what the prior's PATTERN could not
+  see (the discipline, three times over): (1) base flag -> `CLOSED_SET:82` fixed @98f28b321; (2) CTO
+  full-denominator sweep -> found `DoR:313/323` + rule-bank + `canon-patterns:55` (my 031400Z-in); (3) ~C
+  NEXT-3 refresh @ae18caeb5 -> fixed `DoR:313/323/442` (+:442 ~C found) + its `contract:64/134/185/189` +
+  rule-bank catalog-ref v1->v2; (4) base independent BROAD sweep (my earlier `(=debt)`-only grep was
+  pattern-narrow -- missed the prose forms) -> found +2 in MY OWN `COMPSIMILAR_PH2_MOTIF_ENRICHMENT` design
+  (:48 MSTR-input blockquote [editorial annotation added] + :130 self-flagged adopt-on-land [updated to v2]),
+  which were OUT of CTO's doctrine scope, fixed by base this commit; and confirmed
+  `UNIVERSAL_ARCHETYPE_v0.1:314` is SUPERSEDED-banner-neutralized = NO ACTION (~C's disposition correct).
+  ZERO unconditional survivor now across the NFRA_ONTOLOGY deliverables + the COMPSIMILAR design.
+  **REMAINING, correctly routed OUT of the deliverable lane:** `canon-patterns.yaml:55` (CTO, exec-locked,
+  judgment call) + `summary_corpus.py` test phrasings (~D, code lane). Doctrine copies ride CTO's closed-set
+  gate + MSTR ratify. This anchor (Variance row) corrected @0e48bcf66.
 - **Coherent + no drift otherwise:** Roles-minus-Observer (12), Relationships-minus-owns (11), Variance (6),
   the C3 naming ladder, and fog-4 materialization all ride the elemental frame with zero shared term left
   implicit. The GRAIN/ARITY distinction (elemental precision) must survive into ~A's formal render.
