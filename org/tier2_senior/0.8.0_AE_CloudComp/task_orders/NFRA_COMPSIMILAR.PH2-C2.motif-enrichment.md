@@ -4,7 +4,7 @@
 <issued_by>0.8.0_AE_CloudComp (base) — dispatched on Andrew-direct</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-07-18</date>
-<status>pending</status>
+<status>complete</status>
 <priority>P2. Andrew-direct GO on the build (2026-07-18). Mechanism (Part A) is UNGATED — build now. Label binding (Part B) activates on CTO landing canon-patterns roles: (graceful — see scope).</priority>
 
 <authority>
@@ -106,4 +106,40 @@ instance-grain source is wired.
   <ref type="gate">CTO C2 framing-GO + vocab-governance ACK 20260718T021711Z</ref>
   <ref type="held">C3 + Twin/Fork-Shadow -> NFRA_ONTOLOGY (Andrew-direct 3, awaiting charter-shape)</ref>
 </references>
+
+<completion>
+COMPLETE 2026-07-19 (0.8.0_AE_CloudComp~D, on the Andrew-direct/COO reactivation). Acceptance criteria
+1-6 MET; evidenced on the CURRENT (07-19) live graph, not self-report.
+
+EVIDENCE (all fresh 2026-07-19 unless a landed commit):
+- Mechanism DELIVERED @4c57b963a (crash-interrupted session): classify_motif (pure/deterministic) +
+  _load_canon_roles (read-from-canon, graceful {}) + motif_prose_and_tokens (no-canon-label -> NO clause)
+  + coverage extension. Code INTACT at HEAD; no crash residual (summary_corpus.py clean in git status).
+- Label-binding gate (Part B, CTO-owned) CLEARED: SERVED_LINEAGE roles: blessed @ddfe05ae9 (07-17 23:40);
+  PIPELINE/AUTH/DEPLOY roles: blessed + SERVED_LINEAGE drift live-grounded @e462e04da (CTO, 07-18 10:13).
+  [Reconciliation: COO reactivation note @5372a637d (07-19 13:24) treats this blessing as the still-open
+   forward gate -- it is STALE by ~27h; the gate closed 07-18. Surfaced to COO.]
+- AC1/AC2: summary_corpus.py --self-test PASS 10/10 incl. M6 no-invented-token (absent->no-clause,
+  blessed->splices, off-canon->no-clause) + M7 classify_motif structural (served-s3, data-s3-excluded, fe-type).
+- AC3: EXERCISED live -- comp-describe opal-data-bd (CF-served) -> "instantiates SERVED_LINEAGE_CANON as
+  S3 tail" (MOTIF line renders, blessed label spliced, zero surface change); comp-describe opal-data-mdpf
+  (not CF-served) -> NO motif clause (graceful-degrade, no data-bucket mislabel).
+- AC4: --build coverage denominator -> "5 matched >=1 canonical motif, 1785 unmatched" (5 = the CF-served
+  tails; the SOLE operative SERVED_LINEAGE role on the ARN corpus, exactly as arch-gated 5/39).
+- AC5: C3/Twin/Fork-Shadow are NOT in classify_motif (PH2-C2). The C2/C3 MEMBERSHIP + firm-VARIANCE clauses
+  that DO render in --describe were built LATER under separate NFRA_ONTOLOGY authority (LD-0310/0311,
+  materialized A+B layer), not smuggled into this TO.
+- AC6: session log with the mandate runs -> org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-07-19/.
+
+FOLLOW-ON INCREMENTS (DEPLOY/AUTH/PIPELINE) -- role-keys CTO-blessed, but instance-grain SOURCES confirmed
+UNWIRED on the LIVE graph 2026-07-19 (comp-kuzu, DB age 0.0h, Nessie HEAD current, Rule 22a). Each is a
+SEPARATE gated increment, NOT remaining work of this TO (per the AC's own "follow as source is wired"):
+- DEPLOY: 0 code/-prefix nodes; 0 S3->runner edges (only EC2_INSTANCE-[RUNS]->PipelineScript, wrong grain/
+  direction). Source = 0.7.0 globgrph extractor adding code/-prefix grain + deploy-ledger cross-ref.
+- AUTH: 0 (API_ROUTE|ServedURL)-[TRIGGERS]->LAMBDA (all 143 TRIGGERS are EVENT_RULE/SCHEDULE->LAMBDA).
+  Source = comp-routes BEHAVIOR adapter feeding route->auth-edge TRIGGERS.
+- PIPELINE: no FEEDS edge type, no bronze/silver/gold stage nodes. Source = comp-pipescript-interior adapter.
+Building any matcher now = dead code (never fires) or a Rule-22a mislabel; none is ~D enricher work and none
+is self-authorizable (SCOPE#5 -- surfaced to COO for sequencing against its upstream source owner).
+</completion>
 </task_order>
