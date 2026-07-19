@@ -145,12 +145,20 @@ present  = { firm_value(i) : i in group }
 ```
 { kind:"Canonical",  dim:"firm", of_names:[<sibling names>] }  -> "canonical firm-twin (reference) of opal-data-cot/opal-data-inf"
 { kind:"Twin",       dim:"firm", of:<arn>, of_name:<name> }    -> "canonical firm-twin of opal-data-bd"
-{ kind:"Fork-Shadow",dim:"firm", of:<arn>, of_name:<name> }    -> "divergent fork-shadow of opal-data-bd (debt)"
-{ kind:"Fork-Shadow",dim:"firm", of_names:[<others>], note:"no canonical majority" } -> "divergent fork-shadow of opal-data-cot/opal-data-inf -- no canonical majority (debt)"
+{ kind:"Fork-Shadow",dim:"firm", of:<arn>, of_name:<name> }    -> "divergent fork-shadow of opal-data-bd (candidate -- advisory, pending adjudication)"   # firm advisory; v2
+{ kind:"Fork-Shadow",dim:"firm", of_names:[<others>], note:"no canonical majority" } -> "divergent fork-shadow of opal-data-cot/opal-data-inf -- no canonical majority (candidate -- advisory, pending adjudication)"
 { kind:"Orphan" }                                              -> "orphan (no twin, no consumer)"
 { kind:"Superseded", by:<arn>, by_name:<name> }               -> "superseded by <by_name>"
 (none)                                                         -> NO clause (absent, counted in denominator)
 # Variant is UNREACHABLE for firm (allowed_facets=[]); it exists in the catalog for env/region dimensions.
+
+# v2 DISPOSITION SUFFIX (CTO ruling 013249Z, advisory-CONDITIONAL -- render honesty): the Fork-Shadow visible
+# suffix must match the governance regime's CERTAINTY + DIRECTION. The enricher fills it from the dimension's
+# grounding: advisory (allowed_facets=[]) -> "(candidate -- advisory, pending adjudication)" (asserts NEITHER
+# certainty NOR direction); grounded (allowed_facets populated+cited) -> "(debt)" (a fork-shadow there IS
+# confirmed debt). ~D's clause BRANCHES on the flag. Rationale: the render cannot know a candidate's downstream
+# adjudication (debt / coverage-gap / designed-facet), so it pre-judges NONE -- opal-data-cot is the live proof
+# (Fork-Shadow candidate that grounded to a coverage-gap, NOT debt). Catalog: fork_shadow_disposition map.
 ```
 
 ### 2.6 The no-feedback invariant (HONORED -- structural, never reads a label)
