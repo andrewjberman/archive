@@ -323,7 +323,8 @@ dimensions (firm, environment, region, tenant, service, ...). Then, keying ident
   (layer, stage)? Yes -> **Twin/Variant** (canon). One value special-cased -> **Fork-Shadow** (advisory
   debt-CANDIDATE under `[]`+advisory; confirmed debt only when the dimension is grounded -- v2, CTO 013249Z).
 - **Polarity is load-bearing (base specific-B):** the guard **CLEARS** designed parallels (they are canon);
-  it does **NOT** flag them. Only asymmetric+undeclared divergence is debt.
+  it does **NOT** flag them. Only asymmetric+undeclared divergence is a debt-CANDIDATE (advisory under
+  `[]`+advisory; confirmed debt ONLY when the dimension is grounded -- v2, LD-0315; consistent with :324).
 
 This is substrate-agnostic AND it unifies three suppression families as ONE calculus with different declared
 dimensions: `DUP_BENIGN_CROSS_FIRM` = Twin on `firm`; `DUP_BENIGN_ENV_TWIN` = Variant on `env`;
