@@ -79,10 +79,14 @@ UP to an abstract RELATION, PLUS a Role** (so no concrete relation is orphaned -
 
 ## 3. VARIANCE operator -- 6 (cross-instance, orthogonal; mechanism @f904033ea)
 
-`Canonical / Twin / Variant / Fork-Shadow(=debt) / Superseded / Orphan`. Deterministic declared-dimension
+`Canonical / Twin / Variant / Fork-Shadow / Superseded / Orphan`. Deterministic declared-dimension
 symmetry test (base Q1/Q2-fixed): group by dimension-stripped position_key, compare structure vs
 `allowed_facets`; generalizes CSE `supersedes` + canon-patterns' `twin_shadow_guard`. `implements`/structural-
 conformance stays IN as this operator (Variance), distinct from spec-conformance (D3-adjacent, scope-out).
+**Fork-Shadow disposition (v2, CTO 013249Z + CVO cot adjudication -- REMOVES the retired "(=debt)" equation):**
+a fork-shadow is an advisory debt-CANDIDATE, NOT confirmed debt. Confirmed debt ONLY on a GROUNDED dimension
+(allowed_facets populated+cited); under `[]`+advisory it is a CANDIDATE pending adjudication (can ground to
+real-debt / graph-coverage-gap / designed-difference -- opal-data-cot is the live NON-debt proof @1fe0f5e6f).
 
 ---
 
