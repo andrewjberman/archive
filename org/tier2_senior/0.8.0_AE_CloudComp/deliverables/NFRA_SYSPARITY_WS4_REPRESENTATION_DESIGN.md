@@ -59,17 +59,26 @@ citation stays live-generated + drift-proof, consistent with 06's contract. (cse
   is ~A's -- UNTOUCHED. I represent the ratified vocab; ~A's loop folds forward enhancements. COO brokers if
   the schema/enum change ripples into ~A's drift-gate surface.
 
-## 5. Open questions (for COO/CTO before I land)
+## 5. Open questions -- 2 of 3 GROUNDED + RESOLVED by ~C (2026-07-19); 1 genuine COO call remains
 
-1. **06 generator emit:** OK to extend `comp-system` (an AE-lane comp-tool) to emit the `<!--cs:ontology-->`
-   citation region, or should 06 stay untouched and the scope_contract's ont-archetypes-in-system be satisfied
-   by the hand-editable docs alone (is the grep_present ANY-of or ALL-of the file list)? I lean: comp-system
-   emit (robust, drift-proof, matches 06's contract). Confirm the comp-system source is my lane.
-2. **~A boundary on schema.json:** the binding_mode enum change touches `sdk/00_manifest/schema.json` -- does
-   ~A's drift-gate read that schema? If so, coordinate the change so ~A's loop does not flag it. COO broker.
-3. **ONTOCLARITY (WS-1) sequencing:** WS-4 "feeds from" WS-1's clarified defs (the two-layer distinction). Do I
-   land WS-4 now with the two-layer framing as I understand it (CSE ladder vs archetype layer), aligning the
-   exact wording to WS-1 on its land, or hold the /system prose until WS-1 lands? (SDK half is WS-1-independent.)
+1. **[RESOLVED -- no generator change needed]** `grep_present` is **ANY-of** the file list
+   (`system_parity.py:110-114`: `hits = [f for f in files if pat.search(_read(f))]; found = bool(hits)`).
+   So the hand-editable core docs (00/01/03/05/07) satisfy `ont-archetypes-in-system` + `ont-vocab-referenced`
+   WITHOUT touching the auto-generated 06 -> **comp-system is NOT modified** (scope tighter, no generator risk).
+   06's citation via a `<!--cs:ontology-->` emit is a DEFERRED nice-to-have (drift-proof robustness), not required
+   for the gate; leave to a later comp-system pass unless COO wants it now.
+2. **[RESOLVED for the SDK half; COO-broker for the core-docs half]** ~A's `surface_map.json`: the SDK
+   `00_manifest/schema.json` + tenant configs are **NOT** in any ~A surface -> my Part-B binding_mode edit is
+   OUTSIDE ~A's drift-gate surface (CLEAN, no collision). BUT `infra/system/0*_*.md` IS in ~A's `NFRA_SYSTEM`
+   surface (surface_map.json:75) -> my Part-A core-doc citations touch a file ~A's drift-gate WATCHES. This is
+   NOT a duplication of ~A's forward loop (AC-3 satisfied -- I add a citation, I do not re-implement incorporation);
+   it is an edit to a tracked surface, so it likely needs the drift-gate's `abstraction-ledger:` annotation on my
+   commit (per surface_map `_note`). **COO broker (as offered): confirm the annotation / ~A re-baseline for the
+   0*_*.md citation-add so ~A's loop reads it as intentional WS-4 representation, not mechanism drift.**
+3. **[GENUINE COO CALL] ONTOCLARITY (WS-1) sequencing:** WS-4 "feeds from" WS-1's clarified defs (the two-layer
+   CSE-ladder vs archetype-layer distinction). Land WS-4's /system prose now with the two-layer framing as I
+   understand it (aligning exact wording to WS-1 on its land), or hold the prose until WS-1 lands? The **SDK half
+   (Part B) is WS-1-independent** -- I can land that leg regardless of WS-1.
 
 ## 6. Land path
 COO design GO -> implement (00/01/03/05/07 citations + comp-system 06-emit + SDK schema/validate/tenant flip) ->
