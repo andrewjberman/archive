@@ -3,7 +3,9 @@
 <project>NFRA_SYSPARITY</project>
 <issued_to>0.8.0_AE_CloudComp~Z</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-07-19 (0.8.0_AE_CloudComp~Z): all 4 parts landed + verified. (a) COMPRAIL enforcement subsection in 03_comp_tools.md; (b) tenant-neutral over-reach corrected in README; (c) front-end docstring 3->4 (python_resolved added, commit-gate PASS); (d) count reconcile: the one present-tense live-claim (NFRA_SYSTEM_PRD ~30, ANY_CTO lane) ROUTED to CTO (owned-paths gate blocked self-edit -- correct, architecture PRDs are CTO-owned); 03 cs-markers auto-managed/current, CLAUDE.md CTO-owned @49dad1c83, memory clean, historical records untouched. Live gate 79/61 at run time. Log: logs/2026-07-19/ws7_rail_description_and_count_reconcile.md. CVO-pinged per LD-0318. -->
+
 <priority>P2 -- ANY TIME (PRD S4: independent of WS-1's denominator; the small honest-lag fixes). Context-reallocation of ~Z (comp-which/routing/comp-tools lane) per Andrew-direct idle-reallocation-by-context.</priority>
 
 <references>
