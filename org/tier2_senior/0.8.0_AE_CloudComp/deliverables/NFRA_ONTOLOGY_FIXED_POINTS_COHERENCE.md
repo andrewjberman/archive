@@ -31,7 +31,7 @@ CTO in parallel. Last reconciled: 2026-07-18 ~0756Z against @96e86c8a4.
 |---|---|---|
 | **Roles (14, FINAL @96e86c8a4)** | Source, Store, Producer, Transformer, Consumer, Sink, Gateway, Guard, Router, Trigger, Registry, Container, Observer, **Custodian** | Custodian = the OWNS-target actor (Person/Org now CONTEXTUAL, not fixed Source/Sink -- base heads-up folded). Gateway/Router/Registry absorb projects/routes-to/resolves-through (each = a concrete relation -> abstract RELATION + a Role; `served_from`->derives-from+Gateway, base coherence-check). **Observer full-Role-vs-Guard-subtype = the ONE open CTO item.** |
 | **Relationships (10, OWNER-RATIFIED @a7f075a77)** | produces, consumes, derives-from, depends-on, contains, triggers, **guards**, **governs**, denies, **owns** | DS~B ruling (below): guards/governs SPLIT (2, not 1 -- governance != gating); `owns` = governed CSE primitive (0.4->0.5 bump, S5); routes-to / resolves-through / projects RE-HOMED to Role-composites (NOT primitives). C-1 RESOLVED. Supersedes the pre-ruling 12-set. |
-| **Variance (6)** | Canonical, Twin, Variant, Fork-Shadow, Superseded, Orphan | base-confirmed, MSTR-endorsed. Mechanism @f904033ea (position_key = logical-identity only; structure COMPARED; allowed_facets). |
+| **Variance (6)** | Canonical, Twin, Variant, Fork-Shadow, Superseded, Orphan | base-confirmed, MSTR-endorsed. Mechanism advanced @f904033ea -> **v3 co-landed @136999d97** (render-honesty: Fork-Shadow is an ADVISORY debt-CANDIDATE, NOT confirmed debt; renders `(candidate -- advisory, pending adjudication)` unless the dimension is grounded/allowed_facets-cited -> then `(debt)`). **base-VALIDATED 2026-07-18 ~0306Z** independently (source: only conditional-grounded `(debt)` survives the render path; EXERCISE: live `comp-describe opal-data-cot` -> the advisory string, no `(debt)`). position_key = logical-identity only; structure COMPARED. |
 | **Lineage** | compositional (Role+Relationship grammar) | no ratification -- zero new primitives. |
 | **C3 naming** | INHERITED from constituents: capability-cluster -> pipeline-thread -> resource-domain -> governed-catalog -> NEVER invented | @297c12bea. Same principle as C2 typing, applied to naming; deterministic, no-invent. |
 | **Materialization (fog-4)** | archetype = an ATTRIBUTE on the EXISTING C2Motif/C3System, never a parallel node-type | ~A. Keeps the CVO-frozen semctl layer intact; materialization stays light. |
@@ -47,6 +47,13 @@ A+B materialize spec 7892f3fbc; C3 naming 297c12bea.
 - **C-2 (Observer 13th Role + owns 12th Relationship are CTO-PENDING, not settled).** Both are the
   empirical resolution of DoR open decisions -- strong justification, but they are the CTO closed-set
   ruling's to bless. Lock them as "empirically-grounded PROPOSED", not "ratified".
+- **C-3 (render-honesty residual -- FLAGGED to ~C 2026-07-18 ~0306Z, folds into NEXT-3).** The v3
+  render-honesty fix landed + base-validated at the RUNTIME (catalog v2 + mechanism v3 + enricher, co-land
+  @136999d97) -- but the DOCTRINE artifact `NFRA_ONTOLOGY_CLOSED_SET.md:82` still hard-equates
+  `Fork-Shadow(=debt)`, the exact unconditional equation v2 retired. Verification-Law-8 / retraction-
+  propagation: a retracted equation is only as dead as its LAST-SURVIVING copy; the gate must not ratify the
+  stale label. ~C folds the advisory-conditional correction into its NEXT-3 rule-bank pass to ride the CTO
+  closed-set gate together. This anchor (Variance row) is already corrected.
 - **Coherent + no drift otherwise:** Roles-minus-Observer (12), Relationships-minus-owns (11), Variance (6),
   the C3 naming ladder, and fog-4 materialization all ride the elemental frame with zero shared term left
   implicit. The GRAIN/ARITY distinction (elemental precision) must survive into ~A's formal render.
