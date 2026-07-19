@@ -1,8 +1,11 @@
 # NFRA_ONTOLOGY -- Variance FIRM-dimension Catalog + `variance_verdict` Consumer Contract
 
-**Author:** `0.8.0_AE_CloudComp~C`, 2026-07-18. **Status:** rev.2 -- base coherence-check PASS (@234142Z:
-narrowing RATIFIED, realization faithful to `@f904033ea`) + the ONE correctness fix FOLDED (canonical ref =
-MODAL, not a fixed firm -- §1/§2.4/§3/§4). Ready for `~D` to wire. **Companion to**
+**Author:** `0.8.0_AE_CloudComp~C`, 2026-07-18. **Status:** rev.3 -- WIRED + LANDED by `~D` @566ea8cd7
+(self-test 10/10, M10 mutant-tests the modal-ref + empty-modal fixes). rev.2 = base coherence-check PASS
+(@234142Z: narrowing RATIFIED, realization faithful to `@f904033ea`) + canonical-ref=MODAL fix (§1/§2.4/§3/§4).
+rev.3 = fold `~D`'s landed collision fix: GROUPING KEY = `(node_type, position_key)` + empty-modal-suppress +
+real-ARN-prefer (§2.2) -- a same-named S3_BUCKET_POLICY was colliding with its bucket and inverting the verdict.
+**Companion to**
 `NFRA_ONTOLOGY_VARIANCE_MECHANISM.md` (the frozen mechanism) -- this is its CONCRETE, grounded, `~D`-wireable
 realization for the `firm` dimension.
 
@@ -87,7 +90,17 @@ position_key(node) = node.name with any declared firm value-token replaced by th
 - **Structure is NOT in the key** (the load-bearing Q1 fix): the key is the dimension-stripped LOGICAL
   identity ONLY. If `position_key` returns unchanged (no firm token matched) -> the node carries no firm
   dimension -> **no verdict** (counted in the denominator, never guessed).
-- Siblings = the set of nodes sharing a `position_key`, each carrying a DISTINCT `firm` value.
+- **GROUPING KEY = `(node_type, position_key)`, NOT `position_key` ALONE (~D collision fix, landed
+  @566ea8cd7 -- rev.3 fold).** A bucket's twin is a BUCKET. Grouping on `position_key` alone collides
+  `opal-data-bd` (S3_BUCKET) with its same-named `S3_BUCKET_POLICY` (whose bare arn IS the bucket name, and
+  whose C2 membership is EMPTY). The empty-membership policy then wins the modal -> **INVERTS the verdict**
+  (observed first run: bd=fork-shadow, cot=canonical -- garbage). This is the SAME collision class as the
+  `--describe` resolution bug (@075f3ac5b) and the OWNED_BY polysemy. **So siblings = nodes sharing
+  `(node_type, position_key)`,** each carrying a DISTINCT `firm` value.
+- **EMPTY-MODAL-SUPPRESS:** if the modal membership-SET among the (typed) siblings is EMPTY, SUPPRESS the
+  group -> **no verdict** (an empty set is not a reference; never let an empty-membership node define the
+  modal). **REAL-ARN-PREFER:** on any residual tie, prefer a real-ARN resource over a bare-arn attachment
+  (consistent with @075f3ac5b). Both landed in ~D's code @566ea8cd7; mutant-tested (M10).
 
 ### 2.3 The compared STRUCTURE = the motif-membership SET (base 231424Z realization)
 ```
@@ -102,8 +115,9 @@ structure(node) = frozenset( node's C2 motif-membership )   # e.g. {a-access, a-
   C3 set, never as the primary key.
 
 ### 2.4 The symmetry test (firm-specialized; mechanism §3, allowed_facets=[])
-For a sibling group at one `position_key` over `firm`, with declared `values V = {bd,cot,inf}` scoped to the
-node's scope, `ref = the MODAL membership-SET among PRESENT siblings` (the set with the strict plurality; NOT a
+For a sibling group at one `(node_type, position_key)` over `firm` (grouping key per §2.2 -- a bucket groups
+only with buckets), with declared `values V = {bd,cot,inf}` scoped to the node's scope, `ref = the MODAL
+membership-SET among PRESENT siblings` (empty modal -> suppress, §2.2) (the set with the strict plurality; NOT a
 fixed firm -- base 234142Z correctness fix; among the modal-matchers designate the Canonical by a deterministic
 tie-break, e.g. the alphabetically-first firm token -- that badge picks the reference LABEL, never the ref STRUCTURE):
 ```
@@ -177,6 +191,7 @@ graph @ 21:43Z). `structure(opal-data-bd) = {a-access, a-serve, a-store, b-io}` 
 | Frozen mechanism element (@f904033ea) | Realized here |
 |---|---|
 | §2.2 `position_key` = dimension-stripped logical identity, structure OUT of the key (Q1) | §2.2 name-minus-firm-token; unchanged-key -> no verdict |
+| §3 sibling group = same logical identity (a twin is the SAME kind of thing) | §2.2 grouping key = `(node_type, position_key)` (~D collision fix @566ea8cd7): a bucket's twin is a bucket, not its same-named policy; + empty-modal-suppress + real-ARN-prefer |
 | §2.1 `allowed_facets=[]` for firm -> ANY off-key diff = Fork-Shadow (Q2) | §2.4 no Variant tier for firm; set-diff -> Fork-Shadow |
 | §2.2 `structure` = the COMPARED thing, not the key | §2.3 structure = C2 membership-SET (base 231424Z), compared not keyed |
 | §3 two-step: GROUP by position_key, COMPARE structure | §2.4 (2a) completeness + (2b) set-equality |
