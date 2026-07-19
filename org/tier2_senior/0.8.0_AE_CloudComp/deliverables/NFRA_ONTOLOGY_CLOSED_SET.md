@@ -1,4 +1,5 @@
 # NFRA_ONTOLOGY -- The Closed Vocabulary Set (gate-submission fixed point)
+<!-- genesis-surface: NFRA_ONTOLOGY -->
 
 > **DEFERS TO THE RULE-BANK for the machine vocab (NFRA_ONTOCLARITY WS-A fog-b, CTO 221516Z):** the single
 > canonical machine source-of-record is `org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml`

@@ -1,4 +1,5 @@
 # NFRA_ONTOLOGY -- Universal Relational-Archetypal Ontology (Design-of-Record)
+<!-- genesis-surface: NFRA_ONTOLOGY -->
 
 **Living design-of-record. Version 0.2 (2026-07-18).** Author: `0.8.0_AE_CloudComp~C` (build/author lane,
 LD-0310). Status: **DRAFT for CTO arch-gate -- design, not code.** Supersedes the founding draft

@@ -1,4 +1,5 @@
 # NFRA_ONTOLOGY -- Additive LLM-Classification Layer (motifs + systems)
+<!-- genesis-surface: NFRA_ONTOLOGY -->
 
 **Author:** `0.8.0_AE_CloudComp~C`, 2026-07-18. **Trigger:** Andrew-direct *"yes i absolutely want the
 llm-classification layer of the motifs and systems."* **Status:** DRAFT -- design + FIRST PASS executed on the

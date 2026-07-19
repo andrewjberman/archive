@@ -1,4 +1,5 @@
 # NFRA_ONTOLOGY -- A+B Canonical Motif Materialization Spec (for the SoD pipeline)
+<!-- genesis-surface: NFRA_ONTOLOGY -->
 
 **Author:** `0.8.0_AE_CloudComp~C`, 2026-07-18. **Trigger:** Andrew-direct *"materialize A+B first into the
 canonical layer."* **Status:** DRAFT -- the VOCABULARY/detector spec (my lane). **The materialization RUN is

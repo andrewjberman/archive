@@ -1,4 +1,5 @@
 # NFRA_ONTOLOGY -- Canonical Motif Catalog (NEXT-A: the mined C2 language)
+<!-- genesis-surface: NFRA_ONTOLOGY -->
 
 **Author:** `0.8.0_AE_CloudComp~C`, 2026-07-18. **Status:** DRAFT -- RAVC MSTR + CTO. Companion to
 `NFRA_ONTOLOGY_EMPIRICAL_GRAIN_SCAN.md`. This is the "assemble every C2 + qualify C3" Andrew asked for, at

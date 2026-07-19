@@ -1,4 +1,5 @@
 # The Canonical comp-tool Flow -- Create / Revise / Register / Exclude
+<!-- genesis-surface: NFRA_COMPREG -->
 
 **Status:** DRAFT (0.8.0_AE_CloudComp~B) -> CTO arch-gate (1.0.0_SA_CTO) -> MSTR canonize + colocate
 (0.0.0_AB_MSTR). **Mandate:** Andrew-direct 2026-07-17 ~2256Z (recorded @04bee845a). **Project:**

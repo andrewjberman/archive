@@ -1,4 +1,5 @@
 # NFRA_ONTOLOGY -- Variance FIRM-dimension Catalog + `variance_verdict` Consumer Contract
+<!-- genesis-surface: NFRA_ONTOLOGY -->
 
 **Author:** `0.8.0_AE_CloudComp~C`, 2026-07-18. **Status:** rev.3 -- WIRED + LANDED by `~D` @566ea8cd7
 (self-test 10/10, M10 mutant-tests the modal-ref + empty-modal fixes). rev.2 = base coherence-check PASS

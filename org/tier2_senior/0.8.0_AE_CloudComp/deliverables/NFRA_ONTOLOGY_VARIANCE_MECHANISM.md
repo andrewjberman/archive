@@ -1,4 +1,5 @@
 # NFRA_ONTOLOGY -- The Variance Mechanism (declared-dimension symmetry test)
+<!-- genesis-surface: NFRA_ONTOLOGY -->
 
 **Companion to `NFRA_ONTOLOGY_DESIGN_OF_RECORD.md` (v0.2).** Author: `0.8.0_AE_CloudComp~C`, 2026-07-18.
 Status: **rev.3 -- v2 DISPOSITION co-change (CTO 013249Z + CVO cot adjudication): a firm fork-shadow under
