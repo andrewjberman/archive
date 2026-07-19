@@ -49,19 +49,25 @@ A+B materialize spec 7892f3fbc; C3 naming 297c12bea.
   ruling's to bless. Lock them as "empirically-grounded PROPOSED", not "ratified".
 - **C-3 (render-honesty retraction DENOMINATOR -- deliverable lane RESOLVED; 2 residuals routed OUT).**
   VL#8 / retraction-propagation: the v2 retraction (Fork-Shadow != unconditional debt) had to reach EVERY
-  governing copy, not a hand-list. Swept in FOUR passes, each catching what the prior's PATTERN could not
-  see (the discipline, three times over): (1) base flag -> `CLOSED_SET:82` fixed @98f28b321; (2) CTO
-  full-denominator sweep -> found `DoR:313/323` + rule-bank + `canon-patterns:55` (my 031400Z-in); (3) ~C
-  NEXT-3 refresh @ae18caeb5 -> fixed `DoR:313/323/442` (+:442 ~C found) + its `contract:64/134/185/189` +
-  rule-bank catalog-ref v1->v2; (4) base independent BROAD sweep (my earlier `(=debt)`-only grep was
-  pattern-narrow -- missed the prose forms) -> found +2 in MY OWN `COMPSIMILAR_PH2_MOTIF_ENRICHMENT` design
-  (:48 MSTR-input blockquote [editorial annotation added] + :130 self-flagged adopt-on-land [updated to v2]),
-  which were OUT of CTO's doctrine scope, fixed by base this commit; and confirmed
-  `UNIVERSAL_ARCHETYPE_v0.1:314` is SUPERSEDED-banner-neutralized = NO ACTION (~C's disposition correct).
-  ZERO unconditional survivor now across the NFRA_ONTOLOGY deliverables + the COMPSIMILAR design.
-  **REMAINING, correctly routed OUT of the deliverable lane:** `canon-patterns.yaml:55` (CTO, exec-locked,
-  judgment call) + `summary_corpus.py` test phrasings (~D, code lane). Doctrine copies ride CTO's closed-set
-  gate + MSTR ratify. This anchor (Variance row) corrected @0e48bcf66.
+  governing copy, not a hand-list. Swept in FIVE passes, each catching what the prior's PATTERN could not
+  see -- and the 5th recursed into THIS record itself: (1) base flag -> `CLOSED_SET:82` fixed @98f28b321;
+  (2) CTO full-denominator sweep -> found `DoR:313/323` + rule-bank + `canon-patterns:55`; (3) ~C NEXT-3
+  refresh @ae18caeb5 -> fixed `DoR:313/323/442` (+:442 ~C found) + its `contract:64/134/185/189` + rule-bank
+  catalog-ref v1->v2; (4) base independent BROAD sweep (my earlier `(=debt)`-only grep was pattern-narrow --
+  missed the prose forms) -> found +2 in MY OWN `COMPSIMILAR_PH2_MOTIF_ENRICHMENT` design (:48 MSTR-input
+  blockquote [editorial annotation] + :130 self-flagged adopt-on-land [updated to v2]), OUT of CTO's doctrine
+  scope, fixed @1e775d7ee; confirmed `UNIVERSAL_ARCHETYPE_v0.1:314` SUPERSEDED-banner-neutralized = NO
+  ACTION; (5) **MSTR independent CENSUS -> caught `DoR:326`** ("...divergence is debt" -- a PROSE-SYNONYM
+  keyed on the CONCEPT, not the term "fork-shadow", so ALL FOUR prior term-adjacent sweeps missed it, base's
+  included -- base had even seen :326 in raw grep output and not dispositioned it), fixed @ccb4a63a8 (~C
+  NEXT-3 :326 refresh + a FINAL broad-prose sweep reading every 'debt' hit across all 4 governing artifacts;
+  :326 was the sole residual). **THE RECURSION:** base's earlier "ZERO-residual" claim in THIS record fell to
+  the very "no single denominator is complete" lesson C-3 documents -- a coherence record is not exempt from
+  its own law. Confidence now rests on THREE CONVERGING independent broad-prose sweeps (MSTR census + ~C final
+  + base semantic re-sweep 2026-07-18 ~0343Z, all zero across deliverables+graph-configs) -- a convergence,
+  not a proof. **REMAINING, correctly routed OUT of the deliverable lane:** `canon-patterns.yaml:55` (CTO,
+  exec-locked, judgment call) + `summary_corpus.py` test phrasings (~D, code lane). Doctrine copies ride
+  CTO's closed-set gate + MSTR ratify.
 - **Coherent + no drift otherwise:** Roles-minus-Observer (12), Relationships-minus-owns (11), Variance (6),
   the C3 naming ladder, and fog-4 materialization all ride the elemental frame with zero shared term left
   implicit. The GRAIN/ARITY distinction (elemental precision) must survive into ~A's formal render.
