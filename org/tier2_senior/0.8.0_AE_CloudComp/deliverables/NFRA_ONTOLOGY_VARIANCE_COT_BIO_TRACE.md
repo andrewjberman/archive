@@ -5,11 +5,18 @@
 `opal-data-cot` as a **Fork-Shadow of the bd/inf modal** on its FIRST live run. This trace applies CTO's 2
 mandatory requirements BEFORE any debt-filing and delivers the disposition.
 
-**BOTTOM LINE (grounded, not asserted):** the cot b-io fork-shadow is a **GRAPH PROJECTION / COVERAGE GAP**
-(cot is under-materialized in the graph), **NOT real debt** and **NOT a legitimate firm-shape difference**.
-Fix the GRAPH (materialize cot's pipeline I/O); do **NOT** file debt on cot; do **NOT** populate an
-`allowed_facets` "cot lacks b-io" facet (that would encode a graph defect as false legitimate-difference).
-The variance mechanism worked: it surfaced a real anomaly -- which turns out to be a graph-quality defect.
+**BOTTOM LINE (grounded, not asserted):** the cot b-io fork-shadow is a **GRAPH COVERAGE GAP** (cot is
+under-materialized in the graph), **NOT real debt** and **NOT a legitimate firm-shape difference**. Do **NOT**
+file debt on cot; do **NOT** populate an `allowed_facets` "cot lacks b-io" facet (that would encode a graph
+defect as false legitimate-difference). The variance mechanism worked: it surfaced a real anomaly -- which
+turns out to be a graph-quality defect.
+
+**>> CVO ADJUDICATION (010038Z, authoritative -- CONFIRMED + SHARPENED; see §8):** disposition CONFIRMED. But
+CVO independently ground-truthed the RAW `graph_nodes` axis and found cot=1 S3Key THERE too (identical to
+comp-kuzu's 1) -> the projection is FAITHFUL; the defect is UPSTREAM in the **DERIVE / S3Key-materialization**,
+NOT a projection-drop. My "projection/coverage gap" label was imprecise on the layer (I had left derive-vs-
+projection as a follow-up in §5); CVO's answer: it is a **DERIVE gap**. Fixing the projection would do nothing.
+Fix owner = the graph-DERIVE / S3Key-materialization owner (comp_aws_cli / globgrph), NOT the kuzu-projection owner.
 
 ---
 
@@ -78,11 +85,30 @@ the trace's "double duty" lands on the GRAPH-FIX queue for this candidate, NOT t
 
 ## 7. Routing
 - **CVO** -- adjudicate this candidate: recommend disposition = **graph coverage gap, NOT debt, NOT a facet**.
-- **Graph owner (DS~B / the CSE-derive + kuzu-projection owner)** -- FOLLOW-UP: cot is under-materialized
-  (1 S3Key + 1 EC2 r/w projected vs 3,600+ real objects + active pipeline). Materialize cot's pipeline->bucket
-  I/O (the b-io bridge) so the projected graph matches the raw estate. This likely affects other cot verdicts too.
-- **~C (me)** -- the other 4 firm fork-shadows (5 total, 46 verdicts) are SEPARATE candidates, each needs its
-  own grounding trace before any disposition; this trace grounds ONLY the opal-data-cot b-io case.
-- **~D** -- no clause change; the mechanism is correct. Post graph-fix, cot re-renders as Twin (re-verify live).
+- **Graph-DERIVE owner (comp_aws_cli / globgrph cloud-graph derive -- NOT the kuzu-projection owner; CVO §8)**
+  -- FOLLOW-UP: the derive materializes bd=153 / inf=74 / mdpf=4 / cot=1 S3Keys; cot's lone key is a single
+  config file, not its medallion I/O, so cot's pipeline->bucket b-io edges have no S3Key targets to attach to.
+  Fix the DERIVE's cot S3-scan so cot's own estate materializes (firm-separated -- NEVER mirror bd's keys).
+- **~C (me)** -- the other 4 firm fork-shadows (5 total, 46 verdicts) are SEPARATE candidates; per CVO, run the
+  SAME-ROOT check (do they share this derive-scan gap?) -- likely, so: derive-fix -> re-run variance -> trace
+  survivors. This trace grounds ONLY the opal-data-cot b-io case.
+- **~D** -- no clause change; the mechanism is correct. Post derive-fix, cot re-renders as Twin (re-verify live).
 
-*-- 0.8.0_AE_CloudComp~C. Variance candidate grounding trace; both CTO requirements applied; CVO to adjudicate.*
+## 8. CVO adjudication (010038Z, authoritative)
+CVO independently grounded (Rule 22, own instruments -- did NOT accept the trace) and **CONFIRMED**: cot b-io
+= GRAPH COVERAGE GAP, NOT debt, NOT a firm-facet. **Sharpening (accepted):** it is a **DERIVE / materialization
+gap, NOT a projection-drop.**
+- CVO's RAW `graph_nodes` axis (marker->StaticTable, the AC4 v2 instrument): cot S3Key = 1 on BOTH the raw
+  graph_nodes AND comp-kuzu -> the projection is FAITHFUL (raw 1 == projected 1); the defect is UPSTREAM in the
+  derive. Per-bucket materialization: bd=153, inf=74, mdpf=4, cot=1 (total 232). cot's lone S3Key =
+  `opal-data-cot/blackdiamond/cot/session-trigger-mode.json` (a config file), not the medallion I/O.
+- **=> Fixing the projection does NOTHING** (the nodes aren't in graph_nodes to project). Fix = the DERIVE's cot S3-scan.
+- **Root-cause question (CVO, for the fix owner):** WHY does the derive materialize bd=153 but cot=1? Likely a
+  firm-SCOPED derive config (the pipeline-script READS_S3/WRITES_S3 parse in comp_aws_cli excludes cot's
+  scripts -- bd/cot are IAM+gate-separated). If so the fix is a derive-CONFIG scope gap; it MUST materialize
+  cot's OWN estate without mirroring bd's keys (Rule 13 preserved). Same-root check on the other 4 fork-shadows.
+- **Rule 13:** respected -- the disposition explains cot's b-io absence as a graph defect ORTHOGONAL to firm
+  separation, not a "cot should mirror bd" expectation. CVO's estate read is a read-VERIFY (post lifted block).
+
+*-- 0.8.0_AE_CloudComp~C. Variance candidate grounding trace; both CTO requirements applied; CVO-ADJUDICATED
+CONFIRMED + sharpened to a DERIVE gap (§8).*
