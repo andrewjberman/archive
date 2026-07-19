@@ -4,7 +4,15 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-07-17</date>
-<status>staged</status>
+<status>pending</status>
+<!-- 2026-07-19 ~D: GO'd under COO PROCEED-ALL-NFRA @180112Z (Andrew-direct via CTO). Engine comp_similar.py
+     LANDED @b63b18853 (self-test 7/7, live-exercised); .tools/comp-similar wrapper + comp-tools.yaml +
+     coverage-map staged. Two external gates pending, both submitted: CTO arch-gate @184502Z (PRD-4.3
+     departure + gate-scoping + heat-plumbing call); COO registration SoD @184511Z (graph-call-manifest
+     tools_index/entries/comp-which -- registration invariant blocks the wrapper commit without it). NOT
+     complete until both clear. Dogfood: offline C4 mutant PASS; monolith live pair PH3-gated
+     (opal-data-assets UNKNOWN-thin). -->
+
 <priority>P2 (Andrew batch 2026-07-17). GATE: NFRA_COMPSIMILAR.PH1 landed (resource_summaries corpus live) + CTO arch-gate on the PRD's engine/registration decisions.</priority>
 
 <authority>
