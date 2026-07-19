@@ -42,8 +42,11 @@ module load (it is the algebra contract; `cse_emit_graphhead` imports IT -- a di
   catalog + `_scan` already live -- `cse_emit_graphhead` / a globgrph util), and `_pull_live_types` calls it via
   a **lazy (function-level) import** (breaks the load-time cycle; the catalog dep stays in the infra lane, only
   invoked when `--live` runs). This is the co-sequenced 0.7.0-lane piece; CTO routes it via COO.
-- Fallback contract: if the raw helper is unavailable, `--live` FAILS LOUD (`LivePullError`) -- it NEVER silently
-  degrades to comp-kuzu-projected (that would re-bless the wrong axis; the existing fail-loud discipline extends).
+- Fallback contract (THE LOAD-BEARING GUARD -- a NAMED, EXERCISABLE branch, not just an assertion): if the raw
+  helper is unavailable (import fails / catalog error / 0-rows), `--live` RAISES `LivePullError` -- it NEVER
+  silently degrades to comp-kuzu-projected (that would re-bless the wrong axis). This is what makes criterion #1
+  PERMANENT: a future silent re-bless of the projected axis is impossible because the only alternatives are
+  raw-or-error. **The failure path is EXERCISED, not asserted (Sec 4b) -- CTO landing-condition #2.**
 
 ---
 
@@ -94,17 +97,51 @@ check("AC4v2: coverage GREEN vs the RAW 55-edge axis (not the projected 53)",
 method @235342Z -- criterion #4 is pre-handled). CVO exercises `assert_live_coverage --live` -> reads raw
 `graph_edges` -> ok=TRUE.
 
+## 4b. FAIL-LOUD FAILURE-PATH EXERCISE (CTO landing-condition #2 -- non-optional; the control must be exercised)
+
+The fail-loud (Sec 1: helper-unavailable -> `LivePullError`, never a projected fallback) MUST be in the LANDED
+code and EXERCISED on the FAILURE path -- an un-exercised control is exactly the failure class this whole item
+is about. Make it a NAMED branch + a self-test that drives it:
+```python
+# In _pull_live_types: the raw-edge read is a distinct branch that raises LivePullError on any unavailability.
+# Self-test (drives the FAILURE path, not just the happy path):
+def _raw_edge_types_or_raise(pull_fn):   # pull_fn = the injected raw-read (globgrph helper) -- injectable for the test
+    try:
+        vals = pull_fn()
+    except Exception as ex:
+        raise LivePullError(f"raw graph_edges read unavailable: {ex} -- refusing comp-kuzu-projected fallback")
+    if not vals:
+        raise LivePullError("raw graph_edges returned 0 edge_types -- refusing a silent projected fallback")
+    return vals
+
+check("AC4v2 fail-loud: helper-unavailable RAISES LivePullError (NOT a projected fallback)",
+      _raises(LivePullError, lambda: _raw_edge_types_or_raise(lambda: (_ for _ in ()).throw(OSError("no catalog")))))
+check("AC4v2 fail-loud: 0-rows RAISES LivePullError (NOT a silent empty pass)",
+      _raises(LivePullError, lambda: _raw_edge_types_or_raise(lambda: set())))
+```
+Injecting `pull_fn` makes the failure path exercisable WITHOUT a live catalog -- so CVO drives it deterministically
+(helper-unavailable -> LivePullError; NEVER a comp-kuzu-projected value). **CVO's condition-#2 exercise = run
+these two + confirm no code path returns a projected set on raw-read failure.**
+
 ---
 
 ## 5. Landing (governed -- NOT a version bump; a coverage-method correction)
 
-1. **DS~B (me):** this spec = the DESIGN (the method + the 2 rulings + the snapshot fallback).
-2. **CTO:** arch-gate against the 4 hold-criteria (method-primary; 2 rulings; raw-permanent basis; CVO-raw).
-3. **CVO:** re-sign on the RAW axis (`assert_live_coverage --live` reading raw `graph_edges` -> ok=TRUE).
-4. **COO/exec:** single-editor land the cse_schema.py change (Secs 1-4). **CO-SEQUENCE with the globgrph
-   `distinct_raw_edge_types(catalog)` helper (0.7.0 lane, Sec 1 mechanism) -- the standalone `--live` cannot
-   read the raw axis without it; land together or the method half is inert.**
-5. **0.7.0:** confirm the in-derive lane-2 already asserts raw-axis coverage (it does) -- so both the in-derive
-   and the standalone paths verify the SAME raw axis.
+1. **DS~B (me):** this spec = the DESIGN. **CTO arch-gate PASS @001253Z** (all 4 criteria source-confirmed;
+   architecture explicitly endorsed). Design accepted as-is; the 2 conditions below are LANDING, not design.
+2. **CVO:** re-sign on the RAW axis -- `assert_live_coverage --live` reading raw `graph_edges` -> ok=TRUE, AND
+   **exercise the FAIL-LOUD failure path (Sec 4b, CTO landing-condition #2): helper-unavailable -> LivePullError,
+   NEVER a projected fallback -- run, don't assert.**
+3. **COO/exec:** single-editor land the cse_schema.py change (Secs 1-4b). **LANDING-CONDITION #1: HARD
+   CO-SEQUENCE with the globgrph `distinct_raw_edge_types(catalog)` helper (0.7.0 lane) in the SAME governed
+   cycle.** Safe-by-construction: cse_schema alone -> `--live` raises LivePullError (safe + inert), never a
+   wrong-axis GREEN -- so partial-land cannot mislead. (Standing protection UNBROKEN throughout: lane-2 already
+   reads the raw axis; this fix ALIGNS the standalone `--live` + CVO onto that same axis, it does not restore
+   lost protection -- CTO. That is why there is no rush.)
+4. **0.7.0:** build the globgrph helper (CTO-routed via COO) + confirm the in-derive lane-2 asserts raw-axis
+   coverage (it does) -- both the in-derive + standalone paths verify the SAME raw axis.
+5. **NA-0003 flip-trigger (CTO):** this landing (v2 + helper + CVO raw-sign) flips NESTEDABSTRACT NA-0003
+   PENDING -> incorporated (the live-cadence-recheck half built; sdk_ref covers both halves; COO folds the
+   sharpened axis-string then). **AC4 class closes when both land + CVO raw-signs.**
 
 *-- 0.4.0_DS_ClientPlatform~B, cse_schema.py owner. AC4 v2 raw-axis coverage-method correction; governed landing.*
