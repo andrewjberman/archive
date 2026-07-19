@@ -12,6 +12,14 @@
      tools_index/entries/comp-which -- registration invariant blocks the wrapper commit without it). NOT
      complete until both clear. Dogfood: offline C4 mutant PASS; monolith live pair PH3-gated
      (opal-data-assets UNKNOWN-thin). -->
+<!-- 2026-07-19 UPDATE: BOTH gates CLEARED. CTO arch-gate GO @185343Z (departure approved, read/scan
+     scoping confirmed, heat-cadence deferred, dogfood correct). COO landed graph-call-manifest routing +
+     wrapper atomically @e58a1bcd6 (rank-1 2.00, no theft, routing-test PASS, baseline regression-free);
+     AE-SoD half (comp-tools.yaml + coverage-map) committed @2956c2751; comp-manifest-check
+     registration-invariant PASS. ENGINE+REGISTRATION LANDED. Sole remaining = CVO held supersede-path
+     exercised verify (pinged @192357Z) -> that CLOSES PH2 (COO). Flip to complete on CVO PASS.
+     Deferred/separate (CTO-ruled, not PH2 blockers): heat-source cadence follow-on (data-production, not a
+     monitor) + PH3 authored summaries. -->
 
 <priority>P2 (Andrew batch 2026-07-17). GATE: NFRA_COMPSIMILAR.PH1 landed (resource_summaries corpus live) + CTO arch-gate on the PRD's engine/registration decisions.</priority>
 
