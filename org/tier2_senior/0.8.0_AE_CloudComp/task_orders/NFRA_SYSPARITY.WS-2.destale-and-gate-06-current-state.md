@@ -12,6 +12,17 @@
      comp-manifest-check PASS. ENFORCEMENT WIRING at CTO arch-gate (relayed via COO @213148Z): proposal =
      commit-gate leg on comp-system _SOURCES touch. NOT complete until CTO rules the wiring + I wire it +
      CVO verifies (LD-0318). PH1 stays HELD. -->
+<!-- 2026-07-19 ~D UPDATE: CTO arch-gate GO @213935Z (engine ACCEPTED + ruled: commit-gate-leg fail-closed
+     PRIMARY + COO sweep backstop; system-current-override audited trailer; surface age-WARN; content-hash
+     deferred P2.5). ENFORCEMENT LEG LANDED LIVE @748bd523a in safe-commit.sh: fail-closed on clean rc2
+     (genuine drift on a _SOURCE touch, PATHSPEC-keyed = covers yaml/json), FAIL-SAFE (rc1/other ->
+     WARN+proceed, never wedges), audited system-current-override -> git-author-override-audit.log (= P2.5
+     over-rate signal), surfaced age-WARN. Fixed a set-e command-substitution bug (mis-exited 2). bash -n
+     clean; LIVE block-test PASS (rc1 clean block, no leak). Queue path DORMANT -> legacy path is the active
+     enforcement point (queue-worker leg = TO-6 future; COO sweep backstops). 06 regen CURRENT at land.
+     COO fabric-awareness broadcast + sweep-backstop asked @221131Z. SOLE remaining = CVO LD-0318 exercise
+     (pinged @221154Z, recipe given) -> that CLOSES WS-2. Flip to complete on CVO PASS. -->
+
 
 <priority>P1 -- LOAD-BEARING control fix (PRD S3/S4). [CTO ARCH-GATE at build.] Part (a) de-stale is independent of WS-1; part (b) the gate mechanism is CTO-arch-gated. Context-reallocation of ~D (comp-tools lane) per Andrew-direct idle-reallocation-by-context.</priority>
 
