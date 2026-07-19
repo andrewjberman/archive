@@ -4,6 +4,15 @@
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <status>pending</status>
+<!-- 2026-07-19 ~D progress: (a) DE-STALE COMPLETE @4e5a78abc -- comp-system --check = SYSTEM CURRENT
+     (ledger 80->82/tools 59->61/cse_schema 0.4->0.5; post-commit still CURRENT). (b) GATE ENGINE LANDED
+     INERT @2c4902a5c -- comp-system --gate, fail-closed/staleness-conditioned (rc2 genuine drift, rc0
+     WARN on age-only=no false-Monday), self-test 13/13 + LIVE both-directions (seed->fire/age->WARN/
+     fixed->clear, byte-identical restore), mirrors ~A drift_gate.py, reuses _staleness() (one predicate).
+     comp-manifest-check PASS. ENFORCEMENT WIRING at CTO arch-gate (relayed via COO @213148Z): proposal =
+     commit-gate leg on comp-system _SOURCES touch. NOT complete until CTO rules the wiring + I wire it +
+     CVO verifies (LD-0318). PH1 stays HELD. -->
+
 <priority>P1 -- LOAD-BEARING control fix (PRD S3/S4). [CTO ARCH-GATE at build.] Part (a) de-stale is independent of WS-1; part (b) the gate mechanism is CTO-arch-gated. Context-reallocation of ~D (comp-tools lane) per Andrew-direct idle-reallocation-by-context.</priority>
 
 <references>
