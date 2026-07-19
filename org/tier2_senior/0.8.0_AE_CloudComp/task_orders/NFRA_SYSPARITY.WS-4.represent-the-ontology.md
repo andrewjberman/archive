@@ -3,7 +3,16 @@
 <project>NFRA_SYSPARITY</project>
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<completion>
+COMPLETE 2026-07-19 (COO-accepted @220519Z, self-mark authorized). All 5 ACs met + independently verified:
+- AC-1 (citational archetype-layer in /system): 00_synthesis "## The archetype layer" + 4 threaded citations @e1f5f23f2 -- grep-of-the-citation (rule-bank path + LD-0311/0315), NOT grep-of-the-word.
+- AC-2 (SDK vocabulary-bound): @327b615e5 -- v0.1 stub retired, ontology_ref cites the rule-bank not a hand-copy.
+- AC-3 (no NESTEDABSTRACT duplication): static binding only; abstraction-ledger:n-a on the 0*_*.md commit (COO-ruled, ~A concurred).
+- AC-4 (CVO citational-verify, load-bearing): CVO AC-4 CLEAR @220251Z on the COMMITTED HEAD -- ontology domain 40->100% (4/4), citational-axis.
+- AC-5 (session log + Compiler Tools): logged.
+Gates: CTO arch-gate both parts (verified at source, 214436Z + 215631Z) + CVO PASS/AC-4 + RAVC. ~Z 03-collision reconciled. CITE-not-copy architecture.
+</completion>
 <priority>P2 -- follows WS-1 (feeds from its scope + ONTOCLARITY's clarified defs) but the grounding + representation-design start NOW. Context-reallocation of ~C (NFRA_ONTOLOGY lane, variance thread just closed CVO-PASS) per Andrew-direct idle-reallocation-by-context.</priority>
 
 <references>
