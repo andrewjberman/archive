@@ -124,47 +124,78 @@ def _fieldbase(leafpath):
     return re.sub(r"\[\d+\]", "", leafpath)
 
 
+def _all_specs(entries):
+    """Yield (name, spec) over the ledger; a value may be a single spec dict OR a
+    LIST of specs (e.g. history_windows[]). Skips _meta/_note markers."""
+    for name, val in entries.items():
+        if name.startswith("_"):
+            continue
+        for spec in (val if isinstance(val, list) else [val]):
+            if isinstance(spec, dict):
+                yield name, spec
+
+
+def _spec_is_latest(spec):
+    return spec.get("scope") == "latest_cross_section" or any(
+        "(latest)" in fp for fp in spec.get("field_paths", []))
+
+
+def _spec_field_hit(spec, base):
+    for fp in spec.get("field_paths", []):
+        fp_clean = fp.replace("(latest)", "").strip()
+        if fp_clean == base or fp_clean in base or fnmatch.fnmatch(base, fp_clean):
+            return True
+    return False
+
+
+def _spec_date_ok(spec, idx_date):
+    db, da = spec.get("date_before"), spec.get("date_after")
+    if db and idx_date and idx_date >= db:
+        return False
+    if da and idx_date and idx_date < da:
+        return False
+    return True
+
+
+def _spec_band(spec, sign, pct_signed, delta, sv):
+    if "pct_range" in spec:                          # SIGNED band (two-sided-safe)
+        lo, hi = spec["pct_range"]
+        return lo <= pct_signed <= hi
+    if "abs" in spec:
+        if spec.get("sign", "any") not in ("any", sign):
+            return False
+        tol = spec.get("tol_pct", 10) / 100.0 * abs(spec["abs"])
+        return abs(abs(delta) - abs(spec["abs"])) <= tol
+    return False
+
+
 def _ledger_match(leafpath, idx_date, is_latest, sv, pv, entries):
-    """DS named-entry ledger. Returns the matching note, or None (UNEXPLAINED)."""
+    """Returns the matching note, or None (UNEXPLAINED). A latest-scoped entry is
+    AUTHORITATIVE for a latest leaf: if a latest leaf matches its field but falls
+    OUTSIDE its (tight) band, it is UNEXPLAINED -- it does NOT fall through to a
+    broader all-date entry (else post_convergence [-1.43,2.08] masks a small latest
+    bug the tight model_latest_tie [-0.5,0.5] is meant to catch)."""
     delta = pv - sv
     sign = "+" if delta >= 0 else "-"
     base = _fieldbase(leafpath)
     pct_signed = delta / max(abs(sv), 1.0) * 100.0
-    for name, val in entries.items():
-        if name.startswith("_"):
+    if is_latest:
+        latest_field_matched = False
+        for name, spec in _all_specs(entries):
+            if not _spec_is_latest(spec) or not _spec_field_hit(spec, base):
+                continue
+            latest_field_matched = True
+            if _spec_band(spec, sign, pct_signed, delta, sv):
+                return spec.get("note", name)
+        if latest_field_matched:
+            return None                              # authoritative: out of the tight latest band
+    for name, spec in _all_specs(entries):           # general (non-latest-scoped) entries
+        if _spec_is_latest(spec):
             continue
-        # a value may be a single spec dict OR a LIST of specs (e.g. history_windows[])
-        for spec in (val if isinstance(val, list) else [val]):
-            if not isinstance(spec, dict):
-                continue
-            scope_latest = spec.get("scope") == "latest_cross_section"
-            hit = False
-            for fp in spec.get("field_paths", []):
-                fp_latest = "(latest)" in fp
-                fp_clean = fp.replace("(latest)", "").strip()
-                if fp_clean == base or fp_clean in base or fnmatch.fnmatch(base, fp_clean):
-                    hit = True
-                    scope_latest = scope_latest or fp_latest
-                    break
-            if not hit:
-                continue
-            if scope_latest and not is_latest:
-                continue
-            db, da = spec.get("date_before"), spec.get("date_after")
-            if db and idx_date and idx_date >= db:
-                continue
-            if da and idx_date and idx_date < da:
-                continue
-            if "pct_range" in spec:                  # SIGNED band (two-sided-safe)
-                lo, hi = spec["pct_range"]
-                if lo <= pct_signed <= hi:
-                    return spec.get("note", name)
-            if "abs" in spec:
-                if spec.get("sign", "any") not in ("any", sign):
-                    continue
-                tol = spec.get("tol_pct", 10) / 100.0 * abs(spec["abs"])
-                if abs(abs(delta) - abs(spec["abs"])) <= tol:
-                    return spec.get("note", name)
+        if not _spec_field_hit(spec, base) or not _spec_date_ok(spec, idx_date):
+            continue
+        if _spec_band(spec, sign, pct_signed, delta, sv):
+            return spec.get("note", name)
     return None
 
 
@@ -235,9 +266,16 @@ def self_test():
     exp_win = any(k == "model_aua[0]" for k, *_ in r["expected"])        # +20% in-window (LIST) -> EXPECTED
     exp_latest = any(k == "model_aua[1]" for k, *_ in r["expected"])     # +4.1 latest -> latest-scoped abs entry
     unexp = any(k == "x[1]" for k, *_ in r["unexplained"])               # +50% unrelated -> UNEXPLAINED
-    ok &= exp_win and exp_latest and unexp
+    # authoritative-latest: a latest delta OUT of the tight latest band must NOT be masked by a broader all-date band
+    tsa_s = {"dates": ["2026-05-01", "2026-06-01"], "model_aua": [100.0, 100.0]}
+    tsa_p = {"dates": ["2026-05-01", "2026-06-01"], "model_aua": [100.0, 101.5]}  # latest +1.5%
+    leda = {"latest_tie": {"field_paths": ["model_aua(latest)"], "scope": "latest_cross_section", "pct_range": [-0.5, 0.5], "note": "tie"},
+            "post_conv": {"field_paths": ["model_aua"], "pct_range": [-1.43, 2.08], "date_after": "2026-04-09", "note": "postconv"}}
+    auth = any(k == "model_aua[1]" for k, *_ in compare(tsa_s, tsa_p, leda)["unexplained"])
+    ok &= exp_win and exp_latest and unexp and auth
     print(f"SELF-TEST snapshot identity+mutant: {ident['shape_ok'] and not ident['unexplained']} / {bool(compare(served, mut)['unexplained'])}")
     print(f"SELF-TEST DS-ledger: history_windows-LIST(model_aua[0])={exp_win}; latest-scope(model_aua[1])={exp_latest}; UNEXPLAINED(x[1])={unexp}")
+    print(f"SELF-TEST authoritative-latest: +1.5% latest out-of-tie NOT masked by post_conv -> UNEXPLAINED={auth}")
     print(f"SELF-TEST {'PASS' if ok else 'FAIL'} -- consumes DS named-entry format + classifies EXPECTED vs UNEXPLAINED")
     return ok
 
