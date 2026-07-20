@@ -7,7 +7,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DE_ClientPlatform</issued_to>
     <date>2026-07-07</date>
-    <status>staged</status>
+    <status>complete</status>
+    <completed>2026-07-08</completed>
+    <reconcile_note>Status-reconciled 2026-07-20 by 2.0.0_SA_COO (Andrew-direct backlog review). Books tab / advisor-drill config-nav SHIPPED LIVE on portal PROD -- portal-v2.1.133 (@27f543ade, CI run 28954979551 SUCCESS, present-as-is Option A). TO-1's served advisor entity landed first so the gate was met.</reconcile_note>
     <dispatch_state>STAGED, GATED on TO-1's SERVED advisor entity. TO-1 (DS A_01 injection) must land AND be nightly-served (exactly one cottonwood_capital_advisors/ book on opal-data-cot) before this can render anything but an empty stub. GO fires when DS notifies COO the served entity has landed (expected earliest: tonight's 02:00 UTC nightly after DS deploys TO-1). DE (0.4.0_DE_ClientPlatform) is not yet respawned -- COO will respawn the DE lane at GO time, not now (no actionable work until TO-1's entity exists; respawning now would just idle it, LD-0158). PRD docs/architecture/ADVI_COTPPLADVFIX_PRD.md. TO-2 of 3.</dispatch_state>
     <gate_note>Gates: HARD dependency on TO-1's served advisor entity (needs the data, not a stub). Portal main tree stays on DEV.</gate_note>
   </metadata>

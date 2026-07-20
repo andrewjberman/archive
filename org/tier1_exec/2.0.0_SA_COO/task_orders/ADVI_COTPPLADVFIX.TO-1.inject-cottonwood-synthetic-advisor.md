@@ -7,7 +7,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-07-07</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-07-08</completed>
+    <reconcile_note>Status-reconciled 2026-07-20 by 2.0.0_SA_COO (Andrew-direct backlog review). SHIPPED + served-verified: synthetic single-advisor injection @0bb589a29 (2026-07-07) + 6 cot-clone 49F-safety fixes; DS ship-log @1dbc13e66 (full advisor-drill chain served-verified, live-call fast-track); the paired TO-2 Books/advisor-drill tab is LIVE on portal PROD (portal-v2.1.133, @27f543ade 2026-07-08). The Cottonwood synthetic single-advisor IS the intended state; native advisor keying is deferred to the Sept-2026 Cottonwood-BD phase (GCONTR disposition @a2a0a8c2f). The TO+JSON simply were never reconciled after the 07-07/08 ship.</reconcile_note>
     <dispatch_state>DISPATCHED + GO 2026-07-07 (Andrew-direct P0 via CTO 192953Z re-confirm; paired MCP GO to 0.4.0_DS_ClientPlatform). This is the SEPARATE cot gold/advisor-dimension workstream -- NOT the held cot DATEMODE/holdings-freshness thread (Andrew's PRD in flight); no file overlap (A_01 gold vs cot_bronze_ingest bronze), so the DATEMODE hold does NOT block this. DS lane note: DS was not broker-live at dispatch (post-reboot Tier-1-only); respawn-requested to MSTR same cycle -- the GO drains on respawn. PRD docs/architecture/ADVI_COTPPLADVFIX_PRD.md (commit 11f6bd3c2). TO-1 of 3.</dispatch_state>
     <gate_note>Gates: none upstream. Validate on the SCHEDULED nightly's served artifact (CLAUDE.md NEVER #4 -- no ad-hoc gold run). Gates TO-2 (DE) downstream: TO-2 cannot render until this TO's served advisor entity lands.</gate_note>
   </metadata>

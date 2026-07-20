@@ -7,7 +7,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.5.0_AE_OpalETL</issued_to>
     <date>2026-07-07</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-07-07</completed>
+    <reconcile_note>Status-reconciled 2026-07-20 by 2.0.0_SA_COO (Andrew-direct backlog review). MDPF custody flip (bd->schwab-native) FIRED + verified on the 3-way never-widen co-sign @12dd979c7 (2026-07-02); LD-0292 ($528mm 49financial custody defect) CLOSED @0a4fed471 (cured by the pipeline running normally, DO-NOT-REPAIR never broken); mdpf served is T-1 healthy (comp-freshness: as_of 2026-07-18, 1 trading day behind the 2026-07-20 frontier = PASS). The custody-flip substance is DONE and the broader MDPF/ETLFIX work now lives under OPAL_CONSOLIDATION. Superseded-by-completion. NOTE: this reconcile does not separately re-certify the formal WS-3 leg-2 protection-gate pattern DOC (a non-blocking write-up); flag if you want that produced.</reconcile_note>
     <dispatch_state>DISPATCHED (post-reboot /drive cycle; PRD authored 2026-07-02, 5 days undecomposed -- WS-3 carved out first since 0.5.0 is live+idle and is the sole named owner)</dispatch_state>
     <gate_note>COO-RESOLVABLE now. Confirms/closes the custody flip that already fired (0.5.0, commit 12dd979c7, SSM schwab v2 @14:06Z) -- this TO is the close-out + hardening, not new build.</gate_note>
   </metadata>
