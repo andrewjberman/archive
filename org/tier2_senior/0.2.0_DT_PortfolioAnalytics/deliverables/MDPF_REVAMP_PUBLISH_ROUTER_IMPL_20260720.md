@@ -47,20 +47,24 @@ def _list_one(s3, key):
 
 def _publish_one(s3, segment, name, portal_key):
     src_key = f"{STAGING_ROOT}/{segment}/{name}.json"
-    src = _list_one(s3, src_key)
-    if src is None:
-        _log(f"MISSING: staged source absent {src_key} -> {portal_key} NOT published")
-        return {"portal_key": portal_key, "status": "missing_source", "published": False}
-    s3.copy_object(Bucket=BUCKET, Key=portal_key,
-                   CopySource={"Bucket": BUCKET, "Key": src_key}, MetadataDirective="COPY")
-    dst = _list_one(s3, portal_key)
-    if dst is None:
-        return {"portal_key": portal_key, "status": "verify_absent", "published": False}
-    if dst["Size"] != src["Size"]:
-        _log(f"ERROR: size mismatch {portal_key} dst={dst['Size']} src={src['Size']}")
-        return {"portal_key": portal_key, "status": "size_mismatch", "published": False}
-    _log(f"OK: published {src_key} -> {portal_key} ({dst['Size']:,}B, etag_match={dst.get('ETag')==src.get('ETag')})")
-    return {"portal_key": portal_key, "status": "published", "published": True, "size": dst["Size"]}
+    try:  # AE-C hardening: one key's failure must not crash the run or lose all_present
+        src = _list_one(s3, src_key)
+        if src is None:
+            _log(f"MISSING: staged source absent {src_key} -> {portal_key} NOT published")
+            return {"portal_key": portal_key, "status": "missing_source", "published": False}
+        s3.copy_object(Bucket=BUCKET, Key=portal_key,
+                       CopySource={"Bucket": BUCKET, "Key": src_key}, MetadataDirective="COPY")
+        dst = _list_one(s3, portal_key)
+        if dst is None:
+            return {"portal_key": portal_key, "status": "verify_absent", "published": False}
+        if dst["Size"] != src["Size"]:
+            _log(f"ERROR: size mismatch {portal_key} dst={dst['Size']} src={src['Size']}")
+            return {"portal_key": portal_key, "status": "size_mismatch", "published": False}
+        _log(f"OK: published {src_key} -> {portal_key} ({dst['Size']:,}B, etag_match={dst.get('ETag')==src.get('ETag')})")
+        return {"portal_key": portal_key, "status": "published", "published": True, "size": dst["Size"]}
+    except Exception as e:  # per-key error status; run still reports all_present + the full map
+        _log(f"ERROR: publish {src_key} -> {portal_key} raised {type(e).__name__}: {e}")
+        return {"portal_key": portal_key, "status": "error", "published": False, "error": str(e)}
 
 def lambda_handler(event, context):
     s3 = boto3.client("s3", region_name=S3_REGION)
@@ -106,6 +110,7 @@ export const handler = async (event) => {
 - `s3:ListBucket` on `opal-data-assets` Condition prefix `["gold/mdpf_revamp/*","portal/*"]` (the listing-based verify)
 - AES256 default SSE on opal-data-assets (no KMS/SSE header). NEVER a source layer (bronze/silver), NEVER bd/schwab, NEVER cross-firm.
 - **22a AT APPLY (live simulate, ONE --resource-arns each, positive controls SEPARATE):** PutObject portal/model-portfolios/49financial/aggregate_aua_timeseries.json -> ALLOW; PutObject portal/portfolios/global/aum_metrics.json -> ALLOW; GetObject gold/mdpf_revamp/49financial/account_distribution.json -> ALLOW; PutObject bronze/... -> implicitDeny; PutObject silver/... -> implicitDeny; GetObject schwab/... -> implicitDeny; PutObject opal-data-cot/... -> explicitDeny (fence). comp-iam is NOT sufficient (fails GREEN on new (action,resource)); the live simulate is the instrument.
+  **AE apply-discipline folds (0.7.0_AE 210705Z, BINDING at apply):** (A) the conditioned ListBucket (Condition s3:prefix) MUST be simulated WITH `--context-entries s3:prefix=gold/mdpf_revamp/...` AND `=portal/...` -- without them it returns implicitDeny byte-identical to a real deny (the smartx conditioned-ListBucket class), so the grant reads untested/self-denied. (B) the simulate proves the GRANT, not that CopyObject LANDS under the live bucket policy (the 17a deny + AES256-default; the code sets no SSE header) -- so AE EXERCISES a real publish (or the DS-pinged first run) + verifies portal/* via ListObjectsV2 = desired+applied+EXERCISED, never simulate-only.
 
 **3b. Router role `mdpf-data-router-role`** (Lambda@Edge): trust `lambda.amazonaws.com` + `edgelambda.amazonaws.com` (replication); `AWSLambdaBasicExecutionRole` (logs) ONLY. NO S3 perms -- CF fetches from origin via OAC, the lambda only rewrites URIs.
 
