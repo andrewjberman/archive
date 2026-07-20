@@ -3,7 +3,8 @@
 <project>NFRA_ONTOCLARITY</project>
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>complete</status>
+<completed>2026-07-20T06:32Z -- CVO-DETERMINISM-PASS (364 role-triples x every permutation -> one answer; totality GUARANTEES min-by-priority.index order-independence). Landed: role_priority @317b3d0af (CTO grantor), comp_ontolint role-resolve @5b98d0ed6 (AE). ONTOCLARITY 3/4.</completed>
 <priority>P2 -- definitional, startable after WS-A (parallel-OK with WS-B). Context-owner ~C.</priority>
 
 <references>
