@@ -32,14 +32,18 @@ All magnitudes grounded live 2026-07-20 (opal-data-assets silver + served opal-d
 - **Custody HISTORY:** rps/rps_s2 snapshots where they exist (real back-depth TBD -- enumerating) +
   NAME any pre-coverage gap; NO interpolation (D1).
 
-## D-3 -- 49F model-AUA LATEST: complete roster vs under-enumerated legacy feeder
-- **Field:** 49F 5-core `model_aua` latest (the F2(2) enumeration correction).
-- **Corrected source:** the COMPLETE `fact_model_allocation_roster` (advisor="49 Financial Group",
-  status=open) -- ALL served models enumerated.
-- **Corrected (same-cycle 07-18):** ~$1,401.3M. **Legacy served:** $1,397.30M (feeder enumerated 11 of
-  >=14 models). **Delta: +$4.1M / +0.29%.** **Reason:** complete-vs-under-enumerated. NOTE: my roster
-  read is ALREADY the complete set -- this delta is inherent to the correct source, not a change I make.
-  (My 07-20 read = $1,395.41M; the delta is date-drift off the 07-18 $1,401.3M, same F2 class.)
+## D-3 -- 49F model-AUA LATEST: RESOLVED = NOT A REAL DELTA (monolith ties served, +$0)
+- **GROUNDED 2026-07-20 (FLAG-1, CTO priority):** roster `Sigma value` (open) and aum_daily
+  `closing_equity` are the SAME measure -- per-model EXACT tie for 4/5 core (INT/LTA/UST exact,
+  ST -0.011M); ONLY LTC differs -1.866M = pure date-drift (aum_daily last day 07-17 vs roster 07-20).
+  Both TIE the served $1,397.3M. Recently-opened-after-07-17 core = only $1.35M.
+- **Conclusion:** there is NO $4.1M systematic under-enumeration. The spec's "roster 07-18 $1,401.3M vs
+  DDB $1,397.2M" was the roster's DAY-TO-DAY VOLATILITY (my 07-20 roster = $1,395.4M, LOWER than the DDB),
+  NOT an enumeration gap. The served 5-core is FULLY enumerated in BOTH roster and aum_daily.
+- **=> NO D-3 delta.** The monolith model-AUA latest ties served (+$0, modulo daily drift). Andrew's D-3
+  "legacy 11-of->=14 enumeration gap" framing does NOT apply to the served 5-core (any un-enumerated
+  models are OUTSIDE the served 7, not on the page). CTO to correct Andrew's D-3. The D-1 history + D-2
+  custody deltas STAND.
 
 ## TIES (NOT deltas -- must remain exact/named-drift-only)
 - **Inflection model_aua** = eclipse `fact_portfolios_full.totalValue` (Opal-filtered) = **$137,170,028.82
