@@ -61,8 +61,16 @@ All magnitudes grounded live 2026-07-20 (opal-data-assets silver + served opal-d
   do not extend the shallow cohorts). Serve real VALUES within each existing depth.
 - **eclipse_id 30** ("90/10 Opal LT/UST" blend): excluded for parity (served omits it); post-swap co-sign
   candidate (KNOWN_EXCLUDED_ECLIPSE_IDS).
-- **account_count[] history:** monolith has no daily count source -- disposition pending CTO (reconstruct
-  from roster opened_ts, basis-named / vs serve-latest+name-gap). [sub-question surfaced 220311Z]
+- **account_count[] history -- PRESERVE (co-sign note, CTO-approved 225137Z):** the served count[] is
+  REAL daily-snapshots (all-integer, irregular day-over-day steps -- INT 269 distinct/311 changes, LTC
+  388/391; NOT interpolated, unlike model_value[]). None would be a REGRESSION on a feature Andrew asked
+  about (Count toggle). Disposition = import the served count arrays ONCE as the real historical backfill
+  + roster-daily forward (distinct allocation_id per model per daily roster partition). Serve-real-CONSISTENT
+  (real data the monolith didn't itself capture; NOT replicating an interpolated artifact). Imported==served
+  => count arrays TIE exactly in parity (no gap). SEAM-CONTINUITY check at wire-time: verify roster-daily
+  count method matches the legacy trend at the boundary (funded/unfunded, model-membership, allocation_id
+  vs account_id) -- name any discontinuity, do NOT smooth. Wired at cutover on the co-sign; folded into the
+  cutover co-sign package, not a separate Andrew interrupt.
 
 ---
 **STATUS:** shape-parity done (3/3 TO-3). Value-parity streak pending the history builds (this ledger's
