@@ -113,3 +113,10 @@ Either is safe (no fetch stranded -- unmatched paths fall to behavior 18). **RUL
 2. Architecture -> **s3** (isolated behaviors + new lambda; public-data-router byte-unchanged).
 3. Origin -> **OAC** (AE implements origin + portal/* bucket policy with OAC; confirming w/ AE msg 204201Z).
 Both hard reqs folded into s7. Design is gate-approved; refinements track here as the build proceeds.
+
+## 10. OPEN CONSTRAINT (surfaced 2026-07-20 ~2050Z, grounded) -- CloudFront behavior quota
+
+`comp-routes behaviors` shows the portal distribution carries **25 cache behaviors (0-24) -- AT the CloudFront default limit of 25/distribution.** The IN-ALL s3 design ADDS behaviors: exact-match = 9 (5 mdpf keys + 4 portfolios keys) -> 34; a `/api/general/mdpf/*` wildcard + 4 exact portfolios = 5 -> 30. **Both exceed 25.** This was not accounted for in the s3 approval. Dispositions (routed to CTO+AE 205xZ):
+- **(A) quota increase** -- if "25 behaviors/distribution" is raisable in our account (Service Quotas), s3 stays cleanest; AE requests it (lead time). **AE to ground whether it is raisable or a HARD cap** -- this is the pivot.
+- **(B) if 25 is HARD:** (i) **s4** (modify public-data-router with a translate+origin-override map = ZERO new behaviors) becomes the feasible path despite touching the SEV1 router -- reopens Q2 under the constraint; (ii) consolidate/retire existing behaviors to free slots; (iii) a `/api/general/mdpf/*` + `/api/general/portfolios/*` wildcard pair (2 behaviors) + lambda origin-override-BACK to opal-data-portal-v2 for non-MDPF portfolios/ keys (FRAGILE -- replicates public-data-router logic; not recommended).
+- **My read:** flips to s4 ONLY if the limit is hard (zero new behaviors beats a fragile wildcard-override); else s3 + a quota bump. **Lambda authoring HELD until this resolves** (the mechanism may change). Also affects the exact-vs-wildcard sub-choice (exact-match is safer -- no orphan-404 -- but costs more of the scarce behavior budget).
