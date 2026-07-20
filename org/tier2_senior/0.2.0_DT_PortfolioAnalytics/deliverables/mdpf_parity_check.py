@@ -3,39 +3,25 @@ its SERVED legacy counterpart. Grounds on LIVE S3, never a self-report. Parity b
 = impl package s6 + the pre-swap baseline + CTO's D1=serve-real bar (2026-07-20).
 
 D1 = SERVE REAL/COMPLETE DATA (Andrew, 2026-07-20): the revamp CORRECTS 3 legacy
-artifacts, each a NAMED delta -- (1) real history vs interpolated backfill (+10-40%
-2024-25, converging), (2) full-envelope custody +$20M, (3) complete 49F model +$4.1M
-(the legacy feeder's model-tier enumeration gap). So a value delta is EXPECTED iff it
-matches the DS-supplied NAMED-DELTA LEDGER; anything else is UNEXPLAINED.
+artifacts, each a NAMED delta -- (1) real history vs interpolated backfill (converging
+by 2026-04-09), (2) full-envelope custody +$20.3M, (3) complete 49F model +$4.1M
+(enumeration gap). A value delta is EXPECTED iff it matches the DS-supplied NAMED-DELTA
+LEDGER; anything else is UNEXPLAINED.
 
-THE (a)-(d) BAR (CTO, value-parity streak):
-  (a) shape parity holds (incl. the history arrays),
-  (b) each value delta MATCHES the named-delta ledger (magnitude + sign),
-  (c) NO OTHER unexplained delta,
-  (d) the clean cross-sections tie + date-drift converges same-cycle (run the streak
-      SAME-CYCLE: a date-aligned gold vs served has no date-drift; any residual delta
-      is then either a ledger-named correction or unexplained).
-Tight 0.1% tolerance so any UNEXPECTED delta still surfaces named.
+THE (a)-(d) BAR (CTO): (a) shape parity incl. history arrays; (b) each value delta
+MATCHES a ledger entry (magnitude+sign+date-window); (c) NO OTHER unexplained delta;
+(d) clean cross-sections tie + date-drift converges same-cycle. Tight 0.1% tol so any
+UNEXPECTED delta surfaces. Verdict: SHAPE_FAIL > UNEXPLAINED_DELTA > NAMED_DELTA_PASS > PASS.
+NO ledger -> every value delta UNEXPLAINED (fail-safe).
 
-VERDICT: SHAPE_FAIL (missing/unexpected-extra) > UNEXPLAINED_DELTA (a delta with no
-ledger match) > NAMED_DELTA_PASS (only ledger-matched deltas) > PASS (no delta).
-NO ledger -> every value delta is UNEXPLAINED (fail-safe: the ledger must be supplied
-to pass value parity; run account_distribution SAME-CYCLE so there is nothing to explain).
-
-MODES:
-  --artifact <name> --firm <firm> [--ledger <ledger.json>]
-  --all [--ledger <ledger.json>]
-  --self-test        identity + mutant discrimination (snapshot + history/ledger) --
-                     a comparator that cannot fail is not a comparator
-
-LEDGER FORMAT (DS supplies, keyed "<artifact>/<firm>"; per field-path pattern):
-  { "aggregate_aua_timeseries/49financial": {
-      "model_aua":               {"sign":"+","pct_range":[10,40],"date_before":"2026-01-01","note":"D1 real-history correction (converging)"},
-      "partner_custody_total":   {"sign":"+","abs":20000000,"tol_pct":25,"note":"full-envelope custody +$20M"},
-      "by_model.*.model_value":  {"sign":"+","pct_range":[0,45],"note":"complete-model / enumeration-gap correction"} } }
-  Match iff: the field-path pattern is a substring of the leaf path (glob '*' allowed),
-  the sign matches, the magnitude is in pct_range (relative) OR within tol_pct of abs
-  (absolute), and dates[i] satisfies date_before/date_after if present.
+LEDGER FORMAT (DS, keyed "<artifact>/<firm>" -> {entry_name: spec}); each spec:
+  field_paths: [pattern, ...]     (glob '*'; a "(latest)" suffix or scope:"latest_cross_section"
+                                   restricts the entry to the latest cross-section element)
+  pct_range: [lo, hi]             SIGNED % band (handles two-sided converging corrections), OR
+  abs: N, tol_pct: T              absolute delta +/- tol
+  sign: "+"/"-"/"any"             (checked for abs entries; pct_range band is already signed)
+  date_before / date_after        ISO date; BOTH => a window [date_after, date_before)
+Entries whose name starts with "_" (e.g. _meta/_note) are ignored.
 
 NOTES: account_distribution keys by_model on DISPLAY NAME; aggregate on MODEL_KEY --
 each compared to its OWN served, never cross-normalized. Spec extras (basis/meta) allowed.
@@ -46,6 +32,7 @@ import argparse
 import copy
 import fnmatch
 import json
+import re
 import sys
 
 import boto3
@@ -53,7 +40,7 @@ from botocore.exceptions import ClientError
 
 SERVED_BUCKET = "opal-data-portal-v2"
 PUBLISHED_BUCKET = "opal-data-assets"
-REL_TOL = 0.001  # 0.1% -- deliberately tighter than the F2 band so deltas surface NAMED
+REL_TOL = 0.001
 ALLOWED_EXTRAS = {"basis", "meta", "source_vintage_last"}
 
 ARTIFACTS = {
@@ -120,8 +107,7 @@ def _shape_diff(served, published):
 
 
 def _leaves(obj, path="", idx=None):
-    """All numeric leaves keyed by path; array elements as path[i]. Records the array
-    index of the LAST path component so the ledger can date-scope it."""
+    """All numeric leaves -> {path: (value, last_array_index)}; arrays as path[i]."""
     out = {}
     if isinstance(obj, dict):
         for k, v in obj.items():
@@ -135,33 +121,46 @@ def _leaves(obj, path="", idx=None):
 
 
 def _fieldbase(leafpath):
-    """Strip [i] indices -> the ledger-matchable field path (e.g. by_model.Long Term.model_value[3] -> by_model.Long Term.model_value)."""
-    import re
     return re.sub(r"\[\d+\]", "", leafpath)
 
 
-def _ledger_match(leafpath, idx_date, sv, pv, entries):
+def _ledger_match(leafpath, idx_date, is_latest, sv, pv, entries):
+    """DS named-entry ledger. Returns the matching note, or None (UNEXPLAINED)."""
     delta = pv - sv
-    sign = "+" if delta > 0 else "-"
+    sign = "+" if delta >= 0 else "-"
     base = _fieldbase(leafpath)
-    for pat, spec in entries.items():
-        if not (pat == base or pat in base or fnmatch.fnmatch(base, pat)):
+    pct_signed = delta / max(abs(sv), 1.0) * 100.0
+    for name, spec in entries.items():
+        if name.startswith("_") or not isinstance(spec, dict):
             continue
-        if spec.get("sign", "any") not in ("any", sign):
+        scope_latest = spec.get("scope") == "latest_cross_section"
+        hit = False
+        for fp in spec.get("field_paths", []):
+            fp_latest = "(latest)" in fp
+            fp_clean = fp.replace("(latest)", "").strip()
+            if fp_clean == base or fp_clean in base or fnmatch.fnmatch(base, fp_clean):
+                hit = True
+                scope_latest = scope_latest or fp_latest
+                break
+        if not hit:
+            continue
+        if scope_latest and not is_latest:
             continue
         db, da = spec.get("date_before"), spec.get("date_after")
         if db and idx_date and idx_date >= db:
             continue
         if da and idx_date and idx_date < da:
             continue
-        if "pct_range" in spec:
+        if "pct_range" in spec:                      # SIGNED band (two-sided-safe)
             lo, hi = spec["pct_range"]
-            if lo <= abs(delta) / max(abs(sv), 1.0) * 100.0 <= hi:
-                return spec.get("note", pat)
+            if lo <= pct_signed <= hi:
+                return spec.get("note", name)
         if "abs" in spec:
+            if spec.get("sign", "any") not in ("any", sign):
+                continue
             tol = spec.get("tol_pct", 10) / 100.0 * abs(spec["abs"])
             if abs(abs(delta) - abs(spec["abs"])) <= tol:
-                return spec.get("note", pat)
+                return spec.get("note", name)
     return None
 
 
@@ -169,6 +168,7 @@ def compare(served, published, entries=None):
     entries = entries or {}
     missing, extra = _shape_diff(served, published)
     dates = served.get("dates") if isinstance(served, dict) else None
+    ndates = len(dates) if dates else None
     ls, lp = _leaves(served), _leaves(published)
     expected, unexplained = [], []
     for k in sorted(set(ls) & set(lp)):
@@ -176,8 +176,9 @@ def compare(served, published, entries=None):
         pv, _ = lp[k]
         if abs(sv - pv) / max(abs(sv), 1.0) <= REL_TOL:
             continue
-        idx_date = dates[idxs] if (dates and idxs is not None and 0 <= idxs < len(dates)) else None
-        note = _ledger_match(k, idx_date, sv, pv, entries)
+        idx_date = dates[idxs] if (dates and idxs is not None and 0 <= idxs < ndates) else None
+        is_latest = (idxs is None) or (dates is None) or (idxs == ndates - 1)
+        note = _ledger_match(k, idx_date, is_latest, sv, pv, entries)
         (expected if note else unexplained).append((k, sv, pv, note))
     return {"missing": missing, "extra": extra, "expected": expected, "unexplained": unexplained,
             "shape_ok": not (missing or extra)}
@@ -201,7 +202,7 @@ def check_pair(name, firm, spec, ledger):
         r["verdict"] = "NAMED_DELTA_PASS"
     else:
         r["verdict"] = "PASS"
-    r["name"], r["firm"], r["ledger_n"] = name, firm, len(entries)
+    r["name"], r["firm"], r["ledger_n"] = name, firm, len([k for k in entries if not k.startswith("_")])
     return r
 
 
@@ -217,17 +218,21 @@ def self_test():
     mut = copy.deepcopy(served)
     mut["total"]["account_count"] += 100
     ok &= bool(compare(served, mut)["unexplained"])
-    # history + ledger: +20% pre-2026 (EXPECTED) + an unrelated +50% (UNEXPLAINED)
+    # DS-format ledger over a synthetic timeseries: history-window + latest-abs entries
     ts_s = {"dates": ["2025-06-01", "2026-06-01"], "model_aua": [100.0, 200.0], "x": [50.0, 60.0]}
-    ts_p = {"dates": ["2025-06-01", "2026-06-01"], "model_aua": [120.0, 200.0], "x": [50.0, 90.0]}
-    led = {"model_aua": {"sign": "+", "pct_range": [10, 40], "date_before": "2026-01-01", "note": "D1 history"}}
+    ts_p = {"dates": ["2025-06-01", "2026-06-01"], "model_aua": [120.0, 204.1], "x": [50.0, 90.0]}  # [0]:+20% pre-26 hist; [1]:+4.1 latest
+    led = {
+        "history": {"field_paths": ["model_aua"], "pct_range": [10, 40], "date_before": "2026-01-01", "note": "D1 history"},
+        "model_latest": {"field_paths": ["model_aua(latest)"], "sign": "+", "abs": 4.1, "tol_pct": 5, "note": "enumeration gap"},
+    }
     r = compare(ts_s, ts_p, led)
-    exp_ok = any(k == "model_aua[0]" for k, *_ in r["expected"])
-    unexp_ok = any(k == "x[1]" for k, *_ in r["unexplained"])
-    ok &= exp_ok and unexp_ok
-    print(f"SELF-TEST snapshot identity(tie)+mutant(+100 detected): {ident['shape_ok'] and not ident['unexplained']} / {bool(compare(served, mut)['unexplained'])}")
-    print(f"SELF-TEST history+ledger: EXPECTED(model_aua[0] +20% pre-26)={exp_ok}; UNEXPLAINED(x[1] +50%)={unexp_ok}")
-    print(f"SELF-TEST {'PASS' if ok else 'FAIL'} -- classifies EXPECTED vs UNEXPLAINED (a comparator that can't fail proves nothing)")
+    exp_hist = any(k == "model_aua[0]" for k, *_ in r["expected"])       # +20% pre-26 -> history entry
+    exp_latest = any(k == "model_aua[1]" for k, *_ in r["expected"])     # +4.1 latest -> latest-scoped entry
+    unexp = any(k == "x[1]" for k, *_ in r["unexplained"])               # +50% unrelated -> UNEXPLAINED
+    ok &= exp_hist and exp_latest and unexp
+    print(f"SELF-TEST snapshot identity+mutant: {ident['shape_ok'] and not ident['unexplained']} / {bool(compare(served, mut)['unexplained'])}")
+    print(f"SELF-TEST DS-ledger: history-window(model_aua[0])={exp_hist}; latest-scope(model_aua[1] +4.1)={exp_latest}; UNEXPLAINED(x[1])={unexp}")
+    print(f"SELF-TEST {'PASS' if ok else 'FAIL'} -- consumes DS named-entry format + classifies EXPECTED vs UNEXPLAINED")
     return ok
 
 
@@ -264,7 +269,10 @@ def main():
     args = ap.parse_args()
     if args.self_test:
         return 0 if self_test() else 1
-    ledger = json.load(open(args.ledger, encoding="utf-8")) if args.ledger else None
+    ledger = None
+    if args.ledger:
+        with open(args.ledger, encoding="utf-8") as fh:
+            ledger = json.load(fh)
     if args.all:
         for (name, firm), spec in ARTIFACTS.items():
             _report(check_pair(name, firm, spec, ledger))
