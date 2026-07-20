@@ -41,6 +41,7 @@ DO NOT re-do WS-4; extend/reconcile it.
 1. Every clarified def from WS-A/B/C that belongs in the machine-readable ontology surface is represented there (extending WS-4, not duplicating) -- the definitions<->representation seam coherent in one head.
 2. SYSPARITY ontology parity stays 100% (no regression) with the clarified defs represented; drift-gate self-test PASS over the ontology surface.
 3. LD-0320/0318 CVO SEMANTIC-VERIFIED GATE: CVO confirms the represented ontology matches the clarified (post-WS-A/B/C) truth, not the pre-clarity fog. Ping CVO on land.
+3a. **ROLE_PRIORITY PROPAGATION OBLIGATION (MSTR /govern @060101Z, LD-0090 discretion):** WS-C's role_priority ordering lands in NFRA_ONTOLOGY_RULE_BANK.yaml (the WS-A-declared SINGLE canonical source). WS-D MUST propagate it into infra/system + sdk so NO stale/partial copy of the role-resolution rule lingers (single-source / EVERY-ENFORCING-COPY discipline -- the exact drift-class this project audits). **CVO's WS-D semantic-verify CONFIRMS the sdk copy MATCHES the RULE_BANK ordering (total order, all 14, same sequence), not a stale/partial copy.** Same obligation applies to every WS-A/B/C clarified def, but the role_priority ordering is the named one.
 4. Session log with Compiler Tools section reproducing each <run> vs <expect>.
 </acceptance_criteria>
 
