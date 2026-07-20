@@ -7,7 +7,8 @@
      The gateway IAM apply is AE-executed (m365-mcp-gateway is AE/CloudOps infra) — DT designs, AE applies,
      CTO gates. -->
 <date>2026-07-17</date>
-<status>pending</status>
+<!-- PARKED 2026-07-20 by 0.2.0_DT per CTO sequence call 201850Z: MDPF_REVAMP is sole focus. Resume-trigger = MDPF parity+swap complete OR Andrew word (OR immediately if urgent -> flag CTO). Clean-park: the gateway-IAM apply STAYS HELD (not half-landed), pick-up-ready; on resume the 22a applied+exercised evidence routes to CTO as the SEV1 gate. -->
+<status>staged</status>
 <priority>P2 (Andrew-direct via CTO 205620Z). GATE: CTO hard plan-gate (net-new external-read grant) + WS-3 gold prefix exists (the verify target). Parallel to the data chain; the read path (WS-6) needs it.</priority>
 
 <authority>

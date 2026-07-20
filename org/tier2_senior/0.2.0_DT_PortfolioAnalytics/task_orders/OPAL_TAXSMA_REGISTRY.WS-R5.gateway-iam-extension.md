@@ -5,7 +5,8 @@
 <issued_to>0.2.0_DT_PortfolioAnalytics</issued_to>
 <!-- DT designs the IAM; AE applies (m365-mcp-gateway infra); CTO gates. Mirrors WS-4's DT-designs/AE-applies/CTO-gates split. -->
 <date>2026-07-17</date>
-<status>pending</status>
+<!-- PARKED 2026-07-20 by 0.2.0_DT per CTO sequence call 201850Z: MDPF_REVAMP is sole focus. Resume-trigger = MDPF parity+swap complete OR Andrew word. Clean-park, not started, nothing stranded. Resume owner = OPAL_TAXSMA then-owner (likely 0.5.0~A delegate); flag CTO to route. -->
+<status>staged</status>
 <priority>P2 (Andrew-direct via CTO). Gates WS-R4 (the skill cannot invoke/enroll until this grant is live+verified). Net-new external write path -> CTO HARD plan-gate.</priority>
 
 <authority>

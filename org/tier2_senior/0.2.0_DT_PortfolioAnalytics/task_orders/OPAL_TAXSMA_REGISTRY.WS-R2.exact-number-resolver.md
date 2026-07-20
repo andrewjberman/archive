@@ -4,7 +4,8 @@
 <issued_by>1.0.0_SA_CTO</issued_by>
 <issued_to>0.2.0_DT_PortfolioAnalytics</issued_to>
 <date>2026-07-17</date>
-<status>pending</status>
+<!-- PARKED 2026-07-20 by 0.2.0_DT per CTO sequence call 201850Z: MDPF_REVAMP is sole focus. Resume-trigger = MDPF parity+swap complete OR Andrew word. Clean-park, not started, nothing stranded. Resume owner = OPAL_TAXSMA then-owner (likely 0.5.0~A delegate); flag CTO to route. -->
+<status>staged</status>
 <priority>P2 (Andrew-direct via CTO). The correctness spine — WS-R1 seed + WS-R4 skill both call this resolver. Carries the load-bearing egress-feasibility finding (D2/D3).</priority>
 
 <authority>

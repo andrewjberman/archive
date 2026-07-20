@@ -5,7 +5,8 @@
 <issued_to>0.2.0_DT_PortfolioAnalytics</issued_to>
 <!-- Andrew-direct: CTO writes these TOs directly (not via COO). OPAL_TAXSMA_REGISTRY, couples OPAL_TAXSMA_PT2. -->
 <date>2026-07-17</date>
-<status>pending</status>
+<!-- PARKED 2026-07-20 by 0.2.0_DT per CTO sequence call 201850Z: MDPF_REVAMP is sole focus. Resume-trigger = MDPF parity+swap complete OR Andrew word. Clean-park, not started, nothing stranded. Resume owner = OPAL_TAXSMA then-owner (likely 0.5.0~A delegate); flag CTO to route. -->
+<status>staged</status>
 <priority>P2 (Andrew-direct via CTO). Head of the registry chain — WS-R3 (ETL reads it) + WS-R4 (skill enrolls into it) both depend on this substrate + schema.</priority>
 
 <authority>
