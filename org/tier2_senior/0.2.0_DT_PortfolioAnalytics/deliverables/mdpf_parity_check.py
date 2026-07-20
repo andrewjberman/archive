@@ -130,37 +130,41 @@ def _ledger_match(leafpath, idx_date, is_latest, sv, pv, entries):
     sign = "+" if delta >= 0 else "-"
     base = _fieldbase(leafpath)
     pct_signed = delta / max(abs(sv), 1.0) * 100.0
-    for name, spec in entries.items():
-        if name.startswith("_") or not isinstance(spec, dict):
+    for name, val in entries.items():
+        if name.startswith("_"):
             continue
-        scope_latest = spec.get("scope") == "latest_cross_section"
-        hit = False
-        for fp in spec.get("field_paths", []):
-            fp_latest = "(latest)" in fp
-            fp_clean = fp.replace("(latest)", "").strip()
-            if fp_clean == base or fp_clean in base or fnmatch.fnmatch(base, fp_clean):
-                hit = True
-                scope_latest = scope_latest or fp_latest
-                break
-        if not hit:
-            continue
-        if scope_latest and not is_latest:
-            continue
-        db, da = spec.get("date_before"), spec.get("date_after")
-        if db and idx_date and idx_date >= db:
-            continue
-        if da and idx_date and idx_date < da:
-            continue
-        if "pct_range" in spec:                      # SIGNED band (two-sided-safe)
-            lo, hi = spec["pct_range"]
-            if lo <= pct_signed <= hi:
-                return spec.get("note", name)
-        if "abs" in spec:
-            if spec.get("sign", "any") not in ("any", sign):
+        # a value may be a single spec dict OR a LIST of specs (e.g. history_windows[])
+        for spec in (val if isinstance(val, list) else [val]):
+            if not isinstance(spec, dict):
                 continue
-            tol = spec.get("tol_pct", 10) / 100.0 * abs(spec["abs"])
-            if abs(abs(delta) - abs(spec["abs"])) <= tol:
-                return spec.get("note", name)
+            scope_latest = spec.get("scope") == "latest_cross_section"
+            hit = False
+            for fp in spec.get("field_paths", []):
+                fp_latest = "(latest)" in fp
+                fp_clean = fp.replace("(latest)", "").strip()
+                if fp_clean == base or fp_clean in base or fnmatch.fnmatch(base, fp_clean):
+                    hit = True
+                    scope_latest = scope_latest or fp_latest
+                    break
+            if not hit:
+                continue
+            if scope_latest and not is_latest:
+                continue
+            db, da = spec.get("date_before"), spec.get("date_after")
+            if db and idx_date and idx_date >= db:
+                continue
+            if da and idx_date and idx_date < da:
+                continue
+            if "pct_range" in spec:                  # SIGNED band (two-sided-safe)
+                lo, hi = spec["pct_range"]
+                if lo <= pct_signed <= hi:
+                    return spec.get("note", name)
+            if "abs" in spec:
+                if spec.get("sign", "any") not in ("any", sign):
+                    continue
+                tol = spec.get("tol_pct", 10) / 100.0 * abs(spec["abs"])
+                if abs(abs(delta) - abs(spec["abs"])) <= tol:
+                    return spec.get("note", name)
     return None
 
 
@@ -222,16 +226,18 @@ def self_test():
     ts_s = {"dates": ["2025-06-01", "2026-06-01"], "model_aua": [100.0, 200.0], "x": [50.0, 60.0]}
     ts_p = {"dates": ["2025-06-01", "2026-06-01"], "model_aua": [120.0, 204.1], "x": [50.0, 90.0]}  # [0]:+20% pre-26 hist; [1]:+4.1 latest
     led = {
-        "history": {"field_paths": ["model_aua"], "pct_range": [10, 40], "date_before": "2026-01-01", "note": "D1 history"},
-        "model_latest": {"field_paths": ["model_aua(latest)"], "sign": "+", "abs": 4.1, "tol_pct": 5, "note": "enumeration gap"},
+        "history_windows": [  # DS's LIST format -- per-quarter windows
+            {"field_paths": ["model_aua"], "sign": "+", "pct_range": [10, 40], "date_after": "2025-01-01", "date_before": "2026-01-01", "note": "Q window"},
+        ],
+        "latest_abs": {"field_paths": ["model_aua(latest)"], "sign": "+", "abs": 4.1, "tol_pct": 5, "note": "latest abs"},
     }
     r = compare(ts_s, ts_p, led)
-    exp_hist = any(k == "model_aua[0]" for k, *_ in r["expected"])       # +20% pre-26 -> history entry
-    exp_latest = any(k == "model_aua[1]" for k, *_ in r["expected"])     # +4.1 latest -> latest-scoped entry
+    exp_win = any(k == "model_aua[0]" for k, *_ in r["expected"])        # +20% in-window (LIST) -> EXPECTED
+    exp_latest = any(k == "model_aua[1]" for k, *_ in r["expected"])     # +4.1 latest -> latest-scoped abs entry
     unexp = any(k == "x[1]" for k, *_ in r["unexplained"])               # +50% unrelated -> UNEXPLAINED
-    ok &= exp_hist and exp_latest and unexp
+    ok &= exp_win and exp_latest and unexp
     print(f"SELF-TEST snapshot identity+mutant: {ident['shape_ok'] and not ident['unexplained']} / {bool(compare(served, mut)['unexplained'])}")
-    print(f"SELF-TEST DS-ledger: history-window(model_aua[0])={exp_hist}; latest-scope(model_aua[1] +4.1)={exp_latest}; UNEXPLAINED(x[1])={unexp}")
+    print(f"SELF-TEST DS-ledger: history_windows-LIST(model_aua[0])={exp_win}; latest-scope(model_aua[1])={exp_latest}; UNEXPLAINED(x[1])={unexp}")
     print(f"SELF-TEST {'PASS' if ok else 'FAIL'} -- consumes DS named-entry format + classifies EXPECTED vs UNEXPLAINED")
     return ok
 
