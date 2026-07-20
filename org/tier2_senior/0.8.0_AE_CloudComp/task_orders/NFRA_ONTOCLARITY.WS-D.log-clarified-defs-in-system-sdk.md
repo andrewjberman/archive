@@ -3,7 +3,8 @@
 <project>NFRA_ONTOCLARITY</project>
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>built -- at CVO semantic-verify</status>
+<progress>Grounding+design @48b239338 (COO GO 063241Z). BUILT @2799f8c49 (pushed CLOUD): (1) 01_substrate.md role_priority cite (cite-not-copy, WS-C spot-8); (2) comp_ontolint.py self-test LOADS role_priority from the bank (hardcode ELIMINATED -- folds CVO WS-C rec + AC-3a; zero ordering-copies outside RULE_BANK); (3) sdk no-op (already vocabulary-bound). Verify: self-test PASS, system_parity ontology 100% (4/4), ruff/py_compile/comp-manifest-check clean, seed-guard FAIL branch exercised. CVO verify requested 065155Z -> on PASS: WS-D DONE -> ONTOCLARITY 4/4.</progress>
 <priority>P2 -- SEQUENCED LAST (logs the clarifications WS-A/B/C produce). RIDES SYSPARITY WS-4 (represent-the-ontology, COMPLETE) -- do NOT duplicate WS-4's representation; extend it with the clarified defs. Context-owner ~C (owns both seams).</priority>
 
 <references>
