@@ -7,7 +7,9 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps + 2.0.0_SA_COO</issued_to>
     <date>2026-07-07</date>
-    <status>pending</status>
+    <status>complete</status>
+    <completed>2026-07-20</completed>
+    <reconcile_note>Closed complete-as-SUPERSEDED 2026-07-20 by 2.0.0_SA_COO (Andrew-direct backlog review + same-session 'no alarms' ruling). NFRA_COSTAWS is already in its standing-governance end-state. Of the 2 tail items: W5 alarm/cadence is DEAD -- Andrew-direct 2026-07-20 VERBATIM 'We do not want any fucking alarms' (broadens the 07-17 alert-suspension); a monthly cost-review habit minus alarms is standing COO/AE hygiene, not a discrete deliverable. W1 leg-c (CE resource-level granularity) is a 1-click PAYER-CONSOLE toggle only Andrew can flip at will -- a standing sovereign option, not a COO-drivable blocking TO. Project stays ACTIVE/standing-governance; this completion-tail TO is closed.</reconcile_note>
     <dispatch_state>WRITTEN-NOT-DISPATCHED (wind-down 2026-07-07; Andrew directed decomposition materialized before device reboot; dispatch on restart per the allocation-map in the session handoff /log)</dispatch_state>
     <gate_note>W1 leg-c = Andrew 1-click console toggle (SOVEREIGN, the sole blocker); W5 = COO-RESOLVABLE now.</gate_note>
   </metadata>
