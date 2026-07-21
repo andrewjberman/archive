@@ -416,7 +416,7 @@
         5.0,
         12.0
       ],
-      "note": "non_model @07-17 last-common = D-2 custody delta (+$20.34M full-vs-partial cash) reflected in the residual (custody-model); custody+model separately tie/named. (harness note: _spec_field_hit substring-matches 'model_aua' inside 'non_model_aua' -> model_latest_tie tight band else intercepts this; flagged to DT.)"
+      "note": "non_model @07-17 last-common delta +$21,647,872.00 (+8.78% on 49F base) = D-2 custody ($20,344,172.42 full-vs-partial cash) + F2 model drift ($1,303,699.58, LTC 1-day) propagating through non_model=custody-model. Band [5,12] covers the D-2+F2 composition (CTO 155513Z). custody+model legs separately tie/named. (harness _spec_field_hit substring 'model_aua' in 'non_model_aua' -> flagged to DT.)"
     }
   },
   "aggregate_aua_timeseries/global": {
@@ -843,7 +843,7 @@
         4.0,
         11.0
       ],
-      "note": "global non_model @07-17 last-common = D-2 custody delta (49F full-vs-partial cash +$20.34M) reflected in firm-summed residual; model+custody legs separately tie/named. (harness _spec_field_hit substring 'model_aua' in 'non_model_aua' -> flagged to DT.)"
+      "note": "global non_model @07-17 delta +$21,647,872.00 (+6.96% on global base) = 49F D-2 custody ($20.34M) + F2 model drift ($1.30M) via non_model=custody-model; inflection non_model ties, so global delta == 49F delta. Band [4,11] covers the D-2+F2 composition (CTO 155513Z). model+custody legs separately tie/named."
     }
   },
   "aggregate_aua_timeseries/inflection": {
@@ -1224,15 +1224,6 @@
       "date_after": "2025-12-23",
       "note": "A4.model_aum == base global model_aua EXACTLY -> INHERIT global history_windows + post_convergence D-1 bands (widest span used here; harness date-joins per window)."
     },
-    "enterprise_non_model_history": {
-      "field_paths": [
-        "enterprise_total",
-        "non_model_aum"
-      ],
-      "pct_range": "TBD_STAGE_TIME",
-      "date_after": "2025-12-23",
-      "note": "post-cutover enterprise=opal_aggregate_aua (D-1 model + D-2 custody composite); non_model=enterprise-model. ~A computes exact ranges on A4-vs-served date-join at stage. Internal identity exact."
-    },
     "axis_ffill_delta": {
       "field_paths": [
         "<row-presence>"
@@ -1255,6 +1246,107 @@
       ],
       "null_ok": true,
       "note": "A4-D5: audit-only, DEFERRED for N=3 (DS 151544Z); A4 emits 0.0/null_pre_rps_coverage; served real post-coverage (latest $150,255,184.85). Single-source post-N=3. NOT headline."
-    }
+    },
+    "enterprise_history_windows": [
+      {
+        "field_paths": [
+          "enterprise_total"
+        ],
+        "pct_range": [
+          1.57,
+          6.69
+        ],
+        "date_after": "2025-12-23",
+        "date_before": "2026-01-01",
+        "note": "D-1+D-2 composite 2025Q4post (n=6, obs[+1.97,+6.29])"
+      },
+      {
+        "field_paths": [
+          "enterprise_total"
+        ],
+        "pct_range": [
+          -0.98,
+          3.51
+        ],
+        "date_after": "2026-01-01",
+        "date_before": "2026-04-01",
+        "note": "2026Q1 (n=61, obs[-0.58,+3.11])"
+      },
+      {
+        "field_paths": [
+          "enterprise_total"
+        ],
+        "pct_range": [
+          -1.87,
+          4.71
+        ],
+        "date_after": "2026-04-01",
+        "date_before": "2026-05-18",
+        "note": "2026Q2pre (n=32, obs[-1.47,+4.31])"
+      },
+      {
+        "field_paths": [
+          "enterprise_total"
+        ],
+        "pct_range": [
+          -3.42,
+          2.37
+        ],
+        "date_after": "2026-05-18",
+        "date_before": "2027-01-01",
+        "note": "live2605 (n=31, obs[-3.02,+1.97])"
+      }
+    ],
+    "non_model_history_windows": [
+      {
+        "field_paths": [
+          "non_model_aum"
+        ],
+        "pct_range": [
+          -1.44,
+          27.54
+        ],
+        "date_after": "2025-12-23",
+        "date_before": "2026-01-01",
+        "note": "residual (ent-model, carries D-1+D-2) 2025Q4post (n=6, obs[-1.04,+27.14])"
+      },
+      {
+        "field_paths": [
+          "non_model_aum"
+        ],
+        "pct_range": [
+          -12.02,
+          18.06
+        ],
+        "date_after": "2026-01-01",
+        "date_before": "2026-04-01",
+        "note": "2026Q1 (n=61, obs[-11.62,+17.66])"
+      },
+      {
+        "field_paths": [
+          "non_model_aum"
+        ],
+        "pct_range": [
+          -15.01,
+          0.08
+        ],
+        "date_after": "2026-04-01",
+        "date_before": "2026-05-18",
+        "note": "2026Q2pre (n=32, obs[-14.61,-0.32])"
+      },
+      {
+        "field_paths": [
+          "non_model_aum"
+        ],
+        "pct_range": [
+          -18.03,
+          14.48
+        ],
+        "date_after": "2026-05-18",
+        "date_before": "2027-01-01",
+        "note": "live2605 (n=31, obs[-17.63,+14.08])"
+      }
+    ],
+    "_meta_a4": "non_model windows WIDE by construction (residual enterprise-model carrying BOTH D-1 model + D-2 custody-full-envelope) -- rigor = identity ent-model-nm==0 ($0.00 all windows) + tighter enterprise + inherited-model windows. etf_public_residual=0.0 (D-5 deferred). model_aum INHERITS aggregate/global windows."
   }
 }
