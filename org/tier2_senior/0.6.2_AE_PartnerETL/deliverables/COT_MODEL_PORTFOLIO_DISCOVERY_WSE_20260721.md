@@ -124,7 +124,7 @@ Still discovery/design only — the build is cloud-side + CTO-gated (the WS-E PR
 
 ## 8. Open items / caveats (grounded)
 
-- **Per-account → model assignment list**: the roster gives per-model *counts*; the explicit account→model list still needs one endpoint (candidate: a Rebalancer assignments endpoint, or fix + use DataMining `allocations` `account_strategy_id`). Not yet enumerated (would benefit from an assignments page in the HAR, or a scoped live read with a fresh word).
+- **Per-account → model assignment list — RESOLVED 2026-07-21 (see §11).** Enumerated by scoped live read-only (Andrew egress word 2026-07-21T192455Z @3e563306c): `POST /api/accounts/search`. The `//` below is now historical: ~~the roster gives per-model *counts*; the explicit account→model list still needs one endpoint~~.
 - **DataMining allocations feed is 0-row for recent dates** (snapshot as-of latent bug) — the model *assignment via DataMining* is currently frozen at the 06-09 backfill. The Rebalancer API is the fresher/authoritative model source; assignment freshness is the item to resolve for a production daily.
 - **Name-filter — RULED (Andrew-direct 2026-07-21):** STRICT. *"If it doesn't say Opal in the name, then we should not be working with it."* Non-Opal products (`Core | Satellite XX`, `Passive XX`, `529-F2`, fund-/client-named without "Opal") are **out of scope** — the fold-in filters to `name LIKE '%Opal%'`. Deeper investigation into whether any non-Opal existing portfolios are silently changing is a **post-launch, non-priority, non-blocker** follow-up ("after this is cleanly incorporated and running smoothly in MDPF for Cottonwood… I doubt that is the case though"). Do NOT gate or expand the launch on it.
 - **Primary building-block models** (`Opal Conservative Growth`, `Opal Intermediate-Term`, `Opal Ultra Short-Term Income`, …) are referenced as blend children and may be a distinct set from the *assignable* roster (`rebalanceModelType`: Strategy vs Model) — the fold-in should build the primary-model dimension from the union of children + the roster.
@@ -143,3 +143,51 @@ Still discovery/design only — the build is cloud-side + CTO-gated (the WS-E PR
 ## 10. Compliance
 
 cot READ-ONLY + LOCAL throughout; zero writes; zero cross-firm (never read the `blackdiamond/49f` partition even in opal-data-assets). Model list/detail came from Andrew's HAR, not a POST of mine. Live rotating BD cookie kept in-memory only — never logged, echoed, or committed. Discovery only — no fold-in built (CTO-gated, cloud-side).
+
+---
+
+## 11. Per-account → model ASSIGNMENT endpoint — RESOLVED (scoped live read-only)
+
+**Provenance:** Andrew-direct egress word **2026-07-21T192455Z** (verbatim recorded @3e563306c). Method = WS-E discovery method: cot READ-ONLY + LOCAL, minted the Rebalancer bearer off the cot OIDC session (`blackdiamond/cot/session`, still live — bearer 200 this session), GET + read-shaped `/search` POST only. Zero mutating calls, zero writes, firm-clean (zero `blackdiamond/49f`). CTO carried this as the account-source decision (fresh HAR vs scoped live read → Andrew chose the scoped live read).
+
+**THE ENDPOINT:** `POST https://rebalancer.bdreporting.com/api/accounts/search`
+- **Auth:** `Authorization: Bearer <token>` from §2 (`GET /auth/token`).
+- **Body:** `{"skip":<int>,"take":<int>,"sort":[],"searchString":""}` (same paged envelope as strategies/search; `take=200` works).
+- **Response:** `{pageCount, pageNumber, totalResultCount, pagedResults[]}`. **Full cot book = 910 accounts** (paginate skip/take).
+- **NO server-side model filter** — tested `modelId / rebalanceModelId / strategyId / modelIds / rebalanceModelIds / filters / assignedModelId`; **every variant returned the full 910** (ignored). Assignment is carried **per row**, filtered client-side.
+
+**Account-row schema (22 fields);** assignment + fold-in-relevant subset:
+`accountId` (8-digit internal BD id) · **`externalId`** (`"z09"`+accountId, 11-char — the value-join key) · `name` · `accountNumber` · **`strategyName`** · `programName` · `taxStatus` · `custodianId` · `accountType` · `isManaged` · `canRebalance` · `isClosed` · `discretionary` · `allowSMA` · `isSMA` · `isUmaSleeveAccount` · `isSystemSleeve` · `isRebalancerUma` · `isInRebalanceGroup` · `exclude`.
+- **`strategyName` = the assigned Rebalancer strategy/model NAME** (unassigned = `"--"`). **No strategy GUID on the row** → the account→model.id join is by NAME.
+
+**Join account→model.id (1:1, COMPLETE):** `accounts/search.strategyName → roster.name → model.id` (via §3 `POST /api/models/strategies/search`).
+- Roster = **60 models / 60 distinct names / 0 duplicate names** → name→id is unambiguous.
+- The **43 assigned strategyNames have 0 orphans** — every assigned name resolves in the roster; no account maps to a strategy outside it.
+
+**VALIDATION (the sharp cross-check):** the full-sweep per-strategy account counts **reproduce the roster `accountCount` EXACTLY for every Opal model** — Sat50=82, Sat60=79, Sat80=54, Sat70=39, Sat40=16, Sat98=12, Sat30=4, Ultra Short=3, Income=2, + 5 low-count (Beecherl Legg / 66%LT-34%UST / Cash+Sat50 / UST-Sat70 / Blended-Sat50 each 1) = **296 Opal-assigned accounts across 14 assigned Opal models** = the roster union. → `/api/accounts/search` **IS the authoritative account→model source** (system-of-record, current, internally consistent). It **supersedes DataMining** (2 accts, structurally under-reports; §9(1)). Non-Opal (`Core | Satellite` 100+, `Passive`, fund-named) correctly excluded by the strict Opal filter.
+
+**SMA/sleeve flags — ALL ZERO across the 296 Opal-assigned accounts** (`isSMA=0, allowSMA=0, isUmaSleeveAccount=0, isSystemSleeve=0, isRebalancerUma=0`; `canRebalance=296`). **Cottonwood Opal has NO SMA/UMA sleeve accounts** — the MDPF-revamp SMA-sleeve filtering that applies elsewhere has **nothing to filter here**; every Opal assignment is a single direct rebalancer-strategy assignment, one strategy per account. → the "client holds multiple sleeves" concern does NOT arise for Cottonwood Opal; the +1-count / split-dollars is driven **solely** by the assigned strategy's blend `children[]` (§6), not by multiple account assignments.
+
+**Value join — CONFIRMED (cot data-plane, off-rail-legal):** account VALUE comes from cot **holdings** silver (`s3://opal-data-cot/silver/holdings/{date}.parquet`, **fresh through 2026-07-17** — holdings is a period table, unaffected by the snapshot freeze on allocations/unrealized). Its **`account_id` column = the `"z09"`-prefixed 11-char id = EXACTLY the Rebalancer `externalId`** → **join key: `accounts/search.externalId === holdings.account_id`.** Σ `market_value` per account_id = account value. (holdings also carries `portfolio_id`, `relationship_id`, `account_number`, `asset_id/symbol/cusip`, `units`.)
+
+**COMPLETE MDPF fold-in chain (no further live read required):**
+1. `POST /api/accounts/search` (paginate 910) → per account: `externalId`, `strategyName`.
+2. Strict Opal name-filter on `strategyName`; map name → `model.id` via roster.
+3. `GET /api/models/{model.id}` → composition + blend `children[].relativeAllocation` (§4/§6).
+4. cot holdings silver (`account_id == externalId`) → Σ `market_value` = account value.
+5. Andrew rule: blend strategy → **+1 count** per underlying primary model, **dollars = account_value × child.relativeAllocation**; single (non-blend) strategy → +1 count + full dollars to that model. (Nested blends recurse.)
+6. → `gold/dim_model_portfolio` per in-scope Opal model `{account_count, dollar_value}` → MDPF DDB.
+
+**Necessary endpoints for the MDPF work — COMPLETE SET:**
+
+| Endpoint | Purpose | Status |
+|---|---|---|
+| `GET rebalancer.bdreporting.com/auth/token` | mint Rebalancer bearer (off cot OIDC session `blackdiamond/cot/session`) | known |
+| `POST /api/models/strategies/search` | model roster: name↔id, per-model counts, type (Strategy/Model) | known |
+| `GET /api/models/{id}` | model composition + blend `children[].relativeAllocation` | known |
+| **`POST /api/accounts/search`** | **account → model assignment (`strategyName` per account) + full 910-account book** | **NEW (this session)** |
+| cot **holdings** silver (S3, `opal-data-cot/silver/holdings/`) | per-account `market_value` (join `externalId == account_id`) | existing feed |
+
+(`POST api.bdreporting.com/ModelMarketplace/subscriptions/summary` = marketplace-subscription flag; **NOT needed** for MDPF.)
+
+**Negative finding (so the build doesn't chase it):** the model-scoped GET paths `/api/models/{id}/accounts`, `/assignments`, `/relationships`, `/portfolios`, `/managedaccounts`, `/detail`, and `/api/strategies/{id}/accounts` all return the **SPA shell (200 `text/html`, 131,461 B)** — they are NOT real API routes (the catch-all fallback). `POST …/accounts/search` on model-scoped paths → 405. The authoritative path is the **full-book `/api/accounts/search`** + client-side `strategyName` filter — which is also what the Rebalancer UI does. `POST /api/relationships/search` exists but is 403 (permission-scoped; not needed).
