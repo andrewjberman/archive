@@ -4,7 +4,8 @@
 <assigned_to>3.0.0_SA_CVO</assigned_to>
 <issued_by>2.0.0_SA_COO (PRD §7 decomposition, 2026-06-16; CTO handoff 125904Z)</issued_by>
 <issued_date>2026-06-16</issued_date>
-<status>pending</status>
+<status>cancelled-suspended</status>
+<suspension_note>CANCELLED-as-suspended by 2.0.0_SA_COO~A registry-hygiene sweep 2026-07-21, per NFRA_GCONTR SUSPENDED-INDEFINITE (Andrew-direct sovereign 2026-07-20 ~14:35 ET; verbatim in the project suspend_directive). The SEV1+SEV2 row authoring + period_defs value-check are DROPPED-as-suspended -- CVO does not author, nothing re-surfaces to Andrew.</suspension_note>
 <priority>HIGH — parallel-once-table-exists. GO gated on TO-2 (the table must exist to write rows). CVO is live + standing by ("I'll ack + author when you GO the TO"). SEV1 row ratification is further gated on Andrew sign-off (§9 tiered ratified_by).</priority>
 
 <references>
