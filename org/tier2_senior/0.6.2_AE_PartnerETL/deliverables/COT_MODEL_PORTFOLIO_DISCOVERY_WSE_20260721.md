@@ -101,15 +101,26 @@ For an account assigned model `M` with value `V`:
 
 The **clear mechanism Andrew asked for exists**: `children[].relativeAllocation` is the blend split, and `child.name`/`child.id` identifies the underlying primary model. (Nested blends recurse.)
 
-## 7. Proposed opal-data-assets daily-strategy fold-in (design only — CTO-gated build)
+## 7. opal-data-assets fold-in — ALIGNED to the estate taxonomy (OPAL_CONSOLIDATION_TAXONOMY_STANDARD §A/§D; grounded 2026-07-21, read-only)
 
-Firm-separated, additive (NEW-TERRITORY rule), read-only pull. Sketch:
+**Prefix (grounded, firm-clean):** the Rebalancer is a Black Diamond app → the model data is BD-sourced / cot-scoped, so it lands under the EXISTING cot BD scope:
+`s3://opal-data-assets/blackdiamond/cottonwood/{layer}/{type}/{date}` — the SAME source/scope as cot's existing allocations/holdings/realized/unrealized/transactions.
+**There is no top-level `cot/` source and one must NOT be created.** cot is a SCOPE under the `blackdiamond` source, exactly like `blackdiamond/49f`, `schwab/{acct}`, `smartx/{feed}`, `eclipse/inflection`, `orion/inflection` (grounded: the six live sources are blackdiamond/eclipse/orion/pathfinder/schwab/smartx/trueshares; `blackdiamond/` scopes = `49f` + `cottonwood`). A separate `cot/` root would fragment cot's BD data across two prefixes and break the cross-firm taxonomy consistency Andrew required. **Firm-sep by scope segment:** the producer writes ONLY `blackdiamond/cottonwood/**`, never `blackdiamond/49f/**` (scope discipline, mirroring `cot_bronze_ingest._assert_firm_separation` + IAM deny).
 
-1. **New bronze producer** (cloud-side, cot-scoped, mirrors `cot_bronze_ingest.py`'s Model-B env pattern): mint the Rebalancer bearer → `POST /api/models/strategies/search` (paged, all 60) → for each `id`, `GET /api/models/{id}` → land **raw JSON byte-for-byte** under `blackdiamond/cottonwood/bronze/.../rebalancer_models/{date}/` (Rule 17a: raw, no parquet-at-ingest).
-2. **Silver**: flatten to two `fact_*` tables — `fact_model_definition` (one row per model × leaf-component: model_id, model_name, is_opal, rebalance_model_type, sleeve_name, symbol, asset_id, absolute_allocation, relative_allocation) and `fact_model_blend` (model_id → child primary-model-id + relative_allocation) — plus `fact_account_model_assignment` (account_id → model_id, from the assignment source in §5/§8).
-3. **Gold / DDB fold-in into `opal-assets-daily-aua`**: per primary Opal model, `{account_count (distinct, +1-per-blend-membership), dollar_value (Σ account_value × relative_allocation)}`, keyed for the MDPF Model-Portfolios page. Dollar attribution uses §6.
+**Layers** (grammar `{source}/{scope}/{layer}/{type|feed}/{date}`, `{layer}∈bronze|silver|gold|meta`, §A):
+- **bronze/** — raw BD Rebalancer JSON, byte-for-byte (Rule 17a; parquet begins at silver): `bronze/rebalancer_models/MODELS_{date}.json` (roster) + `bronze/rebalancer_model_detail/{modelId}_{date}.json` (per-model composition). Mirrors the existing `bronze/{type}/…` raw landing.
+- **silver/** — parquet `fact_{type}` COMPLETE tables, dedup + dtype ONLY (Rule 17):
+  - `silver/fact_model_definition/date=…/data.parquet` — one row per model × leaf-component (model_id, model_name, is_opal, rebalance_model_type, sleeve_name, symbol, asset_id, absolute_allocation, relative_allocation).
+  - `silver/fact_model_blend/date=…/data.parquet` — model_id → child primary-model-id + relative_allocation (the blend split, §6).
+  - `silver/fact_model_assignment/date=…/data.parquet` — account_id → model_id (source = Rebalancer-authoritative, §9(1)).
+- **gold/** — `dim_*` projections (gold = the one parse-down point): `gold/dim_model_portfolio/` → the MDPF DDB fold-in: per in-scope Opal model `{account_count (+1 per blend membership), dollar_value (Σ account_value × relative_allocation)}` (§6). `blackdiamond/cottonwood/gold/` is currently EMPTY = the target.
+- **meta/** — pull provenance to `meta/pulls/{YYYYMMDD}/` (§D) + `meta/conversions/` + a `*-complete.json`/`*-failed.json` stamp pair; NEVER data (mirrors the existing `cottonwood/meta/` + `backfill-status.json`).
 
-Guardrails carried: cot-only (never blackdiamond/49f), read-only, raw bronze, Opal-name filter for "ours", the DataMining as-of fix is a prerequisite if the assignment source is `allocations` (else use the Rebalancer assignment source).
+**Trigger + implementation (mirror the estate, §D — don't improvise siblings):** follow the existing `opal-assets-bd49f-*` BD producer (already lands `blackdiamond/cottonwood/` BD data): EventBridge-scheduled producer named `{unit}-{function}-{cadence}` (e.g. `opal-assets-bd-rebalancer-daily-pull`); HTTP = requests.Session + urllib3 Retry (C5 `smartx_client`); landing verified by the listing-based set-identity guard (`landing_guard.py` / `mirror_conversion.set_identity`, ListObjectsV2 run-time denominators — never HeadObject); bronze-complete stamp → EventBridge → silver → gold `dim_*` → DDB. Auth = mint the Rebalancer bearer from `blackdiamond/cot/session` (§2). IAM = one scoped `{resource}-role`, scope-exact grants verified per Rule 22a (exact-ARN `simulate-principal-policy` + isolated positive control), PAB-on, firm-sep deny to `blackdiamond/49f`.
+
+**Absence-twin:** §D's target-state law pairs a freshness/absence twin, but NEW SNS/CloudWatch alert creation is **ENFORCEMENT-PAUSED** for the consolidation (Andrew 07-17) — so **no new alarm ships with this**; the twin is noted as deferred target-state.
+
+Still discovery/design only — the build is cloud-side + CTO-gated (the WS-E PRD).
 
 ## 8. Open items / caveats (grounded)
 
