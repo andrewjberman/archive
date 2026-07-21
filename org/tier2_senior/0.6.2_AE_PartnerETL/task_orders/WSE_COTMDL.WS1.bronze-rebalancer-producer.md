@@ -13,18 +13,23 @@
 </references>
 
 <objective>
-Build the EventBridge-scheduled bronze producer `opal-assets-bd-rebalancer-daily-pull` that mints a
-Rebalancer bearer off blackdiamond/cot/session and lands the 3 raw BD Rebalancer JSON types byte-for-byte
-under s3://opal-data-assets/blackdiamond/cottonwood/bronze/, then emits the complete-stamp LAST. Mirror the
-existing opal-assets-bd49f-* BD producer -- do NOT improvise a sibling pattern.
+Build the EventBridge-scheduled bronze producer that lands the 3 raw BD Rebalancer JSON types byte-for-byte
+under s3://opal-data-assets/blackdiamond/cottonwood/bronze/, then emits the complete-stamp LAST.
+
+>> PATTERN REDIRECT (Andrew-direct 2026-07-21T213504Z @64fdd919c) -- SUPERSEDES the "mirror opal-assets-bd49f
+(xlsx monolith)" instruction: use the CANONICAL BD-REST format per docs/.../BD_API_DESIGN.md + the existing
+cot BD REST pull (data/cot/scripts/bronze/cot_bronze_ingest.py) -- a COOKIE-RIDING REST RUNNER on the EXISTING
+cot session-refresh chain (not a fresh mint-Rebalancer-bearer monolith). Ground the canonical structure, rework
+the producer to it, re-report the delta, and re-sync WS-5 (0.7.0) once grounded (the canonical runner shape may
+adjust the TF). WS-1 build-phase REOPENED for the rework. <<
 </objective>
 
 <hard_gate>
-STANDING VENDOR-EGRESS WORD (Andrew) is REQUIRED before the SCHEDULED daily pull ships/runs. The per-use
-grants (@b5af1e929, @3e563306c) were discovery/scoped-read -- a recurring producer needs the standing grant.
-COO has SURFACED this to Andrew. You may BUILD + unit-test the producer (dry, no live scheduled egress) while
-staged, but the scheduled daily pull does NOT activate until the standing word lands. Do NOT assume the
-per-use grant covers the recurring producer.
+STANDING VENDOR-EGRESS WORD: GRANTED 2026-07-21T213504Z (Andrew-direct @64fdd919c) -- programmatic daily cot-BD
+pull AUTHORIZED. The egress gate is CLEARED. Scope: cot BD, read-only, recurring/standing (the daily pull). Any
+WIDENING beyond that (other firm, write-back, mutating call, production egress off-scope) still needs a FRESH
+Andrew word. Deploy now waits on: the canonical-BD-REST rework (above) + the WS-5 (0.7.0) role+schedule
+re-sync to the canonical shape + the WS-1/0.6.2 deploy-verify pair -- NOT the egress word.
 </hard_gate>
 
 <scope>
