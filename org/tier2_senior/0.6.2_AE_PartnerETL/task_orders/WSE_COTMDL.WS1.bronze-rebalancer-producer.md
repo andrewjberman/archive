@@ -3,7 +3,7 @@
 <project>WSE_COTMDL</project>
 <issued_to>0.6.2_AE_PartnerETL</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (parallel to MDPF cutover; cutover keeps attention precedence)</priority>
 <date>2026-07-21</date>
 
