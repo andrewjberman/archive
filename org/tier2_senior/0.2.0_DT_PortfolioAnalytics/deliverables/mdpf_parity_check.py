@@ -49,6 +49,10 @@ NOTES: account_distribution keys by_model on DISPLAY NAME; aggregate on MODEL_KE
 each compared to its OWN served, never cross-normalized. Spec extras (basis/meta) allowed.
 account_distribution is a SNAPSHOT (no date axis) -> positional compare, latest everywhere.
 aggregate_aua_timeseries axis = 'dates'; aum_timeseries axis = 'periods'.
+SHAPE: the meta/source_vintage_last PROVENANCE subtrees are EXEMPT from the missing/extra
+shape-diff (their keys legitimately differ served-vs-revamp; the DATA-array shape is checked).
+FIELD MATCH is EXACT-or-glob (never substring) -- a 'model_aua' entry must not intercept a
+'non_model_aua' leaf. --published-prefix points the compare at a staged pre-publish location.
 """
 from __future__ import annotations
 
@@ -66,7 +70,8 @@ from botocore.exceptions import ClientError
 SERVED_BUCKET = "opal-data-portal-v2"
 PUBLISHED_BUCKET = "opal-data-assets"
 REL_TOL = 0.001
-ALLOWED_EXTRAS = {"basis", "meta", "source_vintage_last"}
+ALLOWED_EXTRAS = {"basis", "meta", "source_vintage_last"}   # leaf-name spec extras (published-side, any depth)
+SHAPE_EXEMPT_ROOTS = {"meta", "source_vintage_last"}        # provenance subtrees: keys legitimately differ served-vs-revamp
 _DATE_RE = re.compile(r"@\d{4}-\d{2}-\d{2}")
 
 ARTIFACTS = {
@@ -125,10 +130,19 @@ def _shape(obj, path=""):
     return out
 
 
+def _shape_exempt(p):
+    """A shape path exempt from the missing/extra diff: any leaf named in ALLOWED_EXTRAS, OR
+    any path under a provenance subtree (meta / source_vintage_last) whose keys legitimately
+    differ between served and the revamp (DS harness_requirement, 2026-07-21). The DATA-array
+    shape is still fully checked -- only provenance metadata is exempt."""
+    return (p.split(".")[0].split("[")[0] in SHAPE_EXEMPT_ROOTS
+            or p.split(".")[-1].split("[")[0] in ALLOWED_EXTRAS)
+
+
 def _shape_diff(served, published):
     s, p = _shape(served), _shape(published)
-    missing = sorted(s - p)
-    extra = sorted(k for k in p - s if k.split(".")[-1].split("[")[0] not in ALLOWED_EXTRAS)
+    missing = sorted(k for k in (s - p) if not _shape_exempt(k))   # was unfiltered -> false SHAPE_FAIL on meta.*
+    extra = sorted(k for k in (p - s) if not _shape_exempt(k))
     return missing, extra
 
 
@@ -194,9 +208,12 @@ def _spec_is_latest(spec):
 
 
 def _spec_field_hit(spec, base):
+    """Exact-or-glob field match. NOT substring: `fp_clean in base` wrongly matched 'model_aua'
+    inside 'non_model_aua' -> model_latest_tie's tight band intercepted non_model (DS flag,
+    2026-07-21). '*' globs (by_model.*.model_value) still match via fnmatch."""
     for fp in spec.get("field_paths", []):
         fp_clean = fp.replace("(latest)", "").strip()
-        if fp_clean == base or fp_clean in base or fnmatch.fnmatch(base, fp_clean):
+        if base == fp_clean or fnmatch.fnmatch(base, fp_clean):
             return True
     return False
 
@@ -348,16 +365,19 @@ def compare(served, published, entries=None):
             "shape_ok": not (missing or extra), "axis": axis}
 
 
-def check_pair(name, firm, spec, ledger):
+def check_pair(name, firm, spec, ledger, published_prefix=None):
     served = _get(SERVED_BUCKET, spec["served"])
     if served is None:
         return {"name": name, "firm": firm, "verdict": "SERVED_ABSENT", "note": spec["served"]}
-    published = _get(PUBLISHED_BUCKET, spec["published"])
+    # --published-prefix points at a staged pre-publish location -> {prefix}/{firm}/{artifact}.json
+    pub_key = f"{published_prefix}/{firm}/{name}.json" if published_prefix else spec["published"]
+    published = _get(PUBLISHED_BUCKET, pub_key)
     if published is None:
         return {"name": name, "firm": firm, "verdict": "PUBLISHED_ABSENT",
-                "note": f"{spec['published']} absent (awaiting publisher); served shape {len(_shape(served))} paths"}
+                "note": f"{pub_key} absent (awaiting publisher); served shape {len(_shape(served))} paths"}
     entries = (ledger or {}).get(f"{name}/{firm}", {})
     r = compare(served, published, entries)
+    r["published_key"] = pub_key
     if not r["shape_ok"]:
         r["verdict"] = "SHAPE_FAIL"
     elif r["unexplained"]:
@@ -430,15 +450,34 @@ def self_test():
     dj2 = compare(dj_s, dj_p2, dj_led)
     dj_common_delta_caught = any(k == "model_aua@2026-06-02" for k, *_ in dj2["unexplained"])
 
+    # ===== REGRESSION: two bugs DS hit on the real staged run (2026-07-21) =====
+    # BUG-1: a diff confined to the meta/source_vintage_last provenance subtrees must NOT SHAPE_FAIL
+    m_s = {"dates": ["2026-06-01"], "model_aua": [10.0],
+           "meta": {"backfill_methods": ["a"]}, "source_vintage_last": {"vintage_bearing_feeders": ["x", "y"]}}
+    m_p = {"dates": ["2026-06-01"], "model_aua": [10.0],
+           "meta": {"provenance": "revamp", "extra": 1}, "source_vintage_last": {"vintage_bearing_feeders": ["x"], "new": 2}}
+    meta_shape_ok = compare(m_s, m_p)["shape_ok"]                       # provenance-only diff -> shape OK
+    m_p_realdiff = {"dates": ["2026-06-01"], "model_aua": [10.0], "rogue_data_field": [1.0], "meta": {}}
+    real_shape_still_fails = not compare(m_s, m_p_realdiff)["shape_ok"]  # a real DATA-shape diff still FAILS
+    # BUG-2: a 'model_aua'-scoped entry must NOT intercept a 'non_model_aua' leaf (exact match, not substring)
+    nm_s = {"dates": ["2026-06-01"], "non_model_aua": [100.0]}
+    nm_p = {"dates": ["2026-06-01"], "non_model_aua": [150.0]}          # +50% non_model delta
+    nm_led = {"model_only": {"field_paths": ["model_aua(latest)"], "scope": "latest_cross_section",
+                             "pct_range": [-0.5, 0.5], "note": "model tie"}}
+    nm_not_masked = any(k == "non_model_aua@2026-06-01" for k, *_ in compare(nm_s, nm_p, nm_led)["unexplained"])
+
     ok &= (exp_win and exp_latest and unexp and auth and null_named and null_unexp
            and dj_no_spurious and dj_axis_named and dj_last_common
-           and dj_reports_unnamed and dj_common_delta_caught)
+           and dj_reports_unnamed and dj_common_delta_caught
+           and meta_shape_ok and real_shape_still_fails and nm_not_masked)
     print(f"SELF-TEST snapshot identity+mutant: {ident['shape_ok'] and not ident['unexplained']} / {bool(compare(served, mut)['unexplained'])}")
     print(f"SELF-TEST DS-ledger: history_windows-LIST(model_aua@2025)={exp_win}; latest-scope(model_aua@2026)={exp_latest}; UNEXPLAINED(x@2026)={unexp}")
     print(f"SELF-TEST authoritative-latest: +1.5% latest out-of-tie NOT masked by post_conv -> UNEXPLAINED={auth}")
     print(f"SELF-TEST null-placeholder: null_ok->NAMED={null_named}; no-entry->UNEXPLAINED(NOT silently skipped)={null_unexp}")
     print(f"SELF-TEST DATE-JOIN: common-ties/no-spurious-index-mismatch={dj_no_spurious}; non-common NAMED-surfaced={dj_axis_named}; last_common@2026-06-02(not [-1])={dj_last_common}")
     print(f"SELF-TEST DATE-JOIN fail-safe: unnamed non-common -> UNEXPLAINED(reported,not dropped)={dj_reports_unnamed}; real common-date delta CAUGHT at right date={dj_common_delta_caught}")
+    print(f"SELF-TEST regression BUG-1 (meta/svl subtree exempt from shape): provenance-diff shape-OK={meta_shape_ok}; real data-shape diff still FAILS={real_shape_still_fails}")
+    print(f"SELF-TEST regression BUG-2 (exact field match, no substring): 'model_aua' entry does NOT mask 'non_model_aua'={nm_not_masked}")
     print(f"SELF-TEST {'PASS' if ok else 'FAIL'} -- date-joins by date key, surfaces every non-common date, ties at last-common")
     return ok
 
@@ -489,6 +528,9 @@ def main():
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--ledger")
+    ap.add_argument("--published-prefix",
+                    help="override published key -> {prefix}/{firm}/{artifact}.json "
+                         "(e.g. gold/mdpf_revamp for a staged pre-publish parity run)")
     args = ap.parse_args()
     if args.self_test:
         return 0 if self_test() else 1
@@ -498,14 +540,14 @@ def main():
             ledger = json.load(fh)
     if args.all:
         for (name, firm), spec in ARTIFACTS.items():
-            _report(check_pair(name, firm, spec, ledger))
+            _report(check_pair(name, firm, spec, ledger, args.published_prefix))
         return 0
     if args.artifact and args.firm:
         spec = ARTIFACTS.get((args.artifact, args.firm))
         if not spec:
             print(f"no in-scope artifact ({args.artifact}, {args.firm})")
             return 1
-        _report(check_pair(args.artifact, args.firm, spec, ledger))
+        _report(check_pair(args.artifact, args.firm, spec, ledger, args.published_prefix))
         return 0
     ap.print_help()
     return 2
