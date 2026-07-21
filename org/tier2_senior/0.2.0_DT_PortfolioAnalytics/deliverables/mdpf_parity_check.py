@@ -99,12 +99,12 @@ ARTIFACTS = {
     ("non_model_assets", "global"): {
         "served": "json/portfolios/non_model_assets.json",
         "published": "portal/portfolios/global/non_model_assets.json"},
-    ("aum_metrics", "global"): {
+    ("aum_metrics", "global"): {   # A1: DS builds a revamp producer -> parity artifact coming (CTO 203613Z)
         "served": "json/portfolios/aum-metrics.json",
         "published": "portal/portfolios/global/aum_metrics.json"},
-    ("aum_timeseries", "global"): {
-        "served": "json/portfolios/aum-timeseries.json",
-        "published": "portal/portfolios/global/aum_timeseries.json"},
+    # aum_timeseries (A2) REMOVED (CTO 203613Z scope ruling): FE-DERIVE now, stale legacy dropped from the FE
+    # -> the revamp produces NO aum-timeseries artifact, so there is nothing to parity-check (it left the
+    # picture entirely). Do NOT re-add a target that will only ever read PUBLISHED_ABSENT. Coverage = 8 keys.
     ("account_distribution", "global"): {
         "served": "json/portfolios/account-distribution.json",
         "published": "portal/portfolios/global/account_distribution.json"},
