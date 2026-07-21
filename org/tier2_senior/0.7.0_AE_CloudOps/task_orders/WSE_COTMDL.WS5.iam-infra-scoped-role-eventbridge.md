@@ -3,7 +3,7 @@
 <project>WSE_COTMDL</project>
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (infra scaffolding -- can proceed ahead of the standing-egress GO; the daily SCHEDULE arms only after WS-1 egress)</priority>
 <date>2026-07-21</date>
 
