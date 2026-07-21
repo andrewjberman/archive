@@ -3,8 +3,8 @@
 <project>ad-hoc (NFRA-tooling; Andrew-requested, CTO-approved)</project>
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
-<priority>P2 (Andrew-requested, NOT urgent/not-blocking; BUILD POST-MDPF-CUTOVER -- see gate)</priority>
+<status>pending</status>
+<priority>P1 (Andrew brought 0.8.0 online to build NOW; core-gate care via verify-before-live)</priority>
 <date>2026-07-21</date>
 
 <references>
@@ -13,10 +13,12 @@
 </references>
 
 <hard_gate>
-DO NOT BUILD/APPLY UNTIL THE MDPF_REVAMP CUTOVER + the cot-rebalancer deploy have LANDED. safe-commit.sh is
-the CORE commit gate EVERY agent uses; a change to it (even additive) during the live P0 risks the whole
-fabric's commit path while agents are mid-cutover (DS incremental producer commits, 0.6.2 cot deploy, all
-coordination commits). Not urgent (DS works around it). COO releases this gate + routes the spawn post-cutover.
+ANDREW BROUGHT 0.8.0 ONLINE TO BUILD THIS NOW (2026-07-21, supersedes the prior defer-to-post-cutover). The
+core-gate risk is now managed by VERIFICATION, not deferral: BUILD + SELF-TEST + CVO-VERIFY the additive fix
+BEFORE the live safe-commit.sh change is committed. ADDITIVE-ONLY (preserve the -m read; zero -m regression).
+The change goes LIVE only on CVO-confirm + ZERO regression on either path -- every agent is actively committing
+right now (DS producer commits, 0.6.2 cot deploy, coordination), so the fabric's commit path is protected by
+the verify gate, not luck. CTO gates the apply (the live commit of the modified safe-commit.sh).
 </hard_gate>
 
 <objective>
@@ -48,28 +50,34 @@ on -m (a -m body with $( is denied). Restores the mandated commit path's ability
       <if_mismatch>STOP. Ground the exact lines before editing a core gate.</if_mismatch>
     </step>
   </phase>
-  <phase id="2" when="before commit">
+  <phase id="2" when="before the LIVE commit of safe-commit.sh">
     <step>
-      <run>Self-test: a -F commit carrying `# system-current-override: <reason>` in the body -> the override is READ + honored (matches the -m behavior). A -F body WITHOUT the trailer -> unchanged (no false override).</run>
-      <expect>-F-carried override satisfies the gate identically to -m; F-010 gate still denies -m-with-$(. No regression on either path.</expect>
-      <if_mismatch>STOP. Do not commit a core-gate change that regresses either path.</if_mismatch>
+      <run>Self-test: a -F commit carrying `# system-current-override: <reason>` in the body -> the override is READ + honored (matches the -m behavior). A -F body WITHOUT the trailer -> unchanged (no false override). A -m body with $( -> still F-010-DENIED.</run>
+      <expect>-F-carried override satisfies the gate identically to -m; F-010 gate unchanged; no regression on either path.</expect>
+      <if_mismatch>STOP. Do NOT commit a core-gate change that regresses either path -- every agent uses this gate live.</if_mismatch>
+    </step>
+    <step>
+      <run>CVO independent verify BEFORE the change goes live (it found the bug -> confirms the fix on the real gate)</run>
+      <expect>CVO CONFIRMS: -F-carried override honored + zero regression. THEN the live commit + CTO apply-gate.</expect>
+      <if_mismatch>HOLD the live commit until CVO confirms.</if_mismatch>
     </step>
   </phase>
 </compiler_tools_mandate>
 
 <cross_domain_coordination>
-  - CVO (3.0.0_SA_CVO): FOUND the bug -> VERIFIES the fix (independence: verify not build). Confirm a -F-carried override satisfies the gate + no regression, on the real safe-commit.sh.
-  - CTO (1.0.0_SA_CTO): approved the fix; may gate the apply (COO to confirm at spawn-time).
+  - CVO (3.0.0_SA_CVO): FOUND the bug -> VERIFIES the fix BEFORE it goes live (independence: verify not build). Confirm a -F-carried override satisfies the gate + no regression, on the real safe-commit.sh.
+  - CTO (1.0.0_SA_CTO): approved the fix; gates the apply (the live commit of modified safe-commit.sh).
 </cross_domain_coordination>
 
 <acceptance_criteria>
   1. safe-commit.sh reads the system-current-override from the -F file (verified: a -F commit with the trailer is honored, identically to -m).
   2. No regression: -m path unchanged; F-010 git gate still denies -m-with-$(; a -F body without the trailer is a clean no-override.
-  3. CVO independently VERIFIES (found -> confirms) on the real gate.
-  4. Session log Compiler Tools section reproduces the self-test + observed result.
+  3. CVO independently VERIFIES (found -> confirms) BEFORE the change goes live.
+  4. Session log Compiler Tools section reproduces the self-test + observed result; CTO gates the live apply.
 </acceptance_criteria>
 
 <dependencies>
-  <dependency agent="MDPF_REVAMP cutover + cot deploy" task="land before touching the core commit gate" status="pending (COO releases post-cutover)"/>
+  <dependency agent="3.0.0_SA_CVO" task="verify the fix before the live commit" status="pending"/>
+  <dependency agent="1.0.0_SA_CTO" task="gate the apply (live commit of safe-commit.sh)" status="pending"/>
 </dependencies>
 </task_order>
