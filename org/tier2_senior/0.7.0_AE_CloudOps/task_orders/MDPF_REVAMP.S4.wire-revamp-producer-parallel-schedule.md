@@ -3,7 +3,7 @@
 <project>MDPF_REVAMP</project>
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>pending</status>
 <priority>P0</priority>
 <date>2026-07-21</date>
 
@@ -29,6 +29,24 @@ CTO+COO co-sign. "publish HELD" = publisher NOT scheduled, portal/* UNTOUCHED. T
 PRODUCER (CTO per-cycle S3-verify + DT per-cycle parity + CVO independent each cycle); the publisher /
 portal-copy is NOT needed to accrue the streak and is OUT OF SCOPE for this TO.
 </spec>
+
+<scope_update authority="Andrew-direct via CTO 20260721T165107Z -- SUPERSEDES the 2-producer naming above">
+Andrew-direct (VERBATIM, AE received mid-session): "Yes we need account distributions per firm and globally
+as part of the REVAMP process, all of this needs to be cloud-based, structured off the relevant assets in
+opal-data-assets bucket... Confirm with CTO that they are aware... make sure its properly accounted for as we
+finalize this migration."
+
+The scheduled revamp producer set = **7 KEYS**, all in gold/mdpf_revamp/*, verified every cycle:
+  - aggregate_aua_timeseries x3 firms (49financial / inflection / global) -- dim_mdpf_aggregate_aua_timeseries.py
+  - account_distribution x3 firms (per-firm + global bell-curve) -- dim_mdpf_account_distribution.py (already
+    built, cloud-native off opal-data-assets, CVO-cleared A3/A7; was ALWAYS N=3-scope; AE caught its omission
+    from the earlier 2-producer spec)
+  - non_model_assets A4 x1 (global) -- dim_mdpf_non_model_assets.py
+NO timeline change (account_distribution was always N=3 deliverable scope). The N=3 streak verifies all 7 keys
+per scheduled cycle. OUT of S4 scope (accounted for, not forgotten): aum_metrics + aum_timeseries = TO-2
+(later wave, post-N=3); legacy serves those until TO-2 replaces them off the aggregate. The publisher
+publishes ONLY these 7 revamp keys at cutover (S5).
+</scope_update>
 
 <scope>
   <in>
@@ -76,8 +94,8 @@ portal-copy is NOT needed to accrue the streak and is OUT OF SCOPE for this TO.
       <if_mismatch>STOP. Close the gap before commit.</if_mismatch>
     </step>
     <step>
-      <run>comp-pipescript deployed dim_mdpf_aggregate_aua_timeseries.py (+ dim_mdpf_non_model_assets.py)</run>
-      <expect>MATCH -- the scheduled runner will execute the SAME committed/parity-clean revamp code DS shipped (DEPLOYED == imported), not a stale copy.</expect>
+      <run>comp-pipescript deployed dim_mdpf_aggregate_aua_timeseries.py + dim_mdpf_account_distribution.py + dim_mdpf_non_model_assets.py</run>
+      <expect>MATCH for ALL THREE revamp producers (7 keys) -- the scheduled runner executes the SAME committed/parity-clean revamp code DS shipped (DEPLOYED == imported), not a stale copy.</expect>
       <if_mismatch>STOP. Reconcile the deployed code to DS's committed revamp code before arming the schedule.</if_mismatch>
     </step>
   </phase>
@@ -104,7 +122,7 @@ portal-copy is NOT needed to accrue the streak and is OUT OF SCOPE for this TO.
 </cross_domain_coordination>
 
 <acceptance_criteria>
-  1. gold/mdpf_revamp/* is produced ON THE SCHEDULE (not hand-run) -- verified by ListObjectsV2 (key+ETag+Size, mtime &gt; deploy-commit-time); cycle 1 = first scheduled parallel run.
+  1. ALL 7 revamp keys (aggregate_aua x3 firms + account_distribution x3 firms + non_model A4 x1) are produced ON THE SCHEDULE (not hand-run) -- verified by ListObjectsV2 (key+ETag+Size, mtime &gt; deploy-commit-time); cycle 1 = first scheduled parallel run. A cycle missing any of the 7 keys is NOT a clean cycle.
   2. The publisher (opal-assets-mdpf-portal-publisher) is NOT scheduled and NOT invoked; portal/* mtime UNCHANGED pre/post (machine-checked).
   3. Legacy producer output + current MDPF serving UNCHANGED (build-alongside).
   4. gold/meta/pipeline-complete.json NOT emitted by the new runner.
