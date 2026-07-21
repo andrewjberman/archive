@@ -3,7 +3,9 @@
 <project>WSE_COTMDL</project>
 <issued_to>0.6.2_AE_PartnerETL</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-07-21T234702Z: cot-rebalancer-runner DEPLOYED (safe-apply RC0, 10 add/0 change/0 destroy, 0-diff) + Rule-22a verified read-only cookie-rider + LIVE no-stub test (34 real objects/806KB, 911 accts/60 models/25 details, both gates PASS, opal_assigned=296, closure fired) + tagged cot-rebalancer-runner-v0.1.0. Andrew-direct deploy-now @b5be0f680; CVO issued. Canonical BD-REST rework (Andrew redirect @64fdd919c) superseded the bd49f-mirror objective. -->
+
 <priority>P1 (parallel to MDPF cutover; cutover keeps attention precedence)</priority>
 <date>2026-07-21</date>
 
