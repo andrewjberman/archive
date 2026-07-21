@@ -22,6 +22,7 @@ s3://opal-data-assets/blackdiamond/cottonwood/silver/.
     - fact_model_definition (one row per model x leaf-component: model_id, model_name, is_opal, rebalance_model_type, sleeve_name, symbol, asset_id, absolute_allocation, relative_allocation).
     - fact_model_blend (model_id -> child primary-model-id + relative_allocation -- the blend split).
     - fact_model_assignment (account_id/externalId -> strategyName -> model_id, Rebalancer-authoritative; strategyName '--' = unassigned).
+    - The bronze-complete(meta/{date}-complete.json)->silver EventBridge TRIGGER (targets this silver lambda). OWNERSHIP RULED to WS-2 (COO 2026-07-21, build-where-target-lives): WS-5 cannot forward-reference this silver ARN, so this deploy builds its own inbound trigger. Coordinate the source stamp path with WS-1/WS-5.
     - COMPLETE tables (Rule 17: dedup + dtype standardization ONLY). Parquet begins at silver (Rule 17a).
   </in>
   <out>
