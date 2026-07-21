@@ -51,6 +51,10 @@ account_distribution is a SNAPSHOT (no date axis) -> positional compare, latest 
 aggregate_aua_timeseries axis = 'dates'; aum_timeseries axis = 'periods'.
 SHAPE: the meta/source_vintage_last PROVENANCE subtrees are EXEMPT from the missing/extra
 shape-diff (their keys legitimately differ served-vs-revamp; the DATA-array shape is checked).
+VALUE: leaves UNDER those provenance ROOTS are ALSO exempt from the value compare -- their values
+(age_hours_at_generation/lag/threshold/generated_at) are run-time, so served-vs-revamp differs by
+construction. ROOT-only (_provenance_value_exempt), NOT the leaf-NAME clause -- a numeric data leaf
+named after a provenance token (e.g. 'basis') is STILL value-checked (a false PASS is the danger).
 FIELD MATCH is EXACT-or-glob (never substring) -- a 'model_aua' entry must not intercept a
 'non_model_aua' leaf. --published-prefix points the compare at a staged pre-publish location.
 """
@@ -137,6 +141,18 @@ def _shape_exempt(p):
     shape is still fully checked -- only provenance metadata is exempt."""
     return (p.split(".")[0].split("[")[0] in SHAPE_EXEMPT_ROOTS
             or p.split(".")[-1].split("[")[0] in ALLOWED_EXTRAS)
+
+
+def _provenance_value_exempt(p):
+    """VALUE-loop exemption (BUG-1 value-side completion, DS harness_requirement 2026-07-21). A numeric leaf
+    UNDER a provenance root (meta / source_vintage_last) carries a RUN-TIME-dependent value --
+    age_hours_at_generation (= generated_at - source overall), lag, threshold, generated_at -- that
+    legitimately differs served-vs-revamp. Provenance is not data; it must not be a parity leaf.
+    DELIBERATELY NARROWER than _shape_exempt: ROOT-only, it does NOT include the ALLOWED_EXTRAS leaf-NAME
+    clause -- because _leaves records NUMERIC leaves, a numeric DATA figure that happens to share an extras
+    name (e.g. a 'basis' value present on both sides) must STILL be value-checked. Exempting a provenance
+    SUBTREE must never silently exempt a data leaf BY NAME (a false PASS is the dangerous error here)."""
+    return p.split(".")[0].split("[")[0] in SHAPE_EXEMPT_ROOTS
 
 
 def _shape_diff(served, published):
@@ -348,6 +364,8 @@ def compare(served, published, entries=None):
 
     # --- VALUE comparison over the common (date-aligned) leaves ---
     for k in sorted(set(ls) & set(lp)):
+        if _provenance_value_exempt(k):    # provenance values (age_hours_at_generation/lag/threshold/generated_at) are run-time -> never a parity leaf
+            continue
         sv, sdt = ls[k]
         pv, _ = lp[k]
         idx_date = sdt
@@ -459,6 +477,17 @@ def self_test():
     meta_shape_ok = compare(m_s, m_p)["shape_ok"]                       # provenance-only diff -> shape OK
     m_p_realdiff = {"dates": ["2026-06-01"], "model_aua": [10.0], "rogue_data_field": [1.0], "meta": {}}
     real_shape_still_fails = not compare(m_s, m_p_realdiff)["shape_ok"]  # a real DATA-shape diff still FAILS
+    # BUG-1 VALUE SIDE (DS 2026-07-21): a numeric leaf UNDER a provenance root (meta/source_vintage_last)
+    # present on BOTH sides with a run-time-different value must NOT be UNEXPLAINED (age_hours 15.0 vs 42.2);
+    # AND a numeric DATA leaf NAMED 'basis' (a provenance token, but at a DATA root) must STILL be caught --
+    # proves the value-exemption is ROOT-only, not the leaf-NAME clause (a false PASS is the dangerous error).
+    pv_s = {"dates": ["2026-06-01"], "model_aua": [10.0],
+            "meta": {"source_vintage_last": {"age_hours_at_generation": 15.0, "basis": "schwab-rps"}}, "basis": 200.0}
+    pv_p = {"dates": ["2026-06-01"], "model_aua": [10.0],
+            "meta": {"source_vintage_last": {"age_hours_at_generation": 42.2, "basis": "schwab-rps"}}, "basis": 999.0}
+    pv_r = compare(pv_s, pv_p)
+    prov_value_exempt = not any(str(k).startswith("meta") for k, *_ in pv_r["unexplained"])   # age_hours 15->42.2 NOT flagged
+    basis_data_still_caught = any(k == "basis" for k, *_ in pv_r["unexplained"])              # numeric 'basis' at data root STILL flagged
     # BUG-2: a 'model_aua'-scoped entry must NOT intercept a 'non_model_aua' leaf (exact match, not substring)
     nm_s = {"dates": ["2026-06-01"], "non_model_aua": [100.0]}
     nm_p = {"dates": ["2026-06-01"], "non_model_aua": [150.0]}          # +50% non_model delta
@@ -469,7 +498,8 @@ def self_test():
     ok &= (exp_win and exp_latest and unexp and auth and null_named and null_unexp
            and dj_no_spurious and dj_axis_named and dj_last_common
            and dj_reports_unnamed and dj_common_delta_caught
-           and meta_shape_ok and real_shape_still_fails and nm_not_masked)
+           and meta_shape_ok and real_shape_still_fails
+           and prov_value_exempt and basis_data_still_caught and nm_not_masked)
     print(f"SELF-TEST snapshot identity+mutant: {ident['shape_ok'] and not ident['unexplained']} / {bool(compare(served, mut)['unexplained'])}")
     print(f"SELF-TEST DS-ledger: history_windows-LIST(model_aua@2025)={exp_win}; latest-scope(model_aua@2026)={exp_latest}; UNEXPLAINED(x@2026)={unexp}")
     print(f"SELF-TEST authoritative-latest: +1.5% latest out-of-tie NOT masked by post_conv -> UNEXPLAINED={auth}")
@@ -477,6 +507,7 @@ def self_test():
     print(f"SELF-TEST DATE-JOIN: common-ties/no-spurious-index-mismatch={dj_no_spurious}; non-common NAMED-surfaced={dj_axis_named}; last_common@2026-06-02(not [-1])={dj_last_common}")
     print(f"SELF-TEST DATE-JOIN fail-safe: unnamed non-common -> UNEXPLAINED(reported,not dropped)={dj_reports_unnamed}; real common-date delta CAUGHT at right date={dj_common_delta_caught}")
     print(f"SELF-TEST regression BUG-1 (meta/svl subtree exempt from shape): provenance-diff shape-OK={meta_shape_ok}; real data-shape diff still FAILS={real_shape_still_fails}")
+    print(f"SELF-TEST regression BUG-1 VALUE (root-only exemption): provenance value diff (age_hours 15->42.2) NOT unexplained={prov_value_exempt}; numeric data leaf named 'basis' STILL caught={basis_data_still_caught}")
     print(f"SELF-TEST regression BUG-2 (exact field match, no substring): 'model_aua' entry does NOT mask 'non_model_aua'={nm_not_masked}")
     print(f"SELF-TEST {'PASS' if ok else 'FAIL'} -- date-joins by date key, surfaces every non-common date, ties at last-common")
     return ok
