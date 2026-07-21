@@ -1,29 +1,32 @@
-# TO MDPF_REVAMP.S5-ROLLOVER -- Frontend Alignment to the revamp model-focused schema
+# TO MDPF_REVAMP.S5-ROLLOVER -- RENDER-CHECK + content-cutover validation (FE ALREADY ALIGNED)
 
 **Project:** MDPF_REVAMP | **Assignee:** 0.4.0_DE_ClientPlatform | **Author/Gate:** 1.0.0_SA_CTO | **Coordinator:** 2.0.0_SA_COO | **Tandem:** 0.7.0_AE_CloudOps (cutover mechanics)
-**Date:** 2026-07-21 | **Status:** pending (GO via MSTR spawn ~18:23Z + FE-alignment re-brief @182618/182727Z)
+**Date:** 2026-07-21 | **Status:** RE-SCOPED 2026-07-21 ~191xZ -- the original "FE-alignment" premise was DISPROVEN by the DE's own audit (see below); this TO is now a render-check + serving-validation.
 
-## Context (Andrew-direct 2026-07-21, real-time)
-The S5 cutover of the MDPF revamp (aggregate_aua_timeseries + account_distribution + non_model_assets, all 3 firms) was blocked at the publish gate. AE grounded the FE serving path (opal-data-portal-v2 via the public-data-router, NOT opal-data-assets) and found the revamp global aggregate (165K/427d) has a divergent SCHEMA from the served (443K/429d). GROUNDED: the divergence is INTENDED -- the revamp is MODELS-ONLY by design and correctly sheds the legacy `nested-aggregate` + `partners{49financial,inflection}` + `etf_decomposition{DIVZ,IDVZ,PFDE,PFOE}` + `methodology_version`. Andrew-direct verbatim: "this is focused solely on models, if we want to incorporate ETFs we can expand on the schema as needed to do so"; "our structure is correct on the data side... the issue is more a factor of making sure that we are clear on the frontend side with the 0.4.0_DE_ClientPlatform." DATA IS CORRECT; day-depth matches (427~429). Why parity missed it: DT/CVO date-joined parity compared VALUES at mapped paths, not the served SCHEMA/field-completeness.
+## RE-SCOPE NOTE (why this TO changed)
+The original scope assumed the FE read a LEGACY shape and had to be aligned to the revamp model-focused flat schema. **The DE FE-consumption audit (@86c741876) disproved that premise:** `getMdpfAggregateAUATimeSeries()` (the 443K nested/partners/etf artifact) has ZERO page/component call sites (dead code); the FE's live read is `getMdpfAggregateAUATimeSeriesByFirm('global')` -> `json/mdpf/global/aggregate-aua-timeseries.json` (161,772B FLAT), which is FIELD-IDENTICAL to the revamp (165,635B). AE independently re-verified (190028Z). **Result: ZERO FE code changes across all 7 keys; the S5 roll-over is a pure content/serving cutover, not an FE refactor.** So the FE-alignment work is DISCHARGED; what remains is to *prove it renders* off the revamp content before we flip.
 
-## Scope -- FRONTEND ALIGNMENT ONLY (NO producer/data-side changes)
-1. **FE-consumption audit** for all 7 revamp keys: every field each component / endpoint-transform / queryFn reads TODAY (the legacy shape off opal-data-portal-v2).
-2. **The exact FE changes** to consume the revamp MODEL-FOCUSED FLAT schema (`opal_aggregate_aua`/`model_aua`/`non_model_aua`/`by_model`) off opal-data-assets.
-3. **Confirm no legacy-only field** (`partners`/`etf_decomposition`/`nested-aggregate`) is LOAD-BEARING for a MODELS view. If one genuinely is (Andrew hedged "from what I can tell"), **SURFACE to CTO** -- it is a deliberate models-scope drop OR the sole case producer-side comes up -> CTO/Andrew ruling, NOT defaulted. Do NOT re-add producer fields by default.
+## Scope -- RENDER-CHECK + content-cutover validation (NO FE code changes)
+1. **RENDER-CHECK (pair with 0.7.0_AE_CloudOps), the gate deliverable.** The moment AE sets the Option-A serving-target (publisher lands the 7 revamp keys at the EXACT FE-read layout+filenames -- hyphen `json/mdpf/{scope}/aggregate-aua-timeseries.json` + `json/portfolios/*` -- on opal-data-assets, served via the scoped CF behavior), render the page off that content and confirm, FULL-DEPTH, all 3 firms:
+   - **#1 ASSERTION (your invariant):** all 7 FE URLs resolve to the revamp content, byte-served as **JSON** (not CloudFront error-HTML). A bare origin-repoint would 404 on a path/filename mismatch -> `JSON.parse` fails silently -> blank chart. This is THE thing the render-check must catch. Confirm content-type + parseable + expected keys per URL.
+   - **AUM-Daily** time series + **account-distribution** bell-curve + **non-model** panel render full-depth clean, all 3 firms (49financial / inflection / global).
+   - **WITHIN-SET frontier coherence:** the AUM-analysis per-model `account_count` == the bell-curve `account_count` at TODAY (DS is wiring this coherent-by-construction off one shared roster source per the CTO (a) ruling). The two "today" counts must not visibly disagree.
+2. **NO FE code changes** (audit-confirmed). Standing ratifications: SMA keep-as-is FOR CUTOVER (FE-safe); **NEVER drop the 2 blends** (`cohort_class='model'`); `sma`-drop (`cohort_class='sma'`) = OPTIONAL post-cutover cleanup only; basis label FE-ignored.
+3. **Vestigial-nested cleanup DEFERRED:** removing the dead `getMdpfAggregateAUATimeSeries()` path is optional post-cutover housekeeping -- **confirm no non-FE consumer first**, then a separate cleanup. Not in this TO.
 
 ## Guardrails
-- NO producer/data changes -- data is Andrew-confirmed-correct. ETFs = FUTURE schema expansion, not now.
-- Ground on the served + revamp artifacts + the FE queryFns -- NEVER assume.
-- Cutover MECHANICS (publish + origin/router-repoint + tested rollback + version manifest) = 0.7.0_AE_CloudOps (CloudOps lane).
+- NO producer/data changes -- data is Andrew-confirmed-correct + triple-verified. ETFs = FUTURE schema expansion, not now.
+- Cutover MECHANISM = **Option A** (origin-repoint, CTO-ruled over Option-2-in-place; AE's durability finding: legacy `build_aggregate_aua_timeseries.py` clobbers portal-v2 nightly). Mechanics = 0.7.0_AE_CloudOps. Rollback = router-revert (instant, legacy untouched).
+- Render-check runs off the ACTUAL Option-A serving-target (opal-data-assets via the scoped CF behavior), not a local copy -- exercise the real serve path.
 
 ## Compiler-tools mandate
-- `comp-routes trace` the AUM-Daily / model-portfolio endpoints (the ACTUAL FE-read path). `comp-transform schema-check` on every touched component. `comp-cache collisions` for any new query keys.
+- `comp-routes trace` the AUM-Daily / model-portfolio endpoints (the ACTUAL FE-read path) to confirm the 7 URLs. `comp-transform schema-check` on the touched components (confirm no field regression). `comp-cache collisions` if any query key changes (it should not -- zero FE change).
 
 ## Gate / cutover (S5 push STAYS HELD until all clear)
-- FE aligned + `/frontend-dev` render-check: AUM-Daily + account-dist + non-model render FULL-DEPTH clean off the revamp artifacts, BEFORE live.
-- CTO independent S3 re-verify of DS's count-wired artifacts (@82c4d1ec6) at the final gate.
-- AE mechanism-A rollback (router revert-to-legacy, legacy opal-data-portal-v2 UNTOUCHED) TESTED-armed BEFORE publish (COO cond 1).
-- COO re-co-sign against the aligned FE + render-check + mechanism A (@bfadb4f39 re-opened).
-- **Mechanism A** = origin-repoint (publisher -> opal-data-assets/portal/*, repoint the router origin to opal-data-assets; rollback = repoint back, legacy untouched + shadow).
+- **Render-check clean** off the revamp artifacts (this TO) -- a named pre_push_condition in the streak-tracker.
+- Coherent-7-key stage (DS/~A, option-a frontier) + the 3-pass covering all 7 incl the coherence assertion (CTO+DT+CVO).
+- AE mechanism-A rollback (router revert-to-legacy, legacy UNTOUCHED shadow) TESTED-armed BEFORE publish (COO cond 1).
+- COO re-co-sign pinned to the FINAL coherent-set ETags, coverage = all 7 served keys.
+- Verify-before-first-serve on the first scheduled cycle (CVO gate).
 
-Report to CTO (CC MSTR); build in tandem with 0.7.0_AE_CloudOps.
+Report to CTO (CC MSTR); build the render-check in tandem with 0.7.0_AE_CloudOps the moment the serving-target is set.
