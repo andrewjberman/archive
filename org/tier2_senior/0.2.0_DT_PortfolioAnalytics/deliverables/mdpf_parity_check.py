@@ -8,11 +8,25 @@ by 2026-04-09), (2) full-envelope custody +$20.3M, (3) complete 49F model +$4.1M
 (enumeration gap). A value delta is EXPECTED iff it matches the DS-supplied NAMED-DELTA
 LEDGER; anything else is UNEXPLAINED.
 
-THE (a)-(d) BAR (CTO): (a) shape parity incl. history arrays; (b) each value delta
-MATCHES a ledger entry (magnitude+sign+date-window); (c) NO OTHER unexplained delta;
-(d) clean cross-sections tie + date-drift converges same-cycle. Tight 0.1% tol so any
+DATE-JOIN (CTO 135429Z MUST-FIX, 2026-07-21): the served (legacy rederived-business-day)
+axis and the published (serve-real real-NYSE-trading-day) axis are DIFFERENT date SETS
+(49F: 408 common / 21 served-only synthetic holiday-fills / 20 published-only real trading
+days = 19 legacy gaps + 1 fresh frontier tail; the axis GROWS one entry per trading day --
+DYNAMIC, never frozen). The comparison therefore JOINS BY DATE KEY, never by positional
+index: date-parallel arrays (len == len(axis)) are keyed `path@YYYY-MM-DD` so the served
+and published leaf sets intersect on the COMMON dates only. EVERY non-common date is
+SURFACED as an explicit structural delta (NAMED via the ledger `_date_axis` entry, else
+UNEXPLAINED) -- NEVER silent-skipped (the set-intersection would otherwise drop it, the
+same hide path closed for null-mismatch at 5b097cbf3, one axis up). The LATEST cross-section
+tie is evaluated at the LAST COMMON date, never positional [-1] (comparing served[-1] to
+published[-1] would compare e.g. 07-18-fill vs 07-20-frontier -- the same wrong-axis error).
+
+THE (a)-(d) BAR (CTO): (a) shape parity incl. history arrays + the full date-axis symmetric
+diff explained; (b) each value delta MATCHES a ledger entry (magnitude+sign+date-window) and
+each non-common date MATCHES the _date_axis entry; (c) NO OTHER unexplained delta; (d) clean
+cross-sections tie at last-common + date-drift converges same-cycle. Tight 0.1% tol so any
 UNEXPECTED delta surfaces. Verdict: SHAPE_FAIL > UNEXPLAINED_DELTA > NAMED_DELTA_PASS > PASS.
-NO ledger -> every value delta UNEXPLAINED (fail-safe).
+NO ledger -> every value delta AND every non-common date UNEXPLAINED (fail-safe).
 
 LEDGER FORMAT (DS, keyed "<artifact>/<firm>" -> {entry_name: spec}); each spec:
   field_paths: [pattern, ...]     (glob '*'; a "(latest)" suffix or scope:"latest_cross_section"
@@ -21,10 +35,20 @@ LEDGER FORMAT (DS, keyed "<artifact>/<firm>" -> {entry_name: spec}); each spec:
   abs: N, tol_pct: T              absolute delta +/- tol
   sign: "+"/"-"/"any"             (checked for abs entries; pct_range band is already signed)
   date_before / date_after        ISO date; BOTH => a window [date_after, date_before)
-Entries whose name starts with "_" (e.g. _meta/_note) are ignored.
+  null_ok: true                   a None-vs-populated mismatch on this field is NAMED (placeholder)
+Entries whose name starts with "_" (e.g. _meta/_note) are ignored by the value classifier.
+A special ledger entry NAMES the expected date-axis symmetric diff (structural, not a value):
+  "_date_axis": {served_only: [ISO...], published_only: [ISO...], note: "..."}
+    served_only    dates on the served/legacy axis only (e.g. synthetic holiday-fills) -> EXPECTED
+    published_only dates on the published/serve-real axis only (real trading-day gaps + fresh
+                   frontier tail) -> EXPECTED
+  Any actual non-common date NOT listed is UNEXPLAINED. n_dates and other axis-length-derived
+  scalars differ by construction when the axes differ -- name them as expected value deltas.
 
 NOTES: account_distribution keys by_model on DISPLAY NAME; aggregate on MODEL_KEY --
 each compared to its OWN served, never cross-normalized. Spec extras (basis/meta) allowed.
+account_distribution is a SNAPSHOT (no date axis) -> positional compare, latest everywhere.
+aggregate_aua_timeseries axis = 'dates'; aum_timeseries axis = 'periods'.
 """
 from __future__ import annotations
 
@@ -34,6 +58,7 @@ import fnmatch
 import json
 import re
 import sys
+from collections import Counter
 
 import boto3
 from botocore.exceptions import ClientError
@@ -42,6 +67,7 @@ SERVED_BUCKET = "opal-data-portal-v2"
 PUBLISHED_BUCKET = "opal-data-assets"
 REL_TOL = 0.001
 ALLOWED_EXTRAS = {"basis", "meta", "source_vintage_last"}
+_DATE_RE = re.compile(r"@\d{4}-\d{2}-\d{2}")
 
 ARTIFACTS = {
     ("aggregate_aua_timeseries", "global"): {
@@ -106,31 +132,54 @@ def _shape_diff(served, published):
     return missing, extra
 
 
-def _leaves(obj, path="", idx=None):
-    """All numeric AND None leaves -> {path: (value|None, last_array_index)}; arrays
-    as path[i]. None is recorded (not skipped) so a None-vs-populated NULL MISMATCH
-    is DETECTED, never silently dropped (e.g. a co-sign-gated placeholder array)."""
+def _axis(obj):
+    """The timeseries date axis (a list of date strings) the arrays align to, or None
+    for a SNAPSHOT. Prefers 'dates' (mdpf aggregate family), falls back to 'periods'
+    (portfolios aum-timeseries). Detecting the axis is what lets date-parallel arrays
+    JOIN BY DATE instead of by positional index."""
+    if not isinstance(obj, dict):
+        return None
+    for key in ("dates", "periods"):
+        v = obj.get(key)
+        if isinstance(v, list) and v and all(isinstance(x, str) for x in v):
+            return v
+    return None
+
+
+def _leaves(obj, path="", date=None, axis=None):
+    """All numeric AND None leaves -> {path: (value|None, date|None)}. An array whose
+    length == len(axis) is DATE-PARALLEL: its elements are keyed by the AXIS DATE
+    (path@YYYY-MM-DD) and carry that date, so the served/published leaf sets JOIN BY
+    DATE KEY -- never by positional index. All other arrays stay positional (path[i])
+    and carry no date. None is recorded (not skipped) so a None-vs-populated NULL
+    MISMATCH is DETECTED, never silently dropped."""
     out = {}
     if isinstance(obj, dict):
         for k, v in obj.items():
-            out.update(_leaves(v, f"{path}.{k}" if path else k, idx))
+            out.update(_leaves(v, f"{path}.{k}" if path else k, date, axis))
     elif isinstance(obj, list) and obj:
+        date_parallel = axis is not None and len(obj) == len(axis)
         for i, el in enumerate(obj):
-            out.update(_leaves(el, f"{path}[{i}]", i))
+            if date_parallel:
+                out.update(_leaves(el, f"{path}@{axis[i]}", axis[i], axis))
+            else:
+                out.update(_leaves(el, f"{path}[{i}]", date, axis))
     elif isinstance(obj, (int, float)) and not isinstance(obj, bool):
-        out[path] = (float(obj), idx)
+        out[path] = (float(obj), date)
     elif obj is None:
-        out[path] = (None, idx)
+        out[path] = (None, date)
     return out
 
 
 def _fieldbase(leafpath):
-    return re.sub(r"\[\d+\]", "", leafpath)
+    """Strip positional [i] AND the date suffix @YYYY-MM-DD so a ledger field_path
+    matches the clean field name regardless of index/date keying."""
+    return _DATE_RE.sub("", re.sub(r"\[\d+\]", "", leafpath))
 
 
 def _all_specs(entries):
     """Yield (name, spec) over the ledger; a value may be a single spec dict OR a
-    LIST of specs (e.g. history_windows[]). Skips _meta/_note markers."""
+    LIST of specs (e.g. history_windows[]). Skips _meta/_note/_date_axis markers."""
     for name, val in entries.items():
         if name.startswith("_"):
             continue
@@ -219,18 +268,73 @@ def _ledger_null_match(leafpath, idx_date, is_latest, entries):
     return None
 
 
+def _axis_deltas(saxis, paxis, date_axis_spec):
+    """Symmetric diff of the two date axes -> named vs unexplained STRUCTURAL deltas.
+    A served-only / published-only date is EXPECTED iff listed in the ledger's
+    _date_axis {served_only:[], published_only:[]} entry; otherwise UNEXPLAINED
+    (fail-safe -- NEVER silently dropped). Also flags duplicate axis dates (a real
+    anomaly a positional/date overwrite would otherwise hide)."""
+    named_so = set(date_axis_spec.get("served_only", []))
+    named_po = set(date_axis_spec.get("published_only", []))
+    sset, pset = set(saxis), set(paxis)
+    served_only = sorted(sset - pset)
+    published_only = sorted(pset - sset)
+    sc, pc = Counter(saxis), Counter(paxis)
+    dupes = sorted({d for d, c in sc.items() if c > 1} | {d for d, c in pc.items() if c > 1})
+    return {
+        "common": sorted(sset & pset),
+        "served_only_named": [d for d in served_only if d in named_so],
+        "served_only_unexplained": [d for d in served_only if d not in named_so],
+        "published_only_named": [d for d in published_only if d in named_po],
+        "published_only_unexplained": [d for d in published_only if d not in named_po],
+        "dupes": dupes,
+    }
+
+
 def compare(served, published, entries=None):
     entries = entries or {}
     missing, extra = _shape_diff(served, published)
-    dates = served.get("dates") if isinstance(served, dict) else None
-    ndates = len(dates) if dates else None
-    ls, lp = _leaves(served), _leaves(published)
+    saxis, paxis = _axis(served), _axis(published)
+    ls = _leaves(served, axis=saxis)
+    lp = _leaves(published, axis=paxis)
     expected, unexplained = [], []
+    axis = None
+
+    # --- DATE AXIS: surface EVERY non-common date (NEVER silent-skip) ---
+    if bool(saxis) != bool(paxis):
+        # one side is a timeseries and the other is not -- a gross structural mismatch, LOUD.
+        unexplained.append(("_axis_presence_mismatch",
+                            "timeseries" if saxis else "snapshot",
+                            "timeseries" if paxis else "snapshot", None))
+        ls, lp = _leaves(served), _leaves(published)   # fall back to positional so we still compare
+    elif saxis and paxis:
+        ax = _axis_deltas(saxis, paxis, entries.get("_date_axis", {}))
+        axis = {"common": len(ax["common"]),
+                "last_common": ax["common"][-1] if ax["common"] else None,
+                "served_only_named": ax["served_only_named"],
+                "served_only_unexplained": ax["served_only_unexplained"],
+                "published_only_named": ax["published_only_named"],
+                "published_only_unexplained": ax["published_only_unexplained"],
+                "dupes": ax["dupes"]}
+        for d in ax["served_only_named"]:
+            expected.append((f"axis@{d}", "served-only", "absent", "named served-only (_date_axis)"))
+        for d in ax["published_only_named"]:
+            expected.append((f"axis@{d}", "absent", "published-only", "named published-only (_date_axis)"))
+        for d in ax["served_only_unexplained"]:
+            unexplained.append((f"axis@{d}", "served-only", "absent", None))
+        for d in ax["published_only_unexplained"]:
+            unexplained.append((f"axis@{d}", "absent", "published-only", None))
+        for d in ax["dupes"]:
+            unexplained.append((f"axis@{d} DUPLICATE", "dup", "dup", None))
+
+    last_common = axis["last_common"] if axis else None
+
+    # --- VALUE comparison over the common (date-aligned) leaves ---
     for k in sorted(set(ls) & set(lp)):
-        sv, idxs = ls[k]
+        sv, sdt = ls[k]
         pv, _ = lp[k]
-        idx_date = dates[idxs] if (dates and idxs is not None and 0 <= idxs < ndates) else None
-        is_latest = (idxs is None) or (dates is None) or (idxs == ndates - 1)
+        idx_date = sdt
+        is_latest = (idx_date is None) or (idx_date == last_common)
         if sv is None and pv is None:
             continue
         if isinstance(sv, float) and isinstance(pv, float):
@@ -241,7 +345,7 @@ def compare(served, published, entries=None):
             note = _ledger_null_match(k, idx_date, is_latest, entries)
         (expected if note else unexplained).append((k, sv, pv, note))
     return {"missing": missing, "extra": extra, "expected": expected, "unexplained": unexplained,
-            "shape_ok": not (missing or extra)}
+            "shape_ok": not (missing or extra), "axis": axis}
 
 
 def check_pair(name, firm, spec, ledger):
@@ -278,9 +382,9 @@ def self_test():
     mut = copy.deepcopy(served)
     mut["total"]["account_count"] += 100
     ok &= bool(compare(served, mut)["unexplained"])
-    # DS-format ledger over a synthetic timeseries: history-window + latest-abs entries
+    # DS-format ledger over a synthetic timeseries (len 2 == dates -> DATE-PARALLEL, keyed @date)
     ts_s = {"dates": ["2025-06-01", "2026-06-01"], "model_aua": [100.0, 200.0], "x": [50.0, 60.0]}
-    ts_p = {"dates": ["2025-06-01", "2026-06-01"], "model_aua": [120.0, 204.1], "x": [50.0, 90.0]}  # [0]:+20% pre-26 hist; [1]:+4.1 latest
+    ts_p = {"dates": ["2025-06-01", "2026-06-01"], "model_aua": [120.0, 204.1], "x": [50.0, 90.0]}  # [@25]:+20% hist; [@26]:+4.1 latest
     led = {
         "history_windows": [  # DS's LIST format -- per-quarter windows
             {"field_paths": ["model_aua"], "sign": "+", "pct_range": [10, 40], "date_after": "2025-01-01", "date_before": "2026-01-01", "note": "Q window"},
@@ -288,27 +392,54 @@ def self_test():
         "latest_abs": {"field_paths": ["model_aua(latest)"], "sign": "+", "abs": 4.1, "tol_pct": 5, "note": "latest abs"},
     }
     r = compare(ts_s, ts_p, led)
-    exp_win = any(k == "model_aua[0]" for k, *_ in r["expected"])        # +20% in-window (LIST) -> EXPECTED
-    exp_latest = any(k == "model_aua[1]" for k, *_ in r["expected"])     # +4.1 latest -> latest-scoped abs entry
-    unexp = any(k == "x[1]" for k, *_ in r["unexplained"])               # +50% unrelated -> UNEXPLAINED
+    exp_win = any(k == "model_aua@2025-06-01" for k, *_ in r["expected"])     # +20% in-window (LIST) -> EXPECTED
+    exp_latest = any(k == "model_aua@2026-06-01" for k, *_ in r["expected"])  # +4.1 latest -> latest-scoped abs entry
+    unexp = any(k == "x@2026-06-01" for k, *_ in r["unexplained"])            # +50% unrelated -> UNEXPLAINED
     # authoritative-latest: a latest delta OUT of the tight latest band must NOT be masked by a broader all-date band
     tsa_s = {"dates": ["2026-05-01", "2026-06-01"], "model_aua": [100.0, 100.0]}
     tsa_p = {"dates": ["2026-05-01", "2026-06-01"], "model_aua": [100.0, 101.5]}  # latest +1.5%
     leda = {"latest_tie": {"field_paths": ["model_aua(latest)"], "scope": "latest_cross_section", "pct_range": [-0.5, 0.5], "note": "tie"},
             "post_conv": {"field_paths": ["model_aua"], "pct_range": [-1.43, 2.08], "date_after": "2026-04-09", "note": "postconv"}}
-    auth = any(k == "model_aua[1]" for k, *_ in compare(tsa_s, tsa_p, leda)["unexplained"])
+    auth = any(k == "model_aua@2026-06-01" for k, *_ in compare(tsa_s, tsa_p, leda)["unexplained"])
     # null-placeholder: a None-vs-populated mismatch is DETECTED; NAMED iff a null_ok entry names it, else UNEXPLAINED
     tsn_s = {"dates": ["2025-06-01"], "by_model": {"UST": {"account_count": [180.0], "model_value": [100.0]}}}
     tsn_p = {"dates": ["2025-06-01"], "by_model": {"UST": {"account_count": [None], "model_value": [100.0]}}}
     lednull = {"count_ph": {"field_paths": ["by_model.*.account_count"], "null_ok": True, "note": "placeholder"}}
-    null_named = any(k.endswith("account_count[0]") for k, *_ in compare(tsn_s, tsn_p, lednull)["expected"])
-    null_unexp = any(k.endswith("account_count[0]") for k, *_ in compare(tsn_s, tsn_p, {})["unexplained"])
-    ok &= exp_win and exp_latest and unexp and auth and null_named and null_unexp
+    null_named = any(k.endswith("account_count@2025-06-01") for k, *_ in compare(tsn_s, tsn_p, lednull)["expected"])
+    null_unexp = any(k.endswith("account_count@2025-06-01") for k, *_ in compare(tsn_s, tsn_p, {})["unexplained"])
+
+    # ================= DATE-JOIN proof (CTO 135429Z MUST-FIX) =================
+    # served has B (2025-02-01) published lacks; published has T (2026-07-20) served lacks.
+    # An INDEX-join would compare served model_aua[1]=20 (2025-02-01) vs published [1]=30 (2026-06-02)
+    # -> a spurious value "mismatch", AND silently drop served[2]=30. Date-join must instead TIE the
+    # two COMMON dates and SURFACE the two frontier dates.
+    dj_s = {"dates": ["2025-01-02", "2025-02-01", "2026-06-02"], "model_aua": [10.0, 20.0, 30.0]}
+    dj_p = {"dates": ["2025-01-02", "2026-06-02", "2026-07-20"], "model_aua": [10.0, 30.0, 44.0]}
+    dj_led = {"_date_axis": {"served_only": ["2025-02-01"], "published_only": ["2026-07-20"]}}
+    dj = compare(dj_s, dj_p, dj_led)
+    dj_no_spurious = not any(str(k).startswith("model_aua@") for k, *_ in dj["unexplained"])   # (a) common ties, no wrong-date mismatch
+    dj_axis_named = (dj["axis"]["served_only_named"] == ["2025-02-01"]
+                     and dj["axis"]["published_only_named"] == ["2026-07-20"])                  # (b) non-common SURFACED as NAMED
+    dj_last_common = dj["axis"]["last_common"] == "2026-06-02"                                  # (c) last-common != published [-1]=2026-07-20
+    # fail-safe: WITHOUT the _date_axis ledger the same non-common dates are UNEXPLAINED (reported, NOT dropped)
+    dj_bare = compare(dj_s, dj_p, {})
+    dj_reports_unnamed = (any(k == "axis@2025-02-01" for k, *_ in dj_bare["unexplained"])
+                          and any(k == "axis@2026-07-20" for k, *_ in dj_bare["unexplained"]))
+    # a REAL delta at a COMMON date is CAUGHT at the RIGHT date (99 vs 30 at 2026-06-02)
+    dj_p2 = {"dates": ["2025-01-02", "2026-06-02", "2026-07-20"], "model_aua": [10.0, 99.0, 44.0]}
+    dj2 = compare(dj_s, dj_p2, dj_led)
+    dj_common_delta_caught = any(k == "model_aua@2026-06-02" for k, *_ in dj2["unexplained"])
+
+    ok &= (exp_win and exp_latest and unexp and auth and null_named and null_unexp
+           and dj_no_spurious and dj_axis_named and dj_last_common
+           and dj_reports_unnamed and dj_common_delta_caught)
     print(f"SELF-TEST snapshot identity+mutant: {ident['shape_ok'] and not ident['unexplained']} / {bool(compare(served, mut)['unexplained'])}")
-    print(f"SELF-TEST DS-ledger: history_windows-LIST(model_aua[0])={exp_win}; latest-scope(model_aua[1])={exp_latest}; UNEXPLAINED(x[1])={unexp}")
+    print(f"SELF-TEST DS-ledger: history_windows-LIST(model_aua@2025)={exp_win}; latest-scope(model_aua@2026)={exp_latest}; UNEXPLAINED(x@2026)={unexp}")
     print(f"SELF-TEST authoritative-latest: +1.5% latest out-of-tie NOT masked by post_conv -> UNEXPLAINED={auth}")
     print(f"SELF-TEST null-placeholder: null_ok->NAMED={null_named}; no-entry->UNEXPLAINED(NOT silently skipped)={null_unexp}")
-    print(f"SELF-TEST {'PASS' if ok else 'FAIL'} -- consumes DS named-entry format + classifies EXPECTED vs UNEXPLAINED")
+    print(f"SELF-TEST DATE-JOIN: common-ties/no-spurious-index-mismatch={dj_no_spurious}; non-common NAMED-surfaced={dj_axis_named}; last_common@2026-06-02(not [-1])={dj_last_common}")
+    print(f"SELF-TEST DATE-JOIN fail-safe: unnamed non-common -> UNEXPLAINED(reported,not dropped)={dj_reports_unnamed}; real common-date delta CAUGHT at right date={dj_common_delta_caught}")
+    print(f"SELF-TEST {'PASS' if ok else 'FAIL'} -- date-joins by date key, surfaces every non-common date, ties at last-common")
     return ok
 
 
@@ -323,6 +454,18 @@ def _report(r):
         print(f"{head} -- {r['note']}")
         return
     print(head)
+    ax = r.get("axis")
+    if ax:
+        print(f"    (axis) {ax['common']} common | last_common={ax['last_common']} | "
+              f"served-only {len(ax['served_only_named'])} named"
+              + (f" + {len(ax['served_only_unexplained'])} UNEXPLAINED" if ax['served_only_unexplained'] else "")
+              + f" | published-only {len(ax['published_only_named'])} named"
+              + (f" + {len(ax['published_only_unexplained'])} UNEXPLAINED" if ax['published_only_unexplained'] else "")
+              + (f" | DUPLICATES {ax['dupes']}" if ax['dupes'] else ""))
+        if ax["served_only_unexplained"]:
+            print(f"        served-only UNEXPLAINED: {ax['served_only_unexplained'][:8]}")
+        if ax["published_only_unexplained"]:
+            print(f"        published-only UNEXPLAINED: {ax['published_only_unexplained'][:8]}")
     if r["missing"]:
         print(f"    (a) SHAPE MISSING: {r['missing'][:6]}{' ...+%d' % (len(r['missing'])-6) if len(r['missing'])>6 else ''}")
     if r["extra"]:
