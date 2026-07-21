@@ -7,7 +7,18 @@
      0.6.2_AE_PartnerETL = Cottonwood REST-pattern reference/consult (the pattern being cloned). Bronze data lands
      in the BD tree (bd<->cot separation stands). -->
 <date>2026-07-17</date>
-<status>pending</status>
+<status>complete</status>
+<completion date="2026-07-17" reconciled="2026-07-21" reconciled_by="0.2.0_DT_PortfolioAnalytics">
+WS-1 LIVE + ledger-CLOSED @96348bb35. Producer opal-assets-bd49f-reporting-pull deployed @opal-assets-v0.27.0
+(DRY_RUN=0, standing egress, manual-invoke-only). First Chiles bronze landed + ListObjectsV2 byte-verified
+(reporting_performance 5,280,465B + reporting_costbasis + reporting_allocation) at
+s3://opal-data-assets/blackdiamond/49f/bronze/reporting_{feed}/2026-07-17/. ARTIFACT RE-VERIFIED PERSISTENT
+2026-07-21 (the 3 reporting_* prefixes present, live S3). 22a applied+exercised (5 separate one-resource
+simulate; cross-firm cot/bd PutObject implicitDeny/explicitDeny fence). CTO GO-LIVE CONFIRMED. AC1 (Andrew
+egress word granted 214906Z) / AC2 (raw-17a bronze landing, reused 49F .bd.identity session) / AC3 (bronze
+shape -> WS-2) / AC4 (session log 12474ad44, mandate runs reproduced) all met. Status was stale-pending -- the
+self-mark was missed at the 07-17 close; reconciled this crash-recovery session. WS-2/3/4 remain their own TOs.
+</completion>
 <priority>P2 (Andrew-direct via CTO 205620Z; OPAL_TAXSMA_PT2 @a80840fb1). Head of the WS-1→2→3 chain. **HARD GATE: Andrew's vendor-egress per-use word (below) before the first LIVE reporting call.**</priority>
 
 <authority>
