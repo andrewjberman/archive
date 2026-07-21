@@ -17,26 +17,33 @@ BUG." This enumerates and characterizes every date, against the ONE canonical NY
   (`fact_model_aum_daily`, opal-data-assets smartx silver), via the artifact's own `load_aum_daily`.
 - **Classifier:** `lib.trading_calendar.is_trading_day` (NYSE; the estate's single frontier definition).
 
-## Result (grounded 2026-07-21T14:27Z)
+## Result (grounded 2026-07-21; REFINED to the EXPLICIT canonical calendar axis)
 | set | n | span |
 |---|---|---|
 | SERVED (legacy) | 429 | 2024-11-01 .. 2026-07-18 |
-| MINE (serve-real) | 428 | 2024-11-01 .. 2026-07-20 |
-| COMMON | 408 | -- |
-| SERVED-ONLY | 21 | all NON-trading |
+| MINE (serve-real, canonical NYSE axis) | 427 | 2024-11-01 .. 2026-07-20 |
+| COMMON | 407 | -- |
+| SERVED-ONLY | 22 | all NON-trading |
 | PUBLISHED-ONLY | 20 | all real trading days |
 
-**Reconciles to CTO's 427/19 exactly:** the axis advanced ONE real trading day (2026-07-20)
-since CTO's 427-era count -> 427->428 mine, 19->20 published-only. The extra one IS the fresh
-frontier tail. CTO's "19 published-only" == my 19 in-range legacy gaps.
+**PARITY-NEUTRAL GUARD REFINEMENT (2026-07-21, CTO calendar-wiring):** wiring the axis to the
+EXPLICIT canonical NYSE calendar (`_trading_day_calendar`, byte-identical to `lib/trading_calendar`)
+caught that **`fact_model_aum_daily` carries a datapoint for 2025-01-09** -- the Carter National Day
+of Mourning, when the **NYSE was CLOSED**. The canonical calendar correctly drops it, so the axis is
+**428 -> 427** and **2025-01-09 moves from common to SERVED-ONLY** (a holiday-fill like the other 21).
+Refined diff: **407 common / 22 served-only / 20 published-only**, identical across all 3 firms
+(shared axis). CTO's original 427/19 reconciles: the +1 published (07-20 fresh tail) and the -1 common
+(01-09 dropped) net to 427 with 20 published-only. This is the guard doing exactly its job -- an
+implicit-partition axis silently included a non-trading day; the explicit calendar excludes it.
 
-### SERVED-ONLY (21) -- legacy has, serve-real omits -> ALL synthetic holiday-fills
+### SERVED-ONLY (22) -- legacy has, serve-real omits -> ALL synthetic holiday-fills
 Every one is a NYSE non-trading day (weekend or holiday). The legacy rederived-business-day axis
 filled these forward; serve-real correctly omits them (no real trading occurred). **0 real trading
-days were dropped from serve-real.** Dates: 2024-11-28, 2024-12-25, 2025-01-01, 2025-01-20,
+days were dropped from serve-real.** Dates: 2024-11-28, 2024-12-25, 2025-01-01, **2025-01-09
+(Carter National Day of Mourning, NYSE closed -- caught by the parity-neutral guard)**, 2025-01-20,
 2025-02-17, 2025-04-18, 2025-05-26, 2025-06-19, 2025-07-04, 2025-09-01, 2025-11-27, 2026-01-19,
 2026-02-16, 2026-04-03, 2026-05-25, 2026-06-13(Sat), 2026-06-14(Sun), 2026-06-19, 2026-06-20(Sat),
-2026-06-21(Sun), 2026-07-18(Sat). (CTO pre-accepted these as "clear -- holiday-fills"; confirmed.)
+2026-06-21(Sun), 2026-07-18(Sat). (CTO pre-accepted 21 as holiday-fills; 01-09 added by the guard.)
 
 ### PUBLISHED-ONLY (20) -- serve-real has, legacy omits -> ALL real trading days w/ real data
 Every one is (a) a real NYSE trading day AND (b) carries real measured `aum_daily` data (7-8 model
