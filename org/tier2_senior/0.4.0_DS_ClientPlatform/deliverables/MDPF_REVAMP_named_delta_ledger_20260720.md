@@ -22,15 +22,42 @@ All magnitudes grounded live 2026-07-20 (opal-data-assets silver + served opal-d
   legacy backfill understated 2024-25). **Reason:** real-vs-interpolated.
 - **UST later-start:** measured UST starts 2025-01-16; zero-pad 2024-11-01..2025-01-15 (D4, shape parity).
 
-## D-2 -- 49F CUSTODY: full-envelope vs partial-cash
-- **Field:** `aggregate_aua_timeseries` 49F `partner_custody_total[]` (+ the non_model residual off it).
-- **Corrected source:** `fact_rps_s2.net_mv_plus_cash` (the full account custody envelope).
-- **Corrected latest:** **$1,665,338,126.76**. **Legacy served:** $1,644,993,954.34 (coverage=incomplete,
-  ~40% of the $33.76M cash leg). **Delta: +$20,344,172.42 / +1.24%.** **Reason:** full-vs-partial-cash
-  (the revamp includes the full cash leg). Positions-only cross-check: fact_rps assets-only $1,631.66M /
-  fact_rps_s2 net_mv_positions $1,631.58M (the legacy sits between positions-only and full-envelope).
-- **Custody HISTORY:** rps/rps_s2 snapshots where they exist (real back-depth TBD -- enumerating) +
-  NAME any pre-coverage gap; NO interpolation (D1).
+## D-2 -- 49F CUSTODY: full-envelope real-daily vs rederived-estimate  [BUILT 2026-07-21 @6eb54c186]
+- **Field:** `aggregate_aua_timeseries` 49F `partner_custody_total[]` + `non_model_aua[]` (the residual off it).
+- **Corrected source:** `fact_rps_s2.net_mv_plus_cash` (the full account custody envelope), REAL daily snapshots.
+- **Corrected latest:** **$1,665,338,126.76**. **Legacy served (07-17 common):** $1,644,993,954.34. **Delta
+  +$20,344,172.42 / +1.24%** = full-vs-partial-cash at the live tail (legacy ~40% of the $33.76M cash leg).
+- **Custody HISTORY -- GROUNDED (Rule 22), NOT a flat +1.24%:** the legacy served custody[] is the v0.9
+  schwab_canonical **REDERIVED estimate** (per the served meta.backfill_methods: `.031` 2024depth pre-2026-01-16
+  + `.029` rps_calibrated 2026-01-16..05-17 + real daily-forward 2026-05-18+). So D-2 is the SAME FAMILY as D-1
+  (real-vs-rederived): the per-date delta is **date-VARYING**. Date-joined per-quarter (partner_custody_total,
+  obs range +/-0.4 buffer -> ledger.json `custody_history_windows`): 2024Q4 [+2.46,+6.67] . 2025Q1 [+2.25,+6.58] .
+  2025Q2 [+2.27,+4.32] . 2025Q3 [+1.62,+2.79] . 2025Q4 [+1.85,+6.27] . 2026Q1 [-0.58,+1.64] . 2026Q2pre
+  [-1.47,-0.37] . live2605 [-3.23,+2.03]. **Coverage: 427/427 axis dates have an rps_s2 partition, ZERO gaps,
+  NO interpolation (D1).**
+- **non_model_aua[]:** the derived residual (`non_model[i] = custody[i] - model_aua[i]`); windows are WIDE
+  ([-38%,+21%]) BY CONSTRUCTION (carries both D-1 model + D-2 custody corrections). Rigor = the internal identity
+  `non_model==custody-model` (0 mismatches, enforced in-build) + the tighter custody + model windows -- not the
+  wide non_model band alone.
+
+## D-2b -- AXIS CALENDAR: DATE-JOIN REQUIRED (harness finding 2026-07-21)  [STRUCTURAL, named]
+- The **published axis = real aum_daily trading days (427)**; the **served axis = the rederived business-day
+  calendar (429) that FILLS market holidays**. Symmetric diff: **21 served-only** (Thanksgiving/Christmas/MLK/
+  Juneteenth/Good Friday/... + the 07-18 frontier) + **19 published-only** (real trading days the rederive
+  omitted); **408 common**.
+- **=> DT's parity harness MUST DATE-JOIN, not index-join.** Index-join compares MISMATCHED dates from i=19
+  onward (pub 2024-11-29 vs serv 2024-11-28). All windows above are DATE-JOINED on the 408 common dates; the
+  symmetric-diff dates are the named structural delta (real-trading-days vs rederived-filled-business-days).
+  Flagged to DT + CTO; ledger.json carries `_meta.harness_requirement` + `._calendar_note`.
+
+## D-2c -- account_count[] PRESERVE PLACEHOLDER (co-sign-gated, NAMED)  [CTO 131345Z + DT 132025Z]
+- 49F/global `by_model.*.account_count[]` = None history + latest (placeholder) while served is 429/429
+  populated. NAMED via ledger.json `account_count_placeholder` **null_ok=true** (DT's consumer now DETECTS the
+  null mismatch @5b097cbf3 -> classified NAMED, not UNEXPLAINED/SHAPE_FAIL). Disposition: import served-real
+  count arrays as historical seed + roster-daily forward; ties EXACTLY (imported==served) at CUTOVER, when the
+  null_ok entry is REMOVED and the count held to an exact tie. Serve-real-CONSISTENT (real data the monolith
+  didn't itself capture). SEAM-CONTINUITY check at wire-time (roster-daily vs legacy boundary). cohort_provenance[]
+  = None (revamp uniformly real-measured; legacy 82-date estimate labels retired) -- co-sign item, not FE-consumed.
 
 ## D-3 -- 49F model-AUA LATEST: RESOLVED = NOT A REAL DELTA (monolith ties served, +$0)
 - **GROUNDED 2026-07-20 (FLAG-1, CTO priority):** roster `Sigma value` (open) and aum_daily
