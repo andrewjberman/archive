@@ -418,6 +418,54 @@ def check_pair(name, firm, spec, ledger, published_prefix=None):
     return r
 
 
+def _coherence_mismatches(agg, ad):
+    """Pure frontier-coherence comparator (S3-free, unit-testable). CTO 190518Z (a): the revamp aggregate's
+    FRONTIER per-model account_count must equal account_dist's OWN funded count. Returns
+    [(model_key, aggregate_frontier, account_dist_count)] for every funded model that does NOT cohere.
+    Keyed by STABLE model_key from account_dist.meta.account_count_by_model_key (kills the 49F/global
+    display-key trap); SMAs carry no funded count -> absent from the meta-map -> auto-skipped. FRONTIER-ONLY
+    (only [-1]); middle published-only gaps are honest-None BY DESIGN and NOT checked. A None meta count is
+    skipped; a None frontier vs a real count is a (frozen-None) mismatch -- account_dist HAS the count today."""
+    acbmk = (ad.get("meta") or {}).get("account_count_by_model_key") or {}
+    by_model = agg.get("by_model") or {}
+    out = []
+    for mkey, count_ad in acbmk.items():
+        if count_ad is None:
+            continue
+        series = (by_model.get(mkey) or {}).get("account_count")
+        frontier = series[-1] if isinstance(series, list) and series else None
+        if frontier != count_ad:
+            out.append((mkey, frontier, count_ad))
+    return out
+
+
+def check_frontier_coherence(firm, published_prefix=None):
+    """INDEPENDENT verification (verification-side, separate from DS's producer ASSERTs) that the frontier
+    account_count coherence-by-construction held: loads the STAGED aggregate + account_dist and asserts each
+    funded model's aggregate.account_count[-1] == account_dist.meta.account_count_by_model_key[model_key]."""
+    def _staged(name):
+        key = f"{published_prefix}/{firm}/{name}.json" if published_prefix else ARTIFACTS[(name, firm)]["published"]
+        return _get(PUBLISHED_BUCKET, key), key
+    agg, agg_key = _staged("aggregate_aua_timeseries")
+    ad, ad_key = _staged("account_distribution")
+    if agg is None or ad is None:
+        return {"firm": firm, "verdict": "COHERENCE_ABSENT",
+                "note": f"aggregate={'ok' if agg else 'MISSING'} / account_dist={'ok' if ad else 'MISSING'}"}
+    if not (ad.get("meta") or {}).get("account_count_by_model_key"):
+        return {"firm": firm, "verdict": "COHERENCE_NO_MAP",
+                "note": f"{ad_key} has no meta.account_count_by_model_key (pre-coherence stage -> re-stage account_dist)"}
+    mism = _coherence_mismatches(agg, ad)
+    checked = len([1 for v in (ad["meta"]["account_count_by_model_key"]).values() if v is not None])
+    return {"firm": firm, "verdict": "COHERENCE_PASS" if not mism else "COHERENCE_FAIL",
+            "checked": checked, "mismatches": mism, "agg_key": agg_key, "ad_key": ad_key}
+
+
+def _coherence_firms():
+    aggs = {f for (n, f) in ARTIFACTS if n == "aggregate_aua_timeseries"}
+    ads = {f for (n, f) in ARTIFACTS if n == "account_distribution"}
+    return sorted(aggs & ads)
+
+
 def self_test():
     spec = ARTIFACTS[("account_distribution", "49financial")]
     served = _get(SERVED_BUCKET, spec["served"])
@@ -512,6 +560,20 @@ def self_test():
                                       "pct_range": [20, 40], "note": "post-cutover enterprise"}})
     a4_precut_ties = not any("@2025-06-02" in str(k) for k, *_ in a4_r["unexplained"])         # pre-cutover row ties (10==10)
     a4_post_datejoined = any("@2026-06-02" in str(k) for k, *_ in a4_r["expected"])            # +30% delta DATE-JOINED @2026-06-02, glob-named (not positional/UNEXPLAINED)
+    # ITEM-2 FRONTIER COHERENCE (CTO 190518Z (a)): _coherence_mismatches -- aggregate.by_model[mkey].
+    # account_count[-1] == account_dist.meta.account_count_by_model_key[mkey]; frontier-only; SMAs (absent
+    # from the meta-map) auto-skipped; a value mismatch OR a frozen-None frontier is a mismatch.
+    coh_agg = {"by_model": {"ModelA": {"account_count": [None, 100, 246]},
+                            "ModelB": {"account_count": [None, None, 50]},
+                            "SMA_x":  {"account_count": [None, None, None]}}}
+    coh_map = {"meta": {"account_count_by_model_key": {"ModelA": 246, "ModelB": 50}}}          # SMA_x absent -> skipped
+    coh_clean = _coherence_mismatches(coh_agg, coh_map) == []                                  # coherent -> no mismatch
+    coh_sma_skipped = not any(m[0] == "SMA_x" for m in _coherence_mismatches(coh_agg, coh_map))  # SMA never checked
+    coh_val_caught = ("ModelA", 246, 999) in _coherence_mismatches(
+        coh_agg, {"meta": {"account_count_by_model_key": {"ModelA": 999, "ModelB": 50}}})      # value mismatch caught
+    coh_frozen_caught = any(m[0] == "ModelA" and m[1] is None for m in _coherence_mismatches(
+        {"by_model": {"ModelA": {"account_count": [None, None, None]}}},
+        {"meta": {"account_count_by_model_key": {"ModelA": 246}}}))                            # frozen-None frontier caught
     # BUG-2: a 'model_aua'-scoped entry must NOT intercept a 'non_model_aua' leaf (exact match, not substring)
     nm_s = {"dates": ["2026-06-01"], "non_model_aua": [100.0]}
     nm_p = {"dates": ["2026-06-01"], "non_model_aua": [150.0]}          # +50% non_model delta
@@ -524,7 +586,8 @@ def self_test():
            and dj_reports_unnamed and dj_common_delta_caught
            and meta_shape_ok and real_shape_still_fails
            and prov_value_exempt and basis_data_still_caught
-           and a4_axis_derived and a4_precut_ties and a4_post_datejoined and nm_not_masked)
+           and a4_axis_derived and a4_precut_ties and a4_post_datejoined
+           and coh_clean and coh_sma_skipped and coh_val_caught and coh_frozen_caught and nm_not_masked)
     print(f"SELF-TEST snapshot identity+mutant: {ident['shape_ok'] and not ident['unexplained']} / {bool(compare(served, mut)['unexplained'])}")
     print(f"SELF-TEST DS-ledger: history_windows-LIST(model_aua@2025)={exp_win}; latest-scope(model_aua@2026)={exp_latest}; UNEXPLAINED(x@2026)={unexp}")
     print(f"SELF-TEST authoritative-latest: +1.5% latest out-of-tie NOT masked by post_conv -> UNEXPLAINED={auth}")
@@ -534,6 +597,7 @@ def self_test():
     print(f"SELF-TEST regression BUG-1 (meta/svl subtree exempt from shape): provenance-diff shape-OK={meta_shape_ok}; real data-shape diff still FAILS={real_shape_still_fails}")
     print(f"SELF-TEST regression BUG-1 VALUE (root-only exemption): provenance value diff (age_hours 15->42.2) NOT unexplained={prov_value_exempt}; numeric data leaf named 'basis' STILL caught={basis_data_still_caught}")
     print(f"SELF-TEST A4 non_model_assets CLASS (time_series[].period axis): axis-derived={a4_axis_derived}; pre-cutover ties={a4_precut_ties}; post-cutover delta date-joined+named={a4_post_datejoined}")
+    print(f"SELF-TEST Item-2 frontier coherence: coherent-clean={coh_clean}; SMA auto-skipped={coh_sma_skipped}; value-mismatch caught={coh_val_caught}; frozen-None frontier caught={coh_frozen_caught}")
     print(f"SELF-TEST regression BUG-2 (exact field match, no substring): 'model_aua' entry does NOT mask 'non_model_aua'={nm_not_masked}")
     print(f"SELF-TEST {'PASS' if ok else 'FAIL'} -- date-joins by date key, surfaces every non-common date, ties at last-common")
     return ok
@@ -578,6 +642,19 @@ def _report(r):
         print("    shape identical + all values tie")
 
 
+def _report_coherence(r):
+    v = r["verdict"]
+    if v in ("COHERENCE_ABSENT", "COHERENCE_NO_MAP"):
+        print(f"[{v}] frontier_coherence/{r['firm']} -- {r['note']}")
+        return
+    print(f"[{v}] frontier_coherence/{r['firm']} (funded models:{r['checked']})")
+    for mkey, frontier, count_ad in r.get("mismatches", [])[:12]:
+        fstr = _fmt(float(frontier)) if frontier is not None else "None(frozen)"
+        print(f"    (coh) MISMATCH {mkey}: aggregate.frontier={fstr} != account_dist={_fmt(float(count_ad))}")
+    if v == "COHERENCE_PASS":
+        print("    aggregate frontier account_count == account_dist funded count, every funded model")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--artifact")
@@ -598,6 +675,8 @@ def main():
     if args.all:
         for (name, firm), spec in ARTIFACTS.items():
             _report(check_pair(name, firm, spec, ledger, args.published_prefix))
+        for firm in _coherence_firms():                          # CTO Item-2: frontier account_count coherence
+            _report_coherence(check_frontier_coherence(firm, args.published_prefix))
         return 0
     if args.artifact and args.firm:
         spec = ARTIFACTS.get((args.artifact, args.firm))
