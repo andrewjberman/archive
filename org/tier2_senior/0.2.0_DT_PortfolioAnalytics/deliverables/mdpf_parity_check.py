@@ -49,6 +49,8 @@ NOTES: account_distribution keys by_model on DISPLAY NAME; aggregate on MODEL_KE
 each compared to its OWN served, never cross-normalized. Spec extras (basis/meta) allowed.
 account_distribution is a SNAPSHOT (no date axis) -> positional compare, latest everywhere.
 aggregate_aua_timeseries axis = 'dates'; aum_timeseries axis = 'periods'.
+non_model_assets is ROW-oriented (time_series[] of dicts + latest{}, NO top-level dates[]) -> axis is
+DERIVED from time_series[].period (it is the portal's parity contract; must not be restructured).
 SHAPE: the meta/source_vintage_last PROVENANCE subtrees are EXEMPT from the missing/extra
 shape-diff (their keys legitimately differ served-vs-revamp; the DATA-array shape is checked).
 VALUE: leaves UNDER those provenance ROOTS are ALSO exempt from the value compare -- their values
@@ -173,6 +175,14 @@ def _axis(obj):
         v = obj.get(key)
         if isinstance(v, list) and v and all(isinstance(x, str) for x in v):
             return v
+    # non_model_assets class (DS~A 2026-07-21): a ROW-oriented timeseries -- top-level time_series[] of
+    # dicts each carrying its own 'period' (latest{} holds the cross-section), NO top-level dates[]/periods[].
+    # Derive the axis from the row periods so time_series[i] date-JOINS by period. The portal reads this
+    # time_series[] shape (portal-proxy.ts NonModelAssetsResponse{latest,time_series[]}) -- it IS the parity
+    # contract; restructuring A4 to dates[]+arrays would break the page (Path 1 rejected, source-confirmed).
+    ts = obj.get("time_series")
+    if isinstance(ts, list) and ts and all(isinstance(r, dict) and isinstance(r.get("period"), str) for r in ts):
+        return [r["period"] for r in ts]
     return None
 
 
@@ -488,6 +498,20 @@ def self_test():
     pv_r = compare(pv_s, pv_p)
     prov_value_exempt = not any(str(k).startswith("meta") for k, *_ in pv_r["unexplained"])   # age_hours 15->42.2 NOT flagged
     basis_data_still_caught = any(k == "basis" for k, *_ in pv_r["unexplained"])              # numeric 'basis' at data root STILL flagged
+    # A4 non_model_assets CLASS (DS~A 2026-07-21): a ROW-oriented time_series[]+latest{} artifact (no
+    # top-level dates[]) -- _axis must DERIVE the axis from time_series[].period so leaves date-JOIN by
+    # period (not read positional/latest-only). Pre-cutover row ties; a post-cutover delta lands at its date.
+    a4_s = {"latest": {"date": "2026-06-02", "enterprise_total": 200.0},
+            "time_series": [{"period": "2025-06-02", "enterprise_total": 10.0},
+                            {"period": "2026-06-02", "enterprise_total": 200.0}]}
+    a4_axis_derived = (_axis(a4_s) == ["2025-06-02", "2026-06-02"])           # axis DERIVED from time_series[].period
+    a4_p = {"latest": {"date": "2026-06-02", "enterprise_total": 260.0},
+            "time_series": [{"period": "2025-06-02", "enterprise_total": 10.0},
+                            {"period": "2026-06-02", "enterprise_total": 260.0}]}
+    a4_r = compare(a4_s, a4_p, {"w": {"field_paths": ["*.enterprise_total"], "date_after": "2026-01-01",
+                                      "pct_range": [20, 40], "note": "post-cutover enterprise"}})
+    a4_precut_ties = not any("@2025-06-02" in str(k) for k, *_ in a4_r["unexplained"])         # pre-cutover row ties (10==10)
+    a4_post_datejoined = any("@2026-06-02" in str(k) for k, *_ in a4_r["expected"])            # +30% delta DATE-JOINED @2026-06-02, glob-named (not positional/UNEXPLAINED)
     # BUG-2: a 'model_aua'-scoped entry must NOT intercept a 'non_model_aua' leaf (exact match, not substring)
     nm_s = {"dates": ["2026-06-01"], "non_model_aua": [100.0]}
     nm_p = {"dates": ["2026-06-01"], "non_model_aua": [150.0]}          # +50% non_model delta
@@ -499,7 +523,8 @@ def self_test():
            and dj_no_spurious and dj_axis_named and dj_last_common
            and dj_reports_unnamed and dj_common_delta_caught
            and meta_shape_ok and real_shape_still_fails
-           and prov_value_exempt and basis_data_still_caught and nm_not_masked)
+           and prov_value_exempt and basis_data_still_caught
+           and a4_axis_derived and a4_precut_ties and a4_post_datejoined and nm_not_masked)
     print(f"SELF-TEST snapshot identity+mutant: {ident['shape_ok'] and not ident['unexplained']} / {bool(compare(served, mut)['unexplained'])}")
     print(f"SELF-TEST DS-ledger: history_windows-LIST(model_aua@2025)={exp_win}; latest-scope(model_aua@2026)={exp_latest}; UNEXPLAINED(x@2026)={unexp}")
     print(f"SELF-TEST authoritative-latest: +1.5% latest out-of-tie NOT masked by post_conv -> UNEXPLAINED={auth}")
@@ -508,6 +533,7 @@ def self_test():
     print(f"SELF-TEST DATE-JOIN fail-safe: unnamed non-common -> UNEXPLAINED(reported,not dropped)={dj_reports_unnamed}; real common-date delta CAUGHT at right date={dj_common_delta_caught}")
     print(f"SELF-TEST regression BUG-1 (meta/svl subtree exempt from shape): provenance-diff shape-OK={meta_shape_ok}; real data-shape diff still FAILS={real_shape_still_fails}")
     print(f"SELF-TEST regression BUG-1 VALUE (root-only exemption): provenance value diff (age_hours 15->42.2) NOT unexplained={prov_value_exempt}; numeric data leaf named 'basis' STILL caught={basis_data_still_caught}")
+    print(f"SELF-TEST A4 non_model_assets CLASS (time_series[].period axis): axis-derived={a4_axis_derived}; pre-cutover ties={a4_precut_ties}; post-cutover delta date-joined+named={a4_post_datejoined}")
     print(f"SELF-TEST regression BUG-2 (exact field match, no substring): 'model_aua' entry does NOT mask 'non_model_aua'={nm_not_masked}")
     print(f"SELF-TEST {'PASS' if ok else 'FAIL'} -- date-joins by date key, surfaces every non-common date, ties at last-common")
     return ok
