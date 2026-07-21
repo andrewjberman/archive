@@ -8,6 +8,36 @@ Companion to the base named-delta ledger (`MDPF_REVAMP_named_delta_ledger_202607
 
 ---
 
+## STATUS -- A4 3/3, DT leg CLOSED; decouple byte-verified (2026-07-21 ~22:55Z, 0.4.0_DS_ClientPlatform~A)
+
+**A4 is 3/3 verified.** All three N=3 legs green:
+- **CTO S3 re-verify** -- PASS (enterprise/model tie the staged aggregate to the cent, identity $0.00 all
+  windows, pre-cutover ties served exact; CTO 190951Z).
+- **CVO re-derivation** -- PASS (CTO 190951Z).
+- **DT date-joined leg** -- **CLOSED by CTO 203613Z** (confirmed again 203846Z item-1 "A4 CLEAN -- leg
+  closed"): `non_model_assets/global = NAMED_DELTA_PASS, named=720, UNEXPLAINED=0`. The Verification-Law-5
+  held-open ("harness can't-measure" on A4's row-oriented `time_series[]`+`latest{}` shape) resolved via DT's
+  Path-2 axis-handler (`_axis()` derives from `time_series[].period`, @2c6ffad13) + the ledger swap
+  `axis_ffill_delta` -> `_date_axis {served_only:28, published_only:6}` @`de07f087c` (exact-match to DT's
+  symmetric-diff). DT re-ran `--all` against ledger `de07f087c` on the real staged artifact (ETag d4802341)
+  = 0 unexplained. Grounded: DT logs `a4-classhandler-and-item2-coherence-both-green.md` +
+  `a4-leg-closed-and-scope-align.md`.
+
+**A4 DECOUPLE -- APPROVED + byte-verified (CTO 203846Z).** A4 is revamp-native, 0 legacy portal-v2 dep:
+`build_doc()` reads pre-cutover from the frozen snapshot
+`gold/mdpf_revamp/global/non_model_assets_precutover_frozen.json`, not portal-v2. CTO's ONE ADD
+(parity-requires-verbatim: snapshot == portal-v2 source byte/field-exact, exercised-not-assumed) is
+**SATISFIED + independently exercised (~A, 2026-07-21)**: 297 pre-cutover rows (2024-11-01..2025-12-22)
+FIELD-EXACT == `s3://opal-data-portal-v2/json/portfolios/non_model_assets.json` (frozen captured
+2026-07-21T20:51:18Z; mirrors `snapshot_precutover_frozen()` verify at
+`dim_mdpf_non_model_assets.py:228-239`).
+
+**Residual A4-lane item:** `etf_public_residual` single-source off the aggregate (D-5) -- DEFERRED post-N=3
+(audit-only, not headline). The N=3 SCHEDULED streak (0/3) is CTO-owned + gated on the S4 nightly wiring,
+not an A4-substance item.
+
+---
+
 ## 1. What A4 is (source-confirmed, Rule 22)
 
 A4 `non_model_assets` (the `/model-portfolios` "Non-Model" bar) is a **THIN DERIVATION off the serve-real
