@@ -107,7 +107,9 @@ def _shape_diff(served, published):
 
 
 def _leaves(obj, path="", idx=None):
-    """All numeric leaves -> {path: (value, last_array_index)}; arrays as path[i]."""
+    """All numeric AND None leaves -> {path: (value|None, last_array_index)}; arrays
+    as path[i]. None is recorded (not skipped) so a None-vs-populated NULL MISMATCH
+    is DETECTED, never silently dropped (e.g. a co-sign-gated placeholder array)."""
     out = {}
     if isinstance(obj, dict):
         for k, v in obj.items():
@@ -117,6 +119,8 @@ def _leaves(obj, path="", idx=None):
             out.update(_leaves(el, f"{path}[{i}]", i))
     elif isinstance(obj, (int, float)) and not isinstance(obj, bool):
         out[path] = (float(obj), idx)
+    elif obj is None:
+        out[path] = (None, idx)
     return out
 
 
@@ -199,6 +203,22 @@ def _ledger_match(leafpath, idx_date, is_latest, sv, pv, entries):
     return None
 
 
+def _ledger_null_match(leafpath, idx_date, is_latest, entries):
+    """A NULL MISMATCH (exactly one side None) is NAMED only by a ledger entry marking
+    the field null_ok (a co-sign-gated placeholder that wires + ties at cutover); else
+    it is UNEXPLAINED -- never silently skipped."""
+    base = _fieldbase(leafpath)
+    for name, spec in _all_specs(entries):
+        if not spec.get("null_ok") or not _spec_field_hit(spec, base):
+            continue
+        if _spec_is_latest(spec) and not is_latest:
+            continue
+        if not _spec_date_ok(spec, idx_date):
+            continue
+        return spec.get("note", name)
+    return None
+
+
 def compare(served, published, entries=None):
     entries = entries or {}
     missing, extra = _shape_diff(served, published)
@@ -209,11 +229,16 @@ def compare(served, published, entries=None):
     for k in sorted(set(ls) & set(lp)):
         sv, idxs = ls[k]
         pv, _ = lp[k]
-        if abs(sv - pv) / max(abs(sv), 1.0) <= REL_TOL:
-            continue
         idx_date = dates[idxs] if (dates and idxs is not None and 0 <= idxs < ndates) else None
         is_latest = (idxs is None) or (dates is None) or (idxs == ndates - 1)
-        note = _ledger_match(k, idx_date, is_latest, sv, pv, entries)
+        if sv is None and pv is None:
+            continue
+        if isinstance(sv, float) and isinstance(pv, float):
+            if abs(sv - pv) / max(abs(sv), 1.0) <= REL_TOL:
+                continue
+            note = _ledger_match(k, idx_date, is_latest, sv, pv, entries)
+        else:                                        # NULL MISMATCH (exactly one side None)
+            note = _ledger_null_match(k, idx_date, is_latest, entries)
         (expected if note else unexplained).append((k, sv, pv, note))
     return {"missing": missing, "extra": extra, "expected": expected, "unexplained": unexplained,
             "shape_ok": not (missing or extra)}
@@ -272,12 +297,23 @@ def self_test():
     leda = {"latest_tie": {"field_paths": ["model_aua(latest)"], "scope": "latest_cross_section", "pct_range": [-0.5, 0.5], "note": "tie"},
             "post_conv": {"field_paths": ["model_aua"], "pct_range": [-1.43, 2.08], "date_after": "2026-04-09", "note": "postconv"}}
     auth = any(k == "model_aua[1]" for k, *_ in compare(tsa_s, tsa_p, leda)["unexplained"])
-    ok &= exp_win and exp_latest and unexp and auth
+    # null-placeholder: a None-vs-populated mismatch is DETECTED; NAMED iff a null_ok entry names it, else UNEXPLAINED
+    tsn_s = {"dates": ["2025-06-01"], "by_model": {"UST": {"account_count": [180.0], "model_value": [100.0]}}}
+    tsn_p = {"dates": ["2025-06-01"], "by_model": {"UST": {"account_count": [None], "model_value": [100.0]}}}
+    lednull = {"count_ph": {"field_paths": ["by_model.*.account_count"], "null_ok": True, "note": "placeholder"}}
+    null_named = any(k.endswith("account_count[0]") for k, *_ in compare(tsn_s, tsn_p, lednull)["expected"])
+    null_unexp = any(k.endswith("account_count[0]") for k, *_ in compare(tsn_s, tsn_p, {})["unexplained"])
+    ok &= exp_win and exp_latest and unexp and auth and null_named and null_unexp
     print(f"SELF-TEST snapshot identity+mutant: {ident['shape_ok'] and not ident['unexplained']} / {bool(compare(served, mut)['unexplained'])}")
     print(f"SELF-TEST DS-ledger: history_windows-LIST(model_aua[0])={exp_win}; latest-scope(model_aua[1])={exp_latest}; UNEXPLAINED(x[1])={unexp}")
     print(f"SELF-TEST authoritative-latest: +1.5% latest out-of-tie NOT masked by post_conv -> UNEXPLAINED={auth}")
+    print(f"SELF-TEST null-placeholder: null_ok->NAMED={null_named}; no-entry->UNEXPLAINED(NOT silently skipped)={null_unexp}")
     print(f"SELF-TEST {'PASS' if ok else 'FAIL'} -- consumes DS named-entry format + classifies EXPECTED vs UNEXPLAINED")
     return ok
+
+
+def _fmt(v):
+    return f"{v:,.2f}" if isinstance(v, float) else str(v)   # None-safe
 
 
 def _report(r):
@@ -292,11 +328,11 @@ def _report(r):
     if r["extra"]:
         print(f"    (a) SHAPE EXTRA: {r['extra'][:6]}{' ...+%d' % (len(r['extra'])-6) if len(r['extra'])>6 else ''}")
     for k, sv, pv, note in r["expected"][:10]:
-        print(f"    (b) NAMED {k}: {sv:,.2f}->{pv:,.2f} [{note}]")
+        print(f"    (b) NAMED {k}: {_fmt(sv)}->{_fmt(pv)} [{note}]")
     if len(r["expected"]) > 10:
         print(f"    (b) ...+{len(r['expected'])-10} more named")
     for k, sv, pv, _ in r["unexplained"][:12]:
-        print(f"    (c) UNEXPLAINED {k}: {sv:,.2f}->{pv:,.2f}")
+        print(f"    (c) UNEXPLAINED {k}: {_fmt(sv)}->{_fmt(pv)}")
     if len(r["unexplained"]) > 12:
         print(f"    (c) ...+{len(r['unexplained'])-12} more UNEXPLAINED")
     if v == "PASS":
