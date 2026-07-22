@@ -70,6 +70,18 @@ the signal keys on the vendor's BATCH running, which is exactly "the data plane 
 via manifest totalResultCount) · `rebalancer_model_detail`: 25 files/day x 2 days, 25/25 common ·
 `meta/pulls/{date}/`: 2 manifests/day x 2 days. Series is 2 days old because it STARTED 07-21 — not a gap.
 
+## Probe prep (added ~21:47Z — the control is constructed BEFORE the probe runs, per the TO's hard gate)
+
+**15 positive-control candidates identified and banked**: Opal-assigned accounts in today's rebalancer
+book (295 Opal of 911 total) that are ABSENT from the 2026-06-09 `fact_holdings` book (680 distinct
+accounts) — their assignment necessarily changed (none -> Opal) between the probe windows. First eight:
+`658508703` (Sat 50), `658508963` (Sat 40), `658509261` (Sat 60), `658508828` (Sat 60),
+`638432512` (66% LT/34% UST), `Z40493496` (Cash+Sat 50), `658509146` (Sat 60), `658509145` (Sat 80).
+The control can fail in BOTH directions: a TEMPORAL surface must return these absent/unassigned for the
+06-09 window; a CURRENT-stamped surface returns them carrying today's Opal strategy under a 06-09 label.
+The probe itself runs LAST in the consolidated sequence, after tonight's qt1 template dump (CRO reads the
+dims), per COO 204647Z.
+
 ## For CRO (A5 residual, now determined)
 
 CRO's "whether updatedAt movement is composition edits or a system touch is not determined": **determined —
