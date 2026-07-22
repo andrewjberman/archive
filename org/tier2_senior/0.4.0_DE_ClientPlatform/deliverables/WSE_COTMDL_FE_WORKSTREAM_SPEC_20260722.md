@@ -16,7 +16,58 @@ limits) · `mdpf_cottonwood_render_20260722/` @`c95210ec3` (render evidence + di
 
 ---
 
+## 0a. 🔔 ANDREW RULINGS ~1720Z — RECORDED VERBATIM WITH SCOPE
+
+**RULING 1 (D6 — PARTIAL), VERBATIM:**
+> *"Opal Conservative Growth is Long Term Conservative, also known as Opal Long Term, also known as LTC.
+> That is how that needs to be mapped."*
+
+**RULING 2 (day-one naming), VERBATIM:**
+> *"Regarding Day 1, no we are using canonical names, we are not doing this 'Satellite' bullshit unless
+> explicitly asked."*
+
+### ⚠ SCOPE OF RULING 1 — IT COVERS ONE MODEL, NOT TWO. D6 IS **PARTIALLY** RESOLVED.
+
+**RULED:** `Opal Conservative Growth` → **MERGE** onto the canonical **`opal_long_term_conservative`**
+(LTC / "Opal Long Term"). $30.99M / 96 accounts.
+**NOT RULED — STILL OPEN AT ANDREW:** **`Opal - Income`.** It was the model with *no counterpart at all*,
+and the ruling does not name it. **Do not extend the merge to it by analogy.** *A verbatim quote without
+its scope is a future contradiction with a citation.*
+
+### CONSEQUENCES
+
+**(a) SET B IS NOT RELEASED — it is CONDITIONAL ON THE `Opal - Income` HALF.**
+- `opal_long_term_conservative` **is already in `STACK_SERIES`**, so Conservative Growth renders with **no
+  FE change**. That model is fully unblocked.
+- **If `Opal - Income` also merges** onto a canonical key → **Set B vanishes entirely.**
+- **If `Opal - Income` becomes a distinct key** → **B1 + B2 remain MANDATORY**, and the producer twin
+  (`GLOBAL_MODEL_KEYS`) with them, because one non-canonical key is enough to render blank.
+- **So Set B stays FROZEN.** One model does not clear the fork.
+
+**(b) RULING 2 REMOVES A WORK ITEM AND OVERRULES MY RECOMMENDATION.** I recommended advisor-facing
+("Satellite") names for day one. **Overruled: canonical names.** No FE naming work; no display-name
+override layer; the existing canonical `display_name` path is correct as-is. **Scope note:** *"unless
+explicitly asked"* — this is **not-by-default**, not a permanent prohibition.
+**The two rulings are coherent:** if Conservative Growth *is* LTC, rendering it as the canonical
+"Long Term Conservative" is the same answer from both directions.
+
+**(c) ⚠ A DATA CONSEQUENCE THAT MUST BE NAMED BEFORE THE CO-SIGN, NOT AFTER.** Merging is not a labelling
+change — **it moves money into an existing series.** Global `opal_long_term_conservative` will now include
+Cottonwood's **$30.99M**, so the canonical LTC line **steps** on the day Cottonwood folds in. Anyone
+verifying global LTC against a pre-Cottonwood baseline will see a real discontinuity. **It must be
+declared as a named delta up front** — otherwise it reads as exactly the kind of unexplained jump the
+count-axis P0 taught us to treat as a defect.
+
+**(d) OWNER OF THE MERGE:** the crosswalk mapping (Cottonwood's Rebalancer model name →
+`opal_long_term_conservative`) is a **producer/DS** change in `mdpf_revamp_model_crosswalk.py`, **not FE**.
+FE inherits it for free.
+
+**Nothing in this section is started.** The hold stands.
+
+---
+
 ## 1. THE GATING DECISION — D6 FORKS THIS ENTIRE WORKSTREAM
+*(⚠ AMENDED by Ruling 1 above — the fork is now HALF-resolved; read §0a first.)*
 
 **D6 (merge-vs-add canonical model keys) is RESERVED TO ANDREW and is untouched.** It decides the size of
 this workstream, not merely its details:
