@@ -106,6 +106,22 @@ the SAME session gate may bind B5(c)'s template dump (same DataMining surface; c
 stale since 07-09) — evaluate with a cheap read-only auth probe (mint the DataMining bearer) BEFORE the
 dump; a 401 there = B5(c) BLOCKED-ON-SESSION-CAPTURE too, recorded, not forced.
 
+## DISTINCT FOLLOW-ON (WS-1 feed-liveness, SECOND session surface — named per COO 230232Z, NOT a B6 re-open)
+
+**The BD session-capture chain's own liveness is UNDETERMINED while its product keeps working.** Two
+independent groundings, 2026-07-22: (a) CRO @4c701a0b4 — SM `blackdiamond/cot/session` LastChanged ~07-06
+and session-fetch logs stop ~06-26, i.e. the jar has not been re-WRITTEN in ~16 days on his instruments;
+(b) mine — DataMining bearers mint successfully off that jar DAILY (3 qt tables landed 07-22 02:03-04Z)
+and the Rebalancer bearer minted this morning. Reconciles only if durable device/identity cookies outlive
+the product-API TTLs — meaning **the nightly 02:00Z "fresh capture" may be firing without writing, and
+nothing would notice until the durable cookies expire** (the B6-liveness class on a SECOND surface: the
+producer looks alive because its output is consumed, but the producer may be dead). JOINT VERDICT
+COMPATIBLE (CRO 231255Z) is unaffected tonight — auth works on the CURRENT jar either way. **Window
+observation planned (cheap, settles it): read the SM secret's LastChangedDate at ~02:05Z — advanced =
+capture writing; static = the chain fires-without-writing and the WS-1 follow-on is REAL.** Owner: 0.6.2
+(WSE_COTMDL WS-1 lane); qt4/qt5 run-level freeze (silver frozen since 07-09) is the SIBLING defect,
+unified with the ADVI-perception freeze + the banked 18-day alarm per COO 230659Z.
+
 ## For CRO (A5 residual, now determined)
 
 CRO's "whether updatedAt movement is composition edits or a system touch is not determined": **determined —
