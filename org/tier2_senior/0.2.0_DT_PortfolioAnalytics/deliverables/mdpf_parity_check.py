@@ -585,6 +585,66 @@ def _is_finite_num(x):
     return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
 
 
+def _marker(obj):
+    """The producer's honest-None declaration (DS @943d0a2bb, CVO-ruled architecture B 045700Z).
+    `meta.honest_none` = {basis, model_feed_prefix, custody_feed_prefix, by_date (date -> REASON),
+    model_absent_dates, custody_absent_dates, verify, ...}."""
+    return ((obj.get("meta") or {}).get("honest_none")) or {}
+
+
+def _marker_reason(marker, date):
+    """The declared reason TOKEN for a date (the text before ' --'), or None if undeclared."""
+    raw = (marker.get("by_date") or {}).get(date)
+    return raw.split(" --")[0].strip() if isinstance(raw, str) and raw.strip() else None
+
+
+def _marker_admits(marker, date, reason, total_field, t, m, n):
+    """MECHANISM-BOUND admission (CTO 051606Z + CVO architecture B). Returns (admit, why_refused).
+
+    A marker is a producer SELF-REPORT, and a self-report is never trusted alone. CVO owns the
+    lineage-verify (declaration vs LIVE partition presence) -- deliberately NOT done here, because
+    reaching into bronze/silver from the parity harness over-couples it (CVO ruled out architecture A).
+    What IS done here, and what makes this more than a blanket skip: **the reason string makes a
+    PREDICTION about the null pattern, and the prediction is checked against the artifact's own data.**
+    A marker that contradicts the data it is supposed to explain is REFUSED, so the exemption cannot
+    launder a real producer drop:
+
+      model_partition_absent -> model_aua MUST be None. A populated model IS a measurement, so the
+          partition demonstrably was not absent -> REFUSE (this is CTO's seeded mutant).
+          Self-coherence: date in model_absent_dates and NOT in custody_absent_dates.
+          For a CUSTODY-derived total (partner_custody_total) the custody partition is present by
+          construction here, so the total MUST be populated; a None total means all_feeds_absent was
+          the real reason -> REFUSE. A DERIVED total (opal_aggregate_aua) legitimately propagates to
+          None when a contributing leg is absent, so it is not constrained.
+      all_feeds_absent      -> ALL THREE MUST be None; ANY populated value -> REFUSE.
+          Self-coherence: date in BOTH model_absent_dates and custody_absent_dates.
+
+    An unrecognised reason is REFUSED -- a marker cannot buy amnesty with a string nobody parses.
+    THE RESIDUAL, stated plainly: a marker that lies about a date whose data is null-shaped exactly as
+    the reason predicts is NOT catchable from the artifact alone. That is precisely CVO's leg, which is
+    why his verify is load-bearing rather than belt-and-braces."""
+    model_absent = set(marker.get("model_absent_dates") or [])
+    custody_absent = set(marker.get("custody_absent_dates") or [])
+    if reason == "model_partition_absent":
+        if date not in model_absent:
+            return False, "reason=model_partition_absent but date not in model_absent_dates (marker self-incoherent)"
+        if date in custody_absent:
+            return False, "reason=model_partition_absent but date IS in custody_absent_dates (that is all_feeds_absent)"
+        if m is not None:
+            return False, f"reason=model_partition_absent but model_aua is POPULATED ({m!r}) -- a measurement exists"
+        if total_field == "partner_custody_total" and t is None:
+            return False, "reason=model_partition_absent (custody present) but the custody total is None"
+        return True, ""
+    if reason == "all_feeds_absent":
+        if not (date in model_absent and date in custody_absent):
+            return False, "reason=all_feeds_absent but the date is not in BOTH absent lists (marker self-incoherent)"
+        populated = [f for f, v in (("total", t), ("model", m), ("non_model", n)) if v is not None]
+        if populated:
+            return False, f"reason=all_feeds_absent but {'+'.join(populated)} POPULATED -- a measurement exists"
+        return True, ""
+    return False, f"unrecognised honest-None reason {reason!r} -- a marker cannot exempt with an unparsed string"
+
+
 def _consistency_violations(obj):
     """Pure INTERNAL-CONSISTENCY comparator (S3-free, unit-testable): total == model_aua + non_model_aua,
     PER DATE, on ONE firm's aggregate. This is the invariant the 3-pass structurally lacked -- a
@@ -593,27 +653,44 @@ def _consistency_violations(obj):
     $64.5M-$203.2M, and my 3/3 parity leg was honestly CLEAN throughout. PARITY IS NOT CONSISTENCY.)
 
     NULL DISCIPLINE -- absent is NOT zero. Coercing a missing non_model to 0.0 would make the exact
-    Inflection hole tie perfectly, so:
-      all three None at a date -> honest-None row (the FE drops these); SKIPPED, but COUNTED + reported.
-      SOME None, some populated -> PARTIAL_NULL violation. Never silently zero-filled.
+    Inflection hole tie perfectly. A null is admissible ONLY when the producer DECLARES it via
+    `meta.honest_none` AND the declaration survives _marker_admits (see there):
+      any null at a date, marker ADMITS   -> HONEST_NONE, exempt + counted separately.
+      any null at a date, marker REFUSES  -> MARKER_CONTRADICTED (the marker disagrees with its own data).
+      any null at a date, NO marker       -> PARTIAL_NULL / UNDECLARED_NULL_ROW. Never silently skipped.
+
+    >> A WHOLLY-NULL ROW IS NOT SELF-JUSTIFYING. This function previously skipped an all-None row as
+    "honest" with no declaration required, which made "null the whole row" a way to leave the gate --
+    the same shape of hole DS found in their own gate (an identity that only runs where every term is
+    present never examines the rows someone emptied). A null row must now be DECLARED, exactly like a
+    partial one. Verified no-op on the 2026-07-22 staged set: every all-None row on all three firms is
+    already marked. <<
+
     Returns (violations, stats); violations = [(date, kind, total, model, non_model, diff)] where
-    diff = (model + non_model) - total."""
+    diff = (model + non_model) - total, or a reason string for marker refusals."""
     tfield = _resolve_total_field(obj)
     if tfield is None:
         return None, {"total_field": None}
     dates = obj.get("dates") or []
     tot, mod, non = obj.get(tfield) or [], obj.get("model_aua") or [], obj.get("non_model_aua") or []
-    viol, n_checked, n_allnull = [], 0, 0
+    marker = _marker(obj)
+    viol, n_checked, n_honest, n_undeclared = [], 0, 0, 0
     for i, d in enumerate(dates):
         t = tot[i] if i < len(tot) else None
         m = mod[i] if i < len(mod) else None
         n = non[i] if i < len(non) else None
         nulls = [x is None for x in (t, m, n)]
-        if all(nulls):
-            n_allnull += 1
-            continue
         if any(nulls):
-            viol.append((d, "PARTIAL_NULL", t, m, n, None))
+            reason = _marker_reason(marker, d)
+            if reason is None:
+                n_undeclared += 1
+                viol.append((d, "UNDECLARED_NULL_ROW" if all(nulls) else "PARTIAL_NULL", t, m, n, None))
+                continue
+            admit, why = _marker_admits(marker, d, reason, tfield, t, m, n)
+            if not admit:
+                viol.append((d, "MARKER_CONTRADICTED", t, m, n, why))
+                continue
+            n_honest += 1
             continue
         if not all(_is_finite_num(x) for x in (t, m, n)):
             viol.append((d, "NON_FINITE", t, m, n, None))
@@ -622,7 +699,9 @@ def _consistency_violations(obj):
         diff = (m + n) - t
         if abs(diff) > max(CONSISTENCY_ABS_TOL_USD, abs(t) * CONSISTENCY_REL_TOL):
             viol.append((d, "SUM_MISMATCH", t, m, n, diff))
-    return viol, {"total_field": tfield, "checked": n_checked, "all_null": n_allnull, "dates": len(dates)}
+    return viol, {"total_field": tfield, "checked": n_checked, "all_null": n_honest,
+                  "honest_none": n_honest, "undeclared": n_undeclared, "dates": len(dates),
+                  "marker": bool(marker)}
 
 
 def _agg_source(firm, published_prefix=None, served=False):
@@ -821,12 +900,23 @@ def _consistency_self_test():
     part_bad = copy.deepcopy(part)
     part_bad["partner_custody_total"] = [400.0]
     c_part_bad = bool(_consistency_violations(part_bad)[0])          # partner defect CAUGHT too
-    # HONEST-NONE: all three None at a date -> skipped + counted, NOT a violation
+    # HONEST-NONE: all three None at a date -> exempt + counted, NOT a violation -- but ONLY WHEN
+    # DECLARED. This clause used to assert that an all-None row was self-justifying; the marker work
+    # (2026-07-22) deliberately removed that, so the row now needs a marker. Kept as a PAIR: declared
+    # -> exempt, undeclared -> RED, so the tightening itself is regression-locked in both directions.
     hn = copy.deepcopy(base)
     for f in ("opal_aggregate_aua", "model_aua", "non_model_aua"):
         hn[f][1] = None
+    hn["meta"] = {"honest_none": {"by_date": {"2026-07-17": "all_feeds_absent -- both partitions missing"},
+                                  "model_absent_dates": ["2026-07-17"],
+                                  "custody_absent_dates": ["2026-07-17"]}}
     vhn, shn = _consistency_violations(hn)
-    c_hn = (vhn == [] and shn["all_null"] == 1 and shn["checked"] == 2)
+    c_hn = (vhn == [] and shn["honest_none"] == 1 and shn["checked"] == 2)
+    hn_undeclared = copy.deepcopy(base)
+    for f in ("opal_aggregate_aua", "model_aua", "non_model_aua"):
+        hn_undeclared[f][1] = None
+    c_hn_undeclared = any(k == "UNDECLARED_NULL_ROW" for _, k, *_ in _consistency_violations(hn_undeclared)[0])
+    c_hn = c_hn and c_hn_undeclared
     # CROSS-FIRM: clean roll-up passes; a partner dropping out of global is CAUGHT (LD-0292 class)
     g = {"dates": ["2026-07-17", "2026-07-20"], "model_aua": [300.0, 400.0], "non_model_aua": [30.0, 40.0]}
     pA = {"dates": ["2026-07-17", "2026-07-20"], "model_aua": [200.0, 250.0], "non_model_aua": [20.0, 25.0]}
@@ -876,6 +966,65 @@ def _consistency_self_test():
     gB_summed = copy.deepcopy(gB_ident)
     gB_summed["opal_aggregate_aua"] = [440_000_000.0]   # audit field wrongly summed in
     b_catch_summed = bool(_consistency_violations(gB_summed)[0])
+    # ===== HONEST-NONE MARKER CONSUMER (CTO 051606Z leg; CVO architecture B 045700Z) =====
+    # The exemption must be MECHANISM-BOUND: a marker that contradicts its own data buys nothing.
+    R_MODEL = "model_partition_absent -- custody partition PRESENT, honest custody-only day"
+    R_ALL = "all_feeds_absent -- BOTH partitions missing"
+    def _mk(by_date, model_abs, cust_abs):
+        return {"by_date": by_date, "model_absent_dates": model_abs, "custody_absent_dates": cust_abs}
+    # (a) PARTNER, model_partition_absent: custody present, model+non_model None -> ADMITTED
+    pm = {"dates": ["2026-05-21"], "partner_custody_total": [202_041_468.86],
+          "model_aua": [None], "non_model_aua": [None],
+          "meta": {"honest_none": _mk({"2026-05-21": R_MODEL}, ["2026-05-21"], [])}}
+    v_pm, s_pm = _consistency_violations(pm)
+    mk_partner_ok = (v_pm == [] and s_pm["honest_none"] == 1)
+    # (b) CTO'S SEEDED MUTANT: same marker on a date whose MODEL IS POPULATED -> a measurement exists,
+    #     so the partition demonstrably was not absent. MUST still go RED.
+    pm_bad = copy.deepcopy(pm)
+    pm_bad["model_aua"] = [100_000_000.0]        # populated + non_model still None -> partial, marked
+    v_pmb, _ = _consistency_violations(pm_bad)
+    mk_populated_red = any(k == "MARKER_CONTRADICTED" for _, k, *_ in v_pmb)
+    # (c) marker self-incoherence: reason says model-absent but the date is NOT in model_absent_dates
+    pm_inc = copy.deepcopy(pm)
+    pm_inc["meta"]["honest_none"] = _mk({"2026-05-21": R_MODEL}, [], [])
+    mk_incoherent_red = any(k == "MARKER_CONTRADICTED" for _, k, *_ in _consistency_violations(pm_inc)[0])
+    # (d) reason mismatch: claims model-only but the date is ALSO in custody_absent_dates
+    pm_mis = copy.deepcopy(pm)
+    pm_mis["meta"]["honest_none"] = _mk({"2026-05-21": R_MODEL}, ["2026-05-21"], ["2026-05-21"])
+    mk_reason_mismatch_red = any(k == "MARKER_CONTRADICTED" for _, k, *_ in _consistency_violations(pm_mis)[0])
+    # (e) model_partition_absent on a CUSTODY-derived total with a None total -> really all_feeds_absent
+    pm_not = copy.deepcopy(pm)
+    pm_not["partner_custody_total"] = [None]
+    mk_custody_none_red = any(k == "MARKER_CONTRADICTED" for _, k, *_ in _consistency_violations(pm_not)[0])
+    # (f) all_feeds_absent, everything None -> ADMITTED; but ANY populated value -> RED
+    af = {"dates": ["2026-07-13"], "partner_custody_total": [None], "model_aua": [None],
+          "non_model_aua": [None],
+          "meta": {"honest_none": _mk({"2026-07-13": R_ALL}, ["2026-07-13"], ["2026-07-13"])}}
+    mk_all_ok = (_consistency_violations(af)[0] == [])
+    af_bad = copy.deepcopy(af)
+    af_bad["partner_custody_total"] = [202_000_000.0]
+    mk_all_populated_red = any(k == "MARKER_CONTRADICTED" for _, k, *_ in _consistency_violations(af_bad)[0])
+    # (g) unrecognised reason cannot buy amnesty with an unparsed string
+    af_junk = copy.deepcopy(af)
+    af_junk["meta"]["honest_none"] = _mk({"2026-07-13": "because I said so"}, ["2026-07-13"], ["2026-07-13"])
+    mk_junk_red = any(k == "MARKER_CONTRADICTED" for _, k, *_ in _consistency_violations(af_junk)[0])
+    # (h) GLOBAL (derived total) propagates to None under model_partition_absent -> ADMITTED, and the
+    #     custody-total constraint must NOT be applied to a derived total.
+    gm = {"dates": ["2026-05-21"], "opal_aggregate_aua": [None], "model_aua": [None],
+          "non_model_aua": [None],
+          "meta": {"honest_none": _mk({"2026-05-21": R_MODEL}, ["2026-05-21"], [])}}
+    mk_global_prop_ok = (_consistency_violations(gm)[0] == [])
+    # (i) THE HOLE THIS CLOSES: an UNDECLARED wholly-null row is no longer self-justifying
+    und = {"dates": ["2026-05-21"], "partner_custody_total": [None], "model_aua": [None],
+           "non_model_aua": [None]}
+    v_und, s_und = _consistency_violations(und)
+    mk_undeclared_red = (any(k == "UNDECLARED_NULL_ROW" for _, k, *_ in v_und) and s_und["undeclared"] == 1)
+    # (j) a marker must not exempt a FULLY-POPULATED row's real SUM_MISMATCH (marker != amnesty)
+    sm = {"dates": ["2026-05-21"], "partner_custody_total": [100_000_000.0],
+          "model_aua": [90_000_000.0], "non_model_aua": [20_000_000.0],
+          "meta": {"honest_none": _mk({"2026-05-21": R_MODEL}, ["2026-05-21"], [])}}
+    mk_sum_still_red = any(k == "SUM_MISMATCH" for _, k, *_ in _consistency_violations(sm)[0])
+
     # ===== LEDGER-NAMED SHAPE EXTRA (vs a harness exemption) =====
     se_s = {"dates": ["2026-07-20"], "model_aua": [10.0], "non_model_aua": [5.0]}
     se_p = {"dates": ["2026-07-20"], "model_aua": [10.0], "non_model_aua": [5.0],
@@ -894,7 +1043,10 @@ def _consistency_self_test():
           and nf_ok and nf_xf_global and nf_xf_partner
           and b_clean and b_catch_rebased and b_catch_audit and a_clean
           and b_identity and b_catch_summed
-          and se_named and se_undeclared and se_other and se_no_substring)
+          and se_named and se_undeclared and se_other and se_no_substring
+          and mk_partner_ok and mk_populated_red and mk_incoherent_red and mk_reason_mismatch_red
+          and mk_custody_none_red and mk_all_ok and mk_all_populated_red and mk_junk_red
+          and mk_global_prop_ok and mk_undeclared_red and mk_sum_still_red)
     print(f"SELF-TEST consistency CONTROL (coherent artifact PASSES, gate not stuck-red)={c_clean}")
     print(f"SELF-TEST consistency MUTANT-1 (live bug shape: total omits $153M component) -> RED={c_m1}")
     print(f"SELF-TEST consistency MUTANT-2 sensitivity: caught holes {caught} -> measured floor ${floor:,.2f}; sub-cent ignored={c_m2}")
@@ -905,6 +1057,9 @@ def _consistency_self_test():
           f"B CATCHES rebased-non_model drift={b_catch_rebased}; B CATCHES audit-carrier drift={b_catch_audit}")
     print(f"SELF-TEST REGIME-B identity: total==model+non_model(rebased) clean={b_identity}; "
           f"audit field wrongly SUMMED into total -> CAUGHT={b_catch_summed}")
+    print(f"SELF-TEST honest-None MARKER consumer: partner model-absent ADMITTED={mk_partner_ok}; global derived-total propagation ADMITTED={mk_global_prop_ok}; all_feeds_absent ADMITTED={mk_all_ok}")
+    print(f"SELF-TEST marker REFUSALS (mechanism-bound, marker != amnesty): populated-model->RED={mk_populated_red}; self-incoherent->RED={mk_incoherent_red}; reason-mismatch->RED={mk_reason_mismatch_red}; custody-None-under-model-reason->RED={mk_custody_none_red}; all_feeds+populated->RED={mk_all_populated_red}; unparsed-reason->RED={mk_junk_red}; real SUM_MISMATCH still RED={mk_sum_still_red}")
+    print(f"SELF-TEST UNDECLARED wholly-null row -> RED (a null row is not self-justifying)={mk_undeclared_red}")
     print(f"SELF-TEST ledger-NAMED shape extra (_shape_extras, not a harness exemption): declared->shape OK={se_named}; "
           f"undeclared->SHAPE_FAIL={se_undeclared}; a DIFFERENT extra still FAILS={se_other}; exact-not-substring={se_no_substring}")
     print(f"SELF-TEST consistency PARTNER shape (partner_custody_total resolves)={c_part}; partner defect caught={c_part_bad}")
