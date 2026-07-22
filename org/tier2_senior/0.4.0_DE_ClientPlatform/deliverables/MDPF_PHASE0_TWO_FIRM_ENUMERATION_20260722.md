@@ -285,6 +285,57 @@ direction.)*
 
 ---
 
+## 3a. 🔴 VINTAGE CORRECTION (1710Z) — TWO OF MY STRUCTURAL FINDINGS CITE CODE THAT EXISTS AT NO COMMIT
+
+*Prompted by COO's own downward severity correction on the same file. Verified myself against HEAD with a
+positive control (`revamp_stage` ×2, 532 lines at HEAD — the read works).*
+
+**`infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh` IS DIRTY (`+44/−3` vs HEAD) AND HAS BEEN ALL
+SESSION.** Measured:
+
+| my citation | at HEAD | in working tree | verdict |
+|---|---|---|---|
+| **S-3** `_audit()` `:508-539` | **ABSENT** (`_audit(` count = 0) | `:508`, `:537`, `:538` | **🔴 NO COMMIT ANCHOR EXISTS** |
+| **S-4** governance lock `:484-485` (*"CTO-APPROVED AS WRITTEN (134926Z)"*) | **ABSENT** (`134926Z` count = 0) | `:484` | **🔴 NO COMMIT ANCHOR EXISTS** |
+| `count_axis_source_audit` | **0** | **1** | HEAD=0 / TREE=1 |
+| `keys_staged: 7` | `:493` | `:526` | ⚠ **both numbers appear in this census** (different limbs) |
+| `"segments"` block | `:494` | `:527` | ⚠ same split |
+| staging loops `for firm in …` | `:459`, `:472` | `:459`, `:472` | ✅ **identical — these citations stand** |
+
+### WHAT THIS CHANGES
+
+**S-3 and S-4 remain TRUE ABOUT THE PROPOSED CODE, and they are NOT findings about the record or the
+runtime.** Their severity drops the same way COO just dropped its own: from *"a defect on the MDPF nightly
+path"* to *"a defect in an unlanded, uncommitted change."*
+
+**S-4 IS THE ONE THAT EMBARRASSES ME, BECAUSE IT IS A GOVERNANCE CLAIM.** I reported to CTO and COO that a
+**CTO-approved prohibition (134926Z)** protects the per-firm failure policy, and treated it as binding law
+constraining the third-firm design. **That text exists in nobody's commit.** It is in a dirty working file
+that any `git checkout` or `git stash` would erase without trace. *I amplified unlanded text into a
+governance finding and routed it to two Tier-1 lanes.*
+
+### AND THERE ARE THREE VINTAGES HERE, NOT TWO — I CONFLATED THE SECOND AND THIRD
+
+`EC2_MANIFEST.json` / `mdpf-daily-dispatch.sh:7-9`: the runner **fetches the script from
+`s3://opal-data-mdpf/code/` at run time.** So:
+
+> **DEPLOYED ARTIFACT (what runs) ≠ HEAD (the record) ≠ WORKING TREE (someone's uncommitted edit).**
+> **A git commit is not a deploy here, and a working-tree read is not even the record.** My census cited
+> tree as though it were record, in a document whose own §1 demands `file:line @ commit-ish`.
+
+**THE GENERALISATION, and it is the sharpest self-correction in this census:** I have spent the session
+insisting that *a line citation without a vintage is not a citation* — and the failure mode I did not
+anticipate is **a citation for which NO VINTAGE CAN EXIST.** A dirty working tree is not a vintage; it is a
+state no one else can reproduce and nothing can anchor. **The rule needs a second clause: verify the
+citation RESOLVES at the vintage you name — because `grep` on a dirty tree answers confidently and
+`git show HEAD:` is the only thing that would have caught it.**
+
+*(All four census limbs read the working tree. `0.7.0` cited the TREE line numbers, the publisher limb
+cited HEAD line numbers, and I folded both without reconciling them — a two-vintage census presented as
+one.)*
+
+---
+
 ## 4. THE STRUCTURAL FINDINGS — the expensive ones
 
 **S-1 · The global composition gate — ⚠ DOWNGRADED 1615Z BY DIRECT READ. I OVERSTATED THIS, AND THE
@@ -335,7 +386,10 @@ paths. **Update two of three and you get a partial serve that NO single instrume
 behavior exists and the policy denies.
 
 **S-3 · A guard that enumerates its subjects cannot protect a subject it does not enumerate.**
-`mdpf-daily-dispatch.sh:508-539` — `_audit()` exists *specifically* so a missing audit cannot read as clean
+> **⚠ VINTAGE (see §3a): `WORKING TREE ONLY — NO COMMIT ANCHOR EXISTS.** `_audit(` is absent at HEAD. This
+> is a finding about an **unlanded change**, not about the record or the deployed artifact. The
+> generalisation below stands on its own; the citation does not anchor.*
+`mdpf-daily-dispatch.sh:508-539` *(tree)* — `_audit()` exists *specifically* so a missing audit cannot read as clean
 (*"ABSENT IS NOT CLEAN"*), **but its dict has hardcoded firm keys.** For Cottonwood the field is not
 `audit_did_not_run` — Cottonwood is **absent from the dict entirely**. The guard produces exactly the
 failure it was written to prevent, for any firm it does not name. *(0.7.0's finding; the generalisation is
@@ -343,7 +397,11 @@ theirs and it deserves to outlive this document: **absence-is-not-clean holds pe
 firm.**)*
 
 **S-4 · A governance lock forbids the obvious refactor, and Cottonwood has no declared policy.**
-`mdpf-daily-dispatch.sh:484-485` carries an explicit CTO-approved prohibition (134926Z) protecting a
+> **🔴 VINTAGE (see §3a): `WORKING TREE ONLY — NO COMMIT ANCHOR EXISTS.** `134926Z` is absent at HEAD.
+> **I reported this to CTO and COO as binding governance; the text is in a dirty file a `checkout` would
+> erase.** The per-firm-policy QUESTION for a third firm is real and still needs a ruling — but there is
+> **no landed prohibition** to point at, and nobody should cite one.*
+`mdpf-daily-dispatch.sh:484-485` *(tree)* carries an explicit CTO-approved prohibition (134926Z) protecting a
 **per-firm failure policy** — inflection FAILS the stage, 49F is REPORT-ONLY (rationale: 49F has a known
 unfixable defect; failing nightly would train everyone to ignore the guard). **This is correct and must not
 be collapsed.** But there is **no default for an unlisted firm**. This is a **decision request, not a code
