@@ -151,3 +151,22 @@ same window.
 2. The column set (§2) — mirror-exact, zero deviation.
 3. The dedup-key change (§3) — vendor-columns-only, smartx-precedent.
 4. The sequencing (§8) — post-G8 default.
+
+## 10. RULINGS RECEIVED — CTO 20260722T212243Z (all four; design ACCEPTED @b692db295)
+
+1. **Rule-17: PERMITTED, boundary stated as a CLASS** (verbatim spine): *"silver may carry
+   CONVERSION-ACT METADATA — underscore-prefixed columns recording facts the converter OBSERVES
+   ABOUT ITS OWN ACT at conversion time … Anything requiring interpretation of vendor CONTENT stays
+   gold, without exception. That is the line: observation-of-self = silver-legal;
+   interpretation-of-vendor = gold. is_opal was interpretation; _source_file is observation."*
+   Ruled not-the-governed-class — explicitly NOT permitted-because-useful.
+2. **Column set: mirror-exact APPROVED, all four tables incl. `fact_model_definition`** —
+   "uniformity within the family beats reader-count; a zero-reader table that diverges today is a
+   trap for its first reader."
+3. **Dedup: vendor-columns-only APPROVED; the row-count parity control is REQUIRED, not optional.**
+4. **Sequencing: APPROVED behind G8's landed build**; 0.7.0's lambda-twin deploy rides the normal
+   TF cycle under CTO's apply gate when it comes.
+
+Forward-only mechanics accepted without amendment. **Implementation status: AUTHORIZED,
+SEQUENCED — begins after G8's build lands (G8 gate = 3F-B5 alone, ~03:30Z 07-23). Cutover constant
+is fixed at implementation time per §5.** COO acceptance of the design half: 212249Z.
