@@ -13,10 +13,35 @@ P0: live Global's `opal_aggregate_aua` != `model_aua + non_model_aua`. The re-la
 the data is corrected and a **FRESH** never-widen co-sign is issued.
 
 - portal main tree stays on **DEV**, always (CLAUDE.md Rule 19).
-- `origin/DEV` = `aa8c0420` · `origin/PROD` = `99fed48f` · **DEV is 4 commits ahead.**
-- The re-land is a **4-commit forward merge**, not one: `aa8c0420`, `1508d183`, `5b1e44dc`, `2f603319`.
-  "Promote @aa8c0420" reads like a single commit and is not — do not let that phrasing shrink the diff
-  in anyone's head.
+- **PROMOTE TARGET (verified 2026-07-22 ~0635Z): `6287847c625a001cfca4fde7c7b430167a103fb0`** == `origin/DEV` head.
+- `origin/PROD` = `885b76c2` (the 2x hotfix I shipped, `portal-v2.1.141`).
+- **The re-land is a SIX-commit, TWO-file forward merge** — not one, and no longer the four I first
+  counted (DE added `129edad5` + `6287847c`):
+  `6287847c` honest-None bridge · `129edad5` 2x fold · `aa8c0420` A2 revert · `1508d183` dead-endpoint
+  cleanup · `5b1e44dc` content-A/B honest-None render · `2f603319` A2 remove frozen dep.
+  Files: `src/pages/ModelPortfolios.tsx` (+234/−65) **and `src/api/portal-proxy.ts` (+7)**.
+  *"Promote the FE commit" reads like one commit and one file. It is six and two.*
+- `git merge-tree` preview from the merge-base: **no conflict markers** — notable because the 2x fix now
+  exists on BOTH paths (PROD via my hotfix, DEV via DE's fold) and git resolves it. **Still diff the
+  merged tree before pushing: a clean preview is not a verified result.**
+
+### FE-side gates VERIFIED 2026-07-22 ~0635Z (mine, not DE's report)
+| Check | Evidence |
+|---|---|
+| ack `^`-anchored | ran the CI checker's own `sed`; extracts cleanly |
+| Surface-Check Gate | runId **29896944168**, headSha `6287847c`, **success** |
+| CI - Build & Validate | runId **29896944203**, same sha, **success** |
+| green-on-one guard | 2 runs on the sha, **0 non-success** |
+| FE vs OLD data | DE **rendered** it: degrades clean, cosmetic (stale-but-honest). CTO made the explicit accept-the-window call. |
+
+> ### ⚠ TWO INDEPENDENT SURFACE_ACK MECHANISMS — and NEITHER covers the PROD path
+> DE surfaced this and it sharpens the known gap:
+> - the **CI gate** parses `^SURFACE_ACK:` from the commit **MESSAGE** — fires on **push to DEV only**;
+> - the **local pre-commit hook** requires SURFACE_ACK as an **ENV VAR** (rc=2 without it) — and it
+>   **SKIPS ENTIRELY in a standalone worktree** (no superproject).
+> **My promote merge happens in an ephemeral worktree, so it hits neither.** The CI gate never runs on a
+> PROD push; the local hook is skipped by construction. **CTO's manual verify is the sole control on this
+> path, now for two independent reasons rather than one.** Fold into the durable PROD-path-gate TO.
 
 > **⛔ THE 0159Z ANDREW CO-SIGN IS VOID FOR THIS RE-LAND.** It pinned the ORIGINAL (buggy) coherent-9
 > ETags. The fix changes the data → new ETags → new pin → **a FRESH co-sign is required.** A "go" citing
@@ -71,9 +96,9 @@ deliberate inverse of the flip that half-landed:
 | 1 | **DONE** — composition fix landed; `opal_aggregate_aua` == model + non_model exactly |
 | 2 | **DONE** — DT consistency `rc=0` all 3 firms + `CROSSFIRM_PASS` regime B, ETag-pinned; parity all aggregates `NAMED_DELTA_PASS`, 0 unexplainable windows, fitted-signature 0/8 |
 | 3 | **DONE** — 6 dates declared honest-None via `meta.honest_none`, CVO lineage-verified truthful; DT marker consumer @`41cbd7220` (11 mutants, CTO's seeded case RED) |
-| 4 | **PENDING DE** — the revamp FE commit must carry a `^`-anchored `SURFACE_ACK:` line |
-| 5 | **PENDING DE** — DEV surface-check GREEN **on that exact sha**; DT verifies + quotes run id/headSha/conclusion, CTO confirms |
-| 6 | **PENDING** — COO co-sign **STAGED, NOT ISSUED**; Andrew's sovereign limb follows. **STAGED != ISSUED — hold.** |
+| 4 | **DONE** — `6287847c` carries a `^`-anchored `SURFACE_ACK:`; verified with the checker's own sed |
+| 5 | **DONE** — Surface-Check run 29896944168 + Build run 29896944203, both `success` on headSha `6287847c`; 0 non-success runs on the sha |
+| 6 | **THE ONLY ONE OUTSTANDING** — COO co-sign **STAGED, NOT ISSUED**; Andrew's sovereign limb follows. **STAGED != ISSUED — hold.** |
 
 **COO's data-gate verification (055650Z): PASSED**, independently re-ran CVO's Layer-3 live on the
 `c27e1f37` set. The remaining gates are all FE-side + the co-sign, not data.
