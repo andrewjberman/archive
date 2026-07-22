@@ -316,6 +316,39 @@ and stores the value (`:1789-1794`) before dropping it. **The trend silently tot
 error, no gap, no console warning.** Every guard on this page was built for the *value* being absent; none
 for the *series* being absent.
 
+**S-13 · A COMPLETENESS SIGNAL WHOSE DENOMINATOR IS ITS OWN CONFIGURATION — three instances, three
+components, one class. AND IT QUALIFIES R10.** *(`0.7.0_AE_CloudOps` @`3a7e29f47`; limb stated: publisher
+IAM face + `PUBLISH_MAP`, **NOT** producer logic.)*
+
+| signal | its denominator | what it reports on a 3-firm cycle |
+|---|---|---|
+| `count_axis_source_audit` | hardcoded firm keys | GREEN — Cottonwood absent from the dict entirely |
+| `keys_staged: 7` | a literal | GREEN — 7 claimed while 9 landed |
+| `all_present` | `len(PUBLISH_MAP)` | **`9/9, all_present=True` — WITH COTTONWOOD UNSERVED** |
+
+`opal-assets-mdpf-portal-publisher/lambda_function.py:37-47` — `PUBLISH_MAP` is a hardcoded 9-entry dict
+with **no Cottonwood entry**; `:100` iterates the map, `:102` derives `all_present` from that iteration,
+`:106` reports `len(PUBLISH_MAP)` as the total. **A firm absent from the map never enters the loop, so it
+cannot lower the score.** *(Publisher IAM is genuinely CLEAN on the firm axis — wildcard prefixes, no firm
+named, no IAM change needed for a third firm. The map is the defect, not the grants.)*
+
+> **A SIGNAL THAT MEASURES ITS OWN CONFIGURATION CANNOT FAIL.** And the sting: the `_audit()` helper was
+> written *specifically* to stop silent omission (*"absence of a verdict is not a passing verdict"*) — **and
+> it omits silently, because its subject list is hardcoded.** Care did not save it. Only comparing the list
+> to the world would.
+
+**⚠ THIS QUALIFIES R10, WHICH IS A BINDING RULING.** R10 requires every evidence limb to state a coverage
+fraction against the defect-capable population. **All three signals above would SATISFY R10 while
+misleading** — each reports a fraction against *its own denominator*. **So R10 needs one more clause:**
+
+> **RECORD WHAT THE DENOMINATOR IS DERIVED *FROM*.**
+> `9/9 where 9 = len(PUBLISH_MAP)` and `9/9 where 9 = keys actually staged this cycle` **render
+> identically — and only the second is evidence.**
+
+**And it upgrades Population C beyond how it was pitched to me:** the absence axis is not only *"the one
+axis that can see a missing member"* — **it is the only axis that can see a LYING GREEN SIGNAL**, because
+these three are invisible to A, B and D and each passes its own check.
+
 **S-12 · WHAT THE READ FOUND THAT NO SEARCH COULD: the composition's SEMANTICS are already N-firm-correct;
 only its ARITY is fixed at 2.** *(Population B, all `@32b35a589`, none containing a firm name — invisible to
 the token axis.)*
