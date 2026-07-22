@@ -211,3 +211,104 @@ measurement.
 
 **Companion:** `COTTONWOOD_ASSIGNMENT_LOOKBACK_OPTIONS_20260722.md` (the assignment-history question this
 sourcing depends on).
+
+---
+
+# ADDENDUM — 2026-07-22, Andrew correction: the Satellites are WEIGHTED BLENDS OF MODELS, and the backfill mechanism tested
+
+**Andrew, two corrections after the brief:** *(1)* the Opal Satellites are comprised of weights of models;
+*(2)* joining against holdings/transactions is the whole point of backfill — the dated event is what we need.
+**Both are right. §5 and §6 of the brief were wrong or incomplete. This addendum supersedes them.** Zero
+egress — computed from `rebalancer_model_detail` (already pulled daily) + cot silver holdings.
+
+## B1. §6 was NOT a naming mismatch — it is COMPOSITION **[PROVEN]**
+
+The Satellites are risk-tiered **weighted blends of the real Opal models**. Grounded in the
+`rebalancer_model_detail` hierarchy (`rebalanceModelType: Strategy` -> children `rebalanceModelType: Model`
+with `absoluteAllocation`):
+
+| Strategy (what accounts hold) | = weighted models (what you named) |
+|---|---|
+| Satellite 50 (82) | **75% Intermediate-Term + 25% Short-Term** |
+| Satellite 60 (79) | **100% Intermediate-Term** |
+| Satellite 80 (54) | **100% Conservative Growth** |
+| Satellite 70 (39) | **50% Conservative Growth + 50% Intermediate-Term** |
+| Satellite 40 (16) | **50% Intermediate-Term + 50% Short-Term** |
+| Satellite 98 (12) | **100% Long-Term Aggressive** |
+| Satellite 30 (4) | **25% Intermediate-Term + 75% Short-Term** |
+| Ultra Short Term (3) | **100% Ultra Short-Term Income** |
+| + 5 bespoke blends (1 acct each) | Conservative Growth / Short-Term / UST-Income / Sleeve mixes |
+
+**So the "0-account" models (Conservative Growth, Intermediate-Term, Short-Term, Ultra Short-Term Income) are
+not unpopulated — they are the TERMINAL models, populated indirectly through the Satellite blends.** The
+brief's §6 "taxonomy decision" framing was wrong: there is no ambiguity to rule on, there is a **composition to
+apply**. Each model definition also carries its **security basket** with weights (e.g. Intermediate-Term =
+BIV 3.28% + IEFA 11.3% + JAAA 4.19% + ...), so the model layer is fully specified.
+
+## B2. The correct aggregation is a WEIGHT ROLLUP, and it is proven **[PROVEN]**
+
+`model_aua[model] = Sum over accounts [ account_MV(day) x strategy_weight_on_model ]`
+
+Computed on 2026-07-20 (rebalancer assignment x model-composition weights x cot silver holdings):
+
+| Model | Daily AUM |
+|---|---|
+| Opal Intermediate-Term | $74,760,167 |
+| Opal Conservative Growth | $30,991,060 |
+| Opal Short-Term | $16,246,582 |
+| Opal Ultra Short-Term Income | $1,259,943 |
+| Opal Long-Term Aggressive | $1,118,258 |
+| (Sleeve residuals) | $763,214 |
+| **TOTAL** | **$125,139,224** |
+
+Ties to the strategy-level $126.4M within **$1.24M**, which is exactly the one strategy with no model
+composition (`Opal - Income`, 2 accounts) that falls through the rollup -- a **named, measured residual**, not
+a silent gap. So `by_model` in the MDPF slice should key on the **real models** (Intermediate-Term,
+Conservative Growth, ...), computed by this rollup, with `Opal - Income` handled explicitly.
+
+**All THREE inputs already land daily:** `rebalancer_accounts` (assignment) + `rebalancer_model_detail`
+(the blend + security weights) + cot silver holdings (value). The forward pipeline needs no new feed.
+
+## B3. SNAPSHOT is the way, and the FORWARD series is snapshot-native + proven
+
+Confirming directly: yes, snapshot-first is right, and the forward model-AUM series is a pure daily snapshot
+join — that day's holdings x that day's assignment x that day's composition -> that day's model AUM. Dated by
+the pull, self-extending, fabrication-free. **B2 IS that computation for one day.** The original brief covered
+snapshot-first for the *AUM level* (§3) but did NOT carry the model-weight decomposition; B1/B2 are that
+missing piece.
+
+## B4. BACKFILL — I TESTED the holdings/transactions idea. Honest result: the direct fingerprint FAILS, and here is what works instead
+
+Your instinct — use the dated daily holdings/transactions as the temporal anchor so we do not depend on
+live-state assignment — is the right target. I tested the most direct form of it:
+
+**TESTED AND WEAK: recover a past date's STRATEGY by matching that day's holdings basket to the known target
+baskets.** It fails because **the strategy baskets are nearly identical** — they are all built from the same
+~15 ETFs at different weights. Measured pairwise basket cosine similarity: **Satellite 50 vs 60 = 0.969,
+80 vs 70 = 0.981, 60 vs 70 = 0.976** — mostly >0.90. **You cannot reliably tell which strategy an account was
+on from its holdings alone**, so holdings-fingerprinting would misassign the blend and is not defensible
+(it is inference-from-similarity, the fabrication class).
+
+**WHAT ACTUALLY GIVES DATED BACKFILL, in order of cleanliness:**
+
+1. **The DataMining temporal assignment dimension (the real unlock).** IF the qt1/allocations
+   `accountRebalStrategyID` dimension is *temporal* (the §3 probe of the lookback brief), a historical query
+   returns dated `(account, strategy, date)` -> apply the B2 model-weight rollup -> **dated model-level AUM
+   back to the coverage horizon, fabrication-free.** This is the path that turns the snapshot approach into a
+   real backfill. **Still gated on that one probe.** It is now the single highest-value open item, because it
+   unlocks history for BOTH the strategy and (via B2) the model level.
+
+2. **Transactions as dated CHANGE-events (your "some kind of daily event").** The transaction stream is dated
+   and real back to 2026-03-09. A rebalance into a strategy produces a datable *cluster* of trades matching
+   the target basket -- so transactions can date *when an account's composition changed*, bounding the windows
+   in which assignment was stable. This does not name the strategy on its own (same basket-overlap problem),
+   but it tells you *when to trust* a carried-forward assignment vs when it changed -- a real guard against the
+   fabrication B4-fingerprint falls into. Secondary, and a genuine use of the dated event you pointed at.
+
+3. **Forward-only (the safe default).** If neither probe clears, the series starts at the first daily pull and
+   grows -- honest, self-extending, and per the migration reframing, already a correct answer.
+
+**Net:** snapshot is the way (confirmed); the model decomposition is the correction (B1/B2, proven); and the
+dated-event backfill you are pointing at is real but runs through the **temporal DataMining dimension**, not
+through holdings-basket matching (which I tested and it is too coarse). The composition weights (B1) are what
+make it *model*-level rather than *strategy*-level either way.
