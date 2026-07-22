@@ -139,3 +139,94 @@ That is *unmeasured*, not clean. And pre-2026-05-15 dates have no eclipse partit
 
 **What the instrument cannot see:** anything before 2026-05-15 (no eclipse partitions), and the 49F /
 global count axes (different model source, not swept).
+
+---
+
+# ADDENDUM — the fix, the class sweep, and what the instruments could not see (2026-07-22)
+
+CTO ruled the COUNT view **in cutover scope, fix before flip** (123146Z). COO withdrew both exec limbs
+(nothing pending serve). Andrew ruled **one flip with Cottonwood** (~1259Z), which removed the time
+pressure that would have argued for a minimal fix.
+
+## What shipped
+
+| commit | change |
+|---|---|
+| `f5c094434` | `account_count` from the **same snapshot as the value** — inflection from eclipse (`:427`, already computed and discarded); global **composed from the firm legs**; 49F unchanged (no source) |
+| `78b8a5846` | clause (vi) → **parameter-free** round-trip excursion; cross-axis gate **run on global** (CVO gap 2) |
+| `8362f8a8d` | the clause-(v) **skip carries its own measurement** — a silent skip reads GREEN |
+| `77d297819` | global at `same_source=TRUE` with an **enumerated** exemption list (CTO ruling) |
+| `b8efd3214` | **standing per-cycle source cross-reference audit** |
+
+Staged, listing-verified with a local-MD5 control: inflection `5e7b684d…`, global `08f9720e…`,
+A2 `ca0c6d1c…`. 49F, A1, A4, account_dist ×3 **unchanged**. Diff vs frozen: **all `account_count`,
+no value moved anywhere.**
+
+## The class sweep (CTO order) — and the retraction it forced
+
+I claimed the defect was a **pattern across three independent code paths**. **That was wrong**, and I
+reached it from a grep hit without reading the data path — the exact Rule 22 failure. A2's producer is
+`dim_mdpf_aum_timeseries.py`, not `build_legacy_compat_emit.py:598`; its `load_served()` is verify-only.
+**Proven rather than argued: A2 rebuilt against the fixed global with zero code change and self-healed**
+(07-06 7353→7301, AUM diff 0). CTO had built a ruling on my claim and reported it to Andrew, so the
+retraction propagated upward.
+
+**True population:** 56 matches / 14 files / 43 scanned → **exactly 2 data-path read-sites, both the
+same function.** Fixed for inflection and global; structurally unfixable for 49F. Downstream
+derivatives inherit and self-heal.
+
+## Three things the instruments could not see
+
+1. **Global's negatives were my own thresholds.** Two sweeps called global clean; the +66 is 0.86% of a
+   7,544 base. Caught only by checking the composition directly. *A threshold that hides a defect
+   returns a PASS indistinguishable from a real one.*
+2. **Identity-holds is not day-correct.** `global == 49F + inflection` held **exactly 7/7** while the
+   whole sum sat on the wrong day. A coherence check passed and still shipped a foreign-day roster.
+3. **A duplicated roster is indistinguishable from an unchanged roster.** CVO corrected my 05-27
+   mechanism: 05-27 is **byte-identical to 05-26** — a stale roster, not offsetting bands. My own
+   earlier sweep had already printed this and I narrated it differently hours later. CVO built the
+   per-band clause my grain hypothesis implied; it found the **same single date**. Neither shape nor
+   grain reaches this class.
+
+> **Therefore three jobs, one gate:** clause (v) + same-source derivation **closes** the class · the
+> eclipse source cross-reference **audits** it (the only instrument that ever detected a member) ·
+> clause (vi) is a **shape backstop, 1 of 38** — and is described as one everywhere.
+
+## Standing audit — first run
+
+- **inflection: 0 of 37 audited.** 389 dates have no eclipse partition: **unauditable, not clean.**
+- **49financial: 1 of 2 audited** — 2026-07-17.
+- Count + denominator, **never a percentage** (CTO binding). *"We looked twice and it was wrong once."*
+- **It caught its own false alarm on run one:** initially 3 hits, 2 of them the **frontier** (declared
+  account_dist FUNDED seam) which would fail by construction every cycle. Excluded, and the exclusion
+  is reported every run.
+
+## 49F — disposition changed
+
+07-16 roster **matches exactly on all seven bands** (the positive control that licenses the comparison);
+07-17 is **off by −10**. That is the first direct observation of the 49F count axis disagreeing with its
+own source. Per CTO: **a retained-exposure item with a measured defect in it is a KNOWN DEFECT WITH NO
+REMEDIATION DATE.**
+
+**Mechanism grounded, and it is NOT the mis-stamp class:** legacy 07-17 (7140) matches **no** roster date;
+it is not a duplicate of 07-16; the −10 is distributed across 4 of 7 bands. **What it is remains
+UNDETERMINED** — candidates are ungrounded and it should be written as *a known defect of undetermined
+mechanism*.
+
+**Historical 49F remains UNBOUNDED BY CONSTRUCTION**: no roster history before 2026-07-14, closures carry
+no date, and "ever-opened by D" over-counts by a *drifting* 30–37% so no correction factor is legitimate.
+*(A units bug — `opened_ts` is epoch seconds — made my first reconstruction return a flat 9,575 on every
+date; caught because the number was identical across five years, not because anything failed.)*
+
+**49F's count axis has NO assurance instrument for the historical window — not a weak one, none.**
+The prospective comparison begins 2026-07-14 and is the only one available.
+
+## Retained exposure and sequencing
+
+The 49F count axis still reads the legacy served artifact at build time — a live runtime dependency on
+the artifact being replaced. **CVO's finding re-sequences it: global's count axis cannot be complete
+while any leg reads the legacy artifact, so the 49F decouple is a PREREQUISITE for global cross-axis
+coverage, not a post-cutover item.** Reached independently from three directions — COO on measurability,
+CVO on coverage, the −10 on observed error.
+
+**Do not quote a rate for 49F.** n=2 supports none.
