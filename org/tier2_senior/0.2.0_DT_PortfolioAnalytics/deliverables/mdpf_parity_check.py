@@ -87,6 +87,19 @@ CLEAN (CTO confirmed 3/3, 2026-07-22 000840Z) while live Global was internally w
               this in its rc (it previously always returned 0); the parity verdicts still do not.
   --served    runs the same invariant against the LEGACY LIVE artifacts, so "is what we serve
               today correct?" is answerable by the same instrument, not an ad-hoc script.
+
+KNOWN RESIDUALS -- what this gate CANNOT see (CVO adversarial pass, ACCEPTED-CVO 2026-07-22).
+An instrument whose limits are unstated invites over-trust, so they are named here, not omitted:
+  (1) A COMPENSATING ERROR at one firm (model +$50M / non_model -$50M, total unchanged) passes the
+      per-firm identity BY DESIGN -- the identity constrains the sum, not the split. The cross-firm
+      per-field check catches it when the shift is firm-vs-rollup, which is why cross-firm is KEPT
+      (CVO Q3: it is the LOCALIZER, not scope creep -- CROSSFIRM_PASS on both sides is exactly what
+      pinned the 2026-07-22 P0 to opal_aggregate_aua's COMPOSITION rather than the roll-up).
+  (2) THE FRONTIER: a compensating error present IDENTICALLY at firm AND global level evades BOTH
+      checks. Only a deeper-source (cohort / account-level) re-derive catches that -- CVO's Layer-3.
+      Per-firm + cross-firm both green == a component re-derive TRANSITIVELY, not independently.
+  (3) This gate answers "is the artifact internally coherent?", NEVER "is it the RIGHT number?".
+      Coherence is not correctness -- a self-consistent artifact built from a wrong feed passes.
 """
 from __future__ import annotations
 
@@ -94,6 +107,7 @@ import argparse
 import copy
 import fnmatch
 import json
+import math
 import re
 import sys
 from collections import Counter
@@ -520,6 +534,18 @@ def _resolve_total_field(obj):
     return None
 
 
+def _is_finite_num(x):
+    """A value the identity can actually be evaluated on. CVO-found false-PASS (2026-07-22, ITEM 1):
+    a NaN anywhere in (total, model, non_model) makes diff NaN, and `abs(nan) > tol` is **False** in
+    Python -- so the gate returned CLEAN and still counted the date as checked. `json.loads` parses a
+    bare NaN by default, so a producer emitting NaN slipped the gate silently: a false PASS on the exact
+    axis this gate exists for, and a direct violation of its own UNCHECKABLE-IS-NOT-A-PASS rule.
+    inf was already caught (abs(inf) > tol is True) but reported as a SUM_MISMATCH with an infinite
+    hole, which is a misleading verdict; both are now NON_FINITE. bool is excluded deliberately --
+    True/False is not a dollar amount, and `True + 1` would otherwise evaluate happily."""
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
+
+
 def _consistency_violations(obj):
     """Pure INTERNAL-CONSISTENCY comparator (S3-free, unit-testable): total == model_aua + non_model_aua,
     PER DATE, on ONE firm's aggregate. This is the invariant the 3-pass structurally lacked -- a
@@ -549,6 +575,9 @@ def _consistency_violations(obj):
             continue
         if any(nulls):
             viol.append((d, "PARTIAL_NULL", t, m, n, None))
+            continue
+        if not all(_is_finite_num(x) for x in (t, m, n)):
+            viol.append((d, "NON_FINITE", t, m, n, None))
             continue
         n_checked += 1
         diff = (m + n) - t
@@ -608,6 +637,11 @@ def _crossfirm_violations(glob_obj, partner_objs, field):
             parts.append(v)
         if missing:
             out.append((d, "PARTNER_MISSING", g, None, None))
+            continue
+        # same NaN false-PASS as the per-firm identity: sum() with a NaN gives NaN, and abs(nan) > tol
+        # is False -> silently clean. Guarded on BOTH sides of the roll-up, not just the per-firm gate.
+        if not (_is_finite_num(g) and all(_is_finite_num(v) for v in parts)):
+            out.append((d, "NON_FINITE", g, None, None))
             continue
         s = sum(parts)
         diff = s - g
@@ -682,6 +716,27 @@ def _consistency_self_test():
     m3b["non_model_aua"] = m3b["non_model_aua"][:2]
     v3b, _ = _consistency_violations(m3b)
     c_m3b = any(d == "2026-07-20" and k == "PARTIAL_NULL" for d, k, *_ in v3b)
+    # MUTANT 3c -- NON-FINITE (CVO ITEM 1, 2026-07-22): the false PASS CVO constructed. A NaN made
+    # diff NaN, and `abs(nan) > tol` is False -> the gate returned CLEAN **and counted the date as
+    # checked**. json.loads parses a bare NaN by default, so a producer emitting one slipped the gate
+    # silently. Every non-finite shape must now be UNCHECKABLE, and must NOT inflate n_checked.
+    nf_ok = True
+    for bad in (float("nan"), float("inf"), float("-inf"), True, "1234.5"):
+        for field in ("opal_aggregate_aua", "model_aua", "non_model_aua"):
+            mnf = copy.deepcopy(base)
+            mnf[field] = list(mnf[field])
+            mnf[field][2] = bad
+            vnf, snf = _consistency_violations(mnf)
+            nf_ok &= any(d == "2026-07-20" and k == "NON_FINITE" for d, k, *_ in vnf)
+            nf_ok &= (snf["checked"] == 2)          # the poisoned date is NOT counted as checked-clean
+    # and the cross-firm roll-up carries the SAME guard (sum() with a NaN is NaN -> silently clean)
+    g_nf = {"dates": ["2026-07-20"], "model_aua": [float("nan")], "non_model_aua": [40.0]}
+    pA_nf = {"dates": ["2026-07-20"], "model_aua": [250.0], "non_model_aua": [25.0]}
+    pB_nf = {"dates": ["2026-07-20"], "model_aua": [150.0], "non_model_aua": [15.0]}
+    nf_xf_global = any(k == "NON_FINITE" for _, k, *_ in _crossfirm_violations(g_nf, [pA_nf, pB_nf], "model_aua"))
+    g_ok = {"dates": ["2026-07-20"], "model_aua": [400.0], "non_model_aua": [40.0]}
+    pA_bad = {"dates": ["2026-07-20"], "model_aua": [float("nan")], "non_model_aua": [25.0]}
+    nf_xf_partner = any(k == "NON_FINITE" for _, k, *_ in _crossfirm_violations(g_ok, [pA_bad, pB_nf], "model_aua"))
     # MUTANT 4 -- TOTAL FIELD ABSENT is UNCHECKABLE, never a silent clean sweep.
     m4 = {k: v for k, v in base.items() if k != "opal_aggregate_aua"}
     v4, s4 = _consistency_violations(m4)
@@ -715,11 +770,13 @@ def _consistency_self_test():
     c_xf_datejoin = (_crossfirm_violations(g, [pA, pB_rev], "model_aua") == [])
 
     ok = (c_clean and c_m1 and c_m2 and c_m3 and c_m3b and c_m4 and c_part and c_part_bad
-          and c_hn and c_xf_clean and c_xf_drop and c_xf_missing and c_xf_datejoin)
+          and c_hn and c_xf_clean and c_xf_drop and c_xf_missing and c_xf_datejoin
+          and nf_ok and nf_xf_global and nf_xf_partner)
     print(f"SELF-TEST consistency CONTROL (coherent artifact PASSES, gate not stuck-red)={c_clean}")
     print(f"SELF-TEST consistency MUTANT-1 (live bug shape: total omits $153M component) -> RED={c_m1}")
     print(f"SELF-TEST consistency MUTANT-2 sensitivity: caught holes {caught} -> measured floor ${floor:,.2f}; sub-cent ignored={c_m2}")
     print(f"SELF-TEST consistency MUTANT-3 missing-is-NOT-zero: explicit None -> PARTIAL_NULL={c_m3}; truncated array -> PARTIAL_NULL={c_m3b}")
+    print(f"SELF-TEST consistency MUTANT-3c NON_FINITE (CVO ITEM 1 false-PASS): NaN/inf/-inf/bool/str in any of 3 fields -> UNCHECKABLE + not counted checked={nf_ok}; crossfirm global-side={nf_xf_global}, partner-side={nf_xf_partner}")
     print(f"SELF-TEST consistency MUTANT-4 total field absent -> UNCHECKABLE (not a clean sweep)={c_m4}")
     print(f"SELF-TEST consistency PARTNER shape (partner_custody_total resolves)={c_part}; partner defect caught={c_part_bad}")
     print(f"SELF-TEST consistency honest-None row (all 3 None) skipped+counted, not a violation={c_hn}")
@@ -950,6 +1007,9 @@ def _report_consistency(r):
         if kind == "PARTIAL_NULL":
             print(f"    (ic) PARTIAL_NULL {d}: total={_fmt(t)} model={_fmt(m)} non_model={_fmt(n)} "
                   f"-- absent is NOT zero, UNCHECKABLE at this date")
+        elif kind == "NON_FINITE":
+            print(f"    (ic) NON_FINITE {d}: total={t!r} model={m!r} non_model={n!r} "
+                  f"-- not evaluable, UNCHECKABLE at this date (NaN would read CLEAN unguarded)")
         else:
             print(f"    (ic) {d}: total={_fmt(t)} != model {_fmt(m)} + non_model {_fmt(n)} "
                   f"= {_fmt(m + n)}  HOLE={_fmt(diff)}")
@@ -973,6 +1033,8 @@ def _report_crossfirm(r):
         for d, kind, g, s, diff in viol[:5]:
             if kind == "PARTNER_MISSING":
                 print(f"        {d}: global={_fmt(g)} but a partner is missing/None at this date")
+            elif kind == "NON_FINITE":
+                print(f"        {d}: non-finite value on the global or a partner side -- UNCHECKABLE")
             else:
                 print(f"        {d}: global={_fmt(g)} != sum(partners) {_fmt(s)}  DIFF={_fmt(diff)}")
 
