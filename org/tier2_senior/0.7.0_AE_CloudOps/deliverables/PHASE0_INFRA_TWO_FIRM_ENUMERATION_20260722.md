@@ -206,6 +206,12 @@ Findings 1, 2 and 6 are **not three bugs. They are one defect class:**
 | 1 | `count_axis_source_audit` | hardcoded firm keys | two verdicts, third firm absent — **not** `audit_did_not_run` |
 | 2 | `keys_staged: 7` | a literal | `7` |
 | 6 | `all_present` | `len(PUBLISH_MAP)` | `9/9 = True` |
+| 7 | `stale_partners` / `all_fresh` | `partners = {"49financial": …}` | `[]` / `True` — **and the SKIP never fires** |
+
+**Finding 7 is the one that escalates the class from reporting to safety:** 1, 2 and 6 mis-state what
+happened; **7 changes what happens.** A firm outside the protected set does not merely go unreported — **it
+goes unprotected**, and the roll-forward guard that exists to stop WS-E fabricating a residual simply does
+not apply to it.
 
 **Every one reports GREEN while a third firm is missing.** Each was written carefully — Finding 1's helper
 exists *specifically* to prevent silent omission — and each is defeated the same way: **the guard's subject
@@ -214,9 +220,43 @@ list and the world's subject list are different objects, and nothing compares th
 **This is why the completeness-of-enumeration axis is not a nicety.** A green signal derived from a
 hardcoded list is not evidence of coverage; **it is evidence that the list was iterated.**
 
+---
+
+## FINDING 7 — the convergence gate. **A MISSING GUARD, not a missing report.** *(worst of the class)*
+
+`infra/aws/lambda/mdpf-pipeline/mdpf-daily-trigger/lambda_function.py:520-536`
+
+```python
+:520  partners = {"49financial": bd}   # inflection is the spine/DRIVER, not a skippable partner
+:521  stale_partners = [p for p, v in partners.items() if not v["fresh"]]
+:535  "all_fresh": bool(inf["fresh"] and bd["fresh"]),
+```
+
+**`partners` is a SINGLE-ENTRY dict.** Cottonwood is **neither** the spine (inflection is) **nor** a listed
+partner — so **its freshness is never evaluated at all.** It therefore can never appear in `stale_partners`,
+so the dispatch's `MDPF_STALE_PARTNERS` never names it, so **its feeders are never skipped when it is stale.**
+
+**WHY THIS IS CATEGORICALLY WORSE THAN FINDINGS 1, 2 AND 6.** Those omit a firm from a **report**. This omits
+a firm from a **safety mechanism**. The per-partner gate exists *specifically* so a stale partner's feeders
+are skipped — the code says why (`:518-519`): *"WS-E never runs on a stale minuend, so it cannot fabricate a
+residual (roll the BLOCK, never re-derive a field)."*
+
+> **The fabrication this design prevents for 49financial is UNPREVENTED for Cottonwood — not because the
+> protection was refused, but because the protected set is a one-element literal.**
+
+**And `:535` `all_fresh` is a two-firm conjunction** (`inf AND bd`), so on a three-firm cycle it reports
+**`all_fresh: True` with Cottonwood stale.** A fourth instance of the class, on the gate's own verdict field.
+
+**ALIAS DISAMBIGUATION (per DE's caution — resolved by ROLE, not token):** `bd` at `:520`/`:531`/`:535` is the
+**49financial freshness result object**, NOT the `CUSTODY_SOURCE` enum (`bd|schwab`, `:532`, `:404-411`),
+which is a different variable in the same scope. **Two distinct meanings of `bd` in one function; I read the
+role, not the string.**
+
+---
+
 ### IAM — what this limb does NOT cover
-`mdpf-pipeline` + the publisher role. **Not swept:** trigger/freshness Lambda roles beyond the
-`AssetsRevamp*` Sids, `bd-pipeline`/`cot-pipeline` cross-grants, Lambda@Edge. **OPEN, not clean.**
+`mdpf-pipeline` + the publisher role + the trigger gate. **Not swept:** the freshness-checker Lambda,
+`bd-pipeline`/`cot-pipeline` cross-grants, Lambda@Edge. **OPEN, not clean.**
 
 ### INSTRUMENT NOTE — a false ABSENT I nearly published
 `aws s3api list-objects-v2 --delimiter "/" --query 'CommonPrefixes[].Prefix' --output text` returned `None`
