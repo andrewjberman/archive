@@ -100,12 +100,68 @@ from one on the serving path, and I have not distinguished them.*
 
 ---
 
-## IAM — PARTIAL, and I am not claiming it clean
+## IAM — ARN-AXIS SWEEP RUN (DE GO 154107Z). **FINDING 5 IS A HARD BLOCKER ON PHASE 1a.**
 
-The token sweep surfaced **no** firm-enumerating IAM policy in `infra/`. **That is a weak result, not a pass:**
-IAM two-firm encodings would appear as bucket/prefix ARNs (`opal-data-bd`, `opal-data-inf`, `opal-data-cot`),
-**which name buckets, not firms** — so the firm-token axis cannot see them. **The IAM limb needs an
-ARN-axis sweep and I have not run one.** Recorded as OPEN, not covered.
+### FINDING 5 — the MDPF revamp producer's role CANNOT READ Cottonwood silver
+
+`infra/aws/terraform/mdpf-pipeline/iam.tf:243-252`, Sid `AssetsRevampSilverRead`, grants `s3:GetObject` on
+**exactly five** ARNs:
+```
+opal-data-assets/smartx/platform/silver/*
+opal-data-assets/schwab/08242234/silver/*
+opal-data-assets/eclipse/inflection/silver/*
+opal-data-assets/orion/inflection/silver/*
+opal-data-assets/gold/mdpf_revamp/*
+```
+**`blackdiamond/cottonwood/silver/*` is not among them** — and Cottonwood silver demonstrably EXISTS there
+(12 `fact_*` tables: `fact_holdings`, `fact_allocations`, `fact_model_definition`, `fact_transactions`, …
+the WS-5 converter output).
+
+**GROUNDED ON ALL THREE LIMBS (Rule 22a):**
+
+| limb | instrument | result |
+|---|---|---|
+| `desired` | TF source at HEAD | 5 ARNs, no Cottonwood |
+| `applied` | live `aws iam get-role-policy --role-name mdpf-daily-runner-ec2-role --policy-name mdpf-runner-scoped` | **same 5 ARNs, no Cottonwood** — desired and applied AGREE, so this is **not drift, it is an unbuilt dependency** |
+| `exercised` | `simulate-principal-policy`, **one `--resource-arns` per call** | `blackdiamond/cottonwood/silver/...` → **`implicitDeny`** |
+| control | **SEPARATE invocation** (never batched — 2+ ARNs poisons the held ones) | `eclipse/inflection/silver/...` → **`allowed`** |
+
+**The control discriminates**, so the `implicitDeny` is a real deny and not a blanket refusal.
+
+**CONSEQUENCE:** Phase 1a re-homes Cottonwood as `build_cottonwood_artifact()` **inside the shared producer**,
+which runs on `mdpf-daily-runner-ec2-role`. **On its first read of Cottonwood silver it AccessDenies at
+runtime.** `AssetsRevampListScoped` (`:271-279`) carries the same closed prefix-condition list, so partition
+discovery (`_latest_date` / `_read_partition` paginators) fails the same way. **Both need the Cottonwood
+prefix before 1a can run green.** Not built under the hold — recorded, owner CTO.
+
+### WHY NEITHER SWEEP AXIS WOULD HAVE FOUND THIS — a THIRD axis is needed
+
+- **firm-token axis:** `main.tf:56-61` declares `bd_bucket` / `inf_bucket` and **no `cot_bucket`.** Those name
+  **buckets, not firms.** Invisible.
+- **unnamed-arity axis** (DE's second sweep): there is **no `2` anywhere here** — five ARNs covering two firms.
+  A `== 2` / `[0]`/`[1]` / concat-pair search finds nothing. **Also invisible.**
+
+> **The two-firm encoding here is an ABSENCE, and AN ABSENCE HAS NO TOKEN. You cannot grep for what is not
+> there.** Every pattern search — on firm names, on arities, on anything — enumerates what IS present. This
+> class is only visible by taking an enumerated grant/config and **comparing it against the population it is
+> supposed to cover.**
+
+**THIRD AXIS, recommended to DE for the census:** *completeness-of-enumeration* — for each place the estate
+lists its subjects (IAM resource lists, prefix conditions, event-pattern filters, `choices=[...]`, config
+maps), diff that list against the real population. **It is a set-difference check, not a pattern match**, and
+it is the only axis that can see a missing member.
+
+### IAM — what this limb does NOT cover
+The `mdpf-pipeline` root only. **Not swept:** `opal-assets` publisher roles, the trigger/freshness Lambda
+roles beyond the `AssetsRevamp*` Sids, `bd-pipeline`/`cot-pipeline` cross-grants, and Lambda@Edge. **OPEN.**
+
+### INSTRUMENT NOTE — a false ABSENT I nearly published
+`aws s3api list-objects-v2 --delimiter "/" --query 'CommonPrefixes[].Prefix' --output text` returned `None`
+for `blackdiamond/cottonwood/` — **and returned 134 `None`s at the bucket root, where prefixes certainly
+exist.** The positive control is what caught it; `aws s3 ls` on the same bucket returned all 12 prefixes
+correctly. **Mechanism UNDETERMINED** (a lone `"/"` delimiter arg is a plausible MSYS-mangling target, not
+established). **Had I not run the root control I would have reported "Cottonwood silver does not exist" —
+the exact inverse of the true finding.**
 
 ---
 
