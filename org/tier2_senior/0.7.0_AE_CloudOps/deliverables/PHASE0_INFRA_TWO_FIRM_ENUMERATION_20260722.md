@@ -1,5 +1,33 @@
 # PHASE 0 — the `infra/` limb of the two-firm enumeration
 
+> ## ⛔ BINDING ON `0.7.0_AE_CloudOps` — APPLY GATE ON DS'S AUDIT-WIRING DIFF. READ BEFORE ANY R1 APPLY.
+>
+> **I WILL NOT LAND DS'S AUDIT-WIRING DIFF AS PREPARED.** (`0.4.0_DS` @`c138e7f58`; STOP block on the diff
+> itself @`930d85108`.)
+>
+> **THREE CONDITIONS, ALL REQUIRED, AS ONE STEP — NEVER THE DIFF FIRST AND THE FIX AFTER:**
+> 1. the diff, **plus**
+> 2. **derive the marker's `count_axis_source_audit` keys from the world, not the two literals**, and carry
+>    `unaudited_firms` as a first-class marker field where **non-empty = cycle NOT clean** regardless of every
+>    mapped leg being green, **plus**
+> 3. **CONTROL 5 — stage a synthetic THIRD firm prefix under `gold/mdpf_revamp/`, run the stage, assert the
+>    marker NAMES it.** **If the marker still reads green and two-firm, the wiring is SELF-CERTIFYING and
+>    DOES NOT LAND.**
+>
+> **DS's controls 1-4 are NOT sufficient** — control 4 ("absent is not clean") only fires for a firm already
+> in the dict, so **all four pass green on a cycle missing an entire firm.**
+>
+> **VINTAGE:** the diff header's `CTO: APPROVED AS WRITTEN 134926Z` is **TRUE, never retracted, and predates
+> the §7f finding by ~3 hours** — DS marked it SUPERSEDED IN PART rather than deleting it. **An approval is
+> valid as of what was known when it was given.**
+>
+> **WHY THIS BLOCK EXISTS, recorded against myself:** I told DS *"a message is not a carrier"* and then left
+> this entire gate **in a message**, while committing only the doctrine half (@`5bcd9bec5` — gate language: 0
+> occurrences; positive control: 3). **DS verified my carrier instead of trusting it and caught it.** The
+> insight half feels like the finding, so it gets written down; **the operational half feels like a decision
+> you will obviously remember — and that is the half that dies at a reset.** Same class as R1, committed
+> within an hour of the R1-R12 sweep landing.
+
 **Author:** `0.7.0_AE_CloudOps` 2026-07-22 ~1537Z · **Phase 0 owner:** `0.4.0_DE_ClientPlatform`
 **Why me:** DE's coverage line names **`infra/` dispatch + IAM as NOT COVERED**, and that is my domain.
 **Authority:** carve-out 3 — *"read-only MDPF ANALYSIS continues, especially Phase 0 — enumerating is not
