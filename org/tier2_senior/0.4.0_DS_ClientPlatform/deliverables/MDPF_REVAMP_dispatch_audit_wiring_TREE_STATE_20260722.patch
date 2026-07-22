@@ -1,0 +1,71 @@
+diff --git a/infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh b/infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh
+index eeb5a0281..c18e149bf 100644
+--- a/infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh
++++ b/infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh
+@@ -475,15 +475,48 @@ revamp_stage() {  # returns non-zero on ANY failure (caught + non-fatal by the c
+   # 6c: non_model (reads the staged global+inflection aggregate, self-uploads
+   #     gold/mdpf_revamp/global/non_model_assets.json). MUST follow 6a.
+   "$PY" "${REVAMP_DIR}/dim_mdpf_non_model_assets.py" --upload || return 1
++  # 6d: STANDING count-axis SOURCE cross-reference (CTO 132852Z/133040Z). The in-producer
++  #     cross-axis gate CLOSES this defect class but AUDITS NOTHING: a duplicated roster is
++  #     byte-indistinguishable from a genuinely unchanged one, so no artifact-internal check
++  #     can see it. Only a SOURCE comparison can, and a one-time sweep gives zero ongoing
++  #     assurance -- hence every cycle. MUST follow 6a (audits the staged artifacts).
++  #
++  #     >> THE ASYMMETRY BELOW IS DELIBERATE AND CTO-APPROVED AS WRITTEN (134926Z).
++  #        DO NOT "TIDY" IT INTO ONE `|| return 1`. <<
++  #     inflection: a disagreement is a REAL REGRESSION -> fail the stage.
++  "$PY" "${REVAMP_DIR}/mdpf_revamp_count_source_audit.py" --firm inflection \
++       --json "${REVAMP_OUT}/audit_inflection.json" || return 1
++  #     49financial: KNOWN defect (2026-07-17, ten accounts), undetermined mechanism, and NO
++  #     source exists to fix it against. REPORT-ONLY ON PURPOSE -- a `|| return 1` here would
++  #     fail this stage EVERY NIGHT BY CONSTRUCTION: the marker would never land, the streak
++  #     would never accrue, and within a week the nightly failure becomes noise everyone
++  #     scrolls past. That is the alarm-people-learn-to-acknowledge failure, and a guard
++  #     everyone ignores is worse than no guard because it still reads as coverage.
++  "$PY" "${REVAMP_DIR}/mdpf_revamp_count_source_audit.py" --firm 49financial \
++       --json "${REVAMP_OUT}/audit_49financial.json" || true
+   return 0
+ }
+ 
+ if [ -f "${REVAMP_DIR}/dim_mdpf_aggregate_aua_timeseries.py" ]; then
+   if revamp_stage; then
+     # completion marker LAST -- ONLY after all 7 keys staged. REVAMP-NAMESPACED (NOT Door-6).
+-    "$PY" - "$RUN_DATE" "$RUN_ID" > /tmp/mdpf_revamp_marker.json <<'PYEOF'
+-import json, sys, datetime
+-run_date, run_id = sys.argv[1], sys.argv[2]
++    "$PY" - "$RUN_DATE" "$RUN_ID" "$REVAMP_OUT" > /tmp/mdpf_revamp_marker.json <<'PYEOF'
++import json, os, sys, datetime
++run_date, run_id, out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
++
++
++def _audit(name):
++    """Fold the audit verdict in. ABSENT IS NOT CLEAN -- if the file is missing the marker says
++    the audit DID NOT RUN, it does not omit the field (an omitted field reads as 'fine')."""
++    p = os.path.join(out_dir, f"audit_{name}.json")
++    try:
++        with open(p, encoding="utf-8") as fh:
++            return json.load(fh).get(name) or {"error": "audit json missing its firm block"}
++    except Exception as e:                                          # noqa: BLE001
++        return {"audit_did_not_run": True, "reason": str(e)[:200],
++                "read_as": "NOT clean -- absence of a verdict is not a passing verdict"}
++
++
+ print(json.dumps({
+     "schema_version": "1.0",
+     "marker": "mdpf_revamp_cycle_complete",
+@@ -496,6 +529,14 @@ print(json.dumps({
+         "account_distribution": ["49financial", "inflection", "global"],
+         "non_model_assets": ["global"],
+     },
++    # STANDING count-axis source cross-reference (CTO 132852Z/133040Z). Numbers are RECOMPUTED
++    # over full history every run, so they are cumulative AND idempotent -- "1 of 2" becomes
++    # "2 of 5" as dates accrue, with no stored counter to double-count or silently reset.
++    # DELIBERATELY NO PERCENTAGE (CTO 133040Z): count + denominator only. n supports no rate.
++    "count_axis_source_audit": {
++        "inflection": _audit("inflection"),
++        "49financial": _audit("49financial"),
++    },
+     "note": ("REVAMP-namespaced completion marker under gold/mdpf_revamp/meta/. This is NOT "
+              "the legacy gold/meta/pipeline-complete.json (Door-6). Publish HELD: publisher OFF, "
+              "portal/* untouched."),
