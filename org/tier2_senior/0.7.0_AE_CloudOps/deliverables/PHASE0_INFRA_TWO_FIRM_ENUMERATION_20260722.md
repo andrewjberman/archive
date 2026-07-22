@@ -49,7 +49,26 @@ initiating, and it is the input the advisory needs."* **Read-only. Nothing chang
 
 ---
 
+> ### ⚠ VINTAGE CORRECTION (1645Z) — READ BEFORE FINDINGS 1 AND 2.
+> **I originally reported both against the working tree without saying so. Grounded:**
+> ```
+> count_axis_source_audit   HEAD: 0 occurrences   WORKING TREE: 1
+> keys_staged: 7            HEAD: :493            WORKING TREE: :526
+> positive control (revamp_stage)   HEAD: 2       WORKING TREE: 2   <- discriminates
+> ```
+> **FINDING 1 IS NOT ESTATE STATE — it describes UNCOMMITTED code**, i.e. DS's pending audit-wiring diff
+> (44 insertions sitting in the working tree). **It is the same defect DS self-reported @`c138e7f58`, reached
+> independently.** It remains correct *about the pending diff* and is **gated by the BINDING block above**;
+> it is **not** a defect currently running.
+> **FINDING 2 IS estate state** — `keys_staged: 7` is committed, **but I cited `:526`, a working-tree line.
+> At HEAD it is `:493`.** Rule 22: *a line citation without a vintage is not a citation* — committed by me
+> **in the document that flags the class.**
+> **OPERATIONAL:** those 44 uncommitted insertions are exposed to the shared-worktree sweep hazard (twice
+> today: CLAUDE.md, ORG_CHART). **Narrow pathspecs only; do NOT commit it to "protect" it — committing IS
+> landing it, and it is held + gated.**
+
 ## FINDING 1 — the completion marker's anti-omission guard is ITSELF firm-hardcoded
+*(against the PENDING DIFF, not HEAD — see the vintage correction directly above)*
 
 `infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh:508-539`
 
