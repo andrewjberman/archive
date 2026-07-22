@@ -6,7 +6,7 @@
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:29Z</issued_at>
-<status>pending</status>
+<status>complete</status>
 <authorization>LD-0333 am.1 @2eef569d2 -> CTO cascade 200805Z -> COO decomposition.</authorization>
 
 <references>
