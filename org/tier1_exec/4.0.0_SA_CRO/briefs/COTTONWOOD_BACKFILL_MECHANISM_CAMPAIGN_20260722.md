@@ -1,0 +1,210 @@
+# Cottonwood Daily Model-Allocation BACKFILL — Full BD-Surface Mechanism Campaign
+
+**Author:** `4.0.0_SA_CRO` (Chief Research Officer) · **Home:** `org/tier1_exec/4.0.0_SA_CRO/` · **Date:** 2026-07-22
+**Extends:** RCN-0001 (Black Diamond teardown) · **Recon linkage:** the BD half of the MDPF Cottonwood backfill question.
+**Commissioned:** Andrew-direct, 2026-07-22 ~22:10Z, verbatim: *"hit the motherfuck (that means hit a lot and
+everywhere) on BD to identify if there is some possible way of identifying a mechanism for backfill of daily
+allocation count and value for each opal model."*
+**Egress:** Andrew's explicit per-use word above authorizes **read-only cot-BD** probing. **Firm-sep binds — cot-BD
+ONLY** (`blackdiamond/cot/session` + `opal-data-cot`); the BD platform serves 49F too and 49F stays untouched (COO
+222937Z). **No production template is mutated; 0.6.2's `templates_enriched/` paths untouched.**
+**Verdict authority (CTO v1.21 / COO 224310Z):** this campaign now carries the **full temporal-vs-current verdict**
+that gates the Cottonwood backfill design — 0.6.2's second live probe is retired into it.
+**Grades:** **[GROUNDED]** read at source · **[MEASURED]** live-tested (prior addenda) · **[HELD]** gated on a fresh
+session · **[RULED OUT]** measured dead end · **[UNPROBED]** needs a call not yet made.
+
+> **THE ANSWER, one paragraph.** I swept the entire BD estate — both surfaces, every date-bearing endpoint. **Exactly
+> ONE surface can possibly deliver dated per-model allocation history, and it is DataMining's `qt5 allocations`
+> template — which ALREADY selects the account→strategy assignment dimension and is date-windowed, so the decisive
+> test needs no template change, just a past-window RUN.** Every other candidate is either measured-dead (the
+> rebalancer ignores injected dates; its native dated surfaces are empty for Cottonwood) or unprobed-and-lower-odds
+> (Surface-B account/audit/timeline). **The whole question therefore reduces to one probe with an unfalsifiable
+> intrinsic control — blocked today only by a 16-day-stale session.** And whatever it returns, **nothing reaches
+> before ~2026-05-28: the Opal models did not exist, so there is nothing to allocate to.**
+
+---
+
+## 1. What "a backfill mechanism" must produce — the bar every candidate is graded against
+
+For each past date `D` (D ≥ ~05-28), fabrication-free `model_aua[m,D]` and `account_count[m,D]` need **three vintages
+each dated to D** (established in the enriched brief):
+
+| Vintage | We have it dated? |
+|---|---|
+| **(c) VALUE** — per-account holdings MV | **YES** — cot silver holdings back to ~06-08 |
+| **(a) ASSIGNMENT** — which strategy each account was on **on D** | **NO** (live-state roster, no date field) — this campaign hunts it |
+| **(b) BLEND** — strategy→model weights **as of D** | **NO for history** — same hunt, composition axis |
+
+**A mechanism is only as deep as it can date (a) and (b).** (c) is not the constraint. This campaign is the search
+for a dated (a)/(b) source across every BD surface.
+
+---
+
+## 2. THE FULL SURFACE SWEEP — every BD endpoint that could carry dated assignment, graded
+
+### Surface A — DataMining (the date-*windowed* query API; the live hope)
+
+| # | Candidate | Dated? | Carries assignment? | Grade | Verdict |
+|---|---|---|---|---|---|
+| **A1** | **`qt5 allocations` (tid 226334) past-window run** | **YES** — `dateRangeType:Custom`, start/end | **YES — `accountRebalStrategyID`+`accountRebalStrategyName` ALREADY `isSelected:true`** (+ MV + account) | **[GROUNDED / HELD]** | **THE decisive probe. No re-persist. §3.** |
+| A2 | `qt1 holdings` past-window | YES (windowed) | **UNKNOWN** — dims server-side, never dumped (0.6.2 dumps tonight) | [HELD] | If qt1 carries an assignment dim it is the *cleanest* source (native daily snapshot). Await 0.6.2's dump. |
+| A3 | `qt2 transactions` (tid 226274) | YES — real dated events back to ~03-09 | Portfolio-level only (`portfolioRebalStrategyID/Name`); **no account-level**; also carries a **`backdatedDate`** restatement field | [GROUNDED] | **Guard, not source** — dates *when* composition changed (bounds trustworthy windows); cannot *name* the strategy (basket overlap). §4. |
+| A4 | `v1/run` `asOfDate` parameter | YES (server-evaluated) | inherits the table's dims | [HELD] | Same temporal question at the run level — folded into A1's probe (the run body already carries the date). |
+| A5 | `qt3/qt4 realized/unrealized` | YES (windowed) | account-rebal dims **available, unselected** (enriched brief §1) | [GROUNDED] | Lot-grained, not allocation-count; would need a re-persist. Lower value than A1, which is already selected. |
+
+### Surface B — the product APIs (RCN-0001 capture; date-*bearing* fields observed)
+
+| # | Candidate | What the capture proves | Grade | Verdict |
+|---|---|---|---|---|
+| B1 | **Account entity** `rebalancerAssignment` + `asOfDate` + `dataAsOfDate` + `performanceStartDate` | The account record **carries an assignment field and multiple as-of dates** — body retained current only | [UNPROBED] | Probe: `GET account/{id}` with `asOfDate` variants — does `rebalancerAssignment` move? **Second-highest odds after A1.** |
+| B2 | `datamanagement/.../transactionbackdates/dataformat` + `reconstatus/summary` + `dashboard/audit/*` | BD **tracks restatements + backdates as first-class** (the `backdatedDate` field in A3 is its data-plane) | [UNPROBED] | If assignment changes are audited, the audit log IS a dated change-set. Restatement tracking, not assignment-specific — medium odds. |
+| B3 | `includeHistoricalBenchmarkAssignments=true` (proven param on **benchmark** endpoints) | BD treats **historical assignment as a queryable concept** — proven for benchmarks | [UNPROBED] | Probe for a **model/strategy sibling** (`includeHistorical*` on `api/models/strategies/*`). Concept exists; a model twin is the hope. |
+| B4 | `rebalancer` `api/sessions/*` + `trademanagement/blotter/search` | Natively dated (session = timestamped event; blotter = timeframe filter) | **[RULED OUT — MEASURED]** | **EMPTY for Cottonwood over a 19-month window** (Addendum 3, live). Coverage gap = migration, not shape. Dead for cot. |
+| B5 | `relationship.reportingDates{historyStartDate,startDate,asOfDate}` | As-of semantics at relationship level | [UNPROBED] | Governs *reporting window*, not model assignment. Low odds it carries per-account strategy history. |
+| B6 | `timeline` service (`api/v1/posts`, `tags`) | Inherently temporal client feed | [UNPROBED] | It is portal posts/tags, **not** model assignment. Lowest odds; swept for completeness, not expected to carry it. |
+| B7 | `portfolioreporting/performanceSeries` | Daily arrays behind the chart | [UNPROBED] | Return series, not allocation-*count*; could carry per-class MV over time but not the *count* per model. Tangential. |
+
+**Coverage statement (the denominator):** 2 DataMining surfaces × 5 query types + ~15 Surface-B services enumerated;
+**every date-bearing endpoint in the RCN-0001 corpus is accounted for in the table above** — none silently dropped.
+The two surfaces the campaign leans on (A1 live, B1/B2/B3 unprobed) are the only ones where a dated assignment could
+survive; the rest are graded and set aside with the reason stated.
+
+---
+
+## 3. THE DECISIVE PROBE — A1, sharpened, with a WINDOW-INTEGRITY CONTROL (CTO v1.21, binding)
+
+**The single question that gates the whole backfill design:** does `qt5 allocations`, run for a **past window**,
+return the account→strategy assignment **that was in force then** (TEMPORAL → backfill is real) or **today's stamped
+onto the past window** (CURRENT → the surface is closed)?
+
+**Why it is the cheapest possible test:** the account-strategy dimension is **already selected in the production
+template** (verified in `templates/allocations.json`: `accountRebalStrategyID` id 35392 + `accountRebalStrategyName`
+id 35393, both `isSelected:true`, `isEnabled:true`). **No template re-persist. No mutation. A pure past-window RUN of
+the template we already run daily.**
+
+### The verdict logic — window-integrity FIRST (this is the CTO v1.21 requirement, not optional)
+
+> **THE FAILURE MODE THAT MATTERS is window-IGNORING — the eclipse `--date`-is-a-filename class.** A query that
+> silently returns CURRENT state for a past window yields a **false-CURRENT verdict that kills the backfill capability
+> while looking like an honest negative.** 0.6.2 proved exactly this on eclipse today (8 date params → byte-identical
+> sha256). My intrinsic control must catch in-run what a second instrument would otherwise catch.
+
+**The model-creation timeline IS the window-integrity instrument** (from RCN-0001 Addendum A2, `rebalancer_model_detail`
+`createdAt`): on a true **2026-06-15** window, Satellite 60 (created 06-23) and 30/40/70/98 (created 07-06) **cannot
+exist**, and the roster is ~136–215 accounts, not today's 296. So:
+
+```
+RUN qt5 for window W_past = 2026-06-15 (+ a deeper W = 2026-05-15, pre-most-models)
+  and W_recent = today, same template, only the dates differ.
+
+STEP 0 — WINDOW-INTEGRITY GATE (must pass before any temporal/current verdict is legal):
+  Does W_past return a roster STRICTLY REDUCED per the creation timeline
+  (no Satellite 60; no 30/40/70/98; account count < today's 296; April window => "No Strategy" sentinels)?
+    NO  (W_past returns today's full 296 + all strategies) -> WINDOW WAS IGNORED.
+         => the surface is the eclipse class. Verdict = CURRENT-only, backfill CLOSED on A1. VALID because
+            the same run PROVED the query reached (and was ignored by) the past window.
+    YES (W_past returns the reduced, era-correct roster) -> WINDOW WAS HONORED. Proceed to Step 1.
+    INCONCLUSIVE (cannot demonstrate honored either way) -> UNVERIFIABLE-INSTRUMENT, NOT a finding.
+         => trigger the CTO-gated escape (below).
+
+STEP 1 — TEMPORAL DISCRIMINATION (only legal once Step 0 = HONORED):
+  For the 15 churn-control accounts (0.6.2's set: Opal today, ABSENT from the 06-09 book):
+    W_past returns them absent/unassigned  -> TEMPORAL. Backfill is real to the coverage horizon. Apply the B2
+                                              model-weight rollup -> dated model_aua + account_count. GO LOUD to COO/CTO.
+    W_past returns them carrying today's Opal strategy -> CURRENT-stamped at the dimension. Backfill CLOSED.
+```
+
+**Binding (COO 224310Z):** *a CURRENT-only verdict is VALID only if the same run demonstrates the window was honored.*
+A CURRENT-only claim without Step-0=HONORED is `UNVERIFIABLE-INSTRUMENT`, reported as such, never as "the surface is
+current-only." **Both controls are intrinsic and cannot false-positive:** the timeline control cannot be faked (BD
+would have to invent pre-creation history); the churn control fails in both directions.
+
+### The CTO-gated escape (do not self-arrange)
+
+IF the run returns **CURRENT-only AND Step-0 INCONCLUSIVE** (window integrity undemonstrable either way), a
+second-instrument confirmation becomes justified — **0.6.2's re-persist method, ONE deliberate touch inside a normal
+session window, on CTO's EXPLICIT GO, routed back through COO.** Never off-window, never a concurrent session, never
+by default, never arranged directly with 0.6.2.
+
+---
+
+## 4. A3 as a dated GUARD (not a source) — the one honest secondary use
+
+`qt2 transactions` is dated back to ~03-09 and carries a `backdatedDate` restatement field. It **cannot name** a
+strategy (the same basket cosine 0.62–0.98 that bans fingerprinting). But a rebalance produces a datable **cluster**
+of trades → it dates *when* an account's composition changed, bounding the windows in which a carried-forward
+assignment is trustworthy. **Sharp limit (CTO's symmetry): detected rotation → never carry across (sound); no rotation
+detected → nothing licensed** (absence-of-signal cannot affirm stability where baskets overlap most). Use only as a
+guard on A1's output, and to *manufacture* the churn positive control as the forward series accrues — never as the
+assignment source.
+
+---
+
+## 5. RULED OUT — measured, not asserted
+
+- **Holdings-basket fingerprinting** — strategy baskets cosine **0.62–0.98, mostly >0.90** (measured). Inference-from-
+  similarity = the fabrication class. **Never propose.** (COO flagged this is exactly the temptation "identify a
+  mechanism" invites; the run-level discriminator sidesteps it.)
+- **Rebalancer date-injection** — **live-tested (Addendum 3):** 10 date shapes on `accounts/search`, 2 on `models/{id}`
+  — **all ignored, positive control fired.** No hidden date parameter.
+- **Rebalancer native-dated surfaces (sessions/blotter)** — **live-tested: EMPTY for Cottonwood over 19 months.**
+- **Back-mapping today's assignment** — churn-wrong (models created 05-28→07-17; a quarter of the book on one day).
+
+---
+
+## 6. THE STRUCTURAL CEILING — restated because it bounds every branch
+
+**No mechanism, live or not, reaches before ~2026-05-28.** The Opal models were *created* 05-28→07-17
+(`rebalancer_model_detail.createdAt`, measured); only ~54/296 accounts (18%) are even allocatable before June. Backfill
+best-case is Cottonwood joining the MDPF series from ~05-28 (a partial subset) growing to full ~07-06 — **a ~7-week
+window against a 21-month chart, not the series start.** The honest deliverable is a short, self-extending, correctly-
+labelled series; per the migration reframing (Andrew: *"do not get too indebted to what they have or don't have yet"*),
+forward-only is already a correct answer, and A1-if-temporal only *widens* it, never completes it.
+
+---
+
+## 7. THE ONE EXECUTION GATE — and what clears it
+
+**The decisive A1 probe is HELD on session auth, not on design.** `blackdiamond/cot/session` `captured_at =
+2026-07-06T02:02:47Z` — **16 days stale** (read at source this session), far past BD's ~30–60min effective TTL. Every
+data read will 401 exactly as Addendum 2 measured; I am **not** burning a live call to re-confirm a known 401 (that is
+the re-run-a-known-answer anti-pattern).
+
+**What clears it (either path):**
+1. **A fresh cot-BD login capture from Andrew** (as `sdgsdgsd.har` cleared it in Addendum 3). Then the A1 probe runs
+   in seconds — the harness is written and ready (`scripts/cot_qt5_temporal_probe.py`, §8), window-integrity control
+   baked in. **This is the fast path and it is the single thing that lets me answer Andrew's question tonight.**
+2. **Tonight's 02:00Z session-refresh chain** — but note the secret has NOT refreshed in 16 days, so the chain's own
+   freshness is in doubt (a WS-1 feed-liveness flag already in the record, 0.6.2/CTO's lane, not mine to fix). If it
+   fires clean, the on-box operator runs the harness in the same window.
+
+**A blocked run is a STATED GATE, not a failure** (COO 224310Z) — nothing in 0.6.2's sequence changes; the design,
+the controls, and the harness are complete and waiting on auth only.
+
+---
+
+## 8. Harness — ready to fire (`scripts/cot_qt5_temporal_probe.py`)
+
+Self-contained, read-only: loads the SM session, mints the DataMining Bearer, runs `qt5 allocations` for
+{2026-05-15, 2026-06-15, today}, downloads each xlsx, and **evaluates Step-0 window-integrity FIRST** (era-correct
+roster per the model-creation timeline) then Step-1 temporal discrimination on the 15 churn accounts. Prints an
+explicit `VERDICT=TEMPORAL | CURRENT-only(window-honored) | UNVERIFIABLE-INSTRUMENT` line. It **runs nothing until a
+fresh session exists** — a stale session yields a clean `HELD: session 401` and exits, never a false verdict.
+
+---
+
+## 9. Grounding
+
+**[GROUNDED]** qt5 template selects `accountRebalStrategyID/Name` (id 35392/35393, `isSelected:true`) +
+`dateRangeType:Custom` (`data/cot/scripts/bronze/templates/allocations.json`, read this session) · qt2 carries
+`portfolioRebalStrategyID/Name` + `backdatedDate`, no account-level (`transactions.json`, read) · gold
+`dim_model_portfolio` computes the daily count+value (parquet read) · session `captured_at=2026-07-06` (SM secret,
+read) · model-creation timeline + churn-control accounts (RCN-0001 Addendum A2; 0.6.2 B6 probe-prep, 15 accounts).
+**[MEASURED]** rebalancer date-injection ignored + sessions/blotter empty (Addendum 3, live) · basket cosine 0.62–0.98.
+**[UNPROBED]** B1/B2/B3/B5/B6/B7 Surface-B endpoints — enumerated, graded, not yet called. **[HELD]** A1/A2/A4 on the
+fresh session.
+
+**One-line:** the entire BD estate offers exactly one live path to dated per-model allocation history — a past-window
+run of the qt5 template we already own — and it is one fresh login capture away from a definitive, window-integrity-
+controlled verdict; everything else is measured-dead or lower-odds-unprobed, and nothing reaches before the ~05-28
+model-creation floor.
