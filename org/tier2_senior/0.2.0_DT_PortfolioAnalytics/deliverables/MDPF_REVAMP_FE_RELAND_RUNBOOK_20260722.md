@@ -23,6 +23,29 @@ the data is corrected and a **FRESH** never-widen co-sign is issued.
 > 0159Z is **NOT A GO**; route it back rather than acting on it. This is the single most likely way a
 > wrong promote happens, which is why it is at the top.
 
+## LANE ACTIVE — FE-FIRST sequence (COO 055650Z; data-gate PASSED, COO-verified)
+
+The data-gate is **PASSED** — COO independently re-ran CVO's Layer-3 live against the new coherent-9
+(`c27e1f37` set): PASS, B-basis consistent, 421/421 mutant-proven. The re-land is **FE-FIRST**, the
+deliberate inverse of the flip that half-landed:
+
+```
+1. DE   folds 2x + content-A/B into the revamp FE  ->  DEV surface-check GREEN   (DE's leg, CTO-tasked)
+2. DT   promotes FE-FIRST (/prod-deploy, ephemeral worktree, main tree stays DEV) -> opalinvest.dev
+3. AE   re-populates the publisher (9 keys from the c27e1f37 fixed data) + re-applies routing
+```
+**FE leads, data follows.**
+
+> ### ⚠ THE WINDOW BETWEEN STEP 2 AND STEP 3 IS REAL
+> Between my push and AE's re-populate, **the new FE is live against the OLD published data.** If the
+> revamp FE reads a key or shape the currently-published set does not carry, opalinvest.dev renders
+> wrong or empty for the duration — and it is Andrew-visible.
+> This is **not** an argument against FE-first (half-landed proved the other order is worse). It is an
+> argument for answering *"what does the new FE do against the old data?"* **before** the push, not
+> after. **That answer is DE's to give.** Degrades clean (empty states, no crash) -> the window is
+> cosmetic. Hard-fails or shows misleading numbers -> compress the gap deliberately, AE staged to fire
+> immediately behind me. Raised to COO + DE 0557Z so it costs a question rather than an incident.
+
 ## Hard-gate battery — ALL SIX before `/prod-deploy`
 
 | # | Gate | Owner | How it is satisfied (evidence, not assertion) |
@@ -32,7 +55,33 @@ the data is corrected and a **FRESH** never-widen co-sign is issued.
 | 3 | 3 inflection `PARTIAL_NULL` dates dispositioned | DS (+CVO) | 2026-05-21 / 06-01 / 07-01: `partner_custody_total` populated, BOTH components None. Honest → a NAMED exemption I add **and CVO rules whether that exemption can hide a real defect**; else fixed. **Do not soften the gate to reach green.** |
 | 4 | Re-land DEV commit carries `SURFACE_ACK: <reason>` | DE/DS (FE author) | CTO ruling 041852Z (a). The SEV1 touch is *justified* (the revamp IS model-portfolios work) but **justification != ack**. The `^`-anchor is load-bearing: the token must **START** the line. |
 | 5 | **Surface-Check Gate GREEN on the EXACT promoted sha** | DT verifies, CTO confirms | Interim manual control for the PROD-path gap (below). Quote run id + head sha + conclusion. Not "a green run on DEV" — *the sha*. |
-| 6 | **FRESH** never-widen co-sign (CTO+COO+Andrew) + Andrew re-eyeball + CTO go | CTO/COO/Andrew | pinned to the **corrected** ETags |
+| 6 | **FRESH** never-widen co-sign (CTO+COO+Andrew) + Andrew re-eyeball + CTO go | CTO/COO/Andrew | pinned to the **corrected** ETags — **the NEW `c27e1f37` set** |
+
+### Gate status as of 2026-07-22 ~0558Z
+
+| # | Status |
+|---|---|
+| 1 | **DONE** — composition fix landed; `opal_aggregate_aua` == model + non_model exactly |
+| 2 | **DONE** — DT consistency `rc=0` all 3 firms + `CROSSFIRM_PASS` regime B, ETag-pinned; parity all aggregates `NAMED_DELTA_PASS`, 0 unexplainable windows, fitted-signature 0/8 |
+| 3 | **DONE** — 6 dates declared honest-None via `meta.honest_none`, CVO lineage-verified truthful; DT marker consumer @`41cbd7220` (11 mutants, CTO's seeded case RED) |
+| 4 | **PENDING DE** — the revamp FE commit must carry a `^`-anchored `SURFACE_ACK:` line |
+| 5 | **PENDING DE** — DEV surface-check GREEN **on that exact sha**; DT verifies + quotes run id/headSha/conclusion, CTO confirms |
+| 6 | **PENDING** — COO co-sign **STAGED, NOT ISSUED**; Andrew's sovereign limb follows. **STAGED != ISSUED — hold.** |
+
+**COO's data-gate verification (055650Z): PASSED**, independently re-ran CVO's Layer-3 live on the
+`c27e1f37` set. The remaining gates are all FE-side + the co-sign, not data.
+
+### The frozen 9 (every leg must cite THIS set — cross-vintage expiry control, CTO-adopted)
+```
+49f agg    aa5c5b85066109c9bdb557e51b0d8ffd    inf agg    cec5a0d6fe749aae77735f9297edbb71
+global agg c27e1f370f9c08de6489cb11bf885e13    A4         8a195549c6f80257f188d91a6423d547
+A2         f2c034760b44c4bd7338be0fd6c75c58    A1         529b7c211b268f6cb72fa4a92941727d
+dist 49f   865919f2be40c6c44a58fdb15dbefe23    dist inf   afb964c4d67f2a3e3682c50269dc69e8
+dist glb   b946d8364ca35dc258d90919d68fb771
+```
+**A multi-leg gate assembled across a moving vintage risks "four greens each true of a different
+object."** This stage moved three times on 2026-07-22. Before gating, HeadObject all 9 and confirm every
+leg cites the same live set; any leg citing a superseded set re-runs first.
 
 Then: `/prod-deploy` — 4-commit `DEV→PROD` forward merge in an **ephemeral worktree**, `bun install` in it
 first (else the pre-push `tsc` gate fails "tsc: command not found"), main tree never leaves DEV, verify CI
