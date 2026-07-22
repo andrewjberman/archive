@@ -210,10 +210,21 @@ def run_window(token: str, cookie: str, template: dict, start: date) -> list[dic
 
 
 def window_integrity(rows: list[dict], window_start: date) -> tuple[str, list[str]]:
-    """STEP 0: was the past window HONORED? Returns (HONORED|IGNORED|INCONCLUSIVE, notes)."""
+    """STEP 0: was the past window HONORED? Returns (HONORED|IGNORED|INCONCLUSIVE|INSTRUMENT-BROKEN, notes).
+
+    INSTRUMENT-BROKEN guard (0.6.2 230359Z): qt5 allocations has delivered 0-ROW SHELLS (full
+    header, no rows) since ~2026-07-09. A 0-row result is therefore an INSTRUMENT FAILURE, NEVER a
+    window-honored-empty -- a genuine pre-model window still has 54-215 NON-Opal accounts (the book
+    existed, just not on Opal models); only a broken feed returns zero rows total. This guard is the
+    instrument-vs-data adjudication 0.6.2 flagged, made explicit before any HONORED verdict is legal.
+    """
     notes = []
-    strategies_present = {r["strategy"] for r in rows if r["strategy"]}
     n_accounts = len({r["account"] for r in rows if r["account"]})
+    if not rows or n_accounts == 0:
+        notes.append(f"window {window_start}: 0 rows / 0 accounts -> qt5 SHELL (the 07-09 feed failure), "
+                     "NOT a window-honored-empty. INSTRUMENT-BROKEN.")
+        return "INSTRUMENT-BROKEN", notes
+    strategies_present = {r["strategy"] for r in rows if r["strategy"]}
     violations = []
     for name, created in STRATEGY_CREATED.items():
         if window_start < created and any(name in s for s in strategies_present):
@@ -286,42 +297,77 @@ def main(argv=None) -> int:
 
     template = load_template()
 
-    # Baseline: today (must reproduce the live 296 to prove auth is good).
+    # Baseline: today's EXPLICIT-window run. Two things it proves, both binding:
+    #   (1) auth works for the DataMining path (mint + run + export succeed), and
+    #   (2) qt5 works FOR MY CALL PATTERN (explicit window) AT ALL -- if today's explicit run
+    #       returns a 0-row shell (the 07-09 qt5 feed failure reaching my call pattern too), then
+    #       NO past window is interpretable and the whole probe is INSTRUMENT-BROKEN. 0.6.2 noted a
+    #       past-window explicit run is a DIFFERENT call than the daily incremental and MAY clear the
+    #       failure -- this baseline is exactly the test of whether it does.
     try:
         today_rows = run_window(token, cookie, template, date.today())
     except urllib.error.HTTPError as e:
-        log(f"HELD: baseline read HTTP {e.code} -- stale session, no verdict emitted.")
+        log(f"HELD: baseline read HTTP {e.code} -- session not usable for DataMining, no verdict.")
         return 0
     n_today = len({r["account"] for r in today_rows if r["account"]})
-    log(f"baseline (today): {n_today} accounts -- auth confirmed live" if n_today else
-        "baseline empty -- auth suspect, treat downstream with care")
+    if n_today == 0:
+        log("HELD/INSTRUMENT-BROKEN: today's explicit-window qt5 returned a 0-ROW SHELL -- the 07-09 "
+            "qt5 allocations feed failure reaches my call pattern too. No past window is interpretable; "
+            "NO verdict emitted. (This is the bd-cot-silver-stale qt5 family failure, 0.6.2 lane -- not "
+            "a temporal finding.)")
+        return 0
+    log(f"baseline (today): {n_today} accounts, {len({r['strategy'] for r in today_rows if r['strategy']})} "
+        f"strategies -- DataMining auth live AND qt5 explicit-window run WORKS. Past windows interpretable.")
 
-    overall = "CURRENT"  # most conservative default; upgraded only on evidence
+    integrities = []          # per-window Step-0 verdicts
+    temporal_seen = False      # any window proved TEMPORAL
+    current_on_honored = False # any window HONORED and discriminated CURRENT
     for w in past_windows:
         log(f"\n--- window {w.isoformat()} ---")
         try:
             rows = run_window(token, cookie, template, w)
         except urllib.error.HTTPError as e:
             log(f"HELD: window {w} HTTP {e.code} -- no verdict for this window.")
+            integrities.append("HELD")
             continue
         integrity, notes = window_integrity(rows, w)
         for n in notes:
             log(f"  [W0] {n}")
         log(f"  [W0] WINDOW-INTEGRITY = {integrity}")
+        integrities.append(integrity)
         if integrity == "HONORED":
             verdict, tnotes = temporal_discriminate(rows)
             for n in tnotes:
                 log(f"  [W1] {n}")
             log(f"  [W1] TEMPORAL-DISCRIMINATION = {verdict}")
             if verdict == "TEMPORAL":
-                overall = "TEMPORAL"
-        elif integrity == "INCONCLUSIVE":
-            overall = "UNVERIFIABLE-INSTRUMENT"
+                temporal_seen = True
+            elif verdict == "CURRENT":
+                current_on_honored = True
+        # INSTRUMENT-BROKEN / INCONCLUSIVE / IGNORED are handled in the roll-up below.
+
+    # Roll-up, in precedence order. A CURRENT-only verdict is legal ONLY on a HONORED window
+    # (CTO v1.21); an IGNORED window IS the proof-of-honor for CURRENT (the query reached and
+    # ignored the past window); INSTRUMENT-BROKEN and INCONCLUSIVE never yield a finding.
+    if temporal_seen:
+        overall = "TEMPORAL"
+    elif current_on_honored or "IGNORED" in integrities:
+        overall = "CURRENT"
+    elif "INCONCLUSIVE" in integrities:
+        overall = "UNVERIFIABLE-INSTRUMENT"
+    elif integrities and all(i in ("INSTRUMENT-BROKEN", "HELD") for i in integrities):
+        overall = "INSTRUMENT-BROKEN"
+    else:
+        overall = "UNVERIFIABLE-INSTRUMENT"
 
     log("\n=== VERDICT ===")
     if overall == "TEMPORAL":
         log("VERDICT=TEMPORAL -- qt5 returns dated assignment; backfill is REAL to the coverage horizon "
             "(>= ~2026-05-28 model floor). Apply the B2 model-weight rollup. GO LOUD to COO/CTO.")
+    elif overall == "INSTRUMENT-BROKEN":
+        log("VERDICT=INSTRUMENT-BROKEN -- qt5 returned 0-row shells for the past window(s) (the 07-09 "
+            "allocations feed failure, 0.6.2 lane). The temporal question is UNANSWERED, cleanly HELD on "
+            "the qt5 feed, NOT a CURRENT verdict. Do not read empty as 'no data in the window'.")
     elif overall == "UNVERIFIABLE-INSTRUMENT":
         log("VERDICT=UNVERIFIABLE-INSTRUMENT -- window integrity not demonstrable. NOT a finding. "
             "Escape: 0.6.2's re-persist confirmation is pre-authorized + self-evaluable (CTO 224317Z) -- "

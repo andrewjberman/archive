@@ -10,8 +10,8 @@ ONLY** (`blackdiamond/cot/session` + `opal-data-cot`); the BD platform serves 49
 222937Z). **No production template is mutated; 0.6.2's `templates_enriched/` paths untouched.**
 **Verdict authority (CTO v1.21 / COO 224310Z):** this campaign now carries the **full temporal-vs-current verdict**
 that gates the Cottonwood backfill design — 0.6.2's second live probe is retired into it.
-**Grades:** **[GROUNDED]** read at source · **[MEASURED]** live-tested (prior addenda) · **[HELD]** gated on a fresh
-session · **[RULED OUT]** measured dead end · **[UNPROBED]** needs a call not yet made.
+**Grades:** **[GROUNDED]** read at source · **[MEASURED]** live-tested (prior addenda) · **[HELD]** gated on live
+execution (the qt5 window run, §7) · **[RULED OUT]** measured dead end · **[UNPROBED]** needs a call not yet made.
 
 > **THE ANSWER, one paragraph.** I swept the entire BD estate — both surfaces, every date-bearing endpoint. **Exactly
 > ONE surface can possibly deliver dated per-model allocation history, and it is DataMining's `qt5 allocations`
@@ -19,8 +19,15 @@ session · **[RULED OUT]** measured dead end · **[UNPROBED]** needs a call not 
 > test needs no template change, just a past-window RUN.** Every other candidate is either measured-dead (the
 > rebalancer ignores injected dates; its native dated surfaces are empty for Cottonwood) or unprobed-and-lower-odds
 > (Surface-B account/audit/timeline). **The whole question therefore reduces to one probe with an unfalsifiable
-> intrinsic control — blocked today only by a 16-day-stale session.** And whatever it returns, **nothing reaches
-> before ~2026-05-28: the Opal models did not exist, so there is nothing to allocate to.**
+> intrinsic control.** And whatever it returns, **nothing reaches before ~2026-05-28: the Opal models did not exist,
+> so there is nothing to allocate to.**
+>
+> **EXECUTION GATE — CORRECTED 2026-07-22 ~23:0xZ (0.6.2 230359Z, production evidence).** My first draft said "blocked
+> by a 16-day-stale session." **That was wrong for the DataMining path this probe uses.** The 401s I generalized from
+> (Addenda 2/3) were the **Rebalancer product API** — a *different* auth surface. The DataMining path mints a working
+> bearer off the current jar **right now**: holdings/transactions/realized silver landed **this morning** (07-22
+> 02:03–02:04Z) off it. So the probe is **NOT auth-blocked, and no manual Andrew capture is needed.** The real gate is
+> narrower and qt5-specific — see §7.
 
 ---
 
@@ -104,8 +111,12 @@ STEP 0 — WINDOW-INTEGRITY GATE (must pass before any temporal/current verdict 
          => the surface is the eclipse class. Verdict = CURRENT-only, backfill CLOSED on A1. VALID because
             the same run PROVED the query reached (and was ignored by) the past window.
     YES (W_past returns the reduced, era-correct roster) -> WINDOW WAS HONORED. Proceed to Step 1.
+    ZERO ROWS (W_past returns a 0-row shell) -> INSTRUMENT-BROKEN, NOT window-honored-empty. This is the
+         07-09 qt5 allocations feed failure (0.6.2 230359Z: post-06-26 qt5 delivers 0-row shells with the
+         full 56-col header). A genuine pre-model window still has 54-215 NON-Opal accounts; only a broken
+         feed returns zero rows. HELD on the qt5 feed, never a CURRENT verdict.
     INCONCLUSIVE (cannot demonstrate honored either way) -> UNVERIFIABLE-INSTRUMENT, NOT a finding.
-         => trigger the CTO-gated escape (below).
+         => the pre-authorized self-evaluable escape (below).
 
 STEP 1 — TEMPORAL DISCRIMINATION (only legal once Step 0 = HONORED):
   For the 15 churn-control accounts (0.6.2's set: Opal today, ABSENT from the 06-09 book):
@@ -174,29 +185,33 @@ forward-only is already a correct answer, and A1-if-temporal only *widens* it, n
 
 ---
 
-## 7. THE ONE EXECUTION GATE — and what clears it
+## 7. THE EXECUTION GATE — CORRECTED: it is qt5-specific, NOT session auth
 
-**The decisive A1 probe is HELD on session auth, not on design.** `blackdiamond/cot/session` `captured_at =
-2026-07-06T02:02:47Z` — **16 days stale** (read at source this session), far past BD's ~30–60min effective TTL. Every
-data read will 401 exactly as Addendum 2 measured; I am **not** burning a live call to re-confirm a known 401 (that is
-the re-run-a-known-answer anti-pattern).
+**My first draft called this "held on a 16-day-stale session." 0.6.2's production evidence (230359Z) corrected it, and
+the round-trip is why:** I over-generalized the Addendum-2/3 401s — those were the **Rebalancer product API**
+(`/api/accounts/search`), a *different* auth surface with a short TTL. **My harness uses the DataMining path**
+(`/datamining/auth/token` → qt5 run → export), and that path mints a working bearer off the **current** jar right now:
+holdings/transactions/realized silver landed **this morning 07-22 02:03–02:04Z** off it (comp-freshness, 0.6.2). So:
 
-**What clears it (either path):**
-1. **A fresh cot-BD login capture from Andrew** (as `sdgsdgsd.har` cleared it in Addendum 3). Then the A1 probe runs
-   in seconds — the harness is written and ready (`scripts/cot_qt5_temporal_probe.py`, §8), window-integrity control
-   baked in. **This is the fast path and it is the single thing that lets me answer Andrew's question tonight.**
-2. **Tonight's 02:00Z session-refresh chain** — but note the secret has NOT refreshed in 16 days, so the chain's own
-   freshness is in doubt (a WS-1 feed-liveness flag already in the record, 0.6.2/CTO's lane, not mine to fix). If it
-   fires clean, the on-box operator runs the harness in the same window.
+- **Auth is NOT the gate, and no manual Andrew capture is needed.** The DataMining jar is functional. (My §9 note that
+  the SM secret's `LastChanged`/`captured_at` reads 07-06 and session-fetch logs stop ~06-26 is a real WS-1
+  feed-liveness question — but it does not block DataMining bearer minting, which is what this probe needs. 0.6.2/CTO's
+  lane, not mine.)
+- **The REAL gate is qt5-specific.** `qt5 allocations` silver has been **frozen since 2026-07-09** — the feed delivers
+  **0-row shells** (full 56-col header, no rows) while the other qt tables land daily (0.6.2). **A past-window
+  *explicit* run is a different call than the daily incremental and MAY clear it** — that is the unknown the probe
+  itself tests. The hardened harness (§8) makes a 0-row result an explicit **`INSTRUMENT-BROKEN`**, never a
+  window-honored-empty, so the qt5 failure cannot masquerade as a temporal finding.
 
-**A blocked run is a STATED GATE, not a failure** (COO 224310Z) — nothing in 0.6.2's sequence changes; the design,
-the controls, and the harness are complete and waiting on auth only.
+**Execution (per the CTO/COO amendment, 225852Z):** on-box in the 02:00Z window, coordinated with 0.6.2, **sequential
+never concurrent.** Two ways it fires, same harness: (i) as my **primary campaign** if run in that window; (ii) as the
+**escape instrument** — if the pre-auth condition holds at 02:00Z, 0.6.2 runs *this harness* on the nightly session
+(it strictly dominates his original re-persist, which stays fallback only).
 
-> **THE HOLD IS SHARED (COO 225959Z).** 0.6.2's escape confirmation needs the **same** fresh cot-BD session this
-> probe does. So if no fresh capture lands, **neither instrument can fire, and the temporal verdict is cleanly
-> `BLOCKED-ON-SESSION-CAPTURE`** — an honest gated state, not a failure. It gates a backfill *design* question that
-> is CTO-gated and downstream anyway, so **there is no pressure to force a run against a stale session** (neither
-> mine nor 0.6.2's).
+**Possible clean outcomes, all honest, none a failure:** `TEMPORAL` (backfill real to ~05-28) · `CURRENT-only`
+(window honored, backfill closed) · `INSTRUMENT-BROKEN` (qt5 0-row shell — the temporal question stays HELD on the
+07-09 feed, a 0.6.2-lane fix, not a CRO finding) · `UNVERIFIABLE-INSTRUMENT` (window integrity undemonstrable → the
+escape). The design, controls, and harness are complete; nothing waits on a manual capture.
 
 ---
 
@@ -205,8 +220,11 @@ the controls, and the harness are complete and waiting on auth only.
 Self-contained, read-only: loads the SM session, mints the DataMining Bearer, runs `qt5 allocations` for
 {2026-05-15, 2026-06-15, today}, downloads each xlsx, and **evaluates Step-0 window-integrity FIRST** (era-correct
 roster per the model-creation timeline) then Step-1 temporal discrimination on the 15 churn accounts. Prints an
-explicit `VERDICT=TEMPORAL | CURRENT-only(window-honored) | UNVERIFIABLE-INSTRUMENT` line. It **runs nothing until a
-fresh session exists** — a stale session yields a clean `HELD: session 401` and exits, never a false verdict.
+explicit `VERDICT=TEMPORAL | CURRENT-only(window-honored) | INSTRUMENT-BROKEN | UNVERIFIABLE-INSTRUMENT` line.
+**Two binding guards** so a broken instrument never manufactures a verdict: (1) a token-mint / read HTTPError exits
+`HELD` with no verdict; (2) a **today-baseline explicit-window run** must return the live 296 before any past window is
+interpreted — a 0-row today means the 07-09 qt5 shell failure reaches my call pattern too, so the run exits
+`INSTRUMENT-BROKEN`; and any past-window 0-row is classified `INSTRUMENT-BROKEN`, never window-honored-empty.
 
 ---
 
@@ -215,13 +233,16 @@ fresh session exists** — a stale session yields a clean `HELD: session 401` an
 **[GROUNDED]** qt5 template selects `accountRebalStrategyID/Name` (id 35392/35393, `isSelected:true`) +
 `dateRangeType:Custom` (`data/cot/scripts/bronze/templates/allocations.json`, read this session) · qt2 carries
 `portfolioRebalStrategyID/Name` + `backdatedDate`, no account-level (`transactions.json`, read) · gold
-`dim_model_portfolio` computes the daily count+value (parquet read) · session `captured_at=2026-07-06` (SM secret,
-read) · model-creation timeline + churn-control accounts (RCN-0001 Addendum A2; 0.6.2 B6 probe-prep, 15 accounts).
+`dim_model_portfolio` computes the daily count+value (parquet read) · SM `blackdiamond/cot/session`
+`captured_at=2026-07-06`, `LastChanged`≈07-06, session-fetch logs stop ~06-26 (SM + S3, read) — a WS-1 flag, NOT a
+DataMining blocker · DataMining path works off the current jar: cot silver holdings/transactions/realized landed 07-22
+02:03–02:04Z (0.6.2, comp-freshness) · qt5 allocations frozen since 07-09, 0-row shells (0.6.2) · model-creation
+timeline + churn-control accounts (RCN-0001 Addendum A2; 0.6.2 B6 probe-prep, 15 accounts).
 **[MEASURED]** rebalancer date-injection ignored + sessions/blotter empty (Addendum 3, live) · basket cosine 0.62–0.98.
 **[UNPROBED]** B1/B2/B3/B5/B6/B7 Surface-B endpoints — enumerated, graded, not yet called. **[HELD]** A1/A2/A4 on the
-fresh session.
+qt5 window run (auth is live; the gate is the 07-09 qt5 feed, §7).
 
 **One-line:** the entire BD estate offers exactly one live path to dated per-model allocation history — a past-window
-run of the qt5 template we already own — and it is one fresh login capture away from a definitive, window-integrity-
-controlled verdict; everything else is measured-dead or lower-odds-unprobed, and nothing reaches before the ~05-28
-model-creation floor.
+run of the qt5 template we already own, whose auth is live NOW (DataMining path) — gated only on whether an explicit
+past-window run clears the 07-09 qt5-shell failure; everything else is measured-dead or lower-odds-unprobed, and
+nothing reaches before the ~05-28 model-creation floor.
