@@ -7,7 +7,14 @@
 <joint_assignee>0.4.0_DS_ClientPlatform (canonicalization determination + exercised-read validation)</joint_assignee>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:24Z</issued_at>
-<status>staged</status>
+<status>active</status>
+<!-- 20260722T2052Z 0.7.0_AE_CloudOps: RF-10 found HALF-STALE at live state (cottonwood half landed
+     1746Z pre-hold under Andrew carve-out); CTO 203928Z narrowed scope to the gold/dim_model_portfolio/*
+     pure-add and issued CONDITIONAL APPLY GO. Grant APPLIED + verified (ledger 20260722T2041Z closed 7/7,
+     tag mdpf-pipeline-v1.8.0). OUTSTANDING: AC-4 exercised runner-role read (DS thread open 204804Z;
+     cottonwood at next natural pass, dim_model_portfolio after first population) + AC-6 canonicalization
+     determination (joint with DS, process proposed). -->
+
 <authorization>LD-0333 am.1 @2eef569d2 -> CTO cascade 200805Z -> COO decomposition.</authorization>
 
 <references>
