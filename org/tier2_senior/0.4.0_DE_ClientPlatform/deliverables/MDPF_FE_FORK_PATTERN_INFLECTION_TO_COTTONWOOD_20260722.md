@@ -147,8 +147,27 @@ discovered defect into a build failure.
 ---
 
 ## 5. NOT COVERED
-- **`comp-cluster ModelPortfolios` TIMED OUT** (>120s, no output). The panel→drilldown tree and cross-panel
-  coupling are **unresolved, NOT clean**.
+- ~~**`comp-cluster ModelPortfolios` TIMED OUT**~~ — **RESOLVED 1655Z. It completed in the background
+  (a canonical Kuzu auto-refresh was rebuilding; not a tool failure).** Result, with the denominator the
+  tool states itself: **118/119 page-tree nodes assigned, 1 VISIBLE unresolved, 0 SILENT.**
+  **It found ONE panel cluster — `peer-performance` (members=2, sources=25):**
+  `ModelPortfolios <panel> → PeersTab <nested> → QuartileChart <nested>`.
+
+  **⚠ AND IT CONFIRMS §2 L4's Benchmark/Peers item IS BY RULING, NOT BY DEFECT.** Every source on that
+  cluster is a **house-view prefix** — `/api/general/benchmarks/etf_returns.json`,
+  `…/benchmarks/model_portfolio_benchmarks.json`, `…/peers/peer_performance.json`,
+  `…/portfolios/{account-distribution,aum-timeseries,non_model_assets}.json`. Per
+  `ADVI_FIRMSEP.md:133`, **Andrew ruled 2026-05-07 that `json/portfolios/`, `json/peers/` and
+  `json/latest/` are PERMANENT intentional house view**; only `json/model_portfolios/` was left
+  TRANSITIONAL (the FIRMSEP.11 placeholder). **So the Benchmark/Peers tabs being firm-blind is the
+  sovereign's standing design, and "do not fix it as part of Cottonwood" is a CITED ruling rather than my
+  judgement call.** *(What remains genuinely open is only the ATTRIBUTION seam: house-view numbers render
+  under a Cottonwood header with "Black Diamond Rebalancer" beneath, and the disclaimer that used to
+  explain it was removed Andrew-direct 2026-06-01.)*
+
+  **Still limited:** comp-cluster clustered ONLY the peers subtree — the Portfolio Analytics donut, the
+  AUM Trend Analysis panel and the distribution panel are **not** in a cluster. So its 118/119 is coverage
+  of the page TREE, not of the MDPF panels I care about. **Partial, and stated as partial.**
 - **`comp-platinum page ModelPortfolios --firm inf|cot` traces are byte-identical except the bucket line,
   and enumerate only 2 fetches** (`aum-metrics`, `account-distribution`) — **it does not see the three MDPF
   per-firm queries `comp-cache` found.** So its "no firm delta" result is an **instrument limit, not a
