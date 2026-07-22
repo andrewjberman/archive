@@ -71,6 +71,15 @@ So composition drifts. For the AUM rollup only the *blend ratio* (b) matters —
 days, which says **nothing** about whether Sat-50 was 75/25 in June. **Applying today's blend to a June date is
 a fabrication at the composition layer even with perfect dated assignment** (CTO binding #1). The probe must
 therefore answer BOTH temporalities.
+> **REFINEMENT 2026-07-22 (`0.6.2_AE_PartnerETL~A`, B6-liveness deliverable):** the day-over-day security-weight
+> movement is a **nightly ~05:01Z REVALUATION batch (re-mark to prior close), NOT a structural composition
+> edit** — uniform 473+473-leaf re-mark across 20 models in a no-session window. So the *structural* blend
+> (which securities, the blend ratio — the only layer this rollup consumes) is **more stable** than the raw
+> daily diff implied; the drift is price revaluation, the expected heartbeat. This does NOT remove (b) from the
+> probe (a real *rebalance* is a structural change and those exist), but it sharpens the question to *"is the
+> STRUCTURAL blend history dated,"* cleanly separable from revaluation noise. **And it decides feed liveness
+> from storage** (refining §7.4 / A5): the assignment surfaces are byte-identical day-to-day, but this
+> model_detail revaluation heartbeat makes the feed's liveness decidable on trading-day pairs.
 
 ---
 

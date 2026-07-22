@@ -352,6 +352,12 @@ not as a lookback play.**
   roster and a frozen feed are indistinguishable from S3 alone. **Nothing here resolves that** — though
   identical content over ~6.5h between a manual test pull and the first scheduled fire is unsurprising.
 - **`updatedAt` on models DOES move** (five 05-28 models show `updatedAt` 2026-07-22T05:01), so the model
-  layer is being touched. Whether that is composition edits or a system touch is **not determined**.
+  layer is being touched. ~~Whether that is composition edits or a system touch is not determined.~~
+  **DETERMINED 2026-07-22 by `0.6.2_AE_PartnerETL~A`: it is a NIGHTLY REVALUATION BATCH (~05:01Z)** — 473+473
+  relativeAllocation/absoluteAllocation leaves re-marked + 31 `updatedAt` advances across 20 models
+  simultaneously, in a no-session/no-edit window; a config edit cannot produce that uniform signature, a
+  re-mark to prior close does. **So the daily movement is price REVALUATION, not a structural composition
+  edit** — the structural blend (which the AUM rollup consumes) is more stable than the raw diff suggested.
+  Authority: `org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/MDPF_3FIRMS_B6_liveness_signal_20260722.md`.
 - **I did not probe BD live** for a historical-assignment surface. §4.3/§4.4 remain unprobed and, per the
   Amendment, are now low priority.
