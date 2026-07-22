@@ -392,12 +392,14 @@ artifact is perfect.** You cannot stage first and audit later.
 ---
 
 ## 6. DECISIONS THAT MUST BE MADE BEFORE CODE — none is an engineering call
+*(**FIVE** live, not six: D3 was downgraded out of this table at 1615Z. Left in place struck-through rather
+than deleted, so the record shows the correction instead of hiding it.)*
 
 | # | Decision | Why it cannot be defaulted |
 |---|---|---|
 | D1 | **Is Cottonwood a DRIVER, a SKIPPABLE PARTNER, or a third category?** | S-2 of the reframe. `spine_fresh` is a scalar; no code path expresses two drivers. Everything in the trigger depends on the answer. |
 | D2 | **Cottonwood's count-source-audit failure policy: fail-hard or report-only?** | S-4. A CTO governance lock protects the existing asymmetry; there is no default for an unlisted firm. |
-| D3 | **Does the two-leg conservation identity become a fold, or does Global re-derive?** | S-1. The gate is a *correctness* gate; the cheap path is to make it pass by dropping Cottonwood. |
+| D3 | ~~Does the two-leg conservation identity become a fold, or does Global re-derive?~~ **DOWNGRADED 1615Z — see S-1. The identity GENERALISES; basis-B already solved N=3. What remains is not a decision but a REQUIRED CONTROL: assert Cottonwood's null non-model in the gate, so the deferral cannot expire silently.** | No longer a ruling. The bad incentive I flagged (*"make it pass by dropping Cottonwood"*) **does not arise, because the gate does not fail.** |
 | D4 | **Do the per-firm named artifact keys become firm-keyed maps?** | S-5. Breaking artifact-shape change with FE consumers. |
 | D5 | **Which Cottonwood source is canonical for MDPF** — `opal-data-cot` or `opal-data-assets/blackdiamond/cottonwood/**`? | Two mutually-fenced source-of-truth locations exist in one directory, both CTO-conditioned. **Not resolvable from source.** |
 | D6 | **The merge-vs-add canonical-key ruling** (crosswalk raises on 2 unmapped Cottonwood keys, fails closed). | **ALREADY RESERVED TO ANDREW.** Unchanged. Not worked around, not softened. |
@@ -452,8 +454,8 @@ implemented yet."*
 
 **BOTTOM LINE.** The shape is closed; the list is not. The remaining unknown is concentrated and *named*:
 Population B in three large files, **Population C estate-wide (barely started — one sweep, one root)**,
-`runners_49f/**`, `cot-pipeline/`, and the applied plane. **Six decisions (§6) gate code and none is an
-engineering call.** The forced ordering in §5 is measured, not assumed. **Phase 1a is IAM-blocked (S-11),
+`runners_49f/**`, `cot-pipeline/`, and the applied plane. **FIVE decisions (§6) gate code and none is an
+engineering call** *(six, less D3, which reading the arithmetic removed — S-1)*. The forced ordering in §5 is measured, not assumed. **Phase 1a is IAM-blocked (S-11),
 contradicting the plan's "parallel, all unblocked."** And the honest reframe is §7: **this is FIRMSEP.11, a
 phase deferred by ruling in May and never given a task order** — which is why it keeps costing more than a
 fold.
