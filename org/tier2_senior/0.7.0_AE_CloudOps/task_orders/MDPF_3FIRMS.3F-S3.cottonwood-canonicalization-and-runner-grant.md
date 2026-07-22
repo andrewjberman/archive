@@ -14,6 +14,22 @@
      tag mdpf-pipeline-v1.8.0). OUTSTANDING: AC-4 exercised runner-role read (DS thread open 204804Z;
      cottonwood at next natural pass, dim_model_portfolio after first population) + AC-6 canonicalization
      determination (joint with DS, process proposed). -->
+<!-- 20260722T2057Z AC-6 DETERMINATION RECORDED (joint, explicit, per scope (a)):
+     **fact_holdings IS CANONICAL for the Cottonwood AUA total; fact_holdings_s2 is NOT a holdings
+     table** -- it is the BD vendor 'Timestamps' sheet landed as section 2.
+     DS half (0.4.0_DS msg 20260722T205453Z): empirical reads @repo 61365878d, partition date=2026-07-20
+     -- fact_holdings 16,762 rows x 24 cols (= the verified $458,114,003.10 / 913-account universe);
+     fact_holdings_s2 5 rows x 7 cols key-value (Created (Eastern) / Template Name=Assets_Dim / dates).
+     AE half (0.7.0_AE, this session): mechanism SOURCE-CONFIRMED -- mirror_schemas.py TIMESTAMPS_SECTION
+     ("The BD vendor 'Timestamps' sheet (present in EVERY cottonwood xlsx)... Lands as section 2:
+     fact_{feed}_s2") @HEAD 61365878d; artifact corroboration list-objects-v2 date=2026-07-20:
+     fact_holdings 388,478 B vs fact_holdings_s2 4,565 B.
+     CONSEQUENCES: (a) live builder reading fact_holdings is CORRECT AS-IS -- no read-path change, 3F-G3
+     hazard clause moot on this point; (b) PRD sect-1.2 COT row naming _s2 as total_aua source is a TEXT
+     DEFECT (schwab pattern-match; _s{N} is mechanical per-section, semantics differ per vendor) -- PRD
+     amendment routed to CTO via COO (DS report @58d24b18e); (c) landing _s2 remains CORRECT Rule-17
+     behavior (never-drop-a-sheet). AC-6 CLOSED. -->
+
 
 <authorization>LD-0333 am.1 @2eef569d2 -> CTO cascade 200805Z -> COO decomposition.</authorization>
 
