@@ -1,0 +1,126 @@
+MDPF_REVAMP -- wire the standing count-axis SOURCE audit into the nightly dispatch
+================================================================================
+FROM:   0.4.0_DS_ClientPlatform (author of the audit)
+TO:     0.7.0_AE_CloudOps (owns MDPF_REVAMP.S4 + infra/aws/ec2/mdpf-daily-runner/)
+CTO:    APPROVED AS WRITTEN 134926Z (split wiring + marker fold). Route: CTO 134602Z -> 134926Z.
+FILE:   infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh   (AE/DT lane -- NOT landed by DS)
+AUDIT:  data/mdpf/scripts/gold/mdpf_revamp_count_source_audit.py @de078015c (DS lane, landed)
+
+WHY THIS EXISTS
+---------------
+CTO standing order (132852Z + 133040Z): the count-axis SOURCE cross-reference runs EVERY CYCLE.
+I built the audit and hand-ran it once -- but NOTHING INVOKES IT, so the order was satisfied on
+paper and not in the estate. A guard nothing invokes is no guard. (DE hit the identical wiring
+hole on the Cottonwood producer independently, which is how it became a schedule finding rather
+than one agent's hygiene note.)
+
+WHY THE TWO LEGS ARE SPLIT -- DO NOT COLLAPSE THEM INTO ONE `|| return 1`
+------------------------------------------------------------------------
+The audit exits 1 on ANY disagreement. 49financial CURRENTLY HAS a known disagreement
+(2026-07-17, ten accounts) with NO remediation date and NO source to fix it against. So a naive
+`|| return 1` on the 49F leg makes revamp_stage fail EVERY NIGHT BY CONSTRUCTION, the completion
+marker never lands, the streak never accrues, and within a week the nightly failure is noise
+everyone scrolls past. That is the "alarm people learn to acknowledge" failure -- the same shape
+CTO refused for the gate and that this very audit nearly shipped at the frontier.
+  inflection   -> a disagreement is a REAL REGRESSION       -> FAIL the stage
+  49financial  -> KNOWN defect, undetermined mechanism      -> REPORT-ONLY (`|| true`)
+
+DEPENDENCIES -- NOTHING NEW, stated so you do not re-derive it
+-------------------------------------------------------------
+* pyarrow: the dispatch ALREADY preflights it immediately above revamp_stage(). No new install.
+* mdpf_revamp_model_crosswalk: same REVAMP_DIR as the other revamp scripts, imported the same way
+  as dim_mdpf_account_distribution.py already does. No new path setup.
+* boto3/pandas: already required by the existing revamp scripts in this stage.
+* IAM: read-only. The runner role already reads opal-data-assets gold/mdpf_revamp/* (it stages
+  them) and the silver prefixes eclipse/inflection/silver/* + smartx/platform/silver/* (the
+  aggregate producer reads both). It also reads opal-data-portal-v2 json/mdpf/* already.
+  => NO IAM CHANGE EXPECTED. Please still confirm on the live role rather than take this from me;
+  a new (action, resource) pair is exactly what comp-iam reports GREEN on wrongly (Rule 22a).
+
+=== PATCH 1 of 2: add step 6d inside revamp_stage(), AFTER 6c, BEFORE `return 0` ===
+
+   # 6c: non_model (reads the staged global+inflection aggregate, self-uploads
+   #     gold/mdpf_revamp/global/non_model_assets.json). MUST follow 6a.
+   "$PY" "${REVAMP_DIR}/dim_mdpf_non_model_assets.py" --upload || return 1
++  # 6d: STANDING count-axis SOURCE cross-reference (CTO 132852Z/133040Z). The in-producer
++  #     cross-axis gate CLOSES this defect class but AUDITS NOTHING: a duplicated roster is
++  #     byte-indistinguishable from a genuinely unchanged one, so no artifact-internal check
++  #     can see it. Only a SOURCE comparison can, and a one-time sweep gives zero ongoing
++  #     assurance -- hence every cycle. MUST follow 6a (audits the staged artifacts).
++  #     inflection: a disagreement is a REAL REGRESSION -> fail the stage.
++  "$PY" "${REVAMP_DIR}/mdpf_revamp_count_source_audit.py" --firm inflection \
++       --json "${REVAMP_OUT}/audit_inflection.json" || return 1
++  #     49financial: KNOWN defect (2026-07-17, ten accounts), undetermined mechanism, and NO
++  #     source exists to fix it against. REPORT-ONLY ON PURPOSE -- a `|| return 1` here would
++  #     fail this stage every night by construction and become an alarm everyone acknowledges.
++  "$PY" "${REVAMP_DIR}/mdpf_revamp_count_source_audit.py" --firm 49financial \
++       --json "${REVAMP_OUT}/audit_49financial.json" || true
+   return 0
+ }
+
+=== PATCH 2 of 2: fold the audit verdict into the completion marker ===
+Replace the marker heredoc invocation so it also reads the two audit JSONs.
+CTO 134926Z: without this the running hit count "lives only in an EC2 log and RESETS every night."
+
+-    "$PY" - "$RUN_DATE" "$RUN_ID" > /tmp/mdpf_revamp_marker.json <<'PYEOF'
+-import json, sys, datetime
+-run_date, run_id = sys.argv[1], sys.argv[2]
++    "$PY" - "$RUN_DATE" "$RUN_ID" "$REVAMP_OUT" > /tmp/mdpf_revamp_marker.json <<'PYEOF'
++import json, os, sys, datetime
++run_date, run_id, out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
++
++def _audit(name):
++    """Fold the audit verdict in. ABSENT IS NOT CLEAN -- if the file is missing the marker says
++    the audit DID NOT RUN, it does not omit the field (an omitted field reads as 'fine')."""
++    p = os.path.join(out_dir, f"audit_{name}.json")
++    try:
++        with open(p, encoding="utf-8") as fh:
++            return json.load(fh).get(name) or {"error": "audit json missing its firm block"}
++    except Exception as e:                                          # noqa: BLE001
++        return {"audit_did_not_run": True, "reason": str(e)[:200],
++                "read_as": "NOT clean -- absence of a verdict is not a passing verdict"}
+ print(json.dumps({
+     "schema_version": "1.0",
+     "marker": "mdpf_revamp_cycle_complete",
+     "run_date": run_date,
+     "run_id": run_id,
+     "completed_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+     "keys_staged": 7,
+     "segments": {
+         "aggregate_aua_timeseries": ["49financial", "inflection", "global"],
+         "account_distribution": ["49financial", "inflection", "global"],
+         "non_model_assets": ["global"],
+     },
++    # STANDING count-axis source cross-reference (CTO 132852Z/133040Z). Numbers are RECOMPUTED
++    # over full history every run, so they are cumulative AND idempotent -- "1 of 2" becomes
++    # "2 of 5" as dates accrue, with no stored counter to double-count or silently reset.
++    # DELIBERATELY NO PERCENTAGE (CTO 133040Z): count + denominator only. n supports no rate.
++    "count_axis_source_audit": {
++        "inflection": _audit("inflection"),
++        "49financial": _audit("49financial"),
++    },
+     "note": ("REVAMP-namespaced completion marker under gold/mdpf_revamp/meta/. This is NOT "
+              "the legacy gold/meta/pipeline-complete.json (Door-6). Publish HELD: publisher OFF, "
+              "portal/* untouched."),
+ }, indent=2))
+ PYEOF
+
+NOTE ON ORDERING: `rm -rf "$REVAMP_OUT"` currently runs AFTER the marker block, so the audit JSONs
+are still present when the marker is built. Do not move the cleanup earlier.
+
+HOW TO VERIFY THE WIRING ACTUALLY WORKS (please do not accept it on my say-so)
+-----------------------------------------------------------------------------
+1. POSITIVE: run the dispatch stage and confirm `cycle-complete.json` now carries
+   `count_axis_source_audit` with inflection {disagreements 0, audited 37, ...} and 49financial
+   {disagreements 1, audited 2, dates ["2026-07-17"]}. Today's expected values.
+2. THE ONE THAT MATTERS -- prove the inflection leg can FAIL the stage: point the audit at a
+   deliberately mismatched artifact (or temporarily narrow the crosswalk) and confirm
+   revamp_stage returns non-zero AND NO MARKER IS WRITTEN. A leg that has never been seen to
+   fail the stage is not gating anything.
+3. PROVE THE 49F LEG DOES *NOT* FAIL THE STAGE: with its known 07-17 disagreement present, the
+   stage must still complete and the marker must still land. If it does not, the split is wired
+   backwards and the pipeline will die nightly.
+4. ABSENT-IS-NOT-CLEAN: delete one audit_*.json before the marker step and confirm the marker
+   records `audit_did_not_run` rather than silently omitting the field.
+
+Questions to me (0.4.0_DS_ClientPlatform) on the audit itself; wiring/rollout judgement is yours.
