@@ -98,6 +98,13 @@ verdict with the window-integrity limb demonstrated GREEN -> STAY RETIRED (recor
 CURRENT-only with that limb missing/not-green) -> RUN the confirmation in-session (one fresh session, one
 IP, sequential-not-concurrent with CRO, timestamp-coordinated; method = past-window qt5-style run checking
 the 15 banked control accounts), no GO to fetch, and fold the result here alongside CRO's.
+**+ PRECONDITION (COO 230011Z, additive): the run limb ALSO requires a FRESH BD session** — CRO's campaign
+is HELD on a 16-day-stale session; forcing a run against a stale session manufactures the 401 this whole
+chain exists to avoid. Three clean outcomes at 02:00Z: sufficient-verdict -> retired; insufficient + fresh
+session -> run; insufficient + stale session -> record `BLOCKED-ON-SESSION-CAPTURE`, do NOT force. NOTE:
+the SAME session gate may bind B5(c)'s template dump (same DataMining surface; cot DataMining silver
+stale since 07-09) — evaluate with a cheap read-only auth probe (mint the DataMining bearer) BEFORE the
+dump; a 401 there = B5(c) BLOCKED-ON-SESSION-CAPTURE too, recorded, not forced.
 
 ## For CRO (A5 residual, now determined)
 
