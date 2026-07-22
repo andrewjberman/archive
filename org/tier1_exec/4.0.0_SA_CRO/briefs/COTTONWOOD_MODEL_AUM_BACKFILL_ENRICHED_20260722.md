@@ -173,3 +173,114 @@ sourced from a dated (a)+(b) is a future contradiction we would author ourselves
 **Forward is clean and starts itself (~07-21); the ~05-28→07-21 gap opens only if the probe dates BOTH
 assignment and blend; nothing reaches before ~05-28 because the models did not; and until the probe, the only
 honest history is holdings-level firm AUM, never a synthesized model split.**
+
+---
+
+# ADDENDUM 2 — 2026-07-22: the LIVE date-shape probe (Andrew egress-approved) — result: AUTH BARRIER, question unresolved, no harm
+
+**Andrew-direct:** analyze how DataMining carries date, then exploratorily mock that shape on the rebalancer
+endpoints to see if a historical pull comes out despite the HAR fetch returning empty.
+**EGRESS: Andrew explicit per-use word, 2026-07-22 — *"You have my egress approval to test."*** Recorded here
+per audit discipline. Scope: READ-ONLY cot-BD rebalancer reads only. Probe design in P2; the live variant + results are in Addendum 3 below.
+
+## P1. Offline analysis — how DataMining carries date vs what the rebalancer advertises **[GROUNDED]**
+
+- **DataMining query carries date IN THE QUERY TEMPLATE:** `dateRangeType` (`CurrentDay` observed; D2 uses
+  `Custom`), `startDate`, `endDate`, and `asOfDate` on `v1/run`. It is **date-WINDOWED** — the date is a query
+  parameter the server evaluates.
+- **The rebalancer READS do NOT advertise a date on the layers we need.** `POST /api/accounts/search` (the
+  assignment roster) and `GET /api/models/{id}` (the blend/composition) carry **no** date field.
+  `sessions/search` (`createdFromDate/createdToDate`) and `blotter/search` (`timeframe`) DO — but both return
+  **0 rows** for Cottonwood (coverage, not shape). So the "mock a date onto the endpoints that lack one" idea
+  targets `accounts/search` and `models/{id}` — inject `asOfDate` / `effectiveDate` / `dateRangeType` /
+  `timeframe` and see if the server honors a date it does not advertise.
+
+## P2. The probe design — with a built-in positive control **[PROVEN design]**
+
+8 injection shapes (body `asOfDate` mm/dd + iso, `effectiveDate`, `date`, `dateRangeType`+start/end,
+`timeframe`; query `?asOfDate`, `?date`) against `POST /api/accounts/search` for target date **2026-06-15**.
+**The model-creation timeline IS the positive control:** on 2026-06-15 a TRUE roster cannot contain Satellite
+60 (created 06-23) or 30/40/70/98 (created 07-06) and has ~136-215 accounts, not today's 296. So an **honored**
+date returns a strictly reduced strategy set; an **ignored** date returns today's full roster. The test cannot
+give a false positive.
+
+## P3. Live result — AUTH BARRIER **[PROVEN]**
+
+`GET /auth/token` mints a bearer (200), **but every data read returns 401** — including the two CONTROL reads
+that replicate the production runner exactly (`POST /api/models/strategies/search` and `POST
+/api/accounts/search`, no date). Since the plain no-date baseline itself 401s, **the date variants are moot —
+this is an authentication failure, not a date-shape answer.**
+
+**Cause: the cot-BD session cookie is stale.** The secret `blackdiamond/cot/session` shows
+`captured_at = 2026-07-06T02:02:47Z` — **16 days old**, far past BD's measured ~30-60min effective TTL (D2).
+The device cookie still mints a token, but the session it points at is expired, so data calls reject. Classic
+short-TTL expiry.
+
+**No harm: reads only, zero writes, zero state change on BD's side.** Bounded to `/auth/token` + `.../search`
++ would-have-been `GET /api/models/{id}`.
+
+## P4. What this resolves, and what it does not
+
+- **UNRESOLVED (the actual question):** whether the rebalancer honors an injected date. Cannot be answered
+  against a stale session. **To complete: seed a FRESH cot-BD session** (the on-box Playwright login / the
+  refresh chain that owns cookie freshness — D2 §3), then re-run `scripts/cot_bd_rebal_date_probe.py` — it
+  finishes in seconds and the positive control makes the verdict unambiguous.
+- **INCIDENTALLY SURFACED (route to CTO/AE, their lane):** the production runner's OWN read pattern 401s right
+  now, i.e. the session cookie is not currently live between daily runs. This is the **WS-1 feed-liveness**
+  question already open in the record — the probe is a second, independent observation of it. Not mine to fix;
+  flagging because it bears on whether the daily rebalancer pull is actually landing fresh data or riding a
+  stale session.
+- **PRIOR EXPECTATION HOLDS:** even if a fresh-session probe shows the date IS honored, the backfill ceiling
+  stays ~05-28 (models did not exist before) and composition-vintage still must be dated (§3-§4). The probe
+  can only *open* the 05-28->07-21 gap, never reach before it.
+
+**Net:** the mechanism-of-interest (does a mocked date shape pull history?) is now a **one-fresh-session test
+away**, fully designed with an unfalsifiable positive control — but the live attempt hit a stale-cookie 401
+wall and answered nothing about the date shape itself. Egress used exactly as approved, read-only, no harm.
+
+---
+
+# ADDENDUM 3 — 2026-07-22: FRESH-SESSION live probe COMPLETED. Definitive: the rebalancer does NOT honor an injected date, and its dated surfaces are EMPTY for Cottonwood.
+
+**Andrew supplied a fresh login capture** (`sdgsdgsd.har`) for real-time egress exploration — clearing the
+stale-cookie barrier of Addendum 2. **Egress: Andrew explicit per-use word, read-only.** Fresh bearer+cookie
+extracted from a live 200 `accounts/search` in that capture; the baseline reproduced the live roster exactly
+(911 total / 296 Opal / 14 strategies), confirming the auth is good.
+
+## The result — the "mock a DataMining date shape onto the rebalancer" approach FAILS, measured live
+
+| Endpoint | What was tried | Result |
+|---|---|---|
+| `POST /api/accounts/search` (ASSIGNMENT roster) | **10 date shapes** — body `asOfDate`(2 fmts)/`effectiveDate`/`date`/`dateRangeType`+range/`asOfDateTime`/`timeframe`; query `?asOfDate`/`?date`/`?effectiveDate`, target 2026-06-15 | **ALL IGNORED** — every shape returned today's 911/296/14 |
+| `GET /api/models/{guid}` (COMPOSITION/blend) | `?asOfDate`, `?asOfDate+range` | **IGNORED** — same 75/25 blend regardless of date |
+| `POST /api/sessions/search` (natively dated) | wide window **2025-01-01 .. 2026-07-23 (19 mo)** | **200, totalResultCount = 0** |
+| `POST /request/api/trademanagement/blotter/search` (dated trade log) | wide window **19 mo** | **200, totalResultCount = 0** |
+
+**The positive control fired perfectly and makes this unfalsifiable:** a true 2026-06-15 roster cannot contain
+Satellite 60 (created 06-23) or 70/40/30/98 (created 07-06). Every date-injected query returned **today's full
+roster with all those strategies present** — so the endpoint is provably ignoring the date, not honoring it.
+
+## What this settles, definitively
+
+1. **The rebalancer surface is CLOSED for backfill.** Assignment and composition are pure live-state — they
+   ignore every injected date shape (live-tested, not inferred). There is no hidden date parameter to exploit.
+2. **The natively-dated rebalancer surfaces (sessions, blotter) are EMPTY for Cottonwood** even over a 19-month
+   window — confirming Andrew's diagnosis exactly: **a Cottonwood COVERAGE gap (migration in progress), not a
+   Black Diamond shape or fetch problem.** The endpoints work, accept dates, answer 200 — there is simply no
+   session/trade history yet.
+3. **The DataMining surface remains the ONLY backfill hope, and it is a DIFFERENT surface.** The date shape the
+   rebalancer ignores is DataMining's own — and DataMining (`bd3.bdreporting.com/datamining`) *is* genuinely
+   date-windowed (it is how we already pull holdings back to ~06-08). So the open probe is **DataMining's
+   account-strategy dimension** (re-persist the template, run a past window — §4), NOT date-mocking the
+   rebalancer. **This probe has now empirically eliminated the rebalancer alternative.**
+
+## Egress record (audit)
+
+Andrew per-use approval 2026-07-22 (*"You have my egress approval to test"* + the fresh capture). Calls made,
+ALL READ-ONLY: `GET /auth/token`; ~12 `POST /api/accounts/search`; 3 `GET /api/models/{guid}`; 2 `POST
+/api/sessions/search`; 2 `POST /request/api/trademanagement/blotter/search`. Zero writes, zero mutations, zero
+state change on BD's side. Auth sourced from Andrew's own fresh login capture (scratchpad, not committed).
+
+**Bottom line: the exploratory "pull history by mocking a date onto the rebalancer" idea is now a MEASURED
+dead end — the rebalancer ignores the date and its trade/session history is empty. Backfill, if it exists,
+runs through DataMining's dimension, and nothing reaches before the ~05-28 model-creation floor regardless.**
