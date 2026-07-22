@@ -151,9 +151,72 @@ lists its subjects (IAM resource lists, prefix conditions, event-pattern filters
 maps), diff that list against the real population. **It is a set-difference check, not a pattern match**, and
 it is the only axis that can see a missing member.
 
+### FINDING 6 — the PUBLISHER fails SILENTLY and GREEN, and good IAM is *why*
+
+*(Closes a cell DE's census names OUT OF REACH: publisher/promote. **My limb is the IAM face + the publish
+map, NOT the producer logic.**)*
+
+**IAM verdict: CLEAN on the firm axis — a genuine pass.** `mdpf_portal_publisher.tf:29-30` grants
+wildcard prefixes (`gold/mdpf_revamp/*` read → `json/mdpf/*` + `json/portfolios/*` write), conditioned
+ListBucket on the same. **No firm is enumerated anywhere in the grant.** A third firm needs no IAM change.
+
+**And that is exactly the problem.** `lambda_function.py:37-47` — `PUBLISH_MAP` is a **hardcoded 9-entry
+dict** over `global` / `49financial` / `inflection` / `portfolios`. **Cottonwood has no entry.**
+
+```python
+:100  results = [_publish_one(s3, seg, name, pk) for (seg, name), pk in PUBLISH_MAP.items()]
+:102  all_present = len(missing) == 0
+:106  "total": len(PUBLISH_MAP)
+```
+
+**The publisher iterates its own map.** A firm absent from the map is never attempted, never lands in
+`results`, never lands in `missing` — so it cannot raise `all_present`. **The success denominator IS the
+configuration.**
+
+> **`all_present` is a claim about the MAP, not about the CYCLE. The publisher cannot report missing a firm
+> it was never told to look for.**
+
+**At S5/cutover, with Cottonwood staged, the publisher returns `published 9/9, all_present=True` — and
+Cottonwood is simply never served.** Note `_publish_one` has a careful `missing_source` soft-fail path for a
+mapped key whose source is absent; **that care does not reach an unmapped firm, which never enters the loop.**
+
+**THE CONTRAST WITH FINDING 5 IS THE POINT:**
+
+| | Phase 1a (Finding 5) | Phase 4 publisher (Finding 6) |
+|---|---|---|
+| IAM | enumerated prefixes → **blocks** | wildcard prefixes → **permits** |
+| failure | **LOUD** — AccessDenied at runtime | **SILENT** — green, `all_present=True` |
+| when found | first run | possibly never |
+
+**The publisher's IAM is better-written than the runner's — correctly wildcard-scoped, least-privilege — and
+that is precisely what removes the loud failure.** The runner's narrower grant accidentally functions as a
+completeness check the publisher's cannot. **Tightening IAM does not catch a forgotten subject; enumerating
+it does, and only by accident.**
+
+---
+
+## THE PATTERN — three instances, one class, all found in one sweep
+
+Findings 1, 2 and 6 are **not three bugs. They are one defect class:**
+
+> ### **A COMPLETENESS SIGNAL WHOSE DENOMINATOR IS ITS OWN CONFIGURATION.**
+
+| # | signal | denominator | reports on a 3-firm cycle |
+|---|---|---|---|
+| 1 | `count_axis_source_audit` | hardcoded firm keys | two verdicts, third firm absent — **not** `audit_did_not_run` |
+| 2 | `keys_staged: 7` | a literal | `7` |
+| 6 | `all_present` | `len(PUBLISH_MAP)` | `9/9 = True` |
+
+**Every one reports GREEN while a third firm is missing.** Each was written carefully — Finding 1's helper
+exists *specifically* to prevent silent omission — and each is defeated the same way: **the guard's subject
+list and the world's subject list are different objects, and nothing compares them.**
+
+**This is why the completeness-of-enumeration axis is not a nicety.** A green signal derived from a
+hardcoded list is not evidence of coverage; **it is evidence that the list was iterated.**
+
 ### IAM — what this limb does NOT cover
-The `mdpf-pipeline` root only. **Not swept:** `opal-assets` publisher roles, the trigger/freshness Lambda
-roles beyond the `AssetsRevamp*` Sids, `bd-pipeline`/`cot-pipeline` cross-grants, and Lambda@Edge. **OPEN.**
+`mdpf-pipeline` + the publisher role. **Not swept:** trigger/freshness Lambda roles beyond the
+`AssetsRevamp*` Sids, `bd-pipeline`/`cot-pipeline` cross-grants, Lambda@Edge. **OPEN, not clean.**
 
 ### INSTRUMENT NOTE — a false ABSENT I nearly published
 `aws s3api list-objects-v2 --delimiter "/" --query 'CommonPrefixes[].Prefix' --output text` returned `None`
