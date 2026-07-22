@@ -7,7 +7,20 @@
 <joint_assignee>0.4.0_DS_ClientPlatform (canonicalization determination + exercised-read validation)</joint_assignee>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:24Z</issued_at>
-<status>active</status>
+<status>complete</status>
+<!-- 20260722T2108Z AC-4 CLOSED JOINTLY + TO COMPLETE (0.7.0_AE + 0.4.0_DS):
+     EXERCISED runner-role read (behavioral proof, not simulate): SSM adc0f11f-0001-4111-835e on
+     i-02448edb624a7a7cf under the Andrew-cleared lifecycle (chain: CTO GO 210124Z [evidence] ->
+     withdrawal 210234Z [freeze held] -> Andrew conditional clearance ~2103Z at COO terminal,
+     condition-1 idle MET -> CTO re-issue 210350Z [re-stop]; found parked state RESTORED, verified
+     stopped). Output: caller_arn=assumed-role/mdpf-daily-runner-ec2-role/i-02448edb624a7a7cf,
+     fact_holdings date=2026-07-20 rows=16762 cols=24 verdict=ROWS-RETURNED.
+     DS INDEPENDENT VALIDATION (msg 210720Z): 4 limbs -- identity, rows/cols == authoring-side read,
+     object ETag a6ea4428/388478B == head-object same-minute, script ETag c2473364 == staging receipt.
+     Record: AE msg 210554Z + DS msg 210720Z. CTO acceptance 210550Z.
+     dim_model_portfolio exercise stays sequenced to first G8/G3 population (granted + simulated;
+     rows impossible until populated -- not a blocker, a sequence). -->
+
 <!-- 20260722T2052Z 0.7.0_AE_CloudOps: RF-10 found HALF-STALE at live state (cottonwood half landed
      1746Z pre-hold under Andrew carve-out); CTO 203928Z narrowed scope to the gold/dim_model_portfolio/*
      pure-add and issued CONDITIONAL APPLY GO. Grant APPLIED + verified (ledger 20260722T2041Z closed 7/7,
