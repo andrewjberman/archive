@@ -229,6 +229,36 @@ assumes work is done that only my own token/list choices ever looked for.
 5. **THE APPLIED PLANE IS ENTIRELY UNTOUCHED.** Zero live AWS calls across all limbs (correct under the
    hold). Every BLOCKING verdict is a claim about the **repo**, not production — DESIRED, never APPLIED.
 6. **NOTHING WAS EXERCISED.** Every "it will raise / it will silently skip" is INFERRED from source.
+6a. **🔴 A FIFTH INSTRUMENT DEFECT — MINE, AND IT FAILS THE *OPPOSITE* WAY (1745Z).**
+Measuring Cottonwood's `fact_holdings` I reported *"`Cash Equivalent`: object dtype, **0 / 16,762
+non-null** — so CASH CANNOT BE IDENTIFIED IN THIS TABLE"*, and I sent it to DS as the **settle-before-derive
+blocker** on Andrew's total-AUA directive.
+**DS inverted it; I verified the inversion myself rather than inheriting it:**
+`Cash Equivalent` is **16,762 / 16,762 NON-NULL**, dtype object, distinct values `['true','false']` — **a
+BOOLEAN FLAG, not a money column.** I had run `pd.to_numeric()` over it; `'true'`/`'false'` coerce to `NaN`,
+and the non-null count returns **0**.
+**Cash was never missing — it is flagged on EVERY row, and already inside the $458.1M base:**
+`true` = 1,428 rows / **$15,232,656.26 (3.33%)** · `false` = 15,334 rows / $442,881,346.84.
+**So the Cottonwood base is ALREADY full-envelope, semantically matching 49F's `net_mv_plus_cash`.**
+
+> **A FLAG MEASURED ON A NUMERIC AXIS RETURNS THE EXACT OPPOSITE OF THE TRUTH** — not *"cash is absent"*
+> but *"cash is labelled everywhere."*
+>
+> **AND NOTE THE DIRECTION, BECAUSE IT IS NEW.** Every other instrument defect in this census fails toward
+> **FALSE CLEAN** (Glob, `comp-grep -l` truncation, run-date counting, `comp-platinum`'s 2-of-5 fetches).
+> **This one failed toward FALSE ALARM: it manufactured a blocker that did not exist.** Same root cause —
+> wrong axis — opposite sign. **I spent the session cataloguing instruments that answer "nothing found"
+> and then produced one that answers "something is broken," from the identical error.**
+> *An overstated hazard spends the same credibility as a false one, and this one would have spent DS's
+> hours hunting a cash leg that was never lost.*
+
+**AND DS CORRECTED MY FRAMING, NOT JUST MY NUMBER — the more useful half.** I relayed *"propose a solution
+in similar SHAPE."* DS measured that the 0824 base's `.fillna(0.0)` (`:327`) hits **0.00% of rows on live
+49F data and has NEVER FIRED.** **A null policy that has never been exercised is not a design decision, it
+is an untested assertion** — and copying it onto Cottonwood's 26%-null profile is how it fires for the
+first time in production. **Mirror the IDENTITY (custodian total is base, model subtracted, remainder is
+non-model); RE-DECIDE the nulls.**
+
 7. **A live instrument defect found mid-census:** `Glob`/`comp-glob` is **CASE-SENSITIVE**. Globbing
    `portal/src/**/*portfolios.tsx` returns *"No files found"* while `ModelPortfolios.tsx` exists. **Any
    earlier agent who globbed the lowercase form got a FALSE CLEAN.** Prior negative results on the portal
