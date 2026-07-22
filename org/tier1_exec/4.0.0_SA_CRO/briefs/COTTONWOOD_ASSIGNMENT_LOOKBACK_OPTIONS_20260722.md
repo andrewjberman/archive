@@ -14,6 +14,57 @@
 
 ---
 
+## AMENDMENT — 2026-07-22, Andrew-direct, AFTER this brief was written. Read this before §1.
+
+**Andrew, verbatim:** *"Cottonwood does not have full lookback yet because they are in the process of
+migrating their data to Black Diamond, so I would not get too indebted to what they have or don't have yet.
+Our goal is just to get whatever we have access to cleanly and explainably."*
+
+**This reframes the problem and I am recording it rather than silently rewriting the brief.**
+
+**WHAT CHANGES — the premise.** I wrote this as *"the history exists somewhere; find the path to it."* The
+真 situation is that **Cottonwood is mid-migration INTO Black Diamond.** The absent history is therefore
+**neither a BD platform limitation nor a Cottonwood data defect — it is a migration in progress.** Much of
+what is missing today is expected to arrive on its own.
+
+**WHAT THAT INVALIDATES:**
+- **§7's ceiling was right for the wrong reason.** I attributed it to our ingest horizons plus BD retention.
+  The actual binding constraint is **how far Cottonwood's migration has progressed** — which is a moving
+  target, not a fixed wall, and **not ours to measure from the outside.**
+- **Option 4.5 (vendor conversation) drops from "hold" to actively counterproductive for now.** Asking Black
+  Diamond to supply historical assignment for a tenant *currently migrating into* Black Diamond is asking for
+  something that does not exist there yet. It would spend a vendor conversation on a question the migration is
+  already answering.
+- **Options 4.3 / 4.4 (capture walks for a BD historical-assignment surface) drop in priority.** A surface
+  that returns history BD does not yet hold returns nothing useful.
+
+**WHAT SURVIVES, and why it survives INTACT:**
+- **4.1 + 4.2 (re-select the account-level dimension; run the never-run template dump) stand unchanged** —
+  because they were never "reconstruction." They are *"select the field we should have been selecting and
+  read what is actually there."* That is exactly **"get whatever we have access to, cleanly."**
+- **§3's temporal-vs-current probe becomes MORE important, not less.** If BD stamps *current* assignment onto
+  historical rows, and we backfill from it **while real history is still migrating in**, we would be
+  manufacturing a series that the migration later contradicts — **creating a reconciliation problem of our own
+  making, against ground truth that is still arriving.** The probe is the gate that prevents that.
+
+**A THIRD CONSTRAINT, now binding, which the original brief did not carry:**
+
+> **3. WHATEVER WE BUILD MUST BE ADDITIVE AND NON-CONFLICTING WITH DATA THAT ARRIVES LATER.**
+> No synthesized rows, no frozen backfill, no hardcoded series start. The series must simply **extend
+> backwards on its own as the migration lands more history.** Anything that writes a value where real data
+> will later appear is a future contradiction we authored ourselves.
+
+**THE OBJECTIVE, RESTATED in Andrew's terms:** not *"obtain lookback."* It is **"represent exactly what we
+have, honestly labelled, in a way that grows by itself."** A short, true, self-extending series is the
+deliverable. **Do not get indebted to what Cottonwood has or does not have today.**
+
+**PRACTICAL CONSEQUENCE FOR THE PRODUCT:** rendering Cottonwood from its true first date with the start
+honestly labelled is **already a correct answer** — not a placeholder for a better one. The work worth doing
+is the cheap, non-committal part (4.2 then 4.1) that makes "whatever we have" as complete and as explainable
+as it can be, and then **letting it grow.**
+
+---
+
 ## 1. Headline — the most promising path is one we already own, aimed one level off
 
 **Black Diamond's DataMining templates already carry model-assignment dimensions, and one of them is already
