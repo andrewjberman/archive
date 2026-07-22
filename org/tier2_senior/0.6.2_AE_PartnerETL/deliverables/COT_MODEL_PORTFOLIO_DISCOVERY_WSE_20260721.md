@@ -83,6 +83,30 @@ Base host `https://rebalancer.bdreporting.com`. Observed live (HAR), all **read*
 2. **Asset-sleeve model** — children are asset sleeves (`Sleeve - Bond/Equity/Money Market`), each holding fund components. Not a blend of primary models.
 3. **Flat model** — no children; `components[]` directly (e.g. 20 securities).
 
+### 4a. CORRECTION 2026-07-22 (author, exercised on real bronze bytes) — THE THREE PATTERNS ARE **NOT MUTUALLY EXCLUSIVE**, AND `rebalanceModelType` DOES **NOT** DISCRIMINATE
+
+The numbered list above reads as a partition — pick one per model. **It is not one.** A single Strategy can carry primary-model children **and** asset-sleeve children **in the same `children[]` array**. Measured at source (`bronze/rebalancer_model_detail/2026-07-22/`, all 25 details read):
+
+```
+"Blended Opal / Satellite 50"  (rebalanceModelType=Strategy, 1 ASSIGNED account)
+  child: Opal Intermediate-Term       type=Model  rel=0.1875   <-- primary model
+  child: Opal Short-Term              type=Model  rel=0.0625   <-- primary model
+  child: Sleeve - Core Money Market   type=Model  rel=0.015    <-- ASSET SLEEVE
+  child: Sleeve - Equity              type=Model  rel=0.375    <-- ASSET SLEEVE
+  child: Sleeve - Tax-Free Bond       type=Model  rel=0.36     <-- ASSET SLEEVE
+                                      sum(rel) = 1.0
+```
+
+**THE TRAP: every one of those five children carries `rebalanceModelType == "Model"`.** The vendor's own type field is therefore **useless as a primary-model-vs-sleeve discriminator** — a consumer that trusts it (the natural reading of §4 above) will treat `Sleeve - Tax-Free Bond` as a primary model portfolio. **The only observed discriminator is the NAME** (`"Sleeve - "` prefix), which is exactly why Andrew's strict Opal-name rule is load-bearing rather than cosmetic: it is currently the *only* thing standing between an asset sleeve and a served partner page.
+
+**Consequence, measured end-to-end** (WS-3 `build_dim_model_portfolio.py --date 2026-07-22`, dry-run, landed silver): the gold dimension emits **3 `Sleeve - *` rows** — Equity $381,606.92 / Core Money Market $15,264.28 / Tax-Free Bond $366,342.64 (**$763,213.84**, all `is_opal=False`) — from this ONE account. WS-3 correctly carries them **visible** (`dim_rows_non_opal_target=3`) rather than dropping them silently; **the `is_opal` filter is therefore owed by the WS-4 DDB fold**, and WS-4 must not be closed without it.
+
+**§6 below is amended by this:** its two-branch rule ("if M's children are primary models" / "if M is a single non-blend model") has **no branch for the mixed case**, which is the case that actually occurs. Read §6 as: *decompose every child by `relativeAllocation` regardless of kind, then filter the resulting targets by the strict Opal name rule at gold.* The decomposition arithmetic in §6 is correct and conserves dollars exactly (verified 2026-07-22: dim total $126,381,228.86 vs the 296 accounts' own value $126,381,228.84 — **$0.02, pure per-row rounding**); only the branch taxonomy was wrong.
+
+**Two further §4/§6 prose defects found by DE (`0.4.0_DE_ClientPlatform`) and confirmed by me at source — both mine:**
+- The blend tree hangs off **`hierarchy.children`**, never a top-level `children[]`. §6's shorthand "`children[].relativeAllocation`" reads as top-level; a converter written to that lands **zero** blend rows *silently*, because "no blend edges" is a legal state for an unblended model.
+- **`children[]` (sub-models) and `components[]` (security leaves) are different collections with different meanings.** §4's struct block shows both correctly, but conflating them yields a definition table with no securities in it.
+
 ## 5. The join to DataMining / landed data
 
 - `DataMining accountRebalStrategyID` (GUID) `===` `Rebalancer model.id`. Proven by exact match on the only 2 assigned GUIDs present in landed cot allocations.
