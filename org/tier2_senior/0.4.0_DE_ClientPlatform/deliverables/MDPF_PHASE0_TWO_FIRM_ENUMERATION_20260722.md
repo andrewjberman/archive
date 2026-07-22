@@ -332,6 +332,35 @@ SESSION.** Measured:
 | `"segments"` block | `:494` | `:527` | ⚠ same split |
 | staging loops `for firm in …` | `:459`, `:472` | `:459`, `:472` | ✅ **identical — these citations stand** |
 
+### 🔴 CORRECTION TO THIS CORRECTION (1755Z) — MY RETRACTION WAS ITSELF TOO BROAD
+
+*DS caught it; I verified repo-wide myself with a positive control (a fabricated token returns 0 matches,
+so the search discriminates).*
+
+**I wrote:** *"`134926Z` count = 0 → **NO COMMIT ANCHOR EXISTS** … that text exists in nobody's commit."*
+**MEASURED AT HEAD, REPO-WIDE: `134926Z` returns 27 matches across 13 files.** The approval **IS**
+anchored — notably `0.4.0_DS_ClientPlatform/deliverables/MDPF_REVAMP_dispatch_audit_wiring_for_AE_20260722.diff:29`:
+*"CTO: APPROVED AS WRITTEN 134926Z (split wiring + marker fold). Route: CTO 134602Z → 134926Z."* — a
+committed deliverable that **also carries its own SUPERSEDED-IN-PART annotation**, i.e. it states its
+vintage limits.
+
+| claim | verdict |
+|---|---|
+| `_audit()` / `134926Z` are absent from **`mdpf-daily-dispatch.sh` at HEAD** | ✅ **STANDS** — measured, `_audit(`=0, `134926Z`=0 in that file |
+| Citing `mdpf-daily-dispatch.sh:484-485` as live estate governance was **unanchorable** | ✅ **STANDS** — wrong carrier, tree-only |
+| *"The approval exists in nobody's commit"* | ❌ **FALSE — RETRACTED.** It exists in 13 files at HEAD |
+
+> **I MADE THE SAME AXIS ERROR IN THE RETRACTION THAT I MADE IN THE FINDING — measured a SCOPE (one
+> file), concluded about a UNIVERSE (the repo). Twice, in opposite directions, inside one hour.**
+> **A RETRACTION IS A CLAIM AND CARRIES THE SAME EVIDENTIARY BURDEN AS WHAT IT RETRACTS** — and mine had a
+> denominator smaller than its conclusion. **It also PROPAGATED:** COO struck its own citation
+> `@78c828817` on the strength of it, so an approval CTO genuinely gave was recorded as unfindable in two
+> lanes. *Retraction propagates to every enforcing copy — including the wrong ones.*
+
+**NET, and this is what should be carried:** the defect was the **LOCATION AND STATUS** of my citation (a
+tree-only string presented as landed law), **not the EXISTENCE of the approval.** CTO's 134926Z approval is
+real, anchorable, and already annotated with its own supersession.
+
 ### WHAT THIS CHANGES
 
 **S-3 and S-4 remain TRUE ABOUT THE PROPOSED CODE, and they are NOT findings about the record or the
