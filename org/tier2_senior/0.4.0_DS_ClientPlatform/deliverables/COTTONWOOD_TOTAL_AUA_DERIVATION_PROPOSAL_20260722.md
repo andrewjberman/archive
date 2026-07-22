@@ -1,3 +1,45 @@
+> # ⚠ SUPERSEDED IN PART — READ THIS BEFORE §5 (amended ~1750Z, same session)
+>
+> **1. THE MODEL LEG IN §5 IS WITHDRAWN. `blackdiamond/cottonwood/gold/dim_model_portfolio/` ALREADY
+> EXISTS** (Andrew-direct ~1747Z via CTO), archetypal (the ladder: Ultra Short-Term / Short-Term /
+> Intermediate-Term / Conservative Growth / Long-Term Aggressive), **conserving to $0.02**, with **no
+> "Satellite" name leaking** — the 10 Satellite strategies decompose into building blocks via
+> `is_decomposed_target`. **READ IT. DO NOT RE-DERIVE IT.** My §5 account-level join would have rebuilt
+> an existing table on a *worse* basis (vendor strategy names instead of the ladder). I reasoned up from
+> silver because that is where I began measuring and **never asked whether the roll-up already existed.**
+>
+> **2. I CORRECT MY OWN §4 HEADLINE, AND IT IS THE WORSE ERROR.** I wrote the residual would be **~93% of
+> the book**, using 0.6.2's **$30.99M Conservative Growth** as the modeled slice. **The real Opal subtotal
+> is $125,618,015.02 across 6 models.** Residual = **~$332.5M ≈ 72.6%**, not 93%. I *did* label the input
+> attributed-not-adopted and hedged the sentence — **and it was still wrong, because I used a SINGLE-MODEL
+> figure as a WHOLE-SIDE figure. Attribution is not a substitute for asking whether a quantity is the same
+> KIND of thing as the one you need.** Still dominant, still the firm headline, materially different number.
+>
+> **3. NEW BINDING BLOCKER — THE TWO LEGS SHARE ZERO DATES.**
+> `fact_holdings` 33 partitions `2026-06-09..07-20` · `fact_model_assignment` and `dim_model_portfolio`
+> 2 partitions each, `07-21` + `07-22`. **INTERSECTION = 0. COVERAGE = 0 of 33.** The model side starts the
+> day after the total side stops, so **`non_model[i] = total[i] − model[i]` is computable for NO date** —
+> and the 0824 analog is a *daily history* (`:611-614` iterates the axis). **Measured, NOT explained:**
+> cadence artifact vs backfill gap vs two producers on different schedules is undetermined and I am not
+> guessing.
+>
+> **4. READ-PATH CONSTRAINT (CTO, live):** the MDPF runner **cannot currently read
+> `blackdiamond/cottonwood/silver/*` at all.** My total-AUA base reads `silver/fact_holdings`, so it needs
+> either that grant (`0.7.0` building the additive statements on Andrew's GO) **or a gold-side total.**
+> Open question to CTO: does any gold artifact carry the firm TOTAL, or is silver the only source?
+>
+> **5. A NEAR-MISS AGAINST MYSELF, recorded because it is the same class as §3.1.** My first conservation
+> read showed **0 of 911 assignment accounts present in 913 holdings accounts — 100% of dollars
+> unassigned.** I nearly reported it as catastrophic. **It was an ID-SPACE MISMATCH:** `asg.account_id` is
+> a bare integer, `hld.AccountID` is `z09`-prefixed. On the right key (`external_id` × `AccountID`):
+> **906 shared, 99.4% / 99.2%**, 5 assigned-no-holdings, 7 holdings-unassigned. **ACCOUNT CONSERVATION IS
+> FINE** — §3.5's risk is largely retired, and the surviving risk is the DATE axis in item 3.
+>
+> **WHAT STANDS UNCHANGED:** §1 (the 0824 identity, source-verified), §2 (`.fillna(0.0)` never fires —
+> mirror the identity, re-decide the nulls), §3.1 (cash IS in the total, 3.33%), §3.2 (26% nulls are
+> wholly-empty rows; assert the invariant, not a null policy), §3.4 (`_s2` is a BD footer), and the
+> total-AUA base itself — **gold gives the MODEL side; the custodian TOTAL is still `Σ fact_holdings`.**
+
 # COTTONWOOD TOTAL-AUA DERIVATION — PROPOSAL (Andrew-direct ~1735Z)
 
 **Author:** `0.4.0_DS_ClientPlatform` · 2026-07-22 ~1745Z
