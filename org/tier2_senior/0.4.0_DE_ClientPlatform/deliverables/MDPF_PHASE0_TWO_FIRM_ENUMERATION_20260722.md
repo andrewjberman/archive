@@ -77,7 +77,25 @@ config maps, `FIRM_CONFIG`-style dicts — **take the list and diff it against t
 Cheap, because the lists are few and short. **This is the axis that can actually close the enumeration**,
 and neither of my two sweeps could have.
 
-**Therefore: THREE populations, THREE stated fractions, never blended.**
+**⚠ AND POPULATION C'S INSTRUMENT HAS ITS OWN FAILURE MODE — recorded 1620Z, and it nearly fired today.**
+A set-difference is only sound **if the list and the population are in the SAME KEY-SPACE.** Diff two sets
+that look comparable but are keyed differently and you manufacture false absences *and* conceal true ones.
+
+**The live near-miss (CTO, caught by CTO before sending, relayed by COO):** a first pass reported `smartx`
+missing **eight** July days. **That was the instrument, not a gap.** `fact_model_aum_daily` is
+**RUN_DATE-partitioned with full history inside each partition** — today's single partition holds **1,225
+distinct data days.** Counting run-date folders and calling them data dates produces a confident,
+specific, wrong absence.
+
+> **ESTABLISH DATA-DATE vs RUN-DATE PARTITIONING BEFORE QUOTING ANY PARTITION-COVERAGE NUMBER.**
+> **A partition that EXISTS but holds a DIFFERENT DATE-SPACE is an absence a set-difference cannot see.**
+
+**This does not weaken Population C — it bounds it.** For firm-keyed lists (IAM `Resource` sets, `argparse
+choices`, `FIRM_CONFIG`) both sides are firms and the diff is sound. For **date- or partition-keyed** lists
+the key-space must be established first. **Verify the key-space, then difference.**
+
+**Therefore: THREE populations, THREE stated fractions, never blended — and for C, the key-space stated
+before the difference is quoted.**
 
 > **THIS IS THE METHODOLOGICAL FINDING AND IT BINDS THE ADVISORY.** I fanned out four census limbs and
 > briefed every one of them on firm LITERALS. So Population B was under-covered in **all four**, not just in
@@ -232,6 +250,19 @@ Cottonwood's own gold has a different frontier. A third firm forces the question
 deferred: does global's axis become a **union, an intersection, or stay 49F-mastered with a third
 follower?** *Each answer changes served values.* **R2 already rules Cottonwood JOINS the existing axis —
 this is the mechanism by which that ruling must be implemented, and it is not free.**
+
+**S-6a · SOURCE REALITY, added 1620Z (COO, from the July completeness matrix — input to this census, not
+my measurement):** **Cottonwood `fact_model_assignment` carries only 2026-07-21 and 2026-07-22** —
+Rebalancer **live-state, no history**. Raised to CTO as possibly binding the flip SHAPE.
+**Two consequences I can state from my own work:**
+1. It **corroborates R2** (Cottonwood joins the existing axis carrying nulls before 07-21) and the plan's
+   *"1–2 points at the right edge, zero overlap"* — but it makes the *"every pre-07-21 Global value is
+   byte-identical with Cottonwood absent"* claim **true by construction AND nearly vacuous**: a two-day
+   firm cannot move a 427-date series anywhere but its right edge.
+2. **My render fixture was MORE GENEROUS than reality** (I gave Cottonwood 60 populated dates). That does
+   **not** weaken the S-9 finding — the defect is keyed on the model KEY, not the date count, and the
+   control proves it — but a real Cottonwood artifact would render those charts blank *and* nearly
+   empty-by-data. **Stating it so nobody reads my PNG as a claim about data depth.**
 
 **S-7 · A conservation guard DEGRADES SILENTLY rather than failing.**
 `dim_mdpf_non_model_assets.py:122-124` pins `SPINE_NON_MODEL_20260718 = 312170328.70`, a **two-firm-summed**
