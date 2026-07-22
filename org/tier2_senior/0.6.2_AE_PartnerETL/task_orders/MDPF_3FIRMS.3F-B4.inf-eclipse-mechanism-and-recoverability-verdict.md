@@ -27,7 +27,16 @@ SSM, manual). A leg whose ingest mechanism is unnamed has no freshness contract.
 already in hand (yours: 848/848, changed counts 2/14/1/7). What does NOT exist is a VERDICT. Produce
 one, either way, on vendor-side evidence.
 
-Also: determine vendor depth PRIOR to 2026-05-15 (silver currently starts there).
+~~Also: determine vendor depth PRIOR to 2026-05-15 (silver currently starts there).~~
+**(c) DELETED — ANSWERED BY ANDREW-DIRECT ~20:41Z (@0b06b5a14), VERBATIM:** *"Inflection only started
+migrating models on May 15 2026, and anything before is inherently non-model; the interest in their
+validation is a function of checking those July dates."*
+⛔ **THERE IS NO PRE-05-15 MODEL HISTORY TO FIND. The 2026-05-15 silver floor is CORRECT, NOT A GAP.**
+Do not spend vendor probes establishing depth below it. **What survives in this TO is the
+07-01/13/14/15 recoverability verdict** — inside the July window Andrew actually cares about.
+⚠ A design question arising from "inherently non-model" (whether pre-05-15 `model_aum` is KNOWN ZERO,
+making `non_model` computable back to Orion's 2020-04-28 floor, vs merely ABSENT per PRD §1.1) is
+**routed to CTO and NOT yours to act on either way.**
 
 ⛔⛔ **THE HARD PROHIBITION — THIS IS THE WHOLE TRAP OF THIS LEG:**
 **The eclipse puller's `--date` is a FILENAME, NOT A QUERY.** It fetches CURRENT state and files it
@@ -62,10 +71,22 @@ script fetches.**
       <if_mismatch>If nothing routes, that is itself the finding (an unnamed mechanism). Proceed to the rail-checked primitive below and record the coverage gap.</if_mismatch>
     </step>
     <step>
-      <run># rail-checked: EventBridge applied-truth is not modeled by a comp tool
-aws events list-rules --query 'Rules[?contains(Name,`eclipse`)||contains(Name,`inflection`)].{N:Name,S:State,C:ScheduleExpression}'</run>
-      <expect>Either a named rule (cite verbatim) or an EMPTY result that you then treat as "not EventBridge-fired", NOT as "not fired".</expect>
-      <if_mismatch>An empty result is a lead, not a conclusion. Continue to EC2 cron / SSM / runner inspection before asserting the mechanism is absent.</if_mismatch>
+      <run>⛔ RE-DERIVE THE CENSUS YOURSELF — DO NOT INHERIT PRD §9's ABSENCE CLAIM (CTO ruling 204330Z, PRD v1.7).
+# rail-checked: EventBridge applied-truth is not modeled by a comp tool
+# (a) PAGINATED rules census -- print the TOTAL denominator, not just the matches
+aws events list-rules   (paginate fully; report "N matched of M total rules")
+# (b) SCHEDULER namespace -- a DIFFERENT API that list-rules STRUCTURALLY CANNOT SEE
+aws scheduler list-schedules   (paginate; print denominator)
+# (c) LAMBDA DESTINATIONS -- not a rule of any kind, invisible to every rules census
+aws lambda get-function-event-invoke-config  on the candidate functions</run>
+      <expect>A census across ALL THREE surfaces with the DENOMINATOR PRINTED for each. Either a named mechanism, or a measured absence that states what was searched and how many objects were examined.</expect>
+      <if_mismatch>⛔ **PRD §9's "no eclipse-named puller rule" is RULED UNVERIFIED and you must NOT rely on it.** Its sibling claim in the same census sentence ("no smartx-named rule") DID NOT REPRODUCE -- 0.5.0 ran the identical query and got 3 of 141. **An under-enumerating census reports ABSENCE, and absence is the one result nobody re-verifies.** Two of the three smartx mechanism pieces (EventBridge Scheduler, Lambda OnSuccess destination) are STRUCTURALLY INVISIBLE to list-rules, so a rules-only search cannot conclude "not fired". Print your denominators; an empty result without one is not a finding.</if_mismatch>
+    </step>
+    <step>
+      <run>⚠ INSTRUMENT WARNING, EXERCISED THIS SESSION by 0.5.0 -- do not lose a census to it:
+`aws s3api list-objects-v2 --delimiter /` through Git Bash / the .tools/aws shim SILENTLY returns CommonPrefixes=EMPTY with rc=0.</run>
+      <expect>You avoid it: derive partition censuses from FULL KEY LISTINGS, not from --delimiter grouping.</expect>
+      <if_mismatch>Mechanism (instrument-grounded, AWS_SHIM_DEBUG=1): MSYS converts the bare `/` to `C:\Program Files\Git\` because it IS a real local path, so the CLI groups on a delimiter that never matches. **Clean exit, empty result, zero error** -- the same silent-absence class as the census above. It cost 0.5.0 three calls before a positive control caught it.</if_mismatch>
     </step>
     <step>
       <run>comp-freshness</run>
@@ -117,11 +138,15 @@ aws events list-rules --query 'Rules[?contains(Name,`eclipse`)||contains(Name,`i
 <acceptance_criteria>
 1. The ingest mechanism is NAMED with applied-truth evidence (rule ARN + state + cron, or a
    definitively identified non-EventBridge mechanism). "Not found" is not a mechanism.
+1a. **The mechanism census is RE-DERIVED BY YOU across all three surfaces (paginated `events list-rules`
+   + `scheduler list-schedules` + Lambda event-invoke-configs) with the DENOMINATOR PRINTED for each.**
+   PRD §9's absence claim is RULED UNVERIFIED (CTO 204330Z) and inheriting it does not satisfy this.
 2. A RECOVERABILITY VERDICT for 07-01/13/14/15 exists, stated either way, resting on VENDOR-SIDE
    evidence — never on the shape of our puller.
 3. The verdict cites a POSITIVE CONTROL that could have failed. A verdict without one is not accepted.
-4. Vendor depth prior to 2026-05-15 is stated with evidence (or explicitly recorded as undetermined
-   with the reason).
+4. ~~Vendor depth prior to 2026-05-15 is stated with evidence.~~ **STRUCK — answered by Andrew-direct
+   @0b06b5a14: models began 2026-05-15, anything prior is inherently non-model, so the floor is CORRECT
+   and there is nothing to find below it. Do not spend probes here.**
 5. ⛔ Zero use of the eclipse puller `--date` for any backfill purpose. Any such use voids the TO and is
    an incident.
 6. If UNRECOVERABLE: the permanently-absent date list is handed to COO for Andrew's D-3 decision, with
