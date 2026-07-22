@@ -91,6 +91,14 @@ belt-and-suspenders cross-check (offered 222902Z, pre-ruling). **My B6 = the liv
 accepted 211113Z) + the fingerprint-ban and forward-only carriers in this deliverable. The mutation-risk
 re-persist probe piece is retired with the absorption.**
 
+**TERMINAL ESCAPE MECHANICS (CTO 224317Z via COO 224949Z — supersedes "explicit GO only"; the last word):**
+the confirmation run is **PRE-AUTHORIZED on a machine-checkable condition evaluated by 0.6.2 at the 02:00Z
+on-box window**: IF CRO's campaign artifacts show EITHER (a) a TEMPORAL verdict OR (b) a CURRENT-only
+verdict with the window-integrity limb demonstrated GREEN -> STAY RETIRED (record which). ELSE (silent, or
+CURRENT-only with that limb missing/not-green) -> RUN the confirmation in-session (one fresh session, one
+IP, sequential-not-concurrent with CRO, timestamp-coordinated; method = past-window qt5-style run checking
+the 15 banked control accounts), no GO to fetch, and fold the result here alongside CRO's.
+
 ## For CRO (A5 residual, now determined)
 
 CRO's "whether updatedAt movement is composition edits or a system touch is not determined": **determined —
