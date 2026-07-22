@@ -172,8 +172,8 @@ easier to leave half-done, than an explicit list.
 
 | File | Lines read / total | Consequence |
 |---|---|---|
-| `dim_mdpf_aggregate_aua_timeseries.py` | **~150 / 1453** | **the worst hole** — highest firm-token density (140 hits) AND the home of `build_global_artifact`. ~90% unread on the arity axis. |
-| `mdpf_aggregate_aua.py` | **~460 / 1385** | sentinel + reconcile logic largely unread |
+| `dim_mdpf_aggregate_aua_timeseries.py` | **1453 / 1453 — ✅ CLOSED 1645Z** *(was ~150)* | **the census's worst hole, now shut.** Andrew-direct: *"keep closing the read fraction."* Results in §4a. |
+| `mdpf_aggregate_aua.py` | **~460 / 1385** | sentinel + reconcile logic largely unread — **now the largest remaining hole** |
 | `portal/src/pages/ModelPortfolios.tsx` | **~700 / 2276** | the MDPF page itself |
 
 **Read this honestly: the three files that matter most are 10%, 33%, and 31% read on the axis that cannot be
@@ -233,6 +233,55 @@ assumes work is done that only my own token/list choices ever looked for.
    `portal/src/**/*portfolios.tsx` returns *"No files found"* while `ModelPortfolios.tsx` exists. **Any
    earlier agent who globbed the lowercase form got a FALSE CLEAN.** Prior negative results on the portal
    tree taken via Glob should be considered void until re-run.
+
+---
+
+## 4a. ✅ READ FRACTION CLOSED — `dim_mdpf_aggregate_aua_timeseries.py`, 1453/1453 (1645Z)
+
+*Andrew-direct: "keep closing the read fraction." This was the number CTO carried to him as the one that
+gates the date. It is now closed on this file. Three results.*
+
+### (1) THE FILE HAS THREE LAYERS, AND ONLY ONE OF THEM IS TWO-FIRM
+
+| layer | firm-arity | verdict |
+|---|---|---|
+| **helpers + gates** | **already N-firm generic** | `canonical_trading_axis(frontier)` · `_assert_cross_axis_coherence(firm_id, …, same_source, exempt_dates)` · `_honest_none_marker(model_prefix, custody_prefix, …)` · `_cohort_provenance(…)` · `load_account_dist_frontier_counts(firm_id)` · `load_served_account_count(firm_id)` · `build_source_vintage_revamp(by_feeder)` — **`by_feeder` is a firm-KEYED map.** All parameterised. **CLEAN.** |
+| **per-firm builders** | one per firm, **per-VENDOR** | `build_49f_artifact` (SmartX + Schwab) · `build_inflection_artifact` (Eclipse + Orion). A `build_cottonwood_artifact` (Black Diamond) must be **written**, not generalised — each firm has different vendors. **REAL work, but EXPECTED work.** |
+| **orchestration + composition** | **FIXED AT 2 — the actual blocker** | `:1387-1388` argparse choices · `:1395` `want` set · `:1398-1406` three if-blocks + the 2-arg compose · `:1408` report loop over a 3-literal · `:1207` `_sum2` · **`:1262` AND `:1286` — TWO hardcoded 2-tuple folds** (model_value *and* account_count) · `:1316-1320` the vintage merge as two literal `.update()` calls. |
+
+**`SOURCE_PROVENANCE` at `:77-80` ALREADY CONTAINS `"blackdiamond": "Black Diamond"`** — Cottonwood's
+provenance resolves with no change. A rare pre-built absence, and evidence the file was written with a
+third firm in mind.
+
+### (2) ⚠ S-6 DOWNGRADED — the "49F is the axis master" topology does not exist
+
+**BOTH** firms call `canonical_trading_axis(frontier)` (`:583`, `:781`). The `:1403`
+`shared_axis = arts.get(FIRM_49F…)` is main() passing 49F's **frontier** so the two axes match exactly —
+and `:1348-1349` says so: *"expect IDENTICAL axes (both the shared canonical trading-day axis); any diff
+is a NAMED structural delta, never a silent firm-sum on a mismatch."* `canonical_trading_axis`'s own
+docstring (`:361-366`) reads **"All three firms share this axis so global is a trivial date-join."**
+
+> **So there is no union-vs-intersection ruling to make. R2 ("Cottonwood JOINS the existing axis") is
+> implementable by passing the same `shared_axis` — one argument.** *Second structural item that reading
+> downgraded, after D3.*
+
+### (3) 🔴 NEW — A CLOSED MODEL-KEY LIST IN THE PRODUCER, EXACTLY MIRRORING THE FE DEFECT
+
+`:111` — `GLOBAL_MODEL_KEYS = SERVED_MODEL_KEYS + ("opal_blend_5050_int_ltc", "opal_blend_5050_st_int")`
+— a hardcoded **union of the two firms' model sets**. `:1245` `for mkey in GLOBAL_MODEL_KEYS:` is the
+global `by_model` loop.
+
+**Cottonwood's models are absent from that list by OMISSION. So even a PERFECT Cottonwood artifact,
+correctly folded, contributes NOTHING to global `by_model` — silently.** *(And `entry_for_key(mkey)` at
+`:1246` raises on an unknown key, so adding them without a crosswalk entry fails closed — correct
+direction.)*
+
+> **THIS IS THE SAME DEFECT SHAPE AT BOTH ENDS OF THE PIPELINE.** A closed model-key list in the
+> **producer** (`GLOBAL_MODEL_KEYS`), and a closed series list in the **frontend** (`STACK_SERIES`,
+> S-9 — confirmed by render). **Neither errors. Both silently omit a third firm's models.** A fix at one
+> end without the other still yields a Cottonwood that is invisible — and **no single limb could see
+> this**: it took the producer read *plus* the FE render. **Population C, appearing independently in two
+> components that no one instrument covers.**
 
 ---
 
