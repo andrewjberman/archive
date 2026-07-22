@@ -29,22 +29,29 @@ The data-gate is **PASSED** — COO independently re-ran CVO's Layer-3 live agai
 (`c27e1f37` set): PASS, B-basis consistent, 421/421 mutant-proven. The re-land is **FE-FIRST**, the
 deliberate inverse of the flip that half-landed:
 
+**WINDOW-MINIMIZING ORDER (CTO refinement, relayed COO 060313Z — this supersedes the plain 3-step):**
 ```
-1. DE   folds 2x + content-A/B into the revamp FE  ->  DEV surface-check GREEN   (DE's leg, CTO-tasked)
-2. DT   promotes FE-FIRST (/prod-deploy, ephemeral worktree, main tree stays DEV) -> opalinvest.dev
-3. AE   re-populates the publisher (9 keys from the c27e1f37 fixed data) + re-applies routing
+0. DE  folds 2x + content-A/B into the revamp FE  ->  DEV surface-check GREEN   (DE's leg, CTO-tasked)
+1. AE  PRE-POPULATES the 9 assets json/ keys from the frozen-9 fixed data
+       -- BENIGN + UNSERVED (router still legacy) -> zero user impact, data staged + ready
+2. DT  promotes the revamp FE -> PROD                                          <-- MY STEP
+3. AE  re-applies the ROUTING flip IMMEDIATELY behind the promote
+       -- fast CloudFront apply ONLY, NOT a publisher run
 ```
-**FE leads, data follows.**
+**FE leads, data follows — but the data is already sitting there unserved before I push.**
 
-> ### ⚠ THE WINDOW BETWEEN STEP 2 AND STEP 3 IS REAL
-> Between my push and AE's re-populate, **the new FE is live against the OLD published data.** If the
-> revamp FE reads a key or shape the currently-published set does not carry, opalinvest.dev renders
-> wrong or empty for the duration — and it is Andrew-visible.
-> This is **not** an argument against FE-first (half-landed proved the other order is worse). It is an
-> argument for answering *"what does the new FE do against the old data?"* **before** the push, not
-> after. **That answer is DE's to give.** Degrades clean (empty states, no crash) -> the window is
-> cosmetic. Hard-fails or shows misleading numbers -> compress the gap deliberately, AE staged to fire
-> immediately behind me. Raised to COO + DE 0557Z so it costs a question rather than an incident.
+> ### ⚠ THE WINDOW IS SHRUNK, NOT ELIMINATED — and that distinction is the point
+> The original risk: between my push and AE's re-populate, the new FE serves against OLD data. CTO's
+> re-order shrinks that to **routing-propagation only**, because the fixed data is pre-staged (step 1)
+> and step 3 is a fast CF apply rather than a full publisher run.
+> **But during steps 2→3 the router still points at legacy, so the revamp FE IS still reading legacy
+> data for that interval.** Shorter is not zero. So **DE's characterization remains a GATING item**
+> (COO 060313Z), not a formality:
+> - **Graceful degrade** -> CTO makes an explicit *accept-the-window* call. Decided, not assumed.
+> - **Hard-fail** -> tighten further BEFORE I promote.
+> Either way it is **decided and in the package, never a bare proceed.** Raised 0557Z as a question so it
+> would not arrive as an incident; CTO turned it into a better sequence, which is the outcome worth
+> having.
 
 ## Hard-gate battery — ALL SIX before `/prod-deploy`
 
