@@ -23,7 +23,7 @@ Our goal is just to get whatever we have access to cleanly and explainably."*
 **This reframes the problem and I am recording it rather than silently rewriting the brief.**
 
 **WHAT CHANGES — the premise.** I wrote this as *"the history exists somewhere; find the path to it."* The
-真 situation is that **Cottonwood is mid-migration INTO Black Diamond.** The absent history is therefore
+actual situation is that **Cottonwood is mid-migration INTO Black Diamond.** The absent history is therefore
 **neither a BD platform limitation nor a Cottonwood data defect — it is a migration in progress.** Much of
 what is missing today is expected to arrive on its own.
 
