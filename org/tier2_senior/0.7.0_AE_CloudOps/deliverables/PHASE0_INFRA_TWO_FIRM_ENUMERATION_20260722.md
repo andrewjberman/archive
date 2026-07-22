@@ -207,6 +207,7 @@ Findings 1, 2 and 6 are **not three bugs. They are one defect class:**
 | 2 | `keys_staged: 7` | a literal | `7` |
 | 6 | `all_present` | `len(PUBLISH_MAP)` | `9/9 = True` |
 | 7 | `stale_partners` / `all_fresh` | `partners = {"49financial": …}` | `[]` / `True` — **and the SKIP never fires** |
+| 8 | freshness cohort check | `EXPECTED_COHORTS` (15-tuple) | all-fresh — Cottonwood **not expected, so never missing** |
 
 **Finding 7 is the one that escalates the class from reporting to safety:** 1, 2 and 6 mis-state what
 happened; **7 changes what happens.** A firm outside the protected set does not merely go unreported — **it
@@ -254,8 +255,28 @@ role, not the string.**
 
 ---
 
-### IAM — what this limb does NOT cover
-`mdpf-pipeline` + the publisher role + the trigger gate. **Not swept:** the freshness-checker Lambda,
+---
+
+## FINDING 8 — `EXPECTED_COHORTS`: the denominator is literally named *expected*
+
+`infra/aws/lambda/mdpf-pipeline/mdpf-freshness-checker/lambda_function.py:99-130`
+
+A hardcoded 15-entry tuple: **4 ETF + 1 inflection + 10 `49financial`. No Cottonwood cohort.**
+
+> **The instrument asks "are all EXPECTED cohorts fresh?" where *expected* is a literal. A cohort absent
+> from `EXPECTED_COHORTS` is not expected — and therefore can never be missing.** The class again, with the
+> denominator wearing its own name.
+
+**SEVERITY IS LOWER THAN 5/6/7, AND I AM NOT RECOMMENDING A FIX.** Apply Andrew's ~1425Z test — *does it PAGE
+someone, or does it STOP something?* **This one pages.** It is a freshness monitor, not a gate, so it falls
+under the **07-17 alert suspension**: the enumeration gap is a **census fact**, not a work item. **Recording
+it as a two-firm encoding; explicitly NOT proposing to build against it while the suspension stands.**
+*(Contrast Finding 7, which STOPS things and is therefore in scope.)*
+
+---
+
+### IAM / sweep — what this limb does NOT cover
+`mdpf-pipeline` root + publisher role + trigger gate + freshness-checker. **Not swept:**
 `bd-pipeline`/`cot-pipeline` cross-grants, Lambda@Edge. **OPEN, not clean.**
 
 ### INSTRUMENT NOTE — a false ABSENT I nearly published
