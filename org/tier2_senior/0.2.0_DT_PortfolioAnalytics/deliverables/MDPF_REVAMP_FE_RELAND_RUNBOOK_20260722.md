@@ -83,6 +83,14 @@ dist glb   b946d8364ca35dc258d90919d68fb771
 object."** This stage moved three times on 2026-07-22. Before gating, HeadObject all 9 and confirm every
 leg cites the same live set; any leg citing a superseded set re-runs first.
 
+> **LEDGER: open a NEW one at deploy-start. Do NOT re-close the old exact-9 ledger** — AE already closed
+> it as *rolled-back* @040519Z (COO 060024Z). Re-closing someone else's closed ledger would overwrite a
+> rollback record with a deploy record, which is worse than leaving it alone.
+
+> **CO-SIGN: `STAGED` IS NOT `ISSUED`.** COO's limb is staged and will fire with CTO's and Andrew's,
+> pinned to `c27e1f37`. COO will say plainly and unambiguously when the fresh co-sign has FIRED. Until
+> that sentence exists, **there is no go** — and a go citing the 0159Z co-sign is not a go either.
+
 Then: `/prod-deploy` — 4-commit `DEV→PROD` forward merge in an **ephemeral worktree**, `bun install` in it
 first (else the pre-push `tsc` gate fails "tsc: command not found"), main tree never leaves DEV, verify CI
 conclusion via `gh run view --json`, update the workspace submodule pointer on CLOUD, tear down the
