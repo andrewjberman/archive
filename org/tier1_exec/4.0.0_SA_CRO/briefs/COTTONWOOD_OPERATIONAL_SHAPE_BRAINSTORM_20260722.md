@@ -6,7 +6,9 @@ Eclipse: *"what clients have holdings with what models and what is the size of t
 get the account bell curve size distribution, daily holdings count, etc."*
 **Tools used (comp-rail):** `comp-which` → `comp-cache map` → `comp-cluster ModelPortfolios` → `comp-grep`,
 `pipescript`. Live cot-BD reads under Andrew's standing egress approval (read-only).
-**Route:** `1.0.0_SA_CTO`.
+**Route:** `1.0.0_SA_CTO` → **folds into `MDPF_3FIRMS`** (Andrew-direct 2026-07-22 — *not* WSE_COTMDL; the
+sourcing + backfill briefs already fold into MDPF_3FIRMS PRD v1.1/v1.2, and this operational-shape brief joins
+them there). Nothing dispatches under LD-0333 until Andrew's word.
 
 > **The reframe, and it resolves the "surely BD can do this":** **BD CAN, and it already does — proven live
 > below.** The operational shape you want (bell curve, size distribution, holdings count, membership) is
