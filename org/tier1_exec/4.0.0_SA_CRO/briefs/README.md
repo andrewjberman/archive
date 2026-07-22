@@ -13,6 +13,8 @@ endpoints, methodologies, auth, limits, open items — and points at canonical s
 
 **Determinism (Cottonwood current membership):** [`COTTONWOOD_MEMBERSHIP_DETERMINISM_20260722.md`](COTTONWOOD_MEMBERSHIP_DETERMINISM_20260722.md) -- 100% deterministic current model membership via two cross-validated assignment endpoints (17/17, 296==296), vs the ~97% holdings-fit. Read, not fit.
 
+**Appended daily series (Cottonwood model snapshot):** [`COTTONWOOD_DAILY_MODEL_SNAPSHOT_APPEND_SPEC_20260722.md`](COTTONWOOD_DAILY_MODEL_SNAPSHOT_APPEND_SPEC_20260722.md) -- Andrew-commissioned spec: the per-model daily count+value already lands in gold `dim_model_portfolio` per-day partitions but is unqueryable as a series; specs an append-only `fact_model_portfolio_daily` + one-object query surface, FAIL-LOUD identities per append, backfill-compatible by key.
+
 **Verification:** [`SURFACE_RECONCILIATION_TEST_20260722.md`](SURFACE_RECONCILIATION_TEST_20260722.md) — do a
 vendor's two surfaces agree on value? **Orion: PASS, exact to the cent. BD: inconclusive, and the $0==$0
 "agreement" is explicitly not scored as a pass.** Also names two consumption hazards (Orion's mixed units;
