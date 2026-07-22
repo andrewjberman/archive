@@ -51,8 +51,9 @@ account_distribution is a SNAPSHOT (no date axis) -> positional compare, latest 
 aggregate_aua_timeseries axis = 'dates'; aum_timeseries axis = 'periods'.
 non_model_assets is ROW-oriented (time_series[] of dicts + latest{}, NO top-level dates[]) -> axis is
 DERIVED from time_series[].period (it is the portal's parity contract; must not be restructured).
-SHAPE: the meta/source_vintage_last PROVENANCE subtrees are EXEMPT from the missing/extra
-shape-diff (their keys legitimately differ served-vs-revamp; the DATA-array shape is checked).
+SHAPE: the meta/source_vintage_last/cohort_provenance PROVENANCE subtrees are EXEMPT from the
+missing/extra shape-diff (their keys legitimately differ served-vs-revamp; the DATA-array shape is
+checked). cohort_provenance is revamp-only (49f+inflection; global omits) -- a NAMED intended delta.
 VALUE: leaves UNDER those provenance ROOTS are ALSO exempt from the value compare -- their values
 (age_hours_at_generation/lag/threshold/generated_at) are run-time, so served-vs-revamp differs by
 construction. ROOT-only (_provenance_value_exempt), NOT the leaf-NAME clause -- a numeric data leaf
@@ -77,7 +78,7 @@ SERVED_BUCKET = "opal-data-portal-v2"
 PUBLISHED_BUCKET = "opal-data-assets"
 REL_TOL = 0.001
 ALLOWED_EXTRAS = {"basis", "meta", "source_vintage_last"}   # leaf-name spec extras (published-side, any depth)
-SHAPE_EXEMPT_ROOTS = {"meta", "source_vintage_last"}        # provenance subtrees: keys legitimately differ served-vs-revamp
+SHAPE_EXEMPT_ROOTS = {"meta", "source_vintage_last", "cohort_provenance"}  # provenance subtrees: keys legitimately differ served-vs-revamp. cohort_provenance wired @7e0320cc0 (49f+inflection only; global omits) -- ledger harness_requirement + CTO 235117Z: EXEMPT from shape/value-diff (source-path-derived, FE-unconsumed 0-refs, CVO lineage-verifies the map)
 _DATE_RE = re.compile(r"@\d{4}-\d{2}-\d{2}")
 
 ARTIFACTS = {
@@ -99,12 +100,14 @@ ARTIFACTS = {
     ("non_model_assets", "global"): {
         "served": "json/portfolios/non_model_assets.json",
         "published": "portal/portfolios/global/non_model_assets.json"},
-    ("aum_metrics", "global"): {   # A1: DS builds a revamp producer -> parity artifact coming (CTO 203613Z)
-        "served": "json/portfolios/aum-metrics.json",
-        "published": "portal/portfolios/global/aum_metrics.json"},
-    # aum_timeseries (A2) REMOVED (CTO 203613Z scope ruling): FE-DERIVE now, stale legacy dropped from the FE
-    # -> the revamp produces NO aum-timeseries artifact, so there is nothing to parity-check (it left the
-    # picture entirely). Do NOT re-add a target that will only ever read PUBLISHED_ABSENT. Coverage = 8 keys.
+    # A1 aum-metrics + A2 aum-timeseries (coherent-9 exact-9, CTO 233555Z + manifest 235117Z): deliberately
+    # NOT in the date-join value registry. Both stage at gold/mdpf_revamp/portfolios/aum-{metrics,timeseries}.json
+    # -- a portfolios/{hyphen} path that does NOT fit the {prefix}/{firm}/{name} convention -- AND carry NO ledger
+    # window. A1 is QUARTERLY (q0-q3) FIELD-IDENTITY (not a daily date-join); A2 is a revamp-native series whose
+    # +3.07% D-1 + freshness recovery (07-20 fresh vs 05-29 legacy clobber) is CVO-reconciled NAMED, not a value
+    # delta this leg owns. Value-comparing either HERE would manufacture a spurious UNEXPLAINED_DELTA (no ledger)
+    # or PUBLISHED_ABSENT (wrong path). They are confirmed by a separate FIELD-IDENTITY read (key-set/shape +
+    # freshness), citing CTO+CVO -- see the session log. The date-join GATE = 3 aggregates + A4 non_model.
     ("account_distribution", "global"): {
         "served": "json/portfolios/account-distribution.json",
         "published": "portal/portfolios/global/account_distribution.json"},
@@ -546,6 +549,18 @@ def self_test():
     pv_r = compare(pv_s, pv_p)
     prov_value_exempt = not any(str(k).startswith("meta") for k, *_ in pv_r["unexplained"])   # age_hours 15->42.2 NOT flagged
     basis_data_still_caught = any(k == "basis" for k, *_ in pv_r["unexplained"])              # numeric 'basis' at data root STILL flagged
+    # REGRESSION cohort_provenance (DS wired @7e0320cc0; ledger harness_requirement + CTO 235117Z): the
+    # revamp-only cohort_provenance.* subtree (source-path-derived provenance, FE-unconsumed) must NOT
+    # SHAPE_FAIL as a published-only EXTRA -- EXEMPT like meta/source_vintage_last. A real published-only
+    # DATA extra OUTSIDE the exempt roots STILL fails (a false PASS is the danger). Caught on the real
+    # coherent-9 run 2026-07-21: 49f+inflection aggregates SHAPE_FAIL'd on cohort_provenance[].{model,custody}
+    # because SHAPE_EXEMPT_ROOTS lacked cohort_provenance -- the ledger required it, my harness didn't do it.
+    cp_s = {"dates": ["2026-06-01"], "model_aua": [10.0]}
+    cp_p = {"dates": ["2026-06-01"], "model_aua": [10.0],
+            "cohort_provenance": [{"model": "SmartX", "custody": "Schwab"}]}
+    cp_shape_ok = compare(cp_s, cp_p)["shape_ok"]                                 # cohort_provenance-only extra -> shape OK
+    cp_realextra = {"dates": ["2026-06-01"], "model_aua": [10.0], "rogue_field": [1.0]}
+    cp_real_still_fails = not compare(cp_s, cp_realextra)["shape_ok"]             # a real DATA extra STILL fails
     # A4 non_model_assets CLASS (DS~A 2026-07-21): a ROW-oriented time_series[]+latest{} artifact (no
     # top-level dates[]) -- _axis must DERIVE the axis from time_series[].period so leaves date-JOIN by
     # period (not read positional/latest-only). Pre-cutover row ties; a post-cutover delta lands at its date.
@@ -586,6 +601,7 @@ def self_test():
            and dj_reports_unnamed and dj_common_delta_caught
            and meta_shape_ok and real_shape_still_fails
            and prov_value_exempt and basis_data_still_caught
+           and cp_shape_ok and cp_real_still_fails
            and a4_axis_derived and a4_precut_ties and a4_post_datejoined
            and coh_clean and coh_sma_skipped and coh_val_caught and coh_frozen_caught and nm_not_masked)
     print(f"SELF-TEST snapshot identity+mutant: {ident['shape_ok'] and not ident['unexplained']} / {bool(compare(served, mut)['unexplained'])}")
@@ -596,6 +612,7 @@ def self_test():
     print(f"SELF-TEST DATE-JOIN fail-safe: unnamed non-common -> UNEXPLAINED(reported,not dropped)={dj_reports_unnamed}; real common-date delta CAUGHT at right date={dj_common_delta_caught}")
     print(f"SELF-TEST regression BUG-1 (meta/svl subtree exempt from shape): provenance-diff shape-OK={meta_shape_ok}; real data-shape diff still FAILS={real_shape_still_fails}")
     print(f"SELF-TEST regression BUG-1 VALUE (root-only exemption): provenance value diff (age_hours 15->42.2) NOT unexplained={prov_value_exempt}; numeric data leaf named 'basis' STILL caught={basis_data_still_caught}")
+    print(f"SELF-TEST regression cohort_provenance (revamp-only extra EXEMPT): cohort_provenance-only extra shape-OK={cp_shape_ok}; real DATA extra STILL fails={cp_real_still_fails}")
     print(f"SELF-TEST A4 non_model_assets CLASS (time_series[].period axis): axis-derived={a4_axis_derived}; pre-cutover ties={a4_precut_ties}; post-cutover delta date-joined+named={a4_post_datejoined}")
     print(f"SELF-TEST Item-2 frontier coherence: coherent-clean={coh_clean}; SMA auto-skipped={coh_sma_skipped}; value-mismatch caught={coh_val_caught}; frozen-None frontier caught={coh_frozen_caught}")
     print(f"SELF-TEST regression BUG-2 (exact field match, no substring): 'model_aua' entry does NOT mask 'non_model_aua'={nm_not_masked}")
