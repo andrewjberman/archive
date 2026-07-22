@@ -26,7 +26,50 @@ limits) · `mdpf_cottonwood_render_20260722/` @`c95210ec3` (render evidence + di
 > *"Regarding Day 1, no we are using canonical names, we are not doing this 'Satellite' bullshit unless
 > explicitly asked."*
 
-### ⚠ SCOPE OF RULING 1 — IT COVERS ONE MODEL, NOT TWO. D6 IS **PARTIALLY** RESOLVED.
+**RULING 3 (D6 — THE REMAINING HALF), VERBATIM ~1725Z:**
+> *"We are not tracking Opal - Income at this time. That is not relevant to the work here, it would be a
+> 'non-model' asset at this time."*
+
+## ✅ D6 IS NOW FULLY RESOLVED — AND SET B IS RELEASED (OFF)
+
+**I framed D6 as merge-vs-add. The answer was neither.** `Opal - Income` is **not a model at all** — it is a
+non-model asset, and not tracked at this time.
+
+| Cottonwood model | ruling | consequence |
+|---|---|---|
+| `Opal Conservative Growth` ($30.99M / 96 accts) | **MERGE → `opal_long_term_conservative`** | already in `STACK_SERIES` → **renders with no FE change** |
+| `Opal - Income` | **NOT A MODEL — non-model, not tracked at this time** | never enters `by_model` → **no unknown key ever reaches the FE** |
+
+> ### ⇒ **NO NON-CANONICAL MODEL KEY WILL EXIST. SET B (B1 `STACK_SERIES` + B2 `getModelColor`) IS NOT
+> ### REQUIRED, AND NEITHER IS THE `GLOBAL_MODEL_KEYS` PRODUCER TWIN.**
+> The render-confirmed blank-charts defect **cannot fire** on this configuration. It remains a real latent
+> defect for **firm four** — which is precisely what **C1** is for.
+
+**THE FE WORKSTREAM IS NOW: SET A (three small items) + C1 (preventive).** Set B is struck, not deferred.
+
+### ⚠ TWO THINGS TO CARRY, NEITHER AN OBJECTION
+
+**(1) IMPLEMENT THE EXCLUSION AS AN *ENUMERATED* ONE, NOT A SILENT DROP.** The estate already has the right
+pattern: `mdpf_revamp_model_crosswalk.py:167-170` `KNOWN_EXCLUDED_ECLIPSE_IDS` — a **named register of
+reviewed, deliberately-excluded models with a reason string**, so an exclusion is visible and reviewable
+rather than an absence. `Opal - Income` should land in a Cottonwood analog of that register, carrying this
+ruling as its reason.
+**Why it matters:** the crosswalk currently **RAISES** on both Cottonwood keys (correct fail-closed).
+Mapping Conservative Growth retires one raise. The Income raise must be retired **by an enumerated
+exclusion**, *not* by loosening the raise — otherwise the next unknown Cottonwood model is silently
+dropped instead of caught. **Same shape as CTO's 20-date rule: enumerated list, never a predicate.**
+
+**(2) DECLARE WHERE INCOME'S DOLLARS GO — do not let it be discovered at co-sign.** For 49F and Inflection,
+`non_model_aua` is a **residual**: `custody_total − model_aua`. **Cottonwood has no custody total** —
+`build_cottonwood_mdpf_slice.py:243` emits `partner_custody_total = [None] * n` because the BD Rebalancer
+carries model assignment only. **So a "non-model" bucket cannot be computed as a residual for Cottonwood.**
+Consequence: with Income excluded from `by_model` **and** no residual to fall into, **its dollars may appear
+nowhere in the artifact at all.**
+**That may be exactly right** — *"not tracking at this time"* reads as *don't build for it*. **But it should
+be a declared term, not a discovery.** *(I do not have Income's magnitude and am not going to quote one —
+the $99.72M in my render fixture was **invented test data**, not measured.)*
+
+### SCOPE OF RULING 1 — it covered ONE model; RULING 3 closes the other.
 
 **RULED:** `Opal Conservative Growth` → **MERGE** onto the canonical **`opal_long_term_conservative`**
 (LTC / "Opal Long Term"). $30.99M / 96 accounts.
@@ -36,13 +79,10 @@ its scope is a future contradiction with a citation.*
 
 ### CONSEQUENCES
 
-**(a) SET B IS NOT RELEASED — it is CONDITIONAL ON THE `Opal - Income` HALF.**
-- `opal_long_term_conservative` **is already in `STACK_SERIES`**, so Conservative Growth renders with **no
-  FE change**. That model is fully unblocked.
-- **If `Opal - Income` also merges** onto a canonical key → **Set B vanishes entirely.**
-- **If `Opal - Income` becomes a distinct key** → **B1 + B2 remain MANDATORY**, and the producer twin
-  (`GLOBAL_MODEL_KEYS`) with them, because one non-canonical key is enough to render blank.
-- **So Set B stays FROZEN.** One model does not clear the fork.
+**(a) ~~SET B IS NOT RELEASED~~ — SUPERSEDED BY RULING 3 (see above): SET B IS RELEASED / STRUCK.**
+Both Cottonwood keys are resolved without a distinct new model key ever existing, so B1/B2 and the
+`GLOBAL_MODEL_KEYS` twin are **not required**. *(Struck in place rather than deleted so the record shows
+the ruling arriving, not a spec that was always this way.)*
 
 **(b) RULING 2 REMOVES A WORK ITEM AND OVERRULES MY RECOMMENDATION.** I recommended advisor-facing
 ("Satellite") names for day one. **Overruled: canonical names.** No FE naming work; no display-name
