@@ -6,7 +6,7 @@
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:29Z</issued_at>
-<status>staged</status>
+<status>pending</status>
 <authorization>LD-0333 am.1 @2eef569d2 -> CTO cascade 200805Z -> COO decomposition.</authorization>
 
 <references>
@@ -31,10 +31,27 @@ produced three separate incidents on 2026-07-22 alone.
 latent KeyError or a silent null — both reach a served number.
 
 ⚠ §3.1 already ANSWERS the architectural question you raised: **silver IS the canonical source for the
-firm total** (`fact_rps_s2` for 49F, `fact_assets` for Inflection, `fact_holdings_s2` for Cottonwood).
+firm total** (`fact_rps_s2` for 49F, `fact_assets` for Inflection, **`fact_holdings` for Cottonwood**).
 The runner reads silver for totals and gold `dim_model_portfolio` for the Cottonwood model
 decomposition. What was missing is the GRANT (3F-S3), not an artifact. **Do not design a new gold
 artifact to carry firm totals.**
+
+⛔ **CORRECTION @2026-07-22T21:00Z — THIS TO ORIGINALLY SAID `fact_holdings_s2` FOR COTTONWOOD. THAT WAS
+WRONG, AND IT WAS MY ERROR: I transcribed it from PRD §1.2 without checking, which is the exact
+declared-vs-applied failure this TO's auto-rule 7 exists to prevent.** Your own S2 measurement disproved
+it and 3F-S3's joint determination (@`517bcb235`, three independent limbs) settled it:
+- **`fact_holdings` (16,762 x 24) = the real holdings table, CANONICAL for the COT AUA total.**
+- **`fact_holdings_s2` (5 x 7) = the BD vendor TIMESTAMPS sheet**, landed as section 2 by the
+  never-drop-a-sheet law (`mirror_schemas.py TIMESTAMPS_SECTION @61365878d`); 4,565 B vs 388,478 B on
+  `date=2026-07-20`.
+- **The live builder reads `fact_holdings` and is CORRECT AS-IS.** No read-path change.
+
+>> **THIS IS THE SUBJECT OF YOUR OWN TO, DEMONSTRATED ON THE TO ITSELF: `_s{N}` IS NOT A SCHEMA
+CONTRACT.** Schwab's `fact_rps_s2` IS the real balances table (7,086 x 39); Cottonwood's `_s2` is
+metadata. **The suffix means "section N of the vendor workbook," which is a per-vendor accident of
+layout, not a tier or a schema version.** Everyone — the PRD, me, and by pattern-match anyone reading
+Schwab first — read it as a contract. **Make that explicit in the contract document; it is the single
+most valuable thing this TO can leave behind.** <<
 </scope>
 
 <compiler_tools_mandate>
