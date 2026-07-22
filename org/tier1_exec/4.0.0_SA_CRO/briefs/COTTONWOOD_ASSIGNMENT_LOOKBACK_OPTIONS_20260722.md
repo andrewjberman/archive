@@ -264,3 +264,94 @@ read directly) · ingest horizons (S3 listings) · `templates_enriched/` empty (
 from Cottonwood's assignments being account-level (`0.6.2`'s source finding) plus the dimension's presence and
 `isEnabled: True`. **Not verified; §3 is the verification.**
 **[UNPROBED]** everything requiring a call: 4.3, 4.4, 4.5, and the §3 probe itself.
+
+---
+
+# ADDENDUM — 2026-07-22: the "rebal" endpoint, measured. **How far back DO we have Opal Model allocations?**
+
+**Andrew-direct follow-up.** Zero egress — read from `s3://opal-data-assets/blackdiamond/cottonwood/bronze/`.
+
+## A1. The direct answer
+
+**As ALLOCATION SNAPSHOTS: exactly two days — 2026-07-21 and 2026-07-22. And the endpoint structurally cannot
+give more.**
+
+`rebalancer_accounts` returns **911 accounts** over 5 pages, **22 fields per record**:
+`accountId · accountNumber · accountType · allowSMA · canRebalance · custodianId · discretionary · exclude ·
+externalId · isClosed · isInRebalanceGroup · isManaged · isRebalancerUma · isSMA · isSystemSleeve ·
+isUmaSleeveAccount · name · programName · rowNumber · strategyName · taxStatus · userCanViewRestrictedPlanTeam`
+
+> **NOT ONE OF THE 22 IS A DATE.** No `assignedDate`, no `effectiveDate`, no `createdAt`, no `since`.
+> **The hypothesis that a live-state roster might still carry a per-assignment effective date — which would
+> have given retroactive depth with no historical snapshot — is FALSIFIED at source for this endpoint.**
+
+**Current state (identical on both days):** 911 rebalancer accounts · 446 with any strategy · **296 on Opal
+models** across 14 named Opal strategies (Satellite 50 = 82, Satellite 60 = 79, Satellite 80 = 54,
+Satellite 70 = 39, Satellite 40 = 16, Satellite 98 = 12, Satellite 30 = 4, Ultra Short Term = 3, Income = 2,
+plus 5 singletons).
+
+## A2. **But the MODELS are dated — and that is a real, measured lower bound**
+
+`rebalancer_model_detail` **does** carry timestamps: `hierarchy.createdAt` / `updatedAt`. **An account cannot
+be allocated to a model that did not exist**, so model creation dates bound allocation depth from below —
+with no assignment history at all.
+
+**25 model definitions. Every Opal model at Cottonwood was created between 2026-05-28 and 2026-07-17.**
+
+**Cumulative earliest-possible allocation depth** (accounts whose model existed by that date):
+
+| Date | Allocatable | Model created |
+|---|---|---|
+| 2026-05-29 | **54 / 296** | Opal Satellite 80 (+54) |
+| 2026-06-10 | **136 / 296** | Opal Satellite 50 (+82) |
+| 2026-06-23 | **215 / 296** | Opal Satellite 60 (+79) |
+| 2026-06-26 → 06-29 | 219 / 296 | Blended Sat-50, Beecherl Legg, Income (+4) |
+| **2026-07-06** | **290 / 296** | Satellite 30 / 40 / 70 / 98 (**+71 in one day**) |
+| 2026-07-10 → 07-17 | 296 / 296 | 4 singletons (+6) |
+
+**Cross-check: the 14 models' `accountCount` sums to exactly 296 — matching the roster count derived
+independently from `rebalancer_accounts`. Two sources, same number.**
+
+## A3. What this means — it corroborates the migration framing with numbers
+
+- **No Opal-model allocation at Cottonwood can predate 2026-05-28.** Nothing existed to allocate to.
+- **Only 54 of 296 accounts (18%) were even *allocatable* before June.**
+- **71 accounts — a quarter of the book — sit on four models created on a single day, 2026-07-06.**
+- **The last Opal model was created 2026-07-17 — five days before the snapshot.**
+- **Eight Opal models exist with ZERO accounts**, five of them created 2026-05-28. Scaffolding stood up first
+  and populated later — **the signature of a migration in progress**, not a mature book.
+
+> **THE HONEST ANSWER TO "HOW FAR BACK": the deepest possible Opal-allocation history at Cottonwood is
+> ~8 weeks, and only ~18% of the book reaches that depth. The book as it stands today is ~2 weeks old.**
+> **Chasing assignment history further back is chasing something that did not exist.** The 2-day snapshot
+> series is not far off the true information content of the underlying reality — which is exactly why
+> *"don't get too indebted to what they have or don't have yet"* is the right posture.
+
+## A4. Corrections this addendum makes to §1 of the main brief
+
+**§1 said the account-level assignment dimensions are "available but not selected" everywhere.** Measured:
+**on `allocations` (qt5) they ARE selected and ARE flowing into our silver** — `account_strategy_id`,
+`account_strategy_name`, `manager_strategy`, `investment_strategy_name` are columns in
+`silver/allocations/2026-04-22.parquet`, populated with **explicit sentinels** — `"No Strategy"`,
+`"No Manager Strategy Define"`, `"No Investment Strategy Def"` — not nulls.
+
+**That is BD affirmatively reporting "no assignment," not BD withholding data** — and the whole 2026-04-22
+Cottonwood allocations partition is **3 rows**. Consistent with A2: in April there were no Opal models to be
+assigned to, and almost no Cottonwood data in BD at all.
+
+**So the §1 recommendation narrows usefully:** re-selecting account-level dimensions on realized/unrealized is
+still worth doing, **but the evidence now says it would correctly return "No Strategy" for the pre-June
+window** — because that is the truth, not a gap. **Do it for the June-onward window and for future-proofing,
+not as a lookback play.**
+
+## A5. Residual unknowns — stated, not papered over
+
+- **Whether `strategyName` is temporal is now moot for lookback** — there is no date field to make it
+  temporal. It is a pure live-state snapshot.
+- **The two snapshot days are identical** in counts, distribution and byte size. As COO established, a stable
+  roster and a frozen feed are indistinguishable from S3 alone. **Nothing here resolves that** — though
+  identical content over ~6.5h between a manual test pull and the first scheduled fire is unsurprising.
+- **`updatedAt` on models DOES move** (five 05-28 models show `updatedAt` 2026-07-22T05:01), so the model
+  layer is being touched. Whether that is composition edits or a system touch is **not determined**.
+- **I did not probe BD live** for a historical-assignment surface. §4.3/§4.4 remain unprobed and, per the
+  Amendment, are now low priority.
