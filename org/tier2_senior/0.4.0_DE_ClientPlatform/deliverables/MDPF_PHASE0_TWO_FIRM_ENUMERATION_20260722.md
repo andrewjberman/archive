@@ -94,8 +94,41 @@ specific, wrong absence.
 choices`, `FIRM_CONFIG`) both sides are firms and the diff is sound. For **date- or partition-keyed** lists
 the key-space must be established first. **Verify the key-space, then difference.**
 
-**Therefore: THREE populations, THREE stated fractions, never blended — and for C, the key-space stated
-before the difference is quoted.**
+**POPULATION D — THE ALIAS AXIS (added 1625Z; from CVO's A11 FAILURE, relayed by COO).** Sites encoding
+two-firmness in an **ALIAS namespace** rather than the canonical one. The estate carries at least two
+parallel firm namespaces:
+
+| canonical | alias | appears as |
+|---|---|---|
+| `49financial` | **`bd`** | `opal-data-bd`, `bd-pipeline`, `blackdiamond/49f/`, `BD_BUCKET`, `bd_bucket` |
+| `inflection` | `inf` | `opal-data-inf`, `inf-pipeline`, `inf_bucket` |
+| `cottonwood` | `cot` | `opal-data-cot`, `cot-pipeline`, `ROUTER_FIRM_SUFFIX` |
+
+**⚠ THIS IS A MEASURED HOLE IN MY OWN CENSUS, NOT A HYPOTHETICAL.** I briefed my limbs on
+`49financial|inflection|49f|inf|cottonwood`. **Three of the four did NOT include `bd`.** *(Only the FE limb
+searched short-form ids `'bd'|'inf'|'cot'`.)* A spot-check over the MDPF gold + dispatch + publisher surface
+returns a substantial `bd`-aliased population my limbs could not have seen — `validate_schwab_native_custody.py`
+and `build_mdpf_wse_49f_non_model_aua.py` are densely bd-aliased throughout.
+**Therefore my Population-A fraction is OVERSTATED and I am marking it so rather than restating it.**
+
+**⚠ AND THE ALIAS AXIS IS NOISY IN BOTH DIRECTIONS — a naive sweep over-reports.** In this very tree `bd`
+does **double duty**: it is the firm alias for 49financial **and** a custody-source enum value
+(`DEFAULT_CUSTODY_SOURCE = "bd"`, `CUSTODY_SOURCE = bd|schwab`, `build_mdpf_wse_49f_non_model_aua.py:151`).
+**`bd`-as-custody-basis is not a firm-axis site at all.** So the alias sweep must disambiguate by role, or
+it trades my false-negatives for a pile of false-positives.
+
+---
+
+**Therefore: FOUR populations, FOUR stated fractions, never blended — for C, the key-space stated before
+the difference is quoted; for D, the alias disambiguated by role.**
+
+> **AND THE AXIS LIST IS OPEN, WHICH IS THE REAL FINDING.** It has grown **three times after someone
+> declared its shape** — A (mine) → B (`0.7.0`, arity) → C (`0.7.0`, absence) → D (CVO's A11, alias). Each
+> was invisible to its predecessor's method, and **each was discovered by a FAILURE, not by a review.**
+> **Every fraction on this work is therefore PROVISIONAL, including all four of mine.** *(COO's framing,
+> and it is the correct one: treat the axis list as open rather than as a taxonomy that has settled.)*
+> **A census cannot state its own completeness — it can only state which kinds of encoding its instruments
+> can return, and how many kinds it has been surprised by so far. That number is four, today.**
 
 > **THIS IS THE METHODOLOGICAL FINDING AND IT BINDS THE ADVISORY.** I fanned out four census limbs and
 > briefed every one of them on firm LITERALS. So Population B was under-covered in **all four**, not just in
