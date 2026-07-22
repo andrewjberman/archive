@@ -55,7 +55,7 @@ output involved (queries fail LOUD).
 | comp-system --check DRIFTED reds (55/wk) | SYSPARITY verdicts, CVO~Z lane — the tool working |
 | comp-iam non-PASS last week (39) | my own F1/F2 mutant-census exercises — expected refusals |
 | comp-manifest-check FAILs (22/wk) | honest registration-invariant verdicts during tool churn; spot-checked PASS tonight (81 executables accounted, 63 registered) |
-| safe-commit/commit-gate cannot commit a .py DELETION | found 07-09 (DS~B); status UNKNOWN-to-me — flagging for CTO routing check, not adopting |
+| safe-commit/commit-gate cannot commit a .py DELETION | **CLOSED — reproduced-against and FIXED.** Exercised 2026-07-22 ~2140Z: `commit-gate.sh` on a missing .py prints `SKIP: deleted (nothing to compile/lint)`, rc=0. Fix landed @0de97dc69 (0.7.0_AE_CloudOps, 07-14, "pure-deletion staging"). No item 7; no COO chase needed — the reproduce-or-close CTO directed resolved to CLOSE on direct exercise |
 | output-key collision blind spot | CLOSED by CVO building comp-clobber (07-21) |
 | no generator for a new pipeline/partner firm | named in OPAL_PRISTINE audit (CVO 07-21) — archetype gap, not a comp-tool defect; already on record |
 
