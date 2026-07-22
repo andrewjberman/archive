@@ -60,6 +60,33 @@ construction. ROOT-only (_provenance_value_exempt), NOT the leaf-NAME clause -- 
 named after a provenance token (e.g. 'basis') is STILL value-checked (a false PASS is the danger).
 FIELD MATCH is EXACT-or-glob (never substring) -- a 'model_aua' entry must not intercept a
 'non_model_aua' leaf. --published-prefix points the compare at a staged pre-publish location.
+
+=================== INTERNAL-CONSISTENCY GATE (--consistency), 2026-07-22 ===================
+PARITY IS NOT CONSISTENCY. Everything above compares SERVED to PUBLISHED. A defect present on
+BOTH sides ties perfectly and passes -- so a clean 3/3 parity gate says nothing about whether
+either side is internally correct. That is not a hypothetical: my date-joined leg was honestly
+CLEAN (CTO confirmed 3/3, 2026-07-22 000840Z) while live Global was internally wrong.
+
+  INVARIANT   total == model_aua + non_model_aua, PER FIRM, PER DATE.
+  TOTAL FIELD resolved by PRESENCE, measured not assumed -- global carries `opal_aggregate_aua`;
+              49financial/inflection carry `partner_custody_total`. A gate hard-coded to the
+              global field would silently no-op on 2 of 3 firms while reporting a clean sweep.
+  NULLS       absent is NOT zero (zero-filling makes the exact live hole tie perfectly). All
+              three None -> honest-None row, skipped + counted. SOME None -> PARTIAL_NULL FAIL.
+  TOLERANCE   $1.00 absolute floor. USD sums at ~1e9 in float64 carry ~1e-6 genuine FP noise, so
+              the floor sits ~6 orders above it. The mutant test MEASURES and PRINTS the achieved
+              floor ($1.01) -- a gate whose sensitivity is unstated cannot be relied on.
+  CROSS-FIRM  companion check (BEYOND the routed per-firm ask, flagged so it can be accepted or
+              rejected independently): global component == sum(partner components), date-joined.
+              Catches a firm dropping out of the roll-up -- the LD-0292 class.
+  EXERCISED   every clause is mutant-gated (Rule 22a): seeded defects must turn it RED, and a
+              coherent control must still turn it GREEN. A gate that has never failed a seeded
+              defect has never been tested; an instrument that cannot pass is equally broken.
+  RC          --consistency returns 1 on ANY violation, INCLUDING uncheckable states (absent
+              artifact / absent total field). UNCHECKABLE IS NOT A PASS. --all now also reflects
+              this in its rc (it previously always returned 0); the parity verdicts still do not.
+  --served    runs the same invariant against the LEGACY LIVE artifacts, so "is what we serve
+              today correct?" is answerable by the same instrument, not an ad-hoc script.
 """
 from __future__ import annotations
 
@@ -77,6 +104,19 @@ from botocore.exceptions import ClientError
 SERVED_BUCKET = "opal-data-portal-v2"
 PUBLISHED_BUCKET = "opal-data-assets"
 REL_TOL = 0.001
+# --- INTERNAL-CONSISTENCY gate (COO-routed 2026-07-22 after the Global P0) ---
+# Tolerance is chosen by MEASURED sensitivity, not by taste: these are USD sums at ~1e9 magnitude carried
+# in float64 (~15-16 sig digits), so genuine FP noise on a few-hundred-term sum is ~1e-6 USD. A $1.00 floor
+# is therefore ~6 orders of magnitude above the noise and still catches any defect worth a dollar. The
+# mutant test MEASURES and PRINTS the floor it actually achieves -- an unstated sensitivity is an
+# unrelyable gate.
+CONSISTENCY_ABS_TOL_USD = 1.00
+CONSISTENCY_REL_TOL = 1e-9
+# MEASURED 2026-07-22 (live S3, not assumed): only `global` carries opal_aggregate_aua; 49financial and
+# inflection carry `partner_custody_total`. Resolution is by PRESENCE, so the gate covers all three firms.
+TOTAL_FIELD_CANDIDATES = ("opal_aggregate_aua", "partner_custody_total")
+CROSSFIRM_FIELDS = ("model_aua", "non_model_aua")
+GLOBAL_FIRM = "global"
 ALLOWED_EXTRAS = {"basis", "meta", "source_vintage_last"}   # leaf-name spec extras (published-side, any depth)
 SHAPE_EXEMPT_ROOTS = {"meta", "source_vintage_last", "cohort_provenance"}  # provenance subtrees: keys legitimately differ served-vs-revamp. cohort_provenance wired @7e0320cc0 (49f+inflection only; global omits) -- ledger harness_requirement + CTO 235117Z: EXEMPT from shape/value-diff (source-path-derived, FE-unconsumed 0-refs, CVO lineage-verifies the map)
 _DATE_RE = re.compile(r"@\d{4}-\d{2}-\d{2}")
@@ -469,6 +509,224 @@ def _coherence_firms():
     return sorted(aggs & ads)
 
 
+def _resolve_total_field(obj):
+    """Which field carries this firm's TOTAL. MEASURED, not assumed (2026-07-22): `opal_aggregate_aua`
+    exists ONLY on global; 49financial/inflection carry `partner_custody_total` instead. A gate hard-coded
+    to opal_aggregate_aua would therefore silently no-op on both partner firms -- covering 1 of 3 firms
+    while reporting a clean sweep. Returns the field name, or None (-> TOTAL_FIELD_ABSENT, a FAIL)."""
+    for f in TOTAL_FIELD_CANDIDATES:
+        if isinstance(obj.get(f), list):
+            return f
+    return None
+
+
+def _consistency_violations(obj):
+    """Pure INTERNAL-CONSISTENCY comparator (S3-free, unit-testable): total == model_aua + non_model_aua,
+    PER DATE, on ONE firm's aggregate. This is the invariant the 3-pass structurally lacked -- a
+    served-vs-published PARITY check cannot see it, because a defect present on BOTH sides ties clean.
+    (Live proof 2026-07-22: global's total omits Inflection non-model on 421/427 staged dates, hole
+    $64.5M-$203.2M, and my 3/3 parity leg was honestly CLEAN throughout. PARITY IS NOT CONSISTENCY.)
+
+    NULL DISCIPLINE -- absent is NOT zero. Coercing a missing non_model to 0.0 would make the exact
+    Inflection hole tie perfectly, so:
+      all three None at a date -> honest-None row (the FE drops these); SKIPPED, but COUNTED + reported.
+      SOME None, some populated -> PARTIAL_NULL violation. Never silently zero-filled.
+    Returns (violations, stats); violations = [(date, kind, total, model, non_model, diff)] where
+    diff = (model + non_model) - total."""
+    tfield = _resolve_total_field(obj)
+    if tfield is None:
+        return None, {"total_field": None}
+    dates = obj.get("dates") or []
+    tot, mod, non = obj.get(tfield) or [], obj.get("model_aua") or [], obj.get("non_model_aua") or []
+    viol, n_checked, n_allnull = [], 0, 0
+    for i, d in enumerate(dates):
+        t = tot[i] if i < len(tot) else None
+        m = mod[i] if i < len(mod) else None
+        n = non[i] if i < len(non) else None
+        nulls = [x is None for x in (t, m, n)]
+        if all(nulls):
+            n_allnull += 1
+            continue
+        if any(nulls):
+            viol.append((d, "PARTIAL_NULL", t, m, n, None))
+            continue
+        n_checked += 1
+        diff = (m + n) - t
+        if abs(diff) > max(CONSISTENCY_ABS_TOL_USD, abs(t) * CONSISTENCY_REL_TOL):
+            viol.append((d, "SUM_MISMATCH", t, m, n, diff))
+    return viol, {"total_field": tfield, "checked": n_checked, "all_null": n_allnull, "dates": len(dates)}
+
+
+def _agg_source(firm, published_prefix=None, served=False):
+    """Resolve (bucket, key) for a firm's aggregate. served=True targets the LEGACY LIVE artifact -- the
+    bytes the portal serves TODAY -- so the same invariant can be run against what is actually in front of
+    users, not only against what is staged to replace it."""
+    if served:
+        return SERVED_BUCKET, ARTIFACTS[("aggregate_aua_timeseries", firm)]["served"]
+    key = (f"{published_prefix}/{firm}/aggregate_aua_timeseries.json" if published_prefix
+           else ARTIFACTS[("aggregate_aua_timeseries", firm)]["published"])
+    return PUBLISHED_BUCKET, key
+
+
+def check_internal_consistency(firm, published_prefix=None, served=False):
+    """STANDING pre-serve gate (COO-routed 2026-07-22 after the Global P0): each firm's own total must
+    equal its own model + non_model, per date. Reads the STAGED/PUBLISHED artifact (the bytes about to be
+    served), never a producer self-report. served=True points it at the legacy live artifact instead."""
+    bucket, key = _agg_source(firm, published_prefix, served)
+    obj = _get(bucket, key)
+    if obj is None:
+        return {"firm": firm, "verdict": "CONSISTENCY_ABSENT", "note": f"{key} absent", "key": key}
+    viol, stats = _consistency_violations(obj)
+    if viol is None:
+        return {"firm": firm, "verdict": "TOTAL_FIELD_ABSENT", "key": key,
+                "note": f"no total field ({'/'.join(TOTAL_FIELD_CANDIDATES)}) -- UNCHECKABLE, not clean"}
+    return {"firm": firm, "verdict": "CONSISTENCY_PASS" if not viol else "CONSISTENCY_FAIL",
+            "violations": viol, "key": key, **stats}
+
+
+def _crossfirm_violations(glob_obj, partner_objs, field):
+    """Pure cross-firm ROLL-UP comparator: global[field] == sum(partner[field]) at the SAME date
+    (date-joined, never positional). Catches a firm silently dropping out of the global roll-up -- the
+    LD-0292 class (49financial vanished from mdpf held_by_partner, ~$528mm -> public float).
+    A date where global is populated but any partner is missing/None is a violation, not a skip:
+    dropping the partner is exactly the defect being hunted."""
+    out = []
+    gdates = glob_obj.get("dates") or []
+    gvals = glob_obj.get(field) or []
+    idx = [({d: j for j, d in enumerate(o.get("dates") or [])}, o.get(field) or []) for o in partner_objs]
+    for i, d in enumerate(gdates):
+        g = gvals[i] if i < len(gvals) else None
+        if g is None:
+            continue
+        parts, missing = [], False
+        for dmap, vals in idx:
+            j = dmap.get(d)
+            v = vals[j] if (j is not None and j < len(vals)) else None
+            if v is None:
+                missing = True
+                break
+            parts.append(v)
+        if missing:
+            out.append((d, "PARTNER_MISSING", g, None, None))
+            continue
+        s = sum(parts)
+        diff = s - g
+        if abs(diff) > max(CONSISTENCY_ABS_TOL_USD, abs(g) * CONSISTENCY_REL_TOL):
+            out.append((d, "ROLLUP_MISMATCH", g, s, diff))
+    return out
+
+
+def check_crossfirm_rollup(published_prefix=None, served=False):
+    """Companion gate (BEYOND COO's literal per-firm ask -- flagged as such, accept/reject independently):
+    global's component fields must equal the sum of the partner firms', per date. Measured clean 421/421
+    on the 2026-07-22 staged set for BOTH components -- which is what localises the P0 to the total-field
+    COMPOSITION, not to the firm-sum."""
+    def _load(firm):
+        bucket, key = _agg_source(firm, published_prefix, served)
+        return _get(bucket, key), key
+    firms = [f for (n, f) in ARTIFACTS if n == "aggregate_aua_timeseries"]
+    partners = sorted(f for f in firms if f != GLOBAL_FIRM)
+    if GLOBAL_FIRM not in firms or not partners:
+        return {"verdict": "CROSSFIRM_ABSENT", "note": f"need {GLOBAL_FIRM} + >=1 partner; have {sorted(firms)}"}
+    gobj, gkey = _load(GLOBAL_FIRM)
+    pobjs = []
+    for f in partners:
+        o, _ = _load(f)
+        if o is None:
+            return {"verdict": "CROSSFIRM_ABSENT", "note": f"partner {f} artifact absent"}
+        pobjs.append(o)
+    if gobj is None:
+        return {"verdict": "CROSSFIRM_ABSENT", "note": f"{gkey} absent"}
+    res = {f: _crossfirm_violations(gobj, pobjs, f) for f in CROSSFIRM_FIELDS}
+    bad = {f: v for f, v in res.items() if v}
+    return {"verdict": "CROSSFIRM_PASS" if not bad else "CROSSFIRM_FAIL", "partners": partners,
+            "by_field": res, "dates": len(gobj.get("dates") or []), "key": gkey}
+
+
+def _consistency_self_test():
+    """MUTANT-GATED acceptance (COO 034839Z, Rule 22a EXERCISED-not-asserted): a gate that has never
+    failed a seeded defect has never been tested. Every clause below seeds a KNOWN defect and asserts
+    the gate goes RED -- plus a clean control asserting it can still go GREEN (an instrument that cannot
+    pass is as broken as one that cannot fail). Returns (ok, measured_floor_usd)."""
+    base = {"dates": ["2026-07-16", "2026-07-17", "2026-07-20"],
+            "opal_aggregate_aua": [300.0, 400.0, 500.0],
+            "model_aua": [200.0, 250.0, 300.0],
+            "non_model_aua": [100.0, 150.0, 200.0]}
+    # CONTROL: a coherent artifact PASSES (the gate is not stuck-red / undiscriminating)
+    clean_v, clean_s = _consistency_violations(base)
+    c_clean = (clean_v == [] and clean_s["checked"] == 3 and clean_s["total_field"] == "opal_aggregate_aua")
+    # MUTANT 1 -- THE LIVE BUG'S EXACT SHAPE: total omits one component chunk (Inflection non-model).
+    m1 = copy.deepcopy(base)
+    m1["opal_aggregate_aua"] = [t - 153_000_000.0 for t in m1["opal_aggregate_aua"]]
+    v1, _ = _consistency_violations(m1)
+    c_m1 = (len(v1) == 3 and all(k == "SUM_MISMATCH" for _, k, *_ in v1)
+            and abs(v1[0][5] - 153_000_000.0) < 1.0)
+    # MUTANT 2 -- SENSITIVITY FLOOR: descending seeded holes; find the smallest one it still catches.
+    floor, caught = None, []
+    for hole in (1_000_000.0, 1_000.0, 10.0, 2.0, 1.01, 0.50, 0.01):
+        mm = copy.deepcopy(base)
+        mm["opal_aggregate_aua"] = [t - hole for t in mm["opal_aggregate_aua"]]
+        vv, _ = _consistency_violations(mm)
+        if vv:
+            caught.append(hole)
+            floor = hole
+    c_m2 = (1_000_000.0 in caught and 1_000.0 in caught and 10.0 in caught
+            and 0.01 not in caught)          # catches real money; ignores sub-cent FP noise
+    # MUTANT 3 -- MISSING-IS-NOT-ZERO: non_model absent at one date must FAIL, never zero-fill.
+    m3 = copy.deepcopy(base)
+    m3["non_model_aua"][2] = None
+    v3, _ = _consistency_violations(m3)
+    c_m3 = any(d == "2026-07-20" and k == "PARTIAL_NULL" for d, k, *_ in v3)
+    # MUTANT 3b -- the same hole via a SHORT array (truncated series, not an explicit None)
+    m3b = copy.deepcopy(base)
+    m3b["non_model_aua"] = m3b["non_model_aua"][:2]
+    v3b, _ = _consistency_violations(m3b)
+    c_m3b = any(d == "2026-07-20" and k == "PARTIAL_NULL" for d, k, *_ in v3b)
+    # MUTANT 4 -- TOTAL FIELD ABSENT is UNCHECKABLE, never a silent clean sweep.
+    m4 = {k: v for k, v in base.items() if k != "opal_aggregate_aua"}
+    v4, s4 = _consistency_violations(m4)
+    c_m4 = (v4 is None and s4["total_field"] is None)
+    # PARTNER SHAPE: partner_custody_total resolves as the total field (global-only hard-code would no-op)
+    part = {"dates": ["2026-07-20"], "partner_custody_total": [500.0],
+            "model_aua": [300.0], "non_model_aua": [200.0]}
+    pv, ps = _consistency_violations(part)
+    c_part = (pv == [] and ps["total_field"] == "partner_custody_total")
+    part_bad = copy.deepcopy(part)
+    part_bad["partner_custody_total"] = [400.0]
+    c_part_bad = bool(_consistency_violations(part_bad)[0])          # partner defect CAUGHT too
+    # HONEST-NONE: all three None at a date -> skipped + counted, NOT a violation
+    hn = copy.deepcopy(base)
+    for f in ("opal_aggregate_aua", "model_aua", "non_model_aua"):
+        hn[f][1] = None
+    vhn, shn = _consistency_violations(hn)
+    c_hn = (vhn == [] and shn["all_null"] == 1 and shn["checked"] == 2)
+    # CROSS-FIRM: clean roll-up passes; a partner dropping out of global is CAUGHT (LD-0292 class)
+    g = {"dates": ["2026-07-17", "2026-07-20"], "model_aua": [300.0, 400.0], "non_model_aua": [30.0, 40.0]}
+    pA = {"dates": ["2026-07-17", "2026-07-20"], "model_aua": [200.0, 250.0], "non_model_aua": [20.0, 25.0]}
+    pB = {"dates": ["2026-07-17", "2026-07-20"], "model_aua": [100.0, 150.0], "non_model_aua": [10.0, 15.0]}
+    c_xf_clean = (_crossfirm_violations(g, [pA, pB], "model_aua") == []
+                  and _crossfirm_violations(g, [pA, pB], "non_model_aua") == [])
+    c_xf_drop = bool(_crossfirm_violations(g, [pA], "model_aua"))            # firm B dropped -> CAUGHT
+    pB_gap = {"dates": ["2026-07-17"], "model_aua": [100.0], "non_model_aua": [10.0]}
+    c_xf_missing = any(k == "PARTNER_MISSING" for _, k, *_ in
+                       _crossfirm_violations(g, [pA, pB_gap], "model_aua"))  # partner absent AT a date -> CAUGHT
+    # date-join proof: a partner whose dates are ORDERED DIFFERENTLY still ties (never positional)
+    pB_rev = {"dates": ["2026-07-20", "2026-07-17"], "model_aua": [150.0, 100.0], "non_model_aua": [15.0, 10.0]}
+    c_xf_datejoin = (_crossfirm_violations(g, [pA, pB_rev], "model_aua") == [])
+
+    ok = (c_clean and c_m1 and c_m2 and c_m3 and c_m3b and c_m4 and c_part and c_part_bad
+          and c_hn and c_xf_clean and c_xf_drop and c_xf_missing and c_xf_datejoin)
+    print(f"SELF-TEST consistency CONTROL (coherent artifact PASSES, gate not stuck-red)={c_clean}")
+    print(f"SELF-TEST consistency MUTANT-1 (live bug shape: total omits $153M component) -> RED={c_m1}")
+    print(f"SELF-TEST consistency MUTANT-2 sensitivity: caught holes {caught} -> measured floor ${floor:,.2f}; sub-cent ignored={c_m2}")
+    print(f"SELF-TEST consistency MUTANT-3 missing-is-NOT-zero: explicit None -> PARTIAL_NULL={c_m3}; truncated array -> PARTIAL_NULL={c_m3b}")
+    print(f"SELF-TEST consistency MUTANT-4 total field absent -> UNCHECKABLE (not a clean sweep)={c_m4}")
+    print(f"SELF-TEST consistency PARTNER shape (partner_custody_total resolves)={c_part}; partner defect caught={c_part_bad}")
+    print(f"SELF-TEST consistency honest-None row (all 3 None) skipped+counted, not a violation={c_hn}")
+    print(f"SELF-TEST crossfirm: clean rollup PASS={c_xf_clean}; dropped firm CAUGHT={c_xf_drop}; partner-missing-at-date CAUGHT={c_xf_missing}; date-joined (reordered partner ties)={c_xf_datejoin}")
+    return ok, floor
+
+
 def self_test():
     spec = ARTIFACTS[("account_distribution", "49financial")]
     served = _get(SERVED_BUCKET, spec["served"])
@@ -596,6 +854,8 @@ def self_test():
                              "pct_range": [-0.5, 0.5], "note": "model tie"}}
     nm_not_masked = any(k == "non_model_aua@2026-06-01" for k, *_ in compare(nm_s, nm_p, nm_led)["unexplained"])
 
+    cons_ok, cons_floor = _consistency_self_test()
+    ok &= cons_ok
     ok &= (exp_win and exp_latest and unexp and auth and null_named and null_unexp
            and dj_no_spurious and dj_axis_named and dj_last_common
            and dj_reports_unnamed and dj_common_delta_caught
@@ -672,11 +932,81 @@ def _report_coherence(r):
         print("    aggregate frontier account_count == account_dist funded count, every funded model")
 
 
+def _report_consistency(r):
+    v = r["verdict"]
+    if v in ("CONSISTENCY_ABSENT", "TOTAL_FIELD_ABSENT"):
+        print(f"[{v}] internal_consistency/{r['firm']} -- {r['note']}")
+        return
+    print(f"[{v}] internal_consistency/{r['firm']} "
+          f"(total_field={r['total_field']}; checked {r['checked']}/{r['dates']} dates, "
+          f"{r['all_null']} honest-None)")
+    viol = r.get("violations") or []
+    sums = [x for x in viol if x[1] == "SUM_MISMATCH"]
+    if sums:
+        diffs = [x[5] for x in sums]
+        print(f"    (ic) SUM_MISMATCH on {len(sums)} date(s); hole (model+non_model)-total "
+              f"min={_fmt(min(diffs))} max={_fmt(max(diffs))}")
+    for d, kind, t, m, n, diff in viol[:8]:
+        if kind == "PARTIAL_NULL":
+            print(f"    (ic) PARTIAL_NULL {d}: total={_fmt(t)} model={_fmt(m)} non_model={_fmt(n)} "
+                  f"-- absent is NOT zero, UNCHECKABLE at this date")
+        else:
+            print(f"    (ic) {d}: total={_fmt(t)} != model {_fmt(m)} + non_model {_fmt(n)} "
+                  f"= {_fmt(m + n)}  HOLE={_fmt(diff)}")
+    if len(viol) > 8:
+        print(f"    (ic) ...+{len(viol)-8} more")
+    if v == "CONSISTENCY_PASS":
+        print("    total == model_aua + non_model_aua at every checked date")
+
+
+def _report_crossfirm(r):
+    v = r["verdict"]
+    if v == "CROSSFIRM_ABSENT":
+        print(f"[{v}] crossfirm_rollup -- {r['note']}")
+        return
+    print(f"[{v}] crossfirm_rollup (global == {' + '.join(r['partners'])}; {r['dates']} dates)")
+    for field, viol in (r.get("by_field") or {}).items():
+        if not viol:
+            print(f"    (xf) {field}: ties at every date")
+            continue
+        print(f"    (xf) {field}: {len(viol)} violation(s)")
+        for d, kind, g, s, diff in viol[:5]:
+            if kind == "PARTNER_MISSING":
+                print(f"        {d}: global={_fmt(g)} but a partner is missing/None at this date")
+            else:
+                print(f"        {d}: global={_fmt(g)} != sum(partners) {_fmt(s)}  DIFF={_fmt(diff)}")
+
+
+def _consistency_firms():
+    return sorted({f for (n, f) in ARTIFACTS if n == "aggregate_aua_timeseries"})
+
+
+def _run_consistency(published_prefix=None, served=False):
+    """Run the standing gate over every firm + the cross-firm roll-up. Returns True if ANY violation
+    (including UNCHECKABLE states -- an absent artifact or an absent total field is NOT a pass)."""
+    bad = False
+    print(f"--- internal-consistency gate: {'SERVED (legacy live)' if served else 'STAGED/PUBLISHED'} ---")
+    for firm in _consistency_firms():
+        r = check_internal_consistency(firm, published_prefix, served)
+        _report_consistency(r)
+        bad |= r["verdict"] != "CONSISTENCY_PASS"
+    xf = check_crossfirm_rollup(published_prefix, served)
+    _report_crossfirm(xf)
+    bad |= xf["verdict"] != "CROSSFIRM_PASS"
+    return bad
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--artifact")
     ap.add_argument("--firm")
     ap.add_argument("--all", action="store_true")
+    ap.add_argument("--consistency", action="store_true",
+                    help="run ONLY the internal-consistency + cross-firm roll-up gate "
+                         "(rc=1 on any violation -- the scriptable pre-serve gate)")
+    ap.add_argument("--served", action="store_true",
+                    help="point the consistency gate at the LEGACY LIVE artifacts (what the portal serves "
+                         "today) instead of the staged/published set")
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--ledger")
     ap.add_argument("--published-prefix",
@@ -689,12 +1019,19 @@ def main():
     if args.ledger:
         with open(args.ledger, encoding="utf-8") as fh:
             ledger = json.load(fh)
+    if args.consistency or args.all:
+        bad = _run_consistency(args.published_prefix, args.served)
+        if args.consistency:
+            return 1 if bad else 0
     if args.all:
         for (name, firm), spec in ARTIFACTS.items():
             _report(check_pair(name, firm, spec, ledger, args.published_prefix))
         for firm in _coherence_firms():                          # CTO Item-2: frontier account_count coherence
             _report_coherence(check_frontier_coherence(firm, args.published_prefix))
-        return 0
+        # rc REFLECTS the consistency gate (deliberate change 2026-07-22): --all previously always
+        # returned 0, so a caller could not machine-check it. The parity verdicts still do not affect
+        # rc (read the output, as before); only a CONSISTENCY/CROSSFIRM violation does.
+        return 1 if bad else 0
     if args.artifact and args.firm:
         spec = ARTIFACTS.get((args.artifact, args.firm))
         if not spec:
