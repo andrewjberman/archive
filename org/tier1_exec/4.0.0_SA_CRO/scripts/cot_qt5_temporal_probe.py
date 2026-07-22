@@ -33,8 +33,12 @@ THE VERDICT LOGIC -- WINDOW-INTEGRITY FIRST (CTO v1.21, binding, non-optional)
       and ignored).
     * If it returns the era-correct reduced roster -> WINDOW HONORED -> temporal
       discrimination on the churn-control accounts is legal.
-    * If neither can be shown -> UNVERIFIABLE-INSTRUMENT (NOT a finding) -> the CTO-gated
-      escape (a single 0.6.2 re-persist confirmation, routed COO->CTO) applies.
+    * If neither can be shown -> UNVERIFIABLE-INSTRUMENT (NOT a finding) -> the escape:
+      0.6.2's single re-persist confirmation, PRE-AUTHORIZED + SELF-EVALUABLE (CTO 224317Z).
+      0.6.2 self-evaluates a machine condition at the 02:00Z window and runs IFF this campaign
+      has NOT by then produced either a TEMPORAL verdict or a CURRENT-only verdict with the
+      window-integrity limb green. No COO->CTO round-trip; sequential never concurrent; both
+      need the SAME fresh session (else the verdict is cleanly BLOCKED-ON-SESSION-CAPTURE).
 
 SAFETY
   Read-only. No template re-persist, no bronze write, no state change on BD's side. On a
@@ -320,7 +324,9 @@ def main(argv=None) -> int:
             "(>= ~2026-05-28 model floor). Apply the B2 model-weight rollup. GO LOUD to COO/CTO.")
     elif overall == "UNVERIFIABLE-INSTRUMENT":
         log("VERDICT=UNVERIFIABLE-INSTRUMENT -- window integrity not demonstrable. NOT a finding. "
-            "Trigger the CTO-gated escape (single 0.6.2 re-persist confirmation, routed COO->CTO).")
+            "Escape: 0.6.2's re-persist confirmation is pre-authorized + self-evaluable (CTO 224317Z) -- "
+            "he self-evaluates at the 02:00Z window and runs IFF no sufficient verdict landed here first; "
+            "no round-trip, sequential never concurrent, same fresh session required.")
     else:
         log("VERDICT=CURRENT-only(window-honored) -- qt5 stamps today's assignment onto past windows; "
             "backfill CLOSED on A1. Valid ONLY because a past window was demonstrably honored above.")

@@ -119,12 +119,23 @@ A CURRENT-only claim without Step-0=HONORED is `UNVERIFIABLE-INSTRUMENT`, report
 current-only." **Both controls are intrinsic and cannot false-positive:** the timeline control cannot be faked (BD
 would have to invent pre-creation history); the churn control fails in both directions.
 
-### The CTO-gated escape (do not self-arrange)
+### The escape — PRE-AUTHORIZED + SELF-EVALUABLE (CTO finalized 224317Z; no round-trip)
 
-IF the run returns **CURRENT-only AND Step-0 INCONCLUSIVE** (window integrity undemonstrable either way), a
-second-instrument confirmation becomes justified — **0.6.2's re-persist method, ONE deliberate touch inside a normal
-session window, on CTO's EXPLICIT GO, routed back through COO.** Never off-window, never a concurrent session, never
-by default, never arranged directly with 0.6.2.
+> **CORRECTION 2026-07-22 ~23:0xZ (COO 225959Z):** an earlier draft of this section had the escape "routed back
+> through COO to CTO." That is stale — CTO **finalized** it at 224317Z, *after* the relay this brief was first
+> written against, as **pre-authorized and self-evaluable.** The corrected mechanics:
+
+`0.6.2` evaluates a **machine condition himself** at the 02:00Z session window and runs his single re-persist
+confirmation **IFF, by then, this campaign has NOT produced EITHER (a) a TEMPORAL verdict OR (b) a CURRENT-only
+verdict with the window-integrity limb GREEN.** No COO→CTO round-trip; no explicit per-run GO.
+
+- If this campaign lands a **sufficient verdict before 02:00Z** (TEMPORAL, or CURRENT-only with window-integrity
+  green), 0.6.2 stays **retired** — he does not touch the surface.
+- If this campaign is **still HELD / insufficient at 02:00Z**, 0.6.2 self-evaluates the condition and **may run
+  in-session.** **The timeliness and strength of my window-integrity limb directly gate whether he touches BD at all.**
+- If both are live in that window, **coordinate by timestamp — sequential, NEVER concurrent** (a second concurrent
+  IP-bound DataMining session is the 401-manufacture risk v1.21 retired his probe to avoid).
+- **Never off-window, never by default, never a concurrent session.**
 
 ---
 
@@ -180,6 +191,12 @@ the re-run-a-known-answer anti-pattern).
 
 **A blocked run is a STATED GATE, not a failure** (COO 224310Z) — nothing in 0.6.2's sequence changes; the design,
 the controls, and the harness are complete and waiting on auth only.
+
+> **THE HOLD IS SHARED (COO 225959Z).** 0.6.2's escape confirmation needs the **same** fresh cot-BD session this
+> probe does. So if no fresh capture lands, **neither instrument can fire, and the temporal verdict is cleanly
+> `BLOCKED-ON-SESSION-CAPTURE`** — an honest gated state, not a failure. It gates a backfill *design* question that
+> is CTO-gated and downstream anyway, so **there is no pressure to force a run against a stale session** (neither
+> mine nor 0.6.2's).
 
 ---
 
