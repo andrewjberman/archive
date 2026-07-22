@@ -159,12 +159,45 @@ headcount.
 
 ## 4. THE STRUCTURAL FINDINGS — the expensive ones
 
-**S-1 · The global composition gate asserts a TWO-LEG conservation identity that a third firm makes
-arithmetically false.** `dim_mdpf_aggregate_aua_timeseries.py:1104-1106 @a09e14438` pins BOTH legs so
-inflection's non-model *"can neither be silently DROPPED nor silently FOLDED IN."* Adding Cottonwood does
-not add an argument — it requires re-deriving **what the identity IS**. Failure mode is perverse: the gate
-fails loudly, so **the path of least resistance under schedule pressure is to make it pass by excluding
-Cottonwood.** Single most expensive item in the census.
+**S-1 · The global composition gate — ⚠ DOWNGRADED 1615Z BY DIRECT READ. I OVERSTATED THIS, AND THE
+CORRECTION IS THE MOST DECISION-RELEVANT THING IN THE CENSUS.**
+
+**What I originally reported** (relayed from the producers limb, which grepped rather than read): the
+two-leg conservation identity is *"arithmetically false with a third firm"*, requiring the identity itself
+to be re-derived; **the single most expensive item.**
+
+**What the source actually says**, having now read `build_global_artifact` and `_assert_global_composition`
+in full (`:1094-1274 @32b35a589`):
+
+- `:1220-1223` — **`non_model_aua` is the 49F-ONLY basis** by Andrew-direct 2026-07-22 (basis B, *"EXCLUDE
+  consistently"*). Inflection's non-model is carried in a SEPARATE 2b audit field and **never enters the
+  headline**.
+- `:1226-1227` — `opal_aggregate = m49 + nm49 + minf`.
+- The asserted identity is `opal_aggregate == model_aua + non_model_aua`.
+
+**Add Cottonwood and the identity BALANCES BY CONSTRUCTION:**
+`model_aua = m49 + minf + mcot` · `opal_aggregate = m49 + nm49 + minf + mcot` · `non_model = nm49`
+→ `(m49 + minf + mcot) + nm49 == m49 + nm49 + minf + mcot` ✓
+
+**And the LEG PINS are pins on NON-MODEL** (`:1126-1136`) — but **Cottonwood carries no non-model at all**:
+`build_cottonwood_mdpf_slice.py:243` emits `"non_model_aua": [None] * len(dates)`, because Black Diamond
+Rebalancer carries model assignment only and cannot support a custody-total claim. **A firm with no
+non-model leg cannot falsify a non-model pin.**
+
+> **THEREFORE: THE IDENTITY GENERALISES RATHER THAN BREAKING. D3 IS NOT A RE-DERIVATION — IT IS AN ARITY
+> CHANGE.** Andrew's basis-B ruling, made for an unrelated P0 this morning, **happens to have already
+> solved the three-firm case.** *This removes what the census called its single most expensive item.*
+
+**⚠ AND THE CONDITION THAT MUST BE CARRIED WITH IT — this is a DEFERRAL, not an elimination:** the result
+holds **only while Cottonwood's `non_model_aua` is null**. The day Cottonwood gains a custody total, the
+third non-model leg is real and D3 returns in full. **That condition must be written into the gate as an
+assertion, not left as a comment** — otherwise the next firm inherits a silently-wrong-shaped identity.
+
+**WHY THIS CORRECTION EXISTS AT ALL, and it is the census's own lesson turned on itself:** the overstatement
+came from a limb that **grepped** this file (~10% read) and reasoned from the docstring. The correction came
+from **reading the arithmetic**. Population B is not merely under-covered by search — *a search can produce
+a confident finding that is wrong in the expensive direction.* **This is the strongest single argument for
+closing the read fraction before pricing anything.**
 
 **S-2 · The serve path enumerates the same per-firm key list THREE times, in three languages, with no shared
 source of truth.** Publisher `PUBLISH_MAP` (Python, 9 keys, explicitly *"no derive -> no mis-route"*) ·
@@ -218,6 +251,31 @@ model outside the canonical 7 gets a legend swatch and a donut slice and **no ba
 and stores the value (`:1789-1794`) before dropping it. **The trend silently totals less than the donut. No
 error, no gap, no console warning.** Every guard on this page was built for the *value* being absent; none
 for the *series* being absent.
+
+**S-12 · WHAT THE READ FOUND THAT NO SEARCH COULD: the composition's SEMANTICS are already N-firm-correct;
+only its ARITY is fixed at 2.** *(Population B, all `@32b35a589`, none containing a firm name — invisible to
+the token axis.)*
+
+| site | code | why a search misses it |
+|---|---|---|
+| `:1207-1208` | `def _sum2(a, b): return None if (a is None or b is None) else round(a+b, 2)` | **the fold primitive itself, fixed at two arguments.** Named `_sum2`. Used for `model_aua` and `partner_custody`. |
+| `:1262` | `for art_bm, idxmap in ((bm49, d49), (bminf, dinf)):` | **the actual per-model cross-firm fold is a hardcoded 2-element tuple-of-pairs.** This is the single most load-bearing arity site in the file. |
+| `:1226-1227` | `None if None in (m49, nm49, minf) else round(m49 + nm49 + minf, 2)` | a three-term literal sum over two firms' components. |
+| `:1111` | `ident, pin49, pininf, partial = [], [], [], []` | two per-firm violation accumulators, one per leg. |
+| `:1094-1096` | `_assert_global_composition(..., a49, ainf, d49, dinf, ...)` | 2-firm-shaped signature + a firm-named parameter `inf_non_model`. |
+| `:111` | `GLOBAL_MODEL_KEYS = SERVED_MODEL_KEYS + ("opal_blend_5050_int_ltc", "opal_blend_5050_st_int")` | global's model universe expressed as *firm A's models + firm B's models* — a two-term concat. |
+
+**BUT — AND THIS IS THE GOOD NEWS THE CENSUS DID NOT HAVE:** the *hard* part is already right.
+`:1257-1270` explicitly distinguishes **"this firm does not carry this model"** (skip, not a gap) from
+**"a contributing firm's value is missing on this date"** (poison the sum to `None`) — the ABSENT-IS-NOT-ZERO
+logic that closed this morning's false-dip P0. **That logic is written generically over the loop.** Make the
+loop N-ary and it generalises unchanged. Likewise the gate's band/total check (`:1141-1158`) already iterates
+`by_model.values()` — N-firm today.
+
+> **So the re-home is a MECHANICAL GENERALISATION — `_sum2` → an N-ary fold, and the `((bm49,d49),(bminf,dinf))`
+> literal → a list built from a firm registry — NOT a redesign of the composition's semantics.** Combined with
+> the S-1 downgrade, **Phase 1a is substantially cheaper than the census priced it, and it is blocked on IAM
+> (S-11) and a ruling (D5), not on difficulty.**
 
 **S-11 · PHASE 1a IS IAM-BLOCKED. THE PLAN LISTS IT AS "parallel, all unblocked" — IT IS NOT.**
 *(`0.7.0_AE_CloudOps` ARN-axis sweep @`6440ed9d8`, run at my request; this is a Population-C finding and
