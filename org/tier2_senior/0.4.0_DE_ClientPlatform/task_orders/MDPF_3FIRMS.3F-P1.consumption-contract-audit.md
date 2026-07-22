@@ -40,6 +40,38 @@ as deliberate.
 ⛔ **READ-ONLY. No FE changes in this TO** — the builds are 3F-P3/P4/P5 and they gate on WS-G.
 </scope>
 
+<addendum id="ruling-12-verify" added="2026-07-22T20:53Z" authority="CTO ruling 205217Z, PRD v1.9 @47402a90d">
+**ADDED SCOPE — VERIFY-AND-HARDEN, NOT BUILD. Read why, because the framing is the point.**
+
+CTO ruled (ruling 12) that Inflection's pre-2026-05-15 `model_aum` is **RULING-SOURCED KNOWN-ZERO**, not
+missing — so `non_model = total − 0` is correct for those dates. **That ruling was initially framed as a
+BUILD. It was WRONG to frame it that way: Andrew showed the live chart and THE BEHAVIOR ALREADY SHIPS.**
+Non-Model AUM renders continuously from 2025-07-18 through 2026-07-18; the five model bands appear only
+from ~2026-05 onward. **A new code path bolted onto working behavior is how a shipping surface breaks
+while someone believes they are adding a feature.**
+
+>> **THE CLASS, named in the PRD: we adjudicated what the system SHOULD do from DOCUMENTS, about
+behavior we could have LOOKED AT. No instrument lied — nobody rendered the page.** PRD §1.1 asserts
+one-sided dates render as ABSENT; the served Inflection product does not behave that way, and §1.1 will
+be corrected FROM THE MEASURED IMPLEMENTATION after you answer this — not before. <<
+
+**THREE QUESTIONS, read-only, inside your existing audit:**
+1. **WHAT PRODUCES the pre-migration non-model values?** Name the producer + the artifact, file:line
+   @ commit-ish.
+2. **IS THERE AN EXPLICIT ZERO-FILL / BOUNDARY, OR IS THE BEHAVIOR EMERGENT FROM THE DATA?**
+   ⚠ **This is the decisive one.** If `model_aum` is simply absent/zero in the source and `total − model`
+   naturally yields `total`, then **there is NO ruling-zero code path at all** — and CTO's proposed
+   guardrail (c) ("structurally impossible to apply to dates >= 2026-05-15") **has no referent to guard.**
+   If instead there IS an explicit boundary or fill, name it and say whether it is a named constant or a
+   scattered literal.
+3. **IS THERE A PROVENANCE LABEL?** Can a consumer distinguish a RULED zero from a MEASURED zero in the
+   served artifact? (Likely absent — that is fine; report it, do not add it.)
+
+⛔ **DO NOT IMPLEMENT ANYTHING.** No label, no constant, no guard. Guardrails (b)/(c) are HELD pending
+your answer; (a) is evaluated on its merits after. **Answering (2) may dissolve (c) entirely** — which is
+the cheapest possible outcome and the reason this is a verify, not a build.
+</addendum>
+
 <compiler_tools_mandate>
   <phase id="1" when="before write">
     <step>
@@ -103,6 +135,10 @@ as deliberate.
    aggregate rather than in aggregate.
 4. Any served artifact with no identifiable producer recorded as UNKNOWN PRODUCER, never guessed.
 5. Zero FE modifications (read-only TO).
+5a. **RULING-12 ADDENDUM ANSWERED** (see `<addendum id="ruling-12-verify">`): the producer of
+   pre-migration Inflection non-model values NAMED at `file:line @ commit-ish`; an explicit verdict on
+   **EXPLICIT-BOUNDARY vs EMERGENT-FROM-DATA**; and a provenance-label presence/absence statement.
+   **Nothing implemented** — a verify, not a build.
 6. **Session log Compiler Tools section reproduces every `<run>` with observed output and pass/fail vs
    `<expect>`. Missing rows = REWORK.**
 </acceptance_criteria>
