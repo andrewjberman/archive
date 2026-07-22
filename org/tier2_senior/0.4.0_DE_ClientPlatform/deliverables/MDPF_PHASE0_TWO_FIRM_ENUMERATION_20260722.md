@@ -62,6 +62,23 @@ was found by **READING**, not by searching. Credit to `0.7.0_AE_CloudOps`, who i
 whose own words are the proof: *"I caught `keys_staged: 7` only because I read the block, not because the
 search found it."*
 
+**POPULATION C — THE ABSENCE AXIS (added 1550Z; `0.7.0_AE_CloudOps`, and it is the one that closes Phase 0).**
+Sites that encode two-firmness **by OMISSION** — a firm simply missing from a list that should contain it.
+**This is a subset of NEITHER sweep above, and the reason is categorical, not incidental:**
+
+> **AN ABSENCE HAS NO TOKEN. YOU CANNOT GREP FOR WHAT IS NOT THERE.**
+> Populations A and B are both *pattern searches*, and **every pattern search enumerates what IS PRESENT.**
+> A missing member of a list is structurally outside what either can ever return — not rare, not deep,
+> **categorically invisible.**
+
+**The instrument for Population C is a SET-DIFFERENCE, not a pattern match:** wherever the estate enumerates
+its subjects — IAM `Resource` lists, prefix `Condition`s, EventBridge patterns, `argparse choices=[...]`,
+config maps, `FIRM_CONFIG`-style dicts — **take the list and diff it against the real firm population.**
+Cheap, because the lists are few and short. **This is the axis that can actually close the enumeration**,
+and neither of my two sweeps could have.
+
+**Therefore: THREE populations, THREE stated fractions, never blended.**
+
 > **THIS IS THE METHODOLOGICAL FINDING AND IT BINDS THE ADVISORY.** I fanned out four census limbs and
 > briefed every one of them on firm LITERALS. So Population B was under-covered in **all four**, not just in
 > infra. A fraction whose denominator is *"sites containing a firm token"*, reported as if it meant
@@ -202,6 +219,24 @@ and stores the value (`:1789-1794`) before dropping it. **The trend silently tot
 error, no gap, no console warning.** Every guard on this page was built for the *value* being absent; none
 for the *series* being absent.
 
+**S-11 · PHASE 1a IS IAM-BLOCKED. THE PLAN LISTS IT AS "parallel, all unblocked" — IT IS NOT.**
+*(`0.7.0_AE_CloudOps` ARN-axis sweep @`6440ed9d8`, run at my request; this is a Population-C finding and
+neither of my sweeps could have produced it.)*
+`terraform/mdpf-pipeline/iam.tf:243-252` — Sid `AssetsRevampSilverRead` grants **exactly five ARNs**, and
+**`blackdiamond/cottonwood/silver/*` is not one of them.** Cottonwood silver **exists** there — 12 `fact_*`
+tables from the WS-5 converter. `AssetsRevampListScoped` carries the same closed prefix list.
+
+**GROUNDED ON ALL THREE LAYERS, per Rule 22a:**
+- **desired** (Terraform) and **applied** (live `get-role-policy`) **AGREE** → this is **not drift, it was
+  never built**;
+- **exercised** (`simulate-principal-policy`) → **`implicitDeny`** on the Cottonwood ARN, **`allowed`** on
+  inflection **from a SEPARATE invocation** — so the control discriminates rather than merely passing.
+
+**CONSEQUENCE FOR MY OWN NEXT STEP:** Phase 1a re-homes Cottonwood as `build_cottonwood_artifact()` *inside
+the shared producer*, which runs on `mdpf-daily-runner-ec2-role`. **It will `AccessDenied` on the first
+Cottonwood read**, and `_latest_date` / `_read_partition` discovery fails on the List side too. Two additive
+statements fix it. **Not written — an IAM change under the hold; CTO to sequence.**
+
 **S-10 · Two silent-failure modes on a PARTIAL onboarding, both worse than a hard error.**
 (a) **Trigger/dispatch desync** — open `partners` without opening `SKIP_49F` and the Lambda exports
 `MDPF_STALE_PARTNERS=cottonwood`, *believes it skipped*, and the runner **runs Cottonwood's feeders anyway
@@ -294,7 +329,15 @@ implemented yet."*
 ---
 
 **BOTTOM LINE.** The shape is closed; the list is not. The remaining unknown is concentrated and *named*:
-Population B in three large files, `runners_49f/**`, `cot-pipeline/`, and the applied plane. **Six decisions
-(§6) gate code and none is an engineering call.** The forced ordering in §5 is measured, not assumed. And
-the honest reframe is §7: **this is FIRMSEP.11, a phase deferred by ruling in May and never given a task
-order** — which is why it keeps costing more than a fold.
+Population B in three large files, **Population C estate-wide (barely started — one sweep, one root)**,
+`runners_49f/**`, `cot-pipeline/`, and the applied plane. **Six decisions (§6) gate code and none is an
+engineering call.** The forced ordering in §5 is measured, not assumed. **Phase 1a is IAM-blocked (S-11),
+contradicting the plan's "parallel, all unblocked."** And the honest reframe is §7: **this is FIRMSEP.11, a
+phase deferred by ruling in May and never given a task order** — which is why it keeps costing more than a
+fold.
+
+**THE ONE-LINE VERSION OF WHAT THIS CENSUS LEARNED ABOUT ITSELF:** I started with one axis, `0.7.0` showed
+me a second, and the second proved there had to be a third — **and only the third can see a missing member
+of a list.** Each axis was invisible to its predecessor's method. **The lesson is not "grep harder"; it is
+that a census must state WHICH KIND of encoding its instrument can return, because an instrument that
+enumerates only what is present will report an absence as a clean result.**
