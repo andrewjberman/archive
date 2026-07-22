@@ -189,6 +189,34 @@ headcount.
 
 ---
 
+### 2a. ⚠ I RAN S-13's TEST AGAINST MY OWN FOUR FRACTIONS. THREE OF THE FOUR FAIL IT.
+
+Doctrine §7f (`@f9f6a4c72`): **a coverage fraction is only evidence if its denominator comes from OUTSIDE
+the instrument's own configuration.** COO put that to me directly as a test of this census before I close
+it. Running it honestly:
+
+| fraction | its denominator | comes from? | verdict |
+|---|---|---|---|
+| **A · firm-token** | files containing a token **from a list I chose** | **MY CONFIGURATION** | ❌ **FAILS** — and this is *exactly* how `bd` was missed. Marking it overstated was treating the symptom; this is the disease. |
+| **B · unnamed-arity** | **lines read / total lines in the file** | **THE WORLD** (a file's length is a fact, not a choice) | ✅ **SOUND** |
+| **C · absence** | the enumerated lists **I decided to diff** | **MY CONFIGURATION** | ❌ **FAILS** — a list I never thought to check is not in the denominator, and its omission is invisible |
+| **D · alias** | the alias set **I define** (`bd`/`inf`/`cot`) | **MY CONFIGURATION** | ❌ **FAILS** — same shape as A, one namespace over |
+
+> **THE ONLY DENOMINATOR IN THIS CENSUS THAT IS EVIDENCE IS THE READ FRACTION.** Everything else is
+> **directional**, not probative — each measures how thoroughly I applied my own chosen list, which is a
+> statement about my method, not about the estate.
+
+**AND THIS EXPLAINS THE SESSION'S OWN RESULTS RATHER THAN JUST LABELLING THEM.** The read fraction is what
+overturned the crosswalk's CHECKED-CLEAN, and what produced amend 2 — the discovery that a *searched*
+finding was confidently wrong in the expensive direction. **Reading was the only instrument here whose
+denominator I could not accidentally define.** That is why it kept winning.
+
+**PRACTICAL CONSEQUENCE FOR THE DECOMPOSITION (COO is downstream of this census):** quote the **read
+fraction** as coverage. Treat A, C and D as **leads, not clearance** — a TO written against any of them
+assumes work is done that only my own token/list choices ever looked for.
+
+---
+
 ## 3. WHY THE LIST CANNOT BE DECLARED CLOSED
 
 1. **Population B is not searchable** (§1). Its coverage is a *read* fraction, and the densest file is ~10% read.
