@@ -79,8 +79,17 @@ accounts) — their assignment necessarily changed (none -> Opal) between the pr
 `638432512` (66% LT/34% UST), `Z40493496` (Cash+Sat 50), `658509146` (Sat 60), `658509145` (Sat 80).
 The control can fail in BOTH directions: a TEMPORAL surface must return these absent/unassigned for the
 06-09 window; a CURRENT-stamped surface returns them carrying today's Opal strategy under a 06-09 label.
-The probe itself runs LAST in the consolidated sequence, after tonight's qt1 template dump (CRO reads the
-dims), per COO 204647Z.
+~~The probe itself runs LAST in the consolidated sequence, after tonight's qt1 template dump.~~
+
+**SUPERSEDED ~22:31Z (CTO ruling 222856Z, relayed COO 223148Z — which retracts COO 222951Z):** the
+temporal-vs-current probe is **ABSORBED into CRO's Andrew-authorized BD campaign (his terminal ~2210Z)**.
+0.6.2 does NOT run it; 0.6.2 CONSUMES CRO's results. Rationale on the record: CRO's intrinsic controls
+(April "No Strategy" sentinels + the 05-28..07-17 model-creation timeline) are failable positive controls
+baked into the data, and a second agent probing the same live session/IP-bound DataMining surface is a
+401-manufacture hazard, not free redundancy. The 15 banked control accounts above are OFFERED to CRO as a
+belt-and-suspenders cross-check (offered 222902Z, pre-ruling). **My B6 = the liveness signal (CLOSED,
+accepted 211113Z) + the fingerprint-ban and forward-only carriers in this deliverable. The mutation-risk
+re-persist probe piece is retired with the absorption.**
 
 ## For CRO (A5 residual, now determined)
 
