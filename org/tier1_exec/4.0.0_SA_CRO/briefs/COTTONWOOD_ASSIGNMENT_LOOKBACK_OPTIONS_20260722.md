@@ -206,23 +206,23 @@ assignment history.
 
 ## 5. Ruled out — and why, which CTO rightly said is as valuable as the shortlist
 
-### 5.1 — ❌ Reconstructing assignment from holdings similarity
+### 5.1 — **RULED OUT:** Reconstructing assignment from holdings similarity
 Inferring "this account held the Long-Term model's basket in April, therefore it was assigned to Long-Term"
 is **exactly the defect Constraint 1 forbids.** It infers a past assignment from present model composition
 and produces a confident answer with no way to distinguish *was* from *is*. It would also fail silently
 whenever two models overlap in holdings — which, for model families like Opal's ladder, is most of the time.
 **Never propose this.**
 
-### 5.2 — ❌ Re-running the existing puller with a past date
+### 5.2 — **RULED OUT:** Re-running the existing puller with a past date
 **Already proven defective today by `0.6.2`:** the eclipse puller's `--date` is **a filename, not a query** —
 it fetches *today's* state and files it under the past date, **exit 0, silently.** Any variant of "run the
 live-state API for a past date" inherits this. **The Rebalancer has no as-of parameter; this cannot be fixed
 by calling it differently.**
 
-### 5.3 — ❌ Back-filling from the 2-day series
+### 5.3 — **RULED OUT:** Back-filling from the 2-day series
 Carrying 2026-07-21's assignment backwards across 427 dates is 5.1 without even the pretence of evidence.
 
-### 5.4 — ⚠️ NOT ruled out, but explicitly UNKNOWN: holdings (qt1)
+### 5.4 — **NOTE:** NOT ruled out, but explicitly UNKNOWN: holdings (qt1)
 qt1's dimension selection is **server-side and has never been dumped** (D2 §7, still pending). I cannot say
 whether it carries an assignment dimension. **Absence of the dimension from our 537-byte local envelope is
 not evidence of absence from the template** — that envelope carries no dimensions at all, by construction.

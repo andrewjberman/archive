@@ -88,7 +88,7 @@ not inferred.
 `monthly_benchmark_statistics` · **`model.calculations`** — the risk/return suite: **deviation, alpha_spread,
 cagr, sharpe, sortino, max_drawdown, skewness, kurtosis, cumulative_return**.
 
-⚠ **Date params are ignored (always full-history). Monthly cadence end-to-end. Exactly one benchmark per
+**NOTE:** **Date params are ignored (always full-history). Monthly cadence end-to-end. Exactly one benchmark per
 model; no peer/category universe.**
 
 ---
@@ -99,7 +99,7 @@ model; no peer/category universe.**
 `smartx-managerportal-webclient`, credential **`opal7`**, one RS256 JWT (~2h) authenticating all surfaces,
 rate limit ~20/min per credential (**stay ≤17/min**). That mechanism is still correct.
 
-> ### ⚠ THE ACCOUNT-OF-RECORD RULING SUPERSEDES D4's SINGLE-CREDENTIAL FRAMING **[RULING]**
+> ### **NOTE:** THE ACCOUNT-OF-RECORD RULING SUPERSEDES D4's SINGLE-CREDENTIAL FRAMING **[RULING]**
 > **Andrew-direct 2026-07-15 and re-affirmed 2026-07-17 — after D4 was finalized.** The book is a
 > **TWO-AXIS HYBRID, already deployed, both axes correct:**
 >
