@@ -6,7 +6,8 @@
 <issued_to>0.6.2_AE_PartnerETL~A</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:23Z</issued_at>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSED 2026-07-22 ~21:20Z: verdict @dfa42659f, COO accepted 204814Z, CTO NO-GO ratified 204936Z (residual DEFER-TO-FLIP), CVO spot-verify PASS 211918Z @6bb15dbcb (dollar-exact independent confirmation, no rework) -->
 <priority>ANDREW-PRIORITY — his own words: "some numbers are very contentious there ... that is something I want addressed and validated"</priority>
 <authorization>Andrew-direct ~20:16Z @f526334e0 -> CTO ruling 202054Z (new TO, NOT a rider on B3/B4/G7) -> PRD v1.4 @36be68476.</authorization>
 

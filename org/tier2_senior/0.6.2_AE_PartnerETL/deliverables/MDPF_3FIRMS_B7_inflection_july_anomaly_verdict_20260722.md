@@ -179,3 +179,17 @@ escalated in-flight (203305Z) per the LOUD-immediately list; this verdict comple
   `git show`); `build_aggregate_aua_timeseries.py:306-316 @HEAD`; `dim_mdpf_aggregate_aua_timeseries.py:808-818 @HEAD`.
 - comp-freshness self-test PASS 3/3; `chain inf` run 20:2xZ (flat-hours basis gap recorded — only the
   platinum row resolves trading-day; NO staleness raised off it, NEVER#1).
+
+## Addendum (post-CVO spot-verify @6bb15dbcb, 2026-07-22 21:19Z — verdict PASS, no rework)
+
+Two CVO refinements folded, both strengthening:
+1. **The replacement in §2 step 2 is STRUCTURALLY FORCED, not behavioral:** BOTH platinum partitions
+   (2026-07-06.json and 2026-07-10.json) carry internal `as_of_date=2026-07-06` — a visible collision in
+   the payloads themselves — so ANY internal-date dedup with newest-filename-wins MUST overwrite the true
+   07-06. The claim does not depend on trusting the dedup description.
+2. **Probe (a) in §3 is CORROBORATIVE, not discriminating** (a constant tag proves no RECORDED methodology
+   change; an unrecorded one reads identical). Probe (d) carries the discriminating weight — a step inside
+   untouched same-day vendor bronze cannot be manufactured downstream. Read §3 in the order (d),(b),(c),(a).
+CVO independently confirmed the identity to the cent on both value axes and the citations at vintage
+(positive-controlled at 1385 lines); probes (b)/(c)/(d) were NOT re-derived by CVO and are so labeled in
+the CVO record.
