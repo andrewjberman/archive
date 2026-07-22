@@ -11,6 +11,8 @@ endpoints, methodologies, auth, limits, open items — and points at canonical s
 | [`MASTER_ORION_ECLIPSE_ANALYSIS.md`](MASTER_ORION_ECLIPSE_ANALYSIS.md) | Orion Advisor Solutions + Eclipse | Three surfaces, the 9 daily production pulls, the performance method contract, `Reporting/Scope` as a calculation graph, the Orion↔Eclipse join and the ~3.4% lag |
 | [`MASTER_SMARTX_ANALYSIS.md`](MASTER_SMARTX_ANALYSIS.md) | SmartX (TAMP) | **A partner, not a displacement target.** Five surfaces, the build-vs-buy seam, the dependency tradeoff, the two-axis account-of-record ruling, and the three-vendor comparison |
 
+**Determinism (Cottonwood current membership):** [`COTTONWOOD_MEMBERSHIP_DETERMINISM_20260722.md`](COTTONWOOD_MEMBERSHIP_DETERMINISM_20260722.md) -- 100% deterministic current model membership via two cross-validated assignment endpoints (17/17, 296==296), vs the ~97% holdings-fit. Read, not fit.
+
 **Verification:** [`SURFACE_RECONCILIATION_TEST_20260722.md`](SURFACE_RECONCILIATION_TEST_20260722.md) — do a
 vendor's two surfaces agree on value? **Orion: PASS, exact to the cent. BD: inconclusive, and the $0==$0
 "agreement" is explicitly not scored as a pass.** Also names two consumption hazards (Orion's mixed units;
