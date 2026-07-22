@@ -275,9 +275,47 @@ it as a two-firm encoding; explicitly NOT proposing to build against it while th
 
 ---
 
-### IAM / sweep — what this limb does NOT cover
-`mdpf-pipeline` root + publisher role + trigger gate + freshness-checker. **Not swept:**
-`bd-pipeline`/`cot-pipeline` cross-grants, Lambda@Edge. **OPEN, not clean.**
+---
+
+## FINDING 9 — the trigger's IAM enumerates two firm sources (and would fail LOUD)
+
+`iam.tf:390-426` — `InfSentinelRead` (`inf_bucket` sentinel) + `BdSilverGateRead` / `BdSilverGateList`
+(`bd_bucket` `silver/allocations`, `silver/fees`, `schwab/silver/rps`). **No Cottonwood source.**
+
+**Coupled to Finding 7 and they MUST move together:** extending `partners` to include Cottonwood without
+adding the grant makes the gate AccessDeny on the new partner's freshness read.
+
+**CREDIT WHERE IT IS DUE — this one is well-built.** `lambda_function.py:344-348` classifies the failure
+explicitly: **404 → `ROLL_SOURCE_ABSENT` ("a DATA condition, expected"); 403 → `ROLL_SOURCE_UNREADABLE`
+("the INSTRUMENT is broken (missing IAM grant). A CONFIG fault")**. **This code already distinguishes "the
+thing is missing" from "I cannot see the thing."** That is the discrimination the publisher lacks entirely.
+
+## FINDING 10 — freshness-checker IAM: **CLEAN on the firm axis**
+
+`iam.tf:493-525` reads the **served** aggregate partitions (`platinum/mdpf/aggregate_aua/*`) by wildcard.
+**No firm enumerated; a third firm needs no IAM change.** The enumeration is in the code (Finding 8).
+
+---
+
+## THE 2×2 — you can PREDICT the failure mode from the IAM shape
+
+| | IAM **enumerates** firm prefixes | IAM **wildcards** the prefix |
+|---|---|---|
+| **fails** | **LOUD** — AccessDenied on first run | **SILENT + GREEN** |
+| instances | runner (**F5**), trigger (**F9**) | publisher (**F6**), freshness-checker (**F8/F10**) |
+| detectability | found immediately | possibly never |
+
+> **The narrow grant is accidentally a completeness check; the wildcard grant is correctly least-privilege
+> and detects nothing. Where IAM is firm-agnostic, the enumeration hides in CODE and fails silently — so
+> THE BETTER-WRITTEN THE IAM, THE MORE THE CODE'S SUBJECT LIST NEEDS ITS OWN CONTROL.**
+
+**Operational use:** for any remaining component, **read its IAM shape first** — a wildcard grant predicts a
+silent code-level enumeration and tells you where to look. **Both publisher and freshness-checker split
+exactly this way (IAM clean / code two-firm), found independently.**
+
+### Sweep — what this limb does NOT cover
+`mdpf-pipeline` root (runner, trigger, freshness roles) + publisher role + trigger gate logic + cohort list.
+**Not swept:** `bd-pipeline`/`cot-pipeline` cross-grants, Lambda@Edge. **OPEN, not clean.**
 
 ### INSTRUMENT NOTE — a false ABSENT I nearly published
 `aws s3api list-objects-v2 --delimiter "/" --query 'CommonPrefixes[].Prefix' --output text` returned `None`
