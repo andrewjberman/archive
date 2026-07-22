@@ -1,10 +1,22 @@
 # Deliverable 2 -- `opal-data-portal-v2/json/mdpf/**` protection: DESIGN + EXERCISE PLAN
 
 **Status:** DRAFT. **NOT APPLIED. NOT IN `infra/`** -- deliberately held outside the TF tree so it
-cannot be applied by accident while the Andrew gate is open.
+cannot be applied by accident. **This property is now LOAD-BEARING, not tidiness:** under the MDPF
+planning hold the apply is HELD, and a `.tf` file living in a root is reachable by any untargeted
+apply in that root -- the exact hazard class as PART 0's staged CF flip, in a different root.
+**It stays out of `infra/` until the advisory releases the apply.**
 **Author:** `0.7.0_AE_CloudOps` 2026-07-22 · **Hold:** `org/critical_paths/DO_NOT_DECOMMISSION_portal-v2_json_mdpf_49financial_20260722.md` (@74677ea04)
-**Blocked on:** (1) Andrew -- 07-17 alert-suspension adjacency, CTO will not confirm until he answers.
-(2) CTO -- scope call on the lifecycle limb (below). (3) CTO/COO -- placement call (below).
+
+**GATE STATE (updated 2026-07-22 ~1528Z -- 2 of 3 original blockers RULED):**
+| # | blocker | state |
+|---|---|---|
+| 1 | Andrew -- 07-17 alert-suspension adjacency | **RESOLVED.** Andrew ~1425Z, verbatim: *"THere should be a gate/hook for this, but not an 'Alert' not an SES or something like that."* The 07-17 suspension is on **ALERTS**, not on **GATES/HOOKS**. Test: does it PAGE someone, or does it STOP something? This Deny stops something and pages nobody. |
+| 2 | CTO -- lifecycle-limb scope call | **RESOLVED by R5** (`MDPF_CONSOLIDATED_PLAN_20260722.md` @49687d1b2): *"Deliverable 2 includes the `PutLifecycleConfiguration` limb. Routine cleanup arrives as a lifecycle rule far more often than a hand-typed delete; shipping only the easy-to-test half is refused."* **V2 IS IN. Uncommented below.** |
+| 3 | CTO/COO -- placement root | **STILL OPEN.** COO ground-truthed a `desired`/source-layout read (`shared-infra`) at 152230Z and explicitly labelled it his read, not a placement instruction. Mine to confirm on the `applied` limb at plan time. |
+
+**APPLY POSTURE:** **HELD** under CTO's narrowed carve-out 1 (@8da5fbfa5, 152205Z): *"the deny's APPLY is
+HELD ... Drafting, exercise-design and grounding continue; the apply waits for the advisory."* Andrew's
+1425Z settled **whether this exists**, not whether to fire an apply under a planning hold.
 
 ---
 
@@ -77,19 +89,34 @@ The bucket is console-managed and unowned, exactly the pre-FIRMSEP.02 condition 
 | V2 | a lifecycle `Expiration` rule expires them | `Deny s3:PutLifecycleConfiguration` on the **bucket** | **BUCKET-WIDE -- broader than the hold** |
 | V3 | the producer stops writing (frozen input) | nothing here -- this is the DS decouple work item | out of scope |
 
-**V2 IS A SCOPE DECISION AND IT IS NOT MINE.** `PutLifecycleConfiguration` is a bucket-level action and
-**cannot be prefix-scoped**, so denying it protects `json/mdpf/**` by denying *all* lifecycle management on
-a bucket that hosts many other prefixes and several other pipelines' outputs. That is never-widen-shaped.
-**I will not quietly widen a control to make my own deliverable closeable.** CTO + COO call:
+**V2 WAS A SCOPE DECISION AND IT WAS NOT MINE. IT HAS NOW BEEN RULED: V2 IS IN.**
 
-- **Take V2 bucket-wide** -- strongest, but freezes lifecycle management for every tenant of the bucket and
-  needs an owner for legitimate future lifecycle changes.
-- **Skip V2** -- then record the lifecycle vector as **EXPLICITLY UNCLOSED** in the hold doc, so the ladder
-  does not *imply* coverage it does not have. **This is the outcome I would push for if V2 is refused:**
-  an unclosed vector that is named is survivable; one that is silently implied-covered is the failure mode
-  this whole hold was written about.
-- **Object Lock on the specific objects** -- narrower than V2, but a materially bigger change (versioning
-  interactions, retention governance, per-object legal holds) and it needs its own assessment. Not costed.
+> **R5 (CTO, `MDPF_CONSOLIDATED_PLAN_20260722.md` @49687d1b2, owner `0.7.0_AE_CloudOps`):**
+> *"Deliverable 2 includes the `PutLifecycleConfiguration` limb. Routine cleanup arrives as a lifecycle rule
+> far more often than a hand-typed delete; shipping only the easy-to-test half is refused."*
+
+I raised this as a never-widen concern and I stand by having raised it -- **but the ruling is right and my
+framing under-weighted the actual threat model.** The realistic deletion of these objects is not a person
+typing `delete-object`; it is a whole-bucket `Expiration` rule written by someone who never types the string
+`mdpf` at all. **V1 alone closes the rare vector and leaves the common one open**, which is the
+GREEN-while-still-open shape this document was written to refuse.
+
+**WHAT TAKING V2 ACTUALLY COSTS -- stated plainly, because it IS broader than the hold:**
+`s3:PutLifecycleConfiguration` is bucket-level and **cannot be prefix-scoped.** So this denies *all* lifecycle
+management on `opal-data-portal-v2`, a bucket hosting many prefixes and several other pipelines' outputs --
+**not just the MDPF prefix.** Two lifecycle rules exist today (`expire-noncurrent-versions-14d`,
+`abort-incomplete-mpu-7d`, both whole-bucket) and **neither can be modified while this Deny stands.**
+
+**CONSEQUENCE THAT NEEDS AN OWNER (new open item, CTO):** with `Principal = "*"`, the unlock path is "edit the
+bucket policy first, then change lifecycle." That is the intended ratchet -- **the control outlives the person
+who knew about it** -- but it means a legitimate future lifecycle change on this bucket has a prerequisite step
+and **no named owner today.** An undocumented prerequisite is how a control gets ripped out in a hurry by
+someone who reads it as an obstacle rather than a decision. **Name the owner, or the first person who needs a
+lifecycle change removes the Deny.**
+
+**Not taken (recorded so the ladder does not imply coverage it lacks):** *Object Lock on the specific objects*
+-- narrower than V2, but a materially bigger change (versioning interactions, retention governance, per-object
+legal holds), needs its own assessment. **Not costed, NOT closed by this deliverable.**
 
 ---
 
@@ -155,18 +182,34 @@ resource "aws_s3_bucket_policy" "portal_v2" {
         Resource  = "arn:aws:s3:::opal-data-portal-v2/json/mdpf/*"
       },
 
-      # ---- V2, PENDING CTO SCOPE CALL -- BUCKET-WIDE, NOT PREFIX-SCOPED ----
-      # {
-      #   Sid       = "DenyLifecycleChangesProtectingMdpfHold20260722"
-      #   Effect    = "Deny"
-      #   Principal = "*"
-      #   Action    = ["s3:PutLifecycleConfiguration"]
-      #   Resource  = "arn:aws:s3:::opal-data-portal-v2"
-      # },
+      # ---- V2 -- RULED IN BY R5. BUCKET-WIDE, NOT PREFIX-SCOPED. READ THE COST NOTE. ----
+      {
+        # Closes the vector V1 cannot: a lifecycle Expiration rule expires these objects
+        # WITHOUT the string "mdpf" appearing anywhere in the change. Lifecycle expiry is
+        # SERVICE-performed, never evaluated against a principal, so no prefix-scoped Deny
+        # on DeleteObject can reach it.
+        # DELIBERATELY BROADER THAN THE HOLD: s3:PutLifecycleConfiguration is a BUCKET-level
+        # action and CANNOT be prefix-scoped. This freezes ALL lifecycle management on
+        # opal-data-portal-v2, including the two existing whole-bucket rules
+        # (expire-noncurrent-versions-14d, abort-incomplete-mpu-7d).
+        # A legitimate future lifecycle change MUST edit this policy first. That prerequisite
+        # needs a NAMED OWNER -- see "CONSEQUENCE THAT NEEDS AN OWNER" above.
+        Sid       = "DenyLifecycleChangesProtectingMdpfHold20260722"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = ["s3:PutLifecycleConfiguration"]
+        Resource  = "arn:aws:s3:::opal-data-portal-v2"
+      },
     ]
   })
 }
 ```
+
+> **NOTE THE TWO `Resource` SHAPES AND DO NOT "TIDY" THEM.** V1 targets `.../opal-data-portal-v2/*` (the
+> OBJECTS); V2 targets `arn:aws:s3:::opal-data-portal-v2` (the BUCKET itself, no trailing `/*`). A bucket-level
+> action against an object ARN matches nothing and the Deny silently never fires -- **a GREEN apply protecting
+> nothing.** This is the same wrong-axis class as `comp-iam` reporting `[GRANTED]` on `(action)` while the real
+> call fails on `(action, resource)`.
 
 **`Principal = "*"` + `Deny` denies everyone including the account root and me.** That is intended for V1
 (nothing should be deleting these) and is the 17a shape. It also means **removal requires a policy edit** --
@@ -182,7 +225,8 @@ The gap this hold protects was found by a positive control; the control that clo
 |---|---|---|---|
 | 1 | `delete-object` on a **throwaway** key under `json/mdpf/` | **AccessDenied naming the policy** | the real, denied path |
 | 2 | **ISOLATED POSITIVE CONTROL, SEPARATE INVOCATION** -- same delete against a key **outside** `json/mdpf/` | **SUCCEEDS** | proves the test CAN fail, i.e. the deny is doing the work and not a blanket refusal |
-| 3 | **V2 limb, on a SCRATCH BUCKET -- never on portal-v2** | `PutLifecycleConfiguration` **DENIED** with the policy; same call **SUCCEEDS** without it | exercises the lifecycle limb behaviour-grade **without a live-estate mutation and without waiting a day for an expiry to fire** |
+| 3 | **V2 limb, on a SCRATCH BUCKET -- never on portal-v2. NOW MANDATORY (R5), not conditional.** | `PutLifecycleConfiguration` **DENIED** with the policy; same call **SUCCEEDS** without it | exercises the lifecycle limb behaviour-grade **without a live-estate mutation and without waiting a day for an expiry to fire** |
+| 3b | **V2 wrong-axis mutant, scratch bucket** -- same Deny written against the OBJECT ARN (`.../opal-data-portal-v2/*`) instead of the BUCKET ARN | `PutLifecycleConfiguration` **SUCCEEDS** (Deny never matches) | **proves the ARN shape is load-bearing.** Without this, a V2 statement that silently matches nothing passes tests 1-4 unchanged -- a GREEN apply protecting nothing |
 | 4 | CloudFront still serves `json/mdpf/...` post-apply (curl a real served key) | **200** | proves the reproduced Allow statements survived -- **the outage check for Defect 2** |
 
 **Rule 22a compliance:** test 2 runs as a **separate invocation**, never batched with test 1 (a control
@@ -198,14 +242,27 @@ mode the *change* introduces, not only the one it *prevents*.
 
 ## OPEN ITEMS BEFORE APPLY
 
-1. [ ] **Andrew** -- 07-17 alert-suspension adjacency. CTO will not confirm until answered. Shared read
-       (CTO + COO + me): a preventive Deny pages nobody and is therefore outside the suspension --
-       but it was surfaced rather than assumed, and that is correct.
-2. [ ] **CTO** -- V2 scope call (bucket-wide `PutLifecycleConfiguration` deny, or record the vector as
-       explicitly unclosed).
-3. [ ] **CTO/COO** -- placement: which TF root owns a policy for a previously unmanaged bucket.
-4. [ ] Plan must show **exactly one added statement, zero removed/changed**. A plan that is not
+**THE APPLY ITSELF IS HELD** pending Andrew's fabric-wide MDPF advisory (CTO narrowed carve-out 1,
+@8da5fbfa5). Items 1-2 are ruled; the rest are live.
+
+1. [x] **Andrew** -- 07-17 alert-suspension adjacency. **RULED ~1425Z:** *"THere should be a gate/hook for
+       this, but not an 'Alert' not an SES or something like that."* Gates/hooks in scope; alerts suspended.
+       This Deny stops something and pages nobody. Surfaced rather than assumed, which was correct.
+2. [x] **CTO** -- V2 scope call. **RULED by R5: the `PutLifecycleConfiguration` limb is IN.** Uncommented above.
+3. [ ] **CTO** -- placement: which TF root owns a policy for a previously unmanaged bucket. COO's `desired`
+       read is `shared-infra`; **that is my starting hypothesis, not my conclusion.** I confirm on the
+       `applied` limb by reading the plan, not by trusting the root name.
+4. [ ] **CTO (NEW, raised by R5)** -- **name the owner of the lifecycle-unlock path.** V2 means a legitimate
+       future lifecycle change on this bucket must edit the policy first. An unowned prerequisite gets ripped
+       out by whoever first reads it as an obstacle.
+5. [ ] Plan must show **exactly TWO added statements (V1 + V2), zero removed/changed.** *(Was "exactly one"
+       before R5 -- updated deliberately; the acceptance count is part of the control.)* A plan that is not
        pure-add is out of scope and I stop.
-5. [ ] Source-map entry (Rule 4) + tag after 0-diff (Rule 6). `safe-apply` only (Rule 18), never bare.
-6. [ ] Update `pipeline_inventory.xml` post-0-diff, and correct its Known Issue #9 (`opal-data-portal-v2`
+6. [ ] Source-map entry (Rule 4) + tag after 0-diff (Rule 6). `safe-apply` only (Rule 18), never bare.
+7. [ ] Update `pipeline_inventory.xml` post-0-diff, and correct its Known Issue #9 (`opal-data-portal-v2`
        not in TF) if this lands -- it would be partially resolved.
+
+**DO NOT MOVE THIS FILE'S HCL INTO `infra/` UNTIL THE APPLY IS RELEASED.** A `.tf` in a root is reachable by
+any untargeted apply in that root. Keeping it here is the same discipline PART 0 rule 1 enforces on
+`portal-auth` -- staged-but-unapplied code in a live root is indistinguishable from drift to everyone who
+did not stage it.
