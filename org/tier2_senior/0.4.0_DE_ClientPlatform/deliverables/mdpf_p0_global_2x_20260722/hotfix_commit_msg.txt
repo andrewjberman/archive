@@ -1,0 +1,27 @@
+fix(ModelPortfolios): unique monthly x-axis category key -- fixes the Global "2x" mis-read (P0, live on PROD)
+
+The monthly Period-End x-axis bound to `period`, a toLocaleDateString label that OMITS
+the year, while the GLOBAL view alone renders the full since-inception window (21 month-end
+bars) and per-firm views keep a rolling 1-year window (~13). Global therefore produced
+DUPLICATE recharts category keys -- "Mar 31" and "Apr 30" each appear for 2025 AND 2026 on
+the live legacy data. Duplicate categories break the bar<->row binding: recharts resolves
+the tooltip to the FIRST row carrying that category, so hovering the 2026 bar reports the
+2025 row's date AND values while the bar renders at its true 2026 height.
+
+Exercised on the unmodified PROD base (2c802d13) + the real live legacy artifacts:
+  Apr 30 -> 2025 = $963.5M, 2026 = $1,608.9M (1.67x)   Mar 31 -> 1.58x
+which is exactly the reported "almost double". On the revamp fixture the same defect showed
+"April 30, 2025 | Total AUA $988M | Non-Model $263M" on the $1.59B 2026 bar.
+
+FIX: bind the axis to the UNIQUE `fullDate` and format the tick for display; the 2-digit
+year additionally disambiguates the label for the reader. BINDING-ONLY -- the bar dataKeys
+are untouched, so values do not change (verified: 21 columns, monotonic, identical heights
+pre/post). Independent of MDPF_REVAMP (applies cleanly to both 2c802d13 and aa8c0420).
+
+Verified on this exact base with BOTH controls, headed, against real legacy artifacts:
+  negative (unmodified 2c802d13): duplicate-key gate FAILS -- "March 31, 2025" <- bars 4,16;
+                                  "April 30, 2025" <- bars 5,17  (the live defect)
+  positive (this commit):         duplicate-key gate PASSES -- all 21 bars resolved + DISTINCT
+  typecheck (tsc -b --noEmit):    clean
+
+SURFACE_ACK: deliberate isolated Global monthly-axis-key label fix; binding-only, bars unchanged, duplicate-key gate GREEN on real legacy artifacts; fixes live 2x on ModelPortfolios headline surface.

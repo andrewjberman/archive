@@ -1,0 +1,41 @@
+diff --git a/src/pages/ModelPortfolios.tsx b/src/pages/ModelPortfolios.tsx
+index d5f948d4..a3dd556b 100644
+--- a/src/pages/ModelPortfolios.tsx
++++ b/src/pages/ModelPortfolios.tsx
+@@ -1699,12 +1699,26 @@ export function ModelPortfolios() {
+                           margin={{ top: 5, right: 30, left: 0, bottom: 40 }}
+                         >
+                           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
++                          {/* P0 FIX (Global 2x mis-read): the category key MUST be unique. The
++                              monthly `period` label omits the year, and the GLOBAL view renders the
++                              full since-inception window (21 months) while per-firm is a rolling
++                              1 year -- so Global produced DUPLICATE category keys ("Apr 30" for both
++                              2025 and 2026, 4 collisions). Duplicate categories break recharts'
++                              bar<->row binding, so a 2026 bar reads as its 2025 twin (1.6x = Andrew's
++                              "almost double"). Bind the axis to the UNIQUE fullDate and format the
++                              tick for display; the 2-digit year also disambiguates it for the reader. */}
+                           <XAxis
+-                            dataKey="period"
++                            dataKey="fullDate"
+                             stroke="rgba(255,255,255,0.5)"
+                             height={60}
+                             tick={(props) => {
+                               const { x, y, payload } = props
++                              const iso = String(payload.value ?? '')
++                              const label = /^\d{4}-\d{2}-\d{2}$/.test(iso)
++                                ? new Date(iso + 'T12:00:00').toLocaleDateString('en-US', {
++                                    month: 'short', day: 'numeric', year: '2-digit',
++                                  })
++                                : iso
+                               return (
+                                 <g transform={`translate(${x},${y})`}>
+                                   <text
+@@ -1716,7 +1730,7 @@ export function ModelPortfolios() {
+                                     fontSize={11}
+                                     fill="rgba(255,255,255,0.7)"
+                                   >
+-                                    {payload.value}
++                                    {label}
+                                   </text>
+                                 </g>
+                               )
