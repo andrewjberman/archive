@@ -131,6 +131,12 @@ CONSISTENCY_REL_TOL = 1e-9
 TOTAL_FIELD_CANDIDATES = ("opal_aggregate_aua", "partner_custody_total")
 CROSSFIRM_FIELDS = ("model_aua", "non_model_aua")
 GLOBAL_FIRM = "global"
+# Andrew-direct ruling 2026-07-22 ("EXCLUDE consistently", relayed by DS 044655Z): the global total keeps
+# its value and global.non_model_aua is REBASED to 49F-only; Inflection non-model moves to a separate
+# NON-TOTAL audit field. It must NEVER be summed into the total -- the per-firm identity enforces that
+# automatically (summing it back in would break total == model + non_model).
+EXCLUDED_PARTNER = "inflection"
+EXCLUDED_PARTNER_FIELD = "inflection_non_model_aua"
 ALLOWED_EXTRAS = {"basis", "meta", "source_vintage_last"}   # leaf-name spec extras (published-side, any depth)
 SHAPE_EXEMPT_ROOTS = {"meta", "source_vintage_last", "cohort_provenance"}  # provenance subtrees: keys legitimately differ served-vs-revamp. cohort_provenance wired @7e0320cc0 (49f+inflection only; global omits) -- ledger harness_requirement + CTO 235117Z: EXEMPT from shape/value-diff (source-path-derived, FE-unconsumed 0-refs, CVO lineage-verifies the map)
 _DATE_RE = re.compile(r"@\d{4}-\d{2}-\d{2}")
@@ -214,11 +220,39 @@ def _provenance_value_exempt(p):
     return p.split(".")[0].split("[")[0] in SHAPE_EXEMPT_ROOTS
 
 
-def _shape_diff(served, published):
+def _named_shape_hit(path, patterns):
+    """EXACT-or-glob, never substring -- same discipline as _spec_field_hit (BUG-2). A declared
+    'model_aua' must not silently name a 'non_model_aua' extra."""
+    return any(path == pat or fnmatch.fnmatch(path, pat) for pat in patterns)
+
+
+def _shape_diff(served, published, entries=None):
+    """Shape diff, with a LEDGER-DECLARED named-extra channel.
+
+    A revamp-only DATA field (e.g. `inflection_non_model_aua`, the Andrew EXCLUDE/B audit carrier,
+    2026-07-22) is an INTENDED published-only key. The cohort_provenance precedent solved that class by
+    adding a harness EXEMPTION -- correct there, because cohort_provenance is provenance: FE-unconsumed,
+    run-time, not data. It is the WRONG tool for a numeric DATA field: an exemption is invisible in the
+    record, applies forever, and cannot distinguish the intended field from a future accidental one.
+
+    So a data extra is NAMED, not exempted -- declared by DS in the ledger:
+        "_shape_extras": {"published_only": ["inflection_non_model_aua"], "note": "..."}
+    A declared extra is reported as an EXPECTED structural delta; anything undeclared still SHAPE_FAILs.
+    The declaration lives in the ledger (reviewed, diffable, per-artifact) rather than in my source, so
+    it cannot silently widen and it expires with the ledger entry. Same fail-safe as _date_axis: NO
+    ledger -> every extra is unexplained."""
+    entries = entries or {}
+    spec = entries.get("_shape_extras") or {}
+    named_pats = spec.get("published_only") or []
+    missing_pats = spec.get("served_only") or []
     s, p = _shape(served), _shape(published)
-    missing = sorted(k for k in (s - p) if not _shape_exempt(k))   # was unfiltered -> false SHAPE_FAIL on meta.*
-    extra = sorted(k for k in (p - s) if not _shape_exempt(k))
-    return missing, extra
+    missing_all = sorted(k for k in (s - p) if not _shape_exempt(k))  # was unfiltered -> false SHAPE_FAIL on meta.*
+    extra_all = sorted(k for k in (p - s) if not _shape_exempt(k))
+    named_extra = [k for k in extra_all if _named_shape_hit(k, named_pats)]
+    named_missing = [k for k in missing_all if _named_shape_hit(k, missing_pats)]
+    missing = [k for k in missing_all if k not in named_missing]
+    extra = [k for k in extra_all if k not in named_extra]
+    return missing, extra, named_missing, named_extra
 
 
 def _axis(obj):
@@ -393,7 +427,7 @@ def _axis_deltas(saxis, paxis, date_axis_spec):
 
 def compare(served, published, entries=None):
     entries = entries or {}
-    missing, extra = _shape_diff(served, published)
+    missing, extra, named_missing, named_extra = _shape_diff(served, published, entries)
     saxis, paxis = _axis(served), _axis(published)
     ls = _leaves(served, axis=saxis)
     lp = _leaves(published, axis=paxis)
@@ -446,8 +480,13 @@ def compare(served, published, entries=None):
         else:                                        # NULL MISMATCH (exactly one side None)
             note = _ledger_null_match(k, idx_date, is_latest, entries)
         (expected if note else unexplained).append((k, sv, pv, note))
+    for k in named_extra:
+        expected.append((f"shape:{k}", "absent", "published-only", "named published-only (_shape_extras)"))
+    for k in named_missing:
+        expected.append((f"shape:{k}", "served-only", "absent", "named served-only (_shape_extras)"))
     return {"missing": missing, "extra": extra, "expected": expected, "unexplained": unexplained,
-            "shape_ok": not (missing or extra), "axis": axis}
+            "shape_ok": not (missing or extra), "axis": axis,
+            "named_missing": named_missing, "named_extra": named_extra}
 
 
 def check_pair(name, firm, spec, ledger, published_prefix=None):
@@ -671,10 +710,43 @@ def check_crossfirm_rollup(published_prefix=None, served=False):
         pobjs.append(o)
     if gobj is None:
         return {"verdict": "CROSSFIRM_ABSENT", "note": f"{gkey} absent"}
-    res = {f: _crossfirm_violations(gobj, pobjs, f) for f in CROSSFIRM_FIELDS}
+    return {**_crossfirm_regime_probe(gobj, partners, pobjs),
+            "dates": len(gobj.get("dates") or []), "key": gkey}
+
+
+def _crossfirm_regime_probe(gobj, partners, pobjs):
+    """Pure cross-firm roll-up evaluator (S3-free, unit-testable -- same split as _coherence_mismatches).
+
+    REGIME DETECTION (Andrew ruling EXCLUDE/B, 2026-07-22, via DS 044655Z) -- by PRESENCE, the same
+    pattern as the total field, so the gate is correct on BOTH sides of the cutover with no flag day."""
+    #   REGIME A (pre-fix):  global.non_model_aua == 49f + inflection   (all partners summed)
+    #   REGIME B (post-fix): global.non_model_aua == 49f ONLY, and Inflection non-model is carried in a
+    #                        SEPARATE audit field global.inflection_non_model_aua == inflection.non_model_aua
+    # Under B the old all-partner sum would FALSE-RED a correct artifact -- DS flagged this and is right.
+    # model_aua is unaffected in both regimes (it remains the sum over all partners).
+    regime_b = isinstance(gobj.get(EXCLUDED_PARTNER_FIELD), list)
+    res, notes = {}, []
+    for f in CROSSFIRM_FIELDS:
+        if f == "non_model_aua" and regime_b:
+            # (i) global's rebased non_model must equal the INCLUDED partners only
+            incl = [o for f2, o in zip(partners, pobjs) if f2 != EXCLUDED_PARTNER]
+            res[f] = _crossfirm_violations(gobj, incl, f)
+            notes.append(f"non_model_aua rebased to {'+'.join(x for x in partners if x != EXCLUDED_PARTNER)} (EXCLUDE/B)")
+            # (ii) the audit carrier must equal the EXCLUDED partner's own non_model -- so the excluded
+            # money is still CHECKED, not merely moved out of the total and forgotten.
+            exc = [o for f2, o in zip(partners, pobjs) if f2 == EXCLUDED_PARTNER]
+            if exc:
+                res[EXCLUDED_PARTNER_FIELD] = _crossfirm_violations(
+                    {"dates": gobj.get("dates"), EXCLUDED_PARTNER_FIELD: gobj.get(EXCLUDED_PARTNER_FIELD)},
+                    [{"dates": exc[0].get("dates"), EXCLUDED_PARTNER_FIELD: exc[0].get("non_model_aua")}],
+                    EXCLUDED_PARTNER_FIELD)
+                notes.append(f"{EXCLUDED_PARTNER_FIELD} == {EXCLUDED_PARTNER}.non_model_aua (audit carrier)")
+        else:
+            res[f] = _crossfirm_violations(gobj, pobjs, f)
     bad = {f: v for f, v in res.items() if v}
     return {"verdict": "CROSSFIRM_PASS" if not bad else "CROSSFIRM_FAIL", "partners": partners,
-            "by_field": res, "dates": len(gobj.get("dates") or []), "key": gkey}
+            "by_field": res,
+            "regime": "B (EXCLUDE)" if regime_b else "A (all-partner sum)", "notes": notes}
 
 
 def _consistency_self_test():
@@ -769,15 +841,72 @@ def _consistency_self_test():
     pB_rev = {"dates": ["2026-07-20", "2026-07-17"], "model_aua": [150.0, 100.0], "non_model_aua": [15.0, 10.0]}
     c_xf_datejoin = (_crossfirm_violations(g, [pA, pB_rev], "model_aua") == [])
 
+    # ===== REGIME B (Andrew EXCLUDE ruling 2026-07-22): rebased non_model + audit carrier =====
+    # The gate must be correct on BOTH sides of the cutover, and regime B must still CATCH defects --
+    # a regime switch that makes everything pass is a gate that was retired, not adapted.
+    # NOTE: REALISTIC MAGNITUDES ON PURPOSE. These fixtures were first written at unit scale, where a
+    # seeded $1.00 drift sat exactly ON the $1.00 tolerance boundary -- so `b_catch_rebased` went FALSE
+    # and the self-test failed. The GATE was right (a $1.00 diff is within tolerance); the TEST was
+    # wrong. Kept as a note because it is the mutant doing its job on the test author: a mutant whose
+    # magnitude is inside the tolerance proves nothing about the gate.
+    gB = {"dates": ["2026-07-20"], "model_aua": [400_000_000.0],
+          "non_model_aua": [25_000_000.0],                 # 49f ONLY (rebased)
+          "inflection_non_model_aua": [15_000_000.0]}      # inflection's own, carried separately
+    p49 = {"dates": ["2026-07-20"], "model_aua": [250_000_000.0], "non_model_aua": [25_000_000.0]}
+    pinf = {"dates": ["2026-07-20"], "model_aua": [150_000_000.0], "non_model_aua": [15_000_000.0]}
+    rB = _crossfirm_regime_probe(gB, ["49financial", "inflection"], [p49, pinf])
+    b_clean = (rB["regime"].startswith("B") and rB["verdict"] == "CROSSFIRM_PASS")
+    # regime B still CATCHES: global's rebased non_model wrong (26 != 49f's 25)
+    gB_bad = copy.deepcopy(gB)
+    gB_bad["non_model_aua"] = [26_000_000.0]
+    b_catch_rebased = _crossfirm_regime_probe(gB_bad, ["49financial", "inflection"], [p49, pinf])["verdict"] == "CROSSFIRM_FAIL"
+    # regime B still CATCHES: the AUDIT CARRIER drifting from inflection's own non_model (the excluded
+    # money must stay CHECKED -- "moved out of the total" must not mean "no longer verified")
+    gB_bad2 = copy.deepcopy(gB)
+    gB_bad2["inflection_non_model_aua"] = [99_000_000.0]
+    b_catch_audit = _crossfirm_regime_probe(gB_bad2, ["49financial", "inflection"], [p49, pinf])["verdict"] == "CROSSFIRM_FAIL"
+    # regime A (no audit field) still behaves as before: global.non_model == sum of ALL partners
+    gA = {"dates": ["2026-07-20"], "model_aua": [400_000_000.0], "non_model_aua": [40_000_000.0]}
+    rA = _crossfirm_regime_probe(gA, ["49financial", "inflection"], [p49, pinf])
+    a_clean = (rA["regime"].startswith("A") and rA["verdict"] == "CROSSFIRM_PASS")
+    # and the per-firm identity under B: total == model + non_model(rebased); the audit field is NOT summed
+    gB_ident = {"dates": ["2026-07-20"], "opal_aggregate_aua": [425_000_000.0], "model_aua": [400_000_000.0],
+                "non_model_aua": [25_000_000.0], "inflection_non_model_aua": [15_000_000.0]}
+    b_identity = (_consistency_violations(gB_ident)[0] == [])
+    gB_summed = copy.deepcopy(gB_ident)
+    gB_summed["opal_aggregate_aua"] = [440_000_000.0]   # audit field wrongly summed in
+    b_catch_summed = bool(_consistency_violations(gB_summed)[0])
+    # ===== LEDGER-NAMED SHAPE EXTRA (vs a harness exemption) =====
+    se_s = {"dates": ["2026-07-20"], "model_aua": [10.0], "non_model_aua": [5.0]}
+    se_p = {"dates": ["2026-07-20"], "model_aua": [10.0], "non_model_aua": [5.0],
+            "inflection_non_model_aua": [3.0]}
+    se_led = {"_shape_extras": {"published_only": ["inflection_non_model_aua"], "note": "EXCLUDE/B carrier"}}
+    se_named = compare(se_s, se_p, se_led)["shape_ok"]                       # declared -> shape OK
+    se_undeclared = not compare(se_s, se_p, {})["shape_ok"]                  # NO ledger -> still SHAPE_FAIL
+    se_other = not compare(se_s, {**se_p, "rogue_field": [1.0]}, se_led)["shape_ok"]  # a DIFFERENT extra still FAILS
+    # EXACT-not-substring: declaring 'model_aua' must NOT name a 'non_model_aua' extra (BUG-2 discipline)
+    se_sub_s = {"dates": ["2026-07-20"], "model_aua": [10.0]}
+    se_sub_p = {"dates": ["2026-07-20"], "model_aua": [10.0], "non_model_aua": [5.0]}
+    se_no_substring = not compare(se_sub_s, se_sub_p, {"_shape_extras": {"published_only": ["model_aua"]}})["shape_ok"]
+
     ok = (c_clean and c_m1 and c_m2 and c_m3 and c_m3b and c_m4 and c_part and c_part_bad
           and c_hn and c_xf_clean and c_xf_drop and c_xf_missing and c_xf_datejoin
-          and nf_ok and nf_xf_global and nf_xf_partner)
+          and nf_ok and nf_xf_global and nf_xf_partner
+          and b_clean and b_catch_rebased and b_catch_audit and a_clean
+          and b_identity and b_catch_summed
+          and se_named and se_undeclared and se_other and se_no_substring)
     print(f"SELF-TEST consistency CONTROL (coherent artifact PASSES, gate not stuck-red)={c_clean}")
     print(f"SELF-TEST consistency MUTANT-1 (live bug shape: total omits $153M component) -> RED={c_m1}")
     print(f"SELF-TEST consistency MUTANT-2 sensitivity: caught holes {caught} -> measured floor ${floor:,.2f}; sub-cent ignored={c_m2}")
     print(f"SELF-TEST consistency MUTANT-3 missing-is-NOT-zero: explicit None -> PARTIAL_NULL={c_m3}; truncated array -> PARTIAL_NULL={c_m3b}")
     print(f"SELF-TEST consistency MUTANT-3c NON_FINITE (CVO ITEM 1 false-PASS): NaN/inf/-inf/bool/str in any of 3 fields -> UNCHECKABLE + not counted checked={nf_ok}; crossfirm global-side={nf_xf_global}, partner-side={nf_xf_partner}")
     print(f"SELF-TEST consistency MUTANT-4 total field absent -> UNCHECKABLE (not a clean sweep)={c_m4}")
+    print(f"SELF-TEST REGIME-B (Andrew EXCLUDE 2026-07-22): B detected+clean={b_clean}; A still clean={a_clean}; "
+          f"B CATCHES rebased-non_model drift={b_catch_rebased}; B CATCHES audit-carrier drift={b_catch_audit}")
+    print(f"SELF-TEST REGIME-B identity: total==model+non_model(rebased) clean={b_identity}; "
+          f"audit field wrongly SUMMED into total -> CAUGHT={b_catch_summed}")
+    print(f"SELF-TEST ledger-NAMED shape extra (_shape_extras, not a harness exemption): declared->shape OK={se_named}; "
+          f"undeclared->SHAPE_FAIL={se_undeclared}; a DIFFERENT extra still FAILS={se_other}; exact-not-substring={se_no_substring}")
     print(f"SELF-TEST consistency PARTNER shape (partner_custody_total resolves)={c_part}; partner defect caught={c_part_bad}")
     print(f"SELF-TEST consistency honest-None row (all 3 None) skipped+counted, not a violation={c_hn}")
     print(f"SELF-TEST crossfirm: clean rollup PASS={c_xf_clean}; dropped firm CAUGHT={c_xf_drop}; partner-missing-at-date CAUGHT={c_xf_missing}; date-joined (reordered partner ties)={c_xf_datejoin}")
@@ -1024,7 +1153,10 @@ def _report_crossfirm(r):
     if v == "CROSSFIRM_ABSENT":
         print(f"[{v}] crossfirm_rollup -- {r['note']}")
         return
-    print(f"[{v}] crossfirm_rollup (global == {' + '.join(r['partners'])}; {r['dates']} dates)")
+    print(f"[{v}] crossfirm_rollup (global == {' + '.join(r['partners'])}; {r['dates']} dates; "
+          f"regime {r.get('regime', '?')})")
+    for n in r.get("notes") or []:
+        print(f"    (xf) regime note: {n}")
     for field, viol in (r.get("by_field") or {}).items():
         if not viol:
             print(f"    (xf) {field}: ties at every date")
