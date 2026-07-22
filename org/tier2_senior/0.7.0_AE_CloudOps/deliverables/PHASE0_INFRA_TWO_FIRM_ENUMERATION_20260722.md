@@ -313,6 +313,38 @@ thing is missing" from "I cannot see the thing."** That is the discrimination th
 silent code-level enumeration and tells you where to look. **Both publisher and freshness-checker split
 exactly this way (IAM clean / code two-firm), found independently.**
 
+---
+
+## §7f NEEDS A SECOND CLAUSE — **OUTSIDE-THE-CONFIG IS NECESSARY, NOT SUFFICIENT**
+
+**Source: `0.4.0_DS_ClientPlatform` @`c138e7f58`, found against their own diff. The insight is theirs; I am
+connecting it to the doctrine because §7f came from my findings and is now incomplete.**
+
+§7f as landed: *a coverage fraction is only evidence if its denominator comes from OUTSIDE the instrument's
+own configuration.* **DS's audit script satisfies that and is still blind.**
+
+`mdpf_revamp_count_source_audit.py:102-109` `unaudited_firms()` set-differences the **live S3 staging prefix**
+against `AUDITED_FIRMS` — a real set-difference, genuinely outside the config, **and it was landed
+@`6785ce65a` BEFORE the doctrine was written.** But DS states the residual precisely:
+
+> the denominator is derived from the staging prefix — **outside the config, yet still DOWNSTREAM of the
+> producer being audited.** It catches *landed-but-unaudited*; it **cannot** catch *never-landed-at-all*.
+> A firm that never emits has no prefix, the set-difference is empty, and the audit reads clean.
+
+> ### **A DENOMINATOR DERIVED FROM A PROCESS'S OWN OUTPUT CAN ONLY ENUMERATE SUBJECTS THAT PRODUCED OUTPUT.
+> ### THE DENOMINATOR MUST BE *UPSTREAM* OF THE PROCESS BEING MEASURED — AN AUTHORITATIVE REGISTRY — NOT
+> ### MERELY OUTSIDE ITS CONFIG.**
+
+**This is "an absence has no token" one layer up**, and it is the same failure my own census had: I enumerated
+what the estate *contains*. **Observed state is a better denominator than a literal and still not evidence of
+completeness.**
+
+**ONE REGISTRY CLOSES BOTH.** DS's residual and R13's publisher need the *same* fix — an authoritative firm
+list consumed as the denominator. **`PUBLISH_MAP` should not be hand-extended for Cottonwood and the marker
+should not grow a second list**; both should read one registry. **Recommended to CTO as a single item, not
+two.** *(Two hand-maintained lists is how they drift; one registry is why R13 and DS's residual are one
+problem.)*
+
 ### Sweep — what this limb does NOT cover
 `mdpf-pipeline` root (runner, trigger, freshness roles) + publisher role + trigger gate logic + cohort list.
 **Not swept:** `bd-pipeline`/`cot-pipeline` cross-grants, Lambda@Edge. **OPEN, not clean.**
