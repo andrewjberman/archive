@@ -9,6 +9,12 @@ endpoints, methodologies, auth, limits, open items — and points at canonical s
 |---|---|---|
 | [`MASTER_BLACK_DIAMOND_ANALYSIS.md`](MASTER_BLACK_DIAMOND_ANALYSIS.md) | Black Diamond (SS&C/Advent) | Two separate API surfaces (DataMining vs the product APIs), the star schema, snapshot-vs-lots-FIFO doctrine, the method contract, the affect vector |
 | [`MASTER_ORION_ECLIPSE_ANALYSIS.md`](MASTER_ORION_ECLIPSE_ANALYSIS.md) | Orion Advisor Solutions + Eclipse | Three surfaces, the 9 daily production pulls, the performance method contract, `Reporting/Scope` as a calculation graph, the Orion↔Eclipse join and the ~3.4% lag |
+| [`MASTER_SMARTX_ANALYSIS.md`](MASTER_SMARTX_ANALYSIS.md) | SmartX (TAMP) | **A partner, not a displacement target.** Five surfaces, the build-vs-buy seam, the dependency tradeoff, the two-axis account-of-record ruling, and the three-vendor comparison |
+
+**Verification:** [`SURFACE_RECONCILIATION_TEST_20260722.md`](SURFACE_RECONCILIATION_TEST_20260722.md) — do a
+vendor's two surfaces agree on value? **Orion: PASS, exact to the cent. BD: inconclusive, and the $0==$0
+"agreement" is explicitly not scored as a pass.** Also names two consumption hazards (Orion's mixed units;
+our own `factor` field's semantics).
 
 **Cross-platform synthesis** — the seven invariants both vendors arrived at independently, and what they say
 we should build: [`../../../../docs/research/competitive_recon/orion_20260722/PLATFORM_STRUCTURE_COMPARISON_20260722.md`](../../../../docs/research/competitive_recon/orion_20260722/PLATFORM_STRUCTURE_COMPARISON_20260722.md)
