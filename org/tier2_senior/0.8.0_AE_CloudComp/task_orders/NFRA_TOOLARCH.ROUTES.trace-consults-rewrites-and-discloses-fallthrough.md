@@ -4,7 +4,21 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~A</issued_to>
 <date>2026-07-23</date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE @d008e7cf1 (pushed CLOUD, 2026-07-23 ~2205Z, 0.8.0_AE_CloudComp~A).
+     AC1 defect reproduced first-hand + claim scope corrected (CTO~Z amended this TO on it).
+     AC2 discrimination mutant 4/4 DIFFERENT and CORRECT -- MDPF -> json/mdpf/global/aggregate-aua-timeseries.json,
+         confirmed live 254419 B @2026-07-23T21:18:53Z (comp-keys, applied plane).
+     AC3 catch-all disclosed always-on, keyed on behavior.order == 0 (structural slot, not the "/*" string).
+     AC4 comp-routes moved pending_declaration -> contracts; stage-2 clean; manifest-check invariants PASS.
+     AC5 ~B notified 220521Z with all four residuals + the three distinct outcome shapes.
+     AC6 session log 20260723_ROUTES_trace_rewrite_wiring.md + compiler-tools-log line.
+     16 new bidirectional tests, 71 pass; 6/6 guard-mutants redden (harness verified restore-green).
+     RESIDUALS routed to CTO~Z: (R1) OAC origins mistyped api_gateway -> comp-routes auth-map groups two
+     S3 origins wrongly; (R2) the rewrite table is TRANSCRIBED not parsed (_parse_rewrite_rules has a dead
+     `_content` read at :485) -- a router edit nobody mirrors is invisible, and this fix increases reliance
+     on it. Verification: 3.0.0_SA_CVO~Z. -->
+
 <priority>P1 — small fix, HIGH leverage: it is the blocker on ~B's TOOLBHVR.ROUTE flipping from "no coverage" to a real route, and it closes a live false-authority defect</title></priority>
 
 <authority>
