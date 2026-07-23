@@ -26,9 +26,21 @@ by v1/run**) and STILL 0 rows today (the 12-dim hypothesis for the emptiness is 
 
 1. **SOURCE-CONFIRMED: the surface returns DIFFERENTIAL DATED BOOKS per window** — rosters 83->780->857->
    859->867->862->0, controls 0/8->2/8->8/8 in migration order, Opal set 4->11->14. No single stamped
-   state produces this. (Formal TEMPORAL verdict = CRO's ruling; the one open tension is the 4 Opal names
-   at 05-15 vs his era-rule — with his creation-timeline independently contradicted by Sat-40@06-15, the
-   parsimony read is re-save-stamp dates + retroactive names.)
+   state produces this. ~~(Formal TEMPORAL verdict = CRO's ruling; ... the parsimony read is re-save-stamp
+   dates + retroactive names.)~~
+   **VERDICT RULED (CRO 042709Z, his authority): CURRENT-STAMPED ASSIGNMENT — NOT temporal.** The
+   differential windows prove temporal EXISTENCE + VALUE (real onboarding growth, real PIT holdings) —
+   but CRO's direct transition test (the test my summary did not run) shows EVERY matched account
+   carrying its EXACT today-assignment in every window it appears (0 window-assigned->today-unassigned,
+   0 reverse, and the only 5 both-assigned-different are one non-Opal label reclass) — the definition of
+   current-stamped assignment. **My re-save-stamp parsimony hypothesis is FALSIFIED** by his
+   createdAt-stability test: createdAt stable 22/22 across the 07-21/07-22 partitions (real birth dates);
+   the nightly movement my B6 liveness work measured was `updatedAt`, a DIFFERENT field. The 05-15
+   Opal-name presence was the current-stamp artifact; CRO's window-integrity IGNORED flag was correct.
+   **Consequence: qt5 offers NO temporal assignment — the interpolated backfill's assignment leg STANDS;
+   qt5 IS a real dated VALUE/existence source (value-leg refinement to ~05-15).** The recovery sweep
+   remains valid as value/existence recovery (recent-dates assignment ~= correct at ~zero 2-week churn),
+   and the recovered qt5 assignment must NEVER be used as deep PIT assignment history.
 2. **SOURCE-CONFIRMED: the ~07-09 qt5 "freeze" is vendor LATE MATERIALIZATION, and the frozen dates are
    RECOVERABLE NOW** — the daily chain's 0-row rejects were true at the time (SSM verbatim, runs
    244438/247780) and the same as-of dates return full exports today on the same call shape.
