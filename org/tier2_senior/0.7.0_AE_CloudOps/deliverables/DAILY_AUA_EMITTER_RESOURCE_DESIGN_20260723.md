@@ -60,3 +60,27 @@ reproduced); per-row provenance (source key + partition date + derivation tag); 
 ## Sequence
 implement -> commit-gate -> artifact swap at CTO gate (picks bound there) -> walk per channel under
 own ledger -> COO per-date byte-verify -> co-sign. Serve stays HELD for the full backfill (Andrew).
+
+---
+
+## AMENDMENT 1610Z -- D1 SEMANTICS CLAUSE (bound CTO 160900Z, appended to all four contracts)
+Every leg's per-date value = the source's RETROSPECTIVE TRUE daily value (Andrew verbatim: "we dont
+care about 'as known at the time' we care about absolute reality"). Honest-absent where the source
+has not reached a date -- absolute reality never licenses fabricating into an unreached period.
+Legacy as-known-then series = AUDIT LEDGER only (supersession deltas reference it; display never).
+T1_SETTLED is D1-CONSISTENT (the frontier day is not yet settled truth); the COT interpolated_estimate
+provenance label already encodes D1's boundary. Field-choice questions resolve true-value-first.
+
+## TF CHANGE-SET enumerated for the deploy gate (the emitter is a JSON-reader today)
+1. module "emitter" (emitter.tf:108): + layers [pandas-pyarrow], memory 128->2048, timeout 60->600
+   (Rule 3 + Rule 5; the silver-converter family's measured profile), + env for the monolith bucket.
+2. aws_iam_role.emitter policy: + GetObject/conditioned ListBucket on the FIVE new read prefixes
+   (schwab/08242234/silver/fact_rps_s2/*, smartx/platform/silver/*, orion/inflection/silver/
+   fact_assets/*, eclipse/inflection/silver/fact_portfolios_full/*, blackdiamond/cottonwood/silver/*)
+   -- pure adds; Rule-22a battery per prefix (ONE --resource-arns/call, isolated controls,
+   --context-entries on conditioned List) at apply time.
+3. Artifact: lambda_function.py + channel_sources.py + vendored reference readers per BUILD_MANIFEST
+   (load_aum_daily/roster-bridge/CORE_MODEL_KEYS + eclipse resolve/exclusions + orion sum semantics
+   from the spine @9bd23d904 -- vendored, never reimplemented).
+IMPLEMENTATION IN PROGRESS from this committed state; all contracts + picks + this enumeration are
+the resumable record.
