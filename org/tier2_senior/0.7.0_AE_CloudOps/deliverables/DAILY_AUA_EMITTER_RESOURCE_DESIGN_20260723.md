@@ -84,3 +84,16 @@ provenance label already encodes D1's boundary. Field-choice questions resolve t
    from the spine @9bd23d904 -- vendored, never reimplemented).
 IMPLEMENTATION IN PROGRESS from this committed state; all contracts + picks + this enumeration are
 the resumable record.
+
+## AMENDMENTS 1626-1641Z (banked into the build)
+- GLOBAL ruled by Andrew (COO 162601Z): LABELED_PARTIAL confirmed -- legs_present on EVERY global
+  row, phased composition (deep 2024-2025 = 49 alone; +INF-model from the MEASURED 05-15 launch;
+  +COT from discovery). T1_SETTLED confirmed. COO's 05-18 relay retracted (served-axis misread).
+- INF EXPECTED-DELTA (DS 164113Z): the walk WILL flip 2026-05-15..17-window served $0 -> real
+  (canonical carries $94,546,459.54 roster-filtered at launch) -- the D1 port CORRECTING the served
+  artifact; walk control for those dates = the canonical partition sum, NOT the served baseline.
+  Named in advance; never classified as defect/tie-failure.
+- IMPLEMENTATION STATE: channel_sources.py WRITTEN + commit-gated (discovery primitive, 5 leg
+  derivations + global, bound constants; roster bridge built from the 49F/open slice per the spine
+  reference reader -- fidelity fix caught in self-review); mdpf_revamp_model_crosswalk.py vendored
+  verbatim. NEXT: lambda_function integration, BUILD_MANIFEST, TF (layer/resize/IAM adds), tests.
