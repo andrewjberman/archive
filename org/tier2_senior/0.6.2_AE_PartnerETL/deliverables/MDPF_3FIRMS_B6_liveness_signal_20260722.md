@@ -122,6 +122,24 @@ capture writing; static = the chain fires-without-writing and the WS-1 follow-on
 (WSE_COTMDL WS-1 lane); qt4/qt5 run-level freeze (silver frozen since 07-09) is the SIBLING defect,
 unified with the ADVI-perception freeze + the banked 18-day alarm per COO 230659Z.
 
+## ESCAPE EXECUTED (2026-07-23 02:02-02:12Z) — RESULT: HELD-ON-THE-FEED, temporal question stays OPEN
+
+Condition evaluated 02:02Z: no CRO verdict artifact existed (probe [HELD] in the campaign brief) -> escape
+FIRED with the amended instrument (CRO's `cot_qt5_temporal_probe.py`, joint-verdict COMPATIBLE), run ONCE
+on-box (SSM a051ffc7, python3.11, sequential after B5(c), CRO holding zero concurrent calls). Verbatim:
+`token minted OK / HELD: baseline read HTTP 500 -- no verdict.` **Error class captured: NOT auth** (bearer
+minted; template GETs succeeded x4 minutes prior; qt1/qt2/qt3 DataMining RUNS succeeded 02:03-04Z same
+jar), **NOT the 0-row shell** — a server-side HTTP 500 on the qt5 explicit-window RUN call itself.
+**Root read (source-confirmed): the 07-09 qt4/qt5 freeze is a TABLE-SPECIFIC RUN-LEVEL vendor-side
+failure; session/auth fully exonerated** (and the WS-1 fires-without-writing finding above was
+triple-confirmed in-window: SM LastChangedDate ~07-06 across reads 02:02:07/02:02:54/02:08:36Z + the
+harness's own `captured_at=2026-07-06T02:02:47Z`). Mechanism hypotheses (UNTESTED): the 06-30 qt4
+template re-persist (templates/unrealized.json rewritten 06-30T15:25Z; templateId 237784 vs the 226xxx
+siblings) / a vendor change ~07-08. **No verdict was manufactured; the temporal question is UNANSWERED
+pending the qt5 feed repair** — that repair gates it, and carries the unified defect (ADVI-perception
+freeze + the banked 18-day alarm + this). B5(c) note: the dump ran CLEAN the same window (4/5 tables;
+qt3 realized = selectable-but-unpersisted, no templateId — RF-14 refinement).
+
 ## For CRO (A5 residual, now determined)
 
 CRO's "whether updatedAt movement is composition edits or a system touch is not determined": **determined —
