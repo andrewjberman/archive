@@ -40,11 +40,23 @@ THE VERDICT LOGIC -- WINDOW-INTEGRITY FIRST (CTO v1.21, binding, non-optional)
       window-integrity limb green. No COO->CTO round-trip; sequential never concurrent; both
       need the SAME fresh session (else the verdict is cleanly BLOCKED-ON-SESSION-CAPTURE).
 
+RUN-BODY + 0-ROW CORRECTIONS (0.6.2 035931Z, source-confirmed) -- folded into this reference:
+  (1) v1/run needs a WRAPPED body {"template": full, "asOfDate": endDate} + normalization
+      (cot_bronze_ingest.py:405-415); the bare-dict POST this harness first shipped 500s on its
+      own -- so run_window now reuses the PROVEN bi.run_query, and a 500 is no longer read as a
+      vendor condition. (2) A 0-row export is NOT an instrument break: BD returns 0-data-row
+      header-only exports because it holds no point-in-time snapshot for that as-of date (every
+      daily as-of since ~07-09). So today-empty does NOT abort; a 0-row past window is NO-PIT-DATA
+      (a vendor data-availability finding), and today-empty + a past window POPULATED is the
+      informative TEMPORAL outcome. NOTE this pairs with 0.6.2's live R0-R3 run, which streams the
+      raw rows/strategy values and this logic adjudicates the verdict.
+
 SAFETY
-  Read-only. No template re-persist, no bronze write, no state change on BD's side. On a
-  stale session it prints `HELD: session 401` and exits 0 WITHOUT emitting a verdict --
-  a dead instrument never manufactures a finding. Egress = Andrew's explicit per-use word;
-  cot-BD ONLY (firm-sep binds -- never 49F). Run on-box (cot-exporter) or anywhere a fresh
+  Read-only diagnostics; if a template modification is needed it is a COPY (never production 226334),
+  created and DELETED same-window (revert-on-completion). No state change on BD's side otherwise. On a
+  stale session / auth or run-path error it prints HELD and exits 0 WITHOUT a verdict -- a dead
+  instrument never manufactures a finding. Egress = Andrew's explicit per-use word (this-program-scoped
+  cot-DataMining); cot-BD ONLY (firm-sep binds -- never 49F). Run on-box (cot-exporter) or anywhere a fresh
   `blackdiamond/cot/session` jar is valid.
 
 USAGE
@@ -56,7 +68,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import time
 import urllib.error
 import urllib.request
 from datetime import date, timedelta
@@ -155,30 +166,26 @@ def _get(path: str, token: str) -> dict:
 def run_window(token: str, cookie: str, template: dict, start: date) -> list[dict]:
     """Run qt5 for the window starting at `start`; return list of {account, strategy} rows.
 
-    Raises urllib HTTPError(401) on a stale session -- caller treats as HELD, never a verdict.
+    Raises urllib HTTPError on auth failure -- caller treats as HELD, never a verdict.
+
+    RUN-BODY FIX (0.6.2 035931Z, source-confirmed cot_bronze_ingest.py:405-415 @HEAD): v1/run
+    REQUIRES a WRAPPED body {"template": full, "asOfDate": endDate} plus a five-field setdefault
+    + three-field pop normalization -- the bare `dict(template)` POST this harness first shipped
+    500s regardless of session/dates ("omitting asOfDate 500s. This was the root cause"). So the
+    PROVEN production normalizer is reused instead of a re-implementation: bi.run_query does exactly
+    that wrap+normalize. This must run ON-BOX (cot-exporter) where cot_bronze_ingest is importable.
     """
+    import cot_bronze_ingest as bi  # on-box; carries the proven run-body wrap + normalization
     end = start + timedelta(days=WINDOW_DAYS)
     body = dict(template)
     body["startDate"] = start.strftime("%m/%d/%Y")
     body["endDate"] = end.strftime("%m/%d/%Y")
     body["dateRangeType"] = "Custom"
 
-    run = _post("/datamining/request/v1/run", token, body)
-    run_id = run.get("templateId") or run.get("runId")
-    guid = run.get("resultGuid")
+    run_id, guid = bi.run_query(token, body)   # PROVEN wrap+normalize; raises on a real run error
+    bi.poll_status(token, run_id)
     if not guid:
-        raise RuntimeError(f"no resultGuid for {start}: {run}")
-
-    # poll
-    waited = 0
-    while waited < POLL_TIMEOUT_S:
-        st = _get(f"/datamining/request/v1/run/{run_id}/status", token)
-        if st.get("statusMessage") == "Error":
-            raise RuntimeError(f"BD run Error for {start}: {st}")
-        if st.get("isComplete"):
-            break
-        time.sleep(POLL_INTERVAL_S)
-        waited += POLL_INTERVAL_S
+        raise RuntimeError(f"no resultGuid for {start}")
 
     xreq = urllib.request.Request(
         f"{BD_BASE}/Api/DataMining/ExportResults/{guid}",
@@ -210,20 +217,23 @@ def run_window(token: str, cookie: str, template: dict, start: date) -> list[dic
 
 
 def window_integrity(rows: list[dict], window_start: date) -> tuple[str, list[str]]:
-    """STEP 0: was the past window HONORED? Returns (HONORED|IGNORED|INCONCLUSIVE|INSTRUMENT-BROKEN, notes).
+    """STEP 0: was the past window HONORED? Returns (HONORED|IGNORED|INCONCLUSIVE|NO-PIT-DATA, notes).
 
-    INSTRUMENT-BROKEN guard (0.6.2 230359Z): qt5 allocations has delivered 0-ROW SHELLS (full
-    header, no rows) since ~2026-07-09. A 0-row result is therefore an INSTRUMENT FAILURE, NEVER a
-    window-honored-empty -- a genuine pre-model window still has 54-215 NON-Opal accounts (the book
-    existed, just not on Opal models); only a broken feed returns zero rows total. This guard is the
-    instrument-vs-data adjudication 0.6.2 flagged, made explicit before any HONORED verdict is legal.
+    0-ROW SEMANTICS, CORRECTED (0.6.2 035931Z, source-confirmed via the daily export rejects): a
+    0-row export is NOT an instrument break -- the daily qt5 runs EXECUTE CLEAN and BD returns
+    0-DATA-ROW header-only exports because "BD has no point-in-time snapshot for this as-of date"
+    (verbatim reject reason, every daily as-of since ~07-09). So a 0-row window means BD holds NO
+    point-in-time data for THAT date -- a VENDOR DATA-AVAILABILITY fact (NO-PIT-DATA), informative,
+    not a broken instrument. (A genuine instrument break is now an HTTPError/run-error, caught in
+    run_window, not a 0-row. The prior INSTRUMENT-BROKEN-on-0-row read was wrong: it conflated the
+    harness's own malformed-body 500 with the vendor's empty exports.)
     """
     notes = []
     n_accounts = len({r["account"] for r in rows if r["account"]})
     if not rows or n_accounts == 0:
-        notes.append(f"window {window_start}: 0 rows / 0 accounts -> qt5 SHELL (the 07-09 feed failure), "
-                     "NOT a window-honored-empty. INSTRUMENT-BROKEN.")
-        return "INSTRUMENT-BROKEN", notes
+        notes.append(f"window {window_start}: 0 rows -> BD holds NO point-in-time snapshot for this "
+                     "as-of date (vendor data-availability, 0.6.2-confirmed). NO-PIT-DATA, not a break.")
+        return "NO-PIT-DATA", notes
     strategies_present = {r["strategy"] for r in rows if r["strategy"]}
     violations = []
     for name, created in STRATEGY_CREATED.items():
@@ -297,27 +307,33 @@ def main(argv=None) -> int:
 
     template = load_template()
 
-    # Baseline: today's EXPLICIT-window run. Two things it proves, both binding:
-    #   (1) auth works for the DataMining path (mint + run + export succeed), and
-    #   (2) qt5 works FOR MY CALL PATTERN (explicit window) AT ALL -- if today's explicit run
-    #       returns a 0-row shell (the 07-09 qt5 feed failure reaching my call pattern too), then
-    #       NO past window is interpretable and the whole probe is INSTRUMENT-BROKEN. 0.6.2 noted a
-    #       past-window explicit run is a DIFFERENT call than the daily incremental and MAY clear the
-    #       failure -- this baseline is exactly the test of whether it does.
+    # Baseline: today's EXPLICIT-window run. It proves auth + that the RUN PATH itself works
+    # (mint + run + export succeed) -- an HTTPError/run-error here is a genuine instrument/auth break.
+    # But today returning 0 ROWS is NOT a break: it is the KNOWN vendor condition (0.6.2 035931Z,
+    # source-confirmed) -- BD has stopped producing CURRENT point-in-time qt5 snapshots since ~07-09,
+    # so the daily as-of returns 0-data-row header-only exports. So we do NOT abort on today-empty.
+    # CRITICAL: today-empty + a past window POPULATED is the most informative outcome -- it means BD
+    # holds HISTORICAL point-in-time data but stopped current snapshots, which BOTH answers the
+    # temporal question AND characterizes the freeze in one run.
     try:
         today_rows = run_window(token, cookie, template, date.today())
     except urllib.error.HTTPError as e:
-        log(f"HELD: baseline read HTTP {e.code} -- session not usable for DataMining, no verdict.")
+        log(f"HELD: baseline read HTTP {e.code} -- DataMining auth not usable, no verdict.")
+        return 0
+    except Exception as e:
+        log(f"HELD: baseline RUN-ERROR ({type(e).__name__}: {str(e)[:200]}) -- the run path itself "
+            "failed (instrument), no verdict. If this is a body-shape error the run-body fix did not "
+            "take; if a real vendor run error, that is a new finding.")
         return 0
     n_today = len({r["account"] for r in today_rows if r["account"]})
     if n_today == 0:
-        log("HELD/INSTRUMENT-BROKEN: today's explicit-window qt5 returned a 0-ROW SHELL -- the 07-09 "
-            "qt5 allocations feed failure reaches my call pattern too. No past window is interpretable; "
-            "NO verdict emitted. (This is the bd-cot-silver-stale qt5 family failure, 0.6.2 lane -- not "
-            "a temporal finding.)")
-        return 0
-    log(f"baseline (today): {n_today} accounts, {len({r['strategy'] for r in today_rows if r['strategy']})} "
-        f"strategies -- DataMining auth live AND qt5 explicit-window run WORKS. Past windows interpretable.")
+        log("NOTE: today's qt5 returned 0 rows -- the KNOWN vendor condition (BD has no CURRENT "
+            "point-in-time snapshot since ~07-09, 0.6.2-confirmed). NOT an instrument break; the run "
+            "path WORKS. Proceeding to past windows -- if a past window is POPULATED, BD holds history "
+            "and the temporal question is answered.")
+    else:
+        log(f"baseline (today): {n_today} accounts, {len({r['strategy'] for r in today_rows if r['strategy']})} "
+            f"strategies -- current snapshot present, auth live, run path works.")
 
     integrities = []          # per-window Step-0 verdicts
     temporal_seen = False      # any window proved TEMPORAL
@@ -344,30 +360,35 @@ def main(argv=None) -> int:
                 temporal_seen = True
             elif verdict == "CURRENT":
                 current_on_honored = True
-        # INSTRUMENT-BROKEN / INCONCLUSIVE / IGNORED are handled in the roll-up below.
+        # NO-PIT-DATA / INCONCLUSIVE / IGNORED are handled in the roll-up below.
 
     # Roll-up, in precedence order. A CURRENT-only verdict is legal ONLY on a HONORED window
     # (CTO v1.21); an IGNORED window IS the proof-of-honor for CURRENT (the query reached and
-    # ignored the past window); INSTRUMENT-BROKEN and INCONCLUSIVE never yield a finding.
+    # ignored the past window). NO-PIT-DATA (BD holds no point-in-time snapshot for that as-of
+    # date) is a VENDOR data-availability fact, not an instrument break: if EVERY past window is
+    # NO-PIT-DATA, the empty-export freeze extends back through history and qt5 yields no temporal
+    # recovery -- a clean, informative answer (the interpolated backfill stays the only path).
     if temporal_seen:
         overall = "TEMPORAL"
     elif current_on_honored or "IGNORED" in integrities:
         overall = "CURRENT"
     elif "INCONCLUSIVE" in integrities:
         overall = "UNVERIFIABLE-INSTRUMENT"
-    elif integrities and all(i in ("INSTRUMENT-BROKEN", "HELD") for i in integrities):
-        overall = "INSTRUMENT-BROKEN"
+    elif integrities and all(i in ("NO-PIT-DATA", "HELD") for i in integrities):
+        overall = "NO-PIT-DATA"
     else:
         overall = "UNVERIFIABLE-INSTRUMENT"
 
     log("\n=== VERDICT ===")
     if overall == "TEMPORAL":
-        log("VERDICT=TEMPORAL -- qt5 returns dated assignment; backfill is REAL to the coverage horizon "
-            "(>= ~2026-05-28 model floor). Apply the B2 model-weight rollup. GO LOUD to COO/CTO.")
-    elif overall == "INSTRUMENT-BROKEN":
-        log("VERDICT=INSTRUMENT-BROKEN -- qt5 returned 0-row shells for the past window(s) (the 07-09 "
-            "allocations feed failure, 0.6.2 lane). The temporal question is UNANSWERED, cleanly HELD on "
-            "the qt5 feed, NOT a CURRENT verdict. Do not read empty as 'no data in the window'.")
+        log("VERDICT=TEMPORAL -- qt5 returns DATED historical assignment; BD holds point-in-time data "
+            "back through the window(s). Backfill is REAL to the coverage horizon (>= ~2026-05-28 model "
+            "floor); real points SUPERSEDE interpolated ones in the live 3F-BF1 build. GO LOUD to COO/CTO.")
+    elif overall == "NO-PIT-DATA":
+        log("VERDICT=NO-POINT-IN-TIME-DATA -- BD holds no point-in-time qt5 snapshot for the past "
+            "window(s) either; the empty-export freeze extends back through history (0.6.2's data-"
+            "availability mechanism, not a run break). qt5 yields NO temporal recovery -- the interpolated "
+            "backfill stays the only path, and there is nothing to supersede it with. Clean, informative.")
     elif overall == "UNVERIFIABLE-INSTRUMENT":
         log("VERDICT=UNVERIFIABLE-INSTRUMENT -- window integrity not demonstrable. NOT a finding. "
             "Escape: 0.6.2's re-persist confirmation is pre-authorized + self-evaluable (CTO 224317Z) -- "
