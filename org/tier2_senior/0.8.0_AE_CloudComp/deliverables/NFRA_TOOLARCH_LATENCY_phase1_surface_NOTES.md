@@ -70,6 +70,33 @@ Telemetry: the census runs under **`COMP_SYNTHETIC_FIXTURE=1`** (base's ruling),
 analysis stays unpolluted. *Hiding the rows would have made my own run unauditable to keep their
 analysis clean; a census that leaves no trace is its own dishonesty.*
 
+## CORRECTION to my own claim: EXISTS ≠ ROUTABLE (CTO~Z source-falsified my inference)
+
+In the subcommand-drift delta I wrote that the undeclared subcommands mean *"comp-which cannot route
+anyone to them."* **That sentence carried an unverified premise — that `tools_index` feeds the router.
+I never traced the routing path; I inferred a consequence because it was plausible and pointed at a real
+problem.**
+
+CTO~Z source-confirmed the actual mechanism: `.tools/comp-which:1006-1010` @`e6115fa66` scores over
+`entries[].{use_case,id,tool}` and displays `entries[].canonical_call` — **it never reads `tools_index`
+at all.** Positive control on their probe: `comp-iam-usage` *does* surface with its subcommands, because
+those are baked into its `canonical_call` string — so the router can render subcommand grain and the
+probe was not blind to it.
+
+Consequences, both against me:
+1. **The fix I implied (backfill the registry) would not have made anything routable.** Declared entries
+   are equally unroutable. I collapsed two different populations.
+2. My finding was right about the **symptom** and wrong about the **mechanism** — Rule 22's class: a
+   causal claim is a hypothesis until source-confirmed.
+
+**Census consequence, adopted:** `tools_index` is used ONLY as the denominator for *what derivations
+EXIST* — the correct use per the mandate — and must never silently become a claim about what agents can
+**FIND**. The surface records therefore carry **EXISTS vs ROUTABLE as distinct axes**, and the
+population that *exists, is declared, and has no consumer able to route to it* is reported as a
+first-class finding rather than census noise. It is the sharper sibling of the ROUTE finding: there, the
+rail routed to a tool that could not answer; here, the estate declares derivations no router can reach.
+Same family — **the map and the territory disagreeing in a direction nothing measures.**
+
 ## Defect 2 — attribution ATTEMPTED, NOT CLOSED (and exactly why)
 
 Built an AST attributor: map `X = sub.add_parser("name")` → `X.set_defaults(func=handler)` → walk the
