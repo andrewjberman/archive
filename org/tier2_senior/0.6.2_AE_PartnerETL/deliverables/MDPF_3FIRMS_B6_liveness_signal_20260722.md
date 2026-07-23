@@ -131,7 +131,8 @@ on-box (SSM a051ffc7, python3.11, sequential after B5(c), CRO holding zero concu
 minted; template GETs succeeded x4 minutes prior; qt1/qt2/qt3 DataMining RUNS succeeded 02:03-04Z same
 jar), **NOT the 0-row shell** — a server-side HTTP 500 on the qt5 explicit-window RUN call itself.
 **Root read (source-confirmed): the 07-09 qt4/qt5 freeze is a TABLE-SPECIFIC RUN-LEVEL vendor-side
-failure; session/auth fully exonerated** (and the WS-1 fires-without-writing finding above was
+failure; session/auth fully exonerated** *(SUPERSEDED 07-23 ~04:0xZ by the accelerated run-level
+diagnosis — see the correction block below)* (and the WS-1 fires-without-writing finding above was
 triple-confirmed in-window: SM LastChangedDate ~07-06 across reads 02:02:07/02:02:54/02:08:36Z + the
 harness's own `captured_at=2026-07-06T02:02:47Z`). Mechanism hypotheses (UNTESTED): the 06-30 qt4
 template re-persist (templates/unrealized.json rewritten 06-30T15:25Z; templateId 237784 vs the 226xxx
@@ -139,6 +140,21 @@ siblings) / a vendor change ~07-08. **No verdict was manufactured; the temporal 
 pending the qt5 feed repair** — that repair gates it, and carries the unified defect (ADVI-perception
 freeze + the banked 18-day alarm + this). B5(c) note: the dump ran CLEAN the same window (4/5 tables;
 qt3 realized = selectable-but-unpersisted, no templateId — RF-14 refinement).
+
+## CORRECTION (2026-07-23 ~04:0xZ, accelerated run-level diagnosis — offline SSM-history evidence)
+
+My "table-specific RUN-LEVEL server failure" root read above was WRONG IN MECHANISM (what I measured — the
+500 — was real; the attribution was not). The daily chain's own retained stdout (SSM command history, runs
+244438/247780 et al.) shows the qt5/qt4 daily runs since at least 07-11 EXECUTE CLEAN and BD returns
+**0-DATA-ROW HEADER-ONLY exports** ("BD has no point-in-time snapshot for this as-of date"), which the
+chain's honest-reject guard correctly refuses to land. **Freeze root = VENDOR-SIDE DATA AVAILABILITY
+(empty point-in-time exports since ~07-09), not a run-path failure.** The harness's HTTP 500 was
+**INSTRUMENT-SIDE**: v1/run requires the wrapped body `{"template": full, "asOfDate": ...}` plus 5
+defaulted / 3 stripped fields (`cot_bronze_ingest.py:405-415 @HEAD` — "omitting it 500s. This was the root
+cause, not session context"); the harness posted the bare template dict. Fix + baseline-gate amendment
+(today-empty is a known vendor condition, not instrument breakage; today-empty + past-window-populated is
+a coherent decisive outcome) handed to CRO 035931Z with a coordinated rerun offer. Two-mode split
+(CRO 021616Z) stands, sharpened: qt4 = the 06-30 re-persist question, qt5 = vendor data availability.
 
 ## For CRO (A5 residual, now determined)
 
