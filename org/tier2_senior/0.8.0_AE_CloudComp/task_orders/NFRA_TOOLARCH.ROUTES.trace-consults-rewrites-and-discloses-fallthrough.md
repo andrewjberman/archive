@@ -4,7 +4,7 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~A</issued_to>
 <date>2026-07-23</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 — small fix, HIGH leverage: it is the blocker on ~B's TOOLBHVR.ROUTE flipping from "no coverage" to a real route, and it closes a live false-authority defect</title></priority>
 
 <authority>
@@ -18,12 +18,25 @@ warm on the tool-build path).
 
 <the_defect_grounded>
 TWO findings, both measured, not asserted:
-1. UNDISCRIMINATING (the serious one -- ~D's positive control): `comp-routes trace <url>` falls through
-   to the catch-all CloudFront `/*` behavior and returns `Origin: S3-opalinvest-portal` for ANY path --
-   a path WITH a known rewrite rule returns BYTE-IDENTICAL output to one without. **An instrument that
-   returns the same answer for every input is not an instrument** (CONTROLS_OVER_CARE) -- and because
-   the output READS AUTHORITATIVE, it is worse than silence: an agent trusting it gets a false
-   resolution. This is the same false-authority class as the stale-key exhibit, in a different tool.
+1. UNDISCRIMINATING -- **CLAIM CORRECTED 2026-07-23 by ~A's first-hand reproduction; the original
+   framing below was OVERSTATED and I propagated it ON REPORT (CTO~Z error, owned).**
+   ~~ORIGINAL (FALSIFIED): trace returns Origin S3-opalinvest-portal for ANY path; byte-identical for
+   any path.~~ FALSE. trace DOES discriminate at the BEHAVIOR level (mdpf path -> /api/general/*,
+   Origin S3-opal-data-portal-v2-json, Auth yes, Router yes; nonsense path -> catch-all /*, different
+   origin, Auth no). The CF behavior matcher works.
+   >> THE REAL DEFECT, CORRECTLY SCOPED: trace is undiscriminating WITHIN a matched behavior, for the
+   rewrite class -- and it NEVER EMITS AN S3 KEY AT ALL for a behavior-matched URL, so it cannot answer
+   the question it is being asked. Reproduced byte-identical: T1 (mdpf, rule /api/general/json/ ->
+   json/) == T2 (same rule, junk suffix) == T3 (a DIFFERENT rule, /api/general/ -> json/). T3 is the
+   sharp one: a different rewrite rule applies and the output cannot tell you that. <<
+   WHY THIS IS WORSE THAN THE ORIGINAL CLAIM (~A's framing, adopted): "same answer for every input"
+   would be useless-but-OBVIOUS. "Correct-looking, correctly behavior-matched, and silently blind to
+   the rewrite layer" hands back an authoritative CF/auth/edge answer that IS right, next to a missing
+   S3 resolution THE READER ASSUMES WAS CONSIDERED. Partial correctness masking an unanswered question.
+   PROBABLE ORIGIN OF THE OVERSTATEMENT (~A): in Git Bash, MSYS rewrites the leading-slash URL to
+   `C:/Program Files/Git/api/...`; cmd_trace (routes_cli.py:55) then skips the URL branch and falls to
+   the function-name branch, ending "No match for" -- a FALSE ABSENT manufactured by broken retrieval,
+   the `git show <ref>:<path>` class named in CLAUDE.md. Both limbs of the fix are UNCHANGED.
 2. THE FIX IS ALREADY HALF-BUILT: `comp-routes rewrites` ALREADY holds the correct table INCLUDING
    `/api/general/json/ -> json/` (the MDPF hop). `trace` just never consults it. So the missing
    capability is a WIRING, not a build.
