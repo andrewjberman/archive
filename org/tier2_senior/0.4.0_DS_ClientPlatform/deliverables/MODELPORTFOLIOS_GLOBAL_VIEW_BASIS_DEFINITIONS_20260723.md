@@ -5,6 +5,16 @@
 **The governing frame (Andrew, 134944Z relay, verbatim):** *"the Model Portfolios 'Global' view is
 not a true aggregate, it is a business-logic driven subsection."*
 
+## D1 — value semantics, ALL channels (CTO 160900Z, formally bound)
+
+**Verbatim (Andrew):** *"we dont care about 'as known at the time' we care about absolute reality."*
+Every leg's per-date value = the source's retrospective TRUE daily value (49-model field =
+`fact_model_aum_daily.closing_equity`, confirmed on the principle + the −0.09% frontier tie).
+Where a source hasn't reached a date: HONEST-ABSENT — absolute reality never licenses fabricating
+into an unreached period. The legacy as-known-then series is an **audit ledger only** (supersession
+deltas reference it; display never does). Future field-choice questions in any channel resolve
+against this principle first, with an empirical tie as the corroboration pattern.
+
 ## 49financial — C2: the full envelope of Schwab 08242234 (Andrew-RULED, COO 151257Z relay)
 
 **Verbatim (the recorded C2 spec):** *"We want to keep cash, C2."* — resolving his earlier
