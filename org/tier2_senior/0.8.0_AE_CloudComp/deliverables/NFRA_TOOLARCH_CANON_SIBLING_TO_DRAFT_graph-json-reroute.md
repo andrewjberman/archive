@@ -51,6 +51,28 @@ Compare on real invocations (same inputs, both sources, diff the answers), not o
    rather than an undocumented accident. **A declared second projection is not the defect; an
    undeclared one is.**
 
+> **RULED (CTO~Z 210601Z, affirming this design as written):** *">> THE DEFECT IS THE UNDECLARED
+> PROJECTION, NOT THE EXISTENCE OF A SECOND ONE. <<  A silent frozen snapshot that drifts and answers with
+> false authority is the s.2 defect (the acute exhibit). A DECLARED, loud-vintage, self-invalidating
+> projection that answers a question kuzu structurally cannot answer is a legitimate second instrument with
+> honest provenance."* **Outcome 3 is therefore a legitimate LANDING, not an escalation.**
+> **Interpretive note carried by CTO~Z to Andrew:** his words were *"not acceptable at all"*, read here as
+> **no-SILENT-projection** rather than *literally-one-projection-ever*. If Andrew means the stricter
+> reading, this TO gets re-cut -- proceed on the stated reading meanwhile.
+
+### THE THREE GUARDS on outcome 3 (mandatory -- so it cannot become an escape hatch preserving the status quo)
+
+1. **STRUCTURAL PROOF REQUIRED, PER TOOL.** Outcome 3 fires only on **grounded evidence** that the
+   questions genuinely differ at grain/plane -- **never on "the re-point is hard."** State the
+   un-coverable question per tool, with the census evidence backing it.
+2. **DECLARED MEANS ENFORCED.** A retained projection must be **LOUD-VINTAGE** (the `nerves-risk-edges`
+   model) **AND** registered in its output contract with plane/vintage, so **stage-2 (@c716d963e)
+   machine-validates the declaration.** *A projection declared only in prose is UNDECLARED by this
+   program's own standard.*
+3. **OUTCOME 3 EMITS AN OWNED ITEM.** *"kuzu does not cover `<question>`"* is a **FINDING, not a dead
+   end** -- file it per TRIGGER_LAYER (owner + severity) as a kuzu/ontology **coverage-extension
+   candidate.** Otherwise outcome 3 silently freezes a gap, which is this same defect class one layer up.
+
 ## Scope legs
 
 | Leg | What | Owner |
@@ -73,8 +95,11 @@ reroute at commit time.
 3. If re-pointed: per-tool before/after answer-diff on identical inputs shows **zero coverage regression**
    (an answer that shrinks is a FAIL, not an improvement).
 4. Output contracts re-declared for every re-pointed tool; the stage-2 gate passes on the new values.
-5. If outcome 3: both projections DECLARED (plane/grain/vintage per tool), and the "two projections" state
-   is recorded as intentional architecture with its rationale -- not left undeclared.
+5. If outcome 3, **all three guards satisfied**: (a) per-tool STRUCTURAL PROOF of the un-coverable question
+   with census evidence (never "hard to re-point"); (b) each retained projection is LOUD-VINTAGE **and**
+   its plane/vintage registered in the output contract so **stage-2 machine-validates** it (prose-only
+   declaration = UNDECLARED, a FAIL); (c) each *"kuzu does not cover X"* filed per TRIGGER_LAYER with
+   owner + severity as a coverage-extension candidate (an unfiled gap = a silently frozen gap, a FAIL).
 6. Session log + compiler-tools-log line.
 
 ## Cross-domain coordination
