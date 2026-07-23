@@ -5,10 +5,27 @@
 **The governing frame (Andrew, 134944Z relay, verbatim):** *"the Model Portfolios 'Global' view is
 not a true aggregate, it is a business-logic driven subsection."*
 
-## 49financial — the served AUA of Schwab 08242234 (Andrew-DEFINITIVE, 135805Z relay)
+## 49financial — C2: the full envelope of Schwab 08242234 (Andrew-RULED, COO 151257Z relay)
 
-**Verbatim:** *"This is not complicated, the 49 full number should be whatever the aua content of
-the schwab 08242234 account serves."*
+**Verbatim (the recorded C2 spec):** *"We want to keep cash, C2."* — resolving his earlier
+135805Z *"whatever the aua content of the schwab 08242234 account serves"* to the FULL account
+envelope: **49-total = `SUM(fact_rps_s2.net_mv_plus_cash)` per date** (positions + the full cash
+leg: settled cash + bank sweep + MMF, $33,756,230.48 @07-17) from
+`opal-data-assets/schwab/08242234/silver`. NOT positions-ex-cash (candidate C1), NOT ex-options
+(C4). Candidate table + tie evidence: DS→COO 145807Z.
+
+**The legacy $1,644,993,954.34, fully grounded (closes the trichotomy):** it is the
+**positions-only assets-ex-CASH** quantity — `sum(market_value)` excluding literal
+`ticker=='CASH'` (`build_mdpf_wse_49f_non_model_aua.py:564-597`,
+`custody_scope=schwab_native_rps_assets_only`) — computed on the **2026-07-15** partition
+(the legacy `opal-data-bd/schwab/silver/rps` conversion stalled at date=20260715, so the
+"@07-18" label is a 3-day roll-forward). TIE TO THE CENT reproduced on BOTH legacy silver
+(date=20260715) and canonical `dim_position/date=2026-07-15` — the canonical structure
+reproduces the legacy series exactly, so C2-vs-legacy is a clean definitional delta:
+zero cash included in legacy; same-date scope delta = the cash leg ($33,679,450.80 @07-17).
+*RETRACTION: the earlier D-2 characterization "legacy ≈ full minus ~40% of the cash leg" mixed
+the 07-17 envelope against the 07-15 legacy value (a date-axis artifact) and is WITHDRAWN —
+the legacy carries ZERO cash.*
 
 - **Definition:** 49F leg = the served AUA content of Schwab account **08242234** (the 0824 Model
   Portfolios master). Business-purpose-correct use of 0824 for its own view — NOT a 0824/0833
@@ -35,8 +52,10 @@ the schwab 08242234 account serves."*
   (the D-2 serve-real source; the S3 path itself scopes it to the account). Andrew's definition
   and the staged value are the SAME quantity — the earlier "raw aggregate vs subsection" framing
   dissolved on grounding: the staged leg was never a firm-wide aggregate, and the $1.64B
-  reference was the legacy schwab_canonical PARTIAL-CASH REDERIVED ESTIMATE of this same account
-  ($1,644,993,954.34 @07-17 common; D-2 named delta $20.3M envelope + $23.5M real growth).
+  reference is the legacy positions-ex-CASH quantity valued on the 07-15-stalled legacy silver
+  (grounded above; the prior "partial-cash rederived @07-17-common" wording here is superseded —
+  the frontier leg of the legacy series is the live straight-RPS assets-only sum, the REDERIVED
+  estimate applies to its deep history only).
 
 ## inflection — model-scope (standing)
 

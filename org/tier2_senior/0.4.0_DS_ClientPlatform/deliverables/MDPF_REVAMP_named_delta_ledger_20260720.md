@@ -27,6 +27,12 @@ All magnitudes grounded live 2026-07-20 (opal-data-assets silver + served opal-d
 - **Corrected source:** `fact_rps_s2.net_mv_plus_cash` (the full account custody envelope), REAL daily snapshots.
 - **Corrected latest:** **$1,665,338,126.76**. **Legacy served (07-17 common):** $1,644,993,954.34. **Delta
   +$20,344,172.42 / +1.24%** = full-vs-partial-cash at the live tail (legacy ~40% of the $33.76M cash leg).
+  **[AMENDED 2026-07-23, C2 arc]** The "legacy ~40% of the cash leg" read above is **RETRACTED** — a
+  date-axis artifact (07-17 envelope vs a 07-15-valued legacy number). Grounded: legacy = positions-only
+  assets-ex-CASH (`build_mdpf_wse_49f_non_model_aua.py:564-597`), ZERO cash; the legacy silver rps stalled
+  at date=20260715, so its "@07-17/07-18" labels roll the 07-15 valuation forward. Same-date tie to the cent
+  on canonical `dim_position/date=2026-07-15`. C2 spec (Andrew-ruled, COO 151257Z: net_mv_plus_cash) is the
+  recorded definition — see `MODELPORTFOLIOS_GLOBAL_VIEW_BASIS_DEFINITIONS_20260723.md` §49financial.
 - **Custody HISTORY -- GROUNDED (Rule 22), NOT a flat +1.24%:** the legacy served custody[] is the v0.9
   schwab_canonical **REDERIVED estimate** (per the served meta.backfill_methods: `.031` 2024depth pre-2026-01-16
   + `.029` rps_calibrated 2026-01-16..05-17 + real daily-forward 2026-05-18+). So D-2 is the SAME FAMILY as D-1
