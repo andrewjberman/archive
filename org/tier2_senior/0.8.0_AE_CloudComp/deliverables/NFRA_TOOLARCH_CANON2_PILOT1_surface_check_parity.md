@@ -63,4 +63,44 @@ Hold the `comp-surface-check` re-point. Route the guard-3 item for an ontology d
 decides outcome 2 vs 3 for **every** content-change-detection tool in the family, not just this one, so
 answering it once unblocks the rest of the pilot sequence. Proceeding to pilot 2 (`comp-gitdrill`) meanwhile.
 
-*-- `0.8.0_AE_CloudComp~D`, CANON2 leg A pilot 1.*
+---
+
+# PILOT 2 -- `comp-gitdrill`: the fork is **CHANGED-DETECTION-SPECIFIC, NOT family-wide**
+
+## VERDICT: **RE-POINT CANDIDATE** (gated only on the pipeline-type `path` gap; degrades honestly)
+
+`comp_gitdrill.py:56-69` uses the graph for **one narrow job**: resolve a query string to a set of source
+files. Fields consumed: **`file_path`** (`:64`) and **`node_type`** (`:68`, a label only). **`source_sha`
+is NOT used** -- so pilot 1's blocker does not apply here.
+
+| Need | kuzu coverage |
+|---|---|
+| `file_path` from a node match | **PARTIAL** -- `path` on Module/ReactComponent/Component (60/60); **absent on PipelineScript/PipelineFunction** |
+| `node_type` | **YES**, first-class |
+| `source_sha` | **not needed** |
+
+**And it is already a self-declaring, gracefully-degrading instrument** -- the graph lookup is wrapped in
+`try/except` with the comment *"graph optional; fall through to git pathspec"* (`:70`), guarded by
+`if cache.exists()`, and it **reports HOW it resolved** (`"graph-node(<type>)"` vs `"git-pathspec"`,
+`:68`/`:76`). So a partial-coverage re-point would **not** silently shrink its answer: a
+PipelineScript/PipelineFunction query would fall back to the git pathspec and *say so in the returned
+method label*. **That is the opposite of pilot 1**, where losing `source_sha` would have kept the tool
+answering at full apparent confidence while blind to in-place edits.
+
+## What the two pilots together settle (the answer to the gate's open question)
+
+**The guard-3 ontology fork is CHANGED-DETECTION-SPECIFIC, not family-wide.** It blocks only tools that
+need a per-node **repo source-content hash** to detect in-place edits. `comp-gitdrill` needs none and is a
+genuine re-point candidate today, gated only on extending `path` to the pipeline node types -- a *much*
+smaller ask than source-content hashing, and one that does not require kuzu to absorb a source-scan.
+
+**Recommended split for the remaining sequence:** triage the family by *"does it need `source_sha`?"*
+first. That single question partitions the 7 into (a) blocked-on-the-ontology-fork and (b) re-pointable
+subject to the `path` extension -- and it can be answered by reading each tool's field usage, without
+re-running a full parity pass per tool.
+
+**Note on degradation shape, worth carrying into leg C:** `comp-gitdrill` already models the honest
+pattern -- *declare which source answered.* Any re-pointed tool should report its resolution path the same
+way, which makes base's output-contract leg (plane/vintage declaration) the natural place to enforce it.
+
+*-- `0.8.0_AE_CloudComp~D`, CANON2 leg A pilots 1-2.*
