@@ -28,6 +28,14 @@ YAML programmatically -- it does NOT hand-transcribe the mapping surfaces, which
 re-derives (not re-asserts) the tick-29 boundary below. Tracked copy:
 `org/tier2_senior/0.8.0_AE_CloudComp/deliverables/archetype_census.py`.
 
+> **Reproducibility is itself vintage-fragile (CVO~Z verify rec, `@374db63d6`).** The census reproduces the
+> 11-type / 3,912-edge C1 boundary **at `@f38a386a6`** (the build vintage). The unmapped count is a *live
+> gap that closes as ONTOLOGY2 binds the frontend verbs* -- so a working-tree re-run once ~C lands its
+> `c1_frontend_adapter` rails will (correctly) report **fewer than 11**, trending toward 0. That is the
+> boundary being fixed, not the census being wrong. The script therefore pins its INTENT surface by default
+> (`--rule-bank-ref f38a386a6`); pass `--rule-bank-ref worktree` for the live number. Same "a count without
+> its vintage is not a count" discipline, applied to reproduction.
+
 ## Plane taxonomy + mass (HEAD-current; freshly confirms the 2026-07-18 motif-catalog split)
 
 | Plane | Nodes | Mass | Character |

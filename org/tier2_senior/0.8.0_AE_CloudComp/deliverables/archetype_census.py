@@ -7,6 +7,7 @@ Author: 0.8.0_AE_CloudComp~D. Read-only; queries comp-kuzu, parses the rule bank
 """
 
 from __future__ import annotations
+import argparse
 import json
 import subprocess
 import collections
@@ -15,12 +16,47 @@ import sys
 import os
 
 WS = r"C:\Users\AndrewBerman\Desktop\ajb_workspace"
-RULEBANK = os.path.join(WS, "org", "modules", "graph", "NFRA_ONTOLOGY_RULE_BANK.yaml")
+RULEBANK_PATH = "org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml"  # repo-relative (for git show)
+RULEBANK = os.path.join(WS, *RULEBANK_PATH.split("/"))
 KUZU = os.path.join(WS, ".tools", "comp-kuzu")
+# Build vintage: the rule bank (INTENT) this census parsed. VINTAGE-FRAGILE by design --
+# as ONTOLOGY2 adds binds_up entries the unmapped count shrinks toward 0, so a working-tree
+# re-run reproduces a SMALLER boundary, not a wrong one. --rule-bank-ref pins the INTENT surface
+# so the 11-type boundary is reproducible at the vintage it was measured (CVO~Z verify rec, @374db63d6).
+BUILD_RULEBANK_REF = "f38a386a6"
 sys.path.insert(0, os.path.join(WS, ".tools"))
 from git_bash_resolver import git_bash  # noqa: E402  canonical Git-Bash path (NEVER bare bash -> WSL stub)
 
 BASH = git_bash()
+
+_ap = argparse.ArgumentParser(description="NFRA_TOOLARCH.P1 archetype census")
+_ap.add_argument(
+    "--rule-bank-ref",
+    default=BUILD_RULEBANK_REF,
+    help="git ref to read the rule bank (INTENT) from; '' or 'worktree' reads the working tree "
+    "(live number, tracks ONTOLOGY2 closure). Default pins the build vintage %s so the "
+    "measured boundary is reproducible." % BUILD_RULEBANK_REF,
+)
+ARGS, _ = _ap.parse_known_args()
+
+
+def load_rulebank():
+    """INTENT surface. Pinned to a git ref by default (reproducible); worktree on request (live)."""
+    ref = (ARGS.rule_bank_ref or "").strip()
+    if ref in ("", "worktree", "working-tree", "HEAD-worktree"):
+        sys.stderr.write("[rule-bank] INTENT = WORKING TREE (live; unmapped count tracks ONTOLOGY2 closure)\n")
+        return yaml.safe_load(open(RULEBANK, encoding="utf-8"))
+    # read via git show <ref>:<path> -- bare-sha ref + no dot-leading path component => no MSYS mangle
+    out = subprocess.run(
+        [BASH, "-c", "git show %s:%s" % (ref, RULEBANK_PATH)],
+        capture_output=True, text=True, cwd=WS,
+    )
+    if out.returncode != 0 or not out.stdout.strip():
+        # positive-control note: a slashed/dot ref can mangle to a clean-empty stdout (CLAUDE.md git rule)
+        sys.stderr.write("[rule-bank] git show %s:%s FAILED (rc=%d): %s\n" % (ref, RULEBANK_PATH, out.returncode, out.stderr[:200]))
+        sys.exit(2)
+    sys.stderr.write("[rule-bank] INTENT pinned @ %s (reproducible build vintage)\n" % ref)
+    return yaml.safe_load(out.stdout)
 
 
 def kq(cypher):
@@ -38,7 +74,7 @@ def kq(cypher):
 
 
 # ---------------------------------------------------------------- INTENT: rule bank
-rb = yaml.safe_load(open(RULEBANK, encoding="utf-8"))
+rb = load_rulebank()
 ROLES = list(rb["roles"].keys())  # 14
 RELATIONS = rb["relations"]  # 10 abstract
 COMPOSITES = rb["relation_composites"]  # 3
