@@ -8,7 +8,7 @@
      moves to a dedicated lane so base keeps only R5 + owns the shared registration surface. The
      batch-GO assignment of R4R6 to base is SUPERSEDED. -->
 <date>2026-07-23</date>
-<status>staged</status>
+<status>pending</status>
 <priority>R4 = P2 (widest behavioral gap by stakes) · R6 = P3 (cheap hygiene, same batch)</priority>
 
 <authority>
@@ -57,7 +57,19 @@ R6 — PHANTOM-NAME RECONCILIATION:
   </phase>
   <phase id="2" when="before commit">
     <step><run>R4 MUTANT: stage a project-close with an INJECTED registry drift — the trigger must fire and surface it. Stage a deploy with a stale script — the deployed-check must surface LOUD. R6 MUTANT: add a reference to a fake retired name; the alias check must FAIL the gate.</run>
-    <expect>All three mutants on the record. A trigger that has never been observed firing has not been built.</expect></step>
+    <expect>All three mutants on the record. A trigger that has never been observed firing has not been built.</expect>
+    <!-- ISOLATION MANDATE (added 2026-07-23 by 1.0.0_SA_CTO~Z after the shared-worktree incident — MY
+         dispatch gap: the R4 closeout-trigger mutant stages a project-JSON status flip + a REGISTRY row
+         move, which live IN THE SHARED MAIN TREE, and the deploy mutant touches deploy state; running
+         these in the shared tree churns CLOUD<->scratch and STRANDS other agents' commits, the
+         portal-main-stays-on-DEV class). MANDATE: run EVERY R4/R6 mutant fixture in an ISOLATED worktree
+         (`git worktree add ../ajb-r4-mutant <scratch-branch>`), NEVER by switching the shared main tree
+         off CLOUD. The shared tree stays on CLOUD at all times. No rebase, no force; do not delete a
+         scratch branch that anchors a preservation tag. This is a GENERAL rule for any mutant that
+         manipulates real tree/branch/close-path state — the fixture isolates, the shared tree never
+         moves. -->
+    <step><run>ISOLATION: run the above mutant fixtures ONLY in an isolated `git worktree add` — NEVER by switching the shared main tree off CLOUD (the closeout mutant touches the project-JSON/REGISTRY close path in the shared tree; the deploy mutant touches deploy state).</run>
+    <expect>Evidence that mutants ran in an isolated worktree; the shared main tree remained on CLOUD throughout (state it explicitly).</expect></step>
   </phase>
   <phase id="3" when="after commit">
     <step><run>Report the live trigger firings (or their absence) over the first real closeout/deploy after landing.</run>
