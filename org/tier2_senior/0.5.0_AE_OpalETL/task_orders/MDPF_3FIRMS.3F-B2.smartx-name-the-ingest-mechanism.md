@@ -6,7 +6,14 @@
 <issued_to>0.5.0_AE_OpalETL</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:23Z</issued_at>
-<status>staged</status>
+<status>pending</status>
+<!-- RECONCILED 2026-07-23T14:4xZ (0.5.0_AE_OpalETL re-provisioned session, XXX.md Step-2b): status
+     was stale at `staged` vs delivered work. GO received 20260722T2033Z (COO). AC1-AC4 + AC6 DELIVERED
+     @0f4bce90d (mechanism named: Scheduler smartx-assets-daily-pull-daily 09:30 ET -> OnSuccess dest
+     opal-assets-silver-smartx -> sweep rule 16:00Z; failure path bronze=NOTHING, silver=unwatched DLQ)
+     + @695af1a7f (exercised end-to-end: DirtyRunError->58s self-heal observed, USD 1,434,172,228 @ D-1).
+     AC5 (post-TO scheduled-fire verify, fire 2026-07-23 13:30Z) dispatched by CTO to 0.6.2~A (read-only)
+     while this lane was orphaned -- NOT hand-fired, covered there. Close to COO on AC5 evidence. -->
 <authorization>LD-0333 am.1 @2eef569d2 -> CTO cascade 200805Z -> COO decomposition.</authorization>
 
 <references>
