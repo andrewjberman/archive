@@ -3,8 +3,11 @@
 **Author:** `4.0.0_SA_CRO` (Chief Research Officer) · **Home:** `org/tier1_exec/4.0.0_SA_CRO/` · **Date:** 2026-07-23
 **Chain (Andrew-ordered):** this spec → **`3.0.0_SA_CVO` review (schema verified in tandem with CTO's companion)** →
 **`2.0.0_SA_COO` TO decomposition.** CTO + COO CC.
-**Companion (the aggregation half):** CTO's `GLOBAL_INTERPOLATED_AGGREGATION_SPEC_20260723.md` @7ed8a6fd0 — its **§4 is
-the SHARED SCHEMA this spec emits against.** CVO verifies the one schema across both before either builds.
+**Companion (the aggregation half):** CTO's `GLOBAL_INTERPOLATED_AGGREGATION_SPEC` v0.2 **@068cb96aa** (pinned counterpart)
+— its shared schema is the **incumbent provenance vocabulary** this spec emits against (CTO R-1). CVO signs the pinned
+pair (CTO's @068cb96aa + this delta against CVO's @76c786b5e pin), then COO decomposes.
+**Process (CVO R-5):** this is the ONE consolidated delta re-emission; it then HOLDS — any later change re-enters review
+as its own delta.
 **Egress:** NONE — design only, on data we already hold. **Extends:** the backfill-mechanism campaign (@63d0805a9) +
 the daily-snapshot append spec (3F-G8b) + RCN-0001.
 **Grades:** **[GROUNDED]** read at source · **[PROVEN]** computed prior · **[CONTRACT]** fixed by CTO's companion ·
@@ -35,29 +38,39 @@ back for CVO review and COO TO decomposition."*
 
 ---
 
-## 1a. THE SHARED SCHEMA — I emit against CTO's companion contract (his §4) **[CONTRACT, not mine to change]**
+## 1a. THE SHARED SCHEMA — ADOPT the incumbent provenance channel WHOLESALE (CTO R-1, @068cb96aa) **[CONTRACT]**
 
-CTO pre-committed the honesty envelope so both halves decompose as one program. **My producer emits the firm-level
-tuples; his Global aggregator derives `point_class` + the meta block; the FE reads it — one provenance source of
-truth, no re-derivation.** The per-date Global entry:
+**CTO ruled (024627Z/024707Z): adopt the incumbent `build_aggregate_aua_timeseries.py` provenance vocabulary in full,
+not a look-alike.** The decisive reason is INTEROP, not rhetoric: two provenance shapes in one served artifact family
+(the incumbent's for 49financial + a look-alike for Cottonwood) recreates the two-null-semantics defect at the
+provenance layer — the FE would need two readers forever. So the emitter uses the incumbent's **enum, container, field
+name, AND grain**; my per-firm values map onto the finer per-cohort grain, and firm/Global `point_class` **derives**
+(per-cohort is strictly finer — nothing the aggregation needs is lost, richness is gained).
 
 ```
-{ date, model_aua, non_model_aua, total,
-  by_firm: { cottonwood: { model_aua, non_model_aua,
-                           provenance: "interpolated",           // legal: measured | interpolated | absent
-                           interp: { method_version, confidence, window_id } } },
-  point_class: "interpolated"   // DERIVED by CTO's aggregator: any-component-interpolated
-}
+partners: { cottonwood: {
+   model_aua: [...], non_model_aua: [...], partner_custody_total: [...],
+   by_model: { <model_key>: { display_name, cohort_class, model_value:[...], account_count:[...] } },
+   cohort_provenance: [ { date, custody, model, ... } , ... ],   // PER-COHORT, PER-DATE (incumbent grain)
+   backfill_method: "<this spec's method id + version>"          // incumbent field; carries the method tag
+} }
+// enum on every provenance slot:  measured | interpolated_estimate | absent   (the INCUMBENT string, exactly)
+// confidence + window_id ride as ADDITIVE siblings on the cohort_provenance entry (new, additive, non-breaking)
+// firm-level + Global point_class DERIVE in the aggregator: any-cohort-interpolated_estimate  (CTO's half)
 ```
 
-**Three bindings this puts on my emitter, non-negotiable (they are CVO's mutant surface):**
-1. **Values and provenance ship in ONE dated tuple — never parallel arrays.** I do not populate a separate
-   `cohort_provenance[]` array a consumer could read without the value (that split is a planted CVO mutant). The
-   `cohort_provenance` channel is the *carrier concept*; the *shape* is the inline `by_firm.cottonwood.provenance`
-   tuple above.
-2. **`provenance` value is `interpolated`** (not `interpolated_estimate` — I am aligning my vocabulary to the contract).
-3. **`interp.confidence` is MINE to define** (the churn-measured degradation, §5); `method_version` + `window_id` I
-   also supply; the FE MAY render confidence, MUST render the label. `meta.interpolation = {affected_period:[start,end],
+**Bindings on my emitter, non-negotiable (CVO's mutant surface):**
+1. **The enum value is `interpolated_estimate` — the INCUMBENT string, EVERYWHERE.** CVO's S1: one string mismatch
+   anywhere makes an interpolated point derive `point_class=measured` and render **UNLABELED** — my own worst case.
+   Legal values: `measured | interpolated_estimate | absent`.
+2. **PER-COHORT grain (finer than per-firm), on the incumbent `cohort_provenance` channel.** This is *more* honest, not
+   just contract-compliant: within Cottonwood the **model** cohort can be `interpolated_estimate` (the fuzzy assignment)
+   while the **custody** cohort is `measured` (real holdings value back to ~06-08) on the same date — the label marks
+   exactly what is estimated (the model split) vs what is measured (the firm value). §5 maps this per period.
+3. **Precisely what is REUSED vs ADDED (CTO note 3 — the accuracy the softening instinct wanted, kept alongside the
+   adoption):** REUSED wholesale = the channel + enum + container + `backfill_method` carrier + per-cohort grain.
+   ADDED additively (new, non-breaking siblings) = `confidence` (mine, the churn-measured degradation §5) + `window_id`.
+   The FE MAY render confidence, MUST render the label. `meta.interpolation = {affected_period:[start,end],
    method:<this spec id + version>, generated_at, superseded_dates:[...]}`.
 
 **Scope bound (CTO companion §1):** the **Global aum-timeseries is my ONLY aggregation target.** The **radial
@@ -86,21 +99,24 @@ The measured ban (holdings-basket cosine **0.62–0.98**) killed presenting an *
 a different product category: inference presented **AS interpolation**, never crossing into the fact channel. Four
 structural guarantees make that boundary real rather than a promise:
 
-1. **Provenance rides EACH value inline (per §1a) — and the carrier channel already exists.**
+1. **Provenance rides the incumbent channel — and ADOPTION is what makes "extend not invent" TRUE (CTO R-1).**
    `build_aggregate_aua_timeseries.py` carries the `cohort_provenance` channel + a `basis_provenance` block (`:530,:578`),
-   empty for Cottonwood today (429/429 None). This spec gives it its first real Cottonwood population — but in the
-   **inline-tuple shape** of §1a (`by_firm.cottonwood.provenance = interpolated`), **not** a parallel array. `measured`
-   over the forward region, `interpolated` over the gap, `absent` before ~05-28. **Extending an existing,
-   Andrew-established labeling channel, not inventing one.**
-2. **Render-gated.** An `interpolated` point renders ONLY under the Interpolated (yellow-dashed) style, and CTO's
-   aggregator taints the Global point `interpolated`-class if ANY component is interpolated. The FE already reads
-   provenance to style estimate vs measured (the 49financial precedent); Cottonwood joins that path.
-3. **Compute-quarantined — per provenance class.** Interpolated points **NEVER feed** a measured-only consumer (fee
-   basis, DDB truth row, `comp-freshness`, the hard `model_aua + non_model_aua == firm_total` identity). Measured
-   identities run on measured points and hard-fail as today; an interpolated point gets a **consistency check that WARNS
-   loudly but can never fabricate a pass on the measured channel** (CTO companion §3.4). The `source=interpolated`
-   keying is the enforcement handle, filtered out of every measured aggregation exactly as the SMA sleeves are
-   (`cohort_class='sma'` filtered from the model stack by the FE, `:434`).
+   empty for Cottonwood today (429/429 None). This spec gives it its first real Cottonwood population **in the
+   incumbent's exact vocabulary** (§1a): `interpolated_estimate` over the gap, `measured` over the forward region,
+   `absent` before ~05-28. **The 49financial provenance already served IS the channel; interoperating with it — same
+   enum, same container, same carrier — is what makes this an extension rather than a look-alike.** A divergent shape
+   would be the two-null-semantics defect at the provenance layer; adoption is the honesty, not a claim about it.
+2. **Render-gated.** An `interpolated_estimate` point renders ONLY under the Interpolated (yellow-dashed) style, and
+   CTO's aggregator derives the firm/Global `point_class = interpolated_estimate` if ANY cohort is interpolated. The FE
+   already reads this channel to style estimate vs measured (the 49financial precedent); Cottonwood joins that exact
+   path, no second reader.
+3. **Compute-quarantined — per provenance class, on the ONE channel (S6 consolidated).** `interpolated_estimate` points
+   **NEVER feed** a measured-only consumer (fee basis, DDB truth row, `comp-freshness`, the hard `model_aua +
+   non_model_aua == firm_total` identity). Measured identities run on measured points and hard-fail as today; an
+   interpolated point gets a **consistency check that WARNS loudly but can never fabricate a pass on the measured
+   channel** (CTO companion §3.4). The single enforcement handle is the `cohort_provenance` value itself — every
+   measured-only consumer filters on it, exactly as the SMA sleeves are (`cohort_class='sma'` filtered from the model
+   stack by the FE, `:434`). **One channel, one filter predicate — no parallel `source` key to keep in sync.**
 4. **The absence rule — LEARNED FROM A LOGGED INCIDENT.** `YANG_SITTW.TO-1` (`:420-435`): a rederive once **fabricated a
    non-zero interpolated estimate** ($19.67M @ 2024-11-01) where the true value was **$0** (SMA footprint was zero
    pre-launch), superseding a correctly-emitted `None` and mislabeling real non-model residual as a fake cohort.
@@ -156,6 +172,12 @@ only). So estimate it:
   | Sat-60 / Sat-70 | 0.976 | **0.50** | 0.50 | Conservative ↔ Intermediate |
   | Sat-70 / Sat-80 | 0.981 | **0.50** | 0.50 | Conservative ↔ Intermediate |
 
+  **Raw B2 terminal-model weight vectors (R-6, published so CVO re-derives all 5 first-principles — washout =
+  Σ min(w_A,w_B) over terminal models):** Sat-30 = {Int 0.25, Short 0.75} · Sat-40 = {Int 0.50, Short 0.50} ·
+  Sat-50 = {Int 0.75, Short 0.25} · Sat-60 = {Int 1.00} · Sat-70 = {Cons 0.50, Int 0.50} · Sat-80 = {Cons 1.00}
+  (terminal models: Int = Intermediate-Term, Short, Cons = Conservative Growth; from B2, PROVEN). CVO reproduced
+  Sat-50/60 = 0.75; these vectors close the other four.
+
   **Two measured facts that change the design (and that CVO should re-derive):**
   1. **The error is bounded — a misassignment moves only 25–50% of one account's value, and only between two adjacent
      terminal models, never a whole model.** So terminal-grain aggregation is materially more robust than the raw
@@ -172,15 +194,19 @@ only). So estimate it:
 
 ## 5. CONFIDENCE + THE PERIOD MAP — honest where the match is weak, absent where physics forbids
 
-| Period | Value leg | Assignment leg | `provenance` | Render |
-|---|---|---|---|---|
-| **~07-21 →** (forward) | measured (3F-G8b) | measured (deterministic) | `measured` | solid |
-| **~06-08 → 07-21** | **measured** (holdings snapshots) | **interpolated** (fuzzy) | `interpolated` | yellow-dashed |
-| **~05-28 → 06-08** | **reconstructed** (flows back from 06-08 anchor) | **interpolated** (fuzzy) | `interpolated` | yellow-dashed |
-| **before ~05-28** | — | — | **`absent`** | **nothing** (physics) |
+Per-cohort provenance (§1a.2): the **custody** cohort and the **model** cohort can carry different labels on the same
+date — the label marks exactly what is estimated vs measured.
 
-(A value-real / assignment-estimated point is `interpolated`-class — any interpolated component taints the point, per
-CTO companion §2. The `interp.confidence` field carries how strong that estimate is, per row.)
+| Period | custody cohort (value) | model cohort (assignment) | Render |
+|---|---|---|---|
+| **~07-21 →** (forward) | `measured` (3F-G8b) | `measured` (deterministic) | solid |
+| **~06-08 → 07-21** | **`measured`** (holdings snapshots) | **`interpolated_estimate`** (fuzzy) | model dashed, custody solid |
+| **~05-28 → 06-08** | **`interpolated_estimate`** (flows back from 06-08 anchor) | **`interpolated_estimate`** (fuzzy) | yellow-dashed |
+| **before ~05-28** | **`absent`** | **`absent`** | **nothing** (physics) |
+
+(Firm/Global `point_class` derives to `interpolated_estimate` whenever ANY cohort is `interpolated_estimate`, per CTO
+companion §2 — but the finer per-cohort labels stay, so the ~06-08→07-21 band honestly shows measured value under an
+estimated model split. The `confidence` sibling carries how strong that estimate is, per row.)
 
 **Confidence treatment (CTO gate note 3):** the interpolation is honest about — or absent at — its weak points:
 - **Structural ceiling ~05-28 is physics and survives** (models created 05-28→07-17; a quarter of the book on 07-06).
@@ -214,15 +240,15 @@ to the incumbent house convention; compute the numbers on Cottonwood's own data.
 ## 7. SUPERSESSION — measured beats interpolated, and the source-keying already handles it **[GROUNDED]**
 
 qt5's HELD-ON-FEED status is an **input, not a blocker** (CTO gate note 5). If the qt5 feed repair (0.6.2's lane) later
-yields real *temporal* assignment, or the forward series simply extends, **measured points SUPERSEDE interpolated ones
-per `(firm, model, date)`** as an **evented re-emit** (CTO companion §3.3) — via the `source` precedence
-`measured (datamining-backfill | daily-snapshot) > interpolated`.
-- **The overlay window SHRINKS automatically** because it derives from the per-point `provenance`, not from a stored
-  config — no window to hand-edit. Supersession is never silent: it is an evented re-emit with the `meta` diff named
-  (`superseded_dates[]`).
-- **Safe-supersession rule (from the YANG_SITTW incident, §3.4):** a superseding value must itself be **measured**; an
-  interpolated estimate may NEVER supersede a correctly-emitted null/absent (that was the exact 2024-11-01 fault).
-  One-directional: `interpolated → measured`, never the reverse.
+yields real *temporal* assignment, or the forward series simply extends, **measured points SUPERSEDE
+`interpolated_estimate` ones per `(firm, model, date)`** as an **evented re-emit** (CTO companion §3.3) — precedence
+`measured (datamining-backfill | daily-snapshot) > interpolated_estimate`.
+- **The overlay window SHRINKS automatically** because it derives from the per-cohort `cohort_provenance`, not from a
+  stored config — no window to hand-edit. Supersession is never silent: it is an evented re-emit with the `meta` diff
+  named (`superseded_dates[]`).
+- **Safe-supersession rule (from the YANG_SITTW incident, §3.4):** a superseding value must itself be **`measured`**; an
+  `interpolated_estimate` may NEVER supersede a correctly-emitted null/`absent` (that was the exact 2024-11-01 fault).
+  One-directional: `interpolated_estimate → measured`, never the reverse.
 - So the interpolated band is **provisional by construction** — it fills the gap honestly today and **dissolves from the
   bottom up** as real data lands, with no rewrite of the series contract.
 
@@ -235,9 +261,11 @@ per `(firm, model, date)`** as an **evented re-emit** (CTO companion §3.3) — 
    firm total on `d`, components sum). Per CTO companion §3.4 this WARNS loudly on the interpolated class and can never
    fabricate a pass on the measured channel; an interpolation that invents AUM beyond the reconstructed book is the
    fabrication class.
-2. **Absence guard — TWO LOCKS (the YANG_SITTW test, schema-enforced per CTO §3.2):** the producer refuses to emit, AND
-   the schema validator independently refuses, any interpolated point before each model's creation date or before each
-   account's first-existence date. Two independent locks, either firing LOUD; a non-zero there is the fabrication class.
+2. **Absence guard — the floor is a machine-checked `max(...)`, not prose (CTO R-3 / CVO M8):** every point's floor is
+   **`max(model_creation_date, account_first_existence_date)`** — an account cannot carry an interpolated model point
+   before EITHER its model existed OR it existed. This is enforced as **TWO INDEPENDENT LOCKS**: the producer refuses to
+   emit below the floor, AND the schema validator independently refuses. Either firing is LOUD; a non-null point below
+   the floor is the fabrication class (the direct YANG_SITTW guard). **Prose is not a gate — this lives in the validator.**
 3. **Continuity at the seam:** the interpolated tail must join the measured forward series at ~07-21 without a
    discontinuity that is an artifact of the method rather than the data (a step at the seam is a flag).
 4. **Provenance completeness + no parallel-array split (CVO mutant):** every affected date carries an inline
