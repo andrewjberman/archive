@@ -123,6 +123,49 @@ attributor handling all three idioms (`set_defaults`, `args.cmd` if/elif chains,
 `pipeline_cli` uses) — plus a **coverage assertion of its own**: it must report engines-traced /
 engines-total and fail loudly rather than silently attributing only what it understood.
 
+## THE DISPATCH-IDIOM DENOMINATOR — a TOOLARCH finding independent of LATENCY
+
+Enumerated the idiom space **before** writing handlers (CTO~Z ruling: an attributor whose idiom set is
+"the ones I happened to hit" has a denominator sourced from its own encounters). Clustered on observed
+signatures across all engines, so an unrecognised shape forms its own cluster rather than vanishing.
+
+**58 distinct engines · 10 DISTINCT DISPATCH IDIOMS** (11 `cmd_`-prefixed · 6 `cmd_`+if/elif on
+`args.cmd` · 3 raw `sys.argv[1]` · 3 `cmd_`+`set_defaults` · 3 if/elif · 2 `globals()[...]` · 1
+`cmd_`+raw_argv+set_defaults · 1 `cmd_`+dict-dispatch · 1 `set_defaults` alone · 1 click/typer).
+
+**FIVE OF THE TEN ARE COMBINATIONS** — engines dispatching two ways in one file. Design consequence
+(ratified by ~Z): the shared resolver must resolve a **SET of signals per engine, not a single label**;
+a handler-per-idiom design assuming one idiom per engine mis-attributes half the clusters. That is
+precisely the error that would have shipped had handlers been added for the idioms already seen.
+
+**Why this matters beyond this census:** generalising tool creation / registration / testing (Andrew's
+charter) is materially harder against 10 idioms than against 3, and **nobody knew which world we were in
+until this was measured.** ~Z's prior estimate was 6-7 — the direction of the miss is the interesting
+part: *this layer is less uniform than its own architects assume.*
+
+### A CEILING IS NOT A FAILURE RATE
+
+The prior attributor handled `set_defaults(func=)` only, so its **ceiling was 5 of 58 engines (8%)**
+regardless of how well it ran — the other 92% were **structurally invisible**, not failing. "Traced
+5/53" reads as an instrument underperforming; "could ever have reached 8%" is a different and far more
+serious statement. **An instrument failing at 92% shows up as errors; an instrument BLIND to 92% shows
+up as a clean run over a small population, reporting high confidence on everything it can see** — the
+same anti-correlated shape as the orphan-watcher and the `comp-iam` GREEN. The question to ask of any
+instrument is **what its ceiling IS, not what it scored.**
+
+### Bounding: the scare number that was true and would have misled
+
+26 engines showed no dispatch signal — a 45% blind spot, honestly stateable. The discriminating question
+was whether those engines *have* subcommands at all: measured `add_parser >= 2` across them = **ZERO**.
+All are single-derivation / flag-driven tools where there **is** no dispatch to attribute — "unclassified"
+means correct-by-construction, not unattributable. **Real attribution surface: ~32 multi-subcommand
+engines, no hidden gaps in the remainder.** The 23 still render explicit `N/A-UNKNOWN` rather than
+dropping out of the population.
+
+*Two of my own detector passes disagreed 23 vs 26 on the `cmd_`-prefix convention, neither wrong — the
+two-normalizer disease inside one agent, one task, two passes. That it can happen there is the strongest
+available argument that it is structural rather than a lane-coordination failure.*
+
 ## Next, in order
 
 1. **Per-derivation attribution, all three dispatch idioms** (defect 2, OPEN) — required before
