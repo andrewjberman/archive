@@ -7,6 +7,36 @@
 
 ---
 
+> ## !! CORRECTION 2026-07-23 ~21:20Z (self-caught during the CANON2 pilot) -- COUNT 12 -> 10, FAMILY 9 -> 7 !!
+>
+> **Two tools in the `graph.json` family are FALSE POSITIVES of my own mechanical scan, and they were
+> BOTH the approved pilot pair -- so the pilot sequencing is VOID and re-selected.**
+>
+> - **`comp-manifest-check` -- NOT a reader. It is the LINTER THAT ENFORCES THIS VERY RULE.** Its only
+>   `graph.json` occurrences are a docstring (`:13`) and a **lint-rule message string** (`:216` -- *"reads
+>   graph.json (the trace-graph cache) directly. Query via the cached comp-trace..."*). A targeted grep for
+>   `open|json.load|read_text|Path(...graph.json)` returns **zero hits**. My scanner counted the rule TEXT
+>   as a data source -- it flagged the enforcement as the violation.
+> - **`comp-graph` -- NOT a consumer. It is a status/freshness reporter.** `:151` `gpath = _CACHE_DIR /
+>   "graph.json"` is a `stat()` for AGE reporting, done identically for kuzu at `:214-219`
+>   (`kuzu.stat().st_mtime`). It must reference BOTH artifacts *by design* -- that is its job.
+>
+> **CORRECTED NUMBERS:** floating-json set **10 of 84** (was 12); `graph.json` re-point family **7**
+> (comp-blast, comp-build, comp-diff, comp-trace, comp-xref via `cli.py`; comp-gitdrill
+> `TraceGraph.load` `:60`; comp-surface-check `:453` default) -- all seven ground-verified as genuine.
+>
+> **WHY THIS HAPPENED, stated plainly:** the audit declared its floating-json set "ground-verified", but I
+> verified the shared backing (`cli.py`) and the *material clusters* -- I did **not** verify each tool's
+> OWN backing individually. `comp-manifest-check` and `comp-graph` have their own backings and were carried
+> on the mechanical signal alone. **That is this program's own defect class committed inside the audit
+> diagnosing it: a classification asserted at a coverage its evidence did not reach.** Caught only because
+> the CANON2 pilot forced me to read the two tools at source.
+>
+> **PILOT RE-SELECTED:** `comp-surface-check` is the better first pilot -- it already **parameterizes its
+> source** (`--current`, `:830`, defaulting to graph.json), so a re-point is a source-option change rather
+> than surgery. `comp-gitdrill` second (single, explicit `TraceGraph.load`). The `cli.py` five move
+> together as one change and go last.
+
 ## Bottom line
 
 **12 of 84 wrapped comp-tools read a floating-JSON graph/estate projection as a data source, in 3 families
