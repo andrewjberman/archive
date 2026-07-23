@@ -89,3 +89,14 @@ mid-materialization partials -- disposition at CTO (rec: delete + re-run next wi
 adjudicated -- DS lens next; (c) the qt4-vs-qt5 two-mode hypothesis REFUTED for the freeze (one vendor
 late-materialization mechanism covers both; the 500 was instrument-side); (d) the daily-chain never-retry
 fix = the designed morning-batch item (CTO).
+
+## 07-22 DISPOSITION EXECUTED (CTO 044012Z leg 1; attempt ~04:45Z)
+
+Deletion REJECTED by CTO (versioned same-key re-land supersedes; nothing to human-confirm). Gated
+re-land attempted THIS window (SSM 91c6c89e, gate = >=50% of the 07-21 neighbor): allocations 158 rows
+(gate >=760) and unrealized 412 (gate >=33,603) -- **STILL PARTIAL, LANDED NOTHING** (absent >
+false-drop; the partials remain unconverted bronze-only, DS's conversion hold keeps 07-22 honestly
+absent). **NEXT ATTEMPT: the next box window (~02:00Z 07-24), same gated script
+(`code/bronze/qt_0722_reland.py`, staged) -- owner me if live, else the morning-batch never-retry fix
+(CTO's designed item) structurally covers this exact case.** The 07-21 materialization pattern (full by
+D+1's window) says tomorrow's attempt should pass the gate.
