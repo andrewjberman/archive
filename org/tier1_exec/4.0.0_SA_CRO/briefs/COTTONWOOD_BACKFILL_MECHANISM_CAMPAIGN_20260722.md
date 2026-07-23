@@ -303,6 +303,11 @@ I characterized the failing (qt4/qt5) vs working (qt1/qt2/qt3) templates from th
 - **Definitively discriminating them needs a vendor-side template-level probe** (modify the qt5 template, re-run,
   see if the 500 clears) — my campaign's surface, a **future vendor window**, not tonight. Recorded as the next
   actionable step for the qt5 half.
+  > **GATE ON THAT FUTURE PROBE (CTO 021639Z):** the standing campaign egress covers *reads*, but this probe's
+  > **template-MODIFICATION step gets its own look** — route the specific probe plan through CTO for the gate before
+  > touching a production template. Do NOT fire it under the standing egress word alone. Co-design with 0.6.2 (agreed
+  > 021634Z); repair-lane order (CTO): WS-1 cookie fix first at daylight, qt5 feed repair immediately behind, this
+  > addendum as the diagnostic seed.
 
 ## Two other window results folded in
 
