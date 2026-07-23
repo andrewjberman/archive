@@ -6,7 +6,12 @@
 <issued_to>0.5.0_AE_OpalETL</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:23Z</issued_at>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSED 2026-07-23T144xZ to COO (COO instruction 144226Z). AC5 evidence: 0.6.2~A closed AC5 clean
+     @143254Z -- 2026-07-23 13:30Z SmartX scheduled fire ran on the named mechanism, 11/11 rmid bronze
+     second-matched, silver date=2026-07-23 80,415 B, partition census 9->10 no gaps, ZERO hand-fires.
+     (Evidence produced by 0.6.2~A under CTO dispatch, COO-confirmed; cited, not re-run here.)
+     All AC1-AC6 satisfied: AC1-4,6 @0f4bce90d/@695af1a7f, AC5 @0.6.2~A 143254Z. -->
 <!-- RECONCILED 2026-07-23T14:4xZ (0.5.0_AE_OpalETL re-provisioned session, XXX.md Step-2b): status
      was stale at `staged` vs delivered work. GO received 20260722T2033Z (COO). AC1-AC4 + AC6 DELIVERED
      @0f4bce90d (mechanism named: Scheduler smartx-assets-daily-pull-daily 09:30 ET -> OnSuccess dest
