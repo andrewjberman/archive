@@ -69,16 +69,30 @@ Adopted from ~D verbatim, because it is the load-bearing correction: **the same 
 question and stale for another** (pipescript is reasonable for thread topology and WRONG for served
 keys). A tool-level allowlist routes agents into the stale HALF of a "trustworthy" tool.
 
-So the routing table is `(question-class → tool)`, certified per class:
+So the routing table is `(question-class → tool)`, certified per class.
 
-| question class | route to | certification (source: ~D 211545Z) |
-|---|---|---|
-| SOURCE structure (call / import / dataflow) | `comp-trace` `comp-build` `comp-xref` `comp-blast` | TRUSTWORTHY — source-scanned, HEAD-pinned, rebuilds on source-SHA drift |
-| CF/edge CONFIG listing (behaviors, origins, rewrites, api-routes) | `comp-routes behaviors|origins|rewrites|api-routes` | TRUSTWORTHY — config-derived |
-| RESOURCE / estate topology | `comp-kuzu` canonical | TRUSTWORTHY **as of build ts**; post-build changes UNCOVERED — read the provenance header |
-| FE cache leg | `comp-cache` | CTO~Z-attested (105/105 clean) — **carried as their verification, not mine** |
-| thread ORIENTATION | `pipescript <thread>` | orientation ONLY, never authority for a key/path; banner must be visible |
-| **URL → S3 key (static-rewrite)** | **NO TOOL COVERS THIS** | `comp-routes trace` undiscriminating (positive-control-proven); pipescript stale; kuzu has no node |
+### BINDING — the certification source of record is ~D's, not a copy here
+
+**`org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_TOOLARCH_CANON_QUESTION_CLASS_CERTIFICATION.md`
+@`2471d2806` (0.8.0_AE_CloudComp~D)** — 9 classes, route + currency verdict + **per-row provenance**
+(`[~D-verified]` = read at source; `[CTO~Z-attested]` = carried as theirs). **This document binds to
+that table; it does NOT keep a parallel copy** — for exactly the reason ~D gave me for not hardcoding
+a parallel map, and the reason base gave for reusing the registration universe verbatim: a second
+enumeration is the frozen-enumeration defect one layer up. Re-certification is requested from ~D, never
+edited here.
+
+Rows this rail change depends on: **class 4 (URL→S3 key) = NO COVERAGE** (positive-control-proven
+undiscriminating `trace`); **class 3** CF config listings TRUSTWORTHY; **class 6** "what is actually
+served" → **live S3 is the authority**, not pipescript/kuzu; **class 7 (`comp-cache`) carries
+`[CTO~Z-attested — NOT ~D-verified]`** — the refusal to launder their verification into ours is now
+structural in the table rather than an intention.
+
+**~D correction folded in (@`13c9d0f45`):** `comp-manifest-check` and `comp-graph` were FALSE POSITIVES
+in their audit — `comp-manifest-check` is the LINTER that *enforces* the don't-read-graph.json rule
+(their scanner counted its lint-rule MESSAGE STRING as a data source, i.e. flagged the enforcement as
+the violation), and `comp-graph` stats both stores by design. Both CURRENT and safe to route to
+(classes 8, 9). Set corrected 12→10, family 9→7. *Structurally the same defect class as the `"STALE"`
+substring trap my own R4-B mutant caught: **a matcher scoring a message string as evidence.***
 
 **TOOLSEM seam:** the table binds to TOOL NAMES by question class, never to a backing store. ~D's
 CANON2 has three legitimate outcomes (including "keep both projections, DECLARED"), so the source
