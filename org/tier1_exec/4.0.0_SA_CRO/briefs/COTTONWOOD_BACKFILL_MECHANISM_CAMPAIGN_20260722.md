@@ -327,3 +327,58 @@ It is held on a **qt5-specific server-side run failure** (the 07-09 freeze), whi
 *"no mechanism"* answer. The temporal-vs-current verdict re-opens the instant qt5 runs again — no manual capture, no
 design change, just the qt5 feed repair (0.6.2/CTO) plus, if the vendor side is implicated, the template-level probe
 on a future window (my surface). **Nothing reaches before ~05-28 regardless.**
+
+---
+
+# ADDENDUM 2 — 2026-07-23 ~04:2xZ: the probe COMPLETED (Andrew-egress vendor window). FINAL VERDICT = CURRENT-STAMPED, NOT temporal. Two mechanism corrections supersede Addendum 1.
+
+**Andrew opened the vendor gate ("whoever needs egress ability has it / get it done now"). 0.6.2 ran a read-only R0–R3
+pairing pass (his mechanics, my adjudication); I ruled on his retained raw exports + today's roster. Addendum 1's
+HELD-ON-FEED read is superseded on three counts.**
+
+## Correction 1 — my harness's 02:12Z HTTP 500 was a SELF-INFLICTED bug, not a vendor run failure **[SOURCE-CONFIRMED]**
+`v1/run` requires a **wrapped** body `{"template": full, "asOfDate": endDate}` + normalization
+(`cot_bronze_ingest.py:405-415`, comment *"omitting asOfDate 500s — this was the root cause"*). My `run_window` posted a
+bare `dict(template)` — that alone 500s regardless of session/dates. So Addendum 1's *"table-specific server-side run
+failure"* attribution was **wrong** — it was my instrument, caught by 0.6.2 reading the production source, not by my
+care. Harness fixed to reuse `bi.run_query` (@7f2291783).
+
+## Correction 2 — the qt5/qt4 freeze is DATA-AVAILABILITY (late materialization), not a run failure **[SOURCE-CONFIRMED]**
+Daily qt5 runs **execute clean** and BD returns 0-data-row header-only exports — *"BD has no point-in-time snapshot for
+this as-of date"* — because same-day snapshots aren't ready at the 02:00Z run and **materialize later**. Proven by the
+bracket: 07-08/10/14, rejected 0-rows at their daily run, **return full exports now**. The frozen span 07-09..07-22 is
+**recoverable today**; the daily chain's defect is our-side (asks once, never retries) — a catch-up sweep, 0.6.2's WS-1
+lane. **No vendor conversation required.**
+
+## THE VERDICT — CURRENT-STAMPED assignment, grounded THREE independent ways **[the careful negative]**
+The fabric leaned TEMPORAL for ~an hour on genuinely suggestive evidence (differential windows 83→780→857→859→867→862;
+churn controls 0/8→2/8→8/8 in migration order). **That evidence is real — but it proves temporal EXISTENCE + VALUE, not
+temporal ASSIGNMENT.** The direct tests the parsimony read lacked:
+1. **Direct assignment comparison:** across 778+ accounts present in a past window and matched to today's roster,
+   **ZERO real Opal assignment changes** (the only 5 are `Moderate Income → DAF Income`, a non-Opal reclass). Every
+   account carries its **exact today assignment** in every past window — current-stamped by definition.
+2. **`createdAt` stability (falsifies the "re-save-stamp" rebuttal):** `createdAt` is **stable 22/22** across the 07-21
+   and 07-22 partitions (a real birth date), while `updatedAt` moved for the 5 terminal models (the nightly
+   revaluation — the field 0.6.2's B6 measured, generalized one field too far). So Sat-60 (06-23) and Sat-70/98 (07-06)
+   genuinely did not exist at 05-15, yet appear in the 05-15 window = the current-stamp artifact.
+3. **The window-integrity control's IGNORED flag was CORRECT**, not a misfire.
+
+**A lesser process ships the exciting wrong answer tonight and a fabricated assignment history this week.** The
+window-integrity control + independent verification + the direct test are exactly why it didn't.
+
+## Consequences
+- **qt5 is NOT an assignment-backfill source.** The interpolated 3F-BF1 build's **assignment leg STANDS as the only
+  path**; there is nothing from qt5 to supersede it with (the earlier "upside path" framing is retired by evidence).
+- **qt5 IS a real dated VALUE + existence source** back to ~05-15 — an **approved BF1 value-leg refinement** (extends
+  the interpolator's floor below silver-holdings' 06-08); assignment stays interpolated. Spec detail to DS when the
+  recovery sweep lands.
+- **The recovery sweep** (07-09..07-22, CTO-GO'd, 0.6.2) recovers real **value** for the recent frozen daily dates with
+  provenance **value-real / assignment-current-stamped / never-PIT-recovered** — it must never be read as PIT assignment.
+- **Silver dropped `createdAt` (Rule-17 flag):** neither `fact_model_definition` nor `fact_model_roster` carries the
+  creation date (roster's `last_update` is the revaluation timestamp, not creation) — per-model `createdAt` lives only
+  in bronze `rebalancer_model_detail`. Routed to CTO for a silver passthrough on next touch; BF1 reads bronze meanwhile.
+
+**Net for Andrew's question, FINAL:** there is **no historical model-assignment to recover** — qt5's assignment is
+current-stamped, every other surface is measured-dead or lower-odds, and nothing reaches before ~05-28. **The honest
+answer is the interpolated backfill: real dated VALUE, honestly-labelled interpolated ASSIGNMENT — which is exactly
+what the yellow-dashed band exists to say.**
