@@ -1,0 +1,63 @@
+diff --git a/infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh b/infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh
+index eeb5a0281..5fb881a84 100644
+--- a/infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh
++++ b/infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh
+@@ -475,6 +475,42 @@ revamp_stage() {  # returns non-zero on ANY failure (caught + non-fatal by the c
+   # 6c: non_model (reads the staged global+inflection aggregate, self-uploads
+   #     gold/mdpf_revamp/global/non_model_assets.json). MUST follow 6a.
+   "$PY" "${REVAMP_DIR}/dim_mdpf_non_model_assets.py" --upload || return 1
++  # 6d: COTTONWOOD legs (Andrew-direct Global wire 050005Z + morning batch 103609Z --
++  #     "the trend must grow itself starting tonight"; closes the 6d hole that left the
++  #     trend axis frozen). SEQUENCING IS LOAD-BEARING, a genuine circular frontier:
++  #     the slice needs the FRESH axis (6a stages it) to gain covered dates, while 6a's
++  #     global fold reads the slice. Resolution: dim+pair BEFORE 6a ran above is not
++  #     needed (they read silver/dim only) -- so: (1) dim + pair here (freshest silver
++  #     assignment partition, RESOLVED never assumed: at 02:04Z today's partition does
++  #     not exist yet and yesterday's is the correct T-1); (2) slice against the axis
++  #     6a JUST staged (first night the axis carries 07-21+ the slice gains real
++  #     covered points -- the trend grows itself); (3) global-only aggregate re-stage
++  #     so the Global fold picks up TONIGHT's slice coverage instead of lagging a
++  #     night. COTTONWOOD_GOLD_DIR = the data/assets gold scripts staged on this
++  #     runner (0.7.0's half of the joint wiring provisions the path).
++  local COTTONWOOD_GOLD_DIR="${COTTONWOOD_GOLD_DIR:-${SCRIPTS_DIR}/assets_gold}"
++  if [ -f "${COTTONWOOD_GOLD_DIR}/build_cottonwood_mdpf_slice.py" ]; then
++    local cot_date
++    cot_date="$("$AWS" s3api list-objects-v2 --bucket "$REVAMP_BUCKET" \
++        --prefix "blackdiamond/cottonwood/silver/fact_model_assignment/" \
++        --query 'Contents[].Key' --output text 2>/dev/null \
++        | tr '\t' '\n' | grep -o 'date=[0-9][0-9-]*' | sort -u | tail -1 | cut -d= -f2)"
++    [ -n "$cot_date" ] || { echo "[mdpf-dispatch] 6d: no cottonwood assignment partition -- refusing"; return 1; }
++    "$PY" "${COTTONWOOD_GOLD_DIR}/build_dim_model_portfolio.py" --date "$cot_date" --upload || return 1
++    "$PY" "${COTTONWOOD_GOLD_DIR}/build_cottonwood_mdpf_pair.py" --date "$cot_date" --upload || return 1
++    "$PY" "${COTTONWOOD_GOLD_DIR}/build_cottonwood_mdpf_slice.py" --upload || return 1
++    # (3) global-only re-stage on the fresh slice coverage (rebuilds 49F+INF legs in
++    # memory as prerequisites -- a few minutes on the nightly, bought for a Global leg
++    # that never lags its own per-firm slice).
++    "$PY" "${REVAMP_DIR}/dim_mdpf_aggregate_aua_timeseries.py" --firm all --out-dir "$REVAMP_OUT" || return 1
++    "$AWS" s3 cp "${REVAMP_OUT}/global_aggregate_aua_timeseries.json" \
++      "s3://${REVAMP_BUCKET}/${REVAMP_PREFIX}/global/aggregate_aua_timeseries.json" \
++      --content-type application/json || return 1
++    echo "[mdpf-dispatch] 6d COTTONWOOD legs complete (dim ${cot_date} + pair + slice + global re-stage)"
++  else
++    echo "[mdpf-dispatch] 6d: COTTONWOOD scripts not staged at ${COTTONWOOD_GOLD_DIR} -- FAILING the stage (the trend cannot grow itself without them; 0.7.0 provisions the path)"
++    return 1
++  fi
+   return 0
+ }
+ 
+@@ -490,10 +526,12 @@ print(json.dumps({
+     "run_date": run_date,
+     "run_id": run_id,
+     "completed_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+-    "keys_staged": 7,
++    "keys_staged": 11,
+     "segments": {
+-        "aggregate_aua_timeseries": ["49financial", "inflection", "global"],
+-        "account_distribution": ["49financial", "inflection", "global"],
++        "aggregate_aua_timeseries": ["49financial", "inflection", "global", "cottonwood"],
++        "account_distribution": ["49financial", "inflection", "global", "cottonwood"],
++        "aum_metrics": ["cottonwood"],
++        "account_units_sidecar": ["cottonwood"],
+         "non_model_assets": ["global"],
+     },
+     "note": ("REVAMP-namespaced completion marker under gold/mdpf_revamp/meta/. This is NOT "
