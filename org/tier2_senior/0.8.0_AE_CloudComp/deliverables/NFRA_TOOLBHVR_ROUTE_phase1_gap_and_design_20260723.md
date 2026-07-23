@@ -160,11 +160,27 @@ Four negative controls silent + positive fires ⇒ the change **discriminates**;
 **Gating unchanged:** `aws_freshness` and `infra_grep` were ALREADY hard-gated (`_gate=1`, lines
 223-224) before this change. I altered message text only.
 
-## Open / next
+## FLIPPED — class 4 is now ROUTABLE (~A landed the fix @`d008e7cf1`)
 
-- **FLIP-READY:** when ~Z's dispatched fix lands (wiring `comp-routes trace` to the `rewrites` table it
-  already has), the URL→S3-key class becomes routable — upgrade the no-coverage message to a real route.
-  That fix is comp-routes' owner's, not mine.
+`comp-routes trace <url>` now emits the matched behavior, the **named** rewrite rule that fired, and the
+concrete S3 key + URI (verified live: 254,419 B, LastModified 2026-07-23T21:18:53Z). The rail message
+flipped from NO-COVERAGE to a real route, **as designed** — but deliberately NOT as an oracle.
+
+**The flip preserves the disclosure, because collapsing the outcomes would re-create the exact false
+authority the fix removed, one layer up (~A's warning).** The message tells the agent to read WHICH of
+three answers they got:
+- `Rewrite: <rule>` + `S3 key:` → a real resolution;
+- `Rewrite: NONE` / `S3 key: UNRESOLVED` → the static table does not COVER that prefix — **not** proof
+  no key exists;
+- `!! MATCHED: catch-all /*` → **a DEFAULT, NOT a resolution** (same answer for any unmodelled path).
+
+Scope + residuals carried into the message rather than papered over: static CF-rewrite class only (a key
+computed inside a Lambda@Edge/backend Lambda is UNRESOLVED); rewrite rules are **transcribed** from the
+routers, not parsed, so an unmirrored router edit is invisible; **DESIRED plane only** (parsed TF +
+committed source) — `comp-routes edge-versions` for deploy state. Re-verified after the flip: incident
+shape routes correctly, all 4 negative controls still silent, `bash -n`/`sh -n` clean.
+
+## Open / next
 - ~D's per-question-class certification table, when it lands, becomes the certification source of record
   for the table above (with `comp-cache` carried explicitly as CTO~Z-attested, not ~D-verified).
 - AC-5: no rail-gate STANDARD change was needed — message-only, inside the existing rail.
