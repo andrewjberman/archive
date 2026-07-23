@@ -2,9 +2,13 @@
 <to_id>NFRA_MSBEFF.R4R6</to_id>
 <title>TRIGGERS + HYGIENE — (R4) bind the unrun record/deploy tools to the moments their answer matters; (R6) reconcile the ~46 phantom tool names still cited in docs/HUD after retirement</title>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
-<issued_to>0.8.0_AE_CloudComp</issued_to>
+<issued_to>0.8.0_AE_CloudComp~B</issued_to>
+<!-- RE-TARGETED 2026-07-23 from base 0.8.0 to the ~B tilde lane (Andrew spawned 4 build tildes to
+     parallelize the R-series). The batch-GO to base covered R1R3->R5->R2->R4R6 serially; R4R6 now
+     moves to a dedicated lane so base keeps only R5 + owns the shared registration surface. The
+     batch-GO assignment of R4R6 to base is SUPERSEDED. -->
 <date>2026-07-23</date>
-<status>pending</status>
+<status>staged</status>
 <priority>R4 = P2 (widest behavioral gap by stakes) · R6 = P3 (cheap hygiene, same batch)</priority>
 
 <authority>

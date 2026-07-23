@@ -2,9 +2,13 @@
 <to_id>NFRA_MSBEFF.R2</to_id>
 <title>comp-dataflow — answer the question the estate cannot currently ask: "does this value come from the canonical source, or from somewhere else?" (Andrew's state-and-dependency gap, named verbatim by an agent)</title>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
-<issued_to>0.8.0_AE_CloudComp</issued_to>
+<issued_to>0.8.0_AE_CloudComp~A</issued_to>
+<!-- RE-TARGETED 2026-07-23 from base 0.8.0 to the ~A tilde lane (Andrew spawned 4 build tildes to
+     parallelize the R-series). The batch-GO to base covered R1R3->R5->R2->R4R6 serially; R2 and R4R6
+     now move to dedicated lanes so base keeps only R5 + owns the shared registration surface. ~A
+     builds R2 + the PSTMRT item-9 family; the batch-GO assignment of R2 to base is SUPERSEDED. -->
 <date>2026-07-23</date>
-<status>pending</status>
+<status>staged</status>
 <priority>P2 — the charter's own named gap; highest VALUE, moderate build</priority>
 
 <authority>
