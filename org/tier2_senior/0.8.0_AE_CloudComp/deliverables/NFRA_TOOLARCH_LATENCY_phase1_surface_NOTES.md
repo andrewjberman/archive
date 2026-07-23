@@ -70,10 +70,36 @@ Telemetry: the census runs under **`COMP_SYNTHETIC_FIXTURE=1`** (base's ruling),
 analysis stays unpolluted. *Hiding the rows would have made my own run unauditable to keep their
 analysis clean; a census that leaves no trace is its own dishonesty.*
 
+## Defect 2 — attribution ATTEMPTED, NOT CLOSED (and exactly why)
+
+Built an AST attributor: map `X = sub.add_parser("name")` → `X.set_defaults(func=handler)` → walk the
+handler + its local callees (depth 3) for write calls, so a subcommand is MUTATING only when a write is
+reachable **from its own handler**.
+
+**Result: it traced 5 of 53 engines. It does NOT close the defect,** and it did not cover the two
+load-bearing cases (`iam_cli.py`, `pipeline_cli.py`) that motivated the work. Measured cause:
+
+| engine | `set_defaults(func=)` | `args.cmd ==` if/elif | `add_parser` | traced? |
+|---|---|---|---|---|
+| `manifest_check_cli.py` | 8 | 0 | 8 | YES |
+| `iam_cli.py` | **0** | **15** | 15 | no |
+| `pipeline_cli.py` | **0** | **0** | 13 | no — a **third** idiom |
+
+**The estate uses at least THREE subcommand-dispatch idioms, and my attributor handled one.** That is
+the same shape as every other instrument defect on the record today: *a single-pattern matcher that
+silently under-covers and reports a confident number over the fraction it happened to match.* Had I not
+checked coverage, "10 MUTATING / 7 READ-ONLY" would have looked like a per-derivation census of the
+estate; it is a census of 5 engines.
+
+**So defect 2 stands OPEN and no coverage percentage is derivable from this file.** Closing it needs an
+attributor handling all three idioms (`set_defaults`, `args.cmd` if/elif chains, and whatever
+`pipeline_cli` uses) — plus a **coverage assertion of its own**: it must report engines-traced /
+engines-total and fail loudly rather than silently attributing only what it understood.
+
 ## Next, in order
 
-1. **Per-derivation attribution** for the multi-subparser engines (defect 2) — required before execution,
-   or the census under-covers with a biased exclusion set.
+1. **Per-derivation attribution, all three dispatch idioms** (defect 2, OPEN) — required before
+   execution, or the census under-covers with an exclusion set biased toward the high-value reads.
 2. Execute the local read-only half under the timebox, with the timing sanity control (sampled re-runs +
    reported variance; a single-shot wall-clock is a sample, not a measurement).
 3. AWS half on ~Z's non-serve window signal.
