@@ -1,10 +1,10 @@
 <task_order>
 <to_id>NFRA_TOOLARCH.CANON2</to_id>
-<title>graph.json FAMILY (9 tools) — coverage-parity precheck as the DECIDING gate, then re-point OR declare-both; the defect is the UNDECLARED projection, never the second one</title>
+<title>graph.json FAMILY (7 tools -- CORRECTED from 9) — coverage-parity precheck as the DECIDING gate, then re-point OR declare-both; the defect is the UNDECLARED projection, never the second one</title>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-07-23</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P2 — follow-on to CANON (the ACUTE exhibit is already neutralized by the loud-vintage interim @dcf153915, so this is correctness-not-urgency)</priority>
 
 <authority>
@@ -49,8 +49,19 @@ LEG C -- OUTPUT-CONTRACT RE-DECLARE (base 0.8.0 OWNS this leg; base's own catch)
   is the enforcement working as designed; record it that way.
 LEG D -- VERIFY (per tool: the answer is correct AND has not shrunk).
 
-PILOT SEQUENCING (approved): comp-manifest-check + comp-graph already read kuzu alongside graph.json --
-partial hybrids, cheapest re-point, sequence them first.
+PILOT SEQUENCING -- ORIGINAL PAIR VOID, RE-SELECTED (~D correction @13c9d0f45, CTO~Z approved):
+comp-manifest-check + comp-graph were FALSE POSITIVES of the audit scan and are NOT graph.json readers
+-- comp-manifest-check is the LINTER THAT ENFORCES THIS RULE (its only graph.json occurrences are a
+docstring + the lint-rule MESSAGE STRING at :216; targeted grep for open/json.load/read_text = ZERO
+hits -- the scan counted RULE TEXT as a data source and flagged the ENFORCEMENT as the violation, the
+same text-matching-prose defect TRIGGER_LAYER clause 2 forbids and that voided R6's AC-3). comp-graph
+merely stats graph.json for AGE exactly as it stats kuzu (:151 vs :214-219) -- referencing both is its
+job. CORRECTED SET: 7 tools -- comp-blast/build/diff/trace/xref (via cli.py), comp-gitdrill
+(TraceGraph.load :60), comp-surface-check (:453 default); all seven individually ground-verified.
+RE-SELECTED PILOT: comp-surface-check FIRST (it already PARAMETERIZES its source, --current :830
+defaulting to graph.json, so the re-point is a source-option change not surgery, and it still proves
+the leg shape); comp-gitdrill SECOND (single explicit TraceGraph.load); the cli.py FIVE move together
+as ONE change, LAST.
 </scope>
 
 <guards>
@@ -89,7 +100,7 @@ base-routed) -- these are different projections and must not be conflated. No ma
 </cross_domain_coordination>
 
 <acceptance_criteria>
-1. Leg A complete: all 9 tools dispositioned 1/2/3 with printed denominators + per-tool grounding.
+1. Leg A complete: all 7 tools dispositioned 1/2/3 with printed denominators + per-tool grounding.
 2. Re-pointed tools verified: correct AND not shrunk (mutant-proven).
 3. Outcome-3 tools: structural proof (guard 1) + machine-visible declaration passing stage-2 (guard 2)
    + an owned TRIGGER_LAYER finding filed (guard 3).
