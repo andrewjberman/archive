@@ -127,7 +127,24 @@ The profile is a bag of terms/phrases (BM25 side) + a concatenated profile docum
 ### 6.2 Per-paper axes (over FULL TEXT), stored separately (CVO: ablate, don't fuse-and-hide)
 - `bm25_score` — BM25 relevance of the paper against the profile terms (pinned k1,b).
 - `potion_cosine` — cosine(potion-8M(paper full text, mean-pooled), potion-8M(profile)).
-- `nlp_score` — **RRF fusion** of the paper's rank in the BM25 ordering and in the Potion ordering (RRF is the parameter-free fuser for ORDERING per CONTENT_MODULE_DESIGN §8; it is NOT a gate). All three are persisted so any consumer can ablate (bm25-only / potion-only / fused).
+- `nlp_rrf_ordering` — **RRF fusion** of the paper's BM25 rank and Potion rank. **ORDERING ONLY** (the parameter-free fuser per CONTENT_MODULE_DESIGN §8; never a gate, and — see the correction below — **never a multiplicative factor**).
+- `nlp_score` — the **ABSOLUTE relevance MAGNITUDE** in [0,1), and the only thing the derived rank multiplies: geometric mean of the two saturated axes, `sqrt( bm25/(bm25+C) * max(0, potion_cos) )`. Geometric mean means a paper must score on **BOTH** axes — a lexical-only match with unrelated semantics is penalized, and the inverse too.
+- All axis components are persisted so any consumer can ablate (bm25-only / potion-only / fused).
+
+> **CORRECTION v1.1 (2026-07-23, caught in validation before build — the spec as first landed was WRONG).**
+> v1 defined `nlp_score` as the RRF fusion and then multiplied it by recency. **Measured on the real
+> sample: RRF's dynamic range between a perfect match and pure noise is 1.03x, while recency's range is
+> 2x per 45 days and 16x over 180 days — so recency swamped relevance ~100:1.** The falsification test:
+> *word salad published today outranked the high-relevance exemplar that was 3 days old.* RRF is a RANK
+> fuser and has no magnitude by construction, so it can order but must never be a multiplicand.
+> Fix = the absolute magnitude score above. Regression test [7.6] in `scripts/akpipe_scorer.py` pins it.
+>
+> **Why the normalization is ABSOLUTE and not corpus-relative (min-max / z-score):** a corpus-relative
+> score would silently CHANGE a stored paper's value as new papers arrive, which breaks both the lossless
+> contract and independent recomputability — a reader could not reproduce a stored row. A saturating
+> absolute transform keeps every paper's relevance stable forever. **`C` (BM25 saturation) is PROVISIONAL
+> and must be calibrated against the decoy-null distribution on the first real harvest — it is deliberately
+> NOT tuned to the 3-document validation sample.**
 
 ### 6.3 Recency + the derived state rank (recomputed every run)
 - `recency_component = exp(-ln(2) * age_days / HALF_LIFE)`, `age_days = rank_asof_date - timestamp_released`, bounded (0,1]. `HALF_LIFE` default 45 days (a spec knob, set defensibly — NOT tuned to a sample).
@@ -138,6 +155,29 @@ The profile is a bag of terms/phrases (BM25 side) + a concatenated profile docum
 Recency here is **calendar/mtime-based** (a preprint is old-and-correct, not stale). CONTENT_MODULE_DESIGN §9 already carries this caution: importing the data-pipeline T-1 trading-day basis would false-alarm. NFRA_AKPIPE recency is submission-date decay, full stop.
 
 ---
+
+### 6.5 Validation status (EXERCISED 2026-07-23, offline, zero egress)
+
+`scripts/akpipe_scorer.py` implements the scoring core and runs the §7 controls. Run with
+`HF_HUB_OFFLINE=1` — potion-base-8M loads from local cache, **proving no egress occurs in scoring**.
+
+| Check | Result |
+|---|---|
+| [7.1] positive control — SWE-Explore top-ranked | **PASS** (nlp 0.690 vs 0.394 ops-prose vs 0.000 noise) |
+| [7.2] degeneracy — noise below positive | **PASS** |
+| [7.3] ablation — both axes discriminate | **PASS** (BM25 +87.9, Potion +0.330) |
+| [7.4] determinism — two runs byte-identical | **PASS** |
+| [7.5] recompute monotonicity — rank falls with age | **PASS** |
+| [7.6] composition sanity (the v1 defect regression) | **PASS** after the v1.1 fix; **FAILED before it** |
+
+**DECLARED GAP — the negative controls are WEAK, and this is the honest limit of the pass.** The corpus
+was N=3: one on-topic paper, one off-topic operational prose blob, one generated word-salad. That proves
+the mechanism, determinism, and the composition fix. It does **NOT** prove **topical discrimination
+within CS papers** — in production *every* candidate is a CS paper, and the real question is "which CS
+papers are relevant to us," not "is this prose or noise." Word salad is not the adversary. Closing this
+needs either the first real harvest or a handful of deliberately off-topic AI papers (e.g. a vision or
+theory paper) as decoys. **Until then, treat the ranking quality as UNPROVEN and only the machinery as
+validated.**
 
 ## 7. Acceptance criteria (with the CVO honesty controls that make it hold)
 
