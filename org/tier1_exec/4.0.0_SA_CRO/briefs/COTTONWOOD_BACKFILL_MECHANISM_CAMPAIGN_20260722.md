@@ -246,3 +246,79 @@ qt5 window run (auth is live; the gate is the 07-09 qt5 feed, §7).
 run of the qt5 template we already own, whose auth is live NOW (DataMining path) — gated only on whether an explicit
 past-window run clears the 07-09 qt5-shell failure; everything else is measured-dead or lower-odds-unprobed, and
 nothing reaches before the ~05-28 model-creation floor.
+
+---
+
+# ADDENDUM — 2026-07-23 ~02:12Z: the probe RAN (02:00Z window). Verdict = HELD-ON-FEED (qt5 run-level 500), NOT a temporal finding.
+
+**Execution:** my harness `cot_qt5_temporal_probe.py` ran once, on-box, python3.11, via 0.6.2's SSM
+(cmd `a051ffc7-...`), ~02:11–02:12Z, sequential after 0.6.2's B5 dump, zero concurrent vendor calls. **Verbatim:**
+```
+=== cot qt5 temporal probe (read-only) ===
+session captured_at=2026-07-06T02:02:47.724Z
+token minted OK
+HELD: baseline read HTTP 500 -- session not usable for DataMining, no verdict.
+```
+
+## The verdict, and why it is the CORRECT (not a disappointing) outcome
+
+**VERDICT = HELD-ON-FEED. The temporal-vs-current question stays OPEN — it is NOT `CURRENT-only`, NOT
+`backfill-closed`, NOT a temporal finding.** The harness's baseline gate fired exactly as designed: it refused to
+emit any verdict because the instrument could not be shown to work. **A probe that returns "no verdict, and here is
+why" beats one that returns a confident wrong answer** — the whole point of the window-integrity/baseline gate.
+
+## Error-class discrimination (0.6.2 230942/021223Z — his window was pre-tasked to capture exactly this) **[SOURCE-CONFIRMED]**
+
+The 500 is **table-specific and run-level**, not session/auth/call-pattern:
+- **NOT auth** — the bearer minted (harness line 2); 0.6.2's `GET /template/{id}` succeeded ×4 minutes earlier off
+  the same jar.
+- **NOT the 0-row shell** my `INSTRUMENT-BROKEN` branch anticipated — the run died *earlier*, on a server-side 500 on
+  the qt5 **run call itself** (before any rows).
+- **qt1/qt2/qt3 RUNS SUCCEEDED tonight** (holdings/transactions/realized silver landed 02:03–04Z, same jar, same
+  `v1/run` path). **So `v1/run` works per se; it 500s for qt5 specifically** (qt4 same family — both frozen 07-09).
+
+**Conclusion (SOURCE-CONFIRMED): the 07-09 qt4/qt5 freeze is a TABLE-SPECIFIC RUN-LEVEL server failure** — not
+session, not auth, not our call pattern. It lands in **0.6.2's WS-1 qt5 lane** as a feed defect to repair; the
+temporal question re-opens the moment qt5 runs again. **My harness needs zero changes — it did its job one call deep.**
+
+## The qt5-500 mechanism — hypothesis SHARPENED offline (my surface), 0.6.2's "newer-templateId" read partially FALSIFIED **[GROUNDED]**
+
+I characterized the failing (qt4/qt5) vs working (qt1/qt2/qt3) templates from the persisted JSONs + git history:
+
+| qt | table | templateId | last local change | ran tonight? |
+|---|---|---|---|---|
+| 1 | holdings | 226355 | 2026-06-22 (CurrentDay→Custom) | **OK** |
+| 2 | transactions | 226274 | 2026-06-09 | **OK** |
+| 3 | realized | *unprovisioned* (create-on-run) | 2026-06-12 | **OK** |
+| 4 | unrealized | **237784** | **2026-06-30** (new id wired, "verify next") | **500 (frozen 07-09)** |
+| 5 | allocations | **226334** | 2026-06-22 (CurrentDay→Custom, same edit qt1 got) | **500 (frozen 07-09)** |
+
+- **0.6.2's "newer templateId 237784" hypothesis fits qt4 but does NOT extend to qt5** — qt5's `226334` is the *old*
+  id-range (adjacent to working qt2's `226274`), and its last edit (06-22) is the *same* CurrentDay→Custom change qt1
+  received and **survived.** So our template edits do not explain the qt5 500.
+- **The 07-09 freeze ONSET aligns with NO local template change** (last touches: qt5 06-22, qt4 06-30) → this
+  **strengthens the vendor-side-change (~07-08/09) axis** over the our-edit axis for the run-level 500.
+- **Likely two distinct failure modes under one symptom:** qt4 = a possibly-unverified 06-30 template re-persist
+  (`237784`, "verify next" that may never have completed); qt5 = a vendor-side run failure unrelated to our template.
+- **Definitively discriminating them needs a vendor-side template-level probe** (modify the qt5 template, re-run,
+  see if the 500 clears) — my campaign's surface, a **future vendor window**, not tonight. Recorded as the next
+  actionable step for the qt5 half.
+
+## Two other window results folded in
+
+- **A2 CLOSED [GROUNDED]:** 0.6.2's first-ever `dump_enriched_templates.py` run landed qt1's dims — **15 dims / 4
+  levels, and NO strategy/assignment dimension anywhere in qt1.** So the daily holdings snapshot cannot supply
+  assignment; **qt5 is confirmed the ONLY date-windowed surface carrying account→strategy.** (qt3's 13 account-level
+  dims are *selectable-but-unpersisted* — the template has no persisted id; A5 downgraded accordingly.)
+- **WS-1 fires-without-writing CONFIRMED [MEASURED]:** SM `blackdiamond/cot/session` `LastChangedDate` held at
+  ~07-06 across three reads tonight (02:02:07 / 02:02:54 / 02:08:36Z) while auth minted fine — **the nightly capture
+  chain fires without rewriting the jar; a dead producer masked by surviving durable cookies.** My §9 grounding and
+  0.6.2's observation now reconcile exactly. His WS-1 lane owns the repair.
+
+## Net for Andrew's question
+
+**A backfill mechanism EXISTS (qt5 past-window, one surface) — and tonight's run neither confirmed nor closed it.**
+It is held on a **qt5-specific server-side run failure** (the 07-09 freeze), which is a *feed-repair* item, not a
+*"no mechanism"* answer. The temporal-vs-current verdict re-opens the instant qt5 runs again — no manual capture, no
+design change, just the qt5 feed repair (0.6.2/CTO) plus, if the vendor side is implicated, the template-level probe
+on a future window (my surface). **Nothing reaches before ~05-28 regardless.**
