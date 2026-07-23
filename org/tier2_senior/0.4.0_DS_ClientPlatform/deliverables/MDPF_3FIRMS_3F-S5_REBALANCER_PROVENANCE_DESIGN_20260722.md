@@ -170,3 +170,26 @@ same window.
 Forward-only mechanics accepted without amendment. **Implementation status: AUTHORIZED,
 SEQUENCED — begins after G8's build lands (G8 gate = 3F-B5 alone, ~03:30Z 07-23). Cutover constant
 is fixed at implementation time per §5.** COO acceptance of the design half: 212249Z.
+
+## 11. IMPLEMENTATION AMENDMENT (2026-07-23 ~104xZ, morning batch; CTO gates)
+
+**`provenance_contract_start: 2026-07-23`** — published here per §5 AND as
+`rebalancer_schemas.PROVENANCE_CONTRACT_START`, CONDITIONED on 0.7.0's lambda-twin deploying
+before the next conversion run; if the deploy slips a day, the constant bumps to the true first
+changed-converter partition date (the constant must equal reality, never the intention).
+
+**Landed (@ this commit):** the 5-column sidecar on all four tables (mirror-exact, trailing);
+vendor-columns-only dedup (§3); **+ the morning-batch additions:** (a) `createdAt`/`updatedAt`
+passthrough — the Rule-17 remediation (CRO 041139Z): `model_created_at`/`model_updated_at` on
+definition + blend, `child_created_at`/`child_updated_at` on blend edges (the strategy birth
+dates the BF1 floor keys on, now in silver; roster carries NO vendor createdAt — grounded on live
+bronze page keys — and `last_update` is the REVALUATION stamp, never a creation proxy, per-CRO
+noted in the schema comment); (b) **FORCE-GUARD**: `convert_rebalancer_date(force=True)` REFUSES
+any date < the cutover constant — §5's "Reprocess scope: NONE" made a code boundary (a forced
+pre-cutover reconversion would rewrite landed silver AND synthesize provenance).
+
+**Exercised on real bronze (07-22 partition, read-only):** shapes exact on all four;
+per-row sidecar values correct; **ROW-COUNT PARITY 911 == landed 911** (the §3 REQUIRED control —
+the dedup-key change moves no counts); real passthrough stamps (Sat-50 2026-06-10T17:46:49Z,
+terminal 2026-05-28); force-guard refuses 07-21. The Phase-3 ETag negative control (the §5
+baseline table) runs after the twin deploys, against the nightly's first changed partitions.
