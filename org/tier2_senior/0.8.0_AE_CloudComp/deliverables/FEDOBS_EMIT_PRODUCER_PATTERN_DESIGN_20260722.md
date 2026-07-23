@@ -92,3 +92,29 @@ the same container-clock-vs-data-clock error the graph freshness header just had
 - **NOT verified:** who reads `fedobs_obs_findings` today besides `comp-fedobs`, and whether any live
   consumer is currently reasoning off the frozen table. That determines whether this is a freshness
   improvement or an active-correctness issue, and it is the first thing I would check next.
+
+---
+
+## AMENDMENT 2026-07-23 — code_heat is the SECOND INSTANCE of this pattern gap
+
+CVO~Z SYSPARITY tick-4 (025720Z) surfaced comp-learns-status computing over a 144.3h-stale
+code_heat binding. Grounded 0.8.0 (0259Z): the producer (infra/aws/globgrph/code_heat_emit.py,
+DEV-BOX-RESIDENT by TO-2 ruling) has **NO scheduler anywhere** — no EventBridge rule, no
+task-def, no local cron (a 07-08 rail-log override searched for exactly that and found none).
+Last hand-run landed 2026-07-16T03:40:45Z (s3api, explicit Z). NEVER-SCHEDULED, not stalled.
+
+**So Andrew's ruled pattern ("Scheduled full write at night, incremental write function in cloud
+and local as needed", @79c42337e verbatim) now has TWO instances waiting on the same
+architecture decision:**
+
+| Producer | Last write | Consumer harmed |
+|---|---|---|
+| fedobs_emit (4 observers) | 07-07 (LIVE-AWS limb 07-14) | ad-hoc Trino correlation queries (no scheduled reader — consumer question CLOSED @45f5814d1) |
+| code_heat_emit | 07-16T03:40:45Z | comp-learns-status DEMAND/GAP/COST views (build-next decisions) + the GRAPHFEED code_heat_snap sibling |
+
+One decision covers both; the nightly-full trigger choice (the 3 options in this doc) should be
+made once and instantiated per-producer. code_heat's dev-box residency (git-history-shaped)
+constrains its option set: the nightly full write must run WHERE the git history lives, which
+makes the "local scheduled task + cloud incremental" split the natural fit for it specifically.
+Heal-on-read (the item-6 danger-map mechanism) is NOT the right shape here — a refresh needs the
+dev box, so a cloud/commit-path consumer cannot self-heal it.
