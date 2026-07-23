@@ -65,3 +65,15 @@ TF event-wiring + exercise = 0.7.0, PENDING ✓(scoped)  3. Regex fix at the reg
 before/after cited ✓  4. Two-path exercise: PENDING 0.7.0 (event path UNVALIDATED for rebalancer_* until
 then — stated, not assumed; xlsx event path behavior-proven 8s)  5. Reprocess: empty set, measured ✓
 6. Session log Compiler Tools rows: in the closing session log ✓
+
+## SUPERSESSION (2026-07-23 ~11:20Z): S1(b)'s "PENDING TF half / event path UNVALIDATED" is CLOSED-BY-THE-ESTATE
+
+0.7.0's v0.31.0 apply (2026-07-22 14:03Z, his ledger 6/6) landed the rebalancer event wiring AFTER this
+census was written -- and BOTH paths proved on TODAY'S SCHEDULED RUNS, verified by me at the artifacts:
+`meta/conversions/20260723T060051Z-40954490.json` = **mode=='event'**, 4 results (cron(0 6) runner ->
+OnSuccess=opal-assets-silver-blackdiamond) and `20260723T050009Z-8530904b.json` = **mode=='sweep'**
+(0 pending -- the backstop finding nothing, itself healthy). The S3-notification variant in my ask was a
+DESIGN ERROR on my side: per-object rebalancer_* events are the shape CTO's WS-5 ruling rejected
+(self-race / legacy-marker admission / converter-writes-own-trigger-prefix); completion-keyed on_success
+IS the ruled event mechanism, and it is what fired. Residual on S1: ONLY the blackdiamond-converter
+REBUILD carrying the RF-9 regex fix (one rebuild to carry both DS's S5 twin + RF-9, CTO sequencing).
