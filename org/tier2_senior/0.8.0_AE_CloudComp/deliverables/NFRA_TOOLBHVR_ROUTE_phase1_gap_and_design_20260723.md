@@ -107,8 +107,50 @@ passes a URL/path argument must be immune to this or it will manufacture false "
 so a **positive control is required** on any path-passing route before its verdict is trusted.
 (Double-slash `//api/...` defeats the mangle.)
 
+## AC-2 — SHIPPED (CTO~Z ruled the honest no-coverage form APPROVED, 211924Z)
+
+**The design consequence of the gap:** because the rail types by COMMAND SHAPE, and an `aws s3 ls` on a
+served-key prefix is **byte-identical** whether the agent means "is it FRESH?" or "what SERVES this
+key?", no shape-based classifier can separate the two intents. Until TOOLSEM types the QUERY, the
+honest fix is to **serve both intents in one nudge and state plainly which has no coverage**.
+
+Landed in `.tools/hooks/comp-tool-hud.sh` (message-only; **zero** gate/decision/class-assignment lines
+changed — verified by diff, so this is coverage-strengthening inside the existing rail, AC-5, no
+standard change to route to main CTO):
+
+1. `class=aws_freshness` — now answers BOTH: (1) freshness → `comp-freshness`; (2) **URL→S3 path → NO
+   TOOL RESOLVES THIS TODAY** for the static-rewrite class, naming why (trace undiscriminating /
+   pipescript 38-day snapshot / kuzu no post-build node) and carrying the agent to the mapped knowledge
+   that DOES exist (`comp-routes rewrites`, e.g. `/api/general/json/ -> json/`) plus the manual method,
+   and warning that a bare `ls` is evidence of PRESENCE only, never of the serving path.
+2. `class=infra_grep` — the old text promised "`comp-routes` = the serving path". **That claim is
+   refuted** (~D positive control) and is now corrected to `comp-routes behaviors|origins|rewrites|
+   api-routes` = the CF/edge CONFIG listing, explicitly NOT a URL→S3-key resolution. *Promising a
+   resolution the tool cannot make is how a nudge trains bypass.*
+
+### Mutant + controls (all on the record)
+
+| probe | result |
+|---|---|
+| **POSITIVE — the COO incident shape** `aws s3 ls s3://opal-data-portal-v2/json/mdpf/cottonwood/` | FIRES with the dual-intent + no-coverage message |
+| POSITIVE — the other half: `grep -n servedKey infra/aws/lambda/edge_router/index.js` | FIRES with the corrected (non-over-promising) message |
+| NEG-1 generic `aws s3 ls s3://opal-data-assets/` (no served prefix) | SILENT |
+| NEG-2 operational `aws s3 cp ... code/...` | SILENT |
+| NEG-3 non-estate library grep (`deck_generation/`) | SILENT |
+| NEG-4 pipe-grep (`cat x \| grep y`) | SILENT |
+
+Four negative controls silent + positive fires ⇒ the change **discriminates**; it does not over-block
+(the rail's escape discipline is intact — `# rail-checked:` and `/freeform` still apply). `bash -n` and
+`sh -n` both clean, which matters because this hook is PreToolUse on every Bash/Grep call.
+
+**Gating unchanged:** `aws_freshness` and `infra_grep` were ALREADY hard-gated (`_gate=1`, lines
+223-224) before this change. I altered message text only.
+
 ## Open / next
 
-- **HELD:** all routing changes, pending ~Z's AC-2 ruling + ~D's per-class certification table.
-- AC-5: no rail-gate STANDARD change is contemplated — this is coverage-strengthening within the
-  existing rail. If the final design needs gate-semantics changes, it routes to main CTO.
+- **FLIP-READY:** when ~Z's dispatched fix lands (wiring `comp-routes trace` to the `rewrites` table it
+  already has), the URL→S3-key class becomes routable — upgrade the no-coverage message to a real route.
+  That fix is comp-routes' owner's, not mine.
+- ~D's per-question-class certification table, when it lands, becomes the certification source of record
+  for the table above (with `comp-cache` carried explicitly as CTO~Z-attested, not ~D-verified).
+- AC-5: no rail-gate STANDARD change was needed — message-only, inside the existing rail.
