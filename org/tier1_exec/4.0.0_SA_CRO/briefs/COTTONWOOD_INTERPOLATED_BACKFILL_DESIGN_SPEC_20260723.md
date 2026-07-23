@@ -143,11 +143,28 @@ only). So estimate it:
 - **Fuzzy-match** the account's reconstructed holdings basket on `d` to the model target baskets → best-match model.
 - This is the **cosine-similar match the ban forbids AS FACT** — permitted here **only** because it is emitted
   `interpolated_estimate`, render-gated, and compute-quarantined (§3).
-- **Aggregate to TERMINAL models (the B2 rollup), not strategies — and this materially shrinks the fuzzy error.** The
-  confusable strategies (Sat-50↔60, cosine 0.969) map to **overlapping terminal models** (Sat-50 = 75% Intermediate +
-  25% Short; Sat-60 = 100% Intermediate — B1). Misassigning between adjacent Satellites moves only the *residual*
-  Int/Short split, not a whole model — so at the terminal-model level the interpolation is **more robust than the raw
-  strategy-level cosine suggests.** Report at terminal-model grain for this reason.
+- **Aggregate to TERMINAL models (the B2 rollup), not strategies — and this bounds the fuzzy error to a MEASURED
+  per-pair washout coefficient** (computed here from the B2 compositions, per CTO's "make it testable not asserted"
+  note). The washout coefficient = the fraction of a misassigned account's value that lands on the SAME terminal model
+  regardless of which strategy in the confusable pair it is assigned to:
+
+  | Confusable pair | basket cosine | **washout** | max error | error moves only between |
+  |---|---|---|---|---|
+  | Sat-50 / Sat-60 | 0.969 | **0.75** | 0.25 | Intermediate ↔ Short |
+  | Sat-40 / Sat-50 | — | **0.75** | 0.25 | Intermediate ↔ Short |
+  | Sat-30 / Sat-40 | — | **0.75** | 0.25 | Intermediate ↔ Short |
+  | Sat-60 / Sat-70 | 0.976 | **0.50** | 0.50 | Conservative ↔ Intermediate |
+  | Sat-70 / Sat-80 | 0.981 | **0.50** | 0.50 | Conservative ↔ Intermediate |
+
+  **Two measured facts that change the design (and that CVO should re-derive):**
+  1. **The error is bounded — a misassignment moves only 25–50% of one account's value, and only between two adjacent
+     terminal models, never a whole model.** So terminal-grain aggregation is materially more robust than the raw
+     strategy cosine suggests — **confirmed, with numbers.**
+  2. **BUT washout is NOT uniform, and cosine does NOT predict it.** The *highest*-cosine pairs (Sat-70/80, Sat-60/70 at
+     0.98) have the *worst* washout (0.50), while Sat-50/60 (0.969) washes out at 0.75. Basket-confusability and
+     terminal-error-boundedness are **orthogonal axes** — so the confidence treatment (§5) must key on the measured
+     per-pair washout, **not** on cosine. Report at terminal-model grain, and carry the pair-specific washout into the
+     confidence field.
 
 **All three inputs are held today** (roster, holdings, transactions, model composition) — no new feed, no egress.
 
@@ -171,7 +188,14 @@ CTO companion §2. The `interp.confidence` field carries how strong that estimat
 - **An account created 07-06 has no interpolated history before 07-06** — it did not exist to reconstruct.
 - **Where the fuzzy match is weak** (an account whose basket sits between adjacent tiers with no snapshot to anchor it),
   the design's default is **widen the confidence band or emit the terminal-model blend, never a false-precise single
-  model.** A `confidence` scalar per interpolated point is recommended so the FE can render the band, not just the line.
+  model.** The `interp.confidence` field (§1a, mine) is **keyed to the measured per-pair washout coefficient** (§4), not
+  to cosine: a Sat-50/60 ambiguity carries higher confidence (0.75 washout) than a Conservative↔Intermediate ambiguity
+  (Sat-70/80, 0.50 washout). The FE MAY render the band; it MUST render the label.
+- **Account-grain coverage denominator — a transactions HOLE degrades to `absent`, not silently interpolated (CTO note
+  2).** The backwards walk states, per account, the dates where `net_external_flow` is derivable vs the gaps. Over a
+  transactions gap the account's value cannot be reconstructed, so that account contributes **`absent`** for those dates
+  — the same absent-vs-interpolated distinction the aggregation enforces at firm grain, applied at ACCOUNT grain inside
+  the method. An interpolation never fills its own substrate's hole silently.
 - **Never fabricate a non-zero where the true footprint is zero** (§3.4, the YANG_SITTW rule).
 
 ---
@@ -247,8 +271,10 @@ incident + `backfill_method_default: weekly_interpolation_andrew_20260518` + `by
 account_count}` (all `build_aggregate_aua_timeseries.py`, read this session) · qt2 transactions healthy tonight (0.6.2
 02:03–04Z) · holdings horizon ~06-08, transactions ~03-09 (prior S3 listings). **[PROVEN]** current membership
 deterministic 17/17 296==296 (determinism brief); B1/B2 terminal-model composition + the penny-tie; basket cosine
-0.62–0.98 (enriched brief). **[PROPOSAL]** the backwards value reconstruction, the fuzzy assignment overlay, the
-terminal-model-washout robustness claim, and the confidence treatment — CVO's to review, none built.
+0.62–0.98 (enriched brief); **the terminal-model washout coefficients (0.50–0.75 per confusable pair, computed this
+session from the B2 compositions) — and the orthogonality of cosine and washout.** **[PROPOSAL]** the backwards value
+reconstruction, the fuzzy assignment overlay, and the confidence treatment (now keyed to the measured washout) — CVO's
+to review + re-derive, none built.
 
 **One-line:** extend the estate's existing labeled-interpolation machinery to Cottonwood — measured value reconstructed
 backwards, assignment fuzzy-estimated, everything tagged `interpolated_estimate`, render-gated yellow-dashed,
