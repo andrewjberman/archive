@@ -100,6 +100,12 @@ absent). **NEXT ATTEMPT: the next box window (~02:00Z 07-24), same gated script
 (`code/bronze/qt_0722_reland.py`, staged) -- owner me if live, else the morning-batch never-retry fix
 (CTO's designed item) structurally covers this exact case.** The 07-21 materialization pattern (full by
 D+1's window) says tomorrow's attempt should pass the gate.
+**DISPOSITION RE-SEQUENCED (CTO 142439Z item 2 -- supersedes my delete-and-re-run REC's ordering):**
+(a) tonight's 02:00Z window re-runs 07-22 per the standing plan; (b) the quarantined partials STAY
+QUARANTINED THROUGH the re-land -- they are the only copy of what 07-22 delivered and the evidence for
+the next diagnosis if the re-land fails; (c) DELETION only after a verified-FULL re-land AND Andrew's
+confirm (S3-deletion is human-confirm class; an exec cannot clear it on merits). Do NOT delete first.
+
 **LIFT PROTOCOL (DS 044447Z, quarantine deployed @88d165366, ETag 513d9095...):** the 07-22 pair is
 conversion-quarantined (sweep-skip LOUD + hand-run/--force refusal, exercised). After the gated re-land
 passes (next box window): ping 0.4.0_DS with the verification -> DS removes the two FORWARDFILL_QUARANTINE
