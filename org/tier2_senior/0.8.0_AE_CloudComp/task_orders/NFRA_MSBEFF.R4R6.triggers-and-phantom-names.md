@@ -67,7 +67,15 @@ R6 — PHANTOM-NAME RECONCILIATION:
          off CLOUD. The shared tree stays on CLOUD at all times. No rebase, no force; do not delete a
          scratch branch that anchors a preservation tag. This is a GENERAL rule for any mutant that
          manipulates real tree/branch/close-path state — the fixture isolates, the shared tree never
-         moves. -->
+         moves.
+         AXIS 2 (MSTR generalization 194213Z, the second catch): isolation is on TWO axes, not one.
+         A mutant trigger must ALSO never be wired into a SHARED git hook (.git/hooks/post-commit,
+         pre-commit) — a live trigger in a shared hook fires on EVERY lane's commit, taxing all of
+         them and injecting surprise findings (the R4 triggers were wired live into shared
+         post-commit and would have fired on tonight's MDPF serve closures; ~B de-wired them). So:
+         (worktree-isolated fixtures) AND (no shared-hook wiring). Exercise triggers by DIRECT script
+         invocation on the isolated worktree HEAD, never via the shared hook. Live-arming the real
+         hook is a SEPARATE gated step (a non-serve window, async firing) — see the arm-gate ruling. -->
     <step><run>ISOLATION: run the above mutant fixtures ONLY in an isolated `git worktree add` — NEVER by switching the shared main tree off CLOUD (the closeout mutant touches the project-JSON/REGISTRY close path in the shared tree; the deploy mutant touches deploy state).</run>
     <expect>Evidence that mutants ran in an isolated worktree; the shared main tree remained on CLOUD throughout (state it explicitly).</expect></step>
   </phase>
