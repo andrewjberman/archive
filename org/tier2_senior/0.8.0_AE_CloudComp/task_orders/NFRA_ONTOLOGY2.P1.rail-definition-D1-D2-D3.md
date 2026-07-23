@@ -4,14 +4,18 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <date>2026-07-23</date>
-<status>pending</status>
+<status>canonized-verify-pending</status>
 <!-- ~C 2026-07-23 ~19:2xZ: AUTHORED + validated + routed to CTO~Z for arch-gate co-canonize.
      D1/D2/D3 rails + completeness axis + type_tuple + c1_frontend_adapter fork-resolution (11/11
      additive, 0 new-vocab) authored in NFRA_ONTOLOGY_RULE_BANK.yaml (v1.1->1.2) + variance_dimensions.yaml
      (+registry_binding). Acceptance EXERCISED: summary_corpus.py zero-diff (self-test+build+isolation
      control), comp-ontolint PASS, strictly-additive diff. Package: deliverables/NFRA_ONTOLOGY2_P1/
      ARCH_GATE_PACKAGE.md + ontology2_p1_authored.patch. Files are exec-locked (ANY_EXEC) -> CTO~Z
-     co-canonizes (staged live OR apply patch). Status stays pending until canonized + CVO~Z-verified. -->
+     co-canonizes (staged live OR apply patch).
+     ~20:13Z: CTO~Z ARCH-GATE PASS + CO-CANONIZED @5d1161d70 (additivity independently verified at gate;
+     fork accepted 11/11; 06 parity @12201b262). Canonization signal fired to base @201527Z (zero token
+     delta on committed vintage) -> base one-pass stage-2 reconcile. CVO~Z runs independent zero-diff
+     verify. TOOLSEM/TOOLBHVR/TOOLARCH-P2 unblocked. Closes on CVO~Z PASS. -->
 
 <priority>P0 — THE CRITICAL PATH of NFRA_TOOLSTACK. Every layer above the mechanical (TOOLSEM, TOOLBHVR, TOOLARCH P2) blocks on the rail vocabulary this TO produces.</priority>
 
