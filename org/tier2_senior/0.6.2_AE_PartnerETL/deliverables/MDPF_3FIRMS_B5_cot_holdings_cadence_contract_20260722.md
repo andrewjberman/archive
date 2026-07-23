@@ -91,10 +91,15 @@ batch also converted, confirming the converter does not filter to a calendar it 
 3. `_complete/` sentinels exist only from 2026-06-23 onward — the earlier batch dates carry no sentinel;
    consumers must not treat sentinel-absence on <=06-22 dates as incomplete delivery.
 
-## Pending (tonight's window, ~02:00–06:00Z 07-23)
+## ~~Pending~~ RESOLVED (2026-07-23 window) — TO COMPLETE
 
-- (a) `HOLDINGS_DAILY_2026-07-21.xlsx` lands ~03:30Z + converts (expect silver date=2026-07-21 within
-  seconds via event path; sweep 05:00Z backstop; acceptance deadline 06:00Z).
-- (c) `dump_enriched_templates.py` on-box via SSM (S3-pull pattern; script verified byte-identical
-  repo==S3 @md5 64b092f11df12470639e438d229154d3); qt1 dims -> routed to CRO per the TO.
-- Phase-3 partition re-list with denominators.
+- (a) **VERIFIED**: `HOLDINGS_DAILY_2026-07-21.xlsx` landed **2026-07-23T03:30:28Z** (1,153,402B) — the
+  measured (D+2)T03:30:2xZ contract held at ±4s precision — and converted event-path in **7 seconds**
+  (`fact_holdings_s2/date=2026-07-21/` stamped 03:30:35Z; `fact_holdings/date=2026-07-21/` present).
+  Well inside the 06:00Z acceptance deadline.
+- (c) **EXECUTED 02:05-02:07Z** (first-ever run, clean): auth probe OK, 4/5 templates dumped to
+  `templates_enriched/` (qt1 15 dims/4 measures — enumerated + routed to CRO, closed his A2; qt4 208
+  dims; **qt3 realized = selectable-but-unpersisted, no templateId — finding**). Full output in the
+  02:00Z window report (COO 021405Z accepted).
+- Phase-3 re-list: bronze HOLDINGS files **34** == silver `fact_holdings_s2` partitions **34**,
+  set-identical both directions.

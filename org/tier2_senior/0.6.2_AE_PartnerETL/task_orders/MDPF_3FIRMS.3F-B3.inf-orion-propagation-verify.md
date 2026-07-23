@@ -6,7 +6,8 @@
 <issued_to>0.6.2_AE_PartnerETL~A</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:19Z</issued_at>
-<status>staged</status>
+<status>complete</status>
+<!-- CLOSED 2026-07-23 ~03:40Z by 0.6.2_AE_PartnerETL~A: all acceptance criteria measured green on the scheduled 03:30Z pass; evidence in deliverables/ (B3 propagation doc; B5 contract doc + the 02:00Z window dump) -->
 <authorization>LD-0333 amendment 1 @2eef569d2 (Andrew cascade GO) -> CTO cascade 200805Z -> COO decomposition. Andrew confirmed direct at the COO terminal 20:16Z (@f526334e0).</authorization>
 
 <references>
