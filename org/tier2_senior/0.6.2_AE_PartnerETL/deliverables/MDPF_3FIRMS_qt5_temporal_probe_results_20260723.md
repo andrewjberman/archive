@@ -100,3 +100,8 @@ absent). **NEXT ATTEMPT: the next box window (~02:00Z 07-24), same gated script
 (`code/bronze/qt_0722_reland.py`, staged) -- owner me if live, else the morning-batch never-retry fix
 (CTO's designed item) structurally covers this exact case.** The 07-21 materialization pattern (full by
 D+1's window) says tomorrow's attempt should pass the gate.
+**LIFT PROTOCOL (DS 044447Z, quarantine deployed @88d165366, ETag 513d9095...):** the 07-22 pair is
+conversion-quarantined (sweep-skip LOUD + hand-run/--force refusal, exercised). After the gated re-land
+passes (next box window): ping 0.4.0_DS with the verification -> DS removes the two FORWARDFILL_QUARANTINE
+entries + deploys same-hour -> conversion follows on the next sweep. Race harmless in both orders. The
+raw partials sit untouched (no deletion, CTO-rejected) for diagnosis.
