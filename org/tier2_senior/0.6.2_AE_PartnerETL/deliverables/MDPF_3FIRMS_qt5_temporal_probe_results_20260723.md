@@ -59,3 +59,33 @@ Mechanics reused from production `cot_bronze_ingest` (`_request`/`poll_status`/`
 normalization :405-415 — the class whose omission produced the earlier instrument-side 500). GUID->name
 join from the 07-22 `rebalancer_models` roster (60 strategies). Sequential single-session vendor use;
 CRO held zero concurrent calls (his 040505Z).
+
+## RECOVERY SWEEP EXECUTED (CTO GO 041852Z + Andrew-direct "run it now" via COO 042006Z; completed ~04:30Z)
+
+Two passes (pass one SSM 02110d7a; resume 62d87d31 after a bearer-TTL 401 -- an owned instrument gap,
+patched with production's re-mint-once-on-401 discipline). **FULL RECOVERY, both tables, 10/10 possible
+trading dates each, sanctioned forwardfill path, weekends honest-empty, zero forced landings:**
+
+| date | allocations rows | unrealized rows |
+|---|---|---|
+| 07-09 | 1,499 | 161,398 |
+| 07-10 | 1,507 | 161,474 |
+| 07-13 | 1,501 | 161,507 |
+| 07-14 | 1,502 | 77,796 |
+| 07-15 | 1,503 | 67,077 |
+| 07-16 | 1,503 | 67,082 |
+| 07-17 | 1,508 | 67,012 |
+| 07-20 | 1,516 | 67,108 |
+| 07-21 | 1,521 | 67,206 |
+| 07-22 | 158 (PARTIAL-FLAGGED) | 412 (PARTIAL-FLAGGED) |
+
+**PROVENANCE (CTO in-flight amendment 042804Z, verbatim): value: real late-materialized vendor data /
+assignment: current-stamped (accurate-window, not point-in-time). Nothing landed reads as PIT assignment
+recovered; the daily honest-rejects history stays un-edited.**
+
+Open items out of the sweep: (a) 07-22 both tables ~10-100x undersized vs neighbors = likely
+mid-materialization partials -- disposition at CTO (rec: delete + re-run next window) BEFORE the next
+02:00Z conversion; (b) qt4 count-regime shifts inside the span (161K -> 77.8K -> 67K) observed, not
+adjudicated -- DS lens next; (c) the qt4-vs-qt5 two-mode hypothesis REFUTED for the freeze (one vendor
+late-materialization mechanism covers both; the 500 was instrument-side); (d) the daily-chain never-retry
+fix = the designed morning-batch item (CTO).
