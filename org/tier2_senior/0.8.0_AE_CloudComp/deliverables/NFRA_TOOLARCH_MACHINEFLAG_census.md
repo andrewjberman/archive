@@ -43,9 +43,22 @@ The denominator is a claim about the estate and it is complete. The exercised se
 
 ## AC-5 — EXERCISED (a claim about THIS RUN: bounded, per-site provenance, ranked by consumer risk)
 
-Ranked by **consumer risk, not convenience** — tier-1 = a known programmatic consumer parses its `--json`
-today (a rail/gate/other comp-tool); tier-2 = high hand-invocation frequency; tier-3 = the rest. UNKNOWN
-is disaggregated by tier so an unexercised remainder is a scoped follow-on, not a hole.
+Ranked by **consumer risk, not convenience** — tier-1 = a known programmatic consumer **imports or parses**
+its output today; tier-2 = high hand-invocation frequency; tier-3 = the rest. UNKNOWN is disaggregated by
+tier so an unexercised remainder is a scoped follow-on, not a hole.
+
+**CORRECTION (2026-07-24, ~B's catch, grounded before accepting):** my first tier-1 rationale cited "~B's
+rail keys on comp-routes' `--json`." That is **wrong** — ~B's HUD rail is **advisory text**: it *tells* an
+agent to run `comp-routes trace --json` and key on `outcome`; it does not itself call the tool, parse the
+JSON, or branch on a field (which is exactly why it fails safe by construction — no switch, no default). A
+nudge is not a consumer. The **real** programmatic consumers, source-grounded, are code that IMPORTS or
+PARSES tool output: `safe_deploy_core.py:238` `_pipescript_output_ok` parses **comp-pipescript**;
+`manifest_check_cli.py:641` imports **`self_route_verdicts`**; `comp_log_auto.py:226` `classify_exit`
+consumes **every tool's exit contract**. So the true tier-1 is the *parsed/imported* set, not the *nudged*
+set. comp-routes stays in the exercised tier-1 (it is the seed defect and agents are routed to it
+constantly) but on the honest basis: high effective traffic, not "a rail parses it." This is the same
+mis-attribution class the census opens with — a claim (tier membership) I asserted without grounding the
+consumer — caught by the party who actually owns that surface. Recorded, not smoothed.
 
 **A structural limit of the automated check, and it is the most important methodological finding:** a
 first-order "does `--json` emit JSON?" test **confirms HONORED** (JSON came back) but **cannot confirm
@@ -104,7 +117,13 @@ Three recommendations, the first two ratified by CTO~Z:
    `"/bin/bash"`, `subprocess.*bash` in `.py`/`.ps1` that do not route through `git_bash()`. I hold the
    grounding (my exerciser is the exhibit); CTO~Z routes the build.
 
-3. **Method note for whoever extends this sweep:** an automated `--json` format-check is HONORED-confirming
+3. **The tier-1 set must be derived from ACTUAL parse/import sites, not from nudges** (the ~B correction
+   above). The next exercise pass should target the grounded programmatic consumers first: comp-pipescript
+   (parsed by `safe_deploy_core`), the comp-manifest-check completeness family (imports `self_route_verdicts`),
+   and any tool whose exit contract `comp_log_auto.classify_exit` consumes — those are where a silent
+   machine-surface lie is already being parsed by code today. ~B offered their LATENCY consumer-inventory
+   (who-parses-what) rather than re-deriving from the registry — take it; it is the grounded tier-1 source.
+4. **Method note for whoever extends this sweep:** an automated `--json` format-check is HONORED-confirming
    only. A PROSE verdict requires a per-tool valid invocation, because usage-text, mode-incompatibility,
    and real branch-ignore are indistinguishable to a format check. Do not ship a PROSE finding from an
    automated pass without a hand-confirmation on a complete invocation — or you rebuild the 10-false-
