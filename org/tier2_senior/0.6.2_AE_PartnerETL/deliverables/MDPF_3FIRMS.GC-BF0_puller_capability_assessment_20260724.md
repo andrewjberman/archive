@@ -198,9 +198,21 @@ test. A visible gap beats an invisible un-landing.
 2. **05-20 is 399, not 401** (my 154857Z handoff read only the tail of a two-control run; CVO and CTO both
    inherited the error from me). The coherence line is **399 / 399 / 401**, not 401 / 399 / 401.
    **AND 05-20's seven per-model cells are BYTE-IDENTICAL to the 05-21 claim** — 159/127/54/23/21/10/5 —
-   with 05-18 and 05-19 also at 399. So the recovered value is **indistinguishable from the immediately
-   preceding day's roster**, which is exactly what a carry-forward or mis-stamp looks like. The corrected
-   numbers make the evidence *weaker*, not stronger.
+   with 05-15, 05-18 and 05-19 also at 399.
+
+   > **CORRECTION TO MY OWN CORRECTION (1622Z).** I first wrote that this is "exactly what a carry-forward
+   > or mis-stamp looks like," making the evidence *weaker*. **That overstated it in the other direction,
+   > and CVO caught it with the measurement neither of us had:** how suspicious a flat run is depends
+   > entirely on how often this series moves at all.
+   > Measured independently by me — **denominator 40 non-zero trading dates (2026-05-15..07-22, weekdays
+   > only)**: transitions that CHANGE **19 of 39 (49%)**, transitions that are FLAT **20 of 39 (51%)**,
+   > **longest flat run 6 consecutive trading days**. (CVO's filter gave 31/57%/43%/5 — different era
+   > boundary, *same conclusion*; I record both rather than adopt theirs silently.)
+   > **A 4-day flat run is ordinary here — flat is the MODAL transition, and the longest observed run is
+   > longer than this one.** So the identical-to-prior-day observation is **NON-DIAGNOSTIC**: it has high
+   > probability under both hypotheses. It is **not evidence against the recovery, and it was never
+   > evidence for it.** The correct statement is that the coherence check was never informative in either
+   > direction — not that it points at a carry-forward.
 3. **"6 independently-written versions" overstates it** (CVO relabel, accepted). All versions are successive
    publications by the same producer reading the same upstream silver. Distinct ETags prove distinct
    *writes*, not distinct *derivations*. What RC-1 establishes is **SERVING-STABILITY**: 399 is what we
@@ -255,6 +267,18 @@ Global 05-20 = **7279**, 05-21 = **None**, 05-22 = **7299**; CVO's ~7,281 sits i
 **Axis note:** the Global served artifact is on the **447** axis and 38 `exempt_absorbed` dates include
 weekends (05-30/31, 06-06/07, 06-20/21, 06-27/28, 07-04/05, 07-11/12). 05-21 is a Thursday and a genuine
 trading-day exemption. Counting that set on the wrong axis yields a wrong denominator.
+
+> **THE TWO 429s ARE NOT THE SAME 429** (CVO @b8727a1f0, generalising §4's holiday finding). The 07-18 build
+> and the current build **both report `n_dates = 429`** for Inflection — but the 07-18 axis carries **22
+> non-trading days** and the current axis carries **zero**. The axis was **RE-BASED: same cardinality,
+> different membership.**
+> **So a coverage or denominator claim must be pinned to a BUILD, not to the number 429.** Two artifacts
+> both reporting 429 do not necessarily cover the same dates — and "429" is exactly the kind of number that
+> gets quoted across builds as though it were one thing.
+> RC-1 is safe from this and CVO verified rather than assumed it: `probe_date` resolves `dates.index(date)`
+> against **each version's own array** (`:111`), so it is date-keyed per version and never position-carries
+> across them. My W-3 positional-indexing weakness would have been genuinely dangerous had I cached an
+> index across versions; I did not.
 
 ---
 
