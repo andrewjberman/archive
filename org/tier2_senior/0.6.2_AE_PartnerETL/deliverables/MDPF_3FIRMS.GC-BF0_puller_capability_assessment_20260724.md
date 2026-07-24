@@ -19,9 +19,12 @@ Neither SmartX nor Eclipse can target a historical date. Both accept a `--date`,
 dates would produce 22 dates of fabricated history, a continuous-looking chart, and a **passed visual smoke
 test**. COO's 151103Z read is correct and this assessment confirms it at source.
 
-**BUT ONE DATE IS RECOVERABLE WITHOUT ANY PULL, AND IT IS THE ORIGINALLY-NAMED ONE.**
-**2026-05-21 INF = 399 accounts**, sitting in our own retained S3 object-version history, corroborated across
-**6 independently-written versions**. Zero vendor egress, zero fabrication risk. See §3.
+**ONE DATE LOOKED RECOVERABLE WITHOUT ANY PULL — AND ON EXAMINATION IT IS NOT LANDABLE.**
+**2026-05-21 INF = 399 accounts** sits in our own retained S3 object-version history. It is serving-stable
+across 6 retained versions, but it is **byte-identical to the previous trading day's roster**, it comes
+from an artifact source-documented as carrying mis-stamped dates, and **no mechanism exists to land it that
+survives a producer run**. CTO ruled `(iii)` at 160933Z: **ZERO RECOVERED**. Preserved as
+MEASURED-BUT-UNLANDABLE. See §3 for the find and **§3a for the corrections and the ruling** — §3a governs.
 
 ---
 
@@ -170,6 +173,88 @@ in the legacy artifact spans **35 of 426 dates, 2026-05-18 .. 2026-07-08** — 0
 **The other 5 Eclipse dates are NOT recoverable this way** — 06-01, 07-01, 07-13, 07-14, 07-15 are
 `noaxis` (absent from the axis entirely) in every legacy version, and NULL in the current ones. This matches
 the Eclipse puller's own recorded position that those gaps are *"RECORDABLE AND PERMANENTLY UNFILLABLE."*
+
+---
+
+---
+
+## §3a — AMENDMENT (2026-07-24T16:14Z): the 399 is NOT LANDING. Outcome = ZERO RECOVERED.
+
+**CTO ruled (iii) at 160933Z. `2026-05-21` ships as an honest-None with the other 20. Nothing was written.**
+
+**The ruling was on MECHANISM, not on the value.** There is no clean upstream repair for INF:
+`load_served_account_count` is **49F-only** (`:743`); INF derives `account_count` from the eclipse
+`per_date` snapshot (`:966`, `:971`), so an honest upstream repair would need an Eclipse snapshot for
+2026-05-21 — which §1 establishes cannot be obtained at any permission level. The only remaining mechanism
+was an in-place served write, and the current revamp versions carry 05-21 as NULL, so **the next producer
+run would silently revert it** — a repair with a hidden expiry, noticed first by Andrew at a later smoke
+test. A visible gap beats an invisible un-landing.
+
+### THREE CORRECTIONS TO §3, ALL AGAINST MY OWN EVIDENCE
+
+1. **The legacy artifact has NO `account_count_total` field.** That field exists only in the revamp schema.
+   The 399 was **my own sum of seven per-model cells**, presented above as a read value. It resolves
+   correctly — but *it resolves because I measured it, not because I knew it*.
+2. **05-20 is 399, not 401** (my 154857Z handoff read only the tail of a two-control run; CVO and CTO both
+   inherited the error from me). The coherence line is **399 / 399 / 401**, not 401 / 399 / 401.
+   **AND 05-20's seven per-model cells are BYTE-IDENTICAL to the 05-21 claim** — 159/127/54/23/21/10/5 —
+   with 05-18 and 05-19 also at 399. So the recovered value is **indistinguishable from the immediately
+   preceding day's roster**, which is exactly what a carry-forward or mis-stamp looks like. The corrected
+   numbers make the evidence *weaker*, not stronger.
+3. **"6 independently-written versions" overstates it** (CVO relabel, accepted). All versions are successive
+   publications by the same producer reading the same upstream silver. Distinct ETags prove distinct
+   *writes*, not distinct *derivations*. What RC-1 establishes is **SERVING-STABILITY**: 399 is what we
+   stably served for 05-21 until the revamp schema dropped it. CVO's independent close is genuinely
+   stronger than my claim was: 9 distinct ETags, and the axis GREW 426→429 across the concordant set, so
+   399 survived four re-derivations that changed the series shape.
+
+### THE MIS-STAMP RISK — REAL, BOUNDED, AND IRREDUCIBLE AT THIS DATE
+
+The legacy INF served artifact is source-documented as carrying **mis-stamped dates** (`:966-982`: *"legacy
+07-06 holds the 07-10 snapshot, 07-18 holds 07-20 … 2026-07-06 carried 540 (eclipse's 07-10 roster) beside
+the true count of 474"*). **RC-1 is structurally blind to this**: it tests concordance across versions, and
+a systematic mis-stamp is inherited by every version that copies it forward. **Agreement measures
+propagation, not truth.**
+
+Bounding measurement — LEGACY vs CURRENT (eclipse-derived, a genuinely different axis), **denominator 28**:
+
+| | |
+|---|---|
+| AGREE | 26 |
+| DISAGREE (the complete mis-stamp set) | 2 — `2026-05-28` (402/403, −1) and `2026-06-24` (472/467, +5) |
+| 05-21 neighbourhood | 05-18, 05-19, 05-20, 05-22, 05-26, 05-27 — **exact agreement, zero drift** |
+
+So the defect is sparse (~7%), small, and absent from the target window. **But 05-21 itself can never be
+cross-checked — it is null in current precisely BECAUSE it is the gap.**
+
+> **THE UNVERIFIED REMAINDER IS EXACTLY THE TARGET SET.** Every date we want to repair is, by construction,
+> outside the test that would validate the repair. That is a structural property of this class of work, not
+> a gap in the check.
+
+### THE PRESERVED VALUE — record it WITH its doubt
+
+```
+2026-05-21 INF account_count = 399  (159/127/54/23/21/10/5)
+  source     retained version u1V7X3xHgkPAPChJhpyh1Hk50aOWLAgO (2026-07-08T15:00:43Z)
+  evidence   serving-stable across 6 retained versions; 9 distinct ETags; survived 4 axis
+             re-derivations (426->429); DISTINCT not inflated-sum (total == per-model sum, 40/40)
+  DOUBT      byte-identical to 2026-05-20's roster; unverifiable at this date by construction
+  STATUS     MEASURED-BUT-UNLANDABLE / UNVERIFIABLE-AT-DATE
+  IF LANDED  must NOT carry class `measured` (COO condition, endorsed)
+```
+
+### CLASS-C COMPOSITION — CVO right, my doubt wrong
+
+I hypothesised that 05-21's `count_provenance = exempt_absorbed` **forces** None regardless of INF, which
+would have made the restore a no-op. **Source-checked before asserting it, and I was wrong:** at
+`:1719-1733` the None decision is taken FIRST by `any(c is None for c in core_cells)`; `exempt_absorbed` is
+only the **label** applied afterwards. Filling INF's cells would flip the branch. Measured brackets —
+Global 05-20 = **7279**, 05-21 = **None**, 05-22 = **7299**; CVO's ~7,281 sits in the bracket as an
+**estimate-in-range, not a measurement** (the composition was never run).
+
+**Axis note:** the Global served artifact is on the **447** axis and 38 `exempt_absorbed` dates include
+weekends (05-30/31, 06-06/07, 06-20/21, 06-27/28, 07-04/05, 07-11/12). 05-21 is a Thursday and a genuine
+trading-day exemption. Counting that set on the wrong axis yields a wrong denominator.
 
 ---
 
