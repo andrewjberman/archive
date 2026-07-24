@@ -38,6 +38,26 @@ test**. COO's 151103Z read is correct and this assessment confirms it at source.
 | NEVER#4 | **Affirmed.** No ad-hoc gold run was triggered. Nothing here validates against one |
 | Vendor egress | **NONE.** I called neither the SmartX nor the Eclipse API. All evidence is source + our own buckets |
 
+### §0a — THE ECLIPSE EGRESS QUESTION, NAMED (per COO 153210Z [HARD STOP])
+
+**Eclipse is NOT on the standing vendor-egress lift list** (ORION · SMARTX · cot-BD · arxiv). **No Eclipse
+API call was made in producing this assessment, and none is pending.**
+
+**It did not need one, and that is a substantive result rather than a dodge.** Eclipse's (A) and (B) are
+**source-determined**: the puller's own code shows `--date` reaching nine label sites and zero request sites,
+and all four consumed endpoints are literal current-state paths. A vendor call could not have *changed* that
+verdict — it could only have confirmed a fabrication I can already predict from source. So the Eclipse
+verdict is **`NOT-CAPABLE` (source-confirmed)**, **not** `CAPABILITY-UNDETERMINED — requires egress`.
+
+**Where egress would be required, and is therefore an open Andrew-word item:** any attempt to obtain the 5
+permanently-unfillable dates (06-01, 07-01, 07-13, 07-14, 07-15) from a *different* Eclipse surface — e.g.
+the `/auditlog/*` family, the only paths in the vendor's 493-path catalog carrying date parameters. **I did
+not probe it and am not recommending it**; the catalog is an Orion-published OpenAPI doc read on-box. If CTO
+wants that avenue explored it needs Andrew's explicit per-use word first.
+
+**SmartX egress is lifted, and I still made no SmartX call** — the source read plus our own buckets answered
+it, so the lift went unused.
+
 ---
 
 ## §1 — ECLIPSE (INF) · `data/inf/scripts/bronze/pull_eclipse_portfolios.py` @8d9158b500
