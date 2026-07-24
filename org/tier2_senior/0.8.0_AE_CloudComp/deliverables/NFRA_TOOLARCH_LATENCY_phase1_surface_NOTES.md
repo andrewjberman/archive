@@ -146,6 +146,24 @@ attributor handling all three idioms (`set_defaults`, `args.cmd` if/elif chains,
 `pipeline_cli` uses) — plus a **coverage assertion of its own**: it must report engines-traced /
 engines-total and fail loudly rather than silently attributing only what it understood.
 
+## DENOMINATOR GAP against my OWN instrument: comp-which is ABSENT from this census
+
+Surfaced while working the self-route gate: **`comp-which` — the tool Rule 21 makes the mandated first
+reflex, ~0.9s/call, 12,147 route events — is NOT in this census at all.** It is `EXCLUDE`d from the
+routable `tools_index` set (`comp-which`, `comp-grep`, `comp-glob` are the router and its primitives,
+not routing *targets*), so my enumeration-from-the-registry never saw it.
+
+This is the **EXISTS-vs-ROUTABLE axis biting my own instrument**: the enumeration surface does not contain
+the tool everyone routes *through*. A latency census that silently omits the single most-invoked tool in
+the estate has a denominator gap, and I am recording it rather than leaving it implicit. **The busiest
+path is the one most likely to be excluded, precisely because it is infrastructure rather than a target.**
+
+Consequence for Phase 2: the census population must be the registry-derived set **PLUS** the router/
+primitive infrastructure (`comp-which`/`comp-grep`/`comp-glob`) measured explicitly — an EXCLUDE from the
+*routing* denominator is not an EXCLUDE from the *latency* denominator. And per CTO~Z: `comp-which` is
+**CONDITIONALLY-MUTATING** (writes `.comp-graph/which/rank-<pid>.yaml` per call), so any earlier reasoning
+that treated it as read-only was a wrong safety classification — moot here only because it was absent.
+
 ## THE DISPATCH-IDIOM DENOMINATOR — a TOOLARCH finding independent of LATENCY
 
 Enumerated the idiom space **before** writing handlers (CTO~Z ruling: an attributor whose idiom set is
