@@ -33,7 +33,7 @@ import time
 import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from akpipe_scorer import (  # noqa: E402
@@ -115,6 +115,49 @@ def _parse_page(raw: bytes) -> list[dict]:
     return out
 
 
+def harvest_windows(windows: list[tuple[int, int]], per_window: int = 100,
+                    primary_only: bool = True, gap: float = 25.0) -> list[dict]:
+    """Pull distinct AGE BANDS via submittedDate ranges -- ONE request per band.
+
+    WHY BANDS, NOT PAGINATION: rapid paginated requests tripped arxiv's 429. One request
+    per band is both politer and better science -- it gives real AGE VARIANCE, which is
+    what actually exercises the recency limb (a single-day pull leaves recency inert:
+    measured decay range 1.006x, i.e. the limb was never tested on real data).
+    """
+    q = "+OR+".join(f"cat:{c}" for c in CATEGORIES)
+    now = datetime.now(timezone.utc)
+    rows: list[dict] = []
+    for i, (d_old, d_new) in enumerate(windows):
+        lo = (now - timedelta(days=d_old)).strftime("%Y%m%d%H%M")
+        hi = (now - timedelta(days=d_new)).strftime("%Y%m%d%H%M")
+        url = (f"{API}?search_query=({q})+AND+submittedDate:[{lo}+TO+{hi}]"
+               f"&sortBy=submittedDate&sortOrder=descending&start=0&max_results={per_window}")
+        print(f"[harvest] band {d_old}..{d_new}d ago  ({lo}->{hi})")
+        try:
+            chunk = _parse_page(_get(url))
+        except RuntimeError as e:
+            print(f"[harvest]   BAND FAILED (not silently skipped): {e}")
+            continue
+        print(f"[harvest]   got {len(chunk)}")
+        rows.extend(chunk)
+        if i < len(windows) - 1:
+            time.sleep(gap)
+
+    seen, dedup = set(), []
+    for r in rows:
+        k = (r["arxiv_id"], r["version"])
+        if k not in seen:
+            seen.add(k)
+            dedup.append(r)
+    print(f"[harvest] {len(rows)} pulled, {len(dedup)} unique (id,version)")
+    if primary_only:
+        keep = [r for r in dedup if r["primary_category"] in CATEGORIES]
+        print(f"[harvest] SCOPE FILTER: kept {len(keep)}, dropped {len(dedup)-len(keep)} "
+              f"cross-listed -- DENOMINATOR {len(dedup)}")
+        return keep
+    return dedup
+
+
 def harvest(total: int = 400, page: int = 100, primary_only: bool = True) -> list[dict]:
     """Pull recent submissions across the target categories, paginated (back-window),
     then FILTER to target PRIMARY categories (fix 4: kills the cross-listing scope leak)."""
@@ -135,7 +178,8 @@ def harvest(total: int = 400, page: int = 100, primary_only: bool = True) -> lis
         k = (r["arxiv_id"], r["version"])
         if k not in seen:
             seen.add(k)
-        dedup.append(r)
+            dedup.append(r)   # MUST stay inside the guard -- an outdent here silently
+            # disables dedup entirely while the count still looks plausible.
     print(f"[harvest] pulled {len(raw_rows)} entries, {len(dedup)} unique (id,version)")
     if primary_only:
         keep = [r for r in dedup if r["primary_category"] in CATEGORIES]
@@ -243,7 +287,8 @@ def main() -> int:
     n_meta = int(sys.argv[2]) if len(sys.argv) > 2 else 400
     n_full = int(sys.argv[3]) if len(sys.argv) > 3 else 15
 
-    rows = harvest(total=n_meta, primary_only=True)
+    WINDOWS = [(2, 0), (16, 14), (32, 30)]   # age bands: ~1d, ~15d, ~31d old
+    rows = harvest_windows(WINDOWS, per_window=n_meta // 3, primary_only=True)
     if not rows:
         print("[harvest] NOTHING RETURNED -- stopping (a zero needs a positive control)")
         return 1
