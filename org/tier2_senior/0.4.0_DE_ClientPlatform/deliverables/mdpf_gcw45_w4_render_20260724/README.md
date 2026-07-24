@@ -34,3 +34,24 @@ alarm vocabulary UNSPENT for the `present < expected` error W-2 will fire.
 real ZERO ACCOUNTS bar -- visible as sharp vertical spikes in the daily count chart, found by
 READING the screenshot. PRE-EXISTING (confirmed via `git show HEAD:` plus a diff proof that this
 change touches neither site). Out of W-4 scope; routed by COO to CTO.
+
+## Correctness against the CURRENT served artifact (COO ask, 154829Z) -- TESTED, not asserted
+
+Rendered all three PER-FIRM views in count mode against the CURRENT served bytes, holes intact.
+The band count is PREDICTABLE from the data -- |value-bearing non-measured classes|, grouped into
+contiguous runs -- so this is a prediction-match, not an observation:
+
+| View | value-bearing non-measured in the served bytes | PREDICTED bands | OBSERVED | |
+|---|---|---|---|---|
+| Global | 24 `band_2firm` + 1 `frontier_stamp` | 5 runs | **5ra** | MATCH |
+| 49financial | 0 `band_2firm` + 1 `frontier_stamp` | 1 run | **1ra** | MATCH |
+| inflection | none (only `measured` + `source_absent`) | 0 | **0ra** | MATCH |
+| cottonwood | none (only `measured` + `source_absent`) | 0 | **0ra** | MATCH |
+
+**Cottonwood is the extreme hole case in the estate** -- 445 of 447 dates `source_absent`,
+`account_count_total` non-null on 2 dates only. It renders cleanly: the daily chart shows exactly
+the two covered dates, no band, no error, no zero-cliff, panel intact (screenshot READ).
+
+The 22 holes are VALUE-NULL classes, so they plot nothing and band nothing. The render never
+consults a date, a firm name or a count -- only the class on the point -- so a hole-heavy series
+and a filled one take the same path.
