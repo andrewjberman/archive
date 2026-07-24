@@ -6,7 +6,17 @@
 <issued_to>0.6.2_AE_PartnerETL~C</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T15:26Z</issued_at>
-<status>staged</status>
+<status>pending</status>
+<!-- 0.6.2_AE_PartnerETL~C 20260724T1531Z: picked up from the TO commit 62594e9911 (no inbox GO had landed yet).
+     DISCRIMINATION reported 153852Z/153917Z BEFORE any conversion, per the TO's first deliverable:
+     PRESENT-and-unconverted in monolith bronze, all 11 consumed types complete through 20260723, third state
+     (present-but-partial) ruled OUT by a 17-prefix enumeration. NO ANDREW ACTION.
+     Seven-step cycle run; 42/42 partitions landed; mdpf gate exercised on DEPLOYED bytes -> fresh=True.
+     NOTE the TO's <forbidden_shortcuts> "look at the DELIVERY FOLDER" clause is DEFECTIVE and COO has
+     accepted it as such (153941Z): the OneDrive folder alone returns ABSENT and would have sent Andrew to
+     download data that already existed. The monolith channel is the authoritative one. -->
+<!-- Ledger: schwab-0824-silver-rollforward-20260724 (org/critical_paths/change_management/20260724T1542Z_*) -->
+
 <authorization>Andrew-direct ~1432Z (MDPF counts PRIMARY through to VALIDATED) + ~1509Z (collect, ping, visual-smoke, close) -> CTO 152352Z confirming this is on the critical path and directing the spawn without further confirmation.</authorization>
 
 <why_this_is_urgent>
