@@ -6,7 +6,7 @@
 <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T14:10Z</issued_at>
-<status>staged</status>
+<status>pending</status>
 <authorization>Andrew-direct ~1310Z at CTO's terminal ("have COO decompose those to the relevant agents, and call MSTR for spawn") -> CTO PRD @5d7522128 -> COO decomposition. SCOPE-BOUNDED to MDPF_REVAMP_GLOBAL_COUNT_CLOSEOUT W-1..W-7. The broader MDPF_3FIRMS_PRD decomposition REMAINS HELD on Andrew's word (LD-0333).</authorization>
 
 <references>
@@ -95,6 +95,33 @@ clobber)** that COO closed this morning. Different scope, different artifact. La
   <after_commit>Session log with a populated `## Compiler Tools` section; append the
     `org/compiler-tools-log.md` line in the same pass.</after_commit>
 </compiler_tools_mandate>
+
+<forbidden_shortcuts>
+**Per `docs/doctrine/A_VALUE_MUST_CARRY_ITS_CLAIM.md` @d3681d1d0 corollary 3, I applied the easiest-pass
+test to my own criteria below and named what it surfaced. These are the routes that would make this TO
+PASS while defeating its purpose:**
+
+- **AC-4 (the Cottonwood verdict).** *Easiest pass:* write "CONFIRMED" and cite CTO's brief. That is the
+  exact defect the TO exists to prevent — **a verdict whose evidence is somebody else's inference is
+  FORBIDDEN.** Your verdict must rest on YOUR firm-level decomposition of the +408. If your only
+  supporting evidence is the brief, the honest answer is UNDETERMINED.
+- **AC-1 (the 40-date table).** *Easiest pass:* emit 40 rows whose "reason" column all read "cell missing."
+  That is a table that asserts nothing and passes a shape check. **A reason that is true of all 40 rows is
+  not a reason** — it is a restatement of the null. Each row's reason must be capable of DIFFERING from the
+  others; if they genuinely do not differ, say so explicitly and show why.
+- **AC-3 (+408 by firm).** *Easiest pass:* assign the whole 408 to one firm because it is the largest, and
+  it will sum to 408 correctly. **Summing to 408 is arithmetic, not evidence.** Each per-firm figure needs
+  its own trace to served bytes.
+- **AC-2 (the 24/40 split).** *Easiest pass:* restate CTO's 24. **Confirmation means you derived 24
+  independently** and it matched — say which resolver produced it. If you get a different number, THAT is
+  the finding.
+
+**MISSING THIRD STATE (corollary 1):** every one of these has one. A date is not
+`explained | unexplained` — it is `explained | unexplained | NOT-YET-EXAMINED`. Do not let an
+un-examined date render as an unexplained one; they mean different things and only one of them is a finding.
+**Prefer differential invariants:** "the per-firm figures sum to the SAME 408 the served bytes show"
+beats asserting any absolute number that was never independently true.
+</forbidden_shortcuts>
 
 <acceptance_criteria>
 1. **A TABLE of all 40 null dates**, each with: the missing core model cell(s), the reason, and the

@@ -119,6 +119,31 @@ real "zero accounts."
     `org/compiler-tools-log.md` line in the same pass.</after_commit>
 </compiler_tools_mandate>
 
+<forbidden_shortcuts>
+**Per `docs/doctrine/A_VALUE_MUST_CARRY_ITS_CLAIM.md` @d3681d1d0 corollary 3, applied to the criteria
+below. These routes would make this TO PASS while re-committing the defect:**
+
+- **AC-2 (type contract).** *Easiest pass:* widen the declarations to `number | null`, then add `?? 0` at
+  each consumer to silence the compile errors. **That passes AC-2 and re-creates the original lie one
+  layer down** — a real "we don't know" would render as a real "zero accounts." AC-3 forbids it; naming it
+  here so it cannot happen by reflex. **The compile errors ARE the deliverable's evidence** that you found
+  the real consumers.
+- **AC-4 (render discrimination).** *Easiest pass:* style the two point types differently using anything
+  other than `count_provenance` — a date range, an index, a hard-coded list. It would look correct in a
+  screenshot and be decorative. **AC-5's mutant is the control that kills this**, which is exactly why it
+  is not optional: flip one date's provenance and the render MUST follow.
+- **AC-1 (enumeration).** *Easiest pass:* enumerate only the sites you already intended to fix, so the
+  denominator equals the numerator and nothing reads UNCOVERED. **A denominator you chose to make equal
+  the numerator is not a denominator.** Enumerate the SEARCH SPACE first, then report what fell outside
+  the fix scope — the 7 out-of-scope declarations MUST appear in the report as UNCOVERED.
+
+**MISSING THIRD STATE (corollary 1):** `account_count` is not `number | null` in meaning — it is
+`measured | known-absent | not-yet-computed`. W-5 only fixes the TYPE. If the render collapses
+"we did not compute this" into the same visual as "this is genuinely absent," AC-4 is not met.
+**Assertion level:** AC-4 must assert CORRECTNESS (the render changes with the value), not EXISTENCE
+(a provenance field is present) — existence is not content, and content is not correctness.
+</forbidden_shortcuts>
+
 <acceptance_criteria>
 1. **ENUMERATION WITH A DENOMINATOR (gates everything else).** A stated count of `account_count`
    declaration + consumption sites across the serving path, with the enumeration method named. A fix

@@ -67,6 +67,31 @@ post-date it.
   <after_commit>Session log with `## Compiler Tools` populated; append `org/compiler-tools-log.md`.</after_commit>
 </compiler_tools_mandate>
 
+<forbidden_shortcuts>
+**Per `docs/doctrine/A_VALUE_MUST_CARRY_ITS_CLAIM.md` @d3681d1d0 corollary 3, applied to the criteria
+below. This TO has the most seductive easiest-pass in the wave:**
+
+- **AC-1 + AC-3 together.** *Easiest pass:* delete the 16 weekend rows, change the docstring to say the
+  resulting number, and both criteria go green with the artifact and its declaration in perfect agreement.
+  **THAT IS THE FORBIDDEN ROUTE.** It makes the record and the data agree by DESTROYING DATA to satisfy a
+  docstring nobody verified — and it is indistinguishable, afterwards, from having done the work. The
+  verdict in AC-1 must come FIRST and must rest on evidence about what the axis IS, not on what would make
+  the two numbers match.
+- **AC-3 (427 vs 447).** *Easiest pass:* pick whichever of 427 or 447 requires no code change and write it
+  into the docstring. **The TO explicitly permits a third answer** — if the correct figure is neither, say
+  so and show the derivation. A docstring that matches the code is not automatically TRUE; it is only
+  consistent.
+- **AC-2 (enumerate the 16).** *Easiest pass:* list 16 dates that fall on Saturday or Sunday. **Weekend
+  exclusions and MARKET-HOLIDAY exclusions are different exclusions** — a count that conflates them gives
+  a wrong denominator that will still total 16.
+
+**MISSING THIRD STATE (corollary 1):** a date is not `trading-day | weekend`. It is
+`trading-day | weekend | market-holiday | half-day`, and the answer to "does this row belong" differs
+across them. If your verdict has two buckets, you have not finished.
+**Prefer a differential invariant:** show the row count and the spine length BEFORE and AFTER, and state
+which changed and why. An absolute "447 is correct" assertion cannot fail; a pre/post differential can.
+</forbidden_shortcuts>
+
 <acceptance_criteria>
 1. **A VERDICT ON WHICH IS WRONG — the rows or the declaration — with the evidence that discriminates
    them.** Stating this before any fix is the deliverable's spine. "I removed the weekend rows" without
