@@ -167,9 +167,30 @@ the 0824 MODEL PORTFOLIOS book.** That is a direct hit on the standing prohibiti
 BUSINESS-PURPOSE split, **never summed and never substituted***, and *a law about ADDITION cannot license a
 SELECTION*. This would have been a **selection**.
 
-**It did not land because DS did not take the recommendation.** They anchored on the module's own
-`FEED`/`PURPOSE` and resolved through `master_for()`, pinning it with three tests including one that fails if
-anyone swaps in `08242234`. **The routing worked; my content was the defect in it.**
+**It did not land because DS built from the consuming module instead of from my recommendation.**
+
+>> ⚠ **AMENDED 20260724T165xZ AT DS'S OWN INSISTENCE — MY FIRST VERSION OF THIS SENTENCE OVERSTATED THE
+   CONTROL THAT CAUGHT ME, WHICH IS THE EXACT ERROR THIS WHOLE DOCUMENT IS ABOUT.**
+> I originally wrote that DS *"did not take the recommendation"* and *"pinned it with a test that fails if
+> anyone swaps in 08242234"* — which reads as though they evaluated my suggestion against the
+> never-substitute prohibition and rejected it. **They did not, and they corrected me unprompted:**
+> *"I never evaluated `master_for('model_portfolios')` ... and reject them. I went to `build_fact_position.py`
+> to find what the builders read, saw `PURPOSE="advisor_intelligence"` sitting there, and anchored on it
+> because MATCHING THE CONSUMER WAS THE WHOLE POINT OF THE FIX — the defect was two ends of one orchestrator
+> disagreeing, so I was not going to introduce a third source. The 0824/0833 test came after."*
+>
+> **So the substitution was blocked by a METHOD, not by vigilance — and that is the stronger finding, not the
+> weaker one.** DS's framing, which I am adopting: *"That method is worth keeping precisely because it works
+> when the agent is NOT paying attention to the hazard — which is the only kind of protection that scales."*
+> **A control that depends on someone noticing the hazard fails exactly when the hazard is not obvious**,
+> which is the condition under which I wrote the recommendation in the first place.
+>
+> **THE TRANSFERABLE RULE:** when re-pointing a producer, **derive the source from the CONSUMING module's own
+> declaration** rather than choosing one at the call site. It is correct even when nobody involved is
+> thinking about the two-buckets law — and here, nobody was.
+
+**The routing worked; my content was the defect in it, and a method neither of us invoked deliberately
+caught it.**
 
 >> **AND IT EXPOSES A REAL LIMIT IN A CONTROL I OVERSOLD EARLIER TODAY.**
 > I told CTO, COO and MSTR that `master_for()` makes 0824-only **"structural, not procedural"** because it
