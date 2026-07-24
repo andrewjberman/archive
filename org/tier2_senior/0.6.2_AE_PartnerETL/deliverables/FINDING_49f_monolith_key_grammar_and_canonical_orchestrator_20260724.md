@@ -135,10 +135,64 @@ sync cannot repopulate `01_raw`; it would run clean, upload nothing, and leave t
 looking like a remediation. **The instrument you would reach for is the one that is retired.**
 
 ### Real fix — ROUTED, NOT DONE
-Re-point `:154-156` at monolith bronze (`list_bronze_dates('rps', master_for('model_portfolios'))`) or at
-`opal-data-bd/schwab/silver/rps/`. **That is a code change in a DS-owned path (CLAUDE.md Rule 13) — routed to
-CTO/DS, not made here.** Worth pairing with making the orchestrator exit non-zero on any `ERR`, so the done
-line cannot read as a pass.
+Re-point `:154-156` at the monolith bronze `rps` partition directories. **Code change in a DS-owned path
+(CLAUDE.md Rule 13) — routed, not made here.** **FIXED by `0.4.0_DS_ClientPlatform` @ `3b0113227`** (14 tests,
+5/5 mutants caught).
+
+---
+
+## ⛔ CORRECTION 2026-07-24T16:5xZ — **TWO ERRORS IN MY OWN RECOMMENDATION ABOVE. THE FIRST WAS A CROSS-MASTER SUBSTITUTION.**
+
+**This section previously recommended:** *"Re-point `:154-156` at monolith bronze
+(`list_bronze_dates('rps', master_for('model_portfolios'))`) or at `opal-data-bd/schwab/silver/rps/`."*
+
+>> **BOTH HALVES OF THAT WERE WRONG, AND BOTH IN THE FORBIDDEN DIRECTION.**
+> **The canonical store is `advisor_intelligence` -> master `08335338` (0833). I recommended 0824.**
+
+Source, `data/canonical/schwab/silver/build_fact_position.py:35-40`:
+```python
+FEED    = "rps"
+PURPOSE = "advisor_intelligence"   # consumer-anchored: writes ONLY to the canonical
+# store (opal-data-bd/canonical/schwab/), whose sole consumer chain is seed G-gold ->
+# the A1 platinum contract D-publishers -> ai.ts ADVI surfaces. No MP consumer exists
+# on this store (the MP chain reads opal-data-schwab silver + SmartX/DynamoDB).
+MASTER  = master_for(PURPOSE)      # -> 08335338
+```
+- `master_for('model_portfolios')` resolves to **08242234 (0824)** — the Model Portfolios book. Wrong tree.
+- `opal-data-bd/schwab/silver/rps/` is the **bd-tree 0824 silver** — the very table this session built. Same
+  substitution by a second route.
+
+**A literal implementation of either would have pointed the 0833 ADVISOR INTELLIGENCE store's date axis at
+the 0824 MODEL PORTFOLIOS book.** That is a direct hit on the standing prohibition — *0833 and 0824 are a
+BUSINESS-PURPOSE split, **never summed and never substituted***, and *a law about ADDITION cannot license a
+SELECTION*. This would have been a **selection**.
+
+**It did not land because DS did not take the recommendation.** They anchored on the module's own
+`FEED`/`PURPOSE` and resolved through `master_for()`, pinning it with three tests including one that fails if
+anyone swaps in `08242234`. **The routing worked; my content was the defect in it.**
+
+>> **AND IT EXPOSES A REAL LIMIT IN A CONTROL I OVERSOLD EARLIER TODAY.**
+> I told CTO, COO and MSTR that `master_for()` makes 0824-only **"structural, not procedural"** because it
+> *"raises `KeyError` on anything unmapped — NO default, NO literal."* That is true **and it is not the
+> protection I implied.** `master_for()` refuses an **UNKNOWN** purpose. It cannot refuse a **WRONG-but-known**
+> one: `master_for('model_portfolios')` is a perfectly legal call that returns the wrong book for this tree.
+> **The gate catches typos and absent purposes. It does not catch a confident caller naming the wrong
+> business purpose — which is exactly what I did, in writing, one hour after praising the gate.**
+> The thing that actually protects this boundary is each module declaring its **own** consumer-anchored
+> purpose and every caller deriving from *that* — never a purpose literal chosen at the call site, including
+> in a recommendation.
+
+**SECOND ERROR, minor, corrected by DS:** I wrote *"worth pairing with making the orchestrator exit non-zero
+on any ERR."* **It already does** — `build_canonical_daily.py:296`,
+`return 0 if n_ok == len(results) else 2` (I verified; DS cited `:267`, pre-their-commit line numbering).
+**An rc-checking caller was never fooled.** What misleads is only the **printed** line
+`=== done: 20/25 steps OK ===`, which reads like success to a human or to anything grepping `done` — the
+original framing, which stands. DS deliberately left the print alone rather than change an output contract in
+the same commit as the date axis, which is right.
+
+**Both corrections are mine. Neither reached production.** Recording them here because the write-up was
+explicitly built to be implementable without the implementer re-deriving anything — which is exactly what
+makes a wrong recommendation inside it dangerous.
 
 ---
 
