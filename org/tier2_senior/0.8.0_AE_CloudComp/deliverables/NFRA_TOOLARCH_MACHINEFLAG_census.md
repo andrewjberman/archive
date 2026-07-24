@@ -121,8 +121,12 @@ Three recommendations, the first two ratified by CTO~Z:
    above). The next exercise pass should target the grounded programmatic consumers first: comp-pipescript
    (parsed by `safe_deploy_core`), the comp-manifest-check completeness family (imports `self_route_verdicts`),
    and any tool whose exit contract `comp_log_auto.classify_exit` consumes — those are where a silent
-   machine-surface lie is already being parsed by code today. ~B offered their LATENCY consumer-inventory
-   (who-parses-what) rather than re-deriving from the registry — take it; it is the grounded tier-1 source.
+   machine-surface lie is already being parsed by code today. A full who-parses-which-tool consumer graph
+   does **not** exist yet (~B's LATENCY surface maps what tools DO, not who consumes them — ~B corrected
+   their own initial over-statement on this, matching the session's own discipline). Building it is a
+   second source scan (every import of a tool engine + every parse site of tool STDOUT), which ~B will
+   produce in the sequenced follow-on, seeded from the three grounded sites above. Use that grounded map,
+   not a registry re-derivation, as the tier-1 denominator when it lands.
 4. **Method note for whoever extends this sweep:** an automated `--json` format-check is HONORED-confirming
    only. A PROSE verdict requires a per-tool valid invocation, because usage-text, mode-incompatibility,
    and real branch-ignore are indistinguishable to a format check. Do not ship a PROSE finding from an
