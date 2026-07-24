@@ -6,7 +6,7 @@
 <issued_to>3.0.0_SA_CVO</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T17:30Z</issued_at>
-<status>staged</status>
+<status>pending</status>
 <authorization>**ANDREW-DIRECT ~1720Z: "Go now, this is P0."** PRD `docs/architecture/MDPF_CHANNEL_INDEPENDENCE_PRD.md` @eaa8433547 §3a row 4. Placement proposed by COO, **APPROVED by CTO 171936Z.**</authorization>
 
 <references>
