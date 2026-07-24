@@ -180,7 +180,22 @@ Swept across **all 407 non-null dates**: Global total equals the sum of the per-
 
 **Claim under test (CTO, explicitly labelled INFERRED):** *the +408 is Cottonwood entering via the frontier stamp.*
 
-> ## VERDICT: **CONFIRMED in direction and dominant driver — REFUTED as to magnitude and sufficiency.**
+> ## VERDICT: **CONFIRMED in direction and dominant driver — REFUTED as to magnitude, sufficiency, AND MECHANISM.**
+>
+> **AMENDED 2026-07-24 post-CVO (`3.0.0_SA_CVO` @`6e6c8af47`, verified on my own bytes before folding).**
+> My original verdict line claimed two refutations and my §3.1/§4 data supported a **third** that the line did
+> not state. The claim under test is *"the +408 is Cottonwood entering **via the frontier stamp**."* On the
+> served bytes, **cottonwood's `count_provenance` @2026-07-22 is `measured`** — the `frontier_stamp` belongs
+> to **49F and Global**, not to cottonwood. **Cottonwood does not enter via the frontier stamp.** I had the
+> fact (finding #4 identifies the 49F class flip) but left the mechanism clause unchallenged in the verdict
+> line. Corrected here because verdict lines are what downstream readers quote.
+>
+> | firm | `count_provenance` @2026-07-22 | count |
+> |---|---|---|
+> | 49financial | **frontier_stamp** | 7,026 |
+> | inflection | measured | 534 |
+> | cottonwood | **measured** | 442 |
+> | GLOBAL | **frontier_stamp** | 8,094 |
 
 **What my decomposition confirms (from served bytes, not from the brief):** Cottonwood *does* enter at 07-22 — `source_absent` → 442 accounts across 5 core models, its first contribution to the Global count — and it is by far the largest single mover. That much of the inference survives contact with the data.
 
@@ -189,7 +204,12 @@ Swept across **all 407 non-null dates**: Global total equals the sum of the per-
 1. **The magnitude is wrong, and wrong in the direction that misleads.** Cottonwood's entry is **+442**, not +408. Reading "+408 = Cottonwood" understates Cottonwood by 34 accounts and, more importantly, implies the step *is* the entry.
 2. **The +408 is a NET of three independent movements, two of which the attribution omits.** 49F **−114** and INF **−12** move the other way and **mask** the entry. A reader told "+408 is Cottonwood" cannot see that 49F's contribution fell across this seam.
 3. **+92 of the step is not a firm at all.** It is composition: +85 SMA-preserve and +7 frontier-stamp roster split. **No firm-level decomposition can ever sum to 408**, because 92 of it is not firm-attributable — which is exactly why the "+408 by firm" framing needed measuring rather than inheriting.
-4. **49F's −114 is itself a basis artifact, not attrition.** 49F flips `measured` → `frontier_stamp` at 07-22, i.e. its count stops coming from the served-real import and comes from the account-distribution roster frontier with **its own `as_of`**. So −114 is a *source swap*, not 114 lost accounts. **The seam is wider than the PRD states: it is not "Cottonwood arrives," it is "two of three firms change count source on the same date."**
+4. **The mechanism clause is misattributed across firms** (added post-CVO). Cottonwood enters as `measured`;
+   the frontier stamp is 49F's and Global's. So "Cottonwood entering via the frontier stamp" conflates two
+   different firms' basis changes that happen to land on the same date. **This matters for W-2/W-3:** the
+   +92 residual is a *frontier-stamp* effect (49F/Global) and the +442 is a *measured cottonwood* entry —
+   two independent mechanisms, and a fix aimed at one will not touch the other.
+5. **49F's −114 is itself a basis artifact, not attrition.** 49F flips `measured` → `frontier_stamp` at 07-22, i.e. its count stops coming from the served-real import and comes from the account-distribution roster frontier with **its own `as_of`**. So −114 is a *source swap*, not 114 lost accounts. **The seam is wider than the PRD states: it is not "Cottonwood arrives," it is "two of three firms change count source on the same date."**
 
 **The discriminating evidence** (what would have falsified me): if the attribution were complete, Σ(per-firm deltas) would equal +408 and the Global-vs-Σfirms residual would stay 0 as it does on the other 406 dates. It is +316 and +92 respectively. The residual sweep across all 407 non-null dates is the control — it finds 07-22 and nothing else, so this is not a systemic reconciliation gap I mis-measured, it is specific to the one frontier-stamp date.
 

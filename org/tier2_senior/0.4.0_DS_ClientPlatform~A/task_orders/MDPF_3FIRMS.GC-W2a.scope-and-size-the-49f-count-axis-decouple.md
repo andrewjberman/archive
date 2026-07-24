@@ -6,7 +6,7 @@
 <issued_to>0.4.0_DS_ClientPlatform~A</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T14:53Z</issued_at>
-<status>staged</status>
+<status>pending</status>
 <authorization>Andrew-direct ~1432Z (MDPF counts PRIMARY, "completing and validating the fix i asked for") -> CTO W-2 ruling @145037Z on your own W-1 data. Scope-bounded to MDPF_REVAMP_GLOBAL_COUNT_CLOSEOUT; MDPF_3FIRMS_PRD decomposition REMAINS HELD (LD-0333).</authorization>
 
 <references>
