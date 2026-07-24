@@ -27,7 +27,41 @@ Two independent axes, not one:
 
 **Δ = −187,425,395.30 (−9.97%).**
 
-> ### AMENDMENT 2026-07-24 ~1442Z — the Δ is TWO STACKED EFFECTS, and "D_00b/D_01 are on the gold basis" (below) is IMPRECISE
+> ### ⛔ AMENDMENT-2 2026-07-24 ~1525Z — **AMENDMENT-1 BELOW IS RETRACTED. THE "FRAME EFFECT" DOES NOT EXIST.**
+>
+> **Measured** (`client_performance.parquet`, latest date 2026-07-22, **all 3,021 relationships**):
+>
+> ```
+> total_aua sum                            1,692,561,337.83
+> aua_taxable + aua_tax_deferred + aua_tax_exempt   1,692,561,337.83
+> GAP                                      0.00   (0.000%)
+> relationships with total_aua>0 and zero tax attribution:  0
+> relationships with partial tax attribution:               0
+> ```
+>
+> **The tax buckets exhaust `total_aua` exactly.** There is no −4.96% frame effect and no third quantity of
+> the kind Amendment-1 describes. **The whole −9.97% is the BASIS difference** — held 07-17 `certified_aua`
+> (1,879,986,733.13) versus **today's** perf total (1,692,561,337.83), which is precisely what D_00b, D_01 and
+> the tax rows all serve.
+>
+> **How Amendment-1 went wrong, recorded because the failure is the useful part:** `1,780,856,838.03` is **not**
+> a live gold total — it is the `gold_aua` **field inside the 07-17 cert file**, which I read and quoted and DS
+> restated. **Neither of us ever computed it.** I then reported a *source-confirmed mechanism* for the resulting
+> phantom gap (`C_02:175` dropping null `relationship_id`) — every line true about the code, **explaining a
+> difference that is not there.** Reading source is not grounding the number; I never measured the gap I was
+> explaining, and the real mechanism made the wrong conclusion read as rigorous.
+>
+> **One genuinely new measured item replaces it, with NO mechanism offered:** for the same date 2026-07-17 the
+> perf table totals **1,683,764,131.09** while the cert's own `gold_aua` says **1,780,856,838.03** — a
+> **~$97.1mm** disagreement between two of our own bases. Not explained here, deliberately. *(And not a timing
+> effect: the book moved only +$8.8mm / +0.52% from 07-17 to 07-22.)*
+>
+> **Everything below this line in Amendment-1 is superseded. §5's remedy discussion reverts to the original:
+> the basis question covers the whole divergence.**
+>
+> ---
+>
+> ### ~~AMENDMENT 2026-07-24 ~1442Z — the Δ is TWO STACKED EFFECTS~~ *(RETRACTED — see Amendment-2 above)*
 >
 > Chasing this audit's own §4 residual produced a correction to the audit. **The headline stands** — three
 > artifacts, one run, −187,425,395.30 / −9.97%, invisible. **The decomposition changes.** There are **three**
