@@ -4,7 +4,7 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~A</issued_to>
 <date>2026-07-23</date>
-<status>pending</status>
+<status>complete</status>
 <priority>P1 — you found the class; it is almost certainly not one tool</priority>
 
 <authority>
