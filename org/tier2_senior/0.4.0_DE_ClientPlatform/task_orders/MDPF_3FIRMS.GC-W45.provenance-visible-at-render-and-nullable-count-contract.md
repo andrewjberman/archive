@@ -9,6 +9,33 @@
 <status>pending</status>
 <authorization>Andrew-direct ~1310Z at CTO's terminal ("have COO decompose those to the relevant agents, and call MSTR for spawn") -> CTO PRD @5d7522128 -> COO decomposition. SCOPE-BOUNDED: MDPF_REVAMP_GLOBAL_COUNT_CLOSEOUT W-1..W-7 only. The broader MDPF_3FIRMS_PRD decomposition REMAINS HELD on Andrew's word (LD-0333) — do not let the two merge.</authorization>
 
+<addendum id="w4-elevated-permanent-control" added="2026-07-24T15:01Z" authority="ANDREW-DIRECT ~1456Z (relayed CTO 145636Z) + CTO consequence-surfacing">
+>> **W-4 IS ELEVATED. IT IS NO LONGER PARALLEL NICE-TO-HAVE WORK — IT IS HALF THE DELIVERABLE, AND IT IS
+   NOW THE ONLY REMAINING CONTROL ON A PERMANENT CONDITION.**
+
+Andrew ~1456Z, VERBATIM: *"We've already established Cottonwood cannot get backfill counts so no need to
+explore that at this time."*
+
+**THE CONSEQUENCE:** if Cottonwood can NEVER get backfill counts, then the value/count basis divergence is
+**PERMANENT**, not a temporary gap awaiting a fix. On Cottonwood's covered dates the artifact will carry a
+**3-FIRM VALUE and a 2-FIRM COUNT FOREVER** — exactly the `band_2firm` class already in the served bytes
+(`meta.count_basis_note`: *"composes 49F+INF ONLY ... while model_value includes the cottonwood band"*).
+
+**Backfill closes the HOLES. It does NOT close the BASIS SPLIT, and now nothing ever will at the source.
+The only honest outcome is that the chart SAYS SO where it renders.** That is this TO.
+
+⚠ **SCOPE BOUNDARY — the permanent split applies to ~47 dates, NOT the series.** Cottonwood is covered on
+**47 of 447 dates** (`cottonwood_covered_first` = 2026-05-28). For the ~400 dates before that, a 2-firm
+count is **CORRECT** — Cottonwood was not there. **Do not render those as a basis anomaly.** A render that
+flags 400 correct dates as divergent is a worse defect than the one being fixed.
+
+🔒 **HARD PRECONDITION (CTO 145037Z, hardened 145636Z): the class-set convergence with
+`0.4.0_DS_ClientPlatform~A` is now BLOCKING on W-4, not a note.** They measured the `exempt_absorbed`
+COLLISION (18 fallback-labelled dates; 07-20 mis-branched). **If W-4 is the permanent control, it must not
+render a mislabel** — a faithful render of an unreliable label ships a confident wrong statement, forever.
+Converge the class set with them (enumerated vs fallback, 07-20 resolved) **BEFORE** the render lands.
+</addendum>
+
 <addendum id="w5-sequencing-and-scope" added="2026-07-24T14:15Z" authority="CTO 140508Z + 141502Z, reconciled by COO 141553Z">
 **READ THIS BEFORE THE SCOPE SECTION — IT NARROWS W-5 AND UN-BUNDLES ITS SEQUENCING.**
 

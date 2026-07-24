@@ -15,6 +15,28 @@
   <ref type="precedent">`0.6.2_AE_PartnerETL~A`, measured 2026-07-24 on the cot tree: `_as_of_for(:291-297)` returns run_date unless `BD_SNAPSHOT_ASOF_LAG_BDAYS > 0`, and `land_to_s3` keys off `end_date` = the as-of — **so each nightly can land exactly ONE as-of: its own run date.**</ref>
 </references>
 
+<scope_narrowed authority="ANDREW-DIRECT ~1456Z, relayed by CTO 145636Z" added="2026-07-24T15:00Z">
+**READ THIS FIRST — IT NARROWS THE ASSESSMENT TO TWO NAMED SYSTEMS AND REMOVES A THIRD.**
+Andrew, VERBATIM: *"Yes so in this case the surfaces in question are fairly small, its SMartX for 49, and
+Eclipse for Inflection. We've already established Cottonwood cannot get backfill counts so no need to
+explore that at this time."*
+
+```
+49F count axis  -> SMARTX      ASSESS   (21 of the 22 trading-day holes)
+INF count axis  -> ECLIPSE     ASSESS   ( 1 of the 22: 2026-05-21)
+COTTONWOOD      -> OUT OF SCOPE.  ESTABLISHED as incapable of backfill counts.
+                   DO NOT ASSESS IT. Do not re-derive the finding. Do not spend
+                   a probe confirming what the sovereign says is settled.
+```
+The A/B/C/D assessment below applies **UNCHANGED** to those two, and **B (fidelity) still governs.**
+
+⚠ **A BOUNDARY THAT REMOVES WORK — DO NOT "FIX" THE PRE-05-28 ERA.** Cottonwood is covered on only
+**47 of 447 dates** (`meta.firm_axis_reconciliation`, `cottonwood_covered_first` = 2026-05-28). For the
+~400 dates BEFORE 05-28, a 2-firm count is **NOT A DEFECT** — Cottonwood simply was not there. Those are
+`measured` and **CORRECT**. Any "gap" you find before 2026-05-28 is the absence of a firm that did not
+exist in the data yet.
+</scope_narrowed>
+
 <scope>
 **THE ORDER IS THE INSTRUCTION.** Andrew said capability is assessed and validated **FIRST**. This TO is
 that assessment. **It authorizes NO backfill.** Backfill TOs are authored afterwards, one per capable
