@@ -6,7 +6,7 @@
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T14:05Z</issued_at>
-<status>pending</status>
+<status>complete</status>
 <authorization>Andrew-direct ~1310Z at CTO's terminal ("have COO decompose those to the relevant agents, and call MSTR for spawn") -> CTO PRD @5d7522128 -> COO decomposition. SCOPE-BOUNDED: MDPF_REVAMP_GLOBAL_COUNT_CLOSEOUT W-1..W-7 only. The broader MDPF_3FIRMS_PRD decomposition REMAINS HELD on Andrew's word (LD-0333) — do not let the two merge.</authorization>
 
 <addendum id="w4-declared-contract-not-warning" added="2026-07-24T15:05Z" authority="ANDREW-DIRECT ~1500Z (relayed CTO 150258Z) — SUPERSEDES the addendum below where they conflict">
