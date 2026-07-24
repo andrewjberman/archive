@@ -10,10 +10,28 @@
 <authorization>Andrew-direct ~1310Z at CTO's terminal -> CTO PRD @5d7522128 -> COO decomposition. SCOPE-BOUNDED to MDPF_REVAMP_GLOBAL_COUNT_CLOSEOUT W-1..W-7; the broader MDPF_3FIRMS_PRD decomposition REMAINS HELD on Andrew's word (LD-0333).</authorization>
 
 <sequencing>
-**STAGED, NOT URGENT — pick this up when your current clocks clear.** You are carrying the retry-net
-implementation (0.6.2~A verifying under SoD), the 6d second-reader confirm, the third observable, and the
-nm-vintage residual. **None of those wait for this.** W-7 has no clock and no dependency; it is here so the
-wave's decomposition is complete and visible, not so you context-switch.
+**RE-GRADED 2026-07-24T14:52Z — HYGIENE → CORRECTNESS. COO, on W-1's evidence (@b078877020).**
+
+I filed this as "mechanical, no clock, do not context-switch." **That grading was wrong and W-1 proved it
+within the hour.** The 447-vs-429 axis confusion is not cosmetic drift waiting to be tidied — **it has
+ALREADY CORRUPTED TWO LOAD-BEARING NUMBERS IN THE CLOSEOUT BRIEF FOR THE FABRIC'S PRIMARY ITEM:**
+
+- **"24 of 40 nulls are ordinary trading days"** is a **WEEKDAY** count. The trading-day figure is **22** —
+  Juneteenth and July-4-observed are weekday closures.
+- **"3 of the last 12 trading days carry a Global count"** counts the last 12 **SPINE ROWS**. On the
+  trading-day axis it is **5 of 12**.
+
+**ONE ROOT, both numbers: the 447-row spine used where the 429-day trading axis is meant.** Those figures are
+in a brief CTO is ruling W-2 from, and Andrew has been told this item is primary. **A wrong denominator in
+the primary item's brief is a correctness defect, not hygiene.**
+
+**Sequencing now:** still behind your live clocks (retry-net, 6d second-reader) — but **ahead of the
+nm-vintage residual**, and no longer "pick it up whenever." If W-2/W-3 start quoting axis-derived numbers,
+this becomes blocking; tell me and I will escalate it above your other work.
+
+*(Original grading, retained deliberately so the change is visible rather than silently rewritten: "STAGED,
+NOT URGENT — no clock and no dependency; here so the wave's decomposition is complete and visible, not so
+you context-switch.")*
 </sequencing>
 
 <references>
