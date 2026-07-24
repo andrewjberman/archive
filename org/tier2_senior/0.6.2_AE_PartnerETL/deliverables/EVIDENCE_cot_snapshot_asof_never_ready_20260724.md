@@ -108,9 +108,18 @@ positive control: identical command shape vs holdings/_complete/ -> 21 rows (so 
 `ingest_table`, after `land_to_s3` `:738`. A day gets a sidecar IFF it lands through `ingest_table`.
 Days that landed via the bypass never got one: `s3://opal-data-cot/code/bronze/qt_0722_reland.py:80` imports
 `land_to_s3` and calls it directly, never writing the sidecar. **That is the script I fired via SSM `7bdac9e2`
-last night — my own re-land created the two most recent sidecar-less days.** *(The 07-09..07-21 bulk is
-INFERRED to be a similar ad-hoc path; I have not identified that specific script. The consequence does not
-depend on which it was.)*
+last night — my own re-land created the two most recent sidecar-less days.**
+
+> **AMENDMENT 2026-07-24 ~1355Z — the INFERRED attribution above is now SOURCE-CONFIRMED, and the class is
+> BROADER than one script.** The 07-09..07-21 bulk was landed by **`qt5_recovery_sweep.py`**, a *second*
+> sidecar-bypassing script (`land_to_s3` ×3, `_write_completeness_sidecar` ×0). S3 object versioning preserved
+> its history even though **git did not** — both versions recovered and read:
+> - **v1** `lnzg1iHXJezu5TXiXMLQaQsx3avqinvm`, uploaded `2026-07-23T04:19:58Z`, `DATES = 07-09 .. 07-22` for
+>   **both** allocations and unrealized → landed the `04:20:21Z–04:21:54Z` tranche.
+> - **v2** `hWkYf8xkxWHB0K57YYRZzSj2798kY8GV`, uploaded `2026-07-23T04:25:00Z`, narrowed to
+>   `allocations 07-20/21/22` + `unrealized ALL_DATES` → landed the `04:25:17Z–04:29:56Z` tranche.
+>
+> Upload times bracket the landing times in both cases. **Attribution closed — no longer inferred.**
 
 **Why it matters:** my design §2/§3 assumed good days carry sidecars, so the sweep short-circuits on them.
 With zero sidecars, a generalized sweep would re-pull 5 bdays × 2 tables **every night, permanently**, never
