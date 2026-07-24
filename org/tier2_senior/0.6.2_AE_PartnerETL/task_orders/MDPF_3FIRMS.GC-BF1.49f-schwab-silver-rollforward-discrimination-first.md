@@ -6,7 +6,20 @@
 <issued_to>0.6.2_AE_PartnerETL~C</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T15:26Z</issued_at>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 20260724T1638Z. Ledger schwab-0824-silver-rollforward-20260724 CLOSED, all 8 legs proven,
+     nothing stranded (NEVER#6). Acceptance criteria 1-4 all met:
+     (1) discrimination reported FIRST and separately (153852Z COO / 153917Z CTO) naming what was inspected;
+     (2) PRESENT branch -> all seven legs run, 42/42 silver partitions landed + content-verified, and
+         schwab/silver/rps demonstrated within max_lag 2 by EXERCISING the deployed trigger's own
+         _check_schwab_rps() (fresh=True, behind=1) with a positive control reproducing its pre-run
+         log line and mutants proving it can still fail -- condition cited from lambda_function.py:453;
+     (3) n/a (not the ABSENT branch); (4) explicit-Z throughout, no ad-hoc gold run to validate.
+     BEYOND SCOPE, done because leaving it would have been a silent partial: canonical store caught up
+     20260715 -> 20260723 (54/54 partitions) around a source-confirmed defect in build_canonical_daily.py.
+     TWO defects found and ROUTED, not fixed (Rule 17a / Rule 13):
+       org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/FINDING_49f_monolith_key_grammar_and_canonical_orchestrator_20260724.md -->
+
 <!-- 0.6.2_AE_PartnerETL~C 20260724T1531Z: picked up from the TO commit 62594e9911 (no inbox GO had landed yet).
      DISCRIMINATION reported 153852Z/153917Z BEFORE any conversion, per the TO's first deliverable:
      PRESENT-and-unconverted in monolith bronze, all 11 consumed types complete through 20260723, third state
