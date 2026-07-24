@@ -27,6 +27,43 @@ Two independent axes, not one:
 
 **Δ = −187,425,395.30 (−9.97%).**
 
+> ### AMENDMENT 2026-07-24 ~1442Z — the Δ is TWO STACKED EFFECTS, and "D_00b/D_01 are on the gold basis" (below) is IMPRECISE
+>
+> Chasing this audit's own §4 residual produced a correction to the audit. **The headline stands** — three
+> artifacts, one run, −187,425,395.30 / −9.97%, invisible. **The decomposition changes.** There are **three**
+> quantities, not two:
+>
+> | | value | what it is |
+> |---|---|---|
+> | (1) | 1,879,986,733.13 | held 07-17 `certified_aua` — D_00 headline + site-2 pct denominator |
+> | (2) | 1,780,856,838.03 | `gold_aua` — **the 07-17 cert's own recorded field** |
+> | (3) | 1,692,561,337.83 | **the GAINS/TAX frame** — D_00b buckets, D_01 donuts, *and* the tax rows |
+>
+> ```
+> (1)->(2)  -99,129,895.10  = -5.27%   BASIS effect  (held cert vs gold)
+> (2)->(3)  -88,295,500.20  = -4.96%   FRAME effect
+> combined  1,692,561,337.83 / 1,879,986,733.13 = 90.03%
+> ```
+>
+> Three independent code paths produce (3) to the cent, so it is a coherent quantity, not a coincidence.
+> **Consequence for the remedy in §5:** a shared resolver closes the **−5.27% only** and leaves the −4.96%
+> entirely untouched. Scoping it as "the fix for the −9.97%" would be half true.
+>
+> **The frame effect, source-confirmed — this closes §4's second residual with a mechanism:**
+> `C_02.client_performance.py:135-196` (`load_tax_status_split`) does **not** partition `total_aua`. It sums
+> `aua_current` over the 03c `CANONICAL_ACCOUNT_GAINS` partitions, joins `accounts_dimension` for
+> `tax_status`/`relationship_id`, then **filters**: `gains = gains[gains['relationship_id'].notna()]` (`:175`),
+> against an `acct_lookup` already reduced by `drop_duplicates('account_id')` (`:150`). `total_aua` comes from
+> the client-performance frame. **The two were never expected to reconcile — no basis ruling can make them
+> agree.** Two loss paths are visible at source (accounts absent from `accounts_dimension` dropped by the
+> `notna` filter; accounts in the perf frame with no 03c gains row never entering a bucket); **mechanism
+> identified, magnitude NOT attributed between them** — that needs measurement I have not done.
+>
+> **Still un-reground, flagged not claimed:** (2) is the cert's **frozen 07-17** `gold_aua`. DS reported
+> today's live `perf_latest['total_aua'].sum()` as the same figure *to the cent*. That is either a live sum that
+> genuinely has not moved (plausible — the allocations feed stalled after 07-17) or an inherited number. **Not
+> established; do not cite (2) as "today's gold total" on this document's authority.**
+
 ---
 
 ## 2. What they actually do
