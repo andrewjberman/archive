@@ -6,8 +6,39 @@
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T14:05Z</issued_at>
-<status>staged</status>
+<status>pending</status>
 <authorization>Andrew-direct ~1310Z at CTO's terminal ("have COO decompose those to the relevant agents, and call MSTR for spawn") -> CTO PRD @5d7522128 -> COO decomposition. SCOPE-BOUNDED: MDPF_REVAMP_GLOBAL_COUNT_CLOSEOUT W-1..W-7 only. The broader MDPF_3FIRMS_PRD decomposition REMAINS HELD on Andrew's word (LD-0333) — do not let the two merge.</authorization>
+
+<addendum id="w5-sequencing-and-scope" added="2026-07-24T14:15Z" authority="CTO 140508Z + 141502Z, reconciled by COO 141553Z">
+**READ THIS BEFORE THE SCOPE SECTION — IT NARROWS W-5 AND UN-BUNDLES ITS SEQUENCING.**
+
+DE briefly held two directions from two execs: CTO's 140508Z ("land W-5 NOW, standalone") and COO's
+140652Z ("W-4+W-5 are one piece, not splitting them"). CTO raised the conflict himself and called it
+his to fix. **ONE STORY:**
+- **SAME LANE.** W-4 and W-5 stay together under this TO. COO owns lane composition.
+- **W-5 DOES NOT WAIT — it lands FIRST, as its own commit.** CTO owns sequencing and is right: W-5 is
+  independently grounded on DE's own measurement (40/447 nulls in `aggregate[]` and in each of the 5
+  `by_model` series) and **no W-1 outcome can falsify it.** Widening a declaration to match a measured
+  reality removes a false assertion without committing us to any explanation of the nulls.
+- **W-4 proceeds in the same lane**, waiting on nothing.
+Bundled lane, unbundled sequencing.
+
+**W-5 SCOPE NARROWED — SUPERSEDES AC-2 BELOW:**
+```
+IN SCOPE, BOTH:  portal-proxy.ts:213-214   <- the SOURCE (the layer that produces the value)
+                 aum.ts:404-405            <- the RE-DECLARATION
+OUT OF SCOPE:    the other 7 declarations  -- "UNVERIFIED, NOT INNOCENT" (CTO)
+```
+Fixing the re-declaration alone leaves the contract lying at the layer that produces the value — DE's
+finding, and the reason this was never a one-line fix. The other 7 are **not cleared, merely not
+measured.**
+
+**AC-1 IS UNCHANGED AND NOW MATTERS MORE:** still enumerate ALL sites and state the denominator, then
+fix the two pairs and **NAME THE REMAINING SITES EXPLICITLY AS UNCOVERED.** That is the scope-coverage
+law applied honestly — an un-exercised scope is named UNCOVERED, never silently omitted and never
+implied fine. A reader must be able to tell *"fixed 2 of 9, here are the 7 unverified"* from
+*"fixed everything."*
+</addendum>
 
 <references>
   <ref type="prd">docs/architecture/MDPF_REVAMP_GLOBAL_COUNT_CLOSEOUT.md — W-4 (§6), W-5 (§4.4), Defect B (§3.2), acceptance criteria (§6)</ref>
