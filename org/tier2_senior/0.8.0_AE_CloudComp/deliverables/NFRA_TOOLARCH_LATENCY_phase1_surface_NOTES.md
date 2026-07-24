@@ -93,7 +93,30 @@ Consequences, both against me:
 EXIST* — the correct use per the mandate — and must never silently become a claim about what agents can
 **FIND**. The surface records therefore carry **EXISTS vs ROUTABLE as distinct axes**, and the
 population that *exists, is declared, and has no consumer able to route to it* is reported as a
-first-class finding rather than census noise. It is the sharper sibling of the ROUTE finding: there, the
+first-class finding rather than census noise.
+
+### ROUTABLE — re-defined, STRICTER (CTO~Z correction 2026-07-24T033818Z)
+
+~Z corrected their own earlier account: they had source-confirmed the fuzzy **backstop** and spoken
+about "the router" — the file's own docstring names **two** layers. Ground truth:
+
+> **`comp-which` RANKS off a CURATED VOCABULARY TABLE inside `.tools/comp-which`.** The ranked pool is
+> **68 (= tools)**, not 105 (= entries). `entries[]` feeds the fuzzy **backstop** and does **not create a
+> routing candidate at all.**
+
+So **ROUTABLE = has curated vocabulary in `.tools/comp-which`.** `tools_index` presence → NOT routable.
+`entries[]` presence → NOT routable either. **Size the population against the CURATED TABLE, never the
+registry.** The declared-but-unreachable population is therefore **LARGER** than the earlier framing
+implied, and the axis is sharper, not weaker.
+
+**Why this lands harder than a definition change:** a tool can be REGISTERED (`tools_index`),
+CONTRACTED (`comp-output-contracts`), and ENTRIED (`entries[]`) — three surfaces all asserting it exists
+— and still be unreachable to every agent, because the only surface that creates a routing candidate is
+a fourth, curated, hand-maintained table. **Same structural shape as the `subcommands` field: populated
+on everything, gated by nothing, consumed by less than you would assume.** The census will therefore
+report, per unreachable derivation, **which of the four surfaces it IS present on** — "declared in three
+places and routable from none" is a far sharper finding than a bare count, and it tells TOOLSEM where
+the leverage is. It is the sharper sibling of the ROUTE finding: there, the
 rail routed to a tool that could not answer; here, the estate declares derivations no router can reach.
 Same family — **the map and the territory disagreeing in a direction nothing measures.**
 
