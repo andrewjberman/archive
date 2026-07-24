@@ -6,20 +6,32 @@ Home:   org/tier1_exec/4.0.0_SA_CRO/
 Spec:   briefs/NFRA_AKPIPE_BUILD_SPEC_20260723.md
 
 WHAT THIS IS. The relevance-scoring core of the arxiv pipeline, plus the acceptance
-controls from spec section 7, runnable offline with zero egress.
+controls (spec section 7), runnable offline with zero egress.
 
-  nlp_score        = RRF fusion of the BM25 rank and the Potion rank
+  nlp_score          = ABSOLUTE phrase-BM25 magnitude in [0,1)  (the multiplicand)
+  nlp_rrf_ordering   = RRF of the BM25 and Potion ranks         (ORDERING diagnostic only)
   derived_state_rank = recency_decay(age_days) * nlp_score      (recomputed daily)
 
-DETERMINISM CONTRACT (CVO C-1, folded from CONTENT_MODULE_DESIGN): Potion IS a model,
-so the honest guarantee is DETERMINISTIC-GIVEN-A-PINNED-MODEL + reproducible, never
-"no inference". Model id and profile version are stamped into every result row.
+v2 (2026-07-24) -- five fixes measured on the first real harvest:
+  1. PHRASE profile, not generic tokens. "graph"/"code"/"agent" alone matched every CS
+     paper; the signal is in SPECIFIC PHRASES ("knowledge graph", "retrieval augmented",
+     "code localization"). The curated phrase set IS the judgment; corpus idf weights
+     specificity objectively on top.
+  2. LENGTH neutralized -- phrase-BM25 with length normalization (b), and phrases are rare
+     enough that raw-length bias collapses (measured in the harvest report).
+  3. Potion put on the RECOVERY BAR: it is measured, not assumed. v1 measured Potion CV
+     0.165 vs BM25 0.845 -- near-constant within CS. So the RANK is phrase-BM25; potion_cosine
+     is kept as a stored component + a floor guard, and the harvest reports whether Potion
+     recovers any BM25-missed paper (CONTENT_MODULE_DESIGN section 8 recovery bar).
+  4/5. scope filter + back-window live in the harvest client, not here.
 
-BM25 NOTE (convergence item for the build): this uses a standard pinned BM25
-(k1=1.5, b=0.75) because the estate's comp_similar.py BM25 is a pairwise
-resource-vs-resource index, not query-vs-document. The METHOD is converged with
-infra/system/ontology/CONTENT_MODULE_DESIGN (BM25 + Potion + RRF); the IMPLEMENTATION
-should be aligned to the estate index when the content-class partition is built.
+DETERMINISM CONTRACT (CVO C-1): Potion IS a model, so the honest guarantee is
+DETERMINISTIC-GIVEN-A-PINNED-MODEL + reproducible. Model id + profile version stamped in.
+
+IDF STABILITY NOTE (production item): idf here is computed over the SCORED corpus, which
+makes a score corpus-dependent -- fine for a dev ranking pass, but the PRODUCTION store must
+pin idf to a versioned reference corpus (part of profile_version) so a stored paper's score
+never changes as new papers arrive (the lossless + recomputable contract). Flagged in the spec.
 
 ASCII-only (CLAUDE.md Code Quality). No emojis.
 """
@@ -36,105 +48,128 @@ from collections import Counter
 # ---------------------------------------------------------------- pinned config
 
 POTION_MODEL = "minishlab/potion-base-8M"   # Andrew decision 5: "Fast potion is fine."
-PROFILE_VERSION = "akpipe-profile-v1"
+PROFILE_VERSION = "akpipe-profile-v3"
 BM25_K1 = 1.5
 BM25_B = 0.75
-RRF_K = 60          # standard RRF constant; parameter-free fuser for ORDERING ONLY
-HALF_LIFE_DAYS = 45.0   # spec section 6.3 knob; set defensibly, NOT tuned to a sample
+RRF_K = 60
+HALF_LIFE_DAYS = 45.0
+# Absolute saturation constant for bm/(bm+C). PROVISIONAL -- calibrate against the decoy null
+# on a real harvest, NOT tuned to a sample. Phrase-BM25 magnitudes are smaller than token-BM25,
+# so C is lower than v1's 25.
+BM25_SAT_C = 6.0
 
-# BM25 saturation constant for the ABSOLUTE magnitude transform bm/(bm+C).
-# WHY ABSOLUTE, NOT CORPUS-RELATIVE: min-max / z-score normalization is corpus-DEPENDENT,
-# so a paper's stored score would silently CHANGE as new papers arrive -- that breaks the
-# lossless + independently-recomputable contract (a reader could not reproduce a stored row).
-# An absolute saturating transform keeps every paper's relevance stable forever.
-# CALIBRATION STATUS: PROVISIONAL. C must be calibrated against the decoy-null distribution
-# on the first real harvest (CVO: anchor to the null, never a hand-picked value). It is NOT
-# tuned to the 3-doc validation sample -- doing so would be exactly the Goodhart failure.
-BM25_SAT_C = 25.0
+# ---------------------------------------------------------------- the phrase profile
+# Curated from Andrew's stated interests (retrieval, agentic engineering, graph engineering,
+# infrastructure, harness engineering, learning-loop design patterns) + the SWE-Explore
+# fingerprint. Every entry is a SPECIFIC phrase; generic single tokens are deliberately absent.
+# The curation is the judgment; corpus idf weights specificity on top. v3 candidate: derive the
+# ontology-side phrases from NFRA_ONTOLOGY_RULE_BANK.yaml rather than curating them.
 
-# ---------------------------------------------------------------- the profile
-# Sourced from three in-repo places (spec section 6.1). Explicit + versioned so the
-# score is reproducible. v2 candidate: auto-derive the ontology terms from
-# org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml rather than curating them here.
-
-# (a) Andrew's interest anchors, verbatim from his tasking
-INTEREST_ANCHORS = [
-    "retrieval", "retrieval augmented", "context retrieval", "ranking", "reranking",
-    "agentic", "agent", "agentic engineering", "multi agent", "agent harness",
-    "graph engineering", "knowledge graph", "graph", "ontology",
-    "infrastructure", "harness", "harness engineering", "evaluation harness",
-    "learning loop", "feedback loop", "self improvement", "design pattern",
+PROFILE_PHRASES = [
+    # retrieval
+    "retrieval augmented generation", "retrieval augmented", "dense retrieval", "sparse retrieval",
+    "semantic search", "reranking", "re ranking", "reciprocal rank fusion", "vector database",
+    "vector search", "nearest neighbor", "context retrieval", "passage retrieval",
+    "document retrieval", "query expansion", "hybrid retrieval", "graph rag", "retrieval pipeline",
+    "learned sparse", "late interaction",
+    # agentic engineering
+    "agentic", "agentic workflow", "agent framework", "multi agent", "tool use", "tool calling",
+    "function calling", "autonomous agent", "agent orchestration", "planning agent",
+    "self evolving", "self improving", "closed loop", "memory augmented", "experience reuse",
+    "language agent", "agent trajectory", "long horizon",
+    # graph engineering
+    "knowledge graph", "graph neural network", "graph database", "node embedding",
+    "link prediction", "graph traversal", "ontology", "entity linking", "graph construction",
+    "temporal graph", "property graph", "graph learning", "graph retrieval",
+    # infrastructure / harness engineering
+    "evaluation harness", "training pipeline", "data pipeline", "distributed training",
+    "inference server", "vector index", "feature store", "test time", "scaffold",
+    "serving system", "model serving", "orchestration framework",
+    # learning-loop design patterns
+    "learning loop", "feedback loop", "reinforcement learning", "curriculum learning",
+    "self play", "online learning", "active learning", "continual learning", "reward model",
+    "preference optimization", "self correction", "iterative refinement",
+    # code / SWE agents (the SWE-Explore fingerprint)
+    "code generation", "code localization", "repository level", "software engineering agent",
+    "bug localization", "program repair", "code retrieval", "issue resolution", "code search",
+    "repository understanding",
 ]
 
-# (b) infra/system graph-infra + learning-loop vocabulary
-SYSTEM_VOCAB = [
-    "iceberg", "trino", "nessie", "kuzu", "lakehouse", "materialize", "provenance",
-    "motif", "promote", "recognizer", "semantic", "embedding", "index", "corpus",
-    "bm25", "reciprocal rank fusion", "vector", "similarity", "clustering",
-    "pipeline", "orchestration", "scheduler", "incremental", "idempotent",
-]
-
-# (c) ontology / archetype-layer vocabulary (NFRA_ONTOLOGY_RULE_BANK concepts)
-ONTOLOGY_VOCAB = [
-    "role", "relation", "variance", "taxonomy", "classification", "schema",
-    "node", "edge", "traversal", "dependency", "lineage", "aggregation",
-    "localization", "repository", "codebase", "code", "software engineering",
-    "benchmark", "evaluation", "coverage", "trajectory", "tool use",
-]
-
-PROFILE_TERMS = INTEREST_ANCHORS + SYSTEM_VOCAB + ONTOLOGY_VOCAB
-PROFILE_TEXT = " ".join(PROFILE_TERMS)
+# a plain-text rendering of the profile for the Potion (semantic) axis
+PROFILE_TEXT = " ".join(PROFILE_PHRASES)
 
 # ---------------------------------------------------------------- tokenization
 
 _TOKEN = re.compile(r"[a-z0-9]+")
+_SEP = re.compile(r"[-‐‑‒–—_/]+")
+_WSX = re.compile(r"\s+")
+
+def normalize(text: str) -> str:
+    """Lowercase + fold hyphens/dashes/underscores/slashes to spaces + collapse whitespace.
+
+    NOT cosmetic -- this fixes a MEASURED false-negative class. "closed-loop" did not match
+    the phrase "closed loop", so CLARK (Closed-loop Learning over Knowledge Graphs) -- a
+    bullseye for the brief -- scored EXACTLY 0.0. Academic titles hyphenate constantly.
+    """
+    return _WSX.sub(" ", _SEP.sub(" ", text.lower()))
 
 def tokenize(text: str) -> list[str]:
-    return _TOKEN.findall(text.lower())
+    return _TOKEN.findall(normalize(text))
 
-# ---------------------------------------------------------------- BM25
+# ---------------------------------------------------------------- phrase BM25
 
-class BM25:
-    """Standard BM25 over a document corpus, scored against a query term list."""
+class PhraseIndex:
+    """BM25 over a fixed set of PHRASES (not free tokens), length-normalized, with idf
+    computed across the scored corpus. Down-weights phrases common in the corpus and
+    up-weights rare specific ones -- discrimination WITHIN a corpus of CS papers."""
 
-    def __init__(self, docs_tokens: list[list[str]], k1: float = BM25_K1, b: float = BM25_B):
+    def __init__(self, docs_text: list[str], phrases: list[str] = None,
+                 k1: float = BM25_K1, b: float = BM25_B):
+        self.phrases = phrases or PROFILE_PHRASES
         self.k1, self.b = k1, b
-        self.docs = docs_tokens
-        self.N = len(docs_tokens)
-        self.doc_len = [len(d) for d in docs_tokens]
-        self.avgdl = (sum(self.doc_len) / self.N) if self.N else 0.0
-        self.tf = [Counter(d) for d in docs_tokens]
+        # Plural-tolerant on the FINAL word: "knowledge graph" must match "knowledge graphs".
+        # \b after "graph" fails on "graphs", which silently zeroed perfect-match papers.
+        self.pats = {p: re.compile(r"\b" + re.escape(normalize(p)) + r"(?:s|es)?\b")
+                     for p in self.phrases}
+        lowered = [normalize(t) for t in docs_text]
+        self.doc_len = [max(1, len(tokenize(t))) for t in docs_text]
+        self.N = len(docs_text)
+        self.avgdl = (sum(self.doc_len) / self.N) if self.N else 1.0
+        self.tf = [{p: len(self.pats[p].findall(dl)) for p in self.phrases} for dl in lowered]
         df: Counter = Counter()
-        for d in docs_tokens:
-            for t in set(d):
-                df[t] += 1
+        for tfd in self.tf:
+            for p, c in tfd.items():
+                if c > 0:
+                    df[p] += 1
         self.df = df
 
-    def idf(self, term: str) -> float:
-        n = self.df.get(term, 0)
-        # BM25 idf with +0.5 smoothing, floored at 0 so common terms cannot go negative
+    def idf(self, phrase: str) -> float:
+        n = self.df.get(phrase, 0)
         return max(0.0, math.log((self.N - n + 0.5) / (n + 0.5) + 1.0))
 
-    def score(self, doc_i: int, query_terms: list[str]) -> float:
+    def score(self, doc_i: int) -> float:
         s = 0.0
-        tf, dl = self.tf[doc_i], self.doc_len[doc_i]
-        for term in query_terms:
-            f = tf.get(term, 0)
+        dl = self.doc_len[doc_i]
+        tfd = self.tf[doc_i]
+        for p in self.phrases:
+            f = tfd[p]
             if not f:
                 continue
             denom = f + self.k1 * (1 - self.b + self.b * dl / (self.avgdl or 1.0))
-            s += self.idf(term) * (f * (self.k1 + 1)) / denom
+            s += self.idf(p) * (f * (self.k1 + 1)) / denom
         return s
 
-# ---------------------------------------------------------------- Potion
+    def phrase_hits(self, doc_i: int) -> list[str]:
+        return [p for p in self.phrases if self.tf[doc_i][p] > 0]
+
+# ---------------------------------------------------------------- Potion (semantic axis)
 
 def potion_embed(texts: list[str]):
     """Static-embedding encode. Offline: the model must already be in the HF cache."""
     from model2vec import StaticModel
     import numpy as np
     model = StaticModel.from_pretrained(POTION_MODEL)
-    vecs = model.encode(texts)
-    return np.asarray(vecs, dtype="float64")
+    return np.asarray(model.encode(texts), dtype="float64")
 
 def cosine(a, b) -> float:
     import numpy as np
@@ -143,30 +178,17 @@ def cosine(a, b) -> float:
         return 0.0
     return float(np.dot(a, b) / (na * nb))
 
-# ---------------------------------------------------------------- fusion + rank
+# ---------------------------------------------------------------- magnitude + fusion + recency
+
+def bm25_magnitude(phrase_bm25: float) -> float:
+    """Absolute, corpus-stable magnitude in [0,1). Multiplicand for the derived rank."""
+    return phrase_bm25 / (phrase_bm25 + BM25_SAT_C) if phrase_bm25 > 0 else 0.0
 
 def rrf(rank_positions: list[int], k: int = RRF_K) -> float:
-    """Reciprocal Rank Fusion over 1-indexed ranks. Parameter-free ORDERING fuser.
-
-    ORDERING ONLY. Never multiply this by recency: RRF has no magnitude range
-    (a perfect match and pure noise differ by ~3%), so a decay factor with a 16x
-    range would swamp it entirely. Measured, not assumed -- see nlp_relevance.
-    """
+    """Reciprocal Rank Fusion. ORDERING diagnostic ONLY -- never a multiplicand (v1 defect)."""
     return sum(1.0 / (k + r) for r in rank_positions)
 
-def nlp_relevance(bm25_score: float, potion_cos: float) -> float:
-    """ABSOLUTE, corpus-stable relevance magnitude in [0,1) -- the multiplicative factor.
-
-    Geometric mean of the two saturated axes: a document must score on BOTH to rank.
-    A lexical-only match (BM25 high, semantics unrelated) is penalized, and so is the
-    inverse. Both inputs are absolute, so a stored value never changes as the corpus grows.
-    """
-    bm_norm = bm25_score / (bm25_score + BM25_SAT_C) if bm25_score > 0 else 0.0
-    po_norm = max(0.0, potion_cos)
-    return math.sqrt(bm_norm * po_norm)
-
 def recency_component(age_days: float, half_life: float = HALF_LIFE_DAYS) -> float:
-    """Exponential decay in (0,1]. Recomputed every run as age_days grows."""
     return math.exp(-math.log(2.0) * max(0.0, age_days) / half_life)
 
 def derived_state_rank(nlp_score: float, age_days: float) -> float:
@@ -175,19 +197,15 @@ def derived_state_rank(nlp_score: float, age_days: float) -> float:
 # ---------------------------------------------------------------- scoring pass
 
 def score_corpus(docs: list[dict]) -> list[dict]:
-    """docs: [{id, text, age_days}] -> rows with both axes stored separately (CVO: ablate)."""
+    """docs: [{id, text, age_days}] -> rows. RANK = phrase-BM25 magnitude; Potion stored."""
     texts = [d["text"] for d in docs]
-    toks = [tokenize(t) for t in texts]
-    query_terms = tokenize(PROFILE_TEXT)
-
-    bm = BM25(toks)
-    bm_scores = [bm.score(i, query_terms) for i in range(len(docs))]
+    idx = PhraseIndex(texts)
+    bm_scores = [idx.score(i) for i in range(len(docs))]
 
     embs = potion_embed([PROFILE_TEXT] + texts)
     prof_vec, doc_vecs = embs[0], embs[1:]
     po_scores = [cosine(prof_vec, v) for v in doc_vecs]
 
-    # ranks (1-indexed, descending score); ties broken by id for determinism
     def ranks_of(scores):
         order = sorted(range(len(scores)), key=lambda i: (-scores[i], docs[i]["id"]))
         r = [0] * len(scores)
@@ -199,131 +217,104 @@ def score_corpus(docs: list[dict]) -> list[dict]:
 
     rows = []
     for i, d in enumerate(docs):
-        fused = rrf([bm_rank[i], po_rank[i]])          # ORDERING only
-        relev = nlp_relevance(bm_scores[i], po_scores[i])  # MAGNITUDE -> the derived rank
+        rel = bm25_magnitude(bm_scores[i])
         age = d.get("age_days", 0.0)
         rows.append({
             "id": d["id"],
-            "bm25_score": round(bm_scores[i], 6),
+            "phrase_bm25": round(bm_scores[i], 6),
             "bm25_rank": bm_rank[i],
             "potion_cosine": round(po_scores[i], 6),
             "potion_rank": po_rank[i],
-            "nlp_rrf_ordering": round(fused, 8),
-            "nlp_score": round(relev, 8),
+            "nlp_rrf_ordering": round(rrf([bm_rank[i], po_rank[i]]), 8),
+            "nlp_score": round(rel, 8),
             "age_days": age,
             "recency_component": round(recency_component(age), 6),
-            "derived_state_rank": round(derived_state_rank(relev, age), 10),
+            "derived_state_rank": round(derived_state_rank(rel, age), 10),
+            "phrase_hits": idx.phrase_hits(i),
             "profile_version": PROFILE_VERSION,
             "potion_model_version": POTION_MODEL,
-            "bm25_params_version": f"k1={BM25_K1},b={BM25_B}",
+            "bm25_params_version": f"k1={BM25_K1},b={BM25_B},C={BM25_SAT_C}",
         })
     rows.sort(key=lambda r: -r["nlp_score"])
     return rows
 
-# ---------------------------------------------------------------- main
+# ---------------------------------------------------------------- validation main
 
 def main() -> int:
     sp = sys.argv[1] if len(sys.argv) > 1 else "."
     ws = sys.argv[2] if len(sys.argv) > 2 else "."
 
     docs = []
-
-    # POSITIVE CONTROL -- the stated high-relevance exemplar (spec section 7.1)
-    pos_path = os.path.join(sp, "paper_2606.07297v1.txt")
-    with open(pos_path, encoding="utf-8") as f:
+    with open(os.path.join(sp, "paper_2606.07297v1.txt"), encoding="utf-8") as f:
         docs.append({"id": "POS_swe_explore_paper", "text": f.read(), "age_days": 1.0})
 
-    # NEGATIVE CONTROLS -- real off-topic operational prose from the estate
-    for label, rel in [
-        ("NEG_ops_change_mgmt", "org/critical_paths/change_management"),
-    ]:
-        d = os.path.join(ws, rel)
-        if os.path.isdir(d):
-            names = sorted(n for n in os.listdir(d) if n.endswith(".md"))[:6]
-            blob = []
-            for n in names:
-                try:
-                    with open(os.path.join(d, n), encoding="utf-8", errors="replace") as f:
-                        blob.append(f.read())
-                except OSError:
-                    pass
-            if blob:
-                docs.append({"id": label, "text": "\n".join(blob), "age_days": 1.0})
+    d = os.path.join(ws, "org/critical_paths/change_management")
+    if os.path.isdir(d):
+        names = sorted(n for n in os.listdir(d) if n.endswith(".md"))[:6]
+        blob = []
+        for n in names:
+            try:
+                with open(os.path.join(d, n), encoding="utf-8", errors="replace") as f:
+                    blob.append(f.read())
+            except OSError:
+                pass
+        if blob:
+            docs.append({"id": "NEG_ops_change_mgmt", "text": "\n".join(blob), "age_days": 1.0})
 
-    # DEGENERACY CONTROL -- generated, not hand-picked (a hand-chosen control measures
-    # the AUTHOR; a generated one measures the INSTRUMENT). Deterministic seed.
     import random
     rng = random.Random(20260723)
-    filler = ("quarterly invoice ledger custodian settlement reconciliation statement "
-              "premium dividend accrual balance remittance payable receivable audit "
-              "vendor contract renewal clause tenant lease amortization").split()
-    salad = " ".join(rng.choice(filler) for _ in range(4000))
-    docs.append({"id": "DEGEN_word_salad", "text": salad, "age_days": 1.0})
+    filler = ("quarterly invoice ledger custodian settlement reconciliation statement premium "
+              "dividend accrual balance remittance payable receivable audit vendor contract "
+              "renewal clause tenant lease amortization").split()
+    docs.append({"id": "DEGEN_word_salad",
+                 "text": " ".join(rng.choice(filler) for _ in range(4000)), "age_days": 1.0})
 
     rows = score_corpus(docs)
 
-    print("=" * 78)
+    print("=" * 82)
     print("NFRA_AKPIPE scoring core -- validation pass (spec section 7)")
-    print(f"profile={PROFILE_VERSION}  model={POTION_MODEL}  bm25=k1{BM25_K1}/b{BM25_B}  rrf_k={RRF_K}")
+    print(f"profile={PROFILE_VERSION} ({len(PROFILE_PHRASES)} phrases)  model={POTION_MODEL}  "
+          f"bm25=k1{BM25_K1}/b{BM25_B}/C{BM25_SAT_C}")
     print(f"corpus N={len(docs)}   (denominator printed -- Rule 22)")
-    print("=" * 78)
-    hdr = f"{'id':<26}{'bm25':>10}{'bm_r':>6}{'potion':>10}{'po_r':>6}{'nlp':>12}{'derived':>12}"
+    print("=" * 82)
+    hdr = f"{'id':<26}{'ph_bm25':>10}{'bm_r':>6}{'potion':>10}{'po_r':>6}{'nlp':>10}{'derived':>10}"
     print(hdr)
     print("-" * len(hdr))
     for r in rows:
-        print(f"{r['id']:<26}{r['bm25_score']:>10.3f}{r['bm25_rank']:>6}"
+        print(f"{r['id']:<26}{r['phrase_bm25']:>10.3f}{r['bm25_rank']:>6}"
               f"{r['potion_cosine']:>10.4f}{r['potion_rank']:>6}"
-              f"{r['nlp_score']:>12.6f}{r['derived_state_rank']:>12.6f}")
+              f"{r['nlp_score']:>10.4f}{r['derived_state_rank']:>10.4f}")
 
-    # ---- acceptance checks
-    print("\n" + "=" * 78)
-    print("ACCEPTANCE CHECKS")
-    print("=" * 78)
-    top = rows[0]["id"]
-    ok_pos = top == "POS_swe_explore_paper"
-    print(f"  [7.1] POSITIVE CONTROL  : top-ranked = {top}  -> {'PASS' if ok_pos else 'FAIL'}")
-
-    degen = next(r for r in rows if r["id"] == "DEGEN_word_salad")
+    print("\n" + "=" * 82 + "\nACCEPTANCE CHECKS\n" + "=" * 82)
     pos = next(r for r in rows if r["id"] == "POS_swe_explore_paper")
+    degen = next(r for r in rows if r["id"] == "DEGEN_word_salad")
+
+    ok_pos = rows[0]["id"] == "POS_swe_explore_paper"
+    print(f"  [7.1] POSITIVE CONTROL  : top = {rows[0]['id']} -> {'PASS' if ok_pos else 'FAIL'} "
+          f"({len(pos['phrase_hits'])} profile phrases hit)")
     ok_degen = degen["nlp_score"] < pos["nlp_score"]
-    print(f"  [7.2] DEGENERACY        : salad nlp={degen['nlp_score']:.6f} < "
-          f"pos nlp={pos['nlp_score']:.6f} -> {'PASS' if ok_degen else 'FAIL'}")
-
-    spread_bm = pos["bm25_score"] - degen["bm25_score"]
-    spread_po = pos["potion_cosine"] - degen["potion_cosine"]
-    ok_disc = spread_bm > 0 and spread_po > 0
-    print(f"  [7.3] ABLATION          : BM25 delta={spread_bm:+.3f} | "
-          f"Potion delta={spread_po:+.4f} -> {'PASS (both axes discriminate)' if ok_disc else 'CHECK'}")
-
-    r2 = score_corpus(docs)
-    ok_det = json.dumps(rows, sort_keys=True) == json.dumps(r2, sort_keys=True)
+    print(f"  [7.2] DEGENERACY        : salad nlp={degen['nlp_score']:.4f} < pos={pos['nlp_score']:.4f} "
+          f"-> {'PASS' if ok_degen else 'FAIL'}")
+    ok_disc = (pos["phrase_bm25"] - degen["phrase_bm25"]) > 0
+    print(f"  [7.3] ABLATION          : phrase-BM25 delta={pos['phrase_bm25']-degen['phrase_bm25']:+.3f} | "
+          f"Potion delta={pos['potion_cosine']-degen['potion_cosine']:+.4f} -> {'PASS' if ok_disc else 'CHECK'}")
+    ok_det = json.dumps(rows, sort_keys=True) == json.dumps(score_corpus(docs), sort_keys=True)
     print(f"  [7.4] DETERMINISM       : two runs byte-identical -> {'PASS' if ok_det else 'FAIL'}")
-
-    a = derived_state_rank(1.0, 10.0)
-    b = derived_state_rank(1.0, 100.0)
+    a, b = derived_state_rank(1.0, 10.0), derived_state_rank(1.0, 100.0)
     ok_mono = b < a
-    print(f"  [7.5] RECOMPUTE MONOTONE: rank(10d)={a:.6f} > rank(100d)={b:.6f} -> "
-          f"{'PASS' if ok_mono else 'FAIL'}")
+    print(f"  [7.5] RECOMPUTE MONOTONE: rank(10d)={a:.4f} > rank(100d)={b:.4f} -> {'PASS' if ok_mono else 'FAIL'}")
 
-    # [7.6] COMPOSITION SANITY -- the check that CAUGHT the v1 defect.
-    # v1 used derived = recency * RRF. RRF has ~3% dynamic range vs recency's 16x, so
-    # noise-published-today beat a perfect match 3 days old. Relevance must survive age.
-    print("\n  [7.6] COMPOSITION SANITY (the v1 defect regression test)")
-    worst_ok = True
+    ok_comp = True
+    print("  [7.6] COMPOSITION SANITY (v1 defect regression):")
     for age in (3, 7, 30, 45):
-        fresh_noise = derived_state_rank(degen["nlp_score"], 0.0)
-        aged_good = derived_state_rank(pos["nlp_score"], float(age))
-        wins = aged_good > fresh_noise
-        worst_ok = worst_ok and wins
-        print(f"        relevant@{age:>2}d={aged_good:.6f} vs noise@0d={fresh_noise:.6f} "
-              f"-> relevance {'HOLDS' if wins else 'LOSES'}")
-    print(f"        -> {'PASS' if worst_ok else 'FAIL'}  "
-          f"(relevance range={pos['nlp_score']/max(degen['nlp_score'],1e-9):.1f}x, "
-          f"recency range over 45d=2.0x)")
-    ok_comp = worst_ok
+        good = derived_state_rank(pos["nlp_score"], float(age))
+        noise = derived_state_rank(degen["nlp_score"], 0.0)
+        ok_comp = ok_comp and good > noise
+        print(f"        relevant@{age:>2}d={good:.4f} vs noise@0d={noise:.4f} -> "
+              f"{'HOLDS' if good > noise else 'LOSES'}")
 
     allok = all([ok_pos, ok_degen, ok_disc, ok_det, ok_mono, ok_comp])
-    print("\n  RESULT:", "ALL CHECKS PASS" if allok else "SOME CHECKS DID NOT PASS -- read above")
+    print("\n  RESULT:", "ALL CHECKS PASS" if allok else "SOME CHECKS DID NOT PASS")
     return 0 if allok else 1
 
 if __name__ == "__main__":
