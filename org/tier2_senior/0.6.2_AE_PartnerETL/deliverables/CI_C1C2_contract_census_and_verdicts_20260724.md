@@ -97,11 +97,56 @@ Same master, same date `2026-07-23`, both read directly:
 **5-row delta, unexplained. 6 of the 11 bd columns are RENAMES** (`market_value`, `ticker`,
 `quantity_cash/margin/short`, `file_date`).
 
-> **"POINT THE MDPF GATE AT THE FRESHER ONE" IS THE MOST TEMPTING SENTENCE IN THIS PROGRAM AND IT IS WRONG.**
-> It is a **migration, not a repoint**: every consumer of those 11 names breaks, and 5 rows are unaccounted
-> for. **A fresher second source is not a drop-in for a different one** — the same error I made this morning
-> recommending a 0833→0824 source. I am **naming the option and explicitly not recommending it** until (a) the
-> 5 rows are reconciled and (b) the 11 names are mapped. CTO has made that a gate.
+> **"POINT THE MDPF GATE AT THE FRESHER ONE" IS THE MOST TEMPTING SENTENCE IN THIS PROGRAM AND IT IS WRONG
+> AS A ONE-LINE REPOINT.** It is a **migration**: every consumer of those 11 names breaks, and 5 rows are
+> unaccounted for. **A fresher second source is not a drop-in for a different one.**
+
+### 2.1 SUPERSEDED 2026-07-24T18:32Z — **RETIRE, NOT RECONCILE**
+
+**Andrew-direct ~1832Z, verbatim:** *"the entire point of all of this is migrating MDPF to the monolith
+`opal-data-assets` lineage, ENTIRELY."* CTO corrected the PRD's governing objective @`6b69efc57`; closure set
+12 → 16. **The bd lineage is being RETIRED, not reconciled.**
+
+So this section's original framing — *"migration REFUSED until the 5 rows are reconciled"* — **is superseded.**
+The measurements below are unchanged; only their role changes:
+**the 5-row / 11-column delta is now the migration's ACCEPTANCE TEST, not a precondition for deciding whether
+to migrate.** My C1/C2 work is unaffected: it targeted `opal-data-assets` throughout (§1, §4.1).
+
+### 2.2 ⚠ THE ACCEPTANCE TEST HAS AN AMBIGUITY IN IT — **DO NOT BANK THE ~$81K**
+
+CTO's mis-binding finding puts a number on the 5 rows: bd's `:41` regex binds `quantity_settled` to the raw
+*"Quantity Settled/Unsettled"* header, and `:138`'s zero-quantity filter deletes them — *"5 REAL POSITIONS
+worth ~$81K with live prices."* **I isolated the five rows. The ~$81K is one of two defensible readings.**
+
+`(account_id, cusip)` pairs present in monolith, absent from bd, `date=2026-07-23`:
+
+| ticker | `quantity_settled` | price | qty × px | `quantity_settled_unsettled` | `market_value_settled_unsettled` |
+|---|---|---|---|---|---|
+| *(blank)* | 3,000.0000 | 9.57 | 28,704.00 | **0.0000** | **0.0000** |
+| SON | 4.0000 | 56.32 | 225.28 | **0.0000** | **0.0000** |
+| JMUB | 492.2498 | 49.65 | 24,440.20 | **0.0000** | **0.0000** |
+| STIP | 143.4691 | 101.21 | 14,520.51 | **0.0000** | **0.0000** |
+| XLE | 221.5856 | 59.38 | 13,157.75 | **0.0000** | **0.0000** |
+
+```
+READING 1  quantity_settled x closing_price           = $81,047.74   <- matches the ~$81K exactly
+READING 2  quantity_settled_unsettled x closing_price =      $0.00
+the monolith's OWN stored market_value_settled_unsettled =  $0.00 on all five
+```
+
+> **The ~$81K is computed with the very field whose binding is in dispute.** If `quantity_settled` is the
+> holding of record, bd is deleting ~$81K of real positions. If `quantity_settled_unsettled` is — and the
+> monolith's own market-value column agrees with it — these are **closed positions, dropping them is CORRECT**,
+> and "fixing" it would add **$81K of phantom AUA to a client-facing number.**
+>
+> **I assert neither.** Which field Schwab intends as the position of record is a **data-contract question**,
+> not something five rows can settle. What I do assert: **the number is ambiguous and must not be quoted as
+> established.** *"~$81K of real positions are being deleted"* is currently **a hypothesis wearing a
+> measurement's clothes**, and it will read as settled the moment it lands in a closure-set row.
+>
+> **CONSEQUENCE FOR THE TEST ITSELF:** whoever owns the migration must **declare which quantity field is
+> authoritative, and pre-register the expected row count, BEFORE running it.** Otherwise **93,131 confirms
+> reading 1, 93,126 confirms reading 2, and whichever appears looks like a pass** — a test that cannot fail.
 
 ---
 
