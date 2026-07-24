@@ -9,6 +9,32 @@
 <status>staged</status>
 <authorization>**ANDREW-DIRECT ~1720Z: "Go now, this is P0."** PRD `docs/architecture/MDPF_CHANNEL_INDEPENDENCE_PRD.md` @eaa8433547. Fleet narrowed by Andrew; you are one of two Tier-2 lanes KEPT, on CTO's argument that your operational judgement on these rows does not transfer in writing.</authorization>
 
+<addendum id="roster-consumption-interface" added="2026-07-24T17:25Z" authority="CTO 172159Z, relayed by MSTR 172410Z — added BEFORE this TO's GO">
+>> **YOU ALSO OWN THE GOLD-SCRIPT CONSUMPTION OF THE ROSTER. This is an INTERFACE with the roster lane, not
+   a new row and not a fourth spawn.**
+
+```
+ROSTER LANE (CloudOps)  ->  the roster ARTIFACT + its SCHEMA + the divergence computation off it (rows 7, 8)
+YOU (DS lane)           ->  the GOLD-SCRIPT CONSUMPTION: reading expected-vs-present FROM THE ROSTER
+                            instead of literals — which is rows 5/6 territory anyway
+```
+
+**WHY THE SPLIT EXISTS, AND IT IS NOT BUREAUCRACY:** `dim_mdpf_aggregate_aua_timeseries.py` lives under
+`data/mdpf/scripts/gold/`. **CLAUDE.md Rule 13 gives DS the full commit→QA-deploy cycle for
+`data/*/scripts/{gold,silver,bronze}/*.py`, and it is enforced atomically by safe-deploy's PRE-PUSH hook.**
+So a CloudOps lane told to "make composition roster-derived" would build the whole thing correctly, **hit the
+hook at PUSH, and be blocked at the very end — under a P0 clock.** That is exactly the moment someone reaches
+for `--force` or an audited bypass, and it would be a self-inflicted wound caused by the TO's shape rather
+than by anyone's judgement.
+
+**PRACTICALLY:** the roster lane hands you a schema and an artifact; **you make the gold script read
+expected-vs-present from it and remove the literals.** Agree the schema with them *before* either side
+builds against it — a schema agreed after the fact is two lanes discovering they measured different objects,
+which happened twice today.
+**NO HARDCODED FIRM NAMES, NO HARDCODED N, NO HARDCODED DATES** in the consumption path. The acceptance is
+the partner-#4 test: onboarding a partner is a roster row and nothing else.
+</addendum>
+
 <references>
   <ref type="prd">MDPF_CHANNEL_INDEPENDENCE_PRD.md §2.4 (carry-forward), §3a rows 5/6/11/12</ref>
   <ref type="input">**YOUR OWN WORK — POINT AT IT, DO NOT RE-DERIVE IT:** GC-W1 @b078877020 (the `:1656` firm-axis poison; the 40-null attribution), GC-W2a @694175f91 (the frontier-stamp hole generator; the exempt_absorbed 20-enumerated/18-fallback split), GC-W2b @4d0831382 (the served-count definition, EXACT on four quantities; the as-of skew)</ref>
