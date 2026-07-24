@@ -9,7 +9,41 @@
 <status>pending</status>
 <authorization>Andrew-direct ~1310Z at CTO's terminal ("have COO decompose those to the relevant agents, and call MSTR for spawn") -> CTO PRD @5d7522128 -> COO decomposition. SCOPE-BOUNDED: MDPF_REVAMP_GLOBAL_COUNT_CLOSEOUT W-1..W-7 only. The broader MDPF_3FIRMS_PRD decomposition REMAINS HELD on Andrew's word (LD-0333) — do not let the two merge.</authorization>
 
-<addendum id="w4-elevated-permanent-control" added="2026-07-24T15:01Z" authority="ANDREW-DIRECT ~1456Z (relayed CTO 145636Z) + CTO consequence-surfacing">
+<addendum id="w4-declared-contract-not-warning" added="2026-07-24T15:05Z" authority="ANDREW-DIRECT ~1500Z (relayed CTO 150258Z) — SUPERSEDES the addendum below where they conflict">
+>> **RENDER THE DECLARED EXPECTED SET. DO NOT RENDER A WARNING.**
+
+Andrew ~1500Z, VERBATIM: *"Yeah but there will always be scenarios of varying N of partner firms with
+holdings counts as new partners are onboarded. From here on out there should be 3 (until a new partner
+comes in making it 4 and so on), but we can't get 3 in the past because we didnt have COttonwood at that
+time. So rules/error flags need to take that into account."*
+
+```
+completeness := firms PRESENT on date D   vs   firms EXPECTED on date D and for THAT QUANTITY
+              NOT  present vs 3.  NOT  present vs any constant.
+COTTONWOOD:  expected for VALUE from 2026-05-28  ·  NEVER expected for COUNT
+```
+
+**THE ADDENDUM BELOW CALLED THE VALUE/COUNT SPLIT A PERMANENT DEFECT AND MADE THIS RENDER ITS ONLY
+CONTROL. THAT IS SUPERSEDED.** Post-05-28 the expected COUNT set is `{49F, INF}` — so a 2-firm count on
+those dates is **NOT an incomplete 3-firm count, it is a COMPLETE 2-firm count.** CTO: *"That is not a
+defect, it is a contract — provided it is DECLARED. Undeclared, it is exactly the defect I described."*
+**A render that shows those ~47 dates as divergent or apologetic is now WRONG.**
+
+**A REAL FLAG FIRES ONLY ON `present < expected` FOR THAT DATE** — i.e. the 22 trading-day holes, where
+49F/INF are expected and absent. Nothing flags the pre-Cottonwood era; nothing flags Cottonwood's
+permanent count absence. Neither is expected, so neither is an error.
+
+⚠ **THE GATE TEST, and it binds the FE too: WHEN PARTNER #4 ONBOARDS, THE ONLY CHANGE IS A ROSTER ROW.**
+**NO HARDCODED `3`. NO HARDCODED `2026-05-28`. Anywhere in your path.** Read the present-set and
+expected-set from what the artifact DECLARES; do not derive them in the FE. The render must not know what
+a firm is called, how many there are, or when Cottonwood started.
+
+**UNCHANGED — do not rebuild:** the six-class carry-through, class-driven styling, the AC-5 mutant, loud
+degradation on unknown enums, and the class-set convergence precondition with `0.4.0_DS_ClientPlatform~A`.
+What changes is the LABEL and the removal of a warning state on ~47 dates.
+</addendum>
+
+<addendum id="w4-elevated-permanent-control" added="2026-07-24T15:01Z" authority="ANDREW-DIRECT ~1456Z (relayed CTO 145636Z) + CTO consequence-surfacing — SUPERSEDED IN PART by the addendum above; retained so the reasoning chain is visible">
 >> **W-4 IS ELEVATED. IT IS NO LONGER PARALLEL NICE-TO-HAVE WORK — IT IS HALF THE DELIVERABLE, AND IT IS
    NOW THE ONLY REMAINING CONTROL ON A PERMANENT CONDITION.**
 
