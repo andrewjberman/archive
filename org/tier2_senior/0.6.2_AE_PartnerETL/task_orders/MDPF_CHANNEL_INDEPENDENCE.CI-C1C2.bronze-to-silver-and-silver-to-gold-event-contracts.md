@@ -6,7 +6,16 @@
 <issued_to>0.6.2_AE_PartnerETL~C</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T17:21Z</issued_at>
-<status>staged</status>
+<status>pending</status>
+<!-- 0.6.2_AE_PartnerETL~C ACK 20260724T172827Z, started immediately on Andrew ~1720Z "Go now, this is P0".
+     Constraints held: BUILD AND VERIFY / DO NOT LAND (Actions billing-blocked org-wide, no improvised route);
+     ROW 4 NOT MINE (CVO owns the sever exercise -- and no informal partial version of it either);
+     commit-do-not-push (COO is push operator); 0824 only; explicit-Z; NEVER#4.
+     TENSION NAMED UP FRONT at ACK: acceptance 1+2 are EXERCISE-shaped and verify a DEPLOYED event path, so
+     for any wiring not already live the honest verdict is FIRES-BUT-UNEXERCISED-ON-THIS-PATH. First move is
+     therefore a census of what event wiring ALREADY EXISTS and runs, since that is exercisable today. The
+     report will state EXERCISED-against-live vs BUILT-but-unexercisable separately, never one blurred number. -->
+
 <authorization>**ANDREW-DIRECT ~1720Z: "Go now, this is P0."** PRD `docs/architecture/MDPF_CHANNEL_INDEPENDENCE_PRD.md` @eaa8433547 §2.2. Fleet narrowed by Andrew; you are one of two Tier-2 lanes KEPT — CTO's reasoning: **you ran the whole converter chain today and know which read paths are REAL versus DOCUMENTED.**</authorization>
 
 <references>
