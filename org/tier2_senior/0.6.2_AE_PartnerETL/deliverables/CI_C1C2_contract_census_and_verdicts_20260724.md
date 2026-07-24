@@ -142,6 +142,48 @@ merging the two.
 ⚠ **`opal-partner-49financial` is NOT the gold row** — it is a user/access table (`email` HASH, 11 items). The
 name invites the mistake; recording it so the next lane does not make it.
 
+### 4.1 SHARPENED — **the C2 ACTOR ALREADY EXISTS AND READS THE RIGHT LINEAGE. ONLY THE EVENT IS MISSING.**
+
+`opal-assets-daily-emitter` is the gold-DDB writer. Grounded at source and on live AWS:
+
+| | evidence |
+|---|---|
+| **reads** | **MONOLITH silver** — its own header: *"MONOLITH SILVER trees per the DS derivation contracts (C2 custody `fact_rps_s2`…) … **Never `opal-data-bd`**"* (`lambda_function.py:35-39`) |
+| **writes** | `opal-assets-daily-aua`, rows keyed `{run_date, cohort_id}` (`:602`) |
+| **invoked by** | **EventBridge ONLY** — rule `opal-assets-daily-emitter-daily`, **`cron(15 17 * * ? *)`**, ENABLED |
+| **resource policy** | **exactly ONE statement**, `AllowEventBridgeInvoke` (`events.amazonaws.com`). **No S3 principal — S3 is not even permitted to invoke it.** |
+
+> **SO C2 IS NOT "A WRITER THAT MUST BE BUILT." IT IS A WORKING WRITER, ON THE CORRECT LINEAGE, THAT IS
+> SCHEDULE-ONLY.** The missing piece is the **event**: an S3 `ObjectCreated` notification on the silver
+> partition plus the `lambda:InvokeFunction` permission for S3. **That is a much smaller change than the TO
+> assumed — and materially safer, because the actor is already proven in production.**
+
+**And it inverts the C1 picture in a way worth stating, because the amended NEVER#4 asks for both halves:**
+
+| contract | EVENT | SCHEDULED FLOOR |
+|---|---|---|
+| **C1** bronze→silver | ✅ 8/8 wired, ~7s | ✅ (e.g. `opal-assets-silver-etf-sweep-daily`) |
+| **C2** silver→gold | ❌ **absent** | ✅ `cron(15 17 * * ? *)` |
+| **C3** gold→platinum | ❌ **no DDB stream exists** | ❌ |
+
+**C2 has the floor and not the event; C1 has both; C3 has neither.** The floor is why gold rows still appear
+daily — and it is also why a late silver landing is invisible: **the 17:15Z run fires regardless of whether
+silver arrived, and there is no event to catch up when it lands afterwards.** That is the precise shape the
+amended NEVER#4 names — *event-driven is an accelerator; a pipeline whose only trigger is another pipeline's
+success has no schedule* — here inverted: **a schedule with no event.**
+
+### 4.2 ⚠ A SCOPE QUESTION I AM NOT DECIDING — for CTO
+
+Adding C2's trigger means **modifying `opal-data-assets`'s existing bucket notification configuration.** The
+standing OPAL_ASSETS **NEW-TERRITORY RULE** (Andrew ~02:05Z) is: *built ALONGSIDE the estate — no modifying
+existing buckets / policies / **notification-configs** / schedulers; a TF plan that is not pure "to add" is out
+of scope.*
+
+**A ninth `LambdaFunctionConfiguration` on that bucket is additive in intent but is an in-place modification of
+a single existing resource.** Whether that clears the rule is a **scope ruling, not an engineering call** — and
+picking the permissive reading myself is exactly the failure mode I already committed once today. **Routed to
+CTO; not decided here, and no plan run.**
+
 ---
 
 ## 5. WHAT IS **NOT** DONE — stated plainly
