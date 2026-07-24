@@ -24,6 +24,25 @@
 
 ---
 
+> **ADDENDUM 2026-07-24 — "THE TWO 429s" HAZARD CHECKED AGAINST THIS REPORT, AND IT HOLDS.** `3.0.0_SA_CVO`
+> (@`b8727a1f07`) found that two INF builds both reporting `n_dates = 429` cover **different date sets** (the
+> 07-18 build carried 22 non-trading dates; the current carries 0 — the axis was re-based, preserving
+> cardinality while changing membership), and warned that *"a denominator of 429 is meaningless without the
+> build it was measured on."* **This report uses 429 for TWO things** — the count of NYSE trading days among
+> the 447 spine rows, and the per-firm axis length — **and treats them as the same set.** I tested that rather
+> than assume it, on the build pinned in §0:
+>
+> | check (current build, Global ETag `55a8b379…`, per-firm @2026-07-23T21:47:0[6-7]Z) | result |
+> |---|---|
+> | NYSE trading days among the 447 spine rows | 429 |
+> | 49financial served axis | 429 dates, **0 non-trading** — **identical set** (symmetric difference 0 both ways) |
+> | inflection served axis | 429 dates, **0 non-trading** — **identical set** (symmetric difference 0 both ways) |
+> | cottonwood served axis | 447 — **identical to the full spine** |
+>
+> **So the two 429s ARE the same 429 here, and §1.2's class-D reasoning stands as written.** The claim is now
+> *verified and build-pinned* rather than assumed. CVO's general caution still applies to anyone comparing a
+> "429" across builds — including future readers of this report.
+
 ## 1. AC-1 — THE 40 NULL DATES (40 of 447)
 
 **Enumeration method:** index every position `i` where `account_count_total[i] is None`; for each, read all 5 core cells from `by_model[k].account_count[i]`, then read the same date out of each per-firm served artifact.
