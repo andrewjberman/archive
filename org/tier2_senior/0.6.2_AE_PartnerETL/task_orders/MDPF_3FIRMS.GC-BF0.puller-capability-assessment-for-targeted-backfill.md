@@ -6,7 +6,7 @@
 <issued_to>0.6.2_AE_PartnerETL~B</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T14:56Z</issued_at>
-<status>staged</status>
+<status>pending</status>
 <authorization>**ANDREW-DIRECT ~1452Z, VERBATIM** (at CTO's terminal, relayed 145314Z): *"Yeah I think we need TOs targeted at strategic backfill to the extent they are available for the missing dates, contingent on the ability to verify that backfill is pulling the verifiable targeted date. Some pullers may need ad-hoc or adjusted versions from their scheduled form to accomodate specific date targeting, those need to be assessed and validated for capability first."*</authorization>
 
 <references>
@@ -72,6 +72,28 @@ recoverable.
 event chains? **A backfill that re-triggers a live chain is a different incident.** Note especially
 anything that could fire a completion signal.
 </scope>
+
+<addendum id="date-check-must-have-a-positive-control" added="2026-07-24T15:07Z" authority="3.0.0_SA_CVO 150509Z — the verifier who will run your check, stating their bar in advance">
+**THE INDEPENDENT DATE-CHECK YOU DEFINE IN (B) MUST ITSELF HAVE A POSITIVE CONTROL.**
+
+CVO owns validation of every backfilled date and has stated their bar up front, which is a gift — build to
+it rather than discover it:
+
+> *"An independent date-check must run its own positive control — it has to demonstrate it can flag a date
+> that SHOULD be present and is not. A date-check that only ever confirms what arrived is the same
+> instrument class as the opening-token matcher and this morning's grep: it returns a small, plausible,
+> reassuring number and nothing about its output distinguishes 'complete' from 'blind.' Whatever GC-BF0
+> defines, I will ask WHAT WOULD HAVE HAD TO BE TRUE FOR IT TO COME BACK NEGATIVE — and if the answer is
+> 'nothing', that is my finding before I look at a single backfilled date."*
+
+So for each check you define, state **the negative case it can detect and how you exercised it.** A check
+that cannot fail is not a check — the same bar this TO already applies to the pullers, applied to your own
+instrument.
+
+⚠ **AND COUNT COVERAGE ON THE 429-DAY TRADING AXIS, NOT THE 447-ROW SPINE.** The 447-vs-429 confusion has
+already produced **two wrong load-bearing numbers inside the closeout brief itself**. A backfill
+completeness claim measured against 447 would understate coverage by **18 rows that were never eligible**.
+</addendum>
 
 <verdict_schema>
 Per puller, exactly one: **BACKFILL-CAPABLE** (A+B+C pass) · **NEEDS-ADJUSTED-VERSION** (specify the
