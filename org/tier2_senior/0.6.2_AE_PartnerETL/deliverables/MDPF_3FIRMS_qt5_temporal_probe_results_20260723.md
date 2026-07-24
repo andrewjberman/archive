@@ -111,3 +111,50 @@ conversion-quarantined (sweep-skip LOUD + hand-run/--force refusal, exercised). 
 passes (next box window): ping 0.4.0_DS with the verification -> DS removes the two FORWARDFILL_QUARANTINE
 entries + deploys same-hour -> conversion follows on the next sweep. Race harmless in both orders. The
 raw partials sit untouched (no deletion, CTO-rejected) for diagnosis.
+
+## 07-22 RE-LAND EXECUTED + VERIFIED-FULL (2026-07-24 02:05-02:06Z window; 0.6.2_AE_PartnerETL~A)
+
+**PASSED. Both tables landed.** SSM `7bdac9e2-6127-4f2f-a5ea-43d6e5c1741f`, on-box `python3.11`, Success
+02:06:13Z; the staged `code/bronze/qt_0722_reland.py` fired unmodified.
+
+```
+[allocations@2026-07-22] 1521 rows  (neighbor 1521, gate >=760)    -- SANE, LANDED
+[unrealized@2026-07-22]  67163 rows (neighbor 67206, gate >=33603) -- SANE, LANDED
+```
+
+Allocations returned **exactly** the neighbor count; unrealized within 43 rows. Not a marginal pass --
+the "full by the next window" prediction from the 07-21 materialization pattern held at D+2.
+
+**ARTIFACT VERIFICATION (not the producer's self-report):**
+
+| key | before | after | 07-21 neighbor |
+|---|---|---|---|
+| `forwardfill_v2/allocations/ALLOCATIONS_DAILY_2026-07-22.xlsx` | 40,146 B | **342,860 B** @02:05:44Z | 342,969 B |
+| `forwardfill_v2/unrealized/UNREALIZED_DAILY_2026-07-22.xlsx` | 34,146 B | **4,802,196 B** @02:06:09Z | 4,750,358 B |
+
+Size-class agreement is an axis independent of the row count, so the two corroborate rather than restate.
+
+**EVIDENCE PRESERVED / 17a INTACT:** same-key **versioned** land -- both partials survive as non-latest
+versions (`40,146` / `34,146`, `IsLatest=False`). Nothing deleted. **CTO's 044012Z deletion-rejection is
+now moot BY MECHANISM** (versioned supersession did the work), so the Andrew-confirm deletion gate at
+CTO 142439Z(c) **never needs to be opened -- nothing pending at Andrew from this arc.**
+
+**BYTE PROVENANCE:** on-box `md5sum` ties to the S3 ETags verified BEFORE firing --
+`qt_0722_reland.py` `eded477da608faccfca9b69d6bb5aec9`, `cot_bronze_ingest.py` `fa9fd5a9652e7c7aea60776ed469c773`.
+The bytes checked are the bytes that ran.
+
+**SEQUENCING:** the nightly `opal-cot-bronze-run` (`020e9b80`) was **InProgress** when the window opened;
+fire was HELD until it went terminal (Success 02:02:44Z) rather than run concurrent vendor sessions.
+
+**LIFT SIGNALLED to `0.4.0_DS_ClientPlatform` 020917Z** with the full verification -> DS removes the two
+`FORWARDFILL_QUARANTINE` entries + deploys; conversion follows on the next sweep. Quarantine loop closed.
+
+### Forward: the never-retry pattern is now MEASURED, not inferred
+
+Tonight's nightly REJECTED cot `allocations` + `unrealized` + `holdings` for **both 07-23 and 07-24**
+(`0 DATA ROWS` for the first two; `non-zero-MV 0.0% < 50% floor -- prices UNPOPULATED` for holdings).
+Combined with tonight's result: **07-22 was un-recoverable at D+1 and FULLY recoverable at D+2 on the same
+call shape.** So the vendor materializes ~D+2 while the daily chain asks once at D+0 and never again -- a
+catch-up sweep would have recovered 07-22 with no human in the loop, and should recover 07-23 next window.
+**Note for the fix design (CTO's item): holdings rejects on a DIFFERENT limb (prices unpopulated, not
+0-row), so a retry that only covers the 0-row class would silently miss it.**
