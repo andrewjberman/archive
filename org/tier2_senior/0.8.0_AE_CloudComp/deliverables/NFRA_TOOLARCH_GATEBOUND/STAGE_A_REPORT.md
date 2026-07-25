@@ -1,7 +1,9 @@
-# NFRA_TOOLARCH.GATEBOUND -- Stage A delivered (bound the warm path, flip, land base's Rule-22a patch)
+# NFRA_TOOLARCH.GATEBOUND -- Stage A + Stage B delivered, complete end to end
 
 **author:** `0.8.0_AE_CloudComp~D` · 2026-07-25 · **issuer:** `1.0.0_SA_CTO~Z` · **verifier:** `3.0.0_SA_CVO~Z`
-**commits:** `5df71c6f24` (Stage A: watchdog bound + UNEVALUABLE), `8f42c4fdab` (land base's Rule-22a router-reachability patch), both pushed to CLOUD.
+**commits:** `5df71c6f24` (Stage A: watchdog bound + UNEVALUABLE), `8f42c4fdab` (land base's Rule-22a
+router-reachability patch), `4489d4cd8d` (WARM_DEADLINE_S late-binding fix), `38b6a2532b`
+(Stage B: `:1211` timeout+kill, manifest/ledger memoization) -- all pushed to CLOUD.
 
 ---
 
@@ -129,8 +131,86 @@ session.
 | 5 | Member evaluable -> base's `@e78e006cb` patch landed -> item (c) now possible | DONE |
 | 9 | Two-axis isolation for mutant work (own worktree, no shared-hook wiring) | Mutant-proving done in an isolated `git worktree add` off local `CLOUD` HEAD before any main-tree edit; final code copied in only after mutants + regression held there. Per CVO~Z's later-relayed method note (shared-worktree gate blocks MUTATION not INSPECTION), a worktree was not strictly required for this scope, but the isolation was already built and cost nothing extra to keep. |
 
-Stage B (comp-which:1201 timeout+kill, `_manifest_matches`/`_load_ledger` memoization) is next,
-not started.
+---
+
+## Incidental fix, landed separately: `WARM_DEADLINE_S` was not runtime-patchable
+
+CVO~Z's independent Stage A verification (own mutants, not a re-run of mine, plus a positive
+control they added: an unpatched bounded call must succeed for real before a mutant's `False` is
+meaningful) found `deadline: float = WARM_DEADLINE_S` bound the module global's value at
+**function-definition time**, not call time -- reassigning `WARM_DEADLINE_S` after import
+silently did nothing to a caller relying on the default (CVO~Z measured 20.01s after setting it
+to 2.0). My own testing never hit this because I always passed `deadline=` explicitly -- correct
+usage that happened to never exercise the broken path. Fixed (`4489d4cd8d`): default to `None`,
+resolve against the current module global inside the function body. Verified before/after with
+CVO~Z's positive control; CVO~Z independently re-verified the fix against the exact test that
+exposed the bug. Banked as a general testing pattern (CVO~Z's framing): for any function whose
+default sources a module global, one test should exercise the global-reassignment path, not just
+the explicit-argument path -- an author's own tests tend to use the API correctly, which is
+precisely why this class of bug survives them.
+
+---
+
+## Stage B -- delivered: `4489d4cd8d` (deadline fix), `38b6a2532b` (the hang class closed)
+
+`comp-which:1211`'s `_run_primitive` (the `comp-grep`/`comp-glob` fallback shell-out) is now
+`Popen` + `wait(timeout=FALLBACK_TIMEOUT_S=60)` + explicit `kill()`+`wait()` on `TimeoutExpired`
+-- deliberately not `subprocess.call(..., timeout=...)`, which does not kill the child on expiry
+(only `subprocess.run` does that internally). This is the actual close of the hang class Stage A
+could only bound around: Stage A's watchdog reports `UNEVALUABLE` and leaves the underlying call
+CONTINUED-PAST; Stage B REAPS it.
+
+Also memoized `_manifest_matches` (the YAML parse only, via `_load_manifest_data()` -- the
+per-query overlap-scoring still runs fresh, since that genuinely depends on the query) and
+`_load_ledger` (whole-return cacheable, no per-query dependence at all). Both were re-parsing
+their source files from disk on every call (2x and 3x per query cascade respectively); under the
+warm in-process path that was up to ~138/~207 redundant re-parses per gate run of files that
+never change mid-process.
+
+**MUTANT (criterion 6):** a `:1211`-class hang, sandboxed -- `mod.WS` pointed at scratch
+`comp-grep`/`comp-glob` stand-ins that loop-heartbeat to a file every 0.2s forever instead of
+exiting, exercising the real `_run_primitive` code path (Popen, wait, kill) unmodified, not a
+bypass. `_run_primitive` returned in 2.03s against a 2s test deadline (production default 60s),
+`rc=1`, and -- the KILLED-not-continued-past proof, distinct from Stage A's own honest limit --
+the heartbeat file **froze immediately** after the call returned rather than continuing to
+advance every 0.2s, confirming the child was actually terminated and reaped, not merely
+abandoned to keep running in the background.
+
+**REGRESSION (criterion 7, memoization must not change ranking):** full raw-output comparison
+(not verdict-level alone, which RANK1's confirmed unreachability would make too coarse to trust
+by itself), pre-Stage-B (`git show HEAD:.tools/comp-which`) vs post-Stage-B (working tree),
+across the full 69-tool self-route population. **First attempt showed 54 "mismatches" that were
+a bug in my OWN test harness**, not comp-which: the pre-Stage-B comparison copy was written
+directly into the workspace root instead of inside a `.tools/`-depth subdirectory, so its
+`WS = dirname(dirname(__file__))` resolved one level too shallow, silently pointing `MANIFEST`/
+`LEDGER` at nonexistent paths and disabling its own fuzzy-manifest backstop -- OLD wasn't
+producing genuinely different rankings, it was silently running with a broken input. Caught via
+the standard discipline this project runs on: a same-file-loaded-twice control (0 mismatches)
+before trusting the OLD-vs-NEW asymmetry as real, which is exactly what exposed the asymmetry as
+the harness's fault, not the subject's. Corrected (placed the comparison copy at the matching
+directory depth) and re-run: **0/69 mismatches.**
+
+**End-to-end, criterion 8 (coverage discipline, full population, no capping):**
+`self_route_verdicts()` through the complete warm+bounded path against the Stage-A+B-combined
+`comp-which` -- 69/69 NEARTIE, 0 MISS, 0 UNEVALUABLE, 33.1s (down from the 73.6s pre-memoization
+Stage-A-only measurement on the same machine).
+
+**Criterion 9 for Stage B:** a scratch sandbox directory (`mod.WS` override) rather than a full
+`git worktree` -- narrower than Stage A's isolation, but sufficient here since the mutant only
+reads `mod.WS`/`mod.FALLBACK_TIMEOUT_S` and writes to a throwaway heartbeat file, never touching
+the real `.tools/` or `org/modules/graph/` trees. Flagging the narrower choice explicitly rather
+than silently reusing the Stage A worktree pattern without saying why it changed.
+
+### Stage B acceptance criteria
+
+| # | Criterion | Status |
+|---|---|---|
+| 6 | `comp-which:1201`-class hang bounded with timeout+kill; REAPED not continued-past; mutant proves it | DONE, PASS |
+| 7 | `_manifest_matches` + `_load_ledger` memoized; verdict/ranking-identity preserved | DONE, 0/69 mismatches (after fixing a harness bug, see above) |
+| 8 | No sampling/capping; full population; any unevaluable tool loud + in the population | DONE, 69/69 evaluated, 0 UNEVALUABLE |
+| 9 | Isolation for the mutant work | Scratch sandbox dir (see above), narrower than Stage A's worktree by design |
+
+This completes NFRA_TOOLARCH.GATEBOUND end to end (Stage A + Stage B).
 
 ---
 
@@ -142,5 +222,7 @@ not started.
 | `org/modules/graph/manifest_check_cli.py` | Hard-block on UNEVALUABLE | `5df71c6f24` |
 | `.tools/comp-which` | Base's 3 mandated-call RULES entries | `8f42c4fdab` |
 | `org/modules/graph/graph-call-manifest.yaml` | Base's 3 mandated-call manifest entries | `8f42c4fdab` |
-| `infra/system/06_current_state.{md,json}` | comp-system regen, both commits | `5df71c6f24`, `8f42c4fdab` |
-| This report | New | Not yet -- CLOUD_COMP_TESTER own lane |
+| `.tools/comp-which-routing-test.py` | `WARM_DEADLINE_S` late-binding fix | `4489d4cd8d` |
+| `.tools/comp-which` | `:1211` timeout+kill, manifest/ledger memoization | `38b6a2532b` |
+| `infra/system/06_current_state.{md,json}` | comp-system regen, four commits | `5df71c6f24`, `8f42c4fdab`, `4489d4cd8d`, `38b6a2532b` |
+| This report | New / updated | Not yet -- CLOUD_COMP_TESTER own lane |
