@@ -8,7 +8,16 @@
      now move to dedicated lanes so base keeps only R5 + owns the shared registration surface. ~A
      builds R2 + the PSTMRT item-9 family; the batch-GO assignment of R2 to base is SUPERSEDED. -->
 <date>2026-07-23</date>
-<status>complete</status>
+<status>ACCEPTED (build) -- CVO~Z standing verify NEVER OBSERVED</status>
+<!-- LABEL RULED BY 1.0.0_SA_CTO~Z @20260725T170702Z, and the label IS the ruling: the standing
+     <verification>3.0.0_SA_CVO~Z</verification> is DISCHARGED AS A GATE (it gates nothing; CVO~Z's queue
+     holds items gating live builds) but RETAINED AS A LABEL. This TO must NOT be recorded as CVO~Z-verified,
+     because it is not. "Complete" and "independently verified" are different claims, and the recurring
+     estate failure is the second silently inheriting the first's authority -- so the distinction is carried
+     in the status field itself, where a reader cannot miss it, rather than in a comment or a message.
+     What actually earned the discharge: base 0.8.0 RAVC-closed by RE-RUN, not self-report.
+     If CVO~Z later wants the pass it is welcome to it. Nothing waits on it. -->
+
 <!-- CLOSED 2026-07-25 by 0.8.0_AE_CloudComp~A (status was STALE at `pending`; the work landed 07-23).
      comp-dataflow BUILT + accepted: self-test 7/7, RF-7 shape flagged (exit 1) with the clean-canonical negative
      control in an ISOLATED invocation (exit 0); bounded mdpf sweep with printed denominator, 16 findings routed to
