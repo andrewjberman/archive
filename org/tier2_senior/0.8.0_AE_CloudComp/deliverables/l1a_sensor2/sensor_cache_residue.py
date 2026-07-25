@@ -309,8 +309,22 @@ def main() -> int:
             print("  RESIDUE [%s] %s -- %s" % (it["cell"], it["address"], it["evidence"]))
 
     if args.out:
-        Path(args.out).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        print("  REPORT WRITTEN: %s" % args.out)
+        # WRITE-THEN-VERIFY (CVO~Z fix-verify 0928Z: a /cygdrive --out to native Python
+        # produced NO file while the sensor still exited rc=2 -- "REPORT WRITTEN" was an
+        # unverified claim). Resolve to the native absolute path, write, then CONFIRM the
+        # bytes landed; a missing/short file is a FAIL, not a footnote.
+        out_path = Path(args.out).resolve()
+        payload = json.dumps(report, indent=2) + "\n"
+        try:
+            out_path.write_text(payload, encoding="utf-8")
+        except OSError as e:
+            print("FAIL: could not write report to %s (%s: %s)" % (out_path, type(e).__name__, e))
+            return 1
+        if not out_path.is_file() or out_path.stat().st_size < len(payload):
+            print("FAIL: report write to %s did not land (exists=%s) -- refusing to report "
+                  "a verdict whose evidence artifact is missing." % (out_path, out_path.is_file()))
+            return 1
+        print("  REPORT WRITTEN (verified on disk): %s" % out_path)
     if args.json:
         print(json.dumps(report, indent=2))
 
