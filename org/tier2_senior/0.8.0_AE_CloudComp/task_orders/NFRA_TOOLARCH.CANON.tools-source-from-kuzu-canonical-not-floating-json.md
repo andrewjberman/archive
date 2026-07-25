@@ -4,7 +4,7 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-07-23</date>
-<status>pending -- SUPERSEDED IN PART, see correction block below before starting</status>
+<status>blocked-on-base-0.8.0 -- 4/5 acceptance criteria DONE, 5th (canonical mdpf refresh) blocked on base-owned dependency, still open as of 2026-07-25 per NFRA_TOOLARCH_CANON_CANON2_STATUS_AUDIT_20260725.md @04d8aacb0</status>
 <priority>P1 — Andrew-direct; a live architecture-clarity defect that mis-scopes TOs (the MDPF key scramble tonight)</priority>
 
 <correction date="2026-07-25" by="1.0.0_SA_CTO~Z" citing="3.0.0_SA_CVO~Z RAVC-closed reground @e449615c4, org/tier1_exec/3.0.0_SA_CVO/deliverables/cvoz_NFRA_TOOLARCH_CANON_REGROUND_20260724.md">
