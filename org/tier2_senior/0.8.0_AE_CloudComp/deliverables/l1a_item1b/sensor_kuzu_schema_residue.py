@@ -8,14 +8,24 @@ THE QUESTION (L1a): which schema elements does the comp-kuzu layer's OWN source
 ASSUME (table names + column refs inside its Cypher string literals / DDL) that
 the LIVE canonical Kuzu database does not actually carry -- and vice-plane?
 
-SHAPE ARGUMENT (the item-1b gate): the LIVE surface is a binary Kuzu database.
-Its complete metadata introspection surface is `CALL show_tables()` and
-`CALL table_info(<t>)` -- names, types, arities. NEITHER carries a prose field.
-There is no plane of this surface in which a schema element could be "named in
-prose but walked by no code" -- so `doc_only` is NOT-APPLICABLE **BY SHAPE**
-(demonstrated by enumerating the DB's actual metadata surfaces in --oracle-check,
-not asserted by omission). The tool-side .py docstrings are the TOOL's prose
-about itself, not a plane of the DB surface being diffed.
+DOC-PLANE STATUS (CORRECTED per CVO~Z bounce 20260725T114312Z -- the original
+"N/A BY SHAPE" claim was FALSE): `CALL show_tables()` carries a `comment` FIELD
+(['id','name','type','database name','comment']), populatable via
+`COMMENT ON TABLE` (kuzu 0.11.3, CVO~Z round-trip on scratch). The surface
+therefore HAS a table-level prose plane; on the canonical DB it is EMPTY (''
+on every table) -- and EMPTY != ABSENT (L0b-I draft). `doc_only` is
+APPLICABLE-AND-MEASURED here: count = tables whose comment is non-empty and
+which no query literal walks (0 on canonical today -- a real, measured zero).
+Scope nuance, field-enumerated: `table_info` exposes NO comment field, so the
+doc plane covers TABLE-kind elements only; column-kind elements have no prose
+plane on this surface (disclosed per-kind, not generalized).
+THE ORIGINAL ERROR, kept visible: --oracle-check enumerated the metadata
+FUNCTIONS while the N/A claim was about their FIELDS -- the `comment` column
+was in the returned data all along, summarized away as "name/type/arity only."
+The oracle now prints get_column_names() for every metadata call so it can
+falsify its own conclusion. CONSEQUENCE: this sensor does NOT satisfy item-1b's
+doc_only-N/A-by-shape gate (the surface has a doc plane); the re-target /
+L0b-coupling call is CTO~Z's.
 
 DERIVED, NEVER HAND-DECLARED:
   - ASSUMED plane: Cypher string literals extracted from the layer's own .py
@@ -154,7 +164,10 @@ def extract_planes(files):
 
 
 def live_schema(db_path: str):
-    """(tables:dict name->list[col]|None, err) via a DIRECT read-only connection.
+    """((tables:dict name->list[col]|None, comments:dict name->str), err) via a
+    DIRECT read-only connection. Field positions are resolved FROM
+    get_column_names(), never assumed by index -- the bounce's field-vs-function
+    lesson applied to the reader itself.
     None columns = table exists but not introspectable (UNKNOWN-grade for its cols).
     err != None = the DB could not be opened read-only (contended/locked)."""
     import kuzu
@@ -163,21 +176,26 @@ def live_schema(db_path: str):
         conn = kuzu.Connection(db)
     except Exception as e:  # noqa: BLE001 -- the contended path is a designed verdict
         return None, "%s: %s" % (type(e).__name__, e)
-    tables = {}
+    tables, comments = {}, {}
     r = conn.execute("CALL show_tables() RETURN *;")
+    fields = r.get_column_names()
+    i_name, i_comment = fields.index("name"), (fields.index("comment") if "comment" in fields else None)
     while r.has_next():
         row = r.get_next()
-        tables[row[1]] = None
+        tables[row[i_name]] = None
+        comments[row[i_name]] = (row[i_comment] or "") if i_comment is not None else ""
     for t in list(tables):
         try:
             r2 = conn.execute("CALL table_info('%s') RETURN *;" % t)
+            f2 = r2.get_column_names()
+            j = f2.index("name")
             cols = []
             while r2.has_next():
-                cols.append(r2.get_next()[1])
+                cols.append(r2.get_next()[j])
             tables[t] = cols
         except Exception:  # noqa: BLE001
             tables[t] = None  # exists, columns UNKNOWN -- reported, not guessed
-    return tables, None
+    return (tables, comments), None
 
 
 def main() -> int:
@@ -200,20 +218,29 @@ def main() -> int:
     db_path = _canonical.CANONICAL_DB_PATH
 
     if args.oracle_check:
-        # ORACLE CONTROL, separate invocation: it must be able to say YES and NO.
-        tables, err = live_schema(db_path)
+        # ORACLE CONTROL, separate invocation: it must be able to say YES and NO --
+        # and it must print the FIELD NAMES of every metadata call it makes, so the
+        # enumeration's denominator is fields, not functions (the bounce's fix: an
+        # oracle that summarizes its own returned columns cannot falsify its claim).
+        result, err = live_schema(db_path)
         if err:
             print("REFUSE: DB not openable read-only (%s) -- oracle unevaluable, "
                   "UNKNOWN-grade, not a FAIL and not a pass." % err)
             return 3
+        tables, comments = result
+        import kuzu
+        db = kuzu.Database(db_path, read_only=True)
+        conn = kuzu.Connection(db)
+        r = conn.execute("CALL show_tables() RETURN *;")
+        print("ORACLE fields: show_tables() -> %s" % r.get_column_names())
+        for t in sorted(tables):
+            r2 = conn.execute("CALL table_info('%s') RETURN *;" % t)
+            print("ORACLE fields: table_info('%s') -> %s" % (t, r2.get_column_names()))
         print("ORACLE positive: show_tables returned %d table(s): %s"
               % (len(tables), sorted(tables)))
         if not tables:
             print("FAIL: oracle cannot say YES (zero tables) -- do not trust any clean result.")
             return 1
-        import kuzu
-        db = kuzu.Database(db_path, read_only=True)
-        conn = kuzu.Connection(db)
         try:
             conn.execute("CALL table_info('ZzzNoSuchTable9999') RETURN *;")
             print("FAIL: oracle cannot say NO (table_info on a nonexistent table did not error) "
@@ -222,9 +249,11 @@ def main() -> int:
         except Exception as e:  # noqa: BLE001
             print("ORACLE negative: table_info('ZzzNoSuchTable9999') errored as required "
                   "(%s). Oracle discriminates both ways." % type(e).__name__)
-        # SHAPE demonstration for the doc_only N/A claim:
-        print("SHAPE: the DB's complete metadata surface is show_tables()/table_info() -- "
-              "name/type/arity fields only, NO prose field exists (enumerated, not assumed).")
+        print("DOC-PLANE (measured at field level, CORRECTED per the 1143Z bounce): "
+              "show_tables carries a 'comment' prose field; canonical values: %s. "
+              "table_info carries NO comment field (column-kind elements have no prose "
+              "plane). doc_only on this surface is APPLICABLE; EMPTY != ABSENT."
+              % {t: repr(c) for t, c in sorted(comments.items())})
         return 0
 
     base = [Path(p) for p in args.only_source] if args.only_source else list(LAYER_FILES)
@@ -241,13 +270,20 @@ def main() -> int:
               "could be compared." % len(files))
         return 3
 
-    tables, err = live_schema(db_path)
+    result, err = live_schema(db_path)
     if err:
         print("REFUSE (DB-CONTENDED/UNKNOWN-grade): canonical DB not openable read-only: %s. "
               "Per the 6-lane contention lesson this is NEVER a FAIL and NEVER a silent "
               "PASS -- re-run when the writer lock clears." % err)
         return 3
+    tables, comments = result
     print(_provenance.format_provenance_header(db_path), file=sys.stderr)
+
+    # doc_only, CORRECTED (bounce 1143Z): the table-level comment plane EXISTS.
+    # Count = tables carrying a NON-EMPTY comment that no query literal walks.
+    assumed_tables = {el[1] for el in assumed if el[0] == "table"}
+    doc_named_unwalked = sorted(t for t, c in comments.items()
+                                if c.strip() and t not in assumed_tables)
 
     def is_live(el):
         """True/False/None(=UNKNOWN: table exists but columns not introspectable)."""
@@ -273,7 +309,7 @@ def main() -> int:
         else:
             member.append(el)    # declared-only, live
 
-    surface_total = len(covered) + len(member) + len(orphan)
+    surface_total = len(covered) + len(member) + len(orphan) + len(doc_named_unwalked)
 
     def addr(el):
         return ("table:%s" % el[1]) if el[0] == "table" else "column:%s.%s" % (el[1], el[2])
@@ -291,14 +327,21 @@ def main() -> int:
         "cells": {
             "covered": {"applicable": True, "count": len(covered), "method": "mention"},
             "member": {"applicable": True, "count": len(member), "method": "mention"},
-            "doc_only": {"applicable": False, "count": None, "method": None},
+            "doc_only": {"applicable": True, "count": len(doc_named_unwalked), "method": "mention"},
             "orphan": {"applicable": True, "count": len(orphan), "method": "mention"},
         },
-        "doc_only_na_reason": (
-            "N/A BY SHAPE: the live surface is a binary Kuzu database whose complete "
-            "metadata introspection surface (show_tables/table_info -- enumerated in "
-            "--oracle-check, not assumed) carries name/type/arity fields ONLY. No prose "
-            "plane exists in which a schema element could be named-but-unwalked."),
+        "doc_only_status": (
+            "CORRECTED (CVO~Z bounce 20260725T114312Z; original 'no prose plane exists' claim "
+            "FALSIFIED): show_tables() carries a table-level 'comment' prose field, populatable "
+            "via COMMENT ON TABLE (kuzu 0.11.3 round-trip, CVO~Z scratch). On canonical the "
+            "plane is EMPTY ('' on every table) -- doc_only is APPLICABLE with a measured count "
+            "(%d). BOTH readings' consequence, labels PROVISIONAL pending the L0b ratification: "
+            "under the L0b-I draft EMPTY is a DISTINCT member from ABSENT, so this surface does "
+            "NOT demonstrate N/A-by-shape and does NOT clear item 1b; were EMPTY ruled "
+            "equivalent to ABSENT (not the draft's position), the original claim would still "
+            "have been wrong about the FIELD's existence. Scope per-kind: table_info exposes no "
+            "comment field, so column-kind elements carry no prose plane on this surface."
+            % len(doc_named_unwalked)),
         "items": (
             [{"address": addr(e), "cell": "orphan", "method": "mention",
               "evidence": "referenced in layer source (%s plane); ABSENT from live schema"
@@ -306,6 +349,9 @@ def main() -> int:
             + [{"address": addr(e), "cell": "member", "method": "mention",
                 "evidence": "declared in loader DDL, present live, never query-referenced"}
                for e in member]
+            + [{"address": "table:%s" % t, "cell": "doc_only", "method": "mention",
+                "evidence": "table carries a non-empty live comment; no query literal walks it"}
+               for t in doc_named_unwalked]
         ),
     }
 
@@ -320,8 +366,12 @@ def main() -> int:
 
     # RAW ACCOUNTING LINE (the input-4 contract) + both-side denominators + UNKNOWN + direction
     print("SENSOR comp-kuzu schema residue -- LIVE db=%s" % Path(db_path).name)
-    print("  ACCOUNTING: N=%d = covered %d + member %d + orphan %d   (doc_only: N/A-DECLARED, by shape)"
-          % (surface_total, len(covered), len(member), len(orphan)))
+    print("  ACCOUNTING: N=%d = covered %d + member %d + doc_only %d + orphan %d"
+          % (surface_total, len(covered), len(member), len(doc_named_unwalked), len(orphan)))
+    print("  DOC-PLANE (corrected 1143Z): table-level comment field EXISTS, canonical values "
+          "all EMPTY (%s) -- doc_only APPLICABLE-and-measured, EMPTY != ABSENT (provisional "
+          "pending L0b); column-kind elements have no prose plane (table_info field-checked)."
+          % ", ".join("%s=%r" % (t, c) for t, c in sorted(comments.items())))
     print("  DENOMINATOR (assumed-refs side): %d query-assumed + %d loader-declared distinct "
           "elements from %d file(s): %s"
           % (len(assumed), len(declared), len(files),
