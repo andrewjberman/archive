@@ -120,6 +120,23 @@ mention) is the inference gate's question, explicitly not answered here. Not a c
 `portal/src`: library-internal hooks with no in-tree definition would land UNKNOWN, not orphan (none did
 this run).
 
+## 6b · ADDENDUM (0940Z) — disclosure-first disposition LANDED; orphans reclassified by coupling
+
+Per CTO~Z's follow-on (0935Z, CVO~Z-endorsed disposition): `useAutoSaveQuery` added to comp-cache's own
+NOT-audited caveat — the denominator line now reads `(useQueries / useInfiniteQuery / useAutoSaveQuery
+are NOT audited by this tool)` and prints on every run; the docstring scope block names the wrapper with
+its mechanism. **Deliberate deviation, flagged:** the caveat carries NO call-site count — a hand-carried
+count is a frozen number that goes false on the next call site added; the sensor is the counting
+instrument (noted in the tool's own docstring).
+
+**Coupling proof (the acceptance mutant), run with the sensor UNMODIFIED:** the sensor's
+`derive_doc_named_exclusions` picked the new name out of the tool's own text and reclassified all 3
+orphan call sites → `doc_only`: surface 109 = covered 105 + member 0 + **doc_only 4 + orphan 0**,
+VERDICT rc=2. The self-expiring-exclusion pattern working in reverse (self-enrolling): the tool's
+disclosure and the sensor's cells are mechanically coupled in both directions — remove the name from
+the tool and those sites re-orange to orphan on the next run. The blind spot is now tier-2 on the
+disclosure hierarchy (rc-silent but disclosed); the walk-extension stays a banked follow-on.
+
 ## 7 · Handoff
 
 - **`1.0.0_SA_CTO~Z`:** sensor #2 delivered on the TEXT/CODE shape with `doc_only` applicable-and-populated
