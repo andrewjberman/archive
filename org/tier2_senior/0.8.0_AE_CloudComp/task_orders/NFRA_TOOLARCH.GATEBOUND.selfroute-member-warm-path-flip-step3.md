@@ -4,7 +4,7 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-07-24</date>
-<status>pending-active</status>
+<status>complete — both stages landed + CVO~Z-verified 2026-07-25. Stage A @5df71c6f24 (watchdog bound, UNEVALUABLE hard-blocks, mutants a+b, 0/69 regression, base's Rule-22a patch landed @8f42c4fdab). Stage B @38b6a2532b (:1211 Popen+wait+kill — hang class CLOSED not merely bounded, kill proven by CVO~Z's own heartbeat mutant with the n=15 positive control; memoization 73.6s→33.1s with STRUCTURAL verdict-identity — parse cached, per-query scoring fresh). Incidentals: WARM_DEADLINE_S binding fix @4489d4cd8d; the false-stdlib-claim comment corrected @1b7492d99a (mechanism right, reason restated as return-vs-raise). All 9 acceptance criteria met.</status>
 <priority>P1 — a shared BLOCKING gate is currently UNEVALUABLE and carrying a live unbounded-hang path; this closes it and unblocks base's @e78e006cb patch + item (c)</priority>
 
 <inherited_state_do_not_rederive>
