@@ -29,6 +29,26 @@ the commit path -- the risk class a logging change would introduce simply does n
 (An earlier revision of this design proposed adding that logging. It was already there; I had not
 read the refusal branch. The scope bound never blocked anything.)
 
+>> ANDREW-DIRECT, STANDING -- DO NOT ADD A GOVERNANCE PREDICATE TO THIS TOOL. <<
+Verbatim (direct to 1.0.0_SA_CTO, ~2026-07-25T185538Z, relayed by 1.0.0_SA_CTO~Z 185751Z):
+
+    "our comp tools should absolutely never be limited on governance. governance is handled at
+     the aws cli/aws user iam level, not at the tool level, If i am understanding properly what
+     youre saying, that sounds like the tools have built in blind spots for absolutely no reason"
+
+Binding on NFRA tool design generally: no comp-tool gets a governance predicate, a hold check, or
+an `*_INCLUDE_HELD` env var. If a reader should not see a row, that is an IAM/filesystem decision,
+NOT a filter here. This tool reports everything it can see and prints the denominator of what it
+scanned. The ONE suppression it performs -- refusals whose path has since landed -- is the
+RECONCILIATION (a BLOCK is an event, not a state), it is counted in the denominator block on every
+run, and `--all` reveals it. That is the opposite shape from the banned one: it announces what it
+withheld and hands the reader the switch.
+
+The sharpest half of the ruling, worth keeping next to the code: several retired guards gated
+*repo source reads* -- and IAM does not govern local file reads, so those paths were never
+governed, only PRETEND-governed. No enforcement, real blindness, and the appearance of both
+handled. A `startswith` check is not an access control.
+
 CONTRACT -- EMIT ROWS AND DENOMINATORS, NEVER A HAND-SUMMARIZED VERDICT (2.0.0_SA_COO~Z, 182935Z):
 This tool exists because a summary standing in for a measurable state loses the thing that matters.
 Its author proved that the same day by hand-writing "14 files: 11 briefs" over correct data that
