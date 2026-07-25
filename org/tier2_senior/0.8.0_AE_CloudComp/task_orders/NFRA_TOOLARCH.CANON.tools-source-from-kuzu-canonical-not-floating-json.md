@@ -4,8 +4,34 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-07-23</date>
-<status>staged</status>
+<status>pending -- SUPERSEDED IN PART, see correction block below before starting</status>
 <priority>P1 — Andrew-direct; a live architecture-clarity defect that mis-scopes TOs (the MDPF key scramble tonight)</priority>
+
+<correction date="2026-07-25" by="1.0.0_SA_CTO~Z" citing="3.0.0_SA_CVO~Z RAVC-closed reground @e449615c4, org/tier1_exec/3.0.0_SA_CVO/deliverables/cvoz_NFRA_TOOLARCH_CANON_REGROUND_20260724.md">
+  This TO's original scope (below) is PARTIALLY STALE as of 2026-07-24's re-ground. Read the reground
+  doc FIRST, in full, before touching this TO. Summary of what changed:
+  - **comp-pipescript: KEEP, DO NOT RE-POINT.** The brief's headline claim (MDPF dataflow traced
+    through comp-pipescript rides a stale 25-day projection) is REFUTED by exercise: the resolver is
+    referenced ONLY inside `_estate_oos_guard()`, a routing guard, not a dataflow/data source. Both
+    stale-direction failure modes are loud-or-fall-through, not silent-wrong. Do not reroute it.
+  - **estate-coverage-resolver.json: FREEZE, do not regenerate.** `gen-estate-resolver.py:17`
+    hardcodes a date-pinned 2026-06-15 census with NO refresh path -- regenerating stamps a fresh
+    mtime over a frozen census and destroys `last_review`, the one field currently telling the truth.
+    "Just regenerate it" is a trap, not a fix.
+  - **comp-stitch-refresh: REMOVE from any floating-json target list.** It is the PRODUCER of
+    stitch_graph.json, not a consumer of a floating artifact -- false positive in the original audit.
+  - **The true out-of-kuzu set is 9 tools, not 10** (three false positives found across two audit
+    passes: comp-manifest-check, comp-graph, comp-stitch-refresh).
+  - **The actual live, unattended failure in this cluster** (not in this TO's original scope, and
+    higher-value than the audit work below): `stitch_graph.json`'s producer has been hard-failing on
+    a tripped GRAIN-SENTINEL guard for 17 days (since 07-08), backgrounded + discarded, nobody
+    notified -- independently reconfirmed via NFRA_TOOLUNIFY REC-1 (`REC1_EXERCISE.md`). Look at
+    `EXTERNAL_ENDPOINT: count 0 vs baseline 3` FIRST -- a count collapsing to zero smells like a
+    broken extractor, not legitimate drift; the other 5 high-side trips look like real 17-day estate
+    growth against a stale baseline band and are lower priority.
+  **What in this TO's original scope below is UNAFFECTED:** CANON2's graph.json family (7 tools,
+  DEFER + re-point-with-mutant disposition) — proceed on that as originally scoped.
+</correction>
 
 <authority>
 Andrew-direct 2026-07-23 (my terminal), VERBATIM: "I notice that some of these comp-tools actually
