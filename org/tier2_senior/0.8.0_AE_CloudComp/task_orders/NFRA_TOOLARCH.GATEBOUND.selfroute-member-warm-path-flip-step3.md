@@ -2,9 +2,9 @@
 <to_id>NFRA_TOOLARCH.GATEBOUND</to_id>
 <title>STEP 3 of the self-route member repair — bound the warm path, prove BOTH mutants, flip the default; then bound :1201 at source + memoize comp-which. A CHECKPOINTED hand-off: Steps 1-2 are DONE and SOUND.</title>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
-<issued_to>UNASSIGNED — fresh lane, or 0.8.0_AE_CloudComp~B if it raises budget to continue</issued_to>
+<issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-07-24</date>
-<status>pending</status>
+<status>pending-active</status>
 <priority>P1 — a shared BLOCKING gate is currently UNEVALUABLE and carrying a live unbounded-hang path; this closes it and unblocks base's @e78e006cb patch + item (c)</priority>
 
 <inherited_state_do_not_rederive>
