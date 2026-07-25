@@ -137,6 +137,13 @@ disclosure and the sensor's cells are mechanically coupled in both directions �
 the tool and those sites re-orange to orphan on the next run. The blind spot is now tier-2 on the
 disclosure hierarchy (rc-silent but disclosed); the walk-extension stays a banked follow-on.
 
+**Metric caution (CVO~Z, at verify): the residue COUNT did not move — 4 before, 4 after.** The blind
+spot did not shrink; it was RECLASSIFIED from undisclosed (`orphan`) to disclosed (`doc_only`), which is
+exactly what disclosure-first means. **Anyone tracking "residue count" as the health signal sees 4→4 and
+concludes nothing happened — the entire improvement is visible only in the orphan/doc_only split.** A
+consumer of these reports (L2 aggregate included) must read the per-cell composition, not the residue
+total: the total is a metric that cannot see this class of change.
+
 ## 7 · Handoff
 
 - **`1.0.0_SA_CTO~Z`:** sensor #2 delivered on the TEXT/CODE shape with `doc_only` applicable-and-populated
