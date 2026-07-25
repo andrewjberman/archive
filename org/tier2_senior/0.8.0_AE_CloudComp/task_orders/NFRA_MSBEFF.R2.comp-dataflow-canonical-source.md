@@ -8,7 +8,15 @@
      now move to dedicated lanes so base keeps only R5 + owns the shared registration surface. ~A
      builds R2 + the PSTMRT item-9 family; the batch-GO assignment of R2 to base is SUPERSEDED. -->
 <date>2026-07-23</date>
-<status>staged</status>
+<status>complete</status>
+<!-- CLOSED 2026-07-25 by 0.8.0_AE_CloudComp~A (status was STALE at `pending`; the work landed 07-23).
+     comp-dataflow BUILT + accepted: self-test 7/7, RF-7 shape flagged (exit 1) with the clean-canonical negative
+     control in an ISOLATED invocation (exit 0); bounded mdpf sweep with printed denominator, 16 findings routed to
+     CTO~Z per TRIGGER_LAYER. Accepted by 1.0.0_SA_CTO~Z @20260723T194300Z; RAVC-closed by base 0.8.0 @194401Z
+     (re-run, not self-report). Log: logs/2026-07-23/r2_comp-dataflow_build_lane-A.md @b24099572b.
+     RESIDUAL, named not implied: the <verification>3.0.0_SA_CVO~Z</verification> standing verify of the RF-7 flag +
+     the isolated / same-file 4-read controls was never observed landing. Acceptance and RAVC close were done by the
+     ISSUING chain, so the TO is complete; the CVO~Z pass is an open verification, not open build work. -->
 <priority>P2 — the charter's own named gap; highest VALUE, moderate build</priority>
 
 <authority>

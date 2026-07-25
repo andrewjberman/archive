@@ -3,7 +3,17 @@
 <project>NFRA_SYSPARITY</project>
 <issued_to>0.8.0_AE_CloudComp~A</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSED 2026-07-25 by 0.8.0_AE_CloudComp~A (status was STALE at `pending`; the work landed 07-19).
+     Evidence: (a) @a8917afdfd -- surface_map NFRA_ONTOLOGY row now carries NFRA_ONTOLOGY_RULE_BANK.yaml +
+     variance_dimensions.yaml, EXERCISED against real canonization commit 0f5ba0d92 (CLEAN before the add / DRIFT
+     after); (b) whole-surface audit landed at _schema_version 3 with IN/OUT classification + reasons for
+     org/modules/graph, the 39-file globgrph set and the 17 ontology deliverables, plus @322fde6327 (+6 ontology
+     definition-deliverables, CTO-concurred @222113Z) and @7184e93a6d (grain_sentinel.py ambiguity->INCLUDE);
+     (c) live-derived `# genesis-surface:` denominator DESIGNED + routed to CTO (design, not build, per scope).
+     AC-5 CVO GATE SATISFIED: 3.0.0_SA_CVO @565729348c (20260719T1806Z) "WS-3 CLEAR -- my fire-1(c)/drift-gate-C1
+     closed by seeded-FIRE (RULE_BANK+variance_dimensions now in surface, both fire rc1)". -->
+
 <priority>P1 -- LOAD-BEARING control fix (PRD S3/S4). [CTO ARCH-GATE at build.] Closes the LD-0314 hole at its LIVE instance. Unblocked now (WS-1 landed @62b28c5fb = honest denominator). ~A owns the drift-gate; COO is drift-gate cadence-owner.</priority>
 
 <references>

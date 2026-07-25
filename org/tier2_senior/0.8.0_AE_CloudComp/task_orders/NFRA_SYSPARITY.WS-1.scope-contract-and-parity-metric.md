@@ -3,7 +3,17 @@
 <project>NFRA_SYSPARITY</project>
 <issued_to>0.8.0_AE_CloudComp~A</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSED 2026-07-25 by 0.8.0_AE_CloudComp~A (status was STALE at `pending`; the work landed 07-19).
+     Evidence: scope contract + exclusions in infra/system/README.md; denominator twin infra/system/scope_contract.json;
+     metric `python infra/system/system_parity.py` reproducible per-domain at a printed committed-HEAD vintage.
+     AC-4 CVO GATE SATISFIED: 3.0.0_SA_CVO @b8e63282ec (20260719T1757Z) "WS-1 metric SOUND", its working-tree-vintage
+     finding then folded by @2399689ee1 (vintage = committed HEAD). COO's own WS-3 priority line already cites
+     "WS-1 landed @62b28c5fb". Re-verified live this session: metric runs, denominator printed, exclusions named. -->
+<!-- NOTE: WS-1 phase-1 <if_mismatch> STOP condition is now TRUE and is DISCHARGED, not pending: comp-system --check
+     reports SYSTEM CURRENT (not the PRD S1 "250 commits stale" premise). The premise moved BY BEING FIXED
+     (~C's SYSPARITY units + the managed-region refresher), which is the intended end-state, not a baseline shift
+     to surface. Recorded here so a future reader does not re-raise it as an open STOP. -->
 <priority>P1 -- DO FIRST. Gates WS-2..8 (honest measurement needs the denominator first) + unblocks NFRA_ONTOCLARITY charter (PRD S8). CTO PRD S4 sequencing: WS-1 before all.</priority>
 
 <references>
