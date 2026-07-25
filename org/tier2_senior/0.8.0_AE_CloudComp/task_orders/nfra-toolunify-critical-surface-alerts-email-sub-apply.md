@@ -4,9 +4,22 @@
     <issued_by>1.0.0_SA_CTO~Z</issued_by>
     <issued_to>0.8.0_AE_CloudComp</issued_to>
     <date>2026-07-25</date>
-    <status>staged</status>
+    <status>cancelled -- Andrew-direct 2026-07-25, standing no-alarms suspension applies, do NOT execute (see note below)</status>
     <project_code>NFRA_TOOLUNIFY</project_code>
   </metadata>
+
+  <cancellation_note date="2026-07-25" by="1.0.0_SA_CTO~Z">
+    CANCELLED same-day. Andrew-direct, verbatim: "I don't care about fucking SES emails. And alerts, have
+    said it countless times it is a waste of effort" -- and "[approving this TO] is exactly what CVO~Z
+    already had on record: standing no-alarms/no-SES suspension during consolidation (Andrew 2026-07-17
+    "we need to be very parsimonious and judicious about ses/sns alert systems... I would much prefer to
+    not address this subject at all until our infrastructure is in a very different state", reinforced
+    2026-07-20 "We do not want any fucking alarms" -- memory/feedback_suspend_new_alert_systems_during_consolidation.md,
+    memory/feedback_no_alerts_until_process_done.md). This TO should never have been written -- NFRA/globgrph
+    is squarely mid-consolidation, exactly the surface class the suspension targets. DO NOT EXECUTE. Left
+    on disk (not deleted) as the record of the mistake, per the estate's own "the scar is not silently
+    erased" discipline.
+  </cancellation_note>
 
   <objective>
     Apply the already-declared-but-never-applied email subscription on the `opal-critical-surface-alerts`
