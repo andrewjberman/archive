@@ -58,13 +58,28 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 # /tmp is unwritable under the Cygwin harness -- do NOT use mktemp here, and NEVER leave the
 # scratch-dir creation unchecked. That omission is the entire original defect.
 TMP="${SAFE_COMMIT_SELFTEST_TMP:-$HERE/.fread_e2e.$$}"
+
+# SWEEP STALE SCRATCH FROM PRIOR RUNS, FIRST. An EXIT trap cannot survive SIGKILL -- a run
+# killed by a timeout or a session kill leaves its scratch behind, and no trap can fix that
+# from inside the dead process. So the NEXT run cleans up: self-healing beats a promise.
+# (Measured 2026-07-25: a timeout-killed run left .fread_e2e.<pid>/ in the deliverables dir,
+# and CTO~Z found a second one from another interrupted run. On a day spent finding orphaned
+# artifacts, a self-test that litters when interrupted is the wrong instrument to ship.)
+for _stale in "$HERE"/.fread_e2e.*; do
+  [ -d "$_stale" ] || continue
+  [ "$_stale" = "$TMP" ] && continue
+  rm -rf "$_stale" 2>/dev/null && echo "swept stale scratch: $(basename "$_stale")"
+done
+
 rm -rf "$TMP"; mkdir -p "$TMP" 2>/dev/null || true
 if [ ! -d "$TMP" ] || [ ! -w "$TMP" ]; then
   echo "SETUP-ABORT: scratch dir [$TMP] not creatable/writable -- REFUSING TO RUN."
   echo "  (This abort is the repair: the original harness continued here and printed PASS.)"
   exit 9
 fi
-trap 'rm -rf "$TMP"' EXIT
+# INT/TERM as well as EXIT -- covers a Ctrl-C or a timeout's SIGTERM. SIGKILL is uncatchable
+# by design; the startup sweep above is what covers that case.
+trap 'rm -rf "$TMP"' EXIT INT TERM
 
 BIN="$TMP/bin"; mkdir -p "$BIN"
 cat > "$BIN/comp-system" <<'EOF'
