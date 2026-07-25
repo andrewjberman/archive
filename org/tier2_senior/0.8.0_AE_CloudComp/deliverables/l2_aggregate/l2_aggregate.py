@@ -165,46 +165,60 @@ def raw_accounting_lines(l1a_loaded):
 # ---------------------------------------------------------------------------------------
 
 def per_cell_aggregate(l1a_loaded):
+    """Per (cell x address_space) -- NEVER a per-cell scalar across spaces.
+
+    CORRECTED 20260725T1426Z (CTO~Z verify, CVO~Z-checked): the prior version summed
+    `total_count_where_applicable` across ALL address spaces for a given cell (e.g.
+    "covered: 138" = 105 code_call_site + 3 dag_node_type + ... ) -- a real acceptance-2
+    violation. Listing the components beside the sum did not cure it: a total published
+    next to its components is still read as the summary, and it is the number that gets
+    quoted. FIX: break the count out per address_space; the applicability DENOMINATOR
+    (a count of TOOLS, not a sum of incommensurable quantities) stays scalar and correct.
+    """
     agg = {}
     for cell in sorted(BR.CELLS):
         applicable_tools = []
         na_tools = []
-        method_counts = {"traversal": 0, "mention": 0, "declared": 0}
-        total_count = 0
+        by_space = {}  # address_space -> {"count": int, "method": str, "tool": str}
         for path, report, _ in l1a_loaded:
             rec = report.get("cells", {}).get(cell, {})
-            tool_label = "%s/%s" % (report.get("tool"), report.get("address_space"))
+            space = report.get("address_space")
+            tool_label = "%s/%s" % (report.get("tool"), space)
             if rec.get("applicable") is True:
                 applicable_tools.append(tool_label)
-                total_count += rec["count"]
-                method_counts[rec.get("method")] = method_counts.get(rec.get("method"), 0) + rec["count"]
+                # a cell CAN repeat an address_space (none do in this corpus, but comp-blast's
+                # two shapes are both distinct spaces already) -- key by (tool, space) so two
+                # reports sharing a space are never silently merged either.
+                by_space["%s/%s" % (report.get("tool"), space)] = {
+                    "address_space": space,
+                    "count": rec["count"],
+                    "method": rec.get("method"),
+                }
             else:
                 na_tools.append(tool_label)
 
         n = len(l1a_loaded)
         m = len(applicable_tools)
-        bias_parts = []
-        if total_count > 0:
-            for method, cnt in method_counts.items():
-                if cnt > 0:
-                    direction = BR.METHODS[method]
-                    tag = ("EXACT" if not direction["under_reports"] and not direction["over_reports"]
-                           else "UNDER-REPORTS" if direction["under_reports"]
-                           else "OVER-REPORTS")
-                    bias_parts.append("%d via %s (%s)" % (cnt, method, tag))
+
+        per_space_bias = {}
+        for key, rec in by_space.items():
+            direction = BR.METHODS[rec["method"]]
+            tag = ("EXACT" if not direction["under_reports"] and not direction["over_reports"]
+                   else "UNDER-REPORTS" if direction["under_reports"]
+                   else "OVER-REPORTS")
+            per_space_bias[key] = "%d via %s (%s)" % (rec["count"], rec["method"], tag)
 
         agg[cell] = {
             "definition": BR.CELLS[cell],
             "applicability_denominator": "%d/%d tools applicable (%s)" % (
                 m, n, ", ".join(applicable_tools) if applicable_tools else "none"),
             "na_tools": na_tools,
-            "total_count_where_applicable": total_count,
-            "method_mix_bias": (
-                " | ".join(bias_parts) if bias_parts else "no applicable cells to bias-check"
-            ),
+            "counts_by_address_space": by_space,
+            "method_mix_bias_by_address_space": per_space_bias,
             "note": ("N/A is NOT summed as 0 above -- %d of %d tools carry this cell as "
-                     "not-applicable and are excluded from total_count_where_applicable, "
-                     "listed in na_tools instead." % (n - m, n)),
+                     "not-applicable, listed in na_tools. NO CROSS-SPACE SCALAR is published "
+                     "for this cell (acceptance 2) -- counts_by_address_space is the only "
+                     "count field; read it per-space, never summed." % (n - m, n)),
         }
     return agg
 
@@ -439,10 +453,12 @@ def main():
         print("  " + s)
     print()
     print("--- per-cell aggregate (acceptance 1+2+3, banked input 1) ---")
+    print("  NOTE: NO cross-address_space scalar is printed anywhere below (acceptance 2, fixed 20260725T1426Z).")
     for cell, data in report["per_cell_aggregate"].items():
         print("  %s: %s" % (cell, data["applicability_denominator"]))
-        print("    total (where applicable): %d | bias: %s" % (
-            data["total_count_where_applicable"], data["method_mix_bias"]))
+        for key, rec in sorted(data["counts_by_address_space"].items()):
+            print("    %s: count=%d | %s" % (
+                key, rec["count"], data["method_mix_bias_by_address_space"][key]))
     print()
     print("--- ranked residue items (deterministic neighbourhood-touch proxy, acceptance 4) ---")
     for item in report["ranked_residue_items"][:10]:
