@@ -41,30 +41,40 @@
 | orphan key-bearing-ness | the candidate hook's own in-tree definition (body wraps `useQuery`/`queryKey`); no definition found ⇒ **UNKNOWN, reported, excluded from surface_total** | `mention` |
 | head pin | `git -C portal rev-parse --short HEAD` at scan time (`portal@d1ba89b9`) | — |
 
-## 3 · Main run — VERDICT, 5 residue sites of a 110-site surface
+## 3 · Main run — VERDICT, 4 residue sites of a 109-site surface *(corrected per verify, see below)*
 
 ```
 SENSOR comp-cache residue -- source=portal/src head=portal@d1ba89b9
-  DENOMINATOR: surface_total=110 = covered 105 (traversal) + member/unparseable 0 (traversal)
-               + doc_only 1 (mention) + orphan 4 (mention)
+  DENOMINATOR: surface_total=109 = covered 105 (traversal) + member/unparseable 0 (traversal)
+               + doc_only 1 (mention) + orphan 3 (mention)
   UNKNOWN (first-class, EXCLUDED from surface_total, never binned): 0 site(s)
   EXCLUDED by the tool's own declared design (accessor, no key at call site): 14 useQueryClient site(s)
-  DIRECTION: enumeration is mention-derived and UNDER-reports; covered/member are exact.
+  DEFINITION (labeled, NOT counted in any cell): usePortfolioApi.ts:128:useAutoSaveQuery
   TRUE_RC=2 (VERDICT)
 ```
 
 - **doc_only (1):** `portal/src/pages/AdvisorIntelligence/_shared/AdvisorBookView.tsx:236:useQueries` —
   a key-bearing subscription the tool's own contract line names as not-audited. The boundary, working as
   the tool discloses it.
-- **orphan (4):** `useAutoSaveQuery` at `usePortfolioApi.ts:128`, `usePortfolioFileUpload.ts:17`,
+- **orphan (3 CALL SITES):** `useAutoSaveQuery` at `usePortfolioFileUpload.ts:17`,
   `PortfolioManagement.tsx:79`, `TradeTab.tsx:95` — a custom wrapper whose definition wraps `useQuery`
   with `portfolioKeys.*` keys. **Nothing downstream of comp-cache knows these subscriptions exist**: a
   cache-key collision involving an `useAutoSaveQuery` site is invisible to `comp-cache collisions` today,
   and the tool's honest denominator line does not name this hook (it cannot — it doesn't know about it).
   Route-C territory per the cells contract; materiality is the inference gate's call, not this sensor's.
-- Accounting balances over applicable cells (105+0+1+4=110); reconciliation guard between the tool's own
+- **definition (1, labeled, un-counted):** `usePortfolioApi.ts:128` — the wrapper's declaration, where
+  the key is constructed. Reported as a top-level `definitions` row in the emitted JSON (legal extra
+  field; cell accounting unaffected), never folded into a call-site count.
+- Accounting balances over applicable cells (105+0+1+3=109); reconciliation guard between the tool's own
   count (105) and the sensor's independent enumeration of the same hook (105) agreed exactly this run —
   a nonzero delta prints as SENSOR-WARN, reported not smoothed.
+
+**CORRECTION PROVENANCE (CTO~Z + CVO~Z verify, 20260725T0922Z):** the first emission counted orphan=4 —
+the 4th "site" was the wrapper's *function declaration*, which `_QUERY_FAMILY`'s name-followed-by-`(`
+lookahead cannot distinguish from an invocation. The fix reuses this sensor's own declaration pattern
+(previously applied only in `hook_is_key_bearing`) inside `enumerate_sites()`; declarations now return
+separately and render as labeled DEFINITION rows. The finding's validity was never in question — its
+severity axis (how many places *use* the hook invisibly) is what the count feeds, per CVO~Z.
 
 ## 4 · Controls — all run as separate invocations
 
@@ -73,6 +83,7 @@ SENSOR comp-cache residue -- source=portal/src head=portal@d1ba89b9
 | **POSITIVE (can return CLEAN)** | `--source-root portal/src/components` — 10 useQuery sites, all captured | rc=0 CLEAN | **rc=0 CLEAN** ✓ |
 | **NEGATIVE (REFUSE, never "everything is residue")** | `--source-root portal/src/types` — real dir, zero Query-family sites | rc=3 REFUSE | **rc=3 REFUSE** ✓ (exercised twice) |
 | **Nonexistent-input mutation** (beyond spec; motivated by REC1C_E §4.4) | `--source-root portal/src/zzz-nonexistent-dir-9999` | rc=1 FAIL, distinct from REFUSE | **rc=1 FAIL** ✓ |
+| **Declaration-only mutant** (CTO~Z-ordered at verify) | `fixtures/mutant_decl_only/` — a `function useZzzMutantQuery(` declaration + genuine inner `useQuery` call | declaration NOT counted, labeled DEFINITION; inner call counted | **rc=0 CLEAN, covered=1, 1 labeled DEFINITION, 0 orphan** ✓ |
 | **Conformance** | emitted report through `boundary_report.validate()` + the 17-test suite | only BR008 (designed) / 17 pass | **BR008 only · 17/17** ✓ |
 
 **Disclosure of a mid-build correction (retrieval, not sensor):** I first mis-read `portal/src/types` as
@@ -103,7 +114,7 @@ two-commit pre-registration protocol was not triggered.
 
 Not a platform: the enumeration, the key-bearing-ness probe, and the exclusion parsing are bespoke to
 this tool's shape and MUST NOT be reused as an engine for another tool (SENSOR_CONTRACT §6). The
-shareable artifact is the emitted TYPE. Not a materiality judge: the 5 residue sites are a boundary
+shareable artifact is the emitted TYPE. Not a materiality judge: the 4 residue sites are a boundary
 statement; whether `useAutoSaveQuery` deserves folding into comp-cache's walk (or its own denominator
 mention) is the inference gate's question, explicitly not answered here. Not a claim about hooks outside
 `portal/src`: library-internal hooks with no in-tree definition would land UNKNOWN, not orphan (none did

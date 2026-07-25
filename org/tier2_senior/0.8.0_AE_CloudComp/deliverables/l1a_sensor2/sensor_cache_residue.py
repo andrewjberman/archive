@@ -92,15 +92,25 @@ def derive_accessor_exclusion(tool_source: str) -> bool:
 
 
 def enumerate_sites(root: Path):
-    """Token-scan enumeration of Query-family call sites (method=mention).
+    """Token-scan enumeration of Query-family CALL sites (method=mention).
 
     Mirrors the tool's own file-set rule (rglob *.tsx + *.ts) so tool and sensor
     disagree only on HOOK coverage, never on FILE coverage.
-    Returns list of (relpath, line, hook_identifier).
+
+    DECLARATION-vs-INVOCATION (CVO~Z verify fix, 20260725T0922Z): a name followed
+    by `(` matches `export function useAutoSaveQuery(fund: ...)` too -- the regex
+    alone cannot tell a declaration from a call. A `function <name>(` declaration
+    is therefore EXCLUDED from the call-site list and returned separately as a
+    labeled DEFINITION (it is where the key is constructed -- reportable, never
+    counted as a call site). Arrow-form declarations (`const x = (...) =>`) never
+    matched in the first place (name followed by `=`, not `(`).
+
+    Returns (call_sites, definition_sites), each a list of (relpath, line, hook).
     """
     sites = []
+    definitions = []
     if not root.exists():
-        return sites
+        return sites, definitions
     for f in sorted(list(root.rglob("*.tsx")) + list(root.rglob("*.ts"))):
         try:
             content = f.read_text(encoding="utf-8", errors="replace")
@@ -112,8 +122,11 @@ def enumerate_sites(root: Path):
         rel = str(f.relative_to(_WORKSPACE)).replace("\\", "/")
         for m in _QUERY_FAMILY.finditer(blanked):
             line = blanked.count("\n", 0, m.start()) + 1
-            sites.append((rel, line, m.group(1)))
-    return sites
+            if re.search(r"function\s+$", blanked[:m.start()]):
+                definitions.append((rel, line, m.group(1)))
+            else:
+                sites.append((rel, line, m.group(1)))
+    return sites, definitions
 
 
 def hook_is_key_bearing(hook: str, root: Path) -> bool | None:
@@ -178,7 +191,7 @@ def main() -> int:
     entries, unparseable, tool_total = cache_cli.extract(portal_src=root)
 
     # --- sensor-side enumeration (mention) ------------------------------------------------
-    all_sites = enumerate_sites(root)
+    all_sites, definition_sites = enumerate_sites(root)
     surface_sites = []
     unknown_sites = []
     excluded_accessor = 0
@@ -214,6 +227,8 @@ def main() -> int:
 
     # --- REFUSE: nothing to compare -------------------------------------------------------
     if not surface_sites and not unknown_sites:
+        for rel, ln, h in definition_sites:
+            print("  DEFINITION (labeled, never a call site): %s:%d:%s" % (rel, ln, h))
         print("REFUSE: no Query-family call sites under %s -- nothing could be compared. "
               "This is NOT a residue verdict and NOT a clean verdict." % root)
         return 3
@@ -240,6 +255,15 @@ def main() -> int:
             "doc_only": {"applicable": True, "count": n_doc, "method": "mention"},
             "orphan": {"applicable": True, "count": n_orphan, "method": "mention"},
         },
+        # Non-cell, non-counted, LABELED: hook DEFINITIONS (where the key is constructed).
+        # Deliberately outside `cells` accounting -- a definition is not a call site
+        # (CTO~Z/CVO~Z verify ruling 20260725T0922Z). Extra top-level fields are legal
+        # per the L0a validator; a machine consumer counting cells is unaffected.
+        "definitions": [
+            {"address": "%s:%d:%s" % (r, ln, h),
+             "evidence": "function declaration -- key-construction site, not an invocation"}
+            for r, ln, h in definition_sites
+        ],
         "items": (
             [{"address": "%s:%d:%s" % (r, ln, h), "cell": "doc_only", "method": "mention",
               "evidence": "hook named not-audited by the tool's own contract line"}
@@ -277,6 +301,9 @@ def main() -> int:
           "useQueryClient site(s)" % excluded_accessor)
     print("  DIRECTION: enumeration is mention-derived and UNDER-reports; covered/member are "
           "exact (executed traversal). Residue here can be an UNDERCOUNT, never an overcount.")
+    for d in report["definitions"]:
+        print("  DEFINITION (labeled, NOT counted in any cell): %s -- %s"
+              % (d["address"], d["evidence"]))
     for it in report["items"]:
         if it["cell"] in ("doc_only", "orphan"):
             print("  RESIDUE [%s] %s -- %s" % (it["cell"], it["address"], it["evidence"]))
