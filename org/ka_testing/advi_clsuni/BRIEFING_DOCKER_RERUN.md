@@ -1,5 +1,13 @@
 # Briefing: Docker Runtime + Context Windowing Fix
 
+> **REVIVAL PREREQUISITE (added 2026-07-25, runtime retired per LD-0286):** `runtime/nodes/architect.py:62` and
+> `runtime/nodes/coordinator.py:421` spawn bare `['find',...]`, which on a native-Windows host resolves to
+> **System32 `find.exe`, not GNU find** (CreateProcess searches System32 before PATH; `shutil.which` does not
+> reveal this) — both sites return rc=2 and silently degrade (`if rc == 0:` swallows it); they have likely never
+> worked outside the container. **Before any revival: migrate both to `.tools/msys_argv_guard.py
+> msys_safe_run()`** (note: inside Docker this is moot — the hazard is host-side execution only, which the
+> "No Uncontainerized Runtime" rule below already forbids). Record: NFRA_TOOLUNIFY census SYNTHESIS.md §3.
+
 **To:** 2.0.0_SA_COO
 **Date:** 2026-03-19
 **Context:** First live-fire burned 440K tokens on one Worker. Root cause
