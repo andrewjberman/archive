@@ -104,7 +104,54 @@ firm the legacy 2-partner producer structurally cannot emit, is also the firm th
 **Three independent mechanisms, one victim** -- consistent with cottonwood being added to the product
 after each artifact was authored, with every non-wildcard enumeration silently left behind.
 
-### 4.1 DECISION REQUIRED FROM CTO -- bucket-policy shape
+### 4.0 CTO RULING (`20260728T170204Z`): **(b) prefix grant, SourceArn pin RETAINED** -- both preconditions MEASURED
+
+**PRECONDITION 1 -- "enumerate what actually lives under those prefixes; I am not approving a widening
+whose contents nobody has looked at."** Measured, complete listing, **denominator 11 objects**:
+```
+json/mdpf/          (7)   49financial/{account-distribution, aggregate-aua-timeseries}.json
+                          cottonwood/ {account-distribution, aggregate-aua-timeseries}.json
+                          global/     {aggregate-aua-timeseries}.json
+                          inflection/ {account-distribution, aggregate-aua-timeseries}.json
+json/portfolios/    (4)   account-distribution.json · aum-metrics.json
+                          aum-timeseries.json · non_model_assets.json
+```
+**Every one of the 11 is an intended-servable MDPF / portfolio artifact. Nothing else lives under either
+prefix** -- no scratch keys, no partner-scoped data, no other firm's tree. The prefix grant therefore
+widens to exactly the set already intended, plus future keys of the same kind. **Precondition satisfied.**
+
+**AND IT SHARPENS THE COTTONWOOD FINDING -- plus corrects my own earlier claim:**
+- **Cottonwood's two objects EXIST in the bucket.** They are produced and present; they are simply **not
+  on the read allowlist.** A pure policy omission, not a missing artifact.
+- **CORRECTION to §4:** I listed `json/mdpf/global/account-distribution.json` among the allowlist's
+  omissions. **That object does not exist** (global carries only `aggregate-aua-timeseries`), so its
+  absence from the allowlist is correct, not a gap. **The real, exact gap is TWO keys, both cottonwood.**
+  9 allowlisted + 2 cottonwood = the 11 present. Stating it precisely because "three missing" overstated
+  the defect in the direction that inflates it.
+
+**PRECONDITION 2 -- "ESTABLISH, DO NOT ASSUME, that edge auth still governs."** Measured, and it does --
+by a stronger mechanism than the one hypothesised:
+```
+comp-routes behaviors | grep 'opal-data-assets'  ->  NO MATCH.
+```
+**NO CloudFront behavior currently routes to `S3-opal-data-assets` at all.** The origin is defined and
+**unreferenced**. So today there is *no path* by which any client reaches that bucket through the
+distribution, regardless of what the bucket policy says. **Client reachability requires a BEHAVIOR, and the
+only one that will exist is the `[AUTH]`-gated one 2b adds** (mirroring behavior 16's
+`viewer-request: auth-validator-edge`).
+
+>> **So the S3 read grant is NECESSARY-BUT-NOT-SUFFICIENT for client access: widening it cannot widen who
+> can fetch, because the gate is the behavior, not the bucket policy.** CTO's hypothesis holds -- but note
+> it holds *because no behavior exists*, which is a stronger and more checkable reason than "the layers
+> compose." <<
+
+**RESIDUAL, STATED NOT PAPERED OVER:** this safety is **contingent on behavior configuration, not
+intrinsic to the grant.** If anyone later attaches a NON-auth behavior to `S3-opal-data-assets`, the prefix
+grant becomes the thing standing between the public and all 11 objects. **The prefix grant should be
+recorded as depending on "every behavior on this origin is AUTH-gated"** -- an invariant nothing currently
+enforces. Gate candidate; not built here.
+
+### 4.1 (SUPERSEDED BY §4.0 -- retained for the reasoning) decision options
 | | (a) extend the enumeration | (b) prefix grant `json/mdpf/*` + `json/portfolios/*`, SourceArn pin RETAINED |
 |---|---|---|
 | Fixes today | yes | yes |
