@@ -29,6 +29,10 @@ stance:
     - "built YES (inventory gate, EXERCISED): comp-coverage-check 155xZ -- PASS, 88 homed tools,
        12 gate_contract rules, 0 unverifiable, inventory complete. A RUN, not a read."
     - "built NO for the NEGATIVE declaration -- no excludes: field exists in the schema (@a3dac97be s2)."
+    - "built YES (coverage CLASSIFICATION, CVO 212235Z): .tools/TOOL_CLASSIFICATION.yaml +
+       org/modules/graph/TOOL_MASTER.yaml -- 89 of 93 tools carry typed state /
+       denominator-construction / control / excludes, GENERATED MECHANICALLY FROM SOURCE rather than
+       hand-asserted."
     - "serving UNASSESSED -- gate wiring (commit/CI path vs invoke-only) never established.
        DO NOT upgrade to NO; they are different claims."
 primitive_distribution:
@@ -50,6 +54,12 @@ denominators:
     comp-v5-composite-test.sh (test harness). NO PRIMITIVE and NOT AN ENUMERATOR are different
     verdicts and only the first is a gap; recording 93 would read as three uncovered tools that do
     not exist."
+  THE_COUNT_CASCADE: "FIVE numbers, EVERY ONE CORRECT FOR A DIFFERENT POPULATION, AND NONE OF THEM IS
+    'THE TOOLKIT': 93 on disk / 89 classified / 89 homed in the coverage map / 69 in tools_index /
+    105 use-cases. >> THIS LANDS DIRECTLY ON MSTR, BECAUSE THE REGISTER COMPILES COUNTS. The rule is
+    VERIFICATION LAW (6): enumerate what a number is OF before quoting it. A bare tool count in this
+    register is now a defect regardless of which of the five it is -- the population must ride with
+    the number. << The 92->93 correction earlier in the session was one instance of this general form."
   correction: "CVO earlier reported 57 of 92 unresolved. The denominator is 93, not 92 -- a tool
     landed mid-session (comp-missions, the register's OWN tool). Corrected at source because MSTR
     was compiling from CVO's numbers."
@@ -60,16 +70,18 @@ objectives:
     decided: "YES"
     built: "YES"
     serving: "UNASSESSED"
-    frontier: "Wire the declared-vs-actual diff at suite scale. Needs no oracle (Andrew's constraint);
-      comp-toolgraph already implements the shape for coupling. Now cheaper -- per-tool primitive rows
-      persist as JSON so excludes: can be populated mechanically."
-    blocked_on: ""
+    frontier: "Wire comp-which to IMPORT tool_index instead of re-parsing the manifest."
+    blocked_on: "1.0.0_SA_CTO -- the wiring call."
   - id: INFRASTRUCTURE.TOOLS.O2
     title: "Response scope -- high-signal output that is not truncated, redacted or garbled"
     state: "ACTIVE -- Andrew named it a SEPARATE function from coverage"
     decided: "NO"
-    built: "NO"
+    built: "PARTIAL"
     serving: "NO"
+    built_anchor: "CVO 212235Z -- the 8-field card now carries `knows_own_denominator` and `excludes`,
+      the two fields that make silent truncation DETECTABLE. PARTIAL and NOT YES because NO TOOL HAS
+      BEEN CHANGED TO USE THEM YET: the artifact exists, the behaviour has not. That distinction is the
+      whole point of the three axes, and CVO drew it without being asked."
     principle: "BOUNDING IS NOT THE PROBLEM. UNDECLARED BOUNDING IS. A tool returning 40 of 400 AND
       SAYING SO is correct. The defect is truncation the reader cannot detect -- the same property as
       an unenumerated coverage universe, because the output is byte-identical to the complete one.
@@ -78,15 +90,18 @@ objectives:
       - "C1 declare the denominator IN-BAND (showing N of M, M measured BEFORE bounding)"
       - "C2 truncation is a VISIBLE TOKEN, never an absence"
       - "C3 an EMPTY result must be distinguishable from a FAILED retrieval"
-      - "C4 THE CONTRACT IS THE TOOL'S, NOT THE CALLER'S -- all measured instances came from a
+      - "C4 THE CONTRACT IS THE TOOL'S, NOT THE CALLER'S -- every measured instance came from a
          caller's bounding, and a tool that emits its own denominator survives a careless caller"
-    frontier: "A per-tool output contract implementing C1-C4."
+    frontier: "Change a tool to actually USE knows_own_denominator/excludes. Until one does, the fields
+      are declared and unexercised."
     blocked_on: ""
-frontier: "Wire the declared-vs-actual diff at suite scale -- each tool's DECLARED surface against the
-  surface implied by its ENUMERATION PRIMITIVE. Needs no oracle (Andrew's constraint); comp-toolgraph
-  already implements the shape for coupling. NOW CHEAPER: per-tool primitive rows persist as JSON, so
-  excludes: can be populated MECHANICALLY from the primitive. That was the blocker and it is removed."
-blocked_on: ""
+frontier: "Wire comp-which to IMPORT tool_index instead of re-parsing the manifest. Cheap, and it is
+  now the single next thing -- until it lands, the compiled index is a fast artifact nobody reads.
+  (The suite-scale declared-vs-actual diff remains real but is downstream of this, and is now cheaper
+  because per-tool primitive rows persist as JSON.)"
+blocked_on: "1.0.0_SA_CTO -- TWO calls CVO explicitly did NOT make: (a) the comp-which wiring, and
+  (b) whether this 5th registry should FOLD INTO comp-coverage-map.yaml, which already has a passing
+  gate it would inherit. Both routed to him in the same window."
 attach: [NFRA_COMPUNIFY, NFRA_MSBEFF, NFRA_COMPLEARN, NFRA_COMPDRIFT, NFRA_TOOLARCH, NFRA_TOOLBHVR,
          NFRA_TOOLCHECK, NFRA_TOOLGRAPH, NFRA_TOOLHEALTH, NFRA_TOOLHUD, NFRA_COMPASSURANCE,
          NFRA_COMPREG, NFRA_COMPROUTE, NFRA_SYSPARITY]
@@ -100,6 +115,11 @@ holes:
   - "INFRASTRUCTURE.TOOLS.O2 itself (response scope / output contract)."
   - "Cross-tool coverage diffing at suite scale -- comp-toolgraph does declared-vs-actual for
      COUPLING, nothing for COVERAGE."
+  - "comp-which RE-PARSES 133KB OF YAML PER CALL -- yaml.safe_load x10, ~97% of runtime (measured by
+     0.8.0_AE_CloudComp~B with cProfile, 07-24) -- ON THE TOOL CLAUDE.md RULE 21 MANDATES AS THE FIRST
+     REFLEX FOR EVERY SEARCH. CVO built the fix (a compiled index: 0.4ms warm import vs 2,870ms,
+     7,726x) BUT THE WIRING IS NOT ITS CALL. Live work, no project code, no named owner.
+     UNTIL IT LANDS THIS IS A FAST ARTIFACT NOBODY READS."
   - "UNDER-CLASSIFICATION IS INVISIBLE, and it was found INSIDE a field that read COVERED. CVO's
      classifier had NO SIMULATE primitive -- the pattern CVO itself documented four hours earlier as
      the strongest enumeration mechanism we have. Five tools use it: three came back UNRESOLVED and so
@@ -114,3 +134,37 @@ limits_on_the_anchor:
   - ">> BUILT = YES IS CORRECT FOR THE CENSUS BEING COMPLETE. IT IS NOT A CLAIM THAT THE TAXONOMY IS
      CLOSED. << Carried verbatim at CVO's request: the two read the same at a glance and only one is true."
 grounded: "2026-07-28T192952Z -- CVO resolved primitive census, re-runnable anchor."
+
+standardized_constants:
+  note: "Andrew-direct vocabulary, likely register-relevant. His correction is the load-bearing part:
+    'DERIVED IS A QUALIFIER, NOT A STATE.'"
+  state: "LIVE | PERSISTED"
+  derived: "true | false -- PERSISTED+derived -> REFRESH MECHANISM; PERSISTED+authored -> AUTHORSHIP GATE"
+  denominator_construction: "ENUMERATED | MATCHED | TRAVERSED | EXERCISED"
+  control_established: "POSITIVE | NEGATIVE | NONE"
+  measured: "PERSISTED 73 / LIVE 16 -- only 73 need a freshness question, 16 are STRUCTURALLY EXEMPT.
+    NEGATIVE control: 8 of 89 -- the only tools that can establish ABSENCE rather than presence."
+
+documentation_drift_surfaced:
+  - "graph-call-manifest.yaml declares cost:/freshness: as FREE TEXT -- 105/105 populated but PROSE,
+     94 distinct values across 105 entries. The new master carries TYPED equivalents.
+     TWO SCHEMAS NOW DESCRIBE THE SAME PROPERTIES AND WILL DRIFT IF NOT RECONCILED."
+  - "comp-tools.yaml should be DEPRECATED. Its own header says it is 'NOT a registry and NOT a
+     census... Do NOT count tools from this file -- that is how the fabric minted six conflicting tool
+     counts (28/29/~30/42/63/66) with no control catching any of them.' IT IS THE ONLY REGISTRY WITH A
+     MEASURED HISTORY OF PRODUCING WRONG COUNTS, AND THAT HISTORY IS WRITTEN ON IT BY ITS OWN AUTHOR."
+
+cvo_disclosures_held_in_custody:
+  - "An audited `system-current-override` rides CVO's commit AND IT DELIBERATELY DID NOT MAKE the
+     conventional 'regen as the immediate next commit' promise. It checked first: org/modules/graph/
+     held ~17 uncommitted files belonging to a PEER (compproof solver work). Regenerating 06 would have
+     SWEPT THEIR UNLANDED WORK INTO ITS COMMIT -- the exact incident recorded against comp-system today.
+     >> A PROMISE IT COULD NOT KEEP WOULD HAVE BEEN WORSE THAN AN HONEST DEFERRAL. << 06 currency is
+     NOT claimed by that commit. Recorded here because RV-0056 Claim 3 was precisely about an override
+     HONOURING its promise -- so an override that declines to make one is the same discipline, not a
+     lapse in it."
+  - "A VACUOUS FIELD CAUGHT PRE-SHIP: CVO first implemented Andrew's suggested bounded/unbounded
+     boolean and it returned TRUE FOR 89 OF 89. A FIELD THAT CANNOT VARY IS NOT A CLASSIFICATION.
+     Replaced with the 4-value construction archetype before shipping."
+  - "`universe` is precedence-picked and UNRELIABLE for 67 of 89 multi-primitive tools -- recorded in
+     the artifact's own known_limitations, not only in the message to me."
