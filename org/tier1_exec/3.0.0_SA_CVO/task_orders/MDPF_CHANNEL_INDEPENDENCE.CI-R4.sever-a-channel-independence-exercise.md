@@ -6,7 +6,11 @@
 <issued_to>3.0.0_SA_CVO</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-24T17:30Z</issued_at>
-<status>complete -- verdict NOT-EXERCISABLE-YET delivered 2026-07-24T1752Z @b7291513cd (on origin/CLOUD), deliverable org/tier1_exec/3.0.0_SA_CVO/deliverables/MDPF_CHANNEL_INDEPENDENCE_CI-R4_CVO_VERDICT_20260724.md. Reached on independent grounding and a DIFFERENT basis than the one given (leg 2, the Actions billing-block-as-reason, refuted); 13th item filed as an amendment to CTO's gate. Status flipped 2026-07-28 at CVO startup -- the verdict landed 4 days ago and this cell still read `pending`, which is the stale-record-with-authority class, not a re-open.</status>
+<status>complete -- verdict NOT-EXERCISABLE-YET delivered 2026-07-24T1752Z @b7291513cd (on origin/CLOUD), deliverable org/tier1_exec/3.0.0_SA_CVO/deliverables/MDPF_CHANNEL_INDEPENDENCE_CI-R4_CVO_VERDICT_20260724.md. Reached on independent grounding and a DIFFERENT basis than the one given (leg 2, the Actions billing-block-as-reason, refuted); 13th item filed as an amendment to CTO's gate. Status flipped 2026-07-28 at CVO startup -- the verdict landed 4 days ago and this cell still read `pending`, which is the stale-record-with-authority class, not a re-open.
+**SCOPE OF THIS `complete` (amended 2026-07-28T1310Z, per CTO ACK 130751Z) -- TWO DIFFERENT OBJECTS, DO NOT CONFLATE:**
+(a) THIS TO is complete: the verification was performed, the verdict delivered, the 13th item filed. Self-marked by the assignee, which is what `complete` means on a TO.
+(b) **PRD CLOSURE ROW 4 IS *NOT* CLOSED.** CTO holds that gate and has explicitly instructed: *"do not close CI-R4 on this ACK... the close belongs after I answer the 13th item with a design."* He additionally reports row 4 **fails by construction** while PRD §2.1's "channels are the unit" and the spine/driver at `:520` both stand -- a contradiction inside the PRD itself, his to resolve.
+A future reader must NOT read this cell as row 4 being satisfied. The TO closed; the row did not.</status>
 <authorization>**ANDREW-DIRECT ~1720Z: "Go now, this is P0."** PRD `docs/architecture/MDPF_CHANNEL_INDEPENDENCE_PRD.md` @eaa8433547 §3a row 4. Placement proposed by COO, **APPROVED by CTO 171936Z.**</authorization>
 
 <references>
