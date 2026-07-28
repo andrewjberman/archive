@@ -21,6 +21,22 @@ is by definition a different lane, on a file with no git author.
 
     >> The GATE is the only point where authorship AND intent are both known. <<
 
+WHY NOT SELF-REPORTED BLOCKS -- and this is the measured case, not the argument (2026-07-28):
+`2.0.0_SA_COO~Z` reported to three agents, me included, that he was owned-paths-blocked from his
+own tree, and I was carrying it as the sharpest instance of a gate-with-no-queue. HE WAS NEVER
+BLOCKED. He had read `permitted_agents` in `.owned-paths.yaml`, seen his suffixed serial absent,
+and concluded "blocked" -- a BEHAVIORAL claim from a CONFIG READ, never exercised. The
+home-folder rule at `.tools/owned-paths-validate.py:80-84` permits a `~lane` against its base's
+home folder, independent of `permitted_agents`. Verified independently here: the audit log holds
+SIX `PASS  2.0.0_SA_COO~Z  ... (all paths in-lane)` entries and ZERO BLOCK.
+
+    >> A SELF-REPORTED BLOCK IS NOT EVIDENCE OF A GATE REFUSAL, AND THE TWO DIVERGE IN THE
+       DIRECTION THAT INFLATES THE QUEUE. <<
+
+A queue sourced from agents' self-reports would have carried a PHANTOM ROW for an agent the log
+records as PASSING. Sourced from refusals-as-logged, it correctly carries nothing from him. That
+is the design choice, exercised against a real fabrication rather than reasoned about.
+
 `.tools/git-hooks/owned-paths-check.sh:122` already appends, on every refusal:
     <ISO_TS> BLOCK  <AGENT>  <N_FILES>  (<N> violation(s): VIOLATION: <path> -- lane=<LANE> ...)
 Agent (with ~lane suffix), path, owning lane, explicit-Z timestamp, intent certain. 673 entries.
