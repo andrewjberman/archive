@@ -1,0 +1,142 @@
+diff --git a/data/mdpf/scripts/gold/mdpf_aggregate_aua.py b/data/mdpf/scripts/gold/mdpf_aggregate_aua.py
+index f04d3c323c..cf8b56b648 100644
+--- a/data/mdpf/scripts/gold/mdpf_aggregate_aua.py
++++ b/data/mdpf/scripts/gold/mdpf_aggregate_aua.py
+@@ -84,11 +84,74 @@ RECON_TOLERANCE = 0.01                    # USD -- section 3.5 identity 1
+ #        scalar; catches build_partners aggregation bugs).
+ COHORT0_DOD_THRESHOLD = 0.50              # >50% Cohort 0 DoD move = ERROR
+ XPROD_DIVERGENCE_TOLERANCE = 0.01         # >1% rel WS-A vs independent = ERROR
+-# Inflection became an MDPF aggregate partner on the 2026-05-18 daily-forward
+-# partition (AE 0.7.0 ENABLE 12ec0b93d). Earlier dates (historical backfill /
+-# pre-onboarding) expect 49financial only -- so MDPF_ASSETS.016's backfill of
+-# 2026-01-17 -> 2026-05-17 does NOT false-trip sentinel 2.
+-INFLECTION_PARTNER_ONBOARD_DATE = "2026-05-18"
++# --------------------------------------------------------------------------
++# THE PARTNER ROSTER IS THE ONE AUTHORITY (doctrine CONTROLS_OVER_CARE III-e;
++# Andrew-direct 2026-07-28T203435Z "Yes, cottonwood should be included").
++#
++# >> A ROSTER RESTATED IS A ROSTER ROTTED. This module previously carried its own
++#    private partner literals in TWO places -- expected_partners_for() (sentinel 2)
++#    and the `expected_partners` set behind `feeders_missing`. Nothing linked them,
++#    so cottonwood was absent from BOTH and `feeders_missing: []` was *literally
++#    true over a denominator that never contained cottonwood*. A control whose
++#    expectation shares a private literal with the data it checks certifies the
++#    omission it exists to catch -- and would have certified the NEXT omitted
++#    partner (advi) identically. The fix is to READ, never to restate. <<
++#
++# ACCEPTANCE (the roster's own, adopted verbatim): "THE PARTNER-#4 TEST --
++# onboarding a partner is a row in `partners` AND NOTHING ELSE."
++# --------------------------------------------------------------------------
++_ROSTER_PATH = os.path.join(
++    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
++    "config", "partner_roster.json")
++
++
++def load_partner_roster(path: "str | None" = None) -> list:
++    """The declared roster. FAIL-CLOSED, matching the gold-side precedent already
++    established in build_portal_gold_accrual.py: a missing roster or a zero-partner
++    roster is a SystemExit, never a silent empty expectation. An empty expectation
++    is precisely the state in which every completeness field goes quiet."""
++    p = path or _ROSTER_PATH
++    try:
++        with open(p, encoding="utf-8") as fh:
++            roster = json.load(fh)
++    except Exception as e:                       # noqa: BLE001
++        raise SystemExit(f"partner roster UNREADABLE at {p}: {e} -- refusing to run "
++                         f"with an undeclared partner set")
++    partners = roster.get("partners")
++    if not partners:
++        raise SystemExit(f"{p}: roster declares ZERO partners -- refusing to guess")
++    return partners
++
++
++def _effective_from(partner: dict, leg: str, quantity: str) -> "str | None":
++    """The declared effective_from for one (firm, leg, quantity) cell.
++
++    ⚠ `value` and `count` DO NOT SHARE A DATE and must never be collapsed: cottonwood
++    declares model.value from 2026-05-28 but model.count only from 2026-07-22, with a
++    `bounded_historical_fact` (unbackfillable_before) because the vendor is forward-only.
++    Collapsing them would either backdate a count that cannot exist or suppress a real
++    absence the roster binds us to report."""
++    q = (((partner.get("legs") or {}).get(leg) or {}).get("quantities") or {}).get(quantity)
++    return (q or {}).get("effective_from")
++
++
++def _effective_to(partner: dict, leg: str, quantity: str) -> "str | None":
++    q = (((partner.get("legs") or {}).get(leg) or {}).get("quantities") or {}).get(quantity)
++    return (q or {}).get("effective_to")
++
++
++# BACK-COMPAT ONLY -- data/mdpf/scripts/backfill/build_mdpf_process_backfill.py:621
++# imports this attribute (`agg.INFLECTION_PARTNER_ONBOARD_DATE`), so it cannot simply
++# be deleted. It is now DERIVED from the roster rather than restated.
++# ⚠ THIS CORRECTS A DIVERGENCE, it does not merely relocate one: the literal here read
++# "2026-05-18" while the roster declares 2026-05-15 for inflection model.value, carrying
++# an Andrew-direct ruling (2026-07-21 VERBATIM: "it was 0, 5-15 was the beginning") AND
++# independent corroboration from partition identity (eclipse fact_portfolios_full first
++# partition = 2026-05-15). The hardcoded copy was three days stale against a sovereign
++# ruling -- which is the delay fuse the doctrine names.
++INFLECTION_PARTNER_ONBOARD_DATE = next(
++    (_effective_from(p, "model", "value") for p in load_partner_roster()
++     if p.get("firm_id") == "inflection"), None)
+ 
+ # --- headline formula (MDPF_ASSETS.024/.028, PRD v0.9) ---
+ # The Model Portfolios headline AUA (opal_aggregate_aua) = Cohort 1a+1b+1c+2a.
+@@ -489,15 +552,33 @@ def build_etf_decomposition(composition: pd.DataFrame, etf_net_assets: pd.DataFr
+ # Reconciliation -- section 3.5 / section 7
+ # --------------------------------------------------------------------------
+ 
+-def expected_partners_for(date: str) -> set:
+-    """Sentinel 2 config (MDPF_ASSETS.019): the partners that MUST appear in
+-    the cohort decomposition for a given as-of date. Inflection onboarded as
+-    an MDPF aggregate partner on INFLECTION_PARTNER_ONBOARD_DATE; earlier
+-    dates expect 49financial only."""
+-    base = {"49financial"}
+-    if date >= INFLECTION_PARTNER_ONBOARD_DATE:
+-        base.add("inflection")
+-    return base
++def expected_partners_for(date: str, leg: str = "model",
++                          quantity: str = "value") -> set:
++    """Sentinel 2 config (MDPF_ASSETS.019): the partners that MUST appear in the
++    cohort decomposition for a given as-of date -- DERIVED FROM THE ROSTER, never
++    restated here.
++
++    A partner is expected on `date` when the roster declares that (leg, quantity)
++    cell effective on that date: `effective_from <= date` and, when bounded,
++    `date <= effective_to`. `leg`/`quantity` are parameters because the roster is
++    keyed (firm, leg, quantity) and the cells genuinely differ -- cottonwood's
++    model.value starts 2026-05-28 while its model.count only starts 2026-07-22.
++
++    ⚠ A partner declared effective but ABSENT from the data is the caller's finding
++    to report. This function answers "who is EXPECTED", never "who showed up" -- the
++    two must not be derived from the same source, which is exactly the defect that
++    let `feeders_missing: []` be literally true while cottonwood was missing."""
++    out = set()
++    for p in load_partner_roster():
++        fid = p.get("firm_id")
++        ef = _effective_from(p, leg, quantity)
++        if not fid or not ef or date < ef:
++            continue
++        et = _effective_to(p, leg, quantity)
++        if et and date > et:
++            continue
++        out.add(fid)
++    return out
+ 
+ 
+ def load_prior_cohort0(date: str) -> tuple:
+@@ -1129,7 +1210,13 @@ def build_artifact(date: str, feeders: dict, registry: dict,
+                                               if p["firm_id"] in rolled_forward],
+                                rolled_dates=rolled_forward)
+ 
+-    expected_partners = {"49financial", "inflection"}
++    # ROSTER COPY #2 (the `feeders_missing` source) -- was a flat, DATE-BLIND literal
++    # {"49financial","inflection"}: cottonwood absent, and inflection asserted expected
++    # even on 2024-11-01, years before its declared effective_from. Now derived from the
++    # same roster and the same date as sentinel 2, so the two expectations cannot drift
++    # apart again. Fixing one site and not the other would leave the artifact still
++    # asserting completeness over a denominator missing the partner.
++    expected_partners = expected_partners_for(date)
+     present = {p["firm_id"] for p in partners}
+     unmapped = 0
+     if not positions.empty:

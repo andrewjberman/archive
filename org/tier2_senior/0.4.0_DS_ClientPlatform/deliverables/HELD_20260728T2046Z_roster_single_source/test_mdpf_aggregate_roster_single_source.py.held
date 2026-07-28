@@ -1,0 +1,185 @@
+"""THE PARTNER-#4 TEST + the roster single-sourcing, for mdpf_aggregate_aua.py.
+
+The roster states its own acceptance and CTO adopted it verbatim:
+    "THE PARTNER-#4 TEST -- onboarding a partner is a row in `partners` AND NOTHING
+     ELSE. If onboarding requires a code edit, this artifact has failed its purpose."
+
+So the load-bearing test is NOT "cottonwood now appears" -- that is the symptom. It is
+that a partner the producer has NEVER HEARD OF flows through BOTH expectation sites from
+a roster row alone. A fixture parameterised by the producer's own constants cannot detect
+that (it moves with the code); this one injects a roster the producer did not ship.
+
+Sites under test, which were two unlinked private literals before this change:
+    expected_partners_for()   -> sentinel 2
+    `expected_partners`       -> feeders_missing
+"""
+from __future__ import annotations
+
+import importlib.util
+import json
+import os
+import sys
+import unittest
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_GOLD = os.path.dirname(_HERE)
+
+
+def _load_module():
+    """Import the producer by path (it is a script, not a package member)."""
+    spec = importlib.util.spec_from_file_location(
+        "mdpf_aggregate_aua", os.path.join(_GOLD, "mdpf_aggregate_aua.py"))
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["mdpf_aggregate_aua"] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+agg = _load_module()
+
+
+def _roster(rows) -> str:
+    """Write a synthetic roster and return its path."""
+    import tempfile
+    fd, path = tempfile.mkstemp(suffix=".json")
+    with os.fdopen(fd, "w", encoding="utf-8") as fh:
+        json.dump({"partners": rows}, fh)
+    return path
+
+
+def _row(fid, model_value_from, model_count_from=None, effective_to=None):
+    q = {"value": {"effective_from": model_value_from, "effective_to": effective_to}}
+    if model_count_from:
+        q["count"] = {"effective_from": model_count_from, "effective_to": None}
+    return {"firm_id": fid, "legs": {"model": {"quantities": q}}}
+
+
+class TestPartnerFourTest(unittest.TestCase):
+    """A partner the producer never heard of, onboarded by a roster ROW ALONE."""
+
+    def test_unknown_fourth_partner_flows_through_with_zero_code_edits(self):
+        path = _roster([
+            _row("49financial", "2024-11-01"),
+            _row("inflection", "2026-05-15"),
+            _row("cottonwood", "2026-05-28", model_count_from="2026-07-22"),
+            _row("acme_partners_4", "2026-06-10"),      # <-- never named in the producer
+        ])
+        orig = agg._ROSTER_PATH
+        try:
+            agg._ROSTER_PATH = path
+            after = agg.expected_partners_for("2026-06-11")
+            before = agg.expected_partners_for("2026-06-09")
+        finally:
+            agg._ROSTER_PATH = orig
+        self.assertIn("acme_partners_4", after,
+                      "PARTNER-#4 TEST FAILED: a roster row alone did not onboard the "
+                      "partner -- the producer still carries a private partner set")
+        self.assertNotIn("acme_partners_4", before,
+                         "the 4th partner leaked before its declared effective_from")
+
+    # Partner literals that remain in the producer BY DECISION, each with its reason.
+    # Anything NOT on this list is a regression. The list is deliberately explicit so a
+    # new literal cannot hide behind a loosened matcher -- narrowing the assertion to
+    # make it pass is the failure mode this test exists to prevent.
+    KNOWN_PARTNER_LITERALS = {
+        # the back-compat derivation for build_mdpf_process_backfill.py:621, which imports
+        # `agg.INFLECTION_PARTNER_ONBOARD_DATE`; one named lookup, deriving FROM the roster.
+        'if p.get("firm_id") == "inflection"',
+        # SURFACED, NOT SILENTLY REWIRED -- a THIRD partner literal this test found, which
+        # neither the GO nor I had named. It encodes a BASIS rule (Andrew-direct 2026-07-22
+        # basis B: the headline non-model band is 49F-only), not an expectation of who
+        # EXISTS, so it is not a roster restatement and rewiring it would be a basis change
+        # outside a wiring GO. Routed to CTO; if it should derive from a declared fee_scope
+        # that is a separate ruling.
+        'HEADLINE_NONMODEL_FIRMS = ("49financial",)',
+    }
+
+    def test_producer_restates_no_partner_set(self):
+        """STRUCTURAL, and a fixture cannot fake it away: the producer must not restate a
+        partner set. A behavioural test alone still passes if someone re-adds a literal
+        beside the roster read -- which is exactly how the two original copies drifted.
+
+        Scans CODE ONLY (comments stripped): a comment naming a partner is documentation,
+        and failing on it would train the next reader to weaken the matcher."""
+        path = os.path.join(_GOLD, "mdpf_aggregate_aua.py")
+        with open(path, encoding="utf-8") as fh:
+            lines = fh.readlines()
+        offenders = []
+        for i, raw in enumerate(lines, 1):
+            code = raw.split("#", 1)[0]          # strip trailing/whole-line comments
+            if not code.strip():
+                continue
+            for fid in ("49financial", "inflection", "cottonwood"):
+                if f'"{fid}"' in code or f"'{fid}'" in code:
+                    if any(k in code for k in self.KNOWN_PARTNER_LITERALS):
+                        continue
+                    offenders.append(f"{path}:{i}: {code.strip()[:100]}")
+        self.assertEqual(
+            offenders, [],
+            "partner literal(s) restated in producer CODE -- a roster restated is a "
+            "roster rotted (CONTROLS_OVER_CARE III-e):\n  " + "\n  ".join(offenders))
+
+
+class TestRosterDerivedDates(unittest.TestCase):
+    def test_value_and_count_do_not_share_a_date(self):
+        """Cottonwood declares model.value from 05-28 but model.count only from 07-22
+        (bounded_historical_fact, vendor forward-only). Collapsing them would either
+        backdate an impossible count or suppress a real absence."""
+        path = _roster([_row("cottonwood", "2026-05-28", model_count_from="2026-07-22")])
+        orig = agg._ROSTER_PATH
+        try:
+            agg._ROSTER_PATH = path
+            v = agg.expected_partners_for("2026-06-01", quantity="value")
+            c = agg.expected_partners_for("2026-06-01", quantity="count")
+        finally:
+            agg._ROSTER_PATH = orig
+        self.assertIn("cottonwood", v)
+        self.assertNotIn("cottonwood", c,
+                         "count leg collapsed onto the value leg's effective_from")
+
+    def test_effective_to_bounds_a_retired_partner(self):
+        path = _roster([_row("retired_co", "2025-01-01", effective_to="2025-06-30")])
+        orig = agg._ROSTER_PATH
+        try:
+            agg._ROSTER_PATH = path
+            self.assertIn("retired_co", agg.expected_partners_for("2025-03-01"))
+            self.assertNotIn("retired_co", agg.expected_partners_for("2025-07-01"))
+        finally:
+            agg._ROSTER_PATH = orig
+
+    def test_live_roster_declares_cottonwood_effective_2026_05_28(self):
+        """The date is READ, never chosen. Two independent derivations already agree
+        (roster declaration + COO's measured first non-null model_aua)."""
+        live = {p["firm_id"]: p for p in agg.load_partner_roster()}
+        self.assertEqual(
+            agg._effective_from(live["cottonwood"], "model", "value"), "2026-05-28")
+        self.assertEqual(
+            agg._effective_from(live["cottonwood"], "model", "count"), "2026-07-22")
+
+    def test_cottonwood_is_expected_on_a_current_date(self):
+        self.assertIn("cottonwood", agg.expected_partners_for("2026-07-27"))
+
+
+class TestFailClosed(unittest.TestCase):
+    def test_missing_roster_is_systemexit_not_empty_expectation(self):
+        orig = agg._ROSTER_PATH
+        try:
+            agg._ROSTER_PATH = os.path.join(_HERE, "__no_such_roster__.json")
+            with self.assertRaises(SystemExit):
+                agg.expected_partners_for("2026-07-27")
+        finally:
+            agg._ROSTER_PATH = orig
+
+    def test_zero_partner_roster_is_systemexit(self):
+        path = _roster([])
+        orig = agg._ROSTER_PATH
+        try:
+            agg._ROSTER_PATH = path
+            with self.assertRaises(SystemExit):
+                agg.expected_partners_for("2026-07-27")
+        finally:
+            agg._ROSTER_PATH = orig
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
