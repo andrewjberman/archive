@@ -429,3 +429,121 @@ never omitted, and never counted as fresh. Not-knowing renders as an unknown, ne
    `tree -> (bucket, label, key_prefix, layers)`. **A layer list cannot express two repo trees feeding
    one S3 tree** -- I would have shipped a schema that still could not describe the defect it was
    designed for. Corrected before writing code, not after.
+
+---
+---
+
+# PART III -- THE ROUTER FALSE-CLEAN, AND WHY IT WAS TWO HALVES
+
+*Appended 2026-07-28 ~2140Z. CTO approval `213109Z`. Landed `6ce5c45f7c`. No deploy, no apply, no IAM.*
+
+## F-7. The bd-gold fallthrough was reachable on `data/assets/...` paths -- and CTO hit it himself
+
+```
+comp-pipescript deployed data/assets/scripts/gold/build_cottonwood_mdpf_pair.py
+  -> "DEPLOYED STATUS: local repo vs s3://opal-data-bd/code/{gold,silver,bronze}/"   WRONG TREE
+     0 MATCH, 0 STALE, ... 0 UNCOVERED    "No scripts matched filter"    rc=0
+```
+
+**A deploy-verification instrument failing OPEN, on the exact path shape the cottonwood STALE findings
+came from** -- the tool AE and DS run *before* gold deploys. Not a regression from Part II (that fixed
+layer *coverage*; this is *routing*), but the same `:1785` fallthrough as F-2b reachable on a second
+path shape.
+
+## >> IT WAS TWO HALVES, AND FIXING ONLY THE DIAGNOSED ONE IS WORSE THAN THE BUG <<
+
+**HALF 1 -- ROUTING.** `_DATADIR_TO_PIPELINE` is built from PIPELINE_MAP dirs + mdpf =
+`{black_diamond, cot, inf, mdpf}`. **`assets` is not a key**, so `:1780-1783` matched nothing and
+`:1785` fell to `bd-gold`.
+
+**HALF 2 -- FILTER CANONICALIZATION.** `_canonicalize_script_id` carries the **same hardcoded
+alternation** -- `(black_diamond|inf|schwab|cot|mdpf)` x `(gold|silver|bronze|backfill|feeders)`,
+**no `assets`, no `assets_gold`.** So a `data/assets/...` path was never stripped to its stem, and the
+filter compared a **full path against a bare stem**.
+
+**With HALF 1 alone, the output read:**
+```
+DEPLOYED STATUS [mdpf]: ... code/scripts/{assets_gold,backfill,bronze,feeders,gold,silver}   <- CORRECT
+  Summary: 0 MATCH, 0 STALE, ... 0 UNCOVERED                                                 <- EMPTY
+```
+>> **A correct header over an empty result is arguably WORSE than the original defect. A wrong header
+> is a visible tell; a right header over nothing looks authoritative.** I would have reported "fixed"
+> against a unit test that was true and an outcome that was still false -- **the deployed-vs-repo shape
+> one layer up, inside my own verification.** It was caught only by running CTO's *exact invocation
+> end-to-end* rather than trusting the passing unit test. <<
+
+**Both halves now derive from `CODE_TREES`** -- the third and fourth consumer of the table, with no
+fifth hardcoded directory list.
+
+## PRESERVED BY CONSTRUCTION, NOT BY LUCK
+
+The bare-id -> `bd-gold` fallthrough (`:1777`) is **documented backward-compat, not a bug**, and CTO
+made preserving it an explicit requirement. **It is untouched because both matchers require a
+`data/.../` prefix, which a bare id cannot have** -- structurally unreachable by the new path rather
+than special-cased around. Asserted on its own line in the suite so a future reader cannot "clean it
+up". The legacy alternation is retained for shapes `CODE_TREES` does not model (notably
+`data/schwab/`).
+
+## Routing table, BEFORE -> AFTER
+
+```
+data/black_diamond/scripts/gold/x.py                    bd-gold  -> bd-gold   IDENTITY
+data/inf/scripts/silver/s.py                            inf-gold -> inf-gold  IDENTITY
+data/cot/scripts/bronze/b.py                            cot-gold -> cot-gold  IDENTITY
+data/mdpf/scripts/gold/m.py                             mdpf     -> mdpf      IDENTITY
+data/assets/scripts/gold/build_cottonwood_mdpf_pair.py  bd-gold  -> mdpf      FIXED
+data/assets/scripts/silver/rebalancer_schemas.py        bd-gold  -> mdpf      FIXED
+D_00                                                    bd-gold  -> bd-gold   PRESERVED
+<bare filename>                                         bd-gold  -> bd-gold   PRESERVED
+'' (empty)                                              bd-gold  -> bd-gold   PRESERVED
+```
+**Canonicalization identity checked separately:** `B_01.holdings_lots.py`, `B_01.py`, `INF_D_04`,
+`data/black_diamond/...` and `data/schwab/...` canonicalize **exactly** as before; only the
+`data/assets/` forms change.
+
+## Controls (all five CTO specified)
+
+| # | control | result |
+|---|---|---|
+| 1 | routing identity over bd/inf/cot/mdpf path forms | **PASS** -- 9-case frozen contract |
+| 2 | new case resolves to `mdpf`, correct header + prefix | **PASS** -- live |
+| 3 | bare bd id still routes `bd-gold` | **PASS** -- asserted separately; live `deployed D_00` -> bd tree, 4 MATCH |
+| 4 | mutant: break `assets_gold`'s repo_home | **PASS** -- routing breaks (detected), restored |
+| 5 | `shared_repo_homes` still suppresses false `MISSING_ON_S3` | **PASS** -- no return of the ~16 rows |
+
+**Suite 18/18** (was 14). Pre-existing `test_safe_deploy.py` **14/14, no regression.**
+
+**End-to-end, CTO's exact invocation, post-fix:**
+```
+[mdpf:assets_gold] build_cottonwood_mdpf_pair.py   STALE
+Summary: 0 MATCH, 1 STALE, ... 0 UNCOVERED
+```
+
+## The staleness DIRECTION (answered to CTO `212939Z`, recorded here)
+
+```
+                              LOCAL(repo)                         DEPLOYED(S3)
+build_cottonwood_mdpf_pair    24907 B  commit 2026-07-23T13:52:32Z  23543 B  2026-07-23T10:55:20Z
+build_cottonwood_mdpf_slice   22840 B  commit 2026-07-23T20:25:19Z  19203 B  2026-07-23T10:55:23Z
+```
+**THE REPO IS NEWER in both cases** -- both S3 objects landed 10:55Z on 07-23; both repo commits are
+later the same day. Timestamps unambiguous by construction (git emitted an explicit `-04:00`, S3 an
+explicit `GMT`; converted rather than read as bare local time).
+
+**POSITIVE CONTROL, same file family:** `build_dim_model_portfolio.py` local md5
+`56c82788a2539767ca258c8a62c0b18a` **== the S3 ETag exactly**, reading `MATCH` in the same sweep --
+so the comparison discriminates rather than calling everything stale.
+
+**SEMANTIC:** `pair.py` differs by **976 lines** -- a different *generation* (the 3F-G8 parity emitter
+that *imports* `decompose()` so "the three existing convergent computations stay three"). `slice.py`
+adds `holdings_total_by_date()`: the **MEASURED** Total-AUA series, Andrew verbatim in its docstring
+-- *"we shouldnt need to 'interpolate' that total; that is a known amount"* -- missing partitions
+rendering honest-absent.
+
+>> **NOT DEPLOYED, and the reason is stronger than "one variable at a time": `slice.py`'s new function
+> is the measured-vs-interpolated axis `0.4.0_DS` is HELD on.** Deploying it would move another lane's
+> held variable, silently, on the run meant to accept the Stage-6 grant. **Two lanes, one artifact, and
+> the collision would have been invisible in both lanes' reasoning.** CTO recorded it as a queue item
+> owned by DS, gated by him, explicitly coupled to DS's read-preference: **neither moves alone.** And
+> 17a is genuinely open -- *newer and larger is not correct*; a 976-line generation gap on a
+> client-facing emitter is an architectural review, not a sync. <<
