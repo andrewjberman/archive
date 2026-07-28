@@ -151,9 +151,82 @@ Per CTO's instruction I do **not** reconstruct emitters. Identified where source
 
 ---
 
-## RESIDUALS
-- **Per-firm × Benchmark/Peers not exercised.** A firm-scoped benchmark fetch would not appear here.
-- **`json/latest/manifest.json` not traced** — found at the buzzer, producer and purpose unknown.
-- **`account_distribution.json` (underscore, 2026-02-19)** sits beside `account-distribution.json` (hyphen).
-  Two spellings, one concept. Not traced.
-- Single-date grounding on artifact contents where stated; the 447-date history remains untested.
+---
+
+# RESIDUALS — CLOSED (Andrew: *"finish the traces"*)
+
+## R1 — `json/latest/manifest.json` = THE YANG-PIPELINE MANIFEST. **CLOSED.**
+Producer: **`yang-generate-manifest`** Lambda (`docs/reference/yang-pipeline-lineage-map.md:70` —
+*"source-verified: `MANIFEST_KEY` constant; also reads `json/latest/` prefix to enumerate artifacts"*).
+Second writer: `opal_security_scanner_processor/lambda_function.py:402-410` appends a `screening_excel`
+entry. Consumed off-portal too: `m365-mcp-gateway/.../opal_portal/integration.py:69`.
+Bucket contents corroborate — `attribution_excel · cma_excel · data_pkl · manifest · model_pkl · peer_excel`.
+It is described in-estate as *"the canonical freshness signature"* for yang.
+> **NOTE: this is MY OWN pipeline** (`yang-pipeline`, DT-owned). The Benchmark tab reads the yang manifest,
+> which is coherent — benchmarks are produced by `yang-model-portfolio-benchmarks`. **Not debt; correctly a
+> sixth namespace, and it was simply invisible to every mdpf/portfolios-shaped search.**
+
+## R2 — THE FROZEN PER-FIRM LEGACY KEYS. **CLOSED, and it CORROBORATES the vintage verdict.**
+`data/smartx/scripts/compute_per_firm_account_distribution.py`, **dated 2026-05-29 — the exact
+LastModified of the frozen keys.** Its docstring contains BOTH targets:
+```
+line 3   "Emits json/portfolios/{firm}/account-distribution.json for 49financial ... and inflection"
+line 18  "Output keys (per DE coordination 20260529T210337Z -- aligned to DE query key):"
+line 19    json/mdpf/49financial/account-distribution.json
+line 20    json/mdpf/inflection/account-distribution.json
+```
+**The script was written to emit into `json/portfolios/{firm}/` and RE-POINTED to `json/mdpf/{firm}/` the
+same day**, per DE coordination. **The frozen legacy per-firm objects are the artifacts of the pre-re-point
+run — orphaned 2026-05-29 and never touched again.**
+> This is the vintage verdict with a **timestamp and a cause**, not an inference: the two namespaces held the
+> same per-firm shape because one was re-pointed into the other. **And the docstring's opening line still
+> names the OLD target while its Output-keys section names the new one** — doc-lagging-code, the same shape
+> as Trace 1's half-finished cleanup, in the file that performed the migration.
+
+## R3 — `account_distribution.json` (UNDERSCORE) IS A STAGING CONVENTION, NOT DRIFT. **CLOSED.**
+The underscore form is the **gold/staging** spelling; the hyphen form is the **served** spelling:
+```
+gold/mdpf_revamp/{firm}/account_distribution.json   dim_mdpf_account_distribution.py:69-73 (STAGING_PREFIX)
+gold/mdpf_revamp/cottonwood/account_distribution.json  build_cottonwood_mdpf_pair.py:4,464
+views/account_distribution.json                     compute_account_distribution.py:86
+   vs
+json/portfolios/account-distribution.json           compute_account_distribution.py:81 (PORTAL_OUTPUT_KEY)
+json/mdpf/{firm}/account-distribution.json          served
+```
+**A deliberate layer boundary, not a typo.** ⚠ **EXCEPT** the 2026-02-19
+`json/portfolios/account_distribution.json` — an **underscore key in the SERVED namespace**, predating the
+convention. **Orphan; no live reference found.**
+
+## R4 — PER-FIRM × BENCHMARK/PEERS. **CLOSED ANALYTICALLY — stronger than sampling it.**
+All four tab-gated queries are **firm-invariant**: `queryKey`s carry **no firm token**
+(`['model-portfolio-benchmarks']`, `['etf-benchmark-returns']`, `['peer-performance']`,
+`['model-portfolio-timeseries']`) and every endpoint fn takes **no arguments**
+(`portal-proxy.ts:827, 858, 890, 935`). **Selecting a firm CANNOT change these URLs**, so the unexercised
+combination is provably empty rather than merely unsampled.
+> **Worth flagging, not adjudicating:** this means **Benchmark and Peers render identical data regardless of
+> which partner is selected**, on a page whose header carries a partner selector. Plausibly correct
+> (benchmarks are model-level, not firm-level) — but it is a UX/semantics question someone should confirm,
+> not a thing I can settle from the wiring.
+
+## R5 — THE PREVIOUSLY-`UNTRACED` PRODUCERS. **NOW NAMED — but with a multiplicity warning.**
+- **`json/portfolios/account-distribution.json`** ← `data/smartx/scripts/compute_account_distribution.py:81`
+  (`PORTAL_OUTPUT_KEY`). **Single, clear writer.**
+- **`json/portfolios/aum-metrics.json`** ← **AT LEAST THREE candidate writers**, and I am not adjudicating
+  which one actually wrote the live object:
+  ```
+  infra/aws/lambda/smartx_ingestion_pipeline/lambda_function.py:13   "3.5 Generate AUM metrics -> json/portfolios/aum-metrics.json"
+  infra/aws/lambda/opal-assets/.../opal-assets-mdpf-portal-publisher/lambda_function.py:51   PUBLISH_MAP ("portfolios","aum-metrics")
+  data/mdpf/scripts/gold/dim_mdpf_aum_metrics.py:40,54   staging key + "(AE repoints json/portfolios/aum-metrics.json)"
+  ```
+  > **THE SOURCE-SIDE ANSWER IS A CANDIDATE LIST, NOT AN ATTRIBUTION.** Which one wrote the LIVE object is
+  > still **unattributable** — CloudTrail has no data-event coverage of `portal-v2`, and the object carries
+  > no producer metadata. **Naming three candidates is progress over `UNTRACED`; it is NOT the answer to
+  > "who wrote this."** Read the list as a floor.
+  Readers found incidentally: `infrastructure_monitor`, the smartx `ai-supervisor`(-v2), and
+  `data/analysis/q1_2026_aggregate_opal_return.py:50` — **an analysis script reading a served portal key.**
+
+## STILL OPEN (not closable from the consumption side)
+- **Applied write-attribution for `portal-v2`** — structurally unavailable (no CloudTrail data events, no
+  object metadata). Needs producer-side instrumentation, which is an AE/CTO decision, not a trace.
+- **Single-date grounding** on artifact contents where stated; the 447-date history remains untested.
+- Error/empty states and modals never exercised in the runtime capture.
