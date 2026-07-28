@@ -286,3 +286,146 @@ line citations, S3 layout from live listings, the absent cron from `events list-
 plane. **F-1's "documented decision" reading is the one that changed the shape of the work**, and it
 was only available by reading the tool that worked *around* the map rather than the map itself -- the
 same deployed-vs-repo ordering error AE-base bound as a rule at 17:23Z, avoided here by reading first.
+
+---
+---
+
+# PART II -- THE FIX, AND THE 22-OF-27 CENSUS
+
+*Appended 2026-07-28 ~2115Z by `0.7.0_AE_CloudOps~C`. CTO rulings `203649Z` (one plan, all three, or
+none) + `204943Z` (proceed; PROVE the invariant) + `204454Z` (the trigger-field ruling).*
+*Landed `85a64cada` + `d11b98e2ae`. Tooling + tests only -- no deploy, no apply, no IAM.*
+
+## F-6. NAMED FINDING, independent of any fix: ONE S3 CODE TREE IS FED BY TWO REPO TREES
+
+Recorded on its own because the next person needs it whether or not they touch `CODE_TREES`.
+
+```
+s3://opal-data-mdpf/code/scripts/assets_gold/  <-  data/assets/scripts/gold     NOT data/mdpf/
+s3://opal-data-mdpf/code/scripts/silver/       <-  data/assets/scripts/silver   NOT data/mdpf/
+```
+
+**Two consumers hardcoded the false assumption that a repo home is derivable from the tree name**
+(`data/<tree>/scripts/<layer>/`): `safe_deploy_core.file_to_s3_target:97-118` and `pipeline_cli:1944`.
+**A layer LIST cannot express this shape.**
+
+>> **AND THIS IS WHY THE OBVIOUS FIX WAS THE MUTANT.** The literal reading of *"correct the layer
+> count"* -- add `assets_gold` and `silver` to the `:1945` tuple -- globs a nonexistent
+> `data/mdpf/scripts/<layer>/`, hits `:1947 if not _ldir.is_dir(): continue`, and **skips both
+> silently.** Same clean summary, same `rc=0`, same `0 UNCOVERED`, now with a layer list that *looks*
+> complete. **It converts a VISIBLE 4-vs-6 gap into an INVISIBLE one** -- the precise outcome the
+> one-plan ruling was issued to prevent, reproduced by the fix for it. <<
+
+## The fix: one declaration, three consumers derive
+
+`safe_deploy_core.CODE_TREES` -- per-`(tree, layer)` to `(repo_home, s3_prefix)`, plus `deploy_gated`,
+`shared_repo_homes`, and `artifacts`.
+
+| registry | BEFORE | AFTER |
+|---|---|---|
+| `safe_deploy_core` | 3 trees x 3 layers = **9 cells**; mdpf **inexpressible (0)** | **4 trees** (3 gated + 1 check-only) = **15 cells**; mdpf = **6** |
+| `pipeline_cli` mdpf sweep | **4 layers hardcoded / 6 live** -- 4 of 28 `.py` invisible | **6 derived / 6 live** -- **0 invisible** |
+| `EC2_MANIFEST.code_prefix` | depth-1 `code/`, non-discriminating | `code/scripts/` + separate `dispatch_script_prefix`, **pointing at `CODE_TREES`** |
+
+**The Rule-13 deploy gate is UNCHANGED, and that is test-proven rather than asserted** --
+`PIPELINE_MAP` = `{black_diamond, cot, inf}`, `VALID_LAYERS` = `{bronze, gold, silver}`.
+
+**`mdpf` is `deploy_gated: False`.** Registering it as gated would silently begin uploading on DS
+pushes -- a live-behavior change nobody authorized, on the lane boundary Rule 13 polices. This is the
+**declared-UNKNOWN sentinel applied to gate membership**: *"mdpf has no deploy path"* becomes an
+auditable one-line fact instead of an absence nobody can query. **That decision is CTO's and remains
+OPEN.**
+
+**Fail-loudly, the load-bearing line:** a declared layer whose `repo_home` does not exist is a
+**DECLARATION DEFECT** and surfaces as `UNCOVERED` -- never `continue`. The check sits **upstream of
+the skip**, which is the only place it can fire. **This is the fix for F-2b's `:1929` defect** -- a
+guard downstream of the routing it audits cannot see what the routing dropped.
+
+**No fallback copy of `CODE_TREES` in `pipeline_cli`** -- a hand-maintained duplicate is exactly the
+divergence this table ends. On import failure it reports `UNCOVERED` loudly rather than guessing.
+
+## A false-positive class I INTRODUCED, and caught before shipping
+
+`data/assets/scripts/{gold,silver}` serve multiple destinations: only **3 of 7** and **1 of 13** deploy
+to mdpf's tree. Naively mapping the whole directory emitted **~16 false `MISSING_ON_S3` rows.**
+**A sweep with more false positives than findings trains people to ignore it -- the same end state as
+the blindness it replaced.** `shared_repo_homes` reclassifies "absent on S3" as `not-in-tree`
+(informational); `STALE`/`MATCH` still bind and the `UNCOVERED` direction is untouched.
+
+## Non-script artifacts (AE-base `210149Z`, measured)
+
+The dispatch syncs `code/scripts/` **with `--delete`**; the tree holds 34 objects and
+`partner_roster.json` is **ABSENT**. A cross-tree import RAISEs, a repo-relative read fail-closes, and
+**`--delete` silently reverts a hand-placed copy.** A model knowing only `.py` excludes the class, and
+the next person solves it with a one-off `aws s3 cp` the following sync undoes. `artifacts` now models
+it; `s3_key: None` = **declared, target unresolved** -- the destination is a real decision and
+inventing it here would be the call-site literal this table abolishes.
+
+## Verification
+
+**14 cases, `.tools/test_code_trees_invariant.py`.** Expected values are a **FROZEN LITERAL FIXTURE**
+transcribed from `safe_deploy_core.py:22-29 @92e41ad1b3` -- *a fixture computed from the code under
+test cannot detect that code changing.* Pre-existing `test_safe_deploy.py`: **14/14, no regression.**
+
+**Mutants exercised against the SOURCE FILE, both directions reported:**
+
+| mutant | result |
+|---|---|
+| **A** `cot` bucket to `opal-data-bd` (firm-separation breach) | **4 of 11 FAIL**, incl. byte-identity + bucket-collision |
+| **B** `assets_gold` repo_home to `data/mdpf/scripts/assets_gold` (**exactly what the naive fix would have written**) | **1 of 11 FAIL**: "every declared repo_home exists on disk" |
+| **C** rename the `artifacts` key | **1 of 12 FAIL**: "mdpf declares a non-script artifact class" |
+| restore | byte-identical (`diff -q`), suite back to **14/14** |
+
+## What the newly-visible layers found immediately
+
+```
+[mdpf:assets_gold] build_cottonwood_mdpf_pair.py    STALE
+[mdpf:assets_gold] build_cottonwood_mdpf_slice.py   STALE
+```
+**Both cottonwood scripts are STALE on S3, and the tool could not see either until this commit.**
+Reported, **not fixed** -- deploying them is a DS/CTO call, not a side effect of a tooling change.
+
+## THE 22-OF-27 CENSUS (durable record, per CTO `204454Z`)
+
+**PREDICATE:** any field whose NAME contains `cron`/`schedule`/`trigger`, OR whose VALUE contains a
+`cron(`/`rate(` expression. **DENOMINATOR = 27 services**, verified against the **full 100-rule**
+applied-plane EventBridge inventory -- *not* a name-prefix query, **which is how the phantom survived
+a `--name-prefix mdpf` check for weeks.**
+
+```
+5 of 27 carry a schedule assertion:
+  inf-bronze-runner        cron(30 13 * * ? *)            TRUE   opal-inf-bronze-runner-cron, ENABLED
+  canonical-schwab-runner  canonical-schwab-xref-success  TRUE   present, ENABLED, no schedule
+  cot-exporter             "cron(0 2) chain"              TRUE   cot-bd-session-daily
+  mdpf-daily-runner        phantom                        FALSE  -> CORRECTED b17260251c
+  bd-price-runner          sequence-position claim        NOT VERIFIABLE by list-rules -- left
+                                                          UNVERIFIED, endorsed by CTO
+```
+
+>> **22 OF 27 SERVICES ASSERT NOTHING AT ALL ABOUT HOW THEY ARE TRIGGERED.** Not 22 defects -- some
+> are ephemeral or manual by design, and **absence of a field is not absence of a schedule.** It is 22
+> entries where the Rule-8 source of truth cannot answer *"what starts this, and on what cadence"*
+> without a console trip. **An optional field cannot be audited for absence; only a required one
+> can.** <<
+
+**CTO RULING (`204454Z`), build routed separately -- NOT this session:** the trigger/schedule field
+becomes **REQUIRED** in `EC2_MANIFEST.json`, **and** an explicit declared-unknown value is
+**PERMITTED** (e.g. `{"mechanism": "UNVERIFIED", "measured_at": null}`). **Both halves, and the second
+makes the first landable** -- requiring the field with no unknown-sentinel would break Rule-8 CI on 22
+entries and force someone to guess 22 values under deadline, manufacturing exactly the false
+assertions we just deleted one of. Precedent already ratified one tree over, in
+`partner_roster.json`'s `gate_coverage`: *"A NOT_COVERED partner MUST be reported as UNMEASURED --
+never omitted, and never counted as fresh. Not-knowing renders as an unknown, never as health."*
+
+## My errors in Part II
+
+1. **I shipped three tests that never ran.** The artifact tests were written and **not registered in
+   `main_test()`**; the suite reported a clean `11/11` over a suite that never executed them. **I
+   noticed only because I expected 14 and got 11.** A guard nothing invokes is not a guard --
+   committed inside the change whose subject is guards that cannot fire, hours after writing up F-2b.
+   **The COUNT caught it, not the result: a passing suite is silent about what it did not run.**
+   Fixed, then exercised (Mutant C).
+2. **My own earlier recommendation was wrong on the axis that mattered.** In `184924Z` I proposed
+   `tree -> (bucket, label, key_prefix, layers)`. **A layer list cannot express two repo trees feeding
+   one S3 tree** -- I would have shipped a schema that still could not describe the defect it was
+   designed for. Corrected before writing code, not after.
