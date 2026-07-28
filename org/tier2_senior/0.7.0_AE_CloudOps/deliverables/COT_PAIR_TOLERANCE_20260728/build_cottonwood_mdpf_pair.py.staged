@@ -1,0 +1,482 @@
+"""MDPF_3FIRMS 3F-G8 -- Cottonwood CURRENT-STATE Portfolio-Analytics pair.
+
+Emits the two MDPF page artifacts for Cottonwood at 49F/INF schema parity:
+    gold/mdpf_revamp/cottonwood/account_distribution.json
+    gold/mdpf_revamp/cottonwood/aum_metrics.json
+
+WIRE, DO NOT AUTHOR -- every mechanism is imported from its canonical owner:
+  - blend decomposition + silver readers + per-account values:
+    build_dim_model_portfolio (WS-3; the satellite->archetypal decomposition is
+    NEVER re-derived here -- decompose() is imported, so the three existing
+    convergent computations stay three).
+  - key vocabulary: build_cottonwood_mdpf_slice CANONICAL_KEY / DISPLAY_NAME /
+    _norm (one vocabulary across pair + trend slice BY CONSTRUCTION -- the DE
+    P3a contract, DS commitment 20260723T005922Z).
+  - distribution stats: dim_mdpf_account_distribution._distribution_stats
+    (floor/$1K, np.percentile, ddof=1 std, log-20-bin histogram -- byte-parity
+    with the served 49F/INF stats by importing the same function).
+  - quarter machinery: dim_mdpf_aum_metrics.quarter_ends / calc_metric.
+
+READS  s3://opal-data-assets/blackdiamond/cottonwood/silver/fact_model_{roster,
+       blend,assignment}/date=A/ + fact_holdings/date=V/  (A=assignment date,
+       V=value date -- TWO DATES, NEVER ONE; both ride the artifacts)
+WRITES the two staged JSONs above. NEVER a served location; NEVER opal-data-cot
+       or opal-data-bd (firm-separation condition (i) -- no such bucket constant
+       exists in this module, same discipline as build_dim_model_portfolio).
+
+COUNT-AXIS LAW (Andrew, LD-0330 class): a blended account counts +1 in EACH
+underlying model, so sum(by_model.account_count) OVERCOUNTS the firm population
+(~1.51x). The legacy aum-metrics total.account_count = sum(by_model) semantics
+is therefore DELIBERATELY NOT reproduced for Cottonwood: total.account_count is
+the DISTINCT opal-assigned account population, and the divergence is named in
+meta.count_axis_note. Presenting 447 as the account population is the exact
+defect class that rolled back the 07-22 S5 flip.
+
+Q0-Q3 / SERIES_START (CTO ruling 20260722T213636Z): the facts series starts
+~07-21, so every quarter-end prior is honestly absent -> calc_metric emits the
+all-None triple. The discriminator is per-entity `series_start` (first fact
+date, DERIVED at build time from the gold dim partitions, never hardcoded);
+quarter_end < series_start => structurally absent; >= with None => feed-gap.
+NOTE: if the general G1 null-composition rule lands on a different shape, G1
+WINS and this field migrates (ruling binding 3) -- consumers read tolerantly.
+
+Author: 0.4.0_DS_ClientPlatform. Gate: 1.0.0_SA_CTO (design rulings banked in
+logs/2026-07-22/3f_s4_schema_parity_close.md G8 PREP STATE). TO: MDPF_3FIRMS.3F-G8.
+"""
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import json
+import os
+import sys
+
+import boto3
+import pandas as pd
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _HERE)
+sys.path.insert(0, os.path.abspath(os.path.join(_HERE, "..", "..", "..", "mdpf", "scripts", "gold")))
+
+import build_dim_model_portfolio as bdmp                    # noqa: E402
+from build_cottonwood_mdpf_slice import (                   # noqa: E402
+    CANONICAL_KEY, DISPLAY_NAME, INCOME_NON_MODEL_NAMES, PENDING_RULING, _norm)
+from dim_mdpf_account_distribution import _distribution_stats  # noqa: E402
+from dim_mdpf_aum_metrics import calc_metric, quarter_ends     # noqa: E402
+
+ASSETS_BUCKET = "opal-data-assets"
+STAGING_PREFIX = "gold/mdpf_revamp/cottonwood"
+FIRM_ID = "cottonwood"
+FIRM_NAME = "Cottonwood"
+BASIS = "bd-datamining-holdings"
+
+
+def _log(msg: str) -> None:
+    print(f"[{dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}] {msg}", flush=True)
+
+
+def _canonical_key(model_name) -> str | None:
+    """Archetypal key for an Opal PRIMARY model name via the slice vocabulary.
+    None = not in the map (caller decides loud-vs-fold; a primary Opal leaf
+    missing from the map is LOUD -- the vocabulary must cover every leaf)."""
+    return CANONICAL_KEY.get(_norm(model_name))
+
+
+# ---------------------------------------------------------------------------
+# Units (account grain) -- the distribution's input + the identity anchors
+# ---------------------------------------------------------------------------
+
+def build_units(roster: pd.DataFrame, blend: pd.DataFrame,
+                assignment: pd.DataFrame, values: pd.DataFrame) -> dict:
+    """Per-account decomposed units + firm anchors.
+
+    Returns dict with:
+      units:      df[unit_id, model_key, value] -- value SPLIT by blend weight
+                  (ties to dim.dollar_value to the penny; count +1 per leaf).
+      accounts:   df[unit_id, value] -- DISTINCT accounts at FULL value (the
+                  total-block grain; never the summed by_model axis).
+      bridge:     {assigned, valued, dropped:[...]} -- 296/296 LOUD contract.
+      firm_total: float -- ALL accounts (opal + non), full holdings sum.
+      leaves:     {model_key: {count, dollars}} from the SAME decompose() the
+                  dim uses (identity (i) anchor).
+    """
+    name_to_id = dict(zip(roster.model_name, roster.model_id))
+    id_to_name = {}
+    for _, r in roster.iterrows():
+        id_to_name[r.model_id] = r.model_name
+    for _, e in blend.iterrows():
+        if e.child_model_id and e.child_model_id not in id_to_name:
+            id_to_name[e.child_model_id] = e.child_model_name
+    opal_ids = set(roster[roster.is_opal].model_id)
+
+    val = dict(zip(values.account_id, values.market_value))
+    hasval = dict(zip(values.account_id, values.has_value))
+    firm_total = float(pd.to_numeric(values.market_value, errors="coerce").fillna(0.0).sum())
+
+    assigned = assignment[assignment.strategy_name != "--"].copy()
+    assigned["model_id"] = assigned.strategy_name.map(name_to_id)
+    assigned = assigned[assigned.model_id.notna()]
+    opal_assigned = assigned[assigned.model_id.isin(opal_ids)]
+
+    unit_rows: list[dict] = []
+    account_rows: list[dict] = []          # accounts reaching >=1 ARCHETYPAL model
+    leaves_agg: dict[str, dict] = {}
+    bridge_dropped: list[str] = []
+    unmapped_leaves: set[str] = set()
+    # Edges, both REPORTED-never-vanished:
+    #  - sleeves (non-Opal leaves): dropped from by_model per F2 (a sleeve rendering
+    #    as a model portfolio on a partner page is the live incident this drops).
+    #  - Opal - Income: NON-MODEL residual per the G8 TO standing ruling ("the dim
+    #    as built 07-21/22 predates the ruling and still carries it as an is_opal
+    #    row") -- the ~$1.24M no-composition residual, named, never in by_model.
+    sleeves = {"count": 0, "dollars": 0.0, "names": set()}
+    income = {"count": 0, "dollars": 0.0, "accounts": set()}
+    income_norms = {_norm(n) for n in INCOME_NON_MODEL_NAMES}
+
+    for _, acct in opal_assigned.iterrows():
+        ext = str(acct.external_id)
+        hv = bool(hasval.get(ext, False))
+        raw_v = val.get(ext)
+        if ext not in val:
+            bridge_dropped.append(ext)      # LOUD: assigned but absent from holdings
+        v = 0.0 if (raw_v is None or pd.isna(raw_v) or not hv) else float(raw_v)
+
+        reached_model = False
+        for leaf, w in bdmp.decompose(acct.model_id, blend):
+            name = id_to_name.get(leaf)
+            if not bdmp.rs.is_opal_name(name):
+                sleeves["count"] += 1
+                sleeves["dollars"] += v * float(w)
+                sleeves["names"].add(str(name))
+                continue
+            if _norm(name) in income_norms:
+                # NON-MODEL residual (standing ruling; routing shared with the slice
+                # via INCOME_NON_MODEL_NAMES -- one routing, two artifacts).
+                income["count"] += 1
+                income["dollars"] += v * float(w)
+                income["accounts"].add(ext)
+                continue
+            mkey = _canonical_key(name)
+            if mkey is None:
+                unmapped_leaves.add(str(name))
+                continue
+            reached_model = True
+            unit_rows.append({"unit_id": ext, "model_key": mkey, "value": v * float(w)})
+            agg = leaves_agg.setdefault(mkey, {"count": 0, "dollars": 0.0})
+            agg["count"] += 1
+            agg["dollars"] += v * float(w)
+        if reached_model:
+            account_rows.append({"unit_id": ext, "value": v})
+
+    if unmapped_leaves:
+        raise RuntimeError(
+            "LOUD: %d Opal primary leaf model(s) missing from CANONICAL_KEY: %s "
+            "-- the slice vocabulary must cover every leaf; extend the map (with "
+            "CRO/CTO), never fold silently" % (len(unmapped_leaves), sorted(unmapped_leaves)))
+
+    sleeves["names"] = sorted(sleeves["names"])
+    income["accounts"] = sorted(income["accounts"])
+    return {
+        "units": pd.DataFrame(unit_rows, columns=["unit_id", "model_key", "value"]),
+        "accounts": pd.DataFrame(account_rows, columns=["unit_id", "value"]).drop_duplicates("unit_id"),
+        "bridge": {"assigned": int(len(opal_assigned)),
+                   "valued": int(len(opal_assigned)) - len(bridge_dropped),
+                   "dropped": bridge_dropped},
+        "firm_total": firm_total,
+        "leaves": leaves_agg,
+        "sleeves": sleeves,
+        "income": income,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Identities -- FAIL LOUD, per run (speed never waives these)
+# ---------------------------------------------------------------------------
+
+def assert_identities(u: dict, dim: pd.DataFrame) -> list[str]:
+    """Returns failure strings (empty = pass). (i) split-dollar sum == dim
+    dollar sum to the penny; (ii) model + non_model == firm total to the penny;
+    (iii) bridge: zero dropped accounts."""
+    fails = []
+    dim_opal = dim[dim.is_opal.fillna(False)]
+    dim_total = round(float(dim_opal.dollar_value.sum()), 2)
+    # The dim (built pre-ruling) still carries Opal - Income as an is_opal row, so
+    # the ruling-adjusted identity is: my archetypal dollars + the named Income
+    # residual == dim opal dollar_value, to the penny. Same shape for counts.
+    my_models = round(float(sum(a["dollars"] for a in u["leaves"].values())), 2)
+    my_total = round(my_models + u["income"]["dollars"], 2)
+    if abs(dim_total - my_total) > 0.01:
+        fails.append(f"(i) decomposed dollars {my_total:,.2f} (models {my_models:,.2f} "
+                     f"+ income residual {u['income']['dollars']:,.2f}) != dim opal "
+                     f"dollar_value {dim_total:,.2f}")
+    model_aum = my_models
+    non_model = round(u["firm_total"] - model_aum, 2)
+    if abs((model_aum + non_model) - round(u["firm_total"], 2)) > 0.01:
+        fails.append("(ii) model+non_model != firm total (penny identity)")
+    if u["bridge"]["dropped"]:
+        fails.append(f"(iii) bridge dropped {len(u['bridge']['dropped'])} account(s): "
+                     f"{u['bridge']['dropped'][:5]}{'...' if len(u['bridge']['dropped']) > 5 else ''}")
+    # dim count parity: same decompose, same inputs -> same counts (+ Income rows).
+    dim_count = int(dim_opal.account_count.sum())
+    my_count = int(sum(a["count"] for a in u["leaves"].values())) + u["income"]["count"]
+    if dim_count != my_count:
+        fails.append(f"count-axis parity: my leaf counts {my_count} "
+                     f"(incl. {u['income']['count']} income) != dim {dim_count}")
+    return fails
+
+
+# ---------------------------------------------------------------------------
+# Artifacts
+# ---------------------------------------------------------------------------
+
+def _qnone() -> dict:
+    """The honest-absent quarter triple (CTO 213636Z semantics via calc_metric)."""
+    return calc_metric(None, None)
+
+
+def build_pair(u: dict, dim: pd.DataFrame, assignment_date: str,
+               value_date: str, series_start: str) -> tuple[dict, dict]:
+    now = dt.datetime.now(dt.timezone.utc)
+    generated_at = now.isoformat().replace("+00:00", "Z")
+    q0, q1, q2, q3 = quarter_ends(dt.datetime.strptime(value_date, "%Y-%m-%d"))
+
+    # ---- account-distribution ------------------------------------------------
+    total_stats = _distribution_stats(u["accounts"]["value"])
+    active_total = int(u["accounts"]["unit_id"].nunique())
+    total_stats["active_accounts_count"] = active_total
+    total_stats["excluded_unfunded_count"] = active_total - int(total_stats["account_count"])
+
+    by_model_dist: dict[str, dict] = {}
+    acbmk: dict[str, int] = {}
+    order = [k for k in DISPLAY_NAME if k in u["leaves"]] + \
+            sorted(k for k in u["leaves"] if k not in DISPLAY_NAME)
+    for mkey in order:
+        vals = u["units"].loc[u["units"]["model_key"] == mkey, "value"]
+        bm = _distribution_stats(vals)
+        bm["active_accounts_count"] = int(len(vals))
+        bm["excluded_unfunded_count"] = int(len(vals)) - int(bm["account_count"])
+        by_model_dist[DISPLAY_NAME.get(mkey, mkey)] = bm
+        acbmk[mkey] = int(bm["account_count"])
+
+    distribution = {
+        "firm_id": FIRM_ID,
+        "firm_name": FIRM_NAME,
+        "generated_at": generated_at,
+        "period": value_date,
+        "source": (f"s3://{ASSETS_BUCKET}/{bdmp.SILVER_PREFIX}fact_model_assignment/"
+                   f"date={assignment_date}/ + fact_holdings/date={value_date}/"),
+        "basis": BASIS,
+        "total": total_stats,
+        "by_model": by_model_dist,
+        "meta": {
+            "account_count_by_model_key": acbmk,
+            "assignment_date": assignment_date,
+            "value_date": value_date,
+            "series_start": series_start,
+            "pending_canonical_ruling": [k for k in PENDING_RULING if k in u["leaves"]],
+            "canonical_merge": ("Opal Conservative Growth -> opal_long_term_conservative "
+                                "(display 'Long Term'); Andrew-direct 0215Z 07-23, PRD "
+                                "v1.23 @a41c582ba, crosswalk :6"),
+            "count_axis_note": ("by_model account_count is +1 per underlying model for a "
+                                "blended account; by_model counts are NOT summable to the "
+                                "firm population (LD-0330 count-axis law)"),
+            "income_non_model_residual": {
+                "dollars": round(u["income"]["dollars"], 2),
+                "account_count": len(u["income"]["accounts"]),
+                "note": "Opal - Income routes to NON-MODEL per the G8 standing ruling; "
+                        "reported, never vanished, never in by_model",
+            },
+            "sleeves_dropped": {
+                "leaf_hits": u["sleeves"]["count"],
+                "dollars": round(u["sleeves"]["dollars"], 2),
+                "names": u["sleeves"]["names"],
+                "note": "non-Opal asset sleeves excluded from by_model per F2; "
+                        "dollars reported, never vanished",
+            },
+        },
+    }
+
+    # ---- aum-metrics ---------------------------------------------------------
+    model_aum = round(float(sum(a["dollars"] for a in u["leaves"].values())), 2)
+    non_model_aum = round(u["firm_total"] - model_aum, 2)
+    by_model_metrics = []
+    for mkey in order:
+        agg = u["leaves"][mkey]
+        by_model_metrics.append({
+            "model_name": DISPLAY_NAME.get(mkey, mkey),
+            "aum": round(float(agg["dollars"]), 2),
+            "account_count": int(agg["count"]),
+            "series_start": series_start,
+            "q0": _qnone(), "q1": _qnone(), "q2": _qnone(), "q3": _qnone(),
+        })
+
+    metrics = {
+        "period": value_date,
+        "last_updated": generated_at,
+        "dates": {"q0": q0, "q1": q1, "q2": q2, "q3": q3},
+        "total": {
+            "aum": round(u["firm_total"], 2),
+            "model_aum": model_aum,
+            "non_model_aum": non_model_aum,
+            "account_count": int(u["accounts"]["unit_id"].nunique()),
+            "series_start": series_start,
+            "q0": _qnone(), "q1": _qnone(), "q2": _qnone(), "q3": _qnone(),
+        },
+        "by_model": by_model_metrics,
+        "meta": {
+            "firm_id": FIRM_ID,
+            "assignment_date": assignment_date,
+            "value_date": value_date,
+            "series_start": series_start,
+            "count_axis_note": ("total.account_count is the DISTINCT model-participating "
+                                "account population, deliberately NOT "
+                                "sum(by_model.account_count) (blend +1-per-model overcounts "
+                                "~1.51x; LD-0330 law). Divergence from legacy sum-semantics "
+                                "is NAMED here."),
+            "q_semantics": ("q0-q3 all-None = honest-absent: quarter_end < series_start => "
+                            "structurally absent (CTO 213636Z); if the G1 general rule lands "
+                            "differently, series_start migrates (G1 wins)"),
+            "income_non_model_residual": {
+                "dollars": round(u["income"]["dollars"], 2),
+                "account_count": len(u["income"]["accounts"]),
+                "note": "included in non_model_aum per the G8 standing ruling",
+            },
+            "sleeves_dropped": {
+                "leaf_hits": u["sleeves"]["count"],
+                "dollars": round(u["sleeves"]["dollars"], 2),
+                "names": u["sleeves"]["names"],
+            },
+        },
+    }
+    return distribution, metrics
+
+
+def _stage_upload(art: dict, filename: str) -> None:
+    """PutObject + LISTING-based landing verify (ListObjectsV2 key+ETag+Size --
+    the OPAL_ASSETS acceptance instrument; HeadObject is never the acceptance)."""
+    s3 = boto3.client("s3", region_name="us-east-1")
+    key = f"{STAGING_PREFIX}/{filename}"
+    body = json.dumps(art, separators=(",", ":")).encode("utf-8")
+    put = s3.put_object(Bucket=ASSETS_BUCKET, Key=key, Body=body,
+                        ContentType="application/json")
+    listed = s3.list_objects_v2(Bucket=ASSETS_BUCKET, Prefix=key).get("Contents", [])
+    match = next((o for o in listed if o["Key"] == key), None)
+    if match is None:
+        raise RuntimeError(f"UPLOAD UNVERIFIED: {key} absent from ListObjectsV2 after put")
+    if int(match["Size"]) != len(body):
+        raise RuntimeError(f"UPLOAD SIZE MISMATCH: {key} listed {match['Size']} vs {len(body)}")
+    if match.get("ETag", "").strip('"') != put.get("ETag", "").strip('"'):
+        raise RuntimeError(f"UPLOAD ETAG MISMATCH: {key}")
+    _log(f"OK UPLOAD+VERIFIED s3://{ASSETS_BUCKET}/{key} ({len(body):,}B, "
+         f"ETag {match['ETag'].strip(chr(34))[:12]})")
+
+
+def _gold_dim_dates(s3) -> list[str]:
+    """All gold dim_model_portfolio partition dates (series_start derivation --
+    DERIVED from the facts at build time, never a constant; CTO 213636Z b.1)."""
+    dates = set()
+    tok = None
+    prefix = bdmp.GOLD_PREFIX + "dim_model_portfolio/"
+    while True:
+        kw = {"Bucket": ASSETS_BUCKET, "Prefix": prefix}
+        if tok:
+            kw["ContinuationToken"] = tok
+        r = s3.list_objects_v2(**kw)
+        for o in r.get("Contents", []):
+            for seg in o["Key"].split("/"):
+                if seg.startswith("date="):
+                    dates.add(seg[len("date="):])
+        if not r.get("IsTruncated"):
+            break
+        tok = r["NextContinuationToken"]
+    return sorted(dates)
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="Build the Cottonwood MDPF pair (3F-G8)")
+    ap.add_argument("--date", required=True, help="assignment date (silver partition)")
+    ap.add_argument("--value-date", default=None,
+                    help="holdings date; default = freshest at or before --date")
+    ap.add_argument("--upload", action="store_true", help="write to S3 (default DRY-RUN)")
+    a = ap.parse_args(argv)
+
+    s3 = boto3.client("s3")
+    roster = bdmp.silver_table(s3, "fact_model_roster", a.date)
+    blend = bdmp.silver_table(s3, "fact_model_blend", a.date)
+    assignment = bdmp.silver_table(s3, "fact_model_assignment", a.date)
+    vdate = a.value_date or bdmp.latest_holdings_date(s3, a.date)
+    if vdate is None:
+        print("ERROR: no cottonwood holdings partition at or before " + a.date)
+        return 2
+    values = bdmp.account_values(s3, vdate)
+
+    dim_dates = _gold_dim_dates(s3)
+    if not dim_dates:
+        print("ERROR: no gold dim_model_portfolio partitions -- series_start underivable")
+        return 2
+    series_start = dim_dates[0]
+    dim = bdmp._read_parquet(
+        s3, ASSETS_BUCKET,
+        bdmp.GOLD_PREFIX + f"dim_model_portfolio/date={a.date}/data.parquet")
+
+    u = build_units(roster, blend, assignment, values)
+    fails = assert_identities(u, dim)
+
+    distribution, metrics = build_pair(u, dim, a.date, vdate, series_start)
+
+    _log(f"=== COTTONWOOD MDPF PAIR (assignment {a.date} x value {vdate}) ===")
+    _log(f"  SAME-DAY VINTAGE BINDING: assignment_date={a.date} value_date={vdate} "
+         f"(two dates, both ride every artifact; series_start={series_start} DERIVED "
+         f"from {len(dim_dates)} gold dim partition(s))")
+    t = distribution["total"]
+    _log(f"  distribution: funded(>=1K)={t['account_count']} active={t['active_accounts_count']} "
+         f"total_aum=${t['total_aum']:,.2f} median=${t['median']:,.2f}")
+    m = metrics["total"]
+    _log(f"  metrics: firm aum=${m['aum']:,.2f} model=${m['model_aum']:,.2f} "
+         f"non_model=${m['non_model_aum']:,.2f} accounts={m['account_count']}")
+    _log(f"  by_model keys: {[b['model_name'] for b in metrics['by_model']]}")
+    _log(f"  bridge: {u['bridge']['assigned']}/{u['bridge']['valued']} "
+         f"dropped={len(u['bridge']['dropped'])}")
+
+    if fails:
+        print("IDENTITY FAIL (LOUD -- nothing written):")
+        for f in fails:
+            print("  - " + f)
+        return 1
+    _log("IDENTITIES PASS: (i) decomposed==dim to the penny, (ii) model+non_model==firm, "
+         "(iii) bridge complete, count-axis parity")
+
+    if not a.upload:
+        print("DRY-RUN: artifacts built + identities pass; no bytes written.")
+        return 0
+    _stage_upload(distribution, "account_distribution.json")
+    _stage_upload(metrics, "aum_metrics.json")
+    # UNITS SIDECAR (Global wire 050005Z): the GLOBAL bell-curve fold needs
+    # cottonwood's account-grain values, and the distribution producer lives in
+    # a DIFFERENT deploy tree (data/mdpf) -- a cross-tree runtime import breaks
+    # at the deployed runner, and re-deriving the units there violates
+    # wire-don't-author. So the ONE computation (this producer's build_units)
+    # emits a compact anonymized sidecar the global distribution READS -- the
+    # same cross-producer-coherence pattern as meta.account_count_by_model_key,
+    # one level up. Values only, no account ids (grain: the distribution's
+    # inputs, nothing more).
+    sidecar = {
+        "firm_id": FIRM_ID,
+        "generated_at": distribution["generated_at"],
+        "assignment_date": a.date,
+        "value_date": vdate,
+        "basis": BASIS,
+        "total_unit_values": sorted(
+            (round(float(v), 2) for v in u["accounts"]["value"].tolist()), reverse=True),
+        "by_model_unit_values": {
+            mkey: sorted((round(float(x), 2) for x in
+                          u["units"].loc[u["units"]["model_key"] == mkey, "value"].tolist()),
+                         reverse=True)
+            for mkey in sorted(u["leaves"])},
+    }
+    _stage_upload(sidecar, "account_units.json")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

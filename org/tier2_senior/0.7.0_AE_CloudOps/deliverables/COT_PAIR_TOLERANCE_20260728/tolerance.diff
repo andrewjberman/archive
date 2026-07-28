@@ -1,0 +1,23 @@
+--- build_cottonwood_mdpf_pair.py.staged	2026-07-23 06:55:20.000000000 -0400
++++ build_cottonwood_mdpf_pair.py.patched	2026-07-28 18:49:17.468639600 -0400
+@@ -205,10 +205,18 @@
+     # residual == dim opal dollar_value, to the penny. Same shape for counts.
+     my_models = round(float(sum(a["dollars"] for a in u["leaves"].values())), 2)
+     my_total = round(my_models + u["income"]["dollars"], 2)
+-    if abs(dim_total - my_total) > 0.01:
++    # GATE RECALIBRATION (CTO ruling 20260728T224741Z, S3-staged copy ONLY): the pair sums
++    # TWO independently-rounded components (models + income residual), so the compounding
++    # bound is ~2 cents; house precedent is mdpf AC7's $0.011 for the same class. The delta
++    # is LOGGED on every run -- that is what proves the tolerance is not hiding drift. A
++    # real decomposition defect is dollars, not cents. Diverges from the repo copy by this
++    # block alone; reconciled when G7 lands, toward whichever generation wins.
++    _delta_i = abs(dim_total - my_total)
++    print(f"[identity-i] |decomposed - dim| delta = {_delta_i:.4f} (tolerance 0.02, CTO 224741Z)")
++    if _delta_i > 0.02:
+         fails.append(f"(i) decomposed dollars {my_total:,.2f} (models {my_models:,.2f} "
+                      f"+ income residual {u['income']['dollars']:,.2f}) != dim opal "
+-                     f"dollar_value {dim_total:,.2f}")
++                     f"dollar_value {dim_total:,.2f} (delta {_delta_i:.4f} > 0.02)")
+     model_aum = my_models
+     non_model = round(u["firm_total"] - model_aum, 2)
+     if abs((model_aum + non_model) - round(u["firm_total"], 2)) > 0.01:
