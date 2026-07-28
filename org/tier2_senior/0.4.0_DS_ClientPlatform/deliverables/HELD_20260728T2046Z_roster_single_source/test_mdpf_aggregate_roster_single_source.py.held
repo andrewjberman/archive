@@ -67,8 +67,8 @@ class TestPartnerFourTest(unittest.TestCase):
         orig = agg._ROSTER_PATH
         try:
             agg._ROSTER_PATH = path
-            after = agg.expected_partners_for("2026-06-11")
-            before = agg.expected_partners_for("2026-06-09")
+            after = agg.expected_partners_for("2026-06-11", leg="model", quantity="value")
+            before = agg.expected_partners_for("2026-06-09", leg="model", quantity="value")
         finally:
             agg._ROSTER_PATH = orig
         self.assertIn("acme_partners_4", after,
@@ -129,8 +129,8 @@ class TestRosterDerivedDates(unittest.TestCase):
         orig = agg._ROSTER_PATH
         try:
             agg._ROSTER_PATH = path
-            v = agg.expected_partners_for("2026-06-01", quantity="value")
-            c = agg.expected_partners_for("2026-06-01", quantity="count")
+            v = agg.expected_partners_for("2026-06-01", leg="model", quantity="value")
+            c = agg.expected_partners_for("2026-06-01", leg="model", quantity="count")
         finally:
             agg._ROSTER_PATH = orig
         self.assertIn("cottonwood", v)
@@ -142,8 +142,8 @@ class TestRosterDerivedDates(unittest.TestCase):
         orig = agg._ROSTER_PATH
         try:
             agg._ROSTER_PATH = path
-            self.assertIn("retired_co", agg.expected_partners_for("2025-03-01"))
-            self.assertNotIn("retired_co", agg.expected_partners_for("2025-07-01"))
+            self.assertIn("retired_co", agg.expected_partners_for("2025-03-01", leg="model", quantity="value"))
+            self.assertNotIn("retired_co", agg.expected_partners_for("2025-07-01", leg="model", quantity="value"))
         finally:
             agg._ROSTER_PATH = orig
 
@@ -157,7 +157,7 @@ class TestRosterDerivedDates(unittest.TestCase):
             agg._effective_from(live["cottonwood"], "model", "count"), "2026-07-22")
 
     def test_cottonwood_is_expected_on_a_current_date(self):
-        self.assertIn("cottonwood", agg.expected_partners_for("2026-07-27"))
+        self.assertIn("cottonwood", agg.expected_partners_for("2026-07-27", leg="model", quantity="value"))
 
 
 class TestFailClosed(unittest.TestCase):
@@ -166,7 +166,7 @@ class TestFailClosed(unittest.TestCase):
         try:
             agg._ROSTER_PATH = os.path.join(_HERE, "__no_such_roster__.json")
             with self.assertRaises(SystemExit):
-                agg.expected_partners_for("2026-07-27")
+                agg.expected_partners_for("2026-07-27", leg="model", quantity="value")
         finally:
             agg._ROSTER_PATH = orig
 
@@ -176,9 +176,37 @@ class TestFailClosed(unittest.TestCase):
         try:
             agg._ROSTER_PATH = path
             with self.assertRaises(SystemExit):
-                agg.expected_partners_for("2026-07-27")
+                agg.expected_partners_for("2026-07-27", leg="model", quantity="value")
         finally:
             agg._ROSTER_PATH = orig
+
+
+class TestNoDefaultedQuantity(unittest.TestCase):
+    """F-2 (0.7.0_AE_CloudOps 20260728T210128Z): `leg`/`quantity` must be REQUIRED.
+
+    A default silently picks one semantic at a call site that never declared which it
+    meant -- and the roster deliberately splits them (cottonwood value 2026-05-28 vs
+    count 2026-07-22, unbackfillable). That is the private-literal defect in a different
+    shape: the choice is made, locally, invisibly. Under-specifying must be a TypeError."""
+
+    def test_calling_without_quantity_is_a_TypeError_not_a_silent_default(self):
+        with self.assertRaises(TypeError):
+            agg.expected_partners_for("2026-07-27")
+
+    def test_calling_without_leg_is_a_TypeError(self):
+        with self.assertRaises(TypeError):
+            agg.expected_partners_for("2026-07-27", quantity="value")
+
+    def test_signature_declares_no_defaults(self):
+        """STRUCTURAL -- a behavioural test alone still passes if someone re-adds a
+        default while keeping the current call sites explicit."""
+        import inspect
+        sig = inspect.signature(agg.expected_partners_for)
+        for name in ("leg", "quantity"):
+            self.assertIs(
+                sig.parameters[name].default, inspect.Parameter.empty,
+                f"{name!r} has a default again -- a defaulted quantity re-creates the "
+                f"collapse F-2 caught (roster splits value/count on purpose)")
 
 
 if __name__ == "__main__":
