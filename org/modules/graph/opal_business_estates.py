@@ -222,7 +222,10 @@ def live_keys() -> dict:
     return {"keys": {k: sorted(v) for k, v in keys.items()}, "files": files, "errors": errors}
 
 
-_PATTERNISH = ("*", "{", "}", "<", ">", "|", ",")
+_PATTERNISH = ("*", "{", "}", "<", ">", "|", ",", "(")
+# An ALL-CAPS token in a key position is a placeholder the snapshot never resolved
+# (DATE, YYYY-MM, ALLOC_DAILY_DATE) -- a template, not an object.
+_PLACEHOLDER = re.compile(r"(^|/)[A-Z][A-Z0-9_-]{2,}(\.|/|$)")
 
 
 def _snapshot_keys(blob) -> tuple:
@@ -242,7 +245,19 @@ def _snapshot_keys(blob) -> tuple:
         k = k.rstrip("\"'").strip()
         if not k or k in ("/", "*"):
             return
-        (patterns if any(c in k for c in _PATTERNISH) else concrete).add(k)
+        # UNCOMPARABLE, in three shapes -- all of them name a SET, not an object, so "does a live
+        # producer write it?" has no answer. Shipping any of these into a teardown ledger as a dead
+        # key is how someone ends up hunting a phantom, which is the incident this tool exists to
+        # prevent, not cause.
+        #   glob/template braces   bronze/eclipse/*   json/{firm}/x.json
+        #   PREFIX (trailing /)    raw/   serving/   platinum/firm/
+        #   CAPS PLACEHOLDER       silver/prices/DATE.parquet   .../YYYY-MM/ALLOC_DAILY_DATE.parquet
+        uncomparable = (
+            any(c in k for c in _PATTERNISH)
+            or k.endswith("/")
+            or _PLACEHOLDER.search(k)
+        )
+        (patterns if uncomparable else concrete).add(k)
 
     def walk(o):
         if isinstance(o, dict):
