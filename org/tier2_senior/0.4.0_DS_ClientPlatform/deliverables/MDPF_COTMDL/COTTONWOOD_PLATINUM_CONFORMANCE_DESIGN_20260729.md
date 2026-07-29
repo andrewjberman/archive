@@ -266,7 +266,7 @@ claim at source rather than accept it (portal DEV `a969d615`, `pairedProvenanceR
 :237   if (!VALID.has(raw as string)) {
 :238     warnOnce(... `invalid point_class '...' -- treating as interpolated_estimate
 :239                   (never silently measured)`)
-:241     return { cls: 'interpolated_estimate', confidence: entry.confidence ?? null }
+:240     return { cls: 'interpolated_estimate', confidence: entry.confidence ?? null }
 ```
 
 An unrecognized class does **not** fall through to a safe default -- it **degrades to
@@ -280,9 +280,35 @@ measured"), but it means:
      -> == the 44-date "confident label over nothing" defect this fix exists to remove
 ```
 
-**AND IT IS SHARPER THAN DE STATED: `:241` PRESERVES `entry.confidence`.** The coercion carries
+**AND IT IS SHARPER THAN DE STATED: `:240` PRESERVES `entry.confidence`.** The coercion carries
 `confidence: 1.0` through intact -- reproducing not just the wrong label but the wrong label at full
 confidence. **(ii) fails INTO the defect, not away from it.**
+
+*(Citation corrected by DE 173700Z: the return is `:240`; `:241` is the closing brace. My first
+write said `:241`. Cheap to fix, and Rule 22's point exactly -- a `file:line` that resolves to a
+brace is not a citation.)*
+
+**THE ASYMMETRY DE FOUND ON THE RETURN PASS -- the two "unknown class" paths do NOT carry equal blast
+radius:**
+
+```
+:234   missing ENTRY  ->  { cls: 'interpolated_estimate', confidence: NULL      }   cannot forge confidence
+:240   invalid ENUM   ->  { cls: 'interpolated_estimate', confidence: PRESERVED }   forges it
+```
+
+**A missing row degrades to an UNCONFIDENT estimate; an unrecognized enum value degrades to a
+CONFIDENT one.** The enum route is specifically the dangerous one -- and it is exactly the route (ii)
+would have opened. Two failure modes, different consequences, and the fail-safe is only half safe.
+
+**CANDIDATE HARDENING (DE's, recorded here so it is not lost): `:240` should DROP confidence on an
+unrecognized class rather than preserve it.** An unknown class has no business carrying a confidence
+forward. Independent of this design's decision, which holds either way.
+
+> **GENERALIZATION, worth more than this page:** a fail-safe that COERCES unknown values rather than
+> rejecting them converts every producer-side vocabulary addition into a **silent semantic
+> regression** until the consumer ships first. The coercion is individually correct and collectively
+> a trap. Worth auditing wherever else we coerce-on-unknown. Ordering rule that falls out:
+> **render learns the value BEFORE the producer emits it -- never the same wave.**
 
 **(ii) also buys zero pixels today:** DE confirms `absent` and a hypothetical `underivable` render
 IDENTICALLY -- both are a gap with no decoration, because the signal that must stay loud is *"this
