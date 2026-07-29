@@ -11,6 +11,28 @@
                  comp-tool telemetry
     classified:  210 incidents across 10 prose documents + 26,235 parsed telemetry rows
 
+## DISPOSITION — this directory is a PROJECT CORPUS, not a report
+
+**ANDREW-DIRECT, MSTR~Z terminal, ~2115Z 2026-07-29, VERBATIM:**
+
+> *"i need you to commit and push all of this and send it to base with the instruction that this is
+> ging to be the corpus for a new project i am having base CTO work on"*
+
+**So: `1.0.0_SA_CTO` (base) owns the follow-on project. This directory is its input corpus.** Handed
+to `0.0.0_AB_MSTR` (base) for record custody and relay — bus MessageId
+`42cb0589-1b72-4fd8-a2c7-d53a826614cc`, corpus at `@31a038f0f`, verified present on `origin/CLOUD`.
+
+**What the receiving project inherits, stated so it is not re-derived:**
+- **§5 lists moves that are AVAILABLE, not decided.** No cuts have been landed. Andrew ruled RAVC and
+  "items in verification" KEEP, and ruled nothing he called good is cut without his word.
+- **§6 is an open sovereign question and it determines the project's shape.** Prevention and
+  metabolism imply opposite artifacts. It has not been answered and must not be assumed.
+- **Every count here is a floor with an unknown ceiling** (AXES.md scope note). These are counts of
+  what was WRITTEN DOWN, never of what happened.
+- **The classification is mine and is falsifiable** — each row cites a recoverable incident; each
+  figure in `11` is reproducible from the parse stated in that file. **Re-deriving it is not required;
+  disagreeing with a specific row is welcome and cheap.**
+
 ---
 
 ## 1. THE DOCUMENTS
