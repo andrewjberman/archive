@@ -25,8 +25,9 @@ to `0.0.0_AB_MSTR` (base) for record custody and relay — bus MessageId
 **What the receiving project inherits, stated so it is not re-derived:**
 - **§5 lists moves that are AVAILABLE, not decided.** No cuts have been landed. Andrew ruled RAVC and
   "items in verification" KEEP, and ruled nothing he called good is cut without his word.
-- **§6 is an open sovereign question and it determines the project's shape.** Prevention and
-  metabolism imply opposite artifacts. It has not been answered and must not be assumed.
+- **§6 IS NO LONGER OPEN — ANDREW RULED PREVENTION (~2245Z 2026-07-29, CVO's terminal).** See §6.
+  The corpus is upstream of a chartered workstream (NFRA_VELOCITY_CORE **WS-C8**, doctrine collapse),
+  not a report that sits. **§5's moves are no longer merely available — they land in WS-C8/WS-E4.**
 - **Every count here is a floor with an unknown ceiling** (AXES.md scope note). These are counts of
   what was WRITTEN DOWN, never of what happened.
 - **The classification is mine and is falsifiable** — each row cites a recoverable incident; each
@@ -239,7 +240,30 @@ nothing he called good is cut without his word.**
 
 ---
 
-## 6. THE ONE VALUE QUESTION — Andrew's alone
+## 6. THE ONE VALUE QUESTION — ★ RULED 2026-07-29 ~2245Z: **PREVENTION**
+
+> ### **ANDREW RULED. The question below was open when this was written; it is now CLOSED, and the
+> ### answer is PREVENTION.**
+>
+> **Verbatim option he took** (NFRA_VELOCITY plan review, `3.0.0_SA_CVO`'s terminal, ~2245Z; relayed
+> to site Z by `0.0.0_AB_MSTR` at 2336Z, bus `08ada90b-daa8-4eea-91d9-53ef66070f5b`):
+>
+> > *"VELOCITY includes the collapse: 14 mechanism-laws + a gate/test per law + a 210-row instance
+> > table; doctrine files shrink as gates absorb classes."*
+>
+> **WHAT THIS BINDS:**
+> - The collapse is **chartered**, as **WS-C8** inside `NFRA_VELOCITY_CORE` (owner `1.0.0_SA_CTO~Z`,
+>   this fabric). §5's moves land in **WS-C8 / WS-E4**.
+> - **Instances become ROWS, not prose. NOTHING is deleted.** Nothing Andrew called good is cut
+>   without his word — RAVC and "items in verification" remain KEEP.
+> - **A gate or test per law** is the deliverable, not a better-organised document. §3's `D1` = 2.4%
+>   is the reason the ruling went this way.
+> - **One refinement to §3 F4, adopted:** `~C`'s placement finding sharpens my number — controls are
+>   **commit-time DENSE and measurement-time EMPTY**, so **2.4% is a PLACEMENT fact, not a
+>   design-quality fact.** The controls exist; they are in the wrong place to fire. Use that form.
+>
+> *The original framing is preserved below verbatim rather than rewritten — the reasoning is what
+> made the question answerable, and striking a superseded position in place is the estate's rule.*
 
 **Is this corpus written to PREVENT incidents, or to METABOLISE them?**
 
