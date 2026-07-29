@@ -266,6 +266,95 @@ scoping confidence to the model leg.
 
 ---
 
+## 5b. THE SERVER-SIDE NON-MODEL LEG (CTO 163338Z + ANDREW-DIRECT ~1724Z)
+
+**ANDREW-DIRECT, VERBATIM (CTO terminal, ~1724Z):** *"Yes if this can be done server-side that is
+correct"* -- the balance is computed in the producer and STATED as a field; nothing derives it in the
+browser.
+
+> ### THE HEADLINE: IT IS ALREADY BUILT, ALREADY CORRECT, AND ALREADY IN GOLD.
+> **There is no data-side work in this item.** The custody leg already reads the custodial holdings
+> feed, the balance is already computed server-side and stated as a field, and the `NOT_MEASURED`
+> flag is already retired. All of it is sitting in `gold/` waiting for the bridge.
+
+### Q1 -- source binding, firm separation, or unimplemented? **NONE OF THE THREE. IT IS IMPLEMENTED.**
+
+`build_cottonwood_mdpf_slice.py`:
+
+```
+:272   prefix = "blackdiamond/cottonwood/silver/fact_holdings/"      # the custodial feed
+:385   "partner_custody_total": [(holdings_totals or {}).get(d) for d in dates]
+:380   "non_model_aua": [ round(holdings_totals[dates[i]] - model_aua[i], 2)
+:382       if holdings_totals[dates[i]] is not None and model_aua[i] is not None else None ]
+```
+
+**MEASURED in the artifact I wrote at 15:52:29Z:** `partner_custody_total` **38/450**, window
+`2026-06-09..2026-07-27`. `meta.total_covered_dates` = 38.
+
+**FIRM-SEPARATION STOP CONDITION: NOT TRIGGERED, and I checked before answering.** The producer reads
+`opal-data-assets/blackdiamond/cottonwood/**` -- **cottonwood's own tree, from cottonwood's own
+producer.** The NEVER-rule bars referencing *another* firm's bucket from a pipeline tree (bd <-> cot
+<-> inf); this is same-firm, and it is already running successfully today. **Nothing here crosses a
+boundary and nothing in this design proposes to.**
+
+### The `NOT_MEASURED` flag is ALREADY RETIRED -- it survives only in the stale served copy
+
+| artifact | `meta.non_model_aua_status` |
+|---|---|
+| **served platinum** (stale, what CTO quoted) | `"NOT_MEASURED (Rebalancer carries model assignment only)"` |
+| **my gold slice** (15:52:29Z) | `"BALANCE = partner_custody_total - model_aua, derived where BOTH present (PRD three-quantity convention); honest-None where either leg is absent -- never independently sourced, never fabricated"` |
+
+**The producer stopped declaring the quantity unavailable some time ago.** The served string is a
+fossil of the pre-W-2b build. Retiring it honestly requires **no code change** -- only the bridge.
+
+### Q2 -- the 6-vs-38, and it IS a finding: an ORDERING ARTIFACT
+
+Measured on my composed slice: **38 dates carry BOTH model and custody; only 6 carry `non_model`.**
+The 32-date shortfall is derivable and empty. Zero dates have custody without model.
+
+**Cause, at source.** `:380-384` computes the balance in the **DAILY** build, where `model_aua` holds
+only the **6 MEASURED** dates. The **COMPOSE** then splices in **44 backfill model dates** -- but
+`:594` takes `non_model` from the daily slice verbatim and **never recomputes it.**
+
+```
+DAILY build : model 6   custody 38  ->  non_model 6      (correct at that moment)
+COMPOSE     : model 50 (6+44)       ->  non_model STILL 6 (never recomputed)
+                                        32 dates now derivable, still None
+```
+
+**The balance is computed before the model leg is filled, and never revisited.** The 6 that exist are
+identity-clean (checked all 6: `custody == model + non_model` to the cent, e.g. 2026-07-24
+`463,015,162.92 = 125,132,212.02 + 337,882,950.90` -- which ties to DS base's independent
+`fact_holdings` reconciliation of 16,825 rows at `DELTA 0.00`).
+
+**DO NOT "JUST RECOMPUTE THE 32." IT IS A PROVENANCE DECISION, NOT A CODE MOVE.** On those dates
+custody is **MEASURED** and model is **INTERPOLATED**, so the balance would be
+`measured - interpolated` -- a hybrid that is neither measured nor cleanly estimated, on a
+client-facing series, at ~$330mm scale. Options:
+
+| option | consequence |
+|---|---|
+| **(A) leave None** (status quo) | conservative; band starts 07-20; no hybrid quantity is ever emitted |
+| **(B) compute + label the hybrid** | band populates from 06-09; needs a provenance value that says *derived against an interpolated model leg*; the frontend must be able to render it distinctly, or it lies by omission |
+
+**My recommendation: (A) for the interim, (B) only as a deliberate co-signed decision with DE.**
+Rationale: (B) triples the visible band by adding a quantity whose estimated component is invisible
+unless the render is changed first -- **precisely the "a backfill that arrives on screen
+indistinguishable from measured data is worse than the gap" rule in item (d).** (A) is honest and
+ships today with the grant.
+
+### Q3 -- THE HONEST LIMIT, STATED PLAINLY
+
+`fact_holdings` begins **~2026-06-09**. So even done perfectly, `partner_custody_total` populates
+from June and `non_model_aua` no earlier. Under option (A) the Non-Model band starts **2026-07-20**;
+under (B), **2026-06-09**. **Neither spans the 450-day axis, and no fix can make them.**
+
+> **Andrew must not be told "non-model is fixed" and then see a band that starts in June.** The
+> correct sentence is: *"Non-model now populates from [date], which is as far back as cottonwood's
+> custodial holdings exist. Earlier dates are not missing -- they are outside the data."*
+
+---
+
 ## 6. ITEMS (c), (e), (f)
 
 **(c) Canonical conformance -- ALREADY MET for cottonwood.** All four firms now carry hyphenated
