@@ -185,6 +185,18 @@ posture at `:233`). Therefore:
 > `interpolated_estimate`, over a None value — which is exactly the 44-date defect the fix exists to
 > remove.** (ii) fails INTO the defect, not away from it.
 
+**SHARPENED by DS~A 173513Z, verified by me at source — it is worse than the argument above, and the
+asymmetry is the point.** The coercion at `:240` is
+`return { cls: 'interpolated_estimate', confidence: entry.confidence ?? null }` — **it PRESERVES
+`entry.confidence`.** So an `underivable` row carrying `confidence: 1.0` would not merely be
+mislabelled; it would arrive as `{cls: 'interpolated_estimate', confidence: 1.0}` over a `None` —
+**byte-for-byte the 44-date artifact, manufactured by the fix meant to remove it.**
+
+Contrast `:234`, the *missing-entry* path: it returns `confidence: null` and therefore **cannot forge
+a confidence**. Only the **invalid-enum** path preserves it. So the enum route is specifically the
+dangerous one, and "unknown class" is not one failure mode but two with different blast radii.
+*(DS~A cited `:241`; actual is `:240` — `:241` is the closing brace. Substance unaffected.)*
+
 (ii) also buys **zero pixels**: `absent` and `underivable` render identically under this design (a
 gap, no ornament), since the signal that must stay loud is *"this point is an ESTIMATE"*, not *"this
 point is missing"*. Real risk, no benefit.
