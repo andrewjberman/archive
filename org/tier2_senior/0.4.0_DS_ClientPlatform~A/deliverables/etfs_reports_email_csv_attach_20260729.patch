@@ -1,0 +1,61 @@
+diff --git a/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py b/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py
+index 26b99bcfd9..4d5f1d77bc 100644
+--- a/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py
++++ b/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py
+@@ -130,18 +130,40 @@ def _render_command(month: str) -> list[str]:
+     return [f"su - ec2-user -c '{inner}'"]
+ 
+ 
++def _month_csv_keys(month: str) -> list[str]:
++    """The per-firm simple CSV grids the renderer uploads beside the PDF
++    (render_month_end.write_month_csvs, Andrew-direct 2026-07-07):
++    {REPORTS_PREFIX}/{month}/opaletfs_{firm}_{YYYYMM}.csv. ENUMERATED from S3,
++    never constructed -- a partner with no in-month data has no CSV (the
++    renderer SKIPs it), and the email must reflect what exists."""
++    prefix = f"{REPORTS_PREFIX}/{month}/"
++    r = _s3.list_objects_v2(Bucket=ETFS_BUCKET, Prefix=prefix)
++    return sorted(o["Key"] for o in r.get("Contents", [])
++                  if o["Key"].endswith(".csv"))
++
++
+ def _email_report(month: str) -> None:
+-    """Download the rendered PDF from S3 and SES-send it to Andrew as an attachment."""
++    """Download the rendered PDF + per-firm CSV grids from S3 and SES-send them
++    to Andrew as attachments (Andrew-direct 2026-07-29: the email carries not
++    only the presentation but ALSO the simple CSV spreadsheets)."""
+     pdf_key, _ = _report_keys(month)
+     pdf = _s3.get_object(Bucket=ETFS_BUCKET, Key=pdf_key)["Body"].read()
++    csv_keys = _month_csv_keys(month)
+ 
+     msg = MIMEMultipart("mixed")
+     msg["Subject"] = f"Opal ETF Ownership -- Month-End Report ({month})"
+     msg["From"] = SES_SENDER
+     msg["To"] = EMAIL_RECIPIENT
++    csv_line = (
++        f"Per-firm CSV grids attached: {len(csv_keys)}.\n"
++        if csv_keys else
++        "NOTE: no per-firm CSV grids were found beside the PDF for this "
++        "month (renderer emits one per partner with in-month data).\n"
++    )
+     body = (
+-        f"The month-end ETF ownership report for {month} is attached (PDF).\n\n"
+-        f"Source: s3://{ETFS_BUCKET}/{pdf_key}\n"
++        f"The month-end ETF ownership report for {month} is attached (PDF).\n"
++        + csv_line +
++        f"\nSource: s3://{ETFS_BUCKET}/{pdf_key}\n"
+         "Coverage: 49 Financial, Inflection, Cottonwood (partner grain).\n\n"
+         "-- Opal Capital automated reporting"
+     )
+@@ -150,6 +172,12 @@ def _email_report(month: str) -> None:
+     att.add_header("Content-Disposition", "attachment",
+                    filename=f"opal_etf_ownership_{month}.pdf")
+     msg.attach(att)
++    for key in csv_keys:
++        data = _s3.get_object(Bucket=ETFS_BUCKET, Key=key)["Body"].read()
++        csv_att = MIMEApplication(data, _subtype="csv")
++        csv_att.add_header("Content-Disposition", "attachment",
++                           filename=key.rsplit("/", 1)[-1])
++        msg.attach(csv_att)
+ 
+     _ses.send_raw_email(Source=SES_SENDER, Destinations=[EMAIL_RECIPIENT],
+                         RawMessage={"Data": msg.as_string()})
