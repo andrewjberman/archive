@@ -98,10 +98,21 @@ assets. The chart band beside it correctly shows a gap while the tile asserts ze
 existing honest-absence idiom (the em-dash `AUA_UNAVAILABLE` treatment used for the headline), not a
 new one.
 
-⚠ **INFERRED, not exercised:** read from source; I have not field-read cottonwood's live
-`perFirmAumMetrics.total.non_model_aum`. If that first leg is populated today the tile is currently
-fine and the `?? 0` is a latent trap rather than a live defect. Settle with a read before it is
-treated as a live finding.
+✅ **SETTLED 2026-07-29 — field-read, no longer inferred. It is a LATENT TRAP, not a live defect.**
+`s3://opal-data-portal-v2/platinum/mdpf/cottonwood/aum-metrics.json` states
+`total.non_model_aum = 337,882,950.89`, and the identity holds to the cent:
+`model_aum 125,132,212.03 + non_model_aum 337,882,950.89 = 463,015,162.92 = aum`. **The first leg is
+populated, so the tile renders $337.9M today — it does NOT render $0.** Nobody should chase this as a
+live bug.
+
+The hardening still stands on its own merits (an absent leg would render a confident `$0` on a
+partner AUM page), but its priority drops from *defect* to *latent*. **Sequence it behind the band
+guard, which IS live.**
+
+Worth noting for DS~A/CTO: cottonwood's point-in-time `non_model_aum` is STATED while its
+`non_model_aua` **series** is 0/450 — consistent with the derived-balance account (computable at the
+frontier, undecidable across history where custody is absent). The tile and the band are reading two
+different producer surfaces, which is exactly why one is populated and the other is empty.
 
 ## Axis recommendation (CTO item 2 — RECOMMEND ONLY)
 
