@@ -1,0 +1,86 @@
+diff --git a/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py b/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py
+index 26b99bcfd9..f96e5093c8 100644
+--- a/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py
++++ b/infra/aws/lambda/etfs-reports-orchestrator/lambda_function.py
+@@ -130,18 +130,42 @@ def _render_command(month: str) -> list[str]:
+     return [f"su - ec2-user -c '{inner}'"]
+ 
+ 
+-def _email_report(month: str) -> None:
+-    """Download the rendered PDF from S3 and SES-send it to Andrew as an attachment."""
++def _month_csv_keys(month: str) -> list[str]:
++    """The per-firm simple CSV grids the renderer uploads beside the PDF
++    (render_month_end.write_month_csvs, Andrew-direct 2026-07-07):
++    {REPORTS_PREFIX}/{month}/opaletfs_{firm}_{YYYYMM}.csv. ENUMERATED from S3,
++    never constructed -- a partner with no in-month data has no CSV (the
++    renderer SKIPs it), and the email must reflect what exists."""
++    prefix = f"{REPORTS_PREFIX}/{month}/"
++    r = _s3.list_objects_v2(Bucket=ETFS_BUCKET, Prefix=prefix)
++    return sorted(o["Key"] for o in r.get("Contents", [])
++                  if o["Key"].endswith(".csv"))
++
++
++def _build_report_email(month: str) -> MIMEMultipart:
++    """Build the month-end report email: rendered PDF + per-firm CSV grids from S3
++    as attachments (Andrew-direct 2026-07-29: the email carries not only the
++    presentation but ALSO the simple CSV spreadsheets). Build only -- no send.
++    Shared by _email_report (the one send call site) and the email_qa mode, so the
++    rehearsal exercises this exact code path."""
+     pdf_key, _ = _report_keys(month)
+     pdf = _s3.get_object(Bucket=ETFS_BUCKET, Key=pdf_key)["Body"].read()
++    csv_keys = _month_csv_keys(month)
+ 
+     msg = MIMEMultipart("mixed")
+     msg["Subject"] = f"Opal ETF Ownership -- Month-End Report ({month})"
+     msg["From"] = SES_SENDER
+     msg["To"] = EMAIL_RECIPIENT
++    csv_line = (
++        f"Per-firm CSV grids attached: {len(csv_keys)}.\n"
++        if csv_keys else
++        "NOTE: no per-firm CSV grids were found beside the PDF for this "
++        "month (renderer emits one per partner with in-month data).\n"
++    )
+     body = (
+-        f"The month-end ETF ownership report for {month} is attached (PDF).\n\n"
+-        f"Source: s3://{ETFS_BUCKET}/{pdf_key}\n"
++        f"The month-end ETF ownership report for {month} is attached (PDF).\n"
++        + csv_line +
++        f"\nSource: s3://{ETFS_BUCKET}/{pdf_key}\n"
+         "Coverage: 49 Financial, Inflection, Cottonwood (partner grain).\n\n"
+         "-- Opal Capital automated reporting"
+     )
+@@ -150,7 +174,18 @@ def _email_report(month: str) -> None:
+     att.add_header("Content-Disposition", "attachment",
+                    filename=f"opal_etf_ownership_{month}.pdf")
+     msg.attach(att)
++    for key in csv_keys:
++        data = _s3.get_object(Bucket=ETFS_BUCKET, Key=key)["Body"].read()
++        csv_att = MIMEApplication(data, _subtype="csv")
++        csv_att.add_header("Content-Disposition", "attachment",
++                           filename=key.rsplit("/", 1)[-1])
++        msg.attach(csv_att)
++    return msg
+ 
++
++def _email_report(month: str) -> None:
++    """SES-send the built report email to Andrew. The ONLY send call site."""
++    msg = _build_report_email(month)
+     _ses.send_raw_email(Source=SES_SENDER, Destinations=[EMAIL_RECIPIENT],
+                         RawMessage={"Data": msg.as_string()})
+ 
+@@ -223,5 +258,15 @@ def handler(event, context):  # noqa: ANN001
+     if mode == "absence_check":
+         _absence_check()
+         return {"mode": mode, "ok": True}
++    if mode == "email_qa":
++        # Send-free rehearsal of the attach path (CTO-conditioned, 2026-07-29): build
++        # the exact production MIME via _build_report_email and return its attachment
++        # filename list. STRUCTURALLY SEND-FREE -- no ses/ec2/ssm call is reachable on
++        # this path (the send call site exists only in _email_report; the box control
++        # only in _run). Never wired to a schedule; manual invoke only.
++        month = (event or {}).get("month") or _last_month()
++        msg = _build_report_email(month)
++        names = [p.get_filename() for p in msg.get_payload() if p.get_filename()]
++        return {"mode": mode, "month": month, "attachments": names, "ok": True}
+     _run()
+     return {"mode": "run", "ok": True}
