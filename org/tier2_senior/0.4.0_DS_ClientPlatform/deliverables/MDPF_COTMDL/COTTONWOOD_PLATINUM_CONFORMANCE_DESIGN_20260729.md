@@ -86,10 +86,35 @@ between two adjacent July dates).
 > POPULATED non-model band over 05-28..07-22 -- a visibly *better* chart than the one Andrew reported.
 > **He reported the platinum shape. So for `aggregate-aua-timeseries` the portal reads PLATINUM.**
 >
-> **HONEST BOUND, and it is a real one:** this is symptom-matching against two candidates, **not a route
-> trace.** It settles this family only. `endpoints/aum.ts:557-560` maps the mdpf family to `json/mdpf/`,
-> so **DE's MIXED-STATE hypothesis -- aggregate repointed, `aum-metrics` not -- survives this entirely
-> and is now the leading reading.** DE's routing audit remains the definitive answer.
+> **HONEST BOUND AS FIRST WRITTEN:** symptom-matching against two candidates, **not a route trace**;
+> settles this family only; `endpoints/aum.ts:557-560` maps the mdpf family to `json/mdpf/`, so DE's
+> MIXED-STATE hypothesis survives and is the leading reading.
+>
+> ### ✅ BOUND DISCHARGED 183003Z -- DE's ROUTE TRACE **REFUTES** THE MIXED STATE, NOT MERELY NARROWS IT
+> `infra/aws/lambda-edge/public-data-router/index.mjs`, the actual if/else **order**:
+> ```
+> else if /api/general/mdpf/   -> /platinum/mdpf/     <- special case, evaluated FIRST
+> else if /api/general/        -> /json/              <- default fallback, evaluated AFTER
+> ```
+> **Order was the whole question.** Had the fallback come first, mdpf would land on `json/mdpf/`
+> exactly as the `:560` comment claims. It does not. `comp-routes trace` confirms
+> `/api/general/mdpf/cottonwood/aum-metrics.json -> platinum/mdpf/cottonwood/aum-metrics.json`, and
+> **all four mdpf request paths resolve to `platinum/mdpf/`.** The `:560` comment is simply FALSE --
+> DE notes it is the third load-bearing comment in this file family to lie today.
+>
+> **The non-model series is not a separate fetch at all** -- it is the `non_model_aua` FIELD inside
+> `aggregate-aua-timeseries`, so it rides the same platinum path.
+>
+> **THREE INSTRUMENTS, THREE PLANES, ONE ANSWER:** my runtime negative-control (artifact coverage vs
+> observed symptom), DE's structural route trace, and `comp-routes`. They agree. Worth naming *why
+> both were needed*: `comp-routes` is DESIRED-plane and could not alone exclude deployed-vs-committed
+> drift (DE separately checked `edge-versions` -- all five routers bound DYNAMIC via qualified_arn, no
+> stale pinning), while my control is runtime-grounded but cannot generalize past the family it
+> observed. **Neither instrument was sufficient; the pair is.**
+>
+> **CONSEQUENCE: the conformance premise is SAFE, and the R5 repair matters MORE than stated above --
+> platinum is the SERVED plane, so 2/450 -> 50/450 is a change the client SEES, not an internal
+> correctness fix.**
 >
 > **The transferable lesson is not "verify more."** A single-artifact read cannot distinguish *the page
 > shows this* from *this object happens to look like what the page shows*; **only a candidate that
@@ -583,6 +608,64 @@ All three families Andrew names -- `aum-metrics`, `account-distribution`, `aggre
 AE, CTO to route) confirms zero live readers, with the key-to-URL mapping VERIFIED rather than
 inferred. Flagged into the WI-2 queue so it is not discovered at deploy time. **Not my call to
 adjudicate -- surfaced to CTO + COO + MSTR the same turn.**
+
+---
+
+## 6c. LEGACY vs REPAIRED PLATINUM -- what retiring `json/mdpf/` actually costs (COO's wave question)
+
+COO asked whether the repair restores the legacy plane's richness or something less, because **"if
+less, the legacy plane cannot be retired even after the repair"** -- wait vs redesign for its teardown
+wave. Measured, per-date set difference:
+
+| series | legacy | composed (post-repair) | dates ONLY on legacy | dates ONLY on composed |
+|---|---|---|---|---|
+| `model_aua` | 47 | **50** | **0** | 3 (07-23..07-27) |
+| `non_model_aua` | 47 | 6 | 44 (05-28..07-17) | 3 (07-23..07-27) |
+| `partner_custody_total` | 56 | 38 | 21 (05-28..07-19) | 3 (07-23..07-27) |
+
+**On model the composed slice STRICTLY DOMINATES** -- zero legacy-only dates, and it reaches the true
+frontier (legacy stops 07-22; cottonwood's data now runs to 07-27).
+
+### The count is the WRONG AXIS, and that is what decides the wave
+
+Classifying every legacy-only date by the **legacy artifact's own `cohort_provenance`**:
+
+```
+non_model_aua          44 legacy-only  ->  interpolated_estimate: 44   (100%)
+partner_custody_total  21 legacy-only  ->  interpolated_estimate: 12
+                                           absent:                 9   <- see below
+```
+
+> **EVERY legacy-only NUMBER IS INTERPOLATED. NOT ONE IS MEASURED.** The legacy plane's extra coverage
+> is precisely the interpolated balance §3 ruled must not be carried forward. **So the test is not
+> "is platinum richer" but "does the legacy plane hold anything CORRECT that platinum will not."
+> Measured answer: NO.**
+
+**COO's wave is therefore WAIT-THEN-RETIRE, not redesign**, on correctness grounds. My blocker
+discharges when the repair lands. (COO's independent blocker -- the `:567` silent-default reader in
+`dim_mdpf_aggregate_aua_timeseries.py` -- is untouched by this and still binds, as does ~C's smartx
+pair at `generate_smartx_timeseries_and_metrics.py:481`.)
+
+### ⚠ DISCLOSURE RISK -- the band gets SPARSER, on the page Andrew is watching
+
+`non_model_aua` **47 interpolated points -> 6 measured**; custody 56 -> 38. **The chart becomes more
+honest and visibly emptier at the same moment we report cottonwood fixed.** That is a disclosure
+question (CTO/Andrew), not a correctness one. Say it in advance:
+
+> *"The non-model band now shows only measured data. The longer band you saw before was interpolated
+> estimate."*
+
+### ⚠ NEW FINDING (legacy plane, not mine to fix): a VALUE under an `absent` label
+
+**9 legacy-only custody dates carry a VALUE while their own provenance says `absent`.** This is the
+**mirror image of §5's defect** -- §5 is a label with no value; this is a value the artifact
+simultaneously declares does not exist. Arguably worse, because a consumer reading the value gets a
+number the same record disclaims.
+
+It is on the **legacy** plane, so it is not in my producer and I am not fixing it. Recorded because
+(a) it is a further reason that plane is not a trustworthy fallback, and (b) **anything that ever
+backfills FROM it would propagate 9 dates of data under an absent label.** Not investigated further
+-- out of lane, and it does not change the retire decision (those dates are legacy-only either way).
 
 ---
 
