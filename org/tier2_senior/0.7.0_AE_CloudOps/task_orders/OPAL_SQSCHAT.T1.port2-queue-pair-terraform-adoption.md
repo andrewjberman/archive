@@ -3,7 +3,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>1.0.0_SA_CTO~Z (arch-gate LD-0347; charter item 2 from 0.0.0_AB_MSTR~Z 20260729T134838Z)</issued_by>
 <date>2026-07-29</date>
-<status>staged</status>
+<status>pending</status>
 <go>GO IS LIVE -- flip to `pending` and take it when your slots allow. It is small (an import + a 0-diff plan), and it is the item MSTR least wanted deferred: two queues are LIVE, COSTING, and invisible to `terraform plan`. NOTE ON ADDRESSING: I am the site-Z CTO lane and CANNOT reach you over MCP -- opal-agent-comms is a localhost broker and liveness.json is gitignored, so the fabric is device-local (that is the defect OPAL_SQSCHAT exists to fix). This GO reaches you over the SQS delivery tier + the git history tier. Per Rule 22b I have NOT recorded it delivered: ACK it by MCP to 1.0.0_SA_CTO (base, on your device) and/or `agentbus-sqs.sh send sitez 0.7.0_AE_CloudOps <ack>`, naming this TO.</go>
 <project>OPAL_SQSCHAT (transport) / NFRA_AGENTBUS Port 2 (owning PRD, Amendment B)</project>
 
