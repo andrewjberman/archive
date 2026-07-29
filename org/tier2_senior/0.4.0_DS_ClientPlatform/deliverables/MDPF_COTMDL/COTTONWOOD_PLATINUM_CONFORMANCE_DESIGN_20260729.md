@@ -253,13 +253,53 @@ if d in splice:
            "confidence": oo.get("confidence")}        # scopes to the model leg only
 ```
 
-**Vocabulary question for CTO -- I am not overloading `absent` unilaterally.** `absent` currently
-means *"no data exists."* A splice-date `non_model` is subtly different: *"inputs exist but the
-derivation is not possible."* Options: (i) reuse `absent` (simplest; slight semantic widening);
-(ii) add `underivable` to the enum (precise; **an enum change is a frontend contract change** and
-needs DE). **My recommendation: (i) for the interim fix, (ii) only if DE independently wants the
-distinction on screen.** Shipping a new enum value into a render that does not know it is the
-failure mode this whole page has been paying for today.
+### VOCABULARY: SETTLED BY DE (172942Z). (ii) IS DISQUALIFIED BY MECHANISM, NOT PREFERENCE.
+
+**RULING: reuse `absent`, and carry the precise distinction in a NON-ENUM SIBLING FIELD** -- DE's
+third option, better than either of the two I proposed.
+
+**Adding `underivable` to the enum would RECREATE THIS EXACT DEFECT THROUGH THE FIX.** I verified DE's
+claim at source rather than accept it (portal DEV `a969d615`, `pairedProvenanceRead.ts`):
+
+```
+:159   const VALID: ReadonlySet<string> = new Set(['measured', 'interpolated_estimate', 'absent'])
+:237   if (!VALID.has(raw as string)) {
+:238     warnOnce(... `invalid point_class '...' -- treating as interpolated_estimate
+:239                   (never silently measured)`)
+:241     return { cls: 'interpolated_estimate', confidence: entry.confidence ?? null }
+```
+
+An unrecognized class does **not** fall through to a safe default -- it **degrades to
+`interpolated_estimate`**. That is correct fail-safe design for an unknown value ("never silently
+measured"), but it means:
+
+```
+  `underivable` reaches a renderer that does not know it
+     -> coerced to `interpolated_estimate`
+     -> over a None value
+     -> == the 44-date "confident label over nothing" defect this fix exists to remove
+```
+
+**AND IT IS SHARPER THAN DE STATED: `:241` PRESERVES `entry.confidence`.** The coercion carries
+`confidence: 1.0` through intact -- reproducing not just the wrong label but the wrong label at full
+confidence. **(ii) fails INTO the defect, not away from it.**
+
+**(ii) also buys zero pixels today:** DE confirms `absent` and a hypothetical `underivable` render
+IDENTICALLY -- both are a gap with no decoration, because the signal that must stay loud is *"this
+point is an ESTIMATE,"* not *"this point is missing."* Real risk, no benefit.
+
+**THE SIBLING-FIELD DESIGN (ADOPTED).** Keep the enum at `absent`; carry precision in a non-enum field
+the render safely ignores -- e.g. `"underivable: custody absent"` vs `"no data"`. No contract change,
+no diagnostic loss, ships with the grant. **Enum widening is a one-way door; a sibling field is not**
+-- and if the distinction should later become visible, the render can start consuming that field with
+**no producer change at all.**
+
+**Recorded semantics** (DE is stating the same widening in its design doc, so the narrow reading is
+not re-derived later): **`absent` == "nothing to show at this point"**, covering both *"no data
+exists"* and *"inputs exist, derivation not possible."*
+
+If (ii) is ever revisited, the ordering is **strictly render-first, then producer -- never the same
+wave.**
 
 Note `confidence: 1.0` sitting beside a `None` is the sharpest form of the defect and is removed by
 scoping confidence to the model leg.
@@ -337,11 +377,46 @@ client-facing series, at ~$330mm scale. Options:
 | **(A) leave None** (status quo) | conservative; band starts 07-20; no hybrid quantity is ever emitted |
 | **(B) compute + label the hybrid** | band populates from 06-09; needs a provenance value that says *derived against an interpolated model leg*; the frontend must be able to render it distinctly, or it lies by omission |
 
-**My recommendation: (A) for the interim, (B) only as a deliberate co-signed decision with DE.**
-Rationale: (B) triples the visible band by adding a quantity whose estimated component is invisible
-unless the render is changed first -- **precisely the "a backfill that arrives on screen
-indistinguishable from measured data is worse than the gap" rule in item (d).** (A) is honest and
-ships today with the grant.
+**RULED: (A) -- and DE settled it by MEASURING its own half, not by preference (172942Z).**
+
+I put the condition to DE as *"if you cannot show (B) as partly-estimated, (B) is worse than the
+gap."* **DE checked and the answer is: it cannot -- for a reason neither of us had on the table.**
+
+> **THE NON-MODEL BAND HAS NO PROVENANCE CHANNEL TO THE SCREEN AT ALL.** Verified at source
+> (`ModelPortfolios.tsx:1323-1331`, portal DEV `a969d615`):
+>
+> ```
+> const perFirmNonModelByPeriod = useMemo(() => {
+>   const map: Record<string, number | null> = {}     // VALUE ONLY
+>   for (const p of readNonModelSeries(perFirmMdpfData)) {
+>     map[p.period] = p.value                          // p.pointClass DISCARDED here
+>   }
+> ```
+>
+> `readNonModelSeries` correctly *returns* `pointClass`; this map throws it away before the render
+> sees it. The band/overlay/legend choke point (`trendInterpolatedDates`, `:977-982`) draws only from
+> `timeSeriesData.aggregate` and `by_model` -- the non-model map is not among its inputs.
+
+**So under (B) a hybrid would reach the screen INDISTINGUISHABLE FROM MEASURED, however it is
+labelled. My condition evaluates to false.** At ~$330mm on a client-facing series with Andrew
+actively reading the page, (B) is not a risk worth a wider band. **Leave the 32 dates None.**
+
+**This is a THIRD render gap, distinct from the two already known (DE's, and DE owns them):**
+
+| | gap | status |
+|---|---|---|
+| 1 | the band keys on class ALONE -> paints "estimated" over null values (model/aggregate) | LIVE |
+| 2 | the Non-Model TILE `?? 0` -> an absent quantity renders a confident `$0` | LATENT |
+| 3 | **the Non-Model BAND discards `pointClass` -> cannot render provenance at all** | **NEW** |
+
+**(A) IS CORRECT-UNTIL-STEP-2, NOT FINAL.** DE named the sequence that unlocks (B):
+1. DE's band guard lands: key on `(class === interpolated_estimate AND value != null)` [CTO-gated]
+2. carry `pointClass` through `:1323-1331` and feed the non-model series into the choke set [DE, small]
+3. **then (B) is not merely safe but BETTER** -- the hybrid renders visibly reconstructed and the
+   visible band triples honestly.
+
+Both steps are DE's and both are small. Neither is started (CTO gates the design). **When CTO clears
+them, (B) becomes the right answer and DE will say so.** Do not read (A) as a permanent verdict.
 
 ### Q3 -- THE HONEST LIMIT, STATED PLAINLY
 
