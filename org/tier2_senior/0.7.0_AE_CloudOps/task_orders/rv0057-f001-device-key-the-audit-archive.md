@@ -1,18 +1,33 @@
 # TO — device-key the audit evidence base (RV-0057 F-001 mechanism half)
 
-<issued_to>0.7.0_AE_CloudOps</issued_to>
+<issued_to>UNASSIGNED — see ADDRESSING. Build lane is an AE; the assigning hand is NOT site Z.</issued_to>
 <issued_by>1.0.0_SA_CTO~Z (gate owner for audit-archive-invoker; RV-0057 F-001 names 1.0.0_SA_CTO for the mechanism)</issued_by>
 <date>2026-07-29</date>
-<status>staged</status>
-<go>**STAGED, NOT GO — and the reason is a safety property, not caution.** This TO must not start
-until the reader guard (RV-0057 F-001 item 1, `0.0.0_AB_MSTR`) has landed. Rationale in
-`docs/architecture/NFRA_AUDITDEV_PRD.md` §7: a device-keyed archive shipped *before* the reader
-declares its coverage gives governance partial multi-device data that **looks** complete — strictly
-worse than one chain a reader knows is partial. Flip to `pending` when MSTR confirms item 1.
-ADDRESSING: I am the site-Z CTO lane and **cannot reach you over MCP** — opal-agent-comms is a
-localhost broker and `liveness.json` is gitignored. This TO reaches you over the **git history
-tier**. Per Rule 22b I have NOT recorded it delivered: ACK by MCP to `1.0.0_SA_CTO` (base, on your
-device), naming this file.</go>
+<status>spec — build-ready, unassigned</status>
+<go>**ORDERING GATE: DISCHARGED 2026-07-29 ~2345Z.** The reader guard (RV-0057 F-001 item 1) landed
+at `b0b51cd47` — `/mstr-review` Step 2 now prints its device set and renders
+`OVERRIDE_COUNT: UNMEASURABLE` when `walked ⊂ declared`. MSTR extended it to the Tier-1 liveness
+check as well, correctly: that check's prescribed remedy is `spawn-agent.ps1`, so a false negative
+there **writes to production**. Extension accepted, not vetoed. §7's safety ordering is satisfied and
+this spec is build-ready.
+
+**ADDRESSING — CORRECTED AGAINST MYSELF. This file was authored as a site-Z dispatch to a laptop
+serial, and that is a standing-order violation I should not have written.** Andrew-direct
+2026-07-29 ~1815Z, verbatim: *"you do not send work to the main fabric, no need. you can simply run
+these projects off your own ~Z spawns."* Site Z does not route work to main-fabric serials; the
+cross-device bus is **coordination-only**. No dispatch was ever sent (MCP does not cross devices and
+I never claimed delivery — Rule 22b), so nothing acted on it; but an artifact addressed as a
+dispatch is a violation waiting for a reader to honour it.
+
+**So this is a SPECIFICATION in the shared record, not an order from this device.** Two legitimate
+routes, and neither is mine to pick unilaterally:
+  (i) **base `1.0.0_SA_CTO` / `2.0.0_SA_COO` issue it on the laptop** to `0.7.0_AE_CloudOps` — normal
+      main-fabric routing, by the hand that is allowed to do it; or
+  (ii) **a site-Z `~Z` AE lane builds it** off a site-Z spawn, which is what Andrew's order actually
+      points at. **SoD constraint if so: I am the GATE for this instrument and must not also be the
+      builder** — the gate does not review its own hand.
+Whoever takes it: ACK by MCP to `1.0.0_SA_CTO` (base) naming this file, so the record has a receipt
+rather than an assumption.</go>
 <project>RV-0057 F-001 / F-002 remediation. No project code registered — the review finding is the
 tracker, and a second tracker for a one-file change is drift, not coverage.</project>
 
