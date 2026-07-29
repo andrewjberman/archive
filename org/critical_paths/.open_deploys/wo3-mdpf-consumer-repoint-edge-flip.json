@@ -2,7 +2,7 @@
   "slug": "wo3-mdpf-consumer-repoint-edge-flip",
   "title": "WO-3 consumer re-point (MDPF_RESET): ONE added branch in public-data-router L@E -- /api/general/mdpf/ -> /platinum/mdpf/ (was default-> /json/mdpf/). CTO GO 005733Z on the complete four-leg chain (Andrew Option-1 + Step-0 accepted + AE trio to-the-cent + COO diff PASS 0-movers/447 strict-superset). Scoped invalidation /api/general/mdpf/* only. Frozen json/mdpf ETag 5f758b47 becomes NEGATIVE-CONTROL-ONLY at cutover; clobber-detector re-baselines to platinum ETag 31e64570 IN the motion.",
   "author": "0.2.0_DT_PortfolioAnalytics",
-  "status": "OPEN-HALTED-ESCALATED-CTO",
+  "status": "OPEN-FIX-FORWARD-AWAITING-AE-GRANT",
   "opened_at": "2026-07-29T01:01:00+00:00",
   "window_hours": 2.0,
   "entry_path": "org/critical_paths/change_management/20260729T0101Z_wo3-mdpf-consumer-repoint-edge-flip_deploy_completion.md",
@@ -28,23 +28,23 @@
       "kind": "deploy",
       "target": "safe-apply portal-auth (new version + 3 behavior associations via qualified_arn) -> 0-diff",
       "proof_required": "apply output + 0-diff plan + live CF config shows new version pinned",
-      "proof": "HALTED BY DT BEFORE APPLY -- NOT RUN, AWS UNCHANGED (router still :5, distribution untouched, serve still json/mdpf). CAUSE: the portal-auth plan is 1-add/2-change and only ONE line is this deploy's; the rest is 0.7.0_AE's HELD MDPF_REVAMP.S5 CF flip @328248c135 ('HELD for CTO+COO+Andrew re-land co-sign'), P0-rolled-back once @9a59360605 -- aws_cloudfront_origin_access_control.assets CREATE + 11 ordered_cache_behaviors (live 24 -> 35, 0 removed, origin -/+ pairs are set-ordering noise). Those behaviors are EXACT-KEY, so CF matches them before /api/general/* and the request never reaches public-data-router: applying would ship held architecture AND render this GO'd Mechanism-A branch inert, serving S3-opal-data-assets instead of the platinum artifact verified tonight. No -target separates them (behaviors and the Lambda association live in the same distribution resource). ESCALATED 011658Z to CTO (ruling requested; recommendation: AE de-stages the S5 block, then this plan reads exactly 1-to-change), 011720Z to AE, COO cc.",
-      "closed_at": null
+      "proof": "HALTED at first plan-read (held S5 CF flip in-module) -> CTO ruled Option A -> AE de-staged @5bb23c45a6 -> I RE-PLANNED MYSELF: 0 add / 1 change / 0 destroy, residue grep S3-opal-data-assets|origin_access_control|path_pattern = 0. APPLY #1 published public-data-router:6 but the plan never listed the distribution -- the hazard documented at cloudfront-distribution.tf:59-64 ('published but CF stayed pinned', caught 2026-04-15 on auth-validator-edge v13). The post-apply re-plan CAUGHT it: distribution diff = ONLY :5->:6 on both router associations, zero residue. APPLY #2 landed it. TWO APPLIES REQUIRED, not one -- reported, not smoothed. APPLIED-PLANE VERIFIED: live CF association = public-data-router:6 on /api/general/* AND /api/general/json-tiered/*; distribution Deployed; 24 ordered behaviors (no S5 residue); TF 0-diff 'No changes.'",
+      "closed_at": "20260729T013000Z"
     },
     {
       "id": "L3",
       "kind": "activation",
       "target": "CF distribution Deployed + scoped invalidation /api/general/mdpf/* Completed",
       "proof_required": "invalidation id + status Completed",
-      "proof": null,
-      "closed_at": null
+      "proof": "Invalidation I6PA7CJZQ07WPOHQGLTSYH11OP, paths ['/api/general/mdpf/*'] ONLY (scoped as ordered, not /*), Status Completed, created 2026-07-29T01:31:42.802Z. Distribution Status=Deployed.",
+      "closed_at": "20260729T013200Z"
     },
     {
       "id": "L4",
       "kind": "verify",
       "target": "4 exercises (global content 1,950,519,805.86 @ 07-27; 3 firm URLs 200 platinum; non-mdpf control byte-identical; frozen 5f758b47 unmoved) + shared-date spot-check + JWT wipe attestation + detector re-baseline recorded",
       "proof_required": "exercise outputs with hashes; report to CTO/COO",
-      "proof": null,
+      "proof": "BLOCKED THEN RESOLVED-PENDING: acceptance battery returned 403 on 4/4 mdpf URLs. ROOT CAUSE SOURCE-CONFIRMED in ~4 min: opal-data-portal-v2 bucket policy statement AllowCloudFrontOACPublicData grants s3:GetObject on [json/*, json-tiered/*] ONLY -- platinum/* absent on BOTH planes (AE confirmed TF desired at shared-infra/s3-portal-v2-import.tf:108; a grant never written, not drift). BLAST RADIUS CONFINED: non-mdpf control /api/general/portfolios/aum-metrics.json 200 at 7,234B == pre-flip byte size; NEGATIVE frozen json/mdpf/global ETag 5f758b47 / 254,419B / LM 13:41:05Z UNMOVED. MISS OWNED: verified the platinum KEYS existed, never that the READER could reach them -- 'presence is not access, READER-side'; CTO notes the check was in nobody's plan (WO-2 verify exercised the WRITER's path only). RESOLUTION: fix-forward, ruled independently by CTO 013747Z (Option A) and by ANDREW-DIRECT VERBATIM ~0138Z at the DT terminal: 'no we're not wasting time rolling back, lets just do this properly in the first place and point to the right place with right permissions' (recorded + broadcast same turn: CTO 013844Z, COO 013907Z, MSTR 013925Z). AE executing the one-line Resource append platinum/mdpf/* -- the READ-direction twin of COO's 221211Z-co-signed publisher-write scope. Battery re-fires on AE's confirmation.",
       "closed_at": null
     }
   ]
