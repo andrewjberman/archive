@@ -63,9 +63,38 @@ now cleared** -- I composed the slice at 15:52:29Z (see §2).
 because the accrual bridge is IAM-blocked.**
 
 Served cottonwood after the 16:15Z fire (measured): `37,518 B`, `model_aua` **2/450**
-(07-21..07-22), `non_model_aua` **0/450**, `partner_custody_total` **0/450**. That is Andrew's
-screenshot exactly: one date span in Daily AUM Analysis, Period End Summary empty (no month-end lies
+(07-21..07-22), `non_model_aua` **0/450**, `partner_custody_total` **0/450**. That matches Andrew's
+screenshot: one date span in Daily AUM Analysis, Period End Summary empty (no month-end lies
 between two adjacent July dates).
+
+> ### ⚠ SELF-CORRECTION: THIS SENTENCE FIRST READ "IS ANDREW'S SCREENSHOT EXACTLY." THAT WAS AN INFERENCE.
+> Measuring the platinum OBJECT proves the object's contents. It does **not** prove the page RENDERS
+> that object -- two claims, and I collapsed them into one confident sentence. DE made the identical
+> collapse at 180344Z, retracted it at 180858Z, and its retraction is what sent me back to re-derive
+> mine. **The prompt to check came from someone else's correction, not from my own review** -- worth
+> recording, because the sentence read fine to me twice.
+>
+> **RE-DERIVED PROPERLY, WITH A NEGATIVE CONTROL (this is now a discrimination, not a match):**
+>
+> | plane | dates | model_aua | non_model_aua | partner_custody_total |
+> |---|---|---|---|---|
+> | **legacy** `json/mdpf/cottonwood/aggregate-aua-timeseries.json` (87,262 B, LM 2026-07-23T21:47Z) | 447 | **47** | **47** | **56** |
+> | **platinum** `platinum/mdpf/cottonwood/aggregate-aua-timeseries.json` | 450 | **2** | **0** | **0** |
+>
+> The legacy object **is** the interpolated artifact (matches CTO's `md5 194e5bb0` byte-proof). The two
+> candidates predict **opposite observable outcomes**: reading legacy would render 47 model dates and a
+> POPULATED non-model band over 05-28..07-22 -- a visibly *better* chart than the one Andrew reported.
+> **He reported the platinum shape. So for `aggregate-aua-timeseries` the portal reads PLATINUM.**
+>
+> **HONEST BOUND, and it is a real one:** this is symptom-matching against two candidates, **not a route
+> trace.** It settles this family only. `endpoints/aum.ts:557-560` maps the mdpf family to `json/mdpf/`,
+> so **DE's MIXED-STATE hypothesis -- aggregate repointed, `aum-metrics` not -- survives this entirely
+> and is now the leading reading.** DE's routing audit remains the definitive answer.
+>
+> **The transferable lesson is not "verify more."** A single-artifact read cannot distinguish *the page
+> shows this* from *this object happens to look like what the page shows*; **only a candidate that
+> predicts a DIFFERENT outcome can.** The legacy plane was available the whole time and I did not think
+> to read it until a peer corrected themselves on the same mistake.
 
 The chain is:
 
@@ -491,6 +520,69 @@ days and can fill 50 reads as broken to Andrew regardless of correctness -- whic
 happened today. **My input (DE owns the call): span the axis to the firm's own data envelope, or mark
 the pre-history region as out-of-coverage rather than empty.** Rendering "no data" and "not yet a
 client" identically is the same absent-vs-underivable confusion as §5, one layer up.
+
+---
+
+## 6b. ANDREW-DIRECT ~1800Z -- SERVING-PLANE RULING (recorded verbatim; relayed via DE 180344Z)
+
+**VERBATIM, Andrew at DE's terminal, ~2026-07-29 1800Z:**
+
+> *"all the /json paths are deprecated for the mdpf files in question. Other paths for mdpf are only
+> relevant if its peers or benchmark data. the aum-metrics, account-distribution, and
+> aua-aggregate-timeseries json files are all to be pulled from opal-data-portal-v2/platinum/"*
+
+**and earlier in the same exchange:**
+
+> *"the portal should never be calling from opal-data-assets"*
+
+**SCOPE, as relayed:** working guidance for current MDPF work, **not law** -- Andrew was explicit it
+does not go into `XXX.md`. Recorded here because it binds this design's serving plane and my WI-2
+queue. **Surfaced, not adjudicated.**
+
+### This design is COMPLIANT -- checked, not assumed
+
+Every `opal-data-assets` reference in this document is **PRODUCER-side**: the IAM grant on
+`portal/gold/mdpf/*` (§4 step 1) and cottonwood's own `blackdiamond/cottonwood/**` silver read (§5b).
+**Zero portal-read references.** The chain this design recommends already terminates where Andrew
+says it must:
+
+```
+opal-data-assets/gold/mdpf_revamp/   (producer staging)
+   -> opal-data-assets/portal/gold/mdpf/   (canonical gold tree; accrual bridge)
+      -> opal-data-portal-v2/platinum/mdpf/{scope}/{type}.json   <- THE PORTAL READS HERE, and only here
+```
+
+All three families Andrew names -- `aum-metrics`, `account-distribution`, `aggregate-aua-timeseries`
+-- are exactly the ones §6(c) already tracks as canonical-hyphenated under `platinum/mdpf/{scope}/`.
+**No change to this design.**
+
+### ⚠ WHERE IT DOES BITE: MY OWN WI-2 PRODUCER STILL EMITS A DEPRECATED `/json` KEY
+
+`dim_mdpf_aum_metrics.py` carries a **legacy dual emission**, in scope for the frozen WI-2 queue:
+
+```
+:40    gold/mdpf_revamp/portfolios/aum-metrics.json  (AE repoints json/portfolios/aum-metrics.json)
+:62-63 "the legacy json/portfolios/aum-metrics.json read (Global view quarterly cells) lives until DE ..."
+:565   "(+ the legacy portfolios/aum-metrics.json key when firm=global ...)"
+```
+
+`aum-metrics` is one of the three families named. **This emission is now on a deprecated plane.**
+
+> ### ⛔ DEPRECATED IS NOT UNREAD -- DO NOT DELETE THE EMISSION ON THIS RULING ALONE.
+> DE's CTO-dispatched census (same turn) measured **LIVE readers still on those legacy paths**: a
+> 3-hop portal chain on `json/portfolios/aum-timeseries.json`, **plus two more legacy-path readers on
+> `aum-metrics` reaching Attribution and Positioning.** DE explicitly left the key-to-URL mapping
+> **UNVERIFIED rather than guess it.**
+>
+> **So the ruling states a DIRECTION, and the estate is not there yet.** Removing the legacy emission
+> before those readers are repointed breaks live client-facing surfaces. **The ordering is
+> repoint-readers-THEN-retire-emission** -- the same render-learns-first ordering §5 arrived at for
+> the enum, one layer up. Retiring the producer half first is the mirror-image failure.
+
+**MY POSITION: no producer change on this ruling.** The emission stays until the repoint owner (DE /
+AE, CTO to route) confirms zero live readers, with the key-to-URL mapping VERIFIED rather than
+inferred. Flagged into the WI-2 queue so it is not discovered at deploy time. **Not my call to
+adjudicate -- surfaced to CTO + COO + MSTR the same turn.**
 
 ---
 
