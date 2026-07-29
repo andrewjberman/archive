@@ -141,3 +141,79 @@ recommendation awaiting his word.
    one idiom for both.
 3. Sequencing with DS~A: the `(class AND value)` guard is correct **independently** of their label
    fix, so it need not wait on them. Confirm we want it landed on its own merits rather than bundled.
+
+---
+
+# ADDENDUM 2026-07-29 ~1730Z — DS~A exchange: a THIRD gap, and two rulings
+
+⚠ **VINTAGE:** all citations ABOVE are `@b0fc1e75`. The PROD back-merge landed as `a969d615` and
+shifted this file by +45 lines, so **the line numbers above are stale for current head** — re-locate
+by symbol, never by number. Citations in this addendum are `@a969d615`.
+
+## GAP 3 (NEW, mine) — the Non-Model band has NO provenance channel to the screen
+
+`ModelPortfolios.tsx:1323-1331`:
+
+```
+const perFirmNonModelByPeriod = useMemo(() => {
+  const map: Record<string, number | null> = {}   // <- VALUE ONLY, by type
+  for (const p of readNonModelSeries(perFirmMdpfData)) {
+    map[p.period] = p.value                       // <- p.pointClass DISCARDED here
+  }
+```
+
+`readNonModelSeries` correctly *returns* `pointClass`; this map throws it away before the render sees
+it. And the choke set (`trendInterpolatedDates`, `:977-982`) draws only from `timeSeriesData.aggregate`
+and `by_model` — the non-model map is not among its inputs. **So the Non-Model band cannot render
+provenance at all, regardless of how the producer labels it.**
+
+Full gap list:
+| # | Status | What |
+|---|---|---|
+| 1 | **LIVE** | Band/overlay/legend keys on class ALONE → paints "estimated" over null values |
+| 2 | latent | Non-Model TILE `?? 0` → an absent quantity would render a confident `$0` |
+| 3 | **NEW** | Non-Model BAND discards `pointClass` → no provenance channel at all |
+
+## RULING — DS~A's enum question: reuse `absent`. Mechanism, not preference.
+
+Their options were (i) reuse `absent` vs (ii) add `underivable` for "inputs exist, derivation not
+possible". **Ruled (i)**, because `pairedProvenanceRead.ts:239` degrades an *unrecognized*
+`point_class` to `interpolated_estimate` + loud warn (the deliberate "never silently measured"
+posture at `:233`). Therefore:
+
+> An `underivable` string arriving at a renderer that does not know it is **coerced to
+> `interpolated_estimate`, over a None value — which is exactly the 44-date defect the fix exists to
+> remove.** (ii) fails INTO the defect, not away from it.
+
+(ii) also buys **zero pixels**: `absent` and `underivable` render identically under this design (a
+gap, no ornament), since the signal that must stay loud is *"this point is an ESTIMATE"*, not *"this
+point is missing"*. Real risk, no benefit.
+
+**Third option offered and recommended:** keep the ENUM at `absent`, carry the precise distinction in
+a **non-enum sibling field** (a reason/status string). The render safely ignores unknown non-enum
+fields, diagnostic precision is preserved, the contract does not change, and if the distinction should
+later become *visible* the render can start consuming it with no producer change. **Enum widening is a
+one-way door; a sibling field is not.**
+
+Recorded semantics under (i): **`absent` = "nothing to show at this point"** — covering both "no data
+exists" and "inputs exist, derivation not possible". Stated explicitly so the narrow reading is not
+re-derived later.
+
+## RULING — DS~A's 32 derivable-but-empty dates: stay on (A), leave them None
+
+Their condition: *"if you cannot show (B) as partly-estimated, (B) is worse than the gap."* **Measured,
+and I currently cannot — Gap 3 is why.** A (B) hybrid (MEASURED custody − INTERPOLATED model) would
+reach the screen indistinguishable from measured no matter how it is labelled. At ~$330mm on a
+client-facing series with Andrew actively reading the page, not worth a wider band.
+
+**This is a sequence, not a refusal.** (B) becomes correct — and better — after:
+1. the Gap-1 band guard lands `(class === interpolated_estimate AND value != null)` *(gated, CTO)*
+2. `pointClass` is carried through `:1323-1331` and the non-model series feeds the choke set *(small; mine)*
+3. then (B) renders visibly reconstructed and honestly triples the band.
+
+**(A) is correct-until-step-2, NOT final.** DS~A asked to be told the moment it flips.
+
+## Housekeeping
+`NOT_MEASURED` / `non_model_aua_status`: **1 hit in 404 files scanned, and it is a COMMENT**
+(`ModelPortfolios.tsx:304`), not a predicate. Nothing in the render keys off DS~A's fossil string, so
+the IAM grant landing breaks nothing here — it only makes that comment stale. Correct on next touch.
