@@ -1,0 +1,134 @@
+diff --git a/infra/aws/terraform/portal-auth/cloudfront-distribution.tf b/infra/aws/terraform/portal-auth/cloudfront-distribution.tf
+index 890b536217..b0952727a8 100644
+--- a/infra/aws/terraform/portal-auth/cloudfront-distribution.tf
++++ b/infra/aws/terraform/portal-auth/cloudfront-distribution.tf
+@@ -68,31 +68,16 @@ locals {
+   public_data_router_arn      = var.enable_lambda_edge ? aws_lambda_function.public_data_router[0].qualified_arn    : "${local.edge_arn_prefix}:public-data-router:4"
+   cache_control_injector_arn  = var.enable_lambda_edge ? aws_lambda_function.cache_control_injector[0].qualified_arn : "${local.edge_arn_prefix}:cache-control-injector:1"
+ 
+-  # MDPF_REVAMP.S5 Option-C: the 9 FE-read paths that flip from the /api/general/*
+-  # catch-all (portal-v2) to the opal-data-assets OAC origin. Each becomes an exact-
+-  # path ordered_cache_behavior that is an EXACT CLONE of behavior 8 (/api/general/*)
+-  # -- same auth-validator + public-data-router (/api/general/ -> /json/ rewrite) +
+-  # cache-control-injector L@E -- differing ONLY in path_pattern + target_origin_id.
+-  # Path = /api/general + (served json/ key minus its json/ prefix).
+-  # 3F-F1 pre-flip identity (PRD v1.12, from DE finding F-1): this set must cover EVERY
+-  # registry firm before any apply -- the declared set was measured missing Cottonwood
+-  # entirely, and a green flip would have silently split it onto the legacy origin,
+-  # breaking the LD-0330 one-flip ruling at execution. Machine check:
+-  # .tools/mdpf-preflip-check (cross-layer identity vs the publisher PUBLISH_MAP now;
+-  # binds to the 3F-G2 firm registry when it lands). Run it before the S5 flip apply.
+-  mdpf_assets_behavior_paths = [
+-    "/api/general/mdpf/global/aggregate-aua-timeseries.json",
+-    "/api/general/mdpf/49financial/aggregate-aua-timeseries.json",
+-    "/api/general/mdpf/inflection/aggregate-aua-timeseries.json",
+-    "/api/general/mdpf/cottonwood/aggregate-aua-timeseries.json",
+-    "/api/general/mdpf/49financial/account-distribution.json",
+-    "/api/general/mdpf/inflection/account-distribution.json",
+-    "/api/general/mdpf/cottonwood/account-distribution.json",
+-    "/api/general/portfolios/account-distribution.json",
+-    "/api/general/portfolios/non_model_assets.json",
+-    "/api/general/portfolios/aum-metrics.json",
+-    "/api/general/portfolios/aum-timeseries.json",
+-  ]
++  # MDPF_REVAMP.S5 Option-C DE-STAGED 2026-07-29T0120Z (CTO order 011801Z, executing
++  # the G8-ruled disposition): superseded by the A-2 ruling (option 1 -- the egress
++  # principal + platinum serving per Andrew's locked layout, 2026-07-28). Option C's
++  # exact-key shape cannot absorb `advi` without hand-written infra per scope/type;
++  # retired from desired state so it can never again ride an unrelated apply (it rode
++  # DT's WO-3 portal-auth plan tonight, halted at plan-read). The held block is
++  # preserved VERBATIM at org/tier2_senior/0.7.0_AE_CloudOps/deliverables/
++  # S5_OPTIONC_DESTAGE_20260729/ and in git history @328248c135 (+11-behavior form
++  # @8ec253b343); P0 rollback precedent @9a59360605. Applied plane untouched
++  # (live distro: 24 behaviors, no assets origin -- DT-verified).
+ }
+ 
+ # ---------------------------------------------------------------------------
+@@ -111,24 +96,6 @@ resource "aws_cloudfront_function" "spa_fallback" {
+   code    = file("${path.module}/spa-fallback-function.js")
+ }
+ 
+-# ---------------------------------------------------------------------------
+-# Origin Access Control -- opal-data-assets MDPF served keys (MDPF_REVAMP.S5, Option C)
+-# ---------------------------------------------------------------------------
+-# The 9 MDPF FE-read behaviors point DIRECTLY at an opal-data-assets S3 origin
+-# signed by this dedicated OAC (sigv4 / always). The own-origin OAC signs natively
+-# (b1-proven, isolated-distro test) so NO Lambda@Edge ORIGIN swap is needed -- an
+-# L@E origin swap breaks OAC signing (403); the retained public-data-router only
+-# rewrites the URI (/api/general/ -> /json/), which OAC signs after. The
+-# opal-data-assets bucket policy grants THIS distribution GetObject on the 9 exact
+-# keys (AllowMdpfPortalCloudFrontOACRead, SourceArn=EVTSA9VEHNZVH).
+-resource "aws_cloudfront_origin_access_control" "assets" {
+-  name                              = "opal-data-assets-mdpf-oac"
+-  description                       = "OAC for opal-data-assets MDPF served keys (Option C direct behaviors)"
+-  origin_access_control_origin_type = "s3"
+-  signing_behavior                  = "always"
+-  signing_protocol                  = "sigv4"
+-}
+-
+ # ---------------------------------------------------------------------------
+ # CloudFront Distribution
+ # ---------------------------------------------------------------------------
+@@ -245,15 +212,6 @@ resource "aws_cloudfront_distribution" "portal" {
+     }
+   }
+ 
+-  # MDPF revamp served keys (opal-data-assets, OAC -- MDPF_REVAMP.S5 Option C).
+-  # OAC-backed => NO s3_origin_config block (that is OAI-only; an empty one causes
+-  # set-hash drift after import -- see the S3-opal-data-portal-v2-json origin note).
+-  origin {
+-    domain_name              = "opal-data-assets.s3.us-east-1.amazonaws.com"
+-    origin_id                = "S3-opal-data-assets"
+-    origin_access_control_id = aws_cloudfront_origin_access_control.assets.id
+-  }
+-
+   # --- Default Cache Behavior (SPA static assets) ---
+ 
+   default_cache_behavior {
+@@ -651,46 +609,6 @@ resource "aws_cloudfront_distribution" "portal" {
+     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_s3_origin.id
+   }
+ 
+-  # 7b. MDPF_REVAMP.S5 Option-C -- 9 exact-path direct behaviors -> opal-data-assets
+-  # OAC origin. EXACT clones of behavior 8 (/api/general/*) below; ONLY path_pattern
+-  # + target_origin_id differ. Placed BEFORE behavior 8 so the exact paths win over
+-  # the catch-all (CloudFront evaluates ordered behaviors by position, first match
+-  # wins). The retained public-data-router rewrites /api/general/X -> /json/X (the
+-  # published assets key layout) and the assets OAC signs the rewritten request.
+-  # THE FLIP = these 9 behaviors; ROLLBACK = remove this block (the 9 paths fall back
+-  # to behavior 8 -> portal-v2, which the legacy nightly keeps writing = the shadow).
+-  dynamic "ordered_cache_behavior" {
+-    for_each = local.mdpf_assets_behavior_paths
+-    content {
+-      path_pattern           = ordered_cache_behavior.value
+-      target_origin_id       = "S3-opal-data-assets"
+-      viewer_protocol_policy = "redirect-to-https"
+-      allowed_methods        = ["GET", "HEAD"]
+-      cached_methods         = ["GET", "HEAD"]
+-      compress               = true
+-      cache_policy_id          = data.aws_cloudfront_cache_policy.caching_optimized.id
+-      origin_request_policy_id = data.aws_cloudfront_origin_request_policy.cors_s3_origin.id
+-
+-      lambda_function_association {
+-        event_type   = "viewer-request"
+-        lambda_arn   = local.auth_validator_edge_arn
+-        include_body = false
+-      }
+-
+-      lambda_function_association {
+-        event_type   = "origin-request"
+-        lambda_arn   = local.public_data_router_arn
+-        include_body = false
+-      }
+-
+-      lambda_function_association {
+-        event_type   = "origin-response"
+-        lambda_arn   = local.cache_control_injector_arn
+-        include_body = false
+-      }
+-    }
+-  }
+-
+   # 8. /api/general/* -> S3 opal-data-portal-v2 (public + cache + rewrite)
+   ordered_cache_behavior {
+     path_pattern           = "/api/general/*"
