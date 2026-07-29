@@ -63,9 +63,38 @@ now cleared** -- I composed the slice at 15:52:29Z (see §2).
 because the accrual bridge is IAM-blocked.**
 
 Served cottonwood after the 16:15Z fire (measured): `37,518 B`, `model_aua` **2/450**
-(07-21..07-22), `non_model_aua` **0/450**, `partner_custody_total` **0/450**. That is Andrew's
-screenshot exactly: one date span in Daily AUM Analysis, Period End Summary empty (no month-end lies
+(07-21..07-22), `non_model_aua` **0/450**, `partner_custody_total` **0/450**. That matches Andrew's
+screenshot: one date span in Daily AUM Analysis, Period End Summary empty (no month-end lies
 between two adjacent July dates).
+
+> ### ⚠ SELF-CORRECTION: THIS SENTENCE FIRST READ "IS ANDREW'S SCREENSHOT EXACTLY." THAT WAS AN INFERENCE.
+> Measuring the platinum OBJECT proves the object's contents. It does **not** prove the page RENDERS
+> that object -- two claims, and I collapsed them into one confident sentence. DE made the identical
+> collapse at 180344Z, retracted it at 180858Z, and its retraction is what sent me back to re-derive
+> mine. **The prompt to check came from someone else's correction, not from my own review** -- worth
+> recording, because the sentence read fine to me twice.
+>
+> **RE-DERIVED PROPERLY, WITH A NEGATIVE CONTROL (this is now a discrimination, not a match):**
+>
+> | plane | dates | model_aua | non_model_aua | partner_custody_total |
+> |---|---|---|---|---|
+> | **legacy** `json/mdpf/cottonwood/aggregate-aua-timeseries.json` (87,262 B, LM 2026-07-23T21:47Z) | 447 | **47** | **47** | **56** |
+> | **platinum** `platinum/mdpf/cottonwood/aggregate-aua-timeseries.json` | 450 | **2** | **0** | **0** |
+>
+> The legacy object **is** the interpolated artifact (matches CTO's `md5 194e5bb0` byte-proof). The two
+> candidates predict **opposite observable outcomes**: reading legacy would render 47 model dates and a
+> POPULATED non-model band over 05-28..07-22 -- a visibly *better* chart than the one Andrew reported.
+> **He reported the platinum shape. So for `aggregate-aua-timeseries` the portal reads PLATINUM.**
+>
+> **HONEST BOUND, and it is a real one:** this is symptom-matching against two candidates, **not a route
+> trace.** It settles this family only. `endpoints/aum.ts:557-560` maps the mdpf family to `json/mdpf/`,
+> so **DE's MIXED-STATE hypothesis -- aggregate repointed, `aum-metrics` not -- survives this entirely
+> and is now the leading reading.** DE's routing audit remains the definitive answer.
+>
+> **The transferable lesson is not "verify more."** A single-artifact read cannot distinguish *the page
+> shows this* from *this object happens to look like what the page shows*; **only a candidate that
+> predicts a DIFFERENT outcome can.** The legacy plane was available the whole time and I did not think
+> to read it until a peer corrected themselves on the same mistake.
 
 The chain is:
 
