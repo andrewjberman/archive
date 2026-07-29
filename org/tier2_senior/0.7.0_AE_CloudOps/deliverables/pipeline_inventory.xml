@@ -925,4 +925,30 @@
     </module>
   </nfra_cmtque_alarms>
 
+  <etfs_reports>
+    <!-- 2026-07-29 (0.7.0_AE_CloudOps~A): month-end report email now attaches per-firm CSV grids
+         beside the PDF (Andrew-direct ~0135Z via DS~A + "Yes run it now" ~0254Z at my terminal),
+         plus a send-free email_qa rehearsal mode (CTO-ruled 024911Z, ratified 025334Z). -->
+    <module>
+      <tf_dir>infra/aws/terraform/etfs-reports/</tf_dir>
+      <tag>etfs-reports-v1.1.0 (module's FIRST tag -- the 06-25 creation deploy was never tagged; disclosed in ledger)</tag>
+      <design>org/critical_paths/change_management/20260729T0300Z_etfs-reports-csv-attach-email-qa_deploy_completion.md</design>
+      <resources>
+        aws_lambda_function.orchestrator (etfs-reports-orchestrator) updated in-place -- source only
+        (data.archive_file inline zip; no IAM/schedule/alarm change). CodeSha256
+        jfMnlSE2VocFe7kN9uxhx35iU3JLev5flYOJKW9OE+I= applied 2026-07-29T03:09:32Z, 0-diff verified.
+        Modes now {run, absence_check, email_qa}; email_qa is send-free by call-graph (builder split:
+        _build_report_email = build-only; _email_report = the ONE ses.send_raw_email call site),
+        manual-invoke only, never scheduled.
+      </resources>
+      <exercised>
+        Deployed-runtime email_qa invokes: month=9999-qa (4 synthetic fixtures seeded) returned
+        exactly the expected 4-attachment set both directions; month=2026-06 (real, read-only)
+        returned PDF-only proving the zero-CSV disclosure branch. Fixtures deleted post-exercise,
+        residual listing empty (disclosed in ledger). Aug 1 10:00 ET production fire remains the
+        full-chain acceptance (renderer-side write_month_csvs still first-exercises then -- DS/DE lane).
+      </exercised>
+    </module>
+  </etfs_reports>
+
 </pipeline_inventory>
