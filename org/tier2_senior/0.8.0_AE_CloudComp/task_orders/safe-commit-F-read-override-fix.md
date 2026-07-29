@@ -3,7 +3,15 @@
 <project>ad-hoc (NFRA-tooling; Andrew-requested, CTO-approved)</project>
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSED 2026-07-29 by 0.8.0_AE_CloudComp on CVO close-on-sight relay (msg 20260729T030632Z).
+     Evidence chain: e3fa2aaf13 (Phase-2 self-test 13/13 incl. mutant control) + 4fa52dc487 (extended
+     harness: rc=2 branch, audit write, block path, trigger predicate, fail-safe, AGE-WARN + 2 subtle
+     mutants, 13/13) + 7212941e6f (CVO verify log = the TO's CVO-verify gate) + 01c815ef87 (CTO~Z
+     LANDED 2026-07-25T13:32:43-04:00). Implementation live at safe-commit.sh:586-615, in-code
+     attributed to this TO; re-confirmed on the working tree at close time. CVO exercised the path
+     live 07-29 (comp-system BLOCK -> -F-carried override honored). -->
+
 <priority>P1 (Andrew brought 0.8.0 online to build NOW; core-gate care via verify-before-live)</priority>
 <date>2026-07-21</date>
 
@@ -77,7 +85,7 @@ on -m (a -m body with $( is denied). Restores the mandated commit path's ability
 </acceptance_criteria>
 
 <dependencies>
-  <dependency agent="3.0.0_SA_CVO" task="verify the fix before the live commit" status="pending"/>
-  <dependency agent="1.0.0_SA_CTO" task="gate the apply (live commit of safe-commit.sh)" status="pending"/>
+  <dependency agent="3.0.0_SA_CVO" task="verify the fix before the live commit" status="complete"/>
+  <dependency agent="1.0.0_SA_CTO" task="gate the apply (live commit of safe-commit.sh)" status="complete"/>
 </dependencies>
 </task_order>
