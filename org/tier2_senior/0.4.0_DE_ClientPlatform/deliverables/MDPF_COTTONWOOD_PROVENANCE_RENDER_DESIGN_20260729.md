@@ -228,4 +228,96 @@ client-facing series with Andrew actively reading the page, not worth a wider ba
 ## Housekeeping
 `NOT_MEASURED` / `non_model_aua_status`: **1 hit in 404 files scanned, and it is a COMMENT**
 (`ModelPortfolios.tsx:304`), not a predicate. Nothing in the render keys off DS~A's fossil string, so
-the IAM grant landing breaks nothing here — it only makes that comment stale. Correct on next touch.
+the IAM grant landing breaks nothing here. **DS~A corrected this further (173513Z): the string does
+not merely go stale, it becomes FALSE** — the producer already emits the BALANCE status and the served
+copy is a pre-W-2b fossil. So on next touch it needs **deleting, not softening.**
+
+---
+
+# GAP 3 DESIGN — a provenance channel for the Non-Model band
+
+**Status: DESIGN ONLY.** CTO 173640Z made gap 3 a **binding cross-lane GATE** — *"no hybrid or
+estimated value is served into the Non-Model band until the provenance channel exists"* — and ordered
+the sequence **gap 3 → gap 1 → gap 2**, none to be built yet (freeze; the wave and the accrual grant
+are ahead). Citations `@a969d615`.
+
+## Scope bound (established before designing, so this does not grow)
+
+Gap 3 is **per-firm only**. The Global path reads `globalEnterpriseByPeriod` (from
+`readGlobalEnterpriseSeries`, which returns `{period, totalAua, modelAua, nonModelAua}` — also no
+class), **but `:976` deliberately returns an empty choke set at Global grain** ("at Global grain the
+estimated slice is not material enough to band"). So Global is out of scope *by design*, not by
+oversight. **Flagged so nobody later "fixes" Global banding into existence** without re-opening that
+ruling — it is a decision, not a gap.
+
+## Part 1 — carry the class (mechanical)
+
+`perFirmNonModelByPeriod` currently types the loss in: `Record<string, number | null>`.
+
+```
+Record<string, { value: number | null; pointClass: PointClass; confidence: number | null }>
+```
+
+Two consumers change, both the identical shape `const nm = map?.[period]; dataPoint[nmKey] = nm == null
+? null : Number(nm)` → `nm?.value`:
+- consumer 1 `~:2079` (aggregate row build)
+- consumer 2 `~:2275` (daily row build)
+
+**One map of objects, NOT a parallel class map.** Two maps keyed the same way can drift, and a
+provenance map that silently disagrees with its value map is a worse failure than no channel at all.
+
+## Part 2 — THE DESIGN DECISION: per-SERIES, not period-level
+
+The existing choke set is **period-level**: band, dashed overlay, legend entry and bar outlines all
+assert *"this PERIOD is estimated."* The obvious implementation — route non-model into
+`trendInterpolatedDates` — is wrong, and its failure mode is quiet:
+
+> **A period would be marked estimated because ONE stack segment is, implying the whole stack is.**
+> And for cottonwood specifically, non-model is expected to be interpolated across most of the span —
+> so the band would cover nearly the entire chart. **A marker that marks everything distinguishes
+> nothing.** It would satisfy the letter of "provenance reaches the screen" while destroying the
+> signal's meaning.
+
+Note the estate already has an any-cohort-interpolated→interpolated rule (`derivedFirmClass`, `:253`)
+— but that governs a **derived scalar class**, not a **visual assertion over a whole period**. Reusing
+its semantics for pixels is the category error here.
+
+**Recommended: mark the Non-Model band SEGMENT itself on estimated dates**, leaving the period-level
+band to mean what it means today (the model stack). Candidate treatments:
+- **(a)** pattern/hatch fill or reduced opacity on the non-model segment for estimated dates — recharts
+  `Bar` supports per-datapoint fill via `<Cell>`, and `Cell` is already imported. ⚠ **UNVERIFIED for a
+  STACKED bar specifically** — must be exercised before it is claimed.
+- **(b)** tooltip naming *which legs* are estimated on that date. Needed regardless of (a); it is the
+  only channel that can say "custody measured, model estimated" on a hybrid.
+- **(c)** a separate legend entry. Rejected as a default: it splits one series into two in the legend
+  and reads as two quantities.
+
+**Recommendation: (a) + (b).** (b) alone is insufficient — a tooltip requires hover, and a client
+reading the chart without hovering sees an unmarked estimate.
+
+## Part 3 — the gap-1 guard applies here too
+
+Whatever the treatment, the predicate is the same one gap 1 establishes: mark only when
+`pointClass === 'interpolated_estimate' && value != null`. An estimate over a null value is not an
+estimate; it is absence, and it must not be ornamented. Building gap 3 without this predicate would
+reintroduce gap 1 in a new channel.
+
+## Verification requirement (non-negotiable, portal CLAUDE.md)
+
+**A grep cannot see contrast, and neither can a type.** Whichever treatment is chosen must be rendered
+headlessly via `/frontend-dev` and the PNG **read**, against a fixture with a known mix of measured /
+estimated / absent non-model points — including the hybrid case. "The classes look right" is not a
+verification; that exact reasoning shipped the TicketCenter defect. Also check the estimated treatment
+survives the silver-canvas colour law.
+
+## Open questions for CTO's gate
+
+1. **Per-series vs period-level** — my recommendation is per-series, on the marks-everything-marks-
+   nothing argument. Period-level is a smaller diff and I will build it if overruled, but I think it
+   buys a compliant chart that communicates less than today's.
+2. **Treatment (a)'s mechanism** is unverified for stacked bars. If it does not hold, the fallback is
+   opacity, which is weaker signal. Want me to exercise that before the gate, or after?
+3. **Does the hybrid deserve its own vocabulary on screen?** DS~A's `underivable` question was about
+   the *producer* enum, and I ruled reuse-`absent`. The mirror question here is whether "custody
+   measured, model estimated" should read differently from "wholly estimated". My instinct is no for
+   the band and yes for the tooltip — the pixel says "not fully measured", the tooltip says why.
