@@ -53,10 +53,34 @@ MSYS_NO_PATHCONV=1 git show "HEAD:$SRC" | grep -c 'carried forward at the last k
   exit 1
 }
 
-echo "=== 1. THE LANDED BLOB is the source of truth for this verify ==="
-# Direct md5 comparison against `git show HEAD:` is VALID HERE because .gitattributes:5 pins
-# `*.py text eol=lf`, so the blob and the working tree share line endings (measured: 0 CR bytes).
-# DO NOT copy this pattern to a file WITHOUT eol=lf -- there the comparison mismatches spuriously.
+echo "=== 1a. SELF-CHECK THE ASSUMPTION THAT MAKES A BYTE-EXACT COMPARISON VALID ==="
+# Do NOT trust a note written hours before the run -- that is precisely how the 49F watch script
+# fired a verdict frozen at authoring time. CHECK the attribute AT RUN TIME.
+#
+# WHY THIS MATTERS: `core.autocrlf` is TRUE in this repo, so a text file WITHOUT an explicit eol
+# attribute checks out CRLF while `git show` emits LF -- a pure line-ending delta that reads as a
+# content mismatch. (0.4.0_DE hit exactly that on 2026-07-30 and advised normalising before
+# comparing.) For THIS file an explicit `eol=lf` attribute OVERRIDES autocrlf, so both sides are LF
+# and the comparison is byte-exact.
+# **DO NOT ADD A NORMALISATION STEP.** Normalising would mask a REAL CRLF corruption in the uploaded
+# artifact -- it weakens the check rather than hardening it. Instead, PROVE no normalisation is needed:
+EOL_ATTR="$(MSYS_NO_PATHCONV=1 git check-attr eol -- "$SRC" | awk '{print $NF}')"
+echo "  git check-attr eol -> $EOL_ATTR   (core.autocrlf=$(git config --get core.autocrlf || echo unset))"
+if [ "$EOL_ATTR" != "lf" ]; then
+  echo "*** STOP: this file does NOT carry eol=lf, so a checkout may be CRLF while the blob is LF."
+  echo "*** A byte-exact md5 comparison would mismatch SPURIOUSLY and you cannot tell that from real"
+  echo "*** corruption on the clock. Do NOT normalise to make it pass -- tell COO and re-scope the verify."
+  exit 1
+fi
+CR_WT="$(tr -cd '\r' < "$SRC" | wc -c)"
+CR_BLOB="$(MSYS_NO_PATHCONV=1 git show "HEAD:$SRC" | tr -cd '\r' | wc -c)"
+echo "  CR bytes -- working tree: $CR_WT   blob: $CR_BLOB   (both MUST be 0)"
+[ "$CR_WT" -eq 0 ] && [ "$CR_BLOB" -eq 0 ] || { echo "*** STOP: CR bytes present despite eol=lf. Tell COO."; exit 1; }
+
+echo "=== 1b. THE LANDED BLOB is the source of truth for this verify ==="
+# Verify against the BLOB, never a working-tree read: this is a SHARED worktree that has been swept
+# before, so a working-tree copy could carry another agent's concurrent edit and you would md5-verify
+# a file that is not what DE committed. (0.4.0_DE made this point explicitly at 105512Z.)
 LANDED_MD5="$(MSYS_NO_PATHCONV=1 git show "HEAD:$SRC" | md5sum | awk '{print $1}')"
 WT_MD5="$(md5sum "$SRC" | awk '{print $1}')"
 echo "  landed blob md5 : $LANDED_MD5"
