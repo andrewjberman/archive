@@ -56,8 +56,12 @@ order: `docs/briefs/terraform-fixes-before-decommission-20260730.md`.
 
 ## D. PRODUCERS TO STOP FIRST (ordering)
 
-- [ ] **D1** `seeking-alpha-news-daily` + `seeking-alpha-analysis-daily` — ENABLED; zero articles
-      produced since **2026-04-14**.
+- [x] **D1** `seeking-alpha-news-daily` + `seeking-alpha-analysis-daily` — ~~ENABLED~~ **DISABLED
+      2026-07-30 ~19:3xZ** under the Andrew-direct GO relayed by CTO (*"go ahead with the
+      seeking-alpha teardown"*). **Evidence:** `describe-rule` → `State: DISABLED` on both, read back
+      after the change; **positive control** `news-api-100pm` (untouched) still reads `ENABLED`, so
+      the probe discriminates. The 107-day dead channel no longer fires. **Fully reversible**
+      (`enable-rule`); nothing downstream removed.
 - [ ] **D2** fred: **6 ENABLED rules / 2 functions** — `fred-data-ingestion` ×5 (`-daily` `cron(0 23)`,
       `-weekly`, `-monthly-early/mid/late`) + `fred-macro-ingestion-daily` `cron(30 23)`. Three are
       MONTHLY → invisible 27 days in 30.
