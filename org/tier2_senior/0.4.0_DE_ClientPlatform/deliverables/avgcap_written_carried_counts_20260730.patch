@@ -1,0 +1,70 @@
+diff --git a/data/etfs/scripts/gold/avgcap_monthly_average.py b/data/etfs/scripts/gold/avgcap_monthly_average.py
+index ff0d579f10..3fba975f7f 100644
+--- a/data/etfs/scripts/gold/avgcap_monthly_average.py
++++ b/data/etfs/scripts/gold/avgcap_monthly_average.py
+@@ -204,11 +204,31 @@ def compute_partner_month(partner: str, month: str,
+         covered_days = len(carried)
+         partial = covered_days < n_window_days
+ 
++        # ADDITIVE (2026-07-30): the carried complement of `written_days`, so the
++        # carried fraction is readable FROM the artifact instead of requiring an
++        # after-the-fact re-derivation from daily/ slices -- an archaeology nobody
++        # performs, which is why June shipped 49financial at 17 written days in a
++        # 30-day window with `partial=False` and no one noticed.
++        #
++        # INVARIANT (this is the useful part):
++        #     written_days + carried_days == calendar_days_covered <= window_calendar_days
++        #     equality with window_calendar_days  <==>  `partial` is False
++        # Days BEFORE first_written are in NEITHER count: the carry loop above only
++        # appends from first_written onward, so they are excluded from the average
++        # denominator entirely. Their number is window_calendar_days - calendar_days_covered.
++        #
++        # `partial` IS DELIBERATELY UNTOUCHED. It is a consumed field whose value
++        # propagates to a render, and re-keying it is gated on a full-estate consumer
++        # census (~C). These counts make its real behaviour -- it tracks a LATE START,
++        # not coverage -- checkable from the file without changing what it reports.
++        carried_days = covered_days - len(written_days)
++
+         etf_results.append({
+             "etf": etf,
+             "monthly_avg_ownership_value": round(monthly_avg, 2),
+             "trading_day_mean_diagnostic": round(trading_day_mean, 2),
+             "written_days": len(written_days),
++            "carried_days": carried_days,
+             "calendar_days_covered": covered_days,
+             "window_calendar_days": n_window_days,
+             "first_written": first_written.isoformat(),
+@@ -219,6 +239,24 @@ def compute_partner_month(partner: str, month: str,
+     window_partial = (window_start > month_start) or (window_end < month_end) \
+         or any(e["partial"] for e in etf_results)
+ 
++    # ADDITIVE (2026-07-30): PARTNER-level coverage. The window dict previously
++    # carried no coverage count at all, so "what fraction of this partner's billing
++    # window is carried" -- the question a rebate reader actually has -- could only
++    # be answered by descending into per-ETF entries.
++    #
++    # NAMED *_dates, NOT *_days, ON PURPOSE. These count CALENDAR DATES on which the
++    # partner wrote ANY slice. The per-ETF `written_days` above counts days on which
++    # ONE ETF was present. They are DIFFERENT QUANTITIES and neither is derivable
++    # from the other -- a date can carry a slice for some ETFs and not others. Giving
++    # both the same name would invite a reader to compare or sum them, which is the
++    # conflation this whole pass exists to remove.
++    #
++    # INVARIANT: written_dates + carried_dates == calendar_days, always (unlike the
++    # per-ETF pair, which sums to calendar_days_covered). No late-start exclusion
++    # applies here: this is measured over the window, not from a first-written seed.
++    written_dates = len({to_date(d) for d in in_window})
++    carried_dates = n_window_days - written_dates
++
+     return {
+         "partner": partner,
+         "month": month,
+@@ -226,6 +264,8 @@ def compute_partner_month(partner: str, month: str,
+             "start": window_start.isoformat(),
+             "end": window_end.isoformat(),
+             "calendar_days": n_window_days,
++            "written_dates": written_dates,
++            "carried_dates": carried_dates,
+             "clock_applied": clock.isoformat() if clock else None,
+             "mtd_capped": as_of.isoformat() if (as_of and as_of < month_end) else None,
+             "partial": window_partial,
