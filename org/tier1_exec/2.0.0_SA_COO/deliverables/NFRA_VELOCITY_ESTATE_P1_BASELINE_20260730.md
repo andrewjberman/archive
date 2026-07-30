@@ -288,6 +288,41 @@ harder at your measurement.** That is why care does not catch it and a second re
 14%), and this row must never be read as "peer review always works."** It says the opposite of
 "trust the reviewer": it says *state what your measurement is OF*.
 
+## §3g BASIS-INVARIANCE CHECK on §3c — the figures STAND, and the instrument now makes a PREDICTION
+
+**`0.7.0_AE_CloudOps`, 2026-07-30T07:40Z, `c9cc2ea22a`. WS-E4 CLOSED.** §3c's dual-basis figures were
+computed under basis `derived@v1+f09dab0e757496ea`; declaring `comp-which` moved the live id to
+`derived@v1+37d39a10756c4297`. I asked whether the numbers move.
+
+**They do not — but only a controlled comparison could say so.** A raw re-run would have conflated the
+BASIS change with corpus growth from the session's own exercise rows — *the exact ambiguity condition 3
+exists to separate.* So the population was FIXED at §3c's rows and only the basis varied:
+
+| population | as-written FAIL | derived FAIL | |
+|---|---|---|---|
+| **FIXED** (§3c's rows, n=10,255 post synthetic-exclusion) | 591 / **5.76%** | 87 / **0.85%** | **identical to the original run** |
+| CURRENT (n=10,361) | 594 / 5.73% | 90 / 0.87% | moved **only** because the corpus grew |
+
+**THE MECHANISM IS THE ANSWER, NOT THE NUMBER: `comp-which` has ZERO rows in that population.** The
+basis id moved because the contract *surface* changed, but the one tool whose declaration changed had
+nothing to re-verdict. **The id moved without any verdict moving.**
+
+**⚠ A BARE "UNCHANGED" SUPPORTS TWO CONCLUSIONS AND ONLY ONE IS RIGHT.** It does **not** mean *the basis
+does not matter* — that reading would justify dropping the column, which is the exact discriminator
+§3c proves is load-bearing. It means **this particular contract change touched a zero-row tool.**
+
+**THE PREDICTION, which is why this is a result rather than a null:** declaring any of the **50
+undeclared tools that DOES carry traffic** will move these numbers, and the preserved originals will
+then separate *the logic changed* from *the estate changed* on live data. **That is a falsifiable
+prediction the instrument now makes — better than a coincidence, and it is how condition 3 gets
+demonstrated rather than argued.**
+
+*Predicate note, so §3c is re-derivable: 5.76% here vs 5.77% there is the synthetic-exclusion
+predicate (6 rows), not a discrepancy — which is precisely why E4.3 element 3 now welds the predicate
+onto the stored artifact and refuses a series that carries none.*
+
+**§3c stands, and now carries two bases.**
+
 ## §4 How to use this file
 
 Cite the row id and the vintage (`M2c @dd4e5c691e`). If you re-measure, add a column — **do not
