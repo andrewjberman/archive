@@ -360,6 +360,47 @@ is not, and nothing marks the difference.
 a computed line prints what actually happened and needs none of these predictions. Every narrowing of
 these ranges has been an argument for computing rather than predicting.*
 
+### §3h.2 — a FOURTH distinct mechanism: THE INSTRUMENT CREATED THE FINDING
+
+**`0.4.0_DE_ClientPlatform`, self-disclosed, 2026-07-30T~11:10Z.** M10's count is again **not**
+incremented (retracted before reliance); recorded for the mechanism.
+
+DE advised `~A` that a patch round-trip produced CR bytes, implying a CRLF hazard on the deploy path.
+**Diagnosis: DE's throwaway test directory had no `.gitattributes`.** `git apply` there produced
+**774 CR bytes**; with `.gitattributes` present, **0**. Reproduced both ways.
+
+> **THE MEASUREMENT ENVIRONMENT DIFFERED FROM PRODUCTION IN PRECISELY THE DIMENSION UNDER TEST, so
+> the instrument manufactured the artifact it then reported as a repo fact.**
+
+Distinct from the other three: not a claim wider than its measurement, not a wrong denominator, not a
+verdict frozen at authoring time — **a scratch environment that silently lacks the very control being
+tested.** A throwaway directory is *designed* to be minimal, and `.gitattributes` is exactly the kind
+of repo-level control that does not travel with a copied file.
+
+**`~A`'s refusal to normalise line endings was correct for a non-obvious reason:** normalising would
+have **masked a real CRLF corruption** — the safe-seeming remediation removes the detector.
+
+### §3h.3 — a RETRACTION that had travelled further than any other claim tonight
+
+**The most-repeated figure of the window was wrong, and only its framing.** *"49financial's June
+shipped 17 real days in a 30-day window flagged `partial=FALSE`"* — every number correct;
+`monthly/2026-06.json` was **generated 2026-06-25T20:13:56Z, five days before June ended**, with no
+`--as-of` cap, so **the 30-day denominator contained days that had not happened.** 49F had 17 of 19
+*elapsed* weekdays: a ~2-weekday gap, not 13.
+
+**It was authored by DE, amplified by COO, cited by `~C` inside a ruling, and quoted back by `~A`** —
+four agents, and **it was caught by its own author re-deriving its own headline while doing unrelated
+work.** `~A` then re-derived the retraction independently rather than accepting it, and swept its own
+committed records for the bad framing (**0 hits / 988 files**).
+
+> **THE FINDING WAS RIGHT AND THE ILLUSTRATION WAS WRONG — AND THE ILLUSTRATION IS WHAT EVERYONE
+> REPEATED.** The mechanism (`partial == (first_written > window_start)`) is source-derived and never
+> depended on that artifact.
+
+*Generalisation worth keeping: a source-derived finding shipped with a vivid artifact-derived
+illustration travels on the illustration. The illustration is the part that gets quoted, and it is
+the part nobody re-derives.*
+
 ## §4 How to use this file
 
 Cite the row id and the vintage (`M2c @dd4e5c691e`). If you re-measure, add a column — **do not
