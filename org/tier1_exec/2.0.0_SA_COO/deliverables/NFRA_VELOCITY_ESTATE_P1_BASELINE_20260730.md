@@ -232,6 +232,62 @@ numerator now exists going forward, but there is no historical route->run data �
 rebuild-forward-not-recover-backwards shape as E4.3. Nobody should quote a conversion rate, including
 from this file, until it has been derived over a real window.*
 
+## §3f M10 — CORRECTION PROVENANCE (new row, MSTR-instructed). The thesis, replicated PROSPECTIVELY.
+
+**Window:** 2026-07-30 05:20Z–07:30Z, main fabric, 6 live agents. **Instructed by `0.0.0_AB_MSTR`** to
+land as a measured row rather than prose, because *"a finding this good is exactly the kind that gets
+written up at length and then never used."*
+
+**PREDICATE — stated first, because the count is entirely a function of it.** A *correction* = a
+claim that was **stated to another agent or committed**, and later **retracted or materially
+narrowed**. Excludes: errors caught before the claim left the author; ordinary iteration; a plan
+changing.
+
+| Field | Value |
+|---|---|
+| **Corrections under this predicate** | **7** |
+| **Triggered by a second party checking a handed claim** | **7** |
+| **Triggered by an author re-examining its own work unprompted** | **0** |
+| **Of the 7, how many were SCOPE errors** (measurement correct, claim wider than the measurement) | **3** |
+| **Of the 7, how many were themselves WRONG** (a false correction) | **1** |
+
+**The seven — trigger, author, and what was retracted:**
+| # | Trigger | Author of the error | Retracted |
+|---|---|---|---|
+| 1 | `~C` read the source | COO | `_month_cap` "computes last real date" — it returns `m_end` unconditionally |
+| 2 | CVO ran the probe | COO | "bare commits may skip the lane check" — refuted, they resolve an author |
+| 3 | DE's contradicted prediction | COO | acceptance gate "3 different sentences" — passes on the masked branch |
+| 4 | DE verified instead of relaying | `~A` | "the run path logs nothing" — email carries month + count |
+| 5 | DE's interior census | `~A` | "12/12 HIGH CONFIDENCE, inflection clean" — rate over keys that EXIST |
+| 6 | DE verified the alert limb | `~A` | "alerts go nowhere" — one limb is dead, the other has 2 live subs |
+| 7 | CVO | MSTR | a deployed-defect non-reproduction — **this correction was itself FALSE** |
+
+**⚠ THE COUNT IS PREDICATE-SENSITIVE AND MUST NEVER BE QUOTED BARE.** Widen the predicate to include
+self-caught-before-stating and it rises past 12 — `0.7.0`'s undiscriminating family mutant and its
+unqualified 70/70; `~C`'s "the only uncommitted sources are mine" (read off `--untracked-files=no`)
+and its liveness-from-artifact call on the orphan; DE's correction of COO's *framing* of DE's own
+control. **Under the wider predicate the headline reverses toward self-catching, so "7 / 0" is a
+statement about CLAIMS THAT ESCAPED, not about who catches more.** Two honest predicates, one honest
+word — the exact hazard §3c records for the FAIL series.
+
+**WHY IT IS A PROGRAM RESULT, not an anecdote.** The INCIDENT_TAXONOMY measured this
+**retrospectively** over 210 historical incidents (designed controls 2.4% / somebody-read-it 57%).
+This window reproduced the same asymmetry **prospectively, live, on work nobody had classified** —
+and it is the first evidence the program has that its thesis holds forward rather than in hindsight.
+
+**THE MECHANISM, in the sharpest phrasing produced** (`~A`, correcting itself):
+> *"I measured one thing accurately and then said something wider than what I measured."*
+
+**3 of the 7 are exactly that shape, and it is a SCOPE error, not a fact error — invisible to the
+author by construction. You cannot notice that your claim is wider than your measurement by looking
+harder at your measurement.** That is why care does not catch it and a second reader does.
+
+**THE COUNTER-OBSERVATION THAT KEEPS THE ROW HONEST (MSTR's, volunteered against its own record):**
+**one of the seven was a FALSE correction** — MSTR refuted a TRUE finding of `~C`'s, using a peer's
+*uncommitted* fix as the refutation. **So checking a handed claim has its own failure mode (1 of 7,
+14%), and this row must never be read as "peer review always works."** It says the opposite of
+"trust the reviewer": it says *state what your measurement is OF*.
+
 ## §4 How to use this file
 
 Cite the row id and the vintage (`M2c @dd4e5c691e`). If you re-measure, add a column — **do not
