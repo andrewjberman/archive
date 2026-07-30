@@ -1,0 +1,83 @@
+diff --git a/data/etfs/scripts/presentation/render_month_end.py b/data/etfs/scripts/presentation/render_month_end.py
+index 6b39f92351..b0d9b7ce39 100644
+--- a/data/etfs/scripts/presentation/render_month_end.py
++++ b/data/etfs/scripts/presentation/render_month_end.py
+@@ -561,6 +561,48 @@ def _html(month, m_start, m_end, present, summary_rows, grand_cur, grand_avg,
+             f'<style>{css}</style></head><body>{s1}{s2}{s3}{s4}{s5}</body></html>')
+ 
+ 
++def _carried_disclosure(in_month: list[str], cap: date, m_start: date) -> str:
++    """The per-partner, COMPUTED-AT-RUN-TIME carried-forward disclosure line for the CSV.
++
++    Derived from the partner's OWN last real in-month slice date -- NEVER from `cap`.
++
++    WHY NOT `cap`: `_month_cap` returns `m_end` UNCONDITIONALLY once the month is
++    complete (the deliberate full-calendar-month BILLING window -- Andrew 2026-06-25,
++    CVO-verified 2026-07-07, +$790,884 on May 49F). So on a 1st-of-next-month run
++    `cap` is the month end for EVERY partner regardless of what actually landed, and a
++    disclosure computed from it would print "data through <month end>" for a partner
++    whose tail is carried -- AFFIRMATIVELY CERTIFYING CARRIED DAYS AS REAL on the
++    partner-rebate basis. This reads `in_month` instead and changes nothing about the
++    billing window: the window stays `m_start..cap`, and this states how much of it is
++    real. The three partners run on three different cadences (measured 2026-07-30:
++    T+0 / T+2 / batch), which is why no static sentence can be true for all of them.
++
++    Also states the INTERIOR carry count: weekends, holidays and vendor gaps within the
++    month carry too, so a tail-only sentence would invite the false inference that every
++    earlier date is real.
++    """
++    if not in_month:
++        # Currently unreachable -- write_month_csvs SKIPs a partner with no in-month
++        # data before reaching here, so no CSV exists to disclose on. Kept correct in
++        # case that guard is ever reordered: emit no date rather than a wrong one.
++        return ("No daily slices were received for this month; every date in this file is "
++                "carried forward at the last known value.")
++    last_real = to_date(in_month[-1])
++    real_in_window = len([to_date(d) for d in in_month if m_start <= to_date(d) <= cap])
++    window = (cap - m_start).days + 1
++    carried_total = window - real_in_window
++    if last_real >= cap:
++        tail = "No dates at the end of this file are carried forward."
++    elif (cap - last_real).days == 1:
++        tail = f"Date {cap.isoformat()} is carried forward at the last known value."
++    else:
++        tail = (f"Dates {(last_real + timedelta(days=1)).isoformat()} through "
++                f"{cap.isoformat()} are carried forward at the last known value.")
++    return (f"Data through {last_real.isoformat()} (last daily slice received). {tail} "
++            f"{carried_total} of {window} dates in this file have no daily slice and carry "
++            f"the last known value, per the full-calendar-month billing convention.")
++
++
+ def write_month_csvs(month: str, out_dir: str) -> list[str]:
+     """The simple per-firm CSV grid (Andrew-direct 2026-07-07), one file per partner:
+     opaletfs_{canonical_firm}_{YYYYMM}.csv (e.g. opaletfs_49financial_202604.csv).
+@@ -588,7 +630,29 @@ def write_month_csvs(month: str, out_dir: str) -> list[str]:
+             w.writerow(["Date"] + [d.isoformat() for d in dates])
+             for etf in universe:
+                 w.writerow([etf] + [f"{carried[etf][d]:.2f}" for d in dates])
++            # Carried-forward disclosure, per partner, computed from THIS partner's own
++            # last real slice. Appended AFTER the ETF rows (and behind a blank row) so
++            # rows 2..5 stay exactly the ETF grid and an Excel AVERAGE() over a row still
++            # reproduces the deck's monthly average, as the docstring above guarantees.
++            #
++            # FAIL-SAFE BY CONSTRUCTION: main() calls write_month_csvs unconditionally,
++            # with no try/except, UPSTREAM of every S3 upload, and the cloud SSM command
++            # runs under `set -e`. A raise here would therefore lose the PDF as well --
++            # total non-delivery of the month-end report rather than a degraded one. A
++            # missing disclosure line is recoverable; a missing report on the billing
++            # clock is not. So this can degrade, but it can never throw.
++            # (Hazard identified by 0.7.0_AE_CloudOps~A, 2026-07-30.)
++            try:
++                disclosure = _carried_disclosure(in_month, cap, m_start)
++                w.writerow([])
++                w.writerow([disclosure])
++            except Exception as exc:  # noqa: BLE001 -- deliberate: never break the CSV
++                disclosure = ""
++                print(f"WARN: carried-forward disclosure skipped for {partner} {month} "
++                      f"({type(exc).__name__}: {exc}); CSV data rows are unaffected")
+         print(f"OK: CSV -> {path}")
++        if disclosure:
++            print(f"     {disclosure}")
+         paths.append(path)
+     return paths
+ 
