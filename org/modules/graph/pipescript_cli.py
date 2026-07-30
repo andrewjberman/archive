@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""pipescript <name> -- named-thread estate traversal (NFRA_PIPESCRIPT P1).
+"""RETIRED NAME NOTE (2026-07-30, Andrew-direct): the user-facing tool is `comp-semantic-estates`;
+bare `pipescript` is prohibited + rc=2 tombstoned. This module stays as the imported engine
+(opal_business_estates.py + comp_api.py import it) -- do not invoke it by the old name.
+
+pipescript <name> -- named-thread estate traversal (NFRA_PIPESCRIPT P1).
 
 One human entry point: `pipescript news` -> every resource in that named thread +
 its producers -> served artifacts -> frontend consumers + owning tool + coverage
