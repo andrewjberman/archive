@@ -15,6 +15,41 @@ order: `docs/briefs/terraform-fixes-before-decommission-20260730.md`.
 
 ---
 
+## ✅ AUTHORIZED PLAN OF RECORD (Andrew-direct 2026-07-30 ~19:4xZ via CTO, verbatim: *"yes im ok with these items from 0.7.0 you can approve them"*)
+
+**Execution order is APPROVED. Everything below is authorized — no further GO is needed to start any
+tranche. What IS required: take only what you can CLOSE, and if you hand off, hand off AT A SEAM.**
+
+| Order | Tranche | Risk class | Ledger entry? |
+|---|---|---|---|
+| **1st** | **A1 + A2 + A3** (+ **B1** crawl-harness destroy — A3 is that stack's declaration leg, so sequencing them together is cleaner; + **G1** the 6 stale `tfplan.*`) | **PURE REPAIR — nothing dies** | no |
+| 2nd | **T1** selective capture | additive, zero deletion | no |
+| 3rd | **T2** 7 lambdas + DDB `seeking-alpha-article-urls` (bucket SURVIVES; **NOT** `opal-news-articles`) | inert compute (rules already disabled) | no |
+| 4th | **T3** `news_layer3_curation:52` + deploy cycle — **MUST precede T4**, and stands on its own merit even if the bucket never dies | normal deploy | no |
+| 5th | **T4** bucket + `seeking-alpha/main.tf` destroy + 2 EC2 + AMI-rotation keyword + **E1** grants | **IRREVERSIBLE** | **YES** — open at deploy-start, close at completion |
+
+**T1 capture standard (adopted verbatim into the plan):** article payloads ONLY — `news/articles/`
+through 2026-04-13, `analysis/articles/` through 2026-02-23. **SKIP** the 107 days of zero-manifests
+and the debug/batches churn, **and say so in the report rather than capturing 82.8 MB to look
+thorough.**
+
+**Why these are the seams:** the right unit is the set of points where *stopping forever is still
+coherent*. Each tranche leaves the estate consistent if it is the last thing that ever happens.
+
+> ⚠ **THE ADJACENCY TRAP BINDS ON TRANCHE 1** — `opal-cloudtrail-logs-313476888478` is declared at
+> `shared-infra/s3.tf:63-83`, **between A1 and A2**, near-identical block shape, and it is **LIVE**.
+> **Remove by RESOURCE ADDRESS, never by line range or block pattern.**
+
+**LANE FACT (CTO, structural — not a preference):** `infra/aws` is **AE-commit-only** and CTO's
+session holds **denied destructive permissions** (a `delete-table` was refused twice on 2026-07-30).
+**T2 and T4 require an AE seat regardless of who is supervising.**
+
+**ROSTER CORRECTION (CTO, 2026-07-30):** RV-0058 (MSTR~Z) records the AE device-keyed-archive TO as
+blocked because *"the 0.7.0 seat was killed at 1810Z."* That is a **stale-roster read of the
+PREDECESSOR's kill** — this seat is live and is not a blocker on anything; that TO is **unparked**.
+
+---
+
 ## A. RESURRECTION HAZARDS — declared in TF, resource ALREADY deleted (fix regardless of any teardown)
 
 - [ ] **A1** `opal-analytics-dashboard` — `infra/aws/terraform/shared-infra/s3.tf:89-97+` (bucket +
