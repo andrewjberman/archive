@@ -400,6 +400,47 @@ def do_refresh() -> int:
     return 0
 
 
+def cmd_segments() -> int:
+    """C4 SEGMENTS -- the agent routing entry point (Andrew-ratified names + registries,
+    2026-07-30). Reads the canonical catalog live; a missing/corrupt catalog fails LOUD."""
+    import os
+    import sys
+    try:
+        import yaml
+    except ImportError:
+        print(f"{TOOL} --segments: pyyaml unavailable -- cannot read the canonical catalog",
+              file=sys.stderr)
+        return 2
+    cat = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       "NFRA_ONTOLOGY_C2C3_CANONICAL.yaml")
+    try:
+        with open(cat, encoding="utf-8") as f:
+            d = yaml.safe_load(f)
+        segs = d["c4_segments"]
+    except (OSError, KeyError, yaml.YAMLError) as exc:
+        print(f"{TOOL} --segments: canonical catalog unreadable ({exc}) -- "
+              "an unnamed source is not a source; rc=2", file=sys.stderr)
+        return 2
+    print(f"{TOOL} | C4 SEGMENTS -- the agent routing layer (source: {os.path.basename(cat)}, "
+          f"rule bank v1.4)")
+    print("  Route: segment -> C3 system -> chain -> nodes. Verticals (named threads) are the")
+    print("  business overlay; `comp-semantic-estates <thread>` enters by vertical.\n")
+    for name, v in segs.items():
+        print("=" * 88)
+        print(f"SEGMENT: {name}   ({v.get('display_name', '')})")
+        print(f"  systems: {', '.join(v.get('registry', []))}")
+        if v.get("flags"):
+            print(f"  FLAGS: {'; '.join(v['flags'])}")
+        print(f"  verticals: {', '.join(v.get('verticals_served', []))}")
+        desc = " ".join(str(v.get("high_signal", "")).split())
+        import textwrap
+        for line in textwrap.wrap(desc, width=86):
+            print(f"    {line}")
+    print("=" * 88)
+    print(f"  denominator: {len(segs)} segments (the catalog is the source; this print is a view)")
+    return 0
+
+
 def cmd_census_drift(plane: str) -> int:
     """L3 world-model drift: SET-diff (never a count) of the hand-adjudicated lambda census
     against the live estate. Founding specimen 2026-07-30: census 169 vs TF 169 was COUNT-parity
@@ -502,12 +543,18 @@ def main(argv=None) -> int:
     ap.add_argument("--keys", action="store_true",
                     help="append the live key-plane scan (tens of seconds; the thread-model "
                          "answer itself is ~0.3s from the resolver snapshot)")
+    ap.add_argument("--segments", action="store_true",
+                    help="THE C4 ENTRY POINT: the five agent-routing segments, each a registry "
+                         "of C3 systems with a high-signal description. Start here.")
     ap.add_argument("--census-drift", action="store_true", dest="census_drift",
                     help="SET-diff the L3 lambda census against the live estate "
                          "(default plane: tf/DESIRED; --plane aws for APPLIED). "
                          "Process: org/modules/graph/ESTATE_WORLD_MODEL_PROCESS.md")
     ap.add_argument("--plane", choices=("tf", "aws"), default="tf")
     a = ap.parse_args(argv)
+
+    if a.segments:
+        return cmd_segments()
 
     if a.census_drift:
         return cmd_census_drift(a.plane)
