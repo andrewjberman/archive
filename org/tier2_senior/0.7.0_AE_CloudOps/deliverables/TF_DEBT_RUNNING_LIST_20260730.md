@@ -65,6 +65,61 @@ PREDECESSOR's kill** — this seat is live and is not a blocker on anything; tha
 > `shared-infra/s3.tf:63-83`, between them, near-identical block shape, **LIVE**. Remove by resource
 > ADDRESS + named sub-resources. Never by line range or block pattern.
 
+---
+
+## A-SWEEP — ESTATE-WIDE RESURRECTION-HAZARD DETECTION (2026-07-30 ~20:3xZ, Andrew asked how to eliminate the CLASS)
+
+**Denominator: 26 bucket names declared across 57 Terraform stacks vs 32 live buckets.**
+
+**TWO REAL HAZARDS REMAIN** (both already-deleted buckets whose declarations survive):
+- [ ] **A6** `opal-data-aaii-v2` — 404 live, still declared.
+- [ ] **A7** `opal-market-data-v2` — 404 live, still declared.
+
+Both appear in the S3 close-out's "7 DELETED this session" list, which is the same C-F pattern:
+**the deletion was completed and verified; the declaration was not part of the delete.**
+
+> 🚨 **THE SWEEP INSTRUMENT PRODUCED A FALSE POSITIVE ON THE MOST DANGEROUS BUCKET IN THE ESTATE.**
+> `comm -23 declared live` reported **`opalinvest-portal`** as declared-but-absent. It is **LIVE** —
+> HeadBucket returns 200, and it is present in BOTH files (`live.txt:32`, `declared.txt:26`). It is
+> the **DEFAULT CloudFront behavior origin — the dashboard's front door** (note #35). Acting on that
+> row would have removed the declaration for the live SPA shell.
+> **Root cause: `comm` requires strict matching collation and silently mis-reports otherwise; the
+> false positive landed on the LAST line of the live file.** Caught only by re-probing each candidate
+> individually instead of trusting the set operation.
+> **CONTROL: never act on a set-difference row without an individual live probe of that row.** The
+> set operation is a CANDIDATE GENERATOR, never a verdict. Same class as the `grep -c` on an error
+> message: the retrieval, not the pattern, is what needs the control.
+
+**STILL UNSWEPT — the class is not S3-only.** The same declared-vs-live difference must be run for
+DynamoDB tables, Lambda functions, EventBridge rules, SSM documents, and IAM roles. **A6/A7 are the
+S3 slice only.**
+
+## THE PROCEDURAL FIX — how the class stops being generated
+
+**MEASURED TODAY: `terraform destroy` IS THE INSTRUMENT THAT MANUFACTURES THIS HAZARD.** On the
+crawl-harness retirement, the moment the destroy completed, `terraform plan` read **20 TO ADD** — all
+16 resources gone, all still declared, the stack primed to rebuild the entire estate including the
+EC2 box on the next apply by anyone.
+
+> **`terraform destroy` empties the STATE and leaves the SOURCE fully armed. It guarantees the
+> window. The window is worst precisely because the resources are gone — so nobody is watching
+> them — while the declaration is intact.**
+
+**THE ZERO-WINDOW PROCEDURE (use this instead, for any retirement):**
+
+1. **DELETE THE RESOURCE BLOCKS FROM THE `.tf` FIRST.**
+2. `terraform plan` → reads **"N to destroy"** (terraform reconciles state against the reduced config).
+3. `.tools/safe-apply.sh apply <plan>` (Rule 18).
+4. **Source and state go clean in the SAME operation. There is no window at any point.**
+
+This reaches an identical end state with **one leg instead of two**, and it is not a preference —
+the two-leg path has an unavoidable armed interval and the one-leg path has none.
+
+- [ ] **PROPOSED GATE (not built — proposing, not building):** a plan-time lint that fails any stack
+      whose plan contains `to add` for an `aws_s3_bucket`/`aws_dynamodb_table` the estate has
+      deliberately deleted. Andrew's standing moratorium bans alerts/monitors; a **GATE** is the
+      sanctioned form (gates teach at violation time). **Needs Andrew's word before anyone builds it.**
+
 ## B. STACKS TO DESTROY (authorized; ordering applies)
 
 - [ ] **B1** `infra/aws/terraform/crawl-harness/` — **ENTIRE STACK.** Andrew-direct verbatim
