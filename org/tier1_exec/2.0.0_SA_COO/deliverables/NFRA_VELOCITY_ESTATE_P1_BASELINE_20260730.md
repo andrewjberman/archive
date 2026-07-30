@@ -401,6 +401,108 @@ committed records for the bad framing (**0 hits / 988 files**).
 illustration travels on the illustration. The illustration is the part that gets quoted, and it is
 the part nobody re-derives.*
 
+### §3h.4 — a SIXTH mechanism: THE RULE LEARNED ON ONE ARTIFACT AND NOT CARRIED TO THE NEXT
+
+**`1.0.0_SA_CTO~C`, self-diagnosed, 2026-07-30T~11:27Z.** ~C supplied the `partial` consumer set as
+`:215 :220 :231 :247 :328`. **At HEAD those are comments and a blank line — the file had moved ~40
+lines.** `0.7.0` re-derived instead of trusting a CTO's offsets **and found `:380`, a SECOND render
+not in the list.**
+
+> **A census run off those numbers would have declared the field safe while missing a render, on the
+> artifact that decides partner pay.**
+
+**What makes it a mechanism rather than a slip is ~C's own account:** *"I pinned the substrate hash
+for `render_month_end.py` earlier tonight after the shared-worktree confound burned me, then produced
+raw line numbers with no vintage on the very next file. I learned the rule on one artifact and did not
+carry it to the next one an hour later."*
+
+**The lesson was learned, correctly, and stayed attached to the artifact it was learned on.** That is
+distinct from not knowing the rule — Rule 22 is written down and ~C had applied it within the hour.
+**The control that caught it was a worker declining to trust a CTO's citation.**
+
+*Also recovered in the same pass: `:220` already carried "`partial` IS DELIBERATELY UNTOUCHED... it
+tracks a LATE START, not coverage." Someone reached tonight's conclusion earlier and left it in the
+file. We re-derived it from scratch — a prior finding present in-source and invisible to everyone.*
+
+### §3h.5 — THE FIRST POSITIVE RESULT: a fix landed this session caught a real defect six hours later
+
+Recorded because a corpus of only failures cannot show whether anything works.
+
+`comp-pipescript io` **REFUSED rc=2** on the ETFS payment pipeline instead of silently defaulting to
+bd-gold and returning a clean zero for the wrong tree. **That is the exact silent-wrong-tree defect
+measured at 05:29Z and closed at `64a17a77b9` — doing its job on a live payment surface within six
+hours of landing.**
+
+> **The refusal is what made the ETFS absence VISIBLE rather than a silent wrong answer.**
+
+And the absence it exposed is itself a finding: **`--pipeline etfs` is an INVALID CHOICE because a
+hand-maintained `_PIPELINE_CHOICES` tuple omits a pipeline that computes what a partner is paid — and
+the omission was invisible precisely because the tool refuses cleanly rather than answering wrong.**
+~C has taken it into WS4 with the correct acceptance term: **the pipeline set is DERIVED, never a hand
+tuple** (*"adding 'etfs' to a tuple would be treating the symptom with the mechanism"*).
+
+**Standing consequence, unsoftened:** `comp-blast` returns NOT-FOUND on that pipeline (2,252-node
+denominator printed, and it states *"this is a NOT-FOUND, not a 'nothing breaks' clear"*), so
+**"no external consumer" there rests on TEXT SEARCH ALONE — a dynamic or string-constructed read is
+invisible to it.** A real coverage hole on a payment surface, E1/E5 material, and **it does not close
+by anyone being more thorough with grep.**
+
+*Three instruments reported their own blindness honestly in one pass — which is the behaviour WS-E5
+exists to generalise, observed before E5 was built.*
+
+### §3h.6 — *** THE SHARPEST SPECIMEN OF THE NIGHT: SIX AGENTS, SIX HOURS, AND NOBODY ASKED WHETHER THE MISSING DAYS WERE RECOVERABLE ***
+
+**Andrew, 2026-07-30 ~11:3xZ, from outside the measurement.** MSTR-instructed into this record.
+
+The fabric spent six hours establishing that inflection's July rebate basis was **45–52% carried**,
+measuring forecast ranges to error bars, splitting the remedy into (a) and (a+), arguing disclosure
+wording, and re-deriving the population **four times**. Andrew asked one question:
+
+> *"they're ingested daily and we've proved it happens reliably, so what do you mean when you say
+> carried figures 50%?"*
+
+**MEASURED in response:**
+```
+SOURCE   opal-data-inf/gold/canonical/holdings_{date}.parquet   JULY: 29 of 29 present
+                                                                 (positive control: June = 30)
+DERIVED  opal-data-etfs/daily/inflection/{date}.json             JULY: 15 present
+```
+**14 days of SOURCE data exist for which NO DERIVED SLICE was ever produced.** It is a **PRODUCER
+GAP, not a data gap** — and the remedy inverts: **re-derive, do not disclose.** Question (b) —
+*"is a 45–52% carried month a valid rebate basis"* — **is largely MOOT**, because the month does not
+have to be 45–52% carried.
+
+**THE EVIDENCE WAS IN OUR OWN MEASUREMENT THE WHOLE TIME.** `~A`'s histogram showed weekend keys
+**07-18, 07-25, 07-26 PRESENT** while contiguous **Monday-start weekday runs were ABSENT.** *That is
+not what missing holdings looks like.* It is a producer that ran on some days and not others. **Every
+agent, including COO, read past it.**
+
+> **EVERY MEASUREMENT WAS CORRECT. THE COMPOSITE WAS WRONG. AND THE CORRECTIVE QUESTION CAME FROM THE
+> ONE PERSON WHO WAS NOT INSIDE THE MEASUREMENT.**
+
+**Why it is the sharpest specimen and not just the largest miss:** the six agents were not careless —
+they were *rigorous about the wrong proposition, in convoy.* Each measurement was positive-controlled,
+each denominator printed, each correction volunteered. **The failure was that everyone accepted
+"absent from the derived layer" as "absent from the world" and then competed on the honesty of the
+consequence.** Rigour inside a shared frame cannot see the frame.
+
+**And it is the counter-example M10 needs:** §3f says every correction came from a second party
+checking a handed claim. **This one came from someone who had never handled the claim at all** — no
+prior position to defend, and therefore the only party who could question the premise rather than the
+inference. *A reviewer inside the measurement checks the work; only a reader outside it checks the
+question.*
+
+**Consequence for the remedy that was 20 minutes from shipping:** the staged disclosure would have
+**published a self-inflicted derivation gap as a data limitation, on a partner-payment artifact, in
+writing, to the party being paid.** An honest-looking label on a wrong diagnosis. **Both steps
+halted** — including against any pre-existing approval, since an approval obtained on a refuted
+premise does not transfer to the corrected situation.
+
+*Residual deliberately open, MSTR's own bound on its own measurement: source PARTITIONS were confirmed
+to exist; they were NOT opened to confirm they hold usable inflection rows. Key presence is not row
+presence — the exact class hit repeatedly tonight. Verification dispatched before any re-derivation is
+scoped, and no producer is fired.*
+
 ## §4 How to use this file
 
 Cite the row id and the vintage (`M2c @dd4e5c691e`). If you re-measure, add a column — **do not
