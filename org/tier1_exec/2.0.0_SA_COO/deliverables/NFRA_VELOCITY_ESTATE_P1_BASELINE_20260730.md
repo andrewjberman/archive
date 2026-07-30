@@ -323,6 +323,43 @@ onto the stored artifact and refuses a series that carries none.*
 
 **§3c stands, and now carries two bases.**
 
+## §3h M10 ADDENDUM — an EIGHTH correction with a DISTINCT mechanism: wrong-VINTAGE, not wrong-axis
+
+**`0.7.0_AE_CloudOps~A`, 2026-07-30T10:49Z.** Added under §3f's predicate; **the M10 count is NOT
+incremented** — this was retracted by its author before anyone relied on it, and §3f counts claims
+that escaped. It is recorded because **the mechanism is new**.
+
+**What happened:** an armed watch confirmed its fact correctly (two consecutive T+1 landings, one
+second apart in wall-clock — a fixed daily schedule) and then **auto-printed a VERDICT its evidence
+did not support**: *"→ 49financial LIKELY holds 07-31 → carries 0 days."* The deciding question was
+whether the producer runs on a **Saturday**; measured after the fact, **zero Saturday landings in 61
+observations** (positive control: cottonwood has 3, so the test can detect them). Range narrowed
+0–3 → **0 OR 1**, not 0.
+
+**THE MECHANISM, and it is not the one the other seven share:**
+> **A conclusion was baked into the watch script AT ARMING TIME, before the evidence that would
+> qualify it existed. An automated verdict is FROZEN AT AUTHORING TIME while the evidence keeps
+> moving.**
+
+The other three scope errors were *claims wider than what was measured*. **This is a claim written
+BEFORE it was measured**, then fired hours later into a dollar-bearing thread, automatically, under
+its author's serial — where it would have read as a **fresh measurement** rather than an hours-old
+assumption.
+
+**THE DESIGN RULE IT YIELDS — and it is a sharper argument for the standing monitor moratorium than
+the one currently written down:** the moratorium's stated rationale is that *a monitor on an unsettled
+route measures the wrong thing precisely.* **This is stronger and applies even on a settled route: a
+monitor that emits a VERDICT rather than an OBSERVATION carries its author's assumptions forward
+under the borrowed authority of a live signal.** The signal is current; the reasoning attached to it
+is not, and nothing marks the difference.
+
+>> **EMIT THE OBSERVATION. LET THE READER SUPPLY THE VERDICT.** The script should have printed
+>> `07-29.json landed at 10:45:11Z, lag 1d` and stopped. <<
+
+*Note this is the fifth time in one window that a per-partner COMPUTED disclosure beat a forecast:
+a computed line prints what actually happened and needs none of these predictions. Every narrowing of
+these ranges has been an argument for computing rather than predicting.*
+
 ## §4 How to use this file
 
 Cite the row id and the vintage (`M2c @dd4e5c691e`). If you re-measure, add a column — **do not
