@@ -58,15 +58,35 @@ explicitly rejects Cloudflare/Tailscale.
 No VPN, peering, or security-group change can reach it. Something on this box must make the
 blpapi call. Every design that forgets this fails at the same place.
 
-**Gates (MEASURED open, 2026-07-30):**
+**Gates — MEASURED 2026-07-30, re-measured independently by `0.7.0_AE_CloudOps~Z` the same day.
+EXECUTION ORDER IS NOT TABLE ORDER; see the two corrections below.**
 
-| # | Gate | State |
-|---|---|---|
-| 1 | AWS creds for this device | in flight |
-| 2 | SSM Agent MSI installed (one-time admin) | **NOT INSTALLED** (`Get-Service AmazonSSMAgent` absent) |
-| 3 | `server.py` running `streamable-http` on `:8790` as a service | **NOT LISTENING** |
-| 4 | IAM role / hybrid activation, scoped to this managed-instance id | open — CloudOps lane |
-| 5 | Register forwarded endpoint as a gateway backend | open |
+| # | Gate | State | Order |
+|---|---|---|---|
+| 1 | AWS creds for this device | **SATISFIED** — `sts get-caller-identity` -> `user/Andrew_Berman`, acct `313476888478`, rc=0 (control: bogus profile errors loudly) | done |
+| 4 | IAM role + **`aws_ssm_activation`**, scoped | open — CloudOps | **FIRST** |
+| 2 | SSM Agent MSI installed (one-time admin, **Andrew**) | **NOT INSTALLED** | **after 4** |
+| 3 | `server.py` `streamable-http` on `:8790` as a service | **NOT LISTENING** | after 2 |
+| 5 | Register forwarded endpoint as a gateway backend | open | **after the §3 rename** |
+
+> **CORRECTION 1 — GATE 4 PRECEDES GATE 2, and it is a hard dependency, not a preference.**
+> An SSM **hybrid activation is created in AWS first** and emits an activation **code + id**; the
+> MSI install then **consumes those as registration inputs**. Working the table order would idle
+> Andrew on an admin step that has no inputs yet. Gate 4 first puts the code+id in his hands as
+> **one self-contained admin action**. *(Raised by `0.7.0_AE_CloudOps~Z` against this document's
+> original ordering; the original table listed 1-5 and implied that sequence.)*
+>
+> **CORRECTION 2 — GATE 5 MUST FOLLOW THE §3 RENAME.** §6 already sequences *Bloomberg-as-
+> IntegrationSpec* after the rename, but gate 5 was written free-standing. **If gate 5 lands
+> first, Bloomberg registers under the `m365` namespace and the client-re-registration break is
+> paid TWICE** — once for Bloomberg, again for the rename. That is exactly the
+> `mcp__m365__bloomberg_reference_data` outcome §3 exists to prevent, **arriving through the
+> tunnel half instead of the naming half.** Ordering rename -> gate 5 pays it once.
+>
+> **Gate 1 was recorded here as "in flight" on the strength of the 07-10 README and was ALREADY
+> SATISFIED.** It is the gate that makes gate 4 actionable at all, so a stale "in flight" would
+> have read as a blocker on the critical path. *Inheriting a gate state instead of measuring it
+> is the same class as every other stale-record finding in this file.*
 
 DAPI **redistribution was cleared by Andrew 2026-07-10** (per that README), so multi-user
 exposure is authorized and is not a gate.
