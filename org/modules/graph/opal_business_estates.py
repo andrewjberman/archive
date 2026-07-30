@@ -464,6 +464,56 @@ def cmd_definitions(term: str) -> int:
     return 0
 
 
+def cmd_matrix() -> int:
+    """C3 cross-partition matrix -- the standing reconciliation instrument (rule bank v1.5
+    c3_dual_partition). View-compiled from the resolver dual keys at invocation."""
+    import collections
+    snap, rc = load_snapshot()
+    if rc:
+        return rc
+    fam2sys = {
+        "bd-medallion": "sys-bd-medallion", "inf-medallion": "sys-inf-medallion",
+        "cot-and-mdpf": "sys-cot-mdpf-assets", "smartx": "sys-smartx-feed",
+        "yang-datapipeline": "sys-yang-analytics-engine",
+        "market-analytics": "sys-market-intelligence-engine",
+        "news-seeking-alpha": "sys-news-intelligence-engine",
+        "causality-ai": "sys-causality-engine",
+        "fred-and-generated-outputs": "sys-macro-data-engine",
+        "pm-tool": "sys-portfolio-management-suite",
+        "trade-submission": "sys-trade-submission-engine",
+        "partners-portal-infra": "sys-partner-serving-platform",
+        "graph-and-ops-and-casefind": "sys-estate-ops-platform",
+    }
+    sysv = collections.defaultdict(set)
+    vsys = collections.defaultdict(set)
+    for t in snap.get("threads", []):
+        sname = fam2sys.get(t.get("family") or "", "UNASSIGNED-RESIDUE")
+        sysv[sname].add(t["named_thread"])
+        vsys[t["named_thread"]].add(sname)
+    print(f"{TOOL} | C3 CROSS-PARTITION MATRIX (C3.i x C3.ii; dual key = (family, named_thread))")
+    print(f"  denominators: {len(sysv)} systems x {len(vsys)} verticals over "
+          f"{len(snap.get('threads', []))} chains -- a matrix CHANGE is an adjudication event")
+    print("")
+    print("  C3.i SYSTEM -> C3.ii vertical span:")
+    for sname in sorted(sysv, key=lambda k: -len(sysv[k])):
+        print(f"    {sname:34} ({len(sysv[sname]):2}) {', '.join(sorted(sysv[sname]))}")
+    print("")
+    print("  C3.ii VERTICAL -> C3.i system span:")
+    for v in sorted(vsys):
+        print(f"    {v:22} ({len(vsys[v])}) {', '.join(sorted(vsys[v]))}")
+    bound = [(s, sorted(vs)[0]) for s, vs in sysv.items()
+             if len(vs) == 1 and len(vsys.get(sorted(vs)[0], set())) == 1
+             and s != "UNASSIGNED-RESIDUE"]
+    names = ", ".join(f"{s}<->{v}" for s, v in sorted(bound)) or "none"
+    print("")
+    print(f"  bound_pairs (mutual 1:1, computed): {names}")
+    declared = set(snap.get("named_threads", []))
+    chainless = sorted(declared - set(vsys))
+    if chainless:
+        print(f"  DECLARED-BUT-CHAINLESS (adjudication owed): {', '.join(chainless)}")
+    return 0
+
+
 def cmd_segments() -> int:
     """C4 SEGMENTS -- the agent routing entry point (Andrew-ratified names + registries,
     2026-07-30). Reads the canonical catalog live; a missing/corrupt catalog fails LOUD."""
@@ -487,7 +537,7 @@ def cmd_segments() -> int:
         return 2
     print(f"{TOOL} | C4 SEGMENTS -- the agent routing layer (source: {os.path.basename(cat)}, "
           f"rule bank v1.4)")
-    print("  Route: C4 segment -> C3 system -> C2 motif (D2 chain) -> C1 -> C0. Verticals are the")
+    print("  Route: C4 segment -> C3(i|ii) -> C2 motif (D2 chain) -> C1 -> C0. Verticals are C3.ii,")
     print("  business overlay; `comp-semantic-estates <thread>` enters by vertical.\n")
     for name, v in segs.items():
         print("=" * 88)
@@ -611,6 +661,9 @@ def main(argv=None) -> int:
                     help="the stable C0..C4 ladder doc, served verbatim")
     ap.add_argument("--definitions", nargs="?", const="__ALL__", metavar="TERM",
                     help="canonical term lookup from SYSTEM_DEFINITIONS.yaml (no arg = list)")
+    ap.add_argument("--matrix", action="store_true",
+                    help="the C3 cross-partition matrix: per-system vertical span x per-vertical "
+                         "system span (view-compiled; a matrix CHANGE is an adjudication event)")
     ap.add_argument("--segments", action="store_true",
                     help="THE C4 ENTRY POINT: the five agent-routing segments, each a registry "
                          "of C3 systems with a high-signal description. Start here.")
@@ -625,6 +678,8 @@ def main(argv=None) -> int:
         return cmd_layers()
     if a.definitions:
         return cmd_definitions(a.definitions)
+    if a.matrix:
+        return cmd_matrix()
     if a.segments:
         return cmd_segments()
 
