@@ -487,7 +487,7 @@ def cmd_segments() -> int:
         return 2
     print(f"{TOOL} | C4 SEGMENTS -- the agent routing layer (source: {os.path.basename(cat)}, "
           f"rule bank v1.4)")
-    print("  Route: segment -> C3 system -> chain -> nodes. Verticals (named threads) are the")
+    print("  Route: C4 segment -> C3 system -> C2 motif (D2 chain) -> C1 -> C0. Verticals are the")
     print("  business overlay; `comp-semantic-estates <thread>` enters by vertical.\n")
     for name, v in segs.items():
         print("=" * 88)
