@@ -124,9 +124,52 @@ integration alongside ycharts, opal_portal and bloomberg.
   `mcp__m365__ycharts_*`. Most of the remainder are historical session logs, which are records
   and **must not be rewritten**. Live surfaces: `.claude/skills/teams-assist/SKILL.md` and the
   gateway's own `audit.py`.
-- **Blast radius:** the server name is the client-visible namespace. Every registered client
-  needs re-registration; until it happens, tool references break. **This is a live OAuth
-  endpoint serving real users — it goes through the EC2 deploy path, not an inline edit.**
+- ~~**Blast radius:** the server name is the client-visible namespace. Every registered client
+  needs re-registration; until it happens, tool references break.~~ **STRUCK — FALSE. See the
+  correction block below.** The deploy-path discipline still stands: it goes through
+  `safe-ec2-deploy.sh` + `EC2_MANIFEST.json`, never an inline edit.
+
+> ### ⛔ CORRECTION (2026-07-30) — THE SERVER RENAME DOES NOT CHANGE THE CLIENT-VISIBLE NAMESPACE
+>
+> **The struck sentence above is wrong and it was load-bearing** — it sized the whole sequencing
+> caution, and Andrew approved a rename on it believing the rename fixed the namespace.
+>
+> **The client-visible prefix comes from the REGISTRATION KEY, not the server's `FastMCP()` name.**
+> The gateway is the estate's only case where the two differ, which makes it the oracle:
+>
+> | | |
+> |---|---|
+> | server self-name (`tools.py:37`) | `FastMCP("m365-gateway")` |
+> | registration key (`~/.claude.json`) | `m365` |
+> | tool names actually held | `mcp__m365__whoami` — matches the **key**, not the name |
+>
+> **The competing explanation, and it had to be killed** *(raised and closed by
+> `0.7.0_AE_CloudOps~Z`; my first proof did not close it)*: that `m365-gateway` is **truncated at
+> the hyphen** to `m365`, which would make the server name the source and invert the conclusion.
+> **Refuted by hyphen survival** — key `opal-agent-comms` yields `mcp__opal-agent-comms__*`, hyphens
+> verbatim. A hyphenated key does not collapse, so `m365` cannot be a truncation. Three keys, three
+> exact matches, zero server-name matches, **no surviving alternative.**
+>
+> **CONSEQUENCES, both directions:**
+> 1. The server rename is **harmless** — no client breaks, no sweep needed.
+> 2. The server rename is also **cosmetic** — Bloomberg would *still* land as
+>    `mcp__m365__bloomberg_reference_data`. **Shipping only that line is a green deploy that changes
+>    nothing an agent can see**, i.e. a config-read standing in for a behavioural result.
+> 3. **The real fix is the CLIENT KEY** (`m365` -> `opal`).
+>
+> **TRUE BREAKAGE SURFACE — MEASURED, and far smaller than this document first implied: 2 lines,
+> 1 file.** Only full `mcp__m365__` literals break; bare tool names are unchanged by a key move.
+> - `teams-assist/SKILL.md:44,47` (`list_chats`, `read_chat_messages`) — **the entire estate-wide set**
+> - `tax-pt1` (Alyssa's daily FIS runner): **0** `mcp__`-prefixed refs — uses bare
+>   `validate_ssavail_attachment` / `save_email_attachment_to_site`. **UNAFFECTED.** Same for
+>   `taxsma-step1`, `tax-pt3`. *An earlier count in this session cited "5 m365-tool refs" in tax-pt1
+>   and implied risk; those are bare names and a key change does not touch them.*
+>
+> **WHO CAN DO IT — a constraint neither the tunnel nor the rename section had stated
+> (`0.7.0_AE_CloudOps~Z`): the registration key lives in PER-DEVICE CLIENT CONFIG.** It is **not a
+> deploy**. Site Z cannot reach the laptop's or Alyssa's `~/.claude.json`, and on Alyssa's machine it
+> is **not ours to change unilaterally**. This moves the work from CloudOps' deploy lane to a
+> per-device action requiring the device owner — a different *who*, not just a different *what*.
 
 Owner: **CloudOps.** Sequencing options: (a) server rename + redeploy + client sweep, or (b)
 client-side re-registration on one device first to prove the shape, then the fleet.
