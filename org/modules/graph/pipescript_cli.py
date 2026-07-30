@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""pipescript <name> -- named-thread estate traversal (NFRA_PIPESCRIPT P1).
+"""RETIRED NAME NOTE (2026-07-30, Andrew-direct): the user-facing tool is `comp-semantic-estates`;
+bare `pipescript` is prohibited + rc=2 tombstoned. This module stays as the imported engine
+(opal_business_estates.py + comp_api.py import it) -- do not invoke it by the old name.
+
+pipescript <name> -- named-thread estate traversal (NFRA_PIPESCRIPT P1).
 
 One human entry point: `pipescript news` -> every resource in that named thread +
 its producers -> served artifacts -> frontend consumers + owning tool + coverage
@@ -119,11 +123,11 @@ def cmd_list(data):
     for t in threads:
         by_name[t["named_thread"]].append(t)
     print(
-        f"pipescript - {len(data['named_threads'])} named threads / {len(threads)} sub-threads "
+        f"comp-semantic-estates - {len(data['named_threads'])} named threads / {len(threads)} sub-threads "
         f"(estate census {data.get('last_review', '')})"
     )
     print("=" * 78)
-    print("Usage: pipescript <name>   |   pipescript --resource <substr>   |   pipescript --validate")
+    print("Usage: comp-semantic-estates <name>   |   comp-semantic-estates --resource <substr>   |   comp-semantic-estates --validate")
     print()
     print(f"{'NAME':<20} {'THREADS':>7}  {'IN-SCOPE':>8} {'OUT':>4} {'UNREV':>5}  TOOLS")
     print("-" * 78)
@@ -231,7 +235,7 @@ def cmd_resource(data, needle):
     if not hits:
         sys.stderr.write(f"pipescript: no thread references '{needle}'.\n")
         sys.exit(2)
-    print(f"pipescript --resource '{needle}' -> {len(hits)} thread(s):")
+    print(f"comp-semantic-estates --resource '{needle}' -> {len(hits)} thread(s):")
     for t in hits:
         print(f"  {t['named_thread']:<18} / {t['thread_id']:<32} [{t['status']} | {t['owning_tool']}]")
 
@@ -447,12 +451,12 @@ def cmd_gate_b(data, fixtures_path=None):
     try:
         fixtures = json.load(open(fxpath, encoding="utf-8"))["fixtures"]
     except (FileNotFoundError, KeyError, json.JSONDecodeError) as exc:
-        sys.stderr.write(f"pipescript --gate-b: cannot load fixtures at {fxpath} ({exc})\n")
+        sys.stderr.write(f"comp-semantic-estates --gate-b: cannot load fixtures at {fxpath} ({exc})\n")
         sys.exit(3)
     rbnt = data.get("resources_by_named_thread", {})
     if not rbnt:
         sys.stderr.write(
-            "pipescript --gate-b: resolver has no resources_by_named_thread roster "
+            "comp-semantic-estates --gate-b: resolver has no resources_by_named_thread roster "
             "(regenerate from the authoritative per-lambda taxonomy).\n"
         )
         sys.exit(3)
@@ -470,7 +474,7 @@ def cmd_gate_b(data, fixtures_path=None):
             if re.search(r"(?<![\w-])" + re.escape(v) + r"(?![\w-])", text)
         }
 
-    print(f"pipescript --gate-b (standing oracle; fixtures: {os.path.basename(fxpath)})")
+    print(f"comp-semantic-estates --gate-b (standing oracle; fixtures: {os.path.basename(fxpath)})")
     print("=" * 78)
     gb_fail = 0
     for name in sorted(fixtures):

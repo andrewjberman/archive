@@ -400,6 +400,87 @@ def do_refresh() -> int:
     return 0
 
 
+def cmd_census_drift(plane: str) -> int:
+    """L3 world-model drift: SET-diff (never a count) of the hand-adjudicated lambda census
+    against the live estate. Founding specimen 2026-07-30: census 169 vs TF 169 was COUNT-parity
+    concealing 66 membership changes. tf = DESIRED (repo greps, no creds); aws = APPLIED
+    (lambda list-functions). Nonzero residue is a WORKLIST (route per the process doc s.4),
+    not an error -- exits 0 with the sets printed, 3 only on a broken retrieval."""
+    import glob
+    import json
+    import os
+    import re
+    import sys
+    here = os.path.dirname(os.path.abspath(__file__))
+    root = os.path.dirname(os.path.dirname(os.path.dirname(here)))
+    taxo_path = os.path.join(root, "org", "tier1_exec", "3.0.0_SA_CVO", "logs",
+                             "2026-06-15", "estate_census", "AUTHORITATIVE_lambda_taxonomy.json")
+    try:
+        with open(taxo_path, encoding="utf-8") as f:
+            census = set(json.load(f)["lambda_to_named_thread"].keys())
+    except (OSError, KeyError, json.JSONDecodeError) as exc:
+        print(f"census-drift: cannot load taxonomy ({exc})", file=sys.stderr)
+        return 3
+    if plane == "aws":
+        import subprocess
+        try:
+            out = subprocess.run(["aws", "lambda", "list-functions", "--query",
+                                  "Functions[].FunctionName", "--output", "json"],
+                                 capture_output=True, text=True, timeout=120)
+            live = set(json.loads(out.stdout))
+        except Exception as exc:
+            print(f"census-drift: aws plane retrieval failed ({exc}) -- refusing to "
+                  "diff against an empty live set", file=sys.stderr)
+            return 3
+        plane_note = "APPLIED (aws lambda list-functions)"
+    else:
+        live = set()
+        pat = re.compile(r'function_name\s*=\s*"([a-z0-9_-]+)"', re.I)
+        for tf in glob.glob(os.path.join(root, "infra", "aws", "**", "*.tf"), recursive=True):
+            try:
+                with open(tf, encoding="utf-8", errors="replace") as f:
+                    live |= set(pat.findall(f.read()))
+            except OSError:
+                continue
+        plane_note = "DESIRED (infra/aws TF function_name declarations)"
+    if not live:
+        print("census-drift: live set came back EMPTY -- that is a broken retrieval, "
+              "not a clean estate", file=sys.stderr)
+        return 3
+    added = sorted(live - census)
+    gone = sorted(census - live)
+    print(f"CENSUS-DRIFT | plane: {plane_note}")
+    print(f"  census (taxonomy 26b32687a, frozen 2026-06-15): {len(census)} lambdas")
+    print(f"  live: {len(live)} | UNMODELED (live, not in census): {len(added)} | "
+          f"CENSUS-ONLY (gone or unmanaged-on-this-plane): {len(gone)}")
+    print("  >> a SET diff -- equal counts prove nothing (66 changes once cancelled to zero net)")
+    for n in added:
+        print(f"  + {n}")
+    for n in gone:
+        print(f"  - {n}")
+    print("  route the residue per ESTATE_WORLD_MODEL_PROCESS.md s.4 "
+          "(A=assign to a thread, B=add the missing plane/predicate, C=candidate NEW business "
+          "function -> naming is Andrew/CVO's, never auto)")
+    return 0
+
+
+def _legacy():
+    """The thread-model engine (named threads -> sub-threads -> producers -> served ->
+    frontend + owning tool + debt flags). REGRESSION REPAIR 2026-07-30 (CVO tool-walk #1):
+    the 07-29 rename shipped this module as a REPLACEMENT and silently dropped the
+    flagship traversal + --tool/--debt/--fe-reachability/--validate/--gate-b and both
+    standing oracles. The capability was intact in pipescript_cli.py the whole time --
+    this delegation re-exposes it. Two planes, one CLI: THREAD MODEL (legacy, resolver
+    snapshot, ~0.3s) + KEY PLANE (this module, live re-derivation, tens of seconds)."""
+    import os
+    import sys as _sys
+    _here = os.path.dirname(os.path.abspath(__file__))
+    if _here not in _sys.path:
+        _sys.path.insert(0, _here)
+    import pipescript_cli as legacy
+    return legacy, legacy.load()
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog=TOOL, description="Opal business-semantic estate traversal.")
     ap.add_argument("name", nargs="?", help="named thread (substring)")
@@ -409,15 +490,75 @@ def main(argv=None) -> int:
     ap.add_argument("--refresh", action="store_true")
     ap.add_argument("--refresh-only", action="store_true")
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument("--tool", nargs=2, metavar=("NAME", "TOOL"),
+                    help="sub-threads of NAME owned by TOOL (loud out-of-scope)")
+    ap.add_argument("--debt", action="store_true", help="debtscan-flag view across all threads")
+    ap.add_argument("--fe-reachability", action="store_true", dest="fe_reachability",
+                    help="FE-reachability per backend thread (CVO ground-truth)")
+    ap.add_argument("--orphans-only", action="store_true", dest="orphans_only")
+    ap.add_argument("--validate", action="store_true", help="completeness gate")
+    ap.add_argument("--gate-b", action="store_true", dest="gate_b",
+                    help="standing regression oracle (named-thread reproduction)")
+    ap.add_argument("--keys", action="store_true",
+                    help="append the live key-plane scan (tens of seconds; the thread-model "
+                         "answer itself is ~0.3s from the resolver snapshot)")
+    ap.add_argument("--census-drift", action="store_true", dest="census_drift",
+                    help="SET-diff the L3 lambda census against the live estate "
+                         "(default plane: tf/DESIRED; --plane aws for APPLIED). "
+                         "Process: org/modules/graph/ESTATE_WORLD_MODEL_PROCESS.md")
+    ap.add_argument("--plane", choices=("tf", "aws"), default="tf")
     a = ap.parse_args(argv)
+
+    if a.census_drift:
+        return cmd_census_drift(a.plane)
 
     if a.self_test:
         return self_test()
+
+    # Legacy-plane modes: thread model only, no live key scan (fast path).
+    # Legacy cmd_* may return None for success -- normalize to int.
+    if a.tool or a.debt or a.fe_reachability or a.validate or a.gate_b:
+        legacy, data = _legacy()
+        if a.gate_b:
+            return legacy.cmd_gate_b(data) or 0
+        if a.validate:
+            return legacy.cmd_validate(data) or 0
+        if a.debt:
+            return legacy.cmd_debt(data) or 0
+        if a.fe_reachability:
+            return legacy.cmd_fe_reachability(data, name=a.name, orphans_only=a.orphans_only) or 0
+        return legacy.cmd_tool(data, a.tool[0], a.tool[1]) or 0
 
     if a.refresh or a.refresh_only:
         rc = do_refresh()
         if rc:
             return rc
+
+    # The live key-plane (load_snapshot's re-derivation) costs tens of seconds; the
+    # flagship thread-model answers come from the resolver snapshot at ~0.3s. Only pay
+    # the scan when the caller asks a key-plane question (--drift / --refresh / --keys).
+    want_keys = a.drift or a.refresh or a.refresh_only or a.keys or not (a.name or a.resource or a.list)
+
+    if a.list:
+        legacy, data = _legacy()
+        return legacy.cmd_list(data) or 0
+    if a.resource:
+        # Thread-model reverse lookup (lambdas/resources/sub-threads) -- the question
+        # the registry teaches; append the live key match only under --keys.
+        legacy, data = _legacy()
+        lrc = legacy.cmd_resource(data, a.resource) or 0
+        if a.keys:
+            snap, rc = load_snapshot()
+            if rc:
+                return rc
+            emit_header(snap)
+            krc = cmd_resource(snap, a.resource) or 0
+            return 0 if (lrc == 0 or krc == 0) else max(lrc, krc)
+        return lrc
+    if a.name and not want_keys:
+        # The flagship: full thread traversal from the resolver snapshot, fast.
+        legacy, data = _legacy()
+        return legacy.cmd_thread(data, a.name) or 0
 
     snap, rc = load_snapshot()
     if rc:
@@ -425,15 +566,14 @@ def main(argv=None) -> int:
     emit_header(snap)
     if a.refresh_only:
         return 0
-
-    if a.list:
-        return cmd_list(snap)
-    if a.resource:
-        return cmd_resource(snap, a.resource)
     if a.drift:
         return cmd_drift(snap)
     if a.name:
-        return cmd_thread(snap, a.name)
+        legacy, data = _legacy()
+        lrc = legacy.cmd_thread(data, a.name) or 0
+        print()
+        cmd_thread(snap, a.name)
+        return lrc
     return cmd_list(snap)
 
 
