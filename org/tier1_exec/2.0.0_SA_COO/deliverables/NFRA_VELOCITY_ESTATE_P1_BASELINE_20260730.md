@@ -184,6 +184,29 @@ missing production schedule 28h before a hard external fire; `comp-trigger` prin
 denominator (**143 rules + 11 schedules**) resolved it. This is WS-E2's two-system denominator
 specimen, live-confirmed.
 
+## §3d CAVEAT ON M2b/M2c — the enforced-complete roster omits the estate's most-used tool
+
+**Source:** `0.7.0_AE_CloudOps`, 2026-07-30T06:51Z, correcting its own earlier unqualified figure while
+grounding R8. Added per §4; M2b and M2c above are **not** overwritten.
+
+**There are 96 `.tools/comp-*` executables against a 70-tool `tools_index`** — and the 26 outside it
+include **`comp-which`, `comp-grep` and `comp-glob`**: Rule 21's mandatory reflex *and* both of its
+sanctioned fallbacks. They are **excluded-not-missing** (the invariant requires registered-OR-excluded,
+so this is a deliberate exemption, not a silent hole), and the invariant is honest about it.
+
+**But the consequence is real and was not being said: the enforced-complete contract surface is
+complete over a roster that omits the most-invoked comp surface in the estate.** So `70/70 PASS` is
+true and, unqualified, invites a reading it does not support. Any coverage claim built on M2b/M2c must
+state that its denominator is the *registered* roster, not the *installed* one — and the gap is not
+random, it is precisely the routing layer.
+
+*Note the shape: this is the same defect class as §2.2's self-route WARN and §1's M1c — an instrument
+reporting truthfully on a population whose boundary it does not restate. The number is right; the
+denominator is the finding.*
+
+**Routed:** the roster question itself (should the routing layer be inside the enforced contract
+surface?) to ~C and CVO as a Rule-21-adjacent standard question. **Not** on R8's path.
+
 ## §4 How to use this file
 
 Cite the row id and the vintage (`M2c @dd4e5c691e`). If you re-measure, add a column — **do not
