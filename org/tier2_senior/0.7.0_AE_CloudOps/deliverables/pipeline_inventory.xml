@@ -951,4 +951,58 @@
     </module>
   </etfs_reports>
 
+  <estate_report>
+    <!-- 2026-07-30 (0.7.0_AE_CloudOps~B): NEW MODULE. The daily semantic-evolution pipeline.
+         Andrew-direct rulings 1-4a (2026-07-30, CVO terminal + MY terminal); CVO-approved
+         20260730T221931Z; GO for apply 20260730T222922Z with condition C3. -->
+    <module>
+      <tf_dir>infra/aws/terraform/estate-report/</tf_dir>
+      <tag>estate-report-v0.1.0</tag>
+      <state_key>estate-report/tfstate</state_key>
+      <design>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ESTATE_REPORT_PIPELINE_20260730/SPEC.md</design>
+      <purpose>
+        Structure that can be compiled gets compiled (CTO's RESOLVER_DEFROST_DESIGN). PROSE cannot --
+        it is hand-legislated by construction. So what cannot be view-compiled must be
+        ACTIVITY-REVIEWED. This pipeline is that loop's PRODUCER: each morning it reports what moved
+        in the estate and PROPOSES where the prose has drifted. It proposes; it never lands. Andrew
+        ratifies, CVO lands via /estate-pull.
+      </purpose>
+      <resources>
+        19 created, 0 changed, 0 destroyed (apply 2026-07-30T22:31Z, 0-diff verified immediately
+        after). aws_s3_bucket.estate_report (opal-estate-report; versioned, AES256, PAB-all, NO
+        retention rule on report prefixes -- deliberate, routed to Andrew as a ruling ask) +
+        aws_instance.estate_report_runner (i-090d1fa3cd5b2125b, t3.medium, TRANSIENT) +
+        aws_lambda_function.orchestrator (timeout 60s) + aws_scheduler_schedule.estate_report_0900et
+        (cron(0 9 * * ? *), America/New_York, state=DISABLED) + 3 roles / 4 policies / SG / secret.
+        ZERO aws_sns_topic, ZERO aws_cloudwatch_metric_alarm, ZERO SES -- the cloned reference module
+        (astn-pipeline/orchestrator.tf) declares all three; omitted under the standing 2026-07-28
+        moratorium and RECORDED AS A DECISION in the module header so nobody "restores parity" later.
+      </resources>
+      <exercised>
+        A12 (ARN-pin) verified on the APPLIED policy, not the plan -- the plan rendered
+        `policy = (known after apply)` and structurally COULD NOT prove it; `aws iam get-role-policy`
+        shows Resource = instance/i-090d1fa3cd5b2125b with the tag condition gone.
+        A5 (THE BOUNDARY) exercised as TWO SEPARATE simulate-principal-policy invocations, ONE
+        --resource-arns each (Rule 22a): daily/* -> allowed, adjudicated/* -> implicitDeny. The
+        positive control doubles as the action-name oracle -- a typo'd action denies BOTH, so an
+        allow on one side proves s3:PutObject is real.
+        A10 (moratorium) run on the plan WITH a positive control on the same file (scheduler 2,
+        instance 2, 522 lines): four zeros from a broken grep look exactly like four zeros from a
+        clean module.
+        Artifact deploy verified byte-level: S3 ETag 710885db07ddbbcef2b95095eeef035a == local md5.
+      </exercised>
+      <not_yet_exercised>
+        A1-A4, A6-A9, A11 require a RUN, and the runner cannot run until the GitHub PAT value is
+        landed by a human into estate-report/github-token (created EMPTY on purpose: writing the
+        value through Terraform would put a live credential into S3-backed state, outliving every
+        rotation). SCHEDULE IS DISABLED -- go-live is a separate explicit act after acceptance.
+      </not_yet_exercised>
+      <downstream>
+        CVO owns adjudicated/* + manifest/* FLIP + the repo accrual (org/estate-reports/) via
+        /estate-pull. This module writes daily/* + manifest/* ONLY, enforced by IAM rather than
+        convention -- a producer that can write the adjudication surface can ratify its own proposals.
+      </downstream>
+    </module>
+  </estate_report>
+
 </pipeline_inventory>
