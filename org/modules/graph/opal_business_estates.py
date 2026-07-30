@@ -400,6 +400,70 @@ def do_refresh() -> int:
     return 0
 
 
+def cmd_census_drift(plane: str) -> int:
+    """L3 world-model drift: SET-diff (never a count) of the hand-adjudicated lambda census
+    against the live estate. Founding specimen 2026-07-30: census 169 vs TF 169 was COUNT-parity
+    concealing 66 membership changes. tf = DESIRED (repo greps, no creds); aws = APPLIED
+    (lambda list-functions). Nonzero residue is a WORKLIST (route per the process doc s.4),
+    not an error -- exits 0 with the sets printed, 3 only on a broken retrieval."""
+    import glob
+    import json
+    import os
+    import re
+    import sys
+    here = os.path.dirname(os.path.abspath(__file__))
+    root = os.path.dirname(os.path.dirname(os.path.dirname(here)))
+    taxo_path = os.path.join(root, "org", "tier1_exec", "3.0.0_SA_CVO", "logs",
+                             "2026-06-15", "estate_census", "AUTHORITATIVE_lambda_taxonomy.json")
+    try:
+        with open(taxo_path, encoding="utf-8") as f:
+            census = set(json.load(f)["lambda_to_named_thread"].keys())
+    except (OSError, KeyError, json.JSONDecodeError) as exc:
+        print(f"census-drift: cannot load taxonomy ({exc})", file=sys.stderr)
+        return 3
+    if plane == "aws":
+        import subprocess
+        try:
+            out = subprocess.run(["aws", "lambda", "list-functions", "--query",
+                                  "Functions[].FunctionName", "--output", "json"],
+                                 capture_output=True, text=True, timeout=120)
+            live = set(json.loads(out.stdout))
+        except Exception as exc:
+            print(f"census-drift: aws plane retrieval failed ({exc}) -- refusing to "
+                  "diff against an empty live set", file=sys.stderr)
+            return 3
+        plane_note = "APPLIED (aws lambda list-functions)"
+    else:
+        live = set()
+        pat = re.compile(r'function_name\s*=\s*"([a-z0-9_-]+)"', re.I)
+        for tf in glob.glob(os.path.join(root, "infra", "aws", "**", "*.tf"), recursive=True):
+            try:
+                with open(tf, encoding="utf-8", errors="replace") as f:
+                    live |= set(pat.findall(f.read()))
+            except OSError:
+                continue
+        plane_note = "DESIRED (infra/aws TF function_name declarations)"
+    if not live:
+        print("census-drift: live set came back EMPTY -- that is a broken retrieval, "
+              "not a clean estate", file=sys.stderr)
+        return 3
+    added = sorted(live - census)
+    gone = sorted(census - live)
+    print(f"CENSUS-DRIFT | plane: {plane_note}")
+    print(f"  census (taxonomy 26b32687a, frozen 2026-06-15): {len(census)} lambdas")
+    print(f"  live: {len(live)} | UNMODELED (live, not in census): {len(added)} | "
+          f"CENSUS-ONLY (gone or unmanaged-on-this-plane): {len(gone)}")
+    print("  >> a SET diff -- equal counts prove nothing (66 changes once cancelled to zero net)")
+    for n in added:
+        print(f"  + {n}")
+    for n in gone:
+        print(f"  - {n}")
+    print("  route the residue per ESTATE_WORLD_MODEL_PROCESS.md s.4 "
+          "(A=assign to a thread, B=add the missing plane/predicate, C=candidate NEW business "
+          "function -> naming is Andrew/CVO's, never auto)")
+    return 0
+
+
 def _legacy():
     """The thread-model engine (named threads -> sub-threads -> producers -> served ->
     frontend + owning tool + debt flags). REGRESSION REPAIR 2026-07-30 (CVO tool-walk #1):
@@ -438,7 +502,15 @@ def main(argv=None) -> int:
     ap.add_argument("--keys", action="store_true",
                     help="append the live key-plane scan (tens of seconds; the thread-model "
                          "answer itself is ~0.3s from the resolver snapshot)")
+    ap.add_argument("--census-drift", action="store_true", dest="census_drift",
+                    help="SET-diff the L3 lambda census against the live estate "
+                         "(default plane: tf/DESIRED; --plane aws for APPLIED). "
+                         "Process: org/modules/graph/ESTATE_WORLD_MODEL_PROCESS.md")
+    ap.add_argument("--plane", choices=("tf", "aws"), default="tf")
     a = ap.parse_args(argv)
+
+    if a.census_drift:
+        return cmd_census_drift(a.plane)
 
     if a.self_test:
         return self_test()
