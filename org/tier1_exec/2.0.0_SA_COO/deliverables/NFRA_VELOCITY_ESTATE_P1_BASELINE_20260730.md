@@ -136,6 +136,54 @@ surface **will** change again.
 declarative-drift class this program was commissioned to kill, found inside the program's own first
 workstream — and it was found by measuring before building.*
 
+## §3c RE-MEASURE 2 — the measurement plane came online, and its first answer is about itself
+
+**Source:** `0.7.0_AE_CloudOps`, 2026-07-30T06:24Z, WS-E4 landed (`39dffb3af7` E4.1.1+E4.1.2 ·
+`631e71f4b9` E4.1.3 · `a580011c3d` E4.2). 34/34 traps across three suites, every suite proven able
+to go RED before green was trusted.
+
+**M7 IS NOW ANSWERABLE — and the first thing it says is that the headline improvement was the
+INSTRUMENT, not the estate.** The dual-basis query (both bases run, which is the acceptance I set):
+
+| basis | FAIL rate | |
+|---|---|---|
+| as-written | **5.77%** | the number the old record would have reported as improvement |
+| derived (corrected contracts) | **0.85%** | |
+
+The mix, per-series: **comp-pulse 358 -> 0** (alone 358 of 505 corrected rows) · comp-system 59 -> 0
+· comp-blast 45 -> 5 · comp-constants 17 -> 0 · +12 more to zero. The movement is the frozen-era
+`nonzero -> FAIL` blanket being retired — **the verdict LOGIC changing** — not the estate getting
+better.
+
+***This is the single most important number this program has produced so far, and it exists only
+because condition 3 was binding.*** Had the history been re-baselined without preserving the
+originals, this series would have moved identically and been indistinguishable from real
+improvement. The discriminator ~C's finding 3 protected is not hypothetical: **it fired on the
+first real query.**
+
+| Row | Re-measure 2 | Note |
+|---|---|---|
+| M7 | **ANSWERABLE per-series with denominators** — three meanings separated in the machine record as a typed `fail_kind` | The row above stays as originally written; this is the state change, dated. |
+| M7-split | post-M3 FAIL population (87 rows): **usage_error 33 / kind_undeclared 32 / undeclared_rc 22 / negative_control 6** | **62% not yet assignable, REPORTED rather than guessed**, tail bounded and named (5 tool:rc pairs). ⚠ **CAVEAT, disclosed by the author unprompted: the `usage_error 33` depends on an UNCOMMITTED `kind: usage` declaration held behind a peer's unlanded file — it is NOT reproducible from a fresh checkout today.** Degraded-but-honest; do not quote 33 as tree-backed. |
+| M7-denom | declared-only: **9,789 rows / 0.89%**; **106 nonzero rows structurally invisible to FAIL** | An undeclared tool **cannot contribute a FAIL by construction**. The 50 undeclared tools are **71% of the roster but only 4.5% of the traffic** — so the coverage gap is far smaller in traffic terms than in tool terms, and either framing alone misleads. |
+| M1-adjacent | **rc=120: 19 rows, 6 tools, cause UNDETERMINED** | Two hypotheses tested and **BOTH REFUTED** — harness-rc corruption refuted because the rate *rose* across the 07-28 mount fix (a fix cannot raise the rate of what it fixes); CPython flush-on-closed-pipe refuted by exercise. **No cause attached.** 22% of FAIL, sitting visibly in `undeclared_rc`. Includes comp-iam and comp-blast. |
+
+**M4b/E3.0 — the safe slice was measured and the PRD's premise did not survive it** (`~A`,
+`2da40ba711`): 437 written surfaces of 643 locations, 8,915 files scanned -> 56 in the E3.0 name
+population -> 21 structurally excluded -> 35 survivors -> **29 HOLD LIVE OBJECTS** (largest 436,489 B)
+-> 6 genuinely empty -> **0 retired, 6 of 6 KEEP-DORMANT** on the Tier-C-never-sufficient rule.
+**Census-only 56, derived-from-contracts 0, coverage debt 56 of 56.** Existence via ListObjectsV2
+(key+size), never HeadObject. **The safe slice and the clearable slice do not overlap** — the
+population with zero blast radius is also the population with no Tier-A intent evidence. E3.0's
+"early visible win" is not available as specified; re-spec routed to ~C.
+
+**M6-adjacent, found in the field rather than from the PRD:** `aws events list-rules` is
+structurally blind to EventBridge **Scheduler** — the Aug-1 month-end schedule is an
+`aws_scheduler_schedule` and does not appear in it at all. A worker was one step from reporting a
+missing production schedule 28h before a hard external fire; `comp-trigger` printing its own
+denominator (**143 rules + 11 schedules**) resolved it. This is WS-E2's two-system denominator
+specimen, live-confirmed.
+
 ## §4 How to use this file
 
 Cite the row id and the vintage (`M2c @dd4e5c691e`). If you re-measure, add a column — **do not
