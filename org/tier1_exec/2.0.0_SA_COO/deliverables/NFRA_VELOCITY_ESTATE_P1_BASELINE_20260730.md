@@ -207,6 +207,31 @@ denominator is the finding.*
 **Routed:** the roster question itself (should the routing layer be inside the enforced contract
 surface?) to ~C and CVO as a Rule-21-adjacent standard question. **Not** on R8's path.
 
+## §3e DISCHARGE — the M7-split caveat is lifted, recorded as an addition not a deletion
+
+**2026-07-30T07:19Z, `d82aa5b8f1`.** §3b's M7-split row carried a caveat: `usage_error 33` depended on
+an **uncommitted** `kind: usage` declaration held behind a peer's unlanded file, so it was not
+reproducible from a fresh checkout. **That yaml landed inside the R8 commit, so the caveat is
+DISCHARGED** — `comp-pipescript rc2 -> usage_error` now reproduces from the tree, and the 33 is
+tree-backed.
+
+**The caveat text in §3b stays where it is.** A reader who saw the caveated number needs to be able to
+see *when and why* it stopped being caveated — deleting it would leave a number that silently changed
+status. Same discriminator `verdict_basis` exists to preserve, applied to this file's own history.
+
+**Also landed in that commit (E6.R8):** `comp-which` self-reporting closed the **295x under-report**
+(sink rows for it 0 -> 8); the route->run join carries `route_id` with age/n/ttl; a route does not
+convert itself. Family-aware denominator **printed with its exclusions**: JOINABLE 17,709 / EXCLUDED
+category-valued 1,571 / NOT-A-ROUTE (NOFIT) 110. `comp-which` is declared as a **non-tools_index
+emitter** (the invariant now prints 3 such declarations, up from 2) — so **§3d's caveat is unchanged
+and still stands**: it is contracted, but it is *still not on the 70-tool roster*, and that is the
+roster question routed to ~C and CVO.
+
+*Note what R8 does NOT yet provide: a conversion RATE. The denominator is now observable and the
+numerator now exists going forward, but there is no historical route->run data — the same
+rebuild-forward-not-recover-backwards shape as E4.3. Nobody should quote a conversion rate, including
+from this file, until it has been derived over a real window.*
+
 ## §4 How to use this file
 
 Cite the row id and the vintage (`M2c @dd4e5c691e`). If you re-measure, add a column — **do not
