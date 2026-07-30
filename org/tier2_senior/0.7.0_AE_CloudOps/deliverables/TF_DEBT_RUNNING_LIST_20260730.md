@@ -17,8 +17,39 @@ order: `docs/briefs/terraform-fixes-before-decommission-20260730.md`.
 
 ## ✅ AUTHORIZED PLAN OF RECORD (Andrew-direct 2026-07-30 ~19:4xZ via CTO, verbatim: *"yes im ok with these items from 0.7.0 you can approve them"*)
 
-**Execution order is APPROVED. Everything below is authorized — no further GO is needed to start any
-tranche. What IS required: take only what you can CLOSE, and if you hand off, hand off AT A SEAM.**
+**Execution order is APPROVED for the tranches named below. What IS required: take only what you can
+CLOSE, and if you hand off, hand off AT A SEAM.**
+
+> 🚨 **SCOPE RULING — Andrew-direct 2026-07-30 ~2215Z via CTO, and it NARROWS what this file
+> authorizes. Verbatim:** *"everyones allowed to write now by the way, i just didnt want agents
+> jumping on NFRA_VELOCITY or outstanding MDPF projects or etc, we are doing ad hoc athletic infra
+> and tooling work for today and P0 is what i say it is and everything else that I do not explicitly
+> say we're doing does not matter until I say otherwise"*
+>
+> **THE RESTRICTION IS ON SCOPE, NOT ON WRITING.** Committing, deploying and landing are free.
+> Choosing the next project from a backlog is not.
+>
+> **THIS FILE IS A BACKLOG, NOT A WARRANT — and my earlier wording overclaimed.** The line above
+> previously read *"Everything below is authorized — no further GO is needed to start any tranche,"*
+> which, read by a successor, would turn ~30 tracker rows into self-authorized work. **It is
+> corrected here rather than quietly edited, because the overclaim is exactly the failure the ruling
+> exists to stop.**
+>
+> **AUTHORIZED (Andrew named these explicitly):** the kill-list confirmation mandate · the
+> seeking-alpha teardown, i.e. **A1–A3 then T1–T4** · the storage enrichment pass · the tombstone
+> gate (built @HEAD) · **the Aug-1 14:00Z ETFS fire — unchanged, real clock, mine.**
+>
+> **NOT AUTHORIZED — surfaced only, do NOT self-dispatch:** every other row in this file, including
+> **A6/A7** (`opal-data-aaii-v2`, `opal-market-data-v2` declaration removal — found by MY sweep, NOT
+> part of the A1–A3 Andrew approved), **F1** (the applied-against-its-own-hold xref rule), **E1–E3**
+> grant cleanup, and the **`ms-heat-snapshots-expire-60d`** ruling.
+>
+> **P0 IS DECLARED, NOT DERIVED.** Do not compute one from severity or staleness. Named as
+> looking-P0-but-not-being-P0: the **wsd-49f frozen frontier** and the **etfs canonicality**
+> question. Surface them; do not act.
+>
+> **DEPRIORITIZED BY NAME:** NFRA_VELOCITY and outstanding MDPF projects. A row that routes into
+> either **parks**.
 
 | Order | Tranche | Risk class | Ledger entry? |
 |---|---|---|---|
