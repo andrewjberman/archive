@@ -11,6 +11,24 @@ This record is independent of that hold -- it is a record, not a renderer change
 
 ---
 
+> ## ⚠ CORRECTION, 2026-07-30 ~1115Z -- READ BEFORE QUOTING SECTION 1
+>
+> **The MECHANISM finding below is unchanged and source-grounded. The ILLUSTRATION I attached to it was
+> misleading, and I am retracting that framing.** I originally wrote *"17 days of real data in a 30-day
+> billing window, flagged NOT PARTIAL"* as though `monthly/2026-06.json` were a completed-June artifact
+> that under-reported coverage. **It is not.** Measured from S3 API timestamps:
+> `generated_utc = 2026-06-25T20:13:56Z` with `mtd_capped = null` and `as_of_cap = None` -- the run was
+> invoked **five days before June ended, with no as-of cap**, so it built a full 30-day window and
+> carried the last value forward across **five days that had not yet happened**. On 06-25, 49financial
+> had written **17 of 19 elapsed weekdays** -- a ~2-weekday gap, not 13.
+>
+> **Two correct measurements, a conclusion about a proposition neither was about** -- the same wrong-axis
+> error this document catalogues in other instruments, committed by its author on its own headline number.
+> Section 1 is rewritten below; Sections 2, 2a, 5 and 6 are unaffected because they rest on source, not on
+> that artifact. **Two NEW findings this surfaced are in Section 8.**
+
+---
+
 ## 1. THE FINDING IN ONE LINE
 
 **`partial` detects a LATE START and nothing else.** It cannot detect interior gaps, and it cannot detect
@@ -18,15 +36,22 @@ a dead tail -- because the quantity it compares against the window is produced b
 and therefore equals the window **by construction**. The discriminating evidence is already emitted in
 the same object, one field away, and the flag does not read it.
 
-Live proof, production artifact, `s3://opal-data-etfs/monthly/2026-06.json`:
+**This rests on SOURCE (Section 2), not on any artifact.** `partial == (first_written > window_start)` is
+derived from the carry loop; no measurement is required to establish it, and none can refute it without
+refuting the code.
 
-```
-49financial  DIVZ   written_days = 17     calendar_days_covered = 30     partial = FALSE
-                    ^ real data              ^ what `partial` compares       ^ says "complete"
-```
+The production artifact `monthly/2026-06.json` is **consistent with** that mechanism but is **not clean
+proof of it**, for the reason in the correction above: it is a mid-month snapshot whose 30-day denominator
+included unelapsed days, so its `written_days` shortfall has two causes mixed together (real producer gaps
+*and* the future) and the artifact cannot separate them.
 
-**17 days of real data in a 30-day billing window, flagged NOT PARTIAL.** Thirteen carried days, on the
-artifact family that decides what a partner is paid.
+**What the artifact does prove, cleanly:** `calendar_days_covered == window_calendar_days` for **every
+partner in both shipped months** -- 30/30, 30/30, 23/23 -- which is the by-construction equality the
+mechanism predicts, and which is why `partial` read `False` on all of them regardless of coverage.
+
+> **The honest form of the headline is the mechanism, not a number.** A flag that cannot fail on the shape
+> it appears to guard is not a weak control; it is not a control. That statement needed no artifact, and
+> attaching a dramatic one to it made the record weaker rather than stronger.
 
 ---
 
@@ -69,7 +94,14 @@ the mechanism that is supposed to detect the fault is satisfied *by* the fault's
 | cottonwood | 06-08..06-30 (23) | **10** | 23 | **False** | True |
 
 `calendar_days_covered == window_calendar_days` in **all three** cases -- it cannot be otherwise once
-`first_written == window_start`.
+`first_written == window_start`. **That equality is the load-bearing observation in this table** and it is
+unaffected by the vintage problem below.
+
+> ⚠ **VINTAGE ON THE `written_days` COLUMN (corrected 2026-07-30):** these are the values **AS SHIPPED**
+> on 2026-06-25, not June's true coverage. The artifact was generated five days before June ended and
+> **has never been regenerated**; 13 further June slices have landed since. A recompute today from the
+> same `daily/` keys yields **21 / 29 / 14**, not 17 / 24 / 10. **Do not quote this column as June's
+> coverage** -- quote it only as what the served artifact says. See Section 8.
 
 **Cottonwood is the instructive one.** Its window-level `partial=True` looks like the flag working. It is
 not: `window_partial` is `(window_start > month_start) or (window_end < month_end) or any(etf partial)`
@@ -226,3 +258,55 @@ One factual note bearing on it, offered without a recommendation: the full-calen
 the carry-forward rule were both ratified when the question on the table was **weekends and holidays** --
 a 9-of-31 floor. Whether they were intended to extend to a 45-52% carried month is a question about the
 scope of the original ruling, not about the code, which is implementing that ruling faithfully.
+
+---
+
+## 8. TWO FINDINGS SURFACED BY THE CORRECTION (added 2026-07-30 ~1120Z)
+
+Both were found by chasing a discrepancy rather than shrugging at it: the exercise of the additive counts
+recomputed June from the same S3 keys and returned **21 / 29 / 14** where the served artifact says
+**17 / 24 / 10**. Running that down produced the correction above *and* these.
+
+### 8a. The monthly artifacts are STALE and have never been regenerated -- DOLLAR-BEARING
+
+```
+monthly/2026-05.json   LastModified 2026-06-25T20:14:02Z   generated_utc 2026-06-25T20:14:01Z
+monthly/2026-06.json   LastModified 2026-06-25T20:13:58Z   generated_utc 2026-06-25T20:13:56Z
+monthly/2026-07.json   DOES NOT EXIST (NoSuchKey)
+```
+
+**Both were written in the same minute, on 2026-06-25, and nothing has been written since.** June was
+five days from over; May was already closed and was regenerated in that same batch.
+
+**Thirteen June daily slices have landed after that run:**
+
+| partner | at artifact time | now | arrived after | landing |
+|---|---|---|---|---|
+| 49financial | 17 | **21** | 06-25, 06-26, 06-29, 06-30 | 2026-07-14T05:12Z |
+| inflection | 24 | **29** | 06-25, 06-27, 06-28, 06-29, 06-30 | 06-26 .. 06-30 |
+| cottonwood | 10 | **14** | 06-25, 06-26, 06-29, 06-30 | 06-29 .. 07-02 |
+
+So the **served** June averages were computed on a five-day-incomplete June that has since completed, and
+the artifact carried the last known value forward across days that had not occurred at generation time.
+
+**NOT established, and it is the question that matters:** whether anything consumed these averages for a
+June rebate. **I did not census consumers** -- that is the same full-estate census already gated at ~C.
+The finding here is the staleness and the drift, not a payment claim.
+
+### 8b. A malformed window shipped in `monthly/2026-05.json`
+
+```
+cottonwood May: {"start": "2026-06-08", "end": "2026-05-31", "calendar_days": 0, "partial": true}
+```
+
+**`start` is AFTER `end`.** Cottonwood's onboarding clock (2026-06-08) post-dates May's month end, and
+`compute_partner_month` clamps `window_start` up by the clock **without ever checking it against
+`window_end`**, so it emits an inverted, zero-length window instead of erroring or skipping the partner.
+
+Substantively harmless for May -- cottonwood held nothing, and the averages are 0.0 -- but it is a
+degenerate record that shipped, and **the same clamp reproduces it for any partner whose clock lands after
+a month end.** `partial: true` is the only signal, and it fires for the unrelated clock reason, so it
+would not distinguish this from a normal late-onboarding month.
+
+*Reported, not fixed: this is inside the same function whose `partial` semantics are gated at ~C, and it
+is outside the additive dispatch. Flagged to COO.*
