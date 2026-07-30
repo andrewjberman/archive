@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
-"""RETIRED NAME NOTE (2026-07-30, Andrew-direct): the user-facing tool is `comp-estate`;
+"""estate_infrastructure_cli -- the legacy THREAD-MODEL engine comp-estate delegates to.
+
+RENAMED from pipescript_cli.py 2026-07-30 (Andrew-direct naming consolidation; C4 language).
+RETIRED NAME NOTE (2026-07-30, Andrew-direct): the user-facing tool is `comp-estate`;
 bare `pipescript` is prohibited + rc=2 tombstoned. This module stays as the imported engine
-(opal_business_estates.py + comp_api.py import it) -- do not invoke it by the old name.
+(opal_estate_infrastructure.py + comp_api.py import it) -- do not invoke it standalone.
+
+Historical usage below is the ORIGINAL pipescript CLI surface, preserved as the record of the
+forms this module's main(argv) still parses (reach them via `comp-estate` today):
 
 pipescript <name> -- named-thread estate traversal (NFRA_PIPESCRIPT P1).
 
@@ -145,7 +151,7 @@ def cmd_list(data):
 
 def _drill_call(tool, threads):
     """P1b.2 (CTO Option-A + call-string): the EXACT runnable sub-resolver command to drill
-    into a thread for live/deeper detail. pipescript stays READ-ONLY and renders the catalog
+    into a thread for live/deeper detail. comp-estate stays READ-ONLY and renders the catalog
     traversal; the human copy-pastes this to invoke the owning tool (F5 -- never re-run here).
     """
     sample = next((t["thread_id"] for t in threads if t["owning_tool"] == tool), "<resource>")
@@ -168,15 +174,15 @@ def cmd_thread(data, name):
     resources = data.get("resources_by_named_thread", {}).get(name, [])
     if not threads and not resources:
         # LOUD unknown name - never a silent empty result
-        sys.stderr.write(f"pipescript: '{name}' is NOT a known named thread.\n")
+        sys.stderr.write(f"comp-estate: '{name}' is NOT a known named thread.\n")
         sys.stderr.write(f"  -> known threads: {', '.join(data['named_threads'])}\n")
-        sys.stderr.write("  -> run `pipescript --list` for counts.\n")
+        sys.stderr.write("  -> run `comp-estate --list` for counts.\n")
         sys.exit(2)
     sc = Counter(t["status"] for t in threads)
     tc = Counter(t["owning_tool"] for t in threads)
     n_debt = sum(1 for t in threads if t.get("debtscan_flags"))
     print(
-        f"pipescript {name} - {len(threads)} threads "
+        f"comp-estate {name} - {len(threads)} threads "
         f"(in-scope {sc.get('in-scope', 0)} / explicit-out {sc.get('explicit-out', 0)} / "
         f"unreviewed {sc.get('unreviewed', 0)})"
         + (f" | {n_debt} with DEBT flags" if n_debt else "")
@@ -201,7 +207,7 @@ def cmd_thread(data, name):
         if _auth:
             print(f"    -> reachable: {_st} [CVO ground-truth]")
     print("\n" + "-" * 78)
-    print("owning tools in this thread (drill in for live detail -- pipescript stays read-only):")
+    print("owning tools in this thread (drill in for live detail -- comp-estate stays read-only):")
     for tool, n in tc.most_common():
         print(f"  {n:>3}  {tool:<22} {OWNING_TOOLS.get(tool, '')}")
         drill = _drill_call(tool, threads)
@@ -214,7 +220,7 @@ def cmd_thread(data, name):
         print(f"resources ({len(resources)}) - every lambda/EC2/StepFn in '{name}':")
         for r in resources:
             print(f"  {_a(r)}")
-    print("\nrun `pipescript --tool <name> <tool>` to assert a tool owns it (LOUD OUT-OF-SCOPE if not).")
+    print("\nrun `comp-estate --tool <name> <tool>` to assert a tool owns it (LOUD OUT-OF-SCOPE if not).")
 
 
 def cmd_resource(data, needle):
@@ -233,7 +239,7 @@ def cmd_resource(data, needle):
         if needle_l in blob:
             hits.append(t)
     if not hits:
-        sys.stderr.write(f"pipescript: no thread references '{needle}'.\n")
+        sys.stderr.write(f"comp-estate: no thread references '{needle}'.\n")
         sys.exit(2)
     print(f"comp-estate --resource '{needle}' -> {len(hits)} thread(s):")
     for t in hits:
@@ -249,13 +255,13 @@ def cmd_tool(data, name, tool):
     """
     if tool not in OWNING_TOOLS:
         sys.stderr.write(
-            f"pipescript: '{tool}' is not a known owning_tool. "
+            f"comp-estate: '{tool}' is not a known owning_tool. "
             f"Known: {', '.join(sorted(OWNING_TOOLS))}.\n"
         )
         sys.exit(2)
     threads = [t for t in data["threads"] if t["named_thread"] == name]
     if not threads:
-        sys.stderr.write(f"pipescript: '{name}' is NOT a known named thread (see --list).\n")
+        sys.stderr.write(f"comp-estate: '{name}' is NOT a known named thread (see --list).\n")
         sys.exit(2)
     owned = [t for t in threads if t["owning_tool"] == tool]
     if not owned:
@@ -279,7 +285,7 @@ def cmd_validate(data):
     names = set(data["named_threads"])
     unbucketed = [t["thread_id"] for t in threads if t["named_thread"] not in names]
     ok = True
-    print("pipescript --validate (NFRA_PIPESCRIPT acceptance)")
+    print("comp-estate --validate (NFRA_PIPESCRIPT acceptance)")
     print("=" * 60)
     print(f"  total sub-threads:        {len(threads)}")
     print(f"  named threads:            {len(names)}")
@@ -361,7 +367,7 @@ def cmd_fe_reachability(data, name=None, orphans_only=False):
     threads = data["threads"]
     if name:
         if name not in set(data["named_threads"]):
-            sys.stderr.write(f"pipescript: '{name}' is NOT a known named thread (see --list).\n")
+            sys.stderr.write(f"comp-estate: '{name}' is NOT a known named thread (see --list).\n")
             sys.exit(2)
         threads = [t for t in threads if t["named_thread"] == name]
     rows = [(t["named_thread"], t["thread_id"], *_fe_status(t), _fe_advisory(t)) for t in threads]
@@ -370,7 +376,7 @@ def cmd_fe_reachability(data, name=None, orphans_only=False):
         order = order + ["mounted-reachable"]
     summ = Counter(s for _, _, s, _, _ in rows)
     label = "--orphans" if orphans_only else "--fe-reachability"
-    print(f"pipescript {label} ({name or 'estate'}) - {len(rows)} threads")
+    print(f"comp-estate {label} ({name or 'estate'}) - {len(rows)} threads")
     print("AUTHORITATIVE = CVO reachability_status field; * = provisional CLI flag; grep = supplementary hint")
     print("=" * 78)
     for s in order:
@@ -414,7 +420,7 @@ def cmd_debt(data):
         for t in data["threads"]
         if t.get("debtscan_flags")
     ]
-    print(f"pipescript --debt - {len(flagged)} threads carry DEBTSCAN flags")
+    print(f"comp-estate --debt - {len(flagged)} threads carry DEBTSCAN flags")
     print("=" * 78)
     by_nt = defaultdict(list)
     for nt, tid, fl in flagged:
@@ -710,19 +716,19 @@ def main(argv):
         return 0
     if argv[0] == "--resource":
         if len(argv) < 2:
-            sys.stderr.write("usage: pipescript --resource <substr>\n")
+            sys.stderr.write("usage: comp-estate --resource <substr>\n")
             sys.exit(3)
         cmd_resource(data, argv[1])
         return 0
     if argv[0] == "--tool":
         if len(argv) < 3:
-            sys.stderr.write("usage: pipescript --tool <name> <tool>\n")
+            sys.stderr.write("usage: comp-estate --tool <name> <tool>\n")
             sys.exit(3)
         cmd_tool(data, argv[1], argv[2])
         return 0
     if argv[0] == "--contract":
         if len(argv) < 2:
-            sys.stderr.write("usage: pipescript --contract <surface>\n")
+            sys.stderr.write("usage: comp-estate --contract <surface>\n")
             sys.exit(3)
         return cmd_contract(argv[1])
     if argv[0] == "--flipped":
@@ -734,7 +740,7 @@ def main(argv):
                 since = argv[i + 1]
         if not since:
             sys.stderr.write(
-                "usage: pipescript --flipped --since <snapshot>"
+                "usage: comp-estate --flipped --since <snapshot>"
                 "  (e.g. 20260617 | latest | s3://.../graph-*.tar.gz)\n")
             sys.exit(3)
         return cmd_flipped(since)

@@ -1,9 +1,14 @@
-"""opal_business_estates -- the OPAL BUSINESS-SEMANTIC estate traversal engine.
+"""opal_estate_infrastructure -- the OPAL estate traversal engine (C4: estate-infrastructure).
 
-Tool: `comp-semantic-estates`. Replaces the bare-named `pipescript` and its `pipescript_cli.py` engine,
-which are DEPRECATED (Andrew-direct 2026-07-29: "we are deprecating base pipescript. there is
+Tool: `comp-estate` (the first point of contact for agent coherence over the Estate).
+NAMING HISTORY, superseded rulings quoted for the record: born `opal_business_estates` under
+`comp-semantic-estates` (Andrew-direct 2026-07-29: "we are deprecating base pipescript. there is
 comp-pipescript only for future reference" / "pipescript needs to be categorically renamed as
-comp-semantic-estates, and if you need a name for the script itself say opal_business_estates").
+comp-semantic-estates, and if you need a name for the script itself say opal_business_estates");
+renamed `comp-estate` 2026-07-30 (Andrew-direct); engine renamed `opal_estate_infrastructure.py`
+2026-07-30 (Andrew-direct, to mirror C4 segment language). The bare-named `pipescript` remains
+DEPRECATED as a user surface; its engine (renamed estate_infrastructure_cli.py 2026-07-30, same
+consolidation) survives only as the imported legacy thread-model engine this module delegates to.
 
 === WHAT WAS BROKEN, AND WHY A WRAPPER COULD NOT FIX IT ===
 
@@ -468,22 +473,34 @@ def cmd_matrix() -> int:
     """C3 cross-partition matrix -- the standing reconciliation instrument (rule bank v1.5
     c3_dual_partition). View-compiled from the resolver dual keys at invocation."""
     import collections
+    import os
+    try:
+        import yaml
+    except ImportError:
+        print(f"{TOOL} --matrix: pyyaml unavailable -- cannot read the canonical catalog",
+              file=sys.stderr)
+        return 2
     snap, rc = load_snapshot()
     if rc:
         return rc
-    fam2sys = {
-        "bd-medallion": "sys-bd-medallion", "inf-medallion": "sys-inf-medallion",
-        "cot-and-mdpf": "sys-cot-mdpf-assets", "smartx": "sys-smartx-feed",
-        "yang-datapipeline": "sys-yang-analytics-engine",
-        "market-analytics": "sys-market-intelligence-engine",
-        "news-seeking-alpha": "sys-news-intelligence-engine",
-        "causality-ai": "sys-causality-engine",
-        "fred-and-generated-outputs": "sys-macro-data-engine",
-        "pm-tool": "sys-portfolio-management-suite",
-        "trade-submission": "sys-trade-submission-engine",
-        "partners-portal-infra": "sys-partner-serving-platform",
-        "graph-and-ops-and-casefind": "sys-estate-ops-platform",
-    }
+    # The family->structure translation is CATALOG-OWNED (legacy_family_key on each C3.i entry);
+    # view-compile it at invocation. A hand-copied dict here previously duplicated the catalog --
+    # a rename/new family would not have propagated and would silently bucket to residue.
+    cat = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       "NFRA_ONTOLOGY_C2C3_CANONICAL.yaml")
+    try:
+        with open(cat, encoding="utf-8") as f:
+            structures = yaml.safe_load(f)["c3_deterministic_structures"]
+    except (OSError, KeyError, yaml.YAMLError) as exc:
+        print(f"{TOOL} --matrix: canonical catalog unreadable ({exc}) -- refusing a hand-copied "
+              "fallback for a catalog-owned mapping; rc=2", file=sys.stderr)
+        return 2
+    keys = [v.get("legacy_family_key") for v in structures.values()]
+    if len(set(keys)) != len(keys):
+        print(f"{TOOL} --matrix: DUPLICATE legacy_family_key in the catalog -- a collision here "
+              "silently drops a structure from the matrix; fix the catalog; rc=2", file=sys.stderr)
+        return 2
+    fam2sys = {v["legacy_family_key"]: k for k, v in structures.items()}
     sysv = collections.defaultdict(set)
     vsys = collections.defaultdict(set)
     for t in snap.get("threads", []):
@@ -538,7 +555,7 @@ def cmd_segments() -> int:
     print(f"{TOOL} | C4 SEGMENTS -- the agent routing layer (source: {os.path.basename(cat)}, "
           f"rule bank v1.4)")
     print("  Route: C4 segment -> C3(i|ii) -> C2 motif (D2 chain) -> C1 -> C0. Verticals are C3.ii,")
-    print("  business overlay; `comp-semantic-estates <thread>` enters by vertical.\n")
+    print("  business overlay; `comp-estate <thread>` enters by vertical.\n")
     for name, v in segs.items():
         print("=" * 88)
         print(f"SEGMENT: {name}   ({v.get('display_name', '')})")
@@ -624,15 +641,16 @@ def _legacy():
     frontend + owning tool + debt flags). REGRESSION REPAIR 2026-07-30 (CVO tool-walk #1):
     the 07-29 rename shipped this module as a REPLACEMENT and silently dropped the
     flagship traversal + --tool/--debt/--fe-reachability/--validate/--gate-b and both
-    standing oracles. The capability was intact in pipescript_cli.py the whole time --
-    this delegation re-exposes it. Two planes, one CLI: THREAD MODEL (legacy, resolver
-    snapshot, ~0.3s) + KEY PLANE (this module, live re-derivation, tens of seconds)."""
+    standing oracles. The capability was intact in the legacy CLI (then pipescript_cli.py,
+    now estate_infrastructure_cli.py) the whole time -- this delegation re-exposes it.
+    Two planes, one CLI: THREAD MODEL (legacy, resolver snapshot, ~0.3s) + KEY PLANE
+    (this module, live re-derivation, tens of seconds)."""
     import os
     import sys as _sys
     _here = os.path.dirname(os.path.abspath(__file__))
     if _here not in _sys.path:
         _sys.path.insert(0, _here)
-    import pipescript_cli as legacy
+    import estate_infrastructure_cli as legacy
     return legacy, legacy.load()
 
 
