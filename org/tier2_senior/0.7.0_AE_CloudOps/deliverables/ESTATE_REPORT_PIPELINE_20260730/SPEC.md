@@ -365,7 +365,9 @@ The boundary in section 2 is only real if it is exercised as a deny.
 | A7 | Prose-only proposals | Feed a fixture proposing against `producers` -> assembler DROPS it and says so |
 | A8 | Manifest born PENDING | Fresh run -> `manifest/YYYY-MM-DD.json` `status=="PENDING"` |
 | A9 | Timezone is wall-clock | `aws scheduler get-schedule` shows `America/New_York`; and the schedule's next-fire is 09:00 ET across a DST boundary |
-| A10 | No banned resource | `terraform plan` output contains ZERO `aws_sns_topic`, `aws_cloudwatch_metric_alarm`, `ses:` |
+| A10 | No banned resource | `terraform plan` output contains ZERO `aws_sns_topic`, `aws_cloudwatch_metric_alarm`, `ses:` -- **run with a positive control on the same file**, because four zeros from a broken grep look exactly like four zeros from a clean module |
+| A11 | **Unset PAT refuses BY NAME** (CVO C3 addendum) | Run with the secret empty -> `SecretUnset` naming the secret, **no report object written**. The failure to catch is not a crash but a well-formed report with an empty deterministic half, which is indistinguishable from a genuinely quiet estate day |
+| A12 | **Self-stop is ARN-pinned** (CVO C3) | `aws iam get-role-policy --role-name estate-report-runner-role --policy-name estate-report-runner-selfstop` shows the instance ARN, not `instance/*` with a tag condition |
 
 ---
 
