@@ -491,14 +491,14 @@ def cmd_matrix() -> int:
         sysv[sname].add(t["named_thread"])
         vsys[t["named_thread"]].add(sname)
     print(f"{TOOL} | C3 CROSS-PARTITION MATRIX (C3.i x C3.ii; dual key = (family, named_thread))")
-    print(f"  denominators: {len(sysv)} systems x {len(vsys)} verticals over "
+    print(f"  denominators: {len(sysv)} structures x {len(vsys)} verticals over "
           f"{len(snap.get('threads', []))} chains -- a matrix CHANGE is an adjudication event")
     print("")
-    print("  C3.i SYSTEM -> C3.ii vertical span:")
+    print("  C3.i DETERMINISTIC STRUCTURE -> C3.ii semantic-vertical span:")
     for sname in sorted(sysv, key=lambda k: -len(sysv[k])):
         print(f"    {sname:34} ({len(sysv[sname]):2}) {', '.join(sorted(sysv[sname]))}")
     print("")
-    print("  C3.ii VERTICAL -> C3.i system span:")
+    print("  C3.ii SEMANTIC VERTICAL -> C3.i structure span:")
     for v in sorted(vsys):
         print(f"    {v:22} ({len(vsys[v])}) {', '.join(sorted(vsys[v]))}")
     bound = [(s, sorted(vs)[0]) for s, vs in sysv.items()
@@ -542,7 +542,7 @@ def cmd_segments() -> int:
     for name, v in segs.items():
         print("=" * 88)
         print(f"SEGMENT: {name}   ({v.get('display_name', '')})")
-        print(f"  systems: {', '.join(v.get('registry', []))}")
+        print(f"  structures: {', '.join(v.get('registry', []))}")
         if v.get("flags"):
             print(f"  FLAGS: {'; '.join(v['flags'])}")
         print(f"  verticals: {', '.join(v.get('verticals_served', []))}")
