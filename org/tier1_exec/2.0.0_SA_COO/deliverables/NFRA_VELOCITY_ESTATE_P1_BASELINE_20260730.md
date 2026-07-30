@@ -111,6 +111,31 @@ failure, not the fix. WS-E1 and WS-E2 do not start until MSTR relays that it is 
 plainly at the anchor point, because a program can move all nineteen rows above and still have failed
 its actual test.
 
+## §3b RE-MEASURE 1 — added as a column, per §4. Nothing above is overwritten.
+
+**Source:** `0.7.0_AE_CloudOps`, 2026-07-30T05:45Z, while exercising E4.1. Its measurement is
+**finer-grained than mine** and supersedes nothing — both stand with their provenance.
+
+| Row | My value (05:30Z) | Re-measure (05:45Z, 0.7.0) | Note |
+|---|---|---|---|
+| M2c | declared **20** / pending **50** of 70 | declared **22** (20 registered + 2 non-tools_index emitters) / pending_declaration **51** | **DISCREPANCY, DELIBERATELY UNRECONCILED:** my numbers are the invariant's own summary line (`declared 20 + pending 50`, which sums to exactly 70); theirs decomposes declarations to include the 2 non-tools_index emitters, and reports pending as **51**, not 50. I am not silently picking one. The 20/50 pair is the *registered* population; 22/51 counts a wider set. **Anyone computing a rate must say which population.** |
+| M2c-derived | — | **50 of 70 registered tools (71%) render UNKNOWN on a nonzero exit today** | The consequence that matters: a FAIL-% computed over *declared* tools has a denominator of **20, not 70**. 0.7.0 is printing that denominator on every series it ships. |
+| M7 (row counts only) | NOT-YET-MEASURABLE | **10,237 telemetry rows: PASS 9,117 / FAIL 585 / VERDICT 442 / UNKNOWN 76 / REFUSE 11 / 6 synthetic-tagged** | The row **counts** are measurable now; the **three-meanings separation** is still not built, so M7 stays NOT-YET-MEASURABLE as specified. A count is not a decomposition. |
+
+**Scope correction that came with it, and it changes what P1 is:** E4.1's conditions 1 and 2 were
+**already built on 2026-07-23** (NFRA_MSBEFF.R1R3/M3) and had **never been exercised**. 0.7.0
+exercised both with deliberate mutants, positive controls run first and separately, and
+byte-identical restore verified — both PASS, the guard fires and names its offender. **The real
+unbuilt work is condition 3 (`verdict_basis`) and E4.2.** `comp_msbeff_rebaseline.py` emits
+`result` + `result_prior` + `rebaselined:true` on one row — two values on a row is **not** a version
+column, and `rebaselined:true` cannot distinguish a v1 re-baseline from a v2 one, which is precisely
+the discriminator condition 3 exists to preserve. With 51 tools pending declaration the contract
+surface **will** change again.
+
+*Two-thirds of a gate-approved deliverable was already built and unexercised. That is the
+declarative-drift class this program was commissioned to kill, found inside the program's own first
+workstream — and it was found by measuring before building.*
+
 ## §4 How to use this file
 
 Cite the row id and the vintage (`M2c @dd4e5c691e`). If you re-measure, add a column — **do not
