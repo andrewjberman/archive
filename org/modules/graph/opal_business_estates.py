@@ -64,7 +64,7 @@ _WS = _HERE.parent.parent.parent
 _SNAPSHOT = _HERE / "estate-coverage-resolver.json"
 _REFRESHER = _HERE / "gen-estate-resolver.py"
 
-TOOL = "comp-semantic-estates"
+TOOL = "comp-estate"
 STALE_AFTER_DAYS = 14
 _DYN = "{*}"
 
@@ -400,6 +400,70 @@ def do_refresh() -> int:
     return 0
 
 
+def _ontology_dir():
+    import os
+    here = os.path.dirname(os.path.abspath(__file__))
+    root = os.path.dirname(os.path.dirname(os.path.dirname(here)))
+    return os.path.join(root, "infra", "system", "ontology")
+
+
+def cmd_layers() -> int:
+    """STABLE canon, served verbatim (the serving law: stable above the emergence line)."""
+    import os
+    import sys
+    p = os.path.join(_ontology_dir(), "C0_C1_C2_C3_C4_SYSTEM_LAYERS.md")
+    try:
+        with open(p, encoding="utf-8") as f:
+            content = f.read()
+        # encoding-safe on Windows consoles (cp1252 chokes on box-drawing glyphs)
+        try:
+            sys.stdout.write(content)
+        except UnicodeEncodeError:
+            sys.stdout.buffer.write(content.encode("utf-8", errors="replace"))
+        return 0
+    except OSError as exc:
+        print(f"{TOOL} --layers: stable canon unreadable ({exc}); rc=2", file=sys.stderr)
+        return 2
+
+
+def cmd_definitions(term: str) -> int:
+    """Canonical term lookup -- SYSTEM_DEFINITIONS.yaml, fuzzy on term name."""
+    import os
+    import sys
+    try:
+        import yaml
+    except ImportError:
+        print(f"{TOOL} --definitions: pyyaml unavailable", file=sys.stderr)
+        return 2
+    p = os.path.join(_ontology_dir(), "SYSTEM_DEFINITIONS.yaml")
+    try:
+        with open(p, encoding="utf-8") as f:
+            d = yaml.safe_load(f)
+        terms = d["terms"]
+    except (OSError, KeyError, yaml.YAMLError) as exc:
+        print(f"{TOOL} --definitions: registry unreadable ({exc}); rc=2", file=sys.stderr)
+        return 2
+    print(f"{TOOL} | SYSTEM_DEFINITIONS v{d.get('version','?')} (STABLE canon; "
+          f"changes only by naming act)")
+    if term == "__ALL__":
+        for k, v in terms.items():
+            print(f"  {k:22} [{v.get('status','?'):10}] {str(v.get('definition',''))[:90]}")
+        print(f"  denominator: {len(terms)} terms")
+        return 0
+    tl = term.lower()
+    hits = {k: v for k, v in terms.items() if tl in k.lower()}
+    if not hits:
+        print(f"  NO TERM matches {term!r} -- that is a statement about the registry "
+              f"({len(terms)} terms), not the concept. Propose additions by naming act.")
+        return 1
+    for k, v in hits.items():
+        print(f"\nTERM: {k}   [{v.get('status')}]")
+        print(f"  definition: {v.get('definition')}")
+        print(f"  authority:  {v.get('authority')}")
+        print(f"  sits_at:    {v.get('sits_at')}")
+    return 0
+
+
 def cmd_segments() -> int:
     """C4 SEGMENTS -- the agent routing entry point (Andrew-ratified names + registries,
     2026-07-30). Reads the canonical catalog live; a missing/corrupt catalog fails LOUD."""
@@ -543,6 +607,10 @@ def main(argv=None) -> int:
     ap.add_argument("--keys", action="store_true",
                     help="append the live key-plane scan (tens of seconds; the thread-model "
                          "answer itself is ~0.3s from the resolver snapshot)")
+    ap.add_argument("--layers", action="store_true",
+                    help="the stable C0..C4 ladder doc, served verbatim")
+    ap.add_argument("--definitions", nargs="?", const="__ALL__", metavar="TERM",
+                    help="canonical term lookup from SYSTEM_DEFINITIONS.yaml (no arg = list)")
     ap.add_argument("--segments", action="store_true",
                     help="THE C4 ENTRY POINT: the five agent-routing segments, each a registry "
                          "of C3 systems with a high-signal description. Start here.")
@@ -553,6 +621,10 @@ def main(argv=None) -> int:
     ap.add_argument("--plane", choices=("tf", "aws"), default="tf")
     a = ap.parse_args(argv)
 
+    if a.layers:
+        return cmd_layers()
+    if a.definitions:
+        return cmd_definitions(a.definitions)
     if a.segments:
         return cmd_segments()
 
