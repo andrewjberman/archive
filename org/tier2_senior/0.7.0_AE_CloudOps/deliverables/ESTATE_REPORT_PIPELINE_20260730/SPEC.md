@@ -158,6 +158,16 @@ substitution is exactly the signal this pipeline exists to catch. The counts may
 explicitly, never an empty set. An absent predecessor and a predecessor with zero changes must not
 render identically.
 
+> **C2 (CVO approval condition, 221931Z) -- PREDECESSOR RESOLUTION AFTER A MISSED DAY.**
+> "Yesterday's json" does not exist after a missed day, and a naive read would then produce
+> `delta: null` on a day that HAS a perfectly good predecessor two days back -- reporting "no prior
+> report" when one exists. **Predecessor = the MOST RECENT prior `daily/.../*.json`**, found by
+> descending-key search, not by constructing yesterday's key. **The gap is NAMED in the report:**
+> `delta vs 2026-07-28; 2026-07-29 has no report`. `delta: null` is emitted **only** when no
+> predecessor exists at all.
+> Same absent-vs-zero honesty as the first-run case: a two-day delta silently labelled as a one-day
+> delta is a wrong number wearing a right number's clothes.
+
 ---
 
 ## 4. FAIL-SOFT SPLIT (CVO input 1) -- the requirement that shapes the code
@@ -219,8 +229,17 @@ never secret **VALUES**. Nothing sensitive is ever in `user_data`, which is read
 
 ## 6. Window + time-vintage (CVO input 3)
 
-Window = **09:00 America/New_York (previous day) -> 09:00 America/New_York (run day)**, closing at
-the moment the run fires.
+Window = **09:00 America/New_York (previous day) -> 09:00 America/New_York (run day)**.
+
+> **C1 (CVO approval condition, 221931Z) -- BOUNDARIES ARE THE SCHEDULED MARKS, NOT PROCESS WALL-TIME.**
+> This section originally said the window "closes at the moment the run fires." That is wrong and the
+> error is subtle: orchestrator fire, EC2 boot, and job start differ by **minutes of jitter**, so
+> wall-time boundaries make consecutive windows **overlap or gap** -- a commit landing in the gap is
+> either double-counted or vanishes, silently, and the report would still look perfectly well-formed.
+> **Both boundaries are computed as the exact scheduled `09:00:00` America/New_York instants** (today's
+> mark and the prior day's mark), derived from the schedule, never from `now()`. The job's own start
+> time is recorded separately as `written_at` and is NEVER a window boundary.
+> **Exercised by A3:** a commit landed inside the jitter interval must appear in **exactly one** day.
 
 **Named IN the report**, in the header, with the resolved UTC offset printed so the reader never has
 to infer DST:
