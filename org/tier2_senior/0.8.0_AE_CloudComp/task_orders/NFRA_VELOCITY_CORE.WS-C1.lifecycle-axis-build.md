@@ -7,6 +7,31 @@
 
 <priority>P1 -- THE CRITICAL PATH. NFRA_VELOCITY is the EXCLUSIVE work regime (Andrew GO 2026-07-31 ~0225Z); WS-C1 is CORE's P1 first half and WS-C2 cannot start until this enum exists to validate.</priority>
 
+<amendment date="20260731T0330Z" by="1.0.0_SA_CTO~Z">
+**THE SPEC IS NOW REV 3 @691860493. HOLD RELEASED. BUILD FROM THE SPEC FILE, NOT FROM THIS TO's BODY.**
+
+Everything below this block was written against spec rev 1 and IS STALE IN THREE PLACES. The spec file
+is authoritative; where this TO and the spec disagree, THE SPEC WINS. Specifically superseded:
+
+- **objective (a)'s enum list is WRONG.** It names `PERMANENT / ROLLING / TRANSIENT / EVENT_CREATED /
+  SUPERSEDED / RETIRED / UNDECLARED`. The correct 7 are
+  **`PERMANENT / TRANSIENT / EVENT_CREATED / DORMANT / LEGACY / RETIRED / UNDECLARED`**.
+  `ROLLING` collapsed to a derivation (F-8); `SUPERSEDED` renamed `LEGACY` and the typed violation
+  `ZOMBIE/ORPHAN` renamed `SILENT-RESIDENT` (F-1) -- **both old tokens are ALREADY OCCUPIED in ratified
+  `variance.labels` and MUST NOT appear.** `DORMANT` added (your own catch).
+- **objective (e) and acceptance item 5 name `ZOMBIE-ORPHAN`.** Use `SILENT-RESIDENT`, and the gate
+  must name **BOTH** it and **`variance.Orphan`** as gated consumers -- that was the BLOCKING finding.
+- **acceptance is now the spec's S.7 items 1-13**, not the 9 listed below. New requirements you did not
+  have: `consumer`/`successor` EXERCISED not merely resolved (F-4); `max_dwell` BOUND to the consumer's
+  D3 cadence (F-3); `revalidate_by` on EVERY declaration (S.3.1); an explicit `scope` per declaration
+  (F-6); and **>=1 CONSUMER ACTUALLY GATED, which prose cannot discharge (F-7)**.
+
+STILL BINDING AND UNCHANGED: every constraint (additive-only, `type_tuple` untouched, no name-pattern
+inference, the held-out fence, no non-ASCII), the whole compiler-tools mandate, and the
+cross-domain-coordination block. Re-run your phase-1 consumer enumeration against the rev-3 shape
+before landing -- `DORMANT` and `scope` add fields the rev-1 shape did not have.
+</amendment>
+
 <references>
   <ref type="prd">docs/architecture/NFRA_VELOCITY_CORE_PRD.md -- WS-C1</ref>
   <ref type="design">org/tier1_exec/1.0.0_SA_CTO/deliverables/WS-C1_LIFECYCLE_DESIGN_SPEC.md @bab75bba5 -- THE SPEC YOU BUILD FROM. Read it in full before writing YAML.</ref>
