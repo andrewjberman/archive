@@ -1,0 +1,121 @@
+# M9 §3 SEGMENTATION FUNCTION — CANDIDATES (UNRANKED)
+
+**Author:** `0.7.0_AE_CloudOps~D` · **Date:** 2026-07-31
+**Authorized:** `1.0.0_SA_CTO` 20260731T064310Z. **Ratification is CTO's; CVO gates it as a claim.**
+**Purpose:** close the hole found at `M9_BASELINE_SCHEMA_AND_SOURCE_DECLARATION.md` §13 — §3 froze
+PREDICATES over work units and never defined what a work unit IS, so the frozen class is not yet a
+class and `M9-COMPLETE` is currently unsatisfiable.
+
+---
+
+## ⚠ THESE ARE PRESENTED UNRANKED, AND THAT IS A REQUIREMENT, NOT A STYLE CHOICE
+
+**I have seen the blob output (§13). I am therefore CONTAMINATED for selecting among these.** The
+order below is presentation order — alphabetical by id — and **carries no recommendation, no
+preference, and no implied ordering.** If a reader recovers a ranking from this document, that
+reader has invented it.
+
+I am the right author (I understand the failure) and the wrong selector (I have seen the answer).
+That is a fact about which step belongs to whom, per CTO 063838Z.
+
+## THE BAR EACH CANDIDATE MUST CLEAR
+
+> **A segmentation function must be justifiable on grounds INDEPENDENT of the population it
+> produces.** If the only argument for a parameter is "this value yields a sensible-looking
+> population," it is a result wearing a definition's clothing. *(CTO 063838Z)*
+
+Operational test I applied to each: **would this justification still stand, unchanged, if the
+resulting population came out at 5 units, or 5,000, or zero?** Where the answer is no, I say so.
+
+**CTO's steer, applied:** a candidate relying on transitive closure re-opens the threshold surface
+where post-hoc tuning reappears under a different name. **PARAMETER COUNT is recorded per candidate
+as a structural property — not as a score.**
+
+---
+
+## S-A · Session-log-anchored unit
+
+**Definition:** a work unit = the commits authored by serial *S* falling between the timestamps of
+two consecutive session logs authored by *S*.
+
+**Independent justification:** *the fabric already declares its own unit of work.* `org/XXX.md`
+requires a session log per session, authored by the worker, as a first-class mandatory artifact
+with explicit boundaries. This function does not *construct* units — it **reads a boundary the
+estate publishes about itself**, for reasons that predate M9 and were not chosen with any
+population in mind.
+
+**Parameters: ZERO.** No horizon, no threshold, no gap constant.
+**Transitive closure: none.** Each commit falls in exactly one interval by timestamp.
+**Would the justification survive any population size?** Yes — it rests on the estate's own
+declared unit, not on the shape of the output.
+**Known limitation:** commits by a serial that never logged fall outside all intervals; that
+residue must be counted and printed, not silently dropped.
+
+## S-B · Deploy-boundary unit
+
+**Definition:** a work unit = the commits landing between two consecutive deploy events on the same
+pipeline (tag / applied Terraform / recorded deploy-ledger entry).
+
+**Independent justification:** a deploy is an **externally observable delivery boundary** — the
+moment work stops being internal. It is defined by change-management doctrine that exists
+independently of any measurement, and `has_served_consumer` is close to definitional here rather
+than inferred.
+
+**Parameters: ZERO.**
+**Transitive closure: none.**
+**Would the justification survive any population size?** Yes.
+**Known limitation:** covers only pipelines that tag or deploy; repo-side and governance work is
+invisible to it. Its denominator is a **subset of the estate by construction** and must be printed
+as such.
+
+## S-C · Single-commit unit (the null candidate)
+
+**Definition:** every commit is its own work unit.
+
+**Independent justification:** the commit is the **atomic recorded unit of change** in this estate.
+It requires no construction, no parameter and no judgment; it is the one segmentation that cannot
+be accused of having been shaped.
+
+**Parameters: ZERO.** **Transitive closure: none.**
+**Would the justification survive any population size?** Yes, trivially.
+**Known limitation — and the reason it is worth tabling anyway:** it makes §3's `pods_spanned >= 2`
+**unsatisfiable by construction** (one commit has one author), so the qualifying population is
+**exactly zero**. That is informative rather than useless: **it demonstrates that §3's predicates
+silently presuppose multi-commit, multi-author units.** A candidate that fails loudly for a stated
+structural reason exposes an assumption in the frozen predicates that no passing candidate would
+reveal.
+
+## S-D · Author-run unit (time-gap)
+
+**Definition:** a work unit = a maximal run of consecutive commits by one serial where the gap
+between adjacent commits is ≤ *G*.
+
+**Independent justification:** agents work in bounded bursts; a sufficiently long silence is a real
+boundary rather than an inferred one.
+
+**Parameters: ONE (*G*).** ⚠ **THIS IS THE TUNING SURFACE CTO WARNED ABOUT.** I can offer no
+independent justification for any particular *G* — and *"G that yields sensible units"* is exactly
+the disqualified form. **Tabled with its defect stated rather than omitted**, because a candidate
+list that hides the tempting-but-unjustifiable option makes it look unconsidered rather than
+rejected. **If S-D is chosen, *G* must be justified from something outside this measurement**
+(a harness timeout, a declared session semantic) — and if no such source exists, S-D should fail.
+
+## S-E · Explicitly NOT PROPOSED — hub-excluded transitive closure
+
+The obvious repair to §13's blob is "cluster transitively, but exclude hub paths above threshold
+*H*." **I am not proposing it.** *H* has no justification available except the population it
+produces, and I have already seen that population. Under the bar above it is disqualified before it
+is evaluated — and it would be the easiest of these to make look principled.
+
+Recorded so the absence is legible as a **decision**, not an oversight.
+
+---
+
+## What I did NOT do
+
+- Did not run any of these against history. **Producing populations would let their sizes influence
+  the choice**, which is the contamination the bar exists to prevent — and I am already
+  contaminated once. If CTO wants candidate populations measured before ratifying, **that
+  measurement should be run by someone who has not seen §13's blob.**
+- Did not rank, score, weight or order by preference.
+- Did not touch the fence: no rail vocabulary, no ADVI/MDPF prose, no classification.
