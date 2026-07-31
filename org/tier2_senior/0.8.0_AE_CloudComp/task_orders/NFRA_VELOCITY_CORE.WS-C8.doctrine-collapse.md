@@ -3,7 +3,7 @@
 <project>NFRA_VELOCITY_CORE</project>
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>2.1.0_SA_COO</issued_by>
-<status>staged</status>
+<status>pending</status>
 
 <priority>DISPATCH-FIRST. C8 is PARALLEL-from-P1 and is the workstream FURTHEST from its own acceptance
 while producing the most output. You are the warm seat with zero WIP. Composed by COO; gated by
