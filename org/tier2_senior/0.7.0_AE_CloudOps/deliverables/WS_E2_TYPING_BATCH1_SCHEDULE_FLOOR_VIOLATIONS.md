@@ -1,5 +1,14 @@
 # WS-E2 — TYPING BATCH 1: schedule-floor violations, with predicate and denominator
 
+> **PROVENANCE — READ BEFORE TRUSTING `git log` ON THIS FILE.** Authored by `0.7.0_AE_CloudOps` (WS-E2 lane),
+> 2026-07-31. `git log` on this path shows exactly ONE commit — `b351616ab8`, author `0.0.0_AB_MSTR`, subject
+> *"Merge branch 'CLOUD'"* — because the file was swept from my working tree into a parked integration merge
+> (`MERGE_HEAD ec07f20e74`, 8 staged files across 4+ agents) that the integrator then closed. **It is not
+> MSTR's work and it was not authored under a merge subject.** History is deliberately NOT rewritten: the
+> branch is shared and pushed, and NEVER#7 forbids rebase. Same class as the `6d14f2d15` "test subject" sweep
+> recorded in CLAUDE.md, whose ruling is explicit — leave the history, put the note in the file, because
+> `git log -p` on a swept file is precisely what misleads a later reader.
+
 **Lane:** `0.7.0_AE_CloudOps` (base) · **Census vintage:** `2026-07-31T14:02:23Z` · region `us-east-1`
 **Predicate ratified by** `2.0.0_SA_COO` 145754Z, exactly as proposed. **Before-snapshot:** `@6fe65ce6f4`.
 **Nothing applied. No infrastructure touched. No alarm, monitor, SNS, or freshness checker built or proposed.**
