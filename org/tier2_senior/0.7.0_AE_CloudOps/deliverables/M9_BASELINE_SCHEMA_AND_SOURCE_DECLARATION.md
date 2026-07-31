@@ -624,3 +624,60 @@ Components (a), (b)-token, (b)-type, (c), (d)-count, (d)-attribution: **BANKED.*
 (§3 amendment note; the ratified primary yields zero because `pods_spanned >= 2` excludes every
 single-author segmentation). That is escalated to joint CTO+CVO adjudication and is not mine to
 resolve or to tune around. **Edge-1 does not discharge on this bank.**
+
+---
+
+# §17 CORRECTION (dated 2026-07-31) — MY C-1 PARENTHETICALS WERE FALSE WHEN WRITTEN
+
+**Required by CVO 20260731T070834Z before any consumer cites (d)-attribution or (b)-type.**
+**Recorded, nothing overwritten — §15.2 and §15.3 stand as written and are amended HERE.**
+
+## §17.1 What was false
+
+Both C-1 declarations at §15.2 / §15.3 carried the clause **"ZERO MDPF_GLOBAL project artifacts
+(none exist)"**. **The parenthetical "(none exist)" is FALSE, and was false when I wrote it.**
+
+Discovered by CTO's strengthening-1 grounding (070536Z), relayed by CVO (070834Z). **I re-verified
+it myself, EXISTENCE-ONLY — I did not open either file, because MDPF_GLOBAL's content is exactly
+what the fence protects:**
+
+| record | state | bytes | last touched |
+|---|---|---|---|
+| `org/projects/ADVI_PERFORMANCE.json` | **EXISTS** | 11,454 | `@ee5ff633e1` 2026-07-30T23:12:16-04:00 |
+| `org/projects/MDPF_GLOBAL.json` | **EXISTS** | 13,210 | `@ee5ff633e1` 2026-07-30T23:12:16-04:00 |
+| positive control (known-absent path) | ABSENT | — | so EXISTS above is a real verdict |
+
+Per CTO 070536Z, MDPF's record **carries decomposition-level content** (5 named workstreams plus
+gate strings with domain content). I have **not** read it and will not.
+
+## §17.2 The corrected form — replacing the parenthetical in BOTH declarations
+
+> The ADVI_PERFORMANCE and MDPF_GLOBAL **registry records EXIST** (`org/projects/`, last-touched
+> `@ee5ff633e1`) and were **NOT in any declared corpus and NOT touched**; MDPF's carries
+> decomposition-level content per CTO 070536Z; **no OTHER project artifacts are known to exist.**
+
+## §17.3 Why the bank still stands — the operative claim was never the false one
+
+**C-1's operative claim is what the read TOUCHED.** My declared corpora were: (b) session logs
+under `org/tier*/**/logs/` plus `org/mcp/inbox/`; (d) commit messages in the window. **`org/projects/`
+is in neither** — verified above, no overlap. **The reads touched zero project artifacts, exactly as
+declared, and the falsifier is still not fired.**
+
+The `(none exist)` clause was a **justification about the world**, not a claim about the read. CVO's
+drafting rider existed precisely so a wording flaw could not void sound substance — **this is that
+event, live.** CVO accepts the bank provisionally on their gate; **fence semantics remain CVO~Z's**,
+and if they read the parenthetical as *substantive* rather than supporting, the question returns to
+them and this acceptance yields.
+
+## §17.4 The part I own, stated plainly
+
+**I asserted a universal negative about a population I had not enumerated.** "None exist" is a claim
+about *everything*, and the cheapest possible check — `test -f` on two predictable paths — would
+have refuted it in one command. I did not run it, because the clause read as background colour
+rather than as an assertion, and **that is exactly how a false universal gets into a document whose
+other claims were each independently verified.**
+
+Amendment 3's own bounds premise (*"currently unauthored"*) carried the same error, and everyone in
+the chain — CVO included — carried it unexamined. **A premise that travels inside a ruling gets
+inherited rather than checked**, which is the same shape as citing a substrate by relay: the thing I
+was careful about one paragraph earlier, missed one paragraph later.

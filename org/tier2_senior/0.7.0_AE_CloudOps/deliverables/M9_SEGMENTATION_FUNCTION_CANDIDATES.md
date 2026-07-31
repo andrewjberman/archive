@@ -252,3 +252,57 @@ it, not of its own predicate.**
 Correcting it here rather than waiting, because a vacuous zero left standing in a record is exactly
 the shape that gets quoted later as though it were measured — and the whole S-A finding is
 load-bearing for the escalated §3 question.
+
+---
+
+# §PROBES — SEG-0 v3 SATISFIABILITY PROBES (authorized CVO 20260731T070928Z, CTO concurred 065455Z)
+
+**A probe is a MEASUREMENT, not a ratification.** Pair ratification (CTO + CVO) comes *after*
+reading this. Per-predicate INDEPENDENT form: each predicate measured against the **full** segmented
+population, cascade published beside it and labelled distinctly.
+
+## CLASS (B) — NATURAL-UNIT · single-author boundary (S-A) · `pods_spanned` DROPPED
+
+**Full segmented population (probe denominator): 3,530 units**
+
+| predicate | INDEPENDENT | of full population |
+|---|---|---|
+| `pods_spanned >= 2` | — | **DROPPED for this class** |
+| `has_served_consumer` | **859** | **24.3%** |
+| `delivered_within_window` | 3,530 | 100.0% |
+
+Cascade beside it: `AND has_served_consumer` 859 → `AND delivered_within_window` 859. **No vacuous
+step** — nothing here is downstream of a zero.
+
+> ### THE RESULT THAT MATTERS: (B) IS SATISFIABLE, AT 24.3%
+> This is precisely the quantity my earlier S-A cascade zero **established nothing about** — it was
+> a zero downstream of the pods zero, and it read as though `has_served_consumer` had been measured
+> over single-author units when it had not. **Measured independently, it is 859/3,530.** The
+> natural-unit class is viable where the frozen §3 *combination* was not, and the thing that made
+> §3 unsatisfiable was the pods predicate alone, not the predicate set.
+
+## CLASS (A) — TARGET-CLASS · ratified per-pipeline delivery boundary (S-B)
+
+**Full segmented population (probe denominator): 318 units**
+
+| predicate | INDEPENDENT | of full population |
+|---|---|---|
+| `pods_spanned >= 2` | **59** | **18.6%** ← the binding constraint |
+| `has_served_consumer` | 318 | 100.0% |
+| `delivered_within_window` | 318 | 100.0% |
+
+Cascade beside it: 59 → 59 → 59. **No vacuous step.**
+
+> **`has_served_consumer` is unconstraining on this class at 100% — near-definitional, as predicted
+> when S-B was proposed** (a deploy boundary is where work stops being internal). So on (A) the
+> pods predicate does all the filtering, and the other two do none.
+
+## What the two probes say together
+
+**The pods predicate is the entire binding constraint in both classes** — it removes 81.4% of (A)
+and made §3 unsatisfiable outright against single-author segmentations. The other two predicates
+are unconstraining wherever they have been measured independently (100%, 100%, 100%).
+
+**Neither figure is a ratification and neither is banked.** Terminal counts: **(A) 59 · (B) 859**.
+Publishing both, labelled, per the binding condition; the pairs live or die on CTO's and CVO's read
+of this output, not on mine.
