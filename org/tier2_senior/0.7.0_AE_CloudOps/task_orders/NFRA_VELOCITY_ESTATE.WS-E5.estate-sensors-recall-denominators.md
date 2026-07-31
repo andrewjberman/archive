@@ -79,7 +79,46 @@ schedules** against a carried 143 + 11 -- drift on BOTH limbs, in OPPOSITE direc
 UNRECONCILED. CTO: *"a sensor built on a census nobody reconciled inherits the gap."*
 </amendment>
 
-<amendment date="20260731T1519Z" by="2.0.0_SA_COO" subject="CORRECTION TO THE AMENDMENT BELOW -- 'IT IS A CLASS' IS REFUTED BY MEASUREMENT. NOT UNIVERSAL. Read this BEFORE the 1510Z block.">
+<amendment date="20260731T1803Z" by="2.0.0_SA_COO" subject="⚠ THE AXIS IS LEGIBILITY, NOT SCOPE-TRACKING. This TO's phase-3 standard as written is UNSATISFIABLE BY ANY MEASURED INSTRUMENT -- read this FIRST.">
+**`~D` RETRACTED ITS OWN COUNTER-EXAMPLE (20260731T175942Z) AND THE RETRACTION CHANGES THIS TO's BAR.**
+
+It reported `comp-trigger` as the **scope-correct** instrument that refuted universality. **Running it
+properly REFUTES THAT CLAIM:**
+```
+  comp-trigger --list (wide)   ->  "142 events-rules + 12 schedules"
+  comp-trigger mdpf   (narrow) ->  "142 events-rules + 12 schedules"    <- IDENTICAL
+```
+>> **BOTH MEASURED INSTRUMENTS CARRY SCOPE-INVARIANT DENOMINATORS.** `comp-trigger` is not
+scope-correct and never was. <<
+
+**THE REAL DISCRIMINATOR IS LEGIBILITY, NOT SCOPE-TRACKING.** `comp-trigger` prints
+`forensics for: "mdpf"` and **LABELS its count as the SCANNED population**, so a reader can separate
+scan-population from answer-population. `comp-legacywriter` names the run, the spec and the source
+HEAD -- **and never the target.** One is legible; **neither varies.**
+
+**⛔ CONSEQUENCE FOR THIS TO, AND IT IS A DEFECT IN MY OWN TEXT: the phase-3 mandate below says
+"MUTATE: make its address space wrong and confirm the report changes," and the acceptance says the
+boundary report must be "MUTANT-PROVEN: it changes when the address space changes." THAT PREDICATE IS
+SATISFIED BY ZERO MEASURED INSTRUMENTS.** Wiring a standard to it would make every tool fail
+conformance -- **unimplementable rather than demanding**, and it would send a lane hunting a defect in
+each tool rather than a missing convention across all of them.
+
+**✅ THE CORRECTED BAR -- achievable today by both measured instruments and still a real improvement:**
+> **NAME the address space you ranged over, and LABEL the count as the SCANNED population.**
+A boundary report passes when a reader can tell **what was scanned** from **what the answer ranges
+over**. It does NOT have to make the number move.
+
+**THIS CARRIES BEYOND E5:** the same corrected axis must travel with the C7-vs-D3 cross-fabric seam --
+**if C7's schema is wired on the assumption that a conforming declaration VARIES WITH SCOPE, it is
+wired to a predicate nothing satisfies.** Relayed to MSTR at 180255Z for Andrew's seams review.
+
+**WHAT SURVIVES UNCHANGED: the class refutation.** The defect is per-instrument, NOT universal;
+n=2, chosen for family contrast, never a rate; **"NOT UNIVERSAL," never "rare."** Only the AXIS
+narrows. *(`~D` caught this by RE-RUNNING its own counter-example rather than citing its earlier
+result -- the second time in one day that lane falsified its own finding before anyone else read it.)*
+</amendment>
+
+<amendment date="20260731T1519Z" by="2.0.0_SA_COO" subject="CORRECTION TO THE AMENDMENT BELOW -- 'IT IS A CLASS' IS REFUTED BY MEASUREMENT. NOT UNIVERSAL. (AXIS FURTHER NARROWED 1803Z ABOVE -- read that first.)">
 **THE 1510Z AMENDMENT BELOW ASSERTS THE UNSCOPED-BOUNDARY DEFECT IS A CLASS COVERING "MOST OF THE
 EXISTING POPULATION." THAT IS REFUTED. It survived 9 minutes.** Detector 2 (@708f7ba84c) measured a
 counterexample, so the universality claim is dead; the membership PREDICATE survives intact.
