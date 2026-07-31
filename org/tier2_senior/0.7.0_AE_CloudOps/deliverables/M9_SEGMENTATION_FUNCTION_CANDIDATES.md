@@ -119,3 +119,68 @@ Recorded so the absence is legible as a **decision**, not an oversight.
   measurement should be run by someone who has not seen §13's blob.**
 - Did not rank, score, weight or order by preference.
 - Did not touch the fence: no rail vocabulary, no ADVI/MDPF prose, no classification.
+
+---
+
+# §RESULTS — S-A and S-B MEASURED. BOTH PUBLISHED UNCONDITIONALLY.
+
+**Ratified:** CTO 20260731T064734Z — S-A PRIMARY, S-B INDEPENDENT CROSS-CHECK, **binding condition:
+publish both whichever looks better; a divergence is reported, never resolved by preference.**
+**Window:** 2026-04-30 .. 2026-07-29 (pre-framework), 15,770 commits.
+
+| | **S-A** (primary) | **S-B** (cross-check) |
+|---|---|---|
+| units formed | 3,530 | 455 |
+| commits covered | 15,709 | 15,770 |
+| **AND** `pods_spanned >= 2` | **0** | 431 |
+| **AND** `has_served_consumer` | **0** | **415** |
+| unit size min/median/max | 1 / 2 / 488 | 1 / 16 / 635 |
+| **max pods in ANY unit** | **1** | 24 |
+
+## THE DIVERGENCE IS TOTAL, AND IT IS STRUCTURAL — NOT NOISE
+
+**The ratified PRIMARY yields a §3-qualifying population of exactly ZERO.** Not small — zero, and
+zero for a reason that no amount of data would change.
+
+**A session log is authored by ONE serial.** So a session-log-anchored unit contains one serial's
+commits **by construction** — `max pods in any unit = 1`, measured, across all 3,530 units.
+Therefore `pods_spanned >= 2` is **unsatisfiable**, and the population is empty before any content
+is considered.
+
+## THIS IS THE THIRD COLLISION WITH THE SAME PREDICATE — §3 AMENDMENT NOTE
+
+S-C (the null candidate) hit it. **S-A, the ratified primary, hits it.** The generalisation:
+
+> **§3's `pods_spanned >= 2` is incompatible with ANY single-author segmentation — and the estate's
+> own published work-unit boundary is single-author by construction.**
+
+The predicate silently presupposes a **multi-agent collaboration unit**, which *neither the commit
+nor the session log supplies*. Only an **external delivery boundary** (S-B) produces multi-author
+units at all. So §3 did not merely omit a segmentation function (§13); **its predicates additionally
+constrain which segmentations can ever satisfy them** — and they rule out the one the estate
+publishes about itself.
+
+**Reported, not resolved.** Per CTO 064734Z this is a finding about the estate and about the freeze,
+**not grounds to re-open the selection.** I am not preferring S-B because it produced a usable
+number; that is precisely the move the binding condition forbids.
+
+## ⚠ DECLARED IMPLEMENTATION DEVIATION IN S-B — read before citing its 415
+
+**S-B as I PROPOSED it:** commits between consecutive deploy events **on the same pipeline**.
+**S-B as I MEASURED it:** commits between consecutive tags **globally, by tag time**, across all
+477 in-window tags — a coarser, time-sliced approximation that does **not** scope units per
+pipeline.
+
+This is a real deviation and it inflates coverage: the global form covers **all 15,770 commits**,
+whereas the per-pipeline form would produce smaller, pipeline-scoped units and a **subset**
+denominator — the very subset-coverage limitation S-B was required to declare.
+
+**So S-B's 415 is a number for the global-tag-time segmentation, NOT for the ratified per-pipeline
+definition.** Citing it as the latter would be exactly the name-vs-computation defect this artifact
+has now caught three times. The per-pipeline measurement is not run.
+
+## Status
+
+Neither number is banked as the §3-population capture. **S-A is the ratified primary and it yields
+zero**; S-B's figure is from a deviating implementation. Both are published here unconditionally as
+required, and what happens next is CTO's and CVO's, not mine.
