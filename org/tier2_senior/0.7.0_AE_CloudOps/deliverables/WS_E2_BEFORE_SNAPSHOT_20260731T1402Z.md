@@ -144,7 +144,50 @@ candidate, the **DELETE parks and the schedule-floor typing lands.**
 
 ---
 
-## 6. POSTURE
+## 6. THE BOUND ON THIS CENSUS — what it could NOT have seen
+
+**`T = 154` is the EVENTBRIDGE-ADDRESSABLE trigger population. It is NOT the population of things that can
+start a pipeline.** Stated in the census's own voice, because a denominator that does not declare its own
+scope will be read as total.
+
+**What is genuinely closed** (measured, not assumed): both systems (Rules AND Scheduler); all 17 regions;
+and **all event buses — exactly one (`default`) exists, holding exactly 142 rules.** The EventBridge escape
+hatches are shut, and the partition (20 event-pattern + 122 scheduled = 142, no residue) is complete **for
+EventBridge rules.**
+
+**What this census is structurally blind to — a THIRD CLASS: producer-to-producer DIRECT INVOKE.**
+Not hypothetical. Source-authored and named, `infra/aws/lambda/inf-pipeline/inf-gold-trigger/lambda_function.py:246-261`
+(read directly, verbatim):
+
+> *"There are FOUR armed paths into this function, and only three are EventBridge rules … the silver
+> aggregator — DIRECT lambda invoke — **NOT a rule; invisible to `list-rule-names-by-target` AND to
+> `get-policy`** (an IAM-role caller needs no resource-policy statement). Disabling the rules is a
+> **PLACEBO** … **THE DOORS ARE NOT THE CHOKEPOINT.** This function is: every path must pass through it.
+> Assert here."*
+
+**Measured live, independently, before reading that source:** `inf-gold-trigger` fires daily at
+`13:47:24Z` with `{"mode": "full", "source": "aggregator"}` while **all three** of its EventBridge rules
+are DISABLED and its resource policy names **only** those three. Three instruments — the trigger graph, the
+resource policy, and a repo source search — each reported truthfully and none could see the live driver.
+
+⚠ *That source comment describes two of the rules as ENABLED; they are DISABLED today. The comment is a
+point-in-time record and its enumeration is what is load-bearing, not its state column.*
+
+### Consequence for WS-E2's acceptance clause
+
+**The schedule-floor law sees EventBridge. A direct-invoke-driven pipeline is outside its reach.** So
+"zero unscheduled production pipelines" cannot be certified from this census alone — the census cannot
+enumerate the direct-invoke class, and that limit belongs beside the intent limit already routed to CTO.
+
+> **A CONTROL CAN BE CORRECT, DOCUMENTED, LIVE — AND STILL INVISIBLE TO EVERY INSTRUMENT AIMED AT ITS
+> LAYER. The only thing that found this one was READING THE FUNCTION.**
+
+This is E5's boundary standard applied to this census, with a source-authored specimen — the same
+discipline that made all 17 regions a measurement instead of an assumption.
+
+---
+
+## 7. POSTURE
 
 Zero live infrastructure touched. No deploy-completion ledger entry opened — deliberately, so that an
 open entry continues to mean exactly what it is supposed to mean. No alarm, SNS topic, freshness
