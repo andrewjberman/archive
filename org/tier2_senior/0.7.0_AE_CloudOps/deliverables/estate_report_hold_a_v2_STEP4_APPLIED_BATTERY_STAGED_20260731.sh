@@ -1,4 +1,46 @@
 #!/usr/bin/env bash
+# =============================================================================================
+# *** SUPERSEDED 20260731T1355Z -- DO NOT RUN. THIS SCRIPT WOULD NOW REPORT A FALSE FAILURE. ***
+# =============================================================================================
+# Superseded by CVO 20260731T135324Z, ~25 min after I authored it. CTO found that IAM CANNOT
+# EVALUATE "TODAY"; CVO then ruled (a)-deliberate + storage-layer integrity for BOTH principals,
+# superseding CVO's OWN daily-apply ruling.
+#
+# THE SPECIFIC WAY THIS FILE IS NOW WRONG -- and it is wrong in the dangerous direction:
+#   Invocation (2) below asserts DENY on {past-day}/text-input/ and treats an ALLOW as a floor
+#   violation. Under the new ruling a **past-day ALLOW is EXPECTED AND DELIBERATE** -- the date
+#   dimension is no longer the fence at all. So this script, run against a CORRECTLY applied
+#   policy, prints "floor NOT satisfied" and reports a healthy boundary as broken.
+#   **A FALSE FAILURE ON A CVO GATE IS NOT A SAFE ERROR** -- it manufactures pressure to "fix" a
+#   policy that is right, which is how a correct fence gets widened.
+#
+# THE NEW BATTERY (CVO 135324Z) fences on PRINCIPAL and SUBFOLDER, not on date:
+#   - per-principal ALLOWs, subfolder-scoped, ALL DATES (past-day ALLOW expected)
+#   - CROSS-PRINCIPAL DENYs: runner DENIED on text-input/ and signed-review/; the writer role
+#     denied on everything but text-input/  <- the discriminator lives here now
+#   - STORAGE EXERCISES: (i) versioning enabled, verified LIVE; (ii) OVERWRITE MUTANT -- PutObject
+#     twice on one key, version count must go 1->2 with the original intact; (iii) FALLBACK MUTANT
+#     -- break the assume-role path, the write must FAIL LOUD (a success means ambient-credential
+#     fallback, i.e. the role is decoration); (iv) manifest-hash detection against a deliberately
+#     altered copy.
+#
+# WHY I AM NOT WRITING THE REPLACEMENT YET, deliberately: the floor has moved TWICE in ~20 minutes
+# and step 3 now waits on **Andrew's step-0 yes/no** (writer-role creation, held by CTO as a
+# distinct act). Authoring a third battery against an unsettled contract would just be re-derived
+# again -- and a staged script frozen at authoring time firing a stale verdict is precisely the
+# failure the 49F watch script already committed once. The replacement gets written when the
+# principals exist and the contract stops moving.
+#
+# WHAT SURVIVES AND WAS RATIFIED: the DISCRIMINATOR PRINCIPLE in section (1) below -- if the
+# expected-ALLOW case also denies, the battery is VOID AND UNRUNNABLE, never "all boundaries held."
+# CVO ratified that permanently into the battery spec for every seat: at least one expected-ALLOW
+# and one expected-DENY on the same principal, or the run proves nothing about either.
+#
+exit 99   # hard stop: refuses to run rather than emit a superseded verdict
+# =============================================================================================
+#
+# ---- ORIGINAL CONTENT BELOW, PRESERVED UNEDITED FOR THE RECORD (do not resurrect piecemeal) ----
+#
 # STAGED -- DO NOT EXECUTE YET. Fires only AFTER hold (a) v2 step 3 (safe-apply) has LANDED.
 #
 # CVO hold (a) v2, STEP 4 of 6: the APPLIED IAM battery for the estate-report day-first storage contract.
