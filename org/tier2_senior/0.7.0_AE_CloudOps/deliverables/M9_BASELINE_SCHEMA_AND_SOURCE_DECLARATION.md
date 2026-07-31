@@ -555,3 +555,68 @@ terminal state**. I am not incentivised to rescue either one.
 shared by two objects, the fence follows the object whose structure the future test will TYPE —
 never the name. Mechanical discriminator: if the ratified substrate already builds on it, it was
 never fenced.*
+
+---
+
+# §16 (d)-ATTRIBUTION + (b)-TYPE — BANKED (CVO gate word 20260731T070250Z)
+
+**Cleared:** both C-1 declarations PASSED at §15; CVO re-derived all five substrate checks
+independently. Reads confined to the declared corpora. **Added table — nothing above overwritten.**
+**Declaration vintage:** §15 @`aee8ec028b` / header @`2dab415fdc`. **Freeze:** @`e649eb8249`.
+
+## §16.1 `d_rework_wave_denominator_attributed`
+
+| metric | value | denominator | capture_method | scope | status |
+|---|---|---|---|---|---|
+| `d_rework_wave_denominator_attributed` | **282** | 15,772 reference-class commits | `SELF_REPORT` | `repo_global` | MEASURED |
+| unattributable residue | **15,490** | same | — | — | **98.2%** |
+
+Per-pattern, reported separately, never summed into a rate: `denominator` 252 · `undercount` 14 ·
+`miscount` 6 · `recount` 6 · `overcount` 3 · `re-count` 2 · `wrong count` 1 · `wrong population` 1 ·
+`wrong scope` 1.
+
+> ### ⚠ THE 98.2% RESIDUE IS *UNATTRIBUTABLE*, NOT *NOT-CAUSED*.
+> Absence of an indicator in prose is **not** absence of the cause. Reading 282/15,772 as "1.8% of
+> rework was denominator-caused" would convert a **coverage limit into a rate** — the identical law
+> that governs (b)'s token zero and COO's M1c. The honest statement is: **282 are attributable; the
+> cause of 15,490 is not recoverable from the prose that exists.**
+
+## §16.2 `b_canonicity_questions` — THE TYPE AXIS, and it is 1–2 ORDERS OF MAGNITUDE BELOW THE MENTION AXIS
+
+Type = a canonicity token co-occurring with an interrogative marker (pre-registered,
+project-generic per §6.1). **Both corpus halves reported separately — never summed (CVO condition 3).**
+
+| corpus | files | MENTION lines | **TYPE lines** | type/mention | scope |
+|---|---|---|---|---|---|
+| session logs | 4,208 | 7,055 | **94** | **0.013** | `repo_global` (durable) |
+| inbox bodies | 54,735 | 22,742 | **840** | **0.037** | ⚠ `device_local` (perishable) |
+
+### THIS RETROSPECTIVELY PRICES §12.2's NUMBER
+
+§12.2 banked the **mention** axis — 7,304 `canonical` hits in logs. The actual **question** count in
+that same corpus is **94**. Had the mention figure ever been cited as "the canonicity question
+count," it would have overstated it by roughly **75×**. §12.2 was labelled correctly at the time and
+is not retracted; **what changes is that the gap is now measured rather than asserted.** Fourth
+name-vs-computation catch in this artifact.
+
+### AND IT CONFIRMS THE 77/23 SPLIT WAS UNDERSTATING THE PROBLEM
+
+The inbox type/mention ratio (**0.037**) is **~2.8× the logs ratio (0.013)** — questions are asked
+disproportionately in *messages*, not in retrospective logs, which is what one would expect and
+what I could previously only argue. **So a durable-only (b) does not merely lose 77% of the volume;
+it loses the corpus where the behaviour concentrates**, and it loses it at a higher rate than the
+raw volume split implies. That strengthens the §14.1 required declaration rather than softening it.
+
+## §16.3 Falsifier — NOT fired
+
+Neither classification required MDPF_GLOBAL project artifacts or ADVI decomposition artifacts. C-1
+holds truthfully for both as declared at §15.2 / §15.3. **Reported as not-fired rather than left
+silent**, since a falsifier nobody reports on is indistinguishable from one nobody checked.
+
+## §16.4 M9 status after this bank
+
+Components (a), (b)-token, (b)-type, (c), (d)-count, (d)-attribution: **BANKED.**
+**M9-COMPLETE is still NOT reached** — the §3-population capture remains unsatisfiable as frozen
+(§3 amendment note; the ratified primary yields zero because `pods_spanned >= 2` excludes every
+single-author segmentation). That is escalated to joint CTO+CVO adjudication and is not mine to
+resolve or to tune around. **Edge-1 does not discharge on this bank.**
