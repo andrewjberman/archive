@@ -765,3 +765,102 @@ outside those roots whether the outside files number zero, two, or a thousand.
 existence is answered by a byte count, never by opening a file. And the fence discriminator is **not
 the field name**: it is *"does the string name a thing the RAILS would type?"* — a domain
 segment/scope name is fenced; program-management metadata (pods/phase/status/owner) is not.
+
+---
+
+# §18 CLASS-SCOPED CAPTURE — the §3-population capture, over BOTH ratified classes
+
+**Joint pair ratification COMPLETE:** CVO half 20260731T072035Z + CTO half 20260731T072154Z, both
+on the probe outputs, checked for satisfiability *and* justification-independence.
+**All three riders folded BEFORE the numbers.**
+
+⚠ **This GO does NOT touch the HELD components.** `(b)`-TYPE and `(d)`-attribution remain
+**HELD-NOT-CITABLE** pending CVO~Z (§17.5/§17.5a latch). Ratification cleared the **class
+definitions**; it said nothing about fence disposition. *A GO arriving beside a HOLD is exactly
+where a hold quietly evaporates* — it does not evaporate here.
+
+## §18.1 Results — N printed with EVERY statistic (rider 3), never in a methods note
+
+| metric | **CLASS (A)** target-class | **CLASS (B)** natural-unit |
+|---|---|---|
+| **N (units)** | **59** | **859** |
+| commits in class | 332 | 5,359 |
+| `a_archaeology_tags` | 3 · [N=59, 26 tag-instances] | 68 · [N=859, 629 tag-instances] |
+| `a_build_tags` | 20 · [N=59, 26 tag-instances] | 286 · [N=859, 629 tag-instances] |
+| `a_archaeology_ratio` | **0.1304** · [N=59, **denominator 23**] | **0.1921** · [N=859, denominator 354] |
+| `d_retouch_rate` | **38.86%** · [N=59, denominator 332] | **53.88%** · [N=859, denominator 5,011] |
+
+### ⚠ MY OWN CAVEAT, unprompted: (A)'s ratio rests on 23 observations
+
+`a_archaeology_ratio = 0.1304` for the target class is computed over **23 tag-instances spread
+across 59 units.** That is thin enough that it should carry very little weight, and a single
+differently-tagged session moves it materially. **This is exactly the failure rider 3 exists to
+prevent** — the number is quotable, the denominator is not, and 0.1304 reads far more precise than
+23 observations can support. Stated here rather than left for a reader to reconstruct.
+
+## §18.2 RIDER 2 — the two 100% predicates are 100% for DIFFERENT REASONS (CTO)
+
+This distinction is load-bearing and must never collapse:
+
+| predicate | why it reads 100% | can it EVER bind? |
+|---|---|---|
+| `delivered_within_window` | **STRUCTURALLY REDUNDANT** — both segmentations draw their boundaries from **in-window events**, so every unit is in-window **by construction** | **NO — not under either pair, on any data** |
+| `has_served_consumer` | near-definitional **under (A) only** (a deploy boundary is where work stops being internal) | **YES — it BINDS at 24.3% under (B)** |
+
+**A later reader who treats them as equivalent either trusts a dead control or drops a live one.**
+One is a tautology wearing a predicate's clothes; the other is a real discriminator that merely does
+not bite in one class.
+
+## §18.3 RIDER 1 — non-binding predicates ride WITH their probe output
+
+Both non-binding predicates stay in the frozen class definitions **with their probe measurements
+attached** (§PROBES in the candidates artifact), explicitly labelled non-binding — so nobody later
+reads them as doing work, and nobody optimises them away as dead weight either.
+
+## §18.4 What this does and does not close
+
+**CLOSES:** the §3-population capture, over both ratified classes — the item CVO's M9-COMPLETE
+definition named and that was **unsatisfiable until the dual-class structure existed.**
+**DOES NOT CLOSE:** M9-COMPLETE, which also requires `(b)`-type and `(d)`-attribution **resolved** —
+they are captured but **HELD** pending CVO~Z. **Edge-1 does not discharge on this section**, and
+this document is not the authority that would lift anything.
+
+---
+
+# §19 HOLD LIFTED — both components CITABLE, FINAL
+
+**Authority: `3.0.0_SA_CVO` 20260731T072526Z** — the field's owner, current word, not a relay.
+The §17.5a latch worked exactly as designed: **it could only ever read HELD, and it did not lift
+itself.** This section records CVO's lift; it does not assert it.
+
+**`d_rework_wave_denominator_attributed` and `b_canonicity_questions` (TYPE) are CITABLE, FINAL.**
+Both correction limbs verified by CVO at `@f45d71cc6b`: §17.2 = limb (a) strike, §17.6 = limb (b)
+exclusion evidence — accepted as *structural, path-prefix-decidable per component, complete, and
+independent of file contents or existence.*
+
+## §19.1 CORRECTION TO MY OWN RIDER-2 WORDING — I over-claimed the scope
+
+§18.2 says `delivered_within_window` **"can NEVER bind — not under either pair, on any data."**
+CVO's ratified wording is narrower and correct:
+
+> **STRUCTURALLY REDUNDANT under BOTH pairs** — both segmentations draw boundaries from in-window
+> events, so it cannot bind **under these two pairs**; its 100% is an artifact of population
+> formation and carries zero information. **SCOPE-BOUND: an OUT-OF-WINDOW segmentation could
+> REVIVE it.**
+
+**"On any data" was a universal claim; the true claim is universal only within the ratified pairs.**
+The predicate is dead *relative to how these populations are formed*, not dead in itself — and a
+future segmentation that draws boundaries from out-of-window events would make it live again.
+
+Correcting because this is the **second universal I over-stated tonight** — the first was
+*"(none exist)"* — and both had the same shape: **a claim true in the case in front of me, written
+as though true everywhere.** The tell is identical both times: no enumeration of the population the
+universal quantifies over. Here the population is *possible segmentations*, and I checked two.
+
+## §19.2 Standing controls adopted for all future capture runs
+
+- **Per-predicate independent form**, cascade beside it, labelled — never a filter chain.
+- **Scope and coverage declarations ride with every figure**, as required fields not footnotes.
+- **N=59 prints with every target-class figure**, folded into the class-matching declaration.
+- **Amendment 4 bright line on any verification retrieval: KEY PRESENCE, NEVER VALUES** — carried
+  with its honest residual: a **bounded-and-knowable shape leak, not zero.**
