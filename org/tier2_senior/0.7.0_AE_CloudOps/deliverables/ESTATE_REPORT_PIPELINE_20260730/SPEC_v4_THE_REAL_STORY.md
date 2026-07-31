@@ -108,6 +108,23 @@ s3://opal-estate-report/{YYYY-MM-DD}/
 §6.1), so a partition that cannot express "which device" makes a partial day indistinguishable from a
 complete one. **The key itself carries the denominator.**
 
+**MANIFEST HOME — PINNED (CVO binding hold (b), 020112Z).** Andrew's list ended *"something like
+this"*, so it was illustrative, not exhaustive — and it left the contract-v2 manifest unhomed. Pinned
+at the **DAY ROOT, beside the five folders, not inside any of them**:
+
+```
+s3://opal-estate-report/{YYYY-MM-DD}/manifest.json
+```
+
+**Why the root and not a sixth folder:** the manifest is *about* the day — it describes the state of
+all five classes (born `RUNNING`, `PENDING` on success, `FAILED` with a reason, flipped by
+signed-review). **An object that describes its five siblings cannot live inside one of them without
+implying it belongs to that one.** A reader listing a day sees five folders and exactly one status
+file, and the shape itself says which is which.
+
+This placement is **MSTR's declared carrier-amendment trigger** (oracle mechanics = manifest
+shape/location, their 013830Z) — MSTR is notified at the moment of placement, not at build end.
+
 **"change-cochange" IS AN INSTRUCTION, not a folder name.** Ruling 7 said *"git co change"* and I read
 it as "git change"; this names it twice. **CO-CHANGE — what moves TOGETHER — is a required analytic,
 not a synonym for change.** Two files that always change in the same commit are coupled whether or not
