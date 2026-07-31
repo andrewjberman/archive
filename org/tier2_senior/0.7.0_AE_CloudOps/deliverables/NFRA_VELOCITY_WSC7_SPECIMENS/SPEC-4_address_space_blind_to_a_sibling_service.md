@@ -5,13 +5,21 @@
 list-rules` -> structurally blind to EventBridge Scheduler; 11 live schedules absent."*
 **Basis: EXERCISED.** Re-derived live on account `313476888478`, 2026-07-31 ~17:19Z.
 **Status:** LIVE. Not fixed; it is a property of the AWS API surface, not of our code.
+**SUITE PROGRESS: 1 of 9** canonical specimens written (this one). **Remaining 8 named at
+`NFRA_DEBTLOOPS_ANDREW_VOICE_MEMO_20260729.md:140-161`** -- enumerated in
+`WSC7_SUITE_ENUMERATION_AND_COUNT_FINDING.md` section 1. *Printed per L-16: a bare green is not a
+count, and a suite with no denominator is the defect this suite exists to demonstrate.*
 
-> **WHY THIS ONE, WHILE TWO RULINGS ARE OPEN:** it is **in scope under BOTH readings of the suite
-> fork** -- under (a) it IS a member of the canonical nine; under (b) it is available to choose. **It
-> costs nothing under either answer**, which is why it is the one I could write while blocked.
-> **The `Class 1 / Class 2` classification line is DELIBERATELY ABSENT** -- that term resolves
-> nowhere in the estate and inventing it to complete my own acceptance criterion is the invented-
-> oracle failure. **The line goes in when the term is defined.**
+> **WRITTEN WHILE TWO RULINGS WERE OPEN; BOTH ARE NOW CLOSED.** It was chosen because it was **in
+> scope under BOTH readings of the suite fork** -- under (a) a member of the canonical nine, under
+> (b) available to choose -- so it cost nothing under either answer. **CTO~Z ruled (a) at
+> `173205Z`: this IS canonical #2.**
+>
+> **The classification line was DELIBERATELY ABSENT** -- `Class 1 / Class 2` resolved nowhere in the
+> estate, and inventing it to complete my own acceptance criterion is the invented-oracle failure.
+> **CTO~Z repaired the PRD clause at `@05adba68b` and the line has now LANDED (section
+> "CLASSIFICATION" below).** *Recorded because the sequence is the point: the hole stayed open for
+> ~22 minutes and was filled by a definition, not by me deciding what the term probably meant.*
 
 ---
 
@@ -84,6 +92,48 @@ strongest form available: I did not have to imagine how the instrument could fai
 
 ---
 
+## CLASSIFICATION -- against the REPAIRED acceptance criterion
+
+**Criterion** (`NFRA_VELOCITY_CORE_PRD.md` @`05adba68b`, replacing the undefined `Class 1 / Class 2`):
+*"each specimen re-derives as **a true measurement of the wrong proposition** that the contract
+surfaces."* **IN CLASS** = the output was CORRECT for the question it actually answered, and that
+question was not the one asked. **OUT OF CLASS** = merely a wrong number.
+
+| limb | the question actually answered | the question asked | verdict |
+|---|---|---|---|
+| structural | *"how many EventBridge **Rules** exist?"* -> **142, exactly right** | *"how many **triggers** exist?"* | **IN CLASS** |
+| pagination | *"how many rules are on **page one**?"* -> **100, exactly right** | *"how many rules exist?"* | **IN CLASS** |
+
+> **THE PAGINATION LIMB IS THE SHARPER TEST OF THE CRITERION, BECAUSE IT LOOKS LIKE A WRONG NUMBER
+> AND IS NOT.** `100` is not an error, a truncation, or an approximation -- **it is the exact and
+> complete answer to a question I did not ask and did not know I was asking.** Under the old
+> undefined clause I could have graded this either way; under the repaired one it is decidable, and
+> it decides IN. **That is the criterion doing work, which is the property the old one lacked.**
+
+### EVIDENCE ON CTO~Z's PROPOSED TWO-WAY SPLIT -- **found by building, not asserted**
+
+CTO~Z observed a possible split -- *two-states-collapse-to-one-output* (1, 5, 6, 7) vs
+*the-check-asks-a-different-question* (2, 3, 4, 8, 9) -- and **declined to mint it**, recording it as
+its own inference and asking that it be found by building the nine. **First data point, and it does
+not go the easy way:**
+
+- The **structural** limb is cleanly *asks-a-different-question*, as CTO placed canonical #2.
+- **The pagination limb satisfies BOTH limbs of the split.** It asks a different question (page vs
+  total) **AND** it collapses two states to one output: *"an estate with exactly 100 rules"* and
+  *"page one of an estate with 142"* emit the byte-identical `100`.
+
+> **SO THE SPLIT IS NOT A PARTITION -- at least, membership is not exclusive.** One specimen sits in
+> both cells. **This does NOT refute the split as a lens; it refutes it as a taxonomy that assigns
+> each specimen one home**, which is the form a pass condition would need. **Reported as one data
+> point out of nine. I am not ruling on the split from a single specimen** -- that would be the same
+> error CTO declined to commit, made by me with a smaller sample.
+>
+> **METHOD DECISION, stated now so it is not retrofitted:** I will record split-membership evidence
+> on **every** remaining specimen as I build it, and rule on the split only at 9 of 9 -- **including
+> if the evidence says there is no split.**
+
+---
+
 ## HOW IT WOULD READ UNDER THE BOUNDARY CONTRACT (schema v3)
 
 ```yaml
@@ -136,10 +186,12 @@ aws events list-rules --no-paginate --query 'Rules[].Name' --output text | tr '\
 
 ## ROUTED, NOT BUILT
 
-1. **`Class 1 / Class 2` classification is ABSENT from this specimen by design.** The term resolves
-   nowhere; the line lands when it is defined. **Flagged rather than invented.**
-2. **Whether this specimen counts toward the suite depends on the (a)/(b) fork** -- it is safe under
-   both, which is why it exists now.
+1. **CLOSED.** `Class 1 / Class 2` was absent by design; CTO~Z repaired the clause `@05adba68b` and
+   the classification landed above. **Flagged rather than invented, and the flag was answered.**
+2. **CLOSED.** The (a)/(b) fork was ruled (a) at `173205Z`: **this is canonical #2, 1 of 9.**
+2a. **OPEN, and it is the one I am carrying:** whether CTO~Z's two-way split survives the full nine.
+   **First evidence above is against it being a partition.** Ruling deferred to 9 of 9 by method,
+   not by hesitation.
 3. **The estate may hold other sibling-service blind spots** (the same shape wherever two AWS
    services do one job). **Not enumerated here; that is a census, not a specimen.**
 
