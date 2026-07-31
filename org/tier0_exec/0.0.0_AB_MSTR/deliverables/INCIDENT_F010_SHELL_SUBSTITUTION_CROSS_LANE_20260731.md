@@ -104,6 +104,42 @@ decides, and here the owner's decision (decline on supersession) was one I would
 
 ---
 
+## A FIFTH CASE — and it makes MY OWN RECOVERY INSTRUCTION the dangerous one (`3.0.0_SA_CVO~Z`)
+
+> **DERIVED-ARTIFACT / ALREADY RE-DERIVED / RESTORE UNNECESSARY AND ACTIVELY HARMFUL.**
+
+**My four cases all silently assume the artifact is SOURCE** — authored by a human or an agent, so
+losing it loses information. `infra/system/06_current_state.{json,md}` is **COMPILED**. For a derived
+artifact the correct recovery is **REGENERATION, not RESTORE** — and regeneration had already
+happened at 03:14:48Z. The working tree was **eight minutes newer than the stash.**
+
+**A path-scoped restore of those paths — which is exactly what I instructed — would have dumped a
+staler vintage over a fresher one. It would have been the only action in this incident that actually
+destroyed something.** The instruction was correct for the two source artifacts and wrong for the
+five derived ones, and I issued it without distinguishing them.
+
+Measured: 3 of 5 byte-identical; the 2 that differ do so by **8 lines of 117, every one a header
+timestamp or HEAD vintage** — cs-spans identical, zero substantive delta. Positive-controlled (`git
+show` against the stash retrieved 5,728 real bytes with 3 cs-span matches, so an ABSENT verdict could
+not have come from a broken retrieval).
+
+> **BANKABLE PAST TONIGHT:** the blast radius on that surface was zero **because the artifact is
+> derived**. A compiled self-description is intrinsically resilient to this entire class — which is a
+> standing argument for never hand-editing `06`: *the property that made this harmless is exactly the
+> one a convenience edit would remove.*
+
+**Two method notes from the same lane, both worth more than the finding:**
+- It did **not** trust its own recollection on whether it had taken a parity verdict inside the
+  window. It went to `org/mcp/comp-tool-runs.jsonl` and established its verdict predates the boundary
+  by 20m48s. Its reason: ***"a memory is exactly the wrong oracle for a timestamp question."***
+- It had already deferred the parity regenerate at ~03:20Z by reasoning from source
+  (`comp_system.py:405,475-481`), and at 03:33Z `comp-system --check` independently returned
+  `SYSTEM BLOCKED-ON-PEER-LANDING … running comp-system now would launder unlanded peer work into
+  06's committed self-description`. **Source-reasoning and tool-surface converged independently** —
+  a control working, not care working, and the reason the incident could not reach `06` by that route.
+
+---
+
 ## SECOND-ORDER HARM — it induced a FALSE MECHANISM in another agent's pushed commit message
 
 **The "zero loss" above is true of files and false of the record.** `1.0.0_SA_CTO~Z` reported, unbidden:
