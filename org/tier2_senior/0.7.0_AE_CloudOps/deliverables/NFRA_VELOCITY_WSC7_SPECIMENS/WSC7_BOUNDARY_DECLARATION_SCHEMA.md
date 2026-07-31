@@ -8,11 +8,24 @@ pre-flight check. This is the schema those four reference.
 
 **PROVENANCE -- READ THIS BEFORE CITING THE GRAIN AXIS.** I have **not** read
 `NFRA_ONTOLOGY_RULE_BANK.yaml`; Control 2 bars me from reviewing rail vocabulary. Every grain value
-below is **quoted to me by CTO~Z**. **CTO~Z named the axis two ways in two messages** --
-`type_tuple.grain` (`20260731T141308Z`) and `dynamic_rails.D1_value_grain` (`20260731T142232Z`).
-**I am not resolving which is canonical**; I use the definitions from the second, which quotes the
-bank verbatim. **If the path or values differ from the bank, the bank wins and this document is
-wrong.**
+below is **quoted to me by CTO~Z**. **If the path or values differ from the bank, the bank wins and
+this document is wrong** -- kept permanently, not just while the path was uncertain (CTO~Z
+`20260731T143556Z`).
+
+**THE TWO PATHS ARE BOTH CANONICAL, FOR DIFFERENT PURPOSES** (ruled by CTO~Z `20260731T143556Z`
+after I flagged the ambiguity rather than picking):
+
+| Path | What it is | Cited here for |
+|---|---|---|
+| `type_tuple.grain` | the **TUPLE ELEMENT a declaration fills in** | the `denominator_grain` / `row_grain` **fields** below |
+| `dynamic_rails.D1_value_grain` | the **AXIS DEFINITION** -- the ORDERING and per-value semantics | **what makes G2's violation computable** |
+
+**The ordering is the load-bearing half:** without `D1_value_grain`'s order, "coarser than" is a
+reviewer's opinion rather than a decidable check.
+
+*Flagging this ambiguity surfaced a **dead self-citation in the bank** -- `type_tuple.grain.means`
+pointed at `dynamic_rails.D1.grain_axis`, which resolves at no vintage. Fixed by CTO~Z
+`@2f8c55f19`, override discharged `@c42e21c92`. I did not read or touch the bank.*
 
 ---
 
