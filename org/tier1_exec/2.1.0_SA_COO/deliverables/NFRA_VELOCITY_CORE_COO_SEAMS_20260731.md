@@ -113,7 +113,7 @@ under active dispute.** The migration is deferred on A11.1 grounds: *after migra
 boundary contract, the discrimination question becomes unanswerable, because every tool passes and passing
 looks like evidence.*
 
-**And the number that makes it sharp: discrimination is currently proven at 1 of 9 canonical specimens.**
+**And the number that makes it sharp: discrimination is currently UNPROVEN -- 1 of 9 canonical specimens written.**
 So the program's back half is gated on an artifact that should not be built until a suite that is 1/9 done
 is finished -- and both facts are correct simultaneously.
 
