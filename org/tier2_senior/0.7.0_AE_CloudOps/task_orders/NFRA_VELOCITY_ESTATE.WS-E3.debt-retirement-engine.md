@@ -7,6 +7,60 @@
 
 <priority>P3. **GATED -- DO NOT START.** This TO exists so the gate is legible and the unblock condition is written down, not so someone begins. Filed per LD-0365: Kimi-DEPENDENT work is TO'd but MARKED GATED so the fabric does not stall on it.</priority>
 
+<why_the_engine_returns_zero>
+**ANDREW-DIRECT ~1655-1700Z, ratified verbatim (via base CVO 171333Z). THIS IS THE EXPLANATION OF E3's
+INERTIA AND IT IS BETTER THAN "gated on lifecycle values" -- it tells the lane WHAT IT IS WAITING FOR
+rather than only that it waits.**
+
+>> **SHED IS A TWO-AXIS DECISION:**
+>>   **AXIS 1 -- INTENT: "is it wanted?"** -> `lifecycle_class`, PRODUCER-ASSERTED.
+>>       **NO INSTRUMENT FOR THIS HAS EVER EXISTED.**
+>>   **AXIS 2 -- FRICTION: "what does removal cost, what does keeping cost?"** -> blast radius, live
+>>       gates, writer/reader census. **INSTRUMENTED AND WORKING.**
+>> **THE ESTATE HAS BEEN MAKING A TWO-AXIS DECISION ON ONE AXIS, AND THE HONEST VERDICT ON ONE AXIS IS
+>> ALWAYS "DO NOT TOUCH IT."** <<
+
+**THE MEASURED PROOF IS ALREADY IN THE PROGRAM'S OWN BASELINE:** E3.0 closed **0 retired / 6 of 6
+KEEP-DORMANT** because **THE SAFE SLICE AND THE CLEARABLE SLICE DO NOT OVERLAP** (P1 baseline s.3c).
+**That zero was NOT caution and NOT a gate artifact -- it was the only SOUND answer available on the
+evidence E3 had.** An engine with a working friction axis and no intent axis cannot return anything
+else, and should not.
+
+**WHAT THIS CHANGES FOR THE LANE:** E3 is not waiting for permission. It is waiting for **AXIS 1 TO
+EXIST**, and axis 1 is exactly what **WS-E8's C3 walk produces** (CTO 161617Z: the registry is the
+STORE, the walk is the WRITER; all 14 declarations read UNDECLARED because no mechanism ever ASKED).
+**E3 unblocks when the walk produces asserted intent, not when someone lifts a hold.**
+</why_the_engine_returns_zero>
+
+<axis_2_becomes_generative>
+**ANDREW ACT 3, VERBATIM:** *"I think blast-radius is a way to potentially check overlap, in essence if
+something has highly overlapping blast radius and is doing the same function, that is very high
+friction, and needs to be assessed."*
+
+**THIS MAKES THE FRICTION AXIS GENERATIVE.** Today blast radius can only **PRICE a candidate somebody
+else proposed.** Under act 3 it can **PROPOSE candidates** -- because **two assets whose blast radii
+heavily overlap AND whose function is the same are probably ONE ASSET WEARING TWO NAMES, and the
+duplication is a cost paid continuously by everyone downstream.**
+
+**LIVE SPECIMEN, Andrew's own, already condemned in the census ledger:** `estimate-shadowing-exact` --
+*"an agent built an ESTIMATOR for a quantity the estate already measures EXACTLY"* -- with
+`canon-bypass-creation` as its sibling class. **The estate has a NAMED duplication class, an ANDREW
+CONDEMNATION of it, and NO MECHANISM THAT WOULD HAVE SURFACED IT.**
+
+**⚠ OPEN QUESTION -- ROUTED TO COO + base CTO JOINTLY BY CVO, NOT SETTLED, AND IT MAY MAKE THE AXES
+NON-INDEPENDENT:** *"doing the same function"* is a **SEMANTIC judgement. OVERLAP IS COMPUTABLE;
+FUNCTION-SAMENESS IS NOT.** So act 3 plausibly needs the **C3.ii vertical labels -- i.e. AXIS 1's
+OUTPUT.** If that holds, **the two axes are NOT independent**, and **the C3 walk gains a FOURTH
+CONSUMER** (E2's DELIBERATE-HOLD field, E3's Tier-A annotations, E5's boundary declarations, and now
+duplication detection). Do not build act 3 against an assumption of independence until this is ruled.
+
+**🚧 FENCE, STATED BEFORE ANYONE BUILDS (CVO, and it binds):** act 3 is an **ANALYSIS over the existing
+dependency graph, producing CANDIDATES FOR HUMAN ASSESSMENT** -- Andrew's own word is *"assessed."*
+**NOT an alarm. NOT a monitor. NOT a pager.** The moratorium binds hardest exactly where a duplication
+finding feels most alertable, and a duplication candidate is the single most tempting thing in this
+workstream to wire to a notification.
+</axis_2_becomes_generative>
+
 <gate>
 **BLOCKED ON: WS-E1 lifecycle VALUES, which are Andrew-GATED on the Kimi user-input pipeline.**
 

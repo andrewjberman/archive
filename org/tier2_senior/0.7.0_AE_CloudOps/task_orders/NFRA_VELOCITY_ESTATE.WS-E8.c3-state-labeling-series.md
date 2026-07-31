@@ -196,7 +196,60 @@ available and the record of the scope breach below stands unchanged.)*
      if E8.3's workflow only supports confirm/deny of the question as posed, it will force a wrong
      answer onto a well-intentioned doubt. Build the dissolve path.
 
-**E8.1 -- THE ITEM POPULATION AND ITS DENOMINATOR. STARTABLE NOW; PRECONDITION FOR EVERYTHING ELSE.**
+**E8.1 -- ✅ FIRST ARTIFACT DELIVERED @3e241b2f93. THE POPULATION IS MEASURED.**
+  **C3.ii -- 29 SEMANTIC VERTICALS / 138 CHAINS** (`comp-estate --list`, census vintage 2026-07-30;
+  sub-denominators tallied INDEPENDENTLY rather than trusting the footer: 98 in-scope + 26 explicit-out
+  + 14 unreviewed = 138, reconciles exactly).
+  **C3.i -- 14 DETERMINISTIC STRUCTURES** (13 named `sys-*` + UNASSIGNED-RESIDUE), `comp-estate --matrix`.
+
+  **BOTH OPEN QUESTIONS ANSWERED BY MEASUREMENT, NOT BY RULING:**
+  (1) **The population needs NO NEW ENUMERATION.** `--structure SYS` drills ONE NAMED system and
+      PRESUPPOSES the names; **`--matrix` already carries the population.** The item list is a READ.
+  (2) >> **C3.i IS NOT A SUBSET OF C3.ii. C3 IS THE DUAL-PARTITIONED RUNG: TWO COMPLETE PARTITIONS OF
+      THE SAME 138-CHAIN GROUND SET, CUT DIFFERENTLY. C3.ii is DECLARED never discovered; C3.i is
+      DISCOVERED never declared.** So Andrew's "and potentially c3.i" **ADDS A SECOND AXIS with a
+      different derivation and different failure modes -- it is NOT finer granularity on the 29.**
+      *(Both COO and base CTO had been reading it as a widening. It surfaced before a spec fixed a
+      scope, which is what E8.1 existed to do.)* <<
+
+  **BASE CTO RULING 165136Z -- ZERO-IN-SCOPE VERTICALS ARE WALKED. DENOMINATOR IS 29, NOT 26.**
+  Three verticals carry zero in-scope chains (causality 5, insurance 2, ops-internal 5). They are IN.
+  >> **"NOTHING HERE IS IN SCOPE" IS A CLAIM THAT SILENTLY STOPS BEING TRUE. An unmaintained zero and
+  an unexamined zero are INDISTINGUISHABLE FROM THE OUTSIDE, and the zero is the state most likely to
+  go stale unnoticed BECAUSE NOTHING ABOUT IT EVER CHANGES VISIBLY.** Excluding them would exclude
+  precisely the population whose staleness is invisible. << *(Same shape as the four audit logs being
+  pre-conversion rather than safe, and `partial` keying off calendar coverage that carry-forward
+  satisfies by construction.)*
+
+  **BASE CTO RULING 165136Z -- THE RESIDUE IS NOT A WALKABLE ITEM, BUT ITS EXTENT IS A MAINTAINED FACT.**
+  **NOBODY CAN ASSERT THE LIFECYCLE STATE OF "EVERYTHING UNASSIGNED" -- there is no producer for a
+  residue; that is what MAKES it residue.** Asking the walk to label it would be **observer-inference
+  wearing a declaration's costume**, the exact thing the producer-assertion rule forbids.
+  **RESOLUTION: UNASSIGNED-RESIDUE enters as ONE item whose maintained fact is "the C3.i partition is
+  incomplete by N chains across 7 verticals"** -- a claim about the PARTITION's completeness, not about
+  the residue's state. **You can maintain a fact ABOUT the residue without asserting a state OF it, and
+  the first is checkable while the second is not.**
+  **CONSEQUENCE: C3.i-only is 13 SYSTEMS + 1 COMPLETENESS ITEM, not 14 systems.**
+
+  **⏳ THE WALK DENOMINATOR IS ANDREW'S DECISION, NOT CTO's -- ESCALATED 165136Z, PENDING.**
+  ```
+    C3.ii, all verticals (CTO-ruled floor) ....... 29
+    C3.i only .................................... 13 systems + 1 completeness item
+    C3.ii + C3.i ("and potentially c3.i") ........ 43
+  ```
+  **Why it is not CTO's: the walk is CTO + ANDREW, so the denominator decides how much of the one
+  NON-AGENT participant's time the process consumes.** CTO recommends **START AT C3.ii (29), defer C3.i
+  to a second pass** -- and NOT because smaller is easier:
+  > **C3.ii is DECLARED -> walking it MAINTAINS existing declarations = directly the producer-assertion
+  > mechanism the E1 registry is missing, closing a loop already open.
+  > C3.i is DISCOVERED -> walking it AUTHORS declarations for things nobody declared = a different act,
+  > different confidence, different cost per item.
+  > MAINTAINING A RECORD AND AUTHORING ONE ARE NOT THE SAME WALK.**
+  Do the pass that closes the open loop, learn what an item COSTS IN WALL-CLOCK, then decide the second
+  axis with evidence rather than an estimate. Andrew's own word was "*potentially* c3.i" -- **a hedge is
+  correctly resolved with data from the first pass.**
+
+**E8.1-RESIDUAL -- (original scope statement, retained for the reasoning)**
   Enumerate the C3.ii items, with the denominator printed and the enumeration's blindness stated.
   **THE ITEM LIST IS THE DENOMINATOR: without it, a labeling has no coverage claim and "we walked the
   C3 items" cannot be distinguished from "we walked the C3 items we happened to enumerate."**
