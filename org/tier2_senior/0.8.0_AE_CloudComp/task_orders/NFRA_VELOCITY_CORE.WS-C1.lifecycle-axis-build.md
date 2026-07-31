@@ -3,9 +3,69 @@
 <project>NFRA_VELOCITY_CORE</project>
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
-<status>staged</status>
+<status>pending</status>
 
 <priority>P1 -- THE CRITICAL PATH. NFRA_VELOCITY is the EXCLUSIVE work regime (Andrew GO 2026-07-31 ~0225Z); WS-C1 is CORE's P1 first half and WS-C2 cannot start until this enum exists to validate.</priority>
+
+<amendment date="20260731T0330Z" by="1.0.0_SA_CTO~Z">
+**THE SPEC IS NOW REV 3 @691860493. HOLD RELEASED. BUILD FROM THE SPEC FILE, NOT FROM THIS TO's BODY.**
+
+Everything below this block was written against spec rev 1 and IS STALE IN THREE PLACES. The spec file
+is authoritative; where this TO and the spec disagree, THE SPEC WINS. Specifically superseded:
+
+- **objective (a)'s enum list is WRONG.** It names `PERMANENT / ROLLING / TRANSIENT / EVENT_CREATED /
+  SUPERSEDED / RETIRED / UNDECLARED`. The correct 7 are
+  **`PERMANENT / TRANSIENT / EVENT_CREATED / DORMANT / LEGACY / RETIRED / UNDECLARED`**.
+  `ROLLING` collapsed to a derivation (F-8); `SUPERSEDED` renamed `LEGACY` and the typed violation
+  `ZOMBIE/ORPHAN` renamed `SILENT-RESIDENT` (F-1) -- **both old tokens are ALREADY OCCUPIED in ratified
+  `variance.labels` and MUST NOT appear.** `DORMANT` added (your own catch).
+- **objective (e) and acceptance item 5 name `ZOMBIE-ORPHAN`.** Use `SILENT-RESIDENT`, and the gate
+  must name **BOTH** it and **`variance.Orphan`** as gated consumers -- that was the BLOCKING finding.
+- **acceptance is now the spec's S.7 items 1-13**, not the 9 listed below. New requirements you did not
+  have: `consumer`/`successor` EXERCISED not merely resolved (F-4); `max_dwell` BOUND to the consumer's
+  D3 cadence (F-3); `revalidate_by` on EVERY declaration (S.3.1); an explicit `scope` per declaration
+  (F-6); and **>=1 CONSUMER ACTUALLY GATED, which prose cannot discharge (F-7)**.
+
+STILL BINDING AND UNCHANGED: every constraint (additive-only, `type_tuple` untouched, no name-pattern
+inference, the held-out fence, no non-ASCII), the whole compiler-tools mandate, and the
+cross-domain-coordination block. Re-run your phase-1 consumer enumeration against the rev-3 shape
+before landing -- `DORMANT` and `scope` add fields the rev-1 shape did not have.
+</amendment>
+
+<amendment date="20260731T0345Z" by="1.0.0_SA_CTO~Z" subject="THE LAND PATH -- an omission in my original TO">
+**THIS TO NAMED `0.8.0_AE_CloudComp~C` AS BUILDER OF AN ARTIFACT ITS LANE STRUCTURALLY CANNOT LAND,
+AND NEVER STATED THE LAND PATH. That gap is mine, not the lane's, and it is corrected here.**
+
+`org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml` resolves to lane **`ANY_EXEC`**. Verified by me
+directly against `.tools/owned-paths-validate.py`, with positive controls (two real refusals on paths
+I do NOT own, so the instrument is discriminating, not permissive):
+
+```
+lane(NFRA_ONTOLOGY_RULE_BANK.yaml)            = ANY_EXEC
+check_agent(1.0.0_SA_CTO~Z,       rulebank)   = True
+check_agent(3.0.0_SA_CVO~Z,       rulebank)   = True
+check_agent(0.8.0_AE_CloudComp~C, rulebank)   = False   <- the builder
+check_agent(0.8.0_AE_CloudComp,   rulebank)   = False   <- base too; the tilde auto-permit does not rescue it
+control: check_agent(1.0.0_SA_CTO~Z, org/tier0/ledger/LD-0001.md)  = False  [TIER0_MSTR]
+control: check_agent(1.0.0_SA_CTO~Z, .../data_refresh/handler.py)  = False  [DATA_REFRESH_DEPLOY]
+```
+
+**CANONICAL LAND PATH FOR THIS TO AND EVERY WS-C1/WS-C2 RULE-BANK INCREMENT:**
+> **BUILD + verify (`~C`) -> HAND OFF the content + commit message -> GATE + LAND (`1.0.0_SA_CTO~Z`),
+> builder credited in the commit message -> signal `3.0.0_SA_CVO~Z` to verify.**
+
+**A LANE-ADD WAS PROPOSED AND IS REJECTED -- on governance, not on speed.** `~C` correctly routed the
+ask instead of self-landing (SoD: the grantee never lands its own grant) and reasonably suggested
+widening the lane so future increments do not relay through me. Rejected because **the exec-lock is
+deliberate** -- the rule bank's own header says *"Canonical placement (org/modules/graph, exec-locked)
+routes through CTO -- like the census"* -- and it is the SINGLE vocabulary carrier for BOTH fabrics.
+
+The decisive point: **the relay is not overhead, it IS the gate.** Acceptance already requires CTO~Z to
+gate items 1-17 before CVO~Z verifies, so the artifact must pass through me regardless; landing it
+myself is the same act, not an extra one. **Widening the lane would make it possible for an increment
+to land WITHOUT passing that gate** -- converting a structural guarantee into a promise to wait. That
+is the DESIRED-vs-APPLIED substitution acceptance item 10 exists to forbid, applied to the gate itself.
+</amendment>
 
 <references>
   <ref type="prd">docs/architecture/NFRA_VELOCITY_CORE_PRD.md -- WS-C1</ref>
