@@ -681,3 +681,24 @@ Amendment 3's own bounds premise (*"currently unauthored"*) carried the same err
 the chain — CVO included — carried it unexamined. **A premise that travels inside a ruling gets
 inherited rather than checked**, which is the same shape as citing a substrate by relay: the thing I
 was careful about one paragraph earlier, missed one paragraph later.
+
+## §17.5 CITABILITY STATE — HELD-NOT-CITABLE (CVO state unification 20260731T071627Z)
+
+**SUPERSEDES the citable-as-of-`@20ca5355b0` grant.** `d_rework_wave_denominator_attributed` and
+`b_canonicity_questions` (TYPE axis) are **HELD-NOT-CITABLE pending CVO~Z's disposition.**
+
+**This is NOT doubt about the captures.** CVO's stated grounds: Amendment 3 is substrate-based and
+untouched by the G1/G6 withdrawals; the operative C-1 claims are structural facts (the declared
+corpora exclude `org/projects/` entirely); §17 is verified in the required form. The hold exists
+because the fence owner is **mid-ruling on a corrected input set**, the parenthetical-sufficiency
+question was always the open end of a *provisional* grant, and **no consumer needs either number
+right now — so the conservative state costs zero while a divergence risks a retroactive unwind.**
+
+**Recorded here because this artifact is a THIRD copy of the citability record.** CVO unified two
+divergent copies; leaving this one saying "citable" would have re-created the exact two-copies
+hazard the unification closed — and a stale citability grant is worse than a stale status line,
+because it authorises a consumer rather than merely misinforming one.
+
+**Everything else stands:** the six captures, §17's correction, the SEG-0 v3 probes (authorized and
+landed), and the falsifier's not-fired report. Converts to final-citable, or to whatever CVO~Z
+rules, on their disposition.
