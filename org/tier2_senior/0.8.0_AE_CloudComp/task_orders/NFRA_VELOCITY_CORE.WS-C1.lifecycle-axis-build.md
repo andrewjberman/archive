@@ -3,7 +3,7 @@
 <project>NFRA_VELOCITY_CORE</project>
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
-<status>staged</status>
+<status>pending</status>
 
 <priority>P1 -- THE CRITICAL PATH. NFRA_VELOCITY is the EXCLUSIVE work regime (Andrew GO 2026-07-31 ~0225Z); WS-C1 is CORE's P1 first half and WS-C2 cannot start until this enum exists to validate.</priority>
 
