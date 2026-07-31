@@ -206,3 +206,61 @@ whether a declared address space is the real one.
 - **PRODUCER-ASSERTED, UNVERIFIED.** These are the standard's boundary, not its backlog.
 
 **E5 has no standing to demand of detectors what it will not do itself.**
+
+---
+
+# §10 DETECTOR 2 — **IT IS NOT A CLASS.** COO's instinct was wrong, and that is the useful answer.
+
+COO 150455Z: *"a second detector to test whether the unscoped-boundary defect is
+comp-legacywriter-specific or a CLASS. My instinct is class, and I would rather know."*
+
+**MEASURED: not a class. `comp-trigger` draws the distinction that `comp-legacywriter` does not.**
+Deliberately a **different family** — trigger forensics, not writer census — so a shared result would
+have been strong class evidence. It is not shared.
+
+## §10.1 The same mutant, run across families
+
+| | baseline | scoped | scope named in header? | denominator wording |
+|---|---|---|---|---|
+| **`comp-trigger`** | 155 lines · `census -- 142 events-rules + 12 schedules` | 18 lines | **YES** — `forensics for: "mdpf"` | **`142 … SCANNED`** |
+| **`comp-legacywriter`** | 2,426 lines · `examined 8915 file(s)` · `642 locations` | 181 lines | **NO** — header byte-identical to baseline | `examined 8915` (scan wording only) |
+
+Both mutations took effect (155→18 and 2,426→181), so neither is a non-mutating mutant.
+
+**`comp-trigger` lets a reader separate the two populations:** it names the query (`forensics for:
+"mdpf"`) and labels the number `scanned`. **`comp-legacywriter` does not** — its scoped header is
+indistinguishable from its unscoped one.
+
+## §10.2 NARROWING MY OWN §8 AGAIN — and the sharper version is worse for the tool
+
+`comp-legacywriter`'s scoped output **does** contain six scope-flavoured strings, so "no scope
+language at all" would have been wrong. **All six are the identical per-row evidence bar:**
+
+> `evidence_bar: NO READER FOUND IN THE SCANNED POPULATION -- this is NOT 'no reader'.`
+> **`State the population before acting`**
+
+That is a per-finding caveat, not a header scope declaration — and it makes the defect sharper
+rather than softer:
+
+> ### The tool instructs the reader to **"state the population before acting"** while itself not stating which population its own scoped answer ranges over.
+
+The instrument knows the failure mode by name, warns about it per row, and then commits it at the
+header level.
+
+## §10.3 What this does to E5's population
+
+COO's own framing: if it were a class, E5's population becomes *"detectors whose declarations would
+be wrong"* — a materially different workstream. **It is not.** The population stays *"detectors
+needing declarations,"* **with per-instrument variance that must be measured rather than assumed** —
+one of the first two already draws the distinction correctly.
+
+**So a survey counting "detectors lacking a boundary declaration" would have been wrong in both
+directions**: it would have missed that `comp-legacywriter` already emits one in prose, and missed
+that `comp-trigger`'s is scope-correct while the other's is not. Presence is not the axis;
+**correctness under scope change is**, and only a mutant reveals it.
+
+## §10.4 Denominator, unchanged and stated
+
+**TWO detectors, chosen for family contrast, not sampled.** `n=2` cannot establish a rate — it can
+only refute universality, which is exactly what was asked. **The honest claim is "not universal,"
+NOT "rare."** Whether most detectors resemble one or the other is unmeasured and I am not implying it.
