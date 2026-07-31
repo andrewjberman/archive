@@ -1,182 +1,284 @@
-# WS-C7 BOUNDARY-DECLARATION SCHEMA (first artifact)
+# WS-C7 BOUNDARY-DECLARATION SCHEMA -- v2
 
 **Author:** `0.7.0_AE_CloudOps~Z` -- **Gate:** `1.0.0_SA_CTO~Z` -- **Verify:** `3.0.0_SA_CVO~Z`
-**Scope grant:** CTO~Z `20260731T131608Z` -- *"THE BOUNDARY-DECLARATION SCHEMA. One document. What a
-tool must declare to register: its ADDRESS SPACE, its TRAVERSAL RESIDUE, and its METHOD'S FAILURE
-DIRECTION. Nothing else."*
-**Shaping corpus:** declared at `2b8860674` before this was written.
-**NOT in this artifact, by instruction:** the registration invariant, N-of-M migration, the fixture
-suite, the pre-flight check. This is the schema those four will reference.
+**v2 authorized:** CTO~Z `20260731T142115Z` -- *"I RULE VOCABULARY, YOU BUILD YOUR SCHEMA."*
+**Supersedes v1** (`d4e724aab`, gate-passed `20260731T132546Z`).
+**NOT in this artifact:** the registration invariant, N-of-M migration, the fixture suite, the
+pre-flight check. This is the schema those four reference.
+
+**PROVENANCE -- READ THIS BEFORE CITING THE GRAIN AXIS.** I have **not** read
+`NFRA_ONTOLOGY_RULE_BANK.yaml`; Control 2 bars me from reviewing rail vocabulary. Every grain value
+below is **quoted to me by CTO~Z**. **CTO~Z named the axis two ways in two messages** --
+`type_tuple.grain` (`20260731T141308Z`) and `dynamic_rails.D1_value_grain` (`20260731T142232Z`).
+**I am not resolving which is canonical**; I use the definitions from the second, which quotes the
+bank verbatim. **If the path or values differ from the bank, the bank wins and this document is
+wrong.**
 
 ---
 
-## 0. WHAT THIS SCHEMA IS FOR
+## REVISION HISTORY -- what v1 got wrong and how each was found
 
-WS-C7's mandate in one line: **every tool reports what it FOUND; none reports what it COULD NOT HAVE
-FOUND.** 363 of MSBEFF's 718 findings (50.6%) are recall/coverage -- the largest single class in the
-estate's record *(figure quoted to me by CTO~Z; I have not read MSBEFF directly)*.
+v1 was applied to `comp_legacywriter.py`, a tool its author did not write (`6fa9120ba`). **Five gaps
+came from that single cross-seat application**; one more arrived from `SPEC-3`.
 
-A findings list without a denominator is unfalsifiable from the result alone. **This schema is the
-denominator, made mandatory and machine-checkable at registration time.**
-
-**THE ONE-SENTENCE TEST FOR EVERY FIELD BELOW:** *if this tool ran, found nothing, and exited 0,
-would this declaration let a reader tell "there was nothing" apart from "I could not look"?* A field
-that does not serve that distinction does not belong here.
+| # | v1 defect | v2 |
+|---|---|---|
+| G1 | one scalar `denominator` | **ordered `denominator_chain`**, recall restated per stage, multiple chains |
+| G2 | no grain field | **binds the bank's ordered grain axis + a COMPUTABLE violation check** |
+| G3 | no value for unfed-but-not-blind | **`run_conditional`** + mandatory `enabled_by` |
+| G4 | residue only per-run | **`per_item_residue`** |
+| G5 | traversal and display residue conflated | **`presentation_residue`** split out |
+| L-16 | `basis: exercised` satisfiable by a tool that cannot discriminate | **`known_negative` mandatory alongside `exercised`** |
 
 ---
 
-## 1. THE THREE DECLARATIONS
+## 0. THE TEST EVERY FIELD MUST SERVE
 
-### 1.1 ADDRESS SPACE -- what the tool COULD have reached
+*If this tool ran, found nothing, and exited 0, would this declaration let a reader tell
+**"there was nothing"** apart from **"I could not look"**?*
 
-The set the tool draws from. Without it, "0 found" is uninterpretable.
+**v2 adds a second test, from L-16:** *would this declaration have come out differently if the
+answer were different?* **A field that cannot vary with the truth is not a measurement.**
+
+---
+
+## 1. ADDRESS SPACE
 
 | Field | Type | Values |
 |---|---|---|
 | `address_space.kind` | enum, **RATIFIED-STRUCTURED** | `enumerable` / `bounded_unenumerable` / `unbounded` / `single_target` |
-| `address_space.denominator` | integer, **or the literal `NOT-ENUMERABLE`** | required when `kind=enumerable` |
+| `address_space.chains` | **list** of named chains, each an ordered list of `{stage, count}` | required when `kind=enumerable` |
+| `address_space.denominator_grain` | **bank enum** | `artifact` / `partition` / `row` / `field` |
+| `address_space.row_grain` | **bank enum** | the grain of the items the denominator is divided into |
 | `address_space.denominator_source` | enum, **RATIFIED-STRUCTURED** | `independent_precount` / `derived_from_own_output` / `declared_static` / `NOT-LINT-CHECKED` |
-| `address_space.description` | free text, **DECLARED UN-DECIDABLE (NOT-LINT-CHECKED)** | human-readable scope |
+| `address_space.description` | free text, **DECLARED UN-DECIDABLE (NOT-LINT-CHECKED)** | |
 
-**`denominator_source` is the load-bearing field and it exists because of SPEC-2.** A count taken
-AFTER an operation measures the operation's own success claim; a count taken BEFORE it is
-independent of that claim. **`derived_from_own_output` is a legal value and a LOUD one** -- it is
-self-certifying and must be readable as such rather than silently accepted. It is not banned,
-because for some tools no independent precount exists; it is *declared*, so a reader can discount it.
+### G1 -- THE CHAIN, AND WHY A SCALAR IS WRONG
+`comp-legacywriter` narrows `4846 files -> 642 locations -> 439 written surfaces -> 345 scored ->
+25 displayed`, and **separately** `14 subjects -> 2 joinable -> 1 matched of 439`. **Two chains, not
+one.**
 
-*Specimen: `aws s3 sync` had an address space of 55,878 and returned 0. The failure was invisible
-because nothing required the 55,878 to appear beside the 0.*
+> **THE RECALL QUESTION MUST BE RESTATED AT EVERY STAGE.** A single ratio across a chain is computed
+> against the wrong denominator by construction -- "1 of 439" and "1 of 4846" are both true and
+> answer different questions. **A reader handed only the endpoints cannot tell which was meant.**
 
-### 1.2 TRAVERSAL RESIDUE -- what it did NOT reach, and whether it can say
+### G2 -- GRAIN IS BOUND TO THE BANK, AND THE VIOLATION IS COMPUTABLE
 
-The complement actually encountered on this run: skipped, filtered, failed, truncated, denied.
+**There is no vocabulary gap.** The bank's ordered axis (`artifact -> partition -> row -> field`)
+already types this case exactly, per CTO~Z quoting it verbatim:
+
+- `artifact` = *"a whole object/table/topic as a unit (**S3_BUCKET**, DYNAMODB_TABLE, ...)"*
+- `partition` = *"a dated/keyed slice of an artifact (**an S3 object key** under a firm/date prefix)"*
+
+So `comp-legacywriter` types cleanly with the enum as it stands: invocation axis = bucket =
+**`artifact`**; scored rows = key = **`partition`**.
+
+> **BECAUSE THE AXIS IS ORDERED, "COARSER" IS DECIDABLE RATHER THAN A JUDGEMENT CALL.** A
+> declaration where `denominator_grain` is **coarser than** `row_grain` is a **mechanically
+> flaggable violation** -- not a reviewer's opinion.
+
+**A DENOMINATOR AT A COARSER GRAIN THAN ITS ROWS YIELDS A WELL-FORMED WRONG RATIO.** The bank's own
+note names this as the #1 MSBEFF layer-mismatch. It is a **PRECISION** failure produced by a
+**RECALL** declaration -- the M2 boundary (section 5) seen from the inside.
+
+*v1 had no grain field at all. An intermediate draft of v2 carried an `UNTYPEABLE-TODAY` placeholder
+awaiting a vocabulary change; **CTO~Z retracted that need before this landed** (`20260731T142232Z`),
+having read the enum's token list without its definitions. **No placeholder remains, and none is
+owed.***
+
+---
+
+## 2. TRAVERSAL RESIDUE
 
 | Field | Type | Values |
 |---|---|---|
-| `traversal_residue.reportable` | enum, **RATIFIED-STRUCTURED** | `enumerated` / `counted_only` / `detected_not_counted` / `structurally_invisible` |
+| `traversal_residue.reportable` | enum, **RATIFIED-STRUCTURED** | `enumerated` / `counted_only` / `detected_not_counted` / `run_conditional` / `structurally_invisible` |
+| `traversal_residue.enabled_by` | **MANDATORY when `reportable=run_conditional`** | what would make it reportable |
 | `traversal_residue.channel` | enum, **RATIFIED-STRUCTURED** | `stdout` / `stderr` / `exit_code` / `sidecar_artifact` / `none` |
-| `traversal_residue.silent_modes` | list of free text, **DECLARED UN-DECIDABLE (NOT-LINT-CHECKED)** | known ways this tool drops items without saying so |
+| `traversal_residue.per_item_residue` | enum, **RATIFIED-STRUCTURED** | `emitted_per_item` / `run_aggregate_only` / `none` |
+| `traversal_residue.silent_modes` | list of free text, **DECLARED UN-DECIDABLE (NOT-LINT-CHECKED)** | |
 
-**`structurally_invisible` is the most important value in this schema and it must never be a
-failure to register.** A tool that *cannot* observe its own residue is exactly the tool WS-C7 needs
-declared -- forcing it to claim otherwise converts an honest blind spot into a false declaration.
-**The point is to make blindness legible, not to punish it.**
+**`structurally_invisible` MUST NEVER FAIL REGISTRATION** (unchanged from v1). A tool that cannot
+observe its own residue is exactly the tool WS-C7 needs declared. **Make blindness legible, not
+punished.**
 
-**`silent_modes` is deliberately free text and deliberately NOT-LINT-CHECKED.** Enumerating the
-ways a tool can silently drop things is not decidable in advance -- that is the whole problem. An
-enum here would be a false oracle, and per L-10 the honest move is to mark it un-decidable rather
-than leave it a required field with no checker.
+### G3 -- `run_conditional`, AND WHY THE COMPANION IS MANDATORY
+`comp-legacywriter`'s three enrichment axes are fully reportable when the operator supplies
+`--heat-json` / `--dups-json` / `--debris-json`, and absent otherwise. **They are neither
+`enumerated` nor `structurally_invisible`.**
 
-*Specimen: `s3 sync`'s residue was 100% of its address space, emitted per-object to stderr and
-erased by `--quiet`, with NO summary channel at any verbosity. `reportable=detected_not_counted`,
-`channel=stderr`, and a `silent_modes` entry naming `--quiet`.*
+> **Forcing `structurally_invisible` on a tool that is UNFED rather than BLIND is a FALSE
+> DECLARATION, and preventing false declarations is the entire schema.**
 
-### 1.3 FAILURE DIRECTION -- which way this method fails
+**`enabled_by` is mandatory** (CTO~Z's condition): without it, `run_conditional` decays into a
+softer `structurally_invisible` and buys nothing. A reader must separate *"unfed this run"* from
+*"cannot ever."*
 
-**NOT A SCALAR.** This is the schema requirement my SPEC-1 pair produced, handed back by CTO~Z as a
-design input.
+### G4 -- PER-ITEM RESIDUE
+`comp-legacywriter` emits `axes measured: 1/4  BLIND: code-heat, exact-dup, invocation` **per row**.
+A run-level summary would report `enumerated` and **lose that coverage varies item by item.**
+
+> **An aggregate that hides per-item variance is the defect that produced this schema author's worst
+> instrument of the day** -- a 14-row table reading 100% on every row, published as a measurement.
+> `run_aggregate_only` is a legal value and a **loud** one.
+
+---
+
+## 3. PRESENTATION RESIDUE (G5 -- NEW, and NOT traversal residue)
+
+| Field | Type | Values |
+|---|---|---|
+| `presentation_residue.truncated` | enum, **RATIFIED-STRUCTURED** | `none` / `count_declared` / `count_undeclared` |
+| `presentation_residue.control` | free text, **DECLARED UN-DECIDABLE (NOT-LINT-CHECKED)** | the knob that widens it |
+
+`comp-legacywriter` prints `showing 25 of 345`. **Those 320 rows were examined and scored. Nothing
+was skipped.** Traversal residue and presentation residue are **different failures with different
+remedies** -- widen the scan versus raise `--top` -- and v1 had one field for both.
+
+---
+
+## 4. FAILURE DIRECTION
 
 | Field | Type | Values |
 |---|---|---|
 | `failure_direction.self` | enum, **RATIFIED-STRUCTURED** | `under_report` / `over_report` / `traversal_exact` / `unknown` |
-| `failure_direction.consumer_edge` | **optional object**, same enum + `consumer` id | present only when this tool's output is another instrument's input |
+| `failure_direction.consumer_edge` | **optional** object: `consumer` + same enum | present when this tool's output is another instrument's input |
 | `failure_direction.basis` | enum, **RATIFIED-STRUCTURED** | `exercised` / `reasoned` / `NOT-LINT-CHECKED` |
+| `failure_direction.known_negative` | **MANDATORY when `basis=exercised`** | the case that would have failed, or the literal `none` |
 
-**WHY THE PAIR IS MANDATORY WHERE IT APPLIES:** an availability check that OVER-REPORTS, feeding an
-authorization gate that then UNDER-REPORTS, is not two defects. Limb B is limb A's output consumed
-downstream. **A schema holding one value per tool structurally cannot express it -- and would grade
-the CAUSING instrument healthy while recording the consumer as defective.**
+**THE PAIR (v1, retained).** An availability check that OVER-reports feeding an authorization gate
+that UNDER-reports is not two defects -- limb B is limb A's output consumed downstream. **A schema
+holding one value per tool grades the CAUSING instrument healthy.**
 
-*Specimen: `shutil.which('aws')` returned a real, existing, absolute path (`over_report`), which made
-`comp-tagauthz` produce no verdict at all (`under_report` at the consumer edge). Scored
-individually, `shutil.which` passes its own audit. It was the cause.*
+**`consumer_edge` stays OPTIONAL** (CTO~Z affirmed): *required* needs a decidable oracle for "has a
+consumer" and none exists. **Making it required would create the required-field-with-no-checker
+decay this document forbids.**
 
-**`basis` exists so a declared direction cannot be quietly assumed.** `exercised` means the tool was
-made to fail in that direction and observed doing so. `reasoned` is legal and weaker, and must be
-visibly weaker.
+### L-16 -- `exercised` IS NOT SUFFICIENT, AND THIS FIELD WAS THE PROOF
+
+> **Exercising proves a tool RUNS. Only a known-negative proves it DISCRIMINATES.**
+
+**This schema's own author shipped an instrument that would have passed `basis: exercised`
+honestly.** A CR-counter that was a line counter -- run, on real files, on a real corpus, returning
+real numbers, every criterion for `exercised` met, and structurally incapable of its function. It
+validated on **its only non-discriminating input** (`SPEC-3`).
+
+**So `known_negative` is mandatory alongside `exercised`:** name the case that would have come out
+differently, or write `none` **loudly**. A declared `none` is an honest weak claim; an absent one is
+an unexamined strong claim wearing the strong value.
+
+*(Same construction as G3's `enabled_by`: a strong enum value carries a companion that makes it
+falsifiable, or it decays into the weak value it was meant to outrank.)*
 
 ---
 
-## 2. WHAT THIS CONTRACT DOES NOT COVER -- **M2 IS OUT OF CONTRACT**
+## 5. OUT OF CONTRACT -- **M2**
 
 > **M2 (shape-match, wrong content) IS NOT A WS-C7 CONCERN AND THIS SCHEMA MUST NOT BE READ AS
 > COVERING IT.**
 
-**Mechanism, not just instruction:** every field above describes what a tool COULD NOT HAVE
-FOUND. M2 is a tool that **DID** find something -- well-formed, correctly shaped, and wrong. An
-address space cannot catch it (the item was in scope). Traversal residue cannot catch it (nothing
-was skipped). A failure direction cannot catch it (the count is right). **A complete, honest,
-fully-conformant boundary declaration is compatible with every value being wrong.**
+Every field here describes what a tool **COULD NOT HAVE FOUND**. M2 is a tool that **DID** find
+something -- well-formed, correctly shaped, wrong. Address space cannot catch it (in scope);
+traversal residue cannot (nothing skipped); failure direction cannot (the count is right).
 
-**Recall and precision are orthogonal, and this schema measures only recall.** M2 carries 19
-measured corpus instances plus nine live ones from 2026-07-30/31 and **stays named-homeless**, on
-the M15 precedent. Naming it here is not absorbing it: **a contract that states its own exclusion is
-what stops a later reader assuming coverage it never had.**
+**A COMPLETE, HONEST, FULLY-CONFORMANT BOUNDARY DECLARATION IS COMPATIBLE WITH EVERY VALUE BEING
+WRONG.** Recall and precision are orthogonal; this schema measures only recall. M2 carries 19
+measured corpus instances plus nine live ones and **stays named-homeless**, on the M15 precedent.
+
+**Note G2's interaction:** a grain mismatch is a precision failure *arising from* a recall
+declaration. **Naming the grain is in contract; guaranteeing the value is not.**
 
 ---
 
-## 3. THE TWO-STATE RULE (L-10), APPLIED TO THIS DOCUMENT
+## 6. THE TWO-STATE RULE (L-10) -- SELF-AUDIT
 
-**Every field above is either RATIFIED-STRUCTURED (has an enum) or DECLARED UN-DECIDABLE (carries an
-explicit `NOT-LINT-CHECKED` marker). There is no third state.**
-
-Audit of this schema against its own rule:
+**Every field is RATIFIED-STRUCTURED, DECLARED UN-DECIDABLE, or a MANDATORY COMPANION to a
+structured value. There is no third state.**
 
 | Field | State |
 |---|---|
 | `address_space.kind` + `denominator_source` | RATIFIED-STRUCTURED |
-| `address_space.denominator` | structured integer, or literal `NOT-ENUMERABLE` |
+| `address_space.chains` | structured `{stage, count}` |
+| `address_space.denominator_grain` + `row_grain` | BANK ENUM (referenced as ruled, never redefined) |
 | `address_space.description` | DECLARED UN-DECIDABLE |
-| `traversal_residue.reportable` + `channel` | RATIFIED-STRUCTURED |
+| `traversal_residue.reportable` + `channel` + `per_item_residue` | RATIFIED-STRUCTURED |
+| `traversal_residue.enabled_by` | MANDATORY COMPANION to `run_conditional` |
 | `traversal_residue.silent_modes` | DECLARED UN-DECIDABLE |
+| `presentation_residue.truncated` | RATIFIED-STRUCTURED |
+| `presentation_residue.control` | DECLARED UN-DECIDABLE |
 | `failure_direction.self` + `consumer_edge.direction` + `basis` | RATIFIED-STRUCTURED |
+| `failure_direction.known_negative` | MANDATORY COMPANION to `exercised` |
 
-**Why the rule matters here specifically:** a required field with no enum and no un-decidable marker
-decays, because the next value-check invents its own oracle. That cost the fabric two hours on
-`locality` today. **Marking a field un-decidable is a decision; leaving it unmarked is a deferral
-that someone else pays for.**
+**Two mandatory companions is the shape v2 added.** A required field with neither an enum nor an
+un-decidable marker decays, because the next value-check invents its own oracle.
 
 ---
 
-## 4. SHAPE (illustrative -- the schema, not an implementation)
+## 7. SHAPE (illustrative -- `comp-legacywriter` as actually observed)
 
 ```yaml
 boundary_declaration:
-  tool: comp-example
+  tool: comp-legacywriter
   address_space:
     kind: enumerable
-    denominator: 55878
+    denominator_grain: artifact     # invocation axis is BUCKET
+    row_grain: partition            # scored rows are KEYS
+    # denominator_grain is COARSER than row_grain -> mechanically flaggable (G2)
+    chains:
+      - name: write_surface_scan
+        denominator_chain:
+          - {stage: files_scanned,    count: 4846}
+          - {stage: locations,        count: 642}
+          - {stage: written_surfaces, count: 439}
+          - {stage: scored_ge_3,      count: 345}
+      - name: contract_join
+        denominator_chain:
+          - {stage: subjects_declared, count: 14}
+          - {stage: joinable,          count: 2}
+          - {stage: matched,           count: 1}
     denominator_source: independent_precount
-    description: "objects under s3://opal-mcp-audit/audit/"   # NOT-LINT-CHECKED
+    description: "S3 write surfaces resolved from AST across the repo"
   traversal_residue:
-    reportable: detected_not_counted
-    channel: stderr
-    silent_modes:                                             # NOT-LINT-CHECKED
-      - "--quiet suppresses per-object failures; no summary exists at any verbosity"
+    reportable: run_conditional
+    enabled_by: "--heat-json / --dups-json / --debris-json"
+    channel: stdout
+    per_item_residue: emitted_per_item      # "axes measured: 1/4  BLIND: ..."
+    silent_modes:
+      - "invocation axis is bucket-grain while rows are key-grain (the tool declares this itself)"
+  presentation_residue:
+    truncated: count_declared               # "showing 25 of 345"
+    control: "--top"
   failure_direction:
-    self: under_report
+    self: under_report                      # deliberate: refuses deadness while UNDECLARED
     basis: exercised
+    known_negative: "none -- two successful runs observed; no case was constructed that would
+                     have made the declaration come out differently"
     consumer_edge:
-      consumer: safe-apply.sh
+      consumer: "kill-list / retire decisions"
       direction: under_report
 ```
 
+> **THE `known_negative: none` ABOVE IS NOT A PLACEHOLDER -- IT IS THE HONEST VALUE.** My cross-seat
+> application was two successful runs with no constructed failing case. **Under v1 that declaration
+> read as fully `exercised`. Under v2 it reads as what it is.**
+>
+> **And the grain pair above is a live G2 violation, in the very example the schema ships with.**
+> The tool declares the mismatch itself in prose; v2 makes it a computable flag.
+
 ---
 
-## 5. ROUTED TO THE GATE, NOT DECIDED HERE
+## 8. ROUTED TO THE GATE, NOT DECIDED HERE
 
-Per scope, these are surfaced for `1.0.0_SA_CTO~Z` and **not built or ruled by me**:
+1. **The grain axis was named two ways** (`type_tuple.grain`, `dynamic_rails.D1_value_grain`).
+   **Not resolved by me** -- I cannot read the bank. One canonical path wanted.
+2. **Should `basis: reasoned` expire?** A reasoned direction never exercised is a standing claim
+   nobody tested. An invariant question, not a schema one.
+3. **Zero-variance smell (SPEC-3):** where `kind=enumerable` and every item returns an identical
+   ratio, that is a candidate constant. **Schema or invariant? The gate's call.**
+4. **Who declares** is a registration-invariant rule (PRODUCER-ASSERTED, NEVER OBSERVER-INFERRED),
+   not a schema field. Confirmed from outside in `6fa9120ba`.
 
-1. **Is `consumer_edge` REQUIRED when a consumer exists, or optional-but-encouraged?** Required is
-   stronger and matches the SPEC-1 finding, but it needs a decidable oracle for "has a consumer" --
-   and I do not have one. Left optional here **so the field is not required-with-no-checker**, which
-   is the exact L-10 decay this document forbids. **This is the schema's weakest joint.**
-2. **`basis: reasoned` may need a expiry.** A reasoned direction that is never exercised is a
-   standing claim nobody tested. Whether the invariant should decay it is an invariant question.
-3. **Nothing here constrains WHO declares.** My SPEC-1 observation that a declaration must be
-   PRODUCER-ASSERTED rather than OBSERVER-INFERRED applies, but that is a registration-invariant
-   rule and belongs in your P2 artifact, not this one.
-
-**CONTROL 2 CHECK:** nothing above is WS-C1/WS-C2 rail vocabulary. These enums type *an instrument's
-coverage behaviour*, not *where an assertion sits*. If the gate reads any of it as rail vocabulary,
-it stops with me and routes to CTO~Z rather than being defended.
+**CONTROL 2 CHECK:** these enums type an **instrument's coverage behaviour**, not where an assertion
+sits. Not rail vocabulary. The grain axis is **referenced as ruled, never redefined, and no value is
+proposed for it.** If the gate reads any of this as rail vocabulary, it stops with me and routes to
+CTO~Z.
