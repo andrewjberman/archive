@@ -255,3 +255,98 @@ Values land as an **added table**, never overwriting a row (COO baseline §4 rul
 - **Builds no guard, alarm, monitor or checker.** CTO `@ee5ff633e1` is explicit that the control is
   a **work-ordering precondition in the record a decomposer reads, NOT a detector**, and that the
   moratorium must not be cited against it. Nothing here fires anything.
+
+---
+
+# §12 RESULTS — FIRST CAPTURE (added table, nothing above overwritten)
+
+**Freeze hash:** `e649eb8249595cfa683711852831865f1e827f44` — pinned BEFORE these numbers existed.
+**Gates cleared:** CTO schema 20260731T061312Z · CVO source declaration 20260731T061200Z.
+**Header declarations (§0b):** `baseline_reading=retrospective_reference_class` ·
+`comparison_validity=cross_work_compositional` · **`causal_reading_permitted=false`**
+**Window (git components):** 2026-04-30 .. 2026-07-29 — **ends before NFRA_VELOCITY was
+commissioned (2026-07-29), so it is genuinely PRE-framework.**
+
+| metric_id | value | denominator | denominator_of | capture_method | scope | status |
+|---|---|---|---|---|---|---|
+| `a_archaeology_ratio` | **0.2666** | 889 | archaeology+build tag-instances | SELF_REPORT | repo_global | MEASURED |
+| `a_archaeology_tags` | 237 | 2,446 | all archetype tag-instances | GIT_DERIVED | repo_global | MEASURED |
+| `a_build_tags` | 652 | 2,446 | all archetype tag-instances | GIT_DERIVED | repo_global | MEASURED |
+| `a_context_sessions` | 2,078 | 4,206 | log files in scope | GIT_DERIVED | repo_global | MEASURED |
+| `b_canonicity_questions` | **0** | 4,206 | log files scanned | SELF_REPORT | repo_global | **MEASURED-AS-TOKEN — SEE §12.2. DOES NOT ESTABLISH A RATE OF 0.** |
+| `c_rail_override_count` | **76** | 26,590 | rail-log lines | GIT_DERIVED | ⚠ **device_local** | MEASURED |
+| `c_rail_deny_count` | **672** | 26,590 | rail-log lines | GIT_DERIVED | ⚠ **device_local** | MEASURED |
+| `d_retouch_rate` | **36.77%–56.09%** | 14,154 | eligible commits | GIT_DERIVED | repo_global | MEASURED AS A **RANGE** — SEE §12.3 |
+| `d_rework_wave_denominator_attributed` | — | — | — | — | — | **NOT_YET_MEASURABLE** (CVO~Z step 3 open) |
+
+`a_archaeology_ratio`'s denominator is **889 (archaeology+build), NOT 2,446** — the 1,557
+NEITHER-tags (VALIDATE / COORDINATE / SCRIBE / MIXED = 63.7%) are **not folded into either side.**
+
+## §12.1 ⚠ A ZERO I ALMOST BANKED, CAUGHT BY THE POSITIVE CONTROL
+
+My first (a)/(b) run returned `a_archaeology_ratio = 0.0000` and every (b) pattern at 0. **Both
+were fabricated by a broken retrieval, not measured.** The `git grep -- "org/tier*/*/logs/"`
+pathspec matched nothing; the real population is 2,446 archetype tags across 2,078 files. A
+positive control — grepping a line I had personally written into a log minutes earlier — returned
+the line by direct read and **nothing** through the pathspec, which located the fault in the
+RETRIEVAL rather than the estate.
+
+**Had I banked it, `a_archaeology_ratio = 0.0000` would have entered the program's only
+product-grade metric as a number produced entirely by a failed glob** — and it would have read as
+a stunning finding (*"zero archaeology!"*) rather than as a bug. *Put the control on the retrieval,
+not the pattern.*
+
+## §12.2 (b) IS ON THE WRONG AXIS — and the zero is real while the rate is not
+
+The three literal strings PROGRAM §5.9 names return **0 each**. The scan is sound (same loop
+returned 2,446 archetype tags), so this is a **real token-count zero — and it does NOT establish
+that the questions were not asked.** A broader pre-registered, project-generic probe over the same
+4,206 files, each reported separately and never summed:
+
+`canonical` **7,302** (1,815 files) · `authoritative` **569** (374) · `source of truth` **92** (80)
+· `still live` **40** (39) · `who owns` **11** · `who writes` **1** · `which is canonical` **0** ·
+`is it live` **0** · `is this live` **0**
+
+**§5.9 names a question TYPE; a literal-token count is a proxy on the wrong axis for it.** The
+category is plainly present at scale while its literal phrasings are absent. **This is the same
+shape as COO's M1c NUDGE zero** (*"no NUDGE token across 24,205 lines"* — recorded as a token count
+with the ambiguity named, never as a rate of zero), and it is recorded the same way.
+
+**Consequence:** (b) as literally specified is **not capturable by pre-registered literal
+patterns.** Capturing the TYPE needs judgment over prose — which raises **the same fence-scope
+question already open for (d)**, and I am not resolving it here for the same reason.
+
+## §12.3 (d) — THE PREDICATE IS THE MEASUREMENT, so all four are reported
+
+| predicate (commit introduces NO new path within…) | count | denom | rate |
+|---|---|---|---|
+| 7d horizon, any author, logs INCLUDED | 6,730 | 15,741 | 42.75% |
+| 7d horizon, any author, logs EXCLUDED | 7,939 | 14,154 | **56.09%** |
+| 24h horizon, any author, logs EXCLUDED | 7,122 | 14,154 | 50.32% |
+| 24h horizon, **same author**, logs EXCLUDED | 5,205 | 14,154 | **36.77%** |
+
+**A 19-point spread across four honest predicates. The spread IS the result** — "rework" is not one
+population, and any single figure here would have been a choice wearing the costume of a
+measurement. Excluding logs *raised* the rate (42.75%→56.09%), the opposite of my expectation,
+because session logs are mostly NEW paths — **the measurement corrected me, my intuition did not.**
+
+**NAMING CORRECTION, and it matters:** I have renamed this `d_retouch_rate`, **not**
+`d_rework_wave_count`. What is measured is *re-touch*, which is a **superset** of rework — it
+cannot separate correction from normal iteration by structure alone. Calling it "rework" would name
+a number for what I wanted it to measure rather than what it measures.
+
+**This widens what I told CTO at 060847Z.** I reported that only (d)'s *attribution* half was
+judgment-bound. **The *count* half does not cleanly isolate rework either.** Reporting the widening
+rather than letting the earlier, narrower claim stand.
+
+## §12.4 DECLARED GAP — measured population ≠ frozen §3 population
+
+§3 froze a **work-unit** population (`pods_spanned>=2`, `has_served_consumer`,
+`delivered_within_window`). **These results are measured over COMMITS and LOG FILES — a proxy
+population, not the frozen one.** Segmenting the history into work units satisfying §3 is not
+built, so the §3 predicates are **declared-but-unapplied** in this first capture.
+
+Stating it because an unstated proxy-for-population substitution is precisely the axis-confusion
+this program exists to catch, and because §3's freeze is only worth something if deviations from it
+are visible. **A second capture against the true §3 population would be an ADDED column, never an
+overwrite.**
