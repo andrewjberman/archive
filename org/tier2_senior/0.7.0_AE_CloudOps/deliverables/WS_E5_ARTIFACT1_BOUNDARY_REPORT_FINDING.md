@@ -90,3 +90,57 @@ The blocking question for CORE, stated as a specimen and not a design:
 **a detector that already computes its address space, denominator, residue and failure direction has
 no field in `contract_record` to declare them in.** What that implies for the grammar is the rail
 authors' call.
+
+---
+
+# §8 THE MUTANT PROOF — REQUIRED, RUN, AND IT **FAILED**. That is the sharpest finding here.
+
+COO required the report to change when the address space changes. **It does not.**
+
+| run | answer size | declared address space | declared denominator |
+|---|---|---|---|
+| baseline (whole population) | **2,426 lines** | `examined 8915 file(s)` | `642 distinct (BUCKET,KEY)` |
+| scoped to one bucket | **181 lines** | `examined 8915 file(s)` | `642 distinct (BUCKET,KEY)` |
+
+**The answer narrowed by 93%. The declared boundary did not move by one character.**
+
+## §8.1 I ruled out the likelier explanation first
+
+A failed mutant usually means the mutant did not mutate. **Discriminating check: the outputs differ
+enormously — 2,426 vs 181 lines — so the scope argument unambiguously took effect.** The scoping is
+real; the boundary is simply invariant to it.
+
+## §8.2 What the defect IS
+
+**A SCOPED ANSWER CARRIES AN UNSCOPED BOUNDARY.** A reader of the scoped run receives a 181-line
+answer about one bucket, accompanied by a denominator computed over the whole estate. Nothing in the
+output distinguishes *"what the scan examined"* from *"what this answer ranges over"* — and those
+diverged by 93% in this single invocation.
+
+**This is mechanism 2, live:** *"WIDER-THAN-MEASURED — does the CLAIM's axis equal the MEASURED
+axis?"*
+
+## §8.3 And it is the arity gap, arrived at from the opposite direction
+
+`test_e5_recall_standard_arity_limits.py` (`@3d9ad164b2`, base serial, 07-30) concluded **from the
+type alone** that the L0a boundary report expresses ONE of five mechanisms, and that the other four
+are blocked by its **ARITY** — one `source`, one `address_space`, one `head` — so *"a MISMATCH
+between the plane measured and the plane a claim ranges over has nowhere to live."*
+
+**That was a prediction from reading the type. This is the same defect measured in a live detector's
+output.** The type cannot carry the distinction, so the detector does not draw it — and a 93%
+divergence between scan-scope and answer-scope goes unstated.
+
+**Three independent routes, one wall:** CVO read the grammar and found no carrier field; I exercised
+a detector and found the substance already written in prose; the mutant found the boundary invariant
+to the very thing it is supposed to bound. **A single `address_space` field cannot be both the
+scan's and the answer's, and no amount of care in the detector fixes a field that does not exist.**
+
+## §8.4 Status
+
+**Artifact 1 is a NEGATIVE RESULT and it is complete as one.** Registration is open (base CTO
+143606Z — the defer is field-level and this detector declares no `cadence` / `delivery_cadence`),
+but **what would be registered has no field to hold it, and the one field that exists cannot tell
+two address spaces apart.**
+
+Specimen to the rail authors through the seam. **I do not name the field that would fix it.**
