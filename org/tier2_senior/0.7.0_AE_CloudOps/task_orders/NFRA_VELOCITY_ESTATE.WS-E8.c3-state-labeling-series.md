@@ -92,13 +92,50 @@ what the rule bank forbids.
 </the_registry_is_the_store_the_walk_is_the_writer>
 
 <the_series>
-**E8.0 -- ⛔ WITHDRAWN AS A SPECIMEN. ANDREW-DIRECT, 2026-07-31 ~1630Z. INFLECTION IS DEFERRED.**
-  **VERBATIM (Andrew at the CTO terminal): "WE will deal with inflection later, i have made it very
-  clear i want the focus on NFRA_VELOCITY"**
-  The aggregator/`mode=full` items are **DEFERRED, not open questions.** Nothing acts on them. The
-  analysis below is KEPT so nobody re-derives it later, and the mechanism-vs-intent separation it
-  produced is kept because that separation is in-program -- **but the aggregator STOPS BEING A FIRST
-  SPECIMEN CANDIDATE. When the C3 walk needs one, it comes from an IN-PROGRAM system.**
+**E8.0 -- ✅ THE DOGFOODED CASE STUDY. ANDREW-DIRECT, 2026-07-31 ~1640Z: "have COO fold the aggregator
+case into the TO series."** *(This REVERSES the ~1630Z withdrawal recorded below. Both Andrew messages
+are real and the second CLARIFIES the first -- see the work-type boundary immediately following.)*
+
+>> **THE BOUNDARY IS WORK-TYPE, NOT SYSTEM. Andrew, VERBATIM:** *"It is fine to use inflection in this
+context, i thought you were getting distracted on ETFS_AVGCAP / rebate mechanism work as opposed to
+NFRA_VELOCITY work. If these cases are being dogfooded as case studies, that is fine"* <<
+  ✅ **SPECIMEN / CASE STUDY IN THIS SERIES** -- reason about it, justify the design from it, show what
+     the C3 layer resolves that no instrument can. **This IS the dogfooding.**
+  ⛔ **DISPATCH-TO-MEASURE** -- no INF silver read, no `rep_id` measurement, no aggregator tracing, no
+     seat sequenced against it. That was the retracted error; it STAYS retracted.
+  ⛔ **ETFS_AVGCAP / REBATE-MECHANISM WORK** -- the actual distraction he named.
+  ⚠ **KEEP TWO ADJACENT-LOOKING THINGS APART:** the **$532K INF gold-floor / rebate-basis orphan STAYS
+     PARKED** (ETFS_AVGCAP-adjacent, Andrew-reserved). **`canonical_nna` / `aggregator` is
+     ADVISOR-ATTRIBUTION, not rebate** -- that is the case folded here. Same pipeline family, different
+     work-type. *CTO nearly conflated them, and the whole clarification turns on the distinction.*
+
+**WHY IT IS THE RIGHT SPECIMEN -- provenance, not convenience: the COO and base CTO INDEPENDENTLY
+classified it C3.ii BEFORE this spec existed.** That is the strongest provenance a first specimen can
+have, and **a TO series arguing from a live item nobody could resolve is stronger than one arguing from
+a constructed example.**
+
+**THE DEFINING PROPERTY, which is exactly what this layer is for:**
+> *Is `aggregator` the sanctioned successor path the three-rule disarm deliberately left open, or a
+> route that SURVIVED a disarm aimed at the other three?*
+**THREE INDEPENDENT INSTRUMENTS AGREE AND STILL CANNOT ANSWER IT:** the rule census (142, denominator
+closed by measurement, escape hatches shut), the Lambda resource policy, and a repo source search.
+**Identical live signatures.**
+
+>> **A QUESTION WHERE THE MISSING THING IS *INTENT* RATHER THAN *DATA*, THAT THREE INSTRUMENTS AGREE ON
+AND STILL CANNOT ANSWER, IS THE CANONICAL CASE FOR A HUMAN+CTO WALK WITH CVO-ON-DOUBT.** <<
+
+**AND THE HARDEST DETAIL, which is the reason the walk cannot be replaced by better tooling:** the
+Lambda resource policy names ONLY the three DISABLED rules. **That is FACTUALLY CORRECT AND COMPLETELY
+MISLEADING** -- a same-account IAM principal needs no resource-policy statement, so the live daily
+caller leaves no trace on the callee's policy. **AN INSTRUMENT THAT IS CORRECT AND MISLEADING IS A
+HARDER FAILURE THAN ONE THAT IS WRONG**, because nothing about its output invites suspicion. No amount
+of better tooling at that layer fixes it; the answer was only ever in the function's source and in the
+intent of the people who put it there.
+
+*(HISTORICAL, retained: the ~1630Z Andrew-direct -- "WE will deal with inflection later, i have made it
+very clear i want the focus on NFRA_VELOCITY" -- withdrew this item entirely for ~10 minutes, until the
+~1640Z clarification established the work-type boundary. The withdrawal was CORRECT on the information
+available and the record of the scope breach below stands unchanged.)*
   **THE THREE SPEC LESSONS (source-first · controls invisible to their own layer · build the dissolve
   path) SURVIVE** -- they are properties of the WALK, not of Inflection, and they were paid for.
   *Record of how this went wrong, because it is the series' own subject matter: base CTO issued a
