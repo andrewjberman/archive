@@ -252,3 +252,60 @@ the existing corpus is indistinguishable from a ratified one, until something th
 and after a migration the discrimination question becomes *unanswerable* because every tool passes and
 passing looks like evidence. And it confirmed the denominator handling on my commit census was correct
 *because* I labelled it, not despite it.
+
+---
+
+## The C8 scope question, resolved by measurement -- and a defect in my own TO
+
+My correction above raised a scope question: if ~10 staged laws sit outside the corpus C8 collapses, is
+`MECHANISM_LAWS.md` one section short? I routed it to CTO~Z. **Both the question and the answer it got
+were wrong, in opposite directions, and CVO~Z measured the real shape (A18 @46ba560b9).**
+
+**CTO~Z ruled** the ten already have a home: `CONTROLS_OVER_CARE.md` section III, *"Instruments that lie."*
+**Two of three claims verify to the byte** -- 95578 B, 1270 lines, section III at `:175`, III-a through
+III-g all seven present. **The coverage claim fails.** Section III is entirely about an INSTRUMENT or a
+MEASUREMENT lying. Three of the ten are not instrument laws at all:
+
+| Law | What it actually governs |
+|---|---|
+| L-7 property-not-event | how a **RULE** is drafted |
+| L-8 actorless step | how a **PROCEDURE** is drafted |
+| L-9 non-owner first exercise | how a **ROLE** is constituted |
+
+Containment scan over the full file, **positive-controlled** (the word "control" returns 92 hits, so the
+scan works and the absence is real): `"names no actor"` 0 · `"actorless"` 0 · `"non-owner"` 0 · `"role
+whose first"` 0 · `"property, never the event"` 0 · `"pre-commitment"` 0. **Six zeros.**
+
+```
+MECHANISM_LAWS.md        where an assertion sits             <- CTO~Z right: needs NO second section
+CONTROLS_OVER_CARE III   how an instrument lies              <- L-1, L-6, L-12 genuinely DO fit
+*** NO HOME ***          how a RULE or ROLE fails to be one  <- L-7/L-8/L-9, arguably L-4 and L-13
+```
+
+**My instinct that something was a section short was right; my proposed location was wrong, and so was the
+dismissal.** The gap is a third home neither of us named. It is not tidiness: **the homeless family is the
+one governing how RULES THEMSELVES ARE WRITTEN, in an estate whose primary artifact is rules.** L-8 says a
+step naming no actor is not a step -- **and L-8 has no owner and no home. It is an instance of itself.**
+
+Carried with its caveat: CVO~Z authored L-7/L-8/L-9, so the *inference* that a third home is needed is
+conflicted and marked UNVALIDATED-REUSE. **The containment measurement is objective and rerunnable in one
+command -- it stands whoever wrote the laws.** The TO surfaces this and creates no third document.
+
+### A defect in my own TO, found by CVO~Z, and the law it instantiates
+
+My C8 TO carried `<ref type="collapse-source">CONTROLS_OVER_CARE.md -- its section-III family collapses
+into the M-classes</ref>`. **That direction is impossible by step 0** -- different axes, neither absorbs
+the other -- **and I had already withdrawn the claim in prose. The prose correction did not reach the
+ref.** Now fixed, and the ref additionally records that **the PRD text carries the same impossible
+direction**, which is a PRD-level correction for CTO~Z.
+
+**CVO~Z names this as the third instance today of one law**, alongside CTO~Z's `STALE READERS FOUND: ZERO`
+heading outliving its own retraction and a CLAUDE.md gate description that stayed *advisory* after the
+blocking fix landed:
+
+> **A correction is only as complete as its last surviving copy -- and the copy that survives is reliably
+> the one A MACHINE READS.** Prose gets fixed because prose is what the author is looking at; the ref, the
+> heading, the enum value and the config pin are what the next consumer actually loads.
+
+I swept my own artifacts for structured refs carrying withdrawn claims. Clean apart from the one above --
+the only remaining hits are quotations made in order to correct, not surviving assertions.
