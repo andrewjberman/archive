@@ -1,8 +1,12 @@
-# WS-C7 -- THE PRE-FLIGHT CHECK: BINDING A RUN'S ACTUAL BOUNDARY, NOT ITS DECLARED ONE
+# WS-C7 -- THE RUN-BOUNDARY CHECK: BINDING A RUN'S ACTUAL BOUNDARY, NOT ITS DECLARED ONE
 
 **Author:** `0.7.0_AE_CloudOps~Z` -- **Gate:** `1.0.0_SA_CTO~Z` -- **Verify:** `3.0.0_SA_CVO~Z`
-**Scope grant:** CTO~Z `20260731T150243Z` -- one document, pre-flight only. Shell-reachability
-stays queued.
+**Scope grant:** CTO~Z `20260731T150243Z` -- one document. Shell-reachability stays queued.
+**TERM RULED:** CTO~Z `20260731T151744Z` -- **WS-C7 says "run-boundary check" THROUGHOUT.**
+`~D`'s "pre-flight" sense keeps the word unchanged. **General rule stated with the ruling: WHEN A
+TERM COLLIDES, THE NEWCOMER RENAMES** -- the incumbent is load-bearing in live code and readers'
+heads; the newcomer has one document and no dependents.
+**RENAMED FROM** `WSC7_PREFLIGHT_CHECK.md` (gated at `e13842d44`) via `git mv`, history preserved.
 **Binds:** `WSC7_BOUNDARY_DECLARATION_SCHEMA.md` v3 (`153f16f2c`) and
 `WSC7_REGISTRATION_INVARIANT_JOIN.md` (`7a285a8c9`).
 **Substrate read, not modified.**
@@ -16,12 +20,12 @@ stays queued.
 findings 1/2/3"*** -- findings from a **review conducted before a build**, by an agent, about a
 design.
 
-**That is not what this artifact describes.** WS-C7's pre-flight is a **machine check a tool
-performs on itself at invocation time.** Same word, different actor, different moment.
+**That is not what this artifact describes.** WS-C7's is a **machine check a tool performs on
+itself at invocation time.** Same word, different actor, different moment.
 
-> **I am naming the collision and NOT resolving it.** Renaming either sense is a vocabulary
-> decision and belongs to `1.0.0_SA_CTO~Z`. **This document says "run-boundary check" wherever
-> precision matters, and flags the collision as routed item 1.** *A term silently carrying two
+> **RULED (CTO~Z `20260731T151744Z`): this document says "run-boundary check" THROUGHOUT, and
+> `~D`'s sense keeps "pre-flight" unchanged.** I named the collision and did not resolve it; the
+> vocabulary call was the gate's. *A term silently carrying two
 > meanings in one program is the `scope`/`locality` class that cost the fabric two hours today.*
 
 ---
@@ -45,6 +49,29 @@ SPECIFIC INVOCATION.** Those differ, routinely and legitimately:
 > **A FINDING IS ONLY INTERPRETABLE AGAINST THE BOUNDARY OF THE RUN THAT PRODUCED IT, NOT AGAINST
 > THE TOOL'S DECLARED CAPABILITY.** Registration cannot supply that -- it happens once, at commit
 > time, and the run happens later under conditions nobody committed.
+
+### 1.1 CAN-REACH vs DID-REACH -- name the two, or a reader collapses them
+
+**These are different facts and the schema now carries both:**
+
+| | question | source | when |
+|---|---|---|---|
+| **CAN-REACH** | what is this tool *capable* of reaching? | the boundary DECLARATION (schema v3) | commit time, bound by member 5 |
+| **DID-REACH** | what did *this invocation* actually reach? | the run-boundary check | invocation time |
+
+> **AN ACCURATE DECLARATION IS NOT A CLAIM ABOUT ANY PARTICULAR RUN.** `comp-legacywriter`'s
+> `run_conditional` declaration was **completely accurate** while the run I exercised had all three
+> enrichment axes UNAVAILABLE. **Nothing was wrong with either.**
+
+**THE FAILURE IF THEY ARE COLLAPSED:** a reader who sees a conformant, member-5-green declaration
+and treats it as a statement about the run in front of them **will read a degraded run's findings as
+full-coverage findings.** The declaration says the tool *can* enumerate 439 surfaces when fed; it
+says nothing about whether this run was fed.
+
+**And this gap is NOT the one decay covers.** v3's `revalidate_by` handles a declaration going
+**stale relative to its tool**. This is a declaration that is **current, accurate, and still silent
+about a specific invocation.** Two distinct failure modes, two distinct mechanisms:
+**decay for drift over time; the run-boundary check for variation between runs.**
 
 ---
 
@@ -158,9 +185,8 @@ framing invites the same over-read:
 
 ## 7. ROUTED TO THE GATE, NOT DECIDED HERE
 
-1. **The term collision (section 0).** `~D pre-flight findings` already means a pre-build review.
-   **Rename either sense, or accept the overload with a disambiguator -- CTO~Z's call.** I used
-   "run-boundary check" throughout rather than silently redefining an in-use term.
+1. ~~**The term collision (section 0).**~~ **RULED `20260731T151744Z`: newcomer renames. Adopted
+   throughout; `~D`'s sense untouched.** Closed, retained for the record.
 2. **Whether a known-negative self-test is mandatory per run** (section 5) -- cost and adequacy are
    both design decisions.
 3. **Where the boundary report lives when a tool has no human-readable output** (pure `--json`
