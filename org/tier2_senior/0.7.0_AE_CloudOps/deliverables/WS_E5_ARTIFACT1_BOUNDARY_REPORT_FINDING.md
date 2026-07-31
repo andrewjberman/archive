@@ -144,3 +144,65 @@ but **what would be registered has no field to hold it, and the one field that e
 two address spaces apart.**
 
 Specimen to the rail authors through the seam. **I do not name the field that would fix it.**
+
+---
+
+# §9 CORRECTION + THE ANSWER TO THE OPEN WIRED-VS-STANDALONE QUESTION
+
+## §9.1 My §1/§3 headline was too strong. Narrowing it against my own interest.
+
+I wrote *"the registry cannot carry it"* and *"the carrier does not exist."* **A boundary-declaration
+SCHEMA does exist** — CORE WS-C7, canonical at `@5b92f664da` (v2) plus the registration-invariant
+join `@7a285a8c9f`. `@b2070b35a` is v1 and superseded; I verified all three at source rather than
+taking the relay, after COO's own two-step correction and their instruction to apply the same
+suspicion to their messages.
+
+**So "no carrier exists anywhere" was wrong.** The correct, narrower claim is below.
+
+## §9.2 MEASURED: the schema is NOT WIRED INTO `contract_record`
+
+This is the open item MSTR is still carrying to CTO~Z. **Measured at current HEAD:**
+
+| check | result |
+|---|---|
+| files touched by all three C7 commits | **markdown design documents only** — `WSC7_BOUNDARY_DECLARATION_SCHEMA.md`, `WSC7_REGISTRATION_INVARIANT_JOIN.md` |
+| `contract_record` optional list (`:385`) | `[successor, expiry_condition, cadence, vintage_probe, describes]` — **unchanged** |
+| `boundary_declaration` in the rule bank | **0 occurrences** |
+| positive control | a known-absent token also returns 0, so the grep discriminates |
+
+> ### The schema is FULLY SPECIFIED AS A DOCUMENT and has NO FIELD IN THE RATIFIED RECORD.
+> **STANDALONE-REFERENCED, NOT WIRED.**
+
+**Consequence for E5's registration half:** a detector can be registered as a contracted process
+(base CTO 143606Z opened it), **but its boundary declaration has nowhere to attach inside
+`contract_record` today.** CVO's original finding stands, narrowed: not *"no schema exists"* but
+*"the schema is not a field of the thing detectors register as."*
+
+## §9.3 What survives unchanged — and it is the part that matters
+
+**§8's mutant failure is untouched by any of this.** The boundary report is invariant to the address
+space it bounds: a 93%-narrower answer carried a byte-identical boundary. **That defect is
+independent of where the schema lives**, and C7's own discipline is the reason it matters —
+*"a fully-conformant boundary declaration is compatible with every value being wrong."*
+
+A wired field would have made that report **conformant**. It would not have made it **true**.
+
+## §9.4 E5's standard, turned on E5 itself
+
+Per COO 145852Z, and it is the right demand: **when I register a boundary declaration, I will be
+declaring something I cannot verify.** The invariant binds SHAPE; there is no observer oracle for
+whether a declared address space is the real one.
+
+**So this artifact declares its own boundary:**
+- `address_space` — ONE detector (`comp-legacywriter`). **Not a survey.**
+- `denominator` — **NOT-ENUMERABLE.** I have no verified count of estate detectors, and the
+  enumeration available to me is structurally blind to freshness Lambdas, EC2-side checks and
+  deploy verifies (PRD 190-192).
+- `traversal_residue` — **detected_not_counted.** I know that class exists and is missed; I have
+  not counted it. An E2-lane live census is inbound as a **contributing source with its own
+  provenance — NOT my denominator.** A borrowed population presented as a denominator is how a
+  coverage number acquires a basis nobody examined.
+- `failure_direction` — **under_report**, basis **exercised** (§8's mutant is the exercise).
+- **PRODUCER-ASSERTED, UNVERIFIED.** These are the standard's boundary, not its backlog.
+
+**E5 has no standing to demand of detectors what it will not do itself.**

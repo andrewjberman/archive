@@ -957,8 +957,47 @@
          20260730T221931Z; GO for apply 20260730T222922Z with condition C3. -->
     <module>
       <tf_dir>infra/aws/terraform/estate-report/</tf_dir>
-      <tag>estate-report-v0.1.0</tag>
+      <tag>estate-report-v0.2.0</tag>
       <state_key>estate-report/tfstate</state_key>
+      <!-- 2026-07-31 (0.7.0_AE_CloudOps~B): v0.2.0 adds estate-capture-writer. Andrew-direct
+           "yes on estate capture writer" ~1358Z via CTO; CVO hold (a) v3. 2 added / 0 changed /
+           0 destroyed, 0-diff verified.
+
+           WHY IT EXISTS: the capture layer runs DEVICE-SIDE by force (transcripts live at
+           ~/.claude/projects/, not in the repo or S3, so the runner structurally cannot see them).
+           MEASURED before it existed: the device authenticates as user/Andrew_Berman, a member of
+           AdministratorAccessOpalCapital, and simulate returned ALLOWED on today's capture key with
+           no policy in place. An EVIDENCE STORE of Andrew's words cannot have a substrate where
+           anything at all could have written them -- content-layer provenance (HUMAN/HARNESS/
+           UNCLASSIFIED) demands storage-layer parity.
+           NOTE the measurement trap: list-attached-user-policies showed four narrow policies and
+           read reassuring -- THE ADMIN RIDES THE GROUP, which that call does not show.
+
+           SOLE GRANT: s3:PutObject on opal-estate-report/{capture_day}/text-input/* . Trust names
+           exactly ONE principal (user/Andrew_Berman) -- a role many principals can assume attributes
+           nothing. Day scope is an explicit LITERAL re-applied daily: a time Condition is
+           INEXPRESSIBLE, because aws:CurrentTime bounds WHEN A CALL HAPPENS, never WHAT KEY IT
+           WRITES, so a conditioned grant permits writing a past-day key today.
+
+           var.capture_day carries an UNREACHABLE SENTINEL default (1970-01-01). It was REQUIRED
+           with no default first, and safe-apply REFUSED the apply: the gate runs its own var-less
+           internal plan for comp-tagauthz, which failed, so the gate could not evaluate and
+           fail-closed. A REQUIRED NO-DEFAULT VARIABLE MAKES A MODULE UN-GATEABLE BY ANY WRAPPER
+           THAT PLANS IT WITHOUT VARS. The sentinel keeps fail-closed-loud (a forgotten -var grants
+           1970 and denies today) and is self-diagnosing.
+
+           >> BOUNDARY PROVEN, PATH UNPROVEN. << Draft battery 6/6, applied battery 10/10 across
+           both principals with a separate positive control each. But the FALLBACK MUTANT has NOT
+           run (needs the capture write path, which does not exist yet), so a silent boto3 fallback
+           to ambient admin is still indistinguishable from the role working. THE ROLE IS NOT
+           TRUSTED UNTIL THAT MUTANT RUNS. Zero objects exist under any {day}/text-input/.
+           Ledger: org/critical_paths/change_management/20260731T1440Z_estate-capture-writer-role_deploy_completion.md -->
+      <capture_writer>
+        <role>estate-capture-writer (arn:aws:iam::313476888478:role/estate-capture-writer)</role>
+        <trust>arn:aws:iam::313476888478:user/Andrew_Berman -- exactly one principal</trust>
+        <grant>s3:PutObject on opal-estate-report/{capture_day}/text-input/* -- no Get, no Delete, no List</grant>
+        <runbook>terraform plan -var capture_day=YYYY-MM-DD ; .tools/safe-apply.sh -chdir=... apply &lt;plan&gt; -- DAILY</runbook>
+      </capture_writer>
       <design>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ESTATE_REPORT_PIPELINE_20260730/SPEC.md</design>
       <purpose>
         Structure that can be compiled gets compiled (CTO's RESOLVER_DEFROST_DESIGN). PROSE cannot --
