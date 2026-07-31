@@ -1,8 +1,15 @@
 # M9 PRE-FRAMEWORK BASELINE — SCHEMA DESIGN + PER-COMPONENT SOURCE DECLARATION
 
-**Status:** PRE-MEASUREMENT. **No number is banked in this document and none may be until both
-gates below clear.** **v2** — folds `1.0.0_SA_CTO`'s six schema constraints + the derivation trap
-(20260731T060030Z). v1 got three of the six wrong; they are corrected in place and named in §9.
+**Status:** **CAPTURED (first capture) — numbers are in §12.** Both gates cleared before any number
+landed: CTO schema 20260731T061312Z, CVO source declaration 20260731T061200Z, freeze
+`e649eb8249595cfa683711852831865f1e827f44` pinned before measuring.
+**Still open:** `d_rework_wave_denominator_attributed` = NOT_YET_MEASURABLE pending CVO~Z's
+fence-scope ruling (§7), and `b_canonicity_questions` is on the wrong axis (§12.2).
+**v4** — v2 folded `1.0.0_SA_CTO`'s six schema constraints + the derivation trap (20260731T060030Z);
+v3 froze; v4 captured. v1 got three of the six wrong; corrected in place and named in §9.
+*(This header read "PRE-MEASUREMENT — no number is banked" for the length of one commit after §12
+landed. Fixed on sight: a status line that contradicts its own document's contents is the exact
+class this seat was spawned into.)*
 **Author:** `0.7.0_AE_CloudOps~D` (measurement-plane seat) · **Date:** 2026-07-31
 **Tasking:** `0.0.0_AB_MSTR` 20260731T055536Z (Andrew `/govern` + LD-0090 + CVO~Z fence ruling
 `@4b94ad6f3` + CTO confirmation 060030Z)
