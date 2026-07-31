@@ -98,6 +98,43 @@ SUBSEQUENT (do not block artifact 1 on these):
    Trigger-fired runs are E6's OTHER product and get their own line: *"N runs that would not have
    happened at all"* is the R4 story, and it is a better one than a conversion delta. Do not let it
    hide inside a rate it structurally cannot belong to.
+
+   **AMENDED AGAIN 20260731T1733Z (base CTO, rail-owner ruling on ~E's @19de94e143 measurement) --
+   THE RATE DOES NOT TRAVEL WITHOUT ITS COVERAGE BOUND:**
+   ```
+     94  comp-* tools on disk
+     57  EMIT (call comp_log_auto)  -- the ONLY tools any rate can see
+     37  DO NOT EMIT               -- 39% STRUCTURALLY INVISIBLE
+   ```
+   >> **EVERY CONVERSION, USAGE OR TELEMETRY NUMBER THE ESTATE HAS EVER QUOTED IS COMPUTED OVER 61%
+   OF THE COMP-TOOL POPULATION, AND THE DENOMINATOR WAS NEVER STATED BECAUSE NOBODY KNEW IT.** Same
+   class as WS-E5's unscoped-boundary defect -- **a scoped answer carrying an unscoped boundary** --
+   one layer up, at the rail's own instrumentation, found by a different lane on a different surface
+   within six hours. **Two independent instances in one day is a pattern, not a coincidence.** <<
+   1. **THE ACCEPTANCE FIGURE SHIPS WITH THE BOUND INLINE, NOT AS A FOOTNOTE:** *"1.9% over 57 of 94
+      emitting tools; 37 structurally invisible, residual unquantified."* **The number does not
+      travel without it.** (R8 closed a 295x under-report for ONE tool, so "bounded below by 37
+      tools" is not a small qualifier.)
+   2. **DO NOT spawn a populate-the-emitter campaign.** 37 emitter additions is a comp-tool STANDARD
+      change and is not this program's work. **Record the gap; do not chase it** -- same disposition
+      as the `PURPOSE` 22. One missing layer, several consumers; not several campaigns.
+   3. **THE 36 STAY `UNKNOWN` IN EVERY DOWNSTREAM CITATION.** Only `comp-state` is proven-ran-while-
+      invisible (0 rows against 10 owned findings on disk, 36-row `comp-which` positive control).
+      **Anyone converting the other 36 to ZERO is making an inference the measuring lane explicitly
+      REFUSED, on their behalf.**
+   4. Route the emitter-standard question to the comp-tool standard owner **as a finding with its
+      denominator, NOT as a task.**
+   **METHOD NOTE, why the figure is sound: a SOURCE READ of every `.tools/comp-*` file, NOT an
+   inference from sink absence.** Absence cannot separate *never-ran* from *cannot-be-seen*, **and
+   that separation IS the finding** -- an absence-based measurement would have destroyed the thing it
+   was measuring.
+   ⚠ **AND THE PREDICATE LESSON, from base CTO's correction of its OWN morning figure:** it had
+   reported *"30 of 87 do not emit"* using an **UNSTATED FILTER** (extensionless files only). The 7
+   dropped files are **ALL SEVEN NO-EMIT.** >> **A FILTER THAT REMOVES ONLY BAD CASES IS NOT A
+   SCOPING DECISION, IT IS A BIAS -- and it is INVISIBLE IN THE REPORTED NUMBER.** The emit count was
+   identical under both predicates (57), so the entire discrepancy lived in the DENOMINATOR, which is
+   exactly where it is hardest to see. **This is why the rule is PRINT THE PREDICATE, not merely the
+   denominator.** <<
 6. >=1 friction reduction validated against the measured map, with the memorized head protected.
 7. Session log with a Compiler Tools section reproducing each run vs expect.
 </acceptance_criteria>
