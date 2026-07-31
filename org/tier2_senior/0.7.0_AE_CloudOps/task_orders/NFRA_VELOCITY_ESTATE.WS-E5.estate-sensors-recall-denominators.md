@@ -36,13 +36,43 @@ DECLARATION** are all untouched by a trigger re-sequencing.
 does not block registration -- it joins the re-lint set (same treatment as the 9 pinned process
 declarations: not wrong today, may become wrong, re-lint after E2 settles).
 
-**STILL OPEN AND UNAFFECTED BY THIS RULING -- do not conflate them:** whether the `contract_record`
-GRAMMAR can express a boundary declaration at all. base CVO reads the ratified shape (intent_source /
-obligation / lifecycle_class / revalidate_by / describes / locality / successor) as carrying NO such
-field, with `describes` explicitly non-vocabulary and therefore unable to hold a checkable one --
-so **the WS-C1 feedback route is the PROBABLE first outcome, not the tail.** CTO ruled the DEFER does
-not apply; that is permission, not capability. Route the grammar gap through the seam (MSTR is
-pre-notifying the CORE rail authors); do not extend the grammar yourself.
+**THE GRAMMAR QUESTION IS NOW ANSWERED -- AND THE ANSWER HAS A LOAD-BEARING LIMIT.** base CVO
+predicted no `contract_record` field could carry a boundary declaration, making a WS-C1 feedback the
+probable first outcome. **CORE's WS-C7 had already shipped the schema.** Build against the CANONICAL
+revisions, verified at source (all on origin, author `0.7.0_AE_CloudOps~Z`):
+
+  `5b92f664da` 2026-07-31T10:26:35-04:00 -- **schema v2** (G1-G5 + the L-16 known-negative companion)
+  `7a285a8c9f` 2026-07-31T10:40:44-04:00 -- **the REGISTRATION INVARIANT JOIN**
+
+  ** `b2070b35a5` 09:19:01 is v1 and SUPERSEDED -- DO NOT BUILD AGAINST IT.** (Non-ASCII + broken
+  tables; it was relayed as canonical in COO msg 144731Z and CORRECTED at 145333Z.)
+
+Shape: `address_space` (kind / denominator / denominator_source / description) · `traversal_residue`
+(reportable / channel) · `failure_direction` (self / basis). Every field RATIFIED-STRUCTURED or
+DECLARED UN-DECIDABLE.
+
+>> **CARRYING IS NOT CHECKING, AND CONFLATING THEM IS THE WORST AVAILABLE OUTCOME FOR THIS
+WORKSTREAM.** `7a285a8c9`'s own subject: *"member 5 binds a declaration's SHAPE and can NEVER bind its
+TRUTH, and saying so is the whole artifact."* **A boundary declaration is PRODUCER-ASSERTED** -- the
+schema REQUIRES it, never DERIVES it.
+  DECIDABLE (shape): `known_negative` present when `basis=exercised`; `denominator_grain` coarser than
+  `row_grain` (D1_value_grain ORDERED); presence/membership.
+  UNDECIDABLE (truth): is the declared address space the REAL one? **NO** -- producer-asserted, no
+  observer oracle. Is `known_negative` a REAL discriminator? **NO** -- needs understanding what the
+  tool means. **These are the standard's BOUNDARY, not its backlog -- name them as such, never as
+  pending checks.**
+**DO NOT let a registered boundary declaration READ AS VALIDATED.** That would license every
+downstream consumer to trust a producer-asserted, unverified claim -- the comp-iam deletion-warrant
+class (CLAUDE.md 22a), which is the surface E5 exists to CLOSE, not to build. C7's companion
+discipline: *"a fully-conformant boundary declaration is compatible with every value being wrong."* <<
+
+**PROVENANCE LESSON, RECORDED BECAUSE IT NEARLY LANDED IN THIS FILE:** the wrong hash reached this TO
+through two agents who each grounded correctly and still got it wrong -- MSTR ground-verified the
+CONTENT at the hash it was handed (correct for that hash) and COO relayed it without checking the hash
+was the current revision. **Grounding content-at-a-hash is not verifying the hash is right.** A correct
+read of a superseded artifact is a wrong answer carrying full provenance, and it travels FASTER than
+an unsourced one because it looks grounded. CLAUDE.md already says it: a line citation without a
+vintage is not a citation.
 
 **ALSO FOLD INTO THE DENOMINATOR WORK:** the E2 lane measured **142 EventBridge rules + 12 Scheduler
 schedules** against a carried 143 + 11 -- drift on BOTH limbs, in OPPOSITE directions, reported
