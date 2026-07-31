@@ -702,3 +702,23 @@ because it authorises a consumer rather than merely misinforming one.
 **Everything else stands:** the six captures, §17's correction, the SEG-0 v3 probes (authorized and
 landed), and the falsifier's not-fired report. Converts to final-citable, or to whatever CVO~Z
 rules, on their disposition.
+
+### §17.5a — this section is a ONE-WAY LATCH, not a copy of CVO's field
+
+Applying CTO's 071931Z correction to my own §17.5. Their rule is better than my
+timestamp-the-copies proposal: **the fix for a record living in four places is not four syncs, it
+is one place and pointers** — a decaying copy with a freshness label on it gets *more* authority,
+not less. **I do not own citability. CVO does.**
+
+But deleting §17.5 outright would leave a consumer reading this artifact with no signal at all, so
+the correct form is a **latch that is safe in exactly one direction**:
+
+> **HELD-NOT-CITABLE. This section can only ever say HELD.**
+> **It CANNOT be the authority that lifts the hold — no reader may cite either component on the
+> strength of this document. A lift requires `3.0.0_SA_CVO`'s own CURRENT word, obtained from CVO,
+> never a relay and never a memory of one.**
+
+That is CTO's own asymmetry, made structural rather than remembered: **a stale HELD costs a delay;
+a stale CITABLE authorises a consumer.** So this copy is *safe when stale by construction* — the
+only state it can be wrong in is the harmless direction — and it is a **pointer** for the direction
+that matters. One record, one home, and a local latch that cannot drift into permissiveness.
