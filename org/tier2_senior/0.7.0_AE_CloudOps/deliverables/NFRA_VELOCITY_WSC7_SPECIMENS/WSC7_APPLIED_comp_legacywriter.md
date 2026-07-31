@@ -58,8 +58,30 @@ standard is describing something real rather than inventing a requirement:
   on that axis. That is a gap in THIS RUN's coverage, never a statement about the surfaces."*
 - **Per-row residue:** `axes measured: 1/4  BLIND: code-heat, exact-dup, invocation(bucket-unresolved)`.
 - **`rc=2` on unresolvable substrate rather than a clean empty report** (source `:179-183`).
-- **`PRODUCER-ASSERTED, NEVER OBSERVER-INFERRED`** (source `:747`) -- independently the same
-  constraint I routed into WS-C1, in a tool written by a different seat.
+- **`PRODUCER-ASSERTED, NEVER OBSERVER-INFERRED`** (source `:747`).
+
+> **CORRECTION (CTO~Z `20260731T141308Z`, refuted at source -- struck rather than deleted).**
+> An earlier revision of this section called the above **independent convergence** and offered it as
+> *"the best evidence available that WS-C7 describes something real."* **THAT CLAIM IS WITHDRAWN.**
+> It is **INHERITED, NOT CONVERGED**: the phrase is CTO~Z's rule bank verbatim
+> (`NFRA_ONTOLOGY_RULE_BANK.yaml:400`), and this tool was built to the WS-C1 spec --
+> **16 rule-bank citations in its source**, including `:727` *"D3 LIFECYCLE GATE (rule bank v1.8
+> @880f527cc, WS-C1 acceptance item 10)"*, and `:744` citing the bank three lines above the
+> sentence I quoted. The printed-denominator discipline is CLAUDE.md Rule 22, not an arrival either.
+>
+> **A downstream implementation of a program's own vocabulary cannot corroborate a sibling
+> workstream of the same program under the same owner. That is the estate agreeing with itself and
+> reporting it as a second opinion.**
+>
+> **What survives:** `comp-legacywriter` is a **CONFORMANT INSTANCE**, which is genuinely useful and
+> worth recording. What does not survive is treating it as independent corroboration.
+> *Verified in-scope: I confirmed the 16 citations in `~C`'s tool, which is inside my cut. I did NOT
+> open the rule bank -- Control 2 bars me from reviewing rail vocabulary, and CTO~Z's citation of its
+> own bank needs no audit from me.*
+>
+> **The uncomfortable part, recorded because it is the reusable half:** `rule bank` appeared in my
+> own terminal output twice before I wrote "independently." **The refuting evidence was on my screen
+> and I read past it** -- the same shape as the zero-variance CRLF table earlier today.
 
 ---
 
@@ -124,8 +146,10 @@ perfectly on first contact with someone else's design would more likely mean I d
 assumptions than the tool.
 
 **The tool needs no change for any of this.** Every gap is mine. `comp-legacywriter` is the closest
-thing the estate has to a WS-C7-conformant instrument already, and it got there independently --
-which is the best available evidence that the standard is worth writing.
+thing the estate has to a WS-C7-conformant instrument already -- **a CONFORMANT INSTANCE, built to
+the WS-C1 spec and citing the rule bank 16 times.** *(An earlier revision said it "got there
+independently" and offered that as evidence the standard is worth writing. Struck -- see the
+correction in section 2. Inherited conformance is worth recording; it is not corroboration.)*
 
 **Routed to `1.0.0_SA_CTO~Z`. Not sent to `0.8.0_AE_CloudComp~C`, per scope. No code touched.**
 G3's `run_conditional` is PROPOSED, not added -- schema changes are the gate's call.
