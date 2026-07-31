@@ -357,3 +357,112 @@ Stating it because an unstated proxy-for-population substitution is precisely th
 this program exists to catch, and because §3's freeze is only worth something if deviations from it
 are visible. **A second capture against the true §3 population would be an ADDED column, never an
 overwrite.**
+
+---
+
+# §13 A HOLE IN §3's OWN FREEZE — the frozen class is not yet a class
+
+**Status:** FINDING. **No §3-population capture is banked, and none is in progress** (CTO
+063318Z sequenced the inbox-side (b) capture ahead of it; I stopped on that word).
+*Sequencing note, stated plainly: I began this segmentation on CVO's 063042Z ruling and CTO's
+stop-instruction landed while it was running. Reporting the result, not presenting it as
+correctly ordered.*
+
+## §13.1 What happened
+
+Applying §3's frozen predicates required segmenting history into work units. Structural
+clustering — commits linked by ≥1 shared path within a 7-day horizon, then the three predicates —
+produced:
+
+| stage | count |
+|---|---|
+| candidate components | 4,570 |
+| `pods_spanned >= 2` | 244 |
+| **AND** `has_served_consumer` | **65** |
+| unit size | min 2 · median 4 · **max 8,043** |
+| pods per unit | min 2 · median 2 · **max 77** |
+
+**One component swallowed 8,043 of the 8,654 qualifying commits (93%) and spans 77 distinct
+agents.** That is not a work unit; it is the fabric's shared surface.
+
+**Diagnosis (structural, no path content reasoned about):** transitive path-connectivity fuses
+unrelated work through ubiquitous hub paths — the top 10 most-touched paths carry **9.9% of all
+path-touches** across 19,426 distinct paths, and are touched by nearly every agent on nearly every
+task. **The blob is an artifact of the LINKING RULE, not a property of the work.**
+
+## §13.2 THE ACTUAL FINDING — and it is about §3, not about the clustering
+
+**§3 froze the PREDICATES but never defined the SEGMENTATION FUNCTION.**
+
+`pods_spanned >= 2`, `has_served_consumer` and `delivered_within_window` are each well-defined
+**given** work units. *What constitutes a work unit was never pinned.* I did not notice at freeze
+time; it surfaced only on application. **So the frozen class is not yet a class** — §3 pre-registers
+a filter over a population whose construction rule does not exist.
+
+This is a defect in my own control, found by trying to use it. Recording it here because §3's
+freeze is only worth something if its holes are as visible as its deviations.
+
+## §13.3 WHAT I AM DELIBERATELY NOT DOING
+
+**I am not tuning a hub-exclusion threshold to make the population appear.** A threshold chosen
+*now*, after seeing the blob, is a reference class chosen after seeing the result — **precisely
+what §3's pre-registration exists to prevent**, and it would retroactively empty the strongest
+control in this artifact. It would also work: some threshold produces a plausible unit count, and
+nothing downstream would reveal that the parameter was fitted to its own answer.
+
+**The segmentation function must be defined and frozen on its own, ratified without tuning against
+this output.** That is an arch-gate call. Until it exists, `M9-COMPLETE`'s §3-population clause
+(CVO 063042Z) cannot be satisfied by any measurement I could take — and that is a real blocker on
+the obligation, not a delay in my execution.
+
+---
+
+# §14 (b) TOKEN-AXIS INBOX CAPTURE — banked (CTO authorized 20260731T063838Z)
+
+**Axis:** TOKEN ONLY. No classification, no judgment, no TYPE inference — so this needs no fence
+ruling and pre-empts none. **TYPE axis remains pending** CVO~Z's A2.3 self-test + a C-1-analog
+declaration (CVO 063717Z).
+**Denominators enumerated AT RUN TIME:** 54,700 inbox `.md` files · 117,343,092 bytes ·
+captured 2026-07-31T06:39:37Z (computed offset, never a hand-typed `Z`).
+**`scope: device_local`** — 0-TRACKED (`.gitignore:248`).
+
+| pattern | inbox hits | inbox files | (durable logs, §12.2) |
+|---|---|---|---|
+| `canonical` | 23,951 | 11,208 | 7,304 |
+| `authoritative` | 2,190 | 1,655 | 570 |
+| `source of truth` | 344 | 322 | 93 |
+| `still live` | 208 | 192 | 40 |
+| `who owns` | 136 | 133 | 11 |
+| `who writes` | 21 | 21 | 1 |
+| `is it live` | **9** | 9 | **0** |
+| `is this live` | **4** | 4 | **0** |
+| `which artifact is canonical` | **1** | 1 | **0** |
+
+**Per-pattern, reported separately. NEVER summed into a rate** (CVO condition 3).
+
+## §14.1 REQUIRED DECLARATION on any (b) figure that ships (CTO 063838Z)
+
+**The inbox holds 77% of observable (b) signal volume and is 0-tracked/device-local; durable
+session logs hold 23%.** Any (b) figure ships with this split or it is malformed — *a logs-only (b)
+would otherwise be a real number silently hiding that three quarters of its evidence existed and
+expired.*
+
+## §14.2 THE THREE LITERAL §5.9 STRINGS EXIST — AND ONLY IN THE PERISHABLE STORE
+
+`which artifact is canonical` (1), `is it live` (9), `is this live` (4) appear in inbox bodies and
+**zero times** in durable logs. Trace volume, and that is the point: **the only corpus containing
+the literal phrasings PROGRAM §5.9 names is the one that is not tracked and that this fabric loses
+routinely.** A durable-only capture of (b) would report those three at 0 forever and be, narrowly,
+correct — and completely misleading about whether the question was ever asked in those words.
+
+## §14.3 WHY THE BODIES ARE UNTRACKED — the reason is documented, not incidental
+
+CTO (063838Z) declined to order a snapshot noting the bodies *"are untracked for reasons I have not
+audited (size, noise, possibly PII)."* **The reason is recorded in `.gitignore`:**
+`:235` — *"MCP runtime state (broker database, inbox, liveness) — local runtime only"*, and
+`:248` — `org/mcp/inbox/*`, with a deliberate carve-out for one serial's undelivered mail.
+
+**"Local runtime only" is a deliberate scoping decision, not an oversight.** So preserving 54,700
+bodies / 111.9 MB to a durable store would *override a standing decision*, which is a named call
+for its owner — not something a measurement seat does on its own initiative. **I did not build it.**
+Recorded here so the decision-maker has the actual reason rather than a guess at it.
