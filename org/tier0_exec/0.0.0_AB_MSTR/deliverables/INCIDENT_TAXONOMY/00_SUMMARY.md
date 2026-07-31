@@ -84,6 +84,23 @@ is stale against its own corpus* — M4, in the file whose job is to say what ex
 > **Fourteen mechanisms carry all of it.** The corpus is 286KB of prose organised by *when things
 > happened*; it has fourteen underlying shapes and no file groups by them.
 
+> **⚠ CORRECTION (2026-07-31 — `0.0.0_AB_MSTR` custodian; arithmetic measured by `3.0.0_SA_CVO~Z`,
+> inferred half DISCONFIRMED by `0.0.0_AB_MSTR~Z`): THE "55% / n=210" ABOVE MISQUOTES AN UNSTABLE
+> DENOMINATOR.** The mechanism counts in §2.1 **sum to 219, not 210**; the share column is computed on
+> 210, so it totals **104%**. The 219−210 = 9 gap is **NOT** explained by multi-coded incidents
+> (measured across the per-incident rows: **1** multi-coded incident, not the ~9 first inferred).
+> Across five parse methods the denominator is **204 / 208 / 210 / 219 / 221** — five methods, five
+> answers — so **no canonical denominator is established.** **What is durable is the CONCENTRATION**
+> (M6+M1+M2+M5 dominate under *every* method, ≈52–55%); what is not durable is any bare point figure.
+> **Cite the concentration with its denominator NAMED per method — "55%" and "52.5%" are equally
+> misquotes.** ROOT (structural, not arithmetic): the corpus has **no canonical per-incident→mechanism
+> mapping** — the 210-row instance table is **proposed (§5), not built.** **Building it is the fix
+> (chartered as WS-C8, §6); adjusting a percentage is not.** The correction is itself instances **M1**
+> (shared denominator) + **M6** (axis/grain mismatch): the count is a distribution over *assignments*,
+> the percentage over *incidents*, and nothing reconciled the two — which is why the column summing to
+> 104% went unnoticed. The same caveat binds §3 Finding 1's "114 of 210 (54%)" and every §2 figure
+> keyed to n=210.
+
 ### 2.2 EPISTEMIC TYPE
 
 E1 FALSE-CLEAN **133 (63%)** · E2 FALSE-ALARM 20 · E3 WRONG-VALUE 14 · E4 WRONG-OBJECT 13 ·
