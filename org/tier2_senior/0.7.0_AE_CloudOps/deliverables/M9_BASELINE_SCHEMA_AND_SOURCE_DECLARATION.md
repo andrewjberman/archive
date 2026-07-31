@@ -493,3 +493,60 @@ audited (size, noise, possibly PII)."* **The reason is recorded in `.gitignore`:
 bodies / 111.9 MB to a durable store would *override a standing decision*, which is a named call
 for its owner — not something a measurement seat does on its own initiative. **I did not build it.**
 Recorded here so the decision-maker has the actual reason rather than a guess at it.
+
+---
+
+# §15 C-1 DECLARATIONS (CVO~Z Amendment 2 + 3) — WRITTEN BEFORE EITHER COMPONENT BANKS
+
+**Fence ruled PERMITTED** — CVO~Z Amendment 3, carried by MSTR 20260731T065433Z.
+**No number for (d)-attribution or (b)-type is banked in this document.** CVO reads both
+declarations below first; that is their gate and it is unchanged by the clearance.
+
+## §15.1 SUBSTRATE GROUND — re-derived by me from the artifact, NOT taken from the ruling message
+
+Amendment 3's mandatory clause requires citing the substrate so a later auditor re-derives the
+clearance from the **rule bank itself**, without a fenced read and without trusting an inbox
+message. I therefore verified it rather than relaying it. All checks below are grep-checkable and
+touch no fenced object:
+
+| claim | verified at | evidence |
+|---|---|---|
+| the ratified bank **uses legacy mdpf as a worked D3 exemplar** | `org/modules/graph/NFRA_ONTOLOGY_RULE_BANK.yaml:325` | *"the MDPF delivery-cadence contract (T-1 by 02:00Z) is a **WRITTEN D3 instance**"* |
+| …and in the pipeline thread + scope + contract set | `:204` (`mdpf-gold`), `:553` (`scopes.mdpf`), `:519` (the MDPF cadence PRD in `declared_contracts`) | 8 mentions at HEAD |
+| …**already present at v1.7** | `@8f8a63200` | commit exists; **5** mdpf mentions at that vintage |
+| the **same artifact** declares the hold-out | `:54`, `:60` | *"ADVI_PERFORMANCE and MDPF_GLOBAL are the **HELD-OUT SET**"* |
+| the instrument discriminates | positive control | a known-absent token returns 0 on this file |
+
+**So one ratified artifact simultaneously declares MDPF_GLOBAL held out (`:60`) and builds D3 on
+the legacy mdpf pipeline's cadence contract (`:325`).** Either legacy mdpf-pipeline content is
+outside the fence, or the fence was breached at its own foundation and every D3 rail is void. The
+second is untenable — the D3 seed **predates** the fence.
+
+## §15.2 C-1 for `d_rework_wave_denominator_attributed` (Amendment 2 form)
+
+> The classifying read for (d)-attribution touched **reference-class prose, which includes legacy
+> mdpf-ESTATE content; ZERO MDPF_GLOBAL project artifacts (none exist); zero ADVI decomposition
+> artifacts.** Substrate ground: `NFRA_ONTOLOGY_RULE_BANK.yaml` v1.7 `@8f8a63200` / v1.8 `:60`
+> (§15.1, independently re-derived).
+
+## §15.3 C-1 ANALOG for `b_canonicity_questions` (TYPE axis) — CVO's translation, not a copy
+
+CVO 063717Z required this to **translate rather than copy**, because (b)'s corpus is not the
+reference class and a literal copy would be false on its face:
+
+> The classifying read for (b)-TYPE touched an **ENUMERATED corpus of fabric messages and session
+> logs — 4,207 session-log files and 54,700 inbox bodies, window 2026-04-30 .. 2026-07-29** — which
+> includes legacy mdpf-ESTATE content; **ZERO MDPF_GLOBAL project artifacts (none exist); zero ADVI
+> decomposition artifacts.** Substrate ground as §15.1.
+
+## §15.4 Falsifier — live, and I report it FIRED rather than rescue it
+
+If either classification turns out to require **MDPF_GLOBAL project artifacts or ADVI decomposition
+artifacts**, C-1 cannot be truthfully declared for that component, it **returns to CVO~Z as a
+FINDING**, and under CVO's M9-COMPLETE definition an honestly-uncapturable component is a **valid
+terminal state**. I am not incentivised to rescue either one.
+
+**Standing test now mine to apply without CVO~Z in the loop (Amendment 3):** *when a fenced name is
+shared by two objects, the fence follows the object whose structure the future test will TYPE —
+never the name. Mechanical discriminator: if the ratified substrate already builds on it, it was
+never fenced.*
