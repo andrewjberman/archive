@@ -92,7 +92,28 @@ what the rule bank forbids.
 </the_registry_is_the_store_the_walk_is_the_writer>
 
 <the_series>
-**E8.0 -- THE WORKED SPECIMEN (available NOW, needs no mechanism).**
+**E8.0 -- ⛔ WITHDRAWN AS A SPECIMEN. ANDREW-DIRECT, 2026-07-31 ~1630Z. INFLECTION IS DEFERRED.**
+  **VERBATIM (Andrew at the CTO terminal): "WE will deal with inflection later, i have made it very
+  clear i want the focus on NFRA_VELOCITY"**
+  The aggregator/`mode=full` items are **DEFERRED, not open questions.** Nothing acts on them. The
+  analysis below is KEPT so nobody re-derives it later, and the mechanism-vs-intent separation it
+  produced is kept because that separation is in-program -- **but the aggregator STOPS BEING A FIRST
+  SPECIMEN CANDIDATE. When the C3 walk needs one, it comes from an IN-PROGRAM system.**
+  **THE THREE SPEC LESSONS (source-first · controls invisible to their own layer · build the dissolve
+  path) SURVIVE** -- they are properties of the WALK, not of Inflection, and they were paid for.
+  *Record of how this went wrong, because it is the series' own subject matter: base CTO issued a
+  "MEASURE NOW" ruling overturning a COO hold, on a CORRECT observation -- the COO's stated rationale
+  ("dormant-by-inaction") was contradicted by its own evidence, since `mode=full` fired at 13:47:24Z
+  that day. **The observation was right and it did not matter: Inflection was ALREADY deferred by
+  standing Andrew-direct order.** A correct point about a hold's REASONING was used to reopen a
+  decision the sovereign had already closed, and the COO relayed it into a dispatch without catching
+  it. **DEFEATING THE STATED RATIONALE FOR A HOLD DOES NOT REOPEN THE DECISION UNDERNEATH IT.**
+  Both seats had the governing rule ("P0 is what Andrew says it is") in front of them; both had quoted
+  it to others that same day. Dispatch 162956Z, retraction 163045Z, stand-down 163134Z -- ~95 seconds
+  live, no work performed. **A scope breach dressed as rigour is the most persuasive form it takes,
+  because every individual step is grounded.*
+
+**E8.0-HISTORICAL -- THE WORKED SPECIMEN AS IT RAN (retained for its METHOD lessons only; DO NOT ACT).**
   The "aggregator" question is already at the doubt step and can be walked by hand before anything is
   built. E2 traced (grounded on the invocation PAYLOAD, read-only): a caller self-identifying as
   `aggregator` invokes `inf-gold-trigger` DAILY with `{"mode":"full"}`, starting a STOPPED EC2 and
