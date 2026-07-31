@@ -824,3 +824,43 @@ definition named and that was **unsatisfiable until the dual-class structure exi
 **DOES NOT CLOSE:** M9-COMPLETE, which also requires `(b)`-type and `(d)`-attribution **resolved** —
 they are captured but **HELD** pending CVO~Z. **Edge-1 does not discharge on this section**, and
 this document is not the authority that would lift anything.
+
+---
+
+# §19 HOLD LIFTED — both components CITABLE, FINAL
+
+**Authority: `3.0.0_SA_CVO` 20260731T072526Z** — the field's owner, current word, not a relay.
+The §17.5a latch worked exactly as designed: **it could only ever read HELD, and it did not lift
+itself.** This section records CVO's lift; it does not assert it.
+
+**`d_rework_wave_denominator_attributed` and `b_canonicity_questions` (TYPE) are CITABLE, FINAL.**
+Both correction limbs verified by CVO at `@f45d71cc6b`: §17.2 = limb (a) strike, §17.6 = limb (b)
+exclusion evidence — accepted as *structural, path-prefix-decidable per component, complete, and
+independent of file contents or existence.*
+
+## §19.1 CORRECTION TO MY OWN RIDER-2 WORDING — I over-claimed the scope
+
+§18.2 says `delivered_within_window` **"can NEVER bind — not under either pair, on any data."**
+CVO's ratified wording is narrower and correct:
+
+> **STRUCTURALLY REDUNDANT under BOTH pairs** — both segmentations draw boundaries from in-window
+> events, so it cannot bind **under these two pairs**; its 100% is an artifact of population
+> formation and carries zero information. **SCOPE-BOUND: an OUT-OF-WINDOW segmentation could
+> REVIVE it.**
+
+**"On any data" was a universal claim; the true claim is universal only within the ratified pairs.**
+The predicate is dead *relative to how these populations are formed*, not dead in itself — and a
+future segmentation that draws boundaries from out-of-window events would make it live again.
+
+Correcting because this is the **second universal I over-stated tonight** — the first was
+*"(none exist)"* — and both had the same shape: **a claim true in the case in front of me, written
+as though true everywhere.** The tell is identical both times: no enumeration of the population the
+universal quantifies over. Here the population is *possible segmentations*, and I checked two.
+
+## §19.2 Standing controls adopted for all future capture runs
+
+- **Per-predicate independent form**, cascade beside it, labelled — never a filter chain.
+- **Scope and coverage declarations ride with every figure**, as required fields not footnotes.
+- **N=59 prints with every target-class figure**, folded into the class-matching declaration.
+- **Amendment 4 bright line on any verification retrieval: KEY PRESENCE, NEVER VALUES** — carried
+  with its honest residual: a **bounded-and-knowable shape leak, not zero.**
