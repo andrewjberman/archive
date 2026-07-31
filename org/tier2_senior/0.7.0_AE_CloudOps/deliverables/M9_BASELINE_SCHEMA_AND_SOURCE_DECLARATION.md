@@ -765,3 +765,62 @@ outside those roots whether the outside files number zero, two, or a thousand.
 existence is answered by a byte count, never by opening a file. And the fence discriminator is **not
 the field name**: it is *"does the string name a thing the RAILS would type?"* — a domain
 segment/scope name is fenced; program-management metadata (pods/phase/status/owner) is not.
+
+---
+
+# §18 CLASS-SCOPED CAPTURE — the §3-population capture, over BOTH ratified classes
+
+**Joint pair ratification COMPLETE:** CVO half 20260731T072035Z + CTO half 20260731T072154Z, both
+on the probe outputs, checked for satisfiability *and* justification-independence.
+**All three riders folded BEFORE the numbers.**
+
+⚠ **This GO does NOT touch the HELD components.** `(b)`-TYPE and `(d)`-attribution remain
+**HELD-NOT-CITABLE** pending CVO~Z (§17.5/§17.5a latch). Ratification cleared the **class
+definitions**; it said nothing about fence disposition. *A GO arriving beside a HOLD is exactly
+where a hold quietly evaporates* — it does not evaporate here.
+
+## §18.1 Results — N printed with EVERY statistic (rider 3), never in a methods note
+
+| metric | **CLASS (A)** target-class | **CLASS (B)** natural-unit |
+|---|---|---|
+| **N (units)** | **59** | **859** |
+| commits in class | 332 | 5,359 |
+| `a_archaeology_tags` | 3 · [N=59, 26 tag-instances] | 68 · [N=859, 629 tag-instances] |
+| `a_build_tags` | 20 · [N=59, 26 tag-instances] | 286 · [N=859, 629 tag-instances] |
+| `a_archaeology_ratio` | **0.1304** · [N=59, **denominator 23**] | **0.1921** · [N=859, denominator 354] |
+| `d_retouch_rate` | **38.86%** · [N=59, denominator 332] | **53.88%** · [N=859, denominator 5,011] |
+
+### ⚠ MY OWN CAVEAT, unprompted: (A)'s ratio rests on 23 observations
+
+`a_archaeology_ratio = 0.1304` for the target class is computed over **23 tag-instances spread
+across 59 units.** That is thin enough that it should carry very little weight, and a single
+differently-tagged session moves it materially. **This is exactly the failure rider 3 exists to
+prevent** — the number is quotable, the denominator is not, and 0.1304 reads far more precise than
+23 observations can support. Stated here rather than left for a reader to reconstruct.
+
+## §18.2 RIDER 2 — the two 100% predicates are 100% for DIFFERENT REASONS (CTO)
+
+This distinction is load-bearing and must never collapse:
+
+| predicate | why it reads 100% | can it EVER bind? |
+|---|---|---|
+| `delivered_within_window` | **STRUCTURALLY REDUNDANT** — both segmentations draw their boundaries from **in-window events**, so every unit is in-window **by construction** | **NO — not under either pair, on any data** |
+| `has_served_consumer` | near-definitional **under (A) only** (a deploy boundary is where work stops being internal) | **YES — it BINDS at 24.3% under (B)** |
+
+**A later reader who treats them as equivalent either trusts a dead control or drops a live one.**
+One is a tautology wearing a predicate's clothes; the other is a real discriminator that merely does
+not bite in one class.
+
+## §18.3 RIDER 1 — non-binding predicates ride WITH their probe output
+
+Both non-binding predicates stay in the frozen class definitions **with their probe measurements
+attached** (§PROBES in the candidates artifact), explicitly labelled non-binding — so nobody later
+reads them as doing work, and nobody optimises them away as dead weight either.
+
+## §18.4 What this does and does not close
+
+**CLOSES:** the §3-population capture, over both ratified classes — the item CVO's M9-COMPLETE
+definition named and that was **unsatisfiable until the dual-class structure existed.**
+**DOES NOT CLOSE:** M9-COMPLETE, which also requires `(b)`-type and `(d)`-attribution **resolved** —
+they are captured but **HELD** pending CVO~Z. **Edge-1 does not discharge on this section**, and
+this document is not the authority that would lift anything.
