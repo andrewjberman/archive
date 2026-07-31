@@ -224,3 +224,31 @@ measurement of what the deviation cost, and it has now served it.
 Neither is banked as the §3-population capture. **The ratified primary (S-A) yields zero**
 structurally; S-B is a cross-check over a 4.6% subset. The §3 predicate question is escalated to
 joint CTO+CVO adjudication (CTO 065140Z) and is not mine to resolve.
+
+## ⚠ CORRECTION TO MY OWN S-A REPORTING — the cascade zeros are VACUOUS, not informative
+
+**Raised by CVO 20260731T065410Z. This corrects how I PRESENTED my own numbers; it is NOT me acting
+on the dual-class proposal, which is explicitly pending CTO concurrence and on which I act on
+nothing.**
+
+My S-A table reported:
+
+```
+AND pods_spanned >= 2      : 0
+AND has_served_consumer    : 0
+```
+
+**The second zero is DOWNSTREAM of the first and therefore establishes NOTHING.** The
+`has_served_consumer` filter received an already-empty input, so its output is empty *by
+arithmetic*, not by measurement. It is **not** evidence that single-author units lack served
+consumers — that quantity is **UNMEASURED**, and a probe over single-author units would be needed
+to say anything about it at all.
+
+A cascade table is a normal way to show attrition, but a terminal `0` in one reads as a *result*
+for that predicate. Here only the **first** zero is a finding; every zero after it is the first one
+propagating. **A number has to state what it is OF — and a cascade zero is "of" the filter above
+it, not of its own predicate.**
+
+Correcting it here rather than waiting, because a vacuous zero left standing in a record is exactly
+the shape that gets quoted later as though it were measured — and the whole S-A finding is
+load-bearing for the escalated §3 question.
