@@ -184,3 +184,43 @@ has now caught three times. The per-pipeline measurement is not run.
 Neither number is banked as the §3-population capture. **S-A is the ratified primary and it yields
 zero**; S-B's figure is from a deviating implementation. Both are published here unconditionally as
 required, and what happens next is CTO's and CVO's, not mine.
+
+## §RESULTS-2 — S-B PER-PIPELINE (the RATIFIED form), published beside the global figure
+
+CTO 065140Z: *"415 is a number for a definition I did not ratify… run the per-pipeline form,
+publish it beside the global figure with both labelled, and do not retire the global one — the gap
+between them is itself the measurement of what the deviation cost."*
+
+**Pipeline identity resolved STRUCTURALLY, not guessed:** tag stem → a tree that must EXIST on disk
+(`infra/aws/terraform/{stem}/` or `data/{stem}/`). 49 stems in window; **30 resolved and included,
+19 excluded** because no tree resolves (declared, not silently dropped).
+
+| | **S-B GLOBAL** (my deviation) | **S-B PER-PIPELINE** (ratified) |
+|---|---|---|
+| units formed | 455 | 318 |
+| commits covered | 15,770 / 15,770 = **100%** | 725 / 15,770 = **4.6%** |
+| `pods_spanned >= 2` | 431 | 59 |
+| **§3-qualifying** | **415** | **59** |
+| unit size min/median/max | 1 / 16 / 635 | 1 / 2 / 27 |
+| max pods in any unit | 24 | 7 |
+
+### WHAT THE DEVIATION COST — the gap, stated as a number
+
+**The qualifying population was inflated 7.0× (415 vs 59) and the coverage denominator 21.7×
+(100% vs 4.6%).** Global tag-time slicing put *every commit in the estate* into some deploy
+interval — including commits touching no pipeline at all — because a tag anywhere in the repo
+closed a bucket everywhere. **The ratified per-pipeline form shows the estate's deploy-bounded work
+is a 4.6% sliver**, which is precisely the subset-coverage limitation S-B was required to declare
+and which the global form silently erased.
+
+Had 415 shipped as "the ratified S-B figure," it would have been a real number computed correctly
+**for a definition nobody approved**, carrying a 100% coverage claim for a 4.6% population. That is
+the third name-vs-computation catch in this artifact.
+
+**Both figures stand, labelled. The global one is NOT retired** — its only remaining use is as the
+measurement of what the deviation cost, and it has now served it.
+
+### Status
+Neither is banked as the §3-population capture. **The ratified primary (S-A) yields zero**
+structurally; S-B is a cross-check over a 4.6% subset. The §3 predicate question is escalated to
+joint CTO+CVO adjudication (CTO 065140Z) and is not mine to resolve.
