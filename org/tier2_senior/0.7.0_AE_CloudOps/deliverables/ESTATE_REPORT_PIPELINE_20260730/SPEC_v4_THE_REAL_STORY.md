@@ -78,6 +78,44 @@ A story built on a partial corpus says so on its face.
 
 ---
 
+### 1e. PERSISTENCE CONTRACT (CVO binding addendum, 015119Z)
+
+Ruling 7 says the input must be *"tracked **somewhere** on a day by day basis"* and v4 never named
+the somewhere. Naming it:
+
+**(a) HOME + GRAMMAR.** `s3://opal-estate-report/input/{YYYY}/{MM}/{DD}/{device}/{session_id}.jsonl`
+Day-partitioned because the mandate is day-by-day. **`{device}` is in the key deliberately** — coverage
+is device-scoped today (site-Z is a declared gap, §6.1), so a partition that cannot express "which
+device" makes a partial day indistinguishable from a complete one. The key itself carries the
+denominator.
+
+**(b) IAM BOUNDARY — and this store gets a HARDER rule than `daily/`.**
+This is **the primary record of Andrew's words.** Anything that can silently rewrite it can rewrite
+what he said, and no downstream reader could tell.
+- capture role: `s3:PutObject` on `input/*` **only**.
+- **EXPLICIT DENY on `s3:DeleteObject` + `s3:DeleteObjectVersion` for `input/*`** — the producer
+  cannot delete or rewrite history it has already written. Deletion stays human-reserved.
+- versioning is already ON bucket-wide, so even a same-key rewrite is recoverable rather than
+  destructive.
+- the **story builder READS `input/*` and WRITES `daily/*`** — different prefixes, and the pointer
+  **validator resolves against `input/*` INDEPENDENTLY**, never against the builder's index. That is
+  CVO's validator law expressed as a prefix boundary rather than a convention.
+
+**(c) DE-DUP KEY.** `sha256(session_id + "\x1e" + normalized_text)`.
+**Required, not hygiene:** a single mid-turn message appears in **both** the `queue-operation` and
+`attachment` row classes (§1a), so the union that fixes the 40% miss *guarantees* duplicates. Keying
+on a row `uuid` would fail — the same utterance carries different ids across row types. Normalization
+is whitespace-collapse only; **never case-fold or strip punctuation**, because the stored text is
+evidence and must stay byte-faithful to what he typed.
+
+**(d) RETENTION — rides the open Andrew ruling (§6.3), and RAISES ITS WEIGHT.**
+No lifecycle rule, consistent with the rest of the bucket. But flag plainly: **that open ruling now
+governs the retention of Andrew's own verbatim words, not just derived reports.** A lifecycle rule
+applied here would delete primary evidence. The store grows unbounded until he rules; that is a
+deliberate choice, stated, not an oversight.
+
+---
+
 ## 2. THREE SYNTHESIS INPUTS
 
 **(a) user-input store** (§1) · **(b) git change** — re-admitted from appendix; the attribution
@@ -172,7 +210,21 @@ format.
    (assert on the actual request body, not on the template — the template is the builder's own index
    of what it believes it sent), and `prompt_sha` in the manifest matches it. A drifted or
    paraphrased block FAILS the build.
-7. **CAPTURE FIXTURE 2** — replay CVO's session; ruling 7a's two mid-turn messages must both survive.
+7. **CAPTURE FIXTURE 2** — replay CVO's session; ruling 7a's mid-turn messages must all survive.
+   **Denominator pinned AT DAY CLOSE, not now** (CVO note 1): that session is still accruing — a
+   THIRD mid-turn sovereign instruction landed after this spec was written. The fixture is specified
+   as a **MUST-INCLUDE SUBSET** (these known utterances must be present) rather than an exact count,
+   which is precisely why it survives the day continuing to grow. An exact-count assertion written
+   mid-day would have gone red for the correct reason and been "fixed" by loosening it.
+
+### Sentence-boundary rule (CVO note 2) — stated so AC5 is deterministic
+
+A naive `.`-split is fooled by abbreviations and decimals, so "5-10 sentences" would be
+non-deterministic and the budget check would pass or fail on formatting noise. **Rule: sentences are
+split on `[.!?]` followed by whitespace + an uppercase letter or end-of-string, with a
+non-splitting exception list** (`e.g.`, `i.e.`, `etc.`, `vs.`, `approx.`, `No.`, single capital +
+`.`), **and decimals `\d\.\d` never split.** The rule ships as a named function with its own unit
+fixtures, because a budget enforced by an undefined counter is not enforced.
 
 ---
 
