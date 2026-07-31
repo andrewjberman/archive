@@ -1,8 +1,9 @@
-# WS-C7 BOUNDARY-DECLARATION SCHEMA -- v2
+# WS-C7 BOUNDARY-DECLARATION SCHEMA -- v3
 
 **Author:** `0.7.0_AE_CloudOps~Z` -- **Gate:** `1.0.0_SA_CTO~Z` -- **Verify:** `3.0.0_SA_CVO~Z`
+**v3 authorized:** CTO~Z `20260731T144328Z` -- decay ruling on the tool-source drift class.
 **v2 authorized:** CTO~Z `20260731T142115Z` -- *"I RULE VOCABULARY, YOU BUILD YOUR SCHEMA."*
-**Supersedes v1** (`d4e724aab`, gate-passed `20260731T132546Z`).
+**Supersedes v2** (`5b92f664d`) and v1 (`d4e724aab`).
 **NOT in this artifact:** the registration invariant, N-of-M migration, the fixture suite, the
 pre-flight check. This is the schema those four reference.
 
@@ -42,6 +43,7 @@ came from that single cross-seat application**; one more arrived from `SPEC-3`.
 | G4 | residue only per-run | **`per_item_residue`** |
 | G5 | traversal and display residue conflated | **`presentation_residue`** split out |
 | L-16 | `basis: exercised` satisfiable by a tool that cannot discriminate | **`known_negative` mandatory alongside `exercised`** |
+| **v3** | a declaration could stand still while its tool moved -- **verified once, never again** | **`revalidate_by` + tool-source revalidation trigger + STALE semantics (section 5)** |
 
 ---
 
@@ -92,7 +94,7 @@ So `comp-legacywriter` types cleanly with the enum as it stands: invocation axis
 
 **A DENOMINATOR AT A COARSER GRAIN THAN ITS ROWS YIELDS A WELL-FORMED WRONG RATIO.** The bank's own
 note names this as the #1 MSBEFF layer-mismatch. It is a **PRECISION** failure produced by a
-**RECALL** declaration -- the M2 boundary (section 5) seen from the inside.
+**RECALL** declaration -- the M2 boundary (section 6) seen from the inside.
 
 *v1 had no grain field at all. An intermediate draft of v2 carried an `UNTYPEABLE-TODAY` placeholder
 awaiting a vocabulary change; **CTO~Z retracted that need before this landed** (`20260731T142232Z`),
@@ -185,7 +187,60 @@ falsifiable, or it decays into the weak value it was meant to outrank.)*
 
 ---
 
-## 5. OUT OF CONTRACT -- **M2**
+## 5. DECAY -- `revalidate_by`, THE TOOL-SOURCE TRIGGER, AND STALE SEMANTICS (v3)
+
+| Field | Type | Values |
+|---|---|---|
+| `revalidate_by` | **BANK FIELD** (`dynamic_rails.D3_contract_obligation.lifecycle.decay`) | required on EVERY declaration, not only dormant ones |
+
+**THE PROBLEM v2 COULD NOT SEE.** Members 1-4 of the registration invariant are introduced by editing
+a *registration* substrate. **A boundary declaration can go wrong without any registration edit at
+all:** widen a tool's address space in its own source and the declaration stands still, still
+well-formed, still passing every decidable check.
+
+**THE BANK ALREADY TYPES THIS**, quoted as ruled by CTO~Z (`20260731T144328Z`):
+
+> *"A FALSIFIER VERIFIED ONCE AND NEVER AGAIN IS A CONTROL THAT CANNOT FAIL... a perfectly-formed,
+> fully-populated, PERMANENTLY-SILENCING LIE -- it still names a consumer, the field is still
+> present, and the detector it disarms will never fire again."*
+
+### 5.1 THE RULING: EXPIRE, DO NOT CHECK
+
+**A CHANGE TO THE DECLARED TOOL'S SOURCE IS A REVALIDATION TRIGGER. It EXPIRES the declaration
+rather than checking it.**
+
+> **Expiry is honest exactly where a check is impossible.** It does not assert the declaration is
+> WRONG. It asserts **nobody has re-asserted it since the tool moved.** That is a *producer
+> obligation*, which is where a producer-asserted field belongs.
+
+**WHY WIDENING THE GATE'S SUBSTRATE WAS THE WRONG ANSWER, AND THIS SCHEMA'S OWN SECTION 2.2 PROVES
+IT.** Putting the tool's source in the registration substrate would make member 5 fire on a `.py`
+edit -- **but member 5 still cannot evaluate whether the widened address space matches the
+declaration.** It can only check presence and well-formedness.
+
+> **THAT BUYS A TRIGGER, NOT A CHECK.** A gate that fires on a tool edit and then goes green
+> **licences the reader to believe the declaration was validated against the new tool.** It would
+> MANUFACTURE the "appears to validate content" hazard while feeling like coverage -- the precise
+> failure section 2.2 exists to prevent. **Decay avoids it because expiry makes no claim about
+> correctness at all.**
+
+### 5.2 STALE IS LOUD AND NON-ACTIONABLE -- inherited verbatim, and load-bearing
+
+> **`stale_never_auto_promotes`: "STALE NEVER AUTO-PROMOTES TO A FINDING. That would make EXPIRY A
+> DELETION WARRANT -- precisely the failure this axis exists to prevent. Stale is LOUD and
+> NON-ACTIONABLE, which is the correct pairing."**
+
+**A stale boundary declaration is never a finding, never a block, and never a claim that the tool is
+wrong.** It says one thing: *this was last asserted before the tool changed.*
+
+**Both halves are required and neither survives without the other.** Decay without the
+non-promotion clause turns expiry into a deletion warrant -- the same hazard in the opposite
+direction, and the same shape as `comp-iam`'s operation list being read as a deletion warrant
+(CLAUDE.md, live). **Loud and non-actionable is the correct pairing, not a compromise between them.**
+
+---
+
+## 6. OUT OF CONTRACT -- **M2**
 
 > **M2 (shape-match, wrong content) IS NOT A WS-C7 CONCERN AND THIS SCHEMA MUST NOT BE READ AS
 > COVERING IT.**
@@ -203,7 +258,7 @@ declaration. **Naming the grain is in contract; guaranteeing the value is not.**
 
 ---
 
-## 6. THE TWO-STATE RULE (L-10) -- SELF-AUDIT
+## 7. THE TWO-STATE RULE (L-10) -- SELF-AUDIT
 
 **Every field is RATIFIED-STRUCTURED, DECLARED UN-DECIDABLE, or a MANDATORY COMPANION to a
 structured value. There is no third state.**
@@ -221,17 +276,19 @@ structured value. There is no third state.**
 | `presentation_residue.control` | DECLARED UN-DECIDABLE |
 | `failure_direction.self` + `consumer_edge.direction` + `basis` | RATIFIED-STRUCTURED |
 | `failure_direction.known_negative` | MANDATORY COMPANION to `exercised` |
+| `revalidate_by` | BANK FIELD (referenced as ruled, never redefined) -- required on EVERY declaration |
 
 **Two mandatory companions is the shape v2 added.** A required field with neither an enum nor an
 un-decidable marker decays, because the next value-check invents its own oracle.
 
 ---
 
-## 7. SHAPE (illustrative -- `comp-legacywriter` as actually observed)
+## 8. SHAPE (illustrative -- `comp-legacywriter` as actually observed)
 
 ```yaml
 boundary_declaration:
   tool: comp-legacywriter
+  revalidate_by: <date>          # bank field; a tool-source change TRIGGERS revalidation
   address_space:
     kind: enumerable
     denominator_grain: artifact     # invocation axis is BUCKET
@@ -280,7 +337,7 @@ boundary_declaration:
 
 ---
 
-## 8. ROUTED TO THE GATE, NOT DECIDED HERE
+## 9. ROUTED TO THE GATE, NOT DECIDED HERE
 
 1. **The grain axis was named two ways** (`type_tuple.grain`, `dynamic_rails.D1_value_grain`).
    **Not resolved by me** -- I cannot read the bank. One canonical path wanted.
