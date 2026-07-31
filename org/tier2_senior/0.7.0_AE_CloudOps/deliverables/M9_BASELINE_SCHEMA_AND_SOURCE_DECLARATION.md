@@ -93,6 +93,33 @@ first is pre-registration, and it is the honest sense in which this capture is t
 **Freezing before the first number is what makes this a control rather than a rationalisation** —
 and it is checkable by anyone, because the freeze is a commit hash and the numbers land after it.
 
+### ⚠ §3 AMENDMENT NOTE (appended 2026-07-31, CTO-instructed 064734Z — the frozen predicates above are NOT edited)
+
+**`pods_spanned >= 2` is UNSATISFIABLE against any SINGLE-AUTHOR segmentation, and the estate's own
+published work-unit boundary is single-author by construction.**
+
+Established by collision, three times, from independent directions:
+
+| candidate | outcome | why |
+|---|---|---|
+| **S-C** single-commit (null) | population **0** | one commit has one author |
+| **S-A** session-log-anchored — **the RATIFIED PRIMARY** | population **0** | **measured: max pods = 1 across all 3,530 units** — a session log is authored by one serial |
+| **S-B** deploy-boundary | 415 (see deviation note) | an external delivery boundary is the *only* one of the three that yields multi-author units (max pods 24) |
+
+**So §3 has TWO holes, not one, and they interact.** §13 found that it froze predicates without
+defining a segmentation function. This note records the second: **the predicates additionally
+constrain which segmentation functions could ever satisfy them — and they exclude the one the
+estate publishes about itself.** `pods_spanned >= 2` silently presupposes a **multi-agent
+collaboration unit**, which neither a commit nor a session log supplies.
+
+**This is a fact about the frozen predicates, not a candidate result** — which is why it lives here
+with the predicates rather than in the candidates file (CTO 064734Z). It was invisible to reading
+and appeared only when something ran into it: **a null candidate that fails loudly is an
+instrument, and the candidates that could pass could not have found it.**
+
+Neither number is banked as the §3-population capture. Amending the predicates is CTO's and CVO's,
+not mine — I am recording the collision, not resolving it.
+
 ## §4 The schema
 
 | field | type | notes |
