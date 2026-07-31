@@ -1,163 +1,202 @@
 # M9 PRE-FRAMEWORK BASELINE — SCHEMA DESIGN + PER-COMPONENT SOURCE DECLARATION
 
 **Status:** PRE-MEASUREMENT. **No number is banked in this document and none may be until both
-gates below clear.** This is the artifact-with-path CTO's precondition `@ee5ff633e1` discharges on.
+gates below clear.** **v2** — folds `1.0.0_SA_CTO`'s six schema constraints + the derivation trap
+(20260731T060030Z). v1 got three of the six wrong; they are corrected in place and named in §9.
 **Author:** `0.7.0_AE_CloudOps~D` (measurement-plane seat) · **Date:** 2026-07-31
 **Tasking:** `0.0.0_AB_MSTR` 20260731T055536Z (Andrew `/govern` + LD-0090 + CVO~Z fence ruling
-`@4b94ad6f3` + CTO/CVO/CVO~Z convergence on a main non-rail-author seat)
-**Gates:** SCHEMA -> `1.0.0_SA_CTO` (ESTATE arch-gate) before measuring · SOURCE DECLARATION ->
-`3.0.0_SA_CVO` (baseline gate) before any number banks.
+`@4b94ad6f3` + CTO confirmation 060030Z)
+**Gates:** SCHEMA -> `1.0.0_SA_CTO` before measuring · SOURCE DECLARATION -> `3.0.0_SA_CVO` before
+any number banks.
 
 ---
 
-## §0 Capturer declaration (CVO~Z control 2, on the record at assignment)
+## §0 Capturer declaration (CVO~Z control 2; CTO 060030Z made this message the declaration — it
+travels with the evidence, per instruction)
 
-While the held-out fence stands, I author, review and ratify **ZERO** WS-C1/C2 rail vocabulary.
-I am measurement-plane only. I do not decompose ADVI_PERFORMANCE or MDPF_GLOBAL; capturing this
-baseline is the pre-step that protects the decomposition, not the decomposition.
+**`0.7.0_AE_CloudOps~D` authors, reviews and ratifies NO WS-C1/WS-C2 rail vocabulary while the
+fence stands.** Measurement-plane only. If a VELOCITY task would put me on rail vocabulary I refuse
+it and route to MSTR — I do not take both. I do not decompose ADVI_PERFORMANCE or MDPF_GLOBAL.
 
-Fence basis (CVO~Z `@4b94ad6f3`): the apparent capture contradiction is an **equivocation** — a
-build-cost baseline and a domain surface are different objects, and only the second is fenced.
-This schema is built so that the first cannot carry the second (§2).
+Fence basis (CVO~Z `@4b94ad6f3`, CTO-grounded independently at `4b94ad6f392e1f99`): the apparent
+capture contradiction is an **equivocation** — a build-cost baseline and a domain surface are
+different objects, and only the second is fenced.
 
-## §1 What M9 is, quoted not paraphrased
+## §1 What M9 is, quoted not paraphrased (PROGRAM §5.9)
 
-PROGRAM §5.9 declares M9 as ADVI_PERFORMANCE + MDPF_GLOBAL build cost vs their pre-framework
-baseline, in **four components**:
-
-| id | PROGRAM §5.9 wording |
+| id | wording |
 |---|---|
 | **a** | archaeology-vs-build wall-clock and agent-context |
 | **b** | count of "which artifact is canonical / who writes this / is it live" questions |
 | **c** | rail-override count |
 | **d** | rework waves caused by a wrong denominator |
 
-Also declared there: *"Hand-tagged is fine; it is a baseline, not a gate."* I am not inventing a
-metric; I am making these four measurable without inventing vocabulary (arch-gate constraint 4).
+Also declared: *"Hand-tagged is fine; it is a baseline, not a gate."* I invent no metric and no
+vocabulary (arch-gate constraint 4).
 
 ## §2 THE ANTI-LEAK CONTROL — a CLOSED schema, not a careful author
 
-CVO~Z control 1 excludes free text rather than discouraging it. **I implement the exclusion as a
-TYPE, not as discipline: the schema below has no free-text field, so a surface leak is not
-expressible in it.** Every field is one of — an integer, a real, an enumerated token from a fixed
-list, an ISO-8601 timestamp, or a repo-relative source path.
+CVO~Z control 1 **excludes** free text rather than discouraging it. **I implement the exclusion as
+a TYPE: the schema has no free-text field, so a surface leak is not expressible in it.** Every
+field is an integer, a real, an enum from a stated set, an ISO-8601 timestamp with a **computed**
+offset, or a source enum token.
 
-This is deliberate and it is the whole design. *Care is not a control* — a schema that permits a
-notes field and asks the author not to leak into it is a guard that depends on the guarded party's
-attention, exactly the shape `docs/doctrine/CONTROLS_OVER_CARE.md` rejects. A closed schema fails
-the leak at write time instead of at review time.
+*Care is not a control.* A schema with a notes field plus an instruction not to leak is a guard
+that depends on the guarded party's attention — the shape `docs/doctrine/CONTROLS_OVER_CARE.md`
+rejects. A closed schema fails the leak at write time, not at review time.
 
-**Forbidden by construction (cannot be typed into any field):** ADVI/MDPF identifiers, field names,
-path structures inside those products, grains, partition schemes, contract content.
-**Permitted:** counts, durations, ratios, denominators, and source paths of the MEASUREMENT
-instruments (never of the measured products).
+**Forbidden by construction:** ADVI/MDPF identifiers, field/column names, path structures, grains,
+partition schemes, contract content, work-unit NAMES.
+**Permitted:** counts, durations, ratios, denominators, diffstat MAGNITUDES.
 
-## §3 The reference class — STRUCTURAL predicates, never product identity
+## §3 Population — STRUCTURAL predicates, ORDINAL identity
 
-A work unit enters the baseline population by **structural** predicate only. This is what lets the
-population be defined without naming what is in it:
+**A work unit is identified by an ORDINAL, never a name** (CTO constraint 3): `work_unit_seq: 7`.
+There is no name field and no description field. *A work-unit name is grain vocabulary wearing a
+label.*
 
-- `pods_spanned >= 2` (integer, from commit-author distinct-serial count)
-- `has_served_consumer` (boolean)
-- `delivered_within_window` (boolean)
-- `unit_kind` ∈ {`new_surface`, `extension`, `migration`} (enumerated)
+Entry predicates (structural only):
+`pods_spanned >= 2` (integer, distinct committing serials) · `has_served_consumer` (boolean) ·
+`delivered_within_window` (boolean)
 
-Inclusion/exclusion criteria are **frozen at gate-approval time and recorded with a commit hash.**
-Choosing a reference class after seeing the treatment result is post-hoc and unfalsifiable; pinning
-it before is the entire reason this capture is time-sensitive. That is pre-registration discipline,
-and it is the honest sense in which this baseline is perishable.
+Inclusion/exclusion criteria **freeze at gate approval and are recorded with a commit hash.**
+Choosing a reference class after seeing the treatment is post-hoc and unfalsifiable; pinning it
+first is pre-registration, and it is the honest sense in which this capture is time-sensitive.
 
-## §4 The schema (every row: value + unit + denominator + source + status + window)
+## §4 The schema
 
 | field | type | notes |
 |---|---|---|
+| `work_unit_seq` | integer | **ordinal identity; NO name field exists** |
 | `component` | enum {`a`,`b`,`c`,`d`} | PROGRAM §5.9 id |
-| `metric_id` | enum (fixed list, §4.1) | no free naming |
+| `metric_id` | enum (fixed, §4.1) | no free naming |
+| `unit_kind` | enum {`DECOMPOSE`,`SPEC`,`IMPLEMENT`,`VERIFY`,`REWORK`,`INTEGRATE`,`DEPLOY`,`REVIEW`} | **CTO's project-generic set, ADOPTED — see §9.2** |
 | `value` | number | — |
-| `unit` | enum {`minutes`,`count`,`ratio`,`sessions`,`commits`} | — |
+| `unit` | enum {`minutes`,`count`,`ratio`,`sessions`,`commits`,`lines`} | — |
 | `denominator` | number | **required, never null** |
-| `denominator_of` | enum (fixed list) | what the denominator counts — closes the "number OF what" law |
-| `source_path` | repo-relative path | measurement instrument only |
-| `extraction` | enum {`deterministic`,`hand_tagged`} | deterministic-first per PROGRAM §6 |
-| `status` | enum {`MEASURED`,`CARRIED`,`NOT_YET_MEASURABLE`} | COO's M-table convention, reused not reinvented |
-| `window_start` / `window_end` | ISO-8601 | computed offsets, never a hand-typed `Z` |
-| `scope` | enum {`device_local`,`repo_global`} | §5 — load-bearing |
+| `denominator_of` | enum (fixed) | what it counts — closes the "number OF what" law |
+| `capture_method` | enum {`DIRECT_OBSERVATION`,`GIT_DERIVED`,`SELF_REPORT`} | **CTO constraint 6** |
+| `source_id` | enum (fixed, §5) | **an enum token, NOT a path — CTO constraint 5** |
+| `status` | enum {`MEASURED`,`CARRIED`,`NOT_YET_MEASURABLE`} | COO's convention, reused not reinvented |
+| `scope` | enum {`device_local`,`repo_global`} | §5.1 — load-bearing |
+| `window_start`/`window_end` | ISO-8601, **computed offset** | never a hand-typed `Z` (host UTC-4; a typed `Z` cancels the check instead of prompting it) |
 
 ### §4.1 Metric ids (fixed)
-
 `a_archaeology_minutes` · `a_build_minutes` · `a_archaeology_ratio` · `a_context_sessions`
 `b_canonicity_questions` · `c_rail_override_count` · `c_rail_deny_count`
-`d_rework_waves` · `d_rework_waves_denominator_caused`
+`d_rework_wave_count` · `d_rework_wave_denominator_attributed`
 
 **Aggregate rule (inherited, not invented):** no aggregate headline without per-series
-decomposition — the WS-E4.3 rule, which is already structural in `series()`.
+decomposition (WS-E4.3, already structural in `series()`).
 
-## §5 PER-COMPONENT SOURCE DECLARATION (CVO's gate — read this before any number banks)
+## §5 PER-COMPONENT SOURCE DECLARATION (CVO's gate — read before any number banks)
 
-**Binding attestation: NO component below reads `org/mcp/agent_telemetry/` or the M3 verdict sink
-`org/mcp/comp-tool-runs.jsonl`, pre-fix or post-fix.** The baseline must be methodologically the
-first number, not a hand-tag/telemetry mix (axis-confusion, verification law 6). I am the seat that
-repaired M3; reading my own in-repair instrument into the baseline is the exact conflation the
-condition exists to prevent.
+**Binding attestation: NO component reads `org/mcp/agent_telemetry/` or the M3 verdict sink
+`org/mcp/comp-tool-runs.jsonl`, pre-fix or post-fix.** I am the seat that repaired M3; reading my
+own in-repair instrument into the baseline is the exact axis-confusion the condition prevents
+(verification law 6).
 
-| comp | source | scope | extraction | non-M3 attestation |
-|---|---|---|---|---|
-| **a** | agent session logs `org/tier*/*/logs/**` + commit timestamps | `repo_global` | hand_tagged + deterministic timestamps | ✅ no telemetry read |
-| **b** | session logs + `org/mcp/inbox/**` message bodies, matched against a FIXED question-pattern set | `repo_global` | deterministic first pass, hand_tagged residue, **both counts reported separately** | ✅ no telemetry read |
-| **c** | `org/mcp/comp-which-rail.log` | ⚠ **`device_local`** | deterministic | ✅ rail log is a SEPARATE instrument from M3 — CVO ruled this explicitly at 20260731T023531Z |
-| **d** | git commit history (revert/fix/correct subjects) + `docs/references/INCIDENTS_*.md` | `repo_global` | hand_tagged, criteria fixed at §3 freeze | ✅ no telemetry read |
+| comp | `source_id` | instrument | scope | `capture_method` | non-M3 |
+|---|---|---|---|---|---|
+| a | `SRC_SESSION_LOGS` | agent session logs + commit timestamps | `repo_global` | `GIT_DERIVED` (durations) + `SELF_REPORT` (phase split) | ✅ |
+| b | `SRC_FABRIC_MSGS` | session logs + inbox bodies vs a FIXED question-pattern set | `repo_global` | `SELF_REPORT` (deterministic first pass + judgment residue, **counts reported separately**) | ✅ |
+| c | `SRC_RAIL_LOG` | `org/mcp/comp-which-rail.log` | ⚠ `device_local` | `GIT_DERIVED` | ✅ separate instrument from M3 — CVO ruled this explicitly 20260731T023531Z |
+| d | `SRC_COMMIT_STRUCTURE` | repeat-touch structure over commit metadata | `repo_global` | `GIT_DERIVED` (count) / `SELF_REPORT` (attribution) | ✅ |
 
-### ⚠ §5.1 A DECLARED WEAKNESS IN COMPONENT (c) — surfaced now, not discovered later
+### ⚠ §5.1 DECLARED WEAKNESS IN (c) — surfaced now, not discovered later
 
 **`org/mcp/comp-which-rail.log` is NOT TRACKED IN GIT** (verified: `git ls-files --error-unmatch`
-fails; `.gitignore` carries the sibling telemetry sinks at `:261`, `:447-448`, `:454`). It is
-**device-local**, so a rail-override count taken from it is **this device's traffic only and is
-silently short by every other device's**. Current local file: 5,336,054 bytes.
+fails; `.gitignore` carries the sibling sinks at `:261`, `:447-448`, `:454`). It is **device-local**,
+so a rail-override count from it is **this device's traffic only, silently short by every other
+device's**. Local file at capture design: 5,336,054 bytes.
 
-This is not a defect I can fix and it is not a reason to skip (c) — PROGRAM §5.1 already cites a
-187/month rail-override baseline, and COO's M1a measured 76 overrides against a 24,205-line
-denominator from this same source. **It is a scope qualifier that must ride with the number
-permanently**, because `scope` is exactly the field that gets dropped when a figure is quoted
-onward. Hence `scope` is a required enum in the schema (§4) rather than a footnote.
+Not a defect I can fix and not a reason to skip (c) — PROGRAM §5.1 already cites a 187/month
+baseline and COO's M1a measured 76 overrides against 24,205 lines from this same source. **It is a
+scope qualifier that must ride with the number permanently**, because scope is exactly the
+qualifier dropped when a figure is quoted onward. Hence `scope` is a required enum, not a footnote.
 
-## §6 THE ONE DESIGN FORK — named, with a decisive recommendation for CTO
+## §6 THE DERIVATION TRAP — CTO 060030Z, and it invalidated my v1 source for (d)
 
-Both products are **PHASE 0** (CTO `@ee5ff633e1`: 25,048 files / 23,518 commits / all branches
-searched by MSTR~Z — 5 files describe the obligation, **zero capture it**; all 33 S3 buckets
-negative per MSTR). Nothing has been built. So "pre-framework build cost" must be measured on
-*something*, and there are exactly two candidates:
+CTO: *a git-derived row takes COUNTS, TIMESTAMPS and MAGNITUDES only — never subjects, never
+paths, never file names,* because the breach arrives through the derivation rather than the author,
+so nobody feels themselves doing it.
 
-**Reading A — RETROSPECTIVE REFERENCE CLASS.** Measure a–d over comparable already-completed
-conventional builds in the fabric's record, reference class pinned now per §3.
+**This killed my v1 (d) source.** v1 declared (d) would match commit *"revert/fix/correct
+subjects"* — reading commit subjects, which are free text and are exactly where grain and contract
+vocabulary live. **Corrected in §5: (d) now derives from repeat-touch STRUCTURE over commit
+metadata** — same path-set touched again inside the window, measured as counts and diffstat
+magnitudes, never as subjects, paths or file names.
 
-**Reading B — PROSPECTIVE FIRST SLICE.** Build one slice of ADVI/MDPF conventionally and measure it.
+## §7 THE HONEST PARTIAL ON (d) — reported, NOT engineered around
 
-**I recommend A, and B is not merely weaker — it is structurally unavailable.** B requires
-decomposing one of the two projects, which is precisely what CTO's precondition withholds until
-this baseline exists. B is therefore circular: it can only be run by violating the control it would
-serve. A is takeable today against data that already exists.
+CTO instructed: if a cost dimension cannot be captured without free text, report it as the
+falsifier firing rather than working around it, because a workaround silently converts a failed
+premise into a passed one.
 
-**THE LIMITATION THAT MUST RIDE WITH READING A, stated now rather than discovered at comparison
-time:** under A the baseline measures *the fabric's conventional build cost on comparable work*,
-**not those two products' own prior cost.** The eventual comparison is therefore across different
-work, not a before/after on the same work — so a later delta is partly compositional and **may not
-be read as purely causal**. Enumerate what the number is OF before explaining why it differs
-(verification law 6). I would rather this be a declared limitation in the baseline than a
-discovered confound in the verdict.
+**Component (d) splits, and only half is mechanical:**
+- `d_rework_wave_count` — **GIT_DERIVED.** Repeat-touch structure. No free text. Clean.
+- `d_rework_wave_denominator_attributed` — the *"caused by a wrong denominator"* half is a
+  **CAUSAL** claim. Cause is not present in commit metadata at any magnitude; it lives in prose.
+  It is therefore **`SELF_REPORT` and can never be `GIT_DERIVED`**, and retrospectively it requires
+  a human/agent to read prose to classify.
 
-## §7 Sequence
+**My reading, offered for CTO/CVO~Z to rule, not asserted:** this is a **LIMITATION, not the
+falsifier firing.** The schema still holds — the *artifact* carries only a closed enum, and the
+classification act happens outside it. But the resulting row is judgment-grounded, which is weaker
+evidence than a mechanical one, and PROGRAM §5.9's own *"hand-tagged is fine"* appears to license
+exactly this. **If CVO~Z reads the fence as also barring the classifying READ (not merely the
+written artifact), then (d)'s attribution half is genuinely uncapturable retrospectively and the
+falsifier HAS fired on that half.** That is a fence-scope question and it is CVO~Z's, not mine —
+I am not resolving it in my own favour to keep my task whole.
 
-1. CTO arch-gates this **schema** (§2–§4, §6 fork). No measuring before that word.
-2. CVO reads the **source declaration** (§5, §5.1). No number banks before that word.
-3. Freeze §3 criteria + record the freeze commit hash.
-4. Measure. Land values as an **added table**, never overwriting a row (COO's baseline §4 rule).
-5. Edge-1 discharges on this artifact having a path — never on a status claim.
+## §8 THE FORK — decisive recommendation
 
-## §8 What this document deliberately does NOT do
+Both products are **PHASE 0** (CTO `@ee5ff633e1`: MSTR~Z searched 25,048 files / 23,518 commits /
+all branches — 5 files describe the obligation, **zero capture it**; MSTR: all 33 S3 buckets
+negative). Nothing is built, so "pre-framework cost" must be measured on something:
 
-- Does not decompose ADVI_PERFORMANCE or MDPF_GLOBAL.
-- Does not author, review or ratify rail vocabulary (§0).
-- Does not bank a number (§7 sequence not yet run).
-- Does not build a guard, alarm, monitor or checker — CTO `@ee5ff633e1` is explicit that the
-  control here is a **work-ordering precondition in the record a decomposer reads, NOT a detector**,
-  and that the moratorium must not be cited against it. Nothing in this schema fires anything.
+**A — RETROSPECTIVE REFERENCE CLASS:** measure a–d over comparable completed conventional builds,
+class pinned per §3.
+**B — PROSPECTIVE FIRST SLICE:** build one slice conventionally and measure it.
+
+**I recommend A. B is not merely weaker — it is structurally unavailable:** it requires decomposing
+one of the two projects, which is exactly what CTO's precondition withholds until this baseline
+exists. **B can only be run by violating the control it would serve.**
+
+**THE LIMITATION THAT RIDES WITH A, stated now rather than discovered at comparison time:** under A
+the baseline measures *the fabric's conventional build cost on comparable work*, **not those two
+products' own prior cost.** The eventual comparison is therefore across different work, not a
+before/after on the same work — a later delta is partly compositional and **must not be read as
+purely causal.** Enumerate what a number is OF before explaining why it differs (verification law
+6). Better a declared limitation in the baseline than a discovered confound in the verdict.
+
+## §9 WHAT v1 GOT WRONG (recorded, not silently corrected)
+
+1. **Row-level `source_path`** — a path field in the measurement row, straight into CTO constraint
+   5. Replaced by `source_id`, an enum; paths now live only in §5's declaration prose.
+2. **`unit_kind` = {`new_surface`,`extension`,`migration`}** — mine classified the OUTPUT's shape,
+   which sits closer to product surface. **CTO's set classifies the WORK PHASE and is
+   project-generic; adopted without argument** — it is better precisely on the anti-leak axis, and
+   it is also the right cut for (a)'s archaeology-vs-build split.
+3. **`extraction` = {`deterministic`,`hand_tagged`}** — describes technique, not grounding.
+   Replaced by CTO's `capture_method`, which is what CVO actually needs to gate a mixed artifact.
+4. **(d) sourced from commit SUBJECTS** — the derivation trap, §6. The most serious of the four:
+   a schema that reads clean while the derivation carries the surface in.
+5. **No ordinal work-unit identity declared** — added (§3).
+
+## §10 Sequence
+
+1. CTO arch-gates this schema (§2–§4, §6–§8). **No measuring before that word.**
+2. CVO reads the source declaration (§5, §5.1). **No number banks before that word.**
+3. CVO~Z rules the §7 fence-scope question (does the fence bar the classifying READ?).
+4. Freeze §3 criteria; record the freeze commit hash.
+5. Measure. Land values as an **added table**, never overwriting a row (COO baseline §4 rule).
+6. Edge-1 discharges on this artifact having a path **on origin** — never on a status claim.
+
+## §11 What this document deliberately does NOT do
+
+- Does not decompose either project. · Does not author/review/ratify rail vocabulary (§0).
+- Does not bank a number (§10 not yet run).
+- **Builds no guard, alarm, monitor or checker.** CTO `@ee5ff633e1` is explicit that the control is
+  a **work-ordering precondition in the record a decomposer reads, NOT a detector**, and that the
+  moratorium must not be cited against it. Nothing here fires anything.
