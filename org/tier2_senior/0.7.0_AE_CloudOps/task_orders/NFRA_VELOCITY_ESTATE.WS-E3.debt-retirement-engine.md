@@ -47,18 +47,58 @@ duplication is a cost paid continuously by everyone downstream.**
 `canon-bypass-creation` as its sibling class. **The estate has a NAMED duplication class, an ANDREW
 CONDEMNATION of it, and NO MECHANISM THAT WOULD HAVE SURFACED IT.**
 
-**⚠ OPEN QUESTION -- ROUTED TO COO + base CTO JOINTLY BY CVO, NOT SETTLED, AND IT MAY MAKE THE AXES
-NON-INDEPENDENT:** *"doing the same function"* is a **SEMANTIC judgement. OVERLAP IS COMPUTABLE;
-FUNCTION-SAMENESS IS NOT.** So act 3 plausibly needs the **C3.ii vertical labels -- i.e. AXIS 1's
-OUTPUT.** If that holds, **the two axes are NOT independent**, and **the C3 walk gains a FOURTH
-CONSUMER** (E2's DELIBERATE-HOLD field, E3's Tier-A annotations, E5's boundary declarations, and now
-duplication detection). Do not build act 3 against an assumption of independence until this is ruled.
+**✅ RULED (joint call, COO 172022Z + base CTO 172201Z, reached independently and concurring):
+THE AXES ARE COUPLED FOR PRECISION, NOT FOR EXISTENCE.**
+```
+  COMPUTE  blast-radius overlap                    -- fully instrumented TODAY
+  PROPOSE  high-overlap pairs as CANDIDATES
+  ASSESS   function-sameness -- BY A HUMAN, the step Andrew already specified ("assessed")
+```
+**Axis 1 IMPROVES PRECISION; it does NOT GATE EXISTENCE. No fourth consumer is added to the C3 walk as
+a DEPENDENCY -- duplication detection is an ENHANCEMENT.** Act 3 stays OFF the critical path of the
+Kimi/lifecycle chain, which is already carrying E3 and E5.
 
-**🚧 FENCE, STATED BEFORE ANYONE BUILDS (CVO, and it binds):** act 3 is an **ANALYSIS over the existing
-dependency graph, producing CANDIDATES FOR HUMAN ASSESSMENT** -- Andrew's own word is *"assessed."*
-**NOT an alarm. NOT a monitor. NOT a pager.** The moratorium binds hardest exactly where a duplication
-finding feels most alertable, and a duplication candidate is the single most tempting thing in this
-workstream to wire to a notification.
+**WHY IT IS THE ONLY VIABLE v1 RATHER THAN THE CONVENIENT ONE -- base CTO MEASURED IT:**
+```
+  files carrying a PURPOSE declaration ....... 22
+  positive control (`def ` under data/) ...... 837   -> the scan discriminates; 22 is real
+```
+>> **THE BETTER ORACLE HAS THE SAME GAP AS THE ONE IT REPLACES.** `PURPOSE` is producer-asserted,
+function-level, and **essentially unpopulated** -- exactly as `lifecycle_class` is producer-asserted
+and 14-of-14 UNDECLARED. **Act 3's semantic dependency is not "on C3.ii labels" and not "on PURPOSE";
+it is on THE SAME MISSING PRODUCER-ASSERTION LAYER, one field over.** Had PURPOSE come back widely
+populated, "wait for the oracle" would have been arguable. It did not. **v1 ships on the computable
+half or it does not ship this program.** <<
+
+**AND C3.ii LABELS ARE NECESSARY-BUT-NOT-SUFFICIENT:** a C3.ii label is a **VERTICAL ASSIGNMENT** --
+`etf-reports` alone spans 9 producers -- so it **NARROWS the candidate set and ESTABLISHES NOTHING.**
+Treating it as the sameness oracle would emit same-vertical pairs as duplicate candidates: **a
+false-positive generator pointed at the one workstream whose entire discipline is
+fail-safe-toward-keeping.**
+
+**🚧 PROHIBITION, WITH ITS REASON (COO-proposed, CTO-ratified and strengthened -- BINDING):**
+>> **NAME-SIMILARITY, PATH-ADJACENCY AND SHARED-VERTICAL ARE NOT EVIDENCE OF FUNCTION-SAMENESS AND MAY
+NEVER BE EMITTED AS SUCH.** An agent that computes overlap, INFERS sameness from names or paths, and
+emits a duplication finding has performed **observer-inference wearing a declaration's costume** -- the
+same shape ruled out for the UNASSIGNED-RESIDUE and forbidden by `lifecycle_class`'s producer-assertion
+rule, **in a third place.** <<
+**A CANDIDATE LIST IS A LIST OF QUESTIONS. THE MOMENT IT CARRIES A VERDICT IT HAS BECOME AN INFERENCE
+NOBODY WAS AUTHORIZED TO MAKE.**
+
+>> **AND THIS IS THE FIRST ONE WHERE THE FAILURE IS IRREVERSIBLE. THE HUMAN ASSESSMENT STEP IS NOT A
+WORKFLOW NICETY -- IT IS THE CONTROL**, because of what the mechanism is pointed at: **it proposes
+DELETIONS.** Every other observer-inference failure in this program cost a wrong number or a wasted
+hour. **This one would cost an asset.** <<
+
+**FENCE (CVO, binding):** act 3 is an **ANALYSIS over the existing dependency graph producing CANDIDATES
+FOR HUMAN ASSESSMENT.** **NOT an alarm. NOT a monitor. NOT a pager.** The moratorium binds hardest
+exactly where a duplication finding feels most alertable.
+
+**SEQUENCING (CTO 172201Z):** **act 3 v1 is NOT gated on the C3 walk** -- sequence it independently; it
+can start whenever a lane is free and does not queue behind E3/E5.
+**AND DO NOT SPAWN A POPULATE-PURPOSE CAMPAIGN OFF THE 22-FILE FINDING.** That is the solicitation-track
+shape and it belongs to the same producer-assertion mechanism, not to a parallel effort.
+**ONE MISSING LAYER, SEVERAL CONSUMERS WAITING ON IT -- NOT SEVERAL CAMPAIGNS.**
 </axis_2_becomes_generative>
 
 <gate>
