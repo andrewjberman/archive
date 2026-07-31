@@ -414,3 +414,55 @@ nothing downstream would reveal that the parameter was fitted to its own answer.
 this output.** That is an arch-gate call. Until it exists, `M9-COMPLETE`'s §3-population clause
 (CVO 063042Z) cannot be satisfied by any measurement I could take — and that is a real blocker on
 the obligation, not a delay in my execution.
+
+---
+
+# §14 (b) TOKEN-AXIS INBOX CAPTURE — banked (CTO authorized 20260731T063838Z)
+
+**Axis:** TOKEN ONLY. No classification, no judgment, no TYPE inference — so this needs no fence
+ruling and pre-empts none. **TYPE axis remains pending** CVO~Z's A2.3 self-test + a C-1-analog
+declaration (CVO 063717Z).
+**Denominators enumerated AT RUN TIME:** 54,700 inbox `.md` files · 117,343,092 bytes ·
+captured 2026-07-31T06:39:37Z (computed offset, never a hand-typed `Z`).
+**`scope: device_local`** — 0-TRACKED (`.gitignore:248`).
+
+| pattern | inbox hits | inbox files | (durable logs, §12.2) |
+|---|---|---|---|
+| `canonical` | 23,951 | 11,208 | 7,304 |
+| `authoritative` | 2,190 | 1,655 | 570 |
+| `source of truth` | 344 | 322 | 93 |
+| `still live` | 208 | 192 | 40 |
+| `who owns` | 136 | 133 | 11 |
+| `who writes` | 21 | 21 | 1 |
+| `is it live` | **9** | 9 | **0** |
+| `is this live` | **4** | 4 | **0** |
+| `which artifact is canonical` | **1** | 1 | **0** |
+
+**Per-pattern, reported separately. NEVER summed into a rate** (CVO condition 3).
+
+## §14.1 REQUIRED DECLARATION on any (b) figure that ships (CTO 063838Z)
+
+**The inbox holds 77% of observable (b) signal volume and is 0-tracked/device-local; durable
+session logs hold 23%.** Any (b) figure ships with this split or it is malformed — *a logs-only (b)
+would otherwise be a real number silently hiding that three quarters of its evidence existed and
+expired.*
+
+## §14.2 THE THREE LITERAL §5.9 STRINGS EXIST — AND ONLY IN THE PERISHABLE STORE
+
+`which artifact is canonical` (1), `is it live` (9), `is this live` (4) appear in inbox bodies and
+**zero times** in durable logs. Trace volume, and that is the point: **the only corpus containing
+the literal phrasings PROGRAM §5.9 names is the one that is not tracked and that this fabric loses
+routinely.** A durable-only capture of (b) would report those three at 0 forever and be, narrowly,
+correct — and completely misleading about whether the question was ever asked in those words.
+
+## §14.3 WHY THE BODIES ARE UNTRACKED — the reason is documented, not incidental
+
+CTO (063838Z) declined to order a snapshot noting the bodies *"are untracked for reasons I have not
+audited (size, noise, possibly PII)."* **The reason is recorded in `.gitignore`:**
+`:235` — *"MCP runtime state (broker database, inbox, liveness) — local runtime only"*, and
+`:248` — `org/mcp/inbox/*`, with a deliberate carve-out for one serial's undelivered mail.
+
+**"Local runtime only" is a deliberate scoping decision, not an oversight.** So preserving 54,700
+bodies / 111.9 MB to a durable store would *override a standing decision*, which is a named call
+for its owner — not something a measurement seat does on its own initiative. **I did not build it.**
+Recorded here so the decision-maker has the actual reason rather than a guess at it.
