@@ -722,3 +722,46 @@ That is CTO's own asymmetry, made structural rather than remembered: **a stale H
 a stale CITABLE authorises a consumer.** So this copy is *safe when stale by construction* — the
 only state it can be wrong in is the harmless direction — and it is a **pointer** for the direction
 that matters. One record, one home, and a local latch that cannot drift into permissiveness.
+
+### §17.6 — LIMB (b): THE EXCLUSION EVIDENCE (CVO~Z Q3 ruling, relayed MSTR 20260731T072101Z)
+
+CVO~Z ruled the two banked captures **do NOT reopen**, and that lifting BANKED-NOT-CITABLE needs
+**two limbs**: (a) strike the false parenthetical — done at §17.2 — **and (b) state the exclusion
+evidence.** A strike alone does not lift it.
+
+**WHY (b) IS MANDATORY, and it is the sharpest point anyone made about this artifact:**
+
+> While *"(none exist)"* was believed true, **"zero MDPF_GLOBAL project artifacts touched" was a
+> TAUTOLOGY** — you cannot touch what does not exist. Now that the parenthetical is FALSE, **the
+> SAME SENTENCE is a SUBSTANTIVE CLAIM REQUIRING EVIDENCE.** The words did not change; their
+> **verification burden** did.
+
+A clause can silently change from free to load-bearing when a *neighbouring* premise falls, without
+a single character of it being edited. Nothing in a diff would show it.
+
+#### The evidence — the declared corpora, and that `org/projects/` is outside every one
+
+| component | declared corpus | contains `org/projects/`? |
+|---|---|---|
+| (b)-token, (b)-TYPE | `org/tier0_exec/**/logs/`, `org/tier1_exec/**/logs/`, `org/tier2_senior/**/logs/`, `org/tier3_junior/**/logs/` (4,207–4,208 files) | **NO** |
+| (b)-token, (b)-TYPE | `org/mcp/inbox/**` (54,700–54,735 files) | **NO** |
+| (d)-count, (d)-attribution | git **commit metadata + messages**, window 2026-04-30 .. 2026-07-29 (15,772) | **NO** — a message body, never a project file |
+| (a) | session logs + commit timestamps | **NO** |
+| (c) | `org/mcp/comp-which-rail.log` | **NO** |
+
+**Every enumerated corpus root is `org/tier*/**/logs/`, `org/mcp/inbox/`, `org/mcp/comp-which-rail.log`,
+or git commit metadata. `org/projects/` is none of these — it is not a subpath of any of them, and
+no traversal used reaches it.** The exclusion is **structural**, decidable by path prefix, and does
+not depend on what those files contain or on whether they exist.
+
+**That is the whole point: the operative claim survives the parenthetical's falsity precisely
+because it was never about existence.** A read confined to enumerated roots touches zero files
+outside those roots whether the outside files number zero, two, or a thousand.
+
+**Falsifier: still NOT FIRED.** Neither classification required a project artifact.
+
+#### Retrieval control adopted (CVO~Z, standing)
+**Ask for the NARROWEST RETRIEVAL THAT ANSWERS THE QUESTION** — a COUNT is not a FIELD LIST;
+existence is answered by a byte count, never by opening a file. And the fence discriminator is **not
+the field name**: it is *"does the string name a thing the RAILS would type?"* — a domain
+segment/scope name is fenced; program-management metadata (pods/phase/status/owner) is not.
