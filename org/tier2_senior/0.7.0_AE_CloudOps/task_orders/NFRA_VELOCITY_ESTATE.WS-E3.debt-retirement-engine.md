@@ -29,6 +29,15 @@ UNBLOCK CONDITIONS (all three, verified not assumed):
 6 of 6 eligible candidates -> KEEP-DORMANT, 0 retirements, gates exercised, denominator printed at
 every step. That is the PRD's acceptance bar for E3.0 MET, not a partial result. Do not re-run it and
 do not treat E3 as unstarted: its zero-blast-radius half is closed.
+
+**DO NOT RELITIGATE THE GATE WITH "BUT E3.0 RAN WITHOUT LIFECYCLE VALUES."** It did, and that is not
+a counterexample -- it is a spent one. **The non-retiring slice is SPENT AND MEASURED EMPTY:** P1
+baseline s.3c establishes that the safe slice and the CLEARABLE slice DO NOT OVERLAP (0 retired,
+6/6 KEEP-DORMANT; re-spec routed to `~C`). So every remaining member of this workstream's population
+is retirement-class work, and PRD 114-121 forbids exactly that against an UNDECLARED lifecycle.
+**INERT holds for the REMAINDER, which is all that is left.** (Refinement supplied by base CVO,
+review tranche 1, 20260731T143146Z -- added so a later lane cannot reopen a settled gate on a
+half-remembered precedent.)
 </gate>
 
 <references>

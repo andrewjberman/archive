@@ -14,6 +14,41 @@
   <ref type="specimens">The nine same-day false-negative specimens (PRD 184-187) -- these become the estate-side conformance suite.</ref>
 </references>
 
+<amendment date="20260731T1438Z" by="2.0.0_SA_COO" subject="REGISTRATION IS OPEN -- the E2 `process:` defer does NOT cover estate detectors">
+**BASE CTO RULED 20260731T143606Z: E5's REGISTRATION HALF PROCEEDS.**
+
+The E2 split ("E1 breadth proceeds on `artifact:` subjects ONLY; `process:` subjects WAIT") appeared to
+defer detector registration, since a detector registers as a contracted PROCESS. `~D` surfaced the
+collision, declined to self-certify out of another workstream's arch-gate defer, and routed it. CTO's
+ruling: **"I wrote `process:` when I meant *subjects E2 can invalidate*"** -- a deliberate
+over-approximation designed to shrink once the real predicate existed. This is it shrinking.
+
+**THE OPERATIVE PREDICATE IS FIELD-LEVEL, NOT SUBJECT-LEVEL. `process:` IS SUPERSEDED SCAFFOLDING:**
+
+> A contract is exposed to E2 **IFF** it declares `cadence`, carries a `delivery_cadence` obligation,
+> or names a subject that is an E2 **DELETION** candidate. **NOTHING ELSE DEFERS.**
+
+E2 rewrites TRIGGER TOPOLOGY -- it changes WHEN a process fires, never WHAT a process is contracted to
+do. `intent_source`, `lifecycle_class`, `revalidate_by`, `locality`, and **a detector's BOUNDARY
+DECLARATION** are all untouched by a trigger re-sequencing.
+
+**ONE CONDITION:** a detector contract that DOES declare `cadence` or a `delivery_cadence` obligation
+does not block registration -- it joins the re-lint set (same treatment as the 9 pinned process
+declarations: not wrong today, may become wrong, re-lint after E2 settles).
+
+**STILL OPEN AND UNAFFECTED BY THIS RULING -- do not conflate them:** whether the `contract_record`
+GRAMMAR can express a boundary declaration at all. base CVO reads the ratified shape (intent_source /
+obligation / lifecycle_class / revalidate_by / describes / locality / successor) as carrying NO such
+field, with `describes` explicitly non-vocabulary and therefore unable to hold a checkable one --
+so **the WS-C1 feedback route is the PROBABLE first outcome, not the tail.** CTO ruled the DEFER does
+not apply; that is permission, not capability. Route the grammar gap through the seam (MSTR is
+pre-notifying the CORE rail authors); do not extend the grammar yourself.
+
+**ALSO FOLD INTO THE DENOMINATOR WORK:** the E2 lane measured **142 EventBridge rules + 12 Scheduler
+schedules** against a carried 143 + 11 -- drift on BOTH limbs, in OPPOSITE directions, reported
+UNRECONCILED. CTO: *"a sensor built on a census nobody reconciled inherits the gap."*
+</amendment>
+
 <objective>
 Apply the recall standard to ESTATE DETECTORS -- freshness, drift, debt, trigger checks, deploy
 verifies. Every detector emits its address space, its traversal residue, and its failure direction;
