@@ -203,5 +203,24 @@ ON THE STANDARD YOU ARE ENFORCING, APPLIED TO YOURSELF: this workstream's whole 
 that state what they could not have seen. Your first artifact's boundary report is the first instance
 and it will be read as the template. Make its blindness section the honest one -- including, if it is
 true, that the enumeration that found this detector could not have found several others.
+
+**AND THE SAME STANDARD BINDS E5's OWN REGISTRATION -- THIS IS THE LOAD-BEARING ONE.** A boundary
+declaration is PRODUCER-ASSERTED and the registration invariant binds SHAPE, never TRUTH. So E5 will
+register declarations it cannot verify. **The honest move is to DECLARE that and say so plainly in the
+deliverable** -- E5's product is detectors that state what they could not have seen, so **E5 declaring
+a boundary it cannot verify, and saying so, is the standard applied to itself. It has no standing to
+demand of detectors what it will not do.** A registration half that quietly presents producer-asserted
+claims as validated would make E5 the exact surface it exists to close.
+
+**BYPRODUCT INBOUND FROM WS-E2 -- USE IT, DO NOT RE-DERIVE IT.** The E2 lane's violation predicate
+excludes three classes from its schedule-floor count: served-output GUARDS
+(`opal-{inf,cot,49f}-served-guard-on-write`), security/audit DETECTORS (`FIRMSEP-s3-direct-access-bypass`,
+`opal-globgrph-cloudtrail-mgmt`, `moltbot-ssm-sendcommand-alert`), and infrastructure state WATCHERS
+(`opal-inf-ec2-state-change-monitor`). **Those exclusions ARE estate detectors -- your population.**
+E2 is instructed to name them with members and counts in a directly consumable form rather than
+letting them exist only as a subtraction. It is a LIVE-AWS-GROUNDED partial census of detectors your
+own enumeration is expected to miss (PRD 190-192: no comp-manifest-check sees a freshness Lambda or an
+EC2-side check). **It is partial and it is not your denominator** -- state it as a contributing source
+with its own provenance, never as the population.
 </notes>
 </task_order>
