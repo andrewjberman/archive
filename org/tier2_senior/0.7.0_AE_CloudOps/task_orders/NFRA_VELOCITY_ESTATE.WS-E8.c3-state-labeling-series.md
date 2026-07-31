@@ -61,6 +61,36 @@ refreshed labeling cannot rot the same way. This is the cardinal never-depend-on
 applied to INTENT rather than to structure.
 </objective>
 
+<the_registry_is_the_store_the_walk_is_the_writer>
+**BASE CTO RULING 20260731T161617Z -- folded in at CTO's explicit instruction, and it is the single
+most important structural fact in this series.**
+
+**THE C3 WALK IS THE PRODUCER-ASSERTION MECHANISM THAT WS-E1's REGISTRY HAS BEEN MISSING ALL DAY.**
+
+All 14 landed contract declarations carry `lifecycle_class: UNDECLARED`. **Not from laziness.** The rule
+bank requires the value be **"PRODUCER-ASSERTED, NEVER OBSERVER-INFERRED... transience cannot be
+derived; it must be DECLARED"** -- and **there has never been a mechanism by which any producer was
+ASKED.** `~D` could only record the ABSENCE of an assertion; CTO ruled UNDECLARED the honest floor
+precisely because nothing existed above it.
+
+>> **ANDREW'S "that is how the lifecycle stage is maintained" IS THAT MISSING MECHANISM. The C3 walk
+PRODUCES the producer assertion that `lifecycle_class` requires and the estate has never had.**
+>> **THE REGISTRY IS THE STORE. THE WALK IS THE WRITER. THEY ARE ONE LOOP, NOT TWO SYSTEMS.** <<
+
+**THIS IS BINDING ON THE DECOMPOSITION:** E8 does NOT build a second intent record. It writes into the
+WS-E1 estate-contract registry. **If E8 and E1 diverge into two intent stores, that is the TWIN-CANON
+problem the rule bank exists to prevent** -- two records of the same intent that disagree quietly, with
+no way to adjudicate which is canonical. Any sub-TO that would create a parallel store is wrong by
+construction and routes to COO before it is built.
+
+**AND IT EXPLAINS WHY SCAVENGING WAS ALWAYS THE WRONG ARCHITECTURE (CTO, ruled):** an intent record
+that is MAINTAINED beats one INFERRED from residue. COO's E2 mitigation scavenged intent from records
+that happened to exist and **failed its own positive control** -- a hyphen-vs-underscore predicate
+returned 4 hits where the truth was 13, and without that loud failure four of five targets would have
+read "none known." **Scavenging is observer-inference wearing a records costume**, which is exactly
+what the rule bank forbids.
+</the_registry_is_the_store_the_walk_is_the_writer>
+
 <the_series>
 **E8.0 -- THE WORKED SPECIMEN (available NOW, needs no mechanism).**
   The "aggregator" question is already at the doubt step and can be walked by hand before anything is
