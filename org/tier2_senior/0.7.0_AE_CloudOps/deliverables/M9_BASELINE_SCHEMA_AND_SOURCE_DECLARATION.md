@@ -3,18 +3,22 @@
 **Status:** **CAPTURED (first capture) — numbers are in §12.** Both gates cleared before any number
 landed: CTO schema 20260731T061312Z, CVO source declaration 20260731T061200Z, freeze
 `e649eb8249595cfa683711852831865f1e827f44` pinned before measuring.
-**FENCE RULED PERMITTED** — CVO~Z Amendment 3 (MSTR 20260731T065433Z). **Both C-1 declarations are
-WRITTEN at §15**, with the substrate ground re-derived by me from the rule bank rather than taken
-from the ruling message. **Awaiting CVO's gate read of §15 before (d)-attribution or (b)-type banks.**
-**Still open:** the §3 population capture — **unsatisfiable as frozen** (§3 amendment note + §13):
-the ratified primary segmentation yields zero because `pods_spanned >= 2` excludes any single-author
-unit. Escalated to joint CTO+CVO adjudication; not mine to tune.
-**v5** — v2 folded CTO's six schema constraints + the derivation trap; v3 froze; v4 captured;
-v5 carries the C-1 declarations. v1 got three of the six wrong; corrected in place and named in §9.
-*(This header has now gone stale twice — once saying "PRE-MEASUREMENT" while §12 carried results,
-once saying the fence was pending after it was ruled. Both fixed on sight. A status line that
-contradicts its own document is the exact class this seat was spawned into, and it recurs because
-the header is the part nobody re-reads after writing the section.)*
+**ALL SIX COMPONENTS BANKED** — (a), (b)-token, (b)-type, (c), (d)-count, (d)-attribution.
+Fence RULED PERMITTED (CVO~Z Amendment 3); both C-1 declarations written at §15 with the substrate
+**re-derived from the rule bank, not relayed**; CVO gate word 20260731T070250Z **PASSED both** after
+re-running all five checks independently. Falsifier **reported NOT FIRED** rather than left silent.
+**M9-COMPLETE IS NOT REACHED, AND EDGE-1 DOES NOT DISCHARGE ON THIS.** The §3-population capture is
+**unsatisfiable as frozen** (§13 + §3 amendment note): the ratified primary segmentation yields
+**zero**, because `pods_spanned >= 2` excludes every single-author unit — including the estate's own
+published work-unit boundary. Escalated to joint CTO+CVO adjudication; **not mine to tune.**
+**v6** — v2 folded CTO's six constraints + the derivation trap; v3 froze; v4 captured; v5 declared;
+v6 banked the last two. v1 got three of the six wrong; corrected in place and named in §9.
+*(⚠ **THIRD** stale-header instance in this one file — "PRE-MEASUREMENT" while §12 carried results,
+"fence pending" after it was ruled, "awaiting CVO" after CVO passed. Each fixed on sight, and the
+recurrence is the finding: **the header is the one part nobody re-reads after writing a section**,
+so it drifts by default rather than by accident. A status line contradicting its own document is
+the exact class this seat was spawned into — and patching it three times is evidence the fix should
+be structural, not another patch.)*
 **Author:** `0.7.0_AE_CloudOps~D` (measurement-plane seat) · **Date:** 2026-07-31
 **Tasking:** `0.0.0_AB_MSTR` 20260731T055536Z (Andrew `/govern` + LD-0090 + CVO~Z fence ruling
 `@4b94ad6f3` + CTO confirmation 060030Z)
