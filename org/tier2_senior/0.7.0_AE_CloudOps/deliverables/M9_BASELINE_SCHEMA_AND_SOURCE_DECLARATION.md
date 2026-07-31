@@ -22,6 +22,24 @@ Fence basis (CVO~Z `@4b94ad6f3`, CTO-grounded independently at `4b94ad6f392e1f99
 capture contradiction is an **equivocation** — a build-cost baseline and a domain surface are
 different objects, and only the second is fenced.
 
+## §0b REQUIRED ARTIFACT-HEADER DECLARATIONS (CTO rider 3 — structural, not prose)
+
+CTO's instruction was to be consistent with my own best idea: I argued (c)'s scope must be a
+**required enum, not a footnote**, *because scope is exactly the qualifier dropped when a figure is
+quoted onward.* That reasoning applies with equal force to fork A's confound, and §8 prose would
+survive being quoted onward no better than a scope footnote would. So it becomes a **required
+artifact-level field set** — every emission of this baseline carries these three or it is malformed:
+
+| field | type | value at freeze | what it prevents |
+|---|---|---|---|
+| `baseline_reading` | enum {`retrospective_reference_class`, `prospective_first_slice`} | `retrospective_reference_class` | silently re-reading the population as the products' own history |
+| `comparison_validity` | enum {`same_work_before_after`, `cross_work_compositional`} | `cross_work_compositional` | reading a cross-work delta as a before/after |
+| `causal_reading_permitted` | boolean | **`false`** | quoting a later delta as *caused by* the framework |
+
+**A consumer that quotes a causal delta from this baseline contradicts the artifact's own
+`causal_reading_permitted: false` field.** That is the point: the confound is now checkable by a
+reader who never read §8, which prose could not achieve.
+
 ## §1 What M9 is, quoted not paraphrased (PROGRAM §5.9)
 
 | id | wording |
@@ -59,9 +77,14 @@ Entry predicates (structural only):
 `pods_spanned >= 2` (integer, distinct committing serials) · `has_served_consumer` (boolean) ·
 `delivered_within_window` (boolean)
 
-Inclusion/exclusion criteria **freeze at gate approval and are recorded with a commit hash.**
+**🔒 FROZEN. CTO approved the schema at 20260731T061312Z; THIS COMMIT IS THE FREEZE HASH** (§10
+step 4). The three predicates above are pre-registered as of this commit and are not editable
+afterward — a later change is an ADDED column with its own hash, never an overwrite.
+
 Choosing a reference class after seeing the treatment is post-hoc and unfalsifiable; pinning it
 first is pre-registration, and it is the honest sense in which this capture is time-sensitive.
+**Freezing before the first number is what makes this a control rather than a rationalisation** —
+and it is checkable by anyone, because the freeze is a commit hash and the numbers land after it.
 
 ## §4 The schema
 
@@ -127,6 +150,24 @@ vocabulary live. **Corrected in §5: (d) now derives from repeat-touch STRUCTURE
 metadata** — same path-set touched again inside the window, measured as counts and diffstat
 magnitudes, never as subjects, paths or file names.
 
+### §6.1 THE RULE (CTO rider 1) — stated once, so both cases follow from it
+
+Component (b) also reads prose (session logs, inbox bodies), one layer over. That looks like an
+inconsistency with killing (d)'s subject-matching. It is not, and the discriminator is a rule, not
+two case-by-case judgments:
+
+> ## A PROSE-READING DERIVATION IS SAFE **IFF** ITS MATCHING VOCABULARY IS **PRE-REGISTERED** AND **PROJECT-GENERIC**.
+
+- **(d) v1 FAILS it.** Matching `revert|fix|correct` against arbitrary subjects means the
+  classifier's own pattern list **drifts toward the measured surface's vocabulary in order to stay
+  accurate** — the derivation becomes a channel for the thing it is matching against.
+- **(b) PASSES it.** *"which artifact is canonical / who writes this / is it live"* is fixed before
+  measurement, generic to any project, and carries no ADVI/MDPF content — **the pattern set could
+  not encode a grain if it tried.**
+
+Stating it as a rule means a future reader does not have to re-derive why one was killed and the
+other kept, and any NEW prose-reading source must pass the same test before it enters §5.
+
 ## §7 THE HONEST PARTIAL ON (d) — reported, NOT engineered around
 
 CTO instructed: if a cost dimension cannot be captured without free text, report it as the
@@ -184,14 +225,28 @@ purely causal.** Enumerate what a number is OF before explaining why it differs 
    a schema that reads clean while the derivation carries the surface in.
 5. **No ordinal work-unit identity declared** — added (§3).
 
-## §10 Sequence
+## §10 Sequence — LIVE STATE
 
-1. CTO arch-gates this schema (§2–§4, §6–§8). **No measuring before that word.**
-2. CVO reads the source declaration (§5, §5.1). **No number banks before that word.**
-3. CVO~Z rules the §7 fence-scope question (does the fence bar the classifying READ?).
-4. Freeze §3 criteria; record the freeze commit hash.
-5. Measure. Land values as an **added table**, never overwriting a row (COO baseline §4 rule).
-6. Edge-1 discharges on this artifact having a path **on origin** — never on a status claim.
+| # | step | state |
+|---|---|---|
+| 1 | CTO arch-gates the schema | ✅ **APPROVED** 20260731T061312Z (schema v2 + fork A) |
+| 2 | CVO reads the source declaration | ✅ **PASS** 20260731T061200Z on (a)(b)(c)(d)-count; **(d)-attribution WITHHELD** |
+| 3 | CVO~Z rules the §7 fence-scope question | ⏳ OPEN — **does not block; see below** |
+| 4 | Freeze §3 criteria + record freeze hash | ✅ **THIS COMMIT IS THE FREEZE** |
+| 5 | Measure | ▶ proceeding on (a)(b)(c) + `d_rework_wave_count` |
+| 6 | Edge-1 discharges | ⏳ on the **measured** artifact on origin — NOT on schema approval, NOT on a local-only commit |
+
+**Step 3 does not gate step 5 (CTO rider 2).** The `status` enum already carries
+`NOT_YET_MEASURABLE`, which is exactly the slot the open question needs:
+`d_rework_wave_denominator_attributed` sits there until CVO~Z rules, while everything else is clean
+under **either** ruling — so **nothing measured now has to be re-taken whichever way it goes.**
+Perishability makes waiting the expensive option, and the design already absorbed the uncertainty.
+
+**If CVO~Z rules the classifying READ barred, that half is genuinely uncapturable retrospectively
+and the falsifier HAS FIRED on it — I report it fired and do not rescue it** (CTO instruction, and
+I do not resolve it myself even if step 3 runs long).
+
+Values land as an **added table**, never overwriting a row (COO baseline §4 rule).
 
 ## §11 What this document deliberately does NOT do
 
