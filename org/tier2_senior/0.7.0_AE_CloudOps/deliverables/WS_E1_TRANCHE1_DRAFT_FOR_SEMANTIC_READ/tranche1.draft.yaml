@@ -24,7 +24,7 @@ contracts:
 
   "process:mdpf-daily-trigger":
     intent_source: "docs/architecture/MDPF_CHANNEL_INDEPENDENCE_PRD.md"
-    obligation: [delivery_cadence, trigger_layer]
+    obligation: [delivery_cadence]
     lifecycle_class: UNDECLARED
     revalidate_by: "on producer assertion (solicitation outstanding)"
     scope: "mdpf daily convergence gate"
@@ -40,12 +40,7 @@ contracts:
     successor: null
 
   "process:mdpf-freshness-checker":
-    intent_source: REJECTED_NO_GOVERNANCE_ABOVE
-    rejection_reason: >-
-      No governance level above this artifact could be cited without naming the artifact's own
-      schedule/config, which RULE_BANK :354 REJECTS AT DECLARATION as the
-      denominator-is-its-own-configuration defect. No plausible parent was manufactured to satisfy
-      the field. Counted in the rejection rate.
+    intent_source: REJECTED_NO_GOVERNANCE_ABOVE   # reasons in coverage.intent_source_rejections
     obligation: []
     lifecycle_class: UNDECLARED
     revalidate_by: "on producer assertion (solicitation outstanding)"
@@ -68,24 +63,14 @@ contracts:
     successor: null
 
   "artifact:s3://opal-data-portal-v2/json/mdpf/{firmId}/account-distribution.json":
-    intent_source: REJECTED_NO_GOVERNANCE_ABOVE
-    rejection_reason: >-
-      MDPF_SCOPED "Path B" per-firm surface. No governance level above it could be cited without
-      naming its own producer config. NOT manufactured. Counted in the rejection rate.
-      SEPARATELY AND WITHOUT PREJUDICE: this is the second portal-visible key shape observed in
-      the chain; whether it and the platinum path constitute one writer over two keys or two
-      writers is a single-writer adjudication this registry enables and this entry does not
-      pre-judge.
+    intent_source: REJECTED_NO_GOVERNANCE_ABOVE   # reasons in coverage.intent_source_rejections
     obligation: []
     lifecycle_class: UNDECLARED
     revalidate_by: "on producer assertion (solicitation outstanding)"
     scope: "per-firm account distribution"
 
   "artifact:s3://opal-data-mdpf/mdpf/feeds/{artifact}/*/{date}.parquet":
-    intent_source: REJECTED_NO_GOVERNANCE_ABOVE
-    rejection_reason: >-
-      Non-portal intermediate feeder parquet. No governance level above cited; not manufactured.
-      Counted in the rejection rate.
+    intent_source: REJECTED_NO_GOVERNANCE_ABOVE   # reasons in coverage.intent_source_rejections
     obligation: []
     lifecycle_class: UNDECLARED
     revalidate_by: "on producer assertion (solicitation outstanding)"
@@ -113,6 +98,12 @@ coverage:
   # REJECTION RATE — a finding, not an obstacle (CTO 075420Z).
   intent_source_rejected: 3
   intent_source_accepted: 4
+  intent_source_rejections:
+    # MOVED OUT OF THE RECORDS: rejection_reason was an UNRATIFIED TERM (lint A7.1).
+    # Registry-process metadata belongs in coverage, exactly as solicitation state does.
+    "process:mdpf-freshness-checker": "no governance level above; naming its own schedule/config is the :354 defect. Not manufactured."
+    "artifact:s3://opal-data-portal-v2/json/mdpf/{firmId}/account-distribution.json": "no governance level above cited; not manufactured. NOTE without prejudice: second portal-visible key shape in the chain; single-writer adjudication is enabled, not pre-judged."
+    "artifact:s3://opal-data-mdpf/mdpf/feeds/{artifact}/*/{date}.parquet": "no governance level above cited; not manufactured."
   rejection_rate_note: >-
     3 of 7 subjects have NO citable governance level above them. Reported as a rate with its
     denominator. No parent was manufactured for any of them.
