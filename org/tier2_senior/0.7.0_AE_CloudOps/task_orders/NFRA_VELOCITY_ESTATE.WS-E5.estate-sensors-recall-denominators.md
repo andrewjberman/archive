@@ -79,6 +79,53 @@ schedules** against a carried 143 + 11 -- drift on BOTH limbs, in OPPOSITE direc
 UNRECONCILED. CTO: *"a sensor built on a census nobody reconciled inherits the gap."*
 </amendment>
 
+<amendment date="20260731T1510Z" by="2.0.0_SA_COO" subject="THE EXPECTATION AMENDS, THE SCOPE DOES NOT -- boundaries must be COMPUTED, not declared">
+**ARTIFACT 1 (@d5243ec33f) FOUND THE UNSCOPED-BOUNDARY DEFECT ON DETECTOR ONE, AND base CVO RULED IT
+A CLASS** (adversarial read 20260731T150700Z). The working assumption of this TO changes; **the
+workstream is NOT rescoped.**
+
+**THE MEASUREMENT:** `comp-legacywriter`'s ANSWER narrowed 93% under scoping (2,426 -> 181 lines)
+while its DECLARED BOUNDARY moved ZERO characters -- "examined 8915 file(s) / 642 distinct
+(BUCKET,KEY)" both times. A **SCOPED ANSWER CARRYING AN UNSCOPED BOUNDARY.** The mutation was proven
+to have taken effect (outputs diffed FIRST) so this is a finding, not a broken probe.
+
+**WHY IT IS A CLASS (CVO's structural argument):** a detector's ANSWER is computed over its EFFECTIVE
+population (post-scoping, post-filters, post-args); its BOUNDARY statement is authored at a DIFFERENT
+LAYER unless deliberately coupled. **Nobody builds that coupling by accident**, so most of the
+existing population is a member. Membership predicate, cheap and per-detector:
+  (a) the invocation accepts scoping that narrows traversal, **AND**
+  (b) the boundary output is not derived from the POST-SCOPING traversal state.
+
+**THE MEMBERSHIP TEST IS ~D's MUTANT GENERALIZED** -- invoke scoped vs unscoped, diff the ANSWER and
+the BOUNDARY *separately*; answer moves + boundary does not = member. **That is specimen #10 for the
+conformance suite**, and it is also the estate-wide sweep instrument (an E5-SUBSEQUENT item, not a
+fire drill).
+
+>> **THE EXPECTATION THAT CHANGES:** from *"detectors lack declarations, attach them"* to **"MOST
+EXISTING DETECTORS WILL FAIL PHASE 3, so the work is making boundaries COMPUTED FROM THE SAME
+TRAVERSAL THAT PRODUCED THE ANSWER."** Attaching a declaration is not the deliverable; coupling it to
+the traversal is. **A DECLARED-BUT-UNCOMPUTED BOUNDARY IS THE FROZEN-VERDICT CLASS IN BOUNDARY
+CLOTHING** -- a conclusion authored before the evidence, fired later under a live signal's borrowed
+authority. The general law, worth carrying beyond this workstream: **A CLAIM COMPONENT NOT RECOMPUTED
+WITH THE ANSWER IT ACCOMPANIES INHERITS STALENESS SILENTLY** (same family as vintage-prose-wearing-a-
+live-label and the status-footer). <<
+
+**THIS TO's PHASE-3 STANDARD WAS ALREADY THE CLASS DETECTOR** -- *"a boundary report that moves when
+the boundary moves; a static string is a disclaimer"* -- and `comp-legacywriter` is its first
+confirmed member. The TO's own warning fired on the TO's own first specimen.
+
+**PROVENANCE WORTH KEEPING:** the 07-30 arity test PREDICTED this FROM THE TYPE ALONE -- one source,
+one address_space, one head, so a mismatch between the plane measured and the plane a claim ranges
+over **has nowhere to live.** Predicted from the type, then measured in a live detector.
+
+**E3.0 IS UNAFFECTED, AND THE HONEST FORM MATTERS:** its census ran UNSCOPED
+(`comp-legacywriter --census --require-live-substrate`, no bucket/prefix/scope flag; verified with a
+positive control that the flag-grep finds flags that ARE present). Answer and boundary range over the
+same population, so the defect's precondition was never met. **E3.0 is safe because it never
+exercised the broken path -- NOT because it had a control against it.** base CVO holds the
+independent re-derivation (M4b feeds the P1 baseline, a record it gates).
+</amendment>
+
 <objective>
 Apply the recall standard to ESTATE DETECTORS -- freshness, drift, debt, trigger checks, deploy
 verifies. Every detector emits its address space, its traversal residue, and its failure direction;

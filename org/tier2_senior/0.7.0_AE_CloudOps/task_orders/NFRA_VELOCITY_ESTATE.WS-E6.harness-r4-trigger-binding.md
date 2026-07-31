@@ -82,6 +82,22 @@ SUBSEQUENT (do not block artifact 1 on these):
 4. The second binding, same three bars.
 5. Router conversion rate reportable WITH A DENOMINATOR (the PRD's headline acceptance for E6) --
    this rides R8's instrument and is the measurement item 3 depends on.
+   **AMENDED 20260731T1509Z (COO ruling, on ~E's finding 2 -- NOBODY QUOTES AN E6 RATE WITHOUT THIS):
+   TRIGGER-FIRED RUNS ARE A THIRD CATEGORY AND ARE EXCLUDED FROM THE ROUTE DENOMINATOR, IN BOTH
+   LIMBS.** A trigger-fired run is **route-LESS by construction** -- there was no route, so it cannot
+   be a route that converted. Folding it in means **every successful binding LOWERS the measured
+   conversion rate**: the metric moves DOWN precisely as this workstream succeeds, and the number
+   would be defensible, reproducible, and wrong. It is the denominator-shape failure this program
+   exists to catch, inverted -- usually the denominator SHRINKS and looks like progress; here it
+   GROWS with structurally non-convertible members and makes progress look like regression.
+   **THE STANDING FORM:**
+     ROUTED           -- route offered, run followed. The conversion numerator/denominator.
+     UNROUTED-MANUAL  -- run with no route offered. The conversion GAP.
+     TRIGGER-FIRED    -- fired at a moment of work by a binding. **Its OWN count, reported
+                         SEPARATELY. Never in the route denominator.**
+   Trigger-fired runs are E6's OTHER product and get their own line: *"N runs that would not have
+   happened at all"* is the R4 story, and it is a better one than a conversion delta. Do not let it
+   hide inside a rate it structurally cannot belong to.
 6. >=1 friction reduction validated against the measured map, with the memorized head protected.
 7. Session log with a Compiler Tools section reproducing each run vs expect.
 </acceptance_criteria>
