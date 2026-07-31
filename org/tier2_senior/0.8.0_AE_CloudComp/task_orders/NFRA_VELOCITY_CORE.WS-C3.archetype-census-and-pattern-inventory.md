@@ -3,7 +3,7 @@
 <project>NFRA_VELOCITY_CORE</project>
 <issued_to>0.8.0_AE_CloudComp~C</issued_to>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
-<status>staged</status>
+<status>pending</status>
 
 <priority>P2 -- OPEN AS OF 2026-07-31. P1 (C1+C2) closed; P2 = C3 + C7. WS-C7 is with 0.7.0_AE_CloudOps~Z; THIS is the other half. NFRA_VELOCITY remains the EXCLUSIVE work regime.</priority>
 
