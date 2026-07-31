@@ -357,3 +357,60 @@ Stating it because an unstated proxy-for-population substitution is precisely th
 this program exists to catch, and because §3's freeze is only worth something if deviations from it
 are visible. **A second capture against the true §3 population would be an ADDED column, never an
 overwrite.**
+
+---
+
+# §13 A HOLE IN §3's OWN FREEZE — the frozen class is not yet a class
+
+**Status:** FINDING. **No §3-population capture is banked, and none is in progress** (CTO
+063318Z sequenced the inbox-side (b) capture ahead of it; I stopped on that word).
+*Sequencing note, stated plainly: I began this segmentation on CVO's 063042Z ruling and CTO's
+stop-instruction landed while it was running. Reporting the result, not presenting it as
+correctly ordered.*
+
+## §13.1 What happened
+
+Applying §3's frozen predicates required segmenting history into work units. Structural
+clustering — commits linked by ≥1 shared path within a 7-day horizon, then the three predicates —
+produced:
+
+| stage | count |
+|---|---|
+| candidate components | 4,570 |
+| `pods_spanned >= 2` | 244 |
+| **AND** `has_served_consumer` | **65** |
+| unit size | min 2 · median 4 · **max 8,043** |
+| pods per unit | min 2 · median 2 · **max 77** |
+
+**One component swallowed 8,043 of the 8,654 qualifying commits (93%) and spans 77 distinct
+agents.** That is not a work unit; it is the fabric's shared surface.
+
+**Diagnosis (structural, no path content reasoned about):** transitive path-connectivity fuses
+unrelated work through ubiquitous hub paths — the top 10 most-touched paths carry **9.9% of all
+path-touches** across 19,426 distinct paths, and are touched by nearly every agent on nearly every
+task. **The blob is an artifact of the LINKING RULE, not a property of the work.**
+
+## §13.2 THE ACTUAL FINDING — and it is about §3, not about the clustering
+
+**§3 froze the PREDICATES but never defined the SEGMENTATION FUNCTION.**
+
+`pods_spanned >= 2`, `has_served_consumer` and `delivered_within_window` are each well-defined
+**given** work units. *What constitutes a work unit was never pinned.* I did not notice at freeze
+time; it surfaced only on application. **So the frozen class is not yet a class** — §3 pre-registers
+a filter over a population whose construction rule does not exist.
+
+This is a defect in my own control, found by trying to use it. Recording it here because §3's
+freeze is only worth something if its holes are as visible as its deviations.
+
+## §13.3 WHAT I AM DELIBERATELY NOT DOING
+
+**I am not tuning a hub-exclusion threshold to make the population appear.** A threshold chosen
+*now*, after seeing the blob, is a reference class chosen after seeing the result — **precisely
+what §3's pre-registration exists to prevent**, and it would retroactively empty the strongest
+control in this artifact. It would also work: some threshold produces a plausible unit count, and
+nothing downstream would reveal that the parameter was fitted to its own answer.
+
+**The segmentation function must be defined and frozen on its own, ratified without tuning against
+this output.** That is an arch-gate call. Until it exists, `M9-COMPLETE`'s §3-population clause
+(CVO 063042Z) cannot be satisfied by any measurement I could take — and that is a real blocker on
+the obligation, not a delay in my execution.
