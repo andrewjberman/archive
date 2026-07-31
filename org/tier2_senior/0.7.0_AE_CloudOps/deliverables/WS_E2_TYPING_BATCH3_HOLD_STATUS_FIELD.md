@@ -81,6 +81,20 @@ went from **4 hits to 13** — a 3× move, from the same corpus, by one characte
 **Absence of a hit under a spelling-sensitive predicate is not evidence of no hold.** That is why rows 1–3
 are UNRESOLVED rather than `none known`.
 
+### The direction of the failure is the point (COO 160311Z, recorded as instructed)
+
+Without that control, four of five targets would have carried an under-counted evidence base, and their
+absences would have read as `none known`. So **the fail-safe would have been DEFEATED BY A SILENT
+UNDER-COUNT rather than OVERRIDDEN BY A DECISION** — no one would have chosen to bypass it; it would simply
+have had nothing to fire on.
+
+> **A FAIL-SAFE THAT CAN BE QUIETLY STARVED OF EVIDENCE IS NOT FAIL-SAFE. It is
+> fail-safe-conditional-on-a-predicate nobody checked.**
+
+The fail-safe defaults toward *leaving the safety closed* only while its evidence sweep actually finds the
+evidence. **The predicate is therefore part of the control, not part of the query** — and it must be
+positive-controlled every time it is run, against an instance known to be present.
+
 ---
 
 ## VIOLATION 5 — the only fix candidate, and still not now
