@@ -168,6 +168,42 @@ deliberate choice, stated, not an oversight.
 
 ---
 
+### 1f. THE "ANDREW DELIVERABLE" FILES — Andrew-pointed, and MEASURED (mid-turn ~0210Z)
+
+Andrew-direct, VERBATIM:
+
+> *"Yeah one particularly good reference for you if you're accruing data is the 'andrew deliverable'
+> files, ive noticed the agents making when i give them direct commands"*
+
+**MEASURED before elevating it, not after:**
+
+| | |
+|---|---|
+| `ANDREW_RULING_*` / `ANDREW_DIRECT_*` files under `org/` | **156** |
+| created in the last 7 days | **18** (~2.6/day) |
+| of 20 sampled, carrying a `VERBATIM` block | **20 of 20** |
+| distinct owning serials producing them | **7+** (COO, CloudComp, CTO, CloudOps, OpalETL, DS, CVO) |
+
+**It is a high-yield corpus and he is right to point at it.** But the measurement surfaces something
+he named without naming: *"ive noticed the agents making"* — **this convention is EMERGENT, not
+mandated.** `org/XXX.md` requires recording Andrew-direct instructions verbatim; it does **not**
+specify this filename pattern. Agents converged on it independently across at least seven serials.
+
+**CONSEQUENCE FOR THE SPEC, and it cuts both ways:**
+- **High signal** — a file an agent chose to create because Andrew gave a direct command is
+  pre-filtered by a human-in-the-loop judgment no heuristic of mine can match.
+- **NO GATE** — an emergent convention has nothing enforcing it. It can drift, an agent can name a
+  file differently, and **the corpus would silently thin with no error anywhere.** So capture here is
+  pattern-TOLERANT (multiple filename shapes, plus `VERBATIM` block detection inside any deliverable),
+  and **the day's manifest reports how many such files it found** — a count that quietly trends toward
+  zero is the only available signal that the convention is decaying.
+
+**This is a DERIVED record** (an agent transcribed it) where §1's transcript store is **PRIMARY** (he
+typed it). Where both cover the same utterance, the transcript is authoritative and the deliverable
+is corroboration — which is also a live cross-check on transcription fidelity.
+
+---
+
 ## 2. THREE SYNTHESIS INPUTS
 
 **(a) user-input store** (§1) · **(b) git change** — re-admitted from appendix; the attribution
