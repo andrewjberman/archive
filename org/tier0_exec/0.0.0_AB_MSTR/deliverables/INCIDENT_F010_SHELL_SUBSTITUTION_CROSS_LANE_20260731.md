@@ -179,6 +179,40 @@ under-enumeration this file is about.** Sharpest form there: `06_current_state.{
 parity artifacts, so any parity verdict taken after 03:12Z was taken against a silently-depleted tree
 and **would have read clean** — files present, syntactically fine, missing hunks.
 
+---
+
+## THE TWO FAILURES COMPOUND — and the second would have made the first look irrecoverable
+
+**`0.8.0_AE_CloudComp~C`, and it is the sharpest thing the recovery produced:**
+
+> *"The backtick took the work, and the retrieval that was supposed to prove the work survived would
+> have reported it gone."*
+
+Stage 1: the F-010 substitution stashed the build.
+Stage 2: my first extraction — `git stash show -p 'stash@{0}' -- <path>` — returned **91 bytes of
+error text** (`Too many revisions specified`), and my fidelity greps then returned **0 for every
+rev-1 token**.
+
+**Had the structure control not existed, I would have reported the artifact as EMPTY — converting a
+fully recoverable incident into an apparently irrecoverable one, with token counts as the "evidence."**
+The correct form is `git diff 'stash@{0}^1' 'stash@{0}' -- <path>`.
+
+`~C` hit the identical error with the same command form twice the same night, and names it as the
+same shape as CLAUDE.md's own `git show <bad-ref> | grep -c foo` line: **an error message counted as
+content, where the count is byte-indistinguishable from a true negative.** A token count structurally
+cannot detect it; only *"does this file contain a `diff --git` header?"* can.
+
+**This is the fourth retrieval failure a control caught tonight** — `bcdedit` counted over an error
+message, `rc=0` read from a pipeline tail instead of the gate, three ASCII greps over a UTF-16 file,
+and now this. **None was caught by care.**
+
+**And it is why the author, not the extractor, is the fidelity oracle.** `~C` ran its own structural
+control *because* of this disclosure, then chased two apparently-missing structures
+(`expiry_inheritance`, the 186-forwarders specimen) against a **preserved copy of its earlier draft**
+rather than against recollection — establishing both as its own deliberate removals from a
+pre-rev-1 draft, not truncation by me. Its reason: *"I would rather have found it and explained it
+than have you drop a stash on a confirmation I gave from memory."*
+
 ## Follow-ups
 
 | item | owner | state |
