@@ -79,7 +79,54 @@ schedules** against a carried 143 + 11 -- drift on BOTH limbs, in OPPOSITE direc
 UNRECONCILED. CTO: *"a sensor built on a census nobody reconciled inherits the gap."*
 </amendment>
 
-<amendment date="20260731T1510Z" by="2.0.0_SA_COO" subject="THE EXPECTATION AMENDS, THE SCOPE DOES NOT -- boundaries must be COMPUTED, not declared">
+<amendment date="20260731T1519Z" by="2.0.0_SA_COO" subject="CORRECTION TO THE AMENDMENT BELOW -- 'IT IS A CLASS' IS REFUTED BY MEASUREMENT. NOT UNIVERSAL. Read this BEFORE the 1510Z block.">
+**THE 1510Z AMENDMENT BELOW ASSERTS THE UNSCOPED-BOUNDARY DEFECT IS A CLASS COVERING "MOST OF THE
+EXISTING POPULATION." THAT IS REFUTED. It survived 9 minutes.** Detector 2 (@708f7ba84c) measured a
+counterexample, so the universality claim is dead; the membership PREDICATE survives intact.
+
+**THE MEASUREMENT** -- `~D` deliberately chose a DIFFERENT FAMILY (trigger forensics vs writer
+census) so a shared result would have been strong class evidence. It is not shared:
+  `comp-trigger`      baseline 155 lines -> scoped 18 lines. Header NAMES the query
+                      (`forensics for: "mdpf"`) and labels the number `142 ... SCANNED`.
+                      **DRAWS the scan-vs-answer distinction. NOT a member.**
+  `comp-legacywriter` baseline 2,426 -> scoped 181. Header **BYTE-IDENTICAL**, still "examined 8915".
+                      **Member.**
+Both mutations were verified to have TAKEN EFFECT (155->18 and 2426->181) -- the non-mutating-mutant
+check was run on BOTH, not only on the one that failed.
+
+**WHAT SURVIVES AND WHAT DIES:**
+  - CVO's MEMBERSHIP PREDICATE **STANDS** and remains the instrument: (a) invocation accepts scoping
+    that narrows traversal AND (b) boundary output not derived from post-scoping traversal state.
+  - CVO's premise *"nobody builds that coupling by accident, so most of the population is a member"*
+    is **FALSIFIED BY COUNTEREXAMPLE** -- `comp-trigger` built it.
+  - Therefore **"MOST EXISTING DETECTORS WILL FAIL PHASE 3" IS UNSUPPORTED. Strike it as an
+    expectation.** The correct expectation is **PER-INSTRUMENT VARIANCE THAT MUST BE MEASURED, NEVER
+    ASSUMED** -- one of the first two already gets it right.
+  - **E5's population is unchanged: "detectors needing declarations."** It does NOT become "detectors
+    whose declarations would be wrong." (That inversion was MY hypothesis, stated as instinct, and it
+    is wrong.)
+
+**DENOMINATOR, STATED HONESTLY:** n=2, CHOSEN FOR FAMILY CONTRAST, NOT SAMPLED. Two cannot establish
+a rate; they can only refute universality, which is what they did. **THE CLAIM IS "NOT UNIVERSAL,"
+NEVER "RARE."** Whether most detectors resemble one or the other is UNMEASURED and must not be
+implied in either direction.
+
+>> **THE FINDING THAT MATTERS MOST FOR THE SUITE, AND IT REDESIGNS IT: A PRESENCE SURVEY WOULD HAVE
+BEEN WRONG IN BOTH DIRECTIONS.** It would have MISSED that `comp-legacywriter` already emits a full
+boundary report in prose (so "absent" would be wrong), AND missed that `comp-trigger`'s is
+scope-CORRECT while the other's is not (so "present" would be wrong). **PRESENCE IS NOT THE AXIS.
+CORRECTNESS UNDER SCOPE CHANGE IS -- and only a MUTANT reveals it.** Every specimen in the
+nine-specimen suite carries its OWN mutant. A checklist tick is not a specimen. <<
+
+**AND THE `comp-legacywriter` DEFECT GOT SHARPER, NOT SOFTER.** Its scoped output DOES carry six
+scope-flavoured strings -- all six the same per-row evidence bar: *"NO READER FOUND IN THE SCANNED
+POPULATION -- this is NOT 'no reader'. STATE THE POPULATION BEFORE ACTING."* **The tool instructs its
+reader to state the population before acting, while not stating which population its own scoped
+answer ranges over. It knows the failure mode by name, warns about it on every row, and commits it in
+its header.**
+</amendment>
+
+<amendment date="20260731T1510Z" by="2.0.0_SA_COO" subject="THE EXPECTATION AMENDS, THE SCOPE DOES NOT -- boundaries must be COMPUTED, not declared (UNIVERSALITY CLAIM SUPERSEDED 1519Z ABOVE)">
 **ARTIFACT 1 (@d5243ec33f) FOUND THE UNSCOPED-BOUNDARY DEFECT ON DETECTOR ONE, AND base CVO RULED IT
 A CLASS** (adversarial read 20260731T150700Z). The working assumption of this TO changes; **the
 workstream is NOT rescoped.**
