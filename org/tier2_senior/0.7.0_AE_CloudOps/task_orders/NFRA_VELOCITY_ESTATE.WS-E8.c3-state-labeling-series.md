@@ -107,6 +107,37 @@ what the rule bank forbids.
   *Value: walking ONE real item by hand before specifying the mechanism will teach more about the
   mechanism than specifying it first. Owner: CTO + Andrew, CVO investigating.*
 
+  **>> E8.0 IS CLOSED. IT RAN BEFORE THE MECHANISM EXISTED, AND ITS RESULT IS THE SPEC'S BEST INPUT.
+  base CVO investigated on doubt and reported back in ~8 minutes (20260731T162413Z), which IS Andrew's
+  message-(3) middle step executing naturally.** <<
+
+  **THE ANSWER: THE QUESTION HAD A FALSE PREMISE.** Neither successor nor survivor -- both branches
+  assumed the disarm was trying to stop the chain. It was not.
+  `infra/aws/lambda/inf-pipeline/inf-gold-trigger/lambda_function.py:243-262` **ENUMERATES ALL FOUR
+  ARMED PATHS BY NAME**, including the aggregator direct-invoke, and states verbatim: *"Disabling the
+  rules is a PLACEBO: the aggregator dispatches the identical mode=full run 14 minutes later, so
+  'closing' two doors merely PROMOTES the next one... THE DOORS ARE NOT THE CHOKEPOINT. This function
+  is: every path must pass through it. Assert here."* The route was KNOWN and ENUMERATED and is the
+  DOCUMENTED REASON the control sits in the function rather than on the rules. The control is currently
+  **RELEASED** -- sentinel `[RELEASED-BY-CTO-AND-COO-COSIGN]` matching in source AND on the live
+  function config, negative control run -- under a **STANDING DAILY RELEASE (Andrew-worded + CTO + COO
+  co-sign) that has been the NORMAL state since 2026-07-16.** Not a defect, not an incident.
+
+  **THREE THINGS THE SPECIMEN TEACHES THE SPEC, ALL BINDING ON E8.2/E8.3:**
+  1. **SOURCE FIRST, NOT ANOTHER INSTRUMENT** (CVO's method note). The item was escalated as
+     "unanswerable from any instrument" and was answered in ~8 minutes **because the answer was in
+     SOURCE and the doubt had been raised from trigger-layer evidence.** Write into the spec: **when a
+     C3 state question is raised, THE FIRST STOP IS THE ARTIFACT'S OWN SOURCE.** Intent is authored
+     somewhere; the estate's habit is to hunt for it in live state, where it is not.
+  2. **A CONTROL CAN BE CORRECT, DOCUMENTED, LIVE -- AND INVISIBLE TO EVERY INSTRUMENT AIMED AT ITS
+     LAYER.** Three instruments (trigger graph, resource policy, repo search by name) reported
+     TRUTHFULLY about rules and policies; the control lives in neither. Only reading the function
+     found it. **This is the strongest single argument for Layer 2 existing at all.**
+  3. **A DOUBT CAN BE WELL-RAISED AND STILL REST ON A FALSE PREMISE.** Both offered branches were
+     wrong. **The investigation step must be free to DISSOLVE a question, not only to answer it** --
+     if E8.3's workflow only supports confirm/deny of the question as posed, it will force a wrong
+     answer onto a well-intentioned doubt. Build the dissolve path.
+
 **E8.1 -- THE ITEM POPULATION AND ITS DENOMINATOR. STARTABLE NOW; PRECONDITION FOR EVERYTHING ELSE.**
   Enumerate the C3.ii items, with the denominator printed and the enumeration's blindness stated.
   **THE ITEM LIST IS THE DENOMINATOR: without it, a labeling has no coverage claim and "we walked the
