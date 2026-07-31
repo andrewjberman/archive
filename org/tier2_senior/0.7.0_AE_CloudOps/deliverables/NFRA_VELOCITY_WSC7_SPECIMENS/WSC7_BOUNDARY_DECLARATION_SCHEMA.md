@@ -1,6 +1,6 @@
 # WS-C7 BOUNDARY-DECLARATION SCHEMA (first artifact)
 
-**Author:** `0.7.0_AE_CloudOps~Z` | **Gate:** `1.0.0_SA_CTO~Z` | **Verify:** `3.0.0_SA_CVO~Z`
+**Author:** `0.7.0_AE_CloudOps~Z` -- **Gate:** `1.0.0_SA_CTO~Z` -- **Verify:** `3.0.0_SA_CVO~Z`
 **Scope grant:** CTO~Z `20260731T131608Z` -- *"THE BOUNDARY-DECLARATION SCHEMA. One document. What a
 tool must declare to register: its ADDRESS SPACE, its TRAVERSAL RESIDUE, and its METHOD'S FAILURE
 DIRECTION. Nothing else."*
@@ -33,9 +33,9 @@ The set the tool draws from. Without it, "0 found" is uninterpretable.
 
 | Field | Type | Values |
 |---|---|---|
-| `address_space.kind` | enum, **RATIFIED-STRUCTURED** | `enumerable` | `bounded_unenumerable` | `unbounded` | `single_target` |
+| `address_space.kind` | enum, **RATIFIED-STRUCTURED** | `enumerable` / `bounded_unenumerable` / `unbounded` / `single_target` |
 | `address_space.denominator` | integer, **or the literal `NOT-ENUMERABLE`** | required when `kind=enumerable` |
-| `address_space.denominator_source` | enum, **RATIFIED-STRUCTURED** | `independent_precount` | `derived_from_own_output` | `declared_static` | `NOT-LINT-CHECKED` |
+| `address_space.denominator_source` | enum, **RATIFIED-STRUCTURED** | `independent_precount` / `derived_from_own_output` / `declared_static` / `NOT-LINT-CHECKED` |
 | `address_space.description` | free text, **DECLARED UN-DECIDABLE (NOT-LINT-CHECKED)** | human-readable scope |
 
 **`denominator_source` is the load-bearing field and it exists because of SPEC-2.** A count taken
@@ -53,8 +53,8 @@ The complement actually encountered on this run: skipped, filtered, failed, trun
 
 | Field | Type | Values |
 |---|---|---|
-| `traversal_residue.reportable` | enum, **RATIFIED-STRUCTURED** | `enumerated` | `counted_only` | `detected_not_counted` | `structurally_invisible` |
-| `traversal_residue.channel` | enum, **RATIFIED-STRUCTURED** | `stdout` | `stderr` | `exit_code` | `sidecar_artifact` | `none` |
+| `traversal_residue.reportable` | enum, **RATIFIED-STRUCTURED** | `enumerated` / `counted_only` / `detected_not_counted` / `structurally_invisible` |
+| `traversal_residue.channel` | enum, **RATIFIED-STRUCTURED** | `stdout` / `stderr` / `exit_code` / `sidecar_artifact` / `none` |
 | `traversal_residue.silent_modes` | list of free text, **DECLARED UN-DECIDABLE (NOT-LINT-CHECKED)** | known ways this tool drops items without saying so |
 
 **`structurally_invisible` is the most important value in this schema and it must never be a
@@ -78,9 +78,9 @@ design input.
 
 | Field | Type | Values |
 |---|---|---|
-| `failure_direction.self` | enum, **RATIFIED-STRUCTURED** | `under_report` | `over_report` | `traversal_exact` | `unknown` |
+| `failure_direction.self` | enum, **RATIFIED-STRUCTURED** | `under_report` / `over_report` / `traversal_exact` / `unknown` |
 | `failure_direction.consumer_edge` | **optional object**, same enum + `consumer` id | present only when this tool's output is another instrument's input |
-| `failure_direction.basis` | enum, **RATIFIED-STRUCTURED** | `exercised` | `reasoned` | `NOT-LINT-CHECKED` |
+| `failure_direction.basis` | enum, **RATIFIED-STRUCTURED** | `exercised` / `reasoned` / `NOT-LINT-CHECKED` |
 
 **WHY THE PAIR IS MANDATORY WHERE IT APPLIES:** an availability check that OVER-REPORTS, feeding an
 authorization gate that then UNDER-REPORTS, is not two defects. Limb B is limb A's output consumed
@@ -124,12 +124,12 @@ Audit of this schema against its own rule:
 
 | Field | State |
 |---|---|
-| `address_space.kind` | `denominator_source` | RATIFIED-STRUCTURED |
+| `address_space.kind` + `denominator_source` | RATIFIED-STRUCTURED |
 | `address_space.denominator` | structured integer, or literal `NOT-ENUMERABLE` |
 | `address_space.description` | DECLARED UN-DECIDABLE |
-| `traversal_residue.reportable` | `channel` | RATIFIED-STRUCTURED |
+| `traversal_residue.reportable` + `channel` | RATIFIED-STRUCTURED |
 | `traversal_residue.silent_modes` | DECLARED UN-DECIDABLE |
-| `failure_direction.self` | `consumer_edge.direction` | `basis` | RATIFIED-STRUCTURED |
+| `failure_direction.self` + `consumer_edge.direction` + `basis` | RATIFIED-STRUCTURED |
 
 **Why the rule matters here specifically:** a required field with no enum and no un-decidable marker
 decays, because the next value-check invents its own oracle. That cost the fabric two hours on
