@@ -83,11 +83,46 @@ A story built on a partial corpus says so on its face.
 Ruling 7 says the input must be *"tracked **somewhere** on a day by day basis"* and v4 never named
 the somewhere. Naming it:
 
-**(a) HOME + GRAMMAR.** `s3://opal-estate-report/input/{YYYY}/{MM}/{DD}/{device}/{session_id}.jsonl`
-Day-partitioned because the mandate is day-by-day. **`{device}` is in the key deliberately** — coverage
-is device-scoped today (site-Z is a declared gap, §6.1), so a partition that cannot express "which
-device" makes a partial day indistinguishable from a complete one. The key itself carries the
-denominator.
+**(a) HOME + GRAMMAR — ANDREW-DIRECT, mid-turn ~0155Z, VERBATIM (supersedes my proposal):**
+
+> *"where it would be, would be the same bucket where kimi tracks the change logs and other story
+> details"*
+> *"should be a daily sub folder in there for text-input, change-cochange, deployment-motion,
+> kimi-report, signed-review, something like this"*
+
+**DAY-FIRST, with one subfolder per artifact class.** This replaces my class-first
+(`input/YYYY/MM/DD/`) proposal — his layout puts the *day* at the top, which is right, because the
+unit of this whole product is a day and every consumer asks "what happened on date X" before it asks
+"which class of thing".
+
+```
+s3://opal-estate-report/{YYYY-MM-DD}/
+    text-input/{device}/{session_id}.jsonl   <- the capture store (§1)
+    change-cochange/                          <- synthesis input (b): git change AND CO-CHANGE
+    deployment-motion/                        <- synthesis input (c)
+    kimi-report/                              <- THE STORY (was daily/)
+    signed-review/                            <- Andrew+CVO's ratified output (was adjudicated/)
+```
+
+`{device}` stays inside `text-input/` — coverage is device-scoped today (site-Z is a declared gap,
+§6.1), so a partition that cannot express "which device" makes a partial day indistinguishable from a
+complete one. **The key itself carries the denominator.**
+
+**"change-cochange" IS AN INSTRUCTION, not a folder name.** Ruling 7 said *"git co change"* and I read
+it as "git change"; this names it twice. **CO-CHANGE — what moves TOGETHER — is a required analytic,
+not a synonym for change.** Two files that always change in the same commit are coupled whether or not
+any graph says so, and that coupling is exactly the kind of tribal knowledge no artifact declares.
+Folded into input (b) as a stated requirement.
+
+**"signed-review" is a better name than my "adjudicated"** and I am adopting his: *signed* names the
+act that matters — a human put their name to it — where *adjudicated* only names that a decision
+occurred.
+
+**IAM consequence, stated because the shape changed:** the boundaries are now MID-KEY wildcards
+(`arn:aws:s3:::opal-estate-report/*/signed-review/*`, `.../*/text-input/*`) rather than leading
+prefixes. S3 supports mid-key `*`, so every boundary in (b) below survives the restructure — but each
+one must be RE-EXERCISED against the new pattern, because a policy that was correct under a leading
+prefix is not thereby correct under a mid-key one. A5's deny-test is re-run, not assumed.
 
 **(b) IAM BOUNDARY — and this store gets a HARDER rule than `daily/`.**
 This is **the primary record of Andrew's words.** Anything that can silently rewrite it can rewrite
