@@ -866,13 +866,35 @@
       <wave>ETFS_SETUP.W3 (Cottonwood leg)</wave>
       <source_dir>infra/aws/lambda/cot-pipeline/cot-etf-ownership-daily</source_dir>
       <tf_file>infra/aws/terraform/cot-pipeline/cot-etf-ownership-daily.tf</tf_file>
-      <reads>opal-data-cot/gold/canonical/holdings/{date}.parquet (own-firm only; NEVER bd -- firm-separated)</reads>
+      <reads>REPOINTED 2026-08-01 (ETFS_PRODUCERS_REPOINT_TO_OPAL_DATA_ASSETS.md, Andrew-direct) --
+        opal-data-assets/blackdiamond/cottonwood/silver/fact_holdings/date=YYYY-MM-DD/data.parquet
+        (Hive-partitioned; the partition key IS the date). Ticker column = Symbol (not Ticker --
+        Ticker is null on ~8% of rows, Symbol never null, equal wherever both exist). Value column
+        = Market Value (byte-identical to Unaccrued Market Value for the ETF universe; ETFs carry
+        zero accrual). Prior opal-data-cot/gold/canonical/holdings grant LEFT IN PLACE (unused,
+        retire in a follow-on once all three ETFS producers verify green on the monolith). NEVER
+        blackdiamond/49f/ (NEVER#2, firm-separated -- IAM-verified via simulate-principal-policy,
+        implicitDeny confirmed on the 49f prefix).</reads>
       <writes>opal-data-etfs/daily/cottonwood/{date}.json</writes>
-      <trigger>Daily EventBridge SCHEDULE cron(30 10 * * ? *). cot has no gold-complete sentinel + opal-data-cot EventBridge is DISABLED, so the inf sentinel chain does not apply. cot is periodic-snapshot (snapshot-first by design) -- effectively periodic, not strictly daily; idempotent re-process of the latest partition.</trigger>
-      <date_targeting>event["date"]="YYYY-MM-DD" backfills a historical partition (additive).</date_targeting>
-      <tag>cot-pipeline-v0.4.4</tag>
+      <trigger>Unchanged -- Daily EventBridge SCHEDULE cron(30 10 * * ? *). cot has no gold-complete
+        sentinel + opal-data-cot EventBridge is DISABLED. Idempotent re-process of the latest
+        partition.</trigger>
+      <date_targeting>event["date"]="YYYY-MM-DD" backfills a historical partition; fails LOUD on
+        an absent date (e.g. the known 2026-07-31 gap) rather than fabricating a slice.</date_targeting>
+      <tag>cot-pipeline-v0.7.3</tag>
       <layer>pandas-pyarrow-requests-layer:1 (shared ARN)</layer>
-      <notes>Valued series starts 2026-06-08 (cot onboarding 04-22; 05-15..06-07 unpriced -> SKIP'd no-valued-source). 10 valued slices 06-08..06-22 (~$1.04M/4-ETF @06-22). W2 (49F leg) owned by 0.5.0_AE_OpalETL.</notes>
+      <notes>AC3 verified live via the deployed lambda_handler: 2026-07-20 now totals
+        $50,292,778.58 (was the stale published $48,391,202.69) -- confirms the column
+        resolution and closes the repoint's hard oracle. Known gap 2026-07-31 genuinely absent
+        upstream in the monolith too (one of cottonwood's two published roll-forward days) --
+        NOT fixed by this repoint, reported not fabricated. Applied via scoped `-target` (the
+        cot-pipeline TF dir carries unrelated unapplied drift from 2026-07-29 -- schedule-et.tf /
+        ssm.tf, Andrew-direct via CTO -- left untouched, flagged to CTO separately).
+        Sibling inflection leg CANCELLED same day: the proposed monolith source
+        (orion/inflection) was found to carry the identical relabel-across-dates defect the
+        spec attributed only to inf-gold (CTO-ratified). W2 (49F leg) owned by
+        0.5.0_AE_OpalETL / already repointed to monolith fact_rps (0824) 2026-07-29, AC2
+        reverified live 2026-08-01 (528,132,730.04 exact, 2026-07-20).</notes>
     </producer>
 
     <iam_note>
