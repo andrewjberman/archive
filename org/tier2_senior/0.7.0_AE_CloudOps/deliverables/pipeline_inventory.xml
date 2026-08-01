@@ -836,13 +836,29 @@
       <wave>ETFS_SETUP.W1 (Inflection leg)</wave>
       <source_dir>infra/aws/lambda/inf-pipeline/inf-etf-ownership-daily</source_dir>
       <tf_file>infra/aws/terraform/inf-pipeline/inf-etf-ownership-daily.tf</tf_file>
-      <reads>opal-data-inf/gold/holdings/{date}.parquet (own-firm only)</reads>
+      <reads>opal-data-inf/gold/canonical/holdings_{date}.parquet (own-firm only)</reads>
       <writes>opal-data-etfs/daily/inflection/{date}.json</writes>
-      <trigger>S-D4 EventBridge sentinel on opal-data-inf gold/meta/pipeline-complete.json (eventbridge=true on opal-data-inf)</trigger>
-      <date_targeting>event["date"]="YYYY-MM-DD" backfills a historical partition (additive; default = latest partition). Added 2026-06-25 (inf-pipeline-v1.7.75) for the AVGCAP.AC#2 backfill.</date_targeting>
-      <tag>inf-pipeline-v1.7.75</tag>
+      <trigger>CORRECTED 2026-08-01 (INF_ETF_OWNERSHIP_SCHEDULED_FLOOR.md S2, Andrew-direct): the prior sole
+        S-D4 event-pattern trigger on opal-data-inf gold/meta/pipeline-complete.json was the CLAUDE.md
+        NEVER-rule defect ("only trigger is another pipeline's success" -- 8/22 July trading days never
+        ran). REPLACED with aws_cloudwatch_event_rule.inf_etf_ownership_daily_schedule, schedule_expression
+        cron(0 15 * * ? *) -- no event_pattern, no external-bucket dependency, mirrors
+        bd-49f-etf-ownership-scheduled-floor / cot-etf-ownership-daily-schedule exactly.
+      </trigger>
+      <date_targeting>event["date"]="YYYY-MM-DD" backfills a historical partition (explicit path, shared
+        _compute_and_write_slice). Default (no "date") = newest partition + a NEW trailing-10-day
+        catch-up sweep (_catchup_missing_dates, S2a 2026-08-01): fills any date whose output is absent
+        but whose upstream partition now exists -- the true shape of the "8 missing days" (a single-
+        partition trigger, event or schedule, never revisits a late upstream backfill without this).
+      </date_targeting>
+      <tag>inf-pipeline-v1.7.94</tag>
       <layer>pandas-pyarrow-requests-layer:1 (shared ARN)</layer>
-      <notes>Live forward + backfilled 40 days 2026-05-15..06-23 (~$82M/4-ETF @06-22).</notes>
+      <notes>Live forward + backfilled 40 days 2026-05-15..06-23 (~$82M/4-ETF @06-22). July 2026 gap (8/22
+        trading days) closed by CTO backfill 2026-08-01 (22/22) + this schedule fix for recurrence.
+        AC1-AC8 evidence (CTO-validated): inf-etf-ownership-daily-schedule ENABLED, targets this fn,
+        old event rule confirmed ResourceNotFoundException (clean delete, no orphaned lambda-permission
+        statement), 0-diff terraform apply, trigger-map.json cadence_cron now "daily" (was "unknown").
+      </notes>
     </producer>
 
     <producer>
