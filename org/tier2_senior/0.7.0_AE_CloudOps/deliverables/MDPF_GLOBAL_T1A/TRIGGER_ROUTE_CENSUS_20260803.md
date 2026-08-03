@@ -75,10 +75,13 @@ unchanged states on the MDPF-relevant set. (Live count 142 = 143 − 2 + 1; sche
    ABSENT live (Lambda probe ResourceNotFoundException with passing positive control; 142 rules and 51
    alarms materialized contain no `freshness` name). Absent from the 07-29 baseline too — torn down
    before 07-29; the instrument's snapshot lags.
-4. **F4 — The hyphen serve plane has no identified trigger-writer.** Serve reads the HYPHEN
-   `aggregate-aua-timeseries.json` (comp-routes); no enumerated trigger names it. Writer
-   identification is T1.B/T2.B work; the 4-way `account-distribution.json` name collision makes
-   name-matching unsafe. Marked UNKNOWN-loud, deliberately.
+4. **F4 — SETTLED-BY-TRACE (superseded-in-place per CTO RAVC-4 20260803T212214Z; originally
+   UNKNOWN-loud).** The hyphen serve plane's writers are source-confirmed by T2.A @0b5acf3148:
+   `build_portal_gold_accrual.py` (accrual bridge; telemetry written=0 / skipped=11 on 08-03) plus
+   the publisher re-serve. *Original text: no enumerated trigger names the hyphen plane; writer
+   identification deferred to T1.B/T2.B; name-matching unsafe under the 4-way
+   `account-distribution.json` collision.* The caution stands as method — the answer exists by
+   trace, not name-match.
 5. **F5 — The legacy `json/mdpf/**` plane has NO scheduled producer.** Its adjacent writers are an
    on-demand SSM bridge (`mdpf-legacy-emit-on-demand`) and the portal-publisher cron. Given the HOLD
    doc makes this plane a live producer input, its freshness rests on ad-hoc fires — a standing

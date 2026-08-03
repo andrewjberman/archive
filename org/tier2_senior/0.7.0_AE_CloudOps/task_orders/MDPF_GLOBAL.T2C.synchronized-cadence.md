@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (second wave on the s.C.4 spine; unblocked by the T2.B ruling @440d16e018. SEQUENCING: begin AFTER your T1.A census commits -- T1.A stays first; this TO is your queued next.)</priority>
 
 <title>T2.C: The canonical MDPF clock -- one declared, implemented, and proven daily cadence (silver-close -> revamp rebuild -> accrual -> publisher -> invalidation)</title>
