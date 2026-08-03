@@ -75,14 +75,15 @@ producer-trigger maps (T2), schwab delivery cadence (T3), trueshares/pathfinder 
 
 ## 3. UNKNOWNs (loud; also in the registry `unknowns:` block)
 
-| ID | Endpoint | One-line question | Resolution path |
+| ID | Endpoint | One-line question | Status |
 |---|---|---|---|
-| U-1 | orion Assets/{date} | Post-open pulls: prior-settled or intraday marks? (seal covered pre-open only) | A/B same-date probe within lifted Orion egress, or vendor doc |
-| U-2 | orion Envision family (5 feeds) | Report-engine value vintage at run time; no as-of field in CSVs | A/B morning-vs-after-close probe, or vendor doc |
-| U-3 | orion NewPortfolio | current_value refresh timing | same probe class |
+| U-1 | orion Assets/{date} | Post-open pulls: prior-settled or intraday marks? | **RESOLVED 2026-08-03** by CTO-authorized A/B probe (s.7) |
+| U-2 | orion Envision family (5 feeds) | Report-engine value vintage at run time; no as-of field in CSVs | OPEN -- A/B morning-vs-after-close probe, or vendor doc |
+| U-3 | orion NewPortfolio | current_value refresh timing | OPEN -- same probe class |
 
-UNKNOWN count: 3 (all Orion valuation-basis timing; none blocks dedup-key research, all
-block a completeness CERTIFICATION at the value level -- named risks, not silent assumptions).
+UNKNOWN count after probe: 2 open (U-2, U-3) + 1 resolved (U-1). Neither open item blocks
+dedup-key research; both block a value-level completeness CERTIFICATION for their feeds --
+named risks, not silent assumptions.
 
 ## 4. Findings surfaced by the census (beyond the rows)
 
@@ -121,6 +122,28 @@ block a completeness CERTIFICATION at the value level -- named risks, not silent
 | `comp-pipescript io mirror_conversion.py` | REFUSED rc=2: --pipeline required; script not under data/*/scripts gold trees | TOOL GAP per if_mismatch: mirror_conversion is an assets-monolith silver module outside the tool's pipeline map; manual source-read with file:line cites substituted (registry rows cite it). Gap noted for WS4-hardening owner. |
 | `comp-blast` (phase 2) | N/A -- census is read-only; zero shared helpers touched; new files only (data/_contracts/ single-writer per TO, this doc, session log) | PASS per expect |
 | `comp-validate` (phase 3) | N/A per TO expect (registry draft; no validate config exists) | PASS per expect |
+
+## 6a. U-1 A/B probe record (run 2026-08-03 21:08Z; CTO authorization 20260803T210542Z)
+
+Read-only; existing endpoint; lifted Orion egress; zero production writes. Script:
+session scratchpad `u1_ab_probe.py` (probe design: A = the 09:32 ET production capture
+already in bronze; B = fresh Assets/08-03-2026 pull post-close 17:08 ET; C = fresh
+Assets/07-31-2026 pull, prior NYSE trading day; 3 sampled clients).
+
+```
+jwt issued=2026-08-03T21:01:02Z expires=2026-08-04T07:02:02Z
+A-side: bronze/assets/2026-08-03.parquet rows=35219 cols=58 (S3 LastModified 13:35:42Z)
+sampled clientIds=[1357, 1408, 522] (asset rows: 6, 7, 9)
+per client: asOfDate uniques B(req 08-03)=['2026-08-03'] C(req 07-31)=['2026-07-31']
+AvsB (22 common assets): currentValue/currentPrice/currentShares n_diff=0 max_abs=0.0000
+BvsC (22 common assets): currentValue/currentPrice/currentShares n_diff=0 max_abs=0.0000
+VERDICT: A==B (no intraday movement 09:32->17:08 ET on a traded Monday);
+         B==C ({today} request returns prior-settled values; echo mechanism live)
+```
+
+Registry updated: assets_v2 grounding block carries the probe; U-1 moved to `resolved:`.
+The `_orion_vendor_asof.py` docstring premise refresh routes through COO to the inf-tree
+DS lane per CTO instruction -- NOT edited from this seat.
 
 ## 6. Next tranches
 
