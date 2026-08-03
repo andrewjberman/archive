@@ -1,0 +1,155 @@
+{
+  "census": "MDPF_GLOBAL.T3A.cache-census",
+  "captured_utc": "2026-08-03T20:40Z-20:55Z",
+  "author": "0.7.0_AE_CloudOps~F",
+  "vintage": {
+    "workspace_head": "440d16e018",
+    "portal_head": "5ef651b202 (DEV)",
+    "distribution": "EVTSA9VEHNZVH",
+    "distribution_config_etag": "E1H04CVXQPZ22Z",
+    "grounding": "LIVE get-distribution-config + get-cache-policy + deployed lambda get-function artifacts + s3api head-object + measured viewer headers (evidence: headers-pass1.txt / headers-pass2.txt)"
+  },
+  "serve_path": {
+    "route_family": "/api/general/mdpf/*",
+    "matching_behavior": "/api/general/*",
+    "behavior_match_note": "CF behavior order-based match; no earlier pattern matches /api/general/mdpf/* (trades/* and json-tiered/* are the only earlier /api/general patterns)",
+    "edge_trio_pinned_live": {
+      "viewer-request": "auth-validator-edge:18",
+      "origin-request": "public-data-router:6",
+      "origin-response": "cache-control-injector:2"
+    },
+    "origin": "S3-opal-data-portal-v2-json (opal-data-portal-v2)",
+    "rewrite_deployed": "/api/general/mdpf/ -> /platinum/mdpf/  (public-data-router v6, sha vC65BEng0+qoyYfbc42Vwn0JZ0VhTGtAwX2fGB+3zSY=, modified 2026-07-29T01:28:18Z)",
+    "scopes_live": ["49financial", "cottonwood", "inflection", "global"],
+    "routes_measured": [
+      "/api/general/mdpf/49financial/account-distribution.json",
+      "/api/general/mdpf/49financial/aggregate-aua-timeseries.json",
+      "/api/general/mdpf/inflection/account-distribution.json",
+      "/api/general/mdpf/inflection/aggregate-aua-timeseries.json",
+      "/api/general/mdpf/cottonwood/account-distribution.json",
+      "/api/general/mdpf/cottonwood/aggregate-aua-timeseries.json",
+      "/api/general/mdpf/cottonwood/aum-metrics.json",
+      "/api/general/mdpf/global/account-distribution.json",
+      "/api/general/mdpf/global/aggregate-aua-timeseries.json",
+      "/api/general/mdpf/aggregate-aua-timeseries.json  [legacy root: 403, dead post-flip, zero page consumers]"
+    ]
+  },
+  "layers": [
+    {
+      "layer": 1,
+      "name": "CloudFront edge cache",
+      "policy_on_mdpf_path": {
+        "id": "ce00305d-cc58-4b8d-b683-cd5914ded974",
+        "name": "opal-api-general-5min-cache",
+        "min_ttl": 0,
+        "default_ttl": 300,
+        "max_ttl": 31536000,
+        "cache_key": "qs=none, headers=none, cookies=none",
+        "behaviors_sharing_policy": ["/api/general/*"],
+        "policy_blast_radius": "1 behavior (exclusive) -- a change to ce00305d affects only /api/general/*"
+      },
+      "operative_ttl": "DefaultTTL 300s applies (origin sends NO Cache-Control on mdpf objects; with no origin header CF uses DefaultTTL)",
+      "invalidation_mechanism": "NONE on publish (opal-assets-mdpf-portal-publisher fires no create_invalidation; single put_object lambda_function.py:133 @440d16e018). TTL-expiry only (<=300s). Separate path: DataRefresh ROLLBACK invalidates '/api/general/*' (data_refresh/lambda_function.py:56,1339 @440d16e018) which purges mdpf edge entries as a side effect while NOT restoring platinum/mdpf objects (rollbackInvalidation.ts:19).",
+      "measured": "pass1 20:51Z all Miss; pass2 +2m45s Hit Age=160-167; pass3 +3m30s Hit Age=208-214; cycling under 300"
+    },
+    {
+      "layer": 2,
+      "name": "cache-control-injector (origin-response edge)",
+      "deployed_version": "2 (pinned by live distribution)",
+      "code_sha256": "MzQqr+iRorHN7G7CSoDhVvPe5m74onq8jbo20KwIm0Q=",
+      "last_modified": "2026-04-15T20:37:09Z",
+      "stamp": "public, max-age=300, s-maxage=300 + Vary + ACAO -- ONLY when post-rewrite URI startsWith('/json/')",
+      "mdpf_effect": "DOES NOT FIRE on mdpf. Router v6 (2026-07-29 flip) rewrites /api/general/mdpf/ -> /platinum/mdpf/, which does not start with /json/. MDPF responses therefore carry NO Cache-Control end-to-end (measured: zero cache-control headers on all 9 live routes, both passes).",
+      "ttl_stamped_on_mdpf": null,
+      "invalidation_mechanism": "n/a (stateless header stamp)"
+    },
+    {
+      "layer": 3,
+      "name": "Portal client caches",
+      "react_query": {
+        "client_defaults": "staleTime: Infinity, gcTime: Infinity, refetchOnWindowFocus/Reconnect: false (portal/src/main.tsx:37-59 @5ef651b202)",
+        "mdpf_keys": [
+          {"key": "['mdpf-per-firm-timeseries', firmId]", "staleTime_ms": 300000, "enabled": "firm != global", "site": "ModelPortfolios.tsx:417-422"},
+          {"key": "['mdpf-aggregate-timeseries', 'global']", "staleTime_ms": 300000, "enabled": "firm == global", "site": "ModelPortfolios.tsx:430-435"},
+          {"key": "['mdpf-per-firm-distribution', firmId]", "staleTime_ms": 300000, "enabled": "firm != global", "site": "ModelPortfolios.tsx:466-476"},
+          {"key": "['mdpf-per-firm-aum-metrics', firmId]", "staleTime_ms": 300000, "enabled": "firm == cottonwood ONLY", "site": "ModelPortfolios.tsx:485-490"},
+          {"key": "['mdpf-account-distribution', 'global']", "staleTime_ms": 300000, "enabled": "firm == global", "site": "ModelPortfolios.tsx:543-548"}
+        ],
+        "invalidation_mechanism": "staleTime expiry (5m) + remount; queryClient.clear() on logout; ZERO invalidateQueries calls on any mdpf key (comp-grep verified)"
+      },
+      "module_memory_caches": {
+        "ttl_ms": 3600000,
+        "constant": "ACCOUNT_DIST_CACHE_TTL (portal/src/api/endpoints/aum.ts:510 @5ef651b202)",
+        "caches": [
+          {"name": "accountDistributionByFirmCache", "site": "aum.ts:528-546", "covers": "account-distribution, all scopes incl global"},
+          {"name": "aumMetricsByFirmCache", "site": "aum.ts:606-624", "covers": "aum-metrics (cottonwood only in practice)"}
+        ],
+        "stacking": "React Query refetch after 5m re-invokes the fetcher, which serves the SAME bytes from the module cache until 60m elapses -- effective client TTL for distribution + aum-metrics is up to 60min without a page reload",
+        "invalidation_mechanism": "forceRefresh param (no live caller passes it) + page reload only. The old clearAccountDistributionCache was retired 2026-07-29."
+      },
+      "browser_http_cache": {
+        "state": "NO Cache-Control on mdpf responses; ETag + Last-Modified present",
+        "consequence": "RFC 9111 heuristic freshness applies (typically 10% of (now - Last-Modified)). A day-old artifact earns ~2.4h of silent browser-cache freshness; grows with artifact age. UNGOVERNED layer.",
+        "invalidation_mechanism": "none (no header to govern it); conditional revalidation via ETag only after heuristic expiry"
+      }
+    },
+    {
+      "layer": 4,
+      "name": "S3 origin object metadata",
+      "bucket": "opal-data-portal-v2",
+      "keys_checked": 9,
+      "keys_with_cache_control": 0,
+      "evidence": "s3api head-object on all 9 served hyphenated keys 2026-08-03 ~20:47Z: CacheControl null, Expires null, ContentType application/json, all LastModified 2026-08-03T16:15:31-33Z",
+      "publisher": "opal-assets-mdpf-portal-publisher (deployed sha WSwmCWplyR1l8JiXTVijQsmynKldh297SJklzyWEL9M=, modified 2026-07-28T23:17:04Z, SERVE_ROOT=platinum/mdpf, GOLD_ROOT=portal/gold/mdpf, GOLD_BUCKET=opal-data-assets)",
+      "contrast": "json-tiered producers DO stamp S3 CacheControl (json-tiered/market-overview/rsi-summary.json = 'max-age=300' measured live) -- which is exactly DT's behavior-16 'bare max-age=300' observation: on json-tiered the injector also does not fire (rewrite /json-tiered/ != /json/) and the S3 metadata passes through bare. SOURCE-CONFIRMED mechanism for the W9 nuance.",
+      "invalidation_mechanism": "overwrite on publish (same key). DataRefresh rollback does NOT restore platinum/mdpf objects (rollbackInvalidation.ts:19)."
+    }
+  ],
+  "behavior_denominator_all_25": [
+    {"pattern": "DEFAULT /*", "policy": "658327ea Managed-CachingOptimized (def 86400)", "origin": "S3-opalinvest-portal"},
+    {"pattern": "/api/general/trades/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/scoped/advisor-intelligence/artifacts/*/*", "policy": "45eb7514 opal-scoped-advisor-by-firm (def 60, X-Firm-Id key)", "origin": "S3-opal-data-bd"},
+    {"pattern": "/api/scoped/advisor-intelligence/artifacts/*", "policy": "45eb7514 opal-scoped-advisor-by-firm", "origin": "S3-opal-data-bd"},
+    {"pattern": "/api/scoped/advisor-intelligence/entities/*/*", "policy": "45eb7514 opal-scoped-advisor-by-firm", "origin": "S3-opal-data-bd"},
+    {"pattern": "/api/scoped/advisor-intelligence/advisors/*/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/scoped/advisor-intelligence/clients/*/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/scoped/advisor-intelligence/clients/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/scoped/advisor-intelligence/timeseries/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/scoped/advisor-intelligence/snapshots/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/scoped/security-scanner/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/scoped/data-refresh/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/scoped/tickets/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/scoped/tickets", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/scoped/advisor-intelligence/*.json", "policy": "45eb7514 opal-scoped-advisor-by-firm", "origin": "S3-opal-data-bd"},
+    {"pattern": "/api/scoped/advisor-intelligence/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/general/json-tiered/*", "policy": "3eda5c45 json-tiered-5min-cache (def 300)", "origin": "S3-opal-data-portal-v2-json"},
+    {"pattern": "/json-tiered/*", "policy": "3eda5c45 json-tiered-5min-cache (def 300)", "origin": "S3-opal-data-portal-v2-json"},
+    {"pattern": "/api/general/*  <-- THE MDPF SERVE BEHAVIOR", "policy": "ce00305d opal-api-general-5min-cache (def 300)", "origin": "S3-opal-data-portal-v2-json"},
+    {"pattern": "/api/private/portfolio*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portfolio"},
+    {"pattern": "/api/private/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/v1/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/auth/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/scoped/partners/*", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"},
+    {"pattern": "/api/partners", "policy": "4135ea2d Managed-CachingDisabled", "origin": "APIGateway-portal"}
+  ],
+  "policy_sharing_summary": {
+    "ce00305d opal-api-general-5min-cache": 1,
+    "3eda5c45 json-tiered-5min-cache": 2,
+    "45eb7514 opal-scoped-advisor-by-firm": 4,
+    "4135ea2d Managed-CachingDisabled": 17,
+    "658327ea Managed-CachingOptimized": 1,
+    "total": 25
+  },
+  "t3b_clash_flags": [
+    "F1 NO-CLIENT-TTL: mdpf responses carry no Cache-Control (injector /json/-scoped since router v6 flip; S3 metadata unset by publisher). Browser heuristic caching is the operative client policy and it GROWS with artifact age (~2.4h at one day old) -- a daily publish window can be invisible to returning browsers for hours, and no invalidation reaches a browser cache. T3.B options: extend injector stamping to /platinum/mdpf/ OR stamp CacheControl at the publisher put_object. FLAG ONLY, not fixed.",
+    "F2 NO-PUBLISH-INVALIDATION: publisher fires no CF invalidation; edge staleness after a publish is bounded by DefaultTTL 300s. Acceptable for a daily clock, but T2.C's publish-window ruling should state it explicitly; if T2.C lands a tighter-than-5min freshness expectation the 300s tail clashes.",
+    "F3 60-MIN-MODULE-CACHE: accountDistributionByFirmCache + aumMetricsByFirmCache (60m, in-memory, no invalidation path short of reload) sit ABOVE every HTTP layer -- an open tab spans the publish window showing pre-publish numbers for up to 60m regardless of any edge-side T3.B design. Changing this requires a portal release, not an infra change.",
+    "F4 ROLLBACK-SEMANTICS: DataRefresh rollback invalidates /api/general/* (purges mdpf edge cache) while NOT restoring platinum/mdpf objects -- a rollback around the mdpf window re-pulls the SAME post-publish mdpf bytes with a fresh TTL. Coherent today; worth stating in T3.B so nobody reads the invalidation as a rollback of mdpf."
+  ],
+  "findings_non_blocking": [
+    "N1 DECLARATIVE-DRIFT: aum.ts:520-523,560 + portal-proxy.ts:497-501,515-519 comments still claim '/api/general/* -> /json/*' rewrite and json/mdpf/* serve keys; deployed router v6 rewrites mdpf to /platinum/mdpf/. Comments are pre-flip vintage (source fix is a DE/DT lane touch, not mine).",
+    "N2 DEAD-ROOT-ROUTE: portal-proxy.ts getMdpfAggregateAUATimeSeries() targets /api/general/mdpf/aggregate-aua-timeseries.json -> platinum/mdpf/aggregate-aua-timeseries.json which DOES NOT EXIST (measured 403). Zero page consumers (ModelPortfolios uses ByFirm('global')). Dead code candidate.",
+    "N3 AUM-METRICS-SPARSE-BY-DESIGN: platinum/mdpf/{scope}/aum-metrics.json exists only for cottonwood; the only enabled fetch is cottonwood (ModelPortfolios.tsx:488 enabled predicate). Not a defect; recorded so nobody reads the absent keys as gaps.",
+    "N4 QUERY-STRING-NOT-IN-CACHE-KEY: ce00305d has qs=none -- ?refresh= style cache-busting does NOT create a distinct edge entry on mdpf routes (unlike advisor-by-firm which whitelists). Any T3.B buster design must use the path, not a query string."
+  ]
+}
