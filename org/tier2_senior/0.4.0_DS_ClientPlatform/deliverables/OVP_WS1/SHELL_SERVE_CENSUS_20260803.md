@@ -57,6 +57,19 @@ to a working converter would have been the false-outage class NEVER#1 exists to 
 Tonight's scheduled cycle (post the LAG=1 deploy @bf4c0aabbe) advances the snapshot
 frontier to 08-03 in the ordinary course; that scheduled advance is the closure evidence.
 
+## THE RESIDUAL (CTO 234054Z item 3 -- recorded, not built; routed to OVP WS-5)
+
+The ingest guard's stated predicate is `has_data == 0` (cot_bronze_ingest.py REJECT
+branch) -- a ZERO-ROW test. The actual failure shape is a 1-3-row PARTIAL, which passes
+it. **LAG=1 (@bf4c0aabbe) removes the KNOWN PRODUCER of partials (BD's not-yet-completed
+as-ofs); it does NOT make the guard able to see a partial** -- any other partial-producing
+path (truncated transfer, partial vendor day, retry landing mid-write) walks through. An
+existence test wearing a completeness test's name (the night's recurring class). The
+completeness predicate design (row count vs the partition's own recent distribution, or
+vs the roster's expected grain) is routed to OPAL_VENDORPROVENANCE WS-5 where
+completeness rules live -- the blindness is not cot-specific. No alarm, no tonight-build
+(moratorium).
+
 ## Compiler Tools (TO mandate)
 
 | Run | Observed | Verdict |
