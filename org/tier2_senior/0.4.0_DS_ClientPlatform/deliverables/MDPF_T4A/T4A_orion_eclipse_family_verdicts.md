@@ -72,8 +72,25 @@ order). Caught by the immediate post-write field-position verify (grep of every
 dedup_stable_key line + row-context read), reverted, re-applied anchored, YAML re-parsed
 (39 rows, 31 TODO + 8 filled). The defect never reached a commit.
 
+## Tranche 2 -- SmartX family (landed 2026-08-03 ~22:30Z, same method)
+
+| Table | Key (exercised) | Dup rate | Completeness |
+|---|---|---|---|
+| fact_model_aum_daily (THE MDPF feed) | `(rmid, day)` | 0.0 x5 | **COMPLETE 15/15** trading days since C5 birth 07-14; cumulative-series class (whole per-model history each partition, day-series back to 2024-11) |
+| fact_model_allocation_roster | `allocation_id` (9,650/9,650) | 0.0 x5 | COMPLETE 15/15 |
+| fact_allocation_account_map | `allocation_id` (7,214/7,214) | 0.0 x3 non-shell | 14/15 -- missing 07-15 (permanent, current-state class) + **0-row WEEKEND SHELLS 08-01/08-02** that sibling tables do not produce |
+
+Tranche-2 findings: (8) per-feed weekend-shell divergence inside one pull vehicle --
+account_map lands empty weekend partitions while roster/aum carry rows; WS-5's presence
+evaluator must exclude shells (it already must per the TO; this is a live instance).
+(9) fact_model_aum_daily is the second cumulative-series-class table (with orion
+fact_performance) -- the class rule generalizes.
+
+Scope note: the smartx/platform/silver family carries 13 tables; tranche 2 verdicts cover
+the 3 MDPF-named feeds (the TO's exemplar priority). The remaining 10 are enumerated
+residue for a follow-on pass alongside BD + Schwab-0824.
+
 ## Next tranches (per TO order)
 
-SmartX family (smartx/platform/silver fact tables incl. fact_model_aum_daily -- the MDPF
-feed), then BD (blackdiamond/{49f,cottonwood} + cot firm bucket incl. the shell-exclusion
-rule), then Schwab-0824 (19 silver tables).
+BD (blackdiamond/{49f,cottonwood} monolith + cot firm bucket incl. the 0-row-shell
+exclusion rule), then Schwab-0824 (19 silver tables), then the smartx residue (10 tables).
