@@ -58,6 +58,29 @@ Scripts live in `data/assets/scripts/gold/` (staged to the runner as `assets_gol
   (deployed S3 slice untouched; tonight's cycle runs current production; the 6c repair unaffected).
 - **⚠ CLOCK COLLISION FLAG (v1-era, superseded by the v2 re-declaration it forced; kept for the record — routed to AE 21:29Z):** measured binding-input landings — smartx `fact_model_aum_daily` ~13:40Z (2 samples: 13:40:32Z 07-31, 13:41:10Z 08-03), orion `fact_assets` ~14:16Z (08-03), eclipse `fact_portfolios_full` ~03:30Z overnight — so the declared 13:00Z T-1-silver-close predates TWO binding inputs' landings, and **orion lands only ~44min before the 15:00Z floor** (a slow orion day crosses it → the rebuild reads a day-old orion partition). Floor VALUE unaffected today; declaration text + margin need AE's re-anchor.
 
+## v1.3 (21:55–22:00Z) — rows 4+7 IMPLEMENTED + DEPLOYED under the converged ruling
+
+**CONVERGED RULING (CTO+COO 20260803T215349Z): (b) pure canonical axis + MANDATORY (b+) declaration
+rider.** Decisive ground: the global axis UNIONS feeder axes (my own T2.A cite, dim `:1779`) — a
+non-trading date admitted per-firm propagates into the served Opal aggregate; with clock v2 firing
+weekends that would be standing behavior. (c) rejected with a forward door (calendar-day custody =
+a NEW artifact contract if ever needed). Andrew counterweight satisfied by silver retention; CTO
+surfaces the decision to Andrew as MADE.
+
+- **Row 4 → IMPLEMENTED (GREEN pending first rebuilt cycle):** self-derived canonical axis, global-axis
+  import GONE (@4d442fac2a + rider @31af5a04f1). Parity: 441/441 common dates identical on the model
+  leg; the 5 measured-weekend custody drops RULED; 9 padding rows dropped; frontier advances 07-31.
+- **Row 7 → IMPLEMENTED (GREEN pending CTO emission-shape validation at close):** source_vintage /
+  frontier_basis (T2.B-ruling-cited, clock-value-free) / trading_day_calendar / latest_cross_section
+  + (b+) `meta.axis_rule` with the computed measured-excluded enumeration (== the ruling's 5) and the
+  padding class stated separately.
+- **DEPLOYED 22:00Z:** `s3://opal-data-mdpf/code/scripts/assets_gold/build_cottonwood_mdpf_slice.py`
+  md5==ETag `44db6559905d506352a06d4585e45ae6`; ledger
+  `org/critical_paths/change_management/20260803T2200Z_mdpf-t1c-cottonwood-slice-row4-row7-deploy_completion.md`.
+  Served artifact advances on the next chain cycle reaching 6d (no hand-publish).
+- **Open at my seat:** AE ask-1 (7-day landing pull) + ask-2 (job→table proof) — next window; row-12
+  evidence clock once clock-v2 applies.
+
 ## Notes for the record
 
 - **HOLDs read (comp-blast):** slice 1 / pair 2 / dim 3 claims — all deploy-completion ledgers with S3 md5 pins (`20260729T0510Z_mdpf-g7...` etc.): the deployed copies are content-pinned, so ANY edit re-deploys via safe-deploy + a new ledger entry, never a silent divergence.
