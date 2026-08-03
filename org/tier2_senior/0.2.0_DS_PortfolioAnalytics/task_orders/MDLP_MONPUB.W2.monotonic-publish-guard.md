@@ -54,6 +54,22 @@
   </cross_domain_coordination>
 
   <acceptance_criteria>
+    <!-- ACCEPTANCE STATE AS EXERCISED (CTO amendment 2026-08-03T1636Z, per the 155100Z ruling +
+         CVO witness @ff496d7621 -- the record matches what was ACTUALLY exercised, no over-claim):
+         Criterion 1 (older-date):      EXERCISED-LIVE PASS (direct-invoke per CVO method ruling
+                                        162224Z; PublishGuardError at deployed :354; S3 version-gap
+                                        proof: zero new versions on all three keys, battery window).
+         Criterion 2 (passing):         CLOSED via W4's recovery publish (CVO witness @b16913d35e)
+                                        + a second organic exercise: 16:21:45Z execution 3796f456,
+                                        real user pull, equal-date guard pass by design.
+         Criterion 2b (mid-build-crash):EXERCISED-LIVE PASS -- the REAL defective 07-31 pkl (the
+                                        byte-identical input that wrote the serve 4x on 08-03
+                                        morning) crashed at :325 BEFORE any upload; zero writes.
+         Criterion 3 (force_publish):   PENDING SCRATCH-ONLY (CVO ruling: never rewrite the healed
+                                        SEV1 serve to prove a bypass; two-invocation design --
+                                        refusal control then bypass -- on a seeded scratch serve).
+         W2 is LIVE-and-WITNESSED on legs 1/2/2b; formal close issues on CVO's leg-3 verdict. -->
+
     1. EXERCISED-FAILING (the criterion that can fail): on the DEPLOYED Lambda, a mutant invocation
        carrying data_as_of OLDER than served -> execution FAILS AND all three served ETags are
        byte-identical before/after (record all six ETags). A guard never exercised in the failing
