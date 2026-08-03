@@ -156,8 +156,13 @@ source; measured served impact +$205,070.77 (~0.045%) on value-carrying days:
 | cottonwood_aua.py | out-of-substrate (cot gold canonical, not the BD relationship-grain table) | |
 | opal-assets-daily-emitter | DELEGATED to 0.2.0's C1 live trace (seat boundary) | |
 
-Onset measured: 06-20 carried 22 dual-grain groups ALL null-MV ($0 impact); value-carrying
-duals present 07-22 (3 groups) and 07-28/07-31 (2 groups), constant +$205,070.77.
+Onset per my 8-partition sample: 06-20 carried 22 dual-grain groups ALL null-MV ($0
+impact); value-carrying duals present 07-22 (3 groups) and 07-28/07-31 (2 groups),
+constant +$205,070.77. **PRECISION UPDATE (0.2.0's independent 42-partition census
+232754Z, convergent to the cent on both figures):** July onset = **07-21**; and a
+**closed-but-SERVED June episode** (22 positions, value-carrying 06-15..06-18 at
+~$336-338K/day) of which my 06-20 null-MV cluster was the tail. Extensions with CTO for
+Andrew's call.
 **The 07-22 DDB parity tie is itself the double-counted number -- both legs share the
 naive derivation, so the parity check is structurally blind to this defect class.**
 Repair is OUT OF T4.A SCOPE (verdicts only); routed loud to COO/CTO as a served-number
