@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (second wave on the s.C.4 spine; unblocked by the T2.B ruling @440d16e018; you hold the freshest chain mechanism context from your T2.A close)</priority>
 
 <title>T1.C: Cottonwood on-pattern -- restructure the cottonwood MDPF leg to the canonical revamp chain pattern (49F/inflection parity)</title>
