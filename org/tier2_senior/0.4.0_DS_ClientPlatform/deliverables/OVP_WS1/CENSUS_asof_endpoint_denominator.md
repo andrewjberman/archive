@@ -53,25 +53,28 @@ in T1 because its grounding was already sealed in source).
 |---|---|---|---|---|
 | 3 | orion/inflection/bronze/ (.jsonl.gz) | opal-assets-ingest-mirror Lambda (mirror of opal-data-inf bronze) | orion | T1-LANDED (semantics inherit from firm-bucket rows; mirror adds no vendor call) |
 | 4 | eclipse/inflection/bronze/ (.json) | opal-assets-ingest-mirror | eclipse | T1-LANDED (same inheritance) |
-| 1-2 | schwab/08242234/bronze/ + schwab/08335338/bronze/ (.zip CRS/CS) | AE OneDrive->S3 sync (49-schwab-conv skill; manual delivery cadence) | schwab | T3 |
-| 5 | blackdiamond/cottonwood/bronze/ (.xlsx) | cot chain (cot-rebalancer-runner named in source; full trigger map T2) | blackdiamond | T2 |
-| -- | blackdiamond/49f/ | bd chain (bd49f-pull twin named in opal-assets CHANGELOG; map T2) | blackdiamond | T2 |
+| 1-2 | schwab/08242234/bronze/ + schwab/08335338/bronze/ (.zip CRS/CS) | AE OneDrive->S3 sync (49-schwab-conv) + canonical-schwab-si2 EC2 sdd-daily-pull.ps1 (meta/pulls manifests land daily) | schwab | T3 |
+| 5 | blackdiamond/cottonwood/bronze/ | opal-assets-ingest-mirror (from opal-data-cot) + cot-rebalancer-runner DIRECT (rebalancer_* families) | blackdiamond | T2-LANDED |
+| -- | blackdiamond/49f/bronze/ | opal-assets-bd49f-daily-pull cron(30 2)+(30 4)Z (allocation_390224/fees_435407/template_roster, live thru 07-31) + opal-assets-bd49f-reporting-pull (reporting_*, DRY-gated, one partition 07-17) | blackdiamond | T2-LANDED |
 | 6-7 | trueshares/DIVZ/bronze/ + trueshares/IDVZ/bronze/ | ETF chain (etf_conversion.py family) | trueshares | T4 |
 | 8 | pathfinder/filepoint/bronze/ (+ live PFDE/ PFOE/ prefixes to reconcile) | ETF chain | pathfinder | T4 |
-| 10 | smartx/{account,allocation,model,platform}/ | smartx chain (smartx-exporter EC2 heritage; map T2) | smartx | T2 |
+| 10 | smartx/{platform,model/{guid},account/{guid},allocation/{guid}}/ | smartx-assets-daily-pull Lambda (C5), Scheduler cron(30 9 ET) daily; manifests live thru 2026-08-03 | smartx | T2-LANDED |
 | 9 | msn/ | STRUCK (Andrew-direct via COO 182117Z; 0 keys) | -- | CLOSED |
 
 ### opal-data-bd / opal-data-cot (legacy partner buckets; D-2 first-class)
 
 | Ingest path | Producer | Vendor | Status |
 |---|---|---|---|
-| opal-data-bd bronze/ + blackdiamond/ | Black Diamond export landing chain (T2 enumeration: producer + trigger + endpoint grain) | blackdiamond | T2 |
-| opal-data-cot bronze/ + blackdiamond/ | Cottonwood BD chain (cot-BD egress lift scope: blackdiamond/cot/session) | blackdiamond | T2 |
+| opal-data-bd/forwardfill_v2/{transactions,realized,allocations,unrealized,assets} | bd-49f-runner Lambda (shared cot_bronze_ingest.py firm-bound, LAG=1) via session chain cron(0 0 UTC) + daily belt | blackdiamond | T2-LANDED with U-5 STATUS FLAG (last landings 01-27/06-18 -- retired vs stalled = CTO call) |
+| opal-data-cot/forwardfill_v2/{transactions,realized,allocations,unrealized,holdings} + _retry_net | cot-exporter EC2 via SSM opal-cot-bronze-run, session chain cron(30 16 ET); nightly ~22:01 ET | blackdiamond | T2-LANDED |
+| opal-data-bd legacy bronze/ + blackdiamond/ prefixes (Andrew manual TRN CSV heritage etc.) | legacy landing surfaces predating the REST migration | blackdiamond | T2-residue (enumerate-and-classify with the U-5 ruling) |
 
-**Denominator coverage after T1: 15 registry rows landed covering every enumerated
-opal-data-inf ingest path (10/10 data paths; the JWT path is auth-only, recorded above)
-plus the 2 monolith mirror families that inherit them. Open enumeration: bd/cot/smartx
-producer-trigger maps (T2), schwab delivery cadence (T3), trueshares/pathfinder (T4).**
+**Denominator coverage after T2: 34 registry rows. opal-data-inf 10/10 data paths (T1);
+monolith families 3/3 mirror + smartx 10 routes + blackdiamond 49f monolith 4 feeds (one
+UNKNOWN-gated); firm buckets bd 2 rows (U-5 flagged) + cot 3 rows. Open enumeration:
+schwab (T3: OneDrive delivery + sdd-daily-pull EC2), trueshares/pathfinder ETF chain (T4),
+opal-data-bd legacy prefix classification (rides U-5), out-of-census-bucket smartx
+legacy chains (opal-data-smartx-v2 + DDB -- noted, not census scope).**
 
 ## 3. UNKNOWNs (loud; also in the registry `unknowns:` block)
 
@@ -80,10 +83,13 @@ producer-trigger maps (T2), schwab delivery cadence (T3), trueshares/pathfinder 
 | U-1 | orion Assets/{date} | Post-open pulls: prior-settled or intraday marks? | **RESOLVED 2026-08-03** by CTO-authorized A/B probe (s.7) |
 | U-2 | orion Envision family (5 feeds) | Report-engine value vintage at run time; no as-of field in CSVs | OPEN -- A/B morning-vs-after-close probe, or vendor doc |
 | U-3 | orion NewPortfolio | current_value refresh timing | OPEN -- same probe class |
+| U-4 | smartx holdings/aum family | Valuation basis (settled custody vs intraday platform marks) at the 09:30 ET pull | OPEN -- A/B within standing SmartX lift, or vendor doc |
+| U-5 | blackdiamond 49f firm-bucket plane | Retired vs stalled (last landings 01-27 / 06-18 vs a daily monolith twin) | OPEN -- CTO/AE classification ruling |
+| U-6 | blackdiamond portfolioreporting (taxsma) | As-of semantics + cadence behind the DRY_RUN egress gate | OPEN -- egress gate decision + one characterized response |
 
-UNKNOWN count after probe: 2 open (U-2, U-3) + 1 resolved (U-1). Neither open item blocks
-dedup-key research; both block a value-level completeness CERTIFICATION for their feeds --
-named risks, not silent assumptions.
+UNKNOWN count after T2: 5 open (U-2..U-6) + 1 resolved (U-1). None blocks dedup-key
+research; each blocks a value-level completeness CERTIFICATION for its feeds -- named
+risks, not silent assumptions.
 
 ## 4. Findings surfaced by the census (beyond the rows)
 
@@ -120,8 +126,37 @@ named risks, not silent assumptions.
 | `comp-glob` inf-pipeline + data/assets/scripts + data/inf/scripts/bronze | 68 + 81 + 6 files | PASS (enumeration denominators printed) |
 | `comp-grep` orionadvisor / routes / asof / schedule_expression / opal-data-assets / orion-inflection / mirror | 9/9 pullers route-grounded; 18 TF schedules; monolith writer resolved | PASS |
 | `comp-pipescript io mirror_conversion.py` | REFUSED rc=2: --pipeline required; script not under data/*/scripts gold trees | TOOL GAP per if_mismatch: mirror_conversion is an assets-monolith silver module outside the tool's pipeline map; manual source-read with file:line cites substituted (registry rows cite it). Gap noted for WS4-hardening owner. |
+| `comp-estate smartx` (T2) | 3 chains: dormant EC2 CSV path (DISABLED rule), model-monthly-pull (DISABLED), REST-daily-ingest (live, feeds opal-data-smartx-v2 + DDB -- out of census buckets) | PASS as seed; the census-scoped monolith producer (smartx-assets-daily-pull) is NOT in this vertical's chains -- estate-census gap noted, grounded via comp-grep + live manifests instead |
+| `comp-grep` T2 sweeps (smartx endpoints, BD templates, schedules, meta/pulls grammar) | 9 smartx routes + BD datamining/rebalancer/portfolioreporting flows + all T2 crons grounded file:line | PASS |
+| live `aws s3 ls` T2 (monolith smartx/blackdiamond prefixes, both firm buckets, partition tails) | APPLIED evidence per row; surfaced U-5 (bd firm-bucket staleness) + the cot label-forward fact | PASS |
 | `comp-blast` (phase 2) | N/A -- census is read-only; zero shared helpers touched; new files only (data/_contracts/ single-writer per TO, this doc, session log) | PASS per expect |
 | `comp-validate` (phase 3) | N/A per TO expect (registry draft; no validate config exists) | PASS per expect |
+
+## 4a. T2 findings (SmartX + Black Diamond)
+
+7. **SmartX is the eclipse class**: zero date parameters on any consumed route (pull.py
+   url tables) -- every {YYYYMMDD} partition is a run-date label, historical gaps are
+   permanently unfillable, and the same false-vintage hazard applies to any backdated
+   re-label. Two vendor hazards are already guarded in the puller and now recorded as
+   registry facts: the vendor silently ignores unknown modelid filters (returns the
+   UNFILTERED universe), and a well-formed-empty payload is a valid landing (the $1.43B
+   near-miss -- content bar is a separate instrument).
+8. **BD as-of is date-addressed and BACKFILLABLE** (the only census vendor so far where
+   history is recoverable), with a measured mechanism: snapshot tables return 0-row
+   shells for an as-of not yet completed in ET (4,595B vs 12.9MB A/B in source). 49f
+   monolith + firm-bucket runners configure LAG=1 around it.
+9. **cot's snapshot tables run LAG=0 -- the latent 0-row-shell exposure is LIVE**, masked
+   by the holdings retry-net; CTO-flagged at source (cot_bronze_ingest.py:92-93), now a
+   named registry risk on the cot snapshot row.
+10. **cot labels lead content by one ET day** (nightly 02:0xZ run labels with UTC
+    run-date: TRANSACTIONS_DAILY_2026-08-03.xlsx landed 22:01 ET 08-02) -- filename dates
+    on cot period tables are run labels, never content claims.
+11. **The bd 49f firm-bucket plane looks superseded, unclassified** (U-5): transactions
+    last 2026-01-27, allocations 2026-06-18, while the monolith twin lands daily. Needs a
+    one-line retired-vs-stalled ruling.
+12. **The taxsma portfolioreporting family is egress-HARD-GATED by design** (DRY_RUN=1
+    default; one live partition 2026-07-17) -- recorded as UNKNOWN semantics (U-6), not
+    probed.
 
 ## 6a. U-1 A/B probe record (run 2026-08-03 21:08Z; CTO authorization 20260803T210542Z)
 
