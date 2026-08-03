@@ -53,7 +53,7 @@ in T1 because its grounding was already sealed in source).
 |---|---|---|---|---|
 | 3 | orion/inflection/bronze/ (.jsonl.gz) | opal-assets-ingest-mirror Lambda (mirror of opal-data-inf bronze) | orion | T1-LANDED (semantics inherit from firm-bucket rows; mirror adds no vendor call) |
 | 4 | eclipse/inflection/bronze/ (.json) | opal-assets-ingest-mirror | eclipse | T1-LANDED (same inheritance) |
-| 1-2 | schwab/08242234/bronze/ + schwab/08335338/bronze/ (.zip CRS/CS) | AE OneDrive->S3 sync (49-schwab-conv) + canonical-schwab-si2 EC2 sdd-daily-pull.ps1 (meta/pulls manifests land daily) | schwab | T3 |
+| 1-2 | schwab/08242234/bronze/ + schwab/08335338/bronze/ (.zip CRS/CS, 18 types) | canonical-schwab-si2 EC2 sdd-daily-pull.ps1 -Master {m}, 2x daily (manifests 10:15Z+22:15Z live thru 08-03); AsOfDATE-canonical partitions. NOTE: the AE OneDrive lane (49-schwab-conv) feeds the STAGING bucket opal-data-schwab only -- outside census buckets | schwab | T3-LANDED |
 | 5 | blackdiamond/cottonwood/bronze/ | opal-assets-ingest-mirror (from opal-data-cot) + cot-rebalancer-runner DIRECT (rebalancer_* families) | blackdiamond | T2-LANDED |
 | -- | blackdiamond/49f/bronze/ | opal-assets-bd49f-daily-pull cron(30 2)+(30 4)Z (allocation_390224/fees_435407/template_roster, live thru 07-31) + opal-assets-bd49f-reporting-pull (reporting_*, DRY-gated, one partition 07-17) | blackdiamond | T2-LANDED |
 | 6-7 | trueshares/DIVZ/bronze/ + trueshares/IDVZ/bronze/ | ETF chain (etf_conversion.py family) | trueshares | T4 |
@@ -84,7 +84,7 @@ legacy chains (opal-data-smartx-v2 + DDB -- noted, not census scope).**
 | U-2 | orion Envision family (5 feeds) | Report-engine value vintage at run time; no as-of field in CSVs | OPEN -- A/B morning-vs-after-close probe, or vendor doc |
 | U-3 | orion NewPortfolio | current_value refresh timing | OPEN -- same probe class |
 | U-4 | smartx holdings/aum family | Valuation basis (settled custody vs intraday platform marks) at the 09:30 ET pull | OPEN -- A/B within standing SmartX lift, or vendor doc |
-| U-5 | blackdiamond 49f firm-bucket plane | Retired vs stalled (last landings 01-27 / 06-18 vs a daily monolith twin) | OPEN -- CTO/AE classification ruling |
+| U-5 | blackdiamond 49f firm-bucket plane | Retired vs stalled | **RULED 213057Z: RETIRED-BY-SUPERSESSION** + 2 riders (zombie-writer signal; not a deletion warrant) |
 | U-6 | blackdiamond portfolioreporting (taxsma) | As-of semantics + cadence behind the DRY_RUN egress gate | OPEN -- egress gate decision + one characterized response |
 
 UNKNOWN count after T2: 5 open (U-2..U-6) + 1 resolved (U-1). None blocks dedup-key
