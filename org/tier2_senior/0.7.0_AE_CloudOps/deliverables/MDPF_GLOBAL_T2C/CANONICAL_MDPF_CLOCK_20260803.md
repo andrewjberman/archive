@@ -34,13 +34,18 @@ are from my T1.A census crons; job→table rows marked INFERRED are a Phase-1 pr
 | `orion/inflection/silver/fact_assets` | `opal-assets-ingest-mirror-inf-daily` cron(15 14)Z (landing 14:16:05Z = cron+65s; INFERRED) | UTC | 14:16Z = **10:16 ET** | 14:16Z = 09:16 ET | **10:16 ET (summer)** |
 | `schwab/08242234/silver/fact_rps_s2` | `opal-assets-silver-schwab-sweep-daily` cron(15 12)Z | UTC | 12:15Z = 08:15 ET | 07:15 ET | 08:15 ET |
 | `eclipse/inflection/silver/fact_portfolios_full` | overnight job ~03:30Z (measured 03:30:30Z; job id INFERRED) | UTC | 03:30Z = 23:30 ET(-1) | 22:30 ET(-1) | 23:30 ET(-1) |
-| `blackdiamond/cottonwood/silver/{fact_model_assignment,fact_holdings}` | cot mirror 03:30Z + bd silver sweep 05:00Z + dim-convert 03:05Z | UTC | ≤05:00Z = 01:00 ET | 00:00 ET | 01:00 ET |
+| `blackdiamond/cottonwood/silver/{fact_model_assignment,fact_holdings}` | assignment mirror 06:00Z (CORRECTED per DS 7-day table 221516Z; 03:30Z is the holdings/eclipse slot) + bd silver sweep 05:00Z + dim-convert 03:05Z | UTC | ≤06:00Z = 02:00 ET | 01:00 ET | 02:00 ET |
 | roster / crosswalk / frozen snapshot | static | — | n/a | n/a | n/a |
 
 **Season-max lateness = Orion at 10:16 ET (summer).** In winter every UTC-fixed input lands earlier
 in ET and the ET-anchored SmartX chain is season-stable — so the summer row is the binding regime.
-Sample size is 2 days; **Phase-1 evidence: DS pulls a week of per-input landings (their offer,
-212937Z) and the derived close below is re-checked against it before the apply.**
+**RE-CHECKED AT 7 SAMPLES (DS delivery 221516Z, org/tier2_senior/0.2.0_DS_PortfolioAnalytics/deliverables/MDPF_GLOBAL_T2C_LANDING_TABLE_7DAY_20260803.md):
+the 10:45 ET close HOLDS 7/7** — season-worst orion 14:16:05Z to the second, nothing lands between
+10:17 ET and the 11:00 ET floor on any sampled day; ZERO 16:00Z-class binding-table landings
+observed; INFERRED row (b) REFUTED at 7 samples (the morning ET pulls feed the canonical frontier
+table), confirming the ET anchor. Residual Phase-1 half: the job→table SOURCE map (my census side);
+DS's empirical side found no contradiction. New census datum from the same table: cot
+fact_holdings D+2 mirror MISSED its 08-03 03:30Z landing for date=08-01 (first observed break).
 
 **⚠ Winter-collision watch (UTC-fixed jobs entering the window):** the 16:00Z silver sweeps
 (eclipse/orion/smartx) land at 11:00 ET in winter — exactly the floor hour. DS's landing data
