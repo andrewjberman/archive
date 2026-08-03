@@ -111,6 +111,10 @@ artifact advancing), NEVER by the chain's terminal completion marker alone -- ST
 errored five straight days while the chain reported complete. A cycle whose terminal marker says
 complete while any canonical stage errored is a RED cycle. Design your 3-day evidence collection
 on per-stage reads from day one.
+Plus the CTO inflection carry-window pre-rule (221952Z direct to assignee, folded 2226Z):
+2 TRADING DAYS on the BD_MAX_LAG precedent, roster-declared, with three labeling requirements --
+every carried point LABELED as carried; the transition to None VISIBLE (never a silent
+carry-forever); the window value STATED in served meta.
 Plus standing norms: every causal claim cites file:line @ commit or is labeled INFERRED; no new
 alarms/monitors.
 Plus: session log includes a Compiler Tools section reproducing every <run> from
