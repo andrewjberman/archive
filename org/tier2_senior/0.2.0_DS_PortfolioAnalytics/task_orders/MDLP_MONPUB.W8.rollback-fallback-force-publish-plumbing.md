@@ -58,6 +58,13 @@
   <acceptance_criteria>
     1. EXERCISED-SCRATCH: the fallback rollback completes on the seeded scratch serve; the bypass
        log line carries the rollback execution id; scratch keys coherently at the older vintage.
+       ENTRY POINT REQUIRED (CVO witness condition 164003Z): BOTH W8 legs -- the plumbed bypass
+       AND criterion 2's negative control -- enter through data_refresh handle_rollback
+       END-TO-END, never direct-invoke of the benchmarks Lambda. A direct-invoke pass proves the
+       FLAG works while proving nothing about the PLUMBING this TO exists to add (entry-point
+       substitution -- same class as citing W4's publish for the bypass). The witness checks
+       which entry point each request-id came through; DT designs the scratch scoping
+       (BUCKET env on a test instance or event-level override, their call).
     2. NEGATIVE CONTROL (separate invocation): a NORMAL publish event (no force_publish field)
        against the scratch serve with an older date still FAILS with PublishGuardError -- the
        plumbing must not widen the guard's default posture. A bypass that leaks into normal
