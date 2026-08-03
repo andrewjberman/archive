@@ -3,7 +3,15 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-03</date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-08-03T2059Z: CTO ACCEPTED (RAVC-4, msg 205937Z). Diagnosis @0b5acf3148 --
+     convergence-truncation candidate REFUTED (accrual = ungated content-derived copy; global axis
+     = UNION on the 49F frontier); real mechanism = T-1 input frontier at Friday's run (07-30
+     measured) + INF pipeline-failed froze Stage 6 + accrual/publisher propagated the frozen
+     vintage. Counterfactual exercised on real inputs (scratch as_of_last=2026-07-31 n=454, zero
+     production writes, 13 producer HOLDs respected). Acceptance item 2 closed by CTO landing the
+     DS patch @440d16e018 (owned-paths lane held). T2.B ruling issued same-window @440d16e018. -->
+
 <priority>P1 (Andrew-direct GO 2026-08-03 ~20:15Z @3e2b23ebb3; this WS gates the CTO's T2.B producer-unification ruling -- the whole T2/T1.C/T2.C arm of the spine waits on your evidence)</priority>
 
 <title>T2.A: Truncation diagnosis -- source-confirm WHY the accrual/hyphen global series ends 07-30 while the runner/underscore plane reached 07-31</title>
