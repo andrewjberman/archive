@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
     <date>2026-08-03</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>MDLP_MONPUB</project_code>
   </metadata>
 

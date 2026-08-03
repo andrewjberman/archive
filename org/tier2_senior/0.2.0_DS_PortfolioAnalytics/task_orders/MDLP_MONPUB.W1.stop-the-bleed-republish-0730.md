@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics (primary) + 0.2.0_DT_PortfolioAnalytics (execution support)</issued_to>
     <date>2026-08-03</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>MDLP_MONPUB</project_code>
   </metadata>
 
@@ -46,6 +46,9 @@
        AND its ETag != 0a122e2c95ea9ed673c8977c581dc202, AND LastModified &gt; execution start time.
     2. ATOMICITY: all THREE output keys (benchmark_returns.json, model_portfolio_benchmarks.json,
        model_portfolio_timeseries.json) carry identical data_as_of=2026-07-30.
+    2b. ESTATE PROBE (CVO addition): at least one NON-benchmark key (e.g. json/macro/macro_data.json)
+       also reads data_as_of=2026-07-30 -- the 13:27Z run regressed ~40 keys estate-wide and this
+       re-run heals all of them; the probe proves the heal reached beyond the three benchmark keys.
     3. PROVENANCE (forbidden shortcut named): the new artifacts MUST come from a YangDataPipeline
        execution whose ARN you cite -- hand-writing JSON to S3 satisfies criteria 1-2 and is a
        FORGED COMPLETION (Door-6 class); it fails this TO.

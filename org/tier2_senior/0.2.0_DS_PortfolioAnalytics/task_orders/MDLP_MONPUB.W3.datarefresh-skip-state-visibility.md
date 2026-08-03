@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics (code) + 0.2.0_DT_PortfolioAnalytics (deploy)</issued_to>
     <date>2026-08-03</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>MDLP_MONPUB</project_code>
   </metadata>
 
@@ -19,7 +19,10 @@
     infra/aws/lambda/data_refresh/lambda_function.py handle_status(): the history parser (~:862-880)
     checks only TaskStateEntered/TaskStateExited/TaskFailed/ExecutionFailed; STATE_LABELS (~:730-770)
     has no Skip* entries. Add PassStateEntered/PassStateExited handling + STATE_LABELS entries for
-    every Skip* state. Scope is VISIBILITY ONLY -- no new alarm/notification machinery (moratorium).
+    every Skip* state. CVO ADDITION (same pass, cheap): Choice states (Check*) emit
+    ChoiceStateEntered/Exited and are equally unparsed -- several existing STATE_LABELS entries are
+    dead code because of it; add Choice-state handling too, or explicitly scope the delivered claim
+    to Pass-states only. Scope is VISIBILITY ONLY -- no new alarm/notification machinery (moratorium).
     NOTE: an existing deploy-completion ledger for opal-data-refresh-api (07-17) lives in
     org/critical_paths/change_management/ -- open your own entry at deploy start per the NEVER rule.
   </context>

@@ -4,14 +4,19 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics (code) + 0.2.0_DT_PortfolioAnalytics (deploy)</issued_to>
     <date>2026-08-03</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>MDLP_MONPUB</project_code>
   </metadata>
 
   <objective>
-    Add a monotonic date-guard to yang-model-portfolio-benchmarks' publish path so a reprocess of
-    an older upload can never again silently overwrite a newer served vintage (the 2026-08-03
-    last-writer-wins regression class).
+    Two halves, both required: (a) a monotonic date-guard on yang-model-portfolio-benchmarks'
+    publish path so a reprocess of an older upload can never silently overwrite a newer served
+    vintage (the 2026-08-03 last-writer-wins regression class); (b) CVO-REQUIRED build-before-publish
+    reorder -- FAILED executions currently PUBLISH (upload_json :316/:319 runs BEFORE
+    build_rfr_daily :324 throws; the four FAILED 07-31 runs each wrote defective 07-31 data the
+    portal SERVED 12:09Z-13:12Z, timeseries key never landing = mixed-vintage serve). All three
+    payloads must be FULLY CONSTRUCTED before the first upload_json. The guard alone cannot close
+    this half: 07-31 was NEWER than served, so monotonicity passes it.
   </objective>
 
   <context>
@@ -54,6 +59,9 @@
        byte-identical before/after (record all six ETags). A guard never exercised in the failing
        direction is UNEXERCISED != PASSED.
     2. EXERCISED-PASSING: a publish with data_as_of &gt;= served succeeds end-to-end.
+    2b. EXERCISED-CRASH (CVO-required): a mid-build-crash mutant -- the real defective 07-31 pkl
+       is a ready fixture -- leaves ALL THREE served ETags byte-unchanged; the execution FAILS
+       loudly and publishes NOTHING. This is the acceptance for the build-before-publish reorder.
     3. BYPASS: force_publish=true with an older date publishes AND emits the loud log line.
     4. IAM: Phase-3 simulate-principal-policy allowed on the exact key ARN + separate positive control.
     5. DEPLOY DISCIPLINE: Terraform-only via .tools/safe-apply.sh, commit-before-apply, 0-diff
