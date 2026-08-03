@@ -151,3 +151,25 @@ the mechanism WITHIN THE HOUR of this doc landing. Corrections, in evidence-clas
    `data 20251231 v1.pkl`: 70 dup rows all at 2025-12-31 (pairs NOT value-identical);
    `data 20260331 v1.pkl`: 62 all at 2026-03-31 (value-identical); May/Jun vintages zero. The
    crash is newer than the defect because `build_rfr_daily` (strict consumer) is newer.
+
+## CLOSING UPDATE (2026-08-03 ~17:13Z) -- RESOLVED AT ROOT (Andrew-direct via CTO, VERBATIM)
+
+*"Yang has actually gotten rid of the offending Short Term portfolio from Bloomberg so now the
+race issue should be inherently solved. Nevertheless, the work we were doing to fix emergency
+rollback and associated caching, as well as monotonicity for repeated uploads (what alyssa was
+erroring on earlier today) should be continued through fix."*
+
+- The deprecated `.ST` index is deleted from Bloomberg ENTIRELY (supersedes the half-deleted
+  Yang's-side-only state in addendum item 2). With no second index, the mnemonic race cannot
+  occur; the alyssaakeith discriminating-test open item is **MOOT**, not open.
+- **Post-deletion control, run from this terminal 17:15Z:** `.ST Index` resolves to
+  `OPAL SHORT TERM2` / `YBH:2238` / `BBG022LDS2P9`, PX 112.503 -- correct resolution intact
+  after the deletion.
+- W7 (mechanized content gate) STOOD DOWN by CTO -- its justification (sole defense against a
+  live recurring race) is gone with the source. The `PARSEKYABLE_DES` pin remains available as
+  defense-in-depth at Yang's own timing (remap table in item 3 / bus 90d8c433) -- it also
+  guards the residual class this doc flagged in s.5(2): any FUTURE mnemonic collision, not
+  only this one.
+- Continuing per Andrew's instruction: rollback/caching fix + upload monotonicity (W2 line)
+  run through to completion on the main fabric. Open items table above updated by this note:
+  Yang-login `.ST` pull test MOOT; nid:52865 review remains Yang's; Excel-channel cell moot.
