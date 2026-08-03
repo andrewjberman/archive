@@ -127,9 +127,45 @@ Tranche-3 findings (the sharpest of the whole TO so far):
     firm-bucket source carries files labeled through 08-03 -- mirror/converter lag >= 1
     trading day at measure time. Finding for the mirror owner.
 
-## Next tranches (per TO order)
+## Tranche 4 -- Schwab-0824 RPS pair (landed 2026-08-03 ~23:0xZ)
 
-Schwab-0824 (19 silver tables), then residue: smartx (10 tables), blackdiamond
-cottonwood siblings (fact_model_assignment/blend/definition, the _s2 pair disposition
-after the roster escalation resolves, fact_transactions/realized/unrealized + firm-bucket
-tables), 49f monolith silver (dim_account_xref, dim_advisor_fee_role, fact_taxsma_report).
+| Table | Key (exercised) | Dup rate | Completeness |
+|---|---|---|---|
+| fact_rps | `(account_id, schwab_sec_nbr, accounting_rule_code)` (93,207/93,207) | 0.0 x5 | **COMPLETE 436/436 over the FULL serve window** 2024-11-01..2026-07-31; zero weekend partitions (true file-vintage) |
+| fact_rps_s2 | `account_id` (7,138/7,138) | 0.0 x5 | COMPLETE 436/436 full window |
+
+Tranche-4 findings: (14) cusip is an INSUFFICIENT holdings key at Schwab -- blank for
+some products (discriminator schwab_sec_nbr) and the same position legally splits by
+accounting_rule_code (cash/margin settlement location); a (account, cusip) intuition
+would silently merge those. (15) schwab fact_rps_s2 is REAL DATA (39-col account
+balances) -- the s2-suffix precedent is genuine at Schwab and was the pattern-match that
+mis-rostered cottonwood's disclaimer sheets (adjudicated dead-config by 0.2.0 225447Z).
+
+## Consumer enumeration (amended acceptance, CTO 225311Z) -- the BD double-count
+
+**Verdict: NOT zero naive summers.** Three confirmed + one tie-implied, each verified at
+source; measured served impact +$205,070.77 (~0.045%) on value-carrying days:
+
+| Consumer | Verdict | Evidence |
+|---|---|---|
+| build_cottonwood_mdpf_slice `holdings_total_by_date` (:315-345) | **NAIVE** -- whole-column SUM, no collapse | feeds the W-2b SERVED cottonwood Total-AUA series |
+| build_dim_model_portfolio `account_values` (:132-146) | **NAIVE** -- per-account groupby SUM (dual-relationship rows sit inside one account group) | feeds the MP dim |
+| build_cottonwood_mdpf_pair `firm_total` (:124) | **NAIVE** (inherits account_values) | |
+| DDB cottonwood_bd_holdings cohort | **tie-implied NAIVE** | its documented 07-22 tie $458,189,558.77 IS the double-counted figure (collapsed truth $457,984,488.00) |
+| build_cottonwood_interpolated_backfill | CLEAN (dates-only) | |
+| cottonwood_aua.py | out-of-substrate (cot gold canonical, not the BD relationship-grain table) | |
+| opal-assets-daily-emitter | DELEGATED to 0.2.0's C1 live trace (seat boundary) | |
+
+Onset measured: 06-20 carried 22 dual-grain groups ALL null-MV ($0 impact); value-carrying
+duals present 07-22 (3 groups) and 07-28/07-31 (2 groups), constant +$205,070.77.
+**The 07-22 DDB parity tie is itself the double-counted number -- both legs share the
+naive derivation, so the parity check is structurally blind to this defect class.**
+Repair is OUT OF T4.A SCOPE (verdicts only); routed loud to COO/CTO as a served-number
+impact question on a must-always-be-right MP surface.
+
+## Next (residue)
+
+smartx (10 tables), blackdiamond cottonwood siblings (fact_model_assignment/blend/
+definition, _s2 disposition rides the C1 roster spec, fact_transactions/realized/
+unrealized + firm-bucket tables), 49f monolith silver (dim_account_xref,
+dim_advisor_fee_role, fact_taxsma_report), schwab 17 remaining tables.
