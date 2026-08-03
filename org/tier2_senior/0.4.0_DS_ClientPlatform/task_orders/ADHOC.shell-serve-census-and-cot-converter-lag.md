@@ -3,7 +3,11 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>pending</status>
+<!-- Leg 1 DELIVERED @a6d1dc1797, routed CTO cc COO 233544Z/233549Z (4 serve days x 12
+     artifacts within surviving evidence; pre-07-19 UNKNOWN). Leg 2 resolved NO-DEFECT
+     (diagnosis corrected on instrument evidence, no fix deployed); closes on tonight's
+     scheduled snapshot-frontier advance to 08-03 -- read, never hand-run (NEVER#4). -->
 <priority>P1 (CTO ruling 232535Z items b-ii + c: the shell half of the Andrew disclosure package -- bounded, mechanical, no judgement calls; + the converter lag at the same seat because same channel, same evidence base. Sequencing within your seat yours.)</priority>
 
 <title>Shell-serve census (bounded, serve-window) + cottonwood silver-converter lag diagnosis-to-fix -- one seat, one evidence base</title>
