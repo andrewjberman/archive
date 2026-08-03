@@ -20,20 +20,20 @@ completeness_rule / grounding. `UNKNOWN` is a LEGAL, LOUD value -- an endpoint w
 semantics cannot be established is recorded as such and becomes a named risk, never a silent
 assumption.
 
-SCOPE OF CENSUS (PRD WS-1 + D-2 recommendation): every (vendor, endpoint) feeding
+SCOPE OF CENSUS (PRD WS-1; D-2 RULED by CTO 20260803T201328Z): every (vendor, endpoint) feeding
 `opal-data-assets` AND the three legacy partner buckets (`opal-data-bd`, `opal-data-inf`,
-`opal-data-cot`). D-2 (whether the registry BINDS the legacy buckets) is an open CTO/Andrew
-decision -- you CENSUS them regardless; binding is decided at acceptance.
+`opal-data-cot`). The legacy buckets ARE BOUND -- census them as FIRST-CLASS rows, not
+best-effort (CTO: the motivating incident lived in exactly such a tree).
 
-PRIORITY ORDER (D-3 recommendation + sibling-project need): (1) Orion (semantics already sealed in
-data/inf/scripts/silver/_orion_vendor_asof.py -- cheapest exemplar), (2) SmartX + Black
-Diamond/cot (they feed MDPF -- MDPF_GLOBAL.T4A consumes these rows), (3) Schwab-0824, (4)
-Eclipse, (5) everything else. Land rows incrementally in that order; do not hold early rows
+PRIORITY ORDER (D-3 RULED by CTO 20260803T201328Z, as staged): (1) Orion (semantics already
+sealed in data/inf/scripts/silver/_orion_vendor_asof.py -- cheapest exemplar), (2) the
+MDPF-feeding vendors: SmartX + Black Diamond + Eclipse + Schwab-0824 (MDPF_GLOBAL.T4A consumes
+these rows), (3) everything else. Land rows incrementally in that order; do not hold early rows
 hostage to the long tail.
 
-REGISTRY HOME (D-1 open): draft at the PRD-proposed
-`data/_contracts/vendor_asof_registry.yaml`, header-marked DRAFT-pending-D-1. CTO may relocate at
-acceptance; content survives relocation.
+REGISTRY HOME (D-1 RULED by CTO 20260803T201328Z): `data/_contracts/vendor_asof_registry.yaml`,
+ONE file, machine-readable YAML, per-row `grounding` field MANDATORY. This is the canonical home,
+not a draft location -- no DRAFT-pending marker needed.
 
 EGRESS (PRD s.7, binding): the census reads OUR buckets, code, and existing pull records ONLY.
 Any probe requiring a NEW call to a vendor endpoint routes through standing egress rules (lifted:
@@ -51,7 +51,7 @@ explicit Andrew per-use word required). Availability is not authorization.
    probe. "The docstring says" is not an exercise (Rule 22).
 3. UNKNOWNs enumerated LOUD in a dedicated section: endpoint + what was tried + what would resolve
    it (a vendor doc, an egress-gated probe, an Andrew question).
-4. Deliverable: the DRAFT registry file + a census doc in your deliverables folder
+4. Deliverable: the registry file (canonical home per D-1) + a census doc in your deliverables folder
    (org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/OVP_WS1/) with the denominator table.
 5. Report incrementally: Orion rows first (target: first report same session), then the
    MDPF-feeding vendors -- MCP COO + CTO at each tranche so T4.A research can start in parallel
