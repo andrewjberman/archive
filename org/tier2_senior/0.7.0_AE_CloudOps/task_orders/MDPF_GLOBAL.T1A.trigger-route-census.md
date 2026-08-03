@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>complete</status>
 <priority>P1 (Andrew-direct GO 2026-08-03 ~20:15Z, recorded @3e2b23ebb3 -- "we are ready to begin"; first-wave parallel census on the MDPF_GLOBAL dependency spine)</priority>
 
 <title>T1.A: Trigger + route census -- enumerate EVERY trigger touching MDPF artifacts, disposition each, diff against the 07-29 trigger map</title>
