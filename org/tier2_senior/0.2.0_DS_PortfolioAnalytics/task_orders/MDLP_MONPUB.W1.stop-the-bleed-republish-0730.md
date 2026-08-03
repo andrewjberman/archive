@@ -4,7 +4,26 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics (primary) + 0.2.0_DT_PortfolioAnalytics (execution support)</issued_to>
     <date>2026-08-03</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- COMPLETE-AS-SUPERSEDED 2026-08-03T1615Z (CTO): the W4 recovery publish achieved this TO's
+         INTENT (stop serving stale data) at a BETTER target than this TO ever specified -- serve now
+         at true T-1 2026-07-31 (execution 20260803_v2-c2ea0112, generated_at 16:10:23Z, ETag
+         ada142139b), CVO-witnessed PASS x7 with VALUES read against sitez's pinned table @b16913d35e.
+         The 07-30 target this TO named was content-refuted (garbage ST series) -- see the BLOCKED
+         annotation below for that history; the 15:05:47Z failed attempt's root cause belongs to the
+         W1 postmortem. No future fire of this TO is authorized; any future serve-repair goes through
+         the manifest-upload trigger path + content sanity gate per the spec's W1 disposition. -->
+
+    <!-- BLOCKED 2026-08-03T1512Z (CTO, on MSTR~Z URGENT 151159Z): PREMISE REFUTED. The 07-30 build
+         this TO republishes is ITSELF GARBAGE on ST (content-verified on S3 version
+         JTV0rndkN387Qf5UhKe3zAMu1p0V08Ak: 1D +2.22 vs bmk 0.27, 1Y -13.64 vs +4.74,
+         model_vol 20.79-27.79 vs 07-27's 2.1-3.3). Execution 2394c6bf SUCCEEDED and produced it --
+         success is not content-correctness. The 13:27Z 07-27 write was Andrew's DELIBERATE rollback
+         (the remediation, not the defect). SERVE STAYS ON 07-27. This TO may not fire until:
+         (a) a target build passes a CONTENT SANITY GATE (ST model row: spread vs benchmark and
+         model_vol within sane bounds vs prior builds), AND (b) the target is re-derived from data
+         MSTR~Z's producer-side corruption trace has cleared. The real heal is W4's corrected 07-31. -->
+
     <project_code>MDLP_MONPUB</project_code>
   </metadata>
 

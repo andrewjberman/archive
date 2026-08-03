@@ -54,6 +54,29 @@
   </cross_domain_coordination>
 
   <acceptance_criteria>
+    <!-- ACCEPTANCE STATE AS EXERCISED (CTO amendment 2026-08-03T1636Z, per the 155100Z ruling +
+         CVO witness @ff496d7621 -- the record matches what was ACTUALLY exercised, no over-claim):
+         Criterion 1 (older-date):      EXERCISED-LIVE PASS (direct-invoke per CVO method ruling
+                                        162224Z; PublishGuardError at deployed :354; S3 version-gap
+                                        proof: zero new versions on all three keys, battery window).
+         Criterion 2 (passing):         CLOSED via W4's recovery publish (CVO witness @b16913d35e)
+                                        + a second organic exercise: 16:21:45Z execution 3796f456,
+                                        real user pull, equal-date guard pass by design.
+         Criterion 2b (mid-build-crash):EXERCISED-LIVE PASS -- the REAL defective 07-31 pkl (the
+                                        byte-identical input that wrote the serve 4x on 08-03
+                                        morning) crashed at :325 BEFORE any upload; zero writes.
+         Criterion 3 (force_publish):   EXERCISED-SCRATCH PASS (CVO witness @9ba99fcb5c: control
+                                        refusal bound to the scratch bucket by invocation log --
+                                        the binding that distinguishes it from leg A; verbatim
+                                        FORCE_PUBLISH warning in CloudWatch; scratch key flipped
+                                        28B seed -> 19,221B real payload, body read by witness;
+                                        all three LIVE pins byte-identical, witness-verified).
+         W2 BATTERY COMPLETE 2026-08-03T1654Z -- WITNESSED-COMPLETE under this as-exercised
+         acceptance: (a) EXERCISED-LIVE PASS / (b) CLOSED via W4 + organic pull /
+         (2b) EXERCISED-LIVE PASS / (c) EXERCISED-SCRATCH PASS. Leg C does NOT cover W8's
+         handle_rollback end-to-end legs (different entry point); scratch env HELD for that
+         session. -->
+
     1. EXERCISED-FAILING (the criterion that can fail): on the DEPLOYED Lambda, a mutant invocation
        carrying data_as_of OLDER than served -> execution FAILS AND all three served ETags are
        byte-identical before/after (record all six ETags). A guard never exercised in the failing
