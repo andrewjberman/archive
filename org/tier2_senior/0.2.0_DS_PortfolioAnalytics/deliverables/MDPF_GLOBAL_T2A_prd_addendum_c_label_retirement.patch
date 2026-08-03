@@ -1,0 +1,26 @@
+diff --git a/docs/architecture/MDPF_GLOBAL_PRD.md b/docs/architecture/MDPF_GLOBAL_PRD.md
+index e71e728e60..696b18539a 100644
+--- a/docs/architecture/MDPF_GLOBAL_PRD.md
++++ b/docs/architecture/MDPF_GLOBAL_PRD.md
+@@ -702,8 +702,19 @@ because INF wrote `pipeline-failed.json` at 10:50 and the completion sentinel ne
+ anti-pattern producing the observed delay, live, this morning**). The scheduled accrual/hyphen family
+ (`mdpf-accrual-bridge-daily` Scheduler `cron(45 15 UTC)` -> `mdpf-accrual-trigger`) DID run 08-03 12:15 ET
+ and wrote all four scopes — but its global series ends 07-30 (Thursday), one trading day behind the
+-Friday frontier. Why the accrual output truncates at 07-30 is **INFERRED-pending-source-confirmation**
+-(candidate: convergence truncation on the failed INF leg); T2's first work item is source-confirming it.
++Friday frontier. Why the accrual output ends at 07-30 is **SOURCE-CONFIRMED (T2.A, DS 2026-08-03
++@0b5acf3148)** — the convergence-truncation candidate is **REFUTED as a mechanism** (no min-across-feeders
++logic exists on the path: the accrual bridge is a deliberately-ungated content-derived copy,
++`build_portal_gold_accrual.py` docstring + `:222-242`; the global axis is a UNION on the 49F frontier =
++max(day) of the latest `fact_model_aum_daily` partition, `dim_mdpf_aggregate_aua_timeseries.py:1779,:2265,
++:787-789 @e82271228b`). The real mechanism: 07-30 was the TRUE T-1 input frontier at the last successful
++chain run (Friday's partition max(day)=07-30, measured), and the 08-03 INF `pipeline-failed.json` kept
++chain Stage 6 — the revamp tree's ONLY producer — from rebuilding, freezing the tree; the accrual
++(written=0, all R5 skips) and publisher then faithfully re-served the frozen 2026-07-30 vintage.
++Counterfactual EXERCISED on real inputs: a scratch rebuild on the 08-03 partition (max(day)=07-31) emits
++`as_of_last=2026-07-31` — a converged INF leg would have served 07-31. The two planes' frontiers also carry
++DIFFERENT SEMANTICS (underscore = min-common feeder vintage, SmartX-live; hyphen = T-1 silver close) — a
++T2.B input. Full evidence: `org/tier2_senior/0.2.0_DS_PortfolioAnalytics/deliverables/MDPF_GLOBAL_T2A_TRUNCATION_DIAGNOSIS_20260803.md`.
+ The serving read (DESIRED-plane `comp-routes trace`): `/api/general/mdpf/*` rewrites to `platinum/mdpf/*`,
+ so the Global view serves `platinum/mdpf/global/aggregate-aua-timeseries.json` — the 07-30-ending file.
+ Andrew's "appears to be delayed somehow" is CONFIRMED at content level.
