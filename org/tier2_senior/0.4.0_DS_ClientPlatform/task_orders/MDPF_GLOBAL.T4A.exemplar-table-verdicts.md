@@ -108,6 +108,12 @@ Verbatim s.C.4 (CTO validates at close):
 Plus standing norms: serve-window 2024-11+ scoping; trading-day arithmetic (never calendar);
 every causal claim cites file:line @ commit or is labeled INFERRED; no new alarms/monitors;
 Rule 17 untouched.
+Plus the CTO item-3 elevation (225311Z, folded 2257Z): the BD RELATIONSHIP-GRAIN double-count
+hazard closes by CONSUMER ENUMERATION, not annotation -- enumerate every consumer of BD
+relationship-grain data and verify each collapses to (AccountID, AssetID) before aggregating.
+Zero naive summers -> closes WITH EVIDENCE; any naive summer -> a real finding with a
+served-number impact question (MP surfaces are must-always-be-right; the silent-summation shape
+is undetectable by inspection).
 Plus: session log includes a Compiler Tools section reproducing every <run> from
 <compiler_tools_mandate> with observed output and explicit pass/fail vs <expect>. Missing rows =
 REWORK, not COMPLETE.
