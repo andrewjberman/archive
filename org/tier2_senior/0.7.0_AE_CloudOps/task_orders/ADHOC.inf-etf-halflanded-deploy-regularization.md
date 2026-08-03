@@ -52,6 +52,14 @@ vendored-copy parity CI; VERIFY dedup_core.py is ALSO parity-covered and state i
    required artifact; cite the original apply window as best known + this regularization).
 5. REPORT to CTO + COO: 0-diff evidence, commit hash, tag, ledger path, and the Rule-3 debt
    surfaced. Then the targeted-applies-only posture LIFTS (say so explicitly in the report).
+   <!-- SUPERSEDED 2026-08-03 by CTO ruling 215051Z (COMMIT ALL / APPLY NOTHING): the posture
+        does NOT lift at this TO's close -- the committed-declared-unapplied increment ARMS on
+        any code deploy, so TARGETED-APPLIES-ONLY on inf-pipeline CONTINUES until CTO
+        deliberately lands or retires the parked increment. AE correctly reported the
+        continuation explicitly (221020Z). Closed @001a73530a + v1.7.95 + ledger
+        20260803T2200Z (opened+closed same session); L4 green-run observation rides MSTR's
+        push per the observed-green-run law. -->
+
 </scope>
 
 <compiler_tools_mandate>
