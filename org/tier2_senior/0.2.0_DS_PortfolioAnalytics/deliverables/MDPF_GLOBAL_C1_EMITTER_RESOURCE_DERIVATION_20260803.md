@@ -37,7 +37,7 @@ Residual body reads: `generated_at` provenance stamps (cosmetic) + the handler's
 | `_total__etf_fund` | **RE-DERIVES** — sum of the re-sourced 4; keep the existing refusal + mirror the partner_aua AC7 move (`legacy_carried_total` side-field, `contributors`, `legs_present`) | `:1025` + the AC7 precedent block |
 | UNKNOWN rows | **NONE** | — |
 
-**Bonus the re-source buys immediately:** the direct source is FRESHER than the dead runner plane today (PFDE/PFOE carry `data_as_of` 2026-08-03; the frozen runner partition serves 07-30-as-of values) — re-sourcing heals the exact staleness the runner's death causes.
+**Bonus the re-source buys immediately:** the direct source is FRESHER than the dead runner plane today (PFDE/PFOE carry `data_as_of` 2026-08-03; the frozen runner partition serves 07-30-as-of values) — re-sourcing heals the exact staleness the runner's death causes. **(CTO on accepting C1, 232958Z, for the T5 record: "the retirement stops being a cost we absorb and becomes a fix.")**
 
 ## 3. The re-source spec (implementable by AE alone)
 
