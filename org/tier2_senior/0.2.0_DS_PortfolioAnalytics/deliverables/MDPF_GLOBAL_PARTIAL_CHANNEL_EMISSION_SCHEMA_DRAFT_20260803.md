@@ -38,6 +38,24 @@ New `meta.channel_participation` on the GLOBAL artifact:
 
 For dates beyond inflection's own measured frontier but within its window: carry the FRONTIER-dated measured values (model_aua leg + by_model model_value entries; `account_count` stays None — counts never carried), stamp the exception row. Past window: absent → headline None (unchanged behavior, now labeled). Carry source = latest MEASURED inflection date (never an estimated/backfilled point — the cot precedent's law, `:1772-1776`).
 
+## v1.1 (22:22Z) — CTO pre-ruling folded (via AE relay 22:20:23Z; CTO 221952Z)
+
+- **Window = 2 TD is RULED (not proposed):** BD_MAX_LAG precedent, roster-declared, composing with
+  CHANNEL_INDEPENDENCE as **watch at >1 TD divergence / stop carrying at >2 TD**. Schema fold: carried
+  exception rows gain `"watch": true` when `age_trading_days > 1` (the surfaced-divergence marker).
+- **Three labeling requirements, each satisfied and now explicit in the law text:**
+  1. *Every carried point labeled* — the sparse `exceptions` map carries a row for EVERY in-coverage
+     date where any channel deviates from `contributed`; a 2-day carry = 2 labeled rows, never
+     boundary-only.
+  2. *The carried→None transition visible* — the first past-window date is itself an exception row
+     (`{"status": "absent", "reason": "past_window", "last_carried_as_of": "<vintage>"}`), so the flip
+     is in-band, distinguishable from a producer failure.
+  3. *Window value in the SERVED meta* — `windows_trading_days` sits in the artifact meta (already in
+     v1); the roster remains the declaration authority, the serve carries the copy a consumer reads.
+- CTO's framing note adopted into the law text: bounded carry exists because under None-poisoning any
+  single channel lag darkens the whole global point — carry keeps global populated-and-honest INSIDE
+  the window, honestly dark outside.
+
 ## Positions for convergence
 
 1. **AE's inflection window = 2 TD: ENDORSED from producer semantics.** Covers the common case (1-day INF miss, the 08-03 shape) with one day slack; multi-day outages exceed it BY DESIGN (the 07-18 six-day class goes honest-None + labeled — the window is not sized to survive outages, the label is). Consistent with per-channel roster values on ONE mechanism (cot keeps its 3).
