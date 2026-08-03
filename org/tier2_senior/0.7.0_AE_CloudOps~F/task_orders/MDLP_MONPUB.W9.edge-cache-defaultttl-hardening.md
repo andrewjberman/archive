@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~F</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1-adjacent (Andrew is watching the cache-invalidation family of work -- CVO 164133Z Andrew-direct relay; do not let it age)</priority>
 
 <title>W9: stop the cache-control-injector being load-bearing for the /api/general/* TTL -- align the edge cache policy to 300s in Terraform</title>
