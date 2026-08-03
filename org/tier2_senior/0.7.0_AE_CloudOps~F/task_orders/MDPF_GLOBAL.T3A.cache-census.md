@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~F</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (Andrew-direct GO 2026-08-03 ~20:15Z @3e2b23ebb3; parallel first-wave census -- T3.B invalidation design waits on this + T2.C)</priority>
 
 <title>T3.A: Cache census, live-grounded -- every cache layer on the MDPF serve path mapped with MEASURED evidence</title>
