@@ -65,10 +65,17 @@
          Criterion 2b (mid-build-crash):EXERCISED-LIVE PASS -- the REAL defective 07-31 pkl (the
                                         byte-identical input that wrote the serve 4x on 08-03
                                         morning) crashed at :325 BEFORE any upload; zero writes.
-         Criterion 3 (force_publish):   PENDING SCRATCH-ONLY (CVO ruling: never rewrite the healed
-                                        SEV1 serve to prove a bypass; two-invocation design --
-                                        refusal control then bypass -- on a seeded scratch serve).
-         W2 is LIVE-and-WITNESSED on legs 1/2/2b; formal close issues on CVO's leg-3 verdict. -->
+         Criterion 3 (force_publish):   EXERCISED-SCRATCH PASS (CVO witness @9ba99fcb5c: control
+                                        refusal bound to the scratch bucket by invocation log --
+                                        the binding that distinguishes it from leg A; verbatim
+                                        FORCE_PUBLISH warning in CloudWatch; scratch key flipped
+                                        28B seed -> 19,221B real payload, body read by witness;
+                                        all three LIVE pins byte-identical, witness-verified).
+         W2 BATTERY COMPLETE 2026-08-03T1654Z -- WITNESSED-COMPLETE under this as-exercised
+         acceptance: (a) EXERCISED-LIVE PASS / (b) CLOSED via W4 + organic pull /
+         (2b) EXERCISED-LIVE PASS / (c) EXERCISED-SCRATCH PASS. Leg C does NOT cover W8's
+         handle_rollback end-to-end legs (different entry point); scratch env HELD for that
+         session. -->
 
     1. EXERCISED-FAILING (the criterion that can fail): on the DEPLOYED Lambda, a mutant invocation
        carrying data_as_of OLDER than served -> execution FAILS AND all three served ETags are
