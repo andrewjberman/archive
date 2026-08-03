@@ -115,3 +115,39 @@ resolvable from the API side.
 | Identify the rogue instrument behind the 1449-row series (bonus, not load-bearing) | any | OPTIONAL |
 | Interactive Excel BDH on this desk (closes the Excel-channel cell of the matrix) | human at sitez desk | OPTIONAL |
 | Post-publish serve verify vs the pinned interval table (bus msg b5655d76) | CVO/CTO witness + my independent check | PENDING publish confirm |
+
+---
+
+## ADDENDUM + CORRECTION (2026-08-03 ~16:45Z) -- live Teams diagnostic with Andrew/Yang/Alyssa supersedes parts of s.2-s.4
+
+The Investment-Team thread (Andrew added this agent 16:19Z) + live terminal fingerprinting resolved
+the mechanism WITHIN THE HOUR of this doc landing. Corrections, in evidence-class order:
+
+1. **CORRECTED -- the misresolution is ACCOUNT-SCOPED TO `alyssaakeith`, not Yang-login-scoped.**
+   Yang (16:57Z msgs): *"it is on Bloomberg side, but only specific to Alyssa account somehow"*,
+   *"the mapping is right in most days, but collapse in random days."* s.2's candidate ordering
+   inverted; its deliberately-marked INFERRED attribution boundary was the honest part. Friday's
+   bad 0730 pull therefore most plausibly ran ON THIS BOX during a collapse window (consistent
+   with `blppersist2.db` Friday 17:15 local activity noted in s.2).
+2. **MECHANISM PINNED (Andrew, in-thread, concurred by data): an ungated race between TWO custom
+   indices answering the `.ST` mnemonic.** LIVE fingerprint of the correct one (refdata, 16:2xZ,
+   twice): NAME `OPAL SHORT TERM2`, unique id `EI09YBH:2238`, FIGI `BBG022LDS2P9`,
+   `PARSEKYABLE_DES = ".ST YBH:2238 Index"`, PX 112.503, inception 2023-12-29 (Andrew corrected
+   his "Dec 2025" to "Dec 2023" in-thread). The wrong one is a deprecated predecessor (~2021 data,
+   price ~2) -- being deleted from PRTU (Yang deleted his side 16:32Z; Andrew: delete target =
+   *"the deprecated one not the '2' version"*). ST's FIGI (`BBG022LDS...`) sits outside the
+   `BBG01YLJ...` batch of the other 12 family tickers -- corroborating ST's re-creation history.
+3. **STABLE FIX identified + TESTED, HELD at Yang's request** (*"don't make any changes on your
+   side yet"*): pin the notebook's custom tickers to `PARSEKYABLE_DES` forms. Both `.ST YBH:2238
+   Index` and `/bbgid/BBG022LDS2P9` verified returning the correct series through the identical
+   API path. Full 13-ticker remap table delivered to the thread + the fabric (bus 90d8c433).
+4. **Yang's -4003 cause CONFIRMED by Yang**: a 14k-security mutual-fund pull triggered the
+   consumption review -- unrelated to the ST mapping. s.3's login-scoped conclusion stands; its
+   cause is now known, closing the "size-triggered on his login?" unknown.
+5. **s.4's "clean production path" caveat SHARPENED**: clean-by-sampling of an INTERMITTENT
+   account-scoped fault -- the account was healthy at every probe today, and demonstrably not on
+   Friday. The pin (item 3) is what converts "healthy today" into "structurally healthy."
+6. **NEW DATUM (DS W2 battery + local census): the month-end dup class is >=7 months old.**
+   `data 20251231 v1.pkl`: 70 dup rows all at 2025-12-31 (pairs NOT value-identical);
+   `data 20260331 v1.pkl`: 62 all at 2026-03-31 (value-identical); May/Jun vintages zero. The
+   crash is newer than the defect because `build_rfr_daily` (strict consumer) is newer.
