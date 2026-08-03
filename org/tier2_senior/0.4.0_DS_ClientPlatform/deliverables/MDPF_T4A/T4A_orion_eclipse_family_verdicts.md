@@ -90,7 +90,46 @@ Scope note: the smartx/platform/silver family carries 13 tables; tranche 2 verdi
 the 3 MDPF-named feeds (the TO's exemplar priority). The remaining 10 are enumerated
 residue for a follow-on pass alongside BD + Schwab-0824.
 
+## Tranche 3 -- Black Diamond cottonwood family (landed 2026-08-03 ~22:4xZ)
+
+| Table | Key (exercised) | Dup rate | Completeness |
+|---|---|---|---|
+| fact_model_roster | `model_id` (61/61) | 0.0 x5 | COMPLETE 10/10 since birth 07-21; frontier current (08-03) |
+| fact_holdings | `(Relationship ID, PortfolioID, AccountID, AssetID)` (16,893/16,893) | 0.0 x5 | COMPLETE 37/37 trading days 06-09..07-31 |
+| fact_allocations | `(Relationship ID, PortfolioID, AccountID, Rep Code)` (1,534/1,534) | 0.0 x5 | 68/70 (missing 06-24/25) + the oscillation finding below |
+
+Tranche-3 findings (the sharpest of the whole TO so far):
+
+10. **The relationship dimension is part of the BD grain -- and it double-counts if
+    ignored.** What first read as "2 duplicate holdings rows" is one account
+    (z0927448821) holding the same LP assets under TWO relationships (rows differ only
+    in Relationship ID/PortfolioID; full-row exact dups = 0, the Rule-17 silver dedup is
+    clean). Any consumer summing Market Value without collapsing to (AccountID, AssetID)
+    double-counts those positions (~$205K on 07-31). Semantic hazard recorded on the
+    registry row.
+11. **The cot LAG=0 latent snapshot risk is now MEASURED IN THE DATA**: fact_allocations
+    partitions alternate full/near-empty (07-27: 3 rows -> 07-28: 1,525 -> 07-29: 1 ->
+    07-30: 1,525 -> 07-31: 1,534). Landing-conservation reads GREEN while content
+    collapses ~99.9% on alternating days -- the exact shape the registry's named cot
+    snapshot risk predicted. Routed with the cot follow-on owner.
+12. **partner_roster.json registers the DISCLAIMER SHEETS as the MDPF cottonwood custody
+    feeds**: fact_holdings_s2 / fact_allocations_s2 contain 5-6 rows of (c1, c2) --
+    sheet-2 footer blocks of the BD xlsx, measured at 3 vintages each -- yet the MDPF
+    feed registry (data/mdpf/config/partner_roster.json:295,311, feed_ids
+    bd_holdings_s2/bd_allocations_s2) points the custody feeds at them, and the emitter's
+    accept_date() gates date-acceptance on those prefixes' partitions. The evidence
+    blocks were built by LISTING-ONLY methods (aws s3 ls) -- existence + cadence, never
+    content: the exact vintage-is-not-content class banked 08-03. The schwab precedent
+    (fact_rps_s2 = real data per the emitter's own docstring) explains the pattern-match.
+    Whether any consumer reads s2 CONTENT (vs dates-only) is NOT fully traced --
+    ESCALATED to COO/CTO + the roster's author lane (0.7.0_AE~B), not adjudicated here.
+13. **The cottonwood monolith silver plane frontier-stops at 07-31** while its
+    firm-bucket source carries files labeled through 08-03 -- mirror/converter lag >= 1
+    trading day at measure time. Finding for the mirror owner.
+
 ## Next tranches (per TO order)
 
-BD (blackdiamond/{49f,cottonwood} monolith + cot firm bucket incl. the 0-row-shell
-exclusion rule), then Schwab-0824 (19 silver tables), then the smartx residue (10 tables).
+Schwab-0824 (19 silver tables), then residue: smartx (10 tables), blackdiamond
+cottonwood siblings (fact_model_assignment/blend/definition, the _s2 pair disposition
+after the roster escalation resolves, fact_transactions/realized/unrealized + firm-bucket
+tables), 49f monolith silver (dim_account_xref, dim_advisor_fee_role, fact_taxsma_report).
