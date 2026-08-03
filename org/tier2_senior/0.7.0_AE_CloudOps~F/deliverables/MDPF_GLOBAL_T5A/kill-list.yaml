@@ -1,0 +1,54 @@
+# MDPF_GLOBAL.T5A -- machine-readable kill-list (doc: KILL_LIST_CENSUS.md)
+# Vintage: 2026-08-03T21:26-22:00Z live reads; workspace @440d16e018; portal @5ef651b202;
+#   clock v1 @f603923cf8 (v2 @5a20433a5c declared DURING census, apply pending);
+#   PRE the DS 6c Stage-6 deploy (in flight at census time).
+# Reader-evidence limits: NO access-log window exists (S3 logging absent + CF logging disabled,
+#   measured; moratorium bars building). Evidence = source file:line @ commit + deployed
+#   artifacts (Rule 22a) + live write freshness + T3.A measured routes. Lower bounds stated.
+# Name-collision law: every entry resolves by FULL bucket+key (account-distribution.json is
+#   4-way colliding across opal-data-portal-v2 {json/mdpf,platinum/mdpf} and opal-data-assets
+#   {json/mdpf,gold/mdpf_revamp}).
+
+verdict:
+  retires_whole: CONDITIONAL-YES
+  conditions:
+    - id: C1
+      what: "opal-assets-daily-emitter daily path reads aggregate_aua/{date}.json as BASE input (non-re-sourced legacy rows have no other source)"
+      evidence: "infra/aws/lambda/opal-assets/opal-assets-daily-emitter/lambda_function.py:1513-1518 + :39 @440d16e018; deployed 2026-07-28, env PLATINUM_BUCKET=opal-data-portal-v2"
+      closes_when: "emitter legacy rows re-sourced to canonical facts OR ruled droppable (AE base + DS; CTO ruling)"
+    - id: C2
+      what: "canonical carry-read of frozen json/mdpf mirrors guarded by bare except -> {} silent-fail"
+      evidence: "data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py:567,569 @440d16e018 (banked T5.B pre-kill fix)"
+      closes_when: "T5.B enumerated fix lands"
+  t1b_implication: "With C1+C2 landed the runner chain retires whole and T1.B mdpf migration is SATISFIED BY ELIMINATION (T2.B ruling item 5). Recommendation: hold T1.B as conditional-eliminate; neither condition needs T1.B."
+  falsified_during_census:
+    - "Claimed underscore reader portal_data_proxy /aum/aggregate-mdpf DOES NOT EXIST deployed (opal-portal-data-proxy sha LpodJICu... 2026-06-10, 2/2 py files, zero mdpf refs; provenance of claim = HANDOFF_AE_lambda_route.diff never deployed + stale comp-estate prose + aum.ts:474 comment)"
+
+entries:
+  - {id: 1, entity: "runner chain core (rule mdpf-daily-refresh-trigger -> lambda mdpf-daily-trigger -> SSM -> EC2 i-02448edb624a7a7cf -> s3://opal-data-mdpf/code/mdpf-daily-dispatch.sh)", disposition: RETIRE-WHOLE-CANDIDATE, conditional_on: [C1, C2], readers: "unique consumed output = per-date partitions only (see 2)", gate: "T5.B + CTO"}
+  - {id: 2, entity: "s3://opal-data-portal-v2/platinum/mdpf/aggregate_aua/{date}.json (~436 keys, newest 2026-07-31)", disposition: RETIRE-AFTER-REPOINT, equals_condition: C1, readers: ["opal-assets-daily-emitter DAILY BASE READ (canonical, live)"], reader_evidence: "lambda_function.py:1513-1518 @440d16e018"}
+  - {id: 3, entity: "s3://opal-data-portal-v2/platinum/mdpf/aggregate_aua_timeseries.json + 49financial/aggregate_aua_timeseries.json (underscore, 2026-07-31)", disposition: RETIRE-WHOLE-CANDIDATE, readers: [], reader_note: "deployed-proxy claim FALSIFIED; portal reads hyphen; gold revamp underscore keys live on opal-data-assets (different bucket, canonical)", writer: "runner build_aggregate_aua_timeseries.py:78"}
+  - {id: 4, entity: "s3://opal-data-portal-v2/platinum/mdpf/etf_ownership_timeseries/{DIVZ,IDVZ,PFDE,PFOE}.json + builder build_mdpf_etf_ownership_timeseries.py", disposition: RETIRE-WHOLE-CANDIDATE, readers: [], reader_note: "zero outside runner family; lower bound stated"}
+  - {id: 5, entity: "s3://opal-data-portal-v2/platinum/mdpf/_g6_fixture/* (4 keys, 07-12)", disposition: RETIRE-WHOLE-CANDIDATE, readers: [], reader_note: "fixtures for the already-absent freshness-checker family"}
+  - {id: 6, entity: "s3://opal-data-portal-v2/json/mdpf/{root,global,49financial,inflection,cottonwood}/aggregate-aua-timeseries.json (frozen 07-23/27/28)", disposition: RETIRE-AFTER-REPOINT, equals_condition: C2, readers: ["dim_mdpf_aggregate_aua_timeseries.py:569 carry-read (canonical chain)"], blocker: ":567 bare-except->{} silent-fail", writer_state: "DENIED since 07-28 (iam.tf:191-194 P0DenyJsonMdpfClobber20260728)"}
+  - {id: 7, entity: "s3://opal-data-portal-v2/json/mdpf/{49financial,inflection}/account-distribution.json (written 2026-08-03T11:30:39Z)", disposition: RETAIN-CANONICAL, readers: ["49F account-count producer input per HOLD doc DO_NOT_DECOMMISSION 20260722"], writer: "opal-smartx-ingestion-pipeline cron 11:30Z (compute_per_firm_account_distribution.py:276-277; tool-blind, hand-derived)", note: "NOT legacy despite prefix; mixed-vintage prefix resolves per KEY"}
+  - {id: 8, entity: "s3://opal-data-portal-v2/json/mdpf/{cottonwood,global}/account-distribution.json + cottonwood/aum-metrics.json (frozen 07-23)", disposition: UNKNOWN-loud, readers: [], reader_note: "serving superseded by platinum plane 07-29; needs DS confirm the 07-23 freeze is the cutover", blocker: ":567-family annotation"}
+  - {id: 9, entity: "s3://opal-data-portal-v2/json/portfolios/aum-timeseries.json (07-27) + non_model_assets.json", disposition: RETIRE-WHOLE-CANDIDATE, readers: ["data/analysis/fy2025_aggregate_opal_return.py (ad-hoc only)"], reader_note: "portal fetch deleted 07-29; caller sweep 0 non-comment refs", writer_state: "DENIED (iam.tf:238-244 P0DenyLegacyPortfoliosClobber20260728, two literal keys)"}
+  - {id: 10, entity: "build_legacy_compat_emit.py (Stage 3.5/6 LEGACY-EMIT) + SSM doc mdpf-legacy-emit-on-demand", disposition: RETIRE-WHOLE-CANDIDATE, readers: [], reader_note: "write targets denied + reader-less; comp-blast no extracted consumers (lower bound, hand-grep done)", note: "retiring it silences the recurring Friday denied-write chain error (COO live seed)"}
+  - {id: 11, entity: "s3://opal-data-portal-v2/json/portfolios/ Feb-2026 residue (latest,manifest,summary,metrics,timeseries,account_distribution[underscore])", disposition: RETIRE-WHOLE-CANDIDATE, readers: [], note: "hyphenated account-distribution.json (07-23) in same prefix is row-8 class -- basename trap"}
+  - {id: 12, entity: "eventbridge rule canonical-schwab-si2-download-schedule (DISABLED)", disposition: RETIRE-WHOLE-CANDIDATE, readers: [], basis: "superseded by per-account daily-pull pair (T1.A); 49F converter ops Andrew-deprecated 07-30", gate: CTO}
+  - {id: 13, entity: "eventbridge rule smartx-daily-export-trigger (DISABLED) -> smartx-ec2-autostart", disposition: RETIRE-WHOLE-CANDIDATE, readers: [], basis: "exporter-EC2 script copy superseded by live Lambda copy (row 7), source-confirmed same script", gate: "owner ruling"}
+  - {id: 14, entity: "scheduler smartx-model-monthly-pull-daily (DISABLED)", disposition: UNKNOWN-loud, readers: [], note: "disable rationale unrecoverable live; rides row 1 as conditional rider (model_composition feeds consumed by runner feeders)"}
+  - {id: 15, entity: "portal-proxy.ts:505-509 root fetcher + stale pre-flip comments (aum.ts:520-523,560; portal-proxy.ts:497-501,515-519)", disposition: RETIRE-WHOLE-CANDIDATE, scope: portal-side, readers: [], evidence: "measured 403 S3-origin (T3.A supplement); zero page consumers", lane: "DE/DT"}
+  - {id: 16, entity: "opal-data-mdpf EventBridge attachments", disposition: CANONICAL-ABSENCE, evidence: "0 of 142 materialized rules name it (Name or EventPattern, token-walked); bucket notification config NONE (T1.A)"}
+
+denominators:
+  eventbridge_rules_materialized: 142
+  rules_attached_to_opal_data_mdpf: 0
+  scheduler_schedules: 12
+  platinum_mdpf_objects: 460
+  json_mdpf_keys: 10
+  json_portfolios_top_level_keys: 9
+  deployed_artifacts_read: ["auth-validator-edge:18", "public-data-router:6", "cache-control-injector:2", "opal-portal-data-proxy (2/2 py)", "opal-assets-daily-emitter (config+source)", "opal-assets-mdpf-portal-publisher (config+source)"]
+  comp_blast_runs: {count: 4, not_found_blind_spots: 1, graph_nodes: 2255}
+  portal_caller_sweeps: {aum_timeseries_fetch_chain_non_comment_refs: 0, useQuery_sites_total: 103}

@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~F</issued_to>
 <date>2026-08-03</date>
-<status>pending</status>
+<status>complete</status>
 <priority>P1 (spine: unblocked by T1.A @389c528ddb; the delta census here also ANSWERS whether T1.B happens at all -- ruling item 5. CENSUS ONLY: T5.B kills stay gated on CANON PROVEN.)</priority>
 
 <title>T5.A: Legacy inventory + reader census -- every legacy publisher/scheduler/bucket/route enumerated with per-artifact READER evidence, dispositioned into a kill-list</title>
