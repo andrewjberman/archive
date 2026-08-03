@@ -5,6 +5,20 @@
 **Date:** 2026-08-03 (T1 tranche)
 **TO:** OPAL_VENDORPROVENANCE.WS1.asof-endpoint-census (GO 20260803T201222Z; D-1/D-2/D-3 folded @e82271228b)
 **Registry:** `data/_contracts/vendor_asof_registry.yaml` (canonical home per D-1)
+**Gate:** WS-1 completeness ACCEPTED by CTO 20260803T221313Z (denominator independently
+re-derived from live S3; 39/39 rows grounded; acceptance covers the AS-OF census only --
+keys are T4.A/WS-4).
+
+---
+
+## THE HEADLINE NUMBER (CTO-flagged as the single most decision-relevant WS-1 fact)
+
+**17 of 39 feeds -- 44% of the enumerated estate -- are `current-state-no-date`: a missed
+pull is PERMANENTLY UNRECOVERABLE data loss, and SCHEDULE RELIABILITY IS THE ONLY CONTROL
+THAT EXISTS for them.** Full distribution: 17 current-state-no-date, 7 event-dated,
+5 file-vintage, 3 settled-close, 2 echo-normalized, 5 UNKNOWN. Only Black Diamond is
+date-addressed backfillable. This is why OPAL_VENDORPROVENANCE and MDPF_GLOBAL's trigger
+canon are one program: for nearly half the estate, the schedule IS the data guarantee.
 
 ---
 
