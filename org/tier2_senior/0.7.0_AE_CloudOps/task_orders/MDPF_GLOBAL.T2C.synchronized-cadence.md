@@ -98,10 +98,13 @@ Verbatim s.C.4 (CTO validates at close):
 2. No hand-runs in the evidence window.
 Plus the T2.B ruling terms implemented: schedule floor on the producing tree; INF event =
 accelerator-only (s.C.3 @440d16e018).
-Plus the CTO redline (212557Z direct to assignee, folded 212643Z): TIMEZONE-ANCHOR COHERENCE --
-the whole clock hangs on ONE anchor (CTO recommends America/New_York); a UTC-fixed clock is
-acceptable ONLY with all-legs coverage + winter-margin evidence (the declared windows must hold
-through the EST offset shift, shown, not asserted).
+Plus the CTO CLOCK-V2 MANDATE (213314Z, superseding the 212557Z discretionary form): v1 is
+FACTUALLY CONTRADICTED by measurement (declared 13:00Z close vs inputs measurably landing
+~14:16Z) and is the contract T1.C/T3.B consume -- RE-DECLARE v2 BEFORE anything implements
+against v1. Binding form: whole clock ET-anchored (America/New_York); the declared close DERIVED
+from the measured per-input landing table (both DST regimes represented); floor placed off that
+close; double-fire proof unchanged. v2 is a doc commit to the same consumer set (0.2.0_DS + ~F +
+COO + CTO); content within that form remains yours.
 Plus the CTO CANON-PROVEN sharpening (212847Z, forced by the 6c find -- PRD amendment in CTO's
 lane): a green cycle is evidenced by PER-STAGE status reads (every stage rc + every scope's
 artifact advancing), NEVER by the chain's terminal completion marker alone -- STAGE6-REVAMP
