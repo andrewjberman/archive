@@ -18,6 +18,15 @@
     <requirement id="1">network-isolation posture specified + CTO-gated</requirement>
     <requirement id="2">broker review complete</requirement>
     <requirement id="3">CVO certs the P2 controls live</requirement>
+    <requirement id="4">JWT-BYPASS TRUST SURFACE (folded 2026-08-03 per CTO 210706Z, on ~F's
+      disclosed T3.A method): the deployed auth-validator-edge (v18 at fold time) carries an
+      admin-role bypass that lets a seat mint valid JWTs from opal/auth/jwt-private-key.
+      Enumerated review items: (a) the bypass's existence + exact predicate in the DEPLOYED
+      artifact (Rule 22a, not committed source); (b) its intended invokers, named; (c) whether
+      the private key's IAM read scope matches exactly that invoker set (live
+      get-role-policy / simulate-principal-policy, one resource per call). Owned blocking item,
+      NOT an alarm (moratorium). Same trust-surface class as the dev@test.com attribution gap.
+      Disclosure record: ~F T3.A close 20260803T210325Z; CTO route 20260803T210706Z.</requirement>
   </requirements>
 </task_order>
 ```
