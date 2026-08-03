@@ -3,7 +3,11 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-03</date>
-<status>pending</status>
+<status>complete</status>
+<!-- completed 2026-08-03 ~2200Z: registry 39 rows @01ab614102 (T1 f129fc1c80 / probe 15d0326c80 /
+     T2 438a3c69b3 / T3 89d5de8a4a / T4 01ab614102); census doc + session log 2af96c7155;
+     CTO completeness gate = the close validation (RAVC-4) against census doc s.6 -->
+
 <priority>P1 (Andrew-direct GO 2026-08-03 ~20:15Z @3e2b23ebb3; Andrew-explicit prerequisite to the silver dedup/completeness canon -- MDPF_GLOBAL T4.A certification waits on your exemplar rows)</priority>
 
 <title>OVP WS-1: Vendor as-of endpoint census -- an As-Of Contract Registry row for EVERY (vendor, endpoint) feeding the estate, grounded or loudly UNKNOWN</title>

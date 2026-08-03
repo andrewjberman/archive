@@ -3,7 +3,10 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>pending</status>
+<!-- self-activated 2026-08-03 ~2200Z on WS-1 completion (registry 39 rows @01ab614102, TO complete);
+     first family per tranche order: Orion/Eclipse -->
+
 <priority>P1 (spine: unblocked by your OVP WS-1 tranches 1-2 @f129fc1c80/@438a3c69b3 -- the Andrew-explicit prerequisite rows exist. SELF-ACTIVATING: begin when your WS-1 census completes (T3/T4 tranches done or explicitly parked with CTO word); this message-in-TO is the GO, no re-send needed. RESEARCH may overlap your remaining tranches at your discretion; CERTIFICATION waits for the as-of rows per Andrew.)</priority>
 
 <title>T4.A: Exemplar table verdicts -- per MDPF-feeding silver family: stable key DECLARED + EXERCISED, measured duplicate rate, completeness verdict over the serve window</title>
