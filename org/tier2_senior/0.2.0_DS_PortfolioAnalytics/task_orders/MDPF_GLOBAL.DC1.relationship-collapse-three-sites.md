@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (CTO ruled 230622Z: BUILD NOW, gate granted for the collapse scope at all three sites. >> THE SERVE-CHANGE HOLDS FOR ANDREW: DELTA != 0 on a served client-facing value -- the corrected number must NOT reach the served surface until his disclosure call. <<)</priority>
 
 <title>DC1: collapse to (AccountID, AssetID) before aggregating -- the three naive summers over BD relationship grain; BUILT + EXERCISED + HELD, never served without Andrew's word</title>
