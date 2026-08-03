@@ -3,7 +3,11 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~F</issued_to>
 <date>2026-08-03</date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-08-03T1711Z: COO ACCEPTED (171132Z, all 5 ACs validated). Deployed policy
+     ce00305d (DefaultTTL 300) on /api/general/*; commit 04cd2f22f0; tag portal-auth-v1.21.0
+     pushed (MSTR 171059Z); log @7eeec44ee8. Age<300 residual tracked on COO's W6 line;
+     advisor-by-firm same-class flag at CTO; comp-routes gap at CVO. -->
 <priority>P1-adjacent (Andrew is watching the cache-invalidation family of work -- CVO 164133Z Andrew-direct relay; do not let it age)</priority>
 
 <title>W9: stop the cache-control-injector being load-bearing for the /api/general/* TTL -- align the edge cache policy to 300s in Terraform</title>
