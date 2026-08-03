@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (Andrew-direct GO 2026-08-03 ~20:15Z @3e2b23ebb3; Andrew-explicit prerequisite to the silver dedup/completeness canon -- MDPF_GLOBAL T4.A certification waits on your exemplar rows)</priority>
 
 <title>OVP WS-1: Vendor as-of endpoint census -- an As-Of Contract Registry row for EVERY (vendor, endpoint) feeding the estate, grounded or loudly UNKNOWN</title>
