@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (Andrew-direct GO 2026-08-03 ~20:15Z @3e2b23ebb3; this WS gates the CTO's T2.B producer-unification ruling -- the whole T2/T1.C/T2.C arm of the spine waits on your evidence)</priority>
 
 <title>T2.A: Truncation diagnosis -- source-confirm WHY the accrual/hyphen global series ends 07-30 while the runner/underscore plane reached 07-31</title>
