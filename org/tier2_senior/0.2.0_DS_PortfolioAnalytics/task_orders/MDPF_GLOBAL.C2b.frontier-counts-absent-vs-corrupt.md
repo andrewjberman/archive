@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1-small (CTO ruled + granted direct 222901Z on YOUR routed finding; time-sensitive because honest-None became LOAD-BEARING tonight via the floor-gate ruling)</priority>
 
 <title>C2b: load_account_dist_frontier_counts -- discriminate ABSENT from CORRUPT: absence keeps honest-None (declared behavior), corruption RAISES</title>
