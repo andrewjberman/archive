@@ -34,8 +34,11 @@ Three facts for T5.A, recorded not adjudicated:
    global key the portal actually consumes.
 2. **The two 200s disagree on frontier and coverage:** underscore root `as_of_last=07-31` / 436 dates vs global scope
    `as_of_last=07-30` / 453 dates, generated 37s apart in the same 07-31T15:00Z window. (Calendar note: 08-03 is a Monday;
-   07-31 Friday is the correct T-1 frontier. The global slice sits one trading day behind the root on `as_of_last` while
-   carrying 17 MORE dates. Mechanism not established here -- `INFERRED` candidates: different slicers, different
-   None-padding/coverage rules. T5.A's delta census owns the adjudication.)
+   07-31 Friday is the correct T-1 frontier.) **Mechanism SOURCE-CONFIRMED by T2.A (0.2.0_DS diagnosis @0b5acf3148, CTO
+   pointer 20260803T211314Z), superseding this addendum's original `INFERRED` label:** underscore = min-common
+   vintage-bearing FEEDER vintage (`mdpf_aggregate_aua.py:1139-1150`, SmartX-live, legitimately reached 07-31 same-day
+   Friday); hyphen/revamp = T-1 SILVER CLOSE via max(day) of the latest `fact_model_aum_daily` partition (07-30 on Friday).
+   **Different semantics BY CONSTRUCTION, not drift** -- they can disagree by one trading day on a converged day. T5.A's
+   remaining adjudication is only the READER question (who consumes each plane), not the mechanism.
 3. **The 08-03 12:15 publisher run re-wrote the global key with content generated 07-31** (S3 Last-Modified 08-03 16:15:32Z vs
    body `generated_at=2026-07-31T15:00:37Z`) -- an S3 write timestamp on this path is a PUBLISH event, not a data-vintage claim.
