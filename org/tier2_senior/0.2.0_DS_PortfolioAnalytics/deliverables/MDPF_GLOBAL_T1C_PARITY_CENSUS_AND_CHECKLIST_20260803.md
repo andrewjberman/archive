@@ -35,6 +35,12 @@ Scripts live in `data/assets/scripts/gold/` (staged to the runner as `assets_gol
 
 **Baseline: 5 GREEN / 3 AMBER / 4 RED.** DS-actionable now: rows 4 + 7 (slice-local). Row 3 topology: DS script logic + AE/DT dispatch legs, coordinate. Rows 1/2/12 pend the T2.C clock (AE).
 
+## v1.1 updates (21:20–21:35Z, same session)
+
+- **ROW 13 (NEW) — 6c starvation blocker: FOUND + REPAIRED.** Stage 6 failed EVERY cycle since 07-29 at 6c (`dim_mdpf_non_model_assets.py` deployed copy NoSuchKey on the retired `json/portfolios/non_model_assets.json`; the A4 DECOUPLE fix @6a9fe4f771 landed 07-21 but was NEVER deployed) → 6d (all cottonwood legs) never reached. **CENSUS CORRECTION (COO-confirmed): the stale cottonwood as-ofs in the grounding section were STARVATION, not vendor cadence.** Repair: repo HEAD deployed 21:24Z, `comp-pipescript deployed` MATCH, ledger `org/critical_paths/change_management/20260803T2125Z_mdpf-6c-non-model-assets-a4-decouple-deploy_completion.md`, COO NO-HOLD 21:24:55Z. Behavioral proof = next scheduled cycle (6d runs, marker advances past 07-29 00:33Z) — and per COO: if tonight's event trigger doesn't fire because INF failed this morning, that is the T2.C-class trigger gap, NOT this repair failing.
+- **Rows 1/2/12 clock values DECLARED** (AE T2.C @f603923cf8, 21:24:42Z): dedicated 15:00Z MON-FRI EventBridge floor on the producing tree (UTC-fixed), cottonwood INSIDE the same run (no separate cot schedule — row-1 shape confirmed on-pattern); cadence window 15:00–16:15Z (floor → accrual 15:45Z → publisher 16:15Z); evidence clock = 3 consecutive NYSE trading days, zero hand-runs. Rows stay open until the schedule is LIVE + evidence accrues.
+- **⚠ CLOCK COLLISION FLAG (routed to AE 21:35Z):** measured binding-input landings — smartx `fact_model_aum_daily` ~13:40Z (2 samples: 13:40:32Z 07-31, 13:41:10Z 08-03), orion `fact_assets` ~14:16Z (08-03), eclipse `fact_portfolios_full` ~03:30Z overnight — so the declared 13:00Z T-1-silver-close predates TWO binding inputs' landings, and **orion lands only ~44min before the 15:00Z floor** (a slow orion day crosses it → the rebuild reads a day-old orion partition). Floor VALUE unaffected today; declaration text + margin need AE's re-anchor.
+
 ## Notes for the record
 
 - **HOLDs read (comp-blast):** slice 1 / pair 2 / dim 3 claims — all deploy-completion ledgers with S3 md5 pins (`20260729T0510Z_mdpf-g7...` etc.): the deployed copies are content-pinned, so ANY edit re-deploys via safe-deploy + a new ledger entry, never a silent divergence.
