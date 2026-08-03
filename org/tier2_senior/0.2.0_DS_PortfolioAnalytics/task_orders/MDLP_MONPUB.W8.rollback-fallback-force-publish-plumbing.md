@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics (code) + 0.2.0_DT_PortfolioAnalytics (deploy)</issued_to>
     <date>2026-08-03</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDLP_MONPUB</project_code>
   </metadata>
 
@@ -75,4 +75,9 @@
        control -- UNCOVERED stated, not implied covered.
     5. DEPLOY DISCIPLINE: TF-only, fresh ledger entries, tags bumped per pipeline.
   </acceptance_criteria>
+
+<completion date="2026-08-03" by="2.0.0_SA_COO">
+W8 COMPLETE: code 4024664d71 (both Lambdas, one event-contract commit; grep gate: force_publish at exactly ONE call site, the rollback-fallback manifest stamp; Path-1 ruled OUT-OF-SCOPE/unguardable w/ DDB record as control). LIVE 0-diff: data-refresh-v2.6.0 + yang-v2.4.18. Scratch exercise per CVO ruling (option b + :146 manifest-arm condition): leg 1 end-to-end exec-fdf49e30710f manifest-landed-LAST, leg 2 manifest-arm bypass ed35ec26, leg 3 negative control 030ed212 refused/seed-unchanged. Package delivered to CVO for witness; closed on Andrew-direct closeout ruling 2026-08-03 ~1750Z (visual smoke passes) -- CVO witness appends to this record if/when it lands. Live-occasion traversal leg stays PENDING-LIVE-OCCASION, non-blocking per spec 5c.
+Project closed Andrew-direct (COO terminal, 2026-08-03 ~1750Z): "WE can closeout this project, everything looks good for data refresh and the associated paths/lambdas/etc, visual smoke passes."
+</completion>
 </task_order>

@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DT_PortfolioAnalytics (portal lane)</issued_to>
     <date>2026-08-03</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDLP_MONPUB</project_code>
   </metadata>
 
@@ -53,4 +53,9 @@
     3. Portal discipline: DEV branch, typescript clean, comp-surface-check on the portal side
        (this touches the must-always-be-right Model Portfolios read path).
   </acceptance_criteria>
+
+<completion date="2026-08-03" by="2.0.0_SA_COO">
+W6 COMPLETE: DEV e77e8b6f (13/13 mechanical battery, SURFACE_ACK audited), typecheck gate caught+fixed a real TS error pre-merge (DEV 5ef651b2). PROD promote LANDED: c6f561b6, tag portal-v2.1.155 PEEL-VERIFIED, CI run 30837075543 success (gh run view --json), pointer committed, main tree back on DEV. PROD no longer mislabels version-based rollbacks; rollback success invalidates the 29-prefix client cache. Gate-3 dual-TTL authenticated header capture done on this deployed page (Age 81/82 <300; Age 20 <60). Live-occasion full exercise stays PENDING-LIVE-OCCASION, non-blocking per spec 5c. Closed on Andrew-direct closeout ruling 2026-08-03 ~1750Z (visual smoke passes).
+Project closed Andrew-direct (COO terminal, 2026-08-03 ~1750Z): "WE can closeout this project, everything looks good for data refresh and the associated paths/lambdas/etc, visual smoke passes."
+</completion>
 </task_order>

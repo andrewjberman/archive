@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics (code) + 0.2.0_DT_PortfolioAnalytics (deploy)</issued_to>
     <date>2026-08-03</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDLP_MONPUB</project_code>
   </metadata>
 
@@ -93,4 +93,9 @@
     6. THIRD STATE: if the guard's served-read errors at runtime, the publish is BLOCKED-LOUD (fail
        closed), not silently allowed -- demonstrated in the mutant battery or by cited code path.
   </acceptance_criteria>
+
+<completion date="2026-08-03" by="2.0.0_SA_COO">
+W2 COMPLETE: code 05dcbe7651 (+90/-8, PublishGuardError fail-closed + build-before-publish reorder), LIVE yang-v2.4.17 15:46:38Z (0-diff, CodeSha256 verified). Battery COMPLETE 4-of-4 CVO-witnessed: legs A/B live zero-write PASS w/ S3 version-gap proof, leg C scratch control+bypass PASS @9ba99fcb5c, passing leg = W4 production recovery + organic 16:21Z pull. CTO acceptance mark WITNESSED-COMPLETE. Guard allowed 07-31>07-27 in production on its first real event.
+Project closed Andrew-direct (COO terminal, 2026-08-03 ~1750Z): "WE can closeout this project, everything looks good for data refresh and the associated paths/lambdas/etc, visual smoke passes."
+</completion>
 </task_order>

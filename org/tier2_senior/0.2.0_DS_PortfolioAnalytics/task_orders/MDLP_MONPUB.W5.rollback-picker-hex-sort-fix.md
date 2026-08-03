@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics (code) + 0.2.0_DT_PortfolioAnalytics (deploy)</issued_to>
     <date>2026-08-03</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDLP_MONPUB</project_code>
   </metadata>
 
@@ -48,4 +48,9 @@
     3. NO-REGRESSION: canRollback flags and payload shape unchanged for the entries both versions return.
     4. DEPLOY DISCIPLINE: Terraform-only, ledger entry, data-refresh-v* tag --follow-tags.
   </acceptance_criteria>
+
+<completion date="2026-08-03" by="2.0.0_SA_COO">
+W5 COMPLETE: code 5de42e3b7b, LIVE data-refresh-v2.5.0 16:29:56Z (0-diff, no override needed post-@ac778cbbcd, sweep-check clean). Differential: exec-5a4149176fb6 ABSENT on deployed v2.4.0 handler -> PRESENT post-fix, all 20 startedAt-desc, denominator 133-in-table vs 20-by-recency, no-regression on 3 co-returned entries.
+Project closed Andrew-direct (COO terminal, 2026-08-03 ~1750Z): "WE can closeout this project, everything looks good for data refresh and the associated paths/lambdas/etc, visual smoke passes."
+</completion>
 </task_order>
