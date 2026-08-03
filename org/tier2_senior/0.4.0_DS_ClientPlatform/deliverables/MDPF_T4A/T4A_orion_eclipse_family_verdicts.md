@@ -1,0 +1,79 @@
+# MDPF_GLOBAL.T4A -- Tranche 1: Orion/Eclipse family verdicts (8 exemplar tables)
+
+**archetype:** VALIDATE
+**Author:** 0.4.0_DS_ClientPlatform
+**Date:** 2026-08-03 (~22:10-22:30Z)
+**TO:** MDPF_GLOBAL.T4A.exemplar-table-verdicts @a9f8f06c55 (self-activated on WS-1 completion; COO proceed-confirm 220451Z)
+**Registry rows updated:** data/_contracts/vendor_asof_registry.yaml (8 rows now carry
+`T4.A EXERCISED` keys + `t4a_completeness_verdict` fields; header key-authority note amended)
+
+## Method (all read-only; harness in session scratchpad `t4a_verdicts.py` + `t4a_schema_scan.py`)
+
+1. **Schema scan** -- latest partition of each table read whole; candidate-key uniqueness
+   printed with denominators.
+2. **Key exercise** -- POSITIVE control (a REAL row duplicated in-memory must collapse to a
+   size-2 key group) and NEGATIVE control (two REAL distinct rows must carry distinct keys),
+   run as **separate invocations** per the TO. 8/8 PASS on both.
+3. **Rates** -- within-partition duplicate rate on the declared key, last 5 existing
+   partitions per table.
+4. **Completeness** -- full partition-date enumeration vs `lib/trading_calendar.py`
+   trading days over serve-window 2024-11+ intersected with corpus birth; weekend
+   partitions counted separately as carries; shells screened within the rate window.
+
+## Verdicts
+
+| Table | Key (exercised) | Dup rate (last 5 parts) | Completeness |
+|---|---|---|---|
+| orion fact_assets | `id` (35,219/35,219 unique) | 0.0 all 5 | **COMPLETE 437/437** trading days 2024-11-01..2026-08-03; 654 weekend carries |
+| orion fact_positions | `id` (confirms the Andrew-direct retro-dedup spec's measured key) | 0.0 all 5 | 436/437 -- **missing 2026-07-01 only** (assets does NOT share the hole) |
+| orion fact_performance | `(client_id, date)` -- factor VALUE deliberately excluded from the key | 0.0 (full 460,676-row series unique per client-day) | **CUMULATIVE-WINDOW CLASS**: partition presence is the wrong rule; series coverage in the LATEST partition is the rule. Partition gaps 46/63 since birth 05-03 (17, all May ramp) = LOW severity |
+| orion fact_transactions | `id`, LATEST-PARTITION-WINS (resolves the EditedDate mutation hazard by design) | 0.0 on 1.4M-row partitions | 53/57 since birth 05-12 -- missing 07-01 + 07-13/14/15 (the inf outage window) |
+| eclipse fact_models | `id` (18/18) | 0.0 | 47/53 since birth 05-15 -- **6 missing** incl. the NEW 05-21 |
+| eclipse fact_portfolios_simple | `id` (843/843) | 0.0 | same 47/53 (one pull vehicle) |
+| eclipse fact_portfolios_full | `id` (855/855) | 0.0 | same |
+| eclipse fact_model_composition | `id` (9/9) | 0.0 | same |
+
+## Findings (each with an owner-shaped next step)
+
+1. **Eclipse's known-gap ledger is short by one: 2026-05-21 is a sixth missing day** the
+   puller docstring's list (5 gaps) does not carry. All 6 permanently unfillable
+   (current-state-no-date). Owner: the docstring/ledger correction routes to the inf-tree
+   DS lane with the _orion_vendor_asof premise refresh already queued via COO.
+2. **fact_positions has a single-day hole (2026-07-01) that fact_assets does not share** --
+   the two feeds pull the same endpoint family; a one-sided hole means one converter/mirror
+   leg missed a day the other caught. Owner: WS-5 sweep / mirror set-identity census.
+3. **The 07-01 + 07-13/14/15 cluster recurs across transactions + all eclipse tables** --
+   consistent with the known inf outage window; now MEASURED per table rather than
+   remembered. No backfill possible for eclipse (honest-Nones); transactions IS
+   backfillable (date-addressed window) if anyone ever wants those days -- a ruling, not
+   a default.
+4. **Cumulative-window tables need a different completeness rule** (performance,
+   transactions): each daily partition snapshots the whole series/window, so a missed
+   partition day does NOT lose those dates' content -- the rule that matters is series
+   coverage inside the latest partition. Registry rows updated to say so; WS-5's
+   evaluator should implement that rule for this class.
+5. **Dual-producer attribution is structurally unobservable at silver** for the inf dim
+   feeds: both producers write the SAME bronze key (last-writer-wins), so per-producer
+   duplicate attribution cannot be measured downstream of the collapse. The overlap's
+   real risk is content-vintage, not row duplication (measured dup rate 0.0 supports
+   this). Recorded here against the TO's attribution constraint, honestly.
+6. **Eclipse silver sat at 08-02 while its bronze had 08-03** at measure time (~22:15Z) --
+   an intra-day conversion-lag observation; the sweep schedule for the eclipse family is
+   the confirm point. NOT an outage claim (NEVER#1 discipline).
+7. **transactions 08-02 and 08-03 partitions carry identical row counts** (1,417,631) --
+   same-count is not same-content; noted for the retro-dedup fingerprint axis, not
+   adjudicated here.
+
+## Repair note (process, on the record)
+
+The first registry write of the eclipse verdicts landed on the WRONG four rows (a
+first-occurrence replace walked into the orion dimension rows that precede eclipse in file
+order). Caught by the immediate post-write field-position verify (grep of every
+dedup_stable_key line + row-context read), reverted, re-applied anchored, YAML re-parsed
+(39 rows, 31 TODO + 8 filled). The defect never reached a commit.
+
+## Next tranches (per TO order)
+
+SmartX family (smartx/platform/silver fact tables incl. fact_model_aum_daily -- the MDPF
+feed), then BD (blackdiamond/{49f,cottonwood} + cot firm bucket incl. the shell-exclusion
+rule), then Schwab-0824 (19 silver tables).
