@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
     <date>2026-08-03</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDLP_MONPUB</project_code>
   </metadata>
 
@@ -64,4 +64,9 @@
     4. THIRD STATE: if the original crashing 07-31 artifact cannot be retrieved for the census, that
        is CANNOT-VERIFY (a finding, reported), not a silent skip to re-generation.
   </acceptance_criteria>
+
+<completion date="2026-08-03" by="2.0.0_SA_COO">
+W4 COMPLETE: recovery publish 16:10:24Z through the W2 guard (07-31 > 07-27, the designed forward path). GO chain: MSTR~Z source-confirmed trace @f0ee7c588 (dup mechanism: final-date double-append; 07-30 pkl carried foreign .ST Index history) + CTO GO 160441Z/160449Z (5 conditions). Serve at true T-1 2026-07-31, CVO values-read witness x7 PASS @b16913d35e. Postmortem datum banked: 2025-12-31 pkl carries the SAME defect (producer defect months old); race source REMOVED at Bloomberg by Yang (Andrew-direct ~1705Z).
+Project closed Andrew-direct (COO terminal, 2026-08-03 ~1750Z): "WE can closeout this project, everything looks good for data refresh and the associated paths/lambdas/etc, visual smoke passes."
+</completion>
 </task_order>
