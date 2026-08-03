@@ -98,6 +98,10 @@ Verbatim s.C.4 (CTO validates at close):
 2. No hand-runs in the evidence window.
 Plus the T2.B ruling terms implemented: schedule floor on the producing tree; INF event =
 accelerator-only (s.C.3 @440d16e018).
+Plus the CTO redline (212557Z direct to assignee, folded 212643Z): TIMEZONE-ANCHOR COHERENCE --
+the whole clock hangs on ONE anchor (CTO recommends America/New_York); a UTC-fixed clock is
+acceptable ONLY with all-legs coverage + winter-margin evidence (the declared windows must hold
+through the EST offset shift, shown, not asserted).
 Plus standing norms: every causal claim cites file:line @ commit or is labeled INFERRED; no new
 alarms/monitors.
 Plus: session log includes a Compiler Tools section reproducing every <run> from

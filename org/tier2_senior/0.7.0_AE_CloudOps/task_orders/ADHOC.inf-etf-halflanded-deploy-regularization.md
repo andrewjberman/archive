@@ -27,6 +27,13 @@ RULE-3 NOTE (Lambda Layers): the two vendored .py copies are inline vendoring, w
 explicit approval. The regularization commits the APPLIED reality under CTO's adjudication (that
 message is the approval context for the commit) -- but annotate the commit that layer-migration
 is the standing debt, and surface it in your report so CTO can queue or waive it explicitly.
+
+CTO DISPOSITION (212643Z, recorded here so it cannot silently become a ratified pattern):
+LAYER-DEBT QUEUED, NOT WAIVED -- migrate both vendored copies to a Lambda Layer at the NEXT code
+touch of inf-etf-ownership-daily; no standalone TO now. INTERIM OBLIGATION FOLDED INTO THIS TO
+(completion of the F2 leg, not new scope): trading_calendar.py is already under the ETFS-weekend
+vendored-copy parity CI; VERIFY dedup_core.py is ALSO parity-covered and state it in the report
+-- if NOT covered, ADD it to that CI in the same regularization commit.
 </context>
 
 <scope>
