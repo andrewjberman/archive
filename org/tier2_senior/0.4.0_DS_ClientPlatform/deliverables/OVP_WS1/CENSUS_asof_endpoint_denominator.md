@@ -56,8 +56,8 @@ in T1 because its grounding was already sealed in source).
 | 1-2 | schwab/08242234/bronze/ + schwab/08335338/bronze/ (.zip CRS/CS, 18 types) | canonical-schwab-si2 EC2 sdd-daily-pull.ps1 -Master {m}, 2x daily (manifests 10:15Z+22:15Z live thru 08-03); AsOfDATE-canonical partitions. NOTE: the AE OneDrive lane (49-schwab-conv) feeds the STAGING bucket opal-data-schwab only -- outside census buckets | schwab | T3-LANDED |
 | 5 | blackdiamond/cottonwood/bronze/ | opal-assets-ingest-mirror (from opal-data-cot) + cot-rebalancer-runner DIRECT (rebalancer_* families) | blackdiamond | T2-LANDED |
 | -- | blackdiamond/49f/bronze/ | opal-assets-bd49f-daily-pull cron(30 2)+(30 4)Z (allocation_390224/fees_435407/template_roster, live thru 07-31) + opal-assets-bd49f-reporting-pull (reporting_*, DRY-gated, one partition 07-17) | blackdiamond | T2-LANDED |
-| 6-7 | trueshares/DIVZ/bronze/ + trueshares/IDVZ/bronze/ | ETF chain (etf_conversion.py family) | trueshares | T4 |
-| 8 | pathfinder/filepoint/bronze/ (+ live PFDE/ PFOE/ prefixes to reconcile) | ETF chain | pathfinder | T4 |
+| 6-7 | trueshares/DIVZ/bronze/ + trueshares/IDVZ/bronze/netassets/ | etfs-netassets-daily Lambda (0.5.0 lane), cron(0 22 UTC) post-close; per-metric as-of parsed from the page | trueshares | T4-LANDED |
+| 8 | pathfinder/filepoint/bronze/{holdings,dailynav}/ | same Lambda; fixed-URL CSVs, in-file Date/Rate Date columns; PFDE/PFOE prefixes RECONCILED = the per-fund SILVER/meta trees of the 1->2 fan (filepoint is the bronze delivery scope) | pathfinder | T4-LANDED |
 | 10 | smartx/{platform,model/{guid},account/{guid},allocation/{guid}}/ | smartx-assets-daily-pull Lambda (C5), Scheduler cron(30 9 ET) daily; manifests live thru 2026-08-03 | smartx | T2-LANDED |
 | 9 | msn/ | STRUCK (Andrew-direct via COO 182117Z; 0 keys) | -- | CLOSED |
 
@@ -180,12 +180,32 @@ Registry updated: assets_v2 grounding block carries the probe; U-1 moved to `res
 The `_orion_vendor_asof.py` docstring premise refresh routes through COO to the inf-tree
 DS lane per CTO instruction -- NOT edited from this seat.
 
-## 6. Next tranches
+## 6. DENOMINATOR-COMPLETENESS STATEMENT (the WS-1 CTO gate claim)
 
-- **T2 (next)**: SmartX (4 monolith prefixes + exporter chain) + Black Diamond bd/cot
-  (both firm buckets + blackdiamond/{49f,cottonwood} monolith families). MDPF_GLOBAL.T4A
-  consumes these rows -- tranche-report immediately on landing.
-- **T3**: Schwab-0824 (AE-owned OneDrive delivery; census from code/records only, per TO)
-  + Schwab-0833.
-- **T4**: trueshares, pathfinder (incl. PFDE/PFOE prefix reconciliation), remaining
-  monolith residue; final denominator-completeness statement for the CTO gate.
+All four tranches landed 2026-08-03, registry at **39 rows** (orion 11, eclipse 4,
+smartx 10, blackdiamond 9, schwab 2, trueshares 1, pathfinder 2). Coverage against the
+live ingest inventory, bucket by bucket:
+
+- **opal-data-inf**: 10/10 enumerated data ingest paths -> rows; JWT/auth path recorded
+  as AUTH-ONLY (no as-of row by design).
+- **opal-data-assets**: all 10 V2-contract bronze families accounted: schwab x2 (rows),
+  orion + eclipse (mirror rows inherit the firm-bucket rows; the 3-row mirror map never
+  grows), blackdiamond/cottonwood (mirror + rebalancer rows), blackdiamond/49f native
+  (3 data feeds + the DRY-gated reporting family as a loud UNKNOWN row), trueshares +
+  pathfinder (rows; PFDE/PFOE reconciled as silver-tree homes), smartx (10 route rows),
+  msn STRUCK-CLOSED.
+- **opal-data-bd**: forwardfill_v2 plane RETIRED-BY-SUPERSESSION (U-5 CTO-ruled, riders
+  recorded). Zero ACTIVE bronze writers observed in the live window; the zombie-writer
+  rider defines the detection posture for any future write. Legacy prefix teardown =
+  T5-class behind a reader census (rider b), NOT a WS-1 item.
+- **opal-data-cot**: 5 forwardfill_v2 table families -> rows (period + snapshot classes,
+  the LAG=0 latent risk named); mirrored monolith plane inherits.
+
+UNKNOWN ledger: 4 open (U-2 Envision engine vintage, U-3 NewPortfolio timing, U-4 smartx
+valuation basis, U-6 portfolioreporting gated family) + 2 resolved (U-1 by exercised
+probe, U-5 by CTO ruling). Every open UNKNOWN carries what-was-tried + what-resolves-it.
+
+RECOVERABILITY DISTRIBUTION (now PRD s.3.2a law per CTO 213057Z): date-addressed
+backfillable = **blackdiamond only**; echo-normalized re-pullable = orion; current-state
+or current-latest-only = smartx, eclipse, trueshares, pathfinder (permanent gaps;
+schedule reliability is the only defense); file-vintage settled = schwab.
