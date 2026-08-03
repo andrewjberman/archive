@@ -102,6 +102,12 @@ Plus the CTO redline (212557Z direct to assignee, folded 212643Z): TIMEZONE-ANCH
 the whole clock hangs on ONE anchor (CTO recommends America/New_York); a UTC-fixed clock is
 acceptable ONLY with all-legs coverage + winter-margin evidence (the declared windows must hold
 through the EST offset shift, shown, not asserted).
+Plus the CTO CANON-PROVEN sharpening (212847Z, forced by the 6c find -- PRD amendment in CTO's
+lane): a green cycle is evidenced by PER-STAGE status reads (every stage rc + every scope's
+artifact advancing), NEVER by the chain's terminal completion marker alone -- STAGE6-REVAMP
+errored five straight days while the chain reported complete. A cycle whose terminal marker says
+complete while any canonical stage errored is a RED cycle. Design your 3-day evidence collection
+on per-stage reads from day one.
 Plus standing norms: every causal claim cites file:line @ commit or is labeled INFERRED; no new
 alarms/monitors.
 Plus: session log includes a Compiler Tools section reproducing every <run> from
