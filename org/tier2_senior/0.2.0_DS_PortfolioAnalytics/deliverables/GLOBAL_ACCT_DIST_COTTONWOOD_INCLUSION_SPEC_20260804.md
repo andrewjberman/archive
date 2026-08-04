@@ -47,7 +47,7 @@ One builder, `dim_mdpf_account_distribution.py`, per-firm unit extraction then s
 
 ## 4. SEAM — GRF carry (0.4.0_DS), composed not raced
 
-COO 181124Z: 0.4.0_DS's GRF roll-forward scoping (Andrew ~1715Z T+2 ruling) covers account-COUNT CARRY semantics in this SAME artifact. Composition (COO's natural order, adopted): **INCLUSION first (this spec), then CARRY applies to the included cottonwood leg on its lagged dates** (cottonwood value-dates lag T+2-class; on a day the sidecar's vintage trails, the carry semantics govern what the fold shows rather than the fold dropping the leg). Their spec cites this one and vice versa; conflicts route through CTO.
+COO 181124Z: 0.4.0_DS's GRF roll-forward scoping (Andrew ~1715Z T+2 ruling) covers account-COUNT CARRY semantics in this SAME artifact. Composition (COO's natural order, adopted): **INCLUSION first (this spec), then CARRY applies to the included cottonwood leg on its lagged dates** (cottonwood value-dates lag T+2-class; on a day the sidecar's vintage trails, the carry semantics govern what the fold shows rather than the fold dropping the leg). **CROSS-CITED both ways (0.4.0_DS ACK 182948Z):** their `deliverables/MDPF_CANRTE_GRF_GLOBAL_T2_ROLLFORWARD_SCOPING_20260804.md` §3 cites this spec and states its carry baseline as the POST-HEAL 3-firm artifact with the in-band `meta.cottonwood_fold` marker. No blocking dependency either direction; conflicts route through CTO.
 
 ## 5. RIDERS (observed during grounding, not this spec's scope)
 
