@@ -3,7 +3,11 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~F</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-08-04T2344Z: all named items landed @ffb41a849 + T0 restore @3293a0cda; CVO
+     RAVC CLOSE 232812Z (6/6) + 234335Z (T0 restore, dial FULLY CLOSED); CTO accepted DEPTH-1
+     232056Z. T2 untouched (PRD-gated). Override trailers discharged by ~B @4527d310e.
+     Session log: logs/2026-08-04/dial_fixes_trace_depth_2145-2330Z.md -->
 <priority>P1 (ANDREW-DIRECT ~1900Z fan-out @fc42aacc5: parallel seats on the spine-tool items; this seat takes the trace+depth fix set)</priority>
 
 <title>comp-trace fixes T0/T1/T3/T5/T6 + comp-depth DEPTH-0/DEPTH-1 -- per the CVO dial records; T2 EXCLUDED (PRD-gated)</title>
