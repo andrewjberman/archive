@@ -27,7 +27,7 @@ each downloaded file's size byte-matches its `head-object` `ContentLength` (retr
 |---|---:|---:|---:|---:|---|
 | 49financial | 1,689,302,889.53 | 1,414,120,540.22 | 275,182,349.31 | 275,182,349.31 | **EXACT** |
 | inflection | 202,258,677.80 | 137,997,265.16 | 64,261,412.64 | 64,261,412.64 | **EXACT** |
-| cottonwood | 458,189,558.77 | 124,376,009.73 | 333,813,549.04 | 333,813,549.04 | **EXACT** |
+| cottonwood | ~~458,189,558.77~~ | 124,376,009.73 | 333,813,549.04 | 333,813,549.04 | **EXACT** [SUPERSEDED 2026-08-03 @387fa87c90 by 0.4.0_DS per ADHOC.0722-tie TO: the total-holdings figure is the naive double-counted sum (+$205,070.77 relationship-grain; collapsed truth 457,984,488.00). The EXACT arithmetic verdict on THIS row's decomposition stands -- the inputs shared the same naive total, so the identity held; the total itself must not be cited as verified] |
 
 **SOURCE-CONFIRMED, independently of the arithmetic** —
 `data/mdpf/scripts/backfill/build_aggregate_aua_timeseries.py` @HEAD:
