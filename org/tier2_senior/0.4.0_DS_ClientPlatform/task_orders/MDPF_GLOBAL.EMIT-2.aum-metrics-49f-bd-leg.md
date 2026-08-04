@@ -3,7 +3,9 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
+<!-- GO 20260804T044117Z (COO, sovereign-priority); sequenced FIRST at this seat, BR1-DS
+     puller second (same-session clock start). CTO spec @90db23580 = authority. -->
 <priority>P1-SOVEREIGN (the canonical map's missing producer, your scope leg; CTO spec @90db23580 IS THE AUTHORITY. Sequence with BR1-DS at your discretion -- guidance: this first, it gates the client-facing lit flip; BR1's puller second to start its 5-TD clock same-session.)</priority>
 
 <title>EMIT-2: the 49financial scope leg of the aum-metrics emitter -- the SmartX/BD/Schwab-fed by_model + metrics into the shared fold; grain + tie laws bind</title>
