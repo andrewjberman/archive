@@ -115,6 +115,18 @@ Plus the CTO inflection carry-window pre-rule (221952Z direct to assignee, folde
 2 TRADING DAYS on the BD_MAX_LAG precedent, roster-declared, with three labeling requirements --
 every carried point LABELED as carried; the transition to None VISIBLE (never a silent
 carry-forever); the window value STATED in served meta.
+Plus the PARTNER-BLINDNESS supersession criteria (CTO 001159Z + assignee's compound answer
+001336Z, folded 08-04 ~0015Z; provenance: the live trigger gate has ZERO cottonwood refs in
+892 lines, measured + positive-controlled, and row 7 of MDPF_CHANNEL_INDEPENDENCE was
+gate-REFUSED on it): (1) FLOOR path SUPERSEDES by construction -- partner honesty lives in the
+roster-driven participation schema, PARTNER-COMPLETE with cottonwood included; (2) the RESIDUAL
+ACCELERATOR would inherit, so the SAME Lambda change makes its partners dict + roll-source
+checks ROSTER-DERIVED -- zero literals anywhere in the trigger post-change; onboarding = a
+roster row at BOTH layers; (3) acceptance exercises the gate PER ROSTER PARTNER (a partner
+absent from the gate is the defect class this criterion exists to kill). The honest caveat is
+on the record: the accelerator's cot-blindness has no dispatch-into-guaranteed-fail path today
+(6d resolves cot at run time); the roster fold closes onboarding/consistency, the live
+served-integrity gap closes at the producer schema.
 Plus standing norms: every causal claim cites file:line @ commit or is labeled INFERRED; no new
 alarms/monitors.
 Plus: session log includes a Compiler Tools section reproducing every <run> from
