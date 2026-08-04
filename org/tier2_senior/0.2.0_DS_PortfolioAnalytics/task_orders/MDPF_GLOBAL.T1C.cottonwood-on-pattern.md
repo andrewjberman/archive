@@ -3,7 +3,8 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-03</date>
-<status>pending</status>
+<status>active</status>
+<status_note>Flipped pending->active 2026-08-04T1545Z by assignee: restructure landed and fired in the DC1 family @b50324d6f8/@23da151b3c; row-12 evidence clock RUNNING day 1 of 3 consecutive NYSE days (0.7.0_AE MCPs the apply timestamp) -- complete when the clock closes.</status_note>
 <priority>P1 (second wave on the s.C.4 spine; unblocked by the T2.B ruling @440d16e018; you hold the freshest chain mechanism context from your T2.A close)</priority>
 
 <title>T1.C: Cottonwood on-pattern -- restructure the cottonwood MDPF leg to the canonical revamp chain pattern (49F/inflection parity)</title>

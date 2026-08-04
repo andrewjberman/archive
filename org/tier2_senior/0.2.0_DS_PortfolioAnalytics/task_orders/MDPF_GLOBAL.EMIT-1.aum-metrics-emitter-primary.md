@@ -3,7 +3,8 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>active</status>
+<status_note>Flipped pending->active 2026-08-04T1545Z by assignee: builder deployed @5ee67e2f3 (MATCH), 6e wired pre-fire by AE 051338Z, ledger accepted CTO 050950Z; P0 direct fire 08-04 served global+inflection (water-test PASS, ledger ADDENDUM @017b7fca3) + 49f accrual staged. OPEN: acceptance leg 1 (SCHEDULED v3-window run, NEVER#4) + leg 5 (DE render evidence); cot scope field deployed @669e9b134 rides next pair emission.</status_note>
 <priority>P1-SOVEREIGN (the voice-memo canonical map's one missing producer @7a585074e; CTO spec @90db23580 IS THE AUTHORITY -- this TO binds execution. Sequence AFTER your in-flight DC1 serve-correction leg; ahead of everything else at your seat.)</priority>
 
 <title>EMIT-1 (primary): the platinum aum-metrics emitter -- extend the canonical builder family to emit {scope}/aum-metrics.json for global + inflection (+ the fold layer all four ride); the TIE LAW is acceptance-grade</title>

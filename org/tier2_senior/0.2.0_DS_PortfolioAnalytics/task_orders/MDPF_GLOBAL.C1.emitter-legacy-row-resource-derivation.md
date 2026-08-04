@@ -3,7 +3,8 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>complete</status>
+<status_note>Flipped pending->complete 2026-08-04T1545Z by assignee (stale-line reconciliation, evidence-cited): spec COMPLETE @03ab006764 (droppable branch EMPTY, parity 12/12 exact, :992 fail-loud spec, s2 verdict made sound); close-out ACCEPTED @f8d294e39b (CTO retirement-becomes-a-fix line folded).</status_note>
 <priority>P1 (T5.B precondition C1, the DERIVATION leg -- CTO ruling 221736Z: RE-SOURCE IS THE DEFAULT AND THE PRESUMPTION. This is the last live dependency on the runner chain; your derivation determines the implementation AE base executes.)</priority>
 
 <title>C1 derivation: can opal-assets-daily-emitter's non-re-sourced legacy rows re-derive from the canonical revamp lineage? RE-SOURCE presumed; droppable needs value-level proof</title>

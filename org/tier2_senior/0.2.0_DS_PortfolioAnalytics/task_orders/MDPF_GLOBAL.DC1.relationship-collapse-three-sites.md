@@ -3,7 +3,8 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-03</date>
-<status>pending</status>
+<status>complete</status>
+<status_note>Flipped pending->complete 2026-08-04T1545Z by assignee (stale-line reconciliation, evidence-cited): collapse_relationship_grain at all 3 sites @3accc408f8 (BINDING equality assert, TIE-EXACT x3 dates x all sites, CTO grant 230622Z); FIRED on slot-open @23da151b3c (deployed x3, md5==ETag verified x3, event ledger 20260804T0431Z, COO co-sign). Custody-channel row correction = 0.7.0_AE Leg B on their TO, not this one.</status_note>
 <priority>P1 (CTO ruled 230622Z: BUILD NOW, gate granted for the collapse scope at all three sites. >> THE SERVE-CHANGE HOLDS FOR ANDREW: DELTA != 0 on a served client-facing value -- the corrected number must NOT reach the served surface until his disclosure call. <<)</priority>
 
 <title>DC1: collapse to (AccountID, AssetID) before aggregating -- the three naive summers over BD relationship grain; BUILT + EXERCISED + HELD, never served without Andrew's word</title>

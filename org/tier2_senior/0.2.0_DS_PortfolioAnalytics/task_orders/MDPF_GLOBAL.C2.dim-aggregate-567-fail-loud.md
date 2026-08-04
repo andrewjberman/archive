@@ -3,7 +3,8 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-03</date>
-<status>staged</status>
+<status>complete</status>
+<status_note>Flipped pending->complete 2026-08-04T1545Z by assignee (stale-line reconciliation, evidence-cited): :567 bare-except goes FAIL-LOUD @0f0f173351 (exercised BOTH directions, raise path traced to STAGE6-REVAMP per-stage status, CTO gate grant 221736Z); deploy-completion ledger @0273788ff6 (MATCH). Sibling :621 finding routed and closed as C2b.</status_note>
 <priority>P1-small (T5.B precondition C2, CTO dispatch concurrence 221736Z: "author it NOW, pre-T5.B" -- a live silent-fail defect on a carry-read whose urgency does not depend on retirement timing)</priority>
 
 <title>C2: dim_mdpf_aggregate_aua_timeseries.py:567 -- the bare except swallowing the json/mdpf carry-read to {} goes FAIL-LOUD; fix EXERCISED, not asserted</title>
