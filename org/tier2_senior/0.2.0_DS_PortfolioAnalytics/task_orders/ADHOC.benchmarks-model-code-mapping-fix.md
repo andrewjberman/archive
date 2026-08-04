@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (Andrew-active thread: his FE-first Teams ruling to Yang this morning + the DE sweep executing at his direction; CTO routing 155310Z)</priority>
 
 <title>Benchmarks producer: carry Yang's renamed model codes (LTA->ULT, LTC->LT) -- the regen currently DROPS the renamed portfolios at the data layer</title>
