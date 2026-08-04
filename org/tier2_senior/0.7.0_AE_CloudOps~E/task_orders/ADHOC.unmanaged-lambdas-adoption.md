@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~E</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P2 (CTO morning-wave add 170852Z + rider 170951Z, pulled forward: your lane spawned for a since-superseded build (Andrew took cochange to his own terminal) and this is the ready work fitting your profile)</priority>
 
 <title>Seven unmanaged live Lambdas: ONE adoption-by-default TO with a per-function verdict table -- coldness-discriminated, CRO consulted on the research-adjacent pair, nothing deleted in-TO</title>
