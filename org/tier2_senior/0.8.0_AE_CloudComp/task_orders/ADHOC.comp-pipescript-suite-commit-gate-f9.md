@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (Andrew-named start item 2, graph-seam/comp-blast fixes thread -- CVO ITEM-2 relay @fa4279588; F9 disposition CTO 062256Z, build via COO)</priority>
 
 <title>comp-pipescript test suite: path-scoped commit-gate stage -- the suite runs when engine/subparser/test files are staged (F9: a gate no runner is wired to decays silently)</title>

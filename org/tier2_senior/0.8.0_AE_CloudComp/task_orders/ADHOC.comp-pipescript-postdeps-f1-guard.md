@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (Andrew-named start item 2, graph-seam/comp-blast fixes thread -- CVO ITEM-2 relay @fa4279588; SEV-HIGH on the $22M-class ad-hoc-run guard)</priority>
 
 <title>comp-pipescript postdeps: F1 two-half guard -- unknown script_id rc=2 + kill the silent flagless bd default</title>
