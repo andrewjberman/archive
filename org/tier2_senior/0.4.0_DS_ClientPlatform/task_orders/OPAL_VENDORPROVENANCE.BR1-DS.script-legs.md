@@ -3,7 +3,10 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
+<!-- GO 20260804T043442Z (COO); spec = BR1_EXECUTION_PLAN @7538cbc5f by reference; build
+     order: puller (starts the 5-TD overlap clock) -> emitter (refusal leg exercised) ->
+     overlap harness; staging-prefix ONLY pre-cut -->
 <priority>P1 (implementation leg 1 of the sovereign retire ruling @6f4ad98db; THE PLAN @7538cbc5f IS THE SPEC -- this TO binds its execution, it does not restate it)</priority>
 
 <title>BR1-DS: the three script legs -- Eclipse puller content, completion-emitter content, overlap-compare harness -- staging-prefix writes ONLY until the G3 cut</title>
