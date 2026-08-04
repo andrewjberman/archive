@@ -3,7 +3,8 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>complete</status>
+<status_note>Complete 2026-08-04T2003Z, all four acceptance criteria evidenced: (1) drop mechanism file:line + live-run WARNs (RequestId dc51d3bc) + post-fix regen 5/5 (content capture in window logs); (2) re-keyed all three artifacts zero old-code residue (legacy incl., zero live FE call sites per DE census); (3) FE-first wall evidenced (portal v2.1.157 PROD w/ 70c884ae in ancestry, COO-verified 193242Z; commit shipped after); (4) DE Phase-3 render verify ON RECORD 200116Z (scatter + heatmap all 5 incl. LT/ULT on the REAL 19:51Z artifact through PROD code; screenshot portal/.frontend-dev/screenshots/benchmark-tab-live-artifact.png). Chain: commit @0ce5aa5ada -> DT apply (tag yang-pipeline-v1.5.2, live CodeSha256 verify) -> regen 19:51:04Z -> content-verify -> render verify.</status_note>
 <priority>P1 (Andrew-active thread: his FE-first Teams ruling to Yang this morning + the DE sweep executing at his direction; CTO routing 155310Z)</priority>
 
 <title>Benchmarks producer: carry Yang's renamed model codes (LTA->ULT, LTC->LT) -- the regen currently DROPS the renamed portfolios at the data layer</title>
