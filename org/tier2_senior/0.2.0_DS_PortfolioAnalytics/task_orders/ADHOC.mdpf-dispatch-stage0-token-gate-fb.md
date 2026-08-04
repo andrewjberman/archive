@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P2 (the F-B class-closer from the Orion-401 root cause; F-A (AE's schedule fix) covers the daily race -- this closes the CLASS for any future token/schedule drift; sequence AFTER your benchmarks-mapping TO)</priority>
 
 <title>MDPF dispatch stage-0: pre-pull token gate -- decode exp locally, bounded SM re-poll near expiry, else fail LOUD named TOKEN-EXPIRED (a gate in the flow, not an alarm)</title>
@@ -27,6 +27,10 @@ alarm ships with this.
 </context>
 
 <scope>
+<!-- AMENDED 1947Z per 0.2.0_DS's surfaced lane fact: the GATE SCRIPT is DS-lane (landed
+     @572e40f2f5, deployed via the new mdpf gate); the DISPATCH WIRING (infra/aws/ec2) is
+     CLOUD_OPS_OR_ETL -- owned-paths correctly refused the DS author; that edit sits in-tree
+     for AE's author line + runner deploy. "Your runner lane" below reads as this split. -->
 1. Stage-0 of the mdpf daily dispatch (your runner lane): before the first Orion pull, decode
    the JWT exp from the secret (local decode -- no network validation call needed; exp is in
    the token). Ground the insertion point file:line first.
