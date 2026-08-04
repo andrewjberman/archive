@@ -3,7 +3,13 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>deprecated-as-shaped</status>
+<!-- DEPRECATED 1845Z per ANDREW-DIRECT (AE terminal ~1825Z fuller verbatim, CTO adjudication
+     184443Z, COO converged release 184xZ): NO shadow pipelines, comparator DELETED ("also a
+     horrible idea"), swap gate RETRACTED both halves. SURVIVORS: the spine builder ("the
+     collective spine, that is fine") + W-1 tie-out (build-time control). Successor TO:
+     MDPF_CANRTE.W2R.modelb-spine-port (build-correctly + direct port w/ rollback). -->
+
 <priority>P1 (Phase-C wave 2; joint acceptance on record; Andrew "Proceed" 1706Z. SEQUENCE BEHIND W-1 -- this consumes its bindings)</priority>
 
 <title>MDPF_CANRTE W-2: the Model-B firm-parameterized spine builder, build-alongside -- SHADOW staging writes only, 3-green-scheduled-cycles parity before any swap</title>
