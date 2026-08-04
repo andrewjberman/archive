@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P2 (the closure sweep's row-6 RENDER-HALF -- the one MDPF closure row needing a DE seat; CTO sweep @67bbb6981d found it delivered-nowhere, gated-nowhere. Queued per your ready-for-next 025201Z; your @b48634789a map is the grounding.)</priority>
 
 <title>CI-R6 render-half: the UI visibly distinguishes MEASURED from HELD/CARRIED values on the Model Portfolios surfaces -- designed against the emission schema, implemented on its ratified shape</title>
