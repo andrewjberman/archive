@@ -50,6 +50,10 @@ REGRESSION_MODELS = {"UST", "ST", "INT", "LT", "ULT"}
 # Yang's index_name values for the five models (spelling pinned AS-IS from the data).
 # Post-rename source spellings per DS live workbook check @89a3cca5ed: 'Long Term' /
 # 'Ultra Long Term' (unhyphenated; the 'Agressive' typo retired with the source series).
+# LAYER NOTE (MSTR 230727Z, twins verified aligned at source): index_names here are
+# DELIBERATELY unhyphenated while the served DISPLAY layer hyphenates per the DE typing
+# canon @02b7f351 ('Ultra Short-Term'/'Ultra Long-Term' -- hyphen joins Term). A validator
+# comparing display names against these index_names will manufacture a false mismatch.
 MODEL_INDEX_NAMES = {
     "Ultra Short Term", "Short Term", "Intermediate Term",
     "Long Term", "Ultra Long Term",
