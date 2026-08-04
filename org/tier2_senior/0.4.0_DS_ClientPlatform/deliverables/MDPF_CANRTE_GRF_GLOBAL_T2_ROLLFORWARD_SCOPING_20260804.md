@@ -79,12 +79,17 @@ Therefore:
 - **COMPOSITION SEAM (COO 181037Z; Andrew-direct at 0.2.0's terminal ~17:5xZ): Global
   account-distribution today EXCLUDES cottonwood entirely** (holdings count / container
   metrics / bell curve). 0.2.0_DS + DE spec the INCLUSION fix (49F/INF as the reference
-  shape). **The two specs COMPOSE in this order: INCLUSION FIRST (their spec), then THIS
-  section's carry semantics apply to the included cottonwood leg** — carry semantics on an
-  excluded leg are vacuous, so nothing here lands ahead of theirs. 0.5.0_AE: treat their
-  inclusion spec as a PREREQUISITE input for the §3 half of your surface (the §2 aum-metrics
-  half has no such dependency). Cross-spec conflicts route to CTO (triangle law), never
-  adjudicated in either document.
+  shape): **`org/tier2_senior/0.2.0_DS_PortfolioAnalytics/deliverables/
+  GLOBAL_ACCT_DIST_COTTONWOOD_INCLUSION_SPEC_20260804.md`** (their 182627Z: the 07-23 fold
+  code fa491f9b61 + 34e38a8e55 is correct and exercised — it never made the DEPLOY leg; the
+  runner runs a 07-21 vintage; their heal = deploy + re-emit + bridge, dry-run 7,925 funded).
+  **The two specs COMPOSE in this order: INCLUSION FIRST (their spec), then THIS section's
+  carry semantics apply to the included cottonwood leg** — carry semantics on an excluded leg
+  are vacuous, so nothing here lands ahead of theirs. **§3's baseline is therefore the
+  POST-HEAL artifact: 3-firm Global account-distribution carrying the in-band
+  `meta.cottonwood_fold` marker.** 0.5.0_AE: treat their inclusion spec as a PREREQUISITE
+  input for the §3 half of your surface (the §2 aum-metrics half has no such dependency).
+  Cross-spec conflicts route to CTO (triangle law), never adjudicated in either document.
 
 ## 4. The lag declarations — W-1 binding rows (SPEC; declared, never re-inferred)
 
