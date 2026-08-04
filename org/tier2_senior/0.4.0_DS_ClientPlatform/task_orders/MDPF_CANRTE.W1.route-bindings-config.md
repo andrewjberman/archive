@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>complete</status>
 <priority>P1 (Phase-C wave 1; joint plan acceptance on record -- CTO 165917Z + COO 165942Z, gate-3 closed per CTO 170636Z; Andrew "Proceed" at the COO terminal 1706Z accelerates seating from the morning wave to NOW)</priority>
 
 <title>MDPF_CANRTE W-1: route_bindings.yaml lands (pure-add, zero behavior) -- the Phase-A binding table as declared config</title>
