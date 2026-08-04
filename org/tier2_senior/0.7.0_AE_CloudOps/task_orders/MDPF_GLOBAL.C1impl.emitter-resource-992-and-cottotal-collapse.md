@@ -13,7 +13,16 @@ THE SPEC (DS @03ab006764, delivered to you directly; embed-by-reference at that 
 - RE-SOURCE: the legacy non-re-sourced set collapsed to ONE quantity -- etf_total_net_assets x4
   tickers feeding 3 row families; canonical source = opal-data-etfs/silver/netassets_daily.parquet
   (the runner was a pure two-hop pass-through); parity proven 12/12 exact on 3 sample dates keyed
-  by stamped as-of. DELTA=0 BY CONSTRUCTION for these rows, evidenced.
+  by stamped as-of.
+  <!-- FRAMING CORRECTED 2026-08-04 (CTO precision 232944Z + AE self-retraction 000941Z): this
+       line originally read "DELTA=0 BY CONSTRUCTION" -- RETRACTED. DELTA=0 is a live serving-law
+       precedent term and the claim is false on its face: Leg A ADVANCES served values where the
+       direct source is fresher than the dead runner plane. Correct framing:
+       PARITY-VERIFIED-PLUS-HEAL -- byte-identical where both sources carry the same stamped
+       as_of (the 12/12), advancing where the source is fresher. Still no disclosure hold, for
+       the correct reason: advancing an OLD value to its current vintage is the pipeline doing
+       its job; correcting a WRONG value (Leg B) is the act with disclosure implications. The
+       Leg-A apply record carries before/after for the four tickers. -->
 - :992 RIDER (CTO-binding regardless of branch): _latest_key demoted to event-flagged walk-only;
   run_date event-derived; body=None becomes the DECLARED normal mode with an in-band degraded
   state; per-stage observable; NO alarms (moratorium).
