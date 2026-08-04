@@ -1,0 +1,153 @@
+diff --git a/src/pages/ModelPortfolios.tsx b/src/pages/ModelPortfolios.tsx
+index 22b00e7c..33cc2313 100644
+--- a/src/pages/ModelPortfolios.tsx
++++ b/src/pages/ModelPortfolios.tsx
+@@ -570,10 +570,13 @@ export function ModelPortfolios() {
+     () => readParticipationMarks(activeParticipation),
+     [activeParticipation]
+   )
+-  // (T1 carried-point pixels HELD-UNCOMMITTED pending Andrew's word — COO interim
+-  // 031733Z; the carried-date derivation + trace + chip + tooltip rows live in the
+-  // working tree only. T2 dark-vs-broken + T3 window statement below were never
+-  // deleted and are cleared to land.)
++  // Dates whose ratified declaration carries any channel — Global only in practice (the
++  // carry is global-fold-local; per-firm LITE emits absent rows, never carried ones).
++  const trendCarriedDates = useMemo(() => {
++    const s = new Set<string>()
++    for (const [date, m] of participationMarks) if (m.carried.length) s.add(date)
++    return s
++  }, [participationMarks])
+   const participationTransitions = useMemo(
+     () => firstPastWindowDates(participationMarks),
+     [participationMarks]
+@@ -1014,7 +1017,11 @@ export function ModelPortfolios() {
+     // across interpolated dates, so summing it beside the model buckets DOUBLE-COUNTS the
+     // same dollars (Andrew's $248M = $124M buckets + $124M overlay). Excluded from the
+     // tooltip's total AND its rows; the band/dash/label carry the provenance signal.
+-    const buckets = payload.filter((entry) => entry.dataKey !== 'interp_total')
++    // carried_total shares interp_total's double-count hazard exactly (it traces the
++    // total across carried dates) — both are ANNOTATIONS, never dollars in a sum.
++    const buckets = payload.filter(
++      (entry) => entry.dataKey !== 'interp_total' && entry.dataKey !== 'carried_total'
++    )
+     // W-3b: Total AUM ANCHORS on the TOTAL series when the artifact provides it
+     // (partner_custody_total, real for COT since DS's W-2b) -- buckets are detail and
+     // non-model is the balance; summing buckets is only the fallback where no total
+@@ -1035,14 +1042,30 @@ export function ModelPortfolios() {
+     const fmtVal = (val: number) =>
+       formatNumberTo3Digits(val, { unit: '$', includeSign: false })
+ 
+-    // (Carried tooltip phrasing DELETED, Andrew-direct ~0450Z via COO 044951Z; the
+-    // CI-R6R carried successor rows are HELD-UNCOMMITTED pending Andrew's word. The
+-    // ABSENT rows below are the T2 dark-vs-broken distinction — never deleted: they
+-    // quote the producer's DECLARED reason/last-measured-as-of, facts only.)
++    // (Carried tooltip phrasing DELETED, Andrew-direct ~0450Z via COO 044951Z. The rows
++    // below are the CI-R6R successor under the ratified participation contract: they
++    // quote the producer's DECLARED as_of/age/reason — facts, never the cadence-
++    // compliance claim the deleted phrasing asserted.)
+     const rowPeriod = String(rowPayload?.['period'] ?? '')
+     const mark = rowPeriod ? participationMarks.get(rowPeriod) : undefined
+     const participationRows: Array<{ label: string; value: string; labelColor?: string }> = []
+     if (mark) {
++      for (const c of mark.carried) {
++        participationRows.push({
++          label: `Carried forward — ${c.channel}: from ${c.asOf ?? 'unknown'}${
++            c.ageTradingDays != null ? ` (${c.ageTradingDays} TD)` : ''
++          }${c.watch ? ' · watch' : ''}`,
++          value: '',
++          labelColor: '#94a3b8',
++        })
++      }
++      if (mark.carried.length) {
++        participationRows.push({
++          label: 'counts not carried',
++          value: '',
++          labelColor: 'rgba(148,163,184,0.6)',
++        })
++      }
+       for (const a of mark.absent) {
+         participationRows.push({
+           label:
+@@ -1102,8 +1125,16 @@ export function ModelPortfolios() {
+         </div>
+       )}
+       {/* (Carried-point legend chip DELETED, Andrew-direct ~0450Z via COO 044951Z. The
+-          CI-R6R successor chip is HELD-UNCOMMITTED pending Andrew's word — COO interim
+-          031733Z; it keys on the RATIFIED participation meta only, worded as fact.) */}
++          chip below is the CI-R6R successor: present exactly when the RATIFIED
++          participation meta declares carried dates — never lit from the incumbent
++          per-leg strings — and worded as fact, not cadence-compliance. Slate, never
++          the interpolated yellow: the two non-measured classes must not collapse.) */}
++      {trendCarriedDates.size > 0 && (
++        <div className="flex items-center gap-2">
++          <div className="w-6 h-0 border-t-2 border-dashed" style={{ borderColor: '#94a3b8' }} />
++          <span className="text-sm text-white/90">Carried forward (as-of labeled)</span>
++        </div>
++      )}
+     </div>
+   )
+ 
+@@ -2117,6 +2148,13 @@ export function ModelPortfolios() {
+                           dataPoint['total_aua'] =
+                             globalEnterpriseByPeriod.get(period)?.totalAua ?? null
+                         }
++                        // CI-R6R T1: the Carried-forward overlay traces the TOTAL on dates the
++                        // RATIFIED participation meta declares carried (empty per-firm: the carry
++                        // is global-fold-local). Same annotation-never-dollars contract as
++                        // interp_total (both excluded from tooltip sums).
++                        dataPoint['carried_total'] = trendCarriedDates.has(period)
++                          ? ((dataPoint['total_aua'] as number | null) ?? modelSum)
++                          : null
+                         return dataPoint
+                       })
+                       // MDPF_REVAMP.S5 content-A/B: drop whole-day feed-gap rows (every plotted series
+@@ -2310,8 +2348,47 @@ export function ModelPortfolios() {
+                               hide={trendInterpolatedDates.size === 0}
+                               isAnimationActive={false}
+                             />
+-                            {/* (CI-R6R T1 Carried-forward trace + ring dots: HELD-UNCOMMITTED
+-                                pending Andrew's word, COO interim 031733Z.) */}
++                            {/* CI-R6R T1: the Carried-forward trace — slate dashed, DISTINCT from
++                                the interpolated yellow idiom (the two non-measured classes never
++                                collapse, COO-named pixel-layer law). Ring dots mark carried
++                                points; a watch row (age > 1 TD, the CTO divergence marker) rings
++                                amber-orange. Facts-only: the declared as_of/age ride the tooltip;
++                                no cadence-compliance wording anywhere (~0450Z lesson). Mounted
++                                always (fixed registration order); hidden when no carried dates —
++                                which includes every artifact predating the ratified meta. */}
++                            <Area
++                              type="monotone"
++                              dataKey="carried_total"
++                              name="Carried forward"
++                              stroke="#94a3b8"
++                              strokeWidth={2.5}
++                              strokeDasharray="2 6"
++                              fill="transparent"
++                              fillOpacity={0}
++                              hide={trendCarriedDates.size === 0}
++                              isAnimationActive={false}
++                              dot={(props: { cx?: number; cy?: number; payload?: Record<string, unknown> }) => {
++                                const { cx, cy, payload } = props
++                                const period = String(payload?.['period'] ?? '')
++                                if (cx == null || cy == null || payload?.['carried_total'] == null) {
++                                  return <g key={`carried-dot-${period || 'none'}`} />
++                                }
++                                const watch = participationMarks
++                                  .get(period)
++                                  ?.carried.some((c) => c.watch)
++                                return (
++                                  <circle
++                                    key={`carried-dot-${period}`}
++                                    cx={cx}
++                                    cy={cy}
++                                    r={4}
++                                    fill="transparent"
++                                    stroke={watch ? '#fb923c' : '#94a3b8'}
++                                    strokeWidth={2}
++                                  />
++                                )
++                              }}
++                            />
+                           </AreaChart>
+                         </ResponsiveContainer>
+                       )
