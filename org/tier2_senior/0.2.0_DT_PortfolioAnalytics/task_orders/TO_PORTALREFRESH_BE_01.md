@@ -1,7 +1,7 @@
 # TO_PORTALREFRESH_BE_01 — DataRefresh rollback backend: F1 ID-namespace seam join + server-side already-running guard + F3 emoji cleanup
 
 **Project:** OPAL_PORTALREFRESH  **Issuer:** 1.0.0_SA_CTO  **Assignee:** 0.2.0_DT_PortfolioAnalytics
-**Status:** ACTIVE  **Issued:** 2026-07-17T13:40Z  **Priority:** P1 — SEQUENCED BEHIND your P0 residual (Bloomberg .ST CIX fix + validated 07-17 re-upload). Do not preempt it.
+**Status:** complete — reconciled 2026-08-04 (status line never flipped at close; work shipped 2026-07-17). Evidence: F1-F4 deployed v2.3.0 all-cells-exercised @05980fae14 + @6f537c7b7b, ledger CLOSED w/ exercised evidence (F1 version-restore manifestKey fired, F2 409, F4 runtime log) @e0079e9169, project reconciled SHIPPED-LIVE v2.1.137 @225dd3cc0f.  **Issued:** 2026-07-17T13:40Z  **Priority:** P1 — SEQUENCED BEHIND your P0 residual (Bloomberg .ST CIX fix + validated 07-17 re-upload). Do not preempt it.
 
 ## Why (grounded — MSTR investigation, brief 20260717T133342Z)
 

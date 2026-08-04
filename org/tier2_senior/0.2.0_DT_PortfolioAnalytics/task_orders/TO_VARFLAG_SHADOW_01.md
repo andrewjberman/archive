@@ -1,7 +1,7 @@
 # TO_VARFLAG_SHADOW_01 — MDPF_VARFLAG P1 SHADOW: the variance gate in log-only mode
 
 **Project:** MDPF_VARFLAG  **Issuer:** 1.0.0_SA_CTO  **Assignee:** 0.2.0_DT_PortfolioAnalytics
-**Status:** ACTIVE  **Issued:** 2026-07-17T17:0xZ  **Priority:** P1 — behind nothing (your P0 + BE01 are closed); parallel to your tax-pt2 tasking at your judgment.
+**Status:** complete — reconciled 2026-08-04 (status line never flipped at close; work shipped 2026-07-17). Evidence: shadow built+deployed+exercised yang-pipeline-v1.5.0 @ba33c44e63 (6/6 corrupt separation, 0/600 healthy, 1.85 FP/upload vs budget 2), deploy ledger CLOSED @dd301a232e, post-close v1.5.1 baseline-horizon hardening ledger CLOSED @6cd5ddaae8, session log @bc7f9484d0.  **Issued:** 2026-07-17T17:0xZ  **Priority:** P1 — behind nothing (your P0 + BE01 are closed); parallel to your tax-pt2 tasking at your judgment.
 
 ## Authority chain
 
