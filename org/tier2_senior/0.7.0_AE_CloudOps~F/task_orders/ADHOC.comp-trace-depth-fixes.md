@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~F</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (ANDREW-DIRECT ~1900Z fan-out @fc42aacc5: parallel seats on the spine-tool items; this seat takes the trace+depth fix set)</priority>
 
 <title>comp-trace fixes T0/T1/T3/T5/T6 + comp-depth DEPTH-0/DEPTH-1 -- per the CVO dial records; T2 EXCLUDED (PRD-gated)</title>
