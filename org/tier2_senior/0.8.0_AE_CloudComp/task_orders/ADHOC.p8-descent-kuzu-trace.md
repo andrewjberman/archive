@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P2 (dial-program feed: both dials' P8 leg; CTO seat ask 153743Z, seat+trigger concurred 153944Z -- trigger FIRED on your F9+F1 closes)</priority>
 
 <title>P8 independent descent, BOTH instruments in one session: comp-kuzu + comp-trace cold-use stumble capture (non-dialer seat)</title>
