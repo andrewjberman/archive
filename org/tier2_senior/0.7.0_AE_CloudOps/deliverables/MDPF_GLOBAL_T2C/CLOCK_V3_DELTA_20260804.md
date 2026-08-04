@@ -36,6 +36,24 @@ re-heals all scopes to the full 08-03 frontier within roughly the following hour
 full-T-1-by-10:00 arrives when the pull shifts land on probe PASS (target: tomorrow).
 A publish that shows anything OTHER than this shape = STOP + diagnose before the next cycle.
 
+## Amendment 1 — 2026-08-04 ~16:2xZ (CTO F-A GO 155020Z rider b): the Orion JWT chain IS a clock member
+
+The 08-04 first fire exposed a cross-pipeline blind spot in this table: the MDPF chain's stage-0
+depends on SM `orion/jwt/current` (10h TTL, Orion-issued), renewed by `inf-jwt-trigger` — a
+resource of the INF pipeline that this table never listed. Its renewal cron sat UTC-fixed at
+13:00Z = the floor's own minute in EDT; stage-0 read the overnight token (expired 07:02Z)
+12 seconds before the fresh one landed → 401 × 9 models, nondeterministic by EC2 warm/cold.
+Membership row (added, F-A applied same commit):
+
+| Leg | pre-F-A | **F-A** | UTC basis | Basis |
+|---|---|---|---|---|
+| Orion JWT renewal (inf-jwt-trigger jwt-extract → exporter SSM fetch) | 13:00Z (floor-colliding in EDT) | **12:15Z, deliberately UTC-fixed** | 12:15Z both regimes | ≥45 min floor lead EDT / 105 min EST; off the 12:00/12:30 Orion hazard marks year-round (an ET-anchored 08:30 lands ON 12:30Z in EDT); retires the daily 07:02Z–13:01Z expired-token window (now ends ~12:16Z). Structural close of the race class = F-B stage-0 exp gate (DS), not this geometry. |
+
+The 21:00Z export login remains the second daily mint (unchanged, unlisted before, listed now).
+UTC-fixed is a DELIBERATE exception to the whole-clock-ET anchor, CTO-reasoned in the GO: the
+hazard-mark avoidance must hold year-round, and the deeper mixed-time-basis unification is the
+clock program's job, not this hotfix's.
+
 ## Unchanged from v2 (by reference, not restated)
 
 ET whole-clock anchor (CTO redline) · derived-from-measured-landings discipline · daily-incl-weekends
