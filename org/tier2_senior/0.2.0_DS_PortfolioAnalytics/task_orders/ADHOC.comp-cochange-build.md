@@ -1,10 +1,10 @@
 <task_order>
 <to_id>ADHOC.comp-cochange-build</to_id>
 <issued_by>2.0.0_SA_COO</issued_by>
-<issued_to>0.7.0_AE_CloudOps~E</issued_to>
+<issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-04</date>
 <status>staged</status>
-<priority>P2 (Andrew proposal @22f33727a, CTO arch gate cleared 200144Z; consumered build -- the Kimi meta-analysis Friction battery's third leg)</priority>
+<priority>P1 TONIGHT (CRITICAL-PATH ELEVATION, Andrew via CTO~B ~200xZ per CVO 201039Z: the Kimi Phase-0 ratification sitting WAITS on comp-heat dial [CLOSED] + THIS BUILD -- "crucial touchpoints for Kimi to come to conclusions". Re-seated from the unspawnable ~E lane to this live seat 2011Z)</priority>
 
 <title>comp-cochange: co-change analysis over git history (agent-type-tagged), BORN-REGISTERED -- typed dispatch over existing substrate, no new git-walking engine</title>
 
@@ -23,7 +23,11 @@ SUBSTRATE: comp-gitdrill's vintage-stamped history walk + comp-missions' commit-
 the tool, DENOMINATORS PRINTED on every output. (4) BORN-REGISTERED at landing -- the tool
 ships WITH its output contract + coordinate declaration (provisional C1-discovered-relations,
 dial-confirms) + intent_from_above, in the same landing; it NEVER joins the pending
-registration tail. (5) First dial rides CVO's queue post-build -- do not self-dial.
+registration tail. (5) First dial rides CVO's queue post-build -- do not self-dial; CVO runs a dial-grade
+verify on landing (their word). (6) SPEC INPUTS folded per CVO 201039Z: Andrew's verbatim
+(@22f33727a: git change records tagged by AGENT TYPES) + CTO~B's F4 instrument definition
+(agent-type CO-MOVEMENT; denominators = commits-attributed/total AND pairs-observed/possible --
+both printed on every output).
 </scope>
 
 <compiler_tools_mandate>
