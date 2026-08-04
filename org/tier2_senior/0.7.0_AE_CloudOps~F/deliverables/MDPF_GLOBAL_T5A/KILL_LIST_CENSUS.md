@@ -66,6 +66,18 @@ No third condition exists: the freshness-checker family comp-estate still names 
 **Net on dispositions: rows 1-4 LIVE-SERVING stands, with the internal split sharpened** -- the accrual->publisher leg is the CANONICAL-designate already owning 100% of the serve (RETAIN; becomes THE chain at T2.C), while the runner/underscore leg is the one-miss-measured retiring plane; the freeze/blank hazard attaches to the FEEDER+ACCRUAL legs, not the underscore.
 5. **Chain composition (CTO 022148Z):** the `by_feeder` datum and the `_provenance` reads are TWO HOPS OF ONE CHAIN: `opal-data-mdpf/mdpf/feeds` -> accrual gold build -> `opal-data-assets/portal/gold/mdpf` -> publisher -> `opal-data-portal-v2/platinum/mdpf` (hyphen). **The canonical chain still READS opal-data-mdpf at its HEAD** -- so "opal-data-mdpf not required for a run" stays FALSE with receipts at the FEED layer too, and any T5 teardown sequencing must include the FEED-HEAD REPOINT (attaches to the C1 workstream's scope).
 
+## AMENDMENT #5 -- DEAD-CONSUMER KILL WAVE EXECUTED (2026-08-04T04:37-05:12Z; COO GO 042634Z, CTO split-gate 042600Z, Andrew categorical)
+
+Five kills landed, each one commit + change record + live-verified with positive controls; records in
+`org/critical_paths/change_management/20260804T04*` + `T0505Z*`:
+- **Row 17 (K1) EXECUTED** @ce77c1107: `mdpf-freshness-checker-lambda-role` + scoped inline policy + basic attachment (3 TF destroys, mdpf-pipeline; NoSuchEntity verified). Tag mdpf-pipeline-v2.0.1.
+- **Row 10 on-demand half (K2) EXECUTED** @4fce27eff: SSM doc `mdpf-legacy-emit-on-demand` + never-attached `MDPFLegacyEmitInvoker` policy (2 TF destroys; InvalidDocument + policy-absent verified). The IN-CHAIN Stage 3.5 emitter script remains (runner chain, three-gate teardown).
+- **Row 5 (K3) EXECUTED** @1805ea2ae: `_g6_fixture/*` 4 objects (delete markers recorded; prefix empty).
+- **Row 11 (K4) EXECUTED** @5b54436a0: json/portfolios Feb-2026 residue, 6 exact keys (delete markers recorded; protected survivors verified intact).
+- **Row 12 (K5) EXECUTED** @bd1470c80: `canonical-schwab-si2-download-schedule` rule + target + single-purpose events role + policy (4 TF destroys; live daily-pull pair blast-checked on a DIFFERENT role pre-kill and verified ENABLED post-kill).
+- **Row 17's shadow-S3Key half: NO-OP, recorded honestly** -- the declarations are GRAPH entries derived from live writer code (runner chain, out of scope); no AWS resource exists to delete. They die with the writer code at the three-gate teardown.
+- **NOT touched, per GO exclusions + wave judgment:** rows 1-4 (live-serving), row 6 (C2-gated), rows 7-8 (retain/superseded classes), **row 9** (CTO-deliberate freeze artifacts -- deleting buys nothing until the in-chain emitter retires; flagged to the three-gate teardown), row 13 (CTO not-a-deletion-warrant rider), row 14 (UNKNOWN-loud), row 15 (DE-lane, flagged), item-7 chain accessories (live-chain-coupled).
+
 ## DENOMINATORS
 Triggers: 142 rules materialized (0 attach to opal-data-mdpf) + 12 schedules (T1.A seed carried). S3 planes: platinum/mdpf 460 objects (9 hyphen-served + underscore root + 1 per-scope underscore + ~436 per-date + 4 OWNTS + 4 fixtures + prefix dirs); json/mdpf 10 keys; json/portfolios 9 top-level keys + 2 firm prefixes. Deployed artifacts read (Rule 22a): 3 edge (T3.A) + opal-portal-data-proxy (2/2 py files) + daily-emitter config + publisher config. comp-blast: 4 legacy producers (1 NOT-FOUND = tool blind spot, hand-derived + stated; graph 2255 nodes denominator printed by the tool). Caller sweeps: portal pages/components/contexts, 0 non-comment refs to the aum-timeseries fetch chain; 103/103 useQuery sites (T3.A comp-cache).
 
