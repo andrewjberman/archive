@@ -3,7 +3,20 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~B</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>complete</status>
+<!-- COMPLETE 2026-08-04T0028Z, CTO no-redline on COO acceptance flex (002748Z flag, 002826Z
+     accept). PREMISE FALSIFIED HONESTLY: to-check.py was ALREADY issued_to-keyed (:211/:136/
+     :419-422) -- ~B's discriminating pair proved CORRECTNESS (lane query surfaces the
+     lane-issued base-foldered CI-R7R8, excludes five same-folder siblings issued elsewhere).
+     AC-2 UNSATISFIABLE BY CONSTRUCTION, and the WHY is the record (CTO requirement): the
+     premise was false, the instrument was already correct, there was no pre-fix state to fail
+     -- this is NOT a shortfall in ~B's delivery; THE UNEXERCISED PREMISE WAS THE EXECS' (CTO
+     wrote the folder-vs-issued_to framing, COO staged it, neither exercised to-check first).
+     AC-1 satisfied (census 293/294 in scope, 21 matches/11 files) + AC-3 satisfied
+     (server.py:809-812 measured+flagged only). REAL DEFECTS FOUND INSTEAD, both ruled: the
+     default view's PRD-age gate (startup --all line RULED IN, CTO lands the law text); the
+     server.py folder-keyed surface (~B owns, sequenced behind the exposure scan + bd review,
+     discriminating pair both directions required). -->
 <priority>P2 (CTO BUILD ruling 000023Z rider 1: "it is HOW this sat 10 days... cheap and load-bearing." ACTIVATES when the CI-R7R8 fork resolves; you found the class, you fix it.)</priority>
 
 <title>Key TO discovery on `issued_to`, never folder location -- the fix for "a lane reads its own folder, reports IDLE, and carries a live P0"</title>
