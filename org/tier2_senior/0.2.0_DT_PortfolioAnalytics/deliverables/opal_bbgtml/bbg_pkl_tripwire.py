@@ -50,10 +50,13 @@ REGRESSION_MODELS = {"UST", "ST", "INT", "LT", "ULT"}
 # Yang's index_name values for the five models (spelling pinned AS-IS from the data).
 # Post-rename source spellings per DS live workbook check @89a3cca5ed: 'Long Term' /
 # 'Ultra Long Term' (unhyphenated; the 'Agressive' typo retired with the source series).
-# LAYER NOTE (MSTR 230727Z, twins verified aligned at source): index_names here are
-# DELIBERATELY unhyphenated while the served DISPLAY layer hyphenates per the DE typing
-# canon @02b7f351 ('Ultra Short-Term'/'Ultra Long-Term' -- hyphen joins Term). A validator
-# comparing display names against these index_names will manufacture a false mismatch.
+# LAYER NOTE (MSTR 230727Z + artifact adjudication 232036Z): THREE distinct name layers
+# exist and only this one is validated here -- (1) pkl index_name, unhyphenated, pinned
+# above; (2) served JSON display strings, currently 'Ultra-Short Term'/'Ultra-Long Term'
+# (DIVERGENT from canon, producer fix at DS next-seam); (3) rendered display, DE typing
+# canon @02b7f351 ('Ultra Short-Term'/'Ultra Long-Term', hyphen joins Term) via the FE
+# displayModelName() render-boundary resolver. A validator comparing any two layers'
+# strings byte-wise will manufacture a false mismatch; compare within a layer only.
 MODEL_INDEX_NAMES = {
     "Ultra Short Term", "Short Term", "Intermediate Term",
     "Long Term", "Ultra Long Term",
