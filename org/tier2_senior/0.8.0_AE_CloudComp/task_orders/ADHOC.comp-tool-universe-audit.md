@@ -48,6 +48,14 @@ with that case as a calibration exemplar -- and expect the audit to find more of
    comp-pipescript's tree map (your sibling TO); the phantom freshness family in the shared
    census; comp-iam's TF-parsed DESIRED universe (classify honestly -- DESIRED-plane is a
    different axis than hand-drawn, state which axis binds).
+   NAMED INPUT (CTO 005543Z, carried verbatim): comp-pipescript deployed reported "all
+   up-to-date / 0 UNCOVERED" on the exact file whose bd copy was six weeks stale -- it scopes by
+   the script's REPO HOME, so a shared script deployed into a SECOND firm's bucket is outside
+   its coverage entirely ("Model-B one-source means a script has MORE DEPLOYMENT TARGETS THAN
+   TREES, and this instrument models one target per script" -- ~B). THE LAW, verbatim: **"A
+   COVERAGE COUNTER EVALUATED WITHIN THE SCOPE IT IS MEANT TO AUDIT WILL ALWAYS READ ZERO --
+   strictly worse than no counter, because the zero is read as assurance."** The audit checks
+   every tool's coverage COUNTERS for this shape, not just its universe.
 5. Deliverable: the classification table (machine-readable + doc) in your deliverables folder;
    report to CTO (Part-2 sizing input) cc COO + CVO (Part-3 dial input).
 </scope>
