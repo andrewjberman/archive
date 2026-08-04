@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.8.0_AE_CloudComp~D</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>complete</status>
 <priority>P2 (dial F10 + the tests-outside-the-instruments family; originally morning-wave -- pulled forward on Andrew "Proceed" 1706Z + your lane going IDLE post-descent; the not-~D wall applied only WHILE you held the descent, which is complete @150dd98d7)</priority>
 
 <title>Graph-tests hygiene: repair the stale hold-era suite (F10) + enroll it in the F9 gate + the predicate-not-roster sweep of tests/ vs watch globs</title>
