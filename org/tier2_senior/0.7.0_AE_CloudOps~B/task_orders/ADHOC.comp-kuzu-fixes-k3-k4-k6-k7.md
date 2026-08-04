@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~B</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>complete</status>
 <priority>P1 (ANDREW-DIRECT ~1900Z fan-out @fc42aacc5: parallel seats on the spine-tool items; graph infra = the 0.7.0 lane family)</priority>
 
 <title>comp-kuzu fixes: K3 -full/-inc output contracts + K6 0-rows scope note + K7 edge-direction primer line -- K4 STRUCK (CTO 191057Z: stitch DB = RETIRE-CANDIDATE at the PRD, no interim machinery, seat deliberately waits)</title>
