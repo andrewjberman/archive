@@ -1,9 +1,12 @@
 <task_order>
 <to_id>ADHOC.comp-cochange-build</to_id>
+<!-- AMENDED 2025Z: scope grew to the FOUR-ITEM critical-path cluster per Andrew rounds 2-3
+     (record ANDREW_DIRECT_20260804_1945Z @175d829, CVO relay 202428Z) -- one seat, one
+     battery seam, one acceptance discipline. -->
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.2.0_DS_PortfolioAnalytics</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 TONIGHT (CRITICAL-PATH ELEVATION, Andrew via CTO~B ~200xZ per CVO 201039Z: the Kimi Phase-0 ratification sitting WAITS on comp-heat dial [CLOSED] + THIS BUILD -- "crucial touchpoints for Kimi to come to conclusions". Re-seated from the unspawnable ~E lane to this live seat 2011Z)</priority>
 
 <title>comp-cochange: co-change analysis over git history (agent-type-tagged), BORN-REGISTERED -- typed dispatch over existing substrate, no new git-walking engine</title>
@@ -24,7 +27,19 @@ the tool, DENOMINATORS PRINTED on every output. (4) BORN-REGISTERED at landing -
 ships WITH its output contract + coordinate declaration (provisional C1-discovered-relations,
 dial-confirms) + intent_from_above, in the same landing; it NEVER joins the pending
 registration tail. (5) First dial rides CVO's queue post-build -- do not self-dial; CVO runs a dial-grade
-verify on landing (their word). (6) SPEC INPUTS folded per CVO 201039Z: Andrew's verbatim
+verify on landing (their word). CLUSTER ITEMS 2-4 (AMENDED 2025Z, Andrew rounds 2-3 @175d829):
+ITEM 2 -- comp-heat COMPARE mode: divergence/convergence of heat between two named resources
+(the comp-blast overlap analog); per-window git-history series per side; output = current heat
+delta (absolute + bands + basis) + CONVERGING/DIVERGING/PARALLEL verdict + denominators
+(windows, commits per side, shared commits).
+ITEM 3 -- BASIS-IN-OUTPUT (Andrew-ratified elevation of dial CH-3): every band verdict prints
+WITH age_days + score + half_life + the barrier definition (7d/30d) -- a band NEVER prints
+without the numbers that produced it.
+ITEM 4 -- FEDERATED REGISTRATION (Andrew round 3 verbatim: "we do need federated Trino mode
+registered"): tools_index subcommand + contract row; CVO's deferred P6 probe converts to a due
+exercise on landing.
+Acceptance for ALL FOUR: dial-grade verify at CVO on landing; re-dial triggers already
+declared at their records. (6) SPEC INPUTS folded per CVO 201039Z: Andrew's verbatim
 (@22f33727a: git change records tagged by AGENT TYPES) + CTO~B's F4 instrument definition
 (agent-type CO-MOVEMENT; denominators = commits-attributed/total AND pairs-observed/possible --
 both printed on every output).
