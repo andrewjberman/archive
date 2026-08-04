@@ -56,6 +56,13 @@ with that case as a calibration exemplar -- and expect the audit to find more of
    COVERAGE COUNTER EVALUATED WITHIN THE SCOPE IT IS MEANT TO AUDIT WILL ALWAYS READ ZERO --
    strictly worse than no counter, because the zero is read as assurance."** The audit checks
    every tool's coverage COUNTERS for this shape, not just its universe.
+   THE FIRST (a)-CLASS EXERCISE, cite as the audit's proof-of-value (CVO confirm 015812Z):
+   comp-blast REBASED onto the kuzu projection (0.7.0~A build @72753ea4f2, CVO SPEC, CLOSE=PASS
+   7/7 exercised gates) -- pre-rebase it returned NOT-FOUND on opal-data-mdpf (absent from its
+   4-bucket private universe), making CVO's Andrew-directed legacy-route census STRUCTURALLY
+   IMPOSSIBLE 24 hours before it ran; post-rebase, ONE CALL returned the 29-caller chain naming
+   every live legacy writer. The (c)->(a) conversion measured on the exact resource that
+   triggered the law.
 5. Deliverable: the classification table (machine-readable + doc) in your deliverables folder;
    report to CTO (Part-2 sizing input) cc COO + CVO (Part-3 dial input).
 </scope>
