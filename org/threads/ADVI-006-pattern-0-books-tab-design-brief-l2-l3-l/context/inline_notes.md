@@ -1,2 +1,0 @@
-This is a Books tab design alignment. The previous run (ADVI-003) failed to produce its required deliverable: docs/architecture/advisor_intelligence/books_tab_design_brief.md. The DE must write this file as their final turn. It is not optional.
-DS: read lambda_function.py before describing what currently flows through the advisor-publisher. Anchor every answer to a function name and output dict key. Distinguish between what is currently in the published JSON vs what is gold-layer only. The gap list (what is missing from publisher output) is the core deliverable.
