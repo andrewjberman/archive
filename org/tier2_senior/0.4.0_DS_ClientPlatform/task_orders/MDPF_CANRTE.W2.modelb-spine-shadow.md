@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 (Phase-C wave 2; joint acceptance on record; Andrew "Proceed" 1706Z. SEQUENCE BEHIND W-1 -- this consumes its bindings)</priority>
 
 <title>MDPF_CANRTE W-2: the Model-B firm-parameterized spine builder, build-alongside -- SHADOW staging writes only, 3-green-scheduled-cycles parity before any swap</title>
@@ -17,8 +17,13 @@ build-alongside -> DELTA=0 on 3 consecutive green SCHEDULED cycles -> single dis
 <scope>
 Exactly the plan's W-2: ONE firm-parameterized spine builder consuming W-1 bindings, emitting
 the canonized contract per firm + the existing global fold mechanism, writing to the SHADOW
-prefix gold/mdpf_canrte_shadow/{firm}/aggregate_aua_timeseries.json on the same schedule,
-alongside the incumbents. The cottonwood L1 dim + its vocabulary/composition gates are
+prefix -- AMENDED 1748Z by joint word (COO 174803Z + CTO co-word 174841Z, on your Rule-22a
+implicitDeny finding): gold/mdpf_revamp/_canrte_shadow/{firm}/aggregate_aua_timeseries.json
+(RE-SITED under the granted prefix; ZERO IAM change; consumer-exclusion mechanically grounded:
+accrual reads roster-declared scopes and _canrte_shadow is not a roster firm, publisher derives
+from portal/gold/mdpf listing only) -- on the same schedule, alongside the incumbents.
+CTO CLEANUP RIDER (binding): the shadow tree gets an explicit REGISTERED DELETE STEP (at W-2
+close or W-5, whichever the plan sequences) -- it dies by declared step, not by memory. The cottonwood L1 dim + its vocabulary/composition gates are
 UNTOUCHED (declared vendor-necessity; today's Moderate-Income arc is live proof they are
 load-bearing). NO dispatch re-point in this TO -- the swap is its own step gated on the 3-green
 parity record; this TO delivers the builder + the shadow emission + the parity harness reads.
@@ -74,6 +79,8 @@ stream: your chain-green tie reads ride their own thread -- keep artifacts separ
 3. Builder deployed; shadow emission proven (mechanism-proof labeled as such); accrual/publisher
    listing-scope exclusion cited at source.
 4. Parity record armed and honestly OPEN (0/3 scheduled) at TO close -- no swap, no re-point.
+5. AMENDED 1748Z: the shadow-tree DELETE STEP registered (named owner + trigger: W-2 close or
+   W-5 per plan sequencing) -- the CTO cleanup rider on the re-site co-word.
 Plus: session log Compiler Tools section reproducing every run. Missing rows = REWORK.
 </acceptance_criteria>
 
