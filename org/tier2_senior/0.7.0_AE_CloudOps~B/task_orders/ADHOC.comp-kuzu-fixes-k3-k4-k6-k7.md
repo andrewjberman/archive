@@ -6,7 +6,7 @@
 <status>staged</status>
 <priority>P1 (ANDREW-DIRECT ~1900Z fan-out @fc42aacc5: parallel seats on the spine-tool items; graph infra = the 0.7.0 lane family)</priority>
 
-<title>comp-kuzu fixes: K4 stitch adjudication-fix + K3 -full/-inc output contracts + K6 0-rows scope note + K7 edge-direction primer line</title>
+<title>comp-kuzu fixes: K3 -full/-inc output contracts + K6 0-rows scope note + K7 edge-direction primer line -- K4 STRUCK (CTO 191057Z: stitch DB = RETIRE-CANDIDATE at the PRD, no interim machinery, seat deliberately waits)</title>
 
 <context>
 Andrew ordered agents fanned out on the comp-kuzu dial items (CVO record @fc42aacc5; the dial
@@ -18,8 +18,12 @@ is proportionate.
 
 <scope>
 Per the kuzu dial record's own item shapes (the record wins conflicts; surface, don't adjudicate):
-K4 (stitch adjudication-fix), K3 (the -full/-inc output contracts declared), K6 (the 0-rows
-scope note in output), K7 (the edge-direction primer line). NOTHING beyond the four items --
+K3 (the -full/-inc output contracts declared), K6 (the 0-rows scope note in output), K7 (the
+edge-direction primer line). ⛔ K4 IS STRUCK from this TO (AMENDED 1916Z): CTO dispositioned it
+191057Z (kuzu dial record @7250e83f4) -- the stitch DB is a RETIRE-CANDIDATE adjudicated at the
+C-indexed PRD, NO interim rebuild machinery gets built (route-first doctrine), the fix seat
+DELIBERATELY waits on the PRD. Building K4 machinery would be the exact
+standing-machinery-for-an-unsettled-surface class CTO ruled against. NOTHING beyond the three items --
 no re-dial, no engine work the record does not name. T2-class family questions stay PRD-gated.
 Exercise-before-and-after per item (the dial's own method: every gate an exercise); CVO's
 baselines are your pre-fix controls.
@@ -28,7 +32,7 @@ baselines are your pre-fix controls.
 <compiler_tools_mandate>
   <phase id="1" when="before write">
     <step><run>read the comp-kuzu dial record in full + reproduce each K-item's finding (pre-fix control, verbatim captures)</run>
-    <expect>4/4 reproduced or the delta from the record named to CVO before building.</expect>
+    <expect>3/3 reproduced (K3/K6/K7) or the delta named to CVO before building; K4 untouched.</expect>
     <if_mismatch>STOP on any item that no longer reproduces -- re-ground with CVO.</if_mismatch></step>
   </phase>
   <phase id="2" when="before commit">
@@ -50,7 +54,7 @@ with the mdpf/CANRTE streams.
 </cross_domain_coordination>
 
 <acceptance_criteria>
-1. 4/4 items: pre-fix control + post-fix exercise captured verbatim.
+1. 3/3 items (K3/K6/K7): pre-fix control + post-fix exercise captured verbatim; K4 surface untouched (shown).
 2. Baseline byte-stability shown outside each item's intended surface.
 3. CVO verify-on-landing obtained per item.
 Plus: session log Compiler Tools section reproducing every run. Missing rows = REWORK.
