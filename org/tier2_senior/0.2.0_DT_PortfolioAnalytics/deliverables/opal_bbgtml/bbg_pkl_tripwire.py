@@ -44,11 +44,15 @@ MODEL_KEYS = {
     "factor_spreads", "model_returns", "benchmark_returns", "factor_spread",
     "model_correlations", "factor_correlations", "combined", "regression", "summary",
 }
-REGRESSION_MODELS = {"UST", "ST", "INT", "LTC", "LTA"}
+# 2026-08-04 rename mirror (LTC->LT / LTA->ULT, MSTR route-out 225204Z; sitez twin fixed live
+# under the /terminal-upload fire authorization -- keep both twins in lockstep on any edit).
+REGRESSION_MODELS = {"UST", "ST", "INT", "LT", "ULT"}
 # Yang's index_name values for the five models (spelling pinned AS-IS from the data).
+# Post-rename source spellings per DS live workbook check @89a3cca5ed: 'Long Term' /
+# 'Ultra Long Term' (unhyphenated; the 'Agressive' typo retired with the source series).
 MODEL_INDEX_NAMES = {
     "Ultra Short Term", "Short Term", "Intermediate Term",
-    "Long Term Conservative", "Long Term Agressive",
+    "Long Term", "Ultra Long Term",
 }
 ROW_PINS = {  # frame -> (floor, ceiling)
     ("data", "return_daily"):   (107000, 165000),
