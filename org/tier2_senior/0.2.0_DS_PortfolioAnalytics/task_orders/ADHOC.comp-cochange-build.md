@@ -1,5 +1,10 @@
 <task_order>
 <to_id>ADHOC.comp-cochange-build</to_id>
+<!-- AMENDED 2101Z: ITEM 1 (comp-cochange) SUPERSEDED at this seat -- Andrew ~2045Z pulled the
+     design/build to the CVO terminal himself (record @dcf03e271, CTO~B Kimi-legs precedent).
+     ITEMS 2-4 REMAIN at this seat at ORDINARY cadence (tonight-P1 dissolved -- the sitting's
+     gate travels with the cochange work at Andrew's terminal); the attribution producer fix
+     (COO 203744Z) outranks them in sequence. -->
 <!-- AMENDED 2025Z: scope grew to the FOUR-ITEM critical-path cluster per Andrew rounds 2-3
      (record ANDREW_DIRECT_20260804_1945Z @175d829, CVO relay 202428Z) -- one seat, one
      battery seam, one acceptance discipline. -->
