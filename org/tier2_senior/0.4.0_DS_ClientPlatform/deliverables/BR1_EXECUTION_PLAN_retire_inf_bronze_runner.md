@@ -78,3 +78,52 @@ G1: >=5 trading days field-exact overlap, zero unexplained divergence, cut execu
 no production dual-write interval. G2: emitter + BOTH floors live, one full scheduled
 cycle + one floor exercise observed. G3: box stopped on human word, TF clean, ledger
 closed, R-1 registry row updated to RETIRED-WRITER-B with this plan cited.
+
+---
+
+## AMENDMENT 1 (2026-08-04 ~20:1xZ) -- Gate-2 floor row 1 re-shaped: the dead citation replaced by a NEW GUARDED FLOOR (GF-1)
+
+**Frame:** CTO ruling 200314Z on AE's phase-1 stop (their live verify caught row 1's cited
+floor wrong on BOTH values). Option (a) -- re-enabling `inf-canonical-prices-daily` -- is
+DEAD: the disable is DELIBERATE, declared in TF with the 07-13 triple-ratified reasoning
+(@b7bce51bd: an UNGUARDED `{mode:full}` re-derive racing the dispatch lock, won by ~16
+minutes daily by luck; "prose governs an agent; it cannot govern a scheduler"). Nobody
+re-enables it.
+
+**The mis-cite, owned (plan-author):** row 1 cited "cron 14:00 UTC" ENABLED-implied from a
+DESIRED-state read; live state is cron(47 14) and DISABLED. The row's own "AE verifies the
+rule live at implementation" clause is what caught it -- correct stop, but the clause
+DEFERRED the live read instead of making it at authoring time, letting a wrong citation
+live in the plan for a day. The citation-discipline rider (below) closes that class.
+
+**GF-1 -- the NEW GUARDED FLOOR for the gold-runner consumer (replaces row 1):**
+- **Schedule-anchored:** an EventBridge cron ~15:30 UTC (after the Gate-2 emitter's ~14:45Z
+  sentinel window; exact minute AE's, off the :00/:30 fleet marks) -- a floor IS a
+  schedule (NEVER#4).
+- **Data-state-GUARDED:** the floor invocation verifies input state BEFORE dispatching --
+  the day's `_BRONZE_COMPLETE.json` sentinel (or the same required-dim contract the
+  emitter checks, re-verified) AND silver-converted state for {date}. NO blind
+  `{mode:full}` re-derive, ever -- the exact hazard that killed the old rule.
+- **Lock-COMPOSING, not racing:** idempotent skip-if-already-run (the day's gold outputs
+  present = exit 0 quietly) + gate-before-fire (the F-B stage-0 exp-gate pattern, tonight's
+  in-estate precedent). The floor can only ever START work the sentinel path did not
+  already start; it can never run beside it.
+- **BR1-SIZED (criterion 4, stated honestly):** GF-1 floors the ONE consumer BR1's
+  sentinel serves, using the SAME pattern as floor row 2 (the ~15:15Z idempotent
+  silver-chain floor AE already implements) -- an increment to already-planned Gate-2
+  work in the same AE lane, not a chain redesign. **THE BIGGER ITEM IS CARVED OUT:** the
+  INF chain has been deliberately floor-LESS since 07-13 and the 08-03 no-cycle gap is
+  that condition's symptom -- a chain-wide guarded-floor design is ITS OWN item, routed
+  to CTO (same NEVER#4 family as the mdpf convergence-gate debt already routed), with
+  BR1 citing it as adjacent, never absorbing it.
+
+**Citation discipline (binding on this plan from here, per CTO's adoption of AE's class
+note -- STATE + recorded hazard, never existence+target):**
+- `inf-canonical-prices-daily`: cron(47 14), **DISABLED** (AE live verify 2026-08-04);
+  hazard on record: the 07-13 unguarded-full race (@b7bce51bd). Cited as a DEAD rule that
+  STAYS dead.
+- The runner dispatch lock: LIVE; hazard it guards: the same 07-13 race.
+- The Gate-2 emitter + row-2 silver floor: **PLANNED, not live** (AE TF hold until this
+  amendment lands); nothing here cites them as existing controls.
+- Gate-3 preconditions now read GF-1 in place of the dead row-1 citation ("both floors
+  live AND exercised" = row-2 floor + GF-1).
