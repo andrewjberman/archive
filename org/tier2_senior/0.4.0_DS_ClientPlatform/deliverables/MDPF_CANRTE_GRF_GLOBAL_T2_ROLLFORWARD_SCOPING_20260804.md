@@ -76,6 +76,15 @@ Therefore:
 - **Coherence rule under carry:** the frontier-count coherence check (account_dist as the ONE
   count source [dim:614-657]) compares LIKE vintages: a carried-count date carries its
   source's as_of, so the check binds carried-to-carried and real-to-real, never across.
+- **COMPOSITION SEAM (COO 181037Z; Andrew-direct at 0.2.0's terminal ~17:5xZ): Global
+  account-distribution today EXCLUDES cottonwood entirely** (holdings count / container
+  metrics / bell curve). 0.2.0_DS + DE spec the INCLUSION fix (49F/INF as the reference
+  shape). **The two specs COMPOSE in this order: INCLUSION FIRST (their spec), then THIS
+  section's carry semantics apply to the included cottonwood leg** — carry semantics on an
+  excluded leg are vacuous, so nothing here lands ahead of theirs. 0.5.0_AE: treat their
+  inclusion spec as a PREREQUISITE input for the §3 half of your surface (the §2 aum-metrics
+  half has no such dependency). Cross-spec conflicts route to CTO (triangle law), never
+  adjudicated in either document.
 
 ## 4. The lag declarations — W-1 binding rows (SPEC; declared, never re-inferred)
 
