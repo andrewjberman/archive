@@ -25,28 +25,42 @@ SEAT WALL (Andrew's own naming, record it in your artifact): 0.5.0_AE_OpalETL im
 cloud side and ANDREW BRINGS THEM IN HIMSELF -- your scoping document HANDS OFF to that seat;
 NOBODY (you, me, CTO) dispatches 0.5.0_AE on this. Your deliverable must be readable by that
 seat cold.
+
+AMENDED 1738Z (CTO source-grounded simplification, his 173824Z -- dim_mdpf_aggregate_aua_
+timeseries.py:1940-2030 + :1749-1775 read this hour): THE CARRY MACHINERY ALREADY EXISTS for
+aggregate-aua-timeseries -- the Global fold already (a) carries cottonwood's last measured value
+within the roster-derived gate_policy window (cottonwood 3 TD); (b) labels every carried point
+carried_at_declared_cadence(as_of=...) with as_of_by_partner -- Andrew's marked-interim semantic
+VERBATIM; (c) overwrites naturally on rebuild when real data arrives; (d) DE's new clamp reads
+carried points as PRESENT, so the frontier self-advances with zero further FE work. Today
+clamped to 07-30 only because the freeze EXCEEDED the declared window and the bounded carry
+correctly refused -- the fix for a frozen pipeline is the PIPELINE (unfrozen today), never a
+wider window. Record note (fold into your artifact): DE's clamp and the fold carry were built
+as two halves of ONE mechanism without either seat knowing it -- the inversion Andrew intuited
+is the two halves meeting.
 </context>
 
 <scope>
-DESIGN-ONLY scoping document (zero code, zero serve contact -- the CANRTE walls apply):
-1. THE MARKING MECHANISM: interim-vs-real distinguishable by ANY reader FROM THE ARTIFACT ITSELF
-   (per-date marking in content, never doc-carried or inferred from timestamps) -- propose the
-   concrete shape against the three surfaces' existing schemas; additive, never a shape fork.
-2. OVERWRITE SEMANTICS: real value arrival replaces the marked interim -- state the detection
-   (what event/read establishes "real arrived"), the replacement mechanics, idempotency, and
-   what history shows after overwrite (no residue of the interim beyond any audit trail you
-   propose).
+DESIGN-ONLY scoping document (zero code, zero serve contact -- the CANRTE walls apply).
+NARROWED per the 1738Z amendment -- NO new carry engine, NO window widening, and
+aggregate-aua-timeseries needs NO design (the mechanism is live; cite it):
+1. EXTEND THE SAME CARRY BASIS (existing window + carried_at_declared_cadence labels + natural
+   overwrite) to the TWO derived artifacts: Global aum-metrics.json -- the real design work is
+   PER-MODEL carry in by_model, and the composition gate MUST HOLD under carried legs (state
+   how); and Global account-distribution.json -- account-COUNT carry semantics.
+2. THE STEADY-STATE CONTRACT, stated: cot at T+2 inside its 3-TD declared window = always
+   carried on the T+1 tail = Global frontier at T+1 every day, PROVIDED THE DAILY CHAIN RUNS --
+   name the NEVER#4 schedule work as the real dependency, routed to CTO, not absorbed here.
 3. THE LAG DECLARATIONS AS W-1 BINDING ROWS: per-firm effective-lag declared in
-   route_bindings.yaml (your own W-1, in flight -- fold naturally; the L3 Global-fold contract
-   row family). A lag is a DECLARED property, never re-inferred at run time.
-4. FRONTIER-CLAMP INTERACTION: show that with roll-forward live the clamp becomes naturally
-   non-binding (complete-data frontier == display frontier), and state explicitly that the clamp
-   is not removed by this design absent Andrew's word.
-5. HANDOFF SECTION for 0.5.0_AE: implementation surface named (which producer/fold step carries
-   the roll-forward), inputs they need, acceptance shape (including the marked-interim
-   round-trip: interim served -> real arrives -> overwrite verified) -- written cold-readable.
-6. Sequencing at your seat is YOURS: interleave with W1/W2 + tonight's ~02Z clock; the natural
-   fold is the lag rows riding your W-1 work.
+   route_bindings.yaml (landed @8058f5523 -- fold as the L3 Global-fold contract row family).
+   A lag is a DECLARED property, never re-inferred at run time.
+4. FRONTIER-CLAMP INTERACTION: one paragraph -- the clamp already reads carried points as
+   PRESENT (mechanism live), so with the derived artifacts carrying, it becomes naturally
+   non-binding; it is NOT removed by this design absent Andrew's word.
+5. HANDOFF SECTION for 0.5.0_AE: the (much smaller) implementation surface named per artifact,
+   inputs, acceptance shape incl. the marked-interim round-trip (interim served -> real arrives
+   -> overwrite verified) -- written cold-readable.
+6. Sequencing at your seat is YOURS: interleave with W-2 + tonight's ~02Z clock.
 </scope>
 
 <compiler_tools_mandate>
