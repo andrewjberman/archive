@@ -76,14 +76,17 @@ merged FE-side into the per-point class at `combinedData` build).
 
 ## 3. Schema flags — routed to CTO shape validation BEFORE ratification
 
-**F-A (load-bearing): per-firm slices need a PROJECTED channel_participation.** v1.1 declares the
+**F-A (load-bearing): per-firm surfaces need participation meta.** v1.1 declares the
 meta on the GLOBAL artifact only — but the per-firm views fetch ONLY
-`platinum/mdpf/{firm}/aggregate-aua-timeseries.json` (map @b48634789a, rows 1/3), so inflection's
-carried points would render UNLABELED on the exact surface a user checks that firm on —
-recreating the rider's gap-1 one view over. Ask: `slice_per_firm` projects the slice-firm's OWN
-exception rows + its window into the slice meta (same shape, single channel). The alternative
-(FE fetches the global artifact on per-firm views) double-fetches and couples views — not
-recommended.
+`platinum/mdpf/{firm}/aggregate-aua-timeseries.json` (map @b48634789a, rows 1/3).
+~~so inflection's carried points would render UNLABELED on the exact surface a user checks that
+firm on — recreating the rider's gap-1 one view over. Ask: `slice_per_firm` projects the
+slice-firm's OWN exception rows + its window into the slice meta~~ **MECHANISM CORRECTED by DS
+030624Z — see §6: no carried points exist on the per-firm artifact (carry is global-fold-local);
+the REAL per-firm gap is the T2 distinction (honest-lag tail vs broken producer). DS's
+participation-LITE proposal supersedes my projection ask and is ENDORSED render-side.** The
+alternative (FE fetches the global artifact on per-firm views) double-fetches and couples views —
+not recommended (unchanged).
 
 **F-B (rider on F-A):** the projection must include the per-channel past_window ABSENT row — the
 transition marker (T2) is per-channel and must survive slicing.
@@ -117,5 +120,27 @@ Phase 1 delivered: design + census + flags. Field-availability confirm dispatche
 `0.2.0_DS_PortfolioAnalytics` (citing @b91c99dfc4); F-A/F-B/F-C/F-D routed to `1.0.0_SA_CTO`
 shape validation; COO CCed. **Phase 2 waits for the ratified shape relayed by COO/CTO** — no
 portal edit lands from this phase.
+
+## 6. CORRECTED + CONVERGED 2026-08-04 ~031xZ (DS producer answers 030624Z; struck text in §3 retained, do not re-cite)
+
+- **F-A premise was WRONG on mechanism, right on gap-location:** the inflection carry is
+  GLOBAL-FOLD-LOCAL (`build_global_artifact` only); the per-firm artifact carries an honest-None
+  ABSENT tail on lag days (shared axis), never carried points — so nothing could have rendered
+  "unlabeled-carried" there. The real per-firm gap is T2 one level down: honest-lag tail vs broken
+  producer are indistinguishable. **DS's participation-LITE** (same vocabulary, single channel:
+  the firm's own measured frontier + roster window + absent rows with reason on shared-axis tail
+  dates) **is ENDORSED render-side** — it feeds per-firm T2 (window-end marker + past_window
+  tooltip) and T3 (window statement) directly, one vocabulary across surfaces.
+- **Design simplification that falls out:** T1's carried treatment (rings + slate dash + watch) is
+  **GLOBAL-VIEW-ONLY** — no carried points exist per-firm to mark. T5 reduces to per-firm T2+T3
+  bound to participation-LITE fields.
+- **F-B:** satisfied INSIDE participation-LITE (tail absent rows carry reason + the firm's own
+  frontier as last-good marker).
+- **F-C:** settled by RULING, not preference — CTO 000925Z mandated SPARSE ONLY, no dense twin.
+- **F-D:** NOT derivable today — the revamp global has NO `partners{}.by_model` (flat per-firm
+  shape is a CTO ruling 2026-07-22; do not wait on the nested shape). DS's proposed
+  `by_model_channels` additive meta (derived at build from which firm legs contributed — measured,
+  not hand-listed) is ENDORSED for T4; until CTO's shape word, T4 ships aggregate-only badges.
+- Both DS proposals (participation-LITE, by_model_channels) ride CTO's F-A validation round.
 
 — 0.4.0_DE_ClientPlatform
