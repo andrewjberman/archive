@@ -53,7 +53,17 @@ control before first use.
 - **ROLLBACK:** delete the file — nothing consumes it yet.
 - **SERVE EXPOSURE:** zero.
 
-## 3. W-2 — Model-B spine builder, build-alongside (staging writes only)
+## 3. W-2 — Model-B spine builder ~~build-alongside (staging writes only)~~
+
+> **⚠ HISTORICAL — DO NOT EXECUTE THIS SECTION AS WRITTEN. W-2 IS DONE, AND IT WAS NOT DONE THIS
+> WAY.** The shadow prefix below was **deleted pre-first-emission** and the comparator
+> **deleted + deprecated** under Andrew's 2026-08-04 complete veto; the port then ran as W2R
+> (build-correctness + ad-hoc QA + direct swap, incumbents deleted same-window), and the
+> 3-consecutive-green gate was collapsed as a shadow-era artifact.
+> **The text is preserved unedited as the record of what was PLANNED** — the veto landed mid-wave
+> and that sequence is part of the history. **It is not an instruction and nothing should be
+> derived from it.** For the method that actually applies to any remaining wave, see §4's
+> METHOD bullet.
 
 - **WHAT LANDS:** ONE firm-parameterized spine builder (F-3) consuming W-1 bindings, emitting
   the canonized §2.1 contract per firm + the existing global fold mechanism. It writes to a
@@ -71,18 +81,83 @@ control before first use.
   vendor-necessity per F-2; today's Moderate-Income arc is live proof those gates are
   load-bearing).
 
-## 4. W-3 — Derived producers parameterized (metrics / distribution / pair fold-in)
+## 4. W-3 — Derived producers parameterized — **AMENDED 2026-08-05, TWICE. READ THE BOX FIRST.**
 
-- **WHAT LANDS:** the same binding parameterization for `dim_mdpf_aum_metrics`,
-  `dim_mdpf_account_distribution`, and the cottonwood pair's derived outputs (the pair already
-  imports the dim machinery [pair:63-65] — the consolidation is half-done in the dependency
-  direction). Includes the global meta-provenance one-hunk so every derived artifact carries the
-  uniform meta block (source_spine / as_of_basis / firm_id). Same shadow → 3-green → swap
-  idiom as W-2.
-- **PARITY GATE:** DELTA=0 per derived artifact per scope; PLUS the derived-vs-spine tie law
-  (the water-test class: per-model tie to the cent) asserted by the harness, not by rc.
-- **ROLLBACK:** dispatch-step revert, incumbents stay deployed.
+> ### ⛔ AMENDMENT A — THIS SECTION PRESCRIBED A VETOED MECHANISM FOR ~30 HOURS
+>
+> **It said, verbatim: *"Same shadow → 3-green → swap idiom as W-2."* BOTH HALVES ARE DEAD.**
+>
+> - **SHADOW — Andrew-direct COMPLETE VETO, 2026-08-04:** *"We do not do all these extra paths,
+>   these things never ever get decommissioned and they become debt and fuck us up forever… we
+>   simply do something correctly the first time and port over, not making a million backdoor
+>   shadow channels… The comparator is also a HORRIBLE idea."* W-2's shadow prefix was deleted
+>   pre-first-emission and its comparator deleted + deprecated.
+> - **3-GREEN — collapsed** by Andrew's W2R word as *a shadow-era artifact* (COO, relayed).
+>
+> **I WROTE THIS PLAN ON 08-04, THE SAME DAY THE VETO LANDED, AND IT SAT AS THE SEATING DOCUMENT
+> FOR AN UNSTARTED WAVE.** Executing my own plan would have built a shadow channel under a
+> standing veto **while citing an approved design document.** The next reader's diligence —
+> following the plan — is what would have produced the violation.
+>
+> **A STALE PLAN IS WORSE THAN A STALE FACT, BECAUSE A PLAN IS AN INSTRUCTION.** A stale fact gets
+> checked when someone relies on it; a stale plan gets EXECUTED, and the more approved the
+> document, the more faithfully. Amended rather than quietly deviated from — a deviation leaves
+> the bad instruction in place for the next reader.
+> *(COO confirmed the method 2026-08-05T1955Z and directed this amendment as its own commit ahead
+> of any W-3 code. Doctrine candidate they are carrying to CTO: **when a ruling lands, the sweep is
+> not only over records of FACT — it is over PRESCRIPTIVE documents, which are the ones that will
+> be acted on.**)*
+
+> ### ⚠ AMENDMENT B — THE SCOPE WAS THREE LEGS AND IT IS FOUR
+>
+> This section named *"metrics, distribution, and the cottonwood pair"*. The program label in the
+> registry is **"derived-producer consolidation (6b/6c/6e)"** — three letters that map neatly onto
+> those three components. **That neatness is a coincidence, and acting on it would have built the
+> wrong scope.**
+>
+> `6a`–`6e` are **dispatch stage-6 steps**, ground-truthed in
+> `infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh` (@HEAD, `:521`–`:615`):
+>
+> | step | what it runs | status |
+> |---|---|---|
+> | **6a** | THE COLLECTIVE SPINE (`build_mdpf_spine.py`) | DONE — W-2/W2R swap |
+> | **6b** | `account_distribution` per firm | **W-3** |
+> | **6c** | `non_model` (`dim_mdpf_non_model_assets`) — MUST follow 6a | **W-3** |
+> | **6d** | COTTONWOOD legs (dim + pair + slice + global re-stage) | **W-3** |
+> | **6e** | `aum_metrics` — runs LAST, sees 6d's output | **W-3** |
+>
+> **The three-letter label SILENTLY DROPPED 6d (cottonwood), and my own prose had named the
+> cottonwood PAIR while OMITTING 6c (non_model_assets) entirely.** Two errors that cancelled in
+> count and not in content. **W-3 IS FOUR LEGS: 6b / 6c / 6d / 6e.**
+> *(COO propagated the three-letter label from CTO without resolving it and said so; I declined to
+> guess the mapping because the letters skip 6d. The dispatch is the authority, not the label.)*
+
+- **WHAT LANDS:** binding parameterization for the FOUR derived-producer legs above —
+  `dim_mdpf_account_distribution` (6b), `dim_mdpf_non_model_assets` (6c), the cottonwood legs
+  (6d — dim + pair + slice + global re-stage; the pair already imports the dim machinery
+  [pair:63-65], so the consolidation is half-done in the dependency direction), and
+  `dim_mdpf_aum_metrics` (6e). Includes the global meta-provenance one-hunk so every derived
+  artifact carries the uniform meta block (source_spine / as_of_basis / firm_id).
+- **METHOD (REPLACES the shadow idiom) — Andrew's own, verbatim: DO IT CORRECTLY THE FIRST TIME
+  AND PORT OVER.** Build-time correctness: tests, exercised tie-outs, and an **AD-HOC QA
+  comparison run (run-and-read, nothing left standing)**. Then a **DIRECT port on the production
+  schedule with same-window rollback.** No shadow prefix. No parallel emitter. No standing
+  comparator. **Nothing that survives the port.**
+- **PARITY GATE — AMENDED:** DELTA=0 per derived artifact per scope, plus the derived-vs-spine tie
+  law (per-model tie to the cent), **read on an AD-HOC QA run before the port and asserted by the
+  test, not by rc.** ⛔ The prior wording — *"asserted by the harness"* — implied a STANDING parity
+  harness, which is the comparator shape in softer form and is vetoed. An ad-hoc run-and-read is
+  sanctioned; a standing second instrument is not.
+- **ROLLBACK:** dispatch-step revert, same window; incumbents stay deployed.
 - **SERVE EXPOSURE:** zero (staging + the accrual's dated tree read the same content by parity).
+- **⚠ SEQUENCING DEPENDENCY, open at Andrew (recorded, not resolved):** CTO's HEAD note on
+  `MDPF_CANRTE.json` identifies a redundant promotion hop — the spine writes
+  `gold/mdpf_revamp/` (underscore, undated) and 40 minutes later the same bytes are promoted to
+  `portal/gold/mdpf/` (hyphen, date-partitioned). *"IF THE SPINE WROTE THE CANONICAL GRAMMAR
+  DIRECTLY, THE PROMOTION HOP DISAPPEARS."* It is **carried to Andrew as part of the W-3 appetite
+  question and NOT authorized as work.** Relevance here: **if he rules the hop away, W-3's
+  meta-provenance one-hunk lands in a DIFFERENT output grammar than the one this plan builds to.**
+  Do not start the meta-provenance leg without checking that ruling's state.
 
 ## 5. W-4 — Home migrations (the ratified grammar's one-builder-home rule)
 
@@ -148,17 +223,35 @@ wanted content change is by definition NOT part of this migration (never-widen).
   `_provenance.written_at` — then require BYTE EQUALITY. No numeric tolerance: the trio's own
   idempotency contract ("generated_at stamps differ; series bytes do not" [trio:19-20]) is the
   precedent that everything else must tie exactly.
-- **Instrument:** a small read-only comparator (Phase-C build item, DS lane) that prints the
-  denominator (files compared, fields stripped) per run.
-- **Its own control:** before first gating use, a MUTANT run (perturb one series value in a
-  copy) must FAIL — a comparator that cannot fail is not a control. Exercised, not assumed.
-- **Cycle rule:** parity is only ever read on SCHEDULED cycles (never an ad-hoc build — ad-hoc
-  artifacts are never production evidence, NEVER#4).
+- **Instrument — AMENDED 2026-08-05:** an **AD-HOC, RUN-AND-READ** comparison, executed by hand
+  before the port and **left standing nowhere**, that prints the denominator (files compared,
+  fields stripped) per run.
+  ⛔ **The prior wording — *"a small read-only comparator (Phase-C build item, DS lane)"* — is
+  VETOED and is struck.** Scheduling a comparator as a build item creates exactly the standing
+  second instrument Andrew's 2026-08-04 veto names: *"The comparator is also a HORRIBLE idea
+  because it just muddies the water even further… Delete all of that and mark it all as
+  deprecated."* **A comparator that never dies is the debt; the comparison itself is fine.**
+- **Its own control (UNCHANGED and still mandatory):** before first gating use, a MUTANT run
+  (perturb one series value in a copy) must FAIL — **a comparator that cannot fail is not a
+  control.** Exercised, not assumed. *(This survives the veto intact: it is a property of the
+  ad-hoc run, not a standing process.)*
+- **Cycle rule — CLARIFIED, because the two halves read as contradictory:** **production EVIDENCE
+  comes only from SCHEDULED cycles** (an ad-hoc artifact is never production evidence, NEVER#4).
+  **The ad-hoc QA comparison above is a QA INSTRUMENT, not production evidence** — it establishes
+  build-time correctness before the port; the scheduled cycle after the port is the acceptance.
+  Both statements are true and neither licenses the other: **run-and-read to decide whether to
+  port; scheduled-run to accept what was ported.**
 
 ## 8. What this plan deliberately does NOT do
 
-- No alarms, monitors, or freshness checkers anywhere (moratorium; the parity harness is a
-  gate on a migration step, not a standing monitor — it retires with the migration).
+- No alarms, monitors, or freshness checkers anywhere (moratorium).
+  ⛔ **AMENDED 2026-08-05 — the original justification is struck:** it read *"the parity harness is
+  a gate on a migration step, not a standing monitor — it retires with the migration."* **That
+  argument is exactly the one the 08-04 veto rejects.** "It retires with the migration" is what
+  every shadow path and standing comparator has claimed, and Andrew's own words are that *"they
+  never ever get decommissioned."* **There is no parity harness in this plan any more** (§7): the
+  comparison is ad-hoc and leaves nothing behind, so the moratorium question does not arise
+  rather than being argued around.
 - No re-litigation of ruled forks; no ETFS-CANON contact (the 49f custody binding carries the
   sovereign ruling verbatim; a future ETFS ruling flips one row, zero route change — ratified).
 - No `mdpf-daily-trigger` scheduling redesign: the convergence-gate/no-schedule class (the
@@ -175,5 +268,6 @@ wanted content change is by definition NOT part of this migration (never-widen).
    W-4/W-5 precondition (§1, §5 sequencing rule).
 5. The §6.2 carry-import decision is made (§6 step 4) with the alternative stated.
 
-Phase-C work items implied by this plan (builder, comparator, config, moves) get their own TOs
+Phase-C work items implied by this plan (builder, config, moves — **NOT a comparator; struck
+2026-08-05 per the 08-04 veto, see §4/§7**) get their own TOs
 at Phase-C seating — none are begun by this document.
