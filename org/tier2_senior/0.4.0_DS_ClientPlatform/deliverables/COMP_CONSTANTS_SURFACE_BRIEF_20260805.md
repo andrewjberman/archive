@@ -202,5 +202,66 @@ violation was correct.
 
 ---
 
+---
+
+## AMENDMENT 1 (2026-08-05, ~21:0xZ) — THE TOOL'S OWN SANCTIONED COMMAND DELETES ITS OWN DOCUMENTATION
+
+**Found by `2.0.0_SA_COO` reviewing my staged file before committing it. It is my defect, and it
+strengthens §4 rather than sitting beside it.**
+
+The tool documents `comp-constants index` as the correct follow-up after a coordinated propagation —
+*"Preserves notes, canonical_value, lane."* I ran it, as instructed. **It regenerated the config and
+silently dropped the file's entire hand-written header — 46 lines** (COO's first read said 20; the
+measured boundary is `file_lanes:` at HEAD line 47, so 46).
+
+Measured, HEAD vs my staged file:
+
+| token | HEAD | staged after `index` |
+|---|---|---|
+| `sovereign_held_markers` | 1 | **0** |
+| `Schema:` | 1 | 0 |
+| `Drift gate` | 1 | 0 |
+| `Re-derive from current AST` | 1 | 0 |
+| `BL-1` / `BL-2` | 1 | 0 |
+
+**WHY THIS IS SERIOUS AND NOT COSMETIC:** that header is the ONLY place in the estate documenting
+`sovereign_held_markers` — the mechanism by which a **sovereign hold** is declared on this tool,
+making it REFUSE (exit 3) any full scan naming a held path. It is inert today (no hold is live), so
+nothing breaks — **but delete the documentation and the next agent needing to declare a sovereign
+hold on this tool concludes the mechanism does not exist.** The same header carries BL-1, BL-2, the
+re-derive command, and the drift-gate contract: the operating instructions for the tool whose config
+it is.
+
+**THREE THINGS THIS ADDS TO THE BRIEF:**
+
+1. **The config is BOTH generated AND hand-authored, and the generator does not know it.** Every
+   `index` run destroys the hand-written half. This is not a one-off — it will recur on every
+   coordinated propagation, which is exactly when `index` is prescribed.
+2. **The loss is invisible to the review anyone would actually perform.** The reviewer checks the
+   `canonical_value` bumps — they were correct. COO caught it only because the diff opened with
+   deletions and they checked `numstat` (319 added / 321 deleted) instead of reading the first twenty
+   lines. **In their own words: that is luck, not method.**
+3. **It is a second, independent instance of the brief's core shape**, one layer further in: a
+   hand-maintained artifact under a tool that treats it as machine-owned. §4.1 says the *values*
+   should be derived rather than copied; this says the *file itself* has two authors, one of whom
+   overwrites the other without noticing.
+
+**DISPOSITION:** header restored verbatim on top of the regenerated body, canonical bumps preserved
+and re-verified (`sovereign_held_markers` 1, BL-1/BL-2 present, `{3, 6, 10, 11, 12}` at both
+constants plus the partner dict). COO lands the file — they are enumerated in `ANY_EXEC_OR_AE`
+(`.owned-paths.yaml:631`), so **no override by anyone was ever required**; the lane question I routed
+dissolved on their read.
+
+**ROUTED, NOT FIXED (per COO):** the generator defect is a `comp-constants` tool defect, not mine to
+repair. *A config generator that eats its own documentation will do it every time.* Owner's call —
+either `index` must preserve a leading comment block, or the header must move somewhere the generator
+does not rewrite.
+
+*Correction to my own §8: I wrote that I "did not touch the tool or its config beyond today's three
+canonical bumps." That was true of my intent and false of the effect — running `index` rewrote the
+whole file. The distinction between what I changed and what I ran matters, and I did not draw it.*
+
+---
+
 *Delivered per Andrew-direct instruction, 2026-08-05, to `1.0.0_SA_CTO` base. Recorded + broadcast
 same turn per the record-and-broadcast law.*
