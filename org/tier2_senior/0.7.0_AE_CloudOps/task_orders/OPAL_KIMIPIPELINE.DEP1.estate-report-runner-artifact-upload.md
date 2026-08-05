@@ -4,13 +4,14 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-05</issued>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 -- hard window</priority>
 
 <references>
   <ref type="prd">docs/architecture/OPAL_KIMIPIPELINE_PRD.md</ref>
-  <ref type="commit">765233590 -- the change being deployed (1.0.0_SA_CTO~B)</ref>
-  <ref type="acceptance">CVO pre-registered acceptance @95d6a8d3d (published BEFORE the build)</ref>
+  <ref type="commit">**a254104b34** -- THE DEPLOY VINTAGE (1.0.0_SA_CTO~B). Carries BOTH the corpus-freshness change AND the `_utc` -04:00 fix.</ref>
+  <ref type="superseded-pin">765233590 -- MY ORIGINAL PIN, STALE. Do NOT deploy it. It is a254104b34's PARENT and lacks the `_utc` fix. Corrected 2026-08-05 1440Z before any upload occurred.</ref>
+  <ref type="acceptance">CVO acceptance = @95d6a8d3d (pre-registered) **+ THE ADDENDUM @72a187048**, which CVO scored AT a254104b34 specifically. CITE BOTH. @95d6a8d3d ALONE DOES NOT COVER a254104b34 -- an acceptance citation naming the wrong vintage is the same defect class as a stale pin.</ref>
   <ref type="source-of-truth">infra/aws/ec2/EC2_MANIFEST.json:557-573 (estate-report-runner entry; :571 is the deploy note)</ref>
 </references>
 
@@ -36,7 +37,7 @@ infrastructure, and THE SMALLNESS IS WHAT MAKES IT PERSUASIVE, NOT WHAT MAKES IT
 <the_deploy_act>
   <what>A SINGLE S3 PutObject.</what>
   <target>s3://opal-estate-report/code/estate_report_runner.py</target>
-  <source>infra/aws/ec2/estate-report-runner/estate_report_runner.py @765233590</source>
+  <source>infra/aws/ec2/estate-report-runner/estate_report_runner.py @a254104b34</source>
   <NOT>NOT safe-ec2-deploy.sh. NOT an SSM push. There is no live host to push to.</NOT>
   <why>EC2_MANIFEST.json:571 VERBATIM: "Code deploys are an S3 UPLOAD, not an SSM push: the systemd
        unit pulls s3://opal-estate-report/code/estate_report_runner.py on every boot (Rule 12).
@@ -55,9 +56,14 @@ infrastructure, and THE SMALLNESS IS WHAT MAKES IT PERSUASIVE, NOT WHAT MAKES IT
       <if_mismatch>404 = the key does not exist; this would be a FIRST MINT, not an update -- STOP and surface to COO before creating it. Any other error: STOP, do not upload blind.</if_mismatch>
     </step>
     <step>
-      <run>git show 765233590:infra/aws/ec2/estate-report-runner/estate_report_runner.py | head -40</run>
-      <expect>The vintage you are deploying resolves and is the corpus-freshness change (per-source vintage + derived staleness statement).</expect>
-      <if_mismatch>STOP. A line citation without a vintage is not a citation. If the ref does not resolve, run a positive control (a line you KNOW is in the file) before concluding ABSENT -- a mangled `git show` prints fatal: on stderr and returns CLEAN EMPTY stdout.</if_mismatch>
+      <run>git log -3 --oneline -- infra/aws/ec2/estate-report-runner/estate_report_runner.py</run>
+      <expect>a254104b34 IS THE TIP for this file. *** THIS STEP IS MANDATORY AND IS THE ONE THAT WAS MISSING. ***</expect>
+      <if_mismatch>If anything sits ABOVE a254104b34, STOP and surface to COO -- the pin has decayed again. DO NOT upload the newer commit on your own judgment and DO NOT upload the pinned one knowing it is superseded; the vintage is CTO~B's call and the acceptance is CVO's. A PIN IS A CLAIM ABOUT A MOMENT AND IT DECAYS WHILE THE AUTHOR KEEPS WORKING -- this TO's original pin went stale in 22 minutes.</if_mismatch>
+    </step>
+    <step>
+      <run>git diff a254104b34 -- infra/aws/ec2/estate-report-runner/estate_report_runner.py</run>
+      <expect>EMPTY. The working-tree file you are about to hash and upload IS a254104b34 -- not a dirty tree, not a different vintage.</expect>
+      <if_mismatch>STOP. Deploy the reviewed artifact BY CONSTRUCTION. A non-empty diff means the bytes you would ship are not the bytes CVO exercised.</if_mismatch>
     </step>
     <step>
       <run>comp-estate estate-report</run>
