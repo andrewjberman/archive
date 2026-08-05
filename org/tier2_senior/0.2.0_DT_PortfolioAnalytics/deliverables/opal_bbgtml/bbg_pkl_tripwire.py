@@ -50,13 +50,15 @@ REGRESSION_MODELS = {"UST", "ST", "INT", "LT", "ULT"}
 # Yang's index_name values for the five models (spelling pinned AS-IS from the data).
 # Post-rename source spellings per DS live workbook check @89a3cca5ed: 'Long Term' /
 # 'Ultra Long Term' (unhyphenated; the 'Agressive' typo retired with the source series).
-# LAYER NOTE (MSTR 230727Z + artifact adjudication 232036Z): THREE distinct name layers
-# exist and only this one is validated here -- (1) pkl index_name, unhyphenated, pinned
-# above; (2) served JSON display strings, currently 'Ultra-Short Term'/'Ultra-Long Term'
-# (DIVERGENT from canon, producer fix at DS next-seam); (3) rendered display, DE typing
-# canon @02b7f351 ('Ultra Short-Term'/'Ultra Long-Term', hyphen joins Term) via the FE
-# displayModelName() render-boundary resolver. A validator comparing any two layers'
-# strings byte-wise will manufacture a false mismatch; compare within a layer only.
+# LAYER NOTE (MSTR 230727Z, artifact adjudication 232036Z, CTO ruling 20260805T0012Z):
+# THREE distinct name layers exist and only this one is validated here -- (1) pkl
+# index_name, unhyphenated, pinned above; (2) served JSON strings, 'Ultra-Short Term'/
+# 'Ultra-Long Term' -- DATA-LAYER VOCABULARY BY CTO RULING 20260805T0012Z, PERMANENT (the
+# producer re-key was stood down; these are identity labels, not display); (3) rendered
+# display, DE typing canon @02b7f351 ('Ultra Short-Term'/'Ultra Long-Term', hyphen joins
+# Term) resolved at the render boundary by displayModelName() -- the ONE sanctioned
+# coupling point. THE LAYERS WILL NEVER CONVERGE BY DESIGN: any cross-layer byte-wise
+# name comparator is a guaranteed false mismatch, forever. Compare within a layer only.
 MODEL_INDEX_NAMES = {
     "Ultra Short Term", "Short Term", "Intermediate Term",
     "Long Term", "Ultra Long Term",
