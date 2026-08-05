@@ -78,6 +78,17 @@ Five kills landed, each one commit + change record + live-verified with positive
 - **Row 17's shadow-S3Key half: NO-OP, recorded honestly** -- the declarations are GRAPH entries derived from live writer code (runner chain, out of scope); no AWS resource exists to delete. They die with the writer code at the three-gate teardown.
 - **NOT touched, per GO exclusions + wave judgment:** rows 1-4 (live-serving), row 6 (C2-gated), rows 7-8 (retain/superseded classes), **row 9** (CTO-deliberate freeze artifacts -- deleting buys nothing until the in-chain emitter retires; flagged to the three-gate teardown), row 13 (CTO not-a-deletion-warrant rider), row 14 (UNKNOWN-loud), item-7 chain accessories (live-chain-coupled).
 - **KILL-LANE RIDER (CTO 054544Z, binding on ANY future dead-kill batch until lifted on ~B's harvest landing):** NO freshness-checker-class resource (checker Lambdas, `*-freshness-*` rules/configs, in-code staleness-check components) enters dead-consumer eligibility regardless of reader evidence -- **the qualification is INVERTED for this class** (Andrew ~0355Z: checkers are deliberately kept as HOMING SIGNALS for deprecated routes; zero-reader is exactly the marker the bet values -> KEEP-UNTIL-HARVESTED). This wave ruled unaffected by CTO. Harvest note: K1's killed role definition is git-preserved (iam.tf@440d16e018:759-842) and its scoped policy NAMES three route prefixes (underscore root, `aggregate_aua/*`, `_g6_fixture/*`) -- harvestable homing-signal content survives in history + this census.
+- **RIDER LIFTED 2026-08-05T0000Z (CTO 000026Z via COO 000652Z):** ~B's harvest banked BOTH halves
+  with denominators @b3c86ec276 (Class A 99/99 config rows; Class B 138 embedded files
+  pattern-printed; B' 7/7 positive-controlled; the K1 cite re-grounded to mdpf-pipeline/iam.tf) --
+  the KEEP-UNTIL-HARVESTED exclusion above is DISCHARGED. **Binding condition on every future
+  checker-class kill record: cite @b3c86ec276 as the markers' banked home.** Key-grain extraction
+  rides post-identity-primitive ungated (git-preserved source is destruction-proof through any
+  kill). Queue effect at lift time, measured: ZERO checker-class items pending -- rows 5/17 were
+  executed in the amendment-#5 wave (ruled unaffected pre-lift); every un-executed row is held by
+  a NON-rider gate (rows 1-4 live-serving, 6=C2, 7-8 retain/superseded, 9 three-gate, 13 rider,
+  14 UNKNOWN-loud). The lift is PROSPECTIVE: it changes T5.B pricing + future batches, not today's
+  eligible set.
 - **Row 15 EXECUTED-on-DEV by DE (same hour, portal DEV @d32f5a52, DE 052406Z):** dead root fetcher killed at BOTH layers (portal-proxy root fn + aum.ts wrapper; kill markers cite this record's @297db6f6bf 403 measurement), the never-built `/aum/aggregate-mdpf` dependency note died with its function, and all four falsified `/json/`-rewrite comment blocks (N1: aum.ts:520-523/:560, portal-proxy.ts:497-501/:515-519) corrected to deployed router-v6 truth. Serve-side inertness follows the DT promote; wave-acceptance validations do not cover this portal-side kill (DE's gates: tsc clean, provenance-guard OK, SEV1 acked both grammars).
 
 ## DENOMINATORS
