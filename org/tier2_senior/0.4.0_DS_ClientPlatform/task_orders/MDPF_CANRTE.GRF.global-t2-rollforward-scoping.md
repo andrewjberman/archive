@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>complete</status>
 <priority>P1 (ANDREW-DIRECT ~1715Z at the CTO terminal -- verbatim record org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260804_1715Z_GLOBAL_ROLLFORWARD_DESIGN.md; folded into the CANRTE frame per CTO's dispatch ask 172343Z)</priority>
 
 <title>Global T+2 roll-forward SCOPING (design-only): cottonwood's last real value carried as a MARKED INTERIM on lagged Global dates, overwritten on real-value arrival -- one time period for everyone</title>
