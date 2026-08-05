@@ -4,7 +4,23 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-05</issued>
-<status>staged</status>
+<status>complete</status>
+<!-- CLOSED 2026-08-05T16:45:22Z by 0.7.0_AE_CloudOps. DEPLOYED VINTAGE 9a1856bc03 (NOT the GO's pin
+     f023857ab3 -- two commits landed above it after the GO was drafted; held at COO's tip-control 1608Z,
+     released 163441Z on the tip).
+     Phase-2 local md5 == Phase-3 head-object ETag == 5ff45f5e968d4a43422c973b5e8f0657 (plain md5, no -N).
+     PRE 62875 B / 14:56:59Z / ETag a110981492b461e19fb9be7848b9ad09 (= my DEP1 artifact; COO discriminator
+     #1 PASS, nobody deployed in between). POST 70281 B / 16:45:22Z / VersionId 08mkactqbO4tmNg.DdLZgMqZBileQwav.
+     Discriminator #2 PASS: Phase-2 md5 DIFFERS from DEP1's -- genuinely new bytes.
+     MANDATED READ-BACK: served md5 identical, cmp byte-for-byte identical, py_compile PASS, non-ASCII = 0.
+     Pin-vs-tip settled by AST identity (both 6a70e3679fcc65a3a1c9288abf8b1019; 31 changed lines, ZERO
+     non-comment) + COO's negative control proving the instrument discriminates.
+     Ledger: org/critical_paths/change_management/20260805T1645Z_estate-report-runner-corpus-delivery_deploy_completion.md
+     ADJUDICATION CARRIED: the 2%-over retune was WITHDRAWN -- input prompt size and output max_tokens are
+     different budgets; 60,000 was a hand-picked [:60000] slice, never a tested boundary. Shipped 25000/35000.
+     OPEN RESIDUAL: kimi-k3 context window unmeasured (estimate, not measurement; vendor egress not called).
+     OPEN BY DESIGN: deployed != exercised -- first execution is the 2026-08-06 13:00Z boot, CVO's verdict. -->
+
 <priority>P0-class defect, P1 window</priority>
 
 <references>
