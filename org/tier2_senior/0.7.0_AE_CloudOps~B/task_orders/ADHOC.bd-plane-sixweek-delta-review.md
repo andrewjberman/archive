@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.7.0_AE_CloudOps~B</issued_to>
 <date>2026-08-04</date>
-<status>staged</status>
+<status>complete</status>
 <priority>P2 (CTO owner word 000023Z rider 2: the REVIEW is yours; >> THE DEPLOY IS NOT -- DS lane per Rule 13, handoff stated up front. << ACTIVATES when the CI-R7R8 fork resolves.)</priority>
 
 <title>bd-plane six-week delta REVIEW (analysis only): the full 07-09 -> current diff of the shared cot_bronze_ingest.py, reviewed change-by-change -- then a DS-seat deploy handoff</title>
