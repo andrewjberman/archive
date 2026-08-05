@@ -4,7 +4,23 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-05</issued>
-<status>staged</status>
+<status>complete</status>
+<!-- CLOSED 2026-08-05T23:40Z by 0.7.0_AE_CloudOps. All three pins carry gold AND retain platinum,
+     verified on live get-role-policy (APPLIED truth, not TF plan). Both modules 0-diff re-plan.
+     ListBucket CONDITION extended (not Resource-only) -- verified by simulate WITH --context-entries.
+     Rule 22a battery: 8 calls, EVERY ONE a separate invocation, ONE --resource-arns each.
+       emitter role: gold List(w/ context) allowed | gold Get allowed | platinum POS-CONTROL allowed
+                     | schwab NEG-CONTROL implicitDeny | non-granted prefix NEG-CONTROL implicitDeny
+       trigger role: gold Get allowed | platinum POS-CONTROL allowed | schwab NEG-CONTROL implicitDeny
+     NEGATIVE controls added beyond the TO (adopted from the risk-reflex G4 citation) -- opal-data-assets
+     is the MONOLITH bucket, so proving NO bucket-level widening is a firm-separation requirement.
+     opal-assets applied -target=aws_iam_role_policy.emitter: the module carries FOREIGN UNAPPLIED DRIFT
+     (3 destroys / 4 creates) from ce99054e44 (~A, Andrew-direct cot move) + f559cbc516 (DT, deliberately
+     CTO-plan-gated). Neither swept in.
+     FINDING: Andrew's 07-29 cot schedule move NEVER APPLIED -- old UTC rule cron(30 3) still ENABLED,
+     new ET Scheduler ABSENT. Surfaced to COO, not actioned (separate authorization/window).
+     Ledger: org/critical_paths/change_management/20260805T2330Z_mdpf-canrte-w1b-additive-gold-iam_deploy_completion.md
+     W-1a (DS) IS UNBLOCKED. -->
 <priority>P1 -- blocks W-1a</priority>
 <arch_gate>1.0.0_SA_CTO, re-gate ruling 183006Z</arch_gate>
 
