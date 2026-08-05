@@ -56,3 +56,13 @@ access-anomaly-scanner is HOT but **36% of invocations error**: the scan works, 
 ## Ledger
 
 Commits: `4c7e6d146` (TO pending) · `d27e3f9f63` (TF authoring + source map x4) · `fd5e98909` (security-ops zero-diff proof + role-tags correction) · `4fc1d37cf` (finbert zero-diff proof). Tags (local, integrator pushes per LD-0367): `security-ops-v0.1.0`, `news-pipeline-finbert-adopt-v1`. All commits lane-local on CLOUD, unpushed by design — **integrator (MSTR) push includes these + both tags (`git push --follow-tags`)**.
+
+---
+
+## ADDENDUM 2026-08-05 — CTO rulings 20260805T002506Z executed
+
+- **D2 schwab-anonymizer: ADOPTED** per CTO adopt-now ruling ("guard-vs-stillborn is UNDECIDABLE from invocations by construction; adoption is cheap + reversible; the 49F Schwab owner consult decides retirement later, never metrics"). `security-ops/schwab-anonymizer.tf`: fn + dedicated role + inline policy imported (exactly the live footprint — NO log group resource because none exists live, NO managed-policy attachment because the role has none); module-wide plan "No changes" (`security-ops/schwab-anonymizer-adoption-plan.txt`). Two facts recorded for the retire-question: (a) inline policy grants are pinned us-east-2 (bucket, secret, logs ARN) while the fn runs us-east-1 — as-wired it cannot write its own logs; (b) deployed handler `lambda_function.lambda_handler` vs repo file `schwab_anonymizer.py` — repo-vs-deployed naming drift. Row-5 verdict updated: **ADOPT (CTO-ruled) — done**; retire-question OPEN at the 49F Schwab owner consult.
+- **D1 opal-bd-transaction-consolidator:** HELD per ruling; the dangling S3 permission (Sid `s3-backfill-trigger`) is hereby annotated **DEFERRED/UNTRACED — permission present, no wired consumer; not observable at any call site; NOT a deletion warrant** (Rule 22a annotation, per CTO). bd-owner consult fired to 0.4.0_DS_ClientPlatform; stages on their word + this table's function-grain read (0 inv/30d, last log 2026-02-09).
+- **D3 sentiment_query_api:** staged to the morning ledger for Andrew's destructive-class confirm with capture-before-delete. Nothing deleted.
+- **AAS-ERR:** owner assigned = 0.7.0_AE_CloudOps base lane (security-ops module now theirs); evidence handed off (two log specimens, mechanism, and the value-question framing: 30 days of silently-dropped alerts nobody missed is itself dispositive evidence).
+- **Tag correction note:** local tag `security-ops-v0.2.0` was minted one commit early (points at the pre-D2 commit; a wrong-target annotated tag). Its deletion (`git tag -d security-ops-v0.2.0`) is human-gated and requested; the CORRECT tag for the D2 adoption is `security-ops-v0.2.1` on the D2 commit. **Integrator: push v0.2.1, not v0.2.0.**
