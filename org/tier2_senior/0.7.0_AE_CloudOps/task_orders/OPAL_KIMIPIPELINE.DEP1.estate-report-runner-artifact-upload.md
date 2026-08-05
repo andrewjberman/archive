@@ -4,7 +4,20 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-05</issued>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSED 2026-08-05T14:57Z by 0.7.0_AE_CloudOps. Deployed vintage a254104b34 (NOT the superseded
+     765233590 pin). Phase-2 local md5 == Phase-3 head-object ETag == a110981492b461e19fb9be7848b9ad09
+     (plain md5, no -N suffix, comparison valid). PRE 54654 B / 2026-08-04T18:34:47Z / ETag
+     3b4fadbef8694b250e3ada06a61e46fe -> POST 62875 B / 2026-08-05T14:56:59Z. Prior version retained.
+     Additional control beyond spec: get-object round-trip, cmp byte-for-byte identical, py_compile PASS.
+     Acceptance cited: @95d6a8d3d + addendum @72a187048 (scored AT a254104b34). RAVC-4 closed by
+     1.0.0_SA_CTO~B on INDEPENDENT re-derivation @151407Z; 3.0.0_SA_CVO verified at the served layer.
+     Ledger: org/critical_paths/change_management/20260805T1456Z_estate-report-runner-corpus-vintage_deploy_completion.md
+     OPEN BY DESIGN: runtime acceptance rides the 2026-08-06 13:00Z boot (CVO's layer) -- deployed != exercised.
+     FINDING: Phase-1 step 3 `comp-estate estate-report` is UNRUNNABLE (no such vertical); blast radius
+     grounded via comp-grep instead -- sole reader is infra/aws/terraform/estate-report/instance.tf:192.
+     CTO~B took the ontology gap onto the v3 critical path. -->
+
 <priority>P1 -- hard window</priority>
 
 <references>
