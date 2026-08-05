@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B (SEMCTL lane, drafted the brief -- P1 owner) | CTO arch-gate (AC4/AC5 hard) + CVO cert (fidelity + collision-safe + freshness)</issued_to>
     <date>2026-07-08</date>
-    <status>dispatched -- Andrew-direct (via CTO 210311Z) decomp. NFRA-first-mandate in-scope: COMPLETES the SEMCTL ladder (the edge axis, dual to the closed node ladder). PRD CTO-authored d58f71767 off your brief (bbf9daaba) + CVO grounding-review (SOUND, 2a6a8a3a0).</status>
+    <status>complete -- CLOSED 2026-08-05 ~2350Z (2.0.0_SA_COO). Phase closed 2026-07-09, both gates MET, commit 262053a3d cited in org/projects/NFRA_EDGES.json. Surfaced as a stale-open row by 0.4.0_DS_ClientPlatform's backlog triage (addressed to the then-non-live ~B lane); dispositioned by 0.0.0_AB_MSTR grounded on the project record before closing.</status>
     <prd_ref>docs/architecture/NFRA_EDGES_PRD.md (SS2 reify-into-existing-Node, SS3-P1, SS4 AC1/AC4/AC5, SS5 Q1-hybrid)</prd_ref>
     <gate_note>THE GAP (CVO-confirmed grounded-EXACT, a COMPLETENESS gap not a correctness bug): the frontend MOTIF pipeline FLATTENS the defining FLOWS_TO/RENDERS edges into rule-TEXT -> a C3 materializes as a node-SKELETON, not the SUBGRAPH it is. The algebra + the reference comp_ladder ALREADY reify edges co-equally; this brings the frontend MOTIF pipeline to the same bar. NO new store, NO new fidelity gate -- reify into the EXISTING comp_ladder.Node model.</gate_note>
   </metadata>

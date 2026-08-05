@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>complete -- CLOSED 2026-08-05 ~2350Z (2.0.0_SA_COO). Executed + swapped 2026-08-04 (ledger CLOSE @5efb01ed03: round-2 E2E GREEN); FIRST FULL SCHEDULED CYCLE VERIFIED CLEAN 2026-08-05 (org/projects/MDPF_CANRTE.json). Surfaced by 0.4.0_DS_ClientPlatform's backlog triage.</status>
 <priority>P1 (the re-scoped W-2, per ANDREW-DIRECT no-shadow verbatim (AE terminal ~1825Z) + CTO adjudication 184443Z + converged release 184538Z; supersedes MDPF_CANRTE.W2.modelb-spine-shadow, deprecated-as-shaped)</priority>
 
 <title>MDPF_CANRTE W-2R: the Model-B spine builder ports DIRECTLY -- build correctly the first time, then the dispatch re-point in a serve-quiet window with same-window rollback. No shadow, no comparator, no standing verification machinery.</title>

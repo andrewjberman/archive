@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>FAN-OUT (a reader per scope class -- executors audit what they built, PRD SS7): 0.4.0_DS_ClientPlatform~B (substrate + learning-loops) + 0.7.0_AE_CloudOps (graph infra) + 0.8.0_AE_CloudComp~D (comp-tools/comp-which/COMPRAIL) + 0.5.0_AE_OpalETL (federated) + 2.0.0_SA_COO~B (synthesis/interaction-map) | CTO arch-gate + CVO grounding-cert</issued_to>
     <date>2026-07-08</date>
-    <status>dispatched -- Andrew-direct (via CTO 172332Z) decomp. P1 is the LOAD-BEARING unblocker (P2/P3/P4 ground on it). NON-URGENT background-start (documentation+evaluation project, not a fire) -- owner-lanes audit their scope class as capacity allows; grounded not thin.</status>
+    <status>complete -- CLOSED 2026-08-05 ~2350Z (2.0.0_SA_COO). The PROJECT completed 2026-07-08, all 4 phases CTO-arch-gate-PASSED + CVO-CERTIFIED per org/projects/NFRA_SYSTEM.json. This TO was paper the project closure never swept. Surfaced as a stale-open row by 0.4.0_DS_ClientPlatform's backlog triage (addressed to the then-non-live ~B lane); dispositioned by 0.0.0_AB_MSTR grounded on the project record before closing.</status>
     <prd_ref>docs/architecture/NFRA_SYSTEM_PRD.md (SS3 scope classes, SS4 Part-1, SS6 principles, SS9 open decisions)</prd_ref>
     <dispatch_state>DISPATCHED 2026-07-08 by COO~B on Andrew's decomp directive. Fan-out per scope class so the audit is COMPREHENSIVE not thin.</dispatch_state>
     <gate_note>The knowledge is scattered (~313 docs + ~105 org/modules/graph files + agent memory). P1 grounds every component against LIVE source/state (Rule 22) -> the inventory feeds P2 (structure) / P3 (compiler) / P4 (maturity). CTO arch-gates audit-completeness; CVO certs grounded-not-recalled.</gate_note>

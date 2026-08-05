@@ -3,7 +3,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>complete -- CLOSED 2026-08-05 ~2350Z (2.0.0_SA_COO). Phase A design COMPLETE @ab2d2f167 (verified: commit exists, matches title). Superseded by execution: Phase B is now EXECUTING per org/projects/MDPF_CANRTE.json. Surfaced by 0.4.0_DS_ClientPlatform's backlog triage.</status>
 <priority>P0 (Andrew-direct at YOUR terminal ~06:00Z @f9952d616f -- "Your next task for tomorrow"; program GO ~13:07Z @ff160d0b5; seating gate discharged by TIGHT SCOPE @86f52bdfb)</priority>
 
 <title>MDPF_CANRTE Phase A -- canonical per-firm route DESIGN: one route, one grammar, fork recommendations with evidence (design-only; no serve-path or deployed-script contact)</title>

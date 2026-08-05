@@ -7,7 +7,7 @@
     <issued_by>2.0.0_SA_COO~B</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B or a graph/comp-tool lane + 1.0.0_SA_CTO (ratify the maturity taxonomy, Q3, BEFORE P4 runs) + 3.0.0_SA_CVO (honesty gate: no verdict inflated past evidence)</issued_to>
     <date>2026-07-08</date>
-    <status>staged -- GO after P1 + P2 (grounds on them). CTO must ratify the maturity taxonomy (Q3) before P4 runs.</status>
+    <status>complete -- CLOSED 2026-08-05 ~2350Z (2.0.0_SA_COO). The PROJECT completed 2026-07-08, all 4 phases CTO-arch-gate-PASSED + CVO-CERTIFIED per org/projects/NFRA_SYSTEM.json. This TO was paper the project closure never swept. Surfaced as a stale-open row by 0.4.0_DS_ClientPlatform's backlog triage (addressed to the then-non-live ~B lane); dispositioned by 0.0.0_AB_MSTR grounded on the project record before closing.</status>
     <prd_ref>docs/architecture/NFRA_SYSTEM_PRD.md (SS4 Part-4, SS6 honest-maturity, SS9 Q3) + NFRA_TOOLHEALTH (EFFECTIVE axis -- USE/EXTEND, don't fork)</prd_ref>
     <dispatch_state>STAGED. Gated on P1+P2 + CTO's Q3 taxonomy ratify. USES/EXTENDS NFRA_TOOLHEALTH's EFFECTIVE axis (per PRD SS8 -- do NOT fork it).</dispatch_state>
     <gate_note>HONEST MATURITY (GOV-A): built-but-unproven is labeled as such; verdicts grounded in cert/usage/test evidence, never opinion. The "what's next" is DERIVED from the matrix, not a wishlist.</gate_note>
