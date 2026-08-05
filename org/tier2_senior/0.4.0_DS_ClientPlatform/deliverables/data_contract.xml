@@ -680,8 +680,11 @@
       <primary_source>
         49 Financial allocation and transaction raw files from Black Diamond Wealth Platform.
         Ingested via bd-allocation-trigger and bd-transactions-trigger Lambdas.
-        Processed through silver layer (bd-transaction-consolidator) into gold parquets
-        by bd-gold-layer-runner EC2 (scripts pulled from s3://opal-data-bd/code/gold/).
+        Processed through the silver layer into gold parquets by bd-gold-layer-runner EC2
+        (scripts pulled from s3://opal-data-bd/code/gold/).
+        CORRECTED 2026-08-05 (live-S3 grounded): the silver step is NO LONGER
+        bd-transaction-consolidator. See the AdvisorIntelligence dependency item below for
+        the verified live shape and the scope of what was re-derived.
       </primary_source>
       <trigger>
         Gold parquet completion signaled by opal-data-bd/gold/pipeline-complete.json.
@@ -887,7 +890,13 @@
     <dependency page="AdvisorIntelligence" pipeline="bd-pipeline">
       <item>49 Financial raw allocation files: Uploaded by Black Diamond Wealth Platform, ingested by bd-allocation-trigger Lambda.</item>
       <item>49 Financial raw transaction files: Ingested by bd-transactions-trigger Lambda.</item>
-      <item>BD silver layer: bd-transaction-consolidator Lambda processes raw files into silver/bd_transactions.parquet and silver/bd_accounts.parquet in opal-data-bd.</item>
+      <item>BD silver layer (transactions): s3://opal-data-bd/silver/transactions/{YYYY-MM-DD}.parquet -- DATE-PARTITIONED, live and fresh (verified 2026-08-05: partitions through 2026-08-05, written 2026-08-04 20:16Z). Live consumers: data/black_diamond/scripts/bronze/build_schwab_bd_account_xref.py (trailing 90d for attribution), data/analysis/nna_suppression_accounting_residual/, data/analysis/t1_cap_audit_dump.py.
+        CORRECTED 2026-08-05 -- THIS ITEM PREVIOUSLY READ: "BD silver layer: bd-transaction-consolidator Lambda processes raw files into silver/bd_transactions.parquet and silver/bd_accounts.parquet in opal-data-bd." THAT WAS FALSE from roughly 2026-02 and was live-falsified this date, output-side:
+          - silver/bd_transactions.parquet DOES NOT EXIST (only bd_transactions_backup_2026-01-20 / _2026-01-28 remain);
+          - silver/bd_nna_daily.parquet + silver/bd_nna_by_architect.parquet (the consolidator's other two outputs, lambda_function.py:30-32) are FROZEN at 2026-01-20, beside an apparent successor nna_timeseries.parquet (2026-02-02);
+          - opal-bd-transaction-consolidator: 0 invocations/30d, last log event 2026-02-09, S3 invoke permission dangling.
+        Consequence worth keeping: this document asserted a dead Lambda was the live silver producer, and it was cited as evidence in the 2026-08-05 D1 decommission consult (0.7.0_AE_CloudOps~E) -- the record would have returned KEEP where live state returns SUPERSEDED. Ground bd silver on the artifact, not on this file.
+        SCOPE OF THIS CORRECTION -- what I did NOT verify: I identified CONSUMERS of silver/transactions/, not its PRODUCER. The writing process is UNVERIFIED-PRODUCER as at 2026-08-05; do not infer one from this entry. The former silver/bd_accounts.parquet has NO verified successor named here -- its status is likewise unre-derived, not "confirmed retired."</item>
       <item>BD gold layer runner EC2 (bd-gold-layer-runner): Persistent EC2 that pulls scripts from s3://opal-data-bd/code/gold/ and produces all gold parquets. Scripts are managed separately from the local repository.</item>
       <item>opal-data-bd S3 bucket: Central storage for all BD pipeline data (silver, gold parquets, published JSON, logs).</item>
       <item>opal-data-portal-v2 S3 bucket: Some static JSON (e.g. advisor_rolling_flows.json per pod_inventory) may be written here by bd-portal-publisher (bucket routing not fully confirmed from code).</item>
