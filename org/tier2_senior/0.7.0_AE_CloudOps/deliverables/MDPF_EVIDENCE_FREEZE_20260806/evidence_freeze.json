@@ -1,0 +1,1376 @@
+{
+  "artifact": "MDPF_PROPVALIDATION_P0.1_evidence_freeze",
+  "purpose": "Phase 0 evidence freeze AND doc 04 s.4 rollback baseline (one artifact)",
+  "captured_at_utc": "2026-08-06T20:45:23.477636+00:00",
+  "captured_at_et": "2026-08-06T16:45:23.477636-04:00",
+  "captured_by": "0.7.0_AE_CloudOps~Z",
+  "account": "313476888478",
+  "region": "us-east-1",
+  "read_only": true,
+  "timestamp_discipline": "all timestamps are boto3 tz-aware UTC serialised with +00:00; no `aws s3 ls` column is used anywhere -- it prints LOCAL time and silently shifts by the box offset",
+  "lambdas": {
+    "functions": {
+      "mdpf-daily-trigger": {
+        "CodeSha256": "xqTiW2Z/ETxDjILu0x0VulMvN9jVux9gG4thanF+mbo=",
+        "Runtime": "python3.12",
+        "MemorySize": 256,
+        "Timeout": 360,
+        "EphemeralStorageMB": 512,
+        "Architectures": [
+          "x86_64"
+        ],
+        "Role": "arn:aws:iam::313476888478:role/mdpf-daily-trigger-lambda-role",
+        "Handler": "lambda_function.lambda_handler",
+        "Layers": [],
+        "Environment": {
+          "DISPATCH_RELPATH": "mdpf-daily-dispatch.sh",
+          "MDPF_BUCKET": "opal-data-mdpf",
+          "PLATINUM_BUCKET": "opal-data-assets",
+          "RUNNER_INSTANCE_ID": "i-02448edb624a7a7cf",
+          "GATE_ENFORCE": "1",
+          "PLATINUM_AGG_PREFIX": "gold/mdpf_revamp/_aggregate_aua",
+          "SCHWAB_RPS_PREFIX": "schwab/08242234/silver/fact_rps_s2",
+          "CODE_PREFIX": "code",
+          "BD_MAX_LAG_TRADING_DAYS": "2",
+          "SCHWAB_RPS_BUCKET": "opal-data-assets",
+          "SCHWAB_RPS_GRAMMAR": "dir:date=YYYY-MM-DD"
+        },
+        "LastModified": "2026-08-06T00:37:53.000+0000",
+        "RevisionId": "92c31c6a-e7bf-4dd7-bbf6-4475bb453277",
+        "ReservedConcurrency": null,
+        "ResourcePolicy": {
+          "Version": "2012-10-17",
+          "Id": "default",
+          "Statement": [
+            {
+              "Sid": "AllowExecutionFromEventBridge",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com"
+              },
+              "Action": "lambda:InvokeFunction",
+              "Resource": "arn:aws:lambda:us-east-1:313476888478:function:mdpf-daily-trigger",
+              "Condition": {
+                "ArnLike": {
+                  "AWS:SourceArn": "arn:aws:events:us-east-1:313476888478:rule/mdpf-daily-refresh-trigger"
+                }
+              }
+            },
+            {
+              "Sid": "AllowExecutionFromSchedulerFloor",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com"
+              },
+              "Action": "lambda:InvokeFunction",
+              "Resource": "arn:aws:lambda:us-east-1:313476888478:function:mdpf-daily-trigger",
+              "Condition": {
+                "ArnLike": {
+                  "AWS:SourceArn": "arn:aws:scheduler:us-east-1:313476888478:schedule/default/mdpf-scheduled-floor"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "mdpf-accrual-trigger": {
+        "CodeSha256": "WonR3KZ0xG8QF4rDJZODzbdDOp94MxdM4PTAO40rLsM=",
+        "Runtime": "python3.12",
+        "MemorySize": 256,
+        "Timeout": 360,
+        "EphemeralStorageMB": 512,
+        "Architectures": [
+          "x86_64"
+        ],
+        "Role": "arn:aws:iam::313476888478:role/mdpf-accrual-trigger-role",
+        "Handler": "lambda_function.lambda_handler",
+        "Layers": [],
+        "Environment": {
+          "MDPF_BUCKET": "opal-data-mdpf",
+          "ACCRUAL_RELPATH": "scripts/gold/build_portal_gold_accrual.py",
+          "RUNNER_INSTANCE_ID": "i-02448edb624a7a7cf",
+          "CODE_PREFIX": "code",
+          "ROSTER_RELPATH": "scripts/gold/partner_roster.json"
+        },
+        "LastModified": "2026-07-29T07:51:15.597+0000",
+        "RevisionId": "70d40fff-958a-48b9-a060-aca8f07167c7",
+        "ReservedConcurrency": null,
+        "ResourcePolicy": {
+          "Version": "2012-10-17",
+          "Id": "default",
+          "Statement": [
+            {
+              "Sid": "SchedulerMdpfAccrualBridgeDaily",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com"
+              },
+              "Action": "lambda:InvokeFunction",
+              "Resource": "arn:aws:lambda:us-east-1:313476888478:function:mdpf-accrual-trigger",
+              "Condition": {
+                "ArnLike": {
+                  "AWS:SourceArn": "arn:aws:scheduler:us-east-1:313476888478:schedule/default/mdpf-accrual-bridge-daily"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "opal-assets-mdpf-portal-publisher": {
+        "CodeSha256": "WSwmCWplyR1l8JiXTVijQsmynKldh297SJklzyWEL9M=",
+        "Runtime": "python3.12",
+        "MemorySize": 256,
+        "Timeout": 120,
+        "EphemeralStorageMB": 512,
+        "Architectures": [
+          "x86_64"
+        ],
+        "Role": "arn:aws:iam::313476888478:role/opal-assets-mdpf-egress-publisher-role",
+        "Handler": "lambda_function.lambda_handler",
+        "Layers": [],
+        "Environment": {
+          "S3_REGION": "us-east-1",
+          "SERVE_BUCKET": "opal-data-portal-v2",
+          "GOLD_ROOT": "portal/gold/mdpf",
+          "SERVE_ROOT": "platinum/mdpf",
+          "GOLD_BUCKET": "opal-data-assets"
+        },
+        "LastModified": "2026-07-28T23:17:04.000+0000",
+        "RevisionId": "b6158005-4979-483c-82ea-f66cf9cd2080",
+        "ReservedConcurrency": null,
+        "ResourcePolicy": {
+          "Version": "2012-10-17",
+          "Id": "default",
+          "Statement": [
+            {
+              "Sid": "AllowExecutionFromSchedulerDaily",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com"
+              },
+              "Action": "lambda:InvokeFunction",
+              "Resource": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-mdpf-portal-publisher",
+              "Condition": {
+                "ArnLike": {
+                  "AWS:SourceArn": "arn:aws:scheduler:us-east-1:313476888478:schedule/default/opal-assets-mdpf-portal-publisher-daily"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "opal-assets-daily-emitter": {
+        "CodeSha256": "oV2seRZKxW/gWSZ8DqnPgO+xlMhEygjfkpt1rhflsZQ=",
+        "Runtime": "python3.11",
+        "MemorySize": 1024,
+        "Timeout": 600,
+        "EphemeralStorageMB": 512,
+        "Architectures": [
+          "x86_64"
+        ],
+        "Role": "arn:aws:iam::313476888478:role/opal-assets-daily-emitter-role",
+        "Handler": "lambda_function.lambda_handler",
+        "Layers": [
+          "arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1"
+        ],
+        "Environment": {
+          "AGGREGATE_PREFIX": "gold/mdpf_revamp/_aggregate_aua/",
+          "PLATINUM_BUCKET": "opal-data-assets",
+          "TABLE_NAME": "opal-assets-daily-aua",
+          "ETFS_BUCKET": "opal-data-etfs",
+          "MONOLITH_BUCKET": "opal-data-assets"
+        },
+        "LastModified": "2026-08-06T00:35:41.000+0000",
+        "RevisionId": "673701eb-26ee-46f9-8831-bb365f634728",
+        "ReservedConcurrency": null,
+        "ResourcePolicy": {
+          "Version": "2012-10-17",
+          "Id": "default",
+          "Statement": [
+            {
+              "Sid": "AllowEventBridgeInvoke",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com"
+              },
+              "Action": "lambda:InvokeFunction",
+              "Resource": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-daily-emitter",
+              "Condition": {
+                "ArnLike": {
+                  "AWS:SourceArn": "arn:aws:events:us-east-1:313476888478:rule/opal-assets-daily-emitter-daily"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "mdpf-freshness-checker": {
+        "where": "lambda:mdpf-freshness-checker",
+        "error": "ResourceNotFoundException",
+        "detail": "An error occurred (ResourceNotFoundException) when calling the GetFunctionConfiguration operation: Function not found: arn:aws:lambda:us-east-1:313476888478:function:mdpf-freshness-checker"
+      }
+    },
+    "denominator": "5 requested, 4 captured",
+    "roles_seen": [
+      "mdpf-accrual-trigger-role",
+      "mdpf-daily-trigger-lambda-role",
+      "opal-assets-daily-emitter-role",
+      "opal-assets-mdpf-egress-publisher-role"
+    ]
+  },
+  "iam": {
+    "roles": {
+      "mdpf-accrual-trigger-role": {
+        "inline": {
+          "mdpf-accrual-trigger-scoped": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": "ec2:StartInstances",
+                "Effect": "Allow",
+                "Resource": "arn:aws:ec2:us-east-1:313476888478:instance/i-02448edb624a7a7cf",
+                "Sid": "StartRunner"
+              },
+              {
+                "Action": [
+                  "ec2:DescribeInstances",
+                  "ec2:DescribeInstanceStatus"
+                ],
+                "Effect": "Allow",
+                "Resource": "*",
+                "Sid": "DescribeGlobal"
+              },
+              {
+                "Action": [
+                  "ssm:SendCommand",
+                  "ssm:GetCommandInvocation",
+                  "ssm:ListCommandInvocations"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:ec2:us-east-1:313476888478:instance/i-02448edb624a7a7cf",
+                  "arn:aws:ssm:us-east-1::document/AWS-RunShellScript",
+                  "arn:aws:ssm:us-east-1:313476888478:*"
+                ],
+                "Sid": "SSMToRunner"
+              },
+              {
+                "Action": "ssm:DescribeInstanceInformation",
+                "Effect": "Allow",
+                "Resource": "*",
+                "Sid": "SSMDescribeGlobal"
+              }
+            ]
+          }
+        },
+        "inline_denominator": 1,
+        "attached_denominator": 1,
+        "attached": {
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogGroup",
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+        }
+      },
+      "mdpf-daily-trigger-lambda-role": {
+        "inline": {
+          "mdpf-trigger-scoped": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": "ec2:StartInstances",
+                "Effect": "Allow",
+                "Resource": "arn:aws:ec2:us-east-1:313476888478:instance/i-02448edb624a7a7cf",
+                "Sid": "StartRunner"
+              },
+              {
+                "Action": [
+                  "ec2:DescribeInstances",
+                  "ec2:DescribeInstanceStatus"
+                ],
+                "Effect": "Allow",
+                "Resource": "*",
+                "Sid": "DescribeGlobal"
+              },
+              {
+                "Action": [
+                  "ssm:SendCommand",
+                  "ssm:GetCommandInvocation",
+                  "ssm:ListCommandInvocations"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:ec2:us-east-1:313476888478:instance/i-02448edb624a7a7cf",
+                  "arn:aws:ssm:us-east-1::document/AWS-RunShellScript",
+                  "arn:aws:ssm:us-east-1:313476888478:*"
+                ],
+                "Sid": "SSMToRunner"
+              },
+              {
+                "Action": "ssm:DescribeInstanceInformation",
+                "Effect": "Allow",
+                "Resource": "*",
+                "Sid": "SSMDescribeGlobal"
+              },
+              {
+                "Action": "sqs:SendMessage",
+                "Effect": "Allow",
+                "Resource": "arn:aws:sqs:us-east-1:313476888478:mdpf-daily-trigger-dlq",
+                "Sid": "DlqSend"
+              },
+              {
+                "Action": [
+                  "s3:GetObject"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-inf/gold/meta/pipeline-complete.json",
+                "Sid": "InfSentinelRead"
+              },
+              {
+                "Action": [
+                  "s3:GetObject"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:s3:::opal-data-bd/silver/allocations/*",
+                  "arn:aws:s3:::opal-data-bd/silver/fees/*",
+                  "arn:aws:s3:::opal-data-bd/schwab/silver/rps/*"
+                ],
+                "Sid": "BdSilverGateRead"
+              },
+              {
+                "Action": [
+                  "s3:ListBucket"
+                ],
+                "Condition": {
+                  "StringLike": {
+                    "s3:prefix": [
+                      "silver/allocations/*",
+                      "silver/fees/*",
+                      "schwab/silver/rps/*"
+                    ]
+                  }
+                },
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-bd",
+                "Sid": "BdSilverGateList"
+              },
+              {
+                "Action": [
+                  "s3:GetObject"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/fact_rps_s2/*",
+                "Sid": "AssetsSchwabRpsS2GateRead"
+              },
+              {
+                "Action": [
+                  "s3:ListBucket"
+                ],
+                "Condition": {
+                  "StringLike": {
+                    "s3:prefix": [
+                      "schwab/08242234/silver/fact_rps_s2/*"
+                    ]
+                  }
+                },
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-assets",
+                "Sid": "AssetsSchwabRpsS2GateList"
+              },
+              {
+                "Action": [
+                  "ssm:GetParameter"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:ssm:us-east-1:313476888478:parameter/mdpf/custody_source",
+                "Sid": "CustodySourceFlagRead"
+              },
+              {
+                "Action": [
+                  "s3:GetObject"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:s3:::opal-data-portal-v2/platinum/mdpf/aggregate_aua/*",
+                  "arn:aws:s3:::opal-data-assets/gold/mdpf_revamp/*"
+                ],
+                "Sid": "PlatinumRollSourceRead"
+              }
+            ]
+          }
+        },
+        "inline_denominator": 1,
+        "attached_denominator": 1,
+        "attached": {
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogGroup",
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+        }
+      },
+      "opal-assets-daily-emitter-role": {
+        "inline": {
+          "opal-assets-daily-emitter-scoped": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": "s3:GetObject",
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:s3:::opal-data-portal-v2/platinum/mdpf/aggregate_aua/*",
+                  "arn:aws:s3:::opal-data-assets/gold/mdpf_revamp/*"
+                ],
+                "Sid": "ReadServedMdpfPartitions"
+              },
+              {
+                "Action": "s3:ListBucket",
+                "Condition": {
+                  "StringLike": {
+                    "s3:prefix": [
+                      "platinum/mdpf/aggregate_aua/*",
+                      "gold/mdpf_revamp/*"
+                    ]
+                  }
+                },
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:s3:::opal-data-portal-v2",
+                  "arn:aws:s3:::opal-data-assets"
+                ],
+                "Sid": "ListServedMdpfPartitions"
+              },
+              {
+                "Action": "s3:GetObject",
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/fact_rps_s2/*",
+                  "arn:aws:s3:::opal-data-assets/smartx/platform/silver/*",
+                  "arn:aws:s3:::opal-data-assets/orion/inflection/silver/fact_assets/*",
+                  "arn:aws:s3:::opal-data-assets/eclipse/inflection/silver/fact_portfolios_full/*",
+                  "arn:aws:s3:::opal-data-assets/blackdiamond/cottonwood/silver/*"
+                ],
+                "Sid": "ChannelSourceSilverRead"
+              },
+              {
+                "Action": "s3:ListBucket",
+                "Condition": {
+                  "StringLike": {
+                    "s3:prefix": [
+                      "schwab/08242234/silver/fact_rps_s2/*",
+                      "smartx/platform/silver/*",
+                      "orion/inflection/silver/fact_assets/*",
+                      "eclipse/inflection/silver/fact_portfolios_full/*",
+                      "blackdiamond/cottonwood/silver/*"
+                    ]
+                  }
+                },
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-assets",
+                "Sid": "ChannelSourceSilverList"
+              },
+              {
+                "Action": "s3:GetObject",
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-assets/gold/mdpf_revamp/cottonwood/*",
+                "Sid": "PairGoldModelSeriesRead"
+              },
+              {
+                "Action": "s3:GetObject",
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-etfs/daily/*",
+                "Sid": "ReadEtfsOwnershipDaily"
+              },
+              {
+                "Action": "s3:ListBucket",
+                "Condition": {
+                  "StringLike": {
+                    "s3:prefix": [
+                      "daily/*"
+                    ]
+                  }
+                },
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-etfs",
+                "Sid": "ListEtfsOwnershipDaily"
+              },
+              {
+                "Action": [
+                  "dynamodb:PutItem",
+                  "dynamodb:BatchWriteItem",
+                  "dynamodb:Query",
+                  "dynamodb:GetItem"
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:dynamodb:us-east-1:313476888478:table/opal-assets-daily-aua",
+                  "arn:aws:dynamodb:us-east-1:313476888478:table/opal-assets-daily-aua/index/*"
+                ],
+                "Sid": "WriteOpalAssetsDaily"
+              }
+            ]
+          }
+        },
+        "inline_denominator": 1,
+        "attached_denominator": 1,
+        "attached": {
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogGroup",
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+        }
+      },
+      "opal-assets-mdpf-egress-publisher-role": {
+        "inline": {
+          "opal-assets-mdpf-egress-publisher-live-serve": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "s3:PutObject"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-portal-v2/platinum/mdpf/*",
+                "Sid": "WriteLiveServedMdpf"
+              },
+              {
+                "Action": "s3:ListBucket",
+                "Condition": {
+                  "StringLike": {
+                    "s3:prefix": [
+                      "platinum/mdpf/*"
+                    ]
+                  }
+                },
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-portal-v2",
+                "Sid": "ListLiveServedMdpf"
+              }
+            ]
+          },
+          "opal-assets-mdpf-egress-publisher-scoped": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "s3:GetObject"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-assets/portal/gold/mdpf/*",
+                "Sid": "ReadPortalGoldMdpf"
+              },
+              {
+                "Action": [
+                  "s3:PutObject"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-portal-v2/platinum/_staging/mdpf/*",
+                "Sid": "WriteStagingMdpf"
+              },
+              {
+                "Action": "s3:ListBucket",
+                "Condition": {
+                  "StringLike": {
+                    "s3:prefix": [
+                      "portal/gold/mdpf/*"
+                    ]
+                  }
+                },
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-assets",
+                "Sid": "ListPortalGoldMdpf"
+              },
+              {
+                "Action": "s3:ListBucket",
+                "Condition": {
+                  "StringLike": {
+                    "s3:prefix": [
+                      "platinum/_staging/mdpf/*"
+                    ]
+                  }
+                },
+                "Effect": "Allow",
+                "Resource": "arn:aws:s3:::opal-data-portal-v2",
+                "Sid": "ListStagingMdpf"
+              }
+            ]
+          }
+        },
+        "inline_denominator": 2,
+        "attached_denominator": 1,
+        "attached": {
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogGroup",
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "denominator": "4 roles"
+  },
+  "schedules": {
+    "scheduler": {
+      "mdpf-scheduled-floor": {
+        "ActionAfterCompletion": "NONE",
+        "Arn": "arn:aws:scheduler:us-east-1:313476888478:schedule/default/mdpf-scheduled-floor",
+        "CreationDate": "2026-08-04T04:13:43.879000+00:00",
+        "FlexibleTimeWindow": {
+          "Mode": "OFF"
+        },
+        "GroupName": "default",
+        "LastModificationDate": "2026-08-04T04:20:15.512000+00:00",
+        "Name": "mdpf-scheduled-floor",
+        "ScheduleExpression": "cron(0 9 * * ? *)",
+        "ScheduleExpressionTimezone": "America/New_York",
+        "State": "ENABLED",
+        "Target": {
+          "Arn": "arn:aws:lambda:us-east-1:313476888478:function:mdpf-daily-trigger",
+          "DeadLetterConfig": {
+            "Arn": "arn:aws:sqs:us-east-1:313476888478:mdpf-daily-trigger-dlq"
+          },
+          "Input": "{\"run_class\":\"production\",\"source\":\"mdpf.scheduled-floor\",\"trigger\":\"scheduled\"}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 86400,
+            "MaximumRetryAttempts": 185
+          },
+          "RoleArn": "arn:aws:iam::313476888478:role/mdpf-floor-scheduler-role"
+        }
+      },
+      "mdpf-accrual-bridge-daily": {
+        "ActionAfterCompletion": "NONE",
+        "Arn": "arn:aws:scheduler:us-east-1:313476888478:schedule/default/mdpf-accrual-bridge-daily",
+        "CreationDate": "2026-07-29T07:51:21.604000+00:00",
+        "FlexibleTimeWindow": {
+          "Mode": "OFF"
+        },
+        "GroupName": "default",
+        "LastModificationDate": "2026-08-04T04:20:15.510000+00:00",
+        "Name": "mdpf-accrual-bridge-daily",
+        "ScheduleExpression": "cron(40 9 * * ? *)",
+        "ScheduleExpressionTimezone": "America/New_York",
+        "State": "ENABLED",
+        "Target": {
+          "Arn": "arn:aws:lambda:us-east-1:313476888478:function:mdpf-accrual-trigger",
+          "Input": "{}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 86400,
+            "MaximumRetryAttempts": 185
+          },
+          "RoleArn": "arn:aws:iam::313476888478:role/mdpf-accrual-scheduler-role"
+        }
+      },
+      "opal-assets-mdpf-portal-publisher-daily": {
+        "ActionAfterCompletion": "NONE",
+        "Arn": "arn:aws:scheduler:us-east-1:313476888478:schedule/default/opal-assets-mdpf-portal-publisher-daily",
+        "CreationDate": "2026-08-04T04:22:16.795000+00:00",
+        "FlexibleTimeWindow": {
+          "Mode": "OFF"
+        },
+        "GroupName": "default",
+        "LastModificationDate": "2026-08-04T04:22:16.795000+00:00",
+        "Name": "opal-assets-mdpf-portal-publisher-daily",
+        "ScheduleExpression": "cron(50 9 * * ? *)",
+        "ScheduleExpressionTimezone": "America/New_York",
+        "State": "ENABLED",
+        "Target": {
+          "Arn": "arn:aws:lambda:us-east-1:313476888478:function:opal-assets-mdpf-portal-publisher",
+          "Input": "{}",
+          "RetryPolicy": {
+            "MaximumEventAgeInSeconds": 86400,
+            "MaximumRetryAttempts": 185
+          },
+          "RoleArn": "arn:aws:iam::313476888478:role/opal-assets-mdpf-portal-publisher-scheduler-role"
+        }
+      }
+    },
+    "classic_rules": {
+      "mdpf-daily-refresh-trigger": {
+        "rule": {
+          "Name": "mdpf-daily-refresh-trigger",
+          "Arn": "arn:aws:events:us-east-1:313476888478:rule/mdpf-daily-refresh-trigger",
+          "EventPattern": "{\"detail\":{\"bucket\":{\"name\":[\"opal-data-inf\"]},\"object\":{\"key\":[\"gold/meta/pipeline-complete.json\"]}},\"detail-type\":[\"Object Created\"],\"source\":[\"aws.s3\"]}",
+          "State": "ENABLED",
+          "Description": "MDPF convergence-gate trigger (MDPF_CADENCE 2026-06-08). Fires on opal-data-inf/gold/meta/pipeline-complete.json ObjectCreated (INF spine, daily incl weekends); the mdpf-daily-trigger Lambda then gates on per-source-vintage freshness (INF + BD-silver, each vs its own calendar) before dispatch. Replaced cron(0 15 ? * MON-FRI *) which missed the Sat T+1 INF reconciliation.",
+          "EventBusName": "default"
+        },
+        "targets": [
+          {
+            "Id": "MdpfDailyTrigger",
+            "Arn": "arn:aws:lambda:us-east-1:313476888478:function:mdpf-daily-trigger",
+            "DeadLetterConfig": {
+              "Arn": "arn:aws:sqs:us-east-1:313476888478:mdpf-daily-trigger-dlq"
+            }
+          }
+        ]
+      },
+      "_denominator": "139 rules across 2 pages (explicitly paginated -- a --query length() would have returned the PAGE count), 1 mdpf-matching"
+    },
+    "denominator": "3 schedules requested"
+  },
+  "s3": {
+    "versioning": {
+      "opal-data-assets": {
+        "Status": "Enabled",
+        "MFADelete": "-"
+      },
+      "opal-data-portal-v2": {
+        "Status": "Enabled",
+        "MFADelete": "-"
+      }
+    },
+    "surfaces": {
+      "platinum_served": {
+        "bucket": "opal-data-portal-v2",
+        "prefix": "platinum/mdpf/",
+        "denominator": "461 objects across 1 pages; 22 undated served keys FROZEN IN FULL; 439 dated keys, newest 3 frozen (dated history is immutable and not a rollback target)",
+        "frozen": {
+          "platinum/mdpf/49financial/account-distribution.json": {
+            "VersionId": "77axjaJ_cXbKt7G35Hxu024L.fxHEoc_",
+            "ETag": "eb7252b4fd9fade97c134707869fed6b",
+            "LastModified": "2026-08-06T13:50:49+00:00",
+            "ContentLength": 5735,
+            "Metadata": {}
+          },
+          "platinum/mdpf/49financial/aggregate-aua-timeseries.json": {
+            "VersionId": "TlpchQMoaykRVfcoUoYeqojg9aXsIs2A",
+            "ETag": "69f1d2bde6d3956fa7147ce4cc237e7f",
+            "LastModified": "2026-08-06T13:50:49+00:00",
+            "ContentLength": 107059,
+            "Metadata": {}
+          },
+          "platinum/mdpf/49financial/aggregate_aua_timeseries.json": {
+            "VersionId": "LPru3xrKo1w8LHIwtIwveG.6rNV.PLnD",
+            "ETag": "867741d5cb34210acc7667586df8b7d2",
+            "LastModified": "2026-07-31T15:00:01+00:00",
+            "ContentLength": 159031,
+            "Metadata": {}
+          },
+          "platinum/mdpf/49financial/aum-metrics.json": {
+            "VersionId": "5eJmO03aq_APHu4p0vateYFfGigia4xZ",
+            "ETag": "55147a5b8ff745969c3a4e76f75c0985",
+            "LastModified": "2026-08-06T13:50:49+00:00",
+            "ContentLength": 4117,
+            "Metadata": {}
+          },
+          "platinum/mdpf/aggregate_aua_timeseries.json": {
+            "VersionId": "_ip.ZDhtyhOTUKuFuXh4N4aE9bFPxUVW",
+            "ETag": "fd4d1a11ffe47fdcd259b0d83fb02c5c",
+            "LastModified": "2026-07-31T15:00:01+00:00",
+            "ContentLength": 451518,
+            "Metadata": {}
+          },
+          "platinum/mdpf/cottonwood/account-distribution.json": {
+            "VersionId": "eQHP_XwM0m28oITm0.emxDfpbuLML2Qd",
+            "ETag": "3e118c94c247921505ceeb5a0ddb9c69",
+            "LastModified": "2026-08-06T13:50:49+00:00",
+            "ContentLength": 7024,
+            "Metadata": {}
+          },
+          "platinum/mdpf/cottonwood/account-units.json": {
+            "VersionId": "ZJleVqBE_qBGxAvD83Mpw85qWDW5SVSF",
+            "ETag": "d6a95a308205a577b5f65eb3bea660a6",
+            "LastModified": "2026-08-06T13:50:49+00:00",
+            "ContentLength": 7702,
+            "Metadata": {}
+          },
+          "platinum/mdpf/cottonwood/aggregate-aua-timeseries.json": {
+            "VersionId": "KtplBMo1umsr81jNNMJkQRU9LmN_2N27",
+            "ETag": "a8dcd5a6bdf1f35f8d457c6dcfbb8276",
+            "LastModified": "2026-08-06T13:50:50+00:00",
+            "ContentLength": 83899,
+            "Metadata": {}
+          },
+          "platinum/mdpf/cottonwood/aum-metrics.json": {
+            "VersionId": "_DDX6H8f.0R83M97IZoksw9X7qMzgpGt",
+            "ETag": "06b0eac214f5a8f09263b9e7fc4d8628",
+            "LastModified": "2026-08-06T13:50:50+00:00",
+            "ContentLength": 3492,
+            "Metadata": {}
+          },
+          "platinum/mdpf/etf_ownership_timeseries/DIVZ.json": {
+            "VersionId": "MYEYdmVjqsPZkxLIUwlCdduzwZNWtzpn",
+            "ETag": "2891f287c7d55d1437ee9556bd4a8216",
+            "LastModified": "2026-08-05T13:34:59+00:00",
+            "ContentLength": 51098,
+            "Metadata": {}
+          },
+          "platinum/mdpf/etf_ownership_timeseries/IDVZ.json": {
+            "VersionId": "V4I8HXfb4is8rXZm18qYUjXnj7oRLq4P",
+            "ETag": "48bed7e958d58b99015d8409691f7302",
+            "LastModified": "2026-08-05T13:34:59+00:00",
+            "ContentLength": 51080,
+            "Metadata": {}
+          },
+          "platinum/mdpf/etf_ownership_timeseries/PFDE.json": {
+            "VersionId": "i_w5piwI8PVxAAqJoOC8wz8oFnCU0Ts2",
+            "ETag": "b8aa035d660949b768296f6e81d8b338",
+            "LastModified": "2026-08-05T13:34:59+00:00",
+            "ContentLength": 38347,
+            "Metadata": {}
+          },
+          "platinum/mdpf/etf_ownership_timeseries/PFOE.json": {
+            "VersionId": "ujTW4UauOEpexVCvrA6zHXQVqUDeznDk",
+            "ETag": "2c2a0eccc07641360c49166f658c6e2d",
+            "LastModified": "2026-08-05T13:34:59+00:00",
+            "ContentLength": 38231,
+            "Metadata": {}
+          },
+          "platinum/mdpf/global/account-distribution.json": {
+            "VersionId": "Pka1VcXTAS8sOAV3zwoMTGW4bnh7pvlA",
+            "ETag": "69a8c55cc5eda5973be79b013e1dfb5a",
+            "LastModified": "2026-08-06T13:50:50+00:00",
+            "ContentLength": 7905,
+            "Metadata": {}
+          },
+          "platinum/mdpf/global/aggregate-aua-timeseries.json": {
+            "VersionId": "TsoF7NVahe57eiZIxeyIMZo5bi_JCFkq",
+            "ETag": "1a9eda5270f120fb801a023bf3a0bafb",
+            "LastModified": "2026-08-06T13:50:50+00:00",
+            "ContentLength": 209149,
+            "Metadata": {}
+          },
+          "platinum/mdpf/global/aggregate_aua_timeseries.json": {
+            "VersionId": "LFfHX5nxQeSmaTAzsjk9xrmaqU4CqEyH",
+            "ETag": "3d749534c9c034ad586c703a6cc6eaed",
+            "LastModified": "2026-07-31T15:00:01+00:00",
+            "ContentLength": 164494,
+            "Metadata": {}
+          },
+          "platinum/mdpf/global/aum-metrics.json": {
+            "VersionId": "DNYv_g2Pzd7WUXsvJBatDjOoTWZp2ZnR",
+            "ETag": "b81b49ef85148e90037ebd01e7f920ee",
+            "LastModified": "2026-08-06T13:50:50+00:00",
+            "ContentLength": 5894,
+            "Metadata": {}
+          },
+          "platinum/mdpf/global/non-model-assets.json": {
+            "VersionId": "rWelx8LfFOQTy1xtrIyQK26C.f7iXtbl",
+            "ETag": "a6d28f8a2136c7a963c6801403b768c3",
+            "LastModified": "2026-08-06T13:50:50+00:00",
+            "ContentLength": 85076,
+            "Metadata": {}
+          },
+          "platinum/mdpf/inflection/account-distribution.json": {
+            "VersionId": "IWIYog5G4m3HWXdAkMIHu06.GSXT9wgz",
+            "ETag": "16669ed4812fb501969e333b9f568963",
+            "LastModified": "2026-08-06T13:50:50+00:00",
+            "ContentLength": 7394,
+            "Metadata": {}
+          },
+          "platinum/mdpf/inflection/aggregate-aua-timeseries.json": {
+            "VersionId": "eEL5eyRqZ.zNh8AtydqIMfusbOMwPrMp",
+            "ETag": "b143c7c010af4b7df5976ede2ef0f494",
+            "LastModified": "2026-08-06T13:50:50+00:00",
+            "ContentLength": 70687,
+            "Metadata": {}
+          },
+          "platinum/mdpf/inflection/aggregate_aua_timeseries.json": {
+            "VersionId": "OkzaUh6DjviGOJY7zvKxRxLM_xekmDlg",
+            "ETag": "4c6525cd3fc561c43b87e1f6640098c5",
+            "LastModified": "2026-07-31T15:00:01+00:00",
+            "ContentLength": 124955,
+            "Metadata": {}
+          },
+          "platinum/mdpf/inflection/aum-metrics.json": {
+            "VersionId": "Uu_j_P3bz21V2vAW1SFXL0D9bh6rTwJS",
+            "ETag": "8c7530dd00f56ab5382a2d13d93dfc83",
+            "LastModified": "2026-08-06T13:50:51+00:00",
+            "ContentLength": 4304,
+            "Metadata": {}
+          },
+          "platinum/mdpf/aggregate_aua/2026-07-31.json": {
+            "VersionId": "SxFBj4Q5KyQy70mWmLvHh7gfOnU4L02v",
+            "ETag": "1abaed4b345553cc52b540e1149202ec",
+            "LastModified": "2026-07-31T14:59:23+00:00",
+            "ContentLength": 10104,
+            "Metadata": {}
+          },
+          "platinum/mdpf/aggregate_aua/2026-08-04.json": {
+            "VersionId": "8L56YEfG0fesGN99JpKY4pMGQQCMk35v",
+            "ETag": "6cea77cd3821746257351f17ea5f7d56",
+            "LastModified": "2026-08-04T21:59:50+00:00",
+            "ContentLength": 10101,
+            "Metadata": {}
+          },
+          "platinum/mdpf/aggregate_aua/2026-08-05.json": {
+            "VersionId": "38Ur7wenA1NUvprHZtJ3j0x_YAcTgFd1",
+            "ETag": "abff8aeb12ebc6e2e5e2c16814f92c75",
+            "LastModified": "2026-08-05T13:34:31+00:00",
+            "ContentLength": 10100,
+            "Metadata": {}
+          }
+        }
+      },
+      "json_bell": {
+        "bucket": "opal-data-portal-v2",
+        "prefix": "json/mdpf/",
+        "denominator": "10 objects across 1 pages; 10 undated served keys FROZEN IN FULL; 0 dated keys, newest 0 frozen (dated history is immutable and not a rollback target)",
+        "frozen": {
+          "json/mdpf/49financial/account-distribution.json": {
+            "VersionId": "1Vf7NIyjiMvnS5f7seJC9niEoydTGiHz",
+            "ETag": "71c9dbe5f236789ee47c90cde759519d",
+            "LastModified": "2026-08-06T11:30:40+00:00",
+            "ContentLength": 5398,
+            "Metadata": {}
+          },
+          "json/mdpf/49financial/aggregate-aua-timeseries.json": {
+            "VersionId": "fRCHTbxB1VT6BOv6ETFHKO3qNIhMWIYE",
+            "ETag": "501407448f554a77a7ff7e2a5dceb954",
+            "LastModified": "2026-07-28T13:41:07+00:00",
+            "ContentLength": 183004,
+            "Metadata": {}
+          },
+          "json/mdpf/aggregate-aua-timeseries.json": {
+            "VersionId": "xxSvXIUbiPk_DCfkDU7mngU1QUJGL02n",
+            "ETag": "a8614a2622744685c34967239a5b57ba",
+            "LastModified": "2026-07-27T15:10:34+00:00",
+            "ContentLength": 447154,
+            "Metadata": {}
+          },
+          "json/mdpf/cottonwood/account-distribution.json": {
+            "VersionId": "G6wytkzukyk1i4hCKF9.L7bXbt0rkmMs",
+            "ETag": "1b283841dd19d255fff22fb19e29775c",
+            "LastModified": "2026-07-23T04:04:42+00:00",
+            "ContentLength": 6375,
+            "Metadata": {}
+          },
+          "json/mdpf/cottonwood/aggregate-aua-timeseries.json": {
+            "VersionId": "3hG6ZfW.lUC5H0joNF.KtkOIkbjyj4o6",
+            "ETag": "194e5bb05c4523abb2cc05988f53005f",
+            "LastModified": "2026-07-23T21:47:07+00:00",
+            "ContentLength": 87262,
+            "Metadata": {}
+          },
+          "json/mdpf/cottonwood/aum-metrics.json": {
+            "VersionId": "JNmkBoTqC2E4_fklVMgLo2HBkM_l21UL",
+            "ETag": "55b1f1a48e0089ec081798683ecca110",
+            "LastModified": "2026-07-23T04:04:42+00:00",
+            "ContentLength": 2862,
+            "Metadata": {}
+          },
+          "json/mdpf/global/account-distribution.json": {
+            "VersionId": "XTTmDTT.SXgl22rLkB4QnT21TngO_fId",
+            "ETag": "14d668ef3b0c048170f59fd5a1516f13",
+            "LastModified": "2026-07-23T20:57:18+00:00",
+            "ContentLength": 7656,
+            "Metadata": {}
+          },
+          "json/mdpf/global/aggregate-aua-timeseries.json": {
+            "VersionId": "2jN1eKB.D_2jULpOYAUQonHQQffSjs5v",
+            "ETag": "5f758b470372da18ad04e5248037cdd0",
+            "LastModified": "2026-07-28T13:41:05+00:00",
+            "ContentLength": 254419,
+            "Metadata": {}
+          },
+          "json/mdpf/inflection/account-distribution.json": {
+            "VersionId": "67TtqD3qcvmdPQXygMd2_HxS6T92fZA9",
+            "ETag": "4aa4db9ba8f060b425659cc092fbedd2",
+            "LastModified": "2026-08-06T11:30:40+00:00",
+            "ContentLength": 6861,
+            "Metadata": {}
+          },
+          "json/mdpf/inflection/aggregate-aua-timeseries.json": {
+            "VersionId": "JhktR4MCgi66lj0tgVDu7dEBsFGB8p1w",
+            "ETag": "e3c8db35d7bfedb15d0876eed6ffdbb4",
+            "LastModified": "2026-07-28T13:41:10+00:00",
+            "ContentLength": 146290,
+            "Metadata": {}
+          }
+        }
+      },
+      "gold_canonical": {
+        "bucket": "opal-data-assets",
+        "prefix": "portal/gold/mdpf/",
+        "denominator": "52 objects across 1 pages; 0 undated served keys FROZEN IN FULL; 52 dated keys, newest 3 frozen (dated history is immutable and not a rollback target)",
+        "frozen": {
+          "portal/gold/mdpf/inflection/aggregate-aua-timeseries/2026-08-03.json": {
+            "VersionId": "E_40tIH67YuvtLIdC4Ama2nsoMcfkt4Q",
+            "ETag": "a9e2cb8461672aaef3e5905997efebe3",
+            "LastModified": "2026-08-04T16:07:53+00:00",
+            "ContentLength": 151776,
+            "Metadata": {}
+          },
+          "portal/gold/mdpf/inflection/aum-metrics/2026-07-30.json": {
+            "VersionId": "bWN3t5q_bBThmz8azZvsVXITr5tMe_bT",
+            "ETag": "76590bcaa0b8ff227e40d48e519959c5",
+            "LastModified": "2026-08-04T14:56:09+00:00",
+            "ContentLength": 5894,
+            "Metadata": {}
+          },
+          "portal/gold/mdpf/inflection/aum-metrics/2026-08-03.json": {
+            "VersionId": "UJHTp69.L4wLUI8XV7T8Xs0icd4_d0.e",
+            "ETag": "3eb57544c5b8e6b84e51739870ed2fbc",
+            "LastModified": "2026-08-04T17:50:13+00:00",
+            "ContentLength": 5892,
+            "Metadata": {}
+          }
+        }
+      },
+      "aggregate_aua": {
+        "bucket": "opal-data-assets",
+        "prefix": "gold/mdpf_revamp/_aggregate_aua/",
+        "denominator": "440 objects across 1 pages; 0 undated served keys FROZEN IN FULL; 440 dated keys, newest 3 frozen (dated history is immutable and not a rollback target)",
+        "frozen": {
+          "gold/mdpf_revamp/_aggregate_aua/2026-08-04.json": {
+            "VersionId": "HC9TAKQvqe3oFkNiDK.u8cYOF9PED3yT",
+            "ETag": "6cea77cd3821746257351f17ea5f7d56",
+            "LastModified": "2026-08-06T00:13:30+00:00",
+            "ContentLength": 10101,
+            "Metadata": {}
+          },
+          "gold/mdpf_revamp/_aggregate_aua/2026-08-05.json": {
+            "VersionId": "hVQSFgg7pWYdH8ra2yNOoinbfPDC3HNg",
+            "ETag": "abff8aeb12ebc6e2e5e2c16814f92c75",
+            "LastModified": "2026-08-06T00:13:30+00:00",
+            "ContentLength": 10100,
+            "Metadata": {}
+          },
+          "gold/mdpf_revamp/_aggregate_aua/2026-08-06.json": {
+            "VersionId": "jZASN3fK.k4XOkKUWgDIX9oZop6hQyWt",
+            "ETag": "42f656bdb3916ae09f02132c9af0fd58",
+            "LastModified": "2026-08-06T13:33:57+00:00",
+            "ContentLength": 10102,
+            "Metadata": {}
+          }
+        }
+      }
+    }
+  },
+  "ec2": {
+    "instance": {
+      "InstanceId": "i-02448edb624a7a7cf",
+      "State": "stopped",
+      "InstanceType": "t3.medium",
+      "ImageId": "ami-0c1e21d82fe9c9336",
+      "LaunchTime": "2026-08-06T13:40:23+00:00",
+      "IamInstanceProfile": "arn:aws:iam::313476888478:instance-profile/mdpf-daily-runner-profile",
+      "SubnetId": "subnet-023db8cbfd99ffff2",
+      "SecurityGroups": [
+        "sg-06fe400379e95d602"
+      ],
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/xvda",
+          "VolumeId": "vol-071d4d9e2d169bbb9",
+          "DeleteOnTermination": true
+        }
+      ],
+      "Tags": {
+        "ManagedBy": "Terraform",
+        "Environment": "production",
+        "Owner": "ae",
+        "Pipeline": "mdpf",
+        "Macro": "ADVI",
+        "Purpose": "MDPFGlobalDailyChain",
+        "Name": "mdpf-daily-runner",
+        "System": "MDPFPipeline",
+        "Project": "mdpf"
+      }
+    },
+    "volumes": [
+      {
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "Size": 50,
+        "VolumeType": "gp3",
+        "State": "in-use",
+        "Encrypted": true,
+        "SnapshotId": "snap-0024585074268f7b2"
+      }
+    ],
+    "existing_snapshots": [
+      {
+        "SnapshotId": "snap-0f1e0578ac6c348d8",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-08-06T07:00:18.125000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-08-06"
+      },
+      {
+        "SnapshotId": "snap-06ae72c6e0793b697",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-08-02T07:00:18.607000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-08-02"
+      },
+      {
+        "SnapshotId": "snap-01c8e8f2432a42237",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-08-01T07:00:18.556000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-08-01"
+      },
+      {
+        "SnapshotId": "snap-0235664ec5c39e74d",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-30T07:00:18.261000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-30"
+      },
+      {
+        "SnapshotId": "snap-0a51d27c745ac53e4",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-28T07:00:18.445000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-28"
+      },
+      {
+        "SnapshotId": "snap-02c71650f3546d1ce",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-27T07:00:18.854000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-27"
+      },
+      {
+        "SnapshotId": "snap-04bddc4817d12e9c9",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-25T07:00:18.721000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-25"
+      },
+      {
+        "SnapshotId": "snap-01a88034ffa4a6e63",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-22T07:00:18.699000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-22"
+      },
+      {
+        "SnapshotId": "snap-02dcf6bdf2f669977",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-31T07:00:18.819000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-31"
+      },
+      {
+        "SnapshotId": "snap-00557583a46401480",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-24T07:00:18.632000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-24"
+      },
+      {
+        "SnapshotId": "snap-0dc61c39beb728a3a",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-16T07:00:18.338000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-16"
+      },
+      {
+        "SnapshotId": "snap-072d7f44b41bf0115",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-10T07:00:18.272000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-10"
+      },
+      {
+        "SnapshotId": "snap-09e0a47b17e181f38",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-09T07:00:18.561000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-09"
+      },
+      {
+        "SnapshotId": "snap-0fd42b486c02b163d",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-08T07:00:18.422000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-08"
+      },
+      {
+        "SnapshotId": "snap-0985ad2d8902afbd1",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-08-05T07:00:18.486000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-08-05"
+      },
+      {
+        "SnapshotId": "snap-066c4dd36aa1b42ca",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-08-04T07:00:18.480000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-08-04"
+      },
+      {
+        "SnapshotId": "snap-0bad7de5ef42f8211",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-29T07:00:18.469000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-29"
+      },
+      {
+        "SnapshotId": "snap-0ec0099bbdbe99dc9",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-21T07:00:18.708000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-21"
+      },
+      {
+        "SnapshotId": "snap-020c21c7412fcfe96",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-19T07:00:18.304000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-19"
+      },
+      {
+        "SnapshotId": "snap-072b8ed95a55c6318",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-18T07:00:18.536000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-18"
+      },
+      {
+        "SnapshotId": "snap-0c3646f384889d7eb",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-17T07:00:18.607000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-17"
+      },
+      {
+        "SnapshotId": "snap-08f5ce89b47c9c66d",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-15T07:00:18.429000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-15"
+      },
+      {
+        "SnapshotId": "snap-0d102b0febd07b0ea",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-13T07:00:18.743000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-13"
+      },
+      {
+        "SnapshotId": "snap-025d2df26abe66677",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-07T07:00:18.497000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-07"
+      },
+      {
+        "SnapshotId": "snap-061abdcc08f45cc67",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-08-03T07:00:18.663000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-08-03"
+      },
+      {
+        "SnapshotId": "snap-0498d267da24eb098",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-26T07:00:18.671000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-26"
+      },
+      {
+        "SnapshotId": "snap-0c4a5e2db3b8e9fbc",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-23T07:00:18.743000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-23"
+      },
+      {
+        "SnapshotId": "snap-059685860841eca5b",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-20T07:00:18.478000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-20"
+      },
+      {
+        "SnapshotId": "snap-0ee8174c66c9393e3",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-14T07:00:18.778000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-14"
+      },
+      {
+        "SnapshotId": "snap-01bea43e8a9a992ad",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-12T07:00:18.236000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-12"
+      },
+      {
+        "SnapshotId": "snap-063da6ca4befaedca",
+        "VolumeId": "vol-071d4d9e2d169bbb9",
+        "StartTime": "2026-07-11T07:00:18.319000+00:00",
+        "State": "completed",
+        "Description": "Daily snapshot 2026-07-11"
+      }
+    ]
+  },
+  "ssm": {
+    "self_owned_documents": [
+      "opal-bd-49f-session-fetch",
+      "opal-bd-allocation-download",
+      "opal-bd-asset-dim-download",
+      "opal-bd-fees-download",
+      "opal-bd-realized-download",
+      "opal-bd-transaction-download",
+      "opal-bd-unrealized-download",
+      "opal-cot-bd-session-fetch",
+      "opal-cot-bronze-run",
+      "opal-cot-gold-run",
+      "opal-cot-silver-run",
+      "opal-inf-export-run",
+      "opal-inf-jwt-fetch",
+      "opal-inf-jwt-setup",
+      "opal-inf-test-login-stage1",
+      "opal-inf-test-login-stage2",
+      "opal-inf-test-login-stage3",
+      "opal-schwab-archive-01raw",
+      "opal-schwab-rps-convert"
+    ],
+    "denominator": "19 self-owned SSM documents across 2 pages",
+    "mdpf_matching": []
+  },
+  "errors": {
+    "count": 1,
+    "records": [
+      {
+        "where": "lambda:mdpf-freshness-checker",
+        "error": "ResourceNotFoundException",
+        "detail": "An error occurred (ResourceNotFoundException) when calling the GetFunctionConfiguration operation: Function not found: arn:aws:lambda:us-east-1:313476888478:function:mdpf-freshness-checker"
+      }
+    ],
+    "note": "a retrieval failure returns a VALUE; every failure is recorded here rather than read as absence"
+  }
+}
