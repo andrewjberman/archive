@@ -154,6 +154,37 @@
        roster/config is `UNKNOWN`/failed manifest status — **never silent listing-derived success.**
        Unrecognized gold grammar is SURFACED, not skipped.
 
+    3a. ⛔ **THE CHECK IS BIDIRECTIONAL — ENUMERATE ACTUAL KEYS, FLAG UNEXPECTED ONES TOO.**
+       Measured live (CVO~Z, s3api UTC, `opal-data-portal-v2` prefix `platinum/mdpf/`, 461 objects /
+       **17 non-archive**):
+         Andrew's **12** — all present, all written today in one publisher cycle.
+         The **2 extras** (`cottonwood/account-units.json`, `global/non-model-assets.json`) — **ALSO written
+           today, same cycle. THEY ARE LIVE, NOT VESTIGIAL.** Retiring them removes something CURRENT.
+         **THE OTHER 3** — `49financial/`, `global/`, `inflection/` `aggregate_aua_timeseries.json`
+           (**UNDERSCORE**), all at `2026-07-31T15:00:01+00:00`. **SIX DAYS STALE, IN THE SERVED BUCKET.**
+
+       **A 12-of-12 PASS AND A 14-of-14 PASS ARE EACH FULLY GREEN WITH THREE STALE FILES ON THE SERVED
+       SURFACE.** And this is not a counting oversight: the `(scope, artifact-type)` PAIR MODEL NORMALISES
+       `aggregate_aua_timeseries` and `aggregate-aua-timeseries` TO THE SAME TYPE, **so the pack's own
+       14-pair denominator STRUCTURALLY CANNOT REPRESENT THEM AS DISTINCT ROWS.** The data model cannot see
+       them, so no amount of care with the count would have found them.
+       ⇒ **Enumerate ACTUAL KEYS under each scope prefix and compare to the expected set in BOTH
+       DIRECTIONS.** An expected-set check that only asks *"are my 12 there"* is ONE-DIRECTIONAL and passes
+       on a served surface carrying arbitrary extra stale content.
+       ⚠ These look like residue of the underscore/undated→hyphen promotion doc 02 marks the 09:40 bridge
+       RETIRE for — **and retiring the bridge does not by itself remove what it left behind.**
+       ⛔ DO NOT DELETE THEM. Served keys are NEVER#3 and Andrew's call. Report them.
+
+    3b. ⛔ **EXISTENCE IS NOT THE WHOLE CHECK — AN A PRIORI DENOMINATOR MAKES A PASS CHEAP.**
+       12 files at 12 known paths **reads identically whether they are fresh or frozen**, so a 12/12
+       EXISTENCE check **WOULD HAVE PASSED ON EVERY FROZEN DAY** — including 08-05 and 08-06, the exact
+       defect this TO exists to fix.
+       So criterion 2a's daily-contract assertion is NECESSARY AND NOT SUFFICIENT: it must be evaluated
+       **together with** criterion 1's source-hash comparison and doc 04 §3's **"read served object BODIES,
+       not LastModified alone."**
+       FORBIDDEN SHORTCUT, NAMED: **do not let the count getting easy retire the body read.** The freshness
+       question is answered by the body and the source hash; the 12 answers only the coverage question.
+
     4. THE ROSTER IS A BUILD-GENERATED, HASH-TIED COPY. **NO `ROSTER_BUCKET`, NO `ROSTER_KEY`, NO GetObject
        leg** — CTO~Z ruled symmetric with gold.
        FORBIDDEN SHORTCUT, NAMED: do not add an S3 read "so expectations can be updated without a redeploy."
