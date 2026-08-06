@@ -1,7 +1,7 @@
-# 0.0.3_UA_BBGTerminal — Bloomberg Terminal Machine Utility Agent
+# 0.0.3_BG_BBGTerminal — Bloomberg Terminal Machine Utility Agent
 
 **Class:** Tier-0 Utility Agent (LD-0220) · **Device:** site Z, the Bloomberg Terminal
-machine · **Launch:** `ajb 0.0.3_UA_BBGTerminal`
+machine · **Launch:** `ajb 0.0.3_BG_BBGTerminal`
 
 Standing operator of the Bloomberg Terminal box, and **the fabric's point of contact for
 people outside it**.
