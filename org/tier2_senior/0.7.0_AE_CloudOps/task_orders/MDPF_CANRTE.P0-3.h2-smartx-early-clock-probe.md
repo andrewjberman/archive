@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
     <date>2026-08-06</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>MDPF_CANRTE</project_code>
   </metadata>
 
@@ -124,6 +124,64 @@
   </cross_domain_coordination>
 
   <acceptance_criteria>
+    0. ⚠ THE PROBE TARGETS `smartx-assets-daily-pull-daily` (09:30 ET), NOT the 09:15 rest pull.
+       ADDED 2026-08-06 ~2110Z — DOC 03's H2 REMEDY MOVES SCHEDULES THAT DO NOT PRODUCE THE BINDING SILVER.
+       Measured on the primitive, fully paginated (7 SmartX Lambdas, 4 Scheduler entries, 3 classic rules —
+       doc 03 describes TWO of those fourteen):
+         `smartx-assets-daily-pull` -> event-invoke-config OnSuccess destination = `opal-assets-silver-smartx`
+         `smartx-rest-pull`         -> event-invoke-configs: **ZERO. Nothing chains off it.**
+       So the binding silver is produced by THE 09:30 ASSETS PULL VIA ITS OnSuccess CHAIN. Doc 03 Phase 0
+       item 4 says "set JWT 07:45 ET and pull 08:00 ET; retain the same on-success converter path" — and
+       THOSE ARE THE TWO SCHEDULES THAT DO NOT PRODUCE `fact_model_aum_daily`.
+       ⛔ **EXECUTED LITERALLY, DOC 03's REMEDY MOVES THE JWT AND THE REST PULL, LEAVES
+       `smartx-assets-daily-pull` AT 09:30 ET, AND THE SILVER LANDS AT ~09:40 ET EXACTLY AS BEFORE — WHILE
+       THE CHANGE READS AS DELIVERED.** That is the failure this criterion exists to prevent, and it would
+       have passed every downstream check that looked at whether the schedules moved.
+       The 30-day census corroborates the MECHANISM, not merely the timing: pull 09:30 -> OnSuccess ->
+       silver 09:37-09:41, median 09:40, 24 of 24 days — a ten-minute converter lag off a 09:30 trigger,
+       not off an 09:15 one.
+       CORRECTED REMEDY: move `smartx-assets-daily-pull-daily`. The JWT must still precede it (ET-anchored,
+       DST-safe, moves cleanly). PROVE OR REFUTE THIS AT THE PROBE rather than asserting it — but the design
+       must target the right schedule or the probe validates a move that changes nothing.
+
+    0a. TWO COUPLING FACTS THAT FALL OUT OF THE SAME MEASUREMENT — record both, act on neither today.
+       (i) **SMARTX IS THE ONLY FAMILY IN `opal-data-assets` WITH NO S3 BRONZE NOTIFICATION.** All 8
+       notification configs are S3 ObjectCreated on a bronze prefix (blackdiamond/cottonwood,
+       eclipse/inflection, orion/inflection, schwab/08242234, schwab/08335338, trueshares/DIVZ,
+       trueshares/IDVZ, pathfinder/filepoint) — there is no `smartx/` prefix among them. Every other family
+       converts on DATA LANDING; SMARTX ALONE CONVERTS ON PULL SUCCESS. Good news for the remedy (its
+       converter moves with its pull) but it means **A PULL THAT SUCCEEDS WITHOUT WRITING STILL FIRES THE
+       CONVERTER, AND A WRITE THAT LANDS BY ANY OTHER ROUTE NEVER DOES.** Know that before leaning on the
+       coupling — a green converter is not evidence that data landed.
+       (ii) **THE BACKSTOP IS UTC-FIXED AND LANDS PAST THE DEADLINE.**
+       `opal-assets-silver-smartx-sweep-daily` is a classic rule at `cron(0 16 * * ? *)` with NO timezone
+       field = 12:00 ET in EDT, 11:00 ET in EST. If the OnSuccess chain fails after the pull moves, the
+       catch-up does not run until TWO HOURS AFTER the 10:00 ET platinum deadline. And because the sweep is
+       UTC-fixed while the pulls are ET-anchored, THE PULL-TO-BACKSTOP GAP CHANGES BY AN HOUR SEASONALLY —
+       the same ET-vs-UTC split CTO~Z identified BETWEEN SmartX and Orion exists INSIDE the SmartX chain,
+       between its pull and its own backstop. CTO~Z's constraint 2 assigned SmartX wholesale to the ET side;
+       that is right for the pulls and WRONG FOR THE SWEEP. Routed to CTO~Z; do not resolve it here.
+       Flagged without conclusion, not yours to chase in this TO: `smartx-account-distribution-daily` fires
+       11:30Z = 07:30 ET, ninety minutes BEFORE the 09:00 ET JWT refresh — either it carries its own auth or
+       it runs on a stale token. Doc 03 does not mention it.
+
+    0b. NO `--no-paginate` LIST IS ACCEPTED AS EVIDENCE FOR AN ABSENCE OR A DENOMINATOR.
+       ⛔ MEASURED 2026-08-06: `aws <svc> list-* --no-paginate` DOES NOT MEAN "return everything without
+       paging" — IT MEANS "RETURN ONLY THE FIRST PAGE." Same calls, paginated vs page-1:
+         `lambda list_functions`   196 across 4 pages — page 1 returns **50. A 74% SHORTFALL.**
+         `events list_rules`       139 across 2 pages — page 1 returns 100.
+         `scheduler list_schedules` 16 across 1 page  — 16. No shortfall, BY LUCK.
+       WHAT IT NEARLY COST: a `--no-paginate` scan returned ONE SmartX Lambda while four ENABLED schedules
+       named four different targets — one step from reporting "two enabled schedules fire at non-existent
+       Lambdas," A FABRICATED PRODUCTION OUTAGE. All four exist. Caught only by re-checking each target
+       individually WITH a positive control (`mdpf-daily-trigger` returned its name) AND a negative control
+       (`zzz-no-such-fn-9999` returned empty), which proved the command shape discriminates and the earlier
+       list was the liar.
+       THIS IS THE SIBLING OF THE `--query length()` TRAP AND IT IS NASTIER: that one returns a wrong
+       NUMBER, THIS ONE RETURNS A WRONG SET — and a filtered `--query` over a truncated page looks exactly
+       like a real absence. THE FAILURE SHAPE IS A CLEAN EMPTY RESULT, the same shape as the mangled grep
+       and the `2>/dev/null`'d `git show`. PAGINATE EXPLICITLY AND PRINT PAGES.
+
     1. VENDOR AUTHORIZATION FOR SMARTX SPECIFICALLY, CITED OR FALLBACK TAKEN. Quote Andrew's per-use word
        and confirm it names SmartX, with channel and time.
        FORBIDDEN SHORTCUT, NAMED: a per-use word granted for Orion/Eclipse DOES NOT COVER SMARTX. Do not
