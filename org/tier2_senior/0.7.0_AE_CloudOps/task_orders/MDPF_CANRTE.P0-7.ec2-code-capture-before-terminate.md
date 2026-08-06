@@ -108,6 +108,44 @@
        manifest mapping on-box path -> S3 key -> sha256. Capture goes EC2 -> S3 per deploy Rule 12:
        NEVER write code on the VM, NEVER inline Python in SSM.
 
+    3a. THE FILESYSTEM DENOMINATOR IS DIFFED AGAINST THE DECLARED BASELINE, AND THE DELTA IS THE FINDING.
+       CVO~Z established (@7cc215f0a) that the port denominator's canonical home was NEVER the volume:
+       `EC2_MANIFEST.json:425-443` registers this instance and declares
+       `code_prefix = s3://opal-data-mdpf/code/scripts/` + `source_path = infra/aws/ec2/mdpf-daily-runner`.
+       Rule 8 meets Rule 12 — S3 + repo is the DECLARED denominator, it is enumerable read-only today, and
+       IT SURVIVES TERMINATION COMPLETELY. Baseline, independently measured:
+         `s3://opal-data-mdpf/code/scripts/`  38 objects · `code/` depth-1  3 shell scripts ·
+         `infra/aws/ec2/mdpf-daily-runner/`   4 files
+       ⚠ **38 IS NOT 38 SCRIPTS. THE DISPOSITION SET IS 33** — 31 executable `.py` + 2 config json
+       (`mdpf_model_registry.json`, `partner_roster.json`). EXCLUDED: 1 backfill DATA json
+       (`aggregate_aua_count_backfill_pre0518.json`), 3 human handoff docs (2x `HANDOFF_*.md`, 1x
+       `HANDOFF_*.diff`), 1 binary `.crosswalk_cache.pkl`.
+       FORBIDDEN SHORTCUT, NAMED: a "38 of 38 ported" claim COUNTS HANDOFF NOTES AS CODE. Accept against
+       33, and state the four content kinds rather than one object count.
+       ⚠ **THE DECLARED BASELINE CANNOT ESTABLISH WHAT THE VOLUME HOLDS.** CVO~Z states the blind spot
+       explicitly and it is load-bearing: `EC2_MANIFEST.json` IS A DECLARATION OF WHERE CODE SHOULD LIVE,
+       NOT A MEASUREMENT THAT THE INSTANCE OBEYED IT — and the entire residual this TO exists to find IS the
+       case where it did not. So the 33 is the thing your filesystem enumeration is DIFFED AGAINST, never a
+       substitute for it. EMPTY DELTA -> Andrew's condition discharged against a real denominator.
+       NON-EMPTY DELTA -> THOSE FILES ARE THE PORT SCOPE AND NOBODY CURRENTLY KNOWS THEY EXIST.
+       Reconcile with `comp-pipescript deployed` (MATCH/STALE/MISSING) — the manifest names it at :443 as
+       the parity instrument, and a hand-diff of 38 keys is exactly where a silent miss lands.
+       NOT A GAP, RESOLVED IN ADVANCE: `user-data.sh` is in the repo and NOT in S3. That is CORRECT —
+       user-data is launch configuration applied at instance creation, not an artifact the instance pulls.
+       Do not file it as a missing port item and do not port it into a Lambda, where it is meaningless.
+
+    3b. `.crosswalk_cache.pkl` GETS A DELIBERATE DISPOSITION, NOT AN EXTENSION-BASED ONE. A pickle cache
+       sitting in a code tree is neither obviously code nor obviously junk: treat it as source and it is
+       "ported" meaninglessly; treat it as deletable and it may be a rebuild input for
+       `mdpf_revamp_model_crosswalk.py`. Route the question to DS~Z (gold-tree owner) and record their
+       answer with its reason. NOBODY CLASSIFIES THIS UNDER DEPLOY PRESSURE.
+
+    3c. FALLBACK IF THE 09:00 WINDOW DOES NOT MATERIALISE — documented so it is not improvised. Restore the
+       P0-7 snapshot to a TEMP volume, mount READ-ONLY, enumerate executables + site-packages, diff against
+       the 33, then DESTROY THE TEMP VOLUME. This is a WRITE path and is your lane; it is the FALLBACK, not
+       the primary, because the production-initiated SSM enumeration reaches the same facts with no
+       lifecycle call and no temp resource. Do not run it while the scheduled window is still viable.
+
     4. THE INSTALLED DEPENDENCY STATE IS CAPTURED AS RESOLVED FACT, NOT AS INTENT. `pip freeze` (or
        equivalent site-packages resolution) from the actual interpreter the MDPF chain uses, preserved to
        S3. Must include the RESOLVED VERSIONS OF BOTH runtime-installed packages:
