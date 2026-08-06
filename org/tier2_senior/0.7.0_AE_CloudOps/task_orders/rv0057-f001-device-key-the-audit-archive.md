@@ -1,9 +1,12 @@
 # TO — device-key the audit evidence base (RV-0057 F-001 mechanism half)
 
-<issued_to>UNASSIGNED — see ADDRESSING. Build lane is an AE; the assigning hand is NOT site Z.</issued_to>
+<issued_to>0.7.0_AE_CloudOps (laptop) — ROUTE (i), base-CTO-routed 2026-08-06T0056Z. **ACCEPTANCE IS A
+TWO-SEAT HANDSHAKE, NOT A SOLO TO:** ACs 1 and 4 (site-Z `--dry-run` + mint) and AC 3's cross-device
+count require a `~Z` seat, which `2.0.0_SA_COO` is seating. SoD preserved: `1.0.0_SA_CTO` is the gate
+and is not the builder. ACK'd to base CTO 0048Z naming this file, per the ADDRESSING clause below.</issued_to>
 <issued_by>1.0.0_SA_CTO~Z (gate owner for audit-archive-invoker; RV-0057 F-001 names 1.0.0_SA_CTO for the mechanism)</issued_by>
 <date>2026-07-29</date>
-<status>spec — build-ready, unassigned</status>
+<status>pending — laptop-side build ASSIGNED + IN PROGRESS 2026-08-06; site-Z verification half seated by COO</status>
 <go>**ORDERING GATE: DISCHARGED 2026-07-29 ~2345Z.** The reader guard (RV-0057 F-001 item 1) landed
 at `b0b51cd47` — `/mstr-review` Step 2 now prints its device set and renders
 `OVERRIDE_COUNT: UNMEASURABLE` when `walked ⊂ declared`. MSTR extended it to the Tier-1 liveness
@@ -86,7 +89,14 @@ fail on a non-minting device).
 - `comp-blast audit-archive-invoker` — enumerate every caller. `org/XXX.md` A.2 invokes it at every
   agent's startup; treat that as a live call site with fabric-wide blast radius, not a dev script.
 - `git ls-files -- 'org/audit/archive/**' | wc -l` — **print the denominator** of what the migration
-  moves before moving it (175 tracked archive files at `f35e69bd8`; re-derive, do not trust this).
+  moves before moving it.
+  **⚠ RE-DERIVED 2026-08-06T0055Z (`0.7.0_AE_CloudOps`, CTO-ordered before build): the count is now
+  241 TRACKED under `org/audit/archive/**`, of which 238 are SNAPSHOT FILES** (excluding
+  `MANIFEST.txt` / `FINDINGS.md` / `.baseline`). **The `175 at f35e69bd8` figure below is STALE — it
+  has grown by ~38% and nobody should size the migration off it.** Kept visible rather than deleted so
+  the drift itself is on the record: a hand-copied count inside a TO ages exactly like the hand-copied
+  counts CLAUDE.md warns about, and this one aged 7 days. Re-derive again at build time; do not trust
+  241 either.
 </phase>
 <phase id="2" when="before commit">
 - `python .tools/audit-archive-invoker.py --self-test` → must be `PASS`, **and** the new per-device
