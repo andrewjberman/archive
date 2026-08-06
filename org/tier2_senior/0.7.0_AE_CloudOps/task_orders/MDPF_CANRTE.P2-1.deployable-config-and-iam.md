@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
     <date>2026-08-06</date>
-    <status>pending</status>
+    <status>superseded -- BY MDPF_CANPLAT.P2-1.deployable-config-and-iam, which ADOPTS this body @a6ae64326 with the fee_scope-axis delta (2.0.0_SA_COO~Z 2026-08-06 fresh decomposition off PRD @24d3eb2f8; single live dispatch authority = org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_CANPLAT_DECOMPOSITION_20260806.md. DO NOT ACT ON THIS TO.)</status>
     <project_code>MDPF_CANRTE</project_code>
   </metadata>
 
