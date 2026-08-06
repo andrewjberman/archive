@@ -16,6 +16,60 @@
   </objective>
 
   <context>
+    ### ⛔⛔ READ THIS PREMISE FIRST OR EVERYTHING BELOW WILL BE MISREAD
+
+    **THIS IS A SHAPE PROJECT, NOT A DATA-CORRECTNESS PROJECT.** Andrew-direct, VERBATIM (spec @1718c2d88):
+
+    > *"We actually are doing this currently, everything I'm describing right now is being depicted properly
+    > in the Portal PROD environment. WHAT WE ARE DISCUSSING HERE IS SIMPLY RENDERING CANONICALLY-SHAPED
+    > JSONS FOR PLATINUM, THAT IS ALL."*
+
+    **THE BUSINESS LOGIC IS CORRECT AND LIVE. A NUMBER THAT DIFFERS FROM YOUR INTUITION IS NOT A FINDING.**
+    Only SHAPE divergences are in scope — a field present on one scope and absent on a sibling, or a value a
+    producer never emits.
+
+    > **TREATING A CORRECT NUMBER AS A FINDING IS HOW A WORKING PIPELINE GETS "FIXED."** (CTO~Z, carried
+    > verbatim at their request.)
+
+    ⚠ **WHY THIS WARNING IS LOUDER THAN IT LOOKS:** this fabric has spent three days finding defects — nine
+    lying instruments and five defective pack prescriptions in one session — and **that success has trained
+    a posture. Every seat is primed to read a surprising number as a bug.** CTO~Z put their OWN instance in
+    the spec: an hour before writing it they surfaced Global's non-model excluding Inflection and Cottonwood
+    (~$409mm) as *"a consequence worth seeing"* — **it is the ruled, correct, intended semantic.**
+
+    ### THREE INVARIANTS — RULED AND LIVE. A TO THAT CHANGES ONE HAS FAILED, NOT FIXED.
+
+    **I-1** Global non-model = **49F ONLY**, in BOTH `aum-metrics` and `aggregate-aua-timeseries`.
+    **I-2** Each firm's OWN artifact carries its OWN non-model, **INDEPENDENT of I-1.** These are two
+      different questions: **I-1 governs what GLOBAL FOLDS; it does not govern what a FIRM PUBLISHES ABOUT
+      ITSELF.** Conflating them is the error the invariant exists to prevent.
+    **I-3** Global `account-distribution` uses total model holdings counts, excluding unfunded
+      (7,925 / 7,974 / 49).
+
+    ⛔ **I-1's MECHANISM IS ALREADY DECLARATIVE — READ IT, DO NOT RE-DERIVE IT.** Global `aum-metrics`
+    `meta.fee_basis_components` carries 49financial `fee_scope: "full"` vs inflection and cottonwood
+    `fee_scope: "model"`. **NON-MODEL FOLDS INTO GLOBAL EXACTLY FOR `fee_scope:full` FIRMS.**
+    **THE CANONICAL BUILDER READS CONFIG AND NEVER SPECIAL-CASES `49financial` BY NAME.** A name-check would
+    satisfy every test and would be **a firm-shaped builder wearing a canonical builder's output.**
+
+    ### TWO SHAPE DIVERGENCES THAT LAND ON THIS TO
+
+    **S-3 IS THIS TO's ATOMIC SCOPE ARRIVING AS A REQUIREMENT.** Cottonwood's `aggregate-aua-timeseries`
+    NEVER EMITS `account_count_total`, `count_provenance`, or `source_vintage_last` — **and the root cause is
+    that COTTONWOOD IS BUILT BY A DIFFERENT SCRIPT IN A DIFFERENT TREE.** The one firm-parameterized path is
+    exactly what closes it.
+
+    **S-4 HAS A TRAP.** Cottonwood's `non_model` is **8/446 populated**, and per I-2 it belongs in
+    Cottonwood's own file, so coverage is required. **BUT IT IS NOT A DERIVATION DEFECT:** the slice builder
+    derives `non_model = custody - model` and **holds HONEST-NONE when custody is absent**, with a W-2b
+    identity gate refusing a fabricated balance. The last two dates ARE populated (~$346mm); the custody leg
+    only recently began landing.
+    ⛔ **NEVER CLOSE S-4 BY RELAXING HONEST-NONE. A POPULATED-BUT-WRONG NON-MODEL IS WORSE THAN None**, and
+    that gate is the control preventing it. **Acceptance is COVERAGE, not "non_model is non-null."**
+
+    ✅ **`aum-metrics` IS ALREADY CANONICALLY SHAPED ACROSS ALL FOUR SCOPES, ZERO DIVERGENCE.** Use it as the
+    reference pattern — it is the existence proof that the other two types can be uniform.
+
     ### ⛔ THIS TO AND THE COTTONWOOD PRODUCERS ARE ONE ATOMIC UNIT (CTO~Z ruled)
 
     `build_cottonwood_mdpf_pair.py:64-65` imports **`_distribution_stats`** — a PRIVATE symbol — plus
@@ -288,6 +342,23 @@
        **NOTHING STOPS BEFORE ITS REPLACEMENT IS PROVEN** — the folded count and non-model fields must be
        demonstrably correct in the canonical 12 first. Same shape as DEPLOY-BEFORE-ENV: the ordering is
        correctness, not preference, and the version that feels tidier is the one that loses data silently.
+
+    9c. ⛔ **THE REGRESSION CRITERION — THIS IS WHAT MAKES "SHAPE PROJECT" MECHANICAL RATHER THAN REMEMBERED.**
+       **BYTE-COMPARE EVERY FIELD NOT NAMED IN SPEC §3 AGAINST TODAY'S SERVED ARTIFACTS. THE SHAPE CHANGES;
+       THE BUSINESS PAYLOAD DOES NOT. A DIFF OUTSIDE §3 IS A REGRESSION, NOT AN IMPROVEMENT.**
+       FORBIDDEN SHORTCUT, NAMED: do not "correct" a value you believe is wrong. **The business logic is
+       live and correct in Portal PROD.** If you are convinced a number is wrong, that is a FINDING TO
+       REPORT, never a change to make — and under this criterion it will surface as a regression whether or
+       not you meant it as one.
+       WHY THIS CRITERION AND NOT AN INSTRUCTION: nobody has to hold the premise in their head for a week.
+       The test enforces it.
+
+    9d. **I-1 IS ASSERTED AGAINST `fee_basis_components`, NEVER AGAINST A LITERAL FIRM NAME.**
+       FORBIDDEN SHORTCUT, NAMED: `if firm == "49financial"` passes every test today and **is a hardcode
+       wearing a rule's clothing.** It breaks silently the moment a firm's `fee_scope` changes or a fourth
+       firm onboards — which is exactly the class of change this port exists to make safe.
+       **I-2 COVERAGE IS REPORTED AS A RATIO WITH ITS DENOMINATOR PRINTED** (e.g. cottonwood non_model
+       populated N of 446), never as a boolean, and never closed by relaxing honest-none.
 
     10. STANDARD DS CRITERIA: `comp-validate <script> --artifact /tmp/<artifact>.json` exits 0;
         `comp-pipescript deployed <script>` shows MATCH after upload.
