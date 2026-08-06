@@ -213,7 +213,21 @@
        actual partitions read; per scope/type source key + source content hash + data-as-of + destination
        key/version/ETag; and `published` / `unchanged` / `skipped` / `carried_forward` / `conflict` / errors.
 
-    6. THE SERVED CONTRACT IS BYTE-COMPATIBLE, VERIFIED PER KEY AGAINST THE P0-1 BASELINE (`@db5f37b11`).
+    6. THE SERVED CONTRACT IS PRESERVED, VERIFIED PER KEY AGAINST THE P0-1 BASELINE (`@db5f37b11`).
+       ⚠ **NOT "BYTE-COMPATIBLE" — CORRECTED per spec §6.4.** "Byte" is a FILE property; "field" is a
+       PARSED-STRUCTURE property; and the shape is changing under the canonical-shape ruling. **A byte
+       comparison fires on everything, reads as noise, and gets weakened by whoever runs it** — reaching the
+       outcome it exists to prevent through imprecision rather than pressure.
+       **FIVE REQUIREMENTS, CARRY ALL FIVE OR CARRY NONE:**
+         (i)   **VALUE-IDENTICAL PER JSON PATH** under a DECLARED canonicalisation (key order, whitespace,
+               number formatting stated explicitly).
+         (ii)  **EXERCISED AGAINST A MUTATION, SHOWN TO FAIL AND LOCALISE, BEFORE ANY PASS IS CITABLE.**
+         (iii) **BASELINE PINNED TO EXPLICIT S3 VersionIds AT A STAMPED INSTANT** — "today's served
+               artifacts" is not a baseline; the publisher writes daily and the target moves under you.
+         (iv)  **ABSENT / NULL / ZERO ARE THREE DISTINCT STATES**, never collapsed.
+         (v)   **THE EXEMPTION SET IS A CLOSED FIELD-PATH LIST THE COMPARATOR CONSUMES AS DATA.**
+               **PROSE IS ARGUABLE EXACTLY WHEN SOMEONE WANTS A DIFF EXCUSED.**
+       FORBIDDEN SHORTCUT, NAMED: do not collapse this to "byte-compare against served artifacts."
        FORBIDDEN SHORTCUT, NAMED: **DO NOT SAMPLE ONE KEY PER ARTIFACT FAMILY.**
        `global/aggregate-aua-timeseries.json` carries `count_as_of` and its twelve siblings do not — a
        family-level sample that picked a firm key would certify a schema the global key does not have.

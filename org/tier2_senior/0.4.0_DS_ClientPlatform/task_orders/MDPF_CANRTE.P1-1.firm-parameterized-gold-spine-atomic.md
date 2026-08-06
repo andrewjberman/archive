@@ -383,15 +383,34 @@
        demonstrably correct in the canonical 12 first. Same shape as DEPLOY-BEFORE-ENV: the ordering is
        correctness, not preference, and the version that feels tidier is the one that loses data silently.
 
-    9c. ⛔ **THE REGRESSION CRITERION — THIS IS WHAT MAKES "SHAPE PROJECT" MECHANICAL RATHER THAN REMEMBERED.**
-       **BYTE-COMPARE EVERY FIELD NOT NAMED IN SPEC §3 AGAINST TODAY'S SERVED ARTIFACTS. THE SHAPE CHANGES;
-       THE BUSINESS PAYLOAD DOES NOT. A DIFF OUTSIDE §3 IS A REGRESSION, NOT AN IMPROVEMENT.**
+    9c. ⛔ **THE REGRESSION CRITERION — FIVE REQUIREMENTS. CARRY ALL FIVE OR CARRY NONE.**
+       ⚠ **CORRECTED per spec §6.4 (CVO~Z).** This criterion first read *"BYTE-COMPARE every field not named
+       in §3."* **THAT VERSION SELF-DESTRUCTS ON FIRST RUN:** "byte" is a FILE property, "field" is a
+       PARSED-STRUCTURE property, **and §3 changes the shape** — so a byte comparison fires on everything,
+       reads as noise, and gets weakened by whoever runs it. **It would have reached the exact outcome it
+       exists to prevent, through imprecision rather than deploy pressure.**
+
+       **(i) VALUE-IDENTICAL PER JSON PATH**, under a DECLARED canonicalisation (key order, whitespace,
+         number formatting stated explicitly) — not byte-identical over the file.
+       **(ii) EXERCISED AGAINST A MUTATION AND SHOWN TO FAIL AND LOCALISE BEFORE ANY PASS IS CITABLE.**
+         A comparator that has never been made to fail has not been tested; a green from it means nothing.
+       **(iii) BASELINE PINNED TO EXPLICIT S3 VersionIds AT A STAMPED INSTANT.** "Today's served artifacts"
+         is not a baseline — the publisher writes daily and the comparison target moves under you.
+       **(iv) ABSENT / NULL / ZERO ARE THREE DISTINCT STATES** in the comparison, never collapsed. This is
+         the same distinction 9e protects at the source; a comparator that folds them cannot see the
+         `else None` → `else 0` edit.
+       **(v) §3 MUST YIELD A CLOSED FIELD-PATH LIST THAT THE COMPARATOR CONSUMES AS DATA.**
+         **§3 IS THE EXEMPTION'S DENOMINATOR, AND PROSE IS ARGUABLE EXACTLY WHEN SOMEONE WANTS A DIFF
+         EXCUSED.** A human reading §3 and deciding whether a diff "counts" is the failure mode; the list
+         is machine-consumed or the criterion is decorative.
+
+       **THE SHAPE CHANGES; THE BUSINESS PAYLOAD DOES NOT. A DIFF OUTSIDE THE §3 LIST IS A REGRESSION, NOT
+       AN IMPROVEMENT.**
        FORBIDDEN SHORTCUT, NAMED: do not "correct" a value you believe is wrong. **The business logic is
-       live and correct in Portal PROD.** If you are convinced a number is wrong, that is a FINDING TO
-       REPORT, never a change to make — and under this criterion it will surface as a regression whether or
-       not you meant it as one.
-       WHY THIS CRITERION AND NOT AN INSTRUCTION: nobody has to hold the premise in their head for a week.
-       The test enforces it.
+       live and correct in Portal PROD.** A number you are convinced is wrong is a FINDING TO REPORT, never
+       a change to make — and it surfaces here as a regression whether or not you meant it as one.
+       ⚠ AND DO NOT COLLAPSE THIS BACK TO ONE SENTENCE. "Byte-compare against served artifacts" IS the
+       version that self-destructs.
 
     9d. **`fee_scope` MOVES INTO THE ROSTER, AND I-1 IS THEN ASSERTED AGAINST IT.**
        ⚠ **CORRECTED 2026-08-06 ~2258Z — THIS CRITERION WAS SELF-SATISFYING AS FIRST WRITTEN.** It said
@@ -406,10 +425,15 @@
        is exactly what remains. **A criterion that cannot fail in the state it detects, in a TO whose whole
        job is naming those.**
 
-       **THE REQUIREMENT:** `fee_scope` moves into `partner_roster.json`; **both consumers read it; the two
-       literals die.** Then I-1 asserts against something the builder does not author.
-       FORBIDDEN SHORTCUT, NAMED: do not satisfy this by reading `meta.fee_basis_components` while the map
-       that produces it is still a literal in the source. **The test must fail if the hardcode is present.**
+       ✅ **RULED (spec §6.2, CTO~Z): P1-1 COLLAPSES THE TWO COPIES TO ONE. THE DECLARATIVENESS MIGRATION
+       IS P2-1's CONFIG AXIS.** `P1-1 collapses 2→1; P2-1 considers 1→declared.` **Nobody populates
+       `firm_registry.json` on CTO~Z's authority** — that is a separate act with its own owner.
+       **YOUR REQUIREMENT HERE IS THE CONSOLIDATION**: one `fee_scope` map, not two, reached by the one
+       parameterized path. Consolidation is squarely in scope; the roster edit is not yours to make.
+       FORBIDDEN SHORTCUT, NAMED: do not claim I-1 is "asserted declaratively" while the surviving map is
+       still a source literal. **State plainly in the deliverable that the value is still authored by the
+       builder and that P2-1 carries the migration.** An honest gap, named, beats a criterion that reads
+       true while being false.
 
        ⚠ **THIS IS THE ROSTER'S OWN CHARTER, VIOLATED THREE TIMES IN THIS CLOSURE.** The roster states:
        *"NO CONSUMER MAY HARDCODE A PARTNER, A CADENCE, A THRESHOLD OR AN EFFECTIVE DATE."* Measured
@@ -433,10 +457,17 @@
        **THE HAZARD IS SHARPER FOR IT:** with no guard object to delete, *"non_model is non-null"* is
        satisfiable by changing **`else None` to `else 0`** — **a one-token edit that reads as null-safety
        hardening and leaves NO DELETED-GUARD SCAR.**
-       ⚠ **THE TWO FIRM PATHS GUARD DIFFERENTLY AND MUST CONVERGE — THAT IS A DECISION, NOT A MERGE
-       DETAIL.** `:853` checks ONLY custody; `:1131` checks BOTH operands. State which form the one
-       parameterized path adopts and why. DS~Z's read is `:1131`'s both-operand form; concur, but record it
-       as a chosen semantic rather than an artifact of whichever branch was kept.
+       ✅ **RULED (spec §6.3): THE BOTH-OPERAND GUARD `:1131` WINS over the custody-only form `:853`.**
+       Record it as a CHOSEN SEMANTIC in the deliverable, not as an artifact of whichever branch survived
+       the refactor — a converged guard that nobody wrote down reads later as an accident.
+
+    9f. **A RESULT THAT WOULD OPEN A BIG FINDING NEEDS A SECOND ORACLE, EXACTLY LIKE ONE THAT WOULD CLOSE A
+       QUESTION** (spec §6.5, CVO~Z — banked as standing).
+       We already require a second oracle before a result CLOSES an open question. **The same tell runs the
+       other way: before reporting a result that would OPEN a large finding, get a second oracle first.**
+       **A FINDING FEELS LIKE THE SAFE ERROR AND IS NOT** — on a SHAPE project whose premise is that the
+       business logic is correct and live, a false finding costs a working pipeline. Same discipline, both
+       directions.
 
     10. STANDARD DS CRITERIA: `comp-validate <script> --artifact /tmp/<artifact>.json` exits 0;
         `comp-pipescript deployed <script>` shows MATCH after upload.
