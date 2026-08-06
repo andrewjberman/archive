@@ -1206,7 +1206,14 @@
 
     <operations>
       <nightly_backfill_command>python data/black_diamond/scripts/bronze/convert_schwab_trn_to_parquet.py &amp;&amp; python data/black_diamond/scripts/bronze/convert_schwab_trn_to_nna_silver.py</nightly_backfill_command>
-      <parity_check>python data/schwab/analysis/nna_parity_harness.py --month-range 2024-07 2024-12</parity_check>
+      <parity_check>RETIRED 2026-08-06 -- RCG ferry D-C009, archived in B-0011 @8c9cc51f14. The harness
+        (data/schwab/analysis/nna_parity_harness.py) read s3://opal-data-schwab/03_silver/TRN_NNA/, which FROZE
+        2026-04-20; production moved two generations on and now reads s3://opal-data-assets/schwab/08242234/silver/fact_trn/
+        via data/black_diamond/scripts/gold/lib/schwab_flows.py. 128 partitions still sat inside its 2024-07..2024-12
+        ground-truth window, so it kept RUNNING and kept printing a confident PASS/FAIL table about a surface production
+        had abandoned -- an instrument that could not have said otherwise. THERE IS NO PARITY CHECK ON THIS PIPELINE
+        TODAY. Stated here so the gap is visible rather than discovered; building a replacement is not authorized by this
+        note.</parity_check>
       <idempotency>Both scripts skip partitions already present. --force rewrites. Layer B is deterministic over Layer A; Layer A is positional and order-stable.</idempotency>
       <bucket_sse_gotcha>opal-data-schwab bucket policy DENIES PutObject without x-amz-server-side-encryption: AES256. Both producers set ServerSideEncryption='AES256' on put_object — do not remove.</bucket_sse_gotcha>
       <deployment_note>No Terraform module yet — scripts run locally. Schwab SFTP automation (replacing OneDrive manual delivery) is a follow-up TO after DS Phase 6.</deployment_note>
