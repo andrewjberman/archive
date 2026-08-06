@@ -46,6 +46,45 @@ the measured numbers, and two things you would otherwise re-derive: a corruption
 that threat), and a defect not in RV-0057 (§5 — the self-test's flagship positive control cannot
 fail on a non-minting device).
 
+## THREAT MODEL — WHAT THIS TO CLOSES, AND WHAT IT DELIBERATELY DOES NOT
+
+*(Added 2026-08-06T0115Z by `0.7.0_AE_CloudOps`, CTO-ruled 0112Z. Recorded because a reviewer must
+**find this named, with its fix specified — never discover it as an unremarked spoof hole in the
+tamper-evidence base**.)*
+
+**THREAT-1 — an UNDECLARED device enters the evidence base silently. CLOSED BY THIS TO.**
+The committed registry is the sole authority. A device id not in it is refused, fail-closed, with a
+named outcome. Resolution is decomposed into two roles, and the split is the ruling:
+- **PROPOSE** — `.tools/agentbus-sqs.sh` `this_device()` (the estate's ONE device-identity mechanism;
+  `AGENTBUS_DEVICE` env tier above a workspace-path fallback). **Non-authoritative.** Its output is
+  inert until admitted.
+- **AUTHORISE** — the committed registry ADMITS or REJECTS. A rejected claim never enters the archive.
+- Fail-closed **both ways**: claim not in registry → `UNDECLARED-DEVICE`; registry missing/unreadable →
+  `REGISTRY-UNREADABLE`. **An authority that cannot be read must not admit everything** — an
+  unreachable oracle reports UNKNOWN and fails closed, never "assume valid."
+
+> **Why this is not a softening of "never a path heuristic" (CTO, 0112Z):** the TO forbids a heuristic
+> being the SOURCE OF AUTHORITY. Under the split it is not — the registry is the sole gate and the
+> heuristic cannot write past a rejection. If the registry merely CO-SIGNED the heuristic's verdict this
+> would be rejected; it does not.
+
+**⚠ THREAT-2 — a DECLARED id claimed by the WRONG machine. NOT CLOSED. DEFERRED, DELIBERATELY.**
+- **Scenario:** a third checkout under a path containing `AndrewBerman` (or `Opal Bloomberg`) claims
+  `laptop`, passes the registry check because `laptop` IS declared, and writes into the laptop chain.
+  The registry gates **undeclared** devices; it does **not** catch a **misidentified** one. A path
+  heuristic can mis-claim, and on a tamper-evidence base a mis-claim is a corrupted attribution.
+- **Closing mechanism (specified, not hand-waved):** a **gitignored per-device marker**, generated once
+  at registration, whose value the registry maps to an id — so the claim becomes **unforgeable rather
+  than inferred**. Requires per-device secret provisioning.
+- **Why deferred (CTO's ruling, reached independently — not deference to the builder):** forcing the
+  unforgeable-marker build into a TO whose model is THREAT-1 is **scope-expansion from the gate side**,
+  the mirror of the dispatch-side expansion this fabric refuses. THREAT-1 is closed completely; a
+  well-scoped THREAT-1 mechanism plus a rigorously named residual beats a hurried THREAT-2 bolt-on onto
+  the security foundation at 01:12. **No third-device path-collision exists today** (measured: the two
+  checkouts live under distinct Windows profiles).
+- **Status:** seat as a follow-on hardening item. **This is a known, accepted, named residual — not an
+  oversight.**
+
 ## BUILD TO THIS
 
     org/audit/archive/<TS>/<flattened-log>          -- today
