@@ -114,13 +114,43 @@
       and makes **12 a DAILY COMPLETENESS DENOMINATOR — a cycle emitting fewer than 12 is INCOMPLETE, not
       merely quiet.**
 
-      ⚠ **OPEN ROW, BLOCKING NOTHING:** his 12 = 3 UNIFORM types × 4 scopes. Doc 02's measured live
-      denominator is **14 pairs** — the same 12 PLUS `cottonwood/account-units` and `global/non-model-assets`.
-      Reading (a): the 12 are the uniform core and the 2 extras continue alongside → 14 emitted.
-      Reading (b): exactly 12 and the 2 extras retire → **two served artifacts dropped, which is NEVER#3
-      territory and NOT ours to infer.** Surfaced to Andrew by CTO~Z, not adjudicated.
-      **THE 12 ARE IDENTICAL UNDER BOTH READINGS, SO DESIGN AGAINST THEM NOW.** Do NOT manufacture a hold
-      around the clarification, and do NOT retire either extra.
+    - ✅ **12-vs-14 RESOLVED, Andrew-direct ~2215Z — A THIRD WAY NEITHER READING OFFERED.**
+      **EXACTLY 12 FILES, and the two extras' INFORMATION FOLDS INTO the canonical 12** rather than
+      continuing standalone or being dropped:
+        `account-units` count → **INTO `account-distribution.json`** (his reason: that is the file feeding
+          the bell curve, which is the component that serves the count)
+        non-model assets → **INTO BOTH `aum-metrics.json` AND `aggregate-aua-timeseries.json`** (both portal
+          components feature non-model)
+
+      ⛔ **SHAPE LAW — the 12 are IDENTICAL IN SHAPE ACROSS SCOPES at platinum.** The folded fields are
+      canonical for EVERY scope. **A scope without data carries the field with HONEST ABSENCE** (existing
+      null-not-zero guards) — **NEVER a scope-specific schema.** So `account_units` exists on all four
+      account-distribution files, not only cottonwood's; non-model fields exist on all four of each type,
+      not only global's.
+
+      ⛔ **LAYER LAW — VENDOR DIVERGENCE IS LEGITIMATE IN BRONZE/SILVER AND DIES IN GOLD.** Cross-vendor
+      normalization is explicitly GOLD's job; **platinum projects an already-canonical gold and NEVER
+      patches shape.** His framing: canonical serve shape first, then work back layer by layer. If a vendor
+      difference reaches platinum, the defect is in gold — do not fix it downstream.
+
+      ⇒ **THE P1 SPEC NOW CARRIES A CANONICAL OUTPUT SCHEMA PER ARTIFACT TYPE — one schema, four scopes,
+      folded fields included.** That composes with doc 02's "AUM metrics soft-fail not acceptable" row:
+      **per-scope STATUS varies in the manifest; SHAPE does not.**
+
+      ⚠ **H6 IS DISCHARGED THROUGH THIS, NOT VIOLATED BY IT.** H6 pins served schema against silent
+      cleanup in an infrastructure cutover. This fold is **exactly the "separately tested schema migration"
+      doc 04 anticipates** — deliberate, in-scope, and tested. **The cutover still does not SILENTLY rename
+      anything; the convergence is its own explicit act.** Do not cite H6 to refuse the fold, and do not
+      cite the fold as licence for any other schema change.
+
+      ⚠ **ORDERING (mechanism, not gate): THE TWO STANDALONE EXTRAS RETIRE ONLY AFTER THEIR INFORMATION IS
+      FOLDED AND VERIFIED IN THE CANONICAL 12.** They were written by this morning's live cycle — they are
+      CURRENT output, not residue. **Nothing stops before its replacement is proven.** Same shape as the
+      DEPLOY-BEFORE-ENV lesson: the order is correctness, not preference.
+
+      ⚠ Portal component re-points (the bell curve reading the folded count; non-model components dropping
+      their standalone fetch) are **DT/portal-lane work — SURFACED, NOT STARTED**, and not this project's
+      scope under the standing frontend guard.
   </context>
 
   <compiler_tools_mandate>
@@ -241,9 +271,23 @@
        ran," "no exception was raised," or "12 writes were attempted."** A build that runs cleanly and emits
        11 has failed this criterion; a report of "12 written" whose sources are all unchanged from yesterday
        has not satisfied it either (see criterion 6's conditional-write semantics).
-       ⚠ DO NOT retire `cottonwood/account-units` or `global/non-model-assets`. His 12 are the uniform core;
-       whether the 2 scope-specific extras continue is an OPEN ROW with him, and dropping a served artifact
-       on an inference is NEVER#3.
+    9a. **CANONICAL SHAPE ACROSS SCOPES, VERIFIED PER FIELD — NOT PER SCOPE.** Each artifact type has ONE
+       schema; all four scopes emit it, folded fields included, with honest absence where a scope has no
+       data.
+       FORBIDDEN SHORTCUT, NAMED: **DO NOT EMIT `account_units` ONLY ON COTTONWOOD OR NON-MODEL FIELDS ONLY
+       ON GLOBAL.** That reproduces the scope-specific schema the ruling removes, and it would pass any
+       check written as "cottonwood carries its count." Assert THE FIELD IS PRESENT ON ALL FOUR, and that a
+       data-less scope carries honest absence — **NEVER zero, never omitted.**
+       ⚠ **AND DO NOT PATCH SHAPE ANYWHERE DOWNSTREAM.** Vendor divergence dies in GOLD. If a shape
+       difference survives into platinum, the defect is in this TO's output — fix it here.
+
+    9b. **THE EXTRAS RETIRE ONLY AFTER THE FOLD IS VERIFIED.** `cottonwood/account-units.json` and
+       `global/non-model-assets.json` were written by this morning's live publisher cycle — **they are
+       CURRENT output, not residue.**
+       FORBIDDEN SHORTCUT, NAMED: do not retire them in the same act that introduces the folded fields.
+       **NOTHING STOPS BEFORE ITS REPLACEMENT IS PROVEN** — the folded count and non-model fields must be
+       demonstrably correct in the canonical 12 first. Same shape as DEPLOY-BEFORE-ENV: the ordering is
+       correctness, not preference, and the version that feels tidier is the one that loses data silently.
 
     10. STANDARD DS CRITERIA: `comp-validate <script> --artifact /tmp/<artifact>.json` exits 0;
         `comp-pipescript deployed <script>` shows MATCH after upload.

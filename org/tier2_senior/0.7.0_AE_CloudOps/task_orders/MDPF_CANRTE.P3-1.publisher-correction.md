@@ -143,10 +143,22 @@
        ⚠ COMPOSES WITH CRITERION 1, and the two are not in tension: an `unchanged` result still satisfies
        "the object exists for the day" — what fails is an object ABSENT, or one whose data-as-of never
        advances while its source did.
-       ⚠ **DO NOT RETIRE `cottonwood/account-units` OR `global/non-model-assets`.** His 12 are the uniform
-       core; doc 02's measured live denominator is 14. Whether the 2 scope-specific extras continue is an
-       OPEN ROW with him — **dropping a served artifact on an inference is NEVER#3.** They keep their
-       existing paths.
+       ✅ **12-vs-14 RESOLVED, Andrew-direct ~2215Z: EXACTLY 12, AND THE EXTRAS' INFORMATION FOLDS IN.**
+       `account-units` count → into `account-distribution.json`; non-model assets → into BOTH
+       `aum-metrics.json` and `aggregate-aua-timeseries.json`. **So 12 IS THE FINAL EXPECTED DENOMINATOR**
+       and criterion 3a's bidirectional check has its complete expected set: **anything else under the
+       scope paths is UNEXPECTED and flags.**
+       ⚠ **BUT NOT YET — ORDERING IS CORRECTNESS HERE.** `cottonwood/account-units.json` and
+       `global/non-model-assets.json` were written by TODAY's live cycle; they are CURRENT output.
+       **THEY RETIRE ONLY AFTER THE FOLDED FIELDS ARE VERIFIED IN THE CANONICAL 12** (P1-1's work).
+       **NOTHING STOPS BEFORE ITS REPLACEMENT IS PROVEN.** Until then the publisher continues emitting
+       them and they are EXPECTED, not unexpected.
+       ⚠ **PLATINUM NEVER PATCHES SHAPE.** Vendor divergence dies in GOLD. If the folded fields are absent
+       or scope-specific when they reach you, that is a P1-1 defect to report — **do not compensate for it
+       in the publisher.** Canonical serve shape comes from an already-canonical gold.
+       ⚠ **H6 IS DISCHARGED THROUGH THE FOLD, NOT VIOLATED BY IT** — it is the "separately tested schema
+       migration" doc 04 anticipates. That licenses the fold and NOTHING ELSE: every other served field
+       stays exactly as the P0-1 baseline recorded it.
 
     3. COMPLETENESS DERIVES FROM EXPECTED SCOPES, NOT FROM LISTING DISCOVERY.
        FORBIDDEN SHORTCUT, NAMED: **A MISSING SCOPE CANNOT DISCOVER ITSELF.** An expected scope absent from
