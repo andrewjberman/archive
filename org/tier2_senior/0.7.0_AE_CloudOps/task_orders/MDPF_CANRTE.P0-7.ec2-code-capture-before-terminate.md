@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
     <date>2026-08-06</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>MDPF_CANRTE</project_code>
   </metadata>
 
@@ -132,8 +132,35 @@
        the capture's coverage. It may assert: "N files enumerated from <root> by <command>, all preserved,
        plus an EBS snapshot that does not depend on enumeration." That is the strongest true claim.
 
-    9. THE INSTANCE IS UNCHANGED. Confirm instance state and volume attachments are identical before and
-       after. This TO stops, detaches, terminates and modifies NOTHING.
+    9. THIS TO INITIATES NO LIFECYCLE CALL. No start, no stop, no detach, no terminate, no modify.
+       ⚠ AMENDED 2026-08-06 ~2055Z (COO~Z ruling, Option B). The instance was found STOPPED, so SSM cannot
+       reach it and criteria 2/3/4/5 had no execution path under the original wording. ENUMERATE DURING A
+       START THE PRODUCTION CHAIN ITSELF INITIATES (the 09:00 ET floor starts the box). Criterion 9 is
+       satisfied by "no lifecycle call was made by this TO," NOT by an unchanged state string — if the
+       chain's own run leaves the instance running or stops it, that is production behaving normally.
+       ALL COMMANDS IN THAT WINDOW ARE READ-ONLY; nothing is written to the instance's disk.
+       WHY NOT SIMPLY START IT OURSELVES — and this is the substantive half, not the governance half:
+       starting is NOT on CLAUDE.md's human-confirmation list, and stopping is SUBSUMED by the teardown
+       authorization (CTO~Z @70733b907 §2B: teardown authorization necessarily covers the lesser act). So a
+       self-initiated cycle was AUTHORIZED and was declined anyway, because `user-data.sh:49` runs
+       `pip install "pandas_market_calendars<5"` — IF THAT FIRES ON BOOT, A SELF-INITIATED START RESOLVES
+       PACKAGES BEFORE WE READ THE PACKAGE STATE, and criterion 4 exists to capture the versions that
+       actually ran the PRODUCTION chain. That is a measurement that changes the thing it measures, on the
+       one criterion whose on-disk state is the only authoritative record in existence. A production-
+       initiated start inverts the problem: the machine is in the state production creates, including
+       whatever the chain installs at runtime. THE WAIT BUYS STRONGER EVIDENCE, it does not merely cost time.
+       If the 09:00 chain does NOT start the box, do not start it yourself — report to COO~Z for a new ruling.
+
+    10. THE EXISTING DAILY SNAPSHOT INVENTORY IS RECORDED WITH ITS MEASURED EXPIRY, NOT AS PERMANENT
+       EVIDENCE. Source-confirmed: `infrastructure-snapshot-daily` cron(0 7 * * ? *) ->
+       `infrastructure-daily-snapshot`, `REAPER_RETENTION_DAYS = 30` at lambda_function.py:40-42,
+       corroborated by the measured 31-snapshot rolling window (oldest 2026-07-07T07:00:18Z).
+       A MANIFEST IS NOT A CONTROL — the reaper reads TAGS, not our deliverables, so naming a snapshot
+       DO-NOT-DELETE in a document protects nothing. (COO~Z issued that instruction; AE~Z refuted it with
+       the source read. The refutation is correct and is recorded here rather than quietly dropped.)
+       DO NOT RETAG the existing dailies — they are not needed; the fresh capture-before-terminate snapshot
+       is the preservation artifact for Andrew's condition. What this criterion prevents is any later TO
+       ASSUMING the dailies are permanent.
   </acceptance_criteria>
 
   <scope>
