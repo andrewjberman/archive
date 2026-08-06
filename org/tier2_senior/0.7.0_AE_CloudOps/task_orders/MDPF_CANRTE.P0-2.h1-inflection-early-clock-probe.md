@@ -34,24 +34,48 @@
     That collapses doc 03 Phase 0 item 4's branch (move-as-a-unit vs MDPF-row-subset): the unit has a
     concrete identity. Prove or refute THAT shape; do not re-open the question from scratch.
 
-    ### H11 — HARD FLOOR ON PROBE DESIGN (CTO~Z @70733b907, and no pack document names it)
+    ### H11 — HARD FLOOR ON PROBE DESIGN (CTO~Z, CORRECTED @5022e995d)
 
-    Clock v3 Amendment 1 pins the Orion JWT renewal UTC-FIXED at 12:15Z, both regimes, deliberately off the
-    12:00/12:30 hazard marks. It exists because the chain's stage-0 read an expired `orion/jwt/current`
-    TWELVE SECONDS before the fresh one landed -> 401 x 9 MODELS.
+    Clock v3 Amendment 1 exists because the chain's stage-0 read an expired `orion/jwt/current` TWELVE
+    SECONDS before the fresh one landed -> 401 x 9 MODELS. It pinned the JWT renewal UTC-FIXED, deliberately
+    off the 12:00/12:30 Orion hazard marks, year-round.
+
+    ⚠ THE NUMBER IS 12:05Z, NOT 12:15Z. Measured on the live plane via `comp-trigger`, denominator
+    139 events-rules + 16 schedules:
+
+      opal-inf-jwt-fetch            cron(5 12 * * ? *)   NO TZ FIELD -> UTC-FIXED
+      smartx-jwt-refresher-daily    cron(0 9 * * ? *)    TZ America/New_York -> ET-ANCHORED
 
     | | EDT | EST |
     |---|---|---|
-    | Orion JWT mint (UTC-fixed 12:15Z) | 08:15 ET | 07:15 ET |
+    | Orion JWT mint (UTC-fixed 12:05Z) | 08:05 ET | 07:05 ET |
     | Required: silver present | 08:40 ET | 08:40 ET |
-    | USABLE ORION PULL WINDOW | 08:15-08:40 ET = 25 MINUTES | 85 min |
+    | USABLE ORION PULL WINDOW | 08:05-08:40 ET = 35 MINUTES | 95 min |
 
-    EDT IS THE BINDING REGIME AND THE WINDOW IS 25 MINUTES. Any Orion pull earlier than 08:15 ET in EDT
-    reads an expired token and re-opens exactly the race Amendment 1 closed.
+    EDT IS THE BINDING REGIME AND THE WINDOW IS 35 MINUTES. Do not book winter slack into the design — a
+    January re-confirmation would show 95 minutes and mean nothing for the binding regime.
 
-    THE FAILURE THIS PREVENTS: a probe run at 07:45 ET would very possibly PASS — and that pass is
-    WORTHLESS, because it certifies an hour production can never use. It would then be recorded as closing
-    H1 while licensing a schedule move that re-opens the 401 race.
+    ⚠ CITE THE PLANE, NOT THE RECORD. Clock v3 Amendment 1 RECORDS 12:15Z while the plane RUNS 12:05Z — the
+    governing clock document is wrong about the single member it exists to pin, and everyone reasoning about
+    this move is reading Clock v3. Ground every floor claim on the live cron expression.
+
+    ### THE CLOCK MOVE IS NOT UNIFORM — AND THIS IS THE PART THAT CHANGES YOUR DESIGN
+
+    Doc 03 says to shift the associated upstream chains earlier. That is CORRECT FOR SMARTX AND WRONG FOR
+    ORION. Doc 03 Phase 4 carries the rule but never says which resources fall on which side. Now measured:
+
+      SMARTX  — ET-anchored, MOVES as specified (doc 03's JWT 07:45 / pull 08:00 ET), DST-safe by construction.
+      ORION   — UTC-fixed, MUST NOT MOVE. The pin is deliberate: it keeps the mint off the 12:00/12:30 hazard
+                marks year-round, and moving it to make room for an early pull RE-OPENS THE EXACT RACE
+                AMENDMENT 1 CLOSED.
+
+    THE ORION PULL ADAPTS TO THE FLOOR; THE FLOOR DOES NOT ADAPT TO THE PULL.
+
+    THE FAILURE THIS PREVENTS, and it is sharper than "the probe is early": A PROBE RESULT FROM BEFORE
+    08:05 ET IS NOT EVIDENCE ABOUT VENDOR DATA AVAILABILITY AT ALL. Below the floor, a FAILURE is a
+    credential artifact, and a PASS is yesterday's token still inside its 10h TTL. Both would otherwise be
+    recorded as closing H1. A PRE-FLOOR PROBE IS WORSE THAN NO PROBE — it yields a confident answer to a
+    question nobody asked.
 
     ### H12 — THE PROBE-FAIL BRANCH IS ALREADY RULED. DO NOT INVENT ONE.
 
@@ -125,11 +149,23 @@
   </cross_domain_coordination>
 
   <acceptance_criteria>
-    1. THE PROBE RAN INSIDE THE H11 WINDOW, OR DID NOT RUN AT ALL. Cite the wall-clock ET time of each
-       Orion call and confirm every one is >= 08:15 ET (EDT). A probe executed before 08:15 ET is REJECTED
-       even if it succeeded.
+    1. THE PROBE RAN AT OR AFTER THE 08:05 ET FLOOR, OR DID NOT RUN AT ALL. Cite the wall-clock ET time of
+       each Orion call and confirm every one is >= 08:05 ET (EDT). A probe executed before 08:05 ET is
+       REJECTED EVEN IF IT SUCCEEDED — and is recorded as NOT-PROBED, never as a result.
        FORBIDDEN SHORTCUT, NAMED: do not "prove earlier is fine" by probing at 07:45 and reporting a PASS.
-       That pass certifies an hour production can never use and would license re-opening the 401x9 race.
+       Below the floor a PASS is yesterday's token inside its 10h TTL and a FAILURE is a credential
+       artifact — NEITHER IS EVIDENCE ABOUT VENDOR DATA AVAILABILITY. A pre-floor probe is worse than no
+       probe: it yields a confident answer to a question nobody asked, and it would license a schedule move
+       that re-opens the 401x9 race.
+       GROUND THE FLOOR ON THE LIVE CRON EXPRESSION, NOT ON CLOCK V3 — the record says 12:15Z, the plane
+       runs 12:05Z, and the record is wrong about the one member it exists to pin.
+
+    1a. THE ORION JWT MINT IS NOT MOVED, AND THE DELIVERABLE SAYS SO. `opal-inf-jwt-fetch` is
+       `cron(5 12 * * ? *)` with NO TZ FIELD — UTC-fixed by design, keeping the mint off the 12:00/12:30
+       hazard marks year-round. THE ORION PULL ADAPTS TO THE FLOOR; THE FLOOR DOES NOT ADAPT TO THE PULL.
+       Any design that widens the window by moving the mint is REJECTED. If 35 minutes proves insufficient,
+       that is a FINDING about the achievable clock reported to COO~Z -> CTO~Z, not a constraint to engineer
+       around.
 
     2. ROW-LEVEL RESULT, NOT AN AGGREGATE VERDICT. Per endpoint AND per row-family the all-row INF mirror
        carries: requested partition, returned partition, returned source vintage, PASS/FAIL. State the
