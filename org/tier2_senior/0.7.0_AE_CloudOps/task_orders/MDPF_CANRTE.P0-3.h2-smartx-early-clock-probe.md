@@ -124,6 +124,21 @@
   </cross_domain_coordination>
 
   <acceptance_criteria>
+    ⛔ **THE GOVERNING CRITERION — ACCEPTANCE ASSERTS ON THE OUTCOME, NEVER ON THE INTERVENTION.**
+       (CTO~Z ruled 2026-08-06 ~2112Z, STANDING across every clock TO in this program.)
+         THE CRITERION IS: **"canonical SmartX silver OBJECT exists by 08:40 ET."**
+         IT IS **NOT**: "the schedules were moved to 07:45/08:00."
+       WHY THIS IS THE FIRST CRITERION AND NOT A STYLE NOTE: *"did the schedules move?"* IS PRECISELY THE
+       CHECK THAT PASSES WHILE THE REMEDY FAILS. Criterion 0 below documents a live instance — doc 03's own
+       prescribed remedy moves two schedules that do not produce the binding silver, and an
+       intervention-shaped acceptance would have certified it as delivered. AN OUTCOME ASSERTION IS IMMUNE
+       TO TARGETING THE WRONG RESOURCE, because a wrong target simply does not produce the outcome.
+       Same shape as the `calendar_source()` ruling: ASSERT THE THING, NOT THE ACT SUPPOSED TO CAUSE IT.
+       Every criterion below is subordinate to this one. If any of them can be satisfied while the silver
+       object is absent at 08:40 ET, that criterion is wrong and you should tell COO~Z rather than satisfy it.
+       SIZING INPUT, from the measured ~10-minute converter lag: a pull at 08:00 predicts silver ~08:10,
+       comfortably inside 08:40.
+
     0. ⚠ THE PROBE TARGETS `smartx-assets-daily-pull-daily` (09:30 ET), NOT the 09:15 rest pull.
        ADDED 2026-08-06 ~2110Z — DOC 03's H2 REMEDY MOVES SCHEDULES THAT DO NOT PRODUCE THE BINDING SILVER.
        Measured on the primitive, fully paginated (7 SmartX Lambdas, 4 Scheduler entries, 3 classic rules —
@@ -161,9 +176,25 @@
        the same ET-vs-UTC split CTO~Z identified BETWEEN SmartX and Orion exists INSIDE the SmartX chain,
        between its pull and its own backstop. CTO~Z's constraint 2 assigned SmartX wholesale to the ET side;
        that is right for the pulls and WRONG FOR THE SWEEP. Routed to CTO~Z; do not resolve it here.
-       Flagged without conclusion, not yours to chase in this TO: `smartx-account-distribution-daily` fires
-       11:30Z = 07:30 ET, ninety minutes BEFORE the 09:00 ET JWT refresh — either it carries its own auth or
-       it runs on a stale token. Doc 03 does not mention it.
+       ⚠ **`smartx-account-distribution-daily` IS IN SCOPE — CTO~Z ruled it in, and the argument is short.**
+       It is a classic rule at 11:30Z = 07:30 ET EDT / 06:30 ET EST, ALWAYS BEFORE the ET-anchored 09:00
+       JWT. So it either carries its own auth or runs on a PRIOR-DAY TOKEN. Whichever it is, **IT IS A
+       CONSUMER OF THE JWT WE ARE MOVING, AND ANY JWT MOVE MUST ACCOUNT FOR EVERY CONSUMER OF THAT JWT.**
+       That alone puts it in Phase 0 regardless of what it produces. DETERMINE WHICH OF THE TWO IT IS BEFORE
+       THE JWT SHIFTS — if it runs on a prior-day token, moving the mint CHANGES ITS TOKEN AGE, and that is
+       a live behavioural change nobody has modelled. Doc 03 does not mention it at all.
+
+    0c. **THE RESOURCE-TYPE RULE — CHECK THE TYPE, NOT THE NAME** (CTO~Z re-ruled at resource-TYPE level,
+       6/6 correlation across everything this project has touched):
+         EventBridge **SCHEDULER** entry -> carries `ScheduleExpressionTimezone` -> CAN be ET-anchored, DST-aware
+         Classic EventBridge **RULE**    -> NO timezone field exists              -> **STRUCTURALLY UTC-ONLY, ALWAYS**
+       Nobody memorizes which resource is which — THE TYPE TELLS YOU. And it predicts the general case:
+       **every classic rule in the estate carrying an ET wall-clock contract has a one-hour seasonal drift
+       BY CONSTRUCTION, not by oversight.**
+       ⚠ CONSEQUENCE THAT MUST BE STATED IN THESE WORDS: `opal-assets-silver-smartx-sweep-daily` fires at
+       12:00 ET in EDT, **TWO HOURS AFTER the 10:00 ET deadline — SO IT IS NOT A BACKSTOP FOR THE PUBLISH
+       AT ALL. IT IS A NEXT-DAY REPAIR WEARING A BACKSTOP'S NAME.** Anyone reasoning "the sweep covers us if
+       the OnSuccess chain fails" is wrong for the deadline that matters.
 
     0b. NO `--no-paginate` LIST IS ACCEPTED AS EVIDENCE FOR AN ABSENCE OR A DENOMINATOR.
        ⛔ MEASURED 2026-08-06: `aws <svc> list-* --no-paginate` DOES NOT MEAN "return everything without

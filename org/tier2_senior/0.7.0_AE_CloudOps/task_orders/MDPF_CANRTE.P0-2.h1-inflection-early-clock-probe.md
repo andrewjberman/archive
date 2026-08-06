@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
     <date>2026-08-06</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>MDPF_CANRTE</project_code>
   </metadata>
 
@@ -149,6 +149,30 @@
   </cross_domain_coordination>
 
   <acceptance_criteria>
+    ⛔ **THE GOVERNING CRITERION — ACCEPTANCE ASSERTS ON THE OUTCOME, NEVER ON THE INTERVENTION.**
+       (CTO~Z ruled 2026-08-06 ~2112Z, STANDING across every clock TO in this program.)
+         THE CRITERION IS: **"canonical Inflection silver OBJECT exists by 08:40 ET."**
+         IT IS **NOT**: "the Wave B schedule was moved."
+       WHY IT LEADS: *"did the schedule move?"* IS THE CHECK THAT PASSES WHILE THE REMEDY FAILS. Measured
+       live instance on the sibling TO — doc 03's prescribed SmartX remedy moves two schedules that do not
+       produce the binding silver, so an intervention-shaped acceptance would have certified a change that
+       altered nothing. **AN OUTCOME ASSERTION IS IMMUNE TO TARGETING THE WRONG RESOURCE**, because a wrong
+       target simply does not produce the outcome.
+       ⚠ APPLY IT HERE SPECIFICALLY: you established that Wave B carries Orion every day AND is where both
+       Eclipse exceptions land. VERIFY THAT MOVING IT PRODUCES THE SILVER OBJECT — do not accept "the Wave B
+       schedule now fires earlier" as the result. Same failure mode, different vendor.
+       Every criterion below is subordinate to this one. If any can be satisfied while the silver object is
+       absent at 08:40 ET, tell COO~Z rather than satisfy it.
+
+    0c. **THE RESOURCE-TYPE RULE — CHECK THE TYPE, NOT THE NAME** (CTO~Z re-ruled at resource-TYPE level;
+       supersedes the vendor-level "SmartX moves, Orion does not" framing, which was a true generalization
+       with a false member because it generalized on the wrong axis). 6/6 correlation measured:
+         EventBridge **SCHEDULER** entry -> carries `ScheduleExpressionTimezone` -> CAN be ET-anchored, DST-aware
+         Classic EventBridge **RULE**    -> NO timezone field exists              -> **STRUCTURALLY UTC-ONLY, ALWAYS**
+       `opal-inf-jwt-fetch` is a CLASSIC RULE — which is *why* it is UTC-fixed, not a property of Orion.
+       Nobody memorizes which resource is which; THE TYPE TELLS YOU. General case: every classic rule in the
+       estate carrying an ET wall-clock contract has a one-hour seasonal drift BY CONSTRUCTION.
+
     1. THE PROBE RAN AT OR AFTER THE 08:05 ET FLOOR, OR DID NOT RUN AT ALL. Cite the wall-clock ET time of
        each Orion call and confirm every one is >= 08:05 ET (EDT). A probe executed before 08:05 ET is
        REJECTED EVEN IF IT SUCCEEDED — and is recorded as NOT-PROBED, never as a result.
