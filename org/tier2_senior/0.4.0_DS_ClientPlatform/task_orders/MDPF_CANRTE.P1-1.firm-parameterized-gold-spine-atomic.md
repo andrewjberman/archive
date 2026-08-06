@@ -70,6 +70,37 @@
     ✅ **`aum-metrics` IS ALREADY CANONICALLY SHAPED ACROSS ALL FOUR SCOPES, ZERO DIVERGENCE.** Use it as the
     reference pattern — it is the existence proof that the other two types can be uniform.
 
+    ### ⛔ THE SHAPE LAW ADMITS NO CARVE-OUT — AND IT MOVES WORK INTO THIS TO
+
+    *(CTO~Z reconciled 225350Z: MSTR~Z's ~2215Z ruling is CURRENT; the spec's "12-vs-14 stays open" was
+    stale by 35 minutes. **The fold stands.** And the ruling resolves more of the spec than that one line.)*
+
+    **1. NO `MODULO A DECLARED GLOBAL-ONLY SET`.** The spec's original acceptance permitted "identical key
+    set across scopes MODULO an explicitly declared global-only set." **Andrew's law admits no such
+    carve-out:** the folded fields are canonical **FOR EVERY SCOPE**, never cottonwood-only or global-only
+    appendages, and a scope without data **carries the field with HONEST ABSENCE.**
+    ⇒ **ONE SCHEMA PER ARTIFACT TYPE. FOUR SCOPES. HONEST ABSENCE WHERE DATA IS ABSENT.** Strike the modulo.
+
+    **2. S-5 AND S-6 ARE DISSOLVED — they are no longer classification questions.**
+      **S-5** global's firm-named `inflection_non_model_aua`: **A FIRM-NAMED FIELD AT GLOBAL SCOPE IS NOT A
+        CANONICAL SHAPE** under a one-schema law. Its information belongs in the canonical non-model structure.
+      **S-6** the five "global-only" fields (`opal_aggregate_aua`, `point_class`, `count_basis`,
+        `count_as_of`, `account_count_total_raw`): **"GLOBAL-ONLY" CEASES TO BE A CATEGORY.** Each field is
+        either canonical for all four scopes (carried with honest absence at firm scope) **or it is not
+        canonical at all.**
+      ⚠ **STILL NOT A DELETION WARRANT.** Deciding a field is non-canonical is NOT deciding to delete a
+        served one. NEVER#3 binds and the sequence is **SHAPE DECISION → VERIFIED FOLD → RETIREMENT.**
+
+    **3. THE CANONICALIZATION IS A GOLD DELIVERABLE — IT IS YOURS, NOT THE PUBLISHER'S.** Andrew: *"the GOLD
+    scripts are where those differences get ironed out. Platinum projects an already-canonical gold; IT
+    NEVER PATCHES SHAPE."* **Any design that puts shape normalization in the publisher is now wrong on his
+    word.** This is Rule 17b's each-layer-one-job with an explicit new assignment: **CROSS-VENDOR
+    NORMALIZATION IS GOLD'S JOB.**
+
+    **4. THE PORT AND THIS RULING ARE ONE BUILD, NOT TWO.** Direction is serve-side-first — pin the platinum
+    shape, make gold produce it, let bronze/silver stay vendor-shaped. **Canonical shape is NOT a follow-on
+    wave to be sequenced after the port**; it is part of this TO's scope.
+
     ### ⛔ THIS TO AND THE COTTONWOOD PRODUCERS ARE ONE ATOMIC UNIT (CTO~Z ruled)
 
     `build_cottonwood_mdpf_pair.py:64-65` imports **`_distribution_stats`** — a PRIVATE symbol — plus
@@ -328,6 +359,15 @@
     9a. **CANONICAL SHAPE ACROSS SCOPES, VERIFIED PER FIELD — NOT PER SCOPE.** Each artifact type has ONE
        schema; all four scopes emit it, folded fields included, with honest absence where a scope has no
        data.
+       ⛔ **ASSERT KEY-SET IDENTITY ACROSS ALL FOUR SCOPES WITH NO MODULO CLAUSE.** There is no declared
+       global-only set and no scope-specific appendix. A criterion written as "identical modulo the declared
+       global-only fields" would pass on the exact divergence the law removes — **"global-only" is not a
+       category any more.**
+       ⚠ Each of S-6's five fields resolves to canonical-for-all-four (honest absence at firm scope) or
+       not-canonical. S-5's firm-named `inflection_non_model_aua` is not a canonical shape at global scope;
+       its information belongs in the canonical non-model structure.
+       ⚠ **NEITHER IS A DELETION WARRANT.** Sequence: SHAPE DECISION → VERIFIED FOLD → RETIREMENT. A served
+       field is not removed because it was classified non-canonical.
        FORBIDDEN SHORTCUT, NAMED: **DO NOT EMIT `account_units` ONLY ON COTTONWOOD OR NON-MODEL FIELDS ONLY
        ON GLOBAL.** That reproduces the scope-specific schema the ruling removes, and it would pass any
        check written as "cottonwood carries its count." Assert THE FIELD IS PRESENT ON ALL FOUR, and that a
