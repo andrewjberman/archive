@@ -393,12 +393,50 @@
        WHY THIS CRITERION AND NOT AN INSTRUCTION: nobody has to hold the premise in their head for a week.
        The test enforces it.
 
-    9d. **I-1 IS ASSERTED AGAINST `fee_basis_components`, NEVER AGAINST A LITERAL FIRM NAME.**
-       FORBIDDEN SHORTCUT, NAMED: `if firm == "49financial"` passes every test today and **is a hardcode
-       wearing a rule's clothing.** It breaks silently the moment a firm's `fee_scope` changes or a fourth
-       firm onboards — which is exactly the class of change this port exists to make safe.
+    9d. **`fee_scope` MOVES INTO THE ROSTER, AND I-1 IS THEN ASSERTED AGAINST IT.**
+       ⚠ **CORRECTED 2026-08-06 ~2258Z — THIS CRITERION WAS SELF-SATISFYING AS FIRST WRITTEN.** It said
+       "assert against `fee_basis_components`, never against a literal firm name, because the mechanism is
+       already declarative." **THE MECHANISM IS NOT DECLARATIVE.** DS~Z measured it:
+         `dim_mdpf_aggregate_aua_timeseries.py:2378` — `"fee_scope": {"49financial": "full", "inflection": "model", "cottonwood": "model"}`
+         `dim_mdpf_aum_metrics.py:191-195` — the same map, second copy
+         `partner_roster.json` — `fee_scope` **ABSENT**.  `route_bindings.yaml` — **ABSENT**.
+       **`meta.fee_basis_components` IS THE OUTPUT OF THOSE TWO LITERALS, NOT AN INDEPENDENT DECLARATION.**
+       So "assert against `fee_basis_components`" was **SATISFIABLE BY ASSERTING AGAINST A LITERAL FIRM NAME
+       ONE LAYER DOWN** — the assertion passes, the hardcode survives, and the criterion's own named hazard
+       is exactly what remains. **A criterion that cannot fail in the state it detects, in a TO whose whole
+       job is naming those.**
+
+       **THE REQUIREMENT:** `fee_scope` moves into `partner_roster.json`; **both consumers read it; the two
+       literals die.** Then I-1 asserts against something the builder does not author.
+       FORBIDDEN SHORTCUT, NAMED: do not satisfy this by reading `meta.fee_basis_components` while the map
+       that produces it is still a literal in the source. **The test must fail if the hardcode is present.**
+
+       ⚠ **THIS IS THE ROSTER'S OWN CHARTER, VIOLATED THREE TIMES IN THIS CLOSURE.** The roster states:
+       *"NO CONSUMER MAY HARDCODE A PARTNER, A CADENCE, A THRESHOLD OR AN EFFECTIVE DATE."* Measured
+       violations: `_cot_window`'s `return 3` (a THRESHOLD) and these two `fee_scope` maps (PARTNERS).
+       **All three close the same way — the declared value lives in the roster and the consumer reads it.**
+
+       ⚠ **IF THE ROSTER EDIT IS RULED OUT OF SCOPE**, this criterion is REWRITTEN, not kept: it must NOT
+       say "never special-cases by name" while the builder still does. **AN ACCEPTANCE CRITERION THAT READS
+       TRUE WHILE BEING FALSE IS WORSE THAN AN HONEST GAP.** (DS~Z's framing; carried because it is right.)
+
        **I-2 COVERAGE IS REPORTED AS A RATIO WITH ITS DENOMINATOR PRINTED** (e.g. cottonwood non_model
        populated N of 446), never as a boolean, and never closed by relaxing honest-none.
+
+    9e. **HONEST-NONE IS A TERNARY, NOT A GATE — PROTECT THE RIGHT THING.**
+       ⚠ **CORRECTED: there is no "W-2b identity gate" object.** Both COO~Z and CTO~Z described one; DS~Z
+       looked for it and it does not exist. The behaviour is the derivation's own ternary:
+         `:853`        `... if custody_hist[i] is not None else None`
+         `:1131-1132`  `... if (custody_hist[i] is not None and model_aua_hist[i] is not None) else None`
+       **DO NOT WRITE "PRESERVE THE W-2b GATE" ANYWHERE** — someone goes looking for a gate, does not find
+       one, and either concludes it was already removed or protects the wrong thing.
+       **THE HAZARD IS SHARPER FOR IT:** with no guard object to delete, *"non_model is non-null"* is
+       satisfiable by changing **`else None` to `else 0`** — **a one-token edit that reads as null-safety
+       hardening and leaves NO DELETED-GUARD SCAR.**
+       ⚠ **THE TWO FIRM PATHS GUARD DIFFERENTLY AND MUST CONVERGE — THAT IS A DECISION, NOT A MERGE
+       DETAIL.** `:853` checks ONLY custody; `:1131` checks BOTH operands. State which form the one
+       parameterized path adopts and why. DS~Z's read is `:1131`'s both-operand form; concur, but record it
+       as a chosen semantic rather than an artifact of whichever branch was kept.
 
     10. STANDARD DS CRITERIA: `comp-validate <script> --artifact /tmp/<artifact>.json` exits 0;
         `comp-pipescript deployed <script>` shows MATCH after upload.
