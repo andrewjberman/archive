@@ -110,9 +110,20 @@
 
     4. THE INSTALLED DEPENDENCY STATE IS CAPTURED AS RESOLVED FACT, NOT AS INTENT. `pip freeze` (or
        equivalent site-packages resolution) from the actual interpreter the MDPF chain uses, preserved to
-       S3. Must include the RESOLVED VERSION of `pandas_market_calendars`.
+       S3. Must include the RESOLVED VERSIONS OF BOTH runtime-installed packages:
+         `mdpf-daily-runner/mdpf-daily-dispatch.sh:189` — `pandas_market_calendars<5`   PINNED
+         `mdpf-daily-runner/mdpf-daily-dispatch.sh:517` — `pyarrow`                     ⚠ UNPINNED
+       Both are sentinel-free conditional self-heals that run on EVERY dispatch. ⚠ THE `pyarrow` LINE IS
+       STRICTLY WORSE THAN THE pmc CASE EVERYONE HAS FOCUSED ON — it carries NO version constraint at all,
+       so whatever version actually ran production is recoverable ONLY from the box or the snapshot. Also
+       capture the first-boot resolution from `user-data.sh:49`
+       (`boto3 pandas pyarrow requests "pandas_market_calendars<5"` — everything unpinned except pmc,
+       resolved once at first boot, volume attached 2026-05-18, so ~11 weeks old and existing nowhere else).
        FORBIDDEN SHORTCUT, NAMED: `requirements.txt` is NOT the dependency state — it does not contain
        `pandas_market_calendars` at all. A capture citing the repo requirements file has captured nothing.
+       LABEL THE ARTIFACT HONESTLY: this is a PROVENANCE BASELINE, NOT A LOCKFILE TO COPY. The dispatch
+       script records 4.x as "the last line that supports Python 3.9," so the box may run 3.9 while the
+       Lambda layer is cp311 — the resolved versions record WHAT RAN, and are not directly transplantable.
 
     5. WHICH INTERPRETER, stated and grounded: the python version and path the MDPF chain actually executes
        under on the box, with the command that showed it. This is H5's reproducibility baseline and it is
@@ -167,8 +178,12 @@
     <files>
       <file action="create">org/tier2_senior/0.7.0_AE_CloudOps/deliverables/MDPF_EC2_CAPTURE_20260806/manifest.json</file>
       <file action="create">org/tier2_senior/0.7.0_AE_CloudOps/deliverables/MDPF_EC2_CAPTURE_20260806/README.md</file>
-      <file action="reference">infra/aws/ec2/mdpf-daily-dispatch.sh</file>
-      <file action="reference">infra/aws/ec2/user-data.sh</file>
+      <file action="reference">infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh</file>
+      <file action="reference">infra/aws/ec2/mdpf-daily-runner/user-data.sh</file>
+      <!-- CORRECTED 2026-08-06: originally cited infra/aws/ec2/{mdpf-daily-dispatch.sh,user-data.sh}.
+           NEITHER EXISTS — both are one directory level down under mdpf-daily-runner/. Harmless to the
+           assignee who found them anyway, but a dangling citation in a TO another agent may execute is
+           exactly the class this program has been correcting all day. Caught by 0.7.0_AE_CloudOps~Z. -->
     </files>
   </scope>
 
