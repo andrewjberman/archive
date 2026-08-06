@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~Z</issued_to>
     <date>2026-08-06</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>MDPF_CANRTE</project_code>
   </metadata>
 
