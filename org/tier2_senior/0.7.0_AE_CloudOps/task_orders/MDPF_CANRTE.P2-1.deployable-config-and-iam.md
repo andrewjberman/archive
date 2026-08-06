@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>0.7.0_AE_CloudOps~Z</issued_to>
     <date>2026-08-06</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>MDPF_CANRTE</project_code>
   </metadata>
 
@@ -126,10 +126,37 @@
        route_bindings." A second thing that can answer *what is expected-ness* IS the defect 230319Z names,
        and we have this morning's nine-day measurement of what it costs.
 
-    3. THE ROSTER LANDS ADJACENT TO THE RESOLVING MODULE IN THE BUILT ARTIFACT, and the import-health test
-       EXERCISES `_load_partner_roster()` FROM THE BUILT ARTIFACT — not from the repo tree.
+    3. THE ROSTER LANDS ADJACENT TO **EVERY** MODULE THAT RESOLVES IT, and the import-health test EXERCISES
+       **BOTH** ROSTER READERS FROM THE BUILT ARTIFACT — not from the repo tree.
        FORBIDDEN SHORTCUT, NAMED: "flat zip root, so `here` is `/var/task`" is an ASSUMPTION about a layout
        Phase 1 has not finalised. Adjacency is a BUILD FACT and must be exercised, not reasoned about.
+
+       ⚠ **THERE ARE TWO ROSTER READERS, IN DIFFERENT TREES, WITH OPPOSITE FAILURE MODES** (DS~Z measured
+       214246Z; not re-derived by COO~Z). `_load_partner_roster()` in the mdpf tree is FAIL-CLOSED.
+       `build_cottonwood_mdpf_slice.py:869-887` `_cot_window()` in the ASSETS tree swallows every exception
+       and **RETURNS A HARDCODED 3** — while citing CTO 230319Z, the ruling that forbids exactly that.
+       **UNDER A NON-FLAT LAYOUT `return 3` FIRES SILENTLY WHILE THE FAIL-CLOSED READER PASSES** — so the
+       loud guard is satisfied and CANNOT SEE the quiet one failing. Ruling extension routed to CTO~Z.
+
+    3a. ⚠ **THE ADJACENCY MAP — NO LAYOUT WORKS WITHOUT CODE CHANGES.** DS~Z mapped every `__file__`-relative
+       resource load, denominator 14 modules, positive-controlled:
+
+         1. `partner_roster.json`      adjacent to `dim_mdpf_aggregate_aua_timeseries.py`
+         2. `partner_roster.json`      adjacent to `build_cottonwood_mdpf_slice.py`  ← SAME FILE, 2nd dir
+         3. `mdpf_model_registry.json` adjacent to `mdpf_aggregate_aua.py`           ← A THIRD CONFIG
+         4. `route_bindings.yaml`      at `<build_mdpf_spine.py dir>/../../config/`
+         5. `rebalancer_schemas`       via `__file__.rsplit("scripts",1)`
+
+         FLAT      makes 1, 2, 3 work; BREAKS 4 and 5.
+         NON-FLAT  makes 4 work; makes 2 BROKEN (silent hardcode) or DUPLICATED (forbidden); 5 still breaks.
+
+       **RECOMMENDATION CARRIED: FLAT.** It is what the estate already does, it KEEPS THE ROSTER A SINGLE
+       PHYSICAL FILE (which is the thing 230319Z protects), and it leaves only rows 4 and 5 — both already
+       inside P1-1's scope. Row 4 exercised: `_HERE=/var/task` → `REPO_CONFIG='/config'`, escaping the task
+       root; it fails **LOUD** on `open()`, unlike row 5. **P2-1's move of `route_bindings.yaml` to a
+       TF-managed S3 object settles row 4's direction**; P1-1 rewrites that load either way.
+       ⚠ Row 3 (`mdpf_model_registry.json`) had not been named in any packaging discussion before now. It is
+       FLAT-compatible and argues the same way — but confirm it rather than inherit it from this TO.
 
     4. WRITE GRANTS ARE RESOURCE-PINNED AND VERIFIED ON THE LIVE PRIMITIVE, not on comp-iam.
        `portal/gold/mdpf/*`, the gold-run manifest prefix, and the dated `_aggregate_aua` prefix.
