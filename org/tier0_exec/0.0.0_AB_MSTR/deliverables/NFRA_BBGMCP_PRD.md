@@ -116,6 +116,19 @@ is not, so every integration inherits `m365` as its namespace. `opal_portal` alr
 **PROPOSED: rename the server identity to a vendor-neutral `opal-gateway`**, demoting m365 to an
 integration alongside ycharts, opal_portal and bloomberg.
 
+> **STATUS 2026-08-06 — EXECUTED, both halves.** Server-side `serverInfo.name` renamed to
+> `opal-gateway` and deployed 2026-07-31 (ledger
+> `org/critical_paths/change_management/20260731T0145Z_gateway-rename-opal-gateway_deploy_completion.md`).
+> Client registration KEY re-keyed `m365` -> **`opal-gateway`** on the laptop 2026-08-06 (both
+> scopes of `~/.claude.json`, backup `.claude.json.bak-pre-opal-gateway-rekey`) on Andrew's word
+> at the MSTR terminal: *"It would be good to canonically rename/rebrand the 'm365' MCP server as
+> 'Opal Gateway' across all relevant surfaces."* **Naming decision settled: the key is
+> `opal-gateway`** (matching the shipped serverInfo.name), superseding the deploy ledger's `opal`
+> shorthand and the `tools.py:51` comment's `mcp__opal__*` example. Tools resolve as
+> `mcp__opal-gateway__*` on next session start; OAuth re-auth required per key (pre-accepted).
+> Residual: site-Z / terminal-box configs (~Z executing) + Alyssa's machine (Andrew's own act).
+> Historical `mcp__m365__` occurrences in logs/telemetry/incident records stay as records.
+
 - **Do NOT fork a separate ycharts/bloomberg MCP server.** The gateway carries OAuth, guard,
   entitlements, blocklist, ratelimit, revocation, OTP and the `s3://opal-mcp-audit` lake. A
   second server duplicates or forks all of it. **One gateway, many integrations** is right;
