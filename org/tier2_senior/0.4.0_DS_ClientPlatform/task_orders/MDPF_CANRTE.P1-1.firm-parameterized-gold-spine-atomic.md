@@ -92,12 +92,35 @@
       `gold/mdpf_revamp/_aggregate_aua` — already the trigger's deployed env; the leading UNDERSCORE is
       load-bearing (a bare `aggregate_aua/` was rejected); `opal-assets-daily-emitter` reads it
       (deployed-confirmed via `AGGREGATE_PREFIX`).
-    - **MULTI-PARTNER SHAPE — PENDING ANDREW, DO NOT BAKE IT FORWARD.** The unscoped
-      `aggregate_aua/{date}.json` carries MULTIPLE PARTNERS IN ONE DOCUMENT. **A single multi-partner file
-      cannot be channel-independent** — one writer, so a partner failure either blocks the file or silently
-      drops that partner, **which IS the Global clamp mechanism.** This is the STORAGE-level cause of the
-      CODE-level coupling you measured. Build per-scope exceptions **compatible with both shapes**; do not
-      re-path unilaterally and do not reproduce the shape unexamined.
+    - ✅ **PER-SCOPE PLATINUM — RULED BY ANDREW 2026-08-06 ~2205Z. NO LONGER PENDING.** VERBATIM:
+      *"Yeah obviously we need the three files for each scope. that means aggregate-aua-timeseries.json,
+      aum-metrics.json, and account-distribution.json for Global, for 49 Financial, for Inflection, and for
+      Cottonwood. 3 files times 4 scopes means that this pipeline needs to generate 12 platinum files into
+      the relevant scope path buckets in opal-data-portal-v2/platinum/mdpf/{scope} every single day, is that
+      abundantly clear?"*
+
+      **THE CONTRACT:** `opal-data-portal-v2/platinum/mdpf/{scope}/` for
+      `{global, 49financial, inflection, cottonwood}` × `{aggregate-aua-timeseries.json, aum-metrics.json,
+      account-distribution.json}` = **12 PLATINUM FILES, EVERY SINGLE DAY.**
+
+      **THIS SETTLES THE DESIGN, NOT JUST THE PATH. PER-SCOPE PATHING MAKES CHANNEL INDEPENDENCE PHYSICALLY
+      ENFORCEABLE** rather than a property the builder must remember to honour: one partner's failure cannot
+      silently remove another partner from a document **because they are no longer in the same document** —
+      absence becomes a MISSING OR STALE FILE rather than a quietly shorter payload. **A single
+      multi-partner document cannot be channel-independent by construction, whatever the builder intends.**
+      The multi-partner single document is the mechanism this REMOVES, not a shape to preserve.
+
+      ⚠ **"EVERY SINGLE DAY" IS PART OF THE RULING, NOT DECORATION.** It binds the scheduled production path
+      and makes **12 a DAILY COMPLETENESS DENOMINATOR — a cycle emitting fewer than 12 is INCOMPLETE, not
+      merely quiet.**
+
+      ⚠ **OPEN ROW, BLOCKING NOTHING:** his 12 = 3 UNIFORM types × 4 scopes. Doc 02's measured live
+      denominator is **14 pairs** — the same 12 PLUS `cottonwood/account-units` and `global/non-model-assets`.
+      Reading (a): the 12 are the uniform core and the 2 extras continue alongside → 14 emitted.
+      Reading (b): exactly 12 and the 2 extras retire → **two served artifacts dropped, which is NEVER#3
+      territory and NOT ours to infer.** Surfaced to Andrew by CTO~Z, not adjudicated.
+      **THE 12 ARE IDENTICAL UNDER BOTH READINGS, SO DESIGN AGAINST THEM NOW.** Do NOT manufacture a hold
+      around the clarification, and do NOT retire either extra.
   </context>
 
   <compiler_tools_mandate>
@@ -208,9 +231,19 @@
     8. COTTONWOOD BUILDS BEFORE GLOBAL, and the declared L1 preparation runs before the Cottonwood spine.
        Assert global is invoked EXACTLY ONCE. Order within the family: backfill → slice → spine.
 
-    9. THE MULTI-PARTNER SHAPE IS FLAGGED, NOT REPRODUCED UNEXAMINED. State in the deliverable whether the
-       implementation writes per-scope or multi-partner-single-document, and why. Per-scope exception
-       handling must be COMPATIBLE WITH BOTH so Andrew's ruling does not force a rewrite either way.
+    9. **PER-SCOPE OUTPUT, AND THE ACCEPTANCE ASSERTS THE 12 OBJECTS — NEVER THAT THE BUILDER RAN.**
+       Andrew-ruled: `platinum/mdpf/{scope}/` × `{aggregate-aua-timeseries, aum-metrics,
+       account-distribution}.json` for all four scopes = **12 FILES EVERY SINGLE DAY.** The gold path this TO
+       builds must produce, per scope, the inputs that make those 12 emittable.
+       **12 IS A DAILY COMPLETENESS DENOMINATOR** — a cycle producing fewer is INCOMPLETE, not quiet.
+       FORBIDDEN SHORTCUT, NAMED: this is the governing outcome-not-intervention criterion applied to the
+       daily contract. **Acceptance asserts THE OBJECTS EXIST FOR THE DAY. It does NOT assert "the builder
+       ran," "no exception was raised," or "12 writes were attempted."** A build that runs cleanly and emits
+       11 has failed this criterion; a report of "12 written" whose sources are all unchanged from yesterday
+       has not satisfied it either (see criterion 6's conditional-write semantics).
+       ⚠ DO NOT retire `cottonwood/account-units` or `global/non-model-assets`. His 12 are the uniform core;
+       whether the 2 scope-specific extras continue is an OPEN ROW with him, and dropping a served artifact
+       on an inference is NEVER#3.
 
     10. STANDARD DS CRITERIA: `comp-validate <script> --artifact /tmp/<artifact>.json` exits 0;
         `comp-pipescript deployed <script>` shows MATCH after upload.

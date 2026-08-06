@@ -130,6 +130,24 @@
        through untouched. **Process time belongs in the manifest/provenance and NOWHERE ELSE.**
        Assertion level is CORRECTNESS: pin the VALUE, not the presence of a field.
 
+    2a. **THE DAILY CONTRACT IS 12 OBJECTS — ANDREW-RULED 2026-08-06 ~2205Z.** VERBATIM: *"3 files times 4
+       scopes means that this pipeline needs to generate 12 platinum files into the relevant scope path
+       buckets in opal-data-portal-v2/platinum/mdpf/{scope} every single day."*
+       `{global, 49financial, inflection, cottonwood}` × `{aggregate-aua-timeseries.json, aum-metrics.json,
+       account-distribution.json}`.
+       **"EVERY SINGLE DAY" IS PART OF THE RULING. 12 IS A DAILY COMPLETENESS DENOMINATOR — a cycle emitting
+       fewer than 12 is INCOMPLETE, not merely quiet.**
+       FORBIDDEN SHORTCUT, NAMED: this is the governing outcome-not-intervention criterion applied to the
+       daily contract. **ACCEPTANCE ASSERTS THE 12 OBJECTS EXIST FOR THE DAY. It does NOT assert "the
+       publisher ran," "the schedule fired," or "12 writes were attempted."**
+       ⚠ COMPOSES WITH CRITERION 1, and the two are not in tension: an `unchanged` result still satisfies
+       "the object exists for the day" — what fails is an object ABSENT, or one whose data-as-of never
+       advances while its source did.
+       ⚠ **DO NOT RETIRE `cottonwood/account-units` OR `global/non-model-assets`.** His 12 are the uniform
+       core; doc 02's measured live denominator is 14. Whether the 2 scope-specific extras continue is an
+       OPEN ROW with him — **dropping a served artifact on an inference is NEVER#3.** They keep their
+       existing paths.
+
     3. COMPLETENESS DERIVES FROM EXPECTED SCOPES, NOT FROM LISTING DISCOVERY.
        FORBIDDEN SHORTCUT, NAMED: **A MISSING SCOPE CANNOT DISCOVER ITSELF.** An expected scope absent from
        gold makes completeness NON-GREEN even when listing discovery otherwise succeeds. Missing
