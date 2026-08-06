@@ -109,6 +109,42 @@ of what counts as terminal — `TERMINAL_STATUS_TOKENS` is unchanged.
   closed).
 - **Owner:** me (I hold every fixture). **CVO verifies by mutation.** **Gate:** CTO.
 
+---
+
+## ⚠ OPEN GAP AGAINST CTO'S STATED ACCEPTANCE — NAMED BEFORE CVO FINDS IT
+
+**This is a gap in MY work, recorded so the reviewer finds it named rather than discovers it.**
+
+CTO's gate condition (0032Z), verbatim intent: the withhold predicate must distinguish a
+**BLOCK-WORTHY** finding (real tamper / coverage gap → correctly withhold) from a **COSMETIC** one
+(line-ending / formatting → archive proceeds, finding noted). Acceptance he specified:
+> *"a cosmetic-finding fixture that proves the chain ADVANCES with the finding noted, plus a
+> real-tamper fixture that proves it correctly WITHHOLDS. **Two fixtures, both firing**, or the
+> withhold predicate is untested."*
+
+**WHAT LANDED (`47b571e0d`) MEETS THE INTENT BY A DIFFERENT ROUTE, AND ONLY HALF THE FIXTURES EXIST:**
+- The EOL fix achieves the separation by **CLASSIFICATION, not by a withhold predicate**: a
+  line-ending-only divergence is no longer a *finding at all* (returns `APPEND_OK` with the kind
+  named), so it cannot withhold. A content divergence still returns `NON_APPEND` and still withholds.
+  That satisfies "cosmetic must not freeze the chain" — arguably more cleanly than gating the
+  withhold, since the cosmetic case never enters the finding set.
+- **REAL-TAMPER fixture: EXISTS.** `--self-test` CONTROL-A (S1 redaction) and CONTROL-B1 (mutant) both
+  return `NON_APPEND` — proof the detector was discriminated, not suppressed.
+- **COSMETIC fixture: DOES NOT EXIST IN THE SELF-TEST.** Evidence today is *live* (the
+  `org/rcg-sweep-audit.log` finding disappeared from the dry-run, 2 findings → 1) and *measured*
+  (baseline CR=0/LF=24 vs live CR=24/CRLF=24, content line-wise identical). **A live observation is
+  not a fixture** — it disappears the moment that log is re-baselined, and then nothing pins the
+  behaviour.
+
+**REQUIRED TO CLOSE:** add a CONTROL that builds a baseline/live pair differing **ONLY** in line
+endings and asserts `APPEND_OK` **with the EOL-normalised detail string** — so a future regression that
+re-collapses cosmetic into `NON_APPEND` fails the self-test rather than merely re-firing on production
+logs. It belongs beside CONTROL-B2 (append) as its sibling.
+
+**Also unverified by fixture:** whether a *coverage* finding (block-worthy per CTO) still correctly
+withholds. The live `pipescript-suite-gate-audit.log` ERROR-FAILCLOSED is currently demonstrating it,
+but for the same reason that is an observation, not a pin.
+
 ## Not in this fix
 
 Device-keying (`archive/<DEVICE>/<TS>/`) is `rv0057-f001`'s own body and needs a **site-Z** run for its
