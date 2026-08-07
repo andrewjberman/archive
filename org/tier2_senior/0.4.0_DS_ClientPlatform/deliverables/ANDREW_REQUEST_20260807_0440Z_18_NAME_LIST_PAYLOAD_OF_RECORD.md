@@ -33,3 +33,11 @@ Opal UST/ Sat 70
 
 *This file is the durable record of the payload exactly as relayed — the phrasing is the
 record; nothing here interprets it.*
+
+---
+
+**CORRECTION, 2026-08-07T04:42Z (Andrew-direct at base MSTR's terminal, verbatim: "it
+actually needs to be sent to 0.7.0_AE_CloudOps~Z, not DS, that was a miscommunication"):**
+the issuance to this seat is WITHDRAWN as mis-addressed; no action ever attached here.
+`0.7.0_AE_CloudOps~Z` holds the operative issuance with the same verbatim payload and
+provenance. This file stands purely as the record of what was issued to this seat and when.
