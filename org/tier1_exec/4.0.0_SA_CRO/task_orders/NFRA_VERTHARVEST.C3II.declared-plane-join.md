@@ -18,10 +18,20 @@
   </objective>
 
   <context>
-    GROUNDING (read first, in full):
-    `org/tier1_exec/1.0.0_SA_CTO/deliverables/C3II_MACRO_REGISTRY_GROUNDING_20260807.md` @98c0991fb0
+    GROUNDING (read first, in full) — **v2, @251605d939. NOT the v1 @98c0991fb0 this TO originally
+    cited**: `org/tier1_exec/1.0.0_SA_CTO/deliverables/C3II_MACRO_REGISTRY_GROUNDING_20260807.md`.
+    v2 adopts your four corrections in full, including that CTO's own control could not fail.
     SPEC: `org/tier1_exec/1.0.0_SA_CTO/deliverables/NFRA_VERTHARVEST_SPEC_20260807.md` (CTO~C;
     survived two CVO falsification rounds)
+
+    >> **RULED 2026-08-07 ~1645Z — INHERIT. YOU ARE THE BUILD OWNER, NOT A SECOND AUTHOR.**
+    Andrew-direct, base CTO terminal, VERBATIM: *"All your recs are approved, proceed"* — closing
+    six open calls including inherit-vs-fresh. **TAKE `NFRA_VERTHARVEST_SPEC_20260807` FORWARD AS
+    BUILD OWNER, ADDING THE DECLARED PLANE PER THE v2 GROUNDING. DO NOT COMMISSION OR AUTHOR A
+    SECOND SPEC.** The spec already implements his stated pipeline shape byte for byte
+    (`HARVEST -> NORMALIZE+CLUSTER -> CONDENSE(AI) -> RATIFY` = deterministic -> AI inferential ->
+    human review) and has survived two CVO falsification rounds. Your job is to build it with the
+    declared plane joined in, not to restate it.
     DECLARED PLANE: `org/projects/MACRO_CODES.md` (~30 rows) + `org/projects/REGISTRY.md` +
     `org/projects/{PROJECT_CODE}.json` for the project layer beneath each macro.
 
@@ -85,10 +95,35 @@
        goes UP, and the instrument goes BLIND at the same moment.
        **A harvest that "finds" causality is reading the model, not the estate.**
 
-    2. THE CONTROL FIRES, AND IT IS ASSERTED NOT ASSUMED: `CENG`/causality MUST land in
-       **DECLARED x NOT-APPLIED**. Assert it explicitly and record the assertion's result. If it
-       lands anywhere else, the join is reading the model — report that as the finding and stop,
-       rather than shipping a candidate list built on a broken join.
+    >> 2. THE CONTROL IS A **PAIR**, ASSERTED FROM THE SAME MEASUREMENT IN THE SAME PASS.
+       ⛔ **AMENDED 2026-08-07 ~1650Z — v1 OF THIS CRITERION WAS UNDISCHARGEABLE AND YOU CAUGHT IT.**
+       v1 said only *"assert `CENG` lands in DECLARED x NOT-APPLIED."* Run the Rule-22a question
+       against it — *could this have said otherwise?* **No.** If the applied-plane measurement returns
+       nothing at all (broken query, wrong prefix, empty credential, a harvest that silently no-ops),
+       `CENG` lands in NOT-APPLIED **trivially, the assertion PASSES, and it passes MORE cleanly the
+       more completely the instrument is dead.** *The control written to protect the harvest carried
+       the exact defect the harvest's own control had.*
+
+       **ASSERT BOTH LIMBS, SAME MEASUREMENT, SAME PASS:**
+         (a) `CENG`/causality lands in **DECLARED x NOT-APPLIED-RETIRED** — RETIRED *specifically*,
+             not the NOT-APPLIED union (see criterion 2a: the cell is split, and CENG's expected
+             resting place is the retired half).
+         (b) a **NAMED LIVE MACRO** — `MDPF` or `ADVI`, both live with a measurable applied plane —
+             lands in **DECLARED x APPLIED**. Name it explicitly in the deliverable.
+       `CENG`-empty is informative ONLY when something else is SIMULTANEOUSLY non-empty. A dead
+       applied plane then fails the POSITIVE limb instead of silently satisfying the negative one.
+       **Record that THE PAIR was asserted, not the single.**
+       *Your own framing, carried verbatim because it is the general form:*
+       **"AN ABSENCE ORACLE PASSES FOR MANY REASONS AND A POSITION ORACLE FAILS FOR ONE."**
+       If either limb lands wrong, the join is reading the model — report it and STOP, rather than
+       shipping a candidate list built on a broken join.
+
+    2a. **THE NOT-APPLIED CELL IS SPLIT — RETIRED vs ASPIRATIONAL** (v2 grounding, and it is not
+       cosmetic): **RETIRED** = was applied, deliberately ended by a NAMING ACT — a correct final
+       resting place that stays there forever (`CENG`). **ASPIRATIONAL** = declared AHEAD of build,
+       never applied — **NOT an end state, a WIP row** that should MOVE to DECLARED x APPLIED when
+       built, **and if it never does, THAT IS A FINDING** (`TAXX`, `SSCN` — both TBD).
+       Collapsing these two loses the finding and mis-sites the control.
 
     >> 3. THE NOT-APPLIED CELL CARRIES THREE STATES, NOT ONE — AND THIS IS THE KIMI COVERAGE CONTRACT
        REUSE, MADE CONCRETE. <<
