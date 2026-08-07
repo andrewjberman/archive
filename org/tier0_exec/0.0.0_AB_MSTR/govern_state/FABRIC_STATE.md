@@ -213,6 +213,58 @@ builds. NO ADVERSE OVERLAP.
   ontology README index (8 not-built docs listed, 0 ratified ones — CRO finding 3/3).
 - No overlap.
 
+---
+
+## CYCLE 10 — 2026-08-07 ~04:35Z (1 peer commit pushed @27a74b9eca) — quiet
+
+- ROUTING EXECUTED on Andrew's word ("route them, run both", ~0430Z): derive_runner ->
+  0.7.0_AE_CloudOps (ACK'd, ACCEPTED, front of queue; convergence — they had closed the
+  pointer half of the loader hazard independently @0215abf3ec); carried point_class ->
+  0.2.0_DE_PortfolioAnalytics (delivered, seat not live, surfaces on wake).
+- BOTH-FABRICS INTEGRATION IN FLIGHT: ~Z ACK'd (a6bb741d), sweeping site-Z tree +
+  nudging seats, merge+push SITEZ; hash frame promised within the half hour. Laptop
+  CLOUD level with origin @27a74b9eca, nothing unpushed.
+- G1: CTO~D NFRA_PYFIELD v0.2 — Q2 answered by CRO's spike, bar correctly NOT set from
+  a subscript-denominator figure. G3: awaiting the sweep push. No overlap.
+
+---
+
+## CYCLE 11 — 2026-08-07 ~04:55Z (1 peer commit pushed @7c02f97f9a) — quiet
+
+- INTEGRATION CLOSED both fabrics: SITEZ merged into CLOUD @a635bf15a3 (169 commits
+  folded); ~Z accepted the one-directional-levelness correction. Red-state device-key
+  residue + ~Z's 17-path owner-triage list routed to the morning walk.
+- Andrew's 18-name list: re-issued to 0.7.0_AE_CloudOps~Z on his correction (DS~Z stood
+  down, payload-of-record @04a617d39 stands as historical). AE~Z ACK pending frame.
+- comp-find rollout hold DISCHARGED (Andrew "(A) lift it"), GO at CTO; comp-read HUD
+  NOT covered (89% fire-rate discriminator rework). 0.0.3_BG second-key mint executing
+  at Andrew's own hand on sitez. CVO~C broker-visibility question resolved (LIVE, PID
+  16956 — point-in-time miss, no registry defect). No overlap; groups winding to close.
+
+---
+
+## CYCLE 12 — 2026-08-07 ~05:15Z (4 peer commits pushed @c99dbc8d09)
+
+- ITEM 5: C2 caller LANDED @627186582 (static specs correctly KEPT as the harness's own
+  control); compose() laptop-boundness blocker routed to CVO base with the Iceberg
+  precedent — AE deliberately withheld the Dockerfile COPY rather than ship a silent
+  no-op wearing a green deploy. My dispatch-wording read confirmed back to AE (RAVC).
+- RUNG-2 AMENDMENT @4ff692a9d0 CONFIRMED BY ANDREW explicitly ("Go ahead with your
+  recs" after reading the diff) — stands as landed. Near-miss recorded: CTO~D was one
+  step from landing a DUPLICATE amendment on the anti-duplicate rung; caught because
+  Andrew told them to check what exists. Keeper: A PENDING PROPOSAL IS NOT A RECORD OF
+  STATE.
+- ANDREW-DIRECT (routed to CTO~D, not me): grant 4.0.0_SA_CRO owned-paths on
+  projects/ATOM_DECOMP/** — expect the TIER0_MSTR lane on that path amended by CTO~D,
+  existing note preserved. Not a surprise when it lands.
+- G3/sitez: 0.0.3_BG identity binding landed (opal-gateway-bbg key + whoami acceptance
+  gate + Secrets Manager credential @f31dd598a/@a69fe345d; launch follows Andrew's
+  mint). AE~Z's Andrew-requested Cottonwood attribution brief landed @924c3b669: root
+  cause source+live confirmed — STRICT OPAL FILTER on the parent strategy name BEFORE
+  decomposition (build_dim_model_portfolio.py:274-277), so Opal children of non-Opal
+  strategies never attribute; 18-name list reconciled (4 deltas, 1 live-account).
+- No overlap.
+
 ### Open subjects at Andrew (unchanged)
 - INF spine freeze: INF_B_00 canonical frozen since 08-01, D-chain since 07-31; MDPF serve
   correctly deferring. Routing question (CTO+DS are the owner chain) awaiting his word.
