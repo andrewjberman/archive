@@ -4,8 +4,17 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform</issued_to>
     <date>2026-08-07</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDPF_CANPLAT</project_code>
+    <status_note>COMPLETE on its own scope, 2026-08-07 ~1935Z, closed by 2.0.0_SA_COO (issuer).
+    Criteria 1-3, 5, 6 MET and independently evidenced @75e379d6ae. Criterion 4 WITHDRAWN as
+    issuer-mis-scoped — see the criterion. **THE DELTA IS $0.00 AND THAT IS THE FINDING, NOT A CLEAN
+    RESULT**: the fix is correct and INERT TODAY because an upstream bronze-harvest filter of the same
+    shape binds first. The harness control ran FIRST and reproduced the LIVE SERVED artifact exactly,
+    so the zero is a measurement and not a dead harness. Mutation matrix 26/26 with the ORIGINAL
+    defect, the overstating mutant and the understating mutant each caught by distinct tests. The
+    residual is a SOVEREIGN CALL at Andrew (bronze model-detail scope), tracked separately - NOT a DS
+    shortfall and NOT carried against this seat.</status_note>
   </metadata>
 
   <objective>
@@ -126,9 +135,22 @@
        delta, the count of newly-attributing constituents, the count of parent strategies newly
        reached, and a measurement vintage.
 
-    4. THE TWO MEASURED CASES RESOLVE, and they are the sharpest test available because AE~Z already
-       measured them: **Opal Fixed Income must APPEAR in the gold dim** (currently ABSENT), and
-       **Conservative Growth's 96+2=98 tie must hold** after the change. State both explicitly.
+    4. ⛔ **WITHDRAWN 2026-08-07 ~1935Z — THIS CRITERION WAS UNSATISFIABLE BY THIS TO AND THAT IS THE
+       ISSUER'S ERROR, NOT THE ASSIGNEE'S.** It read: *"Opal Fixed Income must APPEAR in the gold dim
+       and Conservative Growth's 96+2=98 tie must hold."*
+       **`0.4.0_DS_ClientPlatform` proved it structurally unreachable from the gold layer**, source-
+       confirmed with a positive control: a SECOND filter of the identical shape sits at the BRONZE
+       HARVEST and binds first — `cot-rebalancer-runner/lambda_function.py:303` seeds the model-detail
+       queue on Opal-NAMED roster models, and the transitive closure walks only DOWNWARD from a seed.
+       So a non-Opal-named parent is never fetched, its Opal children never land in bronze, never
+       become silver blend edges, and **gold cannot attribute what was never harvested.**
+       Measured: roster 62 · bronze objects 28 · silver blend edges 33 · **distinct non-Opal-named
+       blend parents 0** · both Anna model_ids ABSENT from bronze. Positive control: the same search
+       for Opal Satellite 70's id returns 1, so ABSENT is a measurement, not a broken retrieval.
+       **I wrote a criterion whose satisfaction depended on a layer this TO does not touch.**
+       ➜ **MOVED to the bronze-harvest scope decision, which is a SOVEREIGN CALL at Andrew** (the scope
+       is *"Andrew-ruled, CTO-ratified"* at `:31`, so widening it reverses a ruling). This TO is
+       assessed on criteria 1–3, 5, 6.
 
     5. `comp-validate` PASS or WAIVED (never signal safe on NO_CONFIG/ZERO_CHECKS), and
        `comp-pipescript deployed` shows MATCH.
