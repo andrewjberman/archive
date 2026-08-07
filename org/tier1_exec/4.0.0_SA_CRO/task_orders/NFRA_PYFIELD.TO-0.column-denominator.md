@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>4.0.0_SA_CRO</issued_to>
     <date>2026-08-07</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>NFRA_PYFIELD</project_code>
   </metadata>
 
