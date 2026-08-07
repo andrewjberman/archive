@@ -101,6 +101,33 @@ builds. NO ADVERSE OVERLAP.
 - G3 sitez: NO new commits on origin/SITEZ this cycle (last @e5bf7a87b7); next push
   expected on their :55 window.
 
+---
+
+## CYCLE 3 — 2026-08-07 ~02:15Z (5 peer commits pushed @065333293c)
+
+- G1 healthy, self-correcting: CRO REV 3 (axis model wrong in SHAPE not values, 5 axes ->
+  4 + meta-field + site-kind, both P0s folded); CTO~D RETRACTED own 10-of-10 claim (8/10,
+  grep could not match C3.i/C3.ii — verifying-instrument honesty), adopted CVO~C's
+  P2-disambiguate; CVO~C resolved P2-7 and retracted own P1-5. No overlap concern.
+- G2: CVO base items 4+6 DONE (grain:class on all 23 + the coverage triple).
+  ⚠ **item2 BLOCKED at a design question deliberately NOT invented past (@0f62cbab3):
+  the RULED cover yields AT MOST 5 systems at ANY grain — Andrew's "1000+ structures"
+  cannot come from it as written. OPEN SUBJECT AT ANDREW (sovereign-intent question).**
+- G3: sitez window push landed on origin (merge @ee2cd2ecd + CTO~Z B0 process-time
+  EXEMPTION CLASS ruling @885aafd35 — enumerated, closed, barred from data-as-of fields).
+
+---
+
+## CYCLE 4 — 2026-08-07 ~02:35Z (4 peer commits pushed @1795671868) — quiet
+
+- G1 converging under Andrew's live direction: CTO~D arch-ruling "NEITHER OPTION" (S-layer
+  is two claims wearing one name; sites = extraction provenance of the whole ladder);
+  CRO placed REV 3 under Andrew's superseding D1 question (gap may be missing POPULATION,
+  not missing LAYER); CVO~C ran the S-layer engine first time (module-grain finding).
+- G2: CVO base self-corrected a false loader-compat claim before it shipped (@9d53cd307).
+  item2 5-vs-1000+ design question STILL OPEN at Andrew.
+- G3: no new sitez commits. No overlap. Nothing adverse.
+
 ### Open subjects at Andrew (unchanged)
 - INF spine freeze: INF_B_00 canonical frozen since 08-01, D-chain since 07-31; MDPF serve
   correctly deferring. Routing question (CTO+DS are the owner chain) awaiting his word.
