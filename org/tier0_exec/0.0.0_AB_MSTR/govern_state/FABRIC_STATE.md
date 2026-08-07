@@ -443,6 +443,94 @@ builds. NO ADVERSE OVERLAP.
   via bus or the next sitez push.
 - No overlap through 24 cycles.
 
+---
+
+## CYCLE 25 — 2026-08-07 ~09:35Z (4 peer commits pushed @23220a7b20) — quiet
+
+- Item-5 deploy prep hardening: truncated-catalog SyntaxError escape closed
+  ("the most likely corruption in a container" @f0cd33c03); kuzu inertness claim
+  re-grounded on zero transitive deps @d2ede8778; pull-list corrected to two commits
+  with measured cost @b603f7d00; CVO measured that BOTH its claim and AE's correction
+  were wrong in opposite directions @23220a7b2.
+- G3: still no post-09:00-ET result commits on origin; outcome pending bus/next push.
+- No overlap through 25 cycles.
+
+---
+
+## CYCLE 26 — 2026-08-07 ~09:55Z (2 peer commits pushed @9b007dc07e) — quiet
+
+- Log hygiene closing the overnight arc: CVO session log (five blockers were
+  fixture-blocked not VPC-blocked); AE's second correction to its own note — "CVO was
+  right; my correction of them was wrong" (wrong measurement shape) @23b6350a5.
+- G3 quiet; 13:00Z (09:00 ET) cycle watch stands. No overlap through 26 cycles.
+
+---
+
+## CYCLE 27 — 2026-08-07 ~10:15Z (2 peer commits pushed @5c3168113e) — quiet
+
+- Kimi/estate-report DEP6 CLOSED: ec2-hop computed reach LANDED + verified 09:45:47Z
+  (CTO~B, ledger L1-L6; deliberately records why THIS deploy fired while the globgrph
+  derive was deferred the same night — different risk profiles, both reasoned)
+  @5c3168113. En route, a frozen-string "measurement" was found wrong three ways and
+  replaced with a computed field + positive/negative/threaded controls @57d183ab9.
+- G3: merged CLOUD forward @3deaed413. No overlap through 27 cycles.
+
+---
+
+## CYCLE 28 — 2026-08-07 ~10:35Z — fully quiet
+
+- Zero new commits on either fabric; nothing local unpushed; no bus/inbox events.
+  Fabric at rest ahead of the 13:00Z sitez cycle. No overlap through 28 cycles.
+
+## CYCLE 29 — 2026-08-07 ~10:55Z — fully quiet
+
+- Zero new commits, nothing unpushed, no events. 29 cycles, no overlap.
+
+## CYCLE 30 — 2026-08-07 ~11:15Z — quiet
+
+- Sitez merged CLOUD forward @c4896e0e5 (picks up DEP6); nothing else moved.
+  30 cycles, no overlap.
+
+## CYCLE 31 — 2026-08-07 ~11:35Z — fully quiet
+
+- Zero movement either fabric. 31 cycles, no overlap. 13:00Z cycle in ~85 min.
+
+## CYCLE 32 — 2026-08-07 ~11:55Z — fully quiet
+
+- Zero movement either fabric. 32 cycles, no overlap. 13:00Z cycle in ~65 min.
+
+## CYCLE 33 — 2026-08-07 ~12:15Z — fully quiet
+
+- Zero movement either fabric. 33 cycles, no overlap. 13:00Z cycle in ~45 min.
+
+## CYCLE 34 — 2026-08-07 ~12:35Z — fully quiet
+
+- Zero movement either fabric. 34 cycles, no overlap. 13:00Z cycle in ~25 min.
+
+## CYCLE 35 — 2026-08-07 ~12:55Z — fully quiet
+
+- Zero movement either fabric. 35 cycles, no overlap. 13:00Z sitez cycle fires within
+  minutes — next cycle should carry its outcome (Andrew personal verification + INF
+  fork answer + first same-data-day aum/distribution adjudication).
+
+---
+
+## CYCLE 36 — 2026-08-07 ~13:15Z — sitez morning results landing
+
+- G3 first post-cycle commits @27086673e/@610fac9d4:
+  - **P0-7R filed NOT-RUN BY CONSTRUCTION** (COO~Z-adjudicated): the old production
+    window DOES NOT EXIST — floor re-pointed to mdpf-gold-lambda; the EC2 starter's
+    only rule has ScheduleExpression null keyed on an INF marker SILENT SINCE 07-31
+    (positive-controlled); instance stopped. No window manufactured, no re-trigger.
+    Confirms the INF-fork branch-(b) shape from the overnight finding. R12 warm-vs-cold
+    fallback implication ROUTED TO ANDREW'S MORNING SESSION.
+  - **H1/H2 probe evidence**: Orion EARLY-VALID (settled money 08:10 ET, delta
+    0.0000%); Eclipse EARLY-VALID on modeling surface; SmartX EARLY-INVALID on the
+    current clock via S3-side fallback. Floor sharpened: mint lands ~93s AFTER the
+    12:05Z cron — a clock-only floor reads yesterday's token. Three instrument traps
+    caught, incl. AE~Z's own false-zero on a nonexistent field.
+- Laptop quiet. No overlap through 36 cycles.
+
 ### Open subjects at Andrew (unchanged)
 - INF spine freeze: INF_B_00 canonical frozen since 08-01, D-chain since 07-31; MDPF serve
   correctly deferring. Routing question (CTO+DS are the owner chain) awaiting his word.
