@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>3.0.0_SA_CVO</issued_to>
     <date>2026-08-07</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>MDPF_CANPLAT</project_code>
   </metadata>
 
