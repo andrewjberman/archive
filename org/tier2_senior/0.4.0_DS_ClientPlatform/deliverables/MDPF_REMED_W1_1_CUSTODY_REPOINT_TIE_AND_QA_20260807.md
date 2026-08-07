@@ -208,6 +208,21 @@ is not a QA run. **None of these are caused by this change and I did not investi
   share one missing step: "a deleted table is referenced somewhere, therefore something crashes" —
   without checking whether the referencing code is REACHABLE, or whether its counterpart moved WITH
   it. Corrections sent to MSTR + CTO 2150/2152Z.*
+
+  ✅ **INDEPENDENTLY CORROBORATED — MSTR retracted to CTO at 2157Z ("STAND DOWN / do not re-cut
+  tonight") after pulling the deployed zip and re-deriving the result themselves rather than
+  accepting my de-escalation on trust.** Their legs differ from mine in derivation — they counted
+  `DDB_AUA_TABLE` *references* per packaged module (spine 1, aua 2) and checked the packaged tie row
+  at `:66`, where I matched source patterns and the `:58` source line — and they added a control I
+  had not: **repo HEAD carries no `ddb-cohort` row at all.** Two instruments, different derivations,
+  same verdict: config-old asserting code-old = coherent = PASS.
+  **MSTR's own diagnosis, worth more than the correction:** they verified the artifact's VINTAGE
+  correctly (16.5h stale) and then read its BEHAVIOR out of the REPO — citing
+  `build_mdpf_spine.py:92`'s `SystemExit` from a file that is not the one in the package. And their
+  hedge ("I have not traced whether the invocation reaches the assertion in-process") pointed away
+  from the binding gap, which was *"is the packaged CODE also old?"* — **a caveat that is not the
+  binding one buys the credibility of having hedged while the real hole stays open, and makes the
+  claim harder to challenge rather than easier.**
 - `trading_calendar.py` is **not** present in `s3://opal-data-mdpf/code/scripts/gold/` (only the
   retired `_trading_day_calendar.py` shim and `mdpf_calendar_binding.py`). My QA run needed the repo
   root on `PYTHONPATH` to resolve it. Whether the EC2 runner provisions it another way is
