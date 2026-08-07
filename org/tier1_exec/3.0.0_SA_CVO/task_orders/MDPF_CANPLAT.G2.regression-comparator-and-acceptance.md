@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>3.0.0_SA_CVO~Z</issued_to>
     <date>2026-08-06</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDPF_CANPLAT</project_code>
     <supersedes>none (new instrument). MDPF_CANRTE.P0-1's frozen evidence (incl. per-key schema baseline @db5f37b11) and P0-6's closed record (@49e236bff) are ADOPTED as inputs.</supersedes>
     <governing>PRD @24d3eb2f8 §5.5 (Guard 2) · CONTRACT @a3106d585 (§B = the closed field-path list; §E rows R1/R2/R7/R12)</governing>
