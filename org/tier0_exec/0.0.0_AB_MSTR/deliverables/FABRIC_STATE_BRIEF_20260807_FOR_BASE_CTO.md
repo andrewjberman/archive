@@ -183,6 +183,13 @@ integrator (lanes commit, integrators push — held throughout).
   measured by MSTR overnight, mechanism diagnosis unowned).
 - 0.5.0_AE seat-or-supersede triage (dark since 07-23; holds the teams-watch dual-identity
   durable fix + 2 pending TOs incl. the July taxsma sovereign item).
+  **CORRECTION 15:18Z (COO triage @7011944a8f): the TO count above is WRONG — the seat holds
+  NINE TOs (7 base + 2 ~A), not 2; this brief counted only the ~A lane. THREE of the nine
+  order work Andrew deprecated 07-30 (DC1/DC2 crawls; ETFS_SETUP.W2 step 1 — W2 is a SPLIT
+  not a close). Class finding: a TO is a standing instruction and a ruling that kills the
+  work does not retract the instruction — the TO surface was never reconciled against the
+  deprecation rulings. Full triage: org/tier1_exec/2.0.0_SA_COO/deliverables/
+  SEAT_TRIAGE_0.5.0_AE_OpalETL_20260807.md.**
 - comp-read HUD selective-trigger rework outcome (CVO~B), 0.0.3_BG launch (his mint).
 
 **Device-axis class (recurring theme, 4+ instances in the window):** "WHAT DOES NOT CROSS GIT
