@@ -314,6 +314,51 @@ builds. NO ADVERSE OVERLAP.
   VERTHARVEST graph-seam ask SHRANK to a usage confirmation (GOVERNS already ratified).
 - G3: sitez merged CLOUD forward @c48ad4537. No overlap.
 
+---
+
+## CYCLE 16 — 2026-08-07 ~06:35Z (9 peer commits pushed @0443d8d674) — quiet, dense
+
+- CROSS-GROUP QUALITY LOOP (healthy, not overlap): CVO~C independently applied CRO's
+  Coherence Base v0.2 to MDPF_CANPLAT (@8170937b6: C4 row earns its place, base is ~40%
+  tool-spec, C0 is a false-coverage cell) -> CRO folded it into v0.3 same cycle
+  (@22509c931). CVO corrected its own 28x overstatement BEFORE it reached Andrew
+  (7-vs-28 gap = ONE edge remedy @d14de658c).
+- G2 hardening: FROZEN_CONTROL asserted COUNT not INTEGRITY — would have passed on
+  gutted nodes; kind-check added @f0f0db7cb. Class-marking made non-destructive
+  @b9b996467 (was about to strip the frozen control's own metadata). Item-5 stamp now
+  reads both envelope shapes @d1c73d4b5.
+- Substrate finding on the record: the two substrate_sides are DISCONNECTED COMPONENTS
+  — 28 cross-side edges total, all dead-ending at one node @4be0b4726.
+- G3 quiet. No overlap.
+
+---
+
+## CYCLE 17 — 2026-08-07 ~06:55Z (5 peer commits pushed @ead4c74666) — quiet
+
+- ITEM 5 CROSS-VERIFIED: CVO executed AE's in-container reader path — DDL + keying +
+  query_fn reproduce the comp-kuzu layer EXACTLY, 5/5 @238c3065e. Deploy leg remains.
+- Graph finding AMENDED worse: `ms` substrate is a fully isolated island, ZERO
+  cross-layer edges @ead4c7466.
+- ATOM_DECOMP at v0.4 via a third-system test: kills the fires-on-everything
+  hypothesis, finds the INVERSE false-coverage shape (tool cannot be entered on
+  cross-cutting work — four structural rows collapse together) @f82f96e66/@04af5ee7f.
+  CRO also pinned a moving-filename citation that made a discharged test read as
+  outstanding @2c58b80be.
+- G3 quiet. No overlap.
+
+---
+
+## CYCLE 18 — 2026-08-07 ~07:15Z (5 peer commits pushed @a98a63997f) — quiet
+
+- Steady self-correction: CVO caught a Rule 24(ii) same-grain violation in its OWN
+  coverage triple @b3001f936; ladder v1.4 fixed drifted C3 derivation pointers
+  @a98a63997; envelopes now carry READING NOTES so true-but-odd numbers explain
+  themselves @6daaf2a7f. AE fixed a prompt.md Known-Issue row that had been FALSE for
+  ~11 weeks (all three Lambdas live+registered; "the row asked the right question and
+  nobody ran it") @35e9c68ad. CRO appended the ATOM_DECOMP continuation to RCN-0006.
+- G3: sitez merged CLOUD forward @4d06c27e2; their 08:05 ET probe window approaches.
+- No overlap.
+
 ### Open subjects at Andrew (unchanged)
 - INF spine freeze: INF_B_00 canonical frozen since 08-01, D-chain since 07-31; MDPF serve
   correctly deferring. Routing question (CTO+DS are the owner chain) awaiting his word.
