@@ -128,6 +128,47 @@ builds. NO ADVERSE OVERLAP.
   item2 5-vs-1000+ design question STILL OPEN at Andrew.
 - G3: no new sitez commits. No overlap. Nothing adverse.
 
+---
+
+## CYCLE 5 — 2026-08-07 ~02:55Z (9 peer commits pushed @da01e98734)
+
+- G1: S-layer ruling MEASURED OUT — CTO~D ran the deciding query (locus survives
+  materialization 961/961, own fidelity-gap hypothesis falsified, ruling = DISSOLVES with
+  zero new vocabulary @8b0ed3212). CRO started LAYER_FIELD_ANATOMY doc (C0-C3 written).
+  CVO~C: D1 edgekind_semantic confirmed at census — count true, mechanism claim false for
+  95.2% of described edges; rule-bank population sweep says D1 defect is one-off not class.
+- G2: CVO base item3 PROVEN (mutation battery), item7 negative half discharged; CTO~B
+  adopted amended grain criteria after its naive predicate false-matched all 19 class nodes.
+- ⚠ NEW AT ANDREW (@611f0e18b0): CTO~D lawcall PROPOSAL on BUILD LADDER rung 2 — the
+  enumeration (code, infrastructure) silently excludes SCHEMA; proposes naming a CLASS
+  instead (limitation_class_form). PROPOSAL ONLY, correctly not landed. Andrew's law,
+  Andrew's call.
+- G3: quiet on origin. No overlap.
+
+---
+
+## CYCLE 6 — 2026-08-07 ~03:15Z (13 peer commits pushed @b5a21f1193)
+
+- ✅ CLOSED AT ANDREW: G2 item2 — he ruled ANCHOR NODE ("I would absolutely say B");
+  1,255 C3.i structures at instance grain, inside his order of magnitude (@eaea0b0dd).
+- ✅ G1 S-LAYER DISPOSITIONED: DISSOLVED, NOT BUILT (@118fb1585) — every capability
+  spec'd across 3 revisions already exists on live D1 edges; Andrew's one-sentence D1
+  question did the dissolving. Residual work = a Python-producer BUILD, leaves CRO lane.
+  CRO corrected LAYER_FIELD_ANATOMY out loud (eight layers not seven; D1 locus 41% not
+  100%); CTO~D corrected its own 961/961 read (per-edge-type figure read as population —
+  third denominator-grain instance at that seat tonight, self-caught).
+- G1 follow-on: CRO PYTHON FIELD GRAIN research — the portal template's core mechanism is
+  a TYPE CHECKER and Python has no equivalent; "copy portal for Python" understates by a
+  capability layer (@46d39a96f). Feeds the ATOM_DECOMP direction.
+- ⚠ CTO~D COMPLEARN P3a ruling (@7b4bc1126): owed 25 days; in that window BOTH
+  load-bearing audit premises went false — the alarm it was told to extend was TORN DOWN,
+  and 2 of 5 emitter partitions read a file FROZEN SINCE 07-29. Real operational finding.
+- G3: strong window — first P1-2 candidate run: timeseries family TIES EXACTLY (0/437
+  dates divergent), aum+distribution honestly not-adjudicable pending same-data-day;
+  "lambda deployed unwired" PROVEN; MDPF_REMEDIATION register R-18 + deferrability
+  discipline (deferrable by FAILURE MODE, not size).
+- No overlap. G1's dissolution outcome REDUCES future overlap surface (no new layer).
+
 ### Open subjects at Andrew (unchanged)
 - INF spine freeze: INF_B_00 canonical frozen since 08-01, D-chain since 07-31; MDPF serve
   correctly deferring. Routing question (CTO+DS are the owner chain) awaiting his word.
