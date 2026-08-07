@@ -359,6 +359,54 @@ builds. NO ADVERSE OVERLAP.
 - G3: sitez merged CLOUD forward @4d06c27e2; their 08:05 ET probe window approaches.
 - No overlap.
 
+---
+
+## CYCLE 19 — 2026-08-07 ~07:35Z (6 peer commits pushed @191b8461eb) — quiet
+
+- Item 5 perf pass: bulk COPY 143.3s -> 0.6s (225x, "every night, forever")
+  @191b8461e; composition itself measured 0.2s — the 52.8s figure was ENTIRELY
+  subprocess overhead @22f0c55cf.
+- ⚠ Finding worth Andrew's eye (comp-estate/north-star relevance): "the north star's
+  named destination cannot read the substrate" — comp-estate's C3.i is CLASS-grain/
+  catalog-backed while the new layer is INSTANCE-grain/graph-backed @4c39a561c. The
+  RESOLVER_DEFROST convergence discussed earlier tonight will need this grain bridge.
+- ms island quantified: 5,828 nodes, zero cross-layer edges; the C0 census line reads
+  as participation and is not @ca1c01baa. CRO named a SECOND structural blind region
+  in the coherence base @0b6d8d9e4.
+- G3 quiet (probe window ~08:05 ET ahead). No overlap.
+
+---
+
+## CYCLE 20 — 2026-08-07 ~07:55Z (5 peer commits pushed @c73f4824b2) — quiet
+
+- SHARP CATCH PAIR pre-landing, same root cause both sides of the seam: run-1 builds
+  the layer, run-2 DESTROYS it (CVO guard added, mutation-proven both directions
+  @0871ce898) — and CTO~B's frozen control WOULD HAVE FAILED on the exact run where
+  the layer lands, root cause = a constraint CTO~B itself ruled @c73f4824b. Both fixed
+  before the first live derive.
+- Equivalence harness now EXTRACTS the producer's DDL instead of transcribing it —
+  drift impossible, not merely detectable @2029217c3.
+- CRO published a 37%-by-proxy bound then REFUTED IT within the hour (entry-point
+  universe contains infrastructure verticals) @729bdbb00/@44373922f.
+- G3 quiet (probe window open). No overlap.
+
+---
+
+## CYCLE 21 — 2026-08-07 ~08:15Z (7 peer commits pushed @63345723b5)
+
+- 🏁 THE POSITIVE HALF IS PROVEN: the acceptance harness's live-layer claim — "the one
+  claim in this build nobody had ever tested" — now EXERCISED in every direction it can
+  distinguish: LIVE on movement, NOT-LIVE on a mutant, INDETERMINATE pre-landing
+  (@96e734f2f CTO~B + @63345723b CVO cross-verify, all four verdict branches on real
+  composed counts). Post-landing fixture proves IDEMPOTENT (compose twice, second
+  against a graph containing run 1's own output @be8f13544). class_population() fix
+  exercised in the grain-LIVE epoch: 19/4 PASS, predicted 6157 now MEASURED
+  @eec2c5810. Item 5 is functionally COMPLETE pending the production deploy leg.
+- CRO recorded the two generalizable lessons from its own refuted proxy (decorative
+  caveat + unchecked proxy cost @f9d1d2e73).
+- G3: merged CLOUD forward @cd411525a; 09:00 ET cycle (Andrew-verified personally +
+  INF fork decider) imminent. No overlap.
+
 ### Open subjects at Andrew (unchanged)
 - INF spine freeze: INF_B_00 canonical frozen since 08-01, D-chain since 07-31; MDPF serve
   correctly deferring. Routing question (CTO+DS are the owner chain) awaiting his word.
