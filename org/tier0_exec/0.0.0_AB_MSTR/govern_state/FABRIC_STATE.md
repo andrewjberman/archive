@@ -265,6 +265,55 @@ builds. NO ADVERSE OVERLAP.
   strategies never attribute; 18-name list reconciled (4 deltas, 1 live-account).
 - No overlap.
 
+---
+
+## CYCLE 13 — 2026-08-07 ~05:35Z (4 peer commits pushed @26776051b5) — quiet
+
+- ATOM_DECOMP grant EXECUTED by CTO~D @fc830fe26 — dedicated one-path lane for CRO,
+  correctly NOT by widening TIER0_MSTR (which would have carried the MSTR ledger with
+  it). CRO recorded the Script I/O precursor's run-and-dissolve into the ATOM_DECOMP
+  record @95d5114ef. CTO~C spec'd NFRA_VERTHARVEST (Andrew-commissioned, routed to CVO,
+  NOT built — ladder discipline holding).
+- ⚠ ROUTED-TO-DARK-SEAT flag: ~Z's teams-watch.py dual-identity defect (token
+  selection by serverUrl) routed per file header to 0.5.0_AE_OpalETL — NOT REGISTERED
+  since 07-23, 2 pending TOs incl. the Andrew taxsma sovereign item. Defect sits unread;
+  fold into the 0.5.0 seat-or-supersede triage (open since 08-04) or re-route at
+  Andrew's word. Mitigation is live session-scoped at ~Z; class lesson banked (tokens
+  key by server NAME, URL-keyed selection re-merges identities).
+- G3 quiet on origin. No overlap.
+
+---
+
+## CYCLE 14 — 2026-08-07 ~05:55Z (6 peer commits pushed @596ff69a15)
+
+- ✅ ITEM-5 BLOCKER CLEARED FAST: CVO base made compose() RUNNABLE in the derive
+  container @d5b0849ad — graph reader injectable, zero host-absolute paths — plus a
+  REFUSE guard (blind reader / empty catalog: "a zero layer is never a finding"
+  @a4986d7ba). AE's caller can now proceed to the Dockerfile leg.
+- G1: CRO drafted ATOM_DECOMP PROJECT COHERENCE BASE v0.1 @0ad081a91 (measured: the
+  method carried ZERO references to C0-C4/D1-D3/territory/substrate/motif) + independent
+  test of the method's laws (4 confirmed). CTO~C's VERTHARVEST discriminator v1 was
+  FALSIFIED by CVO within the hour and replaced with v2 (termination-not-presence),
+  with a Rule 24(iv) stability defect named on its own axis @e6f638e4f.
+- One transient GitHub connection reset mid-fetch; retried clean. G3 quiet. No overlap.
+
+---
+
+## CYCLE 15 — 2026-08-07 ~06:15Z (6 peer commits pushed @9300ec419e)
+
+- ITEM 5 NEARLY CLOSED: AE landed the in-container Iceberg->Kuzu reader + image
+  @525716a1d (correctly NOT kuzu_nessie_load — its pin is a dev-box workaround, a
+  defect in-VPC) + Iceberg snapshot stamped on every composed instance @596ff69a1 (the
+  field the acceptance movement test scopes to). Remaining: deploy + first live derive.
+- G2 hygiene: CVO fixed graph_vintage() missing re.M — graph_nodes_total has read NULL
+  on EVERY run since written @3bd4fbb0c (an instrument born broken, caught by use).
+- G1/ATOM_DECOMP maturing fast: Coherence Base v0.2 @61794af2d after CRO RETRO-TESTED
+  v0.1 against the engagement that produced it — honest PARTIAL verdict (catches the
+  largest error, misses 3 of 5, boundary = the ontology's own ceiling @7da8fd21b); CRO
+  also widened its own bias warning 2->3 degrees of freedom, credited to CVO~C.
+  VERTHARVEST graph-seam ask SHRANK to a usage confirmation (GOVERNS already ratified).
+- G3: sitez merged CLOUD forward @c48ad4537. No overlap.
+
 ### Open subjects at Andrew (unchanged)
 - INF spine freeze: INF_B_00 canonical frozen since 08-01, D-chain since 07-31; MDPF serve
   correctly deferring. Routing question (CTO+DS are the owner chain) awaiting his word.
