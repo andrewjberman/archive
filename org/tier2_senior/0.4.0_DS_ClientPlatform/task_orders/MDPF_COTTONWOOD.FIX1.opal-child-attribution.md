@@ -89,13 +89,29 @@
 
   <acceptance_criteria>
 
-    >> 1. THE TEST MOVES FROM PARENT TO CHILD. IT IS NOT DELETED.
-       ⛔ FORBIDDEN SHORTCUT, NAMED SO IT CANNOT BE TAKEN BY ACCIDENT: the cheapest way to make Opal
-       children attribute is to drop the `:277` filter. **That would attribute EVERYTHING, including
-       genuinely non-Opal exposure, and would OVERSTATE Opal AUA — replacing an understatement with
-       an overstatement on the same client-facing number, in the direction nobody would question.**
-       The strict Opal test must still be applied — at CHILD grain, after decomposition, using the
-       determination `:266` already computes.
+    >> 1. THE RULE IS A **DISJUNCTION**, AND IT IS STRICTLY ADDITIVE.
+       ⛔ **CORRECTED 2026-08-07 ~1705Z BY `0.4.0_DS_ClientPlatform`, WHO CAUGHT THAT MY ORIGINAL
+       PRESCRIPTION WAS WRONG.** v1 of this criterion said *"the test MOVES from parent to child."*
+       Applied literally that keeps ONLY Opal leaves — **which DROPS the non-Opal leaves of
+       Opal-named parents that attribute TODAY, moving a served number DOWN.** Nobody asked for that,
+       and it is the mirror of the overstatement I warned about in the same sentence. The producer
+       carries those rows DELIBERATELY — `:73`, verbatim in the schema:
+           "is_opal",   # carried so a non-Opal blend target is VISIBLE, not hidden
+       Re-derived at the COO seat at HEAD before accepting the correction.
+
+       **THE RULE TO LAND — an assignment attributes to a leaf if EITHER limb holds:**
+         (a) the ASSIGNED STRATEGY is Opal-named  — the EXISTING rule, UNCHANGED, so non-Opal leaves
+             of Opal parents stay visible and nothing that works today changes; **OR**
+         (b) the LEAF ITSELF is Opal — the NEW rule, which is the class Andrew settled.
+       Strictly ADDITIVE. It closes the gap without touching anything currently correct.
+
+       ⛔ BOTH SINGLE-SIDED READINGS ARE WRONG AND BOTH MOVE A SERVED NUMBER:
+         · leaf-only (keep only Opal leaves) → DROPS currently-attributing rows → number moves DOWN.
+         · every-leaf (is_opal as label only) → abandons Andrew's 2026-07-21 strict-Opal ruling and
+           grows the table to the whole 911-account book → number moves UP without warrant.
+       ⛔ AND DO NOT RENORMALIZE. A non-Opal remainder stays in `non_model` — it is a balance. AE~Z's
+       explicit requirement: e.g. Anna *9237's DIVZ SMA 7% stays OUT rather than being swept into the
+       Opal leaves.
 
     2. THE THIRD STATE SURVIVES. `:275` currently counts `unresolved` (strategy names that map to no
        model id). After the change, unresolved constituents MUST STILL BE COUNTED AND REPORTED, and
