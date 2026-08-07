@@ -169,6 +169,50 @@ builds. NO ADVERSE OVERLAP.
   discipline (deferrable by FAILURE MODE, not size).
 - No overlap. G1's dissolution outcome REDUCES future overlap surface (no new layer).
 
+---
+
+## CYCLE 7 — 2026-08-07 ~03:35Z (9 peer commits pushed @dc7899fa2e) — quiet, high-integrity
+
+- G1: post-dissolution follow-through — CTO~D authored NFRA_PYFIELD PRD v0.1 whose FIRST
+  open question is BUILD LADDER rung 1 ("whether to build it at all"; no project registered,
+  deliberately @0bcc85263); withdrew its own gate candidate on measured growth data
+  (@08ad45fe2). CRO closed 14-vs-13 (neither number is the resolver) + found the served
+  ladder doc STALE on C3.ii (27 "adjudication OWED" vs registry 29 RETIRED @2a2062db9) —
+  graph-lane fix, CVO base already de-pinned C3 counts (@dc7899fa2).
+- G2: CVO base corrected own "zero commits" claim (query artifact, not an idle seat) and
+  fixed both CTO~B findings (@8a253d33f). COMPLEARN P3a item 3 executed (@ebde4af0e).
+- G3: quiet. No overlap; the ladder's rung-1 discipline visibly firing in G1.
+
+---
+
+## CYCLE 8 — 2026-08-07 ~03:55Z (3 peer commits pushed @9390140434) — quiet
+
+- Rulings recorded both sides: held-out fence closed no-doctrine (CRO + CVO~C records);
+  rung-2 amendment executed at my seat @4ff692a9d0 (off the open list).
+- ⚠ CRO ontology finding @1ee776148: FOUR CloudNode DDLs exist in THREE shapes, one with
+  NO `props` column — the column where ALL of D1 lives. G1-found, graph-lane-owned;
+  properly routed, watching that it reaches CVO base and does not fork a duplicate fix.
+- G3 quiet. No overlap.
+
+---
+
+## CYCLE 9 — 2026-08-07 ~04:15Z (5 peer commits pushed @16f7a0bd76)
+
+- 🏁 G3 MILESTONE: **MDPF_CANPLAT cutover CLOSED on sitez** (@1502d21af) — all legs
+  landed with evidence. Leg-4 fire-1 FAILED CLOSED on the L-1 key-set gate exactly as
+  designed (cottonwood-only `_leg_source_key` leak; served plane proven untouched), DS~Z
+  fixed at the leak's source, re-pinned, redeployed, closed. The gate discipline earned
+  its keep on its first live fire. No deploy ping to me yet — merge-on-deploy duty stays
+  armed; watching the bus.
+- G2: CTO~B corrected its DDL constraint 2 -> 4-in-3-shapes (@2f82941ab; credit chain:
+  CRO census -> my board line -> re-enumeration). ⚠ NEW ROUTING ITEM AT ANDREW (04:02Z
+  msg): item 5 = `derive_runner.py` must CALL the composition (globgrph lane, neither
+  CVO's nor CTO~B's). Fully specified, nothing held. MSTR rec: 0.7.0_AE_CloudOps
+  (CTO~D stays reserved for Andrew's priority task). AWAITING his word.
+- G1: CRO registered RCN-0006 (S-layer dissolution) late-with-disclosure; CVO fixed the
+  ontology README index (8 not-built docs listed, 0 ratified ones — CRO finding 3/3).
+- No overlap.
+
 ### Open subjects at Andrew (unchanged)
 - INF spine freeze: INF_B_00 canonical frozen since 08-01, D-chain since 07-31; MDPF serve
   correctly deferring. Routing question (CTO+DS are the owner chain) awaiting his word.
