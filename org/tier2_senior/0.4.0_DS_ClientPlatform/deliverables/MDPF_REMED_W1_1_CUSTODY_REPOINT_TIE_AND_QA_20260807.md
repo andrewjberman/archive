@@ -170,12 +170,44 @@ is not a QA run. **None of these are caused by this change and I did not investi
 
 ## 9. RESIDUAL / NOT CLAIMED
 
-- **The Lambda package is NOT re-cut.** `mdpf-gold-lambda/build_package.py:51` packages
-  `route_bindings.yaml` into the zip with a recorded sha256 (`:108`). **If the 09:00 path executes
-  via the Lambda rather than the EC2 runner, that package still carries the OLD bindings and my
-  repointed assertions would fail there.** Lambda deploys are Terraform-only (Rule 1) and are not
-  the DS lane — **surfaced to CTO/AE, not actioned by me.** I verified the EC2 path; I did **not**
-  verify the Lambda path, and I am not claiming it.
+- **The Lambda package is NOT re-cut — RESOLVED 2026-08-07 ~2150Z, and it is NOT a failure.**
+  *(This entry originally read "my repointed assertions would fail there... I did not verify the
+  Lambda path." MSTR then confirmed via `scheduled-floor.tf:128` — `cron(0 9 * * ? *)`
+  America/New_York targeting `aws_lambda_function.mdpf_gold` — that **the 09:00 fire IS the Lambda,
+  and the EC2 runner I QA'd is NOT the 09:00 path**, and escalated it to CTO as a hard fail. I then
+  measured the package and the hard-fail framing is WRONG.)*
+
+  **Measured on the deployed artifact:** `LastModified 2026-08-07T03:51:21Z` (2026-08-06 23:51 ET),
+  `CodeSha256 XuLlClWT6kr6n5TCG7keFmzVd8KEafMuAIQutJB+utQ=`, 648,182B — zip pulled and unzipped:
+
+  | packaged leg | state |
+  |---|---|
+  | `route_bindings.yaml` → `{type: ddb-cohort, table: "opal-assets-daily-aua", ...}` | **OLD** |
+  | `build_mdpf_spine.py` → asserts `spine.DDB_AUA_TABLE` | **OLD** |
+  | `dim_mdpf_aggregate_aua_timeseries.py` → defines `DDB_AUA_TABLE` (count 1) | **OLD** |
+
+  **All three are OLD, so the set is INTERNALLY COHERENT and `assert_bindings_current` PASSES.** The
+  described failure requires NEW code against OLD bindings — **structurally impossible in a package
+  that embeds both and was never re-cut.** `build_package.py`'s `PACKAGE` list is fully
+  self-contained (16 modules + `trading_calendar` + 3 configs at zip root) and there is **no runtime
+  S3 code pull** — the only file in that Lambda directory is `build_package.py`. So my S3 uploads
+  cannot reach it, and that is precisely *why* it is coherent rather than mixed. The DDB reader is
+  dead code in that version too, so the deleted table is never scanned there either.
+
+  **Correct characterisation: STALE-ARTIFACT HYGIENE.** The W1-1 fix is simply **not live on the
+  09:00 path** until the package is re-cut (Terraform-only, Rule 1, CTO's lane, **no night action**).
+  Functional risk is zero twice over: coherent, *and* the measured delta is $0.00 on all 439 dates,
+  so old and new emit identical 49F custody values.
+
+  ⚠ **NOT CLAIMED:** I verified package CONTENTS and their mutual coherence. I did **not** trace the
+  09:00 invocation to the assertion in-process — and this conclusion does not require it, since
+  whichever entry point runs executes an internally consistent old set. Anyone asserting the Lambda
+  is healthy for a reason *other* than coherence still owes an exercise.
+
+  *This would have been the FOURTH false-outage-shaped claim in this TO's lifecycle. Three of them
+  share one missing step: "a deleted table is referenced somewhere, therefore something crashes" —
+  without checking whether the referencing code is REACHABLE, or whether its counterpart moved WITH
+  it. Corrections sent to MSTR + CTO 2150/2152Z.*
 - `trading_calendar.py` is **not** present in `s3://opal-data-mdpf/code/scripts/gold/` (only the
   retired `_trading_day_calendar.py` shim and `mdpf_calendar_binding.py`). My QA run needed the repo
   root on `PYTHONPATH` to resolve it. Whether the EC2 runner provisions it another way is
