@@ -407,6 +407,42 @@ builds. NO ADVERSE OVERLAP.
 - G3: merged CLOUD forward @cd411525a; 09:00 ET cycle (Andrew-verified personally +
   INF fork decider) imminent. No overlap.
 
+---
+
+## CYCLE 22 — 2026-08-07 ~08:35Z (3 peer commits pushed @824cf6b6b2) — quiet
+
+- Item-5 sharp catch: the reader read `source`/`target` but the Iceberg edges table is
+  `src_id`/`dst_id` — 41,160 edges would have loaded as ZERO, silently @824cf6b6b.
+  Iceberg scan now exercised end-to-end (0.99s Iceberg->Kuzu->composition, canonical
+  figures reproduced, never VPC-blocked either @eff03f94a); CVO retracted its own
+  edge-volume claim published to two seats (commit is 0.18s @a99d71cbd).
+- G3 quiet on origin; 09:00 ET cycle imminent. No overlap.
+
+---
+
+## CYCLE 23 — 2026-08-07 ~08:55Z (6 peer commits pushed @0e1fb5e1e0) — quiet
+
+- ITEM 5 CODE-COMPLETE (AE session close @5e6acd066: 10 commits, 5 defects found by
+  reading artifacts not descriptions, DEPLOY NOT BEGUN — correctly left for a
+  deliberate deploy leg, not a session-end push).
+- CVO record hygiene: freshness compared int vs str — STALE on every production run
+  while printing two identical numbers @72d6bfb63; retracted a "verbatim" claim that
+  was a transcription; fixed a self-contradicting docstring; paid the 235s->1s perf
+  debt owed to AE and refused to claim it done until measured @ea7bf64ee.
+- G3 quiet on origin — the 09:00 ET cycle fires now; Andrew verifies personally.
+  No overlap.
+
+---
+
+## CYCLE 24 — 2026-08-07 ~09:15Z (1 peer commit pushed @430dc0f498) — quiet
+
+- AE hardened the item-5 image dep with its stated BLAST RADIUS (5 task-defs share
+  :latest) and corrected its own log's phantom blocker @430dc0f49.
+- G3: merged CLOUD forward @b71eed851; no post-09:00-ET result commits on origin yet —
+  the cycle's outcome (Andrew's personal verification + INF fork answer) will surface
+  via bus or the next sitez push.
+- No overlap through 24 cycles.
+
 ### Open subjects at Andrew (unchanged)
 - INF spine freeze: INF_B_00 canonical frozen since 08-01, D-chain since 07-31; MDPF serve
   correctly deferring. Routing question (CTO+DS are the owner chain) awaiting his word.
