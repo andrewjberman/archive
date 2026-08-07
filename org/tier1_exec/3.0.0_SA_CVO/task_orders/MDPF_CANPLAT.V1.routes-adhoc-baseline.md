@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Z</issued_by>
     <issued_to>3.0.0_SA_CVO~Z</issued_to>
     <date>2026-08-07</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>MDPF_CANPLAT</project_code>
     <governing>VALIDATION PRD docs/architecture/MDPF_CANONICAL_PLATINUM_VALIDATION_PRD.md @2dedd8f6a (V-rubric rows V1–V8) · PRD §0 binds · V-series MEASURES ONLY</governing>
     <sequence>⛔ V-2 FIRST (Andrew-direct "an ad hoc run issued now"), THEN V-1. V9–V12 are NOT in this TO — portal/src is empty at site Z; blocker routed to MSTR~Z by COO, never absorbed by a seat.</sequence>
