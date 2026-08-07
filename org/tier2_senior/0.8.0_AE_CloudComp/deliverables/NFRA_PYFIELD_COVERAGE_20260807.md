@@ -161,8 +161,32 @@ wrong quantity (§1). Both are now fixed and locked.
   **UNSWEPT:** `bd`, `cot`, `mdpf`, the assets monolith, **and every silver tree.** Every figure above
   is scoped to the swept trees, stated in the same sentence per requirement 4.
 - **408 FLOWS_TO edges emitted, NOT YET LOADED INTO THE GRAPH.** This TO builds the producer; the
-  graph-load leg is not in its scope and is not claimed. The Phase-3 `comp-kuzu` census therefore
-  reports the *current* graph state (field grain still 100% portal) — see the session log.
+  graph-load leg is not in its scope and is not claimed.
+
+### §6.1 — PHASE-3 CENSUS: the gap is REAL and now double-controlled — but the PRD names the wrong field
+
+`comp-kuzu` @ Nessie HEAD (pin == HEAD), DB age 0.2h, built 2026-08-07T18:44:58Z:
+
+| query | result | role |
+|---|---|---|
+| `FLOWS_TO` edges, total | **961** | denominator |
+| …whose src `node_id` contains `portal/` | **961 of 961** | **positive control** |
+| …whose src `node_id` contains `scripts/` | **0** | **negative control — the gap my producer targets** |
+
+**The PRD's substantive claim is CONFIRMED**, and now with both controls rather than one count:
+field grain exists for the portal codebase and is **exactly zero** on the python substrate.
+
+⚠ **BUT `layer=portal` DOES NOT EXIST, and the PRD's gap statement cites it.** PRD §2.1 reads
+*"`FLOWS_TO` (961) and `PROP_PASSES` (1382) are 100% `layer=portal`."* Measured: all 961 carry
+**`layer=aws`**, and `layer` estate-wide has only **three** values — `aws` 24,394 / `ms` 11,669 /
+`semctl` 5,092. There is no `portal` layer. The portal-ness lives in the `node_id` path
+(`type:portal/src/...`), not in the `layer` field, which is a coarse *plane* label.
+
+**Why it survived: the NUMBER was right.** 961 is correct, the conclusion is correct, and the
+substrate split is correct — only the field named as the discriminator is wrong. A reader who
+re-derives the gap by filtering `layer='portal'` gets **0 rows, indistinguishable from a true zero**,
+which is the precise trap PRD §5.2 itself warns about one line earlier. **Surfaced, not adjudicated**
+— `docs/architecture/` is the CTO~D lane; routed there with this census, no edit made by me.
 - **Corpus drift, reconciled:** I count **4,904** string-literal subscripts where the PRD says 4,896.
   CRO's own probe, re-run at my seat on today's tree, **also reports 4,904** — two independently
   written instruments agreeing, so the delta is corpus movement since the PRD's read, not an
