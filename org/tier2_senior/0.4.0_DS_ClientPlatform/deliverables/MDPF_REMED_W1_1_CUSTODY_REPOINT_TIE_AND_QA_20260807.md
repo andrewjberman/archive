@@ -2,7 +2,30 @@
 
 **Author:** `0.4.0_DS_ClientPlatform` · **TO:** `MDPF_REMED.W1-1` @ef7b320786
 **Commit:** `f999fb25f6` (atomic, 4 files) · **Date:** 2026-08-07
-**Dispatches:** COO 192846Z · CTO 193650Z · CTO ruling 194804Z · MSTR deploy notice 203351Z
+**Dispatches:** COO 192846Z · CTO 193650Z · CTO ruling 194804Z · MSTR deploy notice 203351Z ·
+MSTR close-state correction 224617Z
+
+> ## ⛔ CLOSE-STATE: **CORRECT AND VERIFIED — NOT YET REACHING THE PRODUCTION PATH.**
+>
+> Landed in git, deployed to the S3 scripts, deployed to the S3 config, QA-verified. **The 09:00 ET
+> floor runs `mdpf-gold-lambda`, which carries its own EMBEDDED copies of every module and config —
+> so this repoint reaches production ONLY when that package is re-cut** (Terraform-only; CTO's lane;
+> package + recorded sha256). **This TO is NOT complete-and-live.**
+>
+> MSTR first framed the re-cut as "hygiene / a normal Terraform item," then corrected it (224617Z):
+> **it is the step that makes the fix REAL, and "unhurried" is not "optional."** Amended here rather
+> than left to be inferred — I spent this session insisting a record must not run ahead of its
+> measurement, and that standard binds my own closure claim first.
+>
+> ⚠ **What the QA in §7 actually proves, re-framed by CTO's later ruling:** the EC2 leg is **CUTOVER
+> RESIDUE, not a production path** (`scheduled-floor.tf:128` self-describes as "cutover leg 2,
+> same-apply atomic swap"; the starter's `ScheduleExpression` is null on an INF marker dead since
+> 07-31; instance stopped). It is being **retired, not fixed.** The QA run exercised the only path
+> this change could actually reach — a sanctioned ad-hoc read, and still the right call — but it is
+> **not** evidence about the 09:00 production path. Two claims; neither substitutes for the other.
+>
+> The $0.00 delta below still holds and still means **no served value moves when the re-cut lands.**
+> That is a statement about the DELTA, not about the fix being live.
 
 ---
 
