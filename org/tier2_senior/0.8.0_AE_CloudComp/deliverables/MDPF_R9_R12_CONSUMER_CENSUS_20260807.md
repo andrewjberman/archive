@@ -14,7 +14,7 @@ Register (PRD): `docs/architecture/MDPF_REMEDIATION_REGISTER.md` @e5e932caf6 §2
 | **R-9** `last_updated` | **ZERO rendering consumers** (1 hit / 288 portal component files — and it is a comment saying *do not use it*). One **disabled** reader, one **live passthrough** in the served response shape. | a move — **but the passthrough is a contract change**, see §1 |
 | **R-10** `inflection_non_model_aua` | **ZERO portal-source consumers** (0 SURFACED / 1,260 files, **positive-controlled**). Three **internal instrument** readers. | a decision — cost is internal gates, §2 |
 | **R-11** five global-only fields | **ALREADY CLOSED — by ADOPTION, on 2026-08-05, two days before the register became the PRD.** | closing the row; nothing to retire |
-| **R-12** pair-model blindness | **CONFIRMED AND MEASURED: 14 pairs served, 12 generated, 8 keys invisible by construction.** Two unrecognised artifact types, both LIVE. | a fix — §4 |
+| **R-12** pair-model blindness | **CONFIRMED AND MEASURED: 14 pairs served, 12 generated, 8 keys invisible by construction.** Two unrecognised artifact types, both LIVE and **OWNED** (publisher `R12_EXTRA_PAIRS`). ⚠ §4 AMENDED — I over-claimed that the row's `_`/`-` mechanism was absent; it is real, one layer up. | a fix — §4 |
 
 ⚠ **THE ASYMMETRY GOVERNING THIS WHOLE DOCUMENT:** a PRESENCE verdict needs one hit; an ABSENCE
 verdict authorizes retiring a client-facing field and needs exhaustiveness nobody fully has. Every
@@ -191,13 +191,67 @@ portal/gold/mdpf/global/non-model-assets/2026-08-05.json
 the twelve recognised pairs (two recognised pairs are fresher, at 08-06). Something writes these
 every cycle and it is not this consolidator.
 
-### ⚠ THE ROW'S CONCLUSION IS RIGHT AND ITS NAMED MECHANISM IS NOT
+### ⚠ AMENDED 2026-08-07 ~2135Z — I OVER-CLAIMED HERE, AND A PEER FALSIFIED IT WITHIN THE HOUR
 
-R-12 says the model *"normalises `_` and `-` variants to one type."* **No underscore normalisation is
-involved in a single one of the 8 invisible keys** — `account-units` and `non-model-assets` are both
-already hyphenated. I found no `_`→`-` normalisation in `data/mdpf` (measured zero over 57 files).
+**What this section said first:** *"the row's conclusion is right and its named mechanism is not…
+no underscore normalisation is involved in a single one of the 8 invisible keys."*
 
-**The operative mechanism is different and worse: the model is GENERATIVE, never OBSERVATIONAL.** It
+**The narrow claim survives:** the 8 SERVED keys are both hyphenated, so no normalisation collides
+them *at the served layer*, and `data/mdpf` really does carry zero `_`→`-` normalisation (measured,
+57 files). **The headline framing does not survive.** `0.4.0_DS_ClientPlatform` supplied the producer
+I could not find, and with it the thing I had concluded was absent — **re-verified at source at this
+seat before amending:**
+
+| layer | spelling | citation |
+|---|---|---|
+| GOLD (staged) | `account_units.json` · `non_model_assets.json` — **UNDERSCORE** | `dim_mdpf_account_distribution.py:328` · `dim_mdpf_non_model_assets.py:86` |
+| SERVED (A4) | `cottonwood/account-units` · `global/non-model-assets` — **HYPHEN** | the key listing above |
+
+**The same logical artifact carries an underscored gold spelling and a hyphenated served spelling.**
+So R-12's `_`/`-` language IS pointing at something real — it just lives at the **gold→served
+boundary**, one hop upstream of the pair model's own comparison, which is where I looked and
+correctly found nothing. **I searched one layer and generalised to the pipeline.** The publisher's
+own key regex encodes the asymmetry: `_KEY_RE` (`lambda_function.py:88`) admits `[a-z0-9_-]` in the
+**scope** group but only `[a-z0-9-]` in the **artifact-type** group — an underscored artifact-type is
+rejected by construction.
+
+**Both mechanisms are real and they are different.** The `_`/`-` duality is a naming-boundary hazard
+(below); the generative-vs-observational defect is why the completeness check cannot see the result.
+Fixing either alone leaves the other.
+
+### ⛔ THE DELETION HAZARD THIS EXPOSES — the sharpest thing in this document
+
+**A census keyed on the GOLD spelling reads the SERVED keys as orphans; a census keyed on the SERVED
+spelling reads the GOLD ones as orphans. Both are wrong, and both fail in the direction that retires
+a live field.** My own census is the worked example: I keyed on the served spelling, found 8 keys
+with no emitter in `data/mdpf`, and wrote *"producer unidentified."* That is one inferential step
+away from *"unowned."* **They are owned, live, and named in code as `R12_EXTRA_PAIRS` — literally
+this register row's identifier, in a file outside the tree I was censusing.**
+
+Treat `account-units` / `account_units`, `non-model-assets` / `non_model_assets`, and the standing
+hyphenated `account-distribution.json` **live-served-portal-bell** as **ONE GUARDED SET**, per DS.
+
+### THE PRODUCER — FOUND (was "unidentified" in the first version of this document)
+
+`infra/aws/lambda/opal-assets/opal-assets-mdpf-portal-publisher/lambda_function.py:84`
+```python
+RULED_TYPES     = ("aggregate-aua-timeseries", "aum-metrics", "account-distribution")
+R12_EXTRA_PAIRS = (("cottonwood", "account-units"), ("global", "non-model-assets"))
+```
+**The PUBLISHER knows all five types; the CONSOLIDATOR knows three.** And the asymmetry that hid them
+from me is real and confirmed at source: the consolidator **CONSUMES** account-units — folding the
+count into `total.account_units` on all four scopes (`mdpf_gold_consolidator.py:337-339`) — while
+**never emitting it.** A census that asks "who emits this?" of the consolidator gets an honest,
+complete, wrong-question answer.
+
+Upstream chain, per DS and spot-verified: `dim_mdpf_account_distribution.py:328` →
+`build_cottonwood_mdpf_pair.py:517` (`_stage_upload`) → `mdpf-daily-dispatch.sh:646`
+(`account_units_sidecar`); and `dim_mdpf_non_model_assets.py:86`, whose `:84` states the portal-side
+copy is *"the AE publisher's, not this"* — **the split was declared in-source all along.**
+
+### The mechanism that remains mine, unchanged by the above
+
+**The model is GENERATIVE, never OBSERVATIONAL.** It
 builds keys from a closed hand-written tuple and then compares *what it built* against *what it
 intended to build* — `emitted` vs `a4_expected`, **both derived from `SCOPES × ARTIFACT_TYPES`.**
 Nothing ever lists the A4 prefix. So the check reads a clean **12/12 green** while 8 live keys sit
@@ -212,7 +266,9 @@ surface unrecognised types by name.
 as my own NFRA_PYFIELD finding this morning — a normalisation hiding a population.)*
 
 **RECOMMENDATION.** Replace the generated `a4_expected` with a listing-derived check that fails loud
-on an unrecognised `(scope, artifact-type)`. **Cost: contained** — one function in
+on an unrecognised `(scope, artifact-type)` -- and make the model's universe a PREDICATE over the
+real key listing rather than a hand-written tuple, so the publisher's five and the consolidator's
+three cannot silently diverge again. **Cost: contained** — one function in
 `mdpf_gold_consolidator.py`, no served shape touched, no field moved. **What breaks if left as-is:**
 nothing today; the check simply cannot report on 8 live keys, and any future artifact type is
 invisible on arrival. **Who decides: CTO** (it is a gate change). ⚠ **Do NOT let "fix R-12" become
