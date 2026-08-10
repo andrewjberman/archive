@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-10</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P1</priority>
 
 <references>
