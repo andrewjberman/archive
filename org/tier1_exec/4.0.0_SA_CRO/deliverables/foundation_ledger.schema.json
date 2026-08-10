@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "opal://atom_decomp/foundation_ledger.schema.json",
+  "title": "Foundation Ledger -- per-project stage-boundary SSOT (ATOM_DECOMP)",
+  "description": "SOURCE OF RECORD for a project's foundational truth, built BEFORE design/implementation. Andrew-direct 2026-08-10: a structured deliverable is XML or JSON, never markdown; the same fields assessed for all pipelines/axes; dependencies at EVERY boundary; every gate declares which clock it reads; declared truth is recorded WITH whether code was measured to honor it. Absence is always an explicit enum state (UNDECLARED/UNMEASURED/UNKNOWN), never a missing key -- the loud-default law.",
+  "type": "object",
+  "required": ["ledger_meta", "rows"],
+  "properties": {
+    "ledger_meta": {
+      "type": "object",
+      "required": ["project", "vintage_utc", "author", "scope_statement", "denominator_statement", "instance_of"],
+      "properties": {
+        "project": { "type": "string", "description": "Registered project code this ledger founds" },
+        "vintage_utc": { "type": "string", "format": "date-time" },
+        "author": { "type": "string", "description": "serial" },
+        "scope_statement": { "type": "string", "description": "The system boundary this ledger claims to cover -- falsifiable" },
+        "denominator_statement": { "type": "string", "description": "How the row set was enumerated and from what population; a ledger without this cannot claim completeness" },
+        "instance_of": { "const": "foundation_ledger/v1" },
+        "derived_renderings": { "type": "array", "items": { "type": "string" }, "description": "Paths of any prose/markdown renderings. THEY ARE DERIVED; where they disagree with this file, this file wins." }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["row_id", "firm", "boundary", "mover", "clocks", "gates", "calendar_semantics", "dependencies", "consumers", "population"],
+        "properties": {
+          "row_id": { "type": "string" },
+          "firm": { "type": "string", "description": "firm scope of this row; 'GLOBAL' for cross-firm rollup rows; 'ALL' only when one mechanism provably serves every firm identically (cite evidence)" },
+          "boundary": {
+            "type": "string",
+            "enum": ["INGESTION", "BRONZE", "SILVER", "GOLD_STAGING", "GOLD", "GLOBAL_ROLLUP", "SERVING"],
+            "description": "The stage boundary this row founds. One row per (firm x boundary)."
+          },
+          "mover": {
+            "type": "object",
+            "required": ["name", "kind", "trigger"],
+            "properties": {
+              "name": { "type": "string", "description": "the resource that moves data across this boundary (lambda/EC2 runner/script), exact resource name" },
+              "kind": { "type": "string", "enum": ["LAMBDA", "EC2", "SCRIPT", "MANUAL", "VENDOR_PUSH", "UNKNOWN"] },
+              "trigger": {
+                "type": "object",
+                "required": ["kind", "expression", "schedule_exists"],
+                "properties": {
+                  "kind": { "type": "string", "enum": ["SCHEDULE", "EVENT", "CHAINED_COMPLETION", "MANUAL", "UNDECLARED"] },
+                  "expression": { "type": "string", "description": "cron()/rate()/event pattern verbatim, or the completion-marker key. 'UNDECLARED' if unknown." },
+                  "schedule_exists": { "type": "boolean", "description": "Estate law: a production pipeline whose only trigger is another pipeline's success has no schedule and is a defect. false here is a FINDING, not a style." }
+                }
+              },
+              "ruled_owner": { "type": "string", "description": "who owns this mover's writes, if ruled (e.g. bronze-prefix ownership); 'UNRULED' otherwise" }
+            }
+          },
+          "clocks": {
+            "type": "object",
+            "required": ["provenance_clock", "write_clock"],
+            "description": "THE TWO-CLOCK LAW: every artifact carries what the data is OF and when WE produced/landed it.",
+            "properties": {
+              "provenance_clock": {
+                "type": "object",
+                "required": ["field", "semantics"],
+                "properties": {
+                  "field": { "type": "string", "description": "where the as-of lives in the artifact (metadata key/column), or 'ABSENT' (a finding)" },
+                  "semantics": { "type": "string", "description": "what day/time the data claims to be of, incl. T-1 semantics if applicable" }
+                }
+              },
+              "write_clock": {
+                "type": "object",
+                "required": ["field", "semantics"],
+                "properties": {
+                  "field": { "type": "string" },
+                  "semantics": { "type": "string" }
+                }
+              },
+              "known_schism_notes": { "type": "string", "description": "any measured divergence pattern between the clocks (e.g. legs firing in the wrong order)" }
+            }
+          },
+          "gates": {
+            "type": "array",
+            "description": "EVERY gate/check/guard on this boundary. Empty array is a claim (\"no gates here\") and carries the population.evidence burden.",
+            "items": {
+              "type": "object",
+              "required": ["name", "reads_clock", "declared_behavior", "measured_honored"],
+              "properties": {
+                "name": { "type": "string" },
+                "reads_clock": { "type": "string", "enum": ["PROVENANCE", "WRITE", "BOTH", "UNDECLARED"], "description": "which clock the gate keys on. UNDECLARED is the defect class that produced five incidents in one week." },
+                "declared_behavior": { "type": "string", "description": "what the gate's own config/doc says it does" },
+                "measured_honored": { "type": "string", "enum": ["MEASURED_TRUE", "MEASURED_FALSE", "UNMEASURED"], "description": "whether code was MEASURED to honor the declaration. A declared value alone is not sufficient -- code has cited a config while contradicting it (route_bindings, 2026-08-10)." },
+                "evidence": { "type": "string", "description": "file:line@commit / tool+output for the measured verdict; required when measured_honored != UNMEASURED" }
+              }
+            }
+          },
+          "calendar_semantics": {
+            "type": "object",
+            "required": ["basis", "authority", "roll_forward"],
+            "properties": {
+              "basis": { "type": "string", "enum": ["TRADING_DAY", "CALENDAR_DAY", "MIXED", "UNDECLARED"] },
+              "authority": { "type": "string", "description": "the ONE frontier definition this row binds to (lib/trading_calendar.py) or the deviation, stated" },
+              "roll_forward": { "type": "string", "description": "any roll-forward/carry-forward behavior on this boundary, or 'NONE'" }
+            }
+          },
+          "dependencies": {
+            "type": "array",
+            "description": "AT EVERY BOUNDARY, never solely at serving (Andrew-direct 2026-08-10). Empty array claims independence and carries the evidence burden.",
+            "items": {
+              "type": "object",
+              "required": ["on", "kind", "declared", "measured_honored"],
+              "properties": {
+                "on": { "type": "string", "description": "the resource/artifact/firm depended on" },
+                "kind": { "type": "string", "enum": ["CROSS_FIRM", "CROSS_BOUNDARY", "EXTERNAL_VENDOR", "SHARED_CODE_PATH", "COMPLETION_MARKER"] },
+                "declared": { "type": "string", "description": "what the declared truth says about this coupling (or 'UNDECLARED')" },
+                "measured_honored": { "type": "string", "enum": ["MEASURED_TRUE", "MEASURED_FALSE", "UNMEASURED"] },
+                "evidence": { "type": "string" }
+              }
+            }
+          },
+          "consumers": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "downstream consumers of this boundary's artifact; empty claims none and carries the burden"
+          },
+          "population": {
+            "type": "object",
+            "required": ["status", "populated_by", "populated_at_utc"],
+            "properties": {
+              "status": { "type": "string", "enum": ["POPULATED", "UNKNOWN_WITH_OWNER"], "description": "the only two legal states. UNKNOWN_WITH_OWNER requires owner + reason; a blank row cannot exist in a valid instance." },
+              "populated_by": { "type": "string" },
+              "populated_at_utc": { "type": "string", "format": "date-time" },
+              "evidence": { "type": "string", "description": "instrument + output the row's facts rest on (Rule 5: source, locator, time, scope, count grain, denominator, limitation)" },
+              "unknown_reason": { "type": "string" },
+              "owner_if_unknown": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
