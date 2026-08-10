@@ -336,10 +336,34 @@ Moved 02:0xZ → 20:3xZ on **2026-08-06** — the ce99054e44 apply date (`2026-0
 (a)-vs-(b) toward **(b) it moved**, and flags the 08-06 apply as an under-appreciated event:
 anything anchored before it should be re-derived.
 
-⚠ **BOUND, stated because §8.1 is what happens when a bound is not honoured:** I measured the
-**sentinel's** history, not the xlsx's. `forwardfill_v2/` currently lands 20:31:05–47Z
-(consistent), but I did **not** pull its pre-08-06 history. "The xlsx moved on 08-06" is
-**INFERRED from the sentinel**, not measured.
+⚠ ~~**BOUND:** I measured the sentinel's history, not the xlsx's… "The xlsx moved on 08-06" is
+INFERRED from the sentinel, not measured.~~ **BOUND DISCHARGED — MEASURED ON THE PRIMARY ARTIFACT.**
+Pulled `forwardfill_v2/`'s full history (**DENOMINATOR: 512 objects, 368 of them `.xlsx`**) and
+grouped the xlsx by write-day:
+
+```
+write-day    first      last        n
+2026-07-27   02:04:11   02:04:21    2
+2026-07-28   02:00:53   02:02:08    3
+2026-07-29   02:01:23   02:02:22    4
+2026-07-30   02:01:00   02:02:28    5
+2026-07-31   02:01:14   02:02:14    4
+2026-08-01   02:01:16   02:02:29    5
+2026-08-02   02:01:45   02:01:54    2
+2026-08-03   02:01:04   02:01:12    2
+2026-08-04   02:06:04   02:07:12    5
+2026-08-05   02:01:06   02:02:15    6      <-- last 02:0xZ day
+2026-08-06   20:31:24   20:32:50    5      <-- THE SWITCH
+2026-08-07   20:30:53   20:32:05    5
+2026-08-08   20:30:54   20:31:52    5
+2026-08-09   20:31:05   20:31:47    5
+```
+
+**Ten consecutive write-days at 02:0xZ, then four at 20:3xZ, switching on 2026-08-06** — the
+ce99054e44 apply date. The xlsx and the sentinel agree, and the claim now rests on the artifact the
+mirror actually consumes rather than on a proxy. **CTO's 02:00Z was CORRECT — measured, ten days of
+it — and was invalidated by the 08-06 apply.** (a)-vs-(b) resolves to **(b) IT MOVED**, on primary
+evidence.
 
 ### 8.5 The premise of the cottonwood move has changed
 
