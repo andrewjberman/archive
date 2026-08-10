@@ -1,0 +1,183 @@
+# DATA_CATALOG.yaml -- 0.0.3_BG_BBGTerminal query -> exact-path routing catalog
+#
+# Axis: QUERY ROUTING (one axis, one intent -- given a user's question in their words,
+# which exact key answers it). Rule 24 discipline: channel -> paths -> semantics, one
+# grain per level. This is the "fuzzy text/semantics" guide Andrew asked for 2026-08-07:
+# match the user's words against `keywords` + `example_asks`, then fetch `paths` via
+# tools/portal_lookup.py. It COMPOSES with, never replaces, the two siblings:
+#   - BUCKET_ALLOWLIST.yaml  = MAY I read there (permission -- default deny)
+#   - PORTAL_RETRIEVAL.md    = HOW to read it safely (discipline: truncation, gzip,
+#                              projection, vintage)
+# A route listed here that the allowlist denies does not exist. Sizes/counts are the
+# 2026-08-06 measured census; re-verify on drift, do not hand-edit numbers casually.
+#
+# WIDENING IS ANDREW-ONLY, same as the allowlist. version bumps carry his verbatim.
+
+version: 0.1
+ratified: andrew-direct 2026-08-07 (MSTR~Z terminal build)
+bucket: opal-data-portal-v2
+access_tool: tools/portal_lookup.py   # NEVER raw `aws s3` to answer a user
+
+channels:
+
+  mdpf_model_portfolios:
+    serves: "Model Portfolios (MDPF): AUA/AUM, allocations, account counts, per-firm and global aggregates"
+    keywords: [model portfolio, model portfolios, MDPF, AUA, AUM, assets under, account count,
+               account distribution, 49, 49 financial, inflection, cottonwood, global aggregate,
+               firm total, how much money, book size]
+    example_asks:
+      - "what's the total AUA in the model portfolios?"
+      - "how many accounts does 49 Financial have?"
+      - "AUM trend for Inflection this quarter"
+    paths:
+      primary: "platinum/mdpf/{49financial|inflection|cottonwood|global}/{aggregate-aua-timeseries|aum-metrics|account-distribution}.json"
+      daily_history: "platinum/mdpf/aggregate_aua/YYYY-MM-DD.json   # daily snapshots since 2024-11-01, with reconciliation PASS/FAIL + provenance"
+      legacy_live: "json/mdpf/{firm}/...   # older serving mirror; platinum is the primary surface since the 2026-08-07 cutover"
+    vintage_field: as_of_date  # (json/mdpf uses `period` -- same meaning)
+    hazards:
+      - "json/mdpf/{firm}/account-distribution.json is a LIVE SERVED PORTAL BELL -- read-only, never touch"
+      - "platinum/mdpf/archive/** is NOT servable (Andrew order 2026-08-06); escalate, never serve"
+      - "cottonwood may run a slower feed cadence -- check its cadence before calling it stale"
+
+  benchmarks_and_models:
+    serves: "benchmark returns; model-portfolio benchmark mappings + performance timeseries (the FRESH model numbers)"
+    keywords: [benchmark, benchmarks, index return, vs benchmark, relative performance,
+               model performance, UST, ST, INT, LT, ULT, portfolio returns, track record]
+    example_asks:
+      - "how did the LT model do against its benchmark this month?"
+      - "benchmark returns for the intermediate model"
+    paths:
+      primary: "json/benchmarks/{benchmark_returns|model_portfolio_benchmarks|model_portfolio_timeseries}.json   # 6 views; timeseries is 716KB"
+    vintage_field: data_as_of
+    hazards:
+      - "NEVER fetch benchmarks/*.pkl -- 8MB binary pipeline inputs, not answers"
+      - "json/model_portfolios/views/ is FROZEN 06-01 -- fresh model numbers live HERE, not there"
+
+  macro_rates:
+    serves: "macro dashboard: rates, yield-curve tenors, FRED series"
+    keywords: [rates, yield, yield curve, 10 year, 2 year, tenor, fed, FRED, macro,
+               treasury, inflation, CPI, GDP, economic data]
+    example_asks:
+      - "where's the 10-year today?"
+      - "what does the yield curve look like?"
+    paths:
+      primary: "json/macro/macro_data.json (196KB) + json/macro/macro_data_fred.json"
+      tenor_series: "json/macro/timeseries/{tenor}.json   # 84 objects"
+    vintage_field: data_as_of
+
+  valuation:
+    serves: "valuation metrics; equity risk premium; IG/HY OAS credit spreads"
+    keywords: [valuation, PE, price to earnings, multiple, cheap, expensive, risk premium,
+               ERP, spread, OAS, credit spread, IG, HY, high yield]
+    example_asks:
+      - "are equities expensive right now?"
+      - "where are high-yield spreads?"
+    paths:
+      primary: "json/valuation/risk_premium_data.json (145KB -- ERP monthly, IG/HY OAS)"
+      big: "json/valuation/valuation_data.json   # 2.2MB -- ALWAYS --project a sub-key, never dump"
+    vintage_field: data_as_of
+
+  sentiment_news_mood:
+    serves: "market sentiment: CNN Fear & Greed, keyword sentiment + article history"
+    keywords: [sentiment, fear and greed, mood, bullish, bearish, market feel, vibe,
+               what are people saying, news sentiment]
+    example_asks:
+      - "what's the fear & greed index at?"
+      - "sentiment on AI stocks lately?"
+    paths:
+      primary: "json/sentiment/fear-greed-index.json (250-day history) + json/sentiment/keyword-sentiments.json"
+      per_keyword: "json/sentiment/keyword-history-articles/{keyword}.json   # ~700 small files, keyword = filename"
+    vintage_field: generated_at
+
+  positioning_holdings:
+    serves: "positioning + holdings attribution"
+    keywords: [positioning, holdings, attribution, exposure, what do we hold, weights, allocation detail]
+    example_asks:
+      - "what's driving performance attribution this month?"
+    paths:
+      primary: "json/positioning/holdings_attribution_data.json (368KB)"
+      gzip: "json/positioning/positioning_data.json   # ContentEncoding: gzip -- helper decodes; raw cp hands you binary"
+    vintage_field: data_as_of
+
+  correlations_factors:
+    serves: "cross-asset correlations; factor tilts"
+    keywords: [correlation, correlated, diversification, factor, tilt, value, growth,
+               momentum factor, quality, size]
+    example_asks:
+      - "how correlated are stocks and bonds right now?"
+      - "what factor tilts do the models carry?"
+    paths:
+      correlations: "json/correlations/correlation_data.json (152KB)"
+      factors: "json/factor-tilts/{tier1|tier2}.json   # tier3 is 3.7MB -- project only"
+    vintage_field: data_as_of
+
+  market_regime_trending:
+    serves: "market regime signals; daily trending bullish/bearish themes"
+    keywords: [regime, momentum, volatility, vol, risk on, risk off, trending, hot,
+               what's moving, themes, top movers]
+    example_asks:
+      - "are we risk-on or risk-off?"
+      - "what themes are trending today?"
+    paths:
+      regime: "json/market/market-regime.json (+715KB history file)"
+      trending: "json/trending/latest.json (154KB: bullish[10]/bearish[10] + analysis + tickers)"
+    vintage_field: data_as_of
+    hazards:
+      - "json/semantic-trending/ is FROZEN Feb-26 -- do not serve"
+
+  peers:
+    serves: "peer comparison data (month-end basis)"
+    keywords: [peer, peers, competitor, comparison, versus other firms, peer group]
+    paths:
+      primary: "json/peers/"
+    vintage_field: data_as_of
+    hazards:
+      - "month-end cadence: 07-31 on an 08-06 read is NORMAL, not stale"
+
+  market_overview:
+    serves: "market overview / macro dashboard headline figures"
+    keywords: [market overview, dashboard, market summary, snapshot, big picture]
+    paths:
+      primary: "market-metrics.json.gz   # single object at bucket root, gzip"
+    vintage_field: data_as_of
+    hazards:
+      - "an old `market-metrics.json` (04-15 vintage) exists -- serve the current .gz artifact and state the vintage read from the file, never assumed"
+
+  pipeline_freshness:
+    serves: "is the dashboard fresh / when did the pipeline last run"
+    keywords: [fresh, updated, last run, latest data, up to date, when was this pulled]
+    paths:
+      primary: "json/latest/manifest.json   # last Yang run + source inputs"
+    vintage_field: generated_at
+    hazards:
+      - "answer WITH the trading calendar: T-1 is healthy; Friday's data on Monday is CORRECT (CLAUDE.md NEVER#1)"
+
+  news:
+    serves: "news articles, daily trending analysis, keyword intelligence (DynamoDB, not S3)"
+    keywords: [news, article, headline, what happened, coverage, press, story about]
+    example_asks:
+      - "any news on rate cuts today?"
+      - "what was the coverage on X this week?"
+    tables:
+      articles: "opal-news-articles -- QUERY by article_date (YYYY-MM-DD) ONLY, NEVER a full scan (298K items; one day ~350 items)"
+      trending: "opal-news-trending-daily -- QUERY by date"
+      keywords: "opal-keyword-intelligence -- QUERY by keyword, or GSI date-index by date"
+    mode: "read-only; paginate to completion or report partial"
+    hazards:
+      - "semantic-news-trending-daily dormant since Feb-26; market-updates empty -- do not serve either"
+
+never_serve:
+  # Mirrors PORTAL_RETRIEVAL "NEVER SERVE" -- kept here so routing and refusal live together.
+  - "portfolio-management/ -- PM working state incl. TRADE DRAFTS"
+  - "benchmarks/*.pkl, lambda-packages/, infrastructure/, security-* -- ops/binary"
+  - "any PII/user/session DDB table"
+  - "frozen legacy AS IF CURRENT: json/model_portfolios/views/ (06-01), json-tiered/ (01-13), semantic-* (Feb), top-level returns/ metrics/ valuation/ sentiment/ positioning/ legacy prefixes -- if only a frozen surface answers, serve WITH its real vintage stated loudly + surface the demand to Andrew"
+
+routing_procedure: >
+  (1) Match the user's words against keywords + example_asks above -- fuzzy is fine, this
+  file exists so you do not guess paths. (2) Confirm the channel's bucket/prefix is allowed
+  in BUCKET_ALLOWLIST.yaml (it is the permission axis; this file cannot grant). (3) Fetch
+  via tools/portal_lookup.py, honoring PORTAL_RETRIEVAL.md discipline (projection >1MB,
+  gzip, truncation-is-not-absence). (4) Answer with the vintage_field value + source in
+  plain words. No channel matches -> it is off-catalog: decline with the quotable reason
+  and surface the demand to Andrew (that demand signal is wanted, not noise).
