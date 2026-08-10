@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-10T23:4xZ</issued>
-<status>staged</status>
+<status>pending</status>
 <priority>P1. Unblocked by Andrew's ruling ~2334Z ("Agree with your recs for all open calls", Call 2
 = route (b); record: CTO relay 234031Z). Two steps IN ORDER — the rename is only TRUE after the
 selector exists. Sequence relative to RP-W5 (your running TO) and the RP-W1/W2/W3 atomic window per

@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-10T23:4xZ</issued>
-<status>staged</status>
+<status>pending</status>
 <priority>P1 — executable NOW, independent of RP-W1/RP-W3's gates. Andrew has spawned you for this plan.</priority>
 
 <references>
