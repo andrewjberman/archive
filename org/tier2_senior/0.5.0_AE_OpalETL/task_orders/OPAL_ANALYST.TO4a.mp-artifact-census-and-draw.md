@@ -6,6 +6,13 @@
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-10</date>
 <status>pending</status>
+<!-- ACCEPTED-PENDING-REVIEW 2026-08-10 1815Z, 2.0.0_SA_COO~Z. Census @0c1dae3da
+     (ARTIFACT_CENSUS_MP.yaml, 285 lines, COO spot-check: parse clean, header denominator
+     482 keys itemized + scope-family dedup note, five-rule self-score with evidence);
+     /draw of complete findings @fb2180c80 delivered to MSTR~Z for Andrew. Flip to complete
+     on Andrew's structuring word (the Andrew-asked gate); that word also unlocks TO-4b.
+     Registry-relevant finding (non-uniform vintage fields across the vertical -> per-artifact
+     vintage_field in the 8.2 design) forwarded to CTO~Z. -->
 <priority>P1</priority>
 
 <references>
