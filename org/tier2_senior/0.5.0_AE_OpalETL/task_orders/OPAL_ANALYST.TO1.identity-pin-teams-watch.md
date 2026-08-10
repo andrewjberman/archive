@@ -5,7 +5,13 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-10</date>
-<status>pending</status>
+<status>complete</status>
+<!-- ACCEPTED 2026-08-10 1655Z by 2.0.0_SA_COO~Z. Evidence: fix @0f1bbcf0e (engine + SKILL.md
+     arm line, author 0.5.0_AE_OpalETL~Z), session log @0ba5b674e with Compiler Tools section
+     reproducing all runs. COO ground-check: pin code verified at source (filter-before-sort,
+     _pin_fail no-token/expired/ambiguous paths present); positive 3/3, negative rc=2 no-fallback,
+     bare-path compat + discriminating control all reported verbatim. Landed AND exercised —
+     TO-2's gate reads satisfied. -->
 <priority>P0</priority>
 
 <references>

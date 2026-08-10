@@ -29,6 +29,9 @@
   WITH the pin; first-serve smoke; the unread 08-07 inbox message (MSTR~Z completion-set
   notification 20260807T1821Z) actioned at first session.
 - Error paths: whoami returns Andrew → HOLD (prompt.md gate); pin arg absent → do not arm.
+- TMPDIR caveat (TO-1 finding, 2026-08-10): under native Windows python with no TMPDIR the
+  engine's cursor default `/tmp/teams-watch.cursor` is unwritable (FileNotFoundError before any
+  poll) — the runbook's arm step MUST set a valid TMPDIR.
 
 **Half 2 — the relaunch (executor: 0.0.0_AB_MSTR~Z at the box — they hold the launcher; this TO
 COORDINATES it, it does not tier-invert):** on runbook completion, message MSTR~Z with the runbook
