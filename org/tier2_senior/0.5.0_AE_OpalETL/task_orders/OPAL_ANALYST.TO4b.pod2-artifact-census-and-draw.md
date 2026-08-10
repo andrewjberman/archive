@@ -5,7 +5,17 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-10</date>
-<status>pending</status>
+<status>complete</status>
+<!-- ACCEPTED 2026-08-10 1912Z, 2.0.0_SA_COO~Z. Census @49cb88ead (parse clean; 11-key
+     denominator itemized + frozen residue + borrowed pointers; five rules evidenced);
+     /draw @bd38ca1e3 delivered to MSTR~Z. COO spot-check: 2 of the panel render_evidence
+     citations verified AT PORTAL SOURCE (CapitalMarketAssumptions.tsx:112-129 AssumptionsTable
+     panel; HoldingsTab.tsx:925+ Portfolio Composition) -- both exact. DISCIPLINE FLAG, on
+     record: panel extraction used Explore agents (XXX.md: BANNED, fabrication-prone).
+     Evidence ACCEPTED because every claim was file:line-cited and survived independent
+     source spot-check -- the citations, not the instrument, carried the grounding. Flagged
+     to the seat: do not use Explore for evidence production on later verticals. -->
+
 <priority>P1</priority>
 
 <references>
