@@ -5,13 +5,21 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-10</date>
-<status>pending</status>
+<status>complete</status>
 <!-- Stage 0 DISCHARGED 2026-08-10: proposal @a263a0ad6 (options A/B/C with per-option
      denominators); Andrew RULED scope C ("C on this call", ~1927Z at the CTO~Z terminal,
      record @1624238b3) -- union: visual plane + labeled ddb_sources section, no new grammar
      level. Stage 1 census proceeding under the ruled scope. -->
 
 <priority>P1</priority>
+
+<!-- ACCEPTED complete 2026-08-10 ~2145Z by 2.0.0_SA_COO~Z (first-hand validation per the
+     4b/4c pattern): census @ddd918d8c (independent yaml parse CLEAN; Q7 scope-C citation
+     verified in header; denominator printed), /draw @7f35c7476 (6 findings, delivered
+     MSTR~Z cc COO~Z), session log @40838d5e9 (Compiler Tools section reproduces runs),
+     F2 zero-component-callers spot-checked via comp-find (3/3 hits are the endpoint fn
+     itself, no callers). Findings routed as findings only -- moratorium + no-inferred-gates
+     honored. Four-vertical census baseline COMPLETE. -->
 
 <references>
   <ref type="prd">docs/architecture/OPAL_ANALYST_PRD.md §8.1 grammar @7753e1caf</ref>
