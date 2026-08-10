@@ -6,6 +6,11 @@
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-10</date>
 <status>pending</status>
+<!-- Stage 0 DISCHARGED 2026-08-10: proposal @a263a0ad6 (options A/B/C with per-option
+     denominators); Andrew RULED scope C ("C on this call", ~1927Z at the CTO~Z terminal,
+     record @1624238b3) -- union: visual plane + labeled ddb_sources section, no new grammar
+     level. Stage 1 census proceeding under the ruled scope. -->
+
 <priority>P1</priority>
 
 <references>
