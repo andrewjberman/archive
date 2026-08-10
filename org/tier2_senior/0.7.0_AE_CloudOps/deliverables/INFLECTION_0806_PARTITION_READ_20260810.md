@@ -97,14 +97,57 @@ note: `_latest_date()` resolves roster and valuation partitions **independently*
 as-of is *"whenever account_distribution last ran — NOT the axis date it lands on, and nothing bounds
 the gap."* The gate's own adjacent line matches: *"the frontier cell wears 2026-08-06 but its count
 was measured as of 2026-08-04 — 2 trading day(s) earlier."*
-⚠ **BOUND: source-consistent, NOT positively confirmed.** I have not opened the staged account_dist
-object to see `12/29/203/91/32` in it. One read, held for CTO's word rather than assumed.
+⚠ ~~**BOUND: source-consistent, NOT positively confirmed.** I have not opened the staged account_dist
+object…~~ **BOUND DISCHARGED — POSITIVELY CONFIRMED** (CTO GO 173402Z READ 1). Opened
+`s3://opal-data-assets/gold/mdpf_revamp/inflection/account_distribution.json`:
+**DENOMINATOR 7 entries** in `meta.account_count_by_model_key`, exactly the 7 `INFLECTION_MODEL_KEYS`.
+All five gate-logged values match **exactly** (12 · 29 · 203 · 91 · 32), and **the two the log
+truncates carry real values: `opal_blend_5050_int_ltc` = 160, `opal_blend_5050_st_int` = 23.**
+**7 of 7 models have a count; 0 of 7 have a value.**
+⚠ *Residual, reported not resolved:* `meta.period` reads **`None`**, yet ROW-11 printed *"measured as
+of 2026-08-04"*. Those do not reconcile from what I can see. **The object is MUTABLE and I read it
+~4.5h after the gate did** — `period` may have moved even though the counts did not.
 
-## One unmeasured link, named
+## ~~One unmeasured link, named~~ → MEASURED, AND IT REFUTED THE IMPLIED CONCLUSION
 
-SmartX has partitions **through 08-10**, yet the axis frontier is **08-06**. Per `:302-305` the axis
-comes from the **`day` column of the LATEST partition**, not partition names — so the day-series max
-would be 08-06. **I did not read the parquet to confirm.** INFERRED, flagged, not spent.
+~~SmartX has partitions through 08-10, yet the axis frontier is 08-06… I did not read the parquet to
+confirm. INFERRED, flagged, not spent.~~
+
+**READ (CTO GO 173402Z READ 2, boto3, all six partitions' `day` column):**
+
+```
+partition     day MAX      rows    weekday
+2026-08-05    2026-08-04   4398    Wednesday
+2026-08-06    2026-08-05   4406    Thursday
+2026-08-07    2026-08-06   4414    Friday
+2026-08-08    2026-08-06   4415    SATURDAY
+2026-08-09    2026-08-06   4415    SUNDAY
+2026-08-10    2026-08-07   4422    Monday
+```
+
+⛔ **I BRIEFLY REPORTED THIS AS "THE FEED STOPPED ADVANCING ON 08-06." THAT WAS A FALSE OUTAGE AND I
+RETRACTED IT AT 175008Z.** The apparent stall across `08-08`/`08-09` **is a Saturday and a Sunday**.
+Data for trading day D lands in the next trading day's partition — Friday 08-07's data is in
+**Monday 08-10's** partition — and the row count **grows throughout** (4398 → 4422). **The feed is
+healthy on a T-1 trading-day cadence.**
+
+> **CLAUDE.md's FIRST NEVER-rule names this exact scenario** — *"Friday's data IS Monday's correct
+> answer… a Monday reading of '3 days stale' is a HEALTHY pipeline plus a weekend."* Today is Monday.
+> I read a Sunday partition, saw Thursday's data, and called an outage. **I had already computed that
+> 08-09 was a Sunday earlier the same session** for the mirror work — I held the fact and did not
+> apply it, which is worse than not having it. **Every instrument agreed with me; what was missing was
+> the calendar frame, not a measurement.** And measuring **n=1** was the enabling error — CTO caught
+> that and asked for more partitions, which is what produced the correction.
+
+**WHAT THE MEASUREMENT ACTUALLY SHOWS:** the floor fires **13:00Z**, SmartX lands **~13:40Z**, so
+**the floor reads yesterday's partition every day.** Today it read Sunday's (day-max 08-06) → frontier
+**08-06**. **Monday's own partition carries day-max 08-07 — and inflection HAS 08-07 on both legs**
+(`eclipse/…/fact_portfolios_full/date=2026-08-07` and `orion/…/fact_assets/date=2026-08-07`, both
+measured present). **The 40-minute ordering gap selects the frontier, and it selects the one date
+inflection lacks.**
+⚠ **PREDICTION, NOT MEASUREMENT:** I have **not** verified that a frontier of 08-07 makes inflection
+pass — other limbs could refuse, and 08-06 remains a real hole in inflection's history regardless.
+**No schedule change proposed.**
 
 ## Compiler Tools
 
