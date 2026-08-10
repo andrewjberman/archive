@@ -113,6 +113,19 @@ flow-unadjusted baseline above (15.78/19.30/136) is the number to beat; **if the
 cannot bring `opal_long_term_conservative` under the single-key bar, the gate fails and that is a
 finding, not a threshold to relax silently.**
 
+## 7a · POST-RATIFICATION BINDINGS (COO relays, 20260810T2331Z + 2345Z — folded, superseding where stricter)
+
+Prefix RATIFIED (CTO), with conditions now binding on the build: **(1)** provenance labels live in
+the artifact BODY; **(2)** calibrate on one known day, **validate on a DIFFERENT known day** — no
+threshold freezing on the calibration day (§7's "frozen from the calibrated run" is amended
+accordingly: freeze from the calibration day, PASS required on the held-out day). **(3)** Andrew
+ruling ~2334Z (Call 3, CTO record 234031Z): **reconstructed values are INTERNAL-ONLY until he says
+otherwise** — the emitter is designed for an internal consumer; no portal/served surface may read
+the prefix, and the artifact body carries `audience: "internal-only"` beside `point_class`.
+The 136bp stance is ratified unchanged: over the bar = gate-FAIL finding, never a threshold relax.
+Execution vehicle: TO `MDPF_REMED.RP-W7.targeted-backfill-emitter.md` @09b57a6278 — **staged, no
+GO**, sequenced behind MDPF pipeline-functional (12/12 A4 on one unattended cycle, COO adjudicates).
+
 ## 8 · NOT AUTHORIZED BY THIS SPEC
 
 No serving change. No historic-gap backfill. No standing pipeline (one-shot ad-hoc QA-class
