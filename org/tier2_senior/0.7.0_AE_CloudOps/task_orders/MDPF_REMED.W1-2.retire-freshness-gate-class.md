@@ -4,9 +4,60 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-08-07</date>
-    <status>pending</status>
+    <status>superseded</status>
     <project_code>MDPF_CANPLAT</project_code>
+    <superseded_by>
+      **REGISTER ROW R-31** (`docs/architecture/MDPF_REMEDIATION_REGISTER.md` @1dbfcdac90) —
+      *"THE EC2 LEG IS CUTOVER RESIDUE — DECOMMISSION IT. DO NOT SCHEDULE IT."*
+      **Ruled by `1.0.0_SA_CTO` 2026-08-10, on `2.0.0_SA_COO`'s ask; recorded @e1c891366a §D-2.**
+    </superseded_by>
+    <superseded_date>2026-08-10</superseded_date>
   </metadata>
+
+  <supersede_note date="2026-08-10" by="2.0.0_SA_COO" ruled_by="1.0.0_SA_CTO">
+    ⛔ **THE NEED WENT AWAY BECAUSE ITS TARGET IS BEING DECOMMISSIONED — this TO is NOT complete,
+    NOT abandoned, and NOT a judgement on the work, which was good.**
+
+    **WHY.** This TO hardens the freshness reader inside
+    `infra/aws/lambda/mdpf-pipeline/mdpf-daily-trigger/lambda_function.py`. **R-31 condemns that
+    exact Lambda.** CTO excluded the filename-coincidence reading BY MEASUREMENT rather than by
+    name — the R-20/R-32 trap this fabric has banked twice:
+      · `lambda_function.py:1` docstring — *"starts the mdpf-daily-runner EC2 and SSM-dispatches…"*
+      · it constructs **ec2 + ssm** clients (`:186-187`)
+      · `get-policy`: invoked **only** by EventBridge rule `mdpf-daily-refresh-trigger` — the rule
+        carrying `ScheduleExpression: None`, independently measured by P0-7R
+      · **absent** from the Scheduler list (only floor / accrual-bridge / publisher appear)
+    ⇒ `mdpf-daily-trigger` **IS** the EC2 starter. Same leg. **R-31 stands and has not moved.**
+
+    ✅ **CARVE-OUT 1 — DISCHARGED, VERIFIED, NOT SELF-REPORTED.** The work LANDED FIRST:
+    **`@586d9f1d8a`**, 132 insertions / 36 deletions, commit-gate clean; working tree confirmed
+    clean for that path at the COO seat. *"Condemned path" was never a licence to leave work
+    uncommitted in a shared tree* — it had already been parked across two dark days (zero commits
+    2026-08-08 and 08-09) with integration passes running. **The commit preceded this status flip
+    by construction, which is the whole point of the carve-out.**
+    *(AE also fixed a CLAUDE.md Code-Quality violation on the way in: `:89` carried U+26D4 —
+    non-ASCII in a Lambda that runs on AWS.)*
+
+    ✅ **CARVE-OUT 2 — THE INSIGHT OUTLIVES THE CODE.** Routed to CTO for banking beside R-31:
+    > **SILVER-FRESH IS NOT GOLD-COMPLETE.** Grounded on 2026-08-07, where
+    > `silver/assets_v2/2026-08-07.parquet` wrote successfully at 16:00Z **while the gold chain
+    > FAILED at INF_C_01 and emitted no canonical_nna.** A silver-based frontier would have
+    > reported the spine healthy **on the exact day it was not.**
+
+    **That is true of ANY surviving path**, and the 4th declared grammar
+    (`GRAMMAR_STEM_PREFIXED`, `<stem>_YYYY-MM-DD.parquet`) plus the bucket-parameterised
+    `_parquet_num_rows` may be reusable wholesale. **The reasoning was better than its target.**
+    Banked so the next seat building a frontier reader does not re-derive it from scratch.
+
+    ⚠ **R-19 ITSELF IS NOT DISCHARGED BY THIS SUPERSEDE.** Andrew's ruling — *"There should be no
+    freshness gates, all of this needs to go"* (2026-08-07 ~0310Z) — is a **CLASS** ruling. Gates
+    (b)–(g) live outside this Lambda and are untouched by R-31. **Retiring the leg retires gate (a)
+    by removing its host; it does not retire the class.** Whoever picks up R-19 next inherits the
+    remainder, and this note exists so that residue is visible rather than silently closed with the
+    TO. The distinction that governs it is unchanged: **A GATE BLOCKS, AN ASSERTION RECORDS — THE
+    GATES GO, THE ASSERTIONS STAY**, and *"no freshness gates"* never meant *"stop measuring
+    freshness."*
+  </supersede_note>
 
   <objective>
     Execute R-19 of the MDPF remediation register: **retire the FRESHNESS-GATE CLASS.** A gate that
