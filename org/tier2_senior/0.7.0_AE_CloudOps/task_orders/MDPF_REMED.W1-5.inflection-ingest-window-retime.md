@@ -8,6 +8,33 @@
     <project_code>MDPF_CANPLAT</project_code>
   </metadata>
 
+  <andrew_ruling date="2026-08-10" relayed_by="1.0.0_SA_CTO" ref="160219Z">
+    ⛔⛔ **THE FLOOR CLAUSE OF THIS TO IS DEAD. ANDREW-DIRECT 2026-08-10, ANSWERING /open-calls,
+    VERBATIM: _"B on call 1"_ — i.e. option (B): DO NOT MOVE `mdpf-scheduled-floor` TO 13:30Z.**
+
+    **HIS OWN 2026-08-07 INSTRUCTION IS HEREBY NOT EXECUTED, on the changed premise.** The floor is
+    **not starving**: it fires **13:00:5xZ every day** (measured 08-08, 08-09, 08-10) and **three of
+    four scopes REFUSE TO EMIT INSIDE IT**. Moving it moves nothing.
+
+    ⇒ **STRUCK AND NOT TO BE EXECUTED BY ANYONE:**
+      · `<objective>`'s *"then move `mdpf-scheduled-floor` to **13:30 UTC**"*
+      · `<acceptance_criteria>` **3** (*"`mdpf-scheduled-floor` MOVES TO 13:30 UTC"* + its timezone sub-question)
+      · `<requirements>` **3** (*"Move the floor to 13:30 with >=10 min margin"*)
+      · `<scope><files>`'s *"the EventBridge Scheduler entry `mdpf-scheduled-floor` (via Terraform)"*
+    **No executor picks these up. They are recorded, not deleted, so the reversal stays visible.**
+
+    ✅ **WHAT SURVIVES HIS RULING — read this before assuming the TO is dead:** he answered the
+    **FLOOR** question ONLY. **The 12:00–13:30 UTC INGEST-WINDOW half of his 08-07 word is UNTOUCHED
+    by this ruling** and is not struck here. Separately, `0.7.0_AE_CloudOps` discharged the T-1
+    concern at source (`date=D` is a run-date LABEL; `orion_normalize_as_of = prior_trading_day`), so
+    the window carries no T-1 hazard.
+
+    ⚠ **AND THE WHOLE SCHEDULE TRACK IS STOOD DOWN INDEPENDENTLY OF THIS** (`1.0.0_SA_CTO`
+    2026-08-10, measured @54efb341e6): the staleness cause is **scope REFUSALS inside the floor**,
+    not timing. **The four-intakes-after-the-floor ordering measurement is TRUE and CAUSALLY INERT —
+    it survives as a FACT and dies as an EXPLANATION.** Do not resurrect a retime from it.
+  </andrew_ruling>
+
   <correction date="2026-08-10" by="2.0.0_SA_COO" ref="@e1c891366a">
     ⛔ **THIS TO'S CONTEXT BLOCK IS MEASURABLY WRONG. READ THIS BEFORE THE `<context>` BELOW.**
     The `<context>` landing table is PRESERVED UNEDITED for provenance -- it is what was believed on
