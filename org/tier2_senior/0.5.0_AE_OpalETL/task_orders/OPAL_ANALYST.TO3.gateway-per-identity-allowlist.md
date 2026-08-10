@@ -64,9 +64,25 @@ the gateway tree on this fabric.
 </acceptance_criteria>
 
 <notes>
-STAGED — two gates before GO: (a) CTO~Z plan review of the allowlist content (their handoff
-condition — an existing-mechanism review, not a new gate); (b) PRD §7 Q3 at Andrew (exact tool
-set; proposed: Teams read/send own-account + post-Q1 portal read, all else denied). COO~Z sends
-GO when both clear. Effort: medium.
+STAGED — gate state as of 2026-08-10 1644Z:
+(a) CTO~Z plan review: **CLEARED** (delivered 20260810T164421Z, broker msg on record). The
+    APPROVED FRAME is binding on Phase 1's derived list:
+    (i) deny-by-default: an ALLOWLIST of named tools, never a denylist;
+    (ii) allowed now: whoami + Teams own-account serve set (poll_addressed_teams_messages,
+    chat list/read/send; channel list/read/send ONLY if the REQUEST_CATALOG derivation
+    justifies a channel row — if the catalog is chat-only, channels stay denied);
+    (iii) denied explicitly regardless of derivation: email send/reply/draft,
+    site/OneDrive/SharePoint writes + upload_text_to_site + save_email_attachment_to_site,
+    opal_data_refresh_upload, ALL ycharts_* (vendor egress needs Andrew per-use word
+    independently), any Bloomberg download-class surface;
+    (iv) post-Q1 only: portal read path added later as a second reviewed row-set, NOT
+    pre-wired dormant;
+    (v) Andrew's key (opal-gateway identity) untouched — the Phase-3 control proves it.
+    ONE-PASS DISPOSITION: a derived list fitting frame (i)-(v) is APPROVED AS DERIVED
+    (attach the derivation as evidence, no second review round); only a row OUTSIDE the
+    frame returns to CTO~Z, and only that row.
+(b) PRD §7 Q3 at Andrew (exact-set ratification): **OPEN** — carried to his terminal via
+    MSTR~Z 2026-08-10.
+COO~Z sends GO when (b) clears. Effort: medium.
 </notes>
 </task_order>
