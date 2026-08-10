@@ -8,6 +8,67 @@
     <project_code>MDPF_CANPLAT</project_code>
   </metadata>
 
+  <correction date="2026-08-10" by="2.0.0_SA_COO" ref="@e1c891366a">
+    ⛔ **THIS TO'S CONTEXT BLOCK IS MEASURABLY WRONG. READ THIS BEFORE THE `<context>` BELOW.**
+    The `<context>` landing table is PRESERVED UNEDITED for provenance -- it is what was believed on
+    2026-08-07 -- but three of its load-bearing claims have since been falsified by measurement
+    (`0.7.0_AE_CloudOps`, live; source-confirmed at the COO seat). DO NOT EXECUTE OFF IT.
+
+    1. **THE TABLE PRESENTS ONE LANDING PATTERN FOR TWO PREFIXES THAT NEVER SHARED ONE.**
+       ORION `fact_positions` was **NEVER** on the T+1 03:30Z pattern -- same-day **14:16Z**,
+       unbroken 2026-07-20 through 2026-08-09. ECLIPSE `fact_model_composition` **was** T+1 03:30Z
+       through date=2026-08-04 and is now same-day **22:31Z**, steady since 08-07.
+       Cause: `ce99054e44` (committed 07-29, **APPLIED 2026-08-06T00:04:48Z**). The missing
+       `date=2026-08-06` partition the table flags is **that cutover's own gap**, now explained --
+       it is NOT an open feed anomaly and NOT the lead on the cross-axis refusal.
+
+    2. **CRITERION 1 IS ANSWERED, AND NEITHER 16:00 SWEEP IS THE PRODUCER.**
+       `opal-assets-ingest-mirror` writes **BRONZE ONLY** (`lambda_function.py:112,:119`; docstring
+       `:1` -- *"Source bronze -> the monolith, raw bytes only"*). The silver is written by
+       `opal-assets-silver-{orion,eclipse}`, **S3-ObjectCreated-triggered off that bronze write**
+       (live bucket notification: Prefix=`orion/inflection/bronze/` Suffix=`.jsonl.gz`;
+       Prefix=`eclipse/inflection/bronze/` Suffix=`.json`). The 16:00 sweeps are a **SECOND,
+       IDEMPOTENT TRIGGER OF THE SAME CONVERTERS** -- they are NOT misnamed-idle and NOT
+       "two rules named for work something else is doing." **The lever is the MIRROR's two
+       schedules; the converters have no independent clock that matters.**
+
+    3. ⛔ **THE MIRROR'S TWO SCHEDULES ARE NOT SEPARABLE BY FIRM -- THIS BOUNDS THE WHOLE TO.**
+       `lambda_function.py:353` -- `for row in MAP + PROVENANCE_RIDERS:` -- iterates **all four**
+       rows unconditionally and **never consults the event payload**; both invokers pass an empty
+       payload (`mirror.tf:155` `input = "{}"`). So `-inf-daily` (14:15Z) and `-cot-daily-et`
+       (22:30Z) are **TWO CLOCKS ON ONE ALL-ROWS FUNCTION**. Retiming either one moves orion
+       inflection, eclipse inflection AND cottonwood **together**. There is no orion-and-eclipse-only
+       retime available at this lever, which is what requirement 2 below assumes.
+
+    >> **CONSEQUENCE FOR REQUIREMENTS 2 AND 3: BOTH ARE HELD, AND NOT ON AGENT DISCRETION.**
+       In steady state **the floor is NOT starving**: at 13:00Z on day D the newest orion partition
+       is `date=D-1` (written D-1 14:16Z) and the newest eclipse is `date=D-1` (written D-1 22:31Z).
+       **Both are correct T-1 reads.** Moving the ingests into 12:00-13:30Z with the floor at 13:30Z
+       would have the floor read a partition written ~10 minutes earlier **the same day** -- which
+       this TO's own `do_not` forbids, and which CLAUDE.md's first NEVER-rule makes the default
+       violation for any AUM/holdings path.
+
+       **BLOCKING QUESTION, being resolved by `0.7.0_AE_CloudOps` from source:** does `date=D`
+       **CONTAIN** day-D data, or is it a **run-date LABEL on D-1 content**? If a label, the window
+       is safe and this resolves without escalation. If it contains same-day data, **Andrew's window
+       and T-1 semantics conflict and only he resolves it** -- routed to him via MSTR 2026-08-10
+       with the measurement attached. ⛔ **NO SCHEDULE MOVES UNTIL ONE OF THOSE TWO RESOLVES.**
+
+    ⚠ **ADDED REQUIREMENT -- A GAP PLAN, STATED BEFORE ANY APPLY.** Moving a daily pull across the
+    clock either double-runs or **skips one business day**. The precedent is inside this very
+    function (item 1: the 08-06 cutover gap). **A missing trading day mid-series is precisely what
+    the cross-axis gate's limb (vi) detects** -- so a careless retime can MANUFACTURE the refusal
+    shape currently blocking inflection. State which case applies and how it is covered.
+
+    ✅ **UNCHANGED AND STILL BINDING:** criterion 5 (do NOT report this as fixing the 6/12), the
+    timezone-explicitness requirement, Terraform-only, and every `do_not`. **Criterion 5 is
+    STRENGTHENED, not weakened:** a schedule fix moves COTTONWOOD and 49FINANCIAL only -- inflection
+    is a cross-axis coherence gate refusal and global inherits it. And per CTO's measured INVERSION
+    (inflection **refused 16-minute-old data** at 22:47:19Z having **passed on two-day-stale data**
+    at 13:00Z), **a SUCCESSFUL retime should be expected to make the 6/12 look WORSE.** That is the
+    inversion predicting itself, not a regression to repair toward.
+  </correction>
+
   <objective>
     ANDREW-DIRECT: re-time **every Orion and Eclipse inflection ingestion** so it lands inside the
     **12:00–13:30 UTC** window, then move `mdpf-scheduled-floor` to **13:30 UTC** — with at least
