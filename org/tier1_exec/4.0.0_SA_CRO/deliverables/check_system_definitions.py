@@ -29,6 +29,11 @@ import sys
 
 DEFAULT_PATH = "infra/system/ontology/SYSTEM_DEFINITIONS.yaml"
 REQUIRED_FIELDS = ("definition", "authority", "sits_at", "status")
+# ⚠ ENUM-FREEZE, documented rather than hidden (the predicate-not-roster class): these three are
+# the OBSERVED values at 2026-08-10, frozen here because the file declares no status vocabulary of
+# its own. A NEW lawful status will FIRE this gate (loud, not silent) until either (a) CVO declares
+# the vocabulary IN SYSTEM_DEFINITIONS (preferred -- then this reads it from the file) or (b) this
+# set is amended with the ratifying record cited. Routed to CVO at wiring.
 STATUS_ENUM = {"reserved_ratified", "deprecated", "contested_unresolved"}
 # keys are identifier-shaped: letters/digits/underscore, no spaces/hyphens. C0..C4/D1..D3 legal.
 # NARROW RATIFIED EXCEPTION (measured on first live run, 2026-08-10): the dotted C-sublayer form
@@ -55,7 +60,9 @@ def check(doc: dict) -> tuple[int, int, list[str]]:
             bad += 1
             msgs.append(f"SHAPE: '{key}' entry is {type(entry).__name__}, not a mapping")
             continue
-        missing = [f for f in REQUIRED_FIELDS if f not in entry or entry[f] in (None, "")]
+        missing = [f for f in REQUIRED_FIELDS
+                   if f not in entry or entry[f] is None
+                   or (isinstance(entry[f], str) and not entry[f].strip())]
         if missing:
             bad += 1
             msgs.append(f"MISSING: '{key}' lacks required field(s): {', '.join(missing)}")
@@ -80,6 +87,7 @@ def self_test() -> int:
         ("extra fields are LAWFUL (annex precedent)", {"terms": {"alpha": {**good_entry, "describes": "x"}}}, 0),
         ("ratified dotted sublayer key (C3.i) is LAWFUL", {"terms": {"C3.i": dict(good_entry)}}, 0),
         ("general dotted key still FIRES (X.y)", {"terms": {"X.y": dict(good_entry)}}, 1),
+        ("whitespace-only required value FIRES", {"terms": {"alpha": {**good_entry, "definition": "   "}}}, 1),
     ]
     failures = 0
     for label, doc, want_bad in cases:
@@ -97,7 +105,27 @@ def main(argv: list[str]) -> int:
     path = argv[0] if argv else DEFAULT_PATH
     try:
         import yaml  # PyYAML is a standing dependency of the ontology tooling
-        doc = yaml.safe_load(io.open(path, encoding="utf-8"))
+
+        # DUPLICATE-KEY DETECTION (exercised breakpoint, 2026-08-10): yaml.safe_load silently
+        # keeps the LAST duplicate mapping key -- so a vocabulary FORK (two entries for one term)
+        # would be collapsed BEFORE any field check runs, and the checker would bless the survivor.
+        # A loader-level hook sees every key as parsed; duplicates are fail-closed (exit 2 --
+        # a forked registry is unreadable-in-the-sense-that-matters, never a PASS).
+        class _DupSafeLoader(yaml.SafeLoader):
+            pass
+
+        def _no_dupes(loader, node, deep=False):
+            seen = set()
+            for k_node, _ in node.value:
+                k = loader.construct_object(k_node, deep=deep)
+                if k in seen:
+                    raise yaml.YAMLError(f"DUPLICATE KEY '{k}' -- a vocabulary fork, collapsed silently by a plain load")
+                seen.add(k)
+            return yaml.SafeLoader.construct_mapping(loader, node, deep)
+
+        _DupSafeLoader.add_constructor(
+            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _no_dupes)
+        doc = yaml.load(io.open(path, encoding="utf-8"), Loader=_DupSafeLoader)
     except Exception as e:  # noqa: BLE001 -- unreadable registry is fail-closed, never PASS
         print(f"UNREADABLE ({type(e).__name__}: {e}) -- an unreadable registry is NOT a pass")
         return 2
