@@ -178,6 +178,30 @@ ledger covers that need instead.
 - **D4 as a standing gate:** the known-day tie-out above becomes the acceptance test of any
   implementation run (reproduce vintage 08-04 at ≤1bp before emitting vintage 08-05).
 
+## 6 · ADDENDUM (post-acceptance, ~2230Z) — THE GRAIN ANSWER: MODEL DECOMPOSITION, NOT TOTAL-ONLY
+
+CTO's pre-D3 question (20260810T222156Z): does the method reconstruct the seven-model
+decomposition, or only the firm total? **Measured answer: PER-MODEL WORKS**, by applying client
+factors to client×model cells (orion `fact_assets` carries `modelName` per row; 24 distinct
+modelName values, total = firm aggregate exactly).
+
+**Model-grain tie-out on the known day (vintage 2026-08-04):** aggregate 0.04bp;
+**value-weighted mean |per-model error| = 9.74bp.** All named Opal models land within ~35bp
+individually (Opal Intermediate Growth +3.5bp on $80.5M; 50/50 Int/LT −7.0bp on $36.2M;
+Opal Long Term −3.5bp). The largest errors sit in the blank/non-model bucket (−51.8bp) and the
+$379K PCOFX sliver (+62.9bp).
+
+**Lost vintage 2026-08-05 per-model (DERIVED):** produced both directions; fwd/bwd agree within
+~±21bp for essentially every named model. Two flagged outliers where the unadjusted backward roll
+disagrees: the blank/non-model bucket (629bp) and **Opal Ultra Short Term (−701bp)** — signature
+of a flow or model-reassignment inside the 08-05→08-06 window; the forward estimate is the
+validated one and the D3 flow adjustment targets exactly these two cells.
+
+**Caveat carried into D3:** orion `modelName` is a PROXY grain for MDPF's seven
+`INFLECTION_MODEL_KEYS` (an eclipse-leg vocabulary). The name families overlap but are not
+identical; the principled join is orion account → eclipse `portfolios/simple.accountId` →
+portfolio → model (that join key is why the puller pulls /simple at all). Feasible, is D3 work.
+
 ## Compiler Tools
 
 | tool | result |
