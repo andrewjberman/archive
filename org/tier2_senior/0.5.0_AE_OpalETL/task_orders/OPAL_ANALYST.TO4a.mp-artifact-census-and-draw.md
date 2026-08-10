@@ -5,7 +5,12 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-10</date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-08-10 1845Z: Andrew's structuring review APPROVED (verbatim record
+     @95b3e2852, ~1825Z at the MSTR~Z terminal: "Great this is excellent work... Please have
+     them run the others as well"). The four pilot grammar choices RATIFIED as exercised
+     (residue plane, scope-family dedup, per-artifact vintage fields, one-panel grain).
+     Prior acceptance record below. -->
 <!-- ACCEPTED-PENDING-REVIEW 2026-08-10 1815Z, 2.0.0_SA_COO~Z. Census @0c1dae3da
      (ARTIFACT_CENSUS_MP.yaml, 285 lines, COO spot-check: parse clean, header denominator
      482 keys itemized + scope-family dedup note, five-rule self-score with evidence);
