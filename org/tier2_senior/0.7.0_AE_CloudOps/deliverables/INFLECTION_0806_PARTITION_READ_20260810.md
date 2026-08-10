@@ -123,3 +123,73 @@ axis.** Live state grounds WHAT; source grounds WHY (Rule 22), and here the WHY 
 **Read only. Nothing repaired, applied, or re-run.** Cottonwood 08-06 untouched (CLOSED, CTO
 @a66080db54). The `ce99054e44` → orion/eclipse attribution is **not inherited as a premise** anywhere
 above, per MSTR's NOT-ESTABLISHED flag.
+
+---
+
+# ADDENDUM 2 — Andrew's question closed it: the publisher is fine, the WRITE is declined
+
+**Andrew-direct ~1758Z, verbatim:** *"If 49F was healthy, we'd be seeing the Friday August 7th data
+displaying in the portal, but we're seeing Thursday August 6th, so something is preventing publishing
+there. Did the portal publisher itself have an issue?"*
+
+**He is right that something is preventing it. It is NOT the publisher.** His question is what made me
+measure the thing nobody had: **what was actually on the publisher's menu.**
+
+## Measured — newest gold object per firm/artifact (DENOMINATOR: 79 objects under `portal/gold/mdpf/`)
+
+| firm | artifact | newest date | **written** |
+|---|---|---|---|
+| 49financial | aggregate-aua-timeseries | 2026-08-06 | **2026-08-07 22:47:19** |
+| 49financial | aum-metrics | 2026-08-06 | **2026-08-07 22:47:19** |
+| 49financial | account-distribution | 2026-08-07 | 2026-08-07 22:47:20 |
+| cottonwood | aggregate-aua-timeseries | 2026-08-06 | 2026-08-07 22:47:19 |
+| global | aggregate-aua-timeseries | 2026-08-05 | 2026-08-07 03:52:16 |
+| inflection | aggregate-aua-timeseries | 2026-08-05 | 2026-08-07 03:52:16 |
+
+**NOTHING under `portal/gold/mdpf/` has been written since `2026-08-08T13:40:44Z`, and nothing for
+49financial since `2026-08-07T22:47:19Z`.** The publisher published the newest object that exists for
+every firm — `published=14 unchanged=0 failed=0`. **It had no 08-07 timeseries to publish.**
+
+## The blockage — two layers, both measured
+
+1. **The frontier never reaches 08-07**, so gold builds *for* 08-06 and never attempts an 08-07 object.
+2. **Rebuilding 08-06 hits an object that already exists**, and the guard declines the write:
+   ```
+   CONFLICT (recorded, not overwritten):
+     portal/gold/mdpf/49financial/aggregate-aua-timeseries/2026-08-06.json -- 19 business path(s)
+     e.g. ['_provenance.process_time', 'by_model.opal_growth_sma.model_value[439]']
+   ```
+
+⇒ **Every daily cycle re-derives a date that already exists, finds it differs, and correctly refuses
+to overwrite.** The guard is doing its job. The product is frozen anyway.
+
+### The counts reconcile exactly — which is why this is believed, not merely plausible
+
+`cycle complete: 3/12 A4 objects built` = **49financial's three artifacts — the same three that logged
+CONFLICT** — and `errors=['cottonwood','inflection','global']` = the other nine.
+**49financial is the ONLY scope that builds, and its output is declined at the write step, daily.**
+
+> **"3/12 built" has been reading as partial success. It is 3 BUILT AND 3 DISCARDED.** A build count
+> that stops at `built` cannot distinguish a written object from a declined one — the same
+> shape as every other retrieval-frame defect recorded today, at the write layer.
+
+## A framing error of mine, corrected by the question
+
+I reported *"the vendor feed is healthy"* and let it carry the implication *"so nothing is wrong
+there."* **Both halves are true and neither follows from the other: THE FEED IS HEALTHY AND THE
+PRODUCT IS FROZEN — three days for 49financial.**
+
+My retraction had fixed a false-outage claim and then **under-claimed in the other direction**. The
+missing frame came from the **product side** — what the portal is actually displaying — which no log
+I was reading would have supplied. *A pipeline-side instrument cannot tell you the product is wrong;
+it can only tell you the pipeline did what it was told.*
+
+## Also surfaced
+
+**49financial's `account-distribution` reached 08-07 while its `aggregate-aua-timeseries` stopped at
+08-06** — different as-of dates across artifacts of the **same firm** (roster basis vs axis frontier),
+served side by side. A coherence question about the served set, same shape as the frontier-count issue
+one layer up.
+
+**The stack is now THREE layers, not one defect:** frontier selection · conflict-decline at write ·
+count/value coherence. Nothing diagnosed further, nothing proposed, nothing touched.
