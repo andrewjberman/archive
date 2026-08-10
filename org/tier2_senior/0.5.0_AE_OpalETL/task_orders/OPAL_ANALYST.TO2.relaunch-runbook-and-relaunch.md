@@ -5,7 +5,13 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-10</date>
-<status>pending</status>
+<status>complete</status>
+<!-- ACCEPTED 2026-08-10 1735Z by 2.0.0_SA_COO~Z. Evidence: runbook @dc5b2f25d + Q5 addendum
+     @b08b13bbf (duty text + @e77bec6e5 cite verified on disk); relaunch smoke all four limbs
+     PASS (whoami Opal Bloomberg, pinned monitor b7043cgjl ground-truthed live PID 85065,
+     serve msg 1786381843024, broker LIVE + 08-07 msg actioned); zero wrapper scaffolding;
+     AC-5 log @12a5ac7c4 with TO-2 Compiler Tools section verified on disk. -->
+
 <priority>P0-adjacent</priority>
 
 <references>

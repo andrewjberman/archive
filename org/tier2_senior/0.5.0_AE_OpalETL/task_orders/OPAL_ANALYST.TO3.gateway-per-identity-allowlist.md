@@ -5,7 +5,16 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-10</date>
-<status>pending</status>
+<status>complete</status>
+<!-- ACCEPTED 2026-08-10 1735Z by 2.0.0_SA_COO~Z. Evidence: @42444e64b (identity_scope.py,
+     both chokepoints, config, 34/34 tests) + overlay row #andrew-asked @e77bec6e5 +
+     @2582eb244 (artifact include-list fix); deployed i-07dccb1615503ac99, deploy ledger
+     CLOSED (DEPLOY_20260810_m365-gateway_identity-scope_TO3.md); Phase-3 exercised as
+     separate live invocations: denied=structured quotable refusal, allowed=whoami serves,
+     Andrew-key control untouched, overlay passes scope with confirm-gates and non-overlay
+     recheck still denied. Log @12a5ac7c4 TO-3 Compiler Tools section verified on disk.
+     CTO frame satisfied one-pass (approved-as-derived); ycharts explicit-deny untouched. -->
+
 <priority>P1</priority>
 
 <references>
