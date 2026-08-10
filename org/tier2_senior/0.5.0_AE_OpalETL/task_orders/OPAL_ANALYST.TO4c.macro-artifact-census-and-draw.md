@@ -5,7 +5,16 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-10</date>
-<status>staged</status>
+<status>complete</status>
+<!-- ACCEPTED 2026-08-10 1925Z, 2.0.0_SA_COO~Z. Census @5efce36b7 (parse clean; 84-key
+     denominator itemized incl. the 79-slug timeseries family, unrendered + frozen rows
+     explicit); /draw @9e89e119c delivered. Discipline flag HONORED: all evidence first-hand,
+     in-flight Explore output discarded, note in census header. COO spot-check at portal
+     source: MacroHeatmap.tsx:136-143 + YieldCurveTab.tsx:289-290 both exact. Residuals
+     routed: third vintage variant (as_of, timeseries family) -> CTO~Z census_ref design;
+     vix_data.json superseded-but-published-daily (zero callers) -> MSTR~Z surprise channel
+     as decommission candidate, no action taken (exclusivity). -->
+
 <priority>P1</priority>
 
 <references>
