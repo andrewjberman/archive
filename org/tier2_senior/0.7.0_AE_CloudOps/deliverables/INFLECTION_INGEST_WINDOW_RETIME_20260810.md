@@ -274,7 +274,91 @@ built (Rule: propose, do not implement).
 
 ---
 
-## 8. State, honestly
+## 8. ADDENDUM — Track A: the cottonwood producer, found (CTO-GO'd hunt)
+
+### 8.1 A CORRECTION TO §3 OF THIS DOCUMENT, AND IT IS THE IMPORTANT PART
+
+I reported to CTO and COO: *"not a Lambda, and nothing fires at 06:00Z across 139 rules + 16
+Scheduler entries."* **THAT WAS FALSE.** `cot-rebalancer-runner-daily` = `cron(0 6 * * ? *)`,
+ENABLED — **and it was in my materialised 139-rule file the entire time.**
+
+I filtered the 139 by keyword (`orion|eclipse|inf|silver|sweep|mdpf|asset`) to build the §3 intake
+table, then made an **absence claim about 06:00Z while citing the full 139.** That rule matches
+none of those keywords. Unfiltered, **10 rules fire between 05:00 and 07:00Z.**
+
+> **THE CLASS, NAMED: an upstream stage silently redefined the domain the downstream claim measured
+> over, and the output did not carry its own frame.** My pagination discipline was correct and
+> irrelevant — the leak was the filter, and I never re-stated the frame when moving from the table
+> to the absence claim. **Printing "139" beside a subset-derived absence lent it false
+> completeness: a denominator next to a filtered result is worse than no denominator at all.**
+> Cost: it pushed the non-AWS and vendor-direct hypotheses up COO's list on the strength of what
+> looked like a complete AWS-side sweep. CLAUDE.md Git §"put the control on the RETRIEVAL", the
+> ACCIDENTAL half — remedied by *how you call it*, which here means re-deriving the frame at the
+> point of the claim, not once at the top.
+
+### 8.2 The producer
+
+`cot-rebalancer-runner` (Lambda) ← `rule/cot-rebalancer-runner-daily` `cron(0 6)` — sole
+resource-policy source.
+
+```
+REBAL_BASE   = https://rebalancer.bdreporting.com     <- paginated vendor API
+BD_FIRM_ID   = cottonwood
+BD_S3_BUCKET = opal-data-assets                       <- WRITES THE MONOLITH DIRECTLY
+```
+Log stream last-event 06:00:48Z on 08-08, 08-09, 08-10 against object landings 06:00:43–47Z.
+
+### 8.3 TWO PRODUCERS ON ONE PREFIX — established by KEY GRAMMAR, not inferred
+
+Under `blackdiamond/cottonwood/bronze/`, **DENOMINATOR 1,229 objects**:
+
+| count | grammar | producer |
+|---|---|---|
+| 687 | `{table}/{date}/*.json` (`page_000.json` …) | `cot-rebalancer-runner` |
+| 368 | `{table}/*.xlsx` (`{TABLE}_DAILY_{date}.xlsx`) | the mirror, from `opal-data-cot/forwardfill_v2/` (row map :137–153) |
+| 4 | legacy `_BRONZE_COMPLETE.json` | June sentinels |
+
+The mirror's `ALIEN SURPLUS` samples are the JSON grammar. **THE GUARD IS RIGHT AND THE ESTATE
+UNDERNEATH IT CHANGED** — it correctly reports 653 keys it did not write. "Fix the mirror" is the
+wrong shape; the open question is **ownership** of that prefix, and whether a vendor API pull
+should land in the monolith directly at all, bypassing the mirror's raw-bytes contract. COO's
+Track D; not mine, no action taken.
+
+### 8.4 CTO's 02:00Z anchor was RIGHT, and went stale on the same apply
+
+`opal-data-cot/bronze/_BRONZE_COMPLETE.json`:
+```
+08-02 02:02:00Z  08-03 02:01:18Z  08-04 02:07:19Z  08-05 02:02:21Z
+08-06 20:33:02Z  08-07 20:32:22Z  08-08 20:32:05Z  08-09 20:31:47Z
+```
+Moved 02:0xZ → 20:3xZ on **2026-08-06** — the ce99054e44 apply date (`2026-08-06T00:04:48Z`).
+**ONE APPLY MOVED BOTH THE ECLIPSE PATTERN (§2) AND THE COT DELIVERY.** That resolves CTO's open
+(a)-vs-(b) toward **(b) it moved**, and flags the 08-06 apply as an under-appreciated event:
+anything anchored before it should be re-derived.
+
+⚠ **BOUND, stated because §8.1 is what happens when a bound is not honoured:** I measured the
+**sentinel's** history, not the xlsx's. `forwardfill_v2/` currently lands 20:31:05–47Z
+(consistent), but I did **not** pull its pre-08-06 history. "The xlsx moved on 08-06" is
+**INFERRED from the sentinel**, not measured.
+
+### 8.5 The premise of the cottonwood move has changed
+
+```
+06:00Z  cot-rebalancer-runner         -> assets bronze DIRECTLY (json)
+20:30Z  cot-bd-session-daily-et       -> starts cot-exporter EC2 (ran 20:30:17 -> 23:36:18Z, 08-09)
+20:31Z  opal-data-cot/forwardfill_v2  -> the xlsx APPEARS, ~60s after the session fires
+22:30Z  the mirror                    -> copies forwardfill_v2 -> assets bronze (xlsx)
+```
+
+**`cot-bd-session-daily-et` DOES NOT WAIT ON DATA ALREADY ON DISK — IT PRODUCES THE DATA.** The
+"18.5-hour wait" describes the pre-08-06 regime. Today the session *is* the producer and its output
+appears a minute later. So moving it earlier is not "stop waiting," it is **"produce earlier"** —
+which turns on vendor availability at the new hour, and that is **UNMEASURED**. A different
+decision with a different risk. No time proposed, nothing applied; CTO ruling + COO sequencing.
+
+---
+
+## 9. State, honestly
 
 **DONE:** producer identified by measurement with evidence; true-UTC timing for both feeds;
 eclipse pattern-change mechanism; the 23-after-floor census with denominators; T-1 discharged at
