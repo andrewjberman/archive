@@ -1,0 +1,125 @@
+# Inflection 2026-08-06 partition read — the axis source, named and measured
+
+**archetype:** DIAGNOSE · **Author:** `0.7.0_AE_CloudOps` · **Date:** 2026-08-10
+**GO:** `1.0.0_SA_CTO` 165710Z + addendum 165902Z (Q3 first, widened) · `2.0.0_SA_COO` 165110Z.
+**Andrew ~1650Z:** *"i would organize it by 08-06 mechanism failure first…"* — fabric top item.
+**Fence: REPORT, do not diagnose. Read only. Cottonwood's mechanism given to REFUTE, never confirm.**
+
+> **THE UNNAMED SOURCE CARRYING 2026-08-06 IS 49FINANCIAL.** Inflection is placed on an axis derived
+> from **SmartX's** feed, by design. CTO's contradiction dissolves: both halves are complete and true,
+> because they are about **different firms' feeds**.
+
+---
+
+## Q3 (done first, widened) — every axis leg, named, with its 08-06 status
+
+`derive_canonical_axis()` `:819-835`, its own docstring:
+
+> *"The canonical shared MDPF trading-day axis, derived ONCE per run from the DECLARED axis-source
+> feed (`fact_model_aum_daily` — route_bindings **49financial** model_leg…). Criterion 2: **sibling
+> firms receive THIS axis from the orchestrator**"*
+
+```python
+aum      = _cached("aum_daily", load_aum_daily)   # -> SMARTX_SILVER  (:304)
+frontier = aum_days[-1]
+dates    = canonical_trading_axis(frontier)
+```
+`SMARTX_SILVER = "smartx/platform/silver"` (`:72`).
+
+| leg | source | carries 2026-08-06? |
+|---|---|---|
+| **axis frontier** | `smartx/platform/silver/fact_model_aum_daily` (**49F**) | **PRESENT** |
+| inflection model value | `eclipse/inflection/silver/fact_portfolios_full` | **ABSENT** |
+| inflection custody | `orion/inflection/silver/fact_assets` | **ABSENT** |
+| frontier `account_count` | staged account_dist `meta.account_count_by_model_key` | **PRESENT** (source-consistent) |
+| historical `account_count` | served `json/mdpf/inflection/aggregate-aua-timeseries.json` | **ABSENT — eliminated by measurement** |
+
+**MEASURED** — `smartx/platform/silver/fact_model_aum_daily/`: `date=2026-08-03 · 08-04 · 08-05 ·`
+**`08-06`** `· 08-07 · 08-08 · 08-09 · 08-10` — unbroken. And **49financial PASSED the gate at 440
+dates.**
+
+⇒ CTO's *"both cannot be complete"* resolves: **both ARE complete.** 08-06 is absent everywhere *in
+inflection* and present in *49financial*, and inflection sits on 49financial's axis by construction.
+
+## Q1 — the discriminator: **ROW ABSENT ENTIRELY**, not present-and-null
+
+`eclipse/inflection/silver/fact_portfolios_full/`, neighbours shown as positive control:
+```
+date=2026-08-04   written 2026-08-05T03:30:30Z
+date=2026-08-05   written 2026-08-06T14:16:06Z
+[ date=2026-08-06  -- ABSENT: the sequence jumps 08-05 -> 08-07 ]
+date=2026-08-07   written 2026-08-07T22:31:10Z
+```
+Per `:457` and `:474`, an absent partition yields the `gap` sentinel → `model_value=None`.
+**The `None` is a sentinel for a missing partition, not a null cell.**
+
+## Q2 — all seven; the two the log never prints
+
+`INFLECTION_MODEL_KEYS` (`:110`), **7 keys**. Printed (5): `opal_ultra_short_term`,
+`opal_short_term`, `opal_intermediate`, `opal_long_term_conservative`, `opal_long_term_aggressive`.
+**Never printed (`pres[:5]` truncation): `opal_blend_5050_int_ltc` · `opal_blend_5050_st_int`.**
+
+**7 disagreements = 7 of 7 = the complete key set.** That reconciles the gate's own count exactly and
+is itself evidence: a whole-partition absence hits every model. A per-model data defect would not
+produce exactly-all-seven.
+
+## Q4 — **CLEAN NO.** Inflection has no second date axis
+
+The eclipse loader (`:422`) reads `["id","modelId","model","totalValue","isDeleted"]`. **No
+`assignment_date`, no roster date, no second date axis.** Partitions keyed by `date=` alone.
+Cottonwood's defect lives in a `(value_date, assignment_date)` pair **inflection does not have**.
+
+## The three offered hypotheses — all tested to kill
+
+| hypothesis | source | verdict |
+|---|---|---|
+| cottonwood-style assignment change | CTO | **REFUTED** — Q4, no second date axis |
+| cutover label-skip | CTO | **NOT REQUIRED** — the count source is another firm's axis, so it is not needed to explain the counts. May still bear on *why the eclipse partition is missing*; untested. |
+| inflection ingestion | **Andrew** | **CLOSEST TO RIGHT.** Inflection's feeds genuinely lack 08-06 on **both** legs. |
+
+**On Andrew's prior:** he called the ingestion gap and it is real. But an ingestion gap alone yields a
+**benign NAMED gap** — the loader is built to emit exactly that. What converts it into a **refusal**
+is the shared 49F-derived axis admitting a date inflection never carried, against a frontier count
+set from a third source.
+
+## The count side — one elimination by measurement, one bound
+
+**ELIMINATED.** `load_served_account_count` (`:529`) reads
+`s3://opal-data-portal-v2/json/mdpf/inflection/aggregate-aua-timeseries.json`. Read directly:
+**429 dates ending 2026-07-22**, `meta.generated_at 2026-07-23T21:44:25Z`, **08-06 not present.**
+*This was my own working hypothesis and the measurement killed it.*
+⚠ That object is generated **07-23** — anyone carrying *"the served artifacts read 08-07"* means a
+**different (platinum/canonical)** object, not this legacy `json/mdpf` one.
+
+**REMAINING, SOURCE-CONSISTENT.** `load_account_dist_frontier_counts` (`:585`): *"the FRONTIER
+per-model account_count = account_dist's OWN funded count… **ONLY the frontier is set**."* Its ROW-11
+note: `_latest_date()` resolves roster and valuation partitions **independently**, so the stamped
+as-of is *"whenever account_distribution last ran — NOT the axis date it lands on, and nothing bounds
+the gap."* The gate's own adjacent line matches: *"the frontier cell wears 2026-08-06 but its count
+was measured as of 2026-08-04 — 2 trading day(s) earlier."*
+⚠ **BOUND: source-consistent, NOT positively confirmed.** I have not opened the staged account_dist
+object to see `12/29/203/91/32` in it. One read, held for CTO's word rather than assumed.
+
+## One unmeasured link, named
+
+SmartX has partitions **through 08-10**, yet the axis frontier is **08-06**. Per `:302-305` the axis
+comes from the **`day` column of the LATEST partition**, not partition names — so the day-series max
+would be 08-06. **I did not read the parquet to confirm.** INFERRED, flagged, not spent.
+
+## Compiler Tools
+
+| Tool | Result |
+|---|---|
+| `aws s3api list-objects-v2` × 3 prefixes | eclipse / orion / smartx partition listings — APPLIED reads; every ABSENT verdict carries the listing it is absent from, with neighbours as positive control |
+| `aws s3 cp s3://… -` (stdout) | Read the served artifact **without touching the filesystem** — the `.tools/aws` shim had rewritten an absolute scratch path to a relative one (`..\..\..\..\cygdrive\c\…`), the MSYS class CLAUDE.md names. Streaming to stdout sidesteps the arg layer entirely |
+| `sed`/`grep` over `dim_mdpf_aggregate_aua_timeseries.py` | Read the **loaders and the axis builder** — this is what named the 49F axis source; no listing could have shown it |
+
+**Method note:** Q3 was answerable only from **source**, not from S3. Every S3 listing in the world
+says "08-06 is absent from inflection"; **only the code says inflection is standing on another firm's
+axis.** Live state grounds WHAT; source grounds WHY (Rule 22), and here the WHY was the whole question.
+
+## State
+
+**Read only. Nothing repaired, applied, or re-run.** Cottonwood 08-06 untouched (CLOSED, CTO
+@a66080db54). The `ce99054e44` → orion/eclipse attribution is **not inherited as a premise** anywhere
+above, per MSTR's NOT-ESTABLISHED flag.
