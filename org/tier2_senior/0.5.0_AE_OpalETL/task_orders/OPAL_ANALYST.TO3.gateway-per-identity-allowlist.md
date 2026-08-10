@@ -81,8 +81,13 @@ STAGED — gate state as of 2026-08-10 1644Z:
     ONE-PASS DISPOSITION: a derived list fitting frame (i)-(v) is APPROVED AS DERIVED
     (attach the derivation as evidence, no second review round); only a row OUTSIDE the
     frame returns to CTO~Z, and only that row.
-(b) PRD §7 Q3 at Andrew (exact-set ratification): **OPEN** — carried to his terminal via
-    MSTR~Z 2026-08-10.
-COO~Z sends GO when (b) clears. Effort: medium.
+(b) PRD §7 Q3 at Andrew: **CLEARED** — Andrew-direct 2026-08-10 ~1653Z at the CTO~Z terminal,
+    "All recs approved, proceed" (record @bc7eb60de): Q3 RATIFIED AS PROPOSED (Teams read/send
+    own-account + post-Q1 portal read, all else denied).
+Q1 RULING FOLDED IN (same record): portal-bucket READ entitlement on `opal-gateway-bbg` is
+ACTIVATED by his word — it lands mechanically via THIS TO's deploy as the frame's clause-(iv)
+second row-set (its own derivation evidence attached, same one-pass disposition). YCHARTS
+STAYS HELD — per-use egress regime unchanged; all ycharts_* remain in the explicit-deny rows.
+ALL GATES CLEAR — GO sent 2026-08-10 (see broker record). Effort: medium.
 </notes>
 </task_order>

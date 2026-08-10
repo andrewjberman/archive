@@ -5,7 +5,13 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued_to>2.0.0_SA_COO~Z</issued_to>
 <date>2026-08-10</date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-08-10 ~1657Z, 2.0.0_SA_COO~Z. Criterion 1: MSTR~Z acceptance on record
+     (broker 20260810T163836Z). Criterion 2: naming edit @3f53d56a5 (README.md + prompt.md,
+     either-seat MSTR named); the 08-07 thread/log records were verified ALREADY TRACKED
+     (swept @65d80ab37) so the sweep clause predated this TO — recorded honestly in that
+     commit's own message. Close condition (commit on origin) verified: origin/SITEZ @
+     bc7eb60de contains 3f53d56a5 (ls-remote watcher b8184tobl, 1656Z). -->
 <priority>P2</priority>
 
 <references>

@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-10</date>
-<status>staged</status>
+<status>pending</status>
 <priority>P0-adjacent</priority>
 
 <references>
@@ -78,8 +78,9 @@ memory. Launch execution is MSTR~Z's (box launcher, LD-0367 integration window u
 </acceptance_criteria>
 
 <notes>
-STAGED — do not begin until COO~Z GO (follows TO-1 acceptance). Steady-state bring-up model
-(who starts the seat daily) is PRD §7 Q2, at Andrew — the runbook documents the procedure without
-presuming the answer; acceptance wording updates if his Q2 word lands mid-flight.
+GO SENT 2026-08-10 1653Z (TO-1 accepted @b5642d197). Steady-state bring-up model RULED
+(Andrew-direct 2026-08-10 ~1653Z, record @bc7eb60de): OPERATOR-STARTED — Andrew or MSTR~Z by
+hand off this runbook; NO cron, NO auto-start. The runbook binds to this model as settled;
+no mid-flight wording risk remains.
 </notes>
 </task_order>
