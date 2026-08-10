@@ -102,3 +102,71 @@ with a false conclusion.* Only the log discriminated.
 
 Read only. **Nothing applied, re-run, or repaired.** No remedy proposed — the 16:00-sweep lever is
 retired on evidence, and the real ordering lever sits with CTO's ruling and DS's lane.
+
+---
+
+# G-3 — the date schism at eclipse/orion: RUN date or DATA date?
+
+**GO:** `1.0.0_SA_CTO` 182558Z (offered if G-1 closed fast; it did). **Read only.**
+
+> **WORSE THAN "NOTHING DECLARES IT": BOTH CANDIDATE AS-OF FIELDS ARE NON-INDEPENDENT.**
+> `_source_as_of` is **our own copy of the partition key**; orion's `asOfDate` **echoes the request**.
+> **Three fields agree by construction and none of them is evidence.**
+
+## The read
+
+| artifact | rows × cols | date-ish columns | the as-of candidates |
+|---|---|---|---|
+| `eclipse/…/fact_portfolios_full/date=2026-08-07` | 856 × **62** | 5 of 62 | **`_source_as_of`="2026-08-07"** (distinct=1). **No vendor-native as-of.** `createdOn` is a record-creation stamp (49 distinct, 2025–2026), not a vintage. |
+| `orion/…/fact_assets/date=2026-08-07` | 35,262 × **63** | 6 of 63 | **`asOfDate`="2026-08-07"** (distinct=1) · **`_source_as_of`="2026-08-07"** (distinct=1) |
+
+Partition key, `_source_as_of` and `asOfDate` **all agree**. That looks like three-way corroboration.
+
+## ⛔ It isn't — neither field *can* disagree
+
+**(1) `_source_as_of` IS OURS, AND IT IS THE PARTITION KEY COPIED IN.** Source-confirmed,
+`opal-assets-silver-blackdiamond/mirror_conversion.py:430`:
+```python
+prov = {"_source_file": key.rsplit("/", 1)[-1], "_source_as_of": date, …}
+```
+`date` is `kc.date` — the value the regex pulled off the **bronze source filename** (`:175` orion,
+`:181` eclipse). **It cannot corroborate the partition key because it IS the partition key.**
+*Shared derivation: a tie is evidence only when the legs differ in derivation. This is one leg
+counted twice.*
+
+**(2) ORION'S `asOfDate` ECHOES THE REQUEST.** Measured by `~Z` in P0-2R: *"Asking for 08-07 returns
+`asOfDate: 2026-08-07` **whatever the data is**."* Caught only because TODAY and PRIOR returned
+identical values under different `asOfDate` strings. **A field that echoes the request cannot
+disagree with it.**
+
+> **THE ESTATE HAS A DATE-DECLARATION FIELD ON THESE ARTIFACTS AND IT IS DECORATIVE.** An agent
+> checking any of the three gets a confident confirmation of whatever the partition already said.
+> **That is what makes the schism invisible rather than merely undeclared — not a missing field, but
+> a field that always says yes.**
+
+## The verdicts
+
+**ORION — RUN DATE. Source-confirmed, and NOT from any field in the artifact.**
+`data/inf/scripts/silver/_orion_vendor_asof.py:126-136`: *"Orion **pre-open forward-labels the prior
+settled close as the run-date**, so the true vintage is the prior NYSE trading day of the labeled
+date (SEALED systematic-1-trading-day)."*
+⇒ **`date=2026-08-07` carries 2026-08-06 settled data.** The true vintage **appears nowhere in the
+file**; it is recovered downstream by subtracting a trading day.
+
+**ECLIPSE — NOT-MEASURABLE from the artifact, and deliberately NOT inferred from orion.**
+62 columns, no vendor as-of, and the only as-of-shaped field is our own copy of the key. **There is
+nothing in the file to check.** Orion's forward-label is a *measured Orion behaviour*, not a property
+of `date=` partitioning — carrying it across would be the resemblance-transfer this session has been
+burned by repeatedly. Settling it needs a vendor-side probe or the eclipse ingest source; neither run.
+
+## Why it matters for the truth document
+
+CTO's framing was *"nothing in the prefix grammar declares which."* The measurement sharpens it:
+**the grammar does not declare it AND the in-file fields falsely appear to.** The document should
+record, per artifact, not just *run-or-data date* but **which field (if any) is INDEPENDENT
+evidence** — because on these two, none is.
+
+**And it makes the 08-06/08-07 arithmetic load-bearing:** if `date=` is the run date at orion, then
+`date=2026-08-07` holds 08-06 data and the absent `date=2026-08-06` would have held 08-05 data.
+Anyone reasoning about which business day is missing needs that offset, **and the artifact will not
+supply it.**
