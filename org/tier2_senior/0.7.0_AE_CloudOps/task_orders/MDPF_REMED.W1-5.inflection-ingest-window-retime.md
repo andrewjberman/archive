@@ -29,10 +29,39 @@
     concern at source (`date=D` is a run-date LABEL; `orion_normalize_as_of = prior_trading_day`), so
     the window carries no T-1 hazard.
 
-    ⚠ **AND THE WHOLE SCHEDULE TRACK IS STOOD DOWN INDEPENDENTLY OF THIS** (`1.0.0_SA_CTO`
+    ~~⚠ **AND THE WHOLE SCHEDULE TRACK IS STOOD DOWN INDEPENDENTLY OF THIS** (`1.0.0_SA_CTO`
     2026-08-10, measured @54efb341e6): the staleness cause is **scope REFUSALS inside the floor**,
     not timing. **The four-intakes-after-the-floor ordering measurement is TRUE and CAUSALLY INERT —
-    it survives as a FACT and dies as an EXPLANATION.** Do not resurrect a retime from it.
+    it survives as a FACT and dies as an EXPLANATION.** Do not resurrect a retime from it.~~
+
+    ⛔⛔ **STRUCK 2026-08-10 ~1755Z — THE ORDERING MECHANISM IS *LIVE*. `1.0.0_SA_CTO` RULED AND
+    CORRECTED THEIR OWN STAND-DOWN.** The stand-down was **right about PUNCTUALITY and wrong about
+    ORDERING**: the floor is **not late — it is 40 MINUTES EARLY RELATIVE TO ITS OWN AXIS SOURCE.**
+    ⇒ **"Causally inert" is WITHDRAWN.** The four-intakes measurement is **CAUSALLY LIVE**, in a form
+    nobody stated: **not *"the data is too old"* but *"the floor picks the axis BEFORE the axis source
+    lands."***
+
+    **THE MECHANISM, source-verified by CTO at `dim_mdpf_aggregate_aua_timeseries.py`:**
+    `:833` `frontier = aum_days[-1]` over the **latest partition present at read time**; `:589`
+    *"Middle published-only gaps stay honest-None (unreconstructable); **ONLY the frontier is set**."*
+    ⇒ **The count is stamped ONLY at the frontier, so a count/value disagreement can ONLY occur AT THE
+    FRONTIER.** The ordering gap does not merely shift a date — **it chooses WHICH date carries the
+    only count in the series.** Floor 13:00Z vs SmartX ~13:40Z ⇒ the floor reads **yesterday's**
+    partition daily; on a **Monday** that is **Sunday's**, carrying **Thursday 08-06** — the one date
+    inflection lacks. *(08-07 passed because the frontier was then 08-05, which inflection has.)*
+
+    ⛔ **BUT THIS IS STILL NOT A LICENCE TO RETIME ANYTHING FROM THIS TO.** The remedy **SPLITS**:
+    **HALF 1 — the GATE FAILURE — is PREDICTED to SELF-HEAL on Tuesday's scheduled 13:00Z cycle at
+    ZERO COST** (it reads `date=2026-08-10`, day-max 08-07, which inflection HAS on both legs).
+    **A prediction that measures itself in ~20 hours for free is not converted into a schedule
+    change.** *(PREDICTION, not measurement — other limbs could refuse.)*
+    **HALF 2 — a PERMANENT ONE-TRADING-DAY LAG — does NOT self-heal:** the floor serves **D-2 when
+    D-1 is available, every day.** That is **exactly what Andrew observed** this morning (*"All of
+    them should be on August 7th at this point"*) — **he was right and this is why.**
+    ⇒ **The remedy space is WIDER than the floor's clock** (read the axis source from the day's own
+    partition; derive the frontier differently), so **presenting "move the floor later" as THE fix
+    would narrow his options to the one he already declined at (B).** **This TO's floor clause stays
+    STRUCK; half 2 is Andrew's call and CTO holds it at his terminal.**
   </andrew_ruling>
 
   <correction date="2026-08-10" by="2.0.0_SA_COO" ref="@e1c891366a">
