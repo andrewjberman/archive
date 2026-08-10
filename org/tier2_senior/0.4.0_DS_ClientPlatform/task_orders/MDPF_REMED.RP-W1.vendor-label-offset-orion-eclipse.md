@@ -78,9 +78,13 @@ this TO is complete.**
 
 <cross_domain_coordination>
 Same file as RP-W2 (dim_mdpf_aggregate_aua_timeseries.py) — SAME OWNER (you). Sequence: RP-W1 lands
-first or in the same commit series; do not interleave with any other agent's edits. RP-W3 (AE,
-staged) is HARD-GATED on this TO's completion — report completion to COO the moment acceptance
-passes, because your report is what un-gates AE.
+first or in the same commit series; do not interleave with any other agent's edits.
+⛔ ATOMIC-DEPLOY RE-CUT (Andrew ruling ~2334Z, Call 1 route (b); CTO relay 234031Z): RP-W1 + RP-W2 +
+AE's RP-W3 cadence change GO LIVE IN ONE COORDINATED WINDOW — build, QA, and COMMIT your work now,
+but the DEPLOY LEG (aws s3 cp to the served plane) fires ONLY inside the COO-called joint window
+with AE's apply; NEITHER SHIPS ALONE. Deploy-completion ledger entry opened at window start; if
+either leg fails, both roll back in-window. Report BUILD-READY (committed + QA'd + validated) to
+COO; that report is what lets COO call the window.
 </cross_domain_coordination>
 
 <acceptance_criteria>

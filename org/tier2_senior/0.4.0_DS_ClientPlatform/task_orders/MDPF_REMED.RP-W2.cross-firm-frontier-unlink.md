@@ -62,6 +62,10 @@ from its OWN legs, then feeds the SAME canonical calendar.** Canonical shape kep
 <cross_domain_coordination>
 Same file as RP-W1, same owner. RP-W1 lands first or same commit series. No other agent edits this
 file during your window (checked: no other active TO touches it).
+⛔ ATOMIC-DEPLOY RE-CUT (Andrew ruling ~2334Z; COO topology decision): RP-W2 is IN the atomic set
+with RP-W1 + AE's RP-W3 — it also changes the frontier, and a partial landing of any two of the
+three is the D-19 shape. Same discipline as RP-W1: commit + QA now, deploy leg ONLY inside the
+COO-called joint window. Report BUILD-READY to COO.
 </cross_domain_coordination>
 
 <acceptance_criteria>

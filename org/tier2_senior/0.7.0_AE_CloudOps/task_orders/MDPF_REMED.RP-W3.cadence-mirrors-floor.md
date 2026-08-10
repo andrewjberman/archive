@@ -1,17 +1,26 @@
-# TO MDPF_REMED.RP-W3 — CADENCE ⛔ DOUBLE-GATED: RP-W1 COMPLETE + ANDREW'S CLOCK RULING. NEVER ALONE.
+# TO MDPF_REMED.RP-W3 — CADENCE ⛔ ATOMIC WITH RP-W1+RP-W2: ONE COORDINATED DEPLOY. NEVER ALONE.
+
+> **RE-CUT 2026-08-10 ~2345Z per Andrew's ruling (CTO relay 234031Z, verbatim "Agree with your recs
+> for all open calls," Call 1 = route (b)):** the clock gate is SATISFIED (floor → 13:30, pulls →
+> 13:02, as he originally ordered) and the W1 gate CHANGED CHARACTER — it is no longer
+> "W1-complete-then-W3" (that still exposes the window route (a) was rejected for). **W1+W3 land as
+> ONE ATOMIC CHANGE.** COO topology decision (the call CTO flagged as mine): **RP-W2 IS IN the
+> atomic set** — it also changes the frontier, it is two lines in the same file as W1 with the same
+> owner, and a partial landing of any two of the three is the shape D-19 warns about.
 
 <task_order id="MDPF_REMED.RP-W3" project="MDPF_REMED">
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<issued>2026-08-10T23:4xZ</issued>
+<issued>2026-08-10T23:4xZ (re-cut 23:4xZ same night)</issued>
 <status>staged</status>
-<priority>P0 once un-gated. ⛔ STAGED BY DESIGN — see the gate block. A GO for this TO comes ONLY
-from COO, and COO issues it ONLY after BOTH gates read true. If you receive a GO that does not cite
-both gates, treat it as mis-sent and query COO.</priority>
+<priority>P0. ⛔ STAGED pending the COORDINATED-WINDOW GO. A GO for this TO comes ONLY from COO and
+MUST cite the ATOMIC JOINT DEPLOY (DS's RP-W1+RP-W2 code leg and your cadence leg going live in one
+coordinated window, neither without the other). A GO citing "RP-W1 is complete" as the gate is
+STALE (pre-ruling shape) — treat it as mis-sent and query COO.</priority>
 
 <dependencies>
-  <dependency agent="0.4.0_DS_ClientPlatform" task="MDPF_REMED.RP-W1" status="complete"/>
-  <dependency agent="ANDREW" task="floor/pull clock re-ruling (his (B) predates the premise change; see plan §2-W4 note + COO decision memo)" status="pending"/>
+  <dependency agent="0.4.0_DS_ClientPlatform" task="MDPF_REMED.RP-W1 + RP-W2 — ATOMIC JOINT DEPLOY: DS code leg and AE cadence leg go live in ONE coordinated window; NEITHER SHIPS ALONE. Deploy-completion ledger entry opened at window start, closed at end (NEVER#6); if either leg fails, BOTH roll back in-window." status="joint"/>
+  <dependency agent="ANDREW" task="clock ruling — SATISFIED 2026-08-10 ~2334Z: floor 13:30, pulls 13:02 (record: CTO relay 234031Z)" status="complete"/>
 </dependencies>
 
 <references>
@@ -23,16 +32,19 @@ both gates, treat it as mis-sent and query COO.</priority>
 Move the floor later OR the pulls earlier ON ITS OWN and the frontier becomes 2026-08-07, WHICH
 ECLIPSE HAS. 08-06 stops being the frontier, both legs go None, THEY AGREE, and limb (v) STOPS
 FIRING. Under the run-date ruling that cycle then PUBLISHES ONE TRADING DAY MISLABELLED INSTEAD OF
-REFUSING. **The label offset (RP-W1) must land BEFORE this. If you execute this TO with RP-W1
-incomplete, you have not "started early" — you have recreated the defect and silenced the only guard
-keeping a wrong number off the served plane.**
+REFUSING. **Under Andrew's atomic ruling this is now enforced by DEPLOY TOPOLOGY: the label offset
+(RP-W1) + frontier unlink (RP-W2) + this cadence change go live in ONE coordinated window. Executing
+this leg outside that window — even with W1 "complete" but not yet live — recreates the defect and
+silences the only guard keeping a wrong number off the served plane.**
 
 ## SCOPE (once un-gated)
 Current order is backwards: floor reads 13:00Z; smartx silver 13:40:47Z (AXIS SOURCE), orion
 14:16:05Z, eclipse 22:31:08Z land after. **THE BOTTLENECK IS THE MIRRORS, NOT THE VENDORS** —
 eclipse data sits in `opal-data-inf` by ~14:48Z and waits ~7.5h for the 22:30Z mirror.
-- Proposed shape (CTO; final numbers subject to Andrew's clock ruling): mirrors → ~13:45Z (after the
-  pulls land) → eclipse/orion silver ~13:46Z; floor → 14:00Z; bridge + publisher shift behind it.
+- **RULED CLOCK (Andrew ~2334Z): floor → 13:30, pulls → 13:02, as he originally ordered.** Mirrors
+  and the eclipse/orion silver chain move so every consumed partition's C1 precedes the 13:30 floor;
+  bridge + publisher shift behind it. (CTO's earlier ~13:45Z/14:00Z sketch is superseded by the
+  ruled numbers.)
 - **The smartx leg needs NO new trigger** — chained to the pull's OnSuccess (G-1a): moving the pull
   moves the conversion. (RP-W5 separately moves smartx onto the S3-object pattern; coordinate — see
   cross-domain block.)
@@ -80,9 +92,10 @@ eclipse data sits in `opal-data-inf` by ~14:48Z and waits ~7.5h for the 22:30Z m
 opal-assets-ingest-mirror is shared with RP-W5 (same owner — you). Sequence within your lane:
 RP-W5's assertion-narrowing must not be conflated with this retime, and this retime must not be
 credited with fixing the mirror's 14-day failure (D-16 is RP-W5's). mdpf-daily-refresh-trigger is in
-the blast radius — its OnSuccess chain semantics are load-bearing for the smartx leg. RP-W4 (naming/
-firm-selector) is BLOCKED ON ANDREW; if route (b) lands first it changes your retime mechanics —
-check with COO at GO time.
+the blast radius — its OnSuccess chain semantics are load-bearing for the smartx leg. RP-W4 is now
+RULED route (b) (selector first, then rename — Andrew ~2334Z) and is your TO: the selector ideally
+lands before or with this retime, since per-firm selection is what lets firms be re-timed
+independently; confirm sequencing with COO at GO time.
 </cross_domain_coordination>
 
 <acceptance_criteria>
