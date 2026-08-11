@@ -62,8 +62,24 @@
   <proof_of_spec>
     <instance_path_grammar>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/PROOF_OF_SPEC_B6_{PIECE}_{YYYYMMDD}.json</instance_path_grammar>
     <criterion_id_grammar>B6-{piece}-{check}</criterion_id_grammar>
-    <group id="B6-1" status="NOT_YET_MINTED"/>
-    <group id="B6-2" status="NOT_YET_MINTED"/>
+    <group id="B6-1" status="MINTED 2026-08-11 by assignee from spec §3 row B6-1 + §3a gate check (a) + §3b rider (a) + TO acceptance line"
+           ids="B6-1-key-layout,B6-1-per-device-partial-visible,B6-1-idempotent,B6-1-bronze-raw,B6-1-no-data-day-loud,B6-1-iam-live-primitive,B6-1-exercised-readback"/>
+    <group id="B6-2" status="MINTED 2026-08-11 by assignee from spec §3 row B6-2 + §3a gate check (b) + TO reqs 3/4/5 + do-not #3"
+           ids="B6-2-device-side-daily-schedule,B6-2-group-w-floor,B6-2-exercised-run,B6-2-andrew-surfaced-at-creation,B6-2-site-z-declared-gap,B6-2-moratorium-naming"/>
+    <!-- JUDGMENT CALLS (assignee, per this block's instruction):
+         (1) phase enum: B6 sits outside the MDPF P1-P5 program; instances use P1-SCRIPTS (B6-1,
+             a script build) and P2-TIMING (B6-2, a schedule) as the least-wrong build-phase
+             values rather than NON-BUILD-OTHER (it IS a build). Flagged here so a verifier does
+             not read them as MDPF-program membership.
+         (2) B6-1-iam-live-primitive: the deny-capable simulate limb is UNCOMPUTABLE for the
+             admin-class device principal (identity policy allows all s3:PutObject) -- declared
+             in the instance per the pre-authorized UNCOMPUTABLE-with-declaration; the exercised
+             upload+read-back battery is the 22a-superior behavioral evidence.
+         (3) The spec's "hash-tied" language (binding docstring) applies to the LAMBDA package
+             distribution, not this leg; the upload leg's integrity control is the per-put
+             content-sha256 metadata + in-run read-back compare, which the mutant control
+             exercises. -->
+
     <group id="B6-3" status="OUT_OF_SCOPE" owner="1.0.0_SA_CTO~B" note="rides the friction-axis runner build; the runner has no friction battery yet"/>
     <!--
     IDS UNMINTED BY THE ISSUER BY DESIGN: the COO has not read the spec's acceptance rows at criterion

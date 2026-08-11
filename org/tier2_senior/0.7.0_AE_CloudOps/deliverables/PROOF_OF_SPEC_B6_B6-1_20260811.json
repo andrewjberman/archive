@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "F3_CAPTURE_UPLOADER.B6.upload-leg-and-device-schedule",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier1_exec/4.0.0_SA_CRO/deliverables/ANDREW_DIRECT_20260811_BUILD_B6_AND_COMPLETION_SPEC.md",
+    "group": "B",
+    "vintage_commit": "59dc585a3cdb6d20a8d235d5bec69b14b390f021"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/estate-capture.py",
+      "kind": "script",
+      "commit_or_etag": "8a789694dd",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Device-side tool: the repo path IS the deployed path (the registered task's action invokes it absolutely). Exercised: scheduled-task run lastresult=0 executing this file, uploads landed + read-back verified."
+    },
+    {
+      "path_or_key": "s3://opal-estate-report/text-input/2026-08-11/Andrew.json",
+      "kind": "s3_object",
+      "commit_or_etag": "sha256:49a29b272b7e (in-run read-back, final restore run)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Independent aws s3 cp read-back: served sha 12-prefix matched the tool's reported sha; content read: schema estate-text-input/v1, 67 records, HARNESS absent. Five sibling day files (08-04..08-10 minus empty weekend) same discipline."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "B6-1-key-layout",
+      "criterion_verbatim": "write the HUMAN + UNCLASSIFIED records to s3://opal-estate-report/text-input/{YYYY-MM-DD}/{device_id}.json",
+      "method": "live_read",
+      "invocation": "python .tools/estate-capture.py --upload --catchup-days 1; then aws s3 cp s3://opal-estate-report/text-input/2026-08-11/Andrew.json + json content read",
+      "output_evidence": "OK: s3://opal-estate-report/text-input/2026-08-11/Andrew.json -- 67 records (11 sessions), read-back sha verified f8304098a9e1 | content: provenance labels present: ['HUMAN'] | HARNESS absent: True | flat date form per CVO 3b (joins manifest/{D}.json on one token)",
+      "denominator": "67 records in the day object / 67 HUMAN + 0 UNCLASSIFIED + 0 HARNESS; 2 of 2 requested days landed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "B6-1-per-device-partial-visible",
+      "criterion_verbatim": "per-device key so a partial day is VISIBLY partial, per the tool's own docstring",
+      "method": "live_read",
+      "invocation": "aws s3 ls s3://opal-estate-report/text-input/2026-08-11/",
+      "output_evidence": "2026-08-11 05:43:01 137499 Andrew.json -- exactly one key, named by device_id() (hostname 'Andrew'); a missing device is a missing KEY, not a merged silence",
+      "denominator": "1 device key present of 1 device currently running the tool (site-Z gap declared)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "B6-1-idempotent",
+      "criterion_verbatim": "Idempotent (re-run overwrites the day's device file)",
+      "method": "live_read",
+      "invocation": "head-object VersionId before/after re-run + aws s3 ls of the day prefix",
+      "output_evidence": "VersionId NNqa2JlcHCsUr4tXiatMwhJPSAfkV_ye -> .hevVu5_pcdEH0g5E9H_GH.FhYde1362 on the SAME key; day prefix still holds exactly 1 object for this device",
+      "denominator": "1 key before == 1 key after; N/A-count -- boolean overwrite check",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "B6-1-bronze-raw",
+      "criterion_verbatim": "BRONZE discipline -- raw capture uploaded UNTOUCHED; character classification happens later at friction time, never at upload",
+      "method": "diff",
+      "invocation": "python dedup_key-joined byte-compare: served object records vs fresh local --json extraction (day-filtered)",
+      "output_evidence": "local 08-11 records: 67 | served records: 67 | keysets equal: True | text fields byte-equal across all 67 records: True -- no classification fields added beyond the extractor's own stored provenance",
+      "denominator": "67 of 67 records byte-compared",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "B6-1-no-data-day-loud",
+      "criterion_verbatim": "The no-data-day law applies (same as B-9/L2): a no-capture day is NO-PARTITION, LOUD -- never a silent empty object",
+      "method": "command",
+      "invocation": "python .tools/estate-capture.py --upload --date 2025-01-01; head-object the would-be key",
+      "output_evidence": "NO-PARTITION 2025-01-01: zero HUMAN/UNCLASSIFIED records ... refusing to write an empty object (no-data-day law) | rc=2 | head-object: 404 Not Found. LIVE corroboration: the scheduled run loud-refused real quiet days 2026-08-08 and 2026-08-09 (a weekend) while landing 6 sibling days",
+      "denominator": "0 objects written on 3 empty days (1 synthetic + 2 real) of 3 empty days requested across runs",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "B6-1-iam-live-primitive",
+      "criterion_verbatim": "the upload leg's IAM verified on the LIVE primitive -- one-ARN simulate-principal-policy + an ISOLATED positive control",
+      "method": "live_read",
+      "invocation": "aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::313476888478:user/Andrew_Berman --action-names s3:PutObject --resource-arns arn:aws:s3:::opal-estate-report/text-input/2026-08-11/Andrew.json (single ARN, single action, own invocation)",
+      "output_evidence": "[{\"action\": \"s3:PutObject\", \"decision\": \"allowed\"}] -- one-ARN, isolated invocation. Deny-capable discriminating limb UNCOMPUTABLE for this admin-class device principal (identity policy allows all s3:PutObject; declared in exclusions); the EXERCISED upload+read-back is the Rule-22a-superior behavioral evidence and it ran seven times green",
+      "denominator": "1 ARN per call (the multi-ARN false-deny mode structurally avoided); 1 of 1 simulate limbs computable for this principal",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "B6-1-exercised-readback",
+      "criterion_verbatim": "\"the upload works\" is EXERCISED -- a real capture uploaded and READ BACK from S3, not an IAM verdict and not an rc=0",
+      "method": "live_read",
+      "invocation": "independent aws s3 cp of the served object + sha256 + content parse (separate from the tool's own in-run verify)",
+      "output_evidence": "served sha256: f8304098a9e1 (matches the tool's reported sha) | schema: estate-text-input/v1 | date: 2026-08-11 | device: Andrew | counts: {HUMAN: 67, UNCLASSIFIED: 0} | sample HUMAN record text read back intact",
+      "denominator": "2 independent read paths (in-run get_object + separate aws cli cp) agreeing on 1 object; 6 day objects total landed this session, each in-run verified",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Out-of-band corruption of the served object (aws s3 cp junk.json onto the key) must be DETECTED by the read-back sha comparator -- a comparator that cannot fire on a wrong object is not a verify",
+      "expected": "sha mismatch detected against the last reported content sha",
+      "observed": "served sha now: d8a3ec67d85a | expected prefix: ee275de64d8a | COMPARATOR FIRES (mismatch detected): True; restored by idempotent re-run (49a29b272b7e verified)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two full corpus extractions (--json) minutes apart, dedup_key-joined, text fields byte-compared; envelope timestamp (uploaded_at) deliberately excluded -- it is wall-clock by design",
+      "observed": "run1 records: 3592 | run2 records: 3592 | overlap: 3592 | all overlapping records byte-stable: True | new-in-run2: 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deny-capable limb of the simulate control",
+      "reason": "The device principal (IAM user Andrew_Berman) is admin-class: identity policy allows all s3:PutObject, so a structural deny does not exist to demonstrate. UNCOMPUTABLE-with-declaration (pre-authorized fabric-wide, CTO 092331Z). The exercised upload+read-back battery is the 22a-superior behavioral evidence."
+    },
+    {
+      "item": "Records with no bucketable UTC timestamp",
+      "reason": "Excluded from day files BY DESIGN with the count printed at run time AND stored in every uploaded object's counts (ts_unbucketable_excluded_corpuswide). Measured 0 in the current corpus."
+    },
+    {
+      "item": "site-Z device",
+      "reason": "DECLARED GAP per spec/TO requirement 5 -- one device runs the tool today; each day object names its device so single-device coverage is visible, never silent."
+    }
+  ],
+  "surprises": [
+    "The task's natural first fire (06:30 local) was ~43min after registration -- today's schedule provides a same-day natural re-proof at no cost.",
+    "2026-08-08/08-09 (weekend) genuinely carried zero operator input -- the no-data-day law fired on real data during the exercised run, a stronger negative than the synthetic 2025-01-01 case."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-11/b6_core_upload_leg_and_schedule.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"upload a day-partitioned JSON capture from a device-side python tool to S3\"",
+      "result": "NO CURATED RULE MATCHED (expected: the reuse target is estate-capture.py itself; BUILD LADDER rung 2 satisfied by extending it -- zero new tools minted)"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": ".tools/commit-gate.sh .tools/estate-capture.py",
+      "result": "PASS (py_compile + ds-precommit + ruff; pre-existing non-ASCII WARN on the extractor's display-prefix glyph constants -- load-bearing data, not this change)"
+    }
+  ]
+}

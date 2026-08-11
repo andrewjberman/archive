@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "F3_CAPTURE_UPLOADER.B6.upload-leg-and-device-schedule",
+  "phase": "P2-TIMING",
+  "spec_ref": {
+    "doc": "org/tier1_exec/4.0.0_SA_CRO/deliverables/ANDREW_DIRECT_20260811_BUILD_B6_AND_COMPLETION_SPEC.md",
+    "group": "B",
+    "vintage_commit": "59dc585a3cdb6d20a8d235d5bec69b14b390f021"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/estate-capture-schedule.ps1",
+      "kind": "script",
+      "commit_or_etag": "8a789694dd",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Registration script committed AND executed this session -- the task it registers exists live (Get-ScheduledTask read-back below) and its exercised run exit 0."
+    },
+    {
+      "path_or_key": "Windows Task Scheduler: OpalEstateCaptureDaily (this laptop)",
+      "kind": "schedule",
+      "commit_or_etag": "8a789694dd",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "PRESENT: 'OpalEstateCaptureDaily' state=Ready nextrun=8/11/2026 6:30:00 AM -- live Get-ScheduledTask/Get-ScheduledTaskInfo read-back after registration, plus an exercised Start-ScheduledTask run with lastresult=0."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "B6-2-device-side-daily-schedule",
+      "criterion_verbatim": "the tool MUST run on the DEVICE (the transcripts are device-local; the EC2 runner structurally cannot see them). A real daily schedule per the \"production pipelines must have a schedule\" rule -- Windows Task Scheduler on the laptop",
+      "method": "live_read",
+      "invocation": ".tools/estate-capture-schedule.ps1 -Action Register; then -Action Status",
+      "output_evidence": "OK: registered 'OpalEstateCaptureDaily' -- daily 06:30 local, StartWhenAvailable, log C:\\Users\\AndrewBerman\\.claude\\estate-capture-schedule.log | PRESENT: state=Ready nextrun=8/11/2026 6:30:00 AM -- registered on the laptop under the device user (transcripts are user-local), not on any runner",
+      "denominator": "1 daily trigger registered of 1 required; N/A-count -- presence check with cadence read back",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "B6-2-group-w-floor",
+      "criterion_verbatim": "the schedule declared in GROUP-W terms (a floor, never event-only)",
+      "method": "manual_read_with_citation",
+      "invocation": "read .tools/estate-capture-schedule.ps1 header @8a789694dd (GROUP-W DECLARATION block)",
+      "output_evidence": "Header verbatim: 'this schedule is the FLOOR, never event-only. The capture pipeline's production trigger is THIS daily task -- manual/ad-hoc runs ... are accelerators, and no event-driven trigger exists or may substitute for the floor'. No event trigger of any kind was built.",
+      "denominator": "N/A -- declaration check; 0 event triggers exist to contradict it",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "B6-2-exercised-run",
+      "criterion_verbatim": "\"the upload works\" is EXERCISED -- a real capture uploaded and READ BACK from S3, not an IAM verdict and not an rc=0",
+      "method": "command",
+      "invocation": "Start-ScheduledTask -TaskName OpalEstateCaptureDaily; Get-ScheduledTaskInfo; Get-Content ~/.claude/estate-capture-schedule.log -Tail 12",
+      "output_evidence": "lastrun=8/11/2026 5:45:29 AM lastresult=0 | log: 6 x 'OK: s3://opal-estate-report/text-input/{day}/Andrew.json -- N records, read-back sha verified ...' (08-04..08-07, 08-10, 08-11) + 2 x LOUD 'NO-PARTITION' on the genuinely-quiet weekend days -- the schedule's own invocation path (cmd wrapper, absolute python, absolute tool, log append) proven end-to-end, uploads verified inside the run",
+      "denominator": "6 day files landed + 2 loud refusals = 8 of 8 days in the catchup window accounted for, zero silent outcomes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "B6-2-andrew-surfaced-at-creation",
+      "criterion_verbatim": "surface it to him AT THE MOMENT OF CREATION -- one line naming the task name, the cadence, and how to disable it -- rather than creating it silently",
+      "method": "command",
+      "invocation": "PushNotification (terminal) sent in the same working session as Register, before any report left the seat",
+      "output_evidence": "Sent: 'New scheduled task on this laptop (you directed B6): OpalEstateCaptureDaily, daily 06:30 local, uploads your terminal text-input capture to S3. Disable: schtasks /Change /TN OpalEstateCaptureDaily /DISABLE' -- result: 'Terminal notification sent. Mobile push not sent (Remote Control inactive)'. Same line repeated in the session's terminal summary. Notification, not a gate: no reply awaited per the TO.",
+      "denominator": "1 of 1 required surfacing channels delivered (terminal); mobile declared inactive",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "B6-2-site-z-declared-gap",
+      "criterion_verbatim": "Site-Z is a DECLARED GAP until the tool runs there too (already noted in the docstring)",
+      "method": "manual_read_with_citation",
+      "invocation": "read .tools/estate-capture-schedule.ps1 header + estate-capture.py docstring @8a789694dd",
+      "output_evidence": "ps1 header verbatim: 'SITE-Z IS A DECLARED GAP: this registration covers ONE device ... each day's object says whose.' Tool docstring carries the same. The per-device key makes the gap MEASURABLE: text-input/{day}/ holds only Andrew.json until site-Z registers.",
+      "denominator": "1 device covered of 2 fabric devices -- the gap is the declared, key-visible remainder",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "B6-2-moratorium-naming",
+      "criterion_verbatim": "Build no alerting, no SNS, no SES, no *-monitor/*-checker naming on this path",
+      "method": "manual_read_with_citation",
+      "invocation": "task name + both artifacts @8a789694dd reviewed against the banned-name classes",
+      "output_evidence": "Task: OpalEstateCaptureDaily; files: estate-capture.py / estate-capture-schedule.ps1 -- zero monitor/checker/alerter names; zero SNS/SES/alarm resources touched (the diff is one .py addition + one .ps1, no Terraform, no aws_* alerting primitives). CTO framing carried in-file: 'a schedule that ARCHIVES is a route.'",
+      "denominator": "0 banned-class names in 3 named artifacts; 0 alerting resources in the commit's full diff",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A broken schedule environment must fail LOUD, never masquerade as a green capture: run the exact scheduled invocation against an empty transcript directory",
+      "expected": "loud refusal, nonzero exit, no object written",
+      "observed": "NO TRANSCRIPTS FOUND under <empty dir> -- refusing to report an empty capture as a complete one | rc=2 -- Task Scheduler history would carry 0x2, visibly not green",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: task registration is an idempotent state change, not a computation -- Register -Force re-applied yields the same task (read back Ready with identical trigger); the upload leg's determinism is proven in the B6-1 instance (3592/3592 byte-stable)",
+      "observed": "Status read-back identical pre/post the exercised run apart from lastrun/lastresult, which are the run's own evidence",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "site-Z registration",
+      "reason": "Declared gap per spec -- the ps1 is the reusable registration path for site-Z's owner; until then coverage is 1 of 2 devices, visible in the day prefix's key census."
+    },
+    {
+      "item": "Mobile push for the Andrew-surfacing line",
+      "reason": "Remote Control inactive at send time -- terminal notification delivered; the line also closes this session's terminal summary."
+    }
+  ],
+  "surprises": [
+    "The task registered at ~05:45 local with its first natural fire at 06:30 local the same morning -- the schedule self-proves within the hour without any induced run."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-11/b6_core_upload_leg_and_schedule.md",
+  "compiler_tools": [
+    {
+      "tool": "PowerShell ScheduledTasks module",
+      "invocation": "Register-ScheduledTask via .tools/estate-capture-schedule.ps1; Get-ScheduledTask/Info read-backs; Start-ScheduledTask exercise",
+      "result": "Registered Ready; exercised run lastresult=0 with 8/8 window days accounted for in the log"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": ".tools/commit-gate.sh .tools/estate-capture.py (the .py half of the commit; .ps1 outside the gate's .py scope)",
+      "result": "PASS"
+    }
+  ]
+}
