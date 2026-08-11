@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-10T23:4xZ</issued>
-<status>staged</status>
+<status>pending</status>
 <priority>P0 — with or after RP-W1. Same file, same owner; do not let it land BEFORE RP-W1.</priority>
 
 <references>
