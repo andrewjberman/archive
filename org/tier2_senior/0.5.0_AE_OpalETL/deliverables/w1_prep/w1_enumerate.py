@@ -37,7 +37,7 @@ PAGES = {
 
 # an import is API-layer if its module path lands in the api tree
 API_MODULE = re.compile(r"(?:^|/)(api|services)(?:/|$)")
-IMPORT_RE = re.compile(r"import\s+(?:type\s+)?(\{[^}]*\}|\w+)\s+from\s+['\"]([^'\"]+)['\"]", re.S)
+IMPORT_RE = re.compile(r"import\s+(type\s+)?(\{[^}]*\}|\w+)\s+from\s+['\"]([^'\"]+)['\"]", re.S)
 CALL_RE = re.compile(r"\b([A-Za-z_$][\w$]*)\s*\(")
 
 
@@ -68,9 +68,19 @@ for route, folder in PAGES.items():
     other_bindings = 0
     for fp in files:
         src = open(fp, encoding="utf-8", errors="replace").read()
-        for names, mod in IMPORT_RE.findall(src):
-            binds = ([n.strip().split(" as ")[-1].strip() for n in names.strip("{}").split(",") if n.strip()]
-                     if names.startswith("{") else [names.strip()])
+        for type_kw, names, mod in IMPORT_RE.findall(src):
+            # A TYPE IS NOT A CONSUMER. Both forms must be excluded: a whole-statement
+            # `import type { X } from '@/api/...'` and an inline `type X` specifier inside a value
+            # import. Counting them inflates the accessor count with compile-time-only bindings.
+            # MEASURED 2026-08-11 on /positioning: 3 real accessors + 2 response types read as 5,
+            # while the census's 5 rows were 3 distinct artifacts -- the two errors CANCELLED and
+            # produced a spurious MATCH that no reconciliation would have investigated. Being right
+            # at the wrong grain is exactly what survives review.
+            if type_kw:
+                continue
+            raw = ([n.strip() for n in names.strip("{}").split(",") if n.strip()]
+                   if names.startswith("{") else [names.strip()])
+            binds = [n.split(" as ")[-1].strip() for n in raw if not n.startswith("type ")]
             if API_MODULE.search(mod):
                 for b in binds:
                     api_bindings[b] = mod
