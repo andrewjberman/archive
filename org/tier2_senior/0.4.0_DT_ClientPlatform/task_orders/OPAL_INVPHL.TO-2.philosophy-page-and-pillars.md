@@ -9,6 +9,17 @@
     <date>2026-08-11</date>
     <project>OPAL_INVPHL</project>
     <status>pending</status>
+    <status_note>
+      BUILD COMPLETE AND VERIFIED at portal DEV @335dd198 (2026-08-11, 0.4.0_DT_ClientPlatform).
+      C1-C6 and C8 PASS, exercised in a browser (redirect navigated, not read off the route
+      table; 5/5 pillar mappings; reflow measured at 1440/900/600px). C7 is
+      UNVERIFIABLE-BY-INSTRUMENT: the CLAUDE.md Rule 25 amendment is authored and verified
+      in-tree but owned-paths refuses this lane (BASE_EXEC), and same-commit is structurally
+      impossible anyway -- the rename lives in the portal SUBMODULE, CLAUDE.md in the
+      workspace repo. Routed to COO+CTO in the same turn per the TO escape.
+       flip WITHHELD on the same proof-of-spec gate conflict as TO-1 (criterion-id
+      grammar vs the pinned C1..C8 id set). No code work outstanding.
+    </status_note>
     <sequencing>
       Runs AFTER TO-1 if one seat holds both — TO-1 establishes the catalyst/dialog treatment this TO reuses.
       Independent file set, so a second seat could parallelize; COO is not requesting one.

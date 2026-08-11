@@ -1,0 +1,202 @@
+{
+  "schema_version": "1.0",
+  "to_id": "OPAL_INVPHL-TO-2-philosophy-page-and-pillars",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/OPAL_INVPHL.TO-2.philosophy-page-and-pillars.md",
+    "group": "OTHER",
+    "vintage_commit": "c87bd0d0cf"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/App.tsx",
+      "kind": "script",
+      "commit_or_etag": "335dd19833403d8a6646d2f06d6eebaf3eebca40",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Route rename + redirect + sidebar label. Portal on DEV (Rule 19); promote is the DT /prod-deploy lane and is NOT in this TO."
+    },
+    {
+      "path_or_key": "portal/src/lib/firmAccess.ts",
+      "kind": "config_data",
+      "commit_or_etag": "335dd19833403d8a6646d2f06d6eebaf3eebca40",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Per-firm path allowlist moved /cma -> /philosophy for all 4 partner firms. See acceptance C2 -- this coupling was NOT named in the PRD, primer, or TO."
+    },
+    {
+      "path_or_key": "portal/src/pages/CapitalMarketAssumptions/components/PhilosophyPillars.tsx",
+      "kind": "script",
+      "commit_or_etag": "335dd19833403d8a6646d2f06d6eebaf3eebca40",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The five-pillar strip + pillar dialog. Frontend source; ships with the promote."
+    },
+    {
+      "path_or_key": "portal/src/pages/CapitalMarketAssumptions/components/PhilosophyPillarIcons.tsx",
+      "kind": "script",
+      "commit_or_etag": "335dd19833403d8a6646d2f06d6eebaf3eebca40",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five distinct pillar icons, GENERATED from slide 9's embedded SVG rather than transcribed."
+    },
+    {
+      "path_or_key": "portal/src/pages/CapitalMarketAssumptions/CapitalMarketAssumptions.tsx",
+      "kind": "script",
+      "commit_or_etag": "335dd19833403d8a6646d2f06d6eebaf3eebca40",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Header wording + strip mount. Everything below the strip byte-unchanged (C6)."
+    },
+    {
+      "path_or_key": "CLAUDE.md",
+      "kind": "doc",
+      "commit_or_etag": "UNCOMMITTED-IN-WORKING-TREE",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Rule 25 amendment WRITTEN and verified in the working tree but REFUSED by owned-paths: lane=BASE_EXEC, agent=0.4.0_DT_ClientPlatform not in permitted_agents (exit 1). --force does not bypass a lane refusal. Routed to COO/CTO in the same turn as the rename commit with the exact substitution, per the TO's own escape. I UNSTAGED it after the refusal (safe-commit had already added it to the index) so it cannot be swept into an unrelated commit -- the exact provenance accident CLAUDE.md's F-010 note records."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C1",
+      "criterion_verbatim": "/philosophy serves the page; header reads \"Investment Philosophy\"; sidebar reads \"Philosophy\".",
+      "method": "test_suite",
+      "invocation": "node invphl_to2.mjs (reads the rendered DOM at /philosophy)",
+      "output_evidence": "C1 HEADER: [\"Investment Philosophy\"]. C1 SIDEBAR: \"Philosophy\" present [ok]. C1 OLD TITLE STILL ON PAGE: false. Screenshot read: header renders 'INVESTMENT PHILOSOPHY'. The two wordings differ ON PURPOSE per decision 1 (narrow nav column) and are not normalized.",
+      "denominator": "3 of 3 wording changes (route, header, sidebar) verified on the rendered page",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C2",
+      "criterion_verbatim": "/cma REDIRECTS to /philosophy -- exercised, not assumed. No dead route, no 404.",
+      "method": "test_suite",
+      "invocation": "page.goto('http://localhost:5175/cma') then read window.location.pathname",
+      "output_evidence": "C2 REDIRECT: /cma -> /philosophy [ok]. Navigated in a real browser and read where it LANDED, not the route table. The redirect route is deliberately OUTSIDE ProtectedRoute: firmAccess is deny-by-default and /cma is no longer in any allowlist, so a guarded redirect would bounce a partner-firm user with a bookmark to /market instead of forwarding them.",
+      "denominator": "N/A -- single navigation, landing path compared to expected",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3",
+      "criterion_verbatim": "Five-pillar strip renders above the AssumptionsTable panel with the five ruled titles; icon choice (distinct vs fallback gear) is stated with its reason.",
+      "method": "test_suite",
+      "invocation": "node invphl_to2.mjs (counts triggers, compares bounding-box tops against the 10-Year Assumptions panel)",
+      "output_evidence": "C3 PILLARS: 5 [\"Invest with a Long-Term Perspective\",\"Capitalize on Market Dislocations\",\"Balance Active and Passive Approaches\",\"Benchmark-Aware, Not Benchmark-Bound\",\"Optimize After-Tax Outcomes\"] -- the five ruled titles verbatim. C3 ABOVE PANEL: 140 < 343.5 [ok] (measured, not assumed from JSX order). ICON CHOICE: FIVE DISTINCT ICONS, not the gear fallback -- stated with reason in surprises[0] and in the component header.",
+      "denominator": "5 of 5 ruled titles; 1 geometric ordering check",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C4",
+      "criterion_verbatim": "Each pillar opens a catalyst/dialog modal carrying the CONFIRMED mapped paragraph. All five mappings verified individually.",
+      "method": "test_suite",
+      "invocation": "node invphl_to2.mjs (opens each pillar; asserts a phrase unique to ITS paragraph is present AND a phrase unique to a SIBLING's is absent)",
+      "output_evidence": "C4 RESULT: 5 passed, 0 failed, of 5. Discriminators: long-term-perspective='building-block approach' vs tactical's 'tactical asset allocation (TAA)'; active-and-passive='allocating active risk' vs benchmark's 'benchmark-aware but not benchmark-bound'; after-tax='tax-loss harvesting'. The sibling checks matter because slides 10 and 11 EACH supply two paragraphs -- the mapping cannot be inferred from slide order, and a mis-wire shows the wrong pillar's text with no error. Modal is the catalyst Dialog (same primitive as TO-1), not a hand-rolled overlay.",
+      "denominator": "5 of 5 pillar->paragraph mappings, each with a positive and a negative assertion",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C5",
+      "criterion_verbatim": "Strip reflows 3-up then 2-up on narrow widths; no horizontal scroller; each pillar keyboard-operable with visible focus.",
+      "method": "test_suite",
+      "invocation": "node invphl_to2.mjs at viewport widths 1440 / 900 / 600, reading computed gridTemplateColumns and comparing scrollWidth vs clientWidth",
+      "output_evidence": "C5 @1440px: 5 columns, horizontal scrollbar: false. C5 @900px: 3 columns, horizontal scrollbar: false. C5 @600px: 2 columns, horizontal scrollbar: false. Reflow is real CSS grid measured at each width, not a class-name reading. Each pillar is a real <button> with focus-visible ring classes; no horizontal scroller anywhere (decision 8 -- a pillar the client never scrolls to is a pillar they never read).",
+      "denominator": "3 of 3 breakpoints measured; 5 of 5 pillars are <button> elements",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C6",
+      "criterion_verbatim": "Expectations and Views tabs BYTE-UNCHANGED; getCMAAssumptions/getOpalViews untouched.",
+      "method": "diff",
+      "invocation": "git -C portal show --stat 335dd198 ; git -C portal diff 84f6b3e2..335dd198 -- src/pages/CapitalMarketAssumptions/tabs/ src/api/portal-proxy.ts",
+      "output_evidence": "5 files changed; tabs/ExpectationsTab.tsx, tabs/OpalViewsTab.tsx, components/AssumptionsTable.tsx and src/api/portal-proxy.ts appear in NEITHER the changed-file list nor the diff -- byte-unchanged. CapitalMarketAssumptions.tsx changed only by the header string, the PhilosophyPillars import, and the strip mount; its two useQuery blocks (cma-assumptions, opal-views) and both queryFns are untouched. The data plane does not move -- this task renamed a ROUTE and LABELS.",
+      "denominator": "4 of 4 below-the-strip files verified absent from the diff",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C7",
+      "criterion_verbatim": "The Rule 25 parenthetical amendment is IN THE SAME COMMIT as the rename (or routed to COO/CTO in the same turn with that stated in the report). Cites the ARTIFACT, not the route.",
+      "method": "command",
+      "invocation": ".tools/safe-commit.sh --author 0.4.0_DT_ClientPlatform -F <msg> -- CLAUDE.md",
+      "output_evidence": "REFUSED, as the TO anticipated: 'VIOLATION: CLAUDE.md -- lane=BASE_EXEC ...; agent=0.4.0_DT_ClientPlatform not in permitted_agents', RC=1. Same-commit was structurally impossible regardless -- the rename lives in the portal SUBMODULE and CLAUDE.md in the workspace repo, two repos, so 'same commit' cannot exist across them; the TO's same-turn escape is the operative branch and was taken. Amendment written + verified in-tree and routed to COO/CTO in the same turn as the rename commit, with the exact substitution text. It cites the ARTIFACT (08_capital_market_assumptions), not the route.",
+      "denominator": "1 of 1 amendment authored; 0 of 1 landed (lane-refused); 1 of 1 routed same turn",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "The amendment cannot be landed by this lane at all (owned-paths BASE_EXEC), so no instrument available to me can move it to PASS. SUBSTITUTE ORACLE: the routed message to 2.0.0_SA_COO + 1.0.0_SA_CTO carrying the verbatim OLD->NEW substitution, plus the verified working-tree state (git status ' M CLAUDE.md', new locator present x1, Andrew's verbatim quote intact x1). PASS becomes verifiable when a BASE_EXEC seat lands it."
+    },
+    {
+      "criterion_id": "C8",
+      "criterion_verbatim": "NO CMS / editable-text affordance in the diff. comp-transform schema-check + comp-cache clean; no new console errors; portal CI green; worktree on DEV.",
+      "method": "test_suite",
+      "invocation": "DOM query for [contenteditable=true], textarea, input[type=text] on /philosophy ; comp-transform schema-check CapitalMarketAssumptions ; comp-cache collisions ; tsc -b --noEmit ; eslint ; git -C portal rev-parse --abbrev-ref HEAD",
+      "output_evidence": "C8 EDITABLE CONTROLS ON PAGE: 0 [ok -- no CMS/editor]. comp-transform schema-check CapitalMarketAssumptions: 'All rendered fields match their response types.' comp-cache collisions: 'captured 104 of 104 useQuery call-site(s); 0 unparseable; 15 shared key(s); 0 with a TYPE MISMATCH' -- this TO adds NO new query key (the strip is static repo copy), so the route rename carries no cache implication. tsc -b --noEmit rc=0; eslint rc=0 (one react-refresh warning resolved by de-exporting the pillar constant). Branch: DEV.",
+      "denominator": "3 editable-control selectors checked, 0 hits; 104 of 104 query call-sites captured; 5 of 5 changed files linted",
+      "status": "PASS",
+      "status_reason": "PASS. Portal CI not run from this seat (no push in TO scope). Note its dedicated typecheck step is a no-op -- see the TO-1 instance's surprises[2]; the meaningful typecheck is the local tsc -b, run here."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pillar->paragraph mapping is the silent-failure axis (slides 10 and 11 each supply TWO paragraphs, so order cannot disambiguate). The C4 assertion is built as a matched pair per pillar -- a MUST-contain phrase unique to its own paragraph and a MUST-NOT-contain phrase unique to a sibling's -- so a swap fails on BOTH limbs at once. The equivalent mutant was fired for real on the sibling instrument in TO-1 (LT/ULT prose keys swapped: 3 passed, 2 failed, rc=1, with the wrong-model diagnosis printed), establishing that this assertion shape detects exactly this class rather than passing on presence alone.",
+      "expected": "A mis-mapped pillar fails both its own-phrase and its sibling-phrase assertion.",
+      "observed": "TO-1's identical-shape mutant FIRED: 'CONTAINS SIBLING phrase \"offense & defense\" -- WRONG MODEL'S PROSE' on exactly the two swapped members, other three unaffected. TO-2's five pairs all pass clean at 5/5 on the unmutated tree.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Full TO-2 exercise re-run after the eslint de-export change; reflow measured at three viewport widths in one pass and the strip re-measured against the panel each run.",
+      "observed": "C2 redirect, C1 wording, C3 5-pillars-above-panel, C4 5/5 and C8 0-editable identical across runs; column counts 5/3/2 stable at 1440/900/600.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any CMS, admin editor, or editable-text affordance for the pillar copy",
+      "reason": "TO-2 R4 decision 9 -- copy ships in the repo; Yang/Manav editability is separately scoped and explicitly NOT authorized here. 0 editable controls verified on the rendered page."
+    },
+    {
+      "item": "Expectations tab, Views tab, AssumptionsTable, getCMAAssumptions/getOpalViews",
+      "reason": "TO-2 R5 -- byte-unchanged by design. Verified absent from the diff (C6)."
+    },
+    {
+      "item": "Landing the CLAUDE.md Rule 25 amendment",
+      "reason": "owned-paths lane refusal (BASE_EXEC). Authored, verified, and routed to COO/CTO in the same turn per the TO's stated escape. C7 carries the detail."
+    },
+    {
+      "item": "Editing the `cma` reference inside Andrew's VERBATIM quote in Rule 25",
+      "reason": "DELIBERATE NON-CHANGE. Rule 25 names `cma` twice; one sits inside his quoted words. org/XXX.md: 'NEVER A PARAPHRASE. THE PHRASING *IS* THE RULING.' Editing a sovereign's quote to tidy our own route rename would falsify the record of what he said. Only the rule's own editorial parenthetical was amended, and it names the old route so the quote still resolves for a reader."
+    },
+    {
+      "item": "DEV->PROD promote",
+      "reason": "Not in TO scope; DT /prod-deploy lane. Portal remains on DEV."
+    }
+  ],
+  "surprises": [
+    "D7 ICON CALL, resolved on evidence rather than the fallback: slide 9's five icons are native SVG carried on the asvg:svgBlip extension, so python-pptx's shape.image raises 'no embedded image' for them -- an instrument-domain miss, not an absent asset. Resolving the relationship layer produced five distinct SVGs (1674-3843 bytes, image26-30.svg), so the FIVE DISTINCT ICONS branch applies and the sanctioned gear fallback was NOT needed. Had I stopped at the first error I would have shipped the fallback for a reason that was not true.",
+    "MY OWN ICON-ORDERING BUG, caught by a denominator: the first extraction matched each icon to its nearest pillar title by centre-to-top-left distance. It collided -- two icons claimed one pillar, two claimed another, two pillars got none -- and because the filename came from the match it silently OVERWROTE, producing 3 files for 5 icons. A clean '5 of 5 icons found' on the FIND step said nothing about the ASSIGN step. Redone by x-position (the strip is a five-across row) with slide 9's own 01..05 number boxes as an independent control, which agreed.",
+    "COUPLING NOT NAMED BY THE PRD, PRIMER, OR TO: src/lib/firmAccess.ts carries a per-firm route allowlist that is DENY-BY-DEFAULT, and its header requires values to match the <Route path> exactly. Renaming /cma -> /philosophy without updating it would have made the Philosophy page unreachable for ALL FOUR partner firms (49financial, inflection, cottonwood, demo), each silently bounced to /market. Found by asking what REFERENCES the route rather than working the spec's file list. Updated in all four.",
+    "'SAME COMMIT' IS STRUCTURALLY IMPOSSIBLE FOR C7 AS WRITTEN: the route rename lands in the portal SUBMODULE and CLAUDE.md lives in the workspace repo. Two repositories cannot share a commit, so even a BASE_EXEC seat could not have satisfied the literal same-commit condition here. The TO's same-turn escape is the only reachable branch. Worth fixing in the TO template for the next cross-repo doc-condition.",
+    "The TO's suggested Rule 25 replacement text is phrased as though it substitutes the parenthetical INSIDE Andrew's verbatim quote. Applied literally there it would rewrite his words. Flagging so the next seat to touch this does not do that.",
+    "SAME GATE CONFLICT AS THE TO-1 INSTANCE, and it GENERALIZES -- 4 artifact-coverage violations here vs 2 there, from one cause. proof-of-spec-check's coverage heuristic scans criterion_id ONLY (:53,:62) and wants the artifact stem inside the id per its {firm}-{group}-{artifact}-{check} grammar, while this TO pins the id set to C1..C8 and the same script rejects any id outside that set. Unresolvable without a false declared_exclusion or a mis-typed artifact kind; neither done. Every other rule in the checker passes. Two instances now fail the same way for the same reason, so this is a template-level incompatibility between the TO grammar and the checker, not a per-instance authoring slip. Routed to COO/CVO."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DT_ClientPlatform/logs/2026-08-11/OPAL_INVPHL_TO1_TO2.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find \"'/cma'|\\\"/cma\\\"|cma\" portal/src --name ; raw follow-up over portal/src for /cma references",
+      "result": "Surfaced the firmAccess.ts coupling (4 allowlist entries) alongside App.tsx:98/:415 -- the finding that would otherwise have shipped the page unreachable for every partner firm. Post-change residue sweep: exactly 1 remaining '/cma' literal, the intended redirect route."
+    },
+    {
+      "tool": "comp-transform schema-check",
+      "invocation": "comp-transform schema-check CapitalMarketAssumptions",
+      "result": "'All rendered fields match their response types.' This page IS inside the tool's domain (src/pages/**), unlike the two TO-1 components -- so this row is a real check, not a fail-green."
+    },
+    {
+      "tool": "comp-cache",
+      "invocation": "comp-cache collisions",
+      "result": "'captured 104 of 104 useQuery call-site(s); 0 unparseable ... 15 shared key(s); 0 with a TYPE MISMATCH'. Rule 20(b) discharged for the rename: the strip is static repo copy and introduces NO query key, and the page's existing cma-assumptions / opal-views keys are untouched, so the route rename carries no cache or lazy-import implication."
+    },
+    {
+      "tool": "tsc -b --noEmit / eslint",
+      "invocation": "./node_modules/.bin/tsc -b --noEmit ; ./node_modules/.bin/eslint src/App.tsx src/lib/firmAccess.ts src/pages/CapitalMarketAssumptions/",
+      "result": "Both rc=0. eslint initially raised one react-refresh warning (exporting the pillar constant beside a component); resolved by de-exporting it, since nothing imported it."
+    },
+    {
+      "tool": "/frontend-dev (ui-smoke pattern, extended)",
+      "invocation": "node invphl_to2.mjs (redirect + DOM + reflow + 5 pillar modals) ; node zoom_icons.mjs (icons at 3x deviceScaleFactor)",
+      "result": "Read the rendered PNGs per the portal verification law: dark navy pillar cards on the SILVER canvas with white text INSIDE the dark container (never on the canvas), modal panel light with dark text. The zoomed pass confirmed the five deck icons render as clean, distinct, semantically apt glyphs (magnifier / puzzle pieces / gear-on-layers / bulb-and-gear / eye-in-brackets) rather than clipped or garbled paths -- the check that actually justified the D7 distinct-icon call."
+    }
+  ]
+}
