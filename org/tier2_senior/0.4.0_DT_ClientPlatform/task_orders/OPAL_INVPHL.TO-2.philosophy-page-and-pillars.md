@@ -8,7 +8,7 @@
     <issued_to>{portal-frontend seat, on registration}</issued_to>
     <date>2026-08-11</date>
     <project>OPAL_INVPHL</project>
-    <status>dispatched</status>
+    <status>pending</status>
     <sequencing>
       Runs AFTER TO-1 if one seat holds both — TO-1 establishes the catalyst/dialog treatment this TO reuses.
       Independent file set, so a second seat could parallelize; COO is not requesting one.
