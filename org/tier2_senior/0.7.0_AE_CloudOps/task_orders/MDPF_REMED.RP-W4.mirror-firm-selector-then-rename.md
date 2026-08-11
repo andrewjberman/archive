@@ -44,8 +44,8 @@ schedule TIME here (that is RP-W3's, atomic-gated) — this TO changes selection
   </phase>
   <phase id="2" when="before apply">
     <step>
-      <run>safe-commit then .tools/safe-apply.sh; Terraform only (a schedule rename may be destroy+create — state the cutover-gap plan: no skipped/double business day)</run>
-      <expect>Plan scoped to selector + naming only; 0-diff post-apply; tag + push --follow-tags.</expect>
+      <run>safe-commit then .tools/safe-apply.sh; Terraform only (a schedule rename may be destroy+create — state the cutover-gap plan: no skipped/double business day). ⛔ CTO-BINDING (000333Z): every TF apply in the opal-assets root during this program is `-target`ed AND its plan output READ before apply — the root plan carries a re-create of opal-assets-daily-aua (deleted by Andrew 08-07); an un-targeted apply RESURRECTS it.</run>
+      <expect>Plan scoped to selector + naming only; NO opal-assets-daily-aua row; 0-diff post-apply; tag + push --follow-tags.</expect>
       <if_mismatch>STOP on dirty plan.</if_mismatch>
     </step>
   </phase>

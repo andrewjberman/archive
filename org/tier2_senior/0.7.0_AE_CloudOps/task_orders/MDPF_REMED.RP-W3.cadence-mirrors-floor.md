@@ -74,8 +74,8 @@ eclipse data sits in `opal-data-inf` by ~14:48Z and waits ~7.5h for the 22:30Z m
   </phase>
   <phase id="2" when="before apply">
     <step>
-      <run>.tools/safe-apply.sh (never bare terraform apply); commit before apply per Deployment Rule 2</run>
-      <expect>Plan shows ONLY the scoped schedule/trigger changes; 0-diff after apply; tag + push --follow-tags.</expect>
+      <run>.tools/safe-apply.sh (never bare terraform apply); commit before apply per Deployment Rule 2. ⛔ CTO-BINDING (000333Z): every TF apply in the opal-assets root during this program is `-target`ed AND its plan output READ before apply — the root plan carries a re-create of opal-assets-daily-aua (a table Andrew DELETED 08-07); an un-targeted apply RESURRECTS it.</run>
+      <expect>Plan shows ONLY the scoped schedule/trigger changes; NO opal-assets-daily-aua row; 0-diff after apply; tag + push --follow-tags.</expect>
       <if_mismatch>STOP at the HALTGT checkpoint discipline; do not proceed on a dirty plan.</if_mismatch>
     </step>
   </phase>
