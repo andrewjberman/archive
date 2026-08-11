@@ -59,11 +59,40 @@
     <instance_path_grammar>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P1_COT_{GROUP}_{YYYYMMDD}.json</instance_path_grammar>
     <criterion_id_grammar>COT-{group}-{artifact}-{check}</criterion_id_grammar>
 
-    <group id="A" status="NOT_YET_MINTED"/>
-    <group id="B" status="NOT_YET_MINTED"/>
-    <group id="C" status="NOT_YET_MINTED"/>
+    <group id="A" status="MINTED-AND-VALIDATED" instance="org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P1_COT_A_20260811.json" validator="VALID rc=0 unpiped, 13 rows 0 violations" minted_by="0.4.0_DS_ClientPlatform~B" minted_at="2026-08-11T153xZ">
+      COT-A-A00-ROWCOUNT, COT-A-A00-SURFACES, COT-A-A01-MAPCENSUS, COT-A-A02-DISJOINT,
+      COT-A-A02-VERSION-DET, COT-A-A02-VERSION-MUT, COT-A-A03-ROWCOUNT, COT-A-A04-GAPCENSUS,
+      COT-A-A05-RESOLVE, COT-A-A05-CENSUSKEY, COT-A-ALL-PROVENANCE, COT-A-ALL-MANIFEST,
+      COT-A-ALL-COMPILE
+      <!-- Judgment calls in the enumeration (stated per TO): SURFACES row minted (no 49F/INF
+      analogue -- the union universe is COT-specific); A06 row NOT minted (BUILD-BLOCKED wait,
+      lives in declared_exclusions, not a fake UNCOMPUTABLE); ALL-rows denominator = 6 built
+      artifacts. -->
+    </group>
+    <group id="B" status="MINTED-AND-VALIDATED" instance="org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P1_COT_B_20260811.json" validator="VALID rc=0 unpiped, 13 rows 0 violations" minted_by="0.4.0_DS_ClientPlatform~B" minted_at="2026-08-11T161xZ">
+      COT-B-B00-ROWCOUNT, COT-B-B00-COLLAPSE, COT-B-B00-DUPFIXTURE, COT-B-B00-NULLSTATUS,
+      COT-B-B00-DECOMP-IDENTITY, COT-B-B01-PASSTHROUGH, COT-B-B01-FLAGS, COT-B-B02-VERDICT,
+      COT-B-B03-TIE, COT-B-B03-MUTANT, COT-B-ALL-PROVENANCE, COT-B-ALL-MANIFEST, COT-B-ALL-COMPILE
+      <!-- Judgment calls: COLLAPSE + DUPFIXTURE + NULLSTATUS rows minted per the CTO 074437Z
+      amendment + ABSENCE-IS-SERVE-LAW (no 49F/INF analogues); B03-TIE graded on the independent
+      roster leg (the OPEN-cell fallback exercised, coverage denominators carried). -->
+    </group>
+    <group id="C" status="MINTED-AND-VALIDATED" instance="org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P1_COT_C_20260811.json" validator="VALID rc=0 unpiped, 14 rows 0 violations" minted_by="0.4.0_DS_ClientPlatform~B" minted_at="2026-08-11T162xZ">
+      COT-C-C00-ONECLASS, COT-C-C00-SEMANTIC, COT-C-C00-VENDORAXIS, COT-C-C00-LADDER,
+      COT-C-C00-MUT, COT-C-C01-SEGREGATION, COT-C-C01-VENDORDELTA, COT-C-C02-FIXTURES,
+      COT-C-C02-REFUSE, COT-C-C03-FIELDS, COT-C-C03-STATUSFN, COT-C-ALL-PROVENANCE,
+      COT-C-ALL-MANIFEST, COT-C-ALL-COMPILE
+      <!-- Judgment calls: VENDORAXIS + LADDER + VENDORDELTA rows minted on cot's two native
+      instruments (External Flow enum + contra marks -- no sibling analogue); C_04/C_05 are
+      DECLARED WAITS on the P2 probe (declared_exclusions, blocker named), not fake rows. -->
+    </group>
     <group id="D" status="HOLD_FOR_RULING" ruling_event="at ~B's Group-C completion" ruling_inputs="base's B-4 emitter outcome + ~A's D outcome + ~B's C-completion" deciders="Andrew + 1.0.0_SA_CTO + 2.0.0_SA_COO"/>
-    <group id="PARQUET-WRITER-FORMAT" status="NOT_YET_MINTED"/>
+    <group id="PARQUET-WRITER-FORMAT" status="MINTED-AND-VALIDATED" instance="org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P1_COT_PARQUET-WRITER-FORMAT_20260811.json" validator="VALID rc=0 unpiped, 4 rows 0 violations" minted_by="0.4.0_DS_ClientPlatform~B" minted_at="2026-08-11T163xZ">
+      COT-PWF-RUNNERCOMMON-GRAMMAR, COT-PWF-RUNNERCOMMON-PARQUETONLY,
+      COT-PWF-RUNNERCOMMON-NOROOT, COT-PWF-RUNNERCOMMON-MANIFEST
+      <!-- schema note: spec_ref.group = OTHER (the enum has no writer-format member; the INF
+      precedent), artifact token RUNNERCOMMON carried in the ids for the coverage matcher. -->
+    </group>
 
     <!--
     IDS UNMINTED BY THE ISSUER BY DESIGN. The COO has NOT read the COT batteries and will not hand over

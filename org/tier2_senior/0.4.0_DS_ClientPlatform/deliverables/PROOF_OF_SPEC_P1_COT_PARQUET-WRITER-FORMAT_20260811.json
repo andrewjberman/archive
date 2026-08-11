@@ -1,0 +1,92 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COT_RUNNER_REFACTOR.P1.scripts-groups-a-c-scoped",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "COT_ABCD_SHAPE_SPEC_20260811.md writer-format requirement (TO requirement 4: {table}/date={D} WRITER FORMAT ONLY; destination root is P3/Andrew per Rule 24 + 17b) -- pattern spec v1.0 @d272021791 atoms 1/3/9, GOLD-AS-PARQUET @a9c159f134",
+  "group": "OTHER",
+  "vintage_commit": "d272021791"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~B",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/runner_common.py",
+   "kind": "script",
+   "commit_or_etag": "b9e6b154e4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the shared harness landed with the Group A commit; P1 is SCRIPTS"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "COT-PWF-RUNNERCOMMON-GRAMMAR",
+   "criterion_verbatim": "every artifact the family emits lands at {table}/date={D}/data.parquet (the silver-mirroring grammar, TO requirement 4)",
+   "method": "command",
+   "invocation": "regex sweep over every data.parquet under the QA root after the full A+B+C exercise",
+   "output_evidence": "GRAMMAR SWEEP: 24 of 24 artifacts match {table}/date={D}/data.parquet (0 violations)",
+   "denominator": "24 of 24 emitted artifacts across 15 tables and 4 as-of dates",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-PWF-RUNNERCOMMON-PARQUETONLY",
+   "criterion_verbatim": "no JSON table-emission path exists in the writer module by construction (JSON leaves the gold tier; publishers are P4 scope) -- the module's only JSON writes are the atom-3 manifests",
+   "method": "command",
+   "invocation": "source read of runner_common.py write paths",
+   "output_evidence": "write_gold_table emits parquet bytes for the table artifact and JSON ONLY for the _manifests/ atom-3 sidecar; no other JSON emission function exists in the module; every group script writes through write_gold_table",
+   "denominator": "1 writer path in the module; 15 of 15 family scripts route through it",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-PWF-RUNNERCOMMON-NOROOT",
+   "criterion_verbatim": "the writer REFUSES an empty output root (F-1 guard: the product root is Andrew's Rule-24 taxonomy act, never defaulted; TO requirement 4's name-it-never-decide-it clause)",
+   "method": "command",
+   "invocation": "python calling write_gold_table with output_root=''",
+   "output_evidence": "REFUSE CONTROL FIRED: 'REFUSE: output_root is required -- the product root is not decided here (F-1)'. No path constant exists in the family; --output-root is required by every script's argparser.",
+   "denominator": "N/A -- boolean control, fired",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-PWF-RUNNERCOMMON-MANIFEST",
+   "criterion_verbatim": "an atom-3 manifest ({data-as-of}/{process-ts}__{table}.json with rows/columns/inputs) lands beside every table write; provenance cols (atom 9) ride every artifact",
+   "method": "command",
+   "invocation": "manifest sweep + per-artifact provenance checks (run per group)",
+   "output_evidence": "MANIFEST SWEEP: 40 atom-3 manifests at rest under _manifests/{data-as-of}/ covering every write incl. control re-runs | provenance BOTH-PRESENT: 6/6 A + 4/4 B + 5/5 C artifacts",
+   "denominator": "40 manifests / 15 of 15 built artifacts provenance-complete",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the REFUSE-empty-root control is the writer's mutant: an emission attempt without an injected root must raise, never write",
+   "expected": "RuntimeError naming F-1",
+   "observed": "fired verbatim; nothing written",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the grammar regex is exact ({table}/date={D}/data.parquet full-match); 24/24 across every group's writes on repeated runs",
+   "observed": "0 violations at every sweep",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the destination root itself",
+   "reason": "P3 scope and a Rule-24 naming act at Andrew (17b ratified direction WITHOUT migration authority). The harness structurally cannot default it -- that is the design, not a gap."
+  },
+  {
+   "item": "S3-root write exercise",
+   "reason": "the writer's s3:// branch is code-complete but deliberately NOT exercised in P1: no cot S3 prefix may receive artifacts before the root ruling, and base holds cot deploy windows. Local-root exercise covered all 24 writes; the S3 branch is exercised at P2/P3 under the live-primitive verify discipline (COO 160305Z note)."
+  }
+ ],
+ "surprises": [
+  "None structural. The vendored collapse_relationship_grain rides this module (the Lambda vendoring precedent @6da43f1c6c class) with column names parameterized -- it is exercised by B_00/B_02/B_03 and its DC1 equality assert fired in the dup-fixture control."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/logs/2026-08-11/cot_p1_groups_a_b_c.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find collapse_relationship_grain",
+   "result": "located the canonical DEF + the vendoring precedent before writing the harness (Build Ladder rung 2)"
+  }
+ ]
+}

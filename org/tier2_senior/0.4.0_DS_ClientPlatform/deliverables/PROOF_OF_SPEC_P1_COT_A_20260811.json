@@ -1,0 +1,244 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COT_RUNNER_REFACTOR.P1.scripts-groups-a-c-scoped",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_A_DIMENSIONS_20260811.md (transposed per org/tier1_exec/4.0.0_SA_CRO/deliverables/COT_ABCD_SHAPE_SPEC_20260811.md, form = the INF spec Commission 2)",
+  "group": "A",
+  "vintage_commit": "9c294bbf15"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~B",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/a00_dim_account.py",
+   "kind": "script",
+   "commit_or_etag": "b9e6b154e4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "P1 is SCRIPTS; runtime home + schedule are P2/P3, and the product root is undecided (F-1 is Andrew's)"
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/a01_dim_relationship.py",
+   "kind": "script",
+   "commit_or_etag": "b9e6b154e4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/a02_dim_boundary.py",
+   "kind": "script",
+   "commit_or_etag": "b9e6b154e4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/a03_dim_security.py",
+   "kind": "script",
+   "commit_or_etag": "b9e6b154e4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/a04_dim_calendar.py",
+   "kind": "script",
+   "commit_or_etag": "b9e6b154e4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/a05_ref_txn_classification.py",
+   "kind": "script",
+   "commit_or_etag": "b9e6b154e4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "COT-A-A00-ROWCOUNT",
+   "criterion_verbatim": "dim_account row count == universe distinct account_id (custody axis UNION roster UNION txn series); denominators printed",
+   "method": "command",
+   "invocation": "python a00_dim_account.py --as-of 2026-08-11 --output-root <any-writable-root>  (run from data/cot/scripts/gold/runners_cot/)",
+   "output_evidence": "DENOMINATOR: rowcount-identity: 926 of 926 universe distinct account_id (100.00%)",
+   "denominator": "926 of 926 universe distinct account_id (custody 925 @2026-08-07 UNION roster 888 @2026-08-07 UNION txn-series 781)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-A00-SURFACES",
+   "criterion_verbatim": "per-surface presence denominators printed (custody/roster/txn); accounts outside custody-UNION-roster carried as TXN-ONLY-HISTORICAL declared class, never silently dropped",
+   "method": "command",
+   "invocation": "python a00_dim_account.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "DENOMINATOR: custody-axis: 925 of 926 (99.89%) | roster: 888 of 926 (95.90%) | txn-series: 781 of 926 (84.34%) | TXN-ONLY-HISTORICAL: 1 account carried with declared class",
+   "denominator": "926 universe accounts; 1 declared TXN-ONLY-HISTORICAL",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-A01-MAPCENSUS",
+   "criterion_verbatim": "mapped + ungrouped == A_00 universe (F-5); disposition enum present (MAPPED / UNGROUPED-SENTINEL / UNGROUPED-NO-SURFACE-ROW); denominators printed",
+   "method": "command",
+   "invocation": "python a01_dim_relationship.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "F-5 CENSUS: mapped 909 + ungrouped 17 == universe 926 -- OK, no silent exclusion | MULTI-MEMBERSHIP CENSUS: 5 accounts under 2+ relationships (incl. the DC1 specimen z0927448821) | MULTI-REP MEMBERSHIPS: 641 memberships carry 2+ rep codes (fee-split attribution class, carried as sorted set + count)",
+   "denominator": "909 + 17 == 926 A_00 accounts; 948 membership rows at native (relationship, account) grain",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-A02-DISJOINT",
+   "criterion_verbatim": "COLLECTION_ACCOUNT set disjoint from IN_CLIENT_BOOK; detection outcome DECLARED: nonempty via the fee-payee-leg named computation OVER THE FULL SERIES, or collection_detection=ABSENT-with-shape (the COT spec's discriminator-unverified cell, resolved by measurement not guess)",
+   "method": "command",
+   "invocation": "python a02_dim_boundary.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "DENOMINATOR: Management-Fee payee-side credits (non-Rebate): 0 of 618 Management Fee rows (0.00%) | DECLARED rebate noise: 24 positive Rebate rows are fee reversals INTO client accounts | COLLECTION detection: ABSENT-with-shape -- the BD txn export carries NO non-rebate payee-side fee legs in the full series; shape = BD fee-payee/billing legs (RECON-5a inventory scope) | BOUNDARY CENSUS: in_client_book=925 collection=0 excluded_other=1 total=926 | DISJOINT: boundary_class single-valued per account",
+   "denominator": "0 payee-side rows of 618 Management Fee rows (full 59,114-row series)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-A02-VERSION-DET",
+   "criterion_verbatim": "boundary_version stable across two same-input runs (determinism control)",
+   "method": "command",
+   "invocation": "python a02_dim_boundary.py --as-of 2026-08-11 --output-root <root>  (twice, compare the boundary_version lines)",
+   "output_evidence": "run1: boundary_version: 12f3e7f00276a3b0f7d4af79e62d9677a0543981dd97cb88604350b8544c8098 | run2: identical. ALSO invariant under the a00/a01 rep-column amendment (hash projects only account_id/class/effective_from -- demonstrated post-amendment rerun)",
+   "denominator": "N/A -- boolean identity across 2 runs",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-A02-VERSION-MUT",
+   "criterion_verbatim": "a mutated input flips boundary_version (mutant control)",
+   "method": "command",
+   "invocation": "python a02_dim_boundary.py --as-of 2026-08-11 --output-root <root> --qa-exclude-account z0927448821",
+   "output_evidence": "QA-MUTANT: excluded account z0927448821 (926 -> 925 rows) | boundary_version: b9acc4e0d3c4a2854fa659c56875b0f5532e2789a6ddb55f8c0c0b8781618fac != 12f3e7f0... -- FLIPPED; canonical hash restored on the post-mutant rerun",
+   "denominator": "N/A -- boolean flip on 1-account perturbation",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-A03-ROWCOUNT",
+   "criterion_verbatim": "dim_security row count == |custody AssetID UNION txn-series AssetID|; per-source denominators printed; accrual inputs deliberately absent (B_02 RESOLVED-BY-CONSTRUCTION)",
+   "method": "command",
+   "invocation": "python a03_dim_security.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "DENOMINATOR: custody-sourced: 1004 of 1012 (99.21%) | txn-sourced: 981 of 1012 (96.94%) | coupon-rate-nonzero: 242 of 1012 (census surface, NOT a B-gate) | rowcount-identity: 1012 of 1012 (100.00%)",
+   "denominator": "1,012 of 1,012 union(custody, txn-series) distinct asset_id",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-A04-GAPCENSUS",
+   "criterion_verbatim": "gap census printed with the trading-calendar frame (lib/trading_calendar.py JOIN vs the fact_holdings partition tree); weekends/holidays NEVER gaps (T-1 law); non-trading-day partitions = DECLARED STATEMENT-DAY class; any TRUE gap NAMED; the COT honest-depth note carried",
+   "method": "command",
+   "invocation": "python a04_dim_calendar.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "GAP CENSUS (frame: 64 calendar days 2026-06-09..2026-08-11, 44 trading days): TRADING-OBSERVED 42 / TRADING-MISSING 2 / NONTRADING-OBSERVED 5 / NONTRADING-ABSENT 15. TRUE GAPS NAMED: 2026-08-10, 2026-08-11 -- BOTH ARE THE T-1 FRONTIER EDGE (08-11 is run day; 08-10 delivery lands T+1), ZERO INTERIOR GAPS across the 47-partition custody series. STATEMENT-DAY artifacts declared: 5. Calendar source=NYSE/pandas_market_calendars via lib/trading_calendar.py (the ONE authority). Honest depth: custody floor 2026-06-09; txn tree (64 partitions since 2026-03-09) carried as SECONDARY observed set in manifest.",
+   "denominator": "0 interior gaps of 44 trading days in frame (2 frontier-edge artifacts named, not staleness claims)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-A05-RESOLVE",
+   "criterion_verbatim": "every (Transaction Type, Transaction Sub Type) pair in the FULL series resolves through the first-match rule list or lands UNRESOLVED-LOUD; 0 silent rows; money-column verification FIRST; denominator = full-series distinct-txn row count",
+   "method": "command",
+   "invocation": "python a05_ref_txn_classification.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "DENOMINATOR: Market Value nonnull: 59114 of 59114 (100.00%) | MONEY-COLUMN SIGN VERIFICATION: Cash Deposit 2859/2859 positive, Cash Withdrawal 1149/1150 negative (the 1 = a zero-amount row, not a positive) | INCOME TWIN CENSUS: MV==Income on 12625/12625 Dividend rows | TWIN SCAN: NONE | FULL-SERIES CENSUS: 28 pairs / 16 types (the spec's 14x21 were window-sample numbers) | UNRESOLVED-LOUD: 65 rows across 6 named pairs (Corporate Action: Merger 50/Spinoff 6/Cash in Lieu 3/Reverse Split 3/Split 2 + Return of Capital 1) | DUAL MATERIALITY: 0.110% rows, 0.309% $ abs | resolved: 59049 of 59114 (0 silent)",
+   "denominator": "59,114 full-series distinct TransactionID rows (every row lands in a class; 65 UNRESOLVED are LOUD)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-A05-CENSUSKEY",
+   "criterion_verbatim": "the classification table's census key re-derives from two independent full-series reads",
+   "method": "command",
+   "invocation": "python a05_ref_txn_classification.py --as-of 2026-08-11 --output-root <root>  (twice, compare CENSUS KEY lines)",
+   "output_evidence": "run1 and run2 both print: CENSUS KEY: f832baeec070db593963afca9b6ee30527561fbaa72898a0649fcb16a257f0f6 -- re-derived IDENTICAL from two independent full-series unions (28 pair rows over 59,114 rows)",
+   "denominator": "28 pair rows over 59,114 full-series rows (union of all 64 at-rest partitions, deduped)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-ALL-PROVENANCE",
+   "criterion_verbatim": "provenance cols (source_pipeline, _ingested_at) present on every built Group A artifact (atom 9)",
+   "method": "command",
+   "invocation": "python reading all 6 emitted parquets and checking both columns",
+   "output_evidence": "dim_account/dim_relationship/dim_boundary/dim_security/dim_calendar/ref_txn_classification: provenance_cols=BOTH-PRESENT (6 of 6)",
+   "denominator": "6 of 6 built Group A artifacts (A_06 declared wait, not built)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-ALL-MANIFEST",
+   "criterion_verbatim": "atom-3 manifest written per artifact ({data-as-of}/{process-ts}); boundary_version stamped where minted",
+   "method": "command",
+   "invocation": "ls <root>/_manifests/2026-08-11/",
+   "output_evidence": "14 manifest files under _manifests/2026-08-11/ (6 artifacts x their runs incl. control re-runs), each {process-ts}__{table}.json with data_as_of/process_ts/rows/columns/inputs; dim_boundary manifests carry boundary_version 12f3e7f0... (B/C stamp it from here on)",
+   "denominator": "6 of 6 artifacts manifested (14 manifest files incl. control runs)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-A-ALL-COMPILE",
+   "criterion_verbatim": "stage-by-stage py_compile pass logged per script at its build stage (Andrew @4dbf4a0d7c), not one end pass",
+   "method": "command",
+   "invocation": "python -m py_compile <file> -- run at EACH script's build stage",
+   "output_evidence": "STAGE-COMPILE PASS logged per stage: runner_common / a00 / a01 / a02+a03+a04 / a05 / a00+a01 rep-amendment restage / a01 rep-agg restage. Commit-gate (py_compile + AST + ruff) exercised at commit: caught 1 finding (unused variable in a02), fixed, re-passed 7 of 7.",
+   "denominator": "7 of 7 family files stage-compiled (plus 3 re-stages after amendments)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "a02 boundary_version mutant: drop one in-universe account (--qa-exclude-account z0927448821, the DC1 dual-relationship specimen) and require the content hash to flip",
+   "expected": "boundary_version != 12f3e7f00276a3b0...",
+   "observed": "b9acc4e0d3c4a2854fa659c56875b0f5532e2789a6ddb55f8c0c0b8781618fac -- FLIPPED; canonical restored on rerun",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input a02 runs compared on boundary_version; two independent full-series a05 unions compared on census key",
+   "observed": "a02: 12f3e7f0... == 12f3e7f0... | a05: f832baee... == f832baee...",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "A_06 dim_identity_crosswalk (the spine account_id vs custody Account Number bridge)",
+   "reason": "BUILD-BLOCKED on RECON-5a's first deliverable per the TO's declared_waits: the COT spec measured NO-DIRECT-JOIN at every tested form; the crosswalk requires the measured intermediary (rebalancer_accounts bronze family -> custody linkage -> BD account-detail surface). Declared, not guessed. NOTE the in-band map (AccountID <-> custody Account Number ships on every custody row) is already carried on dim_account as passthrough -- the BLOCKED half is the REBALANCER-spine bridge only."
+  },
+  {
+   "item": "comp-validate config entries for the runners_cot family",
+   "reason": "comp-validate returns no-script-matching (new family unregistered in gold_validate_config.yaml). NO_CONFIG = UNVALIDATED, not signaled safe. Config authoring routed to wave close; artifact homes cannot be configured before the F-1 root ruling anyway."
+  },
+  {
+   "item": "comp-pipescript io/deployed rows for runners_cot",
+   "reason": "registry does not know the new family. Registration is P2/P3 wiring scope. No S3 code upload has occurred (base's 15:06Z cot deploy window also respected), so no deployed-MATCH claim exists to check."
+  },
+  {
+   "item": "deep-history backfill exercise of the A-chain",
+   "reason": "custody floor is 2026-06-09 (47 partitions at build) -- the backfill program IS the B-group's initial build per the COT spec; A artifacts are date-parameterized and ready for it."
+  },
+  {
+   "item": "runner_common.py acceptance rows in THIS instance",
+   "reason": "the shared harness is the PARQUET-WRITER-FORMAT group's artifact and carries its own battery in PROOF_OF_SPEC_P1_COT_PARQUET-WRITER-FORMAT_20260811.json; listed there, not double-counted here."
+  }
+ ],
+ "surprises": [
+  "fact_allocations' true grain is Account x REP-ASSIGNMENT, not account: 1,532 rows / 888 accounts / 948 distinct (account, relationship) memberships; rep_code is the ONLY column varying across an account's rows (641 accounts), and `Account Rep Fee Split` ships in-schema. The per-membership rep-code SET is carried on dim_relationship (sorted join + count); the rep x split attribution projection is ADVI/D-lane scope, declared.",
+  "fact_transactions partitions are ROLLING-WINDOW daily exports: 537,278 raw rows across 64 partitions dedupe to 59,114 distinct TransactionID (~9x). A union-without-dedup ledger would inflate every flow number; keep-last-partition dedup carries restatement semantics (_partition_date = the surviving export).",
+  "The vendor ships its OWN external-flow designation (`External Flow` enum {None, Contribution, Withdrawal}) -- neither sibling firm has one. Carried as a corroboration axis. HEADLINE DISAGREEMENT: BD marks ALL 594 Management Fee rows external-Withdrawal where GIPS classes them FEE-MANAGEMENT (never external) -- a vendor-NNA-vs-GIPS methodology divergence, adjudicated at C_00 with provenance, and an NNA-definition ruling candidate. Also: 202 of 11,599 Buy rows marked Contribution, 9 Sale rows + 57 Tax Withholding rows + 86 Expense rows marked Withdrawal.",
+  "Full-series type census = 16 types / 28 pairs; the COT spec's 14x21 were window-sample counts (the spec's own prior-3 warning, confirmed by measurement).",
+  "UNRESOLVED = the Corporate Action family (5 sub-types, 64 rows, $3.34M abs) + Return of Capital (1 row) -- exactly the INF five-code-amendment class. Taxonomy amendment is a ruling-class act: surfaced to COO, never guessed. Cross-check: corporate-action rows carry amount_sum $0.00 (Merger/Spinoff/Splits) consistent with non-cashflow reclassification events.",
+  "Collection detection ABSENT-with-shape is now MEASURED (the COT spec had it unverified): 0 of 618 Management Fee rows are non-rebate payee-side credits across the full series; the 24 positive rows are all Rebate sub-type (fee reversals into client accounts, max specimen class identical to INF's $0.17 lesson).",
+  "One Cash Withdrawal row carries a ZERO amount (not positive -- the sign census's 1149/1150 residual named exactly).",
+  "The classification key must be the (type, sub_type) PAIR: Buy x Dividend Reinvestment (DRIP leg), Management Fee x Rebate (fee reversal), Expense x Tax Withholding (withholding) all cross type boundaries with different semantics -- a type-only rule list would misclass all three.",
+  "No forced path constant exists in the family: the writer REFUSES an empty output root -- F-1 remains fully undecided by this build.",
+  "TRANSPOSABILITY TALLY, BOTH FRAMES per CTO ruling (quoting either alone misleads ~14 points): rows-verbatim ~62% (harness+script structure from the INF family: a04 ~90%, harness ~85%, a02 ~70%, a05 ~55%, a03 ~50%, a00 ~40%, a01 ~20% -- the native-grain artifact is COT-novel) BESIDE judgment-calls-diverged 46% (6 of 13 acceptance rows rest on a COT-specific call). The 9 calls, named: (1) monolith blackdiamond/cottonwood home over the opal-data-cot snake_case twin (one input plane, 17b grammar); (2) spine key = BD-internal AccountID, custody Account Number = passthrough display family never joined; (3) TXN-ONLY-HISTORICAL universe class; (4) txn full series = union + TransactionID dedup keep-last-partition (rolling-window exports); (5) rep attribution carried at membership grain as a set; (6) authored classification rules pending ratification (no ratified cot taxonomy exists); (7) vendor External Flow corroboration axis carried per pair + row; (8) pair-grain rules, never type-only; (9) frontier-edge gap reading under the T-1 law. Consistent with the measured curve: Group A front-loads firm-specific work (~A's A was 64%)."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/logs/2026-08-11/cot_p1_group_a.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-to",
+   "invocation": "comp-to COT_RUNNER_REFACTOR.P1.scripts-groups-a-c-scoped",
+   "result": "session TO context set (race-free per-session file)"
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find --name COT_ABCD* / comp-find collapse_relationship_grain",
+   "result": "located the ratified spec (1 hit / 25,376 scanned) and the canonical collapse (2 DEF hits: build_dim_model_portfolio.py:149 canonical + the Lambda vendoring precedent) -- vendored with citation per that precedent"
+  },
+  {
+   "tool": "comp-validate",
+   "invocation": "(deferred)",
+   "result": "new family unregistered -- NO_CONFIG = UNVALIDATED, recorded as DECLARED exclusion, never signaled SAFE"
+  },
+  {
+   "tool": "comp-pipescript",
+   "invocation": "(deferred)",
+   "result": "registry lacks runners_cot; registration = P2/P3 scope, declared"
+  }
+ ]
+}

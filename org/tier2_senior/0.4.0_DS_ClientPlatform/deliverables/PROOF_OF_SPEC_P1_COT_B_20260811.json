@@ -1,0 +1,213 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COT_RUNNER_REFACTOR.P1.scripts-groups-a-c-scoped",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_B_VALUATION_20260811.md (transposed per org/tier1_exec/4.0.0_SA_CRO/deliverables/COT_ABCD_SHAPE_SPEC_20260811.md Group B incl. the CTO 074437Z collapse amendment)",
+  "group": "B",
+  "vintage_commit": "39c41163cd"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~B",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/b00_canonical_valuation.py",
+   "kind": "script",
+   "commit_or_etag": "05d35274de",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "P1 is SCRIPTS; runtime home + schedule are P2/P3, product root undecided (F-1)"
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/b01_canonical_positions.py",
+   "kind": "script",
+   "commit_or_etag": "05d35274de",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/b02_accrual_decision.py",
+   "kind": "script",
+   "commit_or_etag": "05d35274de",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/b03_valuation_integrity.py",
+   "kind": "script",
+   "commit_or_etag": "05d35274de",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "COT-B-B00-ROWCOUNT",
+   "criterion_verbatim": "canonical_valuation row count == boundary IN_CLIENT_BOOK count for the partition; NULL-status rows carried, never dropped; denominators printed",
+   "method": "command",
+   "invocation": "python b00_canonical_valuation.py --as-of 2026-08-11 --output-root <root>  (run from data/cot/scripts/gold/runners_cot/)",
+   "output_evidence": "DENOMINATOR: rowcount-identity: 925 of 925 IN_CLIENT_BOOK accounts (NULL-status rows carried, not dropped) (100.00%)",
+   "denominator": "925 of 925 IN_CLIENT_BOOK accounts @ boundary_version 12f3e7f0...",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-B00-COLLAPSE",
+   "criterion_verbatim": "V(t) routed THROUGH collapse_relationship_grain() (CTO amendment 074437Z); the live dual-row census printed with the naive-vs-collapsed delta",
+   "method": "command",
+   "invocation": "python b00_canonical_valuation.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "LIVE DUAL-ROW CENSUS: 4 custody rows duplicate an (AccountID, AssetID) position across relationships; naive book total $481,317,939.26 vs collapsed $481,112,868.49 (delta $205,070.77 = the double-count removed) -- EXACTLY the DC1-measured double-count (@387fa87c90 class: account z0927448821, two LP assets under two relationships), to the cent",
+   "denominator": "4 dual rows of 17,113 custody rows; delta $205,070.77 of $481.3M naive book",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-B00-DUPFIXTURE",
+   "criterion_verbatim": "the spec-mandated mutant: one duplicated-relationship fixture must FAIL the naive sum and PASS the collapsed one (an account under 2+ relationships sums ONCE); the DC1 equality assert must FIRE on a differing dual pair",
+   "method": "command",
+   "invocation": "python b00_canonical_valuation.py --qa-dup-fixture",
+   "output_evidence": "DUP-FIXTURE: naive=250.00 (DOUBLE-COUNTS, != 150.00: FAILS AS EXPECTED) | collapsed=150.00 (PASSES) | DC1 EQUALITY ASSERT: fired as expected on a differing dual pair (refused, never keep-first)",
+   "denominator": "N/A -- boolean pair: naive MUST fail, collapsed MUST pass; both limbs exercised",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-B00-NULLSTATUS",
+   "criterion_verbatim": "ABSENCE IS SERVE LAW (Andrew-direct ~1450Z): an account whose custody rows are all null carries V(t)=NULL with value_status=ALL-ROWS-NULL, NEVER a laundered $0.00; census printed",
+   "method": "command",
+   "invocation": "python b00_canonical_valuation.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "VALUE-STATUS CENSUS: {'OK': 889, 'ALL-ROWS-NULL': 36} (of 925 boundary accounts) | market_value/unaccrued/accrued set to None on non-OK rows in code (never 0.0); null_row_count carried per account (4,500 null custody rows measured)",
+   "denominator": "36 ALL-ROWS-NULL + 889 OK == 925 boundary accounts",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-B00-DECOMP-IDENTITY",
+   "criterion_verbatim": "the native decomposition identity fair_value == unaccrued + accrued holds per OK account (identity control); one KNOWN account's spot-tie vs raw collapsed custody (positive control)",
+   "method": "command",
+   "invocation": "python b00_canonical_valuation.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "DENOMINATOR: decomposition-identity MV==UMV+Accrual: 889 of 889 OK accounts (100.00%) | SPOT-TIE (positive control): account z0926819471 V(t)=26,517,929.47 vs raw collapsed custody @ 2026-08-07=26,517,929.47 -> TIE",
+   "denominator": "889 of 889 OK accounts; 1-account positive control TIE",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-B01-PASSTHROUGH",
+   "criterion_verbatim": "custody passthrough at VENDOR grain: in-count == out-count, zero rows silently dropped; every source column carried content-named or DECLARED excluded (no silent column drops)",
+   "method": "command",
+   "invocation": "python b01_canonical_positions.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "COLUMN ACCOUNTING: 15 carried content-named + 9 declared exclusions == 24 source columns (a SILENT-DROP GUARD raises on any unaccounted column) | DENOMINATOR: rowcount-identity (passthrough): 17113 of 17113 source custody rows (zero rows silently dropped) (100.00%)",
+   "denominator": "17,113 of 17,113 custody rows; 24 of 24 source columns accounted",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-B01-FLAGS",
+   "criterion_verbatim": "quality flags per row (sec9 instantiated on what the cot substrate ships): null MV, zero-units-nonzero-mv, dual-relationship row, decomposition deviation; denominators printed; the absent vendor stale-price column DECLARED as a divergence",
+   "method": "command",
+   "invocation": "python b01_canonical_positions.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "null_market_value_flag: 4500 of 17113 (26.30%) | zero_units_nonzero_mv_flag: 0 | dual_relationship_row_flag: 4 | decomposition_deviation_flag: 0 | stale-price divergence declared in manifest (no secprice_lstupdte analogue on cot custody rows)",
+   "denominator": "17,113 custody rows per flag",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-B02-VERDICT",
+   "criterion_verbatim": "the accrual artifact LANDS carrying the RAW-IN-ROW verdict with measured grounding (uniformity of shape across firms); NO materiality gate -- resolved by construction, the asymmetry table's 'cot best' cell executed; the in-row identity verified never assumed",
+   "method": "command",
+   "invocation": "python b02_accrual_decision.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "DENOMINATOR: in-row decomposition identity |MV-(UMV+Accrual)|<=$0.01: 12611 of 12611 nonnull collapsed positions @ 2026-08-07 (100.00%) | ACCRUAL MAGNITUDE (evidence, not a gate): $298,435.48 of $481,112,868.49 book fair value (6.20bp) across 264 accrual-bearing positions | verdict=RAW-IN-ROW",
+   "denominator": "12,611 of 12,611 nonnull collapsed positions",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-B03-TIE",
+   "criterion_verbatim": "the integrity flag plane grades every boundary account-day at the 1bp ex-ante-provisional tolerance (ruled-recalibration clause carried verbatim); THREE legs each with derivation stated (collapse identity = shared derivation BUILD check; dual-count census; independent roster tie = different derivation, coverage denominators)",
+   "method": "command",
+   "invocation": "python b03_valuation_integrity.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "collapse identity: 889 of 889 OK accounts | DUAL-COUNT CENSUS: 1 account (z0927448821), $205,070.77 | RECON-STATUS CENSUS (925): TIE 888 (96.00%) / VARIANCE-EXPLAINED 0 / VARIANCE-UNEXPLAINED 0 / NO-INDEPENDENT-SURFACE 37 (4.00%) / VINTAGE-SKEW-DECLARED 0, same-vintage roster@2026-08-07. THE SPECIMEN: z0927448821 roster_account_mv $205,070.77 == collapsed sum (variance -0.0, TIE) vs naive $410,141.54 -- BD's own independent account-level number corroborates the COLLAPSED sum to the cent",
+   "denominator": "888 TIE + 0 UNEXPLAINED + 37 NO-SURFACE + 0 others == 925 boundary account-days",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-B03-MUTANT",
+   "criterion_verbatim": "a poisoned roster MV (mutant) lands VARIANCE-UNEXPLAINED, never TIE; canonical census restored on rerun",
+   "method": "command",
+   "invocation": "python b03_valuation_integrity.py --as-of 2026-08-11 --output-root <root> --qa-poison-account z0926819471",
+   "output_evidence": "QA-MUTANT: poisoned account z0926819471 roster MV x1.5 | VARIANCE-UNEXPLAINED: 1 of 925 (0.11%), abs $13,258,964.73 | restore run: TIE 888, VARIANCE-UNEXPLAINED 0",
+   "denominator": "N/A -- boolean: 1 poisoned account must flip to VARIANCE-UNEXPLAINED and restore",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-ALL-PROVENANCE",
+   "criterion_verbatim": "provenance cols (source_pipeline, _ingested_at) present on every Group B artifact (atom 9)",
+   "method": "command",
+   "invocation": "python reading all 4 emitted parquets and checking both columns",
+   "output_evidence": "canonical_valuation/canonical_positions/accrual_decision/valuation_integrity: provenance_cols=BOTH-PRESENT (4 of 4)",
+   "denominator": "4 of 4 Group B artifacts",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-ALL-MANIFEST",
+   "criterion_verbatim": "atom-3 manifest written per artifact; boundary_version stamped on every consumer",
+   "method": "command",
+   "invocation": "ls <root>/_manifests/2026-08-11/",
+   "output_evidence": "6 B-family manifest files (4 tables incl. b03 control runs), each carrying data_as_of/process_ts/rows/columns/inputs + boundary_version 12f3e7f0... on all four",
+   "denominator": "4 of 4 artifacts manifested (6 files incl. control runs)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-B-ALL-COMPILE",
+   "criterion_verbatim": "stage-by-stage py_compile pass logged per script at its build stage",
+   "method": "command",
+   "invocation": "python -m py_compile <file> per build stage; commit-gate at commit",
+   "output_evidence": "STAGE-COMPILE PASS: b00+b01+b02 stage, b03 stage. Commit-gate (py_compile + AST + ruff): 4 of 4 pass first try.",
+   "denominator": "4 of 4 B files stage-compiled",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "TWO mutants: (1) b00 --qa-dup-fixture: synthetic dual-relationship account must FAIL naive / PASS collapsed + the DC1 equality assert must fire on a differing pair; (2) b03 --qa-poison-account: 1.5x roster MV must land VARIANCE-UNEXPLAINED never TIE",
+   "expected": "fixture: naive 250 != 150, collapsed == 150, assert fires | poison: VARIANCE-UNEXPLAINED >= 1",
+   "observed": "fixture: exactly as expected, both limbs | poison: VARIANCE-UNEXPLAINED 1 of 925 ($13.26M), restored to 0 on rerun",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "b03 canonical run before and after the mutant run compared on the recon-status census",
+   "observed": "TIE 888 / UNEXPLAINED 0 identical across both canonical runs; b00 spot-tie positive control TIE",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the 525-partition-class deep backfill of the B chain (49F spec design rule 3)",
+   "reason": "the cot custody floor is 2026-06-09 (47 partitions at build) and the COT spec rules 'the backfill program IS the B-group's initial build' -- all four scripts are date-parameterized and idempotent, ready for the backfill walk; the walk itself is the build-execution act, not P1-SCRIPTS scope. Post-backfill the B_03 variance DISTRIBUTION reports for the ruled tolerance re-set."
+  },
+  {
+   "item": "B_00 source swap to a BD account-level authoritative total",
+   "reason": "a RULED SPEC-AMENDMENT EVENT per the COT spec, gated on the RECON-5a inventory. The roster Account Market Value surface (measured at-rest this build) is consumed as B_03's TIE only; B_00 stays on the named collapsed SUM."
+  },
+  {
+   "item": "comp-validate / comp-pipescript rows for the B family",
+   "reason": "same registry gap as Group A -- consolidated by COO to CTO as ONE act covering all three firm families (COO acceptance 160305Z); P2/P3 wiring scope."
+  }
+ ],
+ "surprises": [
+  "THE COLLAPSE IS NOW VENDOR-CORROBORATED, not merely ruled: BD's own account-level MV (fact_allocations Account Market Value) ties the COLLAPSED sum on 888 of 925 accounts at 1bp with ZERO unexplained variances -- and on the dual-relationship specimen z0927448821 it equals the collapsed $205,070.77 exactly (naive would serve $410,141.54). The vendor itself collapses relationship grain in its account-level number.",
+  "The live double-count delta is EXACTLY the DC1-measured figure: $205,070.77, to the cent, on the same account the 08-04 ruling measured (z0927448821, two LP assets under two relationships).",
+  "The COT spec's OPEN cell #2 (no account-level authoritative total measured) is now PARTIALLY CLOSED BY MEASUREMENT: fact_allocations carries Account Market Value at rest, 889 of 925 boundary accounts covered, same-vintage with custody. Consumed as B_03's tie per the spec's fallback clause; whether it becomes B_00's AUTHORITATIVE source is RECON-5a's ruled event, explicitly not decided here.",
+  "36 boundary accounts carry ALL-ROWS-NULL custody value (V(t)=NULL served, never $0) and 37 lack the independent roster surface -- 36 of the 37 are the same accounts (the null class is also the roster-absent class), 1 OK-valued account is simply unrostered.",
+  "Zero decomposition deviations at the position level (12,611/12,611) AND the account level (889/889): the vendor's in-row MV = UMV + Accrual identity is exact across the whole book -- B_02's RAW-IN-ROW verdict rests on measurement, not schema trust.",
+  "TRANSPOSABILITY TALLY, BOTH FRAMES per CTO ruling: rows-verbatim ~78% (b03 ~75%, b00 ~70%, b01 ~85%, b02 ~30% -- the verdict artifact is COT-novel in content, INF-shaped in form; the B-group inherits the A-group harness so structure dominates) BESIDE judgment-calls-diverged 31% (4 of 13 rows rest on a COT-specific call). The 5 calls, named: (1) fair_value = market_value with accrual EMBEDDED (never re-added -- the INF/49F fair_value=X+accrued identity does not transpose because cot's MV already contains accrual); (2) the roster Account Market Value consumed as B_03's independent tie (the OPEN-cell fallback exercised); (3) NO-INDEPENDENT-SURFACE minted as a recon_status member (neither sibling needed it); (4) value_status ALL-ROWS-NULL minted (cot's real-null class; INF's zero-coercion classes do not transpose -- cot ships REAL nulls, not coerced zeros); (5) B_01 passthrough keeps VENDOR grain with the collapse contract on the manifest rather than collapsing (the passthrough-vs-gateway split). Curve check: 62% -> 78% matches ~A's 64% -> 79% almost exactly."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/logs/2026-08-11/cot_p1_groups_a_b.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-to",
+   "invocation": "comp-to COT_RUNNER_REFACTOR.P1.scripts-groups-a-c-scoped",
+   "result": "session TO context carried from Group A"
+  },
+  {
+   "tool": "comp-validate",
+   "invocation": "(deferred)",
+   "result": "registry gap consolidated to CTO as ONE act (COO 160305Z); NO_CONFIG = UNVALIDATED, never signaled safe"
+  },
+  {
+   "tool": "comp-pipescript",
+   "invocation": "(deferred)",
+   "result": "same consolidated act; no deploy leg exists in P1 to verify"
+  }
+ ]
+}
