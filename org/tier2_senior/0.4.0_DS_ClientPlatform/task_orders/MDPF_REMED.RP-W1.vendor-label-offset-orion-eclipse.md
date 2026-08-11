@@ -93,6 +93,11 @@ EXERCISED, not config-read (Rule 22a):
    orion date and one eclipse date, values shown, in the session log.
 2. `lag_vs_as_of_days` asserts a nonzero value on a run where lag exists (exercise it; show the run).
 3. NEGATIVE CONTROL: one schwab and one blackdiamond served label shown UNCHANGED pre/post.
+3a. VINTAGE-CONTRADICTION CHECK (CTO 003242Z, verification not a new remedy): the 08-08 emitter
+   death was a VintageContradiction — inflection_models @2026-08-06 claiming fresh while
+   as_of=2026-08-05, the same one-trading-day shape as D-4/D-10. As part of W1 verification, state
+   whether your label fix DISSOLVES that contradiction or leaves it standing. CTO explicitly does
+   NOT assert it dissolves — measure, do not assume; a separate remedy is scoped only if it survives.
 4. Session log Compiler Tools section reproduces every &lt;run&gt; above with observed output and
    explicit pass/fail vs &lt;expect&gt;. Missing rows = REWORK.
 Completion bar context (plan §5): the WORKSTREAM completes only when the scheduled cycle emits with

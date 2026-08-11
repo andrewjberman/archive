@@ -38,6 +38,9 @@ this leg outside that window — even with W1 "complete" but not yet live — re
 silences the only guard keeping a wrong number off the served plane.**
 
 ## SCOPE (once un-gated)
+**LIVE CORROBORATION (AE, 08-10, in production — CTO: "stronger than anything in my plan"):** the
+08-10 aggregate ran at 13:00:58Z, BEFORE the day's smartx pull even landed at 13:36Z — the clock
+defect this TO fixes, observed in the wild, not inferred from a schedule table.
 Current order is backwards: floor reads 13:00Z; smartx silver 13:40:47Z (AXIS SOURCE), orion
 14:16:05Z, eclipse 22:31:08Z land after. **THE BOTTLENECK IS THE MIRRORS, NOT THE VENDORS** —
 eclipse data sits in `opal-data-inf` by ~14:48Z and waits ~7.5h for the 22:30Z mirror.
