@@ -1,0 +1,97 @@
+[
+{"slug":"aum_metrics","short":"aum-metrics","key":"platinum/mdpf/{scope}/aum-metrics.json","tier":"PLATINUM (serving tier)","state":"LIVE","state_class":"live","rendered":"RENDERED","family":"scope family x4: global · 49financial · inflection · cottonwood (one publisher, one schema)",
+ "coords":"<b>/model-portfolios</b><span class=\"arrow\">→</span>header · Page header + Portfolio Analytics summary<span class=\"arrow\">→</span>panel <b>\"Portfolio Analytics\"</b> ({AUA} by Model donut + Client Holdings histogram)",
+ "facts":[["Served route","<code>/api/general/mdpf/{scope}/aum-metrics.json</code> (CF rewrite → platinum/mdpf/; fetch getAUMMetricsByFirm, endpoints/aum.ts:600-612)"],["Producer","opal-assets-mdpf-portal-publisher (writes all 4 scopes)"],["Vintage","<code>_provenance.source_vintages</code> — live value 2026-08-05; NO top-level as_of_date; S3 LastModified 2026-08-10T13:50:50Z"],["Size / read","6,809 bytes, portal_lookup read COMPLETE 2026-08-10"]],
+ "fields":[["_provenance","object","written_by / written_at / source_keys / source_vintages — publisher provenance"],["by_model","list[7] of object","one element per model cohort"],["by_model[].model_name","string","e.g. Ultra Short-Term"],["by_model[].aum","number (USD)","e.g. 51,737,347.29"],["by_model[].account_count","integer","e.g. 186"],["by_model[].q0..q3","object","per-quarter {change USD, growth pct, priorLevel USD}"],["_provenance.source_vintages","object · VINTAGE","e.g. global/aum-metrics: 2026-08-05"]],
+ "evidence":["Render: ModelPortfolios.tsx:1226-1646 (PanelHeader :1228; donut :1241; histogram :1500; PanelFooter dataAsOf :1634-1645)","Retrieval: portal_lookup get mdpf-platinum global/aum-metrics.json 2026-08-10 (6,809 bytes, COMPLETE)"]},
+
+{"slug":"account_distribution","short":"account-distribution","key":"platinum/mdpf/{scope}/account-distribution.json","tier":"PLATINUM (serving tier)","state":"LIVE","state_class":"live","rendered":"RENDERED","family":"scope family x4: global · 49financial · inflection · cottonwood",
+ "coords":"<b>/model-portfolios</b><span class=\"arrow\">→</span>header · Portfolio Analytics summary<span class=\"arrow\">→</span>panel <b>\"Portfolio Analytics\"</b> (Client Holdings histogram partition)",
+ "facts":[["Served route","<code>/api/general/mdpf/{scope}/account-distribution.json</code> (getAccountDistributionByFirm, endpoints/aum.ts:520-533; global ModelPortfolios.tsx:521, per-firm :446)"],["Producer","opal-assets-mdpf-portal-publisher"],["Vintage","<code>_provenance.source_vintages</code> — live value 2026-08-06; LastModified 2026-08-10T13:50:50Z"],["Size / read","8,140 bytes, read COMPLETE 2026-08-10"],["LIVE SERVED BELL","hyphenated account-distribution.json is a LIVE SERVED PORTAL BELL (CLAUDE.md 17b) — serving-path changes gated"]],
+ "fields":[["_provenance","object","same publisher provenance block"],["basis","string|null","null at global"],["by_model","object(7 models)","keyed by model display name"],["by_model.{m}.account_count","integer","e.g. 2,028"],["by_model.{m}.active_accounts_count","integer","e.g. 2,040"],["by_model.{m}.excluded_unfunded_count","integer","e.g. 12"],["by_model.{m}.histogram","object","bin_labels[20], bins[21], counts[20]; e.g. $1K-$2K"],["by_model.{m}.min/max/mean/median","number (USD)","e.g. 95,318.82"],["by_model.{m}.percentiles","object (USD)","p10/p25/p50/p75(/p95)"],["_provenance.source_vintages","object · VINTAGE","e.g. global/account-distribution: 2026-08-06"]],
+ "evidence":["Render: ModelPortfolios.tsx:1226-1646 (shares the Portfolio Analytics panel with aum-metrics)","Retrieval: portal_lookup get mdpf-platinum global/account-distribution.json 2026-08-10 (8,140 bytes, COMPLETE)"]},
+
+{"slug":"aggregate_aua_timeseries","short":"aggregate-aua-timeseries","key":"platinum/mdpf/{scope}/aggregate-aua-timeseries.json","tier":"PLATINUM (serving tier)","state":"LIVE","state_class":"live","rendered":"RENDERED (2 sites)","family":"scope family x4: global · 49financial · inflection · cottonwood",
+ "coords":"<b>/model-portfolios</b><span class=\"arrow\">→</span>header (headline value/count) <b>AND</b> tab Growth<span class=\"arrow\">→</span>panel <b>\"{AUA} Trend Analysis\"</b> (Period End Summary + Daily {AUA} Analysis; Global=since-inception, per-firm=rolling-1Y)",
+ "facts":[["Served route","<code>/api/general/mdpf/{scope}/aggregate-aua-timeseries.json</code> (getMdpfAggregateAUATimeSeriesByFirm, portal-proxy.ts:523-526; global fetch ModelPortfolios.tsx:392, per-firm :379)"],["Producer","opal-assets-mdpf-portal-publisher"],["Vintage","<code>as_of_last</code> — live value 2026-08-05 (no as_of_date field); LastModified 2026-08-10T13:50:50Z"],["Size / read","293,691 bytes, read COMPLETE 2026-08-10"],["Design note","count toggle REMOVED Andrew-direct 2026-07-29 @72f132c5 — value basis only on the Growth tab"]],
+ "fields":[["_provenance","object","publisher provenance"],["firm_id / partner_name","string","global / Global"],["dates","list[448] of date","2024-11-01 .."],["as_of_first / as_of_last","date · VINTAGE (last)","2024-11-01 / 2026-08-05"],["model_aua","list[448] number (USD)","e.g. 436,842,747.89"],["non_model_aua","list[448] number (USD)","e.g. 358,546,854.80"],["inflection_non_model_aua","list[448] number (USD)","e.g. 151,546,249.41"],["opal_aggregate_aua","list[448] number (USD)","e.g. 795,389,602.69"],["account_count_total(_raw)","list[448] integer","e.g. 2,826"],["by_model","object(9 cohorts)","display_name, cohort_class(model|sma), account_count[448], model_value[448]"],["cohort_provenance","list[448] of object","per-date per-partner measured|absent + as_of_by_partner"],["count_as_of/basis/provenance/point_class","list[448]","count-lineage arrays (measured|...)"],["partner_custody_total","list[448] of null","null-valued at global scope"],["non_model_assets_detail","object","4-key detail block"],["meta / source_vintage_last","object(22) / object(8)","producer metadata / per-feeder vintage map"]],
+ "evidence":["Render (canonical): header headline, ModelPortfolios.tsx:392/:379; Growth tab :1713-1720 (h3), :1752 stacked bars, :2000 daily lines","Retrieval: portal_lookup get mdpf-platinum global/aggregate-aua-timeseries.json 2026-08-10 (293,691 bytes, COMPLETE)"]},
+
+{"slug":"mp_timeseries","short":"model_portfolio_timeseries","key":"json/benchmarks/model_portfolio_timeseries.json","tier":"JSON tree (pre-platinum)","state":"LIVE","state_class":"live","rendered":"RENDERED","family":null,
+ "coords":"<b>/model-portfolios</b><span class=\"arrow\">→</span>tab Benchmark (id: performance)<span class=\"arrow\">→</span>panel <b>\"Return vs Volatility\"</b> (multi-view: Rolling Sharpe / Upside-Downside Capture / Maximum Drawdown)",
+ "facts":[["Served route","<code>/api/general/benchmarks/model_portfolio_timeseries.json</code> (getModelPortfolioTimeseries, portal-proxy.ts:858; fetched inside ReturnVolatilityScatter.tsx:334)"],["Vintage","<code>data_as_of</code> — live value 2026-08-07; generated_at 2026-08-08T11:05:46Z"],["Size / read","718,959 bytes, read COMPLETE 2026-08-10"],["Series basis","Yang model-DESIGN return series (model.pkl-derived) per its own series_note"]],
+ "fields":[["generated_at","datetime","2026-08-08T11:05:46Z"],["data_as_of","date · VINTAGE","2026-08-07"],["inception_date","date","2024-04-30"],["rfr_tenors","object(5 models)","risk-free-rate tenor per model code, e.g. UST: 1Y"],["series_note","string","Yang model-DESIGN return series"],["timeseries","list[2970] of object","one row per date x model_code"],["timeseries[].date / model_code","date / string","2024-04-30 / INT"],["timeseries[].model_return","number (decimal)","-0.009261"],["timeseries[].benchmark_return","number (decimal)","-0.007215"],["timeseries[].index_benchmark_return","number (decimal)","-0.007215"],["timeseries[].etf_benchmark_return","number (decimal)","-0.009507"]],
+ "evidence":["Render: components/ReturnVolatilityScatter.tsx (PANEL_CONFIG titles :80-95; mounted ModelPortfolios.tsx:2263-2269, performance tab only)","Retrieval: portal_lookup get benchmarks model_portfolio_timeseries.json 2026-08-10 (718,959 bytes, COMPLETE)"]},
+
+{"slug":"mp_benchmarks","short":"model_portfolio_benchmarks","key":"json/benchmarks/model_portfolio_benchmarks.json","tier":"JSON tree (pre-platinum)","state":"LIVE","state_class":"live","rendered":"RENDERED (2 sites)","family":null,
+ "coords":"<b>/model-portfolios</b><span class=\"arrow\">→</span>tab Benchmark<span class=\"arrow\">→</span>panel <b>\"Benchmark Comparison\"</b> (canonical; net-of-36bps spread framing) + passed as props into \"Return vs Volatility\"",
+ "facts":[["Served route","<code>/api/general/benchmarks/model_portfolio_benchmarks.json</code> (getModelPortfolioBenchmarks, portal-proxy.ts:826-828; fetch ModelPortfolios.tsx:533, performance tab lazy)"],["Vintage","<code>data_as_of</code> — live value 2026-08-07; generated_at 2026-08-08T11:05:45Z"],["Size / read","19,200 bytes, read COMPLETE 2026-08-10"],["Design note","internal-only benchmark-type toggle SHOW_BENCHMARK_TOGGLE at :2279"]],
+ "fields":[["generated_at","datetime","2026-08-08T11:05:45Z"],["data_as_of","date · VINTAGE","2026-08-07"],["periods","list[10] of string","1D .."],["inception_date","date","2024-04-30"],["models","list[5] of object","one per model; code/name e.g. UST / Ultra-Short Term"],["models[].returns.{period}","object","9 measures per period"],["models[].returns.{period}.model","number (pct)","0.1; model_source e.g. yang_design"],["models[].returns.{period}.index_benchmark / etf_benchmark","number (pct)","0.11 / 0.16"],["models[].returns.{period}.index_spread / etf_spread","number (pct)","-0.01"],["models[].returns.{period}.*_volatility","number (pct-annualized)","model/index/etf, e.g. 0.94"]],
+ "evidence":["Render: ModelPortfolios.tsx:2271-2352 (PanelHeader :2273); props into scatter :2264-2267","Retrieval: portal_lookup get benchmarks model_portfolio_benchmarks.json 2026-08-10 (19,200 bytes, COMPLETE)"]},
+
+{"slug":"etf_returns","short":"etf_returns","key":"json/benchmarks/etf_returns.json","tier":"JSON tree (pre-platinum)","state":"LIVE","state_class":"live","rendered":"RENDERED","family":null,
+ "coords":"<b>/model-portfolios</b><span class=\"arrow\">→</span>tab Benchmark<span class=\"arrow\">→</span>panel <b>\"Benchmark Comparison\"</b> (ETF benchmark leg)",
+ "facts":[["Served route","<code>/api/general/benchmarks/etf_returns.json</code> (getETFBenchmarkReturns, portal-proxy.ts:889-890; fetch ModelPortfolios.tsx:541)"],["Vintage","<code>data_as_of</code> — live value 2026-08-07; generated_at 2026-08-08T11:05:46Z"],["Size / read","1,278 bytes, read COMPLETE 2026-08-10"]],
+ "fields":[["generated_at","datetime","2026-08-08T11:05:46Z"],["data_as_of","date · VINTAGE","2026-08-07"],["periods","list[9] of string","1D .."],["etfs","object(5 tickers)","BIL / AGG / IVV + 2 more"],["etfs.{t}.name","string","SPDR Bloomberg 1-3 Month T-Bill ETF"],["etfs.{t}.asset_class","string","Cash"],["etfs.{t}.returns.{period}","number (pct)","0.03"]],
+ "evidence":["Render: within Benchmark Comparison (ModelPortfolios.tsx:2271-2352)","Retrieval: portal_lookup get benchmarks etf_returns.json 2026-08-10 (1,278 bytes, COMPLETE)"]},
+
+{"slug":"peer_performance","short":"peer_performance","key":"json/peers/peer_performance.json","tier":"JSON tree (pre-platinum)","state":"LIVE (month-end cadence)","state_class":"live","rendered":"RENDERED","family":null,
+ "coords":"<b>/model-portfolios</b><span class=\"arrow\">→</span>tab Peers<span class=\"arrow\">→</span>panel <b>\"Peer Performance Comparison\"</b>",
+ "facts":[["Served route","<code>/api/general/peers/peer_performance.json</code> (getPeerPerformance, portal-proxy.ts:934-935; fetch ModelPortfolios.tsx:548, lazy)"],["Vintage","<code>data_as_of</code> — live value 2026-07-31; MONTH-END basis: a month-old data_as_of is its NORMAL cadence (portal_lookup channel note)"],["Size / read","8,548 bytes, read COMPLETE 2026-08-10; generated_at 2026-08-03T13:54:45Z"]],
+ "fields":[["generated_at","datetime","2026-08-03T13:54:45Z"],["data_as_of","date · VINTAGE (month-end)","2026-07-31"],["periods","list[6] of string","1M .."],["models","object(5 models)","keyed by model code; code/name e.g. UST / Ultra Short-Term"],["models.{m}.periods.{p}.model","number (pct)","0.1654"],["models.{m}.periods.{p}.benchmark","number (pct)","0.1448"],["models.{m}.periods.{p}.peer_percentiles","object","p5/p25/p50/p75/p95 peer distribution, e.g. p50: 0.316"]],
+ "evidence":["Render: pages/ModelPortfolios/tabs/PeersTab.tsx:403-404 (PanelHeader)","Retrieval: portal_lookup get peers peer_performance.json 2026-08-10 (8,548 bytes, COMPLETE)"]},
+
+{"slug":"benchmark_returns","short":"benchmark_returns (unrendered)","key":"json/benchmarks/benchmark_returns.json","tier":"JSON tree (pre-platinum)","state":"LIVE","state_class":"live","rendered":"SERVED-BUT-UNRENDERED","family":null,
+ "coords":null,
+ "facts":[["State","refreshed daily alongside the rendered benchmark set — but no panel renders it"],["Consumer evidence","zero frontend callers: grep getBenchmarkReturns over portal/src → only its portal-proxy.ts:757 definition"],["Vintage","<code>data_as_of</code> — live value 2026-08-07"],["Size / read","12,511 bytes, read COMPLETE 2026-08-10"]],
+ "fields":[["periods","list[10]","return periods"],["benchmark_compositions","object(5 models)","e.g. UST: 100% Bloomberg 0-1 Year Treasury"],["per-benchmark returns","object","returns per benchmark per period"],["data_as_of","date · VINTAGE","2026-08-07"]],
+ "evidence":["Census row: unrendered_artifacts[0], ARTIFACT_CENSUS_MP.yaml @0c1dae3da"]},
+
+{"slug":"smartx_daily","short":"_smartx_model_daily (internal)","key":"json/benchmarks/_smartx_model_daily.json","tier":"JSON tree (underscore internal)","state":"LIVE","state_class":"live","rendered":"SERVED-BUT-UNRENDERED","family":null,
+ "coords":null,
+ "facts":[["Class","underscore-prefixed internal view — feeder output beside the rendered benchmarks"],["Consumer evidence","no portal caller found (census first-hand grep)"]],
+ "fields":null,
+ "evidence":["Census row: unrendered_artifacts[1], ARTIFACT_CENSUS_MP.yaml @0c1dae3da"]},
+
+{"slug":"smartx_monthly","short":"_smartx_model_monthly (internal)","key":"json/benchmarks/_smartx_model_monthly.json","tier":"JSON tree (underscore internal)","state":"LIVE","state_class":"live","rendered":"SERVED-BUT-UNRENDERED","family":null,
+ "coords":null,
+ "facts":[["Class","same class as _smartx_model_daily — internal feeder view"],["Consumer evidence","no portal caller found (census first-hand grep)"]],
+ "fields":null,
+ "evidence":["Census row: unrendered_artifacts[2], ARTIFACT_CENSUS_MP.yaml @0c1dae3da"]},
+
+{"slug":"non_model_assets","short":"non-model-assets (retired fetch)","key":"platinum/mdpf/global/non-model-assets.json","tier":"PLATINUM (serving tier)","state":"LIVE (still published)","state_class":"live","rendered":"SERVED-BUT-UNRENDERED","family":null,
+ "coords":null,
+ "facts":[["State","still published 2026-08-10T13:50:50Z — but the page reads non_model_aua from the canonical timeseries instead"],["Consumer evidence","legacy non_model fetch RETIRED Andrew-direct ~0340Z (ModelPortfolios.tsx:530-532 comment); portal-proxy.ts:414 fetch commented out"],["Vintage","latest.date — live value 2026-08-05"],["Size / read","85,641 bytes, read COMPLETE 2026-08-10"]],
+ "fields":[["latest","object","{date, enterprise_total, model_aum, non_model_aum, non_model_pct}"],["time_series","list[445] of object","{period, ...} history"],["latest.date","date · VINTAGE","2026-08-05"]],
+ "evidence":["Census row: unrendered_artifacts[3], ARTIFACT_CENSUS_MP.yaml @0c1dae3da"]},
+
+{"slug":"account_units","short":"cottonwood/account-units","key":"platinum/mdpf/cottonwood/account-units.json","tier":"PLATINUM (serving tier)","state":"LIVE (published daily)","state_class":"live","rendered":"SERVED-BUT-UNRENDERED","family":null,
+ "coords":null,
+ "facts":[["State","published 2026-08-10T13:50:49Z"],["Consumer evidence","zero portal callers (grep account-units over portal/src: none)"],["Vintage","<code>value_date</code> (role: vintage)"],["Basis","bd-rebalancer-models + bd-datamining-values"],["Size / read","7,767 bytes, read COMPLETE 2026-08-10"]],
+ "fields":[["firm_id / generated_at / assignment_date","string / datetime / date","cottonwood scope"],["value_date","date · VINTAGE","per its own basis note"],["basis","string","bd-rebalancer-models + bd-datamining-values"],["total_unit_values","list[298]","unit-value series"],["by_model_unit_values","object(5)","per-model unit values"]],
+ "evidence":["Census row: unrendered_artifacts[4], ARTIFACT_CENSUS_MP.yaml @0c1dae3da"]},
+
+{"slug":"manifests","short":"_manifests/** (ops metadata)","key":"platinum/mdpf/_manifests/** (6 keys incl. latest.json)","tier":"PLATINUM (serving tier)","state":"LIVE","state_class":"live","rendered":"SERVED-BUT-UNRENDERED","family":"6 keys",
+ "coords":null,
+ "facts":[["Class","publisher run-manifests — ops metadata, not a portal surface"],["Consumer evidence","no portal render site; operational readers only"]],
+ "fields":null,
+ "evidence":["Census row: unrendered_artifacts[5], ARTIFACT_CENSUS_MP.yaml @0c1dae3da"]},
+
+{"slug":"archive","short":"archive/** (444 frozen keys)","key":"platinum/mdpf/archive/** (444 keys)","tier":"PLATINUM (serving tier)","state":"FROZEN — NOT servable","state_class":"frozen","rendered":"EXCLUDED FROM SERVING","family":"aggregate_aua/YYYY-MM-DD.json x439 + aggregate_aua_timeseries.json underscore twin + etf_ownership_timeseries/{4 ETFs}.json",
+ "coords":null,
+ "facts":[["State","archived by Andrew's order 2026-08-06; NOT servable"],["Consumer evidence","BUCKET_ALLOWLIST.yaml excluded rows (archive/** ... NOT servable; underscore twins retired — serve the hyphen files only)"]],
+ "fields":null,
+ "evidence":["Census row: unrendered_artifacts[6], ARTIFACT_CENSUS_MP.yaml @0c1dae3da"]},
+
+{"slug":"json_mdpf","short":"json/mdpf/** (legacy tree)","key":"json/mdpf/** (10 keys)","tier":"JSON tree (legacy pre-platinum-flip)","state":"FROZEN — not the served origin","state_class":"frozen","rendered":"NO ROUTE SERVES THIS TREE","family":"per-firm account-distribution x4 + aggregate-aua-timeseries x5 (incl. bare) + cottonwood/aum-metrics",
+ "coords":null,
+ "facts":[["State","legacy pre-platinum-flip tree; CF rewrites /api/general/mdpf/ → platinum/mdpf/ (comp-routes rewrites, live 2026-08-10)"],["Flip record","portal-proxy.ts:504-516 records the flip"],["Teardown status","json/mdpf/* teardown is PARKED (CLAUDE.md 17b) — moving a served key is NEVER#3 territory; this tree is a disposition question, not an action"]],
+ "fields":null,
+ "evidence":["Census row: unrendered_artifacts[7], ARTIFACT_CENSUS_MP.yaml @0c1dae3da"]},
+
+{"slug":"yang_volatility","short":"yang/volatility_data (orphan)","key":"json/yang/volatility_data.json","tier":"JSON tree (yang legacy)","state":"FROZEN (180B, 2026-01-14)","state_class":"frozen","rendered":"FRONTEND-ORPHAN","family":null,
+ "coords":null,
+ "facts":[["State","180 bytes, LastModified 2026-01-14; superseded by json/macro/volatility_data.json"],["Consumer evidence","comp-estate model-portfolios MA-08 — DEBT orphan-candidate, frontend-orphan [CVO ground-truth]; no portal/src ref"]],
+ "fields":null,
+ "evidence":["Census row: unrendered_artifacts[8], ARTIFACT_CENSUS_MP.yaml @0c1dae3da"]}
+]
