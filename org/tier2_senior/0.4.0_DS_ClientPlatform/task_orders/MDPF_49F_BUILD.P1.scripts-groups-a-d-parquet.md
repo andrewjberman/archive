@@ -119,7 +119,7 @@
     THE TWO-LAYER DIVISION covers the issuer's exposure: the validator catches the ASSIGNEE omitting
     against this list; CVO's cert-of-built step-zero catches THIS LIST omitting against the governing
     SPEC. Per-group validation:
-      python .tools/proof-of-spec-check.py {instance}.json --expected-criteria {that group's ids}
+      python .tools/proof-of-spec-check.py {instance}.json {that group's ids}
     -->
   </proof_of_spec>
 
@@ -142,7 +142,7 @@
 
   <deliverables>
     <deliverable type="commit">Groups A–D + parquet writer-format, stage-by-stage compile-verified</deliverable>
-    <deliverable type="document">A schema-valid PROOF_OF_SPEC instance per group, passing proof-of-spec-check with --expected-criteria</deliverable>
+    <deliverable type="document">A schema-valid PROOF_OF_SPEC instance per group, passing proof-of-spec-check with its POSITIONAL id set (comma list or a one-id-per-line file; there is NO --expected-criteria flag -- the flagged form exits rc=2)</deliverable>
     <deliverable type="document">Session log with Compiler Tools section</deliverable>
   </deliverables>
 

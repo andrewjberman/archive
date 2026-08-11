@@ -114,7 +114,7 @@
     TWO-LAYER DIVISION (unchanged): the validator catches the ASSIGNEE omitting against this list;
     CVO's cert-of-built step-zero catches THIS LIST omitting against the governing SPEC.
     Per-group validation:
-      python .tools/proof-of-spec-check.py {instance}.json --expected-criteria {that group's ids}
+      python .tools/proof-of-spec-check.py {instance}.json {that group's ids}
     NOTE the issuance lint (.tools/git-hooks/to-proof-of-spec-check.sh:29) is a PRESENCE grep on NEW
     files only — it binds issuance PRESENCE, never issuance CORRECTNESS. It cannot catch a
     well-formed element naming a nonexistent path. Do not read its pass as a check of this block.
@@ -163,7 +163,7 @@
 
   <deliverables>
     <deliverable type="commit">Groups A–C + parquet writer-format, stage-by-stage compile-verified (D on its wait's release)</deliverable>
-    <deliverable type="document">A schema-valid PROOF_OF_SPEC instance per group, passing proof-of-spec-check with --expected-criteria</deliverable>
+    <deliverable type="document">A schema-valid PROOF_OF_SPEC instance per group, passing proof-of-spec-check with its POSITIONAL id set (comma list or a one-id-per-line file; there is NO --expected-criteria flag -- the flagged form exits rc=2)</deliverable>
     <deliverable type="document">Session log with Compiler Tools section</deliverable>
   </deliverables>
 

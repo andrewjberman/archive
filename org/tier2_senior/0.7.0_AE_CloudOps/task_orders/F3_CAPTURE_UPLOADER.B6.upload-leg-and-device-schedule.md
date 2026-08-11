@@ -88,7 +88,7 @@
     state judgment calls, append here. Surface an ambiguous row rather than guessing.
     UNCOMPUTABLE-with-declaration is PRE-AUTHORIZED (fabric-wide, CTO 092331Z).
     Validate UNPIPED — a piped rc is the pipe's, not the validator's:
-      python .tools/proof-of-spec-check.py {instance}.json --expected-criteria {that piece's ids}
+      python .tools/proof-of-spec-check.py {instance}.json {that piece's ids}
     The issuance lint is a PRESENCE grep on NEW task-order files; it binds issuance PRESENCE, never
     issuance CORRECTNESS. Do not read its pass as a check of this block.
     -->
@@ -113,7 +113,7 @@
 
   <deliverables>
     <deliverable type="commit">B6-1 upload mode + B6-2 schedule artifacts</deliverable>
-    <deliverable type="document">A schema-valid PROOF_OF_SPEC instance per piece, passing proof-of-spec-check with --expected-criteria</deliverable>
+    <deliverable type="document">A schema-valid PROOF_OF_SPEC instance per piece, passing proof-of-spec-check with its POSITIONAL id set (comma list or a one-id-per-line file; there is NO --expected-criteria flag -- the flagged form exits rc=2)</deliverable>
     <deliverable type="document">Session log with Compiler Tools section + the exercised read-back evidence</deliverable>
   </deliverables>
 
