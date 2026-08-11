@@ -5,7 +5,13 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~Z</issued_to>
 <date>2026-08-11</date>
-<status>pending</status>
+<status>complete</status>
+<!-- COMPLETE 2026-08-11 ~2215Z by 0.8.0_AE_CloudComp~Z. Run freshness-deploy-verdict-tools__20260811T2020Z
+     CERTIFIED PASS @1dea476ca5 (CVO~Z; mutant caught as a fabricated coupling on three limbs; the
+     in-family ssot_validate structural_changes finding independently reproduced + escalated).
+     Proof-of-spec validated rc=0 VALID (positional, rc-checked) BEFORE this flip. Closure @d745c9a041.
+     Crown deliverable: NEVER#1's mechanism resolved as a THREE-WAY SPLIT, exercised. C1-C8 all PASS. -->
+
 <priority>P1</priority>
 <!-- Run 2 of the instruments program. P4-AD1's TO is the TEMPLATE — everything there binds here
      unchanged (§9.8.1 A-M regime, K/K.1/K.2 + your shared-tree scratchpad practice, exercised-
