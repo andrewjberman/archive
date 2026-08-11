@@ -1,4 +1,4 @@
-# Fabric Ontology Integration — Axis Map (DRAFT, pending laptop delivery 3 of 3)
+# Fabric Ontology Integration — Axis Map v1 (all 3 laptop deliveries folded; per-row concurrence open)
 
 **Mandate:** Andrew-direct 2026-08-11 ~1817Z (verbatim @a7136a5aa9): MSTR-to-MSTR joint
 integration, "formalized to some extent"; site-Z instruments work "confined to comp tooling";
@@ -35,14 +35,19 @@ Kimi-SVP formal artifacts (delivery 3).**
 | # | Concept | Site-Z formalization | Laptop formalization | Verdict | Remedy / canonical home |
 |---|---|---|---|---|---|
 | 1 | "cell" | RECTANGLE-CELL: entity_id × field; INTENT = fact TRUTH-STATE (MEASURED/UNMEASURED/INFERRED/NOT_MEASURABLE), evidence-carrying | RECON-CELL: pipeline × product × pattern-leg; INTENT = recon-claim LIFECYCLE (OPEN/HELD/DELIVERED/CERTIFIED) | **SAME-WORD-DIFFERENT-AXIS** (grain AND intent differ) | Namespace, never merge: **rectangle-cell** / **recon-cell**; both registered in SYSTEM_DEFINITIONS |
-| 2 | Certification vocabulary | PASS / PASS-WITH-REFUSAL / VOID = outcome of ONE attempt; run terminal state separate (run_manifest.status OPEN/DRY/CERTIFIED/ABORTED) | CERTIFIED (+ CERTIFIED-WITH-ONE-REFUSAL irregular) = claim/run terminal state | **ONE-AXIS-TWO-GRAINS** (attempt-outcome feeds lifecycle-terminal) | Composition rule: a run/claim reaches CERTIFIED via a PASS or PASS-WITH-REFUSAL attempt; VOID attempts accumulate without advancing; laptop's CERTIFIED-WITH-ONE-REFUSAL := terminal state whose certifying attempt was PASS-WITH-REFUSAL (regularizes the irregular). One vocabulary, grain-qualified, home = ssot_establishment.schema.json with SYSTEM_DEFINITIONS registration |
+| 2 | Certification vocabulary | PASS / PASS-WITH-REFUSAL / VOID = outcome of ONE attempt; run terminal state separate (run_manifest.status OPEN/DRY/CERTIFIED/ABORTED) | CERTIFIED (+ CERTIFIED-WITH-ONE-REFUSAL irregular) = claim/run terminal state; CVO structural map concurs: PASS≈CERTIFIED, PASS-WITH-REFUSAL≈CERTIFIED-with-cells-REFUSED, **VOID≈INSTRUMENT-INVALID (a NON-VERDICT)** | **ONE-AXIS-TWO-GRAINS** (+ parity-bar grammar as a third related surface, carried explicitly, not merged — see row 14) | Composition rule: terminal CERTIFIED is reached via a PASS or PASS-WITH-REFUSAL attempt; VOID/INSTRUMENT-INVALID attempts accumulate without advancing. **RECONCILE VOID FIRST (CVO's order): the two fabrics must spell NON-VERDICT identically before anything else — a kill-chain that reads a non-verdict as a pass is the failure this row exists to prevent.** Home = ssot_establishment.schema.json + SYSTEM_DEFINITIONS |
 | 3 | patch vs structural atoms | patch = change-unit, merges ONLY through the validator | 9 structural atoms = per-pipeline conformance REQUIREMENT-predicates, remedied by build acts | **ADJACENT-COMPATIBLE** | Separation already written both sides; joint doc cites both lines |
 | 4 | Method package identity | projects/ATOM_DECOMP + skill (site-Z landed schema amendment @22ce467d37) | Same package lineage @d5eda6112f (laptop-authored origin) | **ONE ARTIFACT, TWO EDIT STREAMS** | Single canonical file, edits land via the ATOM_DECOMP lane (MSTR/CRO/CRO~A) regardless of authoring fabric — the route exercised today |
 | 5 | Term/axis registry | (none independent — consumes) | SYSTEM_DEFINITIONS via comp-estate --definitions, ratified | **DISJOINT (single home exists)** | SYSTEM_DEFINITIONS is THE registry; every new axis/vocab either fabric mints registers there or is a Build-Ladder rung-2 violation |
 | 6 | Liveness/dormancy semantics | rectangle cells measure artifact freshness as facts (e.g. smartx frozen-50-trading-days finding, NOT_MEASURABLE disposition discipline) | Rule-25 dormancy vocabulary: 90-day default + exception KINDS (LONG-TTL-LIVE / CLOSED-PERIOD-IMMUTABLE / build-artifact) | **ADJACENT-COMPATIBLE** (fact-measurement vs classification vocabulary) | Site-Z rectangles CITE Rule-25 kinds in disposition cells rather than minting liveness words; kinds live in SYSTEM_DEFINITIONS |
 | 7 | Recon matrix vs rectangle | rectangle = truth artifact of a decomposition subject | SSOT_RECON_MATRIX = CTO oversight tracker over 6 legs | **ADJACENT-COMPATIBLE** (workflow tracker vs truth artifact) | Tracker rows may cite rectangle/certification refs; never the reverse |
-| 8 | Kimi SVP semantic-evolution vocabulary | (not yet mapped — awaiting delivery 3) | contract v2 manifests, adjudication states | **PENDING delivery 3** | — |
-| 9 | CRO~B anchor-catalog / coordinate schema | (not yet mapped — awaiting delivery 3) | UNDISPATCHED under the hold (the first hold-lift release item) | **PENDING delivery 3** | — |
+| 8 | "Kimi Semantic Vertical Pipeline" (the name) | (consumer only) | Andrew's name for the laptop's semantic-evolution surface (Kimi/K3 daily estate-report pipeline + K-call ontology work); NO artifact carries the literal name; CVO owns the loop, CRO~B the validation mandate | **GLOSSARY ROW** | One glossary entry in the joint doc + SYSTEM_DEFINITIONS registration of the name → artifact set |
+| 9 | CRO~B formalization stack (substrate model + deterministic cascade @14a955257f, anchor-catalog step-0 @164692f9be, codebase/ms extractor gap spec, CONTENT_MODULE_DESIGN @9b4d484132; four ratified domains api-serving/artifact-serving/observability/ui-dataflow + 90/9/1 cascade @7c1b7a8705) | (none — site-Z has not touched this surface) | APPROVED-BUT-HELD; the named hold-release item | **DISJOINT today; rows 10–13 govern its contact points** | Releases on Andrew's ratification (boundary §3); its vocabulary registers in SYSTEM_DEFINITIONS at dispatch |
+| 10 | **Source-of-record FORMAT for formalized truth** | RECTANGLE/PATCH family (grid decomp of a fact table; validator-enforced) | Ontology canon: NFRA_ONTOLOGY_C2C3_CANONICAL.yaml + cover + resolver (graph/relatedness decomp over docs+code); a C3.i inventory is EXPRESSIBLE AS a rectangle | **THE ONE ROW NEEDING A WORKING SESSION** — two formats claiming one office | Proposed office split, to be tested not assumed: rectangle family = truth artifact OF A DECOMPOSITION RUN (bounded subject, run-stamped); ontology canon = STANDING estate ontology (continuously maintained). Bridge: a run's certified rectangle may EMIT canon updates; canon never hand-edits a rectangle. CRO~B + CTO~Z adjudicate per CVO's collision-3 caution (test same-axis before reconciling — a forced merge manufactures a collision) |
+| 11 | Structure-axis vocabulary (legislated twice, same day) | M-5 `relations` (edge findings inside a rectangle) + M-9 `structural_changes` (typed patch path) | Ratified domains + substrate {aws\|portal\|codebase\|ms} (estate topology vocabulary) | **ADJACENT-COMPATIBLE, pending laptop per-row read** | Namespace by scope: substrate/domain words are ESTATE-level; rectangle `relations` entries CITE them in `relation_type`/`endpoints`, never re-coin |
+| 12 | The shared enums (status: MEASURED/UNMEASURED/INFERRED/NOT_MEASURABLE — VERBATIM identical both sides; evidence shape near-identical incl. CLASS/INSTANCE law) | defined in ssot_establishment.schema.json $defs | defined AGAIN in battery/prompt contracts | **FORKED-VOCABULARY RISK (identical today, divergent by default)** | Single-source: the schema $defs is the machine SSOT; laptop battery/prompt contracts CITE it (path+commit); enum registered once in SYSTEM_DEFINITIONS; any change lands via the ATOM_DECOMP lane and both fabrics inherit |
+| 13 | 90/9/1 cascade (deterministic→inferential→user construction stages) vs method classes A–J | §9.8.1 classes A–J | 90/9/1 cascade @7c1b7a8705 | **POSSIBLY ORTHOGONAL — laptop declared A–J UNREAD** | Laptop reads A–J, returns a per-row verdict; no action before that read (an unread-basis verdict is the exact class this exercise exists to catch) |
+| 14 | Verdict axes that must NOT merge | attempt-outcome (PASS/PASS-WITH-REFUSAL/VOID) + run terminal (OPEN/DRY/CERTIFIED/ABORTED) | bundle adjudication lifecycle (PENDING/signed/FAILED) + per-criterion VALID/INVALID + parity-bar grammar (MATCH-CLEAN/MATCH-KNOWN-WRONG/DIVERGE/DIVERGE-SOVEREIGN) | **THREE-PLUS DISTINCT AXES — DO-NOT-MERGE row** (CVO collision-2) | The joint doc lists them side-by-side with intent statements; merging any two is the Rule-24 same-grain violation this exercise catches |
 
 ## 3. The written boundary (Step 3 — the paragraph both fabrics carry)
 
@@ -59,8 +64,20 @@ Kimi-SVP formal artifacts (delivery 3).**
 > minted in ONE place per axis (SYSTEM_DEFINITIONS registration mandatory); the ATOM_DECOMP
 > method package is one artifact edited through its owned-paths lane from either fabric.
 
-## 4. Open to close before ratification
+## 4. Shared DNA (grounded by CRO~B against @22ce467d37 — the reason integration is cheap)
 
-- Delivery 3 (CRO~B pack + CVO Kimi-SVP artifacts) → rows 8–9 + any new rows.
-- Laptop per-row concurrence (CRO~B + CVO input, MSTR channel).
-- Andrew ratification → laptop hold lifts (row-9 item releases first).
+Status enum VERBATIM identical; evidence shape near-identical ({instrument, locator, vintage,
+denominator, count_grain CLASS|INSTANCE} ≈ {instrument, intent_denominator, boundary} + same
+CLASS/INSTANCE law); same sovereignty triangle (Andrew ratifies / CVO certifies); site-Z's
+schema provenance already cites base-CRO's SSOT protocol rulings. The fabrics diverged in
+FORMAT and FILE, not in doctrine — row 12's single-sourcing converts the identity from
+coincidence to invariant.
+
+## 5. Open to close before ratification
+
+- Laptop per-row concurrence via CRO~B + CVO (rows 1–14; row 13 needs their A–J read first).
+- Row 10 working session (CRO~B + CTO~Z): the office split between rectangle family and
+  ontology canon — tested, not assumed.
+- Row 2's VOID/INSTRUMENT-INVALID spelling reconciled FIRST within the cert row.
+- Joint doc assembled from this map → laptop MSTR commits on CLOUD → **Andrew ratifies →
+  laptop hold lifts (row-9 stack releases first).**
