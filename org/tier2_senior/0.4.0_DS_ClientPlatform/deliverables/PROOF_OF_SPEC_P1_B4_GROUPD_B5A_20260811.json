@@ -1,0 +1,204 @@
+{
+ "schema_version": "1.0",
+ "to_id": "P1-B4-GROUP-D-B5A-49F",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_D_SERVING_20260811.md",
+  "group": "D",
+  "vintage_commit": "1e11389af8"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/d00_served_shape_census.py",
+   "kind": "script",
+   "commit_or_etag": "a89eb3a12f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "one-shot committed re-runnable census; P1 scripts phase"
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/d00_fe_routes_input.json",
+   "kind": "config_data",
+   "commit_or_etag": "a89eb3a12f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "leg-1 input, line-cited from the portal endpoints source, vintage stamped in-file"
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/d_publisher_base.py",
+   "kind": "script",
+   "commit_or_etag": "a89eb3a12f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the shape-frozen publisher frame every family emitter runs on"
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/d01_firm_header_metrics.py",
+   "kind": "script",
+   "commit_or_etag": "a89eb3a12f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the archetype emitter; the port (P3+) is the deploy act"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "D6-D00-RECONCILE",
+   "criterion_verbatim": "D_00: three-leg reconciliation printed with all three denominators",
+   "method": "command",
+   "invocation": "python -u d00_served_shape_census.py --out <EV>/d00_census_run4.json",
+   "output_evidence": "leg 2 (estate): 16,452 live objects under 9 prefixes -> 103 families | leg 1 (FE): 24 families, matched 16/24, REACHABILITY 8 (client_directory, cohort_a_summary, activity_scan, cash_drag, firm_concentrations, advisors/base, clients/base, clients/account_timeseries) | orphan-candidates 87 FLAGGED never deleted | leg 3 producers vintage-cited",
+   "denominator": "24 FE families x 103 live families x the advi-bd producer set; all three printed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D6-D00-LIVESCHEMA",
+   "criterion_verbatim": "every census row carries a live-object schema extraction (no doc-derived rows)",
+   "method": "live_read",
+   "invocation": "schema extraction inside the census run (GET + recursive type map per sampled key)",
+   "output_evidence": "every family row carries sampled_schemas machine-extracted from LIVE objects (e.g. platinum/firm/header_metrics.json full nested type map with verbatim spelling); non-json and oversize listed AS such, extract errors carried as rows",
+   "denominator": "103 families, <=2 sampled keys each",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D6-D00-DETERMINISM",
+   "criterion_verbatim": "census_version stable across two same-day runs",
+   "method": "command",
+   "invocation": "run4 vs run5, census_version compare",
+   "output_evidence": "DETERMINISM: caa2dc281a355ff6 == caa2dc281a355ff6 -> STABLE",
+   "denominator": "2 full enumerations + extractions",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D6-D00-MUTANT",
+   "criterion_verbatim": "a hand-poisoned schema field flips it (mutant)",
+   "method": "command",
+   "invocation": "run with --mutant (poisoned field injected post-extraction)",
+   "output_evidence": "MUTANT: f69e63ea27... vs caa2dc281a... -> FLIPPED (FIRED-AS-EXPECTED)",
+   "denominator": "1 poisoned field, version flipped",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D6-D01-HEADER-METRICS-IDENTITY",
+   "criterion_verbatim": "Per emitter: byte-schema diff vs census row == EMPTY on the QA read (the identity control)",
+   "method": "command",
+   "invocation": "python d01_firm_header_metrics.py --date 2026-08-07 --canonical-local <EV>/artifacts --census <EV>/d00_census_run4.json --out <EV>/d01_qa_payload.json",
+   "output_evidence": "SHAPE CHECK PASS: 0 diffs, 0 unmapped vs the LIVE census schema (caa2dc28...). Shape mutant (a field the census never saw): REFUSED, rc=1 measured UNPIPED. Values: aua $1,789,058,516.82 = B_02's book denominator minus EXACTLY the excluded collection account's $2,982.49 -- the A_02 boundary law coherent across three artifacts",
+   "denominator": "archetype family (header_metrics); the full emitter fleet is a NAMED exclusion below",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D6-D01-PUBLISHER-BASE-PROVENANCE",
+   "criterion_verbatim": "field-provenance table complete (every served field -> canonical source or named exception)",
+   "method": "command",
+   "invocation": "ShapeFrozenPublisher.check enforces it at runtime (unmapped_fields nonzero REFUSES)",
+   "output_evidence": "identity run: unmapped=0 with every top-level field mapped (B_00/A_01/C_00/C_01/constants/serving-meta); enforcement is mechanical -- an unmapped field cannot ship by construction",
+   "denominator": "all payload fields; enforcement runtime-mechanical",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "D6-D01-EMITTER-FLOOR",
+   "criterion_verbatim": "schedule floor present",
+   "method": "command",
+   "invocation": "(not yet buildable)",
+   "output_evidence": "schedule floors are proposed per family FROM the census's observed cadence (the census carries last_modified_series per family) and RULED AT REVIEW; schedule wiring is P2-TIMING scope by the phase gates",
+   "denominator": "0 of 1 archetype carries a floor at P1",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "the floor VALUE is ruled at review from census cadence and its WIRING is P2-TIMING (B-7 staged behind its phase gate) -- declared, not skipped"
+  },
+  {
+   "criterion_id": "D6-D01-EMITTER-ROLLBACK",
+   "criterion_verbatim": "rollback artifact named before the port fires",
+   "method": "command",
+   "invocation": "(port protocol step)",
+   "output_evidence": "the port is P3+ scope (spec section 3 steps 3-5: direct port on the production schedule, old object retained versioned, write-leg disabled same act, never-widen on any moved key)",
+   "denominator": "0 ports fired at P1 by design",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "P1 builds scripts; no port fires in this phase, so no rollback artifact exists yet -- the port protocol carries the requirement verbatim"
+  },
+  {
+   "criterion_id": "D6-GROUP-COVERAGE",
+   "criterion_verbatim": "census rows with no emitter == 0 at port-complete, or each carried as a NAMED exclusion with its reason and owner",
+   "method": "command",
+   "invocation": "reconciliation readout + this instance's exclusions",
+   "output_evidence": "P1 is NOT port-complete by phase design. 1 archetype emitter built (header_metrics); the remaining 15 matched FE families + 8 REACHABILITY families are the NAMED exclusion below with owner 0.4.0_DS_ClientPlatform and the archetype as their template",
+   "denominator": "16 matched + 8 reachability families; 1 built, 23 named-excluded with owner",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "B5A-PARQUET-WRITER",
+   "criterion_verbatim": "gold output = PARQUET, {table}/date={D} -- the WRITER-FORMAT half only. The DESTINATION is P3, not P1 -- emit parquet here, re-point there",
+   "method": "command",
+   "invocation": "runner_common.emit (every A/B/C artifact) + the local artifact tree listing",
+   "output_evidence": "every Group A/B/C artifact emits data.parquet + manifest.json under {table}/date={D} via the ONE emit layer (10 artifact families exercised on date=2026-08-07: 6 dims/ref + 4 canonicals); OUT_ROOT is a single re-pointable value; the advi product root is never minted by accident",
+   "denominator": "10 of 10 exercised artifacts in the partition grammar",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two independent: (1) D_00 poisoned schema field must flip census_version; (2) D_01 emitting a field the census never saw must REFUSE with nonzero rc",
+   "expected": "version flips; REFUSED rc=1",
+   "observed": "FLIPPED (f69e63ea vs caa2dc28); REFUSED rc=1 measured UNPIPED (the pipe-rc lesson applied)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two full same-day census runs (enumeration + extraction), census_version compare",
+   "observed": "caa2dc281a355ff6 == caa2dc281a355ff6",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the emitter fleet beyond the archetype (15 matched families + 8 reachability families)",
+   "reason": "one emitter per family per the spec; the archetype (d01) is the template and the publisher base enforces the frame mechanically; owner 0.4.0_DS_ClientPlatform, sequenced post-P1 with the port protocol"
+  },
+  {
+   "item": "deployed-bundle byte verification of leg 1",
+   "reason": "leg-1 routes are line-cited from the portal endpoints SOURCE + comp-cache; the DEPLOYED-bundle cross-check is a census finding when run (repo-vs-deployed drift is a finding, not a blocker, per the spec) -- named for the port QA step"
+  },
+  {
+   "item": "clients-tab + clients-detail-proxy route_class=apigw-lambda families",
+   "reason": "fetch ROUTES not S3 keys (F-6); their contract is the lambda response shape -- censused via route_class, emitter mapping rides the per-family act"
+  },
+  {
+   "item": "value-plausibility ties vs C_03 lineage",
+   "reason": "the PORT QA step (spec section 3 step 2, run-and-read) -- shape identity is P1's control; values need the backfilled canonicals"
+  },
+  {
+   "item": "orphan-candidate disposition (87 flagged)",
+   "reason": "flagged to CTO's roster ONLY per the spec (never deleted here; the account-distribution lesson encoded in the matcher)"
+  }
+ ],
+ "surprises": [
+  "run-1 collapsed 10,567 objects into 10,567 families -- an undiscriminating instrument caught by its own 1:1 census; templating rebuilt against MEASURED key shapes (z-ids, date series, name-style advisor keys)",
+  "run-2's single-prefix cap exhausted alphabetically-early platinum/accounts/ before platinum/firm/ was ever listed -- 'family discovery saturates below the cap' is FALSE for front-loaded id-spaces; caught only because the truncation printed its own denominator; fixed by per-subprefix enumeration",
+  "the 8 REACHABILITY findings are the 49F emitter ROADMAP: the shared FE reads surfaces (client_directory, cohort_a_summary, activity_scan, cash_drag, firm_concentrations, advisor/client bases) that 49F does not serve yet -- the INF side serves them; the gap is the rebuild's purpose made countable",
+  "d01's canonical AUA differs from B_02's book denominator by EXACTLY the collection account's $2,982.49 -- three independently-built artifacts (A_02 boundary, B_00 valuation, B_02 measurement) visibly coherent to the cent"
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-11/p1_b4_b5a_group_d_0917-1025Z.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-estate",
+   "invocation": "comp-estate --list; comp-estate advi-bd",
+   "result": "PASS -- first-contact traversal named the serving chains + producers (leg 3's vintage-cited source)"
+  },
+  {
+   "tool": "comp-cache",
+   "invocation": "comp-cache key 'advisor-intelligence'",
+   "result": "PASS -- 7 queryKeys over 102/102 useQuery call-sites captured (leg 1 co-source)"
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "orion-api-v2 + ending_mv + api_dims/billing sweeps (parallel COO asks)",
+   "result": "PASS -- bronze-parquet consumer disposition + the billing ending_mv reader census (2 readers, both null-tolerant)"
+  },
+  {
+   "tool": "py_compile / commit-gate",
+   "invocation": "per stage + safe-commit",
+   "result": "PASS; one ruff F401 caught at the gate and fixed pre-landing"
+  },
+  {
+   "tool": "proof-of-spec-check",
+   "invocation": "this instance + 10 criterion ids",
+   "result": "run at assembly; VALID is the completion evidence"
+  }
+ ]
+}
