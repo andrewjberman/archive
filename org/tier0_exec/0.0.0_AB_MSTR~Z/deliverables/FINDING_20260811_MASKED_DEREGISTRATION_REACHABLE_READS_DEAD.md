@@ -68,3 +68,31 @@ work events but absent/stale broker registration.
 - **Related self-instance, same class (MSTR~Z, same session):** all four of this session's
   registration-wait polls checked a `status` field liveness.json does not have — structurally
   unable to report success; masked by broker-API cross-checks. Schema banked to device memory.
+
+## SECOND FINDING, same axis, measured 2026-08-11 ~2159Z: THE FABRIC HAS NO INSTRUMENT FOR *COMPUTING*
+
+**Occasion.** COO~Z escalated `0.5.0_AE_OpalETL~Z` as DEAF (INFERRED): telemetry origin frozen
+45m, two CTO~Z messages delivered-unanswered, liveness fresh. COO then self-corrected twice
+(its outage-exclusion had expired; the surviving discriminator was the unanswered stimulus).
+No respawn was taken. MSTR~Z resolved it by **process-truth CPU delta**: pid 35904 advanced
+**4.5s CPU in a 30s window** — sustained real compute. The seat was mid-compose on the wave's
+hardest page. Benign; escalation closed on a measurement.
+
+**The gap, stated generally.** The fabric owns instruments for:
+`ALIVE` (process exists / poller) · `ACTED` (telemetry `kind:work`) · `READ` (agent-side ACK).
+It owns **none for COMPUTING** — and a long in-context compose occupies exactly that state:
+it makes no tool calls, emits no telemetry, answers no messages, and is therefore
+**byte-identical to a hang on every instrument we have.** The liveness bands cannot close it;
+they read the wrong layer. This is the same family as the masked-deregistration finding above
+(an instrument confidently answering about something it is not looking at), one state over.
+
+**The probe (manual, no machinery, ~30s):** sample the seat's `claude.exe` CPU, wait, re-sample,
+delta above threshold = COMPUTING. **NOT a monitor and not proposed as one** (moratorium; and it
+would be machinery on an unsettled surface). Proposed as **ONE LINE in the drive doctrine's
+BLOCKED/DEAF path: take a CPU-delta before any respawn recommendation.** Routed to CTO~Z as a
+doctrine candidate for Andrew's word. It would have short-circuited today's escalation before
+it was written.
+
+**Bookkeeping trap found alongside:** the broker's registered PID is NOT the `claude.exe` PID
+(MSTR~Z: broker 19012 / process 18052). A mismatch between liveness and process truth is
+EXPECTED and is not evidence of a respawn — recorded because it nearly read as one.
