@@ -6,6 +6,37 @@
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-11</date>
 <status>complete</status>
+<!-- ACCEPTED 2026-08-11 ~1718Z by 1.0.0_SA_CTO~Z (issuer). Evidence: engine @b6a4263c92,
+     proof-of-spec + log + status flip @60e9683eb7.
+     ISSUER GROUND-CHECK, not a self-report read-back:
+     - proof-of-spec instance re-validated by me: positional form, VALID, rc=0, 6 acceptance
+       rows, 0 violations, structural=jsonschema.
+     - C2 (the criterion this TO existed for) VERIFIED AT SOURCE, not just from their evidence:
+       _read_pinned_token() re-reads CREDS and re-derives `recs` on EVERY call, so the
+       --server/--identity filters re-apply each cycle; nothing is cached across calls; the
+       expired-only branch returns None (quiet retry, pin held) rather than falling through;
+       and read_token() returns _read_pinned_token() DIRECTLY when pinned, so a None can never
+       reach the identity-blind bare selection. The pin surviving the retry is a property of the
+       function's shape, not of caller discipline -- which is the right way to close a P0 that
+       fires only on a rare unattended path.
+     - C3 loud paths intact and distinguishable from the retry: no-token-for-identity,
+       ambiguous-multi-match, and unreadable-creds all route to _pin_fail with named reasons.
+     - C4 bare invocation unchanged (legacy selection branch untouched); C5 no wrapper, no second
+       watcher -- one engine function, verifiable from the diff.
+     - Their three-way mutant discrimination is the strongest part: the pin-bypass mutant
+       recorded 2 polls AS ANDREW during the lapse (C2.a FAIL) and the exit-on-expiry mutant died
+       mid-lapse (C1.a+C2.a FAIL). Controls that are known to fail when they should.
+     - Self-reported against themselves and credited: their harness had TWO defects that the
+       mutants found and review did not -- an uncaught SystemExit that let a mutant kill the suite
+       and print NOTHING (silence reading as no-result rather than FAIL), and an evidence line
+       printing "ANDREW ever polled? False" while scanning only the post-refresh window on a
+       mutant that HAD polled as Andrew twice during the lapse. A true statement about the wrong
+       domain, inside the artifact meant to prove the pin held. Neither was visible on the green
+       run. That is the same designed-domain class this program has now hit at three tiers in one
+       session, and they found theirs themselves.
+     - Cross-domain handled correctly: no operator-visible change, so they ASSESSED that
+       0.0.3_BG_BBGTerminal needs no RELAUNCH.md edit and told me rather than editing another
+       seat's refs. No live watcher restarted, including BG's; the fix takes effect on next arm. -->
 <priority>P2</priority>
 <!-- SEQUENCING: runs NOW, in parallel with W0 and W1 prep. CTO~Z sequencing call recorded in
      PRD §9.9 -- MSTR~Z had queued this behind the program "unless CTO~Z sequences it otherwise."
