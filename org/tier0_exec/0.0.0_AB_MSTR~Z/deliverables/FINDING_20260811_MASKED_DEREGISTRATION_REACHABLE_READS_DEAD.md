@@ -37,10 +37,17 @@ work events but absent/stale broker registration.
 - **CTO question (queued):** should broker-side sweeps corroborate against agent_telemetry
   before acting on an absent/stale verdict? (An instrument-domain note, not a build order —
   nothing built without Andrew's word.)
-- **Replay shape (secondary, named):** on re-registration the broker replayed 3 already-read
-  ACKs as "URGENT ... act NOW." A queue replay states the QUEUE's condition, never whether
-  the agent read the message (the SENT/EMITTED/READ conflation, again). BG correctly did not
-  re-act; the urgent framing would push a less-suspicious session into re-doing finished work.
+- **Replay shape (secondary — CORRECTED per BG 093624Z; originally misattributed):** the
+  duplicate surfacing is NOT a deregistration artifact. It is ROUTINE DUAL DELIVERY by
+  design: every fabric message reaches a seat twice — immediately via the inbox-watch
+  Monitor, then once more via the broker on the agent's next status/heartbeat call (each
+  message surfaces via the broker exactly once and is drained by that surfacing; mechanism
+  established from two observations, healthy registration throughout the second). What
+  survives, now STANDING on every seat every session: the broker copy arrives framed
+  "URGENT ... act on these NOW" regardless of whether the agent already read and discharged
+  it via the filesystem path — the SENT/EMITTED/READ conflation as a permanent property of
+  normal operation, inviting re-doing finished work. The original attribution made the
+  hazard look rarer than it is.
 - **Related self-instance, same class (MSTR~Z, same session):** all four of this session's
   registration-wait polls checked a `status` field liveness.json does not have — structurally
   unable to report success; masked by broker-API cross-checks. Schema banked to device memory.
