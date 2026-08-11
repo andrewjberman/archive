@@ -1,0 +1,106 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COT_RUNNER_REFACTOR.P1.scripts-groups-a-c-scoped",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_A_DELTA_ALIAS_JOIN_20260811.md (@8a15fbecd9); implemented under CVO's 213401Z proceed + Andrew's standing 'proceed when gates lift' @04f8710999; validated by CVO's VERDICT @4d0b55e880 -- this instance follows that verdict's framing (COVERAGE-CLOSES = PASS-WITH-FINDING at $5,068.75; carry mechanics EXHAUSTED; closure re-scoped to the DATA-CURATION act CVO is surfacing to Andrew)",
+  "group": "A",
+  "vintage_commit": "8a15fbecd9"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~B",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/a07_dim_asset_classification.py (+ consumer rewires d08_cot_mix_summary.py, d06_firm_mix_summary.py)",
+   "kind": "script",
+   "commit_or_etag": "ac8a53650b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the dim now EMITS alias_key_expansion beside itself ({table}/date={D}/data.parquet grammar, same output root); QA emissions local only. Mint alias_key_expansion registered by CVO append @HEAD (checker 64/0, comments intact, entry text mine -- no yaml round-trip, the banked lesson held)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "A5-A07-ALIASJOIN-COVERAGE-CLOSES",
+   "criterion_verbatim": "the CONSUMER-JOIN unjoined mass drops from $113.2M toward residual; MEASURED by re-running the ACTUAL CONSUMER (d08 cot fold $75.09M -> target; 49F $39.1M -> target), before/after, per firm, with denominators",
+   "method": "command",
+   "invocation": "d08_cot_mix_summary.py --as-of 2026-08-11 (expansion n_map live) + d06_firm_mix_summary.py --date 2026-08-07 --a07-date 2026-08-11 + a direct dollar-by-dollar decomposition of the cot book through the four join layers",
+   "output_evidence": "PASS-WITH-FINDING AT $5,068.75, per CVO verdict @4d0b55e880 -- and the decomposition is TOTAL, not inferential: cot book $481,112,868.49 = ticker/cusip-resolved $406,018,583.26 (84.39%) + name-JOINS-but-key-UNCLASSIFIED $75,094,285.23 (15.61%) + name-joins-classified $0.00 + name-MISSES-join $0.00 + nameless $0.00. EVERY unresolved cot dollar already joins the dim and lands on a key the DIM ITSELF carries UNCLASSIFIED-LOUD; cot closes $0.00 of $75.09M. 49F: $39,073,557.34 -> $39,068,488.59 (the expansion's real new coverage: $5,068.75). The join-miss population the spec targeted is measured EMPTY at both consumers. THE RESULT (CVO's framing, verbatim): the two correct builds JOINTLY bound the problem -- classification-mechanics falsified at 2 keys, join-mechanics falsified at $5,068.75 -- so the $113.2M is CLASSIFICATION-CONTENT (cot leading-digit fund name-forms, 49F cusip-only paper: honest UNCLASSIFIED-LOUD, not a defect). No third carry delta; closure is a DATA-CURATION act, surfaced to Andrew by CVO, self-widened by no one.",
+   "denominator": "$5,068.75 closed of $113.2M ($74.1M cot + $39.1M 49F); cot decomposition sums to 100.00% of the book",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-ALIASJOIN-PARITY-PRESERVED",
+   "criterion_verbatim": "EXACT: 0 already-joined book rows change security_key or class under the expansion (the safety gate; a single re-map FAILS). Denominator = the pre-expansion joined-row count",
+   "method": "command",
+   "invocation": "consumer re-runs against the expansion n_map, diffed against the pre-expansion emissions",
+   "output_evidence": "cot fold BYTE-IDENTICAL at $75,094,285.23 and the d08 emission byte-schema IDENTICAL vs live; 49F values moved ONLY by the $5,068.75 of genuinely-new coverage (previously-unjoined rows -- the sanctioned addition kind, never a re-map). The invariant is STRUCTURAL: a variant whose join-norm equals an existing representative resolution to a DIFFERENT key is DROPPED and counted (REMAP-REFUSED census: 6 natural in the wild), so an override is impossible by control flow.",
+   "denominator": "0 re-mapped rows across both consumers' full books; 6 natural remap-refusals counted (dropped, never applied)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-ALIASJOIN-NO-CONSUMER-DDB",
+   "criterion_verbatim": "consumers read the emitted expansion surface, never DDB (mechanically asserted, the A5-A07 law one layer up)",
+   "method": "command",
+   "invocation": "a07 --qa-emitter-grep (sweeps d*.py across runners_cot + runners_inf + runners_49f)",
+   "output_evidence": "A5-A07-NO-EMITTER-DYNAMODB: 0 D-group emitter files touch ETFClassifier/dynamodb across 3 runner trees, rc=0 UNPIPED. AND THE CONTROL FIRED FIRST, correctly on its own terms: the sweep is a TEXT tripwire and it caught 2 files -- on prose MENTIONS of the store name in docstrings/prints (the fires-on-mentions class), not on mechanism. Remedy: reword the mentions, NEVER soften the matcher (a blunt tripwire that also catches real client construction is worth its false fires). RECORD CORRECTION owed and stated: the certified A_07 instance (@c998ff19db) claimed 'd08 passes the same grep' -- that claim is NOT reproducible at current HEAD (the mention-bearing print predates this sweep run); the sweep that produced this row's 0 is the fresh, current-HEAD evidence.",
+   "denominator": "0 violations across all d*.py in 3 runner trees, current HEAD, post-rewording",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-ALIASJOIN-CONFLICT-CENSUS",
+   "criterion_verbatim": "variants mapping to 2+ security_keys, counted not hidden",
+   "method": "command",
+   "invocation": "a07 build run (census prints every run)",
+   "output_evidence": "CONFLICT-CENSUS 14 -- variants claiming 2+ keys resolved by the dim's security_key ascending precedence, counted never silent. Beside it the REMAP-REFUSED census (6 natural) -- two distinct censuses because the two events take different actions (precedence-resolve vs drop), Rule-24 one-intent-per-axis.",
+   "denominator": "14 conflicts + 6 remap-refusals of 2,549 accepted alias-variant rows",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-ALIASJOIN-DETERMINISM",
+   "criterion_verbatim": "sorted expansion, two runs identical hash",
+   "method": "command",
+   "invocation": "a07 build twice, ALIASJOIN-DETERMINISM key compared",
+   "output_evidence": "content hash ea619b8e6df6c91209c3df26db548811efb9c62bad54f5980f701a9d55eaac1e IDENTICAL across two clean runs (the mutant run correctly differs -- a planted row changes the surface). Expansion sorted (alias_norm, security_key) by construction.",
+   "denominator": "N/A -- boolean identity across 2 clean runs on the live snapshot",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-ALIASJOIN-MUTANT-CATCHES",
+   "criterion_verbatim": "plant a variant that would re-map an already-joined row; the invariant must REFUSE it. AND: plant a book row with a known unjoined variant; the expansion must now JOIN it (the coverage teeth, positive)",
+   "method": "command",
+   "invocation": "a07 --qa-join-remap-mutant --qa-join-positive-mutant",
+   "output_evidence": "REMAP: planted rep-colliding variant ('1231 DFA U S LARGE CAP VALUE PORT INST' onto key '00130HCH6', true owner 'BDCH8KWV') -> REFUSED as required, the rep keeps its key, the planted re-map dropped and counted (REMAP-REFUSED 6->7). POSITIVE: planted unjoined variant for key '00130HCH6' -> JOINS as required (expansion rows 4,047->4,048). Both directions exercised in one run, rc=0 with both FAIL branches armed (SystemExit on re-map or on join-miss).",
+   "denominator": "2 planted mutants, 2 correct behaviors (1 refusal + 1 join); both counted in the run's own censuses",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the spec's two-direction mutant pair (re-map REFUSE + positive JOIN) plus the NO-CONSUMER-DDB text tripwire",
+   "expected": "re-map refused; positive joins; sweep 0 after mention rewording",
+   "observed": "all three fired exactly as expected -- and the tripwire's false-fire on mentions is itself recorded evidence the control RUNS at current HEAD",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two clean same-snapshot runs compared on the expansion content hash",
+   "observed": "ea619b8e6df6c912... == ea619b8e6df6c912...",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {"item": "the $113.2M closure",
+   "reason": "carry mechanics EXHAUSTED by the two landed deltas jointly (CVO verdict @4d0b55e880); closure is a DATA-CURATION act (DDB bd-securities curation / new classification rules) surfaced to Andrew by CVO -- spec'd by no one until his word."},
+  {"item": "SYSTEM_DEFINITIONS registration commit",
+   "reason": "CVO's owned lane; alias_key_expansion registered by their append @HEAD (checker 64/0, comments intact) from my entry text -- no yaml round-trip either side."}
+ ],
+ "surprises": [
+  "THE FINDING ITSELF: a TOTAL dollar-by-dollar decomposition (not a sample, not an inference) shows 0% of the cot unresolved mass misses the join -- the spec's target population is empty. Two correct builds falsified two spec premises in one day and thereby LOCATED the mass; CVO owns both premises, and the joint result is stronger than either delta's success would have been.",
+  "The NO-CONSUMER-DDB tripwire fired on prose mentions of the store name in my own consumers' docstrings -- the fires-on-mentions class hitting a control I was citing as evidence. Remedy: reword the prose, never the matcher. It also exposed that the certified A_07 instance's 'd08 passes the same grep' claim was not reproducible at current HEAD -- corrected in this instance rather than left standing.",
+  "6 NATURAL remap-refusals and 14 NATURAL conflicts exist in the wild alias space -- the invariant and precedence rule are not theoretical: without the drop-and-count semantics, 6 live spellings would have silently re-mapped served rows on day one."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/logs/2026-08-11/cot_p1_groups_a_b_c.md",
+ "compiler_tools": [
+  {"tool": "comp-find",
+   "invocation": "targeted source reads (d06/d08 n_map build sites for the join grammar; a07 _load_ddb for the raw alias structure)",
+   "result": "grounded the one load-bearing design decision: the expansion speaks the CONSUMERS' join-norm verbatim, not the classifier lib's normalization -- measured identical at d06:51-52 and d08:73-75 before a line was written"}
+ ]
+}
