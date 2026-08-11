@@ -12,7 +12,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-10T23:4xZ (re-cut 23:4xZ same night)</issued>
-<status>staged</status>
+<status>pending</status>
 <priority>P0. ⛔ STAGED pending the COORDINATED-WINDOW GO. A GO for this TO comes ONLY from COO and
 MUST cite the ATOMIC JOINT DEPLOY (DS's RP-W1+RP-W2 code leg and your cadence leg going live in one
 coordinated window, neither without the other). A GO citing "RP-W1 is complete" as the gate is
