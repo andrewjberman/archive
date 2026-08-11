@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "PORTAL_LINT.FIX1",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier3_junior/0.1.0_DE_MarketIntelligence/task_orders/PORTAL_LINT.FIX1.repo-wide-eslint-blocker.md",
+    "group": "OTHER",
+    "vintage_commit": "1cc166fcf5"
+  },
+  "assignee": "0.1.0_DE_MarketIntelligence~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/ModelPortfolios.tsx",
+      "kind": "script",
+      "commit_or_etag": "ce98e334",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TO requirement 4: DEV branch, no push, no PROD act. Committed on portal DEV; promotion is a separate DT-lane act."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C1",
+      "criterion_verbatim": "`bun run lint` exits 0 REPO-WIDE -- output cited, rc captured unpiped.",
+      "method": "command",
+      "invocation": "cd portal && bun run lint > /tmp/lint-after.txt 2>&1 ; LINT_RC=$?  (rc captured as the statement IMMEDIATELY after the command, no pipe between them)",
+      "output_evidence": "REPO_WIDE_LINT_RC=0. Final output line: '1 problem (0 errors, 1 warning)'. The surviving warning is the ModelPortfolios.tsx:873 react-hooks/preserve-manual-memoization line, still present and failing nothing. BEFORE the change the same repo-wide command reported '2 problems (1 error, 1 warning)' and exited 1.",
+      "denominator": "REPO-WIDE: `lint` is a bare `eslint .` over the whole portal tree, not a path-scoped run. This is the TO's stated denominator -- 'my file is clean' would have been the wrong measurement.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C2",
+      "criterion_verbatim": "Diff is lint-only; behaviour identical -- state what the rule wanted and what you changed, so a reader can see no semantics moved.",
+      "method": "diff",
+      "invocation": "git -C portal diff src/pages/ModelPortfolios.tsx  (pre-commit); git show ce98e334",
+      "output_evidence": "1 file changed, 1 insertion(+), 1 deletion(-). The ENTIRE diff is line 15: '- ... CartesianGrid, ReferenceArea, ReferenceLine } from \\'recharts\\'' / '+ ... CartesianGrid, ReferenceArea } from \\'recharts\\''. WHAT THE RULE WANTED: unused-imports/no-unused-imports (severity 2) flagged 'ReferenceLine' is defined but never used. WHY NO SEMANTICS MOVED: an unused import binding has no runtime effect -- it is never referenced, so no call site, render path, or timing changes. Corroborated: ReferenceLine's only other occurrence in the file is inside a COMMENT at :580 documenting the participation-UI deletion that orphaned it (45e5843f, Andrew-direct 2026-08-04). Sibling ReferenceArea is live JSX at :2165 and was KEPT -- verified before editing so the wrong binding was not removed. The :873 memoization block returns 0 matches against the diff: it was not touched.",
+      "denominator": "1 changed line out of 1 changed file; 2 total occurrences of 'ReferenceLine' in the file (1 import + 1 comment), 3 of 'ReferenceArea' (1 import + 1 comment + 1 live JSX).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3",
+      "criterion_verbatim": "Commit message names the PortfolioAnalytics pod owner and cites this TO as the cross-pod authorization.",
+      "method": "manual_read_with_citation",
+      "invocation": "git -C portal log -1 --format=%B ce98e334",
+      "output_evidence": "Commit ce98e334 opens with 'CROSS-POD ACT, AUTHORIZED AND ON THE RECORD. This file is Pod 2 / PortfolioAnalytics content and its pod owner is 0.2.0_DE_PortfolioAnalytics, who did NOT make this change. Authorization: TO PORTAL_LINT.FIX1, issued by 1.0.0_SA_CTO~Z 2026-08-11 ...' plus the grounds for the crossing and an explicit 'Pod owner: please reverse freely if you disagree with the crossing.' Owner designation cross-checked against .owned-paths.yaml:177-181 (Pod 2 -- PortfolioAnalytics, DE = 0.2.0_DE_PortfolioAnalytics).",
+      "denominator": "N/A -- presence check on one commit message; the message is quoted rather than summarised.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C4",
+      "criterion_verbatim": "Session-log line (no full log needed for a fix this size).",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/tier3_junior/0.1.0_DE_MarketIntelligence/logs/2026-08-11/Z_PORTAL_LINT.FIX1_line.md",
+      "output_evidence": "One-entry log committed at the path in session_log, carrying the misattribution correction, the one-line diff, the repo-wide rc=0 evidence, and a Compiler Tools line. Sized to the TO's own instruction (a line, not a full log).",
+      "denominator": "N/A -- presence check on one artifact.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The TO and my own prior surprise report both asserted the :873 memoization rule was the gate blocker. Rather than accept that framing, I tested the competing hypothesis directly: fix ONLY the unused import, leave :873 completely alone, and re-run the repo-wide gate. If the memo were the blocker the gate must still fail; if the import were the blocker it must pass with the memo warning still printed.",
+      "expected": "If the stated attribution were right: rc=1 with the memoization error still failing. If my re-attribution were right: rc=0 with the memoization line still printed as a WARNING.",
+      "observed": "rc=0, '1 problem (0 errors, 1 warning)', the :873 memoization line STILL PRESENT in the output. The stated attribution is falsified and the re-attribution confirmed by the gate itself. Independently corroborated from the resolved eslint config: preserve-manual-memoization severity 1 (warning), no-unused-imports severity 2 (error), and `lint` carries no --max-warnings so warnings alone cannot fail it.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The gate is a deterministic static analyzer over a fixed tree, not a timing- or network-dependent instrument; the before (rc=1, 1 error 1 warning) and after (rc=0, 0 errors 1 warning) runs were each executed on the full tree with the same command, and the single surviving warning is byte-identical across runs.",
+      "observed": "Stable: same command, same tree, same output modulo the one removed error. No run-to-run variance observed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The ModelPortfolios.tsx:873 react-hooks/preserve-manual-memoization WARNING was not addressed.",
+      "reason": "It is not the gate blocker (severity 1, and `lint` sets no --max-warnings), so clearing it is not required by C1 -- and resolving it would require judgment about memoization semantics that could shift render timing, which is the TO's explicit STOP condition and pod-owner territory. Left for 0.2.0_DE_PortfolioAnalytics."
+    },
+    {
+      "item": "The stale comment at :580 that still references 'dark-marker ReferenceLines' was left in place.",
+      "reason": "TO do_not: 'No touching anything else in the file.' The comment is accurate as history -- it documents the deletion that orphaned the import."
+    },
+    {
+      "item": "Not pushed, not promoted.",
+      "reason": "TO requirement 4: DEV only, no PROD act."
+    }
+  ],
+  "surprises": [
+    "The blocker was misattributed at the source and I am the source: my OPAL_ANALYST.EXP1 surprise #1 named :873/preserve-manual-memoization as the failing rule, and the TO was written from that. The real error was an unused import. I reported the co-located WARNING that eslint printed with a large code frame instead of the terse ERROR line above it -- the visually louder finding was not the operative one. Cost here was zero because the true fix was strictly safer than the feared one, but the same misread in the other direction would have sent a seat into memoization semantics for no reason.",
+    "ModelPortfolios.tsx commit history by author: Andrew Berman 81, 0.4.0_DE_ClientPlatform 47, 0.4.2_RD_AdvisorIntelligence 17, 0.4.1_RD_ModelPortfolios 3 -- 0.2.0_DE_PortfolioAnalytics does not appear at all. The pod-2 designation is correct per .owned-paths.yaml, but the file is in practice edited by other pods routinely, so tonight's crossing is not the anomaly the TO's framing implies. Surfaced, not adjudicated -- ownership is not mine to rule on."
+  ],
+  "session_log": "org/tier3_junior/0.1.0_DE_MarketIntelligence/logs/2026-08-11/Z_PORTAL_LINT.FIX1_line.md",
+  "compiler_tools": [
+    {
+      "tool": "eslint --print-config (resolved severity read)",
+      "invocation": "bun x eslint --print-config src/pages/ModelPortfolios.tsx | python -c \"...\" for the two rule severities",
+      "result": "react-hooks/preserve-manual-memoization -> [1] WARNING; unused-imports/no-unused-imports -> [2] ERROR. This is what falsified the TO's stated blocker; reading the resolved config beat reading the console output, where the warning is far louder than the error."
+    },
+    {
+      "tool": "bun run lint (eslint . -- the gate itself, repo-wide)",
+      "invocation": "bun run lint > file 2>&1 ; LINT_RC=$?",
+      "result": "BEFORE rc=1 '2 problems (1 error, 1 warning)'; AFTER rc=0 '1 problem (0 errors, 1 warning)'. The gate is C1's own instrument and its own denominator."
+    },
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit)",
+      "invocation": "bun run typecheck > file 2>&1 ; TSC_RC=$?",
+      "result": "rc=0. Confirms removing the binding broke no type reference."
+    },
+    {
+      "tool": "grep occurrence census (pre-edit safety check)",
+      "invocation": "grep -n 'ReferenceLine' / 'ReferenceArea' src/pages/ModelPortfolios.tsx with counts",
+      "result": "ReferenceLine: 2 (import + comment) -> genuinely unused. ReferenceArea: 3 (import + comment + live JSX at :2165) -> KEEP. Ran BEFORE the edit specifically to avoid deleting the wrong sibling binding."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to PORTAL_LINT.FIX1",
+      "result": "Race-free per-session TO_ID set."
+    }
+  ]
+}
