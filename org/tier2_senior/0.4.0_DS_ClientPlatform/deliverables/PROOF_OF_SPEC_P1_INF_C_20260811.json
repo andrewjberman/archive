@@ -1,0 +1,312 @@
+{
+ "schema_version": "1.0",
+ "to_id": "INF_RUNNER_REFACTOR.P1.scripts-groups-a-d-parquet",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_C_TWR_ENGINE_20260811.md (transposed per ADVREVIEW_49F_ABCD_AND_INF_SHAPE_SPEC_20260811.md Commission 2 Group C + the COO 101316Z Remark/Reversal fold)",
+  "group": "C",
+  "vintage_commit": "f882b91ce2"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~A",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/c00_flow_ledger.py",
+   "kind": "script",
+   "commit_or_etag": "d47d187227",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "P1 is SCRIPTS; runtime home + schedule are P2/P3; product root undecided (F-1)"
+  },
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/c01_nna_canonical.py",
+   "kind": "script",
+   "commit_or_etag": "d47d187227",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/c02_twr_engine.py",
+   "kind": "script",
+   "commit_or_etag": "d47d187227",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/c03_twr_lineage.py",
+   "kind": "script",
+   "commit_or_etag": "d47d187227",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/c04_validation_battery.py",
+   "kind": "script",
+   "commit_or_etag": "d47d187227",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/c05_verification_twr.py",
+   "kind": "script",
+   "commit_or_etag": "d47d187227",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "INF-C-C00-ONECLASS",
+   "criterion_verbatim": "every txn row on the partition lands in exactly ONE final class (in == out + declared exclusions); UNRESOLVED census printed with the dual materiality frame",
+   "method": "command",
+   "invocation": "python c00_flow_ledger.py --as-of 2026-08-10 --output-root <root>",
+   "output_evidence": "in==out: 1407740 of 1407740 (each in exactly ONE final class) | FINAL-CLASS CENSUS: INTERNAL 1360356 / FEE-MANAGEMENT 20714 / EXTERNAL 16210 / FEE-ADMIN 9728 / UNRESOLVED 732 | UNRESOLVED DUAL MATERIALITY: 732/1407740 rows (0.052%), $2,064,689/$4,097,839,100 abs (0.050%) | PENDING-leak assertion holds (0 rows)",
+   "denominator": "1,407,740 txn rows (full snapshot)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C00-SEMVERIFY",
+   "criterion_verbatim": "sign-semantic verification census per class BEFORE direction is read (the debit_credit amendment's INF transposition: transAmount sign vs class direction expectation, violations LOUD, never assumed)",
+   "method": "command",
+   "invocation": "same c00 run (SIGN-SEMANTIC CENSUS block)",
+   "output_evidence": "sem-ok 100.00% in EVERY class: EXTERNAL-IN 11227/11227, EXTERNAL-OUT 4245/4245, FEE-MANAGEMENT 20714/20714, FEE-ADMIN 9728/9728, INTERNAL 1358378/1358378, CONDITIONAL 2716/2716, UNRESOLVED 732/732 -- verified, not assumed; violations would carry sem_flag=SIGN-VIOLATION and stay loud",
+   "denominator": "per-class denominators printed for all 7 classes",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C00-PAIRVERIFY",
+   "criterion_verbatim": "Exchange In/Out pair-VERIFIED internal (never assumed); Journal In/Out resolved by pair-match with resolution_provenance (matched->INTERNAL, unmatched->EXTERNAL-BY-DEFAULT); unpaired legs LOUD",
+   "method": "command",
+   "invocation": "same c00 run",
+   "output_evidence": "exchange pair-VERIFIED: 881560 of 882412 (99.90%; 852 unpaired FLAGGED, stay INTERNAL per ratified bucket) | journal pair-MATCHED: 1978 of 2716 (72.83%) | JOURNAL RESOLUTION: matched->INTERNAL 1978 (ratified claim VERIFIED), unmatched->EXTERNAL-BY-DEFAULT 738 with resolution_provenance=unmatched-journal-default",
+   "denominator": "882,412 exchange rows; 2,716 journal rows",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C00-DET",
+   "criterion_verbatim": "pair-match determinism across two same-input runs",
+   "method": "command",
+   "invocation": "c00 run twice, resolution + census compared",
+   "output_evidence": "run1 == run2: matched 1978 / unmatched 738 / FINAL-CLASS CENSUS identical across all 5 classes",
+   "denominator": "N/A -- census identity across 2 runs",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C00-MUT",
+   "criterion_verbatim": "a dropped pair leg (mutant) FAILS LOUD as an unpaired flag, never a clean 0.0%",
+   "method": "command",
+   "invocation": "python c00_flow_ledger.py --as-of 2026-08-10 --output-root <root> --qa-drop-txn-id 443776  (a PAIRED Journal In leg)",
+   "output_evidence": "matched 1978->1976, unmatched 738->739 -- the dropped leg's counterpart surfaced as unmatched EXTERNAL-BY-DEFAULT exactly as predicted (pair -2 matched, +1 unmatched survivor)",
+   "denominator": "N/A -- single-leg mutant, predicted-magnitude flip verified",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C00-SPECIMENS",
+   "criterion_verbatim": "Remark (174 rows, $1.79M abs) + Reversal (6 rows, $273K) SPECIMEN-CHARACTERIZED -- reads only, ZERO classification; specimens routed to CTO (COO 101316Z fold; the dollars carry the decision, not the 0.05%)",
+   "method": "command",
+   "invocation": "same c00 run (SPECIMEN blocks)",
+   "output_evidence": "Remark: 174 rows $1,791,613.43 abs, sign 0neg/145pos/29zero, dates 2020-06-05..2026-07-28, 39 accounts, 174/174 ticker'd, 75 with units; top specimens $1,000,000 FID:CASH, MSFT 693u $176,500.17, FXAIX 1454u $171,268.67 -- position-seed-shaped entries, NOT cash-flow-shaped. Reversal: 6 rows $273,075.58, all FID:CASH, all nonneg, unit-matched (240000/25000/4000/2875.58/1200) -- cash-adjustment-reversal-shaped. CLASSIFIED NOTHING; both stay UNRESOLVED; reads routed to CTO in the C-completion report.",
+   "denominator": "180 specimen rows of 1,407,740",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C01-REBASE",
+   "criterion_verbatim": "NNA re-based ON the C_00 flow ledger, ratified taxonomy consumed verbatim (NNA bucket + nna_direction); one flow truth feeds NNA and TWR",
+   "method": "command",
+   "invocation": "python c01_nna_canonical.py --as-of 2026-08-10 --output-root <root>",
+   "output_evidence": "c01's ONLY input is the flow_ledger artifact; classes arrive via A_05's ratified-taxonomy projection; 9,490 account-flow-day rows; headline net $136,711,346.75",
+   "denominator": "16,210 EXTERNAL ledger rows consumed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C01-SEGREGATION",
+   "criterion_verbatim": "ADVREVIEW F-4 BUILT-IN: headline NNA = matched+code-resolved flows only; EXTERNAL-BY-DEFAULT rows land in nna_unresolved_direction with its census",
+   "method": "command",
+   "invocation": "same c01 run",
+   "output_evidence": "headline (code-rule): 15472 of 16210 | segregated (unmatched-journal-default): 738 of 16210 ($2,837,172.35) -- carried in nna_unresolved_direction, never folded into headline",
+   "denominator": "16,210 EXTERNAL rows split 15,472 + 738",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C01-COVERAGE",
+   "criterion_verbatim": "coverage guard: every EXTERNAL-classed row consumed exactly once; no-residual identity headline + segregated == total external (denominators printed)",
+   "method": "command",
+   "invocation": "same c01 run",
+   "output_evidence": "NO-RESIDUAL IDENTITY: headline $136,711,346.75 + segregated $2,837,172.35 == total external $139,548,519.10 (to the penny; coverage fail would raise)",
+   "denominator": "16,210 rows / $139,548,519.10",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C01-DIFF",
+   "criterion_verbatim": "diff vs the existing INF_C_01 canonical_nna output on the SAME partition printed as the migration finding (never silently either)",
+   "method": "command",
+   "invocation": "same c01 run (MIGRATION DIFF block)",
+   "output_evidence": "vs legacy canonical_nna_2026-08-07 (12 accounts union): 0 accounts differ >$0.01; max |diff| $0.00; legacy day-net $-47,234.61 vs mine $-47,234.61 -- EXACT TIE. The migration finding is a NULL finding: the re-base reproduces the ratified NNA on its own partition while adding the F-4 discrimination.",
+   "denominator": "12 accounts union on the shared partition",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C02-FIXTURES",
+   "criterion_verbatim": "GIPS formula identities on synthetic fixtures: known BMV/EMV/CF -> known r under the EOD convention; geometric-vs-summed divergence fixture proves linking",
+   "method": "test_suite",
+   "invocation": "python c02_twr_engine.py --self-test",
+   "output_evidence": "5/5 fixtures PASS: (110-5)/100-1=0.05 exact; flow-free -0.05; geometric [-0.10,+0.10] -> -0.0100 != summed 0.0000; zero-BMV -> UNCOMPUTABLE; gross/net spread == addback/BMV",
+   "denominator": "5 of 5 fixtures",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C02-REFUSE",
+   "criterion_verbatim": "missing/zero BMV -> REFUSE/UNCOMPUTABLE, never a fabricated number (incl. the B_00 ZERO-CONTRADICTED class); zero-denominator fixture exercised",
+   "method": "command",
+   "invocation": "python c02_twr_engine.py --start 2026-08-07 --end 2026-08-10 --output-root <root>",
+   "output_evidence": "computed 970 of 1738 account-days (55.81%) | UNCOMPUTABLE (refused, never fabricated) 768 (44.19%) with status_reason naming the BMV/EMV value_status per row -- the 312-class propagates as REFUSAL, not as a plausible fake return. Fixture 4 exercised the zero-denominator path directly.",
+   "denominator": "1,738 account-days in window",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C02-GROSSNET",
+   "criterion_verbatim": "gross-net spread == FEE-MANAGEMENT add-back identity on a sampled account (FEE-ADMIN retained in both per ruled policy 3)",
+   "method": "command",
+   "invocation": "c02 --self-test fixture 5 + live-window sample scan",
+   "output_evidence": "fixture 5: net 0.0400 gross 0.0500 spread == 1/100 addback/BMV EXACT. Live window carried no in-window mgmt-fee account-day (fees post monthly; window = 2 trading days) -- identity proven by fixture, live sample declared absent-in-window rather than manufactured",
+   "denominator": "fixture exact + 970 live subperiods scanned for a fee day (0 found, declared)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C03-FIELDS",
+   "criterion_verbatim": "every lineage field non-null or explicitly N/A-BY-BOUNDARY (USD; FX N/A-BY-BOUNDARY; method TRUE_TWR-daily)",
+   "method": "command",
+   "invocation": "python c03_twr_lineage.py --start 2026-08-07 --end 2026-08-10 --output-root <root>",
+   "output_evidence": "FIELD NULL SWEEP: nulls only on bmv/emv (35 rows each == exactly the SOURCE-ABSENT class, status-carried) and linked returns on UNCOMPUTABLE periods (declared); fx_policy=N-A-BY-BOUNDARY, base_currency=USD, method=TRUE_TWR-daily on all 869 rows; ESTIMATED_TWR_MODIFIED_DIETZ declared structurally unreachable",
+   "denominator": "869 account-periods x 24 fields",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C03-STATUSFN",
+   "criterion_verbatim": "acceptance status (TRUE_TWR / INDICATIVE_ONLY / UNSUPPORTED) is a pure function of inputs; mutant: inject one unresolved material flow -> UNSUPPORTED",
+   "method": "command",
+   "invocation": "python c03_twr_lineage.py --start 2026-08-07 --end 2026-08-10 --output-root <root> --qa-inject-unresolved 488",
+   "output_evidence": "clean census TRUE_TWR 483 / UNSUPPORTED 384 / INDICATIVE_ONLY 2; mutant run: account 488 (TRUE_TWR clean) derived UNSUPPORTED with reason 'material-unresolved $1,000,000.00>bar $316.24' -- the exact 1bp-of-BMV bar; census flipped 483->482/384->385",
+   "denominator": "869 account-periods; single-account mutant with exact-bar evidence",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C04-NINEGRADES",
+   "criterion_verbatim": "all nine checks emit a grade -- SKIPPED is not a grade; UNCOMPUTABLE/UNAVAILABLE with reason IS",
+   "method": "command",
+   "invocation": "python c04_validation_battery.py --start 2026-08-07 --end 2026-08-10 --output-root <root>",
+   "output_evidence": "checks graded: 9 of 9 (hard-raise if fewer). Grades: position-tie PASS-WITH-CENSUS / cash-balance-roll UNCOMPUTABLE-BY-SOURCE-SHAPE(named) / every-movement-classified PASS-WITH-CENSUS / bmv-rolls PASS-BY-CONSTRUCTION-VERIFIED / price-flags PASS-WITH-CENSUS / matched-internal-net-zero PASS ($-0.00 exact) / anomalous-return PASS-WITH-CENSUS (4 of 970) / vendor-return-tie UNCOMPUTABLE-WINDOW-MISMATCH(measured+named P2) / pnl-identity UNCOMPUTABLE-AT-BUILD(schema fact recorded, named P2)",
+   "denominator": "9 of 9 checks",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-C04-VENDORTIE",
+   "criterion_verbatim": "the star: OUR computed TWR vs the vendor's twr_value (C_05 series) -- tie EXERCISED where the vendor window is covered by our V(t) series, DECLARED with the named P2 computation where not (window-mismatch honest cell)",
+   "method": "command",
+   "invocation": "same c04 run (check 8) + c05's measured window",
+   "output_evidence": "MEASURED at build: vendor window 'Rolling 3-Year' starts 2023-08-11 (907/907 rows); our V(t) series floors at 2026-04-28 -> 0 window-covered accounts -> UNCOMPUTABLE-WINDOW-MISMATCH with the named P2 computation (historical Custom-window V(t) backfill via the P1-probe-proven Envision machinery, or a vendor pull at OUR window). Declared, never manufactured from mismatched windows.",
+   "denominator": "907 vendor rows, 0 window-covered (measured)",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "window mismatch MEASURED (Rolling-3Y vs V(t) floor 2026-04-28); computes at P2 via the named, P1-probe-proven mechanism -- the pre-authorized UNCOMPUTABLE-with-declaration class"
+  },
+  {
+   "criterion_id": "INF-C-C04-PNLCONTROL",
+   "criterion_verbatim": "economic P&L identity control attempted on one known account with components (tax dims validation-only per canonical decision 4); UNCOMPUTABLE-declared with where it WILL compute if the grain does not support it",
+   "method": "command",
+   "invocation": "same c04 run (check 9)",
+   "output_evidence": "ATTEMPTED against tax_unrealized at both frames: the dim carries ending_mv + lt_cost_basis and NO direct unrealized column (schema fact recorded verbatim in the grade) -> UNCOMPUTABLE-AT-BUILD, computes at P2 with the month-grain window -- the 49F-precedented honest cell (a month-grain identity from a 2-day window would be the faked-PASS class)",
+   "denominator": "N/A -- attempted, schema-refused, declared",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "tax-dim schema lacks a direct unrealized column and the QA window is 2 days vs a month-grain identity; P2 computation named -- pre-authorized declaration class"
+  },
+  {
+   "criterion_id": "INF-C-C05-RAW",
+   "criterion_verbatim": "verification_twr lands RAW from silver/api_dims/performance (percent-string coerced, method-disclosure columns carried, outlier row declared); provenance separation stated in-artifact: NEVER served as OUR return",
+   "method": "command",
+   "invocation": "python c05_verification_twr.py --as-of 2026-08-10 --output-root <root>",
+   "output_evidence": "907 rows; METHOD DISCLOSURE in-band: {'TWR': 907}; window Rolling 3-Year 2023-08-11..2026-08-10; twr_value coerced 554/907 (353 nulls = the same vendor-window class, carried); outliers >100pct: 0 (censused, P1-probe precedent declared); provenance_separation column + manifest: 'NEVER SERVED AS OUR RETURN'",
+   "denominator": "907 perf rows @ 2026-08-10",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-ALL-PROVENANCE",
+   "criterion_verbatim": "provenance cols on all six artifacts (atom 9)",
+   "method": "command",
+   "invocation": "python -c sweep over the 7 emitted tables (6 scripts)",
+   "output_evidence": "flow_ledger / nna_canonical / twr_daily / twr_periods / twr_lineage / validation_battery / verification_twr: provenance=BOTH (7 of 7 tables)",
+   "denominator": "7 of 7 tables",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-ALL-MANIFEST",
+   "criterion_verbatim": "atom-3 manifests; boundary_version stamped; policy-block vintage stamped where policies bind",
+   "method": "command",
+   "invocation": "manifest listing + column sweep",
+   "output_evidence": "manifests written per table write under _manifests/2026-08-10/; boundary_version column on 6 of 7 tables -- verification_twr DELIBERATELY exempt (vendor-raw verification series, boundary-independent by design; a stamp claiming boundary-dependence it lacks would be worse than the declared absence); c02's policy block (EOD/cash-receipt/fee-admin-both/anomaly-5%) stamped in its manifests",
+   "denominator": "7 of 7 manifested; 6 of 7 boundary-stamped + 1 declared exemption",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-C-ALL-COMPILE",
+   "criterion_verbatim": "stage-by-stage py_compile logged per script",
+   "method": "command",
+   "invocation": "python -m py_compile <file> at each stage",
+   "output_evidence": "STAGE-COMPILE PASS logged: c00 / c01 / c02 (+1 restage: unused import caught) / c03+c05 (+1 restage: import placement) / c04 (+1 restage: bare f-string). All ruff-clean at commit.",
+   "denominator": "6 of 6 scripts stage-compiled (+3 re-stages)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "THREE mutants this group: c00 dropped pair leg (id 443776) must surface its counterpart; c03 injected $1M unresolved flow must derive UNSUPPORTED; (b03's poison carried from B). Primary: the c00 dropped-leg mutant.",
+   "expected": "matched 1978->1976, unmatched +1 survivor; c03 acct 488 -> UNSUPPORTED at the exact bar",
+   "observed": "c00: matched 1976 / unmatched 739 exactly as predicted; c03: UNSUPPORTED 'material-unresolved $1,000,000.00>bar $316.24'",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input c00 runs: journal resolution + final-class census compared",
+   "observed": "matched 1978 / unmatched 738 / census identical across all 5 classes",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Remark/Reversal CLASSIFICATION",
+   "reason": "characterize-only per COO 101316Z; classification ruling is CTO's on the specimens (Andrew if flows move visibly); both stay UNRESOLVED-LOUD until ruled"
+  },
+  {
+   "item": "MTD/QTD/YTD/ITD period returns",
+   "reason": "UNCOMPUTABLE-AT-P1-QA-WINDOW -- V(t) series spans 2026-04-28..; the engine is date-range-parameterized and the P2 scheduled backfill computes full periods"
+  },
+  {
+   "item": "vendor-TWR tie EXERCISE + P&L identity COMPUTATION",
+   "reason": "both attempted and MEASURED-refused (window mismatch / schema fact); named P2 computations carried in the battery grades -- the pre-authorized UNCOMPUTABLE-with-declaration class, never faked"
+  },
+  {
+   "item": "advisor/household-grain rollups and next-day position-delta corroboration",
+   "reason": "49F spec's own v1 boundary (grain projections are D's; position-delta was the 49F in-kind follow-up -- INF journals are cash) -- declared, not silently absent"
+  },
+  {
+   "item": "EXCLUDED-CORPORATE-ACTION yaml consumption",
+   "reason": "CTO's amendment act (Stock Split/Reverse/Expired- disposition); a05/c00 consume it on landing -- my projection reads the yaml verbatim so it flows through; if the new disposition needs a gips_class mapping row that is a stated 3-line addition"
+  }
+ ],
+ "surprises": [
+  "The c01 migration diff is a NULL finding to the penny: re-based NNA == legacy canonical_nna on the shared partition ($-47,234.61 both) -- the strongest possible evidence the one-flow-truth re-base is value-preserving while adding F-4.",
+  "Remark specimens are position-shaped (174/174 ticker'd, 75 with units, MSFT/FXAIX entries), NOT cash-flow-shaped -- consistent with a position-seed/adjustment family; Reversal specimens are all FID:CASH unit-matched -- consistent with cash-adjustment reversals. Reads only; ruling is CTO's.",
+  "The vendor perf dim's twr_value is ALREADY float64 in silver (the percent-string lives at bronze) -- and 353/907 rows carry null TWR, the same vendor-window class as the activity dim's zeros: the 3y-window artifact has a THIRD surface.",
+  "tax_unrealized carries ending_mv + lt_cost_basis but no direct unrealized column -- the P&L identity's INF component set is derivable (mv - basis), which is a P2 design input now recorded, not improvised mid-battery.",
+  "Sign semantics are 100.00% clean in every class across 1.4M rows -- Orion's transAmount sign IS reliably direction-semantic, unlike the 49F debit_credit trap; the verification now proves per-run what would otherwise be an assumption."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/logs/2026-08-11/inf_p1_group_c_1025-1050Z.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-to",
+   "invocation": "comp-to INF_RUNNER_REFACTOR.P1.scripts-groups-a-d-parquet",
+   "result": "standing session TO context"
+  },
+  {
+   "tool": "comp-validate / comp-pipescript",
+   "invocation": "family probes (Group A window)",
+   "result": "family unregistered -- declared exclusion carried; registration is P2/P3 wiring"
+  }
+ ]
+}
