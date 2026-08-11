@@ -58,9 +58,14 @@ Kimi-SVP formal artifacts (delivery 3).**
 > requires Andrew's word post-integration. Laptop-side, the hold ("I will hold work on the
 > laptop fabric in the interim") is **narrow-operative**: new semantic-structure FORMALIZATION
 > acts are frozen — named queue item: CRO~B's substrate/anchor-catalog formalization
-> (step-0 anchor-type extension, four ratified domain names, coordinate schema,
-> codebase-extractor B6-1/B6-2), UNDISPATCHED at COO staffing, **released by Andrew's
-> ratification of this integration** — while in-flight build/QA continues. Ontology axes are
+> (step-0 anchor-type extension, the four ratified domain names, the coordinate schema, and
+> the codebase-extractor's VOCABULARY half), UNDISPATCHED at COO staffing, **released by
+> Andrew's ratification of this integration** — while in-flight build/QA continues.
+> B6-1/B6-2 and the extractor's build mechanics continue as in-flight build per this
+> paragraph's own build/QA clause. *(Precision per CRO~B tranche-1: B6-1/B6-2 is PURE BUILD —
+> the F3 capture uploader's upload leg + device schedule, zero semantic-structure content —
+> and is a different artifact from the extractor, whose vocabulary half alone is frozen.)*
+> Ontology axes are
 > minted in ONE place per axis (SYSTEM_DEFINITIONS registration mandatory); the ATOM_DECOMP
 > method package is one artifact edited through its owned-paths lane from either fabric.
 
