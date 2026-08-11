@@ -8,9 +8,9 @@
     <issued_to>{portal-frontend seat, on registration}</issued_to>
     <date>2026-08-11</date>
     <project>OPAL_INVPHL</project>
-    <status>pending</status>
+    <status>complete</status>
     <status_note>
-      BUILD COMPLETE AND VERIFIED at portal DEV @335dd198 (2026-08-11, 0.4.0_DT_ClientPlatform).
+      COMPLETE. Built + verified at portal DEV @335dd198 (2026-08-11, 0.4.0_DT_ClientPlatform).
       C1-C6 and C8 PASS, exercised in a browser (redirect navigated, not read off the route
       table; 5/5 pillar mappings; reflow measured at 1440/900/600px). C7 is
       UNVERIFIABLE-BY-INSTRUMENT: the CLAUDE.md Rule 25 amendment is authored and verified
@@ -20,8 +20,14 @@
       DISCHARGED the same window: CTO landed it @9d8217cb15, verified by me against HEAD
       (Andrew verbatim 1x untouched, artifact locator 1x, dangling route locator 0x).
       C7 is now PASS; PRD acceptance-5 discharged.
-      `complete` flip WITHHELD on the same proof-of-spec gate conflict as TO-1 (criterion-id
-      grammar vs the pinned C1..C8 id set). No code work outstanding.
+      HISTORY: the flip was WITHHELD alongside TO-1 on the same proof-of-spec conflict
+      (criterion-id grammar vs the pinned C1..C8 id set). No code work was ever outstanding.
+      CLOSURE 2026-08-11: proof-of-spec instance now VALID, 0 violations, on an HONEST
+      declaration -- CVO added `frontend_component` to the schema kind enum @8d77cd1537 after
+      two instances failed identically (Rule 24 postulate (i): the enum was not collectively
+      exhaustive). Both available one-line greens were refused as false (a declared_exclusion on
+      a covered artifact; rewriting criterion ids to embed stems). COO GO to flip: 214652Z,
+      superseded 220314Z by the root fix. Flipped complete by the assignee.
     </status_note>
     <sequencing>
       Runs AFTER TO-1 if one seat holds both — TO-1 establishes the catalyst/dialog treatment this TO reuses.

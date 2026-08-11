@@ -8,19 +8,22 @@
     <issued_to>{portal-frontend seat, on registration}</issued_to>
     <date>2026-08-11</date>
     <project>OPAL_INVPHL</project>
-    <status>pending</status>
+    <status>complete</status>
     <status_note>
-      BUILD COMPLETE AND VERIFIED at portal DEV @84f6b3e2 (2026-08-11, 0.4.0_DT_ClientPlatform).
+      COMPLETE. Built + verified at portal DEV @84f6b3e2 (2026-08-11, 0.4.0_DT_ClientPlatform).
       All 8 acceptance criteria PASS, exercised on both trigger surfaces (5/5 models each),
       with a fired mutant on the C2 mapping and on the typecheck.
-      The `complete` flip is WITHHELD -- not on my own judgement, but on this TO's own stated
-      completion condition (a schema-valid proof-of-spec instance). That instance is INVALID on
-      exactly 2 artifact-coverage violations that CANNOT be cleared honestly: the checker scans
-      criterion_id only and wants the artifact stem inside the id, while this TO pins the id set
-      to C1..C8 and the same script rejects any id outside that set. Silencing it would require a
-      false declared_exclusion or a mis-typed artifact kind. Routed to 2.0.0_SA_COO for a ruling;
-      instance + full mechanism at deliverables/PROOF_OF_SPEC_OPAL_INVPHL_TO1_20260811.json
-      (surprises[6]). No code work outstanding.
+      HISTORY (kept because the delay is the point, not noise): the flip was WITHHELD for ~40
+      minutes on this TO's own stated completion condition -- a schema-valid proof-of-spec
+      instance -- while that instance failed 2 artifact-coverage violations that could not be
+      cleared honestly. Instance + full mechanism at
+      deliverables/PROOF_OF_SPEC_OPAL_INVPHL_TO1_20260811.json. No code work was ever outstanding.
+      CLOSURE 2026-08-11: proof-of-spec instance now VALID, 0 violations, on an HONEST
+      declaration -- CVO added `frontend_component` to the schema kind enum @8d77cd1537 after
+      two instances failed identically (Rule 24 postulate (i): the enum was not collectively
+      exhaustive). Both available one-line greens were refused as false (a declared_exclusion on
+      a covered artifact; rewriting criterion ids to embed stems). COO GO to flip: 214652Z,
+      superseded 220314Z by the root fix. Flipped complete by the assignee.
     </status_note>
     <authority>
       Andrew-direct ~1953Z: "Approved your artifact-design on Investment Philosophy and all recs, get it

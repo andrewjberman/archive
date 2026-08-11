@@ -11,7 +11,7 @@
   "artifacts_produced": [
     {
       "path_or_key": "portal/src/components/ModelPortfolioModal.tsx",
-      "kind": "script",
+      "kind": "frontend_component",
       "commit_or_etag": "84f6b3e286b3436faf454368ef96cd1c2e5506ed",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Portal frontend on DEV (Rule 19). The DEV->PROD promote is the DT /prod-deploy lane and is explicitly NOT part of this TO (TO-1 execution_rules + COO GO 195948Z 'do not promote')."
@@ -32,14 +32,14 @@
     },
     {
       "path_or_key": "portal/src/components/BenchmarkHeatmap.tsx",
-      "kind": "script",
+      "kind": "frontend_component",
       "commit_or_etag": "84f6b3e286b3436faf454368ef96cd1c2e5506ed",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Trigger surface (a). SEV1 surface model_portfolios.benchmark -- see surprises[0]."
     },
     {
       "path_or_key": "portal/src/pages/Positioning/panels/PositioningSummary.tsx",
-      "kind": "script",
+      "kind": "frontend_component",
       "commit_or_etag": "84f6b3e286b3436faf454368ef96cd1c2e5506ed",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Trigger surface (b)."
@@ -162,8 +162,8 @@
     "portal CI (.github/workflows/ci.yml:56) runs 'bun run tsc --noEmit', which resolves portal/tsconfig.json -- a solution-style config with \"files\": [] and only project references. It therefore typechecks ZERO files and exits 0. Verified: 'tsc --noEmit -p tsconfig.json --listFiles' emits 0 lines. The real typecheck happens only inside 'bun run build' (tsc -b). The dedicated CI typecheck step is a no-op; package.json already has a correct 'typecheck' script (tsc -b --noEmit) that step could call. Not fixed -- outside TO scope, no action taken.",
     "comp-transform schema-check returns rc=0 with 'Component not found' for any component outside portal/src/pages/**, so a mandated check on a src/components file reads as a pass while checking nothing. Separately, 'comp-transform schema-check Tooltip' silently fuzzy-resolves to a DIFFERENT component (ChartTooltip) and reports ITS verdict.",
     "PROOF_OF_SPEC.schema.json's 'phase' enum (P1-SCRIPTS..P5-DECOMMISSION, INVESTIGATION, NON-BUILD-OTHER) is the MDPF pipeline program's axis and has no value for a portal FRONTEND build TO. I recorded NON-BUILD-OTHER as the only non-pipeline option, which is literally inaccurate -- this IS a build. Rule-24 grain/coverage gap on the phase axis; flagged, not worked around silently.",
-    "GATE CONFLICT, ROUTED TO COO, NOT WORKED AROUND: proof-of-spec-check reports 2 artifact-coverage violations on this instance and they cannot be cleared honestly. The check scans criterion_id ONLY (proof-of-spec-check.py:53,62) and expects its documented grammar {firm}-{group}-{artifact}-{check}, i.e. the artifact stem must appear IN THE ID. TO-1's acceptance battery is C1..C8, and the same script's coverage_check treats any id outside the expected set as a violation -- so the artifact stem CANNOT be added to the ids without failing the other half. The only two ways to silence it are to mis-declare a core deliverable in declared_exclusions or to mis-type a .tsx source file's 'kind' away from 'script'; both are false, so neither was done. Note the heuristic is also giving a FALSE PASS in this same instance: PositioningSummary.tsx clears it only because the string 'PositioningSummary' happens to appear inside an unrelated declared_exclusions sentence -- so the control currently passes on coincidence and fails on correctness. Proposed fix (COO/CVO to route, not mine to implement): either have the coverage heuristic also scan invocation/output_evidence, or have TOs mint artifact-bearing criterion ids per the grammar the checker documents. Every other rule in the checker passes on this instance.",
-    "portal/ working tree carries pre-existing untracked residue not from this work: .runtmp/ (which MEMORY.md records as never-to-be-used), org/, src/org/, portal/, catch404_final.png, public/__mockcot/. Untouched by this commit; noted only because a future pathspec-by-directory commit in portal would sweep them."
+    "portal/ working tree carries pre-existing untracked residue not from this work: .runtmp/ (which MEMORY.md records as never-to-be-used), org/, src/org/, portal/, catch404_final.png, public/__mockcot/. Untouched by this commit; noted only because a future pathspec-by-directory commit in portal would sweep them.",
+    "PROOF-OF-SPEC KIND ENUM GAP -- FOUND, ROUTED, AND FIXED AT THE ROOT WITHIN THE SESSION. This instance first failed artifact-coverage because the schema's `kind` enum had NO value for a frontend component, so .tsx files were declared `script` by necessity and were dragged into a heuristic keyed on the DS {firm}-{group}-{artifact}-{check} criterion-id grammar. Two instances failing identically on one cause identified it as template-level rather than authoring slips. Two one-line greens were available and BOTH were refused as false: declaring a covered artifact in declared_exclusions, and rewriting criterion ids to embed stems. CVO added `frontend_component` to the enum @8d77cd1537 (Rule 24 postulate (i) -- the enum was not collectively exhaustive) and annotated the check site so the skip cannot be misread as a gap. These artifacts are now declared with the honest kind and the check passes on a TRUE declaration, not an exception. The red was information; it held ~12 minutes and bought a permanent fix."
   ],
   "session_log": "org/tier2_senior/0.4.0_DT_ClientPlatform/logs/2026-08-11/OPAL_INVPHL_TO1_TO2.md",
   "compiler_tools": [
