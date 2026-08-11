@@ -1,0 +1,128 @@
+{
+ "schema_version": "1.0",
+ "to_id": "49F-OVERLAY-FIRM-HEADER-METRICS",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "PARITY_BAR_49F_PLATINUM_OVERLAY_20260811.md",
+  "group": "D",
+  "vintage_commit": "bcf9e14802"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/predeclared_divergences_49f.json",
+   "kind": "config_data",
+   "commit_or_etag": "28cdbed0e1",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "V1-V4 bands committed 2026-08-11T10:35:58Z, BEFORE the evidence run; V3 carries state DIVERGE-PENDING-SOVEREIGN (this commit)"
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/fit_reports/fit_report_2026-08-11.json",
+   "kind": "doc",
+   "commit_or_etag": "with-this-instance",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the FROZEN one-run report of the sanctioned read-only fit_harness -- frozen evidence, NOT a standing comparator (the 08-04 veto honored; the harness runs and stops)"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-HEADER-METRICS-FIELD-PARITY",
+   "criterion_verbatim": "FIELD PARITY: present/absent/renamed per field, with BOTH denominators (served-side field count and new-side field count)",
+   "method": "command",
+   "invocation": "scratch overlay run (p1_evidence/overlay_header_metrics.out) + fit_harness --surface firm_header_metrics",
+   "output_evidence": "served-side fields: 35 | new-side fields: 35 | present BOTH: 35 | served-only: 0 | new-only: 0 | renamed: NONE (hyphen/underscore-aware matching; this family underscore-spelled both layers). fit_harness: keys 1/1, 84 leaf fields compared",
+   "denominator": "35 vs 35 top-level; 84 leaf fields in the harness frame",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-HEADER-METRICS-QUALITY-PARITY",
+   "criterion_verbatim": "QUALITY PARITY: value-level ... every mismatch ENUMERATED not summarized; three-state adjudication MATCH-CLEAN / MATCH-KNOWN-WRONG / DIVERGE; tolerance = the ALREADY-RULED B_03 1bp band",
+   "method": "command",
+   "invocation": "python fit_harness.py --surface firm_header_metrics --new-root <scratch newroot> (baseline evidence run, post-band-commit)",
+   "output_evidence": "firm_header_metrics: PASS -- 84 fields, DESIGN 31, FAIL 0. Three-state: MATCH-CLEAN 53 fields; DIVERGE 31, every one classified through a PRE-COMMITTED band (D4/D5/D8 + V1/V2/V3), enumerated in the frozen report; MATCH-KNOWN-WRONG structurally impossible in this family (no billing-emv-derived field -- see the INVERTED-312 row). T1 divergences: aua $1,911,578,939.87 vs $1,789,058,516.82 (V3/D5), account_count 6,386 vs 7,238 (V3, counting-basis MEASURED: nonzero-filtered 6,393, delta 7 = one-day vintage), client_count 3,050 vs 4,291 (V3, household-grain, INFERRED pending bd-corpus read)",
+   "denominator": "84 fields; 53 clean + 31 banded-DIVERGE + 0 out-of-band",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-HEADER-METRICS-PREDECLARED-BANDS",
+   "criterion_verbatim": "Pre-declare all divergence bands in predeclared_divergences_49f.json with commit timestamps BEFORE the overlay run",
+   "method": "command",
+   "invocation": "git log @28cdbed0e1 (bands) vs the evidence run wall-clock",
+   "output_evidence": "V1-RUNTIME-META / V2-BACKFILL-PENDING (expires at backfill) / V3-VENDOR-UNIVERSE / V4-INVERTED-BAND committed @28cdbed0e1 2026-08-11T10:35:58Z; the fit_harness evidence run executed after; the earlier scratch run's bands were script-printed-before-diff and are SUPERSEDED by this committed form",
+   "denominator": "4 new bands + the standing D1-D10 registry",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-HEADER-METRICS-MUTANT-CATCHES",
+   "criterion_verbatim": "-MUTANT-CATCHES is REQUIRED -- one run against a deliberately-corrupted new artifact that the check FLAGS; an instance without a demonstrated failure is INVALID",
+   "method": "command",
+   "invocation": "fit_harness --self-test; mutant A (unbanded field corrupted); mutant B (banded monetary +1% > 1bp)",
+   "output_evidence": "SELF-TEST PASS: identity=0 rows; undeclared mutant FAILED loud at firm_id; declared-domain mutant routed DESIGN (368 fields, read-only. rc=0). MUTANT A: firm_header_metrics FAIL (FAIL 1) rc=1 -- the check FLAGS undeclared corruption, rc measured UNPIPED. MUTANT B: +1% on total.aua DETECTED but routed DESIGN under D5 -- stated plainly: every monetary field in THIS family is band-covered by construction of the single-day exercise, so the discriminating MONETARY mutant re-arms when V2 expires at backfill; the demonstrated failures are the self-test's and mutant A's",
+   "denominator": "3 control runs; 1 loud FAIL (rc=1), 1 self-test FAIL-then-route, 1 detected-DESIGN with the limitation named",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-HEADER-METRICS-INVERTED-312-BAND",
+   "criterion_verbatim": "The 312 coerced-zero ending_mv accounts are an INVERTED band: the new runner MUST diverge, and a parity MATCH on those is a FAIL -- reproducing the zeros is the defect transposing",
+   "method": "manual_read_with_citation",
+   "invocation": "V4-COERCED-ZERO-EMV-INVERTED-BAND registry row @28cdbed0e1 + the family's field census",
+   "output_evidence": "DECLARED and deliberately matches no field: an inverted expectation cannot be a DESIGN row (DESIGN would excuse the match the band exists to catch). firm_header_metrics carries NO billing-emv-derived field (fee splits ride the flow-ledger plane) -- the band is structurally inert HERE and LIVE on INF-side overlays + any billing-derived family, where MATCH-KNOWN-WRONG becomes reachable",
+   "denominator": "0 billing-emv-derived fields in this family (of 84)",
+   "status": "N/A-BY-CONSTRUCTION",
+   "status_reason": "firm_header_metrics carries 0 billing-emv-derived fields (of 84) -- the inverted band cannot fire in this family BY CONSTRUCTION; it is DECLARED (V4 @28cdbed0e1, matching no field so DESIGN can never excuse the match it exists to catch) and goes LIVE on INF-side overlays + any billing-derived family, where MATCH-KNOWN-WRONG becomes reachable"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-HEADER-METRICS-VENDOR-UNIVERSE-STATE",
+   "criterion_verbatim": "the $122.5M ... register it as a DIVERGE-PENDING-SOVEREIGN band so the instance is honest about it rather than either hiding it or failing on it",
+   "method": "manual_read_with_citation",
+   "invocation": "V3-VENDOR-UNIVERSE registry row (state: DIVERGE-PENDING-SOVEREIGN) + COO source-grounding 103756Z",
+   "output_evidence": "REGISTERED with the state token. Mechanism now SOURCE-CONFIRMED at tree level (COO grounding: data/black_diamond/scripts/gold/D_00.portal_aggregates.py writes opal-data-bd naming 49financial; the cot control writes no such bucket) -- bd IS Black Diamond and Black Diamond IS 49F's arrival path. COMPOSITION of the $122,520,423.05 stays INFERRED (held-away/other-custodian is a plausible story, not verified); the per-account enumeration is COMMISSIONED (COO 103756Z item 3) and runs next at this seat",
+   "denominator": "$122,520,423.05 = served 1,911,578,939.87 - canonical 1,789,058,516.82",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Injected corruption in the new artifact must be FLAGGED: (A) unbanded field (firm_id) -> loud FAIL; (B) banded monetary field (+1% total.aua, >1bp) -> detected, routed DESIGN under D5 with the band-coverage limitation stated; plus the instrument's own --self-test (undeclared mutant FAILED loud, declared routed DESIGN)",
+   "expected": "A: rc=1 FAIL; B: detected; self-test: PASS with a demonstrated loud failure inside it",
+   "observed": "A: FAIL 1, rc=1 UNPIPED; B: PASS with the +1% detected-DESIGN; self-test rc=0 with 'undeclared mutant FAILED loud at firm_id'",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "fit_harness is deterministic over (legacy bytes, new bytes, registry); the scratch overlay ran twice earlier in the window with identical band counts; the frozen report is one-run evidence by design (run-and-read)",
+   "observed": "identical classification on repeat scratch runs; harness identity self-test = 0 rows",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the other 15 matched + 8 reachability families",
+   "reason": "overlaid per family as their emitters build (the archetype is the template); same harness, same band registry, same instance grammar"
+  },
+  {
+   "item": "the monetary-field discriminating mutant AS an out-of-band FAIL",
+   "reason": "structurally unreachable in this family today -- every monetary field is band-covered by the single-day exercise (V2) + the standing registry (D4/D5/D8); re-arms when V2 expires at backfill; the demonstrated loud failure is carried by mutant A + the self-test"
+  },
+  {
+   "item": "$122.5M composition",
+   "reason": "INFERRED, deliberately -- the per-account enumeration is commissioned and runs next; nothing in this instance asserts the held-away story as fact"
+  }
+ ],
+ "surprises": [
+  "COO's own memory note ('cot-BD ... not bd/49f') initially read AGAINST the vendor mechanism and turned out to be evidence FOR it -- recorded here because the reversal is the strongest possible caution against reasoning from a label: the note was an egress-scope distinction, not a vendor-ownership claim",
+  "the spec-prose premise for forbidding the maturity_date shortcut ('sentinel-populated on ALL rows') does not reproduce (132/2,313 measured) -- the prohibition stands, its stated reason was wrong; CVO amendment carried by COO"
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-11/p1_b4_b5a_group_d_0917-1025Z.md",
+ "compiler_tools": [
+  {
+   "tool": "fit_harness (the sanctioned read-only parity instrument)",
+   "invocation": "--self-test; --surface firm_header_metrics --new-root <scratch> x3 (baseline + 2 mutants)",
+   "result": "PASS/FAIL exactly as designed per run; report frozen at fit_reports/fit_report_2026-08-11.json"
+  },
+  {
+   "tool": "proof-of-spec-check",
+   "invocation": "this instance + 6 criterion ids",
+   "result": "run at assembly; VALID is the completion evidence"
+  }
+ ]
+}
