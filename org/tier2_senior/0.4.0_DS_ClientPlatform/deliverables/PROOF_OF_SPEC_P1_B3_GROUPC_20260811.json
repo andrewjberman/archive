@@ -1,0 +1,67 @@
+{
+ "schema_version": "1.0",
+ "to_id": "P1-B3-GROUP-C-49F",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_C_TWR_ENGINE_20260811.md",
+  "group": "C",
+  "vintage_commit": "f882b91ce2"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform",
+ "artifacts_produced": [
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/c00_flow_ledger.py", "kind": "script", "commit_or_etag": "a781ae9b5d", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "P1 scripts phase; wiring is Group W / P2+"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/c01_nna_canonical.py", "kind": "script", "commit_or_etag": "a781ae9b5d", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/c02_twr_engine.py", "kind": "script", "commit_or_etag": "a781ae9b5d", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/c03_twr_lineage.py", "kind": "script", "commit_or_etag": "a781ae9b5d", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/c04_validation_battery.py", "kind": "script", "commit_or_etag": "a781ae9b5d", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/POLICY_BLOCK.json", "kind": "config_data", "commit_or_etag": "a781ae9b5d", "deployed_state": "STAGED-AWAITING-GATE", "deploy_evidence": "policy as data (atom 6); stages to the product root at P3; engine reads it, never hardcodes"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/tests/test_c02_twr_engine.py", "kind": "test", "commit_or_etag": "a781ae9b5d", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "fixture suite, in-repo"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/tests/test_c00_c03_controls.py", "kind": "test", "commit_or_etag": "a781ae9b5d", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "fixture suite, in-repo"}
+ ],
+ "acceptance": [
+  {"criterion_id": "C5-C00-IDENTITY", "criterion_verbatim": "C_00: every fact_trn row on the partition lands in exactly ONE final class (row-count identity, in == out + declared exclusions; UNRESOLVED census printed with the materiality frame)", "method": "command", "invocation": "python c00_flow_ledger.py --date 2026-08-07 --dry-run --trn-cache ... (+ test_every_row_lands_in_exactly_one_class_and_identity)", "output_evidence": "in=1,961 out=1,961 identity=True | classes {'INTERNAL': 1822, 'EXTERNAL': 137, 'FEE-MANAGEMENT': 2} | UNRESOLVED 0 rows $0.00 | provenance {'code-rule': 1885, 'external-by-default': 68, 'pair-match': 8}", "denominator": "1,961 fact_trn rows on the freshest partition; class enum closed over 5 values", "status": "PASS"},
+  {"criterion_id": "C5-C00-PAIRDET", "criterion_verbatim": "pair-match determinism (two same-input runs)", "method": "test_suite", "invocation": "pytest tests/test_c00_c03_controls.py::test_c00_determinism_two_same_input_builds", "output_evidence": "PASSED -- two same-input builds frame-identical (d1.equals(d2))", "denominator": "N/A -- boolean frame identity", "status": "PASS"},
+  {"criterion_id": "C5-C00-ICTRAP", "criterion_verbatim": "the IC-trap mutant (a direction-keyed matcher on l_s/debit_credit position-side rows) MUST fail loud, not return 0.0% clean", "method": "test_suite", "invocation": "pytest ...::test_ic_trap_mutant_fails_loud_never_reads_direction", "output_evidence": "PASSED -- IC row under a dc-directed class lands UNRESOLVED with provenance ic-under-dc-class-REFUSED, signed_amount stays 0.0; the cash sibling directs normally; the boundary census counts the refusal", "denominator": "1 IC mutant row + 1 cash control row; census generic_external_ic_refused=1", "status": "PASS"},
+  {"criterion_id": "C5-C01-DIFF", "criterion_verbatim": "C_01: diff-vs-existing-c03 printed on the same partition (the migration finding surface).", "method": "command", "invocation": "python c01_nna_canonical.py --date 2026-08-07 --dry-run --canonical-local <EV> --diff-vs-c03", "output_evidence": "MIGRATION DIFF vs existing c03 (dim_transaction, 1961 rows): legacy nna_txn total $-40,096.14 vs ledger headline $-53,987.01 + segregated $260,585.39 -- delta $-246,694.52 (THE FINDING SURFACE, printed not absorbed)", "denominator": "same day both legs; 551 flow-bearing accounts ledger-side; the delta is the finding, deliberately unreconciled here", "status": "PASS"},
+  {"criterion_id": "C5-C02-IDENTITIES", "criterion_verbatim": "C_02: the GIPS formula identities on synthetic fixtures (known BMV/EMV/CF -> known r, both conventions...)", "method": "test_suite", "invocation": "pytest tests/test_c02_twr_engine.py (known-r EOD + known-r BOD)", "output_evidence": "test_known_bmv_emv_cf_gives_known_r PASSED (EOD: (115-10)/100-1 = 5% to 1e-12); test_bod_convention_known_r PASSED (BOD: 115/110-1 to 1e-12)", "denominator": "both conventions, hand-derivable fixtures, 1e-12 bar", "status": "PASS"},
+  {"criterion_id": "C5-C02-LINKING", "criterion_verbatim": "geometric-vs-summed divergence fixture proves linking", "method": "test_suite", "invocation": "pytest ...::test_geometric_linking_diverges_from_summing", "output_evidence": "PASSED -- +10% then -10%: geometric -1.0000% vs summed 0.0000%, divergence asserted >0.9%", "denominator": "N/A -- the divergence IS the assertion", "status": "PASS"},
+  {"criterion_id": "C5-C02-ZERODENOM", "criterion_verbatim": "zero-denominator fixture -> UNCOMPUTABLE, never a number", "method": "test_suite", "invocation": "pytest ...::test_zero_denominator_is_uncomputable_never_a_number (+ the live exercise: 7,238/7,238 REFUSED-NO-BMV on the single-partition run -- the sibling guard exercising itself)", "output_evidence": "PASSED -- status UNCOMPUTABLE-ZERO-BMV with r_net None; live single-partition run: {'REFUSED-NO-BMV': 7238}", "denominator": "fixture + 7,238 live rows through the refuse path", "status": "PASS"},
+  {"criterion_id": "C5-C02-GROSSNET", "criterion_verbatim": "gross-net spread == fee add-back identity on a sampled account.", "method": "test_suite", "invocation": "pytest ...::test_gross_net_spread_is_the_fee_addback_identity", "output_evidence": "PASSED -- net 5% / gross 0% with a -5 fee on BMV 100; spread == fee/BMV to 1e-12. SAMPLED-LIVE-ACCOUNT half: requires consecutive-day valuations -- rides the backfill (declared)", "denominator": "synthetic identity exact; live sample deferred with reason", "status": "PASS"},
+  {"criterion_id": "C5-C03-FIELDS", "criterion_verbatim": "C_03: every lineage field non-null or explicitly N/A-BY-BOUNDARY", "method": "test_suite", "invocation": "pytest ...::test_c03_lineage_fields_nonnull_or_na_by_boundary", "output_evidence": "PASSED -- zero null fields on a fully-specified row; fx_policy == 'N/A-BY-BOUNDARY'; status TRUE_TWR", "denominator": "all 22 lineage fields checked", "status": "PASS"},
+  {"criterion_id": "C5-C03-STATUSMUTANT", "criterion_verbatim": "acceptance-status derivation is a pure function of its inputs (mutant: inject one unresolved material flow -> UNSUPPORTED)", "method": "test_suite", "invocation": "pytest ...::test_c03_status_pure_function_and_mutant", "output_evidence": "PASSED -- TRUE_TWR on clean inputs; INDICATIVE_ONLY with named limitation; the material-unresolved mutant flips to UNSUPPORTED", "denominator": "3 states exercised incl. the mutant", "status": "PASS"},
+  {"criterion_id": "C5-C04-NINEGRADES", "criterion_verbatim": "C_04: all nine checks emit a grade (SKIPPED is not a grade; UNAVAILABLE-BY-MEASUREMENT is)", "method": "command", "invocation": "python c04_validation_battery.py --date 2026-08-07 --dry-run --canonical-local <EV>", "output_evidence": "BATTERY: 9 checks | grades {'PENDING-BACKFILL': 4, 'FLAG': 2, 'PASS': 2, 'UNAVAILABLE-BY-MEASUREMENT': 1} -- incl. matched_internal_nets_to_zero PASS at $0.00 exactly over 8 matched legs; schwab_native_return_tie UNAVAILABLE-BY-MEASUREMENT documented", "denominator": "9/9 checks graded, zero SKIPPED", "status": "PASS"},
+  {"criterion_id": "C5-C04-PNLCONTROL", "criterion_verbatim": "the P&L identity control on one known account-month with hand-derived components", "method": "command", "invocation": "(not yet runnable)", "output_evidence": "month-grain control structurally needs the 525-partition backfill window; the check is IMPLEMENTED and grades PENDING-BACKFILL on the single-day exercise", "denominator": "0 of 1 month windows available at P1 (single-partition exercise)", "status": "UNCOMPUTABLE", "status_reason": "a month-grain control cannot be computed from one day BY CONSTRUCTION; the backfill run (Group W / P2+) is its evidence window -- declared, not skipped"},
+  {"criterion_id": "C5-ALL-PROVENANCE", "criterion_verbatim": "All: provenance cols, manifests, boundary_version stamps, policy-block vintage stamped.", "method": "command", "invocation": "grep Rule-15 x5; artifact column census; POLICY_BLOCK schema_version check in load_policy", "output_evidence": "Rule 15: 5/5 new files | flow_ledger/nna_canonical/validation_battery artifacts carry provenance+manifest+boundary_version (twr artifacts arrive with the backfill); POLICY_BLOCK refused on unrecognized schema_version (fail-closed loader)", "denominator": "5 scripts; 3 emitted artifacts this exercise", "status": "PASS"}
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Three independent mutants: the IC-trap (direction-keyed matcher on position-side rows must REFUSE), the C_03 material-unresolved-flow status flip (-> UNSUPPORTED), and the geometric-vs-summed divergence (summing must NOT reproduce the linked return)",
+   "expected": "REFUSE with provenance; UNSUPPORTED; divergence > 0.9%",
+   "observed": "ic-under-dc-class-REFUSED with signed_amount 0.0; UNSUPPORTED; -1.0000% vs 0.0000%",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input C_00 builds compared frame-identical (test_c00_determinism_two_same_input_builds)",
+   "observed": "d1.equals(d2) True",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {"item": "525-partition backfill (twr_daily/twr_periods/lineage emission, the reversal specimen scan, the P&L month control, the |r| distribution for the ruled threshold)", "reason": "the backfill IS the initial build and executes at wiring (Group W / P2+); every script is date-parameterized + idempotent by design rule 3"},
+  {"item": "position-delta corroboration exercised live", "reason": "implemented; the single-day exercise carries no next-day partition by construction (T-1 frontier); provenance value position-delta-pending covers the daily run honestly"},
+  {"item": "S3 upload / product-root mint", "reason": "P1 emits parquet locally for evidence; destination is P3 (same as B-1/B-2)"},
+  {"item": "c00_account_gains / c01_account_performance / c02_client_performance deletion", "reason": "SUPERSEDED-in-place per the spec's quality partition (section 3): their guards are extracted, their economic content is C_04's P&L input -- removal is a P5-DECOMMISSION act, not P1's"}
+ ],
+ "surprises": [
+  "the classification table's LIVE partition vocabulary carries FEE-MANAGEMENT-VERIFIED (@5bb3b2626d re-grade) which the spec prose never names -- the first C_00 run dropped the TPFEE pair to UNRESOLVED ($5,964.98) until the map enumerated all 10 live values; the frozen-prose-vs-live-artifact class, caught by the UNRESOLVED census being nonzero",
+  "the C_01 migration diff is large and structural: legacy c03 (dim_transaction, sb-code classes) -$40,096.14 vs ledger-based -$53,987.01 headline + $260,585.39 segregated -- the two FEEDS classify differently; the diff is the finding surface the spec designed, handed to the group review not resolved unilaterally",
+  "68 of 137 EXTERNAL rows on 08-07 are external-by-default (unmatched conditional) -- 50% of the day's external class rides the conservative default, which is exactly why F-4's NNA segregation exists"
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-11/p1_b3_group_c_0902-0935Z.md",
+ "compiler_tools": [
+  {"tool": "comp-find", "invocation": "comp-find --name 'pair_match_engine*'", "result": "PASS -- located the ratified engine @5bb3b2626d for absorption (1 hit / 25,300 files)"},
+  {"tool": "py_compile / commit-gate", "invocation": "per stage + safe-commit", "result": "PASS 5/5; ruff F401 caught once (unused runner_common in c02) and fixed pre-landing"},
+  {"tool": "pytest", "invocation": "full corpus suite", "result": "86/86 (73 carried + 13 new C-group controls)"},
+  {"tool": "proof-of-spec-check", "invocation": "this instance + 13 criterion ids", "result": "run at assembly; VALID output is the completion evidence"}
+ ]
+}
