@@ -1,0 +1,67 @@
+{
+ "schema_version": "1.0",
+ "to_id": "P1-B1-GROUP-A-49F",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_A_DIMENSIONS_20260811.md",
+  "group": "A",
+  "vintage_commit": "6fba62393b"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform",
+ "artifacts_produced": [
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/runner_common.py", "kind": "script", "commit_or_etag": "941811c31f", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "P1 is the SCRIPTS phase; runner deploy/wiring is Group W / P2+, and the Rule-13 shared-home S3-membership guard applies at that deploy"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/a00_dim_account.py", "kind": "script", "commit_or_etag": "941811c31f", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same P1 scope statement; atom-9 provenance cols added this commit"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/a01_dim_relationship.py", "kind": "script", "commit_or_etag": "941811c31f", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same P1 scope statement; schema 2.0 fact_fam contract supersedes the union-find (history @941811c31f^)"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/a02_dim_boundary.py", "kind": "script", "commit_or_etag": "941811c31f", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same P1 scope statement"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/a03_dim_security.py", "kind": "script", "commit_or_etag": "941811c31f", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same P1 scope statement"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/a04_dim_calendar.py", "kind": "script", "commit_or_etag": "941811c31f", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same P1 scope statement"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/a05_ref_txn_classification.py", "kind": "script", "commit_or_etag": "941811c31f", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same P1 scope statement"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/a06_dim_identity_crosswalk.py", "kind": "script", "commit_or_etag": "941811c31f", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same P1 scope statement"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/tests/test_wave2_fixtures.py", "kind": "test", "commit_or_etag": "21311962f3", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "fixture suite; runs in-repo, never deploys"}
+ ],
+ "acceptance": [
+  {"criterion_id": "A5-ROWCOUNT-A00", "criterion_verbatim": "Row-count identity vs source (A_00: 7,239 == fact_acc distinct account_id on the same partition; denominators printed).", "method": "command", "invocation": "python a00_runner.py --date 2026-08-07 --dry-run", "output_evidence": "fact_acc date=2026-08-07: 7,239 rows read; converter-attested 7,239 | BUILD OK: 7,263 dim rows x 37 cols (7,239 today + 24 absent-carried per the TTL contract)", "denominator": "7,239 fact_acc rows == 7,239 converter-attested (the tie is against the converter's OWN record, never a self-count)", "status": "PASS"},
+  {"criterion_id": "A5-A01-F5", "criterion_verbatim": "acceptance row: mapped + unmapped == 7,239, denominators printed -- household composites never silently exclude", "method": "command", "invocation": "python a01_dim_relationship.py --date 2026-08-07 --dry-run --local-out <EV>", "output_evidence": "BUILD OK: 7,239 rows x 12 cols | mapped=7186 + unmapped=53 == 7239 (acc universe 7239) | relationships=4291 | fam_only=0", "denominator": "7,239 fact_acc universe; 7,186 fact_fam rows; delta EXACTLY 53 acc-only, 0 fam-only; 4,291 = 4,238 col_6 households + 53 SELF-FAMILY singletons", "status": "PASS"},
+  {"criterion_id": "A5-A02-DISJOINT", "criterion_verbatim": "A_02: collection-account set NONEMPTY and disjoint from IN_CLIENT_BOOK", "method": "command", "invocation": "python a02_dim_boundary.py --date 2026-08-07 --dry-run --local-out <EV> --trn-cache <SC>/p1_inputs/fact_trn_full", "output_evidence": "SWEEP: 38,187 FRM legs across 525 partitions -> 1 collection accounts | per-code {'TPFEE': 38187} | classes {'IN_CLIENT_BOOK': 7238, 'COLLECTION_ACCOUNT': 1} | disjoint=True", "denominator": "525 fact_trn partitions swept (the full tree; the spec's measured 38,187 reproduced EXACTLY); 7,239-account roster", "status": "PASS"},
+  {"criterion_id": "A5-A02-DETERMINISM", "criterion_verbatim": "boundary_version stable across two same-input runs (determinism control)", "method": "command", "invocation": "two identical a02 runs; sha256 over both data.parquet outputs", "output_evidence": "DETERMINISM: run1 sha256=2015094b7c07b6eded9d... run2 sha256=2015094b7c07b6eded9d... -> BYTE-IDENTICAL (STABLE); boundary_version 4ca3132952c8314d... both runs", "denominator": "N/A -- boolean byte-identity over 2 full-artifact runs", "status": "PASS"},
+  {"criterion_id": "A5-A02-MUTANT", "criterion_verbatim": "a mutated input flips it (the mutant control)", "method": "command", "invocation": "python mutant driver (p1_evidence/a02_mutant.out): one date_opened changed; FRM legs removed", "output_evidence": "mutant1 (one date_opened changed): f685a7e76a662464... FLIPPED | mutant2 (FRM legs removed): 789888c3eae0c1c2... FLIPPED, classes {'IN_CLIENT_BOOK': 7239} collection->0 | MUTANT CONTROL: FIRED-AS-EXPECTED", "denominator": "2 mutants, 2 flips; base version 4ca3132952c8314d...", "status": "PASS"},
+  {"criterion_id": "A5-A04-GAPCENSUS", "criterion_verbatim": "A_04: gap census printed with the trading-calendar frame (weekends/holidays are NOT gaps -- the T-1 law); any true gap NAMED.", "method": "command", "invocation": "python a04_dim_calendar.py --date 2026-08-07 --dry-run --local-out <EV>", "output_evidence": "dim_balance partition tree: 525 date keys [2024-07-08 .. 2026-08-07] | BUILD OK: expected=524 observed=525 TRUE GAPS=0 (none) | off-calendar=['2025-01-09']", "denominator": "524 expected trading days (lib/trading_calendar, the ONE authority) vs 525 observed partitions; 0 true gaps; 1 off-calendar partition (surprise channel)", "status": "PASS"},
+  {"criterion_id": "A5-A05-RESOLVE", "criterion_verbatim": "A_05: every fact_trn code on the freshest partition resolves through the table or lands UNRESOLVED-LOUD (0 silent rows)", "method": "command", "invocation": "python a05_ref_txn_classification.py --date 2026-08-07 --dry-run --local-out <EV>", "output_evidence": "RESOLUTION date=2026-08-07: 23/23 triples resolved over 1,961 rows | unresolved=(none)", "denominator": "23 distinct (tran_srcde, tr_cd, sb_cd) triples over 1,961 rows on the freshest partition; 0 unresolved, 0 silent", "status": "PASS"},
+  {"criterion_id": "A5-A05-CENSUSKEY", "criterion_verbatim": "the 187-row table's census key re-derives.", "method": "command", "invocation": "python a05_ref_txn_classification.py --date 2026-08-07 --dry-run (build_ref duplicate-triple refusal + census)", "output_evidence": "TABLE: 187 code rows == 187 distinct triples (census key re-derives) | version 7cac832ff5ddb7bb...", "denominator": "187 rows == 187 distinct key triples (a duplicate triple REFUSES: first-match would be ambiguous)", "status": "PASS"},
+  {"criterion_id": "A5-A06-COVERAGE", "criterion_verbatim": "A_06: coverage ratios printed with BOTH denominators (map-side and feed-side)", "method": "command", "invocation": "python a06_dim_identity_crosswalk.py --date 2026-08-07 --dry-run --local-out <EV>", "output_evidence": "BUILD OK: 7,262 rows | feed->map 7250/7262 (0.9983) | end-to-end 7247/7262 (0.9979) vs universe 7239 | non-8digit 12", "denominator": "feed=7,262 map rows (date=2026-08-10); universe=7,239 fact_acc (date=2026-08-07); both numerator/denominator pairs printed per run in the manifest", "status": "PASS"},
+  {"criterion_id": "A5-A06-LOCKSTEP", "criterion_verbatim": "the lockstep precondition line present in the manifest.", "method": "live_read", "invocation": "read <EV>/artifacts/dimensions/dim_identity_crosswalk/date=2026-08-07/manifest.json field lockstep_precondition", "output_evidence": "\"PRECONDITION (two-derivation lockstep): the bronze-listing universe and the registry-filter universe agree by COINCIDENCE, not construction -- this crosswalk does not prove lockstep and consumers must not cite it as doing so\"", "denominator": "N/A -- presence check on a named manifest field", "status": "PASS"},
+  {"criterion_id": "A5-ALL-PROVENANCE", "criterion_verbatim": "Every artifact: provenance cols present; manifest written (atom 3); py gate + `from __future__ import annotations` (Rule 15).", "method": "command", "invocation": "grep -c '^from __future__ import annotations' <8 files>; parquet column census over all local artifacts; py_compile", "output_evidence": "Rule 15: 8/8 files count=1 each | PROVENANCE CENSUS: ALL PRESENT | denominator: 6 artifacts checked | a00 37 cols (provenance added this commit) | PY_COMPILE OK: 7/7 + a00 recompiled | manifest.json written beside every artifact", "denominator": "8 script files; 6 emitted artifacts + A_00's dry-run frame; 100% carry source_pipeline + _ingested_at", "status": "PASS"}
+ ],
+ "controls": {
+  "mutant": {
+   "description": "A_02 boundary_version: (1) one account's date_opened changed -> version must flip; (2) all FRM legs removed -> version must flip AND collection-account count must drop to 0",
+   "expected": "both mutants flip the version; mutant2 collapses COLLECTION_ACCOUNT to 0",
+   "observed": "mutant1 f685a7e76a... FLIPPED; mutant2 789888c3ea... FLIPPED with classes {'IN_CLIENT_BOOK': 7239}; driver exit 0",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two identical a02 full-sweep runs (same cache, same date); sha256 over the emitted data.parquet of each",
+   "observed": "2015094b7c07b6eded9d... == 2015094b7c07b6eded9d... BYTE-IDENTICAL; boundary_version identical (4ca3132952c8314d...)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {"item": "S3 upload / product-root mint (portal/gold/advi/49financial)", "reason": "P1 emits parquet in {table}/date={D} grammar (B-5a writer-format half); the DESTINATION re-point is P3 per COO dispatch 081619Z, and the advi root awaits Andrew's confirmation line (spec (3)1 F-1 disposition) -- evidence runs used --local-out"},
+  {"item": "EXCLUDED_OTHER boundary rows", "reason": "zero rows emitted at P1: no discretionary flag emerged from fact_acc's 95 cols (recorded ABSENT-WITH-SHAPE in the manifest per @6e180df78e); closed-before-window is window logic, which is C-group's"},
+  {"item": "spec (3)3: dim_asset vs fact_sec content diff", "reason": "built on the fact_sec default per the spec's own source-agnostic contract; the one content diff rides the group review, not this TO"},
+  {"item": "a00/a01 runner S3-wiring consolidation onto runner_common", "reason": "extract-side-only admission: the exercised a00_runner keeps its own working copy until its next touch; consolidating it now would be a rewrite the spec's extraction depth (decision 2) does not ask for"},
+  {"item": "A_00 SCD2 join-dim-2 unbridged census (1,961 unbridged on 2026-08-07)", "reason": "reported-never-defaulted per the core's own law; jd2 coverage is a Wave-1/B-group input question, outside Group A's boundary (spec (4))"}
+ ],
+ "surprises": [
+  "off-calendar partition: dim_balance carries date=2025-01-09 (525 observed vs 524 expected) -- a partition EXISTS on a day lib/trading_calendar says the market was closed (Carter mourning-day class); observed, no action taken, routed in the B-1 report",
+  "fact_trn FRM legs are 100% TPFEE (38,187/38,187; zero MGFEE-family FRM legs) and resolve to exactly ONE collection account -- consistent with a single firm-level third-party-fee collection account; observed, no action",
+  "a06 end-to-end numerator (7,247) exceeds the account universe (7,239) because multiple allocations map to one account -- allocation-grain, correct by construction; noted so the ratio is never misread as account coverage"
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-11/p1_b1_group_a_0821-0912Z.md",
+ "compiler_tools": [
+  {"tool": "comp-find", "invocation": "comp-find --name 'SCHWAB_TRANSACTION_CODE_CLASSIFICATION*'", "result": "PASS -- 2 hits across 25,273 files scanned; located the ratified table @a876ee6ae9 for the A_05 promote"},
+  {"tool": "comp-find", "invocation": "comp-find 'fee_efficiency' data/inf (same session, CPR-4 window)", "result": "PASS -- band-separated DEF/SURFACED hits; the P1 window reused the session's live comp-rail discipline"},
+  {"tool": "py_compile (commit-gate stage verification)", "invocation": "python -m py_compile <8 files> per stage + .tools/commit-gate.sh at both commits", "result": "PASS -- 8/8 compile; both safe-commits green incl. risk-reflex REFLEX CLEAN (1 file vs 1,659 danger nodes at the B-1 commit)"},
+  {"tool": "proof-of-spec-check", "invocation": "python .tools/proof-of-spec-check.py <this file> <11 criterion ids>", "result": "run at assembly; the validating output is the completion evidence of this instance itself"}
+ ]
+}
