@@ -16,7 +16,10 @@
       UNVERIFIABLE-BY-INSTRUMENT: the CLAUDE.md Rule 25 amendment is authored and verified
       in-tree but owned-paths refuses this lane (BASE_EXEC), and same-commit is structurally
       impossible anyway -- the rename lives in the portal SUBMODULE, CLAUDE.md in the
-      workspace repo. Routed to COO+CTO in the same turn per the TO escape.
+      workspace repo. Routed to COO+CTO in the same turn per the TO escape, and
+      DISCHARGED the same window: CTO landed it @9d8217cb15, verified by me against HEAD
+      (Andrew verbatim 1x untouched, artifact locator 1x, dangling route locator 0x).
+      C7 is now PASS; PRD acceptance-5 discharged.
       `complete` flip WITHHELD on the same proof-of-spec gate conflict as TO-1 (criterion-id
       grammar vs the pinned C1..C8 id set). No code work outstanding.
     </status_note>
