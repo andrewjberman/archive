@@ -123,11 +123,22 @@ def main(payload_path: str, rect_path: str) -> int:
         if gap:
             v_partial.append((eid, gap))
 
+    # COUNT DISCIPLINE, and this was found by pointing this guard at a MISMATCHED target
+    # (the /market payload against /macro's rectangle) after COO~Z's staleness check caught the
+    # same class in itself. The old single figure counted only cells whose ENTITY was known, and
+    # printed it as "cells offered" -- so a wholly wrong-subject payload reported "cells offered: 0"
+    # while carrying 12. WELL-FORMED, REFUSED CORRECTLY, AND STILL WRONG ABOUT WHAT IT COUNTED.
+    # A denominator answers HOW MANY; it does not answer OF WHAT. Both numbers now print, and
+    # they diverge exactly when the subject is wrong.
+    offered = sum(len(payload[e]) for e in entities)
     total = sum(len(payload[e]) for e in entities if e in cells_by_entity)
     print("SEMANTICS PAYLOAD GUARD")
     print("  payload   : %s" % payload_path)
     print("  target    : %s" % rect_path)
-    print("  entities  : %d   cells offered: %d" % (len(entities), total))
+    print("  entities  : %d   cells IN PAYLOAD: %d   cells against a KNOWN entity: %d%s"
+          % (len(entities), offered, total,
+             "   <-- DIVERGENT: the payload is addressing a different subject"
+             if offered != total else ""))
     print("  axis limb : %s" % ("axis_declaration.json present -- cross-check ACTIVE"
                                 if axis_bc is not None else
                                 "axis_declaration.json ABSENT -- single-limb (derived) only"))
