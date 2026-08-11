@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADHOC.ending-mv-longitudinal-investigation-20260811",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier1_exec/2.0.0_SA_COO/deliverables/BRIEF_ENDING_MV_LONGITUDINAL_INVESTIGATION_20260811.md",
+    "group": "OTHER",
+    "vintage_commit": "5e9c253613"
+  },
+  "assignee": "0.0.0_AB_MSTR",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier0_exec/0.0.0_AB_MSTR/deliverables/ENDING_MV_LONGITUDINAL_FINDINGS_20260811.md",
+      "kind": "doc",
+      "commit_or_etag": "committed-this-window (same commit as this instance)",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "governance record; nothing here deploys -- the brief's sec10 forbids touching serving and none was touched"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C-1",
+      "criterion_verbatim": "The measured billing cadence, stated with its denominator.",
+      "method": "command",
+      "invocation": "aws s3 ls (rail-checked) + pandas over local partition copies: scratchpad mv_invest/analyze.py + step4.py",
+      "output_evidence": "billing 2026 partitions: 97 nonempty (first 2026-04-01 last 2026-08-11); elapsed days 132; gap distribution {1d:90, 2d:3, 4d:1, 5d:1}; silver 2025-06-30 rows=0, 2025-12-31 rows=0 (INF pre-onboarding); positions 223/223 daily; bronze Billing Cycle = Quarterly on 791/907 rows",
+      "denominator": "97 nonempty snapshots / 132 elapsed days / 102 partition dirs (5 empty-for-INF); cycle read over 907 INF bronze rows",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C-2",
+      "criterion_verbatim": "A per-account classification into H1-H5 with counts, not a single verdict.",
+      "method": "command",
+      "invocation": "scratchpad mv_invest/step3.py + step5.py (longitudinal features per account; bucket partition on bronze cycle/period metadata)",
+      "output_evidence": "POPULATED 485 (emv==current AUA to the cent 485/485, max diff $0.00); ABSENT-in-cycle-fee-earning 259/$59,563,723.65; ABSENT-empty-billing-block 52/$8,757,677.86; ABSENT-past-period 1/$0.01; no-active-positions 73 (honest zeros incl. 4 closed Patrick accounts); H2 REFUTED, H5 REFUTED (divergence $0.00), H1 refuted as general mechanism, H4-parse EXCLUDED 0/907, H4-SEMANTIC confirmed (absent coerced to 0.00, 312/312); is_fee_earning flips 102/907",
+      "denominator": "907 silver rows on 2026-08-11; 485+312+73+36-no-billing-row against 907 billing + 36 position-only accounts",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C-3",
+      "criterion_verbatim": "For H1/H2: the measured lag distribution -- as of any given day, ending_mv reflects a close a median of N days old, p95 M days.",
+      "method": "command",
+      "invocation": "scratchpad mv_invest/step3.py section D (per-day emv-vs-AUA join over 95 joined days)",
+      "output_evidence": "populated accounts lag = 0 days (same-day cent-exact; controls match on 90.5-98.9 percent of days, residue = pull-morning timing); absent class carries NO lag -- absence is persistent per account (0 went-dark transitions in-window); the median-N-days framing dissolves: the feed is current-to-the-day or missing entirely",
+      "denominator": "95 joined snapshot days x cohort; went-dark census over 312 zero-with-assets accounts",
+      "status": "PASS",
+      "status_reason": ""
+    },
+    {
+      "criterion_id": "C-4",
+      "criterion_verbatim": "A restatement of the $68.3M firm-level gap decomposed by hypothesis -- that converts my currently-INFERRED decomposition into a measured one, and it is the single most valuable output.",
+      "method": "command",
+      "invocation": "scratchpad mv_invest/step5.py (firm restatement 2026-08-11)",
+      "output_evidence": "gap 68,321,011.74 = +59,563,710.03 absent-fee (259) + 8,757,691.49 absent-nonfee (53) - 389.78 negative-value residue + 0.00 no-billing-row (36 accts) + 0.00 populated divergence. 100.0 percent absence artifact. Restated current-basis: fee-earning ~196.75M (reported 137.19M, understated 30 percent); non-fee ~12.38M (reported 3.62M)",
+      "denominator": "total current AUA 209,129,912.97 across active positions; component sums tie to the gap to the cent",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C-5",
+      "criterion_verbatim": "A plain-English answer to: when a human reads non-fee-earning assets, which number answers that question? -- as input to Andrew's ruling, explicitly not the ruling.",
+      "method": "manual_read_with_citation",
+      "invocation": "FINDINGS doc sec 2e, grounded on C-2/C-4 measurements",
+      "output_evidence": "ending_mv is not a second valuation basis; it is current AUA with availability holes (same-day cent-exact where present, absent otherwise). Patrick: 695,956.41 current vs 127,852.75 emv = same valuation minus 9 of 12 accounts. The classified current-AUA sum answers the asset question; the emv sum answers an Orion-billing-coverage question. Ruling stays Andrew's",
+      "denominator": "N/A -- interpretive synthesis over C-2/C-4 (their denominators carry)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Contaminated-denominator mutant (self-caught): bronze multi-firm CSV (3,052 rows) compared against INF-filtered silver (907) produced 1,264 false parse-loss candidates; restricting to the INF universe collapsed it to 0.",
+      "expected": "false candidates vanish under the correct universe if the comparison discriminates",
+      "observed": "1,264 -> 0 honest parse-loss candidates (0 of 907)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "headline figures recomputed in three independent passes (step2/step3/step5) + tie-out against DS's independent measurement @c55e0d6fcc",
+      "observed": "127,852.75 / 695,956.41 / 568,103.66 / 68,321,011.74 identical across passes and to DS to the cent",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    { "item": "Why Orion returns empty emv for 259 in-cycle billed accounts (vendor-side semantics)", "reason": "not answerable at rest; the broken Included-In-Billing flag discriminates nothing (Error:Not supported in both classes); needs a per-use Orion egress ask to Andrew per brief sec6" },
+    { "item": "Pre-2026-04 longitudinal depth and two-closed-quarter boundary tests", "reason": "structurally impossible: the INF billing feed begins 2026-04-01; 2025 and 2026Q1 partitions hold 0 INF rows" },
+    { "item": "period_start/period_end boundary marking against SILVER (brief method step 4)", "reason": "silver lacks the columns -- builder rename-map mismatch (defect finding 4.1); run against bronze instead" },
+    { "item": "plots", "reason": "tabulated equivalents carry the same discrimination; no display value added for the ruling" },
+    { "item": "any fix, re-cut, or serving change", "reason": "brief sec10 out-of-scope; findings routed to the P1 build wave owners" }
+  ],
+  "surprises": [
+    "s3://opal-data-inf/bronze/orion-api-v2/2026-04-01/positions.parquet -- a .parquet under bronze/ (Rule 17a class; live gate covers opal-data-assets only)",
+    "PROOF_OF_SPEC phase enum has no investigation/recon value (build-scoped vocabulary; Rule-24 grain note for the schema owner) -- filed under P1-SCRIPTS as least-wrong since every remediation this feeds is a P1 script act",
+    "the brief's '102 partitions dated 2026' counts directories; 5 are empty-for-INF (true nonempty 2026 count = 97)"
+  ],
+  "session_log": "org/tier0_exec/0.0.0_AB_MSTR/logs/2026-08-11/ending_mv_longitudinal_rundown_0845-0930Z.md",
+  "compiler_tools": [
+    {
+      "tool": "rail-checked aws s3 ls / cp (comp-rail markers on each)",
+      "invocation": "partition census + at-rest pulls for billing/positions_mv/representatives + bronze billing.csv",
+      "result": "no comp-tool fits an at-rest partition-grid census or a bulk historical pull; comp-freshness answers freshness-of-one-artifact, comp-routes answers serving -- neither is this question; markers audited per Rule 21"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier0_exec/0.0.0_AB_MSTR/deliverables/ENDING_MV_LONGITUDINAL_PROOF_OF_SPEC_20260811.json",
+      "result": "schema-valid (run before commit; see commit message)"
+    }
+  ]
+}
