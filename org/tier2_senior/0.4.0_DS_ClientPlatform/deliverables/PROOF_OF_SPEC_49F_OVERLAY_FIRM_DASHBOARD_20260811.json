@@ -1,0 +1,135 @@
+{
+ "schema_version": "1.0",
+ "to_id": "49F-OVERLAY-FIRM-DASHBOARD",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "PARITY_BAR_49F_PLATINUM_OVERLAY_20260811.md",
+  "group": "D",
+  "vintage_commit": "bcf9e14802"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/predeclared_divergences_49f.json",
+   "kind": "config_data",
+   "commit_or_etag": "60cc0e1c0f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "D5 pinned_delta on firm_dashboard|headline.total_aua committed @60cc0e1c0f BEFORE the evidence runs quoted below (bands-before-evidence discipline); V3 count pins @28cdbed0e1 stand"
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/fit_reports/fit_report_dashboard_2026-08-11.json",
+   "kind": "doc",
+   "commit_or_etag": "with-this-instance",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the FROZEN one-run baseline report (run-and-read; NOT a standing comparator, the 08-04 veto honored)"
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/fit_harness.py",
+   "kind": "script",
+   "commit_or_etag": "60cc0e1c0f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "SHADOWED-PIN fix: global pin_index across ALL registry rows (first-match band ordering no longer defeats a later row's pin); self-test control 5 added; 5/5 PASS"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-DASHBOARD-FIELD-PARITY",
+   "criterion_verbatim": "FIELD PARITY: present/absent/renamed per field, with BOTH denominators (served-side field count and new-side field count)",
+   "method": "command",
+   "invocation": "leaf-by-leaf comparison (p1_evidence output) + fit_harness --surface firm_dashboard --new-root <scratch newroot>",
+   "output_evidence": "served-side leaves: 21 | new-side leaves: 21 | present BOTH: 21 | served-only: 0 | new-only: 0 | renamed: NONE. fit_harness frame: 21 fields compared (generated_at VOLATILE-skipped by design)",
+   "denominator": "21 vs 21 leaves; 21 fields in the harness frame",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-DASHBOARD-QUALITY-PARITY",
+   "criterion_verbatim": "QUALITY PARITY: value-level, every mismatch ENUMERATED not summarized; three-state adjudication; tolerance = the ALREADY-RULED 1bp band",
+   "method": "command",
+   "invocation": "python fit_harness.py --surface firm_dashboard --new-root <scratch newroot> --report-dir <fit_d02> (baseline, post-pin-commit @60cc0e1c0f); frozen at fit_reports/fit_report_dashboard_2026-08-11.json",
+   "output_evidence": "PASS -- 21 fields, DESIGN 17, FAIL 0, rc=0. The 17, enumerated with their registry-order bands: data_as_of (V1, one-day vintage 2026-08-06 vs 2026-08-07); account_count 6,386 vs 7,238 + client_count 3,050 vs 4,291 (V3 PINNED-OK, deltas 852/1,241 on-pin); total_aua 1,778,539,360.83 vs 1,789,058,516.82 (D5 PINNED-OK, delta +10,519,155.99 = the characterized cross-vendor makeup, CTO-validated 155903Z); fee_earning_account_count 6,327 vs 1 + fee_earning_aua 1,753,689,905.16 vs 329,181.55 + fee_earning_client_count + fee_rate_pct + non_fee_earning_{account_count,aua,client_count} (7 fields, D4 fee-presence plane -- the new side rides the KNOWN-BROKEN is_fee_earning flag whose heal is the in-flight window-fix+flag act; re-arm at flag heal, a D4 DESIGN here after that heal is a REAL failure); nna_12m/nna_qtd/nna_ytd (V2 backfill-pending typed zeros); nna_basis + nna_mtd (V2/V5 nna-rebase plane, basis string + headline both PERMANENTLY re-based on the C_01 flow ledger); small_account_count 2,395 vs 0 (V6 emitter-pending, threshold definition awaits bd-corpus read). MATCH-CLEAN: firm_id, income_yield_pct (0.0==0.0), split. MATCH-KNOWN-WRONG: none reachable this family",
+   "denominator": "21 fields; 3 clean + 17 banded-DESIGN (3 of them PINNED-OK) + 0 out-of-band + 1 volatile-skipped",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-DASHBOARD-PREDECLARED-BANDS",
+   "criterion_verbatim": "Pre-declare all divergence bands with commit timestamps BEFORE the overlay run",
+   "method": "command",
+   "invocation": "git log predeclared_divergences_49f.json: V1-V4 @28cdbed0e1 (10:35:58Z), V7 pin @45399c9ef8, D5 dashboard pin @60cc0e1c0f -- all BEFORE the quoted evidence runs (~16:5xZ)",
+   "output_evidence": "every band and every pin in the quoted baseline predates its evidence run; the D5 pin's expected value (+10,519,155.99) was enumerated from the SAME characterization already validated by CTO (155903Z), not tuned to make the run pass -- tolerance is the 1bp-of-served convention (177,853.94)",
+   "denominator": "3 registry commits, all pre-evidence",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-DASHBOARD-MUTANT-CATCHES",
+   "criterion_verbatim": "MUTANT-CATCHES is REQUIRED -- a demonstrated failure on a live core field; per the CVO banding-kind ruling 163950Z the computable core must carry a monetary mutant that FAILS on a LIVE core field",
+   "method": "command",
+   "invocation": "shape mutant (ShapeFrozenPublisher --mutant); count-pin mutant (earlier evidence d02_pin_mutant.out); MONETARY mutant: +1% on headline.total_aua -> fit_harness --new-root <mutant root>, rc captured UNPIPED",
+   "output_evidence": "shape mutant: publisher REFUSED (a_field_the_census_never_saw -> schema_diff, prohibited-in-v1). count-pin mutant: FAIL 1 (V3 pin). MONETARY mutant: FAIL rc=1 -- headline.total_aua +1% ($17.9M) moved the delta off the D5 pin, pin_violation with off_by printed; DESIGN 17 -> 16 and FAIL 0 -> 1, exactly one row flipped (the discriminating shape). Baseline rc=0 at the same registry vintage. fit_harness --self-test 5/5 (identity, undeclared-loud, declared-DESIGN, on/off-pin, shadowed-pin)",
+   "denominator": "3 mutant classes, 3 loud refusals/failures; self-test 5/5",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-DASHBOARD-INVERTED-312-BAND",
+   "criterion_verbatim": "The 312 coerced-zero ending_mv accounts are an INVERTED band: a parity MATCH on those is a FAIL",
+   "method": "manual_read_with_citation",
+   "invocation": "V4-COERCED-ZERO-EMV-INVERTED-BAND @28cdbed0e1 + this family's field census",
+   "output_evidence": "the dashboard's fee plane (fee_earning_*/non_fee_earning_*) is derived from fee-presence law (D4), not from billing ending_mv values -- no billing-emv-derived VALUE field exists in this family, so V4 cannot fire here BY CONSTRUCTION; it stays LIVE on INF-side overlays. Deliberately NOT a matched-zero: the new side's fee plane diverges (6,327 vs 1), the exact opposite of reproducing the served values",
+   "denominator": "0 billing-emv-derived value fields (of 21)",
+   "status": "N/A-BY-CONSTRUCTION",
+   "status_reason": "no billing-emv-derived value field in this family; the band is declared and live elsewhere"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-DASHBOARD-VENDOR-UNIVERSE-STATE",
+   "criterion_verbatim": "register the vendor-universe divergence as DIVERGE-PENDING-SOVEREIGN -- honest, neither hidden nor failed-on",
+   "method": "manual_read_with_citation",
+   "invocation": "V3-VENDOR-UNIVERSE (state: DIVERGE-PENDING-SOVEREIGN) count pins + D5 aua pin, all PINNED-OK in the frozen baseline",
+   "output_evidence": "the three headline count/aua divergences ride pins whose expected values ARE the characterized cross-vendor deltas (852 accounts / 1,241 clients / +$10.5M aua) -- the card is at Andrew with CTO's serve-canonical REC (155903Z); nothing here absorbs the $122.5M optics figure, which belongs to the served held_certified basis, not to this comparison",
+   "denominator": "3 pinned fields, 3 PINNED-OK",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "shape (publisher REFUSED) + count-pin (FAIL 1) + monetary (+1% headline.total_aua -> pin_violation FAIL rc=1 unpiped)",
+   "expected": "three loud refusals/failures; baseline PASS at the same vintage",
+   "observed": "as expected, all three; exactly one row flipped DESIGN->FAIL on the monetary mutant",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "baseline run twice at the same registry vintage (pre-freeze and freeze runs), identical counts (21/17/0); harness identity self-test 0 rows",
+   "observed": "identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "fee plane VALUE parity (7 D4 fields)",
+   "reason": "the new side rides the KNOWN-BROKEN is_fee_earning derivation; Andrew-direct #2 heals it (window fix -> ~A's flag act, in flight this session). Re-arm: after the heal, a D4 DESIGN routing here is a REAL failure -- narrow D4 then"
+  },
+  {
+   "item": "nna window values (V2) and window blocks generally",
+   "reason": "backfill-pending typed zeros; expires at the 525-partition backfill (scoped to COO 163847Z; 20-date timing sample authorized 164519Z)"
+  },
+  {
+   "item": "data/assets/scripts/gold/runners_49f/fit_harness.py (its own acceptance battery)",
+   "reason": "the harness is the INSTRUMENT of this instance, not its subject -- its acceptance IS its --self-test (5/5 controls incl. the new shadowed-pin control 5, run and quoted in the MUTANT-CATCHES row); a separate battery for the instrument would grade the ruler with itself"
+  }
+ ],
+ "surprises": [
+  "THE SHADOWED-PIN INSTRUMENT DEFECT, found by this battery's monetary mutant on the sibling family: first-match band ordering silently defeated any pin on a later registry row -- the mutant routed DESIGN with rc=0 on the first attempt. Fixed @60cc0e1c0f (global pin_index; self-test control 5). The defect class is exactly CVO's mutant-B hole, and it was reachable in the shipped instrument until this run",
+  "headline.fee_earning_account_count 6,327 vs 1 is not a parity finding -- it is the measured face of the broken is_fee_earning flag whose heal is already ruled and sequenced (COO 161548Z); recorded so nobody reads the D4 band as hiding it"
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-11/window_chain_1424-1518Z.md",
+ "compiler_tools": [
+  {
+   "tool": "fit_harness (read-only parity instrument)",
+   "invocation": "--self-test (5/5); --surface firm_dashboard baseline + monetary mutant, rc unpiped",
+   "result": "baseline PASS rc=0; mutant FAIL rc=1; frozen report committed with this instance"
+  },
+  {
+   "tool": "proof-of-spec-check",
+   "invocation": "this instance + 6 criterion ids",
+   "result": "run at assembly; VALID is the completion evidence"
+  }
+ ]
+}
