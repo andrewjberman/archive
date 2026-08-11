@@ -64,11 +64,35 @@
     <instance_path_grammar>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P1_INF_{GROUP}_{YYYYMMDD}.json</instance_path_grammar>
     <criterion_id_grammar>INF-{group}-{artifact}-{check}</criterion_id_grammar>
 
-    <group id="A" status="NOT_YET_MINTED"/>
+    <group id="A" status="MINTED" minted_by="0.4.0_DS_ClientPlatform~A" minted_at="2026-08-11T094xZ" battery_source="SPEC_49F_GROUP_A_DIMENSIONS_20260811.md §5 (@9c294bbf15+@6fba62393b) transposed per INF shape spec Commission 2 Group A (@75db88d716)">
+      <criterion id="INF-A-A00-ROWCOUNT">dim_account row count == accounts_v2 distinct account_id on the same partition; denominators printed</criterion>
+      <criterion id="INF-A-A00-PREDICATE">universe = DERIVED rep-scope predicate (one home, from the representatives dim / ruled rep set), never INFLECTION_REP_IDS; zero hardcoded rep-allowlist constants in runners_inf; a rep add/reassignment at Orion changes NO code</criterion>
+      <criterion id="INF-A-A01-MAPCENSUS">mapped + unmapped == A_00 universe total (ADVREVIEW F-5); disposition enum SELF-FAMILY/EXCLUDED-LOUD present; denominators printed</criterion>
+      <criterion id="INF-A-A02-DISJOINT">COLLECTION_ACCOUNT set disjoint from IN_CLIENT_BOOK; detection outcome DECLARED: nonempty via the advisory-fee-flow named computation OR collection_detection=ABSENT-with-shape (the INF spec's own ELSE branch -- never guessed)</criterion>
+      <criterion id="INF-A-A02-VERSION-DET">boundary_version stable across two same-input runs (determinism control)</criterion>
+      <criterion id="INF-A-A02-VERSION-MUT">a mutated input flips boundary_version (mutant control)</criterion>
+      <criterion id="INF-A-A03-ROWCOUNT">dim_security row count == source distinct security identifiers; denominators printed</criterion>
+      <criterion id="INF-A-A04-GAPCENSUS">gap census printed with the trading-calendar frame (lib/trading_calendar.py JOIN vs the canonical-holdings partition tree); weekends/holidays NEVER gaps (T-1 law); a partition on a non-trading day = DECLARED STATEMENT-DAY class, never promoted; any TRUE gap NAMED</criterion>
+      <criterion id="INF-A-A05-RESOLVE">every transTypeId on the freshest silver/transactions partition resolves through ref_txn_classification or lands UNRESOLVED-LOUD; 0 silent rows; denominator = partition row count</criterion>
+      <criterion id="INF-A-A05-CENSUSKEY">the classification table's census key re-derives from the FULL-series transTypeId census (46-code universe, never a window sample)</criterion>
+      <criterion id="INF-A-A06-COVERAGE">crosswalk coverage ratios printed with BOTH denominators (spine-side and per-dim side); near-identity expectation stated</criterion>
+      <criterion id="INF-A-ALL-PROVENANCE">provenance cols (source_pipeline, _ingested_at) present on every Group A artifact (atom 9)</criterion>
+      <criterion id="INF-A-ALL-MANIFEST">atom-3 manifest written per artifact ({data-as-of}/{process-ts}); boundary_version stamped where consumed</criterion>
+      <criterion id="INF-A-ALL-COMPILE">stage-by-stage py_compile pass logged per script at its build stage (Andrew @4dbf4a0d7c), not one end pass</criterion>
+      <judgment_calls>
+        (1) The 49F A_02 battery bullet is THREE independently-checkable rows (disjoint/determinism/mutant) -- split per the issuance grammar. (2) 49F's "collection set NONEMPTY" relaxes to DECLARED-nonempty-or-ABSENT-with-shape because the INF spec itself names the ELSE branch (the FRM-leg discriminator does not transpose; Orion is not Schwab's ledger). (3) A_03 gains a ROWCOUNT row by extension of §5's first bullet (its parenthetical is exemplary, not exclusive). (4) The two-calendar STATEMENT-DAY amendment folds into INF-A-A04-GAPCENSUS as a declared class rather than a separate id (one check, one frame). (5) "ALL" artifact-token rows carry the cross-artifact atoms (provenance/manifest/compile) promoted from §5's closing bullet. (6) INF-A-A00-PREDICATE added from the INF spec's own Group-A precondition (the 28-site allowlist is the fork's measured breaker; retirement of LEGACY call sites is W-C/P3 scope -- THIS row binds the NEW runners only).
+      </judgment_calls>
+    </group>
     <group id="B" status="NOT_YET_MINTED"/>
     <group id="C" status="NOT_YET_MINTED"/>
     <group id="D" status="HOLD_FOR_RULING" ruling_event="at ~A's Group-C completion" ruling_inputs="DS base's B-4 emitter outcome + ~A's C-completion" deciders="Andrew + 1.0.0_SA_CTO + 2.0.0_SA_COO"/>
-    <group id="PARQUET-WRITER-FORMAT" status="NOT_YET_MINTED"/>
+    <group id="PARQUET-WRITER-FORMAT" status="MINTED" minted_by="0.4.0_DS_ClientPlatform~A" minted_at="2026-08-11T094xZ" battery_source="pattern spec §1 grammar (@d272021791) + SPEC_49F_GROUP_B §1 FORMAT clause (@39c41163cd vintage) + TO requirement 5">
+      <criterion id="INF-PQW-WRITER-GRAMMAR">every gold artifact write emits {table}/date={D}/data.parquet under the silver partition grammar (one grammar, three tiers)</criterion>
+      <criterion id="INF-PQW-WRITER-PARQUET">the writer's output format is PARQUET only -- JSON is structurally impossible through the gold writer (JSON leaves the gold tier; publishers are P4)</criterion>
+      <criterion id="INF-PQW-WRITER-NOROOT">the writer carries NO decided product root -- the destination root is injectable (P3's act); any forced path constant is NAMED in the instance's surprises, not decided (F-1 stays Andrew's)</criterion>
+      <criterion id="INF-PQW-WRITER-MANIFEST">the writer emits the atom-3 manifest ({data-as-of}/{process-ts}.json) beside every table write</criterion>
+      <judgment_calls>Group token PQW in criterion ids for brevity; the instance FILE keeps the TO's literal group id: PROOF_OF_SPEC_P1_INF_PARQUET-WRITER-FORMAT_20260811.json. The writer battery is minted WITH Group A because the writer is the harness A builds on -- stated so the co-mint is not read as a per-group skip.</judgment_calls>
+    </group>
 
     <!--
     THE ID SETS ARE DELIBERATELY UNMINTED BY THE ISSUER. The COO has NOT read the INF batteries and
