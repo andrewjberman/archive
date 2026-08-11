@@ -53,20 +53,36 @@ FORBIDDEN_ALLOW = {"rectangle.c0.json"}   # c0 is the born-UNMEASURED skeleton; 
 SEAL = "MUTANT_SEALED.md"
 
 
-def classify(name: str) -> str:
+def classify(name: str, allowed_names=None) -> str:
     if name == SEAL:
         return "SEAL (not opened by this guard)"
     if name in FORBIDDEN_EXACT:
         return "FORBIDDEN -- reconstructs the plant"
     if name.startswith(FORBIDDEN_PREFIX) and name not in FORBIDDEN_ALLOW:
         return "FORBIDDEN -- intermediate rectangle reconstructs cells"
-    if name in ALLOWED_EXACT:
+    if name in (allowed_names if allowed_names is not None else ALLOWED_EXACT):
         return "allowed"
     return "UNEXPECTED -- refused, not read"
 
 
-def main(run_dir: str) -> int:
+def main(run_dir: str, extra_allowed=None) -> int:
+    """extra_allowed: names the AUTHOR declared as packet members for THIS program.
+
+    THE PACKET COMPOSITION IS PER-PROGRAM AND MY ALLOWLIST WAS HARDCODED TO ONE SHAPE.
+    Measured on the first non-portal subject (comp-verdict-tools, an INSTRUMENT run): the
+    guard refused DOMAIN_BAR.md and exercises/ -- both DECLARED members of that packet, and
+    exercises/ is the certifier's whole exercise basis for an instrument subject. Refusing a
+    declared member is fail-closed and therefore SAFE, but it is a FALSE POSITIVE, and a
+    guard that cries wolf on legitimate members trains its operator to wave it through --
+    which is the failure mode a fail-closed guard is supposed to prevent.
+    So the DECLARED allowlist now TRAVELS WITH THE INVOCATION rather than being assumed.
+    What does NOT travel: the FORBIDDEN set. dry, the intermediate rectangles and the seal
+    are never openable by declaration, because those are the certifier's own integrity
+    boundary and not the author's to widen.
+    """
     entries = sorted(os.listdir(run_dir))
+    allowed_names = set(ALLOWED_EXACT) | set(extra_allowed or [])
+    allowed_dirs = set(ALLOWED_DIRS) | {n.rstrip("/") for n in (extra_allowed or [])}
 
     # ---- PHASE GATE, and this one was found by exercising the guard ---------
     # K.1 composition binds the PRE-VERDICT packet only. At CLOSURE the full set
@@ -89,9 +105,9 @@ def main(run_dir: str) -> int:
     for name in entries:
         path = os.path.join(run_dir, name)
         if os.path.isdir(path):
-            (allowed if name in ALLOWED_DIRS else refused).append(name + "/")
+            (allowed if name in allowed_dirs else refused).append(name + "/")
             continue
-        k = classify(name)
+        k = classify(name, allowed_names)
         if k == "allowed":
             allowed.append(name)
         elif k.startswith("FORBIDDEN"):
@@ -153,7 +169,18 @@ def main(run_dir: str) -> int:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    # usage: cert_packet_guard.py <run_dir> [--allow name1,name2,...]
+    # --allow carries the AUTHOR's DECLARED packet members for this program. It can only
+    # ever WIDEN the allowed set; it can never open a FORBIDDEN one (dry / intermediate
+    # rectangles / the seal), because that boundary is the certifier's, not the author's.
+    if len(sys.argv) not in (2, 4) or (len(sys.argv) == 4 and sys.argv[2] != "--allow"):
         print(__doc__)
         sys.exit(2)
-    sys.exit(main(sys.argv[1]))
+    extra = sys.argv[3].split(",") if len(sys.argv) == 4 else []
+    if extra:
+        print("DECLARED-PACKET WIDENING accepted for this program: %s" % ", ".join(extra))
+    try:
+        sys.exit(main(sys.argv[1], extra))
+    except (IOError, OSError, ValueError) as exc:
+        print("READ ERROR -- I could not look, which is NOT a violation: %s" % exc)
+        sys.exit(2)
