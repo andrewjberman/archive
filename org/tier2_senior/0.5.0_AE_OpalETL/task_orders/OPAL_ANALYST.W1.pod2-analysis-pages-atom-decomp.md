@@ -56,7 +56,7 @@ six uncensused pages in W4 where the run is the only source.
 <compiler_tools_mandate>
   <before_write>`comp-which` for each search you would otherwise raw-grep. `comp-estate <thread>` per vertical to locate the backend feeding each page before you model it (the Pod-2 census already cites valuation/positioning-adjacent/correlation/factor-tilts/cma threads — start there). `comp-transform schema-check <Component>` for any page component whose data-prop contract you assert.</before_write>
   <before_commit>`.tools/commit-gate.sh` on every `.py` touched. `comp-routes behaviors` for any serving-path claim (this is also how requirement 2's served-state limb gets grounded rather than inferred).</before_commit>
-  <after_commit>`python .tools/proof-of-spec-check.py <instance>.json C1,C2,C3,C4,C5,C6,C7,C8,C9,C10,C11   # POSITIONAL (argv[2]) -- NOT a --expected-criteria flag; the flag form exits 2 into help text carrying no "INVALID" string` — must pass BEFORE the status flip.</after_commit>
+  <after_commit>`python .tools/proof-of-spec-check.py <instance>.json C1,C2,C3,C4,C5,C6,C7,C8,C9,C10,C11   # POSITIONAL (argv[2]), NOT a --expected-criteria flag. CHECK THE RC, never the output string: the flag form is a usage error (rc=2) whose help banner contains BOTH "VALID" and "INVALID", so a success-string grep silently passes` — must pass BEFORE the status flip.</after_commit>
 </compiler_tools_mandate>
 
 <cross_domain_coordination>

@@ -85,7 +85,7 @@ Out of scope: any change to bare-invocation behavior (the engine is SHARED with 
 <compiler_tools_mandate>
   <before_write>`comp-which` for consumer discovery — re-confirm the engine's downstream consumers before changing shared-engine behavior (`/teams-assist` operator skill + `/bbg-teams-assist` concierge).</before_write>
   <before_commit>`.tools/commit-gate.sh` on `teams-watch.py` (py_compile + ruff, universal Rule-14 gate).</before_commit>
-  <after_commit>`python .tools/proof-of-spec-check.py <instance>.json C1,C2,C3,C4,C5,C6   # POSITIONAL (argv[2]) -- NOT a --expected-criteria flag; the flag form exits 2 into help text carrying no "INVALID" string`</after_commit>
+  <after_commit>`python .tools/proof-of-spec-check.py <instance>.json C1,C2,C3,C4,C5,C6   # POSITIONAL (argv[2]), NOT a --expected-criteria flag. CHECK THE RC, never the output string: the flag form is a usage error (rc=2) whose help banner contains BOTH "VALID" and "INVALID", so a success-string grep silently passes`</after_commit>
 </compiler_tools_mandate>
 
 <cross_domain_coordination>

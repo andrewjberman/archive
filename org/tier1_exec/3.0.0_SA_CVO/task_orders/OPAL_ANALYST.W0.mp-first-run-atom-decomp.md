@@ -52,7 +52,7 @@ Steady state from W1 reverts to the method's normal shape: 0.5.0 authors, CVO~Z 
 <compiler_tools_mandate>
   <before_write>`comp-which` for searches; `comp-estate` for the MDPF/platinum backend feeding the page.</before_write>
   <before_commit>`.tools/commit-gate.sh` on any `.py`; `comp-routes behaviors` for serving-path claims.</before_commit>
-  <after_commit>`python .tools/proof-of-spec-check.py <instance>.json C1,C2,C3,C4,C5,C6,C7,C8,C9,C10   # POSITIONAL (argv[2]) -- NOT a --expected-criteria flag; the flag form exits 2 into help text carrying no "INVALID" string`</after_commit>
+  <after_commit>`python .tools/proof-of-spec-check.py <instance>.json C1,C2,C3,C4,C5,C6,C7,C8,C9,C10   # POSITIONAL (argv[2]), NOT a --expected-criteria flag. CHECK THE RC, never the output string: the flag form is a usage error (rc=2) whose help banner contains BOTH "VALID" and "INVALID", so a success-string grep silently passes`</after_commit>
 </compiler_tools_mandate>
 
 <cross_domain_coordination>
