@@ -5,7 +5,7 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-11</date>
-<status>pending</status>
+<status>complete</status>
 <priority>P1</priority>
 <!-- W1 closed 6/6 certified @1927Z; this GO is immediate — same method, one page, everything W1
      paid for bound below rather than remembered. -->
