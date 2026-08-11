@@ -17,7 +17,7 @@
       in-tree but owned-paths refuses this lane (BASE_EXEC), and same-commit is structurally
       impossible anyway -- the rename lives in the portal SUBMODULE, CLAUDE.md in the
       workspace repo. Routed to COO+CTO in the same turn per the TO escape.
-       flip WITHHELD on the same proof-of-spec gate conflict as TO-1 (criterion-id
+      `complete` flip WITHHELD on the same proof-of-spec gate conflict as TO-1 (criterion-id
       grammar vs the pinned C1..C8 id set). No code work outstanding.
     </status_note>
     <sequencing>
