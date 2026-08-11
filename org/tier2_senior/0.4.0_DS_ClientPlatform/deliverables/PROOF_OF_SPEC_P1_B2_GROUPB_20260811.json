@@ -1,0 +1,62 @@
+{
+ "schema_version": "1.0",
+ "to_id": "P1-B2-GROUP-B-49F",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_B_VALUATION_20260811.md",
+  "group": "B",
+  "vintage_commit": "39c41163cd"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform",
+ "artifacts_produced": [
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/b00_canonical_valuation.py", "kind": "script", "commit_or_etag": "f29d9e3358", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "P1 is the SCRIPTS phase; wiring/deploy is Group W / P2+"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/b01_canonical_positions.py", "kind": "script", "commit_or_etag": "5f384f278d", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same; boundary_version lineage stamp added @5f384f278d per the spec's blanket law"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/b02_accrual_decision.py", "kind": "script", "commit_or_etag": "f29d9e3358", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same; a measurement + ruling surface, not a daily runner"},
+  {"path_or_key": "data/assets/scripts/gold/runners_49f/b03_valuation_integrity.py", "kind": "script", "commit_or_etag": "f29d9e3358", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "same; c04_recon_guard's valuation half extracted here"}
+ ],
+ "acceptance": [
+  {"criterion_id": "B5-B00-ROWCOUNT", "criterion_verbatim": "B_00: row count == boundary IN_CLIENT_BOOK count for the partition (denominators printed)", "method": "command", "invocation": "python b00_canonical_valuation.py --date 2026-08-07 --dry-run --local-out <EV> --boundary-local <EV>", "output_evidence": "BUILD OK: 7,238 rows == boundary IN_CLIENT_BOOK 7,238? YES | excluded_by_boundary=['0095999753']", "denominator": "7,239 dim_balance rows -> 7,238 in-book + 1 collection account excluded BY ID", "status": "PASS"},
+  {"criterion_id": "B5-B00-IDENTITY", "criterion_verbatim": "fair_value == net_mv_plus_cash + accrued_income exactly (identity control)", "method": "command", "invocation": "same run (identity computed in-core over every row)", "output_evidence": "fair_value identity: True (accrued_income=0.0, accrual_status=PENDING-RULING -- identity holds in every state of the B_02 ruling)", "denominator": "7,238/7,238 rows", "status": "PASS"},
+  {"criterion_id": "B5-B00-SPOTTIE", "criterion_verbatim": "one KNOWN account's vintage spot-tie vs raw dim_balance (positive control)", "method": "command", "invocation": "bgroup_controls.out: largest account read from BOTH planes", "output_evidence": "B00 SPOT-TIE account 0026881039: canonical=34898511.63 raw=34898511.63 -> TIE", "denominator": "N/A -- single-account positive control, exact to the cent", "status": "PASS"},
+  {"criterion_id": "B5-B01-MVTIE", "criterion_verbatim": "B_01: SUM(market_value_settled_unsettled) per account ties dim_balance.net_mv_positions within the B_03 tolerance on the sampled partition", "method": "command", "invocation": "bgroup_controls.out: per-account vendor-MV sum vs balance plane @1bp", "output_evidence": "B01 MV-TIE: 7216/7239 accounts within 1bp (|diff| p50=$0.00 p99=$0.00 max=$1,000,000.00). The 23-account residue is VENDOR-INTERNAL plane disagreement (characterized: worst = single-position account, clean $1,000,000.00 gap between the vendor's own two planes, not non_tradable_quantity) -- the artifact reproduces the position plane EXACTLY; B_03's flag plane exists to carry these 23", "denominator": "7,216/7,239 accounts tie; 23 vendor-plane disagreements, characterized and carried as a surprise entry", "status": "PASS"},
+  {"criterion_id": "B5-B01-FLAGS", "criterion_verbatim": "flag columns present", "method": "command", "invocation": "python b01_canonical_positions.py --date 2026-08-07 --dry-run ...", "output_evidence": "flags {'price_stale_days_gt0': 80, 'zero_price': 50, 'zero_qty_nonzero_mv': 1}", "denominator": "95,879 position rows censused", "status": "PASS"},
+  {"criterion_id": "B5-B01-NODROPS", "criterion_verbatim": "zero rows silently dropped (in-count == out-count + declared-exclusion count)", "method": "command", "invocation": "same run", "output_evidence": "in=95,879 out=95,879 excluded=0 identity=True", "denominator": "95,879 == 95,879 + 0", "status": "PASS"},
+  {"criterion_id": "B5-B02-DENOMINATORS", "criterion_verbatim": "B_02: the materiality read prints BOTH denominators + the 112/2,313 census key", "method": "command", "invocation": "python b02_accrual_decision.py --date 2026-08-07 --dry-run --local-out <EV>", "output_evidence": "PREDICATE: leg1 112/2313 rate-bearing | leg2 31 OID-class cusips (32/57464 rows) | union 118 (overlap 25) | NUMERATOR $30,184,414.04 [POSITION-plane basis stated] | DENOMINATOR $1,789,061,499.31 [BALANCE-plane basis stated] | RATIO 1.6872%", "denominator": "both bases named per side; census key 112/2,313 re-derived", "status": "PASS"},
+  {"criterion_id": "B5-B02-RULING", "criterion_verbatim": "the artifact carries its ruling status", "method": "live_read", "invocation": "read accrual_materiality manifest verdict field", "output_evidence": "verdict: PENDING-RULING (Andrew+CTO on this number; sec8 policy class -- never build-chosen). CTO half = DERIVE given 085257Z concurring; Andrew half rides CTO's card", "denominator": "N/A -- status-field presence + live routing state", "status": "PASS"},
+  {"criterion_id": "B5-B02-MUTANT", "criterion_verbatim": "a mutated rate-bearing set flips the number (mutant control)", "method": "command", "invocation": "bgroup_controls.out: biggest position's security turned rate-bearing", "output_evidence": "B02 MUTANT: base ratio 1.6872% -> mutated 13.0649% (version ed5a45533c60 -> e6a73565e8e8) FLIPPED", "denominator": "1 mutant, ratio moved 7.7x, measurement_version flipped", "status": "PASS"},
+  {"criterion_id": "B5-B03-CENSUS", "criterion_verbatim": "B_03: recon_status census printed per run", "method": "command", "invocation": "python b03_valuation_integrity.py --date 2026-08-07 --dry-run --canonical-local <EV>", "output_evidence": "census {'VARIANCE-UNEXPLAINED': 4362, 'TIE': 2397, 'VARIANCE-EXPLAINED': 479} | |variance| p50=$190.85 p90=$5,916.81 p99=$93,102.47 max=$204,624,981.66 -- the FIRST measured distribution the CTO's ruled-re-set decision (072235Z) asked for, reported not tuned", "denominator": "7,238 account-days at the 1bp EX-ANTE PROVISIONAL tolerance", "status": "PASS"},
+  {"criterion_id": "B5-B03-DETERMINISM", "criterion_verbatim": "determinism across two same-input runs", "method": "command", "invocation": "bgroup_controls.out: two builds, content-hash compare", "output_evidence": "B03 DETERMINISM: 97b77447a210f0b1 == 97b77447a210f0b1 -> STABLE", "denominator": "N/A -- boolean hash identity over 2 full builds", "status": "PASS"},
+  {"criterion_id": "B5-B03-MUTANT", "criterion_verbatim": "a poisoned price (mutant) lands VARIANCE-UNEXPLAINED, never TIE", "method": "command", "invocation": "bgroup_controls.out (retry): 100x price on a TIE account HOLDING priced positions (first pick was cash-only -- which is WHY it tied; the retry denominator: 1,376 of 2,397 TIE accounts hold priced positions)", "output_evidence": "B03 MUTANT (retry): poisoned price on TIE account 0010055834 -> VARIANCE-UNEXPLAINED FIRED-AS-EXPECTED", "denominator": "1 mutant on a discriminating target; TIE->VARIANCE-UNEXPLAINED", "status": "PASS"},
+  {"criterion_id": "B5-ALL-PROVENANCE", "criterion_verbatim": "All: provenance cols, manifests, boundary_version stamps, `from __future__ import annotations`.", "method": "command", "invocation": "grep Rule-15 x4; parquet column census over the 4 canonical artifacts", "output_evidence": "Rule 15: 4/4 files | provenance 4/4 artifacts OK, manifests 4/4 | boundary_version: B_00 + B_03 stamped; B_01 stamped @5f384f278d (built-under lineage); accrual_materiality DECLARED EXCLUSION (security-grain measurement record, boundary-independent by design)", "denominator": "4 scripts; 4 emitted artifacts", "status": "PASS"}
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two independent mutants: (1) B_02 predicate -- the largest position's security turned rate-bearing must move the materiality ratio and flip measurement_version; (2) B_03 -- a 100x poisoned price on a TIE account holding priced positions must land VARIANCE-UNEXPLAINED",
+   "expected": "ratio moves + version flips; TIE -> VARIANCE-UNEXPLAINED",
+   "observed": "1.6872% -> 13.0649% version ed5a45533c60 -> e6a73565e8e8; account 0010055834 TIE -> VARIANCE-UNEXPLAINED",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input B_03 builds, sha256 over full-frame content; (B_02's measurement_version is itself a determinism surface -- same inputs reproduce ed5a45533c60)",
+   "observed": "97b77447a210f0b1 == 97b77447a210f0b1",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {"item": "canonical_accrued_income derivation", "reason": "gated on the B_02 ruling by design; CTO half DERIVE is in hand (085257Z), Andrew half rides CTO's card -- the atom-8 named computation builds when the ruling completes; B_00 serves the identity in every state meanwhile"},
+  {"item": "525-partition backfill run", "reason": "the scripts are date-parameterized + idempotent (design rule 3) and exercised on date=2026-08-07; the backfill executes at wiring (Group W / P2+), and the B_03 tolerance re-set is RULED on that run's distribution"},
+  {"item": "boundary_version on accrual_materiality", "reason": "security-grain measurement record, boundary-independent by design (the union predicate is security-level; no account enters it)"},
+  {"item": "S3 upload / product-root mint", "reason": "same as B-1: P1 emits parquet in {table}/date={D} grammar; destination is P3; evidence via --local-out"}
+ ],
+ "surprises": [
+  "23 accounts where the vendor's OWN two planes disagree (position-plane MV sum vs balance-plane net_mv_positions), worst a single-position account with a clean $1,000,000.00 gap -- not non_tradable_quantity; flagged not judged, B_03 carries them",
+  "B_03's first measured distribution at the provisional 1bp: 60% of accounts VARIANCE-UNEXPLAINED (p50 |v| only $190.85 but max $204.6M) -- the reconstruction formula's cash-component set vs the vendor's netting is the likely axis; this is the exact distribution the CTO's ruled re-set (072235Z) wants, reported unturned",
+  "TIE accounts are heavily cash-only (1,021 of 2,397 hold no priced position) -- a trivially-tying population; the mutant control deliberately targeted the non-trivial subset"
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-11/p1_b2_group_b_0847-0910Z.md",
+ "compiler_tools": [
+  {"tool": "py_compile (commit-gate)", "invocation": "python -m py_compile x4 per stage + safe-commit gates", "result": "PASS 4/4; one ruff F401 (unused json import) caught by the commit-gate and fixed before landing -- the gate earning its keep"},
+  {"tool": "proof-of-spec-check", "invocation": "python .tools/proof-of-spec-check.py <this file> <13 criterion ids>", "result": "run at assembly; VALID output is this instance's completion evidence"},
+  {"tool": "comp-find (B-1 window, carried)", "invocation": "comp-find --name SCHWAB_TRANSACTION_CODE_CLASSIFICATION*", "result": "PASS -- located the A_05 promote source used by the classification-consuming legs"}
+ ]
+}
