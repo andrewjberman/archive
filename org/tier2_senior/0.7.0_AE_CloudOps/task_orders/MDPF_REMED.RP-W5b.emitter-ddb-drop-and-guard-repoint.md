@@ -65,7 +65,11 @@ the item-4 gate will then police.
 </cross_domain_coordination>
 
 <acceptance_criteria>
-1. Emitter completes on an exercised run; mdpf/feeds/* frontiers ADVANCE (shown pre/post).
+1. Emitter completes on an exercised run WITHOUT ResourceNotFoundException. *(RE-CUT 011911Z on
+   AE's measured correction: the emitter does NOT write mdpf/feeds/* — the feed writers are the WS
+   lambdas (chain-fed; wsb-49f last clean 08-08 03:31Z, no EventBridge rule matches 'wsb'). "Feeds
+   ADVANCE" is NOT dischargeable by this fix alone; the feed-freeze mechanism is a SEPARATE read,
+   surfaced not claimed — likely the same chain question as mdpf-daily-refresh-trigger.)*
 2. Guard function preserved: positive control (repeat value RAISES) + negative control (fresh value
    passes) via the re-pointed read.
 3. TF declaration gone: plan output shows removal, and a subsequent un-targeted plan no longer
