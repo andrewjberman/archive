@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COT_RUNNER_REFACTOR.P1.scripts-groups-a-c-scoped",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "base DS 181403Z dispatch (the A_07 gate-lift consumed in the 49F overlay sweep) per SPEC_49F_GROUP_D_SERVING_20260811.md @1e11389af8 emitter contract + the A_07 delta @93d12a82f2; CVO 163950Z clearance bar; CTO 182033Z bundle ruling (emitters shape-frozen on the LEGACY basis pending adjudication)",
+  "group": "D",
+  "vintage_commit": "1e11389af8"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~B",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/d06_firm_mix_summary.py",
+   "kind": "script",
+   "commit_or_etag": "06b3472f26",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "QA emission only (--out); the serving port is the sweep's later sequenced act. Pathspec-scoped commit in base's lane per their boundary rules (fit_report/fit_streak working-tree state untouched; d00-d05 + fit_harness untouched; diff-stat run before commit)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-MIX-SUMMARY-SHAPE-FREEZE",
+   "criterion_verbatim": "ShapeFrozenPublisher check PASSES against the committed census contract (family platinum/firm/mix_summary, census_version caa2dc281a355ff6): zero schema diffs, zero unmapped top-level fields (per-field provenance complete)",
+   "method": "command",
+   "invocation": "python d06_firm_mix_summary.py --date 2026-08-07 --canonical-local <frozen-mirror> --a07-root <root> --a07-date 2026-08-11 --out <qa>  (run from data/assets/scripts/gold/runners_49f/)",
+   "output_evidence": "SHAPE CHECK PASS: platinum/firm/mix_summary vs census caa2dc281a355ff6... diffs=0 unmapped=0. Conformance was REFUSAL-DRIVEN: the publisher rejected the top-level mix/unclassified key (the served shape is 3-class at top; unclassified rides the period rows + composition bucket) -- the control catching its author before pass, twice incl. the dim's UNCLASSIFIED-LOUD token domain",
+   "denominator": "0 diffs + 0 unmapped of the full contract tree; census @cd670c2521 (committed, the default-path land)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-MIX-SUMMARY-CLASSIFICATION-SOURCE",
+   "criterion_verbatim": "the classification source is DECLARED per the COO 155557Z convention: A_07 dim_asset_classification consumed as MATERIALIZED PARQUET (no classifier code, no DynamoDB -- the A5-A07 emitter law); unclassified mass emitted as its OWN bucket, never absorbed",
+   "method": "command",
+   "invocation": "same run; the provenance map + values line",
+   "output_evidence": "A_07 @d76402f87e (_classifier_vintage stamped in the dim; coverage 89.27%, 406 UNCLASSIFIED-LOUD): lookup ticker->cusip->normalized-name off the dim's own key columns via dim_security(security_key). unclassified = $39,073,557.34 / 392 positions, OWN bucket (composition.unclassified{count,market_value} + period-row unclassified{}; the top-level 3-class pcts deliberately under-sum by its share, stated in-code). DDB 'cash' folded consumer-side (dim stays truth -- CTO 182033Z split)",
+   "denominator": "392 unclassified of 95,879 B_01 positions; $39.1M of $1,764,015,193.51",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-MIX-SUMMARY-PREDECLARED-BANDS",
+   "criterion_verbatim": "value-divergence bands pre-declared BEFORE the evidence run (registry-before-evidence); existing rows read FIRST; new narrow rows only, never a widened row without CTO",
+   "method": "command",
+   "invocation": "read of predeclared_divergences_49f.json D2/D7/D9 rows before the first emission run",
+   "output_evidence": "ZERO new band rows minted -- verified read-first: D2 (classifier-source swap; surfaces *mix*, field_paths mix*/*asset_class*/*top_holdings*/*unclassified*) + D7 (lot/cost surfaces incl firm_mix_summary) + D9 (history floors) already cover this family's expected divergence classes. A covered class re-banded narrow would be duplicate registry -- declared, not silently skipped",
+   "denominator": "0 new rows against 29 existing; 3 covering rows cited by id",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-MIX-SUMMARY-MUTANT-CATCHES",
+   "criterion_verbatim": "the CVO 163950Z clearance bar: the computable core carries a monetary mutant that FAILS rc=1 on a live field, run UNPIPED (suspect the control before the code if it passes); the shape mutant REFUSES",
+   "method": "command",
+   "invocation": "python d06_firm_mix_summary.py ... --mutant  /  ... --monetary-mutant  (both bare invocations, rc read directly -- UNPIPED)",
+   "output_evidence": "shape mutant: SHAPE-FREEZE REFUSAL '/a_field_the_census_never_saw: NEW FIELD' rc=1 | monetary mutant: equity class sum perturbed +$1,000,000 post-computation -> SUM-IDENTITY FAIL 'classes+unclassified 1,765,015,193.51 != total 1,764,015,193.51' rc=1 -- a LIVE monetary field corruption routes LOUD; the identity guard is cent-exact and discriminating (it passed the unperturbed run on the same inputs)",
+   "denominator": "2 of 2 mutants FAIL rc=1 unpiped; the positive (unperturbed) limb passes on identical inputs",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-MIX-SUMMARY-INVERTED-312-BAND",
+   "criterion_verbatim": "the inverted-312 band's status for this family MEASURED with its denominator, never transposed (the limb-6 discipline)",
+   "method": "command",
+   "invocation": "derivation census of the emitter's input plane",
+   "output_evidence": "N/A-BY-CONSTRUCTION-MEASURED: 0 billing-emv-derived fields -- the family's entire plane is B_01 canonical_positions x A_07 classes (position marks, never billing EMV); no billing surface is read by this emitter",
+   "denominator": "0 of the family's emitted fields derive from billing EMV; input set = 2 canonical tables + 1 dim, enumerated",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "49F-OVERLAY-FIRM-MIX-SUMMARY-VINTAGE-FRAMING",
+   "criterion_verbatim": "the content vintage is STATED (the framing convention): canonicals read from the FROZEN LOCAL graded mirror, S3 deliberately unread mid-fill-2; every date framing declared",
+   "method": "command",
+   "invocation": "same run; the vintage lines + this instance",
+   "output_evidence": "canonical-local = base DS's frozen 2026-08-07 graded mirror (their 182351Z unblock: fill-2 is overwriting the S3 partitions with a DIFFERENT contemporaneous boundary_version mid-flight -- an S3 read would race the overwrite and grade against an ungraded basis). B_01 95,879 rows LOCAL ONLY (never uploaded). data_as_of=2026-08-07 (content = the graded vintage); A_07 dim date=2026-08-11. Post-fill-2 re-grade = a separate declared act, never a silent swap. FRAGILITY DECLARED: the mirror is session-scratchpad; base offered durable staging if work spans sessions",
+   "denominator": "2 input vintages stated (canonicals 2026-08-07 frozen-local; A_07 2026-08-11); 0 S3 reads of racing partitions",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "TWO per the clearance bar: shape (un-censused field -> publisher REFUSAL) + monetary (+$1M on the live equity sum -> cent-exact SUM-IDENTITY guard)",
+   "expected": "both FAIL rc=1, unpiped",
+   "observed": "REFUSED rc=1 / SUM-IDENTITY FAIL rc=1 (1,765,015,193.51 != 1,764,015,193.51)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "unperturbed run repeated across the conformance loop iterations on the frozen mirror -- identical class sums each run",
+   "observed": "total $1,764,015,193.51 / equity $1,400,160,218.95 / fi $321,127,962.33 / alt $3,653,454.89 / uncl $39,073,557.34 stable",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "mix_periods history (monthly/quarterly/annually windows beyond the current period)",
+   "reason": "D9-banded backfill-pending: the 525-date backfill is mid-re-fill on contemporaneous boundaries under base's 1750Z ledger; the current-period row emits from the graded vintage, prior windows land with the backfill (the archetype's typed-zero/window-pending convention)."
+  },
+  {
+   "item": "the serving PORT of this emitter",
+   "reason": "the sweep's later sequenced act (base owns sequencing); QA emission only here. Emitters stay shape-frozen serving the LEGACY basis pending the cutover adjudication bundle (CTO 182033Z)."
+  },
+  {
+   "item": "value-parity grading vs the live served mix_summary",
+   "reason": "the 49F overlay sweep's fit-harness leg (base's lane; fit_harness deliberately untouched per their boundary rules) -- this instance certifies shape+controls+source; the harness grades values under D2."
+  }
+ ],
+ "surprises": [
+  "The 49F served top-level mix is 3-class with unclassified EXCLUDED (the publisher refused my 4-class attempt) -- the 49F convention carries unclassified in the period rows + composition bucket, so the top-level pcts deliberately under-sum. Opposite of cot's served fold-into-equity semantic: two firms, two served unclassified semantics, BOTH now explicit in their emitters (the per-firm serving divergence is shape-frozen law, not harmonized silently).",
+  "The A_07 dim's UNCLASSIFIED-LOUD token surfaced through the consumer lookup and the class-domain guard caught it (mapped to this family's own-bucket class, declared) -- the loud-token-vs-consumer-vocabulary seam is a small consumer-contract note for the A_07 record.",
+  "49F unclassified = $39.1M / 2.2% of book (392 of 95,879 positions) vs cot's $75.1M / 15.6% pre-alias-delta -- the alias-set spec-delta's benefit is firm-asymmetric (cot name-forms dominate the miss class)."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/logs/2026-08-11/cot_p1_groups_a_b_c.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find --name d00_census* (workspace-wide)",
+   "result": "MEASURED ZERO (0/25,456) -- surfaced the census-in-scratchpad gap; base committed it @cd670c2521 at the publisher default path (the land-it-committed class, fixed at root)"
+  }
+ ]
+}
