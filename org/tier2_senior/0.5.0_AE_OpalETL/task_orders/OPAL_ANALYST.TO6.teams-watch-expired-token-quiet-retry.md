@@ -5,7 +5,7 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-11</date>
-<status>staged</status>
+<status>complete</status>
 <priority>P2</priority>
 <!-- SEQUENCING: runs NOW, in parallel with W0 and W1 prep. CTO~Z sequencing call recorded in
      PRD §9.9 -- MSTR~Z had queued this behind the program "unless CTO~Z sequences it otherwise."
