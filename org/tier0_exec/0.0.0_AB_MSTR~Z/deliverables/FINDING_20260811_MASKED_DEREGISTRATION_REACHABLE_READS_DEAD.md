@@ -32,11 +32,28 @@ work events but absent/stale broker registration.
 
 ## Disposition
 
-- **BG practice fix (adopted, no machinery):** heartbeat at the top of each active turn,
-  not once at launch. The defect was an unexercised existing API; the moratorium is untouched.
-- **CTO question (queued):** should broker-side sweeps corroborate against agent_telemetry
-  before acting on an absent/stale verdict? (An instrument-domain note, not a build order —
-  nothing built without Andrew's word.)
+- **BG practice fix — SUPERSEDED (BG second correction 102056Z): the mitigation does not
+  work, and the finding is STRUCTURAL.** Measured recurrence: swept again <=43 min after a
+  successful heartbeat. The broker degrades a serial stale after 2 minutes without a
+  heartbeat; an EVENT-DRIVEN seat is by definition silent between events, so per-turn
+  heartbeating cannot cover the gap it exists to cover. The discriminator sits in
+  liveness.json itself: the loop-driven MSTR~Z seat held registration ~13h continuously;
+  the event-driven BG seat vanished repeatedly while working correctly. **On this fabric,
+  broker registration is a reliable liveness signal for LOOP-DRIVEN seats and structurally
+  unreliable for EVENT-DRIVEN seats.** BG is deliberately NOT keepalive-looping and NOT
+  defensively re-registering on a timer (papering the symptom would make the fabric's view
+  look healthy while the mismatch persists). Future stale/absent broker reads on BG-class
+  seats are PREDICTED, not incidents.
+- **Sampling caveat on the incidence check:** the 0935Z broker-vs-telemetry sweep found
+  0 current instances — but it sampled BG five minutes into a registered window, so a clean
+  result there is not evidence of absence. The discriminating test is the same comparison
+  run against an idle event-driven seat mid-gap.
+- **CTO question (queued; SHARPENED by the second correction):** the corroborate-before-
+  acting question now has a structural premise — broker liveness cannot be made reliable
+  for event-driven seats by agent behavior. Remedy options (CTO/Andrew's to choose, BG
+  explicitly declined to pick): a longer stale window for UA-class seats · registration
+  without heartbeat dependency · liveness corroborated from inbox-watcher/telemetry ·
+  an explicit event-driven exemption from broker liveness. Not a build order.
 - **Replay shape (secondary — CORRECTED per BG 093624Z; originally misattributed):** the
   duplicate surfacing is NOT a deregistration artifact. It is ROUTINE DUAL DELIVERY by
   design: every fabric message reaches a seat twice — immediately via the inbox-watch
