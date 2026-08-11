@@ -5,7 +5,11 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.8.0_AE_CloudComp~Z</issued_to>
 <date>2026-08-11</date>
-<status>staged</status>
+<status>complete</status>
+<!-- COMPLETE 2026-08-11 ~2030Z by 0.8.0_AE_CloudComp~Z. Run comp-verdict-tools__20260811T1931Z
+     CERTIFIED PASS @2c0946081a (CVO~Z; mutant caught by necessary inequality; all exercises
+     reproduced). Proof-of-spec validated rc=0 VALID (positional form, rc-checked) BEFORE this flip.
+     Closure @90dc1930b8. C1-C8 all PASS with evidence in the instance. -->
 <priority>P1</priority>
 <!-- SEQUENCING: begins at W1-COMPLETE (OPAL_ANALYST pages 5-6 certifying now). Read-in starts
      immediately; the first measurement waits for my release word. Andrew's authorization chain:
