@@ -145,6 +145,15 @@
     <deliverable type="document">Session log with Compiler Tools section</deliverable>
   </deliverables>
 
+  <andrew_direct_standing>
+    2026-08-11 ~1750Z, at this lane's terminal, VERBATIM: "proceed when gates lift" (immediately
+    prior turn, same channel: "proceed to the fleet"). SCOPE AS ADDRESSED: this lane's queued,
+    gated COT D fleet work -- when a named gate lifts (P2 backfill; A_07 asset-classification dim;
+    attribution content; billing plane; RECON-5a/A_06; lots-canonical), this lane PROCEEDS into
+    the corresponding gated family builds WITHOUT a fresh GO. Recorded verbatim + broadcast to
+    COO/CTO/MSTR same turn per the record+broadcast law; no wider scope adjudicated here.
+  </andrew_direct_standing>
+
   <do_not>
     <item>Do NOT mirror or sync anything between cot and bd. Separate firms, gate + IAM enforced.</item>
     <item>Do NOT start P2/P3/P4/P5, and do NOT re-point the gold DESTINATION.</item>
