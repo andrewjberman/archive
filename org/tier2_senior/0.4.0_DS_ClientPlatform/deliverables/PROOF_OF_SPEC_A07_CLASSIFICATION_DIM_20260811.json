@@ -1,0 +1,116 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COT_RUNNER_REFACTOR.P1.scripts-groups-a-c-scoped",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_A_DELTA_CLASSIFICATION_DIM_20260811.md (@93d12a82f2 + the CTO 160826Z substrate amendment @64c11ae4c2); built under the CTO 175307Z gate-lift dispatch riding Andrew's standing ~1750Z 'proceed when gates lift'",
+  "group": "A",
+  "vintage_commit": "93d12a82f2"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~B",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/a07_dim_asset_classification.py",
+   "kind": "script",
+   "commit_or_etag": "d76402f87e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the dim producer's runtime home + schedule are wiring scope; QA emissions local-root only. Home judgment declared: the archetype tree (runners_49f, beside d_publisher_base -- the established shared home INF imports); consumers read the dim's OUTPUT parquet, never its code."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "A5-A07-COVERAGE",
+   "criterion_verbatim": "every held security across all firms' canonical_positions resolves to a class or lands UNCLASSIFIED-LOUD (0 silent nulls); denominators printed (classified / unclassified / total held)",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-11 --output-root <root>  (run from data/assets/scripts/gold/runners_49f/)",
+   "output_evidence": "A5-A07-COVERAGE: classified 3378 of 3784 held securities (89.27%); UNCLASSIFIED-LOUD 406 (0 silent nulls -- every row carries a class or the loud token). POPULATION UNION: 49F 2,281 (dim_position 2026-08-10) + INF 1,658 (positions_mv 2026-08-11) + COT 1,004 (fact_holdings 2026-08-07) = 3,784 distinct security_key",
+   "denominator": "3,378 classified + 406 UNCLASSIFIED-LOUD == 3,784 union held securities across 3 firms",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-PARITY-VS-SERVED",
+   "criterion_verbatim": "on the bd overlap set, A_07's class per ticker == the currently-served ETFClassifier output (a ported classifier that reclassifies is a rebuild in disguise; the differential control that catches it)",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-11 --output-root <root> --parity-control  (imports the ORIGINAL lib, same DynamoDB snapshot, diffs classify() on the FULL population -- a superset of the bd overlap)",
+   "output_evidence": "A5-A07-PARITY-VS-SERVED: 3784 of 3784 agree with the ORIGINAL lib on the same snapshot; mismatches 0 (the port is faithful). Run on the FULL union incl. the regex-path rows -- stronger than the bd-overlap minimum.",
+   "denominator": "3,784 of 3,784 population keys, zero reclassifications",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-NO-EMITTER-DYNAMODB",
+   "criterion_verbatim": "a grep-class assertion that no D-group emitter imports/calls ETFClassifier or boto3-dynamodb -- the coupling this delta exists to remove, mechanically enforced",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py ... --qa-emitter-grep  (scans d*.py across runners_cot + runners_inf + runners_49f)",
+   "output_evidence": "A5-A07-NO-EMITTER-DYNAMODB: 0 D-group emitter files touch ETFClassifier/dynamodb across 3 runner trees (the coupling is removed by construction). d08_cot_mix_summary (the first dim consumer, @b52614bbda) reads the materialized parquet only and passes the same grep.",
+   "denominator": "0 violations across all d*.py files in 3 runner trees",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-SOURCE-CENSUS",
+   "criterion_verbatim": "classification_source distribution printed (dynamodb-ticker vs alias vs regex vs override) -- a shift toward regex-fallback (DynamoDB coverage decaying) is visible, not silent",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "A5-A07-SOURCE-CENSUS: dynamodb-ticker 2126 / regex-name 1131 / unclassified 406 / dynamodb-alias 121. DDB MATERIALIZED at build (the one sanctioned scan): 9,393 items / 9,393 tickers / 7,620 aliases. held-by-firm coverage: 49f 2281 / inf 1658 / cot 1004",
+   "denominator": "4 source classes summing to 3,784; DDB snapshot denominators printed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-DETERMINISM",
+   "criterion_verbatim": "two same-input runs byte-identical (content hash over the sorted key/class/source projection)",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-11 --output-root <root>  (twice, compare the DETERMINISM key lines)",
+   "output_evidence": "run1 and run2 both print: content hash 053be6b629d557991eb88c7545651ffc1913a3e99b310c530ab567ef2af5a4b9 -- IDENTICAL",
+   "denominator": "N/A -- boolean identity across 2 runs on the live snapshot",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-PROVENANCE",
+   "criterion_verbatim": "provenance cols + _classifier_vintage stamp present (the DynamoDB content changes; a stale-vintage dim is a finding, not silent drift)",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "A5-A07-PROVENANCE: source_pipeline + _ingested_at + _classifier_vintage stamped; vintage = sha256 over (DDB content payload + lib sha 943ff55e2e7bb16d). The manifest carries the substrate-home note verbatim (bd-securities TRANSITIONAL; IAM census annotates DEFERRED/REQUIRED, never a deletion warrant).",
+   "denominator": "3 provenance cols on 3,784 rows; vintage re-derives from the snapshot",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the PARITY control is the battery's differential mutant surface: any port drift (a changed regex, a dropped layer, a changed hedge-mapping) would surface as a mismatch against the ORIGINAL lib run on the same snapshot",
+   "expected": "0 mismatches",
+   "observed": "0 of 3,784 -- and the control was exercised on the FULL population, not a sample",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-snapshot runs compared on the content hash",
+   "observed": "053be6b629d55799... == 053be6b629d55799...",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the multi-homed lib-copy DEPRECATION (bd/cot/partners etf_classifier copies)",
+   "reason": "explicitly out of this delta per the spec (retire-order: consumers first, lib last -- a follow-on). The collapse direction is set; d08 is the first consumer reading the dim instead of a copy."
+  },
+  {
+   "item": "bd-securities substrate disposition",
+   "reason": "TRANSITIONAL per the CTO 160826Z amendment -- migration-or-ratification rides the lib-copy deprecation follow-on; the producer's read is documented shared-plane access, never a deletion warrant."
+  },
+  {
+   "item": "S3/runtime deploy of the dim producer",
+   "reason": "wiring scope; QA local-root emissions only this act."
+  }
+ ],
+ "surprises": [
+  "The bd overlap is smaller than the DDB table suggests: 2,126 of 9,393 DDB tickers are held across the three firms today -- the table carries ~7,200 tickers nobody currently holds (dormant coverage, not a defect; the source census makes decay visible going forward).",
+  "406 UNCLASSIFIED-LOUD (10.7%) concentrated in name-only securities (cot mutual-fund name forms with leading digits, cusip-only 49F paper) -- the regex layers key on names the union population does not always carry cleanly. The 49F dim_position ships NO name column at all (ticker/cusip only), declared in the population print.",
+  "FIRST CONSUMER MEASUREMENT (d08 mix_summary @b52614bbda): the served cot mix's class split diverges MASSIVELY from the dim-based split (equity $304.3M vs served $420.3M / fi $131.0M vs $69.5M / alt $24.8M vs $0.3M) WHILE the parity control proves the port faithful -- candidate mechanisms (diverged multi-homed legacy copy / dim-lookup under-resolution $75.1M declared fold / input-basis) routed for characterization as INFERRED, not claimed. If (a) holds, the A_07 consolidation's justification is measured in dollars: ~$24.5M of alternatives served inside equity/fi at cot."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/logs/2026-08-11/cot_p1_groups_a_b_c.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find header_metrics data/cot/scripts/gold (producer location) + targeted source reads",
+   "result": "located the legacy producers grounding the limb-6 verdicts and the classifier lib for the verbatim port"
+  }
+ ]
+}
