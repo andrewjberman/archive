@@ -143,8 +143,18 @@ def main(payload_path: str, rect_path: str) -> int:
                     v_shape.append((eid, field, "evidence missing %s" % ",".join(missing)))
             if "value" not in cell or "status" not in cell:
                 v_shape.append((eid, field, "missing value/status"))
-        # COMPLETENESS against what this entity was entitled to fill
-        gap = sorted(fillable - set(payload[eid]))
+        # COMPLETENESS against what this entity was entitled to fill.
+        # ⛔ "ENTITLED" IS THE INTERSECTION, NOT `fillable` ALONE -- and this cost a real refusal.
+        # `fillable` is every UNMEASURED cell in the target, which INCLUDES Plane-A cells the
+        # author simply has not measured yet. Scoring completeness against that set demands I
+        # fill the author's cells -- THE EXACT CROSS-PLANE VIOLATION LIMB 1 AND THE AXIS LIMB
+        # BOTH FORBID. Two limbs of one guard disagreeing about what I own.
+        # WHY IT SURVIVED TRANCHE 1: I chose the three entities whose Plane-A was COMPLETE (4/4),
+        # so `fillable` happened to equal exactly my six fields and the two definitions coincided.
+        # THE SELECTION CRITERION THAT MADE THE FIRST PAYLOAD EASY IS WHAT HID THE DEFECT --
+        # measured 2026-08-12 on tranche 2, the first payload containing a partial-Plane-A entity.
+        entitled = (fillable & axis_bc) if axis_bc is not None else fillable
+        gap = sorted(entitled - set(payload[eid]))
         if gap:
             v_partial.append((eid, gap))
 
