@@ -1,0 +1,61 @@
+{
+ "schema_version": "1.0",
+ "scope": {
+  "universe": "PROTOTYPE VALIDATION ONLY -- two already-certified non-news residue rows, used to test that the core is domain-neutral BEFORE W3b populates it with news",
+  "declared_at": "2026-08-11T~2208Z",
+  "widens_to": "news subsystem (W3b), then the portal-wide artifact sweep @1e173e7a00"
+ },
+ "authored_by": "0.5.0_AE_OpalETL~Z",
+ "vintage_utc": "2026-08-11T~2208Z",
+ "denominator": {
+  "universe_size": 2,
+  "rows_present": 2,
+  "enumeration_artifact": "workflows/atom_decomposition/runs/portal-page-valuations/20260811T1902Z/rectangle.final.certified.json + runs/portal-page-market/evidence/",
+  "how_enumerated": "lifted from two CERTIFIED rectangles rather than re-measured -- this instance tests the SCHEMA, not the estate"
+ },
+ "rows": [
+  {
+   "residue_id": "proto.01.valuation-frozen-twin",
+   "locator": "s3://opal-data-portal-v2/valuation/valuation_data.json",
+   "residue_class": "FROZEN-UNCONSUMED",
+   "evidence": {
+    "instrument": "aws s3api head-object",
+    "locator": "valuation/valuation_data.json vs json/valuation/valuation_data.json",
+    "vintage": "2026-08-11",
+    "denominator": "2 trees carrying 1 basename; 291246B vs 2184150B",
+    "count_grain": "INSTANCE"
+   },
+   "last_written_utc": "2026-01-04T04:46:14Z",
+   "age_basis": "scored against the LIVE twin's cadence (rewritten 2026-08-11), not wall-clock; the top-level tree is census-declared frozen and I confirmed it live",
+   "consumed_by": [],
+   "disposition": "RETIRE-CANDIDATE",
+   "disposition_basis": "7 months stale at 1/7th the size of its live twin, zero consumers grounded at the consumed end. RECOMMENDATION ONLY -- Rule 9 forbids deletion before replacement/parity/cutover/drain/rollback/absence-proof, none of which a register establishes.",
+   "blast": "nothing known reads it; the risk is the INVERSE -- a future reader resolving by BASENAME reaches this instead of the live key. That hazard argues for retirement, and equally for a full-key-path catalog rule.",
+   "reversibility": "IRREVERSIBLE",
+   "owner": "1.0.0_SA_CTO~Z"
+  },
+  {
+   "residue_id": "proto.02.market-fallback-frozen",
+   "locator": "s3://opal-data-portal-v2/json/market/all_returns.json",
+   "residue_class": "FROZEN-CONSUMED",
+   "evidence": {
+    "instrument": "aws s3api head-object + source read of both fetch legs",
+    "locator": "api/endpoints/market.ts:219-239; portal-proxy.ts:160",
+    "vintage": "2026-08-11",
+    "denominator": "3 of 3 keys under json/market/ enumerated; 1 frozen, 2 live",
+    "count_grain": "INSTANCE"
+   },
+   "last_written_utc": "2026-04-15T20:19:39Z",
+   "age_basis": "118 days; siblings in the SAME tree written 2026-08-11, so this is not a cadence artifact",
+   "consumed_by": [
+    "getAllReturns FALLBACK leg (executes only on primary failure) -- 1 of 2 fetch paths"
+   ],
+   "disposition": "OWNED-UNKNOWN",
+   "disposition_basis": "RESTORE, RETIRE and REBIND all fit the evidence and have different costs; choosing between them is a design call I do not hold. This is the class the register exists to hand a decider, not to pre-empt.",
+   "discriminator": "whether the fallback path is still WANTED: if yes the target must be restored, if no the path retires, and if the answer is 'wanted but must be visible' the footer rebinds to the artifact.",
+   "blast": "ARMED NOT FIRED -- primary healthy, users served current data now. On a primary failure the default landing page serves 118-day-old data with every surface reporting it current.",
+   "reversibility": "UNKNOWN",
+   "owner": "1.0.0_SA_CTO~Z"
+  }
+ ]
+}

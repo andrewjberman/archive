@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "to_id": "OPAL_ANALYST.W1",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/OPAL_ANALYST.W1.pod2-analysis-pages-atom-decomp.md",
+    "group": "W",
+    "vintage_commit": "a438a40793"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {"path_or_key": "workflows/atom_decomposition/runs/portal-page-cma/20260811T1801Z/", "kind": "doc", "commit_or_etag": "b6a2a827b0", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "Run record, not a deployable artifact. CERTIFIED; consumable rectangle.final.certified.json 20/20 MEASURED."},
+    {"path_or_key": "workflows/atom_decomposition/runs/portal-page-positioning/20260811T1818Z/", "kind": "doc", "commit_or_etag": "dd7fa25ef2", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "CERTIFIED; consumable 30/30 MEASURED."},
+    {"path_or_key": "workflows/atom_decomposition/runs/portal-page-attribution/20260811T1834Z/", "kind": "doc", "commit_or_etag": "85efe0dc48", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "CERTIFIED; consumable 40/40 MEASURED."},
+    {"path_or_key": "workflows/atom_decomposition/runs/portal-page-factor-tilts/20260811T1855Z/", "kind": "doc", "commit_or_etag": "b07a7e32f1", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "CERTIFIED; consumable 40/40 MEASURED."},
+    {"path_or_key": "workflows/atom_decomposition/runs/portal-page-valuations/20260811T1902Z/", "kind": "doc", "commit_or_etag": "b07a7e32f1", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "CERTIFIED; consumable 20/20 MEASURED, R1 denominator corrected per CERT-5."},
+    {"path_or_key": "workflows/atom_decomposition/runs/portal-page-correlations/20260811T1918Z/", "kind": "doc", "commit_or_etag": "c912f0158c", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "CERTIFIED; consumable 10/10 MEASURED, R1 tally corrected per CERT-6. Closes W1."},
+    {"path_or_key": "org/tier2_senior/0.5.0_AE_OpalETL/deliverables/OPAL_ANALYST.W1_DOMAIN_BAR_AND_RUN_PROTOCOL.md", "kind": "doc", "commit_or_etag": "65b803b5ff", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "Committed BEFORE any W1 measurement -- the commit order is what makes C3 provable."},
+    {"path_or_key": "org/tier2_senior/0.5.0_AE_OpalETL/deliverables/w1_prep/w1_enumerate.py", "kind": "test", "commit_or_etag": "bd2cb31ef0", "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE", "deploy_evidence": "C1 enumeration instrument; v2 corrected to exclude type-only imports."}
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C1",
+      "criterion_verbatim": "Enumeration with denominator, per page: every route, panel, fetch and served artifact enumerated first-hand, each count stated WITH what it is a count OF. A retrieval that returns nothing is distinguished from a surface that has nothing.",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.5.0_AE_OpalETL/deliverables/w1_prep/w1_enumerate.py portal   +  per-page grep of SmartPanelFooter over each page dir (untruncated)  +  aws s3api head-object per artifact",
+      "output_evidence": "Per-page denominator_statement in each rectangle's meta, e.g. /cma: '2 distinct served artifacts... 3 census ROWS resolve to 2 distinct because assumptions.json appears in two panels'. Retrieval-vs-absence distinguished explicitly on /positioning: positioning_data.json raised JSONDecodeError at char 0; od -c showed gzip magic \\037\\213 and head-object confirmed ContentEncoding gzip -- recorded as a RETRIEVAL defect, not a content defect (constraint K7).",
+      "denominator": "6 of 6 pages; 16 entities total; every count in every evidence object carries an explicit denominator field.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C2",
+      "criterion_verbatim": "Rectangle born UNMEASURED and schema-valid, per page, entity-by-field, cells carrying {value, status, evidence}.",
+      "method": "test_suite",
+      "invocation": "python projects/ATOM_DECOMP/skill/atomic-decomposition/references/ssot_validate.py rectangle <run>/rectangle.c0.json   (per page)",
+      "output_evidence": "Each c0 validated 0 violations with a hole census of 100% UNMEASURED: /cma 20/20, /positioning 30/30, /attribution 40/40, /factor-tilts 40/40, /valuations 20/20, /correlations 10/10. The born-unmeasured property is structural, not asserted: measurements arrive only as validator-merged patches.",
+      "denominator": "6 of 6 c0 rectangles; 160 cells total, 160 born UNMEASURED.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3",
+      "criterion_verbatim": "Domain bar stated BEFORE measurement, per page, in the rubric -- timestamped/committed such that its precedence over the measurements is verifiable, not merely asserted.",
+      "method": "diff",
+      "invocation": "git log --format='%h %ci' -- org/tier2_senior/0.5.0_AE_OpalETL/deliverables/OPAL_ANALYST.W1_DOMAIN_BAR_AND_RUN_PROTOCOL.md   vs the first W1 run commit",
+      "output_evidence": "Domain bar committed @65b803b5ff at 2026-08-11 ~1716Z. First W1 measurement commit (portal-page-cma run) @5a62993e6a at 13:38 local / ~1738Z. Bar precedes every measurement by commit order. Every run.json sets domain_bar_ref to it. The bar classifies in BOTH directions -- T-1, weekend/holiday and cadence-consistent staleness named EXPECTED and recorded as explicit NON-FINDINGS.",
+      "denominator": "6 of 6 runs reference the same pre-committed bar; 1 bar, committed once, before 6 of 6 measurement commits.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C4",
+      "criterion_verbatim": "DRY reached by convergence: consecutive rounds with zero status changes, evidenced in run.json cycles. A run that stopped at a count target fails this criterion.",
+      "method": "test_suite",
+      "invocation": "ssot_validate patch <rect> <c2 patch> --out <c2 rect>   (per page); inspect run.json cycles[].census",
+      "output_evidence": "Each page's c2 patch carries changes:[] with EVERY cell in unchanged_examined (20/30/40/40/20/10), merged through the validator, so the no-op is an ARTIFACT not an assertion (M-4). Per PRD 9.8.1-C the DRY cycle uses a DIFFERENT lens from c1: c1 by-entity-row, c2 by-cross-entity-mechanism. That lens change is load-bearing, not ceremony -- c1's lens would have surfaced none of the relations, which are all EDGE properties.",
+      "denominator": "6 of 6 pages reached DRY by a zero-change cycle under a second lens; 0 stopped at a count target.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C5",
+      "criterion_verbatim": "Declared / deployed / serving separated for every artifact (Rule 3), with the SERVED limb grounded on a live read or an exercised path -- never on the route table alone. Converts PRD 9.1.2's DESIRED-class denominator to measured for these six pages.",
+      "method": "live_read",
+      "invocation": "aws s3api head-object --bucket opal-data-portal-v2 --key <key>   per artifact, with a positive control on json/benchmarks/etf_returns.json run as a SEPARATE invocation each time",
+      "output_evidence": "16 of 16 entities carry serving_state MEASURED with head-object evidence (LastModified + ContentLength + ContentEncoding), never a route-table citation -- enforced by constraint K1. Positive control run in isolation per page so a 404-on-everything condition would have been visible. Example: json/portfolios/aum-metrics.json 2026-07-23T20:57:17Z 7234B; json/factor-tilts/tier3-timeseries.json 2026-08-11T09:26:03Z 3768675B.",
+      "denominator": "16 of 16 entities live-read; 6 positive controls, each a separate invocation.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C6",
+      "criterion_verbatim": "Census reconciliation stated: Pod-2 census ingested as input; every disagreement between run and census NAMED with the run's evidence. Zero disagreements is a valid result and is stated explicitly as such, not left implicit.",
+      "method": "manual_read_with_citation",
+      "invocation": "Per-page comparison of ARTIFACT_CENSUS_POD2.yaml @49cb88ead rows against first-hand enumeration; recorded in each rectangle's meta.denominator_statement and in run.json.",
+      "output_evidence": "All six reconciled at DISTINCT-ARTIFACT grain. /attribution's +1 NAMED and adjudicated in-run as TWO shapes at once (uncensused live artifact at Attribution.tsx; dead CONSUMER at SelectionTab.tsx). /positioning and /correlations record that their match was RE-DERIVED and that the v1 match was SPURIOUS. /factor-tilts and /valuations record their v1 FLAGS as explicitly STRUCK. Zero-disagreement results stated explicitly, never left implicit.",
+      "denominator": "6 of 6 pages reconciled; 1 genuine disagreement (+1 on /attribution) adjudicated; 2 spurious v1 matches disclosed; 2 wrong v1 flags struck.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C7",
+      "criterion_verbatim": "run.json schema-valid with per-cycle hole census and method vintage, per page.",
+      "method": "schema_validation",
+      "invocation": "jsonschema Draft7Validator against ssot_establishment.schema.json#/$defs/run_manifest, per run.json",
+      "output_evidence": "6 of 6 VALID. Each carries cycles[] with a per-cycle census and package_vintage 22ce467d37 (the amended schema commit). THE VALIDATOR IS DEMONSTRABLY DISCRIMINATING -- it rejected my own run.json twice before passing (list-vs-integer on patches_applied, then additionalProperties), and rejected 5 of 5 deliberately-mutated rectangles in a negative-control battery (prose evidence on a MEASURED cell, UNMEASURED cell carrying a value, relation missing status, relation prose evidence, rectangularity gap) while the positive control passed.",
+      "denominator": "6 of 6 run.json valid; negative-control battery 5 of 5 REFUSED, 1 of 1 positive control PASS.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C8",
+      "criterion_verbatim": "certification.json present and SIGNED BY CVO~Z, per page, its verdict NAMING ITS DISCRIMINATOR, with the planted mutant recorded as caught. Unsigned, self-signed, or discriminator-less = fail.",
+      "method": "manual_read_with_citation",
+      "invocation": "Read certification.json in each of the six run directories; confirm certifier field and verdict text.",
+      "output_evidence": "6 of 6 present, all signed 3.0.0_SA_CVO~Z, none self-signed. All seven plants CAUGHT with named discriminators -- e.g. /cma: 'the cell refutes itself, its own evidence locator names two render sites'; /positioning: 'the relation refutes itself TWICE, its evidence locator and denominator both read weekly'; /correlations: 'value names /cma and rests on it while endpoints omits it'. Seven distinct shapes across seven runs: false fact, false measurement, suppressed finding, severed provenance, corrupted frame, downgraded citability, severed connection.",
+      "denominator": "6 of 6 pages certified by the non-author seat; 7 of 7 plants caught (7 including the superseded /cma 1729Z run); 0 self-signed.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C9",
+      "criterion_verbatim": "Semantics landed from CVO~Z on the 6-question block for every servable artifact, in a form W5 can lift into DATA_CATALOG v0.2 without re-interpretation.",
+      "method": "test_suite",
+      "invocation": "ssot_validate patch <dry> <c4 semantics patch> --out <rectangle.final.certified.json>   per page, after running PLANE and SHAPE guards over each incoming payload",
+      "output_evidence": "6 of 6 consumables at 100% MEASURED (20/30/40/40/20/10 = 160 cells, 0 UNMEASURED). Semantics merged VERBATIM -- no semantic content written or re-worded by me. GUARDS RUN UNCONDITIONALLY on every payload regardless of sender assurance: on /positioning both FAILED (3 Plane-A vintage_grain cells present; all cells bare strings) and I EXCLUDED the Plane-A rows and flagged rather than silently normalizing; CVO~Z confirmed it was a REGRESSION and repaired it. Pages 3-6 payloads: PLANE CLEAN, SHAPE CLEAN.",
+      "denominator": "160 of 160 cells MEASURED across 6 consumables; 6 of 6 payloads guard-checked; 1 payload refused and corrected.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C10",
+      "criterion_verbatim": "Declared exclusions + surprises: everything in scope NOT done, each with a reason (an unmarked gap reads as coverage); surprise-channel entries one line each, observed outside mandate, no action taken.",
+      "method": "manual_read_with_citation",
+      "invocation": "See declared_exclusions and surprises arrays of this instance, and per-run notes fields.",
+      "output_evidence": "Exclusions and surprises populated below. Recorded-not-scored items appear in-run with explicit reasons (mixed content-encoding, frozen legacy twin, vintage-shape variance, two-accessor artifact) -- each a FACT declined as a defect because no evidence of harm exists and the bar forbids scoring an unexplained difference.",
+      "denominator": "4 declared exclusions; 6 surprise entries; 5 recorded-not-scored observations across 6 runs.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C11",
+      "criterion_verbatim": "Session log with a populated Compiler Tools section (blank/N-A not acceptable) + all commits on your own lane under your own author line.",
+      "method": "manual_read_with_citation",
+      "invocation": "See session_log and compiler_tools fields of this instance; git log --format='%an' over the W1 run commits.",
+      "output_evidence": "Session log committed with a populated Compiler Tools table. All W1 commits authored 0.5.0_AE_OpalETL~Z <0.5.0_AE_OpalETL~Z@opal.agent>. Not pushed -- lane commits, MSTR~Z integrates. One lane refusal encountered (ARTIFACT_CENSUS_MP.yaml, TIER0_UTILITY lane) was ESCALATED to CTO~Z rather than overridden.",
+      "denominator": "N/A -- boolean check on log presence and authorship.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "SEVEN planted coherence-violating mutants across seven runs, each SEALED AT PLANT TIME in MUTANT_SEALED.md committed with the rectangle and before handoff, each seal stating in advance which constraint the plant violates and WHY that constraint is not mechanically checkable. Seven DISTINCT shapes by design, escalating away from content and toward the machinery that decides which content counts: (1) fictional producer -- false fact; (2) de-scoped consumer count -- false measurement; (3) real finding recorded as an explicit NON-finding -- suppressed defect; (4) true value with a fabricated citation -- severed provenance; (5) true value, true citation, corrupted denominator -- false frame; (6) true well-evidenced claim marked INFERRED -- downgraded citability; (7) endpoints omitting the claim's own counter-example -- severed connection with every statement left true.",
+      "expected": "Each caught by CVO~Z with a NAMED DISCRIMINATOR (a verdict without one is VOID), and each structurally excluded from the consumable.",
+      "observed": "7 of 7 CAUGHT with named discriminators. 0 shipped: every consumable verified in BOTH directions at close (restored to the pre-plant value AND differing from the planted value). One plant (run 1) had its catch DISCLOSED by my own seal leak -- I named the coordinates inside the artifact under test, so that catch is recorded VOID and a fresh mutant was planted on re-emission at an undisclosed location.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The emitter is deterministic: same page spec re-run produces byte-identical c0/patches. Exercised by emitting /cma twice (1729Z non-conforming, 1801Z conforming) from the same measurements, and by re-merging c0 + patches during the K.1 reconstruction probe.",
+      "observed": "Re-merge of c0 + the two pre-dry patches reproduced the pre-relations rectangle exactly, which is what made the K.1 residual measurable rather than arguable. No flapping criterion across any re-run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "Any fix to the footer-to-artifact binding defect (5 relations across 4 pages)", "reason": "Routed to CTO~Z as one page-family ticket. Not mine to fix, and I touched no portal code. The TO's do_not list forbids acting on residue; a finding gets a disposition and a recommendation, never an act."},
+    {"item": "Any fix to the /cma Views-panel manifest gap (R1, eleven-month forward misstatement)", "reason": "CTO~Z owns the routing. My contribution was the denominator that makes it actionable -- the manifest carries 5 source keys and no 'views' key, so the fix is a MANIFEST ENTRY plus the prop, not the prop swap it resembles."},
+    {"item": "Resolution of the /positioning R2 by-design-vs-partial-write question", "reason": "Recorded NOT_MEASURABLE with its discriminator named (yang-generate-positioning's write-guard source, or the CloudWatch log for execution 2026-08-11T09:26:03Z). Both readings fit the evidence equally and have opposite remedies; guessing would launder a coin-flip into a certified rectangle."},
+    {"item": "W4's six uncensused pages and the news subsystem", "reason": "Out of W1 scope. W1 is the six censused Pod-2 pages; W4 and the news subsystem are separate waves."}
+  ],
+  "surprises": [
+    "The atom_decomp run schema could not carry the mitigations W0's own METHOD_READ prescribed (additionalProperties:false blocked population_mode, dry_basis and the required input_corrections array) -- filed as M-10, closed by the @22ce467d37 amendment.",
+    "The relations-plane mutant-removal path did not exist and REPORTED SUCCESS: structural_changes op is a const 'add', an add on an existing relation_id is a silent no-op, and the merge returned rc=0 while leaving the plant in place -- filed as M-11, closed by binding K.",
+    "Binding K then PUBLISHED THE COMPLEMENT of the seal (dry and final both shipped, so the mutant was the diff) -- found by CVO~Z, filed as M-12, closed by K.1 then K.2. Three fixes chased one secret and each fix's author shipped past their own leak; CTO~Z bound this as class L, 'the remedy is a vector'.",
+    "My own negative-control harness reported rc=0 on all five mutants because `echo \"$(basename $f) rc=$?\"` reads basename's exit code -- a fourth mechanism in the rc-reading class, caught only because the all-clean result contradicted CTO~Z's independent 6/6 on the same shapes.",
+    "CVO~Z's /positioning semantics payload crossed the plane boundary (3 Plane-A cells) and dropped the evidence-object shape -- a REGRESSION by the seat that authored the plane split, and their own diagnosis was that the defect arrived with the pace, not the ignorance.",
+    "MY OWN TWO DENOMINATOR DEFECTS, in consecutive pages: CERT-5 (a footer enumeration ending in `head -10` hid a fourth footer at line 11) and CERT-6 (a page count carried in my head across six runs instead of derived). Both are the same failure -- a denominator that is a RECOLLECTION rather than an ARTIFACT -- on a program whose central discipline is printing the denominator. K10 now covers the first; the second needs its sibling stated: never count from memory either."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-11/OPAL_ANALYST_W1_six_pod2_pages_1729-1930Z.md",
+  "compiler_tools": [
+    {"tool": "ssot_validate", "invocation": "ssot_validate rectangle <rect> ; ssot_validate patch <rect> <patch> --out <merged>  -- every merge, every page", "result": "PASS on 6 of 6 pages at every stage. Demonstrably discriminating: rejected my run.json twice (type error, then additionalProperties), rejected 5 of 5 planted negative controls, rejected count_grain free-text against its CLASS|INSTANCE enum, and REFUSED the entire /cma 1729Z run -- which is what exposed my five conformance divergences before certification."},
+    {"tool": "comp-estate", "invocation": "python .tools/comp-estate cma ; python .tools/comp-estate positioning", "result": "PASS for PRODUCER IDENTITY. Used strictly within its declared domain: its own header warns that freshness adjectives are CENSUS-VINTAGE, and it reported positioning_data.json at 2026-06-15 while the live read said 2026-08-11 -- so currency came from head-object every time, never from the tool."},
+    {"tool": "comp-find", "invocation": "python .tools/comp-find \"atom_decomp\" ; python .tools/comp-find --name \"PROOF_OF_SPEC*\" ; --name \"ARTIFACT_CENSUS*\"", "result": "PASS; every call returned a denominator and band split. Note it does NOT resolve bare on this box (one of 6 of 97 needing an explicit .tools/ prefix)."},
+    {"tool": "comp-which", "invocation": "comp-which \"what pages does the portal have\" ; comp-which \"who consumes teams-watch.py\"", "result": "MIXED. Routed usefully for the portal question; for 'what consumes this SKILL file' it returned three pipeline instruments, none of which models a local skill engine -- logged as a COVERAGE GAP, per the foundational-not-additive line."},
+    {"tool": ".tools/commit-gate.sh", "invocation": "bash .tools/commit-gate.sh <each .py touched>", "result": "PASS on every Python artifact (w1_enumerate.py, teams-watch.py)."},
+    {"tool": "safe-commit.sh + risk-reflex + owned-paths", "invocation": ".tools/safe-commit.sh --author \"0.5.0_AE_OpalETL~Z <...>\" -F <scratchpad msgfile> -- <paths>", "result": "PASS across ~14 lane commits. The owned-paths gate correctly REFUSED my census correction (TIER0_UTILITY lane); I escalated to CTO~Z rather than using the available GIT_COMMIT_AUTHOR_OVERRIDE. Risk-reflex raised a [HOLD] citing LD-0214 on teams-watch.py; I read the citation and found it SUPPORTED the change."},
+    {"tool": "aws s3api head-object / s3 cp (live grounding)", "invocation": "head-object per artifact with a positive control in a SEPARATE invocation; s3 cp piped to a gzip-aware reader", "result": "PASS. 16 entities live-grounded. Caught the gzip case that a naive read reported as JSONDecodeError -- the retrieval was the defect, not the object (K7)."},
+    {"tool": "proof-of-spec-check.py", "invocation": "python .tools/proof-of-spec-check.py <instance> C1,...,C11   (POSITIONAL argv[2])", "result": "See validation of this instance. NOTE: the flag form --expected-criteria exits 2 into help text carrying no 'INVALID' string -- I surfaced that during TO6 and CTO~Z fixed it at the canonical TASK_ORDER_PROTOCOL source @1a963519a2, since every TO in the estate copies from there."}
+  ]
+}

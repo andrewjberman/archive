@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "to_id": "OPAL_ANALYST.TO6",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/OPAL_ANALYST.TO6.teams-watch-expired-token-quiet-retry.md",
+    "group": "T",
+    "vintage_commit": "a438a40793"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".claude/skills/teams-assist/teams-watch.py",
+      "kind": "script",
+      "commit_or_etag": "b6a4263c92",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local harness skill engine, not an AWS artifact -- there is no deploy leg for this file. It takes effect on the next Monitor arm of teams-watch.py; no running watcher is retro-fixed and none was restarted by me. The consumer seat (0.0.3_BG_BBGTerminal) picks it up when they next arm."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C1",
+      "criterion_verbatim": "Expired-token quiet retry EXERCISED, not reasoned: an actually-expired token produces a retry and a subsequent successful poll, with the observed evidence quoted. A source read showing a retry branch does not satisfy this -- behavior claims are exercised (Rule 22a).",
+      "method": "test_suite",
+      "invocation": "python <scratchpad>/to6_loop_test.py .claude/skills/teams-assist/teams-watch.py   (drives the engine's OWN main() loop; CREDS redirected to a fixture, poll() replaced by a recorder that captures the token each poll is made with; fixture starts with the pinned record EXPIRED and is refreshed mid-run)",
+      "output_evidence": "[teams-watch] pinned token expired -- quiet retry, pin HELD (cycle 1, identity=bloomberg@opalinvest.com) / [teams-watch] re-selected after lapse: identity=bloomberg@opalinvest.com / polls DURING the lapse: [] / process alive during lapse: True / poll count after refresh: 3 / VERDICT: PASS. Function-level corroboration: C1.a exit=None (pre-change this path was sys.exit(2)), C1.b read_token() -> identity=bloomberg@opalinvest.com in the same process.",
+      "denominator": "1 lapse-and-recovery cycle driven end to end; 3 post-refresh polls observed, all as the pinned identity; 0 polls during the lapse.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C2",
+      "criterion_verbatim": "NEGATIVE CONTROL -- the pin survives the retry. With both identities' tokens present on the box and the pinned one expired, the post-retry poll runs as the PINNED identity. Evidence must show WHICH identity polled, not merely that polling resumed.",
+      "method": "test_suite",
+      "invocation": "Same two harnesses, fixture = the P0 shape: pinned (bloomberg@opalinvest.com) EXPIRED, other (andrew@opalinvest.com) LIVE throughout. Identity is read from the token argument poll() actually receives -- the one place 'who polled' is unambiguous.",
+      "output_evidence": "identities polled AFTER refresh: ['bloomberg@opalinvest.com'] / ANDREW polled at ANY point?: False (scanned all 3 polls, not just post-refresh) / function-level C2.a: read_token() -> None while Andrew's token was LIVE -- i.e. the engine polled as NOBODY rather than as the wrong identity; C2.b after refresh -> identity=bloomberg@opalinvest.com with BOTH records live, so an unfiltered retry could have selected Andrew and did not.",
+      "denominator": "3 polls scanned across the whole run (not only the post-refresh window); 2 identities present in the fixture at all times.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3",
+      "criterion_verbatim": "Unsatisfiable pin still exits non-zero with a named reason -- exercised, distinguishable from the retry path.",
+      "method": "test_suite",
+      "invocation": "python <scratchpad>/to6_harness.py .claude/skills/teams-assist/teams-watch.py  -- two unsatisfiable fixtures on the SAME engine that returns None for expired-only: (a) zero records matching the pinned identity, (b) two LIVE records both matching it.",
+      "output_evidence": "[TEAMS-IDENTITY-FAIL] no-token-for-identity: no mcpOAuth record matches the pin (--server=None --identity=bloomberg@opalinvest.com) -> SystemExit=2. [TEAMS-IDENTITY-FAIL] ambiguous-token-match: 2 valid records match the pin (m365-bbg, m365-bbg-2) -> SystemExit=2. Distinguishability is direct: the same engine returned None (no exit) on the expired-only fixture in C1.a.",
+      "denominator": "2 of 2 unsatisfiable shapes exit 2 with a named reason; 3 of 3 originally-loud paths preserved (no-token-for-identity, ambiguous-token-match, credentials-unreadable -- the third unchanged in the diff).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C4",
+      "criterion_verbatim": "Bare-invocation compatibility exercised -- no pin flag, selection behavior unchanged vs pre-change baseline, with the comparison stated.",
+      "method": "diff",
+      "invocation": "Differential: the post-change engine and HEAD's pre-change engine (MSYS_NO_PATHCONV=1 git show HEAD:.claude/skills/teams-assist/teams-watch.py, 283 lines, positive-controlled on the string 'expired-token-for-identity' = 1 hit, so not a fatal: string) both imported bare and run against 4 identical fixtures.",
+      "output_evidence": "both live: post='bloomberg@opalinvest.com' pre='bloomberg@opalinvest.com' == ; all expired: post=None pre=None == ; one live one expired: post='andrew@opalinvest.com' pre='andrew@opalinvest.com' == ; empty: post=None pre=None ==. Structural corroboration: PINNED is False when bare, so lapse_cycles never leaves 0, the elif branch never runs, and sleep_for reduces to INTERVAL.",
+      "denominator": "4 of 4 fixtures identical between pre- and post-change engines.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C5",
+      "criterion_verbatim": "No wrapper / shadow path / second watcher introduced -- stated, and verifiable from the diff.",
+      "method": "diff",
+      "invocation": "git show --stat b6a4263c92",
+      "output_evidence": "1 file changed, 47 insertions(+), 7 deletions(-) -- .claude/skills/teams-assist/teams-watch.py only. No file created, no new process spawned, no second entry point, no parallel poller. The fix is entirely inside the existing engine's existing loop.",
+      "denominator": "1 of 1 files touched by the commit; 0 new files.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C6",
+      "criterion_verbatim": "Session log with a populated Compiler Tools section, commit on your own lane under your own author line.",
+      "method": "manual_read_with_citation",
+      "invocation": "See session_log + compiler_tools fields of this instance; commit author line on b6a4263c92.",
+      "output_evidence": "Author: 0.5.0_AE_OpalETL~Z <0.5.0_AE_OpalETL~Z@opal.agent> on b6a4263c92. Session log committed with a populated Compiler Tools table. Not pushed -- lane commit, MSTR~Z integrates.",
+      "denominator": "N/A -- boolean check on authorship + log presence.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO planted mutants, each targeting a different criterion, run through both harnesses. M1 PIN-BYPASS: the expired branch falls through to the identity-blind bare selection -- the exact TO-1 P0 this TO must not reintroduce. M2 EXIT-ON-EXPIRY: the pre-change sys.exit(2) restored.",
+      "expected": "M1 must fail C2 (and must be observed polling AS ANDREW at process level). M2 must fail C1 (process dead during the lapse, zero polls after). Neither may pass silently.",
+      "observed": "M1: function harness 6/7 with C2.a FAILED; process test recorded polls DURING the lapse as ['andrew@opalinvest.com','andrew@opalinvest.com'], ANDREW polled at ANY point = True, VERDICT FAIL. M2: function harness 5/7 with C1.a AND C2.a FAILED; process test alive-during-lapse False, 0 polls after refresh, VERDICT FAIL. Real engine: 7/7 function, process VERDICT PASS. Three-way discrimination confirmed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both harnesses re-run against the real engine after the harness self-defects were fixed; function harness run 3 times total across the session (once pre-fix, twice post-fix) and the process test twice.",
+      "observed": "7/7 stable across every post-fix invocation; process VERDICT PASS on both runs, with poll counts varying (3 vs 3) only within the expected timing window of a wall-clock loop. No flapping criterion.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Restarting or re-arming any live teams-watch process, including the concierge seat's",
+      "reason": "Out of my lane and not asked for. The fix lands on the next arm; no running watcher is retro-fixed. 0.0.3_BG_BBGTerminal picks it up when they next arm."
+    },
+    {
+      "item": "Any edit to 0.0.3_BG_BBGTerminal's refs/RELAUNCH.md or the /bbg-teams-assist arm line",
+      "reason": "TO cross_domain_coordination says say-so rather than edit another seat's core refs unilaterally. No operator-visible behavior changed -- the arm line, flags, and stdout contract are all identical -- so I assess no runbook edit is needed, and I am stating that rather than making it."
+    },
+    {
+      "item": "The 401 mid-poll path (:273) and the bare path (:119-121)",
+      "reason": "Already quiet-retry correctly; untouched by design. The defect was that the PINNED path alone diverged from them."
+    },
+    {
+      "item": "Backoff on the BARE path when no token is available",
+      "reason": "Would change bare behavior and violate requirement 4. Backoff is deliberately pin-scoped."
+    }
+  ],
+  "surprises": [
+    "MY OWN HARNESS HAD TWO DEFECTS, both found by mutants rather than by review, and both would have inflated this deliverable. (a) An uncaught SystemExit let the exit-on-expiry mutant KILL the harness mid-suite and print nothing -- silence that reads as absence of a result, not as FAIL. (b) An evidence line printed 'ANDREW ever polled? False' while scanning only the post-refresh window, on a mutant that had polled as Andrew twice during the lapse -- a true statement about the wrong domain, inside the artifact meant to prove the pin held. Both fixed before any result here was recorded.",
+    "The commit-time risk-reflex flagged 11 recorded claims on teams-watch.py citing LD-0214. I read it as instructed. It does not conflict: LD-0214 records the engine's INTENDED property as 'a token-rotation lapse (401) -> the engine quiet-retries, Claude Code refreshes on next use (no crash)', and assigns the ENGINE to the AE lane. The TO-1 pin added later diverged from that recorded intent on the pinned path; this restores it.",
+    "ARTIFACT_CENSUS_MP.yaml carries page: /model-portfolios while the real route is /portfolios -- found by CVO~Z's W0 re-grounding, not by me, and I had the CORRECT value in the page inventory I committed the same morning. Two of my own artifacts disagreed and I did not cross-check them. Correction is mine and is queued ahead of my first W1 run. Related live defect (PipelineProgress.tsx:432 links to the dead route) is CTO~Z's, named not chased.",
+    "I over-stated a finding earlier today: my subject line claimed the atom_decomp CERTIFY step 'has never been exercised' on the strength of a find over runs/ returning 0. 2 of 3 precedent runs ARE certified under a CERT_* namespace outside that tree. The measurement was sound and scoped; the claim built on it was not."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-11/OPAL_ANALYST_TO6_teams_watch_quiet_retry_1650-1705Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"who consumes teams-watch.py\"",
+      "result": "ROUTED BUT DID NOT FIT -- returned comp-estate/comp-pipescript/comp-freshness, all data-pipeline instruments; teams-watch.py is a local skill engine with no pipeline edge, so none models its consumer set. Consumer discovery done at source instead (the shared-engine coupling is documented in the file header and in LD-0214). Recording this as a coverage gap rather than a clean route: the estate has no comp-tool that answers 'what consumes this SKILL file'."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "python .tools/comp-find \"atom_decomp\" ; python .tools/comp-find --name \"PROOF_OF_SPEC*\"",
+      "result": "119 hits / 24863 files scanned with band split, and 5 hits locating org/standards/PROOF_OF_SPEC.schema.json. Both carried denominators. Note: comp-find does NOT resolve bare on this box (one of the 6 of 97 that need an explicit .tools/ prefix); the bash shim fails on the docstring, python .tools/comp-find works."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh .claude/skills/teams-assist/teams-watch.py",
+      "result": "PASS -- py_compile + ruff clean; retired-alias invariant PASS (7 retired names, 93 live, disjoint)."
+    },
+    {
+      "tool": "safe-commit.sh + risk-reflex",
+      "invocation": ".tools/safe-commit.sh --author \"0.5.0_AE_OpalETL~Z <...>\" -F <scratchpad msgfile> -- .claude/skills/teams-assist/teams-watch.py",
+      "result": "Committed b6a4263c92. Risk-reflex raised [HOLD] with 11 recorded claims citing LD-0214; read before proceeding, no conflict found (see surprises). Msgfile written to session scratchpad with a serial+timestamp name per the banked /tmp-collision lesson, not a generic /tmp path."
+    },
+    {
+      "tool": "git show (baseline extraction) + positive control",
+      "invocation": "MSYS_NO_PATHCONV=1 git show HEAD:.claude/skills/teams-assist/teams-watch.py > baseline; grep -c 'expired-token-for-identity'; wc -l",
+      "result": "283 lines, 1 hit on the control string -- a real file, not a 'fatal:' string. stderr deliberately NOT discarded (a mangled git show returns clean-empty stdout and would have rendered as an empty baseline that silently passes a differential)."
+    }
+  ]
+}

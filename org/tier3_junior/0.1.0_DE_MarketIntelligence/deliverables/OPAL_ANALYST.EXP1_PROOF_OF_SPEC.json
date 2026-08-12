@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "to_id": "OPAL_ANALYST.EXP1",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier1_exec/1.0.0_SA_CTO/deliverables/MARKET_FALLBACK_VISIBILITY_EXPEDITE_SPEC_20260811.md",
+    "group": "OTHER",
+    "vintage_commit": "bc255c79807e8d555ca9144e1c6b76d22d99bbd3"
+  },
+  "assignee": "0.1.0_DE_MarketIntelligence~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/api/endpoints/market.ts",
+      "kind": "script",
+      "commit_or_etag": "715c431f02817aadebaf6549dac6e137419568a4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Spec bound 2 and TO do_not: DEV branch, standard promotion, no direct PROD act, and the lane does not push (MSTR~Z integrates). Committed on portal DEV; promotion is a separate DT act."
+    },
+    {
+      "path_or_key": "portal/src/lib/dataLoader.ts",
+      "kind": "script",
+      "commit_or_etag": "715c431f02817aadebaf6549dac6e137419568a4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same DEV-only bound as above."
+    },
+    {
+      "path_or_key": "portal/src/pages/MarketPerformance/hooks.ts",
+      "kind": "script",
+      "commit_or_etag": "715c431f02817aadebaf6549dac6e137419568a4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same DEV-only bound as above."
+    },
+    {
+      "path_or_key": "portal/src/pages/MarketPerformance/MarketPerformance.tsx",
+      "kind": "script",
+      "commit_or_etag": "715c431f02817aadebaf6549dac6e137419568a4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same DEV-only bound as above."
+    },
+    {
+      "path_or_key": "portal/scripts/ui-smoke.mjs",
+      "kind": "test",
+      "commit_or_etag": "715c431f02817aadebaf6549dac6e137419568a4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verification harness, not product code. Two additive OPTIONAL flags (--fail, --console); default invocation behaviour unchanged, so existing callers are unaffected."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C1",
+      "criterion_verbatim": "RENDERED VERIFICATION, not a source read -- the degraded state is EXERCISED (force the fallback path locally) and OBSERVED in a screenshot per the /frontend-dev discipline, with the artifact's date visible in the render.",
+      "method": "command",
+      "invocation": "node scripts/ui-smoke.mjs market <out>.png --port 5176 --fail \"json-tiered/market-overview/summary/all-returns.json\" --fixtures fallback-stale.json --console \"[market.getAllReturns]\" --console \"[dataLoader]\"",
+      "output_evidence": "FORCED-FAIL: json-tiered/market-overview/summary/all-returns.json | CONSOLE[warning]: [market.getAllReturns] Tiered summary failed, falling back... Error: Public API request failed: 503 Service Unavailable | CONSOLE[log]: [market.getAllReturns] SECONDARY: Fetching from Lambda proxy... | CONSOLE[warning]: [market.getAllReturns] DEGRADED: serving FALLBACK tier from proxy all_returns.json. Artifact data_as_of: 2026-04-15 | LOC: /market | CANVAS: rgb(195, 202, 218). PNG READ (AFTER-degraded-2.png, and the zoomed crop C4-banner-zoom.png) shows the rendered banner verbatim: \"Fallback data source. The primary market feed is unavailable, so these returns come from the backup artifact dated 2026-04-15. This data may not be current.\" -- the ARTIFACT's date (2026-04-15, the real 118-day-stale target date) is visible in the render.",
+      "denominator": "N/A -- single-route rendered observation; the route landed is stated (LOC /market, matching the requested route) rather than assumed.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C2",
+      "criterion_verbatim": "generated_at no longer synthesised on the fallback leg -- shown by the exercised response, not by the diff alone.",
+      "method": "command",
+      "invocation": "same degraded run as C1, with VITE_DEBUG=true so dataLoader logs the generated_at value it actually received from the accessor",
+      "output_evidence": "POST-CHANGE (exercised): CONSOLE[log]: [dataLoader] Market data loaded successfully: 6 equities, 4 fixed income, 5 commodities, updated 2026-04-15  <-- the ARTIFACT's own date. PRE-CHANGE, identical exercise (pristine files restored via git checkout, same --fail + same fixture): CONSOLE[log]: [dataLoader] Market data loaded successfully: ... updated 2026-08-11T22:29:30.128Z  <-- April data stamped with the moment of the request. The value is read off the running accessor's output, not off the diff.",
+      "denominator": "N/A -- boolean check on one field (generated_at) across two exercised runs, pre- and post-change.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3",
+      "criterion_verbatim": "Healthy path UNCHANGED -- primary-path render and payload identical to pre-change (the negative control: a visibility change that alters the healthy surface has changed more than it was authorized to).",
+      "method": "diff",
+      "invocation": "node scripts/ui-smoke.mjs market {BEFORE,AFTER}-healthy-primary.png --port 5176 --fixtures primary-healthy.json  (BEFORE = pristine files restored via git checkout; AFTER = change applied), then a PIL pixel diff of the two PNGs, plus a same-code self-control render (AFTER-healthy-run2.png)",
+      "output_evidence": "BEFORE size (1440, 2462) == AFTER size (1440, 2462). BEFORE-vs-AFTER changed = 59 px of 3,545,280 (0.0017%), bbox (1261,1059,1269,1069). Crop of that bbox READ in both: the ONLY difference is the CNN Fear&Greed panel wall clock, \"August 11th, 2026, 6:29p ET\" vs \"6:28p ET\". SELF-CONTROL, same (changed) code rendered twice: changed = 106 px, bbox (1253,1059,1269,1069) -- a LARGER delta in the SAME region, so the change-attributable delta sits below the run-to-run noise floor. Payload side: healthy console identical apart from a debug-log FORMAT change I introduced (BEFORE 'updated 2026-08-11T10:30:00.000Z' via new Date(x).toISOString(), AFTER 'updated 2026-08-11T10:30:00Z' logging the raw string) -- same instant, same value of generated_at, and that string is DEBUG-only with no consumer. Healthy render carries no banner (PNG read).",
+      "denominator": "59 changed pixels out of 3,545,280 total (1440x2462), against a same-code self-control floor of 106 px in the same region.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C4",
+      "criterion_verbatim": "Silver-canvas colour law honored on any new visual state (the standing portal defect class); session log with Compiler Tools section.",
+      "method": "command",
+      "invocation": "PIL colour sample of the rendered banner strip in AFTER-degraded-2.png + WCAG relative-luminance contrast computation against both the banner fill and the raw silver canvas; PNG crop READ at 1:1",
+      "output_evidence": "Banner fill rgb(201,197,197); darkest text pixel rgb(123,51,6) (= amber-900, the DARK idiom). Contrast text-vs-banner-fill 5.30:1; text-vs-raw-silver-canvas rgb(195,202,218) 5.51:1 -- both above the WCAG AA 4.5:1 floor for normal text. Dark-on-light throughout; no text-white*, no text-{color}-100..300, no bg-white/N on the canvas. Zoomed crop READ and legible. Session log committed with a Compiler Tools section (path in session_log field).",
+      "denominator": "N/A -- contrast is a computed ratio per colour pair, not a count; both pairs (text-vs-fill, text-vs-canvas) are reported rather than the more favourable one alone.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Revert the four product files to pristine (git checkout --) and re-run the IDENTICAL degraded exercise (same --fail, same fixture, same port). If the verification is real, the banner must vanish and generated_at must revert to a synthesised now-stamp. If it does not, C1/C2 were measuring something other than my change.",
+      "expected": "No fallback banner in the render; dataLoader reports a synthesised current timestamp instead of 2026-04-15; no DEGRADED warn in the console.",
+      "observed": "FIRED. BEFORE-degraded.png read: page header goes straight to TRENDING TOPICS, no banner anywhere (page height 2462 px vs 2532 px after -- the 70 px delta IS the banner's own footprint). Console: no '[market.getAllReturns] DEGRADED' line at all, and '[dataLoader] ... updated 2026-08-11T22:29:30.128Z'. All three expected reversions observed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Rendered the same route against the same code and the same fixture twice (AFTER-healthy-primary.png, AFTER-healthy-run2.png) and pixel-diffed, to establish the run-to-run noise floor before attributing any BEFORE/AFTER delta to the change.",
+      "observed": "106 changed px of 3,545,280, confined to bbox (1253,1059,1269,1069) -- the CNN Fear&Greed wall-clock minute digit, which advances between runs. Everything else is byte-stable. The instrument is stable apart from one known wall-clock element, and that element is identified rather than waved off.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The six /market SmartPanelFooter footers that bind manifest data_pkl (3 in MultiAssetTab, 1 each in EquitiesTab / FixedIncomeTab / CommoditiesTab) were NOT re-bound to the artifact.",
+      "reason": "Spec section 'Explicitly OUT': footer-to-artifact binding AS A GENERAL FIX is the W1-W3 page-family class and a design call, not an expedite. Spec C is satisfied by surfacing the degraded state and the artifact date on the /market surface itself."
+    },
+    {
+      "item": "getTickerReturns (market.ts, single-ticker accessor) still contains `generated_at: marketData.generated_at || new Date().toISOString()`.",
+      "reason": "Out of TO scope, which names getAllReturns + the /market footer render path. Same defect CLASS as B one function over; reported to CTO~Z on the surprise channel rather than fixed unilaterally."
+    },
+    {
+      "item": "The fallback leg's per-ticker `latest_date: item.latest_date || new Date().toISOString()` was left as-is.",
+      "reason": "It synthesises a DATA field, not generated_at, so it sits outside B's stated boundary. Flagged to CTO~Z rather than swept in."
+    },
+    {
+      "item": "The 118-day-stale fallback target's restore-vs-retire disposition, and any change to the primary/fallback architecture.",
+      "reason": "Spec 'Explicitly OUT' -- rides the normal remediation queue as a design call."
+    },
+    {
+      "item": "No alarm, monitor, SNS topic, SES send, freshness checker or notification machinery of any kind was built.",
+      "reason": "Andrew's own bound in the ruling: the expedite is NOT an alarm authorization; the standing moratorium is untouched. Existing UI and existing logs only."
+    },
+    {
+      "item": "Not promoted to PROD and not pushed.",
+      "reason": "TO do_not: DEV branch + standard promotion only; lane commits, MSTR~Z integrates."
+    }
+  ],
+  "surprises": [
+    "portal/src/pages/ModelPortfolios.tsx:873 fails `bun run lint` with react-hooks/preserve-manual-memoization ('Could not preserve existing memoization'). PRE-EXISTING and not in my diff -- `bun run lint` runs `eslint .` so it fails repo-wide regardless of the paths passed, which means any seat running the repo lint gate right now sees a red that is not theirs. No action taken.",
+      "getTickerReturns (market.ts:~283) synthesises `generated_at: marketData.generated_at || new Date().toISOString()` -- the same self-reporting-as-current defect as B, in the single-ticker accessor feeding IndexPerformanceModal. Outside this TO's scope. No action taken.",
+    "The /market local render 401s on BOTH accessor legs without backend credentials, landing on the terminal-failure path. That means the ui-smoke default run has never been exercising the primary leg for this page -- a fixture is required to render the healthy state at all. Relevant to anyone reading a past /market smoke render as evidence of healthy-path behaviour. No action taken.",
+    "The portal submodule has no committer identity configured (`git commit` fails with 'Committer identity unknown'); I supplied one per-invocation with `git -c` rather than writing global config. Every portal-committing seat hits this. No action taken."
+  ],
+  "session_log": "org/tier3_junior/0.1.0_DE_MarketIntelligence/logs/2026-08-11/Z_OPAL_ANALYST.EXP1_market_fallback_visibility.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find \"getAllReturns\" portal/src ; comp-find \"dataAsOf\" portal/src ; comp-find \"data_pkl\" portal/src ; comp-find \"SmartPanelFooter\" portal/src/pages/MarketPerformance portal/src/components/market-performance ; comp-find \"generated_at\" portal/src --all",
+      "result": "Mapped the consumer chain with denominators: getAllReturns 13 hits / 403 files (DEF=2: market.ts:140, dataLoader.ts:48); confirmed only dataLoader reads AllReturnsResponse.generated_at (2 hits), so making it optional was safe; located exactly six data_pkl-bound SmartPanelFooters on /market (3 MultiAsset + 1 each of Equities/FixedIncome/Commodities), matching the spec's 'all six footers' claim; confirmed no component READS TickerReturns.generated_at (write-only), so widening it to optional breaks no reader."
+    },
+    {
+      "tool": "comp-transform schema-check",
+      "invocation": ".tools/comp-transform schema-check MarketPerformance  (before and after the change)",
+      "result": "Both runs: 'All rendered fields match their response types.' The DE compiler minimum for a component whose data props changed (sourceTier/dataAsOf added to the useMarketData contract)."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to OPAL_ANALYST.EXP1",
+      "result": "Session TO_ID set race-free per-session (org/mcp/sessions/<sid>.to_id) rather than by writing TO_ID= into the shared .agent_context."
+    },
+    {
+      "tool": "tsc / eslint (portal's own gate)",
+      "invocation": "bun run typecheck  (tsc -b --noEmit) ; bun x eslint <the 5 changed files>",
+      "result": "typecheck rc=0 clean both before and after the scratchpad restore; eslint clean on all 5 changed files. Note `bun run lint` = `eslint .` fails on a PRE-EXISTING ModelPortfolios.tsx error unrelated to this diff (surprise-channel entry above)."
+    },
+    {
+      "tool": "ui-smoke.mjs (/frontend-dev rendered-verification instrument)",
+      "invocation": "node scripts/ui-smoke.mjs market <out>.png --port 5176 [--fail <primary>] [--fixtures <f>] [--console <substr>]  -- 6 renders: degraded x2, healthy AFTER, healthy AFTER run2 (self-control), healthy BEFORE, degraded BEFORE (mutant)",
+      "result": "All six landed LOC /market on the silver canvas rgb(195,202,218). Supplied the C1 rendered evidence, the C2 exercised-response values, the C3 pixel-diff negative control with a same-code noise floor, and the mutant control."
+    }
+  ]
+}

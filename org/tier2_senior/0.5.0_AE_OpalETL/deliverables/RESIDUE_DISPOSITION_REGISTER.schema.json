@@ -1,0 +1,236 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "opal://OPAL_ANALYST/RESIDUE_DISPOSITION_REGISTER.schema.json",
+  "title": "Residue disposition register -- the evidence a cleanup DECISION is made from, never a cleanup act. Prototyped on the W3b news subsystem; authored to be EXTENDED by the portal-wide artifact sweep (CTO~Z design note 195708Z, sweep spec @1e173e7a00).",
+  "description": "AUTHORING RULE, applied to every column below: 'would this column mean something for a /valuations residue row?' If no, it is EXTENSION, not core. A schema prototyped on one domain carries that domain's assumptions silently -- this one is prototyped on news and must not encode news. Core is domain-neutral by construction; news-specific fields live in extensions.news and are invisible to a consumer that does not know what news is.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "scope",
+    "authored_by",
+    "vintage_utc",
+    "denominator",
+    "rows"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "universe",
+        "declared_at",
+        "widens_to"
+      ],
+      "additionalProperties": false,
+      "description": "EVERY REGISTER DECLARES ITS UNIVERSE. The sweep widens this field and nothing else -- that is the whole point of the prototype.",
+      "properties": {
+        "universe": {
+          "type": "string",
+          "description": "what set this register claims to cover, e.g. 'news subsystem (W3b)' or 'all portal-served artifacts'"
+        },
+        "declared_at": {
+          "type": "string",
+          "description": "when the universe was fixed -- a register whose universe drifted mid-authoring has no denominator"
+        },
+        "widens_to": {
+          "type": "string",
+          "description": "the named successor universe, or 'none'. Makes the prototype relationship explicit rather than remembered."
+        }
+      }
+    },
+    "authored_by": {
+      "type": "string"
+    },
+    "vintage_utc": {
+      "type": "string"
+    },
+    "denominator": {
+      "type": "object",
+      "required": [
+        "universe_size",
+        "rows_present",
+        "enumeration_artifact",
+        "how_enumerated"
+      ],
+      "additionalProperties": false,
+      "description": "FILE-BACKED, ALWAYS. Three of my own measurement defects this program came from a count that was a recollection or a summary rather than a derivation. The register cannot state a universe size it cannot point at.",
+      "properties": {
+        "universe_size": {
+          "type": "integer"
+        },
+        "rows_present": {
+          "type": "integer"
+        },
+        "enumeration_artifact": {
+          "type": "string",
+          "description": "path to the PERSISTED full set the counts derive from (enumerate_set.py output). Not a command -- a file."
+        },
+        "how_enumerated": {
+          "type": "string"
+        },
+        "unreconciled": {
+          "type": "string",
+          "description": "if rows_present != universe_size, why -- an unexplained gap reads as coverage"
+        }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/residue_row"
+      }
+    }
+  },
+  "$defs": {
+    "residue_row": {
+      "type": "object",
+      "required": [
+        "residue_id",
+        "locator",
+        "residue_class",
+        "evidence",
+        "disposition",
+        "disposition_basis",
+        "blast",
+        "reversibility"
+      ],
+      "additionalProperties": false,
+      "description": "CORE IS DOMAIN-NEUTRAL. Every field here answers a question that is equally meaningful for a frozen /valuations twin, an orphaned news keyword family, or an unreferenced terraform module.",
+      "properties": {
+        "residue_id": {
+          "type": "string"
+        },
+        "locator": {
+          "type": "string",
+          "description": "the FULL KEY PATH or fully-qualified identifier -- never a basename. CVO~Z's W1 ruling: a basename-keyed row silently merges two different artifacts, measured twice in this program (two aum-metrics.json in different trees; two valuation_data.json)."
+        },
+        "residue_class": {
+          "enum": [
+            "FROZEN-CONSUMED",
+            "FROZEN-UNCONSUMED",
+            "ORPHANED-PRODUCER",
+            "ORPHANED-CONSUMER",
+            "SUPERSEDED",
+            "ABSENT-BUT-REFERENCED",
+            "STAGING-TWIN",
+            "UNREACHABLE-SURFACE",
+            "LIVE-NOT-RESIDUE"
+          ],
+          "description": "MECE over what residue IS, not over what to do about it (Rule 24 iii -- one axis, one intent; disposition is a SEPARATE field precisely so state and remedy do not share an axis). FROZEN-CONSUMED vs -UNCONSUMED is the split that matters most: a frozen artifact nothing reads is inert, a frozen artifact something still reads is a live exposure -- the /market fallback is the type specimen. LIVE-NOT-RESIDUE added 2026-08-11 BY POPULATING THIS SCHEMA: the W3b register had to account for 2 live keys to close its 722 denominator, and the enum -- designed for residue -- had no honest class for a healthy artifact. I had classified them FROZEN-CONSUMED, which is FALSE (they were written hours earlier). A register that cannot say 'this one is fine' forces a wrong class onto every healthy artifact it must count, and the portal-wide sweep will contain vastly more healthy artifacts than residue. Found by USING the prototype, which is what a prototype is for."
+        },
+        "evidence": {
+          "type": "object",
+          "required": [
+            "instrument",
+            "locator",
+            "vintage"
+          ],
+          "description": "The same claim contract the rectangles use. A residue row is a CLAIM and carries its instrument, or it is not citable.",
+          "properties": {
+            "instrument": {
+              "type": "string"
+            },
+            "locator": {
+              "type": "string"
+            },
+            "vintage": {
+              "type": "string"
+            },
+            "denominator": {
+              "type": "string"
+            },
+            "count_grain": {
+              "enum": [
+                "CLASS",
+                "INSTANCE"
+              ]
+            }
+          }
+        },
+        "last_written_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "null where the artifact is ABSENT -- absence is a state, not a missing measurement"
+        },
+        "age_basis": {
+          "type": "string",
+          "description": "HOW the age was scored -- against the artifact's OWN declared cadence, never wall-clock. CLAUDE.md NEVER#1: resolve the calendar first; a cadence-consistent 'stale' value is an EXPECTED non-finding."
+        },
+        "consumed_by": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "consumers grounded at the CONSUMED end (Rule 12), PER CALL SITE and per fetch path (K8). An empty array is a CLAIM requiring evidence, not a default."
+        },
+        "disposition": {
+          "enum": [
+            "RETAIN",
+            "RETIRE-CANDIDATE",
+            "RESTORE-CANDIDATE",
+            "REBIND-CANDIDATE",
+            "OWNED-UNKNOWN",
+            "NOT-MINE"
+          ],
+          "description": "\u26a0 EVERY VALUE IS A RECOMMENDATION TO A DECIDER, NOT AN ACT. The register is the evidence Andrew's cleanup decision reads FROM; nothing here authorises deletion, movement or repair. Rule 9: nothing is deleted before replacement, parity, cutover, drain, rollback and absence proof -- none of which a register can establish. OWNED-UNKNOWN is a first-class answer and must name its discriminator."
+        },
+        "disposition_basis": {
+          "type": "string",
+          "description": "why THIS disposition and not the adjacent one. Where two readings fit the evidence equally and have OPPOSITE remedies, the honest value is OWNED-UNKNOWN with the discriminator named -- guessing laundres a coin-flip into a register a human will act on."
+        },
+        "discriminator": {
+          "type": "string",
+          "description": "REQUIRED in practice when disposition is OWNED-UNKNOWN: the observation that would resolve it"
+        },
+        "blast": {
+          "type": "string",
+          "description": "what breaks if the disposition is enacted -- the question a decider actually needs answered and the one a residue list without it silently omits"
+        },
+        "reversibility": {
+          "enum": [
+            "REVERSIBLE",
+            "IRREVERSIBLE",
+            "UNKNOWN"
+          ],
+          "description": "an irreversible act on residue needs a different approval than a reversible one; conflating them is how a cleanup becomes an incident"
+        },
+        "owner": {
+          "type": "string",
+          "description": "the seat the disposition routes to; NOT-MINE rows must carry one"
+        },
+        "extensions": {
+          "type": "object",
+          "description": "NAMESPACED, DOMAIN-SPECIFIC. Nothing here may be required by a consumer of the core. The test that put a field here rather than above: 'would this mean something for a /valuations residue row?'",
+          "additionalProperties": false,
+          "properties": {
+            "news": {
+              "type": "object",
+              "description": "W3b-specific. A portal-wide sweep consumer ignores this block entirely.",
+              "properties": {
+                "ddb_table": {
+                  "type": "string"
+                },
+                "pipeline_stage": {
+                  "type": "string",
+                  "description": "e.g. ingestion / trending / curation / publish"
+                },
+                "sentiment_family": {
+                  "type": "string"
+                },
+                "family_member_count": {
+                  "type": "integer",
+                  "description": "for slug-parameterised families carried as ONE row with family grammar"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
