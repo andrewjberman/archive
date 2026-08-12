@@ -364,8 +364,8 @@ Immaterial to the end figure, potentially material to the start.
 | | AUA / account | $221,759.04 | $241,612.01 | +$19,852.97 |
 | **Inflection** (Opal models, ruled basis) | AUA | $0.00 *(04-01, measured true zero)* | $144,978,896.75 *(08-10)* | +$144,978,896.75 |
 | | Accounts | 0 | 548 | +548 |
-| | Clients | ⛔ **UNCOMPUTABLE** | ⛔ **UNCOMPUTABLE** | — |
-| | **AUA / client** | ⛔ **UNCOMPUTABLE** | ⛔ **UNCOMPUTABLE** | — |
+| | **Households = clients** *(1:1)* | **4** | **266** | **+262** |
+| | **AUA / household** | $0.00 | **$545,033.45** | — |
 | | AUA / account | $0.00 | $264,560.03 | — |
 | **Cottonwood** (all Opal-strategy accts) | AUA *(ruled 0 start)* | $0.00 *(04-01)* | $190,072,187.03 *(08-10)* | +$190,072,187.03 |
 | | Accounts / Relationships *(ruled)* | 0 / 0 | 324 / 172 | +324 / +172 |
@@ -377,11 +377,63 @@ Immaterial to the end figure, potentially material to the start.
 **relationships**, Inflection has **none** on the ruled basis. Three different units and one
 absence; a total would be meaningless.
 
-⛔ **INFLECTION'S PER-CLIENT CELLS ARE A MARKED GAP, NOT A MISSING MEASUREMENT.** Platinum — the
-ruled AUA basis — carries no client count at all. Orion silver does (4 → 266 clients) but on the
-Opal-*named* basis whose AUA is $914,144.89 → $155,943,297.84, **not** the ruled figure. The
-internally-consistent Orion pair is $228,536.22 → $586,253.00, and **its start denominator is FOUR
-clients — not a statistic, and no percentage change should be published on it.**
+### Inflection households — the gap CLOSED, Andrew-direct ~2100Z
+
+> **VERBATIM:** *"we can definitely figure out inflection clients, just find those 548 accounts and
+> pull HH IDs for all of them"*
+
+**Households: 4 (2026-04-01) → 266 (2026-08-10), +262. AUA per household $0.00 → $545,033.45.**
+
+**Why this is safe to divide the ruled AUA by, when the account count was not:** the household count
+is **stable across every population that can be constructed**, which is exactly what the Cottonwood
+926-vs-324 case was not.
+
+| population at 2026-08-10 | Accounts | **Households** |
+|---|---:|---:|
+| all Opal-named | 600 | **266** |
+| 7 crosswalked models *(the platinum model set)* | 595 | **266** |
+| crosswalked, currentValue > 0 | 581 | 260 |
+| crosswalked, `isActive` | 582 | 260 |
+
+The count moves by 6 across a 19-account swing. **`clientId` maps 1:1 to `householdName` throughout —
+266 clients = 266 households exactly, at both endpoints** — so at Inflection "clients" and
+"households" are the same unit and the column may be labelled either way.
+
+⛔ **WHAT COULD NOT BE CLOSED, AND IT IS STRUCTURAL.** Platinum's exact **548**-account set is not
+reconstructible from Orion silver, which shows **595** accounts on the same 7 crosswalked models.
+Five candidate filters were tested (`currentValue>0`, `isActive`, custodial-cash, `isFeeExcluded`,
+`isGlobalExcluded`); the best reproduced only **3 of 7** per-model counts. The reason is not a missing
+filter: **platinum's model AUA and account counts come from the ECLIPSE model feed, while Orion silver
+is the CUSTODY/positions feed.** Two sources; the account sets are not expected to reconcile exactly.
+
+> **So the numerator ($144,978,896.75, Eclipse) and the denominator (266 households, Orion) come from
+> DIFFERENT SOURCE FEEDS** — the same shape as the Cottonwood population warning, disclosed rather
+> than divided silently. **The difference is that this denominator is demonstrably insensitive to the
+> population choice** (266 on three of four variants). Against the 260 variant the per-household
+> figure is $557,611.14, a **$12,577.69 spread**. *Recommendation: publish the household COUNT, which
+> is robust; treat the per-household dollar as indicative.*
+
+**Platinum ↔ Orion model mapping, summing to exactly 548:**
+
+| platinum slug | accts | Orion display name | accts |
+|---|---:|---|---:|
+| `opal_intermediate` | 202 | Opal Intermediate Growth | 224 |
+| `opal_blend_5050_int_ltc` | 160 | 50/50 Opal Intermediate/Opal Long Term | 162 |
+| `opal_long_term_conservative` | 90 | Opal Long Term | 99 |
+| `opal_long_term_aggressive` | 32 | Opal Ultra Long Term | 32 |
+| `opal_short_term` | 29 | Opal Short Term | 35 |
+| `opal_blend_5050_st_int` | 23 | 50/50 Opal Short Term/Intermediate | 23 |
+| `opal_ultra_short_term` | 12 | Opal Ultra Short Term | 20 |
+| **sum** | **548** | | **595** |
+
+**Two Orion models sit outside the crosswalk entirely** — `90/10 Opal Long Term/Ultra Short Term`
+(4 accounts) and `90/10 Opal Intermediate/Ultra Short Term` (1 account), **$4,865,425.91** combined,
+belonging to 2 households already inside the 266. **That is the same candidate-NEW-Opal-model class
+T1 found being folded into `non_model`, now visible on the account side.**
+
+*The 4 households at 2026-04-01 are the same 4 clients / 17 accounts / $914,144.89 as the T1 Orion
+cross-read — the Orion-basis pre-launch presence. The ruled AUA start remains a measured $0 on the
+Eclipse basis, so AUA per household starts at $0.00.*
 
 ### The 7,189 vs 7,190 question, resolved
 
