@@ -5,7 +5,26 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-11</date>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSED 2026-08-12 ~0450Z by 1.0.0_SA_CTO~Z. W3a CERTIFIED, W3b CERTIFIED + CLOSED @06f010123b,
+     proof-of-spec VALID rc=0, 8 of 10 PASS. C9 (6 DDB tables) DELIVERED @db9b1cbe7d after I refused
+     to descope it -- it was real work and it got done.
+     ⛔ C1 AND C5 CLOSE AS *FAIL*, PERMANENTLY, AND ARE NOT ARGUED DOWN:
+       C1 -- W3b carries no axis_declaration.json where 5 of 5 comparable runs do. NOT bookkeeping:
+             it DEGRADED A LIVE GUARD TO ONE LIMB at closure, three hours later, on another seat's
+             tool. Inherited from the predecessor seat; UNSATISFIABLE NOW because precedence cannot
+             be re-established once measurement has begun.
+       C5 -- no pre-filed prediction artifact for either unit. MY specification ambiguity (the W2
+             predicate's inheritance into W3 was never stated); UNSATISFIABLE NOW because a
+             prediction cannot be retro-filed.
+     THE TO CLOSES BECAUSE THE WORK IS DELIVERED AND THESE TWO CRITERIA CANNOT BE SATISFIED BY ANY
+     FURTHER WORK ON THIS UNIT -- not because they were met. Rewriting either to make it pass would
+     be the retrofit this method exists to prevent, and the assignee refused to flip on a
+     validator-clean instance (9.8.1-X) rather than take the cheap close.
+     >> BOTH REMEDIES ARE DISCHARGED FORWARD ON W4b, WHICH IS WHAT DISTINGUISHES LEARNED FROM
+     EXCUSED: axis+collapse rule committed BEFORE measurement with precedence evidenced by the commit
+     graph @b30bd4460a, and PREFILED_PREDICTION.md @952dc14240 filed before Plane B with its scope
+     limit stated. -->
 <priority>P1</priority>
 <!-- Two units, one TO, SEQUENCED W3a THEN W3b (the page's non-news surface first, so the subsystem
      run inherits a measured page context rather than measuring around an unmeasured one). GO is
