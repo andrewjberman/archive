@@ -97,6 +97,45 @@ money-market balances. `net_mv_plus_cash` is the full total; the position sum is
 
 ---
 
+### 3a. THE BASIS OF THE 49 FINANCIAL FIGURE — one sentence, so the frame travels with the number
+
+> **The $1,736,948,738.65 figure is the total value of the Schwab custody account `08242234` (Model
+> Portfolios) as of 2026-08-11 — net market value plus cash across all 7,190 accounts in that one
+> account, including both Opal-model and non-model holdings, and excluding any 49 Financial assets held
+> at any other custodian or in any other Schwab account (notably `08335338`, ADVI).**
+
+This matters because **the portal serves different, larger 49 Financial numbers on different bases** —
+a headline of $1,911,578,939.87 (`basis=held_certified`, `cert_data_as_of` 2026-07-31) and a trend
+series at $1,778,539,360.83. **Those are not in conflict with this one until someone assumes they are
+measuring the same scope.** I have not reconciled them and this deliverable does not claim to; the
+sentence above exists so a reader cannot set this figure beside the portal's and conclude one is broken.
+*(Basis question raised by `0.0.0_AB_MSTR` 2026-08-12 ~1858Z; the portal's own headline-vs-trend
+difference is a separate open item at Andrew, held by CTO.)*
+
+### 3b. JUNE CROSS-REFERENCE on the ruled basis — requested by CTO
+
+Requested because a June board comparison was derived on the **model** basis, which the ruling changes.
+Reported with frames; **what June's $1.82B headline contained is not adjudicated here — that is Andrew's deck.**
+
+| Date | 49F ENTIRE account `08242234` | 49F model slice | Inflection model AUA |
+|---|---:|---:|---:|
+| 2026-06-12 | $1,661,023,355.72 | $1,396,731,878.62 | $122,119,749.91 |
+| 2026-06-30 | $1,642,683,674.43 | $1,391,024,495.74 | **ABSENT** (`point_class`=absent) |
+| 2026-08-11 | $1,736,948,738.65 | $1,451,519,328.79 | $144,978,896.75 *(as-of 08-10)* |
+
+**49 Financial alone does not reach $1.82B at either June date on either basis.** On the ruled
+entire-account basis it is **$158,976,644.28 short at 2026-06-12** and $177,316,325.57 short at 06-30.
+The ruling narrows the margin substantially — from $423.3M short on the model basis to $159.0M short —
+but does not close it.
+
+⛔ **No combined figure is given for 2026-06-30, deliberately.** Inflection's model AUA that day is
+`absent`, not zero. Forming a 49F + Inflection total there would require substituting zero for an
+absent measurement — **the precise error this deliverable exists to prevent**, and my own first pass at
+this table did exactly that before the `point_class` check caught it. At 2026-06-12, where both legs
+are `measured`, 49F-entire + Inflection-model = **$1,783,143,105.63**.
+
+---
+
 ## 4. CLIENT AND ACCOUNT COUNTS (T1-A7)
 
 | Segment | Metric | Start | as-of | End | as-of | Delta |
