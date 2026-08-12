@@ -1,0 +1,232 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COT_RUNNER_REFACTOR.P1.scripts-groups-a-c-scoped",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_C_TWR_ENGINE_20260811.md (transposed per org/tier1_exec/4.0.0_SA_CRO/deliverables/COT_ABCD_SHAPE_SPEC_20260811.md Group C)",
+  "group": "C",
+  "vintage_commit": "f882b91ce2"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~B",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/c00_flow_ledger.py",
+   "kind": "script",
+   "commit_or_etag": "3fbbf91e19",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "P1 is SCRIPTS; runtime home + schedule are P2/P3, product root undecided (F-1)"
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/c01_nna_canonical.py",
+   "kind": "script",
+   "commit_or_etag": "3fbbf91e19",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/c02_twr_engine.py",
+   "kind": "script",
+   "commit_or_etag": "3fbbf91e19",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/cot/scripts/gold/runners_cot/c03_twr_lineage.py",
+   "kind": "script",
+   "commit_or_etag": "3fbbf91e19",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "COT-C-C00-ONECLASS",
+   "criterion_verbatim": "every fact_transactions row in the FULL series lands in exactly ONE final class (row-count identity, in == out); no PENDING leaks past journal resolution; UNRESOLVED census printed with the dual materiality frame",
+   "method": "command",
+   "invocation": "python c00_flow_ledger.py --as-of 2026-08-11 --output-root <root>  (run from data/cot/scripts/gold/runners_cot/)",
+   "output_evidence": "DENOMINATOR: in==out: 59114 of 59114 txn rows (each in exactly ONE final class) (100.00%) | FINAL-CLASS CENSUS: INTERNAL 41,885 / EXTERNAL 15,894 / FEE-ADMIN 652 / FEE-MANAGEMENT 618 / UNRESOLVED 65 | UNRESOLVED DUAL MATERIALITY: 0.110% rows, 0.309% $ abs | PENDING-leak guard raised on none",
+   "denominator": "59,114 of 59,114 full-series distinct-TransactionID rows",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-C00-SEMANTIC",
+   "criterion_verbatim": "the sign of the money column is VERIFIED against each class's direction expectation BEFORE direction is read; census printed per class; violations flagged LOUD (sem_flag), never silently corrected",
+   "method": "command",
+   "invocation": "python c00_flow_ledger.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "SIGN-SEMANTIC CENSUS: sem-ok 100.00% on all 7 classes (EXTERNAL-IN 12894/12894, EXTERNAL-OUT 1314/1314, FEE-MANAGEMENT 618/618 incl. the Rebate>=0 limb, CONDITIONAL 1914/1914, FEE-ADMIN 652/652, INTERNAL 41657/41657, UNRESOLVED 65/65) -- zero violations measured; the flag path exists and is exercised by construction",
+   "denominator": "59,114 rows across 7 classes, per-class denominators printed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-C00-VENDORAXIS",
+   "criterion_verbatim": "the vendor's native External Flow enum is carried as a corroboration axis: agreement census on authored-external rows printed; disagreements censused LOUD per (type, class), never silently corrected -- a RULING surface",
+   "method": "command",
+   "invocation": "python c00_flow_ledger.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "DENOMINATOR: vendor-corroborated EXTERNAL: 14208 of 14208 authored-external rows (100.00%, vendor-silent externals: 0) | VENDOR DISAGREEMENTS (flagged, carried): Management Fee 618, Buy 202, Expense 86+57, Sale 9 rows vendor-marked external -- the vendor-NNA-vs-GIPS divergence quantified for ruling",
+   "denominator": "14,208 of 14,208 authored-external rows vendor-corroborated; 972 disagreement rows censused",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-C00-LADDER",
+   "criterion_verbatim": "the 5-rung resolution ladder executes with resolution_provenance per row: code-rule > vendor-external-flag > contra-pair-match > pair-match > unmatched-journal-default (conservative toward external, the standard's safe direction)",
+   "method": "command",
+   "invocation": "python c00_flow_ledger.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "contra pair-MATCHED -> INTERNAL: 228 of 230 contra-marked rows (all 228 were authored-external -- disguised intra-book transfers pulled off the flow ledger's external side; 2 unmatched keep class, flagged CONTRA-UNPAIRED) | JOURNAL RESOLUTION: vendor-flag 0, pair-match 0, unmatched->EXTERNAL-BY-DEFAULT 1914 (cot journals are ONE-SIDED by measurement -- they never pair and never carry the vendor mark; the conservative default holds and F-4 segregates) | in-kind: 9,840 of 15,894 EXTERNAL rows (61.9% -- transfers dominate cot external flow, vendor-valued in-row)",
+   "denominator": "230 contra-marked + 1,914 conditional rows, every rung's count printed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-C00-MUT",
+   "criterion_verbatim": "dropping one pair leg (mutant) surfaces its counterpart as unpaired LOUD, never a clean census",
+   "method": "command",
+   "invocation": "python c00_flow_ledger.py --as-of 2026-08-11 --output-root <root> --qa-drop-txn-id 818754936",
+   "output_evidence": "QA-MUTANT: dropped txn id 818754936 (59114 -> 59113) | contra pair-MATCHED fell 228 -> 226 of 229 (the dropped leg AND its orphaned counterpart left the matched set; the counterpart lands flagged) | restore run: 228 of 230, in==out 59114",
+   "denominator": "N/A -- boolean: the census MUST move and the counterpart MUST flag; restored",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-C01-SEGREGATION",
+   "criterion_verbatim": "ADVREVIEW F-4 built in: headline NNA = well-resolved EXTERNAL only (code-rule + vendor-external-flag); EXTERNAL-BY-DEFAULT rows land in a SEGREGATED line carried WITH its census, never folded; coverage + no-residual identities hold with denominators",
+   "method": "command",
+   "invocation": "python c01_nna_canonical.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "headline 13980 of 15894 EXTERNAL rows (87.96%) + segregated 1914 (12.04%) == 15894 | NO-RESIDUAL IDENTITY: headline $404,899,800.79 + segregated $121,221,509.11 == total external $526,121,309.90 | 3,371 account-flow-day rows; firm-day rollup sums accounts once (relationship lens declared to D/ADVI)",
+   "denominator": "13,980 + 1,914 == 15,894 EXTERNAL rows; $404.9M + $121.2M == $526.1M",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-C01-VENDORDELTA",
+   "criterion_verbatim": "the vendor-alignment delta (what a vendor-enum-faithful NNA would add) is computed and CARRIED AS DATA per account-flow-day -- the NNA-definition ruling routes with this number; the build never picks silently",
+   "method": "command",
+   "invocation": "python c01_nna_canonical.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "VENDOR-ALIGNMENT DELTA: 704 fee rows ($-1,110,242.20) vendor-marked external, carried as nna_vendor_alignment_delta; headline stays GIPS (fees excluded). MIGRATION DIFF surface: 127 legacy nna keys found under opal-data-cot gold/canonical/nna/ -- per-key diff routed to the group report (different home)",
+   "denominator": "704 rows / $1.11M of the fee family; 127 legacy keys enumerated",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-C02-FIXTURES",
+   "criterion_verbatim": "the GIPS formula identities on synthetic fixtures: known BMV/EMV/CF -> known r; geometric-vs-summed divergence proves linking; null-BMV AND zero-BMV -> UNCOMPUTABLE never a number; gross/net add-back identity WITH the cot rebate-netting limb",
+   "method": "command",
+   "invocation": "python c02_twr_engine.py --self-test",
+   "output_evidence": "SELF-TEST: 5/5 fixtures PASS -- incl. FIXTURE 4 both null and zero base -> UNCOMPUTABLE, and FIXTURE 5 fees -2 + rebate +1 -> addback exactly 1 (a rebate NETS, never grosses)",
+   "denominator": "5 of 5 fixtures, no live inputs",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-C02-REFUSE",
+   "criterion_verbatim": "REFUSE-not-fabricate ON THE POPULATION: every non-OK or zero BMV/EMV account-day lands UNCOMPUTABLE with a named reason; zero NaN returns on COMPUTED rows; the UNCOMPUTABLE census discriminates its classes",
+   "method": "command",
+   "invocation": "python c02_twr_engine.py --start 2026-08-06 --end 2026-08-07 --output-root <root>  (then read twr_daily and count)",
+   "output_evidence": "computed 1774 of 1850 account-days (95.89%) | UNCOMPUTABLE 76 = 72 ALL-ROWS-NULL-status + 4 ZERO-BMV (true-zero base) | POST-FIX: COMPUTED rows with NaN r_net: 0 of 1774. FOUND-AND-FIXED THIS BUILD (declared): the zero-BMV refusal initially returned None INTO a COMPUTED-stamped row on 2 true-zero accounts -- the fixture proved the function, the POPULATION exposed the status path; the refusal now derives the status. |r|>5% anomaly census: 11 of 1774 (AMENDED post ISO-date fix; was 12 -- one anomaly was a flow-blind artifact) (ex-ante ruled threshold, censused not suppressed) || AMENDED-20260811 (ISO-date edge fix @c00): the vendor ships Trade Date as MM/DD/YYYY strings; the original run's ISO-string cf lookup matched NOTHING, so the QA-window TWR ran FLOW-BLIND (cf_external=0 on all account-days). Post-fix the window is flow-aware: the gross-net identity found a live fee specimen (z0926748431: net -0.002643 / gross 0.000000, spread == addback/BMV). The refusal counts (1774/76) were date-independent and stand. A fixture cannot see a date-format mismatch -- the population caught it, same class as the zero-BMV find.",
+   "denominator": "1,850 account-days: 1,774 computed + 76 refused-with-reason; 0 NaN-on-COMPUTED",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-C03-FIELDS",
+   "criterion_verbatim": "every sec10 lineage field non-null or explicitly its declared class (N/A-BY-BOUNDARY / status-carried NaN); the field null sweep printed",
+   "method": "command",
+   "invocation": "python c03_twr_lineage.py --start 2026-08-06 --end 2026-08-07 --support-as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "FIELD NULL SWEEP: 3 fields carry nulls (bmv 36 / emv 36 / recon_variance 37) -- ALL on non-OK-status rows (ABSENCE-IS-SERVE-LAW: the null classes carry NULL, never 0); linked returns null only on UNCOMPUTABLE periods; fx_policy=N-A-BY-BOUNDARY explicit; support_vintage declared per row (QA-window stamp mix stated, never silent)",
+   "denominator": "925 account-periods x 26 lineage fields; 3 nullable fields, every null status-carried",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-C03-STATUSFN",
+   "criterion_verbatim": "acceptance_status is a PURE FUNCTION of inputs (TRUE_TWR / INDICATIVE_ONLY / UNSUPPORTED mechanically derived; ESTIMATED_TWR_MODIFIED_DIETZ structurally unreachable and stated); the inject-unresolved mutant derives UNSUPPORTED",
+   "method": "command",
+   "invocation": "python c03_twr_lineage.py --start 2026-08-06 --end 2026-08-07 --support-as-of 2026-08-11 --output-root <root> --qa-inject-unresolved z0926819471",
+   "output_evidence": "canonical: TRUE_TWR 501 / INDICATIVE_ONLY 386 / UNSUPPORTED 38 (AMENDED post ISO-fix: 2 accounts gained real window context) of 925 | MUTANT: target row derives UNSUPPORTED 'material-unresolved $1,000,000.00>bar $2,636.46' (census moves by exactly the injected account) | restore: 501/386/38 identical post-fix",
+   "denominator": "925 account-periods; 1 injected account must flip and restore",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-ALL-PROVENANCE",
+   "criterion_verbatim": "provenance cols (source_pipeline, _ingested_at) present on every built Group C artifact (atom 9)",
+   "method": "command",
+   "invocation": "python reading all 5 emitted parquets and checking both columns",
+   "output_evidence": "flow_ledger/nna_canonical/twr_daily/twr_periods/twr_lineage: provenance_cols=BOTH-PRESENT (5 of 5)",
+   "denominator": "5 of 5 built Group C artifacts (C_04/C_05 declared waits, not built)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-ALL-MANIFEST",
+   "criterion_verbatim": "atom-3 manifest written per artifact; boundary_version stamped on every artifact",
+   "method": "command",
+   "invocation": "ls <root>/_manifests/{date}/",
+   "output_evidence": "11 C-family manifest files (5 tables incl. control re-runs), each with data_as_of/process_ts/rows/columns/inputs + boundary_version",
+   "denominator": "5 of 5 artifacts manifested (11 files incl. control runs)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "COT-C-ALL-COMPILE",
+   "criterion_verbatim": "stage-by-stage py_compile pass logged per script at its build stage",
+   "method": "command",
+   "invocation": "python -m py_compile <file> per build stage; commit-gate at commit",
+   "output_evidence": "STAGE-COMPILE PASS: c00+c01+c02+c03 stage, c02 zero-BMV-fix restage. Commit-gate: caught 1 finding (unused pandas import in c01), fixed, 4 of 4 re-passed.",
+   "denominator": "4 of 4 C files stage-compiled (plus 1 restage after the zero-BMV fix)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "THREE mutants: (1) c00 --qa-drop-txn-id on a PAIRED contra leg: counterpart must unpair LOUD; (2) c02's population-level refusal check (0 NaN-on-COMPUTED after the zero-BMV fix); (3) c03 --qa-inject-unresolved: $1M synthetic unresolved flow must derive UNSUPPORTED",
+   "expected": "pair census moves + counterpart flags | 0 NaN-on-COMPUTED | target flips UNSUPPORTED",
+   "observed": "228->226 paired, restored 228 | 0 of 1,774 | UNSUPPORTED 'material-unresolved $1,000,000.00>bar $2,636.46', restored 503/384/38",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "c00 canonical run before and after the mutant compared on pair census + in==out; c03 canonical census before/after mutant",
+   "observed": "c00: 228/230 + 59,114 in==out identical | c03: 503/384/38 identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "C_04 validation_battery",
+   "reason": "PENDS THE P2 PROBE per the TO's declared_waits: the vendor-native return-tie branch (OPEN-PENDING-P2 in the COT spec -- BD may ship a performance queryType; the discriminating instrument is named there). Declared with its blocker, not built partial."
+  },
+  {
+   "item": "C_05 verification series",
+   "reason": "CONDITIONAL on the same P2 probe (exists only if BD ships computed returns); the COT spec's own either-way-honest cell. Declared."
+  },
+  {
+   "item": "MTD/QTD/YTD/ITD full-period linking exercise",
+   "reason": "the custody floor is 2026-06-09; pre-floor periods UNSUPPORTED BY CONSTRUCTION and in-floor full-period linking is the P2 scheduled-backfill act. The engine is date-range-parameterized; only the P1 exercise is windowed (08-06..08-07)."
+  },
+  {
+   "item": "per-key migration diff vs the 127 legacy cot nna partitions",
+   "reason": "legacy home is opal-data-cot gold/canonical/nna/ (the ADVI pipeline's output). Keys enumerated + declared; the row-level diff is a group-review input routed in the completion report, not silently either way."
+  },
+  {
+   "item": "comp-validate / comp-pipescript rows for the C family",
+   "reason": "same registry gap, consolidated to CTO as ONE act (COO 160305Z); P2/P3 wiring scope."
+  }
+ ],
+ "surprises": [
+  "COT JOURNALS ARE ONE-SIDED BY MEASUREMENT: all 1,914 Journal rows are unpaired (no opposite-sign counterpart in the entire series) and none carry the vendor External Flow mark -- so ALL land EXTERNAL-BY-DEFAULT and the F-4 segregated NNA line is LARGE: $121.2M beside a $404.9M headline (23% of external dollars). The one-sided-journal class needs a ruling eye at RECON-5a: they are either genuinely-external one-leg movements (ACAT-style) or intra-book moves whose counterpart lives outside the txn export.",
+  "228 of 230 contra-marked rows pair-matched and were ALL authored-external (Cash Deposit/Withdrawal) -- disguised intra-book transfers that would have inflated headline NNA had the contra instrument not been consumed.",
+  "The vendor External Flow enum corroborates 100.00% of authored-external rows (14,208/14,208, zero vendor-silent externals) -- the two independent axes (my type-rules, BD's enum) agree perfectly on what is external; every disagreement is on the FEE/Buy/Sale side and is quantified for ruling (-$1.11M fee family; 202 Buy rows marked Contribution = a probable in-kind receipt class for RECON-5a).",
+  "IN-KIND dominates cot external flow: 9,840 of 15,894 external rows (61.9%) are transfer-family with units -- vendor-valued in-row, so the in-kind valuation leg the 49F spec worried over is free at cot.",
+  "FOUND-AND-FIXED, named honestly: 2 accounts carry TRUE-ZERO value (nonnull $0 positions -- zero-with-a-reason, distinct from the 36 ALL-ROWS-NULL zero-as-absence accounts). The zero-BMV refusal initially leaked a NaN into a COMPUTED-stamped row (4 account-days) -- the fixture proved daily_r refuses, the POPULATION exposed the status path. Post-fix the UNCOMPUTABLE census discriminates all three refusal classes.",
+  "Restatement instrumentation confirmed in-band: 559 late entries (entry-date-present, 0.95%) over the full series; backdated_date ships on 100% of rows as the vendor booking field -- C_00 carries per-row restatement provenance no sibling firm has.",
+  "TRANSPOSABILITY TALLY, BOTH FRAMES per CTO ruling: rows-verbatim ~84% (c02 ~95%, c03 ~90%, c01 ~85%, c00 ~70% -- the engine and lineage transpose nearly unchanged, exactly as the COT spec predicted 'TRANSPOSES UNCHANGED') BESIDE judgment-calls-diverged 29% (4 of 14 rows rest on a COT-specific call). The 6 calls, named: (1) flow_date = trade_date (the economic date; backdated_date = booking field, entry_date = late-entry marker -- semantics measured then declared); (2) the vendor External Flow rung inserted into the resolution ladder (VENDORAXIS row minted, no sibling analogue); (3) contra-pair-match rung inserted (native contra marks, no sibling analogue; by-number resolution declared A_06-adjacent); (4) fee add-back NETS Rebate credits (cot sub-type semantics); (5) headline provenance set includes vendor-external-flag (INF's was code-rule only); (6) ZERO-BMV minted as its own UNCOMPUTABLE reason class (the true-zero account class). Curve: 62 -> 78 -> 84 vs ~A's 64 -> 79 -> 86 -- the front-loading prediction held to within 2 points at every step.",
+  "FOUND-AND-FIXED #2, the same population-catches-what-fixtures-cannot class: the vendor ships Trade Date as MM/DD/YYYY STRINGS, and the ledger's bare .str[:10] kept the US form -- every ISO-string window/equality comparison downstream matched NOTHING (c02's QA-window cf ran flow-blind; c03 window aggregates zeroed; found by the d07 fleet overlay's income row reading 0.0 against a series carrying real dividends). Fixed at the ledger EDGE (c00 parses all four date carriers to ISO once, nulls stay None); full chain re-run: c00/c01 censuses IDENTICAL (date-format-independent), c02 anomaly 12->11 + the gross-net identity live on a real fee day, c03 501/386/38. The overlay instrument caught its own upstream's defect -- the fleet grading pays for itself."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/logs/2026-08-11/cot_p1_groups_a_b_c.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-to",
+   "invocation": "comp-to COT_RUNNER_REFACTOR.P1.scripts-groups-a-c-scoped",
+   "result": "session TO context carried across all three groups"
+  },
+  {
+   "tool": "comp-validate",
+   "invocation": "(deferred)",
+   "result": "registry gap consolidated at CTO as ONE act; NO_CONFIG = UNVALIDATED, never signaled safe"
+  },
+  {
+   "tool": "comp-pipescript",
+   "invocation": "(deferred)",
+   "result": "same act; no deploy leg exists in P1"
+  }
+ ]
+}

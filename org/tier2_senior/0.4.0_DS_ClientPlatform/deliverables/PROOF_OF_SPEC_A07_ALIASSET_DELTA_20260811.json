@@ -1,0 +1,111 @@
+{
+ "schema_version": "1.0",
+ "to_id": "COT_RUNNER_REFACTOR.P1.scripts-groups-a-c-scoped",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_A_DELTA_ALIAS_SET_20260811.md (@23f23ea039); implemented under CVO's 191943Z UNBLOCKED clearance riding Andrew's standing 'proceed when gates lift' (@04f8710999); validated by CVO's VERDICT @8a15fbecd9 (VALIDATED_A07_ALIAS_SET_DELTA_20260811.md) -- this instance follows that verdict's framing",
+  "group": "A",
+  "vintage_commit": "23f23ea039"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~B",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/a07_dim_asset_classification.py",
+   "kind": "script",
+   "commit_or_etag": "6355392782",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "delta lands on the existing A_07 producer (base @d76402f87e); QA emissions local-root only, deploy/wiring unchanged scope. SYSTEM_DEFINITIONS mints (alias_set_carry / name_variant / alias_set_fallback) landed via CVO's pure-append @da501bf2a7 (owned-paths lane discipline held; my staged yaml round-trip was correctly refused for stripping the header comment block)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "A5-A07-ALIASSET-PARITY-PRESERVED",
+   "criterion_verbatim": "0 STEP-A keys change class -- the safety gate, a single reclassification FAILS. STEP B (variant set) applies ONLY to STEP-A-unclassified keys; parity-vs-served holds BY CONSTRUCTION",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-11 --output-root <root> --parity-control  (from data/assets/scripts/gold/runners_49f/)",
+   "output_evidence": "A5-A07-PARITY-VS-SERVED: 3784 of 3784 agree with the ORIGINAL lib on the same snapshot; mismatches 0. The parity loop skips only the 2 variant-sourced STEP-B rescues (sanctioned delta additions); every STEP-A row diffs against the original classify(). The invariant is STRUCTURAL: STEP B iterates only the STEP-A-unclassified set, so an override is impossible by control flow, not by check.",
+   "denominator": "3,784 of 3,784 population keys; 0 reclassifications; 2 rescues excluded as sanctioned additions",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-ALIASSET-COVERAGE-CLOSES",
+   "criterion_verbatim": "your ~$113.2M -> ~$0.9M, before/after with denominators per firm. Spec's own clause: the $113.2M is the EXPECTED impact, not a target to hit -- if it lands at a different number, that is a finding, report it",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-11 --output-root <root>  (+ d08_cot_mix_summary re-run against the delta dim for the consumer-layer proof)",
+   "output_evidence": "GROUNDED FINDING, per CVO verdict @8a15fbecd9 the row lands PASS-WITH-FINDING AT 2 KEYS: 'A5-A07-ALIASSET: STEP-A classified 3378; STEP-B rescued 2 of 406 STEP-A-unclassified' (UNCLASSIFIED-LOUD 406 -> 404). The $113.2M did NOT close because it is a CONSUMER-JOIN mass, not dim-classification: consumers join through n_maps built from the dim's carried representative name only, so a book-row name variant misses the JOIN regardless of dim-side class. PROOF AT THE CONSUMER: d08 re-run against the delta dim -- cot fold UNCHANGED at $75,094,285.23. A dim-side classification fallback structurally cannot fix a join. The $113.2M bound transfers intact to the JOIN delta (SPEC_49F_GROUP_A_DELTA_ALIAS_JOIN @8a15fbecd9), where COVERAGE-CLOSES is measured at the consumer.",
+   "denominator": "2 rescued of 406 STEP-A-unclassified (3,784 union); consumer-join mass $113.2M ($74.1M cot + $39.1M 49F) re-scoped to the join delta",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-ALIASSET-DETERMINISM",
+   "criterion_verbatim": "sort the variant set; two runs identical hash",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-11 --output-root <root>  (twice, compare DETERMINISM key lines)",
+   "output_evidence": "run1 and run2 both print: content hash 7dffabc7fdae10bfcb94496d314cf5a0bb6077275fa55d8f3c68ea4267ab895c -- IDENTICAL. The variant set is sorted distinct (ticker, asset_name) tuples per key, so the STEP-B merge order is deterministic by construction.",
+   "denominator": "N/A -- boolean identity across 2 runs on the live snapshot",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-ALIASSET-CONFLICT-CENSUS",
+   "criterion_verbatim": "rescued keys whose variants disagreed -- printed not hidden",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "CONFLICT-CENSUS: 0 rescued keys had disagreeing variants (merge-rule resolved, counted never silent). Merge precedence declared in-code: DDB-sourced > regex, then classify()'s own layer order alt > cash > fi > equity (_SRC_RANK/_CLS_RANK).",
+   "denominator": "0 conflicts across 2 rescued keys; the census prints on every run, not only on conflict",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-ALIASSET-SOURCE-CENSUS-SHIFT",
+   "criterion_verbatim": "dynamodb-alias-variant / regex-name-variant buckets",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "A5-A07-SOURCE-CENSUS: {'dynamodb-ticker': 2126, 'regex-name': 1131, 'unclassified': 404, 'dynamodb-alias': 121, 'dynamodb-alias-variant': 2}. Both rescues are DDB-sourced variants; the regex-name-variant bucket exists in the merge rule and is empty on this snapshot (0 is a census value, not an absence).",
+   "denominator": "5 source classes summing to 3,784",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "A5-A07-ALIASSET-MUTANT-CATCHES",
+   "criterion_verbatim": "plant a variant that WOULD reclassify a classified key -- the invariant must REFUSE it; if it reclassifies, STEP B is overriding -> FAIL",
+   "method": "command",
+   "invocation": "python a07_dim_asset_classification.py --as-of 2026-08-11 --output-root <root> --qa-alias-mutant",
+   "output_evidence": "QA-ALIAS-MUTANT: planted an alt-reclassifying variant ('STRUCTURED NOTE MUTANT PROBE') on STEP-A-classified key '01179R4F7' (class 'fixed_income'). A5-A07-ALIASSET-MUTANT: REFUSED as required -- key '01179R4F7' keeps its representative class 'fixed_income'; the planted variant was never consulted (structural). rc=0; the FAIL branch raises SystemExit if the class flips.",
+   "denominator": "1 planted mutant, 1 structural refusal; refusal is by control flow (STEP B never iterates STEP-A-classified keys), not by comparison",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "the planted reclassifying variant on a STEP-A-classified key -- exercises the parity-preserving invariant's REFUSE path directly (the spec's named mutant)",
+   "expected": "variant never consulted; representative class retained; SystemExit if it flips",
+   "observed": "REFUSED on '01179R4F7' (fixed_income retained), rc=0; refusal is structural (control flow), verified beside the full 3,784/3,784 parity control",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-snapshot runs compared on the content hash over the sorted key/class/source projection",
+   "observed": "7dffabc7fdae10bf... == 7dffabc7fdae10bf...",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the $113.2M consumer-join mass",
+   "reason": "re-scoped by CVO's verdict @8a15fbecd9 to the JOIN delta (SPEC_49F_GROUP_A_DELTA_ALIAS_JOIN_20260811.md) -- a dim-side classification fallback structurally cannot close a join mass (grounded: d08 fold unchanged $75,094,285.23). The bound transfers to the join delta's A5-A07-ALIASJOIN-COVERAGE-CLOSES, measured at the consumer."
+  },
+  {
+   "item": "SYSTEM_DEFINITIONS registration commit",
+   "reason": "CVO's owned lane -- landed via their pure-append @da501bf2a7 (3 mints, 63/0 checker, comp-estate live-serve). My staged whole-file yaml.dump round-trip was refused: it stripped the header comment block while passing the checker GREEN (the checker validates entry schema, not comments -- necessary-not-sufficient). Lesson banked: append commented canon as text, never yaml.load->yaml.dump."
+  }
+ ],
+ "surprises": [
+  "THE FINDING (CVO-owned spec layer error, my build the control that caught it): the $113.2M was a consumer-join measurement all along -- both firm figures. The spec's COVERAGE-CLOSES criterion assumed dim-classification layer; the implementation's honest 2-key result plus the d08 consumer re-run exposed the layer mis-attribution. Build validates spec -- the right direction.",
+  "Only 2 of 406 STEP-A-unclassified keys had ANY population variant that classify() could resolve -- the unclassified residue is name-form-poor (cot leading-digit fund names, 49F cusip-only paper with no name column at all), so feeding MORE spellings to classify() cannot reach it. Coverage growth for the dim tier now rides DDB alias curation, visible in the source census."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/logs/2026-08-11/cot_p1_groups_a_b_c.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-find",
+   "invocation": "targeted source reads on a07_dim_asset_classification.py + d08_cot_mix_summary.py for the consumer-join characterization",
+   "result": "grounded the join-layer mechanism (n_map built from the dim's carried representative name) that the d08 re-run then proved"
+  }
+ ]
+}

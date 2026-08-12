@@ -1,0 +1,256 @@
+{
+ "schema_version": "1.0",
+ "to_id": "INF_RUNNER_REFACTOR.P1.scripts-groups-a-d-parquet",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier1_exec/3.0.0_SA_CVO/deliverables/SPEC_49F_GROUP_A_DIMENSIONS_20260811.md (transposed per org/tier1_exec/4.0.0_SA_CRO/deliverables/ADVREVIEW_49F_ABCD_AND_INF_SHAPE_SPEC_20260811.md Commission 2 Group A)",
+  "group": "A",
+  "vintage_commit": "9c294bbf15"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~A",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/a00_dim_account.py",
+   "kind": "script",
+   "commit_or_etag": "7564cf53ab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "P1 is SCRIPTS; runtime home + schedule are P2/P3, and the product root is undecided (F-1 is Andrew's)"
+  },
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/a01_dim_relationship.py",
+   "kind": "script",
+   "commit_or_etag": "7564cf53ab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/a02_dim_boundary.py",
+   "kind": "script",
+   "commit_or_etag": "7564cf53ab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/a03_dim_security.py",
+   "kind": "script",
+   "commit_or_etag": "7564cf53ab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/a04_dim_calendar.py",
+   "kind": "script",
+   "commit_or_etag": "7564cf53ab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/a05_ref_txn_classification.py",
+   "kind": "script",
+   "commit_or_etag": "7564cf53ab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  },
+  {
+   "path_or_key": "data/inf/scripts/gold/runners_inf/a06_dim_identity_crosswalk.py",
+   "kind": "script",
+   "commit_or_etag": "7564cf53ab",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "INF-A-A00-ROWCOUNT",
+   "criterion_verbatim": "dim_account row count == accounts_v2 distinct account_id on the same partition; denominators printed",
+   "method": "command",
+   "invocation": "python a00_dim_account.py --as-of 2026-08-11 --output-root <any-writable-root>  (run from data/inf/scripts/gold/runners_inf/)",
+   "output_evidence": "DENOMINATOR: universe: 869 of 869 accounts_v2 distinct account_id @ 2026-08-11 (100.00%) | DENOMINATOR: rowcount-identity: 869 of 869 source distinct account_id (100.00%)",
+   "denominator": "869 of 869 accounts_v2 distinct account_id @ snapshot 2026-08-11",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-A00-PREDICATE",
+   "criterion_verbatim": "universe = DERIVED rep-scope predicate (one home, from the representatives dim / ruled rep set), never INFLECTION_REP_IDS; zero hardcoded rep-allowlist constants in runners_inf; a rep add/reassignment at Orion changes NO code",
+   "method": "command",
+   "invocation": "grep -rn INFLECTION_REP_IDS data/inf/scripts/gold/runners_inf/ ; plus the a00 run's PREDICATE line",
+   "output_evidence": "PREDICATE: representatives roster = 19 rep_ids @ snapshot 2026-08-11 (derived, zero constants). grep: 2 hits, BOTH the a00 docstring prose naming the retired class (+ its .pyc) -- ZERO constants. The roster is re-read from silver/api_dims/representatives every run, so a rep add lands via the daily pull with no code change.",
+   "denominator": "0 constants of 8 family source files (2 prose mentions declared)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-A01-MAPCENSUS",
+   "criterion_verbatim": "mapped + unmapped == A_00 universe total (ADVREVIEW F-5); disposition enum SELF-FAMILY/EXCLUDED-LOUD present; denominators printed",
+   "method": "command",
+   "invocation": "python a01_dim_relationship.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "F-5 CENSUS: mapped 869 + self-family 0 == universe 869 -- no silent exclusion. Disposition enum realized as {MAPPED, SELF-FAMILY} at A_01 grain; the EXCLUDED-LOUD disposition lives on A_00's universe axis (0 accounts carry it today) and propagates via universe_flag -- the branch exists and is unexercised on this book (100% household coverage).",
+   "denominator": "869 + 0 == 869 A_00 accounts",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-A02-DISJOINT",
+   "criterion_verbatim": "COLLECTION_ACCOUNT set disjoint from IN_CLIENT_BOOK; detection outcome DECLARED: nonempty via the advisory-fee-flow named computation OR collection_detection=ABSENT-with-shape (the INF spec's own ELSE branch -- never guessed)",
+   "method": "command",
+   "invocation": "python a02_dim_boundary.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "DENOMINATOR: Management-Fee payee-side credits: 0 of 20504 Management Fee rows (0.00%) | DECLARED reversal noise: 2 accounts net-positive on Fee Credit reversals alone (max $1.31) -- NOT collection accounts; stay in book | COLLECTION detection: ABSENT-with-shape -- the custody txn ledger structurally carries NO payee-side fee rows | BOUNDARY CENSUS: in_client_book=869 collection=0 excluded_other=0 total=869 | DISJOINT: boundary_class is single-valued per account. The ELSE branch is taken on a MEASURED structural fact, not a guess: the naive net>0 predicate would have ejected managed client account 4320 on a $0.17 fee credit.",
+   "denominator": "0 payee-side rows of 20,504 Management Fee rows (full 1,434,473-row series)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-A02-VERSION-DET",
+   "criterion_verbatim": "boundary_version stable across two same-input runs (determinism control)",
+   "method": "command",
+   "invocation": "python a02_dim_boundary.py --as-of 2026-08-11 --output-root <root>  (twice, compare the boundary_version lines)",
+   "output_evidence": "run1: boundary_version: a26e2926f7e3c2021b5a878bb73293467b1eb83e156bd1fbcb8fc4dc58419849 | run2: boundary_version: a26e2926f7e3c2021b5a878bb73293467b1eb83e156bd1fbcb8fc4dc58419849 -- IDENTICAL",
+   "denominator": "N/A -- boolean identity across 2 runs",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-A02-VERSION-MUT",
+   "criterion_verbatim": "a mutated input flips boundary_version (mutant control)",
+   "method": "command",
+   "invocation": "python a02_dim_boundary.py --as-of 2026-08-11 --output-root <root> --qa-exclude-account 4320",
+   "output_evidence": "QA-MUTANT: excluded account 4320 (869 -> 868 rows) | boundary_version: febec453c77404bae0848a947f4710689740c759485087b57d2d492a69aa07e3 != a26e2926... -- FLIPPED",
+   "denominator": "N/A -- boolean flip on 1-account perturbation",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-A03-ROWCOUNT",
+   "criterion_verbatim": "dim_security row count == source distinct security identifiers; denominators printed",
+   "method": "command",
+   "invocation": "python a03_dim_security.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "DENOMINATOR: txn-sourced: 1619 of 1658 spine tickers (97.65%) | positions-sourced: 1658 of 1658 (100.00%) | enrich:assets_v2@2026-04-29: 1562 of 1658 (STALE vintage declared) | rowcount-identity: 1658 of 1658 spine distinct tickers (100.00%)",
+   "denominator": "1,658 of 1,658 union(txn, positions_mv) distinct tickers",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-A04-GAPCENSUS",
+   "criterion_verbatim": "gap census printed with the trading-calendar frame (lib/trading_calendar.py JOIN vs the canonical-holdings partition tree); weekends/holidays NEVER gaps (T-1 law); a partition on a non-trading day = DECLARED STATEMENT-DAY class, never promoted; any TRUE gap NAMED",
+   "method": "command",
+   "invocation": "python a04_dim_calendar.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "GAP CENSUS (frame: 2521 calendar days 2019-09-17..2026-08-11, 1734 trading days): TRADING-OBSERVED 1728 / TRADING-MISSING 6 / NONTRADING-OBSERVED 722 / NONTRADING-ABSENT 65. TRUE GAPS NAMED (6 of 1734): 2019-09-18..2019-09-25 -- all in the series' first ramp week. STATEMENT-DAY artifacts declared, never promoted: 722. Calendar source=NYSE/pandas_market_calendars via lib/trading_calendar.py (the ONE authority; no second calendar minted).",
+   "denominator": "6 true gaps of 1,734 trading days in frame",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-A05-RESOLVE",
+   "criterion_verbatim": "every transTypeId on the freshest silver/transactions partition resolves through ref_txn_classification or lands UNRESOLVED-LOUD; 0 silent rows; denominator = partition row count",
+   "method": "command",
+   "invocation": "python a05_ref_txn_classification.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "DENOMINATOR: resolved: 1433730 of 1434473 full-series txn rows (0 silent -- every row lands in a class) (99.95%) | UNRESOLVED-LOUD: 743 rows across 5 named codes (Stock Split 553 / Remark 174 / Reverse Stock Split 9 / Reversal 6 / Expired- 1) | DUAL MATERIALITY: 0.052% rows, 0.050% $ abs | money column verified: transAmount nonnull 1434473/1434473, twin scan NONE || AMENDED-20260811 (five-code yaml act, CTO 104942Z): post-amendment re-run UNRESOLVED 0 of 1,434,473 rows (0.000% / $0 abs) -- dropped by exactly 743 as ruled; corporate actions land EXCLUDED-CORPORATE-ACTION (declared, censused).",
+   "denominator": "1,434,473 full-snapshot rows (every row classed; 743 UNRESOLVED are LOUD, not silent)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-A05-CENSUSKEY",
+   "criterion_verbatim": "the classification table's census key re-derives from the FULL-series transTypeId census (46-code universe, never a window sample)",
+   "method": "command",
+   "invocation": "python a05_ref_txn_classification.py --as-of 2026-08-11 --output-root <root>  (twice, compare CENSUS KEY lines)",
+   "output_evidence": "run1 and run2 both print: CENSUS KEY: 3bf5a940cfd1c59d3c6a3f285431c21bf2d4e42c7378498d26e8da61f8d90603 -- re-derived IDENTICAL from two independent full-series reads (46 (transTypeId, trans_type_desc) pairs over 1,434,473 rows) || AMENDED-20260811: new census key e2c2d79e40c78ab52ef500e6d5cc4d38743d734cae4af5cb97d81c18397ef558 (the amendment IS a content change -- the key flipping is the mechanism working; re-derived stable on the amended series).",
+   "denominator": "46 code pairs over 1,434,473 rows (full series, not a window)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-A06-COVERAGE",
+   "criterion_verbatim": "crosswalk coverage ratios printed with BOTH denominators (spine-side and per-dim side); near-identity expectation stated",
+   "method": "command",
+   "invocation": "python a06_dim_identity_crosswalk.py --as-of 2026-08-11 --output-root <root>",
+   "output_evidence": "txn: spine-side 834/869 (95.97%), dim-side 834/850 (98.12%), 16 off-spine carried | positions_mv: 869/869, 869/948, 79 off-spine | performance: 834/869, 834/907, 73 off-spine | billing: 834/869, 834/907, 73 off-spine | NEAR-IDENTITY EXPECTATION stated in output. Off-spine ids = the closed-account/point-in-time class, carried as findings not dropped.",
+   "denominator": "both sides printed per surface (spine 869; per-dim 850/948/907/907)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-ALL-PROVENANCE",
+   "criterion_verbatim": "provenance cols (source_pipeline, _ingested_at) present on every Group A artifact (atom 9)",
+   "method": "command",
+   "invocation": "python -c reading all 7 emitted parquets and checking both columns",
+   "output_evidence": "dim_account/dim_relationship/dim_boundary/dim_security/dim_calendar/ref_txn_classification/dim_identity_crosswalk: provenance_cols=BOTH-PRESENT (7 of 7)",
+   "denominator": "7 of 7 Group A artifacts",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-ALL-MANIFEST",
+   "criterion_verbatim": "atom-3 manifest written per artifact ({data-as-of}/{process-ts}); boundary_version stamped where consumed",
+   "method": "command",
+   "invocation": "ls <root>/_manifests/2026-08-11/",
+   "output_evidence": "15 manifest files under _manifests/2026-08-11/ (7 artifacts x their runs incl. control re-runs), each {process-ts}__{table}.json with data_as_of/process_ts/rows/columns/inputs; dim_boundary manifest carries boundary_version a26e2926... (A-group's only version consumer; B/C stamp it from here on)",
+   "denominator": "7 of 7 artifacts manifested (15 manifest files incl. control runs)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "INF-A-ALL-COMPILE",
+   "criterion_verbatim": "stage-by-stage py_compile pass logged per script at its build stage (Andrew @4dbf4a0d7c), not one end pass",
+   "method": "command",
+   "invocation": "python -m py_compile <file>  -- run at EACH script's build stage (8 stages logged in the build transcript)",
+   "output_evidence": "STAGE-COMPILE PASS logged per stage: runner_common+a00 / a01 / a02 / a03 / a04 / a05 / a06 / a02-amended + a04+a05 path-fix restages. Commit-gate (py_compile + ruff) exercised at commit: caught 4 findings (2 unused imports, 2 bare f-strings), fixed, re-passed.",
+   "denominator": "8 of 8 family files stage-compiled (plus 3 re-stages after amendments)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "a02 boundary_version mutant: drop one in-universe account (--qa-exclude-account 4320) and require the content hash to flip",
+   "expected": "boundary_version != a26e2926f7e3c202...",
+   "observed": "febec453c77404bae0848a947f4710689740c759485087b57d2d492a69aa07e3 -- FLIPPED",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input a02 runs compared on boundary_version; two independent full-series a05 runs compared on census key",
+   "observed": "a02: a26e2926... == a26e2926... | a05: 3bf5a940... == 3bf5a940...",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "comp-validate config entries for the runners_inf family",
+   "reason": "comp-validate returns no-script-matching (new family unregistered in gold_validate_config.yaml). NO_CONFIG = UNVALIDATED, not signaled safe. Config authoring routed to wave close; artifact homes cannot be configured before the F-1 root ruling anyway."
+  },
+  {
+   "item": "comp-pipescript io/deployed rows for runners_inf",
+   "reason": "registry does not know the new family (Script not found). Registration is P2/P3 wiring scope. No S3 code upload has occurred, so no deployed-MATCH claim exists to check."
+  },
+  {
+   "item": "deep-history backfill exercise (2019..) of the A-chain",
+   "reason": "current-day accounts_v2 cannot frame closed accounts (16-79 off-spine ids measured per surface) -- the W-D point-in-time class. Scripts are date-parameterized; historical framing needs the point-in-time account dim, declared not faked."
+  },
+  {
+   "item": "effective-dated boundary history (A_02 effective_from = as_of only)",
+   "reason": "first build mints the initial boundary vintage; effective-dating accretes from daily runs -- no history exists to encode on day one."
+  },
+  {
+   "item": "runner_common.py acceptance rows in THIS instance",
+   "reason": "the shared harness is the PARQUET-WRITER-FORMAT group's artifact and carries its own 4-row battery in PROOF_OF_SPEC_P1_INF_PARQUET-WRITER-FORMAT_20260811.json (grammar/parquet-only/no-root/manifest); listed there, not double-counted here."
+  }
+ ],
+ "surprises": [
+  "The custody txn ledger structurally lacks the fee payee side (0 of 20,504 Management Fee rows positive) -- collection detection is impossible by construction on this ledger; ABSENT-with-shape declared. The naive net>0 predicate would have ejected managed client account 4320 from the book on a $0.17 Fee Credit reversal.",
+  "5 txn codes are absent from the ratified taxonomy (Stock Split/Remark/Reverse Stock Split/Reversal/Expired-, 743 rows, 0.05% both frames) -- land UNRESOLVED-LOUD; taxonomy amendment is a ruling-class act, surfaced to COO not guessed.",
+  "722 of 2,450 observed INF canonical-holdings partitions fall on NON-trading days -- a large STATEMENT-DAY class (Orion delivers weekend snapshots), declared and never promoted.",
+  "assets_v2 (1 partition, 2026-04-29) and assets (3, latest 2026-05-05) are stale against a daily book -- A_03's spine rides the live txn+positions surfaces instead, with enrichment vintages declared.",
+  "No forced path constant exists in the family: the writer REFUSES an empty output root (control fired) -- F-1 remains fully undecided by this build.",
+  "AMENDED-20260811: the five-code yaml amendment (CTO-ruled content, landed this lane) resolves all 743 UNRESOLVED rows: 563 corporate-action rows -> EXCLUDED-CORPORATE-ACTION declared exclusion; Remark -> Internal position-seed with shape-predicate (174/174 pass); Reversal -> Internal adjustment with pair-attempt (5/6 paired, 1 segregated never external). EXTERNAL unchanged at 16,210 rows -- no flow moved."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/logs/2026-08-11/inf_p1_group_a_0926-1005Z.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-to",
+   "invocation": "comp-to INF_RUNNER_REFACTOR.P1.scripts-groups-a-d-parquet",
+   "result": "session TO context set (race-free per-session file)"
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find \"unified_account_dim\" data/inf",
+   "result": "47 hits / 207 files scanned; located the bronze pull + confirmed silver/api_dims/activity as the unified_account_dim silver landing"
+  },
+  {
+   "tool": "comp-validate",
+   "invocation": "comp-validate a00_dim_account",
+   "result": "no script matching -- new family unregistered; recorded as DECLARED exclusion, never signaled SAFE"
+  },
+  {
+   "tool": "comp-pipescript",
+   "invocation": "comp-pipescript io a00_dim_account --pipeline inf",
+   "result": "Script not found -- registry lacks runners_inf; registration = P2/P3 scope, declared"
+  }
+ ]
+}

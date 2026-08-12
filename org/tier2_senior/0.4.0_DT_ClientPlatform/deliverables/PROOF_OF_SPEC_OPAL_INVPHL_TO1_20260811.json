@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "to_id": "OPAL_INVPHL-TO-1-model-portfolio-modal",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/OPAL_INVPHL.TO-1.model-portfolio-modal.md",
+    "group": "OTHER",
+    "vintage_commit": "c87bd0d0cf"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/components/ModelPortfolioModal.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "84f6b3e286b3436faf454368ef96cd1c2e5506ed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal frontend on DEV (Rule 19). The DEV->PROD promote is the DT /prod-deploy lane and is explicitly NOT part of this TO (TO-1 execution_rules + COO GO 195948Z 'do not promote')."
+    },
+    {
+      "path_or_key": "portal/src/lib/modelPortfolioNotes.ts",
+      "kind": "config_data",
+      "commit_or_etag": "84f6b3e286b3436faf454368ef96cd1c2e5506ed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Display copy compiled into the frontend bundle; ships with the promote, not separately."
+    },
+    {
+      "path_or_key": "portal/src/lib/modelPortfolioColors.ts",
+      "kind": "config_data",
+      "commit_or_etag": "84f6b3e286b3436faf454368ef96cd1c2e5506ed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds MODEL_TARGET_RETURN + getModelTargetReturn beside the model definitions per TO R3; no runtime deploy leg of its own."
+    },
+    {
+      "path_or_key": "portal/src/components/BenchmarkHeatmap.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "84f6b3e286b3436faf454368ef96cd1c2e5506ed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Trigger surface (a). SEV1 surface model_portfolios.benchmark -- see surprises[0]."
+    },
+    {
+      "path_or_key": "portal/src/pages/Positioning/panels/PositioningSummary.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "84f6b3e286b3436faf454368ef96cd1c2e5506ed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Trigger surface (b)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C1",
+      "criterion_verbatim": "BOTH trigger surfaces open the SAME modal component. Exactly one dialog implementation exists in the diff; catalyst/dialog is its base.",
+      "method": "test_suite",
+      "invocation": "node invphl_assert.mjs --fixtures invphl_fixtures.json --route positioning  AND  --route portfolios --tab Benchmark",
+      "output_evidence": "RESULT: 5 passed, 0 failed, of 5 (both routes). Both surfaces render triggers whose click opens [role=dialog]. Diff contains exactly one Dialog implementation: ModelPortfolioModal.tsx imports Dialog/DialogTitle from '@/ui/components/catalyst/dialog'; grep of the commit for 'fixed inset-0' returns 0 hits in added lines.",
+      "denominator": "2 of 2 trigger surfaces; 5 of 5 models exercised per surface",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C2",
+      "criterion_verbatim": "Prose matches slides 17/19/21/23/25 per model, keyed off CANONICAL names through the EXISTING alias map. Verified explicitly for the two counter-intuitive mappings: clicking \"Long Term\" shows slide 23 content; clicking \"Ultra-Long Term\" shows slide 25.",
+      "method": "test_suite",
+      "invocation": "node invphl_assert.mjs (per model: MUST-contain a phrase unique to its slide, MUST-NOT-contain a phrase unique to a sibling slide)",
+      "output_evidence": "[ok] Long-Term -> slide 23 (contains 'hedging strategies', lacks 'offense & defense'); [ok] Ultra Long-Term -> slide 25 (contains 'offense & defense', lacks 'hedging strategies'); plus UST->17, ST->19, INT->21. 5 passed, 0 failed on BOTH routes. Content resolves via getCanonicalModelName (CANONICAL_MODEL_NAME map, modelPortfolioColors.ts) -- no second mapping added; fixtures deliberately deliver the DECK aliases ('Long-Term Conservative'/'Long-Term Aggressive') so the alias path is the one under test.",
+      "denominator": "5 of 5 models, on 2 of 2 routes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3",
+      "criterion_verbatim": "The performance pane renders EXACTLY the six ruled fields in the ruled order. 3-Yr Return and 2025 return appear NOWHERE in the diff.",
+      "method": "test_suite",
+      "invocation": "node invphl_assert.mjs (asserts all 6 labels present and index-ordered, and FORBIDDEN ['3-Yr','3-Year Return','2025 Return'] absent from the rendered dialog) + git show --stat/-p grep over the commit",
+      "output_evidence": "'6 fields in order, no 3-Yr/2025' on all 5 models on both routes. Rendered order confirmed: Target Return, YTD Return, 1-Year Return, Since Inception, Current Yield, Portfolio Makeup.",
+      "denominator": "6 of 6 ruled labels; 3 forbidden tokens checked, 0 found; 5 models x 2 routes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C4",
+      "criterion_verbatim": "Every value is either a LIVE field from the two named existing endpoints or the per-model Target config. NO deck number is rendered as if live; no placeholder survives to merge.",
+      "method": "test_suite",
+      "invocation": "node invphl_smoke.mjs positioning --fixtures invphl_fixtures.json --model 'Long-Term' (fixtures carry SYNTHETIC values chosen so they cannot be confused with deck values)",
+      "output_evidence": "Rendered pane for Long-Term: 'Target Return 7% - 9% | YTD Return 12.34% | 1-Year Return 23.45% | Since Inception 34.56% | Current Yield 6.64% | Portfolio Makeup 87% equities / 13% fixed income/cash equivalents'. 12.34/23.45/34.56/6.64 are the FIXTURE values, not the deck's (deck slide 23: 3-Yr 13.7, 2025 19.74, yield 2.40, YTD -0.15) -- so those five fields provably read the serving plane. Target Return 7% - 9% is the config, labelled in-pane as a design objective. Makeup 87/13 = fixture equity 85 + hedge 2 / fixed_income 11 + cash 2, matching PositioningSummary getAllocationData's folding exactly. Unavailable fields render the explicit string 'Not available'.",
+      "denominator": "6 of 6 fields traced to a source; 5 live + 1 config",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C5",
+      "criterion_verbatim": "Modal title is the canonical model name; the deck alias is not rendered.",
+      "method": "test_suite",
+      "invocation": "node invphl_assert.mjs (asserts dialog text STARTS WITH the canonical display name)",
+      "output_evidence": "Titles rendered: Ultra Short-Term / Short-Term / Intermediate-Term / Long-Term / Ultra Long-Term. Fixtures supplied the DECK aliases as model.name ('Long-Term Conservative', 'Long-Term Aggressive') and neither string appears in any rendered dialog. Title emits through displayModelName() per the 2026-08-04 display-typing canon -- see surprises[1].",
+      "denominator": "5 of 5 titles",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C6",
+      "criterion_verbatim": "Trigger affordance is keyboard-operable with a visible focus state, name-only hit target, on both surfaces.",
+      "method": "test_suite",
+      "invocation": "node invphl_affordance.mjs --route portfolios --tab Benchmark (Tab-navigates to the trigger, reads computed style, presses Enter)",
+      "output_evidence": "AT REST: textDecoration 'underline dotted', corner-arrow svg present, hit box 133x20 inside a 200px column (name-only, not the row). TABBED: 26 keypresses -> 'Ultra Short-Term - open portfolio details' (in natural tab order). FOCUSED: boxShadow 'rgb(255,255,255) 0 0 0 1px, rgb(254,215,170) 0 0 0 3px' -- a visible two-layer ring in the model accent. ENTER KEY: {open:true, title:'Ultra Short-Term'} -> keyboard-operable. Both surfaces use the same ModelNameTrigger component.",
+      "denominator": "5 of 5 triggers rendered per surface; 1 measured in depth per surface",
+      "status": "PASS",
+      "status_reason": "PASS. Recorded because the FIRST measurement read 'outline none / boxShadow none' and looked like a defect: it focused the element programmatically, and Chromium does not satisfy :focus-visible for el.focus(). Re-measured with real Tab keypresses. The instrument was wrong, not the code."
+    },
+    {
+      "criterion_id": "C7",
+      "criterion_verbatim": "comp-transform schema-check clean on every touched component; no new console errors; portal CI leg green; portal worktree on DEV (Rule 19).",
+      "method": "command",
+      "invocation": "comp-transform schema-check {ModelPortfolioModal,BenchmarkHeatmap,PositioningSummary}; ./node_modules/.bin/tsc -b --noEmit; ./node_modules/.bin/eslint <5 files>; git -C portal rev-parse --abbrev-ref HEAD",
+      "output_evidence": "PositioningSummary: 'All rendered fields match their response types.' ModelPortfolioModal + BenchmarkHeatmap: 'Component not found' -- comp-transform indexes portal/src/pages/** only, so src/components/** is OUTSIDE ITS DOMAIN and it returns rc=0 for a component it never checked (positive-controlled: FearGreedModal, an untouched src/components file, also returns 'Component not found'). NOT reported as a pass on those two. Compensating instrument: tsc -b --noEmit rc=0, MUTATION-PROVEN live (a deliberate 'const __MUTANT__: number = \"...\"' in ModelPortfolioModal.tsx failed it at src/components/ModelPortfolioModal.tsx(209,7) TS2322, rc=2; reverted, no residue). eslint rc=0. Branch: DEV.",
+      "denominator": "3 components requested; 1 of 3 inside comp-transform's domain (checked, clean), 2 of 3 outside it (unchecked by that tool, covered by tsc). 5 of 5 files linted.",
+      "status": "PASS",
+      "status_reason": "PASS on the criterion's substance with one honest qualification: 2 of the 3 named components CANNOT be checked by comp-transform (domain limit, not a stale index), and its 'not found' exits 0 -- a fail-green. Reported to COO rather than recorded as a clean sweep. Portal CI leg not run from this seat (no push in TO scope); its typecheck step is the same tsc run locally -- see surprises[2] for a defect found in that CI step."
+    },
+    {
+      "criterion_id": "C8",
+      "criterion_verbatim": "NO new API field, NO backend change, NO serving-plane change in the diff.",
+      "method": "diff",
+      "invocation": "git -C portal show --stat 84f6b3e2",
+      "output_evidence": "5 files changed, 467 insertions(+), 20 deletions(-) -- all under portal/src/{components,lib,pages}. Zero files under infra/, data/, or any Lambda/Terraform path. portal-proxy.ts is UNTOUCHED (no new endpoint, no new response field); the modal consumes getModelPortfolioBenchmarks() and getPositioningData() exactly as they already exist.",
+      "denominator": "5 of 5 changed files are frontend source; 0 backend/serving-plane files",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO mutants, one per instrument the deliverable leans on. (1) C2 CONTENT MAPPING: swapped the 'Long Term' and 'Ultra-Long Term' keys in MODEL_KEY_NOTES -- i.e. got the counter-intuitive deck aliases backwards, the exact silent failure the TO warns about. (2) TYPECHECK LIVENESS: injected a deliberate type error into ModelPortfolioModal.tsx.",
+      "expected": "(1) exactly Long-Term and Ultra Long-Term FAIL, other three stay green. (2) tsc exits non-zero naming that file.",
+      "observed": "(1) 'RESULT: 3 passed, 2 failed, of 5' -- [FAIL] Long-Term: missing slide-23 phrase 'hedging strategies' / CONTAINS SIBLING phrase 'offense & defense'; [FAIL] Ultra Long-Term: the mirror. UST/ST/INT unaffected, so the check is specific rather than a blanket fail. rc=1. (2) 'src/components/ModelPortfolioModal.tsx(209,7): error TS2322' rc=2. Both mutants reverted and the revert verified (prose: slide-23 comment precedes 'Long Term', LT block contains hedging and not offense, and the mirror for ULT; type error: no '__MUTANT__' residue).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full 5-model assertion suite re-run on the same inputs after the mutant revert, and independently on the second route.",
+      "observed": "positioning: 5 passed / 0 failed (pre-mutant) and 5 passed / 0 failed (post-revert). portfolios+Benchmark: 5 passed / 0 failed. Same verdicts, same per-model slide/target mapping every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AUM metrics radial legend as a third trigger surface",
+      "reason": "TO-1 R6 OUT OF SCOPE (Andrew's call; the transcript itself hedged it). Not built."
+    },
+    {
+      "item": "3-Yr Return and 2025 calendar-year return",
+      "reason": "TO-1 R2, dropped by Andrew-direct ~1925Z. Not rendered, not stubbed, no API field added."
+    },
+    {
+      "item": "DEV->PROD promote",
+      "reason": "Explicitly NOT part of this TO (execution_rules + COO GO). Portal stays on DEV per Rule 19."
+    },
+    {
+      "item": "Who may edit the Target Return config, and whether it surfaces elsewhere",
+      "reason": "TO-1 R3 marks this UNRULED and not mine to invent. Config shipped; no editor designed. Not yet load-bearing, so surfaced here rather than escalated."
+    },
+    {
+      "item": "Live-artifact verification of the two endpoints' field UNITS",
+      "reason": "The served positioning JSON is auth-gated (HTTP 401 from opalinvest.dev; the 'DEMO MODE: public endpoint' comment at portal-proxy.ts:1085 is stale). Units grounded instead on the RENDER CONTRACT in first-party source: allocation values feed a CSS height percentage directly (PositioningSummary renderBarInner, 'height: ${data.fixedIncome}%') so they are 0-100, and characteristics.yield is rendered raw while the sibling characteristics.cost is multiplied by 100 -- same object, different units, so the scale was read per-field rather than assumed."
+    }
+  ],
+  "surprises": [
+    "portal/src/components/BenchmarkHeatmap.tsx is a SEV1 surface (model_portfolios.benchmark) per org/critical_paths/change_management/20260715T153809Z_model_portfolios-benchmark_all_approval.md:11; the pre-commit risk-reflex flagged it and I read the citation. The SURFACE_ACK mechanism it records is comp-surface-check, RETIRED Andrew-direct 2026-08-06 -- Rule 20 states these surfaces now carry no commit-time guard as the accepted consequence. No gate exists to satisfy and none was manufactured. Compensating evidence is the exercised screenshot + 5-model assertion on that surface.",
+    "TO-1 R4/C5 says the modal title is the CANONICAL name; the portal also carries a DISPLAY TYPING CANON (Andrew-direct via Yang, 2026-08-04) requiring user-visible model strings to emit through displayModelName(). I used displayModelName(canonical), which satisfies both readings -- it is the canonical model, typed per the canon ('Long-Term', not the deck alias 'Long-Term Conservative') -- and it matches what the two host surfaces already render. Flagging because the two rulings touch the same string and I chose the later, more specific one rather than adjudicating silently.",
+    "portal CI (.github/workflows/ci.yml:56) runs 'bun run tsc --noEmit', which resolves portal/tsconfig.json -- a solution-style config with \"files\": [] and only project references. It therefore typechecks ZERO files and exits 0. Verified: 'tsc --noEmit -p tsconfig.json --listFiles' emits 0 lines. The real typecheck happens only inside 'bun run build' (tsc -b). The dedicated CI typecheck step is a no-op; package.json already has a correct 'typecheck' script (tsc -b --noEmit) that step could call. Not fixed -- outside TO scope, no action taken.",
+    "comp-transform schema-check returns rc=0 with 'Component not found' for any component outside portal/src/pages/**, so a mandated check on a src/components file reads as a pass while checking nothing. Separately, 'comp-transform schema-check Tooltip' silently fuzzy-resolves to a DIFFERENT component (ChartTooltip) and reports ITS verdict.",
+    "PROOF_OF_SPEC.schema.json's 'phase' enum (P1-SCRIPTS..P5-DECOMMISSION, INVESTIGATION, NON-BUILD-OTHER) is the MDPF pipeline program's axis and has no value for a portal FRONTEND build TO. I recorded NON-BUILD-OTHER as the only non-pipeline option, which is literally inaccurate -- this IS a build. Rule-24 grain/coverage gap on the phase axis; flagged, not worked around silently.",
+    "portal/ working tree carries pre-existing untracked residue not from this work: .runtmp/ (which MEMORY.md records as never-to-be-used), org/, src/org/, portal/, catch404_final.png, public/__mockcot/. Untouched by this commit; noted only because a future pathspec-by-directory commit in portal would sweep them.",
+    "PROOF-OF-SPEC KIND ENUM GAP -- FOUND, ROUTED, AND FIXED AT THE ROOT WITHIN THE SESSION. This instance first failed artifact-coverage because the schema's `kind` enum had NO value for a frontend component, so .tsx files were declared `script` by necessity and were dragged into a heuristic keyed on the DS {firm}-{group}-{artifact}-{check} criterion-id grammar. Two instances failing identically on one cause identified it as template-level rather than authoring slips. Two one-line greens were available and BOTH were refused as false: declaring a covered artifact in declared_exclusions, and rewriting criterion ids to embed stems. CVO added `frontend_component` to the enum @8d77cd1537 (Rule 24 postulate (i) -- the enum was not collectively exhaustive) and annotated the check site so the skip cannot be misread as a gap. These artifacts are now declared with the honest kind and the check passes on a TRUE declaration, not an exception. The red was information; it held ~12 minutes and bought a permanent fix."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DT_ClientPlatform/logs/2026-08-11/OPAL_INVPHL_TO1_TO2.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find \"PORTFOLIO_NAMES\" portal/src ; comp-find \"getModelPortfolioBenchmarks|getPositioningData\" portal/src ; comp-find \"getAllocationData\" portal/src/pages/Positioning",
+      "result": "Located the identity handle for trigger surface (b): PORTFOLIO_NAMES is DERIVED from PORTFOLIO_ORDER via displayModelName (gridConfig.ts:29), so PORTFOLIO_ORDER[idx] is the model CODE for the same index -- header and model cannot drift. Also established there are no shared query hooks (each page declares its own useQuery), which is why the modal declares its own against the same keys. DENOMINATORs printed: 4/405, 18/405, 5/9 files."
+    },
+    {
+      "tool": "comp-transform schema-check",
+      "invocation": "comp-transform schema-check ModelPortfolioModal | BenchmarkHeatmap | PositioningSummary (+ positive controls Tooltip, CapitalMarketAssumptions, ModelPortfolios, FearGreedModal)",
+      "result": "PositioningSummary: 'All rendered fields match their response types.' The other two: 'Component not found' at rc=0 -- domain limit (src/pages/** only), established by positive control, NOT counted as a pass. See surprises[3]."
+    },
+    {
+      "tool": "comp-cache",
+      "invocation": "comp-cache collisions ; comp-cache key model-portfolio-benchmarks ; comp-cache key positioning-data",
+      "result": "'captured 104 of 104 useQuery call-site(s); 0 unparseable' -- the tool SAW the new file. '15 shared key(s); 0 with a TYPE MISMATCH (the bug-class).' Both keys the modal reuses resolve to the SAME queryFn as their existing call sites (model-portfolio-benchmarks: modal + ModelPortfolios.tsx:533; positioning-data: modal + Attribution.tsx:34 + Positioning.tsx:39), so the modal shares cache rather than double-fetching. Rule 20(b) discharged."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"does clicking a model name have any cached query implication\"",
+      "result": "NO CURATED RULE MATCHED -- top fuzzy candidate comp-cache (score 0.48), which was the right tool and was then run properly with its subcommands. Recorded as a small catalog gap rather than treated as a routing decision, per the tool's own warning."
+    },
+    {
+      "tool": "tsc -b --noEmit / eslint",
+      "invocation": "./node_modules/.bin/tsc -b --noEmit ; ./node_modules/.bin/eslint <the 5 changed files>",
+      "result": "Both rc=0. tsc mutation-proven live in this exact file (see controls.mutant). NOTE: the obvious invocation 'tsc --noEmit -p tsconfig.json' is a FALSE GREEN here -- it checks 0 files; --listFiles printed 0 lines. See surprises[2]."
+    },
+    {
+      "tool": "/frontend-dev (ui-smoke pattern, extended for interactive state)",
+      "invocation": "node invphl_smoke.mjs / invphl_assert.mjs / invphl_affordance.mjs against the local vite dev server with fixtures",
+      "result": "Read the rendered PNGs per the portal verification law. CAUGHT A REAL BUG NO STATIC CHECK COULD: a model CODE passed to getModelColor (a NAME-keyed map) fell through to its partial-match fallback and matched 'Ultra-Long Term' -- because 'ultra' contains the substring 'lt' -- rendering Long Term in Ultra-Long Term's RED. Fixed by resolving getCanonicalModelName() first at both call sites; re-rendered and confirmed blue. Both branches typecheck identically."
+    }
+  ]
+}

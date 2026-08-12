@@ -63,8 +63,44 @@
   </acceptance_criteria>
 
   <proof_of_spec>
-    <expected_criteria>A5-ROWCOUNT-A00,A5-A01-F5,A5-A02-DISJOINT,A5-A02-DETERMINISM,A5-A02-MUTANT,A5-A04-GAPCENSUS,A5-A05-RESOLVE,A5-A05-CENSUSKEY,A5-A06-COVERAGE,A5-A06-LOCKSTEP,A5-ALL-PROVENANCE</expected_criteria>
-    <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/MDPF_49F_BUILD.P1_PROOF_OF_SPEC.json</instance_path>
+    <!-- ONE INSTANCE PER GROUP. The grammar, not a single path (see the ISSUER DEFECT note below):
+         org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P1_B{n}_GROUP{X}_{YYYYMMDD}.json -->
+    <instance_path_grammar>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P1_B{n}_GROUP{X}_{YYYYMMDD}.json</instance_path_grammar>
+
+    <group id="B-1" status="DELIVERED" instance_path="org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P1_B1_GROUPA_20260811.json">
+      <expected_criteria>A5-ROWCOUNT-A00,A5-A01-F5,A5-A02-DISJOINT,A5-A02-DETERMINISM,A5-A02-MUTANT,A5-A04-GAPCENSUS,A5-A05-RESOLVE,A5-A05-CENSUSKEY,A5-A06-COVERAGE,A5-A06-LOCKSTEP,A5-ALL-PROVENANCE</expected_criteria>
+    </group>
+    <group id="B-2" status="DELIVERED" instance_path="org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P1_B2_GROUPB_20260811.json">
+      <expected_criteria>B5-B00-ROWCOUNT,B5-B00-IDENTITY,B5-B00-SPOTTIE,B5-B01-MVTIE,B5-B01-FLAGS,B5-B01-NODROPS,B5-B02-DENOMINATORS,B5-B02-RULING,B5-B02-MUTANT,B5-B03-CENSUS,B5-B03-DETERMINISM,B5-B03-MUTANT,B5-ALL-PROVENANCE</expected_criteria>
+    </group>
+    <group id="B-3" status="DELIVERED" instance_path="org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P1_B3_GROUPC_20260811.json">
+      <expected_criteria>C5-C00-IDENTITY,C5-C00-PAIRDET,C5-C00-ICTRAP,C5-C01-DIFF,C5-C02-IDENTITIES,C5-C02-LINKING,C5-C02-ZERODENOM,C5-C02-GROSSNET,C5-C03-FIELDS,C5-C03-STATUSMUTANT,C5-C04-NINEGRADES,C5-C04-PNLCONTROL,C5-ALL-PROVENANCE</expected_criteria>
+      <!-- C5-C04-PNLCONTROL landed UNCOMPUTABLE-with-declaration and is ACCEPTED as such: a month-grain
+           P&L identity cannot be computed from a single day BY CONSTRUCTION; it rides the backfill,
+           declared not skipped. UNCOMPUTABLE-with-declaration is PRE-AUTHORIZED for B-4/B-5a — an
+           impossible row must not force a choice between a faked PASS and a stall. -->
+    </group>
+    <group id="B-4" status="NOT_YET_MINTED"/>
+    <group id="B-5a" status="NOT_YET_MINTED"/>
+
+    <!--
+    ISSUER DEFECT, RECORDED IN THE TO ITSELF (2026-08-11, COO): this element originally declared a
+    SINGLE <instance_path> (MDPF_49F_BUILD.P1_PROOF_OF_SPEC.json) while the contract delivers ONE
+    INSTANCE PER GROUP. That path matched NO landed instance — a completion flip acting on it would
+    have found NOTHING, and read the absence as work-not-done. The assignee's filenames were correct
+    throughout; the TO was wrong.
+    HOW IT SURVIVED: the issuance lint (.tools/git-hooks/to-proof-of-spec-check.sh:29) greps for the
+    PRESENCE of a <proof_of_spec element on NEW files. It does not resolve instance_path, does not
+    check the id set, and does not re-run on MODIFIED files. IT BINDS ISSUANCE PRESENCE, NEVER
+    ISSUANCE CORRECTNESS — so a well-formed element naming a nonexistent path passes it by design.
+    HOW IT WAS CAUGHT: not by a gate. The issuer guessed two wrong paths while trying to re-validate
+    the assignee's instances, and the NOT-AT-THAT-PATH miss exposed the declaration. A defect found by
+    an unrelated stumble is a defect with no detector.
+    ADOPTED FABRIC-WIDE (CTO 092331Z) for the INF/COT lanes: {phase}_{firm}_{group}_{date} instance
+    paths, and {firm}-{group}-{artifact}-{check} criterion ids declared BEFORE the first mint —
+    49F's A5-/B5-/C5- prefixes carry no firm token and would collide across lanes transposing the
+    batteries verbatim, while CVO's cert step-zero reads ACROSS instances.
+    -->
     <!--
     PROVENANCE OF THE ID SET, STATED BECAUSE IT MATTERS WHO MINTED IT:
     The 11 ids above are GROUP A's battery, ENUMERATED BY THE ASSIGNEE (0.4.0_DS_ClientPlatform,
@@ -83,7 +119,7 @@
     THE TWO-LAYER DIVISION covers the issuer's exposure: the validator catches the ASSIGNEE omitting
     against this list; CVO's cert-of-built step-zero catches THIS LIST omitting against the governing
     SPEC. Per-group validation:
-      python .tools/proof-of-spec-check.py {instance}.json --expected-criteria {that group's ids}
+      python .tools/proof-of-spec-check.py {instance}.json {that group's ids}
     -->
   </proof_of_spec>
 
@@ -106,7 +142,7 @@
 
   <deliverables>
     <deliverable type="commit">Groups A–D + parquet writer-format, stage-by-stage compile-verified</deliverable>
-    <deliverable type="document">A schema-valid PROOF_OF_SPEC instance per group, passing proof-of-spec-check with --expected-criteria</deliverable>
+    <deliverable type="document">A schema-valid PROOF_OF_SPEC instance per group, passing proof-of-spec-check with its POSITIONAL id set (comma list or a one-id-per-line file; there is NO --expected-criteria flag -- the flagged form exits rc=2)</deliverable>
     <deliverable type="document">Session log with Compiler Tools section</deliverable>
   </deliverables>
 
