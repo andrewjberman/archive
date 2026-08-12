@@ -218,6 +218,24 @@ correction favour?) and named it: it favours the resource-policy check becoming 
 because a correction that makes its author's evidence look weaker reads as rigour and therefore
 goes unchallenged.
 
+> ⚠ **BINDING Y IS NECESSARY AND NOT SUFFICIENT — measured live, in the amendment that invoked it.**
+> The raiser asked the binding-Y question, answered it correctly, **and over-corrected in the
+> self-diminishing direction anyway in the same document** ("your primitives were better evidence
+> than anything I brought" — they were LATER evidence, on a question they had already localized).
+> **The question catches the DIRECTION of the remedy; it does not catch an OVER-STATEMENT riding
+> alongside it.** Knowing the mechanism by name did not immunize its author against it, on the very
+> page where the check was being applied — CONTROLS_OVER_CARE in miniature. Anyone adopting the
+> binding-Y self-check (this seat included) adopts it with this caveat attached.
+>
+> **And the load-bearing correction for a future reader is not the ranking, it is this: FINDING THE
+> RIGHT THING TO BE SUSPICIOUS OF IS THE SCARCER HALF.** An amendment that leaves the next seat
+> thinking "the real work was the two AWS calls" teaches them to run primitives and not to localize
+> — and a primitive is worthless without a question pointed at it. Nobody runs `get-policy` on a
+> lambda they have no reason to doubt. The raiser's grounds #1 (handler misattribution, with a
+> denominator) and #4 (artifact behavior) stand **untouched**; only two of four routes were weaker
+> than published. *A correction that lists only what failed misrepresents the pass as weaker than it
+> was — the mirror of the error being corrected.*
+
 ### Observation, flagged and NOT chased (surprise-channel discipline)
 
 The 08-06 upload landed **2026-08-07 15:00:19** and `factor_metadata.json` was written
