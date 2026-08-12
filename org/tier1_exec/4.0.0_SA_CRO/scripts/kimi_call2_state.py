@@ -61,7 +61,7 @@ def build_state_prompt() -> str:
         "  * Cite the friction figure(s) each part of your assessment rests on.\n\n"
         "=== YOUR JOB ===\n"
         "Propose whether mdpf's lifecycle_value is shifting from %s.\n"
-        "Return ONLY JSON:\n"
+        "Return ONLY JSON -- the raw object, no code fences, no ```json wrapper, no prose around it:\n"
         '{"vertical": "mdpf",\n'
         ' "current": "%s",\n'
         ' "proposed": "<enum value -- MAY equal current; equal is the common case>",\n'

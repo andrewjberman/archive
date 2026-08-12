@@ -106,7 +106,16 @@ def build_friction_prompt(b: dict) -> str:
         "CONSOLIDATING / STABLE / BEING-ABANDONED / INDETERMINATE, and in what DIRECTION (diverging / converging /\n"
         "flat / undetermined)? Keep it to the evidence -- do NOT reason beyond the figures, do NOT propose a\n"
         "lifecycle value (that is the next call), do NOT invent an axis that was not measured.\n\n"
-        "Return ONLY JSON:\n"
+        "PRECEDENCE RULE (the enum permits ONE character, and a vertical can honestly be several at once --\n"
+        "two fires on this identical battery returned HEATING and CONSOLIDATING, both defensible, so the\n"
+        "convention is stated rather than left to chance):\n"
+        "  * CHARACTER is carried by the CONSOLIDATION/SPREAD evidence -- where the work is going. If a\n"
+        "    consolidation subsignal is present and holds (one path staying hot while a sibling cools),\n"
+        "    the character is CONSOLIDATING even when heat is at ceiling.\n"
+        "  * DIRECTION is carried by the RATIO bands (commit-volume and heat, newer vs older half) against\n"
+        "    the instrument's own thresholds. A saturated heat ratio does not soften a diverging volume ratio.\n"
+        "  * Use HEATING only when intensity is rising with NO consolidation/spread signal to place it.\n\n"
+        "Return ONLY JSON -- the raw object, no code fences, no ```json wrapper, no prose around it:\n"
         '{"vertical": "%s",\n'
         ' "friction_character": "HEATING|SPREADING|CONSOLIDATING|STABLE|BEING-ABANDONED|INDETERMINATE",\n'
         ' "direction": "DIVERGING|CONVERGING|FLAT|UNDETERMINED",\n'
