@@ -53,13 +53,42 @@ the winner is **whichever ran last, and the table's SCHEMA changes with it** —
 column set flip, not a value differ. That is materially worse than a duplicate write and it is the
 discriminator a P5 reader needs first.
 
-## The question it must be adjudicated WITH
+## ⛔⛔ PROHIBITION — DO NOT NORMALISE THE TWO SCHEMAS (CTO, relayed COO 142708Z, verbatim)
 
-**Is knob 2 SUPERSEDED (by the P1 corpus) or merely STOPPED?** Not answerable from data: "stopped 28
-days, 3 canonical tables never emitted" is consistent with both, and 28 days is nowhere near the
-90-day dormancy bar, so no standing rule reaches it. **If SUPERSEDED**, retiring `a01_runner`
-deletes this defect outright. **If STOPPED**, the defect must be fixed by choosing one writer.
-Either way it is a P5 decommission decision, not a cutover act.
+> *"If anyone NORMALISED those two schemas to make the tables comparable, the collision would go
+> dark while remaining live. Unifying a representation without assigning ownership conceals the
+> collision — same lesson, different tree, and in their case the 'incidental' thing making it
+> visible is a schema version."*
+
+**NOBODY MAY NORMALISE K2's `schema_version=1.0` (no `source_pipeline`) TO K1's `schema_version=2.0`
+TO MAKE THE TABLES COMPARABLE.** Assign ownership first — normalise never, or only after.
+
+⚠ **THIS IS THE SECOND MASKING LAYER, AND THE DANGEROUS ONE.** The first (identical root strings,
+above) hides the collision **by accident**. This one would be removed **ON PURPOSE**: the instinct
+to tidy is exactly what fires on a file describing two writers emitting different shapes, and the
+tidy-up *looks like cleanup while deleting the only signal that the collision exists.* The same
+shape as the withdrawn `bronze/assets` format port — there the incidental tell was a file format,
+here it is a schema version.
+
+## The question it must be adjudicated WITH — AND ITS NOW-REGISTERED METHOD
+
+**Is knob 2 SUPERSEDED (by the P1 corpus) or merely STOPPED?** Not answerable from data as filed:
+"stopped 28 days, 3 canonical tables never emitted" is consistent with both, and 28 days is nowhere
+near the 90-day dormancy bar, so no standing rule reaches it. **If SUPERSEDED**, retiring
+`a01_runner` deletes this defect outright. **If STOPPED**, the defect must be fixed by choosing one
+writer. Either way it is a P5 decommission decision, not a cutover act.
+
+⭐ **METHOD REGISTERED 2026-08-12 (CTO ruling, relayed COO 142708Z) — this question is no longer
+methodless.** The **CONSUMPTION MAP** (what reads each key · what else each path does · coverage/dim
+parity) is specified GENERALLY and registered as the named method for the P5 spec's
+`SUPERSEDED` discrimination, which demands *"named successor + migration record VERIFIED live-plane"*
+and previously supplied no method. **This defect's superseded-vs-stopped, CTO's what-reads-each-key,
+and that spec's abandoned-vs-migrated are ONE QUESTION WITH THREE NAMES.** The `inf` fork is the
+method's first EXERCISE, not its purpose.
+> ⛔ **So P5 must run the consumption map here rather than inherit the (a)-ruling's ASYMMETRY
+> ARGUMENT as though it were the answer.** *(a) was ruled on asymmetry precisely BECAUSE no
+> discriminator existed — the right call with no method available, and a worse one than a method
+> makes.*
 
 ## ⛔ ONE DOCUMENT SENTENCE THAT MUST NOT BE CITED HERE — CONSIDERED AND FOUND SILENT
 
