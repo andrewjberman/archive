@@ -97,30 +97,53 @@ def main(path: str, only_field: str = None) -> int:
         if len(rows) < 2:
             continue
 
-        pols = {eid: polarity(v) for eid, v in rows}
-        opposed = [(a, b) for i, (a, _) in enumerate(rows) for (b, _) in rows[i + 1:]
-                   if pols[a] and pols[b] and not (pols[a] & pols[b])]
-        covs = {eid: set(COVERAGE.findall(v)) for eid, v in rows}
-        cov_split = len({frozenset(x) for x in covs.values() if x}) > 1
+        # PARTITION BY POLARITY CLASS, never enumerate pairs. Rewritten before W4b
+        # (29 entities) after MEASURING the growth rather than guessing at it: pairs grow
+        # as n^2/2, so one field could have printed 406 "A vs B" lines beside 29 value
+        # rows. THE FAILURE THAT SCALE PRODUCES IS NOT BLINDNESS, IT IS BURIAL -- a real
+        # contradiction becomes one line in a wall, and an instrument that drowns its own
+        # finding has the same effect as one that never fired, WITH THE ADDED HARM THAT
+        # IT LOOKS LIKE IT RAN. Grouping is O(n), carries the same information, and puts
+        # the MINORITY CLASS first, which is where a plant sits: one entity alone in a
+        # polarity class among 28 siblings is the shape worth looking at.
+        pols = {eid: frozenset(polarity(v)) for eid, v in rows}
+        groups = {}
+        for eid, _ in rows:
+            if pols[eid]:
+                groups.setdefault(pols[eid], []).append(eid)
+        covs = {eid: frozenset(COVERAGE.findall(v)) for eid, v in rows}
+        cov_groups = {}
+        for eid, _ in rows:
+            if covs[eid]:
+                cov_groups.setdefault(covs[eid], []).append(eid)
 
-        if not (opposed or cov_split):
+        if len(groups) < 2 and len(cov_groups) < 2:
             continue
         flagged += 1
-        print("  == FIELD: %s -- DIVERGENT CLAIMS, ADJACENT FOR COMPARISON ==" % f)
-        for eid, v in rows:
-            print("     %-34s %s" % (eid, v[:150] + ("..." if len(v) > 150 else "")))
-            ev = next((e["cells"][f].get("evidence") for e in ents
-                       if e.get("entity_id") == eid), None)
-            den = (ev or {}).get("denominator") if isinstance(ev, dict) else None
-            if den:
-                print("     %-34s   denominator: %s" % ("", str(den)[:130]))
-        for a, b in opposed:
-            print("     ** OPPOSING POLARITY: %s %s  vs  %s %s"
-                  % (a, sorted(pols[a]), b, sorted(pols[b])))
-        if cov_split:
-            print("     ** COVERAGE CLAIMS DIFFER across entities on this field "
-                  "(an 'N of M' that differs between siblings is where exercise-honesty "
-                  "violations sit while satisfying any check that only looks for the SHAPE).")
+        vals = dict(rows)
+        print("  == FIELD: %s -- %d POLARITY CLASSES, SMALLEST FIRST ==" % (f, len(groups)))
+        for cls, members in sorted(groups.items(), key=lambda kv: len(kv[1])):
+            lone = "   <-- ALONE IN ITS CLASS" if len(members) == 1 and len(rows) > 2 else ""
+            print("     [%s] %d of %d%s" % ("+".join(sorted(cls)) or "none",
+                                            len(members), len(rows), lone))
+            for eid in members:
+                v = vals[eid]
+                print("        %-32s %s" % (eid, v[:120] + ("..." if len(v) > 120 else "")))
+                ev = next((e["cells"][f].get("evidence") for e in ents
+                           if e.get("entity_id") == eid), None)
+                den = (ev or {}).get("denominator") if isinstance(ev, dict) else None
+                if den:
+                    print("        %-32s   denominator: %s" % ("", str(den)[:110]))
+        if len(cov_groups) > 1:
+            print("     ** COVERAGE CLAIMS SPLIT into %d groups: %s"
+                  % (len(cov_groups),
+                     "; ".join("%s -> %s" % ("/".join("%s of %s" % t for t in sorted(k)),
+                                             ",".join(v)) for k, v in
+                               sorted(cov_groups.items(), key=lambda kv: len(kv[1]))[:4]))
+                  + ("  (showing the 4 smallest of %d)" % len(cov_groups)
+                     if len(cov_groups) > 4 else ""))
+            print("        An 'N of M' that differs between siblings is where exercise-honesty "
+                  "violations sit while satisfying any check that only looks for the SHAPE.")
         print("     -> ASK: do these entities share ONE MECHANISM? If yes, they cannot "
               "differ here, and one of them is wrong.\n")
 
