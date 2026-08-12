@@ -357,9 +357,60 @@ The raiser **held a producer cell UNMEASURED for two cycles** rather than resolv
 **The hold was right and it resolved against the tool.** Asserting the near-match would have keyed a
 producer claim to a string that exists in the estate only inside a note saying it does not exist.
 
+### PC-003b — THE CONSUMED END: the bad name reached a LIVE CUTOVER GATE, and the gate reports `valid: OK`
+
+Routed to me by CTO~Z (072237Z) as an addition to the source comment I had quoted only in part: the
+bad name **also reached `49f_parity_config.yaml`**. Verified and then followed to its consumer,
+because a stale string in an unread file and a stale string in a live gate are different findings.
+
+**Verified at source:** `data/canonical/schwab/parity/49f_parity_config.yaml:121` →
+`bd_served: {path: "platinum/firm/header_metrics_fresh", format: json}`. Still present **today**,
+six weeks after `freeze_monitor.py:143` surfaced it as *"a separate config-vs-reality drift,
+surfaced to the diagnosis lane."*
+
+**It has a live consumer, by construction.** `comp_parity_cli.py:280` —
+`cfg_path = a.config or f"data/canonical/schwab/parity/{a.firm}_parity_config.yaml"`, and the shim
+documents **`default firm: 49f`**. So a bare `comp-parity` loads exactly this file. And
+`comp-parity` is not incidental: its own header calls it *"the daily, tolerance-aware, dual-gated
+proof that a canonical pipeline can stand in for the BD-served surfaces — the multi-day CLEAN
+streak IS the cutover gate (firm-by-firm, never-widen)."*
+
+**EXERCISED** (read-only comparison gate; bare invocation, rc captured as the next statement):
+```
+.tools/comp-parity ; RC=$?      # RC=0
+  config: data/canonical/schwab/parity/49f_parity_config.yaml  | valid: OK
+  correctness surfaces (vs Schwab-raw, HARD gate): 7
+  cutover-jump surfaces (vs BD, informational):    3  | streak target: 5
+```
+- **`valid: OK` on a config whose `bd_served` target does not exist.** "Valid" here means
+  schema-shaped, not target-resolvable — **the same existence-vs-resolution gap as M-8 and as PC-003
+  itself, now one layer downstream.** A reader takes `valid: OK` as the config having been checked.
+- **The void is NEVER NAMED anywhere in the verdict** (grepped the full output for
+  `header_metrics|missing|not found|absent|skip`: zero hits). So the *3 cutover-jump surfaces* count
+  includes one surface that cannot ever produce a comparison, and **the count silently overstates
+  comparable surfaces by one on a gate whose streak is the cutover criterion.**
+
+**WHAT I DID NOT ESTABLISH, stated so nobody reads more into this than was measured:** I did **not**
+run the live comparators and I make **no claim** that `comp-parity` produces a wrong parity RESULT.
+The tool is **honest** about this limb and deserves the credit: it reports `G1: RECORDED (static,
+NOT re-measured by this run)` and explicitly says *"Re-run the live comparators to re-confirm."*
+What the void does when those comparators actually run is **UNMEASURED**.
+
+**The propagation chain, now four hops with a documented discovery date:** a GO cited a key that
+never existed → the key entered `49f_parity_config.yaml` → `comp-estate` emits it as served →
+`comp-parity` validates that config `OK` and counts the void among its surfaces. **Flagged in source
+and to an exec six weeks ago; every hop still stands.** This is the strongest specimen in the estate
+for the bound line *a finding without a mechanism decays into a comment* — because **this finding
+literally is a comment**, at `freeze_monitor.py:141`, doing nothing, while both artifacts it names
+remain wrong.
+
+**`comp-parity` is itself an un-decomposed comp-\* VERDICT TOOL** and this makes it a candidate
+entity for a future run — with `valid: OK` as the verdict-vocabulary cell to open on.
+
 ### Disposition
 
-- **No fix, no retirement, no edit to any closed run** (findings-only; Rule 9).
+- **No fix, no retirement, no edit to any closed run** (findings-only; Rule 9). The config edit is
+  the owning lane's, not mine.
 - Registered as **PC-003**, and it warrants its own entry rather than folding into PC-001/002: those
   are false EDGES, this is a false NODE IDENTITY, and its mechanism (mixed-evidence field +
   misdirecting caveat) is distinct from theirs (unscoped topology).
