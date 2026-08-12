@@ -14,14 +14,21 @@
       "kind": "doc",
       "commit_or_etag": "7d46e2d79d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Measurement deliverable. This TO produces no served artifact and deploys nothing; TO section 8 states it changes no served artifact. Nothing was written under platinum/."
+      "deploy_evidence": "Measurement deliverable, REVISED under Andrew-direct ruling 2026-08-12 ~1855Z (deliverable section 0 carries his words verbatim). This TO produces no served artifact and deploys nothing; nothing was written under platinum/."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~O/deliverables/extract_brdsep_t1_v2.py",
+      "kind": "script",
+      "commit_or_etag": "7d46e2d79d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local measurement harness implementing the three Andrew rulings, not a pipeline script. Not in safe-deploy PIPELINE_MAP scope (not under data/*/scripts/{gold,silver,bronze}/); committed for reproducibility. commit-gate.sh passed."
     },
     {
       "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~O/deliverables/extract_brdsep_t1.py",
       "kind": "script",
       "commit_or_etag": "7d46e2d79d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Local measurement harness, not a pipeline script. Not in safe-deploy PIPELINE_MAP scope (not under data/*/scripts/{gold,silver,bronze}/); committed for reproducibility only. commit-gate.sh passed: 'OK: pre-commit gate clean for 1 file(s)'."
+      "deploy_evidence": "v1 harness, retained deliberately: it computes the pre-ruling April-1 framing that mutant 1 and mutant 2 are run against, so deleting it would delete the controls' baseline."
     }
   ],
   "acceptance": [
@@ -29,72 +36,72 @@
       "criterion_id": "T1-A1",
       "criterion_verbatim": "4-segment asset table exists with start, end, delta, and a per-cell as-of date. No cell undated.",
       "method": "manual_read_with_citation",
-      "invocation": "read deliverable section 2 (segment x {start,end,delta} table) + section 3 (counts table); grep -c '2026-0[48]-[0-9][0-9]' on the deliverable",
-      "output_evidence": "Section 2 carries all four segments -- 49 Financial, Inflection Wealth Management, Cottonwood Capital Advisory, ETF Float -- each row carrying an explicit as-of column for BOTH endpoints. 50 dated cells matched across the file. Segments whose start cannot be measured carry the literal 'NO BASELINE' + as-of 2026-04-01 and delta 'UNCOMPUTABLE' rather than a blank or a zero.",
-      "denominator": "4 of 4 segments present; 2 of 4 carry a measured start (49F, Inflection), 2 of 4 carry an explicit NO BASELINE (Cottonwood, ETF Float)",
+      "invocation": "read deliverable section 2 (segment x {start,end,delta}) and section 4 (counts); every value cell paired with an as-of column",
+      "output_evidence": "All four segments present with dated start, dated end and delta: 49 Financial $1,482,015,684.99 (2026-04-01) -> $1,736,948,738.65 (2026-08-11) +$254,933,053.66; Inflection $0.00 (2026-04-01) -> $144,978,896.75 (2026-08-10) +$144,978,896.75; Cottonwood $0.00 RULED (2026-04-01) -> $136,530,322.99 (2026-08-10) +$136,530,322.99; ETF Float $111,150,402.25 (2026-07-20) -> $105,976,737.76 (2026-08-11) -$5,173,664.49. Ruled-not-measured cells carry a superscript R so a reader cannot mistake a ruling for a measurement.",
+      "denominator": "4 of 4 segments carry a dated start, a dated end and a delta",
       "status": "PASS"
     },
     {
       "criterion_id": "T1-A2",
       "criterion_verbatim": "ETF leg states its TRUE start date; if not 2026-04-01, the shortfall is declared on the face of the table.",
       "method": "live_read",
-      "invocation": "aws s3 ls s3://opal-data-etfs/ --recursive (695 objects materialised, counted client-side, not --query length); then read silver/netassets/{2026-04-01,2026-08-11}.parquet and the full 353-partition series",
-      "output_evidence": "Per-ticker truth is NOT uniform, so the leg states it per ticker on the face of the table. DIVZ 2026-04-01 $229,314,418.64 and IDVZ $150,776,235.66 both carry inferred=True, source=reconstructed, shares_basis=msn_anchored_interpolated -- an INTERPOLATED value, declared as such. PFDE/PFOE are ABSENT at 2026-04-01 (first partition 2026-05-18) and their $257,769,042.00 end value is declared as having NO April-1 baseline. A stronger genuine anchor is reported alongside: 2026-03-31 issuer month-end, DIVZ $231,767,565.96 + IDVZ $149,894,362.78 = $381,661,928.74, inferred=False.",
-      "denominator": "4 Opal ETFs; 2 have an April-1 value (interpolated), 2 have none. Genuine observations: DIVZ 73 of 353 dates, IDVZ 73 of 353, PFDE 60 of 60, PFOE 60 of 60.",
+      "invocation": "pivot the 353-partition netassets series by date x ticker; dropna(how='any') to find the first date carrying ALL FOUR Opal ETFs; read that date and 2026-08-11",
+      "output_evidence": "TRUE start declared on the face of the table as 2026-05-18 -- the first of only 60 dates (of 353) carrying all four Opal ETFs. Leg reported as $643,330,643.00 (2026-05-18) -> $754,683,842.00 (2026-08-11), +$111,353,199.00 (+17.31%), every constituent issuer-reported (inferred=False). Andrew's named 2026-05-15 also reported, correctly scoped to DIVZ+IDVZ only ($405,106,800.00 -> $496,914,800.00), because PFDE/PFOE have no data that day. Superseded framing retained in section 7.1: under the original April-1 window DIVZ/IDVZ were interpolated and a genuine issuer anchor existed at 2026-03-31 ($381,661,928.74).",
+      "denominator": "353 dates in the netassets series; 60 carry all four tickers; per-ticker genuine observations DIVZ 73 / IDVZ 73 / PFDE 60 / PFOE 60",
       "status": "PASS"
     },
     {
       "criterion_id": "T1-A3",
       "criterion_verbatim": "The 49F account is written as the FULL 8 digits everywhere it appears. Zero occurrences of a bare 4-digit 0824/0833 as an account identifier.",
       "method": "command",
-      "invocation": "grep -o '08242234' <deliverable> | wc -l ; grep -o '08335338' <deliverable> | wc -l ; grep -nE '0824([^2]|$)|0833([^5]|$)' <deliverable> | grep -v '08242234' | grep -v '08335338'",
-      "output_evidence": "full 8-digit 08242234 occurrences: 3 | full 8-digit 08335338 occurrences: 0 | bare-form scan returned NO MATCHES (exit=1). Andrew confirmed 08242234 (Model Portfolios) at ~1820Z 2026-08-12; the extraction carries the account as a parameter, not a baked assumption.",
-      "denominator": "377 lines of deliverable scanned; 3 account-identifier occurrences found, 3 of 3 in full 8-digit form, 0 bare",
+      "invocation": "grep -o '08242234' <deliverable> | wc -l ; grep -nE '0824([^2]|$)|0833([^5]|$)' <deliverable> | grep -v '08242234' | grep -v '08335338'",
+      "output_evidence": "Full 8-digit form present; bare-form scan returns NO MATCHES. The single 4-digit occurrence in the file is inside Andrew's own quoted words in section 0 ('the 0824 account'), which is a VERBATIM QUOTATION and must not be altered -- the rule governs my identifiers, not his quoted phrasing, and the quotation is immediately resolved to 08242234 in the table beneath it.",
+      "denominator": "all account-identifier occurrences authored by me are full 8-digit; 1 four-digit occurrence exists and is inside a verbatim Andrew quotation",
       "status": "PASS"
     },
     {
       "criterion_id": "T1-A4",
       "criterion_verbatim": "Inflection leg reports the endpoint actually used (2026-08-10 unless a fresher artifact is found) and distinguishes model value from firm AUA.",
       "method": "live_read",
-      "invocation": "read s3://opal-data-portal-v2/platinum/mdpf/inflection/aggregate-aua-timeseries.json; index dates[] for '2026-04-01','2026-08-11','2026-08-10'",
-      "output_evidence": "as_of_last = 2026-08-10; '2026-08-11' is ABSENT from dates[] and is reported as such, not silently substituted. Endpoint used and labelled = 2026-08-10. Model value $144,978,896.75 is reported as the segment number; firm-wide partner_custody_total $209,315,297.79 is reported separately and explicitly excluded from the segment line. Window start 2026-04-01 model_aua = 0.0 with count_basis='measured' (a measured zero, not an absent).",
-      "denominator": "442 dates in series, 2024-11-01..2026-08-10; target 2026-08-11 present on 0 of them",
+      "invocation": "read platinum/mdpf/inflection/aggregate-aua-timeseries.json; index dates[] for 2026-04-01, 2026-08-11, 2026-08-10",
+      "output_evidence": "as_of_last = 2026-08-10; 2026-08-11 ABSENT from dates[] and reported as such, never substituted. Endpoint used and labelled 2026-08-10. Model value $144,978,896.75 is the segment number; firm-wide partner_custody_total $209,315,297.79 reported separately and explicitly excluded. Section 7.3 additionally distinguishes the Eclipse-crosswalked basis (0 at 2026-04-01, count_basis='measured') from Orion silver's $914,144.89 across 17 accounts / 4 clients in Opal-NAMED models the same day -- two honest instruments on different bases, reported not adjudicated.",
+      "denominator": "442 dates 2024-11-01..2026-08-10; target 2026-08-11 present on 0 of them",
       "status": "PASS"
     },
     {
       "criterion_id": "T1-A5",
       "criterion_verbatim": "Cottonwood reconciliation reports BOTH sets: on-list-not-found and found-not-on-list. Both may be empty; both must be present.",
       "method": "live_read",
-      "invocation": "read s3://opal-data-assets/blackdiamond/cottonwood/bronze/rebalancer_models/2026-08-12/page_000.json (today's landing of rebalancer.bdreporting.com); normalize-and-match Andrew's 18 against the roster; then complement on 'opal' in name",
-      "output_evidence": "ON-LIST-NOT-FOUND = EMPTY (all 18 resolved; 17 exact, 1 normalized: 'Moderate Income Portfolio' -> roster 'Opal Moderate Income Portfolio'). FOUND-NOT-ON-LIST (Opal-named) = 5, carrying 2 accounts: Opal Hendrickson LT/UST (1), Opal Sat 50+ 15% cash (1), Opal Long Term Aggressive (0), Opal Long Term Conservative (0), Opal Satellite 90 (0). Both sets present as required.",
-      "denominator": "Andrew list = 18; roster = 63 of 63 (totalResultCount=63, pageCount=1, full listing not a page); roster Opal-named total = 21; accounts on the 18 matched = 322",
+      "invocation": "read blackdiamond/cottonwood/bronze/rebalancer_models/2026-08-12/page_000.json (today's landing of rebalancer.bdreporting.com); normalize-and-match the 18 against the roster; complement on 'opal' in name",
+      "output_evidence": "ON-LIST-NOT-FOUND = EMPTY (18 of 18 resolve; 17 exact, 1 normalized 'Moderate Income Portfolio' -> 'Opal Moderate Income Portfolio'; ' Anna *9238' carries a leading space). FOUND-NOT-ON-LIST = 5 Opal-named strategies carrying 2 accounts: Opal Hendrickson LT/UST (1), Opal Sat 50+ 15% cash (1), Opal Long Term Aggressive (0), Opal Long Term Conservative (0), Opal Satellite 90 (0). Both sets present. Composition-axis limit stated explicitly rather than implied complete: 29 of 63 (46%) landed under the name-gated opal_closure scope; the independent 62/62 live scan of 2026-08-07 closes that axis and found the only non-Opal-named Opal-composed strategies to be Anna *9237 and Anna *9238, both already on the 18.",
+      "denominator": "Andrew list = 18; roster = 63 of 63 (totalResultCount=63, pageCount=1, full listing not a page); roster Opal-named = 21; accounts on matched 18 = 322",
       "status": "PASS"
     },
     {
       "criterion_id": "T1-A6",
       "criterion_verbatim": "ETF Float states the per-firm subtrahend, not only the net.",
       "method": "live_read",
-      "invocation": "read s3://opal-data-etfs/daily/{49financial,inflection}/2026-08-11.json and daily/cottonwood/2026-08-10.json; sum ownership_value per firm per ticker against the 2026-08-11 gross",
-      "output_evidence": "Section 5 states all four per-ticker values for each of the three firms plus each firm total: 49 Financial -$544,129,709.80 (2026-08-11), Inflection -$52,569,955.74 (2026-08-11), Cottonwood -$52,007,438.70 (2026-08-10). Gross $754,683,842.00 - subtrahend $648,707,104.24 = ETF Float $105,976,737.76. 86.0% of Opal ETF assets sit inside the managed books.",
-      "denominator": "3 firms x 4 tickers = 12 subtrahend components, 12 of 12 stated individually",
+      "invocation": "read opal-data-etfs/daily/{firm}/{date}.json at 2026-07-20 and 2026-08-11 (cottonwood 2026-08-10 at the end, no 08-11 partition); subtract from the netassets gross at each date",
+      "output_evidence": "Section 5 states every per-firm subtrahend at BOTH endpoints. 2026-07-20: gross $738,190,364.00 - 49F $528,132,730.04 - Inflection $48,614,453.13 - Cottonwood $50,292,778.58 = float $111,150,402.25. 2026-08-11: gross $754,683,842.00 - 49F $544,129,709.80 - Inflection $52,569,955.74 - Cottonwood $52,007,438.70 (as-of 08-10) = float $105,976,737.76. Delta -$5,173,664.49 (-4.65%). 86.0% of Opal ETF assets sit inside the managed books.",
+      "denominator": "3 firms x 2 endpoints = 6 firm-subtrahends, 6 of 6 stated individually (per-ticker detail carried at the 08-11 endpoint)",
       "status": "PASS"
     },
     {
       "criterion_id": "T1-A7",
       "criterion_verbatim": "Client and account counts delivered per segment at both endpoints with deltas.",
       "method": "live_read",
-      "invocation": "read s3://opal-data-assets/schwab/08242234/silver/{fact_acc,fact_rps}/date={2026-04-01,2026-08-11}/ and s3://opal-data-assets/orion/inflection/silver/fact_positions/date={2026-04-01,2026-08-11}/; distinct-count account and client keys",
-      "output_evidence": "DELIVERED IN FULL for 2 of 4 segments. 49 Financial: accounts 6,683 -> 7,189 (+506, fact_acc dimension), 5,586 -> 6,060 (+474, fact_rps position-bearing), clients 4,020 -> 4,268 (+248, distinct ssn_tin_number). Inflection: Opal-model accounts 17 -> 600 (+583), clients 4 -> 266 (+262); firm-wide 880/311 -> 948/318. NOT DELIVERABLE for Cottonwood: silver fact_holdings partitions begin 2026-06-09, so no 2026-04-01 endpoint exists. NOT APPLICABLE for ETF Float: it is a dollar residual, not an account cohort.",
-      "denominator": "4 segments; 2 delivered with both endpoints + delta, 1 uncomputable (Cottonwood), 1 not-an-account-cohort (ETF Float). Row denominators: 49F fact_acc 6,683/7,189 rows; fact_rps 84,022/93,697 rows; Inflection fact_positions 24,148/35,262 rows.",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "Cottonwood's 2026-04-01 client/account counts cannot be computed from the estate: blackdiamond/cottonwood/silver/fact_holdings begins 2026-06-09 (48 partitions) and the platinum series' first_tracked_date is 2026-07-20 with 12 measured dates of 451. This is a COVERAGE ONSET, not an absence of accounts -- Cottonwood was a Black Diamond client well before April 2026, and Black Diamond holds the history we never ingested. THE NAMED LATER RUN THAT CLOSES IT: a Cottonwood BD historical backfill into blackdiamond/cottonwood/silver/fact_holdings covering 2026-04-01 (the existing cot-rebalancer-runner/silver conversion path already handles the shape; only the historical range is missing). ETF Float is N/A on this criterion by construction -- it is a residual dollar quantity with no account population."
+      "invocation": "read schwab/08242234/silver/{fact_acc,fact_rps}/date={2026-04-01,2026-08-11}/ and orion/inflection/silver/fact_positions/date={2026-04-01,2026-08-11}/; distinct-count account and client keys; read platinum account_count_total for the model cohorts",
+      "output_evidence": "49 Financial accounts 6,683 -> 7,189 (+506) and clients 4,020 -> 4,268 (+248), plus position-bearing accounts 5,586 -> 6,060 (+474). Inflection Opal-model accounts 0 -> 548 (platinum) and Opal-named accounts 17 -> 600 / clients 4 -> 266 (Orion silver); firm-wide 880/311 -> 948/318. Cottonwood 0 -> 314 (+314), the zero per Andrew's ruling. Cottonwood's per-model fan-out trap is carried explicitly: account_count must never be totalled across models (447 vs 296 on 2026-07-22 per the producer's own note).",
+      "denominator": "4 segments: 3 carry account counts at both endpoints with deltas; ETF Float carries none by construction. Row denominators -- fact_acc 6,683/7,189 rows; fact_rps 84,022/93,697 rows; fact_positions 24,148/35,262 rows.",
+      "status": "PASS",
+      "status_reason": "PASS with one segment N/A by construction, stated rather than silently omitted: ETF Float is a dollar residual (gross minus firm holdings), not an account cohort -- it has no account population to count, so 'both endpoints with deltas' is not applicable to it rather than missing from it. The Cottonwood zero start is Andrew-RULED (2026-08-12 ~1855Z), not measured; its underlying coverage remains 21 of 132 days and the deliverable carries that caveat beside the number."
     },
     {
       "criterion_id": "T1-A8",
       "criterion_verbatim": "Every scan reasoned from prints its denominator.",
       "method": "manual_read_with_citation",
-      "invocation": "read deliverable section 8 (denominator table); cross-check each headline figure in sections 2/3/5 against a section-8 row",
-      "output_evidence": "Section 8 carries 12 denominator rows covering every scan the deliverable reasons from: ETF bucket enumeration 695 objects; netassets 353 partitions / 826 rows / 353 dates; per-ticker genuine observations 73/73/60/60; BD roster 63 of 63 with pageCount=1; BD composition 29 of 63 (46%); Cottonwood platinum 12 measured of 451; 49F fact_rps 555 partitions and per-endpoint row counts; 49F fact_acc 646 partitions with tin present on 100% of rows; Inflection fact_positions 2,297 partitions and per-endpoint row counts; both platinum series date counts. Every S3 listing was materialised and counted client-side -- no --query length() on a paginated list-* call.",
+      "invocation": "read deliverable section 9; cross-check each headline figure in sections 2/4/5 against a section-9 row",
+      "output_evidence": "Section 9 carries 12 denominator rows covering every scan reasoned from, including the ones that decided the answer: 60 of 353 netassets dates carry all four tickers (the ETF window); dim_balance net_mv_plus_cash non-null on 100% of 6,683 and 7,190 rows (the 49F total); 41 Cottonwood ETF-ownership dailies (the float ramp); 29 of 63 composition landed (the name-gating limit); 12 measured of 451 Cottonwood axis dates. Every S3 listing materialised and counted client-side -- no --query length() on a paginated list-* call.",
       "denominator": "12 denominator rows for 12 distinct scans reasoned from",
       "status": "PASS"
     },
@@ -102,96 +109,96 @@
       "criterion_id": "T1-A9",
       "criterion_verbatim": "Determinism control: extraction run twice, diff reported.",
       "method": "diff",
-      "invocation": "python extract_brdsep_t1.py > run1.json ; python extract_brdsep_t1.py > run2.json ; diff run1.json run2.json",
-      "output_evidence": "run1 rc=0 bytes=14915 ; run2 rc=0 bytes=14915 ; diff => 'IDENTICAL -- 0 differing lines across 514 lines'. STABLE. Determinism is structural, not lucky: the extraction reads local mirrors of landed S3 artifacts, so a re-run cannot pick up a mid-flight producer write.",
-      "denominator": "514 lines compared, 0 differing",
+      "invocation": "python extract_brdsep_t1_v2.py > v2run1.json ; python extract_brdsep_t1_v2.py > v2run2.json ; diff v2run1.json v2run2.json",
+      "output_evidence": "IDENTICAL -- 0 differing lines across 178 lines; both runs rc=0. STABLE. (v1 harness under the pre-ruling framing likewise IDENTICAL, 0 differing lines of 514.) Stability is structural rather than lucky: both harnesses read local mirrors of landed S3 artifacts, so a re-run cannot pick up a mid-flight producer write.",
+      "denominator": "178 lines compared, 0 differing (v2); 514 lines compared, 0 differing (v1)",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Two mutants, each removing one step of my own method and re-running it, to test whether that step is load-bearing or decorative. Mutant 1 removes cohort-matching from the ETF delta; mutant 2 removes name-normalization from the Cottonwood 18-strategy reconciliation.",
-      "expected": "Mutant 1 should inflate the ETF growth figure by counting PFDE/PFOE's coverage onset as growth. Mutant 2 should manufacture false 'missing strategy' findings for roster names that differ cosmetically from Andrew's list.",
-      "observed": "MUTANT 1 FIRED: mutated (no cohort match) 754,683,842.00 - 380,090,654.30 = +374,593,187.70 (+98.55%) vs correct (cohort-matched) 496,914,800.00 - 380,090,654.30 = +116,824,145.70 (+30.74%). Divergence $257,769,042.00, the two differ by 2.2x. MUTANT 2 FIRED, and harder than predicted: exact-string-only matching reports 4 of the 18 as on-list-not-found -- 'Anna *9238', 'Moderate Income Portfolio', 'Opal - Beecherl Legg', 'Opal - Income' -- all four of which are present on the roster. Correct normalized run reports EMPTY. I predicted 1-2 and measured 4; the deliverable was corrected to the measured figure.",
+      "description": "Three mutants, each removing one step of my own method and re-running it, to test whether that step is load-bearing or decorative. Mutant 1 removes cohort-matching from the ETF delta. Mutant 2 removes name-normalization from the Cottonwood 18-strategy reconciliation. Mutant 3 takes Andrew's 'first available info' literally for the ETF Float, starting at the 2026-06-08 feed onset instead of the 2026-07-20 completeness date.",
+      "expected": "Mutant 1 should inflate ETF growth by counting PFDE/PFOE's coverage onset as growth. Mutant 2 should manufacture false missing-strategy findings from cosmetic roster-name differences. Mutant 3 should inflate the float by subtracting an incomplete Cottonwood subtrahend at the start.",
+      "observed": "MUTANT 1 FIRED: +$374,593,187.70 (+98.55%) mutated vs +$116,824,145.70 (+30.74%) correct; divergence $257,769,042.00, 2.2x apart. MUTANT 2 FIRED harder than predicted: exact-string matching reports 4 of the 18 as not-found ('Anna *9238', 'Moderate Income Portfolio', 'Opal - Beecherl Legg', 'Opal - Income') when all four are present; I predicted 1-2, measured 4, and corrected the deliverable to the measured figure. MUTANT 3 FIRED AND INVERTED THE SIGN, which makes it the most serious of the three: float delta reads +$657,896,761.38 mutated vs -$5,173,664.49 correct -- a $5.2M decline rendered as a $658M increase. Cottonwood's ETF-ownership feed carries 5 accounts / $194,520.46 at its 2026-06-08 onset vs 309 accounts / $52,007,438.70 at the end, with a 5->293 account jump in the week of 2026-07-08..07-15; and 2026-06-08 carries no netassets partition at all, so the mutated gross reads $0.00. Mutant 3 is the reading a careful person gets by following the instruction literally, which is why it was worth building.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "Full extraction run twice from identical local mirrors of the landed S3 artifacts, outputs diffed byte-for-byte",
-      "observed": "IDENTICAL -- 0 differing lines across 514 lines; both runs rc=0, both 14915 bytes",
+      "method": "Full extraction run twice from identical local mirrors of the landed S3 artifacts, outputs diffed byte-for-byte; both the v2 (ruled framing) and v1 (original framing) harnesses",
+      "observed": "v2: IDENTICAL, 0 differing lines across 178. v1: IDENTICAL, 0 differing lines across 514.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "extract_brdsep_t1 -- the extraction script carries no acceptance row of its own",
-      "reason": "It is the measurement harness that PRODUCES the evidence for T1-A1..T1-A9, not a spec'd deliverable artifact; the TO's battery scopes to the figures, not to the tool that computed them. Its correctness is evidenced by the T1-A9 determinism control and by both mutants in controls.mutant, which exercise its two load-bearing steps."
+      "item": "extract_brdsep_t1 and extract_brdsep_t1_v2 -- the extraction harnesses carry no acceptance row of their own",
+      "reason": "They PRODUCE the evidence for T1-A1..T1-A9 rather than being spec'd deliverable artifacts; the TO's battery scopes to the figures, not to the tool that computed them. Their correctness is evidenced by the T1-A9 determinism control on both, and by the three mutants which exercise their load-bearing steps."
     },
     {
       "item": "No single headline growth rate computed",
-      "reason": "TO section 6 explicitly forbids it: 'Do not compute a single headline growth rate.' Deliverable section 6 gives the segments plus the arithmetic to combine them, and names the three framing choices (49F model-vs-custody, Cottonwood growth-vs-coverage, Inflection zero-vs-$0.91M) as Andrew's to make."
+      "reason": "TO section 6 forbids it. Deliverable section 6 gives segments plus the arithmetic, and names the two framing choices that remain Andrew's (whether Cottonwood's $136.53M is growth, and whether Inflection starts at $0 or $914,144.89)."
     },
     {
       "item": "No live vendor call to rebalancer.bdreporting.com",
-      "reason": "Not needed and therefore not made. Our own cot-rebalancer-runner landed that endpoint's full roster today at 02:00Z; I reconciled against that landing (the sanctioned raw-vendor path) and corroborated it against the independent 62/62 live scan of 2026-08-07, which showed zero drift vs bronze. Build-ladder rung 2: the estate already had it."
+      "reason": "Not needed. Our own cot-rebalancer-runner landed that endpoint's full 63-strategy roster today at 02:00Z; I reconciled against that landing (the sanctioned raw-vendor path) and corroborated against the independent 62/62 live scan of 2026-08-07, zero drift. The cot-BD egress lift was available and did not need to be spent."
     },
     {
       "item": "No call to pathfinderetfs.com for PFDE/PFOE history",
-      "reason": "TWO independent reasons. (1) I hold no vendor-egress authorization for it -- the standing lift is Cottonwood Black Diamond only, and availability is not authorization. (2) It would not close the gap anyway: the issuer historical file carries NAV and market price but no Net Assets and no Shares Outstanding, and net assets is nav x shares. Source: docs/briefs/mdpf-pfde-pfoe-etf-netassets-feasibility-20260518.md:84."
+      "reason": "Two independent reasons. (1) No vendor-egress authorization is held for it. (2) It would not close the gap: the issuer historical file carries NAV and market price but no Net Assets and no Shares Outstanding, and net assets is nav x shares (feasibility brief line 84). Moot in any case under Andrew's ruling 3, which starts the ETF leg after that history would apply."
     },
     {
-      "item": "Cottonwood April-1 asset and count baseline",
-      "reason": "UNCOMPUTABLE from the estate -- point_class is 'absent' (absent, not zero) at 2026-04-01; first_tracked_date 2026-07-20; sanctioned interpolated backfill reaches only to 2026-05-28. Declared on the face of the deliverable rather than substituted."
+      "item": "The April-1 ETF baseline question is no longer answered as a requirement",
+      "reason": "Andrew's ruling 3 (2026-08-12 ~1855Z) re-windows the ETF leg to first-available -> now. The prior finding (DIVZ/IDVZ interpolated at 2026-04-01 with a genuine 2026-03-31 issuer anchor at $381,661,928.74; PFDE/PFOE unreconstructible) is retained in deliverable section 7.1 as a data-quality fact but is no longer load-bearing on any board figure."
     },
     {
-      "item": "ETF Float April-1 baseline",
-      "reason": "UNCOMPUTABLE -- the per-firm ETF ownership dailies that form the subtrahend begin 2026-05-01 (49F, Inflection) and 2026-06-08 (Cottonwood). With no subtrahend before May there is no float to compute, and its April-1 value is not zero."
+      "item": "Cottonwood's 2026-04-01 baseline is not measured",
+      "reason": "It is RULED to zero by Andrew, not measured. The underlying data is unchanged: point_class at 2026-04-01 is 'absent' (absent, not zero), first_tracked_date is 2026-07-20, and coverage is 21 of 132 days. The caveat is carried beside the number in the deliverable rather than withholding the number."
     },
     {
       "item": "Did not adjudicate the Inflection basis question",
-      "reason": "Whether the Inflection segment starts at $0 (Eclipse-crosswalked model basis) or at $914,144.89 (Orion silver, Opal-named models) is a framing call reserved to Andrew per TO section 6. Both figures reported with their bases named; neither presented as the answer."
+      "reason": "Whether Inflection starts at $0 (Eclipse-crosswalked model basis) or $914,144.89 (Orion silver, Opal-named models) is reserved to Andrew per TO section 6. Both reported with their bases named; neither presented as the answer."
     }
   ],
   "surprises": [
-    "Inflection's 2026-08-11 per-ticker ETF ownership values are identical to the cent, on all four tickers, to its 2026-08-10 values, while the underlying ETF NAVs moved between those dates -- a carry-forward signature, though the file names holdings_2026-08-11.parquet as its source. Surfaced to 1.0.0_SA_CTO, no action taken. Bounded effect on ETF Float: one day of Inflection drift, order $0.1M.",
-    "comp-estate has no 'etfs' vertical although opal-data-etfs is a canonical bucket with 695 objects and 9 producers; the vertical is spelled 'etf-reports', which reads as a reporting thread rather than the asset thread. A reasonable question -- 'what is in the ETFs pipeline?' -- does not route on the obvious name. Recorded, not chased.",
-    "The 49F platinum series carries meta.basis = 'schwab-rps' on the INFLECTION artifact's sibling field set; noted while reading meta and not investigated, as it is outside this TO's mandate."
+    "Inflection's 2026-08-11 per-ticker ETF ownership values are identical to the cent, on all four tickers, to its 2026-08-10 values while the underlying NAVs moved -- a carry-forward signature, though the file names holdings_2026-08-11.parquet as its source. Surfaced to 1.0.0_SA_CTO, no action taken. Bounded effect: one day of Inflection drift, order $0.1M on the float.",
+    "PFOE fell $17,567,093.00 between 2026-05-18 and 2026-08-11 while the other three Opal ETFs rose; a cohort total moving +17.31% concealed one constituent moving -15.8%. Recorded in the deliverable's per-ticker table, not chased.",
+    "comp-estate has no 'etfs' vertical although opal-data-etfs is a canonical bucket with 695 objects and 9 producers; the vertical is spelled 'etf-reports', which reads as a reporting thread rather than the asset thread. A reasonable question does not route on the obvious name. Recorded, not chased."
   ],
   "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~O/logs/2026-08-12/brdsep_t1_asset_base_1815-1900Z.md",
   "compiler_tools": [
     {
       "tool": "comp-which",
       "invocation": "comp-which \"where does the total Opal ETF holdings snapshot data come from and what produces it\"",
-      "result": "near-tie, top 3 of 75 tools; correctly declined to guess and routed to comp-estate / comp-pipescript"
+      "result": "near-tie, top 3 of 75; declined to guess and routed to comp-estate / comp-pipescript"
     },
     {
       "tool": "comp-estate",
       "invocation": "comp-estate etfs (REJECTED -- not a vertical) then comp-estate etf-reports",
-      "result": "PASS after correction; named the 9 producers. Its own C0 roster self-labels 'do NOT use this roster as a census denominator', so it was not used as one."
+      "result": "PASS after correction; named the 9 producers. Its C0 roster self-labels 'do NOT use this roster as a census denominator' and was not used as one."
     },
     {
       "tool": "comp-find",
       "invocation": "comp-find 'PFDE'",
-      "result": "PASS -- 1,843 hits across 26,096 files, bands HEAD=58/DEF=27/SURFACED=803/CONFIG=415/TEST=41/DOC=499. The HEAD band surfaced the inception-date brief on page 1; this single call produced the finding that PFDE/PFOE were incepted 2025-12-30 and are a coverage onset, not a launch."
+      "result": "PASS -- 1,843 hits across 26,096 files, HEAD=58. The HEAD band surfaced the inception-date brief on page 1, producing the 2025-12-30 inception fact."
     },
     {
       "tool": "comp-find",
       "invocation": "comp-find --name 'rebalance'",
-      "result": "PASS -- 17 of 17 hits; located the existing cot-rebalancer bronze/silver pipeline and both prior Opal strategy scans, which removed the need to stand up a duplicate vendor call (build-ladder rung 2)."
+      "result": "PASS -- 17 of 17; located the existing cot-rebalancer pipeline and both prior Opal strategy scans, removing the need for a duplicate vendor call (build-ladder rung 2)."
     },
     {
       "tool": "comp-to",
       "invocation": "comp-to OPAL_BRDSEP.T1",
-      "result": "PASS -- session TO context set race-free per-session rather than via .agent_context"
+      "result": "PASS -- race-free per-session TO context"
     },
     {
       "tool": "commit-gate.sh",
-      "invocation": "bash .tools/commit-gate.sh org/tier2_senior/0.4.0_DS_ClientPlatform~O/deliverables/extract_brdsep_t1.py",
-      "result": "PASS -- 'All checks passed! / OK: pre-commit gate clean for 1 file(s)'"
+      "invocation": "bash .tools/commit-gate.sh on both extraction harnesses",
+      "result": "PASS -- 'All checks passed!'"
     },
     {
       "tool": "risk-reflex (comp-pulse)",
-      "invocation": "auto, on the deliverable commit",
-      "result": "REFLEX CLEAN -- 2 files checked against 1,731 danger nodes, denominator printed"
+      "invocation": "auto, on each commit",
+      "result": "REFLEX CLEAN -- files checked against 1,731 danger nodes, denominator printed each time"
     }
   ]
 }
