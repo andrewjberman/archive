@@ -1,0 +1,194 @@
+{
+  "schema_version": "1.0",
+  "to_id": "OPAL_BRDSEP.T2",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/OPAL_BRDSEP.T2.non-opal-model-cohort-value-and-count.md",
+    "group": "T",
+    "vintage_commit": "f6039beade"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~O",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~O/deliverables/OPAL_BRDSEP_T2_COTTONWOOD_STRATEGY_DECOMPOSITION_20260812.md",
+      "kind": "doc",
+      "commit_or_etag": "4b76525ba3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Measurement deliverable against the narrowed spec (CTO [STOP] 1933Z). No served artifact; platinum/ read-only; nothing written there."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~O/deliverables/OPAL_BRDSEP_T2_NON_OPAL_MODEL_COHORT_20260812.md",
+      "kind": "doc",
+      "commit_or_etag": "4b76525ba3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The superseded three-firm shape, retained and stamped DESCOPED rather than deleted, per CTO's instruction and the same discipline applied to the descoped June section in T1."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~O/deliverables/extract_brdsep_t2.py",
+      "kind": "script",
+      "commit_or_etag": "4b76525ba3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local measurement harness, not a pipeline script; not in safe-deploy PIPELINE_MAP scope. commit-gate.sh passed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T2-A1",
+      "criterion_verbatim": "All 18 strategies reported with strategy total, Opal-tagged subtotal, non-Opal balance.",
+      "method": "live_read",
+      "invocation": "join cot silver fact_holdings (deduped to AccountID+AssetID) to bronze rebalancer_accounts on account number; resolve the 18 with the T1 normalized matcher; apply hierarchy.children relativeAllocation from bronze rebalancer_model_detail",
+      "output_evidence": "Strategy TOTAL delivered for 18 of 18, summing to $187,928,913.13. Opal-tagged subtotal and non-Opal balance delivered for 16 of 18: $134,387,049.10 Opal and $7,005,515.33 balance over $141,392,564.43. The 2 remaining -- Anna *9237 ($20,052,465.74) and Anna *9238 ($26,483,882.96), $46,536,348.70 combined -- carry a strategy total but NO decomposition.",
+      "denominator": "18 strategies; 18 of 18 carry a strategy total; 16 of 18 carry the Opal/balance split; 2 of 18 (24.8% of value) do not",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Deliberately NOT retro-fitted to PASS, per CTO 194946Z: the strategy-total line is MEASURED and Andrew RULED the Annas' full $46,536,348.70 into Opal AUA at ~1950Z, but the model-vs-non-model split WITHIN those two accounts remains uncomputable and the two facts must not be collapsed into one row. MECHANISM: cot-rebalancer-runner pulls composition under MODEL_DETAIL_SCOPE=opal_closure, which seeds only on strategies whose NAME contains 'opal'; neither Anna does, so their composition has never landed. THE NAMED LATER RUN: invoking the deployed runner from AWS with scope=all -- CTO-authorized 194528Z and then found UNEXECUTABLE as conditioned, because lambda_handler (:407-417) accepts only mode/date/force and --scope exists solely on the CLI path (:424-429). Closing it needs either a Lambda config change (persistent, changes every scheduled run) or a code change, both excluded by the authorization's own conditions. Handed back, not worked around. A live vendor pull was attempted under the standing cot-BD lift and returned HTTP 401 on the detail endpoint; stopped rather than retried, nothing written."
+    },
+    {
+      "criterion_id": "T2-A2",
+      "criterion_verbatim": "Constituent-model breakdown delivered per strategy, with per-model values.",
+      "method": "live_read",
+      "invocation": "for each resolved strategy, read hierarchy.children[] from bronze/rebalancer_model_detail/2026-08-12/{id}.json; value = strategy_total x relativeAllocation",
+      "output_evidence": "Section 3b delivers the full per-constituent table: 28 constituent rows across the 16 decomposable strategies, each with name, relativeAllocation, computed value, Opal flag and source. Constituent values tie to the subtotals exactly ($134,387,049.10 + $7,005,515.33 = $141,392,564.43). Only SIX distinct Opal building blocks appear across all 18 (Intermediate-Term, Short-Term, Conservative Growth, Ultra Short-Term Income, Long-Term Aggressive) plus three non-Opal Sleeves.",
+      "denominator": "28 constituent models across 16 strategies; 2 strategies have zero constituents (leaf, see T2-A3); 2 strategies have no composition at all",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Same 2 of 18 as T2-A1 and the same mechanism -- the Anna compositions have never landed, so no per-constituent breakdown exists to report for them. 16 of 18 are delivered in full. Not retro-fitted to PASS for the same reason as A1: the honest structure is that the totals are measured and the decomposition is not."
+    },
+    {
+      "criterion_id": "T2-A3",
+      "criterion_verbatim": "Identity `opal + non_opal == total` asserted per strategy AND in aggregate; violations reported, not silently balanced.",
+      "method": "command",
+      "invocation": "per strategy, sum children relativeAllocation and compare to 1.000 (tolerance 0.005); in aggregate, compare opal_subtotal + balance to the 16-strategy total",
+      "output_evidence": "PER STRATEGY: 16 of 16 with children close to 1.000 -- reported in the `closes` column of section 3. AGGREGATE: $134,387,049.10 + $7,005,515.33 = $141,392,564.43, exact. TWO VIOLATIONS REPORTED RATHER THAN BALANCED: `Opal Moderate Income Portfolio` and `Opal - Income` have ZERO children and therefore do not close -- flagged with a cross in the table and given their own section (4), because they are LEAF strategies holding securities directly, not a weight defect. A one-cent float difference between the summed components ($7,005,515.34) and the aggregate ($7,005,515.33) is stated explicitly rather than rounded away.",
+      "denominator": "18 strategies: 16 close, 2 are leaf (zero children, flagged), 2 have no composition (held out of the identity entirely)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2-A4",
+      "criterion_verbatim": "Classification signal stated explicitly (tag field vs name heuristic) + count of judged-vs-read constituents.",
+      "method": "manual_read_with_citation",
+      "invocation": "enumerate the field set exposed on a hierarchy.children[] entry and check for any tag/category/flag attribute",
+      "output_evidence": "STATED IN ITS OWN SECTION (2): the endpoint carries NO tag field. A constituent exposes id, rebalanceModelType, name, depth, metadata{isFullAllocation}, absoluteAllocation, relativeAllocation, updatedBy, createdBy, updatedAt, createdAt, isInferred, isLiquidationOnly, isPublished, firmId, toleranceBandOptions, children, components -- no tag, no category, no Opal flag. THEREFORE THE CLASSIFICATION IS NAME-BASED AND JUDGED: 28 of 28 constituents classified by whether `name` contains 'opal'; 0 read from a tag. Stated plainly that this is the same heuristic already measured to fail both directions one level up (drops 3 of 18, invents 4 false absences).",
+      "denominator": "28 constituents: 28 judged by name, 0 read from a tag field",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2-A5",
+      "criterion_verbatim": "Source stated per constituent (own landing vs live Rebalance sweep).",
+      "method": "manual_read_with_citation",
+      "invocation": "source column carried on every row of the section 3b constituent table",
+      "output_evidence": "28 of 28 constituents sourced from OUR OWN LANDING (bronze/rebalancer_model_detail/2026-08-12, landed 02:00Z). ZERO from a live sweep. The uniformity is itself the finding and is stated as such: the live sweep was attempted under the standing cot-BD lift and FAILED -- cookie loaded, bearer minted via /auth/token OK, then GET /api/models/{id} returned HTTP 401, and the Puller's own re-mint-and-retry also 401'd. Stopped rather than retried; nothing written to S3, no secret write, no bronze landing. The 2 Anna rows carry source 'NONE - name-gated gap' rather than being silently blank.",
+      "denominator": "28 constituents sourced + 2 strategies with no constituents to source; 28 own-landing / 0 live-sweep / 2 unavailable",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2-A6",
+      "criterion_verbatim": "Delta against T1's $136,530,322.99 reported with its direction explained.",
+      "method": "diff",
+      "invocation": "compare the Opal-tagged constituent subtotal to T1's platinum model_aua; decompose the residual",
+      "output_evidence": "DELTA = -$2,143,273.89. My $134,387,049.10 is LOWER than T1's $136,530,322.99. DIRECTION EXPLAINED: my scope is narrower -- Andrew's 18-list -- while platinum's basis includes Opal-NAMED strategies that are not on the 18 (Opal Hendrickson LT/UST, Opal Sat 50+ 15% cash). The reconciliation closes to the cent: $134,387,049.10 + $2,143,273.89 = $136,530,322.99. CAVEATED AS ASKED: the arithmetic is exact, the MECHANISM is INFERRED -- I have not read platinum's producer, and an exact tie is evidence for a hypothesis rather than proof of one. Neither figure was tuned toward the other.",
+      "denominator": "1 delta, decomposed into 1 residual component which accounts for 100% of it",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2-A7",
+      "criterion_verbatim": "Cottonwood account + client deltas delivered.",
+      "method": "live_read",
+      "invocation": "read cot fact_holdings at 2026-06-09, 06-15, 06-30, 07-15, 07-20, 08-03, 08-10; dedupe to (AccountID, AssetID); count distinct Account Number and Relationship ID",
+      "output_evidence": "Delivered on both bases. ANDREW-RULED 0 START (2026-04-01 -> 2026-08-10): accounts 0 -> 926 (+926); relationships 0 -> 223 (+223). MEASURED COVERAGE WINDOW (2026-06-09 -> 2026-08-10): accounts 680 -> 926 (+246); relationships 206 -> 223 (+17). Relationship ID named explicitly as the client/household key. The T1 gap is closed.",
+      "denominator": "7 partition dates read; Cottonwood silver has no partition before 2026-06-09 and none at 2026-08-11",
+      "status": "PASS",
+      "status_reason": "PASS with the qualifier carried on the face of the deliverable rather than in a footnote: the MEASURED +246 accounts is NOT clean growth (see T2-A8), and the full-window delta rests on Andrew's ruled zero rather than on a measurement, because no 2026-04-01 partition exists."
+    },
+    {
+      "criterion_id": "T2-A8",
+      "criterion_verbatim": "Every count carries the count-ramp check; every scan prints its denominator.",
+      "method": "live_read",
+      "invocation": "per-date rows/accounts/relationships/value table across the Cottonwood coverage window; denominator table assembled in section 9",
+      "output_evidence": "COUNT-RAMP RUN AND FIRED: accounts +36% (680->926) against relationships +8% (206->223), and rows +45% between 06-30 and 07-15 against a 4% account rise -- the feed picking up more accounts and more assets inside EXISTING relationships, i.e. onboarding, landing on the producer's declared first_tracked_date of 2026-07-20. VERDICT ATTACHED TO THE FIGURE: the +$109,410,107.65 over that window must not be read as growth. DENOMINATORS: section 9 carries 11 rows including the ones that decide the answer -- composition 16 of 18 for the list and 29 of 63 roster-wide, 28 constituents all name-judged, 17,140 raw holdings rows deduped to 17,138, 917 of 926 accounts joined to a strategy, and the live pull's 2 attempted / 0 succeeded / 0 bytes written.",
+      "denominator": "11 denominator rows for 11 distinct scans; 1 multi-date count series subjected to the ramp check",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2-A9",
+      "criterion_verbatim": "Determinism diff reported.",
+      "method": "diff",
+      "invocation": "python extract_brdsep_t2.py > t2run1.json ; python extract_brdsep_t2.py > t2run2.json ; diff t2run1.json t2run2.json",
+      "output_evidence": "IDENTICAL -- 0 differing lines across 137 lines, both runs rc=0. STABLE. Structural rather than lucky: the harness reads local mirrors of landed artifacts, so a re-run cannot pick up a mid-flight producer write. The constituent decomposition was independently re-derived and its totals reproduce ($134,387,049.10 / $7,005,515.33 / $141,392,564.43).",
+      "denominator": "137 lines compared, 0 differing",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Relationship-grain collapse on Cottonwood holdings: cot fact_holdings is Relationship x Account x Asset, so a naive sum double-counts any (account, asset) pair held under more than one relationship. Mutant: skip the collapse and sum naively.",
+      "expected": "The naive sum should exceed the deduped sum, and only the deduped sum should tie to the producer's own published total.",
+      "observed": "FIRED: naive $482,772,843.42 vs deduped $482,567,772.65 -- $205,070.77 phantom from 2 of 17,138 pairs appearing under two Relationship IDs. The DEDUPED figure ties EXACTLY to platinum partner_custody_total @2026-08-10 (difference < $0.01); the naive figure ties to nothing. Small in magnitude at this date, but the tie is what establishes the collapse is correct rather than merely plausible, and the inflation factor is date-dependent.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Full extraction run twice from identical local mirrors of the landed S3 artifacts, outputs diffed byte-for-byte",
+      "observed": "IDENTICAL -- 0 differing lines across 137 lines; both runs rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The two Anna strategies' model-vs-non-model decomposition",
+      "reason": "UNCOMPUTABLE-BY-CONSTRUCTION with the mechanism named (name-gated opal_closure scope). Their VALUE is ruled INTO Opal AUA by Andrew ~1950Z; only the internal split is open. AE's 2026-08-07 record cannot substitute -- its weights sum to 0.97 and 0.967, so a decomposition built on them would look precise and not be."
+    },
+    {
+      "item": "The AWS-side cot-rebalancer-runner scope=all pull -- authorized but NOT run",
+      "reason": "CTO authorized it conditioned on 'existing parameter only'. The condition fires: lambda_handler accepts only mode/date/force and --scope is CLI-only, so closing it needs a Lambda config change (persistent -- it would change every scheduled nightly run, not a one-off) or a code change. Both excluded. Handed back rather than worked around. De-urgented by Andrew's ruling in any case."
+    },
+    {
+      "item": "No retry of the vendor endpoint that returned 401",
+      "reason": "CTO explicitly instructed against it and I agree -- one 401 stop was correct and retrying would be the wrong lesson from an authorization to route around it."
+    },
+    {
+      "item": "No ruling on whether the leaf strategies count as Opal",
+      "reason": "Reserved to Andrew and still open. Both endpoints kept live: balance $780,222.16 if they count as Opal, $7,005,515.33 if not; Opal subtotal $140,612,342.28 or $134,387,049.10. One substitution either way."
+    },
+    {
+      "item": "No measurement of Opal models' own underlying holdings",
+      "reason": "Out of this TO's scope. Flagged as an ambiguity the Anna accounts exposed: the Opal-tagged figure measures money in Opal-MANAGED MODELS, not money in OPAL PRODUCTS, and those may differ materially. Not asserted, not measured, surfaced for routing."
+    },
+    {
+      "item": "No adjudication of the off-list Opal-named strategies",
+      "reason": "Reserved to Andrew. Reported as their own line ($2,143,273.89, 2 accounts) and shown to be exactly the residual in the T1 reconciliation."
+    }
+  ],
+  "surprises": [
+    "The 'Opal Satellite N' family is 100% Opal by constituent -- a Satellite 50 is 75/25 Opal Intermediate-Term / Opal Short-Term, so the satellite sleeve is itself an Opal model. Meanwhile 'Opal - Income', whose name sounds purest, holds only third-party ETFs and scores 0% on a constituent test. The names that sound mixed are pure and the one that sounds pure is not.",
+    "89% of the reported non-Opal balance ($6,225,293.18 of $7,005,515.33) is a definitional artifact rather than non-Opal money -- it comes entirely from two LEAF strategies scoring 0% purely because they have no constituents. The only genuinely non-Opal constituents in all 18 are three Sleeves worth $780,222.16.",
+    "The two Anna accounts hold $9,121,075.85 (19.6%) of our OWN ETFs directly (DIVZ, IDVZ, PFDE, PFOE) and $37,415,272.86 (80.4%) third-party, and both are flagged isManaged=False in the rebalancer despite sitting on Andrew's strategy list. So what is unmeasurable about them is the model ATTRIBUTION, not the content.",
+    "The T1 reconciliation closed to the cent on the first attempt, and the residual was exactly a quantity measured for a different purpose in T1 (the off-list Opal-named strategies).",
+    "The vendor lift was authorized, warranted and still did not work, failing in a discriminating way -- /auth/token succeeded while /api/models/{id} 401'd. Recorded as an observation with three candidate mechanisms named as untested, not as a diagnosis."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~O/logs/2026-08-12/brdsep_t1_asset_base_1815-1900Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'collapse_relationship_grain'",
+      "result": "PASS -- 53 hits across 26,099 files, DEF=3; located the canonical collapse in three implementations in one call, which is what made the relationship-grain mutant cheap to run"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'fact_allocation'",
+      "result": "MEASURED ZERO -- 0 hits across 26,100 files, with the tool's own disclaimer that this is a measured zero in scope and not a claim of estate-wide absence. I widened rather than concluding absence."
+    },
+    {
+      "tool": "comp-rail gate (PreToolUse)",
+      "invocation": "fired twice -- on a raw 'aws s3 ls' partition listing and on an infra grep",
+      "result": "BOTH CORRECT. The first was reworked into a row-count ramp read from the partitions themselves, which is the better instrument for coverage-onset than object counts; the second was reworked onto the native Grep tool."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh on extract_brdsep_t2.py",
+      "result": "PASS -- 'All checks passed! / OK: pre-commit gate clean for 1 file(s)'"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> T2-A1,...,T2-A9",
+      "result": "VALID against the amended criterion set @f6039beade section 10"
+    }
+  ]
+}

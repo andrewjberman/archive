@@ -36,6 +36,111 @@ and in total, not assumed.** Every one of the 16 with children has constituent w
 
 ⛔ **24.8% of the 18-strategy value is UNDECOMPOSED** and that is the headline caveat, not a footnote.
 
+### 1b. THE COTTONWOOD CONTRIBUTION TO OPAL AUA ON ANDREW'S RULED BASIS
+
+> **Andrew-direct ~1950Z, verbatim:** *"the only remaining subject is a factor of the model vs
+> non-model breakdown of the two anna accounts. Regardless, we are including the total amount in the
+> Opal AUA/account growth, but I'd like to have it decomposed if possible."*
+
+**His ruling is about the two Anna accounts' inclusion. It is not a ruling on the internal
+composition of the other sixteen.** On that basis:
+
+```
+Cottonwood contribution to Opal AUA = $183,066,671.69   as-of 2026-08-10
+  = $136,530,322.99   T1 basis, unchanged
+  + $46,536,348.70    the two Anna accounts at full value, RULED IN
+```
+
+⛔ **It is NOT $187,928,913.13 (the 18-strategy total).** That figure would simultaneously
+**add $7,005,515.33 that this document measures as non-Opal** (the three Sleeves plus the two leaf
+strategies) **and drop $2,143,273.89 of off-list Opal-named strategy value that is inside T1's
+figure** — a $4,862,241.44 net overstatement moving in two directions at once.
+
+**The addition is clean and I can assert that rather than assume it:** T1's $136,530,322.99 contains
+**zero** Anna contribution — the reconciliation in §6 closes *exactly* with both Annas fully
+excluded, and an exact tie could not survive any Anna value being inside it. So this is a genuine
+addition, not a double-count.
+
+⚠ **MARK IT AS A BASIS CHANGE WHEREVER IT TRAVELS.** Against T1's $136,530,322.99 this is a $46.5M
+jump that is **a sovereign inclusion ruling, not growth.** Unmarked, it reads as a quarter of new
+money appearing at Cottonwood.
+
+**If the leaf strategies are also ruled Opal** (still open, §4): **$189,291,964.87.**
+
+---
+
+## 1c. ⭐ ANDREW-DIRECT ~1955Z — THE TICKER BASIS, WHICH SUPERSEDES THE COMPOSITION BASIS AND CLOSES THE ANNA GAP
+
+> **VERBATIM:** *"assume that if the holding is an Opal Aggregate holding (check agg "Positioning"
+> from Portal for ticker list) that it is part of an opal model. I want to assess how much value is
+> in non-opal model tickers"*
+
+**This is a better instrument than the composition tree and it does what the composition tree could
+not: it decomposes the two Anna accounts.** Membership is decided by TICKER against the Portal's own
+Opal Aggregate holdings, so it needs no per-strategy composition and is therefore immune to the
+name-gating gap in §5.
+
+**The universe:** `s3://opal-data-portal-v2/json/positioning/positioning_data.json` →
+`current_holdings.AGG.holdings`, **29 tickers**, `data_as_of` **2026-08-11**, `generated_at`
+2026-08-12T11:06:04Z. **The AGG list is the exact union of all five model sleeves (UST/ST/INT/LT/ULT)
+— 29 distinct tickers across all of them — so it is the complete Opal universe, not a subset.**
+*(The file is gzipped despite its `.json` extension; read accordingly.)*
+
+### The two Anna accounts — the §5 UNCOMPUTABLE, closed on this basis
+
+| | Total | In Opal tickers | **NOT in Opal tickers** |
+|---|---:|---:|---:|
+| `Anna *9237` | $20,052,465.74 | $14,767,194.32 (73.6%) | **$5,285,271.42 (26.4%)** |
+| `Anna *9238` | $26,483,882.96 | $24,059,257.67 (90.8%) | **$2,424,625.29 (9.2%)** |
+| **Combined** | **$46,536,348.70** | **$38,826,451.99 (83.4%)** | **$7,709,896.71 (16.6%)** |
+
+`*9237` non-Opal is chiefly cash (FCASH $2,463,348) plus USHY $763,027 and Sprott gold PHYS $742,508.
+`*9238` non-Opal is gold PHYS $1,279,878, USHY $825,703, cash $319,044.
+
+### All 18 Strategies on the ticker basis
+
+| | Value | Share |
+|---|---:|---:|
+| Total | $187,928,913.13 | 100% |
+| **In Opal-model tickers** | **$160,711,950.76** | **85.5%** |
+| **NOT in Opal-model tickers** | **$27,216,962.37** | **14.5%** |
+| — of which cash / money-market / uncategorized | $7,692,519.05 | 28.3% of non-Opal |
+| — **of which INVESTED in outside tickers (162 distinct)** | **$19,524,443.32** | **71.7% of non-Opal** |
+
+**Largest outside positions across the 18** — the wallet-share targets:
+
+| Ticker | Value | Accounts |
+|---|---:|---:|
+| GLD | $4,999,144.26 | 286 |
+| FDRXX | $4,063,407.71 | 289 |
+| FCASH | $3,319,823.07 | 34 |
+| USHY | $2,375,535.56 | 10 |
+| PHYS | $2,163,907.64 | 8 |
+| AAPL | $1,260,783.40 | 4 |
+| SPYI | $984,661.94 | 8 |
+| JEPI | $535,706.16 | 8 |
+
+**All of Cottonwood, not just the 18:** $482,567,772.65 total — **$164,274,408.76 (34.0%) in Opal
+tickers, $318,293,363.89 (66.0%) not.**
+
+### ⚠ Two things to carry with these figures
+
+**1. This basis gives a HIGHER Opal number than the composition basis — $160,711,950.76 vs
+$134,387,049.10 — and both are correct about different questions.** The composition basis asks *which
+model is this account running*; the ticker basis asks *is this holding an Opal-model holding*. Andrew's
+ruling selects the ticker basis, and it has the practical advantage of covering all 18 including the
+Annas. **Do not mix the two in one total.**
+
+**2. It settles the managed-vs-product ambiguity in §5b — in the MANAGED direction.** The 29-ticker
+list is mostly third-party ETFs the Opal models hold (iShares Core MSCI EAFE, SPDR S&P 500, Vanguard,
+Dimensional). So "in an Opal model" here means **inside an Opal-managed allocation**, not **an
+Opal-issued product**. On the narrower product reading, the Annas hold only $9,121,075.85 (19.6%) —
+our own four ETFs. Both measured; the ruling picks the first.
+
+⚠ **The rule is an ASSUMPTION he set, and it is stated as one:** a holding whose ticker appears in the
+Aggregate is *assumed* to be there because of an Opal model. It is not proof that a specific position
+was placed by one — an account could hold QQQ independently of any Opal sleeve.
+
 ---
 
 ## 2. WHICH SIGNAL DEFINES "TAGGED OPAL" — it is a NAME, and I am saying so plainly
@@ -87,6 +192,55 @@ name reads like a blend with outside content and is not one.
 **The only genuine non-Opal constituents in the whole set** sit inside `Blended Opal / Satellite 50`:
 *Sleeve - Equity* (0.375), *Sleeve - Tax-Free Bond* (0.36), *Sleeve - Core Money Market* (0.015),
 against *Opal Intermediate-Term* (0.1875) + *Opal Short-Term* (0.0625). **$780,222.16 of balance.**
+
+---
+
+## 3b. LEVEL 2 IN FULL — every constituent model, with its value and its source (T2-A2, T2-A5)
+
+**Source column is uniform and that is itself the finding: 28 of 28 constituents come from our own
+landing; 0 from a live sweep, because the live sweep failed (§5).**
+
+| Strategy | Constituent model | rel.alloc | Value | Opal? | Source |
+|---|---|---:|---:|:--:|---|
+| **Anna \*9237** | *no composition available* | - | $20,052,465.74 | - | **NONE - name-gated gap** |
+| **Anna \*9238** | *no composition available* | - | $26,483,882.96 | - | **NONE - name-gated gap** |
+| Blended Opal / Satellite 50 | Opal Intermediate-Term | 0.1875 | $195,055.54 | YES | own landing 2026-08-12 |
+| Blended Opal / Satellite 50 | Opal Short-Term | 0.0625 | $65,018.51 | YES | own landing 2026-08-12 |
+| Blended Opal / Satellite 50 | Sleeve - Core Money Market | 0.0150 | $15,604.44 | no | own landing 2026-08-12 |
+| Blended Opal / Satellite 50 | Sleeve - Equity | 0.3750 | $390,111.08 | no | own landing 2026-08-12 |
+| Blended Opal / Satellite 50 | Sleeve - Tax-Free Bond | 0.3600 | $374,506.64 | no | own landing 2026-08-12 |
+| **Opal Moderate Income Portfolio** | *LEAF - 8 direct securities, no child model* | - | $4,989,575.76 | **?** | own landing 2026-08-12 |
+| Opal - Beecherl Legg | Opal Conservative Growth | 0.7900 | $420,356.03 | YES | own landing 2026-08-12 |
+| Opal - Beecherl Legg | Opal Ultra Short-Term Income | 0.2100 | $111,740.21 | YES | own landing 2026-08-12 |
+| Opal - Cash + Satellite 50 | Opal Intermediate-Term | 0.6845 | $1,596,601.74 | YES | own landing 2026-08-12 |
+| Opal - Cash + Satellite 50 | Opal Short-Term | 0.2280 | $531,811.83 | YES | own landing 2026-08-12 |
+| Opal - Cash + Satellite 50 | Opal Ultra Short-Term Income | 0.0875 | $204,094.45 | YES | own landing 2026-08-12 |
+| **Opal - Income** | *LEAF - 4 direct securities, no child model* | - | $1,235,717.42 | **?** | own landing 2026-08-12 |
+| Opal 66% Long Term / 34% UST | Opal Conservative Growth | 0.6600 | $1,433,322.69 | YES | own landing 2026-08-12 |
+| Opal 66% Long Term / 34% UST | Opal Ultra Short-Term Income | 0.3400 | $738,378.35 | YES | own landing 2026-08-12 |
+| Opal Satellite 15 | Opal Short-Term | 1.0000 | $1,265,018.25 | YES | own landing 2026-08-12 |
+| Opal Satellite 30 | Opal Intermediate-Term | 0.2500 | $412,348.38 | YES | own landing 2026-08-12 |
+| Opal Satellite 30 | Opal Short-Term | 0.7500 | $1,237,045.15 | YES | own landing 2026-08-12 |
+| Opal Satellite 40 | Opal Intermediate-Term | 0.5000 | $5,987,568.89 | YES | own landing 2026-08-12 |
+| Opal Satellite 40 | Opal Short-Term | 0.5000 | $5,987,568.89 | YES | own landing 2026-08-12 |
+| Opal Satellite 50 | Opal Intermediate-Term | 0.7500 | $26,294,555.35 | YES | own landing 2026-08-12 |
+| Opal Satellite 50 | Opal Short-Term | 0.2500 | $8,764,851.78 | YES | own landing 2026-08-12 |
+| Opal Satellite 60 | Opal Intermediate-Term | 1.0000 | $32,522,970.13 | YES | own landing 2026-08-12 |
+| Opal Satellite 70 | Opal Conservative Growth | 0.5000 | $8,947,222.78 | YES | own landing 2026-08-12 |
+| Opal Satellite 70 | Opal Intermediate-Term | 0.5000 | $8,947,222.78 | YES | own landing 2026-08-12 |
+| Opal Satellite 80 | Opal Conservative Growth | 1.0000 | $22,303,170.34 | YES | own landing 2026-08-12 |
+| Opal Satellite 98 | Opal Long-Term Aggressive | 1.0000 | $1,151,126.04 | YES | own landing 2026-08-12 |
+| Opal Ultra Short Term | Opal Ultra Short-Term Income | 1.0000 | $2,895,622.20 | YES | own landing 2026-08-12 |
+| Opal UST/ Sat 70 | Opal Conservative Growth | 0.4565 | $1,083,903.92 | YES | own landing 2026-08-12 |
+| Opal UST/ Sat 70 | Opal Intermediate-Term | 0.4565 | $1,083,903.92 | YES | own landing 2026-08-12 |
+| Opal UST/ Sat 70 | Opal Ultra Short-Term Income | 0.0870 | $206,570.95 | YES | own landing 2026-08-12 |
+| | | | **$134,387,049.10 Opal** | | |
+| | | | **$7,005,515.33 balance** | | |
+| | | | **$141,392,564.43 sum** | | |
+
+**Only SIX distinct Opal constituent models appear across the whole set** — Intermediate-Term,
+Short-Term, Conservative Growth, Ultra Short-Term Income, Long-Term Aggressive, and (via the leaf
+strategies) none. Eighteen strategies are built from six building blocks plus three Sleeves.
 
 ---
 
@@ -151,10 +305,49 @@ exact decomposition. Using them would produce a number that looks precise and is
 **Therefore both Anna strategies are `UNCOMPUTABLE-BY-CONSTRUCTION` from available evidence**, and
 their $46,536,348.70 sits outside the split rather than being distributed into it on an assumption.
 
-**The clean closer, if wanted — a decision I did not take unilaterally:** invoking the deployed
-`cot-rebalancer-runner` with `MODEL_DETAIL_SCOPE=all` pulls all 63 compositions from AWS, where the
-scheduled path already works. **That widens what lands in production bronze (63 details vs 29), which
-is a production footprint change for a measurement, so it is CTO's call and not mine.**
+**The clean closer was authorized by CTO and then found to be UNEXECUTABLE as conditioned.** They
+authorized invoking the deployed `cot-rebalancer-runner` with `MODEL_DETAIL_SCOPE=all` from AWS,
+conditioned on *"existing parameter only — if closing this needs a CODE change, STOP."*
+**The condition fires.** Source-grounded in `lambda_function.py`:
+`lambda_handler` (`:407-417`) reads only `mode`, `date`, `force`; `MODEL_DETAIL_SCOPE` is a
+module-level env read (`:70`) evaluated at cold-start; `--scope` exists **only** in the CLI `main()`
+(`:424-429`), and the module docstring says so outright (`:38`). There is no event parameter that
+produces `scope=all` on the deployed function.
+
+⚠ **And the only available route is materially different from the act authorized.** Flipping the
+function's env var is not per-invocation — **every scheduled nightly run would land the full roster,
+permanently**, which is a standing scope change to a production producer rather than the additive
+one-off that was reasoned about. **Not run. No invoke, no config touched, no code edited.** Handed
+back.
+
+### 5b. WHAT THE TWO ACCOUNTS ACTUALLY HOLD — measured without the composition endpoint
+
+The model-attribution split is blocked; **the content is not.** Read directly from holdings:
+
+| | `Anna *9237` | `Anna *9238` |
+|---|---|---|
+| Account | **Anna Thiessen - Individual** | **Harms 2020 Trust** |
+| Tax status / rebalancer `isManaged` | Taxable / **False** | Taxable / **False** |
+| Value | $20,052,465.74 | $26,483,882.96 |
+| Distinct tickers | 71 | 34 |
+| Cash equivalent | $2,463,348.13 (12.3%) | $319,044.11 (1.2%) |
+| **In Opal ETFs** | **$1,986,413.55 (9.9%)** | **$7,134,662.30 (26.9%)** |
+| Third-party | $18,066,052.20 (90.1%) | $19,349,220.66 (73.1%) |
+
+**Combined: $9,121,075.85 (19.6%) sits in our own ETFs** — DIVZ, IDVZ, PFDE, PFOE — and
+**$37,415,272.86 (80.4%) is third-party**: iShares Core MSCI EAFE, SPDR S&P 500, iShares Mid-Cap,
+Sprott Physical Gold, high-yield, CLO and ultra-short income.
+
+**So what remains genuinely unmeasurable is the model ATTRIBUTION, not the content.** Both accounts
+present as bespoke multi-asset portfolios that *include* Opal products, and both are flagged
+`isManaged=False` in the rebalancer despite sitting on Andrew's strategy list.
+
+> ⛔ **AN AMBIGUITY THIS EXPOSES, AND IT IS LARGER THAN THESE TWO ACCOUNTS.** The
+> **$134,387,049.10 "Opal-tagged" figure means money in Opal-MANAGED MODELS. It does not mean money
+> in OPAL PRODUCTS.** If the Opal models hold third-party ETFs the way these two accounts do, those
+> are very different quantities. **I have not measured it** — it needs the Opal models' own holdings
+> — and I am not asserting they differ. But a reader shown "Opal AUA" may reasonably assume the
+> second meaning, and only the first is what was measured.
 
 ---
 
