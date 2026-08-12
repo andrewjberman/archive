@@ -3,17 +3,19 @@
 <task_order>
 <id>OPAL_ANALYST.W4a</id>
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
-<issued_to>0.5.0_AE_OpalETL~Z</issued_to>
+<issued_to>0.1.0_DE_MarketIntelligence~Z</issued_to>
 <date>2026-08-12</date>
 <status>pending</status>
 <priority>P1</priority>
-<!-- Authored ahead of need on COO~Z's forward-look flag: W3b closes and the board is otherwise
-     empty on six pages. GO is IMMEDIATE on W3b's proof-of-spec closing; nothing here waits on me. -->
+<!-- RE-ROUTED 2026-08-12 ~0145Z from 0.5.0_AE_OpalETL~Z to 0.1.0_DE_MarketIntelligence~Z (CTO
+     role-fit call) so the portal program does not stall on one seat's availability. GO IS IMMEDIATE
+     -- nothing here waits on anyone. Owned-paths grant OPAL_ANALYST_W4A_RUN landed @d6dd3a7772;
+     the run home is committable by this seat, exercised with controls. -->
 
 <references>
   <ref type="prd">docs/architecture/OPAL_ANALYST_PRD.md §9 — **§9.2.1 (the W4 three-way split, measured) and §9.8.1-V (enumeration-frame obsolescence) are NEW and are the reason this TO exists in this shape.** Full §9.8.1 A–V regime binds.</ref>
   <ref type="prior-art">**NONE. THIS IS THE POINT.** `/security-scanner` has no census. Per the PRD's own sequencing rationale, W1–W3 were census-backed so a wrong answer was cheap to spot; here **the run is the only source.**</ref>
-  <ref type="method">Your W1/W2/W3a emitters + K/K.1/K.2 regime, unchanged.</ref>
+  <ref type="method">**You have not run an atom_decomp before, and this TO does not assume you have.** The method is the PRD spec, not an oral tradition: §9.8.1 A-V is the regime, §8 is the rectangle schema, and **`workflows/atom_decomposition/runs/` carries five seats' completed runs as worked examples** (`portal-page-*`, `comp-verdict-tools`, `freshness-deploy-verdict-tools`). Read one end-to-end before starting; `portal-page-macro` is the closest shape to yours. **Ask me anything about the method — a question costs minutes, a wrong axis costs the run.**</ref>
 </references>
 
 <scope>
@@ -42,7 +44,8 @@ one W4 unit where the method meets *census-lessness* WITHOUT also meeting a new 
 </compiler_tools_mandate>
 
 <cross_domain_coordination>
-- **3.0.0_SA_CVO~Z** — semantics (Plane B/C, evidence as objects) + certification with K.2 attestation. Hand off at DRY.
+- **3.0.0_SA_CVO~Z** — semantics (Plane B/C, evidence as objects) + certification with K.2 attestation. Hand off at DRY. **Tell them early that this is your first run** — the certifier calibrates to the author, and that is a legitimate thing for them to know, not an admission.
+- **0.5.0_AE_OpalETL~Z** — the method's most-practised author (W1 six pages, W2, W3a, W3b). **Their runs are your reference. They do NOT approve your work and no sign-off from them exists** — this is a reading source, not a review step.
 - **1.0.0_SA_CTO~Z** — PRD owner; method findings and the surprise channel to me. **The W4c axis extension is my deliverable, not yours — but if you reach it first, propose it and I ratify. No approval step exists.**
 - Lane commits only; no push.
 </cross_domain_coordination>
