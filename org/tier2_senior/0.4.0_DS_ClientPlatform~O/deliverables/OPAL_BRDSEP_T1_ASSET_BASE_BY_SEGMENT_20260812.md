@@ -27,6 +27,34 @@ is overstating growth by an unknown amount that is **at most** those $242.5M and
 
 ---
 
+## 1b. THE WINDOW ASYMMETRY, QUANTIFIED — **written to be lifted verbatim into the board document**
+
+> **Not all four segments are measured over the same window.** The requested window is
+> **2026-04-01 → 2026-08-11, 132 days.** Only 49 Financial is measured across all 132 of them. Inflection
+> is measured over 131 days (its data ends 2026-08-10). **Cottonwood Capital Advisory is measured over 21
+> days — 16% of the window** — because Opal's tracking of Cottonwood began 2026-07-20; it was a client
+> well before that, so its $136.5M should be read as a **balance we began measuring**, not as growth we
+> added. **The ETF Float is measured over 64 days — 48% of the window.** Within the ETF holdings
+> themselves, DIVZ and IDVZ span the full window (though the April-1 figure is interpolated between
+> issuer month-end anchors), while **PFDE and PFOE span 85 days — 64% of the window** — because those two
+> funds, though launched 2025-12-30, only entered Opal's measurement on 2026-05-18. **Any total that
+> treats an unmeasured start as a zero start overstates growth.**
+
+| Segment / cohort | Measured from | Measured to | Days | % of the 132-day window | Shortfall |
+|---|---|---|---:|---:|---|
+| 49 Financial | 2026-04-01 | 2026-08-11 | **132** | **100%** | none |
+| Inflection Wealth Management | 2026-04-01 | 2026-08-10 | 131 | 99% | 1 day at the end |
+| — ETF cohort DIVZ + IDVZ | 2026-04-01 | 2026-08-11 | 132 | 100% | none, but the start is **interpolated** |
+| — ETF cohort PFDE + PFOE | 2026-05-18 | 2026-08-11 | 85 | 64% | **47 days at the start** |
+| ETF Float | 2026-06-08 | 2026-08-11 | 64 | 48% | **68 days at the start** |
+| Cottonwood Capital Advisory | 2026-07-20 | 2026-08-10 | **21** | **16%** | **110 days at the start** |
+
+**The ETF Float's 2026-06-08 start is set by its weakest input, not its strongest.** The float is a
+subtraction, so it cannot begin until *every* firm's ETF-ownership feed exists: 49 Financial and
+Inflection begin 2026-05-01, Cottonwood 2026-06-08. The later date governs.
+
+---
+
 ## 2. SEGMENT × {START, END, DELTA} — every cell dated (T1-A1)
 
 **Primary measure = Opal model assets** (the measure Andrew's methodology names for Inflection and Cottonwood).
