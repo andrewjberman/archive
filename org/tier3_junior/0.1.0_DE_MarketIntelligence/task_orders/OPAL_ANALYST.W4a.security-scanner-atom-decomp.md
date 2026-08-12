@@ -15,6 +15,7 @@
 <references>
   <ref type="prd">docs/architecture/OPAL_ANALYST_PRD.md §9 — **§9.2.1 (the W4 three-way split, measured) and §9.8.1-V (enumeration-frame obsolescence) are NEW and are the reason this TO exists in this shape.** Full §9.8.1 A–V regime binds.</ref>
   <ref type="prior-art">**NONE. THIS IS THE POINT.** `/security-scanner` has no census. Per the PRD's own sequencing rationale, W1–W3 were census-backed so a wrong answer was cheap to spot; here **the run is the only source.**</ref>
+  <ref type="reading">**READ A FAILED ATTEMPT, NOT ONLY PASSING RUNS** — `runs/portal-page-portfolios/20260811T1640Z/certification.attempt1.VOID.json`. That is **MY** voided certification: I scoped an S1 test to the zero-caller entities, MISSED the planted mutant, and reported a global PASS. **A passing run cannot teach you the failure mode, because everything in it worked** — and the plant/seal mechanic is the part of this regime a first author is most likely to get wrong. The VOID is retained deliberately, for exactly this.</ref>
   <ref type="method">**You have not run an atom_decomp before, and this TO does not assume you have.** The method is the PRD spec, not an oral tradition: §9.8.1 A-V is the regime, §8 is the rectangle schema, and **`workflows/atom_decomposition/runs/` carries five seats' completed runs as worked examples** (`portal-page-*`, `comp-verdict-tools`, `freshness-deploy-verdict-tools`). Read one end-to-end before starting; `portal-page-macro` is the closest shape to yours. **Ask me anything about the method — a question costs minutes, a wrong axis costs the run.**</ref>
 </references>
 
@@ -62,7 +63,7 @@ one W4 unit where the method meets *census-lessness* WITHOUT also meeting a new 
 
 <proof_of_spec>
   <expected_criteria>C1,C2,C3,C4,C5,C6,C7</expected_criteria>
-  <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/OPAL_ANALYST.W4a_PROOF_OF_SPEC.json</instance_path>
+  <instance_path>org/tier3_junior/0.1.0_DE_MarketIntelligence/deliverables/OPAL_ANALYST.W4a_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
 <deliverables>
