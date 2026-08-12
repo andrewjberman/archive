@@ -69,6 +69,62 @@ money appearing at Cottonwood.
 
 ---
 
+## 1a. ⭐ RULED — ANDREW ~2030Z. THE COTTONWOOD FIGURE IS **$190,072,187**, AND THE BASE BREAKS OUT WITH AND WITHOUT ETF FLOAT
+
+> **VERBATIM:** *"I would use option (c) in this list, all accounts. However, I would break it out to
+> the number with the ETF Float and Without it."*
+
+**Option (c) = all accounts running an Opal strategy**, which is the 18 plus the off-list Opal-named
+strategies — not the 18 alone. Chosen over the alternatives because if a client's whole account counts
+by virtue of running an Opal strategy, that logic does not stop at the boundary of a hand-written list.
+
+```
+Cottonwood, all Opal-strategy accounts   $190,072,187.03    as-of 2026-08-10
+  the 18 strategies                      $187,928,913.13
+  off-list Opal-named strategies           $2,143,273.89    (2 accounts)
+```
+
+**The measured value is $190,072,187.03** (unrounded $190,072,187.0276), by exact Decimal summation
+over the source values. *A component-wise add of the DISPLAYED figures gives $190,072,187.02 — sum of
+rounded is not rounded of sum. Present in whole dollars: **$190,072,187**.*
+
+### The ruled asset base, both ways
+
+| | Value |
+|---|---:|
+| 49 Financial — entire account `08242234` | $1,736,948,738.65 |
+| Inflection — Opal models | $144,978,896.75 |
+| Cottonwood — all Opal-strategy accounts | $190,072,187.03 |
+| **SUBTOTAL, EX ETF FLOAT** | **$2,071,999,822.42** |
+| ETF Float | $105,976,737.76 |
+| **TOTAL, INC ETF FLOAT** | **$2,177,976,560.18** |
+| **Growth EX float** | **+$589,984,137.43** |
+| **Growth INC float** | **+$584,810,472.94** |
+
+> ⚠ **EXCLUDING THE FLOAT RAISES GROWTH BY $5,173,664.49, BECAUSE THE FLOAT DECLINED. The ex-float
+> figure is the LARGER one.** This sentence must appear wherever both figures do. Without it the
+> breakout reads as though the exclusion were chosen to flatter; the reason for wanting both is that
+> the float is a different KIND of asset, not that it is smaller.
+
+⚠ **The $190,072,187 against the $136,530,322.99 the board has previously seen is a $53.5M jump that
+is A RULING PLUS A BASIS CHANGE, NOT GROWTH.** Mark it wherever it appears.
+
+**Still reported alongside, answering a different question:** the in-model figure
+**$160,711,950.76** (§1c). He ruled the AUA basis; he did not retire the ticker decomposition, and
+the DO-NOT-MIX constraint still binds.
+
+### Observation surfaced by the exactness check, changing no figure
+
+**4,539 of 17,138 Cottonwood holdings rows (26.5%) carry a NULL `Market Value`** — and null `Units`
+and null `Unaccrued Market Value` with them; **0 of 4,539 carry a unit count**. 127 distinct tickers,
+each recurring ~245–274 times across accounts, which *reads as* target-allocation template rows rather
+than held positions. **Not diagnosed — that is a pattern inference, not a source read.**
+**It changes nothing here:** the non-null rows tie EXACTLY to platinum `partner_custody_total`
+($482,567,772.65), so the producer excludes them identically and every figure in this document stands.
+Recorded for whoever owns cot silver.
+
+---
+
 ## 1c. ⭐ ANDREW-DIRECT ~1955Z — THE TICKER BASIS, WHICH SUPERSEDES THE COMPOSITION BASIS AND CLOSES THE ANNA GAP
 
 > **VERBATIM:** *"assume that if the holding is an Opal Aggregate holding (check agg "Positioning"
