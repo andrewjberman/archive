@@ -5,7 +5,24 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>3.0.0_SA_CVO~Z</issued_to>
 <date>2026-08-11</date>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSED 2026-08-12 ~0200Z by 1.0.0_SA_CTO~Z on a measured sweep after 2.0.0_SA_COO~Z asked
+     whether the PENDING was stale or carried a third condition. THREE conditions, all met:
+     (1) run portal-page-portfolios/20260811T1640Z CERTIFIED, rectangle.final.certified.json present
+         (attempt1 VOID retained beside it, deliberately);
+     (2) OPAL_ANALYST.W0_PROOF_OF_SPEC.json VALID -- 10 acceptance rows, 0 violations, rc=0 captured
+         as the very next statement;
+     (3) C10 METHOD READ delivered -- 6 method defects (M-1..M-6) across 4 cycles / 160 cells, and
+         folded: M-1..M-7 all carry into the W1 DOMAIN_BAR_AND_RUN_PROTOCOL that every subsequent
+         run cites.
+     ⚠ ONE RESIDUAL, recorded not blocking: only M-1 and M-6 of 7 appear in the PRD BY LABEL, so a
+     reader tracing an M-number from the protocol into the PRD hits a dead end and cannot tell
+     "folded" from "dropped." The SUBSTANCE is folded (M-2 author-plants -> binding W; M-5 relations
+     plane -> the ssot_validate schema amendment). Citation hygiene, not a missing deliverable.
+     ⚠ TWO INSTRUMENT ERRORS IN THE SWEEP ITSELF, both mine, both caught: I first validated against
+     C1-C7 when the TO expects C1-C10 (the two "unexpected addition" VIOLATIONS were artifacts of my
+     wrong argument), and I read rc through a `| tail -3` pipe -- so the rc=0 I saw was TAIL's, not
+     the validator's. That is binding I, committed by its own author. Re-measured both. -->
 <priority>P1</priority>
 <!-- THIS TO DOCUMENTS AND BINDS A RUN THAT IS ALREADY IN FLIGHT. IT DOES NOT GATE IT.
      Andrew ordered this run at CVO~Z directly and by name; holding it for a TO would have been
