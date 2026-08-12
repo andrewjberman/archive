@@ -79,12 +79,37 @@ def main(payload_path: str, rect_path: str) -> int:
             for f, c in e["cells"].items()}
 
     # --- second, independent limb: the declared axis, when it travels ------------
+    # THREE STATES, NAMED SEPARATELY -- and this exists because I collapsed two of them.
+    # The limb read ONLY `field_planes`. W4b's axis_declaration.json declares the identical
+    # split under `plane_ownership.planes_B_C_certifier`, so on the LARGEST unit in the
+    # program my "second, independent limb" silently did not run -- and the status line said
+    # "axis_declaration.json ABSENT" about a file that was PRESENT and DID carry the split.
+    # A DEGRADED CHECK THAT REPORTS ITSELF AS AN ABSENT ONE IS WORSE THAN NO LIMB: the reader
+    # believes two independent instruments agreed when one of them never executed. Measured
+    # 2026-08-12: 1 of 7 runs uses plane_ownership -- and it is the 290-cell one.
     axis_bc = None
+    axis_src = None
     axis_path = os.path.join(os.path.dirname(rect_path), "axis_declaration.json")
-    if os.path.exists(axis_path):
-        planes = (_load(axis_path) or {}).get("field_planes") or {}
+    if not os.path.exists(axis_path):
+        axis_note = "axis_declaration.json ABSENT -- single-limb (derived) only"
+    else:
+        axis = _load(axis_path) or {}
+        planes = axis.get("field_planes") or {}
         if planes:
             axis_bc = {f for f, p in planes.items() if p in ("B", "C")}
+            axis_src = "field_planes"
+        else:
+            owned = (axis.get("plane_ownership") or {}).get("planes_B_C_certifier")
+            if owned:
+                axis_bc = set(owned)
+                axis_src = "plane_ownership.planes_B_C_certifier"
+        if axis_bc:
+            axis_note = "axis_declaration.json present, split read from `%s` -- cross-check ACTIVE" % axis_src
+        else:
+            # PRESENT but unreadable for this purpose. Never report this as ABSENT.
+            axis_note = ("axis_declaration.json PRESENT but declares NO plane split under any key I "
+                         "know (`field_planes`, `plane_ownership.planes_B_C_certifier`) -- limb "
+                         "DEGRADED, NOT absent. Keys seen: %s" % sorted(axis.keys()))
 
     entities = [k for k in payload if not k.startswith("_")]
     v_plane, v_shape, v_unknown, v_partial, v_axis = [], [], [], [], []
@@ -139,9 +164,7 @@ def main(payload_path: str, rect_path: str) -> int:
           % (len(entities), offered, total,
              "   <-- DIVERGENT: the payload is addressing a different subject"
              if offered != total else ""))
-    print("  axis limb : %s" % ("axis_declaration.json present -- cross-check ACTIVE"
-                                if axis_bc is not None else
-                                "axis_declaration.json ABSENT -- single-limb (derived) only"))
+    print("  axis limb : %s" % axis_note)
 
     def report(name, rows, fmt):
         if rows:
@@ -162,9 +185,21 @@ def main(payload_path: str, rect_path: str) -> int:
                   "not Plane B/C. Adjudicate before shipping; do NOT pick the permissive one.")
 
     bad = bool(v_plane or v_shape or v_unknown or v_partial or v_axis)
-    print("  VERDICT: %s" % ("VIOLATIONS -- DO NOT SHIP" if bad else
-                             "CLEAN -- safe to merge as FILL_UNMEASURED"))
-    return 1 if bad else 0
+    if bad:
+        print("  VERDICT: VIOLATIONS -- DO NOT SHIP")
+        return 1
+    if axis_bc is None:
+        # THE VERDICT LINE MUST CARRY THE ASSURANCE IT ACTUALLY BOUGHT. Printing the
+        # degradation above and then "safe to merge" below is how this hid in the first
+        # place: a reader who acts on the verdict line gets nothing from a warning three
+        # lines up. Ablation-measured 2026-08-12 -- with the limb blinded, a payload writing
+        # FOUR Plane-A cells on advi.07 returned CLEAN/rc=0 from this exact function.
+        print("  VERDICT: NO VIOLATIONS FOUND -- but on ONE LIMB ONLY (derived). The declared-axis "
+              "cross-check did NOT run, and it is the only limb that can catch a cell the author "
+              "left UNMEASURED but still owns. NOT the same assurance as a two-limb CLEAN.")
+        return 0
+    print("  VERDICT: CLEAN (both limbs) -- safe to merge as FILL_UNMEASURED")
+    return 0
 
 
 if __name__ == "__main__":
