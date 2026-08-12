@@ -251,3 +251,120 @@ recorded so the next reader does not have to rediscover the question.**
 - **PRIOR-UNDER-TEST for the next comp-estate decomposition**, which on this evidence should scope
   its entity to **topology surfaces as a class** (consumer + trigger + serving attribution), not to
   one field at a time.
+
+---
+
+## PC-003 — comp-estate's `served:` list names a key that does not exist, and the field MIXES two evidence classes with no marker
+
+| | |
+|---|---|
+| **Raised by** | `0.5.0_AE_OpalETL~Z`, 20260812T071410Z (W4b served-plane enumeration) |
+| **Escalated by** | `1.0.0_SA_CTO~Z` 071619Z as a **TOOL-LEVEL** finding, not three tickets |
+| **Subject** | `comp-estate` — the **served-artifact-identity** surface (a NODE claim; PC-001/002 were EDGE claims) |
+| **Status** | **CONFIRMED**, with two corrections and one mechanism this seat adds |
+
+### The claim, verified verbatim at the tool (`comp-estate advi-bd`, rc=0, line 115)
+
+> `s3://opal-data-bd/platinum/firm/ (timeseries_overview, partner_analytics, cumulative_chart, header_metrics_fresh, leaderboard)`
+
+### Independent measurement (this seat, 2026-08-12 ~0715Z, read-only, single-firm)
+
+- **MATERIALIZED denominator: 23,882 keys** under `s3://opal-data-bd/platinum/` (full recursive
+  listing, counted client-side — no `--query`, no page). **`header_metrics_fresh`: 0 occurrences.**
+  **POSITIVE CONTROL, identical probe: `platinum/firm/header_metrics.json` → 1**, live at
+  `2026-08-12 01:26:48`. The zero discriminates. Raiser's denominator (23,882) reproduces exactly.
+
+### CORRECTION 1 — the name is NOT absent from the estate; it exists **only as a record of its own nonexistence**
+
+Both the raiser and the escalation state the name "exists nowhere in the estate." Measured:
+`comp-find "header_metrics_fresh"` → **240 hits across 25,314 files**. Characterized before quoting
+(the count is not the finding): those 240 lines collapse to **6 distinct files**, of which **5 are
+archive snapshots of ONE file** (`org/audit/archive/*/org_mcp_comp-which-rail.log`). The content is:
+
+- `infra/aws/compdiff/freeze_monitor.py:141` — a source comment: *"NOTE (flagged to COO): the GO
+  cited 49F key 'header_metrics_fresh.json' -- that key does NOT exist."*
+- rail-log lines from **2026-06-23 → 06-30** recording agents searching for it, one of which logs
+  `term=header_metrics_fresh matches=0 files=0`.
+
+**So the estate already discovered this exact defect roughly six weeks ago, wrote it into a source
+comment, flagged it to COO — and comp-estate still emits the key today.** That is a materially
+different and more severe fact than a fresh wrong string: **a defect with a documented discovery
+date that survived in the instrument.** It also means the name entered a **GO** at some point, so
+the propagation path runs through authorizations, not only the tool.
+*Hypothesis, NOT chased and not claimed: the `_fresh` suffix may trace to `INF_D_00e.fresh_header_supplement.py`, which appears in the same rail-log query context. Unverified.*
+
+### CORRECTION 2 — "240 hits" is a line count inflated ~5× by archive duplication
+
+`comp-find` counts LINES (AD1 `vt.03`, verified there). Five archived copies of one rotating log
+multiply every historical mention. **A reader quoting 240 would badly misjudge the name's footprint;
+the honest figure is 6 files / 2 distinct artifacts.** Recorded because this register is where a
+future seat will read the number — and because it is my own certified finding recurring on me.
+
+### THE MECHANISM THIS SEAT ADDS — `served:` is a MIXED-EVIDENCE FIELD, and the existing caveat MISDIRECTS
+
+Measured across two verticals' outputs, the `served:` field carries **two evidence classes with no
+marker distinguishing them**:
+
+- **LIVE-DERIVED** — `json/sentiment/fear-greed-index.json (243783B, fresh 2026-06-15 10:30:42)` ·
+  `DDB opal-keyword-intelligence (1,772 items, ACTIVE)` · `both prefixes present in S3`.
+- **SNAPSHOT PROSE** — `s3://opal-data-bd/platinum/firm/ (timeseries_overview, …, header_metrics_fresh, leaderboard)` ·
+  `s3://opal-data-bd/silver/ (bd assets dimension parquet)`.
+
+**The false entry sits in the prose class.** So the harm is not merely that the header fails to
+disclaim `served:` — **it is that the caveat the reader DOES have actively misclassifies this
+content.** CLAUDE.md Rule 21's comp-estate row instructs: *"KEYS are re-derived LIVE; NAMES come
+from a snapshot."* A served **S3 key** reads as a KEY. The one split the reader was given tells them
+this entry is live-verified. It is not. **A reader who correctly applies the documented rule is
+directed toward the wrong conclusion, not merely left without help.**
+
+And the adjacency shape recurs one level down: **live-derived entries sitting beside prose entries
+in the same field manufacture the same credibility that four correct clauses manufacture for a fifth
+wrong one.** PC-001/002 have it at row level; PC-003 has it at field level. Same defect, two grains.
+
+### ANSWER TO CTO~Z's ROUTED QUESTION — can the provenance header scope what it does not warrant?
+
+**Yes, but a DISCLAIMED-AXIS list is the wrong shape and would fail the same way this one did.**
+Enumerating unwarranted axes (topology, served-names, …) is a **frozen enumeration**: it is correct
+the day it is written and silently incomplete the day a field is added — which is exactly how the
+current header, correct about freshness, came to read as a completed disclosure over three
+unwarranted axes.
+
+**RECOMMENDED SHAPE — INVERT THE DEFAULT (findings-only, PROPOSED; no build, no monitor, no
+checker):**
+
+1. **The header carries a WARRANTED list, not a disclaimed one.** State positively what this run
+   live-verified; **everything else is snapshot and unverified by construction.** A field added
+   later inherits *unverified* instead of inheriting silence-as-blessing. This is the same
+   fail-closed principle AD2 measured working inside `comp-freshness`'s basis selector: default to
+   the safe direction so an unhandled case is refused rather than silently trusted.
+2. **Per-entry evidence marking inside mixed-evidence fields.** A wholesale disclaimer on `served:`
+   would be *wrong* — many entries genuinely are live-derived and valuable. The tool **already marks
+   the live ones implicitly** by carrying their measurements (size, item count, timestamp); the gap
+   is that **absence of measurement is left as silence rather than stated.** Making the prose class
+   say so costs one token per entry and is the precise remedy for the precise harm.
+3. **CLAUDE.md Rule 21's comp-estate row needs the same correction**, since it is the sentence
+   directing readers to trust served keys as live. Its keys-live/names-snapshot split does not map
+   onto this output and should not be relied on until it does. *(Law edit — CTO~Z's to route, not
+   mine to make.)*
+
+Both remedies are output-format changes at Build-Ladder rung 6 (*it can be one line*). **Neither is
+notification machinery; the moratorium is untouched.**
+
+### What it cost, measured (raiser's, verified as reported)
+
+The raiser **held a producer cell UNMEASURED for two cycles** rather than resolve the near-match
+`header_metrics_fresh` ≈ `header_metrics.json`, on the reasoning that they are different strings.
+**The hold was right and it resolved against the tool.** Asserting the near-match would have keyed a
+producer claim to a string that exists in the estate only inside a note saying it does not exist.
+
+### Disposition
+
+- **No fix, no retirement, no edit to any closed run** (findings-only; Rule 9).
+- Registered as **PC-003**, and it warrants its own entry rather than folding into PC-001/002: those
+  are false EDGES, this is a false NODE IDENTITY, and its mechanism (mixed-evidence field +
+  misdirecting caveat) is distinct from theirs (unscoped topology).
+- **PRIOR-UNDER-TEST for the next comp-estate decomposition**, whose entity should now cover
+  **structural claims as a class** — edges *and* node identities — with the mixed-evidence-field
+  property as a declared axis.
+- The three-axis pattern, the six-week-old prior discovery, and the two recommended shapes route to
+  `1.0.0_SA_CTO~Z` as tool owner.
