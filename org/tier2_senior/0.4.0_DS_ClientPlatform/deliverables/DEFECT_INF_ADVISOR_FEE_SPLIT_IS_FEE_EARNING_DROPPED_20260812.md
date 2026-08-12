@@ -75,7 +75,49 @@ pair is what made it findable.**
 CRO~A's "fourth implementation": three sites were corrected under CPR-6, this one was not, and the
 disagreement went from 22x to categorical.**
 
-## ⛔ NOT MY CPR-6, AND THE DEPLOYED BUILDER IS NOT THE CULPRIT EITHER
+## ⛔⛔ AMENDMENT 1 (15:56Z) — ROOT CAUSE **CLOSED**, AND MY "OPEN" LINE BELOW WAS WRONG
+
+**`0.4.0_DS_ClientPlatform~A` owns the cause and stated it unprompted (@41ee75c574).** The column did
+not "vanish": **they RETIRED it from silver on 08-11**, deliberately, as leg (b) of the flag act —
+Andrew-direct instruction #2 under CTO's Rule-17 ruling that a judgment classification is
+gold-tier — and re-homed the derivation to `lib/fee_classification.py`. **Correct act.**
+**The defect is the CENSUS, not the retirement:** the retirement was gated on repointing every
+reader; they repointed five and verified all five deployed (md5 TIE), **but enumerated the reader
+set over `data/inf/scripts/` ONLY.** `inf-portal-advisor-publisher` lives under
+`infra/aws/lambda/` and no search of that subtree could ever have surfaced it.
+⭐ **The lesson in one line, theirs: A CENSUS OVER A SUBTREE IS NOT A CENSUS OVER CONSUMERS.**
+✅ **My INFERRED adjacency to the 13→17 widening is CONFIRMED — the SAME act**, deployed in the same
+window, first exercised on the same 08-12 scheduled run. One act, two visible effects, which is
+why both landed on one partition.
+
+## ⛔⛔ AMENDMENT 2 — TWO HOMES, MEASURABLY DIVERGENT (this supersedes §"deployed builder" below)
+
+~A corrected my line *"the deployed builder still derives the column."* **They were right that it is
+false of the artifact THEY read — and I was right about the artifact I read. WE READ TWO DIFFERENT
+DEPLOYED ARTIFACTS AND THEY DO NOT MATCH.** Measured by me on both sides, same session:
+
+| artifact | md5 | bytes | `_derive_is_fee_earning` | `ending_mv_source` |
+|---|---|---|---|---|
+| `s3://opal-data-inf/code/silver/build_billing_dim.py` | **9a25fe0d** | 15,460 | **0** | **3** |
+| `inf-silver-chain` **Lambda package** member | **770dc996** | 8,266 | **2** | **0** |
+
+⛔ **WHICH ONE EXECUTED IS DECIDABLE FROM THE OUTPUT, AND IT IS THE S3 OBJECT:** the 08-12 partition
+has **no `is_fee_earning`** and **does** carry `ending_mv_reported`/`_source`/`_status` — the exact
+signature of `9a25fe0d`. **~A's account is therefore complete and correct: the S3-staged code is
+what runs, and the retirement is a completed act, not an open mystery.**
+
+⚠ **BUT THE LAMBDA PACKAGE IS A STALE SECOND HOME CARRYING THE PRE-RETIREMENT CODE**, and that is a
+NEW finding neither of us filed: **if `inf-silver-chain` ever executes that member, it would
+re-derive `is_fee_earning` and drop the `ending_mv_*` basis columns — silently reverting a ruled
+Andrew-direct act.** ⛔ **NOT MEASURED: whether that Lambda is on a live trigger, and whether it is
+the billing dim's producer at all or a stale sibling.** *That is the next act on this line and it
+is not mine to assume either way.*
+⭐ **This is Rule 22a's own named case — "one logical producer, two independently-editable homes" —
+and note WHICH failure mode we hit: not a false drift alarm, but the second one, where a
+filename-resolved check reads CLEAN on each home while the two have silently diverged. Both of us
+measured a real deployed artifact, honestly, and reached opposite conclusions.**
+
+## ⛔ NOT MY CPR-6 — AND ⚠ THE SECTION BELOW IS SUPERSEDED BY AMENDMENT 2
 - No commit of mine touched `build_billing_dim.py`; CPR-6's commit does not appear in its history.
 - **DEPLOYED bytes read directly** (`aws lambda get-function` -> package -> member, per Rule 22a):
   the deployed `inf-silver-chain/build_billing_dim.py` **DOES** derive the column — `:88`
