@@ -44,6 +44,15 @@ write different locations; change neither and the last runner to execute silentl
 Under P3 option (a) the collision stays exactly as masked as it is today — no better, no worse —
 because all three knobs move to one new root together.
 
+## ⚠ A POST-CUTOVER COLLISION WOULD BE A SILENT SCHEMA FLIP, NOT A DUPLICATE WRITE
+
+The two writers **do not emit the same shape**. K2 (`a01_runner`) writes `schema_version=1.0` with
+**no** `source_pipeline` column; K1 (`a01_dim_relationship`) writes `schema_version=2.0` with
+`source_pipeline='49f-gold-runners'` (the fact_fam rewrite). So if both ever run against one root,
+the winner is **whichever ran last, and the table's SCHEMA changes with it** — consumers would see a
+column set flip, not a value differ. That is materially worse than a duplicate write and it is the
+discriminator a P5 reader needs first.
+
 ## The question it must be adjudicated WITH
 
 **Is knob 2 SUPERSEDED (by the P1 corpus) or merely STOPPED?** Not answerable from data: "stopped 28
@@ -51,6 +60,30 @@ days, 3 canonical tables never emitted" is consistent with both, and 28 days is 
 90-day dormancy bar, so no standing rule reaches it. **If SUPERSEDED**, retiring `a01_runner`
 deletes this defect outright. **If STOPPED**, the defect must be fixed by choosing one writer.
 Either way it is a P5 decommission decision, not a cutover act.
+
+## ⛔ ONE DOCUMENT SENTENCE THAT MUST NOT BE CITED HERE — CONSIDERED AND FOUND SILENT
+
+`runner_common.py:3-6` reads: *"...every existing runner in this corpus carried its own copy of
+partition listing / parquet read / write-verify -- four ad-hoc copies before this module unified them
+(build-ladder rung 2). New artifact scripts use THIS layer; the a00/a01 runners keep their exercised
+copies until their own next touch (extract-side-only)."*
+
+**Both the producing seat and COO overreached on this sentence in OPPOSITE directions and BOTH
+withdrew** (0.4.0_DS 135247Z read it as supersession; 2.0.0_SA_COO 135351Z read it as a coexistence
+commitment and withdrew basis #1 explicitly). **The paragraph's subject is the HELPER LAYER** —
+partition listing, parquet read, write-verify. It records **deliberate NON-MIGRATION of helper code
+at extraction time** and is **SILENT on production topology.**
+
+> **It must NOT be cited as evidence that knob 2 is deliberately retained, nor that it is
+> superseded. It was CONSIDERED AND FOUND SILENT — not overlooked.** Citing it either way would be
+> declarative drift: a docstring about function duplication hardening into a topology ruling.
+
+**THE STANDING BASIS for re-pointing rather than retiring (COO 135351Z, ruling (a)):**
+1. **Superseded-vs-stopped is unanswerable from data** (the `gold/clients/` discriminator: 126 days
+   read "abandoned" while its live successor sat one prefix over), and no standing rule reaches 28 days.
+2. **Asymmetry:** (a) does not foreclose (b); (b) forecloses the answer.
+3. **Sequencing:** a cutover is the wrong cover for a decommission — interleaved evidence, neither
+   act cleanly reversible.
 
 ## Residual risk carried until then (the reason this is filed rather than shrugged)
 
