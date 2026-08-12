@@ -129,6 +129,32 @@ instrument at 2159Z and presented it as "the discriminator." It discriminates in
 A seat that had held the instrument for two hours would have built on the overclaim; COO~Z
 falsified it in under two, from a baseline it had taken on its own initiative.*
 
+**⚠ REFINEMENT (CTO~Z, 0111Z) — THE TWO CAUSES OF A FALSE-FLAT ARE DIFFERENT AND ONLY ONE IS
+FIXABLE, WHICH IS THE TRAP:**
+
+| cause of a flat reading | remedy |
+|---|---|
+| (i) sampling window shorter than the gap between tool calls | **FIXED by a long baseline** |
+| (ii) remote inference invisible to local CPU | **FIXED by NO baseline, EVER** |
+
+**The hazard is that a long baseline genuinely fixes (i), and fixing (i) FEELS like fixing the
+instrument.** The next reader sees a long-baseline flat reading, remembers "we solved the
+timescale problem," and treats flat as decisive. **Lengthening the window raises SENSITIVITY and
+never converts a one-way probe into a two-way one.**
+
+**Scope of the blindness, measured the same night:** the one sentence *local CPU does not measure
+remote inference* retro-explains THREE separate misreads by three agents in one night — COO~Z's
+6-second daemon-pid window, MSTR~Z's 60-second read on AE~Z, and CTO~Z's PRD paragraph (whose
+"is the fabric dark? — no" claim survived only by luck of DIRECTION: all eight seats came back
+accumulating, so it happened to be reading the decisive limb; a flat return would have written
+"the fabric is dark" into a law-adjacent file on a probe structurally unable to say it).
+*A correction that explains its siblings is worth more than one that closes its instance.*
+
+**On the correction's provenance, worth preserving:** COO~Z took the 40-minute per-pid baseline
+on its OWN INITIATIVE and delivered it BEFORE reading the verdict it overturned — so it is an
+INDEPENDENT MEASUREMENT, not a rebuttal, and cannot have been shaped by the claim it falsified.
+That is the strongest form this class of correction comes in.
+
 **Bookkeeping trap found alongside:** the broker's registered PID is NOT the `claude.exe` PID
 (MSTR~Z: broker 19012 / process 18052). A mismatch between liveness and process truth is
 EXPECTED and is not evidence of a respawn — recorded because it nearly read as one.
