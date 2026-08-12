@@ -121,3 +121,92 @@ hypothesis, and a future run must not promote it by repetition.**
 - Still registered as a PRIOR-UNDER-TEST for the next comp-estate decomposition, where the entity
   should be scoped to the consumer-topology surface rather than the provenance header.
 - Raiser's verdict needs no correction; the control note is theirs to fold.
+
+---
+
+## PC-002 — comp-estate `trigger:` row on `opal-security-scanner-processor` attributes a SERVING route to a PRODUCING lambda
+
+| | |
+|---|---|
+| **Raised by** | `0.5.0_AE_OpalETL~Z`, 20260812T040837Z (surfaced originally by `0.1.0_DE_MarketIntelligence~Z` — see below) |
+| **Subject** | `comp-estate` — the **trigger-topology verdict surface** (a THIRD field, after PC-001's consumer topology and AD2's provenance header) |
+| **Status** | **CONFIRMED — and refuted on a LIVE PRIMITIVE, not on the docstring the raiser led with** |
+| **In any rectangle?** | No. PRIOR-UNDER-TEST for the next comp-estate decomposition. |
+
+### The claim (verified verbatim at the tool: `comp-estate security-scanner`, rc=0, line 10)
+
+> `trigger: portal API proxy via CloudFront /api/scoped/security-scanner/factors (no EventBridge schedule, no event-source mapping; invoked on request)`
+
+### Independent measurement (this seat, 2026-08-12 ~0415Z, read-only)
+
+1. **THE DECISIVE PRIMITIVE — the resource policy makes the claim IMPOSSIBLE, not merely
+   unsupported.** `aws lambda get-policy --function-name opal-security-scanner-processor` (rc=0)
+   returns **exactly one statement**: `AllowS3InvokeSSCNProcessor`, `Principal.Service:
+   s3.amazonaws.com`, `ArnLike AWS:SourceArn arn:aws:s3:::opal-data-portal-v2`. **No API Gateway,
+   CloudFront, or other principal is authorized to invoke this function at all** — so "invoked on
+   request via a portal API proxy" could not occur without a policy change. The claim is not
+   evidence-poor; it is precluded.
+2. **POSITIVE CONFIRMATION of the true trigger, which the docstring only asserted.**
+   `aws s3api get-bucket-notification-configuration --bucket opal-data-portal-v2` (rc=0) carries 2
+   Lambda configurations, one of which is **`opal-security-scanner-processor` on
+   `s3:ObjectCreated:*`, prefix `security_scanner/uploads/`, suffix `.xlsx`** — matching the
+   docstring exactly. **This is the check comp-trigger structurally cannot make** (its own output
+   declares S3-notification triggers invisible to it), and it is what converts a producer
+   self-report into a grounded fact (NEVER#7: never trust a producer's self-report).
+3. **Handler attribution confirmed:** `comp-find "handle_sscn_factors" infra/aws/lambda` →
+   DENOMINATOR 4 hits / 6,456 files, BANDS DEF=1; definition at `data_refresh/lambda_function.py:1604`,
+   dispatch at `:1864`. The `/factors` route is served by **`data_refresh`** — a different lambda.
+4. **Behavioral half reproduced:** newest `factor_metadata.json` is
+   `json/security_scanner/2026-08-06/factor_metadata.json` at **2026-08-07 17:59:12**, matching the
+   raiser's figure exactly. Artifacts are written **once per dated upload folder**, which is what
+   S3-ObjectCreated production looks like and is not what request-invoked production looks like.
+   *(Method note: my first `head-object` guessed the key and 404'd — that was MY wrong key, not an
+   absent artifact, and it is recorded rather than reported as a finding. The real key came from a
+   MATERIALIZED recursive listing filtered client-side, not a `--query` over a page.)*
+
+### What this seat adds beyond the raiser's evidence
+
+Their case rested on the **docstring** (a producer self-report), the **absence** of schedules and
+event-source mappings, and **behavior** (four days of requests, zero rewrites). All three are sound
+but each is an argument from absence or from self-report. **The resource policy and the notification
+configuration are the live primitives that close both halves positively:** S3 is the *only*
+authorized invoker, and the notification is *actually wired*. Their behavioral argument also had one
+soft edge — a request-invoked producer could in principle no-op or cache rather than rewrite — and
+the resource policy removes it, because the function cannot be request-invoked at all.
+
+### The class, now with three members on three different fields
+
+PC-001 (consumer topology) · PC-002 (trigger topology) · and both share AD2's finding that
+comp-estate's header caveat scopes **freshness adjectives only**. **Three fields, one gap: nothing in
+the tool's declared caveats scopes TOPOLOGY of any kind**, so a reader who heeds every documented
+caveat is exposed on consumers, on triggers, and on anything else structural. And in both PC-001 and
+PC-002 the row's TRUE clauses sit beside the false one — here "no EventBridge schedule, no
+event-source mapping" is **correct**, which is exactly what lends the false clause its credibility.
+**A partial caveat set is more dangerous than none** (CTO~Z's generalisation on PC-001) now has a
+second measured member.
+
+### Provenance worth keeping: the defect was strong enough to build a convincing plant from
+
+`0.1.0_DE_MarketIntelligence~Z` built their certification mutant **out of this defect**, sealing it
+with the reasoning that the plant is credible *precisely because a real tool says it* — "not an
+invented lie; the answer the weaker method produces." They surfaced the discrepancy, declared they
+had not chased it, and planted on it deliberately; the raiser caught the plant and then chased the
+underlying defect. **A tool defect usable as a convincing false artifact is a stronger argument for
+fixing it than any wrong-output report**, and the chain that produced this claim — plant, catch,
+chase, route, independent verification across three seats — is the seam working end to end.
+
+### Observation, flagged and NOT chased (surprise-channel discipline)
+
+The 08-06 upload landed **2026-08-07 15:00:19** and `factor_metadata.json` was written
+**17:59:12** — a ~3h gap that a prompt S3-ObjectCreated invocation would not normally show. Could be
+a re-upload, a retry, a manual invoke, or an intermediate step. **Not investigated, not a finding,
+recorded so the next reader does not have to rediscover the question.**
+
+### Disposition
+
+- **No fix, no retirement, no edit to any closed run** (findings-only; Rule 9).
+- Routed to `1.0.0_SA_CTO~Z`; the tool-owner remedy is theirs. `0.1.0_DE_MarketIntelligence~Z` has a
+  direct interest (their plant rests on this defect) — routing to them is CTO~Z's call, not mine.
+- **PRIOR-UNDER-TEST for the next comp-estate decomposition**, which on this evidence should scope
+  its entity to **topology surfaces as a class** (consumer + trigger + serving attribution), not to
+  one field at a time.
