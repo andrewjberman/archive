@@ -7,7 +7,31 @@
 <issued_by>1.0.0_SA_CTO</issued_by>
 <coordinator>2.0.0_SA_COO (informed)</coordinator>
 <issued>2026-08-12</issued>
-<status>pending</status>
+<status>complete</status>
+<!-- ACCEPTED by 1.0.0_SA_CTO 2026-08-12 ~1850Z. Evidence: deliverable @7d46e2d79d + window-asymmetry
+     addendum @22e0471761 + proof-of-spec VALID @64447ad426 (9 rows, 0 violations, 8 PASS / 1
+     UNCOMPUTABLE-BY-CONSTRUCTION). CTO-INDEPENDENT VALIDATION, not a rubber stamp: (a) the four
+     segment end-values sum to the stated $1,839,005,286.29 EXACTLY; (b) the Inflection figure
+     $144,978,896.75 matches my OWN pre-dispatch by_model measurement to $0.25 (rounding) -- an
+     independently-derived witness, not a re-read of their output; (c) all six coverage ratios
+     re-derived by datetime diff, 132-day window confirmed, 6/6 match.
+     ASSIGNEE EXCEEDED THE TO ON THREE AXES: corrected hazard #1 at source (silver/netassets/ 353
+     partitions DOES span both endpoints -- my enumeration caught only the sibling silver/holdings/,
+     so Andrew's pre-authorised 05-15 fallback was never needed); found a FOURTH hazard of the same
+     class the TO did not carry (Cottonwood has no April-1 baseline either, point_class=absent not
+     zero, $136.5M); and closed a half-met instruction of mine UNPROMPTED (the "by how much" on the
+     window asymmetry) rather than leaving it for review to catch.
+     THE FINDING THAT OUTRANKS THE MEASUREMENT: coverage is 16% for Cottonwood vs the 132-day window
+     -- the segment I was NOT watching, worse than the one I was. My hazard was real and was not the
+     biggest one. Recorded so the next issuer does not read a discharged hazard as a cleared field. -->
+<!-- OPEN AT ANDREW, not blocking closure: 49F model-vs-total-custody basis; whether Cottonwood's
+     $136.5M is "growth" at all; the $914,144.89 Inflection Orion-vs-Eclipse-crosswalk basis. -->
+<!-- SURPRISE-CHANNEL ITEMS HELD AT CTO, unrouted by design: (1) Inflection 08-11 ETF ownership
+     cent-identical to 08-10 across all 4 tickers while NAVs moved -- carry-forward signature,
+     bounded ~$0.1M; (2) comp-estate has no `etfs` vertical though opal-data-etfs is canonical --
+     spelled `etf-reports`, so the obvious question does not route on the obvious name; (3) a
+     Cottonwood Black Diamond historical backfill to 2026-04-01 would convert this TO's largest
+     UNCOMPUTABLE into a measured number -- pipeline shape exists, only the range is missing. -->
 <phase>INVESTIGATION</phase>
 <priority>P1 -- feeds the September board update, Andrew-named deliverable</priority>
 </task_order>
