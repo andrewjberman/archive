@@ -93,6 +93,42 @@ BLOCKED/DEAF path: take a CPU-delta before any respawn recommendation.** Routed 
 doctrine candidate for Andrew's word. It would have short-circuited today's escalation before
 it was written.
 
+### ⛔ CORRECTION TO THE ABOVE, 2026-08-12 ~0107Z — THE INSTRUMENT IS ONE-WAY, AND I OVERCLAIMED IT
+
+**Caught by `2.0.0_SA_COO~Z`, and caught BEFORE it read my verdict** — it had independently
+recorded a 40-minute per-pid baseline (AE~Z pid 35904: **+17.4s over ~40 min**, sitting in a
+LIGHT cohort with five seats including known-healthy ones; two heavy seats at +154s/+199s were
+the two doing the most TOOL CALLS, i.e. COO and me).
+
+**THE MECHANISM I MISSED: LOCAL CPU DOES NOT MEASURE REMOTE INFERENCE.** The model runs on
+Anthropic's side; what accumulates on this box is the LOCAL half — tool calls, file I/O,
+parsing, streaming. **A seat deep in a long generation with no tool calls can be working
+extremely hard and register almost nothing locally** — which is EXACTLY the shape of a
+plant/seal composition (heavy thinking, no file writes until the seal).
+
+**THEREFORE THE INSTRUMENT IS ASYMMETRIC AND MUST BE STATED THAT WAY:**
+- **CPU delta POSITIVE → COMPUTING. Decisive.** (The 2159Z AE~Z case: +4.5s/30s. That verdict
+  STANDS and was correctly reached.)
+- **CPU delta LIGHT/FLAT → NON-DISCRIMINATING.** Consistent with composing AND with stopped.
+  **It can rule death IN; it cannot rule death OUT.**
+
+**Two corroborating non-discriminators measured the same turn (recorded so nobody re-derives
+them as evidence):** established TCP connection COUNT is 2 for AE~Z and identically 2 for CTO~Z,
+CVO~Z, BG, 0.8.0 and the DE seat — baseline resting state, tells nothing; and newest-connection
+AGE is ~522 min for AE~Z and ~522 min for the healthy CTO~Z/CVO~Z (long-lived streams), so it
+also fails to discriminate.
+
+**WHAT SURVIVES:** the four-state frame (ALIVE / ACTED / READ / COMPUTING) and the gap it names
+are unchanged and correct. What changes is the probe's claim: it is a ONE-WAY test, and the
+doctrine line routed to CTO~Z must say so, or it will be read at 2am as licence to respawn on a
+low number — **which is the precise failure the whole finding exists to prevent, re-manufactured
+by its own remedy.** THE ONLY TWO-WAY ORACLE REMAINS THE AGENT-SIDE ANSWER (Rule 22b, unchanged).
+
+*Self-assessment, recorded because the day's standard requires it of me too: I introduced this
+instrument at 2159Z and presented it as "the discriminator." It discriminates in one direction.
+A seat that had held the instrument for two hours would have built on the overclaim; COO~Z
+falsified it in under two, from a baseline it had taken on its own initiative.*
+
 **Bookkeeping trap found alongside:** the broker's registered PID is NOT the `claude.exe` PID
 (MSTR~Z: broker 19012 / process 18052). A mismatch between liveness and process truth is
 EXPECTED and is not evidence of a respawn — recorded because it nearly read as one.
