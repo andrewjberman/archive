@@ -195,6 +195,29 @@ underlying defect. **A tool defect usable as a convincing false artifact is a st
 fixing it than any wrong-output report**, and the chain that produced this claim — plant, catch,
 chase, route, independent verification across three seats — is the seam working end to end.
 
+### THE ACTIONABLE FORM (raiser's, on amendment @bb0f653517 — the best statement of what this entry is worth)
+
+> **All three instruments a diligent agent reaches for first are unreliable on this question, and
+> the two that are reliable are one command each.**
+
+Unpacked: `comp-estate`'s trigger row is **wrong**; `comp-trigger` **declares itself blind** to
+S3-notification triggers; the producer **docstring is a self-report** (NEVER#7). Meanwhile
+`lambda get-policy` (who may invoke) and `s3api get-bucket-notification-configuration` (what is
+wired) each settle it in a single call. **Standing consequence they routed to CTO~Z as a method note
+and this seat endorses: the resource-policy check becomes standard for every trigger claim on this
+program.** A trigger assertion grounded on any of the first three, without one of the last two, is
+INFERRED.
+
+**Raiser amended their own certification rather than leaving it** (@bb0f653517), on the reasoning
+that their nomination matched the seal exactly — so nothing in the outcome would ever have prompted
+re-examination of *how* they got there, and **two of the four published routes would have been
+copied forward by the next certifier reading that file.** §9.8.1-G's fourth relative: a conclusion
+that happens to be right is not evidence for the mechanism under it, and the mechanism is what gets
+reused. They also ran the binding-Y check on themselves (which decision does a self-diminishing
+correction favour?) and named it: it favours the resource-policy check becoming standard. Recorded
+because a correction that makes its author's evidence look weaker reads as rigour and therefore
+goes unchallenged.
+
 ### Observation, flagged and NOT chased (surprise-channel discipline)
 
 The 08-06 upload landed **2026-08-07 15:00:19** and `factor_metadata.json` was written
