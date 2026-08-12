@@ -326,6 +326,78 @@ that *"a composition-based scan alone would miss them"* — it did.
 
 ---
 
+## 4b. ⛔ CORRECTION — THE COUNT POPULATION MUST MATCH THE AUA POPULATION
+
+**Earlier in this TO I reported Cottonwood counts of 680 → 926 accounts and 206 → 223
+relationships. Those are ALL COTTONWOOD ACCOUNTS. The ruled AUA of $190,072,187.03 is ALL
+OPAL-STRATEGY ACCOUNTS ONLY.** Dividing one by the other puts a $190M numerator over a 926-account
+denominator of which **602 accounts contribute none of it** — the same addition-across-populations
+error as the basis stitch, one level down. Caught by CTO's population check before it reached a
+per-client figure.
+
+**Corrected, scoped to the AUA population — and the AUA reproduces exactly, which is the check:**
+
+| as-of | Accounts | Relationships | AUA |
+|---|---:|---:|---:|
+| 2026-06-09 | 307 | 162 | $166,517,928.12 |
+| 2026-08-10 | **324** | **172** | **$190,072,187.03** — ties to the ruled figure |
+
+**The measured Opal-book growth is +17 accounts and +10 relationships, not +246 and +17.** The
+larger pair was real but measured **the whole firm's onboarding ramp**, not the Opal book. On the
+correct population the coverage-window change is **+$23,554,258.91 across +17 accounts** — i.e.
+predominantly market and inflow rather than onboarding, **the opposite conclusion from the one the
+wrong denominator would have supported.**
+
+⚠ **Caveat on the measured start:** today's strategy assignment (the 2026-08-12 roster) is applied
+to the 2026-06-09 holdings snapshot, because assignment is only available from today's bronze. An
+account that changed strategy in between is classified by its August strategy in both columns.
+Immaterial to the end figure, potentially material to the start.
+
+### Consolidated counts and AUA-per-client, all three firms
+
+| Firm | Metric | Start | End | Delta |
+|---|---|---:|---:|---:|
+| **49 Financial** (entire `08242234`) | AUA | $1,482,015,684.99 *(04-01)* | $1,736,948,738.65 *(08-11)* | +$254,933,053.66 |
+| | Accounts | 6,683 | **7,189** | +506 |
+| | Clients *(distinct tax id)* | 4,020 | 4,268 | +248 |
+| | **AUA / client** | $368,660.62 | $406,970.18 | **+$38,309.56 (+10.4%)** |
+| | AUA / account | $221,759.04 | $241,612.01 | +$19,852.97 |
+| **Inflection** (Opal models, ruled basis) | AUA | $0.00 *(04-01, measured true zero)* | $144,978,896.75 *(08-10)* | +$144,978,896.75 |
+| | Accounts | 0 | 548 | +548 |
+| | Clients | ⛔ **UNCOMPUTABLE** | ⛔ **UNCOMPUTABLE** | — |
+| | **AUA / client** | ⛔ **UNCOMPUTABLE** | ⛔ **UNCOMPUTABLE** | — |
+| | AUA / account | $0.00 | $264,560.03 | — |
+| **Cottonwood** (all Opal-strategy accts) | AUA *(ruled 0 start)* | $0.00 *(04-01)* | $190,072,187.03 *(08-10)* | +$190,072,187.03 |
+| | Accounts / Relationships *(ruled)* | 0 / 0 | 324 / 172 | +324 / +172 |
+| | AUA *(measured)* | $166,517,928.12 *(06-09)* | $190,072,187.03 *(08-10)* | +$23,554,258.91 |
+| | Accounts / Relationships *(measured)* | 307 / 162 | 324 / 172 | +17 / +10 |
+| | **AUA / relationship** *(measured)* | $1,027,888.45 | $1,105,070.85 | **+$77,182.41** |
+
+⛔ **DO NOT SUM THE CLIENTS COLUMN.** 49 Financial is **clients** (tax id), Cottonwood is
+**relationships**, Inflection has **none** on the ruled basis. Three different units and one
+absence; a total would be meaningless.
+
+⛔ **INFLECTION'S PER-CLIENT CELLS ARE A MARKED GAP, NOT A MISSING MEASUREMENT.** Platinum — the
+ruled AUA basis — carries no client count at all. Orion silver does (4 → 266 clients) but on the
+Opal-*named* basis whose AUA is $914,144.89 → $155,943,297.84, **not** the ruled figure. The
+internally-consistent Orion pair is $228,536.22 → $586,253.00, and **its start denominator is FOUR
+clients — not a statistic, and no percentage change should be published on it.**
+
+### The 7,189 vs 7,190 question, resolved
+
+Both are real and neither is stale; in both tables rows equal distinct account ids, so it is not a
+row-vs-distinct artifact:
+
+| Table | 2026-04-01 | 2026-08-11 |
+|---|---:|---:|
+| `fact_acc` (account **dimension**) | 6,683 | **7,189** — use this |
+| `dim_balance` | 6,683 | 7,190 |
+
+`dim_balance` carries exactly one account absent from the dimension (`0035140799`) and its
+`net_mv_plus_cash` is **$0.00** — which is also why the $0.00 AUA tie-out holds at either count.
+
+---
+
 ## 5. THE TWO STRATEGIES WE CANNOT DECOMPOSE, AND THE LIVE PULL I ATTEMPTED
 
 `Anna *9237` and `Anna *9238` carry **$46,536,348.70 (24.8% of the total)** and our own landing has
