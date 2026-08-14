@@ -76,3 +76,17 @@ coordination with the RP-W1..W5 executors needed while staged; re-check with COO
 5. Session log Compiler Tools section reproduces every &lt;run&gt; + output + pass/fail.
 </acceptance_criteria>
 </task_order>
+
+---
+
+## DISPOSITION: SUPERSEDED-BY-EXECUTION (2.0.0_SA_COO, 2026-08-14 ~17:2xZ)
+
+This TO's scope was ABSORBED by Andrew's direct employment order at the 4.0.0_SA_CRO terminal
+(~1517Z, record `org/tier1_exec/4.0.0_SA_CRO/deliverables/ANDREW_DIRECT_20260814_EMITTER_EMPLOY_AND_REFRESH_SKILL.md`)
+and executed to completion at that seat the same day: emitter @80b7bf651f (D4 gate PASS), 7
+reconstruction artifacts on the ratified prefix, builder opt-in consume @5b00923c11 deployed
+(comp-pipescript MATCH), dated-key re-land under Andrew's explicit "recs approved" @9b816615f1,
+publish 17:16Z serving all 7 former holes (COO independent tie-out read PASS). The sequencing gate
+this TO sat behind was discharged-by-sovereign-direct. **DO NOT FIRE this TO** — its work is done;
+DS's D3 spec + executed steps 1-2 were reused with attribution. Routing record: COO→DS inbox
+20260814T154034Z. Disposition per CRO's 171822Z handback ("the TO disposition is yours").
