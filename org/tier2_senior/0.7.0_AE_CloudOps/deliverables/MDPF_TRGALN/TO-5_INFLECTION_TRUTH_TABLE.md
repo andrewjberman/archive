@@ -135,6 +135,27 @@ Consequence for TO-6: **surgical backfill is IMPOSSIBLE for the model leg on all
 08-05 remains fully-empty at serve until the model leg is resolved (the :1050 ternary propagates) —
 the custody fill is real but not display-visible by itself.
 
+## §5a ADDENDUM 2026-08-14 ~15:15Z (Andrew-prompted at the CRO terminal) — a RATIFIED THIRD PATH exists between surgical-measured and roll-forward
+
+§5's "surgical backfill IMPOSSIBLE" holds for MEASURED values and is unchanged. But the fork is not
+binary: **the ECLIPSE VINTAGE RECONSTRUCTION emitter** (0.2.0_DS_PortfolioAnalytics, 2026-08-10 —
+`ECLIPSE_VINTAGE_RECONSTRUCTION_T0_D1_D2_20260810.md` + `_D3_SPEC_20260810.md`, CTO brief
+@7b76f32562) is a specced, CTO-prefix-ratified DERIVED path: eclipse portfolio values rolled from a
+flanking measured partition via orion per-client `fact_performance` factors (a TRUE full-history
+table), flow-adjusted from orion `fact_transactions` (Step 3, the one unbuilt piece). Measured
+accuracy flow-unadjusted: +15.78bp aggregate / 19.30bp value-weighted / worst cell +136bp
+(gate-FAIL-not-relax, ratified). Properties: `point_class: "reconstructed"` never `measured`,
+distinct opt-in prefix `eclipse/inflection/reconstructed/vintage=…`, **Andrew-ruled INTERNAL-ONLY
+until he says otherwise** (~2334Z 08-10). Execution vehicle: TO `MDPF_REMED.RP-W7` @09b57a6278,
+**staged, no GO**, sequenced behind pipeline-functional (12/12 A4 unattended cycle, COO adjudicates).
+Spec scope was ONE vintage (08-05); the six historic holes are out of scope **absent an Andrew/CTO
+word** (D3 §1) — extending is a sovereign call, not an engineering gap.
+**New measurement (this addendum, 15:10Z):** orion `fact_performance` @ partition date=2026-08-14
+(full-history redelivery, 464,104 rows, 2,272 data-dates) carries vendor-computed factors at ALL
+SEVEN hole dates — 05-20: 309 · 05-29: 309 · 06-30: 310 · 07-10: 311 · 07-13: 311 · 07-14: 311 ·
+08-05: 313 clients (of 314 total) — and every hole is bracketed by measured eclipse partitions. The
+emitter's inputs exist for every hole on data already in S3 (zero new vendor calls).
+
 ## §6 Residuals surfaced, not chased (one line each)
 
 - Gold as-of-08-11 snapshot: S3 LastModified 2026-08-13T14:10:48Z but `meta.generated_at`
