@@ -86,6 +86,46 @@ re-fires on healed raw → trio → tie-out). Scheduled-cycle meta-fact: the mid
 142243Z): INF TO-4 leg = PASS_WITH_DISCLOSURE, closing read = tomorrow's clean cycle, failure
 REOPENS. Both conditions written into proof_TO-4 verbatim.
 
+## 6. ANDREW-AUTHORIZED COMPLETION RUN (appended ~15:25Z) — his word, the legs, guard #4, and the (a) ruling
+
+**ANDREW-DIRECT, VERBATIM: "go ahead"** — 2026-08-14 ~15:14Z at the 0.7.0_AE_CloudOps terminal, in
+direct response to the /open-calls card CALL 1 of 1 ("Authorize the one-delete INF completion?").
+Recorded + broadcast to COO/CTO/MSTR 15:15:04-13Z same turn. Scope read narrowly: the carded
+sequence only; COO 152434Z confirmed that reading ("the carded sequence named ONE delete").
+
+Execution legs (each verified before the next):
+1. Pre-mutation live-state verify 15:15:36Z: stale partition 06:16:21Z/1,216,778B; healed raws
+   14:01:19Z (inf) / 14:02:17Z (monolith), 2,201,746B both.
+2. Backup: `stale_fact_assets_date-2026-08-14.parquet` 1,216,778B sha256=2e8141d01f58f885
+   (scratchpad qa-bronze-backup/; first cp attempt to an absolute /cygdrive dest silently
+   mis-landed — aws-shim path class, banked; relative-path pattern verified byte-exact).
+3. DELETE `orion/inflection/silver/fact_assets/date=2026-08-14/data.parquet` 15:17:50Z,
+   absence verified.
+4. Sweep-heal: opal-assets-silver-orion {"mode":"sweep"} run 20260814T151816Z-46eb25be —
+   set-identity PASS (4,762/4,762, 0 holes), converted=1; partition REBUILT 15:18:23Z
+   (1,217,482B) from the healed raw.
+5. Floor re-run 15:18-15:19Z green: fresh values COMPUTED — then **GUARD #4**:
+   `mdpf_gold_consolidator.py conditional_put` (:455-517) recorded-not-overwrote the
+   business-different content at the existing dated keys (verbatim: "CONFLICT (recorded, not
+   overwritten): portal/gold/mdpf/inflection/aggregate-aua-timeseries/2026-08-13.json -- 9
+   business path(s)"; + inflection aum-metrics 12 paths incl. total.aum; + global x2). NO
+   override exists BY DESIGN ("NEVER silently overwritten"). Accrual/publisher NOT fired.
+6. Mechanism finding that re-priced the call: the builder recomputes the whole 445-date series
+   every run — tomorrow's NEW frontier key (2026-08-14.json) carries the corrected 08-13 point
+   and platinum serves it. THE SERVED UNDERSTATEMENT SELF-HEALS IN ~20h; permanence attaches
+   only to the 4 frozen dated gold snapshots (inflection+global × aggregate-aua-timeseries +
+   aum-metrics @ 2026-08-13.json).
+7. **COO DECISION 152434Z: (a) STOP** — the 4 gold keys are a NEW reserved-category delete set
+   outside the carded word; no widening on inference (4th hold of the day); ~20h of a 0.088%
+   self-healing served understatement does not price another reserved act. Conflict records
+   LEFT IN PLACE (the guard's evidence). Option (b) rides Andrew's card until tomorrow's cycle
+   moots it. Tomorrow's closing read reverts to the ORIGINAL form: served-point tie-out at the
+   fresh total (== CTO precision (a)).
+
+Terminal state after the authorized run: silver layer FULLY HEALED (durable); gold/served
+self-heal at tomorrow's cycle; the 4 dated gold snapshots keep the stale point unless Andrew
+spends one more word before tomorrow moots it.
+
 ## 4. Instrument-quality lesson (why the story moved)
 
 LastModified/rowcount said "identical" where values differed; editedDate said "unposted" where
