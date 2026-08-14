@@ -84,10 +84,33 @@ exhaustion (no 2004/2019). Sleep/hibernate (all disabled).
 
 - `PowerButtonTimestamp = 0` -> nobody power-cycled it. Leans power-loss. Never conclusive alone.
 - The downtime axis (#11 was down 18h39m against a 39s-1h29m range for the other twelve) **is
-  confounded by attendance.** Both candidate "unattended" rows proved attended: 07-28 by five
-  site-Z serials resuming 23:34-23:56 plus an Andrew merge; 08-13 by `MSTR~Z`'s own session serial
-  file written 17:57:43 on a box with no remote access -- **a live agent citing its own
-  instantiation as proof of the recovery it was investigating.**
+  confounded by attendance.** 07-28 is attended on its own evidence: five site-Z serials resuming
+  23:34-23:56 plus an Andrew merge.
+
+> ### CORRECTED 2026-08-14T01:30Z -- THE 08-13 ATTENDANCE CLAIM WAS FALSE, AND I HELPED PROPAGATE IT
+>
+> This section originally read that 08-13 was attended because `MSTR~Z`'s session serial file was
+> written 17:57:43 **"on a box with no remote access"** -- and I called that evidence *unimprovable*.
+>
+> **THAT BOX HAS TWO REMOTE-ACCESS AGENTS AND BOTH ARE RUNNING:** Splashtop
+> (`SplashtopRemoteService`, SRService pid 5344, SRManager pid 6488) and N-able Take Control
+> (`BASupportExpressStandaloneService_LOGICnow`). The 17:57 session launch **could have been remote.**
+>
+> `0.0.0_AB_MSTR~Z` self-reported this the moment they measured it, and named their own error
+> precisely: they **asserted an absence from the fact that we were asking for remote access** --
+> reasoning from the ask instead of from the box -- and never ran `Get-Service`. I compounded it by
+> grading an unmeasured claim as unimprovable *because it came from the seat that was standing there*.
+>
+> **WHAT SURVIVES, NARROWER BUT NOT NOTHING: remote software cannot boot a dead box.** Splashtop and
+> Take Control both need a running OS, so *something physical* still happened at 17:37:11 to bring it
+> up. Only the 17:57 **session launch** is now ambiguous between physical and remote; the 08-13 row
+> goes from *"physically attended, established"* to *"acted upon by someone, physically or remotely
+> -- undetermined."*
+>
+> ⚠ **AND IT PRODUCED A NEW DISCRIMINATOR NEITHER OF US HAD -- WAKE-ON-LAN.** If WoL is enabled in
+> firmware, a box that was **OFF** could have been woken remotely. **A HUNG BOX CANNOT BE WOKEN BY
+> WoL.** So evidence that the 17:37 start was a remote wake would be **positive evidence for the
+> power-loss limb.** Added to the console/BIOS trip alongside AC-recovery.
 
 > **"A HUNG BOX AND A POWERED-OFF BOX ARE INDISTINGUISHABLE IF NOBODY COMES."** The 18h39m measured
 > how long until a human arrived on a Thursday, not what the box was doing.
