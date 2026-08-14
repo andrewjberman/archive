@@ -4,7 +4,7 @@
 <issued_to>4.0.0_SA_CRO</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-14T05:20Z (filed on MSTR spawn-confirm 051811Z; drafted @c11d233)</issued>
-<status>pending</status>
+<status>complete</status> <!-- 2026-08-14T05:55Z 4.0.0_SA_CRO: truth table + proof @98dbaf099a; COO validation per RAVC4 pending -->
 <priority>P0 — STAGED. GO comes ONLY from COO when the §8.2 gate reads true (TO-0..TO-3 applied +
 proofed; expected ~06:15Z). Pre-reading the PRD and surfaces before GO is welcome; no mutations and
 no findings-driven dispatches before GO. Completes TONIGHT. Andrew's explicit method call:
