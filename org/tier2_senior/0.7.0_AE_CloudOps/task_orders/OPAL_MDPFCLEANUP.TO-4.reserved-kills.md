@@ -24,7 +24,17 @@ Per-class: Andrew's word recorded verbatim with referents; copy-manifest sha256'
 delete; DELTA=0 or accounted; NEVER#3 sign-off recorded for served keys. PASS_WITH_DISCLOSURE
 available where a leg is blocked by a withheld word (TRGALN v1.4 pattern).
 
+**NEVER#3 sign-off conditions for the `json/mdpf` teardown (pre-agreed COO 174623Z + CTO 174701Z;
+both halves sign at execution against the copy-manifest, no fresh round-trip on Andrew's word):**
+(i) Andrew's TO-1 ratification of the row; (ii) Wave 1's writer-retirement landed FIRST; (iii)
+**a ZERO-DIRECT-HIT access-log read on `json/mdpf/*` paths over >=7 trailing days at execution
+time, BOTH spellings of the guarded set, including whatever post-retirement span exists — a zero
+over a DENOMINATOR-PRINTED request count; an unqueried log is not evidence.** (The router read
+exonerates the ROUTE; only the access log sees a hardcoded direct S3/CDN fetch.) A NON-zero read
+converts CTO's half to a finding (name the fetcher) — route it and the CONSUMER is adjudicated,
+not the delete refused.
+
 <proof_of_spec>
-<expected_criteria>per-class-andrew-word-verbatim-with-referents; copy-manifest-sha256-before-delete; delta-accounting-in-proof; never3-signoff-for-served-keys; producer-leg-retired-before-served-key-delete</expected_criteria>
+<expected_criteria>per-class-andrew-word-verbatim-with-referents; copy-manifest-sha256-before-delete; delta-accounting-in-proof; never3-signoff-for-served-keys; producer-leg-retired-before-served-key-delete; zero-direct-hit-access-read-7d-both-spellings-denominator-printed</expected_criteria>
 <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/OPAL_MDPFCLEANUP/proof_TO-4.json</instance_path>
 </proof_of_spec>
