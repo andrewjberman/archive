@@ -1,7 +1,7 @@
 # MDPF_TRGALN — INF leg intervention record, 2026-08-14 (proof-record delta; COO-required disclosure)
 
-**Author:** 0.7.0_AE_CloudOps · **Status at writing:** frozen under MSTR hold (via COO 131053Z);
-remedy conditionally staged pending COO GO + MSTR concur.
+**Author:** 0.7.0_AE_CloudOps · **Status: CLOSED at the authorized boundary 14:20:43Z** (COO
+stand-down concur; completion staged one-word-away for Andrew). §5 carries the end-state.
 **Why this file exists:** COO 132308Z — *"the full three-swing sequence goes in verbatim with each
 instrument named, so the record shows WHY the story moved (instrument quality, not indecision)."*
 
@@ -66,6 +66,25 @@ runner → raw lands → mirror → trio → discriminator read.
   pre-roll QA pull that claims a production date key collides with resume logic); raw-vs-coerced
   two-producer asymmetry on bronze/assets (Lambda writes parquet, EC2 leg writes the raw twin);
   bronze/assets/2026-08-14.jsonl.gz remains a raw-set hole unless the runner re-fires.
+
+## 5. END-STATE (appended 14:3xZ — the remedy's full arc and terminal state)
+
+Clearance chain: COO GO 132711Z + re-delivery/ACK 133910Z (MSTR concur 132624Z + corrected-spec
+concur 132803Z; CTO no-objection 132639Z). Executed: runner fired 13:54:29Z → raw
+`bronze/assets/2026-08-14.jsonl.gz` re-landed 14:01:19Z (2,201,746B) → mirror 14:02:19Z carried it
+(monolith raw 14:02:17Z, 1 written/verified). **Blocked one layer up:** the silver converter
+invoked (RequestId aa57254f, 518ms) and SKIPPED-IDEMPOTENT on the existing stale partition
+(`mirror_conversion.py:421 partition_exists`); the deployed entry (`lambda_entry` :876-898) has NO
+force path (library carries force :415/:707 — unreachable; sweep = misses-only). Only remaining
+lever = deleting the stale silver partition = **Andrew-reserved**; COO stand-down 142043Z: legs 3–4
+NOT fired (byte-identical re-serve serves nobody), the delete "NOT authorized and will not be"
+tonight. Terminal state: **raw layers healed; silver/gold/served on the 02:12 ET marks; the served
+08-13 label correct as a label; the $185,201.05 / 0.088% understatement permanent for the historical
+08-13 INF point absent Andrew's word** (staged completion: delete stale partition → converter
+re-fires on healed raw → trio → tie-out). Scheduled-cycle meta-fact: the mid-cycle scheduled fires
+(11:02–13:50Z) all ran untouched; the labels served 3/3 at 08-13. CTO ruling (v1.4 §9.5, relayed
+142243Z): INF TO-4 leg = PASS_WITH_DISCLOSURE, closing read = tomorrow's clean cycle, failure
+REOPENS. Both conditions written into proof_TO-4 verbatim.
 
 ## 4. Instrument-quality lesson (why the story moved)
 

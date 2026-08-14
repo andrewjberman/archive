@@ -1,7 +1,7 @@
 {
   "to_id": "MDPF_TRGALN.TO-1",
-  "rev": 1,
-  "rev_scope": "desired+applied delivered at apply time per COO GO 051505Z; exercised appends after today's ~13:50Z publish cycle (TO-1 body) -- verdict flips PASS only with all three layers.",
+  "rev": 2,
+  "rev_scope": "rev 2 (2026-08-14T14:2xZ): exercised layers appended from today's scheduled cycle; verdict PASS.",
   "prd": "docs/architecture/MDPF_TRGALN_PRD.md",
   "prd_commit": "f50ee7223b03421b94a1224218946ab7b505e1c7",
   "executed_by": "0.7.0_AE_CloudOps",
@@ -14,7 +14,7 @@
       "expected": "cron(30 7) ET",
       "desired": {"tf_path": "infra/aws/terraform/cot-pipeline/schedule-et.tf", "commit": "16fc99460c", "line": 90},
       "applied": {"cmd": "aws scheduler get-schedule --name cot-bd-session-daily-et", "observed": "cron(30 7 * * ? *) America/New_York ENABLED", "at": "2026-08-14T05:23Z"},
-      "exercised": {"evidence": "PENDING -- today's first new-time fire (07:30 ET) + monolith fact_holdings LastModified <= 12:50Z + platinum cottonwood as_of_last == T-1 per lib/trading_calendar.py; appends in final rev after today's ~13:50Z publish", "at": ""},
+      "exercised": {"evidence": "SCHEDULED fire occurred at the new time: opal-data-cot bronze/2026-08-14/_BRONZE_COMPLETE.json completed_at=2026-08-14T11:31:44Z (07:31 ET), ALL 5 TABLES, holdings/allocations/unrealized as_of=2026-08-13 (T-1; BD guards passed at the new slot -- B1 window CONFIRMED)", "at": "2026-08-14T12:58Z"},
       "pass": true
     },
     {
@@ -24,7 +24,7 @@
       "expected": "cron(45 7) ET",
       "desired": {"tf_path": "infra/aws/terraform/opal-assets/mirror.tf", "commit": "16fc99460c", "line": 156},
       "applied": {"cmd": "aws scheduler get-schedule --name opal-assets-ingest-mirror-cot-daily-et", "observed": "cron(45 7 * * ? *) America/New_York ENABLED", "at": "2026-08-14T05:23Z"},
-      "exercised": {"evidence": "PENDING -- same cycle read as row 4", "at": ""},
+      "exercised": {"evidence": "monolith blackdiamond/cottonwood/silver/fact_holdings/date=2026-08-13/data.parquet LastModified=2026-08-14T11:46:04Z (<= 12:50Z spec) AND platinum cottonwood as_of_last=2026-08-13 == T-1 per trading calendar (served read 13:51Z, publish manifest 20260814T135046Z-de8ed684 roster-complete)", "at": "2026-08-14T13:51Z"},
       "pass": true
     },
     {
@@ -34,12 +34,12 @@
       "expected": "cron(0 13Z)",
       "desired": {"tf_path": "infra/aws/terraform/opal-assets/silver.tf", "commit": "16fc99460c", "line": 164},
       "applied": {"cmd": "aws events describe-rule --name opal-assets-silver-blackdiamond-sweep-daily", "observed": "cron(0 13 * * ? *) ENABLED", "at": "2026-08-14T05:23Z"},
-      "exercised": {"evidence": "PENDING -- today's 13:00Z sweep fire; NOTE pre-registered double-run: old 05:00Z fire already ran today pre-apply, new 13:00Z also fires = acceptable idempotent backstop double-run (cutover-gap statement in deploy ledger)", "at": ""},
+      "exercised": {"evidence": "13:00Z sweep FIRED: /aws/lambda/opal-assets-silver-blackdiamond START RequestId 03d70fa8 in the 12:58-13:08Z window. Pre-registered double-run held as stated (old 05:00Z fire pre-apply + new 13:00Z, idempotent backstop)", "at": "2026-08-14T14:21Z"},
       "pass": true
     }
   ],
   "terraform": {"plan_zero_diff": true, "tag": "cot-pipeline-v0.7.4 + opal-assets-v0.41.0 (local; push rides MSTR integration window per LD-0367 integrator-only push -- hash 16fc99460c reported to COO/MSTR)", "apply_at": "2026-08-14T05:22:30Z"},
   "forks_hit": [],
   "notes": "Plans READ pre-apply: cot root 'Plan: 0 to add, 1 to change, 0 to destroy' (the one expected row); opal-assets targeted plan 'Plan: 0 to add, 2 to change, 0 to destroy' (the two expected rows, NO opal-assets-daily-aua row). Post-apply 0-diff re-plans: both roots 'No changes'. Compiler mandate: comp-trigger pre-state (TO-0 sweeps + live reads minutes before edit) matched s2 verbatim; comp-blast on cot-bd-session-trigger + opal-assets-ingest-mirror completed POST-apply (first attempt timed out on the kuzu auto-refresh) -- radii carry no NEW consumer vs PRD issue-date; four-entry-function statement + firm-selector (not-all-rows) interaction statement recorded in the deploy ledger. Deploy ledger: org/critical_paths/change_management/mdpf-trgaln-to1-cottonwood-retime-20260814.md CLOSED.",
-  "verdict": "PENDING-EXERCISED"
+  "verdict": "PASS"
 }

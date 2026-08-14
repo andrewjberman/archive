@@ -1,0 +1,56 @@
+{
+  "to_id": "MDPF_TRGALN.TO-4",
+  "rev": 1,
+  "rev_scope": "Filed against PRD v1.4 @771bcd8d0a s9.5 (CTO ruling relayed by COO 142243Z): per-firm acceptance = LABELS read + a VALUE leg. INF leg carries PASS_WITH_DISCLOSURE per the two CTO conditions, stated verbatim inside the claim.",
+  "prd": "docs/architecture/MDPF_TRGALN_PRD.md",
+  "prd_commit": "771bcd8d0a",
+  "executed_by": "0.7.0_AE_CloudOps",
+  "completed_at": "2026-08-14T14:30:00Z",
+  "claims": [
+    {
+      "id": "labels-all-firms",
+      "resource": "platinum/mdpf/{49financial,inflection,cottonwood}/aggregate-aua-timeseries.json",
+      "field": "as_of_last",
+      "expected": "all three firms as-of 2026-08-13 (expected T-1 per lib/trading_calendar.py) at today's scheduled publish",
+      "desired": {"tf_path": "docs/architecture/MDPF_TRGALN_PRD.md s9.5 (v1.4)", "commit": "771bcd8d0a", "line": 0},
+      "applied": {"cmd": "aws s3 cp platinum/mdpf/{firm}/aggregate-aua-timeseries.json + manifest read", "observed": "49financial=2026-08-13, inflection=2026-08-13, cottonwood=2026-08-13; publish manifest 20260814T135046Z-de8ed684 process 13:50:46-13:50:50Z ROSTER-DERIVED complete missing []", "at": "2026-08-14T13:51Z"},
+      "exercised": {"evidence": "The publish itself was the UNTOUCHED SCHEDULED trio (floor 13:30Z gold artifact 13:31:03Z -> accrual 13:40Z -> publisher 13:50:46Z) -- the labels half of s9.5, ACCEPTED by COO 135815Z", "at": "2026-08-14T13:51Z"},
+      "pass": true
+    },
+    {
+      "id": "value-leg-cottonwood-B1-sentinel",
+      "resource": "opal-data-cot bronze/2026-08-14/_BRONZE_COMPLETE.json",
+      "field": "value_vintage",
+      "expected": "COT value leg = the B1 bronze sentinel pattern (v1.4 s9.5)",
+      "desired": {"tf_path": "docs/architecture/MDPF_TRGALN_PRD.md s9.5 (v1.4)", "commit": "771bcd8d0a", "line": 0},
+      "applied": {"cmd": "aws s3 cp s3://opal-data-cot/bronze/2026-08-14/_BRONZE_COMPLETE.json", "observed": "scheduled 07:30 ET session completed_at=2026-08-14T11:31:44Z, ALL 5 tables, as_of: holdings/allocations/unrealized=2026-08-13, realized/transactions=2026-08-14 -- BD guards PASSED at the new slot (vs the 01:42 ET probe's refused partials)", "at": "2026-08-14T12:58Z"},
+      "exercised": {"evidence": "monolith fact_holdings/date=2026-08-13 @11:46:04Z -> served cottonwood as_of_last=2026-08-13. The value vintage is vendor-attested T-1 (B1 CONFIRMED PASS).", "at": "2026-08-14T13:51Z"},
+      "pass": true
+    },
+    {
+      "id": "value-leg-49financial-named-input-reads",
+      "resource": "schwab/08242234/silver/fact_rps_s2 + smartx/platform/silver/fact_model_aum_daily",
+      "field": "value_vintage",
+      "expected": "49F value leg = input-freshness reads, NAMED EXPLICITLY (which inputs, what read, what vintage) (v1.4 s9.5)",
+      "desired": {"tf_path": "docs/architecture/MDPF_TRGALN_PRD.md s9.5 (v1.4); input map data/mdpf/config/route_bindings.yaml:53-136", "commit": "771bcd8d0a", "line": 0},
+      "applied": {"cmd": "aws s3api list-objects-v2 on both input prefixes (newest partitions)", "observed": "INPUT 1 schwab fact_rps_s2: date=2026-08-13 partition landed 2026-08-14T10:16:00Z (T-1 data, 3h14m pre-floor). INPUT 2 smartx fact_model_aum_daily: date=2026-08-14 partition landed 2026-08-14T13:13:51Z (16m pre-floor; pull-date-keyed).", "at": "2026-08-14T13:59Z"},
+      "exercised": {"evidence": "Both named inputs fresh and pre-floor on the scheduled cycle; served 49financial as_of_last=2026-08-13. 49F leg unattended-clean (no intervention touched it).", "at": "2026-08-14T13:59Z"},
+      "pass": true
+    },
+    {
+      "id": "value-leg-inflection-PASS_WITH_DISCLOSURE",
+      "resource": "platinum/mdpf/inflection/aggregate-aua-timeseries.json 2026-08-13 point",
+      "field": "value_vintage",
+      "expected": "INF value leg = post-remedy matched-row tie-out at the fresh total (v1.4 s9.5); remedy ended at the authorized boundary, so the leg closes PASS_WITH_DISCLOSURE per CTO conditions (COO relay 142243Z)",
+      "desired": {"tf_path": "docs/architecture/MDPF_TRGALN_PRD.md s9.5 (v1.4); full narrative org/tier2_senior/0.7.0_AE_CloudOps/deliverables/MDPF_TRGALN/INF_INTERVENTION_RECORD_20260814.md", "commit": "771bcd8d0a", "line": 0},
+      "applied": {"cmd": "matched-row value-diff (accountNumber+ticker): scratchpad backup (02:12 ET pull) vs 09:09 ET re-pull; served-point tie-out vs both totals", "observed": "CTO CONDITION (1) DISCLOSURE, verbatim facts: the served inflection 2026-08-13 point = 210,128,341.20 == the 02:12 ET pre-batch pull's total EXACTLY; the fresh 09:09 ET marks total 210,313,542.25; DELTA = $185,201.05 / 0.088% understatement. INSTRUMENT: matched-row value-diff, backup vs re-pull (24,976 of 35,285 currentPrice changed). MECHANISM: disclosed QA date-key collision + remedy blocked at the Andrew-reserved silver-partition delete (raw layers healed; converter skip-idempotent; no deployed force path).", "at": "2026-08-14T14:19Z"},
+      "exercised": {"evidence": "CTO CONDITION (1) NAMED CLOSING READ: tomorrow's clean unattended cycle -- value tie-out of the served point at the fresh total (no QA keys in play at 08-15 frontier). CTO CONDITION (2), stated in-proof as required: THE CLOSING READ'S FAILURE REOPENS THIS LEG -- this conditional close cannot silently become unconditional. Alternative completion staged for Andrew's word: delete stale orion/inflection/silver/fact_assets/date=2026-08-14/data.parquet -> converter re-fires on healed raw -> trio -> tie-out.", "at": "2026-08-14T14:30:00Z"},
+      "pass": true,
+      "verdict": "PASS_WITH_DISCLOSURE"
+    }
+  ],
+  "terraform": {"plan_zero_diff": true, "tag": "no TF changes in TO-4 (read/acceptance TO); the six TO-1/2/3 tags remain local pending MSTR integration window", "apply_at": ""},
+  "forks_hit": [],
+  "notes": "The scheduled cycle that produced this evidence ran UNTOUCHED (the day's ad-hoc interventions all pre-dated the 11:02Z first fire or were frozen before touching the trio; the one post-cycle remedy stopped at the authorized boundary without firing floor/accrual/publisher). COT + 49F legs are unattended-clean per COO 130416Z binding 4. INF leg's unattended-acceptance formally rides tomorrow's cycle per the named closing read. TO-2 exercised layer: TriggeredRules prove all 9 retimed rules fired exactly once at their new slots today.",
+  "verdict": "PASS_WITH_DISCLOSURE"
+}
