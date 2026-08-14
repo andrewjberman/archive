@@ -25,7 +25,8 @@ ad-hoc run is never production evidence). Then a single proof artifact asserting
 `49financial` / `inflection` / `cottonwood`:
 
 1. platinum `as_of_last` == expected T-1 per `lib/trading_calendar.py` (trading-day frontier,
-   NEVER wall-clock — NEVER#1);
+   NEVER wall-clock — NEVER#1). **Stated concretely per PRD v1.1 §8.1 @f50ee7223b: today's cycle
+   serves as-of 2026-08-13, all three firm scopes**;
 2. gold `portal/gold/mdpf/{scope}/aggregate-aua-timeseries/{T-1}.json` exists;
 3. publish stamp ≈ 13:50Z.
 
@@ -64,6 +65,10 @@ cite those proofs by path+commit; applied = the live reads; exercised = the arti
    attest, and note any QA run that occurred with its QA labeling).
 2. All nine claims PASS, or forks are recorded per the table with measured availability.
 3. proof_TO-0.json FINAL rev (Part B) delivered alongside.
-4. COO validates all five proofs mechanically against §3/§4 and issues the RAVC4 close to CTO.
+4. COO validates all proofs mechanically against §3/§4 and issues the RAVC4 close to CTO.
+5. **PROJECT CLOSE BAR (PRD v1.1 §8.3 @f50ee7223b — supersedes TO-4-alone):** project closes when
+   (1) TO-0..TO-4 validated; (2) served Inflection series has no unadjudicated empty dates (TO-5/
+   TO-6); (3) all three firm scopes serve as-of 2026-08-13 at tonight's/this-morning's publish;
+   (4) fabric holds for the night. This TO's PASS is necessary, not sufficient.
 </acceptance_criteria>
 </task_order>

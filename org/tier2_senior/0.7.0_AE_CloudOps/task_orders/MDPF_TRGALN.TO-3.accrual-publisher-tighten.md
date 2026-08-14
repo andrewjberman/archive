@@ -63,10 +63,19 @@ vendor outcome; do not hold this proof for firm staleness.)
   </phase>
 </compiler_tools_mandate>
 
+## TONIGHT-REFRESH STEP (ADDED per PRD v1.1 §8.1 @f50ee7223b — after this TO's proof delivers)
+
+One ad-hoc FULL-CHAIN exercise run tonight (vendor pulls → mirrors → floor → accrual → publisher)
+so the SERVED data reads **as-of 2026-08-13** before session end. Run-and-read QA exercising the
+retimed path — NOTHING STANDING, and it is never production evidence: the scheduled morning cycle
+remains the unattended TO-4 acceptance. Read the served platinum series for all three firms after
+the run and report the as-of values to COO with the proof_TO-3 close.
+
 <proof_of_spec>
 Path: org/tier2_senior/0.7.0_AE_CloudOps/deliverables/MDPF_TRGALN/proof_TO-3.json per PRD §7.
 Two claims (rows 2/3), field ScheduleExpression, `expected` VERBATIM from §3, each
-desired/applied/exercised; plan_zero_diff; tag.
+desired/applied/exercised; plan_zero_diff; tag. Tonight-refresh read reported alongside (QA-labeled,
+not a §7 claim).
 </proof_of_spec>
 
 <acceptance_criteria>

@@ -46,6 +46,11 @@ floor under the §3 targets, SURFACE to COO for a TO-1 scope amendment — do no
 
 ## PART B — LATE OR FOLDED (CTO risk-frame; ad-hoc = QA-legal, run-and-read, NEVER production evidence)
 
+> **AMENDED per PRD v1.1 §8.1 @f50ee7223b (Andrew-direct, sovereign vendor ground-truth): Black
+> Diamond refreshes by ~01:02 ET, other vendors "likely not long after" — it is past 01:02 ET, so
+> B1/B2 may run NOW as CONFIRMATIONS, not open questions. The §4 fork table stands; its expected
+> outcome is (a). Timing below is superseded; run the probes whenever they fit your Part-A pace.**
+
 **B1. COT vendor window:** one ad-hoc QA session run (`cot-bd-session-trigger` invoke) in the
 07:30 ET window (11:30Z), OR fold into today's first scheduled fire at the new time (post-TO-1) as
 the oracle. Read the pulled holdings vintage — must be T-1 per `lib/trading_calendar.py`. cot
