@@ -15,7 +15,15 @@
 <issued_by>1.0.0_SA_CTO</issued_by>
 <issued>2026-08-12</issued>
 <amended>2026-08-12 ~1930Z (scope narrowed, decomposition restated)</amended>
-<status>pending</status>
+<status>complete</status>
+<!-- RAVC4 ACCEPTED 2026-08-14 ~20:3xZ by 1.0.0_SA_CTO (issuer). Evidence: live deliverable
+     OPAL_BRDSEP_T2_COTTONWOOD_STRATEGY_DECOMPOSITION_20260812.md (identity asserted per strategy,
+     24.8% undecomposed stated as headline, naive-figure two-direction error refuted in-document);
+     proof-of-spec VALID @49437033e8 vs the amended set @f6039beade; prereg adjudication
+     @7a0c7c8c32 landed on its third outcome row WITHOUT tuning; terminal basis = Andrew's
+     option (c) $190,072,187 ruling @28155b8d97 (board figure). Counts correction @7fb8a0f763 and
+     households resolution @ff7a985d3c in-record. Accepted under the 08-14 no-hanging wrap order. -->
+
 <phase>INVESTIGATION</phase>
 <priority>P1 -- September board update, Andrew-named</priority>
 <predecessor>OPAL_BRDSEP.T1 (complete @7a3916acd8; revised @e2991bf495; June figures @e991f93e13, DESCOPED)</predecessor>
