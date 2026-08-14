@@ -1,0 +1,63 @@
+{
+  "to_id": "OPAL_MDPFCLEANUP.TO-3",
+  "rev": 1,
+  "rev_scope": "Wave-1 non-reserved kills complete: applies 1,2,4 executed clean under per-apply CTO gates; apply 3 STOPPED PRE-EDIT with the bd rows FALSIFIED-LIVE and rolled to KEEP per the ratified disputed-row rule. Zero reserved acts.",
+  "prd": "docs/architecture/OPAL_MDPFCLEANUP_PRD.md",
+  "prd_commit": "9f75dcb996",
+  "executed_by": "0.7.0_AE_CloudOps",
+  "completed_at": "2026-08-14T18:36:00Z",
+  "claims": [
+    {
+      "id": "apply1-smartx-account-distribution-set",
+      "resource": "smartx-account-distribution-daily rule + target + permission",
+      "field": "destroyed",
+      "expected": "ratified K2 row; exactly 3 destroys",
+      "desired": {"tf_path": "infra/aws/terraform/smartx-pipeline/eventbridge.tf (kill provenance in-comment)", "commit": "5dc5863a7d", "line": 0},
+      "applied": {"cmd": "safe-apply saved w1a1.tfplan (CTO GO 181936Z)", "observed": "0 added, 0 changed, 3 destroyed; post-apply 0-diff; absence describe-rule -> ResourceNotFoundException; found-control cot-bronze-complete ENABLED (separate invocation)", "at": "2026-08-14T18:21Z"},
+      "exercised": {"evidence": "consumer_exercise: the serving route reads platinum (deployed router:6) and the FE requests platinum keys -- the 13:50Z + 17:16Z publishes ran untouched by this trigger; TOMORROW'S 11:30Z NON-WRITE of json/mdpf keys is standing exercised evidence (cited into the TO-4 access-log window). rollback: git revert 5dc5863a7d + re-apply, same window.", "at": "2026-08-14T18:21Z"},
+      "consumer_exercise": "platinum publishes unaffected + tomorrow's 11:30Z non-write",
+      "rollback": "git revert 5dc5863a7d + safe-apply, same window",
+      "pass": true
+    },
+    {
+      "id": "apply2-cot-session-complete-set",
+      "resource": "cot-session-complete rule + target + permission",
+      "field": "destroyed",
+      "expected": "ratified K2 row; exactly 3 destroys",
+      "desired": {"tf_path": "infra/aws/terraform/cot-pipeline/eventbridge.tf", "commit": "5b989deb27", "line": 0},
+      "applied": {"cmd": "safe-apply saved w1a2.tfplan (CTO GO 182248Z)", "observed": "0/0/3; post-apply 0-diff; absence ResourceNotFoundException + found-control cot-bronze-complete ENABLED", "at": "2026-08-14T18:24Z"},
+      "exercised": {"evidence": "consumer_exercise: the cot chain completed DAILY with this rule silent (1 fire in 7d vs daily bronze markers incl. today's 11:31:44Z) -- the test that would have failed were it load-bearing has been passing daily.", "at": "2026-08-14T18:24Z"},
+      "consumer_exercise": "daily chain completion with the rule silent (incl. today's 11:31:44Z marker)",
+      "rollback": "git revert 5b989deb27 + safe-apply, same window",
+      "pass": true
+    },
+    {
+      "id": "apply3-bd-rows-FALSIFIED-LIVE-to-KEEP",
+      "resource": "bd-49f-runner + bd-49f-fees-runner sets",
+      "field": "kill_stopped",
+      "expected": "ratified K1 rows -- REVERSED by falsifying evidence per the ratified 'any disputed row = KEEP' rule (COO concur 182725Z, CTO ratify @4708e35800)",
+      "desired": {"tf_path": "infra/aws/terraform/bd-pipeline/bd-49f-session-chain.tf", "commit": "a1e73f080b", "line": 121},
+      "applied": {"cmd": "consumers-first reference sweep + last-invocation log reads", "observed": "InvokeRunner grant (session-chain.tf:121) is EXERCISED: bd-49f-fees-runner last event 2026-08-13T22:21:21Z (60s after the ENABLED bd-49f-fees-session-daily 22:20Z fire); bd-49f-runner last event 2026-08-14T00:09:54Z. The K1 evidence ('rule DISABLED, no 7d fires') measured only the DIRECT rules -- a second ENABLED entry point invokes both daily.", "at": "2026-08-14T18:25Z"},
+      "exercised": {"evidence": "STOPPED PRE-EDIT: zero mutations, tonight's 22:20Z chain safe. The consumer_exercise IS the falsification (the live-consumer test FAILED -> kill refused). INSTRUMENT UPGRADE now a standing PRD requirement @4708e35800: last-invocation history on every kill claim.", "at": "2026-08-14T18:26Z"},
+      "consumer_exercise": "FAILED (consumers live) -- which is the control working; kill refused",
+      "rollback": "n/a -- nothing changed",
+      "pass": true
+    },
+    {
+      "id": "apply4-smartx-k1-sets",
+      "resource": "daily_trigger rule + autostart set + model_monthly_pull set + scheduler-role companions (15 rows)",
+      "field": "destroyed",
+      "expected": "ratified K1 rows + 2 validate-found companions (CTO gate expanded 183150Z); exactly 15 destroys",
+      "desired": {"tf_path": "infra/aws/terraform/smartx-pipeline/{eventbridge,iam,lambdas,model-perf-pull,outputs}.tf", "commit": "a3b36fd877", "line": 0},
+      "applied": {"cmd": "safe-apply saved w1a4t.tfplan (CTO GO 183150Z; full-root plan REJECTED dirty -- 2 unrelated KEEP-Lambda updates surfaced, not applied)", "observed": "0/0/15; targeted 0-diff clean; FULL-ROOT RESIDUAL == EXACTLY the 2 surfaced rows (jwt_refresher + rest_pull staged-vs-executing artifact drift, routed to COO for owner+classification per CTO) -- the denominator-carrying 0-diff form; absence: get-function x2 -> ResourceNotFoundException, found-control opal-smartx-ingestion-pipeline FOUND", "at": "2026-08-14T18:34Z"},
+      "exercised": {"evidence": "consumer_exercise: both fns 74d invocation-silent (last events 2026-06-01, the standing instrument) + their triggers dead. DRIFT-HEAL ROW CORRECTED: CloudTrail DeleteSchedule smartx-model-monthly-pull-daily errorCode NONE -- the schedule EXISTED live and the destroy was REAL (TO-0's absence probe had queried the BASE name; corrected in proof_TO-0 rev 3; the kill was the ratified row either way).", "at": "2026-08-14T18:34Z"},
+      "consumer_exercise": "74d invocation silence on both fns + dead triggers",
+      "rollback": "git revert a3b36fd877 + safe-apply, same window",
+      "pass": true
+    }
+  ],
+  "terraform": {"plan_zero_diff": true, "tag": "smartx-pipeline-v0.9.1 + cot-pipeline-v0.7.5 + smartx-pipeline-v0.9.2 (local, MSTR window); plan_zero_diff = targeted-0-residual with the full-root residual ENUMERATED (exactly the 2 surfaced KEEP-Lambda rows)", "apply_at": "2026-08-14T18:21-18:34Z"},
+  "forks_hit": ["apply-3 bd rows: ratified-K1 FALSIFIED-LIVE -> KEEP per the pre-agreed disputed-row rule (no unilateral path; COO+CTO concur on record)"],
+  "notes": "No reserved acts (EC2/S3 untouched -- TO-4). Ledger mdpfcleanup-to3-wave1-kills-20260814.md CLOSED with per-apply evidence. Surfaced-not-chased: jwt_refresher + rest_pull staged-not-applied artifacts (22a class, at COO for classification); the dead account_distribution job-leg code in the KEEP smartx Lambda (cleanup rider at CTO).",
+  "verdict": "PASS"
+}
