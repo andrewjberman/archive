@@ -1,0 +1,45 @@
+{
+  "to_id": "MDPF_TRGALN.TO-3",
+  "rev": 1,
+  "rev_scope": "desired+applied delivered at apply time; exercised (today's publish stamp ~13:50Z, four scopes same pass) appends after the cycle. Tonight-refresh runs after this proof delivers (v1.1 s8.1), reported separately as QA -- not a s7 claim.",
+  "prd": "docs/architecture/MDPF_TRGALN_PRD.md",
+  "prd_commit": "f50ee7223b03421b94a1224218946ab7b505e1c7",
+  "executed_by": "0.7.0_AE_CloudOps",
+  "completed_at": "2026-08-14T05:38:30Z",
+  "claims": [
+    {
+      "id": "row2-mdpf-accrual-bridge-daily",
+      "resource": "mdpf-accrual-bridge-daily",
+      "field": "ScheduleExpression",
+      "expected": "cron(40 13Z)",
+      "desired": {"tf_path": "infra/aws/terraform/mdpf-pipeline/accrual-bridge.tf", "commit": "0484d5d0bd", "line": 188},
+      "applied": {"cmd": "aws scheduler get-schedule --name mdpf-accrual-bridge-daily", "observed": "cron(40 13 * * ? *) UTC ENABLED", "at": "2026-08-14T05:36Z"},
+      "exercised": {"evidence": "PENDING -- today's 13:40Z fire; trio ordering floor 13:30Z -> accrual 13:40Z -> publish 13:50Z", "at": ""},
+      "pass": true
+    },
+    {
+      "id": "row3-opal-assets-mdpf-portal-publisher-daily",
+      "resource": "opal-assets-mdpf-portal-publisher-daily",
+      "field": "ScheduleExpression",
+      "expected": "cron(50 13Z)",
+      "desired": {"tf_path": "infra/aws/terraform/opal-assets/mdpf_portal_publisher.tf", "commit": "0484d5d0bd", "line": 228},
+      "applied": {"cmd": "aws scheduler get-schedule --name opal-assets-mdpf-portal-publisher-daily", "observed": "cron(50 13 * * ? *) UTC ENABLED", "at": "2026-08-14T05:36Z"},
+      "exercised": {"evidence": "PENDING -- today's publish stamp ~13:50Z with all four scopes written in the same pass (firm T-1 correctness is TO-4's claim set, per TO-3 body)", "at": ""},
+      "pass": true
+    },
+    {
+      "id": "floor-unchanged-declaration",
+      "resource": "mdpf-scheduled-floor",
+      "field": "ScheduleExpression",
+      "expected": "cron(30 13Z) UNCHANGED",
+      "desired": {"tf_path": "infra/aws/terraform/mdpf-pipeline/scheduled-floor.tf", "commit": "0484d5d0bd", "line": 110},
+      "applied": {"cmd": "aws scheduler get-schedule --name mdpf-scheduled-floor", "observed": "cron(30 13 * * ? *) UTC ENABLED -- untouched; neither plan carried a floor row", "at": "2026-08-14T05:36Z"},
+      "exercised": {"evidence": "Plans READ: mdpf root 0/1/0 (accrual only), opal-assets targeted 0/1/0 (publisher only) -- a floor row would have been a dirty plan and neither had one", "at": "2026-08-14T05:35Z"},
+      "pass": true
+    }
+  ],
+  "terraform": {"plan_zero_diff": true, "tag": "mdpf-pipeline-v2.1.1 + opal-assets-v0.43.0 (local; push rides MSTR integration window per LD-0367)", "apply_at": "2026-08-14T05:36:00Z"},
+  "forks_hit": [],
+  "notes": "Plans READ pre-apply: one expected row each, NO floor row, NO daily-aua row. Post-apply 0-diff both roots. Live trio read 05:36Z: floor 13:30Z / accrual 13:40Z / publisher 13:50Z, all UTC ENABLED. Cutover-gap (pre-registered): both old fires (14:10Z/14:20Z) not yet fired today, both new times later than apply -> one fire each at new times, no skip/double. comp-blast pre-write on mdpf-accrual-trigger + opal-assets-mdpf-portal-publisher (IAM-only radii, no event consumers). Deploy ledger mdpf-trgaln-to3-trio-tighten-20260814.md CLOSED. ALL MDPF_TRGALN RETIMES (14 resources) NOW LANDED as of 05:36Z vs the 09:45Z deadline.",
+  "verdict": "PENDING-EXERCISED"
+}
