@@ -1,0 +1,190 @@
+{
+  "to_id": "MDPF_TRGALN.TO-0",
+  "rev": 1,
+  "rev_scope": "Part A only (census + import-fidelity + writer-pin). Part B window claims append in the final rev per COO SEQUENCING RULING.",
+  "prd": "docs/architecture/MDPF_TRGALN_PRD.md",
+  "prd_commit": "f50ee7223b03421b94a1224218946ab7b505e1c7",
+  "executed_by": "0.7.0_AE_CloudOps",
+  "completed_at": "2026-08-14T05:10:13Z",
+  "census_note": "DENOMINATOR: 15 of 15 s3-table rows resolved MANAGED across 4 TF roots (opal-assets, mdpf-pipeline, cot-pipeline, inf-pipeline) via `terraform state list` + `terraform state show` attribute tie-out to live APPLIED reads. ZERO imports required: all four PRD-s2 'unmanaged' candidates (#3/#5/#6/#7) were comp-trigger text-scan FALSE NEGATIVES on interpolated names (RP-W3 instrument defect, exactly as the TO warned) -- e.g. name = \"${local.mirror_name}-cot-daily-et\". Import-fidelity requirement discharged as targeted-plan fidelity: all 4 roots report 'No changes. Your infrastructure matches the configuration.' on the s3 resources. No mutations of any kind were made in Part A.",
+  "claims": [
+    {
+      "id": "census-01-mdpf-scheduled-floor",
+      "resource": "mdpf-scheduled-floor",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_scheduler_schedule.mdpf_scheduled_floor",
+      "desired": {"tf_path": "infra/aws/terraform/mdpf-pipeline/scheduled-floor.tf", "commit": "422fb00065", "line": 110},
+      "applied": {"cmd": "aws scheduler get-schedule --name mdpf-scheduled-floor", "observed": "cron(30 13 * * ? *) UTC ENABLED; terraform state show matches verbatim", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (mdpf-pipeline root): 'No changes. Your infrastructure matches the configuration.'", "at": "2026-08-14T05:07Z"},
+      "pass": true
+    },
+    {
+      "id": "census-02-mdpf-accrual-bridge-daily",
+      "resource": "mdpf-accrual-bridge-daily",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_scheduler_schedule.mdpf_accrual_bridge_daily",
+      "desired": {"tf_path": "infra/aws/terraform/mdpf-pipeline/accrual-bridge.tf", "commit": "422fb00065", "line": 165},
+      "applied": {"cmd": "aws scheduler get-schedule --name mdpf-accrual-bridge-daily", "observed": "cron(10 14 * * ? *) UTC ENABLED; state show matches verbatim", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (mdpf-pipeline root): 'No changes.'", "at": "2026-08-14T05:07Z"},
+      "pass": true
+    },
+    {
+      "id": "census-03-opal-assets-mdpf-portal-publisher-daily",
+      "resource": "opal-assets-mdpf-portal-publisher-daily",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_scheduler_schedule.mdpf_publisher_daily",
+      "desired": {"tf_path": "infra/aws/terraform/opal-assets/mdpf_portal_publisher.tf", "commit": "422fb00065", "line": 211},
+      "applied": {"cmd": "aws scheduler get-schedule --name opal-assets-mdpf-portal-publisher-daily", "observed": "cron(20 14 * * ? *) UTC ENABLED; state show name+expr match verbatim (PRD s2 'NOT FOUND in TF' was a text-scan false negative: name = \"${local.mdpf_publisher_name}-daily\")", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (opal-assets root, 4 targets): 'No changes. Your infrastructure matches the configuration.' -- import NOT required", "at": "2026-08-14T05:06Z"},
+      "pass": true
+    },
+    {
+      "id": "census-04-cot-bd-session-daily-et",
+      "resource": "cot-bd-session-daily-et",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_scheduler_schedule.cot_bd_session_daily_et",
+      "desired": {"tf_path": "infra/aws/terraform/cot-pipeline/schedule-et.tf", "commit": "422fb00065", "line": 78},
+      "applied": {"cmd": "aws scheduler get-schedule --name cot-bd-session-daily-et", "observed": "cron(30 16 * * ? *) America/New_York ENABLED; state show matches verbatim", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (cot-pipeline root): 'No changes.'", "at": "2026-08-14T05:07Z"},
+      "pass": true
+    },
+    {
+      "id": "census-05-opal-assets-ingest-mirror-cot-daily-et",
+      "resource": "opal-assets-ingest-mirror-cot-daily-et",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_scheduler_schedule.mirror_cot_et",
+      "desired": {"tf_path": "infra/aws/terraform/opal-assets/mirror.tf", "commit": "422fb00065", "line": 145},
+      "applied": {"cmd": "aws scheduler get-schedule --name opal-assets-ingest-mirror-cot-daily-et", "observed": "cron(30 18 * * ? *) America/New_York ENABLED; state show matches verbatim (text-scan false negative: name = \"${local.mirror_name}-cot-daily-et\")", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (opal-assets root): 'No changes.' -- import NOT required", "at": "2026-08-14T05:06Z"},
+      "pass": true
+    },
+    {
+      "id": "census-06-opal-assets-ingest-mirror-inf-daily",
+      "resource": "opal-assets-ingest-mirror-inf-daily",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_cloudwatch_event_rule.mirror_inf",
+      "desired": {"tf_path": "infra/aws/terraform/opal-assets/mirror.tf", "commit": "422fb00065", "line": 96},
+      "applied": {"cmd": "aws events describe-rule --name opal-assets-ingest-mirror-inf-daily", "observed": "cron(5 15 * * ? *) ENABLED; state show matches verbatim (text-scan false negative: name = \"${local.mirror_name}-inf-daily\")", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (opal-assets root): 'No changes.' -- import NOT required", "at": "2026-08-14T05:06Z"},
+      "pass": true
+    },
+    {
+      "id": "census-07-opal-assets-silver-blackdiamond-sweep-daily",
+      "resource": "opal-assets-silver-blackdiamond-sweep-daily",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_cloudwatch_event_rule.silver_sweep[\"blackdiamond\"]",
+      "desired": {"tf_path": "infra/aws/terraform/opal-assets/silver.tf", "commit": "422fb00065", "line": 540},
+      "applied": {"cmd": "aws events describe-rule --name opal-assets-silver-blackdiamond-sweep-daily", "observed": "cron(0 5 * * ? *) ENABLED; state show matches verbatim (text-scan false negative: for_each name = \"opal-assets-silver-${each.key}-sweep-daily\")", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (opal-assets root): 'No changes.' -- import NOT required", "at": "2026-08-14T05:06Z"},
+      "pass": true
+    },
+    {
+      "id": "census-08-opal-inf-jwt-fetch",
+      "resource": "opal-inf-jwt-fetch",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_cloudwatch_event_rule.inf_jwt_fetch_schedule",
+      "desired": {"tf_path": "infra/aws/terraform/inf-pipeline/eventbridge.tf", "commit": "422fb00065", "line": 31},
+      "applied": {"cmd": "aws events describe-rule --name opal-inf-jwt-fetch", "observed": "cron(5 12 * * ? *) ENABLED; state show matches verbatim", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (inf-pipeline root, 8 targets): 'No changes. Your infrastructure matches the configuration.'", "at": "2026-08-14T05:09Z"},
+      "pass": true
+    },
+    {
+      "id": "census-09-inf-api-reps-daily",
+      "resource": "inf-api-reps-daily",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_cloudwatch_event_rule.inf_api_reps_schedule",
+      "desired": {"tf_path": "infra/aws/terraform/inf-pipeline/inf-api-reps.tf", "commit": "422fb00065", "line": 184},
+      "applied": {"cmd": "aws events describe-rule --name inf-api-reps-daily", "observed": "cron(17 13 * * ? *) ENABLED; state show matches verbatim", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (inf-pipeline root): 'No changes.'", "at": "2026-08-14T05:09Z"},
+      "pass": true
+    },
+    {
+      "id": "census-10-inf-accounts-v2-daily",
+      "resource": "inf-accounts-v2-daily",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_cloudwatch_event_rule.inf_accounts_v2_daily_schedule",
+      "desired": {"tf_path": "infra/aws/terraform/inf-pipeline/inf-accounts-v2-daily.tf", "commit": "422fb00065", "line": 196},
+      "applied": {"cmd": "aws events describe-rule --name inf-accounts-v2-daily", "observed": "cron(22 13 * * ? *) ENABLED; state show matches verbatim", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (inf-pipeline root): 'No changes.'", "at": "2026-08-14T05:09Z"},
+      "pass": true
+    },
+    {
+      "id": "census-11-opal-inf-bronze-runner-cron",
+      "resource": "opal-inf-bronze-runner-cron",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_cloudwatch_event_rule.inf_bronze_runner_schedule",
+      "desired": {"tf_path": "infra/aws/terraform/inf-pipeline/eventbridge.tf", "commit": "422fb00065", "line": 66},
+      "applied": {"cmd": "aws events describe-rule --name opal-inf-bronze-runner-cron", "observed": "cron(30 13 * * ? *) ENABLED; state show matches verbatim", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (inf-pipeline root): 'No changes.'", "at": "2026-08-14T05:09Z"},
+      "pass": true
+    },
+    {
+      "id": "census-12-inf-api-assets-v2-daily",
+      "resource": "inf-api-assets-v2-daily",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_cloudwatch_event_rule.inf_api_assets_v2_schedule",
+      "desired": {"tf_path": "infra/aws/terraform/inf-pipeline/inf-api-assets-v2.tf", "commit": "422fb00065", "line": 185},
+      "applied": {"cmd": "aws events describe-rule --name inf-api-assets-v2-daily", "observed": "cron(32 13 * * ? *) ENABLED; state show matches verbatim", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (inf-pipeline root): 'No changes.'", "at": "2026-08-14T05:09Z"},
+      "pass": true
+    },
+    {
+      "id": "census-13-inf-api-eclipse-daily",
+      "resource": "inf-api-eclipse-daily",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_cloudwatch_event_rule.inf_api_eclipse_daily",
+      "desired": {"tf_path": "infra/aws/terraform/inf-pipeline/br1-eclipse-rehome.tf", "commit": "422fb00065", "line": 119},
+      "applied": {"cmd": "aws events describe-rule --name inf-api-eclipse-daily", "observed": "cron(33 13 * * ? *) ENABLED; state show matches verbatim", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (inf-pipeline root): 'No changes.'", "at": "2026-08-14T05:09Z"},
+      "pass": true
+    },
+    {
+      "id": "census-14-inf-api-positions-daily",
+      "resource": "inf-api-positions-daily",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_cloudwatch_event_rule.inf_api_positions_schedule",
+      "desired": {"tf_path": "infra/aws/terraform/inf-pipeline/inf-api-positions.tf", "commit": "422fb00065", "line": 179},
+      "applied": {"cmd": "aws events describe-rule --name inf-api-positions-daily", "observed": "cron(37 13 * * ? *) ENABLED; state show matches verbatim", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (inf-pipeline root): 'No changes.'", "at": "2026-08-14T05:09Z"},
+      "pass": true
+    },
+    {
+      "id": "census-15-inf-api-txn-daily",
+      "resource": "inf-api-txn-daily",
+      "field": "tf_state_address",
+      "expected": "managed",
+      "tf_state_address": "aws_cloudwatch_event_rule.inf_api_txn_schedule",
+      "desired": {"tf_path": "infra/aws/terraform/inf-pipeline/inf-api-txn.tf", "commit": "422fb00065", "line": 166},
+      "applied": {"cmd": "aws events describe-rule --name inf-api-txn-daily", "observed": "cron(47 13 * * ? *) ENABLED; state show matches verbatim", "at": "2026-08-14T05:02Z"},
+      "exercised": {"evidence": "targeted terraform plan (inf-pipeline root): 'No changes.'", "at": "2026-08-14T05:09Z"},
+      "pass": true
+    },
+    {
+      "id": "writer-pin-dim-model-portfolio",
+      "resource": "blackdiamond/cottonwood/gold/dim_model_portfolio writer",
+      "field": "invocation_path",
+      "expected": "writer pinned with invocation-trace evidence; before/after-floor verdict stated",
+      "desired": {"tf_path": "infra/aws/ec2/mdpf-daily-runner/mdpf-daily-dispatch.sh (line 554: build_dim_model_portfolio.py --upload); trigger rule infra/aws/terraform/mdpf-pipeline/eventbridge.tf (mdpf-daily-refresh-trigger)", "commit": "422fb00065", "line": 554},
+      "applied": {"cmd": "aws events describe-rule --name mdpf-daily-refresh-trigger + aws logs filter-log-events /aws/lambda/mdpf-daily-trigger 14:50-15:10Z 08-13", "observed": "EventPattern = Object Created on opal-data-inf/gold/meta/pipeline-complete.json (INF sentinel) -- hypothesis CONFIRMED at source, no longer INFERRED. Trace: sentinel 14:58:55Z -> mdpf-daily-trigger START 2026-08-13T14:58:55.847Z (RequestId 1c3f9392-fa9a-4269-ba73-72499374b035) -> convergence gate PASS -> SSM cad68288-3db2-46f0-ab22-834fbe50466a dispatched to runner i-02448edb624a7a7cf at 14:58:57.947Z. mdpf-gold-lambda: ZERO invocations in the window (discriminating negative).", "at": "2026-08-14T05:09Z"},
+      "exercised": {"evidence": "s3 head-object blackdiamond/cottonwood/gold/dim_model_portfolio/date=2026-08-13/data.parquet LastModified=2026-08-13T15:01:32Z (sentinel+2m37s). TIMING VERDICT: writer rides the INF sentinel; under s3 targets the sentinel moves to ~12:44Z (TO-2) so the dim write lands ~12:47Z, BEFORE the 13:30Z floor -- NO TO-1 scope amendment needed. COUPLING SURFACED (not adjudicated): cottonwood's dim_model_portfolio currency depends on the INF retiming (TO-2); under fork (b) [INF leg halts] this input stays post-floor even with TO-1 landed.", "at": "2026-08-14T05:10Z"},
+      "pass": true
+    }
+  ],
+  "terraform": {"plan_zero_diff": true, "tag": "none -- Part A made zero mutations (no imports needed, no applies); plan_zero_diff = 4/4 targeted root plans 'No changes'", "apply_at": ""},
+  "forks_hit": [],
+  "verdict": "PASS"
+}
