@@ -43,6 +43,25 @@ must carry the class through, not collapse it:**
 Any other site that narrows the class to a 2-way measured/interpolated split is the same defect —
 grep `pointClass` / `PointClass` consumers and enumerate them in your report WITH THE DENOMINATOR.
 
+**4. [ADDED 1904Z — DE scope surface 190236Z, VERIFIED by the issuer on the served artifact]:
+`provenanceIndex` `:245-249` — on the LIVE per-firm inflection slice
+(`s3://opal-data-portal-v2/platinum/mdpf/inflection/aggregate-aua-timeseries.json`, publisher
+written_at 2026-08-15T13:50Z) `cohort_provenance` has 445 entries and ZERO carry a `date` key
+(model slot = source names: 'Eclipse' x438 / 'reconstructed(evr-1.0.0) -- ...' x7). The reader
+returns null -> predates-contract -> ALL 445 points labelled `measured`, INCLUDING the 7
+reconstructed. PREMISE CORRECTION: on per-firm the 7 do NOT render estimate-class today — they
+already render ordinary AND are already RELABELLED `measured` via the fail-safe (Implementation A,
+pre-existing). The class IS served on that slice in the date-aligned `point_class[]`
+({measured 438, reconstructed 7}) which the per-firm reader by contract (`:141-148`) never reads.
+RULING (COO 190348Z): land a per-firm `point_class[]` array read as a SEPARATE commit after core B —
+fail-safe ORDER: (1) cohort channel well-formed -> slots as today; (2) cohort malformed/absent AND
+`point_class[]` present + length-aligned to `dates[]` -> array read (unknown strings still degrade
+LOUD via VALID; add a mutant fixture on this path); (3) neither -> predates-contract `measured` as
+today. Length-misaligned array = malformed = warn + (3), never index-guess. Keep the malformed-
+channel warn. The `:141-148` per-grain derivation-owner rule is AMENDED by this ruling (the flat
+array owns derivation for that grain when the cohort channel cannot carry classes) — document
+in-code beside `:141`. Global's `readGlobalPointClass` (2 reconstructed dates) is in core-B scope.**
+
 ## Objective
 
 The 7 `reconstructed` inflection points (served MDPF provenance lattice: {438 measured, 7
@@ -103,6 +122,11 @@ can fail), then PASSING on your change.
   slot through the Global-aggregate collapse unpatched) and demonstrate the enumeration REPORTS
   the relabel; then restore and show it clean. A "3 of 3 carry the class" line reads identical
   whether the check works or is vacuous.
+- AC-8 [ADDED 1904Z]: per-firm inflection paired read on the LIVE served artifact returns
+  `pointClass: 'reconstructed'` at exactly the 7 reconstructed dates and `'measured'` at 438
+  (test fixture built from the served file; cite the S3 key + `written_at`); the malformed-
+  channel warn still fires; a length-misaligned `point_class[]` fixture falls to predates-contract
+  with a warn.
 
 **TWO CLAIMS, TWO INSTRUMENTS — neither discharges the other (MSTR 185326Z, adopted 1858Z):**
 | Claim | Instrument | Row |
@@ -119,7 +143,7 @@ LOOKS ordinary. Both rows carry their own evidence in the proof-of-spec instance
 ## proof_of_spec (machine-readable contract — Andrew-direct 2026-08-11)
 
 <proof_of_spec>
-  <expected_criteria>AC-1,AC-2,AC-3,AC-4,AC-5,AC-6,AC-7</expected_criteria>
+  <expected_criteria>AC-1,AC-2,AC-3,AC-4,AC-5,AC-6,AC-7,AC-8</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/MDPF_EVR.FE-2_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
@@ -127,7 +151,7 @@ Assignee fills the instance (schema `org/standards/PROOF_OF_SPEC.schema.json`) f
 efforts — one row per id, criterion VERBATIM + exact re-runnable invocation + evidence + denominator
 — and validates BEFORE the `complete` flip with the POSITIONAL id form (there is no flag; a flagged
 form exits rc=2 and the 2-arg fallback prints VALID with coverage UNCHECKED — CHECK THE RC):
-`python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/MDPF_EVR.FE-2_PROOF_OF_SPEC.json AC-1,AC-2,AC-3,AC-4,AC-5,AC-6,AC-7`
+`python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/MDPF_EVR.FE-2_PROOF_OF_SPEC.json AC-1,AC-2,AC-3,AC-4,AC-5,AC-6,AC-7,AC-8`
 AC-6 evidence is the screenshot path + your read of it, not a class-name argument. AC-5 evidence
 must show the mutant test able to fail (a dead mutant control invalidates the instance).
 
