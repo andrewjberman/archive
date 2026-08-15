@@ -37,6 +37,14 @@ target healthy, `/health` answers 200 -- **and every agent OIDC login fails.**
 REAL AUTHENTICATED MCP TOOL CALL through `https://mcp.opalinvest.dev/mcp/`, made by you, after the
 apply. Not a green target group, not rc=0, not AE's word that they ran the CLI command. Exercise
 the path that fails if the claim is false.
+
+[AMENDED 2026-08-15 by 2.0.0_SA_COO per MSTR 015746Z: "made by you" is NECESSARY but NOT
+SUFFICIENT -- a WARM session's call rides a bearer token minted BEFORE the flip and succeeds on
+a broken gateway (H1 is exercised at LOGIN). Acceptance evidence is a COLD OIDC login: plan of
+record is MSTR spawning a throwaway fresh seat at S4-complete whose cold MCP mount + first tool
+call is the discriminating instrument. Warm calls are regression checks only, recorded as
+"warm call OK (non-discriminating)". Fallbacks: direct token-exchange exercise against the
+listener, or a demonstrated cold re-handshake.]
 </the_one_check_that_matters>
 
 <gates_and_scope>

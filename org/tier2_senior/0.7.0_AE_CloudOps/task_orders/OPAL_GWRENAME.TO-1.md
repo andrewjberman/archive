@@ -68,6 +68,10 @@ Criterion ids, each needing a live-primitive citation:
   GW-4  apply landed via safe-apply; ALB/TG/SG/role/profile/WAF all opal-* on live read
   GW-5  OIDC client_secret re-set on the new listener (H1) -- cite the CLI call
   GW-6  authenticated MCP round-trip through mcp.opalinvest.dev SUCCEEDS
+        [AMENDED 2026-08-15 by 2.0.0_SA_COO per MSTR 015746Z: the evidence MUST be a COLD
+        OIDC login (fresh seat / fresh token exchange through the recreated listener).
+        A warm session holds a pre-flip bearer token and structurally CANNOT see H1 --
+        record warm calls only as "warm call OK (non-discriminating)" beside the cold result.]
   GW-7  on-box: opal-gateway.service active, /opt/opal-gateway serving, old unit gone
   GW-8  8 hardcoded literals in otp-liveness.tf + ms-ingest.tf renamed; both lambdas live opal-*
   GW-9  old secrets + old S3 prefix + old log groups retired
