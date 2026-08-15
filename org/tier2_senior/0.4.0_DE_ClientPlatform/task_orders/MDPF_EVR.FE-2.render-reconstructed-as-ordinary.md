@@ -98,7 +98,23 @@ can fail), then PASSING on your change.
 - AC-6: `/frontend-dev` screenshot: 7 reconstructed points visually indistinguishable from
   measured; `carried` treatment unchanged; PNG path cited in the report.
 - AC-7: enumeration of every `pointClass`/`PointClass` consumer touched-or-confirmed-clean,
-  with denominator.
+  with denominator, **AND the check shown ABLE TO FAIL**: point one consumer at a deliberately
+  un-carried class (e.g. temporarily restore the `:294` fall-through, or feed a `reconstructed`
+  slot through the Global-aggregate collapse unpatched) and demonstrate the enumeration REPORTS
+  the relabel; then restore and show it clean. A "3 of 3 carry the class" line reads identical
+  whether the check works or is vacuous.
+
+**TWO CLAIMS, TWO INSTRUMENTS — neither discharges the other (MSTR 185326Z, adopted 1858Z):**
+| Claim | Instrument | Row |
+|---|---|---|
+| PIXEL claim — "renders ordinary" (Andrew's actual ask) | `/frontend-dev` rendered screenshot | AC-6 |
+| LABEL claim — "never called measured" (the honesty condition) | derived-class read at EVERY consumer, able-to-fail | AC-7 (+AC-2, AC-3) |
+
+**A screenshot is STRUCTURALLY INCAPABLE of seeing a relabel: under Implementation B a
+reconstructed point styled-as-measured and a reconstructed point RELABELLED measured are
+pixel-identical BY DESIGN.** So a green screenshot says nothing about AC-7, and AC-7 must never be
+discharged with a PNG. Conversely, a clean consumer enumeration says nothing about whether the point
+LOOKS ordinary. Both rows carry their own evidence in the proof-of-spec instance.
 
 ## proof_of_spec (machine-readable contract — Andrew-direct 2026-08-11)
 
