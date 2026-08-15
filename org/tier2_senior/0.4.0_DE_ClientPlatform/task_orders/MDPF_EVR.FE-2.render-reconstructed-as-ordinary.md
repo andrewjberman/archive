@@ -4,7 +4,8 @@
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-15T18:55Z</issued>
-<status>pending</status>
+<status>complete</status>
+<completed>2026-08-15T19:3xZ by 0.4.0_DE_ClientPlatform -- portal DEV 778ea780 (core Implementation B) + e8b1fb07 (AC-8 per-firm flat point_class[] read, COO-ruled 190348Z); proof-of-spec instance VALID rc=0 (8/8 rows PASS, mutant FIRED-AS-EXPECTED, determinism STABLE); AC-7 VALUE numbers unchanged before/after (band-extent 0->0, ranges []->[], value sum identical); PNG portal/.frontend-dev/screenshots/mdpf_evr_fe2_inflection_after.png (control: _coreB_778ea780.png, chart panels pixel-identical). Log: org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-15/mdpf_evr_fe2_reconstructed_ordinary_1849-1930Z.md. Awaiting COO validate/close.</completed>
 <priority>P2 — Andrew-direct ruling, spawn-triggered (MSTR spawned DE for this)</priority>
 <authority>Andrew-direct at the MSTR terminal 2026-08-15, VERBATIM: "yes they should render as ordinary points" — answering the open question MSTR surfaced after his ~0350Z ruling "i dont want to draw attention to the interpolated points at all, no one cares about that, its more problematic to open up the can of worms and seed doubt rather than just another data point that is probably within 10bps anyway on a random day no one cares about". Record: org/tier0_exec/0.0.0_AB_MSTR/deliverables/ANDREW_DIRECT_20260815_NO_FIRST_CLASSING_RECONSTRUCTED_POINTS.md + LD-0417 (MSTR broadcast 184917Z).</authority>
 <supersedes>NOTHING. MDPF_EVR.FE-1 (cancelled @bc686bde7e) asked for the OPPOSITE outcome (make reconstructed MORE distinct). This TO has an inverted objective and is NOT FE-1 reinstated.</supersedes>

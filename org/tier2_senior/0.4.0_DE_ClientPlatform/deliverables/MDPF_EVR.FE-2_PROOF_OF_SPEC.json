@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_EVR.FE-2",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/MDPF_EVR.FE-2.render-reconstructed-as-ordinary.md",
+    "group": "OTHER",
+    "vintage_commit": "78cb9b23e7cfe348324a3f682fc75dc20edeecfc"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/lib/pairedProvenanceRead.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "e8b1fb0733287cd57d503b6c19356130f7667a9e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal DEV commits 778ea780 (core Implementation B) + e8b1fb07 (AC-8 per-firm flat point_class[] read, COO-ruled 190348Z). Portal main tree on DEV (Rule 19); PROD promote is a DT /prod-deploy lane, not this TO. Lanes commit, integrators push (MSTR owns push)."
+    },
+    {
+      "path_or_key": "portal/src/pages/ModelPortfolios.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "778ea780c6c5239e4f7584b99165d5ec22f5bc91",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal DEV commit 778ea780: Global aggregate row (:731-745) carries the class (globalClassAt(i) verbatim, else deriveAggregateClass) -- the 2-way interpolated|measured collapse literal is gone. Same deploy scope note as above."
+    },
+    {
+      "path_or_key": "portal/scripts/paired-provenance-read-exercise.mjs",
+      "kind": "test",
+      "commit_or_etag": "e8b1fb0733287cd57d503b6c19356130f7667a9e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bun exercise; `bun run test:provenance-read` (package.json script added @778ea780). Runs against the module/page by default, or --module/--page overrides for HEAD copies and mutants; --inflection/--global feed the served artifacts."
+    },
+    {
+      "path_or_key": "portal/.frontend-dev/screenshots/mdpf_evr_fe2_inflection_after.png",
+      "kind": "doc",
+      "commit_or_etag": "e8b1fb07-tree",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Untracked-by-design screenshot dir (predecessor practice); PNG on disk on the laptop at that path (1440x2315). Control PNG beside it: mdpf_evr_fe2_inflection_coreB_778ea780.png (rendered on the core-B tree)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC-1",
+      "criterion_verbatim": "`PointClass` union + `VALID` set include `'reconstructed'`; served `reconstructed` slots return `cls: 'reconstructed'` from `slotClass` (unit test).",
+      "method": "test_suite",
+      "invocation": "cd portal && bun scripts/paired-provenance-read-exercise.mjs --inflection <served inflection json> --global <served global json>   (AC-1 block: fixture with well-formed cohort_provenance, model slot 'reconstructed' + the producer form 'reconstructed(evr-1.0.0) -- eclipse/inflection/reconstructed/ (EVR)', custody slot 'reconstructed')",
+      "output_evidence": "AFTER (e8b1fb07): PASS AC-1 model slot 'reconstructed' -> pointClass 'reconstructed'; PASS model slot 'reconstructed(evr-1.0.0) -- ...' -> 'reconstructed'; PASS custody slot 'reconstructed' -> 'reconstructed' (readNonModelSeries); PASS zero warns for the reconstructed slots. BEFORE (HEAD 684e67de copy via --module): all four FAIL -- got interpolated_estimate + warns \"invalid point_class 'reconstructed' at 2026-01-06.model -- treating as interpolated_estimate\". Type: `export type PointClass = 'measured' | 'interpolated_estimate' | 'absent' | 'reconstructed'` (pairedProvenanceRead.ts:51 @e8b1fb07); VALID Set includes 'reconstructed' (:186-191); AC-7 static check 'module: VALID set includes reconstructed' PASS.",
+      "denominator": "4 AC-1 checks of 75 total; before-run 4/4 FAIL, after-run 4/4 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC-2",
+      "criterion_verbatim": "`derivedFirmClass` returns `reconstructed` for a reconstructed slot with no interpolated slot (unit test); precedence documented in-code.",
+      "method": "test_suite",
+      "invocation": "same invocation, AC-2 block: 7-row [custody, model] fixture through readFirmAggregateSeries + an 8-row precedence table on the exported deriveAggregateClass",
+      "output_evidence": "AFTER: rows -> ['measured','reconstructed','reconstructed','interpolated_estimate','reconstructed','absent','reconstructed'] for slots [[measured,measured],[measured,reconstructed],[reconstructed,measured],[reconstructed,interpolated_estimate],[absent,reconstructed],[absent,absent],[measured,'reconstructed(evr-1.0.0) -- ...']]; 'a reconstructed slot is NEVER relabelled measured' PASS; zero warns PASS; 8/8 deriveAggregateClass table PASS. BEFORE (HEAD): rows 1,2,4,6 got interpolated_estimate (unknown-string degrade) and deriveAggregateClass ABSENT (8 FAIL). MUT-C (fall-through `return { cls: 'measured' }` restored in a scratch copy): rows 1,2,4,6 got MEASURED -- 'NEVER relabelled measured' FAIL, i.e. the check reports the relabel. Precedence documented in-code at deriveAggregateClass' doc block: interpolated_estimate > reconstructed > absent(all) > measured (pairedProvenanceRead.ts ~:193-227 @e8b1fb07); derivedFirmClass routes through it (:355-370).",
+      "denominator": "17 AC-2 checks of 75; before 12/17 FAIL; MUT-C 5/17 FAIL; after 17/17 PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC-3",
+      "criterion_verbatim": "Global aggregate row (`ModelPortfolios.tsx` ~`:731`) carries `reconstructed` through (unit or render test) -- never relabelled measured.",
+      "method": "test_suite",
+      "invocation": "same invocation, AC-3 block: (a) readGlobalPointClass over a fixture point_class[] with 'reconstructed'; (b) the page's fallback fold deriveAggregateClass(['measured','reconstructed','measured']); (c) STATIC read of ModelPortfolios.tsx: locate the `const aggregate = globalMdpfData.dates` row, assert no `('interpolated_estimate' as const) : ('measured' as const)` collapse literal and that it wires `globalClassAt ? globalClassAt(i) : deriveAggregateClass(...)`. Able-to-fail: --page <MUT-P copy with the 2-way ternary restored> and --page <HEAD copy>.",
+      "output_evidence": "AFTER: PASS readGlobalPointClass 'reconstructed' passes through (at(1),at(5) = reconstructed); PASS other members unchanged; PASS zero warns; PASS page fallback fold -> reconstructed; PASS page: located the Global aggregate row (lines 727-746); PASS page: NO 2-way collapse literal; PASS page: passes globalClassAt(i) through verbatim, else deriveAggregateClass(...). BEFORE (HEAD page): 'NO 2-way collapse literal' FAIL (line 737 `pointClass: anyInterpolated ? ('interpolated_estimate' as const) : ('measured' as const)`), wiring FAIL, readGlobalPointClass FAIL (got interpolated_estimate). MUT-P: 3 FAIL (AC-3 x2 + AC-7 page). LIVE global: readGlobalPointClass tally {measured 403, reconstructed 2, interpolated_estimate 40, absent 9} vs served {measured 403, reconstructed 2, interpolated_estimate 35, absent 9, carried 5} -- the 2 reconstructed carry through; the 5 'carried' still degrade (OUT OF SCOPE, unchanged).",
+      "denominator": "7 AC-3 checks of 75; before 5/7 FAIL; MUT-P 2/7 FAIL (+1 AC-7); after 7/7 PASS. Global visual: trendInterpolatedDates is EMPTIED at global by the 07-23 materiality ruling (ModelPortfolios.tsx ~:888), so no Global pixel keys on the class -- the carry is a LABEL fix at Global.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC-4",
+      "criterion_verbatim": "zero `console.warn` emitted for `reconstructed` on the paired read of the live inflection artifact (test asserts warn count 0 for that class).",
+      "method": "live_read",
+      "invocation": "aws s3 cp s3://opal-data-portal-v2/platinum/mdpf/inflection/aggregate-aua-timeseries.json <sp>/mdpf_inflection.json; aws s3 cp s3://opal-data-portal-v2/platinum/mdpf/global/aggregate-aua-timeseries.json <sp>/mdpf_global.json; cd portal && bun scripts/paired-provenance-read-exercise.mjs --inflection <sp>/mdpf_inflection.json --global <sp>/mdpf_global.json   (console.warn captured; readFirmAggregateSeries + readAllModelSeries + readNonModelSeries + readCountTotalSeries on inflection; readGlobalPointClass over all 454 indices on global)",
+      "output_evidence": "AFTER: [LIVE] inflection (firm_id=inflection n_dates=445 written_at=2026-08-15T13:50:49Z source_keys=[\"s3://opal-data-assets/portal/gold/mdpf/inflection/aggregate-aua-timeseries/2026-08-13.json\"]) paired read emitted 1 warn: '[pairedProvenanceRead] cohort_provenance channel is malformed (null or date-less entries) -- treating the whole channel as predates-contract (measured)' -- NOT about reconstructed, and still true (the cohort channel IS date-less; COO ruled the warn stays). PASS 'zero warns mentioning reconstructed'. [LIVE] global (n_dates=454, written_at=2026-08-15T13:50:49Z) 1 warn: \"invalid Global point_class 'carried' at index 441\" (out of scope); PASS zero warns mentioning reconstructed; PASS readGlobalPointClass returns 'reconstructed' 2x == served. BEFORE (HEAD): inflection emitted 2 warns incl. \"unknown count_provenance 'reconstructed' at 2026-05-20\" and global emitted \"invalid Global point_class 'reconstructed' at index 386\" -> AC-4 FAIL x3.",
+      "denominator": "warns mentioning 'reconstructed': 0 of 1 emitted (inflection), 0 of 1 emitted (global); before: 1 of 2 and 1 of 2. 3 AC-4 checks of 75, all PASS after; 3/3 FAIL before.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC-5",
+      "criterion_verbatim": "MUTANT -- a fabricated unknown class still degrades to `interpolated_estimate` + warns (test present, shown able-to-fail, passing).",
+      "method": "test_suite",
+      "invocation": "same invocation, AC-5 block: 4 fabricated classes ('zzz_no_such_class','reconstructed_zzz','Reconstructed','reconstructedX(evr)') x 4 reader paths (slot via readModelSeries, derivedFirmClass via readFirmAggregateSeries, Global point_class[] via readGlobalPointClass, count_provenance via readCountTotalSeries) + a KNOWN-class control. Able-to-fail runs: --module <sp>/mut/mutA_pairedProvenanceRead.ts (resolvePointClass returns ANY string as-is = the weakened degrade) and --module <sp>/mut/mutB_pairedProvenanceRead.ts (loose `startsWith('reconstructed')` prefix).",
+      "output_evidence": "AFTER (real module): 29/29 AC-5 PASS -- every fabricated class -> interpolated_estimate + exactly one warn naming it on all four paths; control: 'reconstructed' on Global + count paths -> 'reconstructed', 0 warns. MUT-A: 27 FAIL e.g. \"slot 'zzz_no_such_class' -> interpolated_estimate -- got zzz_no_such_class\", \"exactly one warn naming it -- warns=[]\", \"derivedFirmClass with slot 'zzz_no_such_class' -> got measured, warns=0\" (the weakened path silently RELABELS an unknown class measured -- the exact regression the TO names). MUT-B: 12 FAIL -- 'reconstructed_zzz' and 'reconstructedX(evr)' accepted as reconstructed on all four paths. Pre-change (HEAD) module: AC-5 degrade checks PASS (the degrade pre-existed) while the control FAILS -- so the test set discriminates a correct carve-out from both a missing one and a wrong one.",
+      "denominator": "29 AC-5 checks of 75: after 29/29 PASS; MUT-A 27/29 FAIL; MUT-B 12/29 FAIL; HEAD 1/29 FAIL (the known-class control). Mutants live only in the session scratchpad; the tree was never mutated.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC-6",
+      "criterion_verbatim": "`/frontend-dev` screenshot: 7 reconstructed points visually indistinguishable from measured; `carried` treatment unchanged; PNG path cited in the report.",
+      "method": "manual_read_with_citation",
+      "invocation": "cd portal && bun run dev --port 5175 (background); node scripts/ui-smoke.mjs portfolios .frontend-dev/screenshots/mdpf_evr_fe2_inflection_after.png --port 5175 --select inflection --fixtures <sp>/fixtures_mdpf_live.json   (fixtures = the SERVED platinum artifacts: inflection aggregate-aua-timeseries + aum-metrics + account-distribution, global aggregate-aua-timeseries + aum-metrics, pulled 2026-08-15 ~19:1xZ). Run once on the core-B tree (778ea780 -> saved as mdpf_evr_fe2_inflection_coreB_778ea780.png) and once on the AC-8 tree (e8b1fb07 -> mdpf_evr_fe2_inflection_after.png); PIL ImageChops.difference between the two.",
+      "output_evidence": "ui-smoke: SELECTED: inflection; LOC: /portfolios; CANVAS rgb(195,202,218); REFAREAS 0 per-chart (0ra,0ra,0ra) -- zero band reference areas. READ of the PNG (portal/.frontend-dev/screenshots/mdpf_evr_fe2_inflection_after.png, 1440x2315): Inflection Wealth Management selected; AUM Trend Analysis period-end bars and Daily AUM stacked area render with NO yellow dashed 'Interpolated' overlay, NO band, NO 'Interpolated model mix (estimate)' legend entry (legend = Ultra Short-Term / Short-Term / Intermediate-Term / Long-Term / Ultra Long-Term / Non-Model AUM only); the 7 reconstructed dates (2026-05-20, 05-29, 06-30, 07-10, 07-13, 07-14, 08-05) sit inside the May-Aug 2026 model-stack region of the daily chart with no marker, stroke, hollow or badge distinguishing them from neighbours. Color law: all content inside dark panels, canvas text dark -- clean. CONTROL: core-B PNG (all 445 labelled measured) vs AC-8 PNG (7 labelled reconstructed): 60 of 3,333,600 pixels differ, ALL inside bbox (105,2212)-(113,2220) = the animated 'Orion Connected' status dot in the Data Source footer (zoomed and read); both chart panels pixel-identical. carried: no carried treatment exists on this page today (deleted Andrew-direct ~0450Z, per the page's own comments) and Global was not touched visually -- unchanged by construction.",
+      "denominator": "1 route x 1 firm view (inflection, the slice carrying the 7 reconstructed points); 60 of 3,333,600 pixels differ core-B vs AC-8, 0 of them in either chart panel. NOTE: this PNG proves the PIXEL claim only; the LABEL claim is AC-7 (two claims, two instruments -- the TO's own table).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC-7",
+      "criterion_verbatim": "enumeration of every `pointClass`/`PointClass` consumer touched-or-confirmed-clean, with denominator, AND the check shown ABLE TO FAIL [...] AC-7 SPLIT: classify every consumer as DISPLAY-ONLY vs VALUE-AFFECTING [...] For every value-affecting consumer show the BEFORE/AFTER number. If any served or rendered NUMBER moves, STOP.",
+      "method": "test_suite",
+      "invocation": "same invocation, [AC-7] block (module + page line enumeration with denominator, static collapse checks) + [AC-7 VALUE] block (band-extent set, interpolatedRanges, class tallies, aggregate value sum on the LIVE inflection artifact); able-to-fail: --module <sp>/mut/mutC_pairedProvenanceRead.ts (derivedFirmClass fall-through restored) and --page <sp>/mut/mutP_ModelPortfolios.tsx (2-way ternary restored); BEFORE numbers: --module/--page HEAD copies. Import census: grep -rln pairedProvenanceRead portal/src portal/scripts.",
+      "output_evidence": "ENUMERATION (denominator): 44 pointClass/PointClass lines across 2 files (module 31, page 13) @e8b1fb07 (37 across the same 2 files @HEAD); the module is imported by exactly 2 src files (ModelPortfolios.tsx + itself) + 2 scripts (provenance-read-guard.mjs, this exercise); readCountTotalSeries / interpolatedRanges / lastRealPoint / readGlobalCarriedDates(code) have 0 consumers outside the module. CLASSIFICATION -- VALUE-AFFECTING (branches on the label): (1) trendInterpolatedDates (ModelPortfolios.tsx :881-897, Set of periods where pointClass === 'interpolated_estimate' over aggregate + by_model rows) -> feeds band runs interpolatedRunsOverRows(:849), bar-cell interpMonths (:1969), legend entry (:1082), interp_total overlay (:2055), Area hide (:2235) -- the band extent the module's own law says derives from point_class; (2) derivedFirmClass / deriveAggregateClass (the derivation itself); (3) Global aggregate row (:727-746). DISPLAY-ONLY / plumbing: row-shape carries (:669,:687,:756), types (:671,:748), comments (:660,:720,:892-893). BEFORE/AFTER NUMBERS on the LIVE inflection artifact (HEAD 684e67de -> e8b1fb07): trendInterpolatedDates-equivalent size 0 -> 0 (dates: none); interpolatedRanges [] -> []; non-model interpolated points 0 -> 0; aggregate value sum 78,209,487,100.32 over 445/445 non-null -> identical; class tallies aggregate {measured 445} -> {measured 438, reconstructed 7}, every model series {measured 445} -> {measured 438, reconstructed 7}, non_model same, count {measured 438, interpolated_estimate 7} -> {measured 438, reconstructed 7} (readCountTotalSeries has ZERO consumers). LIVE global derived tally {measured 403, interpolated_estimate 42, absent 9} -> {measured 403, reconstructed 2, interpolated_estimate 40, absent 9} -- Global band EMPTIED by ruling, so no rendered number keys on it. RESULT: ZERO served or rendered numbers move; only labels move (the intended ones). ABLE-TO-FAIL: MUT-C -> AC-2 rows 1,2,4,6 'got measured' + 'NEVER relabelled measured' FAIL + AC-7 'derivedFirmClass has NO bare return { cls: measured } fall-through' FAIL (7 FAIL); MUT-P -> AC-7 'zero 2-way collapse literals on pointClass lines (denominator 12)' FAIL naming line 743 + AC-3 x2 (3 FAIL); restored real tree -> 75/75 PASS.",
+      "denominator": "44 consumer lines / 2 files / 2 importing src files; 3 value-affecting consumer classes enumerated, 3 numbers printed before/after (band-extent size, ranges, value sum) all unchanged; 7 AC-7 checks of 75 PASS after; MUT-C 2/7 (+5 AC-2), MUT-P 1/7 (+2 AC-3) FAIL.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC-8",
+      "criterion_verbatim": "per-firm inflection paired read on the LIVE served artifact returns `pointClass: 'reconstructed'` at exactly the 7 reconstructed dates and `'measured'` at 438 (test fixture built from the served file; cite the S3 key + `written_at`); the malformed-channel warn still fires; a length-misaligned `point_class[]` fixture falls to predates-contract with a warn.",
+      "method": "live_read",
+      "invocation": "same invocation ([LIVE] inflection legs + AC-8 fixture block). Served file: s3://opal-data-portal-v2/platinum/mdpf/inflection/aggregate-aua-timeseries.json, _provenance.written_at 2026-08-15T13:50:49Z, written_by opal-assets-mdpf-portal-publisher, source_keys [s3://opal-data-assets/portal/gold/mdpf/inflection/aggregate-aua-timeseries/2026-08-13.json].",
+      "output_evidence": "AFTER (e8b1fb07): [LIVE] inflection firm-aggregate paired read: reconstructed at 7 date(s) [2026-05-20, 2026-05-29, 2026-06-30, 2026-07-10, 2026-07-13, 2026-07-14, 2026-08-05], measured at 438, total 445 == served point_class[] reconstructed dates (7); PASS every model series (7 of 7) carries reconstructed at the same dates; PASS non-model series same; PASS count series reconstructed 7 == served count_provenance 7; the malformed-channel warn STILL fires (1 warn, quoted under AC-4). Fixtures: (2) date-less cohort {custody:'Orion',model:'Eclipse'} + aligned point_class[] -> array read incl. an unknown 'zzz_no_such_class' that degrades to interpolated_estimate with 3 warns for 3 reads (PASS x4); (3a) MISALIGNED point_class[] (2 vs 7 dates) -> ignored, all measured, warn 'point_class[] length 2 != dates[] length 7 -- malformed flat channel, ignored (never index-guess)' (PASS x2); (3b) no array -> measured unchanged (PASS); (1) a well-formed cohort channel WINS over a contradicting array (PASS). ABLE-TO-FAIL: on the core-B commit 778ea780 (before this branch) the same LIVE legs read 'reconstructed at 0 date(s), measured at 445' -> 4 AC-8 FAIL (63/67), i.e. the check fires on the un-carried state.",
+      "denominator": "445 dates: 7 reconstructed / 438 measured on the firm-aggregate, on each of 7 model series, on non-model, on count; 13 AC-8 checks of 75 PASS after; 4/4 live legs FAIL on 778ea780.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Four scratch-copy mutants run through the UNCHANGED exercise via --module/--page: MUT-A resolvePointClass returns any string as-is (weakened degrade); MUT-B loose 'reconstructed' prefix; MUT-C derivedFirmClass `return { cls: 'measured' }` fall-through restored; MUT-P Global aggregate 2-way ternary restored. Plus the pre-change HEAD copies (684e67de) as the before-state.",
+      "expected": "Each mutant fails the checks aimed at it and the real tree passes all: MUT-A -> AC-5 across all 4 reader paths; MUT-B -> the near-miss AC-5 cases; MUT-C -> AC-2 + AC-7 relabel report; MUT-P -> AC-3 + AC-7 page collapse report; HEAD -> AC-1..AC-4, AC-7, AC-8 fail, AC-5 degrade passes.",
+      "observed": "MUT-A 27 FAIL / 61; MUT-B 12 FAIL / 61; MUT-C 7 FAIL / 61; MUT-P 3 FAIL / 61; HEAD copies 35 FAIL / 67 (before AC-8 fixtures were added); real tree 75/75 PASS (0 FAIL). Core-B commit 778ea780 alone: 63 PASS / 4 FAIL, the 4 being the AC-8 live legs -- the able-to-fail record for AC-8.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two consecutive same-input runs of the exercise (real tree, same served artifact files) captured to run1.txt/run2.txt and byte-compared with cmp.",
+      "observed": "byte-identical: 68 lines, sha256 7dadb1776744..., both rc=0, both 'PASS=75 FAIL=0 SKIP=0 of 75 checks'.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "carried / carried_at_declared_cadence(...) (Global point_class[] 'carried' x5 still degrades to interpolated_estimate + warn; Global cohort legs untouched)", "reason": "TO scope: reconstructed ONLY, do not widen on inference; carried is a different mechanism and not the subject of Andrew's words. Recorded, unchanged."},
+    {"item": "EVR emitter + outputs, server-side provenance lattice / point_class in served data, ratified EVR honesty conditions", "reason": "UNTOUCHED per TO scope; CRO/CTO confirm the Implementation-B honesty read in parallel (not a gate on this work)."},
+    {"item": "readGlobalPointClass length-alignment check", "reason": "The misaligned-array guard was ruled for the PER-FIRM read (fail-safe step 3); adding it to the Global reader would change Global behaviour outside the TO. Not done; noted."},
+    {"item": "PROD promote", "reason": "Portal main tree stays on DEV (Rule 19); promotes are the DT /prod-deploy lane on Andrew's word. Not this TO."},
+    {"item": "Producer/consumer contract mismatch (date-less cohort_provenance beside an aligned point_class[] on the inflection slice)", "reason": "Routed by COO to CTO (which form is canonical). The FE fail-safe order is correct under either answer; not closed by this TO."}
+  ],
+  "surprises": [
+    "Served 49financial slice's cohort_provenance has a class distribution count-identical to cottonwood's (custody absent 411 / model interpolated_estimate 44 / custody measured 32 / model measured 15 on BOTH; arrays byte-different) on a ~$1.7B, 455-valued-date firm -- smells like a mis-sourced provenance channel on 49f. Reported to COO 190236Z, COO RECEIVED and routed; not chased.",
+    "Global point_class[] carries 'carried' x5, an unknown string to the reader (degrades loud). Out of scope, recorded only.",
+    "readCountTotalSeries has ZERO consumers in portal/src (its 'reconstructed' relabel BEFORE this TO was invisible at runtime). Recorded only."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-15/mdpf_evr_fe2_reconstructed_ordinary_1849-1930Z.md",
+  "compiler_tools": [
+    {"tool": "comp-transform schema-check", "invocation": "comp-transform schema-check ModelPortfolios", "result": "no MISSING; one [WARN] types-resolution (no co-located types.ts) -- advisory"},
+    {"tool": "comp-transform ternary-audit", "invocation": "comp-transform ternary-audit ModelPortfolios (+ --var pointClass, --var PointClass)", "result": "All ternaries on union-typed variables are exhaustive"},
+    {"tool": "comp-blast", "invocation": "comp-blast pairedProvenanceRead", "result": "NOT-FOUND in the canonical kuzu graph (denominator 20656 nodes) -- a NOT-FOUND, not a clear; consumer census done by import grep instead (2 src files, 2 scripts)"},
+    {"tool": "comp-find", "invocation": "comp-find 'pointClass|PointClass' portal/src", "result": "DENOMINATOR: 37 hit(s) across 409 file(s) scanned @HEAD (2 files); 44 @e8b1fb07"},
+    {"tool": "comp-to", "invocation": "comp-to MDPF_EVR.FE-2.render-reconstructed-as-ordinary", "result": "OK: session TO_ID set (race-free per-session file)"},
+    {"tool": "provenance-read-guard", "invocation": "node portal/scripts/provenance-read-guard.mjs", "result": "OK: no unlabeled reads"},
+    {"tool": "proof-of-spec-check", "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/MDPF_EVR.FE-2_PROOF_OF_SPEC.json AC-1,AC-2,AC-3,AC-4,AC-5,AC-6,AC-7,AC-8", "result": "see session log for the rc"}
+  ]
+}
