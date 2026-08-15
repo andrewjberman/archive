@@ -61,6 +61,12 @@ today. Length-misaligned array = malformed = warn + (3), never index-guess. Keep
 channel warn. The `:141-148` per-grain derivation-owner rule is AMENDED by this ruling (the flat
 array owns derivation for that grain when the cohort channel cannot carry classes) — document
 in-code beside `:141`. Global's `readGlobalPointClass` (2 reconstructed dates) is in core-B scope.**
+**ROOT NOT CLOSED BY THIS FIX (MSTR 190626Z, routed to CTO by COO): a date-less `cohort_provenance`
+beside a date-aligned `point_class[]` is a PRODUCER/CONSUMER CONTRACT MISMATCH — the reader expects
+dated cohort entries (`:13-14` schema SoT), the producer emits an aligned array. The fail-safe order
+above is the correct CONSUMER-side hardening and is correct under EITHER canonical answer — which is
+exactly why the FE fix must NOT be read as closing the question. Which form is canonical is CTO's
+architecture call, routed 1908Z. DE does not wait on it.**
 
 ## Objective
 
@@ -122,6 +128,17 @@ can fail), then PASSING on your change.
   slot through the Global-aggregate collapse unpatched) and demonstrate the enumeration REPORTS
   the relabel; then restore and show it clean. A "3 of 3 carry the class" line reads identical
   whether the check works or is vacuous.
+- AC-7 SPLIT [ADDED 1908Z, MSTR 190626Z — ACCEPTANCE-CRITICAL, the screenshot cannot see it]:
+  classify every consumer as **DISPLAY-ONLY** (styles on the label) vs **VALUE-AFFECTING**
+  (BRANCHES on the label: an aggregate exclusion, a filter, a coverage count, a band-extent
+  derivation — `pairedProvenanceRead.ts:21-22` states the BAND EXTENT ALWAYS DERIVES FROM
+  point_class, so that is one such consumer by the file's own law). Today all 445 per-firm points
+  are labelled `measured` via the fail-safe; after AC-8, 7 become `reconstructed`. **For every
+  value-affecting consumer show the BEFORE/AFTER number. If any served or rendered NUMBER moves,
+  STOP and report to COO + MSTR before landing — Andrew ruled on how points LOOK; he did not rule
+  that a number may change.** Expected: zero numbers move (B styles reconstructed as measured, so
+  band-extent and any measured-vs-estimate branch should treat it as measured-side) — but expected
+  is not evidence; print the before/after.
 - AC-8 [ADDED 1904Z]: per-firm inflection paired read on the LIVE served artifact returns
   `pointClass: 'reconstructed'` at exactly the 7 reconstructed dates and `'measured'` at 438
   (test fixture built from the served file; cite the S3 key + `written_at`); the malformed-
