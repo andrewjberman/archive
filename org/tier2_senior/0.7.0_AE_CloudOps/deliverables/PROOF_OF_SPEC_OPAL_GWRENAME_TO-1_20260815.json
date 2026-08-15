@@ -1,0 +1,204 @@
+{
+  "schema_version": "1.0",
+  "to_id": "OPAL_GWRENAME.TO-1",
+  "phase": "P5-DECOMMISSION",
+  "spec_ref": {
+    "doc": "docs/runbooks/opal-gateway-rename-cutover-runbook.md",
+    "group": "OTHER",
+    "vintage_commit": "c0e8ead091"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/ (main.tf alb.tf secrets.tf secrets-iam.tf otp-liveness.tf ms-ingest.tf waf.tf dns.tf audit-lake.tf taxsma_gateway_iam.tf otp-alert-sqs.tf)",
+      "kind": "terraform",
+      "commit_or_etag": "a7312b946b + f6031fd6f7 + e0e4c62fba + 25202b96e1",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply #2 rc=0 (after #1 SG-deadlock incident, CBD fix @e0e4c62fba); post-apply `terraform plan -detailed-exitcode` rc=0 'No changes'; post-state-migration plan 'No changes' on key opal-gateway/tfstate (77 resources). Live: ALB opal-gateway 2 listeners, TG opal-gateway-tg target HEALTHY, instance opal-gateway-sg + opal-gateway-profile, WAF opal-gateway-waf associated, lambdas opal-{otp,ms-ingest}-liveness."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh + deploy/opal-gateway.service + requirements.txt",
+      "kind": "script",
+      "commit_or_etag": "a7312b946b + 90b89562bc + 81615fbd3e",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-ec2-deploy attempt #3 (wrapper rc=1 on its own bind-race curl -- NOT evidence); ON-BOX SSM reads 0307-0308Z: opal-gateway.service active+enabled, /health {ok:true}, /mcp unauth 401, mcp==1.28.0 in venv, 9/9 manifest md5 == local repo at 81615fbd3e. Artifact opal-gateway-81615fbd3e.tar.gz + opal-gateway-latest.tar.gz under ec2/opal-gateway/."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json (service key opal-gateway)",
+      "kind": "config_data",
+      "commit_or_etag": "a7312b946b + S4 manifest commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rule 8 source-of-truth record; deployed_commit=81615fbd3e, 9 checksums, recorded manually because the wrapper aborted pre-update (11-line surgical diff)."
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/*",
+      "kind": "s3_object",
+      "commit_or_etag": "41 objects (38 copied at S1 + 3 minted at S4)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "S1: 38 of 38 relative keys size-identical to source (client-side diff clean); final census 41 objects; instance role s3:GetObject simulate = allowed on a real key."
+    },
+    {
+      "path_or_key": "opal/mcp/opal-gateway-{login,graph,fernet,jwt}",
+      "kind": "iam",
+      "commit_or_etag": "sha256 bf226373../2ffb6a1a../93edb6ac../acf4abed.. (20-char prefixes)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "4/4 sha256 MATCH to m365 sources (in-memory, never printed); imported into TF at 0-diff; opal-gateway-role simulate-principal-policy GetSecretValue = allowed on all 4 ARNs (one --resource-arns per call); old m365-login = implicitDeny (negative control, separate invocation)."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260815T0230Z_opal-gwrename-s3-cutover_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "opened 0230Z, closed 0336Z",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER#8 deploy-completion ledger, every leg S3-11..S6-23 + GW-12 with proof + state."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "GW-1",
+      "criterion_verbatim": "4 new secrets exist, values sha256-identical to sources (never print a value)",
+      "method": "command",
+      "invocation": "python gwrename_s1_secrets.py (boto3 get->create->get, sha256 in-memory)",
+      "output_evidence": "login sha256 src=bf22637359f1b33c666c.. dst=bf22637359f1b33c666c.. MATCH 226B; graph 2ffb6a1aa6f62aad99ce.. MATCH 226B; fernet 93edb6ac2cebfbb46d9c.. MATCH 44B; jwt acf4abedbb13dad7e5d6.. MATCH 1704B. COO independent read: 4/4 MATCH.",
+      "denominator": "4 of 4 pairs",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "GW-2",
+      "criterion_verbatim": "S3 artifact tree copied to ec2/opal-gateway/*",
+      "method": "diff",
+      "invocation": "aws s3 sync ec2/m365-mcp-gateway/ ec2/opal-gateway/; both prefixes listed --recursive, size+relkey materialized, diff",
+      "output_evidence": "source keys: 38 ; dest keys: 38 ; PARITY: 38 of 38 relative keys byte-size-identical -- MATCH",
+      "denominator": "38 of 38 keys",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "GW-3",
+      "criterion_verbatim": "terraform plan clean, instance NOT replaced (attach plan excerpt)",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/opal-gateway plan -input=false -no-color (3 runs: S2, user_data-edit, reverted-tree)",
+      "output_evidence": "Plan: 40 to add, 7 to change, 35 to destroy. '# aws_instance.gw will be updated in-place' -- diff attrs iam_instance_profile m365-mcp-gateway-profile -> opal-gateway-profile, tags, tags_all, vpc_security_group_ids. NO 'forces replacement' on aws_instance.gw in any run.",
+      "denominator": "1 of 1 instance resource in-place; 82 planned actions",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "GW-4",
+      "criterion_verbatim": "apply landed via safe-apply; ALB/TG/SG/role/profile/WAF all opal-* on live read",
+      "method": "live_read",
+      "invocation": "safe-apply.sh apply (2 attempts); describe-load-balancers/target-health/instances; get-web-acl-for-resource; plan -detailed-exitcode",
+      "output_evidence": "APPLY2 rc=0; post-apply plan 'No changes' rc=0. TG i-07dccb1615503ac99 healthy; instance opal-gateway-sg + instance-profile/opal-gateway-profile; WAF association = opal-gateway-waf; old ALB describe = LoadBalancerNotFound. INCIDENT: apply #1 rc=1 SG-replacement DependencyViolation deadlock (~35 min outage), rolled forward with create_before_destroy on both SGs @e0e4c62fba.",
+      "denominator": "75 of 75 applied actions converged (29+31 in #1, remainder in #2); 0-diff after",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "GW-5",
+      "criterion_verbatim": "OIDC client_secret re-set on the new listener (H1) -- cite the CLI call",
+      "method": "command",
+      "invocation": "python gwrename_s3_oidc_reset.py -> elbv2.modify_listener(ListenerArn=...listener/app/opal-gateway/89166a68f337e5a4/2904a0140214f982, DefaultActions=<oidc with ClientSecret from opal/mcp/opal-gateway-login in-memory>)",
+      "output_evidence": "OK: modify-listener applied on arn:...:listener/app/opal-gateway/89166a68f337e5a4/2904a0140214f982; ClientId=53360468-0a38-4e56-a1ed-3db6914461cd cross-checked == secret client_id. Unauth curl https://mcp.opalinvest.dev/ -> HTTP 302 -> login.microsoftonline.com/6810043e-.../oauth2/v2.0/authorize?client_id=53360468-...&redirect_uri=https%3A%2F%2Fmcp.opalinvest.dev%2Foauth2%2Fidpresponse",
+      "denominator": "1 of 1 listener; N/A for the secret VALUE -- describe-listeners omits ClientSecret by design",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "The CLI act is cited and the 302 proves wiring; the secret VALUE is exercised only at Entra token exchange on a default-action (browser) path, which no MCP call reaches (all /mcp paths bypass authenticate-oidc via prio-10 forward -- MSTR 025946Z / COO 030331Z). SUBSTITUTE ORACLE: a real interactive browser login through https://mcp.opalinvest.dev/login by Andrew. Blast radius if wrong: browser default-action paths only, no agent path. Recorded DESIRED-grade, not blended into GW-6."
+    },
+    {
+      "criterion_id": "GW-6",
+      "criterion_verbatim": "authenticated MCP round-trip through mcp.opalinvest.dev SUCCEEDS",
+      "method": "live_read",
+      "invocation": "MSTR-spawned COLD seats (fresh MCP mount + first tool call whoami) x2, bracketing the GW-12 copy; COO independent warm regression (non-discriminating)",
+      "output_evidence": "Seat #1 032201Z (pre-copy): well-formed needs_login envelope -> transport + auth plane PASS. Seat #2 032929Z (post-copy): FULL Graph payload -> full new-session claim PASS. Cited SEPARATELY (COO 033109Z). Caveat: MSTR disclosed seat messages sender-unverified. Warm calls (COO 0300Z, MSTR 0257Z) OK -- recorded non-discriminating.",
+      "denominator": "2 of 2 cold seats PASS on their respective claims",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "GW-7",
+      "criterion_verbatim": "on-box: opal-gateway.service active, /opt/opal-gateway serving, old unit gone",
+      "method": "live_read",
+      "invocation": "aws ssm send-command AWS-RunShellScript: systemctl is-active/is-enabled both units; systemctl show ExecStart; curl localhost:8080/health; md5sum; (S6) rm unit file + /opt/m365 tree, daemon-reload, systemctl status old",
+      "output_evidence": "0307Z: opal-gateway.service active / m365 inactive; ExecStart path=/opt/opal-gateway/.venv/bin/uvicorn; /health {\"ok\":true}; /mcp unauth 401. 0321Z: is-enabled opal=enabled, m365=disabled. 0332Z: 'Unit m365-mcp-gateway.service could not be found.'; ls /opt/ -> aws opal-gateway only (142M m365 tree removed); new unit active+enabled, /health ok. Corroboration: MSTR needs_login discriminator (new tree won :8080).",
+      "denominator": "1 of 1 unit active+enabled; 0 of 1 old units remaining",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "GW-8",
+      "criterion_verbatim": "8 hardcoded literals in otp-liveness.tf + ms-ingest.tf renamed; both lambdas live opal-*",
+      "method": "live_read",
+      "invocation": "git diff a7312b946b (otp-liveness.tf, ms-ingest.tf); aws lambda list-functions + events list-rules paginated+materialized (final census)",
+      "output_evidence": "8/8 name literals (role, policy, function, rule x2 files) -> opal-*, plus log ARNs + tags. Live: apply outputs otp_liveness_function=opal-otp-liveness, ms_ingest_liveness_function=opal-ms-ingest-liveness; census m365 lambdas 0 of 195, m365 rules 0 of 136.",
+      "denominator": "8 of 8 literals; 0 of 195 lambdas / 0 of 136 rules m365",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "GW-9",
+      "criterion_verbatim": "old secrets + old S3 prefix + old log groups retired",
+      "method": "command",
+      "invocation": "python gwrename_s6_cloud.py --go (delete_secret RecoveryWindowInDays=30; list_objects_v2 -> delete_objects; delete_log_group) + post-reads + positive controls",
+      "output_evidence": "Secrets: 4/4 DeletedDate set, DeletionDate 2026-09-13 (30d recovery, NEVER force); control 4/4 twins no DeletedDate. S3: 38 listed, 38 deleted, 0 errors, 0 remain; control new prefix 41 unchanged. Log groups: both /aws/lambda/m365-*-liveness deleted, exists=False; control 50 /aws/lambda/opal-* groups.",
+      "denominator": "4 of 4 secrets; 38 of 38 objects; 2 of 2 log groups",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "GW-10",
+      "criterion_verbatim": "TF state key migrated; EC2_MANIFEST key + deploy-to-ec2.sh fully unpinned",
+      "method": "command",
+      "invocation": "head-object source; copy-object in-bucket backup; state pull; terraform init -migrate-state -force-copy; head-object new key; plan -detailed-exitcode; grep m365 deploy-to-ec2.sh; manifest key read",
+      "output_evidence": "Source 151843B ETag 6f47cccfde55f61997364860a6288fe4 -> backup m365-mcp-gateway/tfstate.pre-s6-backup-20260815T0333Z ETag-identical; local pull serial 37/77 resources; migrate rc=0 'Successfully configured the backend'; new key opal-gateway/tfstate 151842B, 77 resources; plan 'No changes'. deploy-to-ec2.sh: SERVICE/ARTIFACT_PREFIX/REMOTE_DIR/SYSTEMD_UNIT=opal-*, ART=${SERVICE}-${SHA} (first run minted opal-gateway-81615fbd3e.tar.gz). EC2_MANIFEST service key = opal-gateway.",
+      "denominator": "1 of 1 state key; 77 of 77 resources; 0 m365 live-plane vars in deploy script",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "GW-11",
+      "criterion_verbatim": "acceptance census: 0 m365 across all 14 surfaces, denominators printed",
+      "method": "live_read",
+      "invocation": "boto3 paginators materialized client-side (final census 0336Z; scratchpad s6_final_census.txt)",
+      "output_evidence": "EC2 tags 0/6 · IAM roles 0/208 · profiles 0/23 · inline policies 0/7 · secrets 0/84 live (4/88 incl. planned-deletion, all DeletedDate) · ALBs 0/1 · TGs 0/1 · SGs 0/23 · WAF 0/1 · log groups 0/236 · lambdas 0/195 · rules 0/136 · S3 old prefix 0, new prefix 41 = HISTORY 36 (declared exception, COO 020233Z) / PRODUCERS 0 · unit+/opt 0 · manifest key 0 · state key migrated · deploy script 0. COO independent census: every number reproduced.",
+      "denominator": "14 of 14 surfaces at 0 live m365; 3 declared exceptions named (36 history blobs; 4 secrets in 30d recovery; 2 old-state-key objects surfaced)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "GW-12",
+      "criterion_verbatim": "on-box runtime state migrated: .token_cache",
+      "method": "live_read",
+      "invocation": "SSM: ls/stat old .token_cache; cp -a -> /opt/opal-gateway/.token_cache; chown ec2-user; systemctl restart; MSTR whoami oracle; S6 insurance copy + md5sum both trees",
+      "output_evidence": "4 blobs (13132/13260/13624/12940 B, newest 01:57Z tonight) copied, ec2-user 600 / dir 755; unit restarted active, /health ok. MSTR oracle whoami 0327Z = full Graph payload; COO 0324Z corroborates (same session read needs_login 14 min earlier). Insurance copy /home/ec2-user/.token_cache.pre-s6 md5 4/4 identical to live (462c8663.., 568a9bb6.., 867ed38d.., d596d3b3..).",
+      "denominator": "4 of 4 blobs migrated; 2 of 2 oracles Graph payload",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "IAM negative control: simulate-principal-policy for opal-gateway-role GetSecretValue on the OLD opal/mcp/m365-login ARN, in its own invocation, must read implicitDeny (the de-grant is real and the instrument discriminates)",
+      "expected": "implicitDeny",
+      "observed": "implicitDeny (4 positive controls on the new ARNs each 'allowed' in separate invocations)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "terraform plan run 3x pre-apply on the same tree (S2, +user_data, reverted) and 2x post (post-apply, post-migrate); census run 2x (S5 0320Z, S6 0336Z) + COO independent",
+      "observed": "pre-apply totals identical 40/7/35 each run with the instance in-place; post: 'No changes' both; census numbers reproduce on COO's instrument denominator for denominator",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "main.tf user_data still references /opt/m365-mcp-gateway + deploy/m365-mcp-gateway.service", "reason": "in-place user_data update applies via instance STOP/START (Andrew-reserved act); MSTR/COO converged ruling 022625Z: reverted @f6031fd6f7, MSTR asks Andrew in parallel. TRIP-CONDITION: any future instance replacement first-boots against the old /opt path and a deleted S3 prefix; Entra Conditional Access egress-IP check is a PRECONDITION of any approved stop."},
+    {"item": "H1 ALB OIDC client_secret VALUE not independently verified", "reason": "no headless oracle exists (describe-listeners omits ClientSecret); needs an interactive browser login by Andrew; blast radius browser default-action paths only. Recorded DESIRED-grade (GW-5 UNVERIFIABLE-BY-INSTRUMENT)."},
+    {"item": "36 m365-basename history blobs inside ec2/opal-gateway/", "reason": "COO declared exception 020233Z: dormant version history, not a live surface, S3 deletion Andrew-reserved; PRODUCERS are 0."},
+    {"item": "old TF state key m365-mcp-gateway/tfstate + its dated backup (2 objects)", "reason": "-migrate-state COPIES; deleting a state object is outside runbook-named acts -> surfaced for a cleanup ruling."},
+    {"item": "on-box insurance copy /home/ec2-user/.token_cache.pre-s6", "reason": "COO 033109Z: keep until close; now a named cleanup item (contains Fernet-encrypted consent state, mode 600)."},
+    {"item": "lambda SOURCE dirs infra/aws/lambda/m365-{otp,ms-ingest}-liveness", "reason": "repo homes, not live names; P0-class rename, banked."},
+    {"item": "old opal/mcp/m365-* secrets not hard-deleted", "reason": "30d recovery window by design (H2 / never force); auto-purge 2026-09-13."}
+  ],
+  "surprises": [
+    "safe-ec2-deploy.sh + deploy-to-ec2.sh call BARE jq (Rule 16 dangerous absentee) -- masked as 'Service not found in EC2_MANIFEST'; worked around with .tools/jq.exe on PATH; defect banked.",
+    "t4g.nano (0.5GB) undersized for on-box venv builds -- SSM agent went ConnectionLost ~10 min after back-to-back pip installs (Rule 5 spirit); no SSM-agent restart guard; self-recovered.",
+    "safe-ec2-deploy wrapper false-negative layer #2: flat sleep-3 + systemctl is-active reads ACTIVATING rc=3 on a healthy slow boot and kills the script under set -e (fixed in-script @81615fbd3e; worth a standard).",
+    "requirements.txt mcp>=1.2.0 was a latent bomb: mcp 2.0.0 removed mcp.server.fastmcp; pinned ==1.28.0 (box-proven). Other unpinned deps in that file carry the same class of risk.",
+    "org/mcp/inbox/0.7.0_AE_CloudOps/ carries a stray 'org' DIRECTORY at inbox top-level (wrong-cwd artifact class).",
+    "Terraform replacement ORDERING is an apply-time graph property invisible in plan rows: SG replacements without create_before_destroy deadlock against a live instance ENI (cost ~35 min outage tonight). Candidate for a lint on aws_security_group without CBD in modules with a persistent instance."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-15/session_0150-0340Z_opal_gwrename_to1_s1_s6_cutover.md",
+  "compiler_tools": [
+    {"tool": "comp-find", "invocation": "comp-find -i m365 infra/aws/terraform/opal-gateway (3 pages)", "result": "71 hits / 25 files -- the S2 edit list; also var.name usage census"},
+    {"tool": "comp-iam service", "invocation": "comp-iam service m365-otp-liveness / m365-ms-ingest-liveness", "result": "3 calls each, all UNRESOLVABLE-RESOURCE (sns/ses/secretsmanager) -- floor only, per Rule 22a; grounded on simulate-principal-policy instead"},
+    {"tool": "comp-blast", "invocation": "comp-blast <ALB arn> (name form was AMBIGUOUS-SUBJECT: refused, correctly)", "result": "downstream m365-mcp-gateway-alb-sg; upstream caller = route53 mcp.opalinvest.dev A record -- confirmed the runbook's auto-repoint model"},
+    {"tool": "comp-to", "invocation": "comp-to OPAL_GWRENAME.TO-1", "result": "race-free per-session TO context set"},
+    {"tool": "aws iam simulate-principal-policy", "invocation": "6 invocations, one --resource-arns each (4 new secret ARNs + 1 S3 key + 1 negative control)", "result": "5 allowed, negative control implicitDeny"}
+  ]
+}
