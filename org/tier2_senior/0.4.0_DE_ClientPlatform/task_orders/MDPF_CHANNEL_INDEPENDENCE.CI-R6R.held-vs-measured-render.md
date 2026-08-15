@@ -3,7 +3,10 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <date>2026-08-04</date>
-<status>pending</status>
+<status>cancelled</status>
+<cancelled_at>2026-08-15T21:10:00Z</cancelled_at>
+<cancelled_by>2.0.0_SA_COO (issuer) -- reconciliation on Andrew-direct "yes, do both" (MSTR 210435Z) ahead of DE stand-down</cancelled_by>
+<cancellation_ruling>Andrew-direct 2026-08-04 at the DE terminal, VERBATIM "kill both": the participation UI DELETED IN FULL -- the CI-R6R T3 window footnote AND the T2 dark markers removed; "No participation/carried UI on the page, period." Record: portal commit 45e5843f (message carries the verbatim + scope). HISTORY, so the status is honest: the TO's Phase 2 WAS implemented (DE @7d544d27) and PROMOTED to PROD v2.1.156 (@2d33ea2c, DT), then STRUCK by that ruling the same day. Terminal status is CANCELLED (the need went away by sovereign ruling), NOT superseded (nothing met the need another way) and NOT complete (the deliverable no longer exists on the page). Data-layer participation meta + the pairedProvenanceRead.ts read helpers stay (provenance in the artifact untouched -- the ruling struck the UI, not the data). Consistent with the 2026-08-15 FE-1/FE-2 rulings: PROMINENCE IS NOT A FREE GOOD. This TO read "pending" for 11 days after its deliverable was deleted -- the exact stale-pending class the status vocabulary exists to close.</cancellation_ruling>
 <priority>P2 (the closure sweep's row-6 RENDER-HALF -- the one MDPF closure row needing a DE seat; CTO sweep @67bbb6981d found it delivered-nowhere, gated-nowhere. Queued per your ready-for-next 025201Z; your @b48634789a map is the grounding.)</priority>
 
 <title>CI-R6 render-half: the UI visibly distinguishes MEASURED from HELD/CARRIED values on the Model Portfolios surfaces -- designed against the emission schema, implemented on its ratified shape</title>
