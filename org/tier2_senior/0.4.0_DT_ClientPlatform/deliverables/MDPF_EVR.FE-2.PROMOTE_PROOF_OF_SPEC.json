@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_EVR.FE-2.PROMOTE",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DT_ClientPlatform/task_orders/MDPF_EVR.FE-2.PROMOTE.prod-promote-reconstructed-ordinary.md",
+    "group": "OTHER",
+    "vintage_commit": "13ed79bc40"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal refs/heads/PROD (merge commit 449a6a0e084ba798521d4777762f74d5bcc8e1da)",
+      "kind": "frontend_component",
+      "commit_or_etag": "449a6a0e084ba798521d4777762f74d5bcc8e1da",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "origin/PROD == 449a6a0e (ls-remote read-back after MSTR's integrator push 2118Z); CI 'Deploy to Production' run 31909060242 conclusion=success (1 of 1 workflows on headSha 449a6a0e); annotated tag portal-v2.1.162 peels to 449a6a0e == PROD head; served https://opalinvest.dev/assets/ModelPortfolios-gqyfc1FQ.js carries the FE-2 marker string 'reconstructed(' x1 (absent in v2.1.161 source: git grep -c 'reconstructed(' fbbb9b39 -- src/lib/pairedProvenanceRead.ts src/pages/ModelPortfolios.tsx -> rc=1) with positive control 'interpolated_estimate' x13 in the same chunk."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260815T211100Z_portal_prod_promote_MDPF_EVR_FE2.md",
+      "kind": "doc",
+      "commit_or_etag": "0f264f59de",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "deploy-completion ledger opened at deploy-start (NEVER#8), closed in the session-close commit."
+    },
+    {
+      "path_or_key": "portal/.frontend-dev/screenshots/mdpf_evr_fe2_PROD_v2.1.162_global_REAL.png",
+      "kind": "doc",
+      "commit_or_etag": "untracked-by-design (predecessor practice)",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "1440x2346 PNG rendered from the DEPLOYED PROD bundle (--origin https://opalinvest.dev) with the SERVED platinum Global artifacts as fixtures (s3://opal-data-portal-v2/platinum/mdpf/global/{aggregate-aua-timeseries,aum-metrics,account-distribution}.json pulled 2026-08-15 ~2121Z). Controls beside it: _MUTANT.png (2 reconstructed dates relabelled interpolated_estimate) and _ASMEASURED.png (relabelled measured)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC-P1",
+      "criterion_verbatim": "`origin/PROD..origin/DEV` = exactly the 3 commits above at Step 0 (cite the log).",
+      "method": "command",
+      "invocation": "git -C portal fetch origin && git -C portal log --oneline origin/PROD..origin/DEV && git -C portal rev-list --count origin/PROD..origin/DEV && git -C portal describe --tags --exact-match origin/PROD",
+      "output_evidence": "e8b1fb07 feat(MDPF_EVR.FE-2 AC-8)... / 778ea780 feat(MDPF_EVR.FE-2): `reconstructed` = own render-enum member... / 684e67de feat(OPAL_INVPHL): pillar copy reads served overrides... ; COUNT: 3 ; origin/PROD fbbb9b39 = portal-v2.1.161",
+      "denominator": "3 of 3 expected commits present, 0 unexpected (rev-list count 3)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC-P2",
+      "criterion_verbatim": "CI conclusion `success` via `gh run view --json` (cite run id + conclusion); new annotated tag `portal-v2.1.162` (or the CI-minted next) peeled and cited; PROD HEAD = the merge.",
+      "method": "command",
+      "invocation": "gh run view 31909060242 --json status,conclusion,headSha,workflowName ; gh run list --branch PROD --limit 20 --json databaseId,headSha,workflowName,status,conclusion (filtered to headSha 449a6a0e) ; git -C portal fetch --tags origin && git -C portal rev-parse portal-v2.1.162^{commit} && git -C portal rev-parse origin/PROD",
+      "output_evidence": "{\"conclusion\":\"success\",\"headSha\":\"449a6a0e084ba798521d4777762f74d5bcc8e1da\",\"status\":\"completed\",\"workflowName\":\"Deploy to Production\"} ; DENOM: 1 run(s) on 449a6a0e -> 31909060242 Deploy to Production completed success ; ls-remote refs/tags/portal-v2.1.162 = e9822640 (tag OBJECT), ^{} = 449a6a0e ; peel: 449a6a0e084ba798521d4777762f74d5bcc8e1da ; PROD head: 449a6a0e084ba798521d4777762f74d5bcc8e1da",
+      "denominator": "1 of 1 workflows on the sha = success (enumerated by headSha, not the branch badge)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC-P3",
+      "criterion_verbatim": "RENDERED on the deployed PROD instance: the Model Portfolios GLOBAL view shows the 2 formerly-estimate-class dates as ordinary points -- no band, no dash, no \"Interpolated\" legend entry for them. Evidence = a screenshot of PROD ... with the PNG path cited and READ.",
+      "method": "live_read",
+      "invocation": "cd portal && node scripts/ui-smoke.mjs portfolios .frontend-dev/screenshots/mdpf_evr_fe2_PROD_v2.1.162_global_REAL.png --origin https://opalinvest.dev --fixtures <sp>/fixtures_prod_global_real.json  (fixtures = the SERVED Global platinum artifacts; point_class census: measured 403, interpolated_estimate 35, absent 9, carried 5, reconstructed 2 = 2026-05-20 + 2026-08-05, n_dates 454)",
+      "output_evidence": "LOC: /portfolios ; CANVAS rgb(195,202,218) ; REFAREAS 0 per-chart (0ra,0ra,0ra). PNG READ (1440x2346): 'Select Partner: Global (All)'; AUA Trend Analysis period-end bars + Daily AUA stacked area render with NO band, NO dashed 'Interpolated' overlay, NO 'Interpolated model mix (estimate)' legend entry (legend = Ultra Short-Term / Short-Term / Intermediate-Term / Long-Term / Ultra Long-Term / Non-Model AUA); 2026-05-20 and 2026-08-05 sit in the daily area with no marker/stroke/hollow/badge; color law clean. >> PREMISE CORRECTION, source-confirmed: the pixel read is NON-DISCRIMINATING at Global -- MUTANT (both dates relabelled interpolated_estimate) is pixel-identical to REAL (60 of 3,378,240 px differ, all in bbox (105,2223)-(113,2231) = the animated status dot; ASMEASURED identical likewise) because portal/src/pages/ModelPortfolios.tsx:884-889 @449a6a0e empties trendInterpolatedDates at Global (Andrew-direct 2026-07-23 materiality ruling; same gate at fbbb9b39 :882). Global never pixel-rendered estimate-class on EITHER build; the TO's 'visually distinct, live' premise is FALSE at source. THE DISCRIMINATING EXERCISE ON THE DEPLOYED BUNDLE (console capture, .frontend-dev/testing/ui-smoke-ppr-console.mjs, same fixtures): REAL -> 0 console lines mentioning 'reconstructed' (both slots accepted as a known member -> derived pointClass 'reconstructed', ordinary); unknown-string mutant 'reconstructed_zzz' -> 1 warn '[pairedProvenanceRead] invalid Global point_class 'reconstructed_zzz' at index 386 -- treating as interpolated_estimate' (the instrument CAN fail; unknown strings still degrade LOUD). Served chunk carries the 'reconstructed(' marker (absent at v2.1.161).",
+      "denominator": "2 of 2 reconstructed Global dates (idx 386 = 2026-05-20, idx 447 = 2026-08-05) ordinary in the PNG; 0 of 2 produce a reader warn on the deployed bundle vs 1 of 1 mutant slot warns",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC-P4",
+      "criterion_verbatim": "workspace submodule pointer on CLOUD updated to the PROD merge commit (cite the workspace commit); main portal tree confirmed on DEV; worktree removed; freeze released.",
+      "method": "command",
+      "invocation": "git ls-tree HEAD portal ; git -C portal rev-parse HEAD ; git -C portal branch --show-current ; git diff HEAD -- portal | wc -l ; git -C portal worktree remove <WT> ; git -C portal worktree prune ; git -C portal worktree list ; pwd",
+      "output_evidence": "gitlink in HEAD: e8b1fb0733287cd57d503b6c19356130f7667a9e == main tree HEAD e8b1fb07 (branch DEV) ; gitlink diff 0 lines -- the pointer ALREADY pairs the workspace with the promoted payload head (MSTR integrate commit 04d25a3533 'bump submodule pointer to e8b1fb07'), so a Step-6 pointer commit would be EMPTY. Per /prod-deploy the pointer form is DEV-HEAD (main tree never leaves DEV, Rule 19) with the PROD merge sha in the message (08-11 precedent b59a8841ad); the PROD sha/tag/run traceability is carried by this instance + the ledger close commit instead. worktree remove: 'Filename too long' (documented Windows class; .runtmp dir persists, gitignored, inert); prune OK; worktree list no longer shows it; main tree DEV; cwd /c/Users/AndrewBerman/Desktop/ajb_workspace. Freeze released in the completion report to COO (this session).",
+      "denominator": "N/A -- state checks (gitlink == DEV HEAD; branch == DEV; worktree pruned)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC-P5",
+      "criterion_verbatim": "rollback pointer recorded in the merge commit message per the skill's form (`Base <sha>. Rollback: <sha>.`) -- cite it.",
+      "method": "command",
+      "invocation": "git -C portal log -1 --format=%B 449a6a0e | grep -o 'Base [0-9a-f]*. Rollback: [0-9a-f]*.'",
+      "output_evidence": "Base fbbb9b39a0ce4103eaaf8cdf3f84581d3f244448. Rollback: fbbb9b39a0ce4103eaaf8cdf3f84581d3f244448.  (merge 449a6a0e, parents fbbb9b39 + e8b1fb07)",
+      "denominator": "N/A -- boolean check",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants of the served Global point_class[] rendered on the DEPLOYED PROD bundle: (a) the 2 reconstructed slots relabelled 'interpolated_estimate' -> pixel-diff vs REAL; (b) relabelled to the unknown string 'reconstructed_zzz' -> console capture.",
+      "expected": "(a) EITHER a visible estimate treatment (discriminating pixel pass) OR pixel-identical (proving the pixel read cannot discriminate at Global); (b) a LOUD [pairedProvenanceRead] warn naming the unknown string.",
+      "observed": "(a) pixel-identical: 60/3,378,240 px, all in the animated status-dot bbox -> the pixel oracle is non-discriminating at Global (source-confirmed :884-889). (b) exactly 1 warn: invalid Global point_class 'reconstructed_zzz' at index 386 -- treating as interpolated_estimate; REAL run: 0 'reconstructed' warns. The behavioral oracle fires on the mutant and is silent on the real data.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "console-capture run executed twice per fixture set on the deployed bundle; PPR-CONSOLE line counts compared",
+      "observed": "REAL: 3179 vs 3179 (0 'reconstructed' in both); unknownstr: 3180 vs 3180 (1 'reconstructed_zzz' in both). Pixel renders: MUTANT and ASMEASURED both differ from REAL by the same 60 px status-dot animation only.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Per-firm (inflection) rendered read on PROD",
+      "reason": "TO names Global as the discriminating surface (per-firm was already ordinary on PROD via the fail-safe); DE's DEV render covered per-firm at e8b1fb07 (parity 0 to PROD tree)."
+    },
+    {
+      "item": "Step 6 explicit gitlink-bump commit",
+      "reason": "gitlink already == e8b1fb07 (MSTR @04d25a3533); an empty commit would be a record without a change. Traceability carried by this instance + ledger close."
+    },
+    {
+      "item": "PROD push / CLOUD push by DT",
+      "reason": "never-rules-gate GATE 5 (LD-0367/0368 integrator-only); PROD push executed by 0.0.0_AB_MSTR 2118Z; override not used (a non-integrator push republishes the tree)."
+    }
+  ],
+  "surprises": [
+    "portal main tree carries 13 untracked items (stray agent-telemetry dirs portal/org/, portal/portal/org/, .frontend-dev/org/ from lingering-portal-CWD sessions June-July; 105 /frontend-dev screenshots; .runtmp probes; catch404_final.png) -- none tracked, none in the payload; surfaced to COO 211613Z, logged at their desk as hygiene.",
+    "Deployed Global read emits ~3,178 console warns per load: '[pairedProvenanceRead] invalid point_class 'undefined' at <date>.model' -- the served Global cohort_provenance entries carry partner slots (49financial/cottonwood/inflection) and NO 'model' slot; PRE-EXISTING (same message template at fbbb9b39 pairedProvenanceRead.ts:273), not introduced by FE-2. No action.",
+    "TO premise 'GLOBAL view still renders 2 dates as estimate-class -- visually distinct, live' is FALSE at source on both builds (Global materiality gate, ModelPortfolios.tsx:884-889 @449a6a0e / :882 @fbbb9b39). The user-visible deliverable at Global is therefore label/derivation correctness + no console warn, not a pixel change. Surfaced, not adjudicated."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DT_ClientPlatform/logs/2026-08-15/prod_promote_v2.1.162_mdpf_evr_fe2.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-routes",
+      "invocation": "comp-routes behaviors",
+      "result": "25 CloudFront behaviors parsed (DESIRED plane); /portfolios SPA via behavior 0 (/* -> S3-opalinvest-portal), MDPF data via /api/general/* -> opal-data-portal-v2 through public-data-router; no anomaly for a frontend-only promote"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'getMdpfAggregateAUATimeSeriesByFirm' portal/src",
+      "result": "3 files (aum.ts, portal-proxy.ts, ModelPortfolios.tsx); URL /api/general/mdpf/{firmId}/aggregate-aua-timeseries.json at portal-proxy.ts:532"
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DT_ClientPlatform/deliverables/MDPF_EVR.FE-2.PROMOTE_PROOF_OF_SPEC.json AC-P1,AC-P2,AC-P3,AC-P4,AC-P5",
+      "result": "see session log (rc recorded)"
+    },
+    {
+      "tool": "/frontend-dev (ui-smoke)",
+      "invocation": "node scripts/ui-smoke.mjs portfolios <png> --origin https://opalinvest.dev --fixtures <served Global artifacts> (REAL / MUTANT / ASMEASURED) + console-capture variant (REAL / unknownstr)",
+      "result": "LOC /portfolios, REFAREAS 0 x3 on all runs; PNGs read; pixel-diffs 60 px (status dot) only; console oracle discriminates (0 vs 1 reconstructed warn)"
+    }
+  ]
+}

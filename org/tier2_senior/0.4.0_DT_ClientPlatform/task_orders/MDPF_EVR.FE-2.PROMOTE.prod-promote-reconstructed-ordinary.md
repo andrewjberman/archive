@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DT_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-15T21:12Z</issued>
-<status>pending</status>
+<status>complete</status>
 <priority>P2 — Andrew-direct GO, spawn-triggered (MSTR spawned DT for this)</priority>
 <authority>Andrew-direct at the MSTR terminal 2026-08-15 ~2100Z, VERBATIM: "yes, do both" — (b) spawn DT for the PROD promote (MSTR 210435Z). Underlying ruling being shipped: Andrew-direct 2026-08-15 "yes they should render as ordinary points" (LD-0417; MDPF_EVR.FE-2 @9f074450a4 validated + closed by COO).</authority>
 </task_order>
