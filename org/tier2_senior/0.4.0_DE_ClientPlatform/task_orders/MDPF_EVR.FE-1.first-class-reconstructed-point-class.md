@@ -4,7 +4,10 @@
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-14T17:5xZ</issued>
-<status>pending — event-driven at next DE spawn; NO urgency (the loud-degrade path is honest-by-design today)</status>
+<status>cancelled</status>
+<cancelled_at>2026-08-15T18:25:00Z</cancelled_at>
+<cancelled_by>2.0.0_SA_COO (issuer)</cancelled_by>
+<cancellation_ruling>Andrew-direct at the MSTR terminal 2026-08-15 ~0350Z, VERBATIM: "i dont want to draw attention to the interpolated points at all, no one cares about that, its more problematic to open up the can of worms and seed doubt rather than just another data point that is probably within 10bps anyway on a random day no one cares about". Record: org/tier0_exec/0.0.0_AB_MSTR/deliverables/ANDREW_DIRECT_20260815_NO_FIRST_CLASSING_RECONSTRUCTED_POINTS.md (MSTR broadcast 20260815T181807Z). Status is CANCELLED (the need went away by ruling), NOT superseded (nothing met it another way). SCOPE OF THE RULING, narrow: FE presentation only -- the EVR emitter + outputs (Andrew "yes to both" @e4251a4567), the server-side point_class lattice, and the ratified EVR honesty conditions are UNTOUCHED. Open question MSTR surfaced to Andrew and did NOT adjudicate: whether today's estimate-class + console-warn rendering should itself be softened -- collides with the ratified `reconstructed-never-measured` honesty condition; his to resolve; NO work pends on it. The carried "DE FE-1 spawn-or-defer-date" item is DISCHARGED (no spawn, no date, not an 08-16 item).</cancellation_ruling>
 <priority>P3 backlog — routed per CTO instruction via CRO 174745Z</priority>
 </task_order>
 
