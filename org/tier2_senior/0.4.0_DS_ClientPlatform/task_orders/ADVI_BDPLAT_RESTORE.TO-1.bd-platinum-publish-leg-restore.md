@@ -120,7 +120,7 @@ its proof; the mechanism is the deliverable that prevents recurrence (M2 is the 
 
 ## Acceptance criteria
 
-- BP-1: B_00 reads the OPAL_ASSETS `fact_rps` (or `dim_position`, stated) POSITION-grain home; holdings values on an overlap date tie to the legacy values to the cent (printed); `comp-pipescript io` read shape confirmed; the
+- BP-1: B_00 reads the OPAL_ASSETS `fact_rps` POSITION-grain home under **`08335338` (COO ruling 134509Z + CTO concur 134522Z: correct master outranks content-identity; the legacy `08242234` read was the forbidden two-buckets substitution; the +17-account delta is a disclosed correction)**; holdings values on an overlap date tie to the legacy values to the cent (printed); `comp-pipescript io` read shape confirmed; the
   Schwab range in the next scheduled B_00 log ends at T-1 (not 07-23); **"Dates processed N" with N > 0
   PRINTED, and "Schwab partitions loaded: M" with M > 0 PRINTED** — a POSITIVE read, never rc=0.
   ⚠ **THE FIX'S OWN FAILURE MODE IS BYTE-IDENTICAL TO THE BUG (MSTR 133139Z): the two homes use
@@ -130,13 +130,21 @@ its proof; the mechanism is the deliverable that prevents recurrence (M2 is the 
   "Dates processed 0, rc=0" — SILENT, exactly like today. A green run proves nothing by itself; the
   printed N and M are the acceptance, and `gold/canonical/holdings/` must ADVANCE past 08-06 (BP-4).**
 - BP-2: D_02 completes rc=0 on the live `advisor_assignments_history.parquet` with the NaT count printed
-  (expected 3); the 3 rows' A-phase disposition stated (source-fixed or quarantined-with-reason).
+  (expected 3); **A_01 is the ROOT (`:405-408` baseline branch reads a `start_date` column the accounts
+  dimension does not have -> NaT by construction; fix = `effective_date = account_open_date`, fallback
+  `first_transaction_date`, guard printed) and D_02's guards at BOTH `merge_asof` sites (`:233` team PIT,
+  `:296` fee-rate PIT) are belt-and-braces (DS Addition 3, accepted).**
 - BP-3: IAM: `simulate-principal-policy` ALLOWED on the exact `08335338/silver/fact_rps` key; positive
   control separate; negative control on `08242234` = implicitDeny.
 - BP-4: `gold/canonical/holdings/` newest partition = T-1 after the backfill + scheduled run;
   `account_performance.parquet` size CHANGES (the frozen 225,216,334 B frame moves).
 - BP-5: SERVED: `platinum/firm/header_metrics.json` `as_of` = T-1 and mtime within the last scheduled
-  window; verified through the scoped route; before/after printed.
+  window; verified through the scoped route; before/after printed **as TWO NAMED DELTAS, never blended
+  (CTO 134522Z + COO ruling 134509Z on DS Addition 2): (i) the T-1 CONTENT REFRESH delta (08-06 -> T-1
+  on the same account universe) and (ii) the MASTER-SWITCH delta (+17 mapped 49F accounts / 650 rows /
+  315,389 units the ADVI product never carried because the legacy home read the 08242234 MDPF master's
+  RPS file -- 08335338 ties EXACTLY on all 83,878 legacy agg rows, so this delta is ADDITIVE, not changed
+  values).** Andrew's close report carries the same two numbers, attributed.
 - BP-6: chain log for the run: PHASE_D4 reached, "D_04 done (rc=0)".
 
 <proof_of_spec>
