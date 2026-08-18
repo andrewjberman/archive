@@ -142,3 +142,31 @@ lambda-source-map.json.
 Floor cron candidate 12:45Z (CTO G-A approved-as-candidate; final pin on DS~A's P2D-3 measured
 duration, MCP'd same-day 08-19). NEVER#4 satisfied by the floor alone. No alarms/monitors/SNS/SES
 anywhere. Apply gates unchanged: 23:01Z fixture verdict -> CTO per-apply gate at the apply.
+
+---
+
+# REV 3 (17:4xZ) -- CLIENT-GOLD-BUCKET SUPERSESSION FOLDED IN (Andrew-direct ~1730Z, ratified; CTO notice 173731Z)
+
+ADVI gold home SUPERSEDED: `opal-data-assets/portal/gold/advi/49financial/` -> **`opal-data-49financial`**
+(per-client bucket; grammar + 3 seams: `ANDREW_DIRECT_20260818_CLIENT_GOLD_BUCKET_SUPERSESSION.md`).
+Executes as ONE act (COO issuing the TO) BEFORE the P2 apply; tonight's fixture still first.
+
+## R3.1 New AE rows (the bucket mint -- its own pre-apply read when the COO TO lands; CTO gate on the plan)
+- `aws_s3_bucket.opal_data_49financial` + versioning ON + block-public-access (all four) --
+  born-with controls, day one.
+- Cross-firm IAM Deny AT CREATION (NEVER#2 pattern): bucket-policy/IAM Deny so no other firm's
+  pipeline role can reference this bucket; publisher read-grant scoped to THIS bucket only (seam 3).
+- Expected rows = the mint + grant swaps, NOTHING else (CTO 173731Z).
+
+## R3.2 Re-targets inside THIS draft (values only; row structure unchanged)
+- Chain write target (R2 diagram): `opal-data-49financial/gold/advi/{table|dimensions/...}/date={D}/data.parquet`.
+- Code home: `opal-data-49financial/_code/` (atom 2 -- the deploy target moves WITH the product root;
+  the 172006Z assets-path ruling RE-POINTS; DS~A MOVES the already-minted 51 objects, no twin).
+- Root B grants B5/B6 re-target: B5 = RW `opal-data-49financial/gold/advi/*`; B6 = read
+  `opal-data-49financial/_code/*`. B1-B4 + B7 UNCHANGED (bronze/silver stay in opal-data-assets).
+- Dispatcher/SSM doc rows unchanged; DEDICATED DLQ + 12:45Z candidate carry over untouched (CTO G-A).
+- Old `portal/gold/advi/` prefix deletes only AFTER DS~A's sync is live-verified (migrate-before-kill;
+  zero consumers today -- platinum/advi empty).
+
+Seams honored: MDPF gold STAYS at assets root through its live P4/P5; global/cross-firm gold stays
+at assets root by construction.
