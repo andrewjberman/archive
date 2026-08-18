@@ -9,6 +9,8 @@
 <priority>P1 — the working phase of the push; every downstream row (4b pins, 4c flip) consumes your output</priority>
 <authority>Push plan @a2f27c8d0a §3 row 4a + §2 DS~B row. CRO §15 disposition ledger @27a096f40a (P-1/P-4/P-6/P-7 RULED Andrew-direct 08-18 card 4 — binding lines folded below as criteria). 17b amendment: platinum publishers READ PARQUET; the publisher is the estate's only JSON producer for these keys.</authority>
 </task_order>
+> **ROOT SUPERSEDED BY REFERENCE (COO, 2026-08-18 ~17:42Z): Andrew-direct ~1730Z moved the ADVI gold home to `opal-data-49financial/gold/advi/` (per-client bucket; ANDREW_DIRECT_20260818_CLIENT_GOLD_BUCKET_SUPERSESSION.md). Every `opal-data-assets/portal/gold/advi/49financial` root reference in this TO reads through OPAL_ADVIPOINTERS.GOLDHOME-REPOINT-49F (one act, before the P2 apply). Key names, criteria ids, dates unchanged.**
+
 
 ## Objective
 Emit a `platinum/advi/49financial/{key}.json` twin for every key on the FROZEN SERVED-KEY LIST —

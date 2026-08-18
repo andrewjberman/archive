@@ -9,6 +9,8 @@
 <priority>P1 — the canonical chain's only trigger today is a session act; NEVER#4: a production pipeline MUST have a schedule</priority>
 <authority>Push plan @a2f27c8d0a §3 row 2 + CTO HOST RULING (verbatim in-row: the runner executes under the S3-code standard as its OWN scheduled stage — NOT appended to the legacy chain's stage list; revisable on your read only with new evidence). Ratified P2 spec: org/tier1_exec/4.0.0_SA_CRO/deliverables/P2_UNIFIED_MORNING_SCHEDULE_TIMING_MAP_SPEC_20260811.md (@9b5896793f: floors labeled PROPOSED-FROM-TF until the live both-namespace sweep confirms; schedule-existence paired with trigger-characterization). 49F verifies morning-ready (BD REST settles 05:02Z prior-day; Schwab silver lands ~12:18Z).</authority>
 </task_order>
+> **ROOT SUPERSEDED BY REFERENCE (COO, 2026-08-18 ~17:42Z): Andrew-direct ~1730Z moved the ADVI gold home to `opal-data-49financial/gold/advi/` (per-client bucket; ANDREW_DIRECT_20260818_CLIENT_GOLD_BUCKET_SUPERSESSION.md). Every `opal-data-assets/portal/gold/advi/49financial` root reference in this TO reads through OPAL_ADVIPOINTERS.GOLDHOME-REPOINT-49F (one act, before the P2 apply). Key names, criteria ids, dates unchanged.**
+
 
 ## Objective
 Stand up the production trigger for the canonical 49F runner chain: an EventBridge SCHEDULE FLOOR

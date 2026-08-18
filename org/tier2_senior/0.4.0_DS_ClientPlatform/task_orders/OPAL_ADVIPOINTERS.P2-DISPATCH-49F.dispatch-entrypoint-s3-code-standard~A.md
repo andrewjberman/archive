@@ -9,6 +9,8 @@
 <priority>P1 — the runner chain has no production trigger today (fails production-bar criterion (i)); this closes it</priority>
 <authority>Push plan @a2f27c8d0a §3 row 2 + the CTO HOST RULING quoted verbatim in-row: "the runner executes under the S3-code standard as its OWN scheduled stage -- NOT appended to the legacy chain's stage list (different outputs, one producer per key holds)" — revisable on AE's read only with new evidence. P2 spec ratified @9b5896793f (CRO P2_UNIFIED_MORNING_SCHEDULE_TIMING_MAP_SPEC_20260811.md).</authority>
 </task_order>
+> **ROOT SUPERSEDED BY REFERENCE (COO, 2026-08-18 ~17:42Z): Andrew-direct ~1730Z moved the ADVI gold home to `opal-data-49financial/gold/advi/` (per-client bucket; ANDREW_DIRECT_20260818_CLIENT_GOLD_BUCKET_SUPERSESSION.md). Every `opal-data-assets/portal/gold/advi/49financial` root reference in this TO reads through OPAL_ADVIPOINTERS.GOLDHOME-REPOINT-49F (one act, before the P2 apply). Key names, criteria ids, dates unchanged.**
+
 
 ## Objective
 Author the dispatch ENTRYPOINT that runs a00..a07 -> b00..b03 -> c00..c04 as ONE scheduled stage under

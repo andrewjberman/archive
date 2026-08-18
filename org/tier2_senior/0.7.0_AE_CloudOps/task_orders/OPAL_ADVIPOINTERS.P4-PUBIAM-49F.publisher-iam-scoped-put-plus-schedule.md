@@ -9,6 +9,8 @@
 <priority>P1 — gates the P4 EMIT: DS~B cannot write platinum/advi without the grant, and an over-wide grant is the never-widen hazard in IAM clothing</priority>
 <authority>Push plan @a2f27c8d0a §2 AE row + §3 row 4a. One producer per served key holds by construction (17b amendment: every platinum publisher READS PARQUET; the publisher is the estate's only JSON producer).</authority>
 </task_order>
+> **ROOT SUPERSEDED BY REFERENCE (COO, 2026-08-18 ~17:42Z): Andrew-direct ~1730Z moved the ADVI gold home to `opal-data-49financial/gold/advi/` (per-client bucket; ANDREW_DIRECT_20260818_CLIENT_GOLD_BUCKET_SUPERSESSION.md). Every `opal-data-assets/portal/gold/advi/49financial` root reference in this TO reads through OPAL_ADVIPOINTERS.GOLDHOME-REPOINT-49F (one act, before the P2 apply). Key names, criteria ids, dates unchanged.**
+
 
 ## Objective
 Grant the ADVI publisher exactly what P4 needs — `s3:PutObject` scoped to

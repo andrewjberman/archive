@@ -9,6 +9,8 @@
 <priority>P1 — closes production-bar criterion (i) for the last two session-act producers</priority>
 <authority>Push plan @a2f27c8d0a §3 row 3; PRD §5.D.11 (dim_security/dim_boundary: location correct, producer still a session act). CTO attests the close.</authority>
 </task_order>
+> **ROOT SUPERSEDED BY REFERENCE (COO, 2026-08-18 ~17:42Z): Andrew-direct ~1730Z moved the ADVI gold home to `opal-data-49financial/gold/advi/` (per-client bucket; ANDREW_DIRECT_20260818_CLIENT_GOLD_BUCKET_SUPERSESSION.md). Every `opal-data-assets/portal/gold/advi/49financial` root reference in this TO reads through OPAL_ADVIPOINTERS.GOLDHOME-REPOINT-49F (one act, before the P2 apply). Key names, criteria ids, dates unchanged.**
+
 
 ## Objective
 Attest P3-closed for 49F: every table's newest partition at the canonical root written by the
