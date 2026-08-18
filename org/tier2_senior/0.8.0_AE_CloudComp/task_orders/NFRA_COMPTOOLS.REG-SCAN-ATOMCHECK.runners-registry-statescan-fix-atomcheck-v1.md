@@ -34,7 +34,10 @@ Phase 2: commit-gate. Phase 3: the positive/negative exercises below.
 - REG-1: `comp-pipescript io a00_dim_account --pipeline bd` resolves (positive) AND a nonexistent id
   still refuses rc!=0 (negative); the corpus membership is derived by a stated predicate over the
   tree, printed with its denominator.
-- J2-1: the `:68` fix landed with the self-test leg green; self-test failure exercised once (mutant).
+- J2-1: **SUPERSEDED @fc9026534d (COO, 19:07Z) — the need was met another way: CTO executed J2 solo
+  on Andrew-direct ~1817Z "address while quiet" (state_scan encoding fix + planted-byte self-test leg
+  4/4; COO-validated 19:05Z: `comp-state --self-test` PASS with no env var). Your instance's J2-1 row
+  cites this supersession; zero work at your seat.**
 - J3-1: comp-atomcheck v1 runs the 5 atoms per spec; one positive + one negative fixture each,
   results printed; declaration interface documented; MCP'd to DS~B by 08-20.
 - RSA-VAL: proof instance per group, rc=0 positional, grammar below.
