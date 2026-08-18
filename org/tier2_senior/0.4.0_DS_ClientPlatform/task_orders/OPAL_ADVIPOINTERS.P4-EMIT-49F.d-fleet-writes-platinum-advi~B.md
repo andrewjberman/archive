@@ -65,9 +65,19 @@ commit-gate. Phase 3: `comp-validate` per emitted artifact (NO_CONFIG = say so, 
   the affected families implement THAT ruling with the ruling cited; until it lands they are
   DECLARED-GATED, never quietly emitted on your own basis choice.
 - P4E-7 proof instances VALID rc=0 positional per group; grammar declared in your first report.
+- P4E-8 CLIENT-KEY CONTRACT (added 16:20Z from CRO's consumption map @d774778b58 —
+  CLIENT_KEY_GRAMMAR_CONSUMPTION_MAP_20260818.md; PRD §5.B.5 "waits on the consumption map" is
+  DISCHARGED by it): v1 emits the SERVED z-grammar — (i) key-set equality clients_tab clients[].key
+  <-> advisor-book clients[].client_key <-> gold/entities/clients/{key}/ tree per date (the FE joins
+  at runtime; a partial flip breaks the L3 fetch silently); (ii) zero `rel_*` keys on any served
+  plane (rel_<hash> stays canonical-internal in gold parquet); (iii) the 138 `acct_z*` prefixes each
+  carry a disposition (serve/retire/reclassify) — never silently reproduced. Simplifiers, measured by
+  CRO: no URL carries a client key, no durable storage — no migration/redirect work in v1. The
+  grammar FLIP itself stays OUT of v1 scope (identity coverage 0/201; household spine map open;
+  NEVER#3 when it comes).
 
 <proof_of_spec>
-  <expected_criteria>P4E-1,P4E-2,P4E-3,P4E-4,P4E-5,P4E-6,P4E-7</expected_criteria>
+  <expected_criteria>P4E-1,P4E-2,P4E-3,P4E-4,P4E-5,P4E-6,P4E-7,P4E-8</expected_criteria>
   <instance_path_grammar>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/PROOF_OF_SPEC_P4EMIT_49F_{group}_{YYYYMMDD}~B.json</instance_path_grammar>
 </proof_of_spec>
 Multi-group TO: declare the group set (e.g. keylist / firm-family / advisor-family / twins-trio) with
