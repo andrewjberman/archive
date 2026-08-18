@@ -4,7 +4,7 @@
 <issued_to>0.8.0_AE_CloudComp</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-11T00:4xZ</issued>
-<status>staged</status>
+<status>complete -- census delivered 2026-08-18 (MDPF_REMED_RPF2_ECLIPSE_ORION_CONSUMER_CENSUS_20260818.md; validity gate PASS all 4 known members surfaced independently, mdpf_aggregate_aua via the P2 feed-family predicate extension; 11 offset-relevant rows: 1 corrected-by-W1 / 6 uncorrected / 3 inherited / 1 uncorrected-inert; zero code changes)</status>
 <priority>P1 — independent of the atomic window; may run immediately. First deliverable of the ruled
 follow-on workstream "the label offset for ALL CONSUMERS of eclipse/orion run-date partitions"
 (CTO ruling 004403Z). ⛔ NO code changes in this TO — the census IS the deliverable; fixes are
