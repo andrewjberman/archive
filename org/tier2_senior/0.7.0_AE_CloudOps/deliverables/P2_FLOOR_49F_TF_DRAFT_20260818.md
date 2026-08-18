@@ -81,3 +81,64 @@ is a session act -- the NEVER#4 defect this TO closes.)
 | silver-completeness marker key | DS~A P2D-4 (ground, not recall) | open; floor-only first fire regardless |
 | final cron value | CTO gate on this draft + P2D-3 duration | 12:45Z candidate |
 | dedicated vs shared DLQ | CTO (decision row) | draft = dedicated |
+
+---
+
+# REV 2 (17:4xZ) -- P2D-4 CONTRACT FOLDED IN (@4dadd1354c; DS~A 173547Z)
+
+The written invocation contract landed and changes the shape in three load-bearing ways. This
+revision supersedes s1/s2 above where they conflict; s3-s5 stand.
+
+## R2.1 Contract facts folded
+- **Host is STOPPED at fire time** (bd-gold-layer-runner self-halts; measured stopped ~14:29Z,
+  started 23:01Z by the legacy trigger; live read this hour: `i-01003b035d2988dfb` state=stopped,
+  profile=bd-exporter-profile). The dispatcher takes the ENSURE-RUNNING duty (accrual pattern):
+  start-if-stopped -> wait status-ok -> SSM SendCommand -> the command self-halts the box only if
+  the dispatcher started it (idiom inside the SSM doc per the contract).
+- **Own SSM document** (CTO host ruling): the 49F chain is fired by a NEW dedicated SSM doc whose
+  command body is the contract's verbatim (s3 sync `_code/` -> `python3 chain_49f_entrypoint.py
+  --production` -> log upload -> conditional self-halt). Args: `--production` and NOTHING else
+  (T-1 derived internally, trading-day frontier).
+- **Code home RULED** (CTO 172006Z): `s3://opal-data-assets/portal/gold/advi/_code/` -- first-minted
+  by DS~A, 51 objects ETag-verified.
+- **No silver-completeness marker exists** (grounded: converter manifests land under meta/, RULED
+  non-triggering, conversion_manifest.py:50-53) -- FLOOR-ONLY at first fire is now the contract
+  form, not just my default; the accelerator is a follow-on producer-side act in DS~A's lane,
+  separately contracted when built. The portal-notifications second act DEFERS until then.
+- **Mutex refusal is a real event**: `CHAIN REFUSED: live lock` rc=3 -- the dispatcher polls
+  get-command-invocation and logs the refusal signature LOUD (ERROR log line; no alarm -- moratorium).
+
+## R2.2 Expected plan rows, REVISED -- now TWO ROOTS
+
+**Root A: opal-assets (schedule + dispatcher), 9 rows, all ADDS:**
+rows 1-8 as s2 above (unchanged: schedule advi_49f_gold_floor @ cron(45 12 * * ? *) candidate;
+scheduler role+policy; DEDICATED advi_49f_floor_dlq [CTO-approved G-A]; dispatcher lambda 256MB/
+awaiting-timeout-sizing vs the ensure-running wait -- bumped to timeout=900s, still a dispatcher;
+dispatcher role+policy; log group; scheduler->lambda permission), PLUS:
+| 9 | `aws_ssm_document.advi_49f_chain_dispatch` | command body = contract verbatim; own doc, never the legacy chain's |
+Dispatcher policy adds vs s2: `ec2:StartInstances` + `ec2:DescribeInstanceStatus`/`DescribeInstances` scoped to
+`i-01003b035d2988dfb` (+ ec2:DescribeInstanceStatus is unconditionally resource-`*` by AWS API shape -- noted),
+`ssm:SendCommand` scoped to the instance ARN + the new document ARN, `ssm:GetCommandInvocation`.
+
+**Root B: bd-pipeline (instance-role grants for the chain's measured access surface), ADDS to
+bd-exporter-ec2-role (the profile the host carries -- the SAME role that received this morning's
+monolith_schwab_advi_read fact_rps grant @7b706eec4c):**
+| B1 | S3 read `opal-data-assets/schwab/08335338/silver/*` (widens this morning's fact_rps-only grant to the fact_*/dim_* set the chain reads) |
+| B2 | S3 read `opal-data-assets/blackdiamond/49f/silver/dim_advisor_fee_role/*` |
+| B3 | S3 read `opal-data-assets/schwab/08335338/meta/conversions/*` |
+| B4 | S3 read the a07 bd-securities transitional substrate (exact prefix pinned at build from a07's source; CTO 160826Z annotation: grant required, never a deletion warrant) |
+| B5 | S3 read+write `opal-data-assets/portal/gold/advi/49financial/*` |
+| B6 | S3 read `opal-data-assets/portal/gold/advi/_code/*` |
+| B7 | DynamoDB read `ETFClassifier` (a07) |
+Each new-resource grant verified at apply per Rule 22a: simulate-principal-policy ONE
+--resource-arns per call, isolated positive control, negative on an ungranted sibling prefix.
+
+**Cross-root note for the plan read:** two roots, two applies, one window; Root B applies FIRST
+(grants before the first scheduled fire can need them), Root A second; each root 0-diff + tagged
+(bd-pipeline-vX.Y.Z / opal-assets-vX.Y.Z). Source-map entries: dispatcher lambda added to
+lambda-source-map.json.
+
+## R2.3 What this revision does NOT change
+Floor cron candidate 12:45Z (CTO G-A approved-as-candidate; final pin on DS~A's P2D-3 measured
+duration, MCP'd same-day 08-19). NEVER#4 satisfied by the floor alone. No alarms/monitors/SNS/SES
+anywhere. Apply gates unchanged: 23:01Z fixture verdict -> CTO per-apply gate at the apply.
