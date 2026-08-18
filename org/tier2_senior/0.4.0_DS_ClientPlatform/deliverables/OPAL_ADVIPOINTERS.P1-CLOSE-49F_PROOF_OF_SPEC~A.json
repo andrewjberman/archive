@@ -1,0 +1,112 @@
+{
+ "schema_version": "1.0",
+ "to_id": "OPAL_ADVIPOINTERS.P1-CLOSE-49F",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/OPAL_ADVIPOINTERS.P1-CLOSE-49F.d-fleet-inventory-and-backfill-determination~A.md",
+  "group": "D",
+  "vintage_commit": "49dd8469d1"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~A",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/deliverables/OPAL_ADVIPOINTERS_P1_CLOSE_49F_INVENTORY_AND_BACKFILL_DETERMINATION_20260818.md",
+   "kind": "doc",
+   "commit_or_etag": "3a924da626",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "git log -1 3a924da626 -- inventory + determination + 3 TO status flips, 197 insertions"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/deliverables/OPAL_ADVIPOINTERS_P1_CLOSE_49F_BACKFILL_PRICED_CARD_20260818.md",
+   "kind": "doc",
+   "commit_or_etag": "750a9265a8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "git log -1 750a9265a8 -- priced card (discharge verdict) + sample evidence appendix"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/deliverables/OPAL_ADVIPOINTERS_P1_CLOSE_49F_CONSUMPTION_SAMPLE_EVIDENCE_20260818.md",
+   "kind": "doc",
+   "commit_or_etag": "750a9265a8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "same commit; trimmed transcript of the asof=2026-08-10 exercise (rc + wall-clock + verbatim failure signatures)"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "P1C-1",
+   "criterion_verbatim": "INVENTORY: attestation table committed under your deliverables/ -- one row per D family from the run-8d census (print the family denominator you enumerated over), each row EXACTLY ONE of: EMITTED-with-instance (instance path cited, schema-valid) / DECLARED-GATED (blocker NAMED). A family you cannot classify gets its own UNKNOWN row stated as such -- never silently dropped (missing-third-state test).",
+   "method": "command",
+   "invocation": "python frame-check over d00_census_out.json + d00_fe_routes_input.json + 14 instance JSONs (transcribed in the deliverable DENOMINATORS section); schema-validity pass over all 14 instances",
+   "output_evidence": "113 families enumerated: 17 EMITTED-with-instance (14 instances, 0 non-PASS acceptance rows) / 24 DECLARED-GATED across 5 named gate-kinds / 72 out-of-frame / 0 UNKNOWN; accounting tie 16+1+14+2+72+8=113 exact",
+   "denominator": "113 families = 104 run-8d census live families + 1 (gold/entities/clients/detail, census gap G3) + 8 FE reachability families (absent from census by construction)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "P1C-2",
+   "criterion_verbatim": "BACKFILL DETERMINATION: against the CLOSED spine-fill ledger @61d9600bf2, ENUMERATE (list, not digit) what backfill remains for the D families (candidates you named: the ~10 window/series families fan-out over the now-filled spine; the V16/17/18 legs @3d8a6892d6). Each remaining item carries its scope (tables x dates).",
+   "method": "live_read",
+   "invocation": "paginated boto3 list_objects_v2 over opal-data-assets/portal/gold/advi/49financial/ (partition count per table, all pages materialised client-side); repo-wide grep for nna_atomic consumers",
+   "output_evidence": "canonical_valuation 526 / flow_ledger 526 / nna_canonical 526 / twr_daily 525 (2024-07-08..2026-08-10) -- ties @61d9600bf2; remainder enumerated = the window-consumption pass ONLY (12 families listed in deliverable D1); nna_atomic 1/526 with ZERO consumers (dormant-superseded, successor filled); dims = P3 scope not backfill; D4 names the not-backfill design gates incl. V17/V18",
+   "denominator": "10 tables at the root (5 canonical + 5 dimensions); consumer grep over the runners_49f corpus + gold script trees + infra",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "P1C-3",
+   "criterion_verbatim": "PRICED CARD (conditional on P1C-2 nonempty): run the timing sample ON THE REMAINING SCOPE (>=20 representative dates, ad-hoc QA runs per the ad-hoc-runs rule -- run-and-read, nothing standing; rc AND wall-clock per stage printed), derive the priced fill-word card (scope x per-date cost = hours), deliver to COO for MSTR->Andrew. The card prices the REMAINDER, never the closed fill.",
+   "method": "command",
+   "invocation": "full local mirror (aws s3 sync, 4,222 objects verified by find-count) + timed emitter invocations at asof=2026-08-10 (transcript in the evidence appendix; rc + wall-clock per attempt)",
+   "output_evidence": "Remainder has NO per-date axis (the >=20-dates clause is N/A with evidence: each family is one current artifact whose windows read history); measured structural result -- every emitter refuses loudly on named session-act inputs; card delivered @750a9265a8 pricing the remainder as post-chain emitter runs at zero incremental authorization; the closed fill NOT re-priced",
+   "denominator": "12 consumption-pass families; 11 emitter invocation attempts logged with rc + wall-clock",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "P1C-4",
+   "criterion_verbatim": "CVO HANDOFF: inventory committed BEFORE the MCP; CVO receives the commit hash + the frame statement (see P4-EMIT-49F P4E-1 -- the frozen served-key list is DS~B+CVO's; your table is at FAMILY grain and must SAY SO, so the two grains are never conflated).",
+   "method": "manual_read_with_citation",
+   "invocation": "send_message to 3.0.0_SA_CVO at 165342Z, after commit 3a924da626; delivery receipt in the broker result",
+   "output_evidence": "MCP delivered 20260818T165342Z carrying the GRAIN STATEMENT verbatim (FAMILY grain, NOT the frozen served-KEY list which is DS~B+CVO at P4E-1); COO 165534Z confirms CVO sweep started on the hash",
+   "denominator": "N/A -- ordering + content check (commit precedes MCP; frame statement present in the delivered body)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "P1C-5",
+   "criterion_verbatim": "proof-of-spec instance VALID: python .tools/proof-of-spec-check.py <instance> P1C-1,P1C-2,P1C-3,P1C-4,P1C-5 rc=0 taken WITHOUT a pipe (positional ids -- no flags).",
+   "method": "command",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/OPAL_ADVIPOINTERS.P1-CLOSE-49F_PROOF_OF_SPEC~A.json P1C-1,P1C-2,P1C-3,P1C-4,P1C-5",
+   "output_evidence": "rc=0 VALID (run in this session, bare rc, no pipe)",
+   "denominator": "5 expected criterion ids, coverage-checked before quality",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "MECE mutant on the accounting tie: one family (platinum/firm/dashboard) silently unclassified while the denominator derives from the untouched census universe -- the TO missing-third-state test, mechanized.",
+   "expected": "total rows 112 != expected 113 -> tie breaks",
+   "observed": "FIRED: (112, 113, False). Recorded honestly: a FIRST mutant (family dropped from the census input itself) did NOT fire and structurally cannot -- it mutates both sides of a shared-derivation tie; the tie checks MECE-over-the-universe, not frame completeness (that axis is guarded by the census's own independent object-leg denominator, 16,452 objects).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input frame computations (full classification + tie) compared",
+   "observed": "run1 == run2 == (113, 113, True); identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {"item": "per-family CVO grade join (which 9 BAR-CLEARED / 8 SCOPE-VALIDATED)", "reason": "CVO's record (154146Z frame + P1-SWEEP-49F); re-asserting it here would be a second derivation of their instrument"},
+  {"item": "the frozen served-KEY list", "reason": "DS~B + CVO's deliverable (P4E-1); this table is FAMILY grain and says so"},
+  {"item": "execution of the window-consumption pass", "reason": "structurally rides the first P2 chain cycle + P3C-2 persist acts (@7d7e2e19f6) -- measured in the sample, priced in the card, lands 08-19/20 under the already-GOd TOs"},
+  {"item": "xwalk re-harvest (d05/d14 input)", "reason": "read-only harvest from the served detail family; sequenced with the consumption pass, not needed for the determination"},
+  {"item": "two-writers @c127712198 fix", "reason": "TO Do-not: FILE + name as blocker only -- carried on the d04/d05 rows and in D4"}
+ ],
+ "surprises": [
+  "comp-pipescript io cannot see the runners_49f corpus (BD-gold registry = legacy chain ids only) -- banked to COO 161056Z, no action; retires at NFRA_COMPTOOLS.REG",
+  "census G3: gold/entities/ absent from d00 PREFIXES -- the live client-detail successor family is invisible to the census enumerator; routed as run-9 item (deliverable E-4)",
+  "jd2 (dim_advisor_fee_role) is a UNIVERSAL D-fleet exact-read input required by 6+ emitters -- discovered at argv; live on S3 (25 partitions ..2026-08-17), an input-resolution fact for the P2 entrypoint, not a gap"
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/logs/2026-08-18/p1_close_49f_1520-1720Z.md",
+ "compiler_tools": [
+  {"tool": "comp-to", "invocation": "comp-to OPAL_ADVIPOINTERS.P1-CLOSE-49F.d-fleet-inventory-and-backfill-determination~A", "result": "session TO_ID set (race-free per-session file)"},
+  {"tool": "comp-pipescript", "invocation": "comp-pipescript io d00_served_shape_census --pipeline bd", "result": "Script-not-found -- registry lacks the runners_49f corpus; FLAGGED to COO 161056Z per the TO Phase-1 clause; inventory proceeded on the census JSON + instances directly"},
+  {"tool": "comp-find", "invocation": "comp-find --name rel_to_z_mapping* / bd_map.parquet; comp-find dim_advisor_fee_role data; comp-find 20-date", "result": "xwalk MEASURED zero over 26,527 scanned files (durable-plane absence, corroborated by S3 prefix reads); jd2 producer located a00_runner.py:46; denominators printed on every zero"}
+ ]
+}
