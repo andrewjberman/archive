@@ -34,6 +34,14 @@ Phase 3: `comp-pipescript deployed` MATCH for both moved producers.
   partition at `portal/gold/advi/49financial/` == T-1 per the trading calendar
   (`lib/trading_calendar.py` frontier — NEVER wall-clock), and its manifest identifies the scheduled
   run (run id / trigger source in the manifest), not a session act.
+  **SCOPE PINNED (COO amendment 17:00Z, from DS~B's 165804Z readiness facts): "every table in the
+  chain" INCLUDES the D-fleet exact-read inputs that today have NO S3 home at the product root —
+  `canonical_positions` (b01's output, absent from canonical/) and the A_07 pair
+  (`dim_asset_classification` + `alias_key_expansion`, today session-local only). A P3 close on
+  which the publisher's own inputs are still session acts fails criterion (i) in the exact shape
+  this TO exists to end — the two named tables persist at the root from the scheduled stage before
+  the close is attested. d05/d06 read them (DS~B's measured list); if landing them forces a
+  pattern-spec grammar question, that goes to CTO, not decided here.**
 - P3C-3 ZERO FIRM-BUCKET SILVER READS: measured over the chain's source set — grep/AST count of reads
   against non-canonical silver homes = 0, with the file+line denominator printed beside it.
 - P3C-4 proof instance VALID rc=0 positional: ids P3C-1,P3C-2,P3C-3,P3C-4.
