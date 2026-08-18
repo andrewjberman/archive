@@ -1,9 +1,10 @@
-# P4E-1 FROZEN SERVED-KEY LIST -- ADVI / 49 Financial / Schwab 08335338 (PROPOSED-v1)
+# P4E-1 FROZEN SERVED-KEY LIST -- ADVI / 49 Financial / Schwab 08335338 (PROPOSED-v2)
 
 **Author:** 0.4.0_DS_ClientPlatform~B (publisher lane) · **Joint owner:** 3.0.0_SA_CVO (P4-PINS)
 **TO:** OPAL_ADVIPOINTERS.P4-EMIT-49F @49dd8469d1, amended @7389357 (P4E-1..P4E-8)
-**Status:** PROPOSED-v1 -- the FREEZE EVENT is CVO's concur citing this commit. Until then this is
-the working enumeration, not the denominator.
+**Status:** PROPOSED-v2 -- v1 @4ee19618a8 received CVO CONCUR-WITH-TWO-AMENDMENTS (165352Z, member
+claims verified at source); v2 folds both amendments + the author's own v1 denominator-arithmetic
+correction. The FREEZE EVENT is CVO's concur citing THIS commit.
 **This list supersedes the plan's "15" (COO notified CTO, GO msg 160704Z). Members are NAMED, never
 a digit.**
 
@@ -27,7 +28,7 @@ a digit.**
   LM 08-15 vs gold 38,925,029B LM 08-18 -- legacy chain wrote them on different days; flagged, not
   adjudicated -- CVO 164408Z).
 
-## THE MEMBERS (19 rows)
+## THE MEMBERS (20 rows)
 
 | # | legacy served key (opal-data-bd) | emitter | FE consumer (d00 fe census, advisor-intelligence.ts) | disposition | advi twin key (platinum/advi/49financial/) |
 |---|---|---|---|---|---|
@@ -35,7 +36,7 @@ a digit.**
 | 2 | `platinum/firm/dashboard.json` | d02 | `:449` | **EMIT** | `dashboard.json` |
 | 3 | `platinum/firm/fee_efficiency.json` | d03 | `:480` | **EMIT** | `fee_efficiency.json` |
 | 4 | `gold/artifacts/clients_tab.json` | d04 | `:321` (apigw-lambda `clients-tab`) | **DECLARED-GATED** (household spine map -- P4E-8(ii): current build emits `rel_` keys at `d04_clients_tab.py:72`; no household-grain crosswalk exists, d04 header. Release: the PRD §10 spine-map hop) | `clients_tab.json` (reserved) |
-| 5 | `gold/entities/clients/{key}/detail.json` **FLEET** -- 3,751 live prefixes (3,612 `z*` + 138 `acct_z*` + 1 `"0"`, CRO map §2) | d05 | Lambda C5 route `opal-partners-data:932-934` (+ C6 `:1125`) | **DECLARED-GATED** (same blocker: crosswalk reaches EXACT-class 1,652 of 3,612 households; P4E-8(i) key-set equality unreachable until the spine map lands. Release: same hop) | `clients/{key}/detail.json` (reserved; grammar = served z per CRO map §4.3) |
+| 5 | `gold/entities/clients/{key}/detail.json` **FLEET** -- BOTH grains stated (Amendment 2): 3,751 live prefixes (3,612 `z*` + 138 `acct_z*` + 1 `"0"`, CRO map §2, CVO-verified 165352Z) / CVO harvested-at-grade count 3,324. The FLAT siblings `{key}.json`/`{key}_composition.json`/`{key}_views.json` are EXCLUDED from this row (not `{key}/detail.json` members -- they are row 20) | d05 | Lambda C5 route `opal-partners-data:932-934` (+ C6 `:1125`) | **DECLARED-GATED** (same blocker: crosswalk reaches EXACT-class 1,652 of 3,612 households; P4E-8(i) key-set equality unreachable until the spine map lands. Release: same hop) | `clients/{key}/detail.json` (reserved; grammar = served z per CRO map §4.3) |
 | 6 | `platinum/firm/mix_summary.json` | d06 | `:508` | **EMIT** | `mix_summary.json` |
 | 7 | `platinum/firm/leaderboard.json` | d07 | `:1311` | **EMIT** | `leaderboard.json` |
 | 8 | `platinum/49financial/ownership_map.json` (NOTE: prefix is `platinum/49financial/`, NOT `platinum/firm/` -- CVO 164408Z) | d08 | no cite in scanned file (scan scope = advisor-intelligence.ts only) | **EMIT** (consumer-cite OPEN at DE row 4c) | `ownership_map.json` |
@@ -50,13 +51,37 @@ a digit.**
 | 17 | `platinum/firm/advisor_nna_canonical.json` | d14 | `:392` | **EMIT** (P4E-4 membership contract binds: any active role, once per advisor, non-additive, splits never weight return) | `advisor_nna_canonical.json` |
 | 18 | `platinum/firm/leaderboard.prior_week.json` | **NO EMITTER** | no cite in scanned file | **OPEN** (LIVE key: LM 2026-08-16T00:25:58Z, same batch as the legacy chain's last write. Emitter gap NAMED -- not in the CVO-17 frame because that frame counted emitter-covered keys. Resolver: DE row-4c consumer-confirm -> EMIT-later (new emitter or d07 second key) or EXCLUDED) | `leaderboard.prior_week.json` (reserved) |
 | 19 | `platinum/firm/employee_leaderboard.json` | **NO EMITTER** | no cite in scanned file | **EXCLUDED-DORMANT** (LM 2026-04-09T22:24:14Z = 131d >= 90d, Rule 25, no declared exception; successor CANDIDATE = `leaderboard.json` -- flagged, NOT adjudicated; NOT a deletion warrant) | none |
+| 20 | `gold/entities/clients/{key}.json` + `{key}_composition.json` + `{key}_views.json` **FLAT SIBLING FAMILY** (CVO Amendment 1, 165352Z) -- 10,384 direct objects, vintages MIXED (bulk 2026-08-08 00:4xZ; part LIVE, e.g. `0_composition.json` rewritten 2026-08-18T00:59:53Z) | **NO EMITTER**; d00 census carries ZERO `gold/entities/*` families (predates the plane) -- no census direction sees these | unswept (outside the d00 FE scan) | **OPEN** (resolver: DE row-4c consumer-confirm + producer trace -- same resolver class as row 18. Without this row the non-members section would classify 10,384 live objects by silence) | none reserved |
 
 ## DENOMINATOR STATEMENT (for rows 4a / 4b / 4c)
 
-**19 members enumerated.** EMIT-now = **13 legacy keys -> 12 advi twin objects** (rows 12+13 share
-one). DECLARED-GATED = **5 keys** (rows 4, 5, 14-16), each with a named blocker and release-holder.
-OPEN = **1** (row 18). EXCLUDED-DORMANT = **1** (row 19). CVO pins (row 4b) land on declared
-legacy->advi pairs; gated rows pin on the legacy side only until release.
+**20 members enumerated.** EMIT-now = **12 legacy keys -> 11 advi twin objects** (rows 1,2,3,6,7,8,
+9,10,11,12,13,17; rows 12+13 share one twin). DECLARED-GATED = **5 keys** (rows 4, 5, 14-16), each
+with a named blocker and release-holder. OPEN = **2** (rows 18, 20 -- both resolve at DE row-4c).
+EXCLUDED-DORMANT = **1** (row 19). CVO pins (row 4b) land on declared legacy->advi pairs; gated
+rows pin on the legacy side only until release. *(v2 correction: v1 said EMIT "13 -> 12" -- an
+arithmetic slip against this file's own row enumeration, caught by recounting the named rows; the
+enumeration was and is the authority.)*
+
+## READINESS ANNEX (v1.1 -- live S3 input state per EMIT key, measured 2026-08-18 ~1650Z)
+
+Emitters read `{root}/canonical|dimensions/{table}/date={asof}` EXACT + series globs. Live root
+state: valuation / flow_ledger / nna_canonical = 526 partitions to **08-10**; twr_daily 525 to
+08-10; dim_relationship newest **07-15**; dim_account newest 07-15; dim_boundary / dim_calendar /
+dim_security only **08-11**; nna_atomic 07-15 only. jd2 silver (`blackdiamond/49f/silver/
+dim_advisor_fee_role`) live to **08-17**.
+
+- **NO single date carries all exact-read inputs today** -- first production emission rides DS~A's
+  P3-close (scheduled chain writes every table at T-1, plan row 3, 08-20 = this TO's own date).
+  Pre-close QA emission uses DECLARED latest-<=asof staging per input (the `a00_runner.py:111-115`
+  precedent), every aliased vintage stamped in `_provenance` and in the P4E-5 disclosure.
+- **d06 (mix_summary) has TWO inputs with NO S3 home at the product root:** `canonical_positions`
+  (b01 output -- absent from `canonical/`) and the A_07 pair (`dim_asset_classification` +
+  `alias_key_expansion` -- session-local only, `a07:487`). EMIT disposition unchanged; readiness
+  gated on those tables landing at the root (DS~A P3-close scope question -- SURFACED to COO,
+  not adjudicated here).
+- d05 (already DECLARED-GATED) additionally reads `canonical_positions` + the a06 crosswalk --
+  same missing-table fact, recorded for when its gate lifts.
 
 ## RECONCILIATION (the three frames -> this enumeration)
 
