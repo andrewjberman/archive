@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-19 — same day as DS~A's inventory (their P1C-4 hands you the commit hash; commit-first handoff form).</dated>
-<status>staged -- GO paired; begins on DS~A's inventory MCP</status>
+<status>pending -- GO 20260818T160719Z (COO); begins on DS~A inventory MCP</status>
 <priority>P1 — the CTO P1-close attestation consumes both your sweep and DS~A's table</priority>
 <authority>Push plan @a2f27c8d0a §3 row 1 (+CVO sweep) + your PARITY_BAR_49F_PLATINUM_OVERLAY_20260811.md §§3-5,7 + the banding ruling (banded fraction is a KIND, not a threshold). Your 154146Z inputs are folded (frame, pins state, parity state).</authority>
 </task_order>
