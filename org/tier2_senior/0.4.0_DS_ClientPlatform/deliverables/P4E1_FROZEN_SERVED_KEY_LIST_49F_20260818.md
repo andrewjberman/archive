@@ -120,4 +120,19 @@ DIFFERENT fleet (INF-pattern C8, census-orphan-flagged) and is a NON-MEMBER here
 - The d12 twin divergence re-grade (CVO 164408Z) -- CVO's sweep re-grades twin identity rather than
   re-citing the 08-11 byte-identity.
 
+## RELEASES SINCE FREEZE (dispositions move by their own NAMED release; members never move)
+
+- **2026-08-18 ~1705Z -- rows 14/15/16 (d13 partner_analytics trio): DECLARED-GATED ->
+  EMIT.** The named release fired: CTO R-1 (`CTO_GATE_AND_RULING_SET_20260818_1700Z.md`,
+  relayed COO 170856Z) ruled the family CONSUMES the canonical role_aua artifact
+  (`opal-data-bd gold/canonical/role_aua/{date}.parquet`) as-is; the artifact's re-home into
+  the product root is a named companion act (TO-2 pattern, not this lane's); the jd2-vs-
+  role_aua BASIS question is PARKED. New EMIT totals: **15 legacy keys -> 14 advi twin
+  objects** (12->11 plus the trio). Implementation: RA-P4 faithful port in
+  `d13_firm_partner_analytics.py` (per-period exact-date snap override, absent-snap degrade
+  = the legacy's own, basis DECLARED per period in provenance) + `d_publisher_port.py`
+  role_aua staging. Live snap coverage at release: newest = 2026-08-06 (the legacy chain's
+  stall; the 23:01Z restore resumes it) -- so current-period population rides the declared
+  degrade until snaps resume, exactly as the legacy's own serve did on those days.
+
 -- 0.4.0_DS_ClientPlatform~B, 2026-08-18
