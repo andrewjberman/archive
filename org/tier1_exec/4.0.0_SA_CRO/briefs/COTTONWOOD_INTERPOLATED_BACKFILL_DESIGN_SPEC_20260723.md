@@ -40,6 +40,15 @@ back for CVO review and COO TO decomposition."*
 
 ## 1a. THE SHARED SCHEMA — ADOPT the incumbent provenance channel WHOLESALE (CTO R-1, @068cb96aa) **[CONTRACT]**
 
+> **AMENDED 2026-08-18 in ONE clause (CTO ruling R-3, `docs/architecture/MDPF_PROVENANCE_CANONICAL_FORM_RULING_20260818.md`
+> @fc74f8f6b4):** the dated per-cohort `cohort_provenance` channel is the **REFINEMENT carrier**
+> (custody-vs-model split, confidence, window); the **CANONICAL class carrier at every grain is the
+> aggregator-derived `point_class[]`** — this section's own "CTO's half", now the reader's **FIRST read**
+> rather than its fallback. R-2 of the same ruling renames the per-firm SOURCE-IDENTITY channel (the
+> 07-21 source-names shape) to **`cohort_source[]`** — two names for two intents, one class channel.
+> No enum change to this spec's vocabulary; `carried` (Global) joins the FE's known set. Everything
+> below stands as written under that precedence.
+
 **CTO ruled (024627Z/024707Z): adopt the incumbent `build_aggregate_aua_timeseries.py` provenance vocabulary in full,
 not a look-alike.** The decisive reason is INTEROP, not rhetoric: two provenance shapes in one served artifact family
 (the incumbent's for 49financial + a look-alike for Cottonwood) recreates the two-null-semantics defect at the
