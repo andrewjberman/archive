@@ -1,0 +1,165 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_DEPLOYCENSUS",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_DEPLOYCENSUS.deployed-vs-built-from-census-classify-dont-fix.md",
+  "group": "OTHER",
+  "vintage_commit": "f976c4ea7910d5ea236c445b7e63edf5cf16b7fd"
+ },
+ "assignee": "0.8.0_AE_CloudComp",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_DEPLOYCENSUS/CENSUS_REPORT_20260818.md",
+   "kind": "doc",
+   "commit_or_etag": "landing-commit-this-session",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "classify-only TO: the census IS the deliverable; zero deploys by DC-5's own bar"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_DEPLOYCENSUS/lambda_census_v3_findings.json",
+   "kind": "config_data",
+   "commit_or_etag": "landing-commit-this-session",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "machine evidence rows (Lambda axis), committed beside the report"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_DEPLOYCENSUS/ec2_census_v2_rows.json",
+   "kind": "config_data",
+   "commit_or_etag": "landing-commit-this-session",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "machine evidence rows (EC2 staged axis) + ec2_onbox_verdicts.json (APPLIED axis), committed beside the report"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_DEPLOYCENSUS/INSTRUMENTS_APPENDIX.md",
+   "kind": "doc",
+   "commit_or_etag": "landing-commit-this-session",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the census instruments as fenced listings (re-runnable by copy-out): the Rule-14 ruff gate correctly refuses one-shot scratch python, and --force does not bypass a gate failure -- listings keep the method durable without non-conformant .py in the tree"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DC-1",
+   "criterion_verbatim": "DENOMINATORS printed: N Lambdas in the source-map / M read / K unreadable (named); N EC2 services in the manifest / M staged-read / K on-box-read / K UNREAD (named, with why).",
+   "method": "command",
+   "invocation": "python lambda_census_v3.py; python ec2_census_v2.py; python ec2_onbox.py (this directory)",
+   "output_evidence": "source-map N=197 | live total=194 | in-map&live=188 (all 188 packages downloaded+member-hashed) | in-map NOT live=9 (named) | live NOT in map=6 (named). EC2: 27 services / 17 staged-read (~460 code objects hashed) / 10 staged-UNREAD named / 5 on-box-read (every SSM-Online box) / 22 on-box-UNREAD named with why (19 stopped-by-design, 2 nonexistent manifest instance-ids, 1 null-id).",
+   "denominator": "197 map Lambdas; 194 live; 27 manifest EC2 services; 135 EventBridge rules materialised",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DC-2",
+   "criterion_verbatim": "every Lambda classified (one of the six), with member-level sha diffs cited for anything not CURRENT; bundled-vs-canonical rows for every bundled member (the inf-silver-chain 7 builders as the known-positive control -- the census must FIND the build_billing_dim divergence or it is broken).",
+   "method": "command",
+   "invocation": "python lambda_census_v3.py -> lambda_census_v3_rows.json (member shas) + lambda_census_v3_findings.json",
+   "output_evidence": "197/197 classified: CURRENT 141 / DELIBERATELY-HELD 11 / STALE-BY-NEGLECT 8 / TWO-HOMES-DIVERGED 16 / UNREAD 21 (one cited manual reclass: ycharts-market-data-pull STALE->HELD per its source-map DORMANT note, inference flagged). Every non-CURRENT row carries member sha256/blob, deployed-vintage commit, commits-behind, and delta-kind (code / strings-only / cosmetic). Bundled-vs-canonical axis: 17 finding rows across 14 Lambdas. POSITIVE CONTROL FOUND: inf-silver-chain build_billing_dim deployed==own-tree but similarity 0.345 vs canonical data/inf/scripts/silver/build_billing_dim.py (canonical moved @d8fee4b04f 08-11).",
+   "denominator": "197 Lambdas; 187 bundled-candidate member pairs scanned, 17 diverged findings",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DC-3",
+   "criterion_verbatim": "every EC2 service classified staged-vs-repo AND on-box-vs-staged (or UNREAD, named).",
+   "method": "command",
+   "invocation": "python ec2_census_v2.py; python ec2_onbox.py (read-only SSM sha256sum/Get-FileHash on the 5 SSM-Online boxes)",
+   "output_evidence": "27/27 dual-axis classified (CENSUS_REPORT DC-3 table). Staged: CURRENT 6 / STALE 6 / TWO-HOMES 3 / UNREAD 12 named-with-why. On-box: 5 read (gateway 30/30 md5==repo CURRENT; website 6/7==repo; inf-gold 3-way CURRENT with the /home dispatch leftover proven INERT via inf-gold-trigger/lambda_function.py:473 /tmp fresh-pull; mdpf 41/44==staged, 2 ON-BOX-AHEAD-OF-STAGED (==repo HEAD); si2 9 executing ps1 with NO repo home by name), 22 UNREAD named.",
+   "denominator": "27 services; 24 distinct instance ids; 5 SSM-Online boxes; 44 mdpf on-box files hashed, 30 gateway app members",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DC-4",
+   "criterion_verbatim": "NEGATIVE CONTROL: a Lambda known-CURRENT (e.g. smartx-jwt-refresher, three-way CURRENT 135226Z) reads CURRENT; POSITIVE CONTROL: inf-silver-chain reads TWO-HOMES-DIVERGED on build_billing_dim. Both printed. An instrument that has not been seen to discriminate is a passing assertion.",
+   "method": "command",
+   "invocation": "grep smartx-jwt-refresher / inf-silver-chain in lambda_census_v3_rows.json (both printed in CENSUS_REPORT DC-4)",
+   "output_evidence": "NEGATIVE: smartx-jwt-refresher -> CURRENT (deployed blob == HEAD blob; live CodeSha256 == map artifact_sha256), matching COO's independent 08-18 ~1355Z three-way read @d5d7342da4. POSITIVE: inf-silver-chain -> TWO-HOMES-DIVERGED on build_billing_dim.py (sim 0.345, own-tree CURRENT, canonical moved) -- FOUND, plus 3 sibling members. Instrument discriminates in both directions.",
+   "denominator": "2 controls, 2 expected verdicts, 2 observed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DC-5",
+   "criterion_verbatim": "the summary table (counts per class) + the finding rows, committed as a deliverable; ZERO deploys, ZERO fixes in this TO (classify only). Findings routed by COO/CTO afterwards.",
+   "method": "manual_read_with_citation",
+   "invocation": "CENSUS_REPORT_20260818.md DC-5 + git status of this session (no code/infra paths touched; org/ + scratchpad only)",
+   "output_evidence": "Summary tables committed (per-Lambda, per-axis findings, EC2 dual-axis). Zero deploys / zero fixes / zero staging writes: the session's only estate writes are SSM read-only hash commands (sha256sum / Get-FileHash / schtasks query / ls). Immediate-report clause exercised once (bd merge-daily two-homes, COO 160830Z, ACKed 161035Z, remedy routed to CTO by COO).",
+   "denominator": "N/A -- boolean discipline check over the session's action log",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "DC-6",
+   "criterion_verbatim": "method note: what the census COULD NOT see (its own domain boundary) -- e.g. code fetched at runtime from S3, containers not in the source-map -- stated, so the next reader knows the frame.",
+   "method": "manual_read_with_citation",
+   "invocation": "CENSUS_REPORT_20260818.md section DC-6",
+   "output_evidence": "9 named boundary items: container images (layers unread), runtime-fetched code (moment-not-guarantee), 19 stopped boxes (STAGED-INERT invisible), transformed nodejs builds (chain-verdict weaker than byte-verdict), Lambda layers out of scope, 8 EXTERNAL no-source Lambdas, basename-resolution ambiguity labeling, wt_dirty verdict volatility, si2 name-level-only resolution.",
+   "denominator": "9 boundary items enumerated",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Dual-direction control mandated by the TO itself: the known-CURRENT negative (smartx-jwt-refresher) must read CURRENT and the known-diverged positive (inf-silver-chain build_billing_dim) must be FOUND -- a census reading everything one way is broken by its own bar.",
+   "expected": "negative=CURRENT, positive=TWO-HOMES-DIVERGED on build_billing_dim",
+   "observed": "negative CURRENT; positive TWO-HOMES-DIVERGED, build_billing_dim sim 0.345 vs canonical -- both as expected. Additionally the strings-only AST discriminator was exercised against the known 06-11 provenance sweep (4 inf Lambdas): byte-drift present, AST-with-strings-masked identical -- separates real code drift from path-string drift as designed.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Lambda census executed 3 times during development (v1/v2/v3) across an advancing HEAD; classification of every control row and every finding row stable across runs (class changes between versions are traced to named discriminator additions -- hold-scan, strings-only, orphan-similarity -- not to instability). EC2 staged read executed twice (v1/v2) with stable byte verdicts.",
+   "observed": "controls and finding rows byte-stable run-to-run at fixed HEAD; only labeled-discriminator refinements moved classes",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Container-image member comparison (3 Lambdas)",
+   "reason": "image layers out of the zip-member domain; ECR digest recorded, unpacking is a follow-on read"
+  },
+  {
+   "item": "On-box reads of the 19 stopped/transient boxes",
+   "reason": "read-only census: no instance starts; named UNREAD per DC-1/DC-3"
+  },
+  {
+   "item": "Lambda layer (dependency) currency",
+   "reason": "Rule 3 / lambda-layer-map territory, outside this TO's member-sha scope"
+  },
+  {
+   "item": "Fork-or-drift adjudication of the 14 bundled-copy divergences",
+   "reason": "architectural call belonging to each producer's owner (Rule 17a lesson: 'which is RIGHT?' is not answered by measurement); census states the divergence + similarity only"
+  },
+  {
+   "item": "si2 content-level script matching",
+   "reason": "would need on-box byte pulls; name-level resolution performed and reported"
+  },
+  {
+   "item": "gold-script sweep rebuild",
+   "reason": "reused comp-pipescript deployed per the TO's rail clause (60 MATCH bd / INF_D_02+04+10 STALE inf, cross-checked consistent with my staged reads)"
+  },
+  {
+   "item": "raw .py instrument files (lambda_census_v3.py / ec2_census_v2.py / ec2_onbox.py) as committed artifacts or per-artifact acceptance subjects",
+   "reason": "committed as fenced listings in INSTRUMENTS_APPENDIX.md instead -- Rule-14 commit-gate (ruff) correctly refuses one-shot scratch instruments, and the DC rows exercise them directly (their invocations ARE the acceptance evidence)"
+  }
+ ],
+ "surprises": [
+  "EC2_MANIFEST carries 2 nonexistent instance ids (orion-crawl-harness i-010f195f1798b40ad, estate-report-runner i-04981b6aec3bed86b) -- the ASTN wrong-machine class recurring in the Rule-8 source of truth; observed, not fixed",
+  "lambda-source-map still carries m365-otp-liveness / m365-ms-ingest-liveness while the live functions are opal-otp-liveness / opal-ms-ingest-liveness (rename not reflected; 2 of the 6 live-not-in-map rows)",
+  "mdpf-daily-runner on-box carries code NEWER than its own staging home on 2 files (== repo HEAD) -- a second delivery channel updated the box; carrier INFERRED (accrual re-home), not source-confirmed",
+  "opal-data-bd scripts/src/ staging carries the bd-exporter stepwise TS tree CURRENT while the same prefix family's merge-daily-incremental.py is 4 commits stale -- one staging root, mixed currency",
+  "opal-cot-value-parity + opal-inf-value-parity both carry sovereign_held.py committed-never-deployed since 07-10 (compdiff tree moved, no re-apply)"
+ ],
+ "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-18/deploycensus_session.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-which",
+   "invocation": "comp-which \"compare deployed lambda package bytes against the source it was built from\"",
+   "result": "near-tie routing (comp-aws / comp-estate / comp-iam) -- no existing tool covers member-sha deployed-vs-built-from; census instrument justified under BUILD LADDER rung 2 exhaustion"
+  },
+  {
+   "tool": "comp-pipescript",
+   "invocation": "comp-pipescript deployed (no-arg all-trees sweep, per the TO's reuse clause)",
+   "result": "bd-gold 60 MATCH / 0 STALE; inf-gold INF_D_02, INF_D_04, INF_D_10 STALE; aux:bronze-runner 3 DRIFT; aux:manual_api 5 DRIFT -- cross-checked CONSISTENT with the census's independent staged-byte reads on every overlapping row"
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find --name 'build_billing_dim.py' (+ build_tax_dim, EC2_MANIFEST, value_parity tf, proof-of-spec tooling)",
+   "result": "2 homes for each inf silver builder (canonical data/inf/scripts/silver + bundled inf-silver-chain) -- the bundled-copy predicate's seed, with denominator lines"
+  }
+ ]
+}

@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T15:04Z</issued>
 <dated>NOW — Andrew-direct 08-18 ~1500Z pulled the census forward ("All recs approved"; CTO relay 150051Z item (iv)). Spawn = MSTR on CTO's 49F push plan (this seat is named for it). One bounded read; NOT a fix pass.</dated>
-<status>pending -- authorized NOW, awaiting seat spawn</status>
+<status>complete -- census delivered 2026-08-18 (CENSUS_REPORT_20260818.md + proof-of-spec rc=0 VALID; immediate-report clause exercised once: bd merge-daily two-homes, COO-ACKed 161035Z, remedy routed to CTO)</status>
 <priority>P2 — a bounded read that answers "how blind have we been"; classify only</priority>
 <authority>Andrew-direct 08-18 ~1500Z at the CTO terminal (record org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260818_ALL_RECS_APPROVED_49F_END_TO_END_PUSH_AND_MDPF_UNUSED_DELETE.md; item (iv) census pull-forward YES). Method = CLAUDE.md Rule 22a CODE layer + its gate candidate ("an apply-time assertion for code-carrying deploys — and it must CLASSIFY (stale-by-neglect / deliberately-held / two-homes-diverged), because a detector that cannot tell a hold from neglect manufactures the wrong reflex, and the reflex a drift alert invites is 'deploy'"). This TO is the AUTHORIZED census that gate candidate was sequenced behind. MSTR 145245Z: three live two-homes instances in five days (mdpf json/mdpf-vs-platinum; bd legacy-rps-vs-08335338; inf packaged-vs-canonical builder) — the census answers "how many more".</authority>
 </task_order>
