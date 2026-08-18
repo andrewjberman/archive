@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T17:10Z</issued>
 <dated>2026-08-20 — CTO R-4: the currency read is a P4 FLIP PRECONDITION; if a refresh is needed it lands + verifies BEFORE 08-22 or row 4c RE-DATES in writing.</dated>
-<status>staged -- GO paired; slot after P4-PUBIAM at your discretion, the 08-20 date binds</status>
+<status>pending -- GO 170924Z @dfb5fd8f48; dated 08-20 (binds), slotted after P4-PUBIAM; three-way discharge (current-or-irrelevant / refresh-verified pre-08-22 / 4c re-dates), ER-2 names the specific divergent behavior per diff</status>
 <priority>P1-adjacent — the 08-22 flip traverses shared-advisor-router; flipping through a stale edge is the two-homes class at the serving edge</priority>
 <authority>CTO ruling set @CTO_GATE_AND_RULING_SET_20260818_1700Z.md R-4, on 0.8.0's DEPLOYCENSUS finding (public-data-router + shared-advisor-router running 05-14 builds with source moved since). Rule 22a CODE layer: deployed bytes vs built-from source resolved through the BUILD INPUT, never by filename.</authority>
 </task_order>
