@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-19 build (with AE's TF half, same window); unattended cycles 08-20/21/22 prove it.</dated>
-<status>staged -- GO sent same window; build may start now, sequenced behind P1-CLOSE deliverables at this seat</status>
+<status>pending -- GO received 160631Z; sequenced behind P1-CLOSE deliverables at this seat</status>
 <priority>P1 — the runner chain has no production trigger today (fails production-bar criterion (i)); this closes it</priority>
 <authority>Push plan @a2f27c8d0a §3 row 2 + the CTO HOST RULING quoted verbatim in-row: "the runner executes under the S3-code standard as its OWN scheduled stage -- NOT appended to the legacy chain's stage list (different outputs, one producer per key holds)" — revisable on AE's read only with new evidence. P2 spec ratified @9b5896793f (CRO P2_UNIFIED_MORNING_SCHEDULE_TIMING_MAP_SPEC_20260811.md).</authority>
 </task_order>

@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-19 — the P1-close date for Advisor Intelligence / 49 Financial / Schwab 08335338. Start NOW (GO paired with this commit). A slip is re-dated in writing, never silent.</dated>
-<status>staged -- GO sent same window; flip to pending on receipt</status>
+<status>pending -- GO received 160631Z, ACKed 160826Z; in work at ~A</status>
 <priority>P1 — phase-close gate for the whole push: P2 opens on P1 close (framework law)</priority>
 <authority>Andrew-direct 2026-08-18 ~1500Z (49F end-to-end push, whole fabric, NOW) + CTO push plan @a2f27c8d0a §3 row 1. Close criterion is CTO-attested — your deliverable is the evidence table, CTO attests.</authority>
 </task_order>

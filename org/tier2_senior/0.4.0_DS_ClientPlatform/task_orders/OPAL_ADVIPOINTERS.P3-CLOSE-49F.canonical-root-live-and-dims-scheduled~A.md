@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-20 — after the first unattended P2 cycle (the 08-20 morning write is the evidence source). Sequenced behind P2-FLOOR + P2-DISPATCH; if P2 slips this slips WITH it in writing, never silently.</dated>
-<status>staged -- GO paired; prep (the dim producer moves) may start now, close evidence comes from the 08-20 scheduled run</status>
+<status>pending -- GO received 160631Z; prep may start now, close evidence from the 08-20 scheduled run</status>
 <priority>P1 — closes production-bar criterion (i) for the last two session-act producers</priority>
 <authority>Push plan @a2f27c8d0a §3 row 3; PRD §5.D.11 (dim_security/dim_boundary: location correct, producer still a session act). CTO attests the close.</authority>
 </task_order>
