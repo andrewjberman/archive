@@ -4,8 +4,8 @@
 <issued_to>0.4.0_DS_ClientPlatform (schwab silver converter lane: `data/assets/scripts/silver/schwab_conversion.py` + `schwab_schemas.py`; owned-paths `data/**` = ANY; DS authorship)</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T13:50Z</issued>
-<dated>2026-08-20 — DATED + OWNED. Sequenced BEHIND ADVI_BDPLAT_RESTORE.TO-1 (today) and MDPF_PROVENANCE.T-B (08-19) at the same DS seat. Not tonight; does not gate the restore (DS coerces at gold meanwhile — the correct consumer posture until this lands).</dated>
-<status>staged -- DATED 2026-08-20, owner named</status>
+<dated>2026-08-21 — RE-DATED 2026-08-21 per the 49F push plan @a2f27c8d0a §5 (COO amendment 08-18 ~16:00Z; was 08-20). Sequenced BEHIND ADVI_BDPLAT_RESTORE.TO-1 (08-18) and MDPF_PROVENANCE.T-B (08-19) and OPAL_ADVIPOINTERS.INF-ONEWRITER (08-20) at the same DS seat. Does not gate the restore (DS coerces at gold meanwhile — the correct consumer posture until this lands).</dated>
+<status>staged -- RE-DATED 2026-08-21, owner named</status>
 <priority>P3 — a silver-job defect: every consumer of this silver is coercing dtypes it should not have to</priority>
 <authority>CTO disposition 134609Z (owner + shape ruled). Surfaced by 0.4.0_DS_ClientPlatform 134424Z: `opal-data-assets/schwab/08335338/silver/fact_rps` carries EVERY column as object/string dtype incl. quantities/prices (94,637 x 63 on 08-17). Rule 17: silver = dedup + dtype standardization ONLY — dtype standardization IS silver's one job.</authority>
 </task_order>

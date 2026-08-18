@@ -26,8 +26,11 @@ present slot keeps the LOUD degrade (the FE-2 mutant still binds). Name-tolerant
 `partner_provenance ?? cohort_provenance` (T-B renames the producer key; T-C drops the tolerance).
 **`carried` becomes a KNOWN member** of the render enum (one-law vocabulary is 5-valued:
 `absent | interpolated_estimate | reconstructed | carried | measured`); pixels for `carried` follow the
-LD-0417 pattern (own member, measured-identical) UNLESS Andrew rules otherwise — that is flagged on his
-card, not decided here; if his word lands before you ship, it binds.
+LD-0417 pattern (own member, measured-identical) — **RULED, no longer flagged: Andrew-direct 2026-08-18
+~1500Z at the CTO terminal ("All recs approved" over the /open-calls card; record
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260818_ALL_RECS_APPROVED_49F_END_TO_END_PUSH_AND_MDPF_UNUSED_DELETE.md`)
+ruled `carried` renders as ORDINARY points per the LD-0417 pattern.** Amended by COO 2026-08-18 ~16:00Z
+per the push-plan decomposition (handoff DO-FIRST 2).
 
 ## Acceptance criteria (each with its own instrument — a screenshot cannot see a relabel)
 
