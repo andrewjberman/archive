@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-22 — at DE's P4R-5 handoff (their flip commits are the entire payload; your measured baseline PROD..DEV = 0 makes the enumeration exact).</dated>
-<status>staged -- GO paired; executes on DE's handoff</status>
+<status>pending -- GO 160754Z acknowledged; executes on DE P4R-5 handoff (08-22)</status>
 <priority>P1 — the phase-close criterion for row 4c is the portal VERIFIED taking data in and displaying it; your rendered read IS that evidence</priority>
 <authority>Push plan @a2f27c8d0a §3 row 4c + §2 DT row. /prod-deploy is the canonical procedure (DT lane). GATE-5 mechanics from your 154211Z stand ADOPTED: `git push origin PROD` is integrator-only for your serial — run /prod-deploy through merge/parity/worktree, hand MSTR the exact push, verify CI yourself. No audited override.</authority>
 </task_order>
