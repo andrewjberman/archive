@@ -1,0 +1,174 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_BDPLAT_RESTORE.TO-1",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_BDPLAT_RESTORE.TO-1.bd-platinum-publish-leg-restore.md",
+  "group": "OTHER",
+  "vintage_commit": "f6912f9f1c"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform (+ 0.7.0_AE_CloudOps joint: BP-3/BP-5/BP-6)",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/black_diamond/scripts/gold/B_00.canonical_holdings.py",
+   "kind": "script",
+   "commit_or_etag": "f71e767d33",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-deploy DEPLOYED + VERIFY OK; s3://opal-data-bd/code/gold/B_00.canonical_holdings.py sha256[:16]=31277c56e71db0b6 == git show f71e767d33 (independent read, mtime 2026-08-18T14:16:06Z; COO re-hashed 142016Z). M2: SCHWAB_RPS_BUCKET='opal-data-assets' + SCHWAB_RPS_PREFIX='schwab/08335338/silver/fact_rps/' (FULL 8-digit ADVI master; 08242234=MDPF), _parse_partition_date (ISO date=YYYY-MM-DD + legacy date=YYYYMMDD via strptime, never a positional slice), _read_schwab_rps (the one reader: column selection + numeric coercion + live->legacy column map), two loud fails (0 listed -> rc=2; listed-but-0-loaded -> rc=2)."
+  },
+  {
+   "path_or_key": "data/black_diamond/scripts/gold/D_02.advisor_client_detail.py",
+   "kind": "script",
+   "commit_or_etag": "f71e767d33",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-deploy DEPLOYED + VERIFY OK; deployed sha256[:16]=651dafbb1e65a3f1 == HEAD, mtime 14:16:09Z. M1 guard: _drop_null_scd_keys at BOTH merge_asof sites (build_team_pit advisor_assignments_history + build_fee_bps_pit fee_rate_history) -- NaT effective_date rows excluded from the point-in-time merge WITH THE COUNT PRINTED ('WARN: n NaT effective_date row(s) excluded from <label> SCD merge (of N; accounts: ...)'). Belt-and-braces; the root is fixed at A_01."
+  },
+  {
+   "path_or_key": "data/black_diamond/scripts/gold/A_01.advisor_assignments.py",
+   "kind": "script",
+   "commit_or_etag": "f71e767d33",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-deploy DEPLOYED + VERIFY OK; deployed sha256[:16]=a6635d0c0cb25f0d == HEAD, mtime 14:16:12Z. M1 ROOT: the accounts_baseline branch read baseline['start_date'] -- a column accounts_dimension_latest has NEVER carried (it has account_open_date + first_transaction_date) -- so every baseline row was NaT BY CONSTRUCTION; it first fired non-empty 2026-08-16 (3 accounts opened 08-11, no transactions). Now effective_date = account_open_date, fallback first_transaction_date, residual NaT counted + printed."
+  },
+  {
+   "path_or_key": "s3://opal-data-bd/gold/canonical/holdings/2026-07-24.parquet .. 2026-08-04.parquet (12 partitions)",
+   "kind": "s3_object",
+   "commit_or_etag": "adhoc_B_00_backfill_0724_0804_20260818_142603.log (s3://opal-data-bd/gold/logs/)",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "AD-HOC QA-CLASS RUN (TO item 3), NOT production evidence: SSM 66111816-7642-48f2-b27c-e13a70dc0797 on i-01003b035d2988dfb, S3-staged code (deployed sha 31277c56e71db0b6), 'python3 B_00.canonical_holdings.py --upload --start-date 2026-07-24 --end-date 2026-08-04 --force' -- 'Schwab partitions loaded: 8 (of 8 Schwab-covered cube dates in range)', 'Forward-filled: 4 dates written, 0 skipped', 'Dates processed: 12', 'Sealed 12 new dates (total sealed: 2,410)', rc=0. 12 objects rewritten 2026-08-18T14:26:10-12Z; 07-24 CONTENT: 100,287 rows / 6,346 accts / MV 1,851,154,278.49 / reconciled 51,785 + schwab_override 24,985 + schwab 5,236 + bd 18,281 (replacing forward-filled 07-23 content). Range-bounded by design: never a full --force (the 2024-01-12..2024-07-07 tail). Runner self-halted (launcher-standard 'sudo shutdown -h +2'; state stopped 14:29Z)."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "BP-1",
+   "criterion_verbatim": "B_00 reads the OPAL_ASSETS fact_rps (or dim_position, stated) POSITION-grain home; holdings values on an overlap date tie to the legacy values to the cent (printed); comp-pipescript io read shape confirmed; the Schwab range in the next scheduled B_00 log ends at T-1 (not 07-23); 'Dates processed N' with N > 0 PRINTED, and 'Schwab partitions loaded: M' with M > 0 PRINTED -- a POSITIVE read, never rc=0. [+ MSTR 133139Z partition-grammar hazard]",
+   "method": "command",
+   "invocation": "TABLE CHOICE = fact_rps (the FACT table; the one the IAM grant + TO name; dim_position carries the same 11 needed columns at the same 94,637-row grain but is a projection whose contract can move independently). Tie-out through B_00's OWN prepare path (load_account_mapping 6,952 + build_cusip_bridge 7,655 + >0 filter + cash exclusion + aggregate) on the 2026-07-23 overlap partition, scratch tie3.py; column-map measurement qty_col.py; live dry-run 'python B_00.canonical_holdings.py --date 2026-07-23 --dry-run' on the edited code; ad-hoc backfill log; comp-pipescript io B_00.canonical_holdings --pipeline bd.",
+   "output_evidence": "COLUMN MAP (measured, 93,097 shared keys on 07-23): legacy quantity_settled == live quantity_settled_unsettled to the unit (0 diffs; live quantity_settled differs on 591 rows, max 151,000); legacy market_value == market_value_settled_unsettled (0 diffs); quantity_cash/margin/short == *_settled (0 diffs); closing_price exact; ticker == ticker_symbol (0 mismatches). TIE: 08242234 fact_rps == legacy EXACTLY (83,878 aggregate rows both / 0 unit diffs / 0 either-only / sum units 32,320,515.9612 identical) -- proving the legacy home was fed from the 08242234 (MDPF) master's file (_source_file 'schwab/08242234/bronze/rps/20260723/08242234.CRS20260723.RPS.zip'). 08335338 fact_rps ties EXACTLY on all 83,878 legacy rows (0 diffs) AND ADDS 650 rows / 17 mapped 49F BD accounts / 315,389 units the ADVI product never carried (accounts the legacy missed by reading the 08242234 master). DISCLOSED DELTA (COO ruling 134509Z, CTO 134513Z, MSTR 140642Z/135513Z): master switch = +$17,791,028.82 = +0.961% of firm canonical MV on 07-23 (1,851,169,391.32 -> 1,868,960,420.14), 7 net-new accounts / 17 changed, ALL account_is_open=True under named 49F advisors -- a CORRECTION, disclosed, not a scope change; per-account + per-advisor lists in the MSTR message. POSITIVE READS (edited code, dry-run 07-23): 'Schwab RPS home: s3://opal-data-assets/schwab/08335338/silver/fact_rps/ -- 531 objects listed, 531 date partitions parsed, 0 unparseable date= parts'; 'Schwab range: 2024-07-08 to 2026-08-17' (ends at T-1); 'Schwab partitions loaded: 1 (of 1 Schwab-covered cube dates in range)'; 'Dates processed: 1'. Backfill run: 'loaded 8 (of 8)', 'Dates processed: 12'. GRAMMAR HAZARD CLOSED BY CONSTRUCTION: old positional slice on 'date=2026-08-17' -> '2026--0-8-' (never matches a cube date); new parser -> '2026-08-17'; legacy 'date=20260723' -> '2026-07-23'; garbage -> None (counted + printed). DECLARED SEALED-HISTORY EXCEPTION (Rule 25): the live 08335338 home begins 2024-07-08 (531 partitions) while the legacy home ran 2024-01-12..2026-07-23 (634); 2024-01-12..2024-07-07 Schwab coverage exists ONLY in the dormant legacy home -- those canonical holdings stay SEALED at their existing values (untouched by --force-recent-days 14; no full --force ever); COO RETAIN marker _RETAIN_DECLARED_EXCEPTION_RULE25.txt at the legacy prefix; migrate-or-write-off is a DATED DS-lane item; the serve window (2024-11+) is unaffected. comp-pipescript io B_00 --pipeline bd: 9 READS / 3 WRITES listed (canonical_holdings -> B_02, B_03, D_04) -- NOTE it does NOT list SCHWAB_RPS_PREFIX (a paginated list_objects_v2 prefix read is invisible to it; routed by COO to CTO as a comp-tool coverage gap). The next SCHEDULED log's Schwab range / N / M are read AS OBSERVED after 23:01Z and appended to this row.",
+   "denominator": "93,097 shared keys (column map); 83,878 legacy aggregate rows (tie); 531 partitions listed/parsed; 1 of 1 and 8 of 8 Schwab-covered cube dates loaded; 6,771 vs 6,778 accounts on 07-23 (delta 17 changed / 7 net-new)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "BP-2",
+   "criterion_verbatim": "D_02 completes rc=0 on the live advisor_assignments_history.parquet with the NaT count printed (expected 3); the 3 rows' A-phase disposition stated (source-fixed or quarantined-with-reason).",
+   "method": "command",
+   "invocation": "D_02.advisor_client_detail.py (D02) build_team_pit + build_fee_bps_pit; A_01.advisor_assignments.py (A01) build_advisor_assignments_history baseline branch. scratch exercise_d02_a01.py: d02.build_team_pit(<live gold/dimensions/advisor_assignments_history.parquet, 17,102 rows>, pairs incl. the 3 NaT accounts) and d02.build_fee_bps_pit(<frame with an injected NaT>); scratch exercise_a01.py: a01.build_advisor_assignments_history(<1 synthetic txn>, <live accounts_dimension rows for z0823445531/41/51 + 1 txn account>) + negative control (account_open_date/first_transaction_date stripped).",
+   "output_evidence": "D02 + A01 evidence. D_02 on the LIVE parquet (the input the deployed bytes crashed on 08-16/17/18): 'WARN: 3 NaT effective_date row(s) excluded from advisor_assignments_history SCD merge (of 17,102; accounts: z0823445531, z0823445541, z0823445551)' and the merge COMPLETES (2 team rows out for the 2 non-NaT test accounts). Fee-rate PIT with an injected NaT: 'WARN: 1 NaT effective_date row(s) excluded from fee_rate_history SCD merge (of 3; accounts: a)', 2 fee rows out. A-PHASE DISPOSITION = SOURCE-FIXED (A_01), guard retained: the 3 rows are NOT a data defect in the accounts -- they are 3 real accounts (ALETA M WOLF, opened 2026-08-11, no advisor, no relationship, no transactions yet); the defect was A_01's baseline branch reading a nonexistent 'start_date' column -> NaT by construction (3 of 17,102 rows are accounts_baseline, all 3 NaT, 0 non-baseline NaT). Fixed A_01: the 3 accounts now get effective_date 2026-08-11 (= account_open_date), end_date NaT, is_current True, source accounts_baseline; negative control (date cols stripped) -> 'WARN: 3 baseline account(s) have no account_open_date / first_transaction_date -- effective_date left NaT (D_02 excludes them ...)' + 3 NaT. So after tonight's PHASE_A2 the parquet carries 0 NaT and D_02's WARN prints 0/absent; the guard fires only on a future writer regression. The scheduled 'D_02 done (rc=0)' + PHASE_D4 reached are read AS OBSERVED after 23:01Z and appended here.",
+   "denominator": "17,102 SCD rows / 3 NaT (live); 2 merge sites guarded; 3 baseline accounts source-fixed (3 -> 0 NaT), negative control 3 -> 3 with WARN",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "BP-3",
+   "criterion_verbatim": "IAM: simulate-principal-policy ALLOWED on the exact 08335338/silver/fact_rps key; positive control separate; negative control on 08242234 = implicitDeny.",
+   "method": "live_read",
+   "invocation": "0.7.0_AE_CloudOps: safe-apply @7b706eec4c 1419Z (aws_iam_role_policy.bd_exporter_monolith_schwab_advi_read, 1 added / 0 changed / 0 destroyed, post-apply plan No changes); aws iam simulate-principal-policy per call ONE --resource-arns; live get-role-policy monolith-schwab-08335338-silver-read.",
+   "output_evidence": "AE 142154Z: TARGET GetObject arn:aws:s3:::opal-data-assets/schwab/08335338/silver/fact_rps/date=2026-08-17/data.parquet = allowed; TARGET ListBucket with s3:prefix context schwab/08335338/silver/fact_rps/ = allowed; NEGATIVE GetObject schwab/00000000/silver/... = implicitDeny; NEGATIVE ListBucket prefix portal/gold/zzz/ = implicitDeny (discriminates). NOTE from AE: the TO's suggested 08242234 negative reads ALLOWED for THIS role -- correctly, because bd-exporter-ec2-role already holds the separate CTO-routed grant monolith-schwab-08242234-silver-read (07-16, L4 trn_nna); a genuinely ungranted account was substituted. AE owns this row; DS transcribed AE's 142154Z message verbatim-in-substance -- AE to confirm or amend the wording.",
+   "denominator": "4 simulate invocations (2 target allowed, 2 negative implicitDeny), 1 policy applied",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "BP-4",
+   "criterion_verbatim": "gold/canonical/holdings/ newest partition = T-1 after the backfill + scheduled run; account_performance.parquet size CHANGES (the frozen 225,216,334 B frame moves).",
+   "method": "live_read",
+   "invocation": "AFTER the 23:01Z scheduled chain_full: aws s3 ls s3://opal-data-bd/gold/canonical/holdings/ | tail; aws s3api head-object gold/timeseries/account_performance.parquet; the chain log's B_00 'Schwab range' / 'Schwab partitions loaded' / 'Dates processed'; sealed-through date stated AS OBSERVED (cube frontier was 08-14 at 14:00Z 08-18; 08-17 lands with tonight's A-phase).",
+   "output_evidence": "PRE-STATE (14:30Z 08-18): newest canonical partition 2026-08-06.parquet (2026-08-08T19:15Z, 2,174,534 B, MV 1,803,550,848.72); account_performance.parquet frozen at 225,216,334 B; backfill rewrote 07-24..08-04 (14:26Z). POST-STATE: filled AS OBSERVED after the scheduled run.",
+   "denominator": "pending the scheduled run",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "Awaits the 23:01Z 2026-08-18 scheduled chain_full on bd-gold-layer-runner (production evidence comes ONLY from the schedule; the ad-hoc backfill is QA-class). DS reads the log ~23:30Z and rewrites this row with the observed values."
+  },
+  {
+   "criterion_id": "BP-5",
+   "criterion_verbatim": "SERVED: platinum/firm/header_metrics.json as_of = T-1 and mtime within the last scheduled window; verified through the scoped route; before/after printed. [+ COO/CTO/MSTR: the served value move printed as TWO NAMED DELTAS, % of firm AUM beside absolute, never blended]",
+   "method": "live_read",
+   "invocation": "0.7.0_AE_CloudOps after the scheduled run: head-object + content read of s3://opal-data-bd/platinum/firm/header_metrics.json (as_of, totals) BEFORE (08-06 content) and AFTER; scoped route /api/scoped/advisor-intelligence/platinum/firm/header_metrics.json as a 49F principal or via the router harness.",
+   "output_evidence": "AE fills. Reference deltas from DS (canonical holdings MV, the upstream of header_metrics): master switch +17,791,028.82 = +0.961% (17 accts, 7 net-new); T-1 refresh 08-06 -> 08-14 = +132,550,278.91 = +7.35% (market + flows + BD cube restatements + mapping guard on the fresh Schwab date: 152 vs 176 exclusions); total 1,803,550,848.72 -> 1,953,892,156.44 = +8.336% (08-14 basis; the served as_of will be whatever cube date the schedule seals).",
+   "denominator": "pending the scheduled run + AE's served read",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "AE's row; awaits the 23:01Z scheduled run and AE's before/after served read through the scoped route."
+  },
+  {
+   "criterion_id": "BP-6",
+   "criterion_verbatim": "chain log for the run: PHASE_D4 reached, 'D_04 done (rc=0)'.",
+   "method": "live_read",
+   "invocation": "0.7.0_AE_CloudOps (DS reads too): s3://opal-data-bd/gold/logs/chain_full_20260818_2301*.log -- PHASE_A2 'A_01 done (rc=0)', PHASE_B1 'B_00 done (rc=0)' with N/M, PHASE_D3 'D_02 done (rc=0)' with the NaT WARN count, PHASE_D4 'D_04 done (rc=0)'.",
+   "output_evidence": "AE fills after the scheduled run.",
+   "denominator": "pending the scheduled run",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "AE's row; awaits the 23:01Z scheduled run's log."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "B_00: (1) the OLD positional-slice parser applied to the live ISO partition name; (2) SCHWAB_RPS_PREFIX pointed at a nonexistent prefix, main() run. D_02: the deployed (pre-fix) bytes on the same live parquet. A_01: the accounts frame with account_open_date/first_transaction_date stripped.",
+   "expected": "(1) garbage date key that never matches a cube date (the silent-zero shape); (2) loud ERROR + SystemExit 2; D_02 pre-fix: 'ValueError: Merge keys contain null values on right side' (the 3-day production crash IS the fired mutant); A_01: WARN 3 + 3 NaT.",
+   "observed": "(1) 'date=2026-08-17' -> '2026--0-8-' under the old slice (does not equal '2026-08-17'); new parser -> '2026-08-17'; (2) 'Schwab RPS home: ...fact_rps_DOES_NOT_EXIST/ -- 0 objects listed, 0 date partitions parsed' + 'ERROR: 0 Schwab RPS partitions ... refusing to run' + SystemExit code 2; D_02 pre-fix crash reproduced by 3 scheduled runs (chain_full_20260816/17/18 'D_02 done (rc=1)'), post-fix WARN 3 + completes; A_01 negative control WARN 3 + 3 NaT, positive 0 NaT.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "B_00 dry-run on 2026-07-23 (08335338) executed twice in different harnesses (main() via CLI, and the worker path via delta_quant.py) -- same inputs, same day.",
+   "observed": "identical: rows 103,365 / accts 6,778 / MV 1,868,960,420.14 / reconciled 51,818 / schwab_override 25,016 / schwab 5,223 / bd 21,308.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "full end-to-end local runs of D_02.advisor_client_detail.py and A_01.advisor_assignments.py",
+   "reason": "NOT run whole locally (D_02 = the full advisor client detail across every account, A_01 = the full transactions history) -- exercised at FUNCTION level on the LIVE inputs instead (BP-2: build_team_pit + build_fee_bps_pit on the live 17,102-row parquet; build_advisor_assignments_history on the live accounts_dimension rows + negative control). The end-to-end execution of both is tonight's 23:01Z scheduled chain_full (PHASE_A2 / PHASE_D3) and its log is read AS OBSERVED and appended to BP-2 / BP-6."
+  },
+  {
+   "item": "2024-01-12..2024-07-07 Schwab coverage (legacy-home only)",
+   "reason": "the ADVI master's silver history starts 2024-07-08; earlier partitions were never converted there. Sealed at existing values; no full --force; RETAIN marker at the legacy prefix (COO 141010Z); migrate-or-write-off is a dated DS-lane item, not this TO."
+  },
+  {
+   "item": "the mapping guard's 176 -> 152 exclusion change",
+   "reason": "filter_false_mappings keys on the Schwab date closest to the latest allocations date -- with the live home that is 08-17 instead of 07-23. A T-1 freshness effect by the guard's own design, folded into the T-1 refresh delta, not re-tuned here."
+  },
+  {
+   "item": "fact_rps silver all-object dtype (Rule 17 dtype standardization absent) + comp-pipescript io blind to paginated prefix reads",
+   "reason": "surprise-channel items, routed by COO to CTO (OPAL_ASSETS silver owner / comp-tool coverage). B_00 coerces at gold meanwhile."
+  },
+  {
+   "item": "the sealed 07-23 canonical partition vs a today-inputs re-derivation (+283 bd-only accounts / +$88.5M)",
+   "reason": "sealed-day immutability by design: the positions_cube is rewritten nightly and 07-23's cube gained 283 accounts after the partition was sealed 08-08. Not re-derived (07-23 outside both the backfill range and the --force-recent window)."
+  },
+  {
+   "item": "07-22 canonical partition absent",
+   "reason": "pre-existing (no cube partition for 07-22 in the listing); not touched, not in this TO's scope."
+  }
+ ],
+ "surprises": [
+  "The legacy opal-data-bd/schwab/silver/rps home was fed from the 08242234 (MDPF) master's RPS file: the ADVI product has been built on the MDPF master since at least the tail (_source_file evidence 20260723); the two masters share 5,993 of ~6,000 sub-accounts so it was benign except for the 17 mapped accounts now added. The two-buckets law's exact hazard, found only because the tie-out was run through the real prepare path rather than on prefixes.",
+  "The legacy converter's 'quantity_settled' column was the RPS settled+unsettled quantity (0 diffs vs quantity_settled_unsettled; 591 diffs vs quantity_settled) -- a name that lied; a prefix+name swap would have shipped 591 wrong positions per day silently.",
+  "The old partition parser on the ISO grammar yields '2026--0-8-' -- not merely a wrong date but a string that can never match, i.e. the exact 'Dates processed 0, rc=0' shape of the outage.",
+  "The live 08335338 home starts 2024-07-08 while the legacy started 2024-01-12: the successor is a superset going forward and a subset going back -- Rule 25's abandoned-vs-migrated fork has a THIRD state, partially-migrated, and a full --force rebuild would silently drop six months.",
+  "Silver allocations are WEEKLY (Fridays), so B_00's phantom-account exclusion (alive_cache) is EMPTY on every non-Friday date by construction -- a scoping fact, not a defect, but it is why a today-inputs re-derivation of a sealed weekday differs by 283 accounts."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-18/advi_bdplat_restore_1330-1440Z.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-pipescript io",
+   "invocation": "comp-pipescript io B_00.canonical_holdings --pipeline bd ; comp-pipescript io D_02.advisor_client_detail --pipeline bd",
+   "result": "B_00: 9 READS / 3 WRITES (canonical_holdings -> B_02, B_03, D_04); D_02: 17 READS incl. ADVISOR_ASSIGNMENTS <- A_01. SCHWAB_RPS_PREFIX NOT listed (paginated prefix read invisible -- coverage gap, routed)."
+  },
+  {
+   "tool": "comp-pipescript deployed",
+   "invocation": "comp-pipescript deployed {B_00,D_02,A_01} --pipeline bd (before: STALE x3; after safe-deploy: VERIFY OK x3) + independent sha256 read of the S3 members",
+   "result": "MATCH x3 (31277c56e71db0b6 / 651dafbb1e65a3f1 / a6635d0c0cb25f0d == HEAD f71e767d33)"
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find --name B_00.canonical_holdings.py ; comp-find --name D_02.advisor_client_detail.py ; comp-find advisor_assignments_history data/black_diamond/scripts/gold",
+   "result": "bd tree = data/black_diamond/scripts/gold/ (cot + inf carry same-named separate scripts, untouched); writer of advisor_assignments_history = A_01 (21 hits / 107 files)"
+  },
+  {
+   "tool": "commit-gate",
+   "invocation": ".tools/commit-gate.sh on the 3 files (py_compile + ds-precommit-check + ruff)",
+   "result": "All checks passed x3; safe-commit risk-reflex CLEAN (3 files / 1,817 danger nodes)"
+  },
+  {
+   "tool": "safe-deploy",
+   "invocation": ".tools/safe-deploy.sh --author 0.4.0_DS_ClientPlatform <3 files>",
+   "result": "DEPLOYED x3, VERIFY OK x3, rc=0"
+  }
+ ]
+}
