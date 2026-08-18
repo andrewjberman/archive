@@ -24,9 +24,14 @@ AE mint+IAM -> DS~A sync+flips -> CVO re-anchor -> SPINE live-verify -> SPINE ol
 ## Acceptance criteria
 Group AE (0.7.0):
 - RP-AE-1 BUCKET MINTED (TF, safe-apply, CTO per-apply gate on the plan): `opal-data-49financial`
-  with versioning ON, block-public-access ON, and the cross-firm IAM Deny minted AT CREATION per the
-  NEVER#2 pattern (bd/cot/inf principals denied at birth, never retrofitted). Plan expected-rows in
-  writing pre-apply; 0-diff + tag after.
+  with versioning ON, block-public-access ON, and the CROSS-FIRM IAM Deny minted AT CREATION per the
+  NEVER#2 pattern — **cot-*/inf-* principal patterns (mdpf-* at CTO's word), and NOT bd-*: the 49F
+  chain executes under the bd principal family (bd-exporter-profile per the ratified P2D-4 contract),
+  so a bd-* Deny severs the product's own executor. CORRECTED 2026-08-18 ~17:52Z on AE's 175048Z
+  catch — this line originally read "bd/cot/inf principals denied", pattern-matching the
+  firm-separation triple without noticing the executing principal's own family; AE built it
+  correctly and flagged rather than following the literal.** Plan expected-rows in writing
+  pre-apply; 0-diff + tag after.
 - RP-AE-2 IAM RE-POINTED per the record's three seams: the P3-leg runner grants on
   `portal/gold/advi/*` and the P4-PUBIAM publisher READ-side target re-point to the new bucket
   (the platinum Put half of P4-PUBIAM is UNCHANGED — serving stays at opal-data-portal-v2).
