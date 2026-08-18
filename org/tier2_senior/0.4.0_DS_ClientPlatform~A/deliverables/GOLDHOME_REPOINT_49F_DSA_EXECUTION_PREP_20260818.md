@@ -42,15 +42,19 @@ python -c "<paginated count+bytes of source and target>"   # print both, keep as
      commit). Same split check in `a00_runner.py` (:43-52 BUCKET/GOLD_ROOT) + every stage
      importing them.
 2. `.tools/safe_deploy_core.py` advi row: `"bucket": "opal-data-49financial"`, layer target
-   `("data/assets/scripts/gold/runners_49f", "gold/advi/_code/")` -- wait on the TO's _code
-   grammar: **"_code/ rides the root"** = `s3://opal-data-49financial/gold/advi/_code/`.
+   `("data/assets/scripts/gold/runners_49f", "_code/")` -- **PINNED by CTO 174449Z, pre-act:
+   BUCKET-ROOT `s3://opal-data-49financial/_code/`, NOT gold/advi/_code/** (the ratified
+   record's grammar block; Andrew's own sentence: gold/ is the parquet DATA tree and the
+   agentic-query root -- code does not live under it; _code stays FLAT until a second product
+   joins the bucket, and THAT act adds the product level, not this one).
 3. `chain_49f_entrypoint.py`: `BUCKET`/`GOLD_ROOT` constants follow runner_common's split.
 4. `_code` MOVE (no twin): **enumerate the old prefix AT EXECUTION TIME -- never carry a count**
    (MSTR banked line 174144Z: the 1739-40Z integrator push @b7fce2ed09 minted 3 MORE objects at
    the old home via the advi row -- chain_49f_entrypoint.py, d13_firm_partner_analytics.py,
    d_publisher_port.py -- so any pre-1739Z "51" enumeration is short; an exec-time listing
    covers late writers by construction). Copy ALL listed objects
-   `opal-data-assets/portal/gold/advi/_code/*` -> `opal-data-49financial/gold/advi/_code/`
+   `opal-data-assets/portal/gold/advi/_code/*` -> `opal-data-49financial/_code/` (bucket-root,
+   CTO pin 174449Z)
    (metadata preserved), verify N/N ETag with N printed from the listing, then DELETE the old
    `_code/` prefix in the same act (delete evidence: zero-key listing + adjacent positive
    control). The old-GOLD-prefix delete is NOT mine -- RP-SPINE-2, AE executes after RP-SPINE-1.
@@ -58,7 +62,8 @@ python -c "<paginated count+bytes of source and target>"   # print both, keep as
    (mapping cases updated to the new bucket/prefix) BEFORE the commit.
 
 ## After my legs land (same turn)
-- MCP AE: re-issued P2D-4 FIELD 3 (code key = `s3://opal-data-49financial/gold/advi/_code/`;
+- MCP AE: re-issued P2D-4 FIELD 3 (code key = `s3://opal-data-49financial/_code/`, bucket-root
+  per the CTO pin;
   SSM sync line + IAM surface lines updated -- the 173547Z contract's old key is DEAD).
 - MCP CVO (RP-CVO-1 next in spine) + COO leg-landed report cc CTO/MSTR/DS~B.
 - Proof instance `PROOF_OF_SPEC_GOLDHOME_REPOINT_49F_DSA_20260818.json` (grammar per TO), rc=0.
