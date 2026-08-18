@@ -135,7 +135,13 @@ its proof; the mechanism is the deliverable that prevents recurrence (M2 is the 
   `first_transaction_date`, guard printed) and D_02's guards at BOTH `merge_asof` sites (`:233` team PIT,
   `:296` fee-rate PIT) are belt-and-braces (DS Addition 3, accepted).**
 - BP-3: IAM: `simulate-principal-policy` ALLOWED on the exact `08335338/silver/fact_rps` key; positive
-  control separate; negative control on `08242234` = implicitDeny.
+  control separate; **negative control = an UNGRANTED account prefix (e.g. `schwab/00000000/...`) =
+  implicitDeny, and firm-separation proven by the NEW grant's own resource scope (the applied policy
+  document, `08335338` only). ⚠ AMENDED 1425Z (AE 142206Z): the originally-pinned negative "`08242234`
+  = implicitDeny" was ILL-POSED for this role -- `bd-exporter-ec2-role` already holds a legitimate,
+  separate CTO-routed `monolith-schwab-08242234-silver-read` grant (07-16, L4 trn_nna), so it reads
+  ALLOWED correctly and cannot discriminate anything. A hand-chosen negative measures the AUTHOR, not the
+  instrument (Rule 22b corollary). The `08242234` grant is untouched -- its own owner, not this TO.**
 - BP-4: `gold/canonical/holdings/` newest partition = T-1 after the backfill + scheduled run;
   `account_performance.parquet` size CHANGES (the frozen 225,216,334 B frame moves).
 - BP-5: SERVED: `platinum/firm/header_metrics.json` `as_of` = T-1 and mtime within the last scheduled
