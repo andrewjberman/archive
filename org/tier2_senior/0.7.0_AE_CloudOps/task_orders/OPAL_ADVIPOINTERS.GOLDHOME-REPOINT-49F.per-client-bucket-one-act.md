@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T17:42Z</issued>
 <dated>TONIGHT after the 23:01Z fixture verdict, or early 08-19 — Andrew's own sequencing word: "proceed with the re-point before the P2 apply." The P2 build stays 08-19 and applies AFTER this lands. The fixture posture stands: AE applies nothing before the fixture verdict; this act's TF mint slots immediately after it.</dated>
-<status>staged -- GO paired; AE leg first (bucket must exist), then DS~A, then CVO, then spine</status>
+<status>pending -- GO 173944Z @1b2ee34db7; AE leg first: TF prepped pre-fixture, mint applies immediately post-fixture-verdict (CTO gate on the plan), then DS~A -> CVO -> spine</status>
 <priority>P1 — Andrew-sequenced ahead of the P2 apply; every downstream root reference reads through this act</priority>
 <authority>Andrew-direct 2026-08-18 ~1730Z RATIFIED (verbatim @HEAD: org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260818_CLIENT_GOLD_BUCKET_SUPERSESSION.md): the ADVI gold home = opal-data-49financial/gold/{product}/{table}/date={D}/ (+_code/ rides the root) — the clean template slate AND the client agentic-query location. SUPERSEDES the 08-11 gold-home ruling FOR ADVI ONLY (MDPF gold + global scopes STAY at the assets root). Bucket-name template opal-data-{firm_id}, full canonical firm name, never a truncation. CTO decomposition shape 173703Z; CTO gates the TF apply.</authority>
 </task_order>
