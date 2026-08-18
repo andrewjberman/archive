@@ -121,7 +121,14 @@ its proof; the mechanism is the deliverable that prevents recurrence (M2 is the 
 ## Acceptance criteria
 
 - BP-1: B_00 reads the OPAL_ASSETS `fact_rps` (or `dim_position`, stated) POSITION-grain home; holdings values on an overlap date tie to the legacy values to the cent (printed); `comp-pipescript io` read shape confirmed; the
-  Schwab range in the next scheduled B_00 log ends at T-1 (not 07-23); "Dates processed" > 0.
+  Schwab range in the next scheduled B_00 log ends at T-1 (not 07-23); **"Dates processed N" with N > 0
+  PRINTED, and "Schwab partitions loaded: M" with M > 0 PRINTED** — a POSITIVE read, never rc=0.
+  ⚠ **THE FIX'S OWN FAILURE MODE IS BYTE-IDENTICAL TO THE BUG (MSTR 133139Z): the two homes use
+  DIFFERENT PARTITION-KEY FORMATS (`date=20260723` legacy vs `date=2026-08-17` live). A re-point that
+  changes only the PREFIX and leaves any date-parsing / partition-globbing / string-slicing untouched
+  (`list_schwab_dates` `:357` and every `YYYYMMDD` slice) reads the new home, finds NOTHING, and exits
+  "Dates processed 0, rc=0" — SILENT, exactly like today. A green run proves nothing by itself; the
+  printed N and M are the acceptance, and `gold/canonical/holdings/` must ADVANCE past 08-06 (BP-4).**
 - BP-2: D_02 completes rc=0 on the live `advisor_assignments_history.parquet` with the NaT count printed
   (expected 3); the 3 rows' A-phase disposition stated (source-fixed or quarantined-with-reason).
 - BP-3: IAM: `simulate-principal-policy` ALLOWED on the exact `08335338/silver/fact_rps` key; positive
