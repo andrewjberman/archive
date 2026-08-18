@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-20 — with DS~B's P4-EMIT (row 4a). IAM may be prepared/applied 08-19 after the P2 apply window; the publisher schedule activates only when DS~B's emitters are deploy-ready.</dated>
-<status>staged -- GO paired; sequenced behind P2-FLOOR apply at this seat</status>
+<status>pending -- GO 160648Z @49dd8469d1; sequenced behind P2-FLOOR apply at this seat</status>
 <priority>P1 — gates the P4 EMIT: DS~B cannot write platinum/advi without the grant, and an over-wide grant is the never-widen hazard in IAM clothing</priority>
 <authority>Push plan @a2f27c8d0a §2 AE row + §3 row 4a. One producer per served key holds by construction (17b amendment: every platinum publisher READS PARQUET; the publisher is the estate's only JSON producer).</authority>
 </task_order>

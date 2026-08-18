@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-19 build (TF draft today is fine — read-only prep per your 152834Z order; NO APPLY before tonight's 23:01Z bd platinum fixture passes). Unattended cycles 08-20/21/22 are the proof bar.</dated>
-<status>staged -- GO paired; prep now, apply after the fixture + CTO per-apply gate</status>
+<status>pending -- GO 160648Z @49dd8469d1; prep now, apply after the 23:01Z fixture + P2D-4 contract + CTO per-apply gate</status>
 <priority>P1 — the canonical chain's only trigger today is a session act; NEVER#4: a production pipeline MUST have a schedule</priority>
 <authority>Push plan @a2f27c8d0a §3 row 2 + CTO HOST RULING (verbatim in-row: the runner executes under the S3-code standard as its OWN scheduled stage — NOT appended to the legacy chain's stage list; revisable on your read only with new evidence). Ratified P2 spec: org/tier1_exec/4.0.0_SA_CRO/deliverables/P2_UNIFIED_MORNING_SCHEDULE_TIMING_MAP_SPEC_20260811.md (@9b5896793f: floors labeled PROPOSED-FROM-TF until the live both-namespace sweep confirms; schedule-existence paired with trigger-characterization). 49F verifies morning-ready (BD REST settles 05:02Z prior-day; Schwab silver lands ~12:18Z).</authority>
 </task_order>

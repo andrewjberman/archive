@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-23 onward — EVENT-GATED, not date-triggered: the framework P5 gate is "portal VERIFIED taking data in correctly AND displaying it" (a verification EVENT — the CVO cert chain + DT rendered read from row 4c — never a date). 08-23 is the earliest the event can have occurred; the date moves WITH the event, in writing.</dated>
-<status>staged -- HELD ON THE FRAMEWORK P5 GATE (pre-existing law, not a new gate). GO follows the P4-verified event + CTO per-item gate.</status>
+<status>pending -- GO 160648Z @49dd8469d1; HELD ON THE FRAMEWORK P5 GATE (pre-existing law, not a new gate): acts begin only after the P4-verified event + CTO per-item gate.</status>
 <priority>P2 — nothing regresses by the legacy chain continuing to run; everything regresses by tearing down early</priority>
 <authority>Push plan @a2f27c8d0a §3 row 5 + rollback posture (the legacy bd chain KEEPS RUNNING until P5 attests the flipped keys served correctly for the agreed window); ratified debt-identification methodology @db365bb06c; Rule 25 (dormancy is not a deletion warrant; successor check); CLAUDE.md Rule 25-adjacent retire order: consumers first, binary last. NFRA_DEPLOYCENSUS (0.8.0, @f976c4ea79) feeds this — its classifications are input, never a deletion warrant by themselves.</authority>
 </task_order>
