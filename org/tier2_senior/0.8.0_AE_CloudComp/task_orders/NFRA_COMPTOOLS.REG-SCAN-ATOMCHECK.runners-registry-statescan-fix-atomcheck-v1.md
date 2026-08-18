@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T17:10Z</issued>
 <dated>groups REG + J2: 2026-08-19 (beside PREFIX-READS) · group J3: 2026-08-20 (usable by DS~B's P4 emit)</dated>
-<status>staged -- GO paired; sequence with PREFIX-READS at your discretion, dates bind</status>
+<status>pending -- GO received 2026-08-18T170938Z (COO @dfb5fd8f48); REG+J2 dated 08-19 beside PREFIX-READS, J3 08-20; J1 explicitly NOT released (held at COO)</status>
 <priority>P2 — REG closes the coverage gap every runner TO's Phase-1 clause currently fails on; J3 feeds the P4 emit</priority>
 <authority>CTO ruling set @CTO_GATE_AND_RULING_SET_20260818_1700Z.md: R-3 (runners_49f registry -> 0.8.0, predicate-derived) + G-C (CRO~A TIGHTENING_ENUMERATION_SPEC @1dceb7d61d RATIFIED; J2/J3 released by COO per the spec's own routing suggestions). J1 (proof-board) is NOT released — deliberately held at COO's allocation.</authority>
 </task_order>
