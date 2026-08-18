@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T17:10Z</issued>
 <dated>2026-08-21 — after your P3-close (08-20). NOT sooner by design: no bd-silver staging change near the 08-18 fixture or the first unattended P2 cycles.</dated>
-<status>staged -- GO paired; nothing before 08-21</status>
+<status>pending -- GO received 170910Z; execution HELD to 08-21 by design (no staging change near the 23:01Z fixture or first unattended P2 cycles)</status>
 <priority>P2 — a scheduled daily client-data producer runs 4 commits behind its own correctness guards; the convergence ends it without adjudicating the two-homes architecture</priority>
 <authority>CTO ruling set @CTO_GATE_AND_RULING_SET_20260818_1700Z.md R-2 (adopting COO's rec exactly): near-term CONVERGENCE refresh; the legacy-EC2-leg retirement question stays foldered at P5-TEARDOWN. Finding: 0.8.0 DEPLOYCENSUS 160830Z (all reads live).</authority>
 </task_order>
