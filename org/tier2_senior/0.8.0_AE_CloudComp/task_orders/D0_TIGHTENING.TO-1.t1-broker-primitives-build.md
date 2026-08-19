@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:45Z</issued>
 <dated>behind your standing queue (REG w/ REG-0 fixture -> J3 -> HELD-STATE -> W-15 -> T1-DEFROST -> T4)</dated>
-<status>staged -- GO paired; DESIGN-NOTE GATE **DISCHARGED** (see below)</status>
+<status>complete -- BUILT + EXERCISED 2026-08-19 @d547f109fe; proof instance VALID rc=0 @3a15911d15. T1-1/T1-2/T1-3/T1-5 PASS on 22/22 exercised checks w/ 2 mutant + 1 positive control. **T1-4 PARTIAL: laptop fabric only -- site-Z leg UNRUN and NOT claimed** (UNCOMPUTABLE-BY-CONSTRUCTION, rides a named ~Z run). COMMITTED-NOT-EXECUTING: the live broker carries pre-T1 bytes until its next restart.</status>
 <priority>P1 -- this closes a SOURCE-CONFIRMED message-loss window (CVO P0-2 @c7e4d16f6c, broker.py:474)</priority>
 <authority>D0_INFRA_TIGHTENING_PRD.md §4a + §6 row 1 + **Appendix A**, at dispatch vintage @4bf291b26c (CVO verdict @c7e4d16f6c absorbed). Placement: LAPTOP (CTO placement ruling FINAL 193804Z -- LAPTOP = D0/D1/D2/D3/D4/D5).</authority>
 </task_order>
