@@ -135,4 +135,32 @@ DIFFERENT fleet (INF-pattern C8, census-orphan-flagged) and is a NON-MEMBER here
   stall; the 23:01Z restore resumes it) -- so current-period population rides the declared
   degrade until snaps resume, exactly as the legacy's own serve did on those days.
 
--- 0.4.0_DS_ClientPlatform~B, 2026-08-18
+- **2026-08-19 ~1100Z -- rows 12/13 (d12 timeseries pair): the twin COLLAPSE is RETIRED; the
+  pair serves TWO advi keys (4b determination CLOSED: CTO half + naming word 105824Z, COO half
+  012124Z, CVO concur pre-staged 012150Z).** Mechanism: the twin divergence is d12's OWN
+  designed rule (`PLATINUM_NNA_TRUNC_DAYS=1091` @ d12:41 -- vacuous at the 08-11 grade, 761 <
+  1,091; live at 2,417), so the two legacy twins serve two consumers two CORRECT shapes, and
+  per-consumer DELTA=0 by construction is NEVER#3's own no-hold class. **The advi keys, CTO
+  naming word verbatim:** row 12 -> `timeseries_chart.json` (WINDOWED shape, leaf unchanged
+  from the census; the shape declaration rides this list row, not the filename) · row 13 ->
+  `timeseries_chart_full.json` (FULL-DOMAIN shape, explicit domain-marker suffix). **FE
+  mapping, stated per consumer:** `advisor-intelligence.ts:409` -> `timeseries_chart.json`
+  (windowed) · `:300` -> `timeseries_chart_full.json` (full). **Spelling (CTO word, recorded
+  so nobody later "fixes" it): underscore stands for BOTH -- the advi/bd platinum census
+  spelling is underscore; the mdpf "served spells hyphen" law is that TREE's layer law and
+  does not bind here.** This entry supersedes the FRAME's "d12 twin collapse" paragraph and
+  the rows' shared-twin column read. New EMIT totals: **15 legacy keys -> 15 advi twin
+  objects.** Port converted same-window (per-leaf census checks; the byte-compare refusal
+  retired -- it FIRED on the real condition it was built for, which is how this determination
+  started). Oracle-table row PER KEY + P4R-1 mapping ride DE/CVO per COO condition 4.
+
+- **2026-08-19 note (readiness annex vintage): the 49F GOLD HOME MOVED** @d62b47cc44 (DS~A,
+  08-18 ~2121Z, GOLDHOME-REPOINT-49F): the gold plane now lives at
+  `s3://opal-data-49financial/gold/advi/` (4,222 objects verified two-sided); silver/jd stay
+  on `opal-data-assets`. The annex's root paths are correct AT THEIR 08-18 VINTAGE; current
+  reads resolve through `runner_common`'s GOLD_BUCKET/SILVER_BUCKET split, never a baked
+  bucket. *(Measured 2026-08-19: listing the OLD bucket with the NEW prefix returns a clean,
+  well-formed EMPTY -- the wrong-bucket zero; this note exists so the next reader asks "which
+  bucket" before concluding "absent".)*
+
+-- 0.4.0_DS_ClientPlatform~B, 2026-08-18 (addenda 2026-08-19)
