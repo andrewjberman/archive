@@ -387,3 +387,77 @@ exact-tie groups average 5.3 member accounts. Wide gap tracks a thin export rost
   in both membership and the primary key. One vendor-config remedy addresses both.
 
 **T1-1 is now MEASURED on all three legs.** The RELAYED-not-measured qualifier on L1 is retired.
+
+---
+
+# ADDENDUM 3 -- 2026-08-19 ~2335Z: TWO CORRECTIONS TO ADDENDUM 2, AND THE ROSTER DELTA MEASURED
+
+Done during the 23:32Z broker quiesce (sends held, work continued). Both corrections are to my own
+Addendum-2 framing, and the second one is a mislabel that would have travelled.
+
+## CORRECTION 1 -- "MEMBERSHIP = L1-L2 = 90.8%" WAS IMPRECISE. L1-L2 MIXES TWO TERMS.
+
+The three legs are not interchangeable:
+
+- **L1** = qt6 EMV, **accrual + cash inclusive** (CRO~A proved it on 120,215 rows via the qt1 identity)
+- **L2** = export `Account Market Value`, **POSITIONS grain** (my section-3 finding)
+- **L3** = our `net_mv_plus_cash`, **positions + cash**
+
+**L1 and L3 are the like-for-like pair. L2 is the odd one out.** So `L1-L2` contains *both* the
+missing-member term *and* the cash/accrual measure term, and calling it "MEMBERSHIP" credited the
+whole of it to one cause. **The sound total is `L1-L3` = $2,086,553,267.96.**
+
+The 24 exact ties are what makes this measurable rather than a quibble: on those groups the roster
+agrees and `L1-L3` is zero, so whatever `L1-L2` shows there is **pure basis** -- and it shows
+**-$1,964,099.38**. That is the measure term, isolated, with the membership term held at zero.
+
+**WHAT I CAN CLAIM:** the gap is dominated by BD carrying value we do not, and the basis is *not* the
+cause where the roster agrees.
+**WHAT I CANNOT CLAIM, and Addendum 2 implied I could:** the exact membership-vs-basis split per
+group. **I hold GROUP-GRAIN qt6 only** -- a per-group split needs per-account qt6, which I do not have.
+The 90.8% figure should not be quoted as "membership is 90.8% of the gap."
+
+## CORRECTION 2 -- OUR OWN COVERAGE IS NOT THE DRIVER, AND THAT IS NOW TESTED RATHER THAN ASSUMED
+
+| | groups | median pct L1 vs L3 | sum L1-L3 |
+|---|---:|---:|---:|
+| our canonical covers **every** export member (`unmatched=0`) | 90 | **+29.70%** | $228,477,361.46 |
+| groups **with** unmatched members | 109 | **+29.08%** | $1,858,075,906.49 |
+
+The two medians are indistinguishable. **Fully-covered groups show the same gap as partially-covered
+ones**, so the gap is not our canonical's coverage -- it is upstream, at what the export lists.
+
+> **Caveat kept attached rather than dropped:** `unmatched=0` means our canonical covers every account
+> **the export lists**. It says nothing about accounts **BD has that the export never listed** -- which
+> is exactly the population in question. This is *supporting* evidence, not proof.
+
+## THE ROSTER DELTA, MEASURED (not adjudicated -- CRO~A's line held)
+
+| | |
+|---|---:|
+| qt6 Aug groups | 215 |
+| export groups | 201 |
+| intersection | 200 |
+| **in qt6, not in the export** | **15 groups, combined Aug EMV $8,557,079.70** |
+| **in the export, not in qt6** | **1 -- `Kate Gotta`** (L2 $612,921.73, 3 accounts, L3 $0.00) |
+
+The 15 are **all person-shaped** (no local-ops, no org-unit forms) and all small -- $11,306.85 to
+$2,525,985.21. Shape stated; **why they differ is not mine to say** and I have not guessed.
+
+### THE TWO GAPS ARE DIFFERENT THINGS AND MUST NOT BE ADDED
+
+| | |
+|---|---:|
+| **(A)** within-group shortfall over the 200 shared groups (`L1-L2`, mixed per Correction 1) | $1,895,250,943.98 |
+| **(B)** whole groups absent from the export | $8,557,079.70 across 15 groups |
+
+**(B) is 0.45% of (A).** So the story is **NOT** "the export is missing groups" -- it is **members
+missing inside the groups we already have.** Both are per-group figures over *overlapping* groups, so
+neither is a book total and **they are not additive into one number**; they are reported as two
+measurements, deliberately not summed.
+
+## Net effect on the program's conclusion
+
+Unchanged in direction, sharper in claim: **our chain's valuation ties BD where the roster agrees
+(24 groups, to the cent), and our own coverage is not the driver (+29.70% vs +29.08%). The gap sits
+upstream in what template 390224 selects** -- the same root as dim 436, in rows rather than columns.
