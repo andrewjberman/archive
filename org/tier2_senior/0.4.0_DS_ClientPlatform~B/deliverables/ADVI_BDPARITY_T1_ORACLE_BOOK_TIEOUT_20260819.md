@@ -293,3 +293,90 @@ dedup call the only thing standing between the book and the raw row sum.
 result is a statement about the code AT A VINTAGE, not a permanent property. Change what is being
 aggregated and every control over that aggregation must be re-run, or you carry a stale verdict
 about your own instrument.** The docstring has been corrected a second time accordingly.
+
+---
+
+# ADDENDUM 2 -- 2026-08-19 ~2320Z: THE L1 LEG IS MEASURED. T1-1 IS NOW FULLY MEASURED, AND THE HEADLINE CHANGES
+
+`4.0.0_SA_CRO~A` ran the qt6 group-grain read under their scanning grant and delivered it as a file
+(@`4724daa901`), so the oracle's authority leg is discharged **across the whole population**, not one
+group. Provenance pinned: persisted template **517678** `OPAL_CROA_Probe_GroupKey_qt6`, **run_id
+517753**, resultGuid `7b5f1761-4684-4273-b209-7cc7ac75e12f`, asOfDate 08/18/2026, 33,954-byte export.
+The persisted template was **not modified** -- asOfDate is a run-time parameter, so this stayed inside
+a read verb.
+
+**The relay is now a corroboration.** The predecessor's `$456.8M` (template 517685 / run 517686),
+which I carried explicitly as RELAYED-not-measured, reproduces at **$456,773,323.40** on a fresh run,
+different session, different seat, different run id. Keeping the two apart is what makes the second
+number evidence rather than an echo.
+
+## Coverage
+
+| | |
+|---|---:|
+| export groups (L2/L3 universe) | 201 |
+| qt6 groups supplied (L1 universe) | 215 |
+| **groups carrying all three legs** | **200 (99.5% of export groups)** |
+| in qt6 but not the export | 15 |
+| in the export but not qt6 | 1 (`Kate Gotta`) |
+
+The 215-vs-201 roster difference is **stated, not adjudicated** -- CRO~A labelled it an unexplained
+scope difference and asked that neither instrument be called defective until someone reconciles the
+rosters. I am holding that line.
+
+## THE HEADLINE, RESTATED -- IT IS A MEMBERSHIP GAP, NOT A VALUATION GAP
+
+Travis Penfield now reads **L1 $456,773,323.40 vs L3 $377,433,506.75 = +$79,339,816.65 (+21.02%)**
+(the relayed-value run said +$79,366,493.25 / +21.03%; nothing material moved).
+
+**But at full population the +21% is not the story, and Travis is not even a bad case:**
+
+| pct L1 vs L3, across 199 groups | |
+|---|---:|
+| min | -0.01% |
+| Q1 | +10.28% |
+| **median** | **+29.11%** |
+| Q3 | +51.11% |
+| max | +117,808.82% |
+| **Travis** | **+21.02% -- BELOW the median** |
+
+Banding: `<1%` 28 groups · `1-10%` 21 · `10-25%` 43 · `25-50%` 55 · `50-100%` 28 · `>=100%` 24.
+BD reads higher on 174 groups, lower on 2, and **exactly equal on 24**.
+
+### The decomposition, and it is decisive
+
+| component | sum across 199 groups | share |
+|---|---:|---:|
+| **MEMBERSHIP** (L1-L2) | $1,895,250,943.97 | **90.8%** |
+| VALUATION (L2-L3) | $191,302,323.96 | 9.2% |
+| total (L1-L3) | $2,086,553,267.95 | |
+
+*(Component sums over overlapping groups -- a ratio, never a book figure.)*
+**Membership dominates in 153 of 199 groups (77%).**
+
+### The 24 exact ties are the strongest evidence in this run
+
+**24 groups where BD's own EMV equals our `net_mv_plus_cash` TO THE CENT** -- two fully independent
+engines, no shared derivation. In **22 of 24** the export roster is complete (`matched ==
+member_accounts`). Combined $29,587,743.43 over 128 accounts, and on those same groups the export's
+`Account Market Value` disagrees by $1,964,099.38.
+
+> **Where the roster agrees, our valuation ties BD exactly. The export's `Account Market Value` is
+> the leg that disagrees -- which independently corroborates the positions-grain finding in section 3
+> from a completely different direction.**
+
+And the tail confirms the same mechanism from the other end: the 20 widest groups average an
+**L1/L2 ratio of 20.08x** -- BD's group carries ~20x the value the export's roster lists -- while the
+exact-tie groups average 5.3 member accounts. Wide gap tracks a thin export roster, not a bad price.
+
+## What this means for the program
+
+- **Our chain's valuation is not the problem.** The 24 cent-exact ties and the -0.163% like-for-like
+  residual both say so.
+- **The problem is that the daily allocation export's roster is narrower than BD's own group
+  definition** -- the same class CRO~A measured on Travis (347 BD members vs 318 export), now
+  confirmed as the dominant term across 90.8% of the total gap.
+- **This is the same root as the dim-436 gap**: template 390224's selection is what we are missing,
+  in both membership and the primary key. One vendor-config remedy addresses both.
+
+**T1-1 is now MEASURED on all three legs.** The RELAYED-not-measured qualifier on L1 is retired.
