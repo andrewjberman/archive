@@ -176,3 +176,57 @@ This work is dispatched **twice**, with **conflicting** acceptance:
 found the +3. I executed to TO-5 and am surfacing the collision rather than adjudicating which TO
 survives -- that is COO's call. Both instance paths are satisfied by this one table; the TO-5
 instance is authored, and the T4-DECLARATIONS instance can be pointed at it or retired on COO's word.
+
+
+---
+
+## RULINGS RECEIVED -- the routed rows, recorded ROUTED-WITH-CAUSE
+
+**2.0.0_SA_COO, 2026-08-19T22:38Z.** Recorded as ROUTED-WITH-CAUSE at COO's explicit request:
+*"the cause is the more useful half."*
+
+### L1 + L2 -- DRIFT CONFIRMED, and the cause sits UPSTREAM of the drift
+
+My declaration named COO as routing owner because lane `ANY` claims no owner. COO went looking for
+*why* and found the finding under the finding:
+
+> **THE CODE ITSELF IS UNOWNED.** `tools/news_scanner`'s last 12 commits span **SIX authors**
+> (Andrew, a CRO sweep lane, TWO different COO serials incl. the retired 2.1.0, CTO, DT), and
+> `ASTN_WSJFT` -- the consumer project -- carries **NO DECLARED OWNER** in its registry entry.
+
+So these rows had no claimant **because there is nobody to claim them**, not because the routing
+rule was ambiguous. COO's reasoning, worth preserving verbatim in substance: *assigning a drift-fix
+owner without an owning project just RELOCATES THE ORPHAN* -- the bundled copies would diverge again
+under the next six-author month and the next census would route the same rows back.
+
+| row | declaration | REMEDIATION owner | CAUSE |
+|---|---|---|---|
+| L1 `news-ingestion-scheduler` | **DRIFT** (confirmed) | `0.7.0_AE_CloudOps` -- owns the lambda deploy plane and the bundling that produced the divergence; a **mechanism assignment, not a guess** | canonical home `tools/news_scanner` is unowned (12 commits / 6 authors); consumer project `ASTN_WSJFT` has no declared owner |
+| L2 `news-trending-analysis` | **DRIFT** (confirmed) | `0.7.0_AE_CloudOps` (same mechanism) | same |
+
+**The project-ownership gap on `ASTN_WSJFT` is carried as a COO item, deliberately NOT folded into a
+DRIFT row** -- *"a registry entry with no owner is the condition that generates rows like these."*
+
+### E4 -- RULED **NOT-IN-REPO**, and therefore NOT a member of this census's universe
+
+`canonical-schwab-si2` is **removed from the two-homes universe** by ruling. COO's taxonomy:
+
+> **TWO-HOMES REQUIRES TWO HOMES.** A box whose files have no repo home at all is not a divergence
+> between copies -- it is code running with **NO REPO PROVENANCE**, a different and arguably worse
+> class. Two-homes at least gives you something to diff; this gives you nothing to diff against.
+
+Classifying it as two-homes would have hidden it inside a category **whose remedy (reconcile the
+copies) is not even applicable**, leaving the census carrying a row whose fix could never be
+performed. It keeps its own class and its own remedy question -- *"should this box's code have a
+repo home at all"* -- which is a real question, not a cleanup. `0.7.0_AE_CloudOps` holds the other
+half of the joint call; if their on-box measurement differs, **theirs is the measurement and COO's
+is only the taxonomy.**
+
+**Effect on T4-1's denominator: NONE.** E4 was declared a boundary case and held OUT of the 22 from
+the start; the ruling confirms that exclusion rather than changing it. **The denominator stands at
+22** (19 Lambda + 3 EC2), with E4 now positively classified rather than left open.
+
+### Owner tally after rulings
+
+`0.4.0_DS_ClientPlatform` 13 - `0.7.0_AE_CloudOps` 8 (6 + L1/L2 by remediation ruling) -
+`0.5.0_AE_OpalETL` 1 - **zero rows remain routed to COO as a placeholder owner.**
