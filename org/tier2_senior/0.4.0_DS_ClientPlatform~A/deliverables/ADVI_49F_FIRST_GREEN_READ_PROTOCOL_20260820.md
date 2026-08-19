@@ -58,6 +58,17 @@ It was "the floor proves itself." It is **also** now "these bytes execute unatte
 
 **The fence stands otherwise: nothing else touches that run.**
 
+### ⚖ RULED 2026-08-19 23:41Z (CTO): **LET IT RUN — the fence and the deploys COMPOSE. No revert pre-positioning.**
+
+Stated strongly so nobody re-litigates it at 12:40Z: the hard fence was ruled against **rescheduling or
+interfering with** the run — and **the c00 fix was ordered precisely so the first green would execute the
+corrected producer.** *A fence reading that excluded the ordered deploys would have the run proving the
+defect we just repaired.* C00-5 required the deploy; the fence protects the run; they compose.
+
+**CTO will read F3 FIRST when validating the first green** — it is the one check that distinguishes
+*"the fix RAN"* from *"the fix was DEPLOYED"*, **and the whole point of tonight was the first, not the
+second.** F3 is Rule 22a's EC2 clause turned into a falsifier the run carries for free.
+
 ---
 
 ## 1. WHAT SHOULD HAPPEN
