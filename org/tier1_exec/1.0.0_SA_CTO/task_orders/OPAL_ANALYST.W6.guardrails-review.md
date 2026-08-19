@@ -56,6 +56,7 @@ all of it (§10.8: Opal users see ALL firms, firm users see OWN firm only).
   <before_write>`comp-which` routing; `comp-iam` for the gateway/identity view (DESIRED-only — ground any fresh IAM claim on live `aws iam get-role-policy` per Rule 22a); `comp-routes behaviors` for any serving-route claim.</before_write>
   <before_commit>`.tools/commit-gate.sh` on any `.py` touched.</before_commit>
   <after_commit>python .tools/proof-of-spec-check.py &lt;instance&gt;.json C1,C2,C3,C4,C5,C6   # POSITIONAL argv[2]; CHECK THE RC</after_commit>
+  <at_certification>MANDATORY (PRD_AUTHORING_PROTOCOL @060cb1b130, Andrew-direct 2026-08-19, verified-at-ref + tool exercised at this desk 2026-08-19 ~2140Z — self-test 4/4 rc=0 AND a real compose on the delivered review artifact rc=0): `python .tools/comp-adversary compose &lt;the final review artifact&gt;` BEFORE the certification verdict; the validation_context_declaration ATTACHES to the verdict (or a --open pass declares itself). NOTE: the bare name does not forward on this box — invoke via `python .tools/comp-adversary`. First exercise already surfaced an uncited-sibling the author had not cited (the 1300Z WDAC pull-failure guardrail log) — the complement source works; read what it surfaces, do not skim it.</at_certification>
 </compiler_tools_mandate>
 
 <cross_domain_coordination>
