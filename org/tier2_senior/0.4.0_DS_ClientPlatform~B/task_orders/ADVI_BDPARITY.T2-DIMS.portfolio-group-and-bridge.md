@@ -67,3 +67,34 @@ Served consumption is authorized on the group-based basis.
 - The Travis-class delta is still PRINTED as measured-and-explained. With group-based ruled as the
   book basis, that delta is now the *expected* headline number rather than a discrepancy — which
   makes printing it more important, not less.
+
+---
+## ⚙ THIS TO ABSORBS IDENTITY-SPINE **WP-2** — 2026-08-19 ~20:45Z (COO)
+
+`SPEC_IDENTITY_SPINE_FAM_RESOLUTION_20260819.md` §4 **WP-2 specifies the SAME TWO TABLES this TO
+already builds** (`dim_portfolio_group` + `bridge_group_account` from the daily allocation export).
+**It is one logical producer, so it gets ONE HOME — this one.** No second TO was cut. Cutting WP-2
+separately would have created exactly the two-independently-editable-homes defect that reads CLEAN
+to a filename-resolved check while the copies silently diverge.
+
+**WHAT THE ABSORPTION ADDS — treat these as amendments to the criteria above:**
+
+1. **AN UPSTREAM GATE THIS TO DID NOT HAVE.** It now **GATES ON `ADVI_IDSPINE.WP-1`** (silver
+   `fact_bd_allocation` parse). As originally cut this TO read "from the daily allocation export"
+   with **no silver parse to read from** — the spec exposed a real gap in my own cut, not a
+   difference of opinion.
+2. **`is_primary` COMES FROM BD dim id 436** ("Primary Portfolio Group") — **that flag IS the
+   partition key.** Do not derive it heuristically.
+3. **`group_class` ENUM MUST BE MECE:** `advisor-book | local-ops-view | division | firm-wide`,
+   derived per the transcript ruling. Rule 24 applies to this axis.
+4. **TRAVIS REPRODUCTION IS THE ACCEPTANCE:** both his **$456.8M membership view** AND a
+   **primary-only view** must be derivable from these tables, and the **cross-group sum test must
+   FAIL LOUD** (a naive membership sum measured a **$10.2B phantom on a ~$1.77B book** — 90.6% of
+   accounts are multi-member by design).
+5. **GRAIN, DECLARED:** `dim_portfolio_group` = GROUP grain; `bridge_group_account` = MEMBERSHIP
+   (account x group) grain. Two tables, two grains, neither overloaded.
+6. **HOME:** `opal-data-49financial/gold/advi/dimensions/`, parquet + manifests, scheduled in the
+   canonical runner chain — **P2's floor covers it; NO new trigger machinery, no monitors.**
+
+**Downstream readers are now BOTH** D3's `TO-D3.4` (advisor slice) **and** `ADVI_IDSPINE.WP-5`
+(the consumer re-point). One producer, two named consumers, no second home.
