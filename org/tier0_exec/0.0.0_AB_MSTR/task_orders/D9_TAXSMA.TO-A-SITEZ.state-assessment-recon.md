@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:00Z</issued>
 <dated>START-NOW eligible -- gates on nothing</dated>
-<status>pending -- flipped by 0.4.0_DS_ClientPlatform~Z on kickoff receipt 2026-08-19T20:03Z (kickoff ferried via 0.0.0_AB_MSTR -> MSTR~Z, carrying (prd, workstream, head_version) explicitly. NEVER IMPLICIT.)</status>
+<status>pending -- TO-A DELIVERED 2026-08-19T20:35Z by 0.4.0_DS_ClientPlatform~Z (assessment + live-truth table @1da46a1f43, ingest addendum + proof VALID rc=0 @3da5bcaee6). All 7 parts incl. #42-cited-superseded + #48 split-supersede rec at Andrew + H5 gate-sequencing finding routed. Awaiting COO validation (RAVC-4) to close</status>
 <priority>P1-program. CVO's dispatch-order note names this the STRONGEST whole-item sitez candidate in the D-set: self-contained, read-only, multi-day, ZERO coupling to the 49F Friday spine.</priority>
 <authority>D9_TAX_SMA_OPS_PRD.md §4.1 + §6 item 1 at dispatch vintage @fac13ccc3a (CVO verdict @3ae19879fb absorbed + the guardrail DONE-bar hardening). Placement: SITEZ, Andrew-RATIFIED ~19:3xZ ("I am find with them having D7 D9 D6") and confirmed FINAL by CTO 193804Z.</authority>
 </task_order>
