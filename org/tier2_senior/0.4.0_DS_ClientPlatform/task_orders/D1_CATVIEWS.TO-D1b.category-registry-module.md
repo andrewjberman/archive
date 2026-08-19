@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:35Z</issued>
 <dated>first substantive row at your THU-AM spawn, behind your R-WATCH/PB-1 Friday-path duties</dated>
-<status>staged -- GO paired; GATE-CLEARED (TO-D1a discharged by CTO's taxonomy-gate ruling @3e589fa1eb)</status>
+<status>pending -- BUILT @be05d938af. D1b-1..D1b-4 measured PASS (existence check controlled; 6 F5 raise-paths exercised with 4 positive controls; Q1-closed shape, data-driven property measured). D1b-5 blocked on the SAME artifact-coverage heuristic as WP-1 -- now characterised, routed to COO/CTO. Deploy leg deliberately NOT run (rides TO-D1c). Terminal status left to COO.</status>
 <priority>P1-program; behind the 49F Friday path at the seat</priority>
 <authority>D1_ASSET_CATEGORY_VIEWS_PRD.md §4.1 + §6 item 2, at dispatch vintage @3e589fa1eb (CVO verdict @d476339293 absorbed + THE TAXONOMY GATE RULED -- D1_TAXONOMY_GATE_RULING_20260819.md). Placement: LAPTOP by the EITHER-defaults-laptop rule (Andrew-direct ~19:3xZ leaves the residual placement axis to CTO; this row is EITHER, so the default governs).</authority>
 </task_order>

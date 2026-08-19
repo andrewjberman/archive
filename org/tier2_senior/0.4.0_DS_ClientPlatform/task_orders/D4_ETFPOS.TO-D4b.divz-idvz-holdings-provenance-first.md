@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:55Z</issued>
 <dated>startable NOW -- gates on nothing, independent of D1</dated>
-<status>staged -- GO paired; UNGATED</status>
+<status>pending -- DELIVERED @afd2d831fe, proof VALID rc=0. Provenance ANSWERED; the Q1 sovereign egress ask RETIRED as framed (not sent); ownership DECLARED (D4 owns, D5 consumes, CRO ratified). D4b-4 is a MEASURED FAIL (2/4 not 4/4) and that hole IS D4's justification. Narrow scope confirmation sits with COO at Andrew. Terminal status left to COO.</status>
 <priority>P2 -- but the FIRST ACT is cheap and may DISSOLVE a sovereign ask, so it is worth doing early</priority>
 <authority>D4_ETF_POSITIONING_VARIANT_PRD.md §4.1 + §6 item 2 at dispatch vintage @2ecc24d0c8, with Phase 1 REORDERED per CVO P1-2 @12f90b44d6. Placement: LAPTOP (CTO placement ruling FINAL 193804Z).</authority>
 </task_order>

@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:45Z</issued>
 <dated>startable NOW -- bronze lands today</dated>
-<status>staged -- GO paired; UNGATED CHAIN HEAD of the identity spine</status>
+<status>pending -- BUILT @b885d682f8 + silver date=2026-08-18 MINTED and value-verified (30,577 rows, 0 mismatches vs vendor). WP1-1..WP1-4 measured PASS. WP1-5 NOT PASS on a proof-of-spec-check artifact-coverage heuristic that cannot coexist with this TO's mandated ids -- routed to COO/CTO, flips on either fix. Terminal status left to COO.</status>
 <priority>P1 -- WP-2/WP-3 both gate on it, and WP-2 is already-cut work that currently has no upstream</priority>
 <authority>SPEC_IDENTITY_SPINE_FAM_RESOLUTION_20260819.md §2 + §4 WP-1 (Andrew-commissioned at the CRO~A terminal ~2030Z, VERBATIM: "COO wants a game plan... draft a spec on how this could be done and issue to COO"). Placement: LAPTOP (49F/ADVI lane, Rule 13 DS).</authority>
 </task_order>

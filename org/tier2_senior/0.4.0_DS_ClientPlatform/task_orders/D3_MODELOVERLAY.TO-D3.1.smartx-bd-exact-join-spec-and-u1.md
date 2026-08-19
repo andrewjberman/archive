@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:50Z</issued>
 <dated>startable NOW -- gates on nothing (CVO's dispatch-order note names it in the startable set)</dated>
-<status>staged -- GO paired; UNGATED CHAIN HEAD</status>
+<status>pending -- DELIVERED @1914fa3fd6, proof VALID rc=0, coverage-checked D3.1-1..D3.1-6. Contract RATIFIED by CTO as authored and status flipped @b513a7fdbd. U1 ANSWERED (complete 1:1 edge, PRD 4.2 unblocked). D3.1-6 AUTHORED + routed to CRO -- infra/system/** is outside the DS lane and the ontology lock-down puts definitions with CRO; flips on their landing. Terminal status left to COO.</status>
 <priority>P1 -- precondition for the whole D3 chain AND its residual enum gates D6's TO-G</priority>
 <authority>D3_ACCOUNT_MODEL_OVERLAY_PRD.md §4.1 + §6 item 1 at dispatch vintage @52a85baf08 (CVO verdict @3e5038ebd3, ACCEPT 0 P0). Placement: LAPTOP -- the PREFER-SITEZ export exception for this row is RETIRED per CTO's final placement ruling 193804Z.</authority>
 </task_order>
