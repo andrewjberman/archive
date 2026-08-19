@@ -51,6 +51,10 @@ SSM `AWS-RunShellScript` on `i-07dccb1615503ac99` (cmd `912d34e5-5838-4a5e-b11c-
 
 > D7 TO-A: DLs found — 49F = `49@opalinvest.com`, Inflection = `inflection@opalinvest.com` (both measured off real partner requests); **Cottonwood: none found — confirm its DL or say the word and we add one.** Monitorable-mailbox: undetermined for both (need: are these classic DLs, M365 Groups, or shared mailboxes?) — **simplest v1 path is adding `opalbloomberg@opalinvest.com` as a member of each DL (zero new Graph consent, mail lands in the Analyst's own consented mailbox); the alternative (group/shared-mailbox read) costs an IT admin-consent round-trip** (no Group.Read.All / Mail.Read.Shared consented on App-2, and scope adds are the four-way-pin drift hazard). Ticketing thread: none exists — propose a "Ticketing Center" channel in the "Opal Capital" team (the one team the Analyst is in). One line back: (1) Cottonwood DL? (2) DL type / bless the membership-add path? (3) bless the channel?
 
+## 6a. AMENDMENT 1936Z — ANDREW-DIRECT (relayed by 0.0.0_AB_MSTR~Z from his console, verbatim): *"We need to either change this email or create a new email to opalsupport@opalinvest.com. Can't be broadcasting 'opalbloomberg' externally"*
+
+Effect on §3 option (a): the membership-add path survives ONLY with a non-broadcasting address. Candidate mechanism (MSTR~Z framing, at Andrew as one-liner item 4): an ALIAS `opalsupport@opalinvest.com` on the EXISTING Opal Bloomberg mailbox — delivery stays in the consented `/me` mailbox, so the zero-new-consent property is preserved; outbound send-as opalsupport. A separate NEW mailbox would break the delegated-`/me` consent path and re-price TO-B. Tenant-admin act = Andrew/IT-hand. Read §3(a) through this amendment.
+
 ## 7. Surprise channel (banked, no action)
 
 audit-archive-invoker at session start printed 3 integrity findings on this box: `ledger-hook-audit.log` + `rcg-sweep-audit.log` non-append edits (baseline≫live-head — plausibly the device-axis baseline class), `jq-ban-override-audit.log` live-missing (fail-closed error). Surfaced to MSTR~Z in the kickoff ACK; not adjudicated here.
