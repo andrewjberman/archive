@@ -362,9 +362,9 @@ BD reads higher on 174 groups, lower on 2, and **exactly equal on 24**.
 
 | component | sum across 199 groups | share |
 |---|---:|---:|
-| MIXED membership+basis (L1-L2) — *was mislabelled MEMBERSHIP* | $1,895,250,943.97 | *withdrawn* |
-| MIXED coverage+basis (L2-L3) — *was mislabelled VALUATION* | $191,302,323.96 | *withdrawn* |
-| **total (L1-L3) — the sound figure** | **$2,086,553,267.95** | |
+| MIXED membership+basis (L1-L2) -- *was mislabelled MEMBERSHIP* | $1,895,250,943.97 | *withdrawn* |
+| MIXED coverage+basis (L2-L3) -- *was mislabelled VALUATION* | $191,302,323.96 | *withdrawn* |
+| **total (L1-L3) -- the sound figure** | **$2,086,553,267.95** | |
 
 *(Component sums over overlapping groups -- a ratio, never a book figure.)*
 *(The "membership dominates in 153 of 199 groups" claim rested on the same mislabel and is withdrawn
