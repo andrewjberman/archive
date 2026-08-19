@@ -8,7 +8,7 @@
 
 ---
 
-## 0. HEADLINE: FOUR OF FIVE CRITERIA MET; T2-3 IS HALF-MET AND THE MISSING HALF IS NOT MINE TO BUILD
+## 0. HEADLINE: FOUR OF FIVE CRITERIA MET (T2-1 MINTED + VERIFIED, see ADDENDUM); T2-3 IS HALF-MET AND THE MISSING HALF IS NOT MINE TO BUILD
 
 `Primary Portfolio Group` -- **BD dimension 436, the partition key the ruled basis names** -- **is not
 in the feed.** Persisted template 390224 does not select it. So `is_primary` is emitted **all-null with
@@ -54,13 +54,16 @@ matches the T1 oracle to the cent. The **primary-only view is NOT derivable** --
 
 ## 2. ACCEPTANCE
 
-### T2-1 DIMS LAND IN THE 49financial GOLD GRAMMAR -- **PARTIAL, deliberately**
-Both tables build as parquet with a manifest in the `{table}/date={D}/` shape. **They are NOT minted to
-`opal-data-49financial/gold/advi/dimensions/`,** and `--upload` is wired to **REFUSE** with its reason.
-Two grounds, neither of them mine to overrule: WP-1's own silver partition is not minted either (DS base:
-*"the first mint is not self-authorized yet, it is with COO"*), and minting a gold artifact whose declared
-upstream does not yet exist in S3 would make the tables read from a different source than the ratified one
--- the two-homes defect, created by the fix for it.
+### T2-1 DIMS LAND IN THE 49financial GOLD GRAMMAR -- **PASS (minted + read-back verified ~2250Z)**
+*This section records the WITHHOLD as it stood at build time; the ADDENDUM below records the mint.*
+Both tables build as parquet with a manifest in the `{table}/date={D}/` shape. The mint was initially
+**withheld** on two grounds, neither of them mine to overrule: WP-1's own silver partition was not minted
+(DS base: *"the first mint is not self-authorized yet, it is with COO"*), and minting a gold artifact whose
+declared upstream does not yet exist in S3 would make the tables read from a different source than the
+ratified one -- the two-homes defect, created by the fix for it.
+**Both grounds were discharged within the hour** (WP-1 minted + value-verified with a negative control;
+COO's conditional *"yours unblocks when theirs lands"* met), so the tables are now **minted and verified on
+read-back from S3**. See the ADDENDUM for keys, etags, verification and the negative control.
 
 ### T2-2 BRIDGE COVERS THE EXPORT'S FULL MEMBERSHIP -- **PASS**
 `export memberships 29907 | bridge memberships 29907 | missing 0 | extra 0 | coverage 100.0000%`
@@ -88,9 +91,11 @@ the safe direction and worth stating precisely: absent the key these tables cann
 account-partitioned total AT ALL -- correct or incorrect. The failure mode is CANNOT-ANSWER, never
 ANSWERS-WRONGLY.** But it is a gap, and it is declared rather than papered over.
 
-### T2-4 NO SERVED CONSUMPTION -- **PASS** (4 probes)
-Not in `chain_49f_entrypoint.py:_stage_list` (0 refs) · nothing imports or invokes it · no `boto3`/
-network primitive reachable in the write path and `--upload` refuses · `platinum/advi/49financial/` = **0 keys**.
+### T2-4 NO SERVED CONSUMPTION -- **PASS** (4 probes; re-verified after the mint)
+Not in `chain_49f_entrypoint.py:_stage_list` (0 refs) · nothing imports or invokes it · the producer writes
+**GOLD only** -- `--upload` targets `opal-data-49financial/gold/advi/dimensions/` and nothing else ·
+`platinum/advi/49financial/` = **0 keys, checked again AFTER the mint**. Gold was written; serving was not
+touched and remains P4-class through CTO (NEVER#3 intact).
 
 ### T2-5 proof instance VALID rc=0 positional T2-1..T2-5 -- see the instance.
 
@@ -197,3 +202,84 @@ could be exercised against the **ratified upstream** rather than a substitute so
 probes supplied the T2-4 no-consumer denominators. `.tools/commit-gate.sh` on both scripts: BLOCKED first
 on a real ruff finding (unused `Counter` import), fixed, then clean on 2 files.
 `.tools/proof-of-spec-check.py` on the instance.
+
+---
+
+# ADDENDUM 2026-08-19 ~2250Z -- T2-1 MINTED AND VERIFIED (the withhold is discharged)
+
+Both grounds for withholding the mint were discharged within the hour:
+
+1. **WP-1's silver partition is MINTED and value-verified** by DS base --
+   `s3://opal-data-assets/blackdiamond/49f/silver/fact_bd_allocation/date=2026-08-18/data.parquet`,
+   30,577 rows x 96 cols, **0 mismatches** element-wise against the vendor bronze, with a **+1-shift
+   negative control producing 30,577 of 30,577 mismatches** so the tie is a real comparison. Their
+   parquet is also byte-identical across two different read paths (local copy vs live S3 bronze).
+2. **COO's conditional was met** -- *"hold the mint ... yours unblocks when theirs lands."*
+
+## What was minted
+
+Produced by running against the **LIVE minted silver** (no `--silver` override), so the artifact's
+declared upstream and its actual upstream are the same object.
+
+| key | bytes | etag |
+|---|---:|---|
+| `gold/advi/dimensions/dim_portfolio_group/date=2026-08-18/data.parquet` | 10,411 | `b26d6cce17f530ade96abb86e8ccba92` |
+| `gold/advi/dimensions/dim_portfolio_group/date=2026-08-18/manifest.json` | 1,544 | `4573a26d4825746036146cf2a14b00a7` |
+| `gold/advi/dimensions/bridge_group_account/date=2026-08-18/data.parquet` | 197,188 | `d937238efba43e2d97d102e6bf4c2a7e` |
+| `gold/advi/dimensions/bridge_group_account/date=2026-08-18/manifest.json` | 1,544 | `4573a26d4825746036146cf2a14b00a7` |
+
+*(One manifest describes the pair and is written under both prefixes, so either is self-describing.)*
+
+## Verified on the SERVED artifacts, read back from S3 -- not on the producer's rc=0
+
+```
+  dim_portfolio_group  : 201 rows x 8 cols
+  bridge_group_account : 29907 rows x 10 cols
+  Travis book (served) : $392,556,451.10  accounts=318  class=advisor-book   [ties expected exactly]
+  is_primary non-null  : 0 of 29907
+  bridge money columns : []
+  group_class census   : advisor-book 186 / local-ops-view 9 / division 5 / firm-wide 1
+  manifest             : book_basis=group-based, ruling carried, additive=False, is_primary=ABSENT-UPSTREAM
+  NEG CTRL             : date=1999-01-01 raises FileNotFoundError -- the read discriminates
+```
+
+**NEVER#3 held and re-verified AFTER the mint: `platinum/advi/49financial/` key count is still 0.**
+Gold was written; serving was not touched, and remains P4-class through CTO.
+
+> Note on the upstream read: the live silver presents **97** columns to a partition-aware reader where
+> the local build had 96. The 97th is `date`, the **Hive partition key materialized from the `date=`
+> path segment** -- not a data column, not a schema drift. Checked rather than assumed, because a
+> silently-appearing column is exactly the sort of thing that should not be waved through.
+
+## T2-1 now reads PASS with the mint verified
+
+The remaining `FAIL` on T2-3 is unchanged and unaffected -- it waits on BD dim 436, which CTO has
+routed to COO as a template-390224 amendment with an Andrew-word gate on the vendor-config change.
+
+## One more control added, at DS base's prompting -- a DIFFERENT hazard from the sleeve
+
+The book key `(group, account, supervised)` is **not unique**: the dual-fee-schedule account
+`z0813542821` carries two simultaneous schedules (100bps `49F - Flat 1` and 125bps `49F - Flat 1.25`)
+and so puts 2 rows on that key in each of its 5 groups. **Market value is constant across them, so
+COLLAPSE-TAKE-ONE is correct and SUM would double-count** -- 47,014.32 per group against a true
+23,507.16.
+
+**Measured, not reasoned:** rows surviving dedup in its group = **1**, and the group `Neil Tjon-Hing`
+books **$22,479,576.71 on both the oracle and the T2 producer**. `assert_book_key_collapsible()` now
+pins the property the collapse depends on (holds on 29,926 keys) and fails loud if a future edit
+switches to SUM or the vendor makes the value non-constant.
+
+**"Constant within key" and "safe to sum" are different properties, and this key satisfies only the
+first.** That distinction is DS base's and it is the useful residue of the exchange.
+
+## And a correction to my own correction
+
+I told DS base the supervision term was *"the entire explanation"* of their 24 collapsed keys. They
+measured it as **19 of 24**; the other 5 are the dual-fee class above. The complete grain statement is
+**six** terms -- `(Portfolio Group x Portfolio x Account x Relationship x SUPERVISION x FEE SCHEDULE)`
+-- with **0 unexplained**.
+
+**I generalised from the three accounts I had chased to the whole residual without re-running their
+measurement.** The finding was real; the scope claim was not, and the scope claim is the half that
+travels -- because "the -24 is fully explained" *closes an open question*, and closing one wrongly is
+worse than leaving it open.
