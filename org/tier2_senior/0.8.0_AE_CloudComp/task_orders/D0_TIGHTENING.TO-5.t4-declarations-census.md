@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:45Z</issued>
 <dated>behind your standing queue (already the T4 tail of it)</dated>
-<status>staged -- GO paired</status>
+<status>complete -- CENSUS RE-READ + 22/22 DECLARED 2026-08-19 @b1cd375c32; proof VALID rc=0. **DENOMINATOR IS 22 (19 Lambda + 3 EC2), NOT the 16+3 prior** -- +3 Lambda rows the prior would have left undeclared, exactly the CVO P0-1 failure the amendment was written to prevent. 21 DRIFT w/ named owners + 1 FORK-DELIBERATE (bd/cot firm separation is law -- must NOT be consolidated) + 1 declared boundary case. Census's own artifacts carry FOUR different numbers (15/16/19/19) and the EC2 axis has no TWO-HOMES class at all -- both reported to COO. Duplicate dispatch vs NFRA_DEPLOYCENSUS.T4-DECLARATIONS surfaced for COO ruling.</status>
 <priority>P2</priority>
 <authority>D0_INFRA_TIGHTENING_PRD.md §6 row 5 at dispatch vintage @4bf291b26c, **as amended by CVO P0-1 @c7e4d16f6c**. Placement: LAPTOP (CTO ruling FINAL 193804Z).</authority>
 </task_order>

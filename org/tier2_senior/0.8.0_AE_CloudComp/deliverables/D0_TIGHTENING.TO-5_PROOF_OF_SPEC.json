@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D0_TIGHTENING.TO-5",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "docs/architecture/D0_INFRA_TIGHTENING_PRD.md",
+    "group": "T",
+    "vintage_commit": "4bf291b26c"
+  },
+  "assignee": "0.8.0_AE_CloudComp",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_DEPLOYCENSUS/T4_DECLARATIONS_20260819.md",
+      "kind": "doc",
+      "commit_or_etag": "b1cd375c32",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A declarations table, not a deployable artifact. Lands beside the census it declares over (NFRA_DEPLOYCENSUS/), per T4-4's 'where the census lives'."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T4-1",
+      "criterion_verbatim": "CENSUS RE-READ + DENOMINATOR PRINTED (the count you measured, with how you enumerated it).",
+      "method": "live_read",
+      "invocation": "python -c \"...\" over org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_DEPLOYCENSUS/{lambda_census_v3_findings.json,lambda_census_v3_summary.json,ec2_census_v2_rows.json,ec2_onbox_verdicts.json}",
+      "output_evidence": "LAMBDA TWO-HOMES: finding rows = 19 | DISTINCT lambdas = 19 | lambdas appearing on >1 axis: none\n\nTHE FOUR NUMBERS IN PLAY (all from the census's own artifacts):\n  summary_per_lambda TWO-HOMES-DIVERGED   : 15\n  findings_per_axis_class sum             : 19   (bundled-vs-canonical 17 + own-tree 2)\n  actual finding ROWS in the evidence file : 19\n  actual DISTINCT lambdas                  : 19\n  CENSUS_REPORT prose / both TOs' prior    : 16\n\nEC2 staged_class vocabulary across 27 services: Counter({'UNREAD': 14, 'STALE-BY-NEGLECT': 6, 'CURRENT': 5, 'STAGED-ORPHAN-ONLY': 2}) -- NO 'TWO-HOMES' VALUE EXISTS. A scan keyed on that string returned a clean 0 against a report claiming 3; re-enumerated by SHAPE across both EC2 axes: E1 mdpf-daily-runner (on-box ahead of staged, 3 of 44 files differ), E2 opal-gateway (2 of 2 staged orphaned), E3 bd-49f-auto-login (1 of 4 orphaned), E4 canonical-schwab-si2 (all on-box files repo_exists:false) declared a BOUNDARY CASE.\n\nDENOMINATOR AS READ: LAMBDA 19 + EC2 3 = 22 (23 counting the boundary case). PRIOR 16+3=19. DELTA +3 Lambda rows the prior would have left undeclared.\n\nENUMERATION METHOD, stated: Lambda = every findings row whose class contains TWO-HOMES, counted as distinct lambdas (verified none appears on two axes). EC2 = enumerated by hand across BOTH the staged and on-box axes, because the class does not exist in the EC2 vocabulary.",
+      "denominator": "22 two-homes rows (19 Lambda + 3 EC2), +1 declared boundary case = 23. Enumerated from 59 Lambda finding rows and 27 EC2 services.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T4-2",
+      "criterion_verbatim": "EVERY ROW DECLARED FORK-DELIBERATE(why) or DRIFT(owner) -- zero undeclared against T4-1's denominator.",
+      "method": "manual_read_with_citation",
+      "invocation": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_DEPLOYCENSUS/T4_DECLARATIONS_20260819.md sections T4-2/T4-3",
+      "output_evidence": "22 of 22 rows carry exactly one declaration: 19 Lambda (L1-L19) + 3 EC2 (E1-E3), plus E4 declared DECLARED-UNCONFIRMED as a named boundary case rather than silently included or excluded.\n\n1 FORK-DELIBERATE: L3 opal-partners-data -- its two canonical homes are data/black_diamond/scripts/gold/lib/etf_classifier.py AND data/cot/scripts/gold/lib/etf_classifier.py, and bd<->cot separation is LAW (CLAUDE.md: 'cot is a COMPLETELY separate firm pipeline from bd -- never mirror/sync', enforced at commit gate AND IAM Deny at runtime). The intent that makes two homes correct is firm separation itself. NO consolidation owner is named because no consolidation may occur.\n\n21 DRIFT, each with a named owner. Rationale stated per row rather than per subkind -- 18 of 19 Lambda rows share the subkind BUNDLED-COPY-DIVERGED-FROM-CANONICAL and the 19th (L3) shares it while meaning the OPPOSITE. A subkind-driven declaration would have routed a consolidation the estate forbids at two independent layers.",
+      "denominator": "22 of 22 declared (100%), zero undeclared against T4-1's denominator; +1 boundary case explicitly declared-unconfirmed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T4-3",
+      "criterion_verbatim": "DRIFT rows carry a NAMED OWNER (a drift row without an owner is an unrouted finding, not a declaration).",
+      "method": "command",
+      "invocation": "importlib load .tools/owned-paths-validate.py -> resolve_lane(<canonical path>, _load_yaml('.owned-paths.yaml')['paths']) per row, with positive + negative controls",
+      "output_evidence": "POSITIVE CONTROL org/mcp/broker.py -> BASE_EXEC (the lane that refused my own commit earlier tonight)\nNEGATIVE CONTROL zzz/no/such/path.xyz -> None\nLane distribution over the Lambda rows: POD4 9, ANY 7, UNRESOLVED 2 (own-tree), SHARED_OPAL_ETL 1.\n\nOWNERS NAMED: 0.4.0_DS_ClientPlatform (13 rows -- POD4 lane, plus data/assets/scripts/silver/* where the lane is ANY but CLAUDE.md Rule 13 gives DS the commit->QA-deploy cycle); 0.7.0_AE_CloudOps (6 rows -- 2 own-tree Lambda package rows + 3 EC2 + the E4 boundary); 0.5.0_AE_OpalETL (1 row -- smartx, SHARED_OPAL_ETL); 2.0.0_SA_COO as ROUTING owner (2 rows -- tools/news_scanner/*, where lane ANY claims no owner and no Rule-13 claim exists). Every DRIFT row has exactly one named owner; zero unrouted.\n\nINSTRUMENT NOTE: my first three resolve_lane attempts returned None for EVERY path INCLUDING the positive control, because I passed the whole config instead of config['paths']. The control is the only reason that did not silently become 19 rows of 'UNRESOLVED' -- an all-None result that would have looked like a real finding about the estate rather than a bug in my call.",
+      "denominator": "21 of 21 DRIFT rows carry exactly one named owner (the 22nd row is the FORK-DELIBERATE, which correctly names no consolidation owner); 4 distinct owners named",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T4-4",
+      "criterion_verbatim": "proof instance VALID rc=0 positional: ids T4-1..T4-4. MEASURED/RULED rows only.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D0_TIGHTENING.TO-5_PROOF_OF_SPEC.json T4-1,T4-2,T4-3,T4-4",
+      "output_evidence": "proof-of-spec-check | structural=jsonschema | acceptance rows=4 | violations=0\nVALID (true rc=0, captured without a pipe)\n\nEvery row rests on a re-runnable invocation over named evidence files with verbatim output. No row rests on an INFERRED expected value -- notably, the denominator is REPORTED from a direct count rather than asserted from the brief's prior, which is the entire point of the CVO P0-1 amendment this TO carries.",
+      "denominator": "4 of 4 criterion ids present (T4-1..T4-4)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The instrument-level control that mattered here was on the OWNER RESOLVER, not on the census data: resolve_lane() was exercised with a POSITIVE control (a path whose lane I had independently confirmed that same session, because BASE_EXEC had refused my own commit to it) and a NEGATIVE control (a nonexistent path that must resolve to None). This is the control that catches an undiscriminating or mis-called instrument. Separately, the census re-read is itself a mutant-style test of the brief's prior: the acceptance was deliberately made denominator-relative so that a wrong prior would FAIL rather than pass green.",
+      "expected": "positive control resolves to BASE_EXEC; negative control resolves to None; and if the brief's 16+3 prior were wrong, the re-read must surface it rather than reproduce it.",
+      "observed": "POSITIVE org/mcp/broker.py -> BASE_EXEC. NEGATIVE zzz/no/such/path.xyz -> None. Instrument discriminates. AND IT FIRED FOR REAL TWICE: (1) before the controls, resolve_lane returned None for every path INCLUDING the control -- a wrong-argument bug that would have produced 19 rows of false 'UNRESOLVED' presented as a finding about the estate; (2) the denominator re-read returned 19+3, not 16+3, surfacing +3 Lambda rows the prior would have left undeclared -- exactly the failure CVO P0-1 named. A third instrument miss was caught the same way: an EC2 scan keyed on 'TWO-HOMES' returned a clean, confident 0 against a report claiming 3, because that class does not exist in the EC2 vocabulary at all.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The census re-read is a pure function of four committed JSON evidence files at a fixed commit; re-run over the same files. Owner resolution re-run against the same .owned-paths.yaml.",
+      "observed": "Repeated runs return 19 Lambda finding rows / 19 distinct lambdas and the identical EC2 staged_class distribution (UNREAD 14, STALE-BY-NEGLECT 6, CURRENT 5, STAGED-ORPHAN-ONLY 2 = 27). Lane resolution stable across runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any consolidation, delete, or deploy",
+      "reason": "Explicitly out of scope -- the census's classify-don't-fix discipline, second act. Declarations only; consolidations run per-row at owning lanes behind R, never as a sweep."
+    },
+    {
+      "item": "Per-owner MCP confirmation of each declaration before recording it",
+      "reason": "The older NFRA_DEPLOYCENSUS.T4-DECLARATIONS TO required owning-lane confirmation (its T4-1 'DECLARED-UNCONFIRMED' path); D0_TIGHTENING.TO-5's criteria T4-1..T4-4 do not. I executed to TO-5 (latest binds) and declare from census evidence + the ownership rules. Owners receive their rows by real send; any owner disputing a declaration corrects it at their lane."
+    },
+    {
+      "item": "Adjudicating which of the two overlapping TOs survives",
+      "reason": "Two TOs dispatch this same body of work with CONFLICTING census instructions and different criteria sets. Surfacing the collision is mine; ruling on it is COO's. Surfaced, not adjudicated."
+    },
+    {
+      "item": "Classifying E4 canonical-schwab-si2",
+      "reason": "Orphan-shaped (no repo home) rather than diverged-shaped. Whether a Windows box with no repo home is a two-homes row is a taxonomy call (Rule 24) I do not own; declared as a named boundary case rather than silently counted or dropped."
+    },
+    {
+      "item": "Correcting the census's own summary/prose inconsistency (15 vs 16 vs 19)",
+      "reason": "That is a defect in my own 2026-08-18 delivery and wants its own correction act with its own record, not a silent in-place edit inside a declarations deliverable. Reported to COO; correction not performed here."
+    }
+  ],
+  "surprises": [
+    "THE CENSUS'S OWN ARTIFACTS CARRY FOUR DIFFERENT TWO-HOMES NUMBERS (15 summary / 16 prose+both TOs / 19 axis-class sum / 19 actual rows), and the summary file is internally inconsistent with the findings it summarises. This is a defect in MY OWN 08-18 census delivery, reported rather than quietly corrected.",
+    "The EC2 axis has NO 'TWO-HOMES' class in its vocabulary at all, so the report prose's 'TWO-HOMES (incl. orphan-bearing) 3' describes a class its own evidence file cannot express -- and the prose's EC2 counts (CURRENT 6 / STALE 6 / TWO-HOMES 3 / UNREAD 12) match neither the values nor the counts in the evidence (CURRENT 5 / STALE 6 / STAGED-ORPHAN-ONLY 2 / UNREAD 14).",
+    "L3 opal-partners-data would have been declared DRIFT by any subkind-driven rule, and routing its 'consolidation' would have proposed a bd<->cot mirror that CLAUDE.md forbids and that the commit gate and IAM Deny both block. 18 of 19 rows share that subkind and the 19th means the opposite.",
+    "Two TOs dispatch this work with opposite census instructions (do-not-re-derive vs re-read) and different criteria sets. Latest binds; surfaced to COO for a ruling."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-19/d0_tightening_to1_t1_broker_primitives.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name \"*DEPLOYCENSUS*\" ; comp-find --name \"CENSUS_REPORT*\"",
+      "result": "4 hits / 1 hit with denominators printed (27001 files scanned) -- located the census evidence set and, in the same call, surfaced that the T4-DECLARATIONS TO already existed, which is how the duplicate dispatch was found."
+    },
+    {
+      "tool": "owned-paths-validate.py (resolve_lane)",
+      "invocation": "resolve_lane(<canonical path>, _load_yaml('.owned-paths.yaml')['paths']) with positive + negative controls",
+      "result": "POSITIVE org/mcp/broker.py -> BASE_EXEC; NEGATIVE zzz/no/such -> None. Lane distribution POD4 9 / ANY 7 / UNRESOLVED 2 / SHARED_OPAL_ETL 1. The controls caught a wrong-argument call that had been returning None for everything."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> T4-1,T4-2,T4-3,T4-4",
+      "result": "structural=jsonschema | acceptance rows=4 | violations=0 -> VALID, true rc=0."
+    }
+  ]
+}
