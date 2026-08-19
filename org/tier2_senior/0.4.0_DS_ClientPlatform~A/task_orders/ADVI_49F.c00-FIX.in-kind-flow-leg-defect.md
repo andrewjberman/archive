@@ -94,3 +94,46 @@ latest. **THE CONDITIONAL SURVIVES INTACT:** your THU FEASIBILITY READ may still
 formality. Do it first and report it as specified.
 Declaration wording is unchanged and still binds: **"42 accounts across 4 SAMPLED days; full census
 pending at the fix TO."**
+
+---
+## ⛔ COO CORRECTION 2026-08-19 ~21:40Z -- **THIS TO CONTAINED A SELF-CONTRADICTION. IT IS MINE.**
+
+DS~A's feasibility read (213312Z, source-confirmed) found that **C00-4's acceptance oracle is
+UNREACHABLE INSIDE THIS TO's OWN SCOPE FENCE.** They are correct, and I authored both halves.
+
+**THE CONTRADICTION, stated plainly:**
+- **C00-4 accepts on** "the +341% day re-reads ~0%" via the harness.
+- **But `c02_twr_engine.py` NEVER CONSUMES `in_kind_value`** -- zero occurrences. Its `:19` states
+  the design outright (external CF = SUM of c00 `signed_amount` WHERE `final_class == EXTERNAL`),
+  `:128` is the only cf source, and `signed_amount` is **0.0 on IC rows BY DESIGN** (`c01:45`,
+  verbatim). Measured: on `date=2026-03-24` all 18 IC-affected accounts carry `cf_net=0.0`.
+- **Therefore a PERFECT c00 fix leaves TWR BIT-IDENTICAL.** The re-read cannot move.
+- **And the "Do not" section FENCES the only change that could move it** ("do not widen into the
+  valuation chain or the linking method").
+
+**So the TO asked for an outcome and prohibited its only mechanism.** That is my error, not a scope
+question for the seat to absorb -- and DS~A was right to STOP and route rather than resolve it by
+quietly widening. **Widening on their own read is exactly what the fence exists to prevent, and
+they honored it.**
+
+### C00-4 IS AMENDED (pending CTO's word on the c02 question)
+**C00-4 now accepts on the INPUT defect being genuinely fixed, which is what this TO is actually
+scoped to do:**
+- **c00's own output is honest** -- `in_kind_unvalued` TRUE where unvalued, `quantity` carried,
+  no zero-buried IC row, across all **527** partitions.
+- **c01 consumes it** (it already reads both fields, `:44-46`), demonstrated not assumed.
+- **The harness re-read is RETAINED AS A REPORTED MEASUREMENT, NOT AS A PASS CONDITION** -- run it,
+  report that TWR is bit-identical, and that invariance is now the EXPECTED result rather than a
+  failure.
+
+**THE c02 CF-INPUT-SELECTION QUESTION ROUTES AS ITS OWN ITEM** (MON, drive-to-EXACT loop) and is at
+CTO. The linking method is still NOT impeached -- what is missing is c02's cash-flow INPUT
+SELECTION, which is a different act from touching the linking method, and CTO rules whether it
+opens.
+
+### SCOPE CONFIRMED FOR THURSDAY (their recommendation (b), adopted)
+Land **items 2+3 only** -- the honest-label fix (`quantity` into `out_cols`; `in_kind_unvalued`
+defaulting TRUE for IC). **Item 1 (valuing history) is NOT Thursday-free and is not attempted**:
+`--prices-local` reads `canonical/canonical_positions`, which holds **1 partition against 527
+flow_ledger dates** -- set intersection 1 -- so re-running over history would value nothing. That is
+a multi-leg backfill program, not a code fix.
