@@ -27,6 +27,8 @@ oracle — the mutant discipline applies to the table itself).
   carried with their state, never silently absent.
 - OR-2 RUNNABLE: each oracle is an executable invocation (script/command + expected), not prose; the
   table states where it runs (DEV vs deployed) per row.
+  **R1 RIDER (CTO @9988b2dd66): every value-anchor leg's LEGACY-side expected derives from the
+  04:00Z T-1 serve, never the 23:01Z preview emission.**
 - OR-3 CAN-FAIL (CVO's half): each oracle exercised once against a state where it MUST fail (the
   legacy serve or a mutated fixture) — pass-on-both rows are rewritten, shown.
 - OR-4 proof instance VALID rc=0 positional per author half: ids OR-1,OR-2,OR-3,OR-4 (DE fills

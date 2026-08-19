@@ -34,6 +34,9 @@ Group PIN (08-21):
   Pre-flip pin includes the MEASURED delta (incl. the $122.5M Schwab-canonical authority class
   @745ca6d78f where it lands on a key).
 - 49F-PIN-VINTAGE-STATED: every pin row carries both sides' vintages + content-date explicitly.
+  **R1 RIDER (CTO ruling @9988b2dd66, folded 08-19 ~05:50Z): the SERVED side of every pin frames
+  against the 04:00Z T-1 serve (true landing ~05:27Z), NEVER the 23:01Z T-2-evening preview — a
+  wrong-emission expectation manufactures exactly last night's basis-mismatch flag, per key.**
 Group CERT (08-22, per key at flip):
 - 49F-CERT-PERKEY: Rule-14e cutover cert per key consuming (i) the pre-flip pin, (ii) DS~B's
   never-widen disclosure (P4E-5), (iii) the CTO+COO never-widen determination; DELTA=0 keys certed
