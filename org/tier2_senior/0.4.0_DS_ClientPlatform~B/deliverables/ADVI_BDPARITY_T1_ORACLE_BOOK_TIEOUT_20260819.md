@@ -46,30 +46,33 @@ or VALUATION (L2-L3).**
 ### Three hard rules, enforced in the oracle's own frame
 
 1. **NEVER SUM ACROSS GROUPS.** Groups overlap: measured 5,579 of 6,155 accounts (90.6%) in 2+ groups;
-   the all-group sum is **$8.25B against a $1.550B distinct-account universe**. The tool **refuses to
+   the all-group sum is **$8.25B against a $1.551B distinct-account universe**. The tool **refuses to
    emit a cross-group total** -- that is not a big number, it is a wrong one.
-2. **One account counts once per group.** Enforced structurally by the membership dict.
+2. **One account counts once per group, but its SUPERVISION SLEEVES are SUMMED.** Enforced by
+   `dedupe_group_account` keyed on `(group, account, supervised)` -- mutant-verified load-bearing
+   (79 of 201 groups move if bypassed). *Corrected 2026-08-19 ~2245Z; see ADDENDUM.*
 3. **Join on `zfill(10)`.** Export carries 8-digit; our canonical carries 10-digit.
 
 ---
 
 ## 2. T1-1 -- THE ORACLE READ, PER GROUP (as_of 2026-08-18)
 
-Denominators, printed beside every number: 30,577 export rows read -> 29,907 after collapse; **201
+Denominators, printed beside every number: 30,577 export rows read -> 29,926 after collapse; **201
 portfolio groups**; 6,155 distinct accounts; our canonical carries 7,315 accounts.
 
 | portfolio group | accts | L2 membership MV | L3 ours |
 |---|---:|---:|---:|
-| 49F Schwab AUM | 2989 | $745.6M | $736.1M |
+| 49F Schwab AUM | 2989 | $745.6M | $736.1M |  <!-- corrected: $745,570,084.08 -->
 | Alex Bright - Local Ops | 2230 | $546.9M | $542.2M |
 | Dallas Support | 1498 | $455.1M | $449.4M |
-| Collin Plotts | 1771 | $447.4M | $436.8M |
-| Lane Curry - Local Ops | 1361 | $399.6M | $372.8M |
+| Collin Plotts | 1771 | **$447.6M** | $436.8M |  <!-- corrected +$3,159,412.24 -->
+| Lane Curry - Local Ops | 1361 | **$400.3M** | $372.8M |  <!-- corrected +$3,657,307.24 -->
 | **Travis Penfield** | **318** | **$392.6M** | **$377.4M** |
 | 49 Private Wealth | 188 | $347.7M | $339.4M |
 | Erick Webb - Local Ops | 1187 | $329.7M | $328.7M |
 
-All 201 groups are in the JSON report. **Group-grain only** -- no cross-group total exists in the output.
+All 201 groups are in the JSON report; the three marked rows carry the ADDENDUM's sleeve correction
+(12 of 201 groups moved; **Travis did not**). **Group-grain only** -- no cross-group total exists in the output.
 
 ### The L1 leg is BUILT AND EXERCISED but NOT MEASURED BY ME -- stated plainly
 
@@ -219,3 +222,74 @@ on the instance.
   this map as landing *daily*. **The `opal-data-assets/blackdiamond/49f/bronze/allocation_390224/` feed
   this oracle uses IS daily and IS current (as_of 08-18, pulled 08-19T02:30Z = correct T-1).** No outage
   claimed; a declarative question at most.
+
+---
+
+# ADDENDUM 2026-08-19 ~2245Z -- CORRECTION: THE SUPERVISION SLEEVE
+
+Found while building T2-DIMS, when the T2 producer and this oracle disagreed on 14 of 201 groups.
+Two of my own artifacts disagreeing is not shippable, so I chased it. **The oracle was wrong and is
+now fixed** (@PENDING). Reported here in full because the numbers above were already delivered.
+
+## What was wrong
+
+Both tools collapsed to one row per `(portfolio_group, account)` and **kept a single row**. But an
+account can be split by the vendor's `Account Supervised` column into a **Supervised** and an
+**Unsupervised** sleeve, each carrying its **own** market value and allocation. Keeping one row kept
+one sleeve and silently dropped the other.
+
+## Why SUM is right, and it is proven not assumed
+
+For every sleeve, `account_market_value / account_allocation == portfolio_group_market_value` **to
+the cent** -- i.e. both sleeves divide the *same* portfolio total, so they are slices of one account,
+not competing values:
+
+| account | sleeve | market value | allocation | implied portfolio total | stated portfolio total |
+|---|---|---:|---:|---:|---:|
+| z0821416041 | Supervised | $145,177.38 | 0.036286132 | $4,000,905.31 | $4,000,905.31 |
+| z0821416041 | Unsupervised | $2,887,004.52 | 0.721587815 | $4,000,905.31 | $4,000,905.31 |
+| z0817426131 | Supervised | $16,275.20 | 0.016467561 | $988,318.79 | $988,318.79 |
+| z0817426131 | Unsupervised | $272,407.72 | 0.275627381 | $988,318.79 | $988,318.79 |
+| z0816967031 | Supervised | $488,502.34 | 0.097709973 | $4,999,513.61 | $4,999,513.61 |
+| z0816967031 | Unsupervised | $497,895.00 | 0.099588688 | $4,999,513.61 | $4,999,513.61 |
+
+**Positive control:** an ordinary single-sleeve account (z0812152081) satisfies the same identity
+($448,489.82 implied == stated), so the identity is a property of the feed, not of these three rows.
+
+**Key soundness:** within `(group, account, supervised)` the market value is constant on **29,926 of
+29,926 keys -- zero exceptions**, so collapsing to one row per key loses nothing, while the 554 keys
+backed by multiple rows (an account reachable through two portfolios/relationships inside one group)
+still correctly collapse to one.
+
+## Impact -- and the headline is UNAFFECTED
+
+**3 accounts, 19 `(group, account)` keys, 12 of 201 groups.** Total understatement recovered
+**$24,605,360.68**. Corrected examples: Austin Thompson / Lane Curry - Local Ops / Ted Grant each
++$3,657,307.24; Collin Plotts +$3,159,412.24; Sydney Cobb / Patrick Mundlin / Campbell Huber each
++$2,887,004.52; 49F Schwab AUM +$272,407.72.
+
+> **TRAVIS PENFIELD IS NOT AMONG THE 12. His book is $392,556,451.10 before and after, so every
+> number in sections 2 and 3 above -- including the +$79,366,493.25 (+21.03%) headline, the
+> membership/coverage/valuation split, the attribute view, and the $405.4M double-count correction --
+> STANDS UNCHANGED.** What changed is the per-group table for 12 other groups and the
+> distinct-account universe ($1.550B -> $1.551B).
+
+## Cross-check after the fix
+
+The two producers are now independent implementations that agree: the oracle reads the **bronze
+xlsx positionally with floats**, the T2 producer reads the **silver parquet by name with decimal128**.
+Across all 201 groups: **max |delta| $0.005, total |delta| $0.18** -- and the two $0.005 items are
+this oracle's `round(x, 2)` on values ending in exactly `.725`/`.755`, not a computation difference.
+
+## The control that had to be re-run
+
+**MUTANT 2 NOW FIRES.** Bypassing `dedupe_group_account` changes **79 of 201** group books, total
+|delta| **$206,733,899.92** (Travis inflates to the $405,399,972.00 raw row sum). The earlier
+"did not fire, 0 of 201" result was **true of the earlier code** -- adding the sleeve term changed
+the mechanism, because sleeves are now SUMMED rather than collapsed by dict keying, which makes the
+dedup call the only thing standing between the book and the raw row sum.
+
+**The transferable lesson, and it is why this is in the record rather than a quiet edit: a mutant
+result is a statement about the code AT A VINTAGE, not a permanent property. Change what is being
+aggregated and every control over that aggregation must be re-run, or you carry a stale verdict
+about your own instrument.** The docstring has been corrected a second time accordingly.
