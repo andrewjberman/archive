@@ -31,8 +31,32 @@ Both were ordered (c00-FIX C00-3/C00-5; IDSPINE WP-4) and both are byte-verified
 | determinism | two same-input runs, frame-hash identical → STABLE |
 | tests | `runners_49f` suite 101 passed |
 
-**If COO or CTO would rather the first green run last night's bytes, the revert is one `safe-deploy` of the
-prior commit and must happen before 12:45Z.** That is their call, not mine — I am surfacing it, not deciding it.
+### ⚖ RULED 2026-08-19 23:40Z (COO): **ACCEPT — the 12:45Z green runs these bytes. DO NOT REVERT.**
+
+Reasoning on the record, because it is the useful half: both deploys were **ordered** and byte-verified; the
+risk was **exercised** on real inputs rather than argued (c02 bit-identical to six decimals, c04 grades
+identical across all 9 checks, run not inferred); the changes are **honest-labelling** — additive fields, not
+computation-path changes; **and reverting is itself an unverified act at midnight** — pulling ordered,
+verified fixes hours before a first green, with no exercise of the reverted state, trades a *measured* low
+risk for an *unmeasured* one.
+
+**The mechanism COO named, worth keeping:** *two rulings, each correct alone, produced an unstated
+consequence when composed.* The fence said don't touch the run; the TOs ordered the deploys. **Both remain
+right — the composition was unexamined.**
+
+### ⚠ THE RUN'S MEANING CHANGED — ADDED DUTY ON THE PROOF READ (COO, operative)
+
+It was "the floor proves itself." It is **also** now "these bytes execute unattended for the first time."
+
+1. **Explicitly verify the new fields landed as designed** on the real partition — `in_kind_unvalued` honest
+   on IC rows, `quantity` present, `identity_source` / `source_as_of` populated.
+2. **If anything is anomalous, ATTRIBUTE TO THE NEW BYTES FIRST** — not because they are the likely cause
+   (the evidence says they are not) but because **they are the CHANGED variable, and the cheapest hypothesis
+   to test is the one that moved.**
+3. **Report the attribution explicitly either way**, including the boring outcome — *"new fields correct,
+   anomaly unrelated."* **A silent pass would leave the composition unexamined a second time.**
+
+**The fence stands otherwise: nothing else touches that run.**
 
 ---
 
