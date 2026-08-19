@@ -470,3 +470,53 @@ measurements, deliberately not summed.
 Unchanged in direction, sharper in claim: **our chain's valuation ties BD where the roster agrees
 (24 groups, to the cent), and our own coverage is not the driver (+29.70% vs +29.08%). The gap sits
 upstream in what template 390224 selects** -- the same root as dim 436, in rows rather than columns.
+
+---
+
+# ADDENDUM 4 -- 2026-08-19 ~2345Z: THE IDENTITY JOIN IS NEGATIVE, AND A RETRACTION THAT HAD ALREADY TRAVELLED
+
+## The retraction reached a second seat late, and that is the point worth recording
+
+I withdrew the "MEMBERSHIP = 90.8% of the gap" label at ~2335Z (Addendum 3), during the broker
+quiesce, so my retraction could not be sent. `4.0.0_SA_CRO~A`'s next message closed by adopting the
+withdrawn figure verbatim as "the headline mechanism". **A correction held in the record but not yet
+on the wire does not stop propagation** -- the record was already right and the fabric was already
+carrying the wrong number. Corrected to both CRO~A and COO the moment sends were released.
+
+*The generalisable bit: the window between "corrected in the artifact" and "corrected in every seat
+that read it" is the window in which a withdrawn number gets quoted forward. Committing the fix does
+not close it.*
+
+## The join CRO~A handed me and explicitly did not run -- NEGATIVE
+
+They asked whether their unexplained identity outliers overlap my widest-gap groups. They do not:
+
+| | |
+|---|---:|
+| my WIDE set (pct L1-vs-L3 above Q3 = +51.11%) | 49 groups |
+| their UNEXPLAINED outliers (outside the 1-2% band, BMV >= $1M) | 24 groups |
+| **overlap** | **9** |
+| expected by chance if independent | 5.9 |
+
+Overlap residuals are mixed-sign (+2.88, +2.43, +2.36, +0.99, +0.96, +0.66, +0.32, +0.11, -2.52) --
+no coherent direction. **9 against 5.9 on these counts is not evidence, and I am not going to force a
+story out of it. The two anomaly sets are independent.**
+
+**Their residual is market appreciation, not an error term** -- and the discriminator is that it
+**re-prices monthly** (Jun -0.099%, Jul +0.064%, Aug +1.469%), which a convention or basis mismatch
+does not do. So it is neither my roster mechanism nor a basis term. **This removes a candidate rather
+than confirming one**, which is the useful outcome given the positive result is already carried by the
+24 exact ties.
+
+> **A structural point from CRO~A worth keeping, because I commissioned the read that would have
+> produced the false findings:** `residual = EMV - (BMV + NetFlows - Fees)` is IMPLIED MARKET
+> APPRECIATION -- the identity does **not** close by construction, so **a near-zero residual would be
+> the anomaly, not the goal.** Read as an error term it would have manufactured 215 false findings in
+> one pass. Stating the interpretation *before* the number is what prevented that.
+
+## Provenance footnote closed
+
+CRO~A confirmed the `456,773,300.00` in their earlier prose was a scientific-notation **display
+truncation** (`4.567733e+08`), not a value; exact is `456,773,323.40`, which is what this deliverable
+carries. Their committed artifact was correct throughout. The "artifact governs" note above stands as
+written and needed no change.
