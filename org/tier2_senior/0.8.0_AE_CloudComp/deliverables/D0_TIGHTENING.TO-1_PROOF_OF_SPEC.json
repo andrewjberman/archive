@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D0_TIGHTENING.TO-1",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "docs/architecture/D0_INFRA_TIGHTENING_PRD.md",
+    "group": "T",
+    "vintage_commit": "4bf291b26c"
+  },
+  "assignee": "0.8.0_AE_CloudComp",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/mcp/broker.py",
+      "kind": "script",
+      "commit_or_etag": "d547f109fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local fabric infrastructure -- no S3/Lambda deploy leg exists for the broker. HONEST SCOPE NOTE (Rule 22a, staged code is DESIRED, executing code is APPLIED): the LIVE broker pid 25428 still carries PRE-T1 bytes and will until the next broker restart. Measured post-commit: pid 25428 listening on 7800, /health -> 200, started before this commit. Nothing in this deliverable claims the fix is EXECUTING."
+    },
+    {
+      "path_or_key": "org/mcp/server.py",
+      "kind": "script",
+      "commit_or_etag": "d547f109fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same: every running MCP server process carries pre-T1 bytes; the new _ensure_broker double-spawn path takes effect on the next broker relaunch."
+    },
+    {
+      "path_or_key": "org/mcp/test_d0_t1_delivery_clocks.py",
+      "kind": "test",
+      "commit_or_etag": "d547f109fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Regression battery, re-runnable by a verifier: python org/mcp/test_d0_t1_delivery_clocks.py"
+    },
+    {
+      "path_or_key": "org/mcp/test_d0_t1_recipient_list.py",
+      "kind": "test",
+      "commit_or_etag": "d547f109fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Regression battery, re-runnable by a verifier: python org/mcp/test_d0_t1_recipient_list.py"
+    },
+    {
+      "path_or_key": "org/mcp/test_d0_t1_listener_survival.py",
+      "kind": "test",
+      "commit_or_etag": "d547f109fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Regression battery, re-runnable by a verifier: python org/mcp/test_d0_t1_listener_survival.py"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T1-1",
+      "criterion_verbatim": "THREE-RECIPIENT SEND WITH ONE DEAD SEAT -> 2 DELIVERED + 1 QUEUED, NEVER SILENT. Show the per-recipient result map. Dead recipient -> QUEUED (not silent success); unknown serial -> REFUSED. Backward compatible: to_agent: str call shape unchanged.",
+      "method": "test_suite",
+      "invocation": "python org/mcp/test_d0_t1_recipient_list.py",
+      "output_evidence": "send_message -> 3 recipient(s). PER-RECIPIENT RESULT:\n  DELIVERED 1.0.0_SA_CTO   id=1 via filesystem+broker\n  DELIVERED 2.0.0_SA_COO   id=2 via filesystem+broker\n  QUEUED    3.0.0_SA_CVO   id=3 written to inbox 3.0.0_SA_CVO; no live session\n  -- 2 DELIVERED / 1 QUEUED / 0 REFUSED (denominator 3)\n[PASS] T1-1a: 3 recipients w/ one dead -> 2 DELIVERED + 1 QUEUED (required: 2 + 1)\n[PASS] T1-1d: unknown serial 9.9.9_NO_SUCH_SEAT -> REFUSED and named (nothing written for it)\n[PASS] T1-1e: single-recipient call returns the LEGACY receipt shape unchanged: Message delivered to 1.0.0_SA_CTO (inbox 1.0.0_SA_CTO): 2026...",
+      "denominator": "9 of 9 checks PASS in the recipient-list battery; the T1-1 map itself carries denominator 3 of 3 recipients",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T1-2",
+      "criterion_verbatim": "S1 BODY-CC REPLAY IS DETECTABLE via the receipt query. Replay the measured incident shape (LD-0424: DT's freeze release lost via an in-body cc) and show the query naming what did and did not reach a seat.",
+      "method": "test_suite",
+      "invocation": "python org/mcp/test_d0_t1_recipient_list.py",
+      "output_evidence": "[PASS] T1-2a: receipt query shows the body-cc message reached 1.0.0_SA_CTO ONLY (reached 2.0.0_SA_COO: False, reached 3.0.0_SA_CVO: False) -- the in-body 'cc' copied NOBODY, and the query NAMES that\n[PASS] T1-2b: the receipt query prints per-state TOTALS with a denominator\n[PASS] T1-2c: POSITIVE CONTROL: with to_agents, the SAME query sees the message at BOTH seats -- so T1-2a's absence is a real absence, not a blind query",
+      "denominator": "3 of 3 T1-2 checks PASS; query scoped over 3 recipient serials (2 cc-named in body, 1 addressed)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T1-3",
+      "criterion_verbatim": "LISTENER SURVIVES PARENT DEATH: kill the listener's parent seat; the listener lives. This is the orphan-lifecycle fix -- exercise it, do not reason about it.",
+      "method": "test_suite",
+      "invocation": "python org/mcp/test_d0_t1_listener_survival.py",
+      "output_evidence": "[PASS] T1-3-FIXED: after the seat tree-kill the broker is ALIVE (expected ALIVE)\n[PASS] T1-3-MUTANT: after the seat tree-kill the broker is DEAD (expected DEAD)\nKill used is byte-for-byte the recursive ParentProcessId descent of .tools/kill-agent.ps1:126-133 (Stop-ProcessTree). PRE-BUILD MEASUREMENT that redirected the fix: live broker pid 25428 chain = 25428:python.exe <- 4644:python.exe <- 26272:claude.exe, i.e. REAPABLE despite DETACHED_PROCESS already being set at server.py:516-522.",
+      "denominator": "2 of 2 cases (1 fixed-spawn + 1 mutant pre-fix spawn); 3 of 3 spawn mechanisms probed for parent-chain escape before choosing",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T1-4",
+      "criterion_verbatim": "EXERCISED ON BOTH FABRICS before close (each device runs its own broker -- \u00a77 says so explicitly). A single-fabric green is a partial result and must be reported as one.",
+      "method": "test_suite",
+      "invocation": "python org/mcp/test_d0_t1_delivery_clocks.py && python org/mcp/test_d0_t1_recipient_list.py && python org/mcp/test_d0_t1_listener_survival.py  [LAPTOP ONLY]",
+      "output_evidence": "LAPTOP fabric: 22/22 PASS across the three batteries (11/11 delivery clocks, 9/9 recipient list, 2/2 listener survival). SITE-Z fabric: NOT RUN. This seat is on the laptop; site Z runs its own broker on its own device and this seat cannot reach it. Reported as a PARTIAL result exactly as the criterion requires -- not as a green.",
+      "denominator": "1 of 2 fabrics exercised (laptop yes, site Z no); 22 of 22 checks PASS on the fabric that was exercised",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The site-Z leg rides a NAMED later run: a ~Z seat on the site-Z device must execute the same three committed batteries (org/mcp/test_d0_t1_*.py) against its own broker. This seat is structurally unable to do it -- the laptop cannot reach site Z's broker, and opal-agent-comms is a localhost broker per device. Routed to COO for site-Z scheduling in the report accompanying this instance. The criterion is NOT claimed as met."
+    },
+    {
+      "criterion_id": "T1-5",
+      "criterion_verbatim": "proof instance VALID rc=0 positional: ids T1-1..T1-5. MEASURED/RULED-class run rows only; INFERRED-class expected values are mechanically ineligible.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D0_TIGHTENING.TO-1_PROOF_OF_SPEC.json",
+      "output_evidence": "proof-of-spec-check | structural=jsonschema | acceptance rows=5 | violations=0\nVALID\nTRUE_RC=0 (captured WITHOUT a pipe -- a first attempt read rc through `| tail` and would have reported the tail's 0 while the validator had actually printed usage on a malformed space-separated id list; the id set is COMMA-separated)\nEvery acceptance row above cites a re-runnable invocation and verbatim output; no row rests on an INFERRED expected value -- each expected value is either the spec's own words or a measured chain/count.",
+      "denominator": "5 of 5 criterion ids present (T1-1..T1-5); 5 acceptance rows for 5 spec criteria",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two independent mutant controls, because two different claims needed to be falsifiable. (1) E7-MUTANT: the identical kill-before-drain scenario replayed against the PRE-T1 broker, materialised from PINNED vintage e7858adf52 (deliberately not HEAD -- once T1 landed, a HEAD-sourced baseline would be the fixed code, and a control that drifts with the thing it controls is not a control). (2) T1-3-MUTANT: the pre-fix DETACHED_PROCESS spawn subjected to the same recursive ParentProcessId tree kill the fixed spawn survives.",
+      "expected": "(1) the pre-T1 broker LOSES the message permanently: first poll returns 1, post-death poll returns 0. (2) the pre-fix spawn's broker is DEAD after the seat tree-kill.",
+      "observed": "(1) 'pre-T1 broker: first poll returned 1, post-death poll returned 0 -> message PERMANENTLY LOST' -- the loss window reproduced before being closed. (2) 'after the seat tree-kill the broker is DEAD (expected DEAD)'. Both fired as expected, so neither the E3b survival result nor the T1-3 survival result is consistent with a test that could not fail.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each battery re-run on identical inputs after all edits; the delivery-clocks and recipient-list batteries were additionally re-run a second time to compare same-input results.",
+      "observed": "delivery clocks 11/11 then 11/11; recipient list 9/9 then 9/9; listener survival 2/2 then 2/2. Identical verdicts and identical per-check ids across runs. Each battery uses a scratch port + scratch DB per run, so no run inherits prior state.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "T1-4 site-Z fabric leg",
+      "reason": "Structurally unreachable from this seat -- site Z is a separate device running its own localhost broker. Reported as PARTIAL per the criterion's own instruction and routed to COO, never claimed as met."
+    },
+    {
+      "item": "Retry / guaranteed-delivery layer, delivery-failure alarms, send-side approval steps",
+      "reason": "Explicit ratified anti-scope in Appendix A ('Three primitives exactly'). Alarms additionally fall under the standing notification moratorium."
+    },
+    {
+      "item": "The commit-worker daemon spawn path (_ensure_commit_worker, server.py:~592) still uses the pre-fix single Popen + DETACHED_PROCESS shape",
+      "reason": "Same reapable-parentage defect as the broker had, but OUT OF SCOPE for TO-1, which names the listener/broker. Surfaced to COO rather than fixed, so scope is not silently widened."
+    },
+    {
+      "item": "Live broker restart to make the fix EXECUTING",
+      "reason": "Restarting the fabric's live broker mid-session would interrupt every live seat's comms. Not authorised by this TO and not required by any acceptance criterion. The code is COMMITTED-NOT-DEPLOY-SCOPE and states so."
+    }
+  ],
+  "surprises": [
+    "The PROOF_OF_SPEC `firm` enum (49F/INF/COT/MDPF) has no value for fabric-infrastructure work, so the COO instruction to declare `firm` on next touch is unsatisfiable for D0_TIGHTENING TOs -- declaring a false firm would be worse than the UNPARSED render it is meant to fix. Rule-24 collective-exhaustiveness gap. Field omitted deliberately; no action taken.",
+    "org/mcp/* is owned-paths lane BASE_EXEC (CTO/COO/CVO), which does not include this AE seat, yet COO issued this build TO to this seat. Landed via the sanctioned singular-lane audited escape GIT_COMMIT_AUTHOR_OVERRIDE=BASE_EXEC and surfaced in the report; either the lane membership or the TO placement wants a ruling. No action taken beyond the audited commit.",
+    "broker.py was ALREADY failing the universal commit-gate at HEAD (2 pre-existing ruff findings) before this work touched it, meaning the file could not have been landed through the gate in its prior state without the same treatment. Fixed in passing to land; flagged rather than left silent.",
+    "server.py:~592 _ensure_commit_worker carries the identical reapable-parentage shape the broker just had (plain Popen + DETACHED_PROCESS). Out of scope, unfixed, routed."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-19/d0_tightening_to1_t1_broker_primitives.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"validate a proof of spec instance\"",
+      "result": "NO CURATED RULE MATCHED -- router honestly declined rather than guessing (top score 0.43 comp-validate, a gold-artifact invariant tool, not the proof-of-spec validator). Coverage gap noted: the proof-of-spec validator .tools/proof-of-spec-check.py is not routable via comp-which. Fell through to a direct .tools listing."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D0_TIGHTENING.TO-1_PROOF_OF_SPEC.json T1-1,T1-2,T1-3,T1-4,T1-5",
+      "result": "proof-of-spec-check | structural=jsonschema | acceptance rows=5 | violations=0\nVALID\nTRUE_RC=0 (captured WITHOUT a pipe -- a first attempt read rc through `| tail` and would have reported the tail's 0 while the validator had actually printed usage on a malformed space-separated id list; the id set is COMMA-separated)"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh org/mcp/broker.py org/mcp/server.py org/mcp/test_d0_t1_*.py",
+      "result": "PASS -- 'pre-commit gate clean for 5 file(s)'. Baseline measured under the gate's own invocation (python -m ruff check --target-version py39 --extend-select FA) showed HEAD and this change each carrying exactly 2 findings, so this work introduced ZERO new lint."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "GIT_COMMIT_AUTHOR_OVERRIDE=BASE_EXEC .tools/safe-commit.sh --author \"0.8.0_AE_CloudComp <...>\" -F <msgfile> -- <5 paths>",
+      "result": "Committed d547f109fe, 5 files, 1083 insertions. Audited singular-lane override (all five paths are the same BASE_EXEC lane)."
+    }
+  ]
+}
