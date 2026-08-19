@@ -1,0 +1,127 @@
+{
+ "schema_version": "1.0",
+ "to_id": "OPAL_ADVIPOINTERS.GOLDHOME-REPOINT-49F",
+ "phase": "P3-REPOINTS",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/OPAL_ADVIPOINTERS.GOLDHOME-REPOINT-49F.per-client-bucket-one-act.md",
+  "group": "T",
+  "vintage_commit": "1b2ee34db7"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~A",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/deliverables/goldhome_sync_manifest_part1.json",
+   "kind": "doc",
+   "commit_or_etag": "d62b47cc44",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "pre-sync census both sides (source 4,222/327,275,368B; target 0 first-fill) -- rollback instrument part 1"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/deliverables/goldhome_sync_manifest_part2.json",
+   "kind": "doc",
+   "commit_or_etag": "d62b47cc44",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "post-sync two-sided verify (per-table 10/10, key-set equality both directions, top-5 ETag identity, VERDICT PASS) -- rollback instrument part 2"
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/runner_common.py",
+   "kind": "script",
+   "commit_or_etag": "d62b47cc44",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "the SPLIT (SILVER_BUCKET/GOLD_BUCKET + _bucket_for) landed in the commit AND at s3://opal-data-49financial/_code/runner_common.py via the _code move (51/51 ETag-identical to the enumerated old-home state)"
+  },
+  {
+   "path_or_key": ".tools/safe_deploy_core.py",
+   "kind": "script",
+   "commit_or_etag": "d62b47cc44",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "advi row -> bucket opal-data-49financial, layer target _code/ (bucket-root per CTO pin 174449Z); mapping battery 6/6 + test_safe_deploy 14/14 + pipescript-suite 140/140 at commit"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "RP-DSA-1",
+   "criterion_verbatim": "SYNC two-sided: portal/gold/advi/49financial/ -> opal-data-49financial/gold/advi/ -- object count AND bytes verified both sides (the P3-copy precedent bar; ~4,222 objects/~327MB expected, actual printed), sync manifest kept as the rollback instrument.",
+   "method": "live_read",
+   "invocation": "aws s3 sync (server-side) + paginated boto3 census of BOTH sides pre- and post-sync: per-table object count + bytes, relative-key set comparison both directions, ETag identity on the 5 largest objects",
+   "output_evidence": "SOURCE 4,222 objects / 327,275,368 bytes == TARGET 4,222 / 327,275,368; per-table 10/10 OK (canonical_valuation 1052/148,690,690B ... dim_security 2/102,755B); missing-in-target 0, extra-in-target 0; top-5 ETag OK; TWO-SIDED VERDICT: PASS",
+   "denominator": "4,222 objects across 10 tables, both sides materialised client-side (paginated, never a page count)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RP-DSA-2",
+   "criterion_verbatim": "CODE FLIPS in one commit: runner_common.py BUCKET + OUT_ROOT; the safe_deploy_core advi row; the _code/ home re-points to the new root -- anything already landed at portal/gold/advi/_code/ MOVES (no twin -- the two-homes class); comp-pipescript/commit-gate clean.",
+   "method": "command",
+   "invocation": "one commit d62b47cc44 (runner_common + a00_runner split, c00-c03 gold-plane sites, chain entrypoint constants, safe_deploy_core advi row); pre-commit exercise: real silver read + real gold read + negative control + a00 three-planes; _code move: exec-time enumeration -> copy_object x51 -> ETag verify -> delete-old",
+   "output_evidence": "The flip executed as a SPLIT (measured pre-act: one BUCKET served silver reads AND gold R/W): silver read fact_fam 2026-08-10 7,202 rows FROM opal-data-assets; gold read canonical_valuation 2026-08-10 7,254 rows / 526 partitions FROM opal-data-49financial; bogus-table negative control names the NEW bucket; a00 planes silver 531 partitions ..2026-08-17 / gold 2 / conv attested 7,308. _code: 51/51 ETag-identical at s3://opal-data-49financial/_code/, old prefix deleted to KeyCount=0 with adjacent positive control (old GOLD DATA root untouched -- RP-SPINE-2 is AE's, held for CVO + live-verify per the spine order). Gates: commit-gate + ruff clean (one unused-import catch fixed), pipescript-suite 140/140. CTO gate-seat validation 012326Z.",
+   "denominator": "8 code files in the commit; 51 _code objects enumerated AT EXECUTION (covers the 3 post-mint writers from the 1739Z integrator push by construction -- d_publisher_port.py verified PRESENT at the new home directly)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RP-VAL",
+   "criterion_verbatim": "proof instance per group, rc=0 positional, grammar {assignee_folder}/deliverables/PROOF_OF_SPEC_GOLDHOME_REPOINT_49F_{group}_{YYYYMMDD}.json.",
+   "method": "command",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform~A/deliverables/PROOF_OF_SPEC_GOLDHOME_REPOINT_49F_DSA_20260819.json RP-DSA-1,RP-DSA-2,RP-VAL",
+   "output_evidence": "rc=0 VALID (bare rc, no pipe, run in-session)",
+   "denominator": "3 expected criterion ids for the DSA group (the TO's other 6 belong to the AE/CVO/spine groups' own instances)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two-homes mutant on the _code move: after the copy, the delete step's post-condition (old-prefix KeyCount=0) is the mutant detector -- a move that silently left a twin would read KeyCount>0 and fail the act's own check; exercised beside an ADJACENT positive control (the old gold data root lists >0) so an empty read is discriminated from a broken lister.",
+   "expected": "old _code prefix KeyCount=0 AND adjacent prefix KeyCount>0",
+   "observed": "old-prefix post-delete key count: 0; adjacent positive control: 1 (>0) -- both limbs discriminate",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "N/A-WITH-REASON: a one-act S3 migration is not a re-runnable derivation; its idempotence surrogate is the two-sided census (re-listing both sides reproduces identical counts/bytes) and the versioned target bucket",
+   "observed": "post-sync census re-read during the _code phase reproduced 4,222/327,275,368 unchanged",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "RP-SPINE-1/RP-SPINE-2 (live-verify + old gold-data-prefix delete)",
+   "reason": "AE's legs after CVO's re-anchor, per the TO's spine order; my gold-plane exercise (7,254 rows off the new root) is offered as RP-SPINE-1 input, AE cites or re-runs"
+  },
+  {
+   "item": "RP-AE-* and RP-CVO-1",
+   "reason": "other groups' criteria; their own instances"
+  },
+  {
+   "item": "a01_runner.py (import-broken, dead)",
+   "reason": "deliberately untouched -- FILED P5 candidate; it cannot execute, so it cannot write to any bucket"
+  },
+  {
+   "item": "sha256/vintage object metadata on <=3 _code objects",
+   "reason": "the 1739Z safe-deploy push overwrote my metadata-carrying uploads on the keys it touched; metadata was a bonus, not a criterion; the ETag identity verify is the acceptance instrument"
+  },
+  {
+   "item": "artifact-coverage token linkage for runner_common and safe_deploy_core",
+   "reason": "NOT an exclusion of the artifacts -- both are fully covered by the RP-DSA-2 row (its evidence names them). This TO's criterion grammar is RP-{group}-{n}, not the DS {firm}-{group}-{artifact}-{check} grammar the checker's stem-token heuristic keys on, so the linkage is declared here textually per the checker's own escape (runner_common, safe_deploy_core)."
+  }
+ ],
+ "surprises": [
+  "exec-time _code enumeration found 51 objects (not 51+3): the integrator push's two overwrites replaced existing keys and d_publisher_port.py was already in my mint glob -- verified by direct presence reads, not arithmetic",
+  "the sync task wrapper 'failed' on my own counter regex (progress text prefixes copy lines; grep -c '^copy:' = 0 -> rc 1) while the sync itself was rc=0 -- the retrieval-control class again; the two-sided census, not the log count, is the verify"
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/logs/2026-08-19/goldhome_repoint_dsa_0111-0130Z.md",
+ "compiler_tools": [
+  {
+   "tool": "test_safe_deploy + pipescript-suite gate",
+   "invocation": "python .tools/test_safe_deploy.py; commit-time suite",
+   "result": "14/14 + 140/140 green on the row + resolver state"
+  },
+  {
+   "tool": "comp-pipescript",
+   "invocation": "(io on runners still registry-gapped -- NFRA_COMPTOOLS.REG pending at 0.8.0)",
+   "result": "degraded Phase-1 path stands as disclosed in the runner TOs; direct exercise battery substituted (silver+gold+negative-control reads)"
+  },
+  {
+   "tool": "py_compile + ruff (commit-gate)",
+   "invocation": "per-file at commit",
+   "result": "clean after dropping 3 now-unused BUCKET imports the gate itself caught"
+  }
+ ]
+}
