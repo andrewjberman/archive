@@ -31,6 +31,11 @@ Phase 2: commit-gate. Phase 3: the positive/negative exercises below.
   interface when J3 lands.
 
 ## Acceptance criteria
+- REG-0 FIXTURE (added 08-19 16:15Z, CTO routing): the 08-19 SEVERE wiring incident (entrypoint
+  c00-c02 silently invoking OPAL_GLDRNS.A4 modules under this product's labels — caught only by the
+  QA-before-schedule exercise) is the registry's founding test case: REG's registration MUST bind
+  label->module such that a cross-project casebook collision is a REFUSAL, not a silent resolve;
+  exercise the incident's exact shape as a negative control. J3's atom runner inherits the fixture.
 - REG-1: `comp-pipescript io a00_dim_account --pipeline bd` resolves (positive) AND a nonexistent id
   still refuses rc!=0 (negative); the corpus membership is derived by a stated predicate over the
   tree, printed with its denominator.
