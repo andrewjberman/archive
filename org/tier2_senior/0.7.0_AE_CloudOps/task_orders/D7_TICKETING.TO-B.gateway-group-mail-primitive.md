@@ -42,3 +42,74 @@ ticket DDB config item = the natural home, final call at design).
 ## Reporting
 COO (cc CTO gate, MSTR for the sitez seam) at shape-declared and at primitive-live. Surprise
 channel: one banked line to COO. Session log with Compiler Tools section = deliverable.
+
+---
+
+## ADDENDUM 2026-08-19 ~19:40Z (COO) — TB-1's INPUT HAS LANDED: THE SHAPE IS **REAL BUILD**, NOT COLLAPSE
+
+TO-A's on-box capability read is DONE and ferried from sitez (MSTR bus id 7ab27f01). **This TO does
+NOT collapse to expose-and-wire — build it.**
+
+**The grounding (protocol §6 fourth form, APPLIED layer):** SSM on `i-07dccb1615503ac99`, cmd
+`912d34e5`, service active. The deployed gateway carries **NO** group/shared-mailbox read path —
+`/groups` 0 hits, other-mailbox `users/` 0 hits across 31 deployed `.py` files, **positive-controlled**.
+All mail reads are delegated `/me` only. Deployed-currency chain CLOSED: on-box md5 == repo tree ==
+`EC2_MANIFEST` @81615fbd3e, and the session's own Graph reads exercised the path.
+
+TB-1 is therefore satisfiable by CITING this read (you do not need to re-derive it) — but say so
+explicitly in your first report, per TB-1's wording.
+
+**DL set measured off real partner mailflow:** 49F = `49@opalinvest.com`; Inflection =
+`inflection@opalinvest.com`; **Cottonwood = NONE FOUND.** The Cottonwood DL question is inside
+Andrew's one-liner, being put to him at the sitez console; answers re-ferry through MSTR. Do not
+assume a Cottonwood DL exists.
+
+**TWO SHAPE OPTIONS — Q3's DL-type answer picks between them (do not pick unilaterally):**
+- **(a)** DL-membership delivery to the Analyst's OWN consented mailbox — **ZERO new consent**;
+  primitive = filtered `/me` read + durable cursor.
+- **(b)** group/shared-mailbox read — an **IT admin-consent round-trip**; scope adds carry the
+  four-way-pin drift hazard.
+Option (a) is materially cheaper and is the likely answer; **wait for the one-liner** before building
+the consent-bearing half.
+
+**NEW MEASURED FINDING, ROUTED HERE BECAUSE IT LANDS IN YOUR SCOPE:** the Analyst identity allowlist
+currently **DENIES `search_email`** — failing closed, which is correct behavior, not a bug. But
+**TO-C's mail-read needs that 4.1 tool allowlisted at TO-B, or an explicit widen decision.** Price it
+into your design and name which you are doing; do not silently widen an allowlist as a side effect
+of building the primitive.
+
+Cursor persistence stays durable + OFF-BOX as the original TO says.
+
+---
+
+## ADDENDUM 2 — 2026-08-19 ~19:4xZ — **ANDREW-DIRECT: THE INTAKE IDENTITY IS `opalsupport@opalinvest.com`**
+
+**VERBATIM (Andrew, sitez console, said against the D7 one-liner's membership-add proposal):**
+
+> *"We need to either change this email or create a new email to opalsupport@opalinvest.com. Can't
+> be broadcasting 'opalbloomberg' externally"*
+
+**Binding:** whatever address joins the partner DLs / fronts the ticketing intake **is**
+`opalsupport@opalinvest.com`. This folds into TB-2's shape. Ferried by MSTR (bus id `f97c55bb`),
+primary AE as TO-B author, cc COO + CTO.
+
+**MECHANISM — A RECOMMENDATION FROM SITE Z, NOT A RULING. YOU DECIDE (you are the author):**
+- **ALIAS (proxy address)** `opalsupport@opalinvest.com` on the **EXISTING** Opal Bloomberg mailbox
+  **preserves the zero-new-consent property**: mail to the alias lands in the already-consented
+  `/me` mailbox, the Graph primitive is unchanged, and outbound send-as `opalsupport` closes the
+  external-visibility hole Andrew named.
+- **A SEPARATE NEW MAILBOX BREAKS THE ZERO-CONSENT PATH** — the Analyst's App-2 is delegated `/me`
+  on the opalbloomberg account — and forces a consent round-trip. Note how this interacts with
+  Addendum 1's option (a)/(b): the alias route keeps you on (a); a new mailbox pushes you toward
+  (b)'s admin-consent round-trip. Price that before choosing.
+
+**⚠ THE ALIAS/MAILBOX CREATION IS AN M365 ADMIN ACT — NAME IT AS AN INPUT WITH AN OWNER, DO NOT
+ASSUME AN AGENT CAN MINT IT.** Likely Andrew/IT. A TO that silently depends on an identity nobody
+has been asked to create is the class where the build finishes and the thing still cannot receive
+mail. State the dependency and its owner in your first report.
+
+**Domain note for the record:** `opalinvest.com` **is ours** — Rule 23's caveat is about **SES DKIM
+on sends**, not M365 mailboxes/aliases, so this is not a Rule-23 conflict. `opalcapital.com` remains
+never-touch (we do not own it).
+
+D9/D6 unaffected by this ruling.
