@@ -1,0 +1,105 @@
+{
+ "schema_version": "1.0",
+ "to_id": "D0_TIGHTENING.TO-4",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/D0_TIGHTENING.TO-4.kill-agent-single-serial-self-exclusion.md",
+  "group": "OTHER",
+  "vintage_commit": "c402246dfd"
+ },
+ "assignee": "0.7.0_AE_CloudOps",
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/kill-agent.ps1",
+   "kind": "script",
+   "commit_or_etag": "HEAD (this commit)",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "repo-resident operator tool on PATH via the ~/bin forwarders; no Lambda/EC2 deploy leg exists for it. Runs from the working tree, so the committed bytes ARE the executing bytes."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "K-1",
+   "criterion_verbatim": "SELF-MATCH EXCLUDED, POSITIVE-CONTROLLED: needle == own serial kills nothing and prints the exclusion. Both limbs -- a silent no-kill is indistinguishable from a broken matcher.",
+   "method": "command",
+   "invocation": "OPAL_AGENT_SERIAL=0.7.0_AE_CloudOps powershell -File .scratch-ae/ka_harness2.ps1 -KA .tools/kill-agent.ps1 -Serial 0.7.0_AE_CloudOps. Harness shadows Stop-Process + Add-Content (function lookup precedes cmdlet lookup) so target SELECTION and printing execute for real while nothing dies and the audit log is not written. Run WITH a live claude.exe present for that serial, so the guard is exercised against a real matchable target rather than a vacuous empty set.",
+   "output_evidence": "Exercised against .tools/kill-agent.ps1. BOTH LIMBS PASS. BOTH LIMBS PASS. Limb 1 (printed): \"[kill-agent] SELF-EXCLUDED: '0.7.0_AE_CloudOps' is the caller's own serial (OPAL_AGENT_SERIAL) -- refusing to kill self. Nothing killed, no watcher reaped.\" rc=0. Limb 2 (killed nothing): WOULD-KILL-PID count = 0. Audit intent captured as KILL-SELF-EXCLUDED. DISCRIMINATING CONTROLS, both run separately: (NC-1) same post-patch script, needle = a DIFFERENT live serial 0.8.0_AE_CloudComp -> 27 WOULD-KILL-PID recorded, proving the harness DETECTS kills and K-1's zero is a measurement, not an undiscriminating instrument. (NC-2) PRE-patch baseline script, needle == own serial -> 36 WOULD-KILL-PID incl. \"terminated 0.7.0_AE_CloudOps (claude pid 7832)\" -- the bug was REAL and self-killing, and this test catches it. Post-exercise safety read: all 10 live serials still running, incl. self and the NC-1 target; real audit log carries 0 KILL-SELF-EXCLUDED lines (shim held).",
+   "denominator": "3 isolated invocations (K-1 + 2 controls); 10 live claude.exe serials on the box at exercise time; 0 processes actually terminated",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "K-2",
+   "criterion_verbatim": "-All BEHAVIOR UNCHANGED (regression check, exercised not asserted).",
+   "method": "command",
+   "invocation": "Same harness, -Mode all, so -All binds as a real SWITCH; run against the PRE-patch baseline and the POST-patch script, target serial sets extracted from the recorded audit intents and diffed.",
+   "output_evidence": "Exercised against .tools/kill-agent.ps1 vs its pre-patch baseline. IDENTICAL AND NON-EMPTY. Both runs target the same 8 serials: 0.4.0_DS_ClientPlatform, ~A, ~B, 0.8.0_AE_CloudComp, 1.0.0_SA_CTO, 2.0.0_SA_COO, 3.0.0_SA_CVO, 4.0.0_SA_CRO. Self (0.7.0_AE_CloudOps) absent from both = the pre-existing -All self-exclusion still holds; 0.0.0_AB_MSTR absent from both = the conductor carve-out still holds. Raw PID counts differ (193 pre vs 201 post) from process-tree churn between the two invocations, not from a selection change -- the serial set is the semantic target set and it is byte-identical. FIRST ATTEMPT WAS INVALID AND IS RECORDED AS SUCH: passing '-All' through an array splat bound it POSITIONALLY to $Serial, which failed serial-shape validation, so both runs errored and produced two EMPTY sets that compared 'IDENTICAL' -- a vacuous pass. Caught by checking the denominator rather than trusting the diff; re-run with -All as a switch. An empty-vs-empty comparison is not a regression check.",
+   "denominator": "8 target serials per run, 2 runs (pre/post); 10 live serials on the box, of which 2 correctly excluded (self + MSTR)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "K-3",
+   "criterion_verbatim": "EXERCISED ON BOTH DEVICES (repo + powershell, both fabrics). A one-device green is partial and reported as partial.",
+   "method": "command",
+   "invocation": "Laptop (this fabric): full K-1 + K-2 batteries above, executed on Windows PowerShell against the live process table. Site Z: NOT REACHABLE FROM THIS SEAT -- a separate machine; the laptop cannot exercise the site-Z process table.",
+   "output_evidence": "PARTIAL BY THE CRITERION'S OWN INSTRUCTION, reported as partial rather than rounded to green. LAPTOP: GREEN (K-1 + K-2 + 2 controls, all above). SITE Z: NOT RUN. The change itself is device-agnostic by construction and carries no device-specific logic -- workspace resolved via Split-Path -Parent $PSScriptRoot (kill-agent.ps1:44, pre-existing, and the fix that replaced the old hardcoded C:/Users/AndrewBerman path), no baked drive prefix, no user path, no device-keyed branching added; the guard is a pure string comparison of $Serial against $env:OPAL_AGENT_SERIAL. So it is EXPECTED to behave identically on site Z -- but expected is not exercised, and this row stays PARTIAL until a site-Z seat runs the same two batteries. Routed to MSTR (sole site-Z coordinator) rather than claimed.",
+   "denominator": "1 of 2 devices exercised",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Site Z is a SEPARATE MACHINE. This seat is the laptop fabric and structurally cannot enumerate or signal the site-Z process table -- kill-agent operates on the LOCAL Win32_Process table, so no laptop-side invocation can exercise it there. This is an instrument-reach limit, not a skipped step, and it is recorded UNVERIFIABLE-BY-INSTRUMENT rather than PASS precisely because the TO says a one-device green is partial and must be reported as partial. Laptop half is GREEN (K-1 + K-2 + both controls). Routed to MSTR as sole site-Z coordinator to run the identical two batteries; the row closes only on their result, and I am not closing it on the change being device-agnostic by construction -- expected is not exercised."
+  },
+  {
+   "criterion_id": "K-4",
+   "criterion_verbatim": "proof instance VALID rc=0 positional: ids K-1..K-4. MEASURED/RULED rows only.",
+   "method": "command",
+   "invocation": "python .tools/proof-of-spec-check.py <this file>",
+   "output_evidence": "See the validator run recorded in the session log / commit message for this change. Every row above is MEASURED (commands run, outputs quoted verbatim, controls run separately and in isolation); no row is asserted from reading the source. The two invalid runs encountered during the exercise (the non-.ps1 dot-source in the first NC-2, and the positional -All in the first K-2) are recorded as INVOCATION ERRORS rather than as verdicts, per the estate's own rule that a failed read returns a value and is not a negative observation.",
+   "denominator": "4 criterion ids declared (K-1..K-4); 4 present",
+   "status": "PASS"
+  }
+ ],
+ "compiler_tools": [
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find --name 'kill-agent.ps1' (and the D0_TIGHTENING TO lookup)",
+   "result": "resolved the single repo home .tools/kill-agent.ps1; no second copy exists, so the two-homes-diverged class does not apply here"
+  },
+  {
+   "tool": "aws (lambda/events/scheduler/ssm/ec2/s3)",
+   "invocation": "list-functions / list-rules / list-schedules / list-associations materialised client-side with denominators; describe-instances; get-schedule",
+   "result": "used for the MDPF regression worked in the same session, not for TO-4 itself; recorded here because the session's compiler-tool use is reported as a whole"
+  },
+  {
+   "tool": "python .tools/proof-of-spec-check.py",
+   "invocation": "run against this instance",
+   "result": "FIRST RUN INVALID with 9 violations (phase enum, PARTIAL not an allowed status, 5 missing required root fields, missing status_reason, artifact-coverage zero-battery). Every one fixed rather than worked around; the validator caught a real gap in my instance."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The exercise harness shadows Stop-Process, so 'nothing was killed' could be produced by a harness that simply never records. Ran the same post-patch script against a DIFFERENT live serial (0.8.0_AE_CloudComp) to prove the harness can see a kill, and ran the PRE-patch baseline against my own serial to prove the bug it fixes is real.",
+   "expected": "a discriminating result: non-zero kills in both controls if the instrument works and the bug was real",
+   "observed": "NC-1 recorded 27 WOULD-KILL-PID (harness discriminates). NC-2 recorded 36 WOULD-KILL-PID including 'terminated 0.7.0_AE_CloudOps (claude pid 7832)' -- the pre-patch script would have killed my own session. So K-1's zero is a measurement, not an undiscriminating instrument. POSITIVE CONTROL (Post-exercise liveness + audit-purity read, because a harness that failed OPEN would have killed real agents): all 10 live serials present after every run (incl. self and the NC-1 target 0.8.0_AE_CloudComp); org/mcp/agent-spawn-audit.log carries 0 KILL-SELF-EXCLUDED lines -- the Add-Content shim held and the log was not polluted.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Each battery re-run from a clean recording file; K-2 run twice per script version (once invalid, once valid) and the valid pair compared as SERIAL SETS rather than raw PID counts, because process-tree membership churns between invocations while the semantic target set does not.",
+   "observed": "Stable: K-2 serial sets byte-identical across pre/post (8 serials each), self and MSTR excluded in both; raw PID counts differed 193 vs 201 purely from child-process churn, which is why the PID count is not the oracle. INVALID RUNS RECORDED, NOT TREATED AS VERDICTS: (1) First NC-2 dot-sourced a baseline saved WITHOUT a .ps1 extension; PowerShell refused it, producing 0 recorded kills and no output. That is an INVOCATION ERROR, not evidence the old script was safe. Re-run with a .ps1 copy -> 36 kills. (2) First K-2 passed '-All' through an array splat, binding it POSITIONALLY to $Serial; it failed serial-shape validation, both runs errored, and two EMPTY sets compared 'IDENTICAL' -- a vacuous pass I nearly recorded. Caught by checking the denominator, not the diff. Re-run with -All as a real switch -> 8 serials each side.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "FAMILY mode (`<serial> -All`, base + ~lanes) self-exclusion",
+   "reason": "OUT OF SCOPE AND DELIBERATELY NOT WIDENED. The TO's objective is the SINGLE-serial match and K-2 pins '-All BEHAVIOR UNCHANGED'; family mode is an -All form. A caller naming their own family with an explicit -All opt-in can still include themselves. Surfaced to COO as a residual rather than silently fixed -- widening a TO's scope on my own read is the inferred-gate class."
+  },
+  {
+   "item": "kill-agent's orphan-watcher reaper path",
+   "reason": "untouched by this change except that the self-exclusion returns BEFORE it, which is deliberate and documented in-file: falling through would sweep the caller's OWN live inbox watcher while printing 'nothing to kill'."
+  }
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-19/ (session log lands with this commit window)",
+ "surprises": [
+  "The pre-existing `-All` branch has excluded self since it was written, but the SINGLE-serial branch never did -- so the one form an agent actually types at itself was the only unguarded one. The guard existed, on the wrong path.",
+  "PowerShell will not dot-source a file lacking a .ps1 extension, and it fails in a way that looks exactly like a clean negative result (no output, zero recorded actions). This produced a false 'the old script is safe' reading for one run.",
+  "An array splat turns '-All' into a POSITIONAL argument, so the switch silently became a serial string and failed validation -- and two failed runs then compared IDENTICAL. Empty-vs-empty is the vacuous-pass shape; only the denominator exposed it."
+ ]
+}
