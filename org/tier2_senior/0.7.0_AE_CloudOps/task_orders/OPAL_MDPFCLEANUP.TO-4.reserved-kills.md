@@ -4,7 +4,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-14T17:2xZ</issued>
-<status>staged — gate: Andrew's PER-CLASS word (TO-1 ratification names the set; execution still takes his word per class — the boundary that held 4x on 08-14)</status>
+<status>complete -- S3 delete leg executed 2026-08-19 01:0xZ (10/10 per manifest; Andrew word ~1500Z; both NEVER#3 halves; COO fixture release 005714Z; CTO ledger validation @18c3846cbd; COO proof acceptance 011704Z). HELD residual: json/mdpf/49financial/aggregate-aua-timeseries.json behind MDPF_PROVENANCE T-B (>=08-20). EC2 stop/terminate class NOT exercised (carve-out, KEEP-UNTIL-REHOMED). proof_TO-4.json + ledger 20260819T0057Z.</status>
 <priority>Strict sequence position 5 (PRD §4)</priority>
 </task_order>
 
