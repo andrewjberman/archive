@@ -137,3 +137,19 @@ defaulting TRUE for IC). **Item 1 (valuing history) is NOT Thursday-free and is 
 `--prices-local` reads `canonical/canonical_positions`, which holds **1 partition against 527
 flow_ledger dates** -- set intersection 1 -- so re-running over history would value nothing. That is
 a multi-leg backfill program, not a code fix.
+
+### ⚖ CTO ALIGNMENT 2026-08-19 ~21:41Z -- C00-4's FINAL FORM (supersedes my amendment above where they differ)
+CTO ruled the scope conflict at their gate; their form and mine CONVERGE, and this is the single form
+the TO face carries so there is no second reading:
+
+**C00-4 ACCEPTS ON:** c01/NNA consumption + the honest-label assertions across **527 partitions**
++ **A NEGATIVE CONTROL.**
+
+**THE NEGATIVE CONTROL IS THE PART MY AMENDMENT UNDER-SPECIFIED:** `twr_daily` must be
+**BIT-IDENTICAL post-fix.** I wrote that invariance as merely the *expected reported outcome*. CTO's
+form is sharper and binding: **it is ALSO a control -- if `twr_daily` MOVES after the c00 fix, the
+input TO WIDENED WITHOUT AUTHORIZATION.** Same instrument, both readings, stated together.
+**A result you expect and a result that would convict you are not the same thing; this one is both.**
+
+**THE FENCE HOLDS.** c02's engine edit is NOT in this TO -- it is `ADVI_49F.c02-CFINPUT`, cut
+separately for MON, and **the harness re-read MOVES THERE as its acceptance (moved, never deleted).**
