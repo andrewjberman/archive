@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D1_CATVIEWS.TO-D1b",
+  "firm": "MDPF",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D1_CATVIEWS.TO-D1b.category-registry-module.md",
+    "group": "D",
+    "vintage_commit": "bb8d63f737"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/mdpf_category_registry.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The category registry module per PRD 4.1 -- the single ratified vocabulary D1's projection, the portal build, and D4's ETF flip all read from. NOT DEPLOYED IN THIS TO by explicit instruction: the deploy leg rides TO-D1c's gold cycle. Build-ladder rung 2 -- it EXTENDS mdpf_revamp_model_crosswalk.py's mechanism (frozen-dataclass entries, id-keyed resolution, F5 raise-on-unknown) rather than inventing a framework, and DERIVES the five primary model entries from that crosswalk at import so the two cannot drift. Rule 15 satisfied (from __future__ import annotations); commit-gate PASS."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D1b-1",
+      "criterion_verbatim": "EXISTENCE CHECK RUN + REPORTED with its denominator, not asserted from the PRD.",
+      "method": "command",
+      "invocation": "git log --oneline -- data/mdpf/scripts/gold/mdpf_category_registry.py | wc -l ; plus a positive control on a sibling path ; plus comp-find --name '*category_registry*'",
+      "output_evidence": "RUN, NOT ASSERTED, AND CONTROLLED. git log for the target path returns 0 commits and the file did not exist on disk. POSITIVE CONTROL, because a git-log instrument pointed at a typo'd path also returns 0: the sibling data/mdpf/scripts/gold/mdpf_aggregate_aua.py returns 25 commits through the SAME invocation -- so the instrument works and the zero is a true absence rather than a broken read. ESTATE-WIDE CHECK: comp-find --name '*category_registry*' returned 0 hits across 27,057 files scanned, and the tool printed its own caveat that this is a MEASURED zero over the scanned scope. The PRD's existence claim is therefore CONFIRMED rather than inherited, and the build shape is unchanged -- no STOP condition triggered.",
+      "denominator": "0 commits on the target vs 25 on the control path; 0 hits across 27,057 files scanned estate-wide",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1b-2",
+      "criterion_verbatim": "REGISTRY IMPORTS and every view node in section 3's ruled composition table resolves.",
+      "method": "test_suite",
+      "invocation": "python data/mdpf/scripts/gold/mdpf_category_registry.py (the import-and-enumerate self-test, TO Phase 3)",
+      "output_evidence": "IMPORTS CLEAN AND EVERY DECLARED NODE RESOLVES. 14 members registered across 9 declared view nodes; per-node enumeration printed direct and roll-up counts: Models direct=0 incl-subnodes=8; Models > Primary 5; Models > Custom 3; SMA 6; Alternatives 0; Insurance 0; Client 0; Client > Advised 0; Client > Residual 0 [NON-REGISTRY NODE]. Every member resolves by id, 14 of 14, unresolved=0. The five top-level peers (Models, SMA, Alternatives, Insurance, Client) carry 14 members in total. THE ZEROES ARE NOT SILENT FALLBACKS AND THE MODULE SAYS SO: Alternatives/Insurance/Client are the PRD's named BENIGN non-movers (no registered members yet; a population-fact registration fixes them), while Client > Residual is the Rule-24(iv) STRUCTURAL non-mover -- produced by ARITHMETIC (A4: total_aua - model_aum), never by registry membership, because a registry cannot deliver the complement of itself. That node is tagged in the enumeration output and a consumer finding it empty is directed to residual_is_arithmetic() rather than reading a registration gap. The two non-mover KINDS are different and both are named, per the PRD's amended state-coherence declaration.",
+      "denominator": "9 of 9 declared view nodes enumerated; 14 of 14 members resolved",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1b-3",
+      "criterion_verbatim": "F5 BEHAVIORS EXERCISED -- both limbs, each printed: a duplicate registration RAISES and an unknown-node lookup RAISES. An unexercised raise-path is not evidence; make each one fail on demand and show the failure.",
+      "method": "test_suite",
+      "invocation": "a driver that INJECTS each defect and asserts the raise, each with a paired positive control that must NOT raise",
+      "output_evidence": "BOTH LIMBS MADE TO FAIL ON DEMAND, PLUS TWO MORE, EACH WITH A POSITIVE CONTROL -- rc=0, zero failures. LIMB 1 (duplicate): injecting a second 'divz' entry into SMA_MEMBERS raised RegistryError('duplicate member_id 'divz' -- already registered as 'SMA'. Registration is id-unique; a second entry would make membership order-dependent'). POSITIVE CONTROL: removing the duplicate rebuilds to 14 members without raising -- so the raise is caused by the defect, not by the harness. LIMB 1b (view_path outside the tree): a member declaring 'Nonexistent > Node' raised RegistryError naming the declared VIEW_TREE; and a member targeting 'Client > Residual' raised RegistryError carrying the structural reason, which is the guard that keeps anyone from registering INTO the arithmetic node. POSITIVE CONTROL: restoring rebuilds to 14. LIMB 2 (unknown-node lookup): members_for('SMAs') -- a plausible typo, not a nonsense string -- raised UnknownMemberError printing the full declared tree; members_under('Models > Primaries') likewise. POSITIVE CONTROL: members_for('SMA') returned 6 members. CONSUME-TIME F5: resolve('opal_not_a_model') raised UnknownMemberError instructing the caller to register it and explicitly NOT to string-match a display name or fold it into residual; POSITIVE CONTROL resolve('divz') returned 'Dividend SMA'. NON-REGISTRY EXPLANATION IS ITSELF GUARDED: residual_is_arithmetic('SMA') raises rather than inventing a structural excuse for a node whose emptiness WOULD be a registration gap.",
+      "denominator": "6 raise-paths exercised, 4 positive controls run, 0 failures (driver rc=0)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1b-4",
+      "criterion_verbatim": "D4's ETF SET REPRESENTABLE. Build to the PRD's proposed answer and make the member set data-driven, so a change to Q1's answer is a registry edit and not a code edit. State in your report which shape you built.",
+      "method": "test_suite",
+      "invocation": "resolve() over the 4-ticker D4 universe + a source-level count of ticker literals inside vs outside the SMA_MEMBERS table",
+      "output_evidence": "BUILT TO THE Q1-CLOSED SHAPE, AND THE SHAPE IS STATED: all four ETFs are SMA-view members (view_path='SMA', asset_category='strategy' -- the stored value stays 'strategy' while the DISPLAY label is 'SMA', per Andrew's later sovereign word on display). strategy_id is SET only where a real SMA strategy exists today: divz -> 'divz' (Dividend SMA) and pfoe -> 'pfoe' (Opal Equity Growth SMA); idvz and pfde carry strategy_id=None as ETF-product members pending strategy registration, and that None is MEANINGFUL rather than missing data. Machine-checked against the ruling: sorted(strategy_id set) == ['divz','pfoe'] and sorted(None) == ['idvz','pfde'] -> MATCHES THE RULING: True; all 4 are SMA-view members: True. The SMA node carries 6 members total (4 ETFs + muni + tax). DATA-DRIVEN PROPERTY MEASURED, NOT CLAIMED: ticker literals appear 6 times inside the SMA_MEMBERS table and ZERO times anywhere else in the module ({'divz':0,'idvz':0,'pfde':0,'pfoe':0}), so a change to Q1's answer -- or any future membership change -- is a table edit. NOTE ON THE ONE INFERENCE I MADE, stated rather than buried: PRD section 3 names the five primary archetypes explicitly, so every other registered model falls to Models > Custom BY THE RULED MECE PARTITION (Models = Primary + Custom), not by any judgment of mine about its content. If the taxonomy owner intends a third model_class that is a surprise-channel line, not a registry edit I made unilaterally -- the TO forbids re-opening the taxonomy and I did not.",
+      "denominator": "4 of 4 D4 universe tickers resolved; 6 in-table vs 0 out-of-table ticker literals",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D1b-5",
+      "criterion_verbatim": "proof instance VALID rc=0 positional: ids D1b-1..D1b-5. Expected values cite only MEASURED/RULED-class run rows -- an expected value resting on an INFERRED-class row is mechanically ineligible.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/D1_CATVIEWS.TO-D1b_PROOF_OF_SPEC.json",
+      "output_evidence": "This instance covers the artifact data/mdpf/scripts/gold/mdpf_category_registry.py. Every row above is MEASURED (a command run, a self-test executed, a raise-path fired, a source-level count) or RULED (the Q1 answer, the PRD taxonomy gate); none rests on an INFERRED expected value. SECOND OCCURRENCE OF A KNOWN TOOL-vs-TO CONFLICT, reported rather than worked around: proof-of-spec-check's artifact-coverage rule (:50-74) requires the artifact's stem token (MDPF / CATEGORY / REGISTRY) to appear inside a criterion_id, keying on the DS/gold '{firm}-{group}-{artifact}-{check}' id grammar, while this TO mints ids D1b-1..D1b-5. The same conflict hit ADVI_IDSPINE.WP-1 tonight. The pattern is now characterised: the rule fires ONLY on artifacts of kind script/s3_object, so every TO whose issuer-minted ids do not follow the DS grammar AND which produces a script will fail it -- D3.1 and D4b passed tonight only because their artifacts were config_data/doc. The tool's only escape is naming the central deliverable in declared_exclusions, which is the forced-mis-declaration its own comment records from the frontend_component case (COO 215014Z) where the fix was amending the TOOL. Routed to COO/CTO with the same three options; I declined the mis-declaration.",
+      "denominator": "5 of 5 declared criteria present and positionally ordered D1b-1..D1b-5",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "rc=1 on ONE violation only -- the artifact-coverage heuristic, which cannot be satisfied while the TO's mandated criterion-id set (D1b-1..D1b-5) and the checker's DS-grammar assumption both stand. Structural schema validation is otherwise clean: 5 acceptance rows, 0 schema violations, and D1b-1..D1b-4 all measured PASS. Not a defect in the build and not a missing measurement. Second instance tonight (ADVI_IDSPINE.WP-1 was the first), which is what turns it from a one-off into a characterised tool gap. Flips to PASS under either an issuer re-mint of the ids into the DS grammar or an extension of the checker's heuristic; I declined the declared_exclusions escape because it would declare the central deliverable excluded."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two independent mutant classes, because the TO's own wording is that an unexercised raise-path is not evidence. (1) DEFECT INJECTION: a duplicate member_id, a view_path outside the declared tree, and a member targeting the non-registry arithmetic node were each INJECTED into the registry and the build re-run. (2) LOOKUP MUTANTS: a plausible TYPO ('SMAs', 'Models > Primaries') rather than a nonsense string, and an unregistered member_id. Every mutant is paired with a POSITIVE CONTROL running the same code path on valid input.",
+      "expected": "each injected defect must RAISE the specific declared error, and each positive control must NOT raise -- a harness that raises on everything proves nothing.",
+      "observed": "6 of 6 raise-paths fired with the correct exception type and an actionable message; 4 of 4 positive controls passed (rebuild to 14 members twice, members_for('SMA') -> 6, resolve('divz') -> 'Dividend SMA'). Driver rc=0, zero failures. The typo-shaped mutants matter more than nonsense ones: 'SMAs' is what a consumer would actually write, and it raises with the full declared tree printed rather than returning an empty list that would read as 'no members'.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the registry is a pure-python module with no I/O, no clock and no network; the five primary model entries are DERIVED from the crosswalk at import rather than re-typed, so the self-test enumerates the same 14 members across runs and drift between the two sources is structurally impossible",
+      "observed": "self-test reports 14 members / 9 nodes / 14-of-14 resolved on every invocation; the F5 driver re-built the registry 3 times within one process (inject, restore, inject, restore) and each restore returned exactly 14 members",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "NOT DEPLOYED",
+      "reason": "The TO states explicitly that the deploy leg rides TO-D1c's gold cycle. Deploying here would land code ahead of its declared cycle."
+    },
+    {
+      "item": "The gold projection amendment (PRD 4.2) is not built",
+      "reason": "That is TO-D1c's scope. This TO builds the registry the projection will read."
+    },
+    {
+      "item": "The taxonomy was not re-opened and no composition was proposed",
+      "reason": "The TO forbids it -- the gate is RULED and a composition disagreement is a surprise-channel line to COO, not a unilateral edit. The one derivation I made (non-archetype models fall to Custom) follows from the ruled MECE partition itself and is stated in D1b-4 rather than buried."
+    },
+    {
+      "item": "Alternatives / Insurance / Client carry no registered members",
+      "reason": "The PRD names this as the BENIGN non-mover -- a population-fact registration will fix it. Registering placeholder members to make the tree look populated would be fabrication."
+    }
+  ],
+  "surprises": [
+    "SECOND INSTANCE of the proof-of-spec-check artifact-coverage conflict (WP-1 was the first tonight), and the pattern is now characterised rather than anecdotal: the rule fires ONLY on artifacts of kind script/s3_object and requires the artifact's stem token inside a criterion_id per the DS '{firm}-{group}-{artifact}-{check}' grammar. Any TO whose issuer-minted ids use a different grammar AND which produces a script will fail it -- tonight D3.1 and D4b passed only because their artifacts were config_data and doc. This will recur.",
+    "The five primary model entries are DERIVED from mdpf_revamp_model_crosswalk at import rather than re-typed. That was a build-ladder choice (rung 2, reuse the mechanism) but it also removes a whole drift class by construction: the registry cannot disagree with the crosswalk about a model's display name or served flag, because there is only one copy."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-19/",
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io mdpf_revamp_model_crosswalk --pipeline mdpf (the --pipeline flag is REQUIRED; flagless is rc=2 refused)",
+      "result": "PASS -- resolved the crosswalk consumer in the mdpf tree (Group: gold, Order: 160) and correctly reported no S3 reads/writes with an explicit WARN that manual body review is required. That is the right answer for a pure-python registry module and NOT a silent empty: the tool named its own limitation. Contrast the data/assets 49F tree, which comp-pipescript does not model at all (reported separately)."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name '*category_registry*' ; comp-find 'crosswalk' data/mdpf/scripts/gold",
+      "result": "PASS with denominators -- 0 of 27,057 files (the existence check, with the tool printing its own measured-zero caveat) and 50 hits across 26 files (which located mdpf_revamp_model_crosswalk.py as the mechanism to extend, [HEAD] band separating it from 45 incidental mentions)."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": ".tools/commit-gate.sh data/mdpf/scripts/gold/mdpf_category_registry.py",
+      "result": "PASS -- 'All checks passed! OK: pre-commit gate clean for 1 file(s)' (py_compile + ds-precommit-check AST/silver-ids + ruff py39). Rule 15 satisfied."
+    },
+    {
+      "tool": "the module's own self-test",
+      "invocation": "python data/mdpf/scripts/gold/mdpf_category_registry.py",
+      "result": "PASS -- 14 members, 9 nodes, 14 of 14 resolved, non-registry node tagged in the output."
+    }
+  ]
+}
