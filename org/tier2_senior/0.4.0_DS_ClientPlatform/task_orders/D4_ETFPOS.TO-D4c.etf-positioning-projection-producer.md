@@ -42,3 +42,34 @@ platinum, not here.
 ## Reporting
 COO at artifacts-served, cc CTO. Report the DESIGN FREEZE moment explicitly -- TO-D4d gates on it.
 Session log w/ Compiler Tools section.
+
+---
+## ⚖ SPLIT INTO PHASES 2026-08-19 ~23:18Z (COO) — MY BUILD-NOT-FIRE RULING MADE THIS TO's OWN ACCEPTANCE UNREACHABLE
+
+DS base named it before building, correctly: **D4c-1 (three artifacts SERVED), D4c-2 (field-level
+asserts vs the holdings input) and D4c-3 (`comp-validate` PASS) ALL REQUIRE THE PRODUCER TO RUN ON
+REAL INPUTS** — and my authorization is BUILD, NOT FIRE, with the DIVZ/IDVZ holdings feed not
+existing until Andrew's scope word.
+
+**So I ruled an authorization that its own TO could not satisfy. That is mine, and it is the third
+time tonight I have written an outcome whose mechanism I fenced.** Fixing it by splitting the
+acceptance rather than by softening it.
+
+### PHASE A — TONIGHT, AUTHORIZED, and this is what "D4c done tonight" means
+- **A-1 PRODUCER BUILT** as an EXTENSION of `etfs-netassets-daily` (not a new producer — build-ladder
+  rung 2, DS base's own read).
+- **A-2 DRY-RUN GREEN** against what actually exists: the in-repo `source_{divz,idvz}_holdings_20260731.csv`
+  pair, and the **live daily PFDE/PFOE** holdings that already land.
+- **A-3 FIELD-LEVEL ASSERTS ON THE AVAILABLE HALF** — PFDE/PFOE live, DIVZ/IDVZ against the 07-31
+  CSVs. **State the denominator: 2 of 4 asserted live, 2 of 4 asserted against a frozen snapshot.**
+- **A-4 SCHEDULE PRESENT IN TF AND EXPLICITLY DISABLED**, with the enable as a single reviewable line.
+- **A-5 proof instance covering A-1..A-5 only.**
+
+### PHASE B — ON ANDREW'S SCOPE WORD, not before
+- **B-1** three artifacts SERVED · **B-2** field-level asserts vs the LIVE DIVZ/IDVZ input ·
+  **B-3** `comp-validate` PASS · **B-4** schedule ENABLED.
+
+### ⛔ PHASE B IS DEFERRED, NOT FAILED — AND NOT WAIVED
+`comp-validate` PASS still binds at Phase B, and **`NO_CONFIG` / `ZERO_CHECKS` remains
+never-reportable-as-safe.** Nothing in this split lowers a bar; it separates *when* each bar is
+answerable. **"D4c done" without Phase B named is an overclaim** — say PHASE A COMPLETE.
