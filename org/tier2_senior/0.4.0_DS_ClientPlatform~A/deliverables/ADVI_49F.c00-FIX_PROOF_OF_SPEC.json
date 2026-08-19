@@ -1,0 +1,103 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_49F.c00-FIX",
+ "phase": "WAVE-1",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/task_orders/ADVI_49F.c00-FIX.in-kind-flow-leg-defect.md",
+  "group": "ADVI_49F",
+  "vintage_commit": "5f01d59ba9",
+  "amendments": [
+   "COO C00-4 amendment @5f01d59ba9 (oracle re-point off the unreachable TWR re-read)",
+   "CTO ruling 213741Z (fence HOLDS for c00-FIX; the engine half splits to ADVI_49F.c02-CFINPUT, MON)",
+   "COO 214645Z (the twr invariance is ALSO a NEGATIVE CONTROL, not merely an expectation)",
+   "CTO 214127Z (publish the IC-stratum membership list as an artifact for CVO's Thursday pin read)"
+  ]
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~A",
+ "produced_at_utc": "2026-08-19T22:05:00Z",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/c00_flow_ledger.py",
+   "kind": "script",
+   "commit_or_etag": "89204884d7",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-deploy DEPLOYED + VERIFY OK to s3://opal-data-49financial/_code/c00_flow_ledger.py (safe_deploy_core LONGEST-PREFIX build-input map: data/assets/scripts/gold/runners_49f -> _code/). RULE 22a CODE-LAYER read on the DEPLOYED BYTES: downloaded object sha256 7a89bc699552261fdbbe3d8415e79b94f5810cd9efdbadf64078ef727e287ab4 == the committed local file, byte-identical, 20234 B both sides. Fix present IN THE DEPLOYED BYTES at :53 SCHEMA_VERSION=1.1, :256 in_kind_unvalued=is_ic, :271 quantity in out_cols. NEGATIVE CONTROL run on demonstrably-loaded bytes (20234 chars): pre-fix literal count 0; POSITIVE CONTROL in_kind_unvalued count 10, which proves the search can actually see the file."
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/tests/test_c00_c03_controls.py",
+   "kind": "test",
+   "commit_or_etag": "89204884d7",
+   "deployed_state": "N/A-TEST",
+   "deploy_evidence": "5 tests added, MUTANT-CONTROLLED in both directions with byte-identical restores verified by sha256 each time: (1) default reverted to False -> test_in_kind_is_never_zero_buried_when_prices_are_absent FAILS; (2) quantity removed from out_cols -> test_quantity_survives_into_the_emitted_rows FAILS. Full runners_49f suite 93 passed. One test comment was corrected BY its own mutant run: the useless-price case passes on the OLD code too, so it guards the valued path edge rather than the defect."
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~A/deliverables/ADVI_49F.c00-FIX_IC_STRATUM_MEMBERSHIP.json",
+   "kind": "artifact",
+   "commit_or_etag": "pending-commit",
+   "deployed_state": "PRODUCED",
+   "deploy_evidence": "CTO 214127Z addition: 1728 EXTERNAL-leg accounts and 5423 any-IC accounts, each with affected-date count and first/last date, for CVO's Thursday twin-vs-legacy pin read as a named stratum lens."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "C00-1",
+   "criterion_verbatim": "FEASIBILITY READ REPORTED (Thursday-comfortable: yes/no, with what it would compress).",
+   "method": "source_read + live_read",
+   "invocation": "c00_flow_ledger.py:240 and :315-316 prices-gate; chain_49f_entrypoint.py:163; S3 LastModified over all 527 partitions; canonical_positions partition-set intersection.",
+   "output_evidence": "REPORTED to COO 213312Z, cc CTO 213652Z and CRO~A 213719Z, BEFORE any code was written. SPLIT verdict. Item 1 (carry in_kind_value over history) NOT Thursday-free: --prices-local reads canonical_positions, which holds EXACTLY 1 partition (2026-08-18) against 527 flow_ledger dates, so the set intersection is 1 and a historical re-run would value nothing; valuing history needs new a03 and b01 legs x526. Items 2+3 comfortably free, about 3 lines in one file. RECOMMENDED (b) hold, upgrade conditional NOT earned because the headline symptom is unreachable Thursday at any compression level.",
+   "denominator": "527 flow_ledger partitions vs 1 canonical_positions partition",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "C00-2",
+   "criterion_verbatim": "FULL-HISTORY IC CENSUS across all ~526 partitions: distinct affected accounts + dates + materiality read, denominator printed.",
+   "method": "live_read",
+   "invocation": "paginated list_objects_v2 materialised client-side (never --query length over pages, never --no-paginate) plus 527 parquet reads with every read outcome accounted ok/fail.",
+   "output_evidence": "DENOMINATOR 527 partitions, not ~526: 2 listing pages, 1054 keys = exactly 2 per partition, read OK 527, FAILED 0, range 2024-07-08..2026-08-18. Pagination control: 1054 keys exceeds the 1000 page size, which is positive proof pagination actually ran. 524 of 527 partitions carry at least one IC leg. 41305 IC legs total; 41253 zero-buried (99.87 percent); 52 valued, all on the single chain-written 08-18 partition. DISTINCT ACCOUNTS: 5427 with any IC leg; 1730 with an EXTERNAL IC leg; 1728 with a ZERO-BURIED EXTERNAL leg, which is the TWR-material defect universe and 41x the 42-account 4-day floor. MATERIALITY: 434 affected dates inside serve scope (2024-11-01+), 81 before it, and ZERO gaps exceeding 7 days across the 648-day span, so every TWR window of any length or start date in serve scope spans at least one affected day. There is NO unaffected window to serve.",
+   "denominator": "527 partitions attempted / 527 read / 0 failed; 41305 IC legs",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "C00-3",
+   "criterion_verbatim": "THE FIX LANDS: in_kind_value carried, in_kind_unvalued=True where unvalued, quantity preserved into emitted rows.",
+   "method": "source_change + command",
+   "invocation": "commit 89204884d7; .tools/commit-gate.sh PASS on both files; pytest runners_49f 93 passed.",
+   "output_evidence": "LANDED AS RULED SCOPE (items 2+3; item 1 fenced out per CTO 213741Z item 4 and COO 214645Z item 4). in_kind_unvalued now DEFAULTS to is_ic, TRUE for every IC row, and is cleared only where a real price actually values the leg, so the zero-buried state is unreachable BY OMISSION: prices None, no usable close for the cusip, and quantity zero all now yield an honest unvalued rather than an assertion of worthlessness. quantity added to out_cols. SCHEMA_VERSION 1.0 -> 1.1, which is load-bearing rather than cosmetic: on a 1.0 partition a False flag means never-evaluated rather than valued, so the version is the discriminator for whether that field can be trusted at all. Manifest gains in_kind_census so every partition self-reports its own honesty. NOTE the item-1 carry mechanism was ALREADY CORRECT in code and is exercised by the valued-path test; what was defective was the DEFAULT it fell back to when the valuation block never ran.",
+   "denominator": "1 source file, 4 edits, every anchor asserted to match exactly once",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "C00-4",
+   "criterion_verbatim": "AMENDED (COO @5f01d59ba9 and 214645Z, CTO 213741Z): accepts on (a) c01/NNA consumption, (b) the honest-label assertions across 527 partitions, (c) twr_daily bit-identical as a NEGATIVE CONTROL. The harness re-read is retained as a reported measurement, not a pass condition.",
+   "method": "exercised",
+   "invocation": "OLD (git 89204884d7^) vs NEW build_flow_ledger on REAL date=2026-08-18 inputs (fact_trn 25004 rows, ref 187 codes, boundary 7316) with prices=None to reproduce exactly how the 526 backfilled partitions were produced; both outputs then fed through c01.build_nna_canonical and c02.flows_from_ledger. Run-and-read: nothing uploaded, no partition re-emitted.",
+   "output_evidence": "(b) HONEST LABEL: zero-buried OLD 52 -> NEW 0; flagged unvalued OLD 0 -> NEW 52; quantity emitted OLD False -> NEW True; schema OLD 1.0 -> NEW 1.1; manifest in_kind_census legs 52 valued 0 unvalued 52 zero_buried 0. (a) c01/NNA CONSUMPTION: accounts with row_quality=in_kind_unvalued OLD 0 -> NEW 4, and in_kind_unvalued_count sum OLD 0 -> NEW 27, across an identical 5351 nna rows -- the honest flag demonstrably REACHES the consumer. (c) NEGATIVE CONTROL: the c02 cash-flow frame is BIT-IDENTICAL True, cf_net sum 1779110.820000 on both sides -- PASS, the input TO did NOT widen into the engine.",
+   "denominator": "52 IC legs / 5351 nna rows / 52 cf rows on date=2026-08-18",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "C00-5",
+   "criterion_verbatim": "DEPLOY VERIFIED on the deployed artifact (Rule 22a CODE layer -- the deployed bytes, resolved through the build input, never by filename), not rc=0.",
+   "method": "live_read",
+   "invocation": "boto3 get_object on s3://opal-data-49financial/_code/c00_flow_ledger.py; full sha256 compared against the committed local file; content greps carrying both a positive and a negative control.",
+   "output_evidence": "BYTE-IDENTICAL: deployed sha256 7a89bc699552261fdbbe3d8415e79b94f5810cd9efdbadf64078ef727e287ab4 equals the local committed file, 20234 B both sides. The fix is present in the DEPLOYED bytes at :53, :256 and :271. The pre-fix literal is absent (count 0) alongside a positive control of 10 in_kind_unvalued hits proving the search sees the file. Resolved through the safe_deploy_core build-input map, never by filename. DISCLOSED FAILURE AND RECOVERY: my first verification attempt used aws s3 cp, which the MSYS shim mangled into a relative ..\\..\\..\\ path; the download silently failed and the grep printed a confident 0 occurrences correct against a MISSING FILE -- a retrieval failure returning a value, exactly the class CLAUDE.md names. Caught and re-run through boto3 with the denominator and the positive control printed beside the result.",
+   "denominator": "1 deployed object, 20234 bytes, sha256 compared in full",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "C00-6",
+   "criterion_verbatim": "proof instance VALID rc=0 positional: ids C00-1..C00-6. MEASURED/RULED rows only.",
+   "method": "command",
+   "invocation": "this instance",
+   "output_evidence": "Six rows, ids positional C00-1 through C00-6, every row MEASURED or RULED and carrying its own denominator. No INFERRED rows.",
+   "denominator": "6 criteria",
+   "status": "PASS"
+  }
+ ],
+ "residuals_not_in_scope": [
+  "Item 1 historical re-valuation: canonical_positions holds 1 partition against 527 flow_ledger dates, so it requires an a03 + b01 backfill program rather than a code fix. BACKFILL-PROGRAM decision at the MON census scoping (CTO 213741Z item 4), with Andrew's word if it carries real cost.",
+  "THE CODE IS FIXED; HISTORY IS NOT RE-EMITTED. The 526 historical partitions still carry schema 1.0 zero-buried rows. I did not re-run 526 partitions the night before a flip on my own read. A re-emission would also need a02 and a05 mirrors per date, which exist in S3 for only 2 dates because the 01:13Z backfill produced them locally without uploading.",
+  "The ENGINE half: c02 never consumes in_kind_value at all (:19 design statement, :128 the sole cf source). Split to ADVI_49F.c02-CFINPUT (MON), which carries the harness re-read as ITS acceptance oracle.",
+  "Per-account TWR error MAGNITUDE is unmeasured here. 1728 is a COUNT of accounts carrying a defective input, never a claim that those accounts show materially wrong returns. The +341% specimen proves the error CAN be severe, not that it IS severe everywhere. That distribution is CF-3's job."
+ ]
+}
