@@ -4,7 +4,7 @@
 <issued_to>0.4.0_DS_ClientPlatform (script edits, Rule 13 lane) + 0.7.0_AE_CloudOps (IAM leg + infra verify; joint)</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T13:30Z</issued>
-<status>pending</status>
+<status>complete -- CLOSED 2026-08-19T01:16Z by COO: BP-1..BP-6 ALL PASS, proof instance VALID rc=0 at BOTH DS (@e4a83d1ebb) and COO desks; chain green (25 stages rc=0), publish leg RESTORED (served refreshed in-window, as_of 08-14 = the newest canonical, frontier lag source-confirmed as the 23:01Z-schedule-vs-00:17Z-BD-export ordering, routed COO/CTO as a P2 timing item, NOT a restore defect); AE ledger 20260818T1419Z closed same window</status>
 <priority>P1 — CLIENT-FACING: a served firm dashboard is 8 trading days stale (COO ruling 1305Z: outranks the MDPFCLEANUP teardown wave). Spawn TODAY (MSTR).</priority>
 <authority>MSTR 08-18 status sweep (finding) -> COO discriminator resolved from source 1303Z (SERVED) -> AE mechanism report 132226Z (two stacked causes, deployed bytes + run logs) -> COO independent reproduction 1325Z. No Andrew word needed: repair of a scheduled production path on the scheduled path; nothing reserved touched.</authority>
 </task_order>
