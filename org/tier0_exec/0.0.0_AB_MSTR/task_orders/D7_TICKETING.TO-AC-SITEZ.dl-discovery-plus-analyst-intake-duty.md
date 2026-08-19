@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:15Z</issued>
 <dated>TO-A: at seat assignment (hours of work; Andrew's Q3 one-liner is its gate-out). TO-C: on TO-B + U3/U4 closures. The 07:00-ET±30m window stays light (BBG pulls); WDAC clears 08-20 07:00 before any duty-config lands.</dated>
-<status>staged -- activates at MSTR~Z's seat assignment; this TO is the durable contract, the bus message is the kickoff</status>
+<status>pending -- activated 2026-08-19T19:2xZ at 0.5.0_AE_OpalETL~Z seat assignment (MSTR~Z kickoff 191726Z). TO-A COMPLETE 1931Z (output @69f5f82004: DLs 49@/inflection@ measured, Cottonwood none; CVO-P0-1 verdict TO-B does-not-collapse; one-liner AT ANDREW via MSTR~Z console; capability read ferried to laptop COO/CTO/AE 1935Z). TO-C gated: TO-B + U3/U4 + Andrew's 3 answers + the 08-20 07:00 WDAC acceptance</status>
 <priority>P1 — D7 is the week's flagship per Andrew ("water through the pipes"); TO-A's one-liner unblocks TO-B's shape and Q3's closure</priority>
 <authority>D7_TICKETING_INTAKE_PRD.md §TO-A/§TO-C at dispatch vintage @36a7fbd70e (CVO P0-1 folded: the on-box capability grep IS the §6 existence check — the gateway app is not repo-resident); Andrew's four positions (v1 INTERNAL-ONLY; Opal-Analyst-on-BBG-box placement FINAL; 2PM-ET interim cutoff STANDS for ack wording; bobby involved LATER — notification set proceeds without bobby@); DEVICE_SPLIT_DECISION @a02f9ff5a4.</authority>
 </task_order>
