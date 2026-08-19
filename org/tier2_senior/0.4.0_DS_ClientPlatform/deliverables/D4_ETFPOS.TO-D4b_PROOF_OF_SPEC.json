@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D4_ETFPOS.TO-D4b",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D4_ETFPOS.TO-D4b.divz-idvz-holdings-provenance-first.md",
+    "group": "D",
+    "vintage_commit": "bb8d63f737"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/D4_ETFPOS.TO-D4b_PROOF_OF_SPEC.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "D4b is a READ, not a build: provenance answer + delivery-path trace + coverage measurement + an ownership declaration. No code, no feed, no trigger built. ZERO VENDOR EGRESS PERFORMED -- the provenance was resolved entirely from git history, committed artifacts, and Opal-owned AWS state."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D4b-1",
+      "criterion_verbatim": "PROVENANCE ANSWERED for both CSVs -- where they came from, with evidence, and whether an existing entitlement covers a standing feed.",
+      "method": "manual_read_with_citation",
+      "invocation": "git log/show over research_transcripts/analysis/source_{divz,idvz}_holdings_20260731.csv; comp-find 'TrueShares' and 'docs.google.com'; aws lambda/scheduler reads on etfs-netassets-daily",
+      "output_evidence": "ANSWERED, SOURCE-CONFIRMED. Both CSVs entered the repo in ONE commit, cfdddb5d8d3d2f8dcb4065f9f5426181eea62faa, author 4.0.0_SA_CRO, 2026-07-31 10:50:52 -0400, subject 'DIVZ/IDVZ holdings ingested on Andrew's egress word'. The commit body states the origin verbatim: 'Andrew approved TrueShares egress 2026-07-31' and 'the holdings table is NOT in the bronze HTML we already scrape daily (0 <tr> in 465KB -- the table is JS-rendered). It resolves to a TrueShares-published Google Sheets CSV export, one sheet per fund, linked from the fund page. Pulled both; DIVZ 29 constituents, IDVZ 43, both dated 7/31.' File contents corroborate: header Date,Account,Stock Ticker,CUSIP,Security Name,Shares,Price,Market Value,Weightings,Net Assets; DIVZ 30 lines and IDVZ 44 lines including header (29/43 constituents), all rows dated 7/31/2026. The export mechanism is the Google Sheets CSV export form (https://docs.google.com/spreadsheets/export?id={sid}&exportFormat=csv -- the same form already used in-repo at tools/astn_wsjft/scripts/refresh_holdings.py:63), and the sheet link is embedded in the very TrueShares fund-page HTML the estate already pulls daily (docs.google.com occurs in the captured bronze samples trueshares_{DIVZ,IDVZ}_bronze_netassets_20260806_*.html:1121). ENTITLEMENT: an EXISTING, LIVE, STANDING daily pull of this issuer already runs -- Lambda etfs-netassets-daily is State=Active (LastModified 2026-07-15T23:52:03Z) on EventBridge Scheduler etfs-netassets-daily, ENABLED, cron(0 22 * * ? *), and its source constants are TS_URL='https://www.true-shares.com/etf/{slug}' plus the Pathfinder FILEPOINT CSVs.",
+      "denominator": "2 of 2 CSVs traced to a single named commit; 74 total lines across both files enumerated; 3 of 3 docs.google.com repo hits reviewed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D4b-2",
+      "criterion_verbatim": "THE Q1 EGRESS QUESTION IS RESOLVED OR ESCALATED ON THAT BASIS -- resolved (no ask needed) or escalated with the specific new vendor/feed named. Not left open.",
+      "method": "manual_read_with_citation",
+      "invocation": "the D4b-1 provenance chain, tested against the TO's own criterion: the ask goes to Andrew ONLY if a genuinely NEW vendor/feed is required",
+      "output_evidence": "RESOLVED -- THE Q1 ASK AS FRAMED IS NOT REQUIRED, AND I AM NOT SENDING IT. Applying the TO's own test: is a genuinely NEW vendor or feed required? No. (1) THE VENDOR IS NOT NEW: TrueShares is already an entitled, live, standing daily source -- etfs-netassets-daily is Active and ENABLED at cron(0 22 * * ? *) and fetches www.true-shares.com every day. (2) THE PUBLISHER IS THE SAME: the holdings sheet is TrueShares-published and its link is embedded in the page already being fetched. (3) A DIRECT ANDREW APPROVAL FOR THIS EXACT DATA ALREADY EXISTS ON THE RECORD: 'Andrew approved TrueShares egress 2026-07-31' (@cfdddb5d8d). (4) THE FORM IS ALREADY IN-ESTATE: the Google Sheets CSV export pattern is used at tools/astn_wsjft/scripts/refresh_holdings.py:63. WHAT HONESTLY REMAINS IS NARROWER THAN A SOVEREIGN VENDOR ASK AND I AM NOT DRESSING IT UP AS ONE: the 07-31 approval was given for a one-time research pull, and TrueShares does not appear on the standing-lifted egress roster (ORION, SMARTX, cot-BD, arxiv, ECLIPSE). So the residual is a SCOPE CONFIRMATION -- does the existing entitlement extend from one-time to standing, and does it cover the issuer's own sheet on a Google-hosted export URL -- NOT a vendor onboarding. That is a materially smaller question, and per the TO ('an unnecessary sovereign ask is not free') the correct act is to hand COO the narrow question rather than fire the wide one. ZERO EGRESS PERFORMED at this seat: I did not fetch the sheet, the fund page, or anything off Opal-owned infrastructure. Availability is not authorization.",
+      "denominator": "4 independent provenance legs evaluated (vendor identity, publisher identity, prior Andrew approval, in-estate mechanism); 1 residual question named",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D4b-3",
+      "criterion_verbatim": "OWNERSHIP DECLARED per the cross-PRD rule, reported to both D4 and D5 threads.",
+      "method": "manual_read_with_citation",
+      "invocation": "the TO's cross-PRD rule: whichever program lands the standing DIVZ/IDVZ feed DECLARES ITSELF THE OWNER and the other CONSUMES -- one source for one fact, never two homes",
+      "output_evidence": "DECLARED: D4_ETF_POSITIONING OWNS the standing DIVZ/IDVZ holdings feed; D5 CONSUMES IT. Basis, not preference: D4 is the program whose delivery path already exists and already lands the sibling funds -- etfs-netassets-daily writes PFDE/PFOE holdings into opal-data-etfs/silver/holdings/{date}.parquet daily, so adding DIVZ/IDVZ extends ONE existing producer rather than standing up a second. D5's need (materiality/weight basis) is satisfied by reading that same silver table. The concrete failure this prevents is named in the TO: two PRDs discovered tonight to depend on the same two CSVs, and until tonight neither knew the other did -- which is exactly how a second home gets built. THE PRACTICAL RULE FOR BOTH PROGRAMS: nobody re-pulls the sheet into a private location; the fact has ONE producer and ONE key. Reported to BOTH threads: COO (D4) and CRO (D5's owner), separate sends since an in-body cc copies nobody. NOTE ON MY AUTHORITY: I am declaring the outcome the TO instructed me to declare and routing it to both owners; binding D5 is COO/CRO's to ratify, and I have flagged it as such rather than treating my declaration as their assent.",
+      "denominator": "2 of 2 dependent programs identified and notified (D4 via COO, D5 via CRO)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D4b-4",
+      "criterion_verbatim": "COVERAGE: 4/4 universe tickers present in silver/holdings for 3 consecutive days, denominators printed on both sides.",
+      "method": "live_read",
+      "invocation": "aws s3 cp s3://opal-data-etfs/silver/holdings/{2026-08-17,2026-08-18,2026-08-19}.parquet; pyarrow read; distinct fund_ticker set vs the 4-ticker universe",
+      "output_evidence": "MEASURED 2 OF 4, NOT 4 OF 4 -- THE CRITERION FAILS AND THAT FAILURE IS THE POINT OF D4. Three consecutive days, each read from the live artifact: 2026-08-17 rows=114, universe present 2/4 = [PFDE, PFOE], MISSING [DIVZ, IDVZ]; 2026-08-18 rows=114, 2/4, same two missing; 2026-08-19 rows=114, 2/4, same two missing. DENOMINATORS BOTH SIDES: universe = 4 tickers (DIVZ, IDVZ, PFDE, PFOE); silver/holdings = 114 rows per day across 3 of 3 consecutive days present (partitions exist daily through 2026-08-19, written 22:00Z). MECHANISM, source-confirmed and consistent with the gap: etfs-netassets-daily pulls holdings only from the Pathfinder FILEPOINT CSV (FILEPOINT_HOLDINGS_URL, lambda_function.py:202) which covers PFDE/PFOE; the TrueShares funds contribute NET ASSETS only, because their holdings table is JS-rendered and lives in the separate published sheet. So the coverage hole is not a broken feed -- it is a feed that was never pointed at the TrueShares holdings source. CONSTRAINT THAT BEARS ON ANY REMEDY PLAN: per the ingest commit, 'the TrueShares sheet is current-day-only and carries no history, so its date cannot be chosen' -- DIVZ/IDVZ holdings therefore CANNOT be backfilled, only captured forward from the day the standing pull starts. Any plan that assumes a historical fill is unbuildable.",
+      "denominator": "3 of 3 consecutive days read; 4-ticker universe vs 114 rows per daily partition",
+      "status": "FAIL",
+      "status_reason": "Measured 2/4, not 4/4, on 3 consecutive days (PFDE+PFOE present, DIVZ+IDVZ absent). This is a TRUE FAIL of the criterion as written and is recorded as such deliberately: the coverage hole IS the gap D4_ETF_POSITIONING exists to close, so softening it to N/A or UNCOMPUTABLE would erase the program's own justification. Not a defect in the running feed -- etfs-netassets-daily works and lands 114 rows daily; it was simply never pointed at the TrueShares holdings source, whose table is JS-rendered and lives in a separate published sheet. Closing it is TO-D4c's build, gated on the narrow egress scope-confirmation in D4b-2."
+    },
+    {
+      "criterion_id": "D4b-5",
+      "criterion_verbatim": "proof instance VALID rc=0 positional: ids D4b-1..D4b-5. MEASURED/RULED rows only.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/D4_ETFPOS.TO-D4b_PROOF_OF_SPEC.json",
+      "output_evidence": "This instance. Every row is MEASURED at this seat from git history, committed artifacts, and live Opal-owned AWS state; no row rests on an INFERRED expected value, and no row rests on vendor egress. D4b-4 is recorded as FAIL rather than softened -- the coverage hole it measures is the thing D4 exists to close, and recording it as anything else would hide the program's own justification.",
+      "denominator": "5 of 5 declared criteria present and positionally ordered D4b-1..D4b-5",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The coverage read's discriminating power was controlled two ways rather than assumed. (1) The fund-ticker matcher was checked against a KNOWN-PRESENT pair: if the matcher were broken it would report 0/4, not 2/4. (2) The absence claim was cross-checked against a named MECHANISM (FILEPOINT covers PFDE/PFOE; TrueShares holdings are JS-rendered and live in a separate sheet) rather than resting on the empty result alone.",
+      "expected": "a working matcher must find the funds that ARE fed and miss only those that are not; the absence must have an independent mechanical explanation.",
+      "observed": "2/4 present on all three days -- PFDE and PFOE found, DIVZ and IDVZ missing -- so the matcher discriminates and the zero is specific, not global. The mechanism read (lambda_function.py:183 TS_URL vs :202 FILEPOINT_HOLDINGS_URL) independently predicts exactly that split. Two legs, different derivations, same answer.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the coverage measurement was run across 3 independent daily partitions rather than one, so a single-day anomaly cannot produce the verdict",
+      "observed": "identical result on 2026-08-17, 2026-08-18 and 2026-08-19 -- 114 rows and 2/4 universe coverage each day, same two tickers missing",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No vendor egress performed -- the TrueShares sheet, the fund page, and every non-Opal endpoint were NOT fetched at this seat",
+      "reason": "The TO states NO VENDOR EGRESS in the meantime, and availability is not authorization. The entire provenance answer was reachable from git history, committed artifacts and Opal-owned AWS state, which is precisely why the read was cheap enough to do first."
+    },
+    {
+      "item": "The standing DIVZ/IDVZ feed is NOT built here",
+      "reason": "D4b is provenance plus delivery-path trace. Building the producer is TO-D4c's scope, and it is gated on the narrow egress scope-confirmation surfaced in D4b-2."
+    },
+    {
+      "item": "The Q1 sovereign ask was NOT sent to Andrew",
+      "reason": "D4b-2 resolves it: no genuinely new vendor or feed is required, so firing the wide ask would spend a sovereign turn on a question the record already answers. The narrow residual went to COO instead."
+    }
+  ],
+  "surprises": [
+    "PFDE/PFOE holdings ARE already landing daily and nobody stated it in either PRD: opal-data-etfs/silver/holdings/{date}.parquet has 114 rows every day through 2026-08-19. The D4/D5 framing treats DIVZ/IDVZ holdings as the whole problem, but half the universe is already a solved, running feed -- so the remaining work is an EXTENSION of one live producer, not a new pipeline.",
+    "The TrueShares holdings sheet is CURRENT-DAY-ONLY with no history (stated in the ingest commit @cfdddb5d8d). DIVZ/IDVZ holdings can therefore never be backfilled -- only captured forward. Any D4/D5 plan assuming a historical fill for those two funds is unbuildable, and the 2026-07-31 CSVs in research_transcripts are the only historical snapshot that will ever exist unless someone captured others.",
+    "The docs.google.com sheet link is embedded in the TrueShares fund-page HTML that etfs-netassets-daily ALREADY downloads every day (bronze samples ...:1121). So the discovery path for the sheet id needs no new source -- it is inside bytes the estate already holds."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-19/",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'source_*vz_holdings*' ; comp-find 'TrueShares' ; comp-find 'etf_netassets_watch' ; comp-find 'docs.google.com'",
+      "result": "PASS with denominators (2 of 27,007; 235 of 27,008; 116 of 27,009; 3 of 27,009). The docs.google.com search is what connected the sheet-export form to a page the estate already fetches -- a text-local grep would have found the string but not the coupling."
+    },
+    {
+      "tool": "aws (operational reads, Opal-owned)",
+      "invocation": "lambda get-function-configuration etfs-netassets-daily; scheduler list-schedules; events list-rules; s3 ls/cp over opal-data-etfs/silver/holdings/",
+      "result": "PASS -- established the standing feed is Active + ENABLED cron(0 22 * * ? *) and measured 3 consecutive days of live coverage."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "see D4b-5."
+    }
+  ]
+}
