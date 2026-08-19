@@ -14,7 +14,12 @@
 Probe phase of the BD parity program: for 3-5 hand-picked accounts (choose for cohort diversity —
 fee/non-fee, flows/no-flows, an inception-recent account), pull BD's OWN calculated per-account
 performance/reporting outputs and hand-check our new chain's Thursday output against them, per
-account x period, classifying each figure per the §7 taxonomy: **EXACT · EXACT-SHIFTED (±1d,
+account x period, classifying each figure per the §7 taxonomy.
+**AMENDED 08-19 19:10Z (D2 dispatch vintage @c379cb6521 + convergence deltas): the account-selection
+rider now ALSO wants one income-bearing fixed-income account so prereg C5 (valuation ACCRUAL basis,
+from the Travis decomposition) separates cleanly — CRO methodology owns the selection; C4 cells are
+hand-adjudicated at P1/P2 (no Schwab-statement automation before P3); classification thresholds
+carry the pre-registered convention set C1-C5.** Taxonomy: **EXACT · EXACT-SHIFTED (±1d,
 lag-correlation shown) · TIGHT (within N bp WITH the distribution — a tight-never-exact profile
 fingerprints a convention mismatch: cash-flow timing, fee accrual timing, daily-TWR vs Modified
 Dietz) · LARGE · + the per-account MIX profile.** Every non-EXACT class carries a NAMED candidate
