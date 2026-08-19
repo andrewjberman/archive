@@ -310,6 +310,13 @@ which I carried explicitly as RELAYED-not-measured, reproduces at **$456,773,323
 different session, different seat, different run id. Keeping the two apart is what makes the second
 number evidence rather than an echo.
 
+> **Provenance note, so a future reconciliation does not stall on it:** every figure here is taken
+> from the ARTIFACT, not from the delivering message. The artifact carries `456773323.3982`
+> (`positive_control.aug_emv`) and `456773323.4` (`aug_2026_emv_by_group`), which agree; the covering
+> message's prose says `456,773,300.00`, a ~$23 transcription difference. **The artifact governs.**
+> Flagged only because a reader comparing my number against that sentence would otherwise be left
+> looking for a defect that is not there.
+
 ## Coverage
 
 | | |
