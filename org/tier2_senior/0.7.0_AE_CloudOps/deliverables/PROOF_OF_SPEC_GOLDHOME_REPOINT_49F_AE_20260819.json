@@ -1,0 +1,140 @@
+{
+ "schema_version": "1.0",
+ "to_id": "OPAL_ADVIPOINTERS.GOLDHOME-REPOINT-49F",
+ "phase": "P3-REPOINTS",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/OPAL_ADVIPOINTERS.GOLDHOME-REPOINT-49F.per-client-bucket-one-act.md",
+  "group": "OTHER",
+  "vintage_commit": "1b2ee34db7"
+ },
+ "assignee": "0.7.0_AE_CloudOps (AE group: RP-AE-1/2/3 + RP-SPINE-1/2)",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/shared-infra/s3-49financial.tf",
+   "kind": "terraform",
+   "commit_or_etag": "bbf1cadd4f",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply targeted 5 adds 01:08Z; 0-diff-on-target re-plan; 4 applied-plane reads + 3 sims in ledger 20260819T0106Z (CTO-validated @46e0bce62d); tag shared-infra-v1.46.0 on origin @f4c254c7 (integrator push, LD-0367)"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260819T0106Z_goldhome-repoint-49f-rp-ae-1-bucket-mint_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "HEAD (mint close + spine addenda)",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "CTO validations @46e0bce62d (mint) + 125003Z @f82a95db4e (spine)"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/P2_FLOOR_49F_TF_DRAFT_20260818.md",
+   "kind": "doc",
+   "commit_or_etag": "REV 3 @HEAD",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "RP-AE-3 row; DRAFT by design -- nothing applied until the P2 gate"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "RP-AE-1",
+   "criterion_verbatim": "BUCKET MINTED (TF, safe-apply, CTO per-apply gate on the plan): opal-data-49financial with versioning ON, block-public-access ON, and the cross-firm IAM Deny minted AT CREATION per the NEVER#2 pattern. Plan expected-rows in writing pre-apply; 0-diff + tag after.",
+   "method": "command",
+   "invocation": "safe-apply apply TARGETED x5 (plan sha 3e2e09cbe20c9bd8a0b12bd0512914bd recorded pre-apply in the ledger); post-apply get-bucket-versioning / get-public-access-block / get-bucket-encryption / get-bucket-policy; simulate-principal-policy x3 separate invocations (live-read resource-policy + aws:PrincipalArn context per Rule 22a)",
+   "output_evidence": "Apply complete 5 added 0/0 (01:08Z); versioning=Enabled; BPA all four true; SSE=AES256; policy DenyForeignFirmPrincipals Deny s3:* w/ patterns cot-*/inf-*/mdpf-*/opal-assets-mdpf-* (bd-* EXCLUDED BY DESIGN -- the TO literal would sever the ratified P2D-4 executor; CTO ruled (a) confirm + (b) widen mdpf; COO amended the TO in place). Sims: cot-exporter-ec2-role=explicitDeny/ResourcePolicy; bd-exporter-ec2-role=implicitDeny matched=[] (EXPECTED absent-identity-grant, not failure); mdpf-gold-lambda-role=explicitDeny/ResourcePolicy. 0-diff-on-target re-plan No-changes; tag shared-infra-v1.46.0 on origin @f4c254c7 (integrator push, LD-0367).",
+   "denominator": "5 planned rows = 5 applied; 4 applied-plane reads; 3 sims; 1 drag-in (ms_heat staged row) deliberately NOT ratified via targeting",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RP-AE-2",
+   "criterion_verbatim": "IAM RE-POINTED per the record's three seams: the P3-leg runner grants on portal/gold/advi/* and the P4-PUBIAM publisher READ-side target re-point to the new bucket (the platinum Put half of P4-PUBIAM is UNCHANGED). Live-primitive proof per changed grant.",
+   "method": "manual_read_with_citation",
+   "invocation": "CTO 175124Z + COO 175200Z confirmed the DRAFT-PLANE reading: NO gold-side grant was applied against the old root (measured: bd-exporter implicitDeny on the new bucket = no identity grant exists), so there is nothing to swap live",
+   "output_evidence": "P2 draft REV 3 rows B5 (RW opal-data-49financial/gold/advi/*) + B6 (read opal-data-49financial/_code/*) replace the old assets-root lines; silver/meta reads on opal-data-assets UNCHANGED (byte-consistent with DS~A field-3 re-issue). Live-primitive proofs RIDE the P2/P4 applies, which mint directly against the new bucket.",
+   "denominator": "grants applied against the old root: 0 (hence 0 live swaps); draft rows re-targeted: 2",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RP-AE-3",
+   "criterion_verbatim": "P2-FLOOR TF draft target updated to the new root in the same window.",
+   "method": "manual_read_with_citation",
+   "invocation": "P2_FLOOR_49F_TF_DRAFT_20260818.md REV 3",
+   "output_evidence": "Chain writes -> opal-data-49financial/gold/advi/{table|dimensions}/date={D}/; _code at BUCKET ROOT (CTO pin 174459Z); dedicated DLQ + 12:45Z candidate carried over per CTO G-A.",
+   "denominator": "1 draft, 3 revisions, committed same window",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RP-SPINE-1",
+   "criterion_verbatim": "LIVE-VERIFY: listing on the new root (count matches sync) + ONE runner read exercised against the new root (not a config read -- an actual emitter/stage input resolution).",
+   "method": "command",
+   "invocation": "independent recursive counts BOTH roots; python exercise through the FLIPPED runner_common (_bucket_for + list + real parquet read) + silver-key negative control",
+   "output_evidence": "new 4,222 objects / 327,275,368 B == old EXACT (fourth derivation beside DS~A manifests + CVO 012430Z); _bucket_for(gold/advi/...) -> opal-data-49financial; REAL partition read date=2026-07-02 -> 7,095 rows x 20 cols parsed; negative control: silver key -> opal-data-assets. 1000-key page truncation disclosed (page, not total).",
+   "denominator": "4,222/4,222 objects, bytes exact; 4 independent derivations; 1 positive read + 1 negative control",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RP-SPINE-2",
+   "criterion_verbatim": "OLD PREFIX DELETE, only after RP-SPINE-1: portal/gold/advi/ prefix removed (migrate-before-kill; consumer basis re-checked live at execution, denominator printed); absence read WITH an adjacent positive control; rollback = the sync manifest + versioned new bucket.",
+   "method": "command",
+   "invocation": "HELD overnight on the harness recursive-rm deny (CTO ruling 014221Z: no side-door); RELEASED by Andrew-direct ~12:5xZ VERBATIM 'approve the SPINE-2 delete, go ahead with the batched form' (CTO relay 124622Z); 5x s3api delete-objects off the materialized 4,222-key listing",
+   "output_evidence": "Pre-act re-check RE-DERIVED: platinum/advi=0; 0/7 CF origins name opal-data-assets; 0 source hits/6,887 files. Deleted 1000+1000+1000+1000+222, 0 errors per batch. Absence=0 beside adjacent control portal/gold/mdpf=201 SURVIVES (first KeyCount read returned None on BOTH target+control -- caught BY the control, re-read client-side, both recorded in the ledger). New root re-read post-delete INTACT 4,222/327,275,368.",
+   "denominator": "4,222 keys materialized == deleted; 5 batches; 0 errors; control 201 survivors",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RP-VAL",
+   "criterion_verbatim": "proof instance per group, rc=0 positional.",
+   "method": "command",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps/deliverables/PROOF_OF_SPEC_GOLDHOME_REPOINT_49F_AE_20260819.json",
+   "output_evidence": "VALID rc=0 at write time (run output pasted in the commit thread)",
+   "denominator": "1 instance, 6 criteria",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The Deny exercised against a principal it must NOT catch (bd-exporter) and two it MUST (cot, mdpf); the absence read exercised against a prefix that must SURVIVE (portal/gold/mdpf).",
+   "expected": "cot/mdpf explicitDeny; bd NOT-denied-by-this-policy; control prefix >0 objects",
+   "observed": "exactly as expected -- and the FIRST absence instrument (--query KeyCount) FAILED THE CONTROL (None on both target and control), forcing a client-side re-read: the control caught an undiscriminating instrument before it could pass a clean-looking zero",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the count 4,222 objects / 327,275,368 B derived independently 4 ways (DS~A two-sided manifest, CVO 012430Z recursive count, my SPINE-1 recursive counts, the materialized delete listing)",
+   "observed": "identical across all four",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "P4-PUBIAM platinum Put half",
+   "reason": "UNCHANGED by the TO's own text -- serving stays opal-data-portal-v2"
+  },
+  {
+   "item": "MDPF gold + global/cross-firm gold migration",
+   "reason": "seams 1+2 of the ratified record: mdpf stays at the assets root through its live P4/P5; no client bucket exists for global"
+  },
+  {
+   "item": "role-side mirror-belt extension (cot/inf belts naming opal-data-49financial)",
+   "reason": "surfaced as a CTO-routed parity follow-on; expected rows = mint + swaps only (CTO 173731Z)"
+  }
+ ],
+ "surprises": [
+  "TO Deny literal 'bd/cot/inf' would have severed the ratified chain executor -- caught pre-build, CTO ruled, COO amended the TO crediting the catch",
+  "shared-infra untargeted plan carries 0.8.0~Z's staged ms_heat lifecycle row (committed 07-15, never applied) -- COO-banked; NOT ratified via targeting",
+  "harness permission layer denied the recursive-rm form -> overnight HOLD (CTO ruling: no side-door) -> Andrew's morning word blessed the batched form"
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-18/session_1525-0100Z_relaunch_49f_push_fixture_reads_goldhome_mint_staged.md (the 08-19 morning delta rides the next log)",
+ "compiler_tools": [
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'portal/gold/advi' infra/aws/lambda infra/aws/lambda-edge portal/src",
+   "result": "0 hits / 6,887 files scanned (consumer census, denominator printed) -- run pre-act at both SPINE-2 windows"
+  },
+  {
+   "tool": "terraform",
+   "invocation": "terraform validate; terraform plan -target=<5 mint resources>; untargeted plan (drag-in check)",
+   "result": "validate clean; targeted 5 adds 0/0; untargeted exposed the staged ms_heat lifecycle row (surfaced to COO, not ratified)"
+  },
+  {
+   "tool": "aws iam simulate-principal-policy",
+   "invocation": "x3 separate invocations, ONE --resource-arns each, --resource-policy = live-read bucket policy, --context-entries aws:PrincipalArn",
+   "result": "cot explicitDeny / bd-exporter implicitDeny matched=[] / mdpf explicitDeny -- the Deny EXERCISED, discriminating both directions"
+  }
+ ]
+}
