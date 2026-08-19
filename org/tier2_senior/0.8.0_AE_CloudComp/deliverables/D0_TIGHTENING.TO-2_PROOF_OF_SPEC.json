@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D0_TIGHTENING.TO-2",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "docs/architecture/D0_INFRA_TIGHTENING_PRD.md",
+    "group": "T",
+    "vintage_commit": "4bf291b26c"
+  },
+  "assignee": "0.8.0_AE_CloudComp",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py",
+      "kind": "script",
+      "commit_or_etag": "1bd55740e9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A BUILDER, not a deployed artifact -- it has no deploy leg of its own. TO-2 states explicitly that no bundle rebuild is required, and none was performed: the DEPLOYED mdpf-gold-lambda package still carries the pre-change stamp (live read: in-zip BUILD_MANIFEST.json present, source_commit f3dbe857244ffe66285d568d4dc8572bf1bd13b2, zip_sha256 MISSING, built_at MISSING). Future builds emit the complete pair."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-mdpf-portal-publisher/build_package.py",
+      "kind": "script",
+      "commit_or_etag": "1bd55740e9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same. Live read of the DEPLOYED publisher package: in-zip BUILD_MANIFEST.json present, source_commit c0902245b07438eb0be65cf5e28241d4be56aa38, zip_sha256 MISSING, built_at MISSING. No rebuild performed."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_DEPLOYCENSUS/stamp_coverage_census.py",
+      "kind": "test",
+      "commit_or_etag": "1bd55740e9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Re-runnable coverage census by a verifier at any vintage: `--builders --vintage <commit>` for the builder plane, `--deployed` for the live AWS plane. Prints denominators on both planes."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T2a-1",
+      "criterion_verbatim": "BOTH HOMES EMIT. Both build_package.py homes emit BUILD_MANIFEST. \"Both\" is the criterion -- one home stamping is the two-homes-diverged hazard wearing a success badge.",
+      "method": "command",
+      "invocation": "python infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py --out <scratch>/h1.zip && python infra/aws/lambda/opal-assets/opal-assets-mdpf-portal-publisher/build_package.py --pin 4a2b34df76 --out <scratch>/h2.zip  (then inspect both zips + sidecars)",
+      "output_evidence": "-- mdpf-gold-lambda (22 zip members) --\n   [PASS] in-zip BUILD_MANIFEST.json present\n   [PASS] sidecar present\n   [PASS] source_commit\n   [PASS] members path:sha256\n   [PASS] sidecar zip_sha256\n   [PASS] sidecar built_at\n   [PASS] zip_sha256 MATCHES the sealed bytes\n   [PASS] in-zip stays deterministic (no built_at inside)\n-- opal-assets-mdpf-portal-publisher (3 zip members) --\n   [PASS] (same 8 checks)\nT2a-1: 16/16 checks PASS across 2/2 homes (denominator 16)\nVERDICT: BOTH HOMES EMIT\n\nMEASURED BEFORE BUILDING: both homes ALREADY emitted an in-zip manifest at HEAD, so the criterion's headline was already satisfied; the REAL gap was the section-4b field contract -- zip_sha256 and built_at missing from BOTH, and NO sidecar at all from the publisher home.",
+      "denominator": "16 of 16 checks PASS; 2 of 2 builder homes (the complete set -- comp-find --name build_package.py returned 2 hits across 26988 files scanned)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2a-2",
+      "criterion_verbatim": "CENSUS COVERAGE RISES: re-run the coverage census and show the delta, with the denominator printed on both sides.",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_DEPLOYCENSUS/stamp_coverage_census.py --builders --vintage HEAD   # BEFORE\npython org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_DEPLOYCENSUS/stamp_coverage_census.py --builders                  # AFTER",
+      "output_evidence": "BEFORE (vintage HEAD, pre-TO-2 builders):\n  homes emitting in-zip BUILD_MANIFEST : 2/2  (denominator 2 homes)\n  homes emitting a sidecar            : 1/2  (denominator 2 homes)\n  homes SECTION-4b COMPLETE           : 0/2  (denominator 2 homes)\n\nAFTER (working tree, this commit):\n  homes emitting in-zip BUILD_MANIFEST : 2/2  (denominator 2 homes)\n  homes emitting a sidecar            : 2/2  (denominator 2 homes)\n  homes SECTION-4b COMPLETE           : 2/2  (denominator 2 homes)\n\nDELTA: sidecar 1->2 of 2; section-4b complete 0->2 of 2. Denominator (2 homes) printed on BOTH sides.\n\nDEPLOYED PLANE, reported separately and deliberately: UNCHANGED BY CONSTRUCTION. Live read shows 2/2 deployed packages carry an in-zip stamp (they already did) and 0/2 carry zip_sha256/built_at. TO-2 requires no rebuild and none was done, so a BUILDER-side rise must not be read as a deployed-fleet rise -- the census prints both planes for exactly this reason.",
+      "denominator": "builder plane: 2 homes on both sides. Deployed plane: 2 functions (the TO-2 homes only -- NOT the parent census's 188-of-197 Lambda denominator, which this TO does not move).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2a-3",
+      "criterion_verbatim": "EC2 BUNDLES pick the stamp up at next touch (state the mechanism; no bundle rebuild is required by this TO).",
+      "method": "manual_read_with_citation",
+      "invocation": "read infra/aws/ec2/safe-ec2-deploy.sh:155 + EC2_MANIFEST.json service scan + comp-find 'build_package' infra/aws/ec2",
+      "output_evidence": "MECHANISM: the stamp is emitted by the BUILDER, never by the deploy path, so any EC2 service that adopts a build_package.py-style bundling builder inherits BUILD_MANIFEST automatically at its next build -- no bundle rebuild is required by this TO and none was performed.\n\nMEASURED GAP, stated rather than papered over: there are NO EC2 bundles today. `infra/aws/ec2/safe-ec2-deploy.sh` is a WRAPPER -- it resolves the service from EC2_MANIFEST.json, warns on uncommitted changes, then at :155 delegates to a per-service deploy script (`bash \"$DEPLOY_SCRIPT\" $DEPLOY_ARGS`) and records the manifest. EC2 code ships as LOOSE OBJECTS to S3 per Rule 12, not as zip bundles (the 2026-08-18 census hashed ~460 loose code objects across 17 services with a readable staging surface). Scan: 0 of 27 EC2_MANIFEST services reference build_package; comp-find 'build_package' over infra/aws/ec2 returned 0 hits across 347 files scanned.\n\nSo the criterion's premise -- that EC2 'bundles' exist for the stamp to reach -- does not hold on the measured estate. The mechanism is correct and inert.",
+      "denominator": "0 of 27 EC2_MANIFEST services reference a bundling builder; 0 hits across 347 files scanned under infra/aws/ec2",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2a-4",
+      "criterion_verbatim": "proof instance VALID rc=0 positional: ids T2a-1..T2a-4. MEASURED/RULED rows only.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.8.0_AE_CloudComp/deliverables/D0_TIGHTENING.TO-2_PROOF_OF_SPEC.json T2a-1,T2a-2,T2a-3,T2a-4",
+      "output_evidence": "proof-of-spec-check | structural=jsonschema | acceptance rows=4 | violations=0\nVALID  (true rc=0, captured without a pipe)\n\nEvery row above rests on a re-runnable invocation with verbatim output; none rests on an INFERRED expected value. This instance also declares firm: FABRIC -- the enum value CTO added at @64114c5511 in response to the Rule-24 exhaustiveness gap surfaced from TO-1, verified present in the schema before use rather than taken on trust.",
+      "denominator": "4 of 4 criterion ids present (T2a-1..T2a-4); 4 acceptance rows for 4 spec criteria",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO-SIDED DETERMINISM CONTROL, because each side falsifies a different claim and a one-sided check would pass while the other property was broken. Rebuild each package at a FIXED pin and compare: (a) the zip sha256 must be IDENTICAL -- if built_at had leaked into the in-zip manifest it would differ, so this side falsifies 'reproducibility survived'; (b) the sidecar built_at must DIFFER -- if it were a frozen constant it would match, so this side falsifies 'the field is live rather than merely present'. A field can be present and dead; only (b) can tell.",
+      "expected": "(a) identical zip sha256 across rebuilds; (b) differing sidecar built_at across rebuilds.",
+      "observed": "mdpf-gold-lambda: zip sha256 1bfb547ce6ecb3aea4479147582b3d7f... == 1bfb547ce6ecb3aea4479147582b3d7f... IDENTICAL; built_at 2026-08-19T22:06:11.818410+00:00 vs 2026-08-19T22:07:25.766713+00:00 DIFFERS. opal-assets-mdpf-portal-publisher at fixed pin 4a2b34df76: zip sha256 3ee8af741807a2b50bdd39c682d8fcca... == 3ee8af741807a2b50bdd39c682d8fcca... IDENTICAL; built_at 22:08:01.670316 vs 22:08:01.992154 DIFFERS. 4/4 claims hold. ADDITIONALLY, the control FIRED A REAL FAIL first and it was isolated rather than explained away: the publisher's initial run showed differing zip hashes under `--pin HEAD`, because HEAD moved (4a2b34df76 -> 609aca9b0e) between two runs ~2 minutes apart in this shared multi-agent tree. Re-run at a fixed pin: reproducible. The control caught a genuine property of the estate, not of the change.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each builder invoked twice at an identical pin; zip sha256 compared byte-wise and sidecar built_at compared for liveness. The coverage census additionally re-run at both vintages.",
+      "observed": "Both homes byte-reproducible at a fixed pin (hashes above). Coverage census reproduces 0/2 complete at HEAD and 2/2 complete in the working tree across repeated runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Rebuilding and redeploying either Lambda package so the DEPLOYED artifacts carry zip_sha256/built_at",
+      "reason": "TO-2 states explicitly that no bundle rebuild is required. A redeploy is a separate authorised act; the deployed plane is reported as unchanged rather than quietly implied to have risen."
+    },
+    {
+      "item": "Consolidating the two build_package.py homes into one shared builder",
+      "reason": "That is a CONSOLIDATION, and consolidations are out of scope by the census's classify-don't-fix discipline (and are TO-5's declaration subject, not TO-2's build). The two homes are made CONSISTENT, not merged."
+    },
+    {
+      "item": "Fixing `--pin HEAD` acceptance in the publisher builder",
+      "reason": "Measured defect (HEAD is not a pin in a shared tree) but outside TO-2's stated scope, which is the stamp. Surfaced to COO rather than silently widened."
+    },
+    {
+      "item": "The deploy-time chokepoint that CONSUMES the stamp and prints CURRENT / STALE-BY-NEGLECT / DELIBERATELY-HELD / TWO-HOMES-DIVERGED / UNSTAMPED",
+      "reason": "That is T2b (the assertion half), a separate spec row and a separate TO. TO-2 is T2a, the stamp half only."
+    }
+  ],
+  "surprises": [
+    "`--pin HEAD` IS NOT A PIN. The publisher builder requires --pin (good) but accepts HEAD, which silently defeats its own docstring promise to build 'FROM A PINNED COMMIT ... never the working tree'. Measured: HEAD moved 4a2b34df76 -> 609aca9b0e between two runs about two minutes apart, producing two different packages from one nominal pin. Banked, not fixed.",
+    "CLAUDE.md Deployment Rule 7 and the cloud-ops skill both imply `.tools/safe-ec2-deploy.sh`; the script actually lives at `infra/aws/ec2/safe-ec2-deploy.sh`. I looked in `.tools/` first and got a clean, confident absence -- the wrong question asked cleanly. Caught by re-searching repo-wide with a positive control. Low severity, but it is a dangling-path class in a law file.",
+    "The census's own first run reported 0/0 from a counted parent depth (parents[4] resolves to org/, not the workspace root). It was caught ONLY because the tool prints its DENOMINATOR -- a bare '0 complete' would have read as a real measurement rather than a broken retrieval. Root now resolves via git rev-parse --show-toplevel per the device-agnostic rule.",
+    "EC2 has no bundling step at all (0 of 27 services), so the T2a-3 criterion describes a propagation path with nothing currently on it. Correct mechanism, inert today."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-19/d0_tightening_to1_t1_broker_primitives.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name \"build_package.py\"",
+      "result": "2 hits across 26988 files scanned -- established the builder-home denominator as exactly 2 with its frame printed, which is what makes 'BOTH homes' a checkable claim rather than an assumption."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find \"build_package\" infra/aws/ec2  |  comp-find --name \"safe-ec2-deploy*\"",
+      "result": "0 hits across 347 files (no EC2 bundling); safe-ec2-deploy.sh located at infra/aws/ec2/, NOT .tools/ -- correcting a clean-but-wrong absence from looking in the path the law file implies. Positive control (comp-find --name safe-commit.sh -> 1 hit) confirmed the search discriminates."
+    },
+    {
+      "tool": "stamp_coverage_census.py (built this TO)",
+      "invocation": "python .../stamp_coverage_census.py --builders --vintage HEAD ; --builders ; --deployed",
+      "result": "BEFORE 0/2 section-4b complete, AFTER 2/2, denominator 2 on both sides; deployed plane 2/2 stamped / 0/2 carrying the new fields."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <3 files>",
+      "result": "PASS after fixing a non-ASCII section sign the gate flagged in my own added doc block (CLAUDE.md Code Quality, WARN-class) -- 'pre-commit gate clean for 3 file(s)'."
+    }
+  ]
+}

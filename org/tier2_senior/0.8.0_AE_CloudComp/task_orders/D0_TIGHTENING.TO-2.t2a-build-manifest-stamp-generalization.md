@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:45Z</issued>
 <dated>with/after TO-1 (same builder window)</dated>
-<status>staged -- GO paired</status>
+<status>complete -- BUILT + EXERCISED 2026-08-19 @1bd55740e9; proof VALID rc=0. Both homes section-4b COMPLETE (0/2 -> 2/2, denominator printed both sides); sidecar 1/2 -> 2/2; 16/16 build checks + two-sided determinism control 4/4. DEPLOYED plane UNCHANGED BY CONSTRUCTION (no rebuild required by this TO, none done). T2a-3 mechanism stated WITH its measured gap: 0 of 27 EC2 services bundle, so the propagation path is correct and inert.</status>
 <priority>P2</priority>
 <authority>D0_INFRA_TIGHTENING_PRD.md §4b + §6 row 2 at dispatch vintage @4bf291b26c. Placement: LAPTOP (CTO ruling FINAL 193804Z; §7 notes the deploy chokepoints run laptop today).</authority>
 </task_order>

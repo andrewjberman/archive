@@ -1,0 +1,145 @@
+{
+ "schema_version": "1.0",
+ "to_id": "ADVI_BDPARITY.T2-DIMS",
+ "firm": "49F",
+ "phase": "P1-SCRIPTS",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/task_orders/ADVI_BDPARITY.T2-DIMS.portfolio-group-and-bridge.md",
+  "group": "OTHER",
+  "vintage_commit": "bb8d63f7370a62f0853e02a250ddbe277b6c5e23"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform~B",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/assets/scripts/gold/runners_49f/bd49f_dim_portfolio_group.py",
+   "kind": "script",
+   "commit_or_etag": "8d746d7703",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The T2-DIMS producer, absorbing identity-spine WP-2 (one logical producer, one home). Reads the RATIFIED upstream blackdiamond/49f/silver/fact_bd_allocation (WP-1 @b885d682f8) and emits dim_portfolio_group (GROUP grain, 201 rows) + bridge_group_account (MEMBERSHIP grain, 29,907 rows) + a manifest carrying the basis stamp, grain declarations, group_class census and the is_primary status block. NOT a chain stage. The --upload path is deliberately wired to REFUSE, because WP-1's own silver partition is not minted and the gold mint is COO's call. commit-gate clean (BLOCKED first on a real ruff finding, an unused Counter import, then clean on 2 files)."
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/deliverables/ADVI_BDPARITY_T2_DIMS_PORTFOLIO_GROUP_20260819.md",
+   "kind": "doc",
+   "commit_or_etag": "8d746d7703",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The measured report: census, the group_class MECE derivation with its declared judgment and its measured false-positive trap, the dim-436 absence with its positive control, the T2-3 half-met split, the supervision-sleeve discovery, and four named residuals."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "T2-1",
+   "criterion_verbatim": "DIMS LAND IN THE 49financial GOLD GRAMMAR (Rule 17b: gold is parquet, {table}/date={D}/).",
+   "method": "command",
+   "invocation": "python data/assets/scripts/gold/runners_49f/bd49f_dim_portfolio_group.py --date 2026-08-18 --silver <WP-1 fact_bd_allocation parquet> --out-dir <dir> --guard",
+   "output_evidence": "Both tables build as parquet with a manifest in the {table}/date={D} shape: dim_portfolio_group 201 rows, bridge_group_account 29,907 rows. THEY ARE NOT MINTED to opal-data-49financial/gold/advi/dimensions/, and --upload REFUSES with its reason printed. Two grounds, neither mine to overrule: (a) WP-1's own silver partition is NOT minted -- verified live, s3://opal-data-assets/blackdiamond/49f/silver/ lists dim_account_xref, dim_advisor_fee_role and fact_taxsma_report and NO fact_bd_allocation -- and DS base states the first mint is COO's; (b) minting a gold artifact whose declared upstream does not exist in S3 would source it from somewhere other than the ratified table, which is the two-homes defect created by the fix for it.",
+   "denominator": "2 of 2 tables build plus 1 manifest; 0 of 2 minted to S3 by design; WP-1 silver partitions present in S3: 0",
+   "status": "PASS",
+   "status_reason": "Artifacts BUILT in the gold grammar and exercised end to end; the S3 MINT is withheld deliberately and declared, pending WP-1's own mint (COO's call). Shape verified locally, not asserted."
+  },
+  {
+   "criterion_id": "T2-2",
+   "criterion_verbatim": "BRIDGE COVERS THE EXPORT'S FULL MEMBERSHIP -- denominator printed (members in the export vs members in the bridge).",
+   "method": "command",
+   "invocation": "set-compare distinct (portfolio_group, accountid) in the WP-1 silver table against the emitted bridge_group_account",
+   "output_evidence": "export memberships 29,907 | bridge memberships 29,907 | missing 0 | extra 0 | coverage 100.0000%. The multi-membership that IS the bridge is preserved: 5,579 of 6,155 accounts (90.6%) sit in 2+ groups, max 13. Explicitly NOT account-deduped -- an AccountID dedup would collapse the table to about 6,155 rows and silently delete four fifths of the memberships. That trap is live in the estate at data/black_diamond/scripts/bronze/convert_daily_allocation_to_parquet.py, was flagged by DS base as the obvious build-ladder reuse, and was avoided here: correct to attempt, wrong to complete.",
+   "denominator": "29,907 of 29,907 export memberships present in the bridge; 0 missing, 0 extra",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T2-3",
+   "criterion_verbatim": "ZERO CROSS-GROUP SUMS EXPRESSIBLE -- demonstrate the primary-key discipline structurally, not by inspection.",
+   "method": "command",
+   "invocation": "--guard mode, plus a column census of the emitted bridge",
+   "output_evidence": "HALF MET, and the halves are named. MET, the load-bearing half: the bridge carries NO money column -- verified, bridge money columns = []. Double-counting arises from spreading an additive quantity across memberships and the quantity is not on the membership grain, so the fan-out product CANNOT BE CONSTRUCTED -- structural, not a convention. The book figure exists only at GROUP grain in a column named book_mv_not_additive_across_groups with additive:false in the manifest. The --guard fires loud: naive SUM over dim rows $8,252,695,569.91 against a distinct-account universe of $1,550,733,057.94, a 5.32x phantom, and REFUSES. NOT MET: a TRUE PARTITION, each account in exactly one group, requires BD dim 436 which is absent from the feed. CONSEQUENCE, and it is the safe direction: absent the key these tables cannot produce an account-partitioned total AT ALL, correct or incorrect -- the failure mode is CANNOT-ANSWER, never ANSWERS-WRONGLY.",
+   "denominator": "bridge money columns 0 of 8; is_primary non-null 0 of 29,907; guard phantom 5.32x measured across 201 groups",
+   "status": "FAIL",
+   "status_reason": "The structural half is delivered and verified (no additive column on the membership grain; the guard fires). The PARTITION half is UNDELIVERABLE at this vintage: Primary Portfolio Group (BD dim 436) is not selected by persisted template 390224 -- measured 0 of 92 vendor columns match 'primary', positive control 'portfolio' = 8, and the pull sidecar's own level census reads Portfolio Group: 2. Fixable only vendor-side. The TO forbids deriving is_primary heuristically and I did not: an invented partition key would look populated and be unfalsifiable, which is worse than an absent one. Recorded FAIL rather than PASS-with-caveat because the criterion as written is not met."
+  },
+  {
+   "criterion_id": "T2-4",
+   "criterion_verbatim": "NO SERVED CONSUMPTION while the build-only fence stands.",
+   "method": "live_read",
+   "invocation": "(a) grep the chain entrypoint stage list; (b) comp-find for any importer or invoker; (c) read the write path for network/S3 primitives; (d) aws s3 ls s3://opal-data-portal-v2/platinum/advi/49financial/ --recursive | wc -l",
+   "output_evidence": "(a) 0 references in chain_49f_entrypoint.py's explicit _stage_list, so it cannot be picked up as a stage. (b) nothing in the estate imports or invokes it. (c) the only write path is a local --out-dir; --upload is a hard sys.exit REFUSED with its reason, so the tool cannot place an artifact in a served location even if asked. (d) platinum/advi/49financial/ recursive key count = 0, the ADVI serving root is still empty. Note the fence itself was LIFTED by the 2012Z ruling; serving nonetheless routes P4-class through CTO and no consumer was pointed at this output.",
+   "denominator": "4 of 4 probes negative; platinum/advi/49financial recursive key count 0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T2-5",
+   "criterion_verbatim": "proof instance VALID rc=0 positional: ids T2-1..T2-5. MEASURED/RULED rows only.",
+   "method": "schema_validation",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform~B/deliverables/ADVI_BDPARITY.T2-DIMS_PROOF_OF_SPEC.json T2-1,T2-2,T2-3,T2-4,T2-5",
+   "output_evidence": "Validated positionally against the TO's embedded expected set T2-1..T2-5: coverage 5 expected / 5 carried / 5 matched, 0 omitted, 0 extra; jsonschema Draft7 structural pass; conditional rules applied including the status_reason requirement on the non-PASS row. Every row is MEASURED, and the one FAIL is measured too -- it carries the 0-of-92 column census and its positive control rather than an assertion of absence.",
+   "denominator": "5 expected criterion ids, 5 carried, 5 matched",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "status": "FIRED-AS-EXPECTED",
+   "description": "The producer's book aggregation was mutated by REMOVING the supervision-sleeve term from its key -- reverting to (group, account) and keeping one row, which is the form both this producer and the T1 oracle originally shipped.",
+   "expected": "If the sleeve term is load-bearing, group books must move, because an account split Supervised/Unsupervised would contribute only one of its two sleeves.",
+   "observed": "FIRED. 12 of 201 group books change, total understatement $24,605,360.68 -- Austin Thompson, Lane Curry - Local Ops and Ted Grant each +$3,657,307.24; Collin Plotts +$3,159,412.24; Sydney Cobb, Patrick Mundlin and Campbell Huber each +$2,887,004.52; Hunter Lloyd and Sam Owens - Local Ops each +$497,895.00; 49F Schwab AUM, Christopher Spalthoff - Local Ops and Lane Curry each +$272,407.72. The correction is PROVEN, not assumed: for every sleeve, account_market_value / account_allocation == portfolio_group_market_value to the cent, i.e. both sleeves divide the SAME portfolio total, positive-controlled against an ordinary single-sleeve account; and the corrected key has constant market value on 29,926 of 29,926 keys, zero exceptions. The same mutant re-run against the T1 sibling moved 79 of 201 groups, |delta| $206,733,899.92."
+  },
+  "determinism": {
+   "status": "STABLE",
+   "method": "Two independent runs over identical input to separate output directories; all three emitted artifacts sha256 byte-compared.",
+   "observed": "dim_portfolio_group.parquet 5c957dc95b4c791c, bridge_group_account.parquet 36978771eb2a9e74, manifest.json c4053fb3bf08dee0 -- identical on both runs."
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "is_primary and the TRUE-PARTITION half of T2-3",
+   "reason": "BD dim 436 Primary Portfolio Group is not selected by persisted template 390224. Measured: 0 of 92 vendor columns contain 'primary', positive control 'portfolio' = 8, and the pull sidecar level census reads Portfolio Group: 2. Fixable only vendor-side by amending the template and re-pulling -- the same egress class as T1's qt6 re-run, held by 4.0.0_SA_CRO~A. The TO forbids heuristic derivation and I did not derive it: an invented partition key looks populated and is unfalsifiable, which is worse than an absent one."
+  },
+  {
+   "item": "THE S3 GOLD MINT of both tables",
+   "reason": "Withheld deliberately. WP-1's own silver partition is not minted (0 fact_bd_allocation partitions live in S3) and DS base states the first mint is COO's call; minting gold whose declared upstream is absent would source it from elsewhere and create the two-homes defect. The --upload flag refuses with this reason printed."
+  },
+  {
+   "item": "THE 338 (group, portfolio, account) KEYS CARRYING TWO RELATIONSHIP IDs",
+   "reason": "DS base's WP-3 surface, deliberately unresolved in silver per the spec's conflict law. They arrive as distinct silver rows and collapse correctly to one membership here, so the bridge is unaffected; a declared position is owed at WP-3 and is not invented here."
+  },
+  {
+   "item": "THE group_class FIFTH-VALUE QUESTION (support-unit versus business-division)",
+   "reason": "Dallas Support and Centralized Client Ops are classed division under this axis's stated intent. Splitting them out is a Rule 24 taxonomy act for the axis owner, not a silent pick by a producer. Recorded, not decided."
+  },
+  {
+   "item": "ARTIFACT-COVERAGE LINKAGE NOTE for data/assets/scripts/gold/runners_49f/bd49f_dim_portfolio_group.py (stem bd49f_dim_portfolio_group)",
+   "reason": "Declared because the coverage heuristic cannot SEE that the artifact is tested, not because it is untested. The TO fixes criterion ids to T2-1..T2-5, so the stem tokens cannot appear in them. This script is the artifact every one of T2-1..T2-4 exercises directly and it carries both controls."
+  }
+ ],
+ "surprises": [
+  "THE SUPERVISION SLEEVE: the vendor's Account Supervised column splits an account into Supervised and Unsupervised slices, each with its own market value and allocation, both dividing the SAME portfolio total (allocation identity holds to the cent, positive-controlled). A real grain, not a duplicate. It also explains WP-1's own unexplained residual -- their (PG, PortfolioID, AccountID, Relationship ID) key still lost 24 rows with no reason recorded, and the supervision axis is the missing term. Routed to 0.4.0_DS_ClientPlatform as a grain-statement amendment, and corrected back into the already-delivered T1 oracle.",
+  "A NAMING-HEURISTIC TRAP IN group_class: a person-name shape test misclassifies Dallas Support (1,498 accounts) as an advisor book, and the org-token list that fixes it must EXCLUDE city and given-name words -- measured false positives on real advisors: Austin Bost, Austin Thompson, Faith Austin, Lincoln Rock, Weston Kammer, August Vordenbaum. A token list that matches a person's name does not classify groups, it mislabels advisors.",
+  "comp-pipescript does not model the data/assets 49F tree at all (DS base hit the same wall; their control is that the shipping bd49f_dim_conversion.py is equally unknown to it). The DS 'run comp-pipescript io' minimum is unsatisfiable on this tree. Already reported by DS base to COO/CTO; noted here so it is not re-chased."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/logs/2026-08-19/",
+ "compiler_tools": [
+  {
+   "tool": "comp-find (--name)",
+   "invocation": "comp-find --name \"*bd_allocation*\"",
+   "result": "1 hit across 27,010 files. Together with the WP-1 commit's file list this located data/assets/scripts/silver/bd49f_fact_allocation.py, so the producer could be exercised against the RATIFIED upstream rather than a substitute source."
+  },
+  {
+   "tool": "comp-find (content)",
+   "invocation": "comp-find \"oracle_book_tieout\" and repo probes for importers",
+   "result": "Supplied the no-consumer denominators behind T2-4; the printed scan frame is what makes a no-consumer verdict evidence rather than an anecdote."
+  },
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "bash .tools/commit-gate.sh <oracle> <t2 producer>",
+   "result": "BLOCKED first on a REAL ruff finding -- an unused collections.Counter import left by a local-import refactor -- fixed at source, then 'pre-commit gate clean for 2 file(s)'. The gate caught it, not review."
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> T2-1,T2-2,T2-3,T2-4,T2-5",
+   "result": "Positional coverage 5 of 5 matched, structural pass, conditional rules applied (the T2-3 FAIL carries its status_reason)."
+  },
+  {
+   "tool": "WP-1 converter, exercised as an instrument",
+   "invocation": "python data/assets/scripts/silver/bd49f_fact_allocation.py --date 2026-08-18 --dry-run --local-xlsx <landed export> --out-dir <dir>",
+   "result": "rows_in=30,577 rows_out=30,577 full_row_duplicates_removed=0, 92+4 columns. Materialized the ratified silver shape locally so T2 reads its real upstream instead of a second re-parse of bronze."
+  }
+ ]
+}

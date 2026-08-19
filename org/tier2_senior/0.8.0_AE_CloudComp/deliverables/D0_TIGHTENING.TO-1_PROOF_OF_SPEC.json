@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0",
   "to_id": "D0_TIGHTENING.TO-1",
+  "firm": "FABRIC",
   "phase": "NON-BUILD-OTHER",
   "spec_ref": {
     "doc": "docs/architecture/D0_INFRA_TIGHTENING_PRD.md",
@@ -77,11 +78,10 @@
       "criterion_id": "T1-4",
       "criterion_verbatim": "EXERCISED ON BOTH FABRICS before close (each device runs its own broker -- \u00a77 says so explicitly). A single-fabric green is a partial result and must be reported as one.",
       "method": "test_suite",
-      "invocation": "python org/mcp/test_d0_t1_delivery_clocks.py && python org/mcp/test_d0_t1_recipient_list.py && python org/mcp/test_d0_t1_listener_survival.py  [LAPTOP ONLY]",
-      "output_evidence": "LAPTOP fabric: 22/22 PASS across the three batteries (11/11 delivery clocks, 9/9 recipient list, 2/2 listener survival). SITE-Z fabric: NOT RUN. This seat is on the laptop; site Z runs its own broker on its own device and this seat cannot reach it. Reported as a PARTIAL result exactly as the criterion requires -- not as a green.",
-      "denominator": "1 of 2 fabrics exercised (laptop yes, site Z no); 22 of 22 checks PASS on the fabric that was exercised",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "The site-Z leg rides a NAMED later run: a ~Z seat on the site-Z device must execute the same three committed batteries (org/mcp/test_d0_t1_*.py) against its own broker. This seat is structurally unable to do it -- the laptop cannot reach site Z's broker, and opal-agent-comms is a localhost broker per device. Routed to COO for site-Z scheduling in the report accompanying this instance. The criterion is NOT claimed as met."
+      "invocation": "python org/mcp/test_d0_t1_delivery_clocks.py && python org/mcp/test_d0_t1_recipient_list.py && python org/mcp/test_d0_t1_listener_survival.py   [LAPTOP: this seat] + [SITE Z: run by 0.0.0_AB_MSTR's ferry to the site-Z fabric]",
+      "output_evidence": "LAPTOP fabric: 22/22 PASS (11/11 delivery clocks, 9/9 recipient list, 2/2 listener survival).\nSITE-Z fabric: 22/22 PASS, 3/3 batteries rc=0 -- reported by 0.0.0_AB_MSTR 2026-08-19T22:18Z (ferry bus 368f34a6), run by the site-Z D8 seat and validated-accepted at COO~Z pre-ferry: B1 delivery_clocks 11/11 including the E7-MUTANT control deterministically reproducing the :474 loss on PINNED pre-T1 bytes @e7858adf52; B2 listener_survival 2/2 with the kill proven able to kill; B3 recipient_list 9/9 including the body-cc-copies-nobody replay with its positive control.\n\nBOTH FABRICS EXERCISED: 44/44 across the two devices (denominator 2 of 2 fabrics).\n\nFRAME, stated precisely and matching MSTR's correction: the batteries spawn SCRATCH brokers from the trunk vintage -- they do NOT measure either device's RUNNING :7800 broker. So 44/44 certifies THE TRUNK T1 CODE EXERCISED GREEN ON BOTH PLATFORMS, which is the both-fabrics read T1-4 asks for, while BOTH fabrics' running brokers remain PRE-T1 until their restarts. Nothing here claims the fix is executing on either device.",
+      "denominator": "2 of 2 fabrics exercised; 44 of 44 checks PASS across both (22 laptop + 22 site Z)",
+      "status": "PASS"
     },
     {
       "criterion_id": "T1-5",

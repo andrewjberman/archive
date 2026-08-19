@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_IDSPINE.WP-1",
+  "firm": "49F",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ADVI_IDSPINE.WP-1.silver-fact-bd-allocation-parse.md",
+    "group": "W",
+    "vintage_commit": "bb8d63f737"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/bd49f_fact_allocation.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New silver producer for the 49F monolith tree (blackdiamond/49f). Reads blackdiamond/49f/bronze/allocation_390224/{date}/data.xlsx, emits blackdiamond/49f/silver/fact_bd_allocation/date={date}/data.parquet. Rule 17 scope only: dedup (EXACT FULL-ROW) + dtype standardization; all 92 vendor columns preserved in vendor order plus 4 provenance columns. NO new trigger machinery built, per the TO's explicit zero-new-triggers constraint -- the recurring run rides P2's existing schedule floor and is NOT this TO's deliverable. commit-gate PASS (py_compile + ds-precommit-check + ruff py39)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "WP1-1",
+      "criterion_verbatim": "ROW/COL COUNTS TIE to the xlsx dimension reference -- both counts, both sides, printed.",
+      "method": "live_read",
+      "invocation": "pandas.read_excel over the live 2026-08-18 bronze partition (10,720,605 bytes) vs the producer's own blackdiamond/49f/bronze/allocation_390224/2026-08-18/_meta/pull_complete.json",
+      "output_evidence": "XLSX AS READ: 30,577 rows x 92 columns. PRODUCER'S DECLARED CENSUS (independent derivation, written by opal-assets-bd49f-daily-pull): rows_per_artifact['data.xlsx']=30577, column_extent=92. BOTH COUNTS TIE ON BOTH SIDES, exactly. The two figures come from different derivations (my parse vs the puller's own count at pull time), so the tie is a real cross-check rather than a self-comparison. Feed health resolved on the trading calendar FIRST: as_of 2026-08-18 was pulled 2026-08-19T02:30:33Z, which is the correct T-1 settled arithmetic per vendor_asof_registry label_offset, and the partition series skips exactly the weekends -- not stale.",
+      "denominator": "30,577 rows / 92 columns (the full partition; no sampling)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP1-2",
+      "criterion_verbatim": "RE-RUN IS IDEMPOTENT -- run it twice and show the second run changes nothing. An idempotency claim that was never re-run is an assertion.",
+      "method": "command",
+      "invocation": "python data/assets/scripts/silver/bd49f_fact_allocation.py --date 2026-08-18 --out-dir run1 --dry-run; then the same into --out-dir run2; sha256sum both parquets",
+      "output_evidence": "RE-RUN, NOT ASSERTED. Two independent runs into separate output directories produced BYTE-IDENTICAL parquet: run1 sha256=e877f361776689192473e3a0e886d554f1eb21928fca62d5f58f2b3af392dbe1, run2 sha256=e877f361776689192473e3a0e886d554f1eb21928fca62d5f58f2b3af392dbe1, both 3,726,932 bytes, both 30,577 rows / 0 duplicates removed. NEGATIVE CONTROL RUN: appending a single byte to run2's parquet DID change the verdict, so the comparison discriminates and is not trivially passing.",
+      "denominator": "2 of 2 independent runs compared, full-file sha256 (not a sampled or metadata compare)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP1-3",
+      "criterion_verbatim": "DECIMAL DTYPES per the SILVER-DTYPE law (the Travis-Decimal specimen is the pointer). Float-coerced money is the defect this criterion exists to catch.",
+      "method": "live_read",
+      "invocation": "pyarrow.parquet.read_table(run1/data.parquet).schema type census + element-wise Decimal value tie vs the source xlsx",
+      "output_evidence": "EMITTED SCHEMA: 13 decimal128 columns, 6 date32 columns, 77 string columns, and ZERO float/double columns -- the float-coerced-money defect is absent by construction, not by assertion. Decimal columns: basis_points, flat_fee, flat_fee_1, basis_points_1, lower_range, upper_range, upper_range_1, lower_range_1, account_allocation, account_market_value, portfolio_group_market_value, cash_market_value, cash_allocation. Conversion is via str() (shortest round-trip repr), NEVER Decimal(float), so no binary noise enters a money column; a value exceeding pinned precision/scale RAISES rather than rounding (PrecisionError). THE GUARD IS EXERCISED, NOT THEORETICAL: it fired on the first run against account_allocation 0.0371002078317068 and blocked the build -- the arithmetic in my precision check was wrong (I used len(digits)+|exp| instead of len(digits)+exp+scale); the data was fine and the guard caught my bug. VALUE TIE: account_market_value compared element-wise over all 30,577 rows against the source cast to Decimal -- 0 mismatches; sum 8,459,429,469.8235 both sides. Standardization changed TYPES, not VALUES. Specimen account_allocation[1] = 0.193176246453041000000000 (exact Decimal, not a float repr). DELIBERATELY NOT COERCED: the six '* Split %' columns stay string because they carry the sentinel 'No <Role> Split % Value Assigned' mixed with numerals -- typing them numeric would require deciding what the sentinel MEANS, a null-meaning judgment that Rule 17 assigns to gold.",
+      "denominator": "96 emitted columns typed (92 vendor + 4 provenance); 30,577 of 30,577 rows compared on the value tie",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP1-4",
+      "criterion_verbatim": "NO FIELD LOSS: the emitted column set is the bronze column set. Print both counts -- equality is the criterion, not 'looks complete.'",
+      "method": "live_read",
+      "invocation": "manifest.json columns_in vs columns_out, cross-read against the emitted parquet's own schema width",
+      "output_evidence": "BRONZE COLUMNS = 92. EMITTED VENDOR COLUMNS = 92. EQUAL. The emitted table is 96 columns total = 92 vendor + 4 provenance (_source_key, _source_as_of, _schema_version, _row_sha256) -- additive per the estate PROVENANCE_COLS pattern, nothing removed. Column names are mangled mechanically (lowercase, non-alphanumeric -> underscore, collision-suffixed) and the COMPLETE original->emitted mapping is written into the manifest, so the vendor header is reconstructable from the artifact alone. The vendor header is PINNED: a partition whose header does not match the pinned 92 raises SchemaDriftError naming the missing and unknown columns, rather than silently re-binding a mangled name to different data.",
+      "denominator": "92 of 92 bronze columns accounted for; 96 of 96 emitted columns enumerated",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WP1-5",
+      "criterion_verbatim": "proof instance VALID rc=0 positional: ids WP1-1..WP1-5. MEASURED/RULED-class run rows only; INFERRED-class expected values are mechanically ineligible.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py <this file>",
+      "output_evidence": "This instance covers the artifact data/assets/scripts/silver/bd49f_fact_allocation.py. WP1-1..WP1-4 are all MEASURED and PASS; no row rests on an INFERRED expected value. BUT rc IS 1, NOT 0, ON A MECHANICAL CONFLICT I WILL NOT PAPER OVER. proof-of-spec-check's artifact-coverage rule (:50-74) requires the artifact's stem token (ALLOCATION / BD49 / FACT) to appear inside a criterion_id -- it keys on the DS/gold '{firm}-{group}-{artifact}-{check}' criterion-id grammar. This TO's <expected_criteria> mints ids WP1-1..WP1-5, which carry no artifact token, so THE TO'S MANDATED IDS AND THE CHECKER'S HEURISTIC CANNOT BOTH BE SATISFIED. The only escape the tool offers is naming the artifact in declared_exclusions -- which would declare the CENTRAL DELIVERABLE 'excluded' and is exactly the forced-mis-declaration pathology the checker's own comment records from the frontend_component case (COO 215014Z), where the correct fix was amending the TOOL, not the instance. Routed to COO/CTO with three options: (a) issuer re-mints the ids into the DS grammar (e.g. WP1-ALLOC-1..5), (b) the checker's heuristic is extended to scan invocation/output_evidence or to accept an explicit artifact_covered_by field, (c) the disclosed-exclusion escape, which I recommend AGAINST. One edit flips this row to PASS under (a) or (b). Structural schema validation itself is otherwise clean: 5 acceptance rows, 0 schema violations.",
+      "denominator": "5 of 5 declared criteria present and positionally ordered WP1-1..WP1-5",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The TO's mandated criterion-id set (WP1-1..WP1-5) and proof-of-spec-check's artifact-coverage heuristic (which requires the artifact stem token inside a criterion_id, per the DS '{firm}-{group}-{artifact}-{check}' grammar) are mutually unsatisfiable. Not a defect in the build and not a missing measurement -- WP1-1..WP1-4 are all measured PASS. Awaiting an issuer/tool ruling; declining the declared_exclusions escape because it would mis-declare the central deliverable."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two independent mutants were run rather than asserted. (1) IDEMPOTENCY COMPARATOR: append one byte to the second run's parquet and re-compare sha256 -- if the comparator were undiscriminating it would still report identical. (2) DECIMAL PRECISION GUARD: the guard was not hand-triggered; it fired on its own during the first real build against account_allocation 0.0371002078317068 and refused to write.",
+      "expected": "(1) the mutated file must compare UNEQUAL. (2) a value that does not fit the pinned precision/scale must RAISE, never silently round.",
+      "observed": "(1) the 1-byte mutation DID flip the verdict to unequal -- the comparison is real. (2) PrecisionError raised and halted the build; investigation showed the DATA was valid and MY precision arithmetic was wrong (len(digits)+|exp| instead of len(digits)+exp+scale). Fixed, re-run clean. The guard caught an author bug on its first live exercise, which is the strongest evidence it is not decorative.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two independent full runs into separate output directories, compared by full-file sha256 of the emitted parquet",
+      "observed": "e877f361776689192473e3a0e886d554f1eb21928fca62d5f58f2b3af392dbe1 both runs, 3,726,932 bytes both runs, 30,577 rows both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No trigger, schedule, alarm, monitor or freshness checker built",
+      "reason": "The TO states zero new triggers explicitly and P2's existing schedule floor covers the new runners. Also the standing CLAUDE.md moratorium on alert/monitor/freshness-checker construction absent an explicit Andrew ask."
+    },
+    {
+      "item": "The S3 first-mint of blackdiamond/49f/silver/fact_bd_allocation/ is NOT performed in this instance",
+      "reason": "data/assets/scripts/silver is a SHARED repo home under the safe-deploy S3-membership guard, where key-exists=update is enforced and a FIRST MINT must be explicit. The parse is proven locally against the live bronze bytes; the first mint and the runner's placement on P2's floor are called out to COO rather than self-authorized."
+    },
+    {
+      "item": "The 338 dual-Relationship-ID keys are surfaced, not resolved",
+      "reason": "WP-3's conflict law owns it (one source of record per field; disagreements SURFACE, never merge silently). Resolving it here would be gold-tier judgment inside a Rule 17 silver parse."
+    },
+    {
+      "item": "Split-% sentinel strings are not converted to nulls or numerics",
+      "reason": "Deciding what 'No <Role> Split % Value Assigned' MEANS is a null-meaning judgment, which Rule 17 assigns to gold, not silver."
+    }
+  ],
+  "surprises": [
+    "COMP-TOOL COVERAGE GAP, control-verified: comp-pipescript does not model the data/assets 49F monolith tree at all. `comp-pipescript io bd49f_fact_allocation.py --pipeline assets` is rc=2 (invalid choice; valid trees are bd/inf/cot/mdpf only), and under --pipeline all it reports 'Unknown script in tree [all]'. CONTROL: the ALREADY-SHIPPING sibling bd49f_dim_conversion.py is EQUALLY unknown, so this is a whole-tree modeling gap and not an artifact of my file being new. Consequence: the DS compiler-tool minimum ('comp-pipescript io for every gold/silver script touched') is UNSATISFIABLE for this entire tree, and the OPAL_ASSETS.SILVER-DTYPE TO carries the instruction `comp-pipescript io schwab_conversion --pipeline assets`, which cannot execute as written. Per Rule 22, a comp-tool coverage gap is a DEFECT, not an inconvenience. Surfaced to COO/CTO; not chased at this seat.",
+    "The registry's dedup_stable_key TODO for allocation_390224 now has a MEASURED answer: EXACT-FULL-ROW. Every subset key destroys real grain (AccountID -24,422 rows / 79.87%; (PG,AccountID) -670; (PG,PortfolioID,AccountID) -338; +Relationship ID -24), while all 92 columns give 30,577 distinct = 0 true duplicates. Recommend data/_contracts/vendor_asof_registry.yaml be updated off TODO by the WS-4 owner.",
+    "bd49f_dim_conversion.py exists in two homes (data/assets/scripts/silver/ and infra/aws/lambda/opal-assets/opal-assets-bd49f-dim-convert/), byte-identical today (md5 d26a61e4fb0d3f3ea0d95c2da974a443). Latent two-homes risk of the Rule 22a shape -- a filename-resolved check reads CLEAN right up until they diverge. Noted, not chased."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-19/",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name '*allocation*' data ; comp-find 'allocation_390224' ; comp-find 'dim_account_xref' ; comp-find 'SILVER-DTYPE' ; comp-find 'decimal128' data/assets/scripts",
+      "result": "PASS -- located the existing bd-plane allocation script and the 49F silver converter with denominators printed (4 of 1,059 scanned; 53 of 26,966; 86 of 26,967). This is what caught the AccountID-dedup reuse hazard before it was completed."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": ".tools/commit-gate.sh data/assets/scripts/silver/bd49f_fact_allocation.py",
+      "result": "PASS -- 'All checks passed! OK: pre-commit gate clean for 1 file(s)' (py_compile + ds-precommit-check AST/silver-ids + ruff py39)."
+    },
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io bd49f_fact_allocation.py --pipeline assets ; --pipeline all ; control: comp-pipescript io bd49f_dim_conversion.py --pipeline all",
+      "result": "COVERAGE GAP (rc=2 / Unknown script). The data/assets 49F tree is not modeled; the control proves it is whole-tree, not file-specific. See surprises. The DS minimum could not be satisfied by this tool for this tree."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py close-leg --slug mdpf-canrte-w1a-aggregate-aua-repoint (L7/L8/L9); close; check",
+      "result": "PASS -- entry CLOSED, sentinel removed, all 9 legs proven; post-close check shows 3 of 3 remaining HELD-STALE sentinels belong to other seats."
+    }
+  ]
+}
