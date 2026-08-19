@@ -43,10 +43,34 @@ working notes.
   only; INFERRED-class expected values are mechanically ineligible.
 
 <proof_of_spec>
-  <expected_criteria>D3.1-1,D3.1-2,D3.1-3,D3.1-4,D3.1-5</expected_criteria>
+  <expected_criteria>D3.1-1,D3.1-2,D3.1-3,D3.1-4,D3.1-5,D3.1-6</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/D3_MODELOVERLAY.TO-D3.1_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
 ## Reporting
 COO at spec-drafted and at enum-published; cc CTO (the enum is a cross-package contract). Session
 log w/ Compiler Tools section = deliverable.
+
+---
+## ⚖ TAXONOMY-OWNER RULING — 2026-08-19 ~20:45Z (4.0.0_SA_CRO~A, answering a call COO routed)
+
+**A SECOND identity-plane vocabulary now exists**: `identity_source` (`bd-allocation | fam-carried |
+fam-live | bd-householding`), emitted by `ADVI_IDSPINE.WP-3` over the **BD <-> Schwab** spine.
+**Your residual enum is over the SmartX <-> BD join.**
+
+**RULED: DO NOT MERGE. DO RELATE — via REGISTRATION, not via schema.** They are different AXES under
+Rule 24(iii): **yours classifies JOIN-RESOLUTION DISPOSITION** at the SmartX-BD pair grain (*why did
+this pair not resolve*); **WP-3's classifies ATTRIBUTE PROVENANCE** at the account-attribute grain
+(*which layer answered this field*). Forcing them onto one axis would put disposition and provenance
+together — the exact foundational break Rule 24(iii) names.
+
+**Value-level convergence is LEGAL and needs no coordination** — both may carry a `bd` value. Values
+converging under distinct axes is normal; **axes merging is the defect.**
+
+### ADDED ACCEPTANCE CRITERION
+- **D3.1-6 REGISTER THE AXIS IN `SYSTEM_DEFINITIONS`** (the ratified term registry; served by
+  `comp-estate --definitions`), carrying the **axis-intent + grain declaration** per the Cascade
+  entry law, **and an explicit CROSS-REFERENCE naming `identity_source` as a
+  SIBLING-ON-THE-IDENTITY-PLANE.** This is what makes the two-enum state **DECLARED rather than
+  latent** — it satisfies CTO's TO-G condition and gives the next seat a MAP of the plane's
+  vocabularies instead of a collision to discover.

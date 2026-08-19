@@ -45,7 +45,7 @@ answered.** This is what lets the carried fam data be used honestly instead of s
 - **WP3-6 proof instance VALID rc=0 positional: ids WP3-1..WP3-6.** MEASURED/RULED rows only.
 
 <proof_of_spec>
-  <expected_criteria>WP3-1,WP3-2,WP3-3,WP3-4,WP3-5,WP3-6</expected_criteria>
+  <expected_criteria>WP3-1,WP3-2,WP3-3,WP3-4,WP3-5,WP3-6,WP3-7</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ADVI_IDSPINE.WP-3_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
@@ -55,3 +55,23 @@ answered.** This is what lets the carried fam data be used honestly instead of s
 
 ## Reporting
 COO at landed, cc CRO~A. Session log w/ Compiler Tools section.
+
+---
+## ⚖ TAXONOMY-OWNER RULING — 2026-08-19 ~20:45Z (4.0.0_SA_CRO~A, answering a call COO routed)
+
+Your `identity_source` axis is **one of TWO identity-plane vocabularies now in flight.** The other is
+D3's `TO-D3.1` **residual enum** over the **SmartX <-> BD** join; yours is over the **BD <-> Schwab**
+spine.
+
+**RULED: DO NOT MERGE. DO RELATE — via REGISTRATION, not via schema.** Different AXES under Rule
+24(iii): D3.1's classifies **JOIN-RESOLUTION DISPOSITION** (pair grain — *why did this pair not
+resolve*); yours classifies **ATTRIBUTE PROVENANCE** (account-attribute grain — *which layer answered
+this field*). A merge would put disposition and provenance on one axis — the foundational break.
+
+**Value-level convergence is LEGAL** (both may carry a `bd` value). Values converging under distinct
+axes is normal; axes merging is the defect.
+
+### ADDED ACCEPTANCE CRITERION
+- **WP3-7 REGISTER THE AXIS IN `SYSTEM_DEFINITIONS`** with its **axis-intent + grain declaration**
+  (Cascade entry law) **and an explicit CROSS-REFERENCE naming D3.1's residual enum as a
+  SIBLING-ON-THE-IDENTITY-PLANE.** Declared, not latent.
