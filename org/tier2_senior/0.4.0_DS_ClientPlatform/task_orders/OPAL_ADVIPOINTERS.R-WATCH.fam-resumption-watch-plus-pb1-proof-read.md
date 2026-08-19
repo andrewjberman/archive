@@ -12,11 +12,17 @@
 
 ## Objective
 Two legs, both reads:
-- **A1 R-WATCH (daily, one act):** one paginated listing of
-  `s3://opal-data-assets/schwab/08335338/bronze/fam/` — if the newest prefix > 20260810, **R HAS
-  FIRED**: report to COO + CTO same turn with the denominator; the re-date notice @f79760179a then
-  self-executes (COO fires the respawn recipe). If unchanged: one no-change line in your log, nothing
-  else. Never a polling loop, never an alarm — one read at a natural turn-top.
+- **A1 R-WATCH (daily, one act) — GENERALIZED per CRO~A's Andrew-commissioned triage Rank-3
+  (EXECUTION_RISK_TRIAGE_20260819.md; COO amendment 14:40Z):** the daily read covers the
+  **vendor-frontier ROSTER** (~5 feeds per the triage — the 08335338 bronze type-prefix family at
+  minimum: fam, acc, and the sibling set the fam incident proved differential against), one
+  paginated listing pass, per-feed newest-partition vs the trading-calendar frontier, denominators
+  printed. **fam remains the R-TRIGGER feed:** newest fam prefix > 20260810 means **R HAS FIRED** —
+  report to COO + CTO same turn; the re-date notice @f79760179a then self-executes. Any OTHER feed
+  reading >1 trading day behind its siblings is a NEW differential finding (report, don't chase —
+  the fam incident's own method). If all current: one no-change line in your log. Never a polling
+  loop, never an alarm — one read at a natural turn-top; this is a READER generalization, not
+  monitoring machinery.
 - **B1 PROOF-READ (2026-08-20 ~13:35Z):** read the 13:30Z scheduled run's output for PB-1/PB-2 per
   your own T-B instance @1949f72b7b — the rebuilt lambda (@1349Z ledger, member a7db07bb) makes this
   run the proof vehicle. PB-1: no json/mdpf read at executing bytes + the {D-1} self-carry read
