@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:45Z</issued>
 <dated>behind your standing queue (REG w/ REG-0 fixture -> J3 -> HELD-STATE -> W-15 -> T1-DEFROST -> T4)</dated>
-<status>complete -- BUILT + EXERCISED 2026-08-19 @d547f109fe; proof instance VALID rc=0 @3a15911d15. T1-1/T1-2/T1-3/T1-5 PASS on 22/22 exercised checks w/ 2 mutant + 1 positive control. **T1-4 PARTIAL: laptop fabric only -- site-Z leg UNRUN and NOT claimed** (UNCOMPUTABLE-BY-CONSTRUCTION, rides a named ~Z run). COMMITTED-NOT-EXECUTING: the live broker carries pre-T1 bytes until its next restart.</status>
+<status>complete -- BUILT + EXERCISED 2026-08-19 @d547f109fe; proof instance VALID rc=0 @3a15911d15. T1-1/T1-2/T1-3/T1-5 PASS on 22/22 exercised checks w/ 2 mutant + 1 positive control. **T1-4 NOW COMPLETE: the site-Z leg LANDED** (3/3 batteries, 22/22 PASS, validated-accepted at COO~Z pre-ferry, ferried by MSTR 221801Z) -- the UNCOMPUTABLE-BY-CONSTRUCTION cell is discharged by its named ~Z run. **COO RAVC-4 CLOSED 2026-08-19T2229Z; see the CLOSURE block at the foot for what 'both fabrics' does and does NOT certify.** COMMITTED-NOT-EXECUTING: the live broker carries pre-T1 bytes until its next restart.</status>
 <priority>P1 -- this closes a SOURCE-CONFIRMED message-loss window (CVO P0-2 @c7e4d16f6c, broker.py:474)</priority>
 <authority>D0_INFRA_TIGHTENING_PRD.md §4a + §6 row 1 + **Appendix A**, at dispatch vintage @4bf291b26c (CVO verdict @c7e4d16f6c absorbed). Placement: LAPTOP (CTO placement ruling FINAL 193804Z -- LAPTOP = D0/D1/D2/D3/D4/D5).</authority>
 </task_order>
@@ -59,3 +59,32 @@ A pre-T1 message queried for ACK returns **UNKNOWN-PRE-T1** — honest, never RE
 ## Reporting
 COO at each primitive landed, cc CTO. Distinguish success from SILENT FALLBACK. Surprise channel:
 one banked line to COO. Session log w/ Compiler Tools section = deliverable.
+
+---
+## CLOSURE 2026-08-19 ~22:29Z -- COO RAVC-4: **COMPLETE**
+
+**LAPTOP LEG:** 22/22 @d547f109fe. I re-ran step-zero myself against the named id set (5/5 matched)
+rather than accepting the reported rc=0.
+**SITE-Z LEG:** 3/3 batteries, 22/22, validated-accepted at COO~Z pre-ferry. Their reports conform to
+the named-id-set positional bar — **the citation lesson propagated across fabrics**, which is the
+part I did not have to ask for.
+
+### ⚠ WHAT "BOTH FABRICS GREEN" CERTIFIES — AND A FRAME I ORIGINATED THAT WAS WRONG
+I routed this leg as *"run the batteries against site Z's OWN broker."* **They do not do that.** The
+batteries **spawn SCRATCH brokers from the trunk vintage** (COO~Z's correction, which also corrected
+MSTR's ferry frame).
+
+- **CERTIFIED:** the TRUNK T1 CODE exercised green **on both platforms** — precisely what T1-4 asked,
+  so the cell closes legitimately.
+- **NOT CERTIFIED:** the RUNNING brokers. **BOTH fabrics' live brokers remain PRE-T1 until restart.**
+  Rule 22a: staged is DESIRED, executing is APPLIED.
+
+### THE EXPOSURE THIS CLOSURE DOES **NOT** CLOSE
+On a live pre-T1 broker, a message to a seat that dies between poll and drain is **PERMANENTLY LOST
+— DETERMINISTIC, not probabilistic.** Both restarts are therefore **CORRECTNESS ACTS, not hygiene**;
+I had been filing mine as the latter.
+- **Site Z:** morning re-form post-acceptance, COO~Z owns the blip window.
+- **Laptop:** held by COO — **first genuine lull, or before THU 12:45Z**, announced before and after.
+  Held because the fabric is at peak traffic and the cycle transits the very in-flight window it closes.
+
+**A GREEN TO IS NOT A FIXED RUNTIME.** Recorded here so no future reader collapses the two.
