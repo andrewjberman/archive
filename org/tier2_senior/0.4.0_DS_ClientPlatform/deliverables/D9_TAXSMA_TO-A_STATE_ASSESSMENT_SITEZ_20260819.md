@@ -254,6 +254,43 @@ gap between "built once" and "runs daily at book scale."
 
 ---
 
+## ADDENDUM (post-delivery, same session) — the 07-16 partner-call ingest folded in
+
+Ingest ferried @`ad01cca427` (on-trunk @`4bf2f8f6a3`):
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/partner_calls/20260716_DASHBOARD_TAXSMA_REPORTING_INGEST_20260819.md`
+(+ byte-faithful docx/vtt + 4 SMARTX Chan-account ledgers beside it). What it adds, by part:
+
+- **Part 2 (workflow-as-designed) — the QUARTERLY REPORTING flow, previously invisible to this
+  assessment:** per-client Excel off Yang's 2-page template (p1 identity/BMV/flows/EMV +
+  QTD/YTD/1Y/3Y/SI returns; p2 period tax detail + positioning/sectors), quarterly cadence,
+  Q2 ran 3-of-5 then-live accounts, ENTIRE-ACCOUNT no-sleeves ruling, BMV backed into from
+  performance+EMV. Owners: Alyssa fills, Manav grants BD access, Andrew automates. This is a
+  SECOND human-operated chain beside the daily one — quarterly, template-driven — and it is
+  entirely manual today.
+- **Part 1/5 (SOURCE MAP with rationale):** returns-net-of-fees ← Black Diamond (because 49F
+  turned OFF Schwab's client performance); cost basis + realized/unrealized ← Schwab; sectors +
+  holdings ← FactSet pre-pulls; benchmarks ← Bloomberg (49F custom benchmarks, S&P/AGG
+  declined).
+- **THE FLAG, TESTED (not adopted):** *"returns ← BD"* vs the estate's own 49F TWR chain.
+  Live/deployed read this session: `data/assets/scripts/gold/runners_49f/c02_twr_engine.py`
+  (+ lineage + tests; CVO spec 08-11 — post-dates the call) writes
+  `s3://opal-data-49financial/gold/advi/canonical/twr_daily/` — **LIVE, partitions through
+  `date=2026-08-18` (T-1 current)**, GROSS/NET pair with the fee-management lever (so the
+  net-of-fees semantics BD supplied is covered in-form). **VERDICT: the daily-returns leg of
+  that cell is SUPERSEDED-BY-ESTATE (evidence above); the PERIOD-form leg is NOT YET** —
+  `canonical/twr_periods/` listed EMPTY this session (0 rows; tree searched:
+  opal-data-49financial), and the Q2 template consumes period returns (QTD/YTD/1Y/3Y/SI).
+  The template's other source cells (Schwab cost basis: /tax-pt2 covers; FactSet
+  sectors/holdings: manual pre-pulls; Bloomberg benchmarks: manual) are unchanged by the
+  estate today.
+- **Meeting agenda addition (item 10):** quarterly reporting automation — whether Q3 reports
+  draw returns from the estate TWR chain (period forms pending) instead of BD, and whether the
+  template fill becomes a generated artifact. Population facts from the call (3-of-5 live then;
+  5 traded now per the 08-13 master) size it.
+- **Part 4 addition:** the call names further doc-sync targets located in the OCIO-models
+  Dashboard tree (`.../2026 Q2/` per-client files, FactSet pull files) — enumerated for the
+  meeting, not drift-listed this pass (declared exclusion: OneDrive/OCIO tree not walked).
+
 ## Denominator register (D9A-3)
 
 Every count above carries its frame; the load-bearing ones: comp-find taxsma filename census
