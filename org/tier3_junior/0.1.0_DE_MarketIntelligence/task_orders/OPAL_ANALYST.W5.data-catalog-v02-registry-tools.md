@@ -5,17 +5,24 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.1.0_DE_MarketIntelligence~Z</issued_to>
 <date>2026-08-19</date>
-<status>staged</status>
+<status>superseded</status>
+<superseded_by>D6_ANALYST.TO-CDBFG-SITEZ row TO-B — the D6 root-gate index build IS this artifact, executing at 0.5.0_AE_OpalETL~Z (the PRD wave-table's ORIGINAL W5 owner)</superseded_by>
 <priority>P1</priority>
-<!-- STAGED, spawn-on-GO: the assignee seat is dark by design (COO~Z census 193218Z + 193325Z:
-     NOT REGISTERED, zero load). The spawn routes through MSTR~Z (/mstr-spawn) at GO time with
-     COO~Z surfacing the measured census at that event.
-     GO gates: (1) MSTR~Z's 08-20 07:00 WDAC acceptance; (2) census sequencing at GO time (site-Z
-     sustained ceiling is 6; D9's spawn timing is the laptop's call). W4b does NOT gate this TO —
-     see requirement 9: the loud-refusal rule makes late-landing units safe.
-     Re-routed off 0.5.0_AE_OpalETL~Z (the PRD wave-table default) 2026-08-19 ~1935Z: that seat
-     holds W4b (the largest unit) + D7 TO-A live. Precedent: the W4a/W7 inline re-routes; both
-     homes (PRD §9.2 row + this TO) updated in the same act. -->
+<!-- SUPERSEDED 2026-08-19 ~2015Z BY THE ISSUER (TO-status law: superseded = the need is met
+     another way, named). Reconciliation: MSTR~Z 201242Z as D6 per-row seat holder, collision
+     surfaced by 0.5.0_AE_OpalETL~Z at 201138Z PRE-BYTES (no index artifact existed). Grounds
+     accepted: this TO's re-route was CAPACITY-grounded and the premise died — D7 TO-A closed
+     1931Z; capacity adjudication is MSTR~Z's. No METHOD ground for DE~Z exists (the wave table's
+     original owner WAS 0.5.0~Z; separation-of-duties sits at CVO~Z certification, not at the
+     lift). Zero cost: no GO ever fired, no spawn ever happened, the seat stayed dark.
+     BINDING NOTE FOR THE D6 TO-B EXECUTOR: the SPEC RIDES THE ARTIFACT, NOT THE TO SHELL.
+     Every requirement and criterion below (the s10.1 preconditions a-d, the merged-definition
+     ruling, F4 factor-tilts correction, the three approved widenings, the query-to-route battery
+     with denominator, firm-as-first-class-key, the loud-refusal negative control) binds the v0.2
+     index build wherever it executes — they are PRD s9.6/s10.1/s9.11 law, quoted here for
+     convenience, not created here.
+     ORIGINAL STAGING TERMS (for the record): spawn-on-GO to a dark DE~Z seat, GO gated on the
+     08-20 07:00 WDAC acceptance + census sequencing; grounded on COO~Z census 193218Z + 193325Z. -->
 
 <references>
   <ref type="prd">docs/architecture/OPAL_ANALYST_PRD.md — §9.6 (W5 spec) · §10.1 (Part-1 amendment: preconditions a–d) · §8.2 (EXTEND ruling — never a second registry) · §9.3 (semantics delegation to CVO~Z) · §10.8 + §10.8.1 (firm isolation, sovereign-backed; firm from PREFIX, never bucket name) · §9.11 (BG fold: F2 urgency, F4 named correction) · §9.8.1-A (consumable = `rectangle.final.certified.json`, only that name)</ref>

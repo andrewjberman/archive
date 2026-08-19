@@ -9,7 +9,10 @@
 <priority>P1</priority>
 <!-- TERMINAL WAVE by ruling (§10.6): reviews every access surface INCLUDING W5's catalog and the
      W7/W8 surfaces, so it certifies the system we ship, not a narrower one.
-     GO gates: (1) W5 LANDED; (2) MSTR~Z's 08-20 07:00 WDAC acceptance.
+     GO gates: (1) the v0.2 index LANDED — W5's artifact, executing as D6_ANALYST.TO-CDBFG-SITEZ
+     row TO-B at 0.5.0_AE_OpalETL~Z per the ~2015Z reconciliation (the OPAL_ANALYST.W5 TO is
+     superseded-with-pointer; the gate follows the ARTIFACT, not the TO shell);
+     (2) MSTR~Z's 08-20 07:00 WDAC acceptance.
      Joint: 3.0.0_SA_CVO~Z (second reads). Certification seat on any widening: Andrew (§9.2 table).
      Self-issued under this program's §9.8 issuance routing (Andrew-direct @219bbc246c: W5/W6
      issuance calls are CTO~Z's). -->
