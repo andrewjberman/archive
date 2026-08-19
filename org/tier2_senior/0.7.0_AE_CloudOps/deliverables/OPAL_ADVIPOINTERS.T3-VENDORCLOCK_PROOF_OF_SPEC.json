@@ -1,0 +1,112 @@
+{
+ "schema_version": "1.0",
+ "to_id": "OPAL_ADVIPOINTERS.T3-VENDORCLOCK",
+ "phase": "P2-TIMING",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/OPAL_ADVIPOINTERS.T3-VENDORCLOCK.vendor-clock-anchor-audit-one-pass.md",
+  "group": "OTHER",
+  "vintage_commit": "ade7af5f28"
+ },
+ "assignee": "0.7.0_AE_CloudOps",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier1_exec/4.0.0_SA_CRO/deliverables/P2_TIMING_MAP_VENDOR_CLOCK_ANCHORS_20260819.md",
+   "kind": "doc",
+   "commit_or_etag": "HEAD (this commit)",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the T3-4 timing-map anchor rows, addendum to the ratified P2_UNIFIED_MORNING_SCHEDULE_TIMING_MAP_SPEC_20260811.md; applied-plane reads throughout"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "T3-1",
+   "criterion_verbatim": "ENUMERATION: the vendor-pull census with denominator (both EventBridge namespaces materialised; each pull row = cron + vendor + the anchor evidence class).",
+   "method": "command",
+   "invocation": "aws events list-rules (auto-paginated, materialised to t3_rules.json) + aws scheduler list-schedules (t3_schedules.json) + aws ssm list-associations (t3_ssm_assoc.json); per-schedule get-schedule x15 for Scheduler crons+timezones; target characterization reads (list-targets-by-rule / get-schedule Target.Arn) on every ambiguous row",
+   "output_evidence": "DENOMINATOR: 135 events rules + 15 scheduler schedules + 0 SSM associations; 121 rules schedule-bearing. Vendor-pull classification recorded in the timing-map addendum: brief family (schwab SDD x2, bd49f trio, Orion/inf family incl. eclipse, cot rebalancer, smartx family incl. wsb/wsd) + adjacent (legacy bd evening downloads, etfs-netassets) + out-of-family boundary (news/fred/market, listed by name). bd-canonical-prices-daily discriminated INTERNAL by target read (bd-gold-trigger mode=incremental, not a vendor pull)",
+   "denominator": "150 scheduled dispatch surfaces materialised across 3 namespaces; every vendor-pull row target-characterized",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T3-2",
+   "criterion_verbatim": "ANCHORS: every pull carries a recorded vendor-publish anchor with its authority; an unconfirmable anchor is recorded UNCONFIRMED with what was read -- never guessed.",
+   "method": "command",
+   "invocation": "landing-series reads (aws s3 ls per bronze prefix, n~9-30d per vendor) UTC-controlled via s3api head-object; ruled anchors cited to their sovereign records; state-read semantics recorded with payload evidence",
+   "output_evidence": "Authorities per row: BD REST = RULED (Andrew 08-11 @accf58083e + 08-19 retime verbatim); Orion ~14:16Z = MEASURED (MDPF_PIPELINE_TRUTH.md:120-137 per ratified spec section 1); schwab 0833 = OBSERVED-WITH-WINDOW (21:45Z D, 09:45Z D+1), 0824 = OBSERVED (~08:37Z TF comment + 30d series); eclipse/smartx = STATE-READ SEMANTICS with live payload evidence; wsb/wsd = RULED (CTO 052551Z in-TF); cot rebalancer slot = RULED vendor anchor + PLACEHOLDER slot honestly carried (its open half is downstream chain-timing, named). Zero guessed anchors; the one UNCONFIRMED-class value (cot exact slot) is recorded with what was read (TF comment verbatim)",
+   "denominator": "every vendor-pull row in the addendum carries an anchor + authority tag; 0 guessed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T3-3",
+   "criterion_verbatim": "RETIMES: each mismatch retimed per the exemplar (targeted plan / ledger / applied-plane cron read), CTO-gated per apply; zero pulls left firing before their vendor's publish window, or the exception recorded with its reason.",
+   "method": "manual_read_with_citation",
+   "invocation": "anchor-vs-cron comparison per row (timing-map addendum); the one confirmed mismatch family dispositioned via the exception clause",
+   "output_evidence": "Retimes required this pass = ZERO. bd49f trio already retimed 08-19 (the exemplar, CTO-executed on Andrew's word, my lane review ADOPTED, ledger 20260819T1430Z). Orion/inf family = MISMATCH CONFIRMED (core pulls 11:02-11:32Z vs measured ~14:16Z landing), EXCEPTION RECORDED WITH REASON: the ratified P2 spec section 5 names this fork (unified-floor-vs-later-floor) and routes it CVO->CTO->Andrew; MDPF_REMED.W1-5 (pending, this seat) is the standing retime vehicle -- a unilateral T3 retime would adjudicate a routed sovereign-adjacent fork. Every other row reads POST-publish on its anchor. No applies fired, so no CTO apply-gates were consumed",
+   "denominator": "1 mismatch family confirmed / 1 exception recorded with its routed reason / 0 rows left silently pre-publish",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T3-4",
+   "criterion_verbatim": "TIMING-MAP RECORD: the P2 timing map carries every anchor row (the CRO spec family home); one line per pull, authority cited.",
+   "method": "manual_read_with_citation",
+   "invocation": "P2_TIMING_MAP_VENDOR_CLOCK_ANCHORS_20260819.md authored in org/tier1_exec/4.0.0_SA_CRO/deliverables/ as an addendum to the ratified spec, committed this window",
+   "output_evidence": "Anchor table: one row per pull with applied-plane cron + anchor + authority + verdict; adjacent-pull table; out-of-family boundary recorded by name so the omission is a choice on the record. Includes the banked METHOD WARNING (aws s3 ls prints LOCAL time -- the 05:46Z phantom-scheduler mis-derivation was caught by the head-object GMT control before landing in any row)",
+   "denominator": "1 addendum, every census vendor-pull row present",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "T3-5",
+   "criterion_verbatim": "proof instance VALID rc=0 positional: ids T3-1,T3-2,T3-3,T3-4,T3-5.",
+   "method": "command",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps/deliverables/OPAL_ADVIPOINTERS.T3-VENDORCLOCK_PROOF_OF_SPEC.json",
+   "output_evidence": "VALID rc=0 at write time (output in the commit thread)",
+   "denominator": "1 instance, 5 criteria positional",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The landing-series instrument was itself controlled: s3api head-object (returns GMT) run against a file aws s3 ls displayed at 05:46:35 -- if s3 ls printed UTC the two would match, if LOCAL they would differ by the ET offset",
+   "expected": "discriminating result either way",
+   "observed": "head-object returned 09:46:35 GMT -- s3 ls prints LOCAL (ET). The first-pass 'on-box 05:46Z scheduler' mechanism was FALSE and was retracted before any row recorded it; SSM command history (list-commands epoch timestamps) independently corroborated fires only at the EventBridge crons",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "landing windows re-derived across multiple feed types per vendor (0833: rps + acc + fam; smartx: access_roster + allocations + models) and multiple days (n~9-30)",
+   "observed": "tight sequential windows consistent across types and days (0833 all 09:46:0x-4xZ; smartx 13:02-13:11Z sequential)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "market/news vendor pulls (news-api x13, news-rss x7, fred x6, fear-greed, volatility, market-rsi, historical-prices, etfs-canon-fanin, seeking-alpha x2 DISABLED, ycharts probe)",
+   "reason": "outside the brief's firm-data family (~6 named); enumerated by name in the addendum so the boundary is a recorded choice; anchoring them is a separate commissioned pass"
+  },
+  {
+   "item": "legacy bd evening-download retimes",
+   "reason": "POST-publish (late-not-early) AND the stage is P5-TEARDOWN event-gated for retirement -- retime investment in a retiring stage recorded as the reason"
+  },
+  {
+   "item": "Orion/inf ingest retime execution",
+   "reason": "ratified P2 spec section 5 fork routed CVO->CTO->Andrew; MDPF_REMED.W1-5 is the standing vehicle at this seat -- executes when the fork is adjudicated, not under T3"
+  }
+ ],
+ "surprises": [
+  "aws s3 ls prints LOCAL time with no timezone marker -- manufactured a phantom on-box scheduler on first read; caught by the head-object GMT control + SSM history corroboration; banked as a METHOD WARNING in the timing-map addendum",
+  "the ratified P2 spec section 2 inf chain crons (12:05Z/13:17-13:47Z) do not match the applied plane (09:50Z/11:02-11:32Z) -- consistent with its own TF-DESIRED caveat; the addendum's applied-plane reads are the live record",
+  "smartx/account GUID tree last written 07-14 08:58Z -- a one-time backfill vintage sitting beside the daily lanes; noted in the addendum, no action taken (surprise-channel line to COO)"
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-19/ (T3 session log lands with this commit window)",
+ "compiler_tools": [
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'OpalSddDailyPull|sdd-daily-pull' infra; comp-find --name '*TIGHTENING*' / '*timing*map*' / '*canonical-schwab*'; comp-find 'wsb-49f-model-aua-pull' infra",
+   "result": "located the census's TF + spec homes with denominators (8/7761, 7/26717, 1/26717, 3/7761); first invocation caught by comp-find's own BRE warning (escaped-pipe literal) and re-run correctly"
+  },
+  {
+   "tool": "aws (events/scheduler/ssm/s3/s3api)",
+   "invocation": "list-rules + list-schedules + list-associations materialised; get-schedule x15+2; list-targets-by-rule x7; landing-series s3 ls per vendor prefix; head-object UTC control; ssm list-commands",
+   "result": "the census + anchor evidence base; every count client-side over materialised sets, denominators printed"
+  }
+ ]
+}

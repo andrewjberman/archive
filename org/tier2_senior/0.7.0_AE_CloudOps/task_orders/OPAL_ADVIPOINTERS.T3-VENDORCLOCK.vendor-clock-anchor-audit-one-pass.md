@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T14:50Z</issued>
 <dated>starts NOW (live + idle per CTO); one pass, complete when every vendor pull carries its recorded anchor — target 08-20 EOD</dated>
-<status>staged -- GO paired this window</status>
+<status>complete -- one pass executed 1447-1530Z 08-19: census 135+15+0 materialised, every vendor-pull row anchored w/ authority, retimes required = 0 (bd49f = the pre-completed exemplar; Orion/inf mismatch = the ratified spec section-5 routed fork, exception recorded, W1-5 the vehicle), timing-map rows landed in the CRO family home, proof instance VALID rc=0 (5/5)</status>
 <priority>P2 — front-runs the pre-publish-fire class instead of detecting it (today's bd49f retime, generalized ONCE)</priority>
 <authority>Andrew-direct at the CTO terminal (verbatim in TIGHTENING_INCORPORATION_BRIEF_20260819.md @094df1d132: "I like all your recommendations ... hand it off to COO; they should go get it done") -> brief T3. The bd49f trio retime @807c3c9190/@ee18a14e09 + ledger 20260819T1430Z is the EXEMPLAR — same method per mismatch. CTO gates each apply as usual.</authority>
 </task_order>
