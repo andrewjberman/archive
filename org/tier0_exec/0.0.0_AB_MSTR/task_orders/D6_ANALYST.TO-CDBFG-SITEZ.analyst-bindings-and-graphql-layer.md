@@ -96,3 +96,22 @@ Compiler Tools section.
 This is now backed by a fresh sovereign word, not only the earlier phasing note — so **TO-E's
 "no parquet resolver in v0" boundary (acceptance D6-3) is ruled, not merely proposed.** The v0 DONE
 bar does not re-time.
+
+---
+## ⚖ TO-G IS THE NAMED FIRST DUAL-CONSUMER — CTO RULING 2026-08-19 ~20:47Z
+
+TO-G will carry values from **TWO orthogonal identity-plane vocabularies**, and it must keep them in
+**TWO FIELDS, NEVER ONE**:
+
+- **DISAMBIGUATION classes -> D3's TO-D3.1 RESIDUAL ENUM** (the TO-G gate above, unchanged — *why
+  did this pair fail the SmartX<->BD join*).
+- **PER-ATTRIBUTE PROVENANCE -> `identity_source`** from `ADVI_IDSPINE.WP-3` (*which layer answered
+  this field*, over the BD<->Schwab spine).
+
+**Each field CITES ITS SOURCE VOCABULARY.** No merged enum, no bridge vocabulary, no third home.
+
+**WHY THIS IS A REAL HAZARD AND NOT BOOKKEEPING:** both vocabularies can legally carry a `bd` value.
+A resolver that collapses them into one field produces a value that is individually valid and
+answers **neither question** — and nothing downstream can tell which was meant.
+
+**ADDED ACCEPTANCE (rides D6-4):** TO-G's output declares, per field, which axis it answers.

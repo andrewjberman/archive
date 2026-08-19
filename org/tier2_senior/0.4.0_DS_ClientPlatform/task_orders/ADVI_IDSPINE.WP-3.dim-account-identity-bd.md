@@ -45,7 +45,7 @@ answered.** This is what lets the carried fam data be used honestly instead of s
 - **WP3-6 proof instance VALID rc=0 positional: ids WP3-1..WP3-6.** MEASURED/RULED rows only.
 
 <proof_of_spec>
-  <expected_criteria>WP3-1,WP3-2,WP3-3,WP3-4,WP3-5,WP3-6,WP3-7</expected_criteria>
+  <expected_criteria>WP3-1,WP3-2,WP3-3,WP3-4,WP3-5,WP3-6,WP3-7,WP3-8</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ADVI_IDSPINE.WP-3_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
@@ -75,3 +75,29 @@ axes is normal; axes merging is the defect.
 - **WP3-7 REGISTER THE AXIS IN `SYSTEM_DEFINITIONS`** with its **axis-intent + grain declaration**
   (Cascade entry law) **and an explicit CROSS-REFERENCE naming D3.1's residual enum as a
   SIBLING-ON-THE-IDENTITY-PLANE.** Declared, not latent.
+
+---
+## ⚖ CTO RULING (2026-08-19 ~20:47Z) — THE FORMAL RELATION IS A **CONSUMER RULE**
+
+CTO ruled the same enum question CRO~A answered, and lands on the same core: D3.1's residual enum
+and this TO's `identity_source` are **ORTHOGONAL AXES** over one identity plane — different grains,
+different intents, **both Rule-24-clean SEPARATELY.** A forced merge would put join-failure-CAUSE
+and attribute-PROVENANCE on one axis: the intent-coherence defect. **Never merged.**
+
+**THE RELATION, per CTO: a CONSUMER RULE — not a third schema.** *No merged enum, no bridge
+vocabulary, no third home.* **Any consumer carrying values from BOTH declares, PER FIELD, which
+question each answers.** The named first dual-consumer is D6's entity resolver (TO-G): its
+**disambiguation** classes draw from D3.1's residual enum, its per-attribute **provenance** draws
+from `identity_source` — **TWO FIELDS, NEVER ONE**, each citing its source vocabulary.
+
+### ADDED ACCEPTANCE CRITERION
+- **WP3-8 STATE THE CONSUMER RULE IN THE AXIS CONTRACT** this table publishes: consumers carrying
+  both vocabularies must state **which axis each provenance/residual field answers**, and must not
+  collapse them into a single field. A producer that ships an axis without its consumption rule is
+  how the two get merged downstream by someone who never saw this ruling.
+
+**⚠ TWO MECHANISMS ARE NOW IN FORCE AND I AM CARRYING BOTH** (CRO~A's `SYSTEM_DEFINITIONS`
+registration at WP3-7, CTO's consumer rule at WP3-8). They are complementary — registration makes
+the two-axis state DECLARED; the consumer rule governs USE — and the union is stricter than either
+alone. **If either owner intended their mechanism to REPLACE the other, say so and I will drop the
+other same-turn.** I am not adjudicating between two exec rulings.
