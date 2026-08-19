@@ -1,0 +1,98 @@
+{
+ "schema_version": "1.0",
+ "to_id": "MDPF_PROVENANCE.T-B",
+ "phase": "P3-REPOINTS",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/MDPF_PROVENANCE.T-B.producer-one-intent-per-key-plus-count-carry-repoint.md",
+  "group": "OTHER",
+  "vintage_commit": "8c25748037"
+ },
+ "assignee": "0.4.0_DS_ClientPlatform",
+ "artifacts_produced": [
+  {
+   "path_or_key": "data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py",
+   "kind": "script",
+   "commit_or_etag": "12b93b59ba",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "load_served_account_count re-pointed to the gold self-carry (prior dated vintage of opal-data-assets portal/gold/mdpf/{firm}/aggregate-aua-timeseries/); C2 fail-loud at listing+read+bootstrap; W-7 cce/stamp logic unchanged. safe-deploy DEPLOYED+VERIFY OK to s3://opal-data-mdpf/code/scripts/gold/ (own sha read a7db07bb68f465d5 == HEAD, LM 01:29:44Z). RULE 22a FINDING (own falsification, 13:36Z 08-19): the 13:30Z producer is mdpf-gold-lambda, whose PACKAGE BUNDLES this script (infra/aws/lambda/mdpf-pipeline/mdpf-gold-lambda/build_package.py:35); live package LastModified 2026-08-14T17:49:44Z, member sha256[:16] ce9c0284537e1948 (pre-re-point; f\"json/mdpf read present x1, portal/gold self-carry read x0). THE S3 CODE-HOME DEPLOY DID NOT REACH THE EXECUTING PLANE for this consumer. Remedy: package rebuild + Terraform apply (Rule 1; infra leg, AE), then the NEXT 13:30Z run is the proof vehicle."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "PB-1",
+   "criterion_verbatim": "scheduled 13:30Z run succeeds reading the {D-1} gold self-carry; no json/mdpf read in the 49f build path at executing bytes (package member sha cited + grep count 0 with the file line count as denominator).",
+   "method": "live_read",
+   "invocation": "aws lambda get-function mdpf-gold-lambda -> package download -> member sha + byte greps; output artifact content discriminator (carried 08-17 stamp cells present only via the self-carry).",
+   "output_evidence": "NOT MET AT 2026-08-19 13:30Z: the run executed the OLD bundled member (sha ce9c0284537e1948, json/mdpf read x1, self-carry x0) and its output 2026-08-18.json carries count@2026-08-17=None on every model -- the discriminating cell the self-carry would have populated (704/1606/3279 measured in the prior vintage). Repo/S3-code-home bytes are the re-point (a7db07bb68f465d5, f\"json/mdpf grep = 0 of 2,948 lines) but EXECUTING bytes are not. Green run today == the OLD path exercised, deliberately not claimed as proof.",
+   "denominator": "one Lambda package member inspected; 2,948 source lines; discriminator checked on 3 models",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "Awaits the mdpf-gold-lambda package rebuild + Terraform apply (AE/infra leg), then the next 13:30Z scheduled run. The held json/mdpf/49financial delete MUST STAY HELD until this row is PASS -- the executing producer still reads that key daily; deleting now C2-crashes the next build."
+  },
+  {
+   "criterion_id": "PB-2",
+   "criterion_verbatim": "count_as_of/count_coverage_end unchanged before/after; count carry ties to the cent vs frozen json/mdpf on all common dates (dates compared / dates total printed).",
+   "method": "command",
+   "invocation": "Unit exercise (scratch exercise_repoint.py, live data) on the NEW loader vs the frozen source; plus today's scheduled output vs frozen.",
+   "output_evidence": "UNIT-LEVEL: NEW loader vs frozen source -- 7/7 models, 2,102/2,102 common non-None cells tie EXACTLY, 0 mismatches, 0 old-only; declared count_coverage_end equal (2026-07-18) both sides; negative control (bogus firm) raises C2. Disclosed semantic: 5 new-only cells @2026-08-17 = the prior vintage's ROW-11 core-model frontier stamps (rolling self-carry, frontier_stamp class > cce, never measured). SCHEDULED-RUN LEVEL: today's output (old path) ties frozen 2,102/2,102 with cce 2026-07-18 -- baseline health, not the re-point proof.",
+   "denominator": "2,102 common non-None cells / 429 common dates",
+   "status": "UNCOMPUTABLE",
+   "status_reason": "The criterion binds on a SCHEDULED run executing the re-point; that run has not happened (see PB-1). Unit-level parity is complete and PASS-shaped."
+  },
+  {
+   "criterion_id": "PB-3",
+   "criterion_verbatim": "smartx-ingestion json/mdpf/global read dispositioned, stated.",
+   "method": "live_read",
+   "invocation": "comp-find (1 hit / 6,457 files); head-object 404 on json/mdpf/global; surviving-key census (1 key); trigger read lambda_function.py:46; schema check on the successor artifact.",
+   "output_evidence": "DISPOSITIONED = RE-POINT REQUIRED, NOT INERT, owner AE: generate_smartx_timeseries_and_metrics.py:482 reads json/mdpf/global/aggregate-aua-timeseries.json -- 404 since the 08-19 TO-4 delete; module runs daily ~11:0xZ ({\"job\":\"account_distribution\"}); except-fallback silently swaps the Total-AUM card basis to model_total. One-line remedy named + schema-verified on the live successor (platinum/mdpf/global/aggregate-aua-timeseries.json: opal_aggregate_aua/non_model_aua lists + as_of_last str). Routed AE 012755Z + COO 012741Z 08-19.",
+   "denominator": "6,457 files scanned for readers; json/mdpf surviving keys = 1",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Negative control on the NEW loader bytes: load_served_account_count('zzz_no_such_firm_9999') -- an empty/absent gold prefix.",
+   "expected": "C2 RuntimeError raise (refusing to build), NEVER a clean empty dict (the swallow-to-{} was the original defect class).",
+   "observed": "RuntimeError raised: 'C2 FAIL-LOUD: account_count self-carry has NO dated vintage under s3://opal-data-assets/portal/gold/mdpf/zzz_...'",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "N/A-WITH-REASON: single-shot get_object of a pinned dated vintage (S3 versioned object); the resolved {D-1} key is deterministic given the listing, and the listing changes only when the scheduled producer writes -- re-run identity rides S3 object immutability, not exercised separately.",
+   "status": "N/A-WITH-REASON",
+   "observed": "not separately exercised -- single-shot pinned-vintage read; identity rides S3 object immutability + the deterministic max(vintages) resolution (reason in method)"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "PB-4..PB-8 (Half 2 renames)",
+   "reason": "follow the CTO arch stamp in their own instance per the TO's declared split grammar"
+  },
+  {
+   "item": "artifact-coverage linkage for data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py",
+   "reason": "PB-1/PB-2/PB-3 are ALL rows about this one artifact (the TO's own criterion-id grammar predates the {firm}-{group}-{artifact} form); not a zero-battery case -- every acceptance row exercises it"
+  }
+ ],
+ "surprises": [
+  "EXECUTING-PLANE GAP: the mdpf deploy gate (safe-deploy, S3 code home) and the 13:30Z producer (mdpf-gold-lambda BUNDLED member, build_package.py) are DIFFERENT planes -- a script can be committed+gate-deployed and still not executing. Same class as Rule 22a's 08-12 measured case and the INF billing bundled-copy finding (08-18). The EC2 mdpf-daily-dispatch consumes the S3 code home (:605 REVAMP_DIR check) -- two consumers, two planes, one gate covers one of them."
+ ],
+ "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-19/ (Andrew-ordered wind-down log follows)",
+ "compiler_tools": [
+  {
+   "tool": "comp-pipescript io",
+   "result": "PARTIAL",
+   "note": "pre-write per TO; dynamic-key get_object + prefix reads invisible (banked routed gap) -- treated as floor",
+   "invocation": "dim_mdpf_aggregate_aua_timeseries --pipeline mdpf"
+  },
+  {
+   "tool": "comp-find",
+   "result": "PASS",
+   "note": "located the PB-3 reader (1/6,457) and the executing producer (build_package.py:35) with denominators",
+   "invocation": "json/mdpf/global infra/aws/lambda; dim_mdpf_aggregate_aua_timeseries infra/aws; STAGE6-REVAMP data/mdpf"
+  },
+  {
+   "tool": "comp-system",
+   "result": "PASS",
+   "note": "STRUCTURAL-TWOPHASE overrides discharged in-session",
+   "invocation": "recompile x2 (discharges)"
+  }
+ ]
+}
