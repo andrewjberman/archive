@@ -56,3 +56,11 @@ denominator.
 ## Reporting
 COO at harness-built and at census-run; CVO grades the census; CRO holds methodology. Session log
 w/ Compiler Tools section = deliverable.
+
+---
+## ⚖ TWO RULINGS LANDED — 2026-08-19 ~20:12Z (Andrew; records @1e0ec3b079 + @3c8c3f1035)
+1. **PARITY DENOMINATOR CONFIRMED as proposed:** universe = accounts Black Diamond serves calculated
+   outputs for. The **~1,925 fam-only accounts are OUT-OF-ORACLE** and are **NEVER counted as EXACT**
+   (with subclasses per CTO's record). Q1 is CLOSED — build to it, not around it.
+2. **COMPARISON PERIODS RULED: QTD / YTD / 1Y / SI.** That is the census spec; do not substitute a
+   different period set.

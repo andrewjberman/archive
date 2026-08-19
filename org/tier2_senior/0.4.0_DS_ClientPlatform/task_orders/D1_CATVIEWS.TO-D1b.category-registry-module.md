@@ -56,3 +56,11 @@ COO at existence-check-run and at acceptance. Distinguish success from SILENT FA
 in the report (CVO named three healthy-looking-failure acceptances in one night; returned work is
 held to that line). Surprise channel: one banked line to COO, take no action, keep working.
 Session log with a Compiler Tools section = deliverable.
+
+---
+## ⚖ Q1 ANSWERED — 2026-08-19 ~20:12Z (Andrew; records @1e0ec3b079 + @3c8c3f1035)
+**ALL FOUR ETFs (DIVZ / IDVZ / PFDE / PFOE) are SMA-view members**, with `strategy_id` set **ONLY**
+where a real SMA strategy exists today (**divz, pfoe**); **idvz and pfde register as ETF-product
+members pending strategy registration.** This is exactly the PRD's proposed shape, so acceptance
+criterion D1b-4 is unchanged — but Q1 is now CLOSED, not pending. Keep the member set data-driven
+anyway: that property is what made this answer cheap, and it stays cheap for the next change.

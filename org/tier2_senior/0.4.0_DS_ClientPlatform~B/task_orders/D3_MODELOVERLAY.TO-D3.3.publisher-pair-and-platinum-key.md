@@ -45,3 +45,27 @@ deploy needs no hold, but the verification is the price of skipping it.
 
 ## Reporting
 COO at key-live, cc CTO (served semantics + gate). Session log w/ Compiler Tools section.
+
+
+---
+
+## ⚖ FENCE LIFTED — ANDREW-DIRECT 2026-08-19 ~20:12Z: THE BOOK BASIS IS RULED **GROUP-BASED**
+
+**VERBATIM:** *"All approved"* — ruling on the COO `/open-calls` card set; record at
+`org/tier1_exec/2.0.0_SA_COO/deliverables/ANDREW_DIRECT_20260819_OPEN_CALLS_ALL_APPROVED.md`
+@1e0ec3b079.
+
+**THE RULING:** the advisor-book basis is **GROUP-BASED** (primary-group partition — the $456.8M
+Travis case). **Role-based attribution is RETAINED AS AN ATTRIBUTE VIEW**, not discarded.
+
+**EFFECT ON THIS TO — the BUILD-ONLY fence is LIFTED.** The gate (CVO P2-1) was precisely this word.
+Served consumption is authorized on the group-based basis.
+
+**WHAT DID NOT CHANGE, and do not read the lift as changing it:**
+- **The basis is still STAMPED INTO THE ARTIFACT.** That was never contingent on which way the
+  ruling went — it is what makes a future basis change visible instead of silent.
+- **Serving still routes P4-class through CTO.** The ruling authorizes the BASIS; it does not
+  bypass the serving gate mechanism. Do not treat "unfenced" as "self-serve".
+- The Travis-class delta is still PRINTED as measured-and-explained. With group-based ruled as the
+  book basis, that delta is now the *expected* headline number rather than a discrepancy — which
+  makes printing it more important, not less.
