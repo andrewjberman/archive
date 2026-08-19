@@ -1,0 +1,64 @@
+{
+  "deliverable": "D9_TAXSMA.TO-A-SITEZ live-truth machine table",
+  "author": "0.4.0_DS_ClientPlatform~Z",
+  "measured_utc": "2026-08-19T20:03Z..20:3xZ",
+  "prd": "docs/architecture/D9_TAX_SMA_OPS_PRD.md",
+  "head_version": "fac13ccc3a",
+  "midpass_ruling": "Andrew ~20:12Z @1e0ec3b079: (c1) daily-tracking leg WAIVED ahead of the Yang/Alyssa meeting; rest of (c) holds",
+  "rows": [
+    {
+      "row": "B1",
+      "project": "OPAL_TAXSMA",
+      "claim": "guardrails LIVE (contract v1.0, validator deployed @a89bb53e6, quarantine, cloud logging); /tax-pt1 first live run + 27-file backfill 07-15",
+      "desired": {"verdict": "TRUE", "evidence": ".claude/skills/tax-pt1/SKILL.md + docs/briefs/OPAL_TAXSMA_SSAVAIL_CONTENT_CONTRACT.md in-repo @ working tree 2026-08-19"},
+      "applied": {"verdict": "TRUE", "evidence": "validate_ssavail_attachment live on opal-gateway MCP roster (whoami probed OK this session); SharePoint Shared/TAX/Short Sale + Intake Logs + Flagged Files listed live"},
+      "exercised": {"verdict": "RAN-ONCE-IDLE-SINCE-0715", "evidence": "Intake Logs = 1 file (20260715-183800Z), denominator 1; Short Sale folder census 39 items; post-07-15 arrivals = 2 files (08-04, 08-05) with manual-placement signature (no log, no PRELIM pair); upstream feed ALIVE to 08-19 (mailbox probe: 14 SSAVAIL rows of first 15, nextLink present)"},
+      "verdict": "BUILT-AND-IDLE; operator cadence (Andrew ruling 099b1162c8 'Yes B now') not running"
+    },
+    {
+      "row": "B2.ws1-producer",
+      "project": "OPAL_TAXSMA_PT2",
+      "claim": "WS-1 producer DEPLOYED (opal-assets-bd49f-reporting-pull, DRY_RUN=0, manual-invoke)",
+      "desired": {"verdict": "TRUE", "evidence": "infra/aws/terraform/opal-assets/bd49f_reporting_pull.tf (NO schedule, manual-invoke-only, lines 14/120/140)"},
+      "applied": {"verdict": "TRUE", "evidence": "get-function-configuration: Active, LastModified 2026-07-17T23:06:53Z, python3.12/300s/1024MB, CodeSha256 U1ujLtfbIVEjQxW8Fm+Rb8XeioAc2+e99cokHe7yLV8="},
+      "exercised": {"verdict": "ONCE-EVER", "evidence": "log streams total=1 (2026/07/17); CloudWatch Invocations daily sums 2026-07-01..08-19 (50d window) = 1 datapoint Sum 1.0"},
+      "verdict": "NEVER-SCHEDULED (not never-launched, not stopped): get-policy=ResourceNotFoundException; list-rule-names-by-target=[]; event-source-mappings=[]"
+    },
+    {
+      "row": "B2.ws2-ws3-chain",
+      "project": "OPAL_TAXSMA_PT2",
+      "claim": "silver fact_taxsma_report + gold dim_taxsma_report BUILT + CVO-verified, proven one-account (Chiles 07-17)",
+      "desired": {"verdict": "TRUE", "evidence": "data/assets/scripts/silver/build_fact_taxsma_report.py + data/assets/scripts/gold/build_dim_taxsma_report.py in-repo"},
+      "applied": {"verdict": "PARTIAL", "evidence": "artifacts live: bronze reporting_{performance,costbasis,allocation} 1 partition each (2026-07-17); silver date=2026-07-17 only; gold account=0027265115 only. Scripts have NO S3 code home: comp-pipescript 'not-in-tree' in all trees of its universe (no assets tree in --pipeline enum); agent-run only"},
+      "exercised": {"verdict": "BUILD-DAY-ONLY", "evidence": "single 07-17 vintage across all three tiers; gold single account"},
+      "verdict": "one-account proof state persists unchanged 33 days; multi-account + WS-5 remain (now (c1)-waived cuttable)"
+    },
+    {
+      "row": "B2.ws4-wsr5-iam",
+      "project": "OPAL_TAXSMA_PT2 + REGISTRY",
+      "claim": "WS-4 gateway scoped-IAM REMAINING (Andrew+CTO gate)",
+      "desired": {"verdict": "TRUE", "evidence": "infra/aws/terraform/opal-gateway/taxsma_gateway_iam.tf header: APPLY IS GATED -- DO NOT self-apply"},
+      "applied": {"verdict": "FALSE-CLAIM-ROLES-ARE-LIVE", "evidence": "opal-mcp-emp-alyssa-read + opal-mcp-emp-alyssa-onboard both Created 2026-08-15T02:32Z (inside OPAL_GWRENAME S3 apply window 08-14 22:28-23:34 EDT); positive control opal-assets-bd49f-reporting-pull-role returned identically; live read-role policy == DESIRED lean-SPLIT exactly (GetObject blackdiamond/49f/gold/dim_taxsma_report/* + scoped ListBucket)"},
+      "exercised": {"verdict": "UNKNOWN-NO-RECORD", "evidence": "no WS-4 go-live sequence record found (COND-2/COND-3/taxsma_rule22a_verify.sh/CTO confirm); WS-6 wiring unbuilt per record"},
+      "verdict": "MAP-VS-TERRITORY FINDING (gate-sequencing, not over-grant): gated security surface landed via adjacent program's apply; needs ratification or retroactive WS-4 sequence"
+    },
+    {
+      "row": "B3",
+      "project": "OPAL_TAXSMA_REGISTRY",
+      "claim": "WS-R1 DONE -- S3 roster at blackdiamond/49f/_ops/taxsma_roster.json (ETag-conditional RMW)",
+      "desired": {"verdict": "TRUE", "evidence": "REGISTRY PRD D1 ruling @6fedafcd1b (control-prefix outside layer grammar)"},
+      "applied": {"verdict": "TRUE", "evidence": "s3 ls: key exists, 1645 B, LastModified 2026-07-21T19:56:37Z"},
+      "exercised": {"verdict": "STALE-VS-BUSINESS", "evidence": "roster 3 accounts (1 active Chiles/xref, 2 pending_resolution Bump+Macy on D2/D3 sovereign egress word) vs SharePoint master Tax SMA Accounts.xlsx (2026-08-13): 11 accounts, 5 TRADED 08-05 incl. Nixon+Tracey unenrolled; roster 23d behind"},
+      "verdict": "claim TRUE; currency is the finding"
+    },
+    {
+      "row": "B4",
+      "project": "OPAL_TAXSMA_PT2",
+      "claim": "serve-layer ruling stands: gold-only, PII-free",
+      "desired": {"verdict": "TRUE", "evidence": "recorded CTO ruling 07-17 (OPAL_TAXSMA_PT2.json current_phase)"},
+      "applied": {"verdict": "CONSISTENT", "evidence": "live gold prefix exists; live alyssa-read role grants exactly that one prefix (measured get-role-policy this session)"},
+      "exercised": {"verdict": "NOT-RE-VERIFIED", "evidence": "anonymization-holds (COND-3) is a WS-3-layout gate owned by the (c) sequence -- declared exclusion"},
+      "verdict": "consistent at desired+applied; COND-3 verification open"
+    }
+  ]
+}
