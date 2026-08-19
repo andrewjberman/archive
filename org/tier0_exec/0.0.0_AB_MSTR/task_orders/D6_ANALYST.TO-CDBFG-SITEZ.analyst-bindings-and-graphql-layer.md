@@ -89,3 +89,10 @@ read-only default.
 ## Reporting
 COO via the MSTR ferry, per row. Surprise channel: one banked line. Session log per seat with a
 Compiler Tools section.
+
+---
+## ⚖ v0 SCOPE RULED — 2026-08-19 ~20:12Z (Andrew; @1e0ec3b079 + @3c8c3f1035)
+**v0 STAYS PLUMBING-ONLY. THE LIVE GraphQL SCHEMA IS v1.1.** §7-Q2 is CLOSED.
+This is now backed by a fresh sovereign word, not only the earlier phasing note — so **TO-E's
+"no parquet resolver in v0" boundary (acceptance D6-3) is ruled, not merely proposed.** The v0 DONE
+bar does not re-time.

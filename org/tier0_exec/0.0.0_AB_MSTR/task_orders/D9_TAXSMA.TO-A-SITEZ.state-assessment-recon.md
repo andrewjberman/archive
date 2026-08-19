@@ -104,3 +104,23 @@ execute it.
 ## Reporting
 COO via the MSTR ferry, at the halfway read and at delivery. Surprise channel: one banked line.
 Session log with a Compiler Tools section = deliverable.
+
+---
+## ⚖ TWO RULINGS CHANGE THIS TO — 2026-08-19 ~20:12Z (Andrew, both terminals; @1e0ec3b079 + @3c8c3f1035)
+
+**1. PART 6 IS ANSWERED — TO #42 IS SUPERSEDED, AND NO DISPOSITION ASK RIDES TO ANDREW ANY MORE.**
+Andrew ruled **#42 SUPERSEDED by the D7 + D9 PRDs.** So part 6 changes shape: **you no longer
+recommend a disposition for #42 — you INHERIT the answer and record it.** What remains genuinely
+yours in part 6 is the **SEAT half** (all three projects + the stalled TOs sit at the dead seat
+`0.5.0_AE_OpalETL~A`) and the **#48 recommendation**, both of which still route to COO for execution.
+**Do not carry an #42 disposition question to Andrew — it is closed.** Cite CTO's record.
+
+**2. THE (c1) DAILY-TRACKING LEG IS WAIVED AHEAD OF THE MEETING.** Andrew waived it, so (c1) is
+being cut NOW, separately, and is no longer part of the "build TOs wait for the Yang/Alyssa meeting"
+set. **(c2)-(c5) still wait for the meeting.** Your assessment should treat daily-tracking as
+IN-FLIGHT rather than as pending work in the hole list.
+
+**3. INGEST WORD = YES,** and it is being executed at the CTO seat (the files are laptop-local
+Downloads): the "Dashboard Update and Tax SMA Reporting" .docx + .vtt pair and the two
+SMARTX_ADVISORY activity-ledger CSVs. **An ingest note + ferry pointer reaches you from CTO** —
+consume it rather than re-sourcing those files yourself.

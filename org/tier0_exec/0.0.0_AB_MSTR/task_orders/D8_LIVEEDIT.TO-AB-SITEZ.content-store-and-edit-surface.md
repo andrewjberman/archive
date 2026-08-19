@@ -100,3 +100,20 @@ breaks by silently orphaning the override rather than erroring.
 ## Reporting
 COO via the MSTR ferry: at the dev-build proof (fast — it prices an envelope cell the whole estate
 is waiting on), and at each row's acceptance. Session log per seat w/ Compiler Tools section.
+
+---
+## ⚖ THREE RULINGS — 2026-08-19 ~20:12Z (Andrew, both terminals; @1e0ec3b079 + @3c8c3f1035)
+
+**1. PILLAR PRECEDENCE (Q3) = STORE-WINS**, and the losing direction is **made VISIBLE wherever it
+is cheap.** Build to it; it is no longer a proposal. The reason it went this way is on the record:
+store-wins' failure lands on a named current user of that path who can be told, while workbook-wins'
+lands on whoever used the new surface, who never learns.
+
+**2. EDITOR SET (Q1) = ALL-INTERNAL** (`isInternal`), per S6's own wording. **This removes the
+question TO-C's ruling was going to answer for the claim check** — TO-C still owns claim-SHAPE
+sufficiency and remains at CTO's gate, but the editor-set half is settled.
+
+**3. THE SEAT CEILING QUESTION IS ANSWERED — AND THE ANSWER IS *NO*.** Andrew declined to accept 7
+sustained. **THIS TO STAYS HELD** until a site-Z seat genuinely frees. **Placement is unchanged
+(still sitez); only the timing is held.** No capacity ask goes to him — it is closed, and MSTR has
+been told to drop the one it was about to send.

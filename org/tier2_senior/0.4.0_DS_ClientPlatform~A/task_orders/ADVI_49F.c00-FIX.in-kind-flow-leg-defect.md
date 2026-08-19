@@ -85,3 +85,12 @@ COO at the feasibility read (fast, same session), at census-complete, and at har
 cc CTO (gate) and CRO~A (harness owner + the finder). CRO~A's wider stratified comparison
 deliberately waits until post-fix so it measures parity rather than the known break — endorsed;
 do not ask them to run it early.
+
+---
+## ⚖ TIMING FORK RULED — 2026-08-19 ~20:12Z (Andrew, both terminals; records @1e0ec3b079 + @3c8c3f1035)
+**(b) FLIP FRIDAY WITH THE DEFECT DECLARED.** The fix is the drive-to-EXACT loop's first act, MON at
+latest. **THE CONDITIONAL SURVIVES INTACT:** your THU FEASIBILITY READ may still upgrade this to
+(a) fix-before-flip **if it is comfortably free** — so the read is still a real decision input, not a
+formality. Do it first and report it as specified.
+Declaration wording is unchanged and still binds: **"42 accounts across 4 SAMPLED days; full census
+pending at the fix TO."**
