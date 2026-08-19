@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>pins 2026-08-21 · cert 2026-08-22 (at the 4c flip) · census read 2026-08-23 (P5-gated). The 08-21 pin date is CONDITIONAL on your own stated precondition (group PIN, below); if P2 slips, 4b slips WITH it in writing — never silently (your 154542Z line, adopted verbatim).</dated>
-<status>pending -- GO 20260818T160719Z (COO); group PIN begins when its precondition reads true</status>
+<status>pending -- GO 20260818T160719Z (COO); group PIN begins when its precondition reads true. RE-DATED IN WRITING @f79760179a (COO 20260819T131051Z): Schwab FAM stalled for 08335338 after as_of 08-10 (AE vendor verdict) -- chain re-anchors to R = FAM-resumption day; PIN = R+2, CERT = R+3 flips. No criterion moves: the precondition limbs already encode this by construction (evidence-not-date).</status>
 <priority>P1 — the flip (4c) is illegal without the pre-flip pin + cert; the pin is the instrument that makes a cutover falsifiable</priority>
 <authority>Push plan @a2f27c8d0a §3 rows 4b/4c/5 + §2 CVO row (Rule 14e cert) + PARITY_BAR §§3-5,7 + the never-widen law (NEVER#3: CTO+COO determination per key; verified DELTA=0 needs no hold). Your 154146Z + 154542Z inputs are folded as criteria.</authority>
 </task_order>
