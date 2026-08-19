@@ -97,3 +97,63 @@ follow-on, not 08-19; I will contract it separately when built.
 the c03 nna_atomic stage (EXCLUDED from the chain -- dormant-superseded, zero consumers,
 @3a924da626 D2; one-line re-include if CTO rules otherwise); the a01_runner.py stale
 predecessor (FILED, P5 candidate -- the chain invokes the live module directly).
+
+---
+
+## ADDENDUM 2026-08-19 ~163xZ -- RE-ISSUE per CTO 161352Z (P2D-3's first real S3-code-path
+fire found this contract's fields were under-enumerated in three ways; corrected here before
+your floor apply, per your gate-ask basis 162459Z)
+
+**1. S3 CODE HOME -- confirmed, unchanged.** `s3://opal-data-49financial/_code/` (bucket-root,
+RE-PINNED 174449Z 08-18, live).
+
+**2. BUNDLE MEMBERS -- TWO NEW NON-.PY MEMBERS, not covered by the routine per-commit
+safe-deploy.sh sync (which only picks up .py files):**
+  `s3://opal-data-49financial/_code/ref/SCHWAB_TRANSACTION_CODE_CLASSIFICATION_20260811.json`
+  `s3://opal-data-49financial/_code/ref/etf_classifier.py`
+Both vendored via explicit `aws s3 cp` from their ONE canonical repo homes (org/tier1_exec/
+4.0.0_SA_CRO/deliverables/... and data/black_diamond/scripts/gold/lib/etf_classifier.py
+respectively -- neither is duplicated in-repo, only mirrored to S3). **Operational
+implication for your dispatcher/DLQ design: if either canonical source file is ever amended
+(a05's classification table update, or a etf_classifier.py heal like 2026-08-12's
+BUG-1/BUG-2), the S3 ref/ copy needs an explicit re-cp -- it will NOT auto-update via the
+normal commit->push->safe-deploy cycle the way the .py members do.** Worth a standing
+reminder in whatever runbook covers this schedule; not asking you to build tooling for it
+(moratorium).
+
+**3. IAM ACCESS SURFACE -- under-enumerated at first delivery; full surface as measured
+today (all Sids on `bd-exporter-ec2-role`, policy `advi-49f-chain-access` unless noted):**
+  - S3 GetObject+ListBucket(scoped): `opal-data-assets/schwab/08335338/silver/*` (B1,
+    pre-existing, policy `monolith-schwab-08335338-silver-read`)
+  - S3 GetObject+ListBucket(scoped): `opal-data-assets/blackdiamond/49f/silver/dim_advisor_fee_role/*` (jd2)
+  - S3 GetObject+ListBucket(scoped): `opal-data-assets/schwab/08335338/meta/conversions/*`
+  - S3 GetObject+ListBucket(scoped): `opal-data-49financial/gold/advi/*` (R/W)
+  - S3 GetObject+ListBucket(scoped): `opal-data-49financial/_code/*` (incl. the new ref/ members above)
+  - DynamoDB Scan: `bd-securities` (B7, a07 classification substrate)
+  - S3 GetObject+ListBucket(scoped): `opal-data-assets/smartx/platform/silver/fact_allocation_account_map/*`
+    (B8, LIVE 16:12Z -- jd1 vintage stamp + a06 identity crosswalk, same prefix serves both)
+  - **PENDING CTO RULING (NEVER#2 question, gate ask 162459Z):** S3 read on
+    `opal-data-inf/silver/api_dims/positions_mv/*` and
+    `opal-data-assets/blackdiamond/cottonwood/silver/fact_holdings/*` -- both legs of a07's
+    firm-neutral asset-classification population (49F+INF+COT union, per a07's own docstring
+    citing the CTO 160826Z substrate amendment). Genuinely a cross-firm read from a bd-tree
+    instance role; whether the substrate amendment's shared-plane sanction (already covering
+    the bd-securities DDB scan, B7) extends to these two S3 legs, or needs a different
+    mechanism, is CTO's call, in flight as of this addendum. **This is the one surface still
+    open; everything above it is live and measured.**
+
+**4. DURATION -- partial, growing as the corrected chain clears each blocker:**
+  a00-a06 (7 stages): measured **99s wall-clock** on the corrected wiring, real data,
+  08-18 asof (a02 dominates at 72.3s -- the fact_trn 532-partition sweep). a07-c04 (10 more
+  stages incl. c04 validation) not yet measured -- held on the IAM ruling above. Full-chain
+  figure follows the moment it clears; this is NOT the binding number yet.
+
+**5. WIRING CORRECTION (for your own understanding of what the entrypoint now does, no
+action on your side needed -- this is entirely internal to the host-side subprocess chain,
+no new S3/IAM surface): c00/c01/c02 were found mis-wired to a different project's scripts
+(OPAL_GLDRNS.A4's account_gains/account_performance/client_performance runners, a
+casebook-numbering collision) and corrected to invoke this product's own flow_ledger/
+nna_canonical/twr_daily modules directly. Those modules stage their upstream inputs through
+a LOCAL, ephemeral `workdir/canon_mirror` directory populated by a02/a04/a05/b00/b01's
+existing `--local-out` support -- purely on-host scratch space, nothing new to grant or
+schedule.**
