@@ -13,6 +13,18 @@
      row TO-B at 0.5.0_AE_OpalETL~Z per the ~2015Z reconciliation (the OPAL_ANALYST.W5 TO is
      superseded-with-pointer; the gate follows the ARTIFACT, not the TO shell);
      (2) MSTR~Z's 08-20 07:00 WDAC acceptance.
+     CONVERGED WITH D6 TO-F 2026-08-19 ~2058Z (AE~Z opener 205631Z, CTO reply 205801Z — the
+     agreement of record): ONE artifact serves both — 0.5.0_AE_OpalETL~Z AUTHORS, this seat
+     CERTIFIES, CVO~Z second-reads layer classifications when slotted (do not wait to author).
+     The bar stays THIS TO's C1-C6 verbatim; AE~Z's input set accepted PLUS four amendments
+     (F8+F9; the three prose docs + §4.3 allowlist named in the census denominator; §10.8 firm
+     isolation incl. serving routes + the firm_axis=NONE REFUSE-pending-W9 rows; the W9 boundary).
+     SELF-REVIEW MITIGATION (binding): the author built catalog_gate + the new channels, so at
+     certification this seat independently re-runs the gate's deny paths + separate positive
+     controls — an author-only GATED classification is the self-comparison class.
+     GO-GATE CLARIFIED: staged-form landing starts TO-F AUTHORING now; W6's CLOSE gates on
+     (a) CVO~Z index co-sign + (b) the 0-diff laptop-lane port — authored-on-staged,
+     certified-on-shipped; port-time deltas re-exercise their rows. -->
      Joint: 3.0.0_SA_CVO~Z (second reads). Certification seat on any widening: Andrew (§9.2 table).
      Self-issued under this program's §9.8 issuance routing (Andrew-direct @219bbc246c: W5/W6
      issuance calls are CTO~Z's). -->
