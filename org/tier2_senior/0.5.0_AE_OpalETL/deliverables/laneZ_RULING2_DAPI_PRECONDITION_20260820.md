@@ -73,7 +73,27 @@ second shared a filename and the second `>` overwrite read as "0 new logs" — p
 
 ## Port + live exercise
 - Direct port on my lane (no shadow, no comparator): the three files + this record + the README
-  amendment, one commit. Commit hash in the session log.
+  amendment, one commit — **@7284baa5c7**.
+- ⚠ **CORRECTED 2026-08-20 ~1251Z (MSTR~Z grounded correction, measured `Get-ScheduledTask
+  OPAL_BBGTML_daily_pull` → `TaskToRun = cmd.exe /c "<repo>\integrations\bloomberg\pipeline\scheduled_daily_pull.cmd"`):
+  ON THIS BOX THE SCHEDULED TASK EXECUTES THE REPO WORKING-TREE FILE DIRECTLY. The change was LIVE
+  from the moment the file changed on disk (~12:3xZ), not at integration — the "lane commit, MSTR~Z
+  integrates" framing in my landing notice described the RECORD, not the RUNTIME, and must not
+  survive here.** Two consequences, both honest: (a) the 08-21 07:00 fire exercises the precondition
+  FOR CERTAIN — `PRECONDITION: PASS -- DAPI UP …` on a healthy morning is now the ASSERTION and its
+  absence the anomaly; (b) the build-correctness exercise ran on SCRATCH COPIES while the live file
+  already carried the edit — acceptable only because the next fire was ~18h away; **for any
+  minutes-cadence task on this box the discipline must be edit-on-copy → exercise → swap, because
+  here an edit IS a deploy.** (The ledger-label fix is live from the same instant; rows before it
+  keep the old label and are discriminated by timestamp + 6h count, never by label.)
+- **BG's finding (2160), absorbed: `50` is AMBIGUOUS about whether a sign-in attempt was SPENT.**
+  `bbg_fallback.ps1` rc=2 has six causes (`:58` flicker · `:61` no network · `:62` far-end · `:71`
+  fire-once already used · `:93` fill did not verify · `:102` submitted once, still down) and only
+  `:102` consumes an attempt; all six collapse into 50. **The fire-once LEDGER
+  (`~/.bbg_signin_attempts.json`, 6h window) is the discriminator, and BG's Step 2a now reads it
+  before any human fill — fire-once is per-WINDOW, not per-actor.** Deliberately NOT split into
+  50/51 here: the exit contract names the limb; the ledger names the attempt state; two instruments,
+  two questions (YAGNI — revisit only if a reader needs it in the exit code itself).
 - **Live exercise = the 08-21 07:00 ET fire + BG's 07:15 read.** Expected on a healthy morning: the
   new log carries `PRECONDITION: PASS -- DAPI UP …` (or the sign-in lines then PASS) and everything
   downstream reads exactly as today. The FAILED path is exercised only by a real down; it is NOT to be
