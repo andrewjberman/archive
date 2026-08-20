@@ -72,9 +72,15 @@
         per-field precedence controls green BOTH directions (survive + mutant).
     F2  SCHEMA ACT DISCHARGED: four-postulate record + token-hygiene census on the
         manifest field axis, committed with the change; CTO gate cited.
-    F3  TODAY'S 5 RATIFIED TEXTS LANDED into the new homes (verbatim from
-        @b74527515e's decision record, respells included); served resolver output
-        re-read showing them LIVE and regen-proof.
+    F3  TODAY'S 5 RATIFIED TEXTS LANDED into the new homes -- SPLIT PER THE STANDING
+        SEMANTIC-EVOLUTION MANDATE (amended ~1808Z, pre-execution: the ruled division is
+        "pipeline SUGGESTS, Andrew RATIFIES, CVO LANDS" -- a semantic change is a naming
+        act, so the CONTENT port is 3.0.0_SA_CVO's, not this lane's; my original F3
+        assigning it here was the paraphrase, caught before it executed): 0.7.0 BUILDS
+        the homes (F1) and signals CVO ready; CVO PORTS the 5 texts (mechanical copy from
+        @b74527515e, verbatim + respells, no re-adjudication -- Andrew's word covered the
+        texts, not their storage); 0.7.0 then runs the regen-proof re-read (served output
+        shows the texts LIVE and surviving regen). F3 closes on all three sub-acts.
     F4  ceo-daily-wsjft-digest: manifest row minted OR declared exclusion with reason --
         never silent.
     F5  Proof instance VALID rc=0 positional F1-F5; W-15 touched-rows disclosure in the
