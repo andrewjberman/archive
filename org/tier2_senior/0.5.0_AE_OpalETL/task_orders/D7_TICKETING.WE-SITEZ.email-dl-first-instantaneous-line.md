@@ -36,10 +36,41 @@ INCOMPLETE. THE ORDER IS NOW:**
    backstop, **at the exact moment it is meant to work**.
 2. The DL's **audience**.
 3. **DKIM state** — meaningful only after 1 and 2.
-⚠ **STATED AS A CONDITIONAL, NOT A MEASUREMENT, BY THE GATE ITSELF:** whether Graph `sendMail`
-through that gateway shares the credential lifecycle is **NOT verified**. Same gateway, therefore
-likely — **and likely is not measured.** `0.5.0_AE_OpalETL~Z` owns it, and **it is now the FIRST
-question of the DL design.**
+✅ **CRITERION (1) IS NOW SETTLED AT SOURCE — and the answer is STRUCTURAL, not probabilistic**
+(`0.5.0_AE_OpalETL~Z` 2988, gateway app read at HEAD). *The conditional above resolved to YES, and
+it resolved without needing a `sendMail` test at all:*
+
+**THE DEPENDENCY LIVES AT THE TRANSPORT LAYER, NOT AT THE TOOL LAYER.** `server.py:15` — the gateway
+Bearer is **fully validated before any tool name is dispatched** (`:92-98`). So **a call that cannot
+present a live bearer never reaches a tool.** Therefore **EVERY gateway-mediated send —
+`send_channel_message`, `send_email`, Graph `sendMail`, anything added later — inherits the ~1h
+agent-session dependency BY CONSTRUCTION, and NO PER-TOOL EXCEPTION IS POSSIBLE.** *(A `sendMail`
+probe would only have sampled one tool of a class that shares one gate — the structural read is the
+stronger result.)*
+
+⛔ **AND WHY IT CANNOT BE FIXED BY DILIGENCE:** `server.py:81-87` returns 401 with a
+`WWW-Authenticate: Bearer resource_metadata=…` pointer whose stated purpose is *"triggers Claude"* —
+**the refresh is an INTERACTIVE OAuth challenge answered by the Claude Code client.** A Windows
+Scheduled Task **has no client to answer it**. The credential is not merely short-lived: it is
+**renewable ONLY by the very thing the backstop is meant to work without.** That is why the runner
+exits 2 and waits — *there is nothing it could do differently.*
+
+>> **RULING INPUT: the gateway is DISQUALIFIED for the DL on criterion (1), definitively rather than
+probably** — a gateway-mediated DL would reproduce the exact failure it exists to backstop, at the
+exact hour it is meant to cover, and **SILENTLY from the DL's own point of view** (a 401 is a clean,
+well-formed refusal). **SES survives (1):** AWS-native, authenticates with the box's own credentials,
+no interactive-client dependency — with **NEVER#23 then binding its sender to `opalinvest.dev` at
+criterion (3)**, exactly where the gate placed it.
+
+⚠ **TWO HONEST BOUNDS, carried from the author:** the gateway's **server-side** Graph token
+(`_user_token()`, its own MSAL lifecycle) was **NOT measured** — irrelevant here because the client
+never gets that far, but silence is not converted into a finding. And **SES has NOT been exercised
+from this box**; its suitability rests on **architecture, not an exercised send**. WE-2/WE-3 remain
+the exercised proof.
+
+>> **AND THE "DETECTION IS AGENT-INDEPENDENT; DELIVERY KEEPS TURNING OUT NOT TO BE" PATTERN NOW HAS
+ITS MECHANISM RATHER THAN ITS THIRD COINCIDENCE: every delivery surface reached for routes through
+an interactive-OAuth gateway, and detection does not. ONE ROOT, not three findings.**
 >> **THE PATTERN THE GATE NAMES, worth carrying beyond this TO: this is the THIRD independent
 discovery in one evening that something called "independent of the agent" is not. DETECTION IS
 AGENT-INDEPENDENT; DELIVERY KEEPS TURNING OUT NOT TO BE.**
