@@ -1,0 +1,91 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_TRUNCLASS.PSCRIPT2",
+ "firm": "FABRIC",
+ "phase": "NON-BUILD-OTHER",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_TRUNCLASS.PSCRIPT2.context-tree-resolution-and-49f-registry-row.md",
+  "group": "OTHER",
+  "vintage_commit": "19f3d2e0ec"
+ },
+ "assignee": "0.8.0_AE_CloudComp",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/modules/graph/pipeline_cli.py",
+   "kind": "script",
+   "commit_or_etag": "52a063f50a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": ["P1", "P2", "P3"],
+   "deploy_evidence": "Comp-plane engine, repo-invoked, no deploy leg. FIRST COMMIT UNDER THE NEW org/modules/graph/*.py LANE (@2804811386) -- own author line, no override, the enumeration amendment exercised on real dispatched work its first hour."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "P1",
+   "criterion_verbatim": "Mechanism grounded and named (file:line @ commit) for the context-dependent tree resolution; fix makes standalone == in-harness on the same input.",
+   "method": "live_read",
+   "invocation": "comp-pipescript deployed data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py (standalone, pre- and post-fix) + source reads both sides",
+   "output_evidence": "MECHANISM (grounded at source, not the routed 'calling context' framing): resolve_pipeline_from_arg case 2 -- pipeline_cli.py:109-114 @59347e4d9e -- returned the FIRST startswith match iterating _CODE_TREES.values() in dict order, so mdpf's 'data/assets/scripts/gold' repo home shadowed advi's LONGER 'data/assets/scripts/gold/runners_49f'; safe-deploy's in-harness call rides safe_deploy_core.file_to_s3_target, whose 2026-08-18 advi row DOCUMENTS longest-prefix resolution -- the divergence point is first-match vs longest-prefix, one function pair. SECOND dead-end: _FIRM_TO_PIPELINE (:193) had no advi entry and cmd_deployed no advi branch. Pre-fix standalone: 'DEPLOYED STATUS [mdpf] ... No scripts matched filter' (clean false-ABSENT, reproduced verbatim). Post-fix standalone: 'DEPLOYED STATUS [advi]: ... s3://opal-data-49financial/_code/ ... chain_49f_entrypoint.py MATCH', TRUE rc=0 -- the same verdict safe-deploy's in-harness verify reaches on the same file. 7/7 resolution-matrix regression: advi subtree, BOTH mdpf assets layers unchanged, all firm dirs unchanged, bare-id refusal unchanged.",
+   "denominator": "7 of 7 resolution cases; 1 of 1 reproduction input flipped false-ABSENT -> MATCH",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "P2",
+   "criterion_verbatim": "Every ABSENT verdict from `deployed` carries its searched-tree denominator.",
+   "method": "command",
+   "invocation": "comp-pipescript deployed --pipeline mdpf zzz_no_such_script_9999 (the absence path, exercised)",
+   "output_evidence": "Live output: \"No scripts matched filter: 'zzz_no_such_script_9999' -- ABSENT IN TREE [mdpf] ONLY; trees NOT searched this run: advi, bd-gold, cot-gold, inf-gold\", TRUE rc=0. The unsearched list derives from _ALL_DEPLOYED_TREES minus the searched tree -- never a hand-list. Plus the enum-leg frame fix: a subpath-bearing canonicalized filter ('runners_49f/chain_49f_entrypoint') matched no S3 basename and printed 'matched 0 of 51' BESIDE a MATCHed verdict row -- a false-0 in the denominator's own frame; basename-aware matching now prints 'matched 1 of 51, 1 checked this run'.",
+   "denominator": "absence line frames searched=1 tree + names 4 unsearched; enum frame 1 of 51 corrected from a false 0 of 51",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "P3",
+   "criterion_verbatim": "io registry row for the 49f chain landed; exercised with rows returned.",
+   "method": "command",
+   "invocation": "comp-pipescript io chain_49f_entrypoint --pipeline advi",
+   "output_evidence": "Returns a manifest row, not a registry miss: 'I/O MANIFEST: chain_49f_entrypoint (chain_49f_entrypoint.py) [advi] / Group: C | Order: 290', with the tool's own honest WARN that the script uses dynamic key construction (no s3_layout constants) -- rows returned, coverage gap closed, no fabricated I/O. Registry row = pipeline key 'advi' -> build_silver_dag over data/assets/scripts/gold/runners_49f (the subdir was invisible to assets-gold's non-recursive glob). Rule-24: 'advi' adopts the EXISTING CODE_TREES label (CTO-ruled 2026-08-18) at the same pipeline-key grain as mdpf -- reuse, not re-coin.",
+   "denominator": "1 of 1 chain id resolves to rows under [advi]; TRUE rc=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "P4",
+   "criterion_verbatim": "Regression + census re-scan clean (0 new S1-S5); proof instance VALID rc=0 positional P1,P2,P3,P4.",
+   "method": "schema_validation",
+   "invocation": "census scanner full re-scan + --fixture-check; python .tools/proof-of-spec-check.py <this instance> P1,P2,P3,P4",
+   "output_evidence": "Census re-scan 237/237 corpus files: 394 hits, IDENTICAL to the post-FIX12 baseline -- 0 new S1-S5 hits from this fix. Fixture-check: dot-split->S1 PASS, grep-c->S5 PASS, rc=0. commit-gate PASS on pipeline_cli.py. Validator verbatim + TRUE rc cited in the RAVC close (measured without a pipe on this exact instance).",
+   "denominator": "237 of 237 files re-scanned, 394 == 394 baseline, 0 new",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The pre-fix reproduction IS the mutant record: the identical invocation at @59347e4d9e produced 'DEPLOYED STATUS [mdpf] ... 0 matched ... No scripts matched filter' (captured verbatim this session, pre-edit) -- proving the defect fired on the exact input before the fix and the fix is what flipped it. The 7-case resolution matrix carries the negative controls: both mdpf assets layers, three firm dirs, and the bare-id refusal all resolve UNCHANGED.",
+   "status": "FIRED-AS-EXPECTED",
+   "expected": "Pre-fix: mdpf sweep + false-ABSENT on the 49f path; post-fix: advi + MATCH; all 6 non-advi resolution cases byte-identical.",
+   "observed": "Exactly that, both directions; 7/7 matrix PASS."
+  },
+  "determinism": {
+   "description": "Resolution is pure string/prefix logic; the deployed check is a live ETag read stamped per run.",
+   "status": "STABLE",
+   "method": "Matrix re-runnable offline; live MATCH taken at ~1625Z against s3://opal-data-49financial/_code/.",
+   "observed": "Matrix identical across runs; live MATCH consistent with safe-deploy's same-day in-harness verify (the reporter's own record)."
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The enum DENOMINATOR line's '= N object(s)' label semantics (N = filter-matched, not total)",
+   "reason": "Pre-existing display shape across ALL trees (mdpf shows it too); the parenthetical carries the true total. The false-0 half WAS fixed (basename-aware filter); relabeling the display grain estate-wide is outside this TO's two defects -- observed in the RAVC, not silently widened."
+  }
+ ],
+ "surprises": [
+  "The comp-which rail correctly blocked my raw `aws s3 ls` of the _code/ prefix mid-debug -- the sanctioned rail-checked marker was used with the honest reason: the instrument under repair cannot be its own oracle.",
+  "The enum-leg false-0 ('matched 0 of 51' beside a MATCH) was a THIRD truncation-adjacent frame defect inside the same tool, found because the fixed branch's output was read rather than trusted -- fixed in-scope as part of P2's frame honesty."
+ ],
+ "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-20/pscript2_context_resolution_1610-1630Z.md",
+ "compiler_tools": [
+  {"tool": "comp-pipescript", "invocation": "deployed (standalone repro pre+post) / io --pipeline advi / absence path", "result": "PASS -- false-ABSENT -> MATCH; io rows; framed absence"},
+  {"tool": "commit-gate.sh", "invocation": "pipeline_cli.py", "result": "PASS"},
+  {"tool": "census scanner", "invocation": "full re-scan + fixture-check", "result": "PASS -- 394 == baseline, 0 new"},
+  {"tool": "proof-of-spec-check", "invocation": "this instance, P1-P4 positional", "result": "rc cited in the RAVC"}
+ ]
+}
