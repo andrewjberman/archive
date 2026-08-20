@@ -109,20 +109,23 @@
         declared-vs-delivered class in the ingest's own docstring). The ruling's INTENT
         stands (CTO 63340/63343: daily refresh at dim grain); only mechanism + executor
         move -- a SMALL DS-SIDE CODE CHANGE per Rule 13]:
+        RE-RULED CTO 63351 (correction accepted, their docstring-read owned):
         (i) TABLE_QUERY_TYPE gains "account_attributes": 4 (:108); (ii) TABLE_DATE_MODE
-        gains ("Custom", 14) (:129); (iii) SNAPSHOT_TABLES membership (:145) = a DESIGN
-        CALL AT CTO, routed -- membership gives the 0-row REJECT (a 0-row attributes day
-        is a freeze, never legit-empty) + as-of lag-1 + partial floor + retry-net, and
-        adds the table to the nightly sweep universe; execute per CTO's word, not by
-        default; (iv) the thin persisted-template JSON cites BD templateId 270650 (already
-        created by 0.6.2's one-shot, five dims zero measures) -- 0.6.2 AUTHORS the JSON
-        content and hands it to DS, DS LANDS it in the same commit as the dict entries
-        (clean SoD; no cot-bronze owned-paths ambiguity). Sentinel + silver ride free by
-        construction once the dict entry exists (:1302->:1319; the silver TABLE_CONFIG
-        consumes the same prefix). G1's one pull becomes the BOOTSTRAP of a scheduled
-        table -- the schedule law satisfied as the ruling intended.
-        ACCEPTANCE: dict entries + thin JSON landed; ONE observed nightly run carrying
-        account_attributes with its bronze sentinel emitted.
+        gains ("Custom", 14) (:129); (iii) SNAPSHOT_TABLES membership (:145) RATIFIED --
+        constructively, not defaulted: a 0-row attributes day IS a freeze by construction
+        (943 accounts do not vanish) so the 0-row REJECT is correct semantics, and joining
+        the nightly sweep universe is the promotion's ENTIRE INTENT; all four membership
+        behaviors wanted. (iv) OWNERSHIP, one commit: 0.2.0_DS lands ALL repo edits in ONE
+        commit (both dict entries + SNAPSHOT_TABLES + the thin account_attributes.json +
+        any TABLE_CONFIG touch -- Rule 13, single author line settles the unclaimed dir);
+        0.6.2 AUTHORS the thin JSON content and hands it over, and owns the BD side
+        (templateId 270650 reuse ENDORSED -- proven zero-measure five-dim, no re-mint).
+        G1 is REFRAMED: the one pull is the BOOTSTRAP of a scheduled table.
+        ACCEPTANCE -- BEHAVIORAL, file-presence form RETIRED (inert at :1261; an
+        acceptance keyed on it passes forever on a table the nightly never asks for, the
+        fail-green shape): dict entries landed + ONE OBSERVED SCHEDULED RUN landing
+        account_attributes + its bronze sentinel emitted (:1302->:1319) + DS's silver
+        TABLE_CONFIG consuming the prefix.
     G5 [DS, leg e]: gold emits BOTH aum_supervised and aum_all (the BD-style toggle) +
         the portfolio_group book split -- multi-membership handled explicitly at the join
         (a two-book account appears in both books; the FIRM total never double-counts).
