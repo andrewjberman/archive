@@ -219,6 +219,19 @@ Before commit: commit-gate. Exercise, never compile-and-assume — the runner ex
 </compiler_tools_mandate>
 
 <cross_domain_coordination>
+⛔ **THE DEPLOY FUSE IS A PROPERTY OF THE PATH, NOT OF THE WORK — `1.0.0_SA_CTO~Z` RULING 3a
+@123071c5cd, which WIDENED its own earlier bar.** The Task's `Execute` is `run_intake.cmd` **in the
+working tree**, so **EIGHT artifacts are live production, edited in place, with no deploy step**
+(DENOMINATOR: 8) — `run_intake.cmd` · `runner.py` · `intake_pass.py` · `buzz.py` · `receipt.py` ·
+`row_contract.py` · `runner_config.json` · `.claude/skills/teams-assist/teams-watch.py`.
+**A5/A6/A7 BIND ON ANY EDIT TO ANY OF THEM, FOR ANY REASON** — a typo, a docstring, a comment, a
+config value. *"The hazard is not a property of the work being done, it is a property of the file
+being saved — and the next person to edit one of these will not be someone who read this ruling."*
+⚠ **STATED BOUND, carried so nobody reads a clean result that was not obtained:** only
+`OPAL_D7_ticket_intake` was fully resolved. Three other scheduled tasks execute through
+`cmd.exe`/`wscript.exe` and their `Arguments` plane was NOT read — **their working-tree exposure is
+UNMEASURED, NOT ABSENT.**
+
 `integrations/ticketing/intake/` is this seat's own — BUT IT IS LIVE PRODUCTION INFRASTRUCTURE under
 a 5-minute schedule, so every edit is effectively a deploy the moment it hits disk. **NO W-A
 DEPENDENCY** (his ~20:50Z ruling: the predicate is `status == open` on the deployed row) — so this
