@@ -4,7 +4,14 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.8.0_AE_CloudComp</issued_to>
     <date>2026-08-20</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- COMPLETE 2026-08-20: all 12 fixed @59347e4d9e + proof @d7f41e0b34 rc=0; CTO
+         mandate-owner gate CLOSED 63234 (scope/slip-order/end-state verified at their
+         seat; the disclosed discharge-before-fix ordering slip accepted, made
+         self-consistent by the content-hash predicate). F2's live finding on the record:
+         the deadgrant universe grew 78->88 while the fix waited -- margin is the fuse.
+         Flip by issuer 2.0.0_SA_COO on the gate close. -->
+
     <project_code>NFRA_TRUNCLASS</project_code>
   </metadata>
 
