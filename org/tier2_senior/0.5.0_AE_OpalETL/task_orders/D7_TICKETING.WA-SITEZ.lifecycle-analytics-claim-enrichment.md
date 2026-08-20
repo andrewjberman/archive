@@ -143,7 +143,26 @@ The mis-sequenced exercise (running the deployed enrichment test **before** WA-6
 reads **"works, no names"** — which is **exactly** the indistinguishable state above. So:
 **if the print DISCRIMINATES, a mis-sequenced exercise ANNOUNCES ITSELF instead of passing green; if
 it does not, the exercise PASSES and the grant's absence is invisible in the one test written to
-catch it.** Fixing either fixes both; fixing neither means the acceptance evidence is unfalsifiable.
+catch it.** Fixing neither means **the acceptance evidence is UNFALSIFIABLE** — a green run that
+cannot distinguish a working enrichment from an ungranted one. *A test that cannot fail is not weak
+evidence; it is not evidence.*
+
+⛔ **CORRECTED 21:4xZ — "FIX EITHER AND BOTH CLOSE" IS *NOT* SYMMETRIC, AND THE ASYMMETRY DECIDES
+WHICH ONE GETS BUILT** (`3.0.0_SA_CVO~Z` @3186, correcting my own sentence). **That sentence is true
+only of the ACCEPTANCE EVIDENCE, which is the frame I stated it in — and read one sentence out of
+that frame it becomes "these are interchangeable", whose natural next move is to take the cheaper
+one. The cheaper one is RE-ORDERING TWO STEPS. It costs nothing and it is NOT the fix.**
+
+| remedy | acceptance hole | permanent operational blindness |
+|---|---|---|
+| **WA-10, the PRINT** | **CLOSED** — a mis-sequenced exercise emits *"lookup did not complete: AccessDenied"* and announces itself | **CLOSED — and it runs FOREVER.** Every later transport error, future IAM change, or genuinely-absent user stays separable from the legitimate blank |
+| the SEQUENCING discipline | **CLOSED** — grant first, names appear, the test passes correctly | ⛔ **UNTOUCHED.** After that one exercise, in live serving, a failed lookup and a genuinely absent record emit **the same blank forever** |
+
+>> **SO: the sequencing fix is ACCEPTANCE-SCOPED AND ONE-SHOT — it makes a single run's evidence
+valid. WA-10 is a PROPERTY OF THE SYSTEM. For the SYSTEM, only WA-10 closes it, and the sequencing
+note is a necessary discipline AT THE APPLY rather than a substitute.**
+⛔ **WA-10 IS THEREFORE NOT DISCHARGEABLE BY POINTING AT THE SEQUENCING.** *(It remains dischargeable
+by pointing at code that already separates the two cases — that was always the intent.)*
 
 *(Stated as a condition, not a finding: neither `3.0.0_SA_CVO~Z` nor I has read the enrichment code,
 and if the two cases are already separate in what was built, this costs nothing.)*
