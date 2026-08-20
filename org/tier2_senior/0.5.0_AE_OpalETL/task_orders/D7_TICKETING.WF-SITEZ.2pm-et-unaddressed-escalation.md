@@ -4,7 +4,7 @@
 <issued_to>0.5.0_AE_OpalETL~Z (engine/runner owner — the build-ladder call below is YOURS as the seat that owns the live runner). Laptop apply leg if the definition rides a Lambda field = via 0.0.0_AB_MSTR~Z ferry.</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-20T20:4xZ</issued>
-<status>staged — **BOTH design forks RULED BY ANDREW ~20:50Z @0d82b6ce91 and BOTH SHRINK THIS CUT**: no trading-calendar limb, and ADDRESSED == ACCEPTED/CLAIMED (predicate `status == open`), so **ZERO W-A DEPENDENCY — this no longer sequences behind W-A**. Remaining before build: the re-escalation cadence + WHICH THREAD, both at `1.0.0_SA_CTO~Z`; plus the two structural constraints (own state key, failure isolation) which are engineering, not questions.</status>
+<status>staged — **BOTH design forks RULED BY ANDREW ~20:50Z @0d82b6ce91 and BOTH SHRINK THIS CUT**: no trading-calendar limb, and ADDRESSED == ACCEPTED/CLAIMED (predicate `status == open`), so **ZERO W-A DEPENDENCY — this no longer sequences behind W-A**. **AND the remaining two are now RULED at the `1.0.0_SA_CTO~Z` gate @c9459dfa2f: WHICH THREAD = INTERNAL by default** (telling the CLIENT we were late is a product decision, carded to Andrew — which also dissolves the client-contradiction risk entirely), **and RE-ESCALATION = ONE DIGEST PER SWEEP**, not N messages. **NO DESIGN QUESTIONS REMAIN.** What is left is engineering: own state key, failure isolation, the cap assertion, one config.</status>
 <priority>P2</priority>
 <authority>ANDREW-DIRECT 2026-08-20 ~20:45Z, record @11d274f8c2. VERBATIM: *"we need the agent to be messaging on the thread if there is a service request that was issued prior to naive 2p ET, which has still not been addressed by 2p ET. THat is a feature that needs to be worked in."*
 ⛔ **MORATORIUM: SATISFIED BY EXPLICIT ASK — his verbatim above IS the `# andrew-asked` marker.** And note the shape is already correct by law: this is a **SCHEDULED CHECK**, which is what a production pipeline must be. It is a FEATURE he asked for, not detection machinery.</authority>
@@ -127,6 +127,45 @@ silently stop new-ticket buzzes** — the expensive failure. **Therefore: the sw
 AFTER the buzz work, inside its OWN exception boundary, with its OWN distinct exit code that can
 never mask or preempt the buzz path's.** A second duty is fine; **a shared failure domain is not.**
 
+## ⛔ BINDING DESIGN RULINGS — `1.0.0_SA_CTO~Z` gate @c9459dfa2f / @21bd23d943 (folded ~20:56Z)
+
+**(1) WHICH THREAD — RULED INTERNAL BY DEFAULT.** The escalation says *Opal has not answered* — it
+is **addressed to Opal**. Telling the CLIENT we were late is a **product decision and Andrew's**;
+carded, not assumed. ✅ **This also DISSOLVES the contradiction I flagged:** internal audience means
+the weekend ruling and the client's "next trading day" ack never meet.
+
+**(2) ONE CONFIG — the escalation reads the EXISTING `CUTOFF_ET`.** A second `14:00` literal means
+the ack promises the client one boundary while the escalation enforces another. (This is WF-5,
+now ruled rather than proposed.)
+
+**(3) ⛔ THE `limit=500` IS A CAP, NOT A TOTAL — AND THE SWEEP MUST ASSERT IT DID NOT HIT IT.**
+`1.0.0_SA_CTO~Z`'s own addition, and it is the sharpest one: at 501 open tickets the sweep
+**silently stops seeing the OLDEST** — the truncated-page class landing on **the one mechanism whose
+entire job is noticing what was missed.** A sweep that under-reads its own input fails exactly where
+it is supposed to succeed.
+
+**(4) RE-ESCALATION — ONE DIGEST PER SWEEP, NOT N MESSAGES.** A still-unaccepted ticket DOES escalate
+again (silence after day one re-creates the invisibility the feature removes), **but as ONE digest**:
+the ticket's own thread gets ONE marker; the DL gets a daily digest. **N-per-day escalations train
+the reader to ignore them — which is how a backstop dies without anyone deciding to kill it** — and
+a digest **carries its own denominator for free**, satisfying (3).
+
+## ⛔ THE COUPLING THAT CHANGES WHAT THIS TO IS (gate §7 — read this before building either W-E or W-F)
+
+**KEY THE CHECK ON THE WORK, NOT ON THE AGENT.** Two binding consequences:
+- **(i) THE ESCALATION MUST RUN INDEPENDENT OF THE AGENT WHOSE DEAFNESS IT CATCHES.** As an agent
+  duty it would inherit that deafness — **a check that fails in the same mode as the thing it checks
+  is not a check.** It runs on the **SCHEDULED RUNNER**. *(Two independent routes reached this
+  placement — engine economics and failure analysis — which is the strongest evidence it is right.)*
+- **(ii) IT MUST DELIVER ON A PATH THAT IS NOT THE DEAF SURFACE.** Detection survives deafness;
+  **delivery does not.** A channel-only escalation puts the backstop's output into the exact surface
+  whose deafness it backstops.
+
+>> **THEREFORE: THE ESCALATION DETECTS, THE EMAIL DL DELIVERS — the two mechanisms Andrew named in
+one breath are ONE mechanism.** W-F and **W-E are coupled by design, not merely adjacent**: W-E is
+not only the human first-line, it is the **deafness-independent delivery path** for W-F's output.
+Neither should be scoped as if the other were optional.
+
 ## Acceptance criteria (D7F pattern)
 - **WF-1** BUILT TO THE RULED DEFINITIONS: predicate is `status == open` (ACCEPTED/CLAIMED stops the
   escalation), **wall-clock daily, no calendar limb**, and the **re-escalation cadence** stated by
@@ -149,7 +188,7 @@ never mask or preempt the buzz path's.** A second duty is fine; **a shared failu
 - **WF-6** NO-REGRESSION: the 5-min buzz path, its cursor, and the exit contract behave unchanged;
   the escalation leg failing must NOT break the buzz leg (exercised, given the runner is live
   production infrastructure).
-- **WF-7** Proof instance VALID rc=0 POSITIONAL, ids WF-1..WF-9 (rc unpiped).
+- **WF-7** Proof instance VALID rc=0 POSITIONAL, ids WF-1..WF-11 (rc unpiped).
 - **WF-8** ⛔ **FAILURE ISOLATION, EXERCISED IN THE EXPENSIVE DIRECTION:** with the sweep leg forced
   to raise (scratch fault injection), **the buzz path still fetches, still buzzes, and still exits
   on its own contract** — the sweep's failure carries its OWN distinct exit code and neither masks
@@ -158,9 +197,18 @@ never mask or preempt the buzz path's.** A second duty is fine; **a shared failu
 - **WF-9** **OWN STATE KEY:** the sweep's `last_swept_date` (or equivalent) is separate from the
   forward-only buzz cursor, exercised across a day boundary; and the cursor's own value is
   **byte-unchanged** by a sweep pass (the two state shapes provably do not contaminate each other).
+- **WF-10** ⛔ **THE CAP ASSERTION (gate ruling 3):** every sweep pass **asserts it did not hit the
+  `limit=500` cap**, and says so in its output with the count beside the cap. Exercised in the
+  failing direction: a fixture at/over the cap must make the sweep **declare the truncation
+  loudly**, never silently sweep a partial set. *The mechanism whose job is noticing what was
+  missed must not be able to miss silently.*
+- **WF-11** **ONE DIGEST PER SWEEP (gate ruling 4):** N unaccepted tickets produce **ONE** digest
+  message carrying its own denominator, not N messages; the ticket's own thread gets ONE marker.
+  Exercised with N>1. **Delivery follows the coupling above — the deafness-independent path (W-E),
+  not the channel alone.**
 
 <proof_of_spec>
-  <expected_criteria>WF-1,WF-2,WF-3,WF-4,WF-5,WF-6,WF-7,WF-8,WF-9</expected_criteria>
+  <expected_criteria>WF-1,WF-2,WF-3,WF-4,WF-5,WF-6,WF-7,WF-8,WF-9,WF-10,WF-11</expected_criteria>
   <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WF_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
