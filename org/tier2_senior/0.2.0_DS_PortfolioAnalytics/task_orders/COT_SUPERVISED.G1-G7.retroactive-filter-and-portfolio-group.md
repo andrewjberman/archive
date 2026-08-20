@@ -80,9 +80,18 @@
         history; ACCEPTANCE = grain-collapsed tie-out vs the HAR oracle on 2026-08-19:
         $458,351,400 / $455,532,550 / $30.4M, and the four book totals. The un-collapsed
         mutant fails.
-    G4 [0.6.2 + DS, leg c]: Holding Supervised added to the daily holdings template -- the
-        forward belt converting the account-clean assumption into a DAILY-TESTED invariant
-        (a holdings row whose flag disagrees with its account's = a loud finding).
+    G4 [0.6.2 + DS, leg c] -- SCOPE PINNED 2026-08-20 ~1740Z (COO, on 0.6.2's fork 63338):
+        {Holding Supervised + Account Supervised} BOTH added to the daily holdings template
+        (BD templateId 226355, in-place update per the AUAFIX-DATEMODE precedent). This
+        TO's original one-column line was a PARAPHRASE of CTO's trace section 2, which
+        names two columns -- the ruled design source governs over the paraphrase (the
+        W15-L4 precedent, same day). Mechanism concurs: with both columns the daily
+        invariant (a holdings row whose flag disagrees with its account's = a loud
+        finding) is SELF-CONTAINED in each day's extract, and account_supervised gains a
+        daily refresh path the one-shot G1 pull cannot provide. The Portfolio-Group
+        template rider (same staleness class, surfaced by 0.6.2) is CTO's design fork,
+        routed separately -- NOT granted here; if CTO's word lands before the template
+        touch fires it folds in, else it rides a second touch.
     G5 [DS, leg e]: gold emits BOTH aum_supervised and aum_all (the BD-style toggle) +
         the portfolio_group book split.
     G6 [DS, leg f]: the today's-flags-to-history caveat stated in the served artifact's
