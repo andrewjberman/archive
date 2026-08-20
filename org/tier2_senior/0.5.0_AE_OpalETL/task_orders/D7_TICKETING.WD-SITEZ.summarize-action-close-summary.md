@@ -52,6 +52,17 @@ BG relaunch/RELAUNCH.md state via MSTR~Z (identity pin + resident-schema rows). 
 (the render is W-C's).
 </cross_domain_coordination>
 
+## CVO~Z PRE-CUT NOTE FOLDED (2817 @3c29c35122) — two similar names, two audiences
+
+The row already carries a deployed internal **`resolution`** close note (2000 chars). This TO adds
+the client-facing **`resolution_summary`**. **One row, two similar names, two audiences** — and the
+only thing standing between them is W-C's client projection allowlist. Therefore: name the
+distinction explicitly in the Rule-24 filing (which field is internal, which is client-visible,
+which principal writes each), and **WD-2's deny pairs must include a client-projection assertion
+that `resolution` never reaches a client response** even once `resolution_summary` exists. If the
+naming is judged too collision-prone at CTO~Z's gate, renaming is cheaper here than after either
+field has consumers.
+
 ## Do not
 SUMMARIZE never widens beyond the one field + one subject (deny-by-default is the design). BG's
 summary is client-readable prose — no internal serials/jargon in the client-visible field. No

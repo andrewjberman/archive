@@ -56,7 +56,15 @@ surfaces re-tested per the 08-20 Rule-24 widening).
   + a SEPARATE positive control; comp-iam treated as floor. Laptop apply: ledger opened/closed +
   tag; 0-diff.
 - **WA-7** Proof instance VALID rc=0 POSITIONAL (`python .tools/proof-of-spec-check.py <instance>
-  WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8`) — rc taken unpiped.
+  WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8,WA-9`) — rc taken unpiped.
+- **WA-9** THE CVO~Z PRE-CUT ITEMS DISCHARGED, each with its own evidence: (a) the requester-keyed
+  GSI decision RECORDED (index added + verified, or the explicit no-index decision that obligates
+  W-C's printed bound); (b) `client_updates[]` per-entry AND per-ticket caps exercised (an
+  over-cap append is refused, both directions) — with the S3 spill verifiably NOT built; (c) the
+  `_sod_block` carve-out for the client-update append decided and exercised (the requester CAN
+  append to their own ticket, and CANNOT do anything else to it — the carve-out is scoped, proven
+  by the second half); (d) the reopen/timing GRAIN resolved per CTO~Z's ruling BEFORE the Rule-24
+  record is written, and the record states which shape landed.
 - **WA-8** DAY-ONE SET exercised (the ~20:09Z amendment): a create carries `schema_version:2` +
   `client_updates[0]` == the original description; a claim/close append lands a further
   `client_updates[]` entry APPEND-ONLY (a mutant overwrite/delete of an existing entry is
@@ -66,9 +74,47 @@ surfaces re-tested per the 08-20 Rule-24 widening).
   NAMED in the schema record and verifiably NOT built.
 
 <proof_of_spec>
-  <expected_criteria>WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8</expected_criteria>
+  <expected_criteria>WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8,WA-9</expected_criteria>
   <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WA_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
+
+## CVO~Z PRE-CUT FINDINGS FOLDED (2817 @3c29c35122, ~20:33Z) — three land HERE because W-A is the table touch
+
+**(a) DECIDE THE REQUESTER-KEYED GSI AT THIS TO, NOT AT W-C (P1-1).** The table today has only
+`status-index` (hash `status`, range `created_at`, projection ALL) — **no requester-keyed index
+exists.** W-C's client "My Requests" view would therefore ride a `Limit`-bounded scan plus
+in-memory filter: the estate's own truncated-page class, except turned into a **CLIENT-FACING
+COMPLETENESS CLAIM** — a client who filed 12 can be shown 8 with nothing saying so. **W-A is the
+table touch, so the index decision belongs here.** Either add the index (with its own IAM/22a
+verification) or record the explicit decision not to, in which case W-C's WC-2c must print its
+bound. Do not leave this to be discovered at the view build.
+
+**(b) CAP `client_updates[]` AT AUTHORING TIME — the build-ladder answer to the 400KB cap
+(unknown-unknown 1).** `client_updates[]` is an append-only array authored by the **LEAST-TRUSTED
+principal** — the one field on the row whose growth Opal does not control — against the DDB 400KB
+item cap whose S3 spill is deliberately *designed-not-built*. The row **already** caps
+`description` at 8000 and `resolution` at 2000, so **a per-entry cap and a per-ticket cap make the
+spill unnecessary** rather than deferred. Cap it here; do not build spill infrastructure (rung 1:
+does this need to exist at all?).
+
+**(c) THE `_sod_block` CARVE-OUT IS A DESIGN-TIME DECISION, NOT A TEST-TIME DISCOVERY
+(unknown-unknown 2).** `_sod_block` forbids the requester from acting on their own ticket — and the
+requester is **exactly who authors a client update.** Resolve the carve-out explicitly (scoped to
+the client_updates append, nothing wider) or the append path meets a denial at test time.
+
+⚠ **(d) ROUTED TO CTO~Z, NOT RULED HERE — the reopen GRAIN collision (P1-2).**
+`reopened_count`/`reopened_at[]` are in the cut by **Andrew's own day-one word**, and I am not
+dropping a sovereign field on a review finding. But CVO~Z's mechanism is sound and must be resolved
+*before* the schema lands: there is **no writer** for them today (zero `reopen` occurrences, no
+MATRIX action, no handler), and — the load-bearing half — **they collide in grain with the
+single-valued timing fields the transition handlers set unconditionally.** After a
+reopen/reclaim/recomplete, `time_to_resolve_s` silently means **LAST CYCLE** while `reopened_count`
+says N: Rule 24(ii) same-grain, and the naming-vs-semantic class. `events[]` already records every
+transition, **so per-cycle timings are derivable** — the build-ladder answer. Also note a REOPEN
+action is itself a matrix widening whose natural actor is the requester, whom `_sod_block` forbids.
+**The schema must land coherent: either the timing fields are explicitly last-cycle by definition,
+or per-cycle timings derive from `events[]`. CTO~Z rules the shape; this TO carries the requirement
+that it is resolved before the Rule-24 record is written, never after.**
 
 ## FREE FIXTURE — the measured pre-W-A baseline (COO~Z fold ~20:28Z, from DT~Z's surprise-channel note 2809)
 

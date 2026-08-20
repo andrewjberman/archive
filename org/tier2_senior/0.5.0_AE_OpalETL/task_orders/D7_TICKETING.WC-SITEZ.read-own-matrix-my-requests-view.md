@@ -9,12 +9,40 @@
 <authority>ANDREW-DIRECT 2026-08-20 ~19:4xZ @942d4d885c — his C2/C3/C4 client experience verbatim; CTO~Z ruling 2 (CLIENT VISIBILITY): client-human gains READ-OWN — list/get filtered SERVER-SIDE to the session identity's own rows (never a client parameter); the matrix widening is authorized by his word, scoped to this step. Tenant axis stays absolute.</authority>
 </task_order>
 
+## ⛔ P0 AMENDMENT — ROW-SCOPED IS NOT FIELD-SCOPED (CVO~Z pre-cut read 2817 @3c29c35122, folded ~20:33Z)
+
+**The cut below originally specified only the ROW filter. That is one control where TWO are needed,
+and the missing one leaks internal data to clients.** `get_ticket`/`list_tickets` return
+**UNPROJECTED WHOLE ROWS** — so the day `client-human` joins LIST/GET, a client fetching *their own*
+ticket also receives `events[]` (the full internal audit trail: every internal actor's email,
+action, from/to, free-text notes), `routing{primary,secondary,visibility}`, and the internal
+`resolution` close note.
+
+**REQUIRED, and it is a build-blocking part of this TO:** an explicit **client PROJECTION ALLOWLIST
+at the RESPONSE BOUNDARY** — server-side, never left to the frontend. *A UI that does not render a
+field still shipped it over the wire.* The allowlist is derived from **Andrew's own C2/C3/C4
+enumeration** (their ticket in Open/In Progress/Completed, the claimer's name+email, the AI summary,
+plus the ticket's own identity/title/description/timestamps) — **everything not enumerated is
+internal by his framing**, so this is faithful implementation, not a narrowing.
+
+**AND the mutants must be symmetric:** the D7F-4 class asserts a client response **LACKS**
+`events[]` / `routing` / `resolution` **as positively as** it asserts it HAS the claimer identity.
+An absence that is never asserted is not tested.
+
 ## Objective
-- **Half (b) — matrix:** `client-human` gains **READ-OWN**: list/get scoped server-side to rows
-  where the requester matches the SESSION identity (filter derives from the token — never a client
-  parameter). Tenant axis absolute: a client sees ONLY their own firm's own rows. Deny-by-default
-  preserved everywhere else (svc subjects untouched; internal READ unchanged). PRD §7.3 matrix
-  amendment rides CTO~Z's gate.
+- **Half (b) — matrix + projection:** `client-human` gains **READ-OWN**: list/get scoped server-side
+  to rows where the requester matches the SESSION identity (filter derives from the token — never a
+  client parameter), **AND every client-bound response passes the projection allowlist above.**
+  Tenant axis absolute: a client sees ONLY their own firm's own rows. Deny-by-default preserved
+  everywhere else (svc subjects untouched; internal READ unchanged). PRD §7.3 matrix amendment rides
+  CTO~Z's gate.
+  ⚠ **ARCHITECTURAL FINDING TO RESOLVE AT DESIGN, NOT DISCOVER AT BUILD (CVO~Z P1-3):** `MATRIX` is
+  `action -> {principal_class}` with **no scope channel**, and `authorize()` returns `(allowed, pc)`.
+  Every grant today is unscoped, so action-only modeling has been faithful — **CLIENT READ-OWN is
+  the estate's FIRST SCOPED GRANT and the matrix cannot express it**, which would strand "own only"
+  in handler code *beside* the authorization surface instead of *in* it. That is Rule 22a's
+  `(action)` vs `(action, resource)` defect one layer up. **The return-contract change is far
+  cheaper here than after.** Decide it with CTO~Z before writing the handler.
 - **Half (a) — portal:** client "My Requests" view: Open / In Progress / Completed tabs; renders
   `claimed_by` name+email (W-A enrichment) on claimed rows and `resolution_summary` (W-D) on
   Completed. Client-facing surface: color law + /frontend-dev render-check BINDING. Route stays
@@ -27,6 +55,17 @@
 - **WC-2** MUTANT (forged filter): a client request carrying another requester's
   id/email/firm as a parameter or body field returns ONLY the session identity's rows — the forged
   input is inert (filter from token). Mutant discriminates both directions.
+- **WC-2b** **PROJECTION, ASSERTED IN BOTH DIRECTIONS (the P0):** a client-bound `get` and `list`
+  response **CONTAINS** the enumerated client fields **AND PROVABLY LACKS** `events[]`, `routing`,
+  and `resolution` — on a row where those fields are populated (an absence asserted against an empty
+  row proves nothing). Mutant: remove the projection → the internal fields appear → the test FAILS.
+  Exercised over the wire (the response body), never by reading the frontend.
+- **WC-2c** **COMPLETENESS OF THE CLIENT LIST:** the "My Requests" view either returns ALL of the
+  client's rows or **states its own bound** — no silent truncation. See the GSI decision routed to
+  W-A (CVO~Z P1-1): without a requester-keyed index this view rides a Limit-bounded scan plus
+  in-memory filter, which is the estate's truncated-page class turned into a **client-facing
+  completeness claim** (a client who filed 12 shown 8, with nothing saying so). If the index is not
+  in place, this criterion requires the printed bound.
 - **WC-3** CROSS-FIRM negative: a client token of firm X sees ZERO rows of firm Y (both
   directions); an internal token's board view unchanged (positive control).
 - **WC-4** SVC-subject regression: svc-ticket-form stays CREATE-only, svc-analyst-intake stays
@@ -40,7 +79,7 @@
   instance).
 
 <proof_of_spec>
-  <expected_criteria>WC-1,WC-2,WC-3,WC-4,WC-5,WC-6,WC-7</expected_criteria>
+  <expected_criteria>WC-1,WC-2,WC-2b,WC-2c,WC-3,WC-4,WC-5,WC-6,WC-7</expected_criteria>
   <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WC_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
