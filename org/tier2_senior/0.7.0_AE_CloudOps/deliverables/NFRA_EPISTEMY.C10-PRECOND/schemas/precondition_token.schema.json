@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "opal://nfra_epistemy/precondition_token/0.1.0-proposed",
+  "title": "Precondition_Token (NFRA_EPISTEMY Component 10, precondition-token leg)",
+  "$comment": "PROPOSED, not landed. Source of record CITED not copied: S5 org/tier1_exec/4.0.0_SA_CRO/deliverables/NFRA_EPISTEMY/S5_PROFILE_ALGEBRA_AND_MUTATION_GATEWAY_SPEC_20260820.md sec.1 (the `precondition_token` row) + PRD_EPISTEMIC_MECHANIZATION_20260820.md sec.2.6 element D. The Precondition_Token SCHEMA ACT routes through 4.0.0_SA_CRO base (registry executor, S2), with the Rule-24 record + token census in this deliverable's rule24/ dir; base's spec cert precedes 1.0.0_SA_CTO's arch gate. This file does not become a competing source of record and nothing is landed as canonical in-lane.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["target_state_digest", "read_at", "read_window_seconds"],
+  "properties": {
+    "target_state_digest": {
+      "type": ["string", "null"],
+      "$comment": "The object's ETag as the store returned it -- the ONLY value S3's If-Match evaluates, so the binding anchor even when a multipart ETag is not the object's MD5. The literal string 'ABSENT' is the first-mint sentinel (the token asserts the target does not exist; the write binds via If-None-Match:'*'). null is a REFUSED token (S6 absence semantics): a null digest is NOT 'no precondition' -- it is a token we refuse to act on.",
+      "minLength": 1
+    },
+    "read_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "$comment": "ISO-8601 UTC instant the target state was read LIVE. null -> REFUSED (the read cannot be placed in time, so the window cannot be evaluated)."
+    },
+    "read_window_seconds": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "$comment": "How long after read_at the token stays admissible. Evaluated BEFORE any store call; an out-of-window token is rejected (gate=TRANSACTION, reason=PRECONDITION_CHANGED) with no write attempted. null -> REFUSED (S6): a null window is NOT 'no window'. DECLARED by the caller, never defaulted."
+    },
+    "content_sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$",
+      "$comment": "OPTIONAL secondary content cross-check (sha256 of the read bytes). NEVER the binding anchor -- recorded only where a multipart ETag makes byte-identity ambiguous. The atomic binding is always the ETag, because there is no other value the store will condition on."
+    }
+  },
+  "$defs": {
+    "absence_semantics": {
+      "$comment": "S6 model, restated for readers: every nullable above carries a REFUSED semantic, never a permissive default. A field being null does not relax the precondition -- it makes the token inadmissible. The typed rejection reuses S5 sec.2 (gate=TRANSACTION, reason=PRECONDITION_CHANGED); the null-vs-412 discriminator rides in the rejection detail (READ_WINDOW_NULL_REFUSED / DIGEST_NULL_REFUSED / READ_AT_NULL_REFUSED / WINDOW_EXPIRED / ETAG_MISMATCH_412 / ALREADY_EXISTS_412). A distinct TRANSACTION reason for an inadmissible/malformed token (e.g. TOKEN_INADMISSIBLE) is recorded as a PROPOSAL to base in the Rule-24 record, NOT coined here (reuse-not-re-coin rider)."
+    }
+  }
+}

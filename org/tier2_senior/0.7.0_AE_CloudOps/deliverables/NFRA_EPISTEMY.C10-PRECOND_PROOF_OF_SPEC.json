@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_EPISTEMY.C10-PRECOND",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/NFRA_EPISTEMY.C10-PRECOND.precondition-token-on-a-bounded-write-class.md",
+    "group": "OTHER",
+    "vintage_commit": "2db4e7559587f3f1b80fbe87967e60cbed98158b"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_EPISTEMY.C10-PRECOND/precondition_token.py",
+      "kind": "script",
+      "commit_or_etag": "899d206ba8fb08a8a342924b607d33f9a891063a",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "BUILD-STAGING ONLY. The Precondition_Token object (P1) + put_if_precondition (P2) + Observation_Record emission (P6). Imported by nothing on any live path; awaits base spec cert -> CTO arch gate -> Andrew activation. Blob sha is the content address.",
+      "artifact_covered_by": ["P1", "P2", "P6"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_EPISTEMY.C10-PRECOND/schemas/precondition_token.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "b41b2d5c2aafef24049151aa1d8122324f606523",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "PROPOSED schema (P1), cites S5 sec.1 as source of record; the schema ACT routes through 4.0.0_SA_CRO base, not landed in-lane. Blob sha is the content address.",
+      "artifact_covered_by": ["P1"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_EPISTEMY.C10-PRECOND/exercise_precond.py",
+      "kind": "test",
+      "commit_or_etag": "1f6186a04472272be86df69a040039b2ba91f755",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The P3 real-plane exercise + P4 mutant battery. Run-and-read QA instrument; writes only to a scratch prefix and deletes what it mints. Not on any live path.",
+      "artifact_covered_by": ["P3", "P4"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_EPISTEMY.C10-PRECOND/rule24/PRECONDITION_TOKEN_RULE24_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "f691e78f79af1e0ba5309df890fe8ad76b178d26",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Rule-24 four-postulate record + token census, the required proposal companion to the schema act at base.",
+      "artifact_covered_by": ["P1"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_EPISTEMY.C10-PRECOND/WIRING_PLAN.md",
+      "kind": "doc",
+      "commit_or_etag": "e03fa03de459164a7027605cd7f8efdbea14a1af",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The P5 wiring PROPOSAL to CTO, carrying the # andrew-asked activation-marker requirement. Applies nothing.",
+      "artifact_covered_by": ["P5"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_EPISTEMY.C10-PRECOND/EXERCISE_OUTPUT.txt",
+      "kind": "doc",
+      "commit_or_etag": "03461b1710cc40eb9ec19e4a0209ab2d28d425cc",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Captured stdout of the exercise run (exit 0): the P3/P4/observation/determinism evidence, verbatim.",
+      "artifact_covered_by": ["P3", "P4", "P6"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P1",
+      "criterion_verbatim": "Precondition_Token object schema-native per S5 sec.1 precondition_token + PRD sec.2.6 element D (cited, not copied); Rule-24 record + token census through base; CTO gate; S6 absence semantics (null read_window / null digest -> REFUSED, named).",
+      "method": "schema_validation",
+      "invocation": "python -c 'import json,jsonschema; jsonschema.Draft202012Validator.check_schema(json.load(open(\"schemas/precondition_token.schema.json\")))' ; and the four-postulate record + token census at rule24/PRECONDITION_TOKEN_RULE24_RECORD.md",
+      "output_evidence": "Object {target_state_digest, read_at, read_window_seconds, content_sha256?} cites S5 sec.1 and PRD sec.2.6 element D in its $comment (not copied). S6 absence semantics NAMED: null read_window -> DETAIL_READ_WINDOW_NULL (REFUSED), null digest -> DETAIL_DIGEST_NULL (REFUSED), null read_at -> DETAIL_READ_AT_NULL (REFUSED) -- see precondition_token.py _validate_token. Rule-24 record: Axis A (digest state ETAG/ABSENT, null off-axis as S6 not-a-value) + Axis B (six detail codes, stability failure NAMED: three remedy classes under one reused reason) both held to the four postulates; token census 0/0/0 across CLAUDE.md + RULINGS.jsonl + SYSTEM_DEFINITIONS.yaml, no collision. The schema ACT routes through base (not landed in-lane); CTO gate follows base cert -- STAGED, named as a downstream gate not a local landing.",
+      "denominator": "2 enumerated value-axes (digest-state, rejection-detail), both passing 4/4 postulates; 11 new tokens censused over 3 canon surfaces = 0 collisions",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "P2",
+      "criterion_verbatim": "ATOMICALLY BOUND: put_if_precondition(bucket, key, body, token) uses the store's conditional write (If-Match <etag> for update; If-None-Match:* for first mint); the token is read inside its declared window; an out-of-window token is rejected BEFORE any call; a precondition failure returns the TYPED two-field rejection (gate=TRANSACTION, reason=PRECONDITION_CHANGED) and the object is byte-unchanged (verified by re-read, not assumed).",
+      "method": "live_read",
+      "invocation": "python exercise_precond.py --bucket opal-data-bd (scenarios P3a/P3b/P3c; see EXERCISE_OUTPUT.txt)",
+      "output_evidence": "P3a: If-Match update -> COMMITTED, re-read verifies bytes b'B-updated'. P3b: second writer moves the object under the held token -> 412 -> REJECTED (gate=TRANSACTION, reason=PRECONDITION_CHANGED, detail=ETAG_MISMATCH_412), object re-read = b'C-second-writer' (BYTE-UNCHANGED by the refused put, verified not assumed). P3c: expired-window token -> REJECTED (WINDOW_EXPIRED) with store_put_calls=0 AND store_head_calls=0 (short-circuit BEFORE any call, proven by a call-counting client proxy). Rung 4 held: no StopAndSurface, no lock table, no second store.",
+      "denominator": "3 of 3 P2 scenarios pass; the no-call assertion is 0 store calls of a counted proxy",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "P3",
+      "criterion_verbatim": "EXERCISED ON THE REAL PLANE, scratch-scoped, under the bounded class's bucket (scratch key named in the proof): (a) fresh token -> put succeeds + re-read verifies bytes; (b) a second writer changes the object under a held token -> 412 -> PRECONDITION_CHANGED, bytes unchanged; (c) window expired -> rejected with no call made; (d) first-mint succeeds once, the repeat is rejected; denominators printed; scratch objects deleted afterwards (named).",
+      "method": "live_read",
+      "invocation": "python exercise_precond.py --bucket opal-data-bd  (real plane = opal-data-bd, scratch prefix _probe/c10-precond/<uuid>.bin)",
+      "output_evidence": "P3a COMMITTED, P3b REJECTED+bytes-unchanged, P3c REJECTED+0-calls, P3d first-mint COMMITTED then repeat REJECTED (ALREADY_EXISTS_412). All four OK. Scratch keys under s3://opal-data-bd/_probe/c10-precond/ ; CLEANUP: deleted=9 failed=[] (every minted object removed). Denominators printed per scenario. Real plane = the same store/runtime/account as the bounded class's code puts, dedicated scratch prefix (the probe_ifmatch_cas.py precedent -- no litter in the live code/ namespace).",
+      "denominator": "4 of 4 real-plane scenarios pass; 9 of 9 scratch objects deleted",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "P4",
+      "criterion_verbatim": "MUTANT BATTERY, all FIRE: (m1) conditional header removed -> test (b) FAILS (the header is load-bearing); (m2) token without read_window -> REFUSED; (m3) digest computed from the wrong object -> REFUSED; (m4) a successful put that skips the verifying re-read -> the battery FAILS (the 2026-07-13 class, hung-cp-reports-success); determinism stable.",
+      "method": "test_suite",
+      "invocation": "python exercise_precond.py --bucket opal-data-bd  (P4 battery; see EXERCISE_OUTPUT.txt)",
+      "output_evidence": "FIRED: m1 conditional-header removed (the put COMMITTED and clobbered the second writer -- real code REJECTS at P3b, so the header is load-bearing). FIRED: m2 null read_window -> REJECTED/READ_WINDOW_NULL_REFUSED, object unchanged. FIRED: m3 wrong-object digest -> REJECTED/ETAG_MISMATCH_412, target unchanged. FIRED: m4 skip verifying re-read -- m4 detail printed EXPLICITLY (CTO arch condition 2): with_reread=VERIFY_FAILED (the hung-cp lie caught) | without_reread=COMMITTED (the same lie slips) | object_never_changed=True -> FIRED=True. All four mutants FIRED; the m4 line shows the re-read is demonstrably load-bearing (removing it flips a caught lie into a false commit).",
+      "denominator": "4 of 4 mutants FIRED (m1,m2,m3,m4); m4 shown on the battery output, not asserted",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "P5",
+      "criterion_verbatim": "NO ACTIVATION, STATED AND TRUE: safe-deploy's live path is byte-unchanged (cite the sha); no global write gate; nothing armed; the WIRING PLAN for the named class (call sites, token source, verify step, the # andrew-asked activation marker requirement) delivered to CTO as a PROPOSAL.",
+      "method": "diff",
+      "invocation": "git rev-parse HEAD:.tools/safe_deploy_core.py ; git status --porcelain .tools/safe_deploy_core.py .tools/safe-deploy.sh",
+      "output_evidence": "safe_deploy_core.py blob sha at HEAD = 5276193e00fd70b67bef1b33198b65fb0a97c9be; git status --porcelain returned EMPTY for both safe_deploy_core.py and safe-deploy.sh (BYTE-UNCHANGED, no working-tree edit). No global write gate installed; put_if_precondition is imported by nothing on a live path. WIRING_PLAN.md delivered as a PROPOSAL: names the 2 primitives / 5 dispatch sites, the token source (the existing key-exists-vs-404 membership guard), the verify step (the re-read subsumes the current head-object), and the # andrew-asked activation-marker requirement (no wiring lands without Andrew's word).",
+      "denominator": "N/A -- boolean: safe-deploy live path byte-identical (2 files, 0 modified)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "P6",
+      "criterion_verbatim": "Every read/acquisition emits an Observation_Record (UNKNOWN on failure); plane carried opaque until the rider hash is reported.",
+      "method": "schema_validation",
+      "invocation": "python exercise_precond.py --bucket opal-data-bd  (each head/re-read emits an Observation_Record; all validated against C1 observation_record.schema.json)",
+      "output_evidence": "C1 OBSERVATION ENVELOPE: 11/11 conformant; errors=[] (validated against org/tier1_exec/4.0.0_SA_CRO~A/deliverables/NFRA_EPISTEMY.C1-ENVELOPE/schemas/observation_record.schema.json). The honesty rule is enforced: a non-all-succeeded status (a clean 404 -> acquisition=ABSENT, or a failed head -> acquisition=UNKNOWN) forces substantive_result=UNKNOWN with a reason -- a head-object that fails is not 'no object'. plane is set to the opaque constant 's3-object' and is NEVER branched on (CTO 63744 bind-time condition), carried opaque until 4.0.0_SA_CRO~A's plane-enum rider hash is reported.",
+      "denominator": "11 of 11 emitted Observation_Records conformant to the C1 envelope",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "P7",
+      "criterion_verbatim": "Proof instance VALID rc=0 positional P1-P7; RAVC close to COO, cc 1.0.0_SA_CTO + 4.0.0_SA_CRO (spec cert).",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps/deliverables/NFRA_EPISTEMY.C10-PRECOND_PROOF_OF_SPEC.json P1,P2,P3,P4,P5,P6,P7",
+      "output_evidence": "This instance validates positionally over P1-P7; RAVC close routes to 2.0.0_SA_COO cc 1.0.0_SA_CTO + 4.0.0_SA_CRO (the spec-cert owner). [self-referential row: the validating run is recorded at RAVC time.]",
+      "denominator": "7 of 7 criteria present and PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The P4 battery mutates the four load-bearing properties of put_if_precondition, each independently: m1 removes the conditional header, m2 nulls the read_window, m3 supplies a wrong-object digest, m4 skips the verifying re-read. A control that never fires has never been tested; each mutant is exercised on the real plane and must be CAUGHT.",
+      "expected": "All four mutants FIRE (are caught). m4 is the one that matters (CTO arch condition 2): with the re-read on, a lying put is VERIFY_FAILED; with it off, the same lie is a false COMMITTED -- so the re-read is demonstrably load-bearing.",
+      "observed": "m1 FIRED (header removed -> should-REJECT became COMMIT, clobbering the second writer). m2 FIRED (null window -> READ_WINDOW_NULL_REFUSED). m3 FIRED (wrong-object digest -> ETAG_MISMATCH_412). m4 FIRED (with_reread=VERIFY_FAILED, without_reread=COMMITTED, object_never_changed=True). 4/4 FIRED; m4 shown on the printed battery output.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The exercise runs the full P3+P4 battery TWICE (independent scratch keys per run) and compares the verdict SHAPE (scenario pass booleans + mutant FIRED booleans, dropping per-run uuids/etags/timestamps).",
+      "observed": "DETERMINISM (2 runs, verdict shape): STABLE. Both runs: P3 4/4 pass, P4 4/4 fired.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The mutation-capability gateway, the profile algebra, and any LIVE wiring of the token check onto a real write path.",
+      "reason": "Outside this leg by the TO's own Rule-24 layer declaration (the layer is the precondition-token leg: P1 object, P2 bound check, P3 exercise, P4 battery, P5 no-activation + wiring plan, P6 envelope join, P7 proof). The gateway follows component 4 + the S5 arch gate; live wiring is Andrew's worded activation act (no-gates law)."
+    },
+    {
+      "item": "Base's served-key nomination as the FIRST class.",
+      "reason": "CTO ruled the deploy code-artifact put as the first class (63836: a refused code put fails LOUD toward inaction; a refused served put strands a publish). The served key is the right SECOND class and stays reachable -- the leg is built class-agnostic (bucket/key/body/token) -- as a later, separate Andrew-worded activation with its own failure-direction analysis. Not built here."
+    },
+    {
+      "item": "Editing safe_deploy_core.py to adopt put_if_precondition.",
+      "reason": "BUILD-STAGING ONLY. The live path stays byte-identical (blob sha 5276193e...); the cp -> boto3-conditional-put change is part of the ACTIVATION act, gated on Andrew's word + a probe-SUPPORTED read on the deployed runtime. The wiring PLAN describes it; it is not applied."
+    }
+  ],
+  "surprises": [
+    "The bounded class's two put primitives (deploy_file, mint_bundle) ALREADY carry a post-put head-object ETag verify today -- but it is a check-then-act AFTER an unconditional last-writer-wins put: it confirms 'my bytes landed', never 'I did not clobber a writer who landed between my read and my put'. The atomic binding closes exactly that window; the token is not adding a missing verify, it is upgrading a non-atomic one.",
+    "The PROOF_OF_SPEC phase enum has no value for a fabric-CAPABILITY build (P1-SCRIPTS..P5-DECOMMISSION are the medallion-pipeline program; INVESTIGATION/NON-BUILD-OTHER are the non-build catch-alls). NON-BUILD-OTHER was chosen as least-wrong (a medallion phase value would be a false claim), but this is a genuine build. A Rule-24 observation on the enum, no action taken.",
+    "comp-blast is scoped to the canonical kuzu resource graph (AWS + JSX + pipeline functions, 20729 nodes) and does not cover .tools/ python functions -- deploy_file/mint_bundle return NOT-FOUND there. That is a known coverage boundary, not a finding; the consumers were read from source (the 4 in-module dispatch sites)."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-20/",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name '*freshguard*' + Observation_Record/If-Match source sweeps + the token census (grep -cwo over CLAUDE.md / RULINGS.jsonl / SYSTEM_DEFINITIONS.yaml)",
+      "result": "located the C1 envelope schema + the probe_ifmatch_cas.py estate precedent; token census 0/0/0 for all 11 new tokens (no collision)"
+    },
+    {
+      "tool": "aws iam simulate-principal-policy",
+      "invocation": "--policy-source-arn arn:aws:iam::313476888478:user/Andrew_Berman --action-names s3:PutObject s3:GetObject s3:DeleteObject --resource-arns arn:aws:s3:::opal-data-bd/_probe/c10-precond/probe.json (ONE --resource-arns, Rule 22a)",
+      "result": "all three allowed on the exact scratch key (no implicitDeny); the P3 exercise is the applied-truth confirmation of the grant"
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast deploy_file / mint_bundle",
+      "result": "NOT-FOUND (graph-scoped to AWS/JSX/pipeline nodes; .tools python out of the graph's universe) -- consumers read from source instead: dispatch sites :975/:1164/:1217/:1248"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": ".tools/commit-gate.sh on precondition_token.py + exercise_precond.py",
+      "result": "All checks passed (py_compile + ds-precommit + ruff py39) for both files"
+    }
+  ]
+}
