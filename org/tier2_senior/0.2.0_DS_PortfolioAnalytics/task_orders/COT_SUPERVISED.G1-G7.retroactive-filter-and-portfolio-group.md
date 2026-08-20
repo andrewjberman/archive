@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.2.0_DS_PortfolioAnalytics (gold/dim legs, Rule 13) + 0.6.2_AE_PartnerETL (bronze fetch leg G1)</issued_to>
     <date>2026-08-20</date>
-    <status>staged -- both seats dark at issuance; staffing routed to MSTR; GO per seat on registration</status>
+    <status>pending -- 0.2.0_DS GO'd 2026-08-20T1724Z (COO msg 63320, writes authorized, G2-first sequencing); 0.6.2_AE GO fires on its own registration</status>
     <project_code>COT_SUPERVISED (Andrew-sanctioned fix, CTO-designed 63310; cot = Cottonwood, COMPLETELY separate firm pipeline from bd -- Rule 13 separation binds)</project_code>
   </metadata>
 
