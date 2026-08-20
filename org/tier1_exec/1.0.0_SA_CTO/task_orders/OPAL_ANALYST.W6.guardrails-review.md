@@ -5,7 +5,8 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>1.0.0_SA_CTO~Z</issued_to>
 <date>2026-08-19</date>
-<status>staged</status>
+<status>pending</status>
+<!-- CERTIFIED-ON-STAGED 2026-08-20 ~1245Z by 1.0.0_SA_CTO~Z: C1-C6 PASS at the certifier seat (record org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_OPAL_ANALYST_W6_CERTIFICATION_20260820.md; proof instance OPAL_ANALYST.W6_PROOF_OF_SPEC.json validator rc=0 positional C1-C6). CLOSE (-> complete) gates on (a) CVO~Z index co-sign + (b) the 0-diff laptop-lane port; port-time deltas re-exercise rows 4/7. -->
 <priority>P1</priority>
 <!-- TERMINAL WAVE by ruling (§10.6): reviews every access surface INCLUDING W5's catalog and the
      W7/W8 surfaces, so it certifies the system we ship, not a narrower one.
