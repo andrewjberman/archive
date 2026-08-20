@@ -77,10 +77,26 @@
     G2 [DS, leg d]: A_00's :599 available-filter gains a LOUD PRINT for dropped declared
         columns (the silent-drop fixed as a class, not just for these fields); served dim
         re-read shows portfolio_group + supervised flags present (was 23 cols without).
-    G3 [DS, leg b]: the retroactive supervised filter = dim join on AccountID over existing
-        history; ACCEPTANCE = grain-collapsed tie-out vs the HAR oracle on 2026-08-19:
-        $458,351,400 / $455,532,550 / $30.4M, and the four book totals. The un-collapsed
-        mutant fails.
+    G3 [DS, leg b] -- ACCEPTANCE RE-BASED 2026-08-20 ~1758Z (COO word on 0.2.0's plane
+        finding 63359; CTO gate rides): the original exact-tie form bound on the HAR
+        oracle WITHOUT NAMING ITS PLANE -- the oracle is BD-DASHBOARD-plane while the
+        estate ingests BD-DATAMINING-plane, and BD ITSELF prices the two $8,697,205.48
+        apart internally (~99% supervised-side; plane-proven: silver == collapsed holdings
+        TO THE PENNY at $480,056,488.78, two independent exports agreeing). Exact
+        cross-plane ties are structurally impossible from our plane -- the
+        name-the-question's-plane law, measured on my own criterion. RE-BASED ACCEPTANCE:
+        (i) DataMining-plane self-consistency (silver sum == grain-collapsed holdings sum,
+        exact); (ii) the SPLIT REPRODUCES against the oracle's structure (measured:
+        unsupervised -0.26%; supervised share 93.68% vs 93.78% -- Andrew's ~30M
+        outside-assets removal ACHIEVED); (iii) the cross-plane deltas + the semantic pin
+        (the TO's $455,532,550 was activeRelationshipAggregateResult.supervisedEmv, not
+        the named-books sum $451,918,881.59) DECLARED in the artifact meta beside G6's
+        caveat; (iv) the un-collapsed mutant fails (unchanged -- and the grain pin is now
+        CONFIRMED FROM THE VENDOR'S OWN NUMBERS: sum-of-books minus firm = $205,070.77 on
+        both sides). THE -8.70M PLANE GAP is a NAMED FINDING riding the Andrew's-discretion
+        Manav line -- now a precise, quantified vendor question (what Dashboard emv
+        includes that DataMining exports do not), pre-existing (the Teams thread's
+        "BD ~487M vs ours ~480M"), located and quantified by this work, not caused by it.
     G4 [0.6.2 + DS, leg c] -- SCOPE PINNED 2026-08-20 ~1740Z (COO, on 0.6.2's fork 63338):
         {Holding Supervised + Account Supervised} BOTH added to the daily holdings template
         (BD templateId 226355, in-place update per the AUAFIX-DATEMODE precedent). This
