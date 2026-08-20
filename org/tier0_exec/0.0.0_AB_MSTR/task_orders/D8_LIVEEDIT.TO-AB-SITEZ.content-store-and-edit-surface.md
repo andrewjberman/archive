@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:05Z</issued>
 <dated>HELD -- ferries when a sitez seat frees OR Andrew accepts 7 sustained (MSTR surfaces that ask with this package)</dated>
-<status>pending -- kickoff 20260819T205631Z received by 0.4.0_DE_ClientPlatform~Z; both rows sequential (TO-A author-only infra first, TO-B edit surface). Flip left UNSTAGED per owned-paths; MSTR~Z commits.</status>
+<status>complete -- CLOSED at the CTO~Z gate 2026-08-20 @00d22532ac (acceptance record CLOSE section): D8-1..9 all PASS, validator rc=0 positional; D8-5/6 live halves exercised by 0.4.0_DE_ClientPlatform~Z @981bf28609 (six live DEV runs, both identities, both modal call sites, second-session render, non-employee no-affordance, UI reset, residue 0); laptop apply leg + tag portal-content-v1.0.0 stand as the laptop's record; all three Andrew-ruled riders PASS(live). COO~Z RAVC-4 on the live halves completes validation. Flipped by 0.0.0_AB_MSTR~Z per the gate's close.</status>
 <priority>P1-program, but the LOWEST-COST DELAY of the three sitez items -- already accepted with both riders bound on their trunk (@12cf17a81d), so nothing decays while it waits</priority>
 <authority>D8_LIVE_EDIT_MODALS_PRD.md §4.1/§4.2 + §6 rows 1-2 at dispatch vintage @7416fb46d0 (CVO verdict @a9a173e7fa absorbed: PK ruled stable-identifier-never-display-name; BOTH Q3 failure directions stated; write-API precedent scoped). Placement: SITEZ per Andrew's ~19:37Z word, CTO FINAL 193804Z.</authority>
 </task_order>
