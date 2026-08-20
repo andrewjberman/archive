@@ -9,7 +9,42 @@
 <authority>ANDREW-DIRECT 2026-08-20 ~19:4xZ @942d4d885c — his O3 verbatim: "This write somehow triggers 0.0.3_BG that there is a new ticket..." ("somehow triggers" = his latitude); 1.0.0_SA_CTO~Z ruling 1 (NUDGE MODEL): DDB Streams → small notifier → BG nudge as the FAST path PLUS the 5-min Scheduled Task as the standing backstop — a production pipeline must have a SCHEDULE, event-driven is the accelerator (CLAUDE.md law). The nudge path is ANDREW-ASKED (his flow step O3/O7/O8) — not moratorium machinery.</authority>
 </task_order>
 
-## ⛔ BUILD-BLOCKING HOLE IN THIS CUT — THE LAST ARROW HAS NO MECHANISM (22:15Z)
+## ✅ RULED 22:20Z — W-B's AWS HALF IS **HELD**, AND THE BUILD-LADDER QUESTION COMES FIRST
+
+*(`1.0.0_SA_CTO~Z` @3341, reversing their own "build" of an hour earlier. **A SPEC FACT, not a
+manufactured gate — nobody signs anything**, and the four ratified config decisions stand for
+whenever it proceeds.)*
+
+**(b) RUNG 1, AND NOBODY HAD ASKED IT: DOES THE STREAM NEED TO EXIST?**
+
+| option | detection | delivery | cost |
+|---|---|---|---|
+| **shorten the schedule** | ~30s | **~30s** | **NO new surface** |
+| stream + fast local consumer | sub-second | seconds | the estate's **FIRST DDB stream** + a **new standing local process** + a **new failure domain** |
+
+>> **Whether ~30s → ~2s is worth that is a COST/BENEFIT CALL ON NEW INFRASTRUCTURE, not a technical
+one — and option (ii) must be answered BEFORE option (i) is costed.**
+
+**(c) THEN MEASURE THE WAKE HOP AND DECIDE ON NUMBERS, not architecture preference.** ⛔ **If the wake
+hop is TENS OF SECONDS, the difference between the two options DISAPPEARS INTO IT** — which is
+precisely what the measure-first step exists to reveal before anyone funds a build.
+
+**(d) CARDED TO ANDREW.** He asked for exactly this; the answer is **POSSIBLE, AND THE LAST HOP INTO
+THIS BOX IS THE PART THAT IS NOT.** The costs are his — and **the DL being authorized as the FIRST
+LINE materially lowers what this accelerator has to buy.**
+
+⚠ **TWO OF THE REASONS WERE THE GATE'S OWN, corrected by them rather than by anyone catching it:**
+**(1)** their scoping claimed *"emit to the queue this box ALREADY long-polls — ZERO NEW
+INFRASTRUCTURE"* — **FALSE: that queue is the agentbus, which is COORDINATION-ONLY by standing rule.**
+Option (i) is a NEW queue **plus** a NEW standing consumer, not a reuse. *A cost claim based on a
+resource's EXISTENCE without checking its CHARTER.* **(2)** they **cleared past their own sequencing
+ruling** — *measure the wake hop before funding a transport build* — **and the wake hop is still
+unmeasured.**
+
+⛔ **NOT HELD:** W-A's apply, W-C, W-F, the channel leg, or anything else. **W-B's AWS half alone** —
+stated so no adjacent lane infers a hold from this one.
+
+## ⛔ THE FINDING THAT PRODUCED THE HOLD — THE LAST ARROW HAS NO MECHANISM (22:15Z)
 
 *(`0.5.0_AE_OpalETL~Z` @3318, found on the pre-write check and surfaced BEFORE writing. The defect is
 mine: I cut the chain with a hop that does not exist.)*
