@@ -188,7 +188,7 @@ Neither should be scoped as if the other were optional.
 - **WF-6** NO-REGRESSION: the 5-min buzz path, its cursor, and the exit contract behave unchanged;
   the escalation leg failing must NOT break the buzz leg (exercised, given the runner is live
   production infrastructure).
-- **WF-7** Proof instance VALID rc=0 POSITIONAL, ids WF-1..WF-11 (rc unpiped).
+- **WF-7** Proof instance VALID rc=0 POSITIONAL, ids WF-1..WF-12 (rc unpiped).
 - **WF-8** ⛔ **FAILURE ISOLATION, EXERCISED IN THE EXPENSIVE DIRECTION:** with the sweep leg forced
   to raise (scratch fault injection), **the buzz path still fetches, still buzzes, and still exits
   on its own contract** — the sweep's failure carries its OWN distinct exit code and neither masks
@@ -202,13 +202,18 @@ Neither should be scoped as if the other were optional.
   failing direction: a fixture at/over the cap must make the sweep **declare the truncation
   loudly**, never silently sweep a partial set. *The mechanism whose job is noticing what was
   missed must not be able to miss silently.*
+- **WF-12** ⛔ **THE SWEEP WRITES NO TERMINAL STATE, EXERCISED:** after a sweep pass over an
+  unaccepted ticket, the row's `status` and `closure_reason` are **byte-unchanged** — the sweep
+  escalated and disposed nothing. Mutant: have the sweep set any terminal value → the test
+  FAILS. *(Opal-side ageout is not terminal, and closing on ageout would delete the very signal
+  this feature raises.)*
 - **WF-11** **ONE DIGEST PER SWEEP (gate ruling 4):** N unaccepted tickets produce **ONE** digest
   message carrying its own denominator, not N messages; the ticket's own thread gets ONE marker.
   Exercised with N>1. **Delivery follows the coupling above — the deafness-independent path (W-E),
   not the channel alone.**
 
 <proof_of_spec>
-  <expected_criteria>WF-1,WF-2,WF-3,WF-4,WF-5,WF-6,WF-7,WF-8,WF-9,WF-10,WF-11</expected_criteria>
+  <expected_criteria>WF-1,WF-2,WF-3,WF-4,WF-5,WF-6,WF-7,WF-8,WF-9,WF-10,WF-11,WF-12</expected_criteria>
   <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WF_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
@@ -241,7 +246,21 @@ touches the runner only, **no Lambda leg and no laptop apply**. Coordinate with 
 @0d82b6ce91.*
 </cross_domain_coordination>
 
+## ⛔ THE SWEEP NEVER WRITES A TERMINAL STATE (closure_reason record, ADOPTED @f834702451 21:14Z)
+
+**The ruling names THIS SWEEP as the thing that would misuse the value**, so the guard belongs in
+this TO rather than being discovered at the wiring: the value once called `expired` is **RENAMED
+`requester_unresponsive`** precisely because its **definition is requester-bound** while its old name
+invited *"whoever wires the sweep's terminal handling"* to reach for it as an **Opal-side ageout**.
+
+>> **AND OPAL-SIDE AGEOUT IS NOT TERMINAL.** A ticket nobody has accepted is **not** closed, expired,
+or disposed by the passage of time — **it is exactly the ticket this feature exists to make VISIBLE.**
+**The sweep ESCALATES; it never closes, never sets `closure_reason`, and never writes any terminal
+`status`.** Closing on ageout would delete the very signal the escalation is built to raise, and
+would do it under a value whose definition describes the requester, not us.
+
 ## Do not
+⛔ **The sweep writes NO terminal state and NO `closure_reason` — see above.**
 ⛔ **Do NOT add a trading-calendar limb — that is the "fix" his ruling exists to prevent** (WF-4's
 mutant is now the guard against it). No alarm/monitor machinery — this is a scheduled FEATURE he
 asked for. Do not let the escalation boundary and the client cutoff become two constants. Do not

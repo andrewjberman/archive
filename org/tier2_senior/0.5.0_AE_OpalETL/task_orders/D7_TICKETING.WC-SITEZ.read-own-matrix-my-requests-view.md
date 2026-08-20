@@ -82,6 +82,17 @@ An absence that is never asserted is not tested.
   recorded is not client-rendered.** ⚠ **The per-value TAB MAPPING (and which values show NO AI
   summary) belongs to the closure-reason ruling at `1.0.0_SA_CTO~Z`, NOT to this TO** — this
   criterion exists to make the omission FAIL here rather than ship. Exercised per terminal value.
+  ✅ **THE HOLD IS LIFTED — the `closure_reason` record was ADOPTED 21:14Z (@f834702451) and it
+  covers what this criterion deferred.** Two halves, and the split matters for what W-C may decide:
+  **RULED (correctness, the gate's):** a `status=closed` ticket **MUST NOT render under Completed**
+  and **MUST NOT** carry the AI resolution summary. **CARDED (product, Andrew's):** the client-facing
+  **tab LABEL**, and **whether a client sees `closure_reason` at all.** ⛔ **So W-C builds the
+  correctness half NOW and must NOT invent the label or the disclosure decision** — those are his.
+  Adopted values carry MANDATORY POINTERS that the **client projection must carry**: `superseded`
+  (name what met the need) · `duplicate` (the canonical ticket id) · `disputed` (the rejection
+  message/event id) · `requester_unresponsive` (renamed from `expired`, because the definition was
+  requester-bound while the name invited the sweep to reach for it as an **Opal-side ageout** — and
+  **Opal-side ageout is NOT terminal**).
   Related: any reason carrying a POINTER (e.g. `duplicate` → the canonical ticket) must carry it
   into the client projection — *a terminal status without its pointer is the rot with a tidier
   label*, and a client told "duplicate" with no path to where their request actually lives is that
