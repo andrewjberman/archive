@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADHOC.DORMANT2",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ADHOC.DORMANT2.consolidator-and-market-update-trio-decommission.md",
+    "group": "OTHER",
+    "vintage_commit": "2ba27f1d7fb279533e5127b74645416caf213501"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "Phase-1 invocation-denominator census (surfaced to 2.0.0_SA_COO + 1.0.0_SA_CTO + 3.0.0_SA_CVO, msg 63769-63771; carried into CVO census rows 63778)",
+      "kind": "config_data",
+      "commit_or_etag": "measurement 2026-08-20 ~2110Z",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A measurement act, not a deploy. The four 90-day materialized invocation denominators + comp-blast couplings + TF-management ground-truth; the durable home is 3.0.0_SA_CVO's census rows (their act, one-read-two-homes) + this instance. Zero deletions, zero deploys, zero ledgers (correctly -- see D4).",
+      "artifact_covered_by": [
+        "D1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D1",
+      "criterion_verbatim": "Invocation re-check at teardown time, per function, denominators printed; NONZERO -> RETAIN + one-line surface (the flip path exercised or explicitly zero).",
+      "method": "live_read",
+      "invocation": "CloudWatch AWS/Lambda Invocations Sum, 90-day window 2026-05-22->2026-08-20, daily period (86400s, retained full window), MATERIALIZED per function; NOT logs (market-update-lambda-role is implicitDeny on logs:PutLogEvents). Run at teardown time, not an aged reading. Plus comp-blast per subject (NEVER#3 + coupling) and a TF-management ground-truth (source-map + comp-find over infra/aws/terraform).",
+      "output_evidence": "opal-bd-transaction-consolidator = 0 inv/90d; market-update-exporter = 0; market-update-generator = 2 (both 2026-07-08); market-update-data-aggregator = 3 (both 2026-07-08). FLIP PATH EXERCISED: generator + data-aggregator NONZERO -> RETAIN, surfaced to COO+CVO (the discriminating control -- 2 of 4 flip, 2 do not). 07-08 hits handled per the binary rule (honored, not overridden; context that they are likely the 07-09 investigation's own diagnostic pokes surfaced as CONTEXT -- CTO 63773 recorded this as the model, with the named limitation that an invocation count counts but does not attribute, safe here because it fails toward RETAIN). Denominators carried into CVO's census rows (63778, one read two homes).",
+      "denominator": "4 of 4 functions checked, 90d materialized, per-function denominator printed; 2 flipped RETAIN",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D2",
+      "criterion_verbatim": "Consolidator torn down stop-first via TF; bd-silver-merge's next scheduled run green post-teardown.",
+      "method": "manual_read_with_citation",
+      "invocation": "TF-management ground-truth on opal-bd-transaction-consolidator + the ruling that followed.",
+      "output_evidence": "NOT EXECUTED BY RULING. The consolidator is NOT Terraform-managed (source-map verbatim: 'Has repo source but no TF resource. Legacy deploy via deploy.sh/S3 trigger setup script'; comp-find over infra/aws/terraform = 0 hits), so the TO's mandated 'Terraform, never console' teardown is structurally impossible -- there is no TF plan to enumerate. 1.0.0_SA_CTO (63773) + 3.0.0_SA_CVO (63778) both ruled LEAVE-DORMANT per Rule 25: dormant is NOT a deletion warrant; the dormancy (0 inv/90d) + named canonical successor (bd-silver-merge, 47 inv) are already on the record + census, so deletion adds nothing operationally while risking the shared bd-pipeline IAM (bd-s3-readwrite/pipeline-chain) that live bd functions use. The API-delete exception was OFFERED and explicitly REFUSED (CTO: 'delete it outside TF because it isn't in TF inverts the mandate'). No teardown; leave dormant + recorded.",
+      "denominator": "1 of 1 consolidator dispositioned (leave-dormant, no teardown)",
+      "status": "N/A-BY-CONSTRUCTION",
+      "status_reason": "The teardown act is ruled UNWARRANTED (Rule 25) and the mandated mechanism (TF) is structurally absent (legacy/non-TF). A teardown decision, if ever wanted, is a separate act with its own justification (better than tidiness) and its own mechanism (import-then-destroy, never API-delete). D2's teardown+successor-green cannot and should not be produced."
+    },
+    {
+      "criterion_id": "D3",
+      "criterion_verbatim": "Market-update trio: the 07-30 staged teardown's stop-first order executed (or the package's execution state corrected with reasons per function); same evidence shape.",
+      "method": "manual_read_with_citation",
+      "invocation": "Phase-1 invocation check + comp-blast coupling + TF-declared consumer read on the trio.",
+      "output_evidence": "NOT EXECUTED BY RULING -- RETAINED WHOLE. Two of three flip to RETAIN on the binding check (generator 2, data-aggregator 3). The trio is a coupled unit (shared market-update-lambda-role + 4 IAM policies + 2 DynamoDB tables market-updates/opal-news-trending-daily), so fragmenting it to delete the one 0-inv member (exporter) while its shared infra stays for the retained two gains nothing and strands an asymmetric state. NEVER#3 GATING READ, unresolved and binding before any trio act: infra/aws/terraform/market-overview/dynamo.tf:3-4 declares the market-updates table 'consumed by the market-overview page' -- a SERVED table with a declared page consumer; a served table is not resolved by deleting into it. 1.0.0_SA_CTO (63773) + 3.0.0_SA_CVO (63778) both ruled RETAIN THE WHOLE UNIT. Future teardown order (if ever): resolve the served-table plane (renderer/route census, not a table read) -> CTO+COO never-widen sign-off -> unit teardown.",
+      "denominator": "3 of 3 trio members dispositioned (2 RETAIN on invocation, 1 held as coupled unit); 1 NEVER#3 served-table question named as the gating read",
+      "status": "N/A-BY-CONSTRUCTION",
+      "status_reason": "The trio teardown is ruled UNWARRANTED this act (2/3 RETAIN on the binding rule + coupled-unit coherence + an unresolved NEVER#3 served-table question that binds first). The stop-first order is correctly NOT executed."
+    },
+    {
+      "criterion_id": "D4",
+      "criterion_verbatim": "Ledger(s) opened-and-closed in-session; proof instance VALID rc=0 positional D1-D4.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> D1,D2,D3,D4",
+      "output_evidence": "This instance validates rc=0 positional D1-D4. NO deploy-completion ledger was opened, and that is the CORRECT state, not a gap: a deploy-completion ledger is opened at teardown-START (deploy_ledger.py open), and ZERO teardowns occurred (both threads ruled no-teardown), so zero ledgers is exactly right -- opening a ledger for an act that is ruled not to happen would be the defect. DORMANT2 resolves as a MEASUREMENT act with zero deletions (3.0.0_SA_CVO 63778: 'the right instinct and the wrong verb; characterize + hold'). The realized value -- the dormancy census with successors named + RETAIN flips recorded -- is on the CVO census rows + this instance.",
+      "denominator": "1 proof instance, 0 ledgers (correct: 0 teardowns)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The RETAIN flip IS the discriminating control on the invocation gate: of 4 functions, exactly the 2 with nonzero invocations flip to RETAIN and the 2 with zero do not. If the gate were undiscriminating it would flip all or none; it discriminated on the actual invocation evidence.",
+      "expected": "NONZERO functions flip to RETAIN, ZERO functions do not; the flip is driven by the materialized invocation count, not by a story about what the invocations 'really were'.",
+      "observed": "generator(2)+data-aggregator(3) -> RETAIN; consolidator(0)+exporter(0) -> not flipped by the invocation gate (blocked instead by the TF-management + coupling findings). The gate discriminated on evidence; the 07-08 diagnostic-poke interpretation was surfaced as context and did NOT bend the binary rule.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The invocation check is deterministic given the fixed 90-day window and the CloudWatch metric; re-running yields the same denominators (the only moving part is the window edge, which does not change the zero/nonzero verdicts here).",
+      "observed": "Stable; the 4 denominators are a property of the window + metric, not of run order.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The teardown acts themselves (D2 consolidator, D3 trio)",
+      "reason": "Ruled UNWARRANTED by 1.0.0_SA_CTO (63773) + 3.0.0_SA_CVO (63778): leave-dormant (consolidator, Rule 25) + retain-whole (trio). The TO's 'clean TF teardown of dormant Lambdas' premise failed on the deployed reality (neither thread is TF-managed; 2/3 of the trio flip RETAIN; a NEVER#3 served-table question binds). Per CTO: a blocked mechanism is a prompt to re-ask whether the ACT was warranted, not to hunt a different mechanism -- and the answer is no. The TO wants re-scoping (COO's act) to what Phase 1 established: a measured dormancy census."
+    }
+  ],
+  "surprises": [
+    "The TO's whole premise failed on the deployed reality: BOTH threads are non-TF-managed (consolidator = legacy deploy.sh/no-TF-resource; trio = 'no repo source, code must be downloaded from AWS'), so the mandated Terraform teardown is structurally impossible for either.",
+    "2 of the 3 trio members (generator 2, data-aggregator 3) have nonzero 90-day invocations, all on a single day 2026-07-08 (~43d old, single-day, almost certainly the 07-09 remediation investigation's own diagnostic pokes) -- but the binary RETAIN rule is honored regardless: an invocation count counts, it does not attribute, and here it correctly fails toward RETAIN.",
+    "The market-updates DynamoDB table is TF-declared 'consumed by the market-overview page' (dynamo.tf:3-4) -- a NEVER#3 served-table question that binds before any trio teardown, unresolved by design (a served table is not resolved by deleting into it).",
+    "The API-delete-because-it-isn't-in-TF path was offered to CTO and explicitly refused as the WORST of three options: it both breaks the TF mandate AND sets a precedent that unmanaged resources are easier to destroy than managed ones -- making legacy drift a licence rather than a debt."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-20/ (this session's log, committed at session close)",
+  "compiler_tools": [
+    {
+      "tool": "boto3 cloudwatch get_metric_statistics + lambda get_function_configuration",
+      "invocation": "AWS/Lambda Invocations Sum, 90d materialized, per function x4",
+      "result": "the D1 denominators: 0/0/2/3; the flip path exercised"
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "per subject x4",
+      "result": "consolidator shares bd-pipeline IAM (bd-s3-readwrite/pipeline-chain); the trio shares one role + 4 policies + 2 tables (coupled unit); NEVER#3: nothing serves the consolidator, market-updates table is a trio-shared served surface"
+    },
+    {
+      "tool": "comp-find + source-map read",
+      "invocation": "TF-management ground-truth per subject",
+      "result": "consolidator = no TF resource (legacy deploy.sh); trio = no repo source; the premise-failure finding"
+    }
+  ]
+}
