@@ -139,8 +139,35 @@ The archived file's value is verbatim `"rps_actual:49financial;target_weight:inf
 ⇒ **The ETF decomposition stopped being served on 2026-08-05. The defect was retired by supersession, not by
 fix.** Building the feeder would land correct code on a consumerless path — build-ladder rung 1, debt the
 moment it lands. **CTO ruling 231610Z: do not build.** Whether the decomposition RETURNS to the served layer
-is a **product** decision (does the Model Portfolios product display ETF attribution at all), goes to Andrew
-as a framed open call, and a feeder is re-cut only on his yes.
+was a **product** decision — **AND IT IS NOW RULED.**
+
+### ⚖ ANDREW-DIRECT 2026-08-20, VERBATIM — AND IT CORRECTS MY FRAMING
+
+> *"Model Portfolios doesn't display ETF attribution and never has. Even if there was some json being
+> stored in opal-data-portal-v2/platinum/mdpf/ somewhere or similar, there was never any ETF holdings
+> displayed there, so i dont see the relevance here."*
+
+**He is right, and my error is precise: I measured the SERVED (S3) plane and drew a conclusion about the
+PRODUCT (display) plane.** The 484-object sweep above is sound about S3 and says nothing about what a user
+sees. Source-confirmed against the portal *after* his ruling:
+
+| probe | portal result |
+|---|---|
+| `attribution_basis` | **0 hits / 1,281 files** |
+| `held_by_partner` · `target_weight` · `etf_attribution` | **0 hits each** |
+| `etf_decomposition` | **1 real source hit** — `portal/src/api/portal-proxy.ts:498`, a **TypeScript interface field** declaring an artifact's shape |
+| `etf_decomposition` in components/pages | **0 hits / 291 files** — nothing renders it |
+| `DIVZ` (71 hits) | a **screener preset** (`SSCN_DIVDEF`) — an unrelated feature |
+
+**A TYPE DECLARATION IS NOT A DISPLAY.** `portal-proxy.ts:505` further records the root fetcher **KILLED
+2026-08-04** as a dead consumer.
+
+⇒ **The ETF decomposition was never a product surface** — a gold/served artifact with a type binding and no
+renderer. **So the ~$7.7mm overstatement never reached a client.** That is materially better news than "it
+stopped being served," and it retires the premise under this TO entirely rather than merely superseding its
+target.
+
+*This is the reader-plane class I already carry a memory line on (`feedback_zero_access_oracle_must_match_the_reader_plane`): a storage-plane oracle answering a display-plane question. I walked into a known class, and my `/open-calls` recommendation to restore it stood on the same wrong plane.*
 
 ---
 
@@ -176,6 +203,15 @@ fixture.** As written, the TO's gate would have produced a false STOP.
 - **`mdpf-feeder-accelerator` carries `ScheduleExpression: None`** — event-driven only, the no-schedule shape
   CLAUDE.md names. Not chased.
 - Two near-duplicate silver tables (`fact_assets` / `fact_positions`), same grain, identical content (§3).
+
+## 8b. BOTH OPEN CALLS RULED (Andrew-direct, 2026-08-20)
+
+| call | ruling (verbatim) | consequence |
+|---|---|---|
+| Does the product display ETF attribution / should it return? | *"doesn't display ETF attribution and never has… i dont see the relevance here"* | The re-cut is **DEAD, not deferred** — no feeder now, and none on a later yes. |
+| Re-value the 526 historical in-kind partitions? | *"Leave it"* | Historical partitions stay **declared-and-labelled**. No a03+b01 backfill program. My recommendation, adopted. |
+
+**Both close permanently. Neither is parked work and neither returns to my board.**
 
 ## 9. WHAT I DID NOT DO
 
