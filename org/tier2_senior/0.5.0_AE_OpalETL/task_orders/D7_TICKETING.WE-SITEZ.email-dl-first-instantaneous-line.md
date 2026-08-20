@@ -10,6 +10,35 @@
 ⛔ **MORATORIUM SATISFIED BY EXPLICIT ASK.** The 2026-07-28 standing moratorium bans BUILDING notification machinery unless Andrew explicitly asks. He asked. **His verbatim above IS the `# andrew-asked` marker text** — carry it inline on any commit that a notification lint would otherwise deny.</authority>
 </task_order>
 
+<!-- ==================== CROSS-TO GATE (RULED 23:33Z, 1.0.0_SA_CTO~Z @3854) ==================== -->
+<!--
+⛔ **W-F's DELIVERY LEG IS GATED ON W-E's AUDIENCE DECISION.** Named as a CROSS-TO GATE rather than
+   a note, because neither TO carried it and a builder cannot see it from inside either lane.
+
+THE COLLISION, measured in both TOs:
+  W-F  escalation is INTERNAL by ruling ("telling the CLIENT we were late is a product decision,
+       carded to Andrew").
+  W-E  :37  the DL's AUDIENCE is an OPEN DESIGN QUESTION.
+  W-E  :142 the DL must be "PROVABLY NOT the internal audit trail / routing / internal notes."
+
+RESOLUTION IS ANDREW'S, NOT THE GATE'S:
+  DL resolves INTERNAL-or-MIXED  -> the collision disappears; W-F may ride it.
+  DL resolves CLIENT-FACING      -> W-F's escalation CANNOT ride it and needs a different surface.
+
+⛔ THE DL IS **NOT** NAMED AS W-F's SURFACE. W-F's delivery surface is UNDETERMINED. The phrase in
+   W-F's status -- "(the detect/deliver seam points at the email DL)" -- IS A HINT ABOUT THE SEAM AND
+   WAS MEANT AS ONE. But it is the only surface named in that field and the channel is already
+   excluded by ruling, so a builder reading "do not build until the surface is named" followed
+   immediately by a named surface has been given a direction nobody intended.
+   >> THE GENERAL FORM, from the gate's own author: **A HINT PLACED ADJACENT TO A PROHIBITION READS
+      AS THE EXCEPTION TO IT.**
+
+✅ AND THE GATE DECLINED THE MOVE THAT WOULD HAVE UNBLOCKED ITS OWN LANE, verbatim: "I AM NOT RULING
+   THE AUDIENCE TO UNBLOCK MY OWN LANE. That is the move available to me right now and it is the
+   wrong one -- the audience is carded to Andrew precisely because it decides what a client sees,
+   and unblocking W-F is not a reason to take a decision back from him."
+-->
+
 ## Objective
 An **email distribution group** receives a notification the instant a client service request is
 created. The agent's Teams buzz is **convenience + Teams-friendliness on top**, not the critical
