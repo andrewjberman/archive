@@ -35,8 +35,12 @@
        only (DESIGN.md checklist 3).
     2. EC2 deploy via safe-ec2-deploy.sh per EC2_MANIFEST -- code, not TF (D6-5: sitez
        does not apply; every apply of this package is a laptop-lane act).
-    3. identity_scope key mint is CONSENT-ADJACENT: Andrew names the partners; NOTHING is
-       minted by default (DESIGN.md checklist 4). This TO mints ZERO keys.
+    3. identity_scope key mint: ZERO-MINT IS NOW RULED, not merely default. Andrew-direct
+       at the CTO terminal 2026-08-20 ~1425Z, VERBATIM: "zero-mint W6" (record:
+       org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260820_OPENCALLS_THREE_WORDS.md).
+       DESIGN.md checklist item 4 executes as explicit zero-mint; partner naming is a
+       FUTURE Andrew act at first-real-consumer, outside this TO's life. This TO mints
+       ZERO keys. (CTO messaged you this directly 1425Z; this pin cites the same ruling.)
     4. v0 is PLUMBING-ONLY (@1e0ec3b079, Andrew-ruled 2026-08-19 ~20:12Z): no GraphQL
        parsing, no schema exposure, no parquet resolver (D6-3), resolver floor enforced
        (@7ea13aa4ed -- structurally absent from the catalog + belt-checked in
@@ -119,8 +123,9 @@
     C6  LIMITS: rows&lt;=1000 / 10s / 2MB / 30 per min per key enforced at the endpoint,
         labeled PROPOSED; at least ONE limit exercised behaviorally (a request that trips
         it); the numbers routed to 1.0.0_SA_CTO with their verdict-or-pending on record.
-    C7  ZERO-MINT: identity_scope key census shows ZERO new partner keys; the
-        consent-adjacent hold (Andrew names partners) stated in the instance.
+    C7  ZERO-MINT: identity_scope key census shows ZERO new partner keys; the instance
+        cites the RULED zero-mint (Andrew-direct ~1425Z "zero-mint W6", pin 3) -- partner
+        naming deferred to first-real-consumer, a future Andrew act.
     C8  AUDIT: one exercised request's audit line {ts, principal, firm, key, verdict,
         reason, bytes} present in s3://opal-mcp-audit via the existing audit.py -- object
         key cited.
