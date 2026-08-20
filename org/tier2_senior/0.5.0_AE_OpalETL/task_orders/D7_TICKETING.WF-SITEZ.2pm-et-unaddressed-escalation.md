@@ -4,7 +4,7 @@
 <issued_to>0.5.0_AE_OpalETL~Z (engine/runner owner — the build-ladder call below is YOURS as the seat that owns the live runner). Laptop apply leg if the definition rides a Lambda field = via 0.0.0_AB_MSTR~Z ferry.</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-20T20:4xZ</issued>
-<status>staged — **BOTH design forks RULED BY ANDREW ~20:50Z @0d82b6ce91 and BOTH SHRINK THIS CUT**: no trading-calendar limb, and ADDRESSED == ACCEPTED/CLAIMED (predicate `status == open`), so **ZERO W-A DEPENDENCY — this no longer sequences behind W-A**. **AND the remaining two are now RULED at the `1.0.0_SA_CTO~Z` gate @c9459dfa2f: WHICH THREAD = INTERNAL by default** (telling the CLIENT we were late is a product decision, carded to Andrew — which also dissolves the client-contradiction risk entirely), **and RE-ESCALATION = ONE DIGEST PER SWEEP**, not N messages. **NO DESIGN QUESTIONS REMAIN.** What is left is engineering: own state key, failure isolation, the cap assertion, one config.</status>
+<status>staged — **BOTH design forks RULED BY ANDREW ~20:50Z @0d82b6ce91 and BOTH SHRINK THIS CUT**: no trading-calendar limb, and ADDRESSED == ACCEPTED/CLAIMED (predicate `status == open`), so **ZERO W-A DEPENDENCY — this no longer sequences behind W-A**. **AND the remaining two are now RULED at the `1.0.0_SA_CTO~Z` gate @c9459dfa2f: WHICH THREAD = INTERNAL by default** (telling the CLIENT we were late is a product decision, carded to Andrew — which also dissolves the client-contradiction risk entirely), **and RE-ESCALATION = ONE DIGEST PER SWEEP**, not N messages. ⛔ **RE-OPENED ~21:35Z: the DELIVERY SURFACE is no longer settled.** An Andrew ruling makes the "Opal Client Tickets" channel CLIENT-ORIGINATED ONLY, and this escalation is OPAL-originated by definition — so if "internal" meant that channel, the ruled surface is PROHIBITED. **DO NOT BUILD THE DELIVERY LEG until `1.0.0_SA_CTO~Z` re-states which surface it meant.** Everything else is unchanged and buildable: predicate, wall-clock cadence, own state key, failure isolation, the cap assertion, one config, no terminal writes.</status>
 <priority>P2</priority>
 <authority>ANDREW-DIRECT 2026-08-20 ~20:45Z, record @11d274f8c2. VERBATIM: *"we need the agent to be messaging on the thread if there is a service request that was issued prior to naive 2p ET, which has still not been addressed by 2p ET. THat is a feature that needs to be worked in."*
 ⛔ **MORATORIUM: SATISFIED BY EXPLICIT ASK — his verbatim above IS the `# andrew-asked` marker.** And note the shape is already correct by law: this is a **SCHEDULED CHECK**, which is what a production pipeline must be. It is a FEATURE he asked for, not detection machinery.</authority>
@@ -129,10 +129,33 @@ never mask or preempt the buzz path's.** A second duty is fine; **a shared failu
 
 ## ⛔ BINDING DESIGN RULINGS — `1.0.0_SA_CTO~Z` gate @c9459dfa2f / @21bd23d943 (folded ~20:56Z)
 
-**(1) WHICH THREAD — RULED INTERNAL BY DEFAULT.** The escalation says *Opal has not answered* — it
-is **addressed to Opal**. Telling the CLIENT we were late is a **product decision and Andrew's**;
-carded, not assumed. ✅ **This also DISSOLVES the contradiction I flagged:** internal audience means
-the weekend ruling and the client's "next trading day" ack never meet.
+**(1) WHICH THREAD — ⛔ RE-OPENED BY AN ANDREW RULING ~21:35Z. DO NOT BUILD THE DELIVERY SURFACE
+UNTIL `1.0.0_SA_CTO~Z` RE-STATES WHICH SURFACE "INTERNAL" MEANT.**
+
+*Previously ruled:* INTERNAL by default — the escalation says *Opal has not answered*, so it is
+**addressed to Opal**; telling the CLIENT we were late is a product decision, carded to Andrew.
+*(That reading also dissolved the weekend/ack contradiction, since an internal audience never meets
+the client's "next trading day" promise — and that part still holds.)*
+
+⛔ **THE COLLISION (surfaced by `0.5.0_AE_OpalETL~Z` 3127, adjudicated by nobody):** Andrew's ~21:35Z
+ruling makes the "Opal Client Tickets" channel **CLIENT-ORIGINATED ONLY**. **The 2p escalation is
+OPAL-ORIGINATED BY DEFINITION** — its entire content is *"Opal has not accepted this ticket"*, caused
+by **Opal's inaction**, not by any client act. **So IF "internal" meant that channel, this TO's ruled
+delivery surface is now PROHIBITED** — under either available reading of his word. If "internal"
+meant a **different** internal surface (the DL, a staff channel, his DM), nothing changes.
+**A builder reading the pre-21:35Z text would implement the prohibited surface, which is why this is
+fenced here rather than noted.**
+
+>> **THE DISCRIMINATOR THAT MAKES BOTH READINGS COHERENT IS *ORIGIN*, NOT *AUTHORSHIP*.** Every post
+in that channel is authored by an agent — no client has Teams access — so a literal
+"no-agent-posts" reading would take **the new-ticket buzz itself** with it, and the channel was
+created for exactly those buzzes. Under the origin reading, the buzz is not merely permitted, **it is
+the channel's purpose**, because a *client's form submission caused it*.
+
+✅ **AND THE SEAM ALREADY POINTS AT THE ANSWER — the surface Andrew just closed is not the one the
+design wanted.** The gate's own detect/deliver split puts **DELIVERY on the email DL**: the
+escalation **DETECTS on the runner and DELIVERS on the DL**, which satisfies the new ruling **for
+free**. W-E and W-F being one mechanism is what makes this cost nothing.
 
 **(2) ONE CONFIG — the escalation reads the EXISTING `CUTOFF_ET`.** A second `14:00` literal means
 the ack promises the client one boundary while the escalation enforces another. (This is WF-5,
