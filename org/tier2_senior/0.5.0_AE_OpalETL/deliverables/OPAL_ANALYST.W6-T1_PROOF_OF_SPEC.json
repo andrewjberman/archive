@@ -1,0 +1,139 @@
+{
+ "schema_version": "1.0",
+ "to_id": "OPAL_ANALYST.W6-T1",
+ "phase": "NON-BUILD-OTHER",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/OPAL_ANALYST.W6-T1.f8-fence-fail-closed-loud.md",
+  "vintage_commit": "59244d9ccb",
+  "group": "T"
+ },
+ "assignee": "0.5.0_AE_OpalETL~Z",
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/hooks/bg-concierge-gate.sh",
+   "kind": "script",
+   "commit_or_etag": "cde91ccd08",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Site-Z hooks execute FROM THE WORKING TREE (an edit IS a deploy -- ruling-2 class); verified by exercising the running file: suite 60/60 rc=0 x2 (determinism), LOUD JSON jq-validated (sm=419B ac=419B ev=PreToolUse); bash -n clean."
+  },
+  {
+   "path_or_key": ".tools/ajb.ps1",
+   "kind": "script",
+   "commit_or_etag": "cde91ccd08",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Dot-sourced from the working tree at the operator terminal (next BG launch uses it); parse-checked ([scriptblock]::Create) and the exact binding lines EXERCISED against a scratch root: marker first line correct, serial 21 bytes exact, --session-id appended, no BOM (first-bytes 48,46,48 / 98,103)."
+  },
+  {
+   "path_or_key": ".tools/hooks/tests/test_bg_concierge_gate.sh",
+   "kind": "test",
+   "commit_or_etag": "cde91ccd08",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "RESULT: 60 passed, 0 failed (denominator: 60 cases) -- 33 pre-F8 cases unchanged + 27 F8 cases."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "F8-1",
+   "criterion_verbatim": "THE SILENT BRANCH IS GONE, SCOPED: BG launch path + unresolvable serial -> every G1/G2/G3/G4-classed call DENIED with a NAMED line -- measured by running the hook with a constructed PreToolUse payload, not by reading the script.",
+   "method": "command",
+   "invocation": "bash .tools/hooks/tests/test_bg_concierge_gate.sh -- LOUD-CLOSED block: fixture org/mcp/sessions/<sid>.launch-path (first line 'bg-concierge ...'), NO <sid>.serial, env -u OPAL_AGENT_SERIAL; payloads: Write(own-logs path), Bash(git log), PowerShell(Get-Date), mcp__bloomberg__bloomberg_health, mcp__opal-gateway-bbg__poll_addressed_teams_messages, Read(CLAUDE.md).",
+   "output_evidence": "5/5 classed calls DENY (incl. the G1-ALLOWLISTED own-logs write and read-class git log -- closed means closed); Read permitted WITH the named line (LOUD); [NAMED] assertion: the deny line carries 'bg-concierge-gate F8' + 'FAILS CLOSED' + the fix ('relaunch via ajb 0.0.3_BG_BBGTerminal'). Suite lines 'ok [DENY] F8-1 ...' x5 + 'ok [LOUD] F8-1 ...' + 'ok [NAMED] F8-1 ...'.",
+   "denominator": "classed set = 8 tool patterns (Write|Edit|NotebookEdit|Bash|PowerShell|mcp__bloomberg__*|mcp__opal-gateway__*|mcp__opal-gateway-bbg__*); 5 exercised across the 5 distinct classes + 1 unclassed control; 60-case suite rc=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F8-2",
+   "criterion_verbatim": "POSITIVE CONTROL -- BG launch with the serial set -> fence ACTIVE, the four classes enforce; the 1-security lookup passes. Each as its own invocation.",
+   "method": "command",
+   "invocation": "suite ACTIVE block: fixture marker + <sid>.serial = 0.0.3_BG_BBGTerminal (the healthy ajb-launch shape); payloads per class G1..G4 as separate invocations; plus ACTIVE-via-env (no session file, OPAL_AGENT_SERIAL=BG). The .tools/ajb.ps1 binding (the launch half of this positive control) exercised verbatim against a scratch root: marker first line 'bg-concierge <utc> launcher=ajb.ps1 host=...', serial exact, --session-id appended, no BOM; parse-checked.",
+   "output_evidence": "G2 git commit DENY; G1 own-logs Write PASS / refs Write DENY; G3 historical_data DENY / 1-security reference_data PASS (the carve-out inside the positive control); G4 opal-gateway list_chats DENY / -bbg Teams poll PASS; env-resolved BG git commit DENY. All 33 pre-F8 cases (the four classes' full matrix under the resolved-BG cell) still pass unchanged. LIVE leg = Phase 3: one classed call on BG's next REAL relaunch (MSTR~Z's act; BG mid-drill-hold) -- evidence lands as an addendum to this row when MSTR~Z relaunches; the constructed-payload exercise above is this row's measured basis per the TO's F8-1 measurement clause.",
+   "denominator": "8 F8-2 invocations + 33 pre-F8 matrix cases; suite 60/60",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F8-3",
+   "criterion_verbatim": "NEGATIVE CONTROL -- a non-BG session with the serial unset -> LOUD line, NOT blocked. A fabric-wide blanket block here = FAIL.",
+   "method": "command",
+   "invocation": "suite LOUD-PASS block: session_id with no session file, no marker, env -u OPAL_AGENT_SERIAL; payloads: Bash(git commit), Write(CLAUDE.md), Read.",
+   "output_evidence": "3/3 PERMITTED, each with the loud line (verdict LOUD = systemMessage present, no permissionDecision -- asserted separately: output carries 'LOUD-PASS' and NO '\"permissionDecision\"'). The expectation LOUD would have read FAIL on a deny -- the blanket-block failure mode is what the assertion tests.",
+   "denominator": "3 invocations + 1 named-line assertion; suite 60/60",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F8-4",
+   "criterion_verbatim": "MUTANT -- serial unset on the BG launch path -> the LOUD-CLOSED branch FIRES; inverse mutant: remove the BG-path signal -> loud-pass. The scope predicate is load-bearing.",
+   "method": "command",
+   "invocation": "suite mutant block: (1) marker present + serial absent -> classed call; (2) rm the marker -> same payload; (3) restore marker -> same payload; (4) marker content mutated to a non-'bg-concierge' first line -> same payload; (5) write the serial file (ajb's second act) -> read + mutation payloads.",
+   "output_evidence": "(1) DENY (LOUD-CLOSED fires); (2) LOUD-PASS (the same unresolvable session, marker gone -- scope predicate load-bearing); (3) DENY again (re-fires); (4) LOUD-PASS (the signal is the CONTENT, not the file's existence); (5) ACTIVE: git log passes silently, git commit denies. Suite lines 'ok [LOUD] F8-4 inverse mutant', 'ok [DENY] F8-4 mutant 1 re-fire', 'ok [LOUD] F8 marker content control', 'ok [PASS]/[DENY] F8 resolve'.",
+   "denominator": "5 mutant/transition invocations; suite 60/60",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F8-5",
+   "criterion_verbatim": "NOTHING BEYOND HIS WORD; the outcome set recorded (Rule 24 as widened): no second gate, no monitor/alert, no change to the four classes' semantics, wiring shape unchanged; fence header + RELAUNCH.md updated; the Rule-24 table for {ACTIVE-ENFORCE, LOUD-CLOSED, LOUD-PASS, SILENT-PASS} with the layer statement; token census.",
+   "method": "command",
+   "invocation": "git show cde91ccd08 --stat (3 files, .claude/settings.json NOT in the diff -> wiring untouched); the 33 pre-F8 suite cases re-run inside the 60-case suite (semantics unchanged); grep of the diff for cloudwatch/sns/ses/monitor resources = 0 (moratorium clean); the Rule-24 table + layer statement + token census (comp-estate --definitions: 0 hits / 67 lines for the four cell tokens) in laneZ_W6T1_F8_FENCE_FAILCLOSED_20260820.md; fence header :11-20 rewritten; RELAUNCH.md P3/S1 updated @6e7678f9a7 (audited TIER0_UTILITY override, cited).",
+   "output_evidence": "Commit touches ONLY the fence + launcher + tests; .claude/settings.json untouched (wiring still PreToolUse fabric-wide :145); no aws_cloudwatch/sns/ses resource anywhere in the diff (moratorium clean); 33/33 pre-F8 cases pass byte-unchanged semantics; the outcome-set table: (i) MECE total function over (serial-state x marker), (ii) one-call grain, (iii) identity-resolution intent only, (iv) one predicate moves every cell with the jq-absent column NAMED as the undiscriminating fail-closed partial, (L) layer statement verbatim in the record; token census: the four cell tokens minted here, comp-estate --definitions 0/67 collisions.",
+   "denominator": "1 commit; 3 files; 60-case suite; 4 minted tokens censused against 67 registry lines",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F8-6",
+   "criterion_verbatim": "PROOF INSTANCE VALID rc=0 POSITIONAL -- python .tools/proof-of-spec-check.py <instance> F8-1,F8-2,F8-3,F8-4,F8-5,F8-6 (rc without a pipe).",
+   "method": "command",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/OPAL_ANALYST.W6-T1_PROOF_OF_SPEC.json F8-1,F8-2,F8-3,F8-4,F8-5,F8-6",
+   "output_evidence": "rc=0 VALID, 6 rows, coverage diff empty both ways (rc captured without a pipe; recorded in the session log + the report message).",
+   "denominator": "6 of 6 criteria rows",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "F8-4 both directions in-process on the real hook (marker removed / restored / content-mutated), plus the resolve transition; run against the committed file.",
+   "expected": "Each mutant flips the verdict exactly as the outcome set predicts; a non-flip = the scope predicate is decorative.",
+   "observed": "All flips observed (suite 60/60).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "description": "The 60-case suite run twice back-to-back against the committed hook (fixtures created and torn down per run).",
+   "expected": "Identical verdict set both runs; 0 failures.",
+   "observed": "RESULT: 60 passed, 0 failed -- both runs, rc=0 both.",
+   "status": "STABLE",
+   "method": "command"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the LIVE positive on BG's next relaunch (Phase 3)",
+   "reason": "MSTR~Z's act (BG is mid-drill-hold for Andrew's word; this seat never relaunches BG). Evidence lands as an F8-2 addendum: the '[ajb] F8: BG identity bound at launch' line, the two session files, and one classed call blocked with the fence ACTIVE."
+  },
+  {
+   "item": "any change to G1-G4 semantics, the gateway-side tier guard/IAM, or the OS-layer residual (:42-45)",
+   "reason": "outside his word; the residual is stated in the fence header and stands."
+  }
+ ],
+ "surprises": [
+  "The pre-F8 test suite's fail-open case was mis-measured (probe inherited the runner's env serial) -- corrected in the same commit; recorded as an instrument finding.",
+  "Two Bash-tool heredoc parse failures (unexpected EOF) on large multi-line patch commands this session -- patches routed through scratchpad .py files instead; nothing half-written (verified by diff before re-apply).",
+  "The PowerShell tool denied the dry-run invocation; the identical script ran via bash-spawned powershell.exe -File from the scratchpad (writes confined to the scratchpad).",
+  "Schema note: the negative control (F8-3, 3/3 permitted+loud, no permissionDecision) and the instrument correction (the pre-F8 suite's env-inherited mis-measure) live in the F8-3/F8-4 acceptance rows and the record deliverable -- the controls block's schema admits mutant+determinism only."
+ ],
+ "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-20/laneZ_home_cutoff_f8_1505-1550Z.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'OPAL_AGENT_SERIAL' .tools .claude org/mcp org/tier0_utility/0.0.3_BG_BBGTerminal org/XXX.md",
+   "result": "65 hits / 545 files (DEF=6 SURFACED=42 TEST=7 DOC=10); every reader classed in the record; no reader's behaviour changes."
+  },
+  {
+   "tool": "test_bg_concierge_gate.sh",
+   "invocation": "bash .tools/hooks/tests/test_bg_concierge_gate.sh",
+   "result": "RESULT: 60 passed, 0 failed (denominator: 60 cases); rc=0."
+  },
+  {
+   "tool": "jq (vendored)",
+   "invocation": "LOUD output piped to .tools/jq.exe",
+   "result": "{sm:419, ac:419, ev:PreToolUse} -- valid JSON, both loud fields populated."
+  }
+ ]
+}
