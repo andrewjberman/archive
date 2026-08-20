@@ -1,3 +1,74 @@
+# TO D7_TICKETING.WB-SITEZ — Ticket Lifecycle v2 W-B: nudge SEMANTICS + a faster backstop — **THE STREAM IS DROPPED**
+
+> ⛔ **RE-CUT 22:2xZ. DO NOT BUILD THE DDB STREAM. THE TRANSPORT IS DROPPED; THE LANE IS NOT.**
+> *(`1.0.0_SA_CTO~Z` @3388 / @d7ca0bcd39, engineering recommendation on the numbers: **option (ii)**.
+> Their words: **"W-B's AWS half stays held and on this recommendation SHOULD NOT BE BUILT AT ALL —
+> which is a better outcome than building it correctly"**, and **"2.0.0_SA_COO~Z, that is a RE-CUT
+> rather than a cancellation."**)*
+>
+> **EVERYTHING BELOW THE RE-CUT SECTION IS THE SUPERSEDED STREAM CUT, KEPT AS THE RECORD.** It is
+> **NOT AN INSTRUCTION** and nothing in it is to be built. *It is retained rather than deleted
+> because the reasoning that killed it is the deliverable — but a stale task order is an
+> EXECUTABLE INSTRUCTION sitting in a live builder's lane, so the prohibition goes at the TOP,
+> not in a footnote at the bottom.*
+
+## ✅ THE RE-CUT — WHAT W-B IS NOW
+
+**KEPT: the NUDGE SEMANTICS.** What a nudge means, what it carries, what the consumer does with it,
+and the idempotency / one-digest discipline. That work was never about the transport and survives
+it intact.
+
+**DROPPED: the TRANSPORT.** No DynamoDB stream, no notifier Lambda, no new standing local consumer,
+no new AWS-to-local hop. **Rung 1 of the build ladder is ANSWERED: the stream does not need to
+exist for this requirement.**
+
+**THE REPLACEMENT IS A SCHEDULE CHANGE ON THE EXISTING RUNNER** — no new surface at all.
+
+⛔ **BUT THE FLOOR IS UNESTABLISHED, AND THE QUOTED "~30s" MAY NOT BE REACHABLE ON THIS BOX.**
+**MEASURED 2026-08-20 ~22:27Z** (positive control on the retrieval — the raw task query returned
+1,570 chars; **two earlier greps came back EMPTY and were NOT read as answers**):
+
+| fact | value | grounding |
+|---|---|---|
+| live `OPAL_D7_ticket_intake` repetition | `<Interval>PT5M</Interval>` | **MEASURED** (task XML) |
+| `schtasks /Create /RI` unit | **"the repetition interval in MINUTES"** | **MEASURED** (help text) |
+| whether the ENGINE honors a sub-minute `PT30S` | **UNMEASURED** | — |
+
+>> **SO ONE MINUTE IS ESTABLISHED-REACHABLE AND THIRTY SECONDS IS UNESTABLISHED — NOT REFUTED.**
+The XML schema is ISO-8601 and can *write* `PT30S`; whether Task Scheduler honors it is a different
+question from whether the write succeeds.
+
+**WB-R1 — SETTLE THE FLOOR ON THE REAL SURFACE BEFORE QUOTING A NUMBER.** Register a scratch task
+carrying `<Interval>PT30S</Interval>`, then **READ THE REGISTERED TASK BACK.** ⛔ **THE WRITE
+SUCCEEDING IS NOT THE ENGINE HONORING IT — a silent round-up to `PT1M` is indistinguishable from
+success at the call site.** Minutes of work, no build, and it decides which number is real.
+
+**WHY THE FLOOR IS NOT A DETAIL — it changes the SENTENCE, not just the digit:**
+
+| floor | expected detect | + 14.13s wake | stream's marginal benefit |
+|---|---|---|---|
+| today, `PT5M` | ~150s | **~164s** | — |
+| **`PT1M`** (established) | ~30s | **~44s** | **~28s — TWICE the wake hop** |
+| `PT30S` (unestablished) | ~15s | **~29s** | ~13s — ≈ the wake hop |
+
+>> ⛔ **"THE STREAM'S MARGINAL BENEFIT IS APPROXIMATELY EQUAL TO THE WAKE HOP IT CANNOT TOUCH" IS
+TRUE AT 30s AND FALSE AT 1 MINUTE.** That sentence is the framing that makes the sovereign card
+answerable in one word, and it is the single line that does not survive a 60s floor.
+>> **THE ORDERING AND THE RECOMMENDATION HOLD EITHER WAY** — ~4:1 still favours the schedule change
+decisively, and ~28s is still a thin return on the estate's first DDB stream plus a new standing
+process. **What is fragile is a NUMBER and a SENTENCE, not the decision.**
+
+⚠ **THE FOUR RATIFIED CONFIG DECISIONS WERE STREAM CONFIGURATION.** Their subject is dropped, so
+they are **MOOT-BY-SUBJECT, not overturned** — recorded so nobody reads a surviving ratification as
+a surviving instruction, and so they remain available intact if the stream is ever revisited.
+
+**NOT FORECLOSED:** option (ii) does not prevent the stream later. If Andrew wants the last ~13–28
+seconds, the cut is redone then — with the wake hop already measured underneath it.
+
+---
+
+# ⬇ SUPERSEDED — THE ORIGINAL STREAM CUT. RECORD ONLY. **NOT AN INSTRUCTION.** ⬇
+
 # TO D7_TICKETING.WB-SITEZ — Ticket Lifecycle v2 W-B: DDB-Streams nudge ACCELERATOR on top of the scheduled backstop
 
 <task_order id="D7_TICKETING.WB-SITEZ" project="OPAL_TICKET">
