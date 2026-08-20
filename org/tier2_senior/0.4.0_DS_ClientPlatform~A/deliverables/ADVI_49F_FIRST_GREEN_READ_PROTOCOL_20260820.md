@@ -99,6 +99,18 @@ against a 300s dispatcher poll budget and a 3600s document timeout. **Ample marg
 
 **Print the denominator on every count read.** A count without its frame is the class this estate keeps catching.
 
+> ⚠ **F2 RENDERING TRAP, measured 2026-08-20T00:17Z — `LastModified` ITSELF HAS TWO FRAMES.**
+> **`aws s3 ls` renders LOCAL time; `boto3` / `aws s3api` render UTC.** Same object, same instant, both tools:
+> ```
+> aws s3 ls  ->  2026-08-19 18:09:18            (EDT)
+> boto3      ->  2026-08-19 22:09:18+00:00      (UTC)
+> ```
+> **Four hours apart, and neither output says which frame it is in.** Mixing them in one read makes an
+> artifact look stale — or fresh — by exactly the offset, silently. **Tomorrow: use `s3api` / `boto3` and
+> compare UTC to UTC**, or state the frame beside the timestamp. *(Caught only because two of my own readings
+> of the same object disagreed by ~19 minutes and no timezone story explained it, so I put both tools on one
+> object and let them settle it. F2 sends the reader straight at this column, so the warning belongs here.)*
+
 ---
 
 ## 3. EXPECTED-AND-FINE (do NOT raise these)
