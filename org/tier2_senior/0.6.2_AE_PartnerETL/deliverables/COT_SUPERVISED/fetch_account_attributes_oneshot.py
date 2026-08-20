@@ -94,9 +94,14 @@ def pull(asof: str) -> bytes:
         mode = "zero-measure" if not with_measure else "FALLBACK +%s (extra column, disclosed)" % FALLBACK_MEASURE
         print("attempt: %s" % mode, flush=True)
         try:
+            # NOTE (measured post-run): run_query's return is the RUN id, NOT the created
+            # template's id -- the 2026-08-19 execution returned run=270650 while the roster
+            # shows the persisted template minted as 270648 ("opal_cot_account_attributes_
+            # oneshot", qt4, five dims, zero measures). 270648 is the reusable id the G4b
+            # thin envelope cites; do not quote a run id as a template id.
             run_id, guid = cbi.run_query(token, tpl)
-            print("  run=%s guid=%s templateId recorded in %s -- polling"
-                  % (run_id, guid, TEMPLATE_EVIDENCE.name), flush=True)
+            print("  run=%s guid=%s (RUN id, not the template id -- see NOTE) -- polling"
+                  % (run_id, guid), flush=True)
             cbi.poll_status(token, run_id)
             xlsx = cbi.download_export(cookie, guid)
         except (RuntimeError, TimeoutError) as exc:
