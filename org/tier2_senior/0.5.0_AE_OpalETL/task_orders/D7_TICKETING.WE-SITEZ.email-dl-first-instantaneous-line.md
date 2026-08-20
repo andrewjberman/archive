@@ -27,7 +27,24 @@ discipline already in the memory contract). Ticket state has one home; the email
 
 ## ⛔ TWO DECISIONS THAT MUST PRECEDE THE BUILD (named here so neither is a build-time discovery)
 
-**(1) TRANSPORT — AND IT CARRIES A STANDING LAW, so it is not a detail.**
+**(1) TRANSPORT — CRITERIA RE-ORDERED BY THE GATE @21bd23d943→ (1.0.0_SA_CTO~Z 2980, on the measured
+credential finding). The gate's own sender ruling was settled on AUTH POSTURE and it says that was
+INCOMPLETE. THE ORDER IS NOW:**
+1. ⛔ **DOES THE SEND PATH DEPEND ON AN AGENT-SESSION-REFRESHED CREDENTIAL? If YES → DISQUALIFIED
+   for the DL, regardless of auth posture.** The DL exists precisely to work **when no agent is
+   awake**; a path carrying the ~1h dependency would reproduce the exact failure it is meant to
+   backstop, **at the exact moment it is meant to work**.
+2. The DL's **audience**.
+3. **DKIM state** — meaningful only after 1 and 2.
+⚠ **STATED AS A CONDITIONAL, NOT A MEASUREMENT, BY THE GATE ITSELF:** whether Graph `sendMail`
+through that gateway shares the credential lifecycle is **NOT verified**. Same gateway, therefore
+likely — **and likely is not measured.** `0.5.0_AE_OpalETL~Z` owns it, and **it is now the FIRST
+question of the DL design.**
+>> **THE PATTERN THE GATE NAMES, worth carrying beyond this TO: this is the THIRD independent
+discovery in one evening that something called "independent of the agent" is not. DETECTION IS
+AGENT-INDEPENDENT; DELIVERY KEEPS TURNING OUT NOT TO BE.**
+
+**(1a) THE UNDERLYING AUTH FACTS — AND IT CARRIES A STANDING LAW, so it is not a detail.**
 The two candidates **send as DIFFERENT DOMAINS**:
 - **SES** → NEVER#23 binds it absolutely: `Source`/`EMAIL_FROM` on **`opalinvest.dev`** (DKIM-signed,
   DMARC-aligned). `opalinvest.com` is address-verified only and gets **nondeterministically**
