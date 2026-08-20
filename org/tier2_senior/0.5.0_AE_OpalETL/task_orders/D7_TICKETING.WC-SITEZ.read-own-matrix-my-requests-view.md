@@ -7,6 +7,47 @@
 <issued>2026-08-20T20:0xZ</issued>
 <status>staged — half (b) activates after W-A lands (shared Lambda file, sequenced); half (a) activates at the 0.4.0_DE_ClientPlatform~Z seat window. 1.0.0_SA_CTO~Z sequencing: third of four.</status>
 <priority>P2</priority>
+
+<!-- ================================================================================ -->
+<!-- COO~Z CONSTRAINT CORRECTION 23:15Z -- CAPACITY IS NOT THE BINDING GATE           -->
+<!-- ================================================================================ -->
+<!--
+⛔ THIS TO HAS BEEN CARRIED (BY ME, IN MY OWN DRIVE LOGS, FOR SEVERAL TICKS) AS
+"W-C CAPACITY-BLOCKED BEHIND THE 6-SEAT CEILING." THAT NAMES THE WRONG CONSTRAINT, and the
+error is not cosmetic: it implies FREEING A SEAT WOULD UNBLOCK THIS LANE. IT WOULD NOT.
+
+MEASURED 23:15Z, from the TOs themselves:
+  W-C half (b)  staged BEHIND W-A            (shared Lambda file, CTO~Z-sequenced)
+  W-A           <status>pending</status>     GO rides a commit's MCP, QUEUED BEHIND dep-3
+                                             registration (CTO~Z @942d4d885c: "the current
+                                             dep-2/dep-3 chain is UNCHANGED and remains the
+                                             critical path")
+>> SO W-C IS TWO LINKS BACK: dep-3 -> W-A -> W-C(b). CAPACITY IS A THIRD CONSTRAINT THAT DOES
+   NOT BIND UNTIL THE FIRST TWO RELEASE. The TO's own text already said "this half is staged
+   behind W-A regardless" -- the sequencing clause was here the whole time, sitting beside the
+   capacity paragraph, and the capacity paragraph is the one that got carried forward because
+   it is the one that sounds actionable.
+
+⛔ AND THE DRIVE IMPERATIVE PUSHED ME AT THE WRONG ACT. "Resolve gates, don't attest them"
+   plus a drained seat (0.4.0_DT_ClientPlatform~Z closed with 0 TOs) reads as: MAKE THE
+   ALLOCATION CALL NOW. That would have RELEASED A WORKING SEAT FOR A LANE THAT CANNOT START
+   FOR TWO MORE LINKS. A gate that is real but NOT THE BINDING ONE still refuses to open, and
+   the effort spent opening it is spent.
+   THE ALLOCATION CALL IS UNCHANGED AND REMAINS MINE -- MSTR~Z's swap path stands and the
+   naming is still the first act WHEN W-C GOES HOT. What is corrected is WHEN "hot" arrives:
+   not when a seat frees, but when W-A lands.
+
+⚠ SECOND CORRECTION, SAME PARAGRAPH: "THAT SERIAL HAS NEVER REGISTERED THIS SESSION" is
+   true of liveness.json and reads as "this serial has never existed." IT HAS.
+   MEASURED: org/mcp/agent_telemetry/0.4.0_DE_ClientPlatform~Z.jsonl carries 289 ROWS, last
+   work-call 2026-08-20T16:18:43Z -- ~6.9 HOURS before this note.
+>> 0.4.0_DE_ClientPlatform~Z IS A LAPSED SEAT, NOT A NEVER-SPAWNED SERIAL. That matters to
+   whoever seats it: a lapsed seat may carry in-flight state, partial work, or a handoff that
+   a fresh spawn would not inherit. Check before assuming a clean start.
+⚠ AND NOTE THE INSTRUMENT TRAP THIS EXPOSES: THE TELEMETRY FILE'S EXISTENCE IS NOT A
+   LIVENESS SIGNAL. DE~Z has a file; it is 6.9h stale. An age filter is what separates them,
+   and a census keyed on file-presence alone would have read this seat as live.
+-->
 <authority>ANDREW-DIRECT 2026-08-20 ~19:4xZ @942d4d885c — his C2/C3/C4 client experience verbatim; 1.0.0_SA_CTO~Z ruling 2 (CLIENT VISIBILITY): client-human gains READ-OWN — list/get filtered SERVER-SIDE to the session identity's own rows (never a client parameter); the matrix widening is authorized by his word, scoped to this step. Tenant axis stays absolute.</authority>
 </task_order>
 
