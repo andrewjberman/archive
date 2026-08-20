@@ -70,6 +70,31 @@ surfaces re-tested per the 08-20 Rule-24 widening).
   <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WA_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
+## FREE FIXTURE — the measured pre-W-A baseline (COO~Z fold ~20:28Z, from DT~Z's surprise-channel note 2809)
+
+The TAC-2' water-test row is a **completed lifecycle whose correct analytics values are already known
+and were independently witnessed by four seats.** Use it rather than rediscovering one:
+
+| ticket | `TCK-20260820-dcec0012` |
+|---|---|
+| created | 2026-08-20T20:18:09.873Z |
+| claimed | 2026-08-20T20:25:52.709Z (POST /claim 200, `dt-promote-internal@opalinvest.dev`) |
+| completed | 2026-08-20T20:25:53.113Z (POST /complete 200, same identity) |
+| ⇒ `time_to_claim_s` | **462.836** |
+| ⇒ `time_to_resolve_s` | **463.240** |
+
+**MEASURED BASELINE:** on that completed row, top-level `claimed_by` and `completed_by` are **BOTH
+NULL**, while `events[]` carries the actor correctly at every transition
+(created `svc-ticket-form` → claimed → completed). Same class, same row: `requester_email` and
+`firm` are null at top level while the nested `requester{}` object carries both.
+
+**How to use it, and the honest bound:** this is the *pre-W-A baseline*, not a defect report — the
+fields it shows empty are precisely the ones this TO fills. It gives WA-1/WA-2 a **regression
+anchor with pinned arithmetic** (a post-W-A claim/complete cycle must populate what this row leaves
+null, and the two derived seconds values above are what correct looks like). ⚠ **Whether those keys
+are schema-present-but-unwritten or absent-and-rendered-null is a BUILD-TIME READ you owe at the
+source — do not assume either from this table.** DT~Z surfaced and took no action, correctly.
+
 <compiler_tools_mandate>
 Before write: `comp-blast` on ticket_center lambda + `comp-iam service opal-ticket-api` (floor).
 Before commit: `.tools/commit-gate.sh` (universal); `comp-pipescript` n/a (not a gold script).
