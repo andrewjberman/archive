@@ -57,6 +57,10 @@ Effect on §3 option (a): the membership-add path survives ONLY with a non-broad
 
 **TO-B pricing note (2.0.0_SA_COO~Z 193929Z, INFERRED class — M365 default-config knowledge, NOT measured on this tenant): the alias mechanism is ASYMMETRIC.** Delivery-IN to the alias is free and preserves `/me` consent; outbound PRESENTATION as the alias additionally requires the tenant org setting `SendFromAliasEnabled` (M365 default OFF) — with it off, Graph-sent replies present as the primary (`opalbloomberg@`), the exact broadcast Andrew ruled against, discovered only at first outbound reply. Discharging check for TO-B (one line, IT/Andrew-hand or a permitted Graph read): verify `SendFromAliasEnabled`; if false, remedies are enable-it (tenant-wide) or INVERT — make `opalsupport@` the PRIMARY and `opalbloomberg@` the alias (same mailbox, same consent, presentation inverted; likely the cleaner shape for Andrew's intent). Prices TO-B/TO-C only — TO-A's scope never fires outbound.
 
+## 6b. RULED 2026-08-20 ~0046Z (@c7aa4bb03a, relayed by MSTR~Z): D7 INTAKE PIVOTS TO A CLIENT-FACING DASHBOARD FORM — NO EMAIL INGESTION AT ALL
+
+Consequences for this record: **every email-ingestion option in §3, §6, and §6a is DEAD BY RULING** — do not build, exercise, or price against them (TO-B stood down as scoped; the DL-membership and group-mailbox paths, the opalsupport alias/invert mechanics, and the SendFromAliasEnabled question are all MOOT, no action ever needed). What SURVIVES: the U1/U2/U3/capability measurements themselves (true at their vintage), the **U3 channel proposal — APPROVED** (creation rides the re-cut TO-C from CTO~Z's gate), and TAC-1, which **CLOSES fully-answered** (the one-liner was its gate-out). TAC-2's acceptance is re-cut at the gate; its DL-mail path is not exercised.
+
 ## 7. Surprise channel (banked, no action)
 
 audit-archive-invoker at session start printed 3 integrity findings on this box: `ledger-hook-audit.log` + `rcg-sweep-audit.log` non-append edits (baseline≫live-head — plausibly the device-axis baseline class), `jq-ban-override-audit.log` live-missing (fail-closed error). Surfaced to MSTR~Z in the kickoff ACK; not adjudicated here.
