@@ -67,8 +67,9 @@
   </cross_domain_coordination>
 
   <acceptance_criteria>
-    (Rule-24 layer declaration: the layer is CTO's six-leg design (a)-(f); G1-G6 map to
-    (a)-(f) one-to-one, G7 is the proof contract -- exhaustive over the sanctioned design,
+    (Rule-24 layer declaration, amended ~1741Z: the layer is CTO's six-leg design (a)-(f)
+    PLUS the 63340-ruled freshness path; G1-G6 map to (a)-(f) one-to-one, G4b is the ruled
+    addition, G7 is the proof contract -- exhaustive over the sanctioned-and-ruled design,
     nothing outside it in scope.)
     G1 [0.6.2, design leg a]: ONE account-attributes DataMining pull at Account level
         {AccountID, Account Supervised, Account Billable, Position Only, Portfolio Group}
@@ -88,19 +89,36 @@
         W15-L4 precedent, same day). Mechanism concurs: with both columns the daily
         invariant (a holdings row whose flag disagrees with its account's = a loud
         finding) is SELF-CONTAINED in each day's extract, and account_supervised gains a
-        daily refresh path the one-shot G1 pull cannot provide. The Portfolio-Group
-        template rider (same staleness class, surfaced by 0.6.2) is CTO's design fork,
-        routed separately -- NOT granted here; if CTO's word lands before the template
-        touch fires it folds in, else it rides a second touch.
+        daily refresh path the one-shot G1 pull cannot provide.
+        PG FORK RULED BY CTO ~1739Z (63340), superseding COO's routed rec: Portfolio Group
+        must NOT ride the holdings template -- membership OVERLAPS in the cot book,
+        MEASURED two ways (HAR group sums 492.7M exceed the 488.75M firm total by ~3.9M;
+        G1's own 943 rows / 942 accounts duplicate). A multi-membership dim on a
+        HOLDINGS-grain fact fans out rows and double-counts every naive downstream sum --
+        the relationship-grain class one axis over. THE RULED FRESHNESS PATH instead
+        (G4-adjacent act, 0.6.2, pure config): promote the G1 account-attributes template
+        into the DAILY INGEST SET (place templates/account_attributes.json in the ingest
+        prefix; the scheduled sweep carries it daily -- zero new mechanism, and the
+        production-pipelines-are-scheduled law satisfied by construction). The dim stays
+        honest about multi-membership at its own grain; A_00's join handles the
+        duplicate-account shape explicitly.
+    G4b [0.6.2, CTO-ruled 63340/63343]: the G1 account-attributes template PROMOTED into
+        the daily ingest set (templates/account_attributes.json placed in the ingest
+        prefix; the scheduled sweep carries it daily) -- pure config, zero new mechanism,
+        production-schedule law satisfied by construction. Keeps portfolio_group (+
+        billable/position_only for free) fresh daily AT DIM GRAIN, where multi-membership
+        is visible and the A_00 join handles it. ACCEPTANCE: the template file present in
+        the ingest prefix + one scheduled-sweep run observed carrying account_attributes.
     G5 [DS, leg e]: gold emits BOTH aum_supervised and aum_all (the BD-style toggle) +
-        the portfolio_group book split.
+        the portfolio_group book split -- multi-membership handled explicitly at the join
+        (a two-book account appears in both books; the FIRM total never double-counts).
     G6 [DS, leg f]: the today's-flags-to-history caveat stated in the served artifact's
         meta/notes -- verifiable by reading the artifact, not the TO.
     G7: proof instance VALID rc=0 positional G1-G7; CTO arch-gate acceptance cited.
   </acceptance_criteria>
 
   <proof_of_spec>
-    <expected_criteria>G1,G2,G3,G4,G5,G6,G7</expected_criteria>
+    <expected_criteria>G1,G2,G3,G4,G4b,G5,G6,G7</expected_criteria>
     <instance_path_grammar>org/tier2_senior/{assignee_folder}/deliverables/COT_SUPERVISED_PROOF_OF_SPEC_{seat}_{YYYYMMDD}.json</instance_path_grammar>
     <group id="bronze-G1-G4" status="NOT_YET_MINTED" instance_path="org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/COT_SUPERVISED_PROOF_OF_SPEC_062_20260820.json"/>
     <group id="gold-G2-G6" status="NOT_YET_MINTED" instance_path="org/tier2_senior/0.2.0_DS_PortfolioAnalytics/deliverables/COT_SUPERVISED_PROOF_OF_SPEC_020_20260820.json"/>
