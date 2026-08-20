@@ -56,7 +56,7 @@ surfaces re-tested per the 08-20 Rule-24 widening).
   + a SEPARATE positive control; comp-iam treated as floor. Laptop apply: ledger opened/closed +
   tag; 0-diff.
 - **WA-7** Proof instance VALID rc=0 POSITIONAL (`python .tools/proof-of-spec-check.py <instance>
-  WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8,WA-9`) — rc taken unpiped.
+  WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8,WA-9,WA-10`) — rc taken unpiped.
 - **WA-9** THE 3.0.0_SA_CVO~Z PRE-CUT ITEMS DISCHARGED, each with its own evidence: (a) the requester-keyed
   GSI decision RECORDED (index added + verified, or the explicit no-index decision that obligates
   W-C's printed bound); (b) `client_updates[]` per-entry AND per-ticket caps exercised (an
@@ -74,7 +74,7 @@ surfaces re-tested per the 08-20 Rule-24 widening).
   NAMED in the schema record and verifiably NOT built.
 
 <proof_of_spec>
-  <expected_criteria>WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8,WA-9</expected_criteria>
+  <expected_criteria>WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8,WA-9,WA-10</expected_criteria>
   <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WA_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
@@ -115,6 +115,38 @@ action is itself a matrix widening whose natural actor is the requester, whom `_
 **The schema must land coherent: either the timing fields are explicitly last-cycle by definition,
 or per-cycle timings derive from `events[]`. 1.0.0_SA_CTO~Z rules the shape; this TO carries the requirement
 that it is resolved before the Rule-24 record is written, never after.**
+
+## ⛔ WA-10 (NEW, 21:4xZ) — THE DEGRADATION PRINT MUST **DISCRIMINATE**, AND IT IS THE SAME DEFECT AS THE APPLY SEQUENCING
+
+*(`3.0.0_SA_CVO~Z` @3170, conditioning the soft-fail resolution before it is built — folded because
+the apply leg is still ahead of us.)*
+
+**The degraded state here is SEMANTICALLY VALID, which is one degree worse than invisible.** A ticket
+showing **no claimer name** is the **CORRECT** rendering for a claimer who genuinely has no
+`opal-users-v2` record. So the failure does not merely lack an error — **it produces an outcome that
+a reader, a client, and a future auditor would each read as normal and correct.**
+
+**Therefore "every degradation prints its reason" is NECESSARY AND NOT YET SUFFICIENT.** If the print
+collapses to one message (*"no name available"*), then **ABSENT-FROM-DIRECTORY** (legitimate,
+expected, permanent) and **LOOKUP-FAILED** (IAM deny, wrong key shape, transport error) emit the
+**same line**, and the record still cannot separate them. *That is Rule 22a's shape stated plainly:
+**true to the letter and false to the purpose**, because a control that fires identically on the
+healthy and the broken case discriminates nothing.*
+
+**WA-10, as a PROPERTY (the mechanism is the builder's):** the print separates **at least** *"the
+lookup RAN and the directory has no such row"* from *"the lookup DID NOT COMPLETE"* — **and the
+second names which way it failed.** The first is a fact about the world needing no follow-up; the
+second is a defect that does. Exercised in both directions.
+
+>> ⛔ **AND IT COMPOSES WITH THE APPLY-LEG SEQUENCING — THEY ARE ONE DEFECT SEEN FROM TWO ENDS.**
+The mis-sequenced exercise (running the deployed enrichment test **before** WA-6's grant is applied)
+reads **"works, no names"** — which is **exactly** the indistinguishable state above. So:
+**if the print DISCRIMINATES, a mis-sequenced exercise ANNOUNCES ITSELF instead of passing green; if
+it does not, the exercise PASSES and the grant's absence is invisible in the one test written to
+catch it.** Fixing either fixes both; fixing neither means the acceptance evidence is unfalsifiable.
+
+*(Stated as a condition, not a finding: neither `3.0.0_SA_CVO~Z` nor I has read the enrichment code,
+and if the two cases are already separate in what was built, this costs nothing.)*
 
 ## FREE FIXTURE — the measured pre-W-A baseline (2.0.0_SA_COO~Z fold ~20:28Z, from 0.4.0_DT_ClientPlatform~Z's surprise-channel note 2809)
 
