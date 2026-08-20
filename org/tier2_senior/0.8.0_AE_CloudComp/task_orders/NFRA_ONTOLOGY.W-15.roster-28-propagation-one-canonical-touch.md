@@ -5,35 +5,67 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T15:35Z</issued>
 <dated>at respawn, after the dated rows — W-15 is the PACING item for five Andrew-ruled adjudications (CRO 152726Z: "if it needs staffing, that is your cell"); it outranks T4 because ruled work is waiting on it while T4's consolidations sit behind R regardless</dated>
-<status>staged -- activates at respawn; GO is this TO + the respawn (COO discretion per Andrew ~13:16Z)</status>
+<status>staged -- activates at respawn AND after census-inputs regeneration (CRO's P1 census-regen item); GO is this TO + both conditions (COO discretion per Andrew ~13:16Z; precondition added 2026-08-20 ~1530Z, see AMENDMENT block)</status>
 <priority>P2 — five sovereign-ruled adjudications idle until this lands; the 29-vs-28 materialization gap is a standing law-vs-instrument divergence</priority>
 <authority>Andrew-ruled ~15:0xZ at the CRO terminal ("All recs approved, go ahead and implement as necessary"; record @27f941ede5) + the 2026-08-07 Andrew merge (model-portfolios INTO mdpf; ratified roster = 28 per C3II_COMPREHENSIVE_SEMANTIC_COVERAGE_SCAN_20260811.md §5). Grid authority: org/modules/graph/NFRA_ONTOLOGY_C2C3_CANONICAL.yaml c4_subject_function_grid (RATIFIED 08-12). W-24 placement pass @19f3d59ebd is the placement input. Provenance: the 08-12 walk-list item W-15 (CRO log §E), specified-not-started until this issuance.</authority>
 </task_order>
 
+## AMENDMENT 2026-08-20 ~1530Z (issuer 2.0.0_SA_COO, pre-activation, per CVO's two flags 63189)
+**(A) THE NUMBERS MOVED — this TO's original 28/29 predate the 08-20 observability mint
+(@340cf964fa, Andrew-direct "approved, mint it") and the W15-GRAIN3 landing (@eb58b97bc7).
+POST-MINT TRUTH: ratified roster = 29 (28 + observability), materialized rows today = 30
+(the merged pair still as two). The propagation TARGET is 29 — merged pair as ONE row,
+observability PRESENT (an executor honoring the stale "28" literally would force-drop a
+sovereign-minted vertical; a healthy 29 is SUCCESS, not failure).**
+**(B) THE RULED SYNC ACT FOLDS IN (one execution event, not two executors at two times):
+this touch ALSO lands the four donor/recipient canonical chain_counts (ops-internal 5->3,
+portfolio-management 9->8, security-scanner 2->1, canonical-schwab 1->2),
+sys-estate-ops-platform spans_verticals += observability, and the HELD resolver regen
+(COO hold 63161 -- the regen that must NOT run on stale census inputs). That is WHY the
+census-inputs-regeneration precondition was added to <status>: running this TO's resolver
+materialization before the inputs refresh reproduces the drop-3-admitted-threads hazard.
+Baseline for every sync row: CVO's L7 verify @82aa27590a (pre/post counts vintage-pinned).**
+**(C) GRAIN-NOTE (CVO L7 R2 + the 08-20 ratified Stage law): the adjudicated "land
+ops-internal as DISSOLVING" carries as PROSE/FLAG in the canonical touch, NEVER as a
+lifecycle_stage assertion — Stage population is the walk's act; every vertical stays
+UNASSERTED.**
+
 ## Objective
-Propagate the RATIFIED roster of 28 into every materializing surface — the canonical YAML's
-materialization, the resolver, fixtures, catalog, and `comp-estate --matrix` — which today still
-materialize 29 (the merged `model-portfolios`→`mdpf` pair as two). **THE CANONICAL OPENS ONCE:**
+Propagate the RATIFIED roster of **29** (28 + the 08-20-minted observability; merged
+`model-portfolios`→`mdpf` pair as ONE) into every materializing surface — the canonical YAML's
+materialization, the resolver, fixtures, catalog, and `comp-estate --matrix` — which today
+materialize 30 (the merged pair as two). **THE CANONICAL OPENS ONCE:**
 the same touch carries CVO's five Andrew-ruled C3.ii adjudications (their naming acts, executed by
-CVO on the ruling's own text — "riding the W-15 propagation touch so the canonical opens once") and
-the W-24 F-4 review flag. Coordinate the window with CVO by MCP; you own the propagation mechanics,
-CVO owns the naming-act content.
+CVO on the ruling's own text — "riding the W-15 propagation touch so the canonical opens once"),
+the W-24 F-4 review flag, **and the AMENDMENT-B sync rows**. Coordinate the window with CVO by MCP;
+you own the propagation mechanics, CVO owns the naming-act content.
 
 ## Acceptance criteria
-- W15-1 PROPAGATION: resolver / fixtures / catalog / matrix all materialize 28 (the merged pair as
-  ONE row carrying both name-halves per the W-24 placement); the ontology checker green at its own
-  denominator; positive control (a ratified member resolves) + negative control (the retired
-  29th-as-separate name does NOT resolve as its own row) both printed.
+(Rule-24 layer declaration, per the 08-20 widening: the declared layer is the ONE
+canonical-opening touch — W15-1 propagation + W15-2 coordination + W15-3 F-4 + W15-5 sync
+cover every artifact the touch opens; W15-4 is the proof contract; nothing the touch
+modifies sits outside a criterion.)
+- W15-1 PROPAGATION: resolver / fixtures / catalog / matrix all materialize **29** (the merged
+  pair as ONE row carrying both name-halves per the W-24 placement; observability PRESENT per
+  the 08-20 mint @340cf964fa); the ontology checker green at its own denominator; positive
+  control (a ratified member resolves, observability included) + negative control (the retired
+  extra-name does NOT resolve as its own row) both printed.
 - W15-2 ONE-TOUCH COORDINATION: CVO's five ruled adjudications land in the SAME canonical-opening
   window (their commit or yours-with-their-authored-content, stated which); the canonical is not
-  opened twice; the window's commit set enumerated.
+  opened twice; the window's commit set enumerated. The DISSOLVING disposition carries as
+  PROSE/FLAG per AMENDMENT-C — never a lifecycle_stage assertion.
 - W15-3 F-4 DISPOSITIONED AT THE TOUCH: the two market-overview pm-tool chains reviewed for
   portfolio-management membership per the W-24 flag — a NAMING act, so the disposition carries
   CRO/CVO's word, never your inference; DECLARED-DEFERRED with owner is a legal outcome.
-- W15-4 proof instance VALID rc=0 positional: ids W15-1,W15-2,W15-3,W15-4.
+- W15-5 SYNC ROWS (AMENDMENT-B): the four chain_counts + spans_verticals + the held resolver
+  regen land IN THIS SAME TOUCH, each diffed against CVO's @82aa27590a baseline; the regen's
+  output retains the 3 admitted threads (ceo-digest/etf-reports/ticketing) and does NOT
+  resurrect retired attribution — both printed as controls (they are the exact hazards the
+  hold existed for).
+- W15-4 proof instance VALID rc=0 positional: ids W15-1,W15-2,W15-3,W15-4,W15-5.
 
 <proof_of_spec>
-  <expected_criteria>W15-1,W15-2,W15-3,W15-4</expected_criteria>
+  <expected_criteria>W15-1,W15-2,W15-3,W15-4,W15-5</expected_criteria>
   <instance_path>org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_ONTOLOGY.W-15_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
