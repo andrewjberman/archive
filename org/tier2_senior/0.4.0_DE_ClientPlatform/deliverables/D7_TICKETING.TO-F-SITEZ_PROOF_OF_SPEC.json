@@ -1,0 +1,274 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_TICKETING.TO-F-SITEZ",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "docs/architecture/D7_TICKETING_INTAKE_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "91fe6afbca"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/api/endpoints/ticket-intake.ts (the form's ONE call: submitTicketRequest + intakeErrorMessage)",
+      "kind": "frontend_component",
+      "commit_or_etag": "483b896c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV commit (half (a)); comp-routes trace SubmitRequest -> Calls: intakeErrorMessage, submitTicketRequest ONLY (the D7F-1 split, machine-read). PROD promote is a separate DT-lane act (rule 19)."
+    },
+    {
+      "path_or_key": "portal/src/pages/SubmitRequest/ (SubmitRequest.tsx + index.ts -- the client-facing form)",
+      "kind": "frontend_component",
+      "commit_or_etag": "483b896c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV commit; composition = TradeSubmission page pattern; controls = the TicketCenter create-panel idiom; internal board link gated by useAuth().isInternal() (the D8 cohort predicate, not a fork)."
+    },
+    {
+      "path_or_key": "portal/src/App.tsx (route /submit-request + Tools nav item; /ticket-center route hardened requireInternal) + portal/src/lib/firmAccess.ts (49financial/cottonwood/demo allowlists + the deliberate inflection omission) + portal/src/api/endpoints/tickets.ts (TICKET_TYPE_LABELS -- one copy) + portal/src/pages/TicketCenter/TicketCenter.tsx (imports the shared labels)",
+      "kind": "frontend_component",
+      "commit_or_etag": "483b896c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV commit; tsc -b rc=0; eslint rc=0 on all 7 touched files; tickets.ts does NOT import the submit call (D7F-1 split, both directions)."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py (half (b): sec.7.3.2 matrix AS AMENDED + POST /api/scoped/tickets/submit under svc-ticket-form; cutoff_et on the 201 @1fd9ef2750)",
+      "kind": "script",
+      "commit_or_etag": "4bede18189 + 1fd9ef2750 (cutoff_et)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "CITED from half (b) + TWO laptop applies: ledger 20260820T1516Z_d7-tof-write-path @602b73a1f9 CLOSED 4/4 (apply 1/1/0 == plan: lambda code + ONE route tickets[submit]; 0-diff; tag ticket-center-v1.1.0; deployed CodeSha256 == artifact, member BYTE-MATCH repo@HEAD -- Rule 22a CODE layer); then the RE-PINNED @1fd9ef2750 touch APPLIED same-hour (0.7.0 confirm 1546Z via MSTR~Z: 0/1/0 code-hash-only, 0-diff, member sha 4b7e1bbce31e4d34..a426 == expected, tag v1.1.1) -- the live 201 carries cutoff_et, deny bodies carry none.",
+      "artifact_covered_by": [
+        "D7F-3",
+        "D7F-4",
+        "D7F-5",
+        "D7F-6",
+        "D7F-7",
+        "D7F-10",
+        "D7F-11"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/ticket-center/main.tf (ticket_routes.submit -- pure-add) + infra/aws/lambda/ticket_center/tests/test_authz_matrix.py (13 tests incl. layer-coverage assertion + cutoff_et D7F-11 assertion)",
+      "kind": "terraform",
+      "commit_or_etag": "4bede18189 / 1fd9ef2750",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "CITED from half (b): TF pure-add verified at the COO~Z desk (2389) and applied at the laptop (ledger L2); battery 13/13 at three desks (AE~Z, COO~Z, this seat in scratch).",
+      "artifact_covered_by": [
+        "D7F-5",
+        "D7F-6",
+        "D7F-9",
+        "D7F-10"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.5.0_AE_OpalETL/deliverables/laneZ_D7_TOF_HALF_B_WRITE_PATH_20260820.md (the (b) record incl. the Rule-24 authz-matrix table, last section)",
+      "kind": "config_data",
+      "commit_or_etag": "2e7fae20d3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AE~Z's record; cited into D7F-12 per CTO~Z 2381 / COO~Z 2390.",
+      "artifact_covered_by": [
+        "D7F-12"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D7F-1",
+      "criterion_verbatim": "RENDER FOR A CLIENT, BOARD STAYS INTERNAL -- BOTH DIRECTIONS MEASURED.",
+      "method": "command",
+      "invocation": "2026-08-20 1536-1538Z, ui-smoke (--token = minted RS256 identities, session claims derived from the payload) on DEV :5175 (portal @483b896c) proxied to www.opalinvest.dev: (a) partner firmId=49financial -> submit-request; (b) internal -> submit-request; (c) partner -> ticket-center; (d) internal -> ticket-center. API leg (curl, separate invocations, 1530Z): client GET /api/scoped/tickets and /metrics; internal GET /tickets.",
+      "output_evidence": "(a) LOC=/submit-request, the form renders; nav TEXT = '... TOOLS Trade Submission Submit a Request' -- NO Ticket Center item for the client. (c) LOC=/market -- the board route REDIRECTS the client session (ProtectedRoute requireInternal @483b896c + /ticket-center absent from every partner allowlist). (d) internal LOC=/ticket-center, board GETs 200 (positive control, separate run). API: client GET /tickets -> 403 {action LIST, principal_class client-human}; client GET /metrics -> 403; internal GET /tickets -> 200 (separate invocation). Screenshots a/c/d read (scratchpad d8live/tof/).",
+      "denominator": "2 identities x 2 routes = 4 rendered sessions + 3 API reads (2 deny + 1 positive control); nav read on both identity directions",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D7F-2",
+      "criterion_verbatim": "SCREENSHOT PASS. /frontend-dev headless render of the form route, screenshot READ, silver-canvas color law holds.",
+      "method": "command",
+      "invocation": "node portal/scripts/ui-smoke.mjs submit-request <png> --token @<partner.jwt> (and the submission run e with --fill/--click); PNGs READ with the Read tool",
+      "output_evidence": "a_partner_form.png + e_partner_submit_201.png (scratchpad d8live/tof/), both READ: silver canvas, dark page-header text on canvas, ALL content inside Panel variant=chart (navy) where the white text idiom is legal; labels white/60, fields bg-black/30 white text, emerald submit; the only canvas-level element (error banner) is dark-on-light text-red-900 on bg-red-500/10 and did not fire in the happy path; confirmation panel white-on-navy with the mono ticket id. No light text or ghost-white control on the canvas in either frame.",
+      "denominator": "2 form-route captures read of 2 taken (form + confirmation); 2 further board-direction captures under D7F-1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D7F-3",
+      "criterion_verbatim": "SUBMIT -> 201 + THE ROW CONTRACT. One real client-session submission; the row read back, not inferred from the 201.",
+      "method": "live_read",
+      "invocation": "2026-08-20 1538Z: the FORM itself (partner session, ui-smoke --fill Title/Details --click 'Submit request') -> netlog POST /api/scoped/tickets/submit 201; then (separate invocation) internal GET /api/scoped/tickets/TCK-20260820-4a3b2b89 -> 200",
+      "output_evidence": "Row read back from the API: ticket_id TCK-20260820-4a3b2b89; ticket_type service_request (in the typed set); status open; source 'dashboard_form:49financial' (the SESSION firm); requester {firm: 49financial, email: d8-live-partner@49financial.test, name: D8 Live Partner} -- display-grade from the session; created_by 'svc-ticket-form'; events[0] {actor: svc-ticket-form, action: created, note: 'submitted via the dashboard form by d8-live-partner@49financial.test (firm 49financial; principal class client-human)'}. Confirmation frame read (screenshot e). The FIRST PASS was the laptop's TCK-20260820-f450ec73 with DDB read-back (ledger L4 @602b73a1f9) -- this row is the portal-side leg through the real form.",
+      "denominator": "1 real form submission -> 1 row, 9 contract fields verified on the read-back; positive control (the GET) its own invocation",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D7F-4",
+      "criterion_verbatim": "TENANT MUTANT. A submission whose BODY carries a DIFFERENT requester_firm/firm -> the stored row STILL carries the SESSION firm (body ignored or rejected -- both PASS).",
+      "method": "live_read",
+      "invocation": "2026-08-20 1530Z (curl, client token): POST /api/scoped/tickets/submit body {ticket_type, title, requester_firm: 'opal-capital'}",
+      "output_evidence": "HTTP 400 {error: \"unexpected field(s) on the submit path: ['requester_firm'] -- requester identity, firm, source and provenance are server-derived and may not be supplied\"} -- REJECTED, fail-closed; internal LIST immediately after read count=0 open rows (nothing written). The applied-plane run at the laptop (ledger L4) and the battery's x5 forbidden-key sweep (nothing written, in-memory table) agree.",
+      "denominator": "1 live rejected mutant here + 1 at the laptop + 5 forbidden body keys in the battery",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D7F-5",
+      "criterion_verbatim": "403 ON EXTERNAL-TOKEN DIRECT WRITE. A CLIENT token POSTing directly to /api/scoped/tickets -> 403, the deny path RUN.",
+      "method": "live_read",
+      "invocation": "2026-08-20 1530Z (curl, client token, live route): POST https://www.opalinvest.dev/api/scoped/tickets {ticket_type, title}",
+      "output_evidence": "HTTP 403 {error: \"forbidden: CREATE is not permitted to principal class 'client-human'\", action: CREATE, principal_class: client-human} -- the matrix's own body, not the gateway generic. Same result at the laptop (ledger L4) and in the battery (D7F-5 test).",
+      "denominator": "1 live deny here + laptop + battery; the CREATE positive controls (svc/internal 201) are battery rows on the real handler",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D7F-6",
+      "criterion_verbatim": "BOARD READ DENIED TO THE CLIENT TOKEN -- AND TO svc-ticket-form; internal 200 positive control separate.",
+      "method": "live_read",
+      "invocation": "2026-08-20 1530Z (curl, separate invocations): client GET /api/scoped/tickets -> 403; client GET /api/scoped/tickets/metrics -> 403; internal GET /api/scoped/tickets?status=open -> 200. svc-ticket-form READ: the battery's read-matrix rows on the REAL handler (svc-form LIST -> 403), run at three desks.",
+      "output_evidence": "Client LIST 403 {action LIST, principal_class client-human}; client METRICS 403; internal LIST 200 (separate positive control). svc-ticket-form LIST -> 403 (CREATE-only stays CREATE-only) exercised in test_read_matrix on the real handler with a synthetic authorizer context -- its LIVE pair needs TO-D's minted service token (laptop; CTO~Z 2379: 'stated, not a hold'); minting a service subject at this seat is TO-D's custody act and was deliberately not done.",
+      "denominator": "3 live HTTP reads here (2 deny + 1 positive) + laptop L4 rows + battery svc/read rows 13/13 x3 desks; the svc LIVE pair named as TO-D's",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D7F-7",
+      "criterion_verbatim": "CROSS-PRINCIPAL CLAIM -> 403; an internal human claim still succeeds (positive control, separate invocation). SoD stated.",
+      "method": "live_read",
+      "invocation": "2026-08-20 1539Z (curl, separate invocations, on the real ticket TCK-20260820-4a3b2b89): client POST .../claim; internal POST .../claim; internal (assignee) POST .../complete",
+      "output_evidence": "Client claim -> 403 {action CLAIM, principal_class client-human}. Internal claim -> 200 (status in_progress, assignee d8-live-internal@opalinvest.dev) -- SoD permits it (requester is the partner, not the claimer). Assignee complete -> 200 (status completed, 3 events; the test ticket is closed, board left clean). Laptop L4: non-assignee complete -> 403. STATED RULE (CTO~Z ruling 2379/2442, SoD STRICT in v1): an internal human who files a ticket for THEMSELVES cannot self-claim/self-complete it (requester-never-acts-on-own-ticket, the trade-workflow pattern); relaxable ONLY on a MEASURED case at the CTO~Z gate -- recorded here so it is a stated rule, not a surprise.",
+      "denominator": "3 live invocations here (deny + positive control + assignee complete) + the laptop's non-assignee 403 + the battery's SoD rows",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D7F-8",
+      "criterion_verbatim": "FLOOR NEGATIVE CONTROL. catalog_gate FLOOR_PATTERNS still refuses ticket reads after this TO lands -- exercised, not read from the file.",
+      "method": "command",
+      "invocation": "2026-08-20 1546Z: python import of infra/aws/ec2/opal-gateway/app/graphql_plumbing/catalog_gate.py (pure module) against the live catalog home infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml (v0.2, 48 indexed rows): gate() on 4 ticket-shaped keys x 2 principal classes; floor-removed mutant; served-row positive control",
+      "output_evidence": "8/8 ticket-key cells REFUSED with 'RESOLVER FLOOR: the ticket surface is excluded until the ticket-API authorization design (D7 sec.7.3) lands'; MUTANT (FLOOR_PATTERNS=() in-process): the same key refuses from a DIFFERENT branch ('off-catalog') -- so the floor is what refused, the instrument discriminates; POSITIVE CONTROL: json/benchmarks/model_portfolio_timeseries.json -> allowed (SERVE-WITH-CAVEAT) for opal-internal. FLOOR_PATTERNS untouched by both halves (AE~Z record; my portal change touches no gateway file). Retirement stays sec.7.3.3's three conditions.",
+      "denominator": "8 refusal cells + 1 mutant + 1 positive control over the 48-row v0.2 catalog",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D7F-9",
+      "criterion_verbatim": "MATRIX MUTANTS FAIL (two named): (i) disable ONE action check in a SCRATCH copy -> the deny test FAILS; (ii) disable the svc-analyst-intake SCOPED-list rule in a SCRATCH copy -> the duty's read test FAILS.",
+      "method": "command",
+      "invocation": "2026-08-20 1548Z, SCRATCH copy of infra/aws/lambda/ticket_center/ (never the deployed path): baseline python tests/test_authz_matrix.py; mutant (i) LIST += CLIENT; mutant (ii) LIST -= SVC_ANALYST_INTAKE; restored",
+      "output_evidence": "Baseline 13/13 OK (scratch copy). Mutant (i): FAILED (failures=2 -- test_read_matrix: the client-LIST deny flips to 200; test_mutant_disable_one_rule_flips_the_deny). Mutant (ii): FAILED (failures=1 -- test_read_matrix AssertionError 403 != 200: the svc-analyst-intake list positive control dies -- the amendment's rule is load-bearing). Restored: 13/13 OK. Repo tree untouched (git status clean on the lambda dir). AE~Z's in-process mutants (admit-client flip; dead MATRIX key; METRICS admitting unresolvable) agree at their desk.",
+      "denominator": "2 named mutants + baseline + restore = 4 scratch battery runs, 13 tests each",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D7F-10",
+      "criterion_verbatim": "SVC SUBJECT + CUSTODY VERIFIED ON THE LIVE PRIMITIVE; deployed-bytes check on the apply leg.",
+      "method": "live_read",
+      "invocation": "Cited + exercised: the apply added NO new secret/parameter/table/IAM statement (plan 1/1/0 = lambda code + ONE route; comp-iam FLOOR action set unchanged, grant main.tf:98-116 covers it) -- so the simulate-principal-policy leg is N/A BY CONSTRUCTION (nothing new to point it at). svc-ticket-form CREATE-only: test_read_matrix (svc-form LIST -> 403) on the REAL handler, three desks. Deployed bytes: ledger L4 @602b73a1f9.",
+      "output_evidence": "Ledger L4: deployed CodeSha256 == artifact content-sha256, lambda_function.py member BYTE-MATCH vs repo@HEAD (Rule 22a CODE layer -- the source-map row is a pairing, the byte check is the currency proof). Custody: no key was minted at this seat (a service-subject mint here would be TO-D's custody act -- deliberately not done); the svc token CONTRACT is stated in the (b) record for TO-D (sub == subject name AND userType == 'service'; a name without the marker is unresolvable -- FAKE_SVC test). NON-MOVING CELLS NAMED (Rule 24(iv)): the svc-subject LIVE pairs (svc-ticket-form READ 403 live; svc-analyst-intake list 200 live) exist as battery rows and go live at TO-D's minted tokens (laptop) -- CTO~Z 2379: a dependency stated, not a hold on this TO.",
+      "denominator": "0 new IAM/secret/table resources in the apply (the simulate leg's domain is empty); 1 deployed-bytes check (ledger L4); svc deny rows 13/13 x3 desks; 2 live svc pairs named as TO-D's",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D7F-11",
+      "criterion_verbatim": "ACK WORDING + ZERO NEW MACHINERY. The submit confirmation stamps the ack text from the EXISTING 2PM-ET cutoff config; declared_exclusions carries the no-new-machinery list.",
+      "method": "command",
+      "invocation": "The live submission (run e) confirmation frame READ; the branch ruled by CTO~Z 2442 and folded @5dc7756ac7",
+      "output_evidence": "BOTH BRANCHES EXERCISED LIVE, in order. (1) FALLBACK (while the applied 201 @4bede18189/v1.1.0 carried no cutoff_et): the 1538Z submission's confirmation read verbatim 'Received Aug 20, 2026, 11:38 AM ET. Requests received after the daily cutoff, or outside trading days, are worked on the next trading day.' -- next-trading-day semantics WITHOUT a literal time. (2) LIVE VALUE (after the re-pinned @1fd9ef2750 apply, tag v1.1.1, 0.7.0 confirm 1546Z: the 201 carries cutoff_et='14:00' from the env; deny bodies carry none -- the leak-guard held): the 1548Z submission TCK-20260820-e2c828f2 confirmation read verbatim 'Received Aug 20, 2026, 11:48 AM ET. Requests received after 2:00 PM ET, or outside trading days, are worked on the next trading day.' -- the literal cutoff RENDERED FROM THE RESPONSE FIELD (formatCutoffEt('14:00') -> '2:00 PM'), received-time and the after-cutoff comparison computed in America/New_York (before-cutoff at 11:48 AM, so no extra sentence). The portal carries NO copy of 14:00: the one home is the Lambda env (main.tf:137) -> the 201 -> the form. Zero new machinery: see declared_exclusions. Both test tickets claimed + completed by the internal seat (board left clean).",
+      "denominator": "2 branches implemented, 2 exercised live (fallback at v1.1.0, live value at v1.1.1); 1 leak-guard direction (deny bodies carry no cutoff_et, laptop-exercised); 2 confirmation frames read",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D7F-12",
+      "criterion_verbatim": "PROOF INSTANCE VALID rc=0 POSITIONAL + the Rule-24 table for the authz matrix cited into the proof.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/D7_TICKETING.TO-F-SITEZ_PROOF_OF_SPEC.json D7F-1,D7F-2,D7F-3,D7F-4,D7F-5,D7F-6,D7F-7,D7F-8,D7F-9,D7F-10,D7F-11,D7F-12  (rc taken WITHOUT a pipe)",
+      "output_evidence": "rc=0 VALID on this instance (run recorded in the session log). RULE-24 TABLE CITED (Rule 24 as widened @1ab080d864 + @0ed408ab07, read from the ref): org/tier2_senior/0.5.0_AE_OpalETL/deliverables/laneZ_D7_TOF_HALF_B_WRITE_PATH_20260820.md last section @2e7fae20d3 -- principal-class axis MECE {internal-human, client-human, svc-ticket-form, svc-analyst-intake, unresolvable} with discriminators at :113-130 @4bede18189 (ordered if-chain, terminal UNRESOLVABLE catch-all; allowedFirmIds==ALL at a partner firm is NOT internal); grain = the authenticated caller of one request; one intent (WHO is calling; what-may-they-do = MATRIX, tenancy = _firm_allowed, SoD = _sod_block); stability = one MATRIX edit moves every cell, non-moving svc LIVE cells NAMED; (L) layer coverage = the 7-route action axis enumerated FROM the router :425-454 + the mechanical assertion (authorize() literals == MATRIX keys; every route 403s the unresolvable caller; two in-process mutants fail it) + the one-line layer statement + token census 0 hits/67 lines (comp-estate --definitions; 'unresolvable' the one minted token).",
+      "denominator": "12 of 12 criterion rows present; the Rule-24 table's own denominators: 5 principal classes, 7 routes, 13 tests, 0/67 token census",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three planes: (1) the two NAMED matrix mutants (D7F-9) in a scratch copy; (2) the floor-removed mutant inside the D7F-8 exercise (refusal moves to a different branch -> the floor was the refuser); (3) the live identity-gate direction: the same partner session that renders the form is refused the board route and the board API.",
+      "expected": "(1) the deny tests FAIL under each mutant and pass restored; (2) the refusing branch changes; (3) form 200-render + board redirect/403 for the client, board 200 for internal.",
+      "observed": "(1) mutant (i) failures=2, mutant (ii) failures=1 (403 != 200), restored 13/13; (2) 'RESOLVER FLOOR' -> 'off-catalog'; (3) LOC /submit-request vs LOC /market redirect + LIST/METRICS/CLAIM 403s vs internal 200s.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A for the boolean HTTP deny/positive rows (each a single unambiguous status+body); the repeated member is the authz battery, run at THREE desks (AE~Z 11/11 then 13/13, COO~Z 11/11 then 13/13, this seat 13/13 in scratch) with agreeing results.",
+      "observed": "All three desks agree; the live probes matched the battery's predictions row for row (403 bodies carry the same action/principal_class the tests assert).",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Monitors / alerts / SNS / SES / notification machinery",
+      "reason": "Moratorium (Andrew-direct 2026-07-28). The form's confirmation is in-page; the board is the internal surface; leg-3's buzz is TO-AC's, not this TO's."
+    },
+    {
+      "item": "New consent grants / bobby@ / board visibility change",
+      "reason": "Outside Andrew's words (TO Do-not list). The board stays internal (D7F-1 proves both directions); bobby@ stays parked."
+    },
+    {
+      "item": "Resolver-floor retirement",
+      "reason": "sec.7.3.3's three conditions govern; D7F-8 exercises that the floor STILL refuses after both halves landed. catalog_gate untouched by this TO."
+    },
+    {
+      "item": "TO-D's svc-analyst-intake subject, its minted tokens, and the board deep-link",
+      "reason": "A SIBLING caller built at TO-D (laptop). The matrix rule for it ships here and is proven load-bearing by the D7F-9(ii) scratch mutant; its LIVE pairs (list 200 / claim-complete 403 / svc-form read 403 live) are TO-D's exercise rows -- the named non-moving cells (Rule 24(iv)). No service token was minted at this seat."
+    },
+    {
+      "item": "Second write path / shadow channel / table-side read",
+      "reason": "Vetoed (no-shadow law; CTO~Z r2 ruling): ONE route on the existing Lambda; the form calls ONLY /submit (comp-routes trace: 2 calls, both intake); tickets.ts does not import the submit call."
+    },
+    {
+      "item": "Inflection allowlist widening for /submit-request",
+      "reason": "Inflection has no Tools section (Andrew-direct 2026-05-28, recorded in firmAccess.ts); the form is a Tools item, so adding it would reinterpret that ruling -- SURFACED to COO~Z on the surprise channel, not decided here."
+    },
+    {
+      "item": "RETIRED EXCLUSION (kept for the record): the cutoff_et LIVE render",
+      "reason": "Was gated on the re-pinned apply at instance-draft time; the v1.1.1 touch APPLIED same-hour and the live-value branch was exercised (D7F-11 evidence (2)). Nothing remains excluded here."
+    },
+    {
+      "item": "PROD promote of the portal build",
+      "reason": "Portal main worktree stays on DEV (rule 19); promote is a DT-lane act via /prod-deploy, not this TO's."
+    }
+  ],
+  "surprises": [
+    "CUTOFF_ET existed as a Lambda env (main.tf:137, Andrew ruling #8) that NO code read -- a config with zero consumers; the D7F-11 response field (CTO~Z-ruled, AE~Z-landed @1fd9ef2750) gives it its first consumer. Surfaced, ruled same hour.",
+    "comp-blast create_ticket timed out at this seat too (90s cap; same site-Z graph-backend class AE~Z/CTO~Z named) -- consumer set grounded via comp-routes trace + tickets.ts instead.",
+    "The board's local TYPE_LABELS copy was a latent two-homes drift seed the moment the form needed the same labels -- consolidated into tickets.ts (ONE exported copy) rather than minting a second.",
+    "portal bun.lock carries a pre-existing working-tree modification (not mine, not committed -- same state D8 recorded)."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-20/laneZ_d7_tof_half_a_form_1520-1600Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-routes",
+      "invocation": "comp-routes behaviors; comp-routes trace TicketCenter; comp-routes trace SubmitRequest",
+      "result": "Behaviors 12/13 cover /api/scoped/tickets{,/*} -> APIGateway-portal [AUTH] (no new CF behavior needed -- the submit path sits under 12); TicketCenter calls the 5 board clients only; SubmitRequest calls intakeErrorMessage + submitTicketRequest ONLY (the D7F-1 split, machine-read)."
+    },
+    {
+      "tool": "comp-cache",
+      "invocation": "comp-cache map | grep -i ticket; comp-cache collisions (pre + post)",
+      "result": "No ticket query keys, no collision rows pre or post; the form keeps its tiny state out of the query cache."
+    },
+    {
+      "tool": "comp-transform",
+      "invocation": "comp-transform schema-check TicketCenter (baseline); comp-transform schema-check SubmitRequest (post)",
+      "result": "Both WARN no types.ts near the page (the recorded pre-existing class; AE~Z's Phase-1 saw the same on TicketCenter); SubmitRequest renders no external data props -- its input is the user's own form state and the typed 201 response."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service opal-ticket-api",
+      "result": "FLOOR: 12 DDB calls, role unmapped [UNKNOWN] -- action set unchanged by both halves; no new resource, so no simulate-principal-policy target exists (D7F-10)."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "timeout 90 comp-blast create_ticket",
+      "result": "TIMED OUT (the named site-Z graph-backend class) -- honest timeout recorded; consumer set grounded via comp-routes trace + the tickets client instead."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i cutoff <ticket surfaces>; comp-find --name 'catalog_gate*'; comp-find 'FLOOR_PATTERNS' ...; comp-find 'def test_' ...",
+      "result": "Located the one CUTOFF_ET home (main.tf:137), the floor (catalog_gate.py:42/:82), and the battery's 13 tests; denominators printed on each run."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to D7_TICKETING.TO-F-SITEZ.client-facing-intake-form",
+      "result": "Session TO context set (race-free per-session file)."
+    }
+  ]
+}
