@@ -9,13 +9,17 @@
          recommendation (msg 63167) after independent validation: proof instance VALID
          rc=0 at the issuer seat (11 rows, 0 violations); deploy commits verified
          (@7dda75128d fix + @fca8aaa750 EC2 deploy); ledger w6-port-queryv0 CLOSED 4/4;
-         C1-C9 exercised on-instance. TWO NAMED RIDERS, open by construction, carried as
-         follow-ons with owners: C10/O-1 = the {scope} firm:per-scope battery case,
-         owner 0.5.0_AE_OpalETL~Z (SQS MessageId 6c03f2a2 delivered; closes on their
-         case/ACK); C11/O-2 = the capped max_data_points call, fires at the next
+         C1-C9 exercised on-instance. TWO NAMED RIDERS carried as follow-ons at flip:
+         C10/O-1 -- ⛔ DISCHARGED 2026-08-20 ~1624Z at the v0.3 port (deploy @8e748abeaa):
+         the O-1 case was AUTHORED BY ITS RIGHTFUL OWNER (0.5.0_AE_OpalETL~Z, in the
+         W5-V03 battery -- the firm_resolution-removed mutant, 9/9 with three mutants
+         firing) and is LIVE ON-BOX in v0.3's battery per 0.7.0's close 63295. The
+         criterion's owner-authorship form is met.
+         C11/O-2 = the capped max_data_points call, STILL OPEN, fires at the next
          Bloomberg terminal login on any seat (DAPI 127.0.0.1:8194 closed today; restart
          half clean, zero stale blp processes). D6's laptop dependency is DELIVERED --
-         program close declared at CTO~Z on (a) CVO~Z co-sign + (b) this. -->
+         program close declared at CTO~Z on (a) CVO~Z co-sign + (b) this; D6 FULL close
+         hangs only on CTO~Z's acceptance of the v0.3 exercise-set report. -->
 
     <project_code>OPAL_ANALYST</project_code>
   </metadata>
