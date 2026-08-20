@@ -9,7 +9,8 @@
 <authority>ANDREW-DIRECT 2026-08-20 ~19:4xZ @942d4d885c — his C4 (AI Summary on Completed) + O8; 1.0.0_SA_CTO~Z ruling 4 (THE AI SUMMARY): a new scoped action SUMMARIZE granted ONLY to svc-analyst-intake — its first write beyond CREATE — one field, own matrix row, deny-by-default everywhere else; BG authors the summary at the close nudge: ONE nudge, TWO acts (thread confirmation per approved (b) + the SUMMARIZE write the client reads).</authority>
 </task_order>
 
-## ⛔ NOT BUILDABLE AS SPECIFIED — 21:39Z, `1.0.0_SA_CTO~Z` @3149. STOP BEFORE THE OBJECTIVE.
+## ⛔ PARTIALLY HELD — LIMB (1) NOT BUILDABLE; LIMB (2) SCOPE-QUESTIONED. STOP BEFORE THE OBJECTIVE.
+*(Gate spec-fact 21:39Z `1.0.0_SA_CTO~Z` @3149, NARROWED 21:4xZ on `3.0.0_SA_CVO~Z` @3153 — see the scope correction below. My first fold held this TO wholesale; that was over-broad.)*
 
 **This is a SPEC FACT stated at the gate, not a gate and not a hold — nobody signs anything.**
 Andrew's ~21:35Z ruling makes the "Opal Client Tickets" channel **CLIENT-ORIGINATED ONLY**, and on
@@ -23,10 +24,43 @@ anything, which is a contradiction rather than a reading):
 | header / "now watching" | agent-caused | **PROHIBITED** |
 | **closing-or-claim buzz + THIS TO's AI summary** | an **INTERNAL action on a CLIENT's ticket** | ⛔ **GENUINELY OPEN — ANDREW'S CALL** |
 
-**W-D's specified behaviour IS exactly the behaviour whose legality is uncertain**, which is why the
-TO cannot proceed as written. ⚠ **AND THE COLLISION IS BETWEEN TWO OF HIS OWN RULINGS** — *"Rec
-approved on closing tickets"* predates the client-originated ruling — **so the gate explicitly
-declines to adjudicate between a sovereign's rulings in either direction.** Carded to him.
+⚠ **AND THE COLLISION IS BETWEEN TWO OF HIS OWN RULINGS** — *"Rec approved on closing tickets"*
+predates the client-originated ruling — **so the gate explicitly declines to adjudicate between a
+sovereign's rulings in either direction.** Carded to him.
+
+## ⛔ SCOPE CORRECTION 21:4xZ — **THIS TO IS TWO ACTS ON TWO SURFACES, AND THE PROHIBITION REACHES ONLY ONE**
+
+*(`3.0.0_SA_CVO~Z` @3153, grounded at the v2 record's own O8 row — verbatim: **"one nudge, TWO ACTS
+(the thread confirmation + the SUMMARIZE write)"**. My first fold above held the TO **wholesale**,
+and that was my error.)*
+
+| limb | surface | reached by the channel prohibition? |
+|---|---|---|
+| **(1)** thread confirmation at close | a **Teams post** in the client-tickets channel — **agent-caused** | ✅ **YES — HELD.** The interim covers it exactly |
+| **(2)** the `SUMMARIZE` write | a `resolution_summary` **field on the DDB row**, rendered in the **CLIENT'S PORTAL** "Completed" view — **NEVER TOUCHES TEAMS** | ⛔ **NO — the prohibition does not reach this surface at all** |
+
+⛔ **WHY HOLDING LIMB (2) WOULD BE ACTIVELY HARMFUL, not merely over-broad:** limb (2) is **Andrew's
+own C4 requirement** (*"When ticket is closed, client sees ticket moved to 'Completed' with AI
+Summary of its resolution"*) — **AND it is the mechanism behind the `superseded` exception** in the
+adopted `closure_reason` record (a `closed` ticket must not carry an AI summary, **sole exception
+`superseded`**, restored into W-C at 21:2xZ after a mis-ack nearly cost that clause). **Hold limb (2)
+wholesale and that exception has no mechanism behind it — so the one ticket class whose client
+legitimately GOT an answer is precisely the class that silently loses its answer.**
+
+>> **THE GENERAL FORM, and it is this evening's own class again: A HOLD INHERITS THE SCOPE OF ITS
+REASON.** W-D was decomposed as one workstream because the two acts fire on **one nudge** — a
+**SEQUENCING** fact, not a **SURFACE** fact — and a prohibition scoped to one surface then reads as
+scoped to the whole workstream. *Same shape as "row-scoped is not field-scoped": the bundling was
+correct for the purpose it was made for, and wrong for the purpose it was then used for.*
+
+⚠ **WHAT IS NOT CLAIMED, and either could overturn the split:** (a) **SEPARABILITY IS AN ENGINE
+FACT I DO NOT HOLD** — if the `SUMMARIZE` write is inseparable from the nudge in the serve loop's
+implementation, the wholesale hold is right; `0.5.0_AE_OpalETL~Z` confirms or refutes. (b) **Limb (2)
+is NOT thereby cleared to build** — its Rule-24 matrix row, the deny-by-default scoping of
+`SUMMARIZE` to `svc-analyst-intake`, and the client projection all still gate it, and W-C's tab
+mapping is where the rendering lands. **The claim is only that the CHANNEL prohibition is not what
+gates it, and a hold citing that prohibition must say WHICH LIMB it holds.**
+**Scope confirmation requested from `1.0.0_SA_CTO~Z`: was the spec-fact wholesale, or limb-(1)-scoped?**
 
 **W-A / W-B / W-C are UNTOUCHED and proceeding.** The `SUMMARIZE` action's *matrix/API* half is not
 what is in question — **the CHANNEL POST at close is.** If he rules the closing buzz in, this TO
