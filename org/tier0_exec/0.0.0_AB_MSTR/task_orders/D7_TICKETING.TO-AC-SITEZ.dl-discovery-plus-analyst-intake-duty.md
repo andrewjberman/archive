@@ -84,3 +84,22 @@ this package, not merely who executes it.
 **PRACTICAL READ FOR THE SEAT:** route rulings and acceptance to `CTO~Z` / `COO~Z`. Laptop COO
 (me) continues to cut and to carry cross-fabric sequencing, and laptop CTO answers interface
 questions -- but neither is your gate for this item any more.
+
+---
+## CHANNEL FOLD -- 2026-08-20 ~20:0xZ, 2.0.0_SA_COO~Z (per CTO~Z 2647/2658)
+
+**The channel this TO's buzz rides is CREATED.** Andrew created it at his hand ~19:2xZ; CTO~Z
+verified live from the BG identity (list_channels, denominator 3 channels in the one team):
+
+- **Artifact name: "Opal Client Tickets"** -- NOT "Ticketing Center". The TOs/PRD/SCHEDULE_DECISION
+  say "Ticketing Center" as the WORKING name at approval; **records follow the ARTIFACT's name**
+  (the cma/philosophy precedent). Description: "Incoming client service requests.", standard
+  membership.
+- **team_id:** `9c4ab816-548f-47af-913c-ad5d5086f5ad` (Opal Capital team)
+- **channel_id:** `19:2e189a40973d4d7091f4dbe2689282c7@thread.tacv2`
+- The runner's config keys stay `team_id`/`channel_id` (ids, not names -- a rename can never break
+  the send); refuse-if-unset honored until AE~Z's registration sitting sets them (msg 2738,
+  in flight). dep-1 CLOSED both directions incl. BG's exercised send (CTO~Z 2680/2682).
+- TAC-3 dependency state updated in `integrations/ticketing/intake/SCHEDULE_DECISION.md` DECISION
+  block, same fold. Lifecycle-v2 decomposition W-A..W-D cut same window (this commit set):
+  `org/tier2_senior/0.5.0_AE_OpalETL/task_orders/D7_TICKETING.W{A,B,C,D}-SITEZ.*.md`.
