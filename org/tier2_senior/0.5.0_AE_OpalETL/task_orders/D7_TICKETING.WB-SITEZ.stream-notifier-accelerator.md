@@ -25,7 +25,40 @@ whenever it proceeds.)*
 >> **Whether ~30s → ~2s is worth that is a COST/BENEFIT CALL ON NEW INFRASTRUCTURE, not a technical
 one — and option (ii) must be answered BEFORE option (i) is costed.**
 
-**(c) THEN MEASURE THE WAKE HOP AND DECIDE ON NUMBERS, not architecture preference.** ⛔ **If the wake
+✅ **(c) IS ALREADY SATISFIED — THE WAKE HOP WAS MEASURED AT 21:32Z, 48 MINUTES BEFORE THE RULING
+THAT CALLS IT UNMEASURED.** (`0.0.3_BG_BBGTerminal` msg 3098, on **real traffic, by hand, three
+independent clocks**: send 21:29:12.081Z → emit 21:29:24.564Z = **DETECT 12.48s** → ACK
+21:29:38.692Z = **WAKE-AND-ACT 14.13s**; total 26.61s against ~128s for the same-shaped exchange that
+morning.) *It arrived inside tonight's message volume and was only connected once the ruling named
+the number to look for — so the decision the gate sequenced is available NOW, not after another pass.*
+
+**APPLYING THE GATE'S OWN TEST.** ⚠ **MEASURED vs MODELLED, labelled:** the **14.13s wake floor is
+MEASURED**; the expected-detect figures are **MODELLED on a uniform-arrival assumption — an
+assumption, not an observation.**
+
+| option | expected detect | + wake | expected total |
+|---|---|---|---|
+| today, 5-min backstop | ~150s (worst 300s) | +14s | **~164s** |
+| **(ii) 30s schedule** | ~15s | +14s | **~29s** |
+| (i) stream | ~1–2s | +14s | **~16s** |
+
+>> ⛔ **THE FIRST STEP BUYS ~135 SECONDS; THE SECOND BUYS ~13.** The 5-min → 30s move is roughly
+**TEN TIMES** the improvement of the 30s → stream move — **at NO new infrastructure, NO first-ever DDB
+stream, NO new standing local process, and NO new failure domain.**
+>> **THE STREAM'S MARGINAL BENEFIT IS APPROXIMATELY EQUAL TO THE WAKE HOP IT CANNOT TOUCH** — exactly
+the disappearance the gate's step 2 existed to reveal, now with numbers instead of a prediction.
+
+⛔ **AND THE STATED BOUND MAKES THE CONCLUSION STRONGER, NOT WEAKER:** 14.13s is a **WARM-SCHEMA**
+figure; a cold session still pays the deferred-schema cost until S2 lands. **So the true wake floor is
+14.13s OR MORE, and every second it is larger swallows more of the stream's marginal 13s. The
+uncertainty runs TOWARD option (ii), not against it.**
+
+⚠ **NOT CLAIMED** (the builder's own bounds, kept): this is a **cost/benefit input, not a ruling**;
+the arrival-distribution model is theirs rather than measured, and **if tickets cluster at a known
+hour the expected-value arithmetic shifts**. A 30s schedule also has an uncosted cost — **10× the
+invocations** of a Lambda-free local task, cheap but not free, plus the box's own load tolerance.
+
+**(c-original) THEN MEASURE THE WAKE HOP AND DECIDE ON NUMBERS, not architecture preference.** ⛔ **If the wake
 hop is TENS OF SECONDS, the difference between the two options DISAPPEARS INTO IT** — which is
 precisely what the measure-first step exists to reveal before anyone funds a build.
 
