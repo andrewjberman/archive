@@ -4,7 +4,19 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps</issued_to>
     <date>2026-08-20</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- COMPLETE 2026-08-20 ~1516Z, flipped by issuer 2.0.0_SA_COO on the assignee's
+         recommendation (msg 63167) after independent validation: proof instance VALID
+         rc=0 at the issuer seat (11 rows, 0 violations); deploy commits verified
+         (@7dda75128d fix + @fca8aaa750 EC2 deploy); ledger w6-port-queryv0 CLOSED 4/4;
+         C1-C9 exercised on-instance. TWO NAMED RIDERS, open by construction, carried as
+         follow-ons with owners: C10/O-1 = the {scope} firm:per-scope battery case,
+         owner 0.5.0_AE_OpalETL~Z (SQS MessageId 6c03f2a2 delivered; closes on their
+         case/ACK); C11/O-2 = the capped max_data_points call, fires at the next
+         Bloomberg terminal login on any seat (DAPI 127.0.0.1:8194 closed today; restart
+         half clean, zero stale blp processes). D6's laptop dependency is DELIVERED --
+         program close declared at CTO~Z on (a) CVO~Z co-sign + (b) this. -->
+
     <project_code>OPAL_ANALYST</project_code>
   </metadata>
 
