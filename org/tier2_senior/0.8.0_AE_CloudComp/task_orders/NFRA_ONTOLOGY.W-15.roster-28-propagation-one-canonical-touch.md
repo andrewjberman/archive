@@ -5,7 +5,24 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T15:35Z</issued>
 <dated>at respawn, after the dated rows — W-15 is the PACING item for five Andrew-ruled adjudications (CRO 152726Z: "if it needs staffing, that is your cell"); it outranks T4 because ruled work is waiting on it while T4's consolidations sit behind R regardless</dated>
-<status>pending -- ACTIVATED 2026-08-20 ~1847Z by COO discretion (the clause Andrew granted ~13:16Z): the census-inputs precondition is MET @cef8e071e2 (fresh census LIVE at org/modules/graph/estate_census/, both readers re-pointed + exercised, UNMODELED 0), and the respawn condition's INTENT -- seat availability after its dated rows -- is satisfied by the live seat's drained queue with deep same-day context on every input this touch consumes (GRAIN3, the re-point, the held regen, the expected-diff list). GO sent 1847Z; if the seat prefers the fresh-session form it says so and the GO holds one beat.</status>
+<status>complete</status>
+<!-- COMPLETE 2026-08-20 ~1911Z, flipped by issuer on CVO's verify release @c3c42b7630
+     (12/12 legs MATCH, re-derived against commits + LIVE regenerated files). The touch:
+     @7fe3a68013 + discharge @632e4483ea, proof @a85cb8103a rc=0 (dual-validated).
+     Roster 29 at every surface; five adjudications placed verbatim (authored CVO
+     @51285984d6, placed 0.8.0); the held resolver regen RELEASED on the fresh census
+     with both hazard controls green; sync at POST-TOUCH TRUTH with the vintage
+     correction disclosed (ops-internal landed 2 not the baseline-pinned 3 -- a ruled
+     value is not exempt from the vintage law; accepted by CVO against their own
+     baseline). FIELDHOME survival proven on the REAL substrate 6/6 at this regen.
+     ZERO unexplained diff rows against the maintained expected-diff ledger. F-4
+     DECLARED-DEFERRED at CRO; dissolve-completion act CRO-gated, preconditions closed,
+     no clock. Two surfaced findings ride as routed next-touch riders (spans residue ->
+     CRO's next canonical touch; admitted-verticals manifest rows -> next manifest
+     touch). Activated same-evening by COO discretion; escape offered, declined on an
+     honest capacity read. W-15's arc: measured half-landed at three grains 01:52Z,
+     landed at every grain 19:07Z with the census regenerated beneath it. -->
+
 <priority>P2 — five sovereign-ruled adjudications idle until this lands; the 29-vs-28 materialization gap is a standing law-vs-instrument divergence</priority>
 <authority>Andrew-ruled ~15:0xZ at the CRO terminal ("All recs approved, go ahead and implement as necessary"; record @27f941ede5) + the 2026-08-07 Andrew merge (model-portfolios INTO mdpf; ratified roster = 28 per C3II_COMPREHENSIVE_SEMANTIC_COVERAGE_SCAN_20260811.md §5). Grid authority: org/modules/graph/NFRA_ONTOLOGY_C2C3_CANONICAL.yaml c4_subject_function_grid (RATIFIED 08-12). W-24 placement pass @19f3d59ebd is the placement input. Provenance: the 08-12 walk-list item W-15 (CRO log §E), specified-not-started until this issuance.</authority>
 </task_order>
