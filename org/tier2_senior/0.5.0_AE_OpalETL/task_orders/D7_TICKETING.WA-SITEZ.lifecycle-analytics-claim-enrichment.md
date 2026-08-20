@@ -18,11 +18,24 @@ IN the Lambda at the transition write (process-native, no external analytics job
   SERVER-SIDE at claim time from the claimer's `opal-users-v2` directory row (display-grade
   snapshot ON the ticket row; a snapshot, not a live join).
 - at COMPLETE: `completed_at`, `time_to_resolve_s`, `completed_by = {name, email, user_id}`.
-- `created_at` exists; enums unchanged; one grain = one ticket's lifecycle.
+- `created_at` exists; one grain = one ticket's lifecycle.
 
-The Rule-24 schema record for the analytics field set RIDES this change (grain declared, axis
-intents stated, four-postulate note; the outcome-array/enum surfaces re-tested per the 08-20
-Rule-24 widening).
+**AMENDED ~20:09Z — ANDREW-DIRECT DAY-ONE FIELD SET (his no-retrofit word, "don't want to have to
+be retroactively adding stuff", routed via CTO~Z 2777):** the cut ALSO carries, at day one:
+- `schema_version: 2` (cheapest future-proofing);
+- `priority` enum RESERVED (a reserved value is a schema act — it rides the Rule-24 record);
+- `category` / `tags[]` free-form at claim/close;
+- `reopened_count` + `reopened_at[]`;
+- `first_response_at`;
+- **`client_updates[]` APPEND-ONLY `{ts, author, text}` with the ORIGINAL DESCRIPTION as entry
+  zero** — his rich-text store of client requests, IN the row (no second store, no join). DDB
+  400KB item cap NOTED with the S3-spill key DESIGNED-NOT-BUILT (named in the schema record;
+  never built in this TO).
+`ticket_type`/`status`/`source`/`requester`/`events[]` are deployed and stay.
+
+The Rule-24 schema record RIDES this change and covers the FULL field set above (grain declared,
+axis intents stated, four-postulate note incl. the reserved priority enum; the outcome-array/enum
+surfaces re-tested per the 08-20 Rule-24 widening).
 
 ## Acceptance criteria (D7F pattern: stable ids, mutants, both directions, positional proof)
 - **WA-1** CLAIM transition, exercised on a real row: `claimed_at` + `time_to_claim_s` +
@@ -43,10 +56,17 @@ Rule-24 widening).
   + a SEPARATE positive control; comp-iam treated as floor. Laptop apply: ledger opened/closed +
   tag; 0-diff.
 - **WA-7** Proof instance VALID rc=0 POSITIONAL (`python .tools/proof-of-spec-check.py <instance>
-  WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7`) — rc taken unpiped.
+  WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8`) — rc taken unpiped.
+- **WA-8** DAY-ONE SET exercised (the ~20:09Z amendment): a create carries `schema_version:2` +
+  `client_updates[0]` == the original description; a claim/close append lands a further
+  `client_updates[]` entry APPEND-ONLY (a mutant overwrite/delete of an existing entry is
+  refused/ignored — append-only discriminates); `first_response_at` set on the first responding
+  transition; `reopened_count`/`reopened_at[]` behave on a reopen (or the reopen path's absence
+  is stated honestly if no reopen transition exists yet — no phantom claim); the S3-spill key is
+  NAMED in the schema record and verifiably NOT built.
 
 <proof_of_spec>
-  <expected_criteria>WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7</expected_criteria>
+  <expected_criteria>WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8</expected_criteria>
   <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WA_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
