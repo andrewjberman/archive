@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D2_ADVI_49F.R14-T1FIX",
+  "firm": "49F",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/D2_ADVI_49F.R14-T1FIX.production-date-derivation-prev-trading-day.md",
+    "group": "OTHER",
+    "vintage_commit": "1eb06bff8d"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~B",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py",
+      "kind": "script",
+      "commit_or_etag": "b5b0f26238",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-deploy DEPLOYED + VERIFY OK to s3://opal-data-49financial/_code/chain_49f_entrypoint.py (safe_deploy_core LONGEST-PREFIX map data/assets/scripts/gold/runners_49f -> _code/), 2026-08-20 ~16:00Z. RULE 22a CODE-LAYER read on the DEPLOYED BYTES: get_object sha256 8c18cec94a8979ae5bccef32f3717506fd5140cd6fbc1ada5138bb31519b6858 == committed local file, byte-identical, 18559 B both sides, LastModified 2026-08-20T16:00:56Z. Content controls on the demonstrably-loaded bytes: POSITIVE `_tc.prev_trading_day(` count 2 (want 2 -- lines :230-family production + :237-family dry-run default); NEGATIVE `_tc.expected_last_trading_day(` count 0 (want 0)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T1",
+      "criterion_verbatim": "Call-site fix landed at BOTH lines (CVO audit rider 1): chain_49f_entrypoint.py:230 (production branch) AND :237 (dry-run default) derive prev_trading_day(now); doc block names the same primitive; both diffs quoted.",
+      "method": "diff",
+      "invocation": "git show b5b0f26238 -- data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py",
+      "output_evidence": "Production branch: `-        date = _tc.expected_last_trading_day(dt.datetime.now(dt.timezone.utc)).isoformat()` -> `+        date = _tc.prev_trading_day(dt.datetime.now(dt.timezone.utc)).isoformat()` (plus the R14-T1FIX comment block). Dry-run default: `-            date = _tc.expected_last_trading_day(dt.datetime.now(dt.timezone.utc)).isoformat()` -> `+            date = _tc.prev_trading_day(dt.datetime.now(dt.timezone.utc)).isoformat()` (both lines or neither, CVO rider 1). Doc block now reads: `--production derives D = T-1 from lib/trading_calendar.prev_trading_day ... NOT expected_last_trading_day, which is the FRESHNESS frontier and returns T-0 on any trading day`. Calendar function UNTOUCHED (lib/trading_calendar.py not in the commit; vendored 11x, ruled read-only).",
+      "denominator": "2 MISUSE call expressions named by the CVO audit; 2 fixed in this commit; 0 remaining",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2",
+      "criterion_verbatim": "Caller-audit DISCHARGED BY CITATION: the instance row cites CVO @412f3886a4 (27 expressions / 233-hit census, 2 MISUSE = this fix's two lines) -- do not re-run.",
+      "method": "manual_read_with_citation",
+      "invocation": "CITATION (audit NOT re-run, per the amended TO + COO GO 63232): org/tier1_exec/3.0.0_SA_CVO/deliverables/CVO_AUDIT_EXPECTED_LAST_TRADING_DAY_CALLERS_20260820.md @412f3886a4",
+      "output_evidence": "CVO audit @412f3886a4 over the declared layer: 27 call expressions from a 233-hit/27,022-file census -- 20 CORRECT (freshness-family, frontier paired with trading_days_behind tolerance), 2 MISUSE = chain_49f_entrypoint.py :230 + :237 (this fix, both covered per rider 1), 2 BOUND-OK (cot/inf a04 min-clamps), 1 CONDITIONAL (mdpf-daily-trigger:812, routed separately by COO to the 0.7.0_AE lane -- NOT this TO). Function vendored 11x (6+ lambda copies): the calendar-untouched ruling is doubly load-bearing.",
+      "denominator": "27 of 27 audited call expressions dispositioned by the cited audit",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T3",
+      "criterion_verbatim": "Both-directions battery + refusal control green (outputs quoted; the refusal control EXERCISED, not asserted).",
+      "method": "test_suite",
+      "invocation": "python <scratchpad>/r14_battery.py (legs A+B, run-and-read); LEG C via the real CLI, no stubs: python data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py --date 2026-08-20 --workdir <scratchpad>/legC_work",
+      "output_evidence": "LEG A (primitive, hand-computed constants, calendar_source=NYSE/pandas_market_calendars): PASS trading-day morning THU 2026-08-20 -> WED 2026-08-19; PASS Monday 2026-08-24 -> FRI 2026-08-21; PASS day-after-Labor-Day TUE 2026-09-08 -> FRI 2026-09-04; PASS defect contrast expected_last_trading_day(2026-08-20)==2026-08-20 (the abort mechanism); PASS mutant control (primitives disagree on a trading day -- battery can fail). LEG B (both call sites executed via main(), stages stubbed, date asserted against the LITERAL 2026-08-19, never re-derived): PASS dry-run default rc=0 `CHAIN START date=2026-08-19 mode=dry-run`; PASS production branch rc=0 `CHAIN START date=2026-08-19 mode=production`. LEG C refusal EXERCISED live: `REFUSED: fact_acc has no partition date=2026-08-20 (have ...['2026-08-17', '2026-08-18', '2026-08-19'])` + `CHAIN ABORT stage=a00_dim_account rc=1 wall=1.9s -- nothing after this stage ran`, process rc=1. No fallback fired.",
+      "denominator": "7 of 7 battery checks PASS (5 leg-A + 2 leg-B) + 1 of 1 refusal control fired loud (leg C)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T4",
+      "criterion_verbatim": "Deployed-bytes MATCH before 2026-08-21 12:45Z (comp-pipescript deployed output quoted with timestamp).",
+      "method": "live_read",
+      "invocation": "HALT_ACK=1 .tools/safe-deploy.sh --author '0.4.0_DS_ClientPlatform~B <...>' data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py; then independent boto3 get_object sha256 on s3://opal-data-49financial/_code/chain_49f_entrypoint.py",
+      "output_evidence": "safe-deploy 2026-08-20 ~16:00Z: `DEPLOYED [advi] data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py` + `VERIFY OK comp-pipescript deployed data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py` + `OK: safe-deploy gate PASS -- all files deployed and verified`. Independent Rule-22a read at 16:01:35Z: deployed sha256 8c18cec94a8979ae5bccef32f3717506fd5140cd6fbc1ada5138bb31519b6858 byte-identical to committed local, 18559 B, LastModified=2026-08-20T16:00:56Z -- 20h44m ahead of the 2026-08-21 12:45Z fire. Positive/negative content controls on the deployed bytes: prev_trading_day call count 2, expected_last_trading_day call count 0. NOTE (surprise, surfaced to COO): STANDALONE `comp-pipescript deployed <this path>` sweeps the mdpf tree and matches 0 -- the advi/_code verify leg lives inside safe-deploy's invocation; quoted verdict is safe-deploy's own VERIFY OK plus the byte-level read, which is the stronger instrument.",
+      "denominator": "1 of 1 deploy-scope file DEPLOYED-VERIFIED; 1 of 1 independent byte-level read MATCH",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T5",
+      "criterion_verbatim": "2026-08-21 12:45Z FIRST green confirmed BY YOUR READ of the run log by 13:15Z -- the named-reader row; an ABORT found = same-hour surface to COO.",
+      "method": "live_read",
+      "invocation": "SCHEDULED FRI 2026-08-21 12:45Z-13:15Z: read s3://opal-data-49financial/gold/advi/_logs/chain_*.log for the 12:45Z fire; expect CHAIN OK date=2026-08-20; ABORT = same-hour surface to COO",
+      "output_evidence": "Not yet computable: the fire this row reads occurs FRI 2026-08-21 12:45Z (single-green FRI flip+promote per Andrew-ruled (a), MSTR 63259). Deploy precondition for the row is met (T4, 20h44m of margin). This row flips to PASS/FAIL on my 13:15Z read and the instance re-validates before any complete flip.",
+      "denominator": "0 of 1 scheduled fire elapsed at instance-writing time (2026-08-20 ~16:05Z)",
+      "status": "UNCOMPUTABLE",
+      "status_reason": "Future event by construction TODAY: the criterion names tomorrow's 12:45Z fire and my read of its log by 13:15Z. The TO is not complete until this row is recomputed; an ABORT found is a same-hour surface to COO, not a silent FAIL."
+    },
+    {
+      "criterion_id": "T6",
+      "criterion_verbatim": "Proof instance VALID rc=0 positional: T1,T2,T3,T4,T5,T6.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/D2_ADVI_49F.R14-T1FIX_PROOF_OF_SPEC.json T1,T2,T3,T4,T5,T6",
+      "output_evidence": "VALID rc=0 with the full positional expected set T1,T2,T3,T4,T5,T6 (coverage checked before quality). Run output quoted in the session log; re-run after the T5 flip is part of the complete-flip gate.",
+      "denominator": "6 of 6 expected criterion ids present; 0 violations",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two live can-fail controls: (a) refusal control -- a mutant fix carrying a newest-existing fallback would return green on an absent partition; exercised by requesting the structurally-absent T-0 partition (--date 2026-08-20) through the real CLI; (b) battery mutant -- prev_trading_day and expected_last_trading_day must DISAGREE on a trading day, so a wrong-primitive regression cannot pass leg A silently.",
+      "expected": "(a) loud CHAIN ABORT at a00, process rc=1, no fallback; (b) primitives disagree on 2026-08-20",
+      "observed": "(a) `REFUSED: fact_acc has no partition date=2026-08-20` + `CHAIN ABORT stage=a00_dim_account rc=1 wall=1.9s`, rc=1; (b) 2026-08-19 != 2026-08-20, PASS",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Full battery (legs A+B) re-run twice after the first green run; outputs diffed byte-for-byte. Leg A is fixed-date arithmetic (calendar-pure); leg B's now()-derived date is stable within the same UTC trading day (the literal 2026-08-19 assertion pins it).",
+      "observed": "Runs 2 and 3 byte-identical (`diff` empty, rc=0 both), all checks PASS both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "lib/trading_calendar.py (expected_last_trading_day function semantics)",
+      "reason": "RULED READ-ONLY under this TO (CTO 63213): semantics correct for freshness consumers (paired with trading_days_behind); vendored 11x, a lib change would silently fork the copies. Any function-semantics question routes to CTO."
+    },
+    {
+      "item": "infra/aws/lambda/.../mdpf-daily-trigger:812 (is_floor run_date default, the audit's 1 CONDITIONAL)",
+      "reason": "Routed separately by COO to the mdpf trigger owner (0.7.0_AE lane) per CVO 63225 rider 2 -- explicitly NOT blocking and NOT in this TO's scope."
+    },
+    {
+      "item": "chain stage scripts a00..c04 and the OPAL_GLDRNS colliding wrapper files",
+      "reason": "Untouched by this fix -- the derivation is the entrypoint's; stages are exercised by tomorrow's fire (T5), not re-validated here."
+    }
+  ],
+  "surprises": [
+    "comp-tool routing gap (one line, surfaced to COO in the RAVC close, no action taken): standalone `comp-pipescript deployed data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py` sweeps the mdpf tree (0 match, 'No scripts matched filter') while safe-deploy's internal invocation of the same tool verifies the advi/_code home -- the same nominal call resolves to different trees by calling context.",
+    "No second read-frontier caller of expected_last_trading_day found beyond the CVO audit's dispositioned 27 (the expected surprise shape did not materialize; the audit discharges by citation)."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~B/logs/2026-08-20/session_r14_t1fix_1548-1610Z.md (committed with this instance)",
+  "compiler_tools": [
+    {"tool": "comp-pipescript", "invocation": "comp-pipescript io chain_49f_entrypoint --pipeline bd", "result": "Unknown script (bd-gold registry does not carry the 49f chain entrypoint) -- orientation taken from the entrypoint's own doc block + CVO/CTO mechanism messages instead; gap noted"},
+    {"tool": "comp-find", "invocation": "comp-find --name 'chain_49f_entrypoint*'", "result": "1 hit / 27,049 scanned -- data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py"},
+    {"tool": "comp-find", "invocation": "comp-find 'opal-data-49financial/_code'", "result": "34 hits / 27,040 scanned -- located the declared deploy mechanism (safe_deploy_core longest-prefix map) + prior-instance deploy evidence pattern"},
+    {"tool": "safe-deploy", "invocation": "HALT_ACK=1 .tools/safe-deploy.sh --author '0.4.0_DS_ClientPlatform~B <...>' data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py", "result": "DEPLOYED [advi] + VERIFY OK (internal comp-pipescript deployed leg), gate PASS"},
+    {"tool": "comp-pipescript", "invocation": "comp-pipescript deployed data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py (standalone)", "result": "mdpf-tree sweep, 0 match ('No scripts matched filter') -- routing gap surfaced (see surprises)"},
+    {"tool": "proof-of-spec-check", "invocation": "python .tools/proof-of-spec-check.py <this instance> T1,T2,T3,T4,T5,T6", "result": "VALID rc=0 on the full positional set"}
+  ]
+}
