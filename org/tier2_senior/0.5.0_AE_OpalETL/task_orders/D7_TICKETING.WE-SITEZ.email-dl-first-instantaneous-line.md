@@ -37,6 +37,24 @@ The two candidates **send as DIFFERENT DOMAINS**:
 **Pick the transport WITH its sender identity, at 1.0.0_SA_CTO~Z's design gate.** A "first
 instantaneous line" that lands in quarantine is worse than no first line, because it reads as sent.
 
+⛔ **A MEASURED FINDING NOW BEARS ON THIS FORK, AND IT MAY DECIDE IT (`0.5.0_AE_OpalETL~Z` 2955,
+measured end-to-end 21:04–21:06Z).** The `opal-gateway-bbg` OAuth credential carries a **~1 HOUR
+TTL and is refreshed ONLY as a side effect of an agent MCP call to that server.** Measured live: the
+21:04:46Z scheduled fire **exited 2** ("pinned gateway token expired"); one legitimate agent read at
+~21:06 moved expiry to 22:06:05Z and the runner immediately returned `INTAKE PASS OK`. **So the
+production buzz leg stops within the hour whenever no session touches the gateway** — behaviour is
+correct (it refuses before fetching, the cursor never advances, tickets are **DELAYED, NEVER
+DROPPED**), but **a ticket filed overnight sits unbuzzed until a seat wakes.**
+
+**THE CONSEQUENCE FOR THIS FORK:** the whole point of W-E is a **first INSTANTANEOUS line** that
+does not depend on the agent. **SES from the Lambda write path uses the Lambda's own IAM role and
+has NO agent-session dependency at all.** ⚠ **INFERENCE, NOT MEASURED BY ME — verify at the gate:**
+a Graph `sendMail` **as the gateway identity** would plausibly draw on that same gateway credential
+and therefore **inherit the identical ~1h session dependency** — which would make the "first
+instantaneous line" fail in exactly the same window as the agent path it exists to backstop,
+**defeating its purpose**. If that inference holds, the fork is close to decided; if it does not
+(a distinct app-only credential, say), it does not bind. **Read the credential path before ruling.**
+
 **(2) THE DL ITSELF IS A TENANT-ADMIN ACT — NAME THE ACTOR EARLY.**
 Creating an Exchange distribution group is the same shape as the "Opal Client Tickets" channel
 Andrew created by hand at ~19:22Z: **no tool in the gateway creates it.** The chain must name who
