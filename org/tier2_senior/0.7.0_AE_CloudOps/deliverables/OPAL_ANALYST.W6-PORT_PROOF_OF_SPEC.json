@@ -1,0 +1,224 @@
+{
+  "schema_version": "1.0",
+  "to_id": "OPAL_ANALYST.W6-PORT",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "infra/aws/ec2/opal-gateway/app/graphql_plumbing/DESIGN.md",
+    "group": "OTHER",
+    "vintage_commit": "67a9e615ae"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml",
+      "kind": "config_data",
+      "commit_or_etag": "e52a039d64",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "On-box battery loaded THIS file at /opt/opal-gateway/app/refs/ and passed 13/13 (SSM Success); deployed via tarball opal-gateway-8908b39d5c/@7dda75128d, manifest @fca8aaa750."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/query_v0.py",
+      "kind": "script",
+      "commit_or_etag": "a2a4f63ea8",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Endpoint exercised LIVE on-instance post-deploy: ALLOW 200 w/ data, off-catalog 403, floor 403, zero-mint deny 403, rate 429, unauth 401 -- behavior only the deployed bytes can produce."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py (+audit.py allowlist row, +graphql_plumbing/__init__.py)",
+      "kind": "script",
+      "commit_or_etag": "e52a039d64",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Route serves on the deployed instance (E1-E6); audit rows land with the declared metadata fields (E7 + lake objects).",
+      "artifact_covered_by": [
+        "C3",
+        "C8"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/queryv0-iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "e52a039d64",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply 1/0/0 == staged plan; 0-diff; LIVE simulate: servable-prefix GetObject allowed, excluded-prefix (json-tiered/) implicitDeny -- separate invocations."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh (bounded /health retry)",
+      "kind": "script",
+      "commit_or_etag": "HEAD (deploy-fix commit, pre-deploy)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The fix is the reason the third deploy run succeeded where two identical runs failed deterministically (systemd active precedes uvicorn bind; single unretried curl always lost).",
+      "artifact_covered_by": [
+        "C4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C1",
+      "criterion_verbatim": "PORT-CATALOG: staged catalog lands at the live runtime refs/DATA_CATALOG.yaml path; version reads v0.2; diff ZERO or every port-time delta named line-by-line.",
+      "method": "command",
+      "invocation": "python difflib unified diff, staged vs ported (2026-08-20 ~1454Z)",
+      "output_evidence": "Landed at infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml. Deltas named line-by-line, exactly FOUR lines: +3-line port header (provenance comment, top of file) and 'version: 0.2-staged' -> 'version: 0.2' (line 32->35). Every other line byte-identical. version reads 0.2.",
+      "denominator": "4 delta lines of a 1,29x-line file; 0 content-row changes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C2",
+      "criterion_verbatim": "BATTERY-AT-PORT: full 13-case run from this seat against the PORTED catalog: 13/13, rows 4 and 7 quoted.",
+      "method": "command",
+      "invocation": "python ported_battery.py (imports CASES from the in-tree exercise_catalog_gate.py -- no edit to the O-1-guarded file) vs app/refs/DATA_CATALOG.yaml; plus the in-tree battery vs staged as control",
+      "output_evidence": "13/13 vs PORTED and 13/13 vs STAGED; surfaces identical both runs (opal=36, firm:inflection=3, 48 indexed keys, subset holds). ROW-4 quoted: 'held-at-andrew refuses -- allowed=False reason=verdict_class=held-at-andrew: SERVE-WITH-CAVEAT -- CVO-RECOMMENDED, RIDES TO ANDREW...'. ROW-7 quoted: 'RESOLVER FLOOR: ticket key denies unconditionally -- allowed=False reason=RESOLVER FLOOR: the ticket surface is excluded until the ticket-API authorization design (D7 sec.7.3)...'",
+      "denominator": "13 of 13 cases x 2 catalogs + 1 subset invariant",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C3",
+      "criterion_verbatim": "ENDPOINT: POST /query/v0 accepts {key, params} (NOT GraphQL); principal via EXISTING identity_scope machinery server-side; catalog_gate.gate() called; ALLOW fetches via the catalog row's own tool: path. One exercised ALLOW + one exercised DENY at the DEPLOYED endpoint.",
+      "method": "live_read",
+      "invocation": "SSM on-instance exercises vs the deployed localhost:8080 (Rule 22a APPLIED plane), gateway-Bearer tokens minted from the gateway's own signing key (iss=https://mcp.opalinvest.dev, aud=.../mcp, scope=mcp)",
+      "output_evidence": "ALLOW: internal-principal POST {key: json/benchmarks/etf_returns.json} -> 200 {verdict: 'SERVE -- caveats travel with the verdict (L-8)', bytes: 1277, data: {...data_as_of 2026-08-19 (T-1 healthy)...}}. DENY: same token, off-catalog key -> 403 with the gate's own reason. Principal resolved server-side from the validated Bearer subject; body carries no identity field the server reads.",
+      "denominator": "1 ALLOW + 1 DENY exercised at the deployed endpoint (plus 4 more deny classes under C6/C7/C9)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C4",
+      "criterion_verbatim": "DEPLOY: safe-ec2-deploy.sh per EC2_MANIFEST (code, not TF); deploy output + manifest entry cited.",
+      "method": "command",
+      "invocation": "infra/aws/ec2/safe-ec2-deploy.sh opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh (third run; runs 1-2 failed on the deterministic health-curl race, fixed + committed before run 3)",
+      "output_evidence": "'OK: opal-gateway deployed successfully'; artifact opal-gateway-8908b39d5c.tar.gz -> s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/; SSM Success; EC2_MANIFEST updated + committed @fca8aaa750 ('Deploy EC2 opal-gateway @ 7dda75128d').",
+      "denominator": "1 service deployed; 3 runs (2 named failures, 1 success -- failures were the wrapper's health probe, not the code path; service was live+healthy throughout, journal-verified)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C5",
+      "criterion_verbatim": "ON-BOX BATTERY: 13/13 post-deploy ON-INSTANCE (SSM execution, never a staged-file read).",
+      "method": "live_read",
+      "invocation": "SSM: S3-pulled onbox_battery.py (Rule 12: local->S3->EC2, no inline python) run under /opt/opal-gateway/.venv/bin/python against /opt/opal-gateway/app/refs/DATA_CATALOG.yaml, importing CASES from the DEPLOYED exercise_catalog_gate.py",
+      "output_evidence": "SSM Status=Success; 'ON-BOX BATTERY -- 13 cases vs DEPLOYED refs/DATA_CATALOG.yaml ... RESULT: 13/13 pass; SURFACE: opal=36 firm:inflection=3 of 48 indexed; subset=True'.",
+      "denominator": "13 of 13 on-instance",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C6",
+      "criterion_verbatim": "LIMITS enforced at the endpoint, labeled PROPOSED; at least ONE limit exercised behaviorally; numbers routed to 1.0.0_SA_CTO with verdict on record.",
+      "method": "live_read",
+      "invocation": "32-request burst on the deployed endpoint (rate limit 30/60s sliding-window-log); CTO routing Msg 63051 (pre-discharge APPROVED-for-v0) + Msg 63157 (same-authority AMENDMENT 2MB->4MB after my R1 census)",
+      "output_evidence": "BEHAVIORAL TRIP: burst requests 29->403 (still gate-denied), 30/31/32 -> 429 with Retry-After -- the sliding window tripped at exactly the 30th in-window request (E4's earlier external calls occupied slots, consistent with sliding-window semantics). Audit line discriminates: verdict=RATE-LIMITED reason='sliding-window occupancy >= 30/60s' vs gate DENY rows. LIMITS ON RECORD: rows<=1000 / 10s / 4MB (CTO-amended Msg 63157; R1 census found tier3-timeseries 3.81MB + valuation_data 2.18MB as certified rows a 2MB cap would permanently veto; R1 now STANDING at every catalog port) / 30 per min per key. R2 discharged: window semantics named in the applied config.",
+      "denominator": "1 of 4 limits behaviorally tripped (rate); all 4 declared in the deployed config with the CTO record",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C7",
+      "criterion_verbatim": "ZERO-MINT: identity_scope key census shows ZERO new partner keys; instance cites the RULED zero-mint; partner naming deferred to first-real-consumer.",
+      "method": "live_read",
+      "invocation": "Deployed-bytes state (FIRM_PRINCIPALS = {} in the deployed query_v0.py, tarball @7dda75128d) + BEHAVIORAL proof: a VALID RS256 gateway token with a non-internal subject exercised at the deployed endpoint",
+      "output_evidence": "E4: valid external-subject token -> 403 'unresolvable principal class -- deny by default' -- the ruled zero-mint state EXERCISED, not read. identity_tool_allowlist.txt untouched (git status clean on it); no identity_scope rows added anywhere in the apply. RULING CITED: Andrew-direct 2026-08-20 ~1425Z VERBATIM 'zero-mint W6' (record: org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260820_OPENCALLS_THREE_WORDS.md; TO pin 3). Partner naming = a future Andrew act at first-real-consumer.",
+      "denominator": "0 keys minted of 0 authorized (the ruled state); 1 behavioral deny proving it live",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C8",
+      "criterion_verbatim": "AUDIT: one exercised request's audit line {ts, principal, firm, key, verdict, reason, bytes} present in s3://opal-mcp-audit via the existing audit.py -- object key cited.",
+      "method": "live_read",
+      "invocation": "list_objects_v2 (materialized, 1,618 objects today) + get_object on the lake; local floor tail via SSM as the second leg",
+      "output_evidence": "OBJECT KEY: audit/dt=2026-08-20/2026-08-20T15:08:41.646073+00:00-cd4803c4.jsonl -- body: {ts, user: w6-battery-internal@opalinvest.dev, tool: query_v0, args: {key: json/benchmarks/etf_returns.json, firm, verdict: SERVE, reason, bytes}, outcome: ok}. 36 query_v0 lake objects in the exercise window; local JSONL floor carries the same rows (E7). No new sink -- the existing audit.py R8-PRIV path; query_v0's five fields declared metadata-safe in _ARGS_ALLOWLIST.",
+      "denominator": "36 lake objects + floor rows for ~40 exercised requests (lake is best-effort by design; floor is the durable record)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C9",
+      "criterion_verbatim": "SCOPE-HOLDS: no GraphQL parsing, no parquet resolver anywhere in the apply; a FLOOR_PATTERNS key request returns DENY at the deployed endpoint (exercised).",
+      "method": "live_read",
+      "invocation": "E3 on the deployed endpoint + the module's own structure",
+      "output_evidence": "E3: POST {key: opal-tickets/anything.json} -> 403 'RESOLVER FLOOR: the ticket surface is excluded until the ticket-API authorization design (D7 sec.7.3) lands -- CTO ruling' -- exercised live. The apply contains zero GraphQL parsing (requests are {key, params} JSON; params deliberately unused in v0), zero parquet paths (the fetch reads the catalog's JSON bucket only), no schema exposure (resolvable_keys is not routed).",
+      "denominator": "1 floor key exercised; 0 GraphQL/parquet constructs in the applied module (by read of the deployed-equal bytes)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "C10",
+      "criterion_verbatim": "O-1-COORDINATED: the {scope}-family firm:per-scope battery case is landed by 0.5.0_AE_OpalETL~Z, or their ACK of the routed ask is on record.",
+      "method": "manual_read_with_citation",
+      "invocation": "Cross-device routing: localhost broker send 143511Z (measured as NON-DELIVERING -- that seat is site-Z and the broker is device-local), CORRECTED to the SQS agentbus: MessageId 6c03f2a2-3d97-4ab7-b689-3cf09ffb0f59 to sitez ~1510Z",
+      "output_evidence": "The routed ask is on the wire with a MessageId; per Rule 22b SENT is not READ -- their agent-side ACK is the delivery proof and has not yet arrived. The case is explicitly NOT authored by me (their file, their authorship; cross-domain row honored -- exercise_catalog_gate.py untouched by this apply).",
+      "denominator": "1 ask routed on the correct (cross-device) channel; 0 ACKs received yet",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "C10's closing evidence (their landed case OR their ACK) is another seat's act on another device. The ask is on the bus with a MessageId; closes on their ACK/landing. My battery re-runs on-box when their case lands (13/13 today -> 14/14 then)."
+    },
+    {
+      "criterion_id": "C11",
+      "criterion_verbatim": "O-2-DISCHARGED: a CAPPED CALL at the deployed gateway exercises max_data_points in the live tool signature post-restart -- call output cited, not a config read.",
+      "method": "live_read",
+      "invocation": "Precondition measurements at this seat 2026-08-20 ~1443Z: native process census (Get-CimInstance) for blp/bloomberg processes; Test-NetConnection 127.0.0.1:8194 (the Bloomberg DAPI)",
+      "output_evidence": "max_data_points lives in integrations/bloomberg/mcp/{blp_client,server}.py (the LOCAL Bloomberg MCP; repo-wide comp-find: 11 source hits there, ZERO in the gateway tree). MEASURED: zero blp/bloomberg processes running -> NO stale process holds the old signature (the 'restart' half is vacuously satisfied: the next spawn loads current code, since the default transport is stdio-per-session). DAPI port 8194 -> CLOSED (Bloomberg Terminal not logged in). A capped call is therefore UNEXERCISABLE at this moment by any seat: the instrument's precondition is a human terminal login.",
+      "denominator": "2 preconditions measured (process census: 0 stale; DAPI: down); 0 capped calls possible until login",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Blocked on the Bloomberg Terminal login (a human act at this box). NAMED NEXT RUN: at the next terminal session, any seat fires ONE bloomberg_historical_data call with max_data_points=2 and cites the row-count-capped output. Routed to MSTR + the BG duty seat in the RAVC close. A config read is NOT substituted (the criterion's own bar)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The rate-trip burst doubles as the discriminating control on the deny plane: requests 1-29 return 403 (gate DENY -- the gate is doing the refusing), 30+ return 429 (limiter) -- two refusal mechanisms produce two distinct observable shapes at the same endpoint, so a 403 cannot be a disguised limiter artifact and vice versa. The IAM leg carries its own: excluded-prefix simulate implicitDeny beside servable-prefix allowed (separate invocations).",
+      "expected": "403 with gate reason until the window fills; then 429 with Retry-After; IAM: allowed on granted prefix, implicitDeny on excluded.",
+      "observed": "Exactly that (E5 rows 29-32; IAM pair).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The battery ran at three planes (staged, ported-local, deployed-on-box) with identical 13/13 + identical surface counts (36/3/48) -- cross-plane agreement of independent runs is the determinism read.",
+      "observed": "3/3 planes agree.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The BG-terminal-side port acts named in the staged file's own PORT CONTRACT (replace org/tier0_utility/0.0.3_BG_BBGTerminal/refs/DATA_CATALOG.yaml; PORTAL_RETRIEVAL.md + BUCKET_ALLOWLIST.yaml sibling edits; DELETE the staged file)",
+      "reason": "This TO's scope is the GATEWAY runtime port (C1 names 'the live runtime refs/DATA_CATALOG.yaml path under the gateway app'); the BG-side one-act replace belongs to the catalog owner lane. The staged file also cannot be deleted yet -- C1's zero-diff evidence references it. Surfaced to COO in the RAVC close (surprise channel, one line, no action taken)."
+    },
+    {
+      "item": "ALB listener rule for /query/v0",
+      "reason": "Not in scope and not needed for v0: like /teams/poll (verified 2026-07-09 class), the path falls to the ALB default rule's authenticate-oidc, so external callers are OIDC-gated before the app-layer Bearer check. The on-box battery exercises the app-layer gate directly. Adding a bearer-only perimeter rule would be its own reviewed change."
+    },
+    {
+      "item": "Catalog-shape findings from the R1 census",
+      "reason": "Two catalog rows carry non-concrete keys ('json/macro/timeseries/{slug}.json' -- a {slug} family the gate does not expand; a literal 'A + B' compound key). W5/BG-owner authoring defects, routed via RAVC close; non-blocking (off-catalog-shaped requests deny by default). CTO endorsed the routing (Msg 63157)."
+    }
+  ],
+  "surprises": [
+    "The gateway instance role had NO read on opal-data-portal-v2 (simulate: implicitDeny; positive control allowed) -- the spec's ALLOW-fetch leg required a new scoped grant (GetObject on json/* + platinum/* only), applied via TF with live verify both directions.",
+    "deploy-to-ec2.sh failed twice DETERMINISTICALLY: systemd 'active' (process started) precedes uvicorn's port bind, and the health curl had no retry -- the S4 fix had closed the is-active half and left the curl. Fixed with the same bounded-loop pattern; third run clean. The service was live and healthy throughout both 'failures' (journal-verified) -- the wrapper's probe was the defect, not the deploy.",
+    "R1 census (33 concrete keys, 31 sized): TWO certified catalog rows exceed the 2MB cap -> CTO ruled the cap to 4MB same hour ('a limit that permanently vetoes a certified catalog row is a content policy wearing an ops bound's clothes') and made R1 standing at every port.",
+    "My first O-1 coordination send went via the LOCALHOST broker to a SITE-Z seat -- structurally undeliverable (device-local broker); corrected to the SQS agentbus with a MessageId. SENT != READ still binds (Rule 22b)."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-20/ (this session's log, committed at session close)",
+  "compiler_tools": [
+    {
+      "tool": "verify-ec2.sh",
+      "invocation": "PATH-with-.tools (vendored jq) after the bare run returned a VACUOUS 0-checked pass",
+      "result": "27 checked: opal-gateway's 'drift' = exactly the 4 staged D6 commits this TO deploys; first run's jq-missing 0-checked 'all in sync' recorded as the Rule-16 hazard instance"
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast catalog_gate",
+      "result": "NOT-FOUND with denominator (20,729 nodes; kuzu vintage SERVED-STALE, refresh mutex timeout) -- expected for a new package; matches the TO's thin/absent expectation. Vintage warning honored: nothing quoted from the graph as live."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "identity_scope (68 files) / max_data_points (repo-wide) / opal-gateway-role",
+      "result": "Localized the existing identity_scope machinery (extend-not-rebuild honored); located max_data_points in the Bloomberg MCP (zero gateway hits -> C11's true referent); found the role's TF home via the rename-cutover records"
+    },
+    {
+      "tool": "aws iam simulate-principal-policy",
+      "invocation": "x5 separate invocations (pre-grant deny + positive control; post-grant allow + excluded-prefix deny)",
+      "result": "Rule 22a discipline: one resource per call, controls isolated; the grant measured absent then measured applied"
+    },
+    {
+      "tool": "exercise_catalog_gate.py + ported/on-box runners",
+      "invocation": "3 planes (staged / ported / deployed)",
+      "result": "13/13 x3, surfaces identical -- port semantics-preserving, deploy verified at the executing plane"
+    },
+    {
+      "tool": "commit-gate.sh / safe-commit.sh / safe-apply.sh / safe-ec2-deploy.sh / deploy_ledger.py",
+      "invocation": "5 gated commits, 1 TF apply + 0-diff, 3 EC2 deploy runs, ledger w6-port-queryv0 4 legs",
+      "result": "All green; ledger closes with this instance"
+    }
+  ]
+}

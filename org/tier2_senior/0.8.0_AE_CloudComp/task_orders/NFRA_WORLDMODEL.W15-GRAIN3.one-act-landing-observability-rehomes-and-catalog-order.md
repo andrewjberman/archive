@@ -4,7 +4,15 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.8.0_AE_CloudComp</issued_to>
     <date>2026-08-20</date>
-    <status>pending</status>
+    <status>complete</status>
+    <!-- COMPLETE 2026-08-20 ~1513Z: landing @eb58b97bc7 + discharge @c101d005bf; proof
+         instance @5ee2826d76 VALID rc=0, INDEPENDENTLY re-validated at the issuer seat
+         (rc=0, no pipe). Flip executed by 2.0.0_SA_COO per the assignee's explicit
+         delegation (msg 63165). L4 grain deviation CONFIRMED by CRO 63163 (no re-land);
+         L3 taxonomy re-point rides as its OWN ruled act outside this TO; resolver regen
+         HELD (COO ruling -- lands with CRO's P1 census-regen item). CVO verify (L7
+         packet) proceeds independently of this flip. -->
+
     <project_code>NFRA_WORLDMODEL</project_code>
   </metadata>
 
