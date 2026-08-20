@@ -1,0 +1,65 @@
+# TO OPAL_ANALYST.W6-T1 — F8 fence tightening (D6, W6 T-1): the BG concierge fence goes FAIL-CLOSED-AND-LOUD on an unresolvable `$OPAL_AGENT_SERIAL`, scoped to the BG seat's OWN launch/identity path — never a blanket block
+
+<task_order id="OPAL_ANALYST.W6-T1" project="OPAL_ANALYST">
+<issued_to>0.5.0_AE_OpalETL~Z (the BG seat's tooling owner — RELAUNCH.md / OPAL_ANALYST TO2 author; owner per the approved REC)</issued_to>
+<issued_by>2.0.0_SA_COO~Z</issued_by>
+<issued>2026-08-20T15:20Z</issued>
+<dated>PENDING at cut — Andrew's word IS the GO. SEQUENCE at the seat's cadence: BEHIND the live TO-F half (b) apply-confirm exercise (D7F-3..10 rows when the laptop confirms); AHEAD of the v0.3 build is the COO~Z priority read (small, Andrew-approved, removes a silent defect on the one seat the fence exists for) — CTO~Z routes/overrides. Hours, not days.</dated>
+<status>pending</status>
+<priority>P1-small — an APPROVED gate tightening on the BG seat (Andrew-direct 2026-08-20 ~15:1xZ at the CTO~Z terminal, VERBATIM "rec approved", record @ad2585793c); it removes the SILENT stand-down of all four fence classes that W6 T-1 measured.</priority>
+<authority>ANDREW-DIRECT @ad2585793c (CTO~Z's /open-calls card: *"Build the F8 fence tightening? yes/no … REC — yes, build it (owner AE~Z; the never-rules-gate's own fail-closed pattern, one exit line)"* → VERBATIM *"rec approved"*) — **his explicit word for a GATE tightening; the no-gates-unless-asked law is satisfied by that record and this TO adds NOTHING beyond it.** · W6 guardrails review T-1 / F8 (`org/tier2_senior/0.5.0_AE_OpalETL/deliverables/laneZ_D6_TOF_W6_GUARDRAILS_REVIEW_20260819.md:40` — *"fence identity is single-sourced on `$OPAL_AGENT_SERIAL` (the fence blocks the serial-file write; unset → SILENT stand-down of all four classes)"*), certified @bf0a2c30f9 (CTO~Z), second-read @9b859ca898 (CVO~Z: T-1 classified gate-candidate-to-Andrew — now APPROVED) · CTO~Z design constraint at its gate (2412): scoped to the BG seat's path, never a blanket block; LOUD in every case; acceptance by exercised controls. D-family ownership @550b20ec5b: CTO~Z rules + accepts, COO~Z decomposes + validates; CVO~Z second-reads as W6 T-1's reader (LD-0325 routing).</authority>
+</task_order>
+
+## Objective
+Close the one measured hole in the BG concierge fence: today `.tools/hooks/bg-concierge-gate.sh` (PreToolUse, wired FABRIC-WIDE at `.claude/settings.json:145`) resolves the caller by session-file then `$OPAL_AGENT_SERIAL` (`:69-76` @91fe6afbca) and **`[ "$_CALLER" = "0.0.3_BG_BBGTerminal" ] || exit 0`** — so an UNRESOLVABLE serial on the BG seat is indistinguishable from "not BG" and **all four classes (G1 write allowlist `:97-106`, G2 mutation classes, G3 Bloomberg download-class `:111-115`, G4 identity/gateway) stand down SILENTLY** (`:11-15` says so in its own words: *"UNRESOLVED = NOT BG = pass (fail-open on identity)"*). The tightening: **an unresolvable serial on the BG seat's OWN launch/identity path → the fence FAILS CLOSED AND LOUD (deny every classed call with a named line); an unresolvable serial on any OTHER seat → LOUD line, NOT blocked; a serial that resolves to BG → fence ACTIVE exactly as today.** Silence is the defect being removed. The owner PICKS THE MECHANISM that lets the fence know "this is the BG seat's path" independently of the serial (the natural place is the BG launcher/spawn path — `.tools/spawn-agent.ps1` / RELAUNCH.md §0 — binding the identity at launch: set `$OPAL_AGENT_SERIAL` there and/or carry a launch-path marker the fence reads; **note the fence's own G1 blocks the BG seat's session-serial-file write, which is WHY the serial is single-sourced — either admit that one write to the G1 allowlist as a second source, or bind the env at launch; the owner decides, the controls below prove it**). Block mechanism stays the hook's JSON `permissionDecision="deny"` (`:47-48`: a bare `exit 2` is a hook ERROR, not a block — reserve `exit 2` for the already-fail-closed jq-missing branch `:78-82`, the never-rules-gate pattern `.tools/hooks/never-rules-gate.sh:60-73`).
+
+## Acceptance criteria (ids STABLE; each EXERCISED — a config read is not a control)
+- **F8-1 THE SILENT BRANCH IS GONE, SCOPED.** On the BG seat's launch/identity path with `$OPAL_AGENT_SERIAL` unresolvable (and no session-serial file): every G1/G2/G3/G4-classed call is DENIED with a NAMED line (`BLOCKED (bg-concierge-gate F8): identity unresolvable on the BG seat path — the fence FAILS CLOSED; fix: …`) — LOUD + CLOSED. Measured by running the hook with a constructed PreToolUse payload under the BG-path signal, not by reading the script.
+- **F8-2 POSITIVE CONTROL — BG LAUNCH WITH THE SERIAL SET → FENCE ACTIVE, the four classes enforce:** G1 a refs/** or prompt.md write → deny; G2 a git/aws write verb → deny; G3 `bloomberg_historical_data` / a >2-security reference call → deny, the 1-security quote lookup PASSES (the view-side carve-out = the positive control inside the positive control); G4 an `mcp__opal-gateway__*` call → deny, `mcp__opal-gateway-bbg__*` allowlisted tools pass. Each as its own invocation.
+- **F8-3 NEGATIVE CONTROL — A NON-BG SESSION WITH THE SERIAL UNSET → LOUD LINE, NOT BLOCKED:** the hook emits the loud line (stderr / the hook's additionalContext path) and permits the call; measured with a non-BG launch-path state (no BG-path signal) and `$OPAL_AGENT_SERIAL` unset. A fabric-wide blanket block here = FAIL.
+- **F8-4 MUTANT — SERIAL UNSET ON THE BG LAUNCH PATH → THE LOUD-CLOSED BRANCH FIRES** (the exact F8 shape W6 measured, now refusing instead of standing down); and the inverse mutant: remove the BG-path signal → the same unset serial yields the F8-3 behaviour (loud, not blocked) — the scope predicate is load-bearing.
+- **F8-5 NOTHING BEYOND HIS WORD; THE OUTCOME SET RECORDED (Rule 24 as widened):** no second gate, no monitor/alert, no change to the four classes' semantics, the settings.json wiring shape unchanged (still PreToolUse, still fabric-wide, still a fast no-op for other seats when the serial RESOLVES to another serial); the fence header (`:11-15`) and `docs`/RELAUNCH.md updated to say fail-closed-scoped; and a one-table Rule-24 record for the fence's OUTCOME SET — `{ACTIVE-ENFORCE (BG resolved) · LOUD-CLOSED (BG path, unresolvable) · LOUD-PASS (non-BG, unresolvable) · SILENT-PASS (resolves to another seat)}` — MECE over (serial state × BG-path signal), same grain (one PreToolUse call), one intent (identity resolution for the fence), stability (one predicate edit moves every cell), LAYER = "the fence's identity resolution on this box; NOT the four classes' content, NOT the gateway-side tier guard / IAM" (`:42-44`); token census one line.
+- **F8-6 PROOF INSTANCE VALID rc=0 POSITIONAL** — `python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/OPAL_ANALYST.W6-T1_PROOF_OF_SPEC.json F8-1,F8-2,F8-3,F8-4,F8-5,F8-6` (rc without a pipe; MEASURED rows with the exact payload + output per control; FAIL rows with a reason).
+
+<proof_of_spec>
+  <expected_criteria>F8-1,F8-2,F8-3,F8-4,F8-5,F8-6</expected_criteria>
+  <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/OPAL_ANALYST.W6-T1_PROOF_OF_SPEC.json</instance_path>
+</proof_of_spec>
+
+<compiler_tools_mandate>
+  PHASE 1 — BEFORE WRITING:
+    <run>comp-find 'bg-concierge-gate|OPAL_AGENT_SERIAL' .tools .claude org/tier0_utility/0.0.3_BG_BBGTerminal org/mcp</run>
+    <expect>The fence, its settings.json wiring (:145), the BG launcher/RELAUNCH path, the session-serial writer (XXX.md A.1 / spawn-agent.ps1), and the hooks that already read the serial (never-rules-gate :493-505 pattern). DENOMINATOR printed. Any OTHER reader of `$OPAL_AGENT_SERIAL` on this box that a launch-path change would touch = cross-domain; name it.</expect>
+    <if_mismatch>A reader you did not find is the one your launch-path binding silently changes; stop and name it to CTO~Z.</if_mismatch>
+    <run>bash .tools/hooks/tests/test_never_rules_gate.sh (read its fail-closed case) ; sed -n '60,73p' .tools/hooks/never-rules-gate.sh</run>
+    <expect>The fail-closed-and-loud pattern the REC named — copy its SHAPE (loud line + closed), adapt the block mechanism to the concierge fence's deny JSON (:47-48).</expect>
+    <if_mismatch>If the pattern cannot deny via JSON in the unresolvable case (jq absent), fall to the existing exit-2 jq branch :78-82 — already fail-closed; state it.</if_mismatch>
+  PHASE 2 — BEFORE COMMIT:
+    <run>the four controls F8-1..F8-4 as constructed-payload invocations of the hook (a scratch harness beside the hook, run-and-read; the existing concierge-gate exercise suite if one exists — extend it, do not fork)</run>
+    <expect>Positive ACTIVE · BG-path unresolvable LOUD-CLOSED · non-BG unresolvable LOUD-PASS · resolves-to-another-seat SILENT-PASS; the two mutants flip as stated.</expect>
+    <if_mismatch>A blanket block on a non-BG seat = FAIL — re-scope the predicate; a silent stand-down anywhere = FAIL — the defect being removed.</if_mismatch>
+    <run>.tools/commit-gate.sh on any .py touched; bash -n on the hook; shellcheck if present</run>
+    <expect>clean</expect>
+    <if_mismatch>fix; never bypass a gate failure</if_mismatch>
+  PHASE 3 — AFTER COMMIT:
+    <run>a LIVE exercise on the BG seat's next relaunch (RELAUNCH.md path) — one classed call blocked with the fence ACTIVE (positive), and the launch-path binding measured present; coordinate with MSTR~Z (the BG seat's relauncher) — never relaunch BG yourself</run>
+    <expect>The fence reads BG at launch (serial bound), ACTIVE; no loud-closed on a healthy launch.</expect>
+    <if_mismatch>A healthy BG launch hitting LOUD-CLOSED = the binding did not land on the launch path — that is the finding, not a reason to loosen the fence.</if_mismatch>
+    <run>python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/OPAL_ANALYST.W6-T1_PROOF_OF_SPEC.json F8-1,F8-2,F8-3,F8-4,F8-5,F8-6</run>
+    <expect>rc=0 VALID, 6 rows (rc without a pipe; the id set is POSITIONAL).</expect>
+    <if_mismatch>rc=1 fix the violation; rc=2 = usage — never drop the id argument for a clean "COVERAGE UNCHECKED".</if_mismatch>
+</compiler_tools_mandate>
+
+<cross_domain_coordination>
+  - **0.0.3_BG_BBGTerminal (the fenced seat):** the change lands in the shared repo; it takes effect on BG's NEXT launch/relaunch — BG does no git and cannot write the fence (G1 blocks its refs/tools writes by design). MSTR~Z relaunches BG per RELAUNCH.md; the owner coordinates the timing (BG is mid-drill-hold for Andrew's word — do not relaunch it under this TO without MSTR~Z).
+  - **0.0.0_AB_MSTR~Z:** BG's relauncher + the laptop relay (the fence doc lives in the shared repo; the BG seat is this box — LD-0428: site-Z item, site-Z build; the laptop reads it, does not work it).
+  - **`.tools/spawn-agent.ps1` / RELAUNCH.md / XXX.md A.1 (the identity-binding path):** if the mechanism binds `$OPAL_AGENT_SERIAL` at launch or admits the session-serial write to G1's allowlist, name the exact line; the never-rules-gate reads the same serial (`:493-505` pattern) — do not change ITS behaviour.
+  - **1.0.0_SA_CTO~Z:** gate owner (the design constraint 2412 is binding); acceptance by the exercised controls F8-1..F8-4, not a config read. **3.0.0_SA_CVO~Z:** second read as W6 T-1's reader (re-seat trigger via MSTR~Z; LD-0325 routing). **2.0.0_SA_COO~Z:** validation vs F8-1..F8-6 named + positional.
+  - **TO-F half (b) apply-confirm (same seat):** SEQUENCED AHEAD of this TO at the seat's cadence (the D7 flagship's exercise rows land when the laptop confirms); **v0.3 (W5-V03, same seat, GO fired 15:13Z):** this TO is SMALL and Andrew-approved — COO~Z's priority read puts it ahead of the v0.3 build; CTO~Z routes.
+</cross_domain_coordination>
+
+## Do not
+- No blanket block: an unresolvable serial on a NON-BG seat is LOUD, never denied. No change to G1–G4 semantics. No monitor/alert/SNS/SES. No second gate/hook. No relaunch of BG by the owner (MSTR~Z's act). No loosening of the fence to make a launch pass — a healthy launch failing closed is the finding. Lane commits, never push.
+
+## Reporting (RAVC)
+Ack the GO (RAVC-2, one line, with your sequencing slot). Report to **CTO~Z (acceptance) + COO~Z (validation) + MSTR~Z (BG relaunch coordination)** at: (1) mechanism chosen + Phase-1 denominator; (2) the commit with F8-1..F8-4 exercised (constructed payloads + outputs); (3) the live positive on BG's next launch (with MSTR~Z) + the proof instance path + rc. Surprise channel = one line to COO~Z. Session log with a Compiler Tools section = a deliverable.
