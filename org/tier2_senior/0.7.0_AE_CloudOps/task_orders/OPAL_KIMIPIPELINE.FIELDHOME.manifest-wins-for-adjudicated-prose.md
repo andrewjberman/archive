@@ -4,7 +4,15 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps (base -- the ~B lane authored the loop; base covers the tree and is live; absorb the lane's records)</issued_to>
     <date>2026-08-20</date>
-    <status>pending -- GO rides this issuance (normal cadence, nothing waits: backlog is lock-down-held, only today's 5 ratified texts sit in the decision record)</status>
+    <status>complete</status>
+    <!-- COMPLETE 2026-08-20 ~1848Z: proof VALID rc=0 F1-F5 (re-validated at issuer seat);
+         F1 @d678b9c2dd + CVO port @e5d9df8361 (F3 split executed as ruled, SoD held);
+         F2 Rule-24 record GATE-CLOSED by CTO 63484 (verified at their seat, :87-88 read);
+         F4 declared exclusion; regen-survival proven on scratch, live substrate untouched.
+         The first-landing-day discovery (CVO 63381) closed as a MECHANISM in ~40 minutes.
+         Docs nice-to-have rides CVO's next port (banked with owner+trigger, CVO 63474).
+         Flip by issuer on the gate close. -->
+
     <project_code>OPAL_KIMIPIPELINE</project_code>
   </metadata>
 
