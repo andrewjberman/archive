@@ -21,6 +21,13 @@ Add the FAST path on top of the (already-landed) scheduled backstop, same runner
 - The buzz content = the §12 serve discipline (concise, id, deep link `/ticket-center?ticket=<id>`,
   identifier-beside-value). Every gateway send handles `confirm_on_irreversible` (confirm=true or
   two-step — the fence is TOOL-WIDE, SCHEDULE_DECISION.md send row @56cd2208e1).
+- **COMPLEMENTS, NOT SUBSTITUTES (CTO~Z ruling 2762/2768, folded at the cut):** this stream-nudge
+  accelerator wakes BG for NEW TICKETS; user QUESTIONS in the channel are heard ONLY by the
+  teams-watch CHANNEL-LEG P1 (separate ruled build, owner AE~Z, sequenced ON TAC-2' close, design
+  blessed in 2768: direct bounded read / per-channel cursor own file / watched-ids config). Neither
+  covers the other; W-B's acceptance never claims the consumer limb. Note: TAC-3 = SCHEDULE LANDED
+  (2026-08-20 ~20:0xZ) — this TO's staging condition is MET; sequencing vs the channel-leg P1 and
+  W-A is the seat's queue under CTO~Z's ruled priorities.
 
 ## Acceptance criteria
 - **WB-1** Stream path exercised: a transition write (create / claim / close) produces the nudge
