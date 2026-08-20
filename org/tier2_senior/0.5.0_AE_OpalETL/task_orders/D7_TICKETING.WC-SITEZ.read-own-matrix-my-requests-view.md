@@ -85,7 +85,13 @@ An absence that is never asserted is not tested.
   ✅ **THE HOLD IS LIFTED — the `closure_reason` record was ADOPTED 21:14Z (@f834702451) and it
   covers what this criterion deferred.** Two halves, and the split matters for what W-C may decide:
   **RULED (correctness, the gate's):** a `status=closed` ticket **MUST NOT render under Completed**
-  and **MUST NOT** carry the AI resolution summary. **CARDED (product, Andrew's):** the client-facing
+  and **MUST NOT** carry the AI resolution summary — ⛔ **SOLE EXCEPTION `superseded`, where an
+  outcome genuinely WAS delivered** (just not through this ticket). *Corrected 21:2xZ: my first fold
+  of this ruling omitted that exception, and omitting it would have suppressed the summary on the
+  one terminal value whose client legitimately received an answer — and on live-beta traffic, where
+  one analyst answers in-thread and on the board, that is plausibly the COMMON ending.* The gate's
+  own framing: **it rules that a closed ticket must not read as RESOLVED; it does not rule what it
+  reads as.** **CARDED (product, Andrew's):** the client-facing
   **tab LABEL**, and **whether a client sees `closure_reason` at all.** ⛔ **So W-C builds the
   correctness half NOW and must NOT invent the label or the disclosure decision** — those are his.
   Adopted values carry MANDATORY POINTERS that the **client projection must carry**: `superseded`
