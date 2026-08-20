@@ -9,6 +9,45 @@
 <authority>ANDREW-DIRECT 2026-08-20 ~19:4xZ @942d4d885c — his O3 verbatim: "This write somehow triggers 0.0.3_BG that there is a new ticket..." ("somehow triggers" = his latitude); 1.0.0_SA_CTO~Z ruling 1 (NUDGE MODEL): DDB Streams → small notifier → BG nudge as the FAST path PLUS the 5-min Scheduled Task as the standing backstop — a production pipeline must have a SCHEDULE, event-driven is the accelerator (CLAUDE.md law). The nudge path is ANDREW-ASKED (his flow step O3/O7/O8) — not moratorium machinery.</authority>
 </task_order>
 
+## ⛔ BUILD-BLOCKING HOLE IN THIS CUT — THE LAST ARROW HAS NO MECHANISM (22:15Z)
+
+*(`0.5.0_AE_OpalETL~Z` @3318, found on the pre-write check and surfaced BEFORE writing. The defect is
+mine: I cut the chain with a hop that does not exist.)*
+
+**AS CUT:** DDB stream → notifier Lambda → *"BG's nudge (writes the nudge/buzz payload for the serve
+loop / fabric inbox file to the BG seat)"*. **THAT LAST ARROW HAS NO MECHANISM.**
+
+| grounded fact | consequence |
+|---|---|
+| The notifier is a **Lambda in AWS**; BG's nudge target is a **filesystem inbox on the BBG box** | **A Lambda cannot write a local file.** No bridge exists in the cut |
+| The notifier **cannot send the buzz itself either** — the gateway bearer is validated at the transport layer and its refresh is an **INTERACTIVE OAuth challenge answered by the Claude Code client** | **A LAMBDA CAN NEVER BE THAT CLIENT.** The one delivery surface that works for the runner is **structurally closed** to a Lambda |
+| The estate's only live AWS→local channel is the **agentbus FIFO device pairs** | **MSTR-scoped coordination, one consumer per device, "the bus is coordination-only" is standing.** Not a ticket bus |
+| So the notifier can write an AWS-side store, but **something LOCAL must consume it** | **the only thing already running locally on a schedule is the 5-min runner** |
+
+>> ⛔ **THE CONSEQUENCE, which WB-1 would otherwise surface at test time as "the nudge is not
+faster": IF THE LOCAL CONSUMER IS THE 5-MIN RUNNER, THE ACCELERATOR DELIVERS AT BACKSTOP LATENCY AND
+ACCELERATES NOTHING.** WB-1 asks for the stream path's measured latency — **as cut, that number would
+be the backstop's.** *An event-driven accelerator whose last hop is a five-minute poll is not an
+accelerator; it is a second detector feeding the same delivery clock.*
+
+>> **AND IT IS THE DETECT/DELIVER SEAM, THIRD SURFACE.** The stream is the purest instance yet: **a
+genuinely agent-independent DETECTOR whose DELIVERY terminates at an agent-shaped boundary it cannot
+cross.** Same root as the DL and the escalation — every delivery surface reached for so far routes
+through something only a live interactive session can drive.
+
+**OPTION SET (design is `1.0.0_SA_CTO~Z`'s; neither the builder nor I choose):**
+**(i)** a **fast local consumer** — a long-poll SQS reader on the box, reusing the agentbus consumer's
+existing shape; costs a second standing local process. **(ii)** ⛔ **SHORTEN THE BACKSTOP AND DROP THE
+STREAM** — if the requirement is "faster than 5 minutes", a **1-minute schedule with NO new AWS
+surface** may be the honest answer. **This is rung 1: does the stream need to exist at all?**
+**(iii)** notifier → a nudge flag on the ticket row, runner reads it — no new transport, but inherits
+the 5-min clock. **(iv)** something laptop-side not visible from this box.
+
+⚠ **BUILD IS HELD ON THIS ONE QUESTION ONLY.** The four ratified pre-build decisions still hold
+whichever way it goes — they concern the stream's CONFIGURATION, not its DELIVERY. **Rule the hop and
+the build proceeds the same hour.** *If the answer is (ii), W-B as cut may not need to exist — which
+is a better outcome than building the estate's first DynamoDB stream to feed a five-minute poll.*
+
 ## Objective
 Add the FAST path on top of the (already-landed) scheduled backstop, same runner substrate:
 
