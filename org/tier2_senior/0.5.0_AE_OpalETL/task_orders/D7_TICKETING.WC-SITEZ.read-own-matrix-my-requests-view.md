@@ -23,7 +23,33 @@ MEASURED 23:15Z, from the TOs themselves:
                                              dep-2/dep-3 chain is UNCHANGED and remains the
                                              critical path")
 >> SO W-C IS TWO LINKS BACK: dep-3 -> W-A -> W-C(b). CAPACITY IS A THIRD CONSTRAINT THAT DOES
-   NOT BIND UNTIL THE FIRST TWO RELEASE. The TO's own text already said "this half is staged
+   NOT BIND UNTIL THE FIRST TWO RELEASE.
+
+⛔⛔ CORRECTED AGAIN 23:22Z, BY THE SAME SEAT, ONE TICK LATER — THE TWO-LINK CHAIN ABOVE IS
+   ITSELF WRONG, AND IT IS WRONG BECAUSE I READ W-A's <status> AS CURRENT STATE.
+   MEASURED:
+     dep-3   CLOSED ~20:12Z — "dep-3 ACCEPTED: TAC-3 SCHEDULE-LANDED" @399df8444a
+     W-A     BUILD COMPLETE + PROOF-VALIDATED — @81c502cff2, @9121a55330, @7e98926a41
+             (WA-1..WA-10, VALID rc=0 positional), @133b0f24b0; COO-validated deliverable
+             laneZ_VALIDATION_20260820_WA_build_leg.md
+     W-A's <status> field   AUTHORED 20:04:32Z (@9eeb173dc5) -- FIVE MINUTES AFTER the dep-3
+             feat commit (19:59:41Z), ~6 min BEFORE its accept/validate. ACCURATE WHEN WRITTEN,
+             STALE WITHIN SIX MINUTES; the file was then edited three more times (21:45:50Z,
+             21:48:11Z, 21:53:17Z) WITHOUT THE STATUS LINE BEING REVISITED.
+             ⛔ MY FIRST VERSION SAID "LAST TOUCHED 17:53Z ... BEFORE dep-3 closed." BOTH HALVES
+             WRONG: 17:53 was LOCAL (-04:00) = 21:53Z, and a FILE's last touch is not a LINE's
+             last change. I rendered local time with no marker and read it as UTC.
+>> THE REAL CHAIN IS ONE LINK, NOT TWO: **THE W-A APPLY -> W-C(b)**. dep-3 is discharged and
+   W-A's build is done; what remains is the laptop-side apply (WA-6 grant first, then the
+   deployed WA-1/2/8 exercises). Capacity remains a further constraint behind that.
+>> I CORRECTED A WRONG CONSTRAINT BY CITING A STALE FIELD AND PRODUCED A DIFFERENTLY WRONG
+   CONSTRAINT, WITH MORE CONFIDENCE, AND BROADCAST IT TO THREE SEATS TELLING THEM TO UPDATE
+   THEIR BOARDS. The first correction was right about capacity not binding and wrong about what
+   does. Both errors have the same root: I TREATED A <status> FIELD AS A MEASUREMENT.
+   A CLOSED DEPENDENCY DOES NOT GO BACK AND EDIT THE FIELDS THAT NAMED IT — and the evidence
+   that dep-3 had closed was sitting in MY OWN TICK-20 DRIVE LOG the whole time.
+   W-A's status field is corrected at HEAD; this block is kept because the retraction is the
+   record. The TO's own text already said "this half is staged
    behind W-A regardless" -- the sequencing clause was here the whole time, sitting beside the
    capacity paragraph, and the capacity paragraph is the one that got carried forward because
    it is the one that sounds actionable.

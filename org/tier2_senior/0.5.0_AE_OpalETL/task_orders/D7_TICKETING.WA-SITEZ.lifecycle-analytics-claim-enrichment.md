@@ -4,7 +4,43 @@
 <issued_to>0.5.0_AE_OpalETL~Z (build; site-Z). Laptop apply leg = EXECUTION PLACEMENT via 0.0.0_AB_MSTR~Z ferry (envelope law @550b20ec5b: applies stay under laptop apply-time mechanics).</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-20T20:0xZ</issued>
-<status>pending — GO rides this commit's MCP. QUEUE POSITION: behind the dep-3 registration sitting at this seat (1.0.0_SA_CTO~Z @942d4d885c: "the current dep-2/dep-3 chain is UNCHANGED and remains the critical path"). W-A is first of the four W lanes (CTO sequencing: smallest first).</status>
+<status>**BUILD COMPLETE + VALIDATED. OUTSTANDING: THE APPLY LEG ONLY (laptop).** — corrected 23:22Z by 2.0.0_SA_COO~Z; the previous text was STALE BY TWO STATE TRANSITIONS and is preserved below.
+ ✅ dep-3 CLOSED ~20:12Z — `dep-3 ACCEPTED: TAC-3 SCHEDULE-LANDED` @399df8444a (real fire seat-down, LastTaskResult=0, distinct exits 2/3/4, framed zero). The queue position this field described NO LONGER EXISTS. Line ~220's precondition ("do not begin before the dep-3 registration sitting completes") is DISCHARGED.
+ ✅ BUILD EXECUTED + PROOF-VALIDATED at 0.5.0_AE_OpalETL~Z — @81c502cff2 (feat), @9121a55330 (WA-10 distinct tokens), @7e98926a41 (WA-1..WA-10 instance, `VALID rc=0` positional, discriminated), @133b0f24b0 (comp-blast half discharged). COO-validated: `org/tier1_exec/2.0.0_SA_COO/deliverables/laneZ_VALIDATION_20260820_WA_build_leg.md`.
+ ⛔ OUTSTANDING, AND IT IS THE ONLY THING OUTSTANDING: **THE APPLY LEG** — laptop-side execution placement via the 0.0.0_AB_MSTR~Z ferry, **WA-6 GRANT FIRST**, then the deployed WA-1/WA-2/WA-8 exercises. Genuinely external to site-Z; carried on the cross-fabric board.
+ ⚠ SUPERSEDED TEXT, kept because the retraction is the record: ~~"pending — GO rides this commit's MCP. QUEUE POSITION: behind the dep-3 registration sitting at this seat (1.0.0_SA_CTO~Z @942d4d885c: 'the current dep-2/dep-3 chain is UNCHANGED and remains the critical path'). W-A is first of the four W lanes (CTO sequencing: smallest first)."~~ — the CTO sequencing quote remains TRUE OF ITS MOMENT and was satisfied, not violated.</status>
+
+<!--
+⛔ WHY THIS FIELD WAS WRONG FOR ~3 HOURS, AND WHAT IT COST — recorded because I caused the cost.
+⛔ MY FIRST VERSION OF THIS NOTE GAVE ITS TIMESTAMPS IN LOCAL TIME AND READ THEM AS UTC.
+Corrected by measurement, every value re-derived at the same offset:
+  dep-3 feat commit @399df8444a         2026-08-20T15:59:41-04:00  =  19:59:41Z
+  THIS <status> LINE authored @9eeb173dc5      16:04:32-04:00       =  20:04:32Z
+  file last touched @93ac7ddb68                17:53:17-04:00       =  21:53:17Z  (NOT 17:53Z)
+SO THE CORRECTED STORY IS NARROWER AND MORE HONEST: the field was NOT written before dep-3 closed
+and left to rot. IT WAS WRITTEN FIVE MINUTES AFTER THE dep-3 FEAT COMMIT, ~6 min before its
+accept/validate -- ACCURATE WHEN WRITTEN, STALE WITHIN SIX MINUTES.
+WHAT IS UNCHANGED IS THE PART THAT COST SOMETHING: THE FILE WAS EDITED THREE MORE TIMES
+(21:45:50Z, 21:48:11Z, 21:53:17Z) AND THE STATUS LINE WAS NEVER REVISITED -- while the evidence
+sat in my own tick-20 drive log: "dep-3 EXECUTED->ACCEPTED->VALIDATED; TAC-3 = SCHEDULE LANDED."
+⛔ AND THE TIMEZONE SLIP IS THE LAW I ALREADY CARRY: --date=format:'%H:%M' RENDERS LOCAL TIME
+WITH NO MARKER, exactly like `aws s3 ls`. A TIMESTAMP WITHOUT ITS RENDERING PLANE IS A NUMBER
+WITHOUT ITS DENOMINATOR -- committed by me, inside the correction of a staleness error, against a
+rule I quoted at another seat four hours earlier. Pin the plane (--date=iso-strict) for any
+cross-source time compare.
+
+THE MEASURED COST, 30 MINUTES BEFORE THIS FIX: I read this field, believed it, and BROADCAST TO
+THREE SEATS that W-C was "TWO LINKS BACK: dep-3 -> W-A -> W-C(b)". BOTH LINKS WERE ALREADY WRONG.
+dep-3 was closed and W-A's build was done. W-C(b)'s real constraint is THE W-A APPLY — ONE LINK,
+laptop-side. I corrected a wrong constraint by citing a stale field and produced a differently
+wrong constraint, with more confidence, in a message that told other seats to update their boards.
+
+THE CLASS, and it is the one this fabric named all evening: A STATUS FIELD THAT WAS TRUE WHEN
+WRITTEN, DESCRIBING A CONDITION THAT HAS SINCE CLEARED, WITH NOTHING MARKING IT SUPERSEDED. Same
+shape as the 07-31 gateway deploy record I caught someone else citing four hours ago. THE
+DIFFERENCE IS THAT THIS ONE WAS MY OWN ARTIFACT AND I READ IT AS EVIDENCE ABOUT MY OWN LANE.
+A CLOSED DEPENDENCY DOES NOT GO BACK AND EDIT THE FIELDS THAT NAMED IT.
+-->
 <priority>P2 (P1 = dep-3 schedule-landed)</priority>
 <authority>ANDREW-DIRECT 2026-08-20 ~19:4xZ, TICKET LIFECYCLE v2 flow, record @942d4d885c (org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_ANDREW_DIRECT_20260820_TICKET_LIFECYCLE_V2_FLOW.md) — his O6 verbatim: "we need to have analytics built in to the DDB... easier to manage if its baked into the DDB and process natively." 1.0.0_SA_CTO~Z ruling 3 (ANALYTICS NATIVE) + C3 (claimer identity visible). Rigor frame: ATOM_DECOMP discipline @9b93c39eeb. 1.0.0_SA_CTO~Z RULES + 2.0.0_SA_COO~Z DECOMPOSES (@550b20ec5b). Design-of-record = the 1.0.0_SA_CTO~Z deliverable above; PRD §-anchor is 1.0.0_SA_CTO~Z's leg (TOs re-point when it lands).</authority>
 </task_order>
