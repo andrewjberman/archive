@@ -12,8 +12,12 @@
     OPAL_ANALYST.W6 close-gate (b): the 0-diff laptop-lane port of the certified W6 package
     (catalog_gate.py + the staged W5 catalog), then the TO-E mechanical apply (the v0
     partner-query plumbing endpoint on opal-gateway). Program close is declared at CTO~Z on
-    (a) the CVO~Z co-sign (site Z, in flight) + (b) this TO. Cadence: NOT urgent (MSTR~Z
-    framing) -- sequence behind your D8 apply + credential-holds queue.
+    (a) the CVO~Z co-sign (site Z, in flight) + (b) this TO.
+    CADENCE RE-FRAMED 2026-08-20 ~1429Z (supersedes the dispatch-time "not urgent"):
+    Andrew's fresh word at the site-Z CTO terminal (~142xZ, relayed @e2c8e55dab) put the
+    site-Z D-family (D6/D7/D8/D9) under a sovereign-backed COO~Z /drive loop "to
+    completion" -- and D6's laptop dependency IS this TO. Treat it as your NEXT item
+    after in-flight work; do not park it behind discretionary queue items.
   </objective>
 
   <context>
