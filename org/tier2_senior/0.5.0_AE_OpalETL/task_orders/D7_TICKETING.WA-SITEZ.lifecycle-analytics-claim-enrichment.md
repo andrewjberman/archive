@@ -65,6 +65,15 @@ surfaces re-tested per the 08-20 Rule-24 widening).
   append to their own ticket, and CANNOT do anything else to it — the carve-out is scoped, proven
   by the second half); (d) the reopen/timing GRAIN resolved per 1.0.0_SA_CTO~Z's ruling BEFORE the Rule-24
   record is written, and the record states which shape landed.
+- **WA-10** ⛔ **THE DEGRADATION PRINT DISCRIMINATES** — it separates *"the lookup RAN and the
+  directory has no such row"* (a fact about the world, no follow-up) from *"the lookup DID NOT
+  COMPLETE"* (a defect), and the second **names which way it failed**. Exercised in BOTH directions.
+  **Necessary because the degraded state is SEMANTICALLY VALID:** a blank claimer name is the
+  *correct* rendering for a genuinely-absent user, so a collapsed print leaves the defect reading as
+  normal. ⛔ **NOT dischargeable by pointing at the apply sequencing** — that remedy is
+  acceptance-scoped and one-shot; this one is a property of the system. Dischargeable by pointing at
+  code that already separates the two cases. **Full statement + the asymmetry table: see the WA-10
+  section below.**
 - **WA-8** DAY-ONE SET exercised (the ~20:09Z amendment): a create carries `schema_version:2` +
   `client_updates[0]` == the original description; a claim/close append lands a further
   `client_updates[]` entry APPEND-ONLY (a mutant overwrite/delete of an existing entry is
