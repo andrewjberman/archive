@@ -1,0 +1,110 @@
+# TO D7_TICKETING.TO-F-SITEZ — the CLIENT-FACING dashboard intake FORM (D7 pivot leg-2): portal build on DEV + the form-submit write path BEHIND §7.3 (sitez-authored, laptop-applied)
+
+<task_order id="D7_TICKETING.TO-F-SITEZ" project="OPAL_TICKETING">
+<issued_to>DE~Z-class hands, ROUTED BY 1.0.0_SA_CTO~Z at GO (D-family ownership @550b20ec5b: CTO~Z rules + routes, COO~Z decomposes). Precedent seat: 0.4.0_DE_ClientPlatform~Z (the D8 edit-surface build, portal dev-build PASS measured on site Z — D8-1). The GO names the exact registered serial incl. ~lane; until then this TO is STAGED.</issued_to>
+<issued_by>2.0.0_SA_COO~Z</issued_by>
+<issued>2026-08-20T12:20Z</issued>
+<dated>STAGED at cut. GO = (i) CTO~Z routes the hands + (ii) a seat inside the 6-sustained census ceiling (MSTR~Z spawn window; COO~Z measures the census at the event). The 08-20 07:00 WDAC acceptance is CLEARED (BG backstop 4/4 GREEN, MSTR~Z read) and is NOT a gate on this TO. No TO-B dependency (TO-B stood down at the pivot). 07:00-ET±30m window stays light.</dated>
+<status>staged</status>
+<priority>P1 — D7 is the week's flagship (Andrew: "water through the pipes"). Leg-2 of the pivot decomposition: leg-1 §7.3 design is LANDED + VALIDATED (@a765d66f82, COO~Z 4/4); leg-3 (TO-C duty activation, TAC-2'/TAC-3) CONSUMES this TO's submit path — nothing in leg-3 can exercise TAC-2' until a real form submission exists.</priority>
+<authority>ANDREW-DIRECT pivot @c7aa4bb03a (VERBATIM: "run this straight from the dashboard, no interaction with outlook emails coming in at all, we simply have a form fill out in the dashboard client-facing"; Ticketing Center channel APPROVED) · CTO~Z re-scope + 3-leg decomposition frame `org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_D7_TOC_RESCOPE_DASHBOARD_FORM_20260820.md` @d374872d8c · D7_TICKETING_INTAKE_PRD.md **§7.3 (the ticket-API authorization design, @a765d66f82 — THE BACKEND CONTRACT of this TO, cited verbatim below)** · U4 caller-shape law @c0eed182dc (shape inputs) · D8 family-auth law @e697f1450e · the COO~Z validation-lane input adopted at the CTO~Z gate (TAC-2' shape; §7.3 named gate; portal-build frame; color law). Ownership boundary @550b20ec5b: applies = laptop apply-time mechanics; acceptance = CTO~Z.</authority>
+</task_order>
+
+## KICKOFF TRIPLE (explicit, never implicit — the D-family form)
+- **prd:** `docs/architecture/D7_TICKETING_INTAKE_PRD.md` — **§7.3 is the backend contract** (7.3.1 caller shapes · 7.3.2 matrix · 7.3.3 floor retirement · 7.3.4 exercisable acceptance · 7.3.5 does-NOT-do)
+- **workstream:** TO-F = pivot LEG-2 (the form + its write path). **NOT leg-3** (TO-C duty activation stays on TO-AC's row). **NOT TO-D** (the Analyst caller `svc-analyst-intake` + the board deep-link are TO-D's — a SIBLING caller, do not build it here).
+- **head_version:** `@91fe6afbca` (site-Z trunk at cut; every `file:line` below resolves at this vintage)
+
+## Objective
+Ship the client-facing intake form Andrew described — a CLIENT (non-internal) portal user fills a form on the dashboard and a ticket appears on the internal Ticket Center board — WITHOUT widening the ticket API's exposure class: the write path goes through §7.3's dedicated service subject, the client token never writes, `firm` is server-derived, the board stays internal, and the resolver floor stays up. Two halves, one TO, one proof instance:
+
+- **(a) THE FORM — portal build on DEV (site Z, DE~Z-class hands).** A client-visible route carrying ONE form: `ticket_type` (the existing typed set `trade_request | service_request | meeting_request | other`, `portal/src/api/endpoints/tickets.ts:14` @91fe6afbca), `title`, `description`. Submit → confirmation text that stamps the ack wording from the EXISTING 2PM-ET cutoff config ("next trading day" semantics, PRD §7 Q4 remnant) — no sweep machinery. **Build ladder rung 2 — the estate already has a client-facing submission form: `portal/src/pages/TradeSubmission/` (and the ticket row already carries `linked_submission_id`, `tickets.ts:36`) — reuse its form primitives/pattern; do not invent a second form system.** The internal board (`portal/src/pages/TicketCenter/TicketCenter.tsx`, header `:4` "Internal client-service + trade-request ticketing") stays INTERNAL: the client session must not see or reach it. Silver-canvas color law + `/frontend-dev` headless render-check are BINDING — this is a client-facing surface, the exact class the law exists for.
+- **(b) THE WRITE PATH — sitez-AUTHORED, laptop-APPLIED (envelope law, D8 precedent).** `opal-ticket-api` today STAMPS caller identity and never CHECKS it (§7.3.0 / T-4): `infra/aws/lambda/ticket_center/lambda_function.py:57-64` `_actor()` reads `email`/`firmId` from the authorizer context, and `create_ticket` `:106-108` takes `requester.{email,name,firm}` FROM THE BODY with the actor as fallback, `:115` `source = body.get("source","portal")`, `:246-272` routes with no per-action authorization. The contract this TO lands (AUTHORED here as code + TF in the lane; APPLIED by the laptop AE lane as a mechanical apply — site Z is not a TF-apply site):
+  1. **Form submit = a server-side route behind the EXISTING scoped-route auth chain** (`/api/scoped/tickets*` → portal API GW + auth-validator-edge, PRD §2 R1-R3; no bespoke verification, no bypass header — U4-3 / D8 family-auth law). The route authenticates the CLIENT session via the existing authorizer, VALIDATES input server-side, DERIVES `requester` (display-grade: email/name/firm from the session context) and `firm` from the authorizer context — NEVER from the body — and writes the ticket under the **dedicated service subject `svc-ticket-form`** (§7.3.1: CREATE-only claims, U4-1/U4-2; key custody per the gateway secrets pattern, U4-5). `created_by` = the svc subject; `source = "dashboard_form:<firm>"`. **Client tokens do NOT write directly in v1** (§7.3.1 verbatim) — a direct client POST to `/api/scoped/tickets` is DENIED.
+  2. **§7.3.2 per-action matrix, server-side, deny-by-default:** CREATE → the two svc subjects + internal humans (`isInternal` server-checked) · READ (board/list/metrics) → internal humans ONLY · CLAIM/COMPLETE → internal humans, per-action SoD per the reference implementation (`trade-workflow-handler`) · everything else → DENY (no rule = no access). `firm` on the row is server-derived from the authenticated context, never from the body.
+  3. **The resolver floor is NOT retired by this TO.** `catalog_gate` `FLOOR_PATTERNS` keeps refusing ticket reads until ALL THREE of §7.3.3 hold (implemented + deny paths exercised live · W5 catalog ticket rows landed through the delegated semantics pass · CVO~Z certifies). Retirement is a versioned, consumers-first `catalog_gate` change that belongs to TO-F's sibling cert chain, not here.
+  4. **Implementation shape is a CTO~Z gate input, not ruled here** — the build ladder favors a route on the EXISTING `opal-ticket-api` Lambda behind the EXISTING authorizer (PRD non-goal: "a second ticket write path"; one logical producer, one repo home `infra/aws/lambda/ticket_center/lambda_function.py`, source-map entry `/functions/opal-ticket-api` already exists). A second Lambda / a second write path needs CTO~Z's explicit word at the gate.
+
+## Acceptance criteria (ids STABLE — the positional-citation rule: an rc=0 without this id set is UNVALIDATED)
+- **D7F-1 RENDER FOR A CLIENT, BOARD STAYS INTERNAL — BOTH DIRECTIONS MEASURED.** A CLIENT (non-internal) session renders the form on its route; the SAME session does not see/reach the internal board (`/ticket-center` — no nav affordance AND the route/API is denied). An INTERNAL session still reaches the board (positive control, separate invocation). A one-direction read is not this criterion.
+- **D7F-2 SCREENSHOT PASS.** `/frontend-dev` headless render of the form route, screenshot READ (not described), silver-canvas color law holds (light text / ghost-white buttons outside a dark Panel = FAIL). Screenshot path in the proof row.
+- **D7F-3 SUBMIT → 201 + THE ROW CONTRACT.** One real client-session submission → 201 and a ticket row with `source == "dashboard_form:<firm>"`, `requester.firm == the SESSION firm`, `requester.{email,name}` display-grade from the session, `created_by == svc-ticket-form`, `ticket_type` ∈ the typed set, `status == open`, an `events[]` row for creation. Positive control = its own invocation; the row read back from the table/API, not inferred from the 201.
+- **D7F-4 TENANT MUTANT.** A submission whose BODY carries a DIFFERENT `requester_firm`/`firm` → the stored row STILL carries the SESSION firm (body ignored or rejected — both PASS; silent adoption of the body firm = FAIL). This is `:108`'s body-trust, closed and proven.
+- **D7F-5 403 ON EXTERNAL-TOKEN DIRECT WRITE.** A CLIENT token POSTing directly to `/api/scoped/tickets` → 403 — the deny path RUN, not reasoned about (§7.3.4 item 1).
+- **D7F-6 BOARD READ DENIED TO THE CLIENT TOKEN.** `GET /api/scoped/tickets` (+ `/metrics`) with a client token → 403; the same GETs with an internal human token → 200 (positive control, separate invocation) (§7.3.4 item 4).
+- **D7F-7 CROSS-PRINCIPAL CLAIM → 403.** A claim by a principal outside the matrix's CLAIM set → 403 (§7.3.4 item 2); an internal human claim still succeeds (positive control, separate invocation).
+- **D7F-8 FLOOR NEGATIVE CONTROL.** `catalog_gate` `FLOOR_PATTERNS` still refuses ticket reads after this TO lands (§7.3.4 item 5) — exercised, not read from the file. The floor is retired by §7.3.3's three conditions and nothing else.
+- **D7F-9 MATRIX MUTANT FAILS.** Disable ONE action check in a SCRATCH copy → the corresponding deny test FAILS (§7.3.4 MUTANT — a matrix whose mutant passes was never load-bearing). Scratch only; never the deployed path.
+- **D7F-10 SVC SUBJECT + CUSTODY VERIFIED ON THE LIVE PRIMITIVE.** `svc-ticket-form` carries CREATE-only claims (a READ/CLAIM attempt under it → 403, separate invocation); key custody per the U4-5 gateway secrets pattern; ANY new secret/parameter/resource the apply adds is verified with `aws iam simulate-principal-policy` ONE `--resource-arns` PER CALL + the positive control as a SEPARATE invocation (`comp-iam` is a FLOOR — `(action)` never `(action, resource)`). Deployed-bytes check on the apply leg: the applied Lambda package member hashed against the repo member it is built from (Rule 22a CODE layer — a plan 0-diff proves nothing about code currency).
+- **D7F-11 ACK WORDING + ZERO NEW MACHINERY.** The submit confirmation stamps the ack text from the EXISTING 2PM-ET cutoff config (no new config, no sweep); `declared_exclusions` carries, each with its reason: no monitor/alert/SNS/SES (moratorium), no new consent grant, no bobby@, no board visibility change, no floor retirement, no TO-D caller/deep-link, no second write path — an unmarked gap reads as coverage.
+- **D7F-12 PROOF INSTANCE VALID rc=0 POSITIONAL** — `python .tools/proof-of-spec-check.py <instance> D7F-1,D7F-2,D7F-3,D7F-4,D7F-5,D7F-6,D7F-7,D7F-8,D7F-9,D7F-10,D7F-11,D7F-12` — rc taken WITHOUT a pipe (the usage banner contains the vocabulary of both verdicts; only the exit code discriminates). MEASURED/RULED-class rows only; every PASS row carries the re-runnable invocation + output + denominator; FAIL rows carry a reason.
+
+<proof_of_spec>
+  <expected_criteria>D7F-1,D7F-2,D7F-3,D7F-4,D7F-5,D7F-6,D7F-7,D7F-8,D7F-9,D7F-10,D7F-11,D7F-12</expected_criteria>
+  <instance_path>{assignee_folder}/deliverables/D7_TICKETING.TO-F-SITEZ_PROOF_OF_SPEC.json — ONE instance (single deliverable; the laptop apply leg's evidence rides the same rows because the site-Z seat EXERCISES D7F-3..10 against the applied API from here). `{assignee_folder}` resolves to the routed seat's BASE folder at GO (precedent seat: org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/); the GO message pins the literal path.</instance_path>
+</proof_of_spec>
+
+<compiler_tools_mandate>
+  PHASE 1 — BEFORE WRITING ANY CODE (existence checks first, build ladder rung 2):
+    <run>comp-routes behaviors</run>
+    <expect>/api/scoped/tickets{,/*} behaviors present → portal API GW origin, auth-validator-edge (PRD §2 R1-R3). CF custom-error rules noted — they MASK JSON errors as HTML.</expect>
+    <if_mismatch>A NEW route path (e.g. a form-submit path) with NO CF behavior 4xx's AT THE EDGE and looks like an auth failure — the behavior is part of the APPLY leg; name it in the laptop apply request, never work around it client-side.</if_mismatch>
+    <run>comp-routes trace TicketCenter</run>
+    <expect>Calls: claimTicket, completeTicket, createTicket, getTicketMetrics, listTickets (measured at cut). The NEW form component must call ONLY the submit path — never the board's list/claim/complete/metrics clients.</expect>
+    <if_mismatch>A form component importing board calls leaks internal reads into a client surface → D7F-1/D7F-6 fail by construction. Split the client.</if_mismatch>
+    <run>comp-cache map | grep -i ticket ; comp-cache collisions</run>
+    <expect>The board's tickets/metrics queryKeys are NOT shared by the new form; no collision row naming the form file.</expect>
+    <if_mismatch>A shared key caches board data into a client session's React Query cache. Key the form's (tiny) state separately or keep it out of the query cache.</if_mismatch>
+    <run>comp-transform schema-check TicketCenter</run>
+    <expect>Baseline 0 MISSING before you touch any shared ticket type; record the baseline.</expect>
+    <if_mismatch>A pre-existing MISSING is NOT yours — surprise-channel it (one line to COO~Z), do not fix in this TO.</if_mismatch>
+    <run>comp-iam service opal-ticket-api</run>
+    <expect>dynamodb ops on opal-tickets listed — a FLOOR, never a deletion warrant; UNTRACED/DEFERRED annotations kept.</expect>
+    <if_mismatch>Any NEW secret/param/table the svc-subject needs → the live primitive per D7F-10, one --resource-arns per call, positive control separate. NEVER use simulate-principal-policy to check an action NAME (that oracle is `aws accessanalyzer validate-policy`).</if_mismatch>
+    <run>comp-blast create_ticket</run>
+    <expect>Consumers = TicketCenter.tsx + tickets.ts (+ the new form path). If the blast names ANY other consumer, it is cross-domain — name it under cross_domain_coordination before writing.</expect>
+    <if_mismatch>Unnamed consumer of the create path = a silent contract break on a surface you did not scope. Stop, name it, MCP the owner.</if_mismatch>
+    <run>ls portal/src/pages/TradeSubmission/ ; git log --oneline -5 -- portal/src/api/endpoints/tickets.ts</run>
+    <expect>The client-facing submission-form precedent exists (reuse its primitives); the tickets client's recent history read before extending it.</expect>
+    <if_mismatch>If no reusable form pattern exists, say so in the log and build the MINIMUM — rung 7 only after rungs 1-6 are shown exhausted.</if_mismatch>
+  PHASE 2 — BEFORE COMMIT:
+    <run>git -C portal branch --show-current</run>
+    <expect>DEV (the portal main worktree stays on DEV, always; measured DEV at cut @ccda8711).</expect>
+    <if_mismatch>`cd portal && git checkout DEV` before any portal work — never a .runtmp copy, never PROD.</if_mismatch>
+    <run>comp-transform schema-check <NewFormComponent></run>
+    <expect>0 MISSING (MISSING = runtime undefined on a client-facing surface).</expect>
+    <if_mismatch>Fix before commit; a MISSING here ships undefined to a client.</if_mismatch>
+    <run>/frontend-dev  (headless render of the form route; READ the screenshot)</run>
+    <expect>Silver-canvas color law holds; the screenshot is attached to D7F-2, not described.</expect>
+    <if_mismatch>Light text / ghost-white button outside a dark Panel = the #1 recurring portal defect — fix, re-render, re-read.</if_mismatch>
+    <run>.tools/commit-gate.sh infra/aws/lambda/ticket_center/lambda_function.py</run>
+    <expect>PASS (py_compile + ruff py39); `from __future__ import annotations` present.</expect>
+    <if_mismatch>Fix; a gate FAILURE is never bypassed (`--force` does not bypass a gate failure).</if_mismatch>
+  PHASE 3 — AFTER COMMIT / AFTER THE LAPTOP APPLY:
+    <run>comp-routes behaviors  (re-run)</run>
+    <expect>The submit path's behavior is landed in DESIRED; then the APPLIED read on the live primitive (the 22a split: a comp-tool cannot tell landed from planned).</expect>
+    <if_mismatch>DESIRED-only = INFERRED, non-actionable for the GO-to-exercise; wait for the apply confirmation, then exercise D7F-3..10.</if_mismatch>
+    <run>python .tools/proof-of-spec-check.py <instance>.json D7F-1,D7F-2,D7F-3,D7F-4,D7F-5,D7F-6,D7F-7,D7F-8,D7F-9,D7F-10,D7F-11,D7F-12</run>
+    <expect>rc=0 VALID, 12 rows, coverage diff empty both ways — rc taken without a pipe.</expect>
+    <if_mismatch>rc=1 → fix the named violation; rc=2 → usage error: the id set is POSITIONAL (argv[2]) — there is no --expected-criteria flag, and dropping the id argument yields a clean "VALID, COVERAGE UNCHECKED" that validates NOTHING.</if_mismatch>
+</compiler_tools_mandate>
+
+<cross_domain_coordination>
+  - **0.4.0_DE_ClientPlatform~Z / D8_LIVEEDIT (portal DEV, same hands class):** the D8 edit surface @ccda8711 carries the employee/non-employee affordance logic — REUSE its cohort check for the board-vs-form split (D7F-1); do not fork a second cohort predicate. Portal DEV is a shared tree: commit your own lane, MCR the D8 seat before touching any file the D8 build owns.
+  - **TO-F / W5 catalog floor (`catalog_gate.py` FLOOR_PATTERNS; 3.0.0_SA_CVO~Z cert chain):** DO NOT TOUCH. This TO's D7F-8 proves the floor still refuses. Retirement is §7.3.3's three conditions, versioned, consumers-first — on the cert chain, not here.
+  - **D7 TO-AC leg-3 (TO-C duty at 0.5.0_AE_OpalETL~Z):** CONSUMER of this TO's submit path (TAC-2' = one real form submission → ticket + buzz + link). The buzz is NOT this TO's. Notify CTO~Z + COO~Z at D7F-3 first PASS so leg-3 can sequence.
+  - **TO-D (svc-analyst-intake + board deep-link, laptop):** SIBLING caller of the same matrix. Do not build the Analyst subject or the deep link here; do design the matrix so TO-D's subject slots into the CREATE set without a matrix rewrite.
+  - **Laptop AE apply lane (0.7.0_AE_CloudOps — the D8-applies precedent):** the Lambda/TF/CF-behavior applies of your sitez-authored config. ONE repo home for the handler (`infra/aws/lambda/ticket_center/lambda_function.py`, source-map `/functions/opal-ticket-api`) — never a second copy in another tree (the two-homes-diverged class). Terraform is the only Lambda deploy mechanism; `safe-apply`; tag after the 0-diff.
+  - **1.0.0_SA_CTO~Z:** gate owner (§7.3 named gate) + routing + acceptance. The implementation-shape call (route-on-existing-Lambda vs other) is theirs at the gate. **2.0.0_SA_COO~Z:** RAVC-4 validation vs §7.3.4's bar + the named-id-set rule; census at the seat event. No new gate is created by this TO — the transferring gate set is the one already in the PRD/TOs (@550b20ec5b seam 1).
+</cross_domain_coordination>
+
+## Do not
+- **No client token writes directly** (§7.3.1) — the service-subject indirection is the design, not an option. **No bypass header, no bespoke verification** (U4-3 / D8 family-auth law).
+- **No widening beyond Andrew's words:** the SUBMISSION surface is client-facing; the board / notification set / visibility stay INTERNAL; no bobby@ until his word; no new consent grants; no monitor/alert/SNS/SES (moratorium); **no floor retirement** here.
+- **No second ticket write path, no shadow/parallel channel, no standing comparator** — build it correctly the first time on the real path and port over.
+- **No TF apply / Lambda code push from site Z** (envelope law) — author in the lane, request the laptop apply, exercise from here after it lands. **Never `aws lambda update-function-code`; never bare `terraform apply`.**
+- **Lane commits only, never push** (shared checkout; MSTR~Z integrates). Portal main worktree stays on DEV.
+- **No new gate on anyone's work** — a finding surfaces loudly the same turn; it never holds another seat.
+
+## Reporting (RAVC)
+Ack the GO immediately (RAVC-2). Report to **CTO~Z (acceptance) + COO~Z (validation)** at: (1) Phase-1 existence checks done (what was reused); (2) the form renders + D7F-2 screenshot PASS on DEV; (3) the sitez-authored write path committed + the laptop apply REQUESTED (name the AE lane, the files, the TF resources, the CF behavior); (4) D7F-3 first PASS (leg-3 sequencing trigger); (5) completion with the proof instance path + rc. **Surprise channel = one line to COO~Z via the broker; no action, keep working.** Session log with a Compiler Tools section = a deliverable. **A TO with no compiler check logged is not accepted as complete.**
