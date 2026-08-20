@@ -1,0 +1,195 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_TRUNCLASS.FIX12",
+ "firm": "FABRIC",
+ "phase": "NON-BUILD-OTHER",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_TRUNCLASS.FIX12.tiered-pagination-and-resolver-fixes.md",
+  "group": "OTHER",
+  "vintage_commit": "aca933f1e7"
+ },
+ "assignee": "0.8.0_AE_CloudComp",
+ "artifacts_produced": [
+  {
+   "kind": "script",
+   "commit_or_etag": "59347e4d9e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "path_or_key": ".tools/comp-firmsep-sweep.py",
+   "artifact_covered_by": [
+    "F1"
+   ],
+   "deploy_evidence": "Comp-plane tool, repo-invoked, no deploy leg. Audited ANY_EXEC lane override (COO GO 63153). SEQUENCING SLIP DISCLOSED on the commit pair: the STRUCTURAL-TWOPHASE discharge recompile @f57b4f9d54 landed BEFORE this fix commit (first attempt lane-refused, chained command ran on); content-hash predicate makes the end-state self-consistent, --check CURRENT rc=0 post-landing."
+  },
+  {
+   "kind": "script",
+   "commit_or_etag": "59347e4d9e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "path_or_key": ".tools/comp-deadgrant.py",
+   "artifact_covered_by": [
+    "F2"
+   ],
+   "deploy_evidence": "Same plane, same override, same commit."
+  },
+  {
+   "kind": "script",
+   "commit_or_etag": "59347e4d9e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "path_or_key": "org/modules/graph/clobber_scan.py",
+   "artifact_covered_by": [
+    "F3"
+   ],
+   "deploy_evidence": "Same plane, same override, same commit."
+  },
+  {
+   "kind": "script",
+   "commit_or_etag": "59347e4d9e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "path_or_key": "org/modules/graph/vectorize_audit_cli.py",
+   "artifact_covered_by": [
+    "F4"
+   ],
+   "deploy_evidence": "Same plane, same override, same commit."
+  },
+  {
+   "kind": "script",
+   "commit_or_etag": "59347e4d9e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "path_or_key": "org/modules/graph/comp_aws_cli.py",
+   "artifact_covered_by": [
+    "F5"
+   ],
+   "deploy_evidence": "Same plane, same override, same commit. The _paged helper + 8 re-pointed sites."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "F1",
+   "criterion_verbatim": "comp-firmsep-sweep.py:73 -- full token walk / materialised list; a synthetic page-boundary test proves the sweep sees item N+1 past a page; denominator printed in output.",
+   "method": "live_read",
+   "invocation": "all_roles() vs all_roles(page_size=50) against the real estate (harness exercise_fix12.py)",
+   "output_evidence": "--max-items 1000 removed -> CLI auto-pagination, counted client-side; main prints 'roles : N in account (FULL auto-paginated walk, counted client-side)'. Boundary test: full walk = 212 roles; page-size-50 walk (>=5 page boundaries crossed against the real estate) = 212 roles; sets EQUAL. --page-size flag added so the boundary crossing stays exercisable.",
+   "denominator": "212 of 212 roles, both walks, sets identical",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F2",
+   "criterion_verbatim": "comp-deadgrant.py:206 -- same class fix, same evidence shape.",
+   "method": "live_read",
+   "invocation": "all_live_secret_names(['us-east-1','us-east-2']) via the harness",
+   "output_evidence": "--max-items 500 removed -> full auto-paginated walk both regions; main prints the frame ('FULL auto-paginated walk, counted client-side -- never a --max-items page'). Live: 88 names (the census-day doc said 78 -- the universe had ALREADY grown past its own documentation, which is the fix's point made by the estate itself).",
+   "denominator": "88 secret names, both regions, full walk",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F3",
+   "criterion_verbatim": "clobber_scan.py:182 -- list_object_versions paginated; a >1-page synthetic fixture (or paginator-mock) proves a deep clobber is seen.",
+   "method": "test_suite",
+   "invocation": "harness: 2-page FakePaginator mock + live read of opal-data-bd platinum/firm/header_metrics.json",
+   "output_evidence": "live_confirm now walks the list_object_versions paginator; pages_walked added to the result frame. Mock: 3 versions across 2 pages -> n_versions=3 (the page-2 version IS seen), pages_walked=2, and the cross-page-boundary etag interleave DETECTS (active_clobber=True) -- a deep clobber no longer hides past page 1. Live: 26 versions / 1 page / no clobber on the real bd key.",
+   "denominator": "mock 3 of 3 versions over 2 pages; live 26 versions over 1 page",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F4",
+   "criterion_verbatim": "vectorize_audit_cli.py:23 -- full-id glob resolves BEFORE stem-glob (exact match wins); regression case: a dotted script_id beside a stem-sibling resolves to the RIGHT file.",
+   "method": "test_suite",
+   "invocation": "harness: scratch gold dir {INF_D_06.aaa.py, INF_D_06.cash_drag_v2.py}, resolve 'INF_D_06.cash_drag'; plus the OLD-ORDER mutant",
+   "output_evidence": "Order inverted (exact file -> full-id glob -> stem glob LAST), all globs sorted for deterministic first-match. Regression: resolves INF_D_06.cash_drag_v2.py (RIGHT). Mutant (pre-fix order replayed): resolves INF_D_06.aaa.py (the SIBLING) -- the defect was real and the reorder is what fixes it.",
+   "denominator": "2-file discriminating fixture; fix and mutant both exercised",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F5",
+   "criterion_verbatim": "comp_aws_cli.py x8 (460/472/482/531/839/1405/1454/1632) -- one consistent pagination pattern across all eight; per-site evidence row in the instance.",
+   "method": "command",
+   "invocation": "git show 59347e4d9e -- org/modules/graph/comp_aws_cli.py; live: live_sns() + live_sqs() via harness",
+   "output_evidence": "ONE pattern: _paged(client, op, result_key, frame=..., **kw) -- service paginator, tuple result-keys for nested shapes, honest one-call fallback (unused by the eight). Per-site: :460 sns list_topics [frame]; :472 sns list_subscriptions_by_topic (per-topic, count carried in the node it builds); :482 sqs list_queues [frame]; :531 + :1454 cloudfront list_distributions via ('DistributionList','Items') [frames]; :839 ecs list_clusters [frame]; :1405 + :1632 lambda list_event_source_mappings [frames dlq/triggers]. Live: '[frame] sns.list_topics: 15 item(s) over 1 page(s), full walk' + '[frame] sqs.list_queues: 17 item(s) over 1 page(s), full walk'; node counts match frames.",
+   "denominator": "8 of 8 sites re-pointed to the one pattern",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F6",
+   "criterion_verbatim": "Every fixed call site's output carries its denominator/frame beside the count (the retrieval law made mechanical at these 12 sites).",
+   "method": "command",
+   "invocation": "outputs read live at every printing surface (harness runs above)",
+   "output_evidence": "firmsep: 'N in account (FULL auto-paginated walk, counted client-side[, page-size forced])'. deadgrant: 'N (FULL auto-paginated walk ... never a --max-items page)'. clobber: pages_walked in the result dict beside n_versions. comp_aws_cli: [frame] stderr line (op, items, pages, 'full walk') per collection walk; the ONE non-frame site (:472 per-topic subscriptions) carries its full list in the node it builds, beside the topic's own subscription_count attribute -- disclosed, not silent. vectorize: resolution is a path not a count; determinism (sorted) is its frame.",
+   "denominator": "12 of 12 sites: 11 framed counts + 1 path-resolution (framed by determinism), each stated",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F7",
+   "criterion_verbatim": "Regression: census scanner re-run over touched files = 0 new S1-S5 hits; fixture-check still flags both known specimens.",
+   "method": "command",
+   "invocation": "census_trunclass.py full re-scan + --fixture-check",
+   "output_evidence": "Re-scan 237/237 files (94,130 lines): 394 hits vs 398 pre-fix -- the fixed sites' hits are GONE (S4 39->33; firmsep/deadgrant/clobber call rows cleared). Net S3 +2 EXPLAINED AND CLASSIFIED: 4 new detector matches are the fixes' OWN docstrings/print-strings naming the removed '--max-items' flag -- prose mentions (the census's established DOC-STRING class; the scanner is textual and cannot tell a mention from a call), ZERO new EXECUTABLE truncation instances. Fixture-check: dot-split->S1 PASS, grep-c->S5 PASS, rc=0.",
+   "denominator": "237 of 237 corpus files re-scanned; 0 new executable instances; 4 prose mentions classified not hidden",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F8",
+   "criterion_verbatim": "proof-of-spec-check rc=0 (positional ids, rc without a pipe); CTO gate acceptance cited in the close.",
+   "method": "schema_validation",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_TRUNCLASS.FIX12_PROOF_OF_SPEC.json F1,F2,F3,F4,F5,F6,F7,F8",
+   "output_evidence": "TRUE rc=0 measured without a pipe on this exact instance (verbatim validator line in the RAVC). CTO gate acceptance cited in the close message when it lands -- the gate is CTO's act, not this instance's to pre-claim.",
+   "denominator": "8 of 8 expected ids carried, coverage-checked",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "F4's old-order replay is the primary mutant: the PRE-FIX resolution order run against the same fixture resolves the SIBLING file. F3's mock places the discriminating version on PAGE 2 so a single-page implementation would return n_versions=2 and MISS the interleave. F1's boundary test forces >=5 page crossings the old --max-items path never exercised.",
+   "status": "FIRED-AS-EXPECTED",
+   "expected": "Old order -> sibling (INF_D_06.aaa.py); single-page read -> 2 of 3 versions, no interleave; forced-pages walk == full walk.",
+   "observed": "Old order resolved INF_D_06.aaa.py exactly; mock returned 3/3 with pages_walked=2 and active_clobber=True; 212==212 across boundaries. Harness 7/7."
+  },
+  "determinism": {
+   "description": "Globs now sorted (fs-order first-match was part of the F4 defect); AWS reads are live point-in-time, each stamped with its count and frame.",
+   "status": "STABLE",
+   "method": "Repeat resolution on the fixture; live counts framed per run.",
+   "observed": "Fixture resolution identical across runs; live: 212 roles / 88 secrets / 15 topics / 17 queues at ~1545Z."
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "surface_check_cli.py:846",
+   "reason": "RETIRED-DEAD per the census + CTO concurrence -- classified, not a fix target, NOT a deletion warrant. Untouched, verified untouched in the commit diff."
+  },
+  {
+   "item": "The 4 new S3-detector prose mentions (fix docstrings naming --max-items)",
+   "reason": "Non-executable documentation strings -- the DOC-STRING class the census established; removing the words would trade honest documentation for a cleaner scan count."
+  }
+ ],
+ "surprises": [
+  "SEQUENCING SLIP, self-caught: the first fix-commit attempt was lane-refused (ANY_EXEC enumeration, override env absent) and the chained command ran on -- the discharge recompile @f57b4f9d54 landed BEFORE its fix commit @59347e4d9e, referencing a commit that did not yet exist. The content-hash predicate (this morning's instance-3) made the end-state self-consistent -- the regen fingerprinted the exact bytes the fix commit then landed, and --check reads CURRENT -- but under the OLD mtime fingerprint this would have been a live laundering instance. Surfaced in the artifact row, here, and the RAVC.",
+  "F2's live count (88) exceeds the census-day documented universe (78) -- the secret universe grew during the very window the fix was queued; the cap's margin was shrinking while the fix waited.",
+  "The ANY_EXEC-enumeration-vs-dispatch gap recurred (3rd override this session on TO-dispatched work) -- pattern now real per COO's if-it-recurs note 63166; carried again for the COO/CTO look."
+ ],
+ "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-20/fix12_truncation_fixes_1530-1550Z.md",
+ "compiler_tools": [
+  {
+   "tool": "census scanner (scratchpad)",
+   "invocation": "full re-scan + --fixture-check",
+   "result": "PASS -- 394 hits, fixed sites cleared, specimens still flag"
+  },
+  {
+   "tool": "commit-gate.sh",
+   "invocation": "all 5 touched .py",
+   "result": "PASS 5/5"
+  },
+  {
+   "tool": "comp-system",
+   "invocation": "--check post-fix (true rc)",
+   "result": "PASS -- SYSTEM CURRENT rc=0"
+  },
+  {
+   "tool": "exercise harness",
+   "invocation": "exercise_fix12.py (F1-F5 live + mocks + mutants)",
+   "result": "PASS 7/7"
+  },
+  {
+   "tool": "proof-of-spec-check",
+   "invocation": "this instance, F1-F8 positional",
+   "result": "rc=0 cited in the RAVC"
+  }
+ ]
+}
