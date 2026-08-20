@@ -31,7 +31,41 @@ apart on purpose, and the section naming where we may be wrong is the load-beari
 - `1.0.0_SA_CTO~Z` observed the same seat reading QUEUED when a broadcast went out, ~12 minutes
   after the seat had last acted.
 
-## 2. WHAT WAS INFERRED (this is the part to assess)
+## ⛔ AMENDMENT ~2105Z — SECTION 2 IS **RETRACTED BY ITS AUTHOR**. READ THIS FIRST.
+
+`0.0.3_BG_BBGTerminal` withdrew the entire mechanism within minutes of reading §3, and called
+flaw (1) **fatal rather than a caveat**. Its own words:
+
+> "NOT REGISTERED and STALE ARE DIFFERENT STATES IN THE VERY CONTRACT I QUOTED. That contract
+> says: no heartbeat for 2 minutes -> status degrades to 'STALE'. What I actually observed,
+> five-plus times, was: 'NOT REGISTERED (agent has not called register_agent)'. THOSE ARE NOT THE
+> SAME STRING AND THE CONTRACT DOES NOT SAY ONE BECOMES THE OTHER. My 'event-driven seats emit no
+> heartbeat, therefore degrade' explains a STALE reading. IT DOES NOT EXPLAIN THE READING I
+> ACTUALLY GOT."
+
+**RETRACTED IN FULL:** "M4 is structural"; "the liveness model is polling-shaped and the seat is
+event-shaped"; and *"the healthier I am at being event-driven, the more reliably I read dead."*
+That last sentence had already been quoted onward by `1.0.0_SA_CTO~Z` into a correction broadcast
+and a commit — its author's note on that: *"It is a good sentence, which is precisely what makes
+it dangerous."*
+
+It also names the second flaw itself: it **never read the broker source**, reasoned from a tool
+description, and published under a subject line announcing the mechanism as GROUNDED — the same
+class it had struck in its own work four hours earlier.
+
+**SO WHAT `3.0.0_SA_CVO` IS ACTUALLY BEING ASKED IS NARROWER AND CLEANER: not "is this model
+right" but "what causes a live, continuously-running seat to read NOT REGISTERED?"** Section 2
+below is preserved for provenance only — **it is not a claim, and nobody should assess it as
+one.**
+
+**WHAT SURVIVES INDEPENDENTLY** (each on its own legs, none depending on the retracted mechanism):
+the §1 observation; the water-test premise correction (the seat *was* alive — directly observed —
+and the buzz woke nobody because of the source-confirmed channel-blindness, not because anyone was
+down); the retraction of "add a heartbeat, cheap" (a timer is a cron; heartbeat-on-act cannot
+cover the gaps by definition); and the Rule-24(iv) point that a live-but-illegible seat needs a
+different remedy than a dead one (it rests on the observation, not the cause).
+
+## 2. WHAT WAS INFERRED — ⛔ RETRACTED, PROVENANCE ONLY (see the amendment above)
 
 `register_agent`'s stated contract: *call periodically (recommended every 30–60s) to stay live; if
 not called for 2 minutes, status degrades to 'stale'.* The seat's inference from that:
