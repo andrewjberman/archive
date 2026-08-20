@@ -49,9 +49,14 @@
 
   <compiler_tools_mandate>
     Phase 1 -- before writing:
-      <run>comp-find "expected_last_trading_day" (the REQUIRED caller-audit leg)</run>
-      <expect>Every call site enumerated with denominator; each confirmed as wanting EXPECTED-FRONTIER semantics (freshness checks) -- any caller wanting T-1 read-frontier semantics is a second instance of this same defect: surface it, fix only per this TO's scope</expect>
-      <if_mismatch>A second read-frontier caller = surprise-channel line to COO; do not widen the fix in-lane.</if_mismatch>
+      CALLER-AUDIT: ALREADY COMPLETE -- DISCHARGES BY CITATION, DO NOT RE-RUN (CVO
+      @412f3886a4, org/tier1_exec/3.0.0_SA_CVO/deliverables/
+      CVO_AUDIT_EXPECTED_LAST_TRADING_DAY_CALLERS_20260820.md): 27 call expressions from a
+      233-hit/27,022-file census -- 20 CORRECT (freshness-family, frontier paired with
+      trading_days_behind tolerance), 2 MISUSE (= THIS fix: :230 AND :237), 2 BOUND-OK,
+      1 CONDITIONAL (mdpf-trigger:812, routed separately by COO, NOT yours). The function
+      is VENDORED 11x (6+ lambda copies) -- the calendar-untouched ruling is doubly load-
+      bearing: a lib change would silently fork the copies.
 
       <run>comp-pipescript io chain_49f_entrypoint --pipeline bd</run>
       <expect>Orientation on the chain's IO surface before the edit (Rule 13 DS minimum); flag anything unexpected</expect>
@@ -75,10 +80,13 @@
   </cross_domain_coordination>
 
   <acceptance_criteria>
-    T1  Call-site fix landed: chain_49f_entrypoint.py production branch derives
-        prev_trading_day(now); doc block names the same primitive; diff quoted.
-    T2  Caller-audit of expected_last_trading_day: all call sites enumerated (denominator
-        printed), each classified expected-frontier-correct or surfaced.
+    T1  Call-site fix landed at BOTH lines (CVO audit rider 1): chain_49f_entrypoint.py:230
+        (production branch) AND :237 (dry-run default) derive prev_trading_day(now); doc
+        block names the same primitive; both diffs quoted.
+    T2  Caller-audit DISCHARGED BY CITATION: the instance row cites CVO @412f3886a4
+        (27 expressions / 233-hit census, 2 MISUSE = this fix's two lines) -- do not re-run;
+        re-deriving a completed audit against tomorrow's deadline is the round-trip this
+        citation exists to kill.
     T3  Both-directions battery + refusal control green (outputs quoted; the refusal control
         EXERCISED, not asserted).
     T4  Deployed-bytes MATCH before 2026-08-21 12:45Z (comp-pipescript deployed output quoted
