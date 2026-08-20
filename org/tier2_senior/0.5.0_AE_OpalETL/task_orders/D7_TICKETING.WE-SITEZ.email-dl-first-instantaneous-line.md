@@ -48,12 +48,32 @@ agent-session dependency BY CONSTRUCTION, and NO PER-TOOL EXCEPTION IS POSSIBLE.
 probe would only have sampled one tool of a class that shares one gate — the structural read is the
 stronger result.)*
 
-⛔ **AND WHY IT CANNOT BE FIXED BY DILIGENCE:** `server.py:81-87` returns 401 with a
-`WWW-Authenticate: Bearer resource_metadata=…` pointer whose stated purpose is *"triggers Claude"* —
-**the refresh is an INTERACTIVE OAuth challenge answered by the Claude Code client.** A Windows
-Scheduled Task **has no client to answer it**. The credential is not merely short-lived: it is
-**renewable ONLY by the very thing the backstop is meant to work without.** That is why the runner
-exits 2 and waits — *there is nothing it could do differently.*
+⛔ **RETRACTED BY ITS AUTHOR (3021), AND THE REPLACEMENT IS THE HONEST ARGUMENT — DO NOT CARRY THE
+OLD ONE.** This clause previously read that the refresh *"is an INTERACTIVE OAuth challenge"* and
+that a Scheduled Task *"structurally cannot self-heal."* **TOO STRONG.** Measured (field-name census
+over the credential store, 4 of 4 records, no values printed): **every record carries `refreshToken`
++ `clientId` + `redirectUri` + `scope`** — the complete material for a standard **`refresh_token`
+grant, which is a server-to-server POST needing no human and no browser.** The 401 +
+`WWW-Authenticate` path grounded at `server.py:81-87` is **the INTERACTIVE path — correct for a
+FIRST authorization or an already-failed refresh. It is ONE path, not THE only one.**
+
+>> **WHY THE RUNNER STILL DOES NOT REFRESH IS A DESIGN CHOICE, stated in the engine's own docstring:
+*"Claude Code owns the refresh (rotating tokens), so this never refreshes itself → no refresh-token
+fight."* THE TOKENS ROTATE — two independent refreshers would invalidate each other.**
+
+✅ **THE DISQUALIFICATION SURVIVES, ON A BETTER ARGUMENT: ENTANGLEMENT, NOT IMPOSSIBILITY.** Making a
+gateway-mediated DL work unattended would require **a SECOND REFRESHER RACING CLAUDE CODE ON ROTATING
+TOKENS** — trading a *predictable hourly gap* for **unpredictable mutual invalidation that would take
+down the agent's own connectivity.** That is **the backstop damaging the thing it backstops.**
+>> **THE PRINCIPLE, and it is the durable half: A BACKSTOP MUST NOT BE ENTANGLED WITH THE CREDENTIAL
+OF THE SYSTEM IT COVERS.** Criterion (1) still disqualifies the gateway; SES still survives.
+
+⚠ **AND A DELIBERATE NON-MEASUREMENT, recorded with its reason rather than left as a gap:** the
+refresh grant was **NOT attempted**. A successful refresh **ROTATES** the token, and the artefacts
+live on that exact credential right now are **the production intake's send leg and another seat's
+armed monitor** — so the experiment's failure mode is invalidating a client-facing path and a peer's
+reachability to confirm a claim already corrected on stronger evidence. If the DL design ever needs
+it measured, it wants **a scratch OAuth client or Andrew's word, never a live-credential probe.**
 
 >> **RULING INPUT: the gateway is DISQUALIFIED for the DL on criterion (1), definitively rather than
 probably** — a gateway-mediated DL would reproduce the exact failure it exists to backstop, at the
