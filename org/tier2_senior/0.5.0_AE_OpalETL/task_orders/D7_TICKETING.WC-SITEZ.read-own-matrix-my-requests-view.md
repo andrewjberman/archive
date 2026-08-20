@@ -74,13 +74,25 @@ An absence that is never asserted is not tested.
 - **WC-5** Portal view renders all three tabs against DEV with a client identity; claimed rows
   show claimer name+email; Completed shows the summary when present; screenshots READ; color law
   compliant.
+- **WC-5b** ⛔ **A TERMINAL VALUE THAT IS NOT "COMPLETED" MUST NOT RENDER AS COMPLETED**
+  (`3.0.0_SA_CVO~Z` CE finding 5 @97e58b0c14 — *the P0's shape one layer over*). The client tabs are
+  Open / In Progress / Completed, and **a second terminal `status` value has NO TAB.** Rendered under
+  "Completed", a **withdrawn / out-of-scope / duplicate** ticket **still reads to the client as
+  resolved** — the original defect intact, now with better internal data behind it. **Internal-
+  recorded is not client-rendered.** ⚠ **The per-value TAB MAPPING (and which values show NO AI
+  summary) belongs to the closure-reason ruling at `1.0.0_SA_CTO~Z`, NOT to this TO** — this
+  criterion exists to make the omission FAIL here rather than ship. Exercised per terminal value.
+  Related: any reason carrying a POINTER (e.g. `duplicate` → the canonical ticket) must carry it
+  into the client projection — *a terminal status without its pointer is the rot with a tidier
+  label*, and a client told "duplicate" with no path to where their request actually lives is that
+  rot made client-facing.
 - **WC-6** Ship via the promote pattern (DT lane, /prod-deploy, freeze window declared to 2.0.0_SA_COO~Z);
   exercised on PROD both directions post-promote (the TO-F B-row pattern).
 - **WC-7** Proof instance VALID rc=0 positional, ids WC-1..WC-7 (halves may file jointly; one
   instance).
 
 <proof_of_spec>
-  <expected_criteria>WC-1,WC-2,WC-2b,WC-2c,WC-3,WC-4,WC-5,WC-6,WC-7</expected_criteria>
+  <expected_criteria>WC-1,WC-2,WC-2b,WC-2c,WC-3,WC-4,WC-5,WC-5b,WC-6,WC-7</expected_criteria>
   <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WC_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
