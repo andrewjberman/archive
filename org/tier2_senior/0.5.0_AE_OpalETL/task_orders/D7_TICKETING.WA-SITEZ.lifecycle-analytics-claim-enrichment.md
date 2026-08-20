@@ -1,12 +1,12 @@
 # TO D7_TICKETING.WA-SITEZ — Ticket Lifecycle v2 W-A: native analytics fields + claim enrichment (smallest first; unblocks C3/O6)
 
 <task_order id="D7_TICKETING.WA-SITEZ" project="OPAL_TICKET">
-<issued_to>0.5.0_AE_OpalETL~Z (build; site-Z). Laptop apply leg = EXECUTION PLACEMENT via MSTR~Z ferry (envelope law @550b20ec5b: applies stay under laptop apply-time mechanics).</issued_to>
+<issued_to>0.5.0_AE_OpalETL~Z (build; site-Z). Laptop apply leg = EXECUTION PLACEMENT via 0.0.0_AB_MSTR~Z ferry (envelope law @550b20ec5b: applies stay under laptop apply-time mechanics).</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-20T20:0xZ</issued>
-<status>pending — GO rides this commit's MCP. QUEUE POSITION: behind the dep-3 registration sitting at this seat (CTO~Z @942d4d885c: "the current dep-2/dep-3 chain is UNCHANGED and remains the critical path"). W-A is first of the four W lanes (CTO sequencing: smallest first).</status>
+<status>pending — GO rides this commit's MCP. QUEUE POSITION: behind the dep-3 registration sitting at this seat (1.0.0_SA_CTO~Z @942d4d885c: "the current dep-2/dep-3 chain is UNCHANGED and remains the critical path"). W-A is first of the four W lanes (CTO sequencing: smallest first).</status>
 <priority>P2 (P1 = dep-3 schedule-landed)</priority>
-<authority>ANDREW-DIRECT 2026-08-20 ~19:4xZ, TICKET LIFECYCLE v2 flow, record @942d4d885c (org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_ANDREW_DIRECT_20260820_TICKET_LIFECYCLE_V2_FLOW.md) — his O6 verbatim: "we need to have analytics built in to the DDB... easier to manage if its baked into the DDB and process natively." CTO~Z ruling 3 (ANALYTICS NATIVE) + C3 (claimer identity visible). Rigor frame: ATOM_DECOMP discipline @9b93c39eeb. CTO~Z RULES + COO~Z DECOMPOSES (@550b20ec5b). Design-of-record = the CTO~Z deliverable above; PRD §-anchor is CTO~Z's leg (TOs re-point when it lands).</authority>
+<authority>ANDREW-DIRECT 2026-08-20 ~19:4xZ, TICKET LIFECYCLE v2 flow, record @942d4d885c (org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_ANDREW_DIRECT_20260820_TICKET_LIFECYCLE_V2_FLOW.md) — his O6 verbatim: "we need to have analytics built in to the DDB... easier to manage if its baked into the DDB and process natively." 1.0.0_SA_CTO~Z ruling 3 (ANALYTICS NATIVE) + C3 (claimer identity visible). Rigor frame: ATOM_DECOMP discipline @9b93c39eeb. 1.0.0_SA_CTO~Z RULES + 2.0.0_SA_COO~Z DECOMPOSES (@550b20ec5b). Design-of-record = the 1.0.0_SA_CTO~Z deliverable above; PRD §-anchor is 1.0.0_SA_CTO~Z's leg (TOs re-point when it lands).</authority>
 </task_order>
 
 ## Objective
@@ -21,7 +21,7 @@ IN the Lambda at the transition write (process-native, no external analytics job
 - `created_at` exists; one grain = one ticket's lifecycle.
 
 **AMENDED ~20:09Z — ANDREW-DIRECT DAY-ONE FIELD SET (his no-retrofit word, "don't want to have to
-be retroactively adding stuff", routed via CTO~Z 2777):** the cut ALSO carries, at day one:
+be retroactively adding stuff", routed via 1.0.0_SA_CTO~Z 2777):** the cut ALSO carries, at day one:
 - `schema_version: 2` (cheapest future-proofing);
 - `priority` enum RESERVED (a reserved value is a schema act — it rides the Rule-24 record);
 - `category` / `tags[]` free-form at claim/close;
@@ -57,13 +57,13 @@ surfaces re-tested per the 08-20 Rule-24 widening).
   tag; 0-diff.
 - **WA-7** Proof instance VALID rc=0 POSITIONAL (`python .tools/proof-of-spec-check.py <instance>
   WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8,WA-9`) — rc taken unpiped.
-- **WA-9** THE CVO~Z PRE-CUT ITEMS DISCHARGED, each with its own evidence: (a) the requester-keyed
+- **WA-9** THE 3.0.0_SA_CVO~Z PRE-CUT ITEMS DISCHARGED, each with its own evidence: (a) the requester-keyed
   GSI decision RECORDED (index added + verified, or the explicit no-index decision that obligates
   W-C's printed bound); (b) `client_updates[]` per-entry AND per-ticket caps exercised (an
   over-cap append is refused, both directions) — with the S3 spill verifiably NOT built; (c) the
   `_sod_block` carve-out for the client-update append decided and exercised (the requester CAN
   append to their own ticket, and CANNOT do anything else to it — the carve-out is scoped, proven
-  by the second half); (d) the reopen/timing GRAIN resolved per CTO~Z's ruling BEFORE the Rule-24
+  by the second half); (d) the reopen/timing GRAIN resolved per 1.0.0_SA_CTO~Z's ruling BEFORE the Rule-24
   record is written, and the record states which shape landed.
 - **WA-8** DAY-ONE SET exercised (the ~20:09Z amendment): a create carries `schema_version:2` +
   `client_updates[0]` == the original description; a claim/close append lands a further
@@ -78,7 +78,7 @@ surfaces re-tested per the 08-20 Rule-24 widening).
   <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WA_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
-## CVO~Z PRE-CUT FINDINGS FOLDED (2817 @3c29c35122, ~20:33Z) — three land HERE because W-A is the table touch
+## 3.0.0_SA_CVO~Z PRE-CUT FINDINGS FOLDED (2817 @3c29c35122, ~20:33Z) — three land HERE because W-A is the table touch
 
 **(a) DECIDE THE REQUESTER-KEYED GSI AT THIS TO, NOT AT W-C (P1-1).** The table today has only
 `status-index` (hash `status`, range `created_at`, projection ALL) — **no requester-keyed index
@@ -102,9 +102,9 @@ does this need to exist at all?).
 requester is **exactly who authors a client update.** Resolve the carve-out explicitly (scoped to
 the client_updates append, nothing wider) or the append path meets a denial at test time.
 
-⚠ **(d) ROUTED TO CTO~Z, NOT RULED HERE — the reopen GRAIN collision (P1-2).**
+⚠ **(d) ROUTED TO 1.0.0_SA_CTO~Z, NOT RULED HERE — the reopen GRAIN collision (P1-2).**
 `reopened_count`/`reopened_at[]` are in the cut by **Andrew's own day-one word**, and I am not
-dropping a sovereign field on a review finding. But CVO~Z's mechanism is sound and must be resolved
+dropping a sovereign field on a review finding. But 3.0.0_SA_CVO~Z's mechanism is sound and must be resolved
 *before* the schema lands: there is **no writer** for them today (zero `reopen` occurrences, no
 MATRIX action, no handler), and — the load-bearing half — **they collide in grain with the
 single-valued timing fields the transition handlers set unconditionally.** After a
@@ -113,10 +113,10 @@ says N: Rule 24(ii) same-grain, and the naming-vs-semantic class. `events[]` alr
 transition, **so per-cycle timings are derivable** — the build-ladder answer. Also note a REOPEN
 action is itself a matrix widening whose natural actor is the requester, whom `_sod_block` forbids.
 **The schema must land coherent: either the timing fields are explicitly last-cycle by definition,
-or per-cycle timings derive from `events[]`. CTO~Z rules the shape; this TO carries the requirement
+or per-cycle timings derive from `events[]`. 1.0.0_SA_CTO~Z rules the shape; this TO carries the requirement
 that it is resolved before the Rule-24 record is written, never after.**
 
-## FREE FIXTURE — the measured pre-W-A baseline (COO~Z fold ~20:28Z, from DT~Z's surprise-channel note 2809)
+## FREE FIXTURE — the measured pre-W-A baseline (2.0.0_SA_COO~Z fold ~20:28Z, from 0.4.0_DT_ClientPlatform~Z's surprise-channel note 2809)
 
 The TAC-2' water-test row is a **completed lifecycle whose correct analytics values are already known
 and were independently witnessed by four seats.** Use it rather than rediscovering one:
@@ -139,7 +139,7 @@ fields it shows empty are precisely the ones this TO fills. It gives WA-1/WA-2 a
 anchor with pinned arithmetic** (a post-W-A claim/complete cycle must populate what this row leaves
 null, and the two derived seconds values above are what correct looks like). ⚠ **Whether those keys
 are schema-present-but-unwritten or absent-and-rendered-null is a BUILD-TIME READ you owe at the
-source — do not assume either from this table.** DT~Z surfaced and took no action, correctly.
+source — do not assume either from this table.** 0.4.0_DT_ClientPlatform~Z surfaced and took no action, correctly.
 
 <compiler_tools_mandate>
 Before write: `comp-blast` on ticket_center lambda + `comp-iam service opal-ticket-api` (floor).
@@ -158,9 +158,9 @@ opal-users-v2 (read) — WA-6 covers. No portal files in this TO (the client vie
 No alert/SNS/SES/monitor machinery (2026-07-28 moratorium; the nudge path is W-B and is
 Andrew-asked there). No client-visible surface changes here (W-C). No matrix widening here
 (READ-OWN is W-C; SUMMARIZE is W-D). Do not begin before the dep-3 registration sitting completes
-unless CTO~Z re-sequences.
+unless 1.0.0_SA_CTO~Z re-sequences.
 
 ## Reporting
-Completion report → COO~Z (validation) cc CTO~Z (acceptance gate) + MSTR~Z (laptop ferry for the
-apply leg). Surprise channel: one line to COO~Z. Session log with Compiler Tools section =
+Completion report → 2.0.0_SA_COO~Z (validation) cc 1.0.0_SA_CTO~Z (acceptance gate) + 0.0.0_AB_MSTR~Z (laptop ferry for the
+apply leg). Surprise channel: one line to 2.0.0_SA_COO~Z. Session log with Compiler Tools section =
 deliverable.

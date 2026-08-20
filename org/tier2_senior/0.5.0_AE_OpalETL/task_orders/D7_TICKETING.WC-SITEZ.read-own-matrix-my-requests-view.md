@@ -1,15 +1,16 @@
 # TO D7_TICKETING.WC-SITEZ — Ticket Lifecycle v2 W-C: client READ-OWN matrix + the portal "My Requests" view (JOINT, TO-F precedent)
 
 <task_order id="D7_TICKETING.WC-SITEZ" project="OPAL_TICKET">
-<issued_to>JOINT (the TO-F-SITEZ two-half pattern): half (b) MATRIX = 0.5.0_AE_OpalETL~Z (build; laptop apply leg via MSTR~Z ferry). Half (a) PORTAL VIEW = DE-class hands AT THE NEXT SEAT WINDOW (MSTR~Z spawn call — no DE~Z live at issuance); ship via the DT~Z promote pattern (portal-v2.1.164 precedent).</issued_to>
+<issued_to>JOINT (the TO-F-SITEZ two-half pattern): half (b) MATRIX = 0.5.0_AE_OpalETL~Z (build; laptop apply leg via 0.0.0_AB_MSTR~Z ferry). Half (a) PORTAL VIEW = **0.4.0_DE_ClientPlatform~Z** at the next seat window (0.0.0_AB_MSTR~Z spawn call — that serial was not live at issuance); ship via the 0.4.0_DT_ClientPlatform~Z promote pattern (portal-v2.1.164 precedent).
+⚠ **ADDRESSING NOTE (Andrew-direct 2026-08-20 ~2036Z, record @9e1e94c4f4 — agents refer to other agents by FULL SERIAL):** this line previously read "DE-class hands", which is not an address at all. **And the hazard is sharper here than the general rule:** `0.4.0_DE_ClientPlatform~Z` and `0.4.0_DT_ClientPlatform~Z` differ by ONE LETTER and BOTH are real registered seats — so a one-character slip delivers to a live wrong seat and `send_message` returns DELIVERED. Half (a) is the DE seat (portal build); the promote is the DT seat.</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-20T20:0xZ</issued>
-<status>staged — half (b) activates after W-A lands (shared Lambda file, sequenced); half (a) activates at the DE-class seat window. CTO~Z sequencing: third of four.</status>
+<status>staged — half (b) activates after W-A lands (shared Lambda file, sequenced); half (a) activates at the 0.4.0_DE_ClientPlatform~Z seat window. 1.0.0_SA_CTO~Z sequencing: third of four.</status>
 <priority>P2</priority>
-<authority>ANDREW-DIRECT 2026-08-20 ~19:4xZ @942d4d885c — his C2/C3/C4 client experience verbatim; CTO~Z ruling 2 (CLIENT VISIBILITY): client-human gains READ-OWN — list/get filtered SERVER-SIDE to the session identity's own rows (never a client parameter); the matrix widening is authorized by his word, scoped to this step. Tenant axis stays absolute.</authority>
+<authority>ANDREW-DIRECT 2026-08-20 ~19:4xZ @942d4d885c — his C2/C3/C4 client experience verbatim; 1.0.0_SA_CTO~Z ruling 2 (CLIENT VISIBILITY): client-human gains READ-OWN — list/get filtered SERVER-SIDE to the session identity's own rows (never a client parameter); the matrix widening is authorized by his word, scoped to this step. Tenant axis stays absolute.</authority>
 </task_order>
 
-## ⛔ P0 AMENDMENT — ROW-SCOPED IS NOT FIELD-SCOPED (CVO~Z pre-cut read 2817 @3c29c35122, folded ~20:33Z)
+## ⛔ P0 AMENDMENT — ROW-SCOPED IS NOT FIELD-SCOPED (3.0.0_SA_CVO~Z pre-cut read 2817 @3c29c35122, folded ~20:33Z)
 
 **The cut below originally specified only the ROW filter. That is one control where TWO are needed,
 and the missing one leaks internal data to clients.** `get_ticket`/`list_tickets` return
@@ -35,14 +36,14 @@ An absence that is never asserted is not tested.
   client parameter), **AND every client-bound response passes the projection allowlist above.**
   Tenant axis absolute: a client sees ONLY their own firm's own rows. Deny-by-default preserved
   everywhere else (svc subjects untouched; internal READ unchanged). PRD §7.3 matrix amendment rides
-  CTO~Z's gate.
-  ⚠ **ARCHITECTURAL FINDING TO RESOLVE AT DESIGN, NOT DISCOVER AT BUILD (CVO~Z P1-3):** `MATRIX` is
+  1.0.0_SA_CTO~Z's gate.
+  ⚠ **ARCHITECTURAL FINDING TO RESOLVE AT DESIGN, NOT DISCOVER AT BUILD (3.0.0_SA_CVO~Z P1-3):** `MATRIX` is
   `action -> {principal_class}` with **no scope channel**, and `authorize()` returns `(allowed, pc)`.
   Every grant today is unscoped, so action-only modeling has been faithful — **CLIENT READ-OWN is
   the estate's FIRST SCOPED GRANT and the matrix cannot express it**, which would strand "own only"
   in handler code *beside* the authorization surface instead of *in* it. That is Rule 22a's
   `(action)` vs `(action, resource)` defect one layer up. **The return-contract change is far
-  cheaper here than after.** Decide it with CTO~Z before writing the handler.
+  cheaper here than after.** Decide it with 1.0.0_SA_CTO~Z before writing the handler.
 - **Half (a) — portal:** client "My Requests" view: Open / In Progress / Completed tabs; renders
   `claimed_by` name+email (W-A enrichment) on claimed rows and `resolution_summary` (W-D) on
   Completed. Client-facing surface: color law + /frontend-dev render-check BINDING. Route stays
@@ -62,7 +63,7 @@ An absence that is never asserted is not tested.
   Exercised over the wire (the response body), never by reading the frontend.
 - **WC-2c** **COMPLETENESS OF THE CLIENT LIST:** the "My Requests" view either returns ALL of the
   client's rows or **states its own bound** — no silent truncation. See the GSI decision routed to
-  W-A (CVO~Z P1-1): without a requester-keyed index this view rides a Limit-bounded scan plus
+  W-A (3.0.0_SA_CVO~Z P1-1): without a requester-keyed index this view rides a Limit-bounded scan plus
   in-memory filter, which is the estate's truncated-page class turned into a **client-facing
   completeness claim** (a client who filed 12 shown 8, with nothing saying so). If the index is not
   in place, this criterion requires the printed bound.
@@ -73,7 +74,7 @@ An absence that is never asserted is not tested.
 - **WC-5** Portal view renders all three tabs against DEV with a client identity; claimed rows
   show claimer name+email; Completed shows the summary when present; screenshots READ; color law
   compliant.
-- **WC-6** Ship via the promote pattern (DT lane, /prod-deploy, freeze window declared to COO~Z);
+- **WC-6** Ship via the promote pattern (DT lane, /prod-deploy, freeze window declared to 2.0.0_SA_COO~Z);
   exercised on PROD both directions post-promote (the TO-F B-row pattern).
 - **WC-7** Proof instance VALID rc=0 positional, ids WC-1..WC-7 (halves may file jointly; one
   instance).
@@ -92,7 +93,7 @@ Half (a): comp-transform schema-check on the new view component (+ --feature for
 <cross_domain_coordination>
 `infra/aws/lambda/ticket_center/lambda_function.py` SHARED with W-A (first) and W-D — rebase on
 W-A; MCP before commit if W-D is concurrently editing. Portal tree: half (a) coordinates with any
-live portal work via COO~Z census; promote freeze window binds all portal/DEV pushes.
+live portal work via 2.0.0_SA_COO~Z census; promote freeze window binds all portal/DEV pushes.
 </cross_domain_coordination>
 
 ## Do not
@@ -101,5 +102,5 @@ visibility widening beyond READ-OWN (P3 scope stays parked). The main portal tre
 DEV; promote via the skill only.
 
 ## Reporting
-Each half reports to COO~Z (validation) cc CTO~Z (acceptance); MSTR~Z coordinates the DE-class
-seat window + ferry. Surprise channel: one line to COO~Z. Session logs = deliverables.
+Each half reports to 2.0.0_SA_COO~Z (validation) cc 1.0.0_SA_CTO~Z (acceptance); 0.0.0_AB_MSTR~Z coordinates the 0.4.0_DE_ClientPlatform~Z
+seat window + ferry. Surprise channel: one line to 2.0.0_SA_COO~Z. Session logs = deliverables.
