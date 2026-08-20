@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T20:05Z</issued>
 <dated>HELD -- ferries when a sitez seat frees OR Andrew accepts 7 sustained (MSTR surfaces that ask with this package)</dated>
-<status>staged -- package READY, deliberately NOT ferried. D8's DE~Z seat is the BURST-CROSSER.</status>
+<status>pending -- kickoff 20260819T205631Z received by 0.4.0_DE_ClientPlatform~Z; both rows sequential (TO-A author-only infra first, TO-B edit surface). Flip left UNSTAGED per owned-paths; MSTR~Z commits.</status>
 <priority>P1-program, but the LOWEST-COST DELAY of the three sitez items -- already accepted with both riders bound on their trunk (@12cf17a81d), so nothing decays while it waits</priority>
 <authority>D8_LIVE_EDIT_MODALS_PRD.md §4.1/§4.2 + §6 rows 1-2 at dispatch vintage @7416fb46d0 (CVO verdict @a9a173e7fa absorbed: PK ruled stable-identifier-never-display-name; BOTH Q3 failure directions stated; write-API precedent scoped). Placement: SITEZ per Andrew's ~19:37Z word, CTO FINAL 193804Z.</authority>
 </task_order>

@@ -1,0 +1,240 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D8_LIVEEDIT.TO-AB-SITEZ",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "docs/architecture/D8_LIVE_EDIT_MODALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7416fb46d0"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/portal_content/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "4c8fe9d006",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Site Z is author-only per the D8 envelope law; the apply legs (build-and-upload + safe-apply) route through a laptop lane, WDAC-gated 08-20 07:00."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/portal-content/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "4c8fe9d006",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "terraform validate PASS (backendless init) here; plan/0-diff/apply are the laptop lane's."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/portal-content/build-and-upload.sh",
+      "kind": "script",
+      "commit_or_etag": "4c8fe9d006",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ticket-center byte-parallel artifact builder; runs laptop-side at deploy."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/cloudfront-distribution.tf (ordered behaviors 4c/4d /api/scoped/portal-content{,/*})",
+      "kind": "terraform",
+      "commit_or_etag": "4c8fe9d006",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Shared-infra edit, cross-domain flagged; terraform validate PASS (warnings pre-existing on lambda-edge.tf, untouched)."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json (opal-portal-content-api entry)",
+      "kind": "config_data",
+      "commit_or_etag": "13fd07d510",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rule-4 registration; sha/commit stamped by build-and-upload.sh at first deploy."
+    },
+    {
+      "path_or_key": "portal/src/components/LiveEditableProse.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "ccda8711",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV commit; PROD promote is a separate DT-lane act (rule 19)."
+    },
+    {
+      "path_or_key": "portal/src/hooks/usePortalContent.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "ccda8711",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV commit."
+    },
+    {
+      "path_or_key": "portal/src/api/portal-proxy.ts (portal-content GET/PUT/DELETE client)",
+      "kind": "frontend_component",
+      "commit_or_etag": "ccda8711",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV commit."
+    },
+    {
+      "path_or_key": "portal/src/components/ModelPortfolioModal.tsx (Key Notes pane wired)",
+      "kind": "frontend_component",
+      "commit_or_etag": "ccda8711",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV commit; figures pane untouched (ruled)."
+    },
+    {
+      "path_or_key": "portal/src/pages/CapitalMarketAssumptions/components/PhilosophyPillars.tsx (dialog body wired + ceiling comment superseded)",
+      "kind": "frontend_component",
+      "commit_or_etag": "ccda8711",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D8-1",
+      "criterion_verbatim": "PORTAL DEV-BUILD PROOF REPORTED (TO-B first act) -- pass or fail, explicitly.",
+      "method": "command",
+      "invocation": "bun install && bun run dev --port 5175; curl -s -o /dev/null -w '%{http_code}' http://localhost:5175/; curl -s http://localhost:5175/src/main.tsx | head -c 200",
+      "output_evidence": "bun 1.3.14; VITE v7.3.5 ready in 401 ms; HTTP 200, 826 bytes on root; /src/main.tsx served as live esbuild-transformed module ('import __vite__cjsImport0_react_jsxDevRuntime...'). Reported to MSTR~Z 2102Z, before any surface work.",
+      "denominator": "N/A -- boolean envelope-cell check (build runs or it does not)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D8-2",
+      "criterion_verbatim": "EXISTENCE CHECKS RE-VERIFIED, not inherited from the census.",
+      "method": "live_read",
+      "invocation": "aws dynamodb list-tables --output json (materialized, auto-paginated; rail-checked) + per-module route survey of 7k3ed8px20 wiring + comp-iam service opal-ticket-api + comp-routes trace /api/portal-content",
+      "output_evidence": "35 tables total; portal/content-name hits = [opal-portal-auth-throttle, opal-portal-market-data] -- neither a content store; opal-portal-content ABSENT. Route survey: bd-pipeline/partners-api/ticket-center/trade-pipeline each pure-add per-domain Lambdas; no portal-content capability exists. comp-routes trace: catch-all /* only (net-new path).",
+      "denominator": "35 live DynamoDB tables (full materialized list); 8 TF files referencing 7k3ed8px20",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D8-3",
+      "criterion_verbatim": "OVERRIDE WRITTEN VIA A PORTAL-SHAPED PUT RENDERS FOR A DIFFERENT VIEWER SESSION. A same-session render proves caching, not persistence.",
+      "method": "live_read",
+      "invocation": "(post-apply) portal-shaped PUT with an internal token, then GET from a second, non-editing session",
+      "output_evidence": "Not yet runnable: the table/route/Lambda exist only as committed TF; apply is the laptop lane's, WDAC-gated 08-20 07:00.",
+      "denominator": "N/A -- boolean persistence check across 2 sessions",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Rides the post-apply DEV exercise (named later run: D8 post-apply exercise battery, this seat or laptop lane, after the laptop safe-apply of portal-content + portal-auth)."
+    },
+    {
+      "criterion_id": "D8-4",
+      "criterion_verbatim": "403 EXERCISED with a non-employee token -- the deny path run, not reasoned about.",
+      "method": "live_read",
+      "invocation": "(post-apply) direct PUT /api/scoped/portal-content/{surface_id} with a non-employee token, expecting 403 from the server-side claim check",
+      "output_evidence": "Not yet runnable: same apply gate as D8-3. The check exists at lambda_function.py _is_internal (firmId=='opal-capital', token context only) per D8_AUTH_SURFACE_RULING_20260819.md @e697f1450e.",
+      "denominator": "N/A -- boolean deny-path check",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Rides the same named post-apply exercise battery as D8-3; the ruling requires the 403 to hold ON THE API even where the UI hides the affordance, so the run is an API call, not a UI read."
+    },
+    {
+      "criterion_id": "D8-5",
+      "criterion_verbatim": "EDIT SURFACE BOTH FAMILIES: employee sees the pencil and saves; non-employee sees NO AFFORDANCE; the edit is visible to a second session on BOTH call sites (Benchmark heatmap AND Positioning bars).",
+      "method": "command",
+      "invocation": "node scripts/ui-smoke.mjs philosophy <png> --claim firmId=opal-capital --click 'Invest with a Long-Term Perspective - read more'  (and the same with --claim firmId=49financial --claim userType=Partner)",
+      "output_evidence": "AFFORDANCE HALVES MEASURED at dev level: internal capture shows the pencil Edit affordance below the prose; partner capture shows NO affordance (screenshots d8_pillar_internal.png / d8_pillar_external.png, read). Both families share ONE component (LiveEditableProse), so the gate is structurally identical on the modal family. The save + second-session + both-call-sites halves ride the apply.",
+      "denominator": "2 identity directions x 1 family exercised at dev level; both-call-sites live check pending",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The second-session-on-both-call-sites clause requires the live API (post-apply exercise battery, named at D8-3). The affordance-visibility halves are already measured and evidenced above."
+    },
+    {
+      "criterion_id": "D8-6",
+      "criterion_verbatim": "SCREENSHOT PASS (/frontend-dev, colour law) + live DEV exercise.",
+      "method": "command",
+      "invocation": "ui-smoke captures (internal + partner) read against the silver-canvas law",
+      "output_evidence": "Screenshot half PASS: dialog is the light silver panel with DARK text throughout; Edit button is dark-outline, textarea design solid-white/dark-text; no ghost-white on canvas. Live DEV exercise half rides the apply.",
+      "denominator": "2 captures read of 2 planned dev-level captures; live-DEV half pending",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The 'live DEV exercise' half of the criterion requires the applied API (same named post-apply battery); the screenshot half is complete and PASS as evidenced."
+    },
+    {
+      "criterion_id": "D8-7",
+      "criterion_verbatim": "IAM VERIFIED ON THE LIVE PRIMITIVE per the discipline above, positive control shown as a separate invocation.",
+      "method": "live_read",
+      "invocation": "(post-apply) aws iam simulate-principal-policy --policy-source-arn <opal-portal-content-api-role> --action-names dynamodb:PutItem --resource-arns <table arn>  [ONE resource-arn per call; positive control as a SEPARATE invocation; accessanalyzer validate-policy for action-name validity]",
+      "output_evidence": "Not yet runnable: the role does not exist until the laptop apply mints it. comp-iam floor noted as necessary-not-sufficient per Rule 22a.",
+      "denominator": "N/A -- per-action allow/deny reads, one resource per call",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Rides the post-apply battery (named at D8-3); the instrument cannot simulate a principal that does not exist."
+    },
+    {
+      "criterion_id": "D8-8",
+      "criterion_verbatim": "PK IS A STABLE IDENTIFIER, asserted.",
+      "method": "manual_read_with_citation",
+      "invocation": "Read lambda_function.py _SURFACE_ID_RE @4c8fe9d006 + both call-site keys @ccda8711",
+      "output_evidence": "_SURFACE_ID_RE = ^(philosophy_pillar|model_key_notes)#[a-z0-9][a-z0-9_-]{0,118}$ -- lowercase slug grammar only, so a display name (space/uppercase) is structurally unkeyable. Call sites: philosophy_pillar#${open.id} (existing stable pillar slugs, e.g. long-term-perspective) and model_key_notes#${code.toLowerCase()} (canonical model code UST/ST/INT/LT/ULT, rename-stable via the one existing map). Display names ride as attributes/derivations only.",
+      "denominator": "2 of 2 surface families keyed on stable identifiers",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D8-9",
+      "criterion_verbatim": "proof instances VALID rc=0 positional per row. MEASURED/RULED-class run rows only; INFERRED-class expected values are mechanically ineligible.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/D8_LIVEEDIT.TO-AB-SITEZ_PROOF_OF_SPEC.json",
+      "output_evidence": "rc=0 on this instance (run recorded in the session log). Every PASS row above carries measured output; apply-gated rows are UNCOMPUTABLE-BY-CONSTRUCTION naming their later run, never inferred PASSes.",
+      "denominator": "9 of 9 criterion rows present",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Identity-gate mutant on the edit affordance: the same pillar-dialog capture re-run with the stubbed claim flipped from firmId=opal-capital to firmId=49financial (+userType=Partner).",
+      "expected": "The Edit affordance disappears entirely (no pencil, no divider row).",
+      "observed": "Absent as expected (d8_pillar_external.png). NOTE the control itself needed correcting: the FIRST 'external' run used the stub default identity, which IS internal (opal-capital Dev), and showed the affordance -- a control aimed at the privileged member cannot fail; re-run with the explicit external claim.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A for the dev-level rows (boolean render/build checks); the deciding persistence rows (D8-3/5) are BY DESIGN two-session comparisons in the post-apply battery, where cross-session stability is itself the criterion.",
+      "observed": "Dev-build proof and both screenshot captures each ran once with unambiguous boolean outcomes.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "TF/Lambda apply legs (build-and-upload, safe-apply portal-content + portal-auth, 0-diff, tag)",
+      "reason": "Envelope law: site Z is not a TF-apply site; ferried to the laptop lane, WDAC-gated 08-20 07:00. Not a gap -- a routed handoff (MSTR message 2115Z)."
+    },
+    {
+      "item": "Exercised battery rows against the handler artifact lambda_function.py (infra/aws/lambda/portal_content/lambda_function.py)",
+      "reason": "Apply-gated: the Lambda is authored+committed here but deploys only via the laptop lane, so no runnable row can reference it yet. Its exercised rows ARE D8-3/D8-4/D8-7 in the named post-apply battery; static verification (commit-gate PASS, claim-check/PK read D8-8) is complete."
+    },
+    {
+      "item": "Model-modal family dev-level screenshot",
+      "reason": "The Benchmark heatmap call site requires live benchmarks data (401 without creds; no fixture built). The edit surface is the SAME component proven on the pillar family; the both-call-sites check is D8-5's own post-apply row."
+    },
+    {
+      "item": "Edit-mode (textarea) screenshot",
+      "reason": "ui-smoke supports a single --click; the edit mode is exercised in the post-apply live pass where the save round-trip is the real check."
+    },
+    {
+      "item": "portal bun.lock working-tree modification",
+      "reason": "Pre-existing before this session; not mine, not committed."
+    }
+  ],
+  "surprises": [
+    "Portal local DEV had DIVERGED from the recorded gitlink (5 local-only commits vs 13 gitlink-only); reconciled by merge (never rebase) -> 46f127eb, surfaced to MSTR~Z.",
+    "audit-archive-invoker printed 18 findings at startup -- known site-Z cross-device baseline class already in FINDINGS.md; surfaced, not chased.",
+    ".tools/terraform.exe does not exist on site Z (law Quick-reference hardcodes the laptop layout); winget terraform used for read-only validate only.",
+    "ui-smoke's stubbed default identity IS internal (opal-capital Dev): a default capture cannot serve as the non-employee negative; explicit --claim required."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-19/d8_liveedit_toa_store_api_tob_edit_surface_2056-2140Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-routes",
+      "invocation": "comp-routes trace /api/portal-content; comp-routes behaviors",
+      "result": "Net-new path (catch-all only); scoped-route auth chain identified (auth-validator-edge + APIGateway-portal + authorizer naqxlm)."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service opal-ticket-api",
+      "result": "9 DDB ops [UNKNOWN], role unmapped -- fail-closed floor; precedent survey only, live primitive reserved for D8-7."
+    },
+    {
+      "tool": "comp-transform",
+      "invocation": "comp-transform schema-check PhilosophyPillars (pre+post); comp-transform schema-check ModelPortfolioModal",
+      "result": "PhilosophyPillars PASS both runs; ModelPortfolioModal reproduces the recorded B4 limit (components/ not indexed) -- contract grounded by direct source read."
+    },
+    {
+      "tool": "comp-cache",
+      "invocation": "comp-cache collisions (pre+post)",
+      "result": "No defect rows; ['portal-content'] net-new, no collision."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to D8_LIVEEDIT.TO-AB-SITEZ.content-store-and-edit-surface",
+      "result": "Session TO context set (race-free per-session file)."
+    }
+  ]
+}
