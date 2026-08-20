@@ -5,7 +5,8 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>1.0.0_SA_CTO~Z</issued_to>
 <date>2026-08-19</date>
-<status>pending</status>
+<status>complete</status>
+<!-- CLOSED 2026-08-20 ~15:20Z by 1.0.0_SA_CTO~Z: (a) CVO~Z co-sign + second read DONE (@9b859ca898/@609182ae0d/@c368d66d98) + (b) the laptop 0-diff port LANDED on the applied plane, verified by on-instance read at the certifier seat (deployed catalog_gate.py byte-identical to HEAD; deployed refs/DATA_CATALOG.yaml content-identical to the released v0.2 artifact; /query/v0 live 401 unauth; row 4 re-exercised) -- record ctoZ_OPAL_ANALYST_W6_CERTIFICATION_20260820.md CLOSE section. OPAL_ANALYST program CLOSED per sec9.0; successors = W5-V03 (v0.3) + the approved F8 tightening. -->
 <!-- CERTIFIED-ON-STAGED 2026-08-20 ~1245Z by 1.0.0_SA_CTO~Z: C1-C6 PASS at the certifier seat (record org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_OPAL_ANALYST_W6_CERTIFICATION_20260820.md; proof instance OPAL_ANALYST.W6_PROOF_OF_SPEC.json validator rc=0 positional C1-C6). CLOSE (-> complete) gates on (a) CVO~Z index co-sign + (b) the 0-diff laptop-lane port; port-time deltas re-exercise rows 4/7. -->
 <priority>P1</priority>
 <!-- TERMINAL WAVE by ruling (§10.6): reviews every access surface INCLUDING W5's catalog and the
