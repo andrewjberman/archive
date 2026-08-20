@@ -128,14 +128,37 @@ irreversible full-production acts). Zero-delta exemption re-read precisely: a st
 predicate accepted the bounded risk of a fully parity-proved reversible move with empty irreversible
 residue — evidence never proved "no risk."
 
-**2.9 Harm model** (the residue vector's generator) — compiled from four generators none of which is
-the acting agent (incident taxonomy / obligation inversion / action-class type-signatures / recovery
-model), normalized, fixed-point closed, mutant-challenged, versioned; unit dimensions selected at
-open with the complement printed; adversarial harm-completion pass ("name a harm these action classes
-could produce that is not in the vector") mechanically pre-run from type-signatures; composition
-rules ratified with the model. UNMODELED accepted explicitly by the opening authority; the specimen
-ratchet grows the model. *Open question carried to the whole-system review: cross-leg emergent
-residue vs the reachability condition.*
+**2.9 Harm model — REWRITTEN post the exchange's sixth catch** (the original §2.9 flattened unlike
+outputs into one "harm space," let the unit select its dimensions, and left the algebra authored;
+withdrawn and replaced). The **Harm_Model_Basis decomposes into nine separately-governed surfaces**,
+each with its own grain, producer, and failure direction: dimension registry · action-effect
+TEMPLATES (bound to live context at instantiation; a failed binding → UNKNOWN, never
+zero-contribution) · **applicability compiler** (the unit never selects — applicability COMPILES per
+dimension to APPLICABLE / INAPPLICABLE-with-leased-proof / UNKNOWN-that-never-disappears; the
+adversarial pass challenges the compiled population, it does not create it) · **residue-composition
+algebra** (GENERATED from declared semantics, per-surface closure certificates, its own mutant
+battery — high-water↔current swaps, commutativity violations, checkpoint counter-resets — because a
+wrong operator produces a green vector with every coordinate present) · interaction semantics ·
+observation contracts · recovery REQUIREMENT model · recovery CAPACITY model (**control-side, never
+a harm coordinate** — the prefix inequality's two sides never share an axis) · acceptance-policy
+schema. The four source families (incidents / obligation inversion / action semantics / recovery
+machinery) are RAW MATERIAL feeding several surfaces, not four coordinate lists to union — and they
+share dependencies, so the harm compiler gets the same generated failure-space + cut-coverage
+treatment as retirement evidence. **D3 sparsity widens uncertainty** (obligation-generator silence
+→ UNKNOWN applicability, never inapplicability — the least-modeled region must not produce the
+cleanest vector). **UNMODELED is an epistemic record, never a residue coordinate**: authority may
+accept proceeding within a bounded containment predicate despite model incompleteness; it cannot
+convert unnamed harms into a measured value. Unit-open immutability resolves via two bases
+(immutable Unit_Open_Harm_Acceptance + mutable Current_Harm_Eligibility_Evaluation — a newly
+applicable dimension drops forward eligibility to UNKNOWN, admits containment/rollback edges, and
+requires a fresh acceptance basis to continue). **Cross-leg emergent residue** is answered by typed
+Leg_Effect_Contracts + Recovery_Path_Contracts + an interaction closure over shared resources,
+invariants, and recovery cut-sets (hyperedges, not pairwise enumeration), with reachability returned
+as a **proof-carrying Recovery_Reachability_Certificate carrying an actual path witness** (an
+existential Boolean can hide a fictional path) — static over-approximation at unit-open, recompute
+at every checkpoint, and the conservative direction: unknown state/effect/interaction/path → UNKNOWN
+→ no new forward leg (terminal containment/rollback actions stay separately admissible so UNKNOWN
+cannot strand a unit).
 
 ## 3. Diagnostic laws banked by the exchange (doctrine candidates, cite-ready)
 
@@ -164,6 +187,17 @@ residue vs the reachability condition.*
   + census_substrate (three call-styles, one envelope).
 - Gate candidates herein route to CTO per standing law; NOTHING in this PRD arms an alert, monitor,
   gate, or enforcement — all PROPOSED for ratification.
+
+## 4b. Explicit OPEN REQUIREMENTS (the seams the cross-leg question exposed — received, not closed)
+
+The exchange's sixth catch established that cumulative-harm governance is NOT closed. Four
+load-bearing surfaces are carried as open requirements for the whole-system review and the build:
+(1) the harm normal form separating dimensions / effect maps / composition / interaction /
+observation / recovery capacity; (2) the generated applicability compiler with its proof-bearing
+exclusion process; (3) the composition + interaction algebra with per-surface closure certificates
+and algebra-mutants; (4) the recovery-reachability instrument — path witnesses, support closure,
+independence cuts, and the **exercised-witness floor** (a recovery path never run on the real plane
+is ASSUMED, priced by policy; periodic bounded drills are the evaluator's only non-model grounding).
 
 ## 5. Acceptance bar for the PRD itself
 
