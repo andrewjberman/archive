@@ -86,9 +86,17 @@
         cross-plane ties are structurally impossible from our plane -- the
         name-the-question's-plane law, measured on my own criterion. RE-BASED ACCEPTANCE:
         (i) DataMining-plane self-consistency (silver sum == grain-collapsed holdings sum,
-        exact); (ii) the SPLIT REPRODUCES against the oracle's structure (measured:
-        unsupervised -0.26%; supervised share 93.68% vs 93.78% -- Andrew's ~30M
-        outside-assets removal ACHIEVED); (iii) the cross-plane deltas + the semantic pin
+        EXACT, forever); (ii) SPLIT PARITY vs the Dashboard oracle at DECLARED tolerances
+        (CTO gate 63364): unsupervised delta <=0.5% (measured 0.26%), supervised-share
+        parity <=0.25pp (measured 0.10pp) -- the business ask (Andrew's ~30M
+        outside-assets removal) binds HERE and is ACHIEVED; (ii-b) THE ACCRUAL SELF-TEST
+        (CTO pin 63364, in-house BEFORE any vendor question -- Andrew's own Teams words:
+        "BD does accrued coupons on physical bonds, Schwab does not"): sum the extract's
+        Accrual column (+ market_value-vs-unaccrued delta) for 2026-08-19 against the
+        $8.70M gap; closes materially -> the "BD-internal gap" is accrued-vs-unaccrued
+        pricing, vendor question dissolves; does not close -> the Manav question ships
+        half-diagnosed with the accrual result attached. One pandas sum, no new mechanism;
+        (iii) the cross-plane deltas + the semantic pin
         (the TO's $455,532,550 was activeRelationshipAggregateResult.supervisedEmv, not
         the named-books sum $451,918,881.59) DECLARED in the artifact meta beside G6's
         caveat; (iv) the un-collapsed mutant fails (unchanged -- and the grain pin is now
