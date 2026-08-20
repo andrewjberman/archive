@@ -78,6 +78,13 @@
       "commit_or_etag": "ccda8711",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Portal DEV commit."
+    },
+    {
+      "path_or_key": "portal/scripts/ui-smoke.mjs (--token real bearer with session claims derived from the JWT payload; repeatable --click + --fill steps; miss diagnostics)",
+      "kind": "frontend_component",
+      "commit_or_etag": "f524ef6e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV commit (instrument only, no product code); used for the D8-5/D8-6 live halves."
     }
   ],
   "acceptance": [
@@ -121,21 +128,19 @@
       "criterion_id": "D8-5",
       "criterion_verbatim": "EDIT SURFACE BOTH FAMILIES: employee sees the pencil and saves; non-employee sees NO AFFORDANCE; the edit is visible to a second session on BOTH call sites (Benchmark heatmap AND Positioning bars).",
       "method": "command",
-      "invocation": "node scripts/ui-smoke.mjs philosophy <png> --claim firmId=opal-capital --click 'Invest with a Long-Term Perspective - read more'  (and the same with --claim firmId=49financial --claim userType=Partner)",
-      "output_evidence": "AFFORDANCE HALVES MEASURED at dev level: internal capture shows the pencil Edit affordance below the prose; partner capture shows NO affordance (screenshots d8_pillar_internal.png / d8_pillar_external.png, read). Both families share ONE component (LiveEditableProse), so the gate is structurally identical on the modal family. The save + second-session + both-call-sites halves ride the apply.",
-      "denominator": "2 identity directions x 1 family exercised at dev level; both-call-sites live check pending",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "REMAINING: the render half only (pencil+save on both modals visible to a second session in the BROWSER; affordance halves already PASS at dev level). The API persistence + cross-identity half is now live-proven (D8-3 PASS 2026-08-20, laptop battery). Runs at the morning DE~Z respawn per the builder's close-log next-step 3."
+      "invocation": "2026-08-20 1506-1512Z (0.4.0_DE_ClientPlatform~Z, LIVE against the applied API on DEV): portal DEV :5175 (ccda8711 + instrument f524ef6e) proxied to www.opalinvest.dev; identities = RS256 tokens minted from opal/auth/jwt-private-key (iss opal-portal-auth, aud opal-portal-api; internal sub d8-live-internal@opalinvest.dev firmId=opal-capital; non-employee sub d8-live-partner@49financial.test firmId=49financial) -- the laptop D8-3/4 battery's method; pre-run controls: no-token GET 401, both tokens GET 200 (count 0 = no residue). A (internal, fresh headless profile): node portal/scripts/ui-smoke.mjs portfolios A.png --token @internal --click Benchmark --click 'Short-Term - open portfolio details' --click 'Edit this content for all viewers' --fill 'Edit content=D8LIVE-150632Z ...' --click 'Save for all viewers' --netlog. B (internal, NEW profile = second session): positioning --click 'Short-Term - open portfolio details'. C (internal, new profile): portfolios --click Benchmark --click 'Short-Term - open portfolio details'. D (non-employee): positioning, same click. E (non-employee): portfolios Benchmark, same click. F (internal, new profile): positioning -> 'Remove the override and return to the repo copy' -> 'Confirm reset'.",
+      "output_evidence": "A: netlog GET 200 -> PUT 200 /api/scoped/portal-content/model_key_notes%23st -> GET 200; screenshot shows the saved text + 'Live override by d8-live-internal@opalinvest.dev - 8/20/2026 11:06:57 AM - masking the repo copy' + 'Reset to baseline'; server read (curl, internal token, www.opalinvest.dev) count=1, model_key_notes#st updated_by=d8-live-internal@opalinvest.dev (token subject, not body), updated_at=2026-08-20T15:06:57.087Z, body=D8LIVE-150632Z... B (SECOND session, Positioning bars modal -- the OTHER call site): the edit rendered + pencil + override notice + reset (GET 200). C (second session, Benchmark heatmap modal): same (GET 200; Benchmark-tab data model_portfolio_benchmarks.json + etf_returns.json fetched = the heatmap tab was live). D (non-employee, Positioning bars modal): the override text renders (overrides serve to all viewers) and NO Edit / no notice / no reset row. E (non-employee, Benchmark heatmap modal): same, NO affordance. F: 'Reset to baseline' -> 'Confirm reset' = DELETE 200 model_key_notes%23st; screenshot shows the 4-paragraph repo-copy baseline + pencil, no notice; server read count=0 (residue cleaned). All six runs LOC == route, rc=0; screenshots A_internal_heatmap_save / B_internal2_positioning / C_internal2_heatmap / D_partner_positioning / E_partner_heatmap / F_internal_reset_positioning (.png, session scratchpad d8live/, READ) + netlogs A-F.",
+      "denominator": "2 call sites x 2 identity directions, each read in a session OTHER than the one that saved = 4 second-session captures (B,C,D,E) + 1 save capture (A) + 1 reset capture (F); portal-content requests in the netlogs: A=3 (GET/PUT/GET), B..E=1 each (GET), F=3 (GET/DELETE/GET); 2 server-side reads (count 1 after save, 0 after reset)",
+      "status": "PASS"
     },
     {
       "criterion_id": "D8-6",
       "criterion_verbatim": "SCREENSHOT PASS (/frontend-dev, colour law) + live DEV exercise.",
       "method": "command",
-      "invocation": "ui-smoke captures (internal + partner) read against the silver-canvas law",
-      "output_evidence": "Screenshot half PASS: dialog is the light silver panel with DARK text throughout; Edit button is dark-outline, textarea design solid-white/dark-text; no ghost-white on canvas. Live DEV exercise half rides the apply.",
-      "denominator": "2 captures read of 2 planned dev-level captures; live-DEV half pending",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "REMAINING: the live-DEV render half only (screenshot half PASS). The applied API it rides on is live and exercised (D8-3/4/7 PASS 2026-08-20, laptop battery). Runs at the morning DE~Z respawn per the builder's close-log next-step 3."
+      "invocation": "Screenshot half (2026-08-19): ui-smoke captures internal + partner on the pillar dialog, read against the silver-canvas law. Live-DEV half (2026-08-20 1506-1512Z): the six live captures of D8-5 on DEV :5175 (portal DEV ccda8711 + f524ef6e, proxied to www.opalinvest.dev via the vite /api rule), each READ per /frontend-dev.",
+      "output_evidence": "Screenshot half PASS (as before): light silver dialog, DARK text, dark-outline Edit, white/dark textarea. Live-DEV half PASS: all six live captures land on their route (LOC /portfolios or /positioning), the modal renders LIVE served figures (YTD 2.33%, 1Y 3.92%, SI 4.69%, yield 4.00%, makeup 17% equities / 83% fixed income) -- the page was live, not fixtured -- and the edited Key Notes, the override notice (dark /55 on the light panel), the pencil, the reset link, and the post-reset repo-copy baseline all read within the colour law: no light text or ghost-white control on the canvas, no white text in the dialog. Two call sites x two identities x edited/reset states viewed.",
+      "denominator": "2 dev-level captures (screenshot half) + 6 live-DEV captures read of 6 taken (save, 2x internal second-session, 2x non-employee, reset)",
+      "status": "PASS"
     },
     {
       "criterion_id": "D8-7",
@@ -160,7 +165,7 @@
       "criterion_verbatim": "proof instances VALID rc=0 positional per row. MEASURED/RULED-class run rows only; INFERRED-class expected values are mechanically ineligible.",
       "method": "schema_validation",
       "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/D8_LIVEEDIT.TO-AB-SITEZ_PROOF_OF_SPEC.json",
-      "output_evidence": "rc=0 on this instance (run recorded in the session log). Every PASS row above carries measured output; apply-gated rows are UNCOMPUTABLE-BY-CONSTRUCTION naming their later run, never inferred PASSes.",
+      "output_evidence": "rc=0 on this instance (positional D8-1..9, run recorded in the session logs 2026-08-19 + 2026-08-20). Every PASS row carries measured output; the apply-gated rows were UNCOMPUTABLE-BY-CONSTRUCTION until their named runs (laptop battery 2026-08-20 ~1408-1414Z for D8-3/4/7; DE~Z live UI pass 1506-1512Z for D8-5/6) and now carry those runs' evidence.",
       "denominator": "9 of 9 criterion rows present",
       "status": "PASS"
     }
@@ -169,13 +174,13 @@
     "mutant": {
       "description": "Identity-gate mutant on the edit affordance: the same pillar-dialog capture re-run with the stubbed claim flipped from firmId=opal-capital to firmId=49financial (+userType=Partner).",
       "expected": "The Edit affordance disappears entirely (no pencil, no divider row).",
-      "observed": "Absent as expected (d8_pillar_external.png). NOTE the control itself needed correcting: the FIRST 'external' run used the stub default identity, which IS internal (opal-capital Dev), and showed the affordance -- a control aimed at the privileged member cannot fail; re-run with the explicit external claim.",
+      "observed": "Absent as expected (d8_pillar_external.png). NOTE the control itself needed correcting: the FIRST 'external' run used the stub default identity, which IS internal (opal-capital Dev), and showed the affordance -- a control aimed at the privileged member cannot fail; re-run with the explicit external claim. LIVE (2026-08-20): the same Short-Term modal opened with the minted non-employee token (firmId=49financial) on BOTH call sites (D, E) renders the override text and NO affordance -- fired-as-expected against the applied API, not only the stub.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "N/A for the dev-level rows (boolean render/build checks); the deciding persistence rows (D8-3/5) are BY DESIGN two-session comparisons in the post-apply battery, where cross-session stability is itself the criterion.",
-      "observed": "Dev-build proof and both screenshot captures each ran once with unambiguous boolean outcomes.",
-      "status": "N/A-WITH-REASON"
+      "method": "The persistence rows ARE two-session comparisons by design: the save (A) and every read (B..E) ran in separate fresh headless profiles; the server-side read (curl) is the third observer.",
+      "observed": "Edit saved in A rendered identically in B (Positioning) and C (heatmap) and for the non-employee in D/E; after F's reset, every observer (UI + server count=0) agrees.",
+      "status": "STABLE"
     }
   },
   "declared_exclusions": [
@@ -189,11 +194,11 @@
     },
     {
       "item": "Model-modal family dev-level screenshot",
-      "reason": "The Benchmark heatmap call site requires live benchmarks data (401 without creds; no fixture built). The edit surface is the SAME component proven on the pillar family; the both-call-sites check is D8-5's own post-apply row."
+      "reason": "The Benchmark heatmap call site requires live benchmarks data (401 without creds; no fixture built). The edit surface is the SAME component proven on the pillar family; the both-call-sites check is D8-5's own post-apply row. SUPERSEDED 2026-08-20: the live pass opened the Model modal from BOTH call sites with real tokens (the live benchmarks data loaded), so the modal family is captured live (A..F)."
     },
     {
       "item": "Edit-mode (textarea) screenshot",
-      "reason": "ui-smoke supports a single --click; the edit mode is exercised in the post-apply live pass where the save round-trip is the real check."
+      "reason": "ui-smoke supports a single --click; the edit mode is exercised in the post-apply live pass where the save round-trip is the real check. 2026-08-20: the edit-mode round-trip was EXERCISED live (FILLED the 'Edit content' textbox, 'Save for all viewers' -> PUT 200); the post-save state is what A captures; the open-textarea frame itself is still not a separate screenshot."
     },
     {
       "item": "portal bun.lock working-tree modification",
@@ -206,7 +211,7 @@
     ".tools/terraform.exe does not exist on site Z (law Quick-reference hardcodes the laptop layout); winget terraform used for read-only validate only.",
     "ui-smoke's stubbed default identity IS internal (opal-capital Dev): a default capture cannot serve as the non-employee negative; explicit --claim required."
   ],
-  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-19/d8_liveedit_toa_store_api_tob_edit_surface_2056-2140Z.md",
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-19/d8_liveedit_toa_store_api_tob_edit_surface_2056-2140Z.md (build) + org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-20/laneZ_d8_live_halves_d85_d86_1440-1520Z.md (live halves)",
   "compiler_tools": [
     {
       "tool": "comp-routes",
@@ -232,6 +237,11 @@
       "tool": "comp-to",
       "invocation": "comp-to D8_LIVEEDIT.TO-AB-SITEZ.content-store-and-edit-surface",
       "result": "Session TO context set (race-free per-session file)."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'd8-battery' org; comp-find 'RS256' org/tier2_senior/0.7.0_AE_CloudOps; comp-find 'jwt-private-key' infra/aws",
+      "result": "Located the laptop battery's identity method + the auth-handler signing source (infra/aws/opalinvest_dev/lambda/auth-handler/src/jwt.ts: RS256, iss opal-portal-auth, aud opal-portal-api, secret opal/auth/jwt-private-key) for the live-half identities; denominators 2/14116, 23/1210, 15/7606."
     }
   ]
 }
