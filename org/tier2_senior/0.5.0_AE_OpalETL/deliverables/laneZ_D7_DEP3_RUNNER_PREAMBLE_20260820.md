@@ -22,9 +22,12 @@
    first call — server-side gate, BELOW bg-concierge-gate, measured live by BG (msg 2674 note 1).**
    The runner's injected `send` MUST pass `confirm=true` (or treat `confirm_required` as a protocol
    step). It is NOT an error; a naive ok-check reads it as a false SEND_FAILED, which under
-   intake_pass.py's ordered-retry semantics would WEDGE the pass on every ticket. Whether a bare 1:1 `send_chat_message` trips
-   the same fence is UNTESTED both ways (BG always passed confirm=true on DMs) — assume nothing
-   if the runner ever grows a DM path (MSTR~Z receipt-insured relay, 19:27Z).
+   intake_pass.py's ordered-retry semantics would WEDGE the pass on every ticket. UPDATE 19:35Z — the DM caveat is
+   MEASURED, not open (BG msg 2702, real-traffic branch): a bare `send_chat_message` returns the
+   IDENTICAL `confirm_required` — the fence is TOOL-WIDE on irreversible sends, one server-side
+   guard. ANY irreversible gateway send the runner makes (channel buzz or a future DM path)
+   passes `confirm=true` / two-steps the response, and the registration battery's confirm-path
+   negative control covers every send shape the runner has.
 2. Config keys are **ids, not names** (`team_id`/`channel_id`) — a channel rename can never break
    the send (CTO~Z 2658). Config is minted AT registration; refuse-if-unset is the correct state
    until then — never pre-mint a config file (CTO~Z 2658, confirmed in my 2666).
