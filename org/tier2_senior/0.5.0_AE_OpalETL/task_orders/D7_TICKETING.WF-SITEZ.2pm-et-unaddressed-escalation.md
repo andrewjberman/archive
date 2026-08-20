@@ -27,33 +27,64 @@ rather than a convention.
 
 ## ⛔ TWO ANSWERS REQUIRED BEFORE BUILD
 
-**(1) THE TRADING-CALENDAR QUESTION — NEVER#1 CLASS, and it must be answered at design time, not
-discovered on a Saturday.** The cutoff's own client-facing wording is **trading-day-shaped** ("the
-next trading day"). Does the 2p sweep fire on a weekend or a market holiday? **An unqualified
-wall-clock daily sweep will escalate Saturday tickets that are correctly waiting for Monday** —
-manufacturing an escalation about a system behaving exactly as designed, on the client-facing
-surface. `lib/trading_calendar.py` is the ONE frontier definition
-(`expected_last_trading_day` / `trading_days_behind`). **Answer it, then build.**
+**(1) THE TRADING-CALENDAR QUESTION — NEVER#1 CLASS, and it BITES IN TWO PLACES, not one**
+(engine owner msg 2864 item 5; folded because the second place is easy to miss):
+- **(i) WHETHER THE SWEEP RUNS AT ALL.** An unqualified 2p sweep on a Saturday escalates
+  Friday-afternoon tickets **correctly waiting for Monday** — manufacturing an escalation about a
+  system behaving exactly as designed, on the client-facing surface.
+- **(ii) THE AGE PREDICATE ITSELF.** The product's own client ack promises *"expect it on the next
+  trading day"* — so **lateness must count in TRADING DAYS, or the sweep contradicts the promise the
+  client was already given.** A wall-clock age predicate can call a ticket late that the client was
+  told to expect later.
 
-**(2) "ADDRESSED" HAS NO FIELD TODAY — and the honest definition has a dependency.**
-On the **currently deployed** row the only available signal is `status` still `open`. W-A's day-one
-field set adds **`first_response_at`** (plus `claimed_at`/`claimed_by`), which is the richer and
-more honest definition — *addressed* means someone responded, not merely that the row left `open`.
-**THE FORK, stated so it is chosen rather than defaulted into:**
-- **(i) SHIP ON `status` NOW** — available immediately; but it calls a ticket "addressed" the moment
-  its status changes, which is a **weaker claim than the word means**.
-- **(ii) RIDE W-A for `first_response_at`** — the honest definition; costs the W-A dependency.
-**Whichever is chosen, the TO records WHICH definition shipped, in the record, in those words** —
-so a future reader never has to infer what "addressed" meant on a given date.
+`lib/trading_calendar.py` is the ONE frontier definition and carries what this needs —
+`is_trading_day`, `expected_last_trading_day`, `trading_days_behind` (function list **read at HEAD**
+by the engine owner, not assumed). **Answer both, then build. Never re-implement a calendar.**
 
-## BUILD LADDER — this is plausibly a CONDITIONAL, not a new pipeline
+**(2) "ADDRESSED" HAS NO FIELD TODAY — and the cheap answer has a hole exactly where it matters.**
+On the **currently deployed** row the only signal is `status` (`open | in_progress | completed`).
+W-A's day-one set adds **`first_response_at`** (plus `claimed_at`/`claimed_by`).
 
-The D7 runner **already fires every 5 minutes** and **already reads the board**. A 2p-window
-evaluation is plausibly a conditional inside the existing pass — rung 2 (the estate already has it),
-not rung 7 (new code). ⚖ **COUNTERWEIGHT, and it is real:** that runner is now **live production
-infrastructure** carrying the client-facing buzz path; adding a second responsibility to it is a
-coupling decision. **`0.5.0_AE_OpalETL~Z` owns this call as the engine owner** — either shape is
-legitimate; what is not legitimate is drifting into one without naming it.
+⛔ **THE FORK IS NOT MERELY EARLY-VS-LATE — THE EARLY VERSION UNDER-REPORTS BY CONSTRUCTION**
+(engine-owner measurement, `0.5.0_AE_OpalETL~Z` msg 2864 item 6, folded here before build):
+- **(i) SHIP ON `status` NOW** — zero W-A dependency, implementable immediately. **But "not
+  addressed == still `open`" SILENTLY EXCLUDES CLAIMED-BUT-UNANSWERED**: a ticket someone claimed at
+  9am and never replied to sits `in_progress`, so the sweep skips it — **and that is plausibly the
+  exact case Andrew means by "not addressed."** The cheap definition misses precisely the population
+  a human would consider the worst kind of late.
+- **(ii) RIDE W-A for `first_response_at`** — catches that population; costs the W-A dependency.
+**Whichever ships, the record states WHICH definition shipped AND WHAT IT DOES NOT COVER, in those
+words** — otherwise the gap reads as coverage, which is the failure mode that makes an
+under-reporting sweep worse than none.
+
+**⚠ OPEN DESIGN INPUT — WHICH THREAD? (`0.5.0_AE_OpalETL~Z` cannot answer this from the engine, and
+neither can I.)** *"An agent message on the thread"* — the client's own chat, or the "Opal Client
+Tickets" channel? Different surfaces, different audiences, and **today different consumer
+realities**: a channel post wakes nobody until the channel leg lands. `1.0.0_SA_CTO~Z` rules it.
+
+## BUILD LADDER — ANSWERED BY MEASUREMENT, not estimate (engine owner, msg 2864)
+
+The runner's fetch is `GET /api/scoped/tickets?status=open&limit=500` — **it already returns EVERY
+open ticket every pass**, and new-since-cursor is applied CLIENT-side inside `run_once`. So the
+sweep is **a SECOND PREDICATE OVER DATA ALREADY IN HAND: no new API call, no new credential, no new
+schedule, no new deploy surface.** That is rung 2 settled by measurement rather than plausibility.
+
+⛔ **BUT TWO STRUCTURAL CONSTRAINTS COME WITH IT, and both are build-blocking:**
+
+**(A) THE TWO DUTIES HAVE OPPOSITE STATE SHAPES — the cursor STRUCTURALLY CANNOT SERVE THE SWEEP.**
+The cursor is a **forward-only high-water mark** ("what is new"). A sweep looks **BACKWARD** at rows
+already behind that mark. Reusing the cursor would either re-buzz or find nothing. **The sweep needs
+its OWN state key** — a `last_swept_date` attribute on the same config item is the cheap correct
+form (same item, no second store). *Grain:* at a 5-min cadence, "at 2p" resolves to **the first pass
+on or after 14:00 local that has not yet swept today.**
+
+**(B) FAILURE ISOLATION — the load-bearing constraint, and the honest answer to the
+"second-responsibility-on-live-production-infra" counterweight.** The buzz path is the
+**client-facing SLA path**. Today `run_once` aborts the whole pass on a fetch failure and STOPS on
+`SEND_FAILED` (ordered retry, deliberate). **If the sweep shares that control flow, a sweep bug can
+silently stop new-ticket buzzes** — the expensive failure. **Therefore: the sweep runs STRICTLY
+AFTER the buzz work, inside its OWN exception boundary, with its OWN distinct exit code that can
+never mask or preempt the buzz path's.** A second duty is fine; **a shared failure domain is not.**
 
 ## Acceptance criteria (D7F pattern)
 - **WF-1** BOTH DESIGN ANSWERS RECORDED FIRST: the trading-calendar behavior and the `addressed`
@@ -74,10 +105,18 @@ legitimate; what is not legitimate is drifting into one without naming it.
 - **WF-6** NO-REGRESSION: the 5-min buzz path, its cursor, and the exit contract behave unchanged;
   the escalation leg failing must NOT break the buzz leg (exercised, given the runner is live
   production infrastructure).
-- **WF-7** Proof instance VALID rc=0 POSITIONAL, ids WF-1..WF-7 (rc unpiped).
+- **WF-7** Proof instance VALID rc=0 POSITIONAL, ids WF-1..WF-9 (rc unpiped).
+- **WF-8** ⛔ **FAILURE ISOLATION, EXERCISED IN THE EXPENSIVE DIRECTION:** with the sweep leg forced
+  to raise (scratch fault injection), **the buzz path still fetches, still buzzes, and still exits
+  on its own contract** — the sweep's failure carries its OWN distinct exit code and neither masks
+  nor preempts the client-facing SLA path. The mutant is the proof: share the exception boundary →
+  a sweep fault stops the buzzes → the test FAILS.
+- **WF-9** **OWN STATE KEY:** the sweep's `last_swept_date` (or equivalent) is separate from the
+  forward-only buzz cursor, exercised across a day boundary; and the cursor's own value is
+  **byte-unchanged** by a sweep pass (the two state shapes provably do not contaminate each other).
 
 <proof_of_spec>
-  <expected_criteria>WF-1,WF-2,WF-3,WF-4,WF-5,WF-6,WF-7</expected_criteria>
+  <expected_criteria>WF-1,WF-2,WF-3,WF-4,WF-5,WF-6,WF-7,WF-8,WF-9</expected_criteria>
   <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WF_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
