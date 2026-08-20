@@ -113,3 +113,39 @@ on sends**, not M365 mailboxes/aliases, so this is not a Rule-23 conflict. `opal
 never-touch (we do not own it).
 
 D9/D6 unaffected by this ruling.
+
+---
+
+## ADDENDUM 3 — 2026-08-19 ~19:41Z — **THE ALIAS MECHANISM IS ASYMMETRIC. INBOUND IS FREE; OUTBOUND IS THE TRAP.**
+
+**Classed INFERRED, with its discharging check named** (COO~Z via MSTR, bus id `0da5cf66`) — treat
+it as a prior under test, not a finding. But price it NOW, because the failure mode is late-surfacing.
+
+**The asymmetry:** inbound mail to an `opalsupport@` alias is free — the zero-new-consent property
+in Addendum 2 holds. **Outbound does NOT follow.** M365's `SendFromAliasEnabled` **defaults OFF**,
+and with it off, **Graph sends present the PRIMARY address (`opalbloomberg@`)** — precisely the
+external broadcast Andrew ruled against. **And it would surface only at the first real reply to a
+partner** — i.e. after the build reads green, in front of an external counterparty.
+
+**THE DISCHARGING CHECK (one read, IT/Andrew hand):** is `SendFromAliasEnabled` true on this tenant?
+
+**REMEDIES IF IT IS FALSE:**
+- **(a)** Enable the flag — tenant-wide setting.
+- **(b)** **INVERT primary/alias:** `opalsupport@` becomes PRIMARY, `opalbloomberg@` demoted to
+  alias. Same mailbox, same consent, and **presentation is correct BY CONSTRUCTION** rather than by
+  a setting someone must keep true. Both site-Z execs prefer this shape. **Cost:** a re-verify of
+  BG's identity pins, which key on `opalbloomberg@`.
+
+**Carry the tenant-flag read as a NAMED INPUT in your design either way** — the same discipline as
+Addendum 2's admin act. A build that is correct on inbound and wrong on outbound passes every check
+you would naturally run.
+
+**Andrew is being asked the refined question at the sitez console now; his answer re-ferries through
+MSTR.** Do not pre-commit to (a) or (b) ahead of it.
+
+---
+
+## VINTAGE SUPERSESSION — 2026-08-19 ~19:41Z: **D7 = @fac13ccc3a** (supersedes @36a7fbd70e)
+The authority line above cites @36a7fbd70e. **The final absorbed D7 vintage is `@fac13ccc3a`**, which
+adds the explicit **#42 ticketing-half acceptance**. Cut/execute against @fac13ccc3a. Everything
+already stated in this TO and its addenda stands; the supersession ADDS, it does not retract.

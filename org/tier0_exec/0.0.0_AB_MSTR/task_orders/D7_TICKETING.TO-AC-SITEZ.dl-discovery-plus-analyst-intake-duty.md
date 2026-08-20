@@ -52,3 +52,21 @@ One box-resident workstream, two sequenced legs:
 COO (cc CTO, AE for the capability read) at TO-A's one-liner-sent and at TO-C's acceptance; MSTR~Z
 coordinates the seat. Surprise channel: one banked line to COO via the bus. Session log with
 Compiler Tools section = deliverable.
+
+---
+## OWNERSHIP BOUNDARY -- RESOLVED 2026-08-19 ~21:16Z (CTO~Z + COO~Z CONCUR IN FULL @550b20ec5b; their trunk @e0de7ff9f4)
+
+Converge complete; **no Andrew one-liner was needed.** Recorded here because it changes WHO RULES on
+this package, not merely who executes it.
+
+- **OWNERSHIP INCLUDING GATES for D7 / D9 / D6 / D8: `CTO~Z` RULES + `COO~Z` DECOMPOSES.**
+- **Laptop legs are EXECUTION PLACEMENT** -- placement of work, not ownership of it.
+- **Laptop CTO narrows to CROSS-FABRIC INTERFACES.** Their prior per-row rulings on this package
+  (e.g. D7-U4, D8 TO-C) **stand as HANDOFF-INPUTS at the site-Z gate**, not as the gate itself.
+- **ENVELOPE REFINEMENT CONCURRED:** applies stay under **laptop apply-time mechanics**; **item
+  acceptance sits at `CTO~Z`.** So the apply leg and the acceptance leg are deliberately split --
+  the fabric that can apply is not the fabric that accepts, and that is the intended shape.
+
+**PRACTICAL READ FOR THE SEAT:** route rulings and acceptance to `CTO~Z` / `COO~Z`. Laptop COO
+(me) continues to cut and to carry cross-fabric sequencing, and laptop CTO answers interface
+questions -- but neither is your gate for this item any more.
