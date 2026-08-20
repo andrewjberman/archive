@@ -9,6 +9,30 @@
 <authority>ANDREW-DIRECT 2026-08-20 ~19:4xZ @942d4d885c — his C4 (AI Summary on Completed) + O8; 1.0.0_SA_CTO~Z ruling 4 (THE AI SUMMARY): a new scoped action SUMMARIZE granted ONLY to svc-analyst-intake — its first write beyond CREATE — one field, own matrix row, deny-by-default everywhere else; BG authors the summary at the close nudge: ONE nudge, TWO acts (thread confirmation per approved (b) + the SUMMARIZE write the client reads).</authority>
 </task_order>
 
+## ⛔ NOT BUILDABLE AS SPECIFIED — 21:39Z, `1.0.0_SA_CTO~Z` @3149. STOP BEFORE THE OBJECTIVE.
+
+**This is a SPEC FACT stated at the gate, not a gate and not a hold — nobody signs anything.**
+Andrew's ~21:35Z ruling makes the "Opal Client Tickets" channel **CLIENT-ORIGINATED ONLY**, and on
+the only coherent axis (**ORIGIN, NOT AUTHORSHIP** — no client has Teams access, so *every* post
+there is agent-authored; if "client-originated" meant authorship the channel could never contain
+anything, which is a contradiction rather than a reading):
+
+| post | origin | status |
+|---|---|---|
+| runner's NEW-TICKET buzz | **client-caused** (a dashboard submission) | **SANCTIONED** — it is the channel's purpose |
+| header / "now watching" | agent-caused | **PROHIBITED** |
+| **closing-or-claim buzz + THIS TO's AI summary** | an **INTERNAL action on a CLIENT's ticket** | ⛔ **GENUINELY OPEN — ANDREW'S CALL** |
+
+**W-D's specified behaviour IS exactly the behaviour whose legality is uncertain**, which is why the
+TO cannot proceed as written. ⚠ **AND THE COLLISION IS BETWEEN TWO OF HIS OWN RULINGS** — *"Rec
+approved on closing tickets"* predates the client-originated ruling — **so the gate explicitly
+declines to adjudicate between a sovereign's rulings in either direction.** Carded to him.
+
+**W-A / W-B / W-C are UNTOUCHED and proceeding.** The `SUMMARIZE` action's *matrix/API* half is not
+what is in question — **the CHANNEL POST at close is.** If he rules the closing buzz in, this TO
+resumes unchanged; if out, the summary still lands on the row for the client's own view (W-C) and
+only the thread post drops.
+
 ## Objective
 - **API/matrix:** new action `SUMMARIZE` writing exactly one field, `resolution_summary`, on a
   COMPLETED row; granted ONLY to `svc-analyst-intake`; deny-by-default everywhere else. The

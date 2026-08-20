@@ -4,7 +4,7 @@
 <issued_to>0.5.0_AE_OpalETL~Z (engine/runner owner — the build-ladder call below is YOURS as the seat that owns the live runner). Laptop apply leg if the definition rides a Lambda field = via 0.0.0_AB_MSTR~Z ferry.</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-20T20:4xZ</issued>
-<status>staged — **BOTH design forks RULED BY ANDREW ~20:50Z @0d82b6ce91 and BOTH SHRINK THIS CUT**: no trading-calendar limb, and ADDRESSED == ACCEPTED/CLAIMED (predicate `status == open`), so **ZERO W-A DEPENDENCY — this no longer sequences behind W-A**. **AND the remaining two are now RULED at the `1.0.0_SA_CTO~Z` gate @c9459dfa2f: WHICH THREAD = INTERNAL by default** (telling the CLIENT we were late is a product decision, carded to Andrew — which also dissolves the client-contradiction risk entirely), **and RE-ESCALATION = ONE DIGEST PER SWEEP**, not N messages. ⛔ **RE-OPENED ~21:35Z: the DELIVERY SURFACE is no longer settled.** An Andrew ruling makes the "Opal Client Tickets" channel CLIENT-ORIGINATED ONLY, and this escalation is OPAL-originated by definition — so if "internal" meant that channel, the ruled surface is PROHIBITED. **DO NOT BUILD THE DELIVERY LEG until `1.0.0_SA_CTO~Z` re-states which surface it meant.** Everything else is unchanged and buildable: predicate, wall-clock cadence, own state key, failure isolation, the cap assertion, one config, no terminal writes.</status>
+<status>staged — **BOTH design forks RULED BY ANDREW ~20:50Z @0d82b6ce91 and BOTH SHRINK THIS CUT**: no trading-calendar limb, and ADDRESSED == ACCEPTED/CLAIMED (predicate `status == open`), so **ZERO W-A DEPENDENCY — this no longer sequences behind W-A**. **AND the remaining two are now RULED at the `1.0.0_SA_CTO~Z` gate @c9459dfa2f: WHICH THREAD = INTERNAL by default** (telling the CLIENT we were late is a product decision, carded to Andrew — which also dissolves the client-contradiction risk entirely), **and RE-ESCALATION = ONE DIGEST PER SWEEP**, not N messages. ⛔ **DELIVERY SURFACE: the CHANNEL IS EXCLUDED (settled 21:39Z), the POSITIVE surface is NOT YET NAMED.** Andrew's ~21:35Z ruling makes the "Opal Client Tickets" channel CLIENT-ORIGINATED ONLY; by the gate's own origin axis this escalation is AGENT-CAUSED (it reports Opal's inaction), and the interim is "nothing agent-caused goes in that channel" — so that surface is OUT by ruling, not by caution. **DO NOT BUILD THE DELIVERY LEG until `1.0.0_SA_CTO~Z` names the surface it DOES use** (the detect/deliver seam points at the email DL). The DETECTION half is buildable now. Everything else is unchanged and buildable: predicate, wall-clock cadence, own state key, failure isolation, the cap assertion, one config, no terminal writes.</status>
 <priority>P2</priority>
 <authority>ANDREW-DIRECT 2026-08-20 ~20:45Z, record @11d274f8c2. VERBATIM: *"we need the agent to be messaging on the thread if there is a service request that was issued prior to naive 2p ET, which has still not been addressed by 2p ET. THat is a feature that needs to be worked in."*
 ⛔ **MORATORIUM: SATISFIED BY EXPLICIT ASK — his verbatim above IS the `# andrew-asked` marker.** And note the shape is already correct by law: this is a **SCHEDULED CHECK**, which is what a production pipeline must be. It is a FEATURE he asked for, not detection machinery.</authority>
@@ -134,8 +134,19 @@ never mask or preempt the buzz path's.** A second duty is fine; **a shared failu
 
 ## ⛔ BINDING DESIGN RULINGS — `1.0.0_SA_CTO~Z` gate @c9459dfa2f / @21bd23d943 (folded ~20:56Z)
 
-**(1) WHICH THREAD — ⛔ RE-OPENED BY AN ANDREW RULING ~21:35Z. DO NOT BUILD THE DELIVERY SURFACE
-UNTIL `1.0.0_SA_CTO~Z` RE-STATES WHICH SURFACE "INTERNAL" MEANT.**
+**(1) WHICH THREAD — ⛔ THE CHANNEL IS EXCLUDED. The POSITIVE surface is still to be named.**
+
+✅ **HALF RESOLVED at 21:39Z (`1.0.0_SA_CTO~Z` @3149), and it follows from the gate's OWN axis rather
+than from any inference of mine:** the interim is *"nothing AGENT-CAUSED goes in that channel"*, and
+by the gate's own origin classification **this escalation is agent-caused** (it reports **Opal's
+inaction**; no client act causes it). **So the "Opal Client Tickets" channel is OUT as this feature's
+delivery surface** — that much is settled, and the fence on it is now a RULING rather than a caution.
+
+⚠ **STILL OPEN — WHICH SURFACE IT *DOES* USE.** Excluding one surface does not name the next.
+**`1.0.0_SA_CTO~Z` states the positive surface; the detect/deliver seam points at the EMAIL DL** (and
+the DL's own transport criteria (2) audience and (3) DKIM remain at that gate). **DO NOT BUILD THE
+DELIVERY LEG until the positive surface is named.** *The DETECTION half is unaffected and buildable
+now.*
 
 *Previously ruled:* INTERNAL by default — the escalation says *Opal has not answered*, so it is
 **addressed to Opal**; telling the CLIENT we were late is a product decision, carded to Andrew.
