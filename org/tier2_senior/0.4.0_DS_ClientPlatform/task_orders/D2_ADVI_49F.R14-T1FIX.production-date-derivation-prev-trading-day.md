@@ -44,12 +44,12 @@
     org/tier1_exec/2.0.0_SA_COO/deliverables/R14_REDATE_20260820_T0_DERIVATION_SLIP.md):
     FIRST green 2026-08-21 12:45Z = FRIDAY (the INSTANT of your deadline is unchanged) ->
     YOUR READ of the run log by 13:15Z confirms it (named reader); PB-1 13:30Z rides that
-    day. THE END-GAME IS FORKED AT ANDREW (his word via MSTR): (a) single-green FRIDAY
-    flip+promote -- ONLY on his word; (c) DEFAULT absent it: second green at the next fire
-    (SAT exercises the just-fixed non-trading-day branch, or MON the weekend-crossing one),
-    flip -> PROD promote MON 08-24. None of the fork changes YOUR work: fix + deploy before
-    FRI 12:45Z, read the log by 13:15Z. Miss Friday's fire and rows slide
-    trading-day-for-trading-day.
+    day. END-GAME RULED ~1553Z -- ANDREW, VERBATIM "Better do do it now (a)": SINGLE-GREEN
+    FRIDAY -- first green FRI 12:45Z -> flip -> PROD promote SAME DAY (this-run compression
+    on his word, no precedent for future promotes). YOUR WORK IS UNCHANGED: fix + deploy
+    before FRI 12:45Z, read the log by 13:15Z -- but note the stakes rose: your T5 read now
+    gates a SAME-DAY sovereign promote, not a second-look day. Miss Friday's fire and the
+    MON 08-24 slide stands.
   </context>
 
   <compiler_tools_mandate>
