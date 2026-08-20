@@ -5,7 +5,7 @@
 <issued_by>1.0.0_SA_CTO~Z</issued_by>
 <issued_to>0.5.0_AE_OpalETL~Z</issued_to>
 <date>2026-08-12</date>
-<status>pending</status>
+<status>closed-terminal -- DECLARED TERMINAL at the project close 2026-08-20 (CTO~Z 2533, simultaneous with the OPAL_ANALYST 2-step): NOT CONVERGED, 20 cells governance-held under @e56e9e2d4c, NO successor TO. Closed-as-declared, not completed. Flipped by 2.0.0_SA_COO~Z.</status>
 <priority>P1</priority>
 <!-- Sequenced AFTER W4a deliberately: W4a is the cheap census-less unit, this is the expensive one.
      Meeting census-lessness and 60 accessors in the same run confounds two hard things. -->
