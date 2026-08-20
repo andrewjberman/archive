@@ -35,7 +35,37 @@ THE COLLISION — ONE PREMISE, WHICH IS ALL IT EVER NEEDED:
   W-F  escalation is INTERNAL by ruling ("telling the CLIENT we were late is a product decision,
        carded to Andrew").
   W-E  :37  the DL's AUDIENCE IS UNDETERMINED — open question 2, carded to Andrew.
-  >> THEREFORE W-F's delivery leg cannot be built until the audience is answered. **THE GATE DOES
+  >> THEREFORE **ONLY THE AUDIENCE-DEPENDENT PART** of W-F's delivery leg waits on the answer.
+
+✅ NARROWED 23:42Z (1.0.0_SA_CTO~Z @3923, third narrowing of one ruling in ten minutes) — CUT ON
+   THIS LINE, and the cut is 2.0.0_SA_COO~Z's per their instruction:
+     BLOCKED on the audience answer, AND ONLY THESE:
+         transport binding · recipient resolution · medium-specific formatting
+     FREE, STARTS NOW:
+         the escalation's TRIGGER CONDITION · its DETECTION · its PAYLOAD (see the caveat below)
+   THE TEST, verbatim: "IF A TASK'S OUTPUT WOULD BE BYTE-IDENTICAL UNDER EITHER AUDIENCE ANSWER, IT
+   IS NOT BLOCKED AND MUST NOT BE WRITTEN AS BLOCKED."
+   TRIGGER and DETECTION pass that test cleanly: WHETHER a ticket is overdue (`status == open` at the
+   wall-clock cadence) does not change when the reader changes.
+
+⚠ PAYLOAD — I APPLIED THE TEST RATHER THAN INHERITING THE LIST, AND IT DOES NOT PASS CLEANLY.
+   The FACT SET is audience-invariant: which tickets are overdue, since when, and by how long are the
+   same facts either way. **But FACT SELECTION may not be.** An internal digest would carry routing
+   state (e.g. `claimed_by: none`); a client-facing one plausibly would not — that is the WE-4
+   content-projection concern one level down.
+   >> SO THE CUT IS FINER STILL: **the payload's INVARIANT CORE is FREE and starts now.** If a
+      SPECIFIC FIELD turns out to be audience-dependent, **THAT FIELD waits — not the payload, and
+      certainly not the leg.** Raised rather than silently cut, because declaring free something that
+      is not is the SAME wrong-grain error in the opposite direction.
+
+⛔ THE ERROR SHAPE, and it is why this correction is worth more than the tasks it releases:
+   **A DEPENDENCY STATED AT THE WRONG GRAIN DOES NOT LOOK LIKE AN ERROR — IT LOOKS LIKE CAUTION.**
+   Gating the whole leg reads as prudent, produces no visible defect, and silently holds three tasks
+   that could have run all night. **THE COST IS INVISIBLE AND IS PAID IN IDLE TIME, WHICH NO
+   INSTRUMENT IN THIS FABRIC MEASURES.**
+   And per the standing rule against manufactured gates: **A HOLD WIDER THAN ITS CAUSE IS A
+   MANUFACTURED GATE ON THE EXCESS**, whatever the intent behind it. The wide version was mine in
+   both TOs; the excess held detection and payload on a question that cannot touch them. **THE GATE DOES
      NOT REST ON WE-4 AND NEVER DID.** WE-4 is a CONTENT-projection criterion and is SILENT on
      audience; BOTH BRANCHES OF THE FORK REMAIN LIVE.
 
