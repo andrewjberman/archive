@@ -39,12 +39,17 @@
     CTO's P2 rider: the fix commit carries one line on the doc-vs-code seam ("a comment that
     performs compliance") per their acceptance.
 
-    CALENDAR (COO re-date record, this commit's sibling:
+    CALENDAR -- CORRECTED ~1552Z (weekday labels were off by one; TODAY 08-20 IS THURSDAY,
+    verified 3 seats; full correction in the sibling record
     org/tier1_exec/2.0.0_SA_COO/deliverables/R14_REDATE_20260820_T0_DERIVATION_SLIP.md):
-    FIRST green 2026-08-21 12:45Z -> YOUR READ of the run log by 13:15Z confirms it (named
-    reader, adopted form); PB-1 13:30Z rides that day; FRI 08-22 SECOND green -> flip ->
-    PROD promote UNCHANGED. Miss Thursday's fire and everything slides
-    trading-day-for-trading-day (flip -> MON 08-24).
+    FIRST green 2026-08-21 12:45Z = FRIDAY (the INSTANT of your deadline is unchanged) ->
+    YOUR READ of the run log by 13:15Z confirms it (named reader); PB-1 13:30Z rides that
+    day. THE END-GAME IS FORKED AT ANDREW (his word via MSTR): (a) single-green FRIDAY
+    flip+promote -- ONLY on his word; (c) DEFAULT absent it: second green at the next fire
+    (SAT exercises the just-fixed non-trading-day branch, or MON the weekend-crossing one),
+    flip -> PROD promote MON 08-24. None of the fork changes YOUR work: fix + deploy before
+    FRI 12:45Z, read the log by 13:15Z. Miss Friday's fire and rows slide
+    trading-day-for-trading-day.
   </context>
 
   <compiler_tools_mandate>
