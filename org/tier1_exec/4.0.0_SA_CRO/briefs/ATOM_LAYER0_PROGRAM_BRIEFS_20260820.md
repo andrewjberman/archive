@@ -152,6 +152,15 @@ owner; (c) the census's own Rule-24 record for its verdict array; (d) traversal 
 classes that manufacture future incidents); (f) NO FIXES — census-not-chase; every row routes, nothing
 lands from the census seat.
 
+**Vintage discipline (CVO-supplied at founding, 2026-08-20 msg 63180 — binding on every row):** the
+2026-08-20 W15-GRAIN3 landing (@eb58b97bc7) plus two same-day mints moved the canonical, manifest, and
+CATALOG_ORDER underneath any earlier read, and **four canonical chain_counts are DELIBERATELY
+manifest-stale pending the resolver-commit word** — a census row that does not pin its vintage
+(`file @ commit`) will file that known, held residual as a fresh finding. Pin every row's vintage;
+check the known-residual list (CVO's L7 verify @82aa27590a) before filing any counts-mismatch verdict.
+Citable baselines: CVO's vintage-screen state (their 2026-08-20 session log §7) and CRO's
+citation-integrity close (30/30 anchors, 67/68 files).
+
 **Acceptance bar.** (a) Denominator-first: the population enumeration commits before verdicts begin;
 (b) a positive control (a known-resolved term — e.g. Lifecycle_Class, whose resolves_via/home chain
 landed today) and a known-negative (one of the O1 annex's 5 open non-agreements) both classify
