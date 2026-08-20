@@ -62,7 +62,14 @@ An absence that is never asserted is not tested.
   row proves nothing). Mutant: remove the projection → the internal fields appear → the test FAILS.
   Exercised over the wire (the response body), never by reading the frontend.
 - **WC-2c** **COMPLETENESS OF THE CLIENT LIST:** the "My Requests" view either returns ALL of the
-  client's rows or **states its own bound** — no silent truncation. See the GSI decision routed to
+  client's rows or **states its own bound** — no silent truncation.
+  ⛔ **THIS CRITERION IS NOW THE OBLIGATION-HOLDER FOR THE GSI DECISION (W-A DECIDED 21:4xZ
+  @81c502cff2: NO INDEX IN W-A).** The reasoning is sound and worth carrying: **the requester-keyed
+  access pattern's correct key depends on W-C's query shape, which is unsettled — and a guessed index
+  is a second home for an unspecified pattern.** So the decision was not deferred vaguely; it was
+  **transferred with a named obligation: if this view lists client tickets by SCAN, it MUST PRINT ITS
+  BOUND.** Deciding the index here (once the query shape is real) is in scope; shipping a silent
+  scan is not. See the GSI decision routed to
   W-A (3.0.0_SA_CVO~Z P1-1): without a requester-keyed index this view rides a Limit-bounded scan plus
   in-memory filter, which is the estate's truncated-page class turned into a **client-facing
   completeness claim** (a client who filed 12 shown 8, with nothing saying so). If the index is not
