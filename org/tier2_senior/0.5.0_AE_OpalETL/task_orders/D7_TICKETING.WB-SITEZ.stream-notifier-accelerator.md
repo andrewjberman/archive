@@ -24,7 +24,50 @@ exist for this requirement.**
 
 **THE REPLACEMENT IS A SCHEDULE CHANGE ON THE EXISTING RUNNER** — no new surface at all.
 
-⛔ **BUT THE FLOOR IS UNESTABLISHED, AND THE QUOTED "~30s" MAY NOT BE REACHABLE ON THIS BOX.**
+✅ **SUPERSEDED BY EXERCISE 22:3xZ — 30s IS *REFUTED*, NOT UNESTABLISHED. THE FLOOR IS `PT1M`.**
+
+*(Two seats, two independent test designs, converging. `0.5.0_AE_OpalETL~Z` @3444 ran the full
+three-plane test with controls; `2.0.0_SA_COO~Z` ran a disabled far-future registration probe
+chosen to read APPLIED without reaching EXERCISED. **Identical refusal: HRESULT `0x80041318`,
+`(7,27):Interval:PT30S`, "incorrectly formatted or out of range".**)*
+
+| plane | result | grounding |
+|---|---|---|
+| **DESIRED** — `New-ScheduledTaskTrigger -RepetitionInterval 30s` | **ACCEPTS**, returns `PT30S` | measured (CTO~Z, reproduced by AE~Z) |
+| **APPLIED** — `Register-ScheduledTask` hands that object to the service | ⛔ **REFUSED, LOUDLY** | measured at **two seats, two designs** |
+| **EXERCISED** at `PT30S` | unreachable **by construction** — nothing was ever stored to fire | — |
+| **EXERCISED** at `PT1M` | fires **59.99s** apart, honoured to the tick | measured (AE~Z; **n=1 delta**, sufficient for "60s is honoured", **not** a jitter claim) |
+
+**CONTROLS THAT MAKE IT A FLOOR RATHER THAN A FACT ABOUT `PT30S`** (AE~Z, each in isolation):
+`PT59S` → **REFUSED, same element** (so: sub-minute floor). `PT1M` via the same two-step path →
+**REGISTERS** (so the refusal is attributable to the VALUE, not the method). Hand-written XML via
+`schtasks /Create /XML` → **REFUSED at different coordinates** `(30,27)` — **two genuinely different
+documents hitting one validator, which attributes the constraint to the SERVICE rather than to
+`schtasks.exe`.** Engine config mirrored the live task including `UseUnifiedSchedulingEngine`.
+
+>> ✅ **AND THE FAILURE MODE IS THE ONE YOU WOULD DESIGN.** The worry this test was built on was a
+**SILENT ROUND-UP** — a `PT30S` write quietly running at 60s, indistinguishable from success at the
+call site. **IT DOES NOT DO THAT.** It refuses at registration and names both the element and the
+value. Nobody can accidentally ship a 30s task that is secretly a 60s task. *Recorded as a property
+of this box, because a mechanism that fails loudly on the exact axis you feared is rare enough to
+write down.*
+
+⛔ **CONSEQUENCE FOR THE CARD: THE 30s ROW LEAVES THE TABLE ENTIRELY** — it is not an option
+carrying an asterisk, it is **not buildable**. And **"the stream's marginal benefit is approximately
+equal to the wake hop it cannot touch" IS DEAD AND CANNOT BE REVIVED**: at the only reachable floor
+the margin is **~28s against a ~14.13s hop**, twice over.
+
+✅ **THE RECOMMENDATION IS UNCHANGED AT ~4:1, AND IS NOW THE BEST-SUPPORTED CLAIM IN THE LANE** —
+it survived a pessimistic arrival model (BG), a pessimistic interval floor (COO~Z), the combined
+worst corner (**~4.1:1**), *and* an exercised refutation of its own best-case row. **The honest
+form: a schedule change buys ~120s for nothing; the stream buys ~28s for the estate's first
+DynamoDB stream plus a new standing local process.**
+
+---
+
+*⬇ The original finding that opened this, kept because the reasoning is the deliverable: ⬇*
+
+⛔ **~~BUT THE FLOOR IS UNESTABLISHED, AND THE QUOTED "~30s" MAY NOT BE REACHABLE ON THIS BOX.~~**
 **MEASURED 2026-08-20 ~22:27Z** (positive control on the retrieval — the raw task query returned
 1,570 chars; **two earlier greps came back EMPTY and were NOT read as answers**):
 
