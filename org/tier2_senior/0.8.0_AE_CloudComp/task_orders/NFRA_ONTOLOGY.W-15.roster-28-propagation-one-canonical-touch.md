@@ -61,7 +61,14 @@ modifies sits outside a criterion.)
   regen land IN THIS SAME TOUCH, each diffed against CVO's @82aa27590a baseline; the regen's
   output retains the 3 admitted threads (ceo-digest/etf-reports/ticketing) and does NOT
   resurrect retired attribution — both printed as controls (they are the exact hazards the
-  hold existed for).
+  hold existed for). EXPECTED-DIFF DISCLOSURE (post-baseline adjudicated prose, NOT drift --
+  CVO 63381, estate-report 08-20 Andrew-ruled "approved" @b74527515e): the W15-5 diff WILL
+  see exactly TWO manifest rows changed since the baseline (MA-08-yang-generate-volatility +
+  FRED-01-yield-curve-daily-ingest, prose-only description fields + provenance comments; no
+  routing values, no counts, no named_thread changes) -- treat as expected, cite the decision
+  record, do not chase. Also post-baseline: yang-generate-holdings-attribution taxonomy row
+  re-pointed -> positioning @d4211559b6 (CRO-ruled, same-day). Any OTHER unexplained diff row
+  remains a real finding.
 - W15-4 proof instance VALID rc=0 positional: ids W15-1,W15-2,W15-3,W15-4,W15-5.
 
 <proof_of_spec>
