@@ -49,9 +49,14 @@
        parsing, no schema exposure, no parquet resolver (D6-3), resolver floor enforced
        (@7ea13aa4ed -- structurally absent from the catalog + belt-checked in
        catalog_gate.FLOOR_PATTERNS).
-    5. CTO REVIEW SLOT: the limits numbers (rows &lt;= 1000/response, 10s/request,
-       2 MB/response, 30 req/min/key) are PROPOSED at apply, not settled -- route them to
-       1.0.0_SA_CTO at apply time (that seat already holds the W6 limits-review leg).
+    5. CTO REVIEW SLOT -- EXERCISED AND AMENDED 2026-08-20 ~1456Z (CTO 63158, by the
+       issuing authority): the applied numbers are rows &lt;= 1000/response, 10s/request,
+       **4 MB/response** (raised from the proposed 2 MB after the R1 apply-time size
+       census found two CERTIFIED catalog rows over-cap -- "a limit that permanently
+       vetoes a certified catalog row is a content policy wearing an ops bound's
+       clothes"), 30 req/min/key sliding-window-log. R1 (head-object size census) is
+       now STANDING at EVERY catalog version port; any legitimate over-cap key routes
+       to CTO before the cap moves. Over-cap named-refusal behavior unchanged above 4MB.
     6. O-1 rider at port (cert, from mutant P7): ONE battery case asserting every {scope}
        family row carries firm: per-scope. OWNER IS 0.5.0_AE_OpalETL~Z (their authorship)
        -- coordinate via MCP; do NOT author the case yourself. A test assertion; no gate,
