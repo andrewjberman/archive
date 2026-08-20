@@ -15,11 +15,29 @@
 ⛔ **W-F's DELIVERY LEG IS GATED ON W-E's AUDIENCE DECISION.** Named as a CROSS-TO GATE rather than
    a note, because neither TO carried it and a builder cannot see it from inside either lane.
 
-THE COLLISION, measured in both TOs:
+⛔ CORRECTED 23:36Z — MY FIRST VERSION OF THIS BLOCK CONFLATED TWO ORTHOGONAL AXES AND WOULD HAVE
+   DELETED AN OPTION FROM A SOVEREIGN FORK. It cited WE-4 as an AUDIENCE constraint. IT IS NOT.
+   WE-4 VERBATIM: "POINTER-NOT-HOME: the body carries ticket id + deep link + minimal identifying
+   context, and provably NOT the internal audit trail / routing / internal notes (the W-C
+   projection discipline applied to the email surface)."
+   >> THAT IS A RULE ABOUT WHAT GOES IN THE BODY — CONTENT-SCOPE. **CONTENT-SCOPE AND AUDIENCE ARE
+      ORTHOGONAL:** an INTERNAL-audience DL carrying pointer-only content satisfies WE-4 completely,
+      because "do not put the audit trail in an email" is good practice toward internal readers too.
+   >> **NOTHING IN W-E CONSTRAINS THE DL'S AUDIENCE.** Audience appears EXACTLY ONCE in the whole TO
+      (denominator 1, whole-file count) — as open question 2, resolved nowhere.
+   ⛔ MY VERSION CONTRADICTED ITSELF IN TWO ADJACENT SENTENCES ("constrained to be provably not
+      internal" beside "if it resolves internal-or-mixed the collision disappears") AND THE
+      CONTRADICTION WAS THE TELL. Had it stood, a future reader would take it as foreclosing the
+      INTERNAL-AUDIENCE BRANCH — the very branch that makes the collision vanish at zero cost.
+      Caught by 0.5.0_AE_OpalETL~Z @3865, the criterion's author, reading their own TO at source.
+
+THE COLLISION — ONE PREMISE, WHICH IS ALL IT EVER NEEDED:
   W-F  escalation is INTERNAL by ruling ("telling the CLIENT we were late is a product decision,
        carded to Andrew").
-  W-E  :37  the DL's AUDIENCE is an OPEN DESIGN QUESTION.
-  W-E  :142 the DL must be "PROVABLY NOT the internal audit trail / routing / internal notes."
+  W-E  :37  the DL's AUDIENCE IS UNDETERMINED — open question 2, carded to Andrew.
+  >> THEREFORE W-F's delivery leg cannot be built until the audience is answered. **THE GATE DOES
+     NOT REST ON WE-4 AND NEVER DID.** WE-4 is a CONTENT-projection criterion and is SILENT on
+     audience; BOTH BRANCHES OF THE FORK REMAIN LIVE.
 
 RESOLUTION IS ANDREW'S, NOT THE GATE'S:
   DL resolves INTERNAL-or-MIXED  -> the collision disappears; W-F may ride it.
