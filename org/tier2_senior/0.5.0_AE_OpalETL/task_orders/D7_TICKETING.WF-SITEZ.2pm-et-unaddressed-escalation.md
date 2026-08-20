@@ -12,7 +12,12 @@
 
 ## Objective
 At **naive 2p ET**, any service request **issued before 2p ET** that is **still not addressed**
-gets an agent message on the "Opal Client Tickets" thread.
+raises an escalation **to Opal**. ⛔ **THE DELIVERY SURFACE IS RE-OPENED — see the fence below.**
+*(This line originally read "gets an agent message on the 'Opal Client Tickets' thread". That
+surface may now be PROHIBITED by Andrew's ~21:35Z client-originated-only ruling, since this
+escalation is Opal-originated by definition. The DETECTION half is unaffected and buildable; the
+delivery leg waits on `1.0.0_SA_CTO~Z` re-stating which surface "internal" meant — the detect/deliver
+seam already points at the email DL.)*
 
 **"NAIVE 2p ET" matches the estate's existing scheduling grain.** The D7 runner is registered
 `5-min RepetitionInterval, 24x7, naive-local`, and this box's local clock IS ET (measured: runner
