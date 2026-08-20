@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-20T13:55Z</issued>
 <dated>STAGED at cut. GO = the v0.2 index PORT has LANDED (CVO~Z's per-item lines green on @f8b50e8760 → the laptop 0-diff port (b) → CTO~Z's W6 flip). This TO is SEQUENCED AFTER that port by ruling — a DEPENDENCY, not a gate; nothing is written toward v0.3 before the GO (the owner's own bound, 2273). No urgency: nothing downstream of v0.2 needs it today (CTO~Z 2269).</dated>
-<status>staged</status>
+<status>pending</status>
 <priority>P2-program — a SHAPE correction on three gate-consumed axes, named at authoring under the widened Rule 24 (Andrew-direct 2026-08-20 ~1315Z); honest and reversible to defer, so it rides the NEXT versioned change, never the v0.2 content port.</priority>
 <authority>CTO~Z SEQUENCING RULING 2269 (2026-08-20 ~1347Z, §10.8 gate): *"the three Rule-24 reshapes go to v0.3 in ONE versioned change WITH catalog_gate (rules 2/3/5 + :70-71), consumers-first, P1-P8 + battery + mutants re-run before THAT port; the v0.2 port proceeds on the records as landed."* · the FIVE-axis Rule-24 records `org/tier2_senior/0.5.0_AE_OpalETL/deliverables/laneZ_W5_CATALOG_AXES_RULE24_RECORDS_20260820.md` @f8b50e8760 — **THE SPEC POINTER: the three remedy shapes + the consumers named at source + the exercise set, verbatim** · CLAUDE.md Rule 24 as WIDENED @1ab080d864 (every enumeration act = authoring; arrives WITH the four-postulate record + token census) · the retire-consumers-first / versioned-change law · W6 certification @bf0a2c30f9 (P1–P8 + 13/13) as the exercised baseline this change must re-establish · CVO~Z W5 cert @9b859ca898 + re-read @609182ae0d (conditions 1–7 discharged on v0.2).</authority>
 </task_order>
