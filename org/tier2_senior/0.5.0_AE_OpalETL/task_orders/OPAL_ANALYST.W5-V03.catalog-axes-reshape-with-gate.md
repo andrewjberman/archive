@@ -1,0 +1,78 @@
+# TO OPAL_ANALYST.W5-V03 — DATA_CATALOG v0.3: the three Rule-24 axis reshapes (verdict_class / firm / family.axis) in ONE versioned change WITH catalog_gate, consumers-first, exercised BEFORE the port
+
+<task_order id="OPAL_ANALYST.W5-V03" project="OPAL_ANALYST">
+<issued_to>0.5.0_AE_OpalETL~Z (owner per CTO~Z sequencing ruling 2269 item 4; the W5/v0.2 author + emitter/lift/battery/validate owner; catalog_gate co-moves at this seat per the same ruling)</issued_to>
+<issued_by>2.0.0_SA_COO~Z</issued_by>
+<issued>2026-08-20T13:55Z</issued>
+<dated>STAGED at cut. GO = the v0.2 index PORT has LANDED (CVO~Z's per-item lines green on @f8b50e8760 → the laptop 0-diff port (b) → CTO~Z's W6 flip). This TO is SEQUENCED AFTER that port by ruling — a DEPENDENCY, not a gate; nothing is written toward v0.3 before the GO (the owner's own bound, 2273). No urgency: nothing downstream of v0.2 needs it today (CTO~Z 2269).</dated>
+<status>staged</status>
+<priority>P2-program — a SHAPE correction on three gate-consumed axes, named at authoring under the widened Rule 24 (Andrew-direct 2026-08-20 ~1315Z); honest and reversible to defer, so it rides the NEXT versioned change, never the v0.2 content port.</priority>
+<authority>CTO~Z SEQUENCING RULING 2269 (2026-08-20 ~1347Z, §10.8 gate): *"the three Rule-24 reshapes go to v0.3 in ONE versioned change WITH catalog_gate (rules 2/3/5 + :70-71), consumers-first, P1-P8 + battery + mutants re-run before THAT port; the v0.2 port proceeds on the records as landed."* · the FIVE-axis Rule-24 records `org/tier2_senior/0.5.0_AE_OpalETL/deliverables/laneZ_W5_CATALOG_AXES_RULE24_RECORDS_20260820.md` @f8b50e8760 — **THE SPEC POINTER: the three remedy shapes + the consumers named at source + the exercise set, verbatim** · CLAUDE.md Rule 24 as WIDENED @1ab080d864 (every enumeration act = authoring; arrives WITH the four-postulate record + token census) · the retire-consumers-first / versioned-change law · W6 certification @bf0a2c30f9 (P1–P8 + 13/13) as the exercised baseline this change must re-establish · CVO~Z W5 cert @9b859ca898 + re-read @609182ae0d (conditions 1–7 discharged on v0.2).</authority>
+</task_order>
+
+## Objective
+Land DATA_CATALOG **v0.3** = the three axes whose Rule-24 records FAIL postulate (iii) (and `firm` also (ii)/(iv)) RESHAPED per their recorded remedies, **and `catalog_gate` + its exercise harness moved WITH them in the SAME commit**, so no consumer ever reads a catalog whose axis shapes it does not understand. The v0.2 artifact and gate stay pinned as the rollback.
+
+**THE CHANGE (one versioned commit; CTO~Z 2269 item 4, records @f8b50e8760 — cut right means exactly this, nothing wider):**
+1. **`verdict_class` → two fields (RCG-v2 pattern):** `verdict_class ∈ {serve, serve-with-caveat, deny}` + `verdict_state ∈ {ruled, pending-andrew}`; a held row = `deny` + `pending-andrew`. Consumer: `catalog_gate.py` rule 2 (`:90-93` @91fe6afbca — `SERVABLE_CLASSES` test) + the battery's VERDICT-GATE cases (`battery_catalog_v02.py:150`). **Gate BEHAVIOUR unchanged by the split** (a held row still denies).
+2. **`firm` → tier-or-firm values ONLY** `{opal-internal, cottonwood, 49financial, inflection, …}`; `global` → `opal-internal` + `scope: all-firms-aggregate` (declared with its intent); `per-scope` → a new **`firm_resolution: key-scope-segment`** field at family grain. Consumer: `catalog_gate.py` rule 5 (`:96-115` — the `row_firm == "per-scope"` branch becomes the `firm_resolution` branch; the key-scope check moves with it, byte-for-byte in meaning) + P1/P2/P7/P8 + the `w6-scope-family-firm` battery case (`:214`, becomes `firm_resolution` on the scope-axis family rows). **This is the gate's load-bearing key (CTO~Z O-1) — the one axis whose reshape is a predicate change by construction.**
+3. **`family.axis ∈ {slug, scope, keyword, key-path, key-list}`** — `manifest`/`archive`/`legacy` (content class) → `key-path`; `singleton` (cardinality) → `key-list` or its true template segment. Consumer: `catalog_gate.py` `:70-71` (the `{scope}` + `axis == "scope"` expansion — UNCHANGED for `scope`), the battery w6 case, and `validate_catalog_v02.py` (`:93-106` reads `declared_members`, not the axis token — assert it stays so).
+4. `version` bumps `v0.2 → v0.3`; `supersedes` names v0.2; the emitter PRINTS its counts and REFUSES (rc=2) any row outside the new value sets (the same refusal class as conditions 1 and 7); the five Rule-24 records are UPDATED to PASS on the reshaped axes (the token census re-run; the `scope` two-senses collision stays a REGISTRY item at the CVO~Z/CRO lane — carried, not renamed, not a blocker).
+**Consumers-first inside the commit:** gate + battery + validate understand both shapes → catalog reshaped → the old-shape branches retired in the same commit (no dual-read left standing; a standing dual-read is the shadow-path class one layer down).
+
+## Acceptance criteria (ids STABLE — the named-id-set rule)
+- **V03-1 CATALOG RESHAPED, ALL ROWS.** On the re-emitted artifact: `verdict_class` ∈ the three dispositions AND `verdict_state` ∈ {ruled, pending-andrew} on 36/36 (the 2 held rows = deny + pending-andrew); `firm` ∈ tier-or-firm values on 36/36 with `global` count 0 and `per-scope` count 0; `firm_resolution: key-scope-segment` on every `{scope}`-templated family row (today 4); `family.axis` ∈ the five values on all family rows (today 10); `version: v0.3`, `supersedes: v0.2`; emitter printed counts; a mutant row with an out-of-set value → emitter rc=2, nothing written (positive control rc=0, byte-identical re-emit ×2). Denominators printed from the artifact, not from this TO.
+- **V03-2 GATE CO-MOVED IN THE SAME COMMIT.** `catalog_gate.py` rule 2 reads `verdict_class` (+ `verdict_state` only as a reason string), rule 5 branches on `firm_resolution` (the `per-scope` string literal is GONE from the gate), `:70-71` expansion unchanged for `scope`; `git show --name-only` of the ONE commit lists the catalog + gate + battery + validate + emitter + records together. No second commit, no interim state.
+- **V03-3 EXERCISE SET GREEN BEFORE THE PORT.** `battery_catalog_v02.py` rc=0 all cases (≥40, the VERDICT-GATE + scope-family cases re-pointed) · CTO~Z's P1–P8 re-run from any seat (firm surfaces 3/3/3 pairwise DISJOINT, 0 opal-internal rows; P4 ordering; P5 separate positive control; the three mutants FIRE — P6 on `verdict_class`, P7 on the `firm_resolution`/firm relabel, plus the NEW mutant: a `{scope}` family row with `firm_resolution` removed → the firm principal's own member read is DENIED) · `tests/test_merged_definition.py` 12/12 · LIVE `validate` 36/36 rc=0 (`validation_report.json` restored or committed, stated) · `git status` clean under `workflows/atom_decomposition/` after every run.
+- **V03-4 RULE-24 RE-TEST ON THE RESHAPED AXES.** The five records updated: the four postulates tabled per axis with PASS on verdict_class / firm / family.axis (the named FAILs closed), consumers re-named at source with the NEW line anchors, token-hygiene census re-run at word boundary against `comp-estate --definitions` (denominator printed; `scope` carried as the registry item). **A remedy that introduces a NEW value or field (`verdict_state`, `firm_resolution`, `key-path`, `key-list`, `scope: all-firms-aggregate`) is itself an enumeration act — its record arrives WITH it.**
+- **V03-5 W6 RE-CERTIFICATION DELTA + CVO~Z SECOND READ (recorded, not gated here).** CTO~Z re-exercises W6 rows 4/7 as a DELTA at the §10.8 gate (not a new certification) on the exercised set in V03-3; CVO~Z second-reads the new axis labels (a Rule-24 classification act, LD-0325 routing). Both landings are cited in the proof instance as the record of record — this TO creates no approval step; it names where the two existing reads land.
+- **V03-6 THE PORT, 0-DIFF, ROLLBACK PINNED.** The laptop-lane port per the TO-E port-contract seam (the same seam the v0.2 index rides; port-time rows 4/7 re-exercise); rollback = the v0.2 artifact + the v0.2 gate at their pinned commits, named in the proof. Site Z applies nothing (envelope law).
+- **V03-7 NOTHING WIDENED, NOTHING BUILT BESIDE.** No gate/alert/monitor created; `FLOOR_PATTERNS` untouched (ticket rows still refused — D7 §7.3.3 is the only retirement); no firm-visible read widened (§10.8: Opal sees all, a firm sees only itself — exercised, not read); no second catalog/emitter/gate path left standing; `declared_exclusions` carries each with its reason.
+- **V03-8 PROOF INSTANCE VALID rc=0 POSITIONAL** — `python .tools/proof-of-spec-check.py <instance> V03-1,V03-2,V03-3,V03-4,V03-5,V03-6,V03-7,V03-8`, rc taken WITHOUT a pipe; MEASURED/RULED-class rows only; every PASS row carries the re-runnable invocation + output + denominator.
+
+<proof_of_spec>
+  <expected_criteria>V03-1,V03-2,V03-3,V03-4,V03-5,V03-6,V03-7,V03-8</expected_criteria>
+  <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/OPAL_ANALYST.W5-V03_PROOF_OF_SPEC.json</instance_path>
+</proof_of_spec>
+
+<compiler_tools_mandate>
+  PHASE 1 — BEFORE WRITING (consumers census; the denominator is the point):
+    <run>comp-find 'verdict_class|\bfirm\b|family\.axis|per-scope|held-at-andrew' workflows/atom_decomposition infra/aws/ec2/opal-gateway/app/graphql_plumbing org/tier2_senior/0.5.0_AE_OpalETL/deliverables</run>
+    <expect>Hits only in: emit/lift/battery/validate, catalog_gate.py + exercise_catalog_gate.py, the staged catalog, the Rule-24 records and W5/W6 records. DENOMINATOR line printed.</expect>
+    <if_mismatch>Any OTHER consumer of these axis tokens (a resolver, a concierge prompt, a portal reader) = a CROSS-DOMAIN consumer this TO did not name → stop, name it under cross_domain_coordination, MCP its owner before writing. A consumer you did not find is the one that breaks at port.</if_mismatch>
+    <run>comp-blast gate</run>
+    <expect>The gate function's callers = the graphql_plumbing resolvers + exercise battery only (as at W6 cert).</expect>
+    <if_mismatch>A new caller since @bf0a2c30f9 = the W6 delta must cover it; name it to CTO~Z.</if_mismatch>
+    <run>python .tools/comp-estate --definitions</run>
+    <expect>The ratified term registry (67 lines at @f8b50e8760) — the token census baseline; `scope` two-senses collision pre-existing (registry item, not yours).</expect>
+    <if_mismatch>A NEW collision from a NEW token you mint (`verdict_state`, `firm_resolution`, `key-path`, `key-list`) = rename BEFORE landing, not after.</if_mismatch>
+  PHASE 2 — BEFORE COMMIT:
+    <run>.tools/commit-gate.sh <every .py touched></run>
+    <expect>PASS (py_compile + ruff py39; `from __future__ import annotations` present).</expect>
+    <if_mismatch>Fix; a gate failure is never bypassed.</if_mismatch>
+    <run>python workflows/atom_decomposition/battery_catalog_v02.py ; python -m pytest -q workflows/atom_decomposition/tests ; the P1-P8 probe script (CTO~Z's, in the W6 cert record / your lane) ; python workflows/atom_decomposition/validate_catalog_v02.py</run>
+    <expect>All rc=0 on the RESHAPED catalog + gate; the three mutants FIRE; `git status` clean after (restore validation_report.json or commit it, stated).</expect>
+    <if_mismatch>Do not commit a consumer that fails its own battery; the commit is ONE and it is green or it does not land.</if_mismatch>
+  PHASE 3 — AFTER COMMIT / BEFORE THE PORT:
+    <run>python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/OPAL_ANALYST.W5-V03_PROOF_OF_SPEC.json V03-1,V03-2,V03-3,V03-4,V03-5,V03-6,V03-7,V03-8</run>
+    <expect>rc=0 VALID, 8 rows, coverage diff empty both ways — rc taken without a pipe.</expect>
+    <if_mismatch>rc=1 → fix the named violation; rc=2 → usage: the id set is POSITIONAL (argv[2]); never drop it for a clean "COVERAGE UNCHECKED".</if_mismatch>
+</compiler_tools_mandate>
+
+<cross_domain_coordination>
+  - **1.0.0_SA_CTO~Z (§10.8 gate owner):** `catalog_gate` rules 2/5 + `:70-71` change under this TO — W6 rows 4/7 re-exercised as a DELTA at its gate on V03-3's set; the implementation ships at this seat, the acceptance is CTO~Z's. The ruling that sequenced it is the authority.
+  - **3.0.0_SA_CVO~Z (certifier; LD-0325 comms {~Z}+{MSTR}+{0.8.0_AE}):** second-reads the NEW axis labels (Rule-24 classification act); its W5 conditions 1–7 on v0.2 stand unchanged and must still hold on v0.3 (re-read tests re-runnable one line each).
+  - **The v0.2 PORT (laptop lane, MSTR~Z's integration + the bus):** MUST LAND FIRST — this TO's GO event. v0.3 then rides the same TO-E port-contract seam with rows 4/7 re-exercise; rollback = v0.2 pinned.
+  - **D7 TO-F / TO-D / TO-AC (ticket floor):** `FLOOR_PATTERNS` untouched; D7F-8 / §7.3.3 unaffected. Do not let a firm-axis reshape move the ticket floor.
+  - **The `scope` token collision (ratified PATH-GRAMMAR `{scope}` vs reserved_ratified `Scope`):** CVO~Z registry lane + CRO as registry executor — a semantic-evolution act Andrew ratifies; NOT this TO's to rename; carried in the records.
+  - **W4b (same seat, NOT CONVERGED declared):** unaffected; the governance-held cells wait on a ruled firm-scoped reader, not on v0.3.
+</cross_domain_coordination>
+
+## Do not
+- Do NOT start before the v0.2 port LANDS (the owner's own bound; drift into the v0.2 port is the mixed-change hazard the ruling separates).
+- Do NOT leave a dual-read (old + new shape) standing in the gate or the emitter after the commit — consumers-first INSIDE one commit, old branches retired in the same commit.
+- Do NOT touch `FLOOR_PATTERNS`, widen any firm-visible read, rename the `scope` segment, or add any value/field WITHOUT its four-postulate record arriving with it (Rule 24 as widened).
+- No alert/monitor/SNS/SES; no new gate on anyone; no TF apply / port from site Z (envelope law); lane commits only, never push (MSTR~Z integrates).
+
+## Reporting (RAVC)
+Ack the GO (RAVC-2). Report to **CTO~Z (gate delta + acceptance) + COO~Z (validation vs V03-1..V03-8 named + positional) + CVO~Z (second read; LD-0325 routing via MSTR~Z for the verdict)** at: (1) Phase-1 consumer census done (denominator); (2) the ONE commit landed (hash; V03-1/2); (3) exercise set green (V03-3); (4) proof instance path + rc (V03-8). Surprise channel = one line to COO~Z via the broker, no action. Session log with a Compiler Tools section = a deliverable.
