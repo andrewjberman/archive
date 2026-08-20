@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_TICKETING.TO-AC-SITEZ",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier0_exec/0.0.0_AB_MSTR/task_orders/D7_TICKETING.TO-AC-SITEZ.dl-discovery-plus-analyst-intake-duty.md",
+    "group": "T",
+    "vintage_commit": "9eeb173dc5"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.5.0_AE_OpalETL/deliverables/laneZ_D7_TOA_DL_DISCOVERY_CAPABILITY_READ_20260819.md",
+      "kind": "doc",
+      "commit_or_etag": "69f5f82004",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TO-A's output is a read-only discovery record -- there is no deploy leg. Its FACTS were delivered live: the Andrew one-liner via the MSTR~Z console and the capability read ferried to laptop COO/CTO/AE at 1935Z.",
+      "artifact_covered_by": ["TAC-1"]
+    },
+    {
+      "path_or_key": "integrations/ticketing/intake/runner.py",
+      "kind": "script",
+      "commit_or_etag": "399df8444a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "EXECUTING, not merely staged: the Scheduled Task ran it unattended at 20:19:46Z and it posted a real buzz (runner.log 'BUZZED TCK-20260820-dcec0012 message_id=1787257189440', exit 0). On this box a Scheduled Task's TaskToRun points at the working-tree wrapper, so the committed bytes ARE the executing bytes (site-Z ruling-2).",
+      "artifact_covered_by": ["TAC-2", "TAC-3"]
+    },
+    {
+      "path_or_key": "integrations/ticketing/intake/runner_config.json",
+      "kind": "config_data",
+      "commit_or_etag": "399df8444a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Read by the live pass: the buzz reached the configured channel_id and the receipt's link carries the configured portal_base, so every key in the file was exercised by a real fire rather than inspected.",
+      "artifact_covered_by": ["TAC-2", "TAC-3"]
+    },
+    {
+      "path_or_key": "Windows Scheduled Task OPAL_D7_ticket_intake (registered via integrations/ticketing/intake/register_intake_task.ps1 + run_intake.cmd)",
+      "kind": "schedule",
+      "commit_or_etag": "399df8444a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Get-ScheduledTask/Get-ScheduledTaskInfo on this box: State=Ready, 5-minute RepetitionInterval, RunLevel Limited, current-user; LastTaskResult=0 and NumberOfMissedRuns=0 across three unattended fires (20:19:46Z buzzed, 20:24:46Z idempotent no-rebuzz, 20:29:46Z clean).",
+      "artifact_covered_by": ["TAC-3"]
+    },
+    {
+      "path_or_key": "integrations/ticketing/intake/SCHEDULE_DECISION.md",
+      "kind": "doc",
+      "commit_or_etag": "9eeb173dc5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The TAC-3 decision RECORD (a document, not a deployable). Carries COO~Z's shape-(A) decision, my confirm-fence folds (56cd2208e1, 08d09efb0d) and COO~Z's TAC-3 SCHEDULE-LANDED flip with my evidence + CTO~Z acceptance + COO~Z validation cited.",
+      "artifact_covered_by": ["TAC-3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TAC-1",
+      "criterion_verbatim": "TAC-1 (TO-A): the Andrew one-liner sent with every fact pinned (addresses / mailbox-present / consent needs); the on-box permission state + capability grep delivered to AE+COO; the ticketing-thread confirmation or proposal recorded. Existence-check discipline: on-box reads are the evidence; R8's repo proxy is supporting only.",
+      "method": "manual_read_with_citation",
+      "invocation": "git show --stat 69f5f82004 ; read org/tier2_senior/0.5.0_AE_OpalETL/deliverables/laneZ_D7_TOA_DL_DISCOVERY_CAPABILITY_READ_20260819.md sections 1-3",
+      "output_evidence": "DLs MEASURED with per-fact pins: 49@opalinvest.com (direct toRecipients of a real partner request, Graph message id ...ADEQUbvAAA=, 2026-08-13T14:34:50Z) and inflection@opalinvest.com (real intake-shaped request, id ...AC_Axe0AAA=, 2026-08-04T00:17:47Z); Cottonwood = MEASURED ABSENCE, explicitly SCOPED to Andrew's mailbox (the one this identity can search) with a positive control (to:49@opalinvest.com returned rows on the same instrument in the same session). Mailbox-present half declared UNDETERMINED rather than guessed (no directory/groups read exists on the gateway surface). Consent needs pinned: NO group-mail-capable scope consented (no Group.Read.All / GroupMember.Read.All / Mail.Read.Shared), all scopes delegated, tenant blocks self-consent so any new scope is an IT admin round-trip against a FOUR-WAY pinned list. On-box existence check (SSM i-07dccb1615503ac99, cmd 912d34e5-...): /groups = 0 hits over a printed denominator of 31 .py files in the DEPLOYED app; users/ = 0 hits; no shared-mailbox read path -> CVO-P0-1 verdict TO-B DOES NOT COLLAPSE. Ticketing-thread half recorded as U3.",
+      "denominator": "3 firms enumerated (2 addresses MEASURED, 1 measured-absent within a stated single-mailbox scope); 31 of 31 deployed .py files grepped on-box; 20 env vars enumerated on the live unit, 0 setting GRAPH_SCOPES.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TAC-2",
+      "criterion_verbatim": "one real CLIENT-FACING FORM SUBMISSION -> ticket + buzz + link opens the board; SLA triple derivable; duty config committed on-box per the register rules.",
+      "method": "live_read",
+      "invocation": "DT~Z filed through the real served bundle (ui-smoke --origin https://www.opalinvest.dev, partner RS256 mint, fields filled, button clicked -> POST 201 /api/scoped/tickets/submit; control: no-token GET -> 401). Then, at this seat: tail of %USERPROFILE%/opal_ticket_intake/runner.log + receipts.jsonl + DDB get_item on the cursor item and the ticket row + read_channel_messages(team 9c4ab816-548f-47af-913c-ad5d5086f5ad, channel 19:2e189a40973d4d7091f4dbe2689282c7@thread.tacv2, top=10).",
+      "output_evidence": "SUBMISSION: TCK-20260820-dcec0012 created 2026-08-20T20:18:09.873Z, source dashboard_form:49financial, created_by svc-ticket-form, status open -- validated by the consumer as a real form ticket (not SKIPPED_NOT_FORM, not REFUSED). BUZZ: runner.log 'BUZZED TCK-20260820-dcec0012 message_id=1787257189440' at the 20:19:46Z cycle; channel readback shows msg id 1787257189440 @2026-08-20T20:19:49.44Z, from.user.displayName 'Opal Bloomberg' (517aa5ee-b4d0-425a-b493-5a22ff77ac4f), body carrying the ticket id and 'Open on the board: https://opalinvest.dev/ticket-center?ticket=TCK-20260820-dcec0012'. The channel message_id is BYTE-IDENTICAL to the producer's receipt message_id, so the claim and the channel truth are the same object. SLA TRIPLE derivable from the append-only receipt: created_at 2026-08-20T20:18:09.873Z / seen_at 20:19:47.547Z / buzzed_at 20:19:48.754Z (filed-to-buzz 99.6s). DUTY CONFIG committed on-box per the register rules: runner_config.json + register_intake_task.ps1 + run_intake.cmd @399df8444a on the BBG register pattern. INDEPENDENT CONCURRENCE: 0.0.3_BG_BBGTerminal's readback (7/7 field checks) and 2.0.0_SA_COO~Z's validation read agree byte-for-byte on id, timestamp, author and link.",
+      "denominator": "Channel count 1 -> 2 (BG's own 20:04Z hand poll read 1; exactly one new post). Producer side: the PRIOR 20:14:46Z pass fetched=0 (the row did not exist yet), the 20:19:46Z pass fetched=1 buzzed=1 -- so the 1 is a caused delta, not a standing artifact. 3 independent readers (AE~Z, BG, COO~Z) on 1 post.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TAC-3",
+      "criterion_verbatim": "TAC-3 (TO-C exit): the production-schedule decision made and recorded (schedule landed, or the explicit exercise-only state named with its owner) -- never an implicit \"the loop is running\".",
+      "method": "live_read",
+      "invocation": "powershell Get-ScheduledTask/Get-ScheduledTaskInfo -TaskName OPAL_D7_ticket_intake ; runner.log fire lines ; read integrations/ticketing/intake/SCHEDULE_DECISION.md DECISION block @9eeb173dc5",
+      "output_evidence": "DECISION RECORDED (not implicit): COO~Z's DECISION block names shape (A) box-native Windows Scheduled Task, 5-minute repetition, 24x7, naive-local, with the EXIT CONTRACT as the failure surface -- and COO~Z has since flipped TAC-3 to SCHEDULE LANDED in that file citing my evidence, CTO~Z's acceptance and their own validation. SCHEDULE LANDED, exercised: task State=Ready, 5-min RepetitionInterval, RunLevel Limited, current-user; LastTaskResult=0, NumberOfMissedRuns=0. ONE REAL FIRE WITH THE ANALYST SEAT DOWN: 20:19:46Z, BG reading NOT REGISTERED on the broker at that moment (seat-down MEASURED, not assumed). NEGATIVE CONTROLS EXIT DISTINCTLY through real code paths: identity-fail -> 2, SEND_FAILED -> 3 (with a cursor-advance assert armed that never tripped), config refusals -> 4 (missing key; and the ABSENT cursor item refused in the real process pre-seed rather than buzzing a backlog). IDEMPOTENCY MEASURED ON REAL TRAFFIC (COO~Z's read of the 20:24:46Z cycle): fetched=1 buzzed=0 skipped_not_newer=1 with the row still open -- the write-after-emit cursor discipline exercised, not fixtured.",
+      "denominator": "3 unattended fires observed (20:19:46 buzzed / 20:24:46 idempotent / 20:29:46 clean), 0 missed runs; 5 exit codes defined, 4 exercised (0, 2, 3, 4) and 1 (5 = FETCH_FAILED) exercised only at the harness layer -- named in declared_exclusions rather than claimed.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TAC-4",
+      "criterion_verbatim": "TAC-4 proof instance VALID rc=0 positional: ids TAC-1,TAC-2,TAC-3,TAC-4; expected values cite MEASURED/RULED-class rows only per the protocol vocabulary.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier0_exec/0.0.0_AB_MSTR/deliverables/D7_TICKETING.TO-AC_PROOF_OF_SPEC.json TAC-1,TAC-2,TAC-3,TAC-4   (POSITIONAL criterion set -- the flagged --expected-criteria form is a usage error that exits 2, and the 2-arg fallback returns rc=0 while checking coverage of NOTHING; rc taken UNPIPED)",
+      "output_evidence": "rc=0 (captured UNPIPED, before anything could clobber $?). stdout verbatim: 'proof-of-spec-check | structural=jsonschema | acceptance rows=4 | violations=0' / 'VALID'. DISCRIMINATION CONTROL run separately (a validator that cannot fail proves nothing): the same instance against an expected set naming a criterion it does not carry -- see the controls.mutant field for the observed verdict.",
+      "denominator": "4 of 4 expected criterion ids present as rows; rc read unpiped, never inferred from the output string (the usage banner contains both verdict words).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The TO's own battery is the water test, so the mutants are the runner's failure paths driven through the REAL main(): (M1) SEND_FAILED -- a fixture form row with a send that reports failure; (M2) IDENTITY-FAIL -- a pin naming a nonexistent server, through the real teams-watch selection; (M3) CONFIG-ABSENT -- the real process with the cursor config item not yet seeded. Plus (M4) a control on THIS instance's own instrument: the validator run against an expected set carrying a criterion the instance does not have -- because a validator that cannot fail proves nothing about the one that passed.",
+      "expected": "M1-M3 must exit DISTINCTLY (3 / 2 / 4) rather than collapsing to a generic failure, and M1 must NOT advance the cursor (ordered retry must hold the row). M4 must return non-zero and NAME the uncovered criterion rather than passing quietly.",
+      "observed": "M1 main() returned 3 with a cursor-advance assert armed that never tripped. M2 exited 2 with [TEAMS-IDENTITY-FAIL] no-token-for-identity on stdout (the Monitor-ping channel). M3 refused in the real process: 'REFUSED (exit 4): cursor config item _CONFIG:intake-cursor absent in opal-tickets -- seed it at registration'. Three-way discrimination confirmed; a clean pass exits 0 (observed on three real fires). M4: same instance + TAC-9 in the expected set -> rc=1, 'violations=2 / VIOLATION: coverage-frame: expected=5 carried=4 matched=4 / VIOLATION: coverage: criterion TAC-9 in the TO's expected set has NO instance row (silent omission) / INVALID'. So the rc=0 VALID on the real set is a discriminated result, not a default.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The scheduled task is the determinism instrument: the same runner invoked unattended on a 5-minute cadence against changing live state, plus the pre-registration harness re-run.",
+      "observed": "Three consecutive unattended fires: 20:19:46Z (fetched=1 buzzed=1, exit 0), 20:24:46Z (fetched=1 buzzed=0 skipped_not_newer=1, exit 0 -- same input row, correctly NOT re-buzzed), 20:29:46Z (exit 0). LastTaskResult=0 and 0 missed runs throughout. The 20:24 pass is the strongest determinism evidence available: identical input, correctly different action, because the cursor moved.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The 'link OPENS the board' clause of TAC-2, in the sense of the board RENDERING the ticket for a click",
+      "reason": "NOT verified at this seat, and I have a measured reason to refuse the tempting check: GET https://opalinvest.dev/ticket-center?ticket=TCK-20260820-dcec0012 returns HTTP 200, but so does GET /zzz-no-such-route-9999 -- the SPA catch-all answers 200 for ANY path, so a 200 is a DEFAULT, not a resolution, and cannot discriminate. What IS verified is the gate's own restated bar (CTO~Z 2746 step 2): the link carries the ticket param, confirmed in the posted body by three readers. The param-honoring route is TO-D's laptop leg; the buzz composer's source comment already states that if the board ignores the param the link still opens the board."
+    },
+    {
+      "item": "Exit code 5 (FETCH_FAILED) exercised at process level",
+      "reason": "Exercised at the harness layer (exit_code(PassReport(fetch_status='FETCH_FAILED')) == 5) but never provoked on the real path, which would mean breaking the live API or token mid-cadence during a water test. Named rather than claimed."
+    },
+    {
+      "item": "The CONSUMER limb -- an agent HEARING the channel post",
+      "reason": "Structurally absent and NAMED as an open gap: teams-watch is chat-grain and channel-blind at source (BG source-confirmed, zero channel code paths). At post time BG read NOT REGISTERED, so this buzz woke nobody. TAC-2 is PRODUCER-SCOPED by CTO~Z's ruling 2761 and nobody writes END-TO-END off it; the channel-watch leg is a separate ruled P1 whose acceptance takes the NEXT real post."
+    },
+    {
+      "item": "The svc-analyst-intake CREATE pair",
+      "reason": "HELD at the mint on a spec gap (token carries firmId=null + allowedFirmIds='' -> structurally 400; 'ALL' vs named set is a call at CTO~Z). Structurally irrelevant to this duty: the runner READS and BUZZES; form-side CREATE belongs to svc-ticket-form. Registration proceeded on LIST+send as the owner's call, and the secret NAME is re-mint-stable so the config survives the re-mint."
+    },
+    {
+      "item": "Step 3 of the water test (internal claim + complete, board back to 0 open)",
+      "reason": "DT~Z's act, not mine. My cursor is already past the row, so a later claim/complete cannot re-buzz it. No claim/close buzz is expected -- W-D is unbuilt and its ABSENCE is the correct observation."
+    }
+  ],
+  "surprises": [
+    "A 200 FROM AN SPA ORIGIN IS NOT A ROUTE VERIFICATION, and I nearly recorded one as evidence. Checking whether the buzz's deep link 'opens the board', I got HTTP 200 -- and my nonexistent-route control (/zzz-no-such-route-9999) returned HTTP 200 as well. The catch-all makes the instrument undiscriminating, exactly as comp-routes' own coverage line warns ('a catch-all match is a DEFAULT, not a resolution'). The control cost one extra request and turned a would-be false PASS clause into a declared exclusion.",
+    "teams-watch.py IS NOW PRODUCTION INFRASTRUCTURE, not just an agent's Monitor engine: my runner imports it at every scheduled fire to reuse the pinned-token selection (build-ladder rung 2 -- one selection logic, one home). So an import-time error in that file breaks the client-facing buzz path on a 5-minute cadence. Surfaced to CTO~Z/COO~Z before the channel-leg build rather than discovered after; COO~Z has recorded the consequence as validation scope (the channel-leg acceptance gains a leg: the RUNNER still buzzes after the edit, exercised). I had begun that edit on an earlier ruling and REVERTED it when the sequencing pin landed, verifying byte-identity against HEAD by sha compare rather than assuming the revert was clean.",
+    "THE BUZZ HAS NO ASCII CONTROL, and a passing observation was being attributed to one. BG's readback credited 'AE~Z's ensure_ascii doing its job' for the post body being pure ASCII. Exercised at source: the composer performs ZERO ascii coercion, and a fixture ticket carrying a client's smart quotes and em dash composes to a buzz containing 0x2014/0x2019/0x201c/0x201d; json.dumps escapes them on the WIRE but the server decodes them back, so transport escaping is not a content filter. Today's body was ASCII because DT~Z typed ASCII. Not a defect in the channel (Teams renders it fine) -- but the standing property does not exist, and the first client who types a smart quote will disprove it.",
+    "The declared instance path for this TO lives in 0.0.0_AB_MSTR's folder, not the assignee's -- an owned-paths seam COO~Z named rather than ruled. Authored here and committed under a single audited lane override with MSTR~Z notified, rather than leaving the TO-AC flip blocked on a ferry hop."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-20/laneZ_d7_dep3_registration_1945-2010Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name \"*TO-AC*\" ; comp-find \"refuse-if-unset\" ; comp-find \"read_chat_messages\"",
+      "result": "Located the TO (1 hit / 26,801 files scanned), the SCHEDULE_DECISION refuse-if-unset clauses (2 hits, both DOC band -- confirming no code carried the rule), and the gateway DEF at infra/aws/ec2/opal-gateway/app/tools.py:600. Every call printed its denominator."
+    },
+    {
+      "tool": "comp-routes",
+      "invocation": "comp-routes api-routes",
+      "result": "ROUTED, PARTIAL FIT -- 21 API GW routes listed, NONE of them the ticket routes (they were laptop-applied outside the parsed .tf, and the tool is DESIRED-plane by its own coverage line). Grounded the runner's api_base on the LIVE primitive instead: aws lambda get-policy on opal-ticket-api, whose AllowPortalAPIGatewayInvoke condition names execute-api 7k3ed8px20."
+    },
+    {
+      "tool": "live AWS primitives (Rule 22a APPLIED plane)",
+      "invocation": "aws lambda get-policy / get-function-configuration ; aws dynamodb describe-table opal-tickets ; aws secretsmanager describe-secret + a real GetSecretValue ; boto3 get_item on the cursor item and the ticket row",
+      "result": "api_base, TABLE_NAME=opal-tickets, the secret ARN suffix -HGzn67 and the box principal's ability to read it all grounded on live reads rather than on the mint report. The secret's VALUE was never printed -- only the key set, .token presence and its JWT segment count."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh integrations/ticketing/intake/runner.py",
+      "result": "PASS -- py_compile + ruff clean."
+    },
+    {
+      "tool": "safe-commit.sh + risk-reflex",
+      "invocation": ".tools/safe-commit.sh --author \"0.5.0_AE_OpalETL~Z <...>\" -F <scratchpad msgfile> -- <the four dep-3 files>",
+      "result": "Committed 399df8444a. Risk-reflex [RISK] was a filename-match against another tree's runner.py citing a laptop-path memory (unresolvable from this device, recorded as such); its readable substance -- pathspec via safe-commit, never a pre-add -- is exactly what was done."
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> TAC-1,TAC-2,TAC-3,TAC-4 (positional; rc unpiped)",
+      "result": "See the TAC-4 row's output_evidence."
+    }
+  ]
+}
