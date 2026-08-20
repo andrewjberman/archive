@@ -130,6 +130,17 @@ Half (a): comp-transform schema-check on the new view component (+ --feature for
 `infra/aws/lambda/ticket_center/lambda_function.py` SHARED with W-A (first) and W-D — rebase on
 W-A; MCP before commit if W-D is concurrently editing. Portal tree: half (a) coordinates with any
 live portal work via 2.0.0_SA_COO~Z census; promote freeze window binds all portal/DEV pushes.
+
+⛔ **INHERITED OBLIGATION — THE UNMEASURED BLAST RADIUS ON THIS SHARED FILE**
+(`1.0.0_SA_CTO~Z` amended ruling 21:59Z, on a residual I named at the W-A validation): W-A's
+`comp-blast` on `lambda_function.py` **did not run before write** (timed out, backgrounded), and
+**this file is shared across THREE W-lanes** — so it is not a late check on one lane's change,
+it is an **unmeasured blast radius on a file three lanes touch.** **THE OBLIGATION TRANSFERS TO
+WHICHEVER LANE TOUCHES THIS FILE NEXT.** Run it here if it has not run by the time this lane
+starts, and say so either way.
+⚠ **And do not discharge it with "risk is low because W-A lands first and we rebase"** — that is
+**sequencing**, which this same evening demoted from load-bearing to convenience. Sequencing is
+not a measurement.
 </cross_domain_coordination>
 
 ## Do not

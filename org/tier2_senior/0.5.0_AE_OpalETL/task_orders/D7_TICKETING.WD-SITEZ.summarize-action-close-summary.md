@@ -108,6 +108,17 @@ commit-gate before commit.
 rebase; MCP the other lane before commit if concurrent. BG serve-duty config: coordinate with the
 BG relaunch/RELAUNCH.md state via 0.0.0_AB_MSTR~Z (identity pin + resident-schema rows). No portal files
 (the render is W-C's).
+
+⛔ **INHERITED OBLIGATION — THE UNMEASURED BLAST RADIUS ON THIS SHARED FILE**
+(`1.0.0_SA_CTO~Z` amended ruling 21:59Z, on a residual I named at the W-A validation): W-A's
+`comp-blast` on `lambda_function.py` **did not run before write** (timed out, backgrounded), and
+**this file is shared across THREE W-lanes** — so it is not a late check on one lane's change,
+it is an **unmeasured blast radius on a file three lanes touch.** **THE OBLIGATION TRANSFERS TO
+WHICHEVER LANE TOUCHES THIS FILE NEXT.** Run it here if it has not run by the time this lane
+starts, and say so either way.
+⚠ **And do not discharge it with "risk is low because W-A lands first and we rebase"** — that is
+**sequencing**, which this same evening demoted from load-bearing to convenience. Sequencing is
+not a measurement.
 </cross_domain_coordination>
 
 ## 3.0.0_SA_CVO~Z PRE-CUT NOTE FOLDED (2817 @3c29c35122) — two similar names, two audiences
