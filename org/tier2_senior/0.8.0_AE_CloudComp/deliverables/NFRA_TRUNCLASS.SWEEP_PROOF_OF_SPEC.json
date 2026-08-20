@@ -1,0 +1,131 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_TRUNCLASS.SWEEP",
+ "firm": "FABRIC",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/NFRA_TRUNCLASS.SWEEP.comp-tool-parser-truncation-census.md",
+  "group": "OTHER",
+  "vintage_commit": "829b0b0fe1"
+ },
+ "assignee": "0.8.0_AE_CloudComp",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_TRUNCLASS_SWEEP_CENSUS_20260820.md",
+   "kind": "doc",
+   "commit_or_etag": "e141eb5f30",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Governance deliverable on local CLOUD; no deploy leg exists for org/ deliverables. Publication rides MSTR's LD-0367 integration window (integrator-only push; this seat's push is gate-denied by design, never-rules-gate GATE 5)."
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_TRUNCLASS_SWEEP_CENSUS_20260820.json",
+   "kind": "config_data",
+   "commit_or_etag": "e141eb5f30",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Full 398-row classified dataset (final_class + why + wrong_answer_look per row), same commit as the report."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "TRC-1",
+   "criterion_verbatim": "CENSUS COMPLETE WITH ITS DENOMINATOR -- every .tools/comp-* executable and its engine modules scanned, count of files scanned printed beside the count of hits. A hit count without a denominator is the very class this TO is about.",
+   "method": "command",
+   "invocation": "python <scratchpad>/census_trunclass.py (scanner; corpus derived as a predicate: .tools/comp-* UNION org/modules/graph/*.py UNION wrapper-invoked .py, deduped)",
+   "output_evidence": "DENOMINATOR: scanned 237 of 237 corpus files (93913 lines): 99 wrappers + 125 engine-home .py + 20 wrapper-invoked outside home\nHITS: 398 total; by shape: {\"S1\": 54, \"S2\": 289, \"S3\": 15, \"S4\": 39, \"S5\": 1}",
+   "denominator": "237 of 237 corpus files, 93,913 lines; 398 hits",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "TRC-2",
+   "criterion_verbatim": "EACH HIT CLASSIFIED, NOT FIXED -- for each: the shape, whether the input can legitimately contain the delimiter/exceed the width, and what a wrong answer would LOOK like. A hit whose input provably cannot trigger it is reported as EXAMINED-AND-SAFE, not omitted.",
+   "method": "command",
+   "invocation": "python <scratchpad>/census_finalize.py (rule-based defaults + per-site exceptions, every exception read at source this session)",
+   "output_evidence": "final classes: CONFIRMED-LATENT 11, CONFIRMED-MEDIUM 1, DISPLAY-SAFE 297, DOC-STRING 1, EXAMINED-AND-SAFE 21, RETIRED-DEAD 1, SAFE-BY-CONSTRUCTION 1, SAFE-BY-DESIGN 8, SAFE-BY-GRAMMAR 52, SAFE-BY-QUOTA 4, SAFE-WITH-GUARD 1; residuals: 0. Every row carries why + wrong_answer_look in the committed dataset. Nothing was fixed.",
+   "denominator": "398 of 398 rows classified, 0 residual",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "TRC-3",
+   "criterion_verbatim": "SEVERITY BY WHAT THE OUTPUT AUTHORIZES, not by frequency. A truncation feeding a GONE/ABSENT/UNUSED verdict outranks one feeding a display string.",
+   "method": "live_read",
+   "invocation": ".tools/aws iam list-roles --query Roles[].RoleName --output json (auto-paginated, materialised, counted client-side)",
+   "output_evidence": "Tier-1 (verdict-feeding): firmsep-sweep:73 role universe --max-items 1000 (measured 212 roles live, unique 212, margin 788), deadgrant:206 secret universe 500-cap (doc'd 78), clobber_scan:182 version history. Tier-2 (estate-census absent-edge): 8 comp_aws_cli single-page list_* sites. Tier-3 (wrong-artifact): vectorize_audit_cli:23 dotted-stem sibling resolution. Display cuts ranked lowest (297 rows).",
+   "denominator": "12 confirmed rows tiered over the 398-row census",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "TRC-4",
+   "criterion_verbatim": "THE PRIOR SPECIMENS RE-TESTED as regression fixtures -- at minimum the dot-split case and the single-line-JSON grep -c case. If your census method does not FLAG the known specimens, the method is what you have measured, not the corpus.",
+   "method": "test_suite",
+   "invocation": "python .tools/tests/test_comp_adversary_path_truncation.py; python <scratchpad>/census_trunclass.py --fixture-check; printf '{...}' | grep -c / grep -o | wc -l",
+   "output_evidence": "PATH-TRUNCATION BATTERY: 4/4 PASS (denominator 4; CENSUS-100PCT 17344/17344; MUTANT-OLD-TRUNCATES pre-fix pattern still fails 4/4). FIXTURE-CHECK dot-split specimen flagged as S1: PASS. FIXTURE-CHECK grep -c single-line specimen flagged as S5: PASS (fixture rc=0). Live grain demo: grep -c offer -> 1; grep -o offer | wc -l -> 3 on one single-line JSON.",
+   "denominator": "2 of 2 named specimens flagged by the method + the 4-fixture shipped battery green",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "TRC-5",
+   "criterion_verbatim": "proof instance VALID rc=0, ids TRC-1..TRC-5, run against the named expected-id set with the TRUE rc cited (measured without a pipe).",
+   "method": "schema_validation",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.8.0_AE_CloudComp/deliverables/NFRA_TRUNCLASS.SWEEP_PROOF_OF_SPEC.json TRC-1,TRC-2,TRC-3,TRC-4,TRC-5",
+   "output_evidence": "TRUE rc=0 measured without a pipe on this exact instance; verbatim validator output cited in the RAVC close to COO.",
+   "denominator": "5 of 5 expected criterion ids carried, coverage-checked by the validator",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two mutants, both FIRED: (1) MUTANT-OLD-TRUNCATES in the shipped battery -- the PRE-FIX PATH_RE still produces 4/4 false GONEs on the same fixtures, proving the census corpus exercises the defect; (2) the census's own method mutants: run-1's corpus double-count (7 dup files) and the file-scoped S4 auto-safe that failed OPEN on 19/38 rows -- both caught by controls (dedupe read-back; line-local +/-10 re-check) and fixed in-method, with denominators re-derived (244->237 files, 431->398 hits).",
+   "status": "FIRED-AS-EXPECTED",
+   "expected": "MUTANT-OLD-TRUNCATES: pre-fix PATH_RE must still produce 4/4 false GONEs on the fixtures (else the corpus never exercised the defect); method mutants: a duplicated corpus file must surface as duplicated rows, and an unpaginated call behind a paginated sibling must be caught by the line-local re-check.",
+   "observed": "Battery: pre-fix pattern failed 4/4 as expected. M1: dup rows surfaced (comp-deadgrant listed twice), dedupe applied, denominators re-derived 244->237/431->398. M2: line-local re-check flagged 19/38 file-scoped auto-safe rows; rule replaced, 8 rows reclassified Tier-2 confirmed."
+  },
+  "determinism": {
+   "description": "Scanner is pure regex over committed files -- two consecutive runs post-dedupe produced identical denominators and hit counts (237/93913/398). AWS role count is a point-in-time live read, stamped with its hour.",
+   "status": "STABLE",
+   "method": "Two consecutive post-dedupe scanner runs over the committed tree; compare denominators and per-shape hit counts.",
+   "observed": "Identical both runs: 237 files / 93,913 lines / 398 hits {S1:54,S2:289,S3:15,S4:39,S5:1}. AWS role count is a stamped point-in-time live read (212 @ 2026-08-20 ~1443Z)."
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Transitive imports of engine modules (an engine's own imports outside org/modules/graph)",
+   "reason": "Corpus bound = wrappers + engine home + directly wrapper-invoked .py. One hop keeps the denominator derivable and honest; a transitive-closure corpus is unbounded without a module graph pass. Named here so the boundary is visible, not silent."
+  },
+  {
+   "item": "Fixing any hit",
+   "reason": "The TO's own DO-NOT: classify only; each fix rides its own tool's row with its own reviewer."
+  },
+  {
+   "item": "Shapes beyond the four issued + the one named fifth (S5 wrong-grain count)",
+   "reason": "The TO declares the four shapes non-exhaustive; S5 was found and named per its invitation. No sixth shape surfaced in this pass."
+  }
+ ],
+ "surprises": [
+  "The census's own instruments committed the class twice (M1 corpus double-count; M2 file-scoped auto-safe failing open 19/38) -- both caught by controls, both are report sections, and M2 reclassified 8 rows into Tier-2 confirmed.",
+  "The corpus contains ZERO executable grep -c call sites (the single S5 hit is catalog prose warning against it) -- the wrong-grain-count class lives in ad-hoc shell use, not in the shipped comp-tool layer.",
+  "surface_check_cli.py:846 is a real single-page shape inside a RETIRED tool -- classified RETIRED-DEAD, severity nullified, explicitly not a deletion warrant (Rule 25)."
+ ],
+ "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-20/trunclass_sweep_census_1425-1500Z.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'dot-truncation' / --name '*TRUNCLASS*' / 'def list_lambdas'",
+   "result": "PASS -- located TO, fix state, and helper definition with denominators printed"
+  },
+  {
+   "tool": "comp-adversary",
+   "invocation": ".tools/comp-adversary --self-test (true rc, no pipe)",
+   "result": "PASS 4/4, rc=0"
+  },
+  {
+   "tool": "path-truncation battery",
+   "invocation": "python .tools/tests/test_comp_adversary_path_truncation.py",
+   "result": "PASS 4/4, census 17,344/17,344"
+  },
+  {
+   "tool": "aws (operational read)",
+   "invocation": ".tools/aws iam list-roles --output json, client-side count",
+   "result": "212 roles, auto-paginated materialised -- grounds the Tier-1 margin"
+  }
+ ]
+}
