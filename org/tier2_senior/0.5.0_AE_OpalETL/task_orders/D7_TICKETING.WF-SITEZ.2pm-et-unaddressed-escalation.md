@@ -92,7 +92,16 @@ under-reporting sweep worse than none.
 **⚠ OPEN DESIGN INPUT — WHICH THREAD? (`0.5.0_AE_OpalETL~Z` cannot answer this from the engine, and
 neither can I.)** *"An agent message on the thread"* — the client's own chat, or the "Opal Client
 Tickets" channel? Different surfaces, different audiences, and **today different consumer
-realities**: a channel post wakes nobody until the channel leg lands. `1.0.0_SA_CTO~Z` rules it.
+realities**: a channel post wakes nobody until the channel leg lands.
+
+⛔ **AND THIS FORK GAINED A CONSEQUENCE IT DID NOT HAVE AN HOUR AGO** (`0.5.0_AE_OpalETL~Z` 2879,
+folded ~20:53Z): **the weekend ruling's coherence DEPENDS ON THIS ANSWER.** Wall-clock
+weekend escalation is fully coherent for an **INTERNAL** audience — it is exactly the delay Andrew
+wants surfaced. But **if the escalation posts to the CLIENT's own chat, it collides with the ack the
+product already gave that same client** — *"expect it on the next trading day"* — so on a Saturday
+Opal would tell a client their request is overdue **after telling them to expect it Monday**: two
+Opal surfaces contradicting each other to one person. **If it is the internal channel, no tension
+exists at all.** The two rulings are independently correct and only interact here.
 
 ## BUILD LADDER — ANSWERED BY MEASUREMENT, not estimate (engine owner, msg 2864)
 
