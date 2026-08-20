@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-08-20</date>
-    <status>staged -- activates at seat spawn + COO GO (lane dark at issuance; spawn routed to MSTR 1548Z)</status>
+    <status>pending -- GO sent 2026-08-20 ~1550Z on seat registration (spawned 1547Z by MSTR); deadline THU 08-21 12:45Z</status>
     <project_code>D2_ADVI_49F (directive row org/missions/DIRECTIVES.yaml:53; PRD docs/architecture/D2_ADVI_49F_E2E_PRD.md; LAPTOP-placed by Andrew's word)</project_code>
   </metadata>
 
