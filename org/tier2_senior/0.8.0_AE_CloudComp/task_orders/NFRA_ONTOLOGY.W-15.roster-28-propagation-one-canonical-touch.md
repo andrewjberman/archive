@@ -5,7 +5,24 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T15:35Z</issued>
 <dated>at respawn, after the dated rows — W-15 is the PACING item for five Andrew-ruled adjudications (CRO 152726Z: "if it needs staffing, that is your cell"); it outranks T4 because ruled work is waiting on it while T4's consolidations sit behind R regardless</dated>
-<status>staged -- activates at respawn AND after census-inputs regeneration (CRO's P1 census-regen item); GO is this TO + both conditions (COO discretion per Andrew ~13:16Z; precondition added 2026-08-20 ~1530Z, see AMENDMENT block)</status>
+<status>complete</status>
+<!-- COMPLETE 2026-08-20 ~1911Z, flipped by issuer on CVO's verify release @c3c42b7630
+     (12/12 legs MATCH, re-derived against commits + LIVE regenerated files). The touch:
+     @7fe3a68013 + discharge @632e4483ea, proof @a85cb8103a rc=0 (dual-validated).
+     Roster 29 at every surface; five adjudications placed verbatim (authored CVO
+     @51285984d6, placed 0.8.0); the held resolver regen RELEASED on the fresh census
+     with both hazard controls green; sync at POST-TOUCH TRUTH with the vintage
+     correction disclosed (ops-internal landed 2 not the baseline-pinned 3 -- a ruled
+     value is not exempt from the vintage law; accepted by CVO against their own
+     baseline). FIELDHOME survival proven on the REAL substrate 6/6 at this regen.
+     ZERO unexplained diff rows against the maintained expected-diff ledger. F-4
+     DECLARED-DEFERRED at CRO; dissolve-completion act CRO-gated, preconditions closed,
+     no clock. Two surfaced findings ride as routed next-touch riders (spans residue ->
+     CRO's next canonical touch; admitted-verticals manifest rows -> next manifest
+     touch). Activated same-evening by COO discretion; escape offered, declined on an
+     honest capacity read. W-15's arc: measured half-landed at three grains 01:52Z,
+     landed at every grain 19:07Z with the census regenerated beneath it. -->
+
 <priority>P2 — five sovereign-ruled adjudications idle until this lands; the 29-vs-28 materialization gap is a standing law-vs-instrument divergence</priority>
 <authority>Andrew-ruled ~15:0xZ at the CRO terminal ("All recs approved, go ahead and implement as necessary"; record @27f941ede5) + the 2026-08-07 Andrew merge (model-portfolios INTO mdpf; ratified roster = 28 per C3II_COMPREHENSIVE_SEMANTIC_COVERAGE_SCAN_20260811.md §5). Grid authority: org/modules/graph/NFRA_ONTOLOGY_C2C3_CANONICAL.yaml c4_subject_function_grid (RATIFIED 08-12). W-24 placement pass @19f3d59ebd is the placement input. Provenance: the 08-12 walk-list item W-15 (CRO log §E), specified-not-started until this issuance.</authority>
 </task_order>
@@ -61,7 +78,18 @@ modifies sits outside a criterion.)
   regen land IN THIS SAME TOUCH, each diffed against CVO's @82aa27590a baseline; the regen's
   output retains the 3 admitted threads (ceo-digest/etf-reports/ticketing) and does NOT
   resurrect retired attribution — both printed as controls (they are the exact hazards the
-  hold existed for).
+  hold existed for). EXPECTED-DIFF DISCLOSURE (post-baseline adjudicated prose, NOT drift;
+  running total maintained per CVO's disclosure pattern -- 63381 then 63460): the W15-5 diff
+  WILL see SIX manifest rows carrying adjudicated prose since the baseline -- MA-08 +
+  FRED-01 (descriptions, @b74527515e) and FRED-07 + FRED-06 + TS-5 (classification) +
+  inf-gold-dispatch-ec2 (enrichment) (@e5d9df8361, the FIELDHOME F3 port; prose-only fields
+  + provenance comments; no routing values, no counts, no named_thread changes) -- treat as
+  expected, cite the decision record + port commit, do not chase. Also post-baseline:
+  yang-generate-holdings-attribution taxonomy row re-pointed -> positioning @d4211559b6
+  (CRO-ruled, same-day), and the census successor-home landing (CRO leg 3, pending at this
+  edit) re-points the census inputs -- the fresh census IS the precondition, its own diff
+  rides its landing commit's reader-set enumeration. Any OTHER unexplained diff row remains
+  a real finding.
 - W15-4 proof instance VALID rc=0 positional: ids W15-1,W15-2,W15-3,W15-4,W15-5.
 
 <proof_of_spec>

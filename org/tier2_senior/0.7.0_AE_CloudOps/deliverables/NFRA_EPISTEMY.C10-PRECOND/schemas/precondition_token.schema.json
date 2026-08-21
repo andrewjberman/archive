@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "opal://nfra_epistemy/precondition_token/0.1.0-proposed",
+  "title": "Precondition_Token (NFRA_EPISTEMY Component 10, precondition-token leg)",
+  "$comment": "CERTIFIED-WITH-CONDITIONS (base spec cert 63913) + CTO arch gate PASSED (63945). Source of record CITED not copied: S5 0.1.2 @c67ef52c1a (org/tier1_exec/4.0.0_SA_CRO/deliverables/NFRA_EPISTEMY/S5_PROFILE_ALGEBRA_AND_MUTATION_GATEWAY_SPEC_20260820.md), sec.1 `precondition_token` -- S5 amended to this field's naming (read_window_seconds, D1 accepted) + PRD_EPISTEMIC_MECHANIZATION_20260820.md sec.2.6 element D. This file does not become a competing source of record. DEFERRED to C1 0.2 (non-blocking, base + CTO concur, PORTABILITY not cosmetics): split target_state {PRESENT, ABSENT} from a nullable-when-ABSENT digest -- the ABSENT-string-in-a-digest-field welds the object to S3's IfNoneMatch idiom on a leg built class-agnostic. 0.1 is operationally exact (PRECOND_ABSENT='ABSENT' cannot collide with a real ETag) and the battery exercised it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["target_state_digest", "read_at", "read_window_seconds"],
+  "properties": {
+    "target_state_digest": {
+      "type": ["string", "null"],
+      "$comment": "The object's ETag as the store returned it -- the ONLY value S3's If-Match evaluates, so the binding anchor even when a multipart ETag is not the object's MD5. The literal string 'ABSENT' is the first-mint sentinel (the token asserts the target does not exist; the write binds via If-None-Match:'*'). null is a REFUSED token (S6 absence semantics): a null digest is NOT 'no precondition' -- it is a token we refuse to act on.",
+      "minLength": 1
+    },
+    "read_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "$comment": "ISO-8601 UTC instant the target state was read LIVE. null -> REFUSED (the read cannot be placed in time, so the window cannot be evaluated)."
+    },
+    "read_window_seconds": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "$comment": "How long after read_at the token stays admissible. Evaluated BEFORE any store call; an out-of-window token is rejected (gate=TRANSACTION, reason=PRECONDITION_CHANGED) with no write attempted. null -> REFUSED (S6): a null window is NOT 'no window'. DECLARED by the caller, never defaulted."
+    },
+    "content_sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$",
+      "$comment": "OPTIONAL secondary content cross-check (sha256 of the read bytes). NEVER the binding anchor -- recorded only where a multipart ETag makes byte-identity ambiguous. The atomic binding is always the ETag, because there is no other value the store will condition on."
+    }
+  },
+  "$defs": {
+    "absence_semantics": {
+      "$comment": "S6 model, restated for readers: every nullable above carries a REFUSED semantic, never a permissive default. A field being null does not relax the precondition -- it makes the token inadmissible. RESOLVED by base (spec cert 63913, S5 0.1.2): the typed rejection is TWO reasons over TWO gates -- a null/unparseable field is a BUNDLE-SHAPE defect at (COMPILATION, BUNDLE_MALFORMED), fix-the-caller (details READ_WINDOW_NULL_REFUSED / DIGEST_NULL_REFUSED / READ_AT_NULL_REFUSED); a world-moved / read-too-old outcome is (TRANSACTION, PRECONDITION_CHANGED) (details WINDOW_EXPIRED / ETAG_MISMATCH_412 / ALREADY_EXISTS_412). The earlier TOKEN_INADMISSIBLE-under-TRANSACTION proposal was ruled against: a fix-the-caller remedy has no business inside the retry-or-escalate gate. Three detail sub-codes under each reason."
+    }
+  }
+}

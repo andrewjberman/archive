@@ -1,0 +1,134 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LD0433.RETIRE",
+ "firm": "FABRIC",
+ "phase": "NON-BUILD-OTHER",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.8.0_AE_CloudComp/task_orders/LD0433.RETIRE.directives-native-compiler-and-check.md",
+  "group": "OTHER",
+  "vintage_commit": "67a9b8caf6"
+ },
+ "assignee": "0.8.0_AE_CloudComp",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/modules/graph/comp_directives.py",
+   "kind": "script",
+   "commit_or_etag": "6227fda110",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": ["R1", "R2", "R3"],
+   "deploy_evidence": "The engine (MOVE + CHECK + self-test), own lane (org/modules/graph/*.py @2804811386). Repo-invoked comp-tool, no deploy leg; publication rides MSTR's LD-0367 window."
+  },
+  {
+   "path_or_key": ".tools/comp-directives + .tools/git-hooks/directives-check-post-commit.sh + .tools/git-hooks/install-directives-check.sh",
+   "kind": "script",
+   "commit_or_etag": "6227fda110",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": ["R2"],
+   "deploy_evidence": "Wrapper + the post-commit hook body + idempotent installer (house pattern, both LD-0343 lessons). Hook INSTALLED into .git/hooks/post-commit on this device and FIRED LIVE on the emit commit @f866c4cde2 ('[directives-check] register touched by this commit -- running the retirement invariants:' with zero violations). Audited ANY_EXEC lane override for the .tools members (the registration-canon pattern)."
+  },
+  {
+   "path_or_key": "org/modules/graph/graph-call-manifest.yaml + comp-coverage-map.yaml + comp-output-contracts.yaml",
+   "kind": "config_data",
+   "commit_or_etag": "6227fda110",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": ["R2", "R3"],
+   "deploy_evidence": "Registration in all four homes (tools_index, entries block governance.directives.retirement, coverage-map row routable:true, FULL output contract plane=source/grain=artifact/scope=single-artifact); comp-manifest-check completeness TRUE rc=0 (registration + output-contract + stage-2 vocab + retired-alias invariants all PASS). No vocabulary widened."
+  },
+  {
+   "path_or_key": "org/missions/DIRECTIVES_RETIRED.yaml (+ the mechanical cut on org/missions/DIRECTIVES.yaml)",
+   "kind": "config_data",
+   "commit_or_etag": "f866c4cde2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": ["R1", "R4"],
+   "deploy_evidence": "THE FIRST MACHINE EMIT on MSTR's fact @de6b225bb5 and explicit signal 63666 ('YOUR MOVE: run comp-directives retire'). The retired view is 100% machine-written; the live view touched ONLY by the approved mechanical cut + breadcrumb. Audited lane override on the register owner's signal -- the FACT itself was never machine-written."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "R1",
+   "criterion_verbatim": "MOVE: the comp-directives-class compiler cuts recorded rows into DIRECTIVES_RETIRED.yaml -- 100% machine-written, stances frozen at stamped vintage, live view retains only live rows; re-runnable (idempotent on a no-new-facts run).",
+   "method": "command",
+   "invocation": "comp-directives retire (real register, on the fact) ; comp-directives retire (scratch re-run, idempotency)",
+   "output_evidence": "Real emit: 'comp-directives retire: 10 live row(s) scanned, 1 carry a COMPLETE retired record, 9 stay live / CUT D8 -> DIRECTIVES_RETIRED.yaml (frozen @ stances as_of 2026-08-19); live view: 9 row(s) remain; ever_minted: 10.' rc=0. Retired view: D8 as a byte-frozen literal block + retired_vintage {cut_at, stances_as_of 2026-08-19, row_sha256} + ever_minted [D0..D9] + emit_log + emit_hash seal; banner states 100% MACHINE-WRITTEN. Live: D8 absent, breadcrumb once, the other 9 rows BYTE-IDENTICAL pre/post (9 of 9 compared). Idempotent: scratch re-run -> '9 live row(s) scanned, 0 carry ... Nothing to move -- the views are already partitioned (idempotent no-op)', live byte-identical. Self-test 10/10 incl. partial-record REFUSAL (a bare flag cuts nothing, rc 2).",
+   "denominator": "10 of 10 live rows scanned; 1 of 1 recorded row moved; 9 of 9 unrecorded rows byte-identical",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "R2",
+   "criterion_verbatim": "CHECK: partition + conservation + form + freeze invariants mechanical; the planted hand-edit FAILS it (exercised); wired per the house pattern on the substrate MSTR names.",
+   "method": "test_suite",
+   "invocation": "comp-directives check (real, post-emit) ; OPAL_DIRECTIVES_DIR=<scratch> comp-directives check after a planted stance edit ; self-test 6/7/8 ; post-commit hook on @f866c4cde2",
+   "output_evidence": "Real: 'comp-directives check: live=9 retired=1 ever_minted=10 -- 0 violation(s) / PARTITION + CONSERVATION + FORM + FREEZE all hold'. PLANTED HAND-EDIT (scratch copy of the exact real state): rc 2 with BOTH freeze limbs firing -- 'FREEZE: retired D8 stance bytes CHANGED after the cut (hash 2935309a4797.. != stamped 1f33c639e7df..)' + 'FREEZE: emit_hash seal BROKEN ... (recompute 63e9ce6f8b8c.. != stored 23e0908b1c9f..)'; restore -> green (the control discriminates both directions). Self-test also exercises the conservation-deletion mutant (rc 2) and partial-record refusal. WIRED: directives-check-post-commit.sh installed via the house installer (append-never-clobber, run-time root, pre-exit insert) into .git/hooks/post-commit on the substrate MSTR named (org/missions/), firing ONLY on register-touching commits -- and it FIRED LIVE on the emit commit.",
+   "denominator": "4 of 4 invariants exercised both directions; 1 of 1 hook fire observed live",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "R3",
+   "criterion_verbatim": "Rule-24 record committed WITH the change (the proposal's sec.2 basis carried: presence-based, zero tokens, Lifecycle reuse rejected on grain); CTO gates.",
+   "method": "manual_read_with_citation",
+   "invocation": "engine module docstring @6227fda110 + the entries/contract rows + this instance",
+   "output_evidence": "Carried verbatim in the engine header and the registration rows: the record field is PRESENCE-BASED (`retired: {at, by, authority}` on the row -- presence IS the fact), ZERO enum tokens minted anywhere, Lifecycle_Stage reuse ASSESSED AND REJECTED on grain (the Stage enum is C3.ii VERTICAL grain -- where a vertical sits in its life; a directive completing is PLACEMENT grain -- whether a placed work item is done; reuse would put two grains on one axis, Rule 24(ii)). Four postulates per the proposal sec.2: MECE (complete-record presence is binary and exhaustive; an incomplete record is a check FAILURE, not a third state), same grain (directive rows, sibling file partitioned by the same field), one intent (work-completion only), stability frame (one compiler leg moves every value identically). Token hygiene: the only new name is the field `retired`; word-boundary census = the register files (this build). Both fences carried verbatim in the same header. CTO gates this schema act -- cited in the close, not pre-claimed here.",
+   "denominator": "4 of 4 postulates recorded; 0 enum tokens minted; 1 field name (retired)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "R4",
+   "criterion_verbatim": "D8 ACCEPTANCE: on MSTR's fact -- positive + negative + tripwire + BOTH mutants, evidence packet to 3.0.0_SA_CVO for their sec.5 verify; both fences named HELD in the packet (no missions read/extension/dependency; no attribution leg).",
+   "method": "command",
+   "invocation": "the real emit on @de6b225bb5 + control script (pre/post byte compare) + scratch mutants; packet sent to CVO same window as the COO close",
+   "output_evidence": "FACT (MSTR's hand, @de6b225bb5): D8 row carries retired {at 2026-08-20, by 0.0.0_AB_MSTR, authority 'Andrew-direct \"they work perfectly\" + site-Z acceptance record @393211922e + PROD v2.1.164 serving'} -- verified at source before the emit. POSITIVE: D8 in the retired view, record complete, frozen hash == stamp, seal present. NEGATIVE: D8 absent from live; the other 9 rows byte-identical (9 of 9). TRIPWIRE: check green post-emit -- recomputable from the directives source of record alone (the retired view is derived from live rows + the record, nothing else; the live register's own tripwire header untouched). MUTANT 1 (planted hand-edit in the retired view, scratch): check FAILS rc 2, both freeze limbs. MUTANT 2 (unrecorded directive must not move): scratch re-run of retire moves nothing, live byte-identical; the real emit itself left 9 of 9 unrecorded rows untouched. FENCES HELD AND NAMED: zero missions machinery read, extended, or waited on (the engine imports nothing from comp_missions; the pattern elements -- banner, post-commit refresh, recomputability -- were built from their NAMES in the TO, the missions code was not even opened); NO attribution leg (nothing tracks activity/attribution anywhere in the mechanism). Packet to CVO cited in the close.",
+   "denominator": "positive 1/1, negative 9/9 + 1/1, tripwire 4/4 invariants, mutants 2/2 fired as expected, fences 2/2 named",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "R5",
+   "criterion_verbatim": "Proof instance VALID rc=0 positional R1-R5; RAVC close to COO cc MSTR + CVO + CTO.",
+   "method": "schema_validation",
+   "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.8.0_AE_CloudComp/deliverables/LD0433.RETIRE_PROOF_OF_SPEC.json R1,R2,R3,R4,R5",
+   "output_evidence": "TRUE rc=0 measured without a pipe on this exact instance; validator verbatim + the close receipts cited in the RAVC close to COO cc MSTR + CVO + CTO.",
+   "denominator": "5 of 5 expected ids carried, coverage-checked",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Both ruling-named mutants run on a SCRATCH COPY of the real post-emit state (never the real files): (1) a planted stance edit in the retired view -> check rc 2 with BOTH freeze limbs (per-row hash + whole-file seal) firing, restore -> green; (2) a retire re-run -> nothing moves, live byte-identical. Plus the self-test's conservation-deletion mutant and partial-record refusal, and two BUILD defects caught by the battery before any real act (yaml.safe_dump's document-end marker leaking into the emit; the literal-block round-trip de-indent breaking the freeze hash).",
+   "status": "FIRED-AS-EXPECTED",
+   "expected": "Hand edit -> rc 2 naming freeze; unrecorded rows -> unmoved; restore -> rc 0.",
+   "observed": "Exactly that, with the hash pairs printed (2935309a4797 vs 1f33c639e7df; 63e9ce6f8b8c vs 23e0908b1c9f) and 'live view BYTE-IDENTICAL after re-run'."
+  },
+  "determinism": {
+   "description": "The emit is deterministic over (live rows, records): sorted ids, canonical dedent, json-dumped scalars; the only run-varying fields are cut_at timestamps. The check is pure over the two files.",
+   "status": "STABLE",
+   "method": "Scratch re-run of both subcommands on the real post-emit state.",
+   "observed": "retire -> no-op byte-identical; check -> identical verdict + denominators."
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The FACT (any retired: record) and the VERIFY",
+   "reason": "Other seats' acts by the SoD triangle: MSTR wrote D8's fact (@de6b225bb5); CVO runs the sec.5 verify on the packet. The machine never writes a fact; this seat never verifies its own work."
+  },
+  {
+   "item": "Any attribution/activity leg; any missions machinery read or extension; any register relocation",
+   "reason": "The two ruling fences (Andrew (c) @52db6f2835; CTO 63580) and MSTR's path word (63620) -- all held, none of them this TO's to reopen."
+  },
+  {
+   "item": "Conservation across emits for a row added-then-deleted live BETWEEN two emits",
+   "reason": "ever_minted is EMIT-maintained (declared in the output contract's blind_spots); git history is the oracle for that class."
+  }
+ ],
+ "surprises": [
+  "The registration canon has FOUR layers and the manifest-check walked me through each honestly (registration -> output contract -> canon vocabulary); two tokens (plane='governance', scope='register') were out of canon and were mapped to existing enum values (source / single-artifact) rather than widening the vocabulary (~C's lane).",
+  "One commit attempt was lost to a concurrent-commit lock collision (files left staged; re-run clean) and one pre-step failed on the MSYS /tmp plane for native python -- the commit itself landed, but the registration paragraph did not reach its message body; cited here and in the close instead.",
+  "The post-commit hook's first live fire was on the very commit that performed the first real emit -- R2's wiring and R1's act verified each other in one event."
+ ],
+ "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-20/ld0433_retire_emit_2030-2045Z.md",
+ "compiler_tools": [
+  {"tool": "comp-directives", "invocation": "--self-test / retire --dry-run / retire (real) / check (real + scratch mutants)", "result": "PASS -- 10/10; emit rc 0; check 0 violations; mutants rc 2 + no-op as expected"},
+  {"tool": "comp-manifest-check", "invocation": "completeness (3 iterations)", "result": "PASS rc=0 final"},
+  {"tool": "commit-gate.sh", "invocation": "comp_directives.py", "result": "PASS"},
+  {"tool": "comp-system", "invocation": "discharge regen + --check", "result": "PASS CURRENT rc=0"},
+  {"tool": "proof-of-spec-check", "invocation": "this instance R1-R5", "result": "rc cited in the close"}
+ ]
+}

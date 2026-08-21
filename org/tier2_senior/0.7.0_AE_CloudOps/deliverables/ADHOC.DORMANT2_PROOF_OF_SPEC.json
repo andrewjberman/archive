@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADHOC.DORMANT2",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps/task_orders/ADHOC.DORMANT2.consolidator-and-market-update-trio-decommission.md",
+    "group": "OTHER",
+    "vintage_commit": "2ba27f1d7fb279533e5127b74645416caf213501"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "Phase-1 invocation-denominator census (surfaced to 2.0.0_SA_COO + 1.0.0_SA_CTO + 3.0.0_SA_CVO, msg 63769-63771; carried into CVO census rows 63778)",
+      "kind": "config_data",
+      "commit_or_etag": "measurement 2026-08-20 ~2110Z",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A measurement act, not a deploy. The four 90-day materialized invocation denominators + comp-blast couplings + TF-management ground-truth; the durable home is 3.0.0_SA_CVO's census rows (their act, one-read-two-homes) + this instance. Zero deletions, zero deploys, zero ledgers (correctly -- see D4).",
+      "artifact_covered_by": [
+        "D1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D1",
+      "criterion_verbatim": "Invocation re-check at teardown time, per function, denominators printed; NONZERO -> RETAIN + one-line surface (the flip path exercised or explicitly zero).",
+      "method": "live_read",
+      "invocation": "CloudWatch AWS/Lambda Invocations Sum, 90-day window 2026-05-22->2026-08-20, daily period (86400s, retained full window), MATERIALIZED per function; NOT logs (market-update-lambda-role is implicitDeny on logs:PutLogEvents). Run at teardown time, not an aged reading. Plus comp-blast per subject (NEVER#3 + coupling) and a TF-management ground-truth (source-map + comp-find over infra/aws/terraform).",
+      "output_evidence": "opal-bd-transaction-consolidator = 0 inv/90d; market-update-exporter = 0; market-update-generator = 2 (both 2026-07-08); market-update-data-aggregator = 3 (both 2026-07-08). FLIP PATH EXERCISED: generator + data-aggregator NONZERO -> RETAIN, surfaced to COO+CVO (the discriminating control -- 2 of 4 flip, 2 do not). 07-08 hits handled per the binary rule (honored, not overridden; context that they are likely the 07-09 investigation's own diagnostic pokes surfaced as CONTEXT -- CTO 63773 recorded this as the model, with the named limitation that an invocation count counts but does not attribute, safe here because it fails toward RETAIN). Denominators carried into CVO's census rows (63778, one read two homes).",
+      "denominator": "4 of 4 functions checked, 90d materialized, per-function denominator printed; 2 flipped RETAIN",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D4",
+      "criterion_verbatim": "Measurement characterization complete in TWO homes from ONE read; NO ledger opened because NO act was begun -- stated, not assumed. Proof instance VALID rc=0 positional D1,D4.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> D1,D2,D3,D4",
+      "output_evidence": "This instance validates rc=0 over the re-scoped set D1,D4 (COO 63808 struck D2/D3 per CTO 63773). TWO HOMES, ONE READ: the four materialized denominators live in 3.0.0_SA_CVO's census rows @727daaab94 (consolidator + MA-06 trio, value-grain, not re-derived) AND in this instance + the surfaced record. NO deploy-completion ledger was opened, and that is STATED not assumed: a ledger opens at teardown-START (deploy_ledger.py open) and NO act was begun -- both threads ruled no-teardown before any teardown act existed -- so zero ledgers is exactly correct. DORMANT2 is a MEASUREMENT act, zero deletions; the struck teardowns (D2/D3) are documented in declared_exclusions + the TO status.",
+      "denominator": "1 proof instance over D1,D4; 2 homes for 1 read; 0 ledgers (correct: 0 acts begun)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The RETAIN flip IS the discriminating control on the invocation gate: of 4 functions, exactly the 2 with nonzero invocations flip to RETAIN and the 2 with zero do not. If the gate were undiscriminating it would flip all or none; it discriminated on the actual invocation evidence.",
+      "expected": "NONZERO functions flip to RETAIN, ZERO functions do not; the flip is driven by the materialized invocation count, not by a story about what the invocations 'really were'.",
+      "observed": "generator(2)+data-aggregator(3) -> RETAIN; consolidator(0)+exporter(0) -> not flipped by the invocation gate (blocked instead by the TF-management + coupling findings). The gate discriminated on evidence; the 07-08 diagnostic-poke interpretation was surfaced as context and did NOT bend the binary rule.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The invocation check is deterministic given the fixed 90-day window and the CloudWatch metric; re-running yields the same denominators (the only moving part is the window edge, which does not change the zero/nonzero verdicts here).",
+      "observed": "Stable; the 4 denominators are a property of the window + metric, not of run order.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The teardown acts themselves (D2 consolidator, D3 trio)",
+      "reason": "Ruled UNWARRANTED by 1.0.0_SA_CTO (63773) + 3.0.0_SA_CVO (63778): leave-dormant (consolidator, Rule 25) + retain-whole (trio). The TO's 'clean TF teardown of dormant Lambdas' premise failed on the deployed reality (neither thread is TF-managed; 2/3 of the trio flip RETAIN; a NEVER#3 served-table question binds). Per CTO: a blocked mechanism is a prompt to re-ask whether the ACT was warranted, not to hunt a different mechanism -- and the answer is no. The TO wants re-scoping (COO's act) to what Phase 1 established: a measured dormancy census."
+    }
+  ],
+  "surprises": [
+    "The TO's whole premise failed on the deployed reality: BOTH threads are non-TF-managed (consolidator = legacy deploy.sh/no-TF-resource; trio = 'no repo source, code must be downloaded from AWS'), so the mandated Terraform teardown is structurally impossible for either.",
+    "2 of the 3 trio members (generator 2, data-aggregator 3) have nonzero 90-day invocations, all on a single day 2026-07-08 (~43d old, single-day, almost certainly the 07-09 remediation investigation's own diagnostic pokes) -- but the binary RETAIN rule is honored regardless: an invocation count counts, it does not attribute, and here it correctly fails toward RETAIN.",
+    "The market-updates DynamoDB table is TF-declared 'consumed by the market-overview page' (dynamo.tf:3-4) -- a NEVER#3 served-table question that binds before any trio teardown, unresolved by design (a served table is not resolved by deleting into it).",
+    "The API-delete-because-it-isn't-in-TF path was offered to CTO and explicitly refused as the WORST of three options: it both breaks the TF mandate AND sets a precedent that unmanaged resources are easier to destroy than managed ones -- making legacy drift a licence rather than a debt."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-20/ (this session's log, committed at session close)",
+  "compiler_tools": [
+    {
+      "tool": "boto3 cloudwatch get_metric_statistics + lambda get_function_configuration",
+      "invocation": "AWS/Lambda Invocations Sum, 90d materialized, per function x4",
+      "result": "the D1 denominators: 0/0/2/3; the flip path exercised"
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "per subject x4",
+      "result": "consolidator shares bd-pipeline IAM (bd-s3-readwrite/pipeline-chain); the trio shares one role + 4 policies + 2 tables (coupled unit); NEVER#3: nothing serves the consolidator, market-updates table is a trio-shared served surface"
+    },
+    {
+      "tool": "comp-find + source-map read",
+      "invocation": "TF-management ground-truth per subject",
+      "result": "consolidator = no TF resource (legacy deploy.sh); trio = no repo source; the premise-failure finding"
+    }
+  ]
+}

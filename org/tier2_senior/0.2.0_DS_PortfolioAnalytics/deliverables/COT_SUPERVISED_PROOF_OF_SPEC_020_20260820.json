@@ -1,0 +1,230 @@
+{
+  "schema_version": "1.0",
+  "to_id": "COT_SUPERVISED.G1-G7.retroactive-filter-and-portfolio-group",
+  "firm": "COT",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.2.0_DS_PortfolioAnalytics/task_orders/COT_SUPERVISED.G1-G7.retroactive-filter-and-portfolio-group.md",
+    "group": "OTHER",
+    "vintage_commit": "9ecfcc51ba"
+  },
+  "assignee": "0.2.0_DS_PortfolioAnalytics",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/cot/scripts/gold/A_00.accounts_dimension.py",
+      "kind": "script",
+      "commit_or_etag": "a2723b89b7",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "comp-pipescript deployed A_00.accounts_dimension.py --pipeline cot-gold -> MATCH (post s3 cp)",
+      "artifact_covered_by": ["G2"]
+    },
+    {
+      "path_or_key": "data/cot/scripts/silver/cot_silver_merge.py",
+      "kind": "script",
+      "commit_or_etag": "a2723b89b7",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "comp-pipescript deployed cot_silver_merge.py --pipeline cot-silver -> MATCH",
+      "artifact_covered_by": ["G2"]
+    },
+    {
+      "path_or_key": "data/cot/scripts/bronze/cot_bronze_ingest.py",
+      "kind": "script",
+      "commit_or_etag": "f03ec88563",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "comp-pipescript deployed cot_bronze_ingest.py --pipeline cot-bronze -> MATCH",
+      "artifact_covered_by": ["G4b"]
+    },
+    {
+      "path_or_key": "data/cot/scripts/bronze/templates/account_attributes.json",
+      "kind": "config_data",
+      "commit_or_etag": "f03ec88563",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws s3 cp to s3://opal-data-cot/code/bronze/templates/account_attributes.json; listed present",
+      "artifact_covered_by": ["G4b"]
+    },
+    {
+      "path_or_key": "data/cot/scripts/gold/tests/test_cot_supervised_tieout.py",
+      "kind": "test",
+      "commit_or_etag": "62e0b77055",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws s3 cp to s3://opal-data-cot/code/gold/tests/; battery exercised twice, identical output",
+      "artifact_covered_by": ["G3"]
+    },
+    {
+      "path_or_key": "data/cot/scripts/gold/D_05.supervised_split.py",
+      "kind": "script",
+      "commit_or_etag": "8d19ea52a3",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "comp-pipescript deployed D_05.supervised_split.py --pipeline cot-gold -> MATCH",
+      "artifact_covered_by": ["G5", "G6"]
+    },
+    {
+      "path_or_key": "data/cot/scripts/gold/B_00.canonical_holdings.py",
+      "kind": "script",
+      "commit_or_etag": "8d19ea52a3",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "comp-pipescript deployed B_00.canonical_holdings.py --pipeline cot-gold -> MATCH",
+      "artifact_covered_by": ["G4"]
+    },
+    {
+      "path_or_key": "data/cot/scripts/gold/gold_validate_config.yaml",
+      "kind": "config_data",
+      "commit_or_etag": "8d19ea52a3",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws s3 cp to s3://opal-data-cot/code/gold/gold_validate_config.yaml; comp-validate consumed it (A_00 5/5, D_05 5/5)",
+      "artifact_covered_by": ["G2", "G6"]
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/gold/dimensions/accounts_dimension_latest.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "d35c5bf201c3e3c763966cd84a7469f8",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "live re-read: 943 rows x 27 cols; portfolio_group + account_supervised + account_billable + position_only present (819/123/1-null)",
+      "artifact_covered_by": ["G2"]
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/silver/account_attributes/2026-08-19.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "2e7b274ce639e569efc0d258dc3d4c12",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "live re-read: 943 rows x 8 cols; counts match 0.6.2's bronze measurement exactly (820/123, 690/253, 826/117, books 399/232/231/81, dup z0927448821 flags-agreeing)",
+      "artifact_covered_by": ["G2", "G5"]
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/gold/artifacts/supervised_split.json",
+      "kind": "s3_object",
+      "commit_or_etag": "5bcd489ea79d00ccd02e4c8969d24f63",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "live re-read: data_as_of 2026-08-19, 98 daily rows, 4 book rows, meta.notes x4 incl today's-flags caveat + plane-gap declaration",
+      "artifact_covered_by": ["G5", "G6"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "G2",
+      "criterion_verbatim": "A_00's :599 available-filter gains a LOUD PRINT for dropped declared columns (the silent-drop fixed as a class, not just for these fields); served dim re-read shows portfolio_group + supervised flags present (was 23 cols without).",
+      "method": "live_read",
+      "invocation": "python: read s3://opal-data-cot/gold/dimensions/accounts_dimension_latest.parquet, enumerate columns; _select_declared exercised positive+negative locally; A_00 run log shows the WARN line",
+      "output_evidence": "SERVED DIM RE-READ (live): 943 rows x 27 cols; G2 acceptance columns present: ['portfolio_group','account_supervised','account_billable','position_only'] (4 of 4). Loud print live in the same run: 'WARN: final output (output_cols): 9 of 33 declared columns NOT delivered ...'. Positive control: WARN fired on injected drop; negative control: silent on none.",
+      "denominator": "4 of 4 acceptance columns present; 27 cols total vs 23 before; loud-print drop set 9 of 33 declared",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "G3",
+      "criterion_verbatim": "the retroactive supervised filter = dim join on AccountID over existing history; ACCEPTANCE = grain-collapsed tie-out vs the HAR oracle on 2026-08-19 ... The un-collapsed mutant fails. [REBASED per CTO 63363: (i) internal exact tie, (ii) split parity at declared tolerances, (iii) plane gap declared]",
+      "method": "test_suite",
+      "invocation": "python data/cot/scripts/gold/tests/test_cot_supervised_tieout.py (run twice, identical)",
+      "output_evidence": "(i) internal exact: collapsed holdings $480,056,488.78 vs allocations $480,056,488.78 -> TIE. (ii) split parity: unsupervised delta 0.26% (<=0.50%) + supervised-share gap 0.10pp (<=0.25pp) -> PASS. (iii) plane gap DECLARED: $-8,697,205.48. MUTANT: naive $480,261,559.55 vs collapsed $480,056,488.78 -> FAILS correctly ($205,070.77 = BD's own sum-of-books-minus-firm exactly). VERDICT (rebased): ACCEPT.",
+      "denominator": "join-key control 942 of 942 fact accounts resolve in dim; 3 binding limbs + mutant; oracle constants pinned to HAR JSON paths",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "G4",
+      "criterion_verbatim": "{Holding Supervised + Account Supervised} BOTH added to the daily holdings template ... a holdings row whose flag disagrees with its account's = a loud finding [DS half: the daily-tested invariant in gold]",
+      "method": "live_read",
+      "invocation": "B_00.canonical_holdings.py _build_canonical_from_snapshot: guarded per-row holding_supervised vs account_supervised compare; LOUD FINDING on disagreement, SKIP printed on pre-G4 partitions",
+      "output_evidence": "Check code landed @8d19ea52a3 and deployed MATCH. Template amendment landed BD-side by 0.6.2 (21-col QA read, both columns present, nothing over prod).",
+      "denominator": "N/A -- first exercisable partition is tonight's scheduled extract",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The invariant's first live fire rides tonight's scheduled cot holdings run (the first extract carrying both flags); the enabling code is deployed and the pre-G4 SKIP limb was exercised by design review. Evidence lands with the run."
+    },
+    {
+      "criterion_id": "G4b",
+      "criterion_verbatim": "mechanism = the DS-side code change ... ACCEPTANCE = behavioral: dict entries landed + ONE OBSERVED SCHEDULED RUN landing account_attributes with its bronze sentinel emitted and DS's silver consuming the prefix",
+      "method": "live_read",
+      "invocation": "git show f03ec88563; grep cot_bronze_ingest.py :1266 (tables = sorted(TABLE_QUERY_TYPE.keys())); comp-pipescript deployed -> MATCH",
+      "output_evidence": "Dict entries landed (TABLE_QUERY_TYPE account_attributes:4, TABLE_DATE_MODE (Custom,14), SNAPSHOT_TABLES membership) + thin envelope folded verbatim (templateId 270648). Enumeration-proven: the flagless nightly derives its table set from TABLE_QUERY_TYPE.keys() at :1266, so the promotion is real at the executing enumeration, not file-presence.",
+      "denominator": "N/A -- behavioral acceptance is one observed scheduled run",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The observed-scheduled-run half rides tonight's sweep (bronze sentinel + silver consuming the prefix); the enabling commit + deploy are complete and verified."
+    },
+    {
+      "criterion_id": "G5",
+      "criterion_verbatim": "gold emits BOTH aum_supervised and aum_all (the BD-style toggle) + the portfolio_group book split [+ COO 63346: multi-membership handled at the join, a two-book account appears in both books, the FIRM total never double-counts]",
+      "method": "live_read",
+      "invocation": "python: read s3://opal-data-cot/gold/artifacts/supervised_split.json; compare vs battery numbers (cross-derivation) and vs BD book rows",
+      "output_evidence": "firm_daily latest: all $480,056,488.78 / supervised $449,733,561.36 / unsupervised $30,322,927.42 -- penny-identical to the battery from a DIFFERENT derivation (account_performance vs fact_holdings+dim). Books pair-grain: sum-of-books minus firm = $205,070.76 ~= BD's own 205,070.77 (dual-book account in both books, firm counts once). Book unsupervised ties BD TO THE PENNY on all three named books (9,542,853.08 / 4,744,806.38 / 3,987,479.28).",
+      "denominator": "98 daily dates; 4 book rows; MECE partition asserted per date (all = supervised + unsupervised + unflagged)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "G6",
+      "criterion_verbatim": "the today's-flags-to-history caveat stated in the served artifact's meta/notes -- verifiable by reading the artifact, not the TO.",
+      "method": "schema_validation",
+      "invocation": "comp-validate data/cot/scripts/gold/D_05.supervised_split.py --artifact <downloaded served supervised_split.json>",
+      "output_evidence": "5 PASS, 0 ERROR: 'G6 caveat notes present' count 4 >= 4 at meta.notes; 'plane-gap declaration present' key meta.plane_gap_declaration.gap_usd present (float). Direct read: caveat string present ('TODAY'S-FLAGS CAVEAT: ... never point-in-time supervision truth').",
+      "denominator": "5 of 5 validate checks PASS against the SERVED bytes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "G7",
+      "criterion_verbatim": "proof instance VALID rc=0 positional G1-G7; CTO arch-gate acceptance cited.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.2.0_DS_PortfolioAnalytics/deliverables/COT_SUPERVISED_PROOF_OF_SPEC_020_20260820.json \"G2,G3,G4,G4b,G5,G6,G7\"",
+      "output_evidence": "Validator: 'structural=jsonschema | acceptance rows=7 | violations=0 / VALID' rc=0 (positional). CTO ARCH-GATE ACCEPTANCE CITED: msg 63443, 2026-08-20T1824Z -- GRANTED on independent live read at the CTO seat ('I pulled s3://opal-data-cot/gold/artifacts/supervised_split.json live this minute ... MECE TO THE PENNY and byte-matches the battery's measured figures; meta.notes carry the today's-flags and plane-gap caveats on the artifact's own face. ARCH-GATE ACCEPTANCE CITED for G2/G3/G5/G6 + the G4-gold/G4b enabling acts'). COO RAVC validation: msg 63441 (rc=0 re-run at the COO seat, @8d19ea52a3 verified). The cite explicitly does NOT pre-clear the two tonight-riding G4/G4b rows.",
+      "denominator": "7 of 7 acceptance rows present, 0 violations; cite covers G2/G3/G5/G6 + enabling acts",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Un-collapsed (naive) sum injected in place of the grain-collapsed sum in the tie-out battery; expected to break the internal-exact limb and differ from the collapsed total.",
+      "expected": "naive != collapsed by the dual-relationship double-count; battery must not report the mutant as a tie",
+      "observed": "naive ALL=$480,261,559.55 vs collapsed ALL=$480,056,488.78 -> MUTANT FAILS THE TIE-OUT (correct); delta $205,070.77 equals BD's own sum-of-books-minus-firm, confirming the collapse against the vendor's numbers. Second control: _select_declared positive (WARN fired on injected drop) + negative (silent on none).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_cot_supervised_tieout.py run twice on the same inputs (2026-08-20, as-of 2026-08-19); all limb values compared",
+      "observed": "Identical to the cent on every limb both runs; VERDICT ACCEPT both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "G1 (bronze account-attributes pull) and G4's BD-side template amendment",
+      "reason": "0.6.2_AE_PartnerETL's legs per the TO split; proven in their instance (COT_SUPERVISED_PROOF_OF_SPEC_062_20260820.json)"
+    },
+    {
+      "item": "Platinum/dashboard wiring of the supervised toggle",
+      "reason": "Serving-tier work outside this TO (Rule 17b); D_05's gold artifact is the designed consumption point for the follow-on"
+    },
+    {
+      "item": "The active-relationship supervised limb ($455,532,549.74)",
+      "reason": "No ratified 'active relationship' definition exists on our side; carried INFORMATIONAL in the battery with its true semantic named (CTO owned the trace-label correction)"
+    },
+    {
+      "item": "The BD Dashboard-vs-DataMining plane gap (-$8.70M) root cause",
+      "reason": "Vendor-internal; declared per CTO 63363 limb (iii), never absorbed; the vendor question sits at Andrew's discretion with the accrual result attached (does NOT close it: $220,718.17 = 2.5%)"
+    }
+  ],
+  "surprises": [
+    "Drop set measured 10 of 30 declared columns (trace named 6) -- same class, surfaced to COO msg 63328, not chased.",
+    "Served dim tax_status reads all-'taxable' (943/943, qualified 0) today -- pre-existing served state, banked at COO's cadence (63374).",
+    "A_00 full-rebuild path is window-degraded (73 daily txn files -> 942 accounts) -- a --full --upload today would replace the richer served dim; surfaced, incremental path used.",
+    "COO 63346 cited HAR group sums 492.7M; my sum-of-books measurement is 488,958,765.03 -- direction identical (overlap exists), magnitude differs; noted for the record, not chased.",
+    "comp-blast has no cot node for gold/artifacts/timeseries_chart.json (bd/inf instances only) -- graph coverage gap, one line."
+  ],
+  "session_log": "org/tier2_senior/0.2.0_DS_PortfolioAnalytics/logs/2026-08-20/cot_supervised_g2_g6_retroactive_filter_1720-1815Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-pipescript",
+      "invocation": "io A_00.accounts_dimension.py --pipeline cot; deployed {A_00,cot_silver_merge,cot_bronze_ingest,D_05,B_00} --pipeline cot-*",
+      "result": "io: 15 downstream consumers enumerated pre-touch; deployed: STALE->deploy->MATCH per script"
+    },
+    {
+      "tool": "comp-validate",
+      "invocation": "A_00 + D_05 vs downloaded SERVED artifacts (stanzas authored this session)",
+      "result": "A_00 5/5 PASS, D_05 5/5 PASS"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "collapse_relationship_grain / timeseries_overview / --name sweeps",
+      "result": "located the grain gateway + serving chain with denominators printed"
+    },
+    {
+      "tool": "comp-pulse",
+      "invocation": "diff (safe-commit risk-reflex) on cot_silver_merge.py",
+      "result": "HOLD -> cited memory read (T+1 pricing/retry-net) -- validated the seam design (etag-grounded skip, lag-1 as-of)"
+    }
+  ]
+}

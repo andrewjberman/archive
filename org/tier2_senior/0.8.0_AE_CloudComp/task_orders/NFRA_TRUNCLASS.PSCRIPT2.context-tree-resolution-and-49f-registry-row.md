@@ -4,7 +4,16 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.8.0_AE_CloudComp</issued_to>
     <date>2026-08-20</date>
-    <status>staged -- queue position AFTER FIX12 (same instrument plane, CTO 63279 cadence call); GO rides your FIX12 close</status>
+    <status>complete</status>
+    <!-- COMPLETE 2026-08-20: both defects fixed @52a063f50a + proof @96df8b1b5f rc=0
+         (re-validated at issuer seat); CTO gate CLOSED 63302 with the repro flip
+         independently re-run at their seat and BOTH refusal limbs exercised. The routed
+         "calling-context-dependent" framing SUPERSEDED on the record by the assignee's
+         grounding: first-match vs longest-prefix in resolve_pipeline_from_arg :109-114.
+         GO condition (FIX12 close) was already met at issuance -- assignee's execute-now
+         read was correct. First dispatched work under the @2804811386 engine-home
+         enumeration: zero overrides. Flip by issuer 2.0.0_SA_COO on the gate close. -->
+
     <project_code>NFRA_TRUNCLASS</project_code>
   </metadata>
 
