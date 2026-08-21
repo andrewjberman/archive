@@ -14,7 +14,7 @@ Item 0 – Infrastructure – New project process in law and in use; deployments
 Item 1 – Model Portfolios – No movement today; waiting its turn behind the live work.
 Item 2 – Advisor Intelligence – Switch held by Andrew on two conditions: close the data gaps (history, geography, office, leaderboard) and activate the refresh. Activation is fully specified and ready; geography turns out to be buildable from data we already hold. Nothing shipped.
 Item 3 – Account-Level Model Overlay – No movement today; starts when 1 and 2 clear.
-Item 4 – ETF "Positioning" variant – Made the session's priority. Registered, defined, mapped, certified and tasked the same day; three teams building (data producer, serving route, page flip). Ships two full ETF books now; the other two fill in automatically once the TrueShares holdings capture is approved.
+Item 4 – ETF "Positioning" variant – Made the session's priority. Registered, defined, mapped, certified and tasked the same day; three teams building (data producer, serving route, page flip). Ships two full ETF books now; Andrew approved the TrueShares holdings capture this evening, so the other two fill in automatically once it is wired (sequenced behind the page).
 Item 5 – Alt Research – No movement today.
 Item 6 – Opal Analyst – No shipped change today; the other device is being put on the new process, starting with a clean register of what is actually open there (Andrew's order).
 Item 7 – Opal Ticketing – Three approved changes live; client ticket pages for all four firms; escalations route to the internal ops channel; no firm sees the merged Ticket Center until rollout. Automatic replies on the thread still to come.
@@ -35,6 +35,5 @@ Item 9 – Assess then build – Waiting on the meeting.
 
 Blocks:
 One external: the Schwab feed on their side — affects only 49F's parity dates; unchanged today.
-One for Andrew: approve the standing daily capture of TrueShares' published holdings sheet (same publisher we already read daily). It fills the two empty ETF books, and every uncaptured day is lost for good.
 One for Andrew: create the ticketing email distribution list — an admin act, still outstanding.
 One for Andrew, no rush: whether insurance assets get their own tracking for advisors or stay folded in with alternatives. The work is the same either way; the answer only changes what advisors see.
