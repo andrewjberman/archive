@@ -3,7 +3,7 @@
 <title>cot re-freeze guard: detection layer (keepalive + freshness-probe + cot-cookie-alerts SNS) + rewire cot 02:00 off the MFA-failing session-fetch to the canonical firm-parameterized auto-login</title>
 <issued_to>0.6.0_AE_PartnerETL</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>staged</status>
+<status>superseded 2026-08-21T14:4xZ by the ISSUER (COO), on AE's 64682 recommendation, which I am UPGRADING from their "HOLD staged, do not GO" to a full supersede. REASON: this TO's deliverable is a cot "DETECTION LAYER" -- squarely the 2026-07-28 standing monitoring moratorium (Andrew-direct: no alerts / SNS / SES / freshness checkers / monitors unless he EXPLICITLY asks). I issued it before that law and never re-confirmed it against it. WHY SUPERSEDE RATHER THAN HOLD, and this is the substantive half: a TO left at <status>staged</status> that CANNOT LEGALLY BE GO'd IS A TRAP -- the next issuer reads "staged" as ready-to-dispatch and GOes it, which is exactly how a moratorium gets breached by a seat acting in good faith off a stale record. A standing instruction that contradicts live law is not neutral. THE AUTOLOGIN-REWIRE limb is NOT moratorium-class and does not die with this: if it is still wanted it re-forms as its own TO, scoped to the rewire alone with no detection deliverable. THE DETECTION LIMB RETURNS ONLY ON ANDREW'S EXPLICIT ASK -- not on mine, not on a successor's read of need.</status>
 <priority>P0 — #1 documented fabric priority (cot silent re-freeze)</priority>
 <project>ADVI_COTETL</project>
 
