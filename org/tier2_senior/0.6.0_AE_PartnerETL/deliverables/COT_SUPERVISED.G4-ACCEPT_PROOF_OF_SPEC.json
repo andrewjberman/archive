@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "2.0.0_SA_COO-2026-08-21-cot-g4-accept-handover",
+  "firm": "COT",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.6.0_AE_PartnerETL/task_orders/COT_SUPERVISED.G4-ACCEPT-HANDOVER.friday-1130z-verify-and-close.md",
+    "group": "OTHER",
+    "vintage_commit": "6ae5a5dd7ad1a028e1c711e0760ea7904e93f4c5"
+  },
+  "assignee": "0.6.0_AE_PartnerETL",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.6.0_AE_PartnerETL/logs/2026-08-21/cot_supervised_g4_acceptance_0843-1330Z.md",
+      "kind": "doc",
+      "commit_or_etag": "f3009f8859",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "session log; org record, not deploy-scope. Local CLOUD commit; rides the MSTR integration window (push is integrator-only, LD-0367).",
+      "artifact_covered_by": ["V5"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/COT_SUPERVISED.G4-ACCEPT_PROOF_OF_SPEC.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-SAME-SESSION",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "this instance; committed immediately after schema validation in the same session (hash necessarily postdates the instance's own content -- stated rather than fabricated).",
+      "artifact_covered_by": ["V5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "V1",
+      "criterion_verbatim": "CLOCK RE-READ AT BOTH PLANES before relying on it (DESIRED + APPLIED), stated with both values -- not inherited from this TO or from any report, including mine.",
+      "method": "live_read",
+      "invocation": "sed -n '80,100p' infra/aws/terraform/cot-pipeline/schedule-et.tf ; aws scheduler get-schedule --name cot-bd-session-daily-et --query '{State:State,Expr:ScheduleExpression,Tz:ScheduleExpressionTimezone,Window:FlexibleTimeWindow.Mode}'",
+      "output_evidence": "DESIRED (schedule-et.tf:89-90): schedule_expression = \"cron(30 7 * * ? *)\", schedule_expression_timezone = \"America/New_York\". APPLIED (live get-schedule): State=ENABLED, Expr=cron(30 7 * * ? *), Tz=America/New_York, Window=OFF. 07:30 ET = 11:30Z (EDT). Read fresh this session at 0845Z, pre-fire.",
+      "denominator": "2 of 2 planes read (DESIRED + APPLIED), values identical",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V2",
+      "criterion_verbatim": "LANDING OR ABSENCE, both handled: HOLDINGS_DAILY_2026-08-20.xlsx present -> proceed; absent by a stated margin after 11:30Z -> a FINDING surfaced the same hour to COO + CTO (silence is not success).",
+      "method": "live_read",
+      "invocation": "Monitor task boo34xyaa (armed 0846Z, pre-fire): 60s s3api head-object poll emitting LANDING / OVERDUE past 13:00Z every 15m / rate-limited non-404 POLL-ERROR; instrument positive-controlled (08-19 key present) + negative-controlled (08-20 key true 404) before arming",
+      "output_evidence": "LANDING: forwardfill_v2/holdings/HOLDINGS_DAILY_2026-08-20.xlsx LastModified/Bytes(UTC via s3api): Fri, 21 Aug 2026 11:32:01 GMT / 1,368,202 B -- inside the observed 11:31-11:32Z cadence. OVERDUE limb never fired; stated margin was 13:00Z (the prior seat's threshold, restated in the watch).",
+      "denominator": "3 of 3 watch limbs armed (LANDING/OVERDUE/POLL-ERROR); 1 landing event, 0 overdue, 0 poll-error",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V3",
+      "criterion_verbatim": "SERVED-BYTES VERIFY: +2 supervised columns (19 -> 21) on 18,051 UNCHANGED rows; the sidecar; the bronze sentinel. A row-count change is a FINDING. Timestamps read in UTC via boto3/s3api; the cot_bronze_ingest.py pin RE-PINNED to 01:04:18Z or the timestamp limb dropped in favour of sha256 (state which you did and why).",
+      "method": "command",
+      "invocation": "python org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/COT_SUPERVISED/verify_g4_belt_acceptance.py --asof 2026-08-20 (verifier @d4a86a84e1, served bytes, boto3 UTC); plus direct served-bytes row reads of the 08-18 and 08-19 artifacts for the delta frame",
+      "output_evidence": "Columns 19 -> 21 with BOTH new columns present (['Holding Supervised','Account Supervised']); sha256 706c822019b6331ddfc1fdcdd98ea647d6196191f25561bca5b0a7b09d160d66; holdings sidecar + attributes sidecar basis=land_time_measured has_data_rows=1; bronze sentinel overall=success carrying account_attributes among 6 tables; G4b ACCOUNT_ATTRIBUTES_DAILY_2026-08-20.xlsx landed 11:31:09Z in the schedule window. ROUTED FINDING per this criterion's own words: rows 18,051 -> 18,088 (delta +37), NOT accepted as the verifier's len>0 pass. Frame: 08-18 and 08-19 both measured 18,051 exactly (flat pair, direct served-bytes reads), so +37 is the first movement in 3 business days; disposition offered = genuine data movement on the new as-of day, not a template artifact (a column-add cannot mint rows; invariant clean over all 18,088; supervised value counts 17,708+380 sum to the new total). RE-PIN: settled sha256-only BY SOURCE READ -- verify_g4_belt_acceptance.py contains NO LastModified comparison against the 18:06:50Z code-object pin (it never reads cot_bronze_ingest.py; its only LastModified reads are the landing artifacts' hour-window checks at :103/:147), so nothing existed to re-pin and the 01:04:18Z identical-bytes rewrite cannot fire any limb falsely. CTO's sha256 verification (c8764a43c1fe7189 == pin == repo, annex @65aff2c124) stands un-re-derived per the TO.",
+      "denominator": "12 of 12 verifier checks on served bytes; row delta framed against 2 prior served artifacts (08-18, 08-19) read directly",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V4",
+      "criterion_verbatim": "THE G4 BELT'S FIRST REAL TEST: the per-row Holding-vs-Account supervised disagreement over the ~18k rows, run with the verifier's negative controls intact.",
+      "method": "command",
+      "invocation": "same verifier run (G4-INVARIANT section) + this seat's own controls: mutant --asof 2026-08-21 (absent key), determinism second same-input run; author's 8/12 pre-fire negative control stands @d4a86a84e1",
+      "output_evidence": "DENOMINATOR: 18,088 comparable rows (0 blank/absent, 18,088 total); 0 disagreeing rows; Holding Supervised value counts {\"Unsupervised\": 380, \"Supervised\": 17708}. Controls at this seat: mutant rc=2 UNPIPED ([FAIL] holdings artifact ABSENT / VERDICT: NOT YET ACCEPTABLE); determinism run 2 identical (same sha256, same 12/12, same +37).",
+      "denominator": "0 disagreements of 18,088 comparable rows (18,088 total, 0 blank)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "V5",
+      "criterion_verbatim": "Proof instance VALID rc=0 (rc UNPIPED) over V1-V5; RAVC close to 2.0.0_SA_COO cc 1.0.0_SA_CTO + 0.2.0_DS_PortfolioAnalytics.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.6.0_AE_PartnerETL/deliverables/COT_SUPERVISED.G4-ACCEPT_PROOF_OF_SPEC.json V1,V2,V3,V4,V5 ; rc captured unpiped",
+      "output_evidence": "VALID rc=0 unpiped (run in-session immediately after this instance was written; the validator's own output is the evidence and the session log records it). RAVC close sent to 2.0.0_SA_COO + 1.0.0_SA_CTO + 0.2.0_DS_PortfolioAnalytics via one to_agents send with per-recipient receipts, after the validator rc was read.",
+      "denominator": "5 of 5 expected criteria covered (V1,V2,V3,V4,V5); rc read unpiped",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Run the belt verifier against --asof 2026-08-21, whose holdings key is absent by construction (today's as-of lands tomorrow): the instrument must FAIL, proving today's 12/12 could have said otherwise.",
+      "expected": "ABSENT verdict, rc=2, no ACCEPTED line",
+      "observed": "[FAIL] holdings artifact ABSENT at forwardfill_v2/holdings/HOLDINGS_DAILY_2026-08-21.xlsx (ClientError); VERDICT: NOT YET ACCEPTABLE; rc=2 captured UNPIPED (first capture was piped through tail and read 0 -- discarded, re-run unpiped)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Second same-input verifier run (--asof 2026-08-20) compared to the first on sha256, check count, and row delta",
+      "observed": "Identical: sha256 706c8220...d160d66, 12/12 ACCEPTED, delta +37, rc=0 unpiped both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "G1 bronze-fetch leg + the three STAGED 0.6.2_AE_PartnerETL~A MDPF_3FIRMS TOs (3F-B4/3F-B6/3F-S1)",
+      "reason": "outside this TO's declared layer per its own Rule-24 declaration; open in the lane untouched (CTO annex section 5)"
+    },
+    {
+      "item": "0.2.0_DS_PortfolioAnalytics' G4b half (sentinel + silver consuming)",
+      "reason": "TO cross_domain_coordination: coordinate on landing, do not verify their half for them -- coordination message sent in the RAVC close cc"
+    },
+    {
+      "item": "Any cot script edit or ad-hoc run",
+      "reason": "TO requirement 1: READ-ONLY on cot; production evidence comes from the scheduled run only. Zero writes to cot performed."
+    }
+  ],
+  "surprises": [
+    "verify_g4_belt_acceptance.py:100 'row count intact' passes on len(data)>0 and only prints the delta -- the TO's human-read framing covered it this run; a successor reusing the verifier bare inherits a check whose name says intact and whose predicate says nonempty (routed to COO in the close, no action taken)",
+    ".owned-paths.yaml data/black_diamond/** catch-all is POD4 while COO route 63372 described the API-doc subtree as the AE seat's tree -- surfaced in that route's close (pre-fire window work, unrelated to cot)"
+  ],
+  "session_log": "org/tier2_senior/0.6.0_AE_PartnerETL/logs/2026-08-21/cot_supervised_g4_acceptance_0843-1330Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to COT_SUPERVISED.G4-ACCEPT-HANDOVER.friday-1130z-verify-and-close",
+      "result": "session TO context set (race-free per-session file)"
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'README.md' data/black_diamond ; comp-find 'v1/template' data/black_diamond/API",
+      "result": "located the COO-routed doc target with denominators printed (6/176, 15/19) -- pre-fire window work"
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> V1,V2,V3,V4,V5",
+      "result": "VALID rc=0 unpiped (V5 evidence)"
+    }
+  ]
+}
