@@ -1,0 +1,18 @@
+== A4 NEGATIVE CONTROL (run 2026-08-21 ~0223Z at f5bbfaf66e): break the VERIFIER itself, the NEW c2 must FAIL ==
+harness: .tools/comp-adversary loaded as a module; verify_commits monkeypatched to
+    def regressed_verify(commits): return [(c, "UNVERIFIABLE-PIN") for c in commits]
+(the exact regression MSTR's finding names: compose begins flagging EVERY real commit UNVERIFIABLE)
+
+control 1 (planted bogus commit flags UNVERIFIABLE): PASS
+control 2 (real pin VERIFIED on the printed verification path; source-1 denominator 2/1/1 -- discriminates, HEAD-churn-immune): FAIL
+control 3 (--open emits empty-context declaration, no complement rows): PASS
+control 4 (family-shape sections present): PASS
+self-test: FAIL
+A4 verdict: regressed-verifier self-test rc=1 (must be 1); control 2 FAIL confirmed.
+
+== CONTROL: verifier restored, self-test must PASS again ==
+self-test: PASS 4/4 | rc=0
+
+(The old control `head in out` would have printed PASS under the same regression -- the read-vintage
+header still carried the sha. The new control fails on the regression and passes on the restore:
+it discriminates in both directions.)

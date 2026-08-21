@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.8.0_AE_CloudComp</issued_to>
     <date>2026-08-20</date>
-    <status>staged -- ACTIVATES on the close of NFRA_EPISTEMY.C3-IDENTITY (same seat) AND 4.0.0_SA_CRO base's Knowledge_Basis object (PRD sec.2.3) reaching schema form through the S2 program (CRO base 63752: "order 2->3->4 is a DEPENDENCY order, not a preference"); COO GO on both</status>
+    <status>pending -- GO ISSUED 2026-08-21 ~0120Z by 2.0.0_SA_COO (/drive cycle, Andrew-scoped "NFRA_EPISTEMY to close"). BOTH activation conditions MET: (1) C3-IDENTITY CLOSED and rider-conformant (@d652c88490; COO-validated 27/27 observations vs the HEAD envelope schema, battery 24/24 rc=0 unpiped, proof I1-I7 VALID rc=0); (2) Knowledge_Basis at 0.1.1 @151eaf7e4c with 1.0.0_SA_CTO's ONE blocking condition DISCHARGED and the arch gate CLEARED BY EXERCISE (64060: 4/4 cases each derived twice from independently-ordered input dicts, ALL DETERMINISTIC -- incl. the non-ASCII axis and the nested-reverse-insertion-order axis that proves sort_keys recurses into {ref, version} sub-objects). THE DIGEST RULE YOU CONSUME, and it is normative: the derivation HOME is `precondition_token.py` `_request_hash` (json.dumps sort_keys=True, separators=(",",":"), UTF-8 encode, "sha256:"+hexdigest) -- ONE exercised home, not a restated recipe; ANY OTHER SERIALIZATION IS NON-CONFORMANT EVEN IF THE DIGEST PATTERN MATCHES (the clause that converts a silent divergence into a rule violation; without it a conforming-looking digest from a non-conforming serializer is indistinguishable from a real basis change). NEW BINDING FIELD PAIR, CTO Note 2 routed here as a CONSUMER-side auditability fix (not a Knowledge_Basis defect): the Eligibility_Evaluation record carries BOTH `effect_as_recorded` (what the Basis_Change said, incl. null = UNCOMPUTED) AND `effect_as_evaluated` (what the gate treated it as: UNCOMPUTED -> EXPANDING). The fail-toward-the-higher-bar collapse is ONE-WAY, so without both fields an audit asking "how many authority-expanding edits did we make" SILENTLY COUNTS THE UNCOMPUTED ONES. FIRST-MINT REALITY (CRO 64056): all five members are null (UNRATIFIED_BASIS) today -- C4's first basis is five nulls with a real digest, the honest starting state; lease against "nothing is ratified yet" WITHOUT inventing versions, and every null member CAPS the axes it governs at UNKNOWN. Pre-GO status preserved: "staged -- ACTIVATES on the close of C3-IDENTITY AND base's Knowledge_Basis object reaching schema form through S2 (CRO base 63752: order 2->3->4 is a DEPENDENCY order, not a preference); COO GO on both".</status>
     <project_code>NFRA_EPISTEMY</project_code>
   </metadata>
 
@@ -74,7 +74,12 @@
     exhaustive over the component; components 5/6 OUTSIDE.)
     L1  Lease + Eligibility_Evaluation objects schema-native per PRD sec.2.5 (cited); four-state
         axis Rule-24-recorded; registry-executed via base; CTO-gated; S6 absence semantics on every
-        nullable.
+        nullable. THE EVALUATION RECORD CARRIES BOTH `effect_as_recorded` AND `effect_as_evaluated`
+        (CTO Note 2, binding) -- exercised with an UNCOMPUTED case proving the pair keeps the
+        one-way UNCOMPUTED->EXPANDING collapse auditable; a record carrying only the evaluated
+        value is a FAIL. Digest derivation consumed from the normative home
+        (precondition_token.py _request_hash), never re-implemented -- a re-implementation is
+        NON-CONFORMANT even if its output matches the sha256 pattern.
     L2  The invalidation pipeline runs in the spec's order (coarse intersection -> exclusion replay
         -> residual -> policy) and OVER-includes by construction (m2 fires on under-inclusion).
     L3  "FAILURE TO REEVALUATE NEVER PRESERVES VALIDITY" enforced: m1 fires; a stale lease cannot
