@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_NOTIFY.TO-E",
+  "firm": "FABRIC",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/D7_NOTIFY.TO-SET.md",
+    "group": "W",
+    "vintage_commit": "7843544d22"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LAMBDA PLANE -- BUILD ONLY, NO APPLY OPENED. The queue this rides on top of now stands at: W-A's three commits + 4d5a92f4d7 + 78cd2b0695 + this. THE APPLY IS NOT A SINGLE CHANGE AND MUST NOT BE REQUESTED AS ONE. py_compile rc=0, 0 non-ASCII, 0 CRLF, commit-gate rc=0. Adds the client leg: resolve_client_link, client_notice, _client_recipients, notify_client, notify_client_isolated, and two named exceptions; wires an ack on submit_form and a pickup on claim_ticket (both AST-verified call sites).",
+      "artifact_covered_by": ["E-0", "E-1", "E-2", "E-3", "E-4"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_client_notify.py",
+      "kind": "test",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Never packaged (the zip carries one member). 19 tests across 5 criterion-named classes. A SEPARATE FILE from test_we_dl_notice.py on purpose: the client leg has a different field set, a different recipient rule and a different failure vocabulary, and sharing a file would invite the inheritance E-4 forbids.",
+      "artifact_covered_by": ["E-0", "E-1", "E-2", "E-3", "E-4"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/ticket-center/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DESIRED plane only: terraform validate rc=0, fmt canonical. NO plan, NO apply. Adds the CLIENT_LINK_MAP env slot, declared '{}'. ⛔ fmt -check FIRST RETURNED RC=3 (a misaligned '=' on the new key) -- caught only because the rc was captured rather than discarded into /dev/null, which is the same rc-discipline that caught a crashing comp-closure reading as rc=0 earlier in this session.",
+      "artifact_covered_by": ["E-0"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E-0",
+      "criterion_verbatim": "FIRM-AWARE LINK TARGET, exercised both directions: a firm WITH a reachable target gets the link; `inflection` gets NO link, not a default one. A firm-blind link must FAIL a test. STATE THE DENOMINATOR AS FIRMS, NAMED -- 3 of 4 firms (49financial, cottonwood, demo; NOT inflection) -- NEVER as a path count.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_client_notify.py -v  (class E0_FirmAwareLinkTarget; rc on python, unpiped)",
+      "output_evidence": "rc=0, 19 tests OK overall, 5 in E0_FirmAwareLinkTarget. DENOMINATOR AS FIRMS, NAMED: the map carries 3 OF 4 FIRMS -- 49financial, cottonwood, demo -- and NOT inflection, asserted directly (sorted(CLIENT_LINK_MAP) == the three, len == 3, inflection not in it). BOTH DIRECTIONS: each of the three firms WITH a target gets its link rendered (subtested per firm); inflection gets resolve_client_link -> None AND the body carries none of the mapped URLs AND contains no 'http' at all -- so no link of any kind survives, not merely not-that-one. NO DEFAULT ROW EXISTS TO FALL BACK TO: '*' asserted absent from the map, and an unmapped firm, an empty firm and None all resolve to None. FIRM-BLIND MUTANT: a body built the forbidden way (one URL for everyone, resolved without consulting the firm) does emit a link, and the real path for inflection does not -- the two are asserted unequal, so the test can distinguish the correct implementation from the forbidden one.",
+      "denominator": "5 tests in E0_FirmAwareLinkTarget; 3 of 4 firms mapped and subtested individually; 1 of 4 (inflection) asserted link-free; 3 unmapped-input shapes",
+      "status": "PASS",
+      "status_reason": "PLANE: code, resting on TO-B's CODE-plane measurement of the portal at DEV 483b896c (with the PROD-direction check and its stated residual). ⛔ THE ABSENCE OF A '*' ROW IS THE LOAD-BEARING PART AND IS EASY TO 'FIX' BY MISTAKE: a default row looks like robustness and silently re-introduces the exact defect -- an inflection user sent to a page that bounces them. That is why the no-default-row assertion is its own test rather than a comment."
+    },
+    {
+      "criterion_id": "E-1",
+      "criterion_verbatim": "submit-ack exercised on a real row.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_client_notify.py -v  (class E1_SubmitAck)",
+      "output_evidence": "rc=0, 2 tests. END-TO-END THROUGH THE REAL HANDLER, not against the notice function: a POST to /api/scoped/tickets/submit with a client authorizer context returns 201, exactly ONE client send is recorded, Destinations == [the client's own email from the authorizer context], the log carries WE_CLIENT_SENT kind=ack, and the raw MIME contains 'We received your request'. SCOPE ASSERTED AS WELL AS BEHAVIOUR: a POST to the CREATE route with an internal context returns 201 and records ZERO client sends -- the ack is on the SUBMIT path only.",
+      "denominator": "2 tests in E1_SubmitAck; 1 send asserted on submit; 0 sends asserted on create",
+      "status": "PASS",
+      "status_reason": "PLANE: code. THE SUBMIT-ONLY SCOPE IS A DECISION AND IS STATED AS ONE: on the submit path requester.email is SERVER-DERIVED from the authorizer context, so the ack goes to a verified session. On CREATE the requester is DISPLAY-GRADE -- a service subject may supply it -- so an ack there would mail an address the CALLER ASSERTED, which is a different and unruled act. Andrew ruled a submit acknowledgement; he did not rule mailing body-supplied addresses."
+    },
+    {
+      "criterion_id": "E-2",
+      "criterion_verbatim": "pickup notification exercised, claimer's FULL NAME rendered, degradation path named when the directory has no such row.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_client_notify.py -v  (class E2_PickupNotification)",
+      "output_evidence": "rc=0, 4 tests. FULL NAME RENDERED: 'Menachem Stein has picked up your request' asserted verbatim in the body. DEGRADATION EXERCISED across three empty shapes (None, '', '   '): each raises ClaimerNameUnresolved rather than sending. THE REFUSAL ITSELF IS ASSERTED NOT TO LEAK: the exception message is checked to contain NO internal email address -- a refusal that discloses what it refused to disclose would be worse than the send. FIRED FROM THE REAL CLAIM PATH: a submit-then-claim through lambda_handler returns 200 with status in_progress, and the log carries EITHER WE_CLIENT_SENT kind=pickup OR WE_CLIENT_NO_NAME kind=pickup -- asserted as a disjunction because the FakeTable's claimed_by depends on _directory_snapshot, and BOTH outcomes are correct while SILENCE IS NOT. That assertion is a reachability control in the A-3b shape: it proves the pickup leg was ENTERED rather than skipped.",
+      "denominator": "4 tests in E2_PickupNotification; 3 empty-name shapes subtested; 1 end-to-end claim; 2 acceptable outcomes, silence excluded",
+      "status": "PASS",
+      "status_reason": "PLANE: code. ⛔ THE DEGRADATION CHOICE IS A JUDGEMENT AND I AM FLAGGING IT RATHER THAN PRESENTING IT AS RULED. _directory_snapshot FAILS SOFT by design, so claimed_by can carry an email and no name. Three options, none free: (a) fall back to the claimer's EMAIL -- discloses an internal staffer's address to a client; (b) substitute 'an Opal advisor' -- answers with something Andrew did not rule; (c) REFUSE and send nothing -- the client gets nothing and the gap becomes a log line. I TOOK (c): it keeps the refuse-loudly discipline, never discloses an address he did not approve disclosing, and makes a directory gap VISIBLE. FOR 1.0.0_SA_CTO~Z: (b) is defensible and is a one-line change -- whether a client is better served by a vaguer message than by none is his call, not mine. The claim itself is unaffected either way."
+    },
+    {
+      "criterion_id": "E-3",
+      "criterion_verbatim": "SINGLE-RECIPIENT asserted structurally -- a mutant supplying two recipients must FAIL.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_client_notify.py -v  (class E3_SingleRecipientStructurally)",
+      "output_evidence": "rc=0, 4 tests. STRUCTURAL, NOT CONVENTIONAL: notify_client refuses on any non-singular destination list with a named ClientRecipientNotSingular, so the property is enforced at the send rather than trusted of the caller. NORMAL PATH: exactly 1 destination, equal to the requester's own email. THE MUTANT HITS THE REAL GUARD: _client_recipients is SPLIT FROM the guard specifically so a test can replace the derivation with a two-element list and have notify_client REFUSE -- had they been one expression, the only way to test the guard would have been to re-implement it in the test, which tests the copy. Two recipients -> raises, and NOTHING is sent to either address. Zero recipients -> also raises. THE ISOLATED WRAPPER GIVES IT ITS OWN TOKEN: WE_CLIENT_NOT_SINGULAR, asserted present, and WE_CLIENT_SEND_FAILED asserted ABSENT -- a leak averted is not an operational failure and must not be logged as one.",
+      "denominator": "4 tests in E3_SingleRecipientStructurally; 2 non-singular shapes (0 and 2) both refused; 4 distinct client tokens",
+      "status": "PASS",
+      "status_reason": "PLANE: code. THE SPLIT BETWEEN DERIVATION AND GUARD EXISTS ONLY TO MAKE THIS CRITERION TESTABLE AGAINST THE REAL CODE, and that is worth stating because it looks like gratuitous indirection otherwise. One firm's ticket reaching another is a cross-tenant leak, and 'we only ever pass one' is a convention the next edit breaks silently."
+    },
+    {
+      "criterion_id": "E-4",
+      "criterion_verbatim": "client field set re-derived, and the internal-only fields provably absent on a row where they are populated.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_client_notify.py -v  (class E4_ClientFieldSetReDerived)",
+      "output_evidence": "rc=0, 4 tests, asserted on a row where every internal-only field is POPULATED with a distinctive sentinel. 7 sentinels asserted absent from BOTH client bodies (ack and pickup), subtested per field per kind: description, source, created_by, status, assignee (an internal email address), the event actor and the audit note. RE-DERIVED, NOT INHERITED, ASSERTED AS A SET RELATION: CLIENT_NOTICE_FIELDS != DL_NOTICE_FIELDS, 'description' IS in the internal set and IS NOT in the client set, and the client's carried and prohibited sets are disjoint. THE CARRIED FIELDS DO RENDER: ticket_id, created_at and the client's own title all present. POSITIVE CONTROL ON THE ABSENCE CHECK: a synthetic leaky body containing a sentinel is confirmed to trip the same check, so the absence assertions can fire.",
+      "denominator": "4 tests; 7 internal-only sentinels x 2 message kinds = 14 absence subtests; 3 carried fields asserted present; 1 positive control",
+      "status": "PASS",
+      "status_reason": "PLANE: code. THE INTERESTING EXCLUSION IS `description`, AND IT IS A RE-DERIVATION RATHER THAN A TRIM OF TO-A's SET: the client AUTHORED it, so echoing it back adds nothing they lack while enlarging a surface that crosses a tenant boundary -- the record is the home. AND THE APPARENT CONTRADICTION IS NOT ONE: `assignee` (the claimer's internal EMAIL) is prohibited while the claimer's FULL NAME is ruled IN for the pickup. A name is what Andrew approved disclosing; an address is not."
+    },
+    {
+      "criterion_id": "E-5",
+      "criterion_verbatim": "proof instance VALID rc=0 positional, own-instance discrimination control.",
+      "method": "schema_validation",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_NOTIFY.TO-E_PROOF_OF_SPEC.json \"E-0,E-1,E-2,E-3,E-4,E-5\"",
+      "output_evidence": "See controls.mutant for the discrimination result, run ON THIS INSTANCE and anchor-asserted for REACHABILITY first (6 rows, all PASS) so the mutated rule is demonstrably firable on this instance's shape rather than merely present. Positional form: the bare 1-arg form returns VALID rc=0 with COVERAGE UNCHECKED.",
+      "denominator": "6 of 6 criterion ids carried",
+      "status": "PASS",
+      "status_reason": "PLANE: none -- about the deliverable. Own-instance per 2.0.0_SA_COO~Z's standing requirement across all six TOs."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THREE mutants, each aimed at the assertion built for it, plus the checker control. (1) E-0: a FIRM-BLIND body -- one URL for everyone, resolved without consulting the firm -- asserted to differ from what the real path produces for inflection. (2) E-3: _client_recipients replaced with a TWO-element list, so the REAL guard in notify_client is what refuses (the derivation is split from the guard precisely to make this possible). (3) E-4: a synthetic leaky body carrying an internal-only sentinel, to prove the absence check can fire. CHECKER: output_evidence blanked on E-0 in a scratchpad copy, anchor-asserted first (6 rows, all PASS, all evidence non-empty, exactly 1 E-0 row).",
+      "expected": "Each mutant kills the assertion built for it and leaves the others alone; the two-recipient mutant must RAISE and send nothing; the checker mutant returns rc=1 INVALID naming the mutated row.",
+      "observed": "All three in-battery mutants fire inside a 19-test suite that ends OK rc=0 -- each is exercised in its own test, and the E-3 mutant additionally asserts that NOTHING was sent to either address, so the refusal is not merely an exception raised after a partial send. Checker mutant result recorded in the session log with its captured output.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "19 tests run repeatedly with identical inputs; setUp saves and tearDown restores CLIENT_LINK_MAP, the SES client, the table, _client_recipients AND the internal leg's TICKET_DL_MAP / TICKET_DEEP_LINK_BASE.",
+      "observed": "Identical every run: client 19 OK, W-E 27 OK, authz 15 OK, intake 42 + 25 subtests -- all rc=0 captured on the tool. THE INTERNAL LEG IS DELIBERATELY LEFT UNCONFIGURED IN THIS BATTERY'S setUp so it refuses quietly: otherwise an internal send would land in the same SES stub and a client-count assertion ('exactly one send') would be measuring both legs at once. _client_recipients is in the restore set because E-3 monkeypatches it, and a mutant left installed would make a LATER single-recipient assertion pass or fail by execution order.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Populating CLIENT_LINK_MAP with real portal URLs.",
+      "reason": "Config, and it depends on the portal's public base URL -- the same class as TICKET_DEEP_LINK_BASE. Declared '{}' in TF so the slot is visible; with it empty every firm resolves to None and no link is emitted, which is the safe direction rather than the broken one."
+    },
+    {
+      "item": "Any real send to a client.",
+      "reason": "Build only, no apply. Nothing here has delivered a message to anyone; the SES client is a stub in every test."
+    },
+    {
+      "item": "A completion notification to the client.",
+      "reason": "NOT RULED. Andrew named the submit-ack and the pickup. Adding a third client email on the pattern would be inventing scope -- and the internal side's explicit 'no follow-ups' shows he thinks about these individually rather than as a family."
+    },
+    {
+      "item": "Re-deriving TO-B's portal measurement.",
+      "reason": "TO-B measured and was accepted; E-0 consumes it. Its CODE-plane bound rides forward unchanged: branch agreement is not proof the deployed bundle was built from that HEAD."
+    }
+  ],
+  "surprises": [
+    "terraform fmt -check RETURNED RC=3 ON MY FIRST TF EDIT -- a misaligned '=' on the new CLIENT_LINK_MAP key. I had redirected fmt's output to /dev/null and would have missed it entirely had I not captured the rc separately. Same rc-discipline that caught a crashing comp-closure reading as rc=0 earlier in this session; fixed with terraform fmt, re-checked to RC=0.",
+    "THE PICKUP LEG'S END-TO-END TEST HAD TO BE WRITTEN AS A DISJUNCTION, AND THAT IS THE HONEST FORM RATHER THAN A WEAKNESS: the FakeTable's claimed_by depends on what _directory_snapshot produced, so the test asserts EITHER a send OR a named no-name refusal, and excludes SILENCE. Asserting a send would have made the test depend on a stand-in's fidelity to a live directory; asserting nothing would have let a skipped leg pass. It is A-3b's reachability shape arriving on a different criterion.",
+    "MY OWN HAND-WRITTEN MESSAGE TIMESTAMPS DRIFT +2 TO +52 MINUTES (mean +19.1 over 17 sends), confirming 2.0.0_SA_COO~Z's fabric-wide ratchet at a third seat. Remedy adopted mechanically: `date -u` read in a PRIOR tool call, then written -- which also satisfies the new completed-act law. Reported once and not chased further."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-21/laneZ_toe_client_leg_0840-0900Z.md",
+  "compiler_tools": [
+    {
+      "tool": "python ast (call-site verification)",
+      "invocation": "walk every FunctionDef for Call nodes naming notify_client_isolated, and print the enclosing function + the literal kind argument",
+      "result": "submit_form -> ('ack'), claim_ticket -> ('pickup'). Verified by AST rather than by grep because the question is WHICH HANDLER calls it with WHICH KIND, and a text match cannot attribute a call to its enclosing function."
+    },
+    {
+      "tool": "terraform fmt / validate",
+      "invocation": "terraform fmt -check main.tf (rc=3) ; terraform fmt main.tf ; re-check (rc=0) ; terraform validate (rc=0)",
+      "result": "See surprises. NO plan, NO apply -- the only terraform run was formatting and schema validation."
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <lambda_function.py> <test_client_notify.py>",
+      "result": "rc=0 clean for 2 files; handler 0 non-ASCII / 0 CRLF verified separately by a byte scan, which is the control that has caught three glyphs this session where the gate's WARN-only lint would have printed beneath 'All checks passed!'."
+    },
+    {
+      "tool": "test batteries x4 (full regression after the client leg landed)",
+      "invocation": "test_client_notify.py (19) ; test_we_dl_notice.py (27) ; test_authz_matrix.py (15) ; pytest integrations/ticketing/intake/tests/ (42 + 25 subtests)",
+      "result": "rc=0 on all four, each captured on the tool. The client leg touches submit_form and claim_ticket, both covered by the pre-existing authz battery, so its 15/15 is the no-regression evidence for a path the new code now runs through."
+    },
+    {
+      "tool": "proof-of-spec-check (positional) + own-instance mutant",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py <this file> \"E-0,E-1,E-2,E-3,E-4,E-5\" ; then the same on a scratchpad copy with E-0's output_evidence blanked, anchor-asserted first",
+      "result": "See controls.mutant and the session log."
+    }
+  ]
+}

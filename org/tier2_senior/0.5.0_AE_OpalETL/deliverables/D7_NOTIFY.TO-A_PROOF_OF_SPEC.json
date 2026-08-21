@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_NOTIFY.TO-A",
+  "firm": "FABRIC",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/D7_NOTIFY.TO-SET.md",
+    "group": "W",
+    "vintage_commit": "17cb81d389"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LAMBDA PLANE -- BUILD ONLY, NO APPLY OPENED, and it lands ON TOP OF AN ALREADY-UNAPPLIED QUEUE. Measured at the 20260821T0325Z atom-decomp run (accepted msg 4185, re-derived at the gate by a different path): the executing opal-ticket-api is built from 1fd9ef2750, and the <module-level region> -- where this work's config and imports live -- was ALREADY DIVERGED. THE APPLY THEREFORE CANNOT BE REQUESTED AS A CLEAN SINGLE-CHANGE APPLY: it carries W-A's queue plus 4d5a92f4d7 plus this. Stated at 1.0.0_SA_CTO~Z's standing instruction so the request is framed right rather than corrected afterwards. Hygiene: 0 non-ASCII bytes, 0 CRLF pairs, py_compile rc=0, commit-gate rc=0.",
+      "artifact_covered_by": ["A-1", "A-2", "A-3", "A-3b", "A-4", "A-5", "A-6"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py",
+      "kind": "test",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Never packaged: build-and-upload.sh zips exactly one member (lambda_function.py). 27 tests across 6 criterion-named classes, reusing test_authz_matrix's FakeTable, event builder and authorizer contexts rather than re-declaring them.",
+      "artifact_covered_by": ["A-1", "A-2", "A-3", "A-3b", "A-4", "A-5", "A-6"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/ticket-center/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DESIRED plane only: terraform fmt -check rc=0 and terraform validate rc=0 (v1.15.8 on PATH; .tools/terraform.exe does not exist on this box). NO plan and NO apply were run. Replaces the TICKET_DL scalar slot with TICKET_DL_MAP (a firm-keyed map, declared '{}' = the configured refusal) and re-points the TICKET_DEEP_LINK_BASE comment from audience-dependent to Q3/link-target-dependent.",
+      "artifact_covered_by": ["A-2", "A-5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "A-1",
+      "criterion_verbatim": "FIELD SET, exercised on a real row: the released set renders; a mutant adding `status` FAILS a test asserting the prohibited tuple is absent.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py -v  (class A1_FieldSet; rc on python, unpiped)",
+      "output_evidence": "rc=0, 27 tests OK overall, 4 in A1_FieldSet. RELEASED SET RENDERS, exercised on a fully-populated row: ticket_id, ticket_type, created_at, title, requester name/email/firm, and description all present. NO STATE REACHES THE BODY: 8 state sentinels subtested absent (SENTINEL_SOURCE/CREATEDBY/STATUS/ASSIGNEE/CLAIMEDBY/CLAIMEDNAME/ACTOR/AUDITNOTE). THE CRITERION'S OWN MUTANT: test_MUTANT_adding_status_to_the_field_set_FAILS_the_prohibition appends 'status' to DL_NOTICE_FIELDS and asserts the prohibition check then SEES SENTINEL_STATUS_do_not_leak -- i.e. the guard fires on exactly the misreading the ruling warns about ('we already relaxed WE-4'), and DL_NOTICE_FIELDS is restored in a finally. Plus a disjointness assertion: DL_NOTICE_FIELDS and DL_NOTICE_PROHIBITED share zero members by declaration.",
+      "denominator": "4 tests in A1_FieldSet; 8 released fields asserted present; 8 of 8 state sentinels asserted absent",
+      "status": "PASS",
+      "status_reason": "PLANE: code (lambda plane, built-not-deployed). THE PRINCIPLE IS SHARPER, NOT RELAXED, AND THE CODE SAYS SO IN FRONT OF THE FIELD SET: `description` and `title` are IMMUTABLE INTAKE CONTENT -- authored once by the requester, never changing, so there is nothing for them to diverge from and they cannot make the email a second home. events/source/created_by/status/claimed_by/assignee ARE STATE and go stale the instant someone claims the ticket. The rule is not 'internal means send everything'; it is THE INTAKE SNAPSHOT IN FULL AND NO STATE."
+    },
+    {
+      "criterion_id": "A-2",
+      "criterion_verbatim": "SEAM: `notify_dl` takes firm and calls `resolve_recipients`; no module-scope address is consumed at the send site (assert by AST, not by reading).",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py -v  (class A2_Seam)",
+      "output_evidence": "rc=0, 4 tests. BEHAVIOURAL: a spy on resolve_recipients records exactly ['inflection'] -- the item's own firm, taken from requester.firm. AST, NOT READING, as the criterion demands: the notify_dl FunctionDef's Name nodes are walked; 'TICKET_DL' is asserted ABSENT (the forbidden shipped shape) and 'resolve_recipients' asserted PRESENT both as a Name and as a Call func. POSITIVE CONTROL ON THE AST GUARD ITSELF: the same walk over a synthetic mutant module that DOES read a module-scope TICKET_DL inside notify_dl finds it -- so the absence in the real module is a measured absence, not a check that cannot fire. AND THE SEAM IS EXERCISED AS A SEAM: test_a_per_firm_split_changes_CONFIG_ONLY swaps {'*': DL} for {'*': DL, '49financial': OTHER}, sends twice through the identical code path, and gets OTHER for the 49financial row and DL for the inflection row. A split is rows, not code.",
+      "denominator": "4 tests in A2_Seam; 1 spy assertion; 2 AST assertions + 1 positive control; 2 sends over one code path",
+      "status": "PASS",
+      "status_reason": "PLANE: code. THE FORBIDDEN SHAPE WAS MINE, SHIPPED AT 4d5a92f4d7 -- TICKET_DL read at module scope and consumed inline at Destinations=[TICKET_DL], with no firm parameter anywhere. I surfaced that against my own accepted stage before this TO was written; the AST assertion here is what stops it returning."
+    },
+    {
+      "criterion_id": "A-3",
+      "criterion_verbatim": "THE THREE CELLS, each exercised, both directions: unconfigured -> `DLAddressUnset`; unknown-firm-with-default -> default; no-match-no-default -> `DLAddressUnset`. A resolver returning `[]` without raising must FAIL a test.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py -v  (class A3_TheThreeCells)",
+      "output_evidence": "rc=0, 5 tests. CELL 1 UNCONFIGURED: empty map -> DLAddressUnset, AND the stub SES recorded ZERO sends (refusing must not half-attempt). CELL 2 UNKNOWN-FIRM-WITH-DEFAULT: an unconfigured firm name and an empty firm string BOTH resolve to the '*' row -- today that is every firm, the normal path. CELL 3 ROWS-BUT-NO-MATCH-NO-DEFAULT: a map holding only '49financial' refuses for 'inflection' AND STILL RESOLVES for '49financial' -- both directions in one test, so the refusal is not a resolver that refuses everything. THE EMPTY-SET GUARD, WHICH IS THE ONE THE CRITERION NAMES: [] , [''] and ['   '] each raise DLAddressUnset rather than returning an empty recipient list. A malformed JSON map is treated as UNCONFIGURED rather than silently empty, so a typo in the env cannot present as 'nobody set it up yet'.",
+      "denominator": "5 tests in A3_TheThreeCells; 3 of 3 ruled cells exercised; both directions on cell 3; 3 subtested empty-set shapes",
+      "status": "PASS",
+      "status_reason": "PLANE: code. WE-5's REFUSE-IF-UNSET RE-POINTED AT THE RESOLVER RATHER THAN RETIRING WITH THE OLD STRING -- the property survived the refactor because it was carried deliberately, and it was carried deliberately because I flagged before building that a refactor quietly drops exactly this kind of guard."
+    },
+    {
+      "criterion_id": "A-3b",
+      "criterion_verbatim": "REACHABILITY CONTROL ON THE REFUSAL PATH. Prove the refusing call site was ENTERED, not merely that an exception surfaced -- an invocation assertion on `resolve_recipients` (spy/counter) in the refusing case, plus a positive control on the SAME call site: with a configured map, the identical path SENDS. A refusal that cannot be shown to have been reached is not evidence of a working pipe; it is evidence of silence.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py -v  (class A3b_RefusalPathReachability)",
+      "output_evidence": "rc=0, 3 tests. REFUSING CASE, ENTRY PROVEN: with an empty map, notify_dl raises DLAddressUnset AND the spy records ['inflection'] -- the resolver was ENTERED with the item's firm. Zero sends. POSITIVE CONTROL ON THE SAME CALL SITE: same spy, same path, only the config differs -- resolver entered with ['inflection'], MessageId returned, exactly 1 send, Destinations == the configured row. THE DISCRIMINATOR MADE EXPLICIT: test_a_pipe_that_never_reaches_the_resolver_FAILS_the_reachability_assertion models a send path that refuses WITHOUT entering the resolver; it satisfies a plain assertRaises identically and the spy records []. That is the state the first test rules out, and it is the whole reason the spy exists rather than an assertRaises alone.",
+      "denominator": "3 tests; 1 refusing entry assertion; 1 positive control on the same call site; 1 explicit never-reached counter-case",
+      "status": "PASS",
+      "status_reason": "PLANE: code. THIS CRITERION EXISTS BECAUSE 2.0.0_SA_COO~Z FOUND THE GAP IN CRITERIA THE GATE HAD AUTHORED FIFTEEN MINUTES EARLIER: with membership deferred by Andrew, a REFUSAL is the acceptance surface, and a refusal test passes identically whether the pipe ran and found nothing or was never reached. Those two are byte-identical in a green test and only an entry assertion separates them."
+    },
+    {
+      "criterion_id": "A-4",
+      "criterion_verbatim": "WE-6 NO-REGRESSION PRESERVED: the email leg erroring still yields 201 + a buzz; the mutant repointing at the unisolated sender still makes the handler RAISE.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_authz_matrix.py ; PYTHONIOENCODING=utf-8 python -m pytest integrations/ticketing/intake/tests/ -q ; then class A4_NoRegression",
+      "output_evidence": "PRE-EXISTING BATTERIES GREEN AFTER THE REFACTOR: authz matrix rc=0 '15 tests OK'; intake package rc=0 '42 passed, 25 subtests passed'. ISOLATION PRESERVED, 5 tests: SES raising a distinct _Boom still yields 201 on SUBMIT with the row written (len(_table.items)==1), 201 on CREATE, and 201 with an UNCONFIGURED map -- the state the estate is actually in today. DISTINCT TOKENS PRESERVED: WE_DL_SEND_FAILED and WE_DL_UNCONFIGURED each asserted present in their own case and ABSENT in the other's. THE MUTANT STILL FIRES: repointing the write path at the unisolated notify_dl makes lambda_handler RAISE _Boom, and restoring the boundary in a finally returns the identical call to 201 -- so the mutant was the cause, not a coincidence.",
+      "denominator": "15 + 42 pre-existing tests re-run green (0 failures); 5 isolation tests incl. 1 boundary mutant; 0 modified paths under integrations/",
+      "status": "PASS",
+      "status_reason": "PLANE: code (lambda) + runner plane for the no-regression half. THE SAME LIMB IS STILL THE WEAK ONE AND IS NAMED AGAIN RATHER THAN QUIETLY INHERITED: 'and a buzz' was NOT observed live. What is established is its PRECONDITION (the row is written, asserted under SES failure) plus the runner being byte-unchanged by this work and its own 42-test battery green. A live buzz needs an applied deploy."
+    },
+    {
+      "criterion_id": "A-5",
+      "criterion_verbatim": "SUPERSESSION: L469 and L13 corrected; L132/L135 byte-unchanged (assert).",
+      "method": "test_suite",
+      "invocation": "class A5_Supersession + a byte-level diff of the two protected lines against git show HEAD:<file>",
+      "output_evidence": "CORRECTED: the notify_dl_isolated docstring no longer says 'nobody has set the DL yet (and the audience is open)' -- it now names the RULED audience and covers all three refusal cells, since an unknown firm with no default refuses there too. The test module docstring no longer gives the open audience as the reason WE-2/WE-3 are untested; the real blocker is that no recipient list exists, which is Andrew's deferral. PROTECTED PAIR BYTE-UNCHANGED, ASSERTED TWICE: A5_Supersession asserts both exact strings are still present in the source, and a separate byte-level comparison against git show HEAD returns IDENTICAL=True for both. NO LINE STILL CLAIMS THE AUDIENCE IS OPEN: 'and the audience is open' and 'OPEN SOVEREIGN QUESTION' both assert absent. TF comment re-pointed from audience-dependent to Q3/link-target-dependent.",
+      "denominator": "2 tests in A5_Supersession; 2 of 2 protected lines verified IDENTICAL; 2 stale phrases asserted absent",
+      "status": "PASS",
+      "status_reason": "PLANE: code. ⛔ I BROKE THIS CRITERION FIRST AND MY OWN ASSERTION CAUGHT IT. My module-region rewrite replaced the whole WE-4-PROHIBITED comment block -- which DELETED both protected lines. I did not do a blanket pass over the word 'audience'; I replaced a block and wrote new prose, and the EFFECT WAS IDENTICAL to the thing the criterion forbids. Recovered byte-for-byte from HEAD and re-verified. The lesson is not 'do not sweep on a keyword' but 'a rewrite deletes as surely as a sweep', which is why A-5's assertion is on the BYTES and not on the intent."
+    },
+    {
+      "criterion_id": "A-6",
+      "criterion_verbatim": "SUBJECT + CTA exercised on a real row; link target cites TO-B's measurement.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py -v  (class A6_SubjectAndCTA)",
+      "output_evidence": "rc=0, 4 tests, exercised on the fully-populated row. SUBJECT: exactly '[inflection] Please update the address on file' -- firm first, so it sorts and filters. CTA: the URL is asserted to be a WHOLE LINE of the body (present in body.splitlines(), not merely a substring), and the line above it is asserted to end in ':' -- i.e. a bare URL alone on its own line, introduced by a CTA line, with no label and no markup. LINK TARGET CITES TO-B: the body carries the LIST PAGE base and is asserted NOT to carry base + '/' + ticket_id, because TO-B measured that no per-ticket route exists (25 routes, 2 wildcards neither per-ticket, no query-param reader in the page). An unset base still REFUSES rather than emitting a guessed route.",
+      "denominator": "4 tests in A6_SubjectAndCTA; 1 subject equality; 3 CTA assertions incl. the negative deep-link assertion",
+      "status": "PASS",
+      "status_reason": "PLANE: code. THE BARE-URL FORM IS RULED, NOT CHOSEN, AND IT RESTS ON TO-C: every outbound path in this estate is PLAIN TEXT, so a bare URL autolinks in every major mail client and cannot render broken, whereas a labelled link needs a second HTML body -- and two bodies for one message is the second-home defect one surface over. ⚠ THE TWO SURFACES ARE NOT HARMONISED AND MUST NOT BE: a bare URL autolinks in mail and does NOT necessarily in Teams. Andrew's 'properly linked to be clickable' was said ABOUT TEAMS and does not import onto the email leg."
+    },
+    {
+      "criterion_id": "A-7",
+      "criterion_verbatim": "Proof instance VALID rc=0 POSITIONAL, ids A-1,A-2,A-3,A-3b,A-4,A-5,A-6,A-7 (eight, not seven -- A-3b was added after the first cut), PYTHONIOENCODING=utf-8, rc unpiped. A bare-form VALID is not coverage evidence. Checker-discrimination control run ON THIS INSTANCE -- a sibling's run does not discharge it.",
+      "method": "schema_validation",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_NOTIFY.TO-A_PROOF_OF_SPEC.json \"A-1,A-2,A-3,A-3b,A-4,A-5,A-6,A-7\"",
+      "output_evidence": "See controls.mutant for the discrimination result, run ON THIS INSTANCE. EIGHT ids passed, not seven: the criterion states the count explicitly because the gate added A-3b and left <expected_criteria> at seven for one commit -- had that stood, the reachability control would have been the one criterion the coverage layer could not see, either absent-and-unexpected or present-and-flagged. A criterion set is itself an enumerated schema.",
+      "denominator": "8 of 8 criterion ids carried; expected set = the TO's <expected_criteria> at 17cb81d389",
+      "status": "PASS",
+      "status_reason": "PLANE: none -- about the deliverable. Own-instance discrimination per 2.0.0_SA_COO~Z's standing requirement across all six TOs."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "FOUR mutants, one per class of claim, each aimed at the assertion designed for it. (1) A-1: append 'status' to DL_NOTICE_FIELDS and confirm the prohibition check then sees the state sentinel. (2) A-2: a synthetic module that DOES read a module-scope TICKET_DL inside notify_dl, to prove the AST guard can fire. (3) A-3b: a send path that refuses WITHOUT entering the resolver, to prove the spy discriminates where assertRaises cannot. (4) A-4: repoint the write path at the unisolated sender -- literally 'share the exception boundary'. Plus the checker-discrimination mutant on THIS instance, anchor-asserted first (exactly 8 rows, all PASS, all output_evidence non-empty, exactly 1 A-1 row).",
+      "expected": "Each mutant must kill the assertion built for it and leave the others alone; the isolation mutant must make the handler RAISE and the boundary's restoration must return it to 201; the checker mutant must return rc=1 INVALID naming the mutated row.",
+      "observed": "All four fired as designed within a 27-test battery that ends OK rc=0 -- each mutant is exercised inside its own test and restored in a finally, so the suite proves both the fire and the restoration. Checker mutant: see the session log for the captured rc=1 / violations output. ⛔ AND A FIFTH, UNPLANNED CONTROL FIRED ON ME AND IS THE MOST USEFUL: my own A-5 byte-comparison caught that my module-region rewrite had DELETED both protected lines. The criterion's own assertion, written before the edit, is what found it.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "27 tests run repeatedly with identical inputs; setUp saves and tearDown restores TICKET_DL_MAP, TICKET_DEEP_LINK_BASE, the SES client, the table AND resolve_recipients itself, so no test can leak configuration or a spy into another.",
+      "observed": "Identical every run: 27 OK rc=0; authz 15 OK; intake 42 passed + 25 subtests. THE RESOLVER IS IN THE SAVE/RESTORE SET DELIBERATELY: A-2 and A-3b both monkeypatch resolve_recipients, and a spy left installed would make a LATER refusal assertion pass or fail by execution order -- an order-dependent battery reads as stable until a test is added.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Configuring TICKET_DL_MAP with real addresses.",
+      "reason": "Andrew deferred membership: 'dont worry about whos on the list for now we can add that later, just want all the pipes done'. The pipe is complete and REFUSES -- that refusal is the acceptance surface, and A-3b proves the refusing path is actually entered."
+    },
+    {
+      "item": "WE-2 and WE-3 (latency measured from created_at to send; sender verified ON THE WIRE).",
+      "reason": "Both need a real send to a real list. Deferring the list defers the PROOF, never the BUILD -- and pipe-completion here must NOT be read as their discharge. They remain UNCOMPUTABLE-BY-CONSTRUCTION on the W-E instance."
+    },
+    {
+      "item": "The apply: the SES grant, the env slots, and the new handler bytes.",
+      "reason": "Lambda plane; the apply leg is the laptop's under the envelope law. No plan was run -- only read-only terraform (fmt, validate)."
+    },
+    {
+      "item": "The W-F import edge.",
+      "reason": "TO-F's last act. Nothing in A-E writes it, and on the runner plane that line is a production deploy inside 5 minutes with no apply step."
+    },
+    {
+      "item": "A multipart/alternative HTML body for a labelled CTA link.",
+      "reason": "Ruled out for v1 by 1.0.0_SA_CTO~Z: a labelled link needs a second body, and two bodies for one message is the second-home defect one surface over. Carded to Andrew, not built."
+    }
+  ],
+  "surprises": [
+    "I DELETED THE TWO LINES THE CRITERION EXPLICITLY PROTECTS, AND MY OWN ASSERTION CAUGHT IT. A-5 names L132/L135 as byte-unchanged. My module-region rewrite replaced the whole WE-4-PROHIBITED comment block and took both with it. I had not done a blanket keyword pass -- I replaced a block and wrote new prose -- and THE EFFECT WAS IDENTICAL TO THE THING FORBIDDEN. Recovered byte-for-byte from HEAD and re-verified IDENTICAL=True. A rewrite deletes as surely as a sweep, which is why A-5 asserts on the bytes rather than on the intent.",
+    "THIRD U+26D4 GLYPH OF THE SESSION INTO A FILE THAT RUNS ON AWS, caught again by an explicit byte-level scan rather than by the commit-gate (whose non-ASCII lint is WARN-only and returns 0 under an 'All checks passed!' summary). Stripped to 0 non-ASCII / 0 CRLF before the gate ran. Recorded in-band and not chased, per the standing instruction.",
+    "MY TWO GATEWAY COMMITS REMAIN UNDEPLOYED AND ARE UNRELATED TO THIS TO -- noted only because the MSTR relay closed the opal-gateway TF defect and the gateway's public IP moved (3.83.108.63 -> 13.221.151.249). Nothing in this build pins a gateway address; the W-E transport is SES on the Lambda's own IAM role precisely so it inherits no gateway dependency. No action taken."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-21/laneZ_toa_we_recut_0830-0900Z.md",
+  "compiler_tools": [
+    {
+      "tool": "python ast (in-test assertions, not a report)",
+      "invocation": "walk the notify_dl FunctionDef's Name and Call nodes inside the test battery",
+      "result": "A-2 asserted BY AST as the criterion demands: TICKET_DL absent, resolve_recipients present as both Name and Call. Positive control on the guard via a synthetic mutant module. An AST assertion rather than a text search because the forbidden thing is a READ AT A CALL SITE, and text cannot tell a live read from a mention in a comment."
+    },
+    {
+      "tool": "terraform fmt / validate (v1.15.8 on PATH)",
+      "invocation": "terraform fmt -check -diff main.tf ; terraform validate",
+      "result": "rc=0 both. NO plan, NO apply. Note carried from the W-E instance: CLAUDE.md names .tools/terraform.exe and that file does not exist on this box."
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <lambda_function.py> <test_we_dl_notice.py>",
+      "result": "rc=0 clean for 2 files -- run AFTER the non-ASCII strip, so it never saw the glyph. Its non-ASCII lint is scoped infra/** + .tools/** and WOULD have named the codepoint and line, but it is WARN-only and returns 0, so the warning prints beneath 'All checks passed!'. The byte-level scan is what actually caught it, for the third time this session."
+    },
+    {
+      "tool": "test batteries x3",
+      "invocation": "test_we_dl_notice.py (27) ; test_authz_matrix.py (15) ; pytest integrations/ticketing/intake/tests/ (42 + 25 subtests)",
+      "result": "rc=0 on all three, rc captured on the tool and never after a pipe. The 15 and the 42 are the A-4 no-regression evidence and were untouched by this work."
+    },
+    {
+      "tool": "proof-of-spec-check (positional, 8 ids) + own-instance mutant",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py <this file> \"A-1,A-2,A-3,A-3b,A-4,A-5,A-6,A-7\" ; then the same on a scratchpad copy with A-1's output_evidence blanked, anchor-asserted first",
+      "result": "See controls.mutant and the session log. Eight ids, not seven -- the gate's own near-miss is why the criterion states the count."
+    }
+  ]
+}

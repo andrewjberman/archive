@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_NOTIFY.TO-D",
+  "firm": "FABRIC",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/D7_NOTIFY.TO-SET.md",
+    "group": "W",
+    "vintage_commit": "a75eb92c83"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/teams_format.py",
+      "kind": "script",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EC2 PLANE -- BUILD ONLY. The gateway deploys via safe-ec2-deploy (Rule 7) to /opt/opal-gateway (EC2_MANIFEST remote_path, post OPAL_GWRENAME 2026-08-15); a repo edit here is not a deploy. tools.py was ALREADY 2 commits ahead of the manifest's recorded deployed_commit 5a1cc39e8e before this work, both mine and both build-only, so this joins a queue rather than opening a leg. NEW MODULE, not a modification of an existing formatter: comp-find -i 'def format_|formatter|wrap|paragraph' over the gateway app returned 6 hits / 42 files, ALL unrelated (ASGI receive-wrapping and middleware) -- build-ladder rung 2 checked and genuinely empty before writing.",
+      "artifact_covered_by": ["D-1", "D-2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+      "kind": "script",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EC2 PLANE -- BUILD ONLY, same queue. Two lines added: format_for_teams applied at BOTH Teams send sites, plus the import. contentType is UNCHANGED at 'text' on both -- that is D-HTML's act and a different plane.",
+      "artifact_covered_by": ["D-2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_teams_format.py",
+      "kind": "test",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Never deployed: safe-ec2-deploy ships the app tree, and this sits outside it. 14 tests -- 7 properties, 4 controls on those properties, 3 send-path assertions. Loaded by path because importing `app` wholesale would drag boto3/FastAPI into a test that needs neither.",
+      "artifact_covered_by": ["D-1", "D-2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D-1",
+      "criterion_verbatim": "the standard stated as a testable property, not prose advice.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/ec2/opal-gateway/tests/test_teams_format.py -v  (classes D1_TestableProperties, D1_ControlsOnTheProperties; rc on python, unpiped)",
+      "output_evidence": "rc=0, 14 tests OK. SEVEN PROPERTIES, each asserted on the OUTPUT for arbitrary input rather than on one fixture looking tidy: (1) CONTENT IS NEVER LOST -- content_tokens(format(x)) == content_tokens(x), order included; (2) no paragraph exceeds MAX_SENTENCES_PER_PARAGRAPH=3; (3) paragraphs separated by exactly one blank line, never three consecutive newlines, no leading/trailing newline; (4) a SENTENCE-ENDING url is alone on its line; (5) the declared BOUND -- a genuinely mid-sentence url is left inline and its sentence stays whole; (6) idempotent, format(format(x)) == format(x); (7) all of the above hold on degenerate input ('', '   ', '\\n\\n\\n', 'one', a bare url, 'a: b'). FOUR CONTROLS, because a property that cannot fail is not a property: the wall-of-text fixture is asserted to ACTUALLY violate the cap before formatting (5 sentences in 1 block) and its url asserted to START OUT buried mid-line; a content-losing formatter is shown to FAIL the conservation law; and raising the cap to 99 is shown to leave the wall intact -- so the cap test is measuring the cap.",
+      "denominator": "7 properties x 2 unrelated message shapes + 6 degenerate inputs; 4 controls; 14 tests total",
+      "status": "PASS",
+      "status_reason": "PLANE: code (EC2 plane, built-not-deployed). THE CONSERVATION LAW IS DELIBERATELY RANKED ABOVE THE OTHERS and the module says so: a formatter that silently drops a sentence is worse than the wall of text it replaces, because the wall is legible and the loss is invisible. Every other property is allowed to degrade before that one does -- which is exactly what happened when the url rule was narrowed."
+    },
+    {
+      "criterion_id": "D-2",
+      "criterion_verbatim": "applied at the SEND PATH so every Teams message inherits it -- exercised on at least two unrelated message shapes.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/ec2/opal-gateway/tests/test_teams_format.py -v  (class D2_AppliedAtTheSendPath, AST over tools.py)",
+      "output_evidence": "rc=0, 3 tests. AT THE SEND PATH, ASSERTED BY AST: both send_chat_message and send_channel_message contain a Call to format_for_teams -- checked as {send_chat_message: True, send_channel_message: True}, so the assertion names both rather than passing on one. The formatter is asserted imported at module scope. contentType asserted UNCHANGED: exactly 2 occurrences of '\"contentType\": \"text\"' remain, so D-PROSE demonstrably did not touch D-HTML's surface. TWO UNRELATED SHAPES, deliberately not both ticket-shaped: a Bloomberg-pull status wall (5 sentences, one block, url buried mid-sentence) and a ticket notice (label line + sentence-ending url). Every property is subtested against both.",
+      "denominator": "2 of 2 Teams send functions carry the call; 2 unrelated message shapes; 2 contentType literals asserted unchanged",
+      "status": "PASS",
+      "status_reason": "PLANE: code. PLACEMENT WAS THE POINT OF THE CRITERION AND IT IS WHY THIS IS NOT IN THE TICKET NOTIFIER: building the standard inside one notifier would have yielded ONE well-formatted surface and an unchanged agent, and the next surface would rebuild it. At the send path, the concierge replies, the ticket buzzes and every future caller inherit it without knowing it exists."
+    },
+    {
+      "criterion_id": "D-3",
+      "criterion_verbatim": "hyperlinks clickable, verified against TO-C's measured renderer -- not against the documentation.",
+      "method": "manual_read_with_citation",
+      "invocation": "TO-C's measurement (tools.py:617/:658 hardcode contentType 'text'; census 8 hits / 71 files) -- no post was made and no Graph call was issued",
+      "output_evidence": "CANNOT BE SATISFIED UNDER D-PROSE, AND THE CRITERION'S OWN WORDING IS WHY. It says verify against TO-C's MEASURED RENDERER rather than against the documentation -- and what TO-C measured is that the send path posts contentType 'text', under which the content is NOT parsed as markup. So a markup hyperlink is not clickable on the current renderer, and no formatting change can make it so: it needs contentType 'html', which is D-HTML, a gateway code change riding safe-ec2-deploy. WHAT THIS TO DOES INSTEAD, and it is a lesser thing stated as one: a SENTENCE-ENDING url is placed ALONE ON ITS LINE, which is the best available form under 'text'. THAT IS NOT A CLICKABILITY CLAIM. Whether the Teams client auto-linkifies a bare url is UNMEASURED -- observable only by posting, which TO-C was explicitly told not to do and did not.",
+      "denominator": "0 posts made; 0 Graph calls; 2 of 2 send sites confirmed still posting 'text'",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "PLANE: renderer/live. NAMED LATER RUN: D-HTML -- the contentType change, built and applied here under Rule 26 on Andrew's separate word, with the gateway-bounce cost stated first. ⛔ AND THIS ROW IS THE WHOLE JUSTIFICATION FOR THE J2 SEQUENCING: had the standard been written before TO-C measured, it would have specified link MARKUP that the renderer discards, and it would have passed review because it matched the documentation. The criterion asks for the renderer, not the docs, precisely so that could not happen. TWO THINGS MUST NOT BE READ INTO THIS ROW: it does not say a bare url is unclickable, and it does not say the formatting is worthless -- D-1 and D-2 are the readability half of Andrew's complaint and they are met."
+    },
+    {
+      "criterion_id": "D-4",
+      "criterion_verbatim": "proof instance VALID rc=0 positional, own-instance discrimination control.",
+      "method": "schema_validation",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_NOTIFY.TO-D_PROOF_OF_SPEC.json \"D-1,D-2,D-3,D-4\"",
+      "output_evidence": "See controls.mutant, run ON THIS INSTANCE and anchor-asserted for REACHABILITY first. ⚠ THE REACHABILITY ANCHOR MATTERS MORE ON THIS INSTANCE THAN ON THE OTHERS: the mutated rule is 'a PASS row with empty output_evidence', and this instance has 3 PASS rows and 1 UBC. Had D-3 been the only row, the rule would have been structurally unfirable and a green control would have proved nothing -- which is 2.0.0_SA_COO~Z's borrowed-control finding arriving as a live consideration rather than a formality.",
+      "denominator": "4 of 4 criterion ids carried; 3 PASS rows available for the mutated rule to fire on",
+      "status": "PASS",
+      "status_reason": "PLANE: none -- about the deliverable."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THREE in-battery mutants plus the checker control. (1) CONSERVATION: a formatter that drops the last three words is shown to FAIL the content_tokens equality -- without it, 'content is never lost' passes for any formatter that happens not to lose anything on one fixture. (2) THE CAP: MAX_SENTENCES_PER_PARAGRAPH raised to 99 leaves the wall of text intact as a wall, restored in a finally -- so the cap test is measuring the cap and not the fixture. (3) FIXTURE CONTROLS: the wall is asserted to violate the cap BEFORE formatting (5 sentences, 1 block) and its url asserted to start out buried mid-line, so neither the cap test nor the url test can pass on an already-compliant input. CHECKER: output_evidence blanked on D-1 in a scratchpad copy, anchor-asserted first.",
+      "expected": "Each mutant kills the assertion built for it; the fixture controls fail if the fixtures stop being adversarial; the checker mutant returns rc=1 INVALID naming the mutated row.",
+      "observed": "All three in-battery mutants fire inside a 14-test suite ending OK rc=0. ⛔ AND TWO REAL DEFECTS WERE CAUGHT BY THESE TESTS BEFORE ANY COMMIT, WHICH IS THE POINT OF WRITING THEM AS PROPERTIES: (a) the degenerate-input property FAILED on '\\n\\n\\n' -- whitespace-only input was returned unchanged and violated the blank-line property; fixed to return ''. (b) THE MORE INTERESTING ONE, WHICH NO PROPERTY CAUGHT: the first implementation hoisted EVERY url, satisfied all seven properties, and produced FRAGMENTED PROSE -- 'Full detail is at' / url / 'if you want the breakdown.' as three paragraphs. It passed its own tests and read WORSE THAN THE WALL IT REPLACED. Caught by printing the output and reading it. The code was narrowed to hoist only sentence-ending urls, and the property was narrowed to match -- with the cost pinned by its own test so the weakening is explicit rather than a quiet relaxation.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Pure string transformation with no clock, no network and no state; the battery was run repeatedly across three code revisions.",
+      "observed": "Stable at 14 tests OK rc=0 on the final revision. THE INTERESTING RUNS WERE THE UNSTABLE ONES: revision 1 failed the degenerate-input property, and revision 2 failed the url property BECAUSE I HAD DELIBERATELY CHANGED THE BEHAVIOUR -- a red suite that correctly reported the code no longer promised what the test asserted. Both failures were informative; neither was flaky.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "D-HTML: the contentType 'text' -> 'html' change.",
+      "reason": "Split from D-PROSE by 1.0.0_SA_CTO~Z on TO-C's finding. It is a gateway CODE CHANGE riding safe-ec2-deploy, and that box is the one every seat on this fabric reaches MCP through -- the last such bounce measured ~100s down with the public IP moving. Built and applied HERE under Rule 26, on Andrew's separate word, with the cost stated first. Nothing in this TO opens it."
+    },
+    {
+      "item": "The concierge's PROMPT-side formatting.",
+      "reason": "Andrew's complaint names how the agent WRITES, and the TO scopes it as 'a property of the agent's Teams SEND PATH (and, for the concierge, its prompt)'. The send path is universal and is done here; a prompt change is per-seat, is 0.0.3_BG_BBGTerminal's surface, and would not be inherited by other callers. Flagged, not taken."
+    },
+    {
+      "item": "The EMAIL sends at tools.py:220/:238, which are also plain text.",
+      "reason": "Measured in TO-C and recorded there. They are outside a TEAMS formatting standard, and the W-E/TO-E email legs do their own plain-text composition on the Lambda plane. Chasing them here would widen the TO."
+    },
+    {
+      "item": "Any post to Teams.",
+      "reason": "TO-C forbade posting to prove clickability and I did not; nothing changed that. Zero posts, zero Graph calls."
+    }
+  ],
+  "surprises": [
+    "MY FIRST FORMATTER PASSED EVERY PROPERTY AND PRODUCED WORSE PROSE THAN ITS INPUT. Hoisting every url split 'Full detail is at <url> if you want the breakdown.' into three paragraphs -- content preserved, cap respected, url alone on its line, idempotent, all green. THE PROPERTIES CANNOT SEE FRAGMENTED PROSE; only printing the output and reading it can. Andrew's complaint is a READABILITY complaint, so a test suite that measures structure and never reads the result is measuring the wrong thing. Recorded because it is the sharpest instance tonight of a green suite over a wrong answer.",
+    "THE GATE'S NON-ASCII WARN WAS VISIBLE TO ME THIS TIME, AND ONLY BECAUSE SOMETHING ELSE FAILED LOUDLY. ruff BLOCKED on E741 (ambiguous variable name 'l', three comprehensions), so I read the whole gate output instead of skimming to 'clean' -- and there was the WARN naming U+26D4 and U+26A0 at three lines in teams_format.py, my FOURTH glyph incident this session. When the gate passes, that same WARN prints beneath 'All checks passed!' and I have missed it every time. Both fixed; gate rc=0 and 0 WARN lines after.",
+    "A STALE DOCSTRING SURVIVED MY OWN NARROWING BY ONE EDIT: after changing the code to hoist only sentence-ending urls, format_for_teams's docstring still read 'hoist every URL onto its own line'. Caught on a re-read of the file I had just edited. Same supersession class I have been finding in other people's records all night, arriving inside a function I wrote four minutes earlier."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-21/laneZ_tod_prose_0849-0910Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find -i (build-ladder rung 2 check before writing a new module)",
+      "invocation": "comp-find -i 'def format_|formatter|wrap|paragraph' infra/aws/ec2/opal-gateway/app/",
+      "result": "6 hits / 42 files, ALL unrelated -- ASGI receive-wrapping in ratelimit.py and middleware registration in server.py. No existing formatter to reuse, so a new module is rung 7 (the minimum code that works) correctly reached rather than assumed."
+    },
+    {
+      "tool": "python ast (in-test send-path assertion)",
+      "invocation": "parse tools.py, walk send_chat_message and send_channel_message for a Call to format_for_teams",
+      "result": "{send_chat_message: True, send_channel_message: True}. AST rather than grep because the question is WHICH FUNCTION calls it -- a text match cannot attribute a call to its enclosing function, and 'the string appears in the file' would pass with the call in the wrong place."
+    },
+    {
+      "tool": "commit-gate (ruff + non-ASCII lint)",
+      "invocation": "bash .tools/commit-gate.sh <teams_format.py> <tools.py> <test_teams_format.py>",
+      "result": "FIRST RUN rc=1 -- ruff BLOCKED on E741 x3. Fixed (l -> ln); glyphs stripped; re-run rc=0 with 0 WARN lines. See surprises: the ruff failure is the only reason I read the non-ASCII WARN at all."
+    },
+    {
+      "tool": "the property battery itself, as an instrument",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/ec2/opal-gateway/tests/test_teams_format.py",
+      "result": "Caught a real defect on degenerate input ('\\n\\n\\n' returned unchanged) and correctly went RED when I deliberately narrowed the url rule -- a suite that reports the code no longer promises what it asserts is doing its job. 14 OK rc=0 on the final revision."
+    },
+    {
+      "tool": "proof-of-spec-check (positional) + own-instance mutant",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py <this file> \"D-1,D-2,D-3,D-4\" ; then a scratchpad copy with D-1's output_evidence blanked, anchor-asserted",
+      "result": "See controls.mutant and the session log."
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_NOTIFY.TO-C",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/D7_NOTIFY.TO-SET.md",
+    "group": "W",
+    "vintage_commit": "8bcc0d16c5"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_NOTIFY.TO-C_PROOF_OF_SPEC.json",
+      "kind": "doc",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ-ONLY investigation. Nothing was built, changed, deployed, or posted. The one act I was explicitly told not to take -- posting to Teams to observe the renderer -- was not taken, and C-2 records the consequence rather than working around it.",
+      "artifact_covered_by": ["C-1", "C-2", "C-3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "C-1",
+      "criterion_verbatim": "the send path identified at source with its content-type, and the gateway's ~1h credential dependency restated as it bears on reliability.",
+      "method": "manual_read_with_citation",
+      "invocation": "comp-find -i 'def send_chat_message|def send_channel_message' (DENOMINATOR 60 hits / 27,232 files, BANDS DEF=2 SURFACED=58 -- the 58 are comp-which-rail audit-log lines, the 2 DEF hits are the functions); then ast.get_source_segment on both; comp-find -i 'contentType' infra/aws/ec2/opal-gateway/ ; python -c md5 compare against EC2_MANIFEST.json file_checksums",
+      "output_evidence": "SEND PATH, BOTH FUNCTIONS, AT SOURCE. infra/aws/ec2/opal-gateway/app/tools.py:613 send_chat_message -> POST /chats/{chat_id}/messages ; :654 send_channel_message -> POST /teams/{team_id}/channels/{channel_id}/messages. BOTH build the identical payload, hardcoded, with no branch and no parameter: payload = {\"body\": {\"contentType\": \"text\", \"content\": message}} (:617 and :658). CONTENT-TYPE CENSUS ACROSS THE WHOLE GATEWAY: DENOMINATOR 8 hits / 71 files -- 2 Teams sends (\"text\"), 2 EMAIL sends at :220/:238 (\"Text\"), 1 attachment-metadata $select, 1 S3 ContentType in audit.py, 1 mock fixture. EVERY OUTBOUND MESSAGE PATH IN THE GATEWAY IS PLAIN TEXT, not only Teams. CREDENTIAL DEPENDENCY, RE-DERIVED AT SOURCE RATHER THAN CITED: server.py _bearer_email FULLY validates the gateway-issued Bearer (sig RS256 / iss / aud / exp) at the HTTP layer, and tools.py:64 _run then resolves identity via get_current_email() and returns code=identity_required if absent -- so validation precedes tool dispatch and NO per-tool exception is expressible. That independently confirms 1.0.0_SA_CTO~Z's WE-1 structural disqualification of the gateway as a backstop transport. DEPLOY PLANE: EC2_MANIFEST.json source_path infra/aws/ec2/opal-gateway -> remote_path /opt/opal-gateway, deployed_commit 5a1cc39e8e at 2026-08-20T16:19:36Z. The manifest's recorded md5 for app/tools.py (06e1fd0a11029c74e7cd24294eafc78a) MATCHES the repo at that commit -- so the record is internally consistent, not merely asserted -- while HEAD differs (beba08bb18f7bc46523dcbbca14fe4b7): tools.py is 2 commits ahead of the deployed record (2b7258f31c, 90d526c199), both mine, both BUILD-ONLY.",
+      "denominator": "2 of 2 Teams send functions read at source; 8 of 8 contentType occurrences across 71 files classified; 1 of 1 guard chokepoint; 2 commits ahead on the send-path file",
+      "status": "PASS",
+      "status_reason": "PLANE: SOURCE + DECLARED. The content-type and the guard ordering are SOURCE-confirmed. The deployed-vs-built comparison is on the DECLARED plane -- the EC2_MANIFEST's own recorded checksum -- NOT an on-instance read. Per Rule 22a a staged or recorded artifact is DESIRED, and for EC2 specifically 'reading an artifact proves what is THERE, never what RUNS': the APPLIED truth would need an SSM read of /opt/opal-gateway/app/tools.py, which is outside a read-only TO's scope and is NOT claimed here."
+    },
+    {
+      "criterion_id": "C-2",
+      "criterion_verbatim": "hyperlink clickability MEASURED, not inferred -- what markup the renderer honours. If it cannot be measured without posting, say so and stop; do not post to prove it.",
+      "method": "manual_read_with_citation",
+      "invocation": "ast.get_source_segment on both send functions (the content-type is a hardcoded literal, so the question is settled at source and needs no call); NO Teams post was made and NO Graph API call was issued",
+      "output_evidence": "WHAT IS MEASURED: the send path posts contentType \"text\" on both functions, hardcoded, with no branch, no parameter and no caller override -- so no caller can request html today. WHAT FOLLOWS FROM THE VENDOR CONTRACT, MARKED AS SUCH: Microsoft Graph's chatMessage body.contentType selects how the content is interpreted, and under \"text\" the content is NOT parsed as markup -- so a markdown link [label](url) renders as its literal characters. THAT IS A DECLARED (vendor-documented) consequence of a MEASURED literal, not something I observed on the renderer. WHAT I CANNOT MEASURE AND DID NOT: whether the Teams CLIENT auto-linkifies a BARE URL inside a text message is a renderer behaviour observable only by posting a message and looking at it. THE TO SAYS SAY SO AND STOP, AND I STOPPED. No post was made; the gateway is also vendor egress and a send is not authorised here. >> THE ACTIONABLE CONSEQUENCE, WHICH IS WHY J2 PRECEDES TO-D: Andrew's ask -- 'hyperlinks (which should be properly linked to be clickable)' -- CANNOT BE SATISFIED BY A PROSE FORMATTING STANDARD ON THIS PATH. It needs contentType \"html\", which is a CODE CHANGE to a live EC2 service and therefore a deploy, not a style guide. A standard written today against a text renderer would specify link markup the renderer discards.",
+      "denominator": "2 of 2 send functions carry the literal; 0 posts made; 0 Graph calls issued",
+      "status": "PASS",
+      "status_reason": "PLANE: SOURCE for the content-type; DECLARED (vendor contract) for the rendering consequence; UNMEASURABLE-WITHOUT-POSTING for bare-URL autolinking, which is recorded as an open cell rather than guessed. Marked PASS because the criterion's own terms were met exactly -- it asks for a measurement OR an explicit statement that it cannot be made without posting, and the second branch is the honest one here. THE ONE THING A READER MUST NOT TAKE FROM THIS ROW: it does not establish that a bare URL is unclickable. It establishes that MARKUP is not honoured and that the autolink question is unmeasured."
+    },
+    {
+      "criterion_id": "C-3",
+      "criterion_verbatim": "proof instance VALID rc=0 positional, own-instance discrimination control.",
+      "method": "schema_validation",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_NOTIFY.TO-C_PROOF_OF_SPEC.json \"C-1,C-2,C-3\"  (rc on the checker, unpiped)",
+      "output_evidence": "See controls.mutant for the discrimination result, which was run ON THIS INSTANCE and not borrowed. Run POSITIONAL: the bare 1-arg form returns VALID rc=0 with COVERAGE UNCHECKED, and a reader who skims to VALID has checked row quality and nothing about omissions.",
+      "denominator": "3 of 3 criterion ids carried; expected set = the TO's <expected_criteria> verbatim",
+      "status": "PASS",
+      "status_reason": "PLANE: none -- this criterion is about the deliverable. The own-instance requirement is 2.0.0_SA_COO~Z's finding on my W-E instance, now standing law across all six TOs: a sibling's discrimination run does not discharge it, because the rule under test must be REACHABLE on THIS instance's shape."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CHECKER-DISCRIMINATION, RUN ON THIS INSTANCE (not borrowed from a sibling -- the standing requirement 2.0.0_SA_COO~Z established). Anchor-asserted first: exactly 3 acceptance rows, all PASS, all with non-empty output_evidence; refuse to mutate otherwise. Then blank output_evidence on the C-1 row -- the schema's own named invalidator ('a PASS row with empty output_evidence INVALIDATES the whole deliverable') -- on a COPY in the session scratchpad. The tracked instance was never mutated.",
+      "expected": "rc=1 and INVALID on the mutant copy, with the violation naming the C-1 row; rc=0 VALID on the tracked instance. A validator that cannot fail is not a validator, and the rule must be shown REACHABLE on this instance's shape -- which it is, because this instance has PASS rows for it to fire on.",
+      "observed": "TRACKED INSTANCE: rc=0, 'acceptance rows=3 | violations=0', VALID. MUTANT COPY: rc=1, 'acceptance rows=3 | violations=2', INVALID -- caught TWICE and the second violation names the row: 'schema: acceptance/0/output_evidence: \\'\\' should be non-empty' and 'acceptance[C-1]: PASS with thin/empty output_evidence -- a bare value; INVALID'. The anchor assertions all held before the mutation (3 rows, all PASS, all evidence non-empty, exactly 1 C-1 row), so the mutant hit the cell it was aimed at rather than whatever happened to be first.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The reads are of static source at a pinned HEAD plus a committed manifest; the AST extraction and the md5 comparisons were each run more than once with identical inputs.",
+      "observed": "Identical: the two send functions' segments, the 8-hit contentType census, and the md5 triple (recorded == repo@deployed_commit, HEAD differs) reproduce exactly. Nothing here depends on a clock, a network call, or a live service.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Posting a message to Teams to observe what the renderer does.",
+      "reason": "The TO forbids it in terms ('do not post to prove it'), and a gateway send is vendor egress requiring Andrew's per-use word. The consequence -- bare-URL autolinking stays unmeasured -- is recorded in C-2 rather than worked around."
+    },
+    {
+      "item": "An on-instance (SSM) read of /opt/opal-gateway/app/tools.py.",
+      "reason": "Read-only TO, and EC2 APPLIED-truth reads are the CloudOps lane. The deployed-vs-built comparison here is DECLARED-plane (the manifest's recorded checksum) and is labelled as such in C-1."
+    },
+    {
+      "item": "TO-D's actual formatting standard and the text->html change.",
+      "reason": "TO-D activates on TO-C acceptance. This TO measures the renderer so that standard can be written against something real; it does not write it."
+    },
+    {
+      "item": "The 4 non-Teams contentType occurrences (2 email sends, attachment metadata, S3, mock).",
+      "reason": "Classified and counted for the denominator, not investigated. The EMAIL pair is flagged in surprises because it bears directly on TO-A's CTA, but chasing it is not this TO's question."
+    }
+  ],
+  "surprises": [
+    "THE EMAIL SENDS ARE PLAIN TEXT TOO, AND IT LANDS ON MY OWN TO-A. tools.py:220 and :238 post contentType \"Text\" (capital T) -- so the gateway's email path has the same constraint as Teams. My W-E SES leg is independently also plain text (MIMEText(body, 'plain')), and its CTA is emitted as a bare URL, which mail clients generally autolink where Teams markup would not render. TO-A's A4 asks for 'one standard hyperlink' -- on a plain-text body that is a bare URL relying on client autolinking, NOT a labelled link. Flagging so A4 is built with that known rather than discovering it at the first real send. No action taken.",
+    "MY OWN COMMIT 90d526c199 TOLD A FUTURE APPLIER THE WRONG ON-BOX PATH, AND IT WAS ALREADY WRONG WHEN I WROTE IT. That message states the on-box artifact is /opt/m365-mcp-gateway/app/tools.py, citing a 2026-07-31 deploy record. EC2_MANIFEST.json -- Rule 8's source of truth -- carries remote_path /opt/opal-gateway with _status 'OPAL_GWRENAME P2/S4 CUTOVER DEPLOYED 2026-08-15 ... code @81615fbd3e to /opt/opal-gateway'. The rename landed 2026-08-15; I wrote the message 2026-08-20. STALE BY FIVE DAYS AT AUTHORING, and I flagged it in that very commit as 'the thing the applier most needs'. This is the closed-record-with-no-forward-reference class: the 07-31 record was true when written and carries no pointer to its own supersession. Correcting the record; the manifest is authoritative over my commit message.",
+    "tools.py IS 2 COMMITS AHEAD OF THE DEPLOYED RECORD, AND BOTH ARE MINE -- 2b7258f31c (S2 item A alwaysLoad marks) and 90d526c199 (the $select lastModifiedDateTime). Both were BUILD-ONLY by their own commit messages and the laptop applies. Consistent with the ticket_center posture; noted so nobody reads the gateway as current."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-21/laneZ_toc_teams_send_path_0745-0810Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find -i (per the Rule 21 amendment @5e4a71d604)",
+      "invocation": "comp-find -i 'def send_chat_message|def send_channel_message' ; comp-find -i 'contentType' infra/aws/ec2/opal-gateway/ ; comp-find -i 'm365-mcp-gateway/app/tools.py' org/ docs/",
+      "result": "WORKED, and the BAND SPLIT did the discriminating work: the first search returned DENOMINATOR 60 hits with BANDS DEF=2 SURFACED=58, where the 58 are comp-which-rail audit-log lines recording July DENY events and the 2 DEF hits are the functions themselves. A raw grep would have returned the same 60 lines with no way to separate the definitions from a log of somebody being denied permission to grep for them. Ran -i throughout per the amendment I raised and CTO~Z landed."
+    },
+    {
+      "tool": "python ast (get_source_segment)",
+      "invocation": "extract send_chat_message and send_channel_message by AST rather than by line range",
+      "result": "Both segments read whole. AST rather than sed because a line range drifts the moment the file changes above it, and the content-type literal is the load-bearing token."
+    },
+    {
+      "tool": "EC2_MANIFEST.json + hashlib md5 (Rule 8 source of truth, DECLARED plane)",
+      "invocation": "md5(git cat-file -p 5a1cc39e8e:app/tools.py) vs manifest file_checksums['app/tools.py'] ; md5(HEAD) ; git log deployed_commit..HEAD -- tools.py",
+      "result": "recorded == repo@deployed_commit (06e1fd0a...), so the manifest is internally consistent rather than merely self-reported; HEAD differs; 2 commits ahead. This is the DECLARED plane and is labelled as such -- it is NOT an on-instance read and does not establish what is executing."
+    },
+    {
+      "tool": "proof-of-spec-check (positional) + an own-instance mutant",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py <this file> \"C-1,C-2,C-3\" ; then the same on a scratchpad copy with C-1's output_evidence blanked",
+      "result": "See controls.mutant + the session log. Own-instance per the standing requirement; no sibling run cited."
+    }
+  ]
+}
