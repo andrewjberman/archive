@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>2026-08-22 — after 4a (platinum twins exist) + 4b (per-key pin + cert). Sequenced at your seat: T-A (in flight now) -> T-C (08-20) -> this. Per-key: a key flips only when ITS pin + cert exist; keys flip independently.</dated>
-<status>staged -- GO paired; tolerant-read implementation may start once twins exist (08-20); flips gated per key on CVO cert</status>
+<status>pending -- SEATED 2026-08-21 per LD-0441 (trigger verified live on S3: 10 twins + manifest 933dfc1bf6b1). P4R-1 DELIVERED. P4R-3 flip DECLARED-HELD on all 10 keys: the advi twins are unreachable from every portal route family (advisor-intelligence router pins the bucket to opal-data-bd from firmId; public-data-router has no platinum/advi branch) -- route act surfaced to COO for AE. P4R-2 tolerant read proceeding, per-key, config-dormant.</status>
 <priority>P1 — the flip is the cutover; everything before it is preparation</priority>
 <authority>Push plan @a2f27c8d0a §3 row 4c + §2 DE row (T-A first act, then P4 repoint). Never-widen per key (CTO+COO determination; DELTA=0 keys need no hold). Andrew's 08-12 "proceed with the cutover" answers the 49F cutover.</authority>
 </task_order>
