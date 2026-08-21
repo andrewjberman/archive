@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T17:10Z</issued>
 <dated>2026-08-21 — runnable the day before the 08-22 flip; row references fold into P4R-3/P4X-4 at delivery (COO folds; criterion sets stay stable).</dated>
-<status>staged -- GO paired; author when your 08-19/20 rows clear</status>
+<status>complete 2026-08-21 -- JOINT DELIVERY. DE half OR-1/OR-2 @d8808b489e (table, 20/20 frozen-list members carried); CVO half OR-3 @b50716fb2d (zero pass-on-both rows, zero rewrites); joint proof instance VALID rc=0 unpiped over OR-1..OR-4, one instance with two evidence owners stated per row. Legs not exercisable today are NAMED with the state that unblocks each -- L1 at route-landing (AE remedy A), L2/L4 in the flip window with fixtures PRE-BUILT (8) and CVO reading the markers, never DE self-report. Table is flip-ready.</status>
 <priority>P2 — makes the 08-22 flip's acceptance mechanical per key instead of per-judgment</priority>
 <authority>CRO~A TIGHTENING_ENUMERATION_SPEC @1dceb7d61d J4, RATIFIED by CTO (G-C, @CTO_GATE_AND_RULING_SET_20260818_1700Z.md); COO releases the hook per the CTO ruling. Frame: the frozen P4E-1 v2 list @5f1076e9c1 (20 members) is the row denominator.</authority>
 </task_order>
