@@ -7,7 +7,7 @@
 <joint_assignee>0.7.0_AE_CloudOps (CloudFront / behavior-side reads)</joint_assignee>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:29Z</issued_at>
-<status>staged</status>
+<status>complete 2026-07-22 (status corrected 2026-08-21 -- work and ISSUER ACCEPTANCE both predate this flip by a month). ACCEPTED AT ISSUER: COO 205817Z, "both TOs ACCEPTED, RAVC closed"; F-1 (no Cottonwood in the declared flip set) rated the most consequential finding of the wave. EVIDENCE PER CRITERION -- the deliverable MDPF_3F_P2_ENDPOINT_ROUTE_AUDIT_20260722.md @39ea5916e carries its own Acceptance mapping section, all five marked and cited: (1) route table Parts 1-3, behavior+origin+auth per flip-served artifact, zero orphans; (2) the 9 declared behaviors mapped to artifacts + producers, each confirmed NOT live against APPLIED config (per-row Live? column); (3) null-on-404 documented at aum.ts:586-608 @08c6d8b2 with its rendered consequence (F-2); (4) comp-routes behaviors run FIRST, intercept rules enumerated -- the discriminating result being that CustomErrorResponses quantity is 0 and the masking is SPA-fallthrough, not interception (F-3); (5) zero TF applied, zero behavior changes, portal-auth drift recorded EXPECTED and not actioned; (6) Compiler Tools section present in the 2026-07-22 logs. 6/6 evidenced.</status>
 <authorization>LD-0333 am.1 @2eef569d2 -> CTO cascade 200805Z (WS-P audits explicitly parallel-safe from day one).</authorization>
 
 <references>
