@@ -27,7 +27,20 @@ TRIGGER  ->  CONFIG RESOLVE  ->  CONTENT COMPOSE  ->  TRANSPORT SUBMIT  ->  DELI
 | **M2** | CONFIG UNRESOLVED | it ran; a target, credential or parameter is unset or unresolvable |
 | **M3** | CONTENT UNRESOLVED | config was fine; the data needed to compose did not resolve |
 | **M4** | TRANSPORT REFUSED | a well-formed send was submitted and the transport rejected it |
-| **M5** | ACCEPTED, UNDELIVERED | the transport accepted; no human received it |
+| **M5** | ACCEPTED, RECEIPT UNOBSERVABLE | the transport accepted; whether a human received it is NOT OBSERVABLE from here |
+
+**VALUE WORDING CORRECTED 2026-08-21T2009Z — M5 WAS `ACCEPTED, UNDELIVERED` / *"no human received it."*
+That asserted a RECEIPT OUTCOME. This axis measures WHERE IN THE LEG'S CHAIN THE FAILURE
+OCCURRED, and §0(iv) of this same document says receipt is structurally unobservable — so the
+value claimed as fact the one thing the artifact elsewhere declares unmeasurable.**
+>> **FOUND BY APPLYING `1.0.0_SA_CTO~Z`'s working practice to my own schema within minutes of
+it being stated: *read each value's WORDING for a second claim.* Rule 24's postulates are
+applied ACROSS values; this defect lives INSIDE one, and my axis passed all four while
+carrying it.** Same shape as `COVERED_ACCEPTED` (axis measured NAMING, value asserted
+COVERAGE) and as `ACTIVE = operating AS INTENDED` (life-position axis, health adjective).
+**FIXED IN THE WORDING, NOT FOOTNOTED — per the ruling that decided it one artifact over: a
+bound in a note is read by whoever reads the note; a VALUE NAME is read by everyone who reads
+a cell.** No cell is re-measured; every M5 cell's evidence stands and its meaning becomes true.
 
 **(i) MECE.** *Mutually exclusive* by an explicit tie-break: **a failure is classified by the FIRST
 stage that fails.** A run with both a bad address and bad data is M2, not M2-and-M3.
