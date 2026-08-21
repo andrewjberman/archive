@@ -115,3 +115,58 @@ You proposed ordering both behind the ETF read. **Confirmed, and your reasoning 
 **STATUS MOVES WITH THE ACT, BY YOU, SAME TURN.** Status is CELL-level — `ETFS-e-1`, `-e-2`, `-e-3` complete independently.
 **EVERY REPORT OF A COMMIT STATES ITS PUSH STATE** — never bare "landed."
 ⛔ **Never compose a report of a completed act in the same tool call as the command that produces it.**
+
+---
+
+## ⛔ AMENDMENT A (issuer, 2026-08-21T20:0xZ) — YOUR READ ARRIVED FIRST. `ETFS-e-1` IS RULED: YOUR RECOMMENDATION, ADOPTED.
+
+Your 65661 landed **before this TO reached you** and answered `ETFS-e-1` with live evidence and a
+recommendation. **Leaving the decision open would make DS build a producer against an undecided target, so the
+decomp owner ratifies rather than waits. Three lanes, one voice.**
+
+### RULED: **`platinum/etfs/` on `opal-data-portal-v2`, mdpf-shaped.** Your recommendation, adopted as written.
+
+**The deciding fact was YOURS and it is the counter-intuitive one — the NEVER#3 INVERSION:** landing under
+`json/positioning/` is an **existing prefix with LIVE Models consumers**, so it is **MORE** never-widen-exposed,
+not less. **The "free" option is the one that touches a live serve** — on Andrew's top-priority page. That
+reframes the whole cost table, and I would not have had it without the live read.
+
+Reinforcing, also yours: there **is no `/api/general/positioning/*` behavior** — Positioning rides the
+catch-all to `/json/`, so "the existing family" is a **legacy tree**, not a canonical home. Plus Rule 17b's
+amendment (publisher reads parquet, publisher is the only JSON producer) makes a `json/`-landing producer
+perpetuate the shape 17b retires. Andrew's standing rule closes it: *do it correctly the first time and port
+over.*
+
+**`ETFS-TO2-AC1` IS THEREFORE DISCHARGED AT ISSUE.** Record it in your proof-of-spec with your 65661 evidence
+— route decided, `comp-routes` evidence cited, provenance header read. **Do not re-litigate it; spend the turn
+on the contract and the IAM.**
+
+### `ETFS-e-3` IS NO LONGER DARK — it is a NAMED ACT
+
+Add `arn:aws:s3:::opal-data-portal-v2/platinum/etfs/*` to `AllowCloudFrontOACPublicData` (the live three-statement
+policy you read; `platinum/advi/*` needing its own statement is the confirming precedent). ⛔ **Without it CF
+returns 403 AND the CF error rules MASK JSON errors as HTML — so it fails as a CONFUSING HTML 403, not a clean
+one. That masking is exactly why `ETFS-TO2-AC4` must be EXERCISED, never config-read.**
+
+**Your own note is adopted into the criteria:** superseded TO-D4d's `D4d-2 "EXERCISED FETCH"` had it right —
+**an exercised fetch of the ETF path carries forward as the discharge of `ETFS-TO2-AC5`**, since you correctly
+flagged that nothing in your read is EXERCISED (no ETF path exists to fetch yet).
+
+### ⛔ AMENDMENT B — YOUR STALE-RECORD FIND IS CLASSED **ARMED**, AND YOU ARE THE DISARM OWNER
+
+`infra/aws/terraform/opal-assets/mdpf_egress_publisher.tf:46-48` — *"measured 2026-07-28: 2 statements"*. The
+zero-Denys half stands; the **count and scope are 24 days stale**.
+
+**Class OBSERVATION · standing ARMED · disarm owner `0.7.0_AE_CloudOps` (you measured it) · SAME-TURN.**
+ARMED because **a seat inheriting that header concludes a new platinum prefix is CloudFront-readable — it is
+not** — and the failure it produces is the masked HTML 403, which reads as a *routing* bug rather than a
+*policy* gap and sends the next seat at the wrong layer.
+
+**Disarm = correct the comment to the measured three-statement, prefix-scoped truth. One line, cheap, now.**
+**DISARMED ≠ REMEDIATED** — two states, two clocks. File both to CVO.
+
+*Note this is a comment correction inside a TF file, not a policy change — it does not touch the applied plane
+and needs no apply.*
+
+**Nothing else in this TO changes.** The separate-artifact ruling, the contract-first sequencing (still the
+critical-path join), and your IAM method all stand as written.

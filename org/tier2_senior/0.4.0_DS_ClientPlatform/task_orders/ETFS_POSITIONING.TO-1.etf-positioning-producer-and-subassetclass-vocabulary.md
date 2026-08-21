@@ -120,3 +120,39 @@ Build the scheduled producer that assembles the **four books** (DIVZ / IDVZ / PF
 **STATUS MOVES WITH THE ACT, BY YOU, SAME TURN** — a proof-of-spec instance and its status flip are ONE atomic delivery. **Status is CELL-level** (`ETFS-d-1` and `ETFS-d-2` complete independently).
 **EVERY REPORT OF A COMMIT STATES ITS PUSH STATE** (CTO ruling, today) — *"landed LOCAL @hash, rides integration"* or *"on origin/CLOUD @hash (ls-remote read)"*. **Never bare "landed."**
 ⛔ **Never compose a message reporting a completed act in the SAME tool call as the command that produces it. READ THE NUMBER, THEN WRITE THE SENTENCE.**
+
+---
+
+## ⛔ AMENDMENT A (issuer, 2026-08-21T20:0xZ) — THE WRITE TARGET IS RULED, AND THE PRODUCER IS **TWO STAGES**
+
+The TO above said *"the exact key/prefix is TO-2's deliverable; build against the CONTRACT and take the key as
+a parameter."* **That is now RULED, so you are not parameterising an unknown.**
+
+**RULED: `platinum/etfs/` on `opal-data-portal-v2`, mdpf-shaped.** Decomp §8 Amendment A carries the full
+reasoning; AE's live read (65661) is the evidence.
+
+### THE PART THAT CHANGES YOUR BUILD: **GOLD (parquet) → PLATINUM PUBLISHER (JSON) → `platinum/etfs/`**
+
+**Not one script writing JSON to the serve. Two stages.** Rule 17b's amendment: **every platinum publisher
+READS PARQUET, and the publisher is the estate's ONLY JSON producer** — which is precisely what makes
+one-producer-per-served-key hold *by construction* rather than by discipline. It is the same reasoning as the
+separate-artifact ruling, one layer down.
+
+**AE measured the alternative and it is legacy, not canonical:** today's three positioning Lambdas
+(`yang-generate-positioning:2154`, `yang-generate-allocation-summary:34`,
+`yang-generate-holdings-attribution:42`) write JSON **straight to the serve**. **A `json/`-landing ETF producer
+would perpetuate exactly the shape 17b retires** — and Andrew's own standing rule decides it: *"we simply do
+something correctly the first time and port over."* Building the legacy shape tonight is **debt on landing**.
+
+**Marginal cost is small and the pattern is exercised in-estate twice (mdpf, advi).** ⛔ **This does NOT widen
+your scope to a migration** — the existing three Lambdas are **not yours and are not touched.** Boundary,
+stated so it is not inferred.
+
+### `ETFS-TO1-AC7` GAINS A SECOND HALF (same criterion, sharper)
+
+Also: **NO write lands under `json/positioning/*`.** ⛔ **AE found the inversion and it is counter-intuitive
+enough to state plainly: `json/positioning/` is an EXISTING prefix with LIVE Models consumers, so landing there
+is MORE NEVER#3-exposed, not less. The apparently-free option is the one that touches a live serve.**
+
+**Nothing else in this TO changes.** The bbg three-states ruling, the build-vs-prove split, `ETFS-TO1-AC5`'s
+indeterminate anchor, and the `ETFS-d-2` vocabulary act all stand as written.
