@@ -180,6 +180,25 @@ outcome — `REFUSED`, receipt written, cursor advances — with no new code pat
 **The sweep already does exactly this** (`_parse_created` -> `None` -> counted, not adjudicated), so
 the estate contains both the defect and its own remedy pattern, in one package.
 
+**FIXED 2026-08-21T141933Z -- ACT 2, on Andrew's word ("approved on all three, proceed"), gate decision by
+`1.0.0_SA_CTO~Z` (HOLD lifted).** `validate_form_ticket` now PARSES the stamp instead of measuring
+it, so the row lands in the **existing** `REFUSED` outcome -- receipt written, cursor advances -- with
+no new code path and no new failure mode.
+**PLANE, measured before the act:** NOT in the Lambda package (`files = ['lambda_function.py']`), ON
+the runner import path (`runner -> intake_pass -> row_contract`), task live on a 5-minute cadence
+from this tree. **So saving it WAS the deploy**, and bar A5-A7 applied: exercised in the same
+continuous act, in this tree, **scored on output** -- a real dry-run pass emitted
+`REFUSED ... does not parse` for the bad row and **`WOULD-BUZZ` for the row behind it**
+(`fetched=2 buzzed=1 refused=1`). That second line is the fix: the wedge is gone.
+**THE COUPLING IS NOW A TEST, NOT A COMMENT.** `buzz` imports `row_contract`, so they cannot import
+each other and the parse expression is necessarily duplicated -- and a duplicated expression is
+exactly what drifts back into this defect. The property *anything the contract ACCEPTS, the composer
+can HANDLE* is asserted over a 7-stamp set, with a guard that it is not vacuous.
+**THE `expectedFailure` FORCING FUNCTION WORKED AND THAT IS THE REUSABLE PART:** it flipped to
+**UNEXPECTED SUCCESS** and took the run **non-zero**, so the fix could not land quietly -- and it
+surfaced the three sibling tests still documenting the *defect*, which then had to be rewritten to
+assert the *behaviour*. **That was the maintenance it existed to trigger, not an inconvenience.**
+
 ### FINDING 2 — the two SES legs disagree about whether degradation is announced
 
 L3 announces a degraded **claimer name** (`WE_CLIENT_NAME_DEGRADED`, three-way reason) because E-2
