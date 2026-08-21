@@ -16,7 +16,13 @@
       "commit_or_etag": "THIS COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "LAMBDA PLANE -- BUILD ONLY, NO APPLY OPENED. The queue this rides on top of now stands at: W-A's three commits + 4d5a92f4d7 + 78cd2b0695 + this. THE APPLY IS NOT A SINGLE CHANGE AND MUST NOT BE REQUESTED AS ONE. py_compile rc=0, 0 non-ASCII, 0 CRLF, commit-gate rc=0. Adds the client leg: resolve_client_link, client_notice, _client_recipients, notify_client, notify_client_isolated, and two named exceptions; wires an ack on submit_form and a pickup on claim_ticket (both AST-verified call sites).",
-      "artifact_covered_by": ["E-0", "E-1", "E-2", "E-3", "E-4"]
+      "artifact_covered_by": [
+        "E-0",
+        "E-1",
+        "E-2",
+        "E-3",
+        "E-4"
+      ]
     },
     {
       "path_or_key": "infra/aws/lambda/ticket_center/tests/test_client_notify.py",
@@ -24,15 +30,23 @@
       "commit_or_etag": "THIS COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Never packaged (the zip carries one member). 19 tests across 5 criterion-named classes. A SEPARATE FILE from test_we_dl_notice.py on purpose: the client leg has a different field set, a different recipient rule and a different failure vocabulary, and sharing a file would invite the inheritance E-4 forbids.",
-      "artifact_covered_by": ["E-0", "E-1", "E-2", "E-3", "E-4"]
+      "artifact_covered_by": [
+        "E-0",
+        "E-1",
+        "E-2",
+        "E-3",
+        "E-4"
+      ]
     },
     {
       "path_or_key": "infra/aws/terraform/ticket-center/main.tf",
       "kind": "terraform",
       "commit_or_etag": "THIS COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "DESIRED plane only: terraform validate rc=0, fmt canonical. NO plan, NO apply. Adds the CLIENT_LINK_MAP env slot, declared '{}'. ⛔ fmt -check FIRST RETURNED RC=3 (a misaligned '=' on the new key) -- caught only because the rc was captured rather than discarded into /dev/null, which is the same rc-discipline that caught a crashing comp-closure reading as rc=0 earlier in this session.",
-      "artifact_covered_by": ["E-0"]
+      "deploy_evidence": "DESIRED plane only: terraform validate rc=0, fmt canonical. NO plan, NO apply. Adds the CLIENT_LINK_MAP env slot, declared '{}'. \u26d4 fmt -check FIRST RETURNED RC=3 (a misaligned '=' on the new key) -- caught only because the rc was captured rather than discarded into /dev/null, which is the same rc-discipline that caught a crashing comp-closure reading as rc=0 earlier in this session.",
+      "artifact_covered_by": [
+        "E-0"
+      ]
     }
   ],
   "acceptance": [
@@ -44,7 +58,7 @@
       "output_evidence": "rc=0, 19 tests OK overall, 5 in E0_FirmAwareLinkTarget. DENOMINATOR AS FIRMS, NAMED: the map carries 3 OF 4 FIRMS -- 49financial, cottonwood, demo -- and NOT inflection, asserted directly (sorted(CLIENT_LINK_MAP) == the three, len == 3, inflection not in it). BOTH DIRECTIONS: each of the three firms WITH a target gets its link rendered (subtested per firm); inflection gets resolve_client_link -> None AND the body carries none of the mapped URLs AND contains no 'http' at all -- so no link of any kind survives, not merely not-that-one. NO DEFAULT ROW EXISTS TO FALL BACK TO: '*' asserted absent from the map, and an unmapped firm, an empty firm and None all resolve to None. FIRM-BLIND MUTANT: a body built the forbidden way (one URL for everyone, resolved without consulting the firm) does emit a link, and the real path for inflection does not -- the two are asserted unequal, so the test can distinguish the correct implementation from the forbidden one.",
       "denominator": "5 tests in E0_FirmAwareLinkTarget; 3 of 4 firms mapped and subtested individually; 1 of 4 (inflection) asserted link-free; 3 unmapped-input shapes",
       "status": "PASS",
-      "status_reason": "PLANE: code, resting on TO-B's CODE-plane measurement of the portal at DEV 483b896c (with the PROD-direction check and its stated residual). ⛔ THE ABSENCE OF A '*' ROW IS THE LOAD-BEARING PART AND IS EASY TO 'FIX' BY MISTAKE: a default row looks like robustness and silently re-introduces the exact defect -- an inflection user sent to a page that bounces them. That is why the no-default-row assertion is its own test rather than a comment."
+      "status_reason": "PLANE: code, resting on TO-B's CODE-plane measurement of the portal at DEV 483b896c (with the PROD-direction check and its stated residual). \u26d4 THE ABSENCE OF A '*' ROW IS THE LOAD-BEARING PART AND IS EASY TO 'FIX' BY MISTAKE: a default row looks like robustness and silently re-introduces the exact defect -- an inflection user sent to a page that bounces them. That is why the no-default-row assertion is its own test rather than a comment."
     },
     {
       "criterion_id": "E-1",
@@ -61,10 +75,10 @@
       "criterion_verbatim": "pickup notification exercised, claimer's FULL NAME rendered, degradation path named when the directory has no such row.",
       "method": "test_suite",
       "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_client_notify.py -v  (class E2_PickupNotification)",
-      "output_evidence": "rc=0, 4 tests. FULL NAME RENDERED: 'Menachem Stein has picked up your request' asserted verbatim in the body. DEGRADATION EXERCISED across three empty shapes (None, '', '   '): each raises ClaimerNameUnresolved rather than sending. THE REFUSAL ITSELF IS ASSERTED NOT TO LEAK: the exception message is checked to contain NO internal email address -- a refusal that discloses what it refused to disclose would be worse than the send. FIRED FROM THE REAL CLAIM PATH: a submit-then-claim through lambda_handler returns 200 with status in_progress, and the log carries EITHER WE_CLIENT_SENT kind=pickup OR WE_CLIENT_NO_NAME kind=pickup -- asserted as a disjunction because the FakeTable's claimed_by depends on _directory_snapshot, and BOTH outcomes are correct while SILENCE IS NOT. That assertion is a reachability control in the A-3b shape: it proves the pickup leg was ENTERED rather than skipped.",
-      "denominator": "4 tests in E2_PickupNotification; 3 empty-name shapes subtested; 1 end-to-end claim; 2 acceptable outcomes, silence excluded",
+      "output_evidence": "rc=0, 7 tests (was 4; REBUILT ON THE RULING BELOW). FULL NAME RENDERED when it resolves: 'Menachem Stein has picked up your request' verbatim, and claimer_label reports NO degradation on that path. DEGRADED PATH STILL SENDS, across three empty shapes (None, '', '   '): the body carries 'An Opal advisor has picked up your request'. THREE-WAY DISCRIMINATION IN THE LOG, the gate's non-optional condition: no_claimer / row_found_no_name / no_row_or_lookup_failed, asserted as three DISTINCT tokens over three constructed rows. THE LINE IS EMITTED, NOT MERELY DERIVABLE: stdout carries 'WE_CLIENT_NAME_DEGRADED ... reason=row_found_no_name' plus a pointer to the ENRICHMENT-* line. AND THE TOKEN DISCRIMINATES: a resolved name emits NO degradation line, so it cannot fire on the happy path. NEVER DISCLOSES THE INTERNAL ADDRESS: the degraded body is asserted to contain neither the claimer's address nor '@opalinvest.com' at all. END-TO-END: submit-then-claim returns 200 in_progress and EXACTLY ONE pickup send -- no longer a disjunction, because under the ruling the pickup ALWAYS sends and silence is now a defect rather than an acceptable branch.",
+      "denominator": "7 tests in E2_PickupNotification; 3 empty-name shapes subtested; 3 of 3 degradation causes given distinct tokens; 1 end-to-end claim asserting exactly 1 send",
       "status": "PASS",
-      "status_reason": "PLANE: code. ⛔ THE DEGRADATION CHOICE IS A JUDGEMENT AND I AM FLAGGING IT RATHER THAN PRESENTING IT AS RULED. _directory_snapshot FAILS SOFT by design, so claimed_by can carry an email and no name. Three options, none free: (a) fall back to the claimer's EMAIL -- discloses an internal staffer's address to a client; (b) substitute 'an Opal advisor' -- answers with something Andrew did not rule; (c) REFUSE and send nothing -- the client gets nothing and the gap becomes a log line. I TOOK (c): it keeps the refuse-loudly discipline, never discloses an address he did not approve disclosing, and makes a directory gap VISIBLE. FOR 1.0.0_SA_CTO~Z: (b) is defensible and is a one-line change -- whether a client is better served by a vaguer message than by none is his call, not mine. The claim itself is unaffected either way."
+      "status_reason": "PLANE: code. \u26d4 RULED 2026-08-21T09:06Z BY 1.0.0_SA_CTO~Z, OVERTURNING WHAT I BUILT, AND THE REASONING BEATS MINE. I built (c) REFUSE-AND-SEND-NOTHING and rejected (b) 'An Opal advisor' as 'an answer he did not give'. The gate: (c) IS EQUALLY AN ANSWER HE DID NOT GIVE -- Andrew ruled the happy path and left the degraded one undetermined, so 'he didn't say' does not select between them. What DOES select: (1) 'An Opal advisor' discloses a STRICT SUBSET of the approved full name, and a degraded path disclosing LESS than the approved maximum needs no new sovereign word -- which is exactly why (a), an internal EMAIL, stays rejected, since that discloses something OUTSIDE the approved set; (2) it is a less-specific TRUE description, and the content-projection discipline forbids INVENTING, not GENERALISING -- an Opal person did claim it, only the name lookup failed; (3) (c) sends NOTHING, and silence is the failure Andrew HIMSELF named when he approved the submit-ack ('a form that submits into silence reads as broken'). \u26a0 THE RESIDUAL I MUST STATE: the ROW distinguishes only two of the three causes -- _directory_snapshot leaves user_id None for BOTH 'no PROFILE row' and 'lookup did not complete', so the third token is named no_row_or_lookup_failed and SAYS SO. The separation exists across TWO log lines in the SAME invocation (this token plus the snapshot's own ENRICHMENT-NOROW / ENRICHMENT-FAILED), correlated by ticket id. Stated rather than papered over: an ops reader pairing them gets all three."
     },
     {
       "criterion_id": "E-3",
@@ -131,7 +145,8 @@
   "surprises": [
     "terraform fmt -check RETURNED RC=3 ON MY FIRST TF EDIT -- a misaligned '=' on the new CLIENT_LINK_MAP key. I had redirected fmt's output to /dev/null and would have missed it entirely had I not captured the rc separately. Same rc-discipline that caught a crashing comp-closure reading as rc=0 earlier in this session; fixed with terraform fmt, re-checked to RC=0.",
     "THE PICKUP LEG'S END-TO-END TEST HAD TO BE WRITTEN AS A DISJUNCTION, AND THAT IS THE HONEST FORM RATHER THAN A WEAKNESS: the FakeTable's claimed_by depends on what _directory_snapshot produced, so the test asserts EITHER a send OR a named no-name refusal, and excludes SILENCE. Asserting a send would have made the test depend on a stand-in's fidelity to a live directory; asserting nothing would have let a skipped leg pass. It is A-3b's reachability shape arriving on a different criterion.",
-    "MY OWN HAND-WRITTEN MESSAGE TIMESTAMPS DRIFT +2 TO +52 MINUTES (mean +19.1 over 17 sends), confirming 2.0.0_SA_COO~Z's fabric-wide ratchet at a third seat. Remedy adopted mechanically: `date -u` read in a PRIOR tool call, then written -- which also satisfies the new completed-act law. Reported once and not chased further."
+    "MY OWN HAND-WRITTEN MESSAGE TIMESTAMPS DRIFT +2 TO +52 MINUTES (mean +19.1 over 17 sends), confirming 2.0.0_SA_COO~Z's fabric-wide ratchet at a third seat. Remedy adopted mechanically: `date -u` read in a PRIOR tool call, then written -- which also satisfies the new completed-act law. Reported once and not chased further.",
+    "SUPERSESSION ANNOTATION, added 2026-08-21T09:1xZ per 1.0.0_SA_CTO~Z's ruling (msg 4292): statements in this instance routing the APPLY to the laptop are SUPERSEDED by CLAUDE.md Rule 26 @95b7eeb458 -- 'THE APPLY RUNS ON THE DEVICE THAT OWNS THE WORK. NEVER FERRY AN APPLY ACROSS FABRICS' (Andrew-direct: 'we need to run applys on this device, cant be outsourcing that its too messy to do it cross fabric'). The apply for this work is 0.5.0_AE_OpalETL~Z's, on site Z, and STILL REQUIRES ANDREW'S WORD -- Rule 26 changes WHO applies, not WHETHER. ANNOTATION ONLY: no evidence row was edited, because the rows are TRUE ABOUT WHAT WAS MEASURED and only the routing statement moved. Rewriting an accepted instance's evidence would destroy the record of what was believed when."
   ],
   "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-21/laneZ_toe_client_leg_0840-0900Z.md",
   "compiler_tools": [

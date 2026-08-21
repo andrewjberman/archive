@@ -16,7 +16,11 @@
       "commit_or_etag": "THIS COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "LAMBDA PLANE -- BUILD ONLY, NO APPLY OPENED, and it lands ON TOP OF AN ALREADY-UNAPPLIED QUEUE. Measured at 20260821T0325Z (run workflows/atom_decomposition/runs/ticket-center-deployed-vs-built/20260821T0325Z/ @78218fc482, accepted msg 4185 after 1.0.0_SA_CTO~Z re-derived it by a different path): the executing opal-ticket-api is built from 1fd9ef2750, HEAD was already 4 commits ahead, and the <module-level region> -- where this work's imports and constants go -- was ALREADY DIVERGED by 81c502cff2 + 9121a55330 + b121c2f26e. THEREFORE THE W-E APPLY CANNOT BE REASONED ABOUT AS A CLEAN SINGLE-CHANGE APPLY: it will carry W-A's queue with it. Stated here at 1.0.0_SA_CTO~Z's explicit instruction (msg 4189 bound 1) so nothing in this instance implies otherwise. The apply leg is the laptop's under the envelope law @550b20ec5b; .open_deploys/ carries no ticket-center entry, so nothing is stranded. Diff shape: +162/-0, a surgical add -- no whole-file rewrite, 0 CRLF pairs, 0 non-ASCII bytes.",
-      "artifact_covered_by": ["WE-4", "WE-5", "WE-6"]
+      "artifact_covered_by": [
+        "WE-4",
+        "WE-5",
+        "WE-6"
+      ]
     },
     {
       "path_or_key": "infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py",
@@ -24,7 +28,11 @@
       "commit_or_etag": "THIS COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "A test battery has no deployed side: build-and-upload.sh zips exactly one member (lambda_function.py), so nothing under tests/ is ever packaged. 19 tests across 4 criterion-named classes. It REUSES test_authz_matrix's FakeTable, event builder and authorizer contexts rather than re-declaring them (build-ladder rung 2 -- a second FakeTable would drift from the first the day the handler changes).",
-      "artifact_covered_by": ["WE-4", "WE-5", "WE-6"]
+      "artifact_covered_by": [
+        "WE-4",
+        "WE-5",
+        "WE-6"
+      ]
     },
     {
       "path_or_key": "infra/aws/terraform/ticket-center/main.tf",
@@ -32,7 +40,9 @@
       "commit_or_etag": "THIS COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "DESIRED plane only -- terraform validate rc=0 and fmt -check rc=0 on site Z (Terraform v1.15.8, via winget; NOTE for the record: CLAUDE.md's '.tools/terraform.exe' DOES NOT EXIST ON THIS BOX -- the device-agnostic resolution found the binary on PATH instead). Adds (a) a SEPARATE aws_iam_role_policy 'opal-ticket-api-ses-send' granting ses:SendRawEmail on the opalinvest.dev identity, read through a data source so the plan FAILS LOUDLY if the identity is renamed or removed rather than granting on a string that resolves to nothing, and (b) two DELIBERATELY EMPTY env slots, TICKET_DL and TICKET_DEEP_LINK_BASE. NO PLAN AND NO APPLY WERE RUN: only `terraform init -backend=false` (providers, no state) plus fmt and validate, all read-only. NO bounce/complaint SNS topic was cloned from the ported ses.tf -- that is notification machinery Andrew did not ask for and the 2026-07-28 moratorium is untouched for everything else.",
-      "artifact_covered_by": ["WE-5"]
+      "artifact_covered_by": [
+        "WE-5"
+      ]
     }
   ],
   "acceptance": [
@@ -146,7 +156,8 @@
     "infra/aws/lambda/trade-pipeline/trade-submission-handler/src/config.py:14 bakes DASHBOARD_URL = 'https://trades.opalcapital.com'. PLANE NAMED: this is a REPO read at HEAD; I did NOT read the deployed artifact, so whether the running code carries it is UNMEASURED, not absent. NEVER#23 is explicit that opalcapital.com is not a domain we own -- 'IT IS NOT A VERIFICATION TODO, IT IS SOMEONE ELSE'S PROPERTY'. It is another lane's artifact and I took no action; it is reported because I read that file as the ported shape and it is exactly the failure mode a baked default invites, which is why TICKET_DEEP_LINK_BASE in this build is refuse-if-unset instead.",
     "The same file's BROKERAGE_EMAILS block carries 'NOTE: Using verified test email while SES is in sandbox mode / TODO: Update to real brokerage emails after SES production access' with all five brokerages pointed at one internal address. SES production access was GRANTED at ~0305Z today (case 178727932800843), so that TODO's precondition is now met and the note is stale. Another lane's call entirely; no action taken.",
     "The PROOF_OF_SPEC schema's `phase` enum does not fit this TO. Its build values are P1-SCRIPTS..P5-DECOMMISSION, which are MDPF-build-program vocabulary; the two non-build values are for investigations. A D7 ticketing BUILD is neither. I chose P1-SCRIPTS as the least-false (this is a script-layer build) rather than NON-BUILD-OTHER, which would be simply untrue. This is the same Rule-24 exhaustiveness gap the `firm` enum already hit and fixed by adding FABRIC -- whose own schema note says an inexhaustive enum 'forces either a false firm or a permanent violation'. Routed to 1.0.0_SA_CTO~Z as a schema observation; nothing changed.",
-    "CLAUDE.md's Quick-reference names the Terraform binary as `.tools/terraform.exe`. THAT FILE DOES NOT EXIST ON SITE Z. Terraform v1.15.8 resolves on PATH from a winget install instead, which is what this build used. Consistent with the device-agnostic rule (derive, do not hardcode); surfaced because a seat that takes the documented path literally here gets rc=127 and may conclude Terraform is unavailable. No action taken."
+    "CLAUDE.md's Quick-reference names the Terraform binary as `.tools/terraform.exe`. THAT FILE DOES NOT EXIST ON SITE Z. Terraform v1.15.8 resolves on PATH from a winget install instead, which is what this build used. Consistent with the device-agnostic rule (derive, do not hardcode); surfaced because a seat that takes the documented path literally here gets rc=127 and may conclude Terraform is unavailable. No action taken.",
+    "SUPERSESSION ANNOTATION, added 2026-08-21T09:1xZ per 1.0.0_SA_CTO~Z's ruling (msg 4292): statements in this instance routing the APPLY to the laptop are SUPERSEDED by CLAUDE.md Rule 26 @95b7eeb458 -- 'THE APPLY RUNS ON THE DEVICE THAT OWNS THE WORK. NEVER FERRY AN APPLY ACROSS FABRICS' (Andrew-direct: 'we need to run applys on this device, cant be outsourcing that its too messy to do it cross fabric'). The apply for this work is 0.5.0_AE_OpalETL~Z's, on site Z, and STILL REQUIRES ANDREW'S WORD -- Rule 26 changes WHO applies, not WHETHER. ANNOTATION ONLY: no evidence row was edited, because the rows are TRUE ABOUT WHAT WAS MEASURED and only the routing statement moved. Rewriting an accepted instance's evidence would destroy the record of what was believed when."
   ],
   "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-21/laneZ_we_build_ses_first_line_0430-0510Z.md",
   "compiler_tools": [
