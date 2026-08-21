@@ -30,7 +30,7 @@
 Re-point L118 / L411 / TF L237 from *audience*-dependent to **Q3/link-target**-dependent; the refusal to bake a route stands.
 ⚠ **Run the census `comp-find -i`** -- case-sensitive returns 7 of 13 here, and the miss is non-random.
 
-**A4. SUBJECT + CTA.** Subject `[<FIRM>] <requester subject>`. CTA target: **deep-link to the ticket if a per-ticket route exists, else the list page -- resolved by TO-B's measurement, not by choice.**
+**A4. SUBJECT + CTA.** Subject `[<FIRM>] <requester subject>`. ✅ **CTA TARGET RESOLVED 2026-08-21 ~08:5xZ BY TO-B MEASUREMENT: THE LIST PAGE.** No per-ticket deep-link route exists -- 25 routes in `App.tsx`, only 2 carry a param/wildcard and neither is per-ticket; **no query-param path either** (zero `useSearchParams`/`location.search` in the TicketCenter page; its 6 `ticket_id` hits are React keys and list button targets). **Discriminating control run:** the same regex against a synthetic `/ticket-center/:ticketId` fixture DOES detect a param, **so the absence is measured, not a broken search.** The conditional ruling resolves to its second branch by fact, not by choice.
 ⛔ **CTA FORM RULED 2026-08-21 ~08:2xZ, on TO-C's surprise-channel finding: THE SES LEG IS `MIMEText(body, 'plain')`, so "one standard hyperlink" on that body is A BARE URL RELYING ON CLIENT AUTOLINKING, not a labelled link.**
 **RULED: plain text, CTA URL ON ITS OWN LINE, bare.** It autolinks in every major mail client, it cannot render broken, and a URL alone on a line is also what Andrew's own formatting instinct asks for (*"1 line key lines or hyperlinks"*).
 ⛔ **DO NOT ADD A `multipart/alternative` HTML PART IN v1.** A labelled link would need a second body -- **and two bodies for one message is the SECOND-HOME defect one surface over: they can diverge, and nothing makes them stay in step.** If a labelled link is later wanted, that is a deliberate act with its own sync obligation, not a formatting tweak. **Carded to Andrew, not built.**
@@ -108,9 +108,18 @@ Re-point L118 / L411 / TF L237 from *audience*-dependent to **Q3/link-target**-d
 
 **TWO sends, both ruled:** **(i) submit acknowledgement** (Andrew, CALL 5: *approved* -- a form that submits into silence reads as broken) and **(ii) pickup notification naming the claimer by FULL NAME** (CALL 6).
 ⛔ **SINGLE-RECIPIENT BY CONSTRUCTION, NOT BY CONVENTION** -- addressed to the requester, never to a list. **One firm's ticket reaching another is a cross-tenant leak.**
+
+> ### ⛔ E-0 (NEW, TO-B's B-3 FINDING) -- **A CLIENT-FACING LINK IS NOT UNIFORMLY SAFE, AND THE FIRM KEY GOVERNS IT**
+> Measured at portal DEV, re-derived at the gate: **`FIRM_ALLOWED_PATHS` carries 4 firms** -- `/ticket-center` is in **0 of 4** *and* sits behind `<ProtectedRoute requireInternal>` (`ProtectedRoute.tsx:44`, `firmId !== 'opal-capital'` -> bounce), **so a client cannot reach the board by TWO INDEPENDENT GATES** (correct -- the board is internal).
+> **BUT `/submit-request` IS IN ONLY 3 OF 4 -- NOT `inflection`, deliberately (`firmAccess.ts:66`, the 05-28 Tools-section ruling).**
+> **THEREFORE A PICKUP EMAIL TO AN INFLECTION USER POINTING AT `/submit-request` BOUNCES THEM** -- a notification whose call-to-action lands on an access denial is worse than no link.
+> **RULED: the client email's link target is FIRM-AWARE, resolved through the SAME firm key as the recipient seam, and OMITTED (not defaulted) for a firm with no reachable target.** A firm-blind client link is forbidden.
+> >> **THE ARCHITECTURAL POINT, and it generalises past this TO: THE FIRM KEY RESOLVES BOTH *WHO RECEIVES* AND *WHAT THEY CAN BE SENT TO*.** Andrew declared the seam for recipients; the same seam is load-bearing for link targets, and building it for one and not the other leaves the second to be retrofitted.
+> ⚠ **PLANE: CODE, at portal DEV.** Branch agreement is **not** proof the deployed bundle was built from that HEAD -- that is CI's plane and is not claimed.
 ⛔ **CONTENT PROJECTION BINDS HARDER HERE THAN INTERNALLY.** The intake-snapshot release in TO-A is an **INTERNAL** ruling. **Re-derive the client field set from WE-4's pointer-not-home limb; do NOT inherit TO-A's set.**
 ⛔ **AND NOTE THE ASYMMETRY, DELIBERATE:** internal gets **one** email and **no** follow-ups; the client gets a **pickup follow-up**. A reader taking *"no follow-ups"* as global will delete this.
-<expected_criteria>E-1,E-2,E-3,E-4,E-5</expected_criteria>
+<expected_criteria>E-0,E-1,E-2,E-3,E-4,E-5</expected_criteria>
+- **E-0** FIRM-AWARE LINK TARGET, exercised **both directions**: a firm WITH a reachable target gets the link; **`inflection` gets NO link, not a default one.** A firm-blind link must FAIL a test.
 - **E-1** submit-ack exercised on a real row.
 - **E-2** pickup notification exercised, **claimer's FULL NAME rendered**, degradation path named when the directory has no such row.
 - **E-3** **SINGLE-RECIPIENT asserted structurally** -- a mutant supplying two recipients must FAIL.
