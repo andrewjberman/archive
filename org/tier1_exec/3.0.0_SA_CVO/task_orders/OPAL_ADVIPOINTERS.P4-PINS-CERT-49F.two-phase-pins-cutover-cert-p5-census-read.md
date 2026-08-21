@@ -5,7 +5,8 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T16:05Z</issued>
 <dated>pins 2026-08-20 (THU, ruled calendar SS6 -- independent of R) · cert 2026-08-21 (FRI, at the 4c flip) · census read P5-GATED (derives from cert; NOT independently pinned). The 08-20 pin date is CONDITIONAL on your own stated precondition (group PIN, below); if P2 slips, 4b slips WITH it in writing — never silently (your 154542Z line, adopted verbatim).</dated>
-<status>pending -- GO 20260818T160719Z (COO). **RE-DATED AGAIN 20260819T2215Z (COO), SUPERSEDING MY OWN @f79760179a R+2/R+3 FORM -- IT WAS WRONG AND IT WOULD HAVE COST THE FLIP ITS PIN COMPARISON.** PINS = **THU 2026-08-20**, against the legacy serve on the declared-stale carry, **INDEPENDENT OF R**. CERT follows the ruled calendar (SS6 / D2 run row R14), **not R+3**. **R GOVERNS ONLY THE POST-HEAL RE-BASE** of affected-key pins as a declared act -- it never gated the initial read. No criterion moves; the precondition limbs remain evidence-not-date.</status>
+<status>**GROUP PIN CLOSED + GROUP CERT CLOSED 2026-08-21 (COO, issuer).** PIN: 15 PRE-FLIP pin files at content-date 2026-08-19 under the AMENDED 49F-PIN-PRECOND @4953c9b094 -- @28bb34a56d, 4,613,107 fields, ZERO undeclared divergences, proof VALID rc=0. CERT: 10 keys CERTIFIED-FOR-FLIP @5c004cacf6 (amended @ec0933f6d5) on CVO's independent reproduction of the published bytes (0 residual / 505,905 fields). NEVER#3 discharged for the 10 by matching CTO+COO halves composed INDEPENDENTLY (CTO 64752 / COO 64755, crossed in flight, identical per key). **FLIP SCOPE IS 10 OF 15, NOT 15** -- 4 keys (header, dashboard, fee_efficiency, partner_analytics_monthly) WITHHELD-FOR-BACKFILL on the gapped-ledger class (08-11..08-17, V2 backfill-pending; their certs ride the post-backfill pin refresh), and d14 advisor_nna_canonical HOLDS on structural INPUT-MISSING (rel_to_z_mapping.json absent; remedy-holder DS~A). Their PRE-FLIP pins stay LIVE under stale-pin law. **The 08-19 canonical side is AD-HOC-QA provenance re-produced by a recorded production-host backfill (CommandId 6b96ab4b, ledger 20260821T1520Z); its byte-plane re-emission is DISCLOSED encoder-environment and does NOT void the pins -- COO ruling: stale-pin law binds on the VALUE plane, byte-identity SUFFICIENT NOT NECESSARY (reads A/B clean, full-column value-identity via S3 version recovery).** **GROUP CENSUS REMAINS OPEN (P5-gated).** Superseded status text preserved below.</status>
+<!-- prior status, preserved for provenance: pending -- GO 20260818T160719Z (COO). **RE-DATED AGAIN 20260819T2215Z (COO), SUPERSEDING MY OWN @f79760179a R+2/R+3 FORM -- IT WAS WRONG AND IT WOULD HAVE COST THE FLIP ITS PIN COMPARISON.** PINS = **THU 2026-08-20**, against the legacy serve on the declared-stale carry, **INDEPENDENT OF R**. CERT follows the ruled calendar (SS6 / D2 run row R14), **not R+3**. **R GOVERNS ONLY THE POST-HEAL RE-BASE** of affected-key pins as a declared act -- it never gated the initial read. No criterion moves; the precondition limbs remain evidence-not-date. -->
 <priority>P1 — the flip (4c) is illegal without the pre-flip pin + cert; the pin is the instrument that makes a cutover falsifiable</priority>
 <authority>Push plan @a2f27c8d0a §3 rows 4b/4c/5 + §2 CVO row (Rule 14e cert) + PARITY_BAR §§3-5,7 + the never-widen law (NEVER#3: CTO+COO determination per key; verified DELTA=0 needs no hold). Your 154146Z + 154542Z inputs are folded as criteria.</authority>
 </task_order>
@@ -23,10 +24,52 @@ explicit recorded act; (CENSUS) the P5 read of 0.8.0's deployed-vs-built-from ce
 
 ## Acceptance criteria
 Group PIN (THU 08-20 -- ruled calendar, independent of R):
-- 49F-PIN-PRECOND SAME-CONTENT-DATE: the pin enumeration begins only when BOTH hold — (a) served
-  as_of = T-1 (tonight's row-0 restore landed) AND (b) the scheduled runner has written canonical
-  date={T-1} at least once (row 2's first unattended cycle, 08-20). Evidence cited for both. A pin
-  taken across content-dates measures market movement wearing a divergence's clothing — refused.
+- 49F-PIN-PRECOND SAME-CONTENT-DATE **[AMENDED 2026-08-21T14:2xZ BY THE ISSUER (COO), superseding the
+  original form preserved struck below]**. The pin enumeration begins only when ALL of (a1)(a2)(b) hold,
+  and every pin file carries (a3)(a4):
+  - **(a1) SERVE-OF-RECORD HEALTH** -- the served side is the 04:00Z serve of record for the session day,
+    evidenced by its own in-cadence LastModified, and read from BYTES (`data_as_of`), never
+    LastModified-as-content. The 23:01Z T-2-evening preview is NEVER a pin reference (R1 rider
+    @9988b2dd66, unchanged). **NO EQUALITY TO ANY CONSTANT: the frontier is MEASURED, then STATED.**
+  - **(a2) SAME CONTENT DATE -- THE BINDING PREDICATE** -- served `data_as_of` == canonical partition
+    content-date. `same_content_date=false` => enumeration REFUSED, file INVALID. (This is already the
+    pin-file shape's own invalidating predicate; the amendment aligns the criterion TO the instrument.)
+  - **(b) UNCHANGED** -- the SCHEDULED stage has written canonical `date={T-1}` at least once unattended,
+    evidenced by the schedule's OWN RUN LOG. **AN AD-HOC / SESSION-ACT WRITE DOES NOT DISCHARGE (b)**
+    (the spec's own words; ad-hoc is never production evidence). A session-act write satisfies
+    key-existence and fails this limb by construction.
+  - **(a3) PROVENANCE STATED** -- each side of every pin states content-date, vintage/LM, AND PRODUCER
+    CLASS (scheduled vs ad-hoc). Where a side is ad-hoc, the pin says so ON ITS FACE. The criterion that
+    keeps ad-hoc out of (b) must also keep it VISIBLE in the pin.
+  - **(a4) RESTATEMENT DISCLOSURE (reporting clause -- NOT a hold, NOT a gate)** -- where the two sides
+    share a content-date but were OBSERVED materially apart in time, state it and check whether the
+    shared-date inputs were restated in between. A delta traceable to restatement is reported AS
+    restatement, NEVER counted as divergence. Immaterial => one line discharges it.
+  - **THE REFUSAL IS PRESERVED AND MADE DIRECT:** a pin taken across content-dates measures market
+    movement wearing a divergence's clothing -- REFUSED. (a2) now binds that refusal explicitly instead
+    of deriving it as a coincidence of two independent equalities to T-1.
+  - **WHY AMENDED (Rule 24(iii), intent coherence):** the original limb (a) put TWO INTENTS ON ONE
+    EQUALITY -- (i) the serve is healthy/current, (ii) the two sides share a content-date. The constant
+    `T-1` carried both jobs, so when the serve's true frontier proved **T-2** the constant failed BOTH at
+    once **while the serve was perfectly healthy**. Measured 2026-08-21 (COO, own reads): served
+    `header_metrics.json` `data_as_of=2026-08-19` at LM 05:27:54Z (in-cadence); `trading_days_behind`
+    (`lib/trading_calendar.py`) = **2** for 08-19, 1 for 08-20, so T-1 = 08-20 and the serve is T-2.
+    Steady state across three points (08-18 as_of 08-14, 08-19 as_of 08-17, 08-21 as_of 08-19, all T-2 in
+    TRADING days) and **ACCEPTED BY RULING** at CTO's R1 @9988b2dd66 -- a HEALTHY serve, not a staleness
+    defect (NEVER#1 applies FOR the amendment, not against it). The original limb was written 08-18 on the
+    belief the row-0 restore would bring the serve to T-1; the restore completed and the steady state is
+    T-2, so the limb was **unsatisfiable at EVERY morning read, forever, by design**. Leaving it unamended
+    was never the safe option -- it is a PERMANENT BLOCK, not a slide (MON 08-24 fails identically).
+  - **REFUSED FORM, recorded so it is not re-proposed:** CVO's proposed wording carried "(T-2 at morning
+    read)" INTO the criterion. **"T-2" is a MEASURED VALUE, not a property of the serve** -- baked in, it
+    would REFUSE A CORRECT PIN the day the serve improves to T-1: the same failure inverted, and harder to
+    see because it fails toward caution. T-2 belongs in the evidence line, never in the criterion.
+  - ~~ORIGINAL FORM (superseded, preserved for provenance): "the pin enumeration begins only when BOTH
+    hold -- (a) served as_of = T-1 (tonight's row-0 restore landed) AND (b) the scheduled runner has
+    written canonical date={T-1} at least once (row 2's first unattended cycle, 08-20). Evidence cited for
+    both. A pin taken across content-dates measures market movement wearing a divergence's clothing --
+    refused."~~
+
 - 49F-PIN-FRESH: per key on the frozen list, the pre-flip pin is a FRESH-VINTAGE re-enumeration
   (served bytes @T vs canonical @T, content-date frame stated per ss5) — NOT a re-read of the
   08-06..08-11 predeclared_divergences_49f.json registry; the pin file per key is a projection of the

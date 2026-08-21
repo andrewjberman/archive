@@ -61,8 +61,8 @@ hardcode the band extent.
       <if_mismatch>Itemize MISSING; fix before rendering.</if_mismatch>
     </step>
     <step>
-      <run>comp-surface-check (BY HAND — SEV1 surface, cannot block)</run>
-      <expect>Read it. ModelPortfolios is SEV1.</expect>
+      <run>[STRUCK 2026-08-21 BY THE ISSUER (COO) — comp-surface-check is RETIRED, Andrew-direct 2026-08-06: "I want comp-surface-check retired. i do not like that tool." Executable, registry rows, comp-which route, S3 publish leg, portal CI leg and pre-commit hook were all removed. THIS STEP WAS UNRUNNABLE FROM 08-06 ONWARD AND MADE THIS TO UNSATISFIABLE-BY-CONSTRUCTION.] SUBSTITUTE: none, deliberately. Per CLAUDE.md Rule 20 the MP/benchmark/ADVI surfaces now carry NO automated commit-time guard and "that is the accepted consequence of the ruling" — re-instrumenting here would rebuild what Andrew retired. The SEV1 CARE remains: ModelPortfolios is SEV1, so render and read the surface (the /frontend-dev screenshot loop is the surviving instrument), and state what you read.</run>
+      <expect>A rendered read of the SEV1 surface, stated. Silence is not a pass.</expect>
       <if_mismatch>Silence is not a pass.</if_mismatch>
     </step>
   </phase>
@@ -107,7 +107,7 @@ hardcode the band extent.
 2. Interpolated band renders as a conspicuous yellow dashed line, visually distinct from measured — screenshot-verified.
 3. `point_class` read from the served slice per @708661904; no interpolated point rendered as measured.
 4. Upgrade-ready: the band renders correctly as the interpolated region shrinks (real data superseding estimates); band extent NOT hardcoded.
-5. Zero TS errors; comp-surface-check read by hand; color law honored.
+5. Zero TS errors **— VERIFIED WITH `bun run typecheck` / `tsc -b`, NEVER bare `tsc --noEmit`** (AMENDED 2026-08-21 by the issuer, folding a same-day measured finding: the portal's root tsconfig.json is `"files": []` with project references only, so `tsc --noEmit` compiles an EMPTY set and returns rc=0 OVER DELIBERATE TYPE ERRORS — **its mutant control PASSES**. A criterion reading "zero TS errors" verified by the obvious command would have been satisfied by an instrument that checked nothing. Portal law: portal/CLAUDE.md "Typecheck law" @82d3f28f, on origin/DEV); ~~comp-surface-check read by hand~~ **STRUCK — the tool is RETIRED (Andrew-direct 2026-08-06) and this clause made the TO unsatisfiable-by-construction; no substitute instrument, per Rule 20's accepted consequence**; color law honored.
 6. Session log Compiler Tools section reproduces every `<run>` with observed output and pass/fail.
 </acceptance_criteria>
 

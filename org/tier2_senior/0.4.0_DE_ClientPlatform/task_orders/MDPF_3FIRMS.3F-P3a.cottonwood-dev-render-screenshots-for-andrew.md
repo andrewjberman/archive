@@ -6,7 +6,7 @@
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-23T00:50Z</issued_at>
-<status>staged</status>
+<status>staged -- DELIBERATELY NOT FLIPPED 2026-08-21, gap stated per COO's bar (a partial flip with a stated gap beats confident ones). The BUILD is evidenced: COO GO 005139Z, DEV render + screenshots delivered @c44c79ac6c, PROD verification @ee3d6db85d (five renders on portal-v2.1.142, bundle code-identity proven by 4 literal probes). TWO CRITERIA UNEVIDENCED: (a) NO ISSUER ACCEPTANCE RECORD EXISTS for this TO -- unlike its siblings 3F-P1/3F-P2, which carry COO 205817Z; a census over this seat's 585 files returns 5 hits for 3F-P3a and none is an acceptance. (b) CRITERION 5 READS "Zero served, zero promote, DEV only" while the strongest surviving evidence is a PROD verification -- the promote was CTO's separate leg (log 2026-07-23 "At CTO: the promote"), so this is plausibly post-TO work rather than a scope breach, but the TO as written cannot absorb it and that is an ISSUER call, not this seat's. Surfaced to COO for adjudication.</status>
 <priority>ANDREW-DIRECT (goal function restated). Verbatim below. Opens on G8-green; DE is idle-reserved for it.</priority>
 
 <authorization>
@@ -104,7 +104,7 @@ the frontend Cottonwood page for MDPF" ... "The entire point of _3FIRMS was to g
 3. Colour collision fixed if cheap, else noted + deferred to 3F-P3.
 4. **RENDERED SCREENSHOTS WITH REAL NUMBERS delivered to Andrew** (via /frontend-dev), trends populated,
    numbers legible, silver-canvas color law honored — the screenshot is the acceptance instrument.
-5. Zero served, zero promote, DEV only; portal main tree on DEV.
+5. Zero served, zero promote, DEV only; portal main tree on DEV. **[CLARIFIED 2026-08-21 BY THE ISSUER (COO), on 0.4.0_DE_ClientPlatform's surfaced gap -- the constraint is UNCHANGED IN FORCE; what is clarified is WHAT IT BINDS.] THIS CRITERION BINDS *THIS TO'S OWN ACTS*: the work delivered under 3F-P3a must itself serve nothing, promote nothing, and leave the portal main tree on DEV (Rule 19). A LATER, SEPARATELY-AUTHORIZED PROMOTE BY ANOTHER SEAT IS OUT OF SCOPE AND IS NOT EVIDENCE AGAINST THIS CRITERION** -- the 3F-P3a promote leg was CTO's, recorded at the time in the assignee's 07-23 log ('At CTO: the promote'). WHY THIS NEEDED AN ISSUER ACT RATHER THAN AN ASSIGNEE JUDGEMENT: the strongest surviving evidence for this TO is a PROD verification (@ee3d6db85d, five renders on the deployed opalinvest.dev bundle, code-identity proven by 4 literal probes), and a criterion reading 'zero promote' CANNOT ABSORB PROD EVIDENCE AS WRITTEN -- so the assignee correctly refused to flip and correctly refused to reconcile it themselves. **EVIDENCE THIS CRITERION NOW ASKS FOR: that no serve/promote act was performed UNDER THIS TO, and that the main tree was on DEV at delivery.** PROD-state evidence dated AFTER the TO's delivery neither satisfies nor violates it.
 6. Session log Compiler Tools section reproduces every `<run>` with observed output and pass/fail.
 </acceptance_criteria>
 

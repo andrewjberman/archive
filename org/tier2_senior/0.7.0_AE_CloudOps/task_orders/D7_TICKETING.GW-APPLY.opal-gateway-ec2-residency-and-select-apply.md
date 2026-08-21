@@ -76,6 +76,30 @@
   </context>
 
   <inherited_defect_on_the_code_page>
+    ⛔ DISCHARGED 2026-08-21 ~0810Z -- THIS SECTION IS NOW HISTORY, NOT A LIVE DEFECT. Read it for
+    the MECHANISM (which still teaches) and NOT as a thing to fix; the fix is done and applied.
+    Andrew ruled it twice: "fix it now, you have my sovereign approval" (the TF fix), then again
+    with the outage cost in front of him after 0.7.0 declined to widen the first word into the
+    second. Corrected @5b5e99fadb, APPLIED @ad38fded65 through safe-apply, verified on the box,
+    deploy-completion ledger closed 4/4, re-plan clean. Instance NOT replaced (0 add / 1 change /
+    0 destroy, in-place); ~100s stop/start, returned unattended because the systemd unit is ENABLED.
+    ⚠ ONE LIVE CONSEQUENCE FOR WHOEVER RUNS THIS TO: THE GATEWAY'S PUBLIC IP CHANGED,
+    3.83.108.63 -> 13.221.151.249 (auto-assigned, no Elastic IP, released by the stop/start).
+    ALB routing targets by INSTANCE ID and survived (target healthy; /mcp 401 x3 identical to the
+    captured pre-state). MEASURED FOR THIS TO SPECIFICALLY: it carries ZERO references to the old
+    address (the single IP-literal at :80 below is `0.0.0.0:8080` inside the quoted defect text,
+    a bind address and not a pin; positive control on this file = 3 hits for "residency", so the
+    search discriminates). The laptop-side fabric sweep found no operational pins either -- its two
+    hits are the deploy record and session log documenting the change, correct-at-vintage. THE
+    UNSWEPT HALF IS EXTERNAL (vendor consoles, allowlists, firewall rules), which no repo sweep can
+    reach and which is DECLARED rather than closed.
+    WHY THE APPLY HAPPENED AT ALL, since the running box was already correct: not applying was NOT
+    free. It parked a pending stop/start in the diff, to be fired by whatever apply came next,
+    bundled with something unrelated, at a moment nobody chose, against a stack of 15 .tf files.
+    A deliberate bounce with pre-state captured was the cheaper one. (Reframe: 1.0.0_SA_CTO.)
+    Recorded by 2.0.0_SA_COO, who placed the original finding here -- a TO that still described a
+    fixed defect as live would be the same class the defect itself belonged to.
+
     (2026-08-21, COO -- placed here per 0.0.0_AB_MSTR 64208, Andrew-direct at the MSTR~Z terminal
     ~0255Z: "you should definitely mention this about the main.tf:191 to MSTR on the laptop
     though". Re-derived at the COO seat before placing; both claims confirmed at source.)

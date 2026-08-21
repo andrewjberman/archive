@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "OPAL_ADVIPOINTERS.P4-REPOINT-49F",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/OPAL_ADVIPOINTERS.P4-REPOINT-49F.portal-firm-config-repoint-tolerant-read-then-flip.md",
+    "group": "OTHER",
+    "vintage_commit": "49dd8469d127301ec959cd1ad49968706d1908df"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/OPAL_ADVIPOINTERS.P4-REPOINT-49F_P4R1_READ_SURFACE_20260821.md",
+      "kind": "doc",
+      "commit_or_etag": "388ce182b6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Workspace CLOUD commit 388ce182b6 (author 0.4.0_DE_ClientPlatform): the per-key read-surface enumeration over the P4E-1 frozen list, the P4R-3 reachability blocker (source-confirmed at shared-advisor-router:183-204/:261-265 + firm-config.mjs:30-33, then live-measured with an in-bucket positive control), the :369 template-split finding, and the two disposed no-read-site keys. Same commit flips the TO status staged -> pending."
+    },
+    {
+      "path_or_key": "portal/src/api/endpoints/adviKeyRepoint.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "033ed3c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal DEV commit 033ed3c7 (author 0.4.0_DE_ClientPlatform): the per-KEY tolerant read. ADVI_REPOINT registry expresses the never-widen determination as data (FLIP 10 + HELD 4 + STRUCTURAL 1 = 15, the P4E-1 EMIT denominator); adviRead is new-preferred/legacy-fallback with a LOUD shape-mismatch path; ADVI_ROUTE_LIVE = false so the module is a pass-through until the AE route act lands. Module header carries the REMOVAL CONDITION per COO 64838. Portal main tree on DEV (Rule 19); unpushed -- lanes commit, MSTR integrates."
+    },
+    {
+      "path_or_key": "portal/src/api/endpoints/advisor-intelligence.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "033ed3c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven call sites rewired through adviRead, covering eight keys: getCumulativeChart (timeseries_chart_full), getTimeseriesOverview, getPlatinumPartnerAnalytics (quarterly + annual, monthly held at the SAME site), getPlatinumCumulativeChart, getPlatinumInflecTimeseriesChart (timeseries_chart), getPlatinumFirmMixSummary, getFirmLeaderboard (raw-fetch site: its body lifted into a closure so legacy and twin share ONE request path and the INFFIN #10 NaN strip applies to both). Dormant-path behavior is byte-identical to the prior code at every site."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "P4R-1",
+      "criterion_verbatim": "READ-SURFACE ENUMERATION: the per-key read surface committed first (key -> config/router/component read path), denominator = the FROZEN KEY LIST (P4E-1); any key whose read the portal does not exercise is stated as such (a key nobody reads cannot be flipped -- it is disposed in writing, not silently skipped).",
+      "method": "diff",
+      "invocation": "comp-find 'api/scoped/advisor-intelligence' portal/src ; comp-find -i 'ownership_map' portal/src ; comp-find -i 'clients-tab-slim' portal/src ; comp-find 'PLATINUM_BASE\\}/firm' portal/src",
+      "output_evidence": "Committed @388ce182b6. All 15 P4E-1 EMIT rows mapped to a read site (or to a stated absence). Sweep denominator 17 hits across 414 files -- the read surface is ONE file, portal/src/api/endpoints/advisor-intelligence.ts (swept, not assumed, per the TO's instruction). Counts reconcile FLIP 10 + HELD 4 + d14 1 = 15 against the CTO/COO determination and against the live S3 published/held split by two independent routes. Both no-read-site keys DISPOSED IN WRITING: ownership_map = 0 hits across 414 files (case-insensitive), resolving P4E-1 row 8's open consumer-cite for the portal read plane; clients-tab-slim = 1 hit and it is a COMMENT at types.ts:980, not a fetch.",
+      "denominator": "15 P4E-1 EMIT rows; read-surface sweep 17 hits / 414 files; absence censuses 0/414 and 1/414 (comment).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "P4R-2",
+      "criterion_verbatim": "TOLERANT READ: per key, new-preferred/legacy-fallback read landed with a LOUD shape-mismatch path (the FE-2 mutant discipline: unknown shape degrades loud, never silently falls back); zero TypeScript errors; schema-check 0 MISSING.",
+      "method": "command",
+      "invocation": "cd portal && bunx tsc -b --noEmit  (unpiped rc) ; bun run build ; comp-transform schema-check DistributionTab|AdvisorAnalytics|ClientsTab",
+      "output_evidence": "Landed @033ed3c7. PER KEY, not per call site: resolution keys on the ARTIFACT via ADVI_REPOINT, so the :369 templated site (quarterly|monthly|annual from one expression) cannot flip the HELD PA-monthly. LOUD shape path: transport failure falls back with a warn (expected pre-route); a 200 with an unrecognized shape falls back but emits console.error + a recorded diagnostic, because a wrong-shaped twin is a cutover defect and silently serving legacy would hide it. TYPECHECK: tsc -b --noEmit rc=0 unpiped, 0 output lines. schema-check: 0 MISSING across all three components, all rendered fields match their response types. BUILD: bun run build rc=0, built in 16.70s (the single 'error' match in the log is the asset filename ErrorMessage-*.js -- read and dismissed, not assumed).",
+      "denominator": "7 call sites rewired covering 8 keys (the 10 flip keys minus the 2 with no portal reader); 3 components schema-checked; tsc over the full referenced project set.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "P4R-3",
+      "criterion_verbatim": "FLIP PER KEY: flip commit per key (or per stated key group) ONLY after CVO's pre-flip pin + cert for that key are cited in the commit message; rendered read on DEV per flipped surface (screenshot via /frontend-dev -- silver-canvas law holds).",
+      "method": "live_read",
+      "invocation": "comp-keys prefix s3://opal-data-bd/platinum/advi/  (hypothesis) ; comp-keys prefix s3://opal-data-bd/platinum/firm/  (positive control, same bucket)",
+      "output_evidence": "NOT EXECUTED -- DECLARED-HELD on all 10 keys, in writing, per the TO's own 'no flip of a key whose pin/cert is absent' discipline extended to 'no flip of a key whose new URL is a certain 404'. The twins are UNREACHABLE from every portal route family: shared-advisor-router/index.mjs:183-204 derives the origin bucket SOLELY from firmId and applies it at :261-265 (FIRM_CONFIG['49financial'].bucket = 'opal-data-bd', firm-config.mjs:30-33), so the URL path selects the KEY and nothing in the request selects the BUCKET. Measured live with the control fired in the SAME bucket: opal-data-bd/platinum/advi/ = 0 keys LOUD NOT-FOUND, while opal-data-bd/platinum/firm/ = 15 keys, LastModified 2026-08-21T05:19:56Z..05:43:21Z, live and fresh. public-data-router (:23-45) reaches opal-data-portal-v2 but has only json-tiered/, json/, mdpf/ and a /json/ fallback -- no platinum/advi branch.",
+      "denominator": "10 flip keys, 0 flipped, 10 DECLARED-HELD. Two buckets probed, one positive control per absence verdict.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Blocked on an AE route act, not on this seat. CTO ruled REMEDY (A) (msg 64828, amended 64844: the router learns platinum/advi/{firm}/ -> opal-data-portal-v2 as a path-CLASS override, and MUST ASSERT the {firm} segment against the caller's validated firmId); COO concurred and rejected a third option (republishing into opal-data-bd) in writing (64838, 64850). No AE seat was live at ruling time; MSTR spawn is the chain's critical path. This seat will not flip any key on a reported landing -- the flip evidence is an EXERCISED 200 through the auth path per key, read at this seat (Rule 22a)."
+    },
+    {
+      "criterion_id": "P4R-4",
+      "criterion_verbatim": "NOTHING BLENDED: before/after deltas per key reported as NAMED deltas (content-refresh vs route-move), never blended (the BP-5 discipline from row 0).",
+      "method": "diff",
+      "invocation": "n/a -- contingent on P4R-3",
+      "output_evidence": "NOT YET DUE. No key has flipped, so no before/after delta exists to report or to blend. Recorded rather than omitted so the criterion is not later read as satisfied by silence. The discipline is pre-committed: at each key's flip the delta will be named as route-move vs content-refresh separately, and the two are separable by construction here because the twin's asof (2026-08-20, manifest 933dfc1bf6b1) and the legacy serve's own vintage are independently readable per key.",
+      "denominator": "0 flips executed of 10 held.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Strictly downstream of P4R-3, which is DECLARED-HELD on the AE route act. A delta cannot be measured across a move that has not occurred."
+    },
+    {
+      "criterion_id": "P4R-5",
+      "criterion_verbatim": "DT HANDOFF: the exact commit enumeration to DT + MSTR for the PROD promote, with the flip keys listed.",
+      "method": "live_read",
+      "invocation": "git -C portal log --oneline origin/PROD..origin/DEV ; git -C portal rev-list --count origin/PROD..origin/DEV",
+      "output_evidence": "BASELINE HALF DELIVERED AND VERIFIED LIVE: origin/PROD..origin/DEV = 0 commits, so the PROD payload will be exactly this seat's repoint commits, as the TO predicted. Current enumeration for DT/MSTR: portal DEV 033ed3c7 (P4R-2 tolerant read, dormant) -- one commit, and it is behavior-identical to today's portal while ADVI_ROUTE_LIVE is false, so promoting it carries no served-behavior change. FLIP KEYS LISTED: none yet; the per-key flip commits do not exist because P4R-3 is held. The enumeration is therefore OPEN and will be re-issued complete at flip time.",
+      "denominator": "origin/PROD..origin/DEV = 0 commits at baseline; 1 repoint commit landed to date; 0 of 10 flip commits.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The baseline and the current commit list are delivered and live-verified; the flip-commit enumeration cannot be completed until P4R-3 lifts. Marked PARTIAL rather than PASS because a handoff naming zero flip keys would read as complete and is not."
+    },
+    {
+      "criterion_id": "P4R-6",
+      "criterion_verbatim": "proof instance VALID rc=0 positional: ids P4R-1,P4R-2,P4R-3,P4R-4,P4R-5,P4R-6.",
+      "method": "test_suite",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/OPAL_ADVIPOINTERS.P4-REPOINT-49F_PROOF_OF_SPEC.json \"P4R-1,P4R-2,P4R-3,P4R-4,P4R-5,P4R-6\"",
+      "output_evidence": "See the run recorded in the session log; rc read unpiped. Every non-PASS row carries a status_reason naming its blocker and its owner, so no criterion is satisfied by silence.",
+      "denominator": "6 declared criteria, 6 present.",
+      "status": "PASS"
+    }
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"does a specific S3 key exist under platinum/advi/49financial and what is in that prefix\"",
+      "result": "PASS -- routed to comp-keys (near-tie surfaced honestly with three candidates and their concerns, not a silent guess)"
+    },
+    {
+      "tool": "comp-keys",
+      "invocation": "comp-keys prefix s3://opal-data-portal-v2/platinum/advi/49financial/ ; s3://opal-data-bd/platinum/advi/ ; s3://opal-data-bd/platinum/firm/",
+      "result": "PASS -- trigger verified (12 keys incl. manifest 933dfc1bf6b1) and the P4R-3 blocker measured with an in-bucket positive control (0 vs 15). LastModified is ISO-8601 Z per the tool's own plane declaration, never `aws s3 ls` local time."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'api/scoped/advisor-intelligence' portal/src ; comp-find -i on the absence censuses ; comp-find 'FIRM_BUCKET_MAP' ; comp-find 'portal-v2' infra/aws/lambda-edge ; comp-find --name",
+      "result": "PASS -- every count quoted with its denominator. One run returned '0 hits across 0 files' from a cwd-relative pathspec; caught as a retrieval failure (denominator zero = nothing scanned) and re-run from repo root rather than recorded as an absence."
+    },
+    {
+      "tool": "comp-routes",
+      "invocation": "comp-routes behaviors",
+      "result": "PASS -- 27 CF behaviors; established that the advisor-intelligence family originates on S3-opal-data-bd and that opal-data-portal-v2 is reached only by the /api/general/* + /json-tiered/* family. Treated as DESIRED plane per the tool's own header and corroborated on live S3 + router source."
+    },
+    {
+      "tool": "comp-transform",
+      "invocation": "comp-transform schema-check DistributionTab / AdvisorAnalytics / ClientsTab",
+      "result": "PASS -- 0 MISSING across all three; all rendered fields match their response types."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Type-error mutant injected into adviKeyRepoint.ts ITSELF, to prove the typecheck covers THIS work rather than merely 'some file'. Run BEFORE the pass was trusted.",
+      "expected": "tsc -b fails and names adviKeyRepoint.ts; clean rc=0 after restore",
+      "observed": "rc=2, 'src/api/endpoints/adviKeyRepoint.ts(246,7): error TS2322: Type string is not assignable to type number'; then rc=0 with 0 output lines after restore. >> THIS CONTROL FALSIFIED MY FIRST GATE: the initial attempt used plain `tsc --noEmit`, whose mutant PASSED (rc=0, 0 errors) because the root tsconfig.json is \"files\": [] with project references only -- so that form checks NOTHING and returns a clean green on code containing deliberate type errors. The real gate is `tsc -b` (the repo's own build/typecheck script). A false green would have shipped as verification had the control not been run first. >> TWO FURTHER CONTROLS, both fired: (1) IN-BUCKET POSITIVE CONTROL on every S3 absence verdict, because a 404 in the wrong bucket is the wrong question asked cleanly -- opal-data-bd/platinum/advi/ = 0 keys LOUD NOT-FOUND while opal-data-bd/platinum/firm/ = 15 keys fresh at 05:19:56Z..05:43:21Z, so the zero is a measured absence and not an unreachable bucket. (2) UNPIPED RC: an initial `bunx tsc --noEmit | tail` reported tail's exit code rather than the compiler's; corrected before any verdict was recorded, and every rc quoted in this instance is unpiped.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two consecutive same-input runs of both static gates (bunx tsc -b --noEmit in portal, and comp-transform schema-check DistributionTab), full stdout diffed",
+      "observed": "byte-identical across both runs: tsc rc=0/rc=0 with identical (empty) output; schema-check output identical, 60 lines both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any Lambda@Edge router change (the remedy-(A) path-class override, the {firm} tenant assertion, the portal-v2 origin + OAC/bucket-policy leg)",
+      "reason": "AE act, reserved by this TO's own 'Do not'. Surfaced to COO with a recommendation; CTO ruled (A) and amended the bounds with the tenant assertion this seat raised. Not taken here."
+    },
+    {
+      "item": "The 4 HELD keys (header_metrics, dashboard, fee_efficiency, partner_analytics_monthly) and d14 (advisor_nna_canonical)",
+      "reason": "Out of the handed 10-key scope; they stay legacy-served. Registered in ADVI_REPOINT as 'held'/'structural' so the code cannot flip them even when the route goes live."
+    },
+    {
+      "item": "Rendered-read screenshot via /frontend-dev",
+      "reason": "P4R-3 requires it PER FLIPPED SURFACE and nothing has flipped. This commit is data-read layer only, behavior-identical while dormant, with no visual change -- so the silver-canvas render gate does not apply to it. It is owed at flip time, not now."
+    },
+    {
+      "item": "Whether a NON-portal consumer reads ownership_map",
+      "reason": "A different plane. This sweep answers the portal read plane only; stated as scoped rather than concluded, and COO ratified the scoping (64838 item iv): the serving set remains 10, the portal-side flip population is 8."
+    }
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/logs/2026-08-21/p4_repoint_49f_p4r1_p4r2_1500-1600Z.md",
+  "surprises": [
+    "The certified twins were published to a bucket the ADVI route was DELIBERATELY MIGRATED OFF: the only portal-v2 reference in any edge router (19 files scanned) is shared-advisor-router:10, 'v3: origin migrated from opal-data-portal-v2 to opal-data-bd'. The publish side and the read side were each internally correct and pointed at different buckets, and nothing in either side's own evidence would reveal it -- the manifest is honest, the cert is sound, and the portal config is valid.",
+    "One call site (:369) serves three artifacts whose determination SPLITS them, so a natural one-line repoint of that template would have flipped the HELD PA-monthly -- a never-widen breach travelling through a shared code path rather than through anyone's decision. COO named this the single most valuable line in the report.",
+    "Remedy (A) -- the ruling that unblocks the chain -- silently makes the {firm} PATH SEGMENT security-relevant for the first time on this route. Today the bucket comes from the validated token and the path cannot influence tenancy, which is exactly why a path-only repoint is inert rather than dangerous. Raised one sentence after the ruling landed; ratified by CTO (64844) and COO (64850) as a BINDING bound with a required cross-firm negative control.",
+    "The typecheck this repo invites (`tsc --noEmit`) is VACUOUS -- root tsconfig is \"files\": [] with references only. It returns a clean rc=0 on code containing deliberate type errors. Caught by running the mutant before trusting the pass; worth knowing for any future portal verification."
+  ]
+}

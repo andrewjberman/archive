@@ -6,7 +6,7 @@
 <issued_to>0.4.0_DE_ClientPlatform</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued_at>2026-07-22T20:29Z</issued_at>
-<status>staged</status>
+<status>complete 2026-07-22 (status corrected 2026-08-21 -- work and ISSUER ACCEPTANCE both predate this flip by a month). ACCEPTED AT ISSUER: COO 205817Z, "both TOs ACCEPTED, RAVC closed" (recorded in logs/2026-07-22/mdpf_3f_p1_ruling12_addendum_close_2125Z.md). EVIDENCE PER CRITERION: (1) locus table + denominator 22/22 aggregates, 9/9 hooks, 10/10 producers -- MDPF_3F_P1_CONSUMPTION_CONTRACT_AUDIT_20260722.md @39ea5916e; (2) 7 FE-computed GLOBAL number classes flagged for 3F-P5, headline the Global trend aggregate FE-summed at ModelPortfolios.tsx:724-731 @08c6d8b2; (3) Andrew's "all client-side" answered MIXED PER-AGGREGATE, not in aggregate; (4) ZERO UNKNOWN PRODUCER, stated explicitly rather than by omission; (5) zero FE modifications -- @39ea5916e touched exactly 2 .md files, verified by git show --stat; (5a) RULING-12 addendum @7a2805d4e, all three sub-parts: producer named (mdpf_aggregate_aua.py:91 @47402a90d; the on-page start is the FE rolling window ModelPortfolios.tsx:1602-1611, NOT a data boundary), verdict EMERGENT (no ruling-zero code path exists), and the provenance-label statement (meta coarse-YES; per-date cohort_provenance EXISTS BUT EMPTY 429/429 None; rendered nowhere); (6) Compiler Tools section present in the 2026-07-22 logs. 6/6 evidenced.</status>
 <authorization>LD-0333 am.1 @2eef569d2 -> CTO cascade 200805Z (WS-P audits explicitly parallel-safe from day one).</authorization>
 
 <references>

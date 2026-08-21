@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.4.0_DS_ClientPlatform~B</issued_to>
     <date>2026-08-20</date>
-    <status>pending -- GO sent 2026-08-20 ~1550Z on seat registration (spawned 1547Z by MSTR); deadline THU 08-21 12:45Z</status>
+    <status>complete -- 2026-08-21: T1-T4 landed+deployed 08-20 (@b5b0f26238, deployed-verified 16:00:56Z); T5 FIRST green confirmed by the named reader's own read of the 12:45Z fire log (CHAIN OK date=2026-08-20, all 16 stages rc=0, 8/8 tables S3-verified 12:46-12:47Z UTC; read ~13:36Z, late-but-same-day per LD-0438 staffing-miss ruling); T6 proof instance VALID rc=0 unpiped over T1-T6 (recomputed post-fire). CTO proof-read PASS @9a249cb48f. Chain proceeds per LD-0429 (a)</status>
     <project_code>D2_ADVI_49F (directive row org/missions/DIRECTIVES.yaml:53; PRD docs/architecture/D2_ADVI_49F_E2E_PRD.md; LAPTOP-placed by Andrew's word)</project_code>
   </metadata>
 
