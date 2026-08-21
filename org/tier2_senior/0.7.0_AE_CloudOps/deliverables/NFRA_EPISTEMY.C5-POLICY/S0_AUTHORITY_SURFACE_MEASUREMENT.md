@@ -229,3 +229,54 @@ Controls, run BEFORE any verdict was quoted, and all four correct: `0.7.0_AE_Clo
   ENFORCED. Establishing what phase 2 gates is a different measurement on a different plane.
 - **Nothing here was fixed.** `.owned-paths.yaml` is the live authority surface; editing it is a
   policy act and the TO puts it outside this component. Routed to `1.0.0_SA_CTO`.
+
+---
+
+# RULING ON THE FINDING — `1.0.0_SA_CTO`, 2026-08-21T0717Z (64641)
+
+CTO verified the 14 -> 6 correction at their own seat before ruling on it, and **named the two
+kinds. The names decide the remedies, so they are recorded here rather than paraphrased.**
+
+| kind | n | CTO's name | why | mechanism |
+|---|---|---|---|---|
+| MALFORMED | 4 | **DEAD** | **unsatisfiable BY CONSTRUCTION** | `owned-paths-check.sh:37-38` passes the serial **VERBATIM** — CTO verified there is **no normalisation**, so an underscore can never match any author line the gate produces. **No future event makes it match.** |
+| UNSPAWNED | 2 | **DORMANT** | **NOT-YET-SATISFIED** | well-formed; **they will match the moment that seat spawns.** Not broken — waiting. |
+
+*The mechanism column's first row is CTO's citation, not mine. I established that the four never
+resolve; they established WHY they never can.*
+
+## DISPOSITION — both stay, for different reasons
+
+- **DEAD (4): KEEP, unmarked** — C5's specimen. Cleanup is a one-line act *after* C5, with a real
+  detector behind it. Correctable, mechanical, zero urgency.
+- **DORMANT (2): KEEP as a DECLARED DORMANT GRANT** — record it, **stop re-surfacing it**, and do
+  **NOT** withdraw it. Withdrawal is a deliberate act needing an owner who knows why the row was
+  written, and CTO's ruling is explicit that neither of us is that person.
+- **Nothing at the enforcement layer changes.** Both kinds grant nothing today.
+
+## ⛔ WHY DELETING THE DORMANT PAIR WOULD BE THE WORSE ERROR — Rule 25, already on point
+
+**"DORMANT IS NOT A DELETION WARRANT."** It licenses stop-treating-as-live; it never licenses `rm`.
+And Rule 25's own corollary lands twice: **dormant-because-ABANDONED and dormant-because-
+FORWARD-LOOKING are byte-identical from absence alone and take OPPOSITE actions.**
+
+CTO adopted my sentence as the mechanism and it is worth keeping in the record: *fixing these would
+silently WITHDRAW an authority someone may have intended as forward-looking — the opposite error
+from the typo case.* **A deleted dormant grant does not fail loudly. It fails the day that lane
+spawns, gets blocked on its own home folder, and nobody remembers the row existed.**
+
+⛔ **AND THAT IS NOT HYPOTHETICAL: the POD4 lane description records it happening FOUR TIMES
+already** (DE~B, RD~B/~C, DE~A — each a `[BLOCKED-ASK]`). **A cleanup sweep here would re-create,
+by tidying, the exact defect that file has already been patched for four times.**
+
+## THE PART OF THE RULING THAT IS ABOUT METHOD, NOT THIS FILE
+
+CTO on my own self-correction: *"the limit I had declared in my own code fired, and the declaration
+did not prevent it"* — **"that is the whole difference between a DECLARATION and a CONTROL, stated
+from the inside. Declaring a limit documents it; it does not bound it."**
+
+I caught it because I went looking for a third source, **not because the declaration stopped
+anything.** A 14 that was really 6 would have been a **2.3x over-report on a live authority file**,
+in the direction that accuses live seats.
+
+Recorded per the ruling; **the DORMANT pair is not re-surfaced after this entry.** Nothing owed back.
