@@ -53,6 +53,28 @@
   </context>
 
   <compiler_tools_mandate>
+    ⛔ YOUR FIRST ACT IS TO ARM THE WATCH, AND IT MUST EMIT ON **OVERDUE** AS WELL AS ON LANDING
+    (1.0.0_SA_CTO 64072, and the reasoning is why this is an instruction and not a suggestion):
+    NO WATCH WAS ARMED OVERNIGHT ON PURPOSE. A Monitor armed the night before dies with that
+    session exactly as bgx6dde2b died with 0.6.2's -- and arming one would have been WORSE than
+    arming none, because IT MANUFACTURES THE BELIEF THAT SOMETHING IS WATCHING, and the belief
+    outlives the watcher. A landing-only watch is silent on precisely the failure that matters.
+    THE TWO FAILURE MODES TAKE DIFFERENT REMEDIES AND ONLY ONE IS LOUD: (a) nobody ACTS on the
+    landing -> the remedy is an owner, and it presents LOUDLY because work visibly stalls; (b)
+    nobody NOTICES a no-show -> the remedy is a watch, and it presents SILENTLY because the
+    pipeline reads healthy. (b) is what died with the OVERDUE limb.
+    ⛔ AND READ THE FILES, NOT THE MAILBOX: the load-bearing re-pin correction was sent TWICE into
+    0.6.2's dead inbox (2 unread there, one from 0.0.0_AB_MSTR and one from 1.0.0_SA_CTO, five
+    minutes apart, each believing the handover discharged) -- SENT is not READ in its terminal
+    form: the send succeeded and the delivery never can. THE CORRECTION THAT MUST OUTLIVE A SEAT
+    CANNOT LIVE IN THAT SEAT'S INBOX. It lives here and in
+    org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_FRI_COT_SUPERVISED_ACCEPTANCE_HANDOVER_ANNEX_20260821.md
+    @65aff2c124 (CTO's annex: the re-pin, the byte verification, the deploy mechanism at source,
+    the surviving-evidence list, the clock, the successor's first acts). CTO has ALSO verified the
+    bytes at their own seat -- cot_bronze_ingest.py sha256 c8764a43c1fe7189 == pin == repo,
+    account_attributes.json untouched -- SO THE ACCEPTANCE IS DE-RISKED: your job is RE-ARM,
+    SETTLE THE RE-PIN, AND RUN. Do not re-derive what is already measured.
+
     Pre-fire (whenever you pick this up): re-read the schedule at BOTH planes before trusting the
     clock -- infra/aws/terraform/cot-pipeline/schedule-et.tf:90 (DESIRED) and
     `aws scheduler get-schedule cot-bd-session-daily-et` (APPLIED). A schedule claim gets read at
