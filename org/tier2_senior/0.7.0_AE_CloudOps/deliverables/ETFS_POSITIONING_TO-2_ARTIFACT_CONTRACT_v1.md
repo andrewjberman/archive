@@ -20,7 +20,8 @@
 | **Origin** | `S3-opal-data-portal-v2-json`, OAC `E24L6358YRRKAE` -- **EXISTING, unchanged** |
 | **Auth** | `auth-validator-edge` (viewer-request) -- **EXISTING, unchanged** |
 | **New router branch** | `/api/general/etfs/` -> `/platinum/etfs/` in `public-data-router` |
-| **New bucket-policy ARN** | `arn:aws:s3:::opal-data-portal-v2/platinum/etfs/*` added to `AllowCloudFrontOACPublicData` |
+| **New bucket-policy ARN** | `arn:aws:s3:::opal-data-portal-v2/platinum/etfs/*` added to `AllowCloudFrontOACPublicData` (+ the advi restore, Amendment C) |
+| **Pin drop (v1.1)** | `qualified_arn` removed from `public_data_router.ignore_changes`, `lambda-edge.tf:197` -- **without this the branch publishes a version CloudFront never serves** |
 
 ### AC5 -- IS THE CF PATH CLASS A MINT? **YES. IT IS A MINT, AND A MINT IS NOT A GAP.**
 
@@ -31,8 +32,18 @@ distribution today. **This is a MINT -- a thing not yet built, not a defect and 
 hole in the instrument.**
 
 **But the mint is SMALL, and naming its true size is the point of this section:** no new CloudFront
-behavior, no new origin, no new OAC, no distribution change. `/api/general/*` already claims the
-path. The mint is exactly **two edits**: one router branch and one bucket-policy ARN.
+behavior, no new origin, no new OAC. `/api/general/*` already claims the path.
+
+**THE MINT IS THREE EDITS (v1.1 -- v1.0 said two and undercounted; see the correction at item 4):**
+1. a `public-data-router` branch `/api/general/etfs/` -> `/platinum/etfs/` (mdpf-shaped);
+2. the bucket-policy Resource ARN for `platinum/etfs/*` -- **plus the `AllowAdvisorRouterOAIPlatinumAdvi`
+   restore in the same edit** (TO-2 Amendment C: that statement is live but managed by no TF resource,
+   so any `shared-infra` apply without it deletes a live serving grant);
+3. **drop `qualified_arn` from `public_data_router`'s `ignore_changes`** at `lambda-edge.tf:197`,
+   in the same commit as edit 1 -- without it, edit 1 publishes a version CloudFront never serves.
+
+**Plus one verification step that no plan can substitute for:** read the LIVE distribution's
+association ARN after the apply.
 
 ### The comp-routes evidence (PRD s.11.4(e) requires it)
 
@@ -45,9 +56,26 @@ path. The mint is exactly **two edits**: one router branch and one bucket-policy
 3. **THE PRECEDENT IS EXACT AND ALREADY EXERCISED:** `index.mjs:36-40` --
    `/api/general/mdpf/` -> `/platinum/mdpf/` (WO-3 re-point, v6 2026-07-29), a prefix-disjoint
    branch ahead of the default. The ETF branch is that shape, ~5 lines.
-4. **The edit takes effect:** `comp-routes edge-versions` -- `public-data-router` is
-   **DYNAMIC / `qualified_arn` [OK]**, so it auto-updates on `safe-apply`. No version pin blocks it.
-   (All 5 edge lambdas read dynamic; there is no stale-pin hazard on this path.)
+4. ⛔ **CORRECTED IN v1.1 -- THE EDIT DOES *NOT* TAKE EFFECT BY ITSELF.**
+   *v1.0 said: "`comp-routes edge-versions` -- `public-data-router` is DYNAMIC / `qualified_arn`
+   [OK], so it auto-updates on `safe-apply`. No version pin blocks it." **That was FALSE**, and
+   false in the direction that ships a silently non-working route.*
+   **SOURCE-CONFIRMED:** `infra/aws/terraform/portal-auth/lambda-edge.tf:197` --
+   `aws_lambda_function.public_data_router` carries **`ignore_changes = [qualified_arn,
+   source_code_hash]`**. It is one of exactly THREE still pinned (`auth-validator-edge` :96,
+   `cache-control-injector` :151, `public-data-router` :197); `shared_advisor_router` :244 was
+   fixed and carries only `source_code_hash`.
+   **Consequence, verbatim from that file's header at :36-37:** *"Apply publishes a NEW Lambda
+   version and CloudFront KEEPS SERVING THE OLD ONE."*
+   **And the instrument I cited is documented as blind to exactly this** (`:44-47`):
+   *"`comp-routes edge-versions` does NOT catch it: it reports these as 'DYNAMIC -- auto-update on
+   terraform apply [OK]' ... **Do not read that [OK] as evidence an edge moved.**"* The pin passes
+   every rung of Rule 22a at once -- clean plan, genuine 0-diff re-plan, a real new version, and a
+   route running GREEN on the old code.
+   **REMEDY (the file's own, `:54-58`):** drop `qualified_arn` from that function's
+   `ignore_changes` **in the same commit as the branch**, and **CONFIRM THE LIVE ASSOCIATION
+   VERSION AFTER APPLY** by reading the live distribution -- per `:42-43` that live read is the
+   ONLY instrument that catches it. **A 0-diff re-plan is the SYMPTOM here, not the reassurance.**
 5. **`opal-data-etfs` is NOT a CloudFront origin** -- 0 of 7 enumerated. That candidate would have
    required a full origin + OAC + behavior mint. COO removed it on independent grounds (below);
    this is the third, and it agrees.
@@ -303,7 +331,17 @@ answer now than at the gate.
 
 ---
 
-**v1. Half 1 (`ETFS-e-1` + `ETFS-e-2`) COMPLETE at this document. Half 2 (`ETFS-e-3`) IN PROGRESS.**
+**v1.1. Half 1 (`ETFS-e-1` + `ETFS-e-2`) COMPLETE at this document. Half 2 (`ETFS-e-3`) IN PROGRESS.**
+
+**v1.1 CHANGELOG (2026-08-21, author's own correction).** One change, and nothing a consumer builds
+against moved: the edge-version claim at item 4 was **FALSE** and is corrected -- `public-data-router`
+IS pinned (`lambda-edge.tf:197`), so the mint is **three edits, not two**, and the post-apply
+live-association read is mandatory. **The route decision, the key, the URL, the shape,
+`holdings_status`, the vocabulary boundary and AC3 are all UNCHANGED. DS and DE: nothing here
+changes your build.** Root cause, stated plainly: I cited `comp-routes edge-versions`' `[OK]` as
+evidence an edge would move, when the file governing that surface -- written the same day, by my own
+lane, out of P4R-3 -- says in terms *"Do not read that [OK] as evidence an edge moved."* The tool's
+blind spot was documented; I had not read the documentation for the surface I was standing on.
 Plane discipline: route topology + rewrite = **DESIRED** (parsed TF + committed `.mjs`); bucket
 policy + object vintages = **APPLIED** (live primitives). **Nothing here is EXERCISED** -- no ETF
 path has been fetched, because none exists yet. The exercised fetch belongs to Half 2's close.
