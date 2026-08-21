@@ -336,8 +336,37 @@ LITERAL **1** | GENERATIVE **61** | NOT_MEASURABLE **50**
 | `portal/src/hooks/useLambdaKeepWarm.ts:47` | `/api/scoped/advisor-intelligence/filters?warm=1${firmParam}&_=${Date.now()}` | **GENERATIVE** |
 
 **The repoint DE flipped is itself generative** (`adviKeyRepoint.ts:123`), as is the publisher
-that writes the twins (`serve_key` f-string, `opal-assets-mdpf-portal-publisher:236`). On BOTH
-ends of this change the artifact identity is generated, never named.
+that writes the twins (`serve_key` f-string, `opal-assets-mdpf-portal-publisher:236`).
+
+> ### CORRECTION (0.4.0_DE_ClientPlatform, re-derived at this seat before accepting)
+> This section originally read *"on BOTH ends of this change the artifact identity is generated,
+> **never named**."* **That is wrong for the portal end and the correction sharpens the finding.**
+>
+> `adviKeyRepoint.ts` contains **all 15 key literals** as `leaf: '...'` values in its ADVI_REPOINT
+> registry (re-measured here: 15 `leaf:` entries; `comp-find 'mix_summary.json' portal/src` returns
+> 2 hits across 415 files, one of them this module). **A name census DOES find this file.**
+>
+> **WHAT IS INVISIBLE IS THE COMPOSITION, NOT THE MODULE.** A census can establish THAT the file
+> mentions `mix_summary.json`; it cannot establish that the file REQUESTS
+> `platinum/advi/49financial/mix_summary.json`. That full key never exists in the source -- only its
+> two halves do.
+>
+> **THIS IS THE WORSE FAILURE, NOT THE MILDER ONE.** "Generative therefore invisible" implies the
+> remedy is to find the file. The real gap is narrower and harder: the file is FINDABLE and its
+> BEHAVIOUR is still unreadable by that instrument -- so a census that returned this module in its
+> results could report the surface as COVERED and be wrong about what the surface does. A confident
+> partial is harder to notice than a clean absence.
+>
+> **THEREFORE, READ THE 11% PRECISELY:** it is the share of CALL SITES whose key argument is a
+> literal. It is **not** a claim about how many files a census can discover. Those are different
+> populations, and conflating them is the same grain error this sweep exists to expose.
+
+### GRADING NOTE for the estate-wide inventory (DE, and it should survive into its scope)
+"Builds keys generatively" is not one behaviour. A component that **centralises** its key list in
+one registry and composes at a single site (adviKeyRepoint: the centralisation is what makes the
+10-flip / 4-held / 1-structural never-widen split enforceable, so a held key cannot prefer the twin)
+has an **enumerable surface in one place**. A component that **scatters** interpolation across call
+sites does not. Grading them the same would penalise the deliberate design and miss the diffuse one.
 
 *(First portal pass matched only 2 sites because the regex assumed a bare `fetch(`; the real
 reads go through `adviRead`. Recalibrated against the actual file rather than reporting the 2
