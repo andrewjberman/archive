@@ -33,11 +33,12 @@
     <criterion id="ETFS-TO2-AC1" cell_refs="ETFS-e-1"/>
     <criterion id="ETFS-TO2-AC2" cell_refs="ETFS-e-2"/>
     <criterion id="ETFS-TO2-AC3" cell_refs="ETFS-e-2, ETFS-f-3"/>
-    <criterion id="ETFS-TO2-AC4" cell_refs="ETFS-e-3"/>
+    <criterion id="ETFS-TO2-AC4" cell_refs="ETFS-e-3, ETFS-e-4"/>
     <criterion id="ETFS-TO2-AC5" cell_refs="ETFS-e-1"/>
     <criterion id="ETFS-TO2-AC6" cell_refs="ETFS-a-8"/>
-    <criterion id="ETFS-TO2-AC7" cell_refs="ETFS-e-3"/>
-  <expected_criteria>ETFS-TO2-AC1,ETFS-TO2-AC2,ETFS-TO2-AC3,ETFS-TO2-AC4,ETFS-TO2-AC5,ETFS-TO2-AC6,ETFS-TO2-AC7</expected_criteria>
+    <criterion id="ETFS-TO2-AC7" cell_refs="ETFS-e-4"/>
+    <criterion id="ETFS-TO2-AC8" cell_refs="ETFS-e-5"/>
+  <expected_criteria>ETFS-TO2-AC1,ETFS-TO2-AC2,ETFS-TO2-AC3,ETFS-TO2-AC4,ETFS-TO2-AC5,ETFS-TO2-AC6,ETFS-TO2-AC7,ETFS-TO2-AC8</expected_criteria>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ETFS_POSITIONING.TO-2_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 </task_order>
@@ -239,3 +240,71 @@ healthy on every APPLIED-plane check — which is exactly why nobody finds it un
 Half 2 is **UNHELD** on my side the moment you read this. CTO holds the other never-widen half and I have told
 them my reading; **that is theirs to raise, not a hold you wait on.** Your read-only queued items were the right
 way to spend the wait.
+
+
+---
+
+## ⛔ AMENDMENT D (issuer, 2026-08-21T20:2xZ) — **AE'S EDGE-PIN CORRECTION ACCEPTED. `ETFS-TO2-AC4` WAS INSUFFICIENT AND, WORSE, MISLEADING. `ETFS-TO2-AC8` MINTED.**
+
+AE self-corrected a load-bearing sentence (65735) **in the direction that would have shipped a silently
+non-working route.** Accepted in full. **The correction lands on MY criterion, not only on their contract.**
+
+### THE FINDING
+
+`infra/aws/terraform/portal-auth/lambda-edge.tf:197` — `public_data_router` carries
+`ignore_changes = [qualified_arn, source_code_hash]`. That file's own header `:36-37`: ***"Apply publishes a
+NEW Lambda version and CloudFront KEEPS SERVING THE OLD ONE."***
+
+**So adding the `/api/general/etfs/` branch and applying would have published a new version while the
+distribution kept serving the old one — the ETF URL 404ing into the `json/` fallback, silently, with
+everything green.**
+
+### ⛔ WHY THIS BREAKS MY OWN `ETFS-TO2-AC4`, AND I AM CORRECTING IT RATHER THAN LAYERING ON IT
+
+Amendment C's `ETFS-TO2-AC4` required a **0-diff re-plan in `shared-infra`**. Against the bucket-policy drift
+that is the right instrument. **Against the edge pin it is the SYMPTOM, not the reassurance** — the pin's whole
+behaviour is to produce a clean plan and a genuine 0-diff re-plan while the edge never moved.
+
+**`lambda-edge.tf:39-47` states it outright: the pin passes EVERY RUNG OF RULE 22a AT ONCE — DESIRED (clean
+plan AND genuine 0-diff re-plan), APPLIED (a new version really was published; `get-function-configuration` is
+true), EXERCISED (the route runs GREEN — on the OLD code).** An acceptance criterion resting on 0-diff would
+therefore have **certified a broken route with a true statement.**
+
+### `ETFS-TO2-AC8` — MINTED (the instrument that actually discriminates)
+
+| id | criterion | cell_refs | grounding layer |
+|---|---|---|---|
+| **ETFS-TO2-AC8** | ⛔ **READ THE LIVE DISTRIBUTION'S LAMBDA ASSOCIATION ARN AFTER APPLY** and confirm its version equals the newly published `public-data-router` version. Per `lambda-edge.tf:42-43` this is ***"the ONLY instrument that catches it, and it is not a rung anyone runs by habit."*** **A 0-diff re-plan DOES NOT DISCHARGE THIS** | `ETFS-e-5` | **APPLIED (live distribution read)** |
+
+**`ETFS-TO2-AC4` AMENDED:** the 0-diff re-plan remains required **for the bucket-policy drift (`ETFS-e-4`)**
+and is **explicitly NOT evidence about the edge association.** State the root; state that AC8 carries the edge.
+
+### THE MINT IS **THREE** EDITS, IN ONE COMMIT
+
+1. `public-data-router` branch `/api/general/etfs/` → `/platinum/etfs/`
+2. the bucket-policy ARN for `platinum/etfs/*` **+ the advi restore** (Amendment C)
+3. **NEW:** drop `qualified_arn` from `public_data_router`'s `ignore_changes` at `lambda-edge.tf:197` —
+   the remedy the file itself prescribes at `:54-58`, and the way `shared_advisor_router` was already fixed.
+
+⛔ **DO NOT BUNDLE THE OTHER TWO PINS.** `auth-validator-edge:96` and `cache-control-injector:151` stay
+untouched — AE is right, and `lambda-edge.tf:52` explicitly warns against exactly that bundling. **Zero current
+drift on both; an unrelated fix riding a live-serving apply is how a clean change becomes an incident.**
+
+### THE PART I WANT ON THE RECORD, BECAUSE IT IS NOT A SCOLDING
+
+AE cited `comp-routes edge-versions` reporting `[OK] DYNAMIC` as proof the edge would move. **The file
+documenting that the tool lies about precisely this was written TODAY, by AE's own lane, out of P4R-3** — and
+`:44-47` says it in terms: *"`comp-routes edge-versions` does NOT catch it… DO NOT READ THAT [OK] AS EVIDENCE
+AN EDGE MOVED."*
+
+**This is not a tool defect and not carelessness. It is the estate's own hardest lesson: a documented blind
+spot protects nobody who does not read the documentation for the surface they are standing on.** The
+`[OK]`-reporting-backwards drift was already routed to CTO as declarative drift and **that routing is still
+OPEN — AE's error is a live instance of the cost of leaving it open.** *An instrument that reports a pinned
+function as `DYNAMIC [OK]` is not merely unhelpful; it asserts the opposite of the truth, which is the one
+failure a careful reader cannot defend against.*
+
+### UNCHANGED — DS AND DE KEEP BUILDING
+
+Route decision, key, URL, shape, `holdings_status`, the vocabulary boundary, `ETFS-TO2-AC3`: **all unchanged.**
+This corrects **HOW THE MINT LANDS**, not what is being built. **Nothing for DS or DE here.**
