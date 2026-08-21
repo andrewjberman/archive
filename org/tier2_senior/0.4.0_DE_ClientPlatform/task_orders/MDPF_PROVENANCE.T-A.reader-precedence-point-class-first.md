@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-18T13:35Z</issued>
 <dated>2026-08-19 — DATED + OWNED, awaiting spawn (MSTR spawns on the date; allocation call 132245Z: spawn nothing until bd platinum closes + K3 GOs, whichever later). A dated TO with a named owner is a live item; staged-undated is rot.</dated>
-<status>staged -- DATED 2026-08-19, owner named, awaiting spawn</status>
+<status>complete 2026-08-21 -- LANDED @edcc503e and PROMOTED TO PROD in portal v2.1.163 (commit verified on BOTH origin/DEV and origin/PROD). Proof instance VALID rc=0 unpiped over PA-1..PA-7. VALIDATED AT ISSUER: COO 180336Z ("your T-A close stands as validated") + CTO 170535Z confirming the absent-flat point_class-first reading STANDS, no overrule. Status was stale-at-staged for 3 days after the work closed; corrected by the owning seat.</status>
 <priority>P2 — first of three; kills BOTH live warn classes (inflection/49f "malformed channel", Global ~3,178/load); no pixel change</priority>
 <authority>CTO RULING @fc74f8f6b4 `docs/architecture/MDPF_PROVENANCE_CANONICAL_FORM_RULING_20260818.md` §2 R-1 (binding on reader); routed to COO for decomposition (§4). One two-lane contract correction under CANPLAT/CONTRACT §B3 — NOT a new project. Andrew's 08-15 presentation ruling (LD-0417) untouched: nothing here changes a pixel.</authority>
 <supersedes>Amends the FE-2 AC-8 fail-safe order (@e8b1fb07): that order was correct consumer-side hardening and is now GENERALISED by the ruling — `point_class[i]` is the FIRST read at every grain, not the fallback. FE-2's post_close_correction (49F falsification) rides this TO's startup read.</supersedes>
