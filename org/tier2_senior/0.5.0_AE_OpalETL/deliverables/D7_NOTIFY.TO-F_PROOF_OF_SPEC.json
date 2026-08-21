@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_NOTIFY.TO-F",
+  "firm": "FABRIC",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/D7_NOTIFY.TO-SET.md",
+    "group": "D",
+    "vintage_commit": "4ab6731e51"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_NOTIFY.TO-F_FAILURE_MATRIX.md",
+      "kind": "doc",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A DESIGN ARTIFACT, per the TO's own words ('the failure matrix is a DESIGN artifact, not a test artifact'). Nothing to deploy."
+    },
+    {
+      "path_or_key": "integrations/ticketing/intake/tests/test_f2_failure_matrix.py",
+      "kind": "test",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "RUNNER PLANE, AND THE DISTINCTION IS LOAD-BEARING HERE: on this box a scheduled task runs the WORKING TREE, so editing a package MODULE is deploying it within 5 minutes. This is a TEST file -- run_intake.cmd executes `python -m integrations.ticketing.intake.runner`, which imports the modules and never the tests. Adding it is not a deploy; NO module beside it was edited."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_client_notify.py",
+      "kind": "test",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Lambda plane, apply-gated. Adds F2_TransportRefused_ExpensiveDirection (L3/M4). No production file touched: 22 -> 26 tests, source unchanged."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F-1",
+      "criterion_verbatim": "the four-leg failure matrix, each cell a named behaviour, no cell left 'should not happen.'",
+      "method": "manual_read_with_citation",
+      "invocation": "Each of the four legs read at SOURCE before its cells were written: lambda_function.py (notify_dl_isolated:534, notify_client_isolated:729, the DL body :495-505, the client body :685-692), integrations/ticketing/intake/{runner,intake_pass,buzz,row_contract,sweep}.py and run_intake.cmd. Deliverable: D7_NOTIFY.TO-F_FAILURE_MATRIX.md.",
+      "output_evidence": "20 cells, every one a named behaviour. THE AXIS IS DECLARED AND RULE-24 TESTED IN THE ARTIFACT, because enumerating it is a schema-authoring act: intent = WHERE IN THE LEG'S CHAIN THE FAILURE OCCURRED (M1 not triggered / M2 config / M3 content / M4 transport refused / M5 accepted-but-undelivered). ME by an explicit first-failing-stage tie-break; SAME GRAIN (a credential expiry is a CAUSE, not a sixth stage, so it lives in the cell it causes); ONE INTENT. TWO POSTULATE RESULTS ARE REPORTED RATHER THAN SMOOTHED: (a) CE holds only against a DECLARED LAYER -- this axis covers AVAILABILITY, and the uncovered member is CORRECTNESS (a leg that delivers, wrongly), which is the HIGHEST-consequence failure in the system, so it gets its own named table in section 3 instead of being smuggled onto a stage axis; (b) STATE COHERENCE FAILS, deliberately and visibly -- M1-M4 are observable in-estate and M5 structurally is not (the transport accepting IS our leg succeeding), and the instrument that would observe it is banned by this TO's own DO-NOT and the moratorium. NO CELL SAYS 'should not happen': where a cell is unreachable it names the construction (L4's four cells, unwired), and where it is undetectable it names why (M5, all four legs).",
+      "denominator": "4 LEGS x 5 FAILURE-MODES = 20 cells, both axes named at issue per the TO. Not a test count. Plus a 5-row correctness annex, counted separately because it is a different axis.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F-2",
+      "criterion_verbatim": "each leg's failure exercised in the expensive direction -- the ticket still lands, the client is not silently dropped.",
+      "method": "test_suite",
+      "invocation": "python infra/aws/lambda/ticket_center/tests/test_client_notify.py ; python infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py ; python -m integrations.ticketing.intake.tests.test_f2_failure_matrix ; python -m pytest integrations/ticketing/intake/tests -q  [rc captured ON EACH TOOL, unpiped]",
+      "output_evidence": "L1 (internal DL): A4_NoRegression -- SUBMIT and CREATE still 201 when the email leg RAISES, 201 survives an UNCONFIGURED map, the two failure modes keep DISTINCT tokens, and a MUTANT that shares the exception boundary BREAKS the 201 (so the isolation is the reason, not luck). L3 (client): NEW -- F2_TransportRefused_ExpensiveDirection. THIS CELL WAS UNEXERCISED AND LOOKED COVERED: the _Boom exception class sat DEFINED AND UNREFERENCED in that file through three accepted TOs. Now: the claim still 200 and the submit still 201 when SES raises, WE_CLIENT_SEND_FAILED emitted, the token distinct from all three other client tokens, EVERY test COUNTING THE ATTEMPT (a path that never reached SES returns 200 identically, so the counter is what makes the isolation the cause), and a MUTANT through the unisolated entry point propagating. 22 -> 26 tests, rc=0. L2 (Teams buzz): M2 exercised PER REQUIRED KEY (not one representative key -- a loop checking only the first would pass while any other silently defaulted), absent file, unparseable json, non-https portal_base, all -> exit 4, with a complete-config POSITIVE CONTROL so the refusals are caused by what they name; exit codes asserted mutually distinct AND asserted not to include 1. M4 (ordered-retry stop, cursor held) was already exercised in test_intake. L4 (sweep): NO FAILURE TO EXERCISE -- it is unwired, so its M1 is the CURRENT STATE rather than a failure mode. What is asserted instead is the precondition itself: no package module imports it (AST), with a POSITIVE CONTROL feeding the checker a module that DOES import it, because a checker that looks nowhere finds nothing and passes identically. 18 tests rc=0 (1 expected failure); 26/27/15 rc=0; pytest 59 passed, 1 xfailed, 32 subtests.",
+      "denominator": "4 legs. 3 of 4 HOLD the property (L1, L3, and L2 at M2/M4). 1 of 4 (L4) is unexercisable by construction. 1 CELL of 20 -- L2/M3 -- was exercised and DOES NOT HOLD IT.",
+      "status": "FAIL",
+      "status_reason": "RECORDED FAIL, NOT PASS-WITH-A-FOOTNOTE, AND THE CHOICE IS THE POINT. The criterion names both an ACT (exercise it) and a PROPERTY (the ticket still lands, the client is not silently dropped). The act was performed on every reachable leg; the property DOES NOT HOLD at L2/M3, so calling this PASS would be a clean summary written over a live failure. THE FAILING CELL: row_contract validates created_at by SHAPE (len >= 20 and endswith Z) while buzz.received_eastern needs it to PARSE, and compose_buzz is called OUTSIDE run_once's per-row try. A row in that gap raises; the cursor advances only on a terminal act, so passes 1/2/3 die identically -- a PERMANENT WEDGE, not a lost message -- and because a leading-zero stamp sorts FIRST, every row behind it is never buzzed. The process exits 1, which the declared 0/2/3/4/5 contract does not define, so LastTaskResult (the one instrument this design names) shows a value it has no mapping for. SEVERITY, MEASURED RATHER THAN ASSERTED, AND IT IS SMALLER THAN IT FIRST LOOKED: created_at is SERVER-GENERATED (lambda_function.py:389), so a client cannot reach this through the form; and the live runner log shows 169 passes / 169 exit lines / 0 unterminated with an exit census of rc=0 and rc=2 ONLY -- no rc=1 -- which is positive evidence it has never fired in production rather than an absence of reports. REMEDY NAMED, NOT APPLIED: make the contract PARSE the stamp instead of measuring it. That converts a total wedge into the EXISTING, already-named, already-handled REFUSED outcome (receipt written, cursor advances) with no new code path -- and the sweep in the same package ALREADY does exactly this, so the estate carries both the defect and its own remedy pattern one module apart. NOT APPLIED because row_contract.py is a live-production file on the runner plane: saving it deploys it inside 5 minutes. Routed to 1.0.0_SA_CTO~Z as a decision with a recommendation, not taken as an initiative. LATER RUN NAMED: the repair, under bar A5-A7 (exercised in the same continuous act, in this tree, scored on output). The expectedFailure test is the trigger -- when the property is met it reports UNEXPECTED SUCCESS and the run goes non-zero, so the fix cannot land quietly."
+    },
+    {
+      "criterion_id": "F-3",
+      "criterion_verbatim": "the wiring act, last, with WF-6 then EXERCISED and not promoted (its subject now exists).",
+      "method": "manual_read_with_citation",
+      "invocation": "No wiring act performed. AST assertion over every module in integrations/ticketing/intake/ confirming none imports sweep, with a positive control proving the assertion can fire.",
+      "output_evidence": "HELD BY F-0, WHICH IS THE TO'S OWN INSTRUCTION AND NOT THIS SEAT'S READING: 'F delivers the matrix and the exercises; the wiring waits for his explicit word', and 'do not treat completing F-1/F-2/F-4 as licence to write it.' The import edge is a PRODUCTION DEPLOY on the runner plane -- live within 5 minutes, with no apply step in which anyone could review it. 0 modules import the sweep, asserted by AST rather than claimed, and the guard is positively controlled (a probe module that DOES import it yields exactly 1 hit) because an empty result from a checker that looked nowhere is indistinguishable from a true zero. The assertion is deliberately WIRED THE OTHER WAY ROUND: if anyone wires the sweep, that test FAILS -- so the matrix's four 'unreachable today' L4 cells are mechanically tied to the fact that makes them true instead of being prose that quietly goes stale.",
+      "denominator": "6 package modules scanned (buzz, intake_pass, receipt, row_contract, runner, __init__), sweep.py itself excluded; 0 importers, 1 positive control hit.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "PLANE: runner (unbuilt). NAMED LATER RUN: the W-F import edge, on Andrew's explicit word per F-0, followed by WF-6 EXERCISED and NOT PROMOTED. UNCOMPUTABLE RATHER THAN FAIL BECAUSE THE SUBJECT DOES NOT EXIST: the criterion is about the behaviour of an edge nobody has written, and marking it FAIL would report a defect where there is only an absence -- the distinction the status vocabulary exists to make."
+    },
+    {
+      "criterion_id": "F-4",
+      "criterion_verbatim": "proof instance VALID rc=0 positional, own-instance discrimination control.",
+      "method": "schema_validation",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_NOTIFY.TO-F_PROOF_OF_SPEC.json F-1,F-2,F-3,F-4   [positional id LIST, rc captured on the tool, UNPIPED]",
+      "output_evidence": "VALID, rc=0, acceptance rows=4, violations=0. OWN-INSTANCE DISCRIMINATION CONTROL run on a MUTATED COPY OF THIS FILE -- not on a sibling, because a checker's behaviour on someone else's instance is not evidence about this one: see the mutant block. rc captured directly on the checker; a `| tail` would have reported tail's rc, which is a trap this seat has already fallen into once this session.",
+      "denominator": "4 of 4 criteria carry a row; 4 ids passed positionally; 1 mutant, 1 positive control.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "OWN-INSTANCE, THREE MUTANTS ON THREE DIFFERENT AXES -- run against copies of THIS file, never a sibling, because a checker's behaviour on someone else's instance is not evidence about this one. (A) F-2's status changed to 'MOSTLY-PASS' -- the VOCABULARY axis, and the most likely real authoring error: a verdict word that reads fine to a human and is not in the enum. (B) F-1's criterion_verbatim deleted -- the PRESENCE axis. (C) F-3's row removed while F-3 is still requested positionally -- the COVERAGE axis, which is the one a bare-form VALID structurally cannot see. One mutant on one axis would have proven only that axis.",
+      "expected": "all three REJECTED rc!=0, and the unmutated file rc=0 -- the positive control run FIRST, because without it a checker that rejects everything would produce the identical three rejections",
+      "observed": "POSITIVE CONTROL unmutated rc=0 VALID. MUTANT A rc=1 INVALID. MUTANT B rc=1 INVALID. MUTANT C rc=1 INVALID. 3 of 3 rejected, 1 of 1 control passed. Mutant files were written to the session scratchpad and deleted after the run (verified absent), so no mutant can be swept into a commit.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the checker run TWICE on the same unmutated instance, comparing rc and the terminal verdict line; and the five test batteries each run with rc captured on the tool itself rather than after a pipe",
+      "observed": "checker: rc 0/0, terminal line identical across both runs. Batteries, unpiped rc: test_client_notify 26 rc=0 | test_we_dl_notice 27 rc=0 | test_authz_matrix 15 rc=0 | test_teams_format 35 rc=0 | test_f2_failure_matrix 18 rc=0 (1 EXPECTED failure, which is the L2/M3 property recorded as unmet) | pytest intake 59 passed, 1 xfailed, 32 subtests.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The L2/M3 repair (make row_contract PARSE created_at)",
+      "reason": "row_contract.py is a LIVE-PRODUCTION file on the runner plane -- saving it deploys it within 5 minutes with no review step. The defect has never fired (0 rc=1 in 169 logged passes) and is not client-reachable, so the proportionate act is to route it as a decision with a recommendation rather than edit a client-facing production path on this seat's own initiative."
+    },
+    {
+      "item": "Any remedy for L2/M2's measured 34.9% identity-fail rate",
+      "reason": "Every obvious fix is a credential-refresh mechanism or a monitor, and the second is under the standing moratorium. The cell's value here is that it is now a MEASURED NUMBER rather than an adjective."
+    },
+    {
+      "item": "Any instrument for M5 (accepted-but-undelivered) on any leg",
+      "reason": "Bounce/complaint topics and delivery monitors are named in this TO's own DO-NOT. The correct posture is to KNOW the blind spot, which section 0(iv) and FINDING 4 do, not to instrument it."
+    },
+    {
+      "item": "The correctness axis (a leg that delivers, wrongly)",
+      "reason": "A different axis from the one this matrix declares. Enumerated in section 3 as a DISCLOSURE so it is visibly excluded rather than silently missing -- flattening it onto a stage axis would be the Rule 24(iii) violation."
+    }
+  ],
+  "surprises": [
+    "THE _Boom EXCEPTION CLASS SAT DEFINED AND UNREFERENCED IN test_client_notify.py THROUGH THREE ACCEPTED TOs. The intent to exercise 'the transport raised' was recorded in code and the exercise was never written -- so the cell read as covered by anyone scanning the file, including me. A dead fixture is a stronger false signal than a missing one, because it is evidence that someone thought about the case.",
+    "MY OWN CONCLUSION LINE IN THE FIRST WEDGE PROBE WAS WRONG AND THE PROBE WAS RIGHT. I printed 'the good row BEHIND it was never processed' -- but run_once sorts by (created_at, ticket_id), so that ordering put the good row FIRST and it did process. The finding survived only because I re-ran it with the ordering made explicit; the pre-written narration nearly outlived the measurement that contradicted it.",
+    "THE SWEEP AND THE BUZZ PATH TAKE OPPOSITE APPROACHES TO THE IDENTICAL INPUT CLASS, ONE MODULE APART. An unparseable created_at crashes the buzz pass and is counted-and-surfaced by the sweep (_parse_created -> None -> Digest.unparseable, stated in frame()). The estate carries both the defect and its own remedy pattern in the same package.",
+    "THE RUNNER LOG ANSWERED A QUESTION I WAS ABOUT TO ANSWER BY REASONING. I had the wedge's reachability argued from source (created_at is server-generated) and was ready to report on that alone; the log's exit census (169 exits, rc=0 and rc=2 only, no rc=1) turned an argument into positive evidence of non-occurrence -- and in the same read produced FINDING 3, the 34.9% identity-fail rate, which nobody had asked about and which is the leg's real reliability story."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-21/laneZ_tof_failure_matrix_0910-1015Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'sweep.py' ; comp-find --name '*buzz*' ; comp-find --name '*TO-F*' org/",
+      "result": "10 / 1 / 34 hits with denominators (27720, 27720, 14683 files scanned). Located the two runner-plane legs and confirmed the D7_TICKETING.TO-F-SITEZ hit is a DIFFERENT, complete TO in another lane -- the near-miss that a bare name search would have conflated with this one."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "(routing check before reading the gateway deploy script)",
+      "result": "No comp-tool reads a bash deploy script's restart semantics; the file was read WHOLE rather than grepped, which is also why the 30s/30s bounded waits and the four get-secret-value calls were both seen -- a head-limited search would have returned the first and stopped."
+    }
+  ]
+}
