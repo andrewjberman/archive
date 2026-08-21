@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_TICKETING.GW-APPLY",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/D7_NOTIFY.TO-SET.md",
+    "group": "D",
+    "vintage_commit": "8a99d851f2"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+      "kind": "script",
+      "commit_or_etag": "f50a0e5168",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ON-INSTANCE md5 eccf03c379985e5441e8e06182cb635f == the build input, read over SSM after the restart. NOT the deploy's rc and NOT the S3-staged object: Rule 22a for EC2 says a staged artifact can be inert while the box runs something else."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/teams_format.py",
+      "kind": "script",
+      "commit_or_etag": "f50a0e5168",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "NEW ON THE BOX. ON-INSTANCE md5 a3e14f8d20a04ae9fbbe252ef91930c8 == build input."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "b5eb078c27",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The RECORD of the deploy, not a deployed artifact. Committed under an audited GIT_COMMIT_AUTHOR_OVERRIDE=SHARED_CLOUD_OPS because the wrapper's own manifest commit was refused -- see G3."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/d7-gateway-html-send-act3-20260821.md",
+      "kind": "doc",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy-completion ledger, opened at deploy-start 14:30:46Z and closed 14:40:02Z in the same session (NEVER#6)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "G1",
+      "criterion_verbatim": "the on-box deploy-directory read that settles /opt/opal-gateway vs /opt/m365-mcp-gateway -- RE-RUN against i-07dccb1615503ac99, not carried forward from the 0240Z discharge.",
+      "method": "live_read",
+      "invocation": "aws ssm send-command AWS-RunShellScript (READ-ONLY) -> uptime -s; systemctl is-active on both units; systemctl show -p FragmentPath -p ExecStart -p WorkingDirectory on both; ls -ld both /opt paths; md5sum the tools.py each would import; curl localhost:8080/health",
+      "output_evidence": "uptime -s = 2026-08-21 07:58:49, so this IS the replaced box and the 0240Z record genuinely could not describe it. opal-gateway.service ACTIVE; m365-mcp-gateway.service inactive. The ACTIVE unit's ExecStart is /opt/opal-gateway/.venv/bin/uvicorn and its WorkingDirectory is /opt/opal-gateway. /opt/m365-mcp-gateway DOES NOT EXIST. health 200. AN ls WOULD HAVE BEEN THE WRONG ORACLE -- a directory existing proves nothing about what EXECUTES, and the rename cutover deliberately left the old unit stopped-and-disabled rather than removed, so both paths could plausibly have existed with one inert. The decisive read is the ACTIVE unit's own ExecStart/WorkingDirectory. CORROBORATION RATHER THAN TRUST: the on-box app/tools.py md5 06e1fd0a11029c74e7cd24294eafc78a matched EC2_MANIFEST.file_checksums exactly, so the manifest's deployed_commit self-report was confirmed on the CODE layer by an independent read.",
+      "denominator": "2 candidate directories, 2 units, 1 active; 1 on-box md5 vs 1 recorded.",
+      "status": "PASS",
+      "status_reason": "AND IT FALSIFIED MY OWN PRIOR RECORD, WHICH IS THE REASON IT WAS WORTH RE-RUNNING RATHER THAN CITING. My message of 2026-08-20 ~23:0xZ told the applier 'the on-box path is /opt/m365-mcp-gateway (NOT opal-gateway)'. It is wrong for this box AND IT WAS ALREADY WRONG WHEN I SENT IT: I had corrected the identical claim in my own commit bbb6f2529d at 18:56:04, 3.5 minutes after making it in f3c1ccbe20. THE CORRECTION LIVED IN A COMMIT MESSAGE AND THE ERROR TRAVELLED IN A MESSAGE TO SOMEONE WHO WOULD ACT ON IT. That message then halt-gated my own ACT-1 apply twice and was cited in the ACT-3 amendment. Annotated, never flipped record-vs-record."
+    },
+    {
+      "criterion_id": "G2",
+      "criterion_verbatim": "mark census at the RIGHT denominator -- 4 (tools.py) + 1 (integration.py) in the DEPLOYED artifact, three registration homes named; a tools.py-only count is a FAIL.",
+      "method": "live_read",
+      "invocation": "over SSM on the DEPLOYED tree: grep -rc 'anthropic/alwaysLoad' /opt/opal-gateway/app/ (per-file) and | wc -l (total). Repo-side AST/text census of @mcp.tool across the whole app/ package for the registration homes.",
+      "output_evidence": "DEPLOYED ARTIFACT: /opt/opal-gateway/app/tools.py = 4, /opt/opal-gateway/app/integrations/opal_portal/integration.py = 1, TOTAL 5. Exactly the 4 + 1 the criterion names. A TRAP IN THE RAW OUTPUT, NAMED: the recursive grep ALSO matches the __pycache__/*.pyc compiled caches of those same two sources, which would read as 7 across 4 'homes'. THEY ARE NOT ADDITIONAL HOMES -- they are the same two files compiled, and counting them inflates the denominator with artifacts of the runtime. REGISTRATION HOMES: at FILE grain the estate has FIVE files carrying @mcp.tool -- tools.py (34), integrations/ycharts/integration.py (6), destructive_ops.py (1), integrations/base.py (1), integrations/opal_portal/integration.py (1). At STRUCTURAL grain those group into THREE homes: (1) app/tools.py, (2) app/destructive_ops.py, (3) app/integrations/**. Both grains are stated because the criterion says 'three' and the file count is five -- I am reporting the measurement rather than forcing it to the expected number. THE PRE-STATE IS THE POINT OF THE CRITERION: the deployed vintage 5a1cc39e8e carried ZERO marks (measured), so this deploy takes them 0 -> 5 and changes which tools are resident at session start FOR EVERY MCP SEAT. That is a fabric-wide behaviour change riding inside what reads like a formatting deploy.",
+      "denominator": "whole app/ package on the DEPLOYED tree (never tools.py alone); 5 marks across 2 source files; 5 @mcp.tool files across 3 structural homes; pre-state 0 marks at 5a1cc39e8e.",
+      "status": "PASS",
+      "status_reason": "A tools.py-only count would have been 4 and a FAIL; a .pyc-inclusive count would have been 7 and also wrong. Both wrong answers are available from the same command, which is why the denominator is stated with the number. THE 'three registration homes' HALF IS REPORTED AT TWO GRAINS rather than asserted at one: my file-grain census finds five, and only a structural grouping yields three. If the criterion meant something more specific by 'homes', this row shows the measurement it should be judged against instead of a number chosen to match."
+    },
+    {
+      "criterion_id": "G3",
+      "criterion_verbatim": "safe-ec2-deploy per the standard, EC2_MANIFEST current, verify-ec2.sh parity BEFORE work (Rule 11), ledger opened and closed in-session.",
+      "method": "command",
+      "invocation": "./infra/aws/ec2/verify-ec2.sh (BEFORE work) ; HALT_ACK=1 ./infra/aws/ec2/safe-ec2-deploy.sh opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh ; GIT_COMMIT_AUTHOR_OVERRIDE=SHARED_CLOUD_OPS .tools/safe-commit.sh -- infra/aws/ec2/EC2_MANIFEST.json",
+      "output_evidence": "verify-ec2 run BEFORE any edit: rc=1 estate-wide (27 checked / 2 clean / 7 drift / 18 skipped); the gateway's own row showed 8 undeployed commits to the service dir, which is what this deploy landed. Deploy rc=0 via the wrapper -- NOT a service-specific script, NO code pushed into an image, S3 -> SSM per Rule 12. Ledger opened 14:30:46Z at deploy-start and CLOSED 14:40:02Z in the same session. HALT-GATE blocked the deploy on a pending message (the same 15h-old one that blocked ACT 1 twice) -- reviewed, and it is the very record G1 falsified. Acked, not bypassed blind.",
+      "denominator": "27 services checked by verify-ec2; 4 commits / 3 files shipped; 6 ledger legs, all closed.",
+      "status": "PASS",
+      "status_reason": "PASS WITH A STRUCTURAL DEFECT SURFACED, NOT PAPERED OVER. The deploy LANDED and then the wrapper's OWN manifest-recording commit was REFUSED: EC2_MANIFEST.json is lane SHARED_CLOUD_OPS and 0.5.0_AE_OpalETL~Z is not in permitted_agents. UNDER RULE 26 THE APPLY NOW RUNS ON THE DEVICE THAT OWNS THE WORK, AND THAT SEAT IS NOT THE LANE OWNER OF THE RECORD ITS OWN DEPLOY MUST WRITE -- so this reproduces for every future site-Z EC2 deploy, exactly as the safe-apply terraform-path defect did. The refusal also leaves the change STAGED, which is a sweep risk for the next seat. Recorded at b5eb078c27 under the sanctioned audited override (singular lane, manifest only), because Rule 8 makes this file the source of truth and a landed deploy with a stale manifest is the confident-wrong-record the deploy script's own comments call worse than a missing one. Routed to 1.0.0_SA_CTO~Z."
+    },
+    {
+      "criterion_id": "G4",
+      "criterion_verbatim": "boot test run and printed, with the mcp 1.28.0 two-branch hazard stated -- LOUD means REVERT-not-debug and surface; SILENT is declared NOT REACHABLE by the boot test, NOT ruled out and NOT closed on. No PyPI egress, the pin does not change.",
+      "method": "live_read",
+      "invocation": "the deploy's own bounded readiness loops (systemctl is-active, then /health), then an INDEPENDENT SSM read: systemctl show -p ActiveState -p SubState -p MainPID -p ExecMainStartTimestamp; curl /health; /opt/opal-gateway/.venv/bin/pip show mcp",
+      "output_evidence": "opal-gateway ACTIVE; AS metadata serves; /mcp unauth -> 401 (expected). INDEPENDENT re-read after the deploy: ActiveState=active SubState=running, MainPID 12236 (was 1532), ExecMainStartTimestamp 2026-08-21 14:33:04 UTC -- A REAL RESTART, not an 'enable --now' no-op that would have left the OLD process running with stale code while every on-disk check passed. /health 200. PIN: mcp 1.28.0, UNCHANGED. The crash-loop branch did not fire and no PyPI egress decision was taken.",
+      "denominator": "1 unit, 1 pid compared before/after, 3 endpoint probes, 1 pin read.",
+      "status": "PASS",
+      "status_reason": "THE SILENT BRANCH IS DECLARED NOT REACHABLE BY THIS TEST AND IS NOT CLOSED ON. A boot test can only observe LOUD failure (crash-loop, port never binds, health never 200). A silent mcp-API drift that leaves the service up and answering while some tool path misbehaves is OUTSIDE what any of these probes can see. Not ruled out -- unobserved, and recorded as unobserved rather than as absence."
+    },
+    {
+      "criterion_id": "G5",
+      "criterion_verbatim": "the 22a ladder stated.",
+      "method": "manual_read_with_citation",
+      "invocation": "stated here against the three layers Rule 22a separates.",
+      "output_evidence": "DESIRED: the repo tree at f50a0e5168 -- 4 commits / 3 files in the shipped set (the tarball carries app deploy requirements.txt identity_tool_allowlist.txt and NOT README, so the 8-commit service-dir count is the wrong denominator for what ships). APPLIED: read ON THE INSTANCE over SSM, never from the deploy's rc and never from the S3 object -- a staged artifact may be INERT. All three shipped files' md5s on the box == the build input -- app/tools.py eccf03c3..., app/teams_format.py a3e14f8d... (NEW on the box, the D-PROSE + D-HTML renderer module), app/integrations/opal_portal/integration.py 71c67a7c...; the wiring is present on the box (format_for_teams_html=2, contentType html=2, text=0); MainPID changed, so the process actually reloaded. EXERCISED: /health 200, AS metadata serves, /mcp unauth 401 -- the paths that fail if the service is not really serving. WHAT IS NOT ESTABLISHED, STATED PLAINLY: no Teams message was posted, so THE HTML RENDERING ITSELF IS UNEXERCISED. The bytes are on the box and the markup is correct by test; whether the Teams client renders it clickable is observable only by posting. D-3 stays UNCOMPUTABLE-BY-CONSTRUCTION for exactly that reason -- deploying did not discharge it.",
+      "denominator": "3 layers, each with its own instrument; 3 files verified on-box; 3 endpoint probes; 0 messages posted.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "G6",
+      "criterion_verbatim": "proof instance VALID rc=0 positional over G1-G6.",
+      "method": "schema_validation",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.GW-APPLY_PROOF_OF_SPEC.json G1,G2,G3,G4,G5,G6  [rc on the tool]",
+      "output_evidence": "VALID, rc=0, acceptance rows=6, violations=0, rc captured ON THE TOOL unpiped. THE CHECKER CAUGHT A REAL GAP ON THE FIRST RUN AND I FIXED THE ROW, NOT THE CHECKER: artifact-coverage flagged app/teams_format.py as having NO acceptance row referencing it (the A_03 zero-battery class). It WAS verified on-box, but no row named it -- so the instance would have shipped an artifact whose verification lived only in my head. G5 now names each shipped file with its md5. POSITIVE CONTROL unmutated rc=0 VALID. MUTANT A (G1 status -> 'MOSTLY-PASS', vocabulary axis) rc=1 REJECTED. MUTANT B (G4 row removed while G4 still requested positionally, COVERAGE axis -- the one a bare-form VALID structurally cannot see) rc=1 REJECTED. 2 of 2 rejected, control passed FIRST so a reject-everything checker would not have looked identical. Mutants written to the session scratchpad and deleted after (verified).",
+      "denominator": "6 of 6 criteria carry a row; 6 ids passed positionally.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "OWN-INSTANCE: a copy of THIS file with G1's status changed to a non-enum value, and separately with G4's row removed while G4 is still requested positionally -- the vocabulary axis and the coverage axis, the second being the one a bare-form VALID structurally cannot see.",
+      "expected": "both REJECTED rc!=0, with the unmutated file rc=0 as a positive control run FIRST",
+      "observed": "POSITIVE CONTROL unmutated rc=0 VALID. MUTANT A (G1 status -> 'MOSTLY-PASS', vocabulary axis) rc=1 REJECTED. MUTANT B (G4 row removed while G4 still requested positionally, COVERAGE axis -- the one a bare-form VALID structurally cannot see) rc=1 REJECTED. 2 of 2 rejected, control passed FIRST so a reject-everything checker would not have looked identical. Mutants written to the session scratchpad and deleted after (verified).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the checker run twice on the same unmutated instance; and the on-box SSM verification issued as a second, independent invocation from the deploy's own",
+      "observed": "checker run twice on the unmutated instance: rc 0/0, identical. The on-box verification was issued as a SECOND, INDEPENDENT SSM invocation rather than reusing the deploy's own output, so the APPLIED-layer evidence does not inherit the producer's run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "main.tf :191/:193 (user_data)",
+      "reason": "Excluded IN TERMS by GW-APPLY: 'do not fold it into this TO's deploy legs'. Exercising user_data IS instance replacement -- the disaster the criterion exists to prevent. Untouched, and the deploy succeeded without it."
+    },
+    {
+      "item": "The 7 non-ASCII lines in app/tools.py",
+      "reason": "ALL PRE-EXISTING at the deployed vintage -- measured, not assumed. The box already ran them and this deploy introduced none. Widening an approved deploy to clean someone else's comments is scope creep, and an approval covers what the approver was shown."
+    },
+    {
+      "item": "The opal-gateway telemetry/rightsizing manifest fields",
+      "reason": "WARN-only announce-then-enforce lints (telemetry, duty_cycle, autoshutdown, sizing_review, primary_data_bucket). Pre-existing, not this act's, and the lint itself declares the deploy proceeds."
+    },
+    {
+      "item": "Posting a Teams message to exercise the HTML rendering",
+      "reason": "An outward-facing act into a real channel. Not in ACT 3's scope and not something to do to tick a box. D-3 stays UNCOMPUTABLE-BY-CONSTRUCTION."
+    }
+  ],
+  "surprises": [
+    "THE DEPLOY LANDED AND ITS OWN RECORD WAS REFUSED. safe-ec2-deploy returned rc=0 and then its manifest commit hit an owned-paths lane refusal, leaving the change STAGED and the source of truth asserting the previous commit while new code ran. Rule 26 moved the apply to the seat that owns the work; it did not move the lane that owns the record. Structural, reproduces for every future site-Z EC2 deploy, and the second instance today of the same shape as the safe-apply terraform-path defect.",
+    "RE-SERIALISING THE MANIFEST WOULD HAVE FROZEN SOMEONE ELSE'S CORRUPTION. The file already contains MOJIBAKE -- double-encoded em-dashes -- in six other services' rows. json.dumps with ensure_ascii would have escaped that mojibake into permanent \\u00e2\\u20ac\\u201d sequences, converting recoverable corruption into machine-readable-looking garbage, in rows I have no business touching. Caught by reading the diff rather than the return code; redone byte-surgically with every anchor asserted unique first.",
+    "THE WRAPPER REWROTE 555 LINES AS CRLF FOR FOUR SEMANTIC CHANGES. Every gate would have passed and only the review surface would have died -- the same class as the Lambda source-map ensure_ascii slip earlier in this same session, from a different cause. Twice in one session the diff SHAPE was the only thing that caught it.",
+    "TWO file_checksums ENTRIES WERE ALREADY WRONG BEFORE THIS DEPLOY. app/server.py and app/audit.py matched neither the repo nor the box (the box matched the repo -- only the record was stale). Rule 8's source of truth was partially false and nothing was reporting it. Their correction is stated as pre-existing in the record itself, because an unexplained checksum change inside a deploy record reads as exactly the drift it is not.",
+    "MY OWN COMMIT MESSAGE MISCOUNTED ITS OWN ARTIFACT. 2b7258f31c says '6/6 alwaysLoad marks' and the file AT THAT COMMIT carries 5 -- measured at three vintages. The gate's amendment said 4 + 1 and was right. A self-report in a commit message is not evidence about the commit."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-21/laneZ_tof_failure_matrix_0910-1015Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name 'safe-ec2-deploy*'",
+      "result": "2 hits / 27719 files scanned -- located the wrapper at infra/aws/ec2/ and NOT in .tools/, which is the home decision ADHC_PREFLT_PRD records and the one Rule 26's mechanism list names explicitly."
+    }
+  ]
+}
