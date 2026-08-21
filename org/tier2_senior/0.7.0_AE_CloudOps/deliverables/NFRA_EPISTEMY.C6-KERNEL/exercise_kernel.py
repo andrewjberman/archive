@@ -17,6 +17,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 from transition_kernel import (
+    LegOutcome,
     Checkpoint,
     CumulativeResidueLedger,
     InadmissibleRow,
@@ -227,6 +228,46 @@ def m7_lease_expires_midway() -> None:
            "kernel carried the opening verdict -- a lease silently became a LOCK")
 
 
+# ---------------------------------------------------------------- m8: FAILED_MID_ACT (A1)
+
+def m8_failed_mid_act_records_and_reraises() -> None:
+    """A1, minted by 4.0.0_SA_CRO in the K1 spec cert @b895b7e337.
+
+    The requirement has TWO limbs and the case asserts BOTH, because either alone is a
+    different (and wrong) behaviour:
+      - recorded  : a LegRecord{outcome: FAILED_MID_ACT} exists, and the affected residue
+                    axis is UNKNOWN -- never 0.
+      - re-raised : the exception still reaches the caller. RECORDING IS NOT SWALLOWING; a
+                    kernel that recorded and returned would have silently eaten a crash.
+    """
+    tu = TransitionUnit(_manifest())
+
+    def exploding_act():
+        raise RuntimeError("the act blew up mid-flight")
+
+    propagated = False
+    try:
+        tu.run_leg("leg1", act=exploding_act, residue_axis="objects_written",
+                   measure_fn=lambda: 1.0, method="fixture count")
+    except RuntimeError as exc:
+        propagated = "blew up mid-flight" in str(exc)
+
+    recorded = [leg for leg in tu.legs if leg.outcome is LegOutcome.FAILED_MID_ACT]
+    unknown = tu.ledger.unknown_axes()
+    # the crashed leg produced NO measured row -- inventing a 0 would be the sentinel bug
+    no_invented_row = len(tu.ledger.rows()) == 0
+
+    if propagated and recorded and "objects_written" in unknown and no_invented_row:
+        terminal, reason = tu.terminal()
+        detail = (f"recorded={recorded[0].outcome.value} re-raised=True "
+                  f"unknown_axes={sorted(unknown)} rows={len(tu.ledger.rows())} -> {terminal.value}")
+        record("m8 act() raises -> RECORDED *and* RE-RAISED (A1)", True, detail)
+        return
+    record("m8 act() raises -> RECORDED *and* RE-RAISED (A1)", False,
+           f"propagated={propagated} recorded={bool(recorded)} unknown={sorted(unknown)} "
+           f"no_invented_row={no_invented_row}")
+
+
 # ---------------------------------------------------------------- POSITIVE CONTROL
 
 def positive_control_happy_path() -> None:
@@ -315,6 +356,7 @@ def main() -> int:
     m5_required_exceeds_actual()
     m6_unexercised_recovery_is_assumed()
     m7_lease_expires_midway()
+    m8_failed_mid_act_records_and_reraises()
     positive_control_happy_path()
 
     p3_ok, p3_detail = phase3_exercised_abort()

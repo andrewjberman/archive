@@ -88,15 +88,46 @@ kind, not a claim of tamper-proofing.
 must report a partially-landed transition as rolled back — **false in the direction that HIDES
 STRANDED STATE**, which is the 2026-06-11 class NEVER#8 exists for.
 
-### Axis 2 — `LegOutcome` (4 values). Declared layer: *the outcome of ONE leg.*
+### Axis 2 — `LegOutcome` (**5 values, amended**). Declared layer: *the outcome of ONE leg.*
 
-`LANDED` · `REFUSED_PREFIX_SAFETY` · `REFUSED_SUPPORT_HANDOFF` · `ABORTED_AT_CHECKPOINT`
+`LANDED` · `REFUSED_PREFIX_SAFETY` · `REFUSED_SUPPORT_HANDOFF` · `ABORTED_AT_CHECKPOINT` ·
+**`FAILED_MID_ACT`**
 
-- **(i) MECE** — a leg either landed, was refused (by one of the two distinct gates, kept separate so
-  the battery can discriminate which fired), or aborted at its checkpoint. CE hunted: a leg that
-  *raised an unexpected exception mid-act* is **NOT** covered — see §5 residual.
-- **(ii) SAME GRAIN** — all four are per-leg. **(iii)** outcome only.
-- **(iv) STATE COHERENCE** — satisfied; all four are produced by the same code path.
+⛔ **AMENDED BY A1 — minted by `4.0.0_SA_CRO` as registry executor, K1 spec cert @ `b895b7e337`,
+resolving the CE gap this packet declared as residual 1.** Census run at base before the mint: 0
+occupancy across the canon trio + `CLAUDE.md` + `RULINGS`. The amended record rides my implementing
+commit; no re-cert.
+
+- **(i) MECE — CE NOW CLOSES.** A leg either landed, was refused before the act (by one of two
+  distinct gates, kept separate so the battery can discriminate which fired), aborted deliberately at
+  its checkpoint, or **crashed mid-act**. The fifth value is the one I found by hunting and did not
+  mint, because minting is an authoring act.
+- **(ii) SAME GRAIN** — all five are per-leg. **(iii) INTENT COHERENCE** — outcome only.
+- **(iv) STATE COHERENCE** — satisfied; all five are produced by the same code path.
+
+**CRO's reasoning is the load-bearing half and it is why this is not bookkeeping:** *the most
+dangerous leg state — possible PARTIAL EFFECTS, i.e. the stranded-state class — must not be the least
+recorded.* Before A1, an unexpected mid-act exception propagated and **no `LegRecord` existed at
+all**, so the one outcome that can strand state was the one outcome the ledger could not express.
+
+**Implemented behaviour, and RECORDING IS NOT SWALLOWING** — the kernel records the row, marks the
+affected residue axis **UNKNOWN** (a crashed act's residue is genuinely unmeasured, never `0` — that
+would be the sentinel bug again), and then **RE-RAISES** so the caller still sees the crash.
+Exercised as **m8**, asserting *both* limbs because either alone is a different and wrong behaviour:
+
+```
+[FIRED] m8 act() raises -> RECORDED *and* RE-RAISED (A1):
+        recorded=FAILED_MID_ACT  re-raised=True  unknown_axes=['objects_written']  rows=0  -> CONTAINED
+```
+
+`rows=0` is asserted deliberately: **no measured row is invented for a leg that crashed.** The ledger's
+ROW set stays a set of measurements while the OBSERVATION set stays a complete census of acquisitions
+*including the ones that could not be made*.
+
+**And `terminal()` refuses to price what it cannot measure.** A transition with a `FAILED_MID_ACT` leg
+can never resolve `COMPLETED` or `ROLLED_BACK`, and its reason states that the measured debt is a
+**FLOOR, not the debt** — quoting the sum of measured rows as *the* rollback debt would be a
+wrong-denominator error inside the very object whose job is pricing rollback.
 
 ### Axis 3 — `plane` / `substrate` (CONSUMED, not authored)
 
@@ -164,10 +195,11 @@ a scalar *"nothing here"* wearing an axis name, precisely what `ResidueVector` e
 
 ## 5. RESIDUALS — declared, not absorbed
 
-1. **`LegOutcome` CE gap.** A leg whose `act()` raises an *unexpected* exception mid-flight has no
-   value on the axis; the exception propagates and no `LegRecord` is appended. Distinct from the two
-   REFUSED values (kernel-initiated) and from `ABORTED_AT_CHECKPOINT` (deliberate). Not repaired
-   here — minting a value is a Rule-24 authoring act, and CRO is the registry executor.
+1. ~~**`LegOutcome` CE gap.**~~ **RESOLVED by A1 @ `b895b7e337`** — CRO minted `FAILED_MID_ACT` as
+   registry executor and I implemented it; see Axis 2 above and battery case m8. Struck rather than
+   deleted so the route is legible: *the builder found and declared the gap, the registry executor
+   minted the value, the builder implemented it.* At no point did I widen an axis on my own
+   authority, which is the whole reason the residual was declared instead of quietly filled.
 2. **`PointOfNoReturn` DELETED @ `7b91a7d4b0`.** Found by auditing this module before handing it over:
    `defined=1, raised=0`, against a control of `raised=3` for `PrefixSafetyViolation`. Deletion is the
    correct fix, not wiring it up — crossing a declared point of no return is a **legitimate act**, not

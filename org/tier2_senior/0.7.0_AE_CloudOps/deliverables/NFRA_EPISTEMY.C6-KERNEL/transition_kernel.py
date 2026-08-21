@@ -179,12 +179,32 @@ class Terminal(str, Enum):
 
 class LegOutcome(str, Enum):
     """Per-leg outcome. A DIFFERENT GRAIN from Terminal -- kept on its own axis so the two
-    never mix (Rule-24 postulate ii: never a leg-level value beside a transition-level one)."""
+    never mix (Rule-24 postulate ii: never a leg-level value beside a transition-level one).
+
+    Declared layer: THE OUTCOME OF ONE LEG. CE closes with FAILED_MID_ACT (below).
+    """
 
     LANDED = "LANDED"
     REFUSED_PREFIX_SAFETY = "REFUSED_PREFIX_SAFETY"
     REFUSED_SUPPORT_HANDOFF = "REFUSED_SUPPORT_HANDOFF"
     ABORTED_AT_CHECKPOINT = "ABORTED_AT_CHECKPOINT"
+
+    #: MINTED BY 4.0.0_SA_CRO AS REGISTRY EXECUTOR, K1 spec cert A1 @b895b7e337, resolving
+    #: the CE gap this packet declared as residual 1. Census run at base before the mint:
+    #: 0 occupancy across the canon trio + CLAUDE.md + RULINGS.
+    #:
+    #: The leg's `act()` raised an UNEXPECTED exception mid-flight -- distinct from both
+    #: REFUSED values (kernel-initiated, before the act) and from ABORTED_AT_CHECKPOINT
+    #: (deliberate). CRO's reasoning, and it is the load-bearing half: THE MOST DANGEROUS
+    #: LEG STATE -- possible PARTIAL EFFECTS, i.e. the stranded-state class -- MUST NOT BE
+    #: THE LEAST RECORDED. Previously the exception propagated and no LegRecord existed at
+    #: all, so the one outcome that can strand state was the one outcome the ledger could
+    #: not express.
+    #:
+    #: RECORDING IS NOT SWALLOWING: the kernel records the row, marks the affected residue
+    #: axis UNKNOWN (a crashed act's residue is genuinely unmeasured, never 0), and then
+    #: RE-RAISES.
+    FAILED_MID_ACT = "FAILED_MID_ACT"
 
 
 # --------------------------------------------------------------------------- residue
@@ -398,6 +418,25 @@ class CumulativeResidueLedger:
         self._emit(leg_id, axis, method, float(measured), "KNOWN", None)
         return row
 
+    def record_unknown(self, leg_id: str, axis: str, method: str, reason: str) -> dict:
+        """Record that an axis's residue is UNMEASURED, with the reason (A1).
+
+        No LedgerRow is appended -- there is no measurement to append, and inventing a 0
+        would be the sentinel bug. What IS appended is the Observation_Record, carrying
+        substantive_result UNKNOWN. So the ledger's ROW set stays a set of measurements,
+        while the OBSERVATION set stays a complete census of acquisitions including the
+        ones that could not be made.
+        """
+        return self._emit(leg_id, axis, method, None, "UNKNOWN", reason)
+
+    def unknown_axes(self) -> frozenset[str]:
+        """Axes with at least one UNKNOWN acquisition -- i.e. residue we cannot bound."""
+        return frozenset(
+            r["population_predicate"].split("'")[1]
+            for r in self._observations
+            if r["substantive_result"]["state"] == "UNKNOWN" and "'" in r["population_predicate"]
+        )
+
     def cumulative(self) -> Optional[ResidueVector]:
         """Cumulative residue as a VECTOR, summed WITHIN each axis and never ACROSS axes.
 
@@ -599,7 +638,29 @@ class TransitionUnit:
             self.legs.append(rec)
             raise
 
-        act()
+        # A1 (CRO K1 spec cert @b895b7e337): an UNEXPECTED mid-act exception is RECORDED and
+        # then RE-RAISED. Recording is not swallowing -- the caller still sees the exception,
+        # and the ledger stops being blind to the one outcome that can strand state.
+        try:
+            act()
+        except BaseException as exc:
+            rec = LegRecord(
+                leg_id,
+                LegOutcome.FAILED_MID_ACT,
+                f"{type(exc).__name__}: {exc}",
+                # POSSIBLE partial effects. True is the CONSERVATIVE direction: it prevents
+                # the transition from resolving ROLLED_BACK, which would claim a restoration
+                # nobody performed on a leg whose effects are UNKNOWN.
+                effects_survive=True,
+            )
+            self.legs.append(rec)
+            # The residue this leg produced is genuinely UNMEASURED -- never 0. Emitting a
+            # zero would be a scalar "nothing here", the sentinel bug one layer up.
+            self.ledger.record_unknown(
+                leg_id, residue_axis, method,
+                f"act() raised {type(exc).__name__} mid-flight: {exc}")
+            raise
+
         if checkpoint is not None and checkpoint.is_point_of_no_return:
             self._past_no_return = True
 
@@ -631,6 +692,23 @@ class TransitionUnit:
 
         aborted = [leg for leg in self.legs if leg.outcome is LegOutcome.ABORTED_AT_CHECKPOINT]
         landed = [leg for leg in self.legs if leg.outcome is LegOutcome.LANDED]
+        failed = [leg for leg in self.legs if leg.outcome is LegOutcome.FAILED_MID_ACT]
+
+        # A1: a leg that crashed mid-act can NEVER resolve to COMPLETED or ROLLED_BACK, and
+        # the reason must say the debt is UNBOUNDED rather than quoting a priced number --
+        # the crashed leg's residue is UNKNOWN, so the sum of the measured rows is a FLOOR,
+        # not the debt. Quoting it as the debt would be the wrong-denominator error inside
+        # the very object that prices rollback.
+        if failed:
+            unknown = sorted(self.ledger.unknown_axes())
+            return (
+                Terminal.CONTAINED,
+                f"{len(failed)} leg(s) FAILED MID-ACT ({'; '.join(f.detail for f in failed)}); "
+                f"their effects are POSSIBLE BUT UNMEASURED on axes {unknown or ['<unnamed>']}. "
+                f"Measured rollback debt {self._recovery_requirement()} is a FLOOR, not the "
+                f"debt -- the crashed leg's residue is UNKNOWN. Restoration is neither "
+                f"performed nor priceable; this is the stranded-state class, recorded.",
+            )
 
         if aborted:
             if any(leg.effects_survive for leg in landed):
