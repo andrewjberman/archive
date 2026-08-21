@@ -36,11 +36,33 @@ iter 7 : HEAD-before 9f8a09c051 -> HEAD-after 9f8a09c051 quiet : self-test: PASS
 iter 8 : HEAD-before 9f8a09c051 -> HEAD-after 9f8a09c051 quiet : self-test: PASS 4/4
 ```
 
-Iterations 5 and 6 each SPANNED a real HEAD advance (the two evidence commits of this very record,
-landed deliberately mid-loop) and stayed PASS 4/4 -- the exact condition that produced the old
-control's 02:07Z false FAIL. **Residual, assigned to 0.8.0_AE_CloudComp~A (MSTR-spawned lane,
-coordination 64165/base answer 023434Z): the VACUOUSNESS CONTROL** -- the OLD predicate
-(`head in out`) evaluated under identical spanning runs must FAIL there, proving the churn reached
-the setup->compose window rather than landing between iterations' setup and HEAD-capture. ~A also
-carries mutant M3 (verifier correct, VERIFIED lines suppressed -- the exact pre-fix state; the
-sharpest A4 arm, unrun at base). The full A1-A5 close to MSTR cites both seats' transcripts.
+**CORRECTED on ~A's measurement (64218 @d745b8a341) -- this loop DID NOT ESTABLISH THE CROSSING,
+and the record says so rather than letting a spanning green overstate itself.** Iterations 5 and 6
+spanned real HEAD advances with PASS 4/4, but ~A timestamped the actual defect window (self_test's
+HEAD read to compose's own HEAD read): MEDIAN 205.2 ms of a ~16,500 ms run -- this loop's
+before/after oracle measured a window ~80x WIDER than the defect occupies, and ~A's background
+committer proved ambient churn crosses the true gap ~3% per iteration (0/4 under 1-commit-per-6s
+churn). **A3's non-vacuous discharge therefore rests on ~A's DIRECT WINDOW ORACLE** (setup_head vs
+the sha compose stamps into its own read-vintage header -- the exact two reads the defect sits
+between): **crossings MEASURED 3/3 under injection with NEW PASS (A2+A3), and the old predicate's
+ability to fail under the condition proven by the M3/injected row (OLD FAIL where crossing 2/2)**.
+
+**TWO INSTRUMENT ERRORS AT BASE, owned:** (1) the loop oracle above (window 80x too wide -- named
+as a limitation in my 64167 note to ~A, quantified by their measurement); (2) **the positive
+control I ASSIGNED ~A (old-c2 fails where new-c2 passes) CANNOT FIRE ON THE FIXED TOOL** -- A5's
+VERIFIED line puts the real sha into the output, satisfying `head in out` through the verification
+path, so the old predicate's symptom is incidentally repaired while its blindness stands. Had ~A
+run the control as I specified it, every run would read "churn never reached the gap" forever -- a
+control that could not have said otherwise, assigned inside the acceptance of a finding about
+exactly that class. ~A caught it BEFORE running it and substituted the direct oracle. Wherever
+this bar re-runs, use the header-sha oracle, never the assigned form.
+
+**A4 is TWO DIFFERENT MUTANTS, both required:** M1 (correctness regression -- verifier flags real
+commits; base, in-memory monkeypatch) and ~A's M3 (OBSERVABILITY regression -- verifier correct,
+VERIFIED lines suppressed = byte-faithful pre-fix state; scratch-copy + isolated linked worktree,
+shared tree untouched, sha256-verified). The matrix's load-bearing row: same composed output, OLD
+PASS / NEW FAIL -- the rewritten control discriminates "verification healthy" from "verification
+invisible", which the old one could not.
+
+**BAR: A1-A5 MET across both seats** (~A's matrix rows cited per criterion in their 64218; their
+commit @d745b8a341 is LOCAL pending MSTR's integration window -- flagged, not assumed published).
