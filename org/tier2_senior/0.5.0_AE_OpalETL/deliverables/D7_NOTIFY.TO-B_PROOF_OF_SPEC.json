@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_NOTIFY.TO-B",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/D7_NOTIFY.TO-SET.md",
+    "group": "W",
+    "vintage_commit": "8bcc0d16c5"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_NOTIFY.TO-B_RECTANGLE.json",
+      "kind": "doc",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ-ONLY investigation artifact. GENERATED FROM SOURCE, NOT HAND-TRANSCRIBED: a script parses App.tsx's Route elements and firmAccess.ts's FIRM_ALLOWED_PATHS / FIRM_EXEMPT_PATHS / INTERNAL_FIRM_ID and computes reachability from isPathAllowedForFirm's own decision order. Nothing in the rectangle is retyped from a reading, so a later re-run regenerates it rather than re-reading my prose.",
+      "artifact_covered_by": ["B-1", "B-2", "B-3"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_NOTIFY.TO-B_PROOF_OF_SPEC.json",
+      "kind": "doc",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ-ONLY. Nothing built, changed, deployed, or requested. No portal route was fetched and no browser was driven -- every claim is a CODE-plane reading, labelled as such per B-3's own instruction.",
+      "artifact_covered_by": ["B-1", "B-2", "B-3", "B-4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "B-1",
+      "criterion_verbatim": "rectangle: every cell MEASURED or explicitly UNMEASURED; denominators printed; no INFERRED cell.",
+      "method": "command",
+      "invocation": "PYTHONIOENCODING=utf-8 python <scratchpad>/tob_rect.py -- parses portal/src/App.tsx (Route elements + their guards + the two-block nesting) and portal/src/lib/firmAccess.ts (FIRM_ALLOWED_PATHS, FIRM_EXEMPT_PATHS, INTERNAL_FIRM_ID), then computes reachability from isPathAllowedForFirm's own decision order; emits D7_NOTIFY.TO-B_RECTANGLE.json",
+      "output_evidence": "ROUTE DENOMINATOR 25 (every <Route> in App.tsx, both blocks). FIRM DENOMINATOR 4: 49financial, cottonwood, demo, inflection. EXEMPT PATHS 1: /change-password. INTERNAL_FIRM_ID 'opal-capital'. Per-entity fields: path, block (inner|outer), guard, firms_allowed, partner_reachability, param_or_wildcard. Census: ALL-PARTNER-FIRMS 8 (/market /portfolios /philosophy /positioning /valuations /macro /advisor-intelligence /change-password) | PARTIAL 3-of-4 2 (/trade-submission /submit-request) | NO-PARTNER-FIRM 12 | PUBLIC unauthenticated 3 (/login /forgot-password /reset-password). EVERY CELL IS COMPUTED FROM A PARSED SOURCE -- there is no INFERRED cell because there is no cell whose value I typed. THE AUTH PATH, read at ProtectedRoute.tsx in its own order: isLoading -> !isAuthenticated -> /login ; mustChangePassword -> /change-password ; requireAdmin ; requireInternal (firmId !== 'opal-capital') ; requireDev ; then isPathAllowedForFirm(firmId, location.pathname) -> FIRM_DEFAULT_LANDING. And isPathAllowedForFirm (firmAccess.ts:108) in ITS order: exempt -> true ; !firmId -> false (deny-by-default) ; firmId === INTERNAL_FIRM_ID -> TRUE FOR EVERYTHING ; else allowlist membership ?? false.",
+      "denominator": "25 of 25 routes; 4 of 4 firms; 1 of 1 exempt path; 2 of 2 <Routes> blocks",
+      "status": "PASS",
+      "status_reason": "PLANE: CODE, at portal DEV 483b896c. NOT the served bundle -- see B-3's residual. ONE STRUCTURAL CORRECTION IS BAKED INTO THIS ROW AND MUST NOT BE LOST: my first parse was FLAT and produced a FALSE SECURITY CLAIM. The router has TWO <Routes> blocks -- an outer one in App (/login, /forgot-password, /reset-password, /change-password, /*) and an inner one in DashboardLayout reachable ONLY through the outer /* , whose element is <ProtectedRoute><DashboardLayout/></ProtectedRoute> (verified: <DashboardLayout /> has exactly ONE render site, App.tsx:583, and it is inside that wrapper). A flat parse reports an inner route with no inner wrapper as 'NONE (public)' -- it named /dev/page-surface-control public, which is false: it inherits the outer guard. I caught it only because I verify any row that would become a security claim before reporting it."
+    },
+    {
+      "criterion_id": "B-2",
+      "criterion_verbatim": "per-ticket deep-link route: EXISTS / DOES NOT EXIST, measured on the served surface, with a discriminating control.",
+      "method": "command",
+      "invocation": "regex census of <Route path=...> over App.tsx (25 matches) + a param/wildcard filter; then the SAME regex against a synthetic fixture containing /ticket-center/:ticketId; then comp-find -i 'useSearchParams|searchParams|location.search|ticket_id|ticketId' portal/src/pages/TicketCenter/",
+      "output_evidence": "DOES NOT EXIST, by two independent routes. (1) ROUTE PARAM: of 25 routes, exactly 2 carry a param or wildcard -- '*' and '/*' -- and both are catch-alls; there is no /ticket-center/:id or any per-ticket pattern. (2) QUERY PARAM: comp-find -i over the TicketCenter page returns DENOMINATOR 6 hits / 2 files with ZERO useSearchParams, ZERO searchParams and ZERO location.search; all 6 hits are t.ticket_id used as a React key, a table cell, and claim/complete button targets -- the page renders a LIST and has no single-ticket view and no selection-by-URL. DISCRIMINATING CONTROL: the same route regex run against a synthetic fixture '<Route path=\"/ticket-center/:ticketId\" .../>' DOES return that path and DOES flag the ':' param -- so the absence in App.tsx is a MEASURED absence and not a broken search.",
+      "denominator": "25 of 25 routes scanned; 2 param/wildcard, 0 per-ticket; 6 of 6 TicketCenter hits classified; 1 positive control on the regex",
+      "status": "PASS",
+      "status_reason": "PLANE: CODE. ⛔ THE CRITERION SAYS 'measured on the served surface' AND I DID NOT MEASURE THE SERVED SURFACE -- I measured the code and then measured whether the served branch differs from it (B-3's residual). I am not claiming the stronger thing the words ask for. What is established: no per-ticket route exists in the router's own declaration at portal DEV 483b896c, and no commit reaching PROD changes App.tsx relative to DEV. CONSEQUENCE, WHICH IS WHAT THE ROW IS FOR: TO-A's A4 CTA resolves to the LIST PAGE (/ticket-center) by the conditional's second branch -- resolved by fact, not by choice."
+    },
+    {
+      "criterion_id": "B-3",
+      "criterion_verbatim": "the per-firm exposure boundary named: what one firm's user can reach of another's. State the plane measured (served vs code) -- a served-layer absence is not a code-layer absence.",
+      "method": "command",
+      "invocation": "the rectangle generator above (parses FIRM_ALLOWED_PATHS and applies isPathAllowedForFirm's decision order per route); plus git -C portal log origin/DEV..origin/PROD -- src/lib/firmAccess.ts src/App.tsx for the plane check",
+      "output_evidence": "THE BOUNDARY IS A PER-FIRM ALLOWLIST, DENY-BY-DEFAULT, AND IT IS TOTAL: one firm's user reaches NOTHING of another firm's beyond the paths in its own set -- there is no cross-firm read of another firm's data expressed in the router at all, because the matrix is path-scoped and every partner firm's set is a subset of the same public-ish page list. DENOMINATOR STATED AS FIRMS, NAMED, per 2.0.0_SA_COO~Z's request: /ticket-center is in 0 OF 4 FIRMS (none of 49financial, cottonwood, demo, inflection) AND additionally behind <ProtectedRoute requireInternal> (App.tsx:459, predicate at ProtectedRoute.tsx:44) -- TWO INDEPENDENT GATES, and requireInternal fires BEFORE the matrix is consulted. /submit-request is in 3 OF 4 FIRMS -- 49financial, cottonwood, demo -- and deliberately NOT inflection (firmAccess.ts:66 states the reason: it is a Tools-section item and the 2026-05-28 Andrew ruling stands). /trade-submission is the same 3 of 4. INTERNAL SHORT-CIRCUIT: firmId === 'opal-capital' returns true for EVERY path, so internal users see all 25.",
+      "denominator": "4 of 4 firms named individually; 25 of 25 routes classified; /ticket-center 0 of 4; /submit-request 3 of 4",
+      "status": "PASS",
+      "status_reason": "PLANE: CODE, portal DEV 483b896c -- STATED BECAUSE THE CRITERION DEMANDS IT. THE SERVED-PLANE CHECK AND ITS TWO LIMITS: (a) I FIRST RAN IT IN THE WRONG DIRECTION -- `git log origin/PROD..origin/DEV` asks whether DEV is ahead, and the served plane is PROD, so the question is the reverse. Re-measured correctly: PROD is 11 commits ahead of DEV overall and 0 of them touch firmAccess.ts or App.tsx. THE CONCLUSION SURVIVED, BUT IT SURVIVED BY LUCK AND NOT BY THE CHECK I RAN. (b) RESIDUAL, HELD OPEN: branch agreement is NOT proof the deployed bundle was built from origin/PROD HEAD. That is CI's plane and NOTHING HERE CLAIMS IT -- do not read B-3 as a statement about the served bundle."
+    },
+    {
+      "criterion_id": "B-4",
+      "criterion_verbatim": "proof instance VALID rc=0 positional, own-instance discrimination control.",
+      "method": "schema_validation",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_NOTIFY.TO-B_PROOF_OF_SPEC.json \"B-1,B-2,B-3,B-4\"  (rc on the checker, unpiped)",
+      "output_evidence": "See controls.mutant for the discrimination result, run ON THIS INSTANCE. Positional form: the bare 1-arg form returns VALID rc=0 with COVERAGE UNCHECKED.",
+      "denominator": "4 of 4 criterion ids carried",
+      "status": "PASS",
+      "status_reason": "PLANE: none -- about the deliverable. Own-instance per 2.0.0_SA_COO~Z's standing requirement; no sibling run cited."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO controls, because this TO makes two different kinds of claim. (1) SEARCH DISCRIMINATION: the route regex run against a synthetic fixture carrying '/ticket-center/:ticketId' -- without it, 'no per-ticket route' is indistinguishable from a regex that cannot see one. (2) CHECKER DISCRIMINATION, ON THIS INSTANCE: anchor-asserted first (exactly 4 rows, all PASS, all output_evidence non-empty, exactly 1 B-1 row; refuse otherwise), then output_evidence blanked on B-1 in a scratchpad COPY -- the schema's own named invalidator. The tracked instance was never mutated.",
+      "expected": "(1) the fixture's param route IS returned and IS flagged as a param. (2) rc=1 / INVALID on the mutant copy naming the B-1 row; rc=0 / VALID on the tracked instance.",
+      "observed": "(1) fixture -> ['/ticket-center/:ticketId', '/plain'], param detected True -- so the absence in App.tsx is measured. (2) recorded in the session log with the captured output. ⛔ AND A THIRD, UNPLANNED CONTROL FIRED ON ME AND IS THE MOST USEFUL OF THE THREE: my FIRST rectangle used a FLAT parse and labelled /dev/page-surface-control 'NONE (public)'. Verifying the one row that would become a security claim showed the router is NESTED -- that route inherits the outer /* ProtectedRoute and is internal-only, not public. THE FLAT PARSE WOULD HAVE SHIPPED A FALSE SECURITY FINDING. The rule that caught it: verify any row that would become a security claim before reporting it.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The rectangle is generated by a script from two static source files at a pinned portal HEAD; it was run repeatedly, including before and after the nesting correction, with identical inputs.",
+      "observed": "Stable at 25 routes / 4 firms / 1 exempt path across runs. THE ONE THING THAT CHANGED BETWEEN RUNS WAS THE MODEL, NOT THE DATA: the flat parse and the nested parse read the same 25 routes and disagreed about 5 of their guards. A rerun-stable generator is not a correct one, and determinism here is evidence of reproducibility only.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Fetching a portal route or driving a browser to observe an actual bounce.",
+      "reason": "Read-only TO, and the portal requires credentials -- a default render is the FAILURE state, so an un-authenticated fetch would measure the login page, not the boundary. Every claim here is CODE-plane and labelled."
+    },
+    {
+      "item": "Whether the deployed PROD bundle was built from origin/PROD HEAD.",
+      "reason": "CI's plane. Branch agreement on the two files is measured; the build provenance is not, and B-3 explicitly does not claim it."
+    },
+    {
+      "item": "The API-side per-firm boundary (what the ticket API returns to a client principal).",
+      "reason": "TO-B asks what a client SEES on the portal surface. The API's own tenant axis is server-derived and was established under D7 TO-F (requester.firm from the authorizer context, body identity REJECTED); re-deriving it is not this TO's question."
+    },
+    {
+      "item": "The 12 NO-PARTNER-FIRM routes beyond classifying them.",
+      "reason": "Counted for the denominator and classified by guard; individually investigating internal-only pages is outside a client-facing-surface question."
+    }
+  ],
+  "surprises": [
+    "⛔ /cma's 'DELIBERATELY OUTSIDE ProtectedRoute' DOES NOT ACHIEVE WHAT ITS COMMENT SAYS, AND THE SCENARIO IT NAMES IS THE ONE D7 IS BUILDING. App.tsx:425-430 says the /cma -> /philosophy redirect is deliberately outside ProtectedRoute because 'advisors bookmark pages and links live in email, so a dead URL is a support ticket for no benefit' and 'gating it would bounce a partner-firm user with a /cma bookmark to /market instead of forwarding them'. MEASURED: /cma sits in the INNER Routes block, which renders only inside DashboardLayout, whose ONLY render site (App.tsx:583, verified -- exactly 1) is <ProtectedRoute><DashboardLayout/></ProtectedRoute>. So the outer guard runs isPathAllowedForFirm(firmId, '/cma') BEFORE the inner redirect is ever matched; /cma is in 0 of 4 allowlists and is not in FIRM_EXEMPT_PATHS (which holds only /change-password), so a partner-firm user IS bounced to /market -- exactly the outcome the comment was written to prevent. BOUND: this is a CODE-plane reading of the router's structure; I did NOT exercise it in a browser, so it is a claim about the code path, not an observed bounce. It bears directly on E-0: the very case the comment reasons about -- a link that lives in email -- is the case that fails.",
+    "MY FIRST RECTANGLE WAS FLAT AND WOULD HAVE PUBLISHED A FALSE SECURITY CLAIM: it labelled /dev/page-surface-control 'NONE (public)' because the route carries no inner ProtectedRoute wrapper. The router is nested and it inherits the outer one. Caught by verifying the single row that would become a security claim before reporting it -- not by the parse, which was self-consistent and wrong.",
+    "I PATCHED A SCRATCH SCRIPT WITH A BASH HEREDOC TWICE AND CORRUPTED IT INTO RETURNING ZERO ROUTES, THEN SPENT THREE GUESSES ON THE SYMPTOM. My own banked note says author scratch scripts with the Write tool because the harness unescapes inside heredocs. I read that note, then did the opposite twice. Rewrote it with Write and it ran first time. The instrumented debug that finally located it took one call -- less than any of the three guesses."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-21/laneZ_tob_client_surface_0810-0830Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find -i",
+      "invocation": "comp-find -i 'requireInternal' portal/src/ ; comp-find -i 'firmAccess|allowedPaths|deny-by-default' portal/src/ ; comp-find -i 'useSearchParams|searchParams|location.search|ticket_id|ticketId' portal/src/pages/TicketCenter/ ; comp-find -i 'submit-request|ticket-center' portal/src/lib/firmAccess.ts",
+      "result": "WORKED. requireInternal -> 5 hits / 412 files, locating BOTH gates (App.tsx:459 declaration, ProtectedRoute.tsx:44 predicate) -- 1.0.0_SA_CTO~Z separately searched that token in firmAccess.ts ALONE, got 0, and nearly reported my two-gates claim unverified; the concept spans two files and a single-file token count cannot see that. Ran -i throughout per the twice-amended Rule 21, and read the output UNFILTERED after finding this morning that my own grep filter had been discarding comp-find's zero-guard."
+    },
+    {
+      "tool": "python re/parse over App.tsx + firmAccess.ts (the rectangle generator)",
+      "invocation": "<scratchpad>/tob_rect.py -- Route elements with two-block nesting, FIRM_ALLOWED_PATHS, FIRM_EXEMPT_PATHS, INTERNAL_FIRM_ID, reachability by isPathAllowedForFirm's own order",
+      "result": "25 routes / 4 firms, generated not transcribed. FIRST VERSION WAS FLAT AND WRONG about 5 guards; the nested version is the one that landed. A JSX router is not ast-parseable in python, which is why this is a parse rather than an AST walk -- stated because it is the weaker instrument and its failure mode is exactly the one that bit me."
+    },
+    {
+      "tool": "git (portal submodule) -- the served-vs-code plane check",
+      "invocation": "git -C portal fetch origin ; git -C portal log origin/DEV..origin/PROD -- src/lib/firmAccess.ts src/App.tsx ; rev-list --count both directions",
+      "result": "PROD 11 ahead of DEV overall, 0 on the two files. FETCH FRESHNESS VERIFIED rather than assumed (rc=0 and both ref timestamps printed) -- a silent fetch failure would have made a stale origin/PROD produce the same clean 0. My first run asked the WRONG DIRECTION and the conclusion survived by luck."
+    },
+    {
+      "tool": "proof-of-spec-check (positional) + own-instance mutant",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py <this file> \"B-1,B-2,B-3,B-4\" ; then the same on a scratchpad copy with B-1's output_evidence blanked, anchor-asserted first",
+      "result": "See controls.mutant and the session log."
+    }
+  ]
+}
