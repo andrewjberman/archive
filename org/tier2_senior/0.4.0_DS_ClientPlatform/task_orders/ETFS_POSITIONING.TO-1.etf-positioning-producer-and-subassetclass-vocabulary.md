@@ -10,6 +10,11 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-21T19:55Z</issued>
 <status>ACTIVE</status>
+<cell_status assignee="0.4.0_DS_ClientPlatform" recorded="2026-08-21T21:0xZ" commit="71265d372e" push_state="LOCAL -- 0 remote branches contain it, rides integration">
+  <cell id="ETFS-d-2" state="COMPLETE">Vocabulary act delivered. ETFS-TO1-AC6 PASS. An ADOPTION, not a mint -- 12/12 values already in-estate.</cell>
+  <cell id="ETFS-d-1" state="CODE-COMPLETE -- 2 criteria open">AC1/AC2/AC3/AC7 PASS (AC2+AC3 EXERCISED, 23/23 assertions, mutants fire). AC4 NOT MET -- lane seam, EventBridge/Lambda TF is a Rule-13 DT/AE PROD-trigger act; routed to the issuer, lane not crossed, no gate manufactured. AC5 UNCOMPUTABLE-BY-CONSTRUCTION -- no SCHEDULED bbg/ landing exists (oracle re-read: 1 date prefix); will be read, never dated off the 08-22 07:00 projection.</cell>
+  <proof_of_spec>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ETFS_POSITIONING.TO-1_PROOF_OF_SPEC.json -- VALID, rc=0, 7/7 criteria covered, 0 violations</proof_of_spec>
+</cell_status>
 <priority>P1 — SESSION PRIORITY. Andrew-direct 2026-08-21 ~19:3xZ, VERBATIM: "Make it clear to the fabric that I want ETFS_POSITIONING DONE RIGHT NOW. IT IS PRIORITY FOR THIS SESSION". Front of this seat's queue; everything else at this seat yields.</priority>
 <scope_guard>⛔ ANDREW-DIRECT DS SCOPE-LIFT, VERBATIM: *"bring the DS in just no old TOs, they address what theyre tasked now, and eveyrthing else is on hold for that seat unless qualified otherwise."* **THE HOLD REMAINS THE DEFAULT AND THE BURDEN IS ON ME AS TASKER, NOT ON YOU TO REFUSE.** This TO qualifies EXACTLY the work below and NOTHING else: no D4_ETFPOS TO, no MDPF_PROVCANON work, no backlog item, nothing from the 08-21 TO sweep. If something adjacent looks obviously worth doing — it is still held. One line to CVO's channel, keep working.</scope_guard>
 <authority>PRD `docs/architecture/ETFS_POSITIONING_PRD.md` s.11.1 (the DONE) + s.10.4 (ship shape, Andrew's) + s.11.5 (inherited constraints). Build authorized END TO END 14:1xZ @1cf66d7d93 — no build fence anywhere in this TO.</authority>

@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_POSITIONING.TO-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DS_ClientPlatform/task_orders/ETFS_POSITIONING.TO-1.etf-positioning-producer-and-subassetclass-vocabulary.md",
+    "group": "D",
+    "vintage_commit": "cc7eca2da3"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/gold/etf_positioning_gold.py",
+      "kind": "script",
+      "commit_or_etag": "71265d372e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stage 1 of 2. Committed LOCAL @71265d372e; 0 remote branches contain it (git branch -r --contains, read not inferred) -- rides MSTR's integration push. NOT deployed: the S3 code-deploy leg is gated behind ETFS-TO1-AC4's schedule decision, which is an open lane seam routed to the issuer (see declared_exclusions)."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/gold/etf_positioning_publisher.py",
+      "kind": "script",
+      "commit_or_etag": "71265d372e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stage 2 of 2, the platinum publisher. Committed LOCAL @71265d372e, 0 remote branches contain it. Cannot be exercised against the live serve until AE's TO-2 Half 2 adds the platinum/etfs/* bucket-policy ARN and the writer grant -- expected, AE's cell, not a producer defect."
+    },
+    {
+      "path_or_key": "data/etfs/scripts/gold/test_etf_positioning_upgrade_forward.py",
+      "kind": "test",
+      "commit_or_etag": "71265d372e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline fixture battery, run locally. 23/23 assertions PASS. Not a deployed artifact by nature."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ETFS_POSITIONING_TO-1_SUB_ASSET_CLASS_VOCABULARY_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "71265d372e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The ETFS-d-2 vocabulary act with its four-postulate record. A governance record; nothing to deploy."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "ETFS-TO1-AC1",
+      "criterion_verbatim": "Producer exists, compiles, passes .tools/commit-gate.sh, committed under your author line via safe-commit.sh",
+      "method": "command",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/gold/etf_positioning_gold.py data/etfs/scripts/gold/etf_positioning_publisher.py data/etfs/scripts/gold/test_etf_positioning_upgrade_forward.py ; bash .tools/safe-commit.sh --author \"0.4.0_DS_ClientPlatform <0.4.0_DS_ClientPlatform@opal.agent>\" -F <msgfile> -- <4 paths>",
+      "output_evidence": "OK: pre-commit gate clean for 3 file(s) | [risk-reflex] DENOMINATOR: 4 file(s) checked against 1813 danger node(s), REFLEX CLEAN -- a MEASURED result | [CLOUD 71265d372e] Author: 0.4.0_DS_ClientPlatform <0.4.0_DS_ClientPlatform@opal.agent> | 4 files changed, 1548 insertions(+)",
+      "denominator": "3 py file(s) through the gate; 4 file(s) in the commit; 4 checked against 1813 danger nodes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ETFS-TO1-AC2",
+      "criterion_verbatim": "Emits all four books; PFDE/PFOE FULL (weighted holdings + per-holding analytics), DIVZ/IDVZ book-level SHELLS. The shell path is exercised, not merely coded",
+      "method": "live_read",
+      "invocation": "python data/etfs/scripts/gold/etf_positioning_gold.py --as-of 2026-08-20   (dry run against the live (a) plane)",
+      "output_evidence": "built: {\"books\": 4, \"books_full\": 2, \"books_shell\": 2, \"holding_rows\": 114, \"sub_asset_class_unmapped\": 1, \"sub_asset_class_vocab_size\": 12} | book DIVZ status=book_only n=0 aum=307436800.0 | book IDVZ status=book_only n=0 aum=198489200.0 | book PFDE status=full n=90 aum=165699457.0 | book PFOE status=full n=24 aum=91304910.0 -- and the shells carry real book truth (DIVZ yield 1.568, cost 0.65, beta 0.5907), so a shell is not an empty object. Per-holding analytics present: PFDE top holding NVDA weight 9.95, sub_asset_class 'Information Technology', beta 1.6486, returns.1D -0.3263.",
+      "denominator": "4 of 4 books in the runtime-read universe; 114 of 114 holding rows in silver/holdings/2026-08-20.parquet",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ETFS-TO1-AC3",
+      "criterion_verbatim": "Shells upgrade forward with NO code change -- proven by a run against a fixture carrying DIVZ/IDVZ constituent rows. Sharpest test binds: if a code edit is needed to pick them up, ETFS-TO1-AC3 FAILS",
+      "method": "test_suite",
+      "invocation": "python data/etfs/scripts/gold/test_etf_positioning_upgrade_forward.py",
+      "output_evidence": "T2 AC3: SAME build_tables, fixture carrying DIVZ/IDVZ constituent rows (no edit between T1 and T2 -- identical function object) | [PASS] DIVZ UPGRADED to full -- status=full n=2 (was book_only/0) | [PASS] IDVZ UPGRADED to full -- status=full n=1 (was book_only/0) | [PASS] PFDE unchanged by the upgrade -- still ('full', 4) | [PASS] upgraded shell gains a sector breakdown -- DIVZ segment.sector={\"Consumer Staples\": 8.0}. The full/shell decision is made in ONE place from DATA (len(rows) > 0); no ticker is named anywhere in the producer, so DIVZ/IDVZ are not special-cased and no edit exists to make.",
+      "denominator": "23 of 23 assertions PASS, 0 FAIL, across 5 test groups",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ETFS-TO1-AC4",
+      "criterion_verbatim": "A SCHEDULE exists and is the production trigger -- not event-only, not ad-hoc. Quote the schedule expression",
+      "method": "live_read",
+      "invocation": "comp-trigger etf-positioning ; comp-trigger etf_positioning",
+      "output_evidence": "NO MATCH by name or target-ARN substring. (That is a match-miss, not proof no trigger exists -- an S3-notification/sentinel trigger would not appear here; v1 scans EventBridge rules + Scheduler schedules only.) -- NO SCHEDULE EXISTS. Stated plainly rather than softened: this criterion is NOT met. The producer scripts are complete and schedulable, but the EventBridge rule + Lambda Terraform is an infra act, and CLAUDE.md Rule 13 assigns 'infra, PROD triggers' to DT/AE while assigning data/*/scripts/{gold,silver,bronze}/*.py to DS. I did not cross the lane and did not manufacture a gate; the seam is routed to the issuer same-turn. The exercised precedent for the shape is etfs-netassets-daily: cron(0 22 * * ? *), events-rule ENABLED, FIRED 7x in window.",
+      "denominator": "0 matches across 136 events-rules + 18 Scheduler schedules scanned, region us-east-1",
+      "status": "FAIL",
+      "status_reason": "NOT MET, and it is a LANE SEAM rather than a build failure -- stated as FAIL because under-claiming is the safer error and 'no schedule exists' is the mechanical truth (comp-trigger: 0 matches over 136 events-rules + 18 schedules). The producer scripts are complete and schedule-ready; what is missing is the EventBridge rule + Lambda Terraform, which CLAUDE.md Rule 13 assigns to DT/AE ('infra, PROD triggers') while assigning data/*/scripts/{gold,silver,bronze}/*.py to DS. I did not cross the lane, did not author infra outside it, and did not manufacture an approval gate. Routed to 2.0.0_SA_COO as issuer SAME-TURN for the call: assign the trigger to AE/DT, or explicitly qualify this seat to author and apply it (the TO's <placement> is LAPTOP, which is this box, so Rule 26 is satisfied either way). Precedent shape already exercised in-estate: etfs-netassets-daily, cron(0 22 * * ? *), infra/aws/terraform/etfs-netassets/netassets-lambda.tf."
+    },
+    {
+      "criterion_id": "ETFS-TO1-AC5",
+      "criterion_verbatim": "PROOF RUNS ON THE FIRST SCHEDULED bbg/{date}/ LANDING (earliest 2026-08-22 07:00 local). INDETERMINATE ANCHOR -- no calendar date. The ad-hoc objects DO NOT satisfy this",
+      "method": "live_read",
+      "invocation": "aws s3 ls s3://opal-data-etfs/bbg/",
+      "output_evidence": "PRE 2026-08-20/ -- exactly ONE date prefix. No SCHEDULED landing exists. The 7 objects under bbg/2026-08-20/ are ad-hoc output from three standalone terminal runs (~10:17Z) and are cited here as BUILD-TIME evidence only, never as production evidence. I will re-run this oracle against the first scheduled landing and will NOT date this criterion off the 2026-08-22 07:00 projection -- a dependent act dated off a projected prerequisite is the class the TO named.",
+      "denominator": "1 date prefix under bbg/ (re-measured at 20:1xZ this session, unchanged from pickup)",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "DELIBERATELY NOT SATISFIABLE TODAY and the TO says so explicitly ('ETFS-TO1-AC5 is deliberately not satisfiable today and that is CORRECT, not a defect'). The criterion anchors on the first SCHEDULED bbg/{date}/ landing, which does not exist: the oracle returns exactly ONE date prefix (2026-08-20), and those 7 objects came from three ad-hoc standalone terminal runs, not a scheduled fire. The anchor is INDETERMINATE -- earliest 2026-08-22 07:00 local, but I will re-run the oracle and read it rather than date this criterion off that projection. The other six criteria were delivered without holding for it, as the TO directed."
+    },
+    {
+      "criterion_id": "ETFS-TO1-AC6",
+      "criterion_verbatim": "sub_asset_class vocabulary shipped WITH its four-postulate record + -i token census + comp-estate --definitions check",
+      "method": "manual_read_with_citation",
+      "invocation": "comp-find -i \"<each of 12 values>\" portal/src docs/architecture ; comp-estate --definitions ; deliverable ETFS_POSITIONING_TO-1_SUB_ASSET_CLASS_VOCABULARY_v1.md",
+      "output_evidence": "12-value enum ADOPTED not minted: 11 GICS sectors byte-identical to portal/src/lib/dataLoader.ts:236 SECTOR_INDICES (and to Bloomberg GICS_SECTOR_NAME, so no mapping table exists) + 'Cash & Cash Equivalents' byte-identical to this project's own PRD s.2.5:147. Four-postulate record complete; MECE's CE half HUNTED and found a real uncovered member -- 2602335D (TPG Inc), 1 of 106 unique non-cash tickers -- handled as null + a manifest count rather than an 'Other' bucket. comp-estate --definitions: 65 ratified terms, zero are financial sector/asset-class terms, zero collisions. Census scope 874 files, 1 UNREADABLE carried; the Utilities=50 result was READ (a Tailwind/dateUtils homonym) rather than counted as a collision.",
+      "denominator": "12 of 12 values censused with -i; 874 files scanned, 1 UNREADABLE not searched; 65 ratified terms checked",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "ETFS-TO1-AC7",
+      "criterion_verbatim": "NO write lands under daily/, platinum/, etf_history.csv, or silver/netassets_daily.parquet -- ETFS_CANON's live territory, boundary (h). Amendment A second half: also NO write lands under json/positioning/*",
+      "method": "live_read",
+      "invocation": "python data/etfs/scripts/gold/etf_positioning_gold.py --as-of 2026-08-20 (dry run); source read of _assert_write_boundary() in both stages",
+      "output_evidence": "DRY RUN (no --publish): nothing written. ZERO S3 writes occurred this session across every run. The boundary is a RUNTIME REFUSAL, not a comment: _assert_write_boundary() raises on any key under opal-data-etfs/daily/, opal-data-etfs/platinum/, etf_history.csv, silver/netassets_daily.parquet, opal-data-portal-v2/json/, platinum/mdpf/, platinum/advi/, and on anything outside each stage's single declared target. The publisher additionally requires --publish AND env OPAL_ETFS_PUBLISH_GRANT=1. Models-mode byte-identity therefore holds BY CONSTRUCTION: this producer has no key in json/positioning/ and no grant to it.",
+      "denominator": "5 forbidden prefixes enforced in stage 1, 4 in stage 2; 0 S3 writes performed in 4 dry runs",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants, because a passing assertion never mutated has never been tested. (1) shape_check fed a book declaring holdings_status 'full' with an emptied holdings array -- the THIRD STATE that a length-based inference would render as a normal shell. (2) the as-of guard fed a stale as_of against a fixed calendar frontier, to show an input that makes it fire EXISTS.",
+      "expected": "(1) shape_check REFUSES and names THIRD STATE. (2) trading_days_behind goes non-zero while the honest control stays 0.",
+      "observed": "(1) [PASS] MUTANT: 'full' + empty holdings is REFUSED -- shape_check returned 1 problem(s); THIRD STATE fired=True; CONTROL: honest document passes, shape_check clean over 4 books. (2) [PASS] MUTANT: trading_days_behind(08-14, 08-21) = 5; CONTROL: trading_days_behind(08-21, 08-21) = 0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The gold producer was run 4 times against the same pinned as-of (2026-08-20) across this session, and the fixture battery twice; book/holding counts and all aggregates compared.",
+      "observed": "Identical every run: books 4, books_full 2, books_shell 2, holding_rows 114, sub_asset_class_unmapped 1; PFDE aum 165699457.0 and sector sum 99.64; PFOE sector sum 97.66. The only field that varies between runs is generated_at (a UTC-native timestamp, by design) and run_id (a uuid, by design).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "ETFS-TO1-AC4 -- the EventBridge schedule + Lambda Terraform for the two producer stages",
+      "reason": "LANE SEAM, routed to the issuer same-turn rather than decided silently or crossed. CLAUDE.md Rule 13 gives DS 'the full commit->QA-deploy cycle for data/*/scripts/{gold,silver,bronze}/*.py' and gives DT/AE 'infra, PROD triggers'. An EventBridge rule + Lambda TF is a PROD trigger. I did not author or apply infra outside my lane, and I did not manufacture an approval gate. The producer is schedule-READY (both stages are pure CLI entry points with pinned --as-of support). COO's call: assign the trigger to AE/DT, or explicitly qualify this seat to author+apply it under Rule 26 (the TO's <placement> is LAPTOP, which is this box)."
+    },
+    {
+      "item": "S3 code deploy of the two producer scripts (safe-deploy leg)",
+      "reason": "Held behind the AC4 seam. Deploying a producer that nothing triggers would put an undeployed-but-present script in the tree with no schedule -- the 'pipeline with no schedule is a defect' shape one step early. Deploy lands with the trigger decision."
+    },
+    {
+      "item": "ETFS-c-1 / TO-4 -- the DIVZ/IDVZ constituent source determination and TrueShares capture",
+      "reason": "Sequenced P2 BEHIND TO-1 by the issuer (COO 65785, explicit: 'DO NOT INTERLEAVE. KEEP BUILDING THE PRODUCER'). Andrew's 20:45Z egress grant fires its start condition but does not move the critical path, because ETFS-TO1-AC3 already makes the producer pick those rows up with no code change."
+    },
+    {
+      "item": "Multi-period returns (WTD/MTD/1M/QTD/1Q/YTD/1Y)",
+      "reason": "Emitted as null, not 0.0, because bbg/ carries ONE history partition today and an incomplete window is not a number. The computation is built and windows fill in automatically as partitions accumulate -- no code change. 1D is populated now (NVDA -0.3263). A zero return and an absent series are different statements and only one of them is a claim."
+    },
+    {
+      "item": "The 17 other pending TOs at this seat",
+      "reason": "Andrew-direct scope clause: 'everything else is on hold for that seat unless qualified otherwise'. TO-1 is the qualification and nothing else is."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION/INERT: the portal carries TWO disagreeing spellings of the sector axis -- dataLoader.ts:236 SECTOR_INDICES + Correlation/constants.ts:101 use GICS-canonical 'Information Technology'/'Health Care', while PortfolioManagement/constants.ts:36-50 SECTORS uses 'Technology'/'Healthcare' and additionally mixes a filter sentinel ('ALL') with classification values on one axis (a Rule-24 intent-coherence defect on that enum). Pre-existing, not worsened by adopting the dataLoader spelling. Not edited -- outside ETFS-d-1/d-2.",
+    "OBSERVATION/INERT: AE's CONTRACT v1 was an uncommitted working tree when I began building against it. It has since landed and moved to v1.1 (@f93b4571d1). I re-read rather than assumed: v1.1's own changelog states the change is the edge-version pin and is 'nothing a consumer builds against' -- the key, the B-form shape, holdings_status and the vocabulary hand-off are unchanged, so this build is on-spec against v1.1.",
+    "OBSERVATION/INERT: Bloomberg TOTAL_NUMBER_OF_HOLDINGS_IN_PORT carries a real holdings COUNT for the two shell books (DIVZ 30, IDVZ 46) even though zero constituent rows exist. I did NOT emit it as num_holdings -- doing so would make num_holdings mean 'rows I emitted' for full books and 'rows that exist somewhere' for shells, two grains on one field. num_holdings is len(holdings[]) for every book. Flagging only because it is a genuine forward-upgrade datum for whoever holds the shell-enrichment question, and because COO's TO-4 trap 1 ('a count is not a list') is the same fact seen from the other side."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform/logs/2026-08-21/r15_etfs_positioning_to1_producer_and_vocabulary_2005-2105Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i \"<12 vocabulary values>\" portal/src docs/architecture ; comp-find -i \"Cash Equivalents\" portal/src docs/architecture data ; comp-find --name \"*publisher*\" ; comp-find -i \"GICS_SECTOR_NAME\" data infra",
+      "result": "Drove the ETFS-d-2 act from MINT to ADOPTION. Found the GICS vocabulary already in-estate (dataLoader.ts SECTOR_INDICES + SECTOR_COLORS), found 'Cash & Cash Equivalents' already in this project's own PRD, and found the platinum-publisher precedent (data/assets/scripts/gold/runners_49f/d_publisher_port.py) whose D5/D7/13c discipline this producer adopts rather than reinvents. GICS_SECTOR_NAME = 0 hits across 8927 files in data/infra, confirming no existing data-side mapping to reuse."
+    },
+    {
+      "tool": "comp-estate",
+      "invocation": "comp-estate --definitions",
+      "result": "65 ratified terms, SYSTEM_DEFINITIONS v3.18. Zero are financial sector/asset-class terms -- no proposed vocabulary value collides with a ratified term at a different meaning. Build-ladder rung 2 discharged one layer up."
+    },
+    {
+      "tool": "comp-trigger",
+      "invocation": "comp-trigger etfs-netassets-daily ; comp-trigger etf-positioning ; comp-trigger etf_positioning",
+      "result": "Established the AC4 precedent shape (etfs-netassets-daily: events-rule ENABLED, cron(0 22 * * ? *), FIRED 7x in window, TF at infra/aws/terraform/etfs-netassets/netassets-lambda.tf) and measured AC4's actual state: NO MATCH for this producer over 136 events-rules + 18 schedules."
+    },
+    {
+      "tool": "comp-pipescript",
+      "invocation": "comp-pipescript deployed",
+      "result": "Ran to establish the deploy pattern for data/etfs/scripts/gold/. Exceeded its 120s window and was backgrounded; the AC4/deploy conclusion does NOT rest on it -- it rests on comp-trigger and on Rule 13's lane text. Recorded rather than dropped so the tool inventory is not overstated."
+    }
+  ]
+}
