@@ -36,7 +36,8 @@
     <criterion id="ETFS-TO2-AC4" cell_refs="ETFS-e-3"/>
     <criterion id="ETFS-TO2-AC5" cell_refs="ETFS-e-1"/>
     <criterion id="ETFS-TO2-AC6" cell_refs="ETFS-a-8"/>
-  <expected_criteria>ETFS-TO2-AC1,ETFS-TO2-AC2,ETFS-TO2-AC3,ETFS-TO2-AC4,ETFS-TO2-AC5,ETFS-TO2-AC6</expected_criteria>
+    <criterion id="ETFS-TO2-AC7" cell_refs="ETFS-e-3"/>
+  <expected_criteria>ETFS-TO2-AC1,ETFS-TO2-AC2,ETFS-TO2-AC3,ETFS-TO2-AC4,ETFS-TO2-AC5,ETFS-TO2-AC6,ETFS-TO2-AC7</expected_criteria>
   <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ETFS_POSITIONING.TO-2_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 </task_order>
@@ -170,3 +171,71 @@ and needs no apply.*
 
 **Nothing else in this TO changes.** The separate-artifact ruling, the contract-first sequencing (still the
 critical-path join), and your IAM method all stand as written.
+
+---
+
+## ⛔ AMENDMENT C (issuer, 2026-08-21T20:2xZ) — **OPTION (A) RULED.** The advi statement is restored to code **IN THE SAME EDIT** as the etfs ARN. One edit, one reviewable act, ONE apply.
+
+**AE routed a BLOCKING × ARMED surprise (65720) rather than writing an off-spec fix on their own authority.
+That is the protocol working exactly as designed** — mid-round the spec is frozen for the *executing* seat, and
+the amendment is the *issuer's* act. **This is that amendment.**
+
+### RULED: **(A).** TO-2 Half 2 now includes restoring `AllowAdvisorRouterOAIPlatinumAdvi` to `s3-portal-v2-import.tf`.
+
+**Why (A) and not (B) — the reason is the resource's own semantics, not convenience:**
+
+1. ⛔ **`aws_s3_bucket_policy` is FULL-REPLACE (`PutBucketPolicy`).** Option (B) means **TWO applies against one
+   live bucket policy**, and every apply on a full-replace resource is another chance to write the wrong
+   statement set. **On a live serving resource, fewer applies is the safer direction, not the more casual one.**
+2. **Option (B) serializes Half 2 behind a second TO for no safety gain** — and the two edits touch the *same
+   declaration block*, so splitting them creates a window in which the file is half-correct.
+3. **The drift was discovered by, and is inseparable from, this cell.** Handing it to a different TO would
+   separate the finding from the seat holding the live measurement.
+
+### THIS WIDENS NOTHING, AND THE DISTINCTION IS LOAD-BEARING
+
+**Restoring `AllowAdvisorRouterOAIPlatinumAdvi` to code is not a grant, not a widening, and not a new serve.**
+The grant is **ALREADY LIVE**, **ALREADY CO-SIGNED** (COO's half is in the P4R-3 paper), and **already serving
+traffic**. Codifying it **narrows the gap between code and reality** — it changes the *record*, not the
+*permission*. ⛔ **The dangerous act here is NOT codifying it; the dangerous act is applying without it.**
+
+**And to be explicit, because I will not manufacture one:** the apply freeze AE declared is a **HAZARD DISARM,
+not an approval gate.** No seat needs anyone's permission to work; one specific destructive act is fenced until
+its precondition is in code. That is a control, not a choke point.
+
+### ACCEPTANCE — `ETFS-TO2-AC4` gains a second half, and `ETFS-TO2-AC7` is MINTED
+
+| id | criterion | cell_refs | grounding layer |
+|---|---|---|---|
+| **ETFS-TO2-AC4** *(extended)* | The etfs ARN is added **AND** `AllowAdvisorRouterOAIPlatinumAdvi` is restored, **in ONE edit, ONE `safe-apply`**. Post-apply re-plan **IN `shared-infra`** reads **0-diff** — and **state the root you ran it in**, since running it in the wrong root is the defect being remediated | `ETFS-e-3` | APPLIED |
+| **ETFS-TO2-AC7** *(NEW)* | ⛔ **THE ADVI ROUTE STILL SERVES AFTER THE APPLY — proven by an EXERCISED FETCH through the auth path, not a policy read.** Plus a live `get-bucket-policy` showing **THREE** statements | `ETFS-e-3` | **EXERCISED** |
+
+⛔ **`ETFS-TO2-AC7` IS THE WHOLE POINT AND IS NOT CEREMONY.** The failure mode is *"the apply silently removed a
+live read grant."* **A policy read after the apply would show what we just wrote and tell us nothing about
+whether ADVI still serves.** Only fetching the route exercises it. **And a 403 here would arrive dressed as
+HTML by the CF error rules** — so the check must assert the **body/status of a successful fetch**, never merely
+"a response came back."
+
+**Sequence it so the blast radius is observable:** capture the exercised advi fetch **BEFORE** the apply as
+well, so a post-apply failure is attributable to the apply rather than to a pre-existing condition.
+
+### THE CLASS THIS BELONGS TO — recorded because it will recur, and it is not AE's carelessness
+
+AE's own P4R-3 close was **rigorous**: live-primitive read-back of all three statements, mutation-tested router
+controls, an exercised fetch, deployed bytes hashed. **Every control fired correctly and every one of them was
+about the WRONG PLANE.** A grant applied **out-of-band** is **structurally invisible to a plan you never run**,
+and the re-plan that read *"No changes"* was in a root that **does not own the bucket policy**.
+
+**That is CLAUDE.md's designed-half verbatim: *no control inside the wrong plane can catch a wrong-plane
+error.*** *(AE labelled the "which root" part an INFERENCE and it stays labelled — the measured facts are the
+pending change and the absent TF resource; which root the prior re-plan ran in is reasoned, not read.)*
+
+**The transferable rule, and it is worth more than this fix: A LIVE-PRIMITIVE GRANT WITHOUT A CORRESPONDING
+TERRAFORM RESOURCE IS A DELETION SCHEDULED FOR WHENEVER SOMEONE NEXT APPLIES THAT ROOT.** It reads perfectly
+healthy on every APPLIED-plane check — which is exactly why nobody finds it until the apply.
+
+### PROCEED
+
+Half 2 is **UNHELD** on my side the moment you read this. CTO holds the other never-widen half and I have told
+them my reading; **that is theirs to raise, not a hold you wait on.** Your read-only queued items were the right
+way to spend the wait.
