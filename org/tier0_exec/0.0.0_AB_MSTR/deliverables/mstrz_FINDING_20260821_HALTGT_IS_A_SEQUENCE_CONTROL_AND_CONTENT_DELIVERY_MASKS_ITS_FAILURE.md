@@ -96,29 +96,82 @@ WATCHER PROCESS AT ALL", not "no live Monitor."** That window is real (a seat th
 one whose watcher was properly reaped) and it is the window in which the gate is the ONLY check --
 **and the seat cannot tell from inside which window it is in**, per Rule 22b's anti-correlation.
 
-## 6. THE ERROR MESSAGE IS THE SMALLEST TRUE DEFECT
+## 6. ⛔ RETRACTED WITHIN FOUR MINUTES OF COMMIT -- AND THE RETRACTION IS THE BEST THING IN THIS FILE
 
-Re-cut by `1.0.0_SA_CTO~Z`, and it is the most fixable piece: **the gate prints an instruction
-naming a location the system has already emptied.** *"Review the message(s) above"* -- the gate
-printed nothing above, and the top-level inbox it implies is empty BY DESIGN because the watcher
-did its job. The mail is one directory over. A seat that has never seen this reads the block as a
-malfunction.
+**This section originally read:** *"the gate prints an instruction naming a location the system has
+already emptied -- the gate printed nothing above."* **THAT IS FALSE.** `1.0.0_SA_CTO~Z` opened
+`.tools/halt-gate-check.sh` -- which none of the three of us had done -- and I then verified it at
+source myself rather than inheriting the read:
+
+```
+:5    "Fires at deploy time, BEFORE a long irreversible operation."       <- SEQUENCE, stated
+:11   "Empty inbox -> PASS silently, exit 0."                             <- the silent pass is BY DESIGN
+:373-382  prints a banner, the pending COUNT, and for EVERY message its
+          sender, subject and age -- to stderr -- then "review before proceeding"
+```
+
+**THE GATE SURFACED ITS EVIDENCE CORRECTLY AND COMPLETELY.**
+
+### ⛔ SO WHERE DID MY "THE EVIDENCE EVAPORATES" COME FROM? MY OWN RETRIEVAL.
+
+**I ran both pushes with the output piped through `tail -2`.** The gate printed a banner, a count,
+and one three-line block per pending message; `tail -2` kept the last two lines and discarded every
+one of them. **I never saw the evidence because I cut it off, and then I concluded the system had
+destroyed it.**
+
+>> **THE ARTIFACT NEVER EVAPORATED AT ANY LAYER. THE MAIL WENT TO `read/` AND THE GATE'S OWN
+>> DESCRIPTION OF IT WENT TO MY TERMINAL. I DELETED THE SECOND ONE MYSELF, TWICE, AND FILED THE
+>> ABSENCE AS A PROPERTY OF THE GATE.**
+
+That is CLAUDE.md's own Git-section law landing on the seat that quotes it: **PUT THE CONTROL ON
+THE RETRIEVAL, NOT THE PATTERN.** A truncation is not a failed read -- it returns clean, well-formed
+output that carries no marker saying what was cut. The listed instances are `grep -c` counting zero
+in an error message and `--query length()` returning a page count; **`tail -N` on a diagnostic
+whose whole payload is the part above the tail is the same class, and it manufactured a false
+finding about a control that was working.**
+
+**The smallest true defect is therefore NOT the error message.** It is `1.0.0_SA_CTO~Z`'s corrected
+cut: the gate surfaces correctly and then **FAILS TO BIND THE PUSH TO THE READ** -- the retry passes
+because the inbox has since drained, so it costs one cycle and enforces nothing.
 
 ## 7. THE PROCESS PROPERTY, WHICH IS WHY THIS IS WORTH A FILE
 
+**FOUR FRAMINGS, THREE SEATS, TWENTY-FIVE MINUTES, AND THE ANSWER WAS IN LINE 5 OF THE GATE'S OWN
+SOURCE THE ENTIRE TIME:**
+
+| # | framing | author | fate |
+|---|---|---|---|
+| 1 | BROKEN -- "the evidence evaporates" | `0.0.0_AB_MSTR~Z` measurement + inference, ratified by `1.0.0_SA_CTO~Z` | **false** -- built on my own `tail -2` |
+| 2 | REDUNDANT -- "review relocated, Monitor discharges it" | `3.0.0_SA_CVO~Z` | **over-corrected** -- retracted by its own author |
+| 3 | "names an emptied location" | `1.0.0_SA_CTO~Z`, while correcting #2 | **false at `:373-382`** -- retracted by its own author |
+| 4 | **succeeds at a job it does not have, fails at the one it does** | settled on the source | **stands** |
+
 **A correct MEASUREMENT and a wrong INFERENCE travel together, and only the measurement gets
-checked.** My two push measurements were exact and reproduced; the sentence I built on them was
-false; it was ratified by the law owner within minutes, relayed to Andrew, corrected by a third
-seat, over-corrected by that seat, and settled only when the residual inside my own measurement was
-read. Four hops, one unexamined premise.
+checked.** My two push measurements were exact and reproduced. The sentence I built on them was
+false. It was ratified by the law owner in minutes, relayed to Andrew, corrected, over-corrected,
+and settled only when someone opened the file.
 
-`1.0.0_SA_CTO~Z`, on their own signature: *"0.0.0_AB_MSTR~Z's MEASUREMENT was exact and I accepted
-their INFERENCE about what it meant without testing it against my own session's behaviour"* --
-while holding the disconfirming evidence all evening.
+`1.0.0_SA_CTO~Z`, on their own signature -- and it is the sharpest thing said tonight about being a
+gate: *"I RATIFIED TWICE, IN OPPOSITE DIRECTIONS, INSIDE EIGHT MINUTES. A ratification is what
+converts another seat's framing into a ruling. **A GATE THAT RATIFIES FAST LAUNDERS UNTESTED
+FRAMINGS INTO LAW**, and both times my signature was the load-bearing act."*
 
->> **AND THE PENDULUM IS THE SECOND HALF: the correction to a wrong word landed on another wrong
->> word, because a correction arrives carrying the authority of having caught something.** Both
->> failure directions in one thread, forty minutes apart.
+>> **AND THE ROOT CLASS IS THE ONE THIS FABRIC NAMED EARLIER THE SAME EVENING: WE REASONED ABOUT A
+>> MECHANISM'S PURPOSE FROM ITS BEHAVIOUR WHEN ITS PURPOSE WAS WRITTEN DOWN.** It is the docstring
+>> failure, committed on the night we named the docstring failure, about the mechanism we were
+>> naming it with. **Sixty lines of source settled what twenty-five minutes of three-seat reasoning
+>> could not, and it cost one `sed`.**
+
+## 7b. THE REMEDY SHAPE -- CANDIDATE ONLY, NOT A DESIGN, NOT AUTHORIZED
+
+Both earlier remedies are dead (section 4). `1.0.0_SA_CTO~Z` named the shape that survives, and it
+is a primitive this fabric used tonight: **the gate wants proof of READ, and `ack_messages` is the
+read-clock primitive** -- a gate that required an **ACK OF THE SPECIFIC PENDING IDS** rather than a
+blanket `HALT_ACK=1` would close the sequence hole with exactly the instrument Rule 22b names.
+
+⛔ **UNRESOLVED AND DELIBERATELY UNSIZED:** the gate is bash and the primitive is MCP, so it would
+have to read a ledger rather than call the tool, and **nobody has checked that such a ledger is
+readable.** No build, no sizing. Recorded so the shape is not lost, not so it gets picked up.
 
 ## 8. WHAT STANDS
 
@@ -128,4 +181,14 @@ while holding the disconfirming evidence all evening.
 - **What is new is (c)'s meaning: REVIEW RELOCATED, NOT REVIEW IMPOSSIBLE -- and the relocation is
   INSTRUMENTED** (the read clock answers "was I halted on something I then read?" per message).
 - **What is new and operational: the relocation preserves CONTENT and destroys ORDER, and order is
-  the only thing the gate exists for.**
+  the only thing the gate exists for** -- confirmed against the gate's own line 5.
+- **The gate surfaces its evidence correctly** (`:373-382`, sender + subject + age per message). It
+  is `HALT_ACK=1` that is blanket, and the drained-inbox retry that enforces nothing.
+
+## 9. WHAT THIS SEAT OWES, PLAINLY
+
+I filed a defect against a working control because I truncated its output with `tail -2`, and the
+law owner ratified my inference before either of us read sixty lines of bash. **Section 6 above was
+false four minutes after I committed it.** The retraction is in the same file as the claim, at the
+same heading, with the source lines quoted -- which is the only form of correction that travels as
+far as the error did.
