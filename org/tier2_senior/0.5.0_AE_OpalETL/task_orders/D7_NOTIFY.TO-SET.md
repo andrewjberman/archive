@@ -30,7 +30,11 @@
 Re-point L118 / L411 / TF L237 from *audience*-dependent to **Q3/link-target**-dependent; the refusal to bake a route stands.
 ⚠ **Run the census `comp-find -i`** -- case-sensitive returns 7 of 13 here, and the miss is non-random.
 
-**A4. SUBJECT + CTA.** Subject `[<FIRM>] <requester subject>`. CTA: one standard hyperlink, **deep-link to the ticket if a per-ticket route exists, else the list page -- resolved by TO-B's measurement, not by choice.**
+**A4. SUBJECT + CTA.** Subject `[<FIRM>] <requester subject>`. CTA target: **deep-link to the ticket if a per-ticket route exists, else the list page -- resolved by TO-B's measurement, not by choice.**
+⛔ **CTA FORM RULED 2026-08-21 ~08:2xZ, on TO-C's surprise-channel finding: THE SES LEG IS `MIMEText(body, 'plain')`, so "one standard hyperlink" on that body is A BARE URL RELYING ON CLIENT AUTOLINKING, not a labelled link.**
+**RULED: plain text, CTA URL ON ITS OWN LINE, bare.** It autolinks in every major mail client, it cannot render broken, and a URL alone on a line is also what Andrew's own formatting instinct asks for (*"1 line key lines or hyperlinks"*).
+⛔ **DO NOT ADD A `multipart/alternative` HTML PART IN v1.** A labelled link would need a second body -- **and two bodies for one message is the SECOND-HOME defect one surface over: they can diverge, and nothing makes them stay in step.** If a labelled link is later wanted, that is a deliberate act with its own sync obligation, not a formatting tweak. **Carded to Andrew, not built.**
+⚠ **THE EMAIL AND TEAMS SURFACES DIFFER HERE AND MUST NOT BE HARMONISED:** a bare URL AUTOLINKS in mail and does NOT necessarily in Teams (TO-C left Teams autolink UNMEASURED). **Andrew's "properly linked to be clickable" was said about TEAMS; it does not import onto the email leg.**
 
 <expected_criteria>A-1,A-2,A-3,A-3b,A-4,A-5,A-6,A-7</expected_criteria>
 - **A-1** FIELD SET, exercised on a real row: the released set renders; **a mutant adding `status` FAILS a test asserting the prohibited tuple is absent.**
@@ -78,7 +82,14 @@ Re-point L118 / L411 / TF L237 from *audience*-dependent to **Q3/link-target**-d
 
 ## TO-D -- TEAMS FORMATTING STANDARD + SEND-PATH FIX (STAGED on TO-C)
 
-<issued_to>0.5.0_AE_OpalETL~Z</issued_to> <status>staged -- activates on TO-C acceptance</status>
+<issued_to>0.5.0_AE_OpalETL~Z</issued_to> <status>staged -- activates on TO-C acceptance. **RE-CUT 2026-08-21 ~08:2xZ on TO-C's finding -- SPLIT IN TWO, see D-SPLIT.**</status>
+
+> ### ⛔ D-SPLIT -- TO-C CHANGED WHAT THIS TO IS, AND J2 IS WHY WE KNOW BEFORE BUILDING
+> **`tools.py:617` and `:658` HARDCODE `contentType: "text"` at both Teams send sites** -- no branch, no parameter, no caller override. Census: **8 `contentType` hits / 71 files**, and **the two EMAIL sends at `:220`/`:238` are `"Text"` too. EVERY outbound message path in the gateway is plain text.**
+> **D-PROSE (buildable now, NO deploy):** paragraph spacing, 2-3 sentence maximum, key lines and links on their own line. **All of this is expressible in plain text and needs no content-type change.**
+> **D-HTML (A CODE CHANGE TO A LIVE EC2 SERVICE = A DEPLOY):** *"hyperlinks properly linked to be clickable"* requires `contentType: "html"`. **That is not a formatting standard, it is a gateway code change**, and it rides `safe-ec2-deploy` per Deployment Rule 7 -- **a different plane from everything else in this set.**
+> **DO D-PROSE FIRST AND DO NOT LET IT BLOCK ON D-HTML.** **A standard written today that specifies link MARKUP would specify something the renderer discards** -- which is precisely the failure J2 existed to prevent, and it was prevented.
+> ⚠ **AND THE AUTOLINK QUESTION IS OPEN, NOT ANSWERED:** TO-C established that **markup** is not honoured under `text`; whether the Teams client auto-linkifies a **bare URL** is **UNMEASURED**. **Do not read C-2 as "a bare URL is unclickable."**
 
 **Andrew's standard, VERBATIM:** *"it really needs to do better formatting, it has a tendency to just block a wall of text, sentences should be appropriately spaced out with empty returns between 2-3 sentence max paragraphs and 1 line key lines or hyperlinks (which should be properly linked to be clickable)."*
 ⛔ **THIS IS CROSS-CUTTING, NOT A TICKETING ITEM. It is a property of the agent's Teams SEND PATH (and, for the concierge, its prompt).** Building it inside the ticket notifier yields **one well-formatted surface and an unchanged agent**, and the next surface rebuilds it. **Ticketing CONSUMES this; it does not contain it.**
