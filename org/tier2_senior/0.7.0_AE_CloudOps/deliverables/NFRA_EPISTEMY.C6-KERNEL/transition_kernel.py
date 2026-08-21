@@ -50,11 +50,71 @@ other serialisation is NON-CONFORMANT even if the sha256 pattern matches).
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Callable, Mapping, Optional, Sequence
+from pathlib import Path
+from typing import Any, Callable, Mapping, Optional, Sequence
+
+
+# --------------------------------------------------------------- the normative digest home
+
+def _load_request_hash() -> Callable[[dict], str]:
+    """Import `_request_hash` from C10-PRECOND rather than reimplementing it.
+
+    The TO is explicit: "The digest derivation home is YOUR precondition_token.py
+    _request_hash (normative; any other serialization is NON-CONFORMANT even if the sha256
+    pattern matches)." Reimplementing it here would MINT A SECOND HOME for one derivation,
+    which is the R8 two-homes class this program keeps finding -- and a divergent digest does
+    not error, it silently mints a second identity for the same request.
+
+    The sibling directory name contains a dot ('NFRA_EPISTEMY.C10-PRECOND'), so it is not a
+    legal package path; importlib by file location is the correct loader, not a hack.
+
+    FAILS LOUD. If C10 cannot be loaded we do NOT fall back to a local sha256 -- a silent
+    fallback is exactly how the second home gets minted.
+    """
+    here = Path(__file__).resolve().parent
+    target = here.parent / "NFRA_EPISTEMY.C10-PRECOND" / "precondition_token.py"
+    if not target.is_file():
+        raise ImportError(
+            f"C6 requires the NORMATIVE digest home at {target}, which is absent. Refusing to "
+            f"substitute a local sha256: any other serialisation is NON-CONFORMANT even if the "
+            f"pattern matches, so a fallback would mint a SECOND derivation home."
+        )
+    name = "c10_precondition_token"
+    cached = sys.modules.get(name)
+    if cached is not None:
+        return cached._request_hash
+    spec = importlib.util.spec_from_file_location(name, target)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"could not build an import spec for {target}")
+    mod = importlib.util.module_from_spec(spec)
+    # REGISTER BEFORE exec_module. `dataclasses` resolves a class's __module__ through
+    # sys.modules while processing the decorator, so a module that defines dataclasses
+    # (C10 does) raises AttributeError: 'NoneType' object has no attribute '__dict__' if it
+    # is executed while unregistered. Found by running this loader, not by reading it.
+    sys.modules[name] = mod
+    try:
+        spec.loader.exec_module(mod)
+    except Exception:
+        del sys.modules[name]   # never leave a half-executed module registered
+        raise
+    return mod._request_hash
+
+
+# --------------------------------------------------------------------- C1 envelope enums
+
+#: The RATIFIED C1 enums (observation_record.schema.json @6f944857c4). Named here so a call
+#: site cannot invent a value; NEVER branched on.
+RATIFIED_PLANES = ("DESIRED", "APPLIED", "EXERCISED")
+RATIFIED_SUBSTRATES = ("aws", "portal", "codebase", "ms")
+
+INSTRUMENT_ID = "transition_kernel.TransitionUnit"
+INSTRUMENT_VERSION = "0.1.0-staged"
 
 
 # --------------------------------------------------------------------------- refusals
@@ -224,25 +284,95 @@ class CumulativeResidueLedger:
     THERE IS NO append(row) / add_row(row) / submit(row). The absence is the control.
     `record_measurement` takes a CALLABLE and records what calling it actually returned,
     so a row cannot be authored -- only observed.
+
+    K6: every acquisition (= every measurement) emits a C1-envelope Observation_Record.
+
+    ⛔ PLANE AND SUBSTRATE ARE CONSTRUCTOR PARAMETERS, NOT MODULE CONSTANTS, AND THE
+    DIFFERENCE IS LOAD-BEARING. C10-PRECOND hardcodes PLANE="APPLIED" / SUBSTRATE="aws" and
+    that is CORRECT THERE -- that emitter performs real conditional writes against real S3
+    objects. C6's exercise runs on FIXTURE transitions behind the build-staging fence and
+    touches no cloud substrate, so an emitted APPLIED/aws would assert a plane the
+    measurement never stood on. A fixture run emits EXERCISED/codebase; only a call site
+    activated by Andrew's worded act on a real mutation class passes APPLIED/aws.
+    Hardcoding either bakes the fixture's identity into the production path or the reverse
+    -- and it is precisely the constant that survives an activation nobody re-reads.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, plane: str = "EXERCISED", substrate: str = "codebase") -> None:
+        if plane not in RATIFIED_PLANES:
+            raise ValueError(f"plane {plane!r} is not in the ratified enum {RATIFIED_PLANES}")
+        if substrate not in RATIFIED_SUBSTRATES:
+            raise ValueError(
+                f"substrate {substrate!r} is not in the ratified enum {RATIFIED_SUBSTRATES}")
         self._rows: list[LedgerRow] = []
+        self._observations: list[dict] = []
+        self._plane = plane
+        self._substrate = substrate
+        self._request_hash = _load_request_hash()
+
+    def observations(self) -> Sequence[dict]:
+        """The C1-envelope Observation_Records emitted, one per acquisition."""
+        return tuple(self._observations)
+
+    def _emit(self, leg_id: str, axis: str, method: str,
+              value: Any, state: str, reason: Optional[str]) -> dict:
+        """Build one Observation_Record conformant to the C1 envelope.
+
+        The digest comes from C10's `_request_hash` -- the NORMATIVE home -- never a local
+        sha256. Honesty rule mirrors C1's own allOf: a substantive value is KNOWN only when
+        the whole status tuple succeeded.
+        """
+        request = {"leg_id": leg_id, "axis": axis, "method": method,
+                   "instrument": INSTRUMENT_ID, "version": INSTRUMENT_VERSION}
+        acquisition = "PRESENT" if state == "KNOWN" else "ABSENT"
+        rec = {
+            "instrument": {"id": INSTRUMENT_ID, "version": INSTRUMENT_VERSION},
+            "request_hash": self._request_hash(request),
+            "status": {"acquisition": acquisition, "transport": "SUCCEEDED",
+                       "enumeration": "SUCCEEDED",
+                       "parse": "SUCCEEDED" if state == "KNOWN" else "FAILED"},
+            "plane": self._plane,
+            "substrate": self._substrate,
+            "population_predicate": (
+                f"the residue produced on axis '{axis}' by leg '{leg_id}' of this transition"),
+            "denominator": {"count": 1, "grain": "leg-axis measurement",
+                            "generated_by": f"{INSTRUMENT_ID}.record_measurement"},
+            "traversal_residue": [],
+            "substantive_result": {"state": state, "value": value, "reason": reason},
+            "control_references": [],
+            "discrimination_certificate_ref": None,
+            "observed_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "support_pointers": [f"method:{method}"],
+            "invalidation_predicates": [
+                "the measured leg is re-run", "the transition manifest changes"],
+        }
+        self._observations.append(rec)
+        return rec
 
     def record_measurement(
         self, leg_id: str, axis: str, measure_fn: Callable[[], float], method: str
     ) -> LedgerRow:
+        # K6: EVERY acquisition emits an Observation_Record -- including the ones that FAIL.
+        # A refused acquisition is still an acquisition, and C1's honesty rule covers it:
+        # substantive_result UNKNOWN with the reason, never a missing record. Emitting only
+        # on success would make the observation stream a census of survivors.
         if not callable(measure_fn):
-            raise InadmissibleRow(
+            reason = (
                 f"leg {leg_id} axis {axis}: record_measurement requires a CALLABLE that "
                 f"measures the world. A value was passed instead, which is an agent "
                 f"self-report -- inadmissible by construction (PRD sec.2.7)."
             )
+            self._emit(leg_id, axis, method, None, "UNKNOWN", reason)
+            raise InadmissibleRow(reason)
+
         measured = measure_fn()
         if isinstance(measured, bool) or not isinstance(measured, (int, float)):
-            raise InadmissibleRow(
+            reason = (
                 f"leg {leg_id} axis {axis}: measurement returned {measured!r}, not a number."
             )
+            self._emit(leg_id, axis, method, None, "UNKNOWN", reason)
+            raise InadmissibleRow(reason)
+
         row = LedgerRow(
             leg_id=leg_id,
             axis=axis,
@@ -251,6 +381,7 @@ class CumulativeResidueLedger:
             method=method,
         )
         self._rows.append(row)
+        self._emit(leg_id, axis, method, float(measured), "KNOWN", None)
         return row
 
     def cumulative(self) -> Optional[ResidueVector]:
@@ -355,10 +486,18 @@ class TransitionUnit:
         manifest: TransitionManifest,
         claims: Sequence[SupportClaim] = (),
         recovery_exercised: bool = False,
+        plane: str = "EXERCISED",
+        substrate: str = "codebase",
     ) -> None:
+        """plane/substrate default to the FIXTURE pair (EXERCISED/codebase).
+
+        They are parameters rather than constants so that an activated call site -- which
+        only Andrew's worded act can create -- passes APPLIED/aws, while a build-staging
+        exercise cannot silently claim a cloud plane it never stood on.
+        """
         self.manifest = manifest
         self.claims = tuple(claims)
-        self.ledger = CumulativeResidueLedger()
+        self.ledger = CumulativeResidueLedger(plane=plane, substrate=substrate)
         self.legs: list[LegRecord] = []
         self._recovery_exercised = recovery_exercised
         self._past_no_return = False
