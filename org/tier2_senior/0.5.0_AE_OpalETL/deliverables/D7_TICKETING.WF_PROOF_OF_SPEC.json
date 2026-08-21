@@ -1,0 +1,239 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_TICKETING.WF-SITEZ.2pm-et-unaddressed-escalation",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/D7_TICKETING.WF-SITEZ.2pm-et-unaddressed-escalation.md",
+    "group": "W",
+    "vintage_commit": "cc3ef76c490949b9e45ab72e83e84164dfe675da"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/ticketing/intake/sweep.py",
+      "kind": "script",
+      "commit_or_etag": "bdd9aaa7c9",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "RUNNER PLANE, AND THE STATE IS SUBTLER THAN THE ENUM'S THREE WORDS -- read this before reading the rows. The file is PHYSICALLY PRESENT IN THE EXECUTING TREE: Scheduled Task OPAL_D7_ticket_intake (State=Ready, LastTaskResult=0 at 2026-08-20 23:19:46, next 23:24:45, PT5M) has Execute = C:\\Users\\Opal Bloomberg\\Desktop\\ajb_workspace\\integrations\\ticketing\\intake\\run_intake.cmd -- THE REPO PATH -- so on this plane an edit IS a deploy with no apply step. It is nonetheless UNREACHABLE: comp-find 'from .sweep|import sweep|intake.sweep' -> DENOMINATOR 4 hits across 27,214 files, BANDS HEAD=2 DOC=2, and BOTH HEAD hits are its own tests/test_sweep.py. THE FUSE IS AN ABSENT IMPORT EDGE, NOT AN UNAPPLIED ARTIFACT. The gate it awaits is Andrew's W-E DL audience answer; the act that ships it is one import line, which is why that line was not written. Re-derived independently by 1.0.0_SA_CTO~Z at their own seat (msg 4185).",
+      "artifact_covered_by": ["WF-1", "WF-3", "WF-4", "WF-5", "WF-9", "WF-10", "WF-12"]
+    },
+    {
+      "path_or_key": "integrations/ticketing/intake/tests/test_sweep.py",
+      "kind": "test",
+      "commit_or_etag": "bdd9aaa7c9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A test battery has no deployed side: it is not imported by run_intake.cmd's path and is never executed by the scheduled task. 29 tests + 7 subtests across 9 classes, 8 of them named for the criterion they prove (WF1/WF3/WF4/WF5/WF9/WF10/WF11/WF12) plus Unparseable_NeverSilent.",
+      "artifact_covered_by": ["WF-1", "WF-3", "WF-4", "WF-5", "WF-9", "WF-10", "WF-11", "WF-12"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "8a748d8d31",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LAMBDA PLANE -- BUILT, NOT DEPLOYED, AND MEASURED RATHER THAN ASSUMED. WF-5(c) added cutoff_et to the LIST response at 8a748d8d31. The executing opal-ticket-api package is built from 1fd9ef2750 (deployed member sha256 4b7e1bbce31e4d34..a426, 22,333 B, the zip's only member; content-proven against all 8 commits touching the file, exactly 1 matches). list_tickets is therefore DIVERGED: cutoff_et token count = 1 in the deployed artifact (submit_form's 201 only, deployed L227) vs 2 at HEAD (adds the LIST response, HEAD L415); positive control 'def lambda_handler' = 1 in both, so the search discriminates. Deliberately held -- the apply leg is the laptop's under the envelope law, and .open_deploys/ carries no ticket-center entry. Full run: workflows/atom_decomposition/runs/ticket-center-deployed-vs-built/20260821T0325Z/ @78218fc482, accepted by 1.0.0_SA_CTO~Z msg 4185 after independent re-derivation by a different path (git blob hash vs package-member hash, same sha).",
+      "artifact_covered_by": ["WF-5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "WF-1",
+      "criterion_verbatim": "BUILT TO THE RULED DEFINITIONS: predicate is `status == open` (ACCEPTED/CLAIMED stops the escalation), wall-clock daily, no calendar limb, and the re-escalation cadence stated by 1.0.0_SA_CTO~Z is implemented as stated. Evidence cites @0d82b6ce91.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python -m pytest integrations/ticketing/intake/tests/test_sweep.py::WF1_RuledPredicate -q --no-header -p no:cacheprovider   (rc captured on pytest, NOT after a pipe)",
+      "output_evidence": "rc=0, '2 passed'. test_open_and_before_cutoff_escalates + test_predicate_names_a_real_status. The predicate is not re-spelled: sweep.py imports VALID_STATUSES from .row_contract and asserts OPEN_STATUS in VALID_STATUSES at module scope, so a status rename cannot silently make the predicate match nothing. Wall-clock/no-calendar is WF-4's row. Cadence (gate ruling 4, ONE DIGEST PER SWEEP) is implemented as build_digest returning exactly one Digest per pass, with once-per-day idempotency on should_sweep's own last_swept_date key -- covered by WF-11 and WF-3 rows respectively.",
+      "denominator": "2 of 2 tests in WF1_RuledPredicate; 29 of 29 in the file; the module's 3 ruled limbs each covered by a named row",
+      "status": "PASS",
+      "status_reason": "PLANE: runner (live-on-write, currently unreachable -- absent import edge). BOUND STATED SO THE ROW IS NOT READ WIDER THAN IT IS: this proves the cadence is IMPLEMENTED, which is the criterion's word. It does not prove a digest was DELIVERED -- that limb is WF-11's and is UNCOMPUTABLE-BY-CONSTRUCTION."
+    },
+    {
+      "criterion_id": "WF-2",
+      "criterion_verbatim": "POSITIVE, EXERCISED: a ticket created before 2p ET and left unaddressed produces exactly one escalation message on the thread at the 2p boundary, carrying the ticket id + deep link per the serve rules (and `confirm=true` -- the gateway's tool-wide irreversible-send fence).",
+      "method": "manual_read_with_citation",
+      "invocation": "comp-find 'from .sweep|import sweep|intake.sweep' -> DENOMINATOR 4 hits / 27,214 files, BANDS HEAD=2 DOC=2, both HEAD hits in tests/test_sweep.py; sweep.py module docstring lines 7-13 read at source",
+      "output_evidence": "NO MESSAGE CAN BE PRODUCED BY THIS MODULE, BY DESIGN AND BY MEASUREMENT. sweep.py stops at a Digest dataclass: it has no sender, names no surface, resolves no recipient, and does no medium-specific formatting -- its own docstring states the fence ('this module STOPS AT A PAYLOAD OBJECT'). There is no transport to exercise and no thread to post to. Nothing was sent; confirm=true was never reached because no send exists.",
+      "denominator": "N/A -- a delivery criterion against a module with zero delivery surface; the escalatable-set construction it would deliver is proven under WF-11 (N=3 -> 1 Digest)",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "PLANE: delivery (unbuilt). NAMED LATER RUN: the W-F transport-binding act, which is gated on Andrew's W-E DL audience answer (still open) and, per 1.0.0_SA_CTO~Z's WE-1 ruling @c3e7fc73ac, rides the W-E SES path as the deafness-independent delivery leg. The 'Opal Client Tickets' channel is EXCLUDED BY RULING (Andrew ~21:35Z, client-originated only) and the positive surface is NOT YET NAMED, so there is no surface to bind to even if the audience were answered. Not a gap: the criterion is unreachable until a surface exists."
+    },
+    {
+      "criterion_id": "WF-3",
+      "criterion_verbatim": "NEGATIVE CONTROLS, each exercised: a ticket created after 2p -> no escalation; a ticket created before 2p and ACCEPTED/CLAIMED (`status != open`) -> no escalation -- his \"If a user has already accepted it, then we dont need to buzz it again\", tested directly; already-escalated -> no duplicate within the day (idempotency on the sweep's own state key).",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python -m pytest integrations/ticketing/intake/tests/test_sweep.py::WF3_NegativeControls -q --no-header -p no:cacheprovider",
+      "output_evidence": "rc=0, '4 passed, 2 subtests passed'. All three ruled negatives exercised directly, plus a fourth: test_created_AFTER_cutoff_does_not_escalate; test_accepted_or_claimed_does_not_escalate (subtested across the non-open statuses); test_already_swept_today_is_a_noop (idempotency on last_swept_date, the sweep's OWN key -- not the buzz cursor); test_before_cutoff_never_sweeps (the sweep does not fire at all before the boundary).",
+      "denominator": "4 tests + 2 subtests in WF3_NegativeControls; 3 of 3 ruled negatives covered, 1 extra",
+      "status": "PASS",
+      "status_reason": "PLANE: runner (live-on-write, currently unreachable). Pure functions over mappings with an injected clock, so each negative is exercised at the decision boundary rather than inferred from a code read."
+    },
+    {
+      "criterion_id": "WF-4",
+      "criterion_verbatim": "WEEKEND BEHAVIOR, EXERCISED IN THE DIRECTION HE RULED (inverted by @0d82b6ce91): a simulated Saturday with an unaccepted pre-2p ticket DOES escalate -- the sweep is wall-clock by his word. The mutant is now the opposite one: adding a calendar guard must make the test FAIL. Assert `lib/trading_calendar.py` is not imported by this path.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python -m pytest integrations/ticketing/intake/tests/test_sweep.py::WF4_WeekendInTheDirectionHeRuled -q --no-header -p no:cacheprovider ; then the whole-battery mutant run described in controls.mutant",
+      "output_evidence": "rc=0, '4 passed'. test_saturday_DOES_escalate asserts the fixture IS a Saturday (weekday()==5) before asserting escalation -- the fixture is controlled, not assumed. test_sunday_DOES_escalate likewise (weekday()==6). test_MUTANT_a_calendar_limb_must_not_exist checks IMPORTS AND CALLED ATTRIBUTES VIA AST, not text, so the module may freely NAME the calendar in prose explaining its exclusion -- and it does. test_the_guard_would_catch_a_real_calendar_limb is the positive control ON THE GUARD. MUTANT RUN (see controls.mutant): with a real `from lib.trading_calendar import is_trading_day` limb added to should_sweep on a scratch COPY, the battery went rc=1, 2 failed / 27 passed, and the two killed were exactly WF4::test_MUTANT_a_calendar_limb_must_not_exist ('trading_calendar unexpectedly found in lib.trading_calendar : lib/trading_calendar.py must not enter the sweep path (Andrew @0d82b6ce91)') and WF4::test_saturday_DOES_escalate.",
+      "denominator": "4 tests in WF4; 2 of 29 killed by the mutant, both in WF4, 27 correctly unaffected",
+      "status": "PASS",
+      "status_reason": "PLANE: runner (live-on-write, currently unreachable). MANDATE DISCHARGED: lib/trading_calendar.py was read at source before any judgement (module docstring + public API is_trading_day/prev_trading_day/expected_last_trading_day/trading_days_behind) -- it is the estate's ONE frontier definition and this path deliberately does not consume it, per Andrew. ONE ASYMMETRY RECORDED RATHER THAN LEFT FOR A LATER READER: test_sunday_DOES_escalate SURVIVED the mutant, because it calls only is_unaddressed while the mutant guards should_sweep. The Saturday test asserts BOTH, which is why it fired. The sunday test is therefore weaker than it looks, and if the saturday test's should_sweep assertion were ever removed the sunday test would give false comfort against exactly this mutant."
+    },
+    {
+      "criterion_id": "WF-5",
+      "criterion_verbatim": "BOUNDARY-COUPLING: the escalation boundary and the client-facing cutoff read from ONE source; a mutant changing the cutoff moves the escalation with it (they cannot drift).",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python -m pytest integrations/ticketing/intake/tests/test_sweep.py::WF5_BoundaryCoupling -q --no-header -p no:cacheprovider",
+      "output_evidence": "rc=0, '5 passed, 5 subtests passed'. THE SWEEP STRUCTURALLY CANNOT HOLD A SECOND SOURCE: test_unset_cutoff_REFUSES_rather_than_defaulting raises CutoffUnset across 5 subtested bad inputs (None, '', 'nonsense', '25:00', '14') -- refuse, never default; test_no_baked_cutoff_literal_in_the_module checks STRING CONSTANTS IN CODE VIA AST, so the module's own docstring may mention 14:00 while explaining why there must not be one. Both halves controlled: test_the_guard_would_catch_a_real_baked_cutoff (positive -- a real C = \"14:00\" trips it) and test_the_guard_ignores_a_docstring_mention (negative -- prose alone does not, so the guard is not undiscriminating). COUPLING EXERCISED: test_MUTANT_moving_the_cutoff_MOVES_the_escalation -- one row, created 13:00; cutoff 14:00 -> escalates, cutoff 12:00 -> does not. Opposite verdicts from the same row, so the boundary provably tracks the source.",
+      "denominator": "5 tests + 5 subtests in WF5_BoundaryCoupling; 5 of 5 refuse-cases exercised; 2 controls on the AST guard (1 positive, 1 negative)",
+      "status": "PASS",
+      "status_reason": "PLANE: SPANS BOTH -- and this is the row where a uniform reading of 'deployed' would do real damage. Sweep side (runner plane): PROVEN, and proven in the strong form -- no second literal can exist and the boundary demonstrably moves with its input. Client side (Lambda plane): the ONE source is opal-ticket-api's CUTOFF_ET env; the deployed artifact already serves it on submit_form's 201 (measured, deployed L227), and WF-5(c)'s LIST carrier is BUILT AT 8a748d8d31 AND NOT DEPLOYED. RESIDUAL, STATED PLAINLY: what is NOT exercised is the end-to-end binding -- that the sweep's caller feeds it that exact env value -- because there is no caller. That binding is the wiring act. This row proves the two CANNOT DRIFT BY CONSTRUCTION; it does not prove they have been observed agreeing in production."
+    },
+    {
+      "criterion_id": "WF-6",
+      "criterion_verbatim": "NO-REGRESSION: the 5-min buzz path, its cursor, and the exit contract behave unchanged; the escalation leg failing must NOT break the buzz leg (exercised, given the runner is live production infrastructure).",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python -m pytest integrations/ticketing/intake/tests/ -q  (whole intake battery, buzz path included) ; comp-find import-edge census for the coupling that does not exist",
+      "output_evidence": "rc=0, '42 passed, 25 subtests passed' across the whole intake package (test_intake.py 13 tests + test_sweep.py 29). THE BUZZ PATH IS UNCHANGED IN THE ONLY SENSE AVAILABLE TODAY, AND IT IS THE WEAKER SENSE: the 8 live-production artifacts (run_intake.cmd, runner.py, intake_pass.py, buzz.py, receipt.py, row_contract.py, runner_config.json, teams-watch.py) are BYTE-UNCHANGED by this work -- git status --porcelain integrations/ returns 0 modified paths -- and no import edge to sweep exists, so the sweep cannot participate in the buzz path's control flow at all.",
+      "denominator": "42 tests + 25 subtests, whole intake package; 8 of 8 live-production artifacts byte-unchanged; 0 import edges from the runner to sweep",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "PLANE: runner. NAMED LATER RUN: the W-F wiring act. NOT MARKED PASS, AND THE DISTINCTION IS THE WHOLE POINT OF THE CRITERION -- 'the buzz path is unchanged because the sweep is not wired into it' is TRUE AND VACUOUS. The criterion asks whether the buzz path survives a WIRED escalation leg, and no such leg exists to survive. Marking this PASS on an untouched-bytes argument would retire a regression criterion without ever running the regression."
+    },
+    {
+      "criterion_id": "WF-7",
+      "criterion_verbatim": "Proof instance VALID rc=0 POSITIONAL, ids WF-1..WF-12 (rc unpiped).",
+      "method": "schema_validation",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WF_PROOF_OF_SPEC.json \"WF-1,WF-2,WF-3,WF-4,WF-5,WF-6,WF-7,WF-8,WF-9,WF-10,WF-11,WF-12\"",
+      "output_evidence": "rc=0, verbatim: 'proof-of-spec-check | structural=jsonschema | acceptance rows=12 | violations=0' then 'VALID'. Run POSITIONAL with the comma-separated criterion-id list as the 2nd argument -- NOT the TO path (1.0.0_SA_CTO~Z's own measured trap: a markdown path yields expected=228 carried=10 matched=0 + 239 violations and reads as a broken validator when it is sound). Run with PYTHONIOENCODING=utf-8 because on this box the checker dies UnicodeEncodeError (cp1252) mid-print when violations carry non-ASCII, and rc=1 from a crash is indistinguishable from rc=1 from violations. rc captured on the checker, unpiped. SELF-REFERENCE NAMED RATHER THAN HIDDEN: recording a result inside the artifact the result is about changes that artifact, so the quoted output is from the byte-state immediately preceding this sentence. The invocation was re-run after this edit and after every subsequent one; the LAST run before commit is the one that governs, and a verifier re-running the command above on the committed bytes reproduces it independently of my report.",
+      "denominator": "12 of 12 criterion ids carried; expected set = the TO's <expected_criteria> verbatim",
+      "status": "PASS",
+      "status_reason": "PLANE: none -- this criterion is about the deliverable, not the artifact. The BARE 1-arg form is deliberately not used: it returns VALID rc=0 with COVERAGE UNCHECKED and a reader who skims to 'VALID' has checked row quality and nothing about omissions."
+    },
+    {
+      "criterion_id": "WF-8",
+      "criterion_verbatim": "FAILURE ISOLATION, EXERCISED IN THE EXPENSIVE DIRECTION: with the sweep leg forced to raise (scratch fault injection), the buzz path still fetches, still buzzes, and still exits on its own contract -- the sweep's failure carries its OWN distinct exit code and neither masks nor preempts the client-facing SLA path. The mutant is the proof: share the exception boundary -> a sweep fault stops the buzzes -> the test FAILS.",
+      "method": "manual_read_with_citation",
+      "invocation": "grep -n '^def |^    def ' integrations/ticketing/intake/runner.py (exit_code at :174, main at :182); comp-find import-edge census",
+      "output_evidence": "THERE IS NO SWEEP LEG IN THE RUNNER TO FAULT-INJECT. runner.py contains no reference to sweep and no escalation exception boundary; exit_code(rep: PassReport) at runner.py:174 carries the buzz contract only. A fault injected into a module the runner does not import cannot reach the buzz path, so a green result would measure the absence of the wiring rather than the isolation of the legs.",
+      "denominator": "0 sweep call sites in runner.py, of 12 top-level definitions; 0 of 4 comp-find import-edge hits outside the sweep's own test file",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "PLANE: runner. NAMED LATER RUN: the W-F wiring act, at which the sweep gains its own exception boundary and its own distinct exit code per constraint (B) of the TO. THE CRITERION'S OWN MUTANT DEFINES WHAT WOULD MAKE IT MEANINGFUL -- 'share the exception boundary -> a sweep fault stops the buzzes -> the test FAILS' presupposes a shared-or-separate boundary, and neither exists yet. Running it now would produce a clean pass that proves nothing, which is worse than an honest uncomputable."
+    },
+    {
+      "criterion_id": "WF-9",
+      "criterion_verbatim": "OWN STATE KEY: the sweep's `last_swept_date` (or equivalent) is separate from the forward-only buzz cursor, exercised across a day boundary; and the cursor's own value is byte-unchanged by a sweep pass (the two state shapes provably do not contaminate each other).",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python -m pytest integrations/ticketing/intake/tests/test_sweep.py::WF9_OwnStateKey -q --no-header -p no:cacheprovider (with WF12_NoTerminalState for the byte-unchanged half)",
+      "output_evidence": "rc=0, '3 passed'. test_sweep_key_is_not_a_cursor_key asserts SWEEP_STATE_ATTR ('last_swept_date') is disjoint from CURSOR_ATTRS ('cursor_created_at', 'cursor_ticket_id') -- names compared, not assumed. test_across_a_day_boundary exercises the day rollover: a last_swept_date of the previous day makes should_sweep true again, the same day makes it a no-op. test_cursor_sanity_detects_contamination is the positive control ON cursor_sanity() -- the helper that exists so a caller can PROVE non-contamination rather than assert it. THE BYTE-UNCHANGED HALF IS SATISFIED IN A STRONGER FORM THAN THE CRITERION ASKS: WF12::test_the_module_has_no_write_path_at_all shows the module cannot write anything at all, so it cannot write the cursor -- structural impossibility rather than an observed non-change.",
+      "denominator": "3 tests in WF9_OwnStateKey + 1 supporting test in WF12; 2 cursor attrs vs 1 sweep attr, disjointness checked over both sets",
+      "status": "PASS",
+      "status_reason": "PLANE: runner (live-on-write, currently unreachable). RESIDUAL: exercised against the pure functions and the injected state values, not against the live config item in DynamoDB, because no caller writes one. cursor_sanity() is built precisely so the wiring act can discharge that at integration -- it is a prepared control, not a claim already cashed."
+    },
+    {
+      "criterion_id": "WF-10",
+      "criterion_verbatim": "THE CAP ASSERTION (gate ruling 3): every sweep pass asserts it did not hit the `limit=500` cap, and says so in its output with the count beside the cap. Exercised in the failing direction: a fixture at/over the cap must make the sweep declare the truncation loudly, never silently sweep a partial set. The mechanism whose job is noticing what was missed must not be able to miss silently.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python -m pytest integrations/ticketing/intake/tests/test_sweep.py::WF10_CapAssertion -q --no-header -p no:cacheprovider",
+      "output_evidence": "rc=0, '3 passed'. test_under_cap_reads_complete; test_AT_the_cap_declares_truncation_LOUDLY -- the failing direction, exercised AT the boundary rather than over it, which is the harder case; test_frame_always_carries_the_denominator_and_the_cap. Digest.frame() emits 'SWEEP {date} cutoff={hhmm}: {count} unaddressed of {fetched_count} open fetched (cap {fetch_cap}, input complete|TRUNCATED)' -- the count, its denominator, the cap and the completeness state on ONE line, so a reader cannot receive the number without its frame. Unparseable created_at values append '[N UNPARSEABLE created_at, NOT adjudicated]' rather than being dropped (Unparseable_NeverSilent, 2 further tests, rc=0).",
+      "denominator": "3 tests in WF10_CapAssertion + 2 in Unparseable_NeverSilent; cap boundary exercised at N==cap and N<cap",
+      "status": "PASS",
+      "status_reason": "PLANE: runner (live-on-write, currently unreachable). The truncated flag and fetched_count are inputs to build_digest, so this proves the sweep DECLARES truncation whenever its caller reports a capped fetch. The caller's own duty -- actually passing limit=500 and reporting the true fetched_count -- is the wiring act's, and a caller that lied about fetched_count would defeat this. Stated because a cap assertion that trusts an unverified input is exactly the silent-miss the criterion forbids."
+    },
+    {
+      "criterion_id": "WF-11",
+      "criterion_verbatim": "ONE DIGEST PER SWEEP (gate ruling 4): N unaccepted tickets produce ONE digest message carrying its own denominator, not N messages; the ticket's own thread gets ONE marker. Exercised with N>1. Delivery follows the coupling above -- the deafness-independent path (W-E), not the channel alone.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python -m pytest integrations/ticketing/intake/tests/test_sweep.py::WF11_OneDigestPerSweep -q --no-header -p no:cacheprovider",
+      "output_evidence": "rc=0, '3 passed'. FIRST HALF PROVEN, EXERCISED WITH N>1: test_N_tickets_produce_ONE_digest_with_its_own_denominator; test_oldest_first (the oldest is the worst, so ordering is part of the payload contract); test_mixed_set_counts_only_the_escalatable (a set containing non-escalatable rows still yields ONE digest whose count reflects only the escalatable, with the full fetched_count as denominator). SECOND HALF NOT REACHABLE: 'the ticket's own thread gets ONE marker' is a delivery act, and this module posts nothing anywhere.",
+      "denominator": "3 tests in WF11_OneDigestPerSweep, N>1 exercised; 1 of the criterion's 2 limbs proven",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "PLANE: SPANS BOTH construction and delivery. NAMED LATER RUN: the W-F transport-binding act (same gate as WF-2). MARKED UNCOMPUTABLE RATHER THAN PASS BECAUSE THE CRITERION HAS TWO LIMBS AND ONLY ONE IS REACHABLE -- the digest-construction limb is fully proven with N>1 and its evidence is recorded above so the work is not lost, but the thread-marker limb requires a surface that is EXCLUDED BY RULING (the 'Opal Client Tickets' channel is client-originated only, Andrew ~21:35Z) and a replacement that is NOT YET NAMED. A PASS here would carry the unmet limb silently."
+    },
+    {
+      "criterion_id": "WF-12",
+      "criterion_verbatim": "THE SWEEP WRITES NO TERMINAL STATE, EXERCISED: after a sweep pass over an unaccepted ticket, the row's `status` and `closure_reason` are byte-unchanged -- the sweep escalated and disposed nothing. Mutant: have the sweep set any terminal value -> the test FAILS. (Opal-side ageout is not terminal, and closing on ageout would delete the very signal this feature raises.)",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python -m pytest integrations/ticketing/intake/tests/test_sweep.py::WF12_NoTerminalState -q --no-header -p no:cacheprovider",
+      "output_evidence": "rc=0, '3 passed'. test_the_module_has_no_write_path_at_all -- the strong form: the module has no store, no client, and no write call, so it cannot set status or closure_reason by any route, not merely 'does not on this input'. test_the_guard_would_catch_a_real_write is the positive control on that guard. test_selection_does_not_mutate_its_input proves the input mappings are byte-unchanged by select_unaddressed, which is the criterion's own 'byte-unchanged' phrasing at the level this module operates on.",
+      "denominator": "3 tests in WF12_NoTerminalState; 0 write paths of 8 top-level functions + 3 dataclasses",
+      "status": "PASS",
+      "status_reason": "PLANE: runner (live-on-write, currently unreachable). SATISFIED BY CONSTRUCTION AND THAT IS STRONGER THAN THE CRITERION ASKS -- it wanted an exercised non-write on one input; the module is pure functions over mappings with an injected clock and cannot write at ALL. The obligation transfers unchanged to the wiring act: whoever gives the sweep a store must not give it a terminal write, and the renamed value requester_unresponsive must not be reached for as an Opal-side ageout."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THE FORBIDDEN FIX, PLANTED FOR REAL RATHER THAN SIMULATED. Andrew's ruling @0d82b6ce91 makes the sweep wall-clock and weekend-inclusive; the predictable 'correction' by a future reader is to add a trading-calendar qualification, which would LOOK like NEVER#1 compliance and would silently suppress exactly the weekend escalations he asked for. So the mutant is that fix: `from lib.trading_calendar import is_trading_day` plus an `if not is_trading_day(now_local.date()): return False` limb at the top of should_sweep. Planted on a full COPY of the package in the session scratchpad -- the tracked tree was never mutated (git status --porcelain integrations/ lib/ -> 0 modified paths, checked after). Anchor counts asserted before both edits (expected exactly 1 each) so a silent multi-site or zero-site edit would REFUSE rather than mutate the wrong thing.",
+      "expected": "The battery must FAIL, and fail on the WF-4 assertions specifically -- the AST import guard and the Saturday behavioural test -- while every unrelated test stays green. A mutant that kills everything proves the copy is broken; a mutant that kills nothing proves the guards are decoration.",
+      "observed": "rc=1, '2 failed, 27 passed, 7 subtests passed'. The two killed were exactly WF4_WeekendInTheDirectionHeRuled::test_MUTANT_a_calendar_limb_must_not_exist (AssertionError: 'trading_calendar' unexpectedly found in 'lib.trading_calendar' : lib/trading_calendar.py must not enter the sweep path (Andrew @0d82b6ce91)) and WF4_WeekendInTheDirectionHeRuled::test_saturday_DOES_escalate (AssertionError: False is not true). BASELINE CONTROL ON THE COPY ITSELF, run before mutating: rc=0, 29 passed -- so the copy is a faithful control and the failures are the mutant's, not the copy's. FIRST ATTEMPT WAS INVALID AND IS RECORDED RATHER THAN DISCARDED: rc=2, a pytest COLLECTION error (ModuleNotFoundError: lib.trading_calendar) because lib/ had not been copied. That is a non-zero rc for the wrong reason -- the wrong question asked cleanly -- and it would have been read as 'the mutant was caught' by anyone scoring on rc alone. lib/ was copied and the run repeated; only then did the guards fire on their own merits.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full sweep battery was executed repeatedly across this session -- as a whole-package run, as 9 separate per-class runs, and as the pre-mutation baseline on the scratch copy -- with identical inputs and no shared state between runs (-p no:cacheprovider, and the module is pure functions with an injected clock, so nothing reads a real wall-clock or a store).",
+      "observed": "Identical every time: 29 passed + 7 subtests on test_sweep.py, 42 passed + 25 subtests across the whole intake package, rc=0 on each. Per-class counts summed to 29, matching the file's 29 test functions -- the parts reconcile to the whole rather than being reported separately. THE INJECTED CLOCK IS WHAT MAKES THIS MEANINGFUL: a battery whose weekend case depended on the real date would be stable only from Monday to Friday and would silently change verdict on a Saturday.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The transport binding: any sender, surface, recipient resolution, or medium-specific formatting for the Digest.",
+      "reason": "Gated. Andrew's W-E DL audience answer is open; the 'Opal Client Tickets' channel is EXCLUDED BY RULING (client-originated only, ~21:35Z) and the positive surface is not yet named. 1.0.0_SA_CTO~Z instruction msg 4185: DO NOT WRITE THE IMPORT EDGE."
+    },
+    {
+      "item": "The import edge that would wire sweep.py into runner.py or intake_pass.py -- a single line.",
+      "reason": "ON THE RUNNER PLANE THAT LINE IS ITSELF A PRODUCTION DEPLOY, live within 5 minutes, with no apply step in which anyone could review it. Writing it would ship a half-gated feature unreviewed. Confirmed by 1.0.0_SA_CTO~Z msg 4185: 'Writing that edge would be an unreviewed production deploy of a half-gated feature. Do not.'"
+    },
+    {
+      "item": "Deploying WF-5(c) (list_tickets carrying cutoff_et, built at 8a748d8d31).",
+      "reason": "Lambda plane. The apply leg is the laptop's under the envelope law @550b20ec5b; this seat builds and does not apply. Held deliberately, not by neglect -- .open_deploys/ carries no ticket-center entry, so nothing is stranded."
+    },
+    {
+      "item": "The before-write comp-blast on the runner required by the TO's compiler mandate.",
+      "reason": "NOT YET DUE, AND ATTEMPTED ANYWAY. The mandate scopes it to 'before adding a responsibility to it', and no responsibility was added. Attempted regardless: `comp-blast run_intake` was killed at the 120s tool timeout (exit 143) -- run_intake is a .cmd, and comp-blast takes a FUNCTION name per CLAUDE.md. It is re-attempted on a function target and its result recorded under compiler_tools. This obligation attaches to the wiring act and is carried forward, not discharged."
+    },
+    {
+      "item": "Any claim about the sweep's behaviour in production.",
+      "reason": "It has never executed in production. Every WF row that reads PASS is proven against pure functions with injected inputs, which is the strongest evidence available for a module with no caller -- and is not the same thing as a production observation."
+    }
+  ],
+  "surprises": [
+    "comp-closure is DEAD: rc=1 on both --self-test and compile. org/modules/graph/comp_closure.py:139-145 _obs() omits the required keyword-only 'substrate' argument declared at observation_envelope.py:61, so every observation-record path raises TypeError. It is the tool comp-which routes deployed-package questions to, i.e. the estate's only routed instrument for Rule 22a's CODE layer. Routed to 1.0.0_SA_CTO~Z, acknowledged msg 4185 as characterize-not-fix. No action taken.",
+    "FOUR of 208 Windows scheduled tasks execute out of the working tree, not one: OPAL_D7_ticket_intake, OPAL_BBGTML_daily_pull, OPAL_BBGTML_freshness_check, OPAL_vendor_watch (negative control zzz_no_such_path_9999 -> 0 matches; positive control run_intake -> 1). This DISCHARGES the W-F TO's own stated bound that three other tasks' Arguments plane was UNMEASURED-NOT-ABSENT -- two of those three ARE exposed. Placed off this lane by 1.0.0_SA_CTO~Z msg 4185: the BBGTML pair to 0.0.3_BG_BBGTerminal, OPAL_vendor_watch to 0.0.0_AB_MSTR~Z. No action taken.",
+    "My own first scheduled-task sweep was NAME-FILTERED and structurally blind to the shape it needed to catch -- a cmd.exe /c \"<repo path>\" task carries the repo path in Arguments while Execute reads only 'cmd.exe'. It returned a clean, confident, wrong count of 1. Corrected to a full 208-task Execute+Arguments census with both controls before any number was quoted onward. No action taken beyond the correction.",
+    "test_sunday_DOES_escalate survives the WF-4 calendar mutant because it exercises only is_unaddressed while the mutant guards should_sweep. The Saturday test asserts both and is what fired. Recorded so a later reader does not treat the two weekend tests as interchangeable coverage. No action taken -- adding an assertion to a test file is an edit I was not asked for."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-21/laneZ_atomdecomp_ticketcenter_and_wf_certification_0305-0430Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which \"how do I check whether a Lambda's deployed package bytes match the repo source it is built from\"",
+      "result": "ROUTED CORRECTLY, TOOL DEAD. Returned a 3-way near-tie of 78 (comp-aws / comp-blast / comp-closure) and explicitly labelled the tie 'not a ranking'. comp-closure was the right pick by description and crashes rc=1 -- see the surprise entry. The router was right; the routed tool is broken."
+    },
+    {
+      "tool": "comp-closure",
+      "invocation": "comp-closure --self-test ; comp-closure compile opal-ticket-api --out <scratch>",
+      "result": "rc=1 BOTH, TypeError: build_record() missing 1 required keyword-only argument: 'substrate'. GAP FOUND AND ROUTED. Note on method: my first read of this was rc=0 because I took $? after piping to tail -- tail's rc, not the tool's. Re-measured unpiped. Capture rc on the tool, never after a pipe."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'from .sweep|import sweep|intake.sweep' ; comp-find 'opal-tickets'",
+      "result": "WORKED, AND THE DENOMINATOR LINE IS WHY IT WAS USED. Import-edge census: DENOMINATOR 4 hits / 27,214 files, BANDS HEAD=2 DOC=2 -- both HEAD hits the sweep's own test, which is the evidence the fuse holds. Two-homes census: 162 hits / 27,214 files, exactly one Python source home for the ticket API handler. A raw grep would have returned the same lines without the denominator or the band split, and the band split is what separates a fixture-string hit from a source hit in one call."
+    },
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast run_intake (exit 143, 120s timeout -- WRONG ARGUMENT SHAPE: run_intake is a .cmd and comp-blast takes a FUNCTION name) ; then comp-blast run_once",
+      "result": "rc=3 NOT-FOUND, and the tool behaved WELL: it printed its denominator (20,729 nodes in the canonical kuzu graph, broken out by node class) and stated in its own words 'This is a NOT-FOUND, not a nothing-breaks clear' -- refusing to let absence read as safety. I ATTEMPTED TO DETERMINE WHETHER THE INTAKE PACKAGE IS INDEXED AT ALL AND COULD NOT: comp-xref gateway_send_factory -> rc=3 no match, but the POSITIVE CONTROL comp-xref lambda_handler ALSO returned rc=3 'No matches in graph'. A control that returns the same verdict as the target does not discriminate, so 'the intake package is not in the graph' is UNMEASURED, NOT ESTABLISHED, and I am not reporting it as a coverage gap. FORWARD-LOOKING FLAG for the wiring act: if the runner's symbols genuinely are unindexed, the TO's mandated before-write comp-blast will return NOT-FOUND then too, and whoever runs it must not read that as 'nothing breaks'. Also observed in passing: STALE_NODE_WARN, 295 nodes carrying source-file SHA drift since the last comp-build."
+    },
+    {
+      "tool": "ssot_validate (atom-decomp method validator)",
+      "invocation": "python projects/ATOM_DECOMP/skill/atomic-decomposition/references/ssot_validate.py --self-test ; ... rectangle <file> ; ... patch <c0> <patch>",
+      "result": "self-test rc=0 (7 named PASSes incl. a duplicate-field REFUSAL, so the instrument discriminates); rectangle c0 rc=0 all-UNMEASURED; rectangle final rc=0 all-MEASURED; patch rc=0. Two real schema violations caught and fixed before commit (meta additionalProperties, and patch basis needing a string not an object) -- the validator did work, it did not rubber-stamp."
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py <this file> \"WF-1,...,WF-12\"",
+      "result": "rc=0, 'acceptance rows=12 | violations=0', VALID. AND THE PASS IS CONTROLLED, BECAUSE A VALIDATOR THAT CANNOT FAIL IS NOT A VALIDATOR: a mutant copy of this instance with output_evidence blanked on the WF-10 PASS row (the schema's own named invalidator -- 'a PASS row with empty output_evidence INVALIDATES the whole deliverable') was run through the same invocation and returned rc=1, violations=2, INVALID -- caught twice, once by the schema and once by the semantic bare-value rule. The mutant was written to the session scratchpad; the tracked instance was never mutated. Run POSITIONAL, never the bare 1-arg form (which returns VALID rc=0 with COVERAGE UNCHECKED), and never with the TO path as arg 2."
+    },
+    {
+      "tool": "rail gate (comp-tool HUD)",
+      "invocation": "n/a -- the gate fired on my own commands",
+      "result": "GATE CORRECT. It denied a grep whose path argument contained infra/. I re-ran with an inline # rail-checked: marker naming THE SEARCH (a literal-token comparison across the DOWNLOADED deployed artifact and its repo counterpart in one act -- the artifact is not a repo file, so comp-find structurally cannot reach it), not merely naming a tool. Three raw-aws inspections carried the same discipline."
+    }
+  ]
+}
