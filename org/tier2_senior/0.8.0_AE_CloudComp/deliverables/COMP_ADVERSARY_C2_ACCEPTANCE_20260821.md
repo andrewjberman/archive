@@ -23,6 +23,24 @@ Old control 2 was `head in out` with HEAD read at setup (:257) and compose readi
 
 Scope held per the finding: one control repaired; the compose path, the L0a family shape, the five stages, and the declared-exclusions contract untouched.
 
-## A3 transcript
+## A3 transcript (loop completed ~0234Z; full file: COMP_ADVERSARY_C2_A3_LOOP.txt)
 
-(appended on loop completion -- HEAD-before, HEAD-after, verdict per iteration; the discharging iterations are the ones where before != after with PASS)
+```
+iter 1 : HEAD-before 934cf14cd6 -> HEAD-after 934cf14cd6 quiet : self-test: PASS 4/4
+iter 2 : HEAD-before 934cf14cd6 -> HEAD-after 934cf14cd6 quiet : self-test: PASS 4/4
+iter 3 : HEAD-before 934cf14cd6 -> HEAD-after 934cf14cd6 quiet : self-test: PASS 4/4
+iter 4 : HEAD-before 934cf14cd6 -> HEAD-after 934cf14cd6 quiet : self-test: PASS 4/4
+iter 5 : HEAD-before 934cf14cd6 -> HEAD-after 8ff60eb580 MOVED-MID-RUN : self-test: PASS 4/4
+iter 6 : HEAD-before 8ff60eb580 -> HEAD-after 9f8a09c051 MOVED-MID-RUN : self-test: PASS 4/4
+iter 7 : HEAD-before 9f8a09c051 -> HEAD-after 9f8a09c051 quiet : self-test: PASS 4/4
+iter 8 : HEAD-before 9f8a09c051 -> HEAD-after 9f8a09c051 quiet : self-test: PASS 4/4
+```
+
+Iterations 5 and 6 each SPANNED a real HEAD advance (the two evidence commits of this very record,
+landed deliberately mid-loop) and stayed PASS 4/4 -- the exact condition that produced the old
+control's 02:07Z false FAIL. **Residual, assigned to 0.8.0_AE_CloudComp~A (MSTR-spawned lane,
+coordination 64165/base answer 023434Z): the VACUOUSNESS CONTROL** -- the OLD predicate
+(`head in out`) evaluated under identical spanning runs must FAIL there, proving the churn reached
+the setup->compose window rather than landing between iterations' setup and HEAD-capture. ~A also
+carries mutant M3 (verifier correct, VERIFIED lines suppressed -- the exact pre-fix state; the
+sharpest A4 arm, unrun at base). The full A1-A5 close to MSTR cites both seats' transcripts.
