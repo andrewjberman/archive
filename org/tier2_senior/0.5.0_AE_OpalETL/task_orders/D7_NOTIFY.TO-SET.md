@@ -131,7 +131,15 @@ Re-point L118 / L411 / TF L237 from *audience*-dependent to **Q3/link-target**-d
 
 ## TO-F -- FAILURE MATRIX, THEN THE WIRING ACTS (STAGED on A+D+E)
 
-<issued_to>0.5.0_AE_OpalETL~Z</issued_to> <status>staged -- activates on TO-A + TO-D + TO-E acceptance</status>
+<issued_to>0.5.0_AE_OpalETL~Z</issued_to> <status>✅ **ACTIVE 2026-08-21 (Andrew: "proceed with D E F"). Inputs exist: A/B/C/D/E all accepted + validated.**</status>
+
+> ### ⛔ F-0 -- THE WIRING ACT IS **HELD**, AND F IS ISSUED WITHOUT IT
+> **His *"proceed with D E F"* predates the clarified fact that on the runner plane THE IMPORT EDGE IS A PRODUCTION DEPLOY** -- live within 5 minutes, **no apply step in which anyone could review it.** The TO-SET's standing DO-NOT already forbids opening an apply; **the wiring IS one, in effect if not in form.**
+> **SO F DELIVERS THE MATRIX AND THE EXERCISES. THE WIRING WAITS FOR HIS EXPLICIT WORD.** Same standard as D-HTML and as `0.7.0_AE_CloudOps` stopping at the commit on the gateway TF: **an approval covers what the approver was shown.**
+> **F-3 is therefore UNCOMPUTABLE-BY-CONSTRUCTION at issue, and that is not a gap** -- its subject does not exist until the edge is written. **Do not treat completing F-1/F-2/F-4 as licence to write it.**
+
+**THE FOUR LEGS, NAMED AT ISSUE so the matrix cannot drift:** (1) **internal DL email** (SES, Lambda plane) · (2) **Teams buzz** (5-min scheduled runner, gateway-mediated, carries the ~1h credential dependency) · (3) **client email** -- submit-ack + pickup (SES, Lambda plane, single-recipient) · (4) **the escalation sweep** (`sweep.py`, runner plane, currently unwired).
+**DENOMINATOR FRAMED AT ISSUE: state cell counts as LEGS x FAILURE-MODES, both named -- never as a raw test count.**
 
 **THE RELIABILITY QUESTION IS NOT "does each leg work."** It is: **when one leg fails, what does the system do?** W-E established the shape (email errors -> still 201, named error separating *unconfigured* from *refused*). **That must now hold across FOUR legs -- internal email, Teams, client email, dashboard -- and the failure matrix is a DESIGN artifact, not a test artifact.**
 ⛔ **THE W-F IMPORT EDGE IS THE LAST ACT OF THIS TO AND OF THE WHOLE SET.** On the runner plane it is a production deploy within 5 minutes **with no apply step in which anyone could review it.** It is written only after the matrix is accepted.
