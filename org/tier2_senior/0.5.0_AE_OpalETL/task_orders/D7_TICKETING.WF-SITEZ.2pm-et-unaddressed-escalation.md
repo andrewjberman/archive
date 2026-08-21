@@ -379,10 +379,22 @@ working tree**, so **EIGHT artifacts are live production, edited in place, with 
 **A5/A6/A7 BIND ON ANY EDIT TO ANY OF THEM, FOR ANY REASON** — a typo, a docstring, a comment, a
 config value. *"The hazard is not a property of the work being done, it is a property of the file
 being saved — and the next person to edit one of these will not be someone who read this ruling."*
-⚠ **STATED BOUND, carried so nobody reads a clean result that was not obtained:** only
+~~⚠ **STATED BOUND, carried so nobody reads a clean result that was not obtained:** only
 `OPAL_D7_ticket_intake` was fully resolved. Three other scheduled tasks execute through
 `cmd.exe`/`wscript.exe` and their `Arguments` plane was NOT read — **their working-tree exposure is
-UNMEASURED, NOT ABSENT.**
+UNMEASURED, NOT ABSENT.**~~
+✅ **BOUND DISCHARGED 2026-08-21 by the FULL 208-TASK CENSUS** (`/atom-decomp` stage 1 @78218fc482, carried in
+`D7_TICKETING.WF_PROOF_OF_SPEC.json`; re-read independently by `2.0.0_SA_COO~Z` 2026-08-21 ~0630Z).
+**FOUR of 208 scheduled tasks execute out of the working tree, not one:** `OPAL_D7_ticket_intake` ·
+`OPAL_BBGTML_daily_pull` · `OPAL_BBGTML_freshness_check` · `OPAL_vendor_watch`. **Controlled BOTH ways** —
+negative `zzz_no_such_path_9999` -> 0 matches, positive `run_intake` -> 1, so the census discriminates.
+**THE EXPOSURE WAS REAL, NOT HYPOTHETICAL: two of the three previously-unmeasured tasks ARE exposed** — the bound
+was right to refuse a clean verdict it had not earned.
+⛔ **THIS DOES NOT MOVE THIS TO'S `DENOMINATOR: 8`.** Those 8 artifacts are the ones `OPAL_D7_ticket_intake`
+executes; the other three tasks carry their OWN artifact sets under their OWN owners, and merging the counts would
+manufacture a denominator that describes no single task.
+**ROUTED OFF THIS LANE, NO ACTION TAKEN HERE** (`1.0.0_SA_CTO~Z` msg 4185): the BBGTML pair to
+`0.0.3_BG_BBGTerminal`, `OPAL_vendor_watch` to `0.0.0_AB_MSTR~Z`.
 
 `integrations/ticketing/intake/` is this seat's own — BUT IT IS LIVE PRODUCTION INFRASTRUCTURE under
 a 5-minute schedule, so every edit is effectively a deploy the moment it hits disk. **NO W-A
