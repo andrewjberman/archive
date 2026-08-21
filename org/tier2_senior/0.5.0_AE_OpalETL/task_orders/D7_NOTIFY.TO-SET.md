@@ -119,7 +119,7 @@ Re-point L118 / L411 / TF L237 from *audience*-dependent to **Q3/link-target**-d
 ⛔ **CONTENT PROJECTION BINDS HARDER HERE THAN INTERNALLY.** The intake-snapshot release in TO-A is an **INTERNAL** ruling. **Re-derive the client field set from WE-4's pointer-not-home limb; do NOT inherit TO-A's set.**
 ⛔ **AND NOTE THE ASYMMETRY, DELIBERATE:** internal gets **one** email and **no** follow-ups; the client gets a **pickup follow-up**. A reader taking *"no follow-ups"* as global will delete this.
 <expected_criteria>E-0,E-1,E-2,E-3,E-4,E-5</expected_criteria>
-- **E-0** FIRM-AWARE LINK TARGET, exercised **both directions**: a firm WITH a reachable target gets the link; **`inflection` gets NO link, not a default one.** A firm-blind link must FAIL a test.
+- **E-0** FIRM-AWARE LINK TARGET, exercised **both directions**: a firm WITH a reachable target gets the link; **`inflection` gets NO link, not a default one.** A firm-blind link must FAIL a test. ⚠ **STATE THE DENOMINATOR AS *FIRMS*, NAMED -- `3 of 4 firms (49financial, cottonwood, demo; NOT inflection)` -- NEVER as a path count** (`2.0.0_SA_COO~Z`, validation half). **A path-framed count is the one frame a later reader cannot check against the allowlist**, which is the denominator-choice principle applied before the fact instead of after.
 - **E-1** submit-ack exercised on a real row.
 - **E-2** pickup notification exercised, **claimer's FULL NAME rendered**, degradation path named when the directory has no such row.
 - **E-3** **SINGLE-RECIPIENT asserted structurally** -- a mutant supplying two recipients must FAIL.
