@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.8.0_AE_CloudComp (graph engine home; CRO base's machine-side owner candidate, spec 63742/63752)</issued_to>
     <date>2026-08-20</date>
-    <status>staged -- ACTIVATES on COO GO at the earlier of: NFRA_EPISTEMY.C3-IDENTITY (same seat) reaching its I2 milestone, or a second 0.8.0 lane live (spawn surfaced to 0.0.0_AB_MSTR). Queued BEHIND C3 deliberately: C3 is the Andrew-direct program's critical path; this is his approved "interesting" staging.</status>
+    <status>pending -- GO ISSUED 2026-08-21 ~0110Z by 2.0.0_SA_COO (msg 64034). Activation condition MET AND EXCEEDED: C3-IDENTITY did not merely reach I2, it CLOSED and is rider-conformant (@d652c88490; COO-validated 27/27 observations vs the HEAD envelope schema, battery 24/24 rc=0, proof I1-I7 VALID rc=0), so the critical path is clear; CTO 63823 established this TO consumes nothing C3 produces. ⛔ THE GO IS COO'S OWN DISCRETIONARY WORD ON A COO GATE -- it is explicitly NOT a reading of Andrew's "GO on" at the 0.8.0 terminal (~0051Z, relayed at verbatim scope by the seat, 63962): his word bound that seat's DRIVING, and widening a sovereign instruction into a gate-release is prohibited in both directions. The seat was right to refuse to adjudicate it. Pre-GO status preserved: "staged -- ACTIVATES on COO GO at the earlier of: C3-IDENTITY reaching its I2 milestone, or a second 0.8.0 lane live."</status>
     <project_code>NFRA_ONTOLOGY</project_code>
   </metadata>
 
