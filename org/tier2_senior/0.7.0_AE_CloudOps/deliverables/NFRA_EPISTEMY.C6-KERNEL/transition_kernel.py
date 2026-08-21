@@ -135,8 +135,22 @@ class SupportHandoffViolation(KernelRefusal):
     """Required_Validity_Interval(c) is NOT a subset of Actual_Validity_Interval(c)."""
 
 
-class PointOfNoReturn(KernelRefusal):
-    """Past a declared point of no return with insufficient recovery capacity."""
+# ⛔ `PointOfNoReturn(KernelRefusal)` WAS DEFINED HERE AND IS DELETED. It was never raised
+# (defined=1, raised=0, against a control of raised=3 for PrefixSafetyViolation) -- a dead
+# token in the refusal vocabulary, found by auditing this module before handing it to CRO's
+# spec cert rather than by anything failing.
+#
+# AND DELETION IS THE CORRECT FIX, NOT WIRING IT UP: crossing a declared point of no return
+# is a LEGITIMATE ACT, not a refusal. The kernel records `_past_no_return` and the refusal
+# happens LATER, at the next checkpoint's safe-terminal-reachable clause, which raises
+# PrefixSafetyViolation (m2 exercises exactly that). The concept lives on the TERMINAL axis
+# as ABANDONED_UNSAFE, not in the exception vocabulary.
+#
+# THE HAZARD IT POSED WAS NOT INERTNESS: a reader scanning the refusal vocabulary would
+# reasonably conclude the kernel raises on crossing, and write a caller that catches an
+# exception which cannot occur -- a handler for an unreachable branch, which reads as
+# defensive and is dead. An enumerated name that nothing can produce is a Rule-24 defect on
+# the refusal axis (a value with no member), one layer down from the enums.
 
 
 # --------------------------------------------------------------------------- terminals
