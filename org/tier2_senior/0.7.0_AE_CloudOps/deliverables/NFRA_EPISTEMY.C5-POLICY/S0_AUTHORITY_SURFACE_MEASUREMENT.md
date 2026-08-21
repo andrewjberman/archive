@@ -58,7 +58,16 @@ this file and miss the axis that actually gates a new principal.
 
 ---
 
-## ⛔ FINDING — FOUR DEAD PRINCIPALS IN A LIVE AUTHORITY FILE (surfaced, NOT fixed)
+## ⛔ CORRECTED BY PHASE 3 — THE COUNT BELOW IS **4**; THE MEASURED TOTAL IS **6 ACROSS 3 LANES**
+
+**Read the Phase-3 section at the end of this file before quoting any number here.** The "four"
+below is what I found **by eye**, on a serial that *looked* malformed. When the engine ASKED every
+one of the 518 entries instead, it found two more — in lanes I had no reason to suspect, because
+their entries look perfectly well-formed. **Finding-by-inspection found the ugly one; only the
+census found the rest.** The four below are real and correctly described; the section is preserved
+rather than rewritten because the gap between 4 and 6 *is* the argument for the component.
+
+## FINDING — DEAD PRINCIPALS IN A LIVE AUTHORITY FILE (surfaced, NOT fixed)
 
 Lane **`POD4_OR_EXEC`** (25 agents) enumerates four principals that **cannot match any real seat**:
 
@@ -138,3 +147,85 @@ The one typed rejection this component must produce is already named in the spec
   written is a separate question on a different plane, and this phase does not claim it.
 - `rollout_phase: 2` is carried in the file and I have **not** established what phase 2 gates versus
   phase 1; the count above is of rules present, not of rules currently enforced.
+
+---
+
+# PHASE 3 — the engine over a READ-ONLY snapshot of the real enumerations
+
+`phase3_snapshot.py`. `.owned-paths.yaml` opened `'r'`, **0 writes performed**. This measures the
+authority surface; it does not enforce it.
+
+**plane = `DESIRED`, substrate = `codebase`, and the choice is the point.** The file is the DECLARED
+authority; the pre-commit hook is what APPLIES it. I read the file, so `DESIRED` is the honest rung
+— not `APPLIED` (I never read the hook's behaviour) and not `EXERCISED` (I never ran an act through
+it). Same discipline as C6's fixture emissions, one plane over.
+
+## THE CORRECTED DEAD-MEMBER COUNT: 6 across 3 lanes
+
+```
+POD4_OR_EXEC          0.4.0_DS_ClientPlatform_A / _B / _C / _D      4
+ANY_POD               0.3.1_RD_PortfolioManagement~C                1
+OPAL_ANALYST_DE_RUNS  0.1.0_DE_MarketIntelligence~Z                 1
+```
+
+⛔ **TWO KINDS, AND THEY TAKE OPPOSITE REMEDIES — a Rule-24 postulate (iv) split on my own finding:**
+
+| kind | n | why it never resolves | remedy |
+|---|---|---|---|
+| **MALFORMED** | 4 | underscore where lane serials use a tilde — **can never match any seat, ever** | correct the token |
+| **UNSPAWNED** | 2 | well-formed lane serials (`~C`, `~Z`) with no trace in any source — the seat has simply never existed | **decide whether the grant is still wanted** |
+
+**One remedy does not move both.** A typo is dead forever and fixing it is mechanical; a grant to a
+lane that has not spawned may be legitimately forward-looking, and "fixing" it would silently
+withdraw an authority someone intended. Reporting them as one number of six would have invited one
+remedy for two problems.
+
+## ⛔ MY FIRST RUN REPORTED **14**, AND IT WAS WRONG IN THE DIRECTION THAT DEFAMES A REAL SEAT
+
+The resolver initially sourced existence from `agent-spawn-audit.log` + inbox dirs. It called
+`0.1.2_RD_CausalityEngine` and `0.3.3_RD_DataRefresh` dead. **Both have agent folders under
+`org/tier*/` and are plainly real seats** — they simply predate the spawn-audit log or never took
+inbox mail. Widening the resolver to a third source (agent folders, 70 principals) moved the union
+from 128 to 140 and the count from 14 to 6.
+
+**THIS IS THE LIMIT THIS MODULE HAD ALREADY DECLARED, FIRING.** My own limits list said, verbatim:
+*"a principal that existed and left no trace in either would read DEAD incorrectly."* **The
+declaration was correct and it did not prevent the error.** Naming a failure mode is not a control
+against it — only widening the source set was. That is the night's recurring lesson landing inside
+the instrument built to catch this exact class.
+
+**And note the direction.** An incomplete source set produces **FALSE DEAD**, not missed-dead: it
+accuses a live seat rather than overlooking a dead one. For a component whose output could inform
+who holds authority, that is the more dangerous direction, and it is the one an under-sourced
+resolver defaults to.
+
+## RESOLVER PROVENANCE — stated so a False verdict is auditable
+
+```
+agent-spawn-audit.log        106 principals
+inbox dirs                   108 principals
+org/tier*/ agent folders      70 principals      <- added after the 14-vs-6 correction
+union known principals       140
+```
+Controls, run BEFORE any verdict was quoted, and all four correct: `0.7.0_AE_CloudOps` -> True ·
+`0.4.0_DS_ClientPlatform~A` -> True · `0.4.0_DS_ClientPlatform_A` -> **False** ·
+`9.9.9_ZZ_NoSuchSeat` -> **False**. The resolver returns both answers, so its zeros discriminate.
+
+## OTHER PHASE-3 RESULTS
+
+- **WHAT plane regime-honesty: 250/250 consistent.** No path rule declares a regime its members
+  contradict (a rule declaring PREDICATE with no glob in it would be lying about itself).
+- **PREDICATE lanes: 1 of 58** (`ANY`, value `*`). Confirms the S0 headline against the engine
+  rather than against an ad-hoc script.
+- **The asymmetry, restated from the engine:** 74% predicate on WHAT, 99.8% enumeration on WHO
+  (517 of 518 entries). *The report line rounds that to 100%; the exact figure is 517/518 and the
+  rounding is the printer's, not the measurement's.*
+
+## LIMITS THAT SURVIVE PHASE 3
+
+- **Three sources is not all sources.** A principal existing by some fourth means would still read
+  DEAD. The 6 is a floor on live-seat-hood and a ceiling on deadness, not a certainty.
+- **`rollout_phase: 2` is read and NOT interpreted.** These are rules PRESENT, not rules currently
+  ENFORCED. Establishing what phase 2 gates is a different measurement on a different plane.
+- **Nothing here was fixed.** `.owned-paths.yaml` is the live authority surface; editing it is a
+  policy act and the TO puts it outside this component. Routed to `1.0.0_SA_CTO`.
