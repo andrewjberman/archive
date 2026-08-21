@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_TICKETING.WE-SITEZ.email-dl-first-instantaneous-line",
+  "firm": "FABRIC",
+  "phase": "P1-SCRIPTS",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/D7_TICKETING.WE-SITEZ.email-dl-first-instantaneous-line.md",
+    "group": "W",
+    "vintage_commit": "c3e7fc73ac"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LAMBDA PLANE -- BUILD ONLY, NO APPLY OPENED, and it lands ON TOP OF AN ALREADY-UNAPPLIED QUEUE. Measured at 20260821T0325Z (run workflows/atom_decomposition/runs/ticket-center-deployed-vs-built/20260821T0325Z/ @78218fc482, accepted msg 4185 after 1.0.0_SA_CTO~Z re-derived it by a different path): the executing opal-ticket-api is built from 1fd9ef2750, HEAD was already 4 commits ahead, and the <module-level region> -- where this work's imports and constants go -- was ALREADY DIVERGED by 81c502cff2 + 9121a55330 + b121c2f26e. THEREFORE THE W-E APPLY CANNOT BE REASONED ABOUT AS A CLEAN SINGLE-CHANGE APPLY: it will carry W-A's queue with it. Stated here at 1.0.0_SA_CTO~Z's explicit instruction (msg 4189 bound 1) so nothing in this instance implies otherwise. The apply leg is the laptop's under the envelope law @550b20ec5b; .open_deploys/ carries no ticket-center entry, so nothing is stranded. Diff shape: +162/-0, a surgical add -- no whole-file rewrite, 0 CRLF pairs, 0 non-ASCII bytes.",
+      "artifact_covered_by": ["WE-4", "WE-5", "WE-6"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py",
+      "kind": "test",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A test battery has no deployed side: build-and-upload.sh zips exactly one member (lambda_function.py), so nothing under tests/ is ever packaged. 19 tests across 4 criterion-named classes. It REUSES test_authz_matrix's FakeTable, event builder and authorizer contexts rather than re-declaring them (build-ladder rung 2 -- a second FakeTable would drift from the first the day the handler changes).",
+      "artifact_covered_by": ["WE-4", "WE-5", "WE-6"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/ticket-center/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "THIS COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DESIRED plane only -- terraform validate rc=0 and fmt -check rc=0 on site Z (Terraform v1.15.8, via winget; NOTE for the record: CLAUDE.md's '.tools/terraform.exe' DOES NOT EXIST ON THIS BOX -- the device-agnostic resolution found the binary on PATH instead). Adds (a) a SEPARATE aws_iam_role_policy 'opal-ticket-api-ses-send' granting ses:SendRawEmail on the opalinvest.dev identity, read through a data source so the plan FAILS LOUDLY if the identity is renamed or removed rather than granting on a string that resolves to nothing, and (b) two DELIBERATELY EMPTY env slots, TICKET_DL and TICKET_DEEP_LINK_BASE. NO PLAN AND NO APPLY WERE RUN: only `terraform init -backend=false` (providers, no state) plus fmt and validate, all read-only. NO bounce/complaint SNS topic was cloned from the ported ses.tf -- that is notification machinery Andrew did not ask for and the 2026-07-28 moratorium is untouched for everything else.",
+      "artifact_covered_by": ["WE-5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "WE-1",
+      "criterion_verbatim": "DESIGN GATE DISCHARGED: transport + sender identity ruled by 1.0.0_SA_CTO~Z, recorded before any build act; the DL address exists and its creating actor is named in the record.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_WE1_DESIGN_GATE_RULING_20260821.md @c3e7fc73ac (routing note msg 4166 @20260821T015617Z) and the sec-4 discharge @46d3ce65b5 (msg 4174); ordering confirmed against this seat's own commit timestamps",
+      "output_evidence": "FIRST LIMB DISCHARGED AND ORDERED CORRECTLY: transport = SES from the CREATE Lambda write path, sender = opalinvest.dev, ruled @c3e7fc73ac at 0212Z. My first build act on this file is this commit, at ~0450Z -- the ruling PRECEDES the build rather than being reconstructed after it, which is the limb's actual point. The gate's own grounding: get-email-identity -> Verified true | DkimStatus SUCCESS | SigningEnabled true | DOMAIN, negative-controlled with zzz-no-such-domain-9999.example -> NotFoundException. The sandbox blocker that surfaced at 0212Z was separately discharged at ~0305Z (ProductionAccessEnabled false -> TRUE, quota 200 -> 50,000/day, case 178727932800843), so recipient verification is no longer required. SECOND LIMB NOT DISCHARGED: THE DL DOES NOT EXIST. Its creation is a tenant-admin act -- no tool in the gateway creates a distribution list -- and no actor has been named in any record.",
+      "denominator": "2 of the criterion's 2 conjunctive limbs assessed; 1 discharged, 1 not",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "PLANE: record. NAMED LATER RUN: the tenant-admin act that creates the DL and reports its address, plus the record naming its creating actor. MARKED UNCOMPUTABLE RATHER THAN PASS BECAUSE THE CRITERION IS CONJUNCTIVE AND 1.0.0_SA_CTO~Z SAID SO IN THEIR OWN RULING: 'WE-1 is two claims joined by an and ... RULED HERE: transport + sender identity. NOT DISCHARGED: the DL address exists and its creating actor is named.' The discharged limb's evidence is recorded above so the work is not lost; a PASS would carry the undischarged limb silently."
+    },
+    {
+      "criterion_id": "WE-2",
+      "criterion_verbatim": "INSTANTANEOUS, EXERCISED: one real ticket creation produces the email, with the latency measured from the row's created_at to the send -- and stated beside the agent buzz's own latency on the same ticket, so \"first line\" is a measured ordering, not a claim.",
+      "method": "manual_read_with_citation",
+      "invocation": "n/a -- no send was attempted; TICKET_DL is empty in main.tf by design and the handler refuses on it",
+      "output_evidence": "NO REAL SEND OCCURRED AND NO LATENCY WAS MEASURED. There is no DL to send to, and the build is not applied, so neither the send nor its timing exists to observe. WHAT IS ESTABLISHED INSTEAD, AND IT IS AN ORDERING ARGUMENT RATHER THAN A MEASUREMENT: the send is invoked from the CREATE write path itself (AST-verified call sites: submit_form and create_ticket, both immediately after _table.put_item), while the agent buzz rides the 5-minute scheduled runner. So the email is first BY CONSTRUCTION rather than by contest. THAT IS NOT WHAT WE-2 ASKS FOR -- it asks for a measured ordering, and an architectural argument is exactly the substitution the criterion's own wording forbids.",
+      "denominator": "0 sends attempted; 2 of 2 CREATE write paths carry the call (AST-verified, not grepped)",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "PLANE: exercised/live. NAMED LATER RUN: the first real ticket creation after (a) the DL exists, (b) TICKET_DL and TICKET_DEEP_LINK_BASE are set, and (c) the laptop applies. All three are outside this seat. Both this row and WE-3 remain the exercised proof of W-E and NOTHING IN THIS INSTANCE SUBSTITUTES FOR THEM."
+    },
+    {
+      "criterion_id": "WE-3",
+      "criterion_verbatim": "SENDER VERIFIED ON THE WIRE (not from config): the delivered message's From/authentication headers read the ruled domain. A config value proving itself is not evidence.",
+      "method": "manual_read_with_citation",
+      "invocation": "n/a -- no message was delivered, so no headers exist to read",
+      "output_evidence": "NOT MEASURED, AND THE CRITERION'S OWN SENTENCE IS WHY IT CANNOT BE FUDGED: 'a config value proving itself is not evidence.' What this build establishes is only the config-and-code side -- the Source passed to send_raw_email is the pinned module constant tickets@opalinvest.dev, asserted on the actual send kwargs in test_send_uses_the_pinned_sender_as_Source (Source == EMAIL_FROM, Destinations == [DL], and 'From: tickets@opalinvest.dev' present in the raw MIME). THAT IS THE CONFIG PROVING ITSELF. Nothing here reads a delivered message's headers, and no DKIM or DMARC result has been observed for this sender on this path.",
+      "denominator": "0 delivered messages inspected; 1 of 1 send call site asserted on its Source kwarg",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "PLANE: exercised/wire. NAMED LATER RUN: the same first real send as WE-2 -- read the delivered message's From and Authentication-Results headers at the recipient. The domain's DKIM posture is verified at the IDENTITY (DkimStatus SUCCESS, SigningEnabled true, negative-controlled) but that is the identity's property, not this message's, and the criterion asks about the message."
+    },
+    {
+      "criterion_id": "WE-4",
+      "criterion_verbatim": "POINTER-NOT-HOME: the body carries ticket id + deep link + minimal identifying context, and provably NOT the internal audit trail / routing / internal notes (the W-C projection discipline applied to the email surface -- asserted on a row where those fields are populated).",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py -v  (class WE4_PointerNotHome; rc captured on python, unpiped)",
+      "output_evidence": "rc=0, 19 tests OK overall, 4 in WE4_PointerNotHome. ASSERTED ON A ROW WHERE THE PROHIBITED FIELDS ARE POPULATED, exactly as the criterion demands -- FULL_ROW carries events, description, source, created_by, status, assignee, claimed_by and requester{email,name,firm}, each filled with a DISTINCTIVE SENTINEL ('SENTINEL_AUDITNOTE_do_not_leak' and 12 others) so a substring accident cannot pass. test_body_carries_the_invariant_core asserts ticket_id, ticket_type, created_at and the deep link ARE present; test_body_carries_NONE_of_the_audit_trail_routing_or_deferred_fields subtests all 13 sentinels ABSENT. POSITIVE CONTROL ON THE ASSERTION ITSELF: test_the_guard_would_catch_a_real_leak builds a body that DOES carry the audit trail and confirms the same check fires -- without it the absence test would pass for any formatter, including a broken one. The field set is a DATA DECLARATION (DL_NOTICE_FIELDS), asserted directly, so a future edit that adds a field has to add it in front of the reason it must not.",
+      "denominator": "4 tests in WE4_PointerNotHome; 13 of 13 populated prohibited/deferred sentinels asserted absent; 4 of 4 required content elements asserted present",
+      "status": "PASS",
+      "status_reason": "PLANE: code (lambda plane, built-not-deployed). SCOPE DECISION RECORDED BECAUSE IT IS A JUDGEMENT, NOT A MEASUREMENT: the body carries ONLY ticket_id + ticket_type + created_at + deep link. title and requester{email,name,firm} are WITHHELD AS AUDIENCE-DEFERRED rather than as WE-4-prohibited -- two different reasons that must not be collapsed. Under an internal DL they are plainly fine; under a client-facing one their safety turns on a FURTHER undetermined sub-question (single-recipient ack vs multi-firm list), and on the second reading one firm's title reaching another is a cross-tenant leak. A field whose safety depends on an unanswered question is not byte-identical under either audience answer, so THE FIELD WAITS, NOT THE LEG -- the fine cut the gate ruled. The email is thinner today than it will finally be, and that is the honest form of building under an open sovereign question."
+    },
+    {
+      "criterion_id": "WE-5",
+      "criterion_verbatim": "REFUSE-IF-UNSET: with the DL address absent, the path refuses loudly (distinct exit / named error) and does not fall back to a baked address; exercised.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py -v  (classes WE5_RefuseIfUnset and Sender_NoFallbackEver)",
+      "output_evidence": "rc=0; 7 tests in WE5_RefuseIfUnset + 3 in Sender_NoFallbackEver. REFUSES: test_unset_DL_REFUSES_and_never_reaches_a_send raises DLAddressUnset AND asserts the stub SES recorded ZERO sends -- refusing must not also half-attempt. test_unset_deep_link_base_REFUSES covers the same for the link base. NAMED, NOT BARE: test_refusal_is_a_NAMED_error_not_a_bare_one asserts DLAddressUnset is a distinct subclass, which is what lets the isolation wrapper tell 'unconfigured' from 'SES refused' -- two states taking opposite actions. NO BAKED ADDRESS ANYWHERE: test_no_baked_recipient_address_anywhere_in_the_module scans CODE string constants VIA AST (not text -- the module's own comments discuss addresses while explaining why none may be baked, and a text scan cannot tell those apart) and asserts the ONLY email literal in the entire module is the pinned sender. Both halves controlled: test_the_guard_would_catch_a_real_baked_recipient (positive -- a real DL = \"baked@opalinvest.dev\" trips it) and test_the_guard_ignores_a_docstring_mention (negative -- prose alone does not, so the guard is not undiscriminating). THE SENDER IS PINNED WITH NO ENV OVERRIDE: test_sender_is_a_PINNED_CONSTANT_with_no_env_override walks every os.environ.get call in the module and asserts none names EMAIL_FROM or SENDER.",
+      "denominator": "10 tests across the two classes; 1 of 1 email literal permitted in the module and asserted to be the sender; 2 of 2 refuse-if-unset slots exercised",
+      "status": "PASS",
+      "status_reason": "PLANE: code (lambda plane, built-not-deployed). TWO DELIBERATE DIVERGENCES FROM THE PORTED SHAPE, BOTH FLAGGED FOR ACCEPTANCE RATHER THAN TAKEN SILENTLY. (1) THE SENDER IS A PINNED CONSTANT WITH NO ENV OVERRIDE, which is STRICTER than 1.0.0_SA_CTO~Z's 'copy the sender pattern' instruction: the TO's own Do-not says 'No fallback sender, ever', and an env-with-default IS a fallback path. Pinning makes a wrong sender inexpressible rather than merely linted. Overrule freely -- the divergence is one line. (2) TICKET_DEEP_LINK_BASE IS ALSO REFUSE-IF-UNSET, beyond WE-5's letter, because an internal DL plausibly deep-links to the internal board and a client-facing one to the client's own view, so a baked route would PRE-ENCODE THE AUDIENCE ANSWER in a default string -- and the ported shape's own analogue (trade-pipeline config.py:14 DASHBOARD_URL) bakes a domain NEVER#23 says we do not own, which is that failure mode already realised."
+    },
+    {
+      "criterion_id": "WE-6",
+      "criterion_verbatim": "NO-REGRESSION on the live path: the CREATE write, the 201 contract, the client ack frame and the 5-min runner's buzz all behave unchanged; the existing batteries re-run green. The runner and the CREATE Lambda are LIVE PRODUCTION INFRASTRUCTURE now -- a failure in the email leg must not fail the ticket creation. Exercised: the email leg erroring still yields a 201 and a buzz.",
+      "method": "test_suite",
+      "invocation": "PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_authz_matrix.py ; PYTHONIOENCODING=utf-8 python -m pytest integrations/ticketing/intake/tests/ -q ; PYTHONIOENCODING=utf-8 python infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py -v  (class WE6_IsolationTheExpensiveDirection)",
+      "output_evidence": "PRE-EXISTING BATTERIES GREEN: authz matrix rc=0 '15 tests OK'; intake package rc=0 '42 passed, 25 subtests passed'. ISOLATION EXERCISED IN THE EXPENSIVE DIRECTION, 6 tests: with SES raising a distinct _Boom exception, SUBMIT returns 201 AND the row is written (len(_table.items)==1 -- the write is the contract, the email is a notice), CREATE returns 201, and an UNCONFIGURED DL -- the state the estate is actually in today -- also still returns 201. THE MUTANT IS THE PROOF: test_MUTANT_sharing_the_exception_boundary_BREAKS_the_201 repoints the write path at the UNISOLATED sender (literally 'share the exception boundary') and the handler then RAISES instead of returning 201; the boundary is restored in a finally and the same call is a 201 again, so the mutant was the cause and not a coincidence. Without that test the five above would pass for a handler whose email leg never worked. DISTINCT GREPPABLE TOKENS: WE_DL_SEND_FAILED and WE_DL_UNCONFIGURED are asserted to appear in their own case and NOT in the other's -- they take opposite actions (operational vs config) and one shared token would merge them into an indistinguishable log line. INCIDENTAL CORROBORATION: the pre-existing authz battery emitted 12 WE_DL_UNCONFIGURED lines while staying 15/15 green -- every 201 path in a battery written before this feature existed exercised the isolation without being asked to.",
+      "denominator": "15 + 42 pre-existing tests re-run green (0 failures); 6 isolation tests incl. 1 mutant; 12 incidental isolation exercises in the pre-existing battery; 0 modified paths under integrations/",
+      "status": "PASS",
+      "status_reason": "PLANE: code (lambda plane) + runner plane for the no-regression half. ONE LIMB IS WEAKER THAN THE OTHERS AND IS NAMED RATHER THAN LET PASS: 'and a buzz'. NO LIVE BUZZ WAS OBSERVED. What is established is its PRECONDITION (the row is written, asserted) plus the fact that the runner is byte-unchanged by this work (git status --porcelain integrations/ -> 0 modified paths) and its own 42-test battery is green. The buzz itself is the 5-minute scheduled runner's act and would need a live applied deploy to observe. Marked PASS because the criterion's load-bearing claim -- isolation, that a failure in the email leg must not fail the ticket creation -- IS exercised with a mutant; the buzz limb rests on an asserted precondition and an untouched producer, and a reader should not take it for an observation."
+    },
+    {
+      "criterion_id": "WE-7",
+      "criterion_verbatim": "Proof instance VALID rc=0 POSITIONAL, ids WE-1..WE-7 (rc unpiped; the flagged form exits 2 and the 2-arg fallback prints VALID while checking coverage nothing).",
+      "method": "schema_validation",
+      "invocation": "PYTHONIOENCODING=utf-8 python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WE_PROOF_OF_SPEC.json \"WE-1,WE-2,WE-3,WE-4,WE-5,WE-6,WE-7\"",
+      "output_evidence": "rc=0, 'proof-of-spec-check | structural=jsonschema | acceptance rows=7 | violations=0', VALID. Run POSITIONAL with the comma-separated criterion-id list as the 2nd argument, per the criterion's own warning about the flagged and 2-arg-fallback forms. PYTHONIOENCODING=utf-8 because the checker dies UnicodeEncodeError (cp1252) on this box when violations carry non-ASCII, and rc=1 from a crash is indistinguishable from rc=1 from violations. AND THE PASS IS CONTROLLED: the same control run on the sibling W-F instance earlier this session showed the checker returning rc=1 / violations=2 / INVALID on a mutant with output_evidence blanked on a PASS row -- a validator that cannot fail is not a validator. SELF-REFERENCE NAMED: recording a result inside the artifact it is about changes that artifact, so the quoted output is from the byte-state immediately preceding this sentence; the invocation was re-run after every subsequent edit and the LAST run before commit governs.",
+      "denominator": "7 of 7 criterion ids carried; expected set = the TO's <expected_criteria> verbatim",
+      "status": "PASS",
+      "status_reason": "PLANE: none -- this criterion is about the deliverable, not the artifact."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THE ISOLATION MUTANT, and it is the one that matters because the criterion names it: 'share the exception boundary'. test_MUTANT_sharing_the_exception_boundary_BREAKS_the_201 repoints the CREATE write path from notify_dl_isolated to the UNISOLATED notify_dl, with SES stubbed to raise a distinct _Boom type (a distinct type so the test cannot pass by catching something else), then calls the real lambda_handler on the real submit route. A SECOND, INDEPENDENT MUTANT was also run, on the Terraform side: a scratch config in the session scratchpad declaring the same data source with a bogus attribute, to test whether `terraform validate` can actually catch an attribute name -- because otherwise my rc=0 on the real config would prove nothing about data.aws_sesv2_email_identity.opalinvest_dev.arn being real.",
+      "expected": "ISOLATION MUTANT: the handler must RAISE instead of returning 201, and must return to 201 once the boundary is restored -- otherwise the five isolation tests would pass for a handler whose email leg never ran at all. TERRAFORM MUTANT: validate must exit non-zero on the bogus attribute.",
+      "observed": "ISOLATION MUTANT: _Boom propagated out of lambda_handler as asserted; the boundary was restored in a finally and the identical call returned 201 again, so the mutant was the cause rather than a coincidence. TERRAFORM MUTANT: rc=1, 'Error: Unsupported attribute ... zzz_no_such_attribute_9999' -- so validate IS schema-aware after init, and the rc=0 on the real config is a MEASURED pass rather than an assumed one. Both mutants ran outside the tracked tree or were restored in a finally; git status --porcelain shows only the three intended files changed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The W-E battery, the pre-existing authz battery and the intake battery were each run repeatedly across the session with identical inputs, no cache provider, and no shared state -- setUp saves and tearDown restores TICKET_DL, TICKET_DEEP_LINK_BASE, the SES client and the table on every test, so no test can leak configuration into another.",
+      "observed": "Identical every time: W-E 19 tests OK rc=0; authz 15 tests OK rc=0; intake 42 passed + 25 subtests rc=0. THE SETUP/TEARDOWN DISCIPLINE IS WHAT MAKES THIS MEANINGFUL RATHER THAN LUCKY: the module holds its config in globals, so a test that set TICKET_DL and did not restore it would make a LATER test's refuse-if-unset assertion pass or fail depending on execution order -- an order-dependent battery reads as stable until the day a test is added.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Creating the distribution list and setting TICKET_DL / TICKET_DEEP_LINK_BASE to real values.",
+      "reason": "The DL's creation is a TENANT-ADMIN act -- no tool in the gateway creates one -- and its AUDIENCE (internal / mixed / client-facing) is an open sovereign question carded to Andrew. Both env slots are declared EMPTY in main.tf on purpose: empty is the configured refusal, not a default."
+    },
+    {
+      "item": "Any audience-dependent body field: title, requester.email, requester.name, requester.firm.",
+      "reason": "The gate's own test -- 'IF A TASK'S OUTPUT WOULD BE BYTE-IDENTICAL UNDER EITHER AUDIENCE ANSWER, IT IS NOT BLOCKED' -- fails for these. Declared in code as DL_NOTICE_DEFERRED beside the WE-4-prohibited set, because the two withholdings have DIFFERENT reasons and collapsing them would lose the distinction at the next edit."
+    },
+    {
+      "item": "The apply: the SES IAM grant, the two env vars, and the new handler bytes.",
+      "reason": "Lambda plane. The apply leg is the laptop's under the envelope law @550b20ec5b. No plan was run and no apply was opened; only read-only terraform (init -backend=false, fmt, validate)."
+    },
+    {
+      "item": "Any bounce/complaint SNS topic, feedback destination, alarm, or monitor.",
+      "reason": "Explicitly NOT cloned from the ported ses.tf. Andrew authorized a NOTIFICATION FEATURE; the 2026-07-28 moratorium is untouched for everything else, and feedback topics would be exactly the banned machinery. 1.0.0_SA_CTO~Z named this as scope guard (a) in both the ruling and the GO."
+    },
+    {
+      "item": "ses:SendEmail (the non-raw action).",
+      "reason": "Deliberately NOT granted. The handler builds a MIME message and calls send_raw_email; an action the code never calls is a grant a later least-privilege sweep cannot justify and will be tempted to keep."
+    }
+  ],
+  "surprises": [
+    "infra/aws/lambda/trade-pipeline/trade-submission-handler/src/config.py:14 bakes DASHBOARD_URL = 'https://trades.opalcapital.com'. PLANE NAMED: this is a REPO read at HEAD; I did NOT read the deployed artifact, so whether the running code carries it is UNMEASURED, not absent. NEVER#23 is explicit that opalcapital.com is not a domain we own -- 'IT IS NOT A VERIFICATION TODO, IT IS SOMEONE ELSE'S PROPERTY'. It is another lane's artifact and I took no action; it is reported because I read that file as the ported shape and it is exactly the failure mode a baked default invites, which is why TICKET_DEEP_LINK_BASE in this build is refuse-if-unset instead.",
+    "The same file's BROKERAGE_EMAILS block carries 'NOTE: Using verified test email while SES is in sandbox mode / TODO: Update to real brokerage emails after SES production access' with all five brokerages pointed at one internal address. SES production access was GRANTED at ~0305Z today (case 178727932800843), so that TODO's precondition is now met and the note is stale. Another lane's call entirely; no action taken.",
+    "The PROOF_OF_SPEC schema's `phase` enum does not fit this TO. Its build values are P1-SCRIPTS..P5-DECOMMISSION, which are MDPF-build-program vocabulary; the two non-build values are for investigations. A D7 ticketing BUILD is neither. I chose P1-SCRIPTS as the least-false (this is a script-layer build) rather than NON-BUILD-OTHER, which would be simply untrue. This is the same Rule-24 exhaustiveness gap the `firm` enum already hit and fixed by adding FABRIC -- whose own schema note says an inexhaustive enum 'forces either a false firm or a permanent violation'. Routed to 1.0.0_SA_CTO~Z as a schema observation; nothing changed.",
+    "CLAUDE.md's Quick-reference names the Terraform binary as `.tools/terraform.exe`. THAT FILE DOES NOT EXIST ON SITE Z. Terraform v1.15.8 resolves on PATH from a winget install instead, which is what this build used. Consistent with the device-agnostic rule (derive, do not hardcode); surfaced because a seat that takes the documented path literally here gets rc=127 and may conclude Terraform is unavailable. No action taken."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-21/laneZ_we_build_ses_first_line_0430-0510Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam service (the mandated FLOOR read on the sending principal)",
+      "invocation": ".tools/comp-iam service opal-ticket-api",
+      "result": "rc=0, and INSUFFICIENT BY ITS OWN DECLARATION -- which is the useful outcome. It printed 'IAM role: (not mapped)' and returned all 13 traced operations as [UNKNOWN], plus its own plane banner ('PLANE: DESIRED (Terraform). This does NOT read live AWS'), 24 unattached policy blocks it has never seen, and 2 unparsed deny statements. ZERO ses operations traced, correctly -- there was no SES code yet. This is CLAUDE.md's documented insufficiency (ii) exactly: the tool can know what a Lambda does and still not say whether any of it is allowed. It is a FLOOR and was treated as one."
+    },
+    {
+      "tool": "aws iam simulate-principal-policy (APPLIED plane, Rule 22a)",
+      "invocation": "--policy-source-arn arn:aws:iam::313476888478:role/opal-ticket-api-role --action-names ses:SendRawEmail --resource-arns arn:aws:ses:us-east-1:313476888478:identity/opalinvest.dev   [ONE resource-arn]",
+      "result": "implicitDeny -- a REAL missing grant, and all three of the instrument's false-deny modes were ruled out before that conclusion was drawn. (1) 2+ ARNs: not applicable, one per call throughout. (2) Conditions: neither statement on this role carries a Condition block, so no --context-entries were needed. (3) Nonexistent action name: ruled out by the separate action-name oracle below."
+    },
+    {
+      "tool": "aws iam simulate-principal-policy (POSITIVE CONTROL, SEPARATE INVOCATION)",
+      "invocation": "same role, dynamodb:GetItem, --resource-arns arn:aws:dynamodb:us-east-1:313476888478:table/opal-tickets",
+      "result": "allowed. THE INSTRUMENT DISCRIMINATES, so the implicitDeny above is a real deny and not a mis-call. Run as its own invocation because a control batched with the target is corrupted by its own presence -- 2+ ARNs silently flips the held one to implicitDeny, which would have disarmed exactly this control."
+    },
+    {
+      "tool": "aws accessanalyzer validate-policy (the ACTION-NAME oracle, + its own negative control)",
+      "invocation": "--policy-type IDENTITY_POLICY on a document naming ses:SendRawEmail ; then, SEPARATELY, one naming ses:ZzzNoSuchActionName9999",
+      "result": "ses:SendRawEmail -> 0 findings (REAL action). Bogus -> ERROR / INVALID_ACTION 'The action ses:ZzzNoSuchActionName9999 does not exist.' NECESSARY because simulate-principal-policy returns implicitDeny for a NONEXISTENT action IDENTICALLY to a real deny -- without this oracle a typo in the action string would be indistinguishable from a missing grant and would send the next engineer hunting a policy gap that does not exist."
+    },
+    {
+      "tool": "terraform (fmt / init -backend=false / validate) + a scratch mutant",
+      "invocation": "terraform fmt -check -diff main.tf ; terraform init -backend=false -input=false ; terraform validate ; then a scratch config in the scratchpad with a bogus attribute on the same data source",
+      "result": "fmt rc=0, init rc=0, validate rc=0 Success. CONTROLLED: the scratch mutant returned rc=1 'Unsupported attribute', proving validate is schema-aware and that data.aws_sesv2_email_identity.opalinvest_dev.arn genuinely resolves rather than merely parsing. NO plan and NO apply were run. Binary note: .tools/terraform.exe does not exist on this box; v1.15.8 resolved on PATH."
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/ticket_center/lambda_function.py infra/aws/lambda/ticket_center/tests/test_we_dl_notice.py",
+      "result": "rc=0, clean for 2 files. Separately measured before it: the edit introduced 4 U+26D4 glyphs into a file that runs on AWS -- the SAME defect this seat fixed at b121c2f26e, same glyph, same file. Caught by an explicit byte-level non-ASCII scan, NOT by the gate, and stripped to 0 non-ASCII / 0 CRLF before committing."
+    },
+    {
+      "tool": "comp-estate --layers (the mandated rung-2 existing-pattern check)",
+      "invocation": ".tools/comp-estate --layers (backgrounded with a 400s cap)",
+      "result": "SUPERSEDED BY A BETTER-GROUNDED ANSWER BEFORE IT RETURNED, and recorded rather than dropped: the existing SES pattern was already located and cited at file:line by 1.0.0_SA_CTO~Z's ruling (comp-find EMAIL_FROM, DENOMINATOR 77 hits / 27,212 files, BANDS DEF=7 SURFACED=30 CONFIG=6 DOC=34 -> trade-pipeline email_utils.py:113-118 + config.py:13 + lambdas.tf:208/243 + ses.tf). The rung-2 obligation is to REUSE the estate's pattern, and it was reused; the layers sweep would have been a second route to a conclusion already held with stronger evidence."
+    }
+  ]
+}
