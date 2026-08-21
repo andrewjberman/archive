@@ -10,6 +10,37 @@
 ⛔ **MORATORIUM: SATISFIED BY EXPLICIT ASK — his verbatim above IS the `# andrew-asked` marker.** And note the shape is already correct by law: this is a **SCHEDULED CHECK**, which is what a production pipeline must be. It is a FEATURE he asked for, not detection machinery.</authority>
 </task_order>
 
+<!-- ==================== WF-5 SOURCING: RULED (c) 00:03Z, 1.0.0_SA_CTO~Z @4000 ==================== -->
+<!--
+✅ WF-5 CUTOFF SOURCING = OPTION (c): add `cutoff_et` to the LIST response at
+   infra/aws/lambda/ticket_center/lambda_function.py:410, mirroring the /submit 201 echo at :355.
+
+⛔ AND THE OBJECTION I RAISED AGAINST IT WAS FALSE ON MEASUREMENT -- MINE, and one `git log` away.
+   I framed (c)'s cost as "one Lambda apply" that "re-opens a laptop apply leg the TO closed."
+   MEASURED: that file ALREADY CARRIES THREE UNAPPLIED W-A COMMITS -- 81c502cff2, 9121a55330,
+   b121c2f26e. THE LEG IS ALREADY OPEN. (c) IS ONE TOKEN JOINING A QUEUE, NOT A NEW LEG.
+   I recommended (c) correctly and priced it wrong, having never asked what else was pending on the
+   file I was pricing.
+
+✅ AND THE FILE ALREADY ARGUES FOR (c) IN ITS OWN WORDS -- :354, verbatim:
+   "carried on the 201 so the portal renders it from the response and never re-states a literal time."
+   THAT IS WF-5's CRITERION, ALREADY RATIFIED AND ALREADY SHIPPED FOR THE PORTAL (@1fd9ef2750).
+   The sweep is simply a SECOND CONSUMER with the identical need, so (c) EXTENDS AN ESTABLISHED
+   PATTERN RATHER THAN MINTING ONE -- build-ladder rung 2, and the reason (c) is not merely the best
+   of three but the only option consistent with the file's own stated intent.
+
+(b) `get-function-configuration` per pass: RETAINED AS FALLBACK ONLY if the apply ever slips past the
+   point where the sweep must run. Not wrong -- it reaches into the CONTROL plane for a BUSINESS
+   value, ~168 calls/day on a live client-facing path, where (c) delivers the same value on the DATA
+   plane, free, with a fetch the sweep already makes.
+(a) config literal: EXCLUDED BY CRITERION -- it IS the second source WF-5 exists to prevent.
+
+⛔ ZERO URGENCY, AND THAT IS RULED: DO NOT OPEN AN APPLY FOR THIS. (c) rides the W-A apply --
+   WA-6's grant FIRST, the §6a discriminating print, the comp-blast read before the apply. The
+   detection is inert, the cutoff is INJECTED, and the wiring waits on W-E's audience answer
+   regardless. Nothing is blocked by leaving this queued.
+-->
+
 <!-- ==================== CROSS-TO GATE (RULED 23:33Z, 1.0.0_SA_CTO~Z @3854) ==================== -->
 <!--
 ⛔ **W-F's DELIVERY LEG IS GATED ON W-E's AUDIENCE DECISION.** Named as a CROSS-TO GATE rather than
