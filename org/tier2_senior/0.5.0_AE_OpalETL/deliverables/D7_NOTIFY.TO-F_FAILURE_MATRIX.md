@@ -155,6 +155,24 @@ An uncaught exception would log `intake pass exit 1` (the wrapper captures `%ERR
 **absence across the complete record is positive evidence the wedge has not occurred in production**,
 not merely an absence of reports.
 
+**APPENDED 2026-08-21T10:1xZ AFTER `2.0.0_SA_COO~Z`'s VALIDATION -- THE SEVERITY ABOVE WAS TOO
+GENEROUS TO ITSELF, AND THE CORRECTION MATTERS TO THE DECISION SITTING ON THIS FINDING.** They
+re-derived the de-escalation at source rather than accepting it, and it **holds**: `:389` is the only
+write, `_now()` is a call and not a body read, **0 request-body reads in the create range**, 12
+`created_at` hits of which exactly 1 is a write, and the other table writers (`update_item` on
+claim/complete) never touch it. **The API cannot produce the malformed stamp.**
+**BUT THAT PROVES ONLY THAT *THIS LAMBDA* NEVER WRITES A BAD STAMP. IT CANNOT PROVE NOTHING ELSE
+DOES.** A **direct table write** -- a backfill, a migration, a console edit, a second producer --
+lands a row that never passed `_now()`.
+>> **SO THE ACCURATE SEVERITY IS NOT "LOW LIKELIHOOD": IT IS *UNREACHABLE THROUGH THE PRODUCT
+SURFACE, REACHABLE THROUGH ANY OPERATOR OR MIGRATION PATH*. Latent and one manual write away -- and
+a manual write against the ticket table is exactly the sort of thing someone does DURING AN
+INCIDENT.** The wedge is therefore **anti-correlated with the moment you can afford it**: the
+conditions that produce the bad row are the conditions under which the buzz leg going permanently
+dark costs the most. *(Their derivation, recorded here because it strengthens a finding of mine that
+is currently in front of the gate owner as a decision -- and because "low likelihood" was the phrase
+that would have made the decision look easier than it is.)*
+
 **RECOMMENDED REMEDY (not applied — `intake_pass`/`row_contract` are live-production files with a
 5-minute fuse, and the repair is itself a deploy):** make the contract **parse** the stamp instead of
 measuring it. That converts a total wedge into an **already-existing, already-named, already-handled**
