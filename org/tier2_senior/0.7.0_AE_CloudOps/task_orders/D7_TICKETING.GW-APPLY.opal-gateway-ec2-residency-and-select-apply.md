@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO</issued_by>
     <issued_to>0.7.0_AE_CloudOps (EC2 lane; safe-ec2-deploy mechanism)</issued_to>
     <date>2026-08-21</date>
-    <status>staged -- ⛔ ACTIVATION CONDITION MET 2026-08-21 ~0110Z (both commits verified reachable from CLOUD HEAD at my seat: 2b7258f31c rc=0, 90d526c199 rc=0, via MSTR's /integrate merge 8aa7120a09), GO DEFERRED TO THE NEXT WORKING BLOCK for the same reason as its sibling WA-APPLY: site Z's own "nobody is asking for an apply tonight", CTO~Z's word on the hour, and the assignee's board. CADENCE, NOT A GATE. The prerequisite on-box deploy-directory read (the contested /opt/opal-gateway vs /opt/m365-mcp-gateway pair) still comes FIRST -- safe-ec2-deploy needs the right destination, and that read is the LD-0428 item already on 0.7.0's board with no clock. ORIGINAL: ACTIVATES when the SITEZ build commits 2b7258f31c + 90d526c199 are REACHABLE FROM CLOUD HEAD (0.0.0_AB_MSTR's /integrate merge). ZERO URGENCY, no clock (site Z's own word: nobody is asking for an apply tonight; MSTR 63943). TARGET 2 of the D7 pending-apply surface -- a SEPARATE TO on a SEPARATE MECHANISM from D7_TICKETING.WA-APPLY (Lambda/Terraform): "TWO TARGETS ON TWO MECHANISMS ... anyone treating 'the pending apply' as a single act will do half of it." COO GO on activation.</status>
+    <status>staged -- ⛔ ACTIVATION CONDITION MET 2026-08-21 ~0110Z (both commits verified reachable from CLOUD HEAD at my seat: 2b7258f31c rc=0, 90d526c199 rc=0, via MSTR's /integrate merge 8aa7120a09), GO DEFERRED TO THE NEXT WORKING BLOCK for the same reason as its sibling WA-APPLY: site Z's own "nobody is asking for an apply tonight", CTO~Z's word on the hour, and the assignee's board. CADENCE, NOT A GATE. PREREQUISITE DISCHARGED 2026-08-21 ~0240Z: the on-box deploy-directory read is CLOSED by LD-0428 @b3fdc39f55 (0.7.0, executing truth on the box) -- /opt/opal-gateway LIVE, /opt/m365-mcp-gateway ABSENT (unit load=not-found); safe-ec2-deploy's destination is settled and Phase 1's contested-record item is satisfied. See <inherited_defect_on_the_code_page> -- main.tf still names the dead path. ORIGINAL: The prerequisite on-box deploy-directory read (the contested /opt/opal-gateway vs /opt/m365-mcp-gateway pair) still comes FIRST -- safe-ec2-deploy needs the right destination, and that read is the LD-0428 item already on 0.7.0's board with no clock. ORIGINAL: ACTIVATES when the SITEZ build commits 2b7258f31c + 90d526c199 are REACHABLE FROM CLOUD HEAD (0.0.0_AB_MSTR's /integrate merge). ZERO URGENCY, no clock (site Z's own word: nobody is asking for an apply tonight; MSTR 63943). TARGET 2 of the D7 pending-apply surface -- a SEPARATE TO on a SEPARATE MECHANISM from D7_TICKETING.WA-APPLY (Lambda/Terraform): "TWO TARGETS ON TWO MECHANISMS ... anyone treating 'the pending apply' as a single act will do half of it." COO GO on activation.</status>
     <project_code>OPAL_TICKET</project_code>
   </metadata>
 
@@ -47,6 +47,20 @@
     `meta` -> the gateway BOOTS GREEN and ALL SIX MARKS ARE INERT while every check passes. NO
     BOOT TEST REACHES THE SILENT BRANCH -- it is not ruled out, and the proof SAYS SO.
 
+    (2026-08-21, COO) THE SILENT BRANCH IS NO LONGER HYPOTHETICAL -- IT FIRED IN THIS ESTATE
+    LAST NIGHT, ON THE NEIGHBOURING ITEM. Specimen, rung for rung (1.0.0_SA_CTO's D4 finding):
+    TS_HOLDINGS_ENABLED=1 -- DESIRED true; APPLIED true and verified ON THE DEPLOYED PACKAGE BY
+    CodeSha256, so the token is genuinely in the running bytes; the scheduled run GREEN -- and
+    the flag is read into a bool THAT IS NEVER BRANCHED ON, gating a function defined and never
+    called. Zero rows landed and none ever could have. Every rung except EXERCISED passed,
+    EXERCISED was the only one that could discriminate, and nobody ran it.
+    WHY THIS IS A PARAGRAPH AND NOT A FOOTNOTE: "not ruled out" invites a reasonable engineer to
+    price the silent branch as a TAIL RISK and proceed. "It fired here, on the adjacent item,
+    within hours" tells them THE TAIL ALREADY FIRED. Same fact about the world; opposite
+    instruction to whoever runs the boot test. Plan the mark-residency read as work you WILL do,
+    not as a contingency. Raised by 1.0.0_SA_CTO~Z, ferried by 0.0.0_AB_MSTR (64132); site Z
+    correctly declined to edit this TO themselves -- one logical statement, one home.
+
     THE RULE-22a LADDER FOR THIS ITEM, so nobody closes on the wrong rung: DESIRED = 6/6 marks in
     source (AST census, sound at this layer only). APPLIED = the gateway starts with the new
     package (the boot test). EXERCISED = the six tools arrive RESIDENT at a session start with no
@@ -54,6 +68,51 @@
     (they run it and report). 6/6 at the AST layer certifies the MARKS, NOT the residency. This
     TO does NOT close the exercised rung and declares it.
   </context>
+
+  <inherited_defect_on_the_code_page>
+    (2026-08-21, COO -- placed here per 0.0.0_AB_MSTR 64208, Andrew-direct at the MSTR~Z terminal
+    ~0255Z: "you should definitely mention this about the main.tf:191 to MSTR on the laptop
+    though". Re-derived at the COO seat before placing; both claims confirmed at source.)
+
+    infra/aws/terraform/opal-gateway/main.tf carries TWO stale references inside user_data, and
+    they CONTRADICT the on-box truth this TO's own Phase 1 prerequisite just established:
+      :191  install -d -o ec2-user -g ec2-user /opt/m365-mcp-gateway     <- CREATES the dead path
+      :193  "... and deploy/m365-mcp-gateway.service (binds 0.0.0.0:8080)"  <- DANGLING CITATION
+    MEASURED AT THE COO SEAT: infra/aws/ec2/m365-mcp-gateway/deploy -> ABSENT. The real unit is
+    infra/aws/ec2/opal-gateway/deploy/opal-gateway.service -> EXISTS (950 B). And LD-0428
+    (@b3fdc39f55, 0.7.0's on-box read) settled the contested pair: /opt/opal-gateway is LIVE,
+    /opt/m365-mcp-gateway is ABSENT with its unit load=not-found.
+
+    ⛔ WHY IT SURVIVED EVERY CHECK, AND IT IS THE SHARPEST PART (site Z's mechanism, 64208):
+    USER_DATA EXECUTES ONLY ON FIRST BOOT, AND THE CUTOVER DELIBERATELY DID NOT REPLACE THE
+    INSTANCE (main.tf:60-65 -- "The EC2 INSTANCE is NOT replaced"). So the one block the rename
+    left stale is EXACTLY THE ONE BLOCK ITS OWN EXECUTION MODEL COULD NEVER EXERCISE, and the
+    single event that WOULD execute it -- an instance replacement -- is precisely the event the
+    cutover was designed to avoid. "A rename verified by what it changes cannot see what it left
+    behind in code that does not run." Plan, live AWS and the running box all agreed because none
+    of them executes user_data on a live instance.
+
+    ⛔ AND THE REMEDY INVERTS THE USUAL ONE: for the other three instances of this class tonight,
+    exercise is CHEAP -- run it. HERE, EXERCISE *IS* THE FAILURE EVENT: exercising user_data is
+    the instance replacement that resurrects the dead path in production. WHEN THE EXERCISE IS
+    THE DISASTER YOU ARE PREVENTING, READING IS THE ONLY AVAILABLE CONTROL. A "verify it on the
+    box" reflex is not merely insufficient here, it is structurally impossible. Fix it on the
+    page, by inspection.
+
+    SCOPE (two lines, one heredoc): :191 install path -> /opt/opal-gateway; :193 reference ->
+    opal-gateway/deploy/opal-gateway.service.
+    ⛔ NOT AUTHORIZED BY THIS TO AND NOT A GATE ON THE APPLY. A TF edit is an APPLY ACT and no
+    existing GO covers it (0.7.0 correctly did not touch it; site Z correctly did not either).
+    It is LATENT -- nothing scheduled replaces that instance -- so it carries NO CLOCK. It is
+    recorded here rather than left on the bus because whoever eventually runs GW-APPLY or any
+    instance rebuild INHERITS it, and a durable artifact beats a transient correction. Route the
+    edit through the normal safe-apply path when an apply window is open; do not fold it into
+    this TO's deploy legs.
+
+    OPEN, DELIBERATELY UNCLASSIFIED: site Z surfaced something about infra/aws/ec2/EC2_MANIFEST.json
+    (Deployment Rule 8) and their frame truncated before the finding. ASK 1.0.0_SA_CTO~Z DIRECTLY
+    -- do not guess it; MSTR explicitly declined to invent it and so do I.
+  </inherited_defect_on_the_code_page>
 
   <compiler_tools_mandate>
     Phase 1: activation ancestry (`git merge-base --is-ancestor` both commits) + the on-box
