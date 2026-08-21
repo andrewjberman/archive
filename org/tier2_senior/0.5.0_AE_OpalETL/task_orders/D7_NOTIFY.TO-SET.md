@@ -32,7 +32,7 @@ Re-point L118 / L411 / TF L237 from *audience*-dependent to **Q3/link-target**-d
 
 **A4. SUBJECT + CTA.** Subject `[<FIRM>] <requester subject>`. CTA: one standard hyperlink, **deep-link to the ticket if a per-ticket route exists, else the list page -- resolved by TO-B's measurement, not by choice.**
 
-<expected_criteria>A-1,A-2,A-3,A-4,A-5,A-6,A-7</expected_criteria>
+<expected_criteria>A-1,A-2,A-3,A-3b,A-4,A-5,A-6,A-7</expected_criteria>
 - **A-1** FIELD SET, exercised on a real row: the released set renders; **a mutant adding `status` FAILS a test asserting the prohibited tuple is absent.**
 - **A-2** SEAM: `notify_dl` takes firm and calls `resolve_recipients`; **no module-scope address is consumed at the send site** (assert by AST, not by reading).
 - **A-3** THE THREE CELLS, each exercised, **both directions**: unconfigured -> `DLAddressUnset`; unknown-firm-with-default -> default; no-match-no-default -> `DLAddressUnset`. **A resolver returning `[]` without raising must FAIL a test.**
@@ -42,7 +42,7 @@ Re-point L118 / L411 / TF L237 from *audience*-dependent to **Q3/link-target**-d
 - **A-4** WE-6 NO-REGRESSION PRESERVED: the email leg erroring still yields **201 + a buzz**; the mutant repointing at the unisolated sender still makes the handler RAISE.
 - **A-5** SUPERSESSION: L469 and L13 corrected; **L132/L135 byte-unchanged** (assert).
 - **A-6** SUBJECT + CTA exercised on a real row; **link target cites TO-B's measurement.**
-- **A-7** Proof instance VALID rc=0 **POSITIONAL**, ids A-1..A-7, `PYTHONIOENCODING=utf-8`, rc unpiped. **A bare-form VALID is not coverage evidence.** Checker-discrimination control run **ON THIS INSTANCE** -- a sibling's run does not discharge it.
+- **A-7** Proof instance VALID rc=0 **POSITIONAL**, ids **A-1,A-2,A-3,A-3b,A-4,A-5,A-6,A-7** (eight, not seven -- A-3b was added after the first cut), `PYTHONIOENCODING=utf-8`, rc unpiped. **A bare-form VALID is not coverage evidence.** Checker-discrimination control run **ON THIS INSTANCE** -- a sibling's run does not discharge it.
 <proof_of_spec><instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_NOTIFY.TO-A_PROOF_OF_SPEC.json</instance_path></proof_of_spec>
 
 ---
