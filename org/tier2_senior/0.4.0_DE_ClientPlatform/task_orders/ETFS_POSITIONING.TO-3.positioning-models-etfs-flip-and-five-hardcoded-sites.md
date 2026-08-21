@@ -9,7 +9,10 @@
 <placement>LAPTOP (Rule 26). Portal is a WORK-SITE, never a base — address it as `git -C portal ...` or a scoped `cd portal && <work> && cd -`, and return to the workspace root. **A lingering portal CWD silently substitutes the wrong repo's git history into evidence pulls, with no error.**</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-21T19:55Z</issued>
-<status>ACTIVE — Half 1 executable NOW; Half 2 anchors on TO-2's contract</status>
+<status>BUILD COMPLETE — cell-level: `ETFS-f-1` DONE (flip renders, exercised) · `ETFS-f-2` DONE (12 in-plane membership sites derive, not 5 — see below) · `ETFS-f-3` PROVEN (Models byte-identical, identical sha256 across all four view modes, mutant-controlled) · `ETFS-f-4` DONE against AE CONTRACT v1 (v1.1 read: moves HOW THE MINT LANDS, not key/shape/AC3) · `ETFS-f-5` UNTOUCHED (0 lines diff, mechanically verified).
+Portal DEV @ee90fa8edbf12dcdfbf64e14389f72251a23c06a — **LANDED LOCAL, rides MSTR's integration window** (`git branch -r --contains` returns EMPTY; a direct push was attempted and correctly BLOCKED by the LD-0367 integrator-only gate). Typecheck rc=0 via `bun run typecheck`, instrument proven able to fail first. proof-of-spec VALID rc=0, 6/6 rows, 0 violations.
+⛔ **NOT YET LIVE END-TO-END, AND THE BLOCKER MOVED WHILE I BUILT:** the `platinum/etfs/*` bucket-policy ARN has LANDED, so the blocker is no longer the S3 grant — it is that the `public-data-router` branch + the `qualified_arn` pin drop are COMMITTED BUT NOT DEPLOYED, so `/api/general/etfs/` still falls through to `/json/`. Verified harmless: `json/etfs/positioning_data.json` is a 404, so the route ERRORS rather than silently serving the MODELS book family under the ETF flip.
+READY FOR DT HANDOFF once the integration push lands (DT's fence condition — `origin/DEV` reads `3ade1aba` or later — is MET by this commit's parent).</status>
 <priority>P1 — SESSION PRIORITY (Andrew-direct 19:3xZ). ⛔ **This is the surface Andrew SEES. PRD s.11.1's DONE is a rendered page, not an artifact.**</priority>
 <authority>PRD s.11.1 (the DONE — the flip, the four funds, Models byte-identical) + s.5 + s.11.4(f). Rule 19: portal main worktree stays on `DEV`, always.</authority>
 <proof_of_spec>
