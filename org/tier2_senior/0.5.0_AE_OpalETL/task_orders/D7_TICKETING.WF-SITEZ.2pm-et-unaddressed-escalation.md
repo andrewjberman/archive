@@ -4,15 +4,128 @@
 <issued_to>0.5.0_AE_OpalETL~Z (engine/runner owner — the build-ladder call below is YOURS as the seat that owns the live runner). Laptop apply leg if the definition rides a Lambda field = via 0.0.0_AB_MSTR~Z ferry.</issued_to>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-20T20:4xZ</issued>
-<status>staged — **BOTH design forks RULED BY ANDREW ~20:50Z @0d82b6ce91 and BOTH SHRINK THIS CUT**: no trading-calendar limb, and ADDRESSED == ACCEPTED/CLAIMED (predicate `status == open`), so **ZERO W-A DEPENDENCY — this no longer sequences behind W-A**. **AND the remaining two are now RULED at the `1.0.0_SA_CTO~Z` gate @c9459dfa2f: WHICH THREAD = INTERNAL by default** (telling the CLIENT we were late is a product decision, carded to Andrew — which also dissolves the client-contradiction risk entirely), **and RE-ESCALATION = ONE DIGEST PER SWEEP**, not N messages. **NO DESIGN QUESTIONS REMAIN.** What is left is engineering: own state key, failure isolation, the cap assertion, one config.</status>
+<status>staged — **BOTH design forks RULED BY ANDREW ~20:50Z @0d82b6ce91 and BOTH SHRINK THIS CUT**: no trading-calendar limb, and ADDRESSED == ACCEPTED/CLAIMED (predicate `status == open`), so **ZERO W-A DEPENDENCY — this no longer sequences behind W-A**. **AND the remaining two are now RULED at the `1.0.0_SA_CTO~Z` gate @c9459dfa2f: WHICH THREAD = INTERNAL by default** (telling the CLIENT we were late is a product decision, carded to Andrew — which also dissolves the client-contradiction risk entirely), **and RE-ESCALATION = ONE DIGEST PER SWEEP**, not N messages. ⛔ **DELIVERY SURFACE: the CHANNEL IS EXCLUDED (settled 21:39Z), the POSITIVE surface is NOT YET NAMED.** Andrew's ~21:35Z ruling makes the "Opal Client Tickets" channel CLIENT-ORIGINATED ONLY; by the gate's own origin axis this escalation is AGENT-CAUSED (it reports Opal's inaction), and the interim is "nothing agent-caused goes in that channel" — so that surface is OUT by ruling, not by caution. **DO NOT BUILD THE DELIVERY LEG until `1.0.0_SA_CTO~Z` names the surface it DOES use** (the detect/deliver seam points at the email DL). The DETECTION half is buildable now. Everything else is unchanged and buildable: predicate, wall-clock cadence, own state key, failure isolation, the cap assertion, one config, no terminal writes.</status>
 <priority>P2</priority>
 <authority>ANDREW-DIRECT 2026-08-20 ~20:45Z, record @11d274f8c2. VERBATIM: *"we need the agent to be messaging on the thread if there is a service request that was issued prior to naive 2p ET, which has still not been addressed by 2p ET. THat is a feature that needs to be worked in."*
 ⛔ **MORATORIUM: SATISFIED BY EXPLICIT ASK — his verbatim above IS the `# andrew-asked` marker.** And note the shape is already correct by law: this is a **SCHEDULED CHECK**, which is what a production pipeline must be. It is a FEATURE he asked for, not detection machinery.</authority>
 </task_order>
 
+<!-- ==================== WF-5 SOURCING: RULED (c) 00:03Z, 1.0.0_SA_CTO~Z @4000 ==================== -->
+<!--
+✅ WF-5 CUTOFF SOURCING = OPTION (c): add `cutoff_et` to the LIST response at
+   infra/aws/lambda/ticket_center/lambda_function.py:410, mirroring the /submit 201 echo at :355.
+
+⛔ AND THE OBJECTION I RAISED AGAINST IT WAS FALSE ON MEASUREMENT -- MINE, and one `git log` away.
+   I framed (c)'s cost as "one Lambda apply" that "re-opens a laptop apply leg the TO closed."
+   MEASURED: that file ALREADY CARRIES THREE UNAPPLIED W-A COMMITS -- 81c502cff2, 9121a55330,
+   b121c2f26e. THE LEG IS ALREADY OPEN. (c) IS ONE TOKEN JOINING A QUEUE, NOT A NEW LEG.
+   I recommended (c) correctly and priced it wrong, having never asked what else was pending on the
+   file I was pricing.
+
+✅ AND THE FILE ALREADY ARGUES FOR (c) IN ITS OWN WORDS -- :354, verbatim:
+   "carried on the 201 so the portal renders it from the response and never re-states a literal time."
+   THAT IS WF-5's CRITERION, ALREADY RATIFIED AND ALREADY SHIPPED FOR THE PORTAL (@1fd9ef2750).
+   The sweep is simply a SECOND CONSUMER with the identical need, so (c) EXTENDS AN ESTABLISHED
+   PATTERN RATHER THAN MINTING ONE -- build-ladder rung 2, and the reason (c) is not merely the best
+   of three but the only option consistent with the file's own stated intent.
+
+(b) `get-function-configuration` per pass: RETAINED AS FALLBACK ONLY if the apply ever slips past the
+   point where the sweep must run. Not wrong -- it reaches into the CONTROL plane for a BUSINESS
+   value, ~168 calls/day on a live client-facing path, where (c) delivers the same value on the DATA
+   plane, free, with a fetch the sweep already makes.
+(a) config literal: EXCLUDED BY CRITERION -- it IS the second source WF-5 exists to prevent.
+
+⛔ ZERO URGENCY, AND THAT IS RULED: DO NOT OPEN AN APPLY FOR THIS. (c) rides the W-A apply --
+   WA-6's grant FIRST, the §6a discriminating print, the comp-blast read before the apply. The
+   detection is inert, the cutoff is INJECTED, and the wiring waits on W-E's audience answer
+   regardless. Nothing is blocked by leaving this queued.
+-->
+
+<!-- ==================== CROSS-TO GATE (RULED 23:33Z, 1.0.0_SA_CTO~Z @3854) ==================== -->
+<!--
+⛔ **W-F's DELIVERY LEG IS GATED ON W-E's AUDIENCE DECISION.** Named as a CROSS-TO GATE rather than
+   a note, because neither TO carried it and a builder cannot see it from inside either lane.
+
+⛔ CORRECTED 23:36Z — MY FIRST VERSION OF THIS BLOCK CONFLATED TWO ORTHOGONAL AXES AND WOULD HAVE
+   DELETED AN OPTION FROM A SOVEREIGN FORK. It cited WE-4 as an AUDIENCE constraint. IT IS NOT.
+   WE-4 VERBATIM: "POINTER-NOT-HOME: the body carries ticket id + deep link + minimal identifying
+   context, and provably NOT the internal audit trail / routing / internal notes (the W-C
+   projection discipline applied to the email surface)."
+   >> THAT IS A RULE ABOUT WHAT GOES IN THE BODY — CONTENT-SCOPE. **CONTENT-SCOPE AND AUDIENCE ARE
+      ORTHOGONAL:** an INTERNAL-audience DL carrying pointer-only content satisfies WE-4 completely,
+      because "do not put the audit trail in an email" is good practice toward internal readers too.
+   >> **NOTHING IN W-E CONSTRAINS THE DL'S AUDIENCE.** Audience appears EXACTLY ONCE in the whole TO
+      (denominator 1, whole-file count) — as open question 2, resolved nowhere.
+   ⛔ MY VERSION CONTRADICTED ITSELF IN TWO ADJACENT SENTENCES ("constrained to be provably not
+      internal" beside "if it resolves internal-or-mixed the collision disappears") AND THE
+      CONTRADICTION WAS THE TELL. Had it stood, a future reader would take it as foreclosing the
+      INTERNAL-AUDIENCE BRANCH — the very branch that makes the collision vanish at zero cost.
+      Caught by 0.5.0_AE_OpalETL~Z @3865, the criterion's author, reading their own TO at source.
+
+THE COLLISION — ONE PREMISE, WHICH IS ALL IT EVER NEEDED:
+  W-F  escalation is INTERNAL by ruling ("telling the CLIENT we were late is a product decision,
+       carded to Andrew").
+  W-E  :37  the DL's AUDIENCE IS UNDETERMINED — open question 2, carded to Andrew.
+  >> THEREFORE **ONLY THE AUDIENCE-DEPENDENT PART** of W-F's delivery leg waits on the answer.
+
+✅ NARROWED 23:42Z (1.0.0_SA_CTO~Z @3923, third narrowing of one ruling in ten minutes) — CUT ON
+   THIS LINE, and the cut is 2.0.0_SA_COO~Z's per their instruction:
+     BLOCKED on the audience answer, AND ONLY THESE:
+         transport binding · recipient resolution · medium-specific formatting
+     FREE, STARTS NOW:
+         the escalation's TRIGGER CONDITION · its DETECTION · its PAYLOAD (see the caveat below)
+   THE TEST, verbatim: "IF A TASK'S OUTPUT WOULD BE BYTE-IDENTICAL UNDER EITHER AUDIENCE ANSWER, IT
+   IS NOT BLOCKED AND MUST NOT BE WRITTEN AS BLOCKED."
+   TRIGGER and DETECTION pass that test cleanly: WHETHER a ticket is overdue (`status == open` at the
+   wall-clock cadence) does not change when the reader changes.
+
+⚠ PAYLOAD — I APPLIED THE TEST RATHER THAN INHERITING THE LIST, AND IT DOES NOT PASS CLEANLY.
+   The FACT SET is audience-invariant: which tickets are overdue, since when, and by how long are the
+   same facts either way. **But FACT SELECTION may not be.** An internal digest would carry routing
+   state (e.g. `claimed_by: none`); a client-facing one plausibly would not — that is the WE-4
+   content-projection concern one level down.
+   >> SO THE CUT IS FINER STILL: **the payload's INVARIANT CORE is FREE and starts now.** If a
+      SPECIFIC FIELD turns out to be audience-dependent, **THAT FIELD waits — not the payload, and
+      certainly not the leg.** Raised rather than silently cut, because declaring free something that
+      is not is the SAME wrong-grain error in the opposite direction.
+
+⛔ THE ERROR SHAPE, and it is why this correction is worth more than the tasks it releases:
+   **A DEPENDENCY STATED AT THE WRONG GRAIN DOES NOT LOOK LIKE AN ERROR — IT LOOKS LIKE CAUTION.**
+   Gating the whole leg reads as prudent, produces no visible defect, and silently holds three tasks
+   that could have run all night. **THE COST IS INVISIBLE AND IS PAID IN IDLE TIME, WHICH NO
+   INSTRUMENT IN THIS FABRIC MEASURES.**
+   And per the standing rule against manufactured gates: **A HOLD WIDER THAN ITS CAUSE IS A
+   MANUFACTURED GATE ON THE EXCESS**, whatever the intent behind it. The wide version was mine in
+   both TOs; the excess held detection and payload on a question that cannot touch them. **THE GATE DOES
+     NOT REST ON WE-4 AND NEVER DID.** WE-4 is a CONTENT-projection criterion and is SILENT on
+     audience; BOTH BRANCHES OF THE FORK REMAIN LIVE.
+
+RESOLUTION IS ANDREW'S, NOT THE GATE'S:
+  DL resolves INTERNAL-or-MIXED  -> the collision disappears; W-F may ride it.
+  DL resolves CLIENT-FACING      -> W-F's escalation CANNOT ride it and needs a different surface.
+
+⛔ THE DL IS **NOT** NAMED AS W-F's SURFACE. W-F's delivery surface is UNDETERMINED. The phrase in
+   W-F's status -- "(the detect/deliver seam points at the email DL)" -- IS A HINT ABOUT THE SEAM AND
+   WAS MEANT AS ONE. But it is the only surface named in that field and the channel is already
+   excluded by ruling, so a builder reading "do not build until the surface is named" followed
+   immediately by a named surface has been given a direction nobody intended.
+   >> THE GENERAL FORM, from the gate's own author: **A HINT PLACED ADJACENT TO A PROHIBITION READS
+      AS THE EXCEPTION TO IT.**
+
+✅ AND THE GATE DECLINED THE MOVE THAT WOULD HAVE UNBLOCKED ITS OWN LANE, verbatim: "I AM NOT RULING
+   THE AUDIENCE TO UNBLOCK MY OWN LANE. That is the move available to me right now and it is the
+   wrong one -- the audience is carded to Andrew precisely because it decides what a client sees,
+   and unblocking W-F is not a reason to take a decision back from him."
+-->
+
 ## Objective
 At **naive 2p ET**, any service request **issued before 2p ET** that is **still not addressed**
-gets an agent message on the "Opal Client Tickets" thread.
+raises an escalation **to Opal**. ⛔ **THE DELIVERY SURFACE IS RE-OPENED — see the fence below.**
+*(This line originally read "gets an agent message on the 'Opal Client Tickets' thread". That
+surface may now be PROHIBITED by Andrew's ~21:35Z client-originated-only ruling, since this
+escalation is Opal-originated by definition. The DETECTION half is unaffected and buildable; the
+delivery leg waits on `1.0.0_SA_CTO~Z` re-stating which surface "internal" meant — the detect/deliver
+seam already points at the email DL.)*
 
 **"NAIVE 2p ET" matches the estate's existing scheduling grain.** The D7 runner is registered
 `5-min RepetitionInterval, 24x7, naive-local`, and this box's local clock IS ET (measured: runner
@@ -129,10 +242,44 @@ never mask or preempt the buzz path's.** A second duty is fine; **a shared failu
 
 ## ⛔ BINDING DESIGN RULINGS — `1.0.0_SA_CTO~Z` gate @c9459dfa2f / @21bd23d943 (folded ~20:56Z)
 
-**(1) WHICH THREAD — RULED INTERNAL BY DEFAULT.** The escalation says *Opal has not answered* — it
-is **addressed to Opal**. Telling the CLIENT we were late is a **product decision and Andrew's**;
-carded, not assumed. ✅ **This also DISSOLVES the contradiction I flagged:** internal audience means
-the weekend ruling and the client's "next trading day" ack never meet.
+**(1) WHICH THREAD — ⛔ THE CHANNEL IS EXCLUDED. The POSITIVE surface is still to be named.**
+
+✅ **HALF RESOLVED at 21:39Z (`1.0.0_SA_CTO~Z` @3149), and it follows from the gate's OWN axis rather
+than from any inference of mine:** the interim is *"nothing AGENT-CAUSED goes in that channel"*, and
+by the gate's own origin classification **this escalation is agent-caused** (it reports **Opal's
+inaction**; no client act causes it). **So the "Opal Client Tickets" channel is OUT as this feature's
+delivery surface** — that much is settled, and the fence on it is now a RULING rather than a caution.
+
+⚠ **STILL OPEN — WHICH SURFACE IT *DOES* USE.** Excluding one surface does not name the next.
+**`1.0.0_SA_CTO~Z` states the positive surface; the detect/deliver seam points at the EMAIL DL** (and
+the DL's own transport criteria (2) audience and (3) DKIM remain at that gate). **DO NOT BUILD THE
+DELIVERY LEG until the positive surface is named.** *The DETECTION half is unaffected and buildable
+now.*
+
+*Previously ruled:* INTERNAL by default — the escalation says *Opal has not answered*, so it is
+**addressed to Opal**; telling the CLIENT we were late is a product decision, carded to Andrew.
+*(That reading also dissolved the weekend/ack contradiction, since an internal audience never meets
+the client's "next trading day" promise — and that part still holds.)*
+
+⛔ **THE COLLISION (surfaced by `0.5.0_AE_OpalETL~Z` 3127, adjudicated by nobody):** Andrew's ~21:35Z
+ruling makes the "Opal Client Tickets" channel **CLIENT-ORIGINATED ONLY**. **The 2p escalation is
+OPAL-ORIGINATED BY DEFINITION** — its entire content is *"Opal has not accepted this ticket"*, caused
+by **Opal's inaction**, not by any client act. **So IF "internal" meant that channel, this TO's ruled
+delivery surface is now PROHIBITED** — under either available reading of his word. If "internal"
+meant a **different** internal surface (the DL, a staff channel, his DM), nothing changes.
+**A builder reading the pre-21:35Z text would implement the prohibited surface, which is why this is
+fenced here rather than noted.**
+
+>> **THE DISCRIMINATOR THAT MAKES BOTH READINGS COHERENT IS *ORIGIN*, NOT *AUTHORSHIP*.** Every post
+in that channel is authored by an agent — no client has Teams access — so a literal
+"no-agent-posts" reading would take **the new-ticket buzz itself** with it, and the channel was
+created for exactly those buzzes. Under the origin reading, the buzz is not merely permitted, **it is
+the channel's purpose**, because a *client's form submission caused it*.
+
+✅ **AND THE SEAM ALREADY POINTS AT THE ANSWER — the surface Andrew just closed is not the one the
+design wanted.** The gate's own detect/deliver split puts **DELIVERY on the email DL**: the
+escalation **DETECTS on the runner and DELIVERS on the DL**, which satisfies the new ruling **for
+free**. W-E and W-F being one mechanism is what makes this cost nothing.
 
 **(2) ONE CONFIG — the escalation reads the EXISTING `CUTOFF_ET`.** A second `14:00` literal means
 the ack promises the client one boundary while the escalation enforces another. (This is WF-5,
@@ -188,7 +335,7 @@ Neither should be scoped as if the other were optional.
 - **WF-6** NO-REGRESSION: the 5-min buzz path, its cursor, and the exit contract behave unchanged;
   the escalation leg failing must NOT break the buzz leg (exercised, given the runner is live
   production infrastructure).
-- **WF-7** Proof instance VALID rc=0 POSITIONAL, ids WF-1..WF-11 (rc unpiped).
+- **WF-7** Proof instance VALID rc=0 POSITIONAL, ids WF-1..WF-12 (rc unpiped).
 - **WF-8** ⛔ **FAILURE ISOLATION, EXERCISED IN THE EXPENSIVE DIRECTION:** with the sweep leg forced
   to raise (scratch fault injection), **the buzz path still fetches, still buzzes, and still exits
   on its own contract** — the sweep's failure carries its OWN distinct exit code and neither masks
@@ -202,13 +349,18 @@ Neither should be scoped as if the other were optional.
   failing direction: a fixture at/over the cap must make the sweep **declare the truncation
   loudly**, never silently sweep a partial set. *The mechanism whose job is noticing what was
   missed must not be able to miss silently.*
+- **WF-12** ⛔ **THE SWEEP WRITES NO TERMINAL STATE, EXERCISED:** after a sweep pass over an
+  unaccepted ticket, the row's `status` and `closure_reason` are **byte-unchanged** — the sweep
+  escalated and disposed nothing. Mutant: have the sweep set any terminal value → the test
+  FAILS. *(Opal-side ageout is not terminal, and closing on ageout would delete the very signal
+  this feature raises.)*
 - **WF-11** **ONE DIGEST PER SWEEP (gate ruling 4):** N unaccepted tickets produce **ONE** digest
   message carrying its own denominator, not N messages; the ticket's own thread gets ONE marker.
   Exercised with N>1. **Delivery follows the coupling above — the deafness-independent path (W-E),
   not the channel alone.**
 
 <proof_of_spec>
-  <expected_criteria>WF-1,WF-2,WF-3,WF-4,WF-5,WF-6,WF-7,WF-8,WF-9,WF-10,WF-11</expected_criteria>
+  <expected_criteria>WF-1,WF-2,WF-3,WF-4,WF-5,WF-6,WF-7,WF-8,WF-9,WF-10,WF-11,WF-12</expected_criteria>
   <instance_path>org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WF_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
@@ -241,7 +393,21 @@ touches the runner only, **no Lambda leg and no laptop apply**. Coordinate with 
 @0d82b6ce91.*
 </cross_domain_coordination>
 
+## ⛔ THE SWEEP NEVER WRITES A TERMINAL STATE (closure_reason record, ADOPTED @f834702451 21:14Z)
+
+**The ruling names THIS SWEEP as the thing that would misuse the value**, so the guard belongs in
+this TO rather than being discovered at the wiring: the value once called `expired` is **RENAMED
+`requester_unresponsive`** precisely because its **definition is requester-bound** while its old name
+invited *"whoever wires the sweep's terminal handling"* to reach for it as an **Opal-side ageout**.
+
+>> **AND OPAL-SIDE AGEOUT IS NOT TERMINAL.** A ticket nobody has accepted is **not** closed, expired,
+or disposed by the passage of time — **it is exactly the ticket this feature exists to make VISIBLE.**
+**The sweep ESCALATES; it never closes, never sets `closure_reason`, and never writes any terminal
+`status`.** Closing on ageout would delete the very signal the escalation is built to raise, and
+would do it under a value whose definition describes the requester, not us.
+
 ## Do not
+⛔ **The sweep writes NO terminal state and NO `closure_reason` — see above.**
 ⛔ **Do NOT add a trading-calendar limb — that is the "fix" his ruling exists to prevent** (WF-4's
 mutant is now the guard against it). No alarm/monitor machinery — this is a scheduled FEATURE he
 asked for. Do not let the escalation boundary and the client cutoff become two constants. Do not

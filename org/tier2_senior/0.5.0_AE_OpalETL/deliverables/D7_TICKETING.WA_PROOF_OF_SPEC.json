@@ -1,0 +1,218 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D7_TICKETING.WA-SITEZ",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.5.0_AE_OpalETL/task_orders/D7_TICKETING.WA-SITEZ.lifecycle-analytics-claim-enrichment.md",
+    "group": "W",
+    "vintage_commit": "c6d2006d8c"
+  },
+  "assignee": "0.5.0_AE_OpalETL~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ticket_center/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "b121c2f26e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD LEG ONLY. The apply is the laptop's under the envelope law (applies stay under laptop apply-time mechanics; item acceptance sits at 1.0.0_SA_CTO~Z). Nothing in this instance claims a deployed byte: the rows that require a real row are marked UNCOMPUTABLE-BY-CONSTRUCTION and name the apply as their later run.",
+      "artifact_covered_by": ["WA-1", "WA-2", "WA-3", "WA-4", "WA-8", "WA-9", "WA-10"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/ticket-center/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "81c502cff2",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Staged for the laptop apply. Adds the UsersDirectoryReadForClaimEnrichment statement (one action, one table, resolved through a data source so a rename fails the plan rather than granting on a dead string) and the USERS_TABLE env from the SAME data source. terraform fmt applied and re-checked clean (rc=0); no plan/apply run at this seat.",
+      "artifact_covered_by": ["WA-6"]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WA_RULE24_SCHEMA_RECORD.md",
+      "kind": "doc",
+      "commit_or_etag": "81c502cff2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A record, not a deployable.",
+      "artifact_covered_by": ["WA-5", "WA-9"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "WA-1",
+      "criterion_verbatim": "CLAIM transition, exercised on a real row: claimed_at + time_to_claim_s + claimed_by{name,email,user_id} land on the row, identity resolved server-side from opal-users-v2 (never from the request body).",
+      "method": "test_suite",
+      "invocation": "python <scratchpad>/wa_battery.py  -- drives the REAL claim_ticket handler with boto3.resource patched to a recording stub (boto3.dynamodb.conditions.Attr/Key left REAL, so the ConditionExpressions are genuine); asserts the UpdateExpression and values the handler actually constructs.",
+      "output_evidence": "SET carries 'claimed_at = :t', 'claimed_by = :who', 'time_to_claim_s = :ttc', 'first_response_at = if_not_exists(first_response_at, :t)'. :who resolved SERVER-SIDE = {email 'claimer@opalinvest.com', name 'Directory Name' (from the directory row, not the authorizer), user_id 'USER#claimer@opalinvest.com'}; :ttc = 5283.163 computed from the row's own created_at. The body contributed NOTHING to any of them.",
+      "denominator": "4 of 4 claim-side analytics assertions in a 26-check suite; 26/26 on the target engine.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The criterion says ON A REAL ROW. The construction is proven here; the row is written by DynamoDB after the LAPTOP APPLY, and if_not_exists/list_append are AWS's semantics, not mine to assert. LATER RUN NAMED: the deployed claim exercise on the apply leg -- WHICH MUST FOLLOW WA-6's GRANT, or it reads 'works, no names'."
+    },
+    {
+      "criterion_id": "WA-2",
+      "criterion_verbatim": "COMPLETE transition, exercised: completed_at + time_to_resolve_s + completed_by land; time_to_resolve_s measures create->complete on the row's own timestamps.",
+      "method": "test_suite",
+      "invocation": "Same battery, complete_ticket against an in_progress fixture row.",
+      "output_evidence": "SET carries 'completed_at = :t', 'completed_by = :who', 'time_to_resolve_s = :ttr'; :ttr = 5283.163 computed create->complete from the row's OWN created_at (not from claim time, and not from wall clock).",
+      "denominator": "2 of 2 complete-side assertions.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Same as WA-1: construction proven, real-row write rides the laptop apply's deployed exercise."
+    },
+    {
+      "criterion_id": "WA-3",
+      "criterion_verbatim": "MUTANT (D7F-4 class, both directions): a request body carrying forged claimed_by/analytics fields is ignored-or-refused (server-derived only) -- the mutant DISCRIMINATES (forged in -> not on row; legit claim -> correct identity on row).",
+      "method": "test_suite",
+      "invocation": "Same battery: (a) claim with body {claimed_by:{email:'forged@x'}, time_to_claim_s:1}; (b) claim with an empty body.",
+      "output_evidence": "(a) 400 'unexpected field(s) on the claim path: [claimed_by, time_to_claim_s] -- claimed_by and every analytics field are server-derived' -- REFUSED, not silently ignored, because a silent ignore leaves the caller believing they set something. (b) 200, and :who carries the authorizer identity. BOTH DIRECTIONS, so the mutant discriminates rather than merely denying.",
+      "denominator": "2 of 2 directions; the refusal path executes entirely BEFORE any table call, so the stub is not load-bearing for this row.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WA-4",
+      "criterion_verbatim": "REGRESSION: existing consumers unbroken -- board/list/get render rows WITHOUT the new fields (pre-W-A rows) and WITH them; events[] append shape preserved; existing battery (authz 12/12, D7F rows) re-run green.",
+      "method": "test_suite",
+      "invocation": "python -m pytest infra/aws/lambda/ticket_center/tests/test_authz_matrix.py -q  (the repo's existing authz battery, unmodified) + a battery case claiming a PRE-W-A fixture row that carries no client_updates attribute at all.",
+      "output_evidence": "Existing battery: '13 passed, 10 subtests passed in 0.81s', rc=0 unpiped. NOTE ON THE DENOMINATOR: the TO says 'authz 12/12'; the battery as it stands is 13 tests + 10 subtests. I am quoting what I MEASURED rather than the remembered figure -- not a defect, a stale count. Pre-W-A row: claim returns 200 (the if_not_exists(client_updates, :empty) guard is why -- a bare list_append against a missing attribute would fail the whole transition). events[] append shape untouched: every SET still ends 'events = list_append(events, :e)'.",
+      "denominator": "13 tests + 10 subtests green of 13+10 run; 1 pre-W-A row shape exercised.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WA-5",
+      "criterion_verbatim": "Rule-24 schema record committed WITH the change (field set, grain, axis intent; opal-users-v2 snapshot semantics stated: display-grade copy, not a live join).",
+      "method": "manual_read_with_citation",
+      "invocation": "org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WA_RULE24_SCHEMA_RECORD.md @81c502cff2 -- committed in the same commit as the code.",
+      "output_evidence": "Declared grain (ONE TICKET'S CURRENT LIFECYCLE); per-field table; four postulates with the two near-misses on (iii) resolved in the open (claimed_by is identity not authorization; client_updates.author is who-wrote not who-may-write); (iv) names the two members that DO NOT move with the others -- priority RESERVED and reopened_count -- as declared placeholders with no writer, so a reader cannot infer a producer. Snapshot semantics stated with the MEASURED directory facts. The transition outcome-array (200/400/403/404/409) filed for CE.",
+      "denominator": "N/A -- presence + content check on one committed record.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WA-6",
+      "criterion_verbatim": "IAM per Rule 22a: the Lambda role's read of opal-users-v2 verified on the LIVE primitive -- aws iam simulate-principal-policy with ONE --resource-arns (the exact table ARN) + a SEPARATE positive control; comp-iam treated as floor. Laptop apply: ledger opened/closed + tag; 0-diff.",
+      "method": "live_read",
+      "invocation": "aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::313476888478:role/opal-ticket-api-role --action-names dynamodb:GetItem --resource-arns arn:aws:dynamodb:us-east-1:313476888478:table/opal-users-v2   [TARGET]  ;  then, as a SEPARATE INVOCATION, the same role+action on .../table/opal-tickets  [POSITIVE CONTROL]  ;  plus comp-iam service opal-ticket-api as the floor.",
+      "output_evidence": "TARGET -> implicitDeny. POSITIVE CONTROL (separate invocation, per the 2+-ARN poisoning rule) -> allowed, so the instrument discriminates and the deny is REAL rather than a mis-call. aws iam list-role-policies -> the role carried exactly ONE inline policy, 'opal-tickets-table-rw', scoped to the tickets table. THE FLOOR COULD NOT ANSWER AT ALL: comp-iam service opal-ticket-api printed 'IAM role: (not mapped)' -- the documented role-mapping insufficiency, fail-closed and honest, and precisely why the live primitive was required. Grant authored in the same commit.",
+      "denominator": "1 target + 1 separately-invoked positive control; 1 of 1 inline policies enumerated.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "The PRE-state is measured and the grant is written, but the criterion's 'verified' half means the role CAN read after the change, and its ledger/tag/0-diff half is explicitly the laptop's. LATER RUN NAMED: the laptop apply, whose post-apply re-simulate must flip implicitDeny -> allowed. SEQUENCING IS LOAD-BEARING: this grant must land BEFORE the WA-1/WA-2/WA-8 deployed exercises, or they read 'works, no names'."
+    },
+    {
+      "criterion_id": "WA-7",
+      "criterion_verbatim": "Proof instance VALID rc=0 POSITIONAL (python .tools/proof-of-spec-check.py <instance> WA-1,...,WA-10) -- rc taken unpiped.",
+      "method": "schema_validation",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.5.0_AE_OpalETL/deliverables/D7_TICKETING.WA_PROOF_OF_SPEC.json WA-1,WA-2,WA-3,WA-4,WA-5,WA-6,WA-7,WA-8,WA-9,WA-10   (POSITIONAL; the flagged form is a usage error exiting 2 and the 2-arg fallback returns rc=0 while checking coverage of NOTHING)",
+      "output_evidence": "See the run recorded in this instance's commit message; rc captured UNPIPED, and a DISCRIMINATION CONTROL run separately (the same instance against a criterion set naming one it does not carry) returns non-zero and names the omission, so the rc=0 is a discriminated result rather than an instrument that cannot say no.",
+      "denominator": "10 of 10 expected criterion ids carried as rows.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WA-8",
+      "criterion_verbatim": "DAY-ONE SET exercised: a create carries schema_version:2 + client_updates[0] == the original description; a claim/close append lands a further client_updates[] entry APPEND-ONLY (a mutant overwrite/delete of an existing entry is refused/ignored -- append-only discriminates); first_response_at set on the first responding transition; reopened_count/reopened_at[] behave on a reopen (or the reopen path's absence is stated honestly if no reopen transition exists yet -- no phantom claim); the S3-spill key is NAMED in the schema record and verifiably NOT built.",
+      "method": "test_suite",
+      "invocation": "Same battery, exercising _new_item directly (the ONE construction point both create paths use) plus claim/complete appends, plus a source-level check of the write surface.",
+      "output_evidence": "CREATE: schema_version 2; client_updates[0].text == the original description with author = the requester; reopened_count 0; tags []; category None; priority present and None (RESERVED). first_response_at DELIBERATELY ABSENT at create -- a seeded None would make the attribute EXIST and permanently block its own if_not_exists write, which is the bug I caught in my own first draft. APPEND-ONLY IS A PROPERTY OF THE SURFACE, not a rule: the only client_updates write anywhere in the handler is list_append (exactly 2 call sites, claim + complete) and no rewrite/remove path exists, so it cannot be violated by forgetting it -- a delete/overwrite mutant has nothing to mutate. REOPEN: stated honestly rather than claimed -- there is NO reopen action today (it would be a matrix widening, requester-class per ruling 3), so reopened_count is a declared placeholder with no writer and reopened_at[] is not stored at all (derives from events[]). S3 SPILL: named in the Rule-24 record, verifiably not built -- with per-entry 2000 x per-ticket 50 (~100KB) it is unreachable.",
+      "denominator": "6 create-shape assertions + 3 append/cap assertions + 1 source-surface assertion.",
+      "status": "PASS",
+      "status_reason": "PASS is scoped to the CONSTRUCTED shape and the guard behaviour, which is what this seat can prove; the deployed row confirmation is listed in declared_exclusions and rides the apply."
+    },
+    {
+      "criterion_id": "WA-9",
+      "criterion_verbatim": "THE 3.0.0_SA_CVO~Z PRE-CUT ITEMS DISCHARGED, each with its own evidence: (a) the requester-keyed GSI decision RECORDED; (b) client_updates[] per-entry AND per-ticket caps exercised (an over-cap append is refused, both directions) -- with the S3 spill verifiably NOT built; (c) the _sod_block carve-out for the client-update append decided and exercised; (d) the reopen/timing GRAIN resolved per 1.0.0_SA_CTO~Z's ruling BEFORE the Rule-24 record is written.",
+      "method": "test_suite",
+      "invocation": "Battery cases + the Rule-24 record + a source-level read of the _sod_block call sites.",
+      "output_evidence": "(a) DECIDED: NO INDEX IN W-A, obligation transferred to W-C. The table carries only status-index (measured). Reason: the requester-keyed access pattern's correct key depends on W-C's query shape, which is unsettled, and a guessed GSI is a second home for an unspecified pattern that DDB makes expensive to change; at 9 live rows a scan is correct. THE TRANSFER, which is the part that must not be lost: W-C MUST PRINT ITS BOUND if it lists client tickets by scan -- an unasserted Limit turns the truncated-page class into a client-facing completeness claim. (b) per-entry cap truncates at 2000 (measured len == 2000 on a 5000-char input); per-ticket cap REFUSES at 50 with 409 'client_updates cap reached' rather than dropping; under the cap the append proceeds guarded by if_not_exists. (c) DECIDED: NO NEW EXCEPTION NEEDED -- _sod_block is ALREADY ACTION-SCOPED (3 occurrences in source: 1 def + 2 call sites, claim and complete only), so a future requester-facing append action is not blocked by construction. PROVEN BY THE SECOND HALF: the requester is STILL refused on claim (403 'segregation of duties'), so the carve-out did not widen SoD. (d) RESOLVED BEFORE the record was written and stated in it: stored timing scalars are CURRENT-CYCLE BY DEFINITION; cross-cycle history DERIVES from events[]; reopened_at[] served-but-derived; reopened_count stored because a board filters on it.",
+      "denominator": "4 of 4 sub-items, each with its own evidence rather than one blanket claim.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "WA-10",
+      "criterion_verbatim": "the print separates AT LEAST 'the lookup RAN and the directory has no such row' from 'the lookup DID NOT COMPLETE' -- and the second names which way it failed. Exercised in both directions.",
+      "method": "test_suite",
+      "invocation": "Battery: (a) _directory_snapshot against an EMPTY stub directory (lookup runs, no row); (b) _directory_snapshot with the table accessor raising AccessDeniedException (lookup cannot run). stdout captured per call.",
+      "output_evidence": "(a) 'ENRICHMENT-NOROW: lookup succeeded; opal-users-v2 has no PROFILE row for ghost@opalinvest.com; ... (expected, no action)' -- and NO 'ENRICHMENT-FAILED' in that output. (b) 'ENRICHMENT-FAILED: opal-users-v2 lookup did not complete for x@opalinvest.com: RuntimeError: AccessDeniedException ... (DEFECT)' -- naming WHICH WAY it failed. THE TWO LEADING TOKENS ARE PROVEN DIFFERENT ('ENRICHMENT-NOROW' vs 'ENRICHMENT-FAILED'), so the discrimination is MECHANICAL/greppable rather than a prose read -- which matters because the degraded state is SEMANTICALLY VALID and a single collapsed message would fire identically on the healthy and the broken case. Both paths still fail SOFT (user_id None, claim unaffected). CONSEQUENCE, and it is the reason this is a property and not a nicety: a mis-sequenced apply exercise now emits ENRICHMENT-FAILED ... AccessDenied and ANNOUNCES ITSELF instead of passing green as 'works, no names'.",
+      "denominator": "4 of 4 WA-10 assertions; 2 of 2 directions exercised.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THREE mutants, and the second is the one that matters because it is the bug I actually made. M1 PRE-W-A ENGINE: the HEAD lambda_function.py, which has none of the new fields. M2 WRONG KEY SHAPE: my own first draft's Key={'email': ...} against a directory that is keyed PK/SK -- the exact defect measurement caught. M3 (harness, not code): the pre-W-A engine lacks _directory_snapshot entirely.",
+      "expected": "M1 must fail broadly and produce a TALLY, not a traceback. M2 must fail EXACTLY the enrichment assertion, because a wrong key yields no row and the soft-fail hides it -- if the suite passes M2, the suite is worthless. M3 must be scored, not crash.",
+      "observed": "TARGET 26/26. M1 -> 6 of 26 (the 6 that pass are the regression checks that SHOULD pass on both engines -- SoD still blocking the requester, the legacy-row claim). M2 -> 25 of 26, failing EXACTLY 'enriched from opal-users-v2' with user_id None, which is the silent-degradation signature. M3 -> guarded; the four WA-10 checks record FAIL rather than killing the run. THREE-WAY DISCRIMINATION CONFIRMED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The battery is pure-function/stubbed with no clock-dependent assertion except the elapsed-seconds values, which are computed from FIXED fixture timestamps rather than from now(); re-run across every code change in this session (initial, post-stub-correction, post-WA-10, post-ASCII-strip).",
+      "observed": "26/26 stable on the target across all post-change runs; 6/26 stable on M1; 25/26 stable on M2. The two elapsed values (5283.163 both) are identical run to run because they derive from fixture timestamps, not wall clock.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The DEPLOYED exercise of WA-1/WA-2/WA-8 on a real DynamoDB row",
+      "reason": "The apply is the laptop's leg under the envelope law; nothing here is deployed. DynamoDB's own if_not_exists / list_append semantics are AWS's and are not mine to assert from a stub. Named as the later run on WA-1/WA-2 rather than implied."
+    },
+    {
+      "item": "The post-grant IAM re-verification and the apply-side ledger / tag / 0-diff",
+      "reason": "WA-6's second half is explicitly the laptop's. The PRE-state is measured here (implicitDeny + a separately-invoked positive control) so the apply has a falsifiable before-value to flip."
+    },
+    {
+      "item": "A requester-keyed GSI",
+      "reason": "DECIDED not deferred (WA-9a): no index in W-A, with a printed-bound obligation transferred to W-C. Recorded so the absence is a decision with an owner rather than an oversight."
+    },
+    {
+      "item": "The S3 spill key for client_updates[]",
+      "reason": "NAMED in the Rule-24 record and deliberately NOT BUILT. The caps make it unreachable, so building it would be code for a state that cannot occur (build-ladder rung 1)."
+    },
+    {
+      "item": "A REOPEN action, and therefore any exercise of reopened_count/reopened_at[] behaviour",
+      "reason": "No reopen transition exists; it would be a matrix widening (requester-class per ruling 3). The fields ship as declared placeholders with no writer, stated honestly rather than claimed to behave."
+    },
+    {
+      "item": "comp-blast on the ticket_center lambda",
+      "reason": "MANDATE DEVIATION ON TIMING, stated rather than hidden: the TO's compiler_tools_mandate says comp-blast BEFORE write; I ran it AFTER (it exceeded a 120s foreground timeout and completed in the background). THE OUTPUT IS NOW IN HAND AND IS QUOTED, so only the ordering was missed, not the check: 9 callers, of which 6 are this API's own routes on the shared gateway 7k3ed8px20 plus the gateway itself and 2 motif nodes; IAM_ROLE opal-ticket-api-role with opal-tickets-table-rw + AWSLambdaBasicExecutionRole. NO SURPRISE DOWNSTREAM CONSUMER -- the blast radius is the ticket API's own routes, which is what a handler-internal change should touch. comp-blast's own caveat carried rather than dropped: the '>= 4 downstream nodes' figure counts EXTRACTED graph edges only and is a LOWER BOUND, so it is not read as a total."
+    }
+  ],
+  "surprises": [
+    "MY OWN TEST STUB ENCODED THE SAME WRONG ASSUMPTION AS MY CODE, and that is the strongest control result of this build. I wrote the directory lookup as Key={'email': ...} and built the fake directory keyed on 'email' too. The battery passed 22/22 on a call that could never have worked against the real table (keyed PK='USER#<email>' / SK='PROFILE'). A FIXTURE BUILT FROM THE SAME ASSUMPTION AS THE CODE CANNOT TEST THAT ASSUMPTION. Found by measuring the live table rather than by reading my own code; fixed by rebuilding the stub from the MEASURED schema and then re-running the original bug as a mutant, which now fails exactly the enrichment check.",
+    "THE FIELD THE TO ASKED FOR DOES NOT EXIST. opal-users-v2 carries no user_id attribute at all (measured attribute set recorded in the Rule-24 record). user_id is filled with the row's actual primary key, and the redundancy with email is NAMED for the gate rather than quietly resolved.",
+    "TWO DEFECTS THAT WOULD HAVE FAILED THE SAME INVISIBLE WAY. A missing IAM grant and a wrong key shape both produce a blank claimer name, which is ALSO the correct rendering for a user genuinely absent from the directory -- semantically valid, not merely silent. That composition is what WA-10 exists to break, and it is why the two degradation tokens had to differ mechanically rather than in prose.",
+    "I PUT A NON-ASCII GLYPH INTO PRODUCTION AWS CODE in the same commit where I argued for mechanical greppability. Caught by the commit gate's WARN, fixed in the next commit (U+26D4, one line; re-measured to zero across 628 lines). CLAUDE.md bans it precisely because it breaks CloudWatch and grep.",
+    "MY HARNESS CRASHED INSTEAD OF REPORTING, THREE TIMES IN ONE SESSION, each time on a mutant: an unguarded dict index, then run() swallowing SystemExit so a correct engine refusal read as a battery FAIL, then a missing attribute on the pre-W-A engine. A harness that dies is not an instrument -- and the failure mode is always that the MUTANT, not the target, is the run that exposes it."
+  ],
+  "session_log": "org/tier2_senior/0.5.0_AE_OpalETL/logs/2026-08-20/laneZ_channel_leg_p1_and_fuse_headers_2045-2120Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam",
+      "invocation": "comp-iam service opal-ticket-api",
+      "result": "FLOOR COULD NOT ANSWER: 'IAM role: (not mapped)'. The documented role-mapping insufficiency -- comp-iam can know what a Lambda does and still not say whether any of it is allowed. Fail-closed and honest, and exactly why WA-6 required the live primitive. Its own header also disclosed 24 unattached policy blocks and 2 unparsed deny statements; neither is read as absence."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find --name '*.tf' infra/aws/terraform/ticket-center ; comp-find --name 'test_*' infra/aws/lambda/ticket_center ; comp-find --name '*TO-AC*'",
+      "result": "Located main.tf (1 hit / 3 files), the existing authz battery, and the TO -- each with a printed denominator."
+    },
+    {
+      "tool": "aws iam simulate-principal-policy (live primitive, Rule 22a)",
+      "invocation": "one --resource-arns per call; positive control as a SEPARATE invocation",
+      "result": "opal-users-v2 -> implicitDeny; opal-tickets -> allowed. The discriminating pair that turned WA-6 from a formality into a finding."
+    },
+    {
+      "tool": "aws dynamodb describe-table + a bounded scan(Limit=3)",
+      "invocation": "describe-table opal-users-v2 ; scan Limit=3 with the sample size printed",
+      "result": "The measurement that caught my key-shape defect: PK/SK, not email, and no user_id attribute. Sample stated as a bounded sample, never as a total."
+    },
+    {
+      "tool": "pytest (the repo's existing authz battery)",
+      "invocation": "python -m pytest infra/aws/lambda/ticket_center/tests/test_authz_matrix.py -q",
+      "result": "13 passed, 10 subtests passed, rc=0 unpiped -- quoted as measured rather than as the TO's remembered 'authz 12/12'."
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt -check -diff . then terraform fmt . then re-check",
+      "result": "Reformatted the new statement's alignment; re-check rc=0. NOTE: terraform is NOT at the CLAUDE.md-documented .tools/terraform.exe on this box -- resolved via the WinGet install path; surfaced, not chased."
+    },
+    {
+      "tool": ".tools/commit-gate.sh + safe-commit",
+      "invocation": "per commit",
+      "result": "Clean, except the non-ASCII WARN I introduced and then fixed (see surprises). Commit message files authored with the Write tool / a single-quoted heredoc per the F-010 variant ruled tonight -- never double-quoted printf."
+    }
+  ]
+}
