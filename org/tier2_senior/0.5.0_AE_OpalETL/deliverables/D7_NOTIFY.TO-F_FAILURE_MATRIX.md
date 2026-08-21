@@ -232,6 +232,32 @@ monitor, and the second is under moratorium. **This cell's value is that it is n
 of an adjective** — the design said "the next 5-minute fire retries", which is true and reads as
 though the exposure were five minutes.
 
+**CORRECTED 2026-08-21T150437Z -- THE FIGURES ABOVE ARE WRONG AND THEY UNDERSTATE THE PROBLEM BY ROUGHLY 2x.**
+After wiring ACT 4 I re-read the live log, the totals did not reconcile with the elapsed span, and I
+ground-truthed every exit line by parsing its timestamp instead of trusting a `grep -c`:
+
+```
+                     I REPORTED            TRUE (timestamp-parsed)
+first read 10:15Z    110/59  = 34.9%       110/63  = 36.4%
+second   14:14Z      110/63  = 36.4%       110/111 = 50.2%
+NOW                                        116/114 = 49.6%   over 230 passes / 19h
+longest window       26 passes ~130 min    55 passes ~275 min (4.6 HOURS), 05:59 -> 10:29 local
+```
+**THE BUZZ LEG CANNOT SEND ON ROUGHLY HALF OF ALL PASSES, AND THE WORST WINDOW WAS 4.6 HOURS, NOT 2.**
+
+**THE MECHANISM, as far as I can support it: my 14:14Z read returned the 10:15Z FILE CONTENTS.** The
+reported `exit2=63` is exactly the TRUE value from four hours earlier. I have not established why the
+read was stale and I will not invent a cause.
+>> **WHY IT WAS INVISIBLE, which is the part worth keeping: `exit0` was 110 at both reads AND
+GENUINELY 110 at both** -- every pass in that four-hour window was an identity failure, so the one
+quantity that could have exposed the staleness was constant BY COINCIDENCE. **A stale read is
+detectable only when something you re-read actually moved; here the only thing that moved was the
+number I got wrong.** The figures were plausible, moved in the expected direction, and were wrong.
+**IT PROPAGATED** -- 34.9% went to the gate, was quoted back in an acceptance, and was being carried
+toward Andrew as this leg's reliability story. Corrected at the same reach, once.
+*(One adjacency named so it does not become a causal claim: the 4.6-hour window ended at 10:29 local,
+FOUR MINUTES BEFORE the ACT-3 gateway deploy. The recovery was not my deploy.)*
+
 ### FINDING 4 — M5 is unobservable in all four legs, and its instrument is forbidden
 
 Recorded under §0(iv) rather than as a gap to close. **A delivery monitor is exactly what the
