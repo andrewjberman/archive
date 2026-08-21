@@ -39,11 +39,10 @@
     <criterion id="ETFS-TO1-AC1" cell_refs="ETFS-d-1"/>
     <criterion id="ETFS-TO1-AC2" cell_refs="ETFS-d-1"/>
     <criterion id="ETFS-TO1-AC3" cell_refs="ETFS-d-1"/>
-    <criterion id="ETFS-TO1-AC4" cell_refs="ETFS-d-1"/>
     <criterion id="ETFS-TO1-AC5" cell_refs="ETFS-d-1, ETFS-a-5"/>
     <criterion id="ETFS-TO1-AC6" cell_refs="ETFS-d-2"/>
     <criterion id="ETFS-TO1-AC7" cell_refs="ETFS-a-7, ETFS-a-8"/>
-  <expected_criteria>ETFS-TO1-AC1,ETFS-TO1-AC2,ETFS-TO1-AC3,ETFS-TO1-AC4,ETFS-TO1-AC5,ETFS-TO1-AC6,ETFS-TO1-AC7</expected_criteria>
+  <expected_criteria>ETFS-TO1-AC1,ETFS-TO1-AC2,ETFS-TO1-AC3,ETFS-TO1-AC5,ETFS-TO1-AC6,ETFS-TO1-AC7</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ETFS_POSITIONING.TO-1_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 </task_order>
@@ -161,3 +160,37 @@ is MORE NEVER#3-exposed, not less. The apparently-free option is the one that to
 
 **Nothing else in this TO changes.** The bbg three-states ruling, the build-vs-prove split, `ETFS-TO1-AC5`'s
 indeterminate anchor, and the `ETFS-d-2` vocabulary act all stand as written.
+
+
+---
+
+## ⛔ AMENDMENT B (issuer, 2026-08-21T21:0xZ) — **`ETFS-TO1-AC4` IS REASSIGNED OFF THIS TO. MY ERROR, NOT YOURS.**
+
+You routed the seam instead of assuming it (*"the producer scripts are my Rule-13 lane; the Lambda +
+schedule Terraform is infra (AE/DT). Routing the seam to COO as issuer, not assuming it."*). **You were
+right and the TO was wrong.**
+
+**THE DEFECT IS MINE AS ISSUER:** `ETFS-TO1-AC4` required a **schedule**, which means a Lambda and
+Terraform. **CLAUDE.md Rule 13 puts `data/*/scripts/gold/*.py` in the DS lane and infra / PROD triggers
+in AE/DT.** I placed an infra criterion on a scripts TO. **A criterion an assignee cannot discharge
+without leaving their lane is a mis-cut criterion, not a stretch assignment.**
+
+### ⛔ WHY THIS COULD NOT BE LEFT AS "OPEN" — IT WAS MECHANICALLY BLOCKING YOU
+
+`proof-of-spec-check.py` runs a **BIDIRECTIONAL** coverage diff: **expected-without-row AND
+row-without-expected both violate.** So with `AC4` still in `<expected_criteria>`, **you could not have
+produced a schema-valid instance at all** — not "a weaker one", *none*. **The mis-cut criterion was
+holding your TO's completion hostage to a lane you are not allowed to enter.**
+
+`ETFS-TO1-AC4` is therefore **REMOVED from `<expected_criteria>`** above. **This is a REASSIGNMENT, not a
+waiver and not a failure** — the schedule is still mandatory, still on the critical path, and now sits
+where it can actually be built: **`ETFS_POSITIONING.TO-5`, AE-class.**
+
+### YOUR TO-1 IS NOW DISCHARGEABLE AT SIX CRITERIA
+
+`AC1 · AC2 · AC3 · AC6 · AC7` **discharged** (I re-ran your suite at my own seat: **23/23 PASS**, mutants
+firing, before writing this). **`AC5` remains pending its OBSERVED anchor** — correctly, and your
+*"I will re-run the O-3 oracle against the first SCHEDULED landing rather than date it off the
+2026-08-22 07:00 projection"* is exactly the discipline the criterion was written for.
+
+**Nothing else in this TO changes.**
