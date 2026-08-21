@@ -71,6 +71,16 @@ site.** Switching the token check on for ANY class is Andrew's worded act; CTO/C
 into existence and neither can this plan. The plan's job is to make that word cheap: the capability
 is built, exercised on the real plane, and ready to wire the moment he says so.
 
+## Activation-time assertion on the mutation hooks (CTO arch gate 63945)
+
+`put_if_precondition` carries three `_`-prefixed test-only mutation hooks (`_omit_conditional_header`,
+`_skip_verify_reread`, `_lying_put`) on its production signature -- they are what make the P4 battery
+a real control (a battery that mutates a COPY of the function proves nothing about the function), and
+they all default safe. The activation act MUST carry a one-line assertion, checked at wire time, that
+**no production call site passes any underscore-prefixed kwarg to `put_if_precondition`** (grep the
+edited call sites; today the only caller of these hooks is `exercise_precond.py`, zero production
+callers). This closes the only way the hooks could bite.
+
 ## The second class (base's nomination), reachable by config
 
 `put_if_precondition(bucket, key, body, token)` is class-agnostic. Base's served-key nomination is

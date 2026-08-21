@@ -46,16 +46,19 @@ Values: **WINDOW_EXPIRED** · **READ_WINDOW_NULL_REFUSED** · **DIGEST_NULL_REFU
 | (iii) intent | One intent: "the discriminating cause of a PRECONDITION_CHANGED." |
 | (iv) stability -- **BLATANT FAILURE NAMED** | The six codes carry THREE remedy classes under one reused reason, and they DO NOT move together: the three `*_NULL_REFUSED` codes are TOKEN-AUTHORING defects (remedy: fix how the token is built); WINDOW_EXPIRED is a TIMING outcome (remedy: re-read / shorten read-to-act latency); the two `*_412` codes are WORLD-MOVED outcomes (remedy: re-read the new state and retry). This is exactly the axis a stability frame is meant to surface: one reason value presenting three workstreams. It is tolerated ONLY because the detail STRING is a diagnostic annotation, not an enumerated axis a consumer branches on -- and it is the direct evidence for the proposal to base below. |
 
-## Proposal to base (NOT coined here -- reuse-not-re-coin rider)
+## Proposal to base -- RESOLVED (base spec cert 63913, S5 0.1.2 @c67ef52c1a; CTO concur 63945)
 
-S5 sec.2 gives TRANSACTION exactly {PRECONDITION_CHANGED, LEASE_NOT_VALID}. The three
-`*_NULL_REFUSED` cases are a token-INADMISSIBILITY class whose remedy differs from a
-precondition-that-changed (Axis B (iv)). Coining a new reason locally would violate the rider, so it
-is RECORDED as a proposal for base to weigh at the schema act: **add a distinct TRANSACTION reason
-(candidate name `TOKEN_INADMISSIBLE`) for the malformed/absent-field token**, leaving
-PRECONDITION_CHANGED for WINDOW_EXPIRED + the two 412 (the genuine "world moved / read too old"
-cases). Until base rules, the implementation reuses PRECONDITION_CHANGED and carries the
-discriminator in `detail` -- correct-but-coarse, and flagged as such.
+The proposal is ruled, and the Axis-B(iv) finding was correct. This record originally proposed a
+distinct TRANSACTION reason (candidate `TOKEN_INADMISSIBLE`) for the null/malformed-field cases.
+**Base ruled AGAINST that homing and FOR a cleaner one: the three `*_NULL_REFUSED` cases are a
+BUNDLE-SHAPE defect and home at `(COMPILATION, BUNDLE_MALFORMED)`, NOT under TRANSACTION.** The
+reasoning (CTO's remedy-by-gate argument, applied): a malformed bundle's remedy is FIX-THE-CALLER,
+which has no business inside the retry-or-escalate TRANSACTION gate -- minting `TOKEN_INADMISSIBLE`
+under TRANSACTION would have put two remedies behind one gate. `PRECONDITION_CHANGED` stays reserved
+for the genuine world-moved / read-too-old cases (WINDOW_EXPIRED + the two 412s). The implementation
+now emits `(COMPILATION, BUNDLE_MALFORMED)` for the three null cases and `(TRANSACTION,
+PRECONDITION_CHANGED)` for the rest -- three `detail` sub-codes under each of the two reasons, so the
+stability defect Axis B (iv) named is resolved: each reason now carries ONE remedy class.
 
 ## Token census (word-boundary occupancy over the canon surfaces, run 2026-08-20)
 

@@ -58,31 +58,40 @@ import json
 from datetime import datetime, timezone
 from typing import Any, Callable, Optional
 
-# --- The typed rejection vocabulary (S5 sec.2 -- REUSED, not re-coined). -------------------
+# --- The typed rejection vocabulary (S5 sec.2 @ 0.1.2 c67ef52c1a -- REUSED, not re-coined). --
 # gate x reason, two fields, because one flat enum mixes WHERE it failed with WHY.
+# TRANSACTION/PRECONDITION_CHANGED = a WORLD-MOVED / read-too-old outcome (retry-or-escalate):
+#   the expired window + the two 412s.
 GATE_TRANSACTION = "TRANSACTION"
 REASON_PRECONDITION_CHANGED = "PRECONDITION_CHANGED"
+# COMPILATION/BUNDLE_MALFORMED = a FIX-THE-CALLER (bundle-shape) defect: a null/unparseable token
+# field. Base ruled (CRO spec cert 63913, S5 0.1.2) that the *_NULL_REFUSED cases home HERE, not
+# under TRANSACTION -- a fix-the-caller remedy does not belong in the retry-or-escalate gate. This
+# resolves the Axis-B(iv) stability finding in the Rule-24 record.
+GATE_COMPILATION = "COMPILATION"
+REASON_BUNDLE_MALFORMED = "BUNDLE_MALFORMED"
 
 # The first-mint sentinel: the token asserts the target is ABSENT and the write must be the
 # first one. Distinct from a null digest (which is a REFUSED token -- see S6 semantics below).
 PRECOND_ABSENT = "ABSENT"
 
-# S6 absence semantics, made explicit as detail codes on a REFUSED token. A null field is NOT
-# "no constraint" -- it is a token we REFUSE to act on. These ride in Rejection.detail; the
-# canonical (gate, reason) stays the reused S5 pair. S5 sec.2 has no distinct TRANSACTION
-# reason for an inadmissible/malformed token; coining one here would violate the CITE-NOT-COPY
-# / reuse-not-re-coin rider, so the discriminator lives in detail and a distinct typed reason
-# (e.g. TOKEN_INADMISSIBLE) is recorded as a PROPOSAL to base in the Rule-24 record, not minted.
-DETAIL_WINDOW_EXPIRED = "WINDOW_EXPIRED"                 # token older than its window at act time
-DETAIL_READ_WINDOW_NULL = "READ_WINDOW_NULL_REFUSED"    # null window -> REFUSED (S6), not "no window"
-DETAIL_DIGEST_NULL = "DIGEST_NULL_REFUSED"              # null digest (and not the ABSENT sentinel) -> REFUSED (S6)
-DETAIL_READ_AT_NULL = "READ_AT_NULL_REFUSED"           # null read_at -> cannot place the read in time -> REFUSED
-DETAIL_ETAG_MISMATCH_412 = "ETAG_MISMATCH_412"          # If-Match rejected: current ETag != token digest
-DETAIL_ALREADY_EXISTS_412 = "ALREADY_EXISTS_412"        # If-None-Match rejected: object exists, not a first mint
+# S6 absence semantics, made explicit as detail codes. A null field is NOT "no constraint" -- it
+# is a token we REFUSE to act on. The detail rides in Rejection.detail; the (gate, reason) is the
+# ratified S5 0.1.2 pair. The three *_NULL_REFUSED codes carry (COMPILATION, BUNDLE_MALFORMED) --
+# fix-the-caller defects (base ruling 63913); the rest carry (TRANSACTION, PRECONDITION_CHANGED)
+# -- world-moved / read-too-old. Three detail codes under each reason.
+DETAIL_WINDOW_EXPIRED = "WINDOW_EXPIRED"                 # token older than its window at act time (TRANSACTION)
+DETAIL_READ_WINDOW_NULL = "READ_WINDOW_NULL_REFUSED"    # null window -> REFUSED (S6) (COMPILATION)
+DETAIL_DIGEST_NULL = "DIGEST_NULL_REFUSED"              # null digest (and not the ABSENT sentinel) -> REFUSED (COMPILATION)
+DETAIL_READ_AT_NULL = "READ_AT_NULL_REFUSED"           # null/unparseable read_at -> REFUSED (COMPILATION)
+DETAIL_ETAG_MISMATCH_412 = "ETAG_MISMATCH_412"          # If-Match rejected: current ETag != token digest (TRANSACTION)
+DETAIL_ALREADY_EXISTS_412 = "ALREADY_EXISTS_412"        # If-None-Match rejected: object exists, not a first mint (TRANSACTION)
 
-# Plane is carried OPAQUE (CTO bind-time condition 63744): no consumer may parse, branch on,
-# or key off `plane` until the ratified plane enum lands. This module sets it and never reads it.
-PLANE_OPAQUE = "s3-object"
+# The ratified plane + substrate enums (C1 rider landed @6f944857c4). A head-object is a LIVE read
+# of applied AWS state -> plane=APPLIED, substrate=aws. The bind-time condition (CTO 63744) is
+# DISCHARGED by the landing; the module emits the ratified value and still never BRANCHES on it.
+PLANE = "APPLIED"
+SUBSTRATE = "aws"
 
 INSTRUMENT_ID = "precondition_token.put_if_precondition"
 INSTRUMENT_VERSION = "0.1.0-staged"
@@ -212,7 +221,8 @@ def observe(
             "enumeration": enumeration,
             "parse": parse,
         },
-        "plane": PLANE_OPAQUE,  # opaque; never branched on (CTO 63744 bind-time condition)
+        "plane": PLANE,          # APPLIED; ratified enum, never branched on
+        "substrate": SUBSTRATE,  # aws (C1 rider @6f944857c4)
         "population_predicate": population_predicate,
         "denominator": {
             "count": denominator_count,
@@ -320,18 +330,19 @@ def _default_s3():
 
 def _validate_token(token: PreconditionToken) -> Optional[Rejection]:
     """Token admissibility, evaluated BEFORE any store call (S5 sec.1; P2 'rejected before any
-    call'). Null fields are REFUSED per S6 absence semantics -- a null is never read as 'no
-    constraint'. An out-of-window token is PRECONDITION_CHANGED."""
+    call'). A null/unparseable field is a BUNDLE-SHAPE defect -> (COMPILATION, BUNDLE_MALFORMED),
+    fix the caller (base ruling 63913); it is never read as 'no constraint' (S6). An out-of-window
+    token is a read-too-old outcome -> (TRANSACTION, PRECONDITION_CHANGED)."""
     if token.read_window_seconds is None:
-        return Rejection(GATE_TRANSACTION, REASON_PRECONDITION_CHANGED, DETAIL_READ_WINDOW_NULL)
+        return Rejection(GATE_COMPILATION, REASON_BUNDLE_MALFORMED, DETAIL_READ_WINDOW_NULL)
     if token.target_state_digest is None:
-        return Rejection(GATE_TRANSACTION, REASON_PRECONDITION_CHANGED, DETAIL_DIGEST_NULL)
+        return Rejection(GATE_COMPILATION, REASON_BUNDLE_MALFORMED, DETAIL_DIGEST_NULL)
     if token.read_at is None:
-        return Rejection(GATE_TRANSACTION, REASON_PRECONDITION_CHANGED, DETAIL_READ_AT_NULL)
+        return Rejection(GATE_COMPILATION, REASON_BUNDLE_MALFORMED, DETAIL_READ_AT_NULL)
     try:
         read_at = datetime.fromisoformat(token.read_at)
     except (ValueError, TypeError):
-        return Rejection(GATE_TRANSACTION, REASON_PRECONDITION_CHANGED, DETAIL_READ_AT_NULL)
+        return Rejection(GATE_COMPILATION, REASON_BUNDLE_MALFORMED, DETAIL_READ_AT_NULL)
     if read_at.tzinfo is None:
         read_at = read_at.replace(tzinfo=timezone.utc)
     age = (_now_utc() - read_at).total_seconds()

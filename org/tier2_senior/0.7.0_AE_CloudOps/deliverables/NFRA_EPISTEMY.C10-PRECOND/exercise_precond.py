@@ -24,8 +24,10 @@ from precondition_token import (
     DETAIL_ETAG_MISMATCH_412,
     DETAIL_READ_WINDOW_NULL,
     DETAIL_WINDOW_EXPIRED,
+    GATE_COMPILATION,
     PRECOND_ABSENT,
     PreconditionToken,
+    REASON_BUNDLE_MALFORMED,
     _iso,
     _now_utc,
     put_if_precondition,
@@ -208,11 +210,15 @@ class Harness:
         res = put_if_precondition(self.bucket, key, b"B-updated", bad, client=self.s3)
         self.observations.extend(res.observations)
         stored = self._body_of(key)
+        # A null field is a BUNDLE-SHAPE defect -> (COMPILATION, BUNDLE_MALFORMED), base ruling 63913.
         fired = (res.outcome == "REJECTED"
                  and res.rejection is not None
+                 and res.rejection.gate == GATE_COMPILATION
+                 and res.rejection.reason == REASON_BUNDLE_MALFORMED
                  and res.rejection.detail == DETAIL_READ_WINDOW_NULL
                  and stored == b"A-original")
         return {"mutant": "m2 null read_window", "outcome": res.outcome,
+                "gate_reason": f"{res.rejection.gate}/{res.rejection.reason}" if res.rejection else None,
                 "detail": res.rejection.detail if res.rejection else None,
                 "refused_and_unchanged": stored == b"A-original", "FIRED": fired}
 
