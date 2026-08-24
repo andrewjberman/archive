@@ -32,8 +32,8 @@ review window. Three things want to touch it:
 
 | who | what | status |
 |---|---|---|
-| `0.0.0_AB_MSTR~Z` | the **A5 one-expression** null-tolerance fix at `:88` | authorized, lands **after** the 22:00Z fire |
-| **you, this TO** | the additive CHAR field at `:141` | **needs CTO~Z's word** |
+| `0.0.0_AB_MSTR~Z` | the **A5 one-expression** null-tolerance fix | ✅ **LANDED 22:0xZ and EXERCISED on the real 187-row partition (166 constituents derived, no raise)** |
+| **you, this TO** | the additive CHAR field (locate by content, NOT `:141` — A5 moved it) | ⛔ **CTO~Z HAS RULED: A5 FIRST, GICS SECOND. A5 has LANDED, so your slot is OPEN** |
 | you, later | `INGEST-INV-3` — derive `FUNDS` from the config instead of restating it | **stays on A2's trigger** |
 
 ⛔ **TWO HANDS ON ONE PRODUCTION-ON-SAVE FILE IS THE HAZARD, NOT THE EDIT.** `1.0.0_SA_CTO~Z` holds
@@ -56,11 +56,30 @@ you reach that half, use his ruling and tell me.** Do not pre-empt it.
 
 | id | criterion | cell_refs | grounding |
 |---|---|---|---|
-| **`INGEST-TO6-AC1`** | `GICS_INDUSTRY_GROUP_NAME` added to the **per-security CHAR field list** (`etf_daily_pull.py:141`). **ONE field, nothing adjacent** — `INGEST-INV-3` stays on A2's trigger even though it is in the same file and the same hand | `INGEST-T5-1` | **SOURCE** |
+| **`INGEST-TO6-AC1`** | `GICS_INDUSTRY_GROUP_NAME` added to the **per-security CHAR field list** — ⛔ **LOCATE IT BY CONTENT (the `CHAR` list containing `GICS_SECTOR_NAME`), NOT BY LINE NUMBER.** *(This criterion originally said `:141`; A5 shifted the file and that number is now wrong. See the citation note below.)* **ONE field, nothing adjacent** — `INGEST-INV-3` stays on A2's trigger even though it is in the same file and the same hand | `INGEST-T5-1` | **SOURCE** |
 | **`INGEST-TO6-AC2`** | ⛔ **CTO~Z's sequencing word is CITED in your report before the edit** — who else touched the file, in what order, and where your save sits. **Saving is deploying** | `INGEST-T5-1` | **SOURCE** |
 | **`INGEST-TO6-AC3`** | ⛔ **EXERCISED ON A SCHEDULED FIRE, not an ad-hoc run.** The landed `bbg/{as-of}/characteristics.csv` gains the column, `run_manifest.json` reads `run_class: scheduled`, and the field-exception counts are legible. **Report which run you read and how you know it was the scheduled one** | `INGEST-T5-1` | **EXERCISED** |
 | **`INGEST-TO6-AC4`** | The **gold holding row** carries the field, as a **Rule 24 authoring act** with its four-postulate record — ⛔ **a SECOND schema act at a DIFFERENT GRAIN from T2's row, and the two MAY NOT SHARE AN AXIS.** Include the token-hygiene census (`comp-find -i`, denominator printed) | `INGEST-T3-6` | **SOURCE** |
 | **`INGEST-TO6-AC5`** | ⛔ **RE-CHECK THE OVERLAP AT THIS EDIT — this is the hand-off `ETFS_INGEST.TO-5` AC5 named you for, by serial.** `0.4.0_DE_ClientPlatform~Z` measured that `characteristics.csv` carries **`TOTAL_NUMBER_OF_HOLDINGS_IN_PORT` but NOT `FUND_PCT_TOP_TEN_HOLD`** — so the "two fast-moving fields overlap" premise is **HALF TRUE**, and the second is **SOLE-SOURCED** from the constituents leg. *(I relayed that premise into a TO without measuring it; it is one of two relay defects of mine this round.)* **State both fields' post-edit sourcing** | `INGEST-T5-1` | **DATA** |
+
+## AMENDMENT (22:0xZ) -- AC6 ADDED BY CTO~Z's RULING. Tonight's successful capture ARMED the thing your aggregate will consume.
+
+**Measured independently at three seats on `silver/holdings/2026-08-24.parquet` (187 rows):**
+`is_cash` -> **False 110 - None 73 - True 4**. **`SALXX` (STATE STREET INSTL U.S. GOVERNMENT MMKT -- the CASH SLEEVE) is in DIVZ at weight 0.58% and IDVZ at 0.89%, `is_cash=None`, and A5 admitted it into the 166-constituent Bloomberg universe.**
+
+⛔ **A5 IS CORRECT AND IS NOT BEING REVISITED.** Declared-unknown -> INCLUDE is the conservative direction: carry the row forward VISIBLY rather than drop it silently. Had it defaulted the other way the cash sleeve would have vanished without trace and surfaced in a served number next month. **The inclusion is the safety net WORKING.**
+
+> **THE DEFECT IS ONE LAYER UP: the TrueShares silver parser populates `is_cash` for ZERO of its 73 rows.** 39% of the partition is null on the field the downstream filter keys to, while Pathfinder's 114 rows carry it. **That asymmetry is the finding.**
+
+**It is OBSERVATION and INERT today** -- nothing breaks at 07:00; `SALXX US Equity` returns sparse attributes, not an error. **It becomes ARMED ON A NAMED EVENT: the first served aggregate computed from these weights -- which is YOUR cell.** That is why it is an acceptance criterion here and not a floating channel item.
+
+| id | criterion | cell_refs | grounding |
+|---|---|---|---|
+| **`INGEST-TO6-AC6`** | ⛔ **THE AGGREGATE STATES ITS OWN COVERAGE AND ITS OWN DENOMINATOR.** (1) Print **how many of N constituents carried a GICS value and what WEIGHT they represent** -- *a sector split that does not print its own coverage is the exact class this estate legislates against.* (2) **Cash/sleeve rows are classified EXPLICITLY, never by null-inheritance** -- either silver populates `is_cash` for TrueShares, or the aggregate DECLARES its treatment of a null-classification row. ⛔ **WHAT IS PROHIBITED IS A NULL QUIETLY BECOMING A SECTOR.** (3) **Issuer weights DO NOT SUM TO 100** -- measured on tonight's real bronze, **DIVZ 99.80%, IDVZ 99.51%** -- so the rollup carries a residual BEFORE any classification gap is added. **State which denominator you normalise to. Nobody discovers this from the served number.** | `INGEST-T3-6` | **DATA + EXERCISED** |
+
+⛔ **AND THE SILVER `is_cash` GAP IS A SEPARATE CELL -- DO NOT FOLD IT IN AND DO NOT FIX IT IN PASSING.** Your file here is `etf_daily_pull.py`; that gap lives in the silver parser. **Surface it and I will cut it.** *One variable at a time is the entire reason for the A5-first ordering.*
+
+⚠ **AND A CITATION CORRECTION THAT AFFECTS THIS TO: `etf_daily_pull.py:141` WAS MEASURED PRE-EDIT AND IS NOW WRONG** -- A5 shifted the file. **Re-locate by CONTENT (`GICS_SECTOR_NAME` in the `CHAR` list), never by the line number in AC1 or in the oracle table.** A line citation without a vintage is not a citation, and mine had a vintage I did not state.
 
 <proof_of_spec>
   <!-- POSITIONAL invocation, no flag; CHECK THE RC not the output string; take it WITHOUT a pipe.
@@ -71,7 +90,8 @@ you reach that half, use his ruling and tell me.** Do not pre-empt it.
   <criterion id="INGEST-TO6-AC3" cell_refs="INGEST-T5-1"/>
   <criterion id="INGEST-TO6-AC4" cell_refs="INGEST-T3-6"/>
   <criterion id="INGEST-TO6-AC5" cell_refs="INGEST-T5-1"/>
-  <expected_criteria>INGEST-TO6-AC1,INGEST-TO6-AC2,INGEST-TO6-AC3,INGEST-TO6-AC4,INGEST-TO6-AC5</expected_criteria>
+  <criterion id="INGEST-TO6-AC6" cell_refs="INGEST-T3-6"/>
+  <expected_criteria>INGEST-TO6-AC1,INGEST-TO6-AC2,INGEST-TO6-AC3,INGEST-TO6-AC4,INGEST-TO6-AC5,INGEST-TO6-AC6</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ETFS_INGEST.TO-6_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
@@ -80,7 +100,7 @@ you reach that half, use his ruling and tell me.** Do not pre-empt it.
 | premise | the read |
 |---|---|
 | the field is absent today | `head -1` the landed `bbg/{as-of}/characteristics.csv` → **11 columns, no `GICS_INDUSTRY_GROUP_NAME`**; ⛔ **positive control `GICS_SECTOR_NAME` MUST be present** or your read is broken, not the field absent |
-| the CHAR list is at `:141` | `grep -n "GICS_SECTOR_NAME" integrations/bloomberg/pipeline/etf_daily_pull.py` |
+| the CHAR list is locatable **BY CONTENT** (its line number has already moved once tonight) | `grep -n "GICS_SECTOR_NAME" integrations/bloomberg/pipeline/etf_daily_pull.py` |
 | A5 has landed | `grep -n "fillna(False)" integrations/bloomberg/pipeline/etf_daily_pull.py` |
 | the universe derives from the issuer roster | `sed -n '78,92p' integrations/bloomberg/pipeline/etf_daily_pull.py` — this is the half of his word that already exists |
 
