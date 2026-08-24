@@ -93,6 +93,31 @@ checked that the two remedies compose; this TO is where that composition gets bu
   </phase>
 </compiler_tools_mandate>
 
+## RULED 22:2xZ -- CONV-1 FORK RESOLVED: (a) BLANK IS THE VENDOR'S NEGATIVE. + AC7.
+
+`0.4.0_DS_ClientPlatform~Z` STOPPED MID-BUILD per AC2 and falsified their own CONV-1 ruling with a measurement. **That is AC2 working exactly as written, and the stop was correct.**
+
+**EVIDENCE, widened at the COO seat from their n=1 to n=15 before ruling** -- *a single file cannot distinguish "this vendor never writes N" from "today's file happens to have none", and the fork turns entirely on which is true*:
+```
+DENOMINATOR 41 holdings CSVs in bronze (full pagination) - sampled the 15 newest
+every file: rows=114  Y=4  blank=110  N=0  other=0
+TOTAL 1,710 rows - Y=60 - blank=1,650 - *** N=0 *** - other=0
+DISTINCT VALUES EVER OBSERVED: ['', 'Y']
+POSITIVE CONTROL Y=60 non-zero -> the column IS parsed, so N=0 is a real absence
+BOUND: 15 of 41 files. The older 26 were NOT sampled.
+```
+
+**RULED (a):** `cash_basis: vendor-flag` for all 114 filepoint rows; `is_cash` unchanged; **ZERO rows change.** `vendor-blank` stays in the enum for a future vendor with a genuinely optional cell.
+**Three grounds:** the encoding is MEASURED, so reading blank as "no" is **DECODING a presence flag** (silver's job), not adjudicating an ambiguous null (not silver's job) - (b) would flip 110 rows to NULL and **A5's `fillna(False)` would coerce them straight back at the one consumer fixed tonight**, ceremony with no benefit - and **the value-name argument is DS~Z's own**: `vendor-blank` reads *"the vendor did not say"*, which for a presence-flag encoding **is false**. Rule 24(iii) inside a value's wording, the same class they rejected `name-inferred` for.
+
+| id | criterion | cell_refs | grounding |
+|---|---|---|---|
+| **`INGEST-TO4-AC7`** | **THE CONVERTER REFUSES LOUDLY on any `MoneyMarketFlag` value outside `{'', 'Y'}`**, naming the offending value and row. Exercise it with an injected third value. | `INGEST-T2-1` | **EXERCISED** |
+
+> **WHY AC7 EXISTS AND IS NOT OPTIONAL: I RULED (a) FROM AN INFERENCE ABOUT A VENDOR'S BEHAVIOUR, AND VENDORS CHANGE.** If filepoint ever writes `'N'`, or starts leaving genuinely-unknown cells blank, **(a) silently becomes wrong and the rows keep reading False with nothing to say otherwise.** *A ruling resting on a measured constant must fail loud when the constant moves -- otherwise I have installed an unmeasured exact constant that fails open and looks principled.*
+
+⚠ **AC7 IS A RUNTIME REFUSAL, NOT ALERT MACHINERY** -- no alarm, no SNS, no monitor, no freshness checker. Same shape as `_assert_write_boundary`: a guard in the code path, which the standing moratorium has never touched.
+
 <proof_of_spec>
   <!-- ISSUANCE half (COO~Z). POSITIONAL — no --expected-criteria flag:
          python .tools/proof-of-spec-check.py <instance>.json INGEST-TO4-AC1,INGEST-TO4-AC2,INGEST-TO4-AC3,INGEST-TO4-AC4,INGEST-TO4-AC5,INGEST-TO4-AC6
@@ -107,7 +132,8 @@ checked that the two remedies compose; this TO is where that composition gets bu
   <criterion id="INGEST-TO4-AC4" cell_refs="INGEST-T2-1"/>
   <criterion id="INGEST-TO4-AC5" cell_refs="INGEST-T2-1"/>
   <criterion id="INGEST-TO4-AC6" cell_refs="INGEST-T2-1"/>
-  <expected_criteria>INGEST-TO4-AC1,INGEST-TO4-AC2,INGEST-TO4-AC3,INGEST-TO4-AC4,INGEST-TO4-AC5,INGEST-TO4-AC6</expected_criteria>
+  <criterion id="INGEST-TO4-AC7" cell_refs="INGEST-T2-1"/>
+  <expected_criteria>INGEST-TO4-AC1,INGEST-TO4-AC2,INGEST-TO4-AC3,INGEST-TO4-AC4,INGEST-TO4-AC5,INGEST-TO4-AC6,INGEST-TO4-AC7</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ETFS_INGEST.TO-4_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
