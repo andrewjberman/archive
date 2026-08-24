@@ -43,7 +43,7 @@
 | O-2 | `twr_daily` = 9 columns (`r_net`, `r_gross` + provenance) | one-partition schema read (latest `date=`) via pyarrow |
 | O-3 | The gains trio lands NOWHERE (excluded by determination) | `sed -n 44,52p data/assets/scripts/gold/runners_49f/chain_49f_entrypoint.py` + `aws s3 ls .../gold/advi/` `# rail-checked` → 4 prefixes, none for the trio |
 | O-4 | Schwab silver lots + txn tables PRESENT (names only) | `aws s3 ls s3://opal-data-assets/schwab/08335338/silver/` `# rail-checked` → fact_uln/ult/upn/upt/rld/trn 6/6 |
-| O-5 | The publisher's twin set = 11 EMITTERS under `platinum/advi/49financial` | `grep -c '"script":' data/assets/scripts/gold/runners_49f/d_publisher_port.py` |
+| O-5 | ⛔ **CORRECTED (AE~G 66679): NOT 11.** The publisher's pre-state is **12 emitter entries / 15 EMIT twin objects / 10 live objects**; the three grains are distinct and the criterion is baselined on the DERIVED line, not a literal | `grep -c '"script":'` (=12, ENTRIES) **AND** `d_publisher_port.py:566-568`'s printed derived denominator (twins + entries) — quote both, never one as the other |
 | O-6 | `dim_account` (a00) holds Schwab-08335338 accounts ONLY; `dim_account_xref` exists BD-side | a00 partition read + the xref's home per STITCH s.11 #2 |
 
 ## THE DECISION YOU EXECUTE (decomp s.2.0; CTO-confirmed Q-p1; CVO re-derived)
@@ -82,7 +82,7 @@ The projection **CONSUMES THE LIVE CANONICAL TABLES** joined at `(account_id, bu
 | **PRFR1DS-AC10** | Per-relationship paged key; no-key request REFUSES; `hasMoreResults` present | PRF-b-5 | EXERCISED |
 | **PRFR1DS-AC11** | ONE rollup function (comp-find: one definition); relationship→account recompute printed; advisor→firm NEVER computed | PRF-b-7, PRF-inv-3 | SOURCE + EXERCISED |
 | **PRFR1DS-AC12** | No-firm invocation REFUSES rc≠0; firm-pinned reads/writes only (path census printed) | PRF-inv-5 | EXERCISED |
-| **PRFR1DS-AC13** | Every leaf an `EMITTERS` entry (count = 11 + N, N printed); never-blend fixture byte-equal | PRF-c-1, PRF-inv-2 | EXERCISED |
+| **PRFR1DS-AC13** | ⛔ **DENOMINATOR CORRECTED 2026-08-24 ~21:5xZ on `0.7.0_AE_CloudOps~G`'s finding (66679) — "11 + N" WAS STALE AND WOULD HAVE PASSED A MECHANICAL CHECK WHILE BEING FALSE.** Measured pre-state: **12 emitter ENTRIES / 15 EMIT TWIN OBJECTS / 10 LIVE objects** — three grains, and the old wording mixed them (its named oracle `grep -c '"script":'` counts ENTRIES while the criterion said TWINS: Rule 24(ii), two grains on one axis). **Baseline on the publisher's OWN derived denominator, `d_publisher_port.py:566-568`, which is computed from the dict and cannot go stale — print it before and after and name your N new leaves.** Plus: never-blend fixture byte-equal | PRF-c-1, PRF-inv-2 | EXERCISED |
 | **PRFR1DS-AC14** | `comp-pipescript io <script> --pipeline bd` on each new script; commit-gate PASS; Rule 15; `safe-commit.sh` under your author line; proof instance VALID rc=0 positional | PRF-b-1 | SOURCE |
 
 ## CVO-owned commitments recorded here (NOT this lane's): `PRF-e-1` the parity harness on `b-1`'s FIRST emission (report rides the DEV render, no gate); `PRF-f-1` the HAR/PII repo control; the standing `inv-2` control. You trigger them by reporting the first emission to CVO.
