@@ -9,7 +9,7 @@
 <placement>**SITE Z** (Rule 26). ⚠ **LANE, CHECKED AGAINST THE AUTHORITY RATHER THAN ASSUMED:** this TO touches **both** `data/assets/scripts/silver/` **and** `infra/aws/lambda/etfs-pipeline/`. I expected the second to be AE-only under Rule 13 and it is **not** — `.owned-paths.yaml:1661-1663` puts `infra/aws/lambda/etfs-pipeline/**` on lane **`POD4_OR_AE`**, note: *"DS authors producer code, AE deploys; longest-match overrides the `infra/aws/**` AE-only rule."* **So both halves are yours to author. AE still deploys.** *(I nearly surfaced a lane conflict that does not exist; reading `.owned-paths.yaml` instead of my summary of Rule 13 is what settled it.)</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-24T21:3xZ</issued>
-<status>staged — begins on GO</status>
+<status>pending</status>
 <priority>P1 — this is the cell that actually **fills the DIVZ/IDVZ vendor-silver tier**. TO-1 gave us the unified rows; this gives us the Rule-17-strict vendor rows and puts the ruled conventions into code.</priority>
 <authority>Andrew-direct 2026-08-24 word (1) *"design the structure in a manner that renders a consistent output shape"* and word (4) *"ground-up, in pattern ingestion and processing (bronze and silver) layers… from their idiosyncratic shapes, to unified parquet"*. Conventions ruled under TO-2. CLAUDE.md **Rule 17** (silver = dedup + dtype ONLY; never slim, never fillna/dropna/business-filter), **Rule 15** (`from __future__ import annotations`), **Rule 13** + `.owned-paths.yaml:1661` (lane).</authority>
 </task_order>
