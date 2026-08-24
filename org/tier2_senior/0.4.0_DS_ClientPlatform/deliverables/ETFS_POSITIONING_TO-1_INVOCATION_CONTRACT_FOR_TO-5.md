@@ -61,9 +61,25 @@ layer is built for; nothing here needs 3.12 specifically.
 
 `pandas`, `pyarrow`, `boto3` (ambient in the Lambda runtime), and **`lib/trading_calendar.py`**.
 
-⛔ **`trading_calendar` resolution is the one packaging detail that will bite silently.** Both files
-resolve it as: repo-relative `lib/` -> `/opt/python/lib` (layer) -> `from lib import trading_calendar`.
-**Ensure `lib/trading_calendar.py` is on the layer at `/opt/python/lib/`.**
+⛔ **`trading_calendar` must be IMPORTABLE. That is the whole requirement.** Both files resolve it
+as: repo-relative `lib/` -> `/opt/python/lib` (layer) -> bare `import trading_calendar` ->
+`from lib import trading_calendar`.
+
+> **CORRECTED 2026-08-24 — THIS LINE ORIGINALLY READ "Ensure `lib/trading_calendar.py` is on the
+> layer at `/opt/python/lib/`" AND THAT OVERSTATED THE REQUIREMENT.** It named one *implementation*
+> as if it were the *need*, and AE correctly pushed back rather than minting a layer for a 7 KB
+> module: neither existing layer carries it, and packaging it flat at the FUNCTION ZIP ROOT
+> satisfies the same import, because `/var/task` is already on `sys.path` and the **bare** import
+> at `etf_positioning_gold.py:76` resolves there.
+> **VERIFIED BY REPRODUCTION, not by reading sys.path:** both stage files + `trading_calendar.py`
+> flat in one directory, with no repo `lib/` and no `/opt/python/lib` present, imports clean and
+> `calendar_source()` reports correctly.
+> **A layer is needed only if the module must be SHARED ACROSS FUNCTIONS — which was never this
+> contract's reason.** *A requirement stated as a mechanism rather than as a need sends the reader
+> to build the mechanism.*
+> Note also (AE's catch): `lib/` has no `__init__.py`, so the `from lib import ...` fallback relies
+> on namespace packages and does NOT resolve at task root. It does not need to — the bare import
+> catches first. It is retained because it is what carries local QA runs from inside the repo.
 
 `pandas_market_calendars` is **OPTIONAL by design** -- `trading_calendar` falls back to a hardcoded
 NYSE holiday table (2024-2027) when it is absent, and `calendar_source()` reports which one is live.
