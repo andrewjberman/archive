@@ -1,0 +1,267 @@
+{
+  "schema_version": "1.0",
+  "to_id": "D0_GATES.L1L2 (NO TASK ORDER EXISTS -- see declared_exclusions[0]. Work directed by 1.0.0_SA_CTO's D0_PACKET_BRIEF_0.8.0_AE_CloudComp_20260824.md items P1/P2 + DISPATCH_ORDER_20260824.md, and by CTO rulings 66492 / 66554 / 66622. The brief states on its own face: 'This is a BRIEF, not a TO.')",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/ref/DIRECTIVE_EXECUTION_PIPELINE.md",
+    "group": "OTHER",
+    "vintage_commit": "b153edaa67"
+  },
+  "assignee": "0.8.0_AE_CloudComp~F",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/proof-of-spec-check.py",
+      "kind": "script",
+      "commit_or_etag": "1b285eb822",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A repo-local checker invoked by CVO at cert time; it has no deploy target. ON origin/CLOUD: git ls-remote origin refs/heads/CLOUD -> a0643a35fc, and git merge-base --is-ancestor 1b285eb822 a0643a35fc -> YES.",
+      "artifact_covered_by": ["D0GATE-L1-1", "D0GATE-L1-2", "D0GATE-L1-3", "D0GATE-L1-4", "D0GATE-L1-5", "D0GATE-L1-6", "D0GATE-L1-7", "D0GATE-L1-8"]
+    },
+    {
+      "path_or_key": ".tools/to-decomp-ref-lint.py",
+      "kind": "script",
+      "commit_or_etag": "1b285eb822",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repo-local lint invoked from safe-commit.sh; no deploy target. Same ls-remote ancestry as above.",
+      "artifact_covered_by": ["D0GATE-L2-1", "D0GATE-L2-2", "D0GATE-L2-3", "D0GATE-L2-4", "D0GATE-L2-5", "D0GATE-L2-6"]
+    },
+    {
+      "path_or_key": ".tools/tests/test_proof_of_spec_alignment.py",
+      "kind": "test",
+      "commit_or_etag": "1b285eb822",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file; runs from the repo. 19 arms."
+    },
+    {
+      "path_or_key": ".tools/tests/test_to_decomp_ref_lint.py",
+      "kind": "test",
+      "commit_or_etag": "1b285eb822",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file; runs from the repo. 18 arms."
+    },
+    {
+      "path_or_key": ".tools/safe-commit.sh",
+      "kind": "script",
+      "commit_or_etag": "1b285eb822",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The layer-2 wiring block, ANNOUNCE-by-default. bash -n clean; exercised against real staged git state (D0GATE-L2-6).",
+      "artifact_covered_by": ["D0GATE-L2-6"]
+    },
+    {
+      "path_or_key": "org/standards/PROOF_OF_SPEC.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "f4362fc6a0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AUTHORED BY ME, LANDED BY 1.0.0_SA_CTO -- owned-paths refused this path to my lane (lane=ANY_EXEC) and I declined to self-grant via GIT_COMMIT_AUTHOR_OVERRIDE. LOCAL at the time of writing: 0 occurrences of decomp_ref at origin/CLOUD (git show origin/CLOUD:... | grep -c). Rides MSTR integration. Independently re-derived by 3.0.0_SA_CVO (66643): 130/130 live instances VALID, decomp_ref optional at root, additionalProperties intact."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D0GATE-L1-1",
+      "criterion_verbatim": "an instance for a pipeline-bound project is INVALID without a decomp_ref + bidirectional cell-criterion mapping (denominators printed). No VALID instance -> no complete flip.",
+      "method": "schema_validation",
+      "invocation": "python -c \"json.load(open('org/standards/PROOF_OF_SPEC.schema.json'))\" + jsonschema Draft7Validator over the live corpus",
+      "output_evidence": "decomp_ref present in properties; NOT in root required (optional at schema layer, conditionally required by the checker); additionalProperties still false; root required unchanged at 12 fields. Independently re-derived by 3.0.0_SA_CVO 66643: 130 VALID / 0 INVALID over 130 instances.",
+      "denominator": "130 of 130 live instances on disk remain valid",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L1-2",
+      "criterion_verbatim": "a conformant instance -> VALID, with the bidirectional cell-criterion denominators printed",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_proof_of_spec_alignment.py",
+      "output_evidence": "ARM 1 conformant: decomp id space = 4 distinct cell id(s); alignment-forward-1 2/2 criteria carry >=1 cell_ref; alignment-forward-2 3/3 distinct cell_ref(s) resolve; alignment-backward 3/3 declared cell(s) reachable; 0 violations. Denominators asserted as VALUES, not merely present.",
+      "denominator": "4 decomp cells / 3 declared / 2 criteria; battery 19 of 19 arms as expected",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L1-3",
+      "criterion_verbatim": "drop decomp_ref -> INVALID",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_proof_of_spec_alignment.py (ARM 2)",
+      "output_evidence": "mutant drop-decomp_ref: violation raised -- 'the governing TO carries <decomp_ref>, so this instance MUST carry a decomp_ref object'. Arm PASS.",
+      "denominator": "1 of 1 mutant flipped the verdict",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L1-4",
+      "criterion_verbatim": "delete a criterion row -> INVALID (a criterion arriving WITHOUT cell_refs is REFUSED, never retrofitted)",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_proof_of_spec_alignment.py (ARM 3)",
+      "output_evidence": "mutant no-cell_refs: refused with 'carries NO cell_refs -- REFUSED, never retrofitted'; forward-1 denominator moved 2/2 -> 1/2, so the DENOMINATOR tracked the defect and not merely the verdict.",
+      "denominator": "forward-1 fell to 1 of 2 criteria",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L1-5",
+      "criterion_verbatim": "every cell_ref resolves to an id that EXISTS in the named DECOMP.md",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_proof_of_spec_alignment.py (ARM 4)",
+      "output_evidence": "mutant phantom-cell: 'cell_ref FIX-z-9 (cited by [FIX-C2]) does NOT exist in ... DECOMP.md'. The refusal NAMES the citing criterion, so the finding is actionable rather than a bare count.",
+      "denominator": "1 of 3 distinct cell_refs unresolvable; forward-2 2/3",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L1-6",
+      "criterion_verbatim": "every criterion-bearing cell is reachable from some criterion (the BACKWARD direction)",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_proof_of_spec_alignment.py (ARM 5)",
+      "output_evidence": "mutant unreached-cell: 'declared cell FIX-b-2 is named in the TO's <decomp_ref> but NO criterion references it -- the TO claims a cell it never discharges'; backward denominator moved 3/3 -> 3/4. This is the arm the backward direction exists for: a forward-only checker reads this case as perfectly clean.",
+      "denominator": "backward fell to 3 of 4 declared cells",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L1-7",
+      "criterion_verbatim": "if the TO carries no <decomp_ref> (pre-pipeline work completing under its own spec), the checker ANNOUNCES and stays VALID -- no retroactive invalidation",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_proof_of_spec_alignment.py (ARMS 6, 9) + python .tools/proof-of-spec-check.py on the five pipeline-bound live instances",
+      "output_evidence": "ARM 6 pre-pipeline TO -> 0 violations, ANNOUNCE branch stated. Live: D1_CATVIEWS.TO-D1b rc=0 ANNOUNCE and D3_MODELOVERLAY.TO-D3.1 rc=0 ANNOUNCE. Negative controls exist so the gate cannot be a brick that refuses everything.",
+      "denominator": "2 of 5 live pipeline-bound instances take the ANNOUNCE branch",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L1-8",
+      "criterion_verbatim": "UNKNOWN is not PASS -- an unresolvable governing TO must not silently satisfy the gate",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_proof_of_spec_alignment.py (ARMS 7, 8, 9)",
+      "output_evidence": "SELF-FOUND FAIL-OPEN, found by writing the battery and not by reading the code: an unresolvable TO originally produced NO violation, so the gate PASSED ON UNKNOWN -- reachable by writing a bogus to_ref, i.e. the cheapest possible route around the entire gate. Closed: a declared to_ref that does not resolve is always a violation; an id-scan miss on a pipeline-registered project is a violation; on a non-pipeline project it stays announce (ARM 9), so the 125 non-pipeline instances are untouched.",
+      "denominator": "3 arms; 2 fail-closed + 1 scope control",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L1-9",
+      "criterion_verbatim": "the extension must not regress the existing corpus",
+      "method": "command",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> for every org/**/*PROOF_OF_SPEC*.json, rc read via subprocess returncode",
+      "output_evidence": "Exactly 3 instances carry an alignment-class violation -- ETFS_POSITIONING TO-1, TO-2, TO-3, the three CTO ruled on in 66554 (owner COO, back-fill, gate NOT weakened). Remainder: 38 ANNOUNCE, 88 announce-only with no TO resolved, 1 pre-existing artifact-coverage failure unrelated to alignment. Zero regressions attributable to this change.",
+      "denominator": "3 of 130 instances flip; 130 is the instance count after excluding PROOF_OF_SPEC.schema.json itself, which an earlier sweep of mine wrongly counted as a 131st instance",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L2-1",
+      "criterion_verbatim": "a pipeline-registered TO without <decomp_ref> REFUSED",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_to_decomp_ref_lint.py (ARM 1)",
+      "output_evidence": "registered + no decomp_ref -> rc=1. Also exercised on a real staged file in the live repo: a transient D1_CATVIEWS TO with no ref returned rc=1 under ENFORCE and rc=0 under ANNOUNCE; fixture removed afterwards.",
+      "denominator": "battery 18 of 18 arms as expected",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L2-2",
+      "criterion_verbatim": "a non-pipeline TO passes",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_to_decomp_ref_lint.py (ARMS 2, 3, 4, 5)",
+      "output_evidence": "Four independent out-of-scope shapes all rc=0: unregistered project (skip is COUNTED in the denominator line, never silent), a path outside task_orders/, a conformant TO, and ANNOUNCE mode. 'No findings' and 'did not look' do not render identically.",
+      "denominator": "4 of 4 out-of-scope shapes pass for 4 different reasons",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L2-3",
+      "criterion_verbatim": "the refusal names the rule -- it teaches at violation time",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_to_decomp_ref_lint.py (ARM 1, three assertions)",
+      "output_evidence": "Refusal text asserted to contain the RULE ('must carry <decomp_ref>'), the FIX (a literal <decomp_ref> line to copy), the WHY (the choke-point citation DIRECTIVE_EXECUTION_PIPELINE.md:164), and the anti-shortcut clause ('a PIPELINE FAILURE TO SURFACE to COO/CTO, not a reason to cut the TO without one').",
+      "denominator": "4 of 4 content assertions on the refusal",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L2-4",
+      "criterion_verbatim": "with the announce-then-enforce ramp the comp-rail used (NFRA_COMPRAIL)",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_to_decomp_ref_lint.py (ARMS 5, 6)",
+      "output_evidence": "ANNOUNCE default: finding printed, rc=0, and the output states how to arm. The MARKER FILE ALONE flips mode=ENFORCE with no flag passed -- the marker is the authority, not a comment about the marker. Marker created only inside a temp workspace and in one live check that removed it; gate 2 is NOT ARMED.",
+      "denominator": "2 of 2 ramp arms",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L2-5",
+      "criterion_verbatim": "and an audited override marker",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_to_decomp_ref_lint.py (ARM 7)",
+      "output_evidence": "'# pipeline-gate2-override: <reason>' -> rc=0 and an audit line WRITTEN to org/mcp/pipeline-gate2-override.log (asserted by reading the file back, not by trusting the message), plus a printed warning that a repeat override for one intent is a COVERAGE GAP. Extraction is self-contained rather than reusing CS_MSG, which is built only inside the comp-system gate's rc==2 branch -- reusing it would give an override that works on some commits and not others, the dead-escape-hatch defect safe-commit.sh already records at :514.",
+      "denominator": "3 of 3 override assertions",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L2-6",
+      "criterion_verbatim": "a safe-commit gate (same family as commit-gate.sh / owned-paths)",
+      "method": "command",
+      "invocation": "bash -n .tools/safe-commit.sh; then with a real bad TO staged: python .tools/to-decomp-ref-lint.py (no args, exactly as safe-commit invokes it)",
+      "output_evidence": "bash -n clean. Against REAL staged git state the lint derived its own subject from git diff --cached --diff-filter=A: rc=0 ANNOUNCE without the marker, rc=1 with it armed -- so the wiring's rc branch is reachable and the gate is not one that silently never runs. Fixture and marker both removed afterwards.",
+      "denominator": "2 of 2 modes exercised end-to-end on live git state",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted-mutant batteries on both gates: 5 L1 mutants (drop decomp_ref, criterion without cell_refs, phantom cell_ref, unreached declared cell, bogus to_ref) and the L2 defect, each breaking exactly ONE thing; plus negative controls proving neither gate is a brick.",
+      "expected": "each mutant flips its own verdict and moves its own denominator; the unmutated fixture and every out-of-scope shape stay clean",
+      "observed": "L1 19/19 arms, L2 18/18 arms, all as expected. The battery also FOUND a real fail-open in my own build (unresolvable TO passed on UNKNOWN), which was closed before commit -- the battery earned its place by failing.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "both batteries re-run after the ruff fix and after the fail-open closure; the 130-instance corpus sweep run to completion twice (once truncated by timeout, once to completion in background)",
+      "observed": "identical arm counts and identical 3-flip corpus result across runs; fixtures are sealed in temp workspaces so no live-estate edit can move them",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "decomp_ref on THIS instance (the field my own gate adds)",
+      "reason": "OMITTED DELIBERATELY, AND ITS ABSENCE IS MEASURED, NOT ASSUMED. CTO 66622 instructed 'decomp_ref included -- the D0 packet is pipeline-registered'. I checked that premise instead of complying with it, and it does not hold on this fabric: (1) there is NO D0 project JSON in org/projects/ at all (grep for D0*, and a scan of all 326 JSONs for d0_infra/infra_tightening -> 0 matches), so D0 is NOT pipeline-registered -- the 10 registered projects are ADVI_49FSRC, ADVI_COTKEY, ADVI_INSURE, ADVI_PERFRP, ADVI_STITCH, D1_CATVIEWS, D3_MODELOVERLAY, DATA_PIPMAP, ETFS_POSITIONING, MDPF_PROVCANON; (2) there is NO D0 decomp run under workflows/atom_decomposition/runs/ (no d0/infra directory), so there are no cells to cite; (3) there is NO TO addressed to this lane (to-check --all --assignee 0.8.0_AE_CloudComp~F -> 0 active TOs across 2083 scanned), so there is no to_ref and no issuance-half <criterion cell_refs> to join against. Writing a decomp_ref here would mean inventing a decomp path and cell ids -- which is exactly the retrofitted derivation my own layer-1 code REFUSES ('a derived cell_ref makes alignment LOOK satisfied while being FALSE'), and would make my gate pass on a lie authored by the person who wrote the rule against it. Run against my own checker this instance correctly takes the ANNOUNCE branch (no governing TO carrying <decomp_ref> -> pre-pipeline) and is VALID on that basis, which is the honest outcome rather than a manufactured one."
+    },
+    {
+      "item": "the SEATING LINT (a TO commit-lint refusing a new TO addressed to a multi-project instance unless it names a fresh lane)",
+      "reason": "NOT STARTED. The packet and CLAUDE.md Rule 27 both carry it as a CANDIDATE/PROPOSED only; CTO 66492 and 66554 both restate that it is held pending Andrew's word. Implementing a gate without his explicit word is the NEVER rule against agent-manufactured gates."
+    },
+    {
+      "item": "arming pipeline gate 2 (creating org/mcp/pipeline-gate2.enforce)",
+      "reason": "NOT ARMED. The ramp is deliberately a separate reviewable act; the marker was created only inside temp workspaces and in one live check that removed it immediately. Arming is CTO's call, not a side effect of the build."
+    },
+    {
+      "item": "back-filling decomp_ref onto ETFS_POSITIONING TO-1/TO-2/TO-3 instances",
+      "reason": "NOT MINE. CTO 66554 ruled the amendment owner is the ISSUER (COO). I surfaced the retroactive-invalidation finding and did not touch the three instances."
+    },
+    {
+      "item": "a machine-readable per-cell criterion_bearing flag in DECOMP.md",
+      "reason": "CANDIDATE ONLY, NOT STARTED. It would mechanize the backward denominator fully, but it is a COO decomp-authoring change and a Rule-24 schema-enumeration act requiring its own four-postulate record. CTO 66492 recorded it as COO/CVO's call at the next decomp."
+    },
+    {
+      "item": "the mstr-spawn concurrency-cap population repair (CTO 66598)",
+      "reason": "EXPLICITLY OUT OF SCOPE THIS PROJECT. CTO routed it as my NEXT single project under one-project-per-tier-2-seat, sequenced behind this one, and instructed 'do NOT pick this up mid-L1/L2'."
+    },
+    {
+      "item": "the 17 pending TOs on the base 0.8.0_AE_CloudComp serial",
+      "reason": "NOT THIS LANE'S LOAD. The MSTR spawn brief assigns that heap to 2.0.0_SA_COO for triage; I have read none of them."
+    },
+    {
+      "item": "independent re-run of both batteries",
+      "reason": "BY DESIGN NOT THE AUTHOR'S ACT. The packet specifies 'CVO re-runs the mutants independently'; 3.0.0_SA_CVO 66643 has confirmed the schema half and states plainly that the L1/L2 battery re-run is NOT yet done. My arm counts are my own measurement, not a certification."
+    }
+  ],
+  "surprises": [
+    "CTO 66622's premise that 'the D0 packet is pipeline-registered' does not hold: no D0 project JSON exists in org/projects/ (0 of 326), and no D0 decomp run exists. Surfaced to CTO; no action taken beyond declaring the exclusion. This is the second premise about pipeline registration to fail measurement today, after the ETFS TO decomp_ref case.",
+    "The audit-archive-invoker reported at my startup: baseline 2026-08-20T042433Z is 111.8h old with an uncaptured tail, snapshot deferred because this lane is not GOVERNANCE_AUDIT-permitted. Owner 0.7.0_AE_CloudOps, gate 1.0.0_SA_CTO. OBSERVATION only, no action taken.",
+    "org/standards/PROOF_OF_SPEC.schema.json is lane ANY_EXEC, so the tooling lane that owns proof-of-spec-check.py cannot amend the schema that checker validates against. The two-seat split worked correctly here (I authored, CTO landed), and is noted as a structural coupling rather than a defect.",
+    "check-inbox has no ~/bin forwarder on this box (command not found) while 97 of 102 comp-tools resolve bare; the MCP check_inbox path is unaffected. Not chased."
+  ],
+  "session_log": "org/tier2_senior/0.8.0_AE_CloudComp/logs/2026-08-24/session_F_d0_gates_l1l2.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find -i 'decomp_ref' org",
+      "result": "36 hits / 15023 files scanned, banded CONFIG=4 DOC=32. This is what found the ETFS TO-2 instance carrying decomp_ref as PROSE inside spec_ref.doc -- the evidence that the schema's additionalProperties:false had forced a free-text workaround, which shaped the whole layer-1 design."
+    },
+    {
+      "tool": "comp-state",
+      "invocation": "comp-state --self-test",
+      "result": "PASS 4/4 (planted-behind=BEHIND, planted-current=CURRENT, planted-quiet=QUIET, planted-byte-read=COMPLETE) -- the instrument discriminates. Run before trusting any record, per the D0 packet brief s.1."
+    },
+    {
+      "tool": "to-check.py",
+      "invocation": "python .tools/to-check.py --all --assignee 0.8.0_AE_CloudComp~F",
+      "result": "0 active TOs / 2083 scanned / 0 parse errors. The measured basis for declaring that no TO governs this work and therefore no to_ref exists."
+    }
+  ]
+}
