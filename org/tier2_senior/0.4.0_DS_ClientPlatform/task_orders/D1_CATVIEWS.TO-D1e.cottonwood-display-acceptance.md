@@ -5,7 +5,7 @@
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-19T19:35Z</issued>
 <dated>on TO-D1d's rendered view</dated>
-<status>staged -- GATED ON TO-D1d; this row closes D1's DONE definition</status>
+<status>superseded -- by D1_CATVIEWS.TO-R1-DS (cell D1-d-1): the round-1 cut on the CERTIFIED v2 decomp (CVO @60d4e2f1b4); this pre-pipeline TO was STAGED and NEVER STARTED, so it carries no retrofitted decomp_ref. Set by the ISSUER (2.0.0_SA_COO, 2026-08-24 ~20:2xZ).</status>
 <priority>P1-program (the DONE gate -- D1 is not done without it)</priority>
 <authority>D1_ASSET_CATEGORY_VIEWS_PRD.md §6 item 5 + DONE, at dispatch vintage @3e589fa1eb. Placement: EITHER -> LAPTOP by the standing default (read-only S3 + rendered check).</authority>
 </task_order>
