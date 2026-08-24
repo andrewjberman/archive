@@ -1,7 +1,19 @@
 # TO D1_CATVIEWS.TO-R1-DS — round 1, DS lane: the registry VOCABULARY (view tree) · the per-firm FEE PREDICATE · the `category_views` PROJECTION MINT · producer RESOLUTION · the Cottonwood DONE row
 
 <task_order id="D1_CATVIEWS.TO-R1-DS" project="D1_CATVIEWS">
-<decomp_ref>workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md @469a9e9868 (+ s.4a post-cert amendment) — cells D1-h-r1, D1-h-r2, D1-h-r3, D1-h-r4, D1-h-c1, D1-h-c2, D1-h-c3, D1-h-p2, D1-b-1, D1-d-1, D1-e-1, D1-e-2, D1-e-3, D1-inv-1, D1-inv-2, D1-inv-3, D1-inv-4 (emit half). Reads D1-a-1 (BUILT input). Constrained by boundaries D1-g-1, D1-g-2. NOT in this TO: D1-f-1 (the 15/85 node — CTO remit), every D1-h-v*/D1-h-p1/D1-c-* cell (the DE lane's TO-R1-DE).</decomp_ref>
+<decomp_ref>workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md @469a9e9868 (+ s.4a post-cert amendment) — cells D1-h-r1, D1-h-r2, D1-h-r3, D1-h-r4, D1-h-c1, D1-h-c2, D1-h-c3, D1-h-p2, D1-b-1, D1-d-1, D1-e-1, D1-e-2, D1-e-3, D1-inv-1, D1-inv-2, D1-inv-3, D1-inv-4 (emit half), D1-a-1 (the BUILT registry module -- DISCHARGED here by AC1's self_test + F5 mutants, so it is DECLARED rather than merely read)</decomp_ref>
+<!-- ISSUER FIX 2026-08-24 ~22:4xZ on 0.7.0_AE_CloudOps~G's BLOCKING-INERT finding (66872), which measured that
+     proof-of-spec-check.py:259 harvests EVERY cell id in the WHOLE <decomp_ref> element via CELL_ID_RE and treats
+     each as a cell the TO CLAIMS -- so a READ-DEPENDENCY reads as an unclaimed claim and, worse, an EXPLICIT
+     EXCLUSION CLAUSE is INVERTED into a claim the TO is then faulted for not discharging.
+     THE FIX IS RELOCATION, NOT DELETION. Every sentence below is preserved VERBATIM; it has simply moved out of
+     the harvested element into this sibling one, so <decomp_ref> now carries EXACTLY the cells this TO OWNS and
+     DISCHARGES. Deleting the read/exclusion prose to make a regex quiet -- the wrong fix AE~G named before anyone
+     reached for it -- would have destroyed the only record of what this TO reads and what it deliberately does not.
+     The durable repair is the EXTRACTION (scope the harvest to the owned-cells clause), routed to CTO/the tooling
+     lane; this element is forward-compatible with it. No acceptance row, criterion, cell_ref or attestation changed. -->
+<decomp_context>(D1-a-1 moved into the owned clause above: a criterion discharges it, so declaring it as a mere read would understate what this TO is accountable for.) Constrained by boundaries D1-g-1, D1-g-2. NOT in this TO: D1-f-1 (the 15/85 node — CTO remit), every D1-h-v*/D1-h-p1/D1-c-* cell (the DE lane's TO-R1-DE).</decomp_context>
+
 <certification>**CERTIFIED DECOMP** — `3.0.0_SA_CVO` cert @60d4e2f1b4 (28/28 declared = mentioned, both differences empty; NOT-YET-EVALUABLE criteria→cells recorded as its own state). One P1 sizing correction (r4) is absorbed in the decomp's s.4a and in Half 1 below. If a surprise item returns DECOMP-INVALIDATING, the ISSUER re-derives these premises — the executing seat does not adjudicate that.</certification>
 <issued_to>DS-class (data plane / gold producer, `data/mdpf/**` under Rule 13). **SEATED: `0.4.0_DS_ClientPlatform~F` (MSTR 66470, spawned 2026-08-24 ~20:24Z, D1_CATVIEWS ONLY).** ONE PROJECT PER INSTANCE (Andrew-direct @b705331f7d): this lane holds no other pipeline project's TOs.</issued_to>
 <executor_class>DS-class</executor_class>

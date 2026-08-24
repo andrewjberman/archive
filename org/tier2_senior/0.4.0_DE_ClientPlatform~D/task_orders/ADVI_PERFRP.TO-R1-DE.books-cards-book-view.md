@@ -1,7 +1,19 @@
 # TO ADVI_PERFRP.TO-R1-DE — round 1, DE lane: the shared controls · Books L3 card grid (exactly five) · L4 cards · the advisor Book view · L2 columns · the existing-panels decision · labels / known-not-held · DEV render
 
 <task_order id="ADVI_PERFRP.TO-R1-DE" project="ADVI_PERFRP">
-<decomp_ref>workflows/atom_decomposition/runs/advi-perfrp/20260824T201222Z/DECOMP.md @1ce9b2d6bc — cells PRF-d-1, PRF-d-2, PRF-d-3, PRF-d-4, PRF-d-5, PRF-d-6, PRF-d-7, PRF-d-8, PRF-inv-1, PRF-inv-3 (render half). Reads PRF-b-1's contract (TO-R1-DS). Constrained by PRF-g-1 (deferred cards ABSENT), PRF-g-4 (insurance beside, never inside). NOT in this TO: any producer/serving cell; the PROD promote (DT).</decomp_ref>
+<decomp_ref>workflows/atom_decomposition/runs/advi-perfrp/20260824T201222Z/DECOMP.md @1ce9b2d6bc — cells PRF-d-1, PRF-d-2, PRF-d-3, PRF-d-4, PRF-d-5, PRF-d-6, PRF-d-7, PRF-d-8, PRF-inv-1, PRF-inv-3 (render half).</decomp_ref>
+<!-- ISSUER FIX 2026-08-24 ~22:4xZ on 0.7.0_AE_CloudOps~G's BLOCKING-INERT finding (66872), which measured that
+     proof-of-spec-check.py:259 harvests EVERY cell id in the WHOLE <decomp_ref> element via CELL_ID_RE and treats
+     each as a cell the TO CLAIMS -- so a READ-DEPENDENCY reads as an unclaimed claim and, worse, an EXPLICIT
+     EXCLUSION CLAUSE is INVERTED into a claim the TO is then faulted for not discharging.
+     THE FIX IS RELOCATION, NOT DELETION. Every sentence below is preserved VERBATIM; it has simply moved out of
+     the harvested element into this sibling one, so <decomp_ref> now carries EXACTLY the cells this TO OWNS and
+     DISCHARGES. Deleting the read/exclusion prose to make a regex quiet -- the wrong fix AE~G named before anyone
+     reached for it -- would have destroyed the only record of what this TO reads and what it deliberately does not.
+     The durable repair is the EXTRACTION (scope the harvest to the owned-cells clause), routed to CTO/the tooling
+     lane; this element is forward-compatible with it. No acceptance row, criterion, cell_ref or attestation changed. -->
+<decomp_context>Reads PRF-b-1's contract (TO-R1-DS). Constrained by PRF-g-1 (deferred cards ABSENT), PRF-g-4 (insurance beside, never inside). NOT in this TO: any producer/serving cell; the PROD promote (DT).</decomp_context>
+
 <certification>**CERTIFIED DECOMP** — `3.0.0_SA_CVO` @62598c1bfb (36/36, no P1). Issuer re-derives on a DECOMP-INVALIDATING item.</certification>
 <issued_to>DE-class (portal, `portal/src/pages/AdvisorIntelligence/**` on DEV). **SEATED: `0.4.0_DE_ClientPlatform~D` (MSTR 66575, ADVI_PERFRP ONLY); watches `0.4.0_DS_ClientPlatform~G` for the start condition.** ONE PROJECT PER INSTANCE.</issued_to>
 <executor_class>DE-class</executor_class>

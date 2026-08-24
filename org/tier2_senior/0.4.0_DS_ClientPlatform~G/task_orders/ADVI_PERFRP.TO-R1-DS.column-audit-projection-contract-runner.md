@@ -1,7 +1,19 @@
 # TO ADVI_PERFRP.TO-R1-DS — round 1, DS lane: the COLUMN AUDIT · the PER-CLIENT PROJECTION CONTRACT (the join) · the projection runner B3–B7 · the emitter half of the key family
 
 <task_order id="ADVI_PERFRP.TO-R1-DS" project="ADVI_PERFRP">
-<decomp_ref>workflows/atom_decomposition/runs/advi-perfrp/20260824T201222Z/DECOMP.md @1ce9b2d6bc — cells PRF-a-1, PRF-a-2, PRF-a-3, PRF-a-4, PRF-a-5, PRF-a-6, PRF-b-1, PRF-b-2, PRF-b-3, PRF-b-4, PRF-b-5, PRF-b-6, PRF-b-7, PRF-c-1 (emitter half), PRF-inv-2 (producer half), PRF-inv-3 (producer half), PRF-inv-5 (argument contract), PRF-inv-6. Constrained by boundaries PRF-g-1..g-4 and the FIXED table (s.11 #1–#14). NOT in this TO: every PRF-d-* cell (TO-R1-DE), PRF-c-2/c-3 + the IAM halves (TO-R1-AE), PRF-e-1 / PRF-f-1 (CVO-owned).</decomp_ref>
+<decomp_ref>workflows/atom_decomposition/runs/advi-perfrp/20260824T201222Z/DECOMP.md @1ce9b2d6bc — cells PRF-a-1, PRF-a-2, PRF-a-3, PRF-a-4, PRF-a-5, PRF-a-6, PRF-b-1, PRF-b-2, PRF-b-3, PRF-b-4, PRF-b-5, PRF-b-6, PRF-b-7, PRF-c-1 (emitter half), PRF-inv-2 (producer half), PRF-inv-3 (producer half), PRF-inv-5 (argument contract), PRF-inv-6.</decomp_ref>
+<!-- ISSUER FIX 2026-08-24 ~22:4xZ on 0.7.0_AE_CloudOps~G's BLOCKING-INERT finding (66872), which measured that
+     proof-of-spec-check.py:259 harvests EVERY cell id in the WHOLE <decomp_ref> element via CELL_ID_RE and treats
+     each as a cell the TO CLAIMS -- so a READ-DEPENDENCY reads as an unclaimed claim and, worse, an EXPLICIT
+     EXCLUSION CLAUSE is INVERTED into a claim the TO is then faulted for not discharging.
+     THE FIX IS RELOCATION, NOT DELETION. Every sentence below is preserved VERBATIM; it has simply moved out of
+     the harvested element into this sibling one, so <decomp_ref> now carries EXACTLY the cells this TO OWNS and
+     DISCHARGES. Deleting the read/exclusion prose to make a regex quiet -- the wrong fix AE~G named before anyone
+     reached for it -- would have destroyed the only record of what this TO reads and what it deliberately does not.
+     The durable repair is the EXTRACTION (scope the harvest to the owned-cells clause), routed to CTO/the tooling
+     lane; this element is forward-compatible with it. No acceptance row, criterion, cell_ref or attestation changed. -->
+<decomp_context>Constrained by boundaries PRF-g-1..g-4 and the FIXED table (s.11 #1–#14). NOT in this TO: every PRF-d-* cell (TO-R1-DE), PRF-c-2/c-3 + the IAM halves (TO-R1-AE), PRF-e-1 / PRF-f-1 (CVO-owned).</decomp_context>
+
 <certification>**CERTIFIED DECOMP** — `3.0.0_SA_CVO` cert @62598c1bfb (36/36; no P1; s.11 FIXED 14/14 covered). Q-p1/Q-p2/Q-p3 CONFIRMED by the PRD author (CTO 66460) and Q-p1 independently re-derived by CVO. If a surprise item returns DECOMP-INVALIDATING, the ISSUER re-derives these premises.</certification>
 <issued_to>DS-class (gold producer, `data/assets/scripts/gold/runners_49f/**` under Rule 13). **SEATED: `0.4.0_DS_ClientPlatform~G` (MSTR 66575, spawned 2026-08-24 ~21:0xZ, ADVI_PERFRP ONLY).** ONE PROJECT PER INSTANCE (@b705331f7d).</issued_to>
 <executor_class>DS-class</executor_class>

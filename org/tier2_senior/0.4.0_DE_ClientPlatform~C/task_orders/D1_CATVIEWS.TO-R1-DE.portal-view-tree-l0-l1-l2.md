@@ -1,7 +1,19 @@
 # TO D1_CATVIEWS.TO-R1-DE — round 1, DE lane: the MDPF global view TREE — L0 present-subset tiles · L1 drilldown · L2 Custom enumeration · the predicate-UNAVAILABLE state · consumed-not-rendered acceptance
 
 <task_order id="D1_CATVIEWS.TO-R1-DE" project="D1_CATVIEWS">
-<decomp_ref>workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md @469a9e9868 (+ s.4a post-cert amendment) — cells D1-h-v1, D1-h-v2, D1-h-v3, D1-h-v4, D1-h-p1, D1-c-1, D1-c-2, D1-inv-4 (render half). Reads D1-b-1's contract (the DS lane's mint, TO-R1-DS). Constrained by boundaries D1-g-1, D1-g-2. NOT in this TO: any registry/gold cell (TO-R1-DS), D1-f-1.</decomp_ref>
+<decomp_ref>workflows/atom_decomposition/runs/d1-catviews/20260824T195537Z/DECOMP.md @469a9e9868 (+ s.4a post-cert amendment) — cells D1-h-v1, D1-h-v2, D1-h-v3, D1-h-v4, D1-h-p1, D1-c-1, D1-c-2, D1-inv-4 (render half).</decomp_ref>
+<!-- ISSUER FIX 2026-08-24 ~22:4xZ on 0.7.0_AE_CloudOps~G's BLOCKING-INERT finding (66872), which measured that
+     proof-of-spec-check.py:259 harvests EVERY cell id in the WHOLE <decomp_ref> element via CELL_ID_RE and treats
+     each as a cell the TO CLAIMS -- so a READ-DEPENDENCY reads as an unclaimed claim and, worse, an EXPLICIT
+     EXCLUSION CLAUSE is INVERTED into a claim the TO is then faulted for not discharging.
+     THE FIX IS RELOCATION, NOT DELETION. Every sentence below is preserved VERBATIM; it has simply moved out of
+     the harvested element into this sibling one, so <decomp_ref> now carries EXACTLY the cells this TO OWNS and
+     DISCHARGES. Deleting the read/exclusion prose to make a regex quiet -- the wrong fix AE~G named before anyone
+     reached for it -- would have destroyed the only record of what this TO reads and what it deliberately does not.
+     The durable repair is the EXTRACTION (scope the harvest to the owned-cells clause), routed to CTO/the tooling
+     lane; this element is forward-compatible with it. No acceptance row, criterion, cell_ref or attestation changed. -->
+<decomp_context>Reads D1-b-1's contract (the DS lane's mint, TO-R1-DS). Constrained by boundaries D1-g-1, D1-g-2. NOT in this TO: any registry/gold cell (TO-R1-DS), D1-f-1.</decomp_context>
+
 <certification>**CERTIFIED DECOMP** — `3.0.0_SA_CVO` cert @60d4e2f1b4 (28/28). If a surprise item returns DECOMP-INVALIDATING, the ISSUER re-derives these premises — the executing seat does not adjudicate that.</certification>
 <issued_to>DE-class (portal frontend, `portal/**` on DEV). **SEATED: `0.4.0_DE_ClientPlatform~C` (MSTR 66470, spawned 2026-08-24 ~20:24Z, D1_CATVIEWS ONLY); watches `0.4.0_DS_ClientPlatform~F` for the start condition.** ONE PROJECT PER INSTANCE (Andrew-direct @b705331f7d).</issued_to>
 <executor_class>DE-class</executor_class>
