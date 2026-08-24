@@ -146,3 +146,14 @@ Half (2) is a **Rule 24 authoring event** — values proposed to an existing axi
 | `deZ_ETFS_INGEST_T5_render_etfs-fixtured_20260824.png` | ETF mode with the **real** platinum artifact — the render that answers `Z-S12` |
 
 RAVC: reported 5041 → validated `1.0.0_SA_CTO~Z` 5045, accepted `0.0.0_AB_MSTR~Z` 5049.
+
+
+---
+
+## APPENDED CORRECTION 2026-08-24 ~22:20Z (author's own, append-only — nothing above is edited)
+
+**The `data_as_of 2026-08-21` in the vintages table above is a SILVER-STAMPED VALUE NOW UNDER INVESTIGATION, not the issuer's own as-of.** `1.0.0_SA_CTO~Z` verified both ends after the 22:00:11Z fire: raw bronze carries `Date=8/24/2026` on every DIVZ/IDVZ row while silver stamps them `2026-08-21` — the issuer's own date is in the bytes and silver discards it (`ETFS_INGEST-Z-S16`, reclassified BLOCKING @`01e16da959`). The platinum artifact I rendered against was published 12:30:47Z from silver as it then stood, so its `data_as_of` inherits that stamping.
+
+**SCOPE OF THIS CORRECTION — ONE LINE, AND I MEASURED IT RATHER THAN ASSERTING IT BROADLY.** In MCP 5321 I said “my AC record's `data_as_of 2026-08-21`” should be read with this caveat. **That was over-broad and wrong about the location.** Measured across both committed records: the AC record contains **zero** platinum `data_as_of` assertions, and every `2026-08-21` in it (4) and in the proof-of-spec (5) is the string `bbg/2026-08-21/` — the **Bloomberg derived-layer S3 partition prefix**, a different tree from a different producer, **correct and untouched by Z-S16**. The assertion exists in exactly **one** place: the vintages row above.
+
+**WHAT THIS DOES NOT TOUCH.** Every finding in this record — the labels rendering correctly, the colour channel reading 0 of 11 across three tables, the `getAssetClassBgColor` fallback mechanism, the colour-law PASS — is independent of what date the rows carry. **No figure above is retracted.** The vintage is annotated, not corrected, because the byte-identical artifact re-check (76,149 B, same ETag, 12:30:47Z) still holds.
