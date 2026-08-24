@@ -231,3 +231,26 @@ json/positioning/positioning_data.json   8,133 B STORED, ContentEncoding: gzip -
 *The `DISPLAY_MAP`'s 7-of-10 is NOT a gap: the three absent values (`Developed`, `EM`, `Intermediate`) are the already-SHORTENED forms. That map goes long→short (`International Developed`→`Developed`), so a value already in short form needs no entry. Counting it as a miss would have been the map working correctly, mis-read as a defect.*
 
 ⚠ **And the artifacts are not symmetric in transport:** the Models key is stored **gzipped** (`ContentEncoding: gzip`, 8,133 B stored vs 73,458 B decompressed) while the ETF key is stored plain (76,149 B). A byte-size comparison between the two — 8 KB vs 76 KB — invites the conclusion that Models carries a tenth the data. **It carries 110 rows to ETF's 114.** Noted because a size ratio is exactly the kind of number that gets quoted.
+
+
+---
+
+## FIFTH APPEND 2026-08-24 ~23:10Z — THE PIN'S KEY WAS OVERWRITTEN, AND THE DIFF SAYS THE RENDER STANDS
+
+`ETFS_POSITIONING.TO-5`'s ad-hoc QA run republished the served key at **2026-08-24T23:00:45Z**. The bytes this record was rendered from are now the **superseded** version — exactly the event the pin was taken for. **Diffed old against new, which only this seat could do cheaply because it holds the pre-overwrite bytes:**
+
+```
+old (pinned)  76,149 B  sha256 ae4c405cc8770934…   generated_at 2026-08-24T12:30:42Z
+new (live)    76,149 B  sha256 05e69250c9626d70…   generated_at 2026-08-24T23:00:44Z
+
+LEAF FIELDS TOTAL : 2,384
+LEAF FIELDS DIFFER:     1   -> /generated_at, and nothing else
+```
+
+> **EVERY FIGURE IN THIS RECORD RESTS ON FIELDS THAT DID NOT MOVE** — the 114 rows, the four funds, the two shells, the 11 distinct `sub_asset_class` values, the 0-of-11 colour census, the `getAssetClassBgColor` fallback. **A re-render at the new bytes would be pixel-identical**, so the screenshots are not re-taken: a one-field delta in an operation timestamp cannot change a rendering. **This is now proven rather than presumed.**
+
+⛔ **AND IT CORRECTS SOMETHING I CALLED A COINCIDENCE.** The third append reported the two versions as byte-count-identical with different hashes and treated the collision as luck. **It is not luck — the only mutable field is a fixed-width ISO-8601 timestamp, so a republish over unchanged source is length-preserving BY CONSTRUCTION.** The operational lesson is unchanged and stronger (a size check reads UNMOVED on a real overwrite); the mechanism is now known. *A coincidence you cannot explain is a finding you have not finished.*
+
+⭐ **AND IT IS ANDREW'S ~23:0xZ RULING HOLDING UNDER TEST.** His word: *“it is fine to track metadata of when we've updated data or performed operations on it, but that is a very different figure than the actual data ‘as of’ provenance timestamp.”* Measured across a real republish: **`generated_at` (operation) MOVED; `data_as_of`, `data_date`, `prior_date` and all 2,382 remaining fields UNCHANGED.** That the separation *exists* was established by censusing field names; that it **HOLDS UNDER A REPUBLISH** is a different claim and is the one that could have failed.
+
+⚠ **Bound: measured on a run whose SOURCE WAS UNCHANGED.** Tomorrow's 13:00Z fire selects T-1 = Monday and the 73 TrueShares rows arrive, so its publish legitimately changes many fields. **Repeat-over-identical-source is data-inert; that does not extend to a republish after a genuine change.**
