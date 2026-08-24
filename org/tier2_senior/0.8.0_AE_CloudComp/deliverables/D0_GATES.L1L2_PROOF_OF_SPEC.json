@@ -16,7 +16,7 @@
       "commit_or_etag": "1b285eb822",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "A repo-local checker invoked by CVO at cert time; it has no deploy target. ON origin/CLOUD: git ls-remote origin refs/heads/CLOUD -> a0643a35fc, and git merge-base --is-ancestor 1b285eb822 a0643a35fc -> YES.",
-      "artifact_covered_by": ["D0GATE-L1-1", "D0GATE-L1-2", "D0GATE-L1-3", "D0GATE-L1-4", "D0GATE-L1-5", "D0GATE-L1-6", "D0GATE-L1-7", "D0GATE-L1-8", "D0GATE-L1-10"]
+      "artifact_covered_by": ["D0GATE-L1-1", "D0GATE-L1-2", "D0GATE-L1-3", "D0GATE-L1-4", "D0GATE-L1-5", "D0GATE-L1-6", "D0GATE-L1-7", "D0GATE-L1-8", "D0GATE-L1-10", "D0GATE-L1-11"]
     },
     {
       "path_or_key": ".tools/to-decomp-ref-lint.py",
@@ -31,7 +31,7 @@
       "kind": "test",
       "commit_or_etag": "1b285eb822",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Test file; runs from the repo. 23 arms (19 original + 4 vintage probes added under CTO 66702)."
+      "deploy_evidence": "Test file; runs from the repo. 29 arms (19 original + 4 vintage under CTO 66702 + 6 owned-cells/production-shape under CTO 66893)."
     },
     {
       "path_or_key": ".tools/tests/test_to_decomp_ref_lint.py",
@@ -145,6 +145,15 @@
       "invocation": "python .tools/tests/test_proof_of_spec_alignment.py (ARMS 11-14), plus the same four probes run against the live ETFS TO-3 instance",
       "output_evidence": "REPAIR OF A DEFECT IN MY OWN DELIVERED L1, found by 3.0.0_SA_CVO in independent verification (66693) and routed by CTO 66702. Before: vintage_commit was REQUIRED by schema and its VALUE was checked by no layer, so on live ETFS TO-3 -- 20c092c0da (real) VALID, 20c092c0db (ONE CHAR OFF) VALID, deadbeef99 VALID. Reproduced at my seat before fixing. After: real hash VALID rc=0; one-char-off, deadbeef99 and 0000000000 all INVALID rc=1. MY OWN BATTERY COULD NOT HAVE CAUGHT THIS -- every pre-existing arm used the same fixture vintage, so no arm ever varied the field under test; that is a real limit of author-written mutants and the reason the certifier re-runs independently.",
       "denominator": "4 of 4 vintage probes behave as specified; battery 23 of 23 arms (was 19, +4)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "D0GATE-L1-11",
+      "criterion_verbatim": "the TO's <decomp_ref> gains a DELIMITED OWNED-CELLS clause -- (a) machine-parsed, ids only, no prose inside the delimiter; (b) the backward harvest MUST NOT silently change verdicts on undelimited TOs -- an undelimited <decomp_ref> keeps the wide harvest but ANNOUNCES instead of asserting a violation from prose (ENFORCE fires only on a delimited set)",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_proof_of_spec_alignment.py (ARM 5 re-pointed + ARMS 15-18), then the repaired harvest run against EVERY real TO carrying <decomp_ref>",
+      "output_evidence": "SECOND REPAIR to delivered L1, on 0.7.0_AE_CloudOps~G's finding (66872) confirmed 3/3 by CVO (66901) and routed by CTO 66893. THE DEFECT WAS AN INVERSION, not merely a false positive: the wide harvest read every cell id in the whole <decomp_ref> as a cell the TO CLAIMS, so an EXPLICIT EXCLUSION ('NOT in this TO: X') was reported as a claim the TO failed to discharge -- a seat reading that line without opening the TO would conclude the OPPOSITE of what the TO says. Syntax chosen: a child <owned_cells> element inside <decomp_ref>, forward-compatible with the sibling <decomp_context> COO introduced @249e0687c8. Delimited -> backward ENFORCES over the owned set; undelimited -> wide harvest ANNOUNCES with the reason and asserts nothing; prose inside the delimiter -> VIOLATION, so 'ids only' is mechanical rather than aspirational. Battery 29/29 (was 23): the paired control proves the delimiter is not inert (same prose, 4-wide undelimited vs 2-owned delimited).",
+      "denominator": "battery 29 of 29 arms; 10 of 2088 TOs carry <decomp_ref>, 9 clean and 1 announcing",
       "status": "PASS"
     },
     {
