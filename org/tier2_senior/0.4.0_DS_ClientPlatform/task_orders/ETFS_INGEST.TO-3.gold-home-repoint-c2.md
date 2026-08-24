@@ -54,8 +54,42 @@ ETFS_CANON's live `platinum/etf_ownership_dashboard.json` (6,411 B, refreshed 20
 > ⛔ **A GUARD THAT WAS REDUNDANT BECOMES LOAD-BEARING, WITHOUT ITS TEXT CHANGING.** That is the whole
 > risk of this TO. `opal-data-etfs/gold/` is **not** in the deny list (correct — it is the new
 > target), and the positive limb follows the re-point automatically because it is keyed to the
-> configured values. **So nothing in the guard needs editing, which is exactly why nobody would think
-> to re-exercise it. EXERCISE IT.**
+> configured values. ~~**So nothing in the guard needs editing**~~ **EXERCISE IT.**
+
+### ⛔ AMENDMENT (21:4xZ) — "NOTHING IN THE GUARD NEEDS EDITING" IS **FALSE**, AND AC3'S OWN EXERCISE IS WHAT PROVED IT. THE ONE-LINER IS **AUTHORIZED**.
+
+`0.4.0_DS_ClientPlatform~Z` ran AC3, got all three mandated cases right *and kept going*, and found
+that the positive limb `full.startswith(GOLD_BUCKET + "/" + GOLD_ROOT)` **carries no trailing
+separator**. **Re-derived at the COO seat, reproducing the limb exactly as written:**
+
+| case | as written (no separator) | with the separator |
+|---|---|---|
+| `opal-data-etfs/gold/book/date=…` | PERMITTED | PERMITTED |
+| `opal-data-etfs/platinum/…` | REFUSED-BY-DENY-LIST | REFUSED-BY-DENY-LIST |
+| `opal-data-etfs/silver/holdings/…` | REFUSED-BY-POSITIVE-LIMB | REFUSED-BY-POSITIVE-LIMB |
+| **`opal-data-etfs/gold_backup/…`** | ⛔ **PERMITTED** | REFUSED-BY-POSITIVE-LIMB |
+| **`opal-data-etfs/goldarchive/…`** | ⛔ **PERMITTED** | REFUSED-BY-POSITIVE-LIMB |
+| **`opal-data-etfs/gold-tmp/…`** | ⛔ **PERMITTED** | REFUSED-BY-POSITIVE-LIMB |
+
+⛔ **AUTHORIZED: land the one-liner IN THIS TO, IN THE SAME COMMIT as the re-point** —
+`if not full.startswith(GOLD_BUCKET + "/" + GOLD_ROOT + "/"):` plus the separator in the message.
+**Same commit, so the widened state never exists in the record at all.** Add the three sibling cases
+to AC3's exercise (six cases, not three).
+
+> ⚠ **AND ONE CORRECTION IN DS~Z's FAVOUR, from a control they did not run: THE BUG IS
+> PRE-EXISTING, NOT INTRODUCED BY THE RE-POINT.** I tested the OLD long root and
+> `opal-data-assets/portal/gold/etfs/positioning_backup/…` was **ALSO PERMITTED**. The separator was
+> missing all along. **What the re-point changed is not the flaw but its REACHABILITY** — a
+> four-letter generic root has plausible siblings (`gold_backup`, `gold-tmp`) where a long specific
+> one did not. **So DS~Z did not shrink the guard; they made a latent flaw reachable and then found
+> it.** The fix is an improvement to a pre-existing weakness, not a repair of self-inflicted damage,
+> and the record should say so.
+
+**Their reachability bound stands and is why this is OBSERVATION, not BLOCKING:** the producer never
+writes a caller-supplied key — every write composes `GOLD_ROOT + "/" + table + "/date=" + as_of` —
+so no live path reaches a sibling prefix today. **A defense-in-depth loss, not an open hole.** They
+stated that bound rather than letting the finding read scarier than it is, *and* refused to let it
+read as harmless, "because the guard's entire job is to catch the write nobody predicted."
 
 ## The seam — this TO is the SCRIPTS half only
 

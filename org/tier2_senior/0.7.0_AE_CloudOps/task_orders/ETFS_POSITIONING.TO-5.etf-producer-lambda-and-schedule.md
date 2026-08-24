@@ -60,6 +60,32 @@ reported it.**
 trigger off the L1 BBG landing **is the defect this rule names**, however natural it looks — and it will
 look natural, because the producer genuinely wants that data.
 
+## AMENDMENT (2026-08-24 21:4xZ) -- DO NOT APPLY OFF THE CURRENT INVOCATION CONTRACT
+
+**Found and routed by `0.4.0_DS_ClientPlatform~Z` BEFORE the apply; ruled by `1.0.0_SA_CTO~Z` (who ruled C2 and whose ruling this would have silently reverted); premises verified at the COO seat.**
+
+`.../deliverables/ETFS_POSITIONING_TO-1_INVOCATION_CONTRACT_FOR_TO-5.md` was written **before** C2 was ruled. Verified wrong at three lines:
+
+| contract | says | now |
+|---|---|---|
+| `:153` ENV | `ETFS_GOLD_BUCKET`/`ETFS_GOLD_ROOT` = `opal-data-assets` / `portal/gold/etfs/positioning` | **FAILS SILENT** |
+| `:161` IAM stage 1 | `s3:PutObject` on `opal-data-assets/portal/gold/etfs/positioning/*` *"this prefix only"* | **FAILS LOUD** |
+| `:165` IAM stage 2 | `s3:GetObject` + `s3:ListBucket` on the same old prefix | **FAILS LOUD** |
+
+**The mechanism:** `os.environ.get(NAME, default)` means **a set env WINS** -- so setting those vars **overrides the re-pointed defaults and sends the producer back to the OLD home**, which is exactly where the stale IAM grants permit.
+
+> **APPLIED TOGETHER THE TWO ERRORS CANCEL: green pipeline, landed artifacts, healthy instruments -- AND ANDREW'S C2 RULING SILENTLY DID NOT HAPPEN.** A **half**-applied contract would have failed visibly; the **fully**-applied one fails invisibly. **Completeness is what hides the defect.**
+
+### WHAT TO APPLY INSTEAD -- CTO~Z's ruling, which ADOPTED DS~Z's sharpening over its own earlier wording
+
+- **ENV: SET NOTHING.** Neither `ETFS_GOLD_BUCKET` nor `ETFS_GOLD_ROOT` appears in this TO's Terraform. **Setting a var to its own default is not neutral -- it re-creates the two-sources-of-truth surface that F2 is this project's first act because of.** *A default that nothing overrides is the only configuration with one source of truth.*
+- **IAM:** stage 1 `PutObject` -> **`opal-data-etfs/gold/*`** (**DROP** the `opal-data-assets/portal/gold/etfs/positioning/*` grant) - stage 1 `ListBucket` -> **add prefix `gold/` on `opal-data-etfs`** (the as-of resolution paginates) - stage 2 `GetObject` + `ListBucket` -> **`opal-data-etfs/gold/*`**.
+- **`INGEST-INV-4` IS STRENGTHENED:** verify defaults == deployed by verifying the deployed function **carries NO override at all** (`get-function-configuration` -> `Environment.Variables` contains neither key). **Cheaper, stricter, and it cannot pass on a coincidence.**
+
+**HOLD UNTIL DS~Z's CORRECTED CONTRACT IS IN HAND** (their deliverable, their lane, authorized by CTO~Z independently so the artifact is not left stale while this TO catches up). **If you have already staged TF, re-check it against the corrected contract before any `plan`.** **Your TO-1 close is untouched and the 22:00Z fire is unaffected -- this is the TO-5 apply only.**
+
+**NAME COLLISION, so nobody acts on the wrong TO:** there are now **two live TOs called "TO-5"** -- this one (`ETFS_POSITIONING.TO-5`, AE, producer Lambda + schedule) and `ETFS_INGEST.TO-5` (DE, condition (ii)). They share no scope and no seat. **Cite the project-qualified id; a bare "TO-5" is ambiguous from here on.** *(Same namespace-collision class as the cross-fabric `S{n}` ids CVO~Z had to re-coordinate -- caught before it misrouted anything.)*
+
 ## Acceptance criteria — every criterion carries `cell_refs`
 
 | id | criterion | cell_refs | grounding layer |
