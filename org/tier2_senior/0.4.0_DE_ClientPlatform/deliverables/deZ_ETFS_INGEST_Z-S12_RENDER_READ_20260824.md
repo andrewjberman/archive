@@ -157,3 +157,27 @@ RAVC: reported 5041 → validated `1.0.0_SA_CTO~Z` 5045, accepted `0.0.0_AB_MSTR
 **SCOPE OF THIS CORRECTION — ONE LINE, AND I MEASURED IT RATHER THAN ASSERTING IT BROADLY.** In MCP 5321 I said “my AC record's `data_as_of 2026-08-21`” should be read with this caveat. **That was over-broad and wrong about the location.** Measured across both committed records: the AC record contains **zero** platinum `data_as_of` assertions, and every `2026-08-21` in it (4) and in the proof-of-spec (5) is the string `bbg/2026-08-21/` — the **Bloomberg derived-layer S3 partition prefix**, a different tree from a different producer, **correct and untouched by Z-S16**. The assertion exists in exactly **one** place: the vintages row above.
 
 **WHAT THIS DOES NOT TOUCH.** Every finding in this record — the labels rendering correctly, the colour channel reading 0 of 11 across three tables, the `getAssetClassBgColor` fallback mechanism, the colour-law PASS — is independent of what date the rows carry. **No figure above is retracted.** The vintage is annotated, not corrected, because the byte-identical artifact re-check (76,149 B, same ETag, 12:30:47Z) still holds.
+
+
+---
+
+## SECOND APPEND 2026-08-24 ~22:26Z — THE EVIDENCE SUBSTRATE IS PINNED, because it is about to be overwritten AND versioning has a 14-DAY FUSE
+
+`1.0.0_SA_CTO~Z` ruled (msg 5395) that `ETFS_POSITIONING.TO-5`'s AC3 is discharged by an **ad-hoc QA run** — and named the condition neither seat had stated: **`platinum/etfs/positioning_data.json` is a LIVE SERVED KEY, and an ad-hoc run overwrites production serving in place.** That is the exact object every figure in this record was rendered from.
+
+**WHAT I MEASURED ON HEARING IT, and it changes the remedy:**
+
+| | |
+|---|---|
+| bucket versioning | **Enabled** — so an overwrite does not destroy the bytes immediately |
+| the rendered object's VersionId | `BUS3S19KAalW2aeY6pYNj4MvVjMS4SoU` |
+| lifecycle rule `expire-noncurrent-versions-14d` | **`NoncurrentDays: 14`, Enabled, prefix-wide** |
+
+> ⛔ **SO “versioning protects it” IS TRUE FOR FOURTEEN DAYS AND FALSE AFTER.** The moment the ad-hoc run writes, these bytes become NONCURRENT and are **permanently deleted 14 days later.** This record is the baseline the T5-1 build TO is meant to cite, and T5-1 is gated on a field that does not exist yet — **the evidence could evaporate before the build that cites it happens.** Pinning the VersionId alone would have bought 14 days and read as durable.
+
+**THEREFORE THE BYTES THEMSELVES ARE COMMITTED**, not a pointer to them:
+`deZ_ETFS_INGEST_T5_PINNED_platinum_positioning_data_20260824T123047Z.json`
+
+Verified identical to the live object, twice — before and after the copy: **md5 `ee2c4a89152261051b9109c93b971dd6` == the live `ETag`, 76,149 bytes == live `ContentLength`.** (Single-part upload, so the ETag IS the md5; that is why the comparison is sound rather than merely suggestive.) Every count in this record — 114 rows, 4 funds, 2 shells, 11 distinct `sub_asset_class` values — is now **re-derivable from a committed artifact** rather than from a key that is scheduled to be overwritten.
+
+**This does not object to the ad-hoc run.** Refreshing a served key is the producer's normal act and NEVER#3 governs MOVING served output, not refreshing it. CTO~Z's notify-before-write condition is the right control and I am not asking for more. **I am removing my own dependency on the timing of it** — once the bytes are committed, it does not matter whether I am told before or after.
