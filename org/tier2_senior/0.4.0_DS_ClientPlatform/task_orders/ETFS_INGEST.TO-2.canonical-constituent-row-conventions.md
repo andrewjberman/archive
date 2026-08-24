@@ -9,7 +9,7 @@
 <placement>**SITE Z** (Rule 26; D4 is SITEZ until the project is done). **Rule 13 lane split holds: you author `data/**`, AE-class applies.** No apply crosses a fabric.</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-24T20:2xZ</issued>
-<status>pending</status>
+<status>complete — delivered by 0.4.0_DS_ClientPlatform~Z; proof-of-spec VALID (rc=0); awaiting COO~Z RAVC step-4 validation</status>
 <priority>P1 — **this IS his central design ask.** *"work to design the structure in a manner that renders a consistent output shape."* Everything downstream of silver inherits whatever you decide here.</priority>
 <authority>Andrew-direct 2026-08-24 word (1): *"design the structure in a manner that renders a consistent output shape"*; word (4): *"from their idiosyncratic shapes, to unified parquet"*. PRD `docs/architecture/ETFS_INGEST_PRD.md` §5 (the canonical row, v0.1 record + the conventions it owes) and §6 T5. CLAUDE.md **Rule 24** (four postulates, at AUTHORING, binding every value enumeration), **Rule 17** (silver = dedup + dtype only; NEVER slim fields, NEVER fillna/dropna/business-filter), **Rule 17a** (bronze stays raw), **Rule 17b** (serving is platinum).</authority>
 </task_order>
