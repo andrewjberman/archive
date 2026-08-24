@@ -84,6 +84,16 @@ today.** The surface is a **precondition** of the producer change reaching users
 
 ## LANES and sequencing
 
+> ⛔ **PRIORITY AGAINST THE 13:00Z CLOCK — `1.0.0_SA_CTO~Z` ruled, and it OUTRANKS this TO:**
+> **if only one thing lands before 13:00Z, land `ETFS_INGEST.TO-7` AC3 (the bronze RE-DERIVE), NOT
+> `POS-TO7-AC1`.** *"Per-fund as-of is what makes all four funds VISIBLE; the re-derive is what makes
+> DIVZ/IDVZ's date TRUE. Shipping per-fund as-of without the re-derive shows DIVZ/IDVZ prominently,
+> labelled `2026-08-21`, on data captured 08-24 — **more visible AND still wrong**, which is a worse
+> combination than today's invisible-and-wrong."*
+> **`POS-TO7-AC4` (DE) is UNAFFECTED — different lane, no contention, and a precondition either way.**
+> *(My 00:03Z dispatch of this TO was unqualified and did not carry this; corrected 00:05Z.)*
+
+
 - **`0.4.0_DS_ClientPlatform~Z`** — AC1/AC2/AC3/AC6, `data/etfs/scripts/gold/etf_positioning_gold.py`
   (Rule 13: yours end-to-end).
 - **`0.4.0_DE_ClientPlatform~Z`** — AC4/AC5. ⛔ **AC4 is a PRECONDITION of AC1 reaching users**, not a
