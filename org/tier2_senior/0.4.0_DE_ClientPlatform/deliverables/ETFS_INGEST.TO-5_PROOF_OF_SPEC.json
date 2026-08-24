@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_INGEST.TO-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.4.0_DE_ClientPlatform/task_orders/ETFS_INGEST.TO-5.positioning-subcategories-condition-ii.md",
+    "group": "OTHER",
+    "vintage_commit": "efa80f37a4"
+  },
+  "assignee": "0.4.0_DE_ClientPlatform~Z",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/deZ_ETFS_INGEST_TO5_AC_RECORD_20260824.md",
+      "kind": "doc",
+      "commit_or_etag": "this commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Workspace record, no deploy scope. LANDED LOCAL, rides MSTR~Z's integration window -- stated as push-state rather than a bare 'landed', per the standing rule.",
+      "artifact_covered_by": [
+        "INGEST-TO5-AC2",
+        "INGEST-TO5-AC3",
+        "INGEST-TO5-AC4",
+        "INGEST-TO5-AC5",
+        "INGEST-TO5-AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/deZ_ETFS_INGEST_Z-S12_RENDER_READ_20260824.md",
+      "kind": "doc",
+      "commit_or_etag": "b332cc4fa2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Baseline evidence record for AC1, committed @b332cc4fa2 before this TO's GO under CTO~Z msg 5045 (an evidence record is not a build). LANDED LOCAL, rides integration.",
+      "artifact_covered_by": [
+        "INGEST-TO5-AC1",
+        "INGEST-TO5-AC7"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/deZ_ETFS_INGEST_T5_render_etfs-fixtured_20260824.png",
+      "kind": "doc",
+      "commit_or_etag": "b332cc4fa2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rendered at portal d43b88c5 against the REAL platinum artifact (76,149 B, 2026-08-24T12:30:47Z s3api/UTC, 114 rows), negative control zzz_no_such_key_9999 -> 404. The AC1 answer.",
+      "artifact_covered_by": [
+        "INGEST-TO5-AC1",
+        "INGEST-TO5-AC7"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/deZ_ETFS_INGEST_T5_render_SYNTHETIC-24value-labelfit_20260824.png",
+      "kind": "doc",
+      "commit_or_etag": "this commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "SYNTHETIC-VOCABULARY render at portal d43b88c5. Real published GICS industry-group NAMES mapped deterministically from each holding's real sector, to test RENDER GEOMETRY only. NOT a data claim; no such field is pulled today (AC4's gate). Produced the AC6 Leg-4 column-collision finding.",
+      "artifact_covered_by": [
+        "INGEST-TO5-AC6",
+        "INGEST-TO5-AC7"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/deZ_ETFS_INGEST_T5_SYNTHETIC_24value_fixture_20260824.json",
+      "kind": "test",
+      "commit_or_etag": "this commit",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The fixture behind the synthetic render, committed so the finding is reproducible rather than asserted. 113 rows relabelled, 23 distinct synthetic values, longest label 46 chars.",
+      "artifact_covered_by": [
+        "INGEST-TO5-AC6"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "INGEST-TO5-AC1",
+      "criterion_verbatim": "RENDER IT AND READ THE SCREENSHOT. /frontend-dev, ETF mode, Holdings tab + summary panel. Report what a sub_asset_class cell actually shows and what colour it gets. Answer Z-S-G: is the fallback correct, degraded, or wrong? A grep is not an answer to this criterion",
+      "method": "manual_read_with_citation",
+      "invocation": "node scripts/ui-smoke.mjs positioning <out>.png --port 5175 --fixtures <real-artifact>.json --click ETFs --clickwait 4500",
+      "output_evidence": "DISCHARGED AT ISSUANCE by COO~Z (msg 5042/5056) -- rendered under CTO~Z's direction before this TO arrived; not re-run per the TO's own instruction. VERDICT: the fallback is DEGRADED, and it is a third thing neither prior position predicted. LABELS CORRECT -- every GICS name renders in full and correctly spelled, because the chain ends in `return apiSubAssetClass` so the raw value survives. COLOUR CHANNEL DEAD -- getAssetClassBgColor (holdings-shared.tsx:99-104) returns SUB_ASSET_CLASS_COLORS[sub] when present else ASSET_CLASS_COLORS[assetClass]; at 0-of-11 coverage all 110 equity rows take the same ASSET_CLASS.equity fill, so the SUB ASSET column is one flat blue and the composition treemap paints every tile identically. IT DOES NOT RENDER WRONG, IT RENDERS UNDIFFERENTIATED. Silver-canvas colour law: PASS. Rendered against the REAL artifact, negative control 404.",
+      "denominator": "114 holding rows across 4 funds (DIVZ 0 shell, IDVZ 0 shell, PFDE 90, PFOE 24); 11 distinct non-null sub_asset_class values; 1 NULL row not isolated (declared).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO5-AC2",
+      "criterion_verbatim": "Enumerate the render + lookup sites with a printed denominator, and state which are ETF-mode-only vs SHARED WITH MODELS MODE. A token census is a FLOOR -- pair it with a structural pass",
+      "method": "command",
+      "invocation": "grep -ric 'sub_asset_class|subAssetClass' over src/pages/Positioning + lib/chartColors.ts + Attribution/constants/holdings-shared.tsx (token floor); then a structural importer pass per symbol: grep -rln for SUB_ASSET_CLASS_COLORS / SUB_ASSET_COLORS / ASSET_CLASS_COLORS / getAssetClassBgColor",
+      "output_evidence": "TOKEN CENSUS (floor): HoldingsTab.tsx 27, holdings-shared.tsx 17, etfAdapter.ts 2, PositioningSummary.tsx 2, chartColors.ts 0, other 7 in-tree files 0. THE FLOOR BIT IMMEDIATELY AND THE CRITERION PREDICTED IT: chartColors.ts reads 0 for the token while DEFINING SUB_ASSET_COLORS, one of the three tables under investigation -- a token census structurally cannot see a constant whose KEYS are the vocabulary. STRUCTURAL PASS (load-bearing): SUB_ASSET_CLASS_COLORS -> holdings-shared.tsx + HoldingsTab.tsx; SUB_ASSET_COLORS -> chartColors.ts + HoldingsTab.tsx; ASSET_CLASS_COLORS -> holdings-shared.tsx + HoldingsTab.tsx + 3 Attribution components; getAssetClassBgColor -> holdings-shared.tsx + HoldingsTab.tsx + Attribution/tabs/SelectionTab.tsx. FINDING: ZERO ETF-MODE-ONLY LOOKUP SITES -- every one is SHARED with Models mode (same HoldingsTab component) AND with the Attribution page, a second page the TO does not mention. Any table edit is an AC3 event by construction.",
+      "denominator": "10 files in src/pages/Positioning/ plus the 2 shared lookup homes = 12 files scanned; 4 symbols traced to importers.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO5-AC3",
+      "criterion_verbatim": "MODELS MODE BYTE-IDENTICAL -- the inherited sovereign constraint. ETF and Models render through the same components, so any change here can move Models. Byte-diff the Models-mode payload/render pre- and post-change. This is ETFS_POSITIONING's constraint and it binds you",
+      "method": "command",
+      "invocation": "git -C portal status --porcelain",
+      "output_evidence": "0 lines. NO PORTAL FILE WAS EDITED this turn -- AC4 is gated and AC6 resolves to a determination, not a build -- so Models mode is byte-identical in the strongest available form: there is no diff to byte-diff. Recorded rather than asserted. STATED FOR WHOEVER BUILDS AC6 OPTION (a), because it would NOT be trivial there and the reason is not the colours: SUB_ASSET_CLASS_COLORS membership is a CONTROL-FLOW BRANCH, not merely a palette lookup -- getSubAssetClass (holdings-shared.tsx:136-148) returns the normalized value ONLY IF SUB_ASSET_CLASS_COLORS[normalized] exists, else falls through to getETFCategory(ticker). Adding keys therefore changes which branch Attribution's SelectionTab takes for EXISTING Models holdings. That is an AC3 regression path through a page nobody is watching.",
+      "denominator": "Portal working tree, 0 modified files; 3 shared symbols traced into Attribution.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO5-AC4",
+      "criterion_verbatim": "Condition (ii): BOTH vocabularies rendered SIDE BY SIDE on the DEV build -- GICS_INDUSTRY_GROUP_NAME beside the Bloomberg HB_INDUSTRY_SECTOR_ALLOCATION labels, for him to point at. NOT a swap. Screenshot is the deliverable. Gated on the field landing -- declare KNOWN-UNREACHABLE with one line if it has not, rather than leaving the criterion silently open",
+      "method": "command",
+      "invocation": "aws s3api get-object --bucket opal-data-etfs --key bbg/2026-08-21/characteristics.csv <out>; head -1 <out> | grep -c GICS_INDUSTRY_GROUP_NAME ; and separately | grep -c GICS_SECTOR_NAME",
+      "output_evidence": "KNOWN-UNREACHABLE. Measured on the APPLIED plane (the landed artifact), not only source. Landed header: security,NAME,EQY_DVD_YLD_IND_NET,BETA_ADJ_OVERRIDABLE,GICS_SECTOR_NAME,CNTRY_OF_DOMICILE,CUR_MKT_CAP,FUND_EXPENSE_RATIO,FUND_TOTAL_ASSETS,TOTAL_NUMBER_OF_HOLDINGS_IN_PORT,TRACKING_ERROR. GICS_INDUSTRY_GROUP_NAME = 0 (the gate); POSITIVE CONTROL GICS_SECTOR_NAME = 1, FIRED. Note the control was run as a SEPARATE invocation after an && chain died on the grep -c 0 and skipped it -- caught and re-run rather than reported unfired. THE OTHER HALF OF THE SIDE-BY-SIDE IS LANDING: bbg/2026-08-21/constituents/derived_sector_allocation.csv carries sector_name = 'Health Care (Equity)', 'Energy (Equity)', ... per fund. So AC4 is blocked on ONE of its two inputs, not both. Unblocks when INGEST-T3-6 carries the field into the gold row (DS-class, A2-sequenced).",
+      "denominator": "1 landed characteristics.csv header, 11 columns; 1 positive control fired; constituents leg 9 objects at the same as-of.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "KNOWN-UNREACHABLE, as the criterion itself instructs. The side-by-side cannot be rendered because one of its two inputs does not exist: GICS_INDUSTRY_GROUP_NAME is not pulled (0 in the landed bbg/2026-08-21/characteristics.csv header; positive control GICS_SECTOR_NAME = 1, fired). Not a measurement failure and not an instrument limit -- the field is absent by construction until INGEST-T3-6 (DS-class, A2-sequenced) carries it into the gold row. The OTHER half IS landing (derived_sector_allocation.csv). Declared rather than left silently open, per the criterion's own wording."
+    },
+    {
+      "criterion_id": "INGEST-TO5-AC5",
+      "criterion_verbatim": "The overlap re-check is performed at the field-list edit, or explicitly handed to whoever makes that edit BY SERIAL, with the two fast-moving field names stated. A hand-off names a person; 'someone should check' is not a hand-off",
+      "method": "command",
+      "invocation": "head -1 characteristics.csv | grep -c for each of TOTAL_NUMBER_OF_HOLDINGS_IN_PORT and FUND_PCT_TOP_TEN_HOLD; cat constituents/derived_summary.csv",
+      "output_evidence": "HAND-OFF BY SERIAL: 0.4.0_DS_ClientPlatform~Z owns the etf_daily_pull.py:141 field-list edit when the additive field lands, and owns the re-check AT that edit. Fields named: TOTAL_NUMBER_OF_HOLDINGS_IN_PORT and FUND_PCT_TOP_TEN_HOLD. AND THE PREMISE IS HALF WHAT IT WAS STATED AS -- re-derived, mine governs, ROUTED NOT EDITED: characteristics.csv carries TOTAL_NUMBER_OF_HOLDINGS_IN_PORT (=1) but NOT FUND_PCT_TOP_TEN_HOLD (=0); derived_summary.csv carries BOTH. So the overlap is ONE field, not two, and for the second the dependency runs the OTHER WAY -- FUND_PCT_TOP_TEN_HOLD is SOLE-SOURCED to the constituents leg with no characteristics copy to fall back on. A premise offered as reassurance ('a missed L1 day is survivable') is, for half its members, the opposite. BOUND: one as-of (2026-08-21), and etf_daily_pull.py:141 is one of at least two field lists (the landed header carries members that line does not), so WHICH list requests FUND_PCT_TOP_TEN_HOLD is UNMEASURED -- not traced, and it is DS~Z's file.",
+      "denominator": "2 named fields x 2 landed files (characteristics.csv, constituents/derived_summary.csv) at as-of 2026-08-21 = 4 cells measured; 4 funds present in derived_summary.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO5-AC6",
+      "criterion_verbatim": "THE COLOUR/VOCABULARY ACT FOR THE NEW VALUES -- the second half of T5-1. Either (a) the ~24 GICS_INDUSTRY_GROUP_NAME values get colour coverage across all THREE tables with a Rule 24 four-postulate record + token-hygiene census; or (b) you state, with the render as evidence, that the colour channel is deliberately not carried at this grain and what replaces it as the discriminating dimension. WHAT IS NOT ACCEPTABLE IS SHIPPING 24 UNDIFFERENTIATED VALUES SILENTLY",
+      "method": "command",
+      "invocation": "Leg 1: parse distinct colour values from SUB_ASSET_CLASS_COLORS. Leg 2: read chartColors.ts:307-313 getSubAssetTextColor. Leg 3: grep -rn industryGroup src (9 hits) + read UniverseDataTab.tsx:150-156 + count colour-keyed occurrences. Leg 4: node scripts/ui-smoke.mjs positioning <out>.png --fixtures <synthetic-24>.json --click ETFs, then READ the PNG + grep the col widths at HoldingsTab.tsx:1160-1162.",
+      "output_evidence": "DETERMINATION: OPTION (b) -- colour is deliberately NOT carried at the GICS_INDUSTRY_GROUP_NAME grain. FOUR INDEPENDENT LEGS. (1) CEILING: categorical colour tops out ~8 slots; SUB_ASSET_CLASS_COLORS already carries 16 DISTINCT colours over 21 keys (2x), today's live vocabulary is 11 (already above 8), and C3's 24 is 3x -- so option (a) cannot be done CORRECTLY at 24, and 'just add the 11' is not a clean fallback either. (2) FOURTH SITE, unnamed by the TO and the one that bites: getSubAssetTextColor (chartColors.ts:307-313) picks text colour from an 8-ENTRY ALLOWLIST of light backgrounds -- any new colour omitted from it silently gets WHITE text, i.e. white-on-light, the estate's #1 portal defect, invisible to grep AND typecheck. (3) ESTATE PRECEDENT (build ladder rung 2): industryGroup is ALREADY LIVE -- SecurityScanner/types.ts:75 'source: indgrp_name', 9 occurrences -- and UniverseDataTab.tsx:150-156 renders it as PLAIN RECESSIVE TEXT (opacity 0.7) with a TEXT FILTER at minWidth 200 vs Sector's 160, and a census returns 0 occurrences of ANY colour keyed on industryGroup anywhere in src. The estate already made this decision; option (a) would make Positioning the only page disagreeing with it. (4) I TESTED MY OWN REMEDY AND IT FAILED IN ITS NAIVE FORM: a synthetic 24-value render shows the labels OVERFLOW and COLLIDE with the TICKER column (Technology Hardware & Equipm+AAPL, Semiconductors & Semiconducto+MSFT, Pharmaceuticals, Biotechnology & Life Scienc+ABBV), source-confirmed at HoldingsTab.tsx:1161 -- the Sub Asset col is FIXED 165px/minWidth 165px, sized for the Models vocabulary (<=21 chars), against a 46-char longest GICS industry group. SO T5-1 HAS A THIRD COMPONENT NOBODY NAMED: COLUMN GEOMETRY. WHAT REPLACES COLOUR: (i) the text label, already proven correct by AC1, CONDITIONAL on widening the column; (ii) sort/grouping adjacency; (iii) a text filter, matching SecurityScanner's existing pattern; (iv) colour stays at the asset_class grain (Equity/Fixed Income/Cash = 3, within ceiling) -- WHICH IS PRECISELY WHAT THE FALLBACK ALREADY DOES. SHARPEST FORM: the current behaviour is what the colour rules would prescribe anyway; the defect was never that it falls through, but that it falls through UNDECLARED, so nobody could tell a decision from an accident. AC6 is discharged by DECLARING it, not by changing it. NOT SHIPPED SILENTLY: this record is the declaration.",
+      "denominator": "21 keys / 16 distinct colours in SUB_ASSET_CLASS_COLORS; 8-entry lightBackgrounds allowlist; 9 industryGroup occurrences / 0 colour-keyed; 113 rows relabelled across 23 distinct synthetic values, longest 46 chars; 3 col-width declarations read.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "INGEST-TO5-AC7",
+      "criterion_verbatim": "Land the three screenshots somewhere durable for Andrew to point at, not a session-scoped scratchpad. Name the path in your report",
+      "method": "command",
+      "invocation": "cp <scratchpad>/*.png org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/ ; safe-commit.sh with an explicitly scoped pathspec",
+      "output_evidence": "FOUR screenshots landed under org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/, lane-prefixed per the site-Z owned-paths rule: deZ_ETFS_INGEST_T5_render_models-empty_20260824.png (the toolchain proof), deZ_ETFS_INGEST_T5_render_etfs-today_20260824.png (ETF mode today), deZ_ETFS_INGEST_T5_render_etfs-fixtured_20260824.png (the Z-S12 answer, real artifact), deZ_ETFS_INGEST_T5_render_SYNTHETIC-24value-labelfit_20260824.png (the AC6 Leg-4 collision evidence). First three committed @b332cc4fa2; the fourth plus its fixture in this commit. The commit pathspec was explicitly scoped to my own deliverable files so it could not sweep the then-dirty portal gitlink -- verified after the fact: git show --stat b332cc4fa2 | grep -c portal = 0.",
+      "denominator": "4 screenshots + 1 fixture + 2 records = 7 artifacts under deliverables/.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC6 Leg-4 render is itself the mutant for my own recommendation: I proposed TEXT as the replacement channel, then constructed a fixture carrying the 24-value vocabulary specifically to try to FALSIFY that proposal on geometry rather than to confirm it.",
+      "expected": "If the text channel were sufficient as-is, the 24-value render would show clean labels in the Sub Asset column, indistinguishable in layout from the 11-value render.",
+      "observed": "IT FAILED. Labels overflow the fixed 165px column and collide with the TICKER column at 5+ visible sites. The proposal survives only with a column-geometry change, which is now a named third component of T5-1 rather than a defect discovered mid-build. A recommendation that cannot fail its own test is not a recommendation.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The AC6 Leg-4 finding was re-derived from two independent instrument classes rather than one run: the RENDER (synthetic 24-value fixture, labels observed colliding with the TICKER column) and the SOURCE (HoldingsTab.tsx:1160-1162 col widths read directly: 165px fixed for Sub Asset, 55px for Ticker). The AC1/AC6 colour finding was likewise re-derived at this seat against CVO~Z's independent extraction and reproduced exactly (0 of 11, three tables).",
+      "observed": "Both classes agree: the collision seen in the PNG is explained exactly by the 165px fixed column against a 46-char longest label. CVO~Z independently measured 0 of 24 across the same three tables with a firing positive control ('US Large Cap' in SUB_ASSET_COLORS -> True), reproducing this seat's 0-of-11 result at the finer grain. POSITIVE CONTROLS RUN: AC4 gate: GICS_SECTOR_NAME = 1 in the same landed header that returns 0 for GICS_INDUSTRY_GROUP_NAME -- run as a SEPARATE invocation after an && chain died on the grep -c 0 and silently skipped it. Caught and re-run rather than reported unfired. | AC1 artifact read: platinum/etfs/positioning_data.json HEAD 200 / 76,149 B against negative control platinum/etfs/zzz_no_such_key_9999.json -> 404. The instrument discriminates. | Portal ancestry: merge-base --is-ancestor run in BOTH directions rather than one, which is what revealed the checkout was BEHIND rather than ahead. || CONTROL THAT DID NOT FIRE, STATED: STATED BECAUSE IT DID NOT FIRE: my chosen positive control for the ETF_CATEGORIZATION ticker parse (SPY/AGG) was ABSENT from the file, so it never fired. The parse is corroborated instead by the 36 recovered keys being plainly ETF tickers (BIV, BSCQ, DIVZ, ...). Weaker evidence than intended; reported rather than presented as clean.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The PROD promote",
+      "reason": "Andrew's word, held on his two conditions. This TO serves condition (ii); it does not discharge the promote."
+    },
+    {
+      "item": "Any portal file edit",
+      "reason": "AC4 is KNOWN-UNREACHABLE (gated on a field not pulled) and AC6 resolves to option (b), a determination rather than a build. Nothing to write this turn; AC3 is satisfied by the absence of a diff."
+    },
+    {
+      "item": "Whether the MODELS artifact's vocabulary can reach the shared tables",
+      "reason": "UNMEASURED and named rather than assumed. I could not locate a Models positioning_data.json under opal-data-portal-v2/platinum/ (only advi/ etfs/ mdpf/) or opal-data-assets/json/. NOT load-bearing for the AC6 determination, which rests on the tables and the render."
+    },
+    {
+      "item": "The 1 NULL sub_asset_class row of 114",
+      "reason": "Not isolated. Flagged in the baseline record, not chased -- outside both cells."
+    },
+    {
+      "item": "Which field list requests FUND_PCT_TOP_TEN_HOLD",
+      "reason": "etf_daily_pull.py:141 is one of at least two lists (the landed header carries members that line does not). Not traced -- DS~Z's file, and it rides the AC5 hand-off."
+    }
+  ],
+  "surprises": [
+    "OBSERVATION/INERT -- A FOURTH LOOKUP SITE the TO does not name, and it is the one that bites: getSubAssetTextColor (chartColors.ts:307-313) selects text colour from an 8-ENTRY ALLOWLIST of light backgrounds. Any colour added to the palette tables but omitted from that list silently renders WHITE text -- white-on-light, invisible to grep and to typecheck, visible only in a render. INERT today because nobody is adding colours; it arms the moment anyone attempts AC6 option (a), which this determination declines. Disarm owner would be whoever takes (a) -- nobody, under option (b).",
+    "OBSERVATION/INERT -- SUB_ASSET_CLASS_COLORS MEMBERSHIP IS CONTROL FLOW, not merely a palette lookup: getSubAssetClass (holdings-shared.tsx:136-148) returns the normalized value only if SUB_ASSET_CLASS_COLORS[normalized] exists, else falls through to getETFCategory(ticker). Adding keys changes which branch Attribution's SelectionTab takes for EXISTING Models holdings -- an AC3 regression path through a second page the TO does not mention.",
+    "OBSERVATION/INERT -- COLUMN GEOMETRY IS A THIRD T5-1 COMPONENT. HoldingsTab.tsx:1161 fixes the Sub Asset column at 165px/minWidth 165px, sized for the Models vocabulary (<=21 chars). The longest GICS industry group is 46 chars. Measured by render, not by inspection.",
+    "OBSERVATION/INERT -- AC5's OVERLAP PREMISE IS HALF WHAT IT WAS STATED AS. FUND_PCT_TOP_TEN_HOLD is absent from characteristics.csv entirely and sole-sourced to the constituents leg, so for that field the dependency runs the OPPOSITE way from the reassurance the record carries. Routed to 0.4.0_DS_ClientPlatform~Z at the field-list edit; not edited by me (spec frozen mid-round).",
+    "OBSERVATION/INERT -- CLAUDE.md's Portal section names bun at /c/Users/AndrewBerman/.bun/bin/bun, which DOES NOT EXIST on site Z; bun resolves via PATH to a winget location under this profile. A seat following the law file literally concludes 'bun is not installed here', which is false and is the conclusion that would have sent DE-class to the laptop. Independently re-confirmed at this seat after MSTR~Z first surfaced it. BASE_EXEC lane, non-D4: surfaced, NOT fixed."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/deZ_ETFS_INGEST_TO5_AC_RECORD_20260824.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-transform schema-check",
+      "invocation": "comp-transform schema-check HoldingsTab",
+      "result": "All rendered fields match their response types. One INFO: types resolved from src/pages/Positioning/types.ts (not co-located); getAUMSummary() -> AUMSummaryResponse not found in types.ts. No MISSING field, so no runtime-undefined risk on the page Andrew is watching. Phase 1 clean."
+    },
+    {
+      "tool": "comp-transform ternary-audit",
+      "invocation": "comp-transform ternary-audit HoldingsTab",
+      "result": "'No string-literal union types found in file or types.ts. Nothing to audit.' READ AS A SCOPE STATEMENT, NOT AN ABSENCE: the mode union PositioningMode = 'models' | 'etfs' lives in shared/bookSet.ts:44, which is outside the paths this tool resolves. The empty result measures the tool's scope, not the file's branching -- recorded so nobody cites it as 'no mode-branching exists'."
+    },
+    {
+      "tool": "comp-cache collisions",
+      "invocation": "comp-cache collisions",
+      "result": "No NEW key introduced by this turn (no code written). Existing ['positioning-data'] is shared by ModelPortfolioModal.tsx:119, Attribution.tsx:34 and Positioning.tsx:106 -- pre-existing and deliberate (one artifact, three readers); the ETF artifact already has its own distinct key ['etf-positioning-data'] per TO-3, so the two payloads cannot share a cache entry."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": ".tools/comp-find -i \"GICS\" portal/src",
+      "result": "6 hits, ZERO in pages/Positioning/ -- reproduces the TO's premise oracle. Confirms his 'GICS replaced' is a VALUE change, not a token to edit. Also surfaced the rung-2 lead that decided AC6 Leg 3: types/portfolio-optimization.ts:22 'industryGroup: string // GICS industry group', which traced to a LIVE SecurityScanner implementation of the exact vocabulary C3 ruled."
+    }
+  ]
+}

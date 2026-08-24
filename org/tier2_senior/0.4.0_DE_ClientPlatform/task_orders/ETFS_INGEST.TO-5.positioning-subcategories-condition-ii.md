@@ -9,7 +9,7 @@
 <placement>**SITE Z** — ruled by `1.0.0_SA_CTO~Z` on your own first `/frontend-dev` render (*"an unprovable toolchain = the one laptop leg, SURFACED not assumed"*). I had left this OPEN in my executor-class declaration rather than assuming it; your render settled it.</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-24T21:0xZ</issued>
-<status>staged — begins on GO</status>
+<status>COMPLETE (measurement + determination) — 6 of 7 criteria PASS; `INGEST-TO5-AC4` UNCOMPUTABLE-BY-CONSTRUCTION / KNOWN-UNREACHABLE (the field is not pulled: 0 in the landed `bbg/2026-08-21/characteristics.csv`, positive control `GICS_SECTOR_NAME`=1 fired). ⛔ **NO PORTAL FILE EDITED** — `AC6` resolves to option **(b)**, a determination, so `AC3` holds byte-identical by absence of a diff. proof-of-spec **VALID rc=0**, 7 rows, 0 violations. Record `deZ_ETFS_INGEST_TO5_AC_RECORD_20260824.md`. LANDED LOCAL, rides integration.</status>
 <priority>P1 for `T5-2` (unblocked, and it answers a live open question) · P2 for `T5-1` (gated on the field).</priority>
 <authority>Andrew-direct ~15:2xZ promote conditions, VERBATIM: *"Until data pipeline is complete with full data structure for daily bloomberg data for all ETFs, and it displays properly on DEV build with **GICS replaced for sub-categories on frontend**."* **C3 RULED ~20:0xZ** (*"all recs approved, proceed"*, CTO~Z msg 4845): sub-categories = **`GICS_INDUSTRY_GROUP_NAME`** (one level finer), **rendered on DEV BESIDE Bloomberg's `HB_INDUSTRY_SECTOR_ALLOCATION` labels for him to point at.** The Models-side segment vocabulary is **OUT**. ⛔ **THE PROMOTE WORD REMAINS HIS** — this TO serves condition (ii); it does not discharge the promote.</authority>
 </task_order>
