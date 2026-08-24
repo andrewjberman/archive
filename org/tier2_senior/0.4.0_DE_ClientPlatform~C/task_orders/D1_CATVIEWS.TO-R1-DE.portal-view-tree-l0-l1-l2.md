@@ -72,7 +72,7 @@
 | **D1R1DE-AC2** | L0 renders the PRESENT subset; a fixture with one node at 0 AUM shows the tile ABSENT (not empty); with SMA AUM > 0 three tiles, else two | D1-h-v1, D1-h-p1 | EXERCISED |
 | **D1R1DE-AC3** | L1 drill per L0 value renders from the block: Client fee buckets (+ third), Models Primary/Custom, SMAs registry-driven; Alternatives click inert + labelled | D1-h-v2 | EXERCISED |
 | **D1R1DE-AC4** | L2 Custom list equals the block's Custom members; the DS-disclosed gap renders as a disclosure | D1-h-v3 | EXERCISED |
-| **D1R1DE-AC5** | Inflection fixture (`predicate: "unavailable"`): the panel shows the unavailable state; both fee buckets ABSENT, not zero | D1-h-v4 | EXERCISED |
+| **D1R1DE-AC5** | ⛔ **RE-SIZED BY THE ISSUER 2026-08-24 ~22:0xZ on DS~F's census (66722): Inflection is NOT the unavailable case — it carries a live account-grain predicate (`is_fee_earning`, 911 accounts), so ZERO firms exercise this today.** The cell STAYS and its exercise is now an explicit **FIXTURE** carrying `predicate: "unavailable"` (a render path with no test fails the first time it is real): the panel shows the unavailable state; both fee buckets ABSENT, not zero; **no firm is named in the evidence** | D1-h-v4 | EXERCISED (fixture) |
 | **D1R1DE-AC6** | Consumed vs empty-fallback cases BOTH captured and DISTINGUISHABLE in the test record (NON-NULL member lists for ≥1 firm in the consumed case) | D1-c-1, D1-c-2 | EXERCISED |
 | **D1R1DE-AC7** | Displayed L0 sum == `total_aua − Insurance`; each L1 sums to its L0 parent; no double-count expressible in the UI | D1-inv-4 | EXERCISED |
 | **D1R1DE-AC8** | Screenshot READ on record + colour law checked on the silver canvas | D1-h-v1 | EXERCISED |
