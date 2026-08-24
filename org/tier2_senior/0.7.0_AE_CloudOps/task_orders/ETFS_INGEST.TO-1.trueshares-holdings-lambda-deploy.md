@@ -160,7 +160,7 @@ and the issuer sheets are current-day; an uncaptured day is gone permanently).
        nothing. And take the rc WITHOUT A PIPE: `| tail` gives you tail's rc.
        The coverage diff is BIDIRECTIONAL — an expected id with no row refuses the whole instance. -->
   <criterion id="INGEST-TO1-AC1" cell_refs="INGEST-T0-3, INGEST-INV-1"/>
-  <criterion id="INGEST-TO1-AC2" cell_refs="INGEST-T0-3"/>
+  <criterion id="INGEST-TO1-AC2" cell_refs="INGEST-T0-3, INGEST-INV-2"/>
   <criterion id="INGEST-TO1-AC3" cell_refs="INGEST-INV-1, INGEST-T0-3"/>
   <criterion id="INGEST-TO1-AC4" cell_refs="INGEST-T1-3, INGEST-T0-3"/>
   <criterion id="INGEST-TO1-AC5" cell_refs="INGEST-T0-3"/>
