@@ -82,9 +82,14 @@ code is landing into.**
 <compiler_tools_mandate>
   <phase id="1" when="before write">
     <step>
-      <run>comp-pipescript io etf_positioning_gold.py --pipeline etfs</run>
-      <expect>READS/WRITES with COLUMN GAPS and the portal consumers enumerated. `--pipeline` is REQUIRED — flagless is rc=2 REFUSED.</expect>
-      <if_mismatch>STOP. A consumer you did not expect means the re-point has a blast radius this TO did not price; surface to COO~Z before writing.</if_mismatch>
+      <run>⛔ **WITHDRAWN — THIS MANDATE WAS UNEXECUTABLE AND IT WAS MINE.** I required `comp-pipescript io etf_positioning_gold.py --pipeline etfs`. **`etfs` IS NOT IN THE ENUM.** Measured at the COO seat, true rc without a pipe: `--pipeline etfs` → **rc=2**, argparse `invalid choice: 'etfs'`; `--pipeline all` → **rc=1**, `Unknown script in tree [all]`, and the tool states on its own face that this is NOT a bd fallback. **`comp-pipescript` DOES NOT MODEL THE ETFS TREE AT ALL** — the valid choices are bd/inf/cot/mdpf/advi variants. **DO NOT RUN IT AND DO NOT SUBSTITUTE `--pipeline bd-gold`, which would return a confident answer about the WRONG TREE.**</run>
+      <expect>Nothing. The step is withdrawn. **`0.4.0_DS_ClientPlatform~Z` surfaced this on TO-2, checked TWO ways rather than declaring a gap on one refusal — the check that caught it is theirs, not mine.**</expect>
+      <if_mismatch>n/a. ⛔ **THE DEFECT WAS MINE: I MANDATED AN INVOCATION I HAD NOT EXERCISED.** `etfs` is a plausible value for this project and it does not exist. A mandate is a claim that a command runs, and I made it without running it. Routed as a comp-tool COVERAGE GAP (the sanctioned CLAUDE.md §21 lane), not as a build.</if_mismatch>
+    </step>
+    <step>
+      <run>python -c "import ast,io; [print(n.lineno, ast.dump(n)[:0] or l) for l in [0]]" — i.e. **read the publisher's read path directly**: `grep -n "GOLD_ROOT\|GOLD_BUCKET" data/etfs/scripts/gold/etf_positioning_publisher.py`</run>
+      <expect>Every site that composes a gold key: `:62-63` (the defaults), `:183` (the table key), `:190` (the book prefix), `:389` (`source_gold` in the manifest). **That four-site list IS the consumer surface `comp-pipescript` would have given you** — you enumerate it by reading, because no tool models this tree.</expect>
+      <if_mismatch>A fifth site means the re-point has a surface this TO did not price. STOP and surface to COO~Z.</if_mismatch>
     </step>
     <step>
       <run>comp-blast etf_positioning_gold</run>
