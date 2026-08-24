@@ -1,4 +1,8 @@
-# ETFS_POSITIONING TO-2 Half 1 -- ROUTE DECISION + ARTIFACT CONTRACT v1
+# ETFS_POSITIONING TO-2 Half 1 -- ROUTE DECISION + ARTIFACT CONTRACT v1.2
+
+> **v1.2 (2026-08-24) -- NORMATIVE UNITS SECTION ADDED. If you are here about `weight`, read
+> "⛔ UNITS" in PART 2 and nothing else: `holdings[].weight` is a FRACTION (0..1), `allocation` and
+> `management` are PERCENT (0..100). DO NOT CONVERT `weight` — pass it through.**
 
 **Owner:** `0.7.0_AE_CloudOps` | **TO:** `ETFS_POSITIONING.TO-2` | **Cells:** `ETFS-e-1`, `ETFS-e-2`
 **decomp_ref:** `workflows/atom_decomposition/runs/etfs-positioning/20260821T194927Z/DECOMP.md`
@@ -134,10 +138,42 @@ S3  : s3://opal-data-portal-v2/platinum/etfs/positioning_data.json
 ONE artifact carrying all four books -- mirroring how Models mode carries five models in one file
 (8,111 B live). DE's reader is then symmetric with `getPositioningData`, different endpoint.
 
+### ⛔ UNITS (v1.2 -- NORMATIVE. Read this before the shape; it is the part v1.0/v1.1 got wrong.)
+
+| field group | unit | range | invariant |
+|---|---|---|---|
+| `holdings[].weight` | **FRACTION** | `0..1` | the book's rows sum to **1.0** |
+| `allocation{}` | **PERCENT** | `0..100` | the group sums to **100** |
+| `management{}` | **PERCENT** | `0..100` | the group sums to **100** |
+| `returns{}` | **PERCENT** | signed | per-period, not cumulative |
+
+**Yes, that is mixed within one artifact, and it is mixed DELIBERATELY: it is the estate's existing
+live convention, not a choice made here.** The authority is the artifact the *same Positioning
+component* already renders correctly for real clients —
+`s3://opal-data-portal-v2/json/positioning/positioning_data.json`, book `UST`: `holdings[0]` VGSH
+`weight = 0.1451` with the rows summing to **1.0000** in **both** the A-form and B-form blocks, while
+`allocation` carries `fixed_income: 100.0`. **The ETF artifact matches it exactly** (measured on the
+live object, `generated_at 2026-08-21T21:25:52Z`: PFDE NVDA `0.0995`, 90 rows summing to `0.9999`,
+`allocation.equity 99.64`).
+
+> ⛔ **CONSUMERS: DO NOT CONVERT `weight`. PASS IT THROUGH.** The page already renders Models from
+> fraction weights. A percent→fraction conversion in the adapter divides `0.0995` by 100 and renders
+> NVDA at `0.0995%` instead of `9.95%` — **100x too small, and plausible-looking on any book whose
+> largest position is under 10%, so nobody catches it by eye.**
+
+> ⛔ **WHY v1.0/v1.1 WERE WRONG, stated because the mechanism generalises past this contract:** they
+> never wrote the unit in words. They showed `"weight": 4.31` in the skeleton — an *example*, and
+> therefore a **silent PERCENT specification**, because an example value is the only unit statement a
+> reader gets. **AN UNLABELLED EXAMPLE VALUE IN A DATA CONTRACT IS A UNIT SPECIFICATION.** DE read
+> v1.1 correctly and built the conversion it implied; two seats then corrected one 100x error from
+> opposite ends and nearly shipped the double-fix. The grounding that settles it — the live Models
+> artifact — was one read away when this contract was authored and I did not take it.
+
 ### The shape -- mirrors PRD s.4, B-form holdings
 
 s.4.3 is explicit that the B-form (`current_holdings`) is *"the richer one, and the one an ETF book
-must match."* This contract uses **B-form field names for holdings**.
+must match."* This contract uses **B-form field names for holdings**. **Every numeric field below
+carries the unit declared in the UNITS table above — read it there, not off the example values.**
 
 ```json
 {
@@ -152,7 +188,7 @@ must match."* This contract uses **B-form field names for holdings**.
       "data_as_of": "2026-08-21",
       "prior_date": "2026-08-20",
       "holdings_status": "full",
-      "num_holdings": 105,
+      "num_holdings": 90,
       "aum": 123456789.0,
       "allocation":      { "cash": 0.0, "fixed_income": 0.0, "equity": 100.0, "hedge": 0.0 },
       "management":      { "active": 100.0, "passive": 0.0 },
@@ -167,7 +203,7 @@ must match."* This contract uses **B-form field names for holdings**.
           "name": "Apple Inc",
           "asset_class": "Equity",
           "sub_asset_class": "<ETF-DECLARED VOCAB -- DS's Rule-24 act>",
-          "weight": 4.31,
+          "weight": 0.0431,        // FRACTION, not percent -- see UNITS
           "fee": null, "aum": null, "yield": null, "duration": null,
           "credit": null, "beta": null, "active": true,
           "returns": { "1D": null, "WTD": null, "MTD": null, "1M": null,
