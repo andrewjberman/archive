@@ -181,3 +181,25 @@ RAVC: reported 5041 → validated `1.0.0_SA_CTO~Z` 5045, accepted `0.0.0_AB_MSTR
 Verified identical to the live object, twice — before and after the copy: **md5 `ee2c4a89152261051b9109c93b971dd6` == the live `ETag`, 76,149 bytes == live `ContentLength`.** (Single-part upload, so the ETag IS the md5; that is why the comparison is sound rather than merely suggestive.) Every count in this record — 114 rows, 4 funds, 2 shells, 11 distinct `sub_asset_class` values — is now **re-derivable from a committed artifact** rather than from a key that is scheduled to be overwritten.
 
 **This does not object to the ad-hoc run.** Refreshing a served key is the producer's normal act and NEVER#3 governs MOVING served output, not refreshing it. CTO~Z's notify-before-write condition is the right control and I am not asking for more. **I am removing my own dependency on the timing of it** — once the bytes are committed, it does not matter whether I am told before or after.
+
+
+---
+
+## THIRD APPEND 2026-08-24 ~22:31Z — THE PIN IS PROVABLY THE PUBLISHED ARTIFACT, verifiable without trusting this seat
+
+A self-taken pin has one weakness: **authorship.** I committed bytes and asserted they were the served object. The producer's own immutable run manifest closes that, and it is checkable by anyone:
+
+```
+platinum/etfs/_manifests/2026-08-21/0b2b20a0a2b7.json   (833 B, immutable, one per run)
+  producer       etf_positioning_publisher     stage platinum     status published
+  generated_utc  2026-08-24T12:30:42Z
+  target         opal-data-portal-v2/platinum/etfs/positioning_data.json
+  body_bytes     76149          ==  the pin   76149
+  body_sha256    ae4c405cc877…  ==  the pin   ae4c405cc877…        MATCH
+```
+
+**That hash was recorded BY THE PUBLISHER AT WRITE TIME, in an object this seat did not write and cannot alter.** So the pinned file is not merely *a copy I say is the artifact* — it is **provably the published artifact**, and every figure in this record is re-derivable from bytes whose authenticity does not rest on my word. `2.0.0_SA_COO~Z` independently verified the pin on sha256 (stronger than the md5-vs-ETag check I ran) and `3.0.0_SA_CVO~Z`'s cited ETag reproduces from it — three seats, three oracles, one artifact.
+
+⛔ **AND A CORRECTION TO THE PRESERVATION ACCOUNTING, because the tidy version is wrong.** It was proposed that pin + versioning + manifests are *three independent preservation paths*, i.e. that an overwrite is recoverable even without the pin. **Measured: it is ONE preservation path, ONE 14-day lease, and ONE verifier.** The manifest is **833 bytes** — it records a HASH of the artifact, not the artifact, so it can PROVE a copy authentic but cannot PRODUCE one. Versioning expires per the fuse above. **Only the committed bytes reconstruct.** The manifests are load-bearing as the verification oracle, which is a different job from preservation and does not substitute for it.
+
+*Identified as this artifact's manifest by its timestamp: `s3 ls` renders LOCAL, so `08:30:49` is `12:30:49Z` — two seconds after the artifact's own write. Reading it in the wrong plane would have made it look like a different day's run.*
