@@ -16,7 +16,7 @@
       "commit_or_etag": "1b285eb822",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "A repo-local checker invoked by CVO at cert time; it has no deploy target. ON origin/CLOUD: git ls-remote origin refs/heads/CLOUD -> a0643a35fc, and git merge-base --is-ancestor 1b285eb822 a0643a35fc -> YES.",
-      "artifact_covered_by": ["D0GATE-L1-1", "D0GATE-L1-2", "D0GATE-L1-3", "D0GATE-L1-4", "D0GATE-L1-5", "D0GATE-L1-6", "D0GATE-L1-7", "D0GATE-L1-8"]
+      "artifact_covered_by": ["D0GATE-L1-1", "D0GATE-L1-2", "D0GATE-L1-3", "D0GATE-L1-4", "D0GATE-L1-5", "D0GATE-L1-6", "D0GATE-L1-7", "D0GATE-L1-8", "D0GATE-L1-10"]
     },
     {
       "path_or_key": ".tools/to-decomp-ref-lint.py",
@@ -31,7 +31,7 @@
       "kind": "test",
       "commit_or_etag": "1b285eb822",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Test file; runs from the repo. 19 arms."
+      "deploy_evidence": "Test file; runs from the repo. 23 arms (19 original + 4 vintage probes added under CTO 66702)."
     },
     {
       "path_or_key": ".tools/tests/test_to_decomp_ref_lint.py",
@@ -72,7 +72,7 @@
       "method": "test_suite",
       "invocation": "python .tools/tests/test_proof_of_spec_alignment.py",
       "output_evidence": "ARM 1 conformant: decomp id space = 4 distinct cell id(s); alignment-forward-1 2/2 criteria carry >=1 cell_ref; alignment-forward-2 3/3 distinct cell_ref(s) resolve; alignment-backward 3/3 declared cell(s) reachable; 0 violations. Denominators asserted as VALUES, not merely present.",
-      "denominator": "4 decomp cells / 3 declared / 2 criteria; battery 19 of 19 arms as expected",
+      "denominator": "4 decomp cells / 3 declared / 2 criteria; battery 23 of 23 arms as expected",
       "status": "PASS"
     },
     {
@@ -139,12 +139,21 @@
       "status": "PASS"
     },
     {
+      "criterion_id": "D0GATE-L1-10",
+      "criterion_verbatim": "add the one-line existence check -- decomp_ref.vintage_commit MUST resolve (git cat-file -e <vintage>^{commit}) -> VIOLATION naming the field and the hash when it does not",
+      "method": "test_suite",
+      "invocation": "python .tools/tests/test_proof_of_spec_alignment.py (ARMS 11-14), plus the same four probes run against the live ETFS TO-3 instance",
+      "output_evidence": "REPAIR OF A DEFECT IN MY OWN DELIVERED L1, found by 3.0.0_SA_CVO in independent verification (66693) and routed by CTO 66702. Before: vintage_commit was REQUIRED by schema and its VALUE was checked by no layer, so on live ETFS TO-3 -- 20c092c0da (real) VALID, 20c092c0db (ONE CHAR OFF) VALID, deadbeef99 VALID. Reproduced at my seat before fixing. After: real hash VALID rc=0; one-char-off, deadbeef99 and 0000000000 all INVALID rc=1. MY OWN BATTERY COULD NOT HAVE CAUGHT THIS -- every pre-existing arm used the same fixture vintage, so no arm ever varied the field under test; that is a real limit of author-written mutants and the reason the certifier re-runs independently.",
+      "denominator": "4 of 4 vintage probes behave as specified; battery 23 of 23 arms (was 19, +4)",
+      "status": "PASS"
+    },
+    {
       "criterion_id": "D0GATE-L2-1",
       "criterion_verbatim": "a pipeline-registered TO without <decomp_ref> REFUSED",
       "method": "test_suite",
       "invocation": "python .tools/tests/test_to_decomp_ref_lint.py (ARM 1)",
       "output_evidence": "registered + no decomp_ref -> rc=1. Also exercised on a real staged file in the live repo: a transient D1_CATVIEWS TO with no ref returned rc=1 under ENFORCE and rc=0 under ANNOUNCE; fixture removed afterwards.",
-      "denominator": "battery 18 of 18 arms as expected",
+      "denominator": "L2 battery 18 of 18 arms as expected",
       "status": "PASS"
     },
     {
@@ -212,6 +221,10 @@
       "reason": "OMITTED DELIBERATELY, AND ITS ABSENCE IS MEASURED, NOT ASSUMED. CTO 66622 instructed 'decomp_ref included -- the D0 packet is pipeline-registered'. I checked that premise instead of complying with it, and it does not hold on this fabric: (1) there is NO D0 project JSON in org/projects/ at all (grep for D0*, and a scan of all 326 JSONs for d0_infra/infra_tightening -> 0 matches), so D0 is NOT pipeline-registered -- the 10 registered projects are ADVI_49FSRC, ADVI_COTKEY, ADVI_INSURE, ADVI_PERFRP, ADVI_STITCH, D1_CATVIEWS, D3_MODELOVERLAY, DATA_PIPMAP, ETFS_POSITIONING, MDPF_PROVCANON; (2) there is NO D0 decomp run under workflows/atom_decomposition/runs/ (no d0/infra directory), so there are no cells to cite; (3) there is NO TO addressed to this lane (to-check --all --assignee 0.8.0_AE_CloudComp~F -> 0 active TOs across 2083 scanned), so there is no to_ref and no issuance-half <criterion cell_refs> to join against. Writing a decomp_ref here would mean inventing a decomp path and cell ids -- which is exactly the retrofitted derivation my own layer-1 code REFUSES ('a derived cell_ref makes alignment LOOK satisfied while being FALSE'), and would make my gate pass on a lie authored by the person who wrote the rule against it. Run against my own checker this instance correctly takes the ANNOUNCE branch (no governing TO carrying <decomp_ref> -> pre-pipeline) and is VALID on that basis, which is the honest outcome rather than a manufactured one."
     },
     {
+      "item": "CONTAINMENT of the decomp doc at the cited vintage (does that commit's tree actually contain decomp_ref.doc, and does the doc at that vintage carry the cited cells)",
+      "reason": "NAMED NON-GOAL for L1 v1, ruled by CTO 66702 and declared in the checker's own docstring rather than silently absent. It is the layer-5 judgment residue's mechanical edge and costs a git read per instance per check, and the existence check already kills the one-character-off class that was actually measured. A real instance citing a RESOLVING vintage whose tree lacks the doc re-opens this as its own item -- specimen-triggered, not built on speculation."
+    },
+    {
       "item": "the SEATING LINT (a TO commit-lint refusing a new TO addressed to a multi-project instance unless it names a fresh lane)",
       "reason": "NOT STARTED. The packet and CLAUDE.md Rule 27 both carry it as a CANDIDATE/PROPOSED only; CTO 66492 and 66554 both restate that it is held pending Andrew's word. Implementing a gate without his explicit word is the NEVER rule against agent-manufactured gates."
     },
@@ -237,7 +250,7 @@
     },
     {
       "item": "independent re-run of both batteries",
-      "reason": "BY DESIGN NOT THE AUTHOR'S ACT. The packet specifies 'CVO re-runs the mutants independently'; 3.0.0_SA_CVO 66643 has confirmed the schema half and states plainly that the L1/L2 battery re-run is NOT yet done. My arm counts are my own measurement, not a certification."
+      "reason": "BY DESIGN NOT THE AUTHOR'S ACT, AND NOW DISCHARGED BY THE CERTIFIER. 3.0.0_SA_CVO re-ran both batteries independently at its own seat (66693): 19/19 and 18/18 reproduced exactly, plus a clean live ENFORCE-mode exercise on ETFS TO-3 (forward-1 6/6, forward-2 6/6, backward 5/5). That re-run is ALSO what produced the vintage defect in D0GATE-L1-10, which my own arms structurally could not reach. The 4 new vintage arms (23/23 total) are re-run by CVO per CTO 66702 and are NOT yet independently confirmed at the time of this amendment."
     }
   ],
   "surprises": [
