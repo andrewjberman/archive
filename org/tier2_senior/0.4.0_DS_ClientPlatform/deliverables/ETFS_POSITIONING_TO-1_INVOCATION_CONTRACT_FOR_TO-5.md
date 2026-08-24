@@ -5,6 +5,20 @@
 **Producer commit:** `71265d372e`, **ON `origin/CLOUD`** (`git branch -r --contains` = 1)
 **Governing:** TO-1 Amendment A (two stages) + Amendment B (`AC4` reassigned here) @`124200ad45`
 
+> ⛔ **CORRECTED 2026-08-24 ~21:4xZ — THE GOLD HOME MOVED AFTER THIS CONTRACT WAS WRITTEN. READ
+> §7 AND §8 BEFORE ANY TO-5 APPLY.** `ETFS_INGEST.TO-3` re-pointed the producer to
+> **`opal-data-etfs/gold/{table}/date={D}/`** per **C2** (Andrew-direct 2026-08-24 word (4)). Two
+> rows of this contract were falsified by that ruling, and **applying them together would have
+> failed INVISIBLY**: §7's env vars are an **override**, so setting them re-points the producer back
+> to the old home (silent), while §8's IAM was scoped to the old prefix (loud, `AccessDenied` on the
+> new one) — **and applied together the two CANCEL**, because the env sends writes exactly where the
+> stale grants permit. Green pipeline, landed artifacts, healthy instruments, **and C2 silently did
+> not happen.** A HALF-applied contract would have failed visibly; the FULLY-applied one fails
+> invisibly. Corrections are marked inline in §7 and §8. Authorization: `1.0.0_SA_CTO~Z` msg 5134
+> (who ruled C2). Found by `0.4.0_DS_ClientPlatform~Z` sweeping for old-home references *after*
+> making the code change — **a sweep tells you WHERE a string is, never WHAT DEPENDS ON IT**, and
+> this file is not a record, it is an instruction another seat executes.
+>
 > **EVERY NUMBER BELOW IS MEASURED ON THIS BOX, NOT ESTIMATED.** Rule 5 forbids leaving
 > `yang-lambda` defaults (256MB/30s) on a data-processing Lambda, and a sizing I guessed would be
 > the same defect wearing a different number.
@@ -150,7 +164,7 @@ the timeout is not sized against today's partition count and then quietly breach
 |---|---|---|---|
 | `OPAL_ETFS_PUBLISH_GRANT` | **publisher ONLY** | `1` | **REQUIRED** or `--publish` raises. Not an approval gate -- a runtime write-discipline refusal. |
 | `ETFS_BUCKET` | stage 1 | `opal-data-etfs` | default; override only for QA |
-| `ETFS_GOLD_BUCKET` / `ETFS_GOLD_ROOT` | both | `opal-data-assets` / `portal/gold/etfs/positioning` | must MATCH across both stages |
+| `ETFS_GOLD_BUCKET` / `ETFS_GOLD_ROOT` | both | ⛔ **SET NEITHER — TO-5's Terraform must not carry either key.** The code defaults are now `opal-data-etfs` / `gold` (C2, `etf_positioning_gold.py:91-92`, `etf_positioning_publisher.py:62-63`) | **CORRECTED 2026-08-24 by C2 (Andrew word (4)); ruling `1.0.0_SA_CTO~Z` msg 5134.** The old row said `opal-data-assets` / `portal/gold/etfs/positioning` — **applying it would have SILENTLY REVERTED C2**, because the env is an OVERRIDE by construction. **And setting these vars to their own NEW values is also refused:** a var set to its own default is not neutral — it re-creates the two-sources-of-truth surface F2 is this project's first act because of, and lets a future editor move one side silently. **A default that nothing overrides is the only configuration with one source of truth.** |
 | `ETFS_SERVE_BUCKET` / `ETFS_SERVE_ROOT` | publisher | `opal-data-portal-v2` / `platinum/etfs` | |
 
 ## 8. IAM -- least privilege, and the AC7 boundary is enforced in code as well
@@ -158,11 +172,12 @@ the timeout is not sized against today's partition count and then quietly breach
 **Stage 1 (gold) role:**
 - `s3:GetObject` on `opal-data-etfs/{config/etf_universe.json, silver/holdings/*, silver/netassets/*, bbg/*}`
 - `s3:ListBucket` on `opal-data-etfs` (prefix-scoped: `silver/holdings/`, `bbg/`) -- **required**, the as-of resolution and history read both paginate listings
-- `s3:PutObject` on `opal-data-assets/portal/gold/etfs/positioning/*` -- **this prefix only**
+- `s3:PutObject` on **`opal-data-etfs/gold/*`** -- **this prefix only.** ⛔ **CORRECTED (C2, CTO~Z 5134): DROP the old `opal-data-assets/portal/gold/etfs/positioning/*` grant entirely.**
+- `s3:ListBucket` on `opal-data-etfs` -- **add prefix `gold/`** alongside the existing `silver/holdings/` and `bbg/` (the as-of resolution paginates listings)
 - **NO grant to `opal-data-portal-v2` at all.**
 
 **Stage 2 (publisher) role:**
-- `s3:GetObject` + `s3:ListBucket` on `opal-data-assets/portal/gold/etfs/positioning/*`
+- `s3:GetObject` + `s3:ListBucket` on **`opal-data-etfs/gold/*`** ⛔ **CORRECTED (C2, CTO~Z 5134)** -- was `opal-data-assets/portal/gold/etfs/positioning/*`
 - `s3:GetObject` + `s3:PutObject` + `s3:ListBucket` on `opal-data-portal-v2/platinum/etfs/*` -- **this prefix only, never the parent** (GetObject is needed for the D5 unchanged-source compare; ListBucket for the 13c listing-verified landing)
 - ⛔ **NO grant to `opal-data-portal-v2/json/*`.** That is what makes Models-mode byte-identity
   structural rather than disciplinary, and it is `ETFS-TO1-AC7`'s second half.
