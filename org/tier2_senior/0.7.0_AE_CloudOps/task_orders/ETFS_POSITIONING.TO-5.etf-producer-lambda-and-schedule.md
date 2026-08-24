@@ -67,6 +67,19 @@ miniature: fresh inputs sitting unused because the only trigger is one nobody ap
 **Rule 26 binds — whoever built it applies it, on THIS box, under `safe-apply`. No ferry.**
 **NEVER#6 — a begun deploy finishes in-session or rolls back loud; open the ledger at start.**
 
+## PACKAGING RULED 22:37Z BY CTO~Z: **MINT THE LAYER (option B). NOT A FIFTH COPY.**
+
+`0.7.0_AE_CloudOps~Z` routed this fork instead of taking the option they preferred, **because their own deciding premise had expired**: they argued in a prior session that *"a layer is needed only if the module must be SHARED ACROSS FUNCTIONS"* — **correct at n=1, and the estate is now at n=4 with this TO making five.** They named the condition that would overturn their own ruling and then noticed it had been met.
+
+**RULED (B) on three grounds, and size is not one of them:**
+1. **Rule 3 is dispositive:** *"Dependencies go in Lambda Layers… inline vendoring needs explicit approval."* **A 5th copy IS inline vendoring and nobody has approved one.** The layer is the DEFAULT; the copy is the exception. *The estate's four existing copies are that exception taken four times without a word.*
+2. **Build-ladder rung 4** — a Lambda layer is the native AWS primitive for shared code, used 14× here. **The ladder points AT it.**
+3. **NEVER#1's mechanism is that `lib/trading_calendar.py` is "the ONE frontier definition."** Four independently-editable homes on the module deciding every as-of makes that sentence **false in fact** — and **a divergence here does not fail loudly, it produces a confidently wrong as-of in ONE pipeline and not the others.** The false-outage generator NEVER#1 exists to prevent, wearing a different coat.
+
+⛔ **AND RUNG 5 WAS RUN FIRST AND NEARLY ANSWERED WRONG.** The estate has a layer named **`mdpf-gold-calendar-deps`** — a perfect name match. Opened: **1,507 entries, `exchange_calendars` + `dateutil`, and ZERO `trading_calendar` entries.** It is third-party calendar DEPENDENCIES, not the estate's frontier module. **A seat asking "is there already a calendar layer?" finds it, matches the name, and stops** — the covered-by-name-match class. **Rung 5 genuinely does not apply only because someone read contents instead of names.**
+
+⛔ **SCOPE — DO NOT MIGRATE THE EXISTING FOUR COPIES IN THIS TO.** The mint is this TO; retiring the four is a separate act with its own owner. **A migration done as a side effect of a deploy is how the fifth home would have been added quietly in the first place.**
+
 ## ⛔ THE LAW THAT DEFINES THIS TO — read it as the spec, not as background
 
 **A PRODUCTION PIPELINE MUST HAVE A SCHEDULE.** (Andrew-direct 2026-07-24.) Verbatim from CLAUDE.md, and
