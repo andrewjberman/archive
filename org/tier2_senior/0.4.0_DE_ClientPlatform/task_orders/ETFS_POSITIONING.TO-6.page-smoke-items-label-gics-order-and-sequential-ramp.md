@@ -48,25 +48,39 @@ spend fork, not to a lane.**
 never touches a sector-name string** — which is why the `Technology`/`Healthcare` collision cannot
 fire there. **Correct trap, wrong list to fear it on.**
 
-## ⛔ THE FORK — ANDREW'S OWN SENTENCE CARRIES BOTH HALVES AND THEY PULL APART
+## ✅ THE FORK IS ANSWERED — ANDREW-DIRECT ~23:44Z. **AC3–AC6 ARE RELEASED.**
 
 ```
-"order by canonical Sector/GICS ordering"                  -> SECTOR_INDICES (GICS ascending)
-"see how the frontend handles it in Portfolio Management
- (Yang was very adamant on how sectors should be ordered)" -> ECONOMY_ORDER  (a chosen sequence)
+"If you have access to economy code for these securities we can order based on that instead of
+GICS, i really dont care if its official gics or some general economy/sector thing, whatever we
+can get."
 ```
-**`ECONOMY_ORDER` starts 25, 45, 40, 10 — deliberately NOT ascending. `SECTOR_INDICES` is textbook
-GICS. These are different orders and only one can be built.**
-⚠ **AND THE COST RUNS THE WRONG WAY: `SECTOR_INDICES` is nearly free (name-keyed, exact spelling);
-`ECONOMY_ORDER` needs a sector-name -> code bridge that DOES NOT EXIST and is UNVERIFIED** (PM's own
-header says *"Yang's original economy names and codes, no GICS remapping"* — **do not assume
-45 = Information Technology**). **The cheap option is the one that may be the wrong order, which is
-exactly when a seat picks it and calls it reuse.**
->> **CARDED TO ANDREW. DE~Z reads the second half as governing — "adamant" only means something if
-the order is not the obvious one — and I forward that reading AT THEIR STRENGTH: a reading of his
-words, not a determination. AC2 is discharged by HIS ANSWER, cited; not by either of us picking.**
-⛔ **THE LABEL CRITERION DOES NOT WAIT ON THIS FORK — execute it now. This TO is not a hold on the
-label, and treating the fork as one would be a gate nobody asked for.**
+
+⭐ **WE DO HAVE IT AND IT COSTS NOTHING NEW.** `ECONOMY_ORDER` **is GICS codes** (its own comment,
+`constants.ts:103`: *"Canonical sector/economy ordering (GICS codes)"*), and our `sub_asset_class`
+values are GICS sector NAMES already pulled in `GICS_SECTOR_NAME`. **`1.0.0_SA_CTO~Z` mapped it:
+10 of 10 of our sectors resolve.** No new Bloomberg field, no second source.
+
+### THE RULED ORDERING CONTRACT (`1.0.0_SA_CTO~Z`, on Andrew's word)
+
+1. **Sort key = `GICS_SECTOR_NAME` → GICS code → `ECONOMY_ORDER.indexOf(code)`.** Matches PM's actual
+   behaviour (`TradeTab.tsx:255-262, :286-287`), **so a user moving between Models and ETFs sees ONE
+   order** — which is what his pointing at PM was for.
+2. ⛔ **THE MAP IS A DECLARED CONSTANT, NOT AN INFERENCE.** 11 rows, in code, testable. **Never
+   derive a code from a name at runtime by string-munging.** ⛔ **And key it on the spelling OUR DATA
+   USES** — `Health Care`, `Information Technology` (i.e. `SECTOR_INDICES`' spelling, **NOT**
+   `SECTORS`' `Healthcare`/`Technology`). **That is the collision, arriving where it actually
+   matters.**
+3. **`Cash & Cash Equivalents` and unmapped values APPEND AFTER the ten, DECLARED.** `ECONOMY_ORDER`
+   carries trailing `65, 90, 95` which are not GICS sectors — **if those have known meanings in PM,
+   USE them (rung 2); if not, append and say so.** ⛔ **Do NOT invent a code for Cash to make the
+   sort uniform. An identifier that means nothing is worse than a declared exception.**
+4. **The `None` row (TPG) sorts LAST and stays VISIBLY unlabelled.** It is a real defect with an
+   owner — **hiding it inside a sort order is the safe-and-invisible conversion we keep refusing.**
+
+**Item 6's dependency on item 5 is DISCHARGED.** Ramp technique and colour families from the Models
+ramp (`SUB_ASSET_CLASS_COLORS`), ORDER from (1). **Two inputs, still not a port** — the key sets do
+not overlap, so it is a new table built to the same construction rule.
 
 ## TWO THINGS THAT BIND WHICHEVER ORDER WINS (DE~Z)
 
