@@ -99,8 +99,14 @@ label, and treating the fork as one would be a gate nobody asked for.**
   specifying a **sequential ramp over an ORDERED axis**, a different encoding that tolerates many
   values precisely because order carries the meaning. **Your analysis is out of scope for what he
   asked, not wrong.**
-- **Your own measured constraints still bind:** the **4-site blast radius** and the
-  `getSubAssetTextColor` **8-entry allowlist**.
+- ⛔ **THE RAMP'S SUCCESS CONDITION IS WHAT TRIGGERS THE FAILURE — `0.4.0_DE_ClientPlatform~Z`,
+  5878, binding on AC4+AC5:** *"a light→dark ramp GENERATES LIGHT VALUES BY CONSTRUCTION, and
+  `getSubAssetTextColor` (`chartColors.ts:307-313`) picks text colour from an 8-entry allowlist — any
+  new light step omitted ships WHITE-ON-LIGHT, invisible to grep and to typecheck, visible only in a
+  render."* **Updating that allowlist is PART OF THE CHANGE, NOT A FOLLOW-UP.**
+  ⚠ **No instrument in the commit path can see this** — typecheck passes, grep passes. **Which is
+  why AC4's grounding is EXERCISED (rendered) and must never be discharged from SOURCE.**
+- **The 4-site blast radius** you measured still binds.
 - **No producer changes.** This TO is frontend only and must not collide with the 13:00Z work.
 - **`Real Estate` absent and `None`=1 are FIELDS, not defects.** Do not "fix" the data from here.
 - **No alarms, monitors, SES or freshness checkers** (standing moratorium).
