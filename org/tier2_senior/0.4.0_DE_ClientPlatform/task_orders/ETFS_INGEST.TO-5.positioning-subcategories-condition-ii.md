@@ -44,6 +44,56 @@ that axis, and a pre-existing question fell out instead.** If your render shows 
 **say so and Z-S-G closes as a non-finding** — *the reason it is not a finding is more useful than
 the finding would have been.*
 
+## ⛔ AMENDMENT 1 (21:0xZ, BEFORE GO) — `T5-2` IS ALREADY ANSWERED, AND THE ANSWER IS A THIRD THING
+
+`0.4.0_DE_ClientPlatform~Z` rendered it under CTO~Z's earlier direction before this TO reached them.
+**`INGEST-TO5-AC1` is DISCHARGED at issuance** — evidence: their msg 5042, portal vintage `d43b88c5`,
+the REAL artifact as fixture (`platinum/etfs/positioning_data.json`, 76,149 B, 2026-08-24T12:30:47Z
+s3api/UTC, negative control 404).
+
+**THE VERDICT — neither prediction, and the screenshot is why:**
+- ✅ **THE LABELS ARE FINE.** Every GICS name renders in full and correctly spelled. The display-map
+  miss is **harmless** because the fallback chain ends in `return apiSubAssetClass` — the raw value
+  survives to the page. **Nothing is mislabelled.**
+- ❌ **THE COLOUR CHANNEL IS DEAD.** `getAssetClassBgColor` (`Attribution/constants/holdings-shared.tsx:99-104`)
+  returns `SUB_ASSET_CLASS_COLORS[sub]` when present, **else** `ASSET_CLASS_COLORS[assetClass]`. At
+  **0 of 11** coverage all 110 equity rows fall to the same `ASSET_CLASS.equity` fill: the SUB ASSET
+  column is one flat blue, and the composition treemap paints every tile identically. **In Models mode
+  that colour is the DISCRIMINATING channel; in ETF mode it carries zero information.**
+
+> **SO IT DOES NOT RENDER *WRONG*. IT RENDERS *UNDIFFERENTIATED*.** The lookup census predicted
+> breakage; the fallback chain predicted harmlessness; **the page shows correct text with a dead
+> colour dimension.** Neither grep could have produced that answer.
+
+⚠ **AND THEY FOUND A THIRD TABLE MY MEASUREMENT MISSED.** I cited two maps; there are **three**, and
+the one I missed is **the mechanism site**: `SUB_ASSET_CLASS_COLORS` at
+`Attribution/constants/holdings-shared.tsx:71` (21 keys, 0 of 11). **My two-map figure was a FLOOR I
+presented without saying so.** Colour law: PASS on the silver canvas.
+
+⚠ **TODAY the miss is UNREACHABLE** — the route is committed-not-deployed, so ETF mode shows the
+cause-agnostic "not available yet" notice and nothing renders. **A verdict taken today would have
+read "harmless" and would have been harmless FOR THE WRONG REASON.** Using the live artifact as the
+fixture is what made the answer real.
+
+## ⛔ AMENDMENT 2 (21:0xZ, BEFORE GO) — `T5-1` IS **TWO ACTS**, AND MY ORIGINAL SCOPE HAD ONE
+
+DE~Z's consequence, adopted verbatim in substance: **C3's 24 `GICS_INDUSTRY_GROUP_NAME` values will
+miss the same three tables exactly as the 11 do now.**
+
+> ⛔ **A T5-1 BUILD THAT ONLY SWAPS THE FIELD INHERITS THE DEAD COLOUR CHANNEL AT FINER GRAIN — 24
+> undifferentiated values instead of 11, which is STRICTLY WORSE, because the finer the axis the more
+> the colour channel was carrying.**
+
+**So `T5-1` is scoped as two halves and `AC6` is added for the second:**
+1. **the field swap** — the additive pull + the gold row carrying it (not yours; DS/vehicle lanes);
+2. **a COLOUR/VOCABULARY ACT for the new values** — ⛔ **a Rule 24 AUTHORING EVENT.** Per the
+   2026-08-20 widening, **PROPOSING values to an existing axis is itself an authoring act** requiring
+   the four-postulate test **and** a token-hygiene census.
+
+**DE~Z is NOT minting that vocabulary and neither am I** — they named it so this TO could scope it
+deliberately instead of having it discovered mid-build. **That is the surprise channel working as
+designed: an executing seat surfaced a scope gap in my spec and did not fix it off their own bat.**
+
 ## `INGEST-T5-1` — condition (ii), and its dependency is NOT YOURS
 
 **What C3 asks for: BOTH vocabularies on the DEV build, side by side, so Andrew can point at one.**
@@ -80,6 +130,8 @@ I would not silently edit it — the constraint belongs where it is executable.)
 | **`INGEST-TO5-AC2`** | **Enumerate the render + lookup sites with a printed denominator**, and state which are **ETF-mode-only** vs **SHARED WITH MODELS MODE**. ⛔ **A token census is a FLOOR — pair it with a structural pass** (the round-1 lesson: a quote-delimited pattern found 5 of 12 membership sites and read CLEAN) | `INGEST-T5-2` | **SOURCE, two instrument classes** |
 | **`INGEST-TO5-AC3`** | ⛔ **MODELS MODE BYTE-IDENTICAL — the inherited sovereign constraint.** ETF and Models render through the **same components**, so any change here can move Models. Byte-diff the Models-mode payload/render pre- and post-change. **This is ETFS_POSITIONING's constraint and it binds you** | `INGEST-T5-1`, `INGEST-T5-2` | **EXERCISED** |
 | **`INGEST-TO5-AC4`** | **Condition (ii): BOTH vocabularies rendered SIDE BY SIDE on the DEV build** — `GICS_INDUSTRY_GROUP_NAME` beside the Bloomberg `HB_INDUSTRY_SECTOR_ALLOCATION` labels, **for him to point at.** ⛔ **NOT a swap.** Screenshot is the deliverable. **Gated on the field landing — declare KNOWN-UNREACHABLE with one line if it has not, rather than leaving the criterion silently open** | `INGEST-T5-1` | **EXERCISED (render)** |
+| **`INGEST-TO5-AC6`** | ⛔ **THE COLOUR/VOCABULARY ACT FOR THE NEW VALUES — the second half of `T5-1`.** Either (a) the ~24 `GICS_INDUSTRY_GROUP_NAME` values get colour coverage across **all THREE tables** (`holdings-shared.tsx:71`, `chartColors.ts:279`, `HoldingsTab.tsx:136`) with a **Rule 24 four-postulate record + token-hygiene census**, since proposing values to an existing axis IS an authoring act; **or** (b) you state, with the render as evidence, that the colour channel is deliberately not carried at this grain and **what replaces it as the discriminating dimension.** ⛔ **WHAT IS NOT ACCEPTABLE IS SHIPPING 24 UNDIFFERENTIATED VALUES SILENTLY** | `INGEST-T5-1`, `INGEST-T5-2` | **EXERCISED (render) + SOURCE** |
+| **`INGEST-TO5-AC7`** | **Land the three screenshots somewhere durable for Andrew to point at**, not a session-scoped scratchpad. Name the path in your report. *(You asked where; this criterion is the answer — put them under your own `deliverables/` and cite them, since the DEV render IS the artifact condition (ii) is judged on.)* | `INGEST-T5-2`, `INGEST-T5-1` | **ARTIFACT** |
 | **`INGEST-TO5-AC5`** | **The overlap re-check** (above) is performed at the field-list edit, or explicitly handed to whoever makes that edit **by serial**, with the two fast-moving field names stated. **A hand-off names a person; "someone should check" is not a hand-off** | `INGEST-T5-1` | **SOURCE** |
 
 <compiler_tools_mandate>
@@ -132,7 +184,9 @@ I would not silently edit it — the constraint belongs where it is executable.)
   <criterion id="INGEST-TO5-AC3" cell_refs="INGEST-T5-1, INGEST-T5-2"/>
   <criterion id="INGEST-TO5-AC4" cell_refs="INGEST-T5-1"/>
   <criterion id="INGEST-TO5-AC5" cell_refs="INGEST-T5-1"/>
-  <expected_criteria>INGEST-TO5-AC1,INGEST-TO5-AC2,INGEST-TO5-AC3,INGEST-TO5-AC4,INGEST-TO5-AC5</expected_criteria>
+  <criterion id="INGEST-TO5-AC6" cell_refs="INGEST-T5-1, INGEST-T5-2"/>
+  <criterion id="INGEST-TO5-AC7" cell_refs="INGEST-T5-2, INGEST-T5-1"/>
+  <expected_criteria>INGEST-TO5-AC1,INGEST-TO5-AC2,INGEST-TO5-AC3,INGEST-TO5-AC4,INGEST-TO5-AC5,INGEST-TO5-AC6,INGEST-TO5-AC7</expected_criteria>
   <instance_path>org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/ETFS_INGEST.TO-5_PROOF_OF_SPEC.json</instance_path>
 </proof_of_spec>
 
