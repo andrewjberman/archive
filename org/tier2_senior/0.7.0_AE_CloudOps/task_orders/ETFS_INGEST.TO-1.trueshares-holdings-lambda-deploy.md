@@ -2,7 +2,7 @@
 
 <task_order id="ETFS_INGEST.TO-1" project="ETFS_INGEST">
 <decomp_ref>workflows/atom_decomposition/runs/etfs-ingest/20260824T2010Z/DECOMP.md — cells `INGEST-T0-3` (the TrueShares source), `INGEST-T1-3` (the bronze holdings feed it writes), `INGEST-INV-1` (deployed bytes == the source they are built from)</decomp_ref>
-<certification>⛔ **UNCERTIFIED DECOMP.** The stage-3 run is authored and NOT yet certified — `3.0.0_SA_CVO~Z` (certifier of record) is seated as of 19:57Z and has not signed. Stated on this TO's face per DIRECTIVE_EXECUTION_PIPELINE.md Stage-3. **The decomp is also a REDUCED-COHORT run: one independent perspective (the author's). Read its cells accordingly.** This TO is cut ahead of certification deliberately, because the cell it discharges has a real clock (below) — a disclosed trade, not an oversight.</certification>
+<certification>⛔ **CUT AHEAD OF CERTIFICATION AND CARRIED "UNCERTIFIED DECOMP" ON ITS FACE — that was the legal shape and it was correct.** ✅ **THE DECOMP IS NOW CERTIFIED**: `3.0.0_SA_CVO~Z`, certificate `org/tier1_exec/3.0.0_SA_CVO/deliverables/laneZ_ETFS_INGEST_STAGE3_DECOMP_CERTIFICATION_20260824.md` @422bdb431b, **BOUND TO ONE VINTAGE — `@fcdf042972` AND NO OTHER** (the certifier verified their certified pin byte-identical to that commit, sha256 `1bc5eba5de…`, 480 lines, rather than assuming it; the three earlier commits are explicitly NOT covered and two of them FAIL the cells→criteria direction). ⛔ **THE SIGNATURE DOES NOT CLOSE THE COHORT GAP:** this remains a **REDUCED-COHORT** run — **one independent perspective, the author's**. *A certifier is the second reader, not the cohort;* nobody has independently re-enumerated the operative surfaces. **Premise-oracle verification was a SAMPLE, NOT A CENSUS: 3 of 36 re-run verbatim, 3 of 3 reproducing. The other 33 are unverified and the certificate does not assert them.**</certification>
 <issued_to>AE-class (Lambda / Terraform / deploy). Seated: `0.7.0_AE_CloudOps~Z` (live pid 5024, spawned 20:06Z ahead of this TO).</issued_to>
 <executor_class>AE-class</executor_class>
 <seating_trigger>SEATED. No dependency, no queue — this is the first cut of round 1 and nothing is sequenced ahead of it.</seating_trigger>
@@ -176,7 +176,17 @@ and the issuer sheets are current-day; an uncaptured day is gone permanently).
 | HEAD carries the call site | `grep -n "fetch_trueshares_holdings" infra/aws/lambda/etfs-pipeline/etfs-netassets-daily/lambda_function.py` → **3 hits incl. `:552`** |
 | the working tree == HEAD for that file | `git diff HEAD -- <file>` → **0 lines** |
 | the flag is applied and TRUE | `aws lambda get-function-configuration --function-name etfs-netassets-daily` → `TS_HOLDINGS_ENABLED=1` |
-| the bronze holdings prefix is empty | `aws s3 ls s3://opal-data-assets/trueshares/DIVZ/bronze/holdings/ --recursive \| wc -l` → **0** |
+| the bronze holdings prefix is empty | `aws s3 ls s3://opal-data-assets/trueshares/DIVZ/bronze/holdings/ --recursive \| wc -l` → **0** — ⛔ **AND YOU MUST PAIR IT WITH THE SIBLING POSITIVE CONTROL BELOW; ALONE IT IS NOT A SOUND PRE-CONDITION** |
+| **the sibling prefix is populated — THE CONTROL THAT MAKES THE ROW ABOVE MEAN ANYTHING** | `aws s3 ls s3://opal-data-assets/trueshares/DIVZ/bronze/netassets/ \| wc -l` → **40** |
+
+> ⛔ **WHY THE PAIR — `3.0.0_SA_CVO~Z`'s cert finding against this TO, and it is correct.** The
+> empty-prefix read expects **0**, and **a NONEXISTENT prefix also returns 0** — so as a
+> PRE-condition it cannot tell *"this prefix is empty"* from *"I asked the wrong question"* (a typo,
+> a wrong bucket, a credential problem). **A clean zero from a query that could not have returned
+> anything else is not evidence.** The sibling read must come back **40**; that proves the path form,
+> the bucket and the credentials all work, which is the only thing that makes the zero informative.
+> *(As the POST-condition in AC4 the original read is sound on its own — there the expected value is
+> non-zero, so a broken query fails loudly. The defect was PRE-condition-only.)*
 | the trigger is live | `comp-trigger etfs-netassets-daily` → ENABLED + `cron(0 22 * * ? *)` |
 
 ## Standing constraints
