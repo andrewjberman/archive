@@ -9,7 +9,7 @@
 <placement>LAPTOP (Rule 26) — the apply runs on the device that owns the work.</placement>
 <issued_by>2.0.0_SA_COO</issued_by>
 <issued>2026-08-21T21:00Z</issued>
-<status>ACTIVE — queued behind TO-2's remaining leg</status>
+<status>⛔ **ACTIVE — THE CRITICAL PATH. THE HOLD'S PRECONDITION IS DISCHARGED (22:1xZ): the corrected invocation contract IS IN HAND** (`…/deliverables/ETFS_POSITIONING_TO-1_INVOCATION_CONTRACT_FOR_TO-5.md`, verified at the COO seat — all FOUR parts of CTO~Z's ruling present: env SET NEITHER `:167` · stage-1 PutObject `opal-data-etfs/gold/*` `:175` · stage-1 ListBucket **prefix `gold/` added** `:176` · stage-2 GetObject+ListBucket `opal-data-etfs/gold/*` `:180`). ⚠ The prior status read "queued behind TO-2's remaining leg" — **that was an ETFS_POSITIONING round-1 reference and it is STALE**; it is not what gates this. **NOTHING GATES THIS NOW.**</status>
 <priority>P1 — ⛔ **ON THE CRITICAL PATH TO ANDREW'S DONE.** PRD s.11.1: ETF mode renders *"from **SCHEDULED** production artifacts."* **The schedule is IN the definition of done, not an operational follow-up.**</priority>
 <authority>PRD s.11.1 + s.11.5 (production = SCHEDULED, ad-hoc = QA only). CLAUDE.md Rule 13 (infra/PROD triggers are the AE/DT lane), Rule 1 (Terraform is the only Lambda deploy mechanism), Rule 4 (source map), Rule 5 (size deliberately), NEVER#4 (`safe-apply`, never bare).</authority>
 </task_order>
@@ -42,6 +42,30 @@ seat: **23/23 PASS**, mutants firing):
 Lambda running both stages, or two with an ordering edge. **State which and why.** Note the publisher's
 `OPAL_ETFS_PUBLISH_GRANT=1` requirement and `_assert_write_boundary()` are DS's **runtime refusals**, not
 approval gates — do not "helpfully" remove them to make a deploy simpler.
+
+## ⛔ THIS IS NOW THE ONLY THING BETWEEN A PROVEN CAPTURE AND A RENDERED PAGE (22:1xZ)
+
+**MEASURED AT THE COO SEAT, third independent census after DE~Z (serving end) and AE~Z (rules end):**
+`comp-trigger etf-positioning-producer` → **NO MATCH**, denominator **136 events-rules + 18 schedules** ·
+`get-function-configuration etf-positioning-producer` → **the function does not exist on the applied plane** ·
+`platinum/etfs/positioning_data.json` → **76,149 B, 2026-08-24T12:30:47Z — UNMOVED** (s3api/UTC).
+
+> **BRONZE: exercised. SILVER: exercised, 187 rows, four funds. GOLD: NEVER RUN. PLATINUM: UNMOVED.**
+> **THE SERVED SURFACE IS VERIFIED BY NOBODY**, and the schedule that would move it is *this TO*.
+
+⛔ **AND THE HOLD THAT STOPPED IT WAS MINE AND WAS CORRECT.** Applied as originally written, the
+contract's ENV error would have silently reverted Andrew's C2 gold home while its IAM error failed
+loud — **the two cancelling into a green pipeline where his ruling did not happen** — and
+`_assert_write_boundary` is keyed to the CONFIGURED values, so **the runtime guard would have
+VALIDATED the reverted target.** I would place that hold again.
+**But a correct hold left standing is still a stopped pipeline.** The precondition is discharged;
+**the hold is lifted and this is the top item in the round.**
+
+⚠ **This is CLAUDE.md's scheduled-vs-ad-hoc NEVER, verbatim, and the mdpf six-day freeze in
+miniature: fresh inputs sitting unused because the only trigger is one nobody applied.**
+
+**Rule 26 binds — whoever built it applies it, on THIS box, under `safe-apply`. No ferry.**
+**NEVER#6 — a begun deploy finishes in-session or rolls back loud; open the ledger at start.**
 
 ## ⛔ THE LAW THAT DEFINES THIS TO — read it as the spec, not as background
 

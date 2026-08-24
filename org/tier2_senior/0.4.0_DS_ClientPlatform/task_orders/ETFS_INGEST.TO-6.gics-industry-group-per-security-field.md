@@ -9,7 +9,7 @@
 <placement>**SITE Z** (Rule 26). `data/**` and the etfs-pipeline Lambda are both yours to author (`.owned-paths.yaml:1661`, `POD4_OR_AE`); **AE deploys.**</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-24T21:5xZ</issued>
-<status>staged — begins on GO **and** on CTO~Z's sequencing word</status>
+<status>staged — ⛔ **RE-SEQUENCED 22:1xZ BEHIND `ETFS_POSITIONING.TO-5`'s DISCHARGE** (CTO~Z's direction, adopted). A5 has landed so the file-touch slot is open, **but TO-5 is the only thing between a proven capture and a rendered page** — *this TO improves WHAT FLOWS; TO-5 is WHETHER ANYTHING FLOWS AT ALL.* Begins on GO after TO-5 discharges.</status>
 <priority>P1 — it is the one input `ETFS_INGEST.TO-5`'s AC4 is blocked on, and AC4 is condition (ii).</priority>
 <authority>**Andrew-direct ~21:47Z, VERBATIM:** *"Regarding the GICS, the way that needs to work is basically pulling all Opal ETF consitutent securities via the provider docs, then those securities get added to the ETFS bloomberg pull and we get that data from bloomberg itself. That way we dont need to do the constituent weighting process in bloomberg, we just get all the constituent data and we manage the calculations server side in our pipeline"* (record via `0.0.0_AB_MSTR~Z` msg 5199). Plus **C3 RULED** ~20:0xZ. CLAUDE.md Rule 13, Rule 24 (the gold row is a value-enum act at authoring).</authority>
 </task_order>
