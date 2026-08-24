@@ -1,0 +1,169 @@
+# ADVI_PERFRP TO-R1-DE — AC10(c) MASK SPEC + the AC10(a) closure denominator
+
+**Author:** `0.4.0_DE_ClientPlatform~D` · **Issued against:** COO ruling @f696acb8f8 (msg 66842, "Bring the
+mask spec with the evidence") · **Cell:** `PRF-inv-1` · **Criterion:** `PRFR1DE-AC10`
+**Status:** evidence artifact, authored BEFORE any edit to the change surface. Nothing in the portal tree
+has been modified by this seat.
+
+---
+
+## 0. Why this file exists
+
+`PRF-inv-1`'s original oracle — *"build-output diff of `AdvisorsTab` / `DistributionTab` bundles = 0 bytes
+changed"* — named an artifact the build does not emit (filed 66696/66706; amended into the cell and AC10
+@ad503ce567; re-weighted @f696acb8f8). The replacement oracle has three limbs:
+
+| limb | test | what it actually protects |
+|---|---|---|
+| **(a)** | source diff over the two tab files + their NON-SHARED closure, **denominator printed** | **2 files of 69** — see §1 |
+| **(b)** | confinement at the `hideBookToggle` seam (`AdvisorPublicProfile.tsx:1201`) | the 67 shared files, by reachability argument |
+| **(c)** | **masked pixel** comparison of pre/post captures, both protected tabs, READ | the rendered surface — this file |
+
+COO's ruling is explicit that **(a) is quoted with its denominator or not quoted at all**, and that **(b)+(c)
+are THE protection, not belt-and-braces.** This file supplies (c)'s mask and (a)'s denominator.
+
+⛔ **`md5` / byte comparison of screenshots is BANNED in this criterion** (COO @f696acb8f8). See §3 — the
+positive control that killed it.
+
+---
+
+## 1. AC10(a) — the closure denominator
+
+Import-graph closure over `portal/src`, resolving `@/` and relative specifiers through
+`.tsx/.ts/.jsx/.js` and `index.*`. Instrument: `ac10_closure.py` (committed beside this file).
+
+```
+PROTECTED closure (from AdvisorsTab.tsx + DistributionTab.tsx) : 69 files   (0 unresolved local specs)
+CHANGE    closure (from the 5 d-cell entry points)             : 67 files   (0 unresolved local specs)
+NON-SHARED = PROTECTED - CHANGE                                :  2 files
+SHARED     = PROTECTED & CHANGE                                : 67 files
+```
+
+**The NON-SHARED 2 are `AdvisorsTab.tsx` and `DistributionTab.tsx` themselves. Nothing else.**
+
+The 0-unresolved figure is load-bearing: it says the denominator is not hiding a silently dropped import.
+
+Cause: `AdvisorsTab.tsx:23` imports `AdvisorPublicProfile` and `:566-570` renders it inline, which pulls
+`AdvisorBookView` / `AdvisorBookClientDetail` / `AdvisorBookAccountModal` / `CanonicalBookView` and the whole
+`api/endpoints` + `ui/components/panels` layer into **both** walks.
+
+> **Read (a) as "do not edit the two tab files."** That is what it tests. It is worth testing and it is
+> nearly free, but it is **not** a 69-file guarantee and must never be quoted as one.
+
+---
+
+## 2. AC10(c) — THE MASK
+
+Derived from repeated captures of an **unchanged** tree. Any pixel that varies with no edit is render noise;
+unmasked, it false-positives the comparison. Instrument: `ac10_maskcheck.py` (committed beside this file).
+
+### The mask — PER TAB, not a union
+
+| tab | frame | mask box (x0,y0,x1,y1) | area |
+|---|---|---|---|
+| **Advisors** | 1440 × 1003 | `(105, 904, 113, 912)` | 8×8 = 64 px |
+| **Distribution** | 1440 × 1253 | `(105, 1154, 113, 1162)` | 8×8 = 64 px |
+
+**Identified by cropping and LOOKING, not by inferring from coordinates:** the pulsing green status dot
+preceding *"Black Diamond Connected"* in the `DATA SOURCE` panel. Same element on both tabs; the y differs
+only because the Distribution page is 250 px taller, so the panel sits lower. Sampled colours across
+captures: `(33,152,127)` vs `(34,146,123)` — green, varying luminance, i.e. animation phase.
+
+⛔ **DO NOT union the two boxes.** A naive union across tabs yields `(105, 904, 113, 1162)` — an 8×258 box
+masking ~2,064 pixels that are provably deterministic, which is a blind spot a real regression could hide in.
+My own derivation script printed exactly that union as its proposal and it is **wrong**; the per-tab boxes
+above supersede it. (Caught by reading the tool's output rather than accepting its summary line.)
+
+### Pass rule
+
+```
+PASS  iff  dimensions match EXACTLY
+      and  differing pixels OUTSIDE that tab's mask box == 0
+```
+
+A dimension change is an automatic FAIL — never resize-and-compare. The human READ stays alongside: a pixel
+compare judges *whether* something changed, never whether a change that is there is *correct*.
+
+---
+
+## 3. Evidence
+
+### 3.1 The control that banned `md5`
+
+Two captures, same tree, same route, **no edits**:
+
+```
+baseline  md5 df5493048ef42cc5f80a3715b1b5127c   98,490 bytes
+rerun     md5 4dfdb6b7410aa4ccf925f4a63a784e53   98,491 bytes   -> DIFFERENT
+```
+
+An md5/byte test would have reported a difference where there is none, **on every run**. It was one command
+to find and would otherwise have been written into a frozen spec as the "strengthening."
+
+### 3.2 Mask derivation — n=5 per tab, ALL pairs
+
+All 10 pairs per tab compared (not each-vs-first: a first-capture artefact would otherwise define the mask).
+
+| tab | dims | pairs | pixel-identical pairs | max differing px | union bbox over all pairs |
+|---|---|---|---|---|---|
+| Advisors | 1440×1003 **stable** | 10/10 | **0/10** | 60 of 1,444,320 (0.00415%) | `(105,904,113,912)` |
+| Distribution | 1440×1253 **stable** | 10/10 | **0/10** | 60 of 1,804,320 (0.00333%) | `(105,1154,113,1162)` |
+
+Per-pair spread: Advisors 40–60 px, Distribution 52–60 px. **The magnitude varies; the location never does** —
+the bbox is byte-identical in all 20 pair comparisons.
+
+**`0/10` pixel-identical pairs is the load-bearing number: variance is universal, so masking is REQUIRED, not
+a convenience.** An unmasked pixel test fails 100% of the time on an unchanged tree.
+
+### 3.3 Baseline pre-state
+
+| surface | md5 | note |
+|---|---|---|
+| Advisors (protected) | `df5493048ef42cc5f80a3715b1b5127c` | TOP PERFORMERS / LEADERBOARD / DATA SOURCE |
+| Distribution (protected) | `71f13180d270e753bfb63d69cce4cc3e` | SEGMENT ANALYTICS / DATA SOURCE |
+| Books (change surface) | `09cc74b7266877d5df0d0996a60d5df8` | empty L2 list / DATA SOURCE |
+
+All three READ; colour law clean (silver canvas `rgb(195,202,218)`, every content block inside a dark Panel,
+tab strip dark-on-silver, no light text or ghost buttons on the canvas).
+
+⛔ **The images are the read; the RECIPE is the durable half.** Pre-state vintage:
+
+```
+portal HEAD = d43b88c5124c0b6a8ca0db49a1a8bb5826d0ea1c   branch DEV   (on origin/DEV)
+node scripts/ui-smoke.mjs advisor-intelligence <out.png> --port 5175 [--click "Distribution"|"Books"]
+```
+
+Anyone can regenerate the pre-state from that ref; nobody needs my session scratchpad.
+
+⛔ **Trap, banked:** the tab accessible names are **title-case** (`Distribution`, `Books`) — the uppercase is
+CSS. Passing `DISTRIBUTION` yields `CLICK-FAIL` **and the script still writes a PNG at the requested path**,
+containing the *Advisors* tab. Two files correctly named and wrong inside. On a pre/post comparison that
+produces a large, plausible, meaningless diff. Always confirm the `CLICKED:` line.
+
+---
+
+## 4. What this does NOT cover — stated so no one over-reads a PASS
+
+1. **Cross-machine / cross-session stability is unproven.** 5 captures per tab, one box, one tree. 60 px is
+   the ceiling I have evidence for. Whoever runs the post-state **re-runs the control on their own box first**
+   and confirms the mask still bounds the noise. The mask is declared with its measured basis, not asserted
+   as universal.
+2. **Interaction states are not covered.** These are default-render captures. A shared-file edit could change
+   a protected tab's behaviour behind a click the screenshot never triggers. That residual belongs to **(b)**,
+   which is why (b) must be a *reachability* argument — "my edits are reached only through Book-face paths" —
+   and not merely "the diff looked confined."
+3. **Empty-data environment.** The dev backend serves no rows; both protected tabs render empty states. A
+   populated environment may expose variance this mask does not bound (timestamps, live counts). Re-derive
+   before trusting the mask against populated data.
+4. **(a) protects 2 of 69.** Restated here because it is the number most likely to be dropped when quoted.
+
+---
+
+## 5. Instruments (committed beside this file)
+
+| file | purpose |
+|---|---|
+| `ac10_closure.py` | AC10(a): prints PROTECTED / CHANGE / NON-SHARED / SHARED denominators + both file lists |
+| `ac10_maskcheck.py` | AC10(c): `derive` re-derives the mask from n captures; `compare` runs the masked pre/post assertion and exits non-zero on any differing pixel outside the mask |
+
+Both print their own denominators. `compare` **fails loud** on a dimension mismatch rather than resizing.
