@@ -9,7 +9,7 @@
 <placement>**SITE Z** (Rule 26 — the apply runs on the device that owns the work; D4 is SITEZ until the project is done, Andrew-direct 2026-08-24). `terraform` v1.15.8 resolves on PATH here — **resolve the binary, do not assume `.tools/terraform.exe`, which does not exist on this box.**</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-24T20:1xZ</issued>
-<status>pending</status>
+<status>complete</status>
 <priority>P1 — the cheapest cell in the decomp and the only one with a clock.</priority>
 <authority>Andrew-direct 2026-08-24 ~19:5xZ (stage-3 GO) + ~20:0xZ (*"all recs approved, proceed"* → **C4 RULED: the `etfs-netassets-daily` Lambda is the TrueShares vehicle**; record `org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoZ_ANDREW_DIRECT_20260824_ALL_RECS_APPROVED_C2_C3_C4_C5.md`). PRD `docs/architecture/ETFS_INGEST_PRD.md` §3 F2, §4 T0/T1, §8. CLAUDE.md Rule 1 (Terraform is the only Lambda deploy mechanism), Rule 4 (source map), Rule 5 (size deliberately), Rule 22a (verify on the right layer), NEVER#4 (`safe-apply`, never bare), NEVER#6 (a begun deploy finishes in-session or rolls back loud).</authority>
 </task_order>
