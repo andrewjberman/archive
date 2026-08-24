@@ -9,7 +9,7 @@
 <placement>**SITE Z** (Rule 26; D4 is SITEZ until the project is done). You author; **AE-class applies.** No apply crosses a fabric.</placement>
 <issued_by>2.0.0_SA_COO~Z</issued_by>
 <issued>2026-08-24T20:5xZ</issued>
-<status>staged — begins on GO</status>
+<status>complete -- delivered by 0.4.0_DS_ClientPlatform~Z; proof-of-spec VALID (rc=0); separator amendment landed per COO~Z 5179; awaiting RAVC step-4</status>
 <priority>P2 — **cheap now, dearer every week.** The producer is days old with ONE consumer and the target is greenfield. Every partition written to the old home is another object a later migration would have to reconcile.</priority>
 <authority>Andrew-direct 2026-08-24 word (4): *"…to unified gold parquet format in **opal-data-etfs/gold/** for platinum json serving in opal-data-portal-v2"*, ruled at ~20:0xZ (*"all recs approved, proceed"* → **C2 RULED**, CTO~Z msg 4845). CLAUDE.md Rule 13 (lane split), Rule 17b (tiers; the amendment is routed to base CTO and does NOT gate this), Rule 22a (verify on the right layer).</authority>
 </task_order>
