@@ -1,0 +1,202 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_POSITIONING.TO-2 (issuer 2.0.0_SA_COO @10f94e4f13; Amendment C @6299ec7098; Amendment D @51185358a9)",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "ETFS_POSITIONING.TO-2 etf-serving-route-artifact-contract-and-iam; decomp_ref workflows/atom_decomposition/runs/etfs-positioning/20260821T194927Z/DECOMP.md cells ETFS-e-1/e-2/e-3/e-4/e-5, boundary ETFS-a-8. PRD s.11.1 (Models byte-identical), s.11.4(e), s.11.5. CLAUDE.md Rule 17b, Rule 22a, NEVER#3. DECOMP WAS UNCERTIFIED ON ITS FACE at cut time (issuer-disclosed, permitted under Andrew's 19:3xZ priority word + CTO's cut-uncertified-rather-than-idle instruction).",
+    "group": "OTHER",
+    "vintage_commit": "537b250716"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ETFS_POSITIONING_TO-2_ARTIFACT_CONTRACT_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "f2cdc1137f (v1) + f93b4571d1 (v1.1 self-correction: the edge-pin claim was FALSE, mint is three edits not two)",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "both on origin/CLOUD, verified by `git branch -r --contains` per commit (not inferred from the integrator's report); origin/CLOUD head fd7a8732b9 read via git ls-remote. Delivered to DS+DE at 65689/65690 (QUEUED at send -- Andrew had deleted those seats ~19:56Z for context health -- then drained to read/ by the fresh seats' own watchers, confirmed on disk)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/s3-portal-v2-import.tf",
+      "kind": "terraform",
+      "commit_or_etag": "537b250716",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": ".tools/safe-apply.sh -chdir=infra/aws/terraform/shared-infra apply -target=aws_s3_bucket_policy.portal_v2 -> 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' Adds platinum/etfs/* to AllowCloudFrontOACPublicData AND restores AllowAdvisorRouterOAIPlatinumAdvi (Amendment C)."
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/public-data-router/index.mjs (v7)",
+      "kind": "script",
+      "commit_or_etag": "537b250716; built sha256 u3l/tJrqkP+a0D9zuwr/zWT8yAVFSD5GFMfEv8llIMU=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "built via infra/aws/lambda/ci/build-nodejs-lambda.sh portal-auth public-data-router; S3 object re-read AFTER upload (VersionId fo_nPiGzdevTtcrZcPKrSddpBM6YNl6R -> xNKZb__kZkF6Ip4pkvkft.91_ewzjGR8, 332 B -> 346 B, sha matches build) rather than trusted from the script's OK -- the aws-shim silent-success class; published Lambda v7 CodeSha256 identical; deployed v7 package downloaded and its bytes read."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/lambda-edge.tf",
+      "kind": "terraform",
+      "commit_or_etag": "537b250716",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "qualified_arn dropped from public_data_router.ignore_changes (:197). .tools/safe-apply.sh -chdir=infra/aws/terraform/portal-auth apply -> 'Apply complete! Resources: 0 added, 2 changed, 0 destroyed.'"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "cc4048531b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rule 4 source-map update (artifact_s3_key, artifact_sha256) written by the build script."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/mdpf_egress_publisher.tf",
+      "kind": "terraform",
+      "commit_or_etag": "537b250716",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Amendment B disarm: the 24d-stale '2 statements, both Allow/GetObject' header corrected. Comment only; no resource change, not in any apply."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "ETFS-TO2-AC1",
+      "criterion_verbatim": "Route DECIDED between the two surviving candidates, with comp-routes evidence cited and the provenance header read",
+      "method": "command",
+      "invocation": "comp-routes behaviors | comp-routes trace /api/general/positioning/positioning_data.json | comp-routes rewrites | comp-routes origins | comp-routes edge-versions",
+      "output_evidence": "DECIDED: platinum/etfs/ on opal-data-portal-v2, served at /api/general/etfs/positioning_data.json. Evidence: there is NO /api/general/positioning/* behavior -- positioning rides the /api/general/* catch-all (#20) to origin S3-opal-data-portal-v2-json, OAC E24L6358YRRKAE; trace resolves to s3://opal-data-portal-v2/json/positioning/positioning_data.json; SOURCE-CONFIRMED at public-data-router/index.mjs:42-46 @6f1f242a6a whose line 9 reads 'fallback - covers positioning, cma, etc.'; the mdpf branch :36-40 is the exercised precedent; opal-data-etfs is NOT a CloudFront origin (0 of 7 enumerated) -- a THIRD independent ground for COO's exclusion, reached separately. Provenance header READ and recorded: comp-routes is DESIRED-plane (parsed TF + committed .mjs), never a live describe-distribution. REJECTED the cheaper json/positioning/ option (zero route AND zero IAM work) because it shares the LIVE Models prefix: byte-identity would rest on the producer's key list being correct (discipline) rather than on prefix disjointness (construction). COO accepted at 65700; CTO affirmed at 65706.",
+      "status": "PASS",
+      "denominator": "27 CloudFront behaviors enumerated, 13 rewrite rules, 7 origins; 2 surviving route candidates, 1 decided",
+      "status_reason": "Route decided WITH comp-routes evidence and the provenance header read and recorded as DESIRED-plane. Converged independently with COO (65700) and CTO (65706), by a third ground neither had (opal-data-etfs is not an origin, 0 of 7)."
+    },
+    {
+      "criterion_id": "ETFS-TO2-AC2",
+      "criterion_verbatim": "CONTRACT PUBLISHED -- key/prefix, s.4 shape, four books, shell representation, as-of field. Sent to DS + DE the turn it exists",
+      "method": "manual_read_with_citation",
+      "invocation": "ETFS_POSITIONING_TO-2_ARTIFACT_CONTRACT_v1.md @f2cdc1137f, v1.1 @f93b4571d1; MCP 65689/65690/65691/65692",
+      "output_evidence": "KEY /api/general/etfs/positioning_data.json -> s3://opal-data-portal-v2/platinum/etfs/positioning_data.json. ONE artifact, four books, PRD s.4 B-form holdings (s.4.3: 'the one an ETF book must match'). SHELLS: DIVZ/IDVZ carry the SAME key set with holdings: [] plus an EXPLICIT holdings_status ('full'|'book_only') -- because an empty array from a designed shell and an empty array from a producer that failed to emit are BYTE-IDENTICAL, so inferring from emptiness renders a producer bug as a normal shell on a client-facing page; the field also gives DE a third state to fail loud on ('full' with holdings: []). Rule-24 four-postulate test on that enum recorded and PASSES (MECE; one grain; one axis; one remedy -- TrueShares capture -- moves both members together). Vocabulary VALUES deliberately NOT minted (PRD s.4.4 two-grains-on-one-axis; DS's Rule-24 act). Sent same turn as authored.",
+      "status": "PASS",
+      "denominator": "1 contract published, 4 books specified, 4 recipients addressed (2 DELIVERED / 2 QUEUED at send, both QUEUED later drained to read/ by the fresh seats own watchers, confirmed on disk)",
+      "status_reason": "Published and sent the same turn it existed, as the criterion requires. COO accepted it at 65700 and named holdings_status the reason it is a control rather than care."
+    },
+    {
+      "criterion_id": "ETFS-TO2-AC3",
+      "criterion_verbatim": "Contract states explicitly that positioning_data.json is NOT written by this project and Models-mode bytes are untouched",
+      "method": "manual_read_with_citation",
+      "invocation": "contract PART 2 heading 'AC3 -- WHAT THIS PROJECT DOES NOT WRITE. Stated first because it is the sovereign constraint.'",
+      "output_evidence": "Stated explicitly and FIRST in the contract, covering positioning_data.json, model.json, allocation_summary.json and holdings_attribution_data.json. Made true BY CONSTRUCTION rather than by discipline: the ETF producer receives no grant to json/positioning/ and holds no key in it -- the applied OAC/write grants are prefix-scoped to platinum/etfs/*. VERIFIED POST-DEPLOY: the Models URL returns 401/51 B, byte-identical to its pre-deploy baseline, and json-tiered returns 200/190,287 B identical to baseline. No byte under json/positioning/ was written by any act in this TO.",
+      "status": "PASS",
+      "denominator": "4 json/positioning keys explicitly named as NOT-written; 0 bytes written under json/positioning/ by any act in this TO",
+      "status_reason": "Stated explicitly and first in the contract, and made true BY CONSTRUCTION (no grant, no key) rather than by discipline. Verified post-deploy: Models URL 401/51 B and json-tiered 200/190,287 B, both byte-identical to their pre-deploy baselines."
+    },
+    {
+      "criterion_id": "ETFS-TO2-AC4",
+      "criterion_verbatim": "IAM delta named: what is granted, what a NEW prefix needs -- on the live primitive, ONE --resource-arns per call, positive control in a SEPARATE invocation. (Amendment D: carries the BUCKET-POLICY DRIFT only; explicitly NOT evidence about the edge association, and the re-plan must STATE THE ROOT)",
+      "method": "command",
+      "invocation": "aws s3api get-bucket-policy --bucket opal-data-portal-v2 | aws iam simulate-principal-policy (ONE --resource-arns per call, controls in SEPARATE invocations) | aws accessanalyzer validate-policy | terraform plan -chdir=infra/aws/terraform/shared-infra",
+      "output_evidence": "DELTA NAMED: the OAC statement AllowCloudFrontOACPublicData was PREFIX-SCOPED to json/*, json-tiered/*, platinum/mdpf/* -- platinum/etfs/* absent, so CloudFront would 403 (dressed as HTML by the CF error rules); the bucket-wide grant sits on OAI EU39UXW7CMSI5 which fronts a DIFFERENT bucket and never signs this path. WRITE side proven on the live primitive with a discriminating pair: opal-assets-mdpf-egress-publisher-role s3:PutObject on platinum/etfs/... -> implicitDeny (TARGET, isolated); SAME role on platinum/mdpf/... -> allowed (POSITIVE CONTROL, SEPARATE invocation). Action-name validity checked with the RIGHT oracle -- accessanalyzer validate-policy on {s3:PutObject,s3:GetObject} -> 0 findings -- never the simulator, which returns implicitDeny for a nonexistent action. RE-PLAN, ROOT NAMED = infra/aws/terraform/shared-infra, the root that OWNS aws_s3_bucket_policy.portal_v2 (NOT portal-auth, which owns the lambdas and the distribution): 'No changes. Your infrastructure matches the configuration.'",
+      "status": "PASS",
+      "denominator": "3 bucket-policy statements read live (OAC resources 3 -> 4); 2 simulate-principal-policy calls, exactly 1 --resource-arns each, controls in separate invocations; 1 accessanalyzer validate-policy, 0 findings",
+      "status_reason": "IAM delta named on the live primitive with a pair that discriminates (target implicitDeny / positive control allowed) and the action names checked with the correct oracle rather than the simulator. Re-plan run IN the owning root and the root NAMED, per Amendment D."
+    },
+    {
+      "criterion_id": "ETFS-TO2-AC5",
+      "criterion_verbatim": "If a CF path class is a MINT, say so plainly (mint != gap)",
+      "method": "command",
+      "invocation": "comp-routes behaviors | grep -ci etf",
+      "output_evidence": "SAID PLAINLY: IT IS A MINT. Zero matches for 'etf' across all 27 CloudFront behaviors -- no ETF path class existed. A MINT IS NOT A GAP. And its true size is named rather than left vague: no new behavior, no new origin, no new OAC, no distribution topology change, because /api/general/* already claims the path. THREE EDITS (corrected from two in contract v1.1): the router branch; the bucket-policy ARN; and dropping qualified_arn from public_data_router's ignore_changes -- without the third the branch publishes a version CloudFront never serves.",
+      "status": "PASS",
+      "denominator": "0 of 27 CloudFront behaviors match etf; 3 edits enumerated (was 2 in contract v1, corrected in v1.1)",
+      "status_reason": "Said plainly that it is a MINT and that a mint is not a gap, and the mint sized honestly after my own v1.1 correction: three edits, not two."
+    },
+    {
+      "criterion_id": "ETFS-TO2-AC6",
+      "criterion_verbatim": "NO write, move, or delete touches opal-data-etfs/platinum/ or any ETFS_CANON artifact",
+      "method": "command",
+      "invocation": "aws s3api head-object --bucket opal-data-etfs --key platinum/etf_ownership_dashboard.json (re-measured at spec-at-pickup)",
+      "output_evidence": "HELD. 6,408 B, LastModified 2026-08-21T16:00:04Z via s3api (UTC plane -- deliberately NOT `aws s3 ls`, which renders LOCAL time with no marker) -- byte-identical to COO's independent measurement. No act in this TO wrote, moved or deleted anything under opal-data-etfs/. Its non-canonical placement is a pre-existing ETFS_CANON (boundary (h)) condition: SURFACED, NOT CHASED, per Rule 17b's ratified-direction clause.",
+      "status": "PASS",
+      "denominator": "1 ETFS_CANON artifact re-measured at spec-at-pickup; 0 writes, moves or deletes under opal-data-etfs/",
+      "status_reason": "Held. Re-measurement byte-identical to COO independent read (6,408 B, 2026-08-21T16:00:04Z, s3api UTC plane). Boundary (h) surfaced, not chased."
+    },
+    {
+      "criterion_id": "ETFS-TO2-AC7",
+      "criterion_verbatim": "THE ADVI ROUTE STILL SERVES AFTER THE APPLY -- proven by an EXERCISED FETCH through the auth path, not a policy read. Plus a live get-bucket-policy showing THREE statements. Baseline captured BEFORE the apply.",
+      "method": "command",
+      "invocation": "aws s3api get-bucket-policy (per-statement sha256, BEFORE and AFTER) + curl through CloudFront (json-tiered leg) -- the authenticated ADVI GET was NOT run",
+      "output_evidence": "PARTIALLY DISCHARGED -- AND I AM NOT ROUNDING IT UP. DISCHARGED HALF: the live policy shows THREE statements after the apply, and the statement AC7 exists to protect is proven untouched by per-statement sha256 captured BEFORE and re-read AFTER -- AllowAdvisorRouterOAIPlatinumAdvi fbad446cd46eecac -> fbad446cd46eecac UNCHANGED; AllowCloudFrontOAI 28ba4209bb406f36 unchanged; AllowCloudFrontOACPublicData 285aa1e9dad3796b -> be4e59b01703f4c8, 3 -> 4 resources, sole delta + platinum/etfs/*. COO independently re-read the live policy at their own seat and reproduced it (65790). UNDISCHARGED HALF: no authenticated ADVI GET. The RS256 mint was scrubbed at the P4R-3 close by design and no live seat holds it (CTO 65791). REFUSED SUBSTITUTE, and the refusal is the evidence: an unauthenticated ADVI fetch returns 401 at auth-validator-edge BEFORE the origin is touched, so it is byte-identical whether the S3 grant is intact or deleted -- MEASURED, the working Models URL, the working mdpf platinum URL and a route that does not exist all return 401/51 B. It is the wrong-plane control and banking it would be the exact substitution this TO's other criteria were rewritten to prevent. DISCHARGE POINT (COO ruling 65790, NOT waived): one authenticated GET of any platinum/advi/{firm}/ twin returning 200 at the certified byte count.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "denominator": "3 statements read BEFORE and 3 AFTER, 3 per-statement sha256 digests compared; 0 authenticated ADVI GETs performed (no RS256 mint held by any live seat)",
+      "status_reason": "PARTIAL, DEFERRED BY ISSUER RULING 65790, NOT WAIVED. The applied-plane half IS discharged: the advi statement is proven untouched across the apply by identical per-statement digests, independently reproduced by COO at their own seat. The EXERCISED half cannot be performed at this seat: the RS256 mint was scrubbed at the P4R-3 close by design and no live seat holds it (CTO 65791). I explicitly REFUSED the available substitute -- an unauthenticated ADVI fetch returns 401 at auth-validator-edge before the origin is touched, and I MEASURED that a working Models URL, a working mdpf URL and a nonexistent route all return byte-identical 401/51 B, so it cannot distinguish an intact grant from a deleted one. Banking it would be the wrong-plane substitution this TO exists to prevent. Discharge point: one authenticated GET of any platinum/advi/{firm}/ twin returning 200 at the certified byte count."
+    },
+    {
+      "criterion_id": "ETFS-TO2-AC8",
+      "criterion_verbatim": "READ THE LIVE DISTRIBUTION'S LAMBDA ASSOCIATION ARN AFTER APPLY and confirm its version equals the newly published public-data-router version. A 0-diff re-plan DOES NOT DISCHARGE THIS",
+      "method": "command",
+      "invocation": "aws cloudfront get-distribution-config --id EVTSA9VEHNZVH (live association read, BEFORE and AFTER) + aws lambda list-versions-by-function --function-name public-data-router",
+      "output_evidence": "PASS. BASELINE, read from the LIVE distribution before the apply: public-data-router:6 on 2 behaviors (/api/general/* and /api/general/json-tiered/*). AFTER: VERSION 7 on both behaviors; distribution Status Deployed. Newest published Lambda version 7, CodeSha256 u3l/tJrqkP+a0D9zuwr/zWT8yAVFSD5GFMfEv8llIMU= -- IDENTICAL to the built artifact sha and to the S3 object's content-sha256, so the version CloudFront serves is built from the bytes uploaded. AND THE PIN FIX WAS PROVEN EFFECTIVE BEFORE THE APPLY: the plan showed 'aws_cloudfront_distribution.portal will be updated in-place' with -/+ lambda_function_association pairs; WITH THE PIN IN PLACE THAT RESOURCE PLANS AS NO-OP, so the plan itself discriminated the fixed state from the broken one. Per the criterion, the 0-diff re-plan is NOT cited as evidence here -- it is the pin's own symptom.",
+      "status": "PASS",
+      "denominator": "2 behaviors carry public-data-router; baseline v6 on 2 of 2, post-apply v7 on 2 of 2",
+      "status_reason": "Live distribution association read before and after; version moved 6 -> 7 on both behaviors and published v7 CodeSha256 matches the built artifact and the S3 object. The pin fix was additionally proven effective BEFORE the apply by the plan showing an association swap where a pinned resource plans as no-op. The 0-diff re-plan is deliberately NOT cited here -- it is the pin symptom, per the criterion."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pin-drop is the mutant of its own criterion: the pre-apply plan is run against a tree WITH the pin (distribution no-op) and WITHOUT it (distribution -/+ association). ALSO, every positive result in this instance was run beside a control that could have failed, each in its OWN isolated invocation (2+ --resource-arns silently flips held ARNs to implicitDeny and would disarm the very control being leaned on): IAM: target platinum/etfs -> implicitDeny vs positive control platinum/mdpf -> allowed (separate invocations, same role). HTTP: live json-tiered key 200/190,287 B vs bogus key under the SAME granted prefix 403/111 B (separate invocation). DEPLOYED BYTES: etfs branch PRESENT + mdpf branch PRESENT (positive) + zzzNoSuchMarker9999 ABSENT (negative). EDGE HEALTH: a crashed Lambda@Edge returns 502, not 401 -- zero 502s across Models, ETF and mdpf paths.",
+      "expected": "with the pin the distribution plans as no-op; without it, an association swap",
+      "observed": "pinned state = the documented no-op signature (lambda-edge.tf:36-47); unpinned state = 'aws_cloudfront_distribution.portal will be updated in-place', -/+ lambda_function_association x2, Plan: 0 add / 2 change / 0 destroy",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "per-statement sha256 over canonicalized JSON, same method both sides of the apply (a BEFORE-vs-AFTER comparison within ONE method, which is the control; COO's independent structural re-derivation used a different canonicalization and therefore different digests -- NOT a discrepancy, flagged so nobody later reads two digest sets as a conflict)",
+      "observed": "advi statement digest identical across the apply; byte counts identical across the apply on both HTTP probes",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "ETFS-TO2-AC7's authenticated ADVI GET",
+      "reason": "no RS256 mint held by any live seat (scrubbed at the P4R-3 close by design). Deferred by issuer ruling 65790, NOT waived; discharge point named in the AC7 row. The specific failure AC7 guards against -- the apply silently removing a live read grant -- is disproven on the applied plane by two independent reads."
+    },
+    {
+      "item": "auth-validator-edge:96 and cache-control-injector:151 qualified_arn pins",
+      "reason": "NOT BUNDLED, deliberately. Zero measured current drift; lambda-edge.tf:52 warns against riding an unrelated fix on a live-serving apply; COO ratified the restraint explicitly (65746) so it reads as a decision rather than a gap. Remains the separately-routed AE-lane item."
+    },
+    {
+      "item": "opal-data-etfs/platinum/ non-canonical placement",
+      "reason": "ETFS_CANON, PRD s.11.4(h) declared boundary. Rule 17b ratified-direction clause: a non-conforming tree is not a violation and not a warrant to move anything. Surfaced, not chased."
+    },
+    {
+      "item": "the ETF artifact itself and its producer",
+      "reason": "DS-class, TO-1 and TO-5. This TO delivers the route and the grant; the key 404s until the artifact lands, which is the correct interim state."
+    }
+  ],
+  "surprises": [
+    "BLOCKING x ARMED, found by this cell and remediated in it: AllowAdvisorRouterOAIPlatinumAdvi was LIVE on opal-data-portal-v2 and managed by NO terraform resource. aws_s3_bucket_policy is FULL-REPLACE, so ANY shared-infra apply by anyone for any reason would have deleted a live serving grant and 403'd the ADVI route that went live at ~15:57Z the same day. Plan-proven before any apply (0 add / 1 change / 0 destroy, the change being the REMOVAL of that Sid). Disarm: a fabric-wide shared-infra apply freeze, owner AE, carried by MSTR. Remediation: codified in the same edit as the etfs ARN, one apply, re-plan 0-diff in the owning root. Freeze lifted 65786; independently verified by COO (65790), CVO and CTO. HOW IT HID: the grant was applied on the live primitive and verified on the live primitive during P4R-3 -- sound for 'is it granted', structurally silent on 'does code still describe reality' -- and the re-plan that read 'No changes' ran in portal-auth, which does not own the bucket policy. THE VERIFICATION RAN IN THE WRONG TERRAFORM ROOT. Generalisable: a live-primitive grant with no corresponding terraform resource is a deletion scheduled for whenever someone next applies that root.",
+    "MY OWN FALSE CLAIM, self-caught and corrected same-turn before any apply: I asserted 'public-data-router is DYNAMIC/qualified_arn [OK], the edit takes effect on apply, no version pin blocks it', citing comp-routes edge-versions. FALSE. lambda-edge.tf:197 carries ignore_changes = [qualified_arn, source_code_hash]; the apply would have published a new version while CloudFront kept serving the old one, with a clean plan, a genuine 0-diff re-plan, a really-published version and the route green on old code. The file warning against exactly this -- 'Do not read that [OK] as evidence an edge moved' -- was written the SAME DAY, by MY OWN LANE, in the very file I was editing. Contract went to v1.1 with the correction on its face; the mint became three edits. CVO confirmed the misreport is LIVE (the tool marks all five [OK] including the three pinned) and added the sharper limb: comp-routes' own coverage disclosure cross-references the reader TO edge-versions for the pinning axis -- it routes you to the instrument that gets it wrong.",
+    "OBSERVATION/INERT: infra/aws/lambda/ci/build-nodejs-lambda.sh fails under a /cygdrive/c working directory -- to_native_path()'s regex ^/([a-zA-Z])/ converts /c/... but leaves /cygdrive/c/... untouched, so bun receives a path it cannot read. Proven with a positive control (same bun one-liner: empty on the /cygdrive/c path, correct source_dir on the C:/ path). The failure message is 'ERROR: No source_dir found for public-data-router in lambda-source-map.json' -- IT BLAMES THE MAP FOR A PATH FAILURE, and the map entry is present and correct; I briefly concluded a Rule-4 gap before checking and corrected myself. Worked around by invoking from /c (live on this box), NOT baked anywhere -- /c is the non-durable mount (LD-0340) and baking it is that class's original sin.",
+    "OBSERVATION/INERT: portal_data_proxy/lambda_function.py:2321 serves json/positioning/etf-returns.json, which is a live 404 on opal-data-portal-v2 (positive control positioning_data.json = 8,111 B, so the probe discriminates; absence scoped to that bucket). A dangling handler branch, not a free existing ETF route."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-08-21/ (session log at close)",
+  "compiler_tools": [
+    {
+      "tool": "comp-routes (behaviors, trace, rewrites, origins, edge-versions)",
+      "invocation": "comp-routes behaviors; comp-routes trace /api/general/positioning/positioning_data.json; comp-routes rewrites; comp-routes origins; comp-routes edge-versions",
+      "result": "Provided the whole AC1 evidence base: the catch-all topology, the URL->key resolution, the 13-rule rewrite table with the mdpf precedent, and origins (opal-data-etfs absent, 0 of 7). GAP FOUND AND MEASURED: edge-versions reports all five edge lambdas DYNAMIC/[OK] INCLUDING the three carrying ignore_changes=[qualified_arn], i.e. it asserts the OPPOSITE of the truth for a pinned function. That misreport caused my false claim above. Already routed to the 0.8.0 tooling lane and OPEN; tonight is its third measured instance. Interim discipline: for an edge function read the pin in lambda-edge.tf and the LIVE CloudFront association, never the tool's [OK]."
+    },
+    {
+      "tool": "comp-find (-i, --name)",
+      "invocation": "comp-find --name '*ETF*' docs/; comp-find 'json/positioning' infra/ data/; comp-find -i 'platinum/advi' infra/aws/terraform; comp-find -i 'advisorrouteroai'",
+      "result": "Located the producer chain and the TF homes with denominators. The -i sweep was LOAD-BEARING on the drift finding: it is what established that AllowAdvisorRouterOAIPlatinumAdvi occurs exactly ONCE in 27,965 files and that the one hit is a DOC, not code -- a case-sensitive sweep alone would not have justified the nonexistence claim."
+    },
+    {
+      "tool": "comp-which",
+      "invocation": "comp-which 'what does the opal-data-portal-v2 bucket policy allow CloudFront OAC to read'",
+      "result": "Routed to comp-iam, which CANNOT answer it -- comp-iam models TF role policies, never an S3 BUCKET policy, and models (action) not (action,resource). Correctly recorded as a coverage gap and the live primitive used instead under a rail-checked marker. Also used as the A.3 startup EXERCISE probe (forwarder ran, produced its own banner)."
+    },
+    {
+      "tool": "comp-iam (considered, NOT used as a verdict)",
+      "invocation": "not invoked as evidence",
+      "result": "Deliberately not cited: it models (action) and would have reported GRANTED for s3:GetObject on a prefix that 403s. Treated as a FLOOR per Rule 22a; the live simulate-principal-policy pair carried the claim instead."
+    },
+    {
+      "tool": "comp-to",
+      "invocation": "comp-to ETFS_POSITIONING.TO-2",
+      "result": "Session TO context set race-free (per-session file, not .agent_context)."
+    }
+  ]
+}
