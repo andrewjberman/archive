@@ -203,3 +203,31 @@ platinum/etfs/_manifests/2026-08-21/0b2b20a0a2b7.json   (833 B, immutable, one p
 ⛔ **AND A CORRECTION TO THE PRESERVATION ACCOUNTING, because the tidy version is wrong.** It was proposed that pin + versioning + manifests are *three independent preservation paths*, i.e. that an overwrite is recoverable even without the pin. **Measured: it is ONE preservation path, ONE 14-day lease, and ONE verifier.** The manifest is **833 bytes** — it records a HASH of the artifact, not the artifact, so it can PROVE a copy authentic but cannot PRODUCE one. Versioning expires per the fuse above. **Only the committed bytes reconstruct.** The manifests are load-bearing as the verification oracle, which is a different job from preservation and does not substitute for it.
 
 *Identified as this artifact's manifest by its timestamp: `s3 ls` renders LOCAL, so `08:30:49` is `12:30:49Z` — two seconds after the artifact's own write. Reading it in the wrong plane would have made it look like a different day's run.*
+
+
+---
+
+## FOURTH APPEND 2026-08-24 ~22:52Z — MY DECLARED EXCLUSION IS NOW CLOSED, AND THE ANSWER IS THE EXACT INVERSE OF ETF MODE
+
+The AC record declared UNMEASURED: *“whether the MODELS artifact's vocabulary can reach the shared tables — I could not locate a Models `positioning_data.json` under `opal-data-portal-v2/platinum/` or `opal-data-assets/json/`.”* **`1.0.0_SA_CTO~Z`'s leaf census found it in a tree I had not searched** — `opal-data-portal-v2/**json**/positioning/` — one of THREE live keys sharing the leaf `positioning_data.json` (the third, `positioning/positioning_data.json`, is ~244 days old; Rule 25's same-leaf twins hazard, recorded not dispositioned). **Measured at this seat rather than relayed:**
+
+```
+json/positioning/positioning_data.json   8,133 B STORED, ContentEncoding: gzip -> 73,458 B decompressed
+  110 rows carrying sub_asset_class, 10 distinct — ALL Models-side segments
+  US Large Cap 26 · Ultra Short Duration 25 · Short Duration 14 · Developed 14 · High Yield 9
+  Intermediate 7 · Structured Credit 4 · EM 4 · Volatility 4 · US Mid Cap 3
+```
+
+| table | covers MODELS | covers ETF (from §3 above) |
+|---|---|---|
+| `SUB_ASSET_CLASS_COLORS` | **10 of 10** | 0 of 11 |
+| `SUB_ASSET_COLORS` | **10 of 10** | 0 of 11 |
+| `SUB_ASSET_CLASS_DISPLAY_MAP` | 7 of 10 | 0 of 11 |
+
+> **THE COLOUR TABLES ARE 100% LOAD-BEARING FOR MODELS AND 0% FOR ETF.** They were never generic — they are the Models vocabulary, and ETF mode is the tenant that shares them.
+
+**This SHARPENS `AC3` from a reasoned warning into a measured one.** §3 noted that `SUB_ASSET_CLASS_COLORS` membership is CONTROL FLOW — `getSubAssetClass` returns the normalized value *only if the key exists*. That branch currently succeeds for **every one of the 10 live Models values**. So `AC6` option (a) would mean adding ~24 GICS keys to a table in which **every existing key is live for Models**, on a page whose byte-identical rendering is a sovereign constraint. **Option (b) avoids touching it at all** — which is a stronger argument for the determination than the one I made, and I did not have it when I made it.
+
+*The `DISPLAY_MAP`'s 7-of-10 is NOT a gap: the three absent values (`Developed`, `EM`, `Intermediate`) are the already-SHORTENED forms. That map goes long→short (`International Developed`→`Developed`), so a value already in short form needs no entry. Counting it as a miss would have been the map working correctly, mis-read as a defect.*
+
+⚠ **And the artifacts are not symmetric in transport:** the Models key is stored **gzipped** (`ContentEncoding: gzip`, 8,133 B stored vs 73,458 B decompressed) while the ETF key is stored plain (76,149 B). A byte-size comparison between the two — 8 KB vs 76 KB — invites the conclusion that Models carries a tenth the data. **It carries 110 rows to ETF's 114.** Noted because a size ratio is exactly the kind of number that gets quoted.
