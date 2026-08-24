@@ -108,13 +108,55 @@ two-grains-on-one-axis failure T2-4 records below, imported into the superset.
 | **(iii) ONE INTENT** | The axis records **the EVIDENTIARY STATE of the vendor's cash assertion — what the feed said.** It does **not** record whether the holding *is* cash (that is `is_cash`) and it does **not** record any inference (that is gold). |
 | **(iv) STATE FRAME** | All three values are determinable **at parse time, from the feed header plus this row's cell** — no network call, no judgment, no second artifact. **One remedy (read the header, read the cell) delivers all three; they move together.** PASSES. |
 
-### The values
+### ⛔ AMENDED 2026-08-24 ~22:20Z — THE VALUES BELOW WERE SUPERSEDED BY IMPLEMENTATION, AND THE CENSUS IS WHY
 
-| value | means | `is_cash` MUST be | measured today |
+> **The v1 enum below is struck. It tried to read the encoding OFF A SINGLE CELL, and a single empty
+> cell is genuinely ambiguous between "the vendor said no" and "the vendor said nothing" — NO PER-ROW
+> RULE CAN RESOLVE THAT, because the information is not in the row.**
+>
+> **What falsified it (measured on live bronze, `pathfinder/filepoint/bronze/holdings/20260824/`,
+> DENOMINATOR 114 data rows): `MoneyMarketFlag` = `''` ×110, `'Y'` ×4, and `'N'` ZERO TIMES.**
+> Filepoint is a **PRESENCE FLAG** — it marks positives and leaves everything else empty. **Blank is
+> how this vendor says NO.** Applying `vendor-blank → is_cash MUST be null` literally would have
+> flipped **110 of 114 rows — 96%** — from a known `False` to NULL.
+>
+> **The value NAME is where it broke, and it is Rule 24(iii) inside a value's wording** — the same
+> test that made me reject `name-inferred` and `none` in this very enum. `vendor-blank` asserts *"the
+> vendor did not say"*; the axis measures *what the vendor said*, and **it cannot see whether an
+> emptiness is silence or a negative.**
+>
+> ⛔ **AND I HAD READ THE EVIDENCE AGAINST MYSELF AS EVIDENCE FOR MYSELF.** I quoted
+> `etf_schemas.py`'s dtype law approvingly as corroboration: *"MoneyMarketFlag STAYS STRING … mapping
+> '' to False would be null-meaning judgment."* Re-read, that line says the vendor tier must not
+> decide **BECAUSE `''` IS AMBIGUOUS** — i.e. the question is OPEN. I read it as the answer.
+> **A source that says "this question is open" reads almost identically to one that says "and here is
+> the answer", when you already have an answer.**
+
+### The values — **AS RULED** (`1.0.0_SA_CTO~Z` msg 5380)
+
+**THE ENCODING IS A PROPERTY OF THE FEED, NOT OF THE ROW.** Each source **DECLARES** its encoding,
+the parser **ASSERTS** the declaration against the bytes it just read, and `is_cash` derives from the
+declaration. `cash_basis` carries the declared encoding.
+
+| value | the feed's alphabet | `is_cash` | declared by |
 |---|---|---|---|
-| `vendor-flag` | the feed defines a cash-bearing field **and this row carries a non-empty value in it** | the vendor's assertion (True/False) | filepoint, **7,892 of 7,892 rows** |
-| `vendor-blank` | the feed defines the field; **this row's cell is empty/absent** | **null** | **0 today** — see the live defect below |
-| `vendor-silent` | **the feed defines no such field at all** | **null** | TrueShares (`TS_HOLDINGS_HEADER` has no `MoneyMarketFlag`); 0 rows in silver until tonight's 22:00Z fire |
+| `presence-flag` | emits **only positives** (`'Y'`); every other row left empty → **blank MEANS NO** | `'Y'`→True, `''`→**False** | **filepoint** |
+| `tri-state` | emits `Y` **and** `N` **and** blank → **blank MEANS UNSAID** | `Y`→True, `N`→False, `''`→**null** | *(no feed today)* |
+| `field-absent` | **no such column at all** → UNSAID | **null** | **trueshares** |
+
+⛔ **DECLARED, NEVER INFERRED — and this is the load-bearing half.** The tempting implementation is
+*"if the column contains no negative token, treat it as a presence flag."* **Rejected.** That makes
+**the meaning of every row a function of its cohort**: the first day filepoint emits a single `N` — a
+new fund, a vendor tweak, a partial file — the column becomes tri-state and **110 rows silently
+re-interpret from `False` to NULL, with no error, no diff, and no event to attribute it to.** It is
+the retrieval-control class in spec form: an upstream property silently redefines the domain the
+downstream rule measures over, and the output is well-formed in the new domain.
+
+**THE ASSERTION IS THE CONTROL** (`_assert_cash_encoding`): a `presence-flag` feed that ever emits a
+negative token **RAISES** rather than re-interpreting every blank row. **Both controls are run and
+both behaved** — today's real 114 rows do NOT fire it; the same rows plus one synthetic `'N'` DO.
+*A guard nobody has seen fire is a comment.* It is a **parser guard, not alert machinery** — it fails
+the run that reads bad data, and the alarm moratorium does not touch it.
 
 *Reading of `vendor-silent`, stated so it is not misread:* it asserts **the FEED carries no such
 field** — a structural fact about the header. It does **not** assert that the vendor "has no
