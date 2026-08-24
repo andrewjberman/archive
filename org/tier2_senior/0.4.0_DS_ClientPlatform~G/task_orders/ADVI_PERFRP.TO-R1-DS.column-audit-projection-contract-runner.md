@@ -3,7 +3,7 @@
 <task_order id="ADVI_PERFRP.TO-R1-DS" project="ADVI_PERFRP">
 <decomp_ref>workflows/atom_decomposition/runs/advi-perfrp/20260824T201222Z/DECOMP.md @1ce9b2d6bc — cells PRF-a-1, PRF-a-2, PRF-a-3, PRF-a-4, PRF-a-5, PRF-a-6, PRF-b-1, PRF-b-2, PRF-b-3, PRF-b-4, PRF-b-5, PRF-b-6, PRF-b-7, PRF-c-1 (emitter half), PRF-inv-2 (producer half), PRF-inv-3 (producer half), PRF-inv-5 (argument contract), PRF-inv-6. Constrained by boundaries PRF-g-1..g-4 and the FIXED table (s.11 #1–#14). NOT in this TO: every PRF-d-* cell (TO-R1-DE), PRF-c-2/c-3 + the IAM halves (TO-R1-AE), PRF-e-1 / PRF-f-1 (CVO-owned).</decomp_ref>
 <certification>**CERTIFIED DECOMP** — `3.0.0_SA_CVO` cert @62598c1bfb (36/36; no P1; s.11 FIXED 14/14 covered). Q-p1/Q-p2/Q-p3 CONFIRMED by the PRD author (CTO 66460) and Q-p1 independently re-derived by CVO. If a surprise item returns DECOMP-INVALIDATING, the ISSUER re-derives these premises.</certification>
-<issued_to>DS-class (gold producer, `data/assets/scripts/gold/runners_49f/**` under Rule 13). **Seated: the FRESH `0.4.0_DS_ClientPlatform~<letter>` MSTR spawns for ADVI_PERFRP ONLY (seating call 66493; letter at spawn from the audit ∪ disk occupancy; this file moves into the lane's `task_orders/` when named).** ONE PROJECT PER INSTANCE (@b705331f7d).</issued_to>
+<issued_to>DS-class (gold producer, `data/assets/scripts/gold/runners_49f/**` under Rule 13). **SEATED: `0.4.0_DS_ClientPlatform~G` (MSTR 66575, spawned 2026-08-24 ~21:0xZ, ADVI_PERFRP ONLY).** ONE PROJECT PER INSTANCE (@b705331f7d).</issued_to>
 <executor_class>DS-class</executor_class>
 <seating_trigger>Spawn call routed to MSTR same turn (66493). Start = SEATED: the live canonical plane exists (P1); first act = `PRF-a-1`. Dark mid-execution → MSTR same turn.</seating_trigger>
 <placement>LAPTOP (Rule 26; D2 is laptop-ruled). Nothing ferried.</placement>
@@ -11,7 +11,7 @@
 <issued>2026-08-24T20:3xZ</issued>
 <status>ACTIVE</status>
 <priority>P1 — the PURPOSE project of the 49F sub-program (finding 3); wave-2 first in CTO's dispatch order (PERFRP → INSURE → STITCH-A).</priority>
-<scope_guard>ONE PROJECT. Exactly the cells above. ⛔ **Do NOT build the plan's ~50-column `fact_account_return_daily`** (CTO ruling Q-p1: YAGNI; it would build ADVI_PERFORMANCE's unbuilt Phase-2 table inside PERFRP). ⛔ **Do NOT disambiguate / schedule the `account_gains / account_performance / client_performance` wrapper trio** (Q-p2: off this path). ⛔ **Do NOT brief the plan's author** — the `ADVI_PERFORMANCE_E2E_STANDARDIZATION_PLAN_20260806.md` is REUSED AS AN ARTIFACT; any method extension you need (netting rule, new/lost definition, the residual identity) is drafted by you and RULED by CTO, certified by CVO (s.11 #13). Surprises → `org/surprise_channel/ADVI_PERFRP/INVESTIGATION_v1.md`, one line, keep working. **Nothing to `4.0.0_SA_CRO*` this session.**</scope_guard>
+<scope_guard>ONE PROJECT. Exactly the cells above. ⛔ **Do NOT build the plan's ~50-column `fact_account_return_daily`** (CTO ruling Q-p1: YAGNI; it would build ADVI_PERFORMANCE's unbuilt Phase-2 table inside PERFRP). ⛔ **Do NOT disambiguate / schedule the `account_gains / account_performance / client_performance` wrapper trio** (Q-p2: off this path). ⛔ **Do NOT brief the plan's author** — the `ADVI_PERFORMANCE_E2E_STANDARDIZATION_PLAN_20260806.md` is REUSED AS AN ARTIFACT; any method extension you need (netting rule, new/lost definition, the residual identity) is drafted by you and RULED by CTO, certified by CVO (s.11 #13). Surprises → `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/ADVI_PERFRP/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580), one line, keep working. **Nothing to `4.0.0_SA_CRO*` this session.**</scope_guard>
 <authority>PRD `docs/architecture/ADVI_PERFRP_PRD.md` v0.3 s.4 / s.6 / s.8 / **s.11 (rulings, FIXED)** / s.12 (partner bindings) + s.13 premise correction (CTO, on Q-p1) + run P1–P16. Andrew-direct finding 3 (verbatim, PRD s.0) + "approved all" (~18:5xZ).</authority>
 <proof_of_spec>
   <!-- Positional: python .tools/proof-of-spec-check.py <instance>.json PRFR1DS-AC1,...,PRFR1DS-AC14 ; check the rc. -->
@@ -30,7 +30,7 @@
     <criterion id="PRFR1DS-AC13" cell_refs="PRF-c-1, PRF-inv-2"/>
     <criterion id="PRFR1DS-AC14" cell_refs="PRF-b-1"/>
   <expected_criteria>PRFR1DS-AC1,PRFR1DS-AC2,PRFR1DS-AC3,PRFR1DS-AC4,PRFR1DS-AC5,PRFR1DS-AC6,PRFR1DS-AC7,PRFR1DS-AC8,PRFR1DS-AC9,PRFR1DS-AC10,PRFR1DS-AC11,PRFR1DS-AC12,PRFR1DS-AC13,PRFR1DS-AC14</expected_criteria>
-  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform/deliverables/ADVI_PERFRP.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
+  <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~G/deliverables/ADVI_PERFRP.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>cells in this TO: 18 (a-1..a-6, b-1..b-7, c-1, inv-2, inv-3, inv-5, inv-6); criteria: 14; every criterion ≥1 cell_ref; every cell reachable (a-1 AC1 · a-2 AC3 · a-3 AC4 · a-4 AC5 · a-5 AC6 · a-6 AC7 · b-1 AC2/AC14 · b-2 AC8 · b-3 AC9 · b-4 AC5 · b-5 AC10 · b-6 AC6 · b-7 AC11 · c-1 AC13 · inv-2 AC13 · inv-3 AC11 · inv-5 AC12 · inv-6 AC8). Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
 </task_order>
@@ -91,4 +91,4 @@ The projection **CONSUMES THE LIVE CANONICAL TABLES** joined at `(account_id, bu
 Rule 13 (DS lane, `safe-deploy` gate; the deploy home is the bd tree — `comp-pipescript deployed`) · 14/14a · 15 · 17 (silver untouched) · NEVER#1 (T-1, trading calendar) · **no alerts/monitors** · **no shadow paths** · Build Ladder rung 2 (the cores, the crosswalk, the publisher mechanism, the plan as artifact) · no non-ASCII on AWS.
 
 ## Status + reporting
-Cell-level `<cell_status>` on this file; proof instance + flip = one commit. Report to COO at each flip (hash + push state, never bare "landed"); cc `3.0.0_SA_CVO` at AC2 (the contract) and at the FIRST EMISSION (their harness fires on it); cc the DE and AE PERFRP lanes at AC2 (their start conditions). Surprises: `org/surprise_channel/ADVI_PERFRP/`.
+Cell-level `<cell_status>` on this file; proof instance + flip = one commit. Report to COO at each flip (hash + push state, never bare "landed"); cc `3.0.0_SA_CVO` at AC2 (the contract) and at the FIRST EMISSION (their harness fires on it); cc the DE and AE PERFRP lanes at AC2 (their start conditions). Surprises: `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/ADVI_PERFRP/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580).

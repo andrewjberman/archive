@@ -3,7 +3,7 @@
 <task_order id="ADVI_PERFRP.TO-R1-AE" project="ADVI_PERFRP">
 <decomp_ref>workflows/atom_decomposition/runs/advi-perfrp/20260824T201222Z/DECOMP.md @1ce9b2d6bc — cells PRF-c-1 (publisher/IAM half), PRF-c-2, PRF-c-3, PRF-inv-4, PRF-inv-5 (IAM half). Reads PRF-b-1's contract and the DS lane's emitter scripts (TO-R1-DS). NOT in this TO: any emitter's content (DS), any render (DE), the PROD promote (DT).</decomp_ref>
 <certification>**CERTIFIED DECOMP** — `3.0.0_SA_CVO` @62598c1bfb (36/36, no P1).</certification>
-<issued_to>AE-class (cloud/infra: publisher wiring, IAM, EventBridge/Scheduler, Terraform). **Seated: the FRESH `0.7.0_AE_CloudOps~<letter>` MSTR spawns for ADVI_PERFRP ONLY (66493; letter at spawn; file moves into the lane's `task_orders/` when named).** ONE PROJECT PER INSTANCE. ⛔ This lane is NOT the disarm owner for OPAL_KIMIPIPELINE-S1 (66413) — that item belongs to a 0.7.0 instance seated for the ~B runner, or to MSTR's call.</issued_to>
+<issued_to>AE-class (cloud/infra: publisher wiring, IAM, EventBridge/Scheduler, Terraform). **SEATED: `0.7.0_AE_CloudOps~G` (MSTR 66575, ADVI_PERFRP ONLY); watches `0.4.0_DS_ClientPlatform~G` for the start condition.** ONE PROJECT PER INSTANCE. ⛔ This lane is NOT the disarm owner for OPAL_KIMIPIPELINE-S1 (66413) — that item belongs to a 0.7.0 instance seated for the ~B runner, or to MSTR's call.</issued_to>
 <executor_class>AE-class</executor_class>
 <seating_trigger>Spawn call routed to MSTR same turn (66493). **Start condition (OBSERVED): the DS lane's FIRST LOCAL EMISSION of a PERFRP leaf** (there is something to wire). Reading the contract + preparing the IAM/TF may begin on the contract skeleton commit. Dark mid-execution → MSTR same turn.</seating_trigger>
 <placement>LAPTOP (Rule 26: **the apply runs on the device that owns the work — THIS box, under `safe-apply`; never ferried**).</placement>
@@ -11,7 +11,7 @@
 <issued>2026-08-24T20:3xZ</issued>
 <status>ACTIVE (start condition above)</status>
 <priority>P1 — the 49F purpose project; wave-2 first.</priority>
-<scope_guard>ONE PROJECT. Exactly the cells above. ⛔ **NO new schedule, NO new trigger, NO alarm / SNS / freshness checker / monitor** (moratorium) — the projection is a stage in the existing chain on the existing cron. ⛔ **NO shadow prefix, NO comparator.** Surprises → `org/surprise_channel/ADVI_PERFRP/`. **Nothing to `4.0.0_SA_CRO*` this session.**</scope_guard>
+<scope_guard>ONE PROJECT. Exactly the cells above. ⛔ **NO new schedule, NO new trigger, NO alarm / SNS / freshness checker / monitor** (moratorium) — the projection is a stage in the existing chain on the existing cron. ⛔ **NO shadow prefix, NO comparator.** Surprises → `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/ADVI_PERFRP/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580). **Nothing to `4.0.0_SA_CRO*` this session.**</scope_guard>
 <authority>PRD `docs/architecture/ADVI_PERFRP_PRD.md` v0.3 s.4(c) serving plane / s.8 B8 / **s.11 #11 (PROD exposure rides the 49F switch promote — no new gate), #14 (0.7.0 owns B8)** / s.12 (the firm pin). CLAUDE.md Rules 1–6, 18, 22a.</authority>
 <proof_of_spec>
   <!-- Positional: python .tools/proof-of-spec-check.py <instance>.json PRFR1AE-AC1,...,PRFR1AE-AC6 ; check the rc. -->
@@ -22,7 +22,7 @@
     <criterion id="PRFR1AE-AC5" cell_refs="PRF-inv-5"/>
     <criterion id="PRFR1AE-AC6" cell_refs="PRF-c-3"/>
   <expected_criteria>PRFR1AE-AC1,PRFR1AE-AC2,PRFR1AE-AC3,PRFR1AE-AC4,PRFR1AE-AC5,PRFR1AE-AC6</expected_criteria>
-  <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/ADVI_PERFRP.TO-R1-AE_PROOF_OF_SPEC.json</instance_path>
+  <instance_path>org/tier2_senior/0.7.0_AE_CloudOps~G/deliverables/ADVI_PERFRP.TO-R1-AE_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>cells: 5 (c-1, c-2, c-3, inv-4, inv-5); criteria: 6; every criterion ≥1 cell_ref; every cell reachable (c-1 AC1/AC2 · c-2 AC3 · c-3 AC4/AC6 · inv-4 AC1 · inv-5 AC5). Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
 </task_order>
@@ -59,4 +59,4 @@
 Rules 1–6 (Terraform-only; commit before apply; layers; source map; size deliberately; tag) · Rule 18 (`safe-apply`) · NEVER#4 (no bare apply) · NEVER#6 (finish or roll back loud) · NEVER#2/#3 (no cross-firm read; no served-key move) · **alarm moratorium** · **no shadow paths** · Rule 22a (STATE/IAM cite comp-tool AND live primitive; the simulate three false-deny modes) · Rule 26 (apply on this box).
 
 ## Status + reporting
-Cell-level `<cell_status>`; proof instance + flip = one commit. Report to COO per flip (hash + push state); cc `3.0.0_SA_CVO` at AC2/AC5 (IAM controls) and at AC3 (the first served PERFRP key on DEV — their parity report joins there). Surprises: `org/surprise_channel/ADVI_PERFRP/`.
+Cell-level `<cell_status>`; proof instance + flip = one commit. Report to COO per flip (hash + push state); cc `3.0.0_SA_CVO` at AC2/AC5 (IAM controls) and at AC3 (the first served PERFRP key on DEV — their parity report joins there). Surprises: `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/ADVI_PERFRP/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580).

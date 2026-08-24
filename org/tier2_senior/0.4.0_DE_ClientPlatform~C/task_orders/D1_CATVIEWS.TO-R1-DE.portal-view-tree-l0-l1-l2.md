@@ -11,7 +11,7 @@
 <issued>2026-08-24T20:2xZ</issued>
 <status>ACTIVE (start condition above)</status>
 <priority>P1 — Andrew's "beeline" + the Monday push order (D1 IMMEDIATE TERM).</priority>
-<scope_guard>ONE PROJECT. Exactly the cells in `<decomp_ref>`. No Positioning page, no ETFS GICS→sub-categories work (that is site Z's D4 chain), no Books/ADVI work. Adjacent findings → one line to `org/surprise_channel/D1_CATVIEWS/INVESTIGATION_v1.md`, no action, keep working.</scope_guard>
+<scope_guard>ONE PROJECT. Exactly the cells in `<decomp_ref>`. No Positioning page, no ETFS GICS→sub-categories work (that is site Z's D4 chain), no Books/ADVI work. Adjacent findings → one line to `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/D1_CATVIEWS/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580), no action, keep working.</scope_guard>
 <authority>PRD `docs/architecture/D1_ASSET_CATEGORY_VIEWS_PRD.md` s.8 + **s.8.6 (the view tree, Andrew-direct ~18:5xZ, verbatim record in `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260824_D1_VIEW_TREE_L0_L1_L2_CLIENT_MODELS_SMAS_ALTERNATIVES.md`)** + s.4.3 + the CVO amendment @d476339293 (the invisible-fallback class). Supersedes pre-pipeline TO-D1d (never started).</authority>
 <proof_of_spec>
   <!-- Positional invocation, check the rc:
@@ -84,4 +84,4 @@
 - Do not add L1 nodes for IDVZ / PFDE or any node the block does not carry — the enumeration is the registry's (Q-h1 is at Andrew).
 
 ## Status + reporting
-Cell-level status in a `<cell_status>` block on this file; proof instance + flip = one atomic commit. Report to COO at each flip (hash + push state, never bare "landed"); cc `3.0.0_SA_CVO` at AC6/AC7; cc the DS lane at render-verified so the projection owner sees the consumption result. Surprises: `org/surprise_channel/D1_CATVIEWS/`. **Nothing to `4.0.0_SA_CRO*` this session.**
+Cell-level status in a `<cell_status>` block on this file; proof instance + flip = one atomic commit. Report to COO at each flip (hash + push state, never bare "landed"); cc `3.0.0_SA_CVO` at AC6/AC7; cc the DS lane at render-verified so the projection owner sees the consumption result. Surprises: `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/D1_CATVIEWS/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580). **Nothing to `4.0.0_SA_CRO*` this session.**

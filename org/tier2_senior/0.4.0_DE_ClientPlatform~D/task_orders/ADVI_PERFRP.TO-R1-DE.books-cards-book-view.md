@@ -3,7 +3,7 @@
 <task_order id="ADVI_PERFRP.TO-R1-DE" project="ADVI_PERFRP">
 <decomp_ref>workflows/atom_decomposition/runs/advi-perfrp/20260824T201222Z/DECOMP.md @1ce9b2d6bc — cells PRF-d-1, PRF-d-2, PRF-d-3, PRF-d-4, PRF-d-5, PRF-d-6, PRF-d-7, PRF-d-8, PRF-inv-1, PRF-inv-3 (render half). Reads PRF-b-1's contract (TO-R1-DS). Constrained by PRF-g-1 (deferred cards ABSENT), PRF-g-4 (insurance beside, never inside). NOT in this TO: any producer/serving cell; the PROD promote (DT).</decomp_ref>
 <certification>**CERTIFIED DECOMP** — `3.0.0_SA_CVO` @62598c1bfb (36/36, no P1). Issuer re-derives on a DECOMP-INVALIDATING item.</certification>
-<issued_to>DE-class (portal, `portal/src/pages/AdvisorIntelligence/**` on DEV). **Seated: the FRESH `0.4.0_DE_ClientPlatform~<letter>` MSTR spawns for ADVI_PERFRP ONLY (66493; letter at spawn; file moves into the lane's `task_orders/` when named).** ONE PROJECT PER INSTANCE.</issued_to>
+<issued_to>DE-class (portal, `portal/src/pages/AdvisorIntelligence/**` on DEV). **SEATED: `0.4.0_DE_ClientPlatform~D` (MSTR 66575, ADVI_PERFRP ONLY); watches `0.4.0_DS_ClientPlatform~G` for the start condition.** ONE PROJECT PER INSTANCE.</issued_to>
 <executor_class>DE-class</executor_class>
 <seating_trigger>Spawn call routed to MSTR same turn (66493). **Start condition (OBSERVED): the DS lane's `b-1` contract SKELETON is COMMITTED with its `contract_version`** — `d-1` shared controls begin on the skeleton; card acceptance (AC3–AC8) waits for leaves on DEV. Dark mid-execution → MSTR same turn.</seating_trigger>
 <placement>LAPTOP (portal dev-server + screenshot verification). PROD is DT's (`/prod-deploy`); this TO stops at DEV.</placement>
@@ -11,7 +11,7 @@
 <issued>2026-08-24T20:3xZ</issued>
 <status>ACTIVE (start condition above)</status>
 <priority>P1 — the 49F purpose project; wave-2 first.</priority>
-<scope_guard>ONE PROJECT. Exactly the cells above. **Advisor + Distribution tabs are OUT — byte-identical is an acceptance criterion, not a courtesy.** No INSURE UI (the Total Assets element is INSURE's cell). Surprises → `org/surprise_channel/ADVI_PERFRP/`, one line. **Nothing to `4.0.0_SA_CRO*` this session.**</scope_guard>
+<scope_guard>ONE PROJECT. Exactly the cells above. **Advisor + Distribution tabs are OUT — byte-identical is an acceptance criterion, not a courtesy.** No INSURE UI (the Total Assets element is INSURE's cell). Surprises → `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/ADVI_PERFRP/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580), one line. **Nothing to `4.0.0_SA_CRO*` this session.**</scope_guard>
 <authority>PRD `docs/architecture/ADVI_PERFRP_PRD.md` v0.3 s.6 (the shape, PINNED from Andrew's recording + 13 screenshots — STRUCTURE only, the inputs stay local) / **s.11 rulings #1–#4, #6–#9, #11 (FIXED)** / s.7 acceptance 8–11.</authority>
 <proof_of_spec>
   <!-- Positional: python .tools/proof-of-spec-check.py <instance>.json PRFR1DE-AC1,...,PRFR1DE-AC13 ; check the rc. -->
@@ -29,7 +29,7 @@
     <criterion id="PRFR1DE-AC12" cell_refs="PRF-d-8"/>
     <criterion id="PRFR1DE-AC13" cell_refs="PRF-d-1"/>
   <expected_criteria>PRFR1DE-AC1,PRFR1DE-AC2,PRFR1DE-AC3,PRFR1DE-AC4,PRFR1DE-AC5,PRFR1DE-AC6,PRFR1DE-AC7,PRFR1DE-AC8,PRFR1DE-AC9,PRFR1DE-AC10,PRFR1DE-AC11,PRFR1DE-AC12,PRFR1DE-AC13</expected_criteria>
-  <instance_path>org/tier2_senior/0.4.0_DE_ClientPlatform/deliverables/ADVI_PERFRP.TO-R1-DE_PROOF_OF_SPEC.json</instance_path>
+  <instance_path>org/tier2_senior/0.4.0_DE_ClientPlatform~D/deliverables/ADVI_PERFRP.TO-R1-DE_PROOF_OF_SPEC.json</instance_path>
   <alignment_denominators>cells: 10 (d-1..d-8, inv-1, inv-3); criteria: 13; every criterion ≥1 cell_ref; every cell reachable (d-1 AC1/AC2/AC9/AC13 · d-2 AC3/AC9 · d-3 AC4 · d-4 AC5 · d-5 AC6 · d-6 AC7 · d-7 AC8 · d-8 AC12 · inv-1 AC10 · inv-3 AC11). Unmapped 0; untraceable 0.</alignment_denominators>
 </proof_of_spec>
 </task_order>
@@ -84,4 +84,4 @@
 No PROD promote · no benchmark rows (P-7 deferred; slot reserved, nothing rendered) · no second computation of any figure · no touch to `composition.ts` · nothing on the Advisor / Distribution tabs.
 
 ## Status + reporting
-Cell-level `<cell_status>`; proof instance + flip = one commit. Report to COO per flip (hash + push state); cc `3.0.0_SA_CVO` at AC9/AC10/AC11; cc the DS PERFRP lane at render-verified. Surprises: `org/surprise_channel/ADVI_PERFRP/`.
+Cell-level `<cell_status>`; proof instance + flip = one commit. Report to COO per flip (hash + push state); cc `3.0.0_SA_CVO` at AC9/AC10/AC11; cc the DS PERFRP lane at render-verified. Surprises: `3.0.0_SA_CVO` by MCP, cc `2.0.0_SA_COO` (CVO FILES it under `org/surprise_channel/ADVI_PERFRP/`; executing seats do NOT write that tree -- CVO_WORKSPACE lane, ruling 66580).
