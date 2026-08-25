@@ -1,0 +1,97 @@
+# PROMOTE-HOLD REGISTER — live sovereign holds on PROD promotion
+
+**Compiled:** 2026-08-25 by `0.0.0_AB_MSTR`
+**Why this is a FILE and not a message:** the seat these holds bind — a DT instance — **does not
+exist yet**. A message cannot reach an unseated seat; a fresh seat reads CLAUDE.md and its spawn
+brief, not six hours of other seats' inboxes. **Whoever briefs the next DT instance lifts this
+file, verbatim.**
+
+⛔ **ENUMERATION ONLY. Nothing here is adjudicated.** Where a sovereign word is silent, this file
+records the silence rather than resolving it. Reading a resolution into this document would be the
+inferred-gate / widened-word class the estate has paid for repeatedly.
+
+---
+
+## (1) ETFS PROMOTE — NOT YET
+
+**Andrew-direct 2026-08-24 ~15:2xZ, base CTO terminal. VERBATIM:**
+> *"We are not positioned to promote yet. Until data pipeline is complete with full data structure
+> for daily bloomberg data for all ETFs, and it displays properly on DEV build with GICS replaced
+> for sub-categories on frontend."*
+
+- Record: `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260824_OPEN_CALLS_49F_HELD_ON_MIKE_ETF_PROMOTE_CONDITIONS_BBG_PIPELINE_STRUCTURE.md`; restated `docs/architecture/ETFS_POSITIONING_PRD.md:751` (R2-1).
+- **TWO NAMED CONDITIONS, both his:** (a) the daily Bloomberg data pipeline complete with full data
+  structure for **all** ETFs; (b) it **displays properly on the DEV build**, with GICS replaced by
+  sub-categories on the frontend.
+- Live deploy-completion entry: `org/critical_paths/change_management/20260824T1241Z_etfs-positioning-prod-promote-v2-1-165_deploy_completion.md`
+  — reads **HELD-PENDING-SOVEREIGN**, and on its own face: *"NOT COMPLETED. NOT ABORTED. NEITHER
+  TERMINAL IS TRUE OF THIS ENTRY."* **Do not close it as either.**
+
+## (2) 49F SOURCING — HELD ON MIKE (49 Financial)
+
+Same record, item (1). `org/projects/ADVI_49FSRC.json` PARKED.
+⚠ **This is a SOURCING hold, not a promote hold.** Listed because the PERFRP record names it as a
+possible interaction — **not** because it is the same kind of thing.
+
+## (3) PERFRP — DEV ONLY, NO PROD PROMOTE
+
+**Andrew-direct 2026-08-25 ~01:1xZ, received DIRECTLY at `0.7.0_AE_CloudOps~G` (not a relay).
+VERBATIM:**
+> *"Yeah we do want to build this out but it needs to stay on the DEV branch not promoted to PROD
+> until we know the data pipeline and all underlying data is verified end to end."*
+
+Record `@34791b8d31`. **He authorises the DEV build explicitly** — *"we do want to build this
+out"* — so this holds the PROMOTE ACT only.
+
+### ⛔ Its condition is not merely PENDING — it has MEASURED counter-examples
+
+Contributed by `3.0.0_SA_CVO`, whose function is verification. Both filed in
+`org/surprise_channel/ADVI_PERFRP/INVESTIGATION_v1.md`, both found by the executing DS lane, both
+re-derived or confirmed at the CVO seat:
+
+- **`ADVI_PERFRP-S3`** — the canonical returns table is **HOLLOW AT THE FRONTIER**. `twr_daily`'s
+  `r_net`/`r_gross` are physically NULL for every row across the five most recent partitions (529
+  censused; 523 COMPUTED / 6 ALL-REFUSED; last COMPUTED 2026-08-07). **Refused partitions carry 9
+  columns, not 13** — the four missing are `bmv/emv/cf_net/cf_gross`, *the operands returns are
+  computed from* — so those partitions withhold the material to reconstruct the answer.
+- **`ADVI_PERFRP-S7`** — **8 of 13 sources serve NO contract period.** Every shallow source floors
+  2026-07-14 or later; the contract's earliest period start is QTD 2026-07-01.
+
+**WHY THIS RIDES THE BRIEF:** *a hold whose condition reads "not yet done" is priced differently
+from one whose condition has known failing measurements.* A DT seat reading *"verified end to
+end"* with no attachments will reasonably plan for a verification PASS. These two say the
+underlying data does not currently support one — **and they were found by the lanes building on
+it, not by a verification sweep that has yet to run.**
+**Neither CVO nor MSTR claims the condition is unmeetable.** Both items are GRADUATED-and-open with
+named owners; neither blocks the DEV work his word authorises.
+
+---
+
+## What is NOT stated — preserved as unresolved
+
+Flagged by `0.7.0_AE_CloudOps~G`, who declined to resolve them. **Nobody has resolved them since.**
+
+- **How wide is "this" in (3)?** Said answering a PERFRP question. Whether it reaches the wider 49F
+  ADVI serving surface is **not stated**.
+- **What counts as "verified end to end"?** Not defined. Whether the `twr_daily` BMV gap alone
+  satisfies it, or whether it wants a broader chain-to-card verification, is his call or the PRD
+  author's on his behalf.
+- **WHO VERIFIES?** His word names a verification standard and **names no verifier.** CVO has
+  explicitly **declined to appoint itself** — certifying "verified end to end" for PERFRP would be
+  materially larger than certifying a decomp's enumeration, which is all that seat has signed for.
+- **Are (2) and (3) one hold or two?** Not stated. Being treated as **INDEPENDENT** until he or CTO
+  says otherwise — satisfying one does not release the other. **This is a holding pattern, not a
+  ruling.**
+
+## Provenance and limits
+
+**All three are HIS gates, stated unprompted.** None is agent-manufactured: the no-inferred-gates
+rule bans minting an approval step from precedent or prudence, and does not touch a sovereign's own
+word.
+
+⛔ **THIS REGISTER DOES NOT CLAIM TO BE COMPLETE.** It enumerates holds that were **written**. **A
+hold spoken and not recorded would not appear here, and there is no instrument for that.** Treat it
+as a floor.
+
+**Rule 19 is untouched** — the portal main tree stays on DEV always. These hold the PROMOTE ACT;
+they are not a new mechanism, and PROD promotes remain a DT lane act via `/prod-deploy`.
