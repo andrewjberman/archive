@@ -11,10 +11,11 @@
   <ref type="prd">docs/architecture/D3_ACCOUNT_MODEL_OVERLAY_PRD.md (v1.0 + v1.1 s4b amendment)</ref>
 </references>
 <objective>
-The SMARTX_BD_EXACT_JOIN precondition spec (startable NOW), the account_model_membership
-gold table + producer at ACCOUNT GRAIN, and the platinum projection via the publisher.
-Portal overlay UI (surface d) is excluded to a DE lane; Cottonwood's binding (e-2) is a
-declared cross-project dependency on ADVI_COTKEY, not work to chase. An UNRESOLVED count
+The SMARTX_BD_EXACT_JOIN precondition spec (startable NOW) and the account_model_membership
+gold table + producer at ACCOUNT GRAIN. AMENDED ~12:4xZ: the platinum projection (surface c)
+is REMOVED to 0.7.0_AE_CloudOps per PRD s4c ruling 9, the Andrew-approved owner row. Portal
+overlay UI (surface d) is excluded to a DE lane; Cottonwood's binding (e-2) is a declared
+cross-project dependency on ADVI_COTKEY, not work to chase. An UNRESOLVED count
 greater than zero is a PUBLISHED NUMBER, never a dropped row.
 </objective>
 </task_order>
@@ -26,12 +27,18 @@ greater than zero is a PUBLISHED NUMBER, never a dropped row.
 <decomp_ref>
 workflows/atom_decomposition/runs/d3-account-model-overlay/20260825T123000Z/DECOMP.md — cells
 D3-inv-1, D3-inv-2, D3-inv-3, D3-inv-4, D3-inv-5, D3-inv-6,
-D3-a-1, D3-a-2, D3-a-3, D3-a-4, D3-b-1, D3-b-2, D3-b-3, D3-b-4, D3-c-1, D3-c-2, D3-e-1, D3-e-3
+D3-a-1, D3-a-2, D3-a-3, D3-a-4, D3-b-1, D3-b-2, D3-b-3, D3-b-4, D3-e-1, D3-e-3
 </decomp_ref>
 
 <decomp_context>
-⛔ **THREE OF THE DECOMP'S 21 CELLS ARE EXCLUDED, FOR TWO DIFFERENT REASONS — named so the 18-vs-21 difference is
+⛔ **FIVE OF THE DECOMP'S 21 CELLS ARE EXCLUDED, FOR THREE DIFFERENT REASONS — named so the 16-vs-21 difference is
 visible:**
+- **`D3-c-1`, `D3-c-2` (2) — THE PLATINUM PROJECTION. AMENDED IN ~12:4xZ ON `~K`'s BLOCKING SURPRISE (70396).**
+  **PRD s4c ruling 9 — THE ANDREW-APPROVED OWNER ROW — reads `0.7.0_AE_CloudOps (publisher key)`.** This TO had
+  assigned it here and the decomp's sequencing line had said DE-class; **both were mine and both widened past his
+  approved row.** ⛔ **AND A SECOND LIVE RECORD STILL CLAIMS IT: `D3_MODELOVERLAY.TO-D3.3.publisher-pair-and-platinum-key.md`,
+  `<issued_to>0.4.0_DS_ClientPlatform~B</issued_to>`, `<status>staged -- GATED ON TO-D3.2 + D2 publisher active</status>`
+  — routed to CTO for disposition. DISARMED IS NOT REMEDIATED.**
 - **`D3-d-1`, `D3-d-2` (2) — THE PORTAL OVERLAY UI.** DE-class: the "seventy-thirty at a glance" render and the slice
   pivots. **REAL WORK, another lane. Your gold table is what it consumes.**
 - **`D3-e-2` (1) — A DECLARED CROSS-PROJECT DEPENDENCY, NOT WORK.** Cottonwood's binding waits on `ADVI_COTKEY`
@@ -47,12 +54,12 @@ visible:**
   <criterion id="D3R1DS-AC3" cell_refs="D3-b-1, D3-b-2, D3-inv-1"/>
   <criterion id="D3R1DS-AC4" cell_refs="D3-b-3"/>
   <criterion id="D3R1DS-AC5" cell_refs="D3-b-4, D3-inv-2, D3-inv-6"/>
-  <criterion id="D3R1DS-AC6" cell_refs="D3-c-1, D3-c-2, D3-inv-4, D3-inv-5, D3-e-1, D3-e-3"/>
+  <criterion id="D3R1DS-AC6" cell_refs="D3-inv-4, D3-inv-5, D3-e-1, D3-e-3"/>
   <instance_path>org/tier2_senior/0.4.0_DS_ClientPlatform~K/deliverables/D3_MODELOVERLAY.TO-R1-DS_PROOF_OF_SPEC.json</instance_path>
   <expected_criteria>D3R1DS-AC1,D3R1DS-AC2,D3R1DS-AC3,D3R1DS-AC4,D3R1DS-AC5,D3R1DS-AC6</expected_criteria>
-  <alignment_denominators>cells in this TO: 18 (inv 6 · a 4 · b 4 · c 2 · e 2); criteria: 6; every criterion carries
->=1 cell_ref; all 18 cells reachable. Unmapped 0; untraceable 0. Decomp total 21; 3 excluded for two declared
-reasons, named in decomp_context.</alignment_denominators>
+  <alignment_denominators>cells in this TO: 16 (inv 6 · a 4 · b 4 · e 2); criteria: 6; every criterion carries
+>=1 cell_ref; all 16 cells reachable. Unmapped 0; untraceable 0. Decomp total 21; 5 excluded for THREE declared
+reasons, named in decomp_context (AMENDED ~12:4xZ: surface (c) removed to 0.7.0_AE_CloudOps).</alignment_denominators>
 </proof_of_spec>
 
 ---
@@ -77,7 +84,7 @@ is in] without having to dig… oh yeah, seventy-thirty."***
 | **D3R1DS-AC3** | **`account_model_membership` at ACCOUNT × MODEL × as_of**, writing `gold/advi/canonical/account_model_membership/date={D}/` parquet **+ manifest carrying BOTH coverage denominators**. **NAME the U1 model-identity source explicitly** — an unnamed source is where the grain slips. ⛔ **FULL 8-DIGIT ACCOUNT NUMBERS ALWAYS. TWO MASTERS, NOT INTERCHANGEABLE: `08335338` = ADVI/BD · `08242234` = MDPF/SmartX. NEVER the 4-digit prefix.** **Placement rides the D2-landed grammar, confirmed with the D2 owner — D3 mints no new tree.** | `D3-b-1/2`, `D3-inv-1` | APPLIED |
 | **D3R1DS-AC4** | ⛔⛔ **THE PRD SAYS *"empty map partition = LOUD fail (vintages do not advance — a06 precedent)."* THAT PRECEDENT WAS MEASURED TODAY AND IT IS NOT THE ENDORSEMENT IT READS AS.** `a06` fails loud — **and it fails loud EVERY SUNDAY AND MONDAY BY CONSTRUCTION**: it takes `map_dates[-1]` with no trading-day filter, the map emits EMPTY weekend partitions (4,507 B, byte-identical, zero rows), and the map always lands ~30 min AFTER the chain fires — so `[-1]` is ALWAYS D-1. **The whole 49F gold chain has been dead two days a week; `c02_twr_daily` has not run since 08-22.** ⛔ **INHERIT THE LOUD FAIL. DO NOT INHERIT THE `[-1]` SELECTION.** Select by a **trading-day-resolved date**, or assert non-empty before aborting. **ORACLE: a weekend dry-run that does NOT abort.** | `D3-b-3` | EXERCISED |
 | **D3R1DS-AC5** | ⛔ **AN `UNRESOLVED` COUNT > 0 IS A PUBLISHED NUMBER, NEVER A DROPPED ROW.** *"Perfect" = joined + explained-residual = denominator, **zero silent drops**.* **Coverage below the registered floor = PUBLISH WITH THE BREACH FLAGGED in the manifest, and the flag PROPAGATES into the served artifact's provenance block, read by the publisher pair AT EVERY RUN** — so a regression is visible at every publish, not only at a one-time acceptance pass. ⛔ **NO ALARM MACHINERY. The PRD's own phrasing is the model: *the record simply has a recurring reader.*** | `D3-b-4`, `D3-inv-2/6` | EXERCISED |
-| **D3R1DS-AC6** | **Serving-shaped overlay JSON under `platinum/advi/49financial/`**, key family finalized against the D2-landed route contract; advisor-scoped access follows the scoped advisor-intelligence route pattern. **Key absent = route-level 404 (existing behavior); NO partial write** — exercise both paths. ⛔ **17b: PLATINUM IS SERVING AND THE PUBLISHER IS THE ONLY JSON PRODUCER — serving-shaped work does NOT go in gold.** **49F FIRST (the D2 template firm); INF/COT inherit by TEMPLATE, one implementation with firm-pinned invocations — never a fork.** **§4b's four-level additive runner contract (account / relationship-household-client / advisor / firm) is honoured at all four levels.** ⛔ **NO client-facing surface — Opal stays advisor-level.** | `D3-c-1/2`, `D3-inv-4/5`, `D3-e-1/3` | APPLIED |
+| **D3R1DS-AC6-AMENDED** | ⛔ **AMENDED ~12:4xZ ON `0.4.0_DS_ClientPlatform~K`'s BLOCKING SURPRISE (70396). THE PLATINUM PROJECTION IS REMOVED FROM THIS TO — IT IS NOT YOURS.** **PRD s4c ruling 9, THE ANDREW-APPROVED ROW (*"all recs approved"* ~19:1xZ), reads `0.7.0_AE_CloudOps (publisher key)`.** My decomp's sequencing line said DE-class and this TO assigned it to you; **both were mine and both widened past his approved owner row.** **WHAT REMAINS YOURS IN AC6:** ⛔ **17b — PLATINUM IS SERVING AND THE PUBLISHER IS THE ONLY JSON PRODUCER, so serving-shaped work does NOT go in your gold table.** That constraint binds your table whoever builds the publisher. **49F FIRST (the D2 template firm); INF/COT inherit by TEMPLATE, one implementation with firm-pinned invocations — never a fork.** **§4b's four-level additive runner contract (account / relationship-household-client / advisor / firm) is honoured at all four levels.** ⛔ **NO client-facing surface — Opal stays advisor-level.** | `D3-c-1/2`, `D3-inv-4/5`, `D3-e-1/3` | APPLIED |
 
 ---
 
