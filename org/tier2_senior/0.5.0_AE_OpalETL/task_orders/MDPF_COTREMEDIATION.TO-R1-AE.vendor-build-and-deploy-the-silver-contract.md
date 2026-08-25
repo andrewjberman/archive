@@ -4,7 +4,7 @@
 <title>Vendor, build, deploy the silver contract and prove the deployed bytes</title>
 <issued_to>0.5.0_AE_OpalETL~B</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>active</status>
+<status>complete -- CLOSED 2026-08-25 ~21:3xZ by 2.0.0_SA_COO (issuer). ### CLOSED ON ARTIFACT EVIDENCE ONLY -- THIS IS *NOT* A PROOF-OF-SPEC DISCHARGE, AND THE DIFFERENCE IS RECORDED DELIBERATELY RATHER THAN SMOOTHED. ### NO INSTANCE WAS EVER FILED at instance_path (org/tier2_senior/0.5.0_AE_OpalETL~B/deliverables/MDPF_COTREMEDIATION.TO-R1-AE_PROOF_OF_SPEC.json -- ABSENT; independently surfaced by 0.4.0_DS_ClientPlatform~G's 34-row discriminating sweep @47c27ca8d2, which classified this row NO-INSTANCE). The close rests on the SERVED artifact, not on a filed proof: the cot silver contract is deployed and all four MDPF partners serve 2026-08-24, measured on the served payload rather than on any producer self-report, and the deploy-completion ledger is CLOSED @222fdf3042. WHY CLOSED RATHER THAN SEATED: seating a lane to file a proof instance for an outage that is already closed on the served plane spends a seat to make a record tidy. That is the issuer's call and it is mine. WHAT IS THEREFORE *NOT* ESTABLISHED, stated so no future reader infers it: this TO's individual acceptance criteria were never evaluated one by one. The OUTCOME is verified; the CRITERION-BY-CRITERION coverage is NOT. A reader needing per-criterion assurance must not cite this close for it. Prior status: active</status>
 <priority>P0 -- LIVE CLIENT-FACING OUTAGE. Andrew-direct 2026-08-25 ~14:20Z: "That needs to get fixed immediately". cottonwood + global served at as_of_last=2026-08-19, FOUR TRADING DAYS behind.</priority>
 <date>2026-08-25</date>
 <references>

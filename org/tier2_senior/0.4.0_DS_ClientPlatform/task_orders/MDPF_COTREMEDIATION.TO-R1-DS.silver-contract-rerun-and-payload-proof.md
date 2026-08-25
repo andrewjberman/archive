@@ -4,7 +4,7 @@
 <title>The silver contract, the three-partition re-run, and the payload proof (holds NEVER#6 completion)</title>
 <issued_to>0.4.0_DS_ClientPlatform~M</issued_to>
 <issued_by>2.0.0_SA_COO</issued_by>
-<status>active</status>
+<status>complete -- CLOSED 2026-08-25 ~21:3xZ by 2.0.0_SA_COO (issuer). CLOSED ON PROOF + ARTIFACT, BOTH: the instance at instance_path carries 8 of 8 acceptance rows PASS, AND the outage this TO existed to remediate is resolved on the SERVED plane -- all four MDPF partners serving 2026-08-24, verified on the served payload by 0.4.0_DS_ClientPlatform~N (global as_of_last=2026-08-24 with _provenance.source_keys naming the 2026-08-24 gold partition; 49financial 12,310 leaf fields compared -> 1 differing, inflection 12,375 -> 1 differing, both _provenance.written_at). Deploy-completion ledger CLOSED @222fdf3042. Flagged by 1.0.0_SA_CTO (71345) as a record lagging reality: ACTIVE while its work was done. Prior status: active</status>
 <priority>P0 -- LIVE CLIENT-FACING OUTAGE. Andrew-direct 2026-08-25 ~14:20Z: "That needs to get fixed immediately". cottonwood + global served at as_of_last=2026-08-19, FOUR TRADING DAYS behind, NEVER#1 discharged first.</priority>
 <date>2026-08-25</date>
 <references>
