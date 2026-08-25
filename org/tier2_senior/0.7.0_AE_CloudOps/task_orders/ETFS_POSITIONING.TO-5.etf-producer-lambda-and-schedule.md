@@ -219,16 +219,17 @@ look natural, because the producer genuinely wants that data.
 > **WHOEVER FIRES MUST STATE WHICH BRANCH THEY FIRED UNDER.** *(Still information, not a gate — but
 > the sovereign question that made it a disclosure is now ANSWERED, so the branches are pass/fail.)*
 >
-> ⛔⛔ **AND A SEPARATE GUARD ON HIS OWN RE-RUN INSTRUCTION: DO NOT RE-RUN L1 BEFORE 04:00Z.** At
+> ⛔⛔ **AND A SEPARATE GUARD ON HIS OWN RE-RUN INSTRUCTION: THE AD-HOC L1 RE-RUN IS **DROPPED ENTIRELY** — NOT MOVED TO 04:15Z.** *(RULED `1.0.0_SA_CTO~Z` 02:24Z.)* **MEASURED: the ONLY consumer of `bbg/` is `etf-positioning-producer-daily` = `cron(0 13 * * ? *)`. Gold fires 13:00Z; NOTHING reads `bbg/` before then, and the SCHEDULED 11:00Z L1 pull writes `bbg/2026-08-24/` two hours ahead of it.** So an ad-hoc run **cannot move Andrew's clock by one minute**, and the scheduled pull overwrites the same key anyway — **the ad-hoc artifact is not even durable.** *It was priced "a free option" and it was never free.*
+> ⛔ **AND THE ARITHMETIC THAT KILLED THE 04:00Z OPTION, KEPT SO NOBODY RESURRECTS IT: 04:00Z IS EXACTLY LOCAL MIDNIGHT (UTC-4). 03:59:59Z -> as-of 2026-08-21 WRONG; 04:00:00Z -> 08-24 OK. ZERO SECONDS OF MARGIN** — one second early writes the same wrong prefix from the same clock bug **and reads as the fix having failed rather than the clock.** (`0.4.0_DS_ClientPlatform~Z` ran the arithmetic five seats had quoted for four hours; `0.0.0_AB_MSTR~Z` hit exactly this at 00:49Z.) At
 > 01:2xZ local is still MONDAY, so an L1 re-run lands under `bbg/2026-08-21/` **again** — the same
 > wrong key — **and would OVERWRITE the 170-row characteristics artifact everything currently relies
 > on.** **His authorization is real; the timing is not safe yet.** Gold fix + exercise now (no run
-> needed); L1 re-run after 04:00Z on unmodified code.
+> needed). **NO ad-hoc L1 re-run at all — the SCHEDULED 11:00Z pull is the path.**
 
 > ⚠ **DO NOT fire while `bbg/2026-08-24/` is absent** — the producer steps back to 08-21, publishes a
 > further identical-looking artifact, and adds another ad-hoc decoy to a prefix already carrying
 > three at one as-of (all 76,149 B, three ETags). **That is the only thing the hold protects.**
-> ⭐ **`bbg/2026-08-24/` becomes writable after ~04:00Z (local midnight) with NO code change — the
+> ⭐ **`bbg/2026-08-24/` is written by the **SCHEDULED 11:00Z pull**, with NO code change — the
 > existing `BDay(-1)` resolves correctly from then on, verified across four instants with both
 > wrong-side controls firing. The 11:00Z scheduled run also writes it correctly.**
 
